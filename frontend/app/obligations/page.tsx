@@ -6,6 +6,7 @@ import { yieldToMaturity, durations, yearsTo } from '@/lib/bonds';
 import type { ObligationDaily, Dividend } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Obligations' };
 
 async function getData() {
   const supabase = createClient();

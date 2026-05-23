@@ -3,6 +3,7 @@ import ActionsTable from '@/components/ActionsTable';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Marché Actions' };
 
 async function getData() {
   const supabase = createClient();

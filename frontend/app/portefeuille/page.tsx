@@ -6,6 +6,7 @@ import { addPosition, deletePosition, addWatchItem, deleteWatchItem } from './ac
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Portefeuille & Watchlist' };
 
 interface Position {
   id: string; code: string; quantite: number; prix_entree: number;

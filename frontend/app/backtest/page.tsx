@@ -5,6 +5,7 @@ import BacktestChart from '@/components/BacktestChart';
 import BacktestMetrics from '@/components/BacktestMetrics';
 
 export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Backtest' };
 
 type Period = '1M' | '3M' | '6M' | '1A' | 'max';
 

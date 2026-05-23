@@ -3,8 +3,10 @@ import './globals.css';
 import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = {
-  title: 'BRVM Analyst Pro',
-  description: "Analyse et aide à la décision d'investissement sur la BRVM",
+  // UX fix: template de titre pour que chaque page affiche "Page | BRVM Analyst Pro".
+  title: { default: 'BRVM Analyst Pro', template: '%s | BRVM Analyst Pro' },
+  description: "Plateforme d'analyse et d'aide à la décision d'investissement sur la BRVM (UEMOA).",
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -5,6 +5,7 @@ import { fmtFcfa, fmtNumber } from '@/lib/format';
 import type { ActionDaily, IndiceDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Dashboard' };
 
 async function getData() {
   const supabase = createClient();
@@ -111,8 +112,10 @@ export default async function Dashboard() {
           value={fmtNumber(brvmc?.valeur ?? null, 2)}
           delta={brvmc?.variation_pct ?? null}
         />
-        <KpiCard label="Valeur échangée" value={fmtFcfa(valeurTotale)} suffix="FCFA" />
-        <KpiCard label="Volume total" value={fmtFcfa(volumeTotal)} />
+        {/* UX fix: suffix "FCFA" supprimé — fmtFcfa abrège déjà sans unité (12,3 M). */}
+        <KpiCard label="Valeur échangée" value={fmtFcfa(valeurTotale)} />
+        {/* UX fix: volume en titres (entiers), pas en FCFA — label et format corrigés. */}
+        <KpiCard label="Volume (titres)" value={fmtNumber(volumeTotal)} />
         <KpiCard label="Transactions" value={fmtNumber(txTotal)} />
       </div>
 

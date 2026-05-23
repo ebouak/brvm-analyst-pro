@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ReportConfig, { type ReportParams } from './ReportConfig';
 import ReportView, { type ReportData } from './ReportView';
@@ -34,10 +34,10 @@ export default function ReportsPage() {
     setLoadingInstruments(false);
   }, [instrumentsLoaded]);
 
-  // Montage : charger immédiatement les instruments.
-  useState(() => {
+  // UX fix: useState ne déclenche pas d'effet — useEffect requis pour charger au montage.
+  useEffect(() => {
     ensureInstruments();
-  });
+  }, [ensureInstruments]);
 
   async function generate(params: ReportParams) {
     setLoading(true);

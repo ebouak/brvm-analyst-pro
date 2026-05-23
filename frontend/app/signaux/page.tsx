@@ -3,6 +3,7 @@ import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Signaux' };
 
 async function getData() {
   const supabase = createClient();
