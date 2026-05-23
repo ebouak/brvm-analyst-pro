@@ -1,0 +1,22 @@
+# Secrets — jamais commités
+.env
+.env.local
+.env.*.local
+
+# Dépendances
+node_modules/
+
+# Build outputs
+.next/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
