@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--
+  Fixture représentative de Activites_marche.aspx (markup SIMULÉ pour tests).
+  Reproduit la structure attendue : champs cachés ASP.NET + 3 GridView.
+  À remplacer par un dump réel une fois la page inspectée (voir SCRAPER.md).
+-->
+<html>
+<head><title>Activités du marché - BDFIN</title></head>
+<body>
+<form method="post" action="./Activites_marche.aspx" id="form1">
+  <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKdGVzdHZpZXdzdA==" />
+  <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="CA0B0334" />
+  <input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAtdGVzdGV2YWw=" />
+  <input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+  <input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+
+  <div class="indices">
+    <span>BRVM 30 : 168,42 (+0,79%)</span>
+    <span>BRVM Composite : 285,31 (+0,50%)</span>
+  </div>
+
+  <table id="ContentPlaceHolder1_GridViewActions" class="gridActions">
+    <tr>
+      <th>Code</th><th>Désignation</th><th>Pays</th><th>Secteur</th>
+      <th>Cours précédent</th><th>Cours jour</th><th>Variation</th>
+      <th>Volume</th><th>Transactions</th><th>Valeur échangée</th>
+    </tr>
+    <tr>
+      <td>SNTS</td><td>SONATEL</td><td>SN</td><td>Télécommunications</td>
+      <td>14 500</td><td>14 800</td><td>+2,07%</td>
+      <td>1 240</td><td>25</td><td>18 352 000</td>
+    </tr>
+    <tr>
+      <td>SGBC</td><td>SOCIETE GENERALE CI</td><td>CI</td><td>Finance</td>
+      <td>12 000</td><td>11 900</td><td>-0,83%</td>
+      <td>340</td><td>8</td><td>4 046 000</td>
+    </tr>
+    <tr>
+      <td>ETIT</td><td>ECOBANK TRANSNATIONAL</td><td>TG</td><td>Finance</td>
+      <td>14</td><td>15</td><td>+7,14%</td>
+      <td>250 000</td><td>112</td><td>3 750 000</td>
+    </tr>
+    <tr>
+      <td colspan="6">Total</td><td>251 580</td><td>145</td><td>26 148 000</td>
+    </tr>
+  </table>
+
+  <table id="ContentPlaceHolder1_GridViewObligations" class="gridObligations">
+    <tr>
+      <th>ISIN</th><th>Désignation</th><th>Emetteur</th><th>Taux</th>
+      <th>Maturité</th><th>Cours précédent</th><th>Cours jour</th>
+      <th>Volume</th><th>Valeur échangée</th>
+    </tr>
+    <tr>
+      <td>CI0000000001</td><td>TPCI 6.25% 2025</td><td>Etat de Côte d'Ivoire</td><td>6,25%</td>
+      <td>31/12/2025</td><td>10 050</td><td>10 075</td>
+      <td>1 500</td><td>15 112 500</td>
+    </tr>
+    <tr>
+      <td>SN0000000002</td><td>ETAT SENEGAL 6.50% 2027</td><td>Etat du Sénégal</td><td>6,50%</td>
+      <td>30/06/2027</td><td>9 980</td><td>9 990</td>
+      <td>800</td><td>7 992 000</td>
+    </tr>
+  </table>
+
+  <table id="ContentPlaceHolder1_GridViewIndices" class="gridIndices">
+    <tr><th>Indice</th><th>Valeur</th><th>Précédent</th><th>Variation</th></tr>
+    <tr><td>BRVM 30</td><td>168,42</td><td>167,10</td><td>+0,79%</td></tr>
+    <tr><td>BRVM Composite</td><td>285,31</td><td>283,90</td><td>+0,50%</td></tr>
+  </table>
+</form>
+</body>
+</html>

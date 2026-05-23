@@ -1,0 +1,49 @@
+{
+  "name": "brvm-analyst-pro-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scraper BDFIN BRVM (ASP.NET WebForms) pour BRVM Analyst Pro — collecte actions, obligations, indices, événements.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "scrape:daily": "tsx src/index.ts daily",
+    "scrape:daily:mock": "tsx src/index.ts daily --mock",
+    "scrape:date": "tsx src/index.ts date",
+    "score": "tsx src/index.ts score",
+    "score:mock": "tsx src/index.ts score --mock",
+    "events": "tsx src/index.ts events",
+    "events:mock": "tsx src/index.ts events --mock",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "dividends": "tsx src/index.ts dividends",
+    "dividends:mock": "tsx src/index.ts dividends --mock",
+    "alerts": "tsx src/index.ts alerts",
+    "alerts:mock": "tsx src/index.ts alerts --mock"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "axios": "^1.7.7",
+    "axios-cookiejar-support": "^5.0.3",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "pino": "^9.4.0",
+    "pino-pretty": "^11.2.2",
+    "tough-cookie": "^5.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "eslint": "^9.11.1",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  }
+}

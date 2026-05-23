@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"$HOME\\\\Documents\\\\brvm-analyst-pro\"; git init; git add .; git commit -m \"Initial: BRVM Analyst Pro depuis Cowork\")"
+    ]
+  }
+}
