@@ -8,6 +8,7 @@ const NAV = [
   { href: '/signaux', label: 'Signaux' },
   { href: '/portefeuille', label: 'Portefeuille' },
   { href: '/backtest', label: 'Backtest' },
+  { href: '/reports', label: 'Rapports' },
 ];
 
 export default function Sidebar() {
