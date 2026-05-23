@@ -50,6 +50,11 @@ export type Config = z.infer<typeof schema>;
 
 let cached: Config | null = null;
 
+/** Vide le cache de configuration — utile uniquement dans les tests. */
+export function resetConfigCache(): void {
+  cached = null;
+}
+
 export function getConfig(): Config {
   if (cached) return cached;
   const parsed = schema.safeParse(process.env);
