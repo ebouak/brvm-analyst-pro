@@ -55,6 +55,8 @@ export interface MarketEvent {
   tags: string[] | null;
 }
 
+export type SignalLabel = 'BUY' | 'HOLD' | 'SELL';
+
 export type Period = '1S' | '1M' | '3M' | '6M' | '1A' | 'max';
 
 export const PERIOD_DAYS: Record<Period, number> = {

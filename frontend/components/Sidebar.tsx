@@ -7,6 +7,7 @@ const NAV = [
   { href: '/dashboard/reports', label: 'Rapports' },
   { href: '/signaux', label: 'Signaux' },
   { href: '/portefeuille', label: 'Portefeuille' },
+  { href: '/backtest', label: 'Backtest' },
 ];
 
 export default function Sidebar() {
