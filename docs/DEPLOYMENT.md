@@ -113,6 +113,70 @@ Recommandations :
 - Surveillez `hash_source` identique plusieurs jours → séance non publiée ou
   scraping figé.
 
+## 5. Supabase Edge Functions
+
+Trois Edge Functions dans `supabase/functions/` :
+
+| Fonction | Rôle | Déclenchement |
+| --- | --- | --- |
+| `scrape-daily` | Appelle le runner externe via webhook | 18h45 UTC lun-ven |
+| `score-daily` | Calcule les signaux + détecte les nouveaux | 19h15 UTC lun-ven |
+| `alert-signals` | Envoie les nouveaux signaux au webhook Slack/Discord | Appelée par score-daily |
+
+### Déploiement
+
+```bash
+# Installer la CLI Supabase et s'authentifier
+supabase login
+
+# Lier le projet local
+supabase link --project-ref <votre-project-ref>
+
+# Déployer les 3 fonctions
+supabase functions deploy scrape-daily
+supabase functions deploy score-daily
+supabase functions deploy alert-signals
+```
+
+### Secrets à configurer (Dashboard → Settings → Secrets)
+
+```text
+SCRAPER_WEBHOOK_URL      : URL GitHub Actions dispatch (ou runner dédié)
+SCRAPER_WEBHOOK_TOKEN    : token Bearer pour le webhook scraper
+ALERT_WEBHOOK_URL        : endpoint Slack/Discord/custom pour les alertes
+ALERT_SIGNALS_URL        : URL interne de la function alert-signals
+                           ex: https://<ref>.supabase.co/functions/v1/alert-signals
+```
+
+### Scheduling (pg_cron ou Supabase Scheduled Functions)
+
+```sql
+-- Ajouter dans 0004_cron.sql ou via le dashboard Supabase
+select cron.schedule('scrape-daily',  '45 18 * * 1-5',
+  $$select net.http_post(url:='https://<ref>.supabase.co/functions/v1/scrape-daily',
+    headers:='{"Authorization":"Bearer <anon_key>"}'::jsonb)$$);
+
+select cron.schedule('score-daily',   '15 19 * * 1-5',
+  $$select net.http_post(url:='https://<ref>.supabase.co/functions/v1/score-daily',
+    headers:='{"Authorization":"Bearer <anon_key>"}'::jsonb)$$);
+```
+
+### Monitoring des runs (table scraper_logs — migration 0007)
+
+```sql
+-- Dernier run de chaque fonction
+select * from v_scraper_last_runs;
+
+-- Workers silencieux depuis plus de 30h
+select * from v_scraper_stale;
+
+-- Tous les runs en erreur des 24 dernières heures
+select function_name, run_at, error_message
+from scraper_logs
+where status = 'error' and run_at > now() - interval '24 hours'
+order by run_at desc;
+```
+
 ## 6. Planification des workers complémentaires
 
 En plus du scraping de séance, planifier (cron externe ou pg_cron + Edge) :
