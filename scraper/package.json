@@ -26,7 +26,8 @@
     "alerts": "tsx src/index.ts alerts",
     "alerts:mock": "tsx src/index.ts alerts --mock",
     "backfill": "tsx src/index.ts backfill",
-    "backfill:dry": "tsx src/index.ts backfill --dry-run"
+    "backfill:dry": "tsx src/index.ts backfill --dry-run",
+    "validate": "tsx src/index.ts validate"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

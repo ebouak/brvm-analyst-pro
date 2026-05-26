@@ -29,6 +29,7 @@ import { runDividends } from './dividends/runDividends.js';
 import { runAlerts } from './alerts/runAlerts.js';
 import { runBacktestCmd } from './backtesting/runBacktest.js';
 import { runBackfill } from './backfill/runBackfill.js';
+import { runValidation } from './validation/runValidation.js';
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
 
@@ -92,10 +93,14 @@ async function main(): Promise<number> {
       await runBackfill({ codes, fromDate, dryRun });
       return 0;
     }
+    case 'validate': {
+      await runValidation();
+      return 0;
+    }
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | alerts | backtest | backfill',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | alerts | backtest | backfill | validate',
       );
       return 1;
   }
