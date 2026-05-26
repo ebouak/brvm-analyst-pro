@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node /tmp/check.mjs)",
+      "Bash(SRK=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY node --experimental-default-type=module -e ' *)",
+      "Bash(node --experimental-specifier-resolution=node --input-type=module)",
+      "Bash(cp /tmp/check.mjs ./check-temp.mjs)",
+      "Bash(node ./check-temp.mjs)",
+      "Bash(node ./refresh-views.mjs)",
+      "Bash(USE_MOCK=false npm run score)",
+      "WebFetch(domain:frontend-zeta-ten-22.vercel.app)",
+      "WebFetch(domain:frontend-4xoi1jn55-yvess-projects-bd883875.vercel.app)",
+      "PowerShell(Start-Sleep -Seconds 10; try { Invoke-WebRequest -Uri \"https://frontend-zeta-ten-22.vercel.app/api/debug\" -UseBasicParsing | Select-Object -ExpandProperty Content } catch { $_.Exception.Message })",
+      "PowerShell(Start-Sleep -Seconds 5; try { Invoke-WebRequest -Uri \"https://frontend-zeta-ten-22.vercel.app/api/debug\" -UseBasicParsing | Select-Object -ExpandProperty Content } catch { $_.Exception.Message })",
+      "Bash(vercel deploy *)",
+      "Bash(curl -s https://frontend-zeta-ten-22.vercel.app/api/debug)",
+      "Bash(curl -s https://frontend-zeta-ten-22.vercel.app/api/metrics)"
+    ]
+  }
+}
