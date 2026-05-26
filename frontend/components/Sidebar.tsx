@@ -10,6 +10,7 @@ const NAV = [
   { href: '/portefeuille', label: '💼 Portefeuille' },
   { href: '/backtest', label: '🔬 Backtest' },
   { href: '/dashboard/reports', label: '📑 Rapports' },
+  { href: '/methodologie', label: '📖 Méthodologie' },
 ];
 
 export default function Sidebar() {
