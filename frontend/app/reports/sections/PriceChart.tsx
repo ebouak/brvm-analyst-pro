@@ -1,15 +1,6 @@
 'use client';
 import { useState } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend,
-} from 'recharts';
+import EChart from '@/components/EChart';
 import { normalizeBase100 } from '@/lib/reportUtils';
 
 export interface PriceSeries {
@@ -37,22 +28,14 @@ export default function MultiPriceChart({ series }: Props) {
     );
   }
 
-  // Build unified date index.
   const allDates = [...new Set(series.flatMap((s) => s.dates))].sort();
 
-  const chartData = allDates.map((date) => {
-    const point: Record<string, string | number | null> = { date };
-    for (const s of series) {
+  const seriesData = series.map((s) => {
+    const closes = mode === 'base100' ? normalizeBase100(s.closes) : s.closes;
+    return allDates.map((date) => {
       const idx = s.dates.indexOf(date);
-      if (idx === -1) {
-        point[s.code] = null;
-      } else {
-        const closes =
-          mode === 'base100' ? normalizeBase100(s.closes) : s.closes;
-        point[s.code] = closes[idx] ?? null;
-      }
-    }
-    return point;
+      return idx === -1 ? null : (closes[idx] ?? null);
+    });
   });
 
   return (
@@ -63,6 +46,7 @@ export default function MultiPriceChart({ series }: Props) {
           {(['prix', 'base100'] as Mode[]).map((m) => (
             <button
               key={m}
+              type="button"
               onClick={() => setMode(m)}
               className={`text-xs px-3 py-1 rounded border transition ${
                 mode === m
@@ -76,37 +60,49 @@ export default function MultiPriceChart({ series }: Props) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={chartData} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="#232733" vertical={false} />
-          <XAxis
-            dataKey="date"
-            tick={{ fill: '#8b93a7', fontSize: 10 }}
-            minTickGap={40}
-          />
-          <YAxis
-            tick={{ fill: '#8b93a7', fontSize: 10 }}
-            domain={['auto', 'auto']}
-            width={56}
-          />
-          <Tooltip
-            contentStyle={{ background: '#161922', border: '1px solid #232733', fontSize: 12 }}
-            labelStyle={{ color: '#e6e9f0' }}
-            formatter={(v: number) => v.toFixed(2)}
-          />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          {series.map((s, i) => (
-            <Line
-              key={s.code}
-              dataKey={s.code}
-              stroke={COLORS[i % COLORS.length]}
-              dot={false}
-              strokeWidth={1.5}
-              connectNulls
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+      <EChart
+        height={320}
+        option={{
+          legend: {
+            top: 0, right: 0,
+            textStyle: { color: '#8b93a7', fontSize: 11 },
+            data: series.map((s) => s.code),
+          },
+          xAxis: {
+            type: 'category',
+            data: allDates,
+            boundaryGap: false,
+            axisLabel: { color: '#8b93a7', fontSize: 10, interval: Math.floor(allDates.length / 6), rotate: 30 },
+          },
+          yAxis: {
+            type: 'value',
+            scale: true,
+            axisLabel: {
+              formatter: (v: number) =>
+                mode === 'base100' ? v.toFixed(0) : v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v),
+            },
+          },
+          dataZoom: [
+            { type: 'inside', start: 0, end: 100 },
+            {
+              type: 'slider', height: 20, bottom: 0,
+              borderColor: '#232733',
+              fillerColor: 'rgba(0,200,83,0.08)',
+              handleStyle: { color: '#00c853' },
+              textStyle: { color: '#4a5268', fontSize: 9 },
+            },
+          ],
+          series: series.map((s, i) => ({
+            name: s.code,
+            type: 'line' as const,
+            data: seriesData[i],
+            symbol: 'none',
+            connectNulls: true,
+            lineStyle: { color: COLORS[i % COLORS.length], width: 1.5 },
+            itemStyle: { color: COLORS[i % COLORS.length] },
+          })),
+        }}
+      />
     </section>
   );
 }
