@@ -279,28 +279,48 @@ function countBySignal(results: ScoreResult[]): Record<string, number> {
   }, {});
 }
 
-/** Démonstration hors-ligne : historique synthétique + scoring affiché. */
+/**
+ * Démonstration mock : historique synthétique diversifié + persistance Supabase.
+ * Génère des profils variés (BUY, SELL, HOLD) pour démontrer l'explicabilité.
+ */
 async function runScoringMock(): Promise<ScoringRunResult> {
+  const cfg = getConfig();
   const snap = buildMockSnapshot();
-  const results = snap.actions.map((a) => {
-    // Génère une série de clôtures plausible se terminant au cours du jour.
-    const closes = synthSeries(a.cours_jour ?? 1000, 60);
+
+  type Profile = 'bullish' | 'bearish' | 'neutral' | 'oversold' | 'overbought';
+  // On assigne un profil par titre pour couvrir toute la gamme de signaux.
+  const profiles: Profile[] = ['bullish', 'bearish', 'oversold', 'overbought', 'neutral', 'bullish', 'bearish', 'neutral'];
+
+  const results = snap.actions.map((a, i) => {
+    const closes = synthSeriesProfile(a.cours_jour ?? 1000, 80, profiles[i % profiles.length]!);
+    // Volume ratio : profil bullish → volume > moyenne ; bearish → volume fort aussi.
+    const volRatio = profiles[i % profiles.length] === 'neutral' ? 0.8 : 2.5;
     return computeScore({
       code: a.code,
       closes,
       variation_pct: a.variation_pct,
       volume: a.volume,
-      avg_volume_30d: a.volume != null ? a.volume * 0.9 : null,
+      avg_volume_30d: a.volume != null ? a.volume / volRatio : null,
     });
   });
+
   const repartition = countBySignal(results);
   logger.info({ repartition }, 'Scoring MOCK calculé');
   for (const r of results) {
-    logger.info(
-      { code: r.code, signal: r.signal, score: r.score_total, conf: r.confiance },
-      r.explication,
-    );
+    logger.info({ code: r.code, signal: r.signal, score: r.score_total, conf: r.confiance }, r.explication);
   }
+
+  // Persiste dans Supabase comme le mode réel (sauf DRY_RUN).
+  if (!cfg.DRY_RUN) {
+    try {
+      const sb = getSupabase();
+      await upsertSignals(sb, results, snap.date_marche);
+      logger.info({ count: results.length }, 'Signaux MOCK persistés dans signals_daily');
+    } catch (err) {
+      logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'upsert mock signals a échoué — non bloquant');
+    }
+  }
+
   return {
     date_marche: snap.date_marche,
     nb_signaux: results.length,
@@ -310,7 +330,62 @@ async function runScoringMock(): Promise<ScoringRunResult> {
   };
 }
 
-/** Marche aléatoire bornée se terminant proche de `last`. */
+/**
+ * Série synthétique de clôtures selon un profil :
+ *   bullish   : tendance haussière régulière → RSI élevé, MA20 > MA50 → BUY
+ *   bearish   : tendance baissière régulière → RSI bas, MA20 < MA50 → SELL
+ *   oversold  : chute longue puis rebond → RSI < 30 → BUY potentiel
+ *   overbought: montée longue → RSI > 70 → SELL potentiel
+ *   neutral   : marche aléatoire stable → HOLD
+ */
+function synthSeriesProfile(last: number, n: number, profile: 'bullish' | 'bearish' | 'neutral' | 'oversold' | 'overbought'): number[] {
+  const out: number[] = [];
+  let v: number;
+  switch (profile) {
+    case 'bullish':
+      v = last * 0.80;
+      for (let i = 0; i < n; i++) {
+        v = v * (1 + 0.004 + (Math.random() - 0.3) * 0.008);
+        out.push(Math.max(1, v));
+      }
+      break;
+    case 'bearish':
+      v = last * 1.20;
+      for (let i = 0; i < n; i++) {
+        v = v * (1 - 0.004 + (Math.random() - 0.7) * 0.008);
+        out.push(Math.max(1, v));
+      }
+      break;
+    case 'oversold':
+      v = last * 1.30;
+      for (let i = 0; i < n; i++) {
+        // Forte baisse les 2/3 puis rebond final.
+        const drift = i < (n * 2) / 3 ? -0.006 : 0.003;
+        v = v * (1 + drift + (Math.random() - 0.5) * 0.006);
+        out.push(Math.max(1, v));
+      }
+      break;
+    case 'overbought':
+      v = last * 0.70;
+      for (let i = 0; i < n; i++) {
+        // Forte hausse les 2/3 puis plateau.
+        const drift = i < (n * 2) / 3 ? 0.007 : 0.001;
+        v = v * (1 + drift + (Math.random() - 0.5) * 0.006);
+        out.push(Math.max(1, v));
+      }
+      break;
+    default: // neutral
+      v = last * 0.95;
+      for (let i = 0; i < n; i++) {
+        v = v * (1 + (Math.sin(i / 3) * 0.005 + (Math.random() - 0.5) * 0.006));
+        out.push(Math.max(1, v));
+      }
+  }
+  out[out.length - 1] = last;
+  return out;
+}
+
+/** Marche aléatoire bornée se terminant proche de `last` (utilisée par runBacktestCmd). */
 function synthSeries(last: number, n: number): number[] {
   const out: number[] = [];
   let v = last * 0.95;
