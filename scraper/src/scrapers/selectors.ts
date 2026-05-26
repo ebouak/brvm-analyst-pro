@@ -64,13 +64,14 @@ export const MARKET_DATE = {
  *   #ContentPlaceHolder1_GridView1  ou  #ContentPlaceHolder1_gvCotations
  */
 export const ACTIONS_TABLE = [
+  '#ctl00_Main_GridView1',           // sélecteur réel BDFIN (calibré 2026-05)
   '#ContentPlaceHolder1_GridViewActions',
   '#ContentPlaceHolder1_gvActions',
   '#ContentPlaceHolder1_GridView1',
   '#ContentPlaceHolder1_gvCotations',
+  'table[id*="GridView1"]',
   'table[id*="Action"]',
-  'table[id*="Cotation"]',
-  'table.gridActions',
+  'table.gridcontent',
 ] as const;
 
 /**
@@ -84,12 +85,16 @@ export const ACTIONS_COLUMNS: Record<string, string[]> = {
   pays:            ['pays'],
   secteur:         ['secteur', 'activite'],
   cours_precedent: ['cours precedent', 'cours veille', 'precedent', 'cloture veille', 'cloture precedente'],
+  // En-tête réel BDFIN : "Cours jour"
   cours_jour:      ['cours jour', 'cours du jour', 'cloture', 'dernier cours', 'cours'],
-  // Pas de colonne variation% sur BDFIN — calculé post-parse depuis cours_jour/cours_precedent.
+  // Absent du tableau BDFIN — calculé post-parse.
   variation_pct:   ['variation %', 'var %', 'var. %', 'variation pct'],
-  volume:          ['volume', 'volume echange', 'titres echanges', 'quantite echangee', 'quantite'],
+  // En-tête réel BDFIN : "Volume échangé"
+  volume:          ['volume echange', 'volume echangé', 'volume', 'titres echanges', 'quantite'],
+  // En-tête réel BDFIN : "Nombre transactions"
   nb_transactions: ['nombre transactions', 'nb transactions', 'transactions', 'nombre de transactions'],
-  valeur_echangee: ['valeur echangee', 'valeur echange', 'montant', 'capitaux'],
+  // En-tête réel BDFIN : "Valeur échangée"
+  valeur_echangee: ['valeur echangee', 'valeur echangée', 'valeur echange', 'montant', 'capitaux'],
 };
 
 // ---------------------------------------------------------------------------
@@ -97,11 +102,12 @@ export const ACTIONS_COLUMNS: Record<string, string[]> = {
 // ---------------------------------------------------------------------------
 
 export const OBLIGATIONS_TABLE = [
+  '#ctl00_Main_GridView2',           // sélecteur réel BDFIN (calibré 2026-05)
   '#ContentPlaceHolder1_GridViewObligations',
   '#ContentPlaceHolder1_gvObligations',
   '#ContentPlaceHolder1_GridView2',
+  'table[id*="GridView2"]',
   'table[id*="Obligation"]',
-  'table.gridObligations',
 ] as const;
 
 export const OBLIGATIONS_COLUMNS: Record<string, string[]> = {
@@ -123,11 +129,11 @@ export const OBLIGATIONS_COLUMNS: Record<string, string[]> = {
 // ---------------------------------------------------------------------------
 
 export const INDICES_TABLE = [
+  '#ctl00_Main_GridView3',           // sélecteur réel BDFIN (calibré 2026-05)
   '#ContentPlaceHolder1_GridViewIndices',
   '#ContentPlaceHolder1_gvIndices',
+  'table[id*="GridView3"]',
   'table[id*="Indice"]',
-  'table[id*="Index"]',
-  'table.gridIndices',
 ] as const;
 
 export const INDICES_COLUMNS: Record<string, string[]> = {
@@ -137,7 +143,8 @@ export const INDICES_COLUMNS: Record<string, string[]> = {
   valeur_precedente: ['precedent', 'valeur precedente', 'veille', 'ouverture'],
   // "Variation en valeur" est la var. absolue ; "Variation en %" est le pourcentage.
   variation_abs:     ['variation en valeur', 'var. valeur', 'variation valeur'],
-  variation_pct:     ['variation en %', 'variation %', 'var. %', 'var %', 'variation pct'],
+  // En-tête réel BDFIN : "Variation en %" — 'variation' en dernier pour les fixtures.
+  variation_pct:     ['variation en %', 'variation %', 'var. %', 'var %', 'variation pct', 'variation'],
 };
 
 // ---------------------------------------------------------------------------

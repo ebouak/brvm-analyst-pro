@@ -14,11 +14,14 @@ import {
 import { parseFrDate } from '../utils/dates.js';
 import { logger } from '../logger.js';
 
+/** Calibré sur bfin.brvm.org 2026-05. */
 export const OBLIGATIONS_TABLE_SELECTORS = [
+  '#ctl00_Main_GridView2',
   '#ContentPlaceHolder1_GridViewObligations',
   '#ContentPlaceHolder1_gvObligations',
+  '#ContentPlaceHolder1_GridView2',
+  'table[id*="GridView2"]',
   'table[id*="Obligation"]',
-  'table.gridObligations',
 ];
 
 const COLUMN_SPEC: Record<string, string[]> = {

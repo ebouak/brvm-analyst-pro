@@ -11,11 +11,14 @@ import { parseFrNumber, cleanText } from '../utils/parseNumber.js';
 import { parseTable, buildColumnIndex, cell, isDataRow } from './table.js';
 import { logger } from '../logger.js';
 
+/** Calibré sur bfin.brvm.org 2026-05. */
 export const INDICES_TABLE_SELECTORS = [
+  '#ctl00_Main_GridView3',
   '#ContentPlaceHolder1_GridViewIndices',
   '#ContentPlaceHolder1_gvIndices',
+  '#ContentPlaceHolder1_GridView3',
+  'table[id*="GridView3"]',
   'table[id*="Indice"]',
-  'table.gridIndices',
 ];
 
 const COLUMN_SPEC: Record<string, string[]> = {

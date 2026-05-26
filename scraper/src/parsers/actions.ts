@@ -16,12 +16,15 @@ import {
 } from './table.js';
 import { logger } from '../logger.js';
 
-/** Candidats de sélecteur pour le GridView des actions (calibrer si besoin). */
+/** Candidats de sélecteur pour le GridView des actions — calibré sur bfin.brvm.org 2026-05. */
 export const ACTIONS_TABLE_SELECTORS = [
+  '#ctl00_Main_GridView1',
   '#ContentPlaceHolder1_GridViewActions',
   '#ContentPlaceHolder1_gvActions',
+  '#ContentPlaceHolder1_GridView1',
+  'table[id*="GridView1"]',
   'table[id*="Actions"]',
-  'table.gridActions',
+  'table.gridcontent',
 ];
 
 /** Alias d'en-tête -> champ logique (synchronisé avec selectors.ts ACTIONS_COLUMNS). */

@@ -120,12 +120,16 @@ export function cell(
   return row[pos] ?? null;
 }
 
-/** Filtre les lignes vides ou de pied de page (totaux). */
+/** Filtre les lignes vides ou de pied de page (totaux).
+ * La première cellule peut être vide (image de tendance BDFIN) — on cherche
+ * la première cellule non-vide pour détecter les lignes "total". */
 export function isDataRow(row: string[]): boolean {
   const joined = row.join('').trim();
   if (joined === '') return false;
-  const firstNorm = normalizeHeader(row[0] ?? '');
-  return !['total', 'totaux', 'volume total', ''].includes(firstNorm);
+  // Cherche la première cellule non-vide (ignore les colonnes image).
+  const firstNonEmpty = row.find((c) => c.trim() !== '') ?? '';
+  const firstNorm = normalizeHeader(firstNonEmpty);
+  return !['total', 'totaux', 'volume total'].includes(firstNorm);
 }
 
 export type { Cheerio, Element };
