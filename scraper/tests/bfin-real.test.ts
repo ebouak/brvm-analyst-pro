@@ -17,6 +17,7 @@
 import { describe, it, expect } from 'vitest';
 import 'dotenv/config';
 import { loginBdfin, fetchCoursduJour } from '../src/scrapers/bfin-real.js';
+import { resetConfigCache } from '../src/config.js';
 
 const hasCredentials =
   Boolean(process.env['BDFIN_USERNAME']) &&
@@ -101,16 +102,13 @@ describe('bfin-real (sans réseau — vérifications statiques)', () => {
     const p = process.env['BDFIN_PASSWORD'];
     delete process.env['BDFIN_USERNAME'];
     delete process.env['BDFIN_PASSWORD'];
-
-    // Vider le cache config zod pour qu'il relise l'env.
-    // Le module config.ts cache l'objet ; on patche directement process.env
-    // et on s'attend à ce que loginBdfin() détecte les champs vides.
+    resetConfigCache(); // vide le cache zod pour relire process.env
     try {
       await expect(loginBdfin()).rejects.toThrow(/BDFIN_USERNAME.*BDFIN_PASSWORD|manquants/i);
     } finally {
-      // Restauration.
       if (u !== undefined) process.env['BDFIN_USERNAME'] = u;
       if (p !== undefined) process.env['BDFIN_PASSWORD'] = p;
+      resetConfigCache(); // restaure le cache pour les tests suivants
     }
   });
 });

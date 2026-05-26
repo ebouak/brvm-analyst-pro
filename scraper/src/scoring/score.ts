@@ -37,8 +37,9 @@ export const SCORING_PARAMS = {
   BONUS_TENDANCE: 0.1,
   BUY_THRESHOLD: 0.6,
   SELL_THRESHOLD: -0.6,
-  /** Nb minimum de points d'historique pour ne pas neutraliser le signal. */
-  MIN_HISTORY: 15,
+  /** Nb minimum de points d'historique pour ne pas neutraliser le signal.
+   * 5 jours suffisent pour variation+volume ; RSI et SMA50 resteront partiels. */
+  MIN_HISTORY: 5,
 } as const;
 
 export type SignalLabel = 'BUY' | 'HOLD' | 'SELL';
