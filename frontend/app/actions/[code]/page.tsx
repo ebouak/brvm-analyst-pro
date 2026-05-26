@@ -180,8 +180,15 @@ export default async function InstrumentPage({ params }: { params: { code: strin
 
       {/* ── Bannière données insuffisantes ── */}
       {rows.length < 20 && (
-        <div className="border border-warn/30 bg-warn/5 rounded-xl px-4 py-2 text-xs text-warn">
-          ⚠️ Seulement {rows.length} séance{rows.length > 1 ? 's' : ''} disponible{rows.length > 1 ? 's' : ''} — les indicateurs techniques (RSI, MACD, moyennes mobiles) nécessitent au minimum 20 séances. Lancez le backfill pour enrichir l&apos;historique.
+        <div className="border border-warn/30 bg-warn/5 rounded-xl px-4 py-3 space-y-2">
+          <p className="text-xs text-warn">
+            ⚠️ Seulement {rows.length} séance{rows.length > 1 ? 's' : ''} disponible{rows.length > 1 ? 's' : ''} —
+            RSI, MACD et moyennes mobiles nécessitent au minimum 20 séances.
+          </p>
+          <p className="text-xs text-muted">Pour enrichir l&apos;historique, lancez dans <code className="font-mono bg-surface px-1 rounded">scraper/</code> :</p>
+          <pre className="text-xs font-mono bg-surface border border-border rounded px-3 py-2 text-up select-all overflow-x-auto">
+            npm run backfill -- {code} --from=2023-01-01
+          </pre>
         </div>
       )}
 
