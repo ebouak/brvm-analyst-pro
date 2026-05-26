@@ -1,4 +1,4 @@
-import type { SignalLabel } from './types.js';
+import type { SignalLabel } from './types';
 
 export interface BacktestInput {
   closes: number[];
