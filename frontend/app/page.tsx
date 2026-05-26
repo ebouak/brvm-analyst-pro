@@ -30,7 +30,7 @@ async function getData() {
     .limit(1);
   const prevDate = prevDateRow?.[0]?.date_marche ?? null;
 
-  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }] =
+  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }, { data: indicesHist }] =
     await Promise.all([
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
       supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastDate),
@@ -47,11 +47,27 @@ async function getData() {
             .select('valeur_echangee')
             .eq('date_marche', prevDate)
         : Promise.resolve({ data: [] }),
+      // Sparkline 7 dernières séances pour les 2 indices
+      supabase
+        .from('brvm_indices_daily')
+        .select('code, valeur, date_marche')
+        .in('code', ['BRVM30', 'BRVMC'])
+        .order('date_marche', { ascending: false })
+        .limit(14), // 7 par indice
     ]);
 
   const prevValeur = prevDate
     ? ((prevActions ?? []) as ActionDaily[]).reduce((s, a) => s + (a.valeur_echangee ?? 0), 0)
     : null;
+
+  // Sparklines : dernières 7 valeurs par indice (oldest→newest)
+  const sparkMap: Record<string, number[]> = {};
+  for (const row of ((indicesHist ?? []) as { code: string; valeur: number | null; date_marche: string }[])) {
+    if (row.valeur == null) continue;
+    (sparkMap[row.code] ??= []).push(row.valeur);
+  }
+  // Les rows sont desc (newest first) → inverser pour avoir oldest→newest
+  Object.keys(sparkMap).forEach((k) => sparkMap[k]!.reverse());
 
   return {
     lastDate,
@@ -59,6 +75,7 @@ async function getData() {
     indices: (indices ?? []) as IndiceDaily[],
     signals: (signals ?? []) as SignalDaily[],
     prevValeur,
+    sparklines: sparkMap,
   };
 }
 
@@ -76,7 +93,7 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur } = await getData();
+  const { lastDate, actions, indices, signals, prevValeur, sparklines } = await getData();
 
   if (!lastDate) {
     return (
@@ -135,6 +152,7 @@ export default async function Dashboard() {
           variation_pct={brvm30?.variation_pct ?? null}
           valeur_echangee={volTotal / 2}
           date_seance={lastDate}
+          sparkline={sparklines?.['BRVM30']}
         />
         <IndexCard
           code="BRVMC"
@@ -143,6 +161,7 @@ export default async function Dashboard() {
           variation_pct={brvmc?.variation_pct ?? null}
           valeur_echangee={volTotal}
           date_seance={lastDate}
+          sparkline={sparklines?.['BRVMC']}
         />
       </div>
 

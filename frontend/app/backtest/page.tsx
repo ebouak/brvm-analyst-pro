@@ -106,8 +106,8 @@ export default async function BacktestPage({ searchParams }: PageProps) {
   const instrumentList = (instruments ?? []) as Instrument[];
 
   const selectedCode = searchParams.code ?? '';
-  const rawPeriod = searchParams.period ?? '1A';
-  const period: Period = isPeriod(rawPeriod) ? rawPeriod : '1A';
+  const rawPeriod = searchParams.period ?? 'max';
+  const period: Period = isPeriod(rawPeriod) ? rawPeriod : 'max';
   const dateFrom = searchParams.dateFrom ?? '';
   const dateTo = searchParams.dateTo ?? '';
   const feesPct = parseFloat(searchParams.fees ?? '0.006');
@@ -269,9 +269,36 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       )}
 
       {selectedCode && noData && (
-        <div className="bg-surface border border-border rounded-xl p-8 text-center text-muted">
-          Aucun historique de cours disponible pour{' '}
-          <span className="tabular text-white">{selectedCode}</span> sur cette période.
+        <div className="bg-surface border border-border rounded-xl p-8 text-center space-y-3">
+          <p className="text-muted">
+            Aucun historique de cours disponible pour{' '}
+            <span className="tabular text-white">{selectedCode}</span> sur cette période.
+          </p>
+          <p className="text-xs text-muted">
+            Lancez le backfill dans <code className="text-up bg-up/10 px-1 rounded">scraper/</code> :
+          </p>
+          <pre className="text-xs font-mono bg-surface border border-border rounded px-3 py-2 text-up select-all inline-block">
+            npm run backfill -- {selectedCode} --from=2023-01-01
+          </pre>
+        </div>
+      )}
+
+      {/* Indicateur couverture données */}
+      {result && closes.length > 0 && (
+        <div className="flex items-center gap-3 text-xs text-muted flex-wrap">
+          <span>
+            📅 {dates[0]} → {dates[dates.length - 1]}
+          </span>
+          <span className={`tabular border rounded px-1.5 py-0.5 ${
+            closes.length >= 500 ? 'border-up/30 text-up' :
+            closes.length >= 250 ? 'border-warn/30 text-warn' :
+            'border-down/30 text-down'
+          }`}>
+            {closes.length} séances
+            {closes.length < 250 && ' — historique court'}
+            {closes.length >= 250 && closes.length < 500 && ' — ~1 an'}
+            {closes.length >= 500 && ' — 2+ ans ✓'}
+          </span>
         </div>
       )}
 

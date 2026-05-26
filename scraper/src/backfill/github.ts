@@ -12,12 +12,14 @@ const BASE_RAW = 'https://raw.githubusercontent.com/Fredysessie/brvm-data-public
 const API_URL  = 'https://api.github.com/repos/Fredysessie/brvm-data-public/contents/data';
 
 export interface BackfillRow {
-  code:         string;
-  date_marche:  string;   // YYYY-MM-DD
+  code:            string;
+  date_marche:     string;   // YYYY-MM-DD
   cours_precedent: number | null;
-  cours_jour:   number;
-  variation_pct: number | null;
-  volume:       number | null;
+  cours_jour:      number;
+  variation_pct:   number | null;
+  volume:          number | null;
+  // valeur_echangee estimée : volume (titres) × cours_jour
+  valeur_echangee: number | null;
 }
 
 /** Liste les codes disponibles dans le repo GitHub. */
@@ -64,13 +66,16 @@ export async function fetchDailyCSV(code: string): Promise<BackfillRow[]> {
       ? ((close - prevClose) / prevClose) * 100
       : null;
 
+    const volumeVal = !isNaN(vol as number) && vol !== null ? (vol as number) : null;
     rows.push({
       code,
-      date_marche:  date,
+      date_marche:     date,
       cours_precedent: prevClose,
-      cours_jour:   close,
-      variation_pct: variation_pct != null ? Math.round(variation_pct * 10000) / 10000 : null,
-      volume:       !isNaN(vol as number) ? (vol as number) : null,
+      cours_jour:      close,
+      variation_pct:   variation_pct != null ? Math.round(variation_pct * 10000) / 10000 : null,
+      volume:          volumeVal,
+      // Valeur échangée estimée (volume titres × cours) — approximation pour compatibilité dashboard
+      valeur_echangee: volumeVal != null ? Math.round(volumeVal * close) : null,
     });
 
     prevClose = close;

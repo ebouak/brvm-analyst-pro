@@ -11,18 +11,24 @@ import type { ActionDaily, SignalDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-const HISTORY = 250;
+// 600 séances ≈ 2,3 ans BRVM (260 j/an) — nécessaire pour MA200 + 2 ans de backtest
+const HISTORY = 600;
 
-async function getData(code: string) {
+async function getData(code: string, fromDate?: string) {
   const supabase = createClient();
+
+  let histQuery = supabase
+    .from('brvm_actions_daily')
+    .select('*')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(HISTORY);
+
+  if (fromDate) histQuery = histQuery.gte('date_marche', fromDate);
+
   const [{ data: hist }, { data: instr }, { data: sig }, { data: divs }, { data: evts }] =
     await Promise.all([
-      supabase
-        .from('brvm_actions_daily')
-        .select('*')
-        .eq('code', code)
-        .order('date_marche', { ascending: false })
-        .limit(HISTORY),
+      histQuery,
       supabase.from('brvm_instruments').select('*').eq('code', code).maybeSingle(),
       supabase
         .from('signals_daily')
@@ -53,9 +59,16 @@ async function getData(code: string) {
   };
 }
 
-export default async function InstrumentPage({ params }: { params: { code: string } }) {
+export default async function InstrumentPage({
+  params,
+  searchParams,
+}: {
+  params: { code: string };
+  searchParams: { from?: string };
+}) {
   const code = decodeURIComponent(params.code).toUpperCase();
-  const { rows, instrument, signal, dividends, events } = await getData(code);
+  const fromDate = searchParams.from ?? '';
+  const { rows, instrument, signal, dividends, events } = await getData(code, fromDate || undefined);
 
   if (rows.length === 0) {
     return (
@@ -194,8 +207,35 @@ export default async function InstrumentPage({ params }: { params: { code: strin
 
       {/* ── Graphique ── */}
       <div className="bg-surface border border-border rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">📈 Graphique ({rows.length} séance{rows.length > 1 ? 's' : ''})</h3>
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h3 className="text-sm font-semibold">
+            📈 Graphique ({rows.length} séance{rows.length > 1 ? 's' : ''})
+          </h3>
+          {/* Filtres période rapides */}
+          <div className="flex gap-1">
+            {([
+              { label: '3M', from: new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10) },
+              { label: '6M', from: new Date(Date.now() - 180 * 86400000).toISOString().slice(0, 10) },
+              { label: '1A', from: new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10) },
+              { label: '2A', from: new Date(Date.now() - 730 * 86400000).toISOString().slice(0, 10) },
+              { label: 'Max', from: '' },
+            ] as { label: string; from: string }[]).map(({ label, from }) => {
+              const active = from === fromDate || (label === 'Max' && !fromDate);
+              return (
+                <a
+                  key={label}
+                  href={from ? `?from=${from}` : `?`}
+                  className={`text-xs px-2 py-0.5 rounded border transition ${
+                    active
+                      ? 'border-up text-up'
+                      : 'border-border text-muted hover:border-up/40 hover:text-up'
+                  }`}
+                >
+                  {label}
+                </a>
+              );
+            })}
+          </div>
         </div>
         <PriceChart data={priceData} />
         {/* Légende MA */}
