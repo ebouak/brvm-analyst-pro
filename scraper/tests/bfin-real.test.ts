@@ -75,7 +75,7 @@ describe.skipIf(!hasCredentials)(
         // Si ce test échoue, parseFrNumber ne reconnaît pas le format numérique.
         expect(withPrice.length).toBeGreaterThan(0);
       },
-      TIMEOUT,
+      90000,
     );
 
     it(
