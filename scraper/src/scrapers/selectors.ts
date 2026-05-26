@@ -80,15 +80,16 @@ export const ACTIONS_TABLE = [
  */
 export const ACTIONS_COLUMNS: Record<string, string[]> = {
   code:            ['code', 'symbole', 'ticker'],
-  designation:     ['designation', 'libelle', 'titre', 'valeur', 'societe'],
+  designation:     ['designation', 'libelle', 'titre', 'societe', 'valeur'],
   pays:            ['pays'],
   secteur:         ['secteur', 'activite'],
-  cours_precedent: ['cours precedent', 'cours veille', 'precedent', 'cloture veille'],
-  cours_jour:      ['cours jour', 'cours du jour', 'cours', 'dernier cours', 'cloture'],
-  variation_pct:   ['variation', 'var', 'variation pct', 'var %'],
-  volume:          ['volume', 'titres echanges', 'quantite'],
-  nb_transactions: ['transactions', 'nb transactions', 'nombre de transactions'],
-  valeur_echangee: ['valeur echangee', 'valeur', 'montant', 'capitaux'],
+  cours_precedent: ['cours precedent', 'cours veille', 'precedent', 'cloture veille', 'cloture precedente'],
+  cours_jour:      ['cours jour', 'cours du jour', 'cloture', 'dernier cours', 'cours'],
+  // Pas de colonne variation% sur BDFIN — calculé post-parse depuis cours_jour/cours_precedent.
+  variation_pct:   ['variation %', 'var %', 'var. %', 'variation pct'],
+  volume:          ['volume', 'volume echange', 'titres echanges', 'quantite echangee', 'quantite'],
+  nb_transactions: ['nombre transactions', 'nb transactions', 'transactions', 'nombre de transactions'],
+  valeur_echangee: ['valeur echangee', 'valeur echange', 'montant', 'capitaux'],
 };
 
 // ---------------------------------------------------------------------------
@@ -106,13 +107,15 @@ export const OBLIGATIONS_TABLE = [
 export const OBLIGATIONS_COLUMNS: Record<string, string[]> = {
   code:            ['isin', 'code isin', 'code'],
   designation:     ['designation', 'libelle', 'titre', 'obligation'],
-  emetteur:        ['emetteur', 'emmetteur', 'issuer'],
-  taux_pct:        ['taux', 'coupon', 'taux nominal'],
-  maturite:        ['maturite', 'echeance', 'date echeance'],
-  cours_precedent: ['cours precedent', 'precedent', 'prix precedent'],
-  cours_jour:      ['cours jour', 'cours', 'prix'],
-  volume:          ['volume', 'quantite'],
-  valeur_echangee: ['valeur echangee', 'montant', 'capitaux'],
+  // emetteur/taux/maturite absents de la page activités — enrichis via référentiel séparé.
+  emetteur:        ['emetteur', 'emmetteur', 'issuer', 'etat emetteur'],
+  taux_pct:        ['taux', 'coupon', 'taux nominal', 'taux %'],
+  maturite:        ['maturite', 'echeance', 'date echeance', 'date maturite'],
+  cours_precedent: ['cours precedent', 'precedent', 'prix precedent', 'cloture veille'],
+  cours_jour:      ['cours jour', 'cours', 'cloture', 'prix'],
+  volume:          ['volume', 'volume echange', 'quantite', 'titres echanges'],
+  nb_transactions: ['nombre transactions', 'nb transactions', 'transactions'],
+  valeur_echangee: ['valeur echangee', 'valeur echange', 'montant', 'capitaux'],
 };
 
 // ---------------------------------------------------------------------------
@@ -128,10 +131,13 @@ export const INDICES_TABLE = [
 ] as const;
 
 export const INDICES_COLUMNS: Record<string, string[]> = {
-  libelle:          ['indice', 'libelle', 'designation', 'nom'],
-  valeur:           ['valeur', 'cours', 'niveau', 'valeur jour'],
-  valeur_precedente:['precedent', 'valeur precedente', 'veille'],
-  variation_pct:    ['variation', 'var', 'var %'],
+  libelle:           ['indice', 'libelle', 'designation', 'nom'],
+  // BDFIN affiche "Fermeture" (pas "Valeur") pour les indices.
+  valeur:            ['fermeture', 'valeur', 'cours', 'niveau', 'valeur jour', 'cloture'],
+  valeur_precedente: ['precedent', 'valeur precedente', 'veille', 'ouverture'],
+  // "Variation en valeur" est la var. absolue ; "Variation en %" est le pourcentage.
+  variation_abs:     ['variation en valeur', 'var. valeur', 'variation valeur'],
+  variation_pct:     ['variation en %', 'variation %', 'var. %', 'var %', 'variation pct'],
 };
 
 // ---------------------------------------------------------------------------

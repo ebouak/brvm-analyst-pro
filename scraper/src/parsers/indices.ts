@@ -19,10 +19,14 @@ export const INDICES_TABLE_SELECTORS = [
 ];
 
 const COLUMN_SPEC: Record<string, string[]> = {
-  libelle: ['indice', 'libelle', 'designation', 'nom'],
-  valeur: ['valeur', 'cours', 'niveau', 'valeur jour'],
-  valeur_precedente: ['precedent', 'valeur precedente', 'veille'],
-  variation_pct: ['variation', 'var', 'var %'],
+  libelle:           ['indice', 'libelle', 'designation', 'nom'],
+  // BDFIN affiche "Fermeture" pour la valeur de clôture des indices.
+  valeur:            ['fermeture', 'valeur', 'cours', 'niveau', 'valeur jour', 'cloture'],
+  valeur_precedente: ['precedent', 'valeur precedente', 'veille', 'ouverture'],
+  // Variation absolue en premier (évite que "Variation en valeur" soit pris comme variation%).
+  variation_abs:     ['variation en valeur', 'var. valeur', 'variation valeur'],
+  // "variation en %" exact en premier, puis 'variation' comme fallback pour les fixtures.
+  variation_pct:     ['variation en %', 'variation %', 'var. %', 'var %', 'variation pct', 'variation'],
 };
 
 /** Mappe un libellé d'indice vers un code interne stable. */

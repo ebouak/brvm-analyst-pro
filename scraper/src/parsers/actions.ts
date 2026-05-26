@@ -24,18 +24,19 @@ export const ACTIONS_TABLE_SELECTORS = [
   'table.gridActions',
 ];
 
-/** Alias d'en-tête -> champ logique. Étendre selon les libellés réels. */
+/** Alias d'en-tête -> champ logique (synchronisé avec selectors.ts ACTIONS_COLUMNS). */
 const COLUMN_SPEC: Record<string, string[]> = {
-  code: ['code', 'symbole', 'ticker'],
-  designation: ['designation', 'libelle', 'titre', 'valeur', 'societe'],
-  pays: ['pays'],
-  secteur: ['secteur', 'activite'],
-  cours_precedent: ['cours precedent', 'cours veille', 'precedent', 'cloture veille'],
-  cours_jour: ['cours jour', 'cours du jour', 'cours', 'dernier cours', 'cloture'],
-  variation_pct: ['variation', 'var', 'variation pct', 'var %'],
-  volume: ['volume', 'titres echanges', 'quantite'],
-  nb_transactions: ['transactions', 'nb transactions', 'nombre de transactions'],
-  valeur_echangee: ['valeur echangee', 'valeur', 'montant', 'capitaux'],
+  code:            ['code', 'symbole', 'ticker'],
+  designation:     ['designation', 'libelle', 'titre', 'societe', 'valeur'],
+  pays:            ['pays'],
+  secteur:         ['secteur', 'activite'],
+  cours_precedent: ['cours precedent', 'cours veille', 'precedent', 'cloture veille', 'cloture precedente'],
+  cours_jour:      ['cours jour', 'cours du jour', 'cloture', 'dernier cours', 'cours'],
+  // Colonne absente sur BDFIN — variation calculée post-parse.
+  variation_pct:   ['variation %', 'var %', 'var. %', 'variation pct'],
+  volume:          ['volume', 'volume echange', 'titres echanges', 'quantite echangee', 'quantite'],
+  nb_transactions: ['nombre transactions', 'nb transactions', 'transactions', 'nombre de transactions'],
+  valeur_echangee: ['valeur echangee', 'valeur echange', 'montant', 'capitaux'],
 };
 
 export function parseActions(html: string): ActionRow[] {
@@ -70,14 +71,23 @@ export function parseActions(html: string): ActionRow[] {
     // Une ligne sans code ni désignation n'est pas exploitable.
     if (!code && !designation) continue;
 
+    const cours_precedent = parseFrNumber(cell(row, idx, 'cours_precedent'));
+    const cours_jour = parseFrNumber(cell(row, idx, 'cours_jour'));
+
+    // BDFIN n'affiche pas de colonne variation% — on la calcule depuis les cours.
+    let variation_pct = parseFrNumber(cell(row, idx, 'variation_pct'));
+    if (variation_pct == null && cours_precedent != null && cours_jour != null && cours_precedent > 0) {
+      variation_pct = Math.round(((cours_jour - cours_precedent) / cours_precedent) * 10000) / 100;
+    }
+
     out.push({
       code: code || designation.slice(0, 12).toUpperCase(),
       designation: designation || code,
       pays: cleanText(cell(row, idx, 'pays')) || null,
       secteur: cleanText(cell(row, idx, 'secteur')) || null,
-      cours_precedent: parseFrNumber(cell(row, idx, 'cours_precedent')),
-      cours_jour: parseFrNumber(cell(row, idx, 'cours_jour')),
-      variation_pct: parseFrNumber(cell(row, idx, 'variation_pct')),
+      cours_precedent,
+      cours_jour,
+      variation_pct,
       volume: parseFrInt(cell(row, idx, 'volume')),
       nb_transactions: parseFrInt(cell(row, idx, 'nb_transactions')),
       valeur_echangee: parseFrNumber(cell(row, idx, 'valeur_echangee')),
