@@ -1,4 +1,4 @@
-import { BarChart3, TrendingUp, TrendingDown, Minus, Activity } from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Minus, Activity } from '@/components/icons';
 import { fmtFcfa, fmtNumber } from '@/lib/format';
 
 export interface MarketStats {

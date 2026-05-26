@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown } from '@/components/icons';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber } from '@/lib/format';
 import SignalBadge from '@/components/SignalBadge';

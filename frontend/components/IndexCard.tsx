@@ -1,5 +1,5 @@
 'use client';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from '@/components/icons';
 import { fmtNumber, fmtFcfa, fmtDateTimeFR } from '@/lib/format';
 
 export interface IndexCardProps {
