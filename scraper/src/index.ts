@@ -22,6 +22,13 @@
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
+
+// Polyfill WebSocket global pour Node.js < 22 (requis par Supabase Realtime)
+import ws from 'ws';
+if (!globalThis.WebSocket) {
+  (globalThis as unknown as Record<string, unknown>).WebSocket = ws;
+}
+
 import { runDaily } from './runners/runDaily.js';
 import { runScoring } from './scoring/runScoring.js';
 import { runEvents } from './events/runEvents.js';

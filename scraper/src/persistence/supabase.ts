@@ -7,16 +7,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getConfig } from '../config.js';
 
-// ws requis par Supabase Realtime sur Node < 22 (pas de WebSocket natif)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let wsLib: any;
-try {
-  const mod = await import('ws');
-  wsLib = mod.default ?? mod;
-} catch {
-  // Node 22+ a WebSocket natif — pas de fallback nécessaire
-}
-
 let cached: SupabaseClient | null = null;
 
 export function getSupabase(): SupabaseClient {
@@ -30,7 +20,6 @@ export function getSupabase(): SupabaseClient {
   }
   cached = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
-    ...(wsLib ? { realtime: { transport: wsLib } } : {}),
   });
   return cached;
 }
