@@ -68,34 +68,42 @@ export default async function InstrumentPage({ params }: { params: { code: strin
     );
   }
 
-  const closes = rows.map((r) => r.cours_jour ?? 0);
-  const ma20  = smaSeries(closes, 20);
-  const ma50  = smaSeries(closes, 50);
-  const ma200 = smaSeries(closes, 200);
-  const rsiS  = rsiSeries(closes, 14);
-  const macdS = macdSeries(closes);
-  const det   = detect(closes);
+  // Ne calcule les indicateurs que sur les clôtures valides (jamais avec 0 synthétique)
+  const closes = rows.map((r) => r.cours_jour ?? null);
+  const validCloses = closes.filter((c): c is number => c != null);
+  const ma20  = smaSeries(closes.map((c) => c ?? 0), 20).map((v, i) => closes[i] == null ? null : v);
+  const ma50  = smaSeries(closes.map((c) => c ?? 0), 50).map((v, i) => closes[i] == null ? null : v);
+  const ma200 = smaSeries(closes.map((c) => c ?? 0), 200).map((v, i) => closes[i] == null ? null : v);
+  const rsiS  = rsiSeries(validCloses, 14);
+  const macdS = macdSeries(validCloses);
+  const det   = detect(validCloses);
+
+  // Réindexe RSI/MACD (calculés sur validCloses) vers rows
+  let validIdx = 0;
+  const rsiByRow   = rows.map((r) => r.cours_jour != null ? (rsiS[validIdx++] ?? null) : null);
+  validIdx = 0;
+  const macdByRow  = rows.map((r) => r.cours_jour != null ? (macdS[validIdx++] ?? null) : null);
 
   const priceData: PricePoint[] = rows.map((r, i) => ({
     date: r.date_marche, close: r.cours_jour,
-    ma20: ma20[i], ma50: ma50[i], ma200: ma200[i], volume: r.volume,
+    ma20: ma20[i] ?? null, ma50: ma50[i] ?? null, ma200: ma200[i] ?? null, volume: r.volume,
   }));
   const indicatorData: IndicatorPoint[] = rows.map((r, i) => ({
     date: r.date_marche,
-    rsi: rsiS[i],
-    macd: macdS[i]?.macd ?? null,
-    signal: macdS[i]?.signal ?? null,
-    hist: macdS[i]?.hist ?? null,
+    rsi: rsiByRow[i],
+    macd: macdByRow[i]?.macd ?? null,
+    signal: macdByRow[i]?.signal ?? null,
+    hist: macdByRow[i]?.hist ?? null,
   }));
 
   const last    = rows[rows.length - 1]!;
   const prev    = rows[rows.length - 2] ?? null;
   const up      = (last.variation_pct ?? 0) >= 0;
-  const lastRsi = rsiS[rsiS.length - 1];
-  const lastMacd = macdS[macdS.length - 1];
-  const lastMa20 = ma20[ma20.length - 1];
-  const lastMa50 = ma50[ma50.length - 1];
-  const lastMa200 = ma200[ma200.length - 1];
+  const lastRsi = rsiByRow[rsiByRow.length - 1];
+  const lastMacd = macdByRow[macdByRow.length - 1];
+  const lastMa20 = ma20[ma20.length - 1] ?? null;
+  const lastMa50 = ma50[ma50.length - 1] ?? null;
+  const lastMa200 = ma200[ma200.length - 1] ?? null;
 
   // Variation absolue
   const varAbs = last.cours_precedent != null && last.cours_jour != null
@@ -170,10 +178,17 @@ export default async function InstrumentPage({ params }: { params: { code: strin
         </div>
       </div>
 
+      {/* ── Bannière données insuffisantes ── */}
+      {rows.length < 20 && (
+        <div className="border border-warn/30 bg-warn/5 rounded-xl px-4 py-2 text-xs text-warn">
+          ⚠️ Seulement {rows.length} séance{rows.length > 1 ? 's' : ''} disponible{rows.length > 1 ? 's' : ''} — les indicateurs techniques (RSI, MACD, moyennes mobiles) nécessitent au minimum 20 séances. Lancez le backfill pour enrichir l&apos;historique.
+        </div>
+      )}
+
       {/* ── Graphique ── */}
       <div className="bg-surface border border-border rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">📈 Graphique (Clôtures {rows.length} séances)</h3>
+          <h3 className="text-sm font-semibold">📈 Graphique ({rows.length} séance{rows.length > 1 ? 's' : ''})</h3>
         </div>
         <PriceChart data={priceData} />
         {/* Légende MA */}
@@ -379,34 +394,50 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
         <p className="text-sm text-muted mb-2">{signal.explication ?? 'Signal calculé automatiquement.'}</p>
 
         {/* Sous-scores */}
-        {(signal.score_variation != null || signal.score_volume != null || signal.score_rsi != null) && (
-          <div className="border-t border-border/50 pt-2 mt-2">
-            <p className="text-xs text-muted mb-1.5">Sous-scores :</p>
-            <div className="space-y-1">
-              {[
-                { label: 'variation_norm', val: signal.score_variation },
-                { label: 'volume_signal', val: signal.score_volume },
-                { label: 'rsi_signal', val: signal.score_rsi },
-                { label: 'bonus_tendance', val: signal.bonus_tendance },
-                { label: 'penalite_liquidite', val: signal.penalite_liquidite != null ? -signal.penalite_liquidite : null },
-              ].map(({ label, val }) => val != null ? (
-                <div key={label} className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-mono">{label}</span>
-                  <span className={`tabular font-mono ${val >= 0 ? 'text-up' : 'text-down'}`}>
-                    {val >= 0 ? '+' : ''}{val.toFixed(2)}
-                  </span>
-                </div>
-              ) : null)}
-              {/* Inputs JSON */}
-              {subScores && Object.entries(subScores).slice(0, 4).map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-mono">{k}</span>
-                  <span className="tabular text-white/60">{typeof v === 'number' ? v.toFixed(3) : String(v)}</span>
-                </div>
-              ))}
+        {(() => {
+          const subScoreRows = [
+            { label: 'variation_norm', val: signal.score_variation },
+            { label: 'volume_signal', val: signal.score_volume },
+            { label: 'rsi_signal', val: signal.score_rsi },
+            { label: 'bonus_tendance', val: signal.bonus_tendance },
+            { label: 'penalite_liquidite', val: signal.penalite_liquidite != null ? -signal.penalite_liquidite : null },
+          ].filter((r) => r.val != null);
+
+          if (subScoreRows.length === 0) return null;
+          return (
+            <div className="border-t border-border/50 pt-2 mt-2">
+              <p className="text-xs text-muted mb-1.5">Sous-scores :</p>
+              <div className="space-y-1">
+                {subScoreRows.map(({ label, val }) => (
+                  <div key={label} className="flex items-center justify-between text-xs">
+                    <span className="text-muted font-mono">{label}</span>
+                    <span className={`tabular font-mono ${(val as number) >= 0 ? 'text-up' : 'text-down'}`}>
+                      {(val as number) >= 0 ? '+' : ''}{(val as number).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
+        {/* Indicateurs bruts (inputs JSON) — seulement les valeurs non-null */}
+        {subScores && (() => {
+          const entries = Object.entries(subScores).filter(([, v]) => v != null);
+          if (entries.length === 0) return null;
+          return (
+            <div className="border-t border-border/50 pt-2 mt-2">
+              <p className="text-xs text-muted mb-1.5">Indicateurs utilisés :</p>
+              <div className="space-y-1">
+                {entries.slice(0, 6).map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between text-xs">
+                    <span className="text-muted font-mono">{k}</span>
+                    <span className="tabular text-white/60">{typeof v === 'number' ? v.toFixed(3) : String(v)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       <Link href="/signaux" className="text-xs text-up hover:underline">
