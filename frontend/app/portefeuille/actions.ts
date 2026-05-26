@@ -107,3 +107,79 @@ export async function deleteWatchItem(formData: FormData) {
   if (error) throw new Error(error.message);
   revalidatePath('/portefeuille');
 }
+
+export async function updatePosition(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get('id'));
+  const quantite = Number(formData.get('quantite'));
+  const prix_entree = Number(formData.get('prix_entree'));
+  const date_entree = (formData.get('date_entree') as string) || null;
+  const note = (formData.get('note') as string) || null;
+
+  const { error } = await supabase
+    .from('portfolios_positions')
+    .update({
+      quantite,
+      prix_entree,
+      date_entree,
+      note,
+    })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/portefeuille');
+}
+
+export async function createAlert(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const code = String(formData.get('code')).toUpperCase().trim();
+  const type = String(formData.get('type'));
+  const seuil = Number(formData.get('seuil'));
+  const actif = formData.get('actif') === 'true';
+
+  if (!['prix_au_dessus', 'prix_en_dessous', 'variation'].includes(type)) {
+    throw new Error('Type d\'alerte invalide');
+  }
+  if (seuil <= 0) throw new Error('Seuil doit être positif');
+
+  const { error } = await supabase.from('alerts').insert({
+    user_id: user.id,
+    code,
+    type,
+    seuil,
+    actif,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath('/portefeuille');
+}
+
+export async function updateAlert(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get('id'));
+  const type = String(formData.get('type'));
+  const seuil = Number(formData.get('seuil'));
+  const actif = formData.get('actif') === 'true';
+
+  if (!['prix_au_dessus', 'prix_en_dessous', 'variation'].includes(type)) {
+    throw new Error('Type d\'alerte invalide');
+  }
+  if (seuil <= 0) throw new Error('Seuil doit être positif');
+
+  const { error } = await supabase
+    .from('alerts')
+    .update({
+      type,
+      seuil,
+      actif,
+    })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/portefeuille');
+}
+
+export async function deleteAlert(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get('id'));
+  const { error } = await supabase.from('alerts').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/portefeuille');
+}
