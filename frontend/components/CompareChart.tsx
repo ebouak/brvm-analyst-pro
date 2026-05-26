@@ -1,7 +1,5 @@
 'use client';
-import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
-} from 'recharts';
+import EChart from './EChart';
 
 const COLORS = ['#00c853', '#42a5f5', '#ffb300', '#7e57c2', '#ef5350', '#26c6da'];
 
@@ -10,28 +8,41 @@ export interface ComparePoint {
   [code: string]: number | string | null;
 }
 
-export default function CompareChart({
-  data,
-  codes,
-}: {
-  data: ComparePoint[];
-  codes: string[];
-}) {
+export default function CompareChart({ data, codes }: { data: ComparePoint[]; codes: string[] }) {
+  const dates = data.map((d) => d.date);
+
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
-      <h3 className="text-sm font-semibold mb-2">Performance comparée (base 100)</h3>
-      <ResponsiveContainer width="100%" height={360}>
-        <LineChart data={data} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="#232733" vertical={false} />
-          <XAxis dataKey="date" tick={{ fill: '#8b93a7', fontSize: 10 }} minTickGap={40} />
-          <YAxis tick={{ fill: '#8b93a7', fontSize: 10 }} width={44} domain={['auto', 'auto']} />
-          <Tooltip contentStyle={{ background: '#161922', border: '1px solid #232733', fontSize: 12 }} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          {codes.map((c, i) => (
-            <Line key={c} dataKey={c} stroke={COLORS[i % COLORS.length]} dot={false} strokeWidth={1.5} />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+      <h3 className="text-sm font-semibold mb-2">📊 Performance comparée (base 100)</h3>
+      <EChart
+        height={360}
+        option={{
+          legend: {
+            top: 0, right: 0,
+            textStyle: { color: '#8b93a7', fontSize: 11 },
+            data: codes,
+          },
+          xAxis: {
+            type: 'category', data: dates, boundaryGap: false,
+            axisLabel: { color: '#8b93a7', fontSize: 10,
+              interval: Math.floor(dates.length / 6), rotate: 30 },
+          },
+          yAxis: { type: 'value', scale: true,
+            axisLabel: { formatter: (v: number) => v.toFixed(0) } },
+          dataZoom: [
+            { type: 'inside', start: 0, end: 100 },
+            { type: 'slider', height: 20, bottom: 0, borderColor: '#232733',
+              fillerColor: 'rgba(0,200,83,0.08)', handleStyle: { color: '#00c853' },
+              textStyle: { color: '#4a5268', fontSize: 9 } },
+          ],
+          series: codes.map((code, i) => ({
+            name: code, type: 'line' as const,
+            data: data.map((d) => d[code] as number | null),
+            symbol: 'none',
+            lineStyle: { color: COLORS[i % COLORS.length], width: 1.5 },
+          })),
+        }}
+      />
     </div>
   );
 }

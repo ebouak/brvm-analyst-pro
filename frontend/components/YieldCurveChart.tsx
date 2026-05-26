@@ -1,8 +1,5 @@
 'use client';
-import {
-  ScatterChart, Scatter, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, Legend, ZAxis,
-} from 'recharts';
+import EChart from './EChart';
 
 export interface CurvePoint { emetteur: string; code: string; x: number; y: number }
 
@@ -13,32 +10,40 @@ export default function YieldCurveChart({ data }: { data: CurvePoint[] }) {
     (acc[p.emetteur] ??= []).push(p);
     return acc;
   }, {});
+
   const groups = Object.entries(byEmetteur).map(([em, pts]) => ({
-    em,
-    pts: [...pts].sort((a, b) => a.x - b.x),
+    em, pts: [...pts].sort((a, b) => a.x - b.x),
   }));
 
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
-      <h3 className="text-sm font-semibold mb-2">Courbe des taux (YTM vs maturité, par émetteur)</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <ScatterChart margin={{ top: 5, right: 16, left: 0, bottom: 10 }}>
-          <CartesianGrid stroke="#232733" />
-          <XAxis type="number" dataKey="x" name="Maturité (ans)" unit=" a"
-            tick={{ fill: '#8b93a7', fontSize: 10 }} domain={['auto', 'auto']} />
-          <YAxis type="number" dataKey="y" name="YTM" unit="%"
-            tick={{ fill: '#8b93a7', fontSize: 10 }} domain={['auto', 'auto']} width={44} />
-          <ZAxis range={[60, 60]} />
-          <Tooltip
-            contentStyle={{ background: '#161922', border: '1px solid #232733', fontSize: 12 }}
-            formatter={(v: number, n: string) => [n === 'y' ? v.toFixed(2) + '%' : v.toFixed(1) + ' a', n === 'y' ? 'YTM' : 'Maturité']}
-          />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          {groups.map((g, i) => (
-            <Scatter key={g.em} name={g.em} data={g.pts} fill={COLORS[i % COLORS.length]} line shape="circle" />
-          ))}
-        </ScatterChart>
-      </ResponsiveContainer>
+      <h3 className="text-sm font-semibold mb-2">📉 Courbe des taux (YTM vs maturité)</h3>
+      <EChart
+        height={300}
+        option={{
+          legend: {
+            top: 0, right: 0,
+            textStyle: { color: '#8b93a7', fontSize: 11 },
+            data: groups.map((g) => g.em),
+          },
+          xAxis: { type: 'value', name: 'Maturité (ans)', nameLocation: 'end',
+            nameTextStyle: { color: '#4a5268', fontSize: 10 },
+            axisLabel: { formatter: (v: number) => `${v}a` }, scale: true },
+          yAxis: { type: 'value', name: 'YTM %', nameTextStyle: { color: '#4a5268', fontSize: 10 },
+            axisLabel: { formatter: (v: number) => `${v.toFixed(1)}%` }, scale: true },
+          series: groups.map((g, i) => ({
+            name: g.em, type: 'line' as const,
+            data: g.pts.map((p) => [p.x, p.y]),
+            symbol: 'circle', symbolSize: 8,
+            lineStyle: { color: COLORS[i % COLORS.length], width: 1.5 },
+            itemStyle: { color: COLORS[i % COLORS.length] },
+            tooltip: { formatter: (p: unknown) => {
+              const pt = p as { data: [number, number]; seriesName: string };
+              return `${pt.seriesName}<br/>Maturité: ${pt.data[0].toFixed(1)} ans<br/>YTM: ${pt.data[1].toFixed(2)}%`;
+            } },
+          })),
+        }}
+      />
     </div>
   );
 }

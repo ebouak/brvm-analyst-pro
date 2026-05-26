@@ -1,21 +1,11 @@
 'use client';
-import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, Legend, ReferenceArea,
-} from 'recharts';
+import EChart from './EChart';
 
 interface Props {
   equityCurve: { date_index: number; date?: string; value: number }[];
   closes: number[];
   dates?: string[];
   drawdownPeriods?: { start: number; end: number }[];
-}
-
-function formatDate(iso: string): string {
-  // Format ISO date as dd/MM/yy
-  const parts = iso.slice(0, 10).split('-');
-  if (parts.length !== 3) return iso;
-  return `${parts[2]}/${parts[1]}/${parts[0]!.slice(2)}`;
 }
 
 export default function BacktestChart({ equityCurve, closes, dates, drawdownPeriods }: Props) {
@@ -25,52 +15,59 @@ export default function BacktestChart({ equityCurve, closes, dates, drawdownPeri
 
   const base = closes[0] ?? 1;
 
-  const data = equityCurve.map((pt) => {
-    const rawDate = pt.date ?? dates?.[pt.date_index];
-    return {
-      date_index: pt.date_index,
-      label: rawDate ? formatDate(rawDate) : String(pt.date_index),
-      rawDate,
-      strategie: Math.round(pt.value * 100) / 100,
-      buyhold: Math.round(100 * ((closes[pt.date_index] ?? base) / base) * 100) / 100,
-    };
-  });
+  const labels    = equityCurve.map((pt) => pt.date ?? dates?.[pt.date_index] ?? String(pt.date_index));
+  const strategie = equityCurve.map((pt) => +(pt.value.toFixed(2)));
+  const buyhold   = equityCurve.map((pt) => +(100 * ((closes[pt.date_index] ?? base) / base)).toFixed(2));
 
-  const hasDate = data.some((d) => d.rawDate !== undefined);
+  // Zones de drawdown en markArea
+  const markAreas = (drawdownPeriods ?? []).map((d) => [
+    { xAxis: labels[d.start] ?? String(d.start) },
+    { xAxis: labels[Math.min(d.end, labels.length - 1)] ?? String(d.end) },
+  ] as [{ xAxis: string }, { xAxis: string }]);
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 min-h-[400px]">
+    <div className="bg-surface border border-border rounded-xl p-4 min-h-[420px]">
       <h3 className="text-sm font-semibold mb-2">📈 Courbe d&apos;équité</h3>
-      <ResponsiveContainer width="100%" height={360}>
-        <LineChart data={data} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="#232733" vertical={false} />
-          <XAxis
-            dataKey={hasDate ? 'label' : 'date_index'}
-            tick={{ fill: '#8b93a7', fontSize: 10 }}
-            minTickGap={60}
-          />
-          <YAxis tick={{ fill: '#8b93a7', fontSize: 10 }} domain={['auto', 'auto']} width={56} />
-          <Tooltip
-            contentStyle={{ background: '#161922', border: '1px solid #232733', fontSize: 12 }}
-            labelStyle={{ color: '#e6e9f0' }}
-            labelFormatter={(label) => (hasDate ? `Date : ${label}` : `Jour ${label}`)}
-            formatter={(v: number, name: string) => [`${v.toFixed(2)}`, name]}
-          />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          {(drawdownPeriods ?? []).map((d, i) => (
-            <ReferenceArea
-              key={i}
-              x1={hasDate ? data[d.start]?.label : d.start}
-              x2={hasDate ? data[d.end]?.label : d.end}
-              fill="#f4433620"
-              fillOpacity={1}
-              stroke="none"
-            />
-          ))}
-          <Line dataKey="strategie" name="Stratégie" stroke="#00c853" dot={false} strokeWidth={1.5} />
-          <Line dataKey="buyhold" name="Buy & Hold" stroke="#8b93a7" dot={false} strokeWidth={1.5} strokeDasharray="4 2" />
-        </LineChart>
-      </ResponsiveContainer>
+      <EChart
+        height={380}
+        option={{
+          legend: {
+            top: 0, right: 0,
+            textStyle: { color: '#8b93a7', fontSize: 11 },
+            data: ['Stratégie', 'Buy & Hold'],
+          },
+          xAxis: {
+            type: 'category', data: labels, boundaryGap: false,
+            axisLabel: { color: '#8b93a7', fontSize: 10,
+              interval: Math.floor(labels.length / 6), rotate: 30 },
+          },
+          yAxis: { type: 'value', scale: true,
+            axisLabel: { formatter: (v: number) => v.toFixed(0) } },
+          dataZoom: [
+            { type: 'inside', start: 0, end: 100 },
+            { type: 'slider', height: 20, bottom: 0, borderColor: '#232733',
+              fillerColor: 'rgba(0,200,83,0.08)', handleStyle: { color: '#00c853' },
+              textStyle: { color: '#4a5268', fontSize: 9 } },
+          ],
+          series: [
+            {
+              name: 'Stratégie', type: 'line', data: strategie,
+              symbol: 'none', lineStyle: { color: '#00c853', width: 2 },
+              areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                colorStops: [{ offset: 0, color: 'rgba(0,200,83,0.15)' }, { offset: 1, color: 'transparent' }] } },
+              markArea: markAreas.length > 0 ? {
+                silent: true,
+                itemStyle: { color: 'rgba(244,67,54,0.12)' },
+                data: markAreas,
+              } : undefined,
+            },
+            {
+              name: 'Buy & Hold', type: 'line', data: buyhold,
+              symbol: 'none', lineStyle: { color: '#8b93a7', width: 1.5, type: 'dashed' },
+            },
+          ],
+        }}
+      />
     </div>
   );
 }

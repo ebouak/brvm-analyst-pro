@@ -1,8 +1,5 @@
 'use client';
-import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, ReferenceLine, Cell,
-} from 'recharts';
+import EChart from './EChart';
 
 export interface IndicatorPoint {
   date: string;
@@ -13,39 +10,75 @@ export interface IndicatorPoint {
 }
 
 export default function IndicatorCharts({ data }: { data: IndicatorPoint[] }) {
+  const dates = data.map((d) => d.date);
+
   return (
     <div className="grid md:grid-cols-2 gap-4">
+      {/* RSI */}
       <div className="bg-surface border border-border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-2">RSI (14)</h3>
-        <ResponsiveContainer width="100%" height={160}>
-          <LineChart data={data} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid stroke="#232733" vertical={false} />
-            <XAxis dataKey="date" tick={{ fill: '#8b93a7', fontSize: 10 }} minTickGap={40} />
-            <YAxis domain={[0, 100]} ticks={[0, 30, 50, 70, 100]} tick={{ fill: '#8b93a7', fontSize: 10 }} width={28} />
-            <Tooltip contentStyle={{ background: '#161922', border: '1px solid #232733', fontSize: 12 }} />
-            <ReferenceLine y={70} stroke="#f44336" strokeDasharray="3 3" />
-            <ReferenceLine y={30} stroke="#00c853" strokeDasharray="3 3" />
-            <Line dataKey="rsi" stroke="#42a5f5" dot={false} strokeWidth={1.5} />
-          </LineChart>
-        </ResponsiveContainer>
+        <EChart
+          height={180}
+          option={{
+            grid: { top: 12, right: 12, bottom: 32, left: 40 },
+            xAxis: { type: 'category', data: dates, boundaryGap: false,
+              axisLabel: { color: '#8b93a7', fontSize: 9, interval: Math.floor(dates.length / 4) } },
+            yAxis: { type: 'value', min: 0, max: 100,
+              axisLabel: { color: '#8b93a7', fontSize: 10 },
+              splitLine: { lineStyle: { color: '#232733', type: 'dashed' } } },
+            series: [
+              {
+                name: 'RSI', type: 'line', data: data.map((d) => d.rsi),
+                symbol: 'none', lineStyle: { color: '#42a5f5', width: 1.5 },
+                markLine: {
+                  silent: true,
+                  lineStyle: { type: 'dashed', width: 1 },
+                  data: [
+                    { yAxis: 70, lineStyle: { color: '#f44336' } },
+                    { yAxis: 30, lineStyle: { color: '#00c853' } },
+                  ],
+                  label: { formatter: (p: unknown) => String((p as { value: number }).value), color: '#8b93a7', fontSize: 9 },
+                },
+              },
+            ],
+          }}
+        />
       </div>
 
+      {/* MACD */}
       <div className="bg-surface border border-border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-2">MACD (12, 26, 9)</h3>
-        <ResponsiveContainer width="100%" height={160}>
-          <BarChart data={data} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid stroke="#232733" vertical={false} />
-            <XAxis dataKey="date" tick={{ fill: '#8b93a7', fontSize: 10 }} minTickGap={40} />
-            <YAxis tick={{ fill: '#8b93a7', fontSize: 10 }} width={36} />
-            <Tooltip contentStyle={{ background: '#161922', border: '1px solid #232733', fontSize: 12 }} />
-            <ReferenceLine y={0} stroke="#8b93a7" />
-            <Bar dataKey="hist" name="Histogramme">
-              {data.map((d, i) => (
-                <Cell key={i} fill={(d.hist ?? 0) >= 0 ? '#00c853' : '#f44336'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <EChart
+          height={180}
+          option={{
+            grid: { top: 12, right: 12, bottom: 32, left: 40 },
+            xAxis: { type: 'category', data: dates, boundaryGap: false,
+              axisLabel: { color: '#8b93a7', fontSize: 9, interval: Math.floor(dates.length / 4) } },
+            yAxis: { type: 'value', scale: true,
+              axisLabel: { color: '#8b93a7', fontSize: 9 },
+              splitLine: { lineStyle: { color: '#232733', type: 'dashed' } } },
+            series: [
+              {
+                name: 'Histogramme', type: 'bar',
+                data: data.map((d) => ({
+                  value: d.hist,
+                  itemStyle: { color: (d.hist ?? 0) >= 0 ? '#00c853' : '#f44336' },
+                })),
+                barMaxWidth: 6,
+              },
+              {
+                name: 'MACD', type: 'line',
+                data: data.map((d) => d.macd),
+                symbol: 'none', lineStyle: { color: '#42a5f5', width: 1 },
+              },
+              {
+                name: 'Signal', type: 'line',
+                data: data.map((d) => d.signal),
+                symbol: 'none', lineStyle: { color: '#ffb300', width: 1, type: 'dashed' },
+              },
+            ],
+          }}
+        />
       </div>
     </div>
   );
