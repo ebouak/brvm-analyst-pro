@@ -26,3 +26,5 @@ tsconfig.tsbuildinfo
 
 # Supabase CLI temp
 supabase/.temp/
+
+.vercel

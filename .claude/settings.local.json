@@ -10,7 +10,10 @@
       "PowerShell(node --version)",
       "PowerShell(npm --version)",
       "PowerShell(npm install -g supabase)",
-      "PowerShell(Copy-Item \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env.local\" \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env\" -Force)"
+      "PowerShell(Copy-Item \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env.local\" \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env\" -Force)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -TimeoutSec 5; \"OK: HTTP $\\($r.StatusCode\\)\" } catch { \"Dev server down or slow: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(vercel --version 2>&1)",
+      "PowerShell(vercel whoami 2>&1)"
     ]
   }
 }
