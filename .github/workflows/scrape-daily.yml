@@ -1,50 +1,194 @@
-name: BRVM Scraping Quotidien
+name: BRVM — Scraping & Signaux
 
 on:
   schedule:
-    # 18h30 UTC = 18h30 GMT = après clôture BRVM (lun-ven)
-    - cron: '30 18 * * 1-5'
+    # ── 1. Post-clôture BRVM (13h GMT → 13h30 UTC) ──────────────────
+    # Scrape cours du jour + score + events + dividends + alerts
+    - cron: '30 13 * * 1-5'
+
+    # ── 2. Mise à jour soir (18h00 UTC) ──────────────────────────────
+    # Re-calcul signaux + alertes après publication données définitives
+    - cron: '0 18 * * 1-5'
+
+    # ── 3. Pré-ouverture (08h30 UTC) ─────────────────────────────────
+    # Ingestion communiqués/événements publiés la nuit ou le matin
+    - cron: '30 8 * * 1-5'
+
   workflow_dispatch:
     inputs:
+      command:
+        description: 'Commande (daily | score | events | dividends | alerts | date)'
+        required: false
+        default: 'daily'
       date:
-        description: 'Date à scraper (YYYY-MM-DD), vide = séance courante'
+        description: 'Date YYYY-MM-DD (si command=date)'
         required: false
 
+# Ne pas lancer plusieurs runs en parallèle sur le même groupe
+concurrency:
+  group: brvm-scrape
+  cancel-in-progress: false
+
 jobs:
-  scrape:
-    name: Scrape + Score BRVM
+  # ══════════════════════════════════════════════════════════════════════
+  # JOB 1 — Post-clôture : scrape cours + score + events + dividends + alerts
+  # Déclenché à 13h30 UTC (lun-ven) + dispatch manual command=daily
+  # ══════════════════════════════════════════════════════════════════════
+  post-cloture:
+    name: Post-clôture BRVM (cours + signaux + alertes)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.command == 'daily' || github.event.inputs.command == 'date') ||
+      (github.event_name == 'schedule' && github.event.schedule == '30 13 * * 1-5')
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: npm
           cache-dependency-path: scraper/package-lock.json
 
       - name: Installer les dépendances
         run: cd scraper && npm ci
 
-      - name: Scraper la séance
+      - name: 1 · Scraper la séance
         run: |
           cd scraper
-          if [ -n "${{ inputs.date }}" ]; then
-            npm run scrape:date -- "${{ inputs.date }}"
+          if [ "${{ github.event.inputs.command }}" = "date" ] && [ -n "${{ github.event.inputs.date }}" ]; then
+            npm run scrape:date -- "${{ github.event.inputs.date }}"
           else
             npm run scrape:daily
           fi
         env:
-          BDFIN_BASE_URL: ${{ secrets.BDFIN_BASE_URL }}
-          BDFIN_USERNAME: ${{ secrets.BDFIN_USERNAME }}
-          BDFIN_PASSWORD: ${{ secrets.BDFIN_PASSWORD }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
+          BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}
+          BDFIN_PASSWORD:           ${{ secrets.BDFIN_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: Calculer les signaux
+      - name: 2 · Calculer les signaux
         run: cd scraper && npm run score
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 3 · Ingérer les événements
+        run: cd scraper && npm run events
+        env:
+          BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
+          BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}
+          BDFIN_PASSWORD:           ${{ secrets.BDFIN_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 4 · Ingérer les dividendes
+        run: cd scraper && npm run dividends
+        env:
+          BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
+          BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}
+          BDFIN_PASSWORD:           ${{ secrets.BDFIN_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 5 · Évaluer et envoyer les alertes
+        run: cd scraper && npm run alerts
+        env:
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY:           ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM:        ${{ secrets.ALERTS_EMAIL_FROM }}
+          TELEGRAM_BOT_TOKEN:       ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:         ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: 6 · Déclencher redéploiement Vercel
+        run: |
+          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
+            curl -X POST "$VERCEL_DEPLOY_HOOK"
+          fi
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+
+  # ══════════════════════════════════════════════════════════════════════
+  # JOB 2 — Soir : re-score + alertes (données définitives)
+  # Déclenché à 18h00 UTC (lun-ven)
+  # ══════════════════════════════════════════════════════════════════════
+  soir-rescore:
+    name: Soir — re-score + alertes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.command == 'score' || github.event.inputs.command == 'alerts') ||
+      (github.event_name == 'schedule' && github.event.schedule == '0 18 * * 1-5')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Installer les dépendances
+        run: cd scraper && npm ci
+
+      - name: 1 · Re-calculer les signaux
+        run: cd scraper && npm run score
+        env:
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 2 · Re-évaluer les alertes
+        run: cd scraper && npm run alerts
+        env:
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY:           ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM:        ${{ secrets.ALERTS_EMAIL_FROM }}
+          TELEGRAM_BOT_TOKEN:       ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:         ${{ secrets.TELEGRAM_CHAT_ID }}
+
+  # ══════════════════════════════════════════════════════════════════════
+  # JOB 3 — Pré-ouverture : événements + dividendes du matin
+  # Déclenché à 08h30 UTC (lun-ven)
+  # ══════════════════════════════════════════════════════════════════════
+  matin-events:
+    name: Matin — événements & dividendes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.command == 'events' || github.event.inputs.command == 'dividends') ||
+      (github.event_name == 'schedule' && github.event.schedule == '30 8 * * 1-5')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Installer les dépendances
+        run: cd scraper && npm ci
+
+      - name: 1 · Événements du matin
+        run: cd scraper && npm run events
+        env:
+          BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
+          BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}
+          BDFIN_PASSWORD:           ${{ secrets.BDFIN_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 2 · Dividendes du matin
+        run: cd scraper && npm run dividends
+        env:
+          BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
+          BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}
+          BDFIN_PASSWORD:           ${{ secrets.BDFIN_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
