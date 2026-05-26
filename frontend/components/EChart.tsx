@@ -1,9 +1,5 @@
 'use client';
-/**
- * Wrapper React générique pour Apache ECharts.
- * Utilise echarts-for-react avec import dynamique pour éviter le SSR.
- * Apache License 2.0.
- */
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import type { EChartsOption } from 'echarts';
 import type { EChartsReactProps } from 'echarts-for-react';
@@ -19,7 +15,12 @@ interface EChartProps {
 }
 
 export default function EChart({ option, height = 320, className, loading, onEvents }: EChartProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const style = { height: typeof height === 'number' ? `${height}px` : height, width: '100%' };
+
+  if (!mounted) return <div style={style} className={className} />;
 
   const baseTheme: EChartsOption = {
     backgroundColor: 'transparent',
