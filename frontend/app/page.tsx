@@ -130,19 +130,19 @@ export default async function Dashboard() {
       <div className="grid grid-cols-2 gap-4">
         <IndexCard
           code="BRVM30"
-          label="📈 BRVM 30"
+          label="BRVM 30"
           valeur={brvm30?.valeur ?? null}
           variation_pct={brvm30?.variation_pct ?? null}
           valeur_echangee={volTotal / 2}
-          date_marche="16:30 GMT"
+          date_seance={lastDate}
         />
         <IndexCard
           code="BRVMC"
-          label="📊 BRVM Composite"
+          label="BRVM Composite"
           valeur={brvmc?.valeur ?? null}
           variation_pct={brvmc?.variation_pct ?? null}
           valeur_echangee={volTotal}
-          date_marche="16:30 GMT"
+          date_seance={lastDate}
         />
       </div>
 
@@ -151,8 +151,8 @@ export default async function Dashboard() {
 
       {/* ── Top movers ── */}
       <div className="grid grid-cols-2 gap-4">
-        <TopMovers title="🔥 Top 5 hausses" rows={gainers} />
-        <TopMovers title="📉 Top 5 baisses"  rows={losers} />
+        <TopMovers title="🔥 Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} />
+        <TopMovers title="📉 Top 5 baisses"  rows={losers}  signals={signals as SignalDaily[]} />
       </div>
 
       {/* ── Signaux récents ── */}
