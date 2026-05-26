@@ -24,7 +24,9 @@
     "dividends": "tsx src/index.ts dividends",
     "dividends:mock": "tsx src/index.ts dividends --mock",
     "alerts": "tsx src/index.ts alerts",
-    "alerts:mock": "tsx src/index.ts alerts --mock"
+    "alerts:mock": "tsx src/index.ts alerts --mock",
+    "backfill": "tsx src/index.ts backfill",
+    "backfill:dry": "tsx src/index.ts backfill --dry-run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

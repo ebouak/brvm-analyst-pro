@@ -15,6 +15,10 @@
  *   tsx src/index.ts dividends --mock      # dividendes mock
  *   tsx src/index.ts alerts                # évalue les alertes et notifie
  *   tsx src/index.ts alerts --mock         # notification de démonstration
+ *   tsx src/index.ts backfill              # backfill tous les codes GitHub
+ *   tsx src/index.ts backfill SNTS ETIT    # backfill codes spécifiques
+ *   tsx src/index.ts backfill --from=2022-01-01  # depuis une date
+ *   tsx src/index.ts backfill --dry-run    # simuler sans écrire
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
@@ -24,6 +28,7 @@ import { runEvents } from './events/runEvents.js';
 import { runDividends } from './dividends/runDividends.js';
 import { runAlerts } from './alerts/runAlerts.js';
 import { runBacktestCmd } from './backtesting/runBacktest.js';
+import { runBackfill } from './backfill/runBackfill.js';
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
 
@@ -79,10 +84,18 @@ async function main(): Promise<number> {
       const res = await runBacktestCmd({ code, from, to, mock });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'backfill': {
+      const dryRun = rest.includes('--dry-run');
+      const fromDate = rest.find((a) => a.startsWith('--from='))?.split('=')[1];
+      // Les positionnels sans -- sont des codes (ex: SNTS ETIT BOAB)
+      const codes = positional.length > 0 ? positional : undefined;
+      await runBackfill({ codes, fromDate, dryRun });
+      return 0;
+    }
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date <YYYY-MM-DD> | score [<YYYY-MM-DD>] | events | dividends | alerts | backtest <CODE>',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | alerts | backtest | backfill',
       );
       return 1;
   }
