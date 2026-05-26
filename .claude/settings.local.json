@@ -6,7 +6,11 @@
       "Bash(npx vitest *)",
       "Bash(npm run *)",
       "Bash(npx tsc *)",
-      "Bash(node_modules/.bin/tsc --noEmit)"
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(npm install -g supabase)",
+      "PowerShell(Copy-Item \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env.local\" \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env\" -Force)"
     ]
   }
 }

@@ -2,7 +2,10 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { logout } from '@/app/login/actions';
-import { addPosition, deletePosition, addWatchItem, deleteWatchItem } from './actions';
+import {
+  addPosition, deletePosition, addWatchItem, deleteWatchItem,
+  createWatchlist, deleteWatchlist, setDefaultWatchlist,
+} from './actions';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
@@ -17,25 +20,39 @@ interface WatchItem {
   prix_alerte_haut: number | null; prix_alerte_bas: number | null;
 }
 
-async function getData() {
+interface Watchlist {
+  id: string; nom: string; is_default: boolean;
+}
+
+async function getData(activeWlId?: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const [{ data: positions }, { data: wls }] = await Promise.all([
     supabase.from('portfolios_positions').select('*').order('created_at', { ascending: false }),
-    supabase.from('watchlists').select('id').eq('user_id', user.id).limit(1),
+    supabase
+      .from('watchlists')
+      .select('id, nom, is_default')
+      .eq('user_id', user.id)
+      .order('is_default', { ascending: false })
+      .order('nom'),
   ]);
 
+  const watchlists = (wls ?? []) as Watchlist[];
+  const activeWl =
+    watchlists.find((w) => w.id === activeWlId) ??
+    watchlists.find((w) => w.is_default) ??
+    watchlists[0] ?? null;
+
   let items: WatchItem[] = [];
-  if (wls && wls.length > 0) {
-    const { data } = await supabase.from('watchlist_items').select('*').eq('watchlist_id', wls[0]!.id);
+  if (activeWl) {
+    const { data } = await supabase.from('watchlist_items').select('*').eq('watchlist_id', activeWl.id);
     items = (data ?? []) as WatchItem[];
   }
 
   const pos = (positions ?? []) as Position[];
 
-  // Derniers cours pour les codes concernés (positions + watchlist).
   const codes = [...new Set([...pos.map((p) => p.code), ...items.map((i) => i.code)])];
   const lastPrice: Record<string, number | null> = {};
   if (codes.length > 0) {
@@ -48,11 +65,15 @@ async function getData() {
       if (!(q.code in lastPrice)) lastPrice[q.code] = q.cours_jour;
     }
   }
-  return { email: user.email, pos, items, lastPrice };
+  return { email: user.email, pos, items, lastPrice, watchlists, activeWl };
 }
 
-export default async function PortefeuillePage() {
-  const { email, pos, items, lastPrice } = await getData();
+export default async function PortefeuillePage({
+  searchParams,
+}: {
+  searchParams?: { wl?: string };
+}) {
+  const { email, pos, items, lastPrice, watchlists, activeWl } = await getData(searchParams?.wl);
 
   let totalCost = 0;
   let totalValue = 0;
@@ -135,7 +156,43 @@ export default async function PortefeuillePage() {
 
       {/* Watchlist */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold">Watchlist & alertes</h2>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h2 className="text-sm font-semibold">
+            Watchlist & alertes
+            {activeWl && <span className="ml-2 text-muted font-normal">— {activeWl.nom}</span>}
+          </h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            {watchlists.map((w) => (
+              <Link
+                key={w.id}
+                href={`/portefeuille?wl=${w.id}`}
+                className={`text-xs px-2 py-1 rounded border ${
+                  w.id === activeWl?.id
+                    ? 'border-up text-up bg-up/10'
+                    : 'border-border text-muted hover:border-up/40'
+                }`}
+              >
+                {w.nom}{w.is_default && ' ★'}
+              </Link>
+            ))}
+            <form action={createWatchlist} className="flex gap-1">
+              <input name="nom" placeholder="Nouvelle…" className="bg-bg border border-border rounded px-2 py-1 text-xs w-28" />
+              <button className="text-xs text-up hover:underline">+</button>
+            </form>
+            {activeWl && !activeWl.is_default && (
+              <form action={setDefaultWatchlist}>
+                <input type="hidden" name="id" value={activeWl.id} />
+                <button className="text-xs text-muted hover:text-up">★ défaut</button>
+              </form>
+            )}
+            {activeWl && watchlists.length > 1 && (
+              <form action={deleteWatchlist}>
+                <input type="hidden" name="id" value={activeWl.id} />
+                <button className="text-xs text-down hover:underline">supprimer</button>
+              </form>
+            )}
+          </div>
+        </div>
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="text-xs text-muted border-b border-border bg-bg/40">
@@ -175,6 +232,7 @@ export default async function PortefeuillePage() {
         </div>
 
         <form action={addWatchItem} className="flex flex-wrap gap-2 items-end bg-surface border border-border rounded-xl p-3">
+          {activeWl && <input type="hidden" name="watchlist_id" value={activeWl.id} />}
           <Field name="code" placeholder="Code (ex: SGBC)" required />
           <Field name="prix_alerte_haut" type="number" placeholder="Alerte ↑" step="any" />
           <Field name="prix_alerte_bas" type="number" placeholder="Alerte ↓" step="any" />

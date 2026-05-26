@@ -14,10 +14,95 @@ import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { computeScore, type ScoreInput, type ScoreResult } from './score.js';
+import { sma, ema, rsi } from './indicators.js';
 import { buildMockSnapshot } from '../mock/fixtures.js';
 import type { MarketDate } from '../types.js';
 
-const HISTORY_DEPTH = 120;
+const HISTORY_DEPTH = 200; // augmenté pour SMA200
+
+/** Indicateurs techniques persistables pour une série de clôtures. */
+export interface IndicatorRow {
+  instrument_code: string;
+  date_marche: MarketDate;
+  sma_20: number | null;
+  sma_50: number | null;
+  sma_200: number | null;
+  ema_12: number | null;
+  ema_26: number | null;
+  rsi_14: number | null;
+  macd_line: number | null;
+  macd_signal: number | null;
+  macd_histogram: number | null;
+  is_oversold: boolean | null;
+  is_overbought: boolean | null;
+  is_golden_cross: boolean | null;
+  is_death_cross: boolean | null;
+  is_breakout_20d_high: boolean | null;
+  is_breakdown_20d_low: boolean | null;
+  min_history_required: number;
+  is_reliable: boolean;
+}
+
+export function computeIndicators(
+  code: string,
+  dateMarche: MarketDate,
+  closes: number[],
+): IndicatorRow {
+  const sma20 = sma(closes, 20);
+  const sma50 = sma(closes, 50);
+  const sma200 = sma(closes, 200);
+  const ema12 = ema(closes, 12);
+  const ema26 = ema(closes, 26);
+  const rsi14 = rsi(closes, 14);
+  const macdLine = ema12 != null && ema26 != null ? ema12 - ema26 : null;
+  // MACD signal = EMA(9) de la ligne MACD — approximation : on n'a pas la série de MACD ici.
+  const macdSignal = null;
+  const macdHist = null;
+
+  // Détection golden/death cross : compare aux SMA20/50 de la veille.
+  const sma20Prev = closes.length >= 21 ? sma(closes.slice(0, -1), 20) : null;
+  const sma50Prev = closes.length >= 51 ? sma(closes.slice(0, -1), 50) : null;
+  const isGolden =
+    sma20 != null && sma50 != null && sma20Prev != null && sma50Prev != null
+      ? sma20 > sma50 && sma20Prev <= sma50Prev
+      : null;
+  const isDeath =
+    sma20 != null && sma50 != null && sma20Prev != null && sma50Prev != null
+      ? sma20 < sma50 && sma20Prev >= sma50Prev
+      : null;
+
+  // Breakout/breakdown 20j (close vs max/min des 20 séances précédentes, exclu).
+  let breakoutHigh: boolean | null = null;
+  let breakdownLow: boolean | null = null;
+  if (closes.length >= 21) {
+    const window = closes.slice(-21, -1);
+    const last = closes[closes.length - 1]!;
+    breakoutHigh = last > Math.max(...window);
+    breakdownLow = last < Math.min(...window);
+  }
+
+  return {
+    instrument_code: code,
+    date_marche: dateMarche,
+    sma_20: sma20,
+    sma_50: sma50,
+    sma_200: sma200,
+    ema_12: ema12,
+    ema_26: ema26,
+    rsi_14: rsi14,
+    macd_line: macdLine,
+    macd_signal: macdSignal,
+    macd_histogram: macdHist,
+    is_oversold: rsi14 != null ? rsi14 < 30 : null,
+    is_overbought: rsi14 != null ? rsi14 > 70 : null,
+    is_golden_cross: isGolden,
+    is_death_cross: isDeath,
+    is_breakout_20d_high: breakoutHigh,
+    is_breakdown_20d_low: breakdownLow,
+    min_history_required: 200,
+    is_reliable: closes.length >= 200,
+  };
+}
 
 export interface ScoringRunOptions {
   date?: MarketDate;
@@ -73,19 +158,23 @@ export async function runScoring(
     if (e2) throw new Error(`mv_signal_inputs: ${e2.message}`);
 
     const results: ScoreResult[] = [];
+    const indicators: IndicatorRow[] = [];
     for (const row of inputsRows ?? []) {
-      const closes = await fetchCloses(sb, row.code as string, dateMarche);
+      const code = row.code as string;
+      const closes = await fetchCloses(sb, code, dateMarche);
       const input: ScoreInput = {
-        code: row.code as string,
+        code,
         closes,
         variation_pct: row.variation_pct as number | null,
         volume: row.volume as number | null,
         avg_volume_30d: row.avg_volume_30d as number | null,
       };
       results.push(computeScore(input));
+      indicators.push(computeIndicators(code, dateMarche, closes));
     }
 
     await upsertSignals(sb, results, dateMarche);
+    await upsertIndicators(sb, indicators);
     const repartition = countBySignal(results);
     logger.info({ date: dateMarche, repartition }, 'Signaux générés');
 
@@ -162,6 +251,25 @@ async function upsertSignals(
     .from('signals_daily')
     .upsert(rows, { onConflict: 'code,date_marche' });
   if (error) throw new Error(`upsert signals_daily: ${error.message}`);
+}
+
+async function upsertIndicators(
+  sb: ReturnType<typeof getSupabase>,
+  rows: IndicatorRow[],
+): Promise<void> {
+  if (rows.length === 0) return;
+  const cfg = getConfig();
+  if (cfg.DRY_RUN) {
+    logger.warn({ count: rows.length }, 'DRY_RUN — technical_indicators non écrit');
+    return;
+  }
+  const { error } = await sb
+    .from('technical_indicators')
+    .upsert(rows, { onConflict: 'instrument_code,date_marche' });
+  if (error) {
+    // Non-bloquant : on log mais on ne fait pas échouer le run de signaux.
+    logger.warn({ err: error.message }, 'upsert technical_indicators a échoué');
+  }
 }
 
 function countBySignal(results: ScoreResult[]): Record<string, number> {

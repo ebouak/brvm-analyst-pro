@@ -20,3 +20,9 @@ Thumbs.db
 
 # Vercel
 .vercel/
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+
+# Supabase CLI temp
+supabase/.temp/
