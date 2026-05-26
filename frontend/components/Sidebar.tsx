@@ -3,16 +3,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const NAV = [
-  { href: '/', label: 'Dashboard' },
-  { href: '/actions', label: 'Actions' },
-  { href: '/obligations', label: 'Obligations' },
-  { href: '/signaux', label: 'Signaux' },
-  { href: '/backtest', label: 'Backtest' },
-  // UX fix: renommé "Rapports interactifs" pour distinguer de /dashboard/reports.
-  { href: '/reports', label: 'Rapports' },
-  // UX fix: lien renommé pour clarifier la différence avec /reports.
-  { href: '/dashboard/reports', label: 'Rapports & Événements' },
-  { href: '/portefeuille', label: 'Portefeuille' },
+  { href: '/', label: '📊 Dashboard' },
+  { href: '/actions', label: '📈 Actions' },
+  { href: '/obligations', label: '📋 Obligations' },
+  { href: '/signaux', label: '🔔 Signaux' },
+  { href: '/portefeuille', label: '💼 Portefeuille' },
+  { href: '/backtest', label: '🔬 Backtest' },
+  { href: '/dashboard/reports', label: '📑 Rapports' },
 ];
 
 export default function Sidebar() {
@@ -25,7 +22,6 @@ export default function Sidebar() {
       </div>
       <nav className="space-y-1">
         {NAV.map((n) => {
-          // UX fix: lien actif mis en évidence (fond + couleur).
           const active =
             n.href === '/'
               ? pathname === '/'

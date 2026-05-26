@@ -5,12 +5,13 @@ import { logout } from '@/app/login/actions';
 import {
   addPosition, deletePosition, addWatchItem, deleteWatchItem,
   createWatchlist, deleteWatchlist, setDefaultWatchlist,
-  createAlert, deleteAlert, updateAlert, updatePosition,
+  deleteAlert, updateAlert,
 } from './actions';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
+import PortefeuilleModals from '@/components/PortefeuilleModals';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Portefeuille & Watchlist' };
+export const metadata = { title: 'Portefeuille' };
 
 interface Position {
   id: string; code: string; quantite: number; prix_entree: number;
@@ -34,7 +35,7 @@ async function getData(activeWlId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const [{ data: positions }, { data: wls }, { data: alerts }] = await Promise.all([
+  const [{ data: positions }, { data: wls }, { data: alerts }, { data: instruments }] = await Promise.all([
     supabase.from('portfolios_positions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
     supabase
       .from('watchlists')
@@ -47,6 +48,12 @@ async function getData(activeWlId?: string) {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('brvm_instruments')
+      .select('code, designation')
+      .eq('type', 'action')
+      .eq('actif', true)
+      .order('code'),
   ]);
 
   const watchlists = (wls ?? []) as Watchlist[];
@@ -63,6 +70,7 @@ async function getData(activeWlId?: string) {
 
   const pos = (positions ?? []) as Position[];
   const alertsList = (alerts ?? []) as Alert[];
+  const instrumentsList = (instruments ?? []) as { code: string; designation: string | null }[];
 
   const codes = [...new Set([...pos.map((p) => p.code), ...items.map((i) => i.code)])];
   const lastPrice: Record<string, number | null> = {};
@@ -99,7 +107,7 @@ async function getData(activeWlId?: string) {
     }
   }
 
-  return { email: user.email, pos, items, lastPrice, watchlists, activeWl, alertsList, historicalByDate };
+  return { email: user.email, pos, items, lastPrice, watchlists, activeWl, alertsList, historicalByDate, instrumentsList };
 }
 
 export default async function PortefeuillePage({
@@ -107,7 +115,7 @@ export default async function PortefeuillePage({
 }: {
   searchParams?: { wl?: string };
 }) {
-  const { email, pos, items, lastPrice, watchlists, activeWl, alertsList, historicalByDate } = await getData(searchParams?.wl);
+  const { email, pos, items, lastPrice, watchlists, activeWl, alertsList, historicalByDate, instrumentsList } = await getData(searchParams?.wl);
 
   let totalCost = 0;
   let totalValue = 0;
@@ -143,20 +151,24 @@ export default async function PortefeuillePage({
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-semibold">Portefeuille &amp; Watchlist</h1>
+        <h1 className="text-2xl font-semibold">💼 Portefeuille</h1>
         <div className="flex items-center gap-3 text-xs text-muted">
           <span>{email}</span>
-          <form action={logout}><button type="submit" className="text-up hover:underline">Deconnexion</button></form>
+          <form action={logout}><button type="submit" className="text-up hover:underline">Déconnexion</button></form>
         </div>
       </div>
 
-      {/* Synthese */}
+      {/* Synthèse */}
       <div className="grid grid-cols-3 gap-4 max-w-2xl">
-        <Card label="Cout total" value={fmtFcfa(totalCost) + ' FCFA'} />
+        <Card label="Coût total" value={fmtFcfa(totalCost) + ' FCFA'} />
         <Card label="Valorisation" value={fmtFcfa(totalValue) + ' FCFA'} />
         <Card label="P&L latent" value={(totalPnl >= 0 ? '+' : '') + fmtFcfa(totalPnl)} cls={totalPnl >= 0 ? 'text-up' : 'text-down'} />
         {portfolioValueChange30d !== null && (
-          <Card label="Evolution 30j" value={`${portfolioValueChange30d >= 0 ? 'UP' : 'DN'}${Math.abs(portfolioValueChange30d).toFixed(1)}%`} cls={portfolioValueChange30d >= 0 ? 'text-up' : 'text-down'} />
+          <Card
+            label="Évolution 30j"
+            value={`${portfolioValueChange30d >= 0 ? '▲+' : '▼'}${Math.abs(portfolioValueChange30d).toFixed(1)}%`}
+            cls={portfolioValueChange30d >= 0 ? 'text-up' : 'text-down'}
+          />
         )}
       </div>
 
@@ -170,7 +182,7 @@ export default async function PortefeuillePage({
               <thead className="text-xs text-muted border-b border-border bg-bg/40">
                 <tr>
                   <th className="px-3 py-2 text-left">Titre</th>
-                  <th className="px-3 py-2 text-right">Qte</th>
+                  <th className="px-3 py-2 text-right">Qté</th>
                   <th className="px-3 py-2 text-right">PRU</th>
                   <th className="px-3 py-2 text-right">Cours</th>
                   <th className="px-3 py-2 text-right">Valorisation</th>
@@ -180,7 +192,7 @@ export default async function PortefeuillePage({
               </thead>
               <tbody>
                 {rows.length === 0 ? (
-                  <tr><td colSpan={7} className="px-3 py-4 text-center text-muted text-xs">Aucune position. Ajoutez-en ci-dessous.</td></tr>
+                  <tr><td colSpan={7} className="px-3 py-4 text-center text-muted text-xs">Aucune position. Utilisez le bouton ci-dessous pour en ajouter.</td></tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-border/40 hover:bg-bg/40 group">
                     <td className="px-3 py-2"><Link href={`/actions/${r.code}`} className="font-medium hover:text-up">{r.code}</Link></td>
@@ -203,14 +215,10 @@ export default async function PortefeuillePage({
             </table>
           </div>
 
-          <form action={addPosition} className="flex flex-wrap gap-2 items-end bg-surface border border-border rounded-xl p-3">
-            <Field name="code" placeholder="Code (ex: SNTS)" required />
-            <Field name="quantite" type="number" placeholder="Quantite" required step="any" />
-            <Field name="prix_entree" type="number" placeholder="Prix d'entree" required step="any" />
-            <Field name="date_entree" type="date" />
-            <Field name="note" placeholder="Note" />
-            <button type="submit" className="bg-up/90 hover:bg-up text-black text-sm font-medium rounded px-3 py-1.5">Ajouter</button>
-          </form>
+          <PortefeuilleModals
+            watchlistId={activeWl?.id ?? null}
+            instruments={instrumentsList}
+          />
         </div>
 
         {/* Right: Watchlist + Notes (1/3) */}
@@ -231,7 +239,7 @@ export default async function PortefeuillePage({
               </Link>
             ))}
             <form action={createWatchlist} className="flex gap-1">
-              <input name="nom" placeholder="Nouvelle..." className="bg-bg border border-border rounded px-2 py-1 text-xs flex-1" />
+              <input name="nom" placeholder="Nouvelle…" className="bg-bg border border-border rounded px-2 py-1 text-xs flex-1" />
               <button type="submit" className="text-xs text-up hover:underline">+</button>
             </form>
           </div>
@@ -275,13 +283,10 @@ export default async function PortefeuillePage({
         </div>
       </div>
 
-      {/* Alerts Section */}
+      {/* Alertes */}
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">Alertes ({alertsList.filter(a => a.actif).length} actives)</h2>
-          <form action={createAlert} className="flex gap-1">
-            <button type="submit" className="text-xs text-up hover:underline font-medium">+ Creer alerte</button>
-          </form>
         </div>
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
@@ -296,7 +301,7 @@ export default async function PortefeuillePage({
             </thead>
             <tbody>
               {alertsList.length === 0 ? (
-                <tr><td colSpan={5} className="px-3 py-4 text-center text-muted text-xs">Aucune alerte creee</td></tr>
+                <tr><td colSpan={5} className="px-3 py-4 text-center text-muted text-xs">Aucune alerte créée</td></tr>
               ) : alertsList.map((a) => {
                 const typeLabel =
                   a.type === 'prix_au_dessus' ? 'Au-dessus' :
@@ -324,7 +329,7 @@ export default async function PortefeuillePage({
             </tbody>
           </table>
         </div>
-        <p className="text-[11px] text-muted">Les alertes sont evaluees a l'affichage (dernier cours connu). Une evaluation planifiee cote serveur pourra declencher des notifications.</p>
+        <p className="text-[11px] text-muted">Les alertes sont évaluées à l'affichage (dernier cours connu). Une évaluation planifiée côté serveur pourra déclencher des notifications.</p>
       </section>
     </div>
   );
