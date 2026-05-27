@@ -5,6 +5,7 @@
  * backend de confiance.
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { ws } from '../polyfills.js';
 import { getConfig } from '../config.js';
 
 let cached: SupabaseClient | null = null;
@@ -20,6 +21,7 @@ export function getSupabase(): SupabaseClient {
   }
   cached = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
+    realtime: { transport: ws as unknown as never },
   });
   return cached;
 }
