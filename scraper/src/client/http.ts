@@ -6,13 +6,16 @@
  * le jar entre la requête de login et toutes les requêtes suivantes,
  * sinon le serveur renvoie la page de connexion (cf. §11).
  */
-import https from 'https';
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 import { CookieJar } from 'tough-cookie';
 import { wrapper } from 'axios-cookiejar-support';
 import { getConfig } from '../config.js';
 import { withRetry } from '../utils/retry.js';
 import { logger } from '../logger.js';
+
+// La validation TLS est désactivée globalement par polyfills.ts via
+// https.globalAgent.options.rejectUnauthorized = false. axios-cookiejar-support
+// ne supporte pas qu'on passe un httpsAgent custom — il gère son propre agent.
 
 export interface HttpClient {
   jar: CookieJar;
@@ -29,16 +32,12 @@ export function createHttpClient(): HttpClient {
   const cfg = getConfig();
   const jar = new CookieJar();
 
-  // BDFIN utilise un certificat avec chaîne intermédiaire non reconnue sur certains OS Linux.
-  const httpsAgent = new https.Agent({ rejectUnauthorized: false });
-
   const instance: AxiosInstance = wrapper(
     axios.create({
       baseURL: cfg.BDFIN_BASE_URL,
       timeout: cfg.HTTP_TIMEOUT_MS,
       jar,
       withCredentials: true,
-      httpsAgent,
       // On gère nous-mêmes les status pour pouvoir inspecter les 302 d'ASP.NET.
       maxRedirects: 5,
       // Décompresse gzip/deflate automatiquement.
