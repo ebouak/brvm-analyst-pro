@@ -9,7 +9,7 @@
  *      Le cookie jar (http.ts) suit la redirection et conserve le cookie.
  *   4. On vérifie qu'on n'est PAS retombé sur la page de login.
  *
- * IMPORTANT : les noms exacts des champs de login (txtUser / txtPassword /
+ * IMPORTANT : les noms exacts des champs de login (txtUser / Password /
  * bouton de soumission) dépendent du markup BDFIN. Ils sont paramétrables
  * ci-dessous et documentés dans docs/SCRAPER.md. Ajustez FIELD_* après
  * inspection réelle de la page (un dump est fourni en mode debug).
@@ -29,10 +29,10 @@ import { logger } from '../logger.js';
  * à confirmer/ajuster selon le markup réel (voir SCRAPER.md §"Calibrage").
  */
 export const LOGIN_FIELDS = {
-  username: 'ctl00$ContentPlaceHolder1$txtLogin',
-  password: 'ctl00$ContentPlaceHolder1$txtPassword',
-  submit: 'ctl00$ContentPlaceHolder1$btnConnexion',
-  submitValue: 'Connexion',
+  username: 'ctl00$Main_Login1$UserName',
+  password: 'ctl00$Main_Login1$Password',
+  submit: 'ctl00$Main_Login1$LoginButton',
+  submitValue: 'Se connecter',
 } as const;
 
 export class AuthError extends Error {
