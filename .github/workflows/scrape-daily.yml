@@ -56,9 +56,23 @@ jobs:
       - name: Installer les dépendances
         run: cd scraper && npm ci
 
+      - name: DEBUG · Vérifier que le code déployé est à jour
+        run: |
+          echo "=== git SHA ==="
+          git rev-parse HEAD
+          echo "=== scraper/package.json (extrait) ==="
+          grep -E "scrape:daily|\"ws\"" scraper/package.json || true
+          echo "=== polyfills.ts existe? ==="
+          ls -la scraper/src/polyfills.ts || echo "MANQUANT"
+          echo "=== index.ts ligne 26 ==="
+          sed -n '24,32p' scraper/src/index.ts
+          echo "=== ws installé? ==="
+          ls scraper/node_modules/ws/package.json 2>/dev/null && cat scraper/node_modules/ws/package.json | grep '"version"' || echo "ws MANQUANT dans node_modules"
+
       - name: 1 · Scraper la séance
         run: |
           cd scraper
+          export NODE_TLS_REJECT_UNAUTHORIZED=0
           if [ "${{ github.event.inputs.command }}" = "date" ] && [ -n "${{ github.event.inputs.date }}" ]; then
             npm run scrape:date -- "${{ github.event.inputs.date }}"
           else
