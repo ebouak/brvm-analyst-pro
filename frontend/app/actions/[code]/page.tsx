@@ -97,9 +97,10 @@ export default async function InstrumentPage({
   validIdx = 0;
   const macdByRow  = rows.map((r) => r.cours_jour != null ? (macdS[validIdx++] ?? null) : null);
 
-  const priceData: PricePoint[] = rows.map((r, i) => ({
-    date: r.date_marche, close: r.cours_jour,
-    ma20: ma20[i] ?? null, ma50: ma50[i] ?? null, ma200: ma200[i] ?? null, volume: r.volume,
+  const priceData: PricePoint[] = rows.map((r) => ({
+    date: r.date_marche,
+    close: r.cours_jour,
+    volume: r.volume,
   }));
   const indicatorData: IndicatorPoint[] = rows.map((r, i) => ({
     date: r.date_marche,
@@ -237,7 +238,7 @@ export default async function InstrumentPage({
             })}
           </div>
         </div>
-        <PriceChart data={priceData} />
+        <PriceChart data={priceData} designation={instrument?.designation ?? last.designation ?? code} />
         {/* Légende MA */}
         <div className="grid grid-cols-3 gap-2 mt-3 pt-2 border-t border-border/50">
           {[

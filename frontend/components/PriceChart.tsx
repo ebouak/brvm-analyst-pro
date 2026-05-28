@@ -6,7 +6,6 @@ import {
   AreaSeries,
   LineSeries,
   type IChartApi,
-  type ISeriesApi,
   type AreaData,
   type HistogramData,
   type LineData,
@@ -16,15 +15,29 @@ import {
   type DeepPartial,
   type Time,
 } from 'lightweight-charts';
+import {
+  smaSeries,
+  emaSeries,
+  bollingerSeries,
+  donchianSeries,
+  rsiSeries,
+  macdSeries,
+} from '@/lib/indicators';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface PricePoint {
   date: string;
   close: number | null;
-  ma20: number | null;
-  ma50: number | null;
-  ma200: number | null;
   volume: number | null;
 }
+
+interface Props {
+  data: PricePoint[];
+  designation?: string;
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const THEME = {
   bg: '#0f1117',
@@ -35,72 +48,146 @@ const THEME = {
   down: '#f44336',
   warn: '#ffb300',
   purple: '#7e57c2',
+  blue: '#42a5f5',
   white: '#e6e9f0',
+} as const;
+
+type IndicatorKey = 'ma20' | 'ma50' | 'ma200' | 'ema9' | 'ema21' | 'bb' | 'donchian' | 'rsi' | 'macd';
+type PeriodKey = '1M' | '3M' | '6M' | '1A' | '2A' | 'MAX';
+
+const DEFAULT_VISIBLE: IndicatorKey[] = ['ma20', 'ma50', 'ma200'];
+
+const PERIOD_BARS: Record<PeriodKey, number> = {
+  '1M': 22,
+  '3M': 66,
+  '6M': 132,
+  '1A': 260,
+  '2A': 520,
+  MAX: Number.POSITIVE_INFINITY,
 };
+
+const OVERLAY_INDICATORS: { key: IndicatorKey; label: string }[] = [
+  { key: 'ma20', label: 'MA20' },
+  { key: 'ma50', label: 'MA50' },
+  { key: 'ma200', label: 'MA200' },
+  { key: 'ema9', label: 'EMA9' },
+  { key: 'ema21', label: 'EMA21' },
+  { key: 'bb', label: 'BB(20,2)' },
+  { key: 'donchian', label: 'Donchian' },
+];
+
+const OSCILLATOR_INDICATORS: { key: IndicatorKey; label: string }[] = [
+  { key: 'rsi', label: 'RSI(14)' },
+  { key: 'macd', label: 'MACD(12,26,9)' },
+];
+
+const PERIODS: PeriodKey[] = ['1M', '3M', '6M', '1A', '2A', 'MAX'];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function toTime(dateStr: string): Time {
   return dateStr as Time;
 }
 
-export default function PriceChart({ data }: { data: PricePoint[] }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
+function chartOptions(height: number) {
+  return {
+    width: 0, // set by resize observer
+    height,
+    layout: {
+      background: { color: 'transparent' },
+      textColor: THEME.text,
+      fontFamily: 'Inter, sans-serif',
+      fontSize: 11,
+    },
+    grid: {
+      vertLines: { color: THEME.border },
+      horzLines: { color: THEME.border },
+    },
+    crosshair: {
+      vertLine: { color: THEME.text, labelBackgroundColor: THEME.surface },
+      horzLine: { color: THEME.text, labelBackgroundColor: THEME.surface },
+    },
+    timeScale: {
+      borderColor: THEME.border,
+      timeVisible: true,
+      secondsVisible: false,
+    },
+    rightPriceScale: {
+      borderColor: THEME.border,
+    },
+    handleScroll: true,
+    handleScale: true,
+  };
+}
+
+function lineBase(): DeepPartial<LineSeriesOptions> {
+  return {
+    priceScaleId: 'right',
+    crosshairMarkerVisible: false,
+    lastValueVisible: false,
+    priceLineVisible: false,
+  };
+}
+
+function toLineData(dates: string[], values: (number | null)[]): LineData[] {
+  return dates
+    .map((d, i) => ({ time: toTime(d), value: values[i] }))
+    .filter((p): p is LineData => p.value != null);
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function PriceChart({ data, designation }: Props) {
+  const mainRef = useRef<HTMLDivElement>(null);
+  const rsiRef = useRef<HTMLDivElement>(null);
+  const macdRef = useRef<HTMLDivElement>(null);
+
   const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState<Set<IndicatorKey>>(new Set(DEFAULT_VISIBLE));
+  const [period, setPeriod] = useState<PeriodKey>('1A');
 
   useEffect(() => { setMounted(true); }, []);
 
+  // ── Chart creation ────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!mounted || !containerRef.current || data.length === 0) return;
+    if (!mounted || !mainRef.current || data.length === 0) return;
 
-    const el = containerRef.current;
-    const chart = createChart(el, {
-      width: el.clientWidth,
-      height: 320,
-      layout: {
-        background: { color: 'transparent' },
-        textColor: THEME.text,
-        fontFamily: 'Inter, sans-serif',
-        fontSize: 11,
-      },
-      grid: {
-        vertLines: { color: THEME.border },
-        horzLines: { color: THEME.border },
-      },
-      crosshair: {
-        vertLine: { color: THEME.text, labelBackgroundColor: THEME.surface },
-        horzLine: { color: THEME.text, labelBackgroundColor: THEME.surface },
-      },
-      timeScale: {
-        borderColor: THEME.border,
-        timeVisible: true,
-        secondsVisible: false,
-      },
+    // Slice data by selected period
+    const maxBars = PERIOD_BARS[period];
+    const sliced = maxBars === Number.POSITIVE_INFINITY
+      ? data
+      : data.slice(Math.max(0, data.length - maxBars));
+
+    const dates = sliced.map((d) => d.date);
+    // Use 0 only for indicator calc, but track which indices have real close
+    const closesRaw = sliced.map((d) => d.close);
+    const closesForCalc = closesRaw.map((c) => c ?? 0);
+
+    // ── Main chart ────────────────────────────────────────────────────────
+    const mainEl = mainRef.current;
+    const main = createChart(mainEl, {
+      ...chartOptions(320),
+      width: mainEl.clientWidth,
       rightPriceScale: {
         borderColor: THEME.border,
         scaleMargins: { top: 0.08, bottom: 0.28 },
       },
-      handleScroll: true,
-      handleScale: true,
     });
 
-    chartRef.current = chart;
-
-    // Volume (histogram, bottom pane via price scale)
-    const volSeries: ISeriesApi<'Histogram'> = chart.addSeries(HistogramSeries, {
+    // Volume
+    const volSeries = main.addSeries(HistogramSeries, {
       color: 'rgba(74,82,104,0.4)',
       priceFormat: { type: 'volume' },
       priceScaleId: 'vol',
     } as DeepPartial<HistogramSeriesOptions>);
-    chart.priceScale('vol').applyOptions({
-      scaleMargins: { top: 0.75, bottom: 0 },
-    });
-    const volData: HistogramData[] = data
+    main.priceScale('vol').applyOptions({ scaleMargins: { top: 0.75, bottom: 0 } });
+    const volData: HistogramData[] = sliced
       .filter((d) => d.volume != null)
       .map((d) => ({ time: toTime(d.date), value: d.volume as number }));
     volSeries.setData(volData);
 
-    // Close price (area)
-    const areaSeries: ISeriesApi<'Area'> = chart.addSeries(AreaSeries, {
+    // Close area
+    const areaSeries = main.addSeries(AreaSeries, {
       lineColor: THEME.white,
       topColor: 'rgba(230,233,240,0.12)',
       bottomColor: 'transparent',
@@ -110,87 +197,300 @@ export default function PriceChart({ data }: { data: PricePoint[] }) {
       crosshairMarkerRadius: 4,
       priceFormat: { type: 'price', precision: 0, minMove: 1 },
     } as DeepPartial<AreaSeriesOptions>);
-    const areaData: AreaData[] = data
+    const areaData: AreaData[] = sliced
       .filter((d) => d.close != null)
       .map((d) => ({ time: toTime(d.date), value: d.close as number }));
     areaSeries.setData(areaData);
 
-    const maBase: DeepPartial<LineSeriesOptions> = {
-      priceScaleId: 'right',
-      crosshairMarkerVisible: false,
-      lastValueVisible: false,
-      priceLineVisible: false,
-    };
-
-    // MA20
-    const ma20Series: ISeriesApi<'Line'> = chart.addSeries(LineSeries, { ...maBase, color: THEME.up, lineWidth: 1 });
-    const ma20Data: LineData[] = data
-      .filter((d) => d.ma20 != null)
-      .map((d) => ({ time: toTime(d.date), value: d.ma20 as number }));
-    ma20Series.setData(ma20Data);
-
-    // MA50
-    const ma50Series: ISeriesApi<'Line'> = chart.addSeries(LineSeries, { ...maBase, color: THEME.warn, lineWidth: 1 });
-    const ma50Data: LineData[] = data
-      .filter((d) => d.ma50 != null)
-      .map((d) => ({ time: toTime(d.date), value: d.ma50 as number }));
-    ma50Series.setData(ma50Data);
-
-    // MA200 (dashed)
-    const ma200Series: ISeriesApi<'Line'> = chart.addSeries(LineSeries, {
-      ...maBase, color: THEME.purple, lineWidth: 2, lineStyle: 1,
-    });
-    const ma200Data: LineData[] = data
-      .filter((d) => d.ma200 != null)
-      .map((d) => ({ time: toTime(d.date), value: d.ma200 as number }));
-    ma200Series.setData(ma200Data);
-
-    // Fit visible range to last ~120 points by default
-    const total = areaData.length;
-    if (total > 120) {
-      chart.timeScale().setVisibleRange({
-        from: areaData[total - 120].time,
-        to: areaData[total - 1].time,
-      });
-    } else {
-      chart.timeScale().fitContent();
+    // ── Overlays ──────────────────────────────────────────────────────────
+    function addNull(key: IndicatorKey, values: (number | null)[], opts: DeepPartial<LineSeriesOptions>) {
+      if (!visible.has(key)) return;
+      const s = main.addSeries(LineSeries, { ...lineBase(), ...opts });
+      s.setData(toLineData(dates, values));
     }
 
-    // Resize observer
-    const ro = new ResizeObserver(() => {
-      chart.applyOptions({ width: el.clientWidth });
+    if (visible.has('ma20'))
+      addNull('ma20', smaSeries(closesForCalc, 20).map((v, i) => closesRaw[i] == null ? null : v),
+        { color: THEME.up, lineWidth: 1 });
+
+    if (visible.has('ma50'))
+      addNull('ma50', smaSeries(closesForCalc, 50).map((v, i) => closesRaw[i] == null ? null : v),
+        { color: THEME.warn, lineWidth: 1 });
+
+    if (visible.has('ma200'))
+      addNull('ma200', smaSeries(closesForCalc, 200).map((v, i) => closesRaw[i] == null ? null : v),
+        { color: THEME.purple, lineWidth: 2, lineStyle: 1 });
+
+    if (visible.has('ema9'))
+      addNull('ema9', emaSeries(closesForCalc, 9).map((v, i) => closesRaw[i] == null ? null : v),
+        { color: THEME.blue, lineWidth: 1 });
+
+    if (visible.has('ema21'))
+      addNull('ema21', emaSeries(closesForCalc, 21).map((v, i) => closesRaw[i] == null ? null : v),
+        { color: '#69f0ae', lineWidth: 1 });
+
+    if (visible.has('bb')) {
+      const bb = bollingerSeries(closesForCalc, 20, 2);
+      const upper = bb.map((p, i) => closesRaw[i] == null ? null : p.upper);
+      const middle = bb.map((p, i) => closesRaw[i] == null ? null : p.middle);
+      const lower = bb.map((p, i) => closesRaw[i] == null ? null : p.lower);
+      const bbBase: DeepPartial<LineSeriesOptions> = { ...lineBase(), lineStyle: 2 };
+      const sUpper = main.addSeries(LineSeries, { ...bbBase, color: THEME.warn, lineWidth: 1 });
+      sUpper.setData(toLineData(dates, upper));
+      const sMiddle = main.addSeries(LineSeries, { ...lineBase(), color: 'rgba(255,179,0,0.4)', lineWidth: 1 });
+      sMiddle.setData(toLineData(dates, middle));
+      const sLower = main.addSeries(LineSeries, { ...bbBase, color: THEME.warn, lineWidth: 1 });
+      sLower.setData(toLineData(dates, lower));
+    }
+
+    if (visible.has('donchian')) {
+      const dc = donchianSeries(closesForCalc, 20);
+      const upper = dc.map((p, i) => closesRaw[i] == null ? null : p.upper);
+      const middle = dc.map((p, i) => closesRaw[i] == null ? null : p.middle);
+      const lower = dc.map((p, i) => closesRaw[i] == null ? null : p.lower);
+      const dcBase: DeepPartial<LineSeriesOptions> = { ...lineBase(), lineStyle: 1 };
+      const sUpper = main.addSeries(LineSeries, { ...dcBase, color: THEME.purple, lineWidth: 1 });
+      sUpper.setData(toLineData(dates, upper));
+      const sMiddle = main.addSeries(LineSeries, { ...lineBase(), color: 'rgba(126,87,194,0.4)', lineWidth: 1 });
+      sMiddle.setData(toLineData(dates, middle));
+      const sLower = main.addSeries(LineSeries, { ...dcBase, color: THEME.purple, lineWidth: 1 });
+      sLower.setData(toLineData(dates, lower));
+    }
+
+    main.timeScale().fitContent();
+
+    // ── RSI sub-chart ────────────────────────────────────────────────────
+    let rsiChart: IChartApi | null = null;
+    if (visible.has('rsi') && rsiRef.current) {
+      const rsiEl = rsiRef.current;
+      rsiChart = createChart(rsiEl, {
+        ...chartOptions(100),
+        width: rsiEl.clientWidth,
+        rightPriceScale: { borderColor: THEME.border, scaleMargins: { top: 0.1, bottom: 0.1 } },
+      });
+
+      // Valid closes for RSI
+      const validCloses = sliced.filter((d) => d.close != null).map((d) => d.close as number);
+      const validDates = sliced.filter((d) => d.close != null).map((d) => d.date);
+      const rsiVals = rsiSeries(validCloses, 14);
+
+      const rsiLineData: LineData[] = validDates
+        .map((d, i) => ({ time: toTime(d), value: rsiVals[i] }))
+        .filter((p): p is LineData => p.value != null);
+
+      const rsiLine = rsiChart.addSeries(LineSeries, {
+        ...lineBase(),
+        color: THEME.blue,
+        lineWidth: 1,
+        lastValueVisible: true,
+        priceFormat: { type: 'price', precision: 1, minMove: 0.1 },
+      });
+      rsiLine.setData(rsiLineData);
+
+      // 30 and 70 reference lines via price lines
+      rsiLine.createPriceLine({ price: 30, color: THEME.up, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: '30' });
+      rsiLine.createPriceLine({ price: 70, color: THEME.down, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: '70' });
+
+      rsiChart.timeScale().fitContent();
+    }
+
+    // ── MACD sub-chart ────────────────────────────────────────────────────
+    let macdChart: IChartApi | null = null;
+    if (visible.has('macd') && macdRef.current) {
+      const macdEl = macdRef.current;
+      macdChart = createChart(macdEl, {
+        ...chartOptions(120),
+        width: macdEl.clientWidth,
+        rightPriceScale: { borderColor: THEME.border, scaleMargins: { top: 0.1, bottom: 0.1 } },
+      });
+
+      const validCloses = sliced.filter((d) => d.close != null).map((d) => d.close as number);
+      const validDates = sliced.filter((d) => d.close != null).map((d) => d.date);
+      const macdData = macdSeries(validCloses);
+
+      const macdLineData: LineData[] = validDates
+        .map((d, i) => ({ time: toTime(d), value: macdData[i]?.macd ?? undefined }))
+        .filter((p): p is LineData => p.value != null);
+      const signalLineData: LineData[] = validDates
+        .map((d, i) => ({ time: toTime(d), value: macdData[i]?.signal ?? undefined }))
+        .filter((p): p is LineData => p.value != null);
+      const histData: HistogramData[] = validDates
+        .flatMap((d, i) => {
+          const h = macdData[i]?.hist;
+          if (h == null) return [];
+          const item: HistogramData = {
+            time: toTime(d),
+            value: h,
+            color: h >= 0 ? 'rgba(0,200,83,0.6)' : 'rgba(244,67,54,0.6)',
+          };
+          return [item];
+        });
+
+      const macdLine = macdChart.addSeries(LineSeries, { ...lineBase(), color: THEME.blue, lineWidth: 1, lastValueVisible: true });
+      macdLine.setData(macdLineData);
+      const sigLine = macdChart.addSeries(LineSeries, { ...lineBase(), color: THEME.warn, lineWidth: 1, lastValueVisible: true });
+      sigLine.setData(signalLineData);
+      const histSeries = macdChart.addSeries(HistogramSeries, {
+        priceScaleId: 'right',
+        lastValueVisible: false,
+        priceLineVisible: false,
+      } as DeepPartial<HistogramSeriesOptions>);
+      histSeries.setData(histData);
+
+      macdChart.timeScale().fitContent();
+    }
+
+    // ── Time range sync ───────────────────────────────────────────────────
+    main.timeScale().subscribeVisibleTimeRangeChange((range) => {
+      if (!range) return;
+      rsiChart?.timeScale().setVisibleRange(range);
+      macdChart?.timeScale().setVisibleRange(range);
     });
-    ro.observe(el);
+
+    // ── Resize observer ───────────────────────────────────────────────────
+    const ro = new ResizeObserver(() => {
+      main.applyOptions({ width: mainEl.clientWidth });
+      if (rsiChart && rsiRef.current) rsiChart.applyOptions({ width: rsiRef.current.clientWidth });
+      if (macdChart && macdRef.current) macdChart.applyOptions({ width: macdRef.current.clientWidth });
+    });
+    ro.observe(mainEl);
 
     return () => {
       ro.disconnect();
-      chart.remove();
-      chartRef.current = null;
+      main.remove();
+      rsiChart?.remove();
+      macdChart?.remove();
     };
-  }, [mounted, data]);
+  }, [mounted, data, visible, period]);
 
-  if (!mounted) return <div className="bg-surface border border-border rounded-xl p-4" style={{ height: 388 }} />;
+  // ── Toggle helper ─────────────────────────────────────────────────────────
+  function toggle(key: IndicatorKey) {
+    setVisible((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  // ── Derived values for header ─────────────────────────────────────────────
+  const lastClose = data.length > 0 ? data[data.length - 1]!.close : null;
+  const prevClose = data.length > 1 ? data[data.length - 2]!.close : null;
+  const varPct = lastClose != null && prevClose != null && prevClose !== 0
+    ? ((lastClose - prevClose) / prevClose) * 100
+    : null;
+
+  // ── SSR guard ─────────────────────────────────────────────────────────────
+  if (!mounted) {
+    return (
+      <div className="bg-surface border border-border rounded-xl p-4 h-[420px]" />
+    );
+  }
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold">📈 Cours &amp; Moyennes mobiles</h3>
-        <div className="flex gap-3 text-xs text-muted">
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-4 h-0.5 bg-[#e6e9f0]" />Clôture
+    <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
+
+      {/* ── Header row ── */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">
+            📈 Cours{designation ? ` — ${designation}` : ''}
           </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-4 h-0.5 bg-[#00c853]" />MA20
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-4 h-0.5 bg-[#ffb300]" />MA50
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-4 h-0.5 bg-[#7e57c2]" style={{ borderTop: '1px dashed #7e57c2', height: 0 }} />MA200
-          </span>
+          {lastClose != null && (
+            <span className="tabular text-sm font-medium">
+              {lastClose.toLocaleString('fr-FR')} FCFA
+            </span>
+          )}
+          {varPct != null && (
+            <span
+              className={`tabular text-xs font-medium ${varPct >= 0 ? 'text-up' : 'text-down'}`}
+            >
+              {varPct >= 0 ? '+' : ''}{varPct.toFixed(2)}%
+            </span>
+          )}
+        </div>
+
+        {/* Period selector */}
+        <div className="flex gap-1">
+          {PERIODS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPeriod(p)}
+              className={`text-xs px-2 py-0.5 rounded border transition ${
+                period === p
+                  ? 'bg-up text-bg border-up'
+                  : 'border-border text-muted hover:border-up/40 hover:text-up'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
         </div>
       </div>
-      <div ref={containerRef} />
+
+      {/* ── Indicator toggles ── */}
+      <div className="space-y-1.5">
+        <div className="flex flex-wrap gap-1.5 items-center">
+          <span className="text-[10px] text-muted uppercase tracking-wide mr-1">Overlays</span>
+          {OVERLAY_INDICATORS.map(({ key, label }) => {
+            const active = visible.has(key);
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggle(key)}
+                className={`text-xs px-2 py-0.5 rounded border transition ${
+                  active
+                    ? 'bg-up/15 text-up border-up/40'
+                    : 'border-border text-muted hover:border-up/40 hover:text-up'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap gap-1.5 items-center">
+          <span className="text-[10px] text-muted uppercase tracking-wide mr-1">Oscillateurs</span>
+          {OSCILLATOR_INDICATORS.map(({ key, label }) => {
+            const active = visible.has(key);
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggle(key)}
+                className={`text-xs px-2 py-0.5 rounded border transition ${
+                  active
+                    ? 'bg-up/15 text-up border-up/40'
+                    : 'border-border text-muted hover:border-up/40 hover:text-up'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Main chart ── */}
+      <div ref={mainRef} />
+
+      {/* ── RSI sub-chart ── */}
+      {visible.has('rsi') && (
+        <div>
+          <div className="text-[10px] text-muted mb-0.5 pl-1">RSI (14)</div>
+          <div ref={rsiRef} />
+        </div>
+      )}
+
+      {/* ── MACD sub-chart ── */}
+      {visible.has('macd') && (
+        <div>
+          <div className="text-[10px] text-muted mb-0.5 pl-1">MACD (12, 26, 9)</div>
+          <div ref={macdRef} />
+        </div>
+      )}
     </div>
   );
 }

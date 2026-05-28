@@ -110,6 +110,54 @@ export function macdSeries(
   return out;
 }
 
+export interface BollingerPoint {
+  upper: number | null;
+  middle: number | null;
+  lower: number | null;
+}
+
+export function bollingerSeries(
+  closes: number[],
+  period = 20,
+  multStd = 2,
+): BollingerPoint[] {
+  const out: BollingerPoint[] = closes.map(() => ({ upper: null, middle: null, lower: null }));
+  if (period <= 0) return out;
+  for (let i = period - 1; i < closes.length; i++) {
+    const window = closes.slice(i - period + 1, i + 1);
+    const mean = window.reduce((a, b) => a + b, 0) / period;
+    const variance = window.reduce((a, b) => a + (b - mean) ** 2, 0) / period;
+    const std = Math.sqrt(variance);
+    out[i] = {
+      upper: mean + multStd * std,
+      middle: mean,
+      lower: mean - multStd * std,
+    };
+  }
+  return out;
+}
+
+export interface DonchianPoint {
+  upper: number | null;
+  middle: number | null;
+  lower: number | null;
+}
+
+export function donchianSeries(
+  closes: number[],
+  period = 20,
+): DonchianPoint[] {
+  const out: DonchianPoint[] = closes.map(() => ({ upper: null, middle: null, lower: null }));
+  if (period <= 0) return out;
+  for (let i = period - 1; i < closes.length; i++) {
+    const window = closes.slice(i - period + 1, i + 1);
+    const upper = Math.max(...window);
+    const lower = Math.min(...window);
+    out[i] = { upper, middle: (upper + lower) / 2, lower };
+  }
+  return out;
+}
+
 export interface Detection {
   oversold: boolean; // RSI < 30
   overbought: boolean; // RSI > 70

@@ -6,6 +6,7 @@ const NAV = [
   { href: '/', label: '📊 Dashboard' },
   { href: '/actions', label: '📈 Actions' },
   { href: '/obligations', label: '📋 Obligations' },
+  { href: '/dividendes', label: '💰 Dividendes' },
   { href: '/signaux', label: '🔔 Signaux' },
   { href: '/portefeuille', label: '💼 Portefeuille' },
   { href: '/backtest', label: '🔬 Backtest' },
