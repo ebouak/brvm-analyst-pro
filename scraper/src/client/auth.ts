@@ -60,16 +60,20 @@ export async function login(http: HttpClient): Promise<void> {
   const loginPage = await http.get(cfg.BDFIN_LOGIN_PATH);
   const state = extractAspNetState(loginPage.data);
 
-  if (!state.hidden['__VIEWSTATE']) {
-    // DEBUG : dump du HTML reçu pour diagnostiquer le markup réel
-    const preview = loginPage.data.slice(0, 3000).replace(/\s+/g, ' ');
-    const formMatches = loginPage.data.match(/<form[^>]*>/gi) ?? [];
-    const inputMatches = (loginPage.data.match(/<input[^>]+>/gi) ?? []).slice(0, 20);
-    logger.warn(
-      { preview, forms: formMatches, inputs: inputMatches, length: loginPage.data.length, status: loginPage.status },
-      'La page de login ne contient pas __VIEWSTATE — markup inattendu.',
-    );
-  }
+  // DEBUG TEMPORAIRE : dumper TOUS les inputs/forms pour calibrer LOGIN_FIELDS
+  const formMatches = loginPage.data.match(/<form[^>]*>/gi) ?? [];
+  const inputMatches = loginPage.data.match(/<input[^>]+>/gi) ?? [];
+  logger.info(
+    {
+      url: cfg.BDFIN_LOGIN_PATH,
+      status: loginPage.status,
+      length: loginPage.data.length,
+      hasViewstate: !!state.hidden['__VIEWSTATE'],
+      forms: formMatches,
+      inputs: inputMatches,
+    },
+    'DEBUG markup page login BDFIN',
+  );
 
   // 2) POST des identifiants + tous les champs cachés.
   const form = buildPostback(state, LOGIN_FIELDS.submit, '', {
