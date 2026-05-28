@@ -29,9 +29,9 @@ import { logger } from '../logger.js';
  * à confirmer/ajuster selon le markup réel (voir SCRAPER.md §"Calibrage").
  */
 export const LOGIN_FIELDS = {
-  username: 'ctl00$Main_Login1$UserName',
-  password: 'ctl00$Main_Login1$Password',
-  submit: 'ctl00$Main_Login1$LoginButton',
+  username: 'ctl00$Main$Login1$UserName',
+  password: 'ctl00$Main$Login1$Password',
+  submit: 'ctl00$Main$Login1$LoginButton',
   submitValue: 'Se connecter',
 } as const;
 
@@ -60,20 +60,9 @@ export async function login(http: HttpClient): Promise<void> {
   const loginPage = await http.get(cfg.BDFIN_LOGIN_PATH);
   const state = extractAspNetState(loginPage.data);
 
-  // DEBUG TEMPORAIRE : dumper TOUS les inputs/forms pour calibrer LOGIN_FIELDS
-  const formMatches = loginPage.data.match(/<form[^>]*>/gi) ?? [];
-  const inputMatches = loginPage.data.match(/<input[^>]+>/gi) ?? [];
-  logger.info(
-    {
-      url: cfg.BDFIN_LOGIN_PATH,
-      status: loginPage.status,
-      length: loginPage.data.length,
-      hasViewstate: !!state.hidden['__VIEWSTATE'],
-      forms: formMatches,
-      inputs: inputMatches,
-    },
-    'DEBUG markup page login BDFIN',
-  );
+  if (!state.hidden['__VIEWSTATE']) {
+    logger.warn('Page de login sans __VIEWSTATE — markup inattendu');
+  }
 
   // 2) POST des identifiants + tous les champs cachés.
   const form = buildPostback(state, LOGIN_FIELDS.submit, '', {
