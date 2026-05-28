@@ -19,7 +19,7 @@ const numFromEnv = (def: number) =>
 
 const schema = z.object({
   BDFIN_BASE_URL: z.string().url().default('https://bfin.brvm.org'),
-  BDFIN_LOGIN_PATH: z.string().default('/login.aspx?id=orac'),
+  BDFIN_LOGIN_PATH: z.string().default('/login.aspx?ReturnUrl=%2fdefault.aspx'),
   BDFIN_MARKET_PATH: z.string().default('/Activites_marche.aspx'),
   // Les identifiants ne sont obligatoires qu'en mode réel (validé au runtime).
   BDFIN_USERNAME: z.string().optional().default(''),
