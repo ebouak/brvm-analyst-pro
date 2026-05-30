@@ -1,0 +1,13 @@
+{
+  "name": "BRVM Analyst Pro",
+  "short_name": "BRVM Analyst",
+  "description": "Plateforme d'analyse et d'aide à la décision sur la BRVM",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#0f1117",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "categories": ["finance", "business"]
+}

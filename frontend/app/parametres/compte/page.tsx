@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import NotificationButton from '@/components/NotificationButton';
 
 export default function ComptePage() {
   const [busy, setBusy] = useState<string | null>(null);
@@ -61,6 +62,16 @@ export default function ComptePage() {
         >
           {busy === 'export' ? 'Préparation…' : 'Exporter (JSON)'}
         </button>
+      </section>
+
+      <section className="bg-surface border border-border rounded-xl p-5 space-y-3">
+        <h2 className="text-lg font-medium">Notifications push</h2>
+        <p className="text-sm text-muted">
+          Recevez des alertes BRVM directement dans votre navigateur (signaux,
+          alertes de cours, événements). Fonctionne même quand l'application
+          n'est pas ouverte.
+        </p>
+        <NotificationButton />
       </section>
 
       <section className="bg-surface border border-border rounded-xl p-5 space-y-3">

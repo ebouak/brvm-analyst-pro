@@ -10,6 +10,7 @@ const NAV = [
   { href: '/dividendes', label: '💰 Dividendes' },
   { href: '/secteurs', label: '🏭 Secteurs' },
   { href: '/scanner', label: '🎯 Scanner' },
+  { href: '/calendrier', label: '📅 Calendrier' },
   { href: '/signaux', label: '🔔 Signaux' },
   { href: '/portefeuille', label: '💼 Portefeuille' },
   { href: '/backtest', label: '🔬 Backtest' },

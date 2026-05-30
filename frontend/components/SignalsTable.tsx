@@ -4,6 +4,19 @@ import Link from 'next/link';
 import type { SignalDaily } from '@/lib/types';
 import { fmtNumber } from '@/lib/format';
 import SignalBadge from './SignalBadge';
+import ExportButton from './ExportButton';
+import type { CsvColumn } from '@/lib/export';
+
+const SIGNAL_CSV_COLUMNS: CsvColumn<SignalRow>[] = [
+  { header: 'Code', accessor: (r) => r.code },
+  { header: 'Date', accessor: (r) => r.date_marche },
+  { header: 'Signal', accessor: (r) => r.signal },
+  { header: 'Score', accessor: (r) => r.score_total ?? '' },
+  { header: 'Confiance', accessor: (r) => r.confiance != null ? Number((r.confiance * 100).toFixed(1)) : '' },
+  { header: 'Explication', accessor: (r) => r.explication ?? '' },
+  { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
+  { header: 'Pays', accessor: (r) => r.pays ?? '' },
+];
 
 export interface SignalRow extends SignalDaily {
   designation: string | null;
@@ -146,6 +159,11 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
           <span className="text-xs text-muted self-center ml-auto">
             {filtered.length} signal{filtered.length !== 1 ? 's' : ''}
           </span>
+          <ExportButton<SignalRow>
+            filename={`signaux_${new Date().toISOString().slice(0, 10)}.csv`}
+            rows={filtered}
+            columns={SIGNAL_CSV_COLUMNS}
+          />
         </div>
       </div>
 

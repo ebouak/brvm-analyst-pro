@@ -4,6 +4,22 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { ScanRow } from '@/lib/scanner';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
+import ExportButton from './ExportButton';
+import type { CsvColumn } from '@/lib/export';
+
+const SCANNER_CSV_COLUMNS: CsvColumn<ScanRow>[] = [
+  { header: 'Code', accessor: (r) => r.code },
+  { header: 'Désignation', accessor: (r) => r.designation ?? '' },
+  { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
+  { header: 'Cours', accessor: (r) => r.cours_jour ?? '' },
+  { header: 'Variation %', accessor: (r) => r.variation_pct ?? '' },
+  { header: 'RSI', accessor: (r) => r.rsi ?? '' },
+  { header: 'MACD', accessor: (r) => r.macd ?? '' },
+  { header: 'Volume', accessor: (r) => r.volume ?? '' },
+  { header: 'Signal', accessor: (r) => r.signal ?? '' },
+  { header: 'Score', accessor: (r) => r.score ?? '' },
+  { header: 'Confiance %', accessor: (r) => r.confiance ?? '' },
+];
 
 type SortKey = keyof Pick<
   ScanRow,
@@ -114,9 +130,16 @@ export default function ScannerResults({ rows }: Props) {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted">
-        <span className="text-white font-semibold">{rows.length}</span> action{rows.length > 1 ? 's' : ''} trouvée{rows.length > 1 ? 's' : ''}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm text-muted">
+          <span className="text-white font-semibold">{rows.length}</span> action{rows.length > 1 ? 's' : ''} trouvée{rows.length > 1 ? 's' : ''}
+        </p>
+        <ExportButton<ScanRow>
+          filename={`scanner_${new Date().toISOString().slice(0, 10)}.csv`}
+          rows={sorted}
+          columns={SCANNER_CSV_COLUMNS}
+        />
+      </div>
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead className="bg-black/20 border-b border-border">

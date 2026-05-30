@@ -3,8 +3,22 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { DividendRow } from '@/lib/dividends';
 import { fmtFcfa, fmtDateFR } from '@/lib/format';
+import ExportButton from './ExportButton';
+import type { CsvColumn } from '@/lib/export';
 
 type SortKey = 'code' | 'designation' | 'secteur' | 'pays' | 'montant' | 'rendement_pct' | 'ex_date' | 'payment_date' | 'exercice';
+
+const CSV_COLUMNS: CsvColumn<DividendRow>[] = [
+  { header: 'Code', accessor: (r) => r.code },
+  { header: 'Désignation', accessor: (r) => r.designation ?? '' },
+  { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
+  { header: 'Pays', accessor: (r) => r.pays ?? '' },
+  { header: 'Montant FCFA', accessor: (r) => r.montant ?? '' },
+  { header: 'Rendement %', accessor: (r) => r.rendement_pct ?? '' },
+  { header: 'Ex-date', accessor: (r) => r.ex_date ?? '' },
+  { header: 'Payment date', accessor: (r) => r.payment_date ?? '' },
+  { header: 'Exercice', accessor: (r) => r.exercice ?? '' },
+];
 
 function yieldColor(pct: number | null): string {
   if (pct == null) return 'text-muted';
@@ -117,6 +131,11 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
         <span className="text-xs text-muted ml-auto">
           {filtered.length} dividende{filtered.length !== 1 ? 's' : ''}
         </span>
+        <ExportButton<DividendRow>
+          filename={`dividendes_${new Date().toISOString().slice(0, 10)}.csv`}
+          rows={filtered}
+          columns={CSV_COLUMNS}
+        />
       </div>
 
       <div className="bg-surface border border-border rounded-xl overflow-x-auto">

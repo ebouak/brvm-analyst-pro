@@ -19,6 +19,8 @@ const config: Config = {
         down: '#f44336',   // status.bear / signal.sell
         warn: '#ffb300',   // status.warning
         info: '#2196f3',   // status.info
+        blue: '#42a5f5',   // accent.blue
+        purple: '#7e57c2', // accent.purple
 
         // Text
         muted:   '#8b93a7',   // text.secondary

@@ -4,8 +4,21 @@ import Link from 'next/link';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import SignalBadge from './SignalBadge';
+import ExportButton from './ExportButton';
+import type { CsvColumn } from '@/lib/export';
 
 type SortKey = 'code' | 'variation_pct' | 'cours_jour' | 'volume' | 'valeur_echangee';
+
+const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
+  { header: 'Code', accessor: (r) => r.code },
+  { header: 'Désignation', accessor: (r) => r.designation ?? '' },
+  { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
+  { header: 'Pays', accessor: (r) => r.pays ?? '' },
+  { header: 'Cours', accessor: (r) => r.cours_jour ?? '' },
+  { header: 'Variation %', accessor: (r) => r.variation_pct ?? '' },
+  { header: 'Volume', accessor: (r) => r.volume ?? '' },
+  { header: 'Valeur échangée', accessor: (r) => r.valeur_echangee ?? '' },
+];
 
 export default function ActionsTable({
   actions,
@@ -92,6 +105,11 @@ export default function ActionsTable({
           <input type="number" value={minVol} onChange={(e) => setMinVol(Number(e.target.value) || 0)} className="bg-surface border border-border rounded px-2 py-1 text-sm w-24 tabular" />
         </label>
         <span className="text-xs text-muted ml-auto">{rows.length} résultats</span>
+        <ExportButton<ActionDaily>
+          filename={`actions_${new Date().toISOString().slice(0, 10)}.csv`}
+          rows={rows}
+          columns={CSV_COLUMNS}
+        />
       </div>
 
       <div className="bg-surface border border-border rounded-xl overflow-hidden">

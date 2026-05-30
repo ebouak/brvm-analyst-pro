@@ -9,6 +9,7 @@ import {
 } from './actions';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import PortefeuilleModals from '@/components/PortefeuilleModals';
+import PortefeuilleExport from '@/components/PortefeuilleExport';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Portefeuille' };
@@ -176,7 +177,10 @@ export default async function PortefeuillePage({
       <div className="grid grid-cols-3 gap-6">
         {/* Left: Positions (2/3) */}
         <div className="col-span-2 space-y-3">
-          <h2 className="text-sm font-semibold">Positions</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold">Positions</h2>
+            {rows.length > 0 && <PortefeuilleExport rows={rows} />}
+          </div>
           <div className="bg-surface border border-border rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead className="text-xs text-muted border-b border-border bg-bg/40">
