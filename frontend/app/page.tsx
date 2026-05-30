@@ -4,8 +4,10 @@ import IndexCard from '@/components/IndexCard';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
+import DailyBrief from '@/components/DailyBrief';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
+import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard — BRVM Analyst Pro' };
@@ -19,7 +21,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, brief: null };
 
   // Date précédente pour le delta volume
   const { data: prevDateRow } = await supabase
@@ -69,13 +71,32 @@ async function getData() {
   // Les rows sont desc (newest first) → inverser pour avoir oldest→newest
   Object.keys(sparkMap).forEach((k) => sparkMap[k]!.reverse());
 
+  const typedActions = (actions ?? []) as ActionDaily[];
+  const typedIndices = (indices ?? []) as IndiceDaily[];
+  const typedSignals = (signals ?? []) as SignalDaily[];
+
+  // Brief narratif
+  const topSectorPerfs = computeTopSectorPerfs(typedActions);
+  const brief = generateBrief({
+    date: lastDate,
+    indices: {
+      brvm30: typedIndices.find((i) => i.code === 'BRVM30') ?? null,
+      brvmc:  typedIndices.find((i) => i.code === 'BRVMC')  ?? null,
+    },
+    actions: typedActions,
+    signals: typedSignals,
+    volumePrev: prevValeur,
+    topSectorPerfs,
+  });
+
   return {
     lastDate,
-    actions: (actions ?? []) as ActionDaily[],
-    indices: (indices ?? []) as IndiceDaily[],
-    signals: (signals ?? []) as SignalDaily[],
+    actions: typedActions,
+    indices: typedIndices,
+    signals: typedSignals,
     prevValeur,
     sparklines: sparkMap,
+    brief,
   };
 }
 
@@ -93,7 +114,7 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur, sparklines } = await getData();
+  const { lastDate, actions, indices, signals, prevValeur, sparklines, brief } = await getData();
 
   if (!lastDate) {
     return (
@@ -164,6 +185,9 @@ export default async function Dashboard() {
           sparkline={sparklines?.['BRVMC']}
         />
       </div>
+
+      {/* ── Brief narratif ── */}
+      {brief && <DailyBrief brief={brief} />}
 
       {/* ── État du marché ── */}
       <MarketStateCard stats={stats} />

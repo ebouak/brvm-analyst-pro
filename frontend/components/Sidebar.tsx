@@ -4,9 +4,12 @@ import { usePathname } from 'next/navigation';
 
 const NAV = [
   { href: '/', label: '📊 Dashboard' },
+  { href: '/heatmap', label: '🔥 Heatmap' },
   { href: '/actions', label: '📈 Actions' },
   { href: '/obligations', label: '📋 Obligations' },
   { href: '/dividendes', label: '💰 Dividendes' },
+  { href: '/secteurs', label: '🏭 Secteurs' },
+  { href: '/scanner', label: '🎯 Scanner' },
   { href: '/signaux', label: '🔔 Signaux' },
   { href: '/portefeuille', label: '💼 Portefeuille' },
   { href: '/backtest', label: '🔬 Backtest' },

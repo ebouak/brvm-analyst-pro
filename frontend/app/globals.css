@@ -15,6 +15,21 @@ body {
 /* Chiffres financiers en police mono (§10). */
 .tabular { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 
+/* Champ select commun (scanner, filtres). */
+.select-field {
+  background-color: #0f1117;
+  border: 1px solid #232733;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.875rem;
+  color: #e6e9f0;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.select-field:focus { border-color: #00c853; }
+.select-field option { background-color: #161922; }
+
 /* Skeleton de chargement. */
 .skeleton {
   background: linear-gradient(90deg, #161922 25%, #20242f 50%, #161922 75%);
