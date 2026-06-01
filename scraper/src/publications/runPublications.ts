@@ -308,7 +308,7 @@ export async function runPublications(opts: { mock?: boolean } = {}): Promise<Pu
     }
 
     const n = await upsertPublications(allPubs);
-    logger.info({ total: n, codes: codes.length }, 'Publications ingerees');
+    logger.info({ total: n, emetteurs: mappings.length }, 'Publications ingerees');
     return { status: 'success', count: n };
   } catch (e) {
     logger.error({ err: (e as Error).message }, 'runPublications failed');
