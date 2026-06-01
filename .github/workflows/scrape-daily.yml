@@ -109,7 +109,16 @@ jobs:
           SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: 5 · Évaluer et envoyer les alertes
+      - name: 5 · Ingérer les publications
+        run: cd scraper && npm run publications
+        env:
+          BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
+          BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}
+          BDFIN_PASSWORD:           ${{ secrets.BDFIN_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 6 · Évaluer et envoyer les alertes
         run: cd scraper && npm run alerts
         env:
           SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
@@ -119,7 +128,7 @@ jobs:
           TELEGRAM_BOT_TOKEN:       ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:         ${{ secrets.TELEGRAM_CHAT_ID }}
 
-      - name: 6 · Déclencher redéploiement Vercel
+      - name: 7 · Déclencher redéploiement Vercel
         run: |
           if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
             curl -X POST "$VERCEL_DEPLOY_HOOK"
@@ -206,6 +215,15 @@ jobs:
 
       - name: 2 · Dividendes du matin
         run: cd scraper && npm run dividends
+        env:
+          BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
+          BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}
+          BDFIN_PASSWORD:           ${{ secrets.BDFIN_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 3 · Publications du matin
+        run: cd scraper && npm run publications
         env:
           BDFIN_BASE_URL:           ${{ secrets.BDFIN_BASE_URL }}
           BDFIN_USERNAME:           ${{ secrets.BDFIN_USERNAME }}

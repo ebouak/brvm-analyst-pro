@@ -5,6 +5,7 @@ import PriceChart, { type PricePoint } from '@/components/PriceChart';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
+import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, detect } from '@/lib/indicators';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
@@ -26,7 +27,7 @@ async function getData(code: string, fromDate?: string) {
 
   if (fromDate) histQuery = histQuery.gte('date_marche', fromDate);
 
-  const [{ data: hist }, { data: instr }, { data: sig }, { data: divs }, { data: evts }] =
+  const [{ data: hist }, { data: instr }, { data: sig }, { data: divs }, { data: evts }, { data: pubs }, { count: pubCount }] =
     await Promise.all([
       histQuery,
       supabase.from('brvm_instruments').select('*').eq('code', code).maybeSingle(),
@@ -48,6 +49,16 @@ async function getData(code: string, fromDate?: string) {
         .eq('instrument_code', code)
         .order('event_date', { ascending: false })
         .limit(4),
+      supabase
+        .from('publications')
+        .select('id, date_publication, libelle, type_publication, source_url')
+        .eq('code', code)
+        .order('date_publication', { ascending: false })
+        .limit(50),
+      supabase
+        .from('publications')
+        .select('*', { count: 'exact', head: true })
+        .eq('code', code),
     ]);
 
   return {
@@ -56,6 +67,8 @@ async function getData(code: string, fromDate?: string) {
     signal: (sig?.[0] ?? null) as SignalDaily | null,
     dividends: divs ?? [],
     events: evts ?? [],
+    publications: (pubs ?? []) as Publication[],
+    pubCount: pubCount ?? 0,
   };
 }
 
@@ -68,7 +81,7 @@ export default async function InstrumentPage({
 }) {
   const code = decodeURIComponent(params.code).toUpperCase();
   const fromDate = searchParams.from ?? '';
-  const { rows, instrument, signal, dividends, events } = await getData(code, fromDate || undefined);
+  const { rows, instrument, signal, dividends, events, publications, pubCount } = await getData(code, fromDate || undefined);
 
   if (rows.length === 0) {
     return (
@@ -154,6 +167,12 @@ export default async function InstrumentPage({
           <h1 className="text-xl font-bold">{code}</h1>
         </div>
         <div className="flex gap-2">
+          <PublicationsModal
+            code={code}
+            designation={instrument?.designation}
+            publications={publications}
+            count={pubCount}
+          />
           <Link href="/portefeuille" className="text-xs border border-border rounded px-2 py-1 hover:border-up/40 hover:text-up transition">
             🔖 Watchlist
           </Link>

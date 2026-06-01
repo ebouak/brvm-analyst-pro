@@ -15,6 +15,8 @@
  *   tsx src/index.ts dividends --mock      # dividendes mock
  *   tsx src/index.ts alerts                # évalue les alertes et notifie
  *   tsx src/index.ts alerts --mock         # notification de démonstration
+ *   tsx src/index.ts publications          # ingère les publications BDFIN
+ *   tsx src/index.ts publications --mock   # publications mock
  *   tsx src/index.ts backfill              # backfill tous les codes GitHub
  *   tsx src/index.ts backfill SNTS ETIT    # backfill codes spécifiques
  *   tsx src/index.ts backfill --from=2022-01-01  # depuis une date
@@ -32,6 +34,7 @@ import { runEvents } from './events/runEvents.js';
 import { runDividends } from './dividends/runDividends.js';
 import { runAlerts } from './alerts/runAlerts.js';
 import { runBacktestCmd } from './backtesting/runBacktest.js';
+import { runPublications } from './publications/runPublications.js';
 import { runBackfill } from './backfill/runBackfill.js';
 import { runValidation } from './validation/runValidation.js';
 import { isIsoDate } from './utils/dates.js';
@@ -78,6 +81,10 @@ async function main(): Promise<number> {
       const res = await runAlerts({ mock });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'publications': {
+      const res = await runPublications({ mock });
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'backtest': {
       const code = positional[0];
       if (!code) {
@@ -104,7 +111,7 @@ async function main(): Promise<number> {
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | alerts | backtest | backfill | validate',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | alerts | publications | backtest | backfill | validate',
       );
       return 1;
   }
