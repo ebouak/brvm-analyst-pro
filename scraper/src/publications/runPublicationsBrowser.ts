@@ -137,6 +137,10 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
         // → __doPostBack. Le postback peut être AJAX (UpdatePanel) : on attend
         // alors que la 1ère ligne de données change, sinon on a la table précédente.
         await page.selectOption(SELECT, m.value);
+        // Le postback (full page) vide d'abord la table puis la repeuple. On
+        // attend une ligne de données NON VIDE et DIFFÉRENTE de la précédente —
+        // sinon on capturait l'état transitoire vide (bug : after=null).
+        // Un émetteur réellement sans publication atteindra le timeout (→ 0 pub).
         await page
           .waitForFunction(
             (prev) => {
@@ -145,18 +149,20 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
                 const td = tr.querySelector('td');
                 const t = (td?.textContent ?? '').trim();
                 if (/\d{2}\/\d{2}\/\d{4}/.test(t)) {
-                  return (tr.textContent ?? '').trim().slice(0, 80) !== prev;
+                  const row = (tr.textContent ?? '').trim().slice(0, 80);
+                  return row !== prev; // ligne peuplée et différente
                 }
               }
-              // plus aucune ligne de données : la table a changé (émetteur sans pub)
-              return prev !== null;
+              return false; // table vide/transitoire → continuer d'attendre
             },
             before,
-            { timeout: 15000 },
+            { timeout: 10000 },
           )
           .catch(() => {
-            // timeout : soit émetteur identique au précédent, soit vraiment vide
+            // timeout : émetteur sans publication (ou identique au précédent)
           });
+        // Petite marge pour laisser la table finir de se peupler.
+        await page.waitForTimeout(600);
 
         if (diagCount < 3) {
           const after = await firstDataRow();
