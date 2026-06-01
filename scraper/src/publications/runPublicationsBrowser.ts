@@ -132,41 +132,38 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
     let diagCount = 0;
     for (const m of mappings) {
       try {
-        const before = await firstDataRow();
-        // Sélectionne l'émetteur. selectOption met la valeur + dispatch 'change'
-        // → __doPostBack. Le postback peut être AJAX (UpdatePanel) : on attend
-        // alors que la 1ère ligne de données change, sinon on a la table précédente.
+        // IMPORTANT : recharger la page Publications à chaque émetteur. Les
+        // postbacks ASP.NET successifs accumulent un état (__VIEWSTATE) qui
+        // finit par renvoyer la page par défaut (table vide). Repartir d'un
+        // goto frais garantit que chaque émetteur se comporte comme le 1er.
+        await page.goto(pubUrl, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector(SELECT, { timeout: 15000 });
+
+        // Sélectionne l'émetteur → onchange déclenche __doPostBack (full page).
+        // On attend qu'une ligne de données (date en col 0) apparaisse.
         await page.selectOption(SELECT, m.value);
-        // Le postback (full page) vide d'abord la table puis la repeuple. On
-        // attend une ligne de données NON VIDE et DIFFÉRENTE de la précédente —
-        // sinon on capturait l'état transitoire vide (bug : after=null).
-        // Un émetteur réellement sans publication atteindra le timeout (→ 0 pub).
         await page
           .waitForFunction(
-            (prev) => {
+            () => {
               const trs = Array.from(document.querySelectorAll('tr'));
               for (const tr of trs) {
                 const td = tr.querySelector('td');
                 const t = (td?.textContent ?? '').trim();
-                if (/\d{2}\/\d{2}\/\d{4}/.test(t)) {
-                  const row = (tr.textContent ?? '').trim().slice(0, 80);
-                  return row !== prev; // ligne peuplée et différente
-                }
+                if (/\d{2}\/\d{2}\/\d{4}/.test(t)) return true; // table peuplée
               }
-              return false; // table vide/transitoire → continuer d'attendre
+              return false;
             },
-            before,
+            undefined,
             { timeout: 10000 },
           )
           .catch(() => {
-            // timeout : émetteur sans publication (ou identique au précédent)
+            // timeout : émetteur sans publication → 0 pub
           });
-        // Petite marge pour laisser la table finir de se peupler.
-        await page.waitForTimeout(600);
+        await page.waitForTimeout(400);
 
-        if (diagCount < 3) {
+        if (diagCount < 4) {
           const after = await firstDataRow();
-          logger.info({ code: m.code, emetteur: m.text, before, after }, 'DIAG row change');
+          logger.info({ code: m.code, emetteur: m.text, after }, 'DIAG row');
           diagCount++;
         }
 
