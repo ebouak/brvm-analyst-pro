@@ -83,6 +83,16 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
     );
     logger.info({ totalOptions: options.length }, 'Options émetteurs BDFIN (browser)');
 
+    // DIAG : mécanisme de postback + sélection par défaut
+    const initialSelected = await page.$eval(SELECT, (el) => {
+      const s = el as HTMLSelectElement;
+      const o = s.options[s.selectedIndex];
+      return { value: s.value, text: o ? o.textContent?.trim() : null };
+    }).catch(() => null);
+    const initialHtml = await page.content();
+    const isUpdatePanel = initialHtml.includes('PageRequestManager') || initialHtml.includes('Sys.WebForms');
+    logger.info({ initialSelected, isUpdatePanel }, 'DIAG postback mechanism');
+
     // Charger instruments BRVM actifs
     const sb = getSupabase();
     const { data: instruments, error } = await sb
@@ -106,19 +116,53 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
       return { status: 'failed', count: 0, message: 'aucun mapping' };
     }
 
+    // Helper : texte de la 1ère ligne de données (1ère cellule = date JJ/MM/AAAA)
+    const firstDataRow = async (): Promise<string | null> =>
+      page.evaluate(() => {
+        const trs = Array.from(document.querySelectorAll('tr'));
+        for (const tr of trs) {
+          const td = tr.querySelector('td');
+          const t = (td?.textContent ?? '').trim();
+          if (/\d{2}\/\d{2}\/\d{4}/.test(t)) return (tr.textContent ?? '').trim().slice(0, 80);
+        }
+        return null;
+      }).catch(() => null);
+
     const allPubs: Publication[] = [];
+    let diagCount = 0;
     for (const m of mappings) {
       try {
-        // Le <select> a AutoPostBack=true : onchange déclenche __doPostBack,
-        // qui SOUMET le formulaire → navigation pleine page. On attend donc la
-        // navigation (et non networkidle, qui fire sur la page courante avant le
-        // postback et laisse la table de l'émetteur précédent en place).
-        await Promise.all([
-          page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => null),
-          page.selectOption(SELECT, m.value),
-        ]);
-        // Le dropdown est re-rendu après le postback ; on s'assure qu'il est là.
-        await page.waitForSelector(SELECT, { timeout: 10000 }).catch(() => {});
+        const before = await firstDataRow();
+        // Sélectionne l'émetteur. selectOption met la valeur + dispatch 'change'
+        // → __doPostBack. Le postback peut être AJAX (UpdatePanel) : on attend
+        // alors que la 1ère ligne de données change, sinon on a la table précédente.
+        await page.selectOption(SELECT, m.value);
+        await page
+          .waitForFunction(
+            (prev) => {
+              const trs = Array.from(document.querySelectorAll('tr'));
+              for (const tr of trs) {
+                const td = tr.querySelector('td');
+                const t = (td?.textContent ?? '').trim();
+                if (/\d{2}\/\d{2}\/\d{4}/.test(t)) {
+                  return (tr.textContent ?? '').trim().slice(0, 80) !== prev;
+                }
+              }
+              // plus aucune ligne de données : la table a changé (émetteur sans pub)
+              return prev !== null;
+            },
+            before,
+            { timeout: 15000 },
+          )
+          .catch(() => {
+            // timeout : soit émetteur identique au précédent, soit vraiment vide
+          });
+
+        if (diagCount < 3) {
+          const after = await firstDataRow();
+          logger.info({ code: m.code, emetteur: m.text, before, after }, 'DIAG row change');
+          diagCount++;
+        }
 
         const html = await page.content();
         const rows = parsePublicationsTable(html, cfg.BDFIN_BASE_URL);
