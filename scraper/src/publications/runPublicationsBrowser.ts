@@ -109,15 +109,16 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
     const allPubs: Publication[] = [];
     for (const m of mappings) {
       try {
-        // selectOption déclenche l'AutoPostBack ASP.NET
+        // Le <select> a AutoPostBack=true : onchange déclenche __doPostBack,
+        // qui SOUMET le formulaire → navigation pleine page. On attend donc la
+        // navigation (et non networkidle, qui fire sur la page courante avant le
+        // postback et laisse la table de l'émetteur précédent en place).
         await Promise.all([
-          page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {
-            // networkidle peut ne pas se déclencher sur certains environnements — on continue
-          }),
+          page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => null),
           page.selectOption(SELECT, m.value),
         ]);
-        // Marge pour le rendu de la table
-        await page.waitForTimeout(500);
+        // Le dropdown est re-rendu après le postback ; on s'assure qu'il est là.
+        await page.waitForSelector(SELECT, { timeout: 10000 }).catch(() => {});
 
         const html = await page.content();
         const rows = parsePublicationsTable(html, cfg.BDFIN_BASE_URL);
