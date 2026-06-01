@@ -15,11 +15,23 @@ import type { Publication } from './types.js';
 // Paths candidats — testés dans l'ordre jusqu'à trouver une page contenant
 // __VIEWSTATE + un dropdown émetteur. Sinon discovery via menu Default.aspx.
 const PATH_CANDIDATES = [
+  // Patterns racine
   '/Publications.aspx',
   '/Publication.aspx',
   '/PublicationEmetteur.aspx',
   '/PublicationsEmetteur.aspx',
   '/PublicationEmetteurs.aspx',
+  // Patterns /0/ (préfixe utilisé par /0/communiques.aspx)
+  '/0/publications.aspx',
+  '/0/publication.aspx',
+  '/0/publication_emetteur.aspx',
+  '/0/publications_emetteur.aspx',
+  '/0/emetteur_publications.aspx',
+  '/0/rapports_emetteur.aspx',
+  '/0/rapports.aspx',
+  // Patterns en majuscules
+  '/0/Publications.aspx',
+  '/0/Publication.aspx',
 ];
 
 // Names probables du dropdown émetteur ASP.NET — testés tous, premier qui matche gagne
@@ -55,18 +67,33 @@ async function discoverPublicationsPath(http: HttpClient): Promise<{ path: strin
       // skip
     }
   }
-  // 2) Discovery via le menu Default.aspx — chercher un <a> contenant "Publication"
+  // 2) Discovery via le menu Default.aspx — chercher TOUS les <a> et identifier
+  //    ceux qui ressemblent à une page Publications/Emetteurs/Rapports
   try {
     const home = await http.get('/Default.aspx');
     const $ = cheerio.load(home.data);
-    const links: string[] = [];
+    const allLinks: Array<{ text: string; href: string }> = [];
     $('a').each((_, a) => {
-      const text = ($(a).text() || '').trim().toLowerCase();
+      const text = ($(a).text() || '').trim();
       const href = $(a).attr('href');
-      if (href && text.includes('publication')) links.push(href);
+      if (href && href.endsWith('.aspx')) {
+        allLinks.push({ text, href });
+      }
     });
-    logger.info({ links: links.slice(0, 10) }, 'Menu Default.aspx — liens contenant "publication"');
-    for (const href of links) {
+    logger.info({ totalLinks: allLinks.length, sample: allLinks.slice(0, 30) }, 'Menu Default.aspx — TOUS liens .aspx');
+
+    // Filtrer par texte ou href contenant publication/emetteur/rapport
+    const candidates = allLinks.filter((l) => {
+      const t = l.text.toLowerCase();
+      const h = l.href.toLowerCase();
+      return (
+        t.includes('publication') || t.includes('émetteur') || t.includes('emetteur') || t.includes('rapport') ||
+        h.includes('publication') || h.includes('emetteur') || h.includes('rapport')
+      );
+    });
+    logger.info({ candidates }, 'Liens candidats (publication/emetteur/rapport)');
+
+    for (const { text, href } of candidates) {
       const path = href.startsWith('/') ? href : '/' + href;
       try {
         const resp = await http.get(path);
@@ -74,10 +101,17 @@ async function discoverPublicationsPath(http: HttpClient): Promise<{ path: strin
         const state = extractAspNetState(resp.data);
         if (!state.hidden['__VIEWSTATE']) continue;
         const $$ = cheerio.load(resp.data);
-        const firstSelect = $$('select').first().attr('name');
-        if (firstSelect) {
-          logger.info({ path, field: firstSelect }, 'Publications path découvert via menu');
-          return { path, field: firstSelect };
+        const selects: Array<{ name: string; options: number }> = [];
+        $$('select').each((_, s) => {
+          const name = $$(s).attr('name');
+          if (name) selects.push({ name, options: $$(s).find('option').length });
+        });
+        logger.info({ path, text, selects }, 'Page testée');
+        // Considérer comme bon candidat si au moins 1 select avec >5 options (probable emetteur dropdown)
+        const dropdown = selects.find((s) => s.options > 5);
+        if (dropdown) {
+          logger.info({ path, field: dropdown.name }, 'Publications path découvert via menu');
+          return { path, field: dropdown.name };
         }
       } catch { /* skip */ }
     }
