@@ -1,3 +1,5 @@
+import * as cheerio from 'cheerio';
+import type { HttpClient } from '../client/http.js';
 import { createHttpClient } from '../client/http.js';
 import { login } from '../client/auth.js';
 import { extractAspNetState, buildPostback } from '../client/aspnet.js';
@@ -10,9 +12,80 @@ import { buildMockPublications } from './mock.js';
 import { getSupabase } from '../persistence/supabase.js';
 import type { Publication } from './types.js';
 
-const PUBLICATIONS_PATH = '/Publications.aspx';
-// Probable name du dropdown emetteur (à calibrer si différent)
-const EMETTEUR_FIELD = 'ctl00$Main$DropDownList1';
+// Paths candidats — testés dans l'ordre jusqu'à trouver une page contenant
+// __VIEWSTATE + un dropdown émetteur. Sinon discovery via menu Default.aspx.
+const PATH_CANDIDATES = [
+  '/Publications.aspx',
+  '/Publication.aspx',
+  '/PublicationEmetteur.aspx',
+  '/PublicationsEmetteur.aspx',
+  '/PublicationEmetteurs.aspx',
+];
+
+// Names probables du dropdown émetteur ASP.NET — testés tous, premier qui matche gagne
+const EMETTEUR_FIELD_CANDIDATES = [
+  'ctl00$Main$DropDownList1',
+  'ctl00$Main$ddlEmetteur',
+  'ctl00$Main$DropDownListEmetteur',
+];
+
+async function discoverPublicationsPath(http: HttpClient): Promise<{ path: string; field: string } | null> {
+  // 1) Try direct candidates
+  for (const path of PATH_CANDIDATES) {
+    try {
+      const resp = await http.get(path);
+      if (resp.status !== 200) continue;
+      const state = extractAspNetState(resp.data);
+      if (!state.hidden['__VIEWSTATE']) continue;
+      // Détecter dropdown émetteur
+      const $ = cheerio.load(resp.data);
+      for (const field of EMETTEUR_FIELD_CANDIDATES) {
+        if ($(`select[name="${field}"]`).length > 0) {
+          logger.info({ path, field }, 'Publications path découvert (candidat direct)');
+          return { path, field };
+        }
+      }
+      // Fallback : prendre le 1er <select> de la page
+      const firstSelect = $('select').first().attr('name');
+      if (firstSelect && firstSelect.toLowerCase().includes('emetteur')) {
+        logger.info({ path, field: firstSelect }, 'Publications path découvert (1er select emetteur)');
+        return { path, field: firstSelect };
+      }
+    } catch {
+      // skip
+    }
+  }
+  // 2) Discovery via le menu Default.aspx — chercher un <a> contenant "Publication"
+  try {
+    const home = await http.get('/Default.aspx');
+    const $ = cheerio.load(home.data);
+    const links: string[] = [];
+    $('a').each((_, a) => {
+      const text = ($(a).text() || '').trim().toLowerCase();
+      const href = $(a).attr('href');
+      if (href && text.includes('publication')) links.push(href);
+    });
+    logger.info({ links: links.slice(0, 10) }, 'Menu Default.aspx — liens contenant "publication"');
+    for (const href of links) {
+      const path = href.startsWith('/') ? href : '/' + href;
+      try {
+        const resp = await http.get(path);
+        if (resp.status !== 200) continue;
+        const state = extractAspNetState(resp.data);
+        if (!state.hidden['__VIEWSTATE']) continue;
+        const $$ = cheerio.load(resp.data);
+        const firstSelect = $$('select').first().attr('name');
+        if (firstSelect) {
+          logger.info({ path, field: firstSelect }, 'Publications path découvert via menu');
+          return { path, field: firstSelect };
+        }
+      } catch { /* skip */ }
+    }
+  } catch (e) {
+    logger.warn({ err: (e as Error).message }, 'Discovery menu Default.aspx échouée');
+  }
+  return null;
+}
 
 export interface PubsRunResult {
   status: 'success' | 'failed' | 'mock';
@@ -32,18 +105,20 @@ export async function runPublications(opts: { mock?: boolean } = {}): Promise<Pu
     await login(http);
     const cfg = getConfig();
 
+    // Discovery : trouve dynamiquement le bon path + le bon name de dropdown
+    const discovered = await discoverPublicationsPath(http);
+    if (!discovered) {
+      logger.warn('Aucune page Publications trouvée sur BDFIN — abandon');
+      return { status: 'failed', count: 0, message: 'page publications introuvable (discovery échouée)' };
+    }
+    const PUBLICATIONS_PATH = discovered.path;
+    const EMETTEUR_FIELD = discovered.field;
+
     // Liste des codes actions actives
     const sb = getSupabase();
     const { data: instruments, error } = await sb.from('brvm_instruments').select('code').eq('type', 'action').eq('actif', true);
     if (error) throw new Error(`load instruments: ${error.message}`);
     const codes = (instruments ?? []).map((i: { code: string }) => i.code).slice(0, 50); // safety cap
-
-    // GET page publications
-    const initial = await http.get(PUBLICATIONS_PATH);
-    if (!initial.data || initial.status !== 200) {
-      logger.warn({ status: initial.status }, 'Page publications inaccessible');
-      return { status: 'failed', count: 0, message: 'page publications inaccessible' };
-    }
 
     const allPubs: Publication[] = [];
     for (const code of codes) {
