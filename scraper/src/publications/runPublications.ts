@@ -15,23 +15,12 @@ import type { Publication } from './types.js';
 // Paths candidats — testés dans l'ordre jusqu'à trouver une page contenant
 // __VIEWSTATE + un dropdown émetteur. Sinon discovery via menu Default.aspx.
 const PATH_CANDIDATES = [
-  // Patterns racine
+  // CONFIRMÉ via discovery menu Default.aspx : "Publications" → /0/communiques.aspx
+  '/0/communiques.aspx',
+  // Patterns alternatifs / rapports annuels
+  '/0/rapports_annuels_societes.aspx',
   '/Publications.aspx',
   '/Publication.aspx',
-  '/PublicationEmetteur.aspx',
-  '/PublicationsEmetteur.aspx',
-  '/PublicationEmetteurs.aspx',
-  // Patterns /0/ (préfixe utilisé par /0/communiques.aspx)
-  '/0/publications.aspx',
-  '/0/publication.aspx',
-  '/0/publication_emetteur.aspx',
-  '/0/publications_emetteur.aspx',
-  '/0/emetteur_publications.aspx',
-  '/0/rapports_emetteur.aspx',
-  '/0/rapports.aspx',
-  // Patterns en majuscules
-  '/0/Publications.aspx',
-  '/0/Publication.aspx',
 ];
 
 // Names probables du dropdown émetteur ASP.NET — testés tous, premier qui matche gagne
@@ -51,20 +40,35 @@ async function discoverPublicationsPath(http: HttpClient): Promise<{ path: strin
       if (!state.hidden['__VIEWSTATE']) continue;
       // Détecter dropdown émetteur
       const $ = cheerio.load(resp.data);
+      // Lister TOUS les selects pour debug
+      const allSelects: Array<{ name: string; options: number }> = [];
+      $('select').each((_, s) => {
+        const name = $(s).attr('name');
+        if (name) allSelects.push({ name, options: $(s).find('option').length });
+      });
+      logger.info({ path, selects: allSelects }, 'Page candidate testée — selects présents');
+      // Essayer les names probables
       for (const field of EMETTEUR_FIELD_CANDIDATES) {
         if ($(`select[name="${field}"]`).length > 0) {
           logger.info({ path, field }, 'Publications path découvert (candidat direct)');
           return { path, field };
         }
       }
-      // Fallback : prendre le 1er <select> de la page
-      const firstSelect = $('select').first().attr('name');
-      if (firstSelect && firstSelect.toLowerCase().includes('emetteur')) {
-        logger.info({ path, field: firstSelect }, 'Publications path découvert (1er select emetteur)');
-        return { path, field: firstSelect };
+      // Fallback 1 : 1er select avec "emetteur"/"societe"/"ddl" dans le name
+      for (const s of allSelects) {
+        const n = s.name.toLowerCase();
+        if (n.includes('emetteur') || n.includes('societe') || n.includes('société') || n.endsWith('ddl1') || n.includes('ddlsociete')) {
+          logger.info({ path, field: s.name }, 'Publications path découvert (heuristique nom)');
+          return { path, field: s.name };
+        }
       }
-    } catch {
-      // skip
+      // Fallback 2 : prendre le 1er select de la page (souvent c'est l'emetteur)
+      if (allSelects.length > 0 && allSelects[0]!.options >= 2) {
+        logger.info({ path, field: allSelects[0]!.name }, 'Publications path découvert (1er select)');
+        return { path, field: allSelects[0]!.name };
+      }
+    } catch (e) {
+      logger.warn({ path, err: (e as Error).message }, 'Test candidat échoué');
     }
   }
   // 2) Discovery via le menu Default.aspx — chercher TOUS les <a> et identifier
