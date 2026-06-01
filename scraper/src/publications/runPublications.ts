@@ -37,6 +37,49 @@ function hasViewstate(hidden: Record<string, string>): boolean {
   return Boolean(hidden['__VIEWSTATE'] || hidden['__VIEWSTATE1'] || hidden['__VIEWSTATEFIELDCOUNT']);
 }
 
+/** Normalise une chaîne pour fuzzy matching (lowercase, sans accents, espaces normalisés) */
+function normalizeStr(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+interface EmetteurOption {
+  value: string;
+  text: string;
+}
+
+/** Tente de matcher une désignation BRVM avec un emetteur du dropdown BDFIN */
+function matchEmetteur(designation: string, options: EmetteurOption[]): EmetteurOption | null {
+  if (!designation) return null;
+  const norm = normalizeStr(designation);
+  if (!norm) return null;
+  // 1) Match exact normalisé
+  const exact = options.find((o) => normalizeStr(o.text) === norm);
+  if (exact) return exact;
+  // 2) Substring : un contient l'autre
+  const partial = options.find((o) => {
+    const oNorm = normalizeStr(o.text);
+    return oNorm && (norm.includes(oNorm) || oNorm.includes(norm));
+  });
+  return partial ?? null;
+}
+
+/** Extrait toutes les options [value, text] d'un select dans le HTML */
+function extractSelectOptions(html: string, fieldName: string): EmetteurOption[] {
+  const $ = cheerio.load(html);
+  const out: EmetteurOption[] = [];
+  $(`select[name="${fieldName}"] option`).each((_, o) => {
+    const value = $(o).attr('value');
+    const text = $(o).text().trim();
+    if (value && text) out.push({ value, text });
+  });
+  return out;
+}
+
 async function discoverPublicationsPath(http: HttpClient): Promise<{ path: string; field: string } | null> {
   // 1) Try direct candidates
   for (const path of PATH_CANDIDATES) {
@@ -195,14 +238,41 @@ export async function runPublications(opts: { mock?: boolean } = {}): Promise<Pu
     const PUBLICATIONS_PATH = discovered.path;
     const EMETTEUR_FIELD = discovered.field;
 
-    // Liste des codes actions actives
+    // Liste des instruments BRVM actifs (avec designation pour matching)
     const sb = getSupabase();
-    const { data: instruments, error } = await sb.from('brvm_instruments').select('code').eq('type', 'action').eq('actif', true);
+    const { data: instruments, error } = await sb
+      .from('brvm_instruments')
+      .select('code, designation')
+      .eq('type', 'action')
+      .eq('actif', true);
     if (error) throw new Error(`load instruments: ${error.message}`);
-    const codes = (instruments ?? []).map((i: { code: string }) => i.code).slice(0, 50); // safety cap
+    const brvmInstruments = (instruments ?? []) as Array<{ code: string; designation: string | null }>;
+
+    // Extraire la liste complète des options du dropdown (ID BDFIN → text)
+    const firstPage = await http.get(PUBLICATIONS_PATH);
+    const options = extractSelectOptions(firstPage.data, EMETTEUR_FIELD);
+    logger.info({ totalOptions: options.length, sample: options.slice(0, 5) }, 'Options émetteurs BDFIN');
+
+    // Mapping BRVM code → option BDFIN par fuzzy match designation/text
+    const mappings: Array<{ code: string; bdfinValue: string; bdfinText: string }> = [];
+    const unmatched: string[] = [];
+    for (const instr of brvmInstruments) {
+      const opt = matchEmetteur(instr.designation ?? instr.code, options);
+      if (opt) {
+        mappings.push({ code: instr.code, bdfinValue: opt.value, bdfinText: opt.text });
+      } else {
+        unmatched.push(`${instr.code}=${instr.designation}`);
+      }
+    }
+    logger.info({ matched: mappings.length, unmatched: unmatched.length, unmatchedSample: unmatched.slice(0, 10) }, 'Mapping BRVM → BDFIN');
+
+    if (mappings.length === 0) {
+      logger.warn('Aucun mapping trouvé entre instruments BRVM et options BDFIN');
+      return { status: 'failed', count: 0, message: 'aucun mapping BRVM/BDFIN' };
+    }
 
     const allPubs: Publication[] = [];
-    for (const code of codes) {
+    for (const { code, bdfinValue, bdfinText } of mappings) {
       try {
         // Re-GET pour fresh VIEWSTATE
         const page = await http.get(PUBLICATIONS_PATH);
@@ -211,8 +281,8 @@ export async function runPublications(opts: { mock?: boolean } = {}): Promise<Pu
           logger.warn({ code }, 'VIEWSTATE absent page publications');
           continue;
         }
-        // Postback : sélectionner emetteur
-        const form = buildPostback(state, EMETTEUR_FIELD, '', { [EMETTEUR_FIELD]: code });
+        // Postback : sélectionner emetteur via son ID BDFIN
+        const form = buildPostback(state, EMETTEUR_FIELD, '', { [EMETTEUR_FIELD]: bdfinValue });
         const resp = await http.postForm(PUBLICATIONS_PATH, form);
         const rows = parsePublicationsTable(resp.data, cfg.BDFIN_BASE_URL);
         for (const r of rows) {
@@ -226,7 +296,7 @@ export async function runPublications(opts: { mock?: boolean } = {}): Promise<Pu
             dedupe_hash: dedupeHash(code, r.date_publication, r.libelle),
           });
         }
-        logger.info({ code, found: rows.length }, 'Publications emetteur');
+        logger.info({ code, bdfinText, found: rows.length }, 'Publications émetteur');
       } catch (e) {
         logger.warn({ code, err: (e as Error).message }, 'Echec emetteur, suite');
       }
