@@ -35,9 +35,13 @@ async function discoverPublicationsPath(http: HttpClient): Promise<{ path: strin
   for (const path of PATH_CANDIDATES) {
     try {
       const resp = await http.get(path);
-      if (resp.status !== 200) continue;
       const state = extractAspNetState(resp.data);
-      if (!state.hidden['__VIEWSTATE']) continue;
+      const hasVS = !!state.hidden['__VIEWSTATE'];
+      const htmlLen = (resp.data || '').length;
+      const titleMatch = (resp.data || '').match(/<title>([^<]*)<\/title>/i);
+      logger.info({ path, status: resp.status, htmlLen, hasVS, title: titleMatch?.[1] }, 'Candidat testé');
+      if (resp.status !== 200) continue;
+      if (!hasVS) continue;
       // Détecter dropdown émetteur
       const $ = cheerio.load(resp.data);
       // Lister TOUS les selects pour debug
