@@ -15,7 +15,9 @@ export function buildMockPublications(): Publication[] {
     date_publication: s.date,
     libelle: s.libelle,
     type_publication: classifyPublication(s.libelle),
-    source_url: `https://bfin.brvm.org/publications/${s.code}-${s.date}.pdf`,
+    // Mock : pas de PDF réel (les URLs réelles viennent du scraping BDFIN).
+    // null → le bouton "Voir" est grisé dans le modal au lieu de 404.
+    source_url: null,
     source: 'bdfin' as const,
     dedupe_hash: dedupeHash(s.code, s.date, s.libelle),
   }));
