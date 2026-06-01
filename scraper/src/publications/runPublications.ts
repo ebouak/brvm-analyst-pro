@@ -41,7 +41,34 @@ async function discoverPublicationsPath(http: HttpClient): Promise<{ path: strin
       const titleMatch = (resp.data || '').match(/<title>([^<]*)<\/title>/i);
       logger.info({ path, status: resp.status, htmlLen, hasVS, title: titleMatch?.[1] }, 'Candidat testé');
       if (resp.status !== 200) continue;
-      if (!hasVS) continue;
+
+      // Si pas de VIEWSTATE mais la page est "Publication de l'émetteur", on dump la structure
+      const isPublicationsPage = (titleMatch?.[1] || '').toLowerCase().includes('publication');
+      if (!hasVS) {
+        if (isPublicationsPage) {
+          const $ = cheerio.load(resp.data);
+          const forms = $('form').map((_, f) => ({
+            action: $(f).attr('action'),
+            method: $(f).attr('method'),
+            id: $(f).attr('id'),
+          })).get();
+          const inputs = $('input').map((_, i) => ({
+            name: $(i).attr('name'),
+            type: $(i).attr('type'),
+            id: $(i).attr('id'),
+          })).get().slice(0, 30);
+          const selects = $('select').map((_, s) => ({
+            name: $(s).attr('name'),
+            id: $(s).attr('id'),
+            options: $(s).find('option').length,
+          })).get();
+          const links = $('a').map((_, a) => $(a).attr('href')).get().filter(h => h && h.includes('communique')).slice(0, 10);
+          const tables = $('table').length;
+          const allHidden = Object.keys(state.hidden).slice(0, 20);
+          logger.info({ path, forms, inputs, selects, tables, links, allHidden }, 'STRUCTURE page Publications (debug)');
+        }
+        continue;
+      }
       // Détecter dropdown émetteur
       const $ = cheerio.load(resp.data);
       // Lister TOUS les selects pour debug
