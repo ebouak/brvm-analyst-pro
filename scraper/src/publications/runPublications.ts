@@ -23,12 +23,19 @@ const PATH_CANDIDATES = [
   '/Publication.aspx',
 ];
 
-// Names probables du dropdown émetteur ASP.NET — testés tous, premier qui matche gagne
+// Names probables du dropdown émetteur ASP.NET — CONFIRMÉ via discovery :
+// /0/communiques.aspx utilise DropDownList2 avec ~145 options émetteurs
 const EMETTEUR_FIELD_CANDIDATES = [
+  'ctl00$Main$DropDownList2',
   'ctl00$Main$DropDownList1',
   'ctl00$Main$ddlEmetteur',
   'ctl00$Main$DropDownListEmetteur',
 ];
+
+/** Considère présent un VIEWSTATE direct ou multi-part (__VIEWSTATE1, etc.) */
+function hasViewstate(hidden: Record<string, string>): boolean {
+  return Boolean(hidden['__VIEWSTATE'] || hidden['__VIEWSTATE1'] || hidden['__VIEWSTATEFIELDCOUNT']);
+}
 
 async function discoverPublicationsPath(http: HttpClient): Promise<{ path: string; field: string } | null> {
   // 1) Try direct candidates
@@ -36,7 +43,7 @@ async function discoverPublicationsPath(http: HttpClient): Promise<{ path: strin
     try {
       const resp = await http.get(path);
       const state = extractAspNetState(resp.data);
-      const hasVS = !!state.hidden['__VIEWSTATE'];
+      const hasVS = hasViewstate(state.hidden);
       const htmlLen = (resp.data || '').length;
       const titleMatch = (resp.data || '').match(/<title>([^<]*)<\/title>/i);
       logger.info({ path, status: resp.status, htmlLen, hasVS, title: titleMatch?.[1] }, 'Candidat testé');
@@ -80,8 +87,13 @@ async function discoverPublicationsPath(http: HttpClient): Promise<{ path: strin
       logger.info({ path, selects: allSelects }, 'Page candidate testée — selects présents');
       // Essayer les names probables
       for (const field of EMETTEUR_FIELD_CANDIDATES) {
-        if ($(`select[name="${field}"]`).length > 0) {
-          logger.info({ path, field }, 'Publications path découvert (candidat direct)');
+        const sel = $(`select[name="${field}"]`);
+        if (sel.length > 0) {
+          const sampleOptions = sel.find('option').slice(0, 5).map((_, o) => ({
+            value: $(o).attr('value'),
+            text: $(o).text().trim(),
+          })).get();
+          logger.info({ path, field, sampleOptions }, 'Publications path découvert + sample options');
           return { path, field };
         }
       }
@@ -195,7 +207,7 @@ export async function runPublications(opts: { mock?: boolean } = {}): Promise<Pu
         // Re-GET pour fresh VIEWSTATE
         const page = await http.get(PUBLICATIONS_PATH);
         const state = extractAspNetState(page.data);
-        if (!state.hidden['__VIEWSTATE']) {
+        if (!hasViewstate(state.hidden)) {
           logger.warn({ code }, 'VIEWSTATE absent page publications');
           continue;
         }
