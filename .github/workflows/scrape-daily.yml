@@ -56,6 +56,9 @@ jobs:
       - name: Installer les dépendances
         run: cd scraper && npm ci
 
+      - name: Installer Chromium (Playwright)
+        run: cd scraper && npx playwright install chromium --with-deps
+
       - name: DEBUG · Vérifier que le code déployé est à jour
         run: |
           echo "=== git SHA ==="
@@ -203,6 +206,9 @@ jobs:
 
       - name: Installer les dépendances
         run: cd scraper && npm ci
+
+      - name: Installer Chromium (Playwright)
+        run: cd scraper && npx playwright install chromium --with-deps
 
       - name: 1 · Événements du matin
         run: cd scraper && npm run events
