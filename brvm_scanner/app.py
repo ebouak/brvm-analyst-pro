@@ -11,11 +11,23 @@ Lancement :  streamlit run app.py
 from __future__ import annotations
 
 import logging
+import os
 
-import pandas as pd
 import streamlit as st
 
-from utils import (
+# Sur Streamlit Cloud, les secrets sont fournis via st.secrets. On les recopie
+# dans l'environnement AVANT d'importer utils (qui lit os.environ). Optionnel :
+# la clé anon publique par défaut suffit si aucun secret n'est défini.
+try:
+    for _k in ("SUPABASE_URL", "SUPABASE_ANON_KEY"):
+        if _k in st.secrets:  # type: ignore[operator]
+            os.environ[_k] = str(st.secrets[_k])
+except Exception:
+    pass
+
+import pandas as pd  # noqa: E402
+
+from utils import (  # noqa: E402
     get_available_symbols,
     load_price_data,
     load_fundamentals,
