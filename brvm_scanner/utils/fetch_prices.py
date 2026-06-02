@@ -50,7 +50,12 @@ def fetch_prices_for(symbol: str) -> list[tuple[str, float]]:
 def compute_backtest(closes: list[float]) -> tuple[list[float], list[float]]:
     """
     Calcule les courbes Stratégie et Buy&Hold (base 100), alignées sur `closes`.
-    Réplique exactement la logique du frontend (entrée/sortie puis mark-to-market).
+
+    Stratégie long-only SANS lookahead : la position détenue pendant le jour i
+    est décidée par le signal de la VEILLE (variation > 2% → on est investi,
+    < -2% → on sort). On réalise donc le rendement du jour i avant de mettre à
+    jour la position pour le lendemain — sinon on capture indûment le rendement
+    du jour de décision (biais qui faisait exploser l'equity sur longue période).
     """
     n = len(closes)
     if n == 0:
@@ -61,20 +66,17 @@ def compute_backtest(closes: list[float]) -> tuple[list[float], list[float]]:
     strat: list[float] = []
     bh: list[float] = []
     for i, c in enumerate(closes):
-        # Signal du jour (variation vs veille).
-        if i > 0 and closes[i - 1]:
-            var = (c - closes[i - 1]) / closes[i - 1] * 100
-            signal = "BUY" if var > 2 else ("SELL" if var < -2 else "HOLD")
-        else:
-            signal = "HOLD"
-        # Entrée / sortie.
-        if not in_position and signal == "BUY":
-            in_position = True
-        elif in_position and signal == "SELL":
-            in_position = False
-        # Mark-to-market si en position.
+        # 1) Rendement du jour i selon la position détenue à l'ouverture
+        #    (décidée par le signal de la veille) — pas de lookahead.
         if in_position and i > 0 and closes[i - 1]:
             equity *= 1 + (c - closes[i - 1]) / closes[i - 1]
+        # 2) Signal du jour i → position pour le LENDEMAIN.
+        if i > 0 and closes[i - 1]:
+            var = (c - closes[i - 1]) / closes[i - 1] * 100
+            if var > 2:
+                in_position = True
+            elif var < -2:
+                in_position = False
         strat.append(round(equity, 2))
         bh.append(round(c / base * 100, 2))
     return strat, bh
