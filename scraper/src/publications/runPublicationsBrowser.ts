@@ -83,16 +83,6 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
     );
     logger.info({ totalOptions: options.length }, 'Options émetteurs BDFIN (browser)');
 
-    // DIAG : mécanisme de postback + sélection par défaut
-    const initialSelected = await page.$eval(SELECT, (el) => {
-      const s = el as HTMLSelectElement;
-      const o = s.options[s.selectedIndex];
-      return { value: s.value, text: o ? o.textContent?.trim() : null };
-    }).catch(() => null);
-    const initialHtml = await page.content();
-    const isUpdatePanel = initialHtml.includes('PageRequestManager') || initialHtml.includes('Sys.WebForms');
-    logger.info({ initialSelected, isUpdatePanel }, 'DIAG postback mechanism');
-
     // Charger instruments BRVM actifs
     const sb = getSupabase();
     const { data: instruments, error } = await sb
@@ -116,20 +106,7 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
       return { status: 'failed', count: 0, message: 'aucun mapping' };
     }
 
-    // Helper : texte de la 1ère ligne de données (1ère cellule = date JJ/MM/AAAA)
-    const firstDataRow = async (): Promise<string | null> =>
-      page.evaluate(() => {
-        const trs = Array.from(document.querySelectorAll('tr'));
-        for (const tr of trs) {
-          const td = tr.querySelector('td');
-          const t = (td?.textContent ?? '').trim();
-          if (/\d{2}\/\d{2}\/\d{4}/.test(t)) return (tr.textContent ?? '').trim().slice(0, 80);
-        }
-        return null;
-      }).catch(() => null);
-
     const allPubs: Publication[] = [];
-    let diagCount = 0;
     for (const m of mappings) {
       try {
         // IMPORTANT : recharger la page Publications à chaque émetteur. Les
@@ -160,12 +137,6 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
             // timeout : émetteur sans publication → 0 pub
           });
         await page.waitForTimeout(400);
-
-        if (diagCount < 4) {
-          const after = await firstDataRow();
-          logger.info({ code: m.code, emetteur: m.text, after }, 'DIAG row');
-          diagCount++;
-        }
 
         const html = await page.content();
         const rows = parsePublicationsTable(html, cfg.BDFIN_BASE_URL);
