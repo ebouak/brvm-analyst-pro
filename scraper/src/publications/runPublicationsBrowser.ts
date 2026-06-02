@@ -28,17 +28,64 @@ interface EmetteurOption {
   text: string;
 }
 
+// Mots vides / suffixes pays ignorés dans la comparaison par tokens.
+const STOPWORDS = new Set([
+  'ci', 'sn', 'bf', 'tg', 'bj', 'ne', 'ml', 'gw',
+  'sa', 'sas', 'sarl', 'group', 'groupe', 'cote', 'ivoire',
+  'd', 'de', 'du', 'des', 'la', 'le', 'les', 'et', 'pour',
+  'benin', 'burkina', 'faso', 'mali', 'niger', 'senegal', 'togo', 'guinee', 'bissau',
+]);
+
+function tokens(s: string): string[] {
+  return normalizeStr(s)
+    .split(' ')
+    .filter((t) => t.length >= 2 && !STOPWORDS.has(t));
+}
+
+/**
+ * Score de similarité [0..1] entre une désignation BRVM et un texte BDFIN,
+ * basé sur le chevauchement des tokens significatifs (Jaccard pondéré).
+ */
+function similarity(a: string, b: string): number {
+  const ta = tokens(a);
+  const tb = tokens(b);
+  if (ta.length === 0 || tb.length === 0) return 0;
+  const setB = new Set(tb);
+  let inter = 0;
+  for (const t of ta) {
+    if (setB.has(t)) inter += 1;
+    // correspondance par préfixe (sodeci ~ sodec, unilever ~ unile)
+    else if (tb.some((x) => x.startsWith(t) || t.startsWith(x))) inter += 0.6;
+  }
+  return inter / Math.max(ta.length, tb.length);
+}
+
 function matchEmetteur(designation: string, options: EmetteurOption[]): EmetteurOption | null {
   const norm = normalizeStr(designation);
   if (!norm) return null;
+
+  // 1) Exact normalisé
   const exact = options.find((o) => normalizeStr(o.text) === norm);
   if (exact) return exact;
-  return (
-    options.find((o) => {
-      const on = normalizeStr(o.text);
-      return on && (norm.includes(on) || on.includes(norm));
-    }) ?? null
-  );
+
+  // 2) Substring (un contient l'autre, len >= 5 pour éviter les faux positifs)
+  const sub = options.find((o) => {
+    const on = normalizeStr(o.text);
+    return on.length >= 5 && (norm.includes(on) || on.includes(norm));
+  });
+  if (sub) return sub;
+
+  // 3) Meilleur score de chevauchement de tokens (seuil 0.5)
+  let best: EmetteurOption | null = null;
+  let bestScore = 0;
+  for (const o of options) {
+    const s = similarity(designation, o.text);
+    if (s > bestScore) {
+      bestScore = s;
+      best = o;
+    }
+  }
+  return bestScore >= 0.5 ? best : null;
 }
 
 async function loginBrowser(page: Page, cfg: ReturnType<typeof getConfig>): Promise<void> {
@@ -94,14 +141,24 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
     const brvm = (instruments ?? []) as Array<{ code: string; designation: string | null }>;
 
     const mappings: Array<{ code: string; value: string; text: string }> = [];
+    const unmatched: Array<{ code: string; designation: string | null }> = [];
     for (const ins of brvm) {
       const opt = matchEmetteur(ins.designation ?? ins.code, options);
       if (opt) mappings.push({ code: ins.code, value: opt.value, text: opt.text });
+      else unmatched.push({ code: ins.code, designation: ins.designation });
     }
     logger.info(
-      { matched: mappings.length, total: brvm.length },
+      { matched: mappings.length, total: brvm.length, mappings },
       'Mapping BRVM -> BDFIN (browser)',
     );
+    // DIAG : pour chaque non-matché, top-3 options BDFIN les plus proches
+    for (const u of unmatched) {
+      const ranked = options
+        .map((o) => ({ text: o.text, value: o.value, score: similarity(u.designation ?? u.code, o.text) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+      logger.info({ code: u.code, designation: u.designation, candidates: ranked }, 'DIAG non-matché');
+    }
     if (mappings.length === 0) {
       return { status: 'failed', count: 0, message: 'aucun mapping' };
     }
