@@ -11,6 +11,7 @@ import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { sha256 } from '../utils/hash.js';
 import { extractDividendAmount, extractExercice } from './extract.js';
+import { fetchSikafinanceDividends } from './sikafinance.js';
 import type { Dividend } from './types.js';
 
 function dedupe(d: Dividend): string {
@@ -41,7 +42,16 @@ export async function runDividends(opts: { mock?: boolean } = {}): Promise<Divid
       logger.warn('Mode MOCK dividendes');
       divs = buildMock();
     } else {
-      divs = await deriveFromEvents();
+      // Source principale : sikafinance (montants + dates à jour).
+      // Complétée par les communiqués BDFIN déjà ingérés (historique).
+      const [sika, fromEvents] = await Promise.all([
+        fetchSikafinanceDividends().catch((e) => {
+          logger.warn({ err: (e as Error).message }, 'sikafinance indisponible');
+          return [] as Dividend[];
+        }),
+        deriveFromEvents().catch(() => [] as Dividend[]),
+      ]);
+      divs = [...sika, ...fromEvents];
     }
     const nb = await upsert(divs);
     logger.info({ nb }, 'Dividendes ingérés');
