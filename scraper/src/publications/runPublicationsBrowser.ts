@@ -28,6 +28,45 @@ interface EmetteurOption {
   text: string;
 }
 
+// Map curée code BRVM -> ID émetteur BDFIN, pour les tickers/acronymes que le
+// fuzzy ne peut pas relier au nom légal complet (ex. SGBC -> "Société Générale
+// Côte d'Ivoire"). IDs relevés sur le dropdown /0/communiques.aspx (145 options).
+const CODE_TO_BDFIN_ID: Record<string, string> = {
+  BICC: '1000', // BICICI
+  BNBC: '1003', // BERNABE CI
+  BOAB: '1057', // Bank Of Africa - Bénin
+  BOAC: '1083', // Bank Of Africa - Côte d'Ivoire
+  CABC: '1025', // Société Ivoirienne de Câbles (SICABLE)
+  CFAC: '1004', // CFAO
+  CIEC: '1020', // Compagnie Ivoirienne d'Electricité
+  ECOC: '1092', // ECOBANK CI
+  ETIT: '1070', // Ecobank Transnational Incorporated
+  FTSC: '1021', // Filature, Tissage, Sacs (FILTISAC)
+  NSBC: '1132', // NSIA BANQUE CI
+  NTLC: '1014', // NESTLE CI
+  ONTBF: '1068', // Office National des Télécommunications du Burkina (ONATEL)
+  ORAC: '1146', // ORANGE COTE D'IVOIRE
+  ORGT: '1090', // ORAGROUP
+  PALC: '1050', // PALM CI
+  PRSC: '1005', // Tractafric Motors CI
+  SAFC: '1001', // Société Africaine de Crédit Automobile (SAFCA)
+  SDCC: '1019', // Société de Distribution d'Eau de la CI (SODECI)
+  SDSC: '1010', // Bolloré Transport & Logistics CI (AGL)
+  SEMC: '1032', // Société Ivoirienne d'Emballages Métalliques (CROWN SIEM)
+  SGBC: '1002', // Société Générale Côte d'Ivoire (SGBCI)
+  SHEC: '1026', // VIVO ENERGY CI
+  SICC: '1022', // Société Ivoirienne de Coco Râpé (SICOR)
+  SLBC: '1042', // Société de Limonaderies et Brasseries d'Afrique (SOLIBRA)
+  SMBC: '1028', // Société Multinationale de Bitumes (SMB)
+  SNTS: '1037', // Société Nationale des Télécommunications du Sénégal (SONATEL)
+  SOGC: '1029', // Société des Caoutchoucs de Grand Bereby (SOGB)
+  SPHC: '1031', // Société Africaine des Plantations d'Hévéas (SAPH)
+  STAC: '1018', // Société d'Etudes et de Travaux pour l'Afrique de l'Ouest (SETAO)
+  STBC: '1012', // Société Ivoirienne des Tabacs (SITAB)
+  TTLC: '1008', // TOTAL Côte d'Ivoire
+  UNLC: '1011', // UNILEVER Côte d'Ivoire
+};
+
 // Mots vides / suffixes pays ignorés dans la comparaison par tokens.
 const STOPWORDS = new Set([
   'ci', 'sn', 'bf', 'tg', 'bj', 'ne', 'ml', 'gw',
@@ -141,19 +180,20 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
     const brvm = (instruments ?? []) as Array<{ code: string; designation: string | null }>;
 
     const mappings: Array<{ code: string; value: string; text: string }> = [];
-    const unmatched: Array<{ code: string; designation: string | null }> = [];
+    const unmatched: string[] = [];
     for (const ins of brvm) {
-      const opt = matchEmetteur(ins.designation ?? ins.code, options);
+      // 1) map curée par code (prioritaire) ; 2) fuzzy sur la désignation
+      const curatedId = CODE_TO_BDFIN_ID[ins.code];
+      const opt = curatedId
+        ? options.find((o) => o.value === curatedId) ?? null
+        : matchEmetteur(ins.designation ?? ins.code, options);
       if (opt) mappings.push({ code: ins.code, value: opt.value, text: opt.text });
-      else unmatched.push({ code: ins.code, designation: ins.designation });
+      else unmatched.push(`${ins.code}=${ins.designation}`);
     }
     logger.info(
-      { matched: mappings.length, total: brvm.length, mappings },
+      { matched: mappings.length, total: brvm.length, unmatched },
       'Mapping BRVM -> BDFIN (browser)',
     );
-    // DIAG : liste complète des 145 options BDFIN (pour construire la map curée)
-    logger.info({ allOptions: options.map((o) => `${o.value}=${o.text}`) }, 'DIAG toutes options BDFIN');
-    logger.info({ unmatched: unmatched.map((u) => `${u.code}=${u.designation}`) }, 'DIAG codes non-matchés');
     if (mappings.length === 0) {
       return { status: 'failed', count: 0, message: 'aucun mapping' };
     }
