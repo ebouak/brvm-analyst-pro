@@ -27,7 +27,7 @@ async function getData(code: string, fromDate?: string) {
 
   if (fromDate) histQuery = histQuery.gte('date_marche', fromDate);
 
-  const [{ data: hist }, { data: instr }, { data: sig }, { data: divs }, { data: evts }, { data: pubs }, { count: pubCount }] =
+  const [{ data: hist }, { data: instr }, { data: sig }, { data: divs }, { data: evts }, { data: pubs }, { count: pubCount }, { data: fundsRows }] =
     await Promise.all([
       histQuery,
       supabase.from('brvm_instruments').select('*').eq('code', code).maybeSingle(),
@@ -59,6 +59,12 @@ async function getData(code: string, fromDate?: string) {
         .from('publications')
         .select('*', { count: 'exact', head: true })
         .eq('code', code),
+      supabase
+        .from('fundamentals')
+        .select('year, revenue, net_income, equity, cash, debt, bfr')
+        .eq('code', code)
+        .order('year', { ascending: false })
+        .limit(3),
     ]);
 
   return {
@@ -69,6 +75,10 @@ async function getData(code: string, fromDate?: string) {
     events: evts ?? [],
     publications: (pubs ?? []) as Publication[],
     pubCount: pubCount ?? 0,
+    fundamentals: (fundsRows ?? []) as Array<{
+      year: number | null; revenue: number | null; net_income: number | null;
+      equity: number | null; cash: number | null; debt: number | null; bfr: number | null;
+    }>,
   };
 }
 
@@ -81,7 +91,7 @@ export default async function InstrumentPage({
 }) {
   const code = decodeURIComponent(params.code).toUpperCase();
   const fromDate = searchParams.from ?? '';
-  const { rows, instrument, signal, dividends, events, publications, pubCount } = await getData(code, fromDate || undefined);
+  const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals } = await getData(code, fromDate || undefined);
 
   if (rows.length === 0) {
     return (
@@ -353,6 +363,66 @@ export default async function InstrumentPage({
         <div className="bg-surface border border-border rounded-xl p-4">
           <h3 className="text-sm font-semibold mb-1">🎯 Signal du jour</h3>
           <p className="text-xs text-muted">Aucun signal calculé pour cette séance.</p>
+        </div>
+      )}
+
+      {/* ── Fondamentaux ── */}
+      {fundamentals.length > 0 && (
+        <div className="bg-surface border border-border rounded-xl p-4">
+          <h3 className="text-sm font-semibold mb-3">🏦 Fondamentaux (états financiers)</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-right">
+              <thead>
+                <tr className="border-b border-border/50">
+                  <th className="text-left text-muted font-normal pb-1.5 pr-3">Indicateur</th>
+                  {fundamentals.map((f) => (
+                    <th key={f.year} className="text-muted font-normal pb-1.5 px-2">{f.year ?? '—'}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/30">
+                {(
+                  [
+                    { key: 'revenue',    label: "Chiffre d'affaires" },
+                    { key: 'net_income', label: 'Résultat net' },
+                    { key: 'equity',     label: 'Capitaux propres' },
+                    { key: 'cash',       label: 'Trésorerie' },
+                    { key: 'debt',       label: 'Dette financière' },
+                  ] as { key: keyof typeof fundamentals[0]; label: string }[]
+                ).map(({ key, label }) => {
+                  const hasData = fundamentals.some((f) => f[key] != null);
+                  if (!hasData) return null;
+                  return (
+                    <tr key={key}>
+                      <td className="text-left text-muted py-1.5 pr-3">{label}</td>
+                      {fundamentals.map((f) => {
+                        const val = f[key] as number | null;
+                        return (
+                          <td key={f.year} className="tabular py-1.5 px-2">
+                            {val != null ? fmtFcfa(val) : <span className="text-muted">—</span>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+                {/* Marge nette calculée */}
+                {fundamentals.some((f) => f.revenue && f.net_income) && (
+                  <tr>
+                    <td className="text-left text-muted py-1.5 pr-3">Marge nette</td>
+                    {fundamentals.map((f) => (
+                      <td key={f.year} className="tabular py-1.5 px-2">
+                        {f.revenue && f.net_income
+                          ? <span className={f.net_income > 0 ? 'text-up' : 'text-down'}>{((f.net_income / f.revenue) * 100).toFixed(1)}%</span>
+                          : <span className="text-muted">—</span>}
+                      </td>
+                    ))}
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-[10px] text-muted mt-2">Source : états financiers BDFIN (IFRS / SYSCOHADA). Valeurs en FCFA.</p>
         </div>
       )}
 

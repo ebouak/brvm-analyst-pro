@@ -91,26 +91,56 @@ def load_price_data(symbol: str) -> Optional[pd.DataFrame]:
 
 def load_fundamentals(symbol: str) -> Optional[dict]:
     """
-    Charge les fondamentaux extraits depuis data/extracted/{SYMBOLE}_fundamentals.json.
+    Charge les fondamentaux pour un symbole.
 
-    Args:
-        symbol: code BRVM.
+    Stratégie (ordre de priorité) :
+    1. JSON local  data/extracted/{SYMBOLE}_fundamentals.json  (plus récent / offline)
+    2. Table Supabase `fundamentals`  (fallback pour Streamlit Cloud où le FS est éphémère)
+    3. None si aucune source ne répond.
 
     Returns:
-        Dict des indicateurs (revenue, net_income, equity, cash, year, ...),
-        ou None si le JSON n'existe pas ou est illisible.
+        Dict des indicateurs ou None.
     """
     symbol = symbol.strip().upper()
-    path = EXTRACTED_DIR / f"{symbol}{FUNDAMENTALS_SUFFIX}"
-    if not path.is_file():
-        return None
 
+    # 1) JSON local
+    path = EXTRACTED_DIR / f"{symbol}{FUNDAMENTALS_SUFFIX}"
+    if path.is_file():
+        try:
+            with path.open("r", encoding="utf-8") as fh:
+                data = json.load(fh)
+            if any(data.get(k) for k in ("revenue", "net_income", "equity", "cash")):
+                return data
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("JSON fondamentaux %s illisible : %s", path.name, exc)
+
+    # 2) Supabase (lecture anon publique)
     try:
-        with path.open("r", encoding="utf-8") as fh:
-            return json.load(fh)
-    except (json.JSONDecodeError, OSError) as exc:
-        logger.error("JSON fondamentaux %s illisible : %s", path.name, exc)
-        return None
+        from .supabase_client import fetch  # import local pour éviter dépendance circulaire
+        rows = fetch(
+            "fundamentals",
+            {"select": "year,revenue,net_income,equity,cash,debt,bfr,source_file",
+             "code": f"eq.{symbol}",
+             "order": "year.desc"},
+            paginate=False,
+        )
+        if rows:
+            r = rows[0]
+            return {
+                "year": r.get("year"),
+                "revenue": r.get("revenue"),
+                "net_income": r.get("net_income"),
+                "equity": r.get("equity"),
+                "cash": r.get("cash"),
+                "debt": r.get("debt"),
+                "bfr": r.get("bfr"),
+                "source_file": r.get("source_file"),
+                "_source": "supabase",
+            }
+    except Exception as exc:
+        logger.debug("Fundamentals Supabase non disponibles pour %s : %s", symbol, exc)
+
+    return None
 
 
 def load_symbols_metadata() -> dict[str, dict]:
