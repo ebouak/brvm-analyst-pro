@@ -130,10 +130,25 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Sélection")
+
+        # Synchronisation automatique depuis Supabase (cours + états financiers).
+        if st.button("🔄 Synchroniser depuis Supabase", use_container_width=True):
+            with st.spinner("Récupération des cours et états financiers…"):
+                from utils.sync_data import sync_all
+
+                res = sync_all()
+            st.success(
+                f"Cours : {res['prices']} · États financiers : {res['financials']} · "
+                f"Fondamentaux : {res['fundamentals']}"
+            )
+            st.cache_data.clear()
+            st.rerun()
+
         if not symbols:
             st.warning(
                 "Aucune action disponible.\n\n"
-                "Ajoutez des fichiers `data/prices/{SYMBOLE}_backtest.csv`."
+                "Cliquez sur **🔄 Synchroniser depuis Supabase** pour charger "
+                "automatiquement les cours des 48 actions."
             )
             st.stop()
         symbol = st.selectbox("Action", symbols, format_func=lambda s: f"{s} — {get_symbol_info(s)['name']}")

@@ -76,16 +76,88 @@ PATTERNS: dict[str, list[str]] = {
 
 NUMERIC_FIELDS = list(PATTERNS.keys())
 
+# Garde-fou : aucune société BRVM n'a un poste > 100 000 milliards FCFA (1e17).
+# Au-delà, c'est une fusion de colonnes (texte de tableau aplati) → on rejette.
+MAX_VALUE = 1e17
+
+# Libellés (normalisés) pour le repérage en mode TABLEAU, par champ.
+LABELS: dict[str, list[str]] = {
+    "revenue": ["chiffre d affaires", "produits des ventes"],
+    "net_income": ["resultat net"],
+    "equity": ["total capitaux propres", "capitaux propres"],
+    "cash": ["tresorerie et equivalents", "disponibilites et quasi", "tresorerie"],
+    "debt": ["total dettes financieres", "dettes financieres", "emprunts"],
+    "bfr": ["besoin en fonds de roulement", "bfr"],
+}
+
+
+def _norm(s: str) -> str:
+    """Normalise (minuscule, sans accents) pour comparer des libellés de cellules."""
+    import unicodedata
+
+    s = unicodedata.normalize("NFD", s.lower())
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _cell_to_int(cell: Optional[str]) -> Optional[int]:
+    """Convertit une cellule en entier si elle contient UN nombre plausible."""
+    if not cell:
+        return None
+    txt = cell.strip()
+    # Une vraie cellule de montant ne contient qu'un nombre (chiffres + séparateurs).
+    if not re.fullmatch(r"[-(]?\s*\d[\d.,\xa0\s]*\)?", txt):
+        return None
+    digits = re.sub(r"\D", "", txt)
+    if not digits:
+        return None
+    val = int(digits)
+    return val if val <= MAX_VALUE else None
+
+
+def extract_from_tables(pdf) -> dict[str, Optional[int]]:
+    """
+    Extraction par TABLEAUX (préserve les colonnes, contrairement au texte aplati).
+    Pour chaque ligne dont une cellule matche un libellé, prend la première
+    cellule numérique plausible à droite (= 1ʳᵉ colonne de valeurs).
+    """
+    result: dict[str, Optional[int]] = {k: None for k in NUMERIC_FIELDS}
+    for page in pdf.pages:
+        try:
+            tables = page.extract_tables() or []
+        except Exception:  # page sans table exploitable
+            continue
+        for table in tables:
+            for row in table:
+                cells = [(_norm(c) if c else "") for c in row]
+                for key, labels in LABELS.items():
+                    if result[key] is not None:
+                        continue
+                    # Index de la cellule-libellé.
+                    label_idx = next(
+                        (i for i, c in enumerate(cells) if any(lbl in c for lbl in labels)),
+                        None,
+                    )
+                    if label_idx is None:
+                        continue
+                    # Première cellule numérique à droite du libellé.
+                    for j in range(label_idx + 1, len(row)):
+                        val = _cell_to_int(row[j])
+                        if val is not None:
+                            result[key] = val
+                            break
+    return result
+
 
 def extract_number_from_text(text: str, patterns: list[str]) -> Optional[int]:
-    """Retourne le premier entier trouvé pour l'un des patterns, sinon None."""
+    """Retourne le premier entier PLAUSIBLE trouvé pour l'un des patterns."""
     for pattern in patterns:
-        match = re.search(pattern, text, flags=re.IGNORECASE)
-        if match:
-            # Ne conserver que les chiffres (retire espaces, nbsp, points, virgules).
+        for match in re.finditer(pattern, text, flags=re.IGNORECASE):
             raw = re.sub(r"\D", "", match.group(1))
             if raw:
-                return int(raw)
+                val = int(raw)
+                if val <= MAX_VALUE:  # rejette les fusions de colonnes aberrantes
+                    return val
     return None
 
 
@@ -111,13 +183,16 @@ def process_pdf(pdf_path: Path) -> dict:
         return result
     try:
         with pdfplumber.open(pdf_path) as pdf:
-            full_text = "\n".join((page.extract_text() or "") for page in pdf.pages)
+            # 1) Mode TABLEAU (préserve les colonnes) — le plus fiable.
+            result = extract_from_tables(pdf)
+            # 2) Complément par TEXTE pour les champs encore manquants.
+            missing = [k for k in NUMERIC_FIELDS if result[k] is None]
+            if missing:
+                full_text = "\n".join((page.extract_text() or "") for page in pdf.pages)
+                for key in missing:
+                    result[key] = extract_number_from_text(full_text, PATTERNS[key])
     except Exception as exc:  # PDF corrompu → log + on continue
         logger.error("PDF illisible, ignoré : %s (%s)", pdf_path.name, exc)
-        return result
-
-    for key, patterns in PATTERNS.items():
-        result[key] = extract_number_from_text(full_text, patterns)
     return result
 
 
