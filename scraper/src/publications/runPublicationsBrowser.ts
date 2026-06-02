@@ -139,7 +139,10 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
         await page.waitForTimeout(400);
 
         const html = await page.content();
-        const rows = parsePublicationsTable(html, cfg.BDFIN_BASE_URL);
+        // baseUrl = URL de la PAGE (pas la racine du site) : les liens
+        // "Visualiser" sont relatifs (Communiques_emetteurs/x.pdf) et doivent
+        // se résoudre sous /0/ → https://bfin.brvm.org/0/Communiques_emetteurs/...
+        const rows = parsePublicationsTable(html, pubUrl);
 
         for (const r of rows) {
           allPubs.push({
