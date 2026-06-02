@@ -151,14 +151,9 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
       { matched: mappings.length, total: brvm.length, mappings },
       'Mapping BRVM -> BDFIN (browser)',
     );
-    // DIAG : pour chaque non-matché, top-3 options BDFIN les plus proches
-    for (const u of unmatched) {
-      const ranked = options
-        .map((o) => ({ text: o.text, value: o.value, score: similarity(u.designation ?? u.code, o.text) }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
-      logger.info({ code: u.code, designation: u.designation, candidates: ranked }, 'DIAG non-matché');
-    }
+    // DIAG : liste complète des 145 options BDFIN (pour construire la map curée)
+    logger.info({ allOptions: options.map((o) => `${o.value}=${o.text}`) }, 'DIAG toutes options BDFIN');
+    logger.info({ unmatched: unmatched.map((u) => `${u.code}=${u.designation}`) }, 'DIAG codes non-matchés');
     if (mappings.length === 0) {
       return { status: 'failed', count: 0, message: 'aucun mapping' };
     }
