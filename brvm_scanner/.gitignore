@@ -1,0 +1,11 @@
+# Données volumineuses / fournies par l'utilisateur (on versionne la structure, pas le contenu)
+data/prices/*.csv
+data/financials/*.pdf
+data/extracted/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.streamlit/secrets.toml
