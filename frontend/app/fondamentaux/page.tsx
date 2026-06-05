@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { computeRatios } from '@/lib/fundamentals';
+import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import FundamentalsTable, { type ScreenerRow } from '@/components/fundamentals/FundamentalsTable';
 
 export const dynamic = 'force-dynamic';
@@ -9,15 +9,22 @@ async function getData(): Promise<ScreenerRow[]> {
   const sb = createClient();
   const [{ data: instruments }, { data: funds }, { data: quotes }, { data: divs }] = await Promise.all([
     sb.from('brvm_instruments').select('code, designation, secteur, shares').eq('type', 'action').eq('actif', true),
-    sb.from('fundamentals').select('code, year, revenue, net_income, equity, debt, is_manual').order('is_manual', { ascending: false }).order('year', { ascending: false }),
+    sb.from('fundamentals').select('code, year, revenue, net_income, equity, debt, is_manual').order('year', { ascending: false }),
     sb.from('brvm_actions_daily').select('code, cours_jour, date_marche').order('date_marche', { ascending: false }),
     sb.from('dividends').select('code, montant, ex_date').order('ex_date', { ascending: false }),
   ]);
 
   const lastCours: Record<string, number | null> = {};
   for (const q of (quotes ?? []) as { code: string; cours_jour: number | null }[]) if (!(q.code in lastCours)) lastCours[q.code] = q.cours_jour;
+  // Meilleur exercice par code : le plus récent dont les données sont plausibles.
+  type FundDbRow = { code: string; year: number | null; revenue: number | null; net_income: number | null; equity: number | null; debt: number | null; is_manual: boolean | null };
+  const byCode: Record<string, FundDbRow[]> = {};
+  for (const f of (funds ?? []) as FundDbRow[]) (byCode[f.code] ??= []).push(f);
   const lastFund: Record<string, { revenue: number | null; net_income: number | null; equity: number | null; debt: number | null }> = {};
-  for (const f of (funds ?? []) as { code: string; revenue: number | null; net_income: number | null; equity: number | null; debt: number | null }[]) if (!(f.code in lastFund)) lastFund[f.code] = f;
+  for (const [code, list] of Object.entries(byCode)) {
+    const best = pickBestFundamental(list);
+    if (best) lastFund[code] = { revenue: best.revenue, net_income: best.net_income, equity: best.equity, debt: best.debt ?? null };
+  }
   const lastDiv: Record<string, number | null> = {};
   for (const d of (divs ?? []) as { code: string; montant: number | null }[]) if (!(d.code in lastDiv)) lastDiv[d.code] = d.montant;
 

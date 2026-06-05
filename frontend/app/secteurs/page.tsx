@@ -26,13 +26,27 @@ async function getData() {
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
   const fromDate = oneYearAgo.toISOString().slice(0, 10);
 
-  const { data: rows } = await supabase
-    .from('brvm_actions_daily')
-    .select('code, secteur, date_marche, cours_jour, variation_pct, valeur_echangee')
-    .gte('date_marche', fromDate)
-    .order('date_marche', { ascending: true });
+  const [{ data: rows }, { data: instruments }] = await Promise.all([
+    supabase
+      .from('brvm_actions_daily')
+      .select('code, secteur, date_marche, cours_jour, variation_pct, valeur_echangee')
+      .gte('date_marche', fromDate)
+      .order('date_marche', { ascending: true }),
+    supabase.from('brvm_instruments').select('code, secteur'),
+  ]);
 
-  const perfs = aggregateBySector(rows ?? [], lastDate);
+  // Le secteur de brvm_actions_daily est rarement renseigné : on le complète
+  // depuis le référentiel brvm_instruments (source de vérité des secteurs).
+  const sectorByCode: Record<string, string | null> = {};
+  for (const i of (instruments ?? []) as { code: string; secteur: string | null }[]) {
+    sectorByCode[i.code] = i.secteur;
+  }
+  const enriched = (rows ?? []).map((r) => ({
+    ...r,
+    secteur: r.secteur ?? sectorByCode[r.code] ?? null,
+  }));
+
+  const perfs = aggregateBySector(enriched, lastDate);
 
   return { lastDate, perfs };
 }

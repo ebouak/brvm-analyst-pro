@@ -7,6 +7,7 @@ import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
+import { pickBestFundamental } from '@/lib/fundamentals';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, detect } from '@/lib/indicators';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
@@ -64,10 +65,8 @@ async function getData(code: string, fromDate?: string) {
         .from('fundamentals')
         .select('year, revenue, net_income, equity, cash, debt, bfr, source_file, is_manual')
         .eq('code', code)
-        // Priorité aux lignes corrigées manuellement (fiables), puis année récente.
-        .order('is_manual', { ascending: false })
         .order('year', { ascending: false })
-        .limit(3),
+        .limit(6),
     ]);
 
   return {
@@ -372,7 +371,8 @@ export default async function InstrumentPage({
 
       {/* ── Fondamentaux (analyse complète style T212) ── */}
       {fundamentals.length > 0 && (() => {
-        const latest = fundamentals[0]!;
+        // Meilleur exercice : le plus récent dont les données sont plausibles.
+        const latest = pickBestFundamental(fundamentals)!;
         const closes = rows.map((r) => r.cours_jour).filter((c): c is number => c != null);
         const range52 = {
           low: closes.length ? Math.min(...closes) : null,

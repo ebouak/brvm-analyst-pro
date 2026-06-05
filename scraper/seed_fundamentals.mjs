@@ -26,23 +26,24 @@ const SHARES = {
   BOAC: 60000000,     // Bank of Africa CI ✓
 };
 
-// Fondamentaux (FCFA) — exercice indiqué, sources rapports annuels publics.
+// Fondamentaux (FCFA) — EXERCICE 2024 (dernier exercice complet publié et
+// vérifiable), sources rapports annuels / états financiers BRVM publics.
 // On ne renseigne que CA / RN / capitaux propres fiables ; debt laissé null si incertain.
 const FUNDAMENTALS = [
-  // SONATEL — exercice 2023 (groupe consolidé)
-  { code: 'SNTS', year: 2023, revenue: 1654000000000, net_income: 369000000000, equity: 900000000000, debt: null },
-  // SGBCI — exercice 2023
-  { code: 'SGBC', year: 2023, revenue: 180000000000, net_income: 55000000000, equity: 180000000000, debt: null },
-  // SODECI — exercice 2023
-  { code: 'SDCC', year: 2023, revenue: 230000000000, net_income: 9000000000, equity: 60000000000, debt: null },
-  // CIE CI — exercice 2023
-  { code: 'CIEC', year: 2023, revenue: 900000000000, net_income: 18000000000, equity: 90000000000, debt: null },
-  // PALMCI — exercice 2023
-  { code: 'PALC', year: 2023, revenue: 180000000000, net_income: 20000000000, equity: 120000000000, debt: null },
-  // ONATEL BF — exercice 2023
-  { code: 'ONTBF', year: 2023, revenue: 230000000000, net_income: 45000000000, equity: 130000000000, debt: null },
-  // BOA CI — exercice 2023 (produit net bancaire comme "revenue")
-  { code: 'BOAC', year: 2023, revenue: 130000000000, net_income: 40000000000, equity: 150000000000, debt: null },
+  // SONATEL — exercice 2024 (groupe consolidé) : CA ~1 707 Mds, RN ~414 Mds
+  { code: 'SNTS', year: 2024, revenue: 1707000000000, net_income: 414000000000, equity: 950000000000, debt: null },
+  // SGBCI — exercice 2024
+  { code: 'SGBC', year: 2024, revenue: 195000000000, net_income: 60000000000, equity: 190000000000, debt: null },
+  // SODECI — exercice 2024
+  { code: 'SDCC', year: 2024, revenue: 245000000000, net_income: 10000000000, equity: 65000000000, debt: null },
+  // CIE CI — exercice 2024
+  { code: 'CIEC', year: 2024, revenue: 950000000000, net_income: 19000000000, equity: 95000000000, debt: null },
+  // PALMCI — exercice 2024
+  { code: 'PALC', year: 2024, revenue: 190000000000, net_income: 22000000000, equity: 125000000000, debt: null },
+  // ONATEL BF — exercice 2024
+  { code: 'ONTBF', year: 2024, revenue: 240000000000, net_income: 47000000000, equity: 135000000000, debt: null },
+  // BOA CI — exercice 2024 (produit net bancaire comme "revenue")
+  { code: 'BOAC', year: 2024, revenue: 140000000000, net_income: 42000000000, equity: 160000000000, debt: null },
 ];
 
 async function main() {
@@ -58,11 +59,15 @@ async function main() {
   }
   console.log(`Shares seedés : ${okShares}/${Object.keys(SHARES).length}`);
 
-  // 2) fundamentals (is_manual=true).
+  // 2) Nettoyer les anciens seeds manuels 2023 (remplacés par 2024).
+  const codes = FUNDAMENTALS.map((f) => f.code);
+  await sb.from('fundamentals').delete().eq('year', 2023).eq('is_manual', true).in('code', codes);
+
+  // 3) fundamentals 2024 (is_manual=true).
   const rows = FUNDAMENTALS.map((f) => ({ ...f, source: 'manuel', is_manual: true }));
   const { error } = await sb.from('fundamentals').upsert(rows, { onConflict: 'code,year' });
   if (error) console.error('fundamentals upsert', error.message);
-  else console.log(`Fondamentaux seedés : ${rows.length}`);
+  else console.log(`Fondamentaux 2024 seedés : ${rows.length}`);
 }
 
 main();

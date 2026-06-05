@@ -51,6 +51,46 @@ export function computeRatios(i: FundamentalInputs): Ratios {
   };
 }
 
+export interface FundamentalRow {
+  year: number | null;
+  revenue: number | null;
+  net_income: number | null;
+  equity: number | null;
+  debt?: number | null;
+  cash?: number | null;
+  bfr?: number | null;
+  is_manual?: boolean | null;
+  source_file?: string | null;
+}
+
+/**
+ * Sélectionne la « meilleure » ligne de fondamentaux à afficher.
+ * Règle (best practice — fraîcheur + fiabilité) :
+ *  1. On préfère l'exercice le PLUS RÉCENT dont les données sont plausibles
+ *     (CA, RN, capitaux propres non aberrants — cf. assessQuality).
+ *  2. À plausibilité et année égales, une ligne corrigée manuellement l'emporte.
+ *  3. Si aucune ligne plausible, on retombe sur la plus récente disponible.
+ */
+export function pickBestFundamental<T extends FundamentalRow>(rows: T[]): T | null {
+  if (!rows.length) return null;
+
+  const isPlausible = (r: FundamentalRow): boolean =>
+    assessQuality('revenue', r.revenue) === 'ok' &&
+    assessQuality('net_income', r.net_income) === 'ok' &&
+    (r.equity == null || assessQuality('equity', r.equity) === 'ok');
+
+  const score = (r: T): [number, number, number] => [
+    isPlausible(r) ? 1 : 0,        // plausible d'abord
+    r.year ?? 0,                    // puis année récente
+    r.is_manual ? 1 : 0,            // puis manuel
+  ];
+
+  return [...rows].sort((a, b) => {
+    const sa = score(a), sb = score(b);
+    return sb[0] - sa[0] || sb[1] - sa[1] || sb[2] - sa[2];
+  })[0]!;
+}
+
 export type Quality = 'ok' | 'suspect' | 'missing';
 
 /**
