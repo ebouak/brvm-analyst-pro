@@ -26,6 +26,8 @@ les limites Vercel (timeout, taille upload). Les appels LLM passent par une
 2. **Extraction** (`lib/import/pdfClient.ts`, navigateur, pdf.js) :
    - PDF avec couche texte → texte brut.
    - PDF scanné (texte < seuil) → rendu des pages en **images** (canvas/dataURL).
+     Limité aux **6 premières pages** (bilan + compte de résultat s'y trouvent),
+     pour borner la taille du payload et le coût de la voie vision.
 3. **Cascade LLM** (route `POST /api/extract-llm`) :
    - voie **texte** → DeepSeek → Mistral → Grok (1er disponible qui répond) ;
    - voie **scannée (images)** → Mistral vision → Grok vision (DeepSeek sauté,
