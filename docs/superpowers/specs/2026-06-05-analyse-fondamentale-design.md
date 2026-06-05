@@ -45,10 +45,21 @@ manuellement » sur les valeurs éditées.
 
 ### 4.1 Migration `0015_fundamentals_manual.sql`
 - `brvm_instruments.shares` (bigint, nullable) — nombre d'actions en circulation
-  (indispensable pour PER et P/B). Saisi manuellement.
+  (indispensable pour PER et P/B).
+- `brvm_instruments.shares_source` (text, nullable) — 'sikafinance' | 'pdf' |
+  'derive' | 'manual'. Trace l'origine.
 - `fundamentals.is_manual` (boolean, default false) — marque une ligne corrigée
   à la main (prioritaire sur l'extraction automatique).
 - `fundamentals.updated_at` déjà présent.
+
+### 4.2 Récupération automatique du nombre d'actions (cascade)
+Script scraper `shares` (Node, comme dividendes/sikafinance) :
+1. **sikafinance** : capitalisation boursière par action publiée → shares =
+   capi / cours. Source primaire (fiable, à jour).
+2. **Dérivation** : si la capi BRVM est disponible ailleurs, shares = capi / cours.
+3. **PDF** : extraction « nombre d'actions » des états financiers (best effort).
+4. **Manuel** : correction via l'UI en dernier recours.
+Une valeur `manual` n'est jamais écrasée par l'automatique (comme `is_manual`).
 
 ### 4.2 Source de vérité
 Une ligne `fundamentals` par (code, year). Si `is_manual = true`, elle ne doit
@@ -91,17 +102,49 @@ frontend/
 │   └── api/fundamentals/route.ts      # POST correction manuelle (service_role)
 ├── components/fundamentals/
 │   ├── FundamentalsTable.tsx          # tableau screener triable (client)
-│   ├── FundamentalsPanel.tsx          # bloc /actions/[code] (4 familles + histo)
+│   ├── FundamentalsPanel.tsx          # bloc /actions/[code] (sections + histo)
 │   ├── RatioCard.tsx                  # carte ratio avec badge qualité
-│   └── EditFundamentalsModal.tsx      # correction manuelle
+│   ├── RangeBar.tsx                   # range Haut/Bas T212 (1j, 52 sem.)
+│   └── EditFundamentalsModal.tsx      # correction manuelle (fundamentals + shares)
 └── lib/
     └── fundamentals.ts                # calculs purs + assessQuality
+
+scraper/src/shares/                    # récupération auto nombre d'actions
+├── sikafinance.ts                     # capi/cours -> shares
+├── runShares.ts                       # cascade + upsert brvm_instruments.shares
+└── (CLI: `npm run shares`)
 ```
 
 ### 6.1 `/actions/[code]`
 Le bloc « Fondamentaux » existant (déjà présent) est **remplacé** par
-`FundamentalsPanel` : 4 familles de ratios + tableau pluriannuel + lien PDF +
+`FundamentalsPanel` : sections de ratios + tableau pluriannuel + lien PDF +
 bouton « Corriger ».
+
+### 6.2 Design — structure Trading 212 en dark finance
+Reprise de l'organisation Trading 212 (que l'utilisateur valide), adaptée au
+thème dark finance existant (`bg #0f1117`, `surface #161922`, `up #00c853`,
+`down #f44336`, accent bleu T212 `#1c6dd0` pour les dégradés d'en-tête).
+
+Sections (cartes `bg-surface` arrondies, libellé en `text-muted`, valeur
+`tabular`, signe coloré vert/rouge) :
+- **Générales** : Capitalisation, Valeur d'entreprise (EV), Volume moyen, BPA,
+  Rendement dividende.
+- **Évaluation** : PER (P/E), P/S (coeff. capitalisation des ventes), P/B.
+- **Rentabilité** : Marge nette, ROE, ROA.
+- **Effet de levier** : Ratio d'endettement, Dette/Capitaux propres (gearing).
+- **Par action** : BPA (revenu net/action), CA/action.
+- **Croissance** : Croissance CA, Croissance RN (EPS), Croissance dividende.
+
+Éléments visuels T212 repris :
+- **Range Haut/Bas** (1 jour, 52 semaines) avec barre verticale colorée et
+  curseur de position du cours — composant `RangeBar`.
+- Cartes avec titre de section + lien discret « Voir tout » si pluriannuel.
+- Valeurs négatives en `down`, positives en `up`, neutres en `text-muted`.
+
+> Note honnêteté : contrairement à T212 (qui affiche P/E=−1,86, marge=−204 %
+> sans broncher), nos **garde-fous** marquent ces valeurs aberrantes ⚠️ et ne
+> trompent pas l'utilisateur. C'est notre valeur ajoutée sur un broker grand
+> public.
 
 ## 7. Sécurité
 - Lecture : clé anon (RLS publique sur `fundamentals`, `brvm_instruments`).
