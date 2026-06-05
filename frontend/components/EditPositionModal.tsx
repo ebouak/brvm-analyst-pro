@@ -18,7 +18,6 @@ interface Props {
 
 export default function EditPositionModal({ isOpen, onClose, position }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rating, setRating] = useState(0);
 
   if (!isOpen) return null;
 
@@ -36,13 +35,12 @@ export default function EditPositionModal({ isOpen, onClose, position }: Props) 
           className="p-6 space-y-4"
         >
           <input type="hidden" name="id" value={position.id} />
-          <input type="hidden" name="rating" value={String(rating)} />
 
           <div>
-            <label htmlFor="ep-code" className="block text-sm font-medium mb-1">Code *</label>
-            <input id="ep-code" name="code" type="text" placeholder="ex : SNTS" required
-              defaultValue={position.code} autoComplete="off"
-              className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
+            <label className="block text-sm font-medium mb-1">Titre</label>
+            <div className="w-full bg-bg/40 border border-border rounded px-3 py-2 text-sm text-muted">
+              {position.code} <span className="text-[10px]">(non modifiable)</span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -72,17 +70,6 @@ export default function EditPositionModal({ isOpen, onClose, position }: Props) 
             <textarea id="ep-note" name="note" placeholder="Notes personnelles…" rows={3}
               defaultValue={position.note ?? ''}
               className="w-full bg-bg border border-border rounded px-3 py-2 text-sm resize-none" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Note personnelle</label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button key={star} type="button" onClick={() => setRating(star)}
-                  className={`text-2xl transition ${rating >= star ? 'text-yellow-400' : 'text-muted'}`}
-                  aria-label={`Note ${star} étoile(s)`}>★</button>
-              ))}
-            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

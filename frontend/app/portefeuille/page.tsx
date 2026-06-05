@@ -11,6 +11,7 @@ import { fmtNumber, fmtFcfa } from '@/lib/format';
 import PortefeuilleModals from '@/components/PortefeuilleModals';
 import PortefeuilleExport from '@/components/PortefeuilleExport';
 import PortfolioTabs from '@/components/portfolio/PortfolioTabs';
+import PositionRowActions from '@/components/PositionRowActions';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Portefeuille' };
@@ -76,14 +77,18 @@ async function getData(activeWlId?: string) {
 
   const codes = [...new Set([...pos.map((p) => p.code), ...items.map((i) => i.code)])];
   const lastPrice: Record<string, number | null> = {};
+  const lastPriceDate: Record<string, string | null> = {};
   if (codes.length > 0) {
     const { data: quotes } = await supabase
       .from('brvm_actions_daily')
       .select('code, cours_jour, date_marche')
       .in('code', codes)
       .order('date_marche', { ascending: false });
-    for (const q of (quotes ?? []) as { code: string; cours_jour: number | null }[]) {
-      if (!(q.code in lastPrice)) lastPrice[q.code] = q.cours_jour;
+    for (const q of (quotes ?? []) as { code: string; cours_jour: number | null; date_marche: string }[]) {
+      if (!(q.code in lastPrice)) {
+        lastPrice[q.code] = q.cours_jour;
+        lastPriceDate[q.code] = q.date_marche;
+      }
     }
   }
 
@@ -109,7 +114,7 @@ async function getData(activeWlId?: string) {
     }
   }
 
-  return { email: user.email, pos, items, lastPrice, watchlists, activeWl, alertsList, historicalByDate, instrumentsList };
+  return { email: user.email, pos, items, lastPrice, lastPriceDate, watchlists, activeWl, alertsList, historicalByDate, instrumentsList };
 }
 
 export default async function PortefeuillePage({
@@ -117,7 +122,7 @@ export default async function PortefeuillePage({
 }: {
   searchParams?: { wl?: string };
 }) {
-  const { email, pos, items, lastPrice, watchlists, activeWl, alertsList, historicalByDate, instrumentsList } = await getData(searchParams?.wl);
+  const { email, pos, items, lastPrice, lastPriceDate, watchlists, activeWl, alertsList, historicalByDate, instrumentsList } = await getData(searchParams?.wl);
 
   let totalCost = 0;
   let totalValue = 0;
@@ -192,31 +197,32 @@ export default async function PortefeuillePage({
                     <tr>
                       <th className="px-3 py-2 text-left">Titre</th>
                       <th className="px-3 py-2 text-right">Qté</th>
-                      <th className="px-3 py-2 text-right">PRU</th>
-                      <th className="px-3 py-2 text-right">Cours</th>
+                      <th className="px-3 py-2 text-right" title="Prix de Revient Unitaire — votre prix d'achat moyen">PRU</th>
+                      <th className="px-3 py-2 text-right" title="Dernier cours de marché connu">Cours</th>
+                      <th className="px-3 py-2 text-center" title="Date à laquelle vous avez acheté">Date entrée</th>
+                      <th className="px-3 py-2 text-center" title="Date du dernier cours connu">Date cours</th>
                       <th className="px-3 py-2 text-right">Valorisation</th>
                       <th className="px-3 py-2 text-right">P&L latent</th>
-                      <th className="px-3 py-2 text-center text-xs">Action</th>
+                      <th className="px-3 py-2 text-center text-xs">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.length === 0 ? (
-                      <tr><td colSpan={7} className="px-3 py-4 text-center text-muted text-xs">Aucune position. Utilisez le bouton ci-dessous pour en ajouter.</td></tr>
+                      <tr><td colSpan={9} className="px-3 py-4 text-center text-muted text-xs">Aucune position. Utilisez le bouton ci-dessous pour en ajouter.</td></tr>
                     ) : rows.map((r) => (
-                      <tr key={r.id} className="border-b border-border/40 hover:bg-bg/40 group">
+                      <tr key={r.id} className="border-b border-border/40 hover:bg-bg/40">
                         <td className="px-3 py-2"><Link href={`/actions/${r.code}`} className="font-medium hover:text-up">{r.code}</Link></td>
                         <td className="px-3 py-2 text-right tabular">{fmtNumber(r.quantite)}</td>
                         <td className="px-3 py-2 text-right tabular">{fmtNumber(r.prix_entree)}</td>
                         <td className="px-3 py-2 text-right tabular">{fmtNumber(r.last)}</td>
+                        <td className="px-3 py-2 text-center tabular text-xs text-muted">{r.date_entree ?? '—'}</td>
+                        <td className="px-3 py-2 text-center tabular text-xs text-muted">{lastPriceDate[r.code] ?? '—'}</td>
                         <td className="px-3 py-2 text-right tabular">{r.value != null ? fmtFcfa(r.value) : '-'}</td>
                         <td className={`px-3 py-2 text-right tabular ${r.pnl == null ? 'text-muted' : r.pnl >= 0 ? 'text-up' : 'text-down'}`}>
                           {r.pnl != null ? `${r.pnl >= 0 ? '+' : ''}${fmtFcfa(r.pnl)} (${r.pnlPct?.toFixed(1)}%)` : '-'}
                         </td>
-                        <td className="px-3 py-2 text-center">
-                          <form action={deletePosition} className="inline">
-                            <input type="hidden" name="id" value={r.id} />
-                            <button type="submit" className="text-xs text-down hover:underline opacity-0 group-hover:opacity-100 transition" title="Supprimer position">X</button>
-                          </form>
+                        <td className="px-3 py-2">
+                          <PositionRowActions position={{ id: r.id, code: r.code, quantite: r.quantite, prix_entree: r.prix_entree, date_entree: r.date_entree, note: r.note }} />
                         </td>
                       </tr>
                     ))}
