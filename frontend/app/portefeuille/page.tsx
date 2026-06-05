@@ -12,6 +12,7 @@ import PortefeuilleModals from '@/components/PortefeuilleModals';
 import PortefeuilleExport from '@/components/PortefeuilleExport';
 import PortfolioTabs from '@/components/portfolio/PortfolioTabs';
 import PositionRowActions from '@/components/PositionRowActions';
+import { computePositions, sectorBreakdown, concentrationHHI, bestWorst, nbHoldings } from '@/lib/portfolio/metrics';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Portefeuille' };
@@ -131,29 +132,48 @@ export default async function PortefeuillePage({
 }) {
   const { email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, instrumentsList } = await getData(searchParams?.wl);
 
-  let totalCost = 0;
-  let totalValue = 0;
-  const rows = pos.map((p) => {
+  // Liquidités stockées comme position spéciale ; séparées des actions.
+  const liqPos = pos.find((p) => p.code === 'LIQUIDITES') ?? null;
+  const liquidites = liqPos ? liqPos.prix_entree : null;
+  const equityPos = pos.filter((p) => p.code !== 'LIQUIDITES');
+
+  // Valorisation des positions actions (au cours du marché) + secteur.
+  // On conserve TOUS les champs d'origine (id, date_entree, note) pour le tableau.
+  const rows = equityPos.map((p) => {
     const last = lastPrice[p.code] ?? null;
     const cost = p.quantite * p.prix_entree;
     const value = last != null ? p.quantite * last : null;
     const pnl = value != null ? value - cost : null;
     const pnlPct = cost > 0 && pnl != null ? (pnl / cost) * 100 : null;
     const secteur = secteurByCode[p.code] ?? 'Autres';
-    totalCost += cost;
-    if (value != null) totalValue += value;
     return { ...p, last, cost, value, pnl, pnlPct, secteur };
   });
-  const totalPnl = totalValue - totalCost;
 
-  // Répartition sectorielle (valorisation au cours du marché).
-  const sectorMap: Record<string, number> = {};
-  for (const r of rows) {
-    if (r.value != null) sectorMap[r.secteur] = (sectorMap[r.secteur] ?? 0) + r.value;
-  }
-  const sectorRows = Object.entries(sectorMap)
-    .map(([secteur, valeur]) => ({ secteur, valeur, pct: totalValue > 0 ? (valeur / totalValue) * 100 : 0 }))
-    .sort((a, b) => b.valeur - a.valeur);
+  // Métriques agrégées via les fonctions utiles (computePositions sur le même input).
+  const computed = computePositions(
+    equityPos.map((p) => ({ ...p, secteur: secteurByCode[p.code] ?? 'Autres', last: lastPrice[p.code] ?? null }))
+  ).rows;
+  const totalCost = rows.reduce((s, r) => s + r.cost, 0);
+  const equityValue = rows.reduce((s, r) => s + (r.value ?? 0), 0);
+  const totalPnl = equityValue - totalCost;
+  const totalPnlPct = totalCost > 0 ? totalPnl / totalCost : null;
+
+  // Valeur totale = actions + liquidités.
+  const totalValue = equityValue + (liquidites ?? 0);
+
+  // Répartition sectorielle (inclut les liquidités).
+  const sectorRows = sectorBreakdown([
+    ...computed,
+    ...(liquidites != null
+      ? [{ code: 'LIQUIDITES', quantite: 1, prix_entree: liquidites, cost: liquidites, value: liquidites, pnl: 0, pnlPct: 0, ponderation: 0, is_liquidites: true, secteur: 'Liquidités' }]
+      : []),
+  ]);
+
+  // Métriques d'analyse (concentration, cash, meilleure/pire ligne).
+  const hhi = concentrationHHI(computed);
+  const cashPct = totalValue > 0 ? ((liquidites ?? 0) / totalValue) * 100 : 0;
+  const { best, worst } = bestWorst(computed);
+  const nbLignes = nbHoldings(computed);
 
   // Calculate 30-day portfolio change
   let portfolioValueChange30d: number | null = null;
@@ -162,12 +182,13 @@ export default async function PortefeuillePage({
     if (dates.length > 0) {
       const oldestDate = dates[0];
       let valueOld = 0;
-      for (const p of pos) {
+      for (const p of equityPos) {
         const oldPrice = historicalByDate[oldestDate]?.[p.code];
         if (oldPrice !== undefined) valueOld += p.quantite * oldPrice;
       }
+      // Comparaison à périmètre actions constant (hors liquidités).
       if (valueOld > 0) {
-        portfolioValueChange30d = ((totalValue - valueOld) / valueOld) * 100;
+        portfolioValueChange30d = ((equityValue - valueOld) / valueOld) * 100;
       }
     }
   }
@@ -187,18 +208,52 @@ export default async function PortefeuillePage({
         {/* ── Onglet « Mon portefeuille » : positions, watchlist, alertes ── */}
         <div className="px-6 pb-6 space-y-6">
           {/* Synthèse */}
-          <div className="grid grid-cols-3 gap-4 max-w-2xl">
-            <Card label="Coût total" value={fmtFcfa(totalCost) + ' FCFA'} />
-            <Card label="Valorisation" value={fmtFcfa(totalValue) + ' FCFA'} />
-            <Card label="P&L latent" value={(totalPnl >= 0 ? '+' : '') + fmtFcfa(totalPnl)} cls={totalPnl >= 0 ? 'text-up' : 'text-down'} />
-            {portfolioValueChange30d !== null && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card label="Valorisation totale" value={fmtFcfa(totalValue) + ' FCFA'} sub={liquidites != null ? `dont ${fmtFcfa(liquidites)} cash` : 'actions'} />
+            <Card
+              label="P&L latent"
+              value={`${totalPnl >= 0 ? '+' : ''}${fmtFcfa(totalPnl)}`}
+              sub={totalPnlPct != null ? `${totalPnl >= 0 ? '+' : ''}${(totalPnlPct * 100).toFixed(1)}% / coût` : undefined}
+              cls={totalPnl >= 0 ? 'text-up' : 'text-down'}
+            />
+            <Card label="Coût total (PRU)" value={fmtFcfa(totalCost) + ' FCFA'} sub={`${nbLignes} ligne${nbLignes > 1 ? 's' : ''}`} />
+            {portfolioValueChange30d !== null ? (
               <Card
-                label="Évolution 30j"
-                value={`${portfolioValueChange30d >= 0 ? '▲+' : '▼'}${Math.abs(portfolioValueChange30d).toFixed(1)}%`}
+                label="Évolution actions 30j"
+                value={`${portfolioValueChange30d >= 0 ? '▲ +' : '▼ '}${Math.abs(portfolioValueChange30d).toFixed(1)}%`}
                 cls={portfolioValueChange30d >= 0 ? 'text-up' : 'text-down'}
               />
+            ) : (
+              <Card label="Liquidités" value={liquidites != null ? fmtFcfa(liquidites) + ' FCFA' : '—'} sub={`${cashPct.toFixed(0)}% du total`} />
             )}
           </div>
+
+          {/* Indicateurs d'analyse (best practices) */}
+          {nbLignes > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card
+                label="Concentration (HHI)"
+                value={hhi.toFixed(2)}
+                sub={hhi > 0.25 ? '⚠️ concentré' : '✓ diversifié'}
+                cls={hhi > 0.25 ? 'text-warn' : 'text-up'}
+              />
+              <Card label="Part liquidités" value={`${cashPct.toFixed(1)}%`} sub="du portefeuille" />
+              {best && (
+                <Card
+                  label="Meilleure ligne"
+                  value={`${best.code} ${best.pnlPct != null && best.pnlPct >= 0 ? '+' : ''}${best.pnlPct != null ? (best.pnlPct * 100).toFixed(1) : '—'}%`}
+                  cls="text-up"
+                />
+              )}
+              {worst && (
+                <Card
+                  label="Pire ligne"
+                  value={`${worst.code} ${worst.pnlPct != null && worst.pnlPct >= 0 ? '+' : ''}${worst.pnlPct != null ? (worst.pnlPct * 100).toFixed(1) : '—'}%`}
+                  cls={worst.pnlPct != null && worst.pnlPct < 0 ? 'text-down' : 'text-up'}
+                />
+              )}
+            </div>
+          )}
 
           {/* 2-Column Layout: Positions + Watchlist */}
           <div className="grid grid-cols-3 gap-6">
@@ -245,6 +300,32 @@ export default async function PortefeuillePage({
                         </td>
                       </tr>
                     ))}
+                    {/* Ligne Liquidités (cash) — italique, sans cours */}
+                    {liquidites != null && (
+                      <tr className="border-b border-border/40 bg-bg/20 italic">
+                        <td className="px-3 py-2 font-medium">💵 Liquidités</td>
+                        <td className="px-3 py-2 text-xs text-muted">Cash</td>
+                        <td className="px-3 py-2 text-right text-muted">—</td>
+                        <td className="px-3 py-2 text-right text-muted">—</td>
+                        <td className="px-3 py-2 text-right text-muted">—</td>
+                        <td className="px-3 py-2 text-center text-muted">—</td>
+                        <td className="px-3 py-2 text-center text-muted">—</td>
+                        <td className="px-3 py-2 text-right tabular">{fmtFcfa(liquidites)}</td>
+                        <td className="px-3 py-2 text-right text-muted">—</td>
+                        <td className="px-3 py-2"></td>
+                      </tr>
+                    )}
+                    {/* Ligne TOTAL */}
+                    {(rows.length > 0 || liquidites != null) && (
+                      <tr className="font-semibold border-t border-border bg-bg/30">
+                        <td className="px-3 py-2" colSpan={7}>TOTAL</td>
+                        <td className="px-3 py-2 text-right tabular">{fmtFcfa(totalValue)}</td>
+                        <td className={`px-3 py-2 text-right tabular ${totalPnl >= 0 ? 'text-up' : 'text-down'}`}>
+                          {totalPnl >= 0 ? '+' : ''}{fmtFcfa(totalPnl)}
+                        </td>
+                        <td className="px-3 py-2"></td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -252,6 +333,7 @@ export default async function PortefeuillePage({
               <PortefeuilleModals
                 watchlistId={activeWl?.id ?? null}
                 instruments={instrumentsList}
+                liquidites={liquidites}
               />
             </div>
 
@@ -410,11 +492,12 @@ export default async function PortefeuillePage({
   );
 }
 
-function Card({ label, value, cls }: { label: string; value: string; cls?: string }) {
+function Card({ label, value, sub, cls }: { label: string; value: string; sub?: string; cls?: string }) {
   return (
     <div className="bg-surface border border-border rounded-xl p-3">
       <div className="text-xs text-muted">{label}</div>
       <div className={`tabular text-lg mt-0.5 ${cls ?? ''}`}>{value}</div>
+      {sub && <div className="text-[10px] text-muted mt-0.5">{sub}</div>}
     </div>
   );
 }

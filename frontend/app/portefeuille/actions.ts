@@ -129,6 +129,43 @@ export async function updatePosition(formData: FormData) {
   revalidatePath('/portefeuille');
 }
 
+/**
+ * Définit le montant des liquidités (cash) du portefeuille. Stocké comme une
+ * position spéciale code='LIQUIDITES' : quantite=1, prix_entree=montant.
+ * Upsert idempotent (une seule ligne liquidités par utilisateur).
+ */
+export async function setLiquidites(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const montant = Number(formData.get('montant'));
+  if (!Number.isFinite(montant) || montant < 0) throw new Error('Montant invalide');
+
+  const { data: existing } = await supabase
+    .from('portfolios_positions')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('code', 'LIQUIDITES')
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase
+      .from('portfolios_positions')
+      .update({ quantite: 1, prix_entree: montant })
+      .eq('id', existing.id);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.from('portfolios_positions').insert({
+      user_id: user.id,
+      code: 'LIQUIDITES',
+      quantite: 1,
+      prix_entree: montant,
+      date_entree: null,
+      note: 'Liquidités (cash disponible)',
+    });
+    if (error) throw new Error(error.message);
+  }
+  revalidatePath('/portefeuille');
+}
+
 export async function createAlert(formData: FormData) {
   const { supabase, user } = await requireUser();
   const code = String(formData.get('code')).toUpperCase().trim();

@@ -49,16 +49,7 @@ export default function SuiviGlobalForm({ userId, onSuccess }: Props) {
 
   // Calculate live preview when date or value changes
   useEffect(() => {
-    if (!selectedDate || !valeurFinale || !entries || entries.length === 0) {
-      setLivePerformance(null);
-      setLiveIndex(null);
-      return;
-    }
-
-    const entryDate = new Date(selectedDate);
-    const lastEntry = entries[0]; // Most recent entry (DESC order)
-
-    if (!lastEntry || !lastEntry.valeur_finale || lastEntry.indice_base100 === null) {
+    if (!selectedDate || !valeurFinale) {
       setLivePerformance(null);
       setLiveIndex(null);
       return;
@@ -66,6 +57,20 @@ export default function SuiviGlobalForm({ userId, onSuccess }: Props) {
 
     const valeurFinaleNum = parseFloat(valeurFinale.replace(/\s/g, ''));
     if (isNaN(valeurFinaleNum)) {
+      setLivePerformance(null);
+      setLiveIndex(null);
+      return;
+    }
+
+    // Première entrée → base : Indice 100, perf 0.
+    if (!entries || entries.length === 0) {
+      setLivePerformance(0);
+      setLiveIndex(100);
+      return;
+    }
+
+    const lastEntry = entries[0]; // Most recent entry (DESC order)
+    if (!lastEntry || !lastEntry.valeur_finale || lastEntry.indice_base100 === null) {
       setLivePerformance(null);
       setLiveIndex(null);
       return;
@@ -126,62 +131,69 @@ export default function SuiviGlobalForm({ userId, onSuccess }: Props) {
         return;
       }
 
-      // Get last entry for initial value
-      if (!entries || entries.length === 0) {
-        setSubmitError('Aucune entrée précédente. Veuillez créer une première entrée manuellement.');
-        return;
-      }
-
-      const lastEntry = entries[0];
-      const valeurInitiale = lastEntry.valeur_finale || 0;
-      const indexPrecedent = lastEntry.indice_base100 || 100;
-
-      // Fetch movements for this month
-      const monthStart = new Date(entryDate.getFullYear(), entryDate.getMonth(), 1);
-      const moisFinStr = selectedDate;
-
       if (!clientRef.current) {
         clientRef.current = createClient();
       }
 
-      const { data: movements, error: movError } = await clientRef.current
-        .from('portfolio_movements')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('mois_fin', moisFinStr);
+      const isFirstEntry = !entries || entries.length === 0;
+      let newEntry: Omit<MonthlyTrackingEntry, 'id' | 'created_at' | 'updated_at'>;
 
-      if (movError) {
-        setSubmitError(`Erreur de chargement des mouvements: ${movError.message}`);
-        return;
+      if (isFirstEntry) {
+        // PREMIÈRE LIGNE = base (point zéro). Indice = 100, perf = 0.
+        // valeur_initiale = valeur_finale (pas de période précédente).
+        newEntry = {
+          user_id: userId,
+          date: selectedDate,
+          year: entryDate.getFullYear(),
+          valeur_initiale: valeurFinaleNum,
+          apports: 0,
+          retraits: 0,
+          flux_ponderes: 0,
+          valeur_finale: valeurFinaleNum,
+          performance_mensuelle: 0,
+          indice_base100: 100,
+        };
+      } else {
+        const lastEntry = entries[0];
+        const valeurInitiale = lastEntry.valeur_finale || 0;
+        const indexPrecedent = lastEntry.indice_base100 || 100;
+
+        // Mouvements du mois (apports/retraits datés → poids Dietz).
+        const { data: movements, error: movError } = await clientRef.current
+          .from('portfolio_movements')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('mois_fin', selectedDate);
+        if (movError) {
+          setSubmitError(`Erreur de chargement des mouvements: ${movError.message}`);
+          return;
+        }
+
+        const movArray: Array<{ montant: number; poids: number }> = (movements || []).map((m: { montant: number; poids: number | null }) => ({
+          montant: m.montant,
+          poids: m.poids ?? 0.5, // poids 0.5 par défaut si date non renseignée (Dietz simple)
+        }));
+
+        // Apports = somme des flux positifs ; retraits = somme des flux négatifs.
+        const apports = movArray.filter((m) => m.montant > 0).reduce((s, m) => s + m.montant, 0);
+        const retraits = movArray.filter((m) => m.montant < 0).reduce((s, m) => s + Math.abs(m.montant), 0);
+
+        const monthlyPerf = calculateMonthlyPerformance(valeurFinaleNum, valeurInitiale, movArray);
+        const newIndex = calculateIndex(indexPrecedent, monthlyPerf);
+
+        newEntry = {
+          user_id: userId,
+          date: selectedDate,
+          year: entryDate.getFullYear(),
+          valeur_initiale: valeurInitiale,
+          apports,
+          retraits,
+          flux_ponderes: movArray.reduce((sum, m) => sum + m.montant * m.poids, 0),
+          valeur_finale: valeurFinaleNum,
+          performance_mensuelle: monthlyPerf,
+          indice_base100: newIndex,
+        };
       }
-
-      // Calculate performance with movements
-      const movArray: Array<{ montant: number; poids: number }> = (movements || []).map((m: any) => ({
-        montant: m.montant as number,
-        poids: (m.poids as number) || 0,
-      }));
-
-      const monthlyPerf = calculateMonthlyPerformance(
-        valeurFinaleNum,
-        valeurInitiale,
-        movArray
-      );
-
-      const newIndex = calculateIndex(indexPrecedent, monthlyPerf);
-
-      // Create entry object
-      const newEntry: Omit<MonthlyTrackingEntry, 'id' | 'created_at' | 'updated_at'> = {
-        user_id: userId,
-        date: selectedDate,
-        year: entryDate.getFullYear(),
-        valeur_initiale: valeurInitiale,
-        apports: 0, // TODO: sum from movements
-        retraits: 0, // TODO: sum from movements
-        flux_ponderes: movArray.reduce((sum, m) => sum + m.montant * m.poids, 0),
-        valeur_finale: valeurFinaleNum,
-        performance_mensuelle: monthlyPerf,
-        indice_base100: newIndex,
-      };
 
       // Call mutation hook
       await mutate(newEntry);

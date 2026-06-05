@@ -144,6 +144,25 @@ export default function PortfolioDashboard() {
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
           <>
+            {/* État vide : aucune saisie mensuelle → la performance n'est pas calculable. */}
+            {!statsQuery.isLoading && (!trackingQuery.data || trackingQuery.data.length === 0) && (
+              <div className="border border-warn/30 bg-warn/5 rounded-xl px-4 py-3 space-y-1">
+                <p className="text-sm text-warn font-medium">📊 La performance (indice, KPIs, graphiques) n&apos;est pas encore calculée.</p>
+                <p className="text-xs text-muted">
+                  Ajouter une position met à jour la <span className="text-white">répartition sectorielle</span> et la valorisation,
+                  mais l&apos;<span className="text-white">indice Base 100</span> mesure la performance dans le temps : il faut saisir
+                  ton solde mensuel.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('suivi-global')}
+                  className="text-xs text-up hover:underline font-medium"
+                >
+                  → Saisir mon premier point dans « Suivi Global »
+                </button>
+              </div>
+            )}
+
             <DashboardKPIs
               stats={statsQuery.data}
               isLoading={statsQuery.isLoading}
