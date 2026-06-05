@@ -4,6 +4,8 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { fmtNumber } from '@/lib/format';
 import { assessQuality } from '@/lib/fundamentals';
+import ExportButton from '@/components/ExportButton';
+import type { CsvColumn } from '@/lib/export';
 
 export interface ScreenerRow {
   code: string;
@@ -48,13 +50,31 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
     return <td className={`px-3 py-2 text-right tabular ${q === 'suspect' ? 'text-warn' : ''}`}>{txt}{q === 'suspect' && ' ⚠️'}</td>;
   };
 
+  const csvColumns: CsvColumn<ScreenerRow>[] = [
+    { header: 'Code', accessor: (r) => r.code },
+    { header: 'Société', accessor: (r) => r.designation ?? '' },
+    { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
+    { header: 'PER', accessor: (r) => r.per != null ? Number(r.per.toFixed(2)) : '' },
+    { header: 'P/B', accessor: (r) => r.pb != null ? Number(r.pb.toFixed(2)) : '' },
+    { header: 'ROE %', accessor: (r) => r.roe != null ? Number((r.roe * 100).toFixed(2)) : '' },
+    { header: 'Marge nette %', accessor: (r) => r.margeNette != null ? Number((r.margeNette * 100).toFixed(2)) : '' },
+    { header: 'Rendement div %', accessor: (r) => r.rendementDiv != null ? Number((r.rendementDiv * 100).toFixed(2)) : '' },
+  ];
+
   return (
     <div className="space-y-3">
-      <div className="flex gap-2 flex-wrap">
-        <button type="button" onClick={() => setSecteur('')} className={`text-xs px-2 py-1 rounded border ${secteur === '' ? 'border-up text-up' : 'border-border text-muted'}`}>Tous</button>
-        {secteurs.map((s) => (
-          <button type="button" key={s} onClick={() => setSecteur(s)} className={`text-xs px-2 py-1 rounded border ${secteur === s ? 'border-up text-up' : 'border-border text-muted'}`}>{s}</button>
-        ))}
+      <div className="flex gap-2 flex-wrap items-center justify-between">
+        <div className="flex gap-2 flex-wrap">
+          <button type="button" onClick={() => setSecteur('')} className={`text-xs px-2 py-1 rounded border ${secteur === '' ? 'border-up text-up' : 'border-border text-muted'}`}>Tous</button>
+          {secteurs.map((s) => (
+            <button type="button" key={s} onClick={() => setSecteur(s)} className={`text-xs px-2 py-1 rounded border ${secteur === s ? 'border-up text-up' : 'border-border text-muted'}`}>{s}</button>
+          ))}
+        </div>
+        <ExportButton<ScreenerRow>
+          filename={`fondamentaux_brvm_${new Date().toISOString().slice(0, 10)}.csv`}
+          rows={filtered}
+          columns={csvColumns}
+        />
       </div>
       <div className="bg-surface border border-border rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
