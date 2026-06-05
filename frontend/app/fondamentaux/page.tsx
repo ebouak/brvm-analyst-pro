@@ -9,7 +9,7 @@ async function getData(): Promise<ScreenerRow[]> {
   const sb = createClient();
   const [{ data: instruments }, { data: funds }, { data: quotes }, { data: divs }] = await Promise.all([
     sb.from('brvm_instruments').select('code, designation, secteur, shares').eq('type', 'action').eq('actif', true),
-    sb.from('fundamentals').select('code, year, revenue, net_income, equity, debt').order('year', { ascending: false }),
+    sb.from('fundamentals').select('code, year, revenue, net_income, equity, debt, is_manual').order('is_manual', { ascending: false }).order('year', { ascending: false }),
     sb.from('brvm_actions_daily').select('code, cours_jour, date_marche').order('date_marche', { ascending: false }),
     sb.from('dividends').select('code, montant, ex_date').order('ex_date', { ascending: false }),
   ]);

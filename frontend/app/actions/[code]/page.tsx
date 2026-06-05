@@ -64,6 +64,8 @@ async function getData(code: string, fromDate?: string) {
         .from('fundamentals')
         .select('year, revenue, net_income, equity, cash, debt, bfr, source_file, is_manual')
         .eq('code', code)
+        // Priorité aux lignes corrigées manuellement (fiables), puis année récente.
+        .order('is_manual', { ascending: false })
         .order('year', { ascending: false })
         .limit(3),
     ]);
