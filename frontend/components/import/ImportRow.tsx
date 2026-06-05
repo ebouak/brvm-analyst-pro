@@ -1,0 +1,105 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { readPdf } from '@/lib/import/pdfClient';
+import { validateExtraction, type FundamentalExtraction } from '@/lib/import/validate';
+import FundamentalReview from './FundamentalReview';
+
+type Status = 'pending' | 'reading' | 'analyzing' | 'auto-saving' | 'review' | 'done' | 'error';
+
+interface Props {
+  file: File;
+  validCodes: Set<string>;
+}
+
+function parseName(name: string): { symbol: string; year: number } {
+  const stem = name.replace(/\.[^.]+$/, '');
+  const symbol = stem.split('_')[0]!.toUpperCase();
+  const m = stem.match(/(20\d{2})/);
+  return { symbol, year: m ? Number(m[1]) : new Date().getFullYear() - 1 };
+}
+
+const M = 1_000_000;
+
+export default function ImportRow({ file, validCodes }: Props) {
+  const parsed = parseName(file.name);
+  const [symbol, setSymbol] = useState(parsed.symbol);
+  const [year, setYear] = useState(parsed.year);
+  const [status, setStatus] = useState<Status>('pending');
+  const [provider, setProvider] = useState<string | null>(null);
+  const [extraction, setExtraction] = useState<FundamentalExtraction | null>(null);
+  const [suspects, setSuspects] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run() {
+    setError(null);
+    if (!validCodes.has(symbol)) { setStatus('error'); setError(`Code ${symbol} inconnu — corrigez-le.`); return; }
+    try {
+      setStatus('reading');
+      const pdf = await readPdf(file);
+      setStatus('analyzing');
+      const res = await fetch('/api/extract-llm', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: pdf.mode, symbol, year, text: pdf.text, images: pdf.images }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setStatus('error'); setError(j.error ?? 'Échec analyse'); return; }
+      setProvider(j.provider);
+      const data = j.data as FundamentalExtraction;
+      setExtraction(data);
+      const v = validateExtraction(data);
+      setSuspects(v.suspects);
+      if (v.status === 'auto') {
+        setStatus('auto-saving');
+        const w = await fetch('/api/fundamentals', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: symbol, year,
+            revenue: data.revenue != null ? Math.round(data.revenue * M) : null,
+            net_income: data.net_income != null ? Math.round(data.net_income * M) : null,
+            equity: data.equity != null ? Math.round(data.equity * M) : null,
+            debt: data.debt_total != null ? Math.round(data.debt_total * M) : null,
+            shares: data.shares_outstanding ?? null,
+          }),
+        });
+        if (!w.ok) { const e = await w.json(); setStatus('error'); setError(e.error ?? 'Échec écriture'); return; }
+        setStatus('done');
+      } else {
+        setStatus('review');
+      }
+    } catch (e) {
+      setStatus('error'); setError(e instanceof Error ? e.message : 'Erreur');
+    }
+  }
+
+  useEffect(() => {
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="bg-surface border border-border rounded-xl p-3 space-y-2">
+      <div className="flex items-center gap-3 text-sm">
+        <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+          className="w-20 bg-bg border border-border rounded px-2 py-1 text-sm font-medium" />
+        <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))}
+          className="w-20 bg-bg border border-border rounded px-2 py-1 text-sm" />
+        <span className="text-muted text-xs truncate flex-1">{file.name}</span>
+        <span className="text-xs">
+          {status === 'reading' && '📄 lecture…'}
+          {status === 'analyzing' && '🤖 analyse…'}
+          {status === 'auto-saving' && '💾 écriture…'}
+          {status === 'done' && <span className="text-up">✓ enregistré ({provider})</span>}
+          {status === 'review' && <span className="text-warn">⚠️ à valider ({provider})</span>}
+          {status === 'error' && <span className="text-down">✕ {error}</span>}
+        </span>
+        {status === 'error' && (
+          <button type="button" onClick={() => void run()} className="text-xs text-up hover:underline">Réessayer</button>
+        )}
+      </div>
+      {status === 'review' && extraction && (
+        <FundamentalReview symbol={symbol} year={year} initial={extraction} suspects={suspects} onSaved={() => setStatus('done')} />
+      )}
+    </div>
+  );
+}
