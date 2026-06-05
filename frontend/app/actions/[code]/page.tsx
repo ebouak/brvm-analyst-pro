@@ -394,7 +394,10 @@ export default async function InstrumentPage({
             }}
             sharesSource={instrument?.shares_source ?? null}
             isManual={latest.is_manual ?? false}
-            history={fundamentals.map((f) => ({ year: f.year ?? 0, revenue: f.revenue, net_income: f.net_income }))}
+            history={fundamentals
+              // Croissance : ne comparer que des exercices de même source (manuel vs auto).
+              .filter((f) => (f.is_manual ?? false) === (latest.is_manual ?? false))
+              .map((f) => ({ year: f.year ?? 0, revenue: f.revenue, net_income: f.net_income }))}
             sourceUrl={null}
             range52={range52}
           />
