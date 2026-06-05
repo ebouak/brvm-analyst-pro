@@ -173,3 +173,14 @@ Sections (cartes `bg-surface` arrondies, libellé en `text-muted`, valeur
   cas plausibles et aberrants (FTSC CA=3 → suspect, etc.).
 - Validation manuelle : PER/ROE d'une valeur à fondamentaux fiables (ex. SNTS si
   shares saisi) cohérents avec l'ordre de grandeur connu.
+
+## 12. Décision d'exécution (2026-06-05) — source du nombre d'actions
+
+sikafinance n'expose **plus** de table de capitalisation par titre scrapable
+statiquement (URL 404 ; fiches société sans capitalisation dans le HTML). Le
+code scraper (`scraper/src/shares/`) est conservé et fonctionnel pour le jour
+où une source fiable existera, mais **n'est pas branché en production**.
+
+**Source retenue : saisie manuelle** (Task 7-8). Tant que `shares` est nul, les
+ratios PER / P/B / capitalisation affichent « non disponible » (garde-fou) —
+conforme au principe d'honnêteté. C'est plus fiable qu'un scraping fragile.
