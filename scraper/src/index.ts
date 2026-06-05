@@ -32,6 +32,7 @@ import { runDaily } from './runners/runDaily.js';
 import { runScoring } from './scoring/runScoring.js';
 import { runEvents } from './events/runEvents.js';
 import { runDividends } from './dividends/runDividends.js';
+import { runShares } from './shares/runShares.js';
 import { runAlerts } from './alerts/runAlerts.js';
 import { runBacktestCmd } from './backtesting/runBacktest.js';
 import { runPublications } from './publications/runPublications.js';
@@ -77,6 +78,10 @@ async function main(): Promise<number> {
       const res = await runDividends({ mock });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'shares': {
+      const res = await runShares();
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'alerts': {
       const res = await runAlerts({ mock });
       return res.status === 'failed' ? 1 : 0;
@@ -111,7 +116,7 @@ async function main(): Promise<number> {
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | alerts | publications | backtest | backfill | validate',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate',
       );
       return 1;
   }

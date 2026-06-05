@@ -25,6 +25,7 @@
     "dividends:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts dividends --mock",
     "publications": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications",
     "publications:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications --mock",
+    "shares": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts shares",
     "alerts": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts alerts",
     "alerts:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts alerts --mock",
     "backfill": "tsx src/index.ts backfill",
