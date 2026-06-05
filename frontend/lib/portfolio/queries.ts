@@ -262,9 +262,17 @@ export function useTrackingForCharts(
   return state;
 }
 
+/** Code spécial représentant la poche de liquidités. */
+export const LIQUIDITES_CODE = 'LIQUIDITES';
+
 /**
  * Hook 3: usePortfolioPositions
- * Fetch all portfolio_positions for user (including LIQUIDITES).
+ *
+ * SOURCE UNIFIÉE : lit les MÊMES positions que l'onglet « Mon portefeuille »
+ * (`portfolios_positions`), enrichies du dernier cours de marché
+ * (`brvm_actions_daily`) et du secteur (`brvm_reference`). La valeur et la
+ * pondération sont calculées à la volée. La ligne LIQUIDITES (cours = 0) est
+ * incluse telle quelle. Garantit que les deux onglets restent synchronisés.
  */
 export function usePortfolioPositions(userId: string): HookState<Position[]> {
   const [state, setState] = useState<HookState<Position[]>>({
@@ -279,36 +287,78 @@ export function usePortfolioPositions(userId: string): HookState<Position[]> {
     if (!clientRef.current) {
       clientRef.current = createClient();
     }
+    if (!userId) {
+      setState({ data: [], isLoading: false, error: null });
+      return;
+    }
+    const sb = clientRef.current!;
 
     const fetchData = async () => {
       try {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-        const { data, error } = await clientRef.current!
-          .from('portfolio_positions')
-          .select('*')
+        // 1) Positions brutes (source unique partagée avec « Mon portefeuille »).
+        const { data: raw, error } = await sb
+          .from('portfolios_positions')
+          .select('id, user_id, code, quantite, prix_entree, updated_at, created_at')
           .eq('user_id', userId);
+        if (error) { setState({ data: null, isLoading: false, error: error.message }); return; }
 
-        if (error) {
-          setState({
-            data: null,
-            isLoading: false,
-            error: error.message,
-          });
-          return;
+        const rawRows = (raw ?? []) as Array<{
+          id: string; user_id: string; code: string; quantite: number;
+          prix_entree: number; updated_at: string | null; created_at: string | null;
+        }>;
+
+        const codes = [...new Set(rawRows.map(r => r.code).filter(c => c && c !== LIQUIDITES_CODE))];
+
+        // 2) Cours live + secteurs (en parallèle).
+        const [quotesRes, refRes] = await Promise.all([
+          codes.length
+            ? sb.from('brvm_actions_daily').select('code, cours_jour, date_marche')
+                .in('code', codes).order('date_marche', { ascending: false })
+            : Promise.resolve({ data: [] as { code: string; cours_jour: number | null }[] }),
+          sb.from('brvm_reference').select('symbole, secteur'),
+        ]);
+
+        const lastCours: Record<string, number | null> = {};
+        for (const q of (quotesRes.data ?? []) as { code: string; cours_jour: number | null }[]) {
+          if (!(q.code in lastCours)) lastCours[q.code] = q.cours_jour;
+        }
+        const secteurByCode: Record<string, string> = {};
+        for (const r of (refRes.data ?? []) as { symbole: string; secteur: string }[]) {
+          secteurByCode[r.symbole] = r.secteur;
         }
 
-        setState({
-          data: (data as Position[]) || [],
-          isLoading: false,
-          error: null,
+        // 3) Construction + valorisation au cours du marché.
+        const enriched = rawRows.map((r): Position & { prix_entree: number } => {
+          const isLiq = r.code === LIQUIDITES_CODE;
+          // Liquidités : la valeur est stockée dans prix_entree (quantité = 1).
+          const cours = isLiq ? 0 : (lastCours[r.code] ?? 0);
+          const valeur = isLiq ? r.prix_entree : r.quantite * cours;
+          return {
+            id: r.id,
+            user_id: r.user_id,
+            symbole: r.code,
+            secteur: isLiq ? 'Liquidités' : (secteurByCode[r.code] ?? 'Autres'),
+            quantite: r.quantite,
+            cours,
+            valeur,
+            ponderation: null, // calculé après le total
+            is_liquidites: isLiq,
+            updated_at: r.updated_at ?? r.created_at ?? '',
+            prix_entree: r.prix_entree,
+          };
         });
+
+        const total = enriched.reduce((s, p) => s + (p.valeur ?? 0), 0);
+        const withPond = enriched.map(p => ({
+          ...p,
+          ponderation: total > 0 ? (p.valeur ?? 0) / total : 0,
+        }));
+
+        setState({ data: withPond, isLoading: false, error: null });
       } catch (err) {
-        setState({
-          data: null,
-          isLoading: false,
-          error: err instanceof Error ? err.message : 'Unknown error',
-        });
+        setState({ data: null, isLoading: false, error: err instanceof Error ? err.message : 'Unknown error' });
       }
     };
 

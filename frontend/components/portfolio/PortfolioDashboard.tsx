@@ -17,8 +17,6 @@ import {
   useMonthlyTracking,
   useTrackingForCharts,
   usePortfolioPositions,
-  useUpdatePosition,
-  type Position,
 } from '@/lib/portfolio/queries';
 
 type Tab = 'dashboard' | 'suivi-global' | 'mouvements' | 'positions';
@@ -49,31 +47,12 @@ export default function PortfolioDashboard() {
     getUser();
   }, [supabase]);
 
-  // Fetch data hooks
+  // Fetch data hooks. Les positions proviennent de la SOURCE UNIFIÉE
+  // (portfolios_positions) — identiques à l'onglet « Mon portefeuille ».
   const statsQuery = useDashboardStats(userId || '');
   const trackingQuery = useMonthlyTracking(userId || '');
   const chartDataQuery = useTrackingForCharts(userId || '');
   const positionsQuery = usePortfolioPositions(userId || '');
-  const { mutate: updatePosition } = useUpdatePosition();
-
-  // Handle position update
-  const handleUpdatePosition = useCallback(async (position: Position) => {
-    if (!userId) return;
-    try {
-      await updatePosition({
-        ...position,
-        user_id: userId,
-      });
-      // Refetch positions after update
-      setTimeout(() => {
-        const tempUserId = userId;
-        setUserId(null);
-        setTimeout(() => setUserId(tempUserId), 50);
-      }, 200);
-    } catch (err) {
-      console.error('Failed to update position:', err);
-    }
-  }, [userId, updatePosition]);
 
   // Refetch handler
   const handleRefetch = useCallback(async () => {
@@ -208,13 +187,18 @@ export default function PortfolioDashboard() {
           <MovementsForm />
         )}
 
-        {/* Positions Tab */}
+        {/* Positions Tab — lecture seule (édition dans l'onglet « Mon portefeuille ») */}
         {activeTab === 'positions' && (
-          <PortfolioPositions
-            positions={positionsQuery.data}
-            onUpdate={handleUpdatePosition}
-            isLoading={positionsQuery.isLoading}
-          />
+          <>
+            <div className="text-xs text-muted bg-bg/40 border border-border rounded-lg px-4 py-2">
+              ℹ️ Vue lecture seule. Pour ajouter ou modifier des positions, utilisez l&apos;onglet
+              <span className="text-up font-medium"> 💼 Mon portefeuille</span>.
+            </div>
+            <PortfolioPositions
+              positions={positionsQuery.data}
+              isLoading={positionsQuery.isLoading}
+            />
+          </>
         )}
       </div>
     </div>

@@ -38,7 +38,7 @@ async function getData(activeWlId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const [{ data: positions }, { data: wls }, { data: alerts }, { data: instruments }] = await Promise.all([
+  const [{ data: positions }, { data: wls }, { data: alerts }, { data: instruments }, { data: refRows }] = await Promise.all([
     supabase.from('portfolios_positions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
     supabase
       .from('watchlists')
@@ -57,7 +57,14 @@ async function getData(activeWlId?: string) {
       .eq('type', 'action')
       .eq('actif', true)
       .order('code'),
+    supabase.from('brvm_reference').select('symbole, secteur'),
   ]);
+
+  // Secteur par code (référentiel Base_BRVM du template).
+  const secteurByCode: Record<string, string> = {};
+  for (const r of (refRows ?? []) as { symbole: string; secteur: string }[]) {
+    secteurByCode[r.symbole] = r.secteur;
+  }
 
   const watchlists = (wls ?? []) as Watchlist[];
   const activeWl =
@@ -114,7 +121,7 @@ async function getData(activeWlId?: string) {
     }
   }
 
-  return { email: user.email, pos, items, lastPrice, lastPriceDate, watchlists, activeWl, alertsList, historicalByDate, instrumentsList };
+  return { email: user.email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, instrumentsList };
 }
 
 export default async function PortefeuillePage({
@@ -122,7 +129,7 @@ export default async function PortefeuillePage({
 }: {
   searchParams?: { wl?: string };
 }) {
-  const { email, pos, items, lastPrice, lastPriceDate, watchlists, activeWl, alertsList, historicalByDate, instrumentsList } = await getData(searchParams?.wl);
+  const { email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, instrumentsList } = await getData(searchParams?.wl);
 
   let totalCost = 0;
   let totalValue = 0;
@@ -132,11 +139,21 @@ export default async function PortefeuillePage({
     const value = last != null ? p.quantite * last : null;
     const pnl = value != null ? value - cost : null;
     const pnlPct = cost > 0 && pnl != null ? (pnl / cost) * 100 : null;
+    const secteur = secteurByCode[p.code] ?? 'Autres';
     totalCost += cost;
     if (value != null) totalValue += value;
-    return { ...p, last, cost, value, pnl, pnlPct };
+    return { ...p, last, cost, value, pnl, pnlPct, secteur };
   });
   const totalPnl = totalValue - totalCost;
+
+  // Répartition sectorielle (valorisation au cours du marché).
+  const sectorMap: Record<string, number> = {};
+  for (const r of rows) {
+    if (r.value != null) sectorMap[r.secteur] = (sectorMap[r.secteur] ?? 0) + r.value;
+  }
+  const sectorRows = Object.entries(sectorMap)
+    .map(([secteur, valeur]) => ({ secteur, valeur, pct: totalValue > 0 ? (valeur / totalValue) * 100 : 0 }))
+    .sort((a, b) => b.valeur - a.valeur);
 
   // Calculate 30-day portfolio change
   let portfolioValueChange30d: number | null = null;
@@ -196,6 +213,7 @@ export default async function PortefeuillePage({
                   <thead className="text-xs text-muted border-b border-border bg-bg/40">
                     <tr>
                       <th className="px-3 py-2 text-left">Titre</th>
+                      <th className="px-3 py-2 text-left">Secteur</th>
                       <th className="px-3 py-2 text-right">Qté</th>
                       <th className="px-3 py-2 text-right" title="Prix de Revient Unitaire — votre prix d'achat moyen">PRU</th>
                       <th className="px-3 py-2 text-right" title="Dernier cours de marché connu">Cours</th>
@@ -208,10 +226,11 @@ export default async function PortefeuillePage({
                   </thead>
                   <tbody>
                     {rows.length === 0 ? (
-                      <tr><td colSpan={9} className="px-3 py-4 text-center text-muted text-xs">Aucune position. Utilisez le bouton ci-dessous pour en ajouter.</td></tr>
+                      <tr><td colSpan={10} className="px-3 py-4 text-center text-muted text-xs">Aucune position. Utilisez le bouton ci-dessous pour en ajouter.</td></tr>
                     ) : rows.map((r) => (
                       <tr key={r.id} className="border-b border-border/40 hover:bg-bg/40">
                         <td className="px-3 py-2"><Link href={`/actions/${r.code}`} className="font-medium hover:text-up">{r.code}</Link></td>
+                        <td className="px-3 py-2 text-xs text-muted">{r.secteur}</td>
                         <td className="px-3 py-2 text-right tabular">{fmtNumber(r.quantite)}</td>
                         <td className="px-3 py-2 text-right tabular">{fmtNumber(r.prix_entree)}</td>
                         <td className="px-3 py-2 text-right tabular">{fmtNumber(r.last)}</td>
@@ -297,6 +316,45 @@ export default async function PortefeuillePage({
               </form>
             </div>
           </div>
+
+          {/* Répartition sectorielle (Base_BRVM) */}
+          {sectorRows.length > 0 && (
+            <section className="space-y-3 max-w-2xl">
+              <h2 className="text-sm font-semibold">🏭 Répartition sectorielle</h2>
+              <div className="bg-surface border border-border rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-muted border-b border-border bg-bg/40">
+                    <tr>
+                      <th className="px-3 py-2 text-left">Secteur</th>
+                      <th className="px-3 py-2 text-right">Valeur (FCFA)</th>
+                      <th className="px-3 py-2 text-right">Pondération</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sectorRows.map((s) => (
+                      <tr key={s.secteur} className="border-b border-border/40">
+                        <td className="px-3 py-2">{s.secteur}</td>
+                        <td className="px-3 py-2 text-right tabular">{fmtFcfa(s.valeur)}</td>
+                        <td className="px-3 py-2 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="w-20 h-1.5 bg-border rounded-full overflow-hidden">
+                              <div className="h-full bg-up rounded-full" style={{ width: `${Math.min(s.pct, 100)}%` }} />
+                            </div>
+                            <span className="tabular text-xs w-12 text-right">{s.pct.toFixed(1)}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="font-semibold border-t border-border">
+                      <td className="px-3 py-2">TOTAL</td>
+                      <td className="px-3 py-2 text-right tabular">{fmtFcfa(totalValue)}</td>
+                      <td className="px-3 py-2 text-right tabular text-xs">100,0%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
 
           {/* Alertes */}
           <section className="space-y-3">

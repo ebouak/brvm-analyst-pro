@@ -6,7 +6,8 @@ import { fmtNumber, fmtFcfa } from '@/lib/format';
 
 interface Props {
   positions: Position[] | null;
-  onUpdate: (position: Position) => void;
+  /** Optionnel : si absent, le tableau est en lecture seule (édition via « Mon portefeuille »). */
+  onUpdate?: (position: Position) => void;
   isLoading?: boolean;
 }
 
@@ -138,8 +139,9 @@ function PositionsTable({
   onEditSave,
 }: {
   positions: Position[];
-  onEditSave: (position: Position) => void;
+  onEditSave?: (position: Position) => void;
 }) {
+  const readOnly = !onEditSave;
   const [editingPosition, setEditingPosition] = useState<Position | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -149,7 +151,7 @@ function PositionsTable({
   };
 
   const handleSave = (updated: Position) => {
-    onEditSave(updated);
+    onEditSave?.(updated);
   };
 
   // Separate liquidities and positions
@@ -216,12 +218,14 @@ function PositionsTable({
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => handleEdit(pos)}
-                      className="text-xs px-2 py-1 rounded border border-border hover:bg-bg/40 transition text-muted hover:text-white"
-                    >
-                      Modifier
-                    </button>
+                    {!readOnly && (
+                      <button
+                        onClick={() => handleEdit(pos)}
+                        className="text-xs px-2 py-1 rounded border border-border hover:bg-bg/40 transition text-muted hover:text-white"
+                      >
+                        Modifier
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
@@ -267,12 +271,15 @@ function PositionsTable({
                   </div>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => handleEdit(liquiditiesPosition)}
-                    className="text-xs px-2 py-1 rounded border border-border hover:bg-bg/40 transition text-muted hover:text-white"
-                  >
-                    Modifier
-                  </button>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(liquiditiesPosition)}
+                      className="text-xs px-2 py-1 rounded border border-border hover:bg-bg/40 transition text-muted hover:text-white"
+                    >
+                      Modifier
+                    </button>
+                  )}
                 </td>
               </tr>
             )}
