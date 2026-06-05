@@ -1,0 +1,14 @@
+{
+  "symbol": "BOAM",
+  "year": 2025,
+  "revenue": 37996,
+  "net_income": 11081,
+  "equity": 49820,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "BOAM_2025_*.pdf (OCR)",
+  "_unit_note": "FCFA bruts -> millions (÷1e6). PNB 2025 = 37 996 330 474 -> 37996 (haute confiance ; CR ordre col1=2024 36159 / col2=2025 37996). Resultat net 2025 derive du CR : resultat avant impot 11 422 232 473 - impot 341 042 566 = 11 081 millions (la ligne RESULTAT NET de l'OCR est illisible ; 11081 apparait aussi au bilan comme resultat exercice). Capitaux propres 2025 = 49 820 422 180 -> 49820 (haute confiance). Capital souscrit 27 450 000 000 FCFA. shares_outstanding non determinable (nominal inconnu) -> null. Confiance OCR moyenne-haute."
+}

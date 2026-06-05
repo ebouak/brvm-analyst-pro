@@ -9,3 +9,5 @@ __pycache__/
 .venv/
 venv/
 .streamlit/secrets.toml
+tessdata/*.traineddata
+data/financials/*_BDFIN.pdf

@@ -1,0 +1,14 @@
+{
+  "symbol": "PRSC",
+  "year": 2025,
+  "revenue": 81127,
+  "net_income": 2367,
+  "equity": 28091,
+  "debt_total": 7490,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": 209,
+  "shares_outstanding": null,
+  "_source": "PRSC_2025_*.pdf (OCR)",
+  "_unit_note": "Entite confirmee: TRACTAFRIC MOTORS COTE D'IVOIRE (TMCI), coherent avec PRSC. Etats SYSCOHADA en FCFA bruts, convertis en millions (/1 000 000). CA=81 126 957 415; resultat net=2 367 384 402; capitaux propres=28 090 546 719; emprunts et dettes financieres diverses=7 489 606 500; DPS brut=209 FCFA. Confiance OCR: moyenne-bonne (compte de resultat clair)."
+}

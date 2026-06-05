@@ -1,0 +1,14 @@
+{
+  "symbol": "BOABF",
+  "year": 2025,
+  "revenue": 57490,
+  "net_income": 19252,
+  "equity": null,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "BOABF_2025_*.pdf (OCR)",
+  "_unit_note": "FCFA bruts -> millions (÷1e6). PNB 2025 = 57 489 834 311 -> 57490 (haute confiance, plausible). Resultat net 2025 = 19 252 015 161 -> 19252 (le bilan ligne 113 ordonne col1=2024 / col2=2025, donc resultat exercice 2025 = 19252 ; le compte de resultat OCR inverse les colonnes et est incoherent). Capitaux propres total non lisible dans l'OCR (capital souscrit absent ; reserves 52778 + report 7123 + resultat 19252 visibles mais total fonds propres non agrege fiable) -> equity null. Confiance OCR moyenne sur le mapping des colonnes resultat."
+}

@@ -1,0 +1,14 @@
+{
+  "symbol": "SICC",
+  "year": 2021,
+  "revenue": 1381,
+  "net_income": 119,
+  "equity": 9425,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SICC_2021_*.pdf (OCR)",
+  "_unit_note": "Entite: SOCIETE IVOIRIENNE DE COCO RAPE (SICOR), coherent avec SICC. FCFA bruts -> millions (/1 000 000). CA=1 380 986 108 -> 1381 M. Resultat: colonne N (2021) resultat des activites ordinaires=119 234 795; la ligne RESULTAT NET n'affiche nettement que la valeur N-1 (109 826 095) mais HAO/impots semblent nuls donc net N ~= 119 M (confiance moyenne). Equity: capital 1 500 000 000 + reserves; total capitaux propres lu ~9 424 689 198 -> 9425 M (OCR bruite, confiance faible-moyenne). Confiance OCR globale: faible-moyenne (bilan tres bruite, colonnes melangees)."
+}

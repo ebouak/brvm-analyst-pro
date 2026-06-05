@@ -1,0 +1,14 @@
+{
+  "symbol": "BOAS",
+  "year": 2025,
+  "revenue": null,
+  "net_income": null,
+  "equity": 102267,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "BOAS_2025_*.pdf (OCR)",
+  "_unit_note": "Montants en millions FCFA (ex: capital 36 000, dettes clientele 631 038). Capitaux propres = 102 267 millions (ligne bilan passif, confiance moyenne : une seule valeur lisible, attribuee a 2025). PNB et resultat net NON extractibles : le compte de resultat OCR (lignes 145-171) est completement degrade, aucun montant de PNB / resultat net isolable -> revenue et net_income null. Capital souscrit 36 000 000 000 FCFA. Confiance OCR faible sur le compte de resultat, moyenne sur le bilan."
+}

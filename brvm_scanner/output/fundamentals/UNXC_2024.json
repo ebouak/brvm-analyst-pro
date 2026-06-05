@@ -1,0 +1,14 @@
+{
+  "symbol": "UNXC",
+  "year": 2024,
+  "revenue": null,
+  "net_income": null,
+  "equity": null,
+  "debt_total": null,
+  "cash": 2495,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "UNXC_2024_*.pdf (OCR)",
+  "_unit_note": "Entite: UNIWAX ('UNIWOX' mal reconnu), coherent avec UNXC. FCFA bruts. Le BILAN ACTIF est lisible mais le COMPTE DE RESULTAT et le PASSIF (capitaux propres) sont tres degrades par l'OCR (libelles sans montants): revenue, net_income et equity NON lisibles -> null. Seule valeur fiable: Tresorerie-Actif NET=2 495 089 362 -> 2495 M (cash). Capital social=4 150 000 000 FCFA (mentionne) mais != capitaux propres donc equity laisse a null. Confiance OCR: faible (compte de resultat illisible)."
+}

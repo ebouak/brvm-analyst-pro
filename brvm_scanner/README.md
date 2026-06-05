@@ -12,9 +12,10 @@ backtest et fondamentaux extraits des états financiers (IFRS / SYSCOHADA).
 1. **Texte** : `python scripts/extract_texts.py [ANNÉE]`
    → `output/texts/{SYMBOLE}_{ANNÉE}.txt` (PDF avec couche texte).
 2. **PDF scannés (OCR)** : `python scripts/ocr_extract.py [SYMBOLES…]`
-   → rattrape les PDF sans texte via Tesseract.
-   Pré-requis binaires (PowerShell admin) : `choco install tesseract poppler -y`
-   + `pip install pytesseract pdf2image pillow`.
+   → rattrape les PDF sans texte via Tesseract (rendu image par PyMuPDF,
+   sans poppler). Pré-requis : `choco install tesseract -y` (admin) +
+   `pip install pytesseract pymupdf pillow`. Le français (`tessdata/fra.traineddata`)
+   est embarqué localement → pas besoin de l'installer dans Program Files.
 3. **Extraction LLM** : Claude Code lit chaque `output/texts/*.txt` et écrit
    `output/fundamentals/{SYMBOLE}_{ANNÉE}.json` (règles : `prompts/extract_template.md`).
    Valeurs en **millions de FCFA** ; unités (millions/milliers/bruts) gérées.

@@ -1,0 +1,14 @@
+{
+  "symbol": "CBIBF",
+  "year": 2023,
+  "revenue": 125248,
+  "net_income": 64247,
+  "equity": 271865,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "CBIBF_2023_*.pdf (OCR)",
+  "_unit_note": "Etats DEJA en millions de F CFA (mention explicite ligne 493) -> aucune conversion. Colonnes col1=2022 / col2=2023. Resultat net 2023 = 64 247 (ligne 580, haute confiance ; verif : resultat avant impot 69 258 - impot 5 011 = 64 247). Capitaux propres 2023 = 271 865 (ligne 512, haute confiance). PNB 2023 : la ligne PNB de l'OCR est tronquee ('125 |') ; valeur DERIVEE = RBE 85 727 + charges generales 35 837 + dotations 3 684 = 125 248 (coherent, confiance moyenne). PNB 2022 lisible = 111 106. Capital souscrit 32 000 M. Confiance OCR haute (bilan/resultat), moyenne sur le PNB 2023 reconstruit."
+}

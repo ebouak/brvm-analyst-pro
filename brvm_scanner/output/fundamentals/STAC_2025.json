@@ -1,0 +1,14 @@
+{
+  "symbol": "STAC",
+  "year": 2025,
+  "revenue": 3878,
+  "net_income": -97,
+  "equity": 357,
+  "debt_total": 463,
+  "cash": 1330,
+  "eps": null,
+  "dividend_per_share": 0,
+  "shares_outstanding": null,
+  "_source": "STAC_2025_*.pdf (OCR)",
+  "_unit_note": "Entite: SETAO (Societe d'Etudes et de Travaux pour l'Afrique de l'Ouest), coherent avec STAC. Donnees explicitement 'en milliers de francs CFA' -> converties en millions (/1000). Revenue='CA, autres produits et transfert de charges'=3 878 254 milliers -> 3878 M. Resultat net=-96 558 milliers -> -97 M (deficitaire). Capitaux propres=356 746 -> 357 M. Dettes financieres=463 307 -> 463 M. Tresorerie-Actif=1 330 324 -> 1330 M. Distribution dividende proposee=0. Confiance OCR: bonne (communique structure et lisible)."
+}

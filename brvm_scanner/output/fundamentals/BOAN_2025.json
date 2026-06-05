@@ -1,0 +1,14 @@
+{
+  "symbol": "BOAN",
+  "year": 2025,
+  "revenue": null,
+  "net_income": 409,
+  "equity": null,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "BOAN_2025_*.pdf (OCR)",
+  "_unit_note": "Texte deja en millions FCFA (rapport CAC). Resultat net 2025 = 409 millions FCFA, enonce explicitement (ligne 63 et detail prudentiel ligne 234) -> haute confiance, mais resultat tres faible vs autres BOA (correction d'erreur exercices anterieurs + provisions Commission Bancaire, cf rapport). PNB (revenue) NON disponible : le compte de resultat du bilan publie est illisible dans l'OCR (montants absents) -> null. Equity : pas de total capitaux propres comptable lisible ; le rapport ne donne que des fonds propres effectifs prudentiels (33 137 M) et capitaux propres hors resultat/report (37 154 M), notions non strictement equivalentes au total capitaux propres -> equity null par prudence. Total bilan = 291 750 M (info). Capital social 20 800 000 000 FCFA."
+}

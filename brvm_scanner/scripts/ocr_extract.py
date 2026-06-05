@@ -51,23 +51,39 @@ def _locate_tesseract() -> str | None:
 
 
 def _ensure_deps():
-    """Vérifie pytesseract/pdf2image + binaires Tesseract/poppler ; messages clairs sinon."""
+    """Vérifie pytesseract + PyMuPDF (rendu PDF→image sans poppler) + Tesseract."""
     try:
         import pytesseract  # noqa: F401
-        from pdf2image import convert_from_path  # noqa: F401
+        import fitz  # PyMuPDF  # noqa: F401
     except ImportError as e:
-        sys.exit(f"Lib manquante : {e}. Lancez : pip install pytesseract pdf2image pillow")
+        sys.exit(f"Lib manquante : {e}. Lancez : pip install pytesseract pymupdf pillow")
 
     import pytesseract
     tess = _locate_tesseract()
     if not tess:
         sys.exit(
             "Tesseract introuvable. Installez-le (PowerShell admin) :\n"
-            "  choco install tesseract poppler -y\n"
+            "  choco install tesseract -y\n"
             "ou https://github.com/UB-Mannheim/tesseract/wiki"
         )
     pytesseract.pytesseract.tesseract_cmd = tess
+
+    # tessdata local (français) si présent — évite l'install admin de fra.traineddata.
+    local_tessdata = Path(__file__).resolve().parent.parent / "tessdata"
+    if (local_tessdata / "fra.traineddata").is_file():
+        os.environ["TESSDATA_PREFIX"] = str(local_tessdata)
     return pytesseract
+
+
+def _ocr_lang(pytesseract) -> str:
+    """Renvoie 'fra+eng' si le français est disponible, sinon 'eng'."""
+    try:
+        langs = pytesseract.get_languages(config="")
+        if "fra" in langs:
+            return "fra+eng"
+    except Exception:
+        pass
+    return "eng"
 
 
 def symbol_year(p: Path) -> tuple[str, str]:
@@ -88,24 +104,32 @@ def has_text_layer(pdf: Path) -> bool:
         return False
 
 
-def ocr_pdf(pdf: Path, pytesseract) -> str:
-    """Convertit chaque page en image et OCRise. Limite le texte à MAX_CHARS."""
-    from pdf2image import convert_from_path
-    # On limite aux 20 premières pages (états financiers : tables en début de doc).
-    images = convert_from_path(str(pdf), dpi=DPI, first_page=1, last_page=20)
+def ocr_pdf(pdf: Path, pytesseract, lang: str) -> str:
+    """Rend chaque page en image (PyMuPDF, sans poppler) et OCRise."""
+    import fitz  # PyMuPDF
+    from PIL import Image
+    import io as _io
+
+    doc = fitz.open(str(pdf))
+    zoom = DPI / 72.0  # 72 dpi = base PDF ; zoom pour atteindre DPI cible
+    mat = fitz.Matrix(zoom, zoom)
     parts: list[str] = []
-    for img in images:
-        parts.append(pytesseract.image_to_string(img, lang=OCR_LANG))
+    for page in doc[:20]:  # tables financières en début de document
+        pix = page.get_pixmap(matrix=mat)
+        img = Image.open(_io.BytesIO(pix.tobytes("png")))
+        parts.append(pytesseract.image_to_string(img, lang=lang))
         if sum(len(p) for p in parts) > MAX_CHARS:
             break
-    text = "\n".join(parts)
-    return text[:MAX_CHARS]
+    doc.close()
+    return "\n".join(parts)[:MAX_CHARS]
 
 
 def main() -> None:
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     force = "--force" in sys.argv
     pytesseract = _ensure_deps()
+    lang = _ocr_lang(pytesseract)
+    print(f"Langue OCR : {lang}")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     pdfs = sorted(PDF_DIR.glob("*.pdf"))
@@ -125,7 +149,7 @@ def main() -> None:
             continue
         print(f"  OCR {pdf.name} ...", flush=True)
         try:
-            text = ocr_pdf(pdf, pytesseract)
+            text = ocr_pdf(pdf, pytesseract, lang)
         except Exception as exc:
             print(f"    ! échec OCR : {exc}")
             continue
