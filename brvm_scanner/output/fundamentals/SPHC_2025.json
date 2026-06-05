@@ -1,0 +1,14 @@
+{
+  "symbol": "SPHC",
+  "year": 2025,
+  "revenue": 340831,
+  "net_income": 24972,
+  "equity": 137937,
+  "debt_total": 35599,
+  "cash": 668,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SPHC_2025_*.pdf",
+  "_unit_note": "SAPH (heveas), tableaux 'En XOF' (FCFA bruts) -> divises par 1 000 000 pour passer en millions. revenue=CA 340 830 548 704 -> 340831. net_income=resultat net 24 972 070 150 -> 24972. equity=capitaux propres 137 936 908 394 -> 137937. debt=dettes financieres 35 598 886 719 -> 35599. cash=tresorerie actif 668 168 476 -> 668. Capital 14 593 620 855 FCFA mais nominale non donnee -> shares null. Dividendes 12 497 864 445 FCFA (total)."
+}

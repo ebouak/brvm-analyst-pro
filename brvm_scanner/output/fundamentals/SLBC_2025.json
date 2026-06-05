@@ -1,0 +1,14 @@
+{
+  "symbol": "SLBC",
+  "year": 2025,
+  "revenue": 378123,
+  "net_income": 45781,
+  "equity": 195142,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SLBC_2025_*.pdf",
+  "_unit_note": "SOLIBRA, texte PDF degrade (lettres espacees), tableaux 'en millions de FCFA'. revenue=Chiffre d'affaires et autres produits 2025 = 378123. net_income=benefice net 45781. equity=total capitaux propres 2025 = 195142 (capital/primes/reserves 149361 + resultat 45781). Total bilan 339517. Dettes financieres et cash non isolables de facon fiable dans le texte degrade -> null. Dividende brut total 3501 (FCFA) figurant au projet d'affectation, par action non determinable."
+}

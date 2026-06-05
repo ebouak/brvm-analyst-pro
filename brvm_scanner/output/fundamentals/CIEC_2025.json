@@ -1,0 +1,14 @@
+{
+  "symbol": "CIEC",
+  "year": 2025,
+  "revenue": 306786,
+  "net_income": 13100,
+  "equity": 43024,
+  "debt_total": 236291,
+  "cash": 32512,
+  "eps": 234,
+  "dividend_per_share": null,
+  "shares_outstanding": 56000000,
+  "_source": "CIEC_2025_*.pdf",
+  "_unit_note": "CIE. Comptes CONSOLIDES IFRS retenus (en millions de FCFA, gardes tels quels), pas les comptes personnels SYSCOHADA. revenue=Produits des activites ordinaires 306786. net_income=Resultat net part du groupe 13100. equity=Total capitaux propres 43024 (part groupe 42815 + minoritaires 209/210). debt_total=emprunts/dettes fin nc 48803 + droits util nc 21058 + dettes fin courantes 157959 + droits util courant 8471 = 236291. cash=Tresorerie de cloture 32512. eps=234 (par action), actions en circulation 56 000 000."
+}

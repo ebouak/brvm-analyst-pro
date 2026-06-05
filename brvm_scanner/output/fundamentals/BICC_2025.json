@@ -1,0 +1,14 @@
+{
+  "symbol": "BICC",
+  "year": 2025,
+  "revenue": 79563,
+  "net_income": 36520,
+  "equity": 120570,
+  "debt_total": null,
+  "cash": 126381,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "BICC_2025_*.pdf",
+  "_unit_note": "BICICI (banque). Etats bancaires en millions de FCFA, gardes tels quels. revenue=Produit Net Bancaire 79563. net_income=Resultat net 36520. equity=Capitaux propres et ressources assimilees 120570. cash=Caisse, Banque Centrale, CCP 126381. debt_total null (passifs bancaires: dettes interbancaires/clientele, non assimilables a dette financiere). eps/dividende/actions non fournis."
+}

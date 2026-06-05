@@ -1,0 +1,14 @@
+{
+  "symbol": "ABJC",
+  "year": 2025,
+  "revenue": 13298,
+  "net_income": 1331,
+  "equity": 5512,
+  "debt_total": 652,
+  "cash": 4035,
+  "eps": 122,
+  "dividend_per_share": null,
+  "shares_outstanding": 10912000,
+  "_source": "ABJC_2025_*.pdf",
+  "_unit_note": "Servair Abidjan. Tableaux IFRS deja en millions de FCFA (en-tete 'en millions de FCFA'), valeurs gardees telles quelles. revenue=Chiffre d'affaires 13298. net_income=Resultat net de l'ensemble 1331 (pas de minoritaires). equity=Total capitaux propres 5512. debt_total=emprunts et dettes fin. nc 66 + emprunts droits d'utilisation nc 567 + courant 19 = 652. cash=Tresorerie 4035. eps=122 et nombre d'actions 10 912 000 fournis."
+}

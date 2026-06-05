@@ -1,0 +1,14 @@
+{
+  "symbol": "NSBC",
+  "year": 2025,
+  "revenue": 112928,
+  "net_income": 40712,
+  "equity": 233303,
+  "debt_total": 40117,
+  "cash": 235374,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": 24735000,
+  "_source": "NSBC_2025_*.pdf",
+  "_unit_note": "NSIA Banque CI. Bilan et compte de resultat explicitement 'en millions FCFA' - gardes tels quels. revenue = Produit Net Bancaire 112928. net_income = Resultat Net 40712. equity = Capitaux propres et ressources assimilees 233303. debt_total = Emprunts et titres emis subordonnes 40117 (les dettes interbancaires/clientele sont l'activite bancaire, exclues). cash = Caisse, Banque Centrale, CCP 235374. shares = capital 24735000000 FCFA / nominale ~1000 (capital en millions = 24735) -> hypothese 24 735 000 actions a 1000 FCFA; eps non publie."
+}

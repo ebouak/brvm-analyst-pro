@@ -1,0 +1,14 @@
+{
+  "symbol": "PALC",
+  "year": 2025,
+  "revenue": 197630,
+  "net_income": 15509,
+  "equity": 142639,
+  "debt_total": 797,
+  "cash": 9489,
+  "eps": null,
+  "dividend_per_share": 502,
+  "shares_outstanding": null,
+  "_source": "PALC_2025_*.pdf",
+  "_unit_note": "PALMCI (SYSCOHADA). Etats 'En milliers FRANCS CFA' -> divise par 1000 pour millions. revenue = CHIFFRE D'AFFAIRES 197 629 996 -> 197630. net_income = RESULTAT NET 15 508 655 -> 15509. equity = CAPITAUX PROPRES ET RESSOURCES ASSIMILEES 142 638 984 -> 142639. debt_total = Dettes financieres et ressources assimilees 796 559 -> 797. cash = Tresorerie actif 9 488 637 -> 9489. dividend_per_share = 502 FCFA (brut propose). Capital social 20 406 297 milliers = 20,4 Mds; nominale inconnue -> shares null. eps non publie."
+}

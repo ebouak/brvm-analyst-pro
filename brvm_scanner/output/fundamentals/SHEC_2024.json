@@ -1,0 +1,14 @@
+{
+  "symbol": "SHEC",
+  "year": 2024,
+  "revenue": 600708,
+  "net_income": 5354,
+  "equity": 26521,
+  "debt_total": 10445,
+  "cash": 8118,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SHEC_2024_*.pdf",
+  "_unit_note": "VIVO ENERGY COTE D'IVOIRE (ex-Shell). Bilan/compte de resultat en FCFA bruts -> divise par 1 000 000 pour millions. revenue = Chiffre d'affaires 600 707 830 161 = 600 708 M ; net_income = Resultat net 5 353 993 378 = 5 354 M ; equity = somme capitaux propres (capital 3 150 000 000 + primes/reserves 8 802 000 000 + reserves 630 000 000 + report a nouveau 8 584 598 624 + resultat 5 353 993 378) = 26 520 590 002 = 26 521 M (la ligne Total capitaux propres n'est pas donnee, somme recalculee) ; debt_total = Dettes financieres et ressources assimilees 10 444 665 576 = 10 445 M ; cash = Tresorerie Actif 8 117 985 271 = 8 118 M. Capital social 3 150 000 000 FCFA, nominale non donnee -> shares null."
+}

@@ -1,0 +1,14 @@
+{
+  "symbol": "NTLC",
+  "year": 2025,
+  "revenue": 233261,
+  "net_income": 18427,
+  "equity": 36266,
+  "debt_total": 40196,
+  "cash": 9296,
+  "eps": null,
+  "dividend_per_share": 1680,
+  "shares_outstanding": 5517600,
+  "_source": "NTLC_2025_*.pdf",
+  "_unit_note": "Nestle CI (SYSCOHADA). Bilan/CR en FCFA bruts -> divise par 1 000 000 pour millions. revenue = Sous total Chiffre d'affaires 233 261 162 741 -> 233261. net_income = Benefice net 18 426 899 479 -> 18427. equity = capitaux propres (Capital 5517,6 + Prime fusion 1043,2 + Ecart reeval 3434,6 + Reserves indisp 1103,5 + Report a nouveau 62,3 + Resultat 18426,9) = 36266. debt_total = Emprunt 32097,5 + Autres dettes financieres 8098,2 = 40196. cash = Tresorerie Actif 9 296 074 779 -> 9296. shares = capital 5 517 600 000 / nominale 1000 = 5 517 600 actions. dividend_per_share = dividendes bruts 9 269 568 000 / 5 517 600 = 1680 FCFA."
+}

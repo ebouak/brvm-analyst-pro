@@ -1,0 +1,14 @@
+{
+  "symbol": "ECOC",
+  "year": 2025,
+  "revenue": 132725,
+  "net_income": 63482,
+  "equity": 218573,
+  "debt_total": null,
+  "cash": 82987,
+  "eps": null,
+  "dividend_per_share": 888,
+  "shares_outstanding": null,
+  "_source": "ECOC_2025_*.pdf",
+  "_unit_note": "Ecobank Cote d'Ivoire (banque). Annexes montants nets audites en millions de FCFA, gardes tels quels. revenue=Produit Net Bancaire 132725. net_income=Resultat net 63482. equity=Capitaux propres et ressources assimilees 218573. cash=Caisse, Banque Centrale, CCP 82987. dividende brut propose 888 FCFA/action (texte). debt_total null (passifs bancaires non assimilables). eps/actions non fournis. Chiffres 'milliards' du narratif ignores au profit des tableaux."
+}

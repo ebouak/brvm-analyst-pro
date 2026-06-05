@@ -1,0 +1,14 @@
+{
+  "symbol": "ETIT",
+  "year": 2025,
+  "revenue": 1424261,
+  "net_income": 236781,
+  "equity": 1597846,
+  "debt_total": 1003009,
+  "cash": 2977696,
+  "eps": 10,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "ETIT_2025_*.pdf",
+  "_unit_note": "Ecobank Transnational (groupe consolide IFRS). Colonne 'millions FCFA' retenue (l'autre colonne est en milliers USD). revenue=Produit net bancaire 1424261. net_income=Resultat net part du Groupe 236781 (resultat net consolide total 345523). equity=Total capitaux propres 1597846 (part groupe 1077652 + minoritaires + autres). debt_total=Emprunts 1003009 (passif). cash=Tresorerie et equivalents a la cloture 2977696. eps=10 FCFA par action (base, arrondi). dividende=0,0016 USD/action recommande (pas converti en FCFA fiable). actions non donnees."
+}

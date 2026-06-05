@@ -1,0 +1,14 @@
+{
+  "symbol": "LNBB",
+  "year": 2025,
+  "revenue": 98598,
+  "net_income": 4622,
+  "equity": 21954,
+  "debt_total": 563,
+  "cash": 7979,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "LNBB_2025_*.pdf",
+  "_unit_note": "Loterie Nationale du Benin (SYSCOHADA). Tableaux en FRANCS CFA bruts: converti en millions (division par 1 000 000). revenue=Chiffre d'affaires 98 598 057 859 -> 98598. net_income=Resultat net 4 622 243 779 -> 4622. equity=Total capitaux propres 21 953 860 132 -> 21954. debt_total=Emprunts et dettes financieres diverses 563 235 115 -> 563. cash=Total tresorerie actif 7 978 821 927 -> 7979. Distribution ~80% du resultat prevue mais montant/action non chiffre. eps/actions non donnes (capital 2 000 000 000)."
+}

@@ -1,0 +1,14 @@
+{
+  "symbol": "SAFC",
+  "year": 2021,
+  "revenue": 3567,
+  "net_income": -603,
+  "equity": 6195,
+  "debt_total": null,
+  "cash": 791,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SAFC_2021_*.pdf",
+  "_unit_note": "ALIOS FINANCE / SAFCA (etablissement financier). En-tete: en millions de F CFA. revenue = Produit Net Bancaire 3 567 ; net_income = Resultat Net -603 (perte, integralement affecte en report a nouveau) ; equity = Capitaux propres et ressources assimilees 6 195 ; cash = Caisse/Banque centrale/CCP 791. Dettes interbancaires/clientele non isolees comme dette financiere stricte -> debt_total null. Capital souscrit 3 248 M."
+}

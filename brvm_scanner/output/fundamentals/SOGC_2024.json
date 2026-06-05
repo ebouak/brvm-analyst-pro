@@ -1,0 +1,14 @@
+{
+  "symbol": "SOGC",
+  "year": 2024,
+  "revenue": 89415,
+  "net_income": 13111,
+  "equity": 68899,
+  "debt_total": 9,
+  "cash": 2097,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SOGC_2024_*.pdf",
+  "_unit_note": "SOGB (Societe des Caoutchoucs de Grand-Bereby). En-tete: en milliers de FCFA -> divise par 1000. revenue = chiffre d'affaires reconstitue = ventes marchandises 479 782 + ventes produits fabriques 87 254 124 + travaux/services 1 225 545 + produits accessoires 455 826 = 89 415 277 K = 89 415 M (le CA n'a pas de ligne totale dediee ; production immobilisee/stockee et autres produits exclus) ; net_income = Resultat Net 13 110 790 K = 13 111 M ; equity = capital 21 601 840 + primes/reserves 34 186 212 + resultat 13 110 790 = 68 898 842 K = 68 899 M ; debt_total = Dettes financieres 9 323 K = 9 M (faible) ; cash = Tresorerie-Actif 2 096 844 K = 2 097 M. Dividendes projetes 12 965 304 K (total, pas par action -> dps null). Capital 21 601 840 000 FCFA."
+}

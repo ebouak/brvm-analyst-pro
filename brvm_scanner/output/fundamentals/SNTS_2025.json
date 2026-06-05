@@ -1,0 +1,14 @@
+{
+  "symbol": "SNTS",
+  "year": 2025,
+  "revenue": 1923100,
+  "net_income": 413588,
+  "equity": 1399263,
+  "debt_total": 248038,
+  "cash": null,
+  "eps": 3420,
+  "dividend_per_share": null,
+  "shares_outstanding": 100000000,
+  "_source": "SNTS_2025_ETATS.pdf",
+  "_unit_note": "Tableaux IFRS en millions de FCFA. CA = Revenus consolidés 2025 (1923,1 Mds). RN part groupe = 413 588 M. Capitaux propres totaux = 1 399 263 M (part groupe 1 160 715 + minoritaires 238 547). Dette financière = passifs financiers non courants 232 660 + courants ~15 378. EPS de base = 3 420 FCFA. Actions = capital social 50 000 M / nominal 500 FCFA = 100 M (chiffre officiel Sonatel). '1108 milliards' du texte = CA aux distributeurs (infographie), ignoré."
+}

@@ -1,0 +1,14 @@
+{
+  "symbol": "SDCC",
+  "year": 2025,
+  "revenue": 189400,
+  "net_income": 4663,
+  "equity": null,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": 525,
+  "shares_outstanding": 9000000,
+  "_source": "SDCC_2025_*.pdf",
+  "_unit_note": "SODECI (Distribution d'Eau CI). Le tableau IFRS detaille est illisible (PDF encode en glyphes corrompus). Valeurs prises dans le communique officiel des resultats (compte de resultat/bilan resumes) : revenue = Chiffre d'affaires 189,4 Mds -> 189400. net_income = Resultat net 4,663 Mds -> 4663. Total bilan 472,7 Mds (mentionne mais non utilise). equity/debt/cash non extractibles du texte lisible -> null. dividend_per_share = 525 FCFA brut. shares = dividende global 4,725 Mds / 525 = 9 000 000 actions (capital 4,5 Mds, coherent avec nominale 500). eps non publie lisiblement."
+}

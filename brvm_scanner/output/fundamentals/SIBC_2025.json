@@ -1,0 +1,14 @@
+{
+  "symbol": "SIBC",
+  "year": 2025,
+  "revenue": 108663,
+  "net_income": 55623,
+  "equity": 204765,
+  "debt_total": 104261,
+  "cash": 98820,
+  "eps": null,
+  "dividend_per_share": 425,
+  "shares_outstanding": null,
+  "_source": "SIBC_2025_*.pdf",
+  "_unit_note": "Banque SIB, bilan et compte de resultat 'en millions de FCFA'. revenue=PNB 108663. net_income=resultat net 55623. equity=capitaux propres et ressources assimilees 204765. debt=dettes interbancaires 104261 (dettes clientele 1 503 441 exclues). cash=caisse/banque centrale 98820. DPS 425 XOF propose. Capital 20 000 M mais nominale non precisee -> shares null."
+}

@@ -1,0 +1,14 @@
+{
+  "symbol": "ORAC",
+  "year": 2025,
+  "revenue": 1197100,
+  "net_income": 129100,
+  "equity": 707800,
+  "debt_total": 335900,
+  "cash": 225800,
+  "eps": 857.1,
+  "dividend_per_share": 800,
+  "shares_outstanding": 150655350,
+  "_source": "ORAC_2025_*.pdf",
+  "_unit_note": "Orange CI consolide IFRS. Etats 'en Milliards FCFA' -> multiplie par 1000 pour millions. revenue = CA 1197,1 Mds -> 1197100. net_income = Resultat net attribuable aux proprietaires de la maison mere 129,1 Mds -> 129100 (resultat net ensemble consolide 167,8). equity = Total capitaux propres 707,8 Mds -> 707800. debt_total = Passifs financiers non courants 224,0 + courants 111,9 = 335,9 Mds -> 335900. cash = Disponibilites et quasi-disponibilites 225,8 Mds -> 225800. eps = resultat par action part mere 857,1 FCFA. dividend_per_share = 800 FCFA brut. shares = net_income part mere 129 100 000 000 / 857,1 ~ 150,6M actions (coherent avec dividende global 120 524 280 000 / 800 = 150 655 350)."
+}

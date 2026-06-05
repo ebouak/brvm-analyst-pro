@@ -1,0 +1,14 @@
+{
+  "symbol": "BOAC",
+  "year": 2024,
+  "revenue": 72724,
+  "net_income": 32044,
+  "equity": 112644,
+  "debt_total": null,
+  "cash": 181214,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "BOAC_2024_*.pdf",
+  "_unit_note": "Banque (etats reglementaires BCEAO), montants en millions de FCFA (Total bilan 1 075 479 M = ~1075 Md, plausible pour BOA-CI). revenue = Produit Net Bancaire (PNB) 72 724 ; net_income = Resultat Net 32 044 ; equity = Capitaux propres et ressources assimilees 112 644 ; cash = Caisse/Banque centrale/CCP 181 214. Dette financiere bancaire non isolable proprement -> null. Capital souscrit 40 000 M."
+}

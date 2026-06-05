@@ -1,0 +1,14 @@
+{
+  "symbol": "SGBC",
+  "year": 2025,
+  "revenue": 276048,
+  "net_income": 101352,
+  "equity": 495113,
+  "debt_total": 229970,
+  "cash": 371730,
+  "eps": null,
+  "dividend_per_share": 2606,
+  "shares_outstanding": 31111110,
+  "_source": "SGBC_2025_*.pdf",
+  "_unit_note": "Banque, tableaux 'en millions FCFA', valeurs gardees telles quelles. revenue=PNB 276048. net_income=resultat net 101352. equity=capitaux propres et ressources assimilees 495113. debt=dettes interbancaires 229970 (les dettes clientele 2 907 675 ne sont pas des passifs financiers de marche). cash=caisse/banque centrale 371730. DPS 2606 FCFA et 31 111 110 actions issus du projet d'affectation."
+}

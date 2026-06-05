@@ -1,0 +1,14 @@
+{
+  "symbol": "TTLS",
+  "year": 2025,
+  "revenue": 451054,
+  "net_income": 6147,
+  "equity": null,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "TTLS_2025_*.pdf",
+  "_unit_note": "TotalEnergies Marketing Senegal, en-tete 'en milliers de FCFA' -> divise par 1 000. revenue=ventes de marchandises 451 054 167 milliers -> 451054 M (le narratif cite un CA HT de 455,209 milliards, proche). net_income=resultat net 6 146 527 milliers -> 6147 M. Le texte extrait ne contient que le compte de resultat (pas de bilan) -> equity, debt, cash null."
+}

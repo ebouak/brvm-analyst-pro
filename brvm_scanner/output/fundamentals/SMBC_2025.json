@@ -1,0 +1,14 @@
+{
+  "symbol": "SMBC",
+  "year": 2025,
+  "revenue": 206740,
+  "net_income": 13075,
+  "equity": 42913,
+  "debt_total": 9204,
+  "cash": 23988,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SMBC_2025_*.pdf",
+  "_unit_note": "SMB (bitumes), SYSCOHADA 'en millions de FCFA'. revenue=chiffre d'affaires 206740. net_income=resultat net 13075. equity=capitaux propres 42913. debt=emprunts et dettes financieres 9204. cash=tresorerie actif 23988. Dividendes distribues 6236 M mais DPS et nb actions non donnes."
+}

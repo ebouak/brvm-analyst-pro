@@ -1,0 +1,14 @@
+{
+  "symbol": "SEMC",
+  "year": 2022,
+  "revenue": null,
+  "net_income": null,
+  "equity": null,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SEMC_2022_*.pdf",
+  "_unit_note": "EVIOSYS PACKAGING SIEM - Etats financiers de synthese au 31/12/2022. Le texte extrait ne contient que la page de garde (4 lignes : titre + mention de certification + date AGO 29/09/2023), aucune table financiere (bilan/compte de resultat). Extraction PDF probablement incomplete ou scanne image. Tous les fondamentaux -> null."
+}

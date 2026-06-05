@@ -1,0 +1,14 @@
+{
+  "symbol": "BNBC",
+  "year": 2025,
+  "revenue": 42454,
+  "net_income": 22,
+  "equity": 17770,
+  "debt_total": 209,
+  "cash": 1847,
+  "eps": null,
+  "dividend_per_share": 0,
+  "shares_outstanding": null,
+  "_source": "BNBC_2025_*.pdf",
+  "_unit_note": "Bernabe CI (SYSCOHADA). Tableaux en FRANCS CFA bruts: converti en millions (division par 1 000 000). revenue=Chiffre d'affaires 42 454 158 321 -> 42454. net_income=Resultat net 22 318 122 -> 22. equity=Total capitaux propres 17 769 953 951 -> 17770. debt_total=Emprunts et dettes financieres diverses 208 527 219 -> 209 (hors tresorerie passif/credits de tresorerie 18 536 M qui est decouvert bancaire). cash=Total tresorerie actif 1 846 931 207 -> 1847. dividende brut a distribuer = 0 (affecte au report a nouveau). eps/actions non donnes (capital 1 656 000 000)."
+}

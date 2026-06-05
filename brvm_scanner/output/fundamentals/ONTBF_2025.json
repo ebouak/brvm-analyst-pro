@@ -1,0 +1,14 @@
+{
+  "symbol": "ONTBF",
+  "year": 2025,
+  "revenue": 146177,
+  "net_income": 15887,
+  "equity": 57542,
+  "debt_total": 57796,
+  "cash": 60449,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": 34000000,
+  "_source": "ONTBF_2025_*.pdf",
+  "_unit_note": "Onatel Burkina (SYSCOHADA). Etats en FCFA bruts -> divise par 1 000 000. Beaucoup de cellules illisibles (PDF encode en glyphes cid), mais les totaux cles sont en clair. revenue = CHIFFRE D'AFFAIRES 146 176 657 128 -> 146177. net_income = RESULTAT NET 15 886 921 152 -> 15887. equity = TOTAL CAPITAUX PROPRES 57 541 603 762 -> 57542. debt_total = TOTAL DETTES FINANCIERES 69 691 712 889 inclut provisions risques/charges; emprunts et dettes financieres diverses seules illisibles -> approx via Total dettes financieres moins provisions; faute de detail lisible on retient TOTAL TRESORERIE PASSIF 49 799 634 185 (49800) + part dettes financieres. Valeur retenue = emprunts+tresorerie passif approx 57796 (incertain). cash = TOTAL TRESORERIE ACTIF 60 448 986 044 -> 60449. shares = capital 34 000 000 000 / nominale 1000 = 34 000 000. eps/dividende non lisibles."
+}

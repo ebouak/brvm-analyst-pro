@@ -1,0 +1,14 @@
+{
+  "symbol": "ORGT",
+  "year": 2025,
+  "revenue": 186609,
+  "net_income": 18355,
+  "equity": 113165,
+  "debt_total": 26365,
+  "cash": 346667,
+  "eps": 264,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "ORGT_2025_*.pdf",
+  "_unit_note": "Oragroup (banque) consolide IFRS. Etats explicitement 'En millions de FCFA' - gardes tels quels. revenue = Produit Net Bancaire 186609. net_income = Resultat net attribuable aux Actionnaires de la holding 18355 (resultat net ensemble consolide 21643). equity = TOTAL CAPITAUX PROPRES 113165 (part groupe 69479 + minoritaires 43686). debt_total = Dettes subordonnees 26365 (les dettes envers etablissements de credit/clientele sont l'activite bancaire, exclues). cash = Caisse et banques centrales 346667. eps = Resultat de base par action 264 FCFA. Pas de dividende (affectation en report a nouveau). shares non publie."
+}

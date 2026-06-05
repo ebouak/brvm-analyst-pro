@@ -1,0 +1,14 @@
+{
+  "symbol": "SCRC",
+  "year": 2025,
+  "revenue": 80569,
+  "net_income": -6132,
+  "equity": 13822,
+  "debt_total": 69109,
+  "cash": 4514,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": 8820000,
+  "_source": "SCRC_2025_*.pdf",
+  "_unit_note": "SUCRIVOIRE/SCRC (SYSCOHADA). Etats 'En XOF' (francs bruts) -> divise par 1 000 000 pour millions. revenue = CHIFFRE D'AFFAIRES 80 568 589 451 -> 80569. net_income = RESULTAT NET -6 131 800 226 -> -6132 (perte). equity = Total capitaux propres 13 822 035 189 -> 13822. debt_total = Dettes financieres et ressources assimilees 69 108 844 430 -> 69109. cash = Total tresorerie - Actif (Disponibilite) 4 513 670 176 -> 4514. Capital Social 8 820 000 000 / nominale 1000 = 8 820 000 actions. Pas de dividende (resultat deficitaire). eps non publie."
+}

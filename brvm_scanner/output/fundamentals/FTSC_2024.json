@@ -1,0 +1,14 @@
+{
+  "symbol": "FTSC",
+  "year": 2024,
+  "revenue": 30695,
+  "net_income": 18595,
+  "equity": 24837,
+  "debt_total": 3531,
+  "cash": 21385,
+  "eps": null,
+  "dividend_per_share": 2000.67,
+  "shares_outstanding": null,
+  "_source": "FTSC_2024_*.pdf",
+  "_unit_note": "Filtisac. En-tete: en milliers de F.CFA -> divise par 1000 pour millions. revenue = Chiffre d'affaires 30 694 517 K = 30 695 M ; net_income = Resultat net 18 595 275 K = 18 595 M ; equity = Fonds propres apres affectation 24 837 219 786 FCFA = 24 837 M ; debt_total = Dettes financieres 3 531 444 K = 3 531 M ; cash = Tresorerie Actif 21 384 793 K = 21 385 M ; dividend_per_share = dividende brut unitaire 2000,67 FCFA. Capital social 8 814 837 500 FCFA, valeur nominale non indiquee -> shares null."
+}

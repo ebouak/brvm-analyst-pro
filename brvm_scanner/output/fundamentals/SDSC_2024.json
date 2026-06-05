@@ -1,0 +1,14 @@
+{
+  "symbol": "SDSC",
+  "year": 2024,
+  "revenue": 85643,
+  "net_income": null,
+  "equity": null,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SDSC_2024_*.pdf",
+  "_unit_note": "Africa Global Logistics Cote d'Ivoire (ex-Bollore/SDV). Le texte extrait est UNIQUEMENT le rapport des commissaires aux comptes (exercice clos 31/12/2024), sans bilan ni compte de resultat chiffres complets. Seul chiffre exploitable: chiffre d'affaires 85 643 millions FCFA (deja en millions, cite comme point cle d'audit, = 98,90% des produits ordinaires). Resultat net, capitaux propres et dette absents du texte -> null."
+}

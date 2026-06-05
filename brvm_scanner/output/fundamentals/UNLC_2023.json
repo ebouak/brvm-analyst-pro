@@ -1,0 +1,14 @@
+{
+  "symbol": "UNLC",
+  "year": 2023,
+  "revenue": 34682,
+  "net_income": 640,
+  "equity": -10659,
+  "debt_total": 4379,
+  "cash": 2917,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "UNLC_2023_*.pdf",
+  "_unit_note": "UNILEVER COTE D'IVOIRE SA. Bilan/CR SYSCOHADA en FCFA bruts -> divise par 1 000 000. revenue = Chiffre d'affaires (XB) 34 682 083 215 = 34 682 M ; net_income = Resultat Net (XI) 640 334 855 = 640 M (retour au benefice apres -6,9 Md en 2022) ; equity = Total capitaux propres (CP) -10 658 856 096 = -10 659 M (NEGATIF, report a nouveau cumule -35,6 Md) ; debt_total = Total dettes financieres et ressources assimilees (DD) 4 379 101 937 = 4 379 M ; cash = Tresorerie-Actif (BT) 2 917 467 737 = 2 917 M. Capital 24 336 010 000 FCFA, nominale non donnee -> shares null. Capitaux propres negatifs: societe en situation de fonds propres deficitaires."
+}

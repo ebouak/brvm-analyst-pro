@@ -1,0 +1,14 @@
+{
+  "symbol": "STBC",
+  "year": 2025,
+  "revenue": 268074,
+  "net_income": 36158,
+  "equity": 57258,
+  "debt_total": 1,
+  "cash": 30763,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "STBC_2025_*.pdf",
+  "_unit_note": "SITAB (tabacs), SYSCOHADA en FCFA bruts -> divises par 1 000 000. revenue=ventes marchandises 268 020 013 096 + travaux 54 000 000 + produits accessoires 463 050 000 ~= 268074 (CA). net_income=benefice net 36 157 775 979 -> 36158. equity (capital 4 488 750 000 + prime 11 432 135 + ecart reeval 1 536 369 462 + reserve legale 897 750 000 + report 2 244 529 943 + resultat 36 157 775 979) ~= 57 257 etc -> 57258 M. debt=autres dettes financieres 1 400 000 -> 1 M (emprunts 0). cash=tresorerie actif 30 763 290 013 -> 30763. Dividendes 38 088 960 500 FCFA total; capital/nominal non donne -> shares null."
+}

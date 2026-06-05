@@ -1,0 +1,14 @@
+{
+  "symbol": "SIVC",
+  "year": 2023,
+  "revenue": 8512,
+  "net_income": 896,
+  "equity": 3212,
+  "debt_total": 1465,
+  "cash": 61,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "SIVC_unknown_*.pdf",
+  "_unit_note": "AIR LIQUIDE COTE D'IVOIRE (sigle ALCI). Fichier nomme 'unknown' mais le texte indique clairement Exercice clos le 31/12/2023 -> year=2023. Bilan/CR SYSCOHADA en FCFA bruts -> divise par 1 000 000. revenue = Chiffre d'affaires (XB) 8 512 305 646 = 8 512 M ; net_income = Resultat Net (XI) 895 708 500 = 896 M ; equity = Total capitaux propres (CP) 3 211 638 078 = 3 212 M ; debt_total = Total dettes financieres et ressources assimilees (DD) 1 464 685 387 = 1 465 M ; cash = Total Tresorerie-Actif (BT) 61 357 528 = 61 M. Capital 873 400 000 FCFA, nominale non donnee -> shares null."
+}

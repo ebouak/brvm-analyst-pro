@@ -1,0 +1,14 @@
+{
+  "symbol": "NEIC",
+  "year": 2025,
+  "revenue": null,
+  "net_income": null,
+  "equity": null,
+  "debt_total": null,
+  "cash": null,
+  "eps": null,
+  "dividend_per_share": null,
+  "shares_outstanding": null,
+  "_source": "NEIC_2025_*.pdf",
+  "_unit_note": "Texte extrait illisible/corrompu: les sections COMPTE DE RESULTAT et BILAN sont annoncees mais les chiffres apparaissent encodes/mojibake (ex: ':;7<<;==>;?>8') et non exploitables. Seul le capital social 255 316 500 FCFA est lisible. Aucun fondamental fiable extractible -> tous champs null. Re-extraction OCR du PDF recommandee."
+}
