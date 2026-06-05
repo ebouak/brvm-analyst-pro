@@ -21,6 +21,7 @@ const NAV: NavItem[] = [
   { href: '/portefeuille', label: '💼 Portefeuille' },
   { href: '/backtest', label: '🔬 Backtest' },
   { href: '/fondamentaux', label: '🏦 Analyse fondamentale' },
+  { href: '/admin/import-fondamentaux', label: '📥 Import IA' },
   { href: '/dashboard/reports', label: '📑 Rapports' },
   { href: '/methodologie', label: '📖 Méthodologie' },
 ];
