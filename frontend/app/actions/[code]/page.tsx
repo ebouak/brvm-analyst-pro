@@ -6,6 +6,7 @@ import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorChar
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
+import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, detect } from '@/lib/indicators';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
@@ -61,7 +62,7 @@ async function getData(code: string, fromDate?: string) {
         .eq('code', code),
       supabase
         .from('fundamentals')
-        .select('year, revenue, net_income, equity, cash, debt, bfr')
+        .select('year, revenue, net_income, equity, cash, debt, bfr, source_file, is_manual')
         .eq('code', code)
         .order('year', { ascending: false })
         .limit(3),
@@ -69,7 +70,7 @@ async function getData(code: string, fromDate?: string) {
 
   return {
     rows: ((hist ?? []) as ActionDaily[]).reverse(),
-    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string } | null,
+    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null } | null,
     signal: (sig?.[0] ?? null) as SignalDaily | null,
     dividends: divs ?? [],
     events: evts ?? [],
@@ -78,6 +79,7 @@ async function getData(code: string, fromDate?: string) {
     fundamentals: (fundsRows ?? []) as Array<{
       year: number | null; revenue: number | null; net_income: number | null;
       equity: number | null; cash: number | null; debt: number | null; bfr: number | null;
+      source_file: string | null; is_manual: boolean | null;
     }>,
   };
 }
@@ -366,65 +368,36 @@ export default async function InstrumentPage({
         </div>
       )}
 
-      {/* ── Fondamentaux ── */}
-      {fundamentals.length > 0 && (
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-3">🏦 Fondamentaux (états financiers)</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-right">
-              <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left text-muted font-normal pb-1.5 pr-3">Indicateur</th>
-                  {fundamentals.map((f) => (
-                    <th key={f.year} className="text-muted font-normal pb-1.5 px-2">{f.year ?? '—'}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {(
-                  [
-                    { key: 'revenue',    label: "Chiffre d'affaires" },
-                    { key: 'net_income', label: 'Résultat net' },
-                    { key: 'equity',     label: 'Capitaux propres' },
-                    { key: 'cash',       label: 'Trésorerie' },
-                    { key: 'debt',       label: 'Dette financière' },
-                  ] as { key: keyof typeof fundamentals[0]; label: string }[]
-                ).map(({ key, label }) => {
-                  const hasData = fundamentals.some((f) => f[key] != null);
-                  if (!hasData) return null;
-                  return (
-                    <tr key={key}>
-                      <td className="text-left text-muted py-1.5 pr-3">{label}</td>
-                      {fundamentals.map((f) => {
-                        const val = f[key] as number | null;
-                        return (
-                          <td key={f.year} className="tabular py-1.5 px-2">
-                            {val != null ? fmtFcfa(val) : <span className="text-muted">—</span>}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-                {/* Marge nette calculée */}
-                {fundamentals.some((f) => f.revenue && f.net_income) && (
-                  <tr>
-                    <td className="text-left text-muted py-1.5 pr-3">Marge nette</td>
-                    {fundamentals.map((f) => (
-                      <td key={f.year} className="tabular py-1.5 px-2">
-                        {f.revenue && f.net_income
-                          ? <span className={f.net_income > 0 ? 'text-up' : 'text-down'}>{((f.net_income / f.revenue) * 100).toFixed(1)}%</span>
-                          : <span className="text-muted">—</span>}
-                      </td>
-                    ))}
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-[10px] text-muted mt-2">Source : états financiers BDFIN (IFRS / SYSCOHADA). Valeurs en FCFA.</p>
-        </div>
-      )}
+      {/* ── Fondamentaux (analyse complète style T212) ── */}
+      {fundamentals.length > 0 && (() => {
+        const latest = fundamentals[0]!;
+        const closes = rows.map((r) => r.cours_jour).filter((c): c is number => c != null);
+        const range52 = {
+          low: closes.length ? Math.min(...closes) : null,
+          high: closes.length ? Math.max(...closes) : null,
+          current: last.cours_jour ?? null,
+        };
+        return (
+          <FundamentalsPanel
+            code={code}
+            year={latest.year}
+            inputs={{
+              cours: last.cours_jour ?? null,
+              shares: instrument?.shares ?? null,
+              revenue: latest.revenue,
+              net_income: latest.net_income,
+              equity: latest.equity,
+              debt: latest.debt,
+              dividende: lastDiv?.montant ?? null,
+            }}
+            sharesSource={instrument?.shares_source ?? null}
+            isManual={latest.is_manual ?? false}
+            history={fundamentals.map((f) => ({ year: f.year ?? 0, revenue: f.revenue, net_income: f.net_income }))}
+            sourceUrl={null}
+            range52={range52}
+          />
+        );
+      })()}
 
       {/* ── Dividendes + Événements ── */}
       <div className="grid grid-cols-2 gap-4">
