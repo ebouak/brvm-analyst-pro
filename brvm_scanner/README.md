@@ -7,6 +7,20 @@
 Application Streamlit d'analyse des 48 actions de la BRVM (UEMOA) : cours,
 backtest et fondamentaux extraits des états financiers (IFRS / SYSCOHADA).
 
+## Pipeline d'extraction des fondamentaux (PDF → Supabase)
+
+1. **Texte** : `python scripts/extract_texts.py [ANNÉE]`
+   → `output/texts/{SYMBOLE}_{ANNÉE}.txt` (PDF avec couche texte).
+2. **PDF scannés (OCR)** : `python scripts/ocr_extract.py [SYMBOLES…]`
+   → rattrape les PDF sans texte via Tesseract.
+   Pré-requis binaires (PowerShell admin) : `choco install tesseract poppler -y`
+   + `pip install pytesseract pdf2image pillow`.
+3. **Extraction LLM** : Claude Code lit chaque `output/texts/*.txt` et écrit
+   `output/fundamentals/{SYMBOLE}_{ANNÉE}.json` (règles : `prompts/extract_template.md`).
+   Valeurs en **millions de FCFA** ; unités (millions/milliers/bruts) gérées.
+4. **Push** : `node --env-file=../scraper/.env.local push_extracted.mjs`
+   → upsert `fundamentals` (×1 000 000) + `brvm_instruments.shares`, `is_manual=true`.
+
 ## Structure des données
 
 ```
