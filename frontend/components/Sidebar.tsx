@@ -8,10 +8,6 @@ interface NavItem {
   external?: boolean;
 }
 
-// URL de l'app Streamlit « Analyse fondamentale » (configurable via Vercel env).
-const SCANNER_URL =
-  process.env.NEXT_PUBLIC_SCANNER_URL || 'https://brvm-scanner.streamlit.app';
-
 const NAV: NavItem[] = [
   { href: '/', label: '📊 Dashboard' },
   { href: '/heatmap', label: '🔥 Heatmap' },
@@ -24,7 +20,7 @@ const NAV: NavItem[] = [
   { href: '/signaux', label: '🔔 Signaux' },
   { href: '/portefeuille', label: '💼 Portefeuille' },
   { href: '/backtest', label: '🔬 Backtest' },
-  { href: SCANNER_URL, label: '📑 Analyse fondamentale', external: true },
+  { href: '/fondamentaux', label: '🏦 Analyse fondamentale' },
   { href: '/dashboard/reports', label: '📑 Rapports' },
   { href: '/methodologie', label: '📖 Méthodologie' },
 ];

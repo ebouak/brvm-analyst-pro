@@ -1,5 +1,9 @@
 # BRVM Scanner
 
+> ⚠️ **DEPRECATED (2026-06-05)** — L'analyse fondamentale est désormais intégrée
+> au site Next.js (`/fondamentaux`), sans mise en veille ni synchro locale.
+> Cette app Streamlit n'est plus maintenue ; conservée pour archive uniquement.
+
 Application Streamlit d'analyse des 48 actions de la BRVM (UEMOA) : cours,
 backtest et fondamentaux extraits des états financiers (IFRS / SYSCOHADA).
 
