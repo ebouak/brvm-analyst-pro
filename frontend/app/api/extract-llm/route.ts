@@ -4,6 +4,7 @@ import {
   TEXT_PROVIDERS, VISION_PROVIDERS, SYSTEM_PROMPT, userPrompt, parseLlmJson,
   type Provider, type ExtractRequest,
 } from '@/lib/import/llmProviders';
+import { resolveApiKey } from '@/lib/server/apiKeys';
 
 export const maxDuration = 60;
 
@@ -13,20 +14,23 @@ interface ProviderCfg {
   model: (mode: 'text' | 'vision') => string;
 }
 
-function providers(): Record<Provider, ProviderCfg> {
+async function providers(): Promise<Record<Provider, ProviderCfg>> {
+  const [deepseekKey, mistralKey, xaiKey] = await Promise.all([
+    resolveApiKey('deepseek'), resolveApiKey('mistral'), resolveApiKey('xai'),
+  ]);
   return {
     deepseek: {
-      key: process.env.DEEPSEEK_API_KEY,
+      key: deepseekKey ?? undefined,
       url: 'https://api.deepseek.com/chat/completions',
       model: () => 'deepseek-chat',
     },
     mistral: {
-      key: process.env.MISTRAL_API_KEY,
+      key: mistralKey ?? undefined,
       url: 'https://api.mistral.ai/v1/chat/completions',
       model: (m) => (m === 'vision' ? 'pixtral-large-latest' : 'mistral-large-latest'),
     },
     grok: {
-      key: process.env.XAI_API_KEY,
+      key: xaiKey ?? undefined,
       url: 'https://api.x.ai/v1/chat/completions',
       model: (m) => (m === 'vision' ? 'grok-2-vision-latest' : 'grok-2-latest'),
     },
@@ -71,7 +75,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Requête invalide' }, { status: 400 });
   }
 
-  const cfgs = providers();
+  const cfgs = await providers();
   const order = req.mode === 'vision' ? VISION_PROVIDERS : TEXT_PROVIDERS;
   const available = order.filter((p) => cfgs[p].key);
   if (available.length === 0) {
