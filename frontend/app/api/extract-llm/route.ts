@@ -79,10 +79,10 @@ export async function POST(request: Request) {
   const order = req.mode === 'vision' ? VISION_PROVIDERS : TEXT_PROVIDERS;
   const available = order.filter((p) => cfgs[p].key);
   if (available.length === 0) {
-    return NextResponse.json(
-      { error: 'Aucune clé LLM configurée (DEEPSEEK_API_KEY requis ; MISTRAL_API_KEY pour les scannés).' },
-      { status: 503 },
-    );
+    const msg = req.mode === 'vision'
+      ? 'PDF scanné : aucune clé VISION configurée. Ajoute une clé Mistral ou Grok dans /admin/cles-api (DeepSeek ne lit pas les PDF scannés).'
+      : 'Aucune clé LLM configurée. Ajoute une clé DeepSeek, Mistral ou Grok dans /admin/cles-api.';
+    return NextResponse.json({ error: msg }, { status: 503 });
   }
 
   const errors: string[] = [];
