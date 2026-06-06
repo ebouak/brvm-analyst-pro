@@ -32,10 +32,20 @@ async function getData() {
     .limit(1);
   const prevDate = prevDateRow?.[0]?.date_marche ?? null;
 
+  // Les indices ne sont pas toujours scrapés à la même date que les cours.
+  // On prend leur PROPRE dernière date disponible (sinon le bloc reste vide).
+  const { data: lastIdxRow } = await supabase
+    .from('brvm_indices_daily')
+    .select('date_marche')
+    .not('valeur', 'is', null)
+    .order('date_marche', { ascending: false })
+    .limit(1);
+  const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
+
   const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }, { data: indicesHist }] =
     await Promise.all([
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
-      supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastDate),
+      supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastIdxDate),
       supabase
         .from('signals_daily')
         .select('code, signal, confiance, explication, score_total, date_marche')
