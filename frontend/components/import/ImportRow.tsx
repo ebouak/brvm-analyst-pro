@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { readPdf } from '@/lib/import/pdfClient';
 import { validateExtraction, type FundamentalExtraction } from '@/lib/import/validate';
+import { readJsonResponse } from '@/lib/import/fetchJson';
 import FundamentalReview from './FundamentalReview';
 
 type Status = 'pending' | 'reading' | 'analyzing' | 'auto-saving' | 'review' | 'done' | 'error';
@@ -42,10 +43,10 @@ export default function ImportRow({ file, validCodes }: Props) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode: pdf.mode, symbol, year, text: pdf.text, images: pdf.images }),
       });
-      const j = await res.json();
-      if (!res.ok) { setStatus('error'); setError(j.error ?? 'Échec analyse'); return; }
-      setProvider(j.provider);
-      const data = j.data as FundamentalExtraction;
+      const j = await readJsonResponse(res);
+      if (!j.ok) { setStatus('error'); setError((j.data.error as string) ?? 'Échec analyse'); return; }
+      setProvider(j.data.provider as string);
+      const data = j.data.data as FundamentalExtraction;
       setExtraction(data);
       const v = validateExtraction(data);
       setSuspects(v.suspects);
@@ -62,7 +63,8 @@ export default function ImportRow({ file, validCodes }: Props) {
             shares: data.shares_outstanding ?? null,
           }),
         });
-        if (!w.ok) { const e = await w.json(); setStatus('error'); setError(e.error ?? 'Échec écriture'); return; }
+        const wj = await readJsonResponse(w);
+        if (!wj.ok) { setStatus('error'); setError((wj.data.error as string) ?? 'Échec écriture'); return; }
         setStatus('done');
       } else {
         setStatus('review');

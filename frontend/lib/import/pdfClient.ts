@@ -12,8 +12,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 const TEXT_MIN = 200;
 const MAX_TEXT = 45000;
-const VISION_PAGES = 6;
-const RENDER_SCALE = 2.0;
+const VISION_PAGES = 4;        // bilan + compte de résultat tiennent en 4 pages
+const RENDER_SCALE = 1.4;      // ~100 dpi : lisible mais léger
+const JPEG_QUALITY = 0.7;      // JPEG compressé (bien plus léger que PNG)
+const MAX_PAYLOAD = 3_800_000; // borne sous la limite Vercel (~4,5 Mo body)
 
 export interface PdfResult {
   mode: 'text' | 'vision';
@@ -39,6 +41,7 @@ export async function readPdf(file: File): Promise<PdfResult> {
 
   const images: string[] = [];
   const nImg = Math.min(doc.numPages, VISION_PAGES);
+  let payload = 0;
   for (let i = 1; i <= nImg; i++) {
     const page = await doc.getPage(i);
     const viewport = page.getViewport({ scale: RENDER_SCALE });
@@ -47,7 +50,15 @@ export async function readPdf(file: File): Promise<PdfResult> {
     canvas.height = viewport.height;
     const ctx = canvas.getContext('2d')!;
     await page.render({ canvasContext: ctx, viewport }).promise;
-    images.push(canvas.toDataURL('image/png'));
+    // JPEG compressé : ~5-10× plus léger que PNG, suffisant pour l'OCR vision.
+    const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+    // On borne le payload total pour rester sous la limite serveur Vercel.
+    if (payload + dataUrl.length > MAX_PAYLOAD) break;
+    images.push(dataUrl);
+    payload += dataUrl.length;
+  }
+  if (images.length === 0) {
+    throw new Error('PDF scanné trop volumineux — réduisez le fichier ou utilisez un PDF natif.');
   }
   return { mode: 'vision', images };
 }
