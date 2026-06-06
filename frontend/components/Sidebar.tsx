@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { href: '/backtest', label: '🔬 Backtest' },
   { href: '/fondamentaux', label: '🏦 Analyse fondamentale' },
   { href: '/admin/import-fondamentaux', label: '📥 Import IA' },
+  { href: '/admin/cles-api', label: '🔑 Clés API' },
   { href: '/dashboard/reports', label: '📑 Rapports' },
   { href: '/methodologie', label: '📖 Méthodologie' },
 ];
