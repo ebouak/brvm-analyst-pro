@@ -199,9 +199,9 @@ export default async function Dashboard() {
 
       {/* ── Brief narratif ── */}
       {brief && (
-        <div className="relative">
+        <div>
           <DailyBrief brief={brief} />
-          <div className="absolute top-4 right-4"><BriefAssistant /></div>
+          <div className="flex justify-end mt-2"><BriefAssistant /></div>
         </div>
       )}
 
