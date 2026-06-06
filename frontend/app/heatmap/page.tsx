@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import HeatmapTreemap from '@/components/HeatmapTreemap';
+import HeatmapGrid from '@/components/HeatmapGrid';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
@@ -145,11 +145,8 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
           </Link>
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden"
-          style={{ background: '#161922', border: '1px solid #232733', flex: 1 }}
-        >
-          <HeatmapTreemap data={rows} height={600} />
+        <div className="rounded-lg p-4" style={{ background: '#161922', border: '1px solid #232733', flex: 1 }}>
+          <HeatmapGrid rows={rows} />
         </div>
       )}
 
@@ -177,7 +174,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
             ))}
           </div>
           <span className="text-xs" style={{ color: '#8b93a7' }}>
-            Taille = valeur échangée
+            Couleur = variation du jour
           </span>
         </div>
       )}
