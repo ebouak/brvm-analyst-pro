@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import HeatmapGrid from '@/components/HeatmapGrid';
+import brvmLogos from '@/lib/brvmLogos.json';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
@@ -141,7 +142,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
         </div>
       ) : (
         <div className="rounded-lg p-4" style={{ background: '#161922', border: '1px solid #232733', flex: 1 }}>
-          <HeatmapGrid rows={rows} />
+          <HeatmapGrid rows={rows} logos={brvmLogos as Record<string, string>} />
         </div>
       )}
 
