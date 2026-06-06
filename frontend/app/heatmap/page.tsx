@@ -42,42 +42,37 @@ async function getData(secteur: string | null) {
   const lastDate = lastRow?.[0]?.date_marche ?? null;
   if (!lastDate) return { lastDate: null, rows: [] as HeatmapNode[], allSectors: [] as string[] };
 
-  // Get all active instruments to filter by active flag
+  // Référentiel : le secteur fiable vit dans brvm_instruments (celui de
+  // brvm_actions_daily est quasi vide). On l'utilise pour filtrer les actifs
+  // ET enrichir le secteur de chaque ligne.
   const { data: instruments } = await supabase
     .from('brvm_instruments')
-    .select('code, actif')
+    .select('code, secteur, actif')
     .eq('actif', true);
 
   const activeCodes = new Set<string>((instruments ?? []).map((i: { code: string }) => i.code));
+  const sectorByCode = new Map<string, string>(
+    (instruments ?? [])
+      .filter((i: { secteur: string | null }) => i.secteur != null && i.secteur.length > 0)
+      .map((i: { code: string; secteur: string | null }) => [i.code, i.secteur as string]),
+  );
 
-  let query = supabase
+  const { data: actions } = await supabase
     .from('brvm_actions_daily')
     .select('code, designation, secteur, pays, cours_jour, variation_pct, volume, valeur_echangee')
     .eq('date_marche', lastDate);
 
+  // Enrichit le secteur depuis le référentiel (fallback « Autre »).
+  let rows: HeatmapNode[] = ((actions ?? []) as HeatmapNode[])
+    .filter((r) => !activeCodes.size || activeCodes.has(r.code))
+    .map((r) => ({ ...r, secteur: sectorByCode.get(r.code) ?? r.secteur ?? 'Autre' }));
+
   if (secteur) {
-    query = query.eq('secteur', secteur);
+    rows = rows.filter((r) => r.secteur === secteur);
   }
 
-  const { data: actions } = await query;
-
-  const rows: HeatmapNode[] = ((actions ?? []) as HeatmapNode[]).filter(
-    (r) => !activeCodes.size || activeCodes.has(r.code),
-  );
-
-  // Collect distinct sectors from all data (unfiltered) for the chip list
-  const { data: allSectorsRaw } = await supabase
-    .from('brvm_actions_daily')
-    .select('secteur')
-    .eq('date_marche', lastDate);
-
-  const allSectors = Array.from(
-    new Set<string>(
-      (allSectorsRaw ?? [])
-        .map((r: { secteur: string | null }) => r.secteur)
-        .filter((s): s is string => s != null && s.length > 0),
-    ),
-  ).sort();
+  // Liste des secteurs distincts (depuis le référentiel) pour les chips.
+  const allSectors = Array.from(new Set<string>(sectorByCode.values())).sort();
 
   return { lastDate, rows, allSectors };
 }
