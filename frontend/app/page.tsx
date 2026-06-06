@@ -5,6 +5,7 @@ import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard'
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import DailyBrief from '@/components/DailyBrief';
+import BriefAssistant from '@/components/dashboard/BriefAssistant';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
@@ -197,7 +198,12 @@ export default async function Dashboard() {
       </div>
 
       {/* ── Brief narratif ── */}
-      {brief && <DailyBrief brief={brief} />}
+      {brief && (
+        <div className="relative">
+          <DailyBrief brief={brief} />
+          <div className="absolute top-4 right-4"><BriefAssistant /></div>
+        </div>
+      )}
 
       {/* ── État du marché ── */}
       <MarketStateCard stats={stats} />
