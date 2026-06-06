@@ -1,23 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
 import HeatmapGrid from '@/components/HeatmapGrid';
 import brvmLogos from '@/lib/brvmLogos.json';
+import brvmSectors from '@/lib/brvmSectors.json';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Heatmap marché — BRVM Analyst Pro' };
-
-const SECTORS = [
-  'Banque',
-  'Agriculture',
-  'Distribution',
-  'Industrie',
-  'Services publics',
-  'Transport',
-  'Télécommunications',
-  'Autre',
-];
 
 const GRADIENT_STOPS: { pct: number; color: string; label: string }[] = [
   { pct: -8, color: '#f44336', label: '-8%' },
@@ -63,17 +53,17 @@ async function getData(secteur: string | null) {
     .select('code, designation, secteur, pays, cours_jour, variation_pct, volume, valeur_echangee')
     .eq('date_marche', lastDate);
 
-  // Enrichit le secteur depuis le référentiel (fallback « Autre »).
-  let rows: HeatmapNode[] = ((actions ?? []) as HeatmapNode[])
+  // Secteur : classification fiable du fichier brvmSectors (GICS, par ticker),
+  // sinon référentiel Supabase, sinon « Autre ».
+  const logoSectors = brvmSectors as Record<string, string>;
+  const enriched: HeatmapNode[] = ((actions ?? []) as HeatmapNode[])
     .filter((r) => !activeCodes.size || activeCodes.has(r.code))
-    .map((r) => ({ ...r, secteur: sectorByCode.get(r.code) ?? r.secteur ?? 'Autre' }));
+    .map((r) => ({ ...r, secteur: logoSectors[r.code] ?? sectorByCode.get(r.code) ?? r.secteur ?? 'Autre' }));
 
-  if (secteur) {
-    rows = rows.filter((r) => r.secteur === secteur);
-  }
+  // Liste complète des secteurs (avant filtre) pour les chips.
+  const allSectors = Array.from(new Set<string>(enriched.map((r) => r.secteur ?? 'Autre'))).sort();
 
-  // Liste des secteurs distincts (depuis le référentiel) pour les chips.
-  const allSectors = Array.from(new Set<string>(sectorByCode.values())).sort();
+  const rows = secteur ? enriched.filter((r) => r.secteur === secteur) : enriched;
 
   return { lastDate, rows, allSectors };
 }
