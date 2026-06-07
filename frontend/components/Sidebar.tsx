@@ -40,6 +40,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Admin',
     items: [
+      { href: '/assistant',                 label: 'Assistant IA' },
       { href: '/admin/import-fondamentaux', label: 'Import IA' },
       { href: '/admin/cles-api',            label: 'Clés API' },
       { href: '/methodologie',              label: 'Méthodologie' },

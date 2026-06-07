@@ -512,6 +512,7 @@ export default async function InstrumentPage({
             { href: '/portefeuille', label: 'Créer une alerte prix' },
             { href: `/api/export/actions/${code}`, label: 'Exporter CSV', external: true },
             { href: `/backtest?code=${code}`, label: 'Lancer un backtest' },
+            { href: `/assistant?symbole=${code}`, label: 'Analyser avec l\'IA' },
           ].map(({ href, label, external }) =>
             external ? (
               <a key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-up/30 hover:text-white transition-colors">
