@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import brvmLogos from '@/lib/brvmLogos.json';
+
+const LOGOS = brvmLogos as Record<string, string>;
 import PriceChart, { type PricePoint } from '@/components/PriceChart';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
 import RsiCursor from '@/components/RsiCursor';
@@ -9,7 +12,10 @@ import PublicationsModal, { type Publication } from '@/components/PublicationsMo
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { pickBestFundamental } from '@/lib/fundamentals';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
-import { smaSeries, rsiSeries, macdSeries, detect } from '@/lib/indicators';
+import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
+import { computeTechnicalSummary } from '@/lib/technicalSummary';
+import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
+import TechnicalSummary from '@/components/TechnicalSummary';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -117,6 +123,19 @@ export default async function InstrumentPage({
   const macdS = macdSeries(validCloses);
   const det   = detect(validCloses);
 
+  // ── Nouveaux indicateurs pour TechnicalSummary ──────────────────────────
+  const stochArr = stochasticSeries(validCloses, 14, 3, 3);
+  const lastStochPoint = stochArr[stochArr.length - 1] ?? null;
+  const lastStochK = lastStochPoint?.k ?? null;
+
+  const cciArr = cciSeries(validCloses, 20);
+  const lastCci = cciArr[cciArr.length - 1] ?? null;
+
+  const bbArr = bollingerSeries(validCloses, 20, 2);
+  const lastBbPoint = bbArr[bbArr.length - 1] ?? null;
+  const lastBbUpper = lastBbPoint?.upper ?? null;
+  const lastBbLower = lastBbPoint?.lower ?? null;
+
   // Réindexe RSI/MACD (calculés sur validCloses) vers rows
   let validIdx = 0;
   const rsiByRow   = rows.map((r) => r.cours_jour != null ? (rsiS[validIdx++] ?? null) : null);
@@ -142,6 +161,19 @@ export default async function InstrumentPage({
   const lastRsi = rsiByRow[rsiByRow.length - 1];
   const lastMacd = macdByRow[macdByRow.length - 1];
   const lastMa20 = ma20[ma20.length - 1] ?? null;
+  const technicalSummary: TechnicalSummaryResult = computeTechnicalSummary({
+    lastClose: validCloses[validCloses.length - 1] ?? null,
+    ma20Last: lastMa20,
+    macdVal: lastMacd?.macd ?? null,
+    macdSignal: lastMacd?.signal ?? null,
+    rsiVal: lastRsi ?? null,
+    bbUpper: lastBbUpper,
+    bbLower: lastBbLower,
+    stochK: lastStochK,
+    cci: lastCci,
+    dmiPlus: null,
+    dmiMinus: null,
+  });
   const lastMa50 = ma50[ma50.length - 1] ?? null;
   const lastMa200 = ma200[ma200.length - 1] ?? null;
 
@@ -177,6 +209,10 @@ export default async function InstrumentPage({
         <div className="flex items-center gap-3">
           <Link href="/actions" className="text-muted hover:text-up text-sm">← Retour</Link>
           <span className="text-muted text-sm">•</span>
+          {LOGOS[code] && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={LOGOS[code]} alt={code} width={36} height={36} className="rounded-lg object-contain" style={{ width: 36, height: 36, background: '#fff', padding: 3 }} />
+          )}
           <h1 className="text-xl font-bold">{code}</h1>
         </div>
         <div className="flex gap-2">
@@ -285,6 +321,9 @@ export default async function InstrumentPage({
           ))}
         </div>
       </div>
+
+      {/* ── Configuration technique ── */}
+      <TechnicalSummary result={technicalSummary} />
 
       {/* ── Indicateurs + Détections ── */}
       <div className="grid grid-cols-2 gap-4">
