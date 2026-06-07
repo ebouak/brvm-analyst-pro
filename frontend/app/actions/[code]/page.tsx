@@ -212,7 +212,7 @@ export default async function InstrumentPage({
           <span className="text-faint text-sm">·</span>
           {LOGOS[code] && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={LOGOS[code]} alt={code} width={32} height={32} className="rounded-lg object-contain shrink-0 bg-white p-0.5" style={{ width: 32, height: 32 }} />
+            <img src={LOGOS[code]} alt={code} width={32} height={32} className="w-8 h-8 rounded-lg object-contain shrink-0 bg-white p-0.5" />
           )}
           <div className="min-w-0">
             <h1 className="text-lg font-semibold tracking-tight leading-tight">{code}</h1>

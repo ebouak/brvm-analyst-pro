@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import SignalBadge from './SignalBadge';
 import type { SignalDaily } from '@/lib/types';
+import brvmLogos from '@/lib/brvmLogos.json';
+
+const LOGOS = brvmLogos as Record<string, string>;
 
 interface SignalRow extends SignalDaily {
   designation?: string | null;
@@ -28,6 +31,10 @@ export default function RecentSignalsCard({ signals }: { signals: SignalRow[] })
           <div key={s.code} className="border border-border/60 rounded-lg p-3 hover:border-up/20 transition-colors">
             <div className="flex items-center gap-2 mb-1">
               <SignalBadge signal={s.signal} confiance={s.confiance} />
+              {LOGOS[s.code] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={LOGOS[s.code]} alt={s.code} width={20} height={20} className="w-5 h-5 rounded object-contain bg-white p-px shrink-0" />
+              ) : null}
               <span className="font-medium text-sm">{s.code}</span>
               {s.designation && (
                 <span className="text-xs text-muted truncate max-w-[120px]">{s.designation}</span>

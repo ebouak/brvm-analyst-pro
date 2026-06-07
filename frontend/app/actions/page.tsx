@@ -15,17 +15,29 @@ async function getData() {
   const lastDate = lastRow?.[0]?.date_marche ?? null;
   if (!lastDate) return { lastDate: null, actions: [], signals: {} as Record<string, SignalDaily> };
 
-  const [{ data: actions }, { data: signals }] = await Promise.all([
+  const [{ data: actions }, { data: signals }, { data: instruments }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
     supabase.from('signals_daily').select('*').eq('date_marche', lastDate),
+    supabase.from('brvm_instruments').select('code, secteur, pays').eq('type', 'action'),
   ]);
+
+  // Enrichit chaque ligne daily avec le secteur/pays de brvm_instruments (source de vérité)
+  const instrMap: Record<string, { secteur: string | null; pays: string | null }> = {};
+  for (const i of (instruments ?? []) as { code: string; secteur: string | null; pays: string | null }[]) {
+    instrMap[i.code] = { secteur: i.secteur, pays: i.pays };
+  }
+  const enrichedActions = ((actions ?? []) as ActionDaily[]).map((a) => ({
+    ...a,
+    secteur: instrMap[a.code]?.secteur ?? a.secteur ?? null,
+    pays: instrMap[a.code]?.pays ?? a.pays ?? null,
+  }));
 
   const sigMap: Record<string, SignalDaily> = {};
   for (const s of (signals ?? []) as SignalDaily[]) sigMap[s.code] = s;
 
   return {
     lastDate,
-    actions: (actions ?? []) as ActionDaily[],
+    actions: enrichedActions,
     signals: sigMap,
   };
 }

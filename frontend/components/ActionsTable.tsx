@@ -6,6 +6,9 @@ import { fmtNumber, fmtFcfa } from '@/lib/format';
 import SignalBadge from './SignalBadge';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
+import brvmLogos from '@/lib/brvmLogos.json';
+
+const LOGOS = brvmLogos as Record<string, string>;
 
 type SortKey = 'code' | 'variation_pct' | 'cours_jour' | 'volume' | 'valeur_echangee';
 
@@ -132,10 +135,16 @@ export default function ActionsTable({
               return (
                 <tr key={a.code} className="border-b border-border/40 hover:bg-bg/40">
                   <td className="px-3 py-2">
-                    <Link href={`/actions/${a.code}`} className="font-medium hover:text-up">
-                      {a.code}
+                    <Link href={`/actions/${a.code}`} className="flex items-center gap-2 hover:text-up">
+                      {LOGOS[a.code] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={LOGOS[a.code]} alt={a.code} width={24} height={24} className="w-6 h-6 rounded object-contain shrink-0 bg-white p-px" />
+                      ) : (
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded text-[9px] font-bold shrink-0 bg-border text-faint">{a.code.slice(0,2)}</span>
+                      )}
+                      <span className="font-medium">{a.code}</span>
                     </Link>
-                    <div className="text-xs text-muted truncate max-w-[180px]">{a.designation}</div>
+                    <div className="text-xs text-muted truncate max-w-[180px] ml-8">{a.designation}</div>
                   </td>
                   <td className="px-3 py-2 text-xs text-muted">{a.secteur ?? '—'}</td>
                   <td className="px-3 py-2 text-right tabular">{fmtNumber(a.cours_jour)}</td>

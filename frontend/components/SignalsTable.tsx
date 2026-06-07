@@ -6,6 +6,9 @@ import { fmtNumber } from '@/lib/format';
 import SignalBadge from './SignalBadge';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
+import brvmLogos from '@/lib/brvmLogos.json';
+
+const LOGOS = brvmLogos as Record<string, string>;
 
 const SIGNAL_CSV_COLUMNS: CsvColumn<SignalRow>[] = [
   { header: 'Code', accessor: (r) => r.code },
@@ -252,14 +255,20 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
 
       {/* Instrument */}
       <td className="px-3 py-2">
-        <Link href={`/actions/${s.code}`} className="font-medium hover:text-up">
-          {s.code}
+        <Link href={`/actions/${s.code}`} className="flex items-center gap-2 hover:text-up group-hover:text-up">
+          {LOGOS[s.code] ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={LOGOS[s.code]} alt={s.code} width={24} height={24} className="w-6 h-6 rounded object-contain shrink-0 bg-white p-px" />
+          ) : (
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded text-[9px] font-bold shrink-0 bg-border text-faint">{s.code.slice(0, 2)}</span>
+          )}
+          <span className="font-medium">{s.code}</span>
         </Link>
         {s.designation && (
-          <div className="text-xs text-muted truncate max-w-[180px]">{s.designation}</div>
+          <div className="text-xs text-muted truncate max-w-[180px] ml-8">{s.designation}</div>
         )}
         {s.secteur && (
-          <div className="text-[10px] text-muted/60">{s.secteur}</div>
+          <div className="text-[10px] text-faint ml-8">{s.secteur}</div>
         )}
       </td>
 
