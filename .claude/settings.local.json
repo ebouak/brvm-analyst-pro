@@ -36,7 +36,13 @@
       "Bash(gh repo *)",
       "Bash(vercel inspect *)",
       "Bash(vercel project *)",
-      "Bash(vercel domains *)"
+      "Bash(vercel domains *)",
+      "Bash(SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY\" node seed-secteurs.mjs)",
+      "Bash(SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY node -e ' *)",
+      "Bash(curl -s -X POST https://vozwivhmjfmnnnjbbkpt.supabase.co/rest/v1/rpc/exec_sql -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY' -H 'Content-Type: application/json' -d '{\"sql\":\"alter table public.brvm_instruments add column if not exists notation_json jsonb;\"}')",
+      "Bash(curl -s -X POST https://vozwivhmjfmnnnjbbkpt.supabase.co/pg/query -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY' -H 'Content-Type: application/json' -d '{\"query\":\"alter table public.brvm_instruments add column if not exists notation_json jsonb;\"}')",
+      "Bash(SUPABASE_URL=https://vozwivhmjfmnnnjbbkpt.supabase.co SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY\" npm run notations:mock)",
+      "Bash(SUPABASE_URL=https://vozwivhmjfmnnnjbbkpt.supabase.co SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY\" npm run notations)"
     ]
   }
 }

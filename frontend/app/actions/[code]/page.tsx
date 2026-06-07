@@ -79,7 +79,11 @@ async function getData(code: string, fromDate?: string) {
 
   return {
     rows: ((hist ?? []) as ActionDaily[]).reverse(),
-    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null; flottant?: number | null; vol_moyen_30j?: number | null; notation_json?: { agence: string; note: string; perspective: string; date_notation: string; source_url?: string } | null } | null,
+    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null; flottant?: number | null; vol_moyen_30j?: number | null; notation_json?: {
+        agence: string; note: string; perspective: string; date_notation: string; source_url?: string;
+        court_terme?: string | null; long_terme?: string | null;
+        history?: { note: string; court_terme?: string | null; long_terme?: string | null; perspective: string; date_notation: string }[];
+      } | null } | null,
     signal: (sig?.[0] ?? null) as SignalDaily | null,
     dividends: divs ?? [],
     events: evts ?? [],
@@ -311,7 +315,10 @@ export default async function InstrumentPage({
 
       {/* ── Notation financière ── */}
       {instrument?.notation_json && (
-        <NotationBadge notation={instrument.notation_json} />
+        <NotationBadge
+          notation={instrument.notation_json}
+          notationPubs={publications.filter((p) => p.type_publication === 'notation')}
+        />
       )}
 
       {/* ── Bannière données insuffisantes ── */}

@@ -23,6 +23,31 @@ function fmtDateFR(dateStr: string): string {
   return `${d}/${m}/${y}`;
 }
 
+function PubRow({ pub }: { pub: Publication }) {
+  return (
+    <div className="flex items-start justify-between gap-3 border border-border/60 rounded-lg px-4 py-3 hover:border-border transition">
+      <div className="flex-1 min-w-0">
+        <span className="tabular text-xs text-muted block mb-1">{fmtDateFR(pub.date_publication)}</span>
+        <p className="text-sm text-white/90 line-clamp-2 leading-snug">{pub.libelle}</p>
+      </div>
+      {pub.source_url ? (
+        <a
+          href={pub.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-shrink-0 text-xs text-up border border-up/30 rounded px-2.5 py-1 hover:bg-up/10 transition whitespace-nowrap"
+        >
+          Voir →
+        </a>
+      ) : (
+        <span className="flex-shrink-0 text-xs text-faint border border-border rounded px-2.5 py-1 whitespace-nowrap cursor-not-allowed">
+          Voir →
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function PublicationsModal({ code, designation, publications, count }: Props) {
   const [open, setOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -130,7 +155,7 @@ export default function PublicationsModal({ code, designation, publications, cou
             </div>
 
             {/* List */}
-            <div className="flex-1 px-5 py-3 space-y-2">
+            <div className="flex-1 px-5 py-3">
               {filtered.length === 0 ? (
                 <div className="py-10 text-center">
                   <p className="text-muted text-sm">Aucune publication disponible pour cette action.</p>
@@ -138,44 +163,32 @@ export default function PublicationsModal({ code, designation, publications, cou
                     Les publications BDFIN sont ingérées quotidiennement à 13h30 UTC.
                   </p>
                 </div>
-              ) : (
-                filtered.map((pub) => {
-                  const { bg, text } = colorClassesForType(pub.type_publication);
+              ) : activeFilter === 'all' ? (
+                // Grouped by category
+                PUBLICATION_TYPES.map((pt) => {
+                  const group = filtered.filter((p) => p.type_publication === pt.value);
+                  if (group.length === 0) return null;
+                  const { bg, text } = colorClassesForType(pt.value);
                   return (
-                    <div
-                      key={pub.id}
-                      className="flex items-start justify-between gap-3 border border-border/60 rounded-lg px-4 py-3 hover:border-border transition"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="tabular text-xs text-muted">
-                            {fmtDateFR(pub.date_publication)}
-                          </span>
-                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-chip ${bg} ${text}`}>
-                            {labelForType(pub.type_publication)}
-                          </span>
-                        </div>
-                        <p className="text-sm text-white/90 line-clamp-2 leading-snug">
-                          {pub.libelle}
-                        </p>
-                      </div>
-                      {pub.source_url ? (
-                        <a
-                          href={pub.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-shrink-0 text-xs text-up border border-up/30 rounded px-2.5 py-1 hover:bg-up/10 transition whitespace-nowrap"
-                        >
-                          📄 Voir →
-                        </a>
-                      ) : (
-                        <span className="flex-shrink-0 text-xs text-faint border border-border rounded px-2.5 py-1 whitespace-nowrap cursor-not-allowed">
-                          📄 Voir →
+                    <div key={pt.value} className="mb-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-chip ${bg} ${text}`}>
+                          {pt.label}
                         </span>
-                      )}
+                        <span className="text-xs text-faint">{group.length} doc{group.length > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {group.map((pub) => (
+                          <PubRow key={pub.id} pub={pub} />
+                        ))}
+                      </div>
                     </div>
                   );
                 })
+              ) : (
+                <div className="space-y-2">
+                  {filtered.map((pub) => <PubRow key={pub.id} pub={pub} />)}
+                </div>
               )}
             </div>
 
