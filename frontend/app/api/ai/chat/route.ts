@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { resolveApiKey, type LlmProvider } from '@/lib/server/apiKeys';
-import { TOOL_DEFS, runTool } from '@/lib/briefTools';
+import { runTool } from '@/lib/briefTools';
 import { SYSTEM_PROMPT_ANALYSTE } from '@/lib/ai/prompts';
 
 export const maxDuration = 60;
@@ -12,88 +11,95 @@ const ORDER: { provider: LlmProvider; url: string; model: string }[] = [
   { provider: 'xai',      url: 'https://api.x.ai/v1/chat/completions',      model: 'grok-2-latest' },
 ];
 
-// ── Contexte marché injecté automatiquement ──────────────────────────────────
+// ── Détecte les codes BRVM mentionnés dans le texte ──────────────────────────
 
-async function buildContext(): Promise<string> {
+function extractCodes(text: string): string[] {
+  const matches = text.toUpperCase().match(/\b[A-Z]{2,5}C?\b/g) ?? [];
+  // Filtre les mots courants qui ne sont pas des codes
+  const SKIP = new Set(['RSI','MACD','EMA','SMA','BUY','HOLD','SELL','BRVM','FCFA','ROE','PER']);
+  return [...new Set(matches.filter((m) => !SKIP.has(m)))].slice(0, 3);
+}
+
+// ── Construit un contexte temps réel riche ────────────────────────────────────
+
+async function buildRichContext(question: string): Promise<string> {
+  const parts: string[] = [];
+
   try {
-    const sb = createClient();
-    const [
-      { data: lastRow },
-      { data: lastIdx },
-      { data: actions },
-      { data: signals },
-    ] = await Promise.all([
-      sb.from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1),
-      sb.from('brvm_indices_daily').select('code, valeur, variation_pct').order('date_marche', { ascending: false }).limit(4),
-      sb.from('brvm_actions_daily').select('code, variation_pct, valeur_echangee').order('date_marche', { ascending: false }).limit(47),
-      sb.from('signals_daily').select('code, signal, confiance').order('date_marche', { ascending: false }).limit(47),
+    // Données marché obligatoires (toujours chargées)
+    const [snapshot, topMovers, signals] = await Promise.all([
+      runTool('get_market_snapshot', {}),
+      runTool('get_top_movers', { limit: 5 }),
+      runTool('get_signals', {}),
     ]);
 
-    const lastDate = lastRow?.[0]?.date_marche;
-    if (!lastDate) return '';
+    const snap = snapshot as { date?: string; actions?: Array<{ code: string; variation_pct: number; valeur_echangee: number; cours_jour: number; secteur: string; signal?: string }> };
+    const movers = topMovers as { date?: string; top_hausse?: unknown[]; top_baisse?: unknown[]; top_volume?: unknown[] };
+    const sigs = signals as { date?: string; signals?: Array<{ code: string; signal: string; score_total: number; confiance: number; explication: string }> };
 
-    const rows = actions ?? [];
-    const up   = rows.filter((r) => (r.variation_pct ?? 0) > 0).length;
-    const down = rows.filter((r) => (r.variation_pct ?? 0) < 0).length;
-    const flat = rows.filter((r) => r.variation_pct === 0).length;
+    parts.push(`=== DONNÉES TEMPS RÉEL BRVM — ${snap.date ?? 'dernière séance'} ===`);
+    parts.push(`\n[MARCHÉ]\n${JSON.stringify(snap.actions?.slice(0, 47), null, 0)}`);
+    parts.push(`\n[TOP MOVERS]\n${JSON.stringify(movers, null, 0)}`);
+    parts.push(`\n[SIGNAUX BUY/HOLD/SELL]\n${JSON.stringify(sigs.signals?.slice(0, 20), null, 0)}`);
 
-    const topHausse = [...rows]
-      .sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0))
-      .slice(0, 3).map((r) => `${r.code} +${r.variation_pct?.toFixed(2)}%`).join(', ');
-    const topBaisse = [...rows]
-      .sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0))
-      .slice(0, 3).map((r) => `${r.code} ${r.variation_pct?.toFixed(2)}%`).join(', ');
-    const topVol = [...rows]
-      .sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0))
-      .slice(0, 3).map((r) => r.code).join(', ');
+    // Données spécifiques à la question (indices si demandés, obligations, etc.)
+    const q = question.toLowerCase();
+    const fetches: Promise<void>[] = [];
 
-    const idxTxt = (lastIdx ?? []).slice(0, 2)
-      .map((i) => `${i.code} ${i.valeur} (${i.variation_pct?.toFixed(2)}%)`).join(' | ');
+    if (q.includes('indice') || q.includes('brvm10') || q.includes('composite')) {
+      fetches.push(runTool('get_indices', { days: 10 }).then((d) => {
+        parts.push(`\n[INDICES]\n${JSON.stringify(d, null, 0)}`);
+      }));
+    }
+    if (q.includes('obligat') || q.includes('bond') || q.includes('taux')) {
+      fetches.push(runTool('get_obligations', {}).then((d) => {
+        parts.push(`\n[OBLIGATIONS]\n${JSON.stringify(d, null, 0)}`);
+      }));
+    }
+    if (q.includes('dividende') || q.includes('rendement')) {
+      fetches.push(runTool('get_dividends', {}).then((d) => {
+        parts.push(`\n[DIVIDENDES]\n${JSON.stringify(d, null, 0)}`);
+      }));
+    }
+    if (q.includes('secteur') || q.includes('sector')) {
+      fetches.push(runTool('get_sector_performance', {}).then((d) => {
+        parts.push(`\n[SECTEURS]\n${JSON.stringify(d, null, 0)}`);
+      }));
+    }
+    if (q.includes('notation') || q.includes('rating') || q.includes('bloomfield') || q.includes('gcr')) {
+      fetches.push(runTool('get_notations', {}).then((d) => {
+        parts.push(`\n[NOTATIONS]\n${JSON.stringify(d, null, 0)}`);
+      }));
+    }
+    if (q.includes('événement') || q.includes('evenement') || q.includes('ag ') || q.includes('résultat')) {
+      fetches.push(runTool('get_events', { limit: 20 }).then((d) => {
+        parts.push(`\n[ÉVÉNEMENTS]\n${JSON.stringify(d, null, 0)}`);
+      }));
+    }
 
-    const sigs = signals ?? [];
-    const nBuy  = sigs.filter((s) => s.signal === 'BUY').length;
-    const nSell = sigs.filter((s) => s.signal === 'SELL').length;
-    const nHold = sigs.filter((s) => s.signal === 'HOLD').length;
+    // Détail par société si un code est détecté
+    const codes = extractCodes(question);
+    for (const code of codes) {
+      fetches.push(runTool('search_company', { query: code }).then(async (found) => {
+        const res = found as { results?: Array<{ code: string }> };
+        const match = res.results?.[0];
+        if (match) {
+          const detail = await runTool('get_action_detail', { code: match.code, days: 30 });
+          parts.push(`\n[DÉTAIL ${match.code}]\n${JSON.stringify(detail, null, 0)}`);
+        }
+      }).catch(() => {}));
+    }
 
-    return `\n\n=== DONNÉES TEMPS RÉEL — Séance du ${lastDate} ===
-Indices: ${idxTxt}
-Marché: ${up} hausse · ${down} baisse · ${flat} stables (${rows.length} cotées)
-Top hausses: ${topHausse}
-Top baisses: ${topBaisse}
-Plus gros volumes: ${topVol}
-Signaux: ${nBuy} BUY · ${nHold} HOLD · ${nSell} SELL
-
-IMPORTANT: Tu as accès aux données temps réel via tes outils. Utilise-les SYSTÉMATIQUEMENT avant de répondre. Ne jamais inventer de données.
-Outils disponibles: get_market_snapshot, get_action_detail, get_signals, get_sector_performance, get_indices, get_obligations, get_dividends, get_events, get_notations, get_top_movers, get_fundamentals, search_company`;
-  } catch {
-    return '';
+    await Promise.all(fetches);
+  } catch (e) {
+    parts.push(`[Erreur chargement données: ${String(e)}]`);
   }
+
+  parts.push(`\nINSTRUCTION ABSOLUE: Utilise UNIQUEMENT les données ci-dessus pour répondre. Ne jamais inventer de chiffres. Si la donnée n'est pas dans le contexte, dis-le clairement.`);
+  return parts.join('\n');
 }
 
-// ── Appel LLM (non-streaming pour la boucle d'outils) ────────────────────────
-
-async function callLLM(
-  cfg: { url: string; model: string },
-  key: string,
-  messages: unknown[],
-  withTools: boolean,
-) {
-  const resp = await fetch(cfg.url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: cfg.model,
-      temperature: 0.15,
-      messages,
-      ...(withTools ? { tools: TOOL_DEFS, tool_choice: 'auto' } : {}),
-    }),
-    signal: AbortSignal.timeout(50000),
-  });
-  if (!resp.ok) throw new Error(`LLM HTTP ${resp.status}: ${await resp.text()}`);
-  return resp.json();
-}
-
-// ── Appel LLM streaming (réponse finale) ─────────────────────────────────────
+// ── Streaming LLM ─────────────────────────────────────────────────────────────
 
 async function* streamLLM(
   cfg: { url: string; model: string },
@@ -106,7 +112,10 @@ async function* streamLLM(
     body: JSON.stringify({ model: cfg.model, temperature: 0.15, stream: true, messages }),
     signal: AbortSignal.timeout(50000),
   });
-  if (!resp.ok) throw new Error(`LLM HTTP ${resp.status}`);
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`${resp.status}: ${err.slice(0, 200)}`);
+  }
 
   const reader = resp.body!.getReader();
   const dec = new TextDecoder();
@@ -135,10 +144,10 @@ async function* streamLLM(
 
 export async function POST(req: NextRequest) {
   // 1. Résoudre le provider
-  let chosen: { provider: string; url: string; model: string; key: string } | null = null;
+  let chosen: { url: string; model: string; key: string } | null = null;
   for (const c of ORDER) {
     const key = await resolveApiKey(c.provider);
-    if (key) { chosen = { ...c, key }; break; }
+    if (key) { chosen = { url: c.url, model: c.model, key }; break; }
   }
   if (!chosen) {
     return Response.json(
@@ -148,62 +157,27 @@ export async function POST(req: NextRequest) {
   }
 
   // 2. Parser le body
-  const body = await req.json().catch(() => null);
+  const body = await req.json().catch(() => null) as { messages?: Array<{ role: string; content: string }> } | null;
   if (!body?.messages?.length) {
     return Response.json({ error: 'messages requis' }, { status: 400 });
   }
 
-  // 3. Construire le contexte temps réel
-  const ctx = await buildContext();
-  const systemContent = SYSTEM_PROMPT_ANALYSTE + ctx;
+  // 3. Charger les données temps réel BRVM en parallèle du build messages
+  const lastQuestion = body.messages[body.messages.length - 1]?.content ?? '';
+  const ctx = await buildRichContext(lastQuestion);
 
-  // 4. Construire la conversation initiale
-  type ChatMsg = { role: string; content: unknown; tool_calls?: unknown; tool_call_id?: string; name?: string };
-  const messages: ChatMsg[] = [
-    { role: 'system', content: systemContent },
-    ...(body.messages as ChatMsg[]).slice(-8),
+  // 4. Construire la conversation avec contexte données injecté
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT_ANALYSTE + '\n\n' + ctx },
+    ...body.messages.slice(-8),
   ];
 
-  // 5. Boucle d'outils (max 5 tours, non-streaming)
-  const cfg = { url: chosen.url, model: chosen.model };
-  const key = chosen.key;
-
-  for (let turn = 0; turn < 5; turn++) {
-    const json = await callLLM(cfg, key, messages, true);
-    const msg = json?.choices?.[0]?.message;
-    if (!msg) break;
-
-    const toolCalls = msg.tool_calls as Array<{ id: string; function: { name: string; arguments: string } }> | undefined;
-    if (!toolCalls?.length) {
-      // Pas d'appel d'outil — on relance en mode streaming pour la réponse finale
-      break;
-    }
-
-    // Exécuter les outils en parallèle
-    messages.push({ role: 'assistant', content: msg.content ?? '', tool_calls: msg.tool_calls });
-    await Promise.all(
-      toolCalls.map(async (tc) => {
-        let args: Record<string, unknown> = {};
-        try { args = JSON.parse(tc.function.arguments || '{}'); } catch { /* ignore */ }
-        const result = await runTool(tc.function.name, args);
-        messages.push({
-          role: 'tool',
-          tool_call_id: tc.id,
-          name: tc.function.name,
-          content: JSON.stringify(result),
-        });
-      }),
-    );
-  }
-
-  // 6. Streaming de la réponse finale (sans tools pour forcer le texte)
+  // 5. Streaming
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        // Retirer tool_calls des messages pour le streaming final
-        const cleanMessages = messages.map(({ tool_calls: _tc, ...rest }) => rest);
-        for await (const text of streamLLM(cfg, key, cleanMessages)) {
+        for await (const text of streamLLM({ url: chosen!.url, model: chosen!.model }, chosen!.key, messages)) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
         }
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
@@ -216,10 +190,6 @@ export async function POST(req: NextRequest) {
   });
 
   return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    },
+    headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' },
   });
 }
