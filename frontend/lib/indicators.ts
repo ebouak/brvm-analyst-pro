@@ -202,3 +202,63 @@ export function detect(closes: number[]): Detection {
     breakoutDown,
   };
 }
+
+export interface StochasticPoint {
+  k: number | null; // %K lissé
+  d: number | null; // %D = SMA(%K)
+}
+
+/**
+ * Stochastique %K/%D calculé sur closes uniquement (approximation sans H/L).
+ * period=14, smoothK=3, smoothD=3 (valeurs classiques).
+ * Retourne un tableau aligné sur closes (null en tête tant que la fenêtre n'est pas remplie).
+ */
+export function stochasticSeries(
+  closes: number[],
+  period = 14,
+  smoothK = 3,
+  smoothD = 3,
+): StochasticPoint[] {
+  const n = closes.length;
+  const out: StochasticPoint[] = new Array(n).fill(null).map(() => ({ k: null, d: null }));
+
+  // %K brut
+  const rawK: (number | null)[] = new Array(n).fill(null);
+  for (let i = period - 1; i < n; i++) {
+    const window = closes.slice(i - period + 1, i + 1);
+    const lo = Math.min(...window);
+    const hi = Math.max(...window);
+    rawK[i] = hi === lo ? null : ((closes[i]! - lo) / (hi - lo)) * 100;
+  }
+
+  // %K lissé = SMA(rawK, smoothK)
+  const smoothedK: (number | null)[] = new Array(n).fill(null);
+  for (let i = period + smoothK - 2; i < n; i++) {
+    const window = rawK.slice(i - smoothK + 1, i + 1).filter((v): v is number => v != null);
+    if (window.length === smoothK) smoothedK[i] = window.reduce((a, b) => a + b, 0) / smoothK;
+  }
+
+  // %D = SMA(%K lissé, smoothD)
+  for (let i = period + smoothK + smoothD - 3; i < n; i++) {
+    const window = smoothedK.slice(i - smoothD + 1, i + 1).filter((v): v is number => v != null);
+    const d = window.length === smoothD ? window.reduce((a, b) => a + b, 0) / smoothD : null;
+    out[i] = { k: smoothedK[i] ?? null, d };
+  }
+
+  return out;
+}
+
+/**
+ * CCI (Commodity Channel Index) sur closes (approximation : typical price = close).
+ * period=20. Retourne tableau aligné sur closes.
+ */
+export function cciSeries(closes: number[], period = 20): (number | null)[] {
+  const out: (number | null)[] = new Array(closes.length).fill(null);
+  for (let i = period - 1; i < closes.length; i++) {
+    const window = closes.slice(i - period + 1, i + 1);
+    const mean = window.reduce((a, b) => a + b, 0) / period;
+    const mad = window.reduce((a, b) => a + Math.abs(b - mean), 0) / period;
+    out[i] = mad === 0 ? null : (closes[i]! - mean) / (0.015 * mad);
+  }
+  return out;
+}
