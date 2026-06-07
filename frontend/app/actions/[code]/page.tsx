@@ -289,50 +289,7 @@ export default async function InstrumentPage({
       )}
 
       {/* ── Graphique ── */}
-      <div className="bg-surface border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <span className="text-xs text-muted uppercase tracking-widest">
-            Cours ({rows.length} séance{rows.length > 1 ? 's' : ''})
-          </span>
-          <div className="flex gap-1">
-            {([
-              { label: '3M', from: new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10) },
-              { label: '6M', from: new Date(Date.now() - 180 * 86400000).toISOString().slice(0, 10) },
-              { label: '1A', from: new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10) },
-              { label: '2A', from: new Date(Date.now() - 730 * 86400000).toISOString().slice(0, 10) },
-              { label: 'Max', from: '' },
-            ] as { label: string; from: string }[]).map(({ label, from }) => {
-              const active = from === fromDate || (label === 'Max' && !fromDate);
-              return (
-                <a
-                  key={label}
-                  href={from ? `?from=${from}` : `?`}
-                  className={`text-xs px-2.5 py-1 rounded-chip border transition-colors ${
-                    active
-                      ? 'border-up/60 text-up bg-up/10'
-                      : 'border-border text-faint hover:border-border hover:text-muted'
-                  }`}
-                >
-                  {label}
-                </a>
-              );
-            })}
-          </div>
-        </div>
-        <PriceChart data={priceData} designation={instrument?.designation ?? last.designation ?? code} />
-        <div className="grid grid-cols-3 gap-3 mt-4 pt-3 border-t border-border/30">
-          {[
-            { label: 'MA20', val: lastMa20, color: 'text-warn' },
-            { label: 'MA50', val: lastMa50, color: 'text-blue' },
-            { label: 'MA200', val: lastMa200, color: 'text-purple' },
-          ].map(({ label, val, color }) => (
-            <div key={label} className="text-center">
-              <div className={`text-[11px] font-medium ${color} mb-0.5`}>{label}</div>
-              <div className="tabular text-sm font-medium">{val != null ? fmtNumber(val) : '—'}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <PriceChart data={priceData} designation={instrument?.designation ?? last.designation ?? code} />
 
       {/* ── Configuration technique ── */}
       <TechnicalSummary result={technicalSummary} />
