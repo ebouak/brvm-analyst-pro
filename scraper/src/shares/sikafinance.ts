@@ -86,7 +86,7 @@ export async function fetchSharesFromSikafinance(): Promise<SharesRow[]> {
   $('table tbody tr').each((_, tr) => {
     const cells = $(tr).find('td').map((__, td) => $(td).text().trim()).get();
     if (cells.length < 2) return;
-    const name = cells[0];
+    const name = cells[0] ?? '';
     const nums = cells.map((c) => parseFrNumber(c)).filter((n): n is number => n != null);
     if (!nums.length) return;
     const capitalisation = Math.max(...nums);

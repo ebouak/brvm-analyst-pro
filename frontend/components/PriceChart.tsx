@@ -412,7 +412,7 @@ export default function PriceChart({ data, designation }: Props) {
   // ── SSR guard ─────────────────────────────────────────────────────────────
   if (!mounted) {
     return (
-      <div className="bg-surface border border-border rounded-xl p-4 h-[420px]" />
+      <div className="bg-surface border border-border rounded-xl p-4 h-[420px] animate-pulse" />
     );
   }
 
@@ -463,7 +463,7 @@ export default function PriceChart({ data, designation }: Props) {
                 key={p}
                 type="button"
                 onClick={() => setPeriod(p)}
-                className={`text-xs px-2 py-0.5 rounded border transition ${
+                className={`text-xs px-2 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-up/50 ${
                   period === p
                     ? 'bg-up text-bg border-up'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'
@@ -487,7 +487,7 @@ export default function PriceChart({ data, designation }: Props) {
                 key={key}
                 type="button"
                 onClick={() => toggle(key)}
-                className={`text-xs px-2 py-0.5 rounded border transition ${
+                className={`text-xs px-2 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-up/50 ${
                   active
                     ? 'bg-up/15 text-up border-up/40'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'
@@ -507,7 +507,7 @@ export default function PriceChart({ data, designation }: Props) {
                 key={key}
                 type="button"
                 onClick={() => toggle(key)}
-                className={`text-xs px-2 py-0.5 rounded border transition ${
+                className={`text-xs px-2 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-up/50 ${
                   active
                     ? 'bg-up/15 text-up border-up/40'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'

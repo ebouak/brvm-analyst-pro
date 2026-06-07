@@ -439,7 +439,7 @@ export default async function InstrumentPage({
                     <span className="text-[10px] text-faint">{e.event_date}</span>
                     <span className="text-[10px] border border-border/60 rounded px-1.5 py-px text-faint">{e.event_type}</span>
                   </div>
-                  <p className="text-xs text-white/80 line-clamp-2 mb-1">{e.title}</p>
+                  <p className="text-xs text-muted line-clamp-2 mb-1">{e.title}</p>
                   <Link href={`/dashboard/reports/events/${e.id}`} className="text-[11px] text-up hover:underline">Lire →</Link>
                 </div>
               ))}
@@ -464,11 +464,11 @@ export default async function InstrumentPage({
             { href: `/backtest?code=${code}`, label: 'Lancer un backtest' },
           ].map(({ href, label, external }) =>
             external ? (
-              <a key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-border hover:text-white transition-colors">
+              <a key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-up/30 hover:text-white transition-colors">
                 {label}
               </a>
             ) : (
-              <Link key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-border hover:text-white transition-colors">
+              <Link key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-up/30 hover:text-white transition-colors">
                 {label}
               </Link>
             )

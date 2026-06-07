@@ -115,7 +115,7 @@ export default function ActionsTable({
         />
       </div>
 
-      <div className="bg-surface border border-border rounded-xl overflow-hidden">
+      <div className="bg-surface border border-border rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-xs text-muted border-b border-border bg-bg/40">
             <tr>

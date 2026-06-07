@@ -13,7 +13,30 @@
       "PowerShell(Copy-Item \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env.local\" \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\.env\" -Force)",
       "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -TimeoutSec 5; \"OK: HTTP $\\($r.StatusCode\\)\" } catch { \"Dev server down or slow: $\\($_.Exception.Message\\)\" })",
       "PowerShell(vercel --version 2>&1)",
-      "PowerShell(vercel whoami 2>&1)"
+      "PowerShell(vercel whoami 2>&1)",
+      "Bash(NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx src/index.ts shares)",
+      "Bash(python -c ' *)",
+      "Bash(python scripts/extract_texts.py)",
+      "Bash(tesseract --version)",
+      "Bash(python -c \"import pytesseract; print\\('pytesseract OK'\\)\")",
+      "Bash(python -c \"import pdf2image; print\\('pdf2image OK'\\)\")",
+      "PowerShell(winget install --id UB-Mannheim.TesseractOCR -e --accept-source-agreements --accept-package-agreements 2>&1)",
+      "PowerShell(winget install --id UB-Mannheim.TesseractOCR -e --silent --accept-source-agreements --accept-package-agreements --disable-interactivity 2>&1)",
+      "PowerShell($ErrorActionPreference='Continue')",
+      "PowerShell($paths = @\\(\"C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.exe\", \"$env:LOCALAPPDATA\\\\Programs\\\\Tesseract-OCR\\\\tesseract.exe\"\\); foreach\\($p in $paths\\){ if\\(Test-Path $p\\){ Write-Output \"TROUVE: $p\" } }; if\\(Get-Command tesseract -ErrorAction SilentlyContinue\\){ Write-Output \"tesseract dans PATH\" } else { Write-Output \"tesseract absent du PATH\" }; choco --version 2>&1 | Select-Object -First 1)",
+      "Bash(python -c \"import pytesseract, pdf2image; print\\('libs OK'\\)\")",
+      "Bash(timeout 180 winget install --id UB-Mannheim.TesseractOCR -e --scope user --accept-source-agreements --accept-package-agreements)",
+      "Bash(python -m py_compile scripts/ocr_extract.py)",
+      "Bash(python scripts/ocr_extract.py BOABF)",
+      "Bash(python -c \"import io; print\\(io.open\\('output/texts/NEIC_2025.txt',encoding='utf-8'\\).read\\(\\)[:600]\\)\")",
+      "Bash(python -c \"import io; print\\(io.open\\('output/texts/SEMC_2022.txt',encoding='utf-8'\\).read\\(\\)[:300]\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)[:10]\\); print\\(f'Total: {len\\(d\\)}'\\)\")",
+      "Bash(grep -v \"^.*//\\\\|secteur\\\\|Map\\\\|Set\\\\|push\\\\|has\\\\|get\")",
+      "Bash(grep -rln \"href.*actions/\\\\$\\\\|Link.*actions\" components/ app/)",
+      "Bash(gh repo *)",
+      "Bash(vercel inspect *)",
+      "Bash(vercel project *)",
+      "Bash(vercel domains *)"
     ]
   }
 }

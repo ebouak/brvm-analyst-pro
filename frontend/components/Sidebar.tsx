@@ -9,22 +9,22 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { href: '/', label: '📊 Dashboard' },
-  { href: '/heatmap', label: '🔥 Heatmap' },
-  { href: '/actions', label: '📈 Actions' },
-  { href: '/obligations', label: '📋 Obligations' },
-  { href: '/dividendes', label: '💰 Dividendes' },
-  { href: '/secteurs', label: '🏭 Secteurs' },
-  { href: '/scanner', label: '🎯 Scanner' },
-  { href: '/calendrier', label: '📅 Calendrier' },
-  { href: '/signaux', label: '🔔 Signaux' },
-  { href: '/portefeuille', label: '💼 Portefeuille' },
-  { href: '/backtest', label: '🔬 Backtest' },
-  { href: '/fondamentaux', label: '🏦 Analyse fondamentale' },
-  { href: '/admin/import-fondamentaux', label: '📥 Import IA' },
-  { href: '/admin/cles-api', label: '🔑 Clés API' },
-  { href: '/dashboard/reports', label: '📑 Rapports' },
-  { href: '/methodologie', label: '📖 Méthodologie' },
+  { href: '/', label: 'Dashboard' },
+  { href: '/heatmap', label: 'Heatmap' },
+  { href: '/actions', label: 'Actions' },
+  { href: '/obligations', label: 'Obligations' },
+  { href: '/dividendes', label: 'Dividendes' },
+  { href: '/secteurs', label: 'Secteurs' },
+  { href: '/scanner', label: 'Scanner' },
+  { href: '/calendrier', label: 'Calendrier' },
+  { href: '/signaux', label: 'Signaux' },
+  { href: '/portefeuille', label: 'Portefeuille' },
+  { href: '/backtest', label: 'Backtest' },
+  { href: '/fondamentaux', label: 'Analyse fondamentale' },
+  { href: '/admin/import-fondamentaux', label: 'Import IA' },
+  { href: '/admin/cles-api', label: 'Clés API' },
+  { href: '/dashboard/reports', label: 'Rapports' },
+  { href: '/methodologie', label: 'Méthodologie' },
 ];
 
 const ITEM_CLASS = 'block px-3 py-2 rounded text-sm transition';
@@ -61,7 +61,8 @@ export default function Sidebar() {
             <Link
               key={n.href}
               href={n.href}
-              className={`${ITEM_CLASS} ${active ? ACTIVE_CLASS : INACTIVE_CLASS}`}
+              aria-current={active ? 'page' : undefined}
+            className={`${ITEM_CLASS} ${active ? ACTIVE_CLASS : INACTIVE_CLASS}`}
             >
               {n.label}
             </Link>

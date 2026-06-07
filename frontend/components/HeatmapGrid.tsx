@@ -56,21 +56,21 @@ function Tile({ node, logoUrl }: LogoTileProps) {
         <img
           src={logoUrl}
           alt={node.code}
-          width={28}
-          height={28}
-          className="rounded-md bg-white object-contain"
-          style={{ width: 28, height: 28 }}
+          width={40}
+          height={40}
+          className="rounded-md object-contain"
+          style={{ width: 40, height: 40, background: '#fff', padding: 2 }}
           onError={() => setImgError(true)}
         />
       ) : (
         <div
           className="flex items-center justify-center rounded-md text-[11px] font-bold"
-          style={{ width: 28, height: 28, background: monoColor(node.code), color: '#fff' }}
+          style={{ width: 40, height: 40, background: monoColor(node.code), color: '#fff' }}
         >
           {initials}
         </div>
       )}
-      <span className="mt-1 text-[11px] font-semibold leading-none tabular">{node.code}</span>
+      <span className="mt-1.5 text-[11px] font-semibold leading-none tabular">{node.code}</span>
       <span className="mt-0.5 text-[10px] font-medium leading-none tabular opacity-90">
         {fmtPct(node.variation_pct)}
       </span>

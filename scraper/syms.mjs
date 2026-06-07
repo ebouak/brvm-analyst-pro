@@ -1,0 +1,10 @@
+import 'dotenv/config';
+import { createClient } from '@supabase/supabase-js';
+import { writeFileSync } from 'fs';
+const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const { data } = await sb.from('brvm_instruments').select('code,designation,secteur,pays').eq('type','action').eq('actif',true).order('code');
+const out = {};
+for (const r of data) out[r.code] = { name: r.designation ?? r.code, sector: r.secteur ?? null, country: r.pays ?? null };
+writeFileSync('symbols_seed.json', JSON.stringify(out, null, 2));
+console.log('Symbols:', Object.keys(out).length);
+console.log(JSON.stringify(Object.entries(out).slice(0,3)));
