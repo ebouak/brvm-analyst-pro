@@ -81,6 +81,8 @@ function phrase(id: TechnicalSignal['id'], direction: SignalDirection, value: nu
         : direction === 'down'
         ? `CCI 20 est à ${v} — momentum négatif`
         : `CCI 20 est à ${v} — zone neutre`;
+    default:
+      throw new Error(`Unknown signal id: ${id as string}`);
   }
 }
 
