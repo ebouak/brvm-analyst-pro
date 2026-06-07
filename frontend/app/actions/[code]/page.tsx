@@ -16,6 +16,7 @@ import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSe
 import { computeTechnicalSummary } from '@/lib/technicalSummary';
 import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
 import TechnicalSummary from '@/components/TechnicalSummary';
+import NotationBadge from '@/components/NotationBadge';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -77,7 +78,7 @@ async function getData(code: string, fromDate?: string) {
 
   return {
     rows: ((hist ?? []) as ActionDaily[]).reverse(),
-    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null } | null,
+    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null; notation_json?: { agence: string; note: string; perspective: string; date_notation: string; source_url?: string } | null } | null,
     signal: (sig?.[0] ?? null) as SignalDaily | null,
     dividends: divs ?? [],
     events: evts ?? [],
@@ -259,6 +260,11 @@ export default async function InstrumentPage({
           <Metric label="Clôture préc." value={fmtNumber(last.cours_precedent) + ' FCFA'} />
         </div>
       </div>
+
+      {/* ── Notation financière ── */}
+      {instrument?.notation_json && (
+        <NotationBadge notation={instrument.notation_json} />
+      )}
 
       {/* ── Bannière données insuffisantes ── */}
       {rows.length < 20 && (
