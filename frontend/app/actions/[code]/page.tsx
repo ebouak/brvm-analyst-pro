@@ -229,6 +229,12 @@ export default async function InstrumentPage({
           <Link href="/portefeuille" className="text-xs border border-border rounded px-2 py-1 hover:border-up/40 hover:text-up transition">
             ⚙️ Alertes
           </Link>
+          <Link
+            href={`/actions/${code}/financials`}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-surface border border-border text-muted hover:text-white transition-colors"
+          >
+            📊 Données financières
+          </Link>
         </div>
       </div>
 
