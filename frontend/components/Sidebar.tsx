@@ -18,6 +18,7 @@ const NAV: NavItem[] = [
   { href: '/scanner', label: 'Scanner' },
   { href: '/calendrier', label: 'Calendrier' },
   { href: '/signaux', label: 'Signaux' },
+  { href: '/notations', label: 'Notations' },
   { href: '/portefeuille', label: 'Portefeuille' },
   { href: '/backtest', label: 'Backtest' },
   { href: '/fondamentaux', label: 'Analyse fondamentale' },
