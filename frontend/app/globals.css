@@ -2,44 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
 
 :root { color-scheme: dark; }
 
 body {
-  background-color: #0f1117;
-  color: #e6e9f0;
+  background-color: #0d0f17;
+  color: #e8e3dc;
   font-family: 'Inter', system-ui, sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Chiffres financiers en police mono (§10). */
-.tabular { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+/* Chiffres financiers — police mono tabular */
+.tabular {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
 
-/* Champ select commun (scanner, filtres). */
+/* Accent focus ring global (Claude orange) */
+*:focus-visible {
+  outline: 2px solid #cf6b4e;
+  outline-offset: 2px;
+}
+
+/* Select commun */
 .select-field {
-  background-color: #0f1117;
-  border: 1px solid #232733;
+  background-color: #0d0f17;
+  border: 1px solid #1e2235;
   border-radius: 0.5rem;
   padding: 0.4rem 0.65rem;
   font-size: 0.875rem;
-  color: #e6e9f0;
+  color: #e8e3dc;
   width: 100%;
   outline: none;
   transition: border-color 0.15s;
 }
-.select-field:focus { border-color: #00c853; }
-.select-field option { background-color: #161922; }
+.select-field:focus { border-color: #cf6b4e; }
+.select-field option { background-color: #13161f; }
 
-/* Skeleton de chargement. */
+/* Skeleton shimmer — transform-based (GPU composited, no paint) */
 .skeleton {
-  background: linear-gradient(90deg, #161922 25%, #20242f 50%, #161922 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+  position: relative;
+  overflow: hidden;
+  background: #13161f;
   border-radius: 6px;
 }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #1a1d2e 50%, transparent 100%);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
 
-/* Impression / export PDF (§13) */
+/* Scrollbar — Claude Code style */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1e2235; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #cf6b4e55; }
+
+/* Impression PDF */
 @media print {
   aside { display: none !important; }
   .no-print { display: none !important; }

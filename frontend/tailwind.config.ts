@@ -1,6 +1,6 @@
 import type { Config } from 'tailwindcss';
 
-// Design tokens — Dark Finance (sync Figma Variables collection)
+// Design tokens — Dark Finance × Claude Code aesthetic
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   darkMode: 'class',
@@ -8,23 +8,31 @@ const config: Config = {
     extend: {
       // ── Colors ──────────────────────────────────────────────────────────────
       colors: {
-        // Backgrounds
-        bg:      '#0f1117',   // bg.primary
-        surface: '#161922',   // bg.surface
-        elevated:'#1c2030',   // bg.surface-elevated
-        border:  '#232733',   // border.default
+        // Backgrounds (Claude Code dark palette)
+        bg:       '#0d0f17',   // page background — slightly deeper
+        surface:  '#13161f',   // cards, panels
+        elevated: '#1a1d2e',   // modals, dropdowns
+        border:   '#1e2235',   // borders — cooler, more refined
 
-        // Status / signals
-        up:   '#00c853',   // status.bull / signal.buy
-        down: '#f44336',   // status.bear / signal.sell
-        warn: '#ffb300',   // status.warning
-        info: '#2196f3',   // status.info
-        blue: '#42a5f5',   // accent.blue
-        purple: '#7e57c2', // accent.purple
+        // Claude accent — warm coral/orange (Anthropic brand)
+        accent:   '#cf6b4e',   // primary UI accent (CTA, active nav, focus)
+        'accent-dim': '#a3523a', // pressed / darker
+        'accent-glow': '#cf6b4e33', // glow / bg tint
 
-        // Text
-        muted:   '#8b93a7',   // text.secondary
-        faint:   '#4a5268',   // text.disabled
+        // Financial signals — unchanged (semantic, must stay green/red)
+        up:   '#00c853',   // bull / BUY
+        down: '#f44336',   // bear / SELL
+        warn: '#ffb300',   // caution / HOLD
+        info: '#2196f3',   // informational
+
+        // Accents
+        blue:   '#42a5f5',
+        purple: '#7e57c2',
+
+        // Text hierarchy
+        white:  '#e8e3dc',   // primary text — warm white (Claude feel)
+        muted:  '#8892a4',   // secondary text
+        faint:  '#3d4461',   // disabled / tertiary
       },
 
       // ── Typography ──────────────────────────────────────────────────────────
@@ -44,21 +52,22 @@ const config: Config = {
 
       // ── Spacing ─────────────────────────────────────────────────────────────
       spacing: {
-        section: '24px',  // spacing.section
-        card:    '16px',  // spacing.card
+        section: '24px',
+        card:    '16px',
       },
 
       // ── Border radius ────────────────────────────────────────────────────────
       borderRadius: {
-        card: '12px',   // radius.md (cards)
-        chip: '6px',    // radius.sm (badges, pills)
-        full: '9999px', // radius.full
+        card: '10px',
+        chip: '6px',
+        full: '9999px',
       },
 
       // ── Box shadows ──────────────────────────────────────────────────────────
       boxShadow: {
-        card:  '0 2px 8px rgba(0,0,0,0.4)',
-        modal: '0 8px 32px rgba(0,0,0,0.6)',
+        card:   '0 2px 12px rgba(0,0,0,0.5)',
+        modal:  '0 8px 40px rgba(0,0,0,0.7)',
+        accent: '0 0 0 2px rgba(207,107,78,0.4)',
       },
     },
   },
