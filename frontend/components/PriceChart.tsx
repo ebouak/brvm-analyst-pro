@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   createChart,
+  createSeriesMarkers,
   HistogramSeries,
   AreaSeries,
   LineSeries,
@@ -35,9 +36,17 @@ export interface PricePoint {
   volume: number | null;
 }
 
+export interface ChartMarker {
+  date: string;
+  label: string;   // 'AG' | 'D' | 'RT' | 'A'
+  color: string;
+  title: string;
+}
+
 interface Props {
   data: PricePoint[];
   designation?: string;
+  markers?: ChartMarker[];
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -140,7 +149,7 @@ function toLineData(dates: string[], values: (number | null)[]): LineData[] {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function PriceChart({ data, designation }: Props) {
+export default function PriceChart({ data, designation, markers = [] }: Props) {
   const mainRef = useRef<HTMLDivElement>(null);
   const rsiRef = useRef<HTMLDivElement>(null);
   const macdRef = useRef<HTMLDivElement>(null);
@@ -202,8 +211,12 @@ export default function PriceChart({ data, designation }: Props) {
     volSeries.setData(volData);
 
     // Price series: area or candlestick
+    // Keep a reference to apply markers on
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let priceSeries: ReturnType<typeof main.addSeries<any>> | null = null;
+
     if (chartType === 'candle') {
-      const candleSeries = main.addSeries(CandlestickSeries, {
+      const s = main.addSeries(CandlestickSeries, {
         upColor: THEME.up,
         downColor: THEME.down,
         borderUpColor: THEME.up,
@@ -213,9 +226,10 @@ export default function PriceChart({ data, designation }: Props) {
         priceScaleId: 'right',
         priceFormat: { type: 'price', precision: 0, minMove: 1 },
       } as DeepPartial<CandlestickSeriesOptions>);
-      candleSeries.setData(candleData);
+      s.setData(candleData);
+      priceSeries = s;
     } else {
-      const areaSeries = main.addSeries(AreaSeries, {
+      const s = main.addSeries(AreaSeries, {
         lineColor: THEME.white,
         topColor: 'rgba(230,233,240,0.12)',
         bottomColor: 'transparent',
@@ -228,7 +242,44 @@ export default function PriceChart({ data, designation }: Props) {
       const areaData: AreaData[] = sliced
         .filter((d) => d.close != null)
         .map((d) => ({ time: toTime(d.date), value: d.close as number }));
-      areaSeries.setData(areaData);
+      s.setData(areaData);
+      priceSeries = s;
+    }
+
+    // ── Event markers ─────────────────────────────────────────────────────
+    if (markers.length > 0 && priceSeries) {
+      const sessionDates = dates.slice().sort();
+      const dateSet = new Set(dates);
+
+      function nearestSession(markerDate: string): string | null {
+        let best: string | null = null;
+        for (const d of sessionDates) {
+          if (d <= markerDate) best = d;
+          else break;
+        }
+        return best;
+      }
+
+      const seriesMarkers = markers
+        .map((m) => {
+          const t = dateSet.has(m.date) ? m.date : nearestSession(m.date);
+          if (!t) return null;
+          return {
+            time: toTime(t),
+            position: 'aboveBar' as const,
+            color: m.color,
+            shape: 'circle' as const,
+            text: m.label,
+            size: 1,
+            id: `${m.label}-${m.date}`,
+          };
+        })
+        .filter((m): m is NonNullable<typeof m> => m !== null)
+        .sort((a, b) => String(a.time).localeCompare(String(b.time)));
+
+      if (seriesMarkers.length > 0) {
+        createSeriesMarkers(priceSeries, seriesMarkers);
+      }
     }
 
     // ── Overlays ──────────────────────────────────────────────────────────
@@ -390,7 +441,7 @@ export default function PriceChart({ data, designation }: Props) {
       rsiChart?.remove();
       macdChart?.remove();
     };
-  }, [mounted, data, visible, period, chartType]);
+  }, [mounted, data, visible, period, chartType, markers]);
 
   // ── Toggle helper ─────────────────────────────────────────────────────────
   function toggle(key: IndicatorKey) {

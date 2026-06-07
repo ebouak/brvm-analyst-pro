@@ -32,7 +32,9 @@
     "backfill:dry": "tsx src/index.ts backfill --dry-run",
     "validate": "tsx src/index.ts validate",
     "notations": "tsx src/index.ts notations",
-    "notations:mock": "tsx src/index.ts notations --mock"
+    "notations:mock": "tsx src/index.ts notations --mock",
+    "details": "tsx src/index.ts details",
+    "details:mock": "tsx src/index.ts details --mock"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

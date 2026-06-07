@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import brvmLogos from '@/lib/brvmLogos.json';
 
 const LOGOS = brvmLogos as Record<string, string>;
-import PriceChart, { type PricePoint } from '@/components/PriceChart';
+import PriceChart, { type PricePoint, type ChartMarker } from '@/components/PriceChart';
+import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
@@ -78,7 +79,7 @@ async function getData(code: string, fromDate?: string) {
 
   return {
     rows: ((hist ?? []) as ActionDaily[]).reverse(),
-    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null; notation_json?: { agence: string; note: string; perspective: string; date_notation: string; source_url?: string } | null } | null,
+    instrument: instr as { designation?: string; secteur?: string; pays?: string; type?: string; shares?: number | null; shares_source?: string | null; flottant?: number | null; vol_moyen_30j?: number | null; notation_json?: { agence: string; note: string; perspective: string; date_notation: string; source_url?: string } | null } | null,
     signal: (sig?.[0] ?? null) as SignalDaily | null,
     dividends: divs ?? [],
     events: evts ?? [],
@@ -148,6 +149,28 @@ export default async function InstrumentPage({
     close: r.cours_jour,
     volume: r.volume,
   }));
+
+  // ── Marqueurs d'événements pour le graphique ─────────────────────────────
+  const chartMarkers: ChartMarker[] = [];
+
+  for (const d of dividends as { montant: number; ex_date: string | null }[]) {
+    if (d.ex_date) {
+      chartMarkers.push({ date: d.ex_date, label: 'D', color: '#ffb300', title: `Dividende ${d.montant} FCFA` });
+    }
+  }
+
+  for (const p of publications.slice(0, 20)) {
+    chartMarkers.push({ date: p.date_publication, label: 'RT', color: '#7e57c2', title: p.libelle ?? 'Publication' });
+  }
+
+  for (const e of events as { event_date: string; event_type: string; title: string }[]) {
+    const t = (e.event_type ?? '').toLowerCase();
+    let label = 'A'; let color = '#00c853';
+    if (t.includes('assembl')) { label = 'AG'; color = '#42a5f5'; }
+    else if (t.includes('result') || t.includes('rapport')) { label = 'RT'; color = '#7e57c2'; }
+    else if (t.includes('dividend')) { label = 'D'; color = '#ffb300'; }
+    chartMarkers.push({ date: e.event_date, label, color, title: e.title });
+  }
   const indicatorData: IndicatorPoint[] = rows.map((r, i) => ({
     date: r.date_marche,
     rsi: rsiByRow[i],
@@ -186,6 +209,16 @@ export default async function InstrumentPage({
   const lastDiv = (dividends as { montant: number; ex_date: string; payment_date?: string }[])[0];
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
     ? (lastDiv.montant / last.cours_jour) * 100 : null;
+
+  // Capitalisation boursière = cours × shares (en MFCFA)
+  const shares = instrument?.shares ?? null;
+  const capitalisation = shares != null && last.cours_jour != null
+    ? (last.cours_jour * shares) / 1_000_000 : null;
+
+  // Volume moyen 20j
+  const recentVols = rows.slice(-20).map((r) => r.volume).filter((v): v is number => v != null);
+  const volMoyen = recentVols.length > 0
+    ? Math.round(recentVols.reduce((a, b) => a + b, 0) / recentVols.length) : null;
 
   const pays = instrument?.pays ?? last.pays ?? null;
   const secteur = instrument?.secteur ?? last.secteur ?? null;
@@ -263,11 +296,16 @@ export default async function InstrumentPage({
         <p className="text-[11px] text-faint mb-4">Séance du {last.date_marche}</p>
 
         {/* Métriques de séance */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-border/40 pt-4">
-          <Metric label="Volume" value={fmtNumber(last.volume) + ' titres'} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-border/40 pt-4">
+          <Metric label="Clôture préc." value={fmtNumber(last.cours_precedent) + ' FCFA'} />
+          <Metric label="Volume du jour" value={fmtNumber(last.volume) + ' titres'} />
           <Metric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
           <Metric label="Transactions" value={fmtNumber(last.nb_transactions)} />
-          <Metric label="Clôture préc." value={fmtNumber(last.cours_precedent) + ' FCFA'} />
+          {volMoyen != null && <Metric label="Vol. moyen 20j" value={fmtNumber(volMoyen) + ' titres'} />}
+          {capitalisation != null && <Metric label="Capitalisation" value={fmtNumber(Math.round(capitalisation)) + ' MFCFA'} />}
+          {shares != null && <Metric label="Titres totaux" value={fmtNumber(shares)} />}
+          {instrument?.flottant != null && <Metric label="Titres flottant" value={fmtNumber(instrument.flottant)} />}
+          {divYield != null && <Metric label="Rdt dividende" value={divYield.toFixed(2) + '%'} />}
         </div>
       </div>
 
@@ -289,7 +327,12 @@ export default async function InstrumentPage({
       )}
 
       {/* ── Graphique ── */}
-      <PriceChart data={priceData} designation={instrument?.designation ?? last.designation ?? code} />
+      <PriceChart
+        data={priceData}
+        designation={instrument?.designation ?? last.designation ?? code}
+        markers={chartMarkers}
+      />
+      <EventMarkerLegend markers={chartMarkers} />
 
       {/* ── Configuration technique ── */}
       <TechnicalSummary result={technicalSummary} />

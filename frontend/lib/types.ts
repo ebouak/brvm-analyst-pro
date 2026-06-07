@@ -11,6 +11,9 @@ export interface ActionDaily {
   volume: number | null;
   nb_transactions: number | null;
   valeur_echangee: number | null;
+  ouverture?: number | null;
+  plus_haut?: number | null;
+  plus_bas?: number | null;
 }
 
 export interface IndiceDaily {
