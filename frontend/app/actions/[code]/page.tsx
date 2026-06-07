@@ -203,65 +203,69 @@ export default async function InstrumentPage({
   ].filter((d) => d.ok !== undefined);
 
   return (
-    <div className="p-5 space-y-4 max-w-4xl mx-auto">
+    <div className="px-4 py-6 space-y-5 max-w-4xl mx-auto">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-3">
-          <Link href="/actions" className="text-muted hover:text-up text-sm">← Retour</Link>
-          <span className="text-muted text-sm">•</span>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link href="/actions" className="text-faint hover:text-muted text-sm shrink-0">← Marché</Link>
+          <span className="text-faint text-sm">·</span>
           {LOGOS[code] && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={LOGOS[code]} alt={code} width={36} height={36} className="rounded-lg object-contain" style={{ width: 36, height: 36, background: '#fff', padding: 3 }} />
+            <img src={LOGOS[code]} alt={code} width={32} height={32} className="rounded-lg object-contain shrink-0 bg-white p-0.5" style={{ width: 32, height: 32 }} />
           )}
-          <h1 className="text-xl font-bold">{code}</h1>
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold tracking-tight leading-tight">{code}</h1>
+            <p className="text-xs text-muted truncate">{instrument?.designation ?? last.designation ?? ''}</p>
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
           <PublicationsModal
             code={code}
             designation={instrument?.designation}
             publications={publications}
             count={pubCount}
           />
-          <Link href="/portefeuille" className="text-xs border border-border rounded px-2 py-1 hover:border-up/40 hover:text-up transition">
-            🔖 Watchlist
+          <Link href="/portefeuille" className="text-xs border border-border rounded-chip px-2.5 py-1 text-muted hover:border-up/40 hover:text-up transition-colors">
+            Watchlist
           </Link>
-          <Link href="/portefeuille" className="text-xs border border-border rounded px-2 py-1 hover:border-up/40 hover:text-up transition">
-            ⚙️ Alertes
+          <Link href="/portefeuille" className="text-xs border border-border rounded-chip px-2.5 py-1 text-muted hover:border-up/40 hover:text-up transition-colors">
+            Alertes
           </Link>
           <Link
             href={`/actions/${code}/financials`}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-surface border border-border text-muted hover:text-white transition-colors"
+            className="text-xs border border-border rounded-chip px-2.5 py-1 text-muted hover:border-up/40 hover:text-up transition-colors"
           >
-            📊 Données financières
+            Financials →
           </Link>
         </div>
       </div>
 
-      {/* ── Info société ── */}
-      <div className="bg-surface border border-border rounded-xl p-4">
-        <p className="font-semibold">{instrument?.designation ?? last.designation ?? code}</p>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {pays && <span className="text-xs border border-border rounded-full px-2 py-0.5 text-muted">{pays}</span>}
-          {secteur && <span className="text-xs border border-border rounded-full px-2 py-0.5 text-muted">📡 {secteur}</span>}
-          <span className="text-xs border border-border rounded-full px-2 py-0.5 text-muted">📈 Action</span>
+      {/* ── Cotation + méta ── */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        {/* Méta chips */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {pays && <span className="text-[11px] border border-border rounded-chip px-2 py-0.5 text-faint">{pays}</span>}
+          {secteur && <span className="text-[11px] border border-border rounded-chip px-2 py-0.5 text-faint">{secteur}</span>}
+          <span className="text-[11px] border border-border rounded-chip px-2 py-0.5 text-faint">Action</span>
         </div>
-      </div>
 
-      {/* ── Cotation ── */}
-      <div className="bg-surface border border-border rounded-xl p-4">
-        <div className="text-xs text-muted mb-2">💰 Cotation du {last.date_marche}</div>
-        <div className="flex items-end gap-3 mb-3">
-          <span className="tabular text-3xl font-bold">{fmtNumber(last.cours_jour)} FCFA</span>
+        {/* Prix principal */}
+        <div className="flex items-baseline gap-3 mb-4">
+          <span className="font-mono text-4xl font-bold tracking-tight tabular">{fmtNumber(last.cours_jour)}</span>
+          <span className="text-muted text-sm">FCFA</span>
           {varAbs != null && (
-            <span className={`tabular text-base font-medium pb-0.5 ${up ? 'text-up' : 'text-down'}`}>
-              {up ? '▲' : '▼'} {up ? '+' : ''}{fmtNumber(varAbs)} FCFA ({up ? '+' : ''}{(last.variation_pct ?? 0).toFixed(2)}%)
+            <span className={`font-mono text-sm font-semibold tabular ${up ? 'text-up' : 'text-down'}`}>
+              {up ? '+' : ''}{fmtNumber(varAbs)} ({up ? '+' : ''}{(last.variation_pct ?? 0).toFixed(2)}%)
             </span>
           )}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm border-t border-border/50 pt-3">
+        <p className="text-[11px] text-faint mb-4">Séance du {last.date_marche}</p>
+
+        {/* Métriques de séance */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-border/40 pt-4">
           <Metric label="Volume" value={fmtNumber(last.volume) + ' titres'} />
-          <Metric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee) + ' FCFA'} />
+          <Metric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
           <Metric label="Transactions" value={fmtNumber(last.nb_transactions)} />
           <Metric label="Clôture préc." value={fmtNumber(last.cours_precedent) + ' FCFA'} />
         </div>
@@ -274,12 +278,10 @@ export default async function InstrumentPage({
 
       {/* ── Bannière données insuffisantes ── */}
       {rows.length < 20 && (
-        <div className="border border-warn/30 bg-warn/5 rounded-xl px-4 py-3 space-y-2">
-          <p className="text-xs text-warn">
-            ⚠️ Seulement {rows.length} séance{rows.length > 1 ? 's' : ''} disponible{rows.length > 1 ? 's' : ''} —
-            RSI, MACD et moyennes mobiles nécessitent au minimum 20 séances.
+        <div className="border border-warn/20 bg-warn/5 rounded-xl px-4 py-3 space-y-2">
+          <p className="text-xs text-warn font-medium">
+            Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
           </p>
-          <p className="text-xs text-muted">Pour enrichir l&apos;historique, lancez dans <code className="font-mono bg-surface px-1 rounded">scraper/</code> :</p>
           <pre className="text-xs font-mono bg-surface border border-border rounded px-3 py-2 text-up select-all overflow-x-auto">
             npm run backfill -- {code} --from=2023-01-01
           </pre>
@@ -287,12 +289,11 @@ export default async function InstrumentPage({
       )}
 
       {/* ── Graphique ── */}
-      <div className="bg-surface border border-border rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-          <h3 className="text-sm font-semibold">
-            📈 Graphique ({rows.length} séance{rows.length > 1 ? 's' : ''})
-          </h3>
-          {/* Filtres période rapides */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <span className="text-xs text-muted uppercase tracking-widest">
+            Cours ({rows.length} séance{rows.length > 1 ? 's' : ''})
+          </span>
           <div className="flex gap-1">
             {([
               { label: '3M', from: new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10) },
@@ -306,10 +307,10 @@ export default async function InstrumentPage({
                 <a
                   key={label}
                   href={from ? `?from=${from}` : `?`}
-                  className={`text-xs px-2 py-0.5 rounded border transition ${
+                  className={`text-xs px-2.5 py-1 rounded-chip border transition-colors ${
                     active
-                      ? 'border-up text-up'
-                      : 'border-border text-muted hover:border-up/40 hover:text-up'
+                      ? 'border-up/60 text-up bg-up/10'
+                      : 'border-border text-faint hover:border-border hover:text-muted'
                   }`}
                 >
                   {label}
@@ -319,16 +320,15 @@ export default async function InstrumentPage({
           </div>
         </div>
         <PriceChart data={priceData} designation={instrument?.designation ?? last.designation ?? code} />
-        {/* Légende MA */}
-        <div className="grid grid-cols-3 gap-2 mt-3 pt-2 border-t border-border/50">
+        <div className="grid grid-cols-3 gap-3 mt-4 pt-3 border-t border-border/30">
           {[
-            { label: 'MA20', val: lastMa20, color: 'text-yellow-400' },
-            { label: 'MA50', val: lastMa50, color: 'text-blue-400' },
-            { label: 'MA200', val: lastMa200, color: 'text-purple-400' },
+            { label: 'MA20', val: lastMa20, color: 'text-warn' },
+            { label: 'MA50', val: lastMa50, color: 'text-blue' },
+            { label: 'MA200', val: lastMa200, color: 'text-purple' },
           ].map(({ label, val, color }) => (
             <div key={label} className="text-center">
-              <div className={`text-xs font-medium ${color}`}>{label}</div>
-              <div className="tabular text-sm">{val != null ? fmtNumber(val) : '—'}</div>
+              <div className={`text-[11px] font-medium ${color} mb-0.5`}>{label}</div>
+              <div className="tabular text-sm font-medium">{val != null ? fmtNumber(val) : '—'}</div>
             </div>
           ))}
         </div>
@@ -338,51 +338,49 @@ export default async function InstrumentPage({
       <TechnicalSummary result={technicalSummary} />
 
       {/* ── Indicateurs + Détections ── */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Indicateurs */}
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-3">🎯 Indicateurs</h3>
+        <div className="bg-surface border border-border rounded-xl p-5">
+          <p className="text-xs text-muted uppercase tracking-widest mb-4">Indicateurs</p>
           {/* RSI */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between text-xs mb-1">
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="text-muted">RSI (14)</span>
-              <span className={`tabular font-medium ${
-                lastRsi == null ? 'text-muted' :
+              <span className={`tabular font-semibold font-mono ${
+                lastRsi == null ? 'text-faint' :
                 lastRsi < 30 ? 'text-up' :
                 lastRsi > 70 ? 'text-down' : 'text-white'
               }`}>
                 {lastRsi != null ? lastRsi.toFixed(0) : '—'}
               </span>
             </div>
-            <div className="relative h-2 bg-border rounded-full overflow-hidden">
-              {/* Zones survente (30% gauche) et surachat (30% droite) — largeurs fixes */}
-              <div className="absolute left-0 top-0 bottom-0 w-[30%] bg-up/30 rounded-full" />
-              <div className="absolute right-0 top-0 bottom-0 w-[30%] bg-down/30 rounded-full" />
-              {/* Curseur RSI — position dynamique, inline style inévitable */}
+            <div className="relative h-1.5 bg-border rounded-full overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[30%] bg-up/20" />
+              <div className="absolute right-0 top-0 bottom-0 w-[30%] bg-down/20" />
               {lastRsi != null && (
                 <RsiCursor rsi={lastRsi} />
               )}
             </div>
-            <div className="flex justify-between text-[10px] text-muted mt-0.5">
-              <span>Survente 30</span><span>Surachat 70</span>
+            <div className="flex justify-between text-[10px] text-faint mt-1">
+              <span>Survente &lt;30</span><span>Surachat &gt;70</span>
             </div>
           </div>
           {/* MACD */}
           {lastMacd && (
-            <div className="border-t border-border/50 pt-3">
-              <div className="text-xs text-muted mb-1">MACD</div>
-              <div className="grid grid-cols-3 gap-1 text-xs text-center">
+            <div className="border-t border-border/30 pt-4">
+              <p className="text-xs text-muted mb-2">MACD</p>
+              <div className="grid grid-cols-3 gap-2 text-xs text-center">
                 <div>
-                  <div className="text-muted">Ligne</div>
-                  <div className="tabular">{lastMacd.macd?.toFixed(0) ?? '—'}</div>
+                  <div className="text-faint text-[11px] mb-0.5">Ligne</div>
+                  <div className="tabular font-mono">{lastMacd.macd?.toFixed(0) ?? '—'}</div>
                 </div>
                 <div>
-                  <div className="text-muted">Signal</div>
-                  <div className="tabular">{lastMacd.signal?.toFixed(0) ?? '—'}</div>
+                  <div className="text-faint text-[11px] mb-0.5">Signal</div>
+                  <div className="tabular font-mono">{lastMacd.signal?.toFixed(0) ?? '—'}</div>
                 </div>
                 <div>
-                  <div className="text-muted">Hist.</div>
-                  <div className={`tabular ${(lastMacd.hist ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
+                  <div className="text-faint text-[11px] mb-0.5">Histog.</div>
+                  <div className={`tabular font-mono font-semibold ${(lastMacd.hist ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
                     {lastMacd.hist != null ? (lastMacd.hist >= 0 ? '+' : '') + lastMacd.hist.toFixed(0) : '—'}
                   </div>
                 </div>
@@ -392,19 +390,19 @@ export default async function InstrumentPage({
         </div>
 
         {/* Détections */}
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-3">🔍 Détections</h3>
-          <div className="space-y-1.5">
+        <div className="bg-surface border border-border rounded-xl p-5">
+          <p className="text-xs text-muted uppercase tracking-widest mb-4">Détections actives</p>
+          <div className="space-y-2">
             {detections.map((d) => (
-              <div key={d.label} className="flex items-center gap-2 text-xs">
-                <span className={d.ok ? 'text-up' : 'text-muted'}>
-                  {d.ok ? '✓' : '○'}
+              <div key={d.label} className="flex items-center gap-2.5 text-xs">
+                <span className={`text-[10px] font-bold w-3 text-center shrink-0 ${d.ok ? 'text-up' : 'text-faint'}`}>
+                  {d.ok ? '●' : '○'}
                 </span>
-                <span className={d.ok ? 'text-white' : 'text-muted'}>{d.label}</span>
+                <span className={d.ok ? 'text-white' : 'text-faint'}>{d.label}</span>
               </div>
             ))}
             {detections.every((d) => !d.ok) && (
-              <p className="text-xs text-muted">Aucune détection technique active.</p>
+              <p className="text-xs text-faint italic">Aucune détection active.</p>
             )}
           </div>
         </div>
@@ -414,9 +412,9 @@ export default async function InstrumentPage({
       {signal ? (
         <SignalPanel signal={signal} />
       ) : (
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-1">🎯 Signal du jour</h3>
-          <p className="text-xs text-muted">Aucun signal calculé pour cette séance.</p>
+        <div className="bg-surface border border-border rounded-xl p-5">
+          <p className="text-xs text-muted uppercase tracking-widest mb-1">Signal du jour</p>
+          <p className="text-xs text-faint">Aucun signal calculé pour cette séance.</p>
         </div>
       )}
 
@@ -456,39 +454,41 @@ export default async function InstrumentPage({
       })()}
 
       {/* ── Dividendes + Événements ── */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Dividendes */}
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-3">📊 Dividendes</h3>
+        <div className="bg-surface border border-border rounded-xl p-5">
+          <p className="text-xs text-muted uppercase tracking-widest mb-4">Dividendes</p>
           {lastDiv ? (
-            <div className="space-y-1 text-sm">
-              <Row label="Rendement" value={divYield != null ? divYield.toFixed(2) + '%*' : '—'} highlight />
+            <div className="space-y-0">
+              <Row label="Rendement estimé" value={divYield != null ? divYield.toFixed(2) + ' %' : '—'} highlight />
               <Row label="Montant" value={fmtNumber(lastDiv.montant) + ' FCFA'} />
               <Row label="Ex-date" value={lastDiv.ex_date ?? '—'} />
               {lastDiv.payment_date && <Row label="Paiement" value={lastDiv.payment_date} />}
-              <p className="text-[10px] text-muted mt-2">*Estimé sur la base du cours actuel</p>
+              <p className="text-[10px] text-faint pt-2">Rendement calculé sur le cours actuel</p>
             </div>
           ) : (
-            <p className="text-xs text-muted">Aucun dividende enregistré.</p>
+            <p className="text-xs text-faint italic">Aucun dividende enregistré.</p>
           )}
         </div>
 
         {/* Événements */}
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-sm font-semibold mb-3">📰 Événements</h3>
+        <div className="bg-surface border border-border rounded-xl p-5">
+          <p className="text-xs text-muted uppercase tracking-widest mb-4">Événements récents</p>
           {events.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
-                <div key={e.id} className="text-xs border-b border-border/40 pb-2 last:border-0">
-                  <span className="text-muted">{e.event_date}</span>
-                  <span className="text-[10px] border border-border rounded px-1 py-0.5 ml-2 text-muted">{e.event_type}</span>
-                  <p className="text-white/80 mt-0.5 line-clamp-2">{e.title}</p>
-                  <Link href={`/dashboard/reports/events/${e.id}`} className="text-up hover:underline">📄 Lire →</Link>
+                <div key={e.id} className="border-b border-border/30 pb-3 last:border-0 last:pb-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] text-faint">{e.event_date}</span>
+                    <span className="text-[10px] border border-border/60 rounded px-1.5 py-px text-faint">{e.event_type}</span>
+                  </div>
+                  <p className="text-xs text-white/80 line-clamp-2 mb-1">{e.title}</p>
+                  <Link href={`/dashboard/reports/events/${e.id}`} className="text-[11px] text-up hover:underline">Lire →</Link>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-muted">Aucun événement récent.</p>
+            <p className="text-xs text-faint italic">Aucun événement récent.</p>
           )}
         </div>
       </div>
@@ -497,24 +497,25 @@ export default async function InstrumentPage({
       <IndicatorCharts data={indicatorData} />
 
       {/* ── Actions rapides ── */}
-      <div className="bg-surface border border-border rounded-xl p-4">
-        <h3 className="text-sm font-semibold mb-3">⚡ Actions rapides</h3>
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <p className="text-xs text-muted uppercase tracking-widest mb-4">Actions</p>
         <div className="grid grid-cols-2 gap-2">
-          <Link href="/portefeuille" className="flex items-center gap-2 text-sm border border-border rounded-lg px-3 py-2 hover:border-up/40 hover:text-up transition">
-            🔖 Ajouter à la watchlist
-          </Link>
-          <Link href="/portefeuille" className="flex items-center gap-2 text-sm border border-border rounded-lg px-3 py-2 hover:border-up/40 hover:text-up transition">
-            🔔 Créer une alerte prix
-          </Link>
-          <a
-            href={`/api/export/actions/${code}`}
-            className="flex items-center gap-2 text-sm border border-border rounded-lg px-3 py-2 hover:border-up/40 hover:text-up transition"
-          >
-            📥 Exporter les données (CSV)
-          </a>
-          <Link href={`/backtest?code=${code}`} className="flex items-center gap-2 text-sm border border-border rounded-lg px-3 py-2 hover:border-up/40 hover:text-up transition">
-            🧪 Lancer un backtest
-          </Link>
+          {[
+            { href: '/portefeuille', label: 'Ajouter à la watchlist' },
+            { href: '/portefeuille', label: 'Créer une alerte prix' },
+            { href: `/api/export/actions/${code}`, label: 'Exporter CSV', external: true },
+            { href: `/backtest?code=${code}`, label: 'Lancer un backtest' },
+          ].map(({ href, label, external }) =>
+            external ? (
+              <a key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-border hover:text-white transition-colors">
+                {label}
+              </a>
+            ) : (
+              <Link key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-border hover:text-white transition-colors">
+                {label}
+              </Link>
+            )
+          )}
         </div>
       </div>
     </div>
@@ -525,18 +526,18 @@ export default async function InstrumentPage({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <div className="text-xs text-muted">{label}</div>
-      <div className="tabular text-sm font-medium mt-0.5">{value}</div>
+    <div className="py-1">
+      <div className="text-[11px] text-faint mb-0.5">{label}</div>
+      <div className="tabular text-sm font-medium font-mono">{value}</div>
     </div>
   );
 }
 
 function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
       <span className="text-xs text-muted">{label}</span>
-      <span className={`tabular text-xs ${highlight ? 'text-up font-semibold' : ''}`}>{value}</span>
+      <span className={`tabular text-xs font-mono ${highlight ? 'text-up font-semibold' : 'text-white'}`}>{value}</span>
     </div>
   );
 }
@@ -545,69 +546,66 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
   const subScores = (signal as SignalDaily & { inputs?: Record<string, number> | null }).inputs ?? null;
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4">
-      <div className="flex items-center gap-3 mb-3">
-        <h3 className="text-sm font-semibold">🎯 Signal du jour</h3>
+    <div className="bg-surface border border-border rounded-xl p-5">
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <p className="text-xs text-muted uppercase tracking-widest">Signal du jour</p>
         <SignalBadge signal={signal.signal} confiance={signal.confiance} />
-        <span className="ml-auto tabular text-xs text-muted">
-          Score {signal.score_total != null ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2) : '—'} / 1.00
+        <span className="ml-auto tabular text-[11px] text-faint font-mono">
+          {signal.score_total != null ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2) : '—'} / 1.00
           {' · '}{signal.date_marche}
         </span>
       </div>
 
-      {/* Explication */}
-      <div className="border border-border/60 rounded-lg p-3 mb-3">
-        <p className="text-sm text-muted mb-2">{signal.explication ?? 'Signal calculé automatiquement.'}</p>
+      <p className="text-sm text-muted mb-4 leading-relaxed">{signal.explication ?? 'Signal calculé automatiquement.'}</p>
 
-        {/* Sous-scores */}
-        {(() => {
-          const subScoreRows = [
-            { label: 'variation_norm', val: signal.score_variation },
-            { label: 'volume_signal', val: signal.score_volume },
-            { label: 'rsi_signal', val: signal.score_rsi },
-            { label: 'bonus_tendance', val: signal.bonus_tendance },
-            { label: 'penalite_liquidite', val: signal.penalite_liquidite != null ? -signal.penalite_liquidite : null },
-          ].filter((r) => r.val != null);
+      {/* Sous-scores */}
+      {(() => {
+        const subScoreRows = [
+          { label: 'variation_norm', val: signal.score_variation },
+          { label: 'volume_signal', val: signal.score_volume },
+          { label: 'rsi_signal', val: signal.score_rsi },
+          { label: 'bonus_tendance', val: signal.bonus_tendance },
+          { label: 'penalite_liquidite', val: signal.penalite_liquidite != null ? -signal.penalite_liquidite : null },
+        ].filter((r) => r.val != null);
 
-          if (subScoreRows.length === 0) return null;
-          return (
-            <div className="border-t border-border/50 pt-2 mt-2">
-              <p className="text-xs text-muted mb-1.5">Sous-scores :</p>
-              <div className="space-y-1">
-                {subScoreRows.map(({ label, val }) => (
-                  <div key={label} className="flex items-center justify-between text-xs">
-                    <span className="text-muted font-mono">{label}</span>
-                    <span className={`tabular font-mono ${(val as number) >= 0 ? 'text-up' : 'text-down'}`}>
-                      {(val as number) >= 0 ? '+' : ''}{(val as number).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
+        if (subScoreRows.length === 0) return null;
+        return (
+          <div className="border-t border-border/30 pt-4 mb-4">
+            <p className="text-[11px] text-faint uppercase tracking-wider mb-2">Sous-scores</p>
+            <div className="space-y-1.5">
+              {subScoreRows.map(({ label, val }) => (
+                <div key={label} className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-mono">{label}</span>
+                  <span className={`tabular font-mono font-semibold ${(val as number) >= 0 ? 'text-up' : 'text-down'}`}>
+                    {(val as number) >= 0 ? '+' : ''}{(val as number).toFixed(2)}
+                  </span>
+                </div>
+              ))}
             </div>
-          );
-        })()}
-        {/* Indicateurs bruts (inputs JSON) — seulement les valeurs non-null */}
-        {subScores && (() => {
-          const entries = Object.entries(subScores).filter(([, v]) => v != null);
-          if (entries.length === 0) return null;
-          return (
-            <div className="border-t border-border/50 pt-2 mt-2">
-              <p className="text-xs text-muted mb-1.5">Indicateurs utilisés :</p>
-              <div className="space-y-1">
-                {entries.slice(0, 6).map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between text-xs">
-                    <span className="text-muted font-mono">{k}</span>
-                    <span className="tabular text-white/60">{typeof v === 'number' ? v.toFixed(3) : String(v)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
-      </div>
+          </div>
+        );
+      })()}
 
-      <Link href="/signaux" className="text-xs text-up hover:underline">
-        ❓ Voir tous les signaux →
+      {subScores && (() => {
+        const entries = Object.entries(subScores).filter(([, v]) => v != null);
+        if (entries.length === 0) return null;
+        return (
+          <div className="border-t border-border/30 pt-4 mb-4">
+            <p className="text-[11px] text-faint uppercase tracking-wider mb-2">Indicateurs utilisés</p>
+            <div className="space-y-1.5">
+              {entries.slice(0, 6).map(([k, v]) => (
+                <div key={k} className="flex items-center justify-between text-xs">
+                  <span className="text-muted font-mono">{k}</span>
+                  <span className="tabular font-mono text-faint">{typeof v === 'number' ? v.toFixed(3) : String(v)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      <Link href="/signaux" className="text-xs text-up hover:underline transition-opacity opacity-80 hover:opacity-100">
+        Voir tous les signaux →
       </Link>
     </div>
   );

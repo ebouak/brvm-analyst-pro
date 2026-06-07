@@ -32,27 +32,31 @@ export default async function FinancialsPage({ params }: Props) {
   });
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/actions/${code}`}
-            className="text-muted hover:text-white text-sm transition-colors"
-          >
-            ← {code}
-          </Link>
-          <span className="text-muted">/</span>
-          <h1 className="text-lg font-semibold">Données financières</h1>
+    <div className="min-h-screen bg-bg">
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm">
+          <Link href="/actions" className="text-muted hover:text-white transition-colors">Marché</Link>
+          <span className="text-faint">/</span>
+          <Link href={`/actions/${code}`} className="text-muted hover:text-white transition-colors">{code}</Link>
+          <span className="text-faint">/</span>
+          <span className="text-white">Données financières</span>
         </div>
 
-        {/* Company name */}
-        {data.instrument.designation && (
-          <p className="text-muted text-sm">{data.instrument.designation}</p>
-        )}
+        {/* Page header */}
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-semibold tracking-tight">{code}</h1>
+          {data.instrument.designation && (
+            <p className="text-sm text-muted">{data.instrument.designation}</p>
+          )}
+          {data.instrument.secteur && (
+            <p className="text-xs text-faint">{data.instrument.secteur}</p>
+          )}
+        </div>
 
         {/* 52-week range */}
-        <div className="bg-surface border border-border rounded-xl p-4">
+        <div className="bg-surface border border-border rounded-xl p-5">
           <WeekRange52
             bas={ratios.cours_bas_52s}
             haut={ratios.cours_haut_52s}
@@ -61,16 +65,23 @@ export default async function FinancialsPage({ params }: Props) {
         </div>
 
         {/* Fundamental analysis */}
-        <FundamentalAnalysis ratios={ratios} />
+        <div>
+          <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Ratios fondamentaux</p>
+          <FundamentalAnalysis ratios={ratios} />
+        </div>
 
         {/* Financial statement tabs */}
-        <div className="bg-surface border border-border rounded-xl p-4">
-          <FinancialTabs
-            incomeStatements={data.incomeStatements}
-            balanceSheets={data.balanceSheets}
-            cashFlowStatements={data.cashFlowStatements}
-          />
+        <div>
+          <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">États financiers</p>
+          <div className="bg-surface border border-border rounded-xl p-5">
+            <FinancialTabs
+              incomeStatements={data.incomeStatements}
+              balanceSheets={data.balanceSheets}
+              cashFlowStatements={data.cashFlowStatements}
+            />
+          </div>
         </div>
+
       </div>
     </div>
   );

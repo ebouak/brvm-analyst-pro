@@ -14,7 +14,7 @@ export default function NotationBadge({ notation }: NotationProps) {
   const noteColor = note.startsWith('A')
     ? 'text-up'
     : note.startsWith('B')
-    ? 'text-foreground'
+    ? 'text-white'
     : 'text-down';
 
   const formattedDate = new Date(date_notation).toLocaleDateString('fr-FR', {

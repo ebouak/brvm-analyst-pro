@@ -1,4 +1,3 @@
-'use client';
 import type { TechnicalSummaryResult, SignalDirection } from '@/lib/technicalSummary';
 
 function dirIcon(dir: SignalDirection): string {
@@ -6,7 +5,7 @@ function dirIcon(dir: SignalDirection): string {
     case 'up': return '↑';
     case 'down': return '↓';
     case 'neutral': return '→';
-    case 'na': return '○';
+    case 'na': return '·';
   }
 }
 
@@ -15,7 +14,7 @@ function dirClass(dir: SignalDirection): string {
     case 'up': return 'text-up';
     case 'down': return 'text-down';
     case 'neutral': return 'text-muted';
-    case 'na': return 'text-muted opacity-50';
+    case 'na': return 'text-faint';
   }
 }
 
@@ -23,7 +22,7 @@ function trendColor(trend: TechnicalSummaryResult['trend']): string {
   switch (trend) {
     case 'hausse': return 'bg-up';
     case 'baisse': return 'bg-down';
-    case 'neutre': return 'bg-muted';
+    case 'neutre': return 'bg-faint';
   }
 }
 
@@ -39,49 +38,47 @@ export default function TechnicalSummary({ result }: { result: TechnicalSummaryR
   const { signals, trend, confidence, bullCount, bearCount } = result;
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
-      <h3 className="text-sm font-semibold">⚙️ Configuration technique</h3>
+    <div className="bg-surface border border-border rounded-xl p-5">
+      <p className="text-xs text-muted uppercase tracking-widest mb-4">Analyse technique</p>
 
-      {/* Signaux */}
-      <div className="space-y-1.5">
+      {/* Grille de signaux */}
+      <div className="grid grid-cols-1 gap-0 mb-4">
         {signals.map((s) => (
-          <div key={s.id} className="flex items-start gap-2">
-            <span className={`text-sm font-bold leading-5 shrink-0 w-4 text-center ${dirClass(s.direction)}`}>
+          <div key={s.id} className="flex items-center gap-3 py-2 border-b border-border/20 last:border-0">
+            <span className={`font-mono text-sm font-bold w-4 text-center shrink-0 ${dirClass(s.direction)}`}>
               {dirIcon(s.direction)}
             </span>
-            <span className={`text-xs leading-5 ${s.direction === 'na' ? 'text-muted opacity-60 italic' : 'text-white/80'}`}>
+            <span className={`text-xs flex-1 ${s.direction === 'na' ? 'text-faint italic' : 'text-white/80'}`}>
               {s.detail}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Tendance + barre de confiance */}
-      <div className="border-t border-border/50 pt-3 space-y-1.5">
+      {/* Tendance + barre */}
+      <div className="border-t border-border/30 pt-4 space-y-2.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted">Tendance court terme :</span>
-          <span className={`text-xs font-bold ${trendTextClass(trend)}`}>
+          <span className="text-xs text-muted">Tendance court terme</span>
+          <span className={`text-xs font-semibold font-mono ${trendTextClass(trend)}`}>
             {dirIcon(trend === 'hausse' ? 'up' : trend === 'baisse' ? 'down' : 'neutral')}{' '}
             {trend.charAt(0).toUpperCase() + trend.slice(1)}
           </span>
         </div>
 
-        {/* Barre de confiance */}
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-2 rounded-full bg-border overflow-hidden">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-1 rounded-full bg-border overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${trendColor(trend)}`}
-              style={{ width: `${confidence}%` }}
+              className={`h-full rounded-full transition-all duration-500 ${trendColor(trend)}`}
+              style={{ width: `${confidence}%` }} /* dynamic — inline style required */
             />
           </div>
-          <span className="text-xs text-muted tabular w-8 text-right">{confidence}%</span>
+          <span className="text-xs text-muted font-mono tabular w-8 text-right">{confidence}%</span>
         </div>
 
-        {/* Compteurs */}
-        <div className="flex gap-3 text-xs">
-          <span className="text-up">↑ {bullCount} haussier{bullCount !== 1 ? 's' : ''}</span>
-          <span className="text-down">↓ {bearCount} baissier{bearCount !== 1 ? 's' : ''}</span>
-          <span className="text-muted">→ {result.neutCount} neutre{result.neutCount !== 1 ? 's' : ''}</span>
+        <div className="flex gap-4 text-[11px]">
+          <span className="text-up font-mono">{bullCount} ↑ haussier{bullCount !== 1 ? 's' : ''}</span>
+          <span className="text-down font-mono">{bearCount} ↓ baissier{bearCount !== 1 ? 's' : ''}</span>
+          <span className="text-faint font-mono">{result.neutCount} → neutre{result.neutCount !== 1 ? 's' : ''}</span>
         </div>
       </div>
     </div>
