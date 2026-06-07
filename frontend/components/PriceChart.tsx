@@ -5,13 +5,16 @@ import {
   HistogramSeries,
   AreaSeries,
   LineSeries,
+  CandlestickSeries,
   type IChartApi,
   type AreaData,
   type HistogramData,
   type LineData,
+  type CandlestickData,
   type HistogramSeriesOptions,
   type AreaSeriesOptions,
   type LineSeriesOptions,
+  type CandlestickSeriesOptions,
   type DeepPartial,
   type Time,
 } from 'lightweight-charts';
@@ -145,6 +148,7 @@ export default function PriceChart({ data, designation }: Props) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState<Set<IndicatorKey>>(new Set(DEFAULT_VISIBLE));
   const [period, setPeriod] = useState<PeriodKey>('1A');
+  const [chartType, setChartType] = useState<'line' | 'candle'>('line');
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -162,6 +166,17 @@ export default function PriceChart({ data, designation }: Props) {
     // Use 0 only for indicator calc, but track which indices have real close
     const closesRaw = sliced.map((d) => d.close);
     const closesForCalc = closesRaw.map((c) => c ?? 0);
+
+    // Build pseudo-OHLCV: open = prev close, high/low ±0.1%
+    const candleData: CandlestickData[] = sliced
+      .filter((d) => d.close != null)
+      .map((d, i, arr) => {
+        const close = d.close as number;
+        const open = i > 0 && arr[i - 1]!.close != null ? (arr[i - 1]!.close as number) : close;
+        const high = Math.max(open, close) * 1.001;
+        const low = Math.min(open, close) * 0.999;
+        return { time: toTime(d.date), open, high, low, close };
+      });
 
     // ── Main chart ────────────────────────────────────────────────────────
     const mainEl = mainRef.current;
@@ -186,21 +201,35 @@ export default function PriceChart({ data, designation }: Props) {
       .map((d) => ({ time: toTime(d.date), value: d.volume as number }));
     volSeries.setData(volData);
 
-    // Close area
-    const areaSeries = main.addSeries(AreaSeries, {
-      lineColor: THEME.white,
-      topColor: 'rgba(230,233,240,0.12)',
-      bottomColor: 'transparent',
-      lineWidth: 2,
-      priceScaleId: 'right',
-      crosshairMarkerVisible: true,
-      crosshairMarkerRadius: 4,
-      priceFormat: { type: 'price', precision: 0, minMove: 1 },
-    } as DeepPartial<AreaSeriesOptions>);
-    const areaData: AreaData[] = sliced
-      .filter((d) => d.close != null)
-      .map((d) => ({ time: toTime(d.date), value: d.close as number }));
-    areaSeries.setData(areaData);
+    // Price series: area or candlestick
+    if (chartType === 'candle') {
+      const candleSeries = main.addSeries(CandlestickSeries, {
+        upColor: THEME.up,
+        downColor: THEME.down,
+        borderUpColor: THEME.up,
+        borderDownColor: THEME.down,
+        wickUpColor: THEME.up,
+        wickDownColor: THEME.down,
+        priceScaleId: 'right',
+        priceFormat: { type: 'price', precision: 0, minMove: 1 },
+      } as DeepPartial<CandlestickSeriesOptions>);
+      candleSeries.setData(candleData);
+    } else {
+      const areaSeries = main.addSeries(AreaSeries, {
+        lineColor: THEME.white,
+        topColor: 'rgba(230,233,240,0.12)',
+        bottomColor: 'transparent',
+        lineWidth: 2,
+        priceScaleId: 'right',
+        crosshairMarkerVisible: true,
+        crosshairMarkerRadius: 4,
+        priceFormat: { type: 'price', precision: 0, minMove: 1 },
+      } as DeepPartial<AreaSeriesOptions>);
+      const areaData: AreaData[] = sliced
+        .filter((d) => d.close != null)
+        .map((d) => ({ time: toTime(d.date), value: d.close as number }));
+      areaSeries.setData(areaData);
+    }
 
     // ── Overlays ──────────────────────────────────────────────────────────
     function addNull(key: IndicatorKey, values: (number | null)[], opts: DeepPartial<LineSeriesOptions>) {
@@ -361,7 +390,7 @@ export default function PriceChart({ data, designation }: Props) {
       rsiChart?.remove();
       macdChart?.remove();
     };
-  }, [mounted, data, visible, period]);
+  }, [mounted, data, visible, period, chartType]);
 
   // ── Toggle helper ─────────────────────────────────────────────────────────
   function toggle(key: IndicatorKey) {
@@ -394,7 +423,7 @@ export default function PriceChart({ data, designation }: Props) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold">
-            📈 Cours{designation ? ` — ${designation}` : ''}
+            Cours{designation ? ` — ${designation}` : ''}
           </span>
           {lastClose != null && (
             <span className="tabular text-sm font-medium">
@@ -410,22 +439,40 @@ export default function PriceChart({ data, designation }: Props) {
           )}
         </div>
 
-        {/* Period selector */}
-        <div className="flex gap-1">
-          {PERIODS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setPeriod(p)}
-              className={`text-xs px-2 py-0.5 rounded border transition ${
-                period === p
-                  ? 'bg-up text-bg border-up'
-                  : 'border-border text-muted hover:border-up/40 hover:text-up'
-              }`}
-            >
-              {p}
-            </button>
-          ))}
+        {/* Controls: chart type + period */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5 border border-border rounded overflow-hidden">
+            {(['line', 'candle'] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setChartType(t)}
+                className={`text-xs px-2.5 py-0.5 transition ${
+                  chartType === t
+                    ? 'bg-up/20 text-up'
+                    : 'text-muted hover:text-up'
+                }`}
+              >
+                {t === 'line' ? 'Ligne' : 'Bougies'}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1">
+            {PERIODS.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPeriod(p)}
+                className={`text-xs px-2 py-0.5 rounded border transition ${
+                  period === p
+                    ? 'bg-up text-bg border-up'
+                    : 'border-border text-muted hover:border-up/40 hover:text-up'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
