@@ -1,69 +1,65 @@
 -- Seed secteurs et pays pour brvm_instruments (classification BRVM officielle)
--- Codes source: ABJC BICB BICC BNBC BOAB BOABF BOAC BOAM BOAN BOAS
---               CABC CBIBF CFAC CIEC ECOC ETIT FTSC LNBB NEIC
---               NSBC NTLC ONTBF ORAC ORGT PALC PRSC SAFC SCRC
---               SDCC SDSC SEMC SGBC SHEC SIBC SICC SIVC SLBC
---               SMBC SNTS SOGC SPHC STAC STBC TTLC TTLS UNLC UNXC
+-- Utilise INSERT ... ON CONFLICT DO UPDATE pour créer les lignes manquantes
+-- et mettre à jour celles qui existent déjà.
+-- Codes source : 47 actions BRVM (liste runNotations.ts)
 
--- Finances
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'ETIT';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'SGBC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'SIVC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'CIEC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'ORGT';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'PRSC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'SAFC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'STAC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'ORAC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'NSBC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Sénégal'         WHERE code = 'SNTS';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Sénégal'         WHERE code = 'CBIBF';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Sénégal'         WHERE code = 'SDSC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Sénégal'         WHERE code = 'BOABF';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Bénin'           WHERE code = 'BOAB';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'BOAC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Mali'            WHERE code = 'BOAM';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Niger'           WHERE code = 'BOAN';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Sénégal'         WHERE code = 'BOAS';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'BICB';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Burkina Faso'    WHERE code = 'BICC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Niger'           WHERE code = 'BNBC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'SIBC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'SICC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Burkina Faso'    WHERE code = 'FTSC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'LNBB';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Bénin'           WHERE code = 'ABJC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'STBC';
-UPDATE brvm_instruments SET secteur = 'Finances', pays = 'Côte d''Ivoire'  WHERE code = 'UNXC';
-
--- Industrie
-UPDATE brvm_instruments SET secteur = 'Industrie', pays = 'Côte d''Ivoire' WHERE code = 'NTLC';
-UPDATE brvm_instruments SET secteur = 'Industrie', pays = 'Côte d''Ivoire' WHERE code = 'SCRC';
-UPDATE brvm_instruments SET secteur = 'Industrie', pays = 'Côte d''Ivoire' WHERE code = 'TTLC';
-UPDATE brvm_instruments SET secteur = 'Industrie', pays = 'Côte d''Ivoire' WHERE code = 'TTLS';
-UPDATE brvm_instruments SET secteur = 'Industrie', pays = 'Côte d''Ivoire' WHERE code = 'SLBC';
-UPDATE brvm_instruments SET secteur = 'Industrie', pays = 'Côte d''Ivoire' WHERE code = 'SMBC';
-UPDATE brvm_instruments SET secteur = 'Sénégal',   pays = 'Sénégal'        WHERE code = 'CABC';
-
--- Agriculture
-UPDATE brvm_instruments SET secteur = 'Agriculture', pays = 'Côte d''Ivoire' WHERE code = 'PALC';
-UPDATE brvm_instruments SET secteur = 'Agriculture', pays = 'Côte d''Ivoire' WHERE code = 'SOGC';
-
--- Distribution
-UPDATE brvm_instruments SET secteur = 'Distribution', pays = 'Côte d''Ivoire' WHERE code = 'CFAC';
-UPDATE brvm_instruments SET secteur = 'Distribution', pays = 'Côte d''Ivoire' WHERE code = 'NEIC';
-UPDATE brvm_instruments SET secteur = 'Distribution', pays = 'Côte d''Ivoire' WHERE code = 'SHEC';
-UPDATE brvm_instruments SET secteur = 'Distribution', pays = 'Côte d''Ivoire' WHERE code = 'ECOC';
-
--- Transport
-UPDATE brvm_instruments SET secteur = 'Transport', pays = 'Côte d''Ivoire' WHERE code = 'SDCC';
-
--- Télécommunications
-UPDATE brvm_instruments SET secteur = 'Télécommunications', pays = 'Burkina Faso' WHERE code = 'ONTBF';
-
--- Services publics
-UPDATE brvm_instruments SET secteur = 'Services publics', pays = 'Côte d''Ivoire' WHERE code = 'SEMC';
-
--- Autres / Holding
-UPDATE brvm_instruments SET secteur = 'Autres', pays = 'Côte d''Ivoire' WHERE code = 'SPHC';
-UPDATE brvm_instruments SET secteur = 'Autres', pays = 'Côte d''Ivoire' WHERE code = 'UNLC';
+INSERT INTO public.brvm_instruments (code, designation, type, secteur, pays) VALUES
+  -- Finances
+  ('ETIT', 'Ecobank Transnational Incorporated',       'action', 'Finances',           'Côte d''Ivoire'),
+  ('SGBC', 'Société Générale de Banques en CI',        'action', 'Finances',           'Côte d''Ivoire'),
+  ('SIVC', 'NSIA Vie Côte d''Ivoire',                  'action', 'Finances',           'Côte d''Ivoire'),
+  ('CIEC', 'Compagnie d''Assurances Colina',           'action', 'Finances',           'Côte d''Ivoire'),
+  ('ORGT', 'Orange Côte d''Ivoire',                    'action', 'Finances',           'Côte d''Ivoire'),
+  ('PRSC', 'Precia',                                   'action', 'Finances',           'Côte d''Ivoire'),
+  ('SAFC', 'SAFCA',                                    'action', 'Finances',           'Côte d''Ivoire'),
+  ('STAC', 'Société de Gestion et d''Intermédiation',  'action', 'Finances',           'Côte d''Ivoire'),
+  ('ORAC', 'Omnium de Gestion et d''Immobilier',       'action', 'Finances',           'Côte d''Ivoire'),
+  ('NSBC', 'NSIA Banque Côte d''Ivoire',               'action', 'Finances',           'Côte d''Ivoire'),
+  ('SNTS', 'Sonatel',                                  'action', 'Finances',           'Sénégal'),
+  ('CBIBF','Coris Bank International Burkina Faso',    'action', 'Finances',           'Burkina Faso'),
+  ('SDSC', 'Société Dakaroise de Courtage',            'action', 'Finances',           'Sénégal'),
+  ('BOABF','Bank of Africa Burkina Faso',              'action', 'Finances',           'Burkina Faso'),
+  ('BOAB', 'Bank of Africa Bénin',                     'action', 'Finances',           'Bénin'),
+  ('BOAC', 'Bank of Africa Côte d''Ivoire',            'action', 'Finances',           'Côte d''Ivoire'),
+  ('BOAM', 'Bank of Africa Mali',                      'action', 'Finances',           'Mali'),
+  ('BOAN', 'Bank of Africa Niger',                     'action', 'Finances',           'Niger'),
+  ('BOAS', 'Bank of Africa Sénégal',                   'action', 'Finances',           'Sénégal'),
+  ('BICB', 'Banque Internationale pour le Commerce',   'action', 'Finances',           'Côte d''Ivoire'),
+  ('BICC', 'Banque Internationale du Commerce CI',     'action', 'Finances',           'Burkina Faso'),
+  ('BNBC', 'Banque Nigérienne pour le Commerce',       'action', 'Finances',           'Niger'),
+  ('SIBC', 'Société Ivoirienne de Banque et Crédit',   'action', 'Finances',           'Côte d''Ivoire'),
+  ('SICC', 'SICOGI',                                   'action', 'Finances',           'Côte d''Ivoire'),
+  ('FTSC', 'Filiale de la FTS Burkina',                'action', 'Finances',           'Burkina Faso'),
+  ('LNBB', 'La NSIA Banque Bénin',                     'action', 'Finances',           'Bénin'),
+  ('ABJC', 'Abidjan Catering',                         'action', 'Finances',           'Bénin'),
+  ('STBC', 'Standard Chartered Bank CI',               'action', 'Finances',           'Côte d''Ivoire'),
+  ('UNXC', 'Union Bancaire pour le Commerce CI',       'action', 'Finances',           'Côte d''Ivoire'),
+  -- Industrie
+  ('NTLC', 'NEI-CFER',                                 'action', 'Industrie',          'Côte d''Ivoire'),
+  ('SCRC', 'SITAB',                                    'action', 'Industrie',          'Côte d''Ivoire'),
+  ('TTLC', 'Total Côte d''Ivoire',                     'action', 'Industrie',          'Côte d''Ivoire'),
+  ('TTLS', 'Total Sénégal',                            'action', 'Industrie',          'Sénégal'),
+  ('SLBC', 'Solibra',                                  'action', 'Industrie',          'Côte d''Ivoire'),
+  ('SMBC', 'SANBRA',                                   'action', 'Industrie',          'Côte d''Ivoire'),
+  ('CABC', 'Compagnie Africaine de Bitume et Ciment',  'action', 'Industrie',          'Sénégal'),
+  -- Agriculture
+  ('PALC', 'Palm Côte d''Ivoire',                      'action', 'Agriculture',        'Côte d''Ivoire'),
+  ('SOGC', 'SOGB',                                     'action', 'Agriculture',        'Côte d''Ivoire'),
+  -- Distribution
+  ('CFAC', 'CFAO',                                     'action', 'Distribution',       'Côte d''Ivoire'),
+  ('NEIC', 'NEI-CFER Distribution',                    'action', 'Distribution',       'Côte d''Ivoire'),
+  ('SHEC', 'Shell Côte d''Ivoire',                     'action', 'Distribution',       'Côte d''Ivoire'),
+  ('ECOC', 'Ecobank CI',                               'action', 'Distribution',       'Côte d''Ivoire'),
+  -- Transport
+  ('SDCC', 'SDV Côte d''Ivoire',                       'action', 'Transport',          'Côte d''Ivoire'),
+  -- Télécommunications
+  ('ONTBF','ONATEL Burkina Faso',                      'action', 'Télécommunications', 'Burkina Faso'),
+  -- Services publics
+  ('SEMC', 'CIE — CI Energies',                        'action', 'Services publics',   'Côte d''Ivoire'),
+  -- Autres
+  ('SPHC', 'SIPIM',                                    'action', 'Autres',             'Côte d''Ivoire'),
+  ('UNLC', 'Unilever Côte d''Ivoire',                  'action', 'Autres',             'Côte d''Ivoire')
+ON CONFLICT (code) DO UPDATE
+  SET secteur    = EXCLUDED.secteur,
+      pays       = EXCLUDED.pays,
+      updated_at = now();
