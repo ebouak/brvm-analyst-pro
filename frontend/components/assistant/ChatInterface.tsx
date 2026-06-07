@@ -15,12 +15,26 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
   const [input, setInput] = useState(symbolePreselect ? `Analyse complète de ${symbolePreselect}` : '');
   const [loading, setLoading] = useState(false);
   const [symbole, setSymbole] = useState(symbolePreselect ?? '');
+  const [activeProvider, setActiveProvider] = useState<string | null>(null);
+  const [noKey, setNoKey] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    fetch('/api/ai/status')
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (d) {
+          setActiveProvider(d.active);
+          setNoKey(!d.active);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -45,7 +59,10 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
           signal: abortRef.current.signal,
         });
 
-        if (!res.ok) throw new Error('Erreur serveur');
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+          throw new Error(body?.error ?? `HTTP ${res.status}`);
+        }
 
         const reader = res.body!.getReader();
         const dec = new TextDecoder();
@@ -63,6 +80,7 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
             if (raw === '[DONE]') continue;
             try {
               const parsed = JSON.parse(raw);
+              if (parsed.error) throw new Error(parsed.error);
               if (parsed.text) {
                 setMessages((prev) => {
                   const updated = [...prev];
@@ -73,16 +91,19 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
                   return updated;
                 });
               }
-            } catch { /* skip */ }
+            } catch (streamErr: unknown) {
+              if ((streamErr as Error).message) throw streamErr;
+            }
           }
         }
       } catch (err: unknown) {
         if ((err as Error).name !== 'AbortError') {
+          const msg = (err as Error).message || 'Erreur inconnue';
           setMessages((prev) => {
             const updated = [...prev];
             updated[updated.length - 1] = {
               role: 'assistant',
-              content: '❌ Erreur de connexion. Vérifiez votre clé API Anthropic dans /admin/cles-api.',
+              content: `❌ ${msg}`,
               loading: false,
             };
             return updated;
@@ -123,11 +144,23 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
           <h2 className="text-sm font-semibold text-white">Analyste BRVM IA</h2>
           <p className="text-[11px] text-faint">Analyse technique · Fondamentale · Macro UEMOA</p>
         </div>
-        {symbole && (
-          <span className="ml-auto px-2.5 py-1 bg-accent/10 text-accent rounded-chip text-xs font-mono font-semibold">
-            {symbole}
-          </span>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {activeProvider && (
+            <span className="px-2 py-0.5 bg-up/10 text-up rounded-chip text-[10px] font-mono uppercase tracking-wide">
+              {activeProvider}
+            </span>
+          )}
+          {noKey && (
+            <span className="px-2 py-0.5 bg-down/10 text-down rounded-chip text-[10px]">
+              Aucune clé — <a href="/admin/cles-api" className="underline">configurer</a>
+            </span>
+          )}
+          {symbole && (
+            <span className="px-2.5 py-1 bg-accent/10 text-accent rounded-chip text-xs font-mono font-semibold">
+              {symbole}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
