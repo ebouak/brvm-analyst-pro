@@ -220,28 +220,29 @@ export function stochasticSeries(
   smoothD = 3,
 ): StochasticPoint[] {
   const n = closes.length;
-  const out: StochasticPoint[] = new Array(n).fill(null).map(() => ({ k: null, d: null }));
+  if (period <= 0 || smoothK <= 0 || smoothD <= 0) return new Array(n).fill(null).map(() => ({ k: null, d: null }));
+  const out: StochasticPoint[] = closes.map(() => ({ k: null, d: null }));
 
   // %K brut
   const rawK: (number | null)[] = new Array(n).fill(null);
   for (let i = period - 1; i < n; i++) {
-    const window = closes.slice(i - period + 1, i + 1);
-    const lo = Math.min(...window);
-    const hi = Math.max(...window);
+    const slice = closes.slice(i - period + 1, i + 1);
+    const lo = Math.min(...slice);
+    const hi = Math.max(...slice);
     rawK[i] = hi === lo ? null : ((closes[i]! - lo) / (hi - lo)) * 100;
   }
 
   // %K lissé = SMA(rawK, smoothK)
   const smoothedK: (number | null)[] = new Array(n).fill(null);
   for (let i = period + smoothK - 2; i < n; i++) {
-    const window = rawK.slice(i - smoothK + 1, i + 1).filter((v): v is number => v != null);
-    if (window.length === smoothK) smoothedK[i] = window.reduce((a, b) => a + b, 0) / smoothK;
+    const kSlice = rawK.slice(i - smoothK + 1, i + 1).filter((v): v is number => v != null);
+    if (kSlice.length === smoothK) smoothedK[i] = kSlice.reduce((a, b) => a + b, 0) / smoothK;
   }
 
   // %D = SMA(%K lissé, smoothD)
   for (let i = period + smoothK + smoothD - 3; i < n; i++) {
-    const window = smoothedK.slice(i - smoothD + 1, i + 1).filter((v): v is number => v != null);
-    const d = window.length === smoothD ? window.reduce((a, b) => a + b, 0) / smoothD : null;
+    const dSlice = smoothedK.slice(i - smoothD + 1, i + 1).filter((v): v is number => v != null);
+    const d = dSlice.length === smoothD ? dSlice.reduce((a, b) => a + b, 0) / smoothD : null;
     out[i] = { k: smoothedK[i] ?? null, d };
   }
 
@@ -254,10 +255,11 @@ export function stochasticSeries(
  */
 export function cciSeries(closes: number[], period = 20): (number | null)[] {
   const out: (number | null)[] = new Array(closes.length).fill(null);
+  if (period <= 0) return out;
   for (let i = period - 1; i < closes.length; i++) {
-    const window = closes.slice(i - period + 1, i + 1);
-    const mean = window.reduce((a, b) => a + b, 0) / period;
-    const mad = window.reduce((a, b) => a + Math.abs(b - mean), 0) / period;
+    const slice = closes.slice(i - period + 1, i + 1);
+    const mean = slice.reduce((a, b) => a + b, 0) / period;
+    const mad = slice.reduce((a, b) => a + Math.abs(b - mean), 0) / period;
     out[i] = mad === 0 ? null : (closes[i]! - mean) / (0.015 * mad);
   }
   return out;
