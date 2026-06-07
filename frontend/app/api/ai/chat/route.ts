@@ -1,37 +1,52 @@
 import { NextRequest } from 'next/server';
+import { resolveApiKey, type LlmProvider } from '@/lib/server/apiKeys';
 import { SYSTEM_PROMPT_ANALYSTE } from '@/lib/ai/prompts';
 
 export const maxDuration = 60;
 
-export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return Response.json({ error: 'Clé API Anthropic non configurée (ANTHROPIC_API_KEY).' }, { status: 503 });
-  }
+const ORDER: { provider: LlmProvider; url: string; model: string }[] = [
+  { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions',      model: 'deepseek-chat' },
+  { provider: 'mistral',  url: 'https://api.mistral.ai/v1/chat/completions',     model: 'mistral-large-latest' },
+  { provider: 'xai',      url: 'https://api.x.ai/v1/chat/completions',           model: 'grok-2-latest' },
+];
 
+export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body?.messages?.length) {
     return Response.json({ error: 'messages requis' }, { status: 400 });
   }
 
+  // Choisir le premier provider disponible
+  let chosen: { url: string; model: string; key: string } | null = null;
+  for (const c of ORDER) {
+    const key = await resolveApiKey(c.provider);
+    if (key) { chosen = { url: c.url, model: c.model, key }; break; }
+  }
+
+  if (!chosen) {
+    return Response.json(
+      { error: 'Aucune clé IA configurée. Ajoutez DeepSeek, Mistral ou Grok dans /admin/cles-api.' },
+      { status: 503 },
+    );
+  }
+
   const encoder = new TextEncoder();
+  const { url, model, key } = chosen;
+
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        const resp = await fetch(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'anthropic-beta': 'messages-2023-12-15',
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
           body: JSON.stringify({
-            model: 'claude-opus-4-5',
-            max_tokens: 4096,
+            model,
             stream: true,
-            system: SYSTEM_PROMPT_ANALYSTE,
-            messages: body.messages,
+            temperature: 0.15,
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPT_ANALYSTE },
+              ...body.messages,
+            ],
           }),
         });
 
@@ -58,8 +73,9 @@ export async function POST(req: NextRequest) {
             if (raw === '[DONE]') continue;
             try {
               const evt = JSON.parse(raw);
-              if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: evt.delta.text })}\n\n`));
+              const text = evt?.choices?.[0]?.delta?.content;
+              if (text) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
               }
             } catch { /* skip malformed */ }
           }
