@@ -37,6 +37,7 @@ import { runAlerts } from './alerts/runAlerts.js';
 import { runBacktestCmd } from './backtesting/runBacktest.js';
 import { runPublications } from './publications/runPublications.js';
 import { runBackfill } from './backfill/runBackfill.js';
+import { runNotations } from './notations/runNotations.js';
 import { runValidation } from './validation/runValidation.js';
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
@@ -113,10 +114,15 @@ async function main(): Promise<number> {
       await runValidation();
       return 0;
     }
+    case 'notations': {
+      const res = await runNotations({ mock });
+      logger.info(res, 'Notations terminées');
+      return res.errors > 0 ? 1 : 0;
+    }
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate | notations',
       );
       return 1;
   }

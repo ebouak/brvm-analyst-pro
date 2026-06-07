@@ -30,7 +30,9 @@
     "alerts:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts alerts --mock",
     "backfill": "tsx src/index.ts backfill",
     "backfill:dry": "tsx src/index.ts backfill --dry-run",
-    "validate": "tsx src/index.ts validate"
+    "validate": "tsx src/index.ts validate",
+    "notations": "tsx src/index.ts notations",
+    "notations:mock": "tsx src/index.ts notations --mock"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
