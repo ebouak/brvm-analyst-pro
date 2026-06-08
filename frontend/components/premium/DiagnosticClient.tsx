@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useDeferredValue } from 'react';
 
 interface Props {
   code: string;
@@ -57,16 +57,21 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function renderMarkdown(md: string) {
-    return md.split('\n').map((line, i) => {
-      if (line.startsWith('## ')) return <h2 key={i} className="text-base font-semibold text-white mt-6 mb-2 border-b border-border pb-1">{line.slice(3)}</h2>;
-      if (line.startsWith('### ')) return <h3 key={i} className="text-sm font-semibold text-white mt-4 mb-1">{line.slice(4)}</h3>;
-      if (line.startsWith('- ')) return <li key={i} className="text-sm text-muted ml-4 list-disc">{line.slice(2)}</li>;
-      if (line.startsWith('| ')) return <p key={i} className="text-xs text-muted font-mono whitespace-pre">{line}</p>;
-      if (line.trim() === '') return <div key={i} className="h-2" />;
-      return <p key={i} className="text-sm text-muted leading-relaxed">{line}</p>;
-    });
-  }
+  // rerender-use-deferred-value : pendant le streaming, on diffère le rendu lourd
+  // du markdown pour garder l'UI réactive ; useMemo évite de re-parser à chaque render.
+  const deferredMarkdown = useDeferredValue(markdown);
+  const renderedMarkdown = useMemo(
+    () =>
+      deferredMarkdown.split('\n').map((line, i) => {
+        if (line.startsWith('## ')) return <h2 key={i} className="text-base font-semibold text-white mt-6 mb-2 border-b border-border pb-1">{line.slice(3)}</h2>;
+        if (line.startsWith('### ')) return <h3 key={i} className="text-sm font-semibold text-white mt-4 mb-1">{line.slice(4)}</h3>;
+        if (line.startsWith('- ')) return <li key={i} className="text-sm text-muted ml-4 list-disc">{line.slice(2)}</li>;
+        if (line.startsWith('| ')) return <p key={i} className="text-xs text-muted font-mono whitespace-pre">{line}</p>;
+        if (line.trim() === '') return <div key={i} className="h-2" />;
+        return <p key={i} className="text-sm text-muted leading-relaxed">{line}</p>;
+      }),
+    [deferredMarkdown],
+  );
 
   return (
     <div className="space-y-4">
@@ -111,7 +116,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
 
       {markdown && (
         <div className="bg-surface border border-border rounded-xl p-6 space-y-1 print:bg-white print:text-black print:border-0">
-          {renderMarkdown(markdown)}
+          {renderedMarkdown}
         </div>
       )}
 

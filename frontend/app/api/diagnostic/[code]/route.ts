@@ -60,8 +60,15 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     }
   }
 
-  const data = await loadCompanyFinancials(code);
+  // async-parallel : données financières et clés LLM sont indépendantes → en parallèle
+  const [data, providerList] = await Promise.all([
+    loadCompanyFinancials(code),
+    getProviders(),
+  ]);
   if (!data) return NextResponse.json({ error: 'Instrument inconnu' }, { status: 404 });
+  if (providerList.length === 0) {
+    return NextResponse.json({ error: 'Aucune clé LLM configurée (DeepSeek, Mistral ou Grok requis)' }, { status: 503 });
+  }
 
   const inc_n  = data.incomeStatements[0] ?? null;
   const inc_n1 = data.incomeStatements[1] ?? null;
@@ -92,11 +99,6 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     periode_n: inc_n?.periode ?? 'N',
     periode_n1: inc_n1?.periode ?? 'N-1',
   });
-
-  const providerList = await getProviders();
-  if (providerList.length === 0) {
-    return NextResponse.json({ error: 'Aucune clé LLM configurée (DeepSeek, Mistral ou Grok requis)' }, { status: 503 });
-  }
 
   const encoder = new TextEncoder();
 
