@@ -82,6 +82,60 @@ export default async function FinancialsPage({ params }: Props) {
           </div>
         </div>
 
+        {/* Publications disponibles — fallback si données absentes */}
+        {data.incomeStatements.length === 0 && data.publications.length > 0 && (
+          <div className="bg-surface border border-warn/30 rounded-xl p-5 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-warn">📄 Données financières non importées</p>
+                <p className="text-xs text-muted mt-1">
+                  {data.publications.length} publication{data.publications.length > 1 ? 's' : ''} disponible{data.publications.length > 1 ? 's' : ''} pour {code}.
+                  Importez-les via l&apos;IA pour remplir automatiquement les états financiers.
+                </p>
+              </div>
+              <a
+                href={`/admin/import-fondamentaux?code=${code}`}
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-up text-bg text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
+              >
+                Importer via IA →
+              </a>
+            </div>
+            <div className="divide-y divide-border/40">
+              {data.publications.map((pub) => (
+                <div key={pub.id} className="py-2.5 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm text-white">{pub.libelle ?? pub.type_publication ?? 'Publication'}</p>
+                    <p className="text-xs text-muted">{new Date(pub.date_publication).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                  </div>
+                  {pub.source_url && (
+                    <a
+                      href={pub.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-up hover:underline shrink-0"
+                    >
+                      Voir le PDF ↗
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Aucune donnée du tout */}
+        {data.incomeStatements.length === 0 && data.publications.length === 0 && (
+          <div className="bg-surface border border-border rounded-xl p-10 text-center space-y-3">
+            <p className="text-muted text-sm">Aucune donnée financière ni publication disponible pour {code}.</p>
+            <a
+              href={`/admin/import-fondamentaux?code=${code}`}
+              className="inline-block px-4 py-2 rounded-lg bg-up text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+            >
+              Importer via IA
+            </a>
+          </div>
+        )}
+
       </div>
     </div>
   );

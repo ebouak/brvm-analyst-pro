@@ -101,6 +101,14 @@ export interface FundamentalRatios {
   cours_actuel: number | null;
 }
 
+export interface Publication {
+  id: string;
+  libelle: string | null;
+  date_publication: string;
+  type_publication: string | null;
+  source_url: string | null;
+}
+
 export interface FinancialsData {
   instrument: {
     code: string;
@@ -116,4 +124,5 @@ export interface FinancialsData {
   incomeStatements: IncomeStatement[];
   balanceSheets: BalanceSheet[];
   cashFlowStatements: CashFlowStatement[];
+  publications: Publication[];
 }
