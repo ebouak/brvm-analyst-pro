@@ -20,8 +20,18 @@ function normHeader(s: string): string {
  */
 export function parseBrvmPublic(html: string, date: MarketDate): MarketSnapshot {
   const $ = cheerio.load(html);
-  const table = $('table.activity').first();
   const actions: ActionRow[] = [];
+
+  // Sélectionne la table des cours par le contenu de ses en-têtes (« Symbole » + « Cours »),
+  // jamais par classe (plusieurs tables partagent les mêmes classes Bootstrap).
+  let table = $();
+  $('table').each((_, t) => {
+    const heads = $(t).find('thead th').map((_, th) => normHeader($(th).text())).get();
+    if (heads.some((h) => h.includes('symbole')) && heads.some((h) => h.includes('cours veille'))) {
+      table = $(t);
+      return false;
+    }
+  });
 
   if (table.length > 0) {
     const headers: string[] = [];
