@@ -83,7 +83,7 @@ export default async function FinancialsPage({ params }: Props) {
         </div>
 
         {/* Financial statement tabs */}
-        <div>
+        <div id="etats">
           <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">États financiers</p>
           <div className="bg-surface border border-border rounded-xl p-5">
             <FinancialTabs
@@ -145,6 +145,38 @@ export default async function FinancialsPage({ params }: Props) {
             >
               Importer via IA
             </a>
+          </div>
+        )}
+
+        {/* Publications d'états financiers + résumé chiffres clés */}
+        {data.publications.filter((p) => p.type_publication === 'etats_financiers').length > 0 && (
+          <div className="bg-surface border border-border rounded-xl p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-white">Publications — états financiers</h2>
+            <ul className="space-y-2">
+              {data.publications.filter((p) => p.type_publication === 'etats_financiers').map((p) => {
+                const an = (p.libelle ?? '').match(/[Ee]xercice\s+(20\d{2})/)?.[1] ?? null;
+                const inc = an ? data.incomeStatements.find((s) => s.periode === an) : undefined;
+                return (
+                  <li key={p.id} className="flex flex-col gap-1 border-b border-border/40 pb-2 last:border-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm text-muted">{p.libelle}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {inc && <a href="#etats" className="text-xs text-up hover:underline">Voir les états →</a>}
+                        {p.source_url && <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-info hover:underline">PDF</a>}
+                      </div>
+                    </div>
+                    {inc && (
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-faint tabular">
+                        <span>CA&nbsp;: {inc.revenu_total != null ? (inc.revenu_total / 1e9).toFixed(1) + ' Md' : 'N/D'}</span>
+                        <span>RN&nbsp;: {inc.resultat_net != null ? (inc.resultat_net / 1e9).toFixed(1) + ' Md' : 'N/D'}</span>
+                        <span>BPA&nbsp;: {inc.benefice_par_action ?? 'N/D'}</span>
+                        <span>Div&nbsp;: {inc.dividende_par_action ?? 'N/D'}</span>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
 
