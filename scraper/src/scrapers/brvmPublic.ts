@@ -25,7 +25,9 @@ export function parseBrvmPublic(html: string, date: MarketDate): MarketSnapshot 
 
   if (table.length > 0) {
     const headers: string[] = [];
-    table.find('thead th').each((_, th) => headers.push(normHeader($(th).text())));
+    table.find('thead th').each((_, th) => {
+      headers.push(normHeader($(th).text()));
+    });
     const col = (label: string) => headers.findIndex((h) => h.includes(label));
     const iSym = col('symbole');
     const iNom = col('nom');

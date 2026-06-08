@@ -39,6 +39,7 @@ import { runPublications } from './publications/runPublications.js';
 import { runBackfill } from './backfill/runBackfill.js';
 import { runNotations } from './notations/runNotations.js';
 import { runDetails } from './scrapers/runDetails.js';
+import { runIntraday } from './scrapers/runIntraday.js';
 import { runValidation } from './validation/runValidation.js';
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
@@ -79,6 +80,10 @@ async function main(): Promise<number> {
     case 'dividends': {
       const res = await runDividends({ mock });
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'intraday': {
+      const res = await runIntraday({ mock });
+      return res.nbActions > 0 ? 0 : 1;
     }
     case 'shares': {
       const res = await runShares();

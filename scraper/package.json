@@ -23,6 +23,8 @@
     "lint": "eslint \"src/**/*.ts\"",
     "dividends": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts dividends",
     "dividends:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts dividends --mock",
+    "intraday": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts intraday",
+    "intraday:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts intraday --mock",
     "publications": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications",
     "publications:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications --mock",
     "shares": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts shares",
