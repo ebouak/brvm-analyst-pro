@@ -1,3 +1,5 @@
+import type { Famille } from '@/lib/financials/sectors';
+
 export const FULL_SYSTEM_PROMPT =
   "Tu es un analyste financier expert des états financiers SYSCOHADA/OHADA (BRVM/UEMOA). " +
   "On te donne le texte d'un PDF d'états financiers. Renvoie UNIQUEMENT un objet JSON valide, sans texte autour.\n\n" +
@@ -17,4 +19,22 @@ export const FULL_SYSTEM_PROMPT =
 
 export function fullUserPrompt(symbol: string, text: string): string {
   return `Société BRVM : ${symbol}.\n\nTexte du PDF des états financiers :\n${text.slice(0, 60000)}`;
+}
+
+const LIGNES_FAMILLE: Record<Famille, string> = {
+  banque:
+    "\n\nCETTE SOCIÉTÉ EST UNE BANQUE. En plus des champs communs, renseigne un objet " +
+    "'lignes_specifiques' avec (FCFA bruts sauf ratios en %) : pnb (Produit Net Bancaire), " +
+    "produit_interets, marge_interets, depots_clientele, credits_clientele, creances_douteuses, " +
+    "coefficient_exploitation (%), ratio_solvabilite (%). Mets revenu_total = pnb. Mets null si absent.",
+  assurance:
+    "\n\nCETTE SOCIÉTÉ EST UNE ASSURANCE. En plus des champs communs, renseigne 'lignes_specifiques' avec " +
+    "(FCFA bruts sauf ratios en %) : primes_emises, primes_acquises, charges_sinistres, provisions_techniques, " +
+    "placements, ratio_combine (%). Mets revenu_total = primes_acquises. Mets null si absent.",
+  general: '',
+};
+
+/** Prompt système adapté à la famille comptable de la société. */
+export function buildSystemPrompt(famille: Famille): string {
+  return FULL_SYSTEM_PROMPT + LIGNES_FAMILLE[famille];
 }

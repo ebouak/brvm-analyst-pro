@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { YearStatement } from './fullStatement';
+import { BALANCE_KEYS } from '@/lib/financials/sectors';
 
 const n = (v: number | null | undefined) => (v == null ? null : v);
 
@@ -18,9 +19,21 @@ export function toRows(code: string, s: YearStatement, sourceFile: string): Mapp
       ? s.total_actif_circulant - s.passif_courant
       : null;
 
+  // Répartit les lignes spécifiques : clés "bilan" -> balance, le reste -> income.
+  const ls = s.lignes_specifiques ?? null;
+  let lsIncome: Record<string, number | null> | null = null;
+  let lsBalance: Record<string, number | null> | null = null;
+  if (ls) {
+    for (const [k, v] of Object.entries(ls)) {
+      if (BALANCE_KEYS.has(k)) (lsBalance ??= {})[k] = v;
+      else (lsIncome ??= {})[k] = v;
+    }
+  }
+
   return {
     income: {
       code, periode: s.periode, type_periode: 'annuel',
+      lignes_specifiques: lsIncome,
       revenu_total: n(s.revenu_total), cout_ventes: n(s.cout_ventes), marge_brute: n(s.marge_brute),
       frais_generaux_admin: n(s.frais_generaux_admin), depenses_rd: n(s.depenses_rd), autres_depenses: n(s.autres_depenses),
       resultat_exploitation: n(s.resultat_exploitation), charges_financieres_nettes: n(s.charges_financieres_nettes),
@@ -30,6 +43,7 @@ export function toRows(code: string, s: YearStatement, sourceFile: string): Mapp
     },
     balance: {
       code, periode: s.periode, type_periode: 'annuel',
+      lignes_specifiques: lsBalance,
       total_actifs: n(s.total_actifs), total_actif_circulant: n(s.total_actif_circulant),
       tresorerie_equivalents: n(s.tresorerie_equivalents), investissements_court_terme: n(s.investissements_court_terme),
       creances_clients: n(s.creances_clients), stocks: n(s.stocks), autres_actifs_courants: n(s.autres_actifs_courants),

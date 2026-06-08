@@ -27,6 +27,8 @@ export const yearStatementSchema = z.object({
   emissions_actions: num, variation_tresorerie: num,
   tresorerie_debut_periode: num, tresorerie_fin_periode: num,
   depenses_capital: num, flux_tresorerie_disponible: num,
+  // Lignes propres à la famille (banque/assurance). Clés libres -> nombre|null.
+  lignes_specifiques: z.record(z.number().nullable()).nullable().optional(),
 });
 
 export type YearStatement = z.infer<typeof yearStatementSchema>;

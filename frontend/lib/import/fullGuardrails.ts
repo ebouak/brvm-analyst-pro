@@ -48,3 +48,21 @@ export function checkStatement(s: YearStatement, estBanque: boolean): GuardResul
 
   return { ok: reasons.length === 0, reasons };
 }
+
+/**
+ * Contrôle léger spécifique banque : crédits clientèle + trésorerie ne doivent pas
+ * dépasser le total actif de plus de 5% (sinon erreur d'extraction).
+ */
+export function checkBankSpecific(x: {
+  credits_clientele: number | null;
+  tresorerie: number | null;
+  total_actifs: number | null;
+}): GuardResult {
+  const reasons: string[] = [];
+  if (x.credits_clientele != null && x.tresorerie != null && x.total_actifs != null) {
+    if (x.credits_clientele + x.tresorerie > x.total_actifs * 1.05) {
+      reasons.push('banque : crédits + trésorerie > total actif');
+    }
+  }
+  return { ok: reasons.length === 0, reasons };
+}

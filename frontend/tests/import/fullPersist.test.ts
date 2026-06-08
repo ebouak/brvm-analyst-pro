@@ -25,4 +25,12 @@ describe('toRows', () => {
     expect(r.fundamentals.source).toBe('llm-extracted');
     expect(r.fundamentals.source_file).toBe('fichier.pdf');
   });
+
+  it('répartit lignes_specifiques entre income et balance', () => {
+    const withLs = { ...(y as YearStatement), lignes_specifiques: { pnb: 5e11, depots_clientele: 2e12 } };
+    const r = toRows('NSBC', withLs, 'f.pdf');
+    expect((r.income.lignes_specifiques as Record<string, number>).pnb).toBe(5e11);
+    expect((r.balance.lignes_specifiques as Record<string, number>).depots_clientele).toBe(2e12);
+    expect((r.income.lignes_specifiques as Record<string, unknown>).depots_clientele).toBeUndefined();
+  });
 });
