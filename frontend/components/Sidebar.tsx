@@ -42,6 +42,8 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/premium/calendrier',  label: 'Dates clés',   premium: true },
       { href: '/premium/anomalies',    label: 'Anomalies',    premium: true },
       { href: '/premium/backtesting', label: 'Backtesting',  premium: true },
+      { href: '/premium/correlations', label: 'Corrélations', premium: true },
+      { href: '/premium/outils',      label: 'Outils Pro',   premium: true },
     ],
   },
   {
