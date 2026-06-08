@@ -1,16 +1,20 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-import type { AnalyseStructuree } from './parseAnalyse';
+import type { AnalyseStructuree, ActionAnalysee } from './parseAnalyse';
 
 const C = {
   bg: '#0f1117', surface: '#161b22', border: '#30363d',
   text: '#e6edf3', muted: '#8d96a0',
   up: '#3fb950', down: '#f85149', warn: '#d29922',
-  blue: '#388bfd', white: '#ffffff', dark: '#24292f',
+  white: '#ffffff', dark: '#24292f',
 };
 
-const SIGNAL_COLOR: Record<string, string> = {
-  ACHAT: C.up, NEUTRE: C.warn, VENTE: C.down,
+const SIGNAL_COLOR: Record<string, string> = { ACHAT: C.up, NEUTRE: C.warn, VENTE: C.down };
+const sigColor = (sig: string) => {
+  const s = sig.toUpperCase();
+  return s.includes('ACHAT') || s === 'BUY' ? C.up
+       : s.includes('VENTE') || s === 'SELL' ? C.down
+       : C.warn;
 };
 
 const s = StyleSheet.create({
@@ -60,15 +64,21 @@ const s = StyleSheet.create({
   footerL: { fontSize: 7, color: C.muted, flex: 1 },
   footerR: { fontSize: 7, color: C.up },
   pageNum: { position: 'absolute', bottom: 8, left: 0, right: 0, textAlign: 'center', fontSize: 7.5, color: C.muted },
+  // Screener
+  actionBlock: { marginBottom: 18, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: C.border },
+  actionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, backgroundColor: C.surface, padding: 9, borderRadius: 5 },
+  actionSymbole: { fontSize: 13, fontFamily: 'Helvetica-Bold', color: C.white },
+  actionNom: { fontSize: 8.5, color: C.muted, marginTop: 2 },
+  actionBadges: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  rsiChip: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3, backgroundColor: C.surface, borderWidth: 1 },
+  kpiRowMini: { flexDirection: 'row', gap: 5, marginTop: 6 },
+  kpiMini: { flex: 1, backgroundColor: C.surface, borderRadius: 4, padding: 5, borderWidth: 1, borderColor: C.border },
+  kpiMiniLabel: { fontSize: 6.5, color: C.muted },
+  kpiMiniValue: { fontSize: 8.5, fontFamily: 'Helvetica-Bold', color: C.white, marginTop: 2 },
+  screenerTitle: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: C.white, marginBottom: 14, paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: C.border },
 });
 
-const KpiCard = ({ label, value, pct, valueColor }: { label: string; value: string; pct?: string; valueColor?: string }) => (
-  <View style={s.kpiCard}>
-    <Text style={s.kpiLabel}>{label.toUpperCase()}</Text>
-    <Text style={[s.kpiVal, valueColor ? { color: valueColor } : {}]}>{value}</Text>
-    {pct && pct !== 'N/A' && <Text style={s.kpiPct}>{pct}</Text>}
-  </View>
-);
+// ── Composants partagés ────────────────────────────────────────────────────────
 
 const Tableau = ({ headers, rows }: { headers: string[]; rows: string[][] }) => (
   <View style={s.table}>
@@ -83,52 +93,135 @@ const Tableau = ({ headers, rows }: { headers: string[]; rows: string[][] }) => 
   </View>
 );
 
-export const PdfAnalyseDocument = ({ data }: { data: AnalyseStructuree }) => {
-  const signalColor = SIGNAL_COLOR[data.signal] ?? C.warn;
-  const scoreNote = data.scoreConviction >= 7 ? 'Achat fort ✓' : data.scoreConviction >= 5 ? 'À surveiller' : 'Neutre / Éviter';
+const KpiCard = ({ label, value, pct, valueColor }: { label: string; value: string; pct?: string; valueColor?: string }) => (
+  <View style={s.kpiCard}>
+    <Text style={s.kpiLabel}>{label.toUpperCase()}</Text>
+    <Text style={[s.kpiVal, valueColor ? { color: valueColor } : {}]}>{value}</Text>
+    {pct && pct !== 'N/A' && <Text style={s.kpiPct}>{pct}</Text>}
+  </View>
+);
+
+const ActionScreenerBlock = ({ action, index }: { action: ActionAnalysee; index: number }) => {
+  const sc = sigColor(action.signal);
+  const rsiVal = action.rsi ?? 50;
+  const rsiC = rsiVal < 30 ? C.up : rsiVal > 70 ? C.down : C.warn;
+  const medal = index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : `#${index + 1}`;
 
   return (
-    <Document title={`Analyse BRVM — ${data.symbole} — ${data.date}`} author="BRVM Analyst Pro">
+    <View style={s.actionBlock} wrap={false}>
+      <View style={s.actionHeader}>
+        <View>
+          <Text style={s.actionSymbole}>{medal}  {action.symbole}</Text>
+          <Text style={s.actionNom}>{action.nom}</Text>
+        </View>
+        <View style={s.actionBadges}>
+          {action.rsi !== undefined && (
+            <View style={[s.rsiChip, { borderColor: rsiC }]}>
+              <Text style={[{ fontSize: 8, fontFamily: 'Helvetica-Bold' }, { color: rsiC }]}>RSI {action.rsi}</Text>
+            </View>
+          )}
+          <View style={[s.badge, { backgroundColor: sc }]}>
+            <Text style={s.badgeText}>{action.signal}</Text>
+          </View>
+          <View style={[s.badge, { backgroundColor: C.border }]}>
+            <Text style={[s.badgeText, { color: sc }]}>{action.score}/10</Text>
+          </View>
+        </View>
+      </View>
+      <View style={s.kpiRowMini}>
+        {[
+          { l: 'ENTRÉE',     v: action.prixEntree || 'N/A' },
+          { l: 'OBJECTIF 1', v: action.objectif1 || 'N/A', color: C.up },
+          { l: 'STOP-LOSS',  v: action.stopLoss || 'N/A', color: C.down },
+          { l: 'HORIZON',    v: action.horizon || 'N/A' },
+        ].map((k, i) => (
+          <View key={i} style={s.kpiMini}>
+            <Text style={s.kpiMiniLabel}>{k.l}</Text>
+            <Text style={[s.kpiMiniValue, k.color ? { color: k.color } : {}]}>{k.v}</Text>
+          </View>
+        ))}
+      </View>
+      {action.risques.length > 0 && (
+        <View style={{ marginTop: 5 }}>
+          {action.risques.map((r, i) => (
+            <Text key={i} style={{ fontSize: 8, color: C.warn, marginTop: 1 }}>• {r}</Text>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+};
+
+// ── Document principal ────────────────────────────────────────────────────────
+
+export const PdfAnalyseDocument = ({ data }: { data: AnalyseStructuree }) => {
+  const sc = SIGNAL_COLOR[data.signal] ?? C.warn;
+  const scoreNote = data.scoreConviction >= 7 ? 'Achat fort' : data.scoreConviction >= 5 ? 'A surveiller' : 'Neutre / Eviter';
+
+  return (
+    <Document title={`Analyse BRVM — ${data.symbole || data.titreRapport} — ${data.date}`} author="BRVM Analyst Pro">
       <Page size="A4" style={s.page}>
 
         {/* HEADER */}
         <View style={s.header}>
           <View style={{ flex: 1 }}>
             <Text style={s.brand}>BRVM ANALYST PRO</Text>
-            <Text style={s.titre}>{data.nomComplet}</Text>
-            <Text style={s.sousTitre}>{data.symbole} · Analyse financière complète</Text>
+            <Text style={s.titre}>{data.titreRapport}</Text>
+            <Text style={s.sousTitre}>
+              {data.symbole ? `${data.symbole} · ` : ''}{data.typeAnalyse === 'screener' ? 'Screener multi-actions' : 'Analyse financière complète'}
+            </Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={s.dateText}>{data.date}</Text>
-            <View style={[s.badge, { backgroundColor: signalColor }]}>
+            <View style={[s.badge, { backgroundColor: sc }]}>
               <Text style={s.badgeText}>{data.signal}</Text>
             </View>
           </View>
         </View>
 
-        {/* SCORE + KPIs */}
-        <View style={s.scoreRow}>
-          <View style={s.scoreCard}>
-            <Text style={s.scoreLabel}>SCORE DE CONVICTION</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-              <Text style={[s.scoreVal, { color: signalColor }]}>{data.scoreConviction.toFixed(1)}</Text>
-              <Text style={s.scoreSub}> /10</Text>
+        {/* SCORE + KPIs — uniquement pour fiche action */}
+        {data.typeAnalyse === 'fiche' && (
+          <View style={s.scoreRow}>
+            <View style={s.scoreCard}>
+              <Text style={s.scoreLabel}>SCORE DE CONVICTION</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <Text style={[s.scoreVal, { color: sc }]}>{data.scoreConviction.toFixed(1)}</Text>
+                <Text style={s.scoreSub}> /10</Text>
+              </View>
+              <View style={s.progressBg}>
+                <View style={[s.progressFill, { width: `${data.scoreConviction * 10}%`, backgroundColor: sc }]} />
+              </View>
+              <Text style={s.scoreNote}>{scoreNote}</Text>
             </View>
-            <View style={s.progressBg}>
-              <View style={[s.progressFill, { width: `${data.scoreConviction * 10}%`, backgroundColor: signalColor }]} />
+            <View style={s.kpiGrid}>
+              <KpiCard label="Prix d'entrée" value={data.recommendation.prixEntree} />
+              <KpiCard label="Objectif 1" value={data.recommendation.objectif1} pct={data.recommendation.objectif1Pct} valueColor={C.up} />
+              <KpiCard label="Objectif 2" value={data.recommendation.objectif2} pct={data.recommendation.objectif2Pct} valueColor={C.up} />
+              <KpiCard label="Stop-Loss" value={data.recommendation.stopLoss} pct={data.recommendation.stopLossPct} valueColor={C.down} />
+              <KpiCard label="Horizon" value={data.recommendation.horizon} />
             </View>
-            <Text style={s.scoreNote}>{scoreNote}</Text>
           </View>
-          <View style={s.kpiGrid}>
-            <KpiCard label="Prix d'entrée" value={data.recommendation.prixEntree} />
-            <KpiCard label="Objectif 1" value={data.recommendation.objectif1} pct={data.recommendation.objectif1Pct} valueColor={C.up} />
-            <KpiCard label="Objectif 2" value={data.recommendation.objectif2} pct={data.recommendation.objectif2Pct} valueColor={C.up} />
-            <KpiCard label="Stop-Loss" value={data.recommendation.stopLoss} pct={data.recommendation.stopLossPct} valueColor={C.down} />
-            <KpiCard label="Horizon" value={data.recommendation.horizon} />
-          </View>
-        </View>
+        )}
 
-        {/* SECTIONS */}
+        {/* SCORE SYNTHÈSE — screener */}
+        {data.typeAnalyse === 'screener' && data.actionsAnalysees && (
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+            <View style={s.scoreCard}>
+              <Text style={s.scoreLabel}>ACTIONS SÉLECTIONNÉES</Text>
+              <Text style={[s.scoreVal, { color: sc, fontSize: 22 }]}>{data.actionsAnalysees.length}</Text>
+              <Text style={s.scoreNote}>opportunités filtrées</Text>
+            </View>
+            <View style={[s.scoreCard, { flex: 2 }]}>
+              <Text style={s.scoreLabel}>SCORE MOYEN</Text>
+              <Text style={[s.scoreVal, { color: sc, fontSize: 22 }]}>
+                {(data.actionsAnalysees.reduce((sum, a) => sum + a.score, 0) / data.actionsAnalysees.length).toFixed(1)}
+              </Text>
+              <Text style={s.scoreNote}>/ 10 — classement par conviction décroissante</Text>
+            </View>
+          </View>
+        )}
+
+        {/* SECTIONS TEXTE */}
         {data.sections.map((sec, i) => (
           <View key={i} style={s.section} wrap={false}>
             <View style={s.sectionHead}>
@@ -139,10 +232,20 @@ export const PdfAnalyseDocument = ({ data }: { data: AnalyseStructuree }) => {
           </View>
         ))}
 
+        {/* ACTIONS SCREENER */}
+        {data.actionsAnalysees && data.actionsAnalysees.length > 0 && (
+          <View>
+            <Text style={s.screenerTitle}>Classement des Opportunités</Text>
+            {data.actionsAnalysees.map((action, i) => (
+              <ActionScreenerBlock key={action.symbole + i} action={action} index={i} />
+            ))}
+          </View>
+        )}
+
         {/* RISQUES */}
         {data.risques.length > 0 && (
           <View style={s.riskBox} wrap={false}>
-            <Text style={s.riskTitle}>⚠ RISQUES SPÉCIFIQUES</Text>
+            <Text style={s.riskTitle}>RISQUES SPECIFIQUES</Text>
             {data.risques.map((r, i) => (
               <View key={i} style={s.riskRow}>
                 <Text style={s.riskBullet}>•</Text>
