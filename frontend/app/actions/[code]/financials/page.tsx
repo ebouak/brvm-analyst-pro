@@ -6,6 +6,7 @@ import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
+import SectorSpecificBlock from '@/components/financials/SectorSpecificBlock';
 
 interface Props {
   params: { code: string };
@@ -20,6 +21,13 @@ export default async function FinancialsPage({ params }: Props) {
   const prevIncome = data.incomeStatements[1] ?? null;
   const latestBalance = data.balanceSheets[0] ?? null;
   const latestCashflow = data.cashFlowStatements[0] ?? null;
+
+  // Lignes spécifiques fusionnées (income + balance) du dernier exercice.
+  const lignesSpecifiques = {
+    ...(latestBalance?.lignes_specifiques ?? {}),
+    ...(latestIncome?.lignes_specifiques ?? {}),
+  };
+  const aLignesSpecifiques = Object.keys(lignesSpecifiques).length > 0;
 
   const ratios = calculateFundamentals({
     coursActuel: data.latestDaily?.cours_jour ?? null,
@@ -54,6 +62,11 @@ export default async function FinancialsPage({ params }: Props) {
             )}
             {data.instrument.secteur && (
               <p className="text-xs text-faint">{data.instrument.secteur}</p>
+            )}
+            {data.instrument.famille_comptable !== 'general' && (
+              <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] bg-info/10 text-info border border-info/20 font-medium">
+                {data.instrument.famille_comptable === 'banque' ? 'Banque' : 'Assurance'}
+              </span>
             )}
           </div>
           <ExportBar
@@ -146,6 +159,11 @@ export default async function FinancialsPage({ params }: Props) {
               Importer via IA
             </a>
           </div>
+        )}
+
+        {/* Lignes spécifiques à la famille comptable (banque/assurance) */}
+        {data.instrument.famille_comptable !== 'general' && aLignesSpecifiques && (
+          <SectorSpecificBlock famille={data.instrument.famille_comptable} lignes={lignesSpecifiques} />
         )}
 
         {/* Publications d'états financiers + résumé chiffres clés */}

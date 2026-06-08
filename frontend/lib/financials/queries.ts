@@ -6,7 +6,7 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
 
   const { data: instrument, error: instrError } = await supabase
     .from('brvm_instruments')
-    .select('code, designation, secteur, shares')
+    .select('code, designation, secteur, shares, famille_comptable')
     .eq('code', code)
     .single();
 
@@ -62,6 +62,7 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
       designation: instrument.designation ?? null,
       secteur: instrument.secteur ?? null,
       shares: instrument.shares ?? null,
+      famille_comptable: (instrument.famille_comptable ?? 'general') as 'banque' | 'assurance' | 'general',
     },
     latestDaily: { cours_jour, cours_bas_52s, cours_haut_52s },
     incomeStatements: (incomeRes.data ?? []) as any,

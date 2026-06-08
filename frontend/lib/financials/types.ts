@@ -18,6 +18,7 @@ export interface IncomeStatement {
   actions_en_circulation: number | null;
   actions_diluees: number | null;
   dividende_par_action: number | null;
+  lignes_specifiques: Record<string, number | null> | null;
 }
 
 export interface BalanceSheet {
@@ -51,6 +52,7 @@ export interface BalanceSheet {
   reserves_benefices_non_repartis: number | null;
   autres_capitaux_propres: number | null;
   interets_minoritaires: number | null;
+  lignes_specifiques: Record<string, number | null> | null;
 }
 
 export interface CashFlowStatement {
@@ -115,6 +117,7 @@ export interface FinancialsData {
     designation: string | null;
     secteur: string | null;
     shares: number | null;
+    famille_comptable: 'banque' | 'assurance' | 'general';
   };
   latestDaily: {
     cours_jour: number | null;
