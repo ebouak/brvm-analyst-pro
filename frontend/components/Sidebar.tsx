@@ -39,6 +39,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Premium',
     items: [
       { href: '/assistant',             label: 'Assistant IA',  premium: true },
+      { href: '/premium/diagnostic',    label: 'Diagnostic IA', premium: true },
       { href: '/premium/classements',   label: 'Classements',   premium: true },
       { href: '/premium/calendrier',    label: 'Dates clés',    premium: true },
       { href: '/premium/anomalies',     label: 'Anomalies',     premium: true },
