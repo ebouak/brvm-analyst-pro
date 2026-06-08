@@ -15,9 +15,32 @@ interface Props {
 
 function parseName(name: string): { symbol: string; year: number } {
   const stem = name.replace(/\.[^.]+$/, '');
-  const symbol = stem.split('_')[0]!.toUpperCase();
-  const m = stem.match(/(20\d{2})/);
-  return { symbol, year: m ? Number(m[1]) : new Date().getFullYear() - 1 };
+
+  // Année : premier "20XX" trouvé dans le nom
+  const yearM = stem.match(/(20\d{2})/);
+  const year = yearM ? Number(yearM[1]) : new Date().getFullYear() - 1;
+
+  // Format 1 : SYMBOLE_ANNEE  (ex. PALC_2025)
+  const fmt1 = stem.match(/^([A-Z]{2,6})_\d{4}/i);
+  if (fmt1) return { symbol: fmt1[1]!.toUpperCase(), year };
+
+  // Format 2 : contient un code BRVM connu en majuscules (2-6 lettres capitales)
+  //            isolé par séparateurs (espace, tiret, underscore, point)
+  const codes = stem.match(/(?:^|[\s\-_.])([A-Z]{2,6})(?:[\s\-_.]|$)/g);
+  if (codes) {
+    // Prendre le dernier token qui ressemble à un code (ignore mots courants)
+    const IGNORE = new Set(['PDF', 'CI', 'SA', 'SAS', 'NV', 'AG', 'AN', 'DU', 'DE', 'LA', 'ET']);
+    for (const raw of [...codes].reverse()) {
+      const tok = raw.replace(/[\s\-_.]/g, '').toUpperCase();
+      if (tok.length >= 2 && tok.length <= 6 && !IGNORE.has(tok) && !/^\d+$/.test(tok)) {
+        return { symbol: tok, year };
+      }
+    }
+  }
+
+  // Fallback : premier segment avant _ ou espace
+  const fallback = stem.split(/[_\s]/)[0]!.toUpperCase().slice(0, 6);
+  return { symbol: fallback, year };
 }
 
 const M = 1_000_000;
