@@ -97,8 +97,11 @@ export default function ImportRow({ file, validCodes }: Props) {
     }
   }
 
+  // Ne pas auto-lancer : l'utilisateur valide d'abord le symbole détecté
   useEffect(() => {
-    void run();
+    // Auto-lancer uniquement si le symbole parsé semble fiable (format SYMBOLE_ANNEE exact)
+    const stem = file.name.replace(/\.[^.]+$/, '');
+    if (/^[A-Z]{2,6}_20\d{2}$/i.test(stem)) void run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -106,11 +109,14 @@ export default function ImportRow({ file, validCodes }: Props) {
     <div className="bg-surface border border-border rounded-xl p-3 space-y-2">
       <div className="flex items-center gap-3 text-sm">
         <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-          className="w-20 bg-bg border border-border rounded px-2 py-1 text-sm font-medium" />
+          placeholder="CODE"
+          className="w-20 bg-bg border border-border rounded px-2 py-1 text-sm font-medium uppercase" />
         <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))}
+          placeholder="Année" title="Année de l'exercice"
           className="w-20 bg-bg border border-border rounded px-2 py-1 text-sm" />
         <span className="text-muted text-xs truncate flex-1">{file.name}</span>
         <span className="text-xs">
+          {status === 'pending' && <span className="text-faint">en attente</span>}
           {status === 'reading' && '📄 lecture…'}
           {status === 'analyzing' && '🤖 analyse…'}
           {status === 'auto-saving' && '💾 écriture…'}
@@ -118,8 +124,15 @@ export default function ImportRow({ file, validCodes }: Props) {
           {status === 'review' && <span className="text-warn">⚠️ à valider ({provider})</span>}
           {status === 'error' && <span className="text-down">✕ {error}</span>}
         </span>
-        {status === 'error' && (
-          <button type="button" onClick={() => void run()} className="text-xs text-up hover:underline">Réessayer</button>
+        {status === 'pending' && (
+          <button type="button" onClick={() => void run()}
+            className="text-xs px-2 py-1 rounded bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all">
+            Analyser
+          </button>
+        )}
+        {(status === 'error') && (
+          <button type="button" onClick={() => { setStatus('pending'); setError(null); }}
+            className="text-xs text-up hover:underline">Corriger</button>
         )}
       </div>
       {status === 'review' && extraction && (
