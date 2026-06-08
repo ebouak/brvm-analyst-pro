@@ -3,6 +3,10 @@ import type { YearStatement } from './fullStatement';
 export interface GuardResult { ok: boolean; reasons: string[]; }
 
 const MIN_PLAUSIBLE_FCFA = 1_000_000_000; // 1 Md FCFA
+// Tolérance sur RN vs RAI±impôts : en SYSCOHADA des lignes intermédiaires (participation
+// des travailleurs, etc.) s'intercalent entre le résultat avant impôts et le résultat net.
+// 10% accepte ces écarts normaux tout en rejetant les grosses erreurs d'extraction.
+const RESULT_TOLERANCE = 0.10;
 const rel = (a: number, b: number) => Math.abs(a - b) / Math.max(Math.abs(b), 1);
 
 /** Vérifie un exercice extrait. `estBanque` relâche les contrôles spécifiques industriels. */
@@ -25,7 +29,7 @@ export function checkStatement(s: YearStatement, estBanque: boolean): GuardResul
   if (s.resultat_net != null && s.resultat_avant_impots != null && s.impots != null) {
     const attPlus = s.resultat_avant_impots + s.impots;
     const attMoins = s.resultat_avant_impots - s.impots;
-    if (rel(s.resultat_net, attPlus) > 0.02 && rel(s.resultat_net, attMoins) > 0.02) {
+    if (rel(s.resultat_net, attPlus) > RESULT_TOLERANCE && rel(s.resultat_net, attMoins) > RESULT_TOLERANCE) {
       reasons.push('résultat net incohérent (RAI ± impôts)');
     }
   }
