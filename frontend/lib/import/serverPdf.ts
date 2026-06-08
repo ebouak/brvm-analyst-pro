@@ -6,11 +6,17 @@ export async function fetchPdfText(url: string): Promise<string> {
   if (!resp.ok) throw new Error(`PDF HTTP ${resp.status}`);
   const buf = new Uint8Array(await resp.arrayBuffer());
 
-  // Import dynamique du build legacy (compatible Node, pas de worker DOM)
+  // Import dynamique du build legacy (compatible Node). NE PAS toucher à
+  // GlobalWorkerOptions.workerSrc en pdfjs-dist 4.x (lui assigner undefined lève
+  // « Invalid workerSrc type ») ; le faux worker Node est utilisé automatiquement.
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-  (pdfjs.GlobalWorkerOptions as { workerSrc?: unknown }).workerSrc = undefined;
 
-  const doc = await pdfjs.getDocument({ data: buf, useSystemFonts: true }).promise;
+  const doc = await pdfjs.getDocument({
+    data: buf,
+    useSystemFonts: true,
+    isEvalSupported: false,
+    disableFontFace: true,
+  }).promise;
   let out = '';
   for (let p = 1; p <= doc.numPages; p++) {
     const page = await doc.getPage(p);

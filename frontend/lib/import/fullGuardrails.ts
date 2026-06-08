@@ -19,9 +19,15 @@ export function checkStatement(s: YearStatement, estBanque: boolean): GuardResul
   }
 
   // 3. Cohérence résultat : resultat_net ≈ resultat_avant_impots + impots (impots signé négatif = charge)
+  // Agnostique au signe des impôts : certains PDF présentent l'impôt en charge
+  // négative (RN = RAI + impôts), d'autres en valeur positive (RN = RAI − impôts).
+  // On accepte si l'une des deux conventions est cohérente.
   if (s.resultat_net != null && s.resultat_avant_impots != null && s.impots != null) {
-    const attendu = s.resultat_avant_impots + s.impots;
-    if (rel(s.resultat_net, attendu) > 0.02) reasons.push('résultat net incohérent (RAI + impôts)');
+    const attPlus = s.resultat_avant_impots + s.impots;
+    const attMoins = s.resultat_avant_impots - s.impots;
+    if (rel(s.resultat_net, attPlus) > 0.02 && rel(s.resultat_net, attMoins) > 0.02) {
+      reasons.push('résultat net incohérent (RAI ± impôts)');
+    }
   }
 
   // 4. Cohérence BPA : benefice_par_action ≈ resultat_net / actions_en_circulation (tolérance 5%)
