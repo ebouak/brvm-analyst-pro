@@ -27,15 +27,25 @@ export interface ExtractResponse {
 
 /** Prompt système commun (règles d'unité éprouvées). */
 export const SYSTEM_PROMPT =
-  "Tu es un expert en analyse financière. À partir du document d'états financiers, " +
-  'extrais les fondamentaux et renvoie UNIQUEMENT un JSON valide (aucun texte autour). ' +
-  'Valeurs en MILLIONS de FCFA sauf eps (FCFA/action) et shares_outstanding (unités). ' +
-  "Repère l'unité réelle du tableau (en millions / en milliers / en FCFA) et convertis " +
-  'tout en MILLIONS (milliers÷1000, FCFA bruts÷1000000). Ignore les chiffres marketing ' +
-  "(infographies, 'X milliards' narratif). Prends les lignes du compte de résultat et du " +
-  'bilan consolidés. net_income = résultat net part du groupe sinon consolidé. ' +
-  'Champs JSON: revenue, net_income, equity, debt_total, cash, eps, dividend_per_share, ' +
-  'shares_outstanding. Mets null si non trouvé.';
+  "Tu es un expert en analyse financière BRVM/SYSCOHADA. Extrais les fondamentaux " +
+  "du document et renvoie UNIQUEMENT un objet JSON valide, sans texte autour.\n\n" +
+  "RÈGLE D'UNITÉ CRITIQUE :\n" +
+  "1. Lis l'en-tête du tableau (ex : 'En milliers FRANCS CFA' ou 'En millions FCFA').\n" +
+  "2. Si le tableau est 'en milliers' : divise chaque montant brut par 1 000 pour obtenir des millions.\n" +
+  "   Exemple : tableau en milliers, ligne CA = 197 629 996 → revenue = 197 630 (millions).\n" +
+  "3. Si le tableau est 'en millions' : recopie directement.\n" +
+  "4. Si le tableau est 'en FCFA bruts' : divise par 1 000 000.\n" +
+  "NE recopie PAS le nombre brut du tableau comme résultat : convertis toujours en millions.\n\n" +
+  "Champs JSON attendus (tous en MILLIONS de FCFA sauf eps et shares_outstanding) :\n" +
+  "  revenue           = Chiffre d'affaires\n" +
+  "  net_income        = Résultat net (part du groupe si consolidé)\n" +
+  "  equity            = Capitaux propres totaux\n" +
+  "  debt_total        = Dettes financières totales (CT + LT)\n" +
+  "  cash              = Trésorerie actif\n" +
+  "  eps               = Bénéfice par action (FCFA/action, pas en millions)\n" +
+  "  dividend_per_share= Dividende par action (FCFA/action, pas en millions)\n" +
+  "  shares_outstanding= Nombre d'actions en circulation (unités entières, pas en millions)\n" +
+  "Mets null si un champ est absent. Ne renvoie rien d'autre que le JSON.";
 
 export function userPrompt(symbol: string, year: number, text?: string): string {
   const head = `Société: ${symbol}. Exercice: ${year}.`;
