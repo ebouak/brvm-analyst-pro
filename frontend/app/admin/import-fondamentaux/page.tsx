@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import PdfDropzone from '@/components/import/PdfDropzone';
 import ImportRow from '@/components/import/ImportRow';
+import BatchImportPanel from '@/components/import/BatchImportPanel';
 
 interface Queued { id: string; file: File; }
 
@@ -40,6 +41,7 @@ export default function ImportFondamentauxPage() {
           écriture automatique si les valeurs sont plausibles, validation sinon.
         </p>
       </div>
+      <BatchImportPanel />
       <PdfDropzone onFiles={addFiles} />
       <div className="space-y-2">
         {files.map((q) => <ImportRow key={q.id} file={q.file} validCodes={validCodes} />)}
