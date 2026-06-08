@@ -40,7 +40,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/premium/classements', label: 'Classements',  premium: true },
       { href: '/premium/calendrier',  label: 'Dates clés',   premium: true },
-      { href: '/premium/anomalies',   label: 'Anomalies',    premium: true },
+      { href: '/premium/anomalies',    label: 'Anomalies',    premium: true },
+      { href: '/premium/backtesting', label: 'Backtesting',  premium: true },
     ],
   },
   {
