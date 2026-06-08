@@ -38,18 +38,18 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Premium',
     items: [
-      { href: '/premium/classements', label: 'Classements',  premium: true },
-      { href: '/premium/calendrier',  label: 'Dates clés',   premium: true },
-      { href: '/premium/anomalies',    label: 'Anomalies',    premium: true },
-      { href: '/premium/backtesting', label: 'Backtesting',  premium: true },
-      { href: '/premium/correlations', label: 'Corrélations', premium: true },
-      { href: '/premium/outils',      label: 'Outils Pro',   premium: true },
+      { href: '/assistant',             label: 'Assistant IA',  premium: true },
+      { href: '/premium/classements',   label: 'Classements',   premium: true },
+      { href: '/premium/calendrier',    label: 'Dates clés',    premium: true },
+      { href: '/premium/anomalies',     label: 'Anomalies',     premium: true },
+      { href: '/premium/backtesting',   label: 'Backtesting',   premium: true },
+      { href: '/premium/correlations',  label: 'Corrélations',  premium: true },
+      { href: '/premium/outils',        label: 'Outils Pro',    premium: true },
     ],
   },
   {
     label: 'Admin',
     items: [
-      { href: '/assistant',                 label: 'Assistant IA' },
       { href: '/admin/import-fondamentaux', label: 'Import IA' },
       { href: '/admin/cles-api',            label: 'Clés API' },
       { href: '/methodologie',              label: 'Méthodologie' },
@@ -77,7 +77,7 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
       </div>
 
       {/* Nav groups */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
             <p className="text-[10px] font-semibold text-faint uppercase tracking-widest px-2 mb-1.5">
@@ -94,7 +94,7 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
                     <Link
                       key={item.href}
                       href="/premium/upgrade"
-                      className="flex items-center gap-2.5 px-2 py-1.5 rounded text-sm text-faint hover:text-warn hover:bg-warn/5 transition-all"
+                      className="flex items-center gap-2.5 px-2 py-1 rounded text-sm text-faint hover:text-warn hover:bg-warn/5 transition-all"
                     >
                       <span className="w-1 h-1 rounded-full shrink-0 opacity-0" />
                       {item.label}
@@ -107,7 +107,7 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
                     key={item.href}
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
-                    className={`flex items-center gap-2.5 px-2 py-1.5 rounded text-sm transition-all ${
+                    className={`flex items-center gap-2.5 px-2 py-1 rounded text-sm transition-all ${
                       active ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-white hover:bg-white/5'
                     }`}
                   >
