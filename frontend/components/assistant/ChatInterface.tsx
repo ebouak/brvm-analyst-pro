@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { PROMPTS_TEMPLATES } from '@/lib/ai/prompts';
+import { ExportButton } from './ExportButton';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -214,7 +215,12 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
                   <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:300ms]" />
                 </span>
               ) : (
-                <pre className="whitespace-pre-wrap font-sans text-sm">{msg.content}</pre>
+                <>
+                  <pre className="whitespace-pre-wrap font-sans text-sm">{msg.content}</pre>
+                  {msg.role === 'assistant' && msg.content.length > 200 && (
+                    <ExportButton texteAnalyse={msg.content} symbole={symbole || symbolePreselect} />
+                  )}
+                </>
               )}
             </div>
           </div>
