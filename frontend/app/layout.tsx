@@ -1,9 +1,34 @@
 import type { Metadata, Viewport } from 'next';
+import { Fraunces, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
 import CommandPaletteProvider from '@/components/CommandPaletteProvider';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import { createClient } from '@/lib/supabase/server';
+
+// ── Système typographique premium ────────────────────────────────────────────
+// Display noble (serif à caractère) — titres et moments de marque.
+const fontDisplay = Fraunces({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+});
+// Body distinctif mais très lisible — texte courant et UI (remplace Inter).
+const fontSans = Hanken_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+// Données chiffrées — tabulaire.
+const fontMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   // UX fix: template de titre pour que chaque page affiche "Page | BRVM Analyst Pro".
@@ -19,7 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0f1117',
+  themeColor: '#07080a',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -36,8 +61,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="fr" className="dark">
-      <body className="bg-bg text-white antialiased">
+    <html lang="fr" className={`dark ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}>
+      <body className="bg-bg text-white antialiased font-sans">
         <div className="flex min-h-screen">
           <Sidebar isPremium={isPremium} />
           <main className="flex-1 min-w-0">{children}</main>

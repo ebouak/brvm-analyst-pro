@@ -2,57 +2,104 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
+/* Polices chargées via next/font (layout.tsx) → variables --font-display / --font-sans / --font-mono */
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  --grain-opacity: 0.025;
+}
 
 body {
-  background-color: #0d0f17;
-  color: #e8e3dc;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  background-color: #07080a;
+  color: #ece4d3;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Chiffres financiers — police mono tabular */
+/* Atmosphère : grain minéral très subtil sur toute la page (texture, profondeur). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body > * { position: relative; z-index: 1; }
+
+/* Titres — display noble (Fraunces). À appliquer via .font-display sur les H1/H2 de marque. */
+.font-display { font-family: var(--font-display), Georgia, serif; }
+
+/* Chiffres financiers — mono tabulaire */
 .tabular {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-/* Accent focus ring global (Claude orange) */
+/* Surtitre éditorial (overline doré) */
+.overline {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Filet doré décoratif (séparateurs de section) */
+.gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 164, 92, 0.5), transparent);
+}
+
+/* Texte doré à reflet (titres de consécration) */
+.text-gold-shimmer {
+  background: linear-gradient(100deg, #8a6d35 0%, #e3c98c 45%, #c8a45c 55%, #8a6d35 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Sélection — or */
+::selection { background: rgba(200, 164, 92, 0.28); color: #ece4d3; }
+
+/* Focus ring global — or */
 *:focus-visible {
-  outline: 2px solid #cf6b4e;
+  outline: 2px solid rgba(200, 164, 92, 0.7);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Select commun */
 .select-field {
-  background-color: #0d0f17;
-  border: 1px solid #1e2235;
+  background-color: #050609;
+  border: 1px solid #20242d;
   border-radius: 0.5rem;
   padding: 0.4rem 0.65rem;
   font-size: 0.875rem;
-  color: #e8e3dc;
+  color: #ece4d3;
   width: 100%;
   outline: none;
   transition: border-color 0.15s;
 }
-.select-field:focus { border-color: #cf6b4e; }
-.select-field option { background-color: #13161f; }
+.select-field:focus { border-color: #c8a45c; }
+.select-field option { background-color: #0e1014; }
 
-/* Skeleton shimmer — transform-based (GPU composited, no paint) */
+/* Skeleton shimmer */
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: #13161f;
+  background: #0e1014;
   border-radius: 6px;
 }
 .skeleton::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, #1a1d2e 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #15181e 50%, transparent 100%);
   animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer {
@@ -60,18 +107,28 @@ body {
   100% { transform: translateX(100%); }
 }
 
-/* Scrollbar — Claude Code style */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* Scrollbar — discrète, accent or au survol */
+::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1e2235; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #cf6b4e55; }
+::-webkit-scrollbar-thumb { background: #20242d; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(200, 164, 92, 0.4); }
 
 /* Impression PDF */
 @media print {
+  body::before { display: none !important; }
   aside { display: none !important; }
   .no-print { display: none !important; }
   body { background: #fff; color: #000; }
-  .bg-surface, .bg-bg { background: #fff !important; }
+  .bg-surface, .bg-bg, .bg-onyx, .bg-obsidian { background: #fff !important; }
   .border-border { border-color: #ccc !important; }
   main { width: 100% !important; }
+}
+
+/* Respect des préférences de mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
