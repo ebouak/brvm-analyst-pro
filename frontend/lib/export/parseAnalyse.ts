@@ -115,7 +115,12 @@ export function parseReponseIA(texte: string, symbole = ''): AnalyseStructuree {
     const end = i + 1 < sectionPositions.length
       ? sectionPositions[i + 1]!.start - sectionPositions[i + 1]!.titre.length - 5
       : texte.length;
-    const contenuBrut = texte.slice(start, end).trim();
+    let contenuBrut = texte.slice(start, end).trim();
+    // Pour les screeners : tronquer avant le premier bloc action numéroté
+    if (isScreener) {
+      const blocIdx = contenuBrut.search(/\n\d+\.\s+[A-Z]{2,6}\s+[—–-]/);
+      if (blocIdx > 0) contenuBrut = contenuBrut.slice(0, blocIdx).trim();
+    }
     const tableaux = extraireTableaux(contenuBrut);
     sections.push({
       titre: sectionPositions[i]!.titre,
@@ -125,32 +130,26 @@ export function parseReponseIA(texte: string, symbole = ''): AnalyseStructuree {
   }
 
   if (sections.length === 0) {
-    sections.push({ titre: 'Analyse', contenu: nettoyerMarkdown(texte.replace(/⚠️.*$/s, '').trim()) });
+    // Pour les screeners sans ## headers, extraire uniquement l'intro (avant le premier bloc numéroté)
+    const introEnd = isScreener ? (texte.search(/\n\d+\.\s+[A-Z]{2,6}\s+[—–-]/) || texte.length) : texte.length;
+    const introTexte = introEnd > 0 ? texte.slice(0, introEnd) : texte;
+    sections.push({ titre: 'Analyse', contenu: nettoyerMarkdown(introTexte.replace(/⚠️.*$/s, '').trim()) });
   }
 
   // ── Actions analysées (screener) ──
   const actionsAnalysees: ActionAnalysee[] = [];
   if (isScreener) {
-    const actionRegex = /####\s*(?:\S+\s+)?(?:\d+\.\s*)?([A-ZÀÂÄÉÈÊËÎÏÔÙÛÜ][A-Za-zÀ-ÿ\s]+?)\s*\(([A-Z]{2,6})\)[^\n]*\n[\s\S]*?Score[^\n]*:\s*(\d+(?:\.\d+)?)\/10([\s\S]*?)(?=####|\n---|\n##|$)/g;
-    let am: RegExpExecArray | null;
-    while ((am = actionRegex.exec(texte)) !== null) {
-      const nom = am[1]!.trim();
-      const sym = am[2]!.trim();
-      const score = parseFloat(am[3]!);
-      const bloc = am[4]!;
-
-      const rsiM  = bloc.match(/RSI\(?14\)?\s*:?\s*\**(\d+)/i);
-      const prixM = bloc.match(/Prix d.entr[ée][^:]*:\s*([^\n]+)/i);
-      const obj1M = bloc.match(/Objectif\s*1\s*:\s*([^\n(]+)/i);
+    const extraireAction = (sym: string, nom: string, score: number, bloc: string) => {
+      const rsiM  = bloc.match(/RSI\(?14\)?\s*[à:]\s*\**(\d+)/i) ?? bloc.match(/RSI[^\d]*(\d+)/i);
+      const prixM = bloc.match(/Prix d.entr[ée][^:]*:\s*([^\n(]+)/i);
+      const obj1M = bloc.match(/Objectif\s*(?:cours\s*)?1\s*:\s*([^\n(]+)/i);
       const slM   = bloc.match(/Stop-?loss\s*:\s*([^\n(]+)/i);
       const hM    = bloc.match(/Horizon\s*:\s*([^\n]+)/i);
-      const sigM  = bloc.match(/Signal\s*:\s*\*{0,2}([^\n*]+)/i);
-
-      const risquesBloc = bloc.match(/RISQUES[^\n]*\n([\s\S]*?)(?=\n---|\n####|$)/i);
+      const sigM  = bloc.match(/Signal\s*:\s*\*{0,2}([^\n*(]+)/i);
+      const risquesBloc = bloc.match(/RISQUES[^\n]*\n([\s\S]*?)(?=\n\d+\.\s+[A-Z]{2,}|\n---|\n####|\nConclusion|$)/i);
       const risques = risquesBloc
-        ? risquesBloc[1]!.split('\n').map((r) => nettoyerMarkdown(r.replace(/^[-•*]\s*/, '').trim())).filter(Boolean)
+        ? risquesBloc[1]!.split('\n').map((r) => nettoyerMarkdown(r.replace(/^[-•*]\s*/, '').trim())).filter((r) => r.length > 3)
         : [];
-
       actionsAnalysees.push({
         symbole: sym, nom, signal: nettoyerMarkdown(sigM?.[1]?.trim() || 'NEUTRE'),
         score,
@@ -162,12 +161,41 @@ export function parseReponseIA(texte: string, symbole = ''): AnalyseStructuree {
         risques,
         details: nettoyerMarkdown(bloc),
       });
+    };
+
+    // Format A: #### [Rank.] Full Name (CODE)
+    const regexA = /####\s*(?:\d+\.\s*)?([A-ZÀÂÄÉÈÊËÎÏÔÙÛÜ][A-Za-zÀ-ÿ\s]+?)\s*\(([A-Z]{2,6})\)[^\n]*\n[\s\S]*?Score[^\n]*:\s*(\d+(?:\.\d+)?)\/10([\s\S]*?)(?=####|\n---|\n##|$)/g;
+    let am: RegExpExecArray | null;
+    while ((am = regexA.exec(texte)) !== null) {
+      extraireAction(am[2]!.trim(), am[1]!.trim(), parseFloat(am[3]!), am[4]!);
+    }
+
+    // Format B: "N. CODE — FULL NAME\nScore de Conviction : X/10..."
+    if (actionsAnalysees.length === 0) {
+      const regexB = /\n\d+\.\s+([A-Z]{2,6})\s+[—–-]+\s+([^\n]+)\n([\s\S]*?)Score[^\n]*:\s*(\d+(?:\.\d+)?)\/10([\s\S]*?)(?=\n\d+\.\s+[A-Z]{2,6}\s+[—–-]|\nConclusion\s+G|\n##|$)/g;
+      while ((am = regexB.exec(texte)) !== null) {
+        const bloc = am[3]! + '\nScore : ' + am[4] + '/10' + am[5]!;
+        extraireAction(am[1]!.trim(), am[2]!.trim(), parseFloat(am[4]!), bloc);
+      }
+    }
+
+    // Format C: "### N. CODE — NAME" or "### NAME (CODE)"
+    if (actionsAnalysees.length === 0) {
+      const regexC = /###\s+\d+\.\s+([A-Z]{2,6})\s+[—–-]+\s+([^\n]+)\n([\s\S]*?)(?=###|\n---|\n##|$)/g;
+      while ((am = regexC.exec(texte)) !== null) {
+        const bloc = am[3]!;
+        const scoreM = bloc.match(/Score[^\n]*:\s*(\d+(?:\.\d+)?)\/10/i);
+        if (scoreM) extraireAction(am[1]!.trim(), am[2]!.trim(), parseFloat(scoreM[1]!), bloc);
+      }
     }
   }
 
-  // ── Risques globaux ──
-  const risquesSection = texte.match(/RISQUES?\s+SPÉCIFIQUES[^\n]*\n((?:[^\n]*\n?)+?)(?=\n---|\n##|\n📌|$)/i);
-  const risques = risquesSection
+  // ── Risques globaux (uniquement si hors blocs actions) ──
+  // On cherche seulement après "Conclusion" pour ne pas capturer les risques des actions individuelles
+  const conclusionIdx = texte.search(/\nConclusion\s+G/i);
+  const texteRisques = conclusionIdx > 0 ? texte.slice(conclusionIdx) : texte;
+  const risquesSection = texteRisques.match(/RISQUES?\s+SPÉCIFIQUES[^\n]*\n((?:[^\n]+\n?){1,5})/i);
+  const risques = (risquesSection && actionsAnalysees.length === 0)
     ? risquesSection[1]!.split('\n').map((r) => nettoyerMarkdown(r.replace(/^[-•*]\s*/, '').trim())).filter((r) => r.length > 3)
     : [];
 
