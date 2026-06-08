@@ -62,11 +62,13 @@ export default function ImportRow({ file, validCodes }: Props) {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code: symbol, year,
-            revenue: data.revenue != null ? Math.round(data.revenue * M) : null,
-            net_income: data.net_income != null ? Math.round(data.net_income * M) : null,
-            equity: data.equity != null ? Math.round(data.equity * M) : null,
-            debt: data.debt_total != null ? Math.round(data.debt_total * M) : null,
-            shares: data.shares_outstanding ?? null,
+            revenue:           data.revenue != null   ? Math.round(data.revenue * M)    : null,
+            net_income:        data.net_income != null ? Math.round(data.net_income * M) : null,
+            equity:            data.equity != null     ? Math.round(data.equity * M)     : null,
+            debt:              data.debt_total != null ? Math.round(data.debt_total * M) : null,
+            shares:            data.shares_outstanding ?? null,
+            eps:               data.eps ?? null,
+            dividend_per_share: data.dividend_per_share ?? null,
           }),
         });
         const wj = await readJsonResponse(w);
