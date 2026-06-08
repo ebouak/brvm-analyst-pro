@@ -15,32 +15,15 @@ interface Props {
 
 function parseName(name: string): { symbol: string; year: number } {
   const stem = name.replace(/\.[^.]+$/, '');
-
-  // Année : premier "20XX" trouvé dans le nom
   const yearM = stem.match(/(20\d{2})/);
   const year = yearM ? Number(yearM[1]) : new Date().getFullYear() - 1;
 
-  // Format 1 : SYMBOLE_ANNEE  (ex. PALC_2025)
-  const fmt1 = stem.match(/^([A-Z]{2,6})_\d{4}/i);
-  if (fmt1) return { symbol: fmt1[1]!.toUpperCase(), year };
+  // Format fiable uniquement : SYMBOLE_ANNEE.pdf ou SYMBOLE.pdf
+  const exact = stem.match(/^([A-Za-z]{2,6})(?:_\d{4})?$/);
+  if (exact) return { symbol: exact[1]!.toUpperCase(), year };
 
-  // Format 2 : contient un code BRVM connu en majuscules (2-6 lettres capitales)
-  //            isolé par séparateurs (espace, tiret, underscore, point)
-  const codes = stem.match(/(?:^|[\s\-_.])([A-Z]{2,6})(?:[\s\-_.]|$)/g);
-  if (codes) {
-    // Prendre le dernier token qui ressemble à un code (ignore mots courants)
-    const IGNORE = new Set(['PDF', 'CI', 'SA', 'SAS', 'NV', 'AG', 'AN', 'DU', 'DE', 'LA', 'ET']);
-    for (const raw of [...codes].reverse()) {
-      const tok = raw.replace(/[\s\-_.]/g, '').toUpperCase();
-      if (tok.length >= 2 && tok.length <= 6 && !IGNORE.has(tok) && !/^\d+$/.test(tok)) {
-        return { symbol: tok, year };
-      }
-    }
-  }
-
-  // Fallback : premier segment avant _ ou espace
-  const fallback = stem.split(/[_\s]/)[0]!.toUpperCase().slice(0, 6);
-  return { symbol: fallback, year };
+  // Sinon : champ vide → l'utilisateur saisit le code manuellement
+  return { symbol: '', year };
 }
 
 const M = 1_000_000;
@@ -125,8 +108,8 @@ export default function ImportRow({ file, validCodes }: Props) {
           {status === 'error' && <span className="text-down">✕ {error}</span>}
         </span>
         {status === 'pending' && (
-          <button type="button" onClick={() => void run()}
-            className="text-xs px-2 py-1 rounded bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all">
+          <button type="button" onClick={() => void run()} disabled={!symbol.trim()}
+            className="text-xs px-2 py-1 rounded bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
             Analyser
           </button>
         )}
