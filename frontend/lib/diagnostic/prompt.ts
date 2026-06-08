@@ -2,15 +2,15 @@
 import type { IncomeStatement, BalanceSheet, CashFlowStatement } from '@/lib/financials/types';
 import type { DiagnosticMetrics } from './metrics';
 
-function fmt(n: number | null, decimals = 0): string {
+function fmt(n: number | null | undefined, decimals = 0): string {
   if (n == null) return 'N/D';
   return n.toLocaleString('fr-FR', { maximumFractionDigits: decimals });
 }
-function pct(n: number | null): string {
+function pct(n: number | null | undefined): string {
   if (n == null) return 'N/D';
   return `${n.toFixed(1)}%`;
 }
-function x(n: number | null): string {
+function x(n: number | null | undefined): string {
   if (n == null) return 'N/D';
   return `${n.toFixed(1)}x`;
 }
