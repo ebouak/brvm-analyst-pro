@@ -9,7 +9,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Marché',
     items: [
-      { href: '/',            label: 'Dashboard' },
+      { href: '/dashboard',   label: 'Dashboard' },
       { href: '/actions',     label: 'Actions' },
       { href: '/obligations', label: 'Obligations' },
       { href: '/dividendes',  label: 'Dividendes' },

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import Sidebar from '@/components/Sidebar';
+import ConditionalShell from '@/components/ConditionalShell';
 import CommandPaletteProvider from '@/components/CommandPaletteProvider';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import { createClient } from '@/lib/supabase/server';
@@ -63,10 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="fr" className={`dark ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}>
       <body className="bg-bg text-white antialiased font-sans">
-        <div className="flex min-h-screen">
-          <Sidebar isPremium={isPremium} />
-          <main className="flex-1 min-w-0">{children}</main>
-        </div>
+        <ConditionalShell isPremium={isPremium}>{children}</ConditionalShell>
         <CommandPaletteProvider />
         <ServiceWorkerRegister />
       </body>
