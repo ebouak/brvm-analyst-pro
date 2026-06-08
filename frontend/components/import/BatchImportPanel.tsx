@@ -38,11 +38,13 @@ export default function BatchImportPanel() {
         <input
           value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
           placeholder="CODE (vide = toutes)"
-          className="w-40 bg-bg border border-border rounded px-2 py-1.5 text-sm uppercase"
+          aria-label="Code de l'action à importer (vide pour toutes)"
+          className="w-40 bg-bg border border-border rounded px-2 py-1.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-up/50"
         />
         <button
           type="button" onClick={() => void run()} disabled={running}
-          className="px-3 py-1.5 rounded-lg bg-up text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40"
+          aria-label="Lancer l'import automatique des fondamentaux"
+          className="px-3 py-1.5 rounded-lg bg-up text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-up/50"
         >
           {running ? '⏳ Extraction…' : 'Lancer'}
         </button>

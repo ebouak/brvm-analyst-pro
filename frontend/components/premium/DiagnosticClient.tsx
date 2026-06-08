@@ -86,16 +86,18 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
             <button
               type="button"
               onClick={() => window.print()}
-              className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted hover:text-white hover:border-up/40 transition-all active:scale-95"
+              aria-label="Imprimer le diagnostic en PDF"
+              className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted hover:text-white hover:border-up/40 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-up/50"
             >
-              🖨 PDF
+              <span aria-hidden="true">🖨</span> PDF
             </button>
           )}
           <button
             type="button"
             onClick={() => void generate(true)}
             disabled={loading}
-            className="px-3 py-1.5 text-xs rounded-lg bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40"
+            aria-label={cachedMarkdown ? 'Regénérer le diagnostic' : 'Générer le diagnostic'}
+            className="px-3 py-1.5 text-xs rounded-lg bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-up/50"
           >
             {loading ? '⏳ Génération…' : cachedMarkdown ? '↺ Regénérer' : '✦ Générer le diagnostic'}
           </button>
