@@ -3,6 +3,7 @@ import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { resolveApiKey } from '@/lib/server/apiKeys';
 import { fetchPdfText } from '@/lib/import/serverPdf';
+import { ocrPdf } from '@/lib/import/ocr';
 import { selectFinancialPublications, type PubRow } from '@/lib/import/selectPublications';
 import { FULL_SYSTEM_PROMPT, fullUserPrompt } from '@/lib/import/fullPrompt';
 import { fullExtractionSchema } from '@/lib/import/fullStatement';
@@ -67,7 +68,15 @@ export async function POST(req: Request) {
 
         for (const pub of selected) {
           try {
-            const text = await fetchPdfText(pub.source_url!);
+            let text = await fetchPdfText(pub.source_url!);
+            // PDF scanné (image) : pdfjs renvoie quasi rien → repli OCR Mistral.
+            if (text.trim().length < 500) {
+              const mistralKey = await resolveApiKey('mistral');
+              if (mistralKey) {
+                text = await ocrPdf(pub.source_url!, mistralKey);
+                log(`${code} ex.${pub.exercice} : PDF scanné → OCR (${text.length} car)`);
+              }
+            }
             const raw = await callLlm(text, code);
             if (!raw) { log(`${code} ex.${pub.exercice} : LLM indisponible`); continue; }
             const parsed = fullExtractionSchema.safeParse(JSON.parse(raw));
