@@ -5,6 +5,7 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
+import ExportBar from '@/components/financials/ExportBar';
 
 interface Props {
   params: { code: string };
@@ -45,14 +46,25 @@ export default async function FinancialsPage({ params }: Props) {
         </div>
 
         {/* Page header */}
-        <div className="space-y-0.5">
-          <h1 className="text-xl font-semibold tracking-tight">{code}</h1>
-          {data.instrument.designation && (
-            <p className="text-sm text-muted">{data.instrument.designation}</p>
-          )}
-          {data.instrument.secteur && (
-            <p className="text-xs text-faint">{data.instrument.secteur}</p>
-          )}
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-0.5">
+            <h1 className="text-xl font-semibold tracking-tight">{code}</h1>
+            {data.instrument.designation && (
+              <p className="text-sm text-muted">{data.instrument.designation}</p>
+            )}
+            {data.instrument.secteur && (
+              <p className="text-xs text-faint">{data.instrument.secteur}</p>
+            )}
+          </div>
+          <ExportBar
+            code={code}
+            designation={data.instrument.designation}
+            secteur={data.instrument.secteur}
+            ratios={ratios}
+            incomeStatements={data.incomeStatements}
+            balanceSheets={data.balanceSheets}
+            cashFlowStatements={data.cashFlowStatements}
+          />
         </div>
 
         {/* 52-week range */}
@@ -135,6 +147,20 @@ export default async function FinancialsPage({ params }: Props) {
             </a>
           </div>
         )}
+
+        {/* Lien vers le diagnostic Premium */}
+        <div className="bg-surface border border-warn/20 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-warn">✦ Diagnostic financier &amp; économique</p>
+            <p className="text-xs text-muted mt-0.5">Rapport sell-side complet généré par IA — réservé aux membres Premium.</p>
+          </div>
+          <Link
+            href={`/premium/diagnostic/${code}`}
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-warn/10 border border-warn/30 text-warn text-xs font-semibold hover:bg-warn/20 transition-all"
+          >
+            Voir le diagnostic →
+          </Link>
+        </div>
 
       </div>
     </div>
