@@ -28,3 +28,7 @@ tsconfig.tsbuildinfo
 supabase/.temp/
 
 .vercel
+
+# Skills installés (contenu volumineux / machine — reproductible via skills-lock.json)
+.agents/
+.claude/skills/
