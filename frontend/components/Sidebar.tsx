@@ -61,7 +61,7 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
   const pathname = usePathname();
 
   return (
-    <aside className="w-52 shrink-0 hidden md:flex flex-col border-r border-border bg-surface">
+    <aside className="w-52 shrink-0 hidden md:flex flex-col border-r border-border bg-surface h-screen sticky top-0">
       {/* Logo */}
       <div className="px-4 py-5 border-b border-border">
         <div className="flex items-center gap-2.5">
