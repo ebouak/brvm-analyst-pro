@@ -10,7 +10,7 @@
 
 **Référence :** spec `docs/superpowers/specs/2026-06-08-etats-financiers-par-secteur-design.md`.
 
-**Classification validée :** SMBC = banque, SAFC = général (confirmés par l'utilisateur le 2026-06-08), assurance = 0 société.
+**Classification validée :** SMBC = général (Société Multinationale de Bitumes — industrie), SAFC = général (confirmés par l'utilisateur le 2026-06-08). 15 banques, 33 général, 0 assurance.
 
 ---
 
@@ -54,10 +54,10 @@ alter table public.brvm_instruments
 alter table public.income_statements add column if not exists lignes_specifiques jsonb;
 alter table public.balance_sheets   add column if not exists lignes_specifiques jsonb;
 
--- Banques (16)
+-- Banques (15)
 update public.brvm_instruments set famille_comptable='banque'
   where code in ('BICB','BICC','BOAB','BOABF','BOAC','BOAM','BOAN','BOAS',
-                 'CBIBF','ECOC','ETIT','NSBC','ORGT','SGBC','SIBC','SMBC');
+                 'CBIBF','ECOC','ETIT','NSBC','ORGT','SGBC','SIBC');
 
 -- Secteur BRVM fin (toutes actions). Banques -> Finance.
 update public.brvm_instruments set secteur='Finance'
@@ -71,6 +71,7 @@ update public.brvm_instruments set secteur = m.sect from (values
   ('PRSC','Distribution'),('SAFC','Finance'),('SCRC','Agro-industrie'),
   ('SDCC','Services publics'),('SDSC','Transport'),('SEMC','Industrie'),
   ('SHEC','Distribution'),('SICC','Agro-industrie'),('SIVC','Industrie'),
+  ('SMBC','Industrie'),
   ('SLBC','Agro-industrie'),('SNTS','Télécommunications'),('SOGC','Agro-industrie'),
   ('SPHC','Agro-industrie'),('STAC','Industrie'),('STBC','Industrie'),
   ('SVOC','Services'),('TTLC','Distribution'),('TTLS','Distribution'),
@@ -86,7 +87,7 @@ Vérification attendue (SQL) :
 ```sql
 select famille_comptable, count(*) from brvm_instruments where type='action' group by 1;
 ```
-Attendu : `banque=16, general=32`.
+Attendu : `banque=15, general=33`.
 
 - [ ] **Step 3 : Commit**
 
@@ -236,12 +237,12 @@ D'abord ajouter dans `frontend/lib/financials/sectors.ts` (à la suite) la const
 export const FAMILLE_PAR_CODE: Record<string, Famille> = {
   BICB: 'banque', BICC: 'banque', BOAB: 'banque', BOABF: 'banque', BOAC: 'banque',
   BOAM: 'banque', BOAN: 'banque', BOAS: 'banque', CBIBF: 'banque', ECOC: 'banque',
-  ETIT: 'banque', NSBC: 'banque', ORGT: 'banque', SGBC: 'banque', SIBC: 'banque', SMBC: 'banque',
+  ETIT: 'banque', NSBC: 'banque', ORGT: 'banque', SGBC: 'banque', SIBC: 'banque',
   ABJC: 'general', BNBC: 'general', CABC: 'general', CFAC: 'general', CIEC: 'general',
   FTSC: 'general', LNBB: 'general', NEIC: 'general', NTLC: 'general', ONTBF: 'general',
   ORAC: 'general', PALC: 'general', PRSC: 'general', SAFC: 'general', SCRC: 'general',
   SDCC: 'general', SDSC: 'general', SEMC: 'general', SHEC: 'general', SICC: 'general',
-  SIVC: 'general', SLBC: 'general', SNTS: 'general', SOGC: 'general', SPHC: 'general',
+  SIVC: 'general', SLBC: 'general', SMBC: 'general', SNTS: 'general', SOGC: 'general', SPHC: 'general',
   STAC: 'general', STBC: 'general', SVOC: 'general', TTLC: 'general', TTLS: 'general',
   UNLC: 'general', UNXC: 'general',
 };
@@ -259,10 +260,10 @@ describe('FAMILLE_PAR_CODE', () => {
     expect(Object.keys(FAMILLE_PAR_CODE)).toHaveLength(48);
   });
 
-  it('contient 16 banques et 32 général, 0 assurance', () => {
+  it('contient 15 banques et 33 général, 0 assurance', () => {
     const vals = Object.values(FAMILLE_PAR_CODE);
-    expect(vals.filter((v) => v === 'banque')).toHaveLength(16);
-    expect(vals.filter((v) => v === 'general')).toHaveLength(32);
+    expect(vals.filter((v) => v === 'banque')).toHaveLength(15);
+    expect(vals.filter((v) => v === 'general')).toHaveLength(33);
     expect(vals.filter((v) => v === 'assurance')).toHaveLength(0);
   });
 

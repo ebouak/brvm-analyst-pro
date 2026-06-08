@@ -40,15 +40,15 @@ Les montants agrégés sont en **FCFA bruts** (mêmes règles d'unité que l'exi
 
 ## Classification des 48 sociétés (proposée — à valider)
 
-**Banque (16)** : BICB, BICC, BOAB, BOABF, BOAC, BOAM, BOAN, BOAS, CBIBF, ECOC, ETIT, NSBC, ORGT, SGBC, SIBC, SMBC*.
+**Banque (15)** : BICB, BICC, BOAB, BOABF, BOAC, BOAM, BOAN, BOAS, CBIBF, ECOC, ETIT, NSBC, ORGT, SGBC, SIBC.
 
 **Assurance (0)** : aucune assurance pure cotée dans la liste actuelle. La famille est **définie pour l'avenir** (template prêt) mais sans société affectée au lancement.
 
-**Général (32)** : ABJC, BNBC, CABC, CFAC, CIEC, FTSC, LNBB, NEIC, NTLC, ONTBF, ORAC, PALC, PRSC, SAFC*, SCRC, SDCC, SDSC, SEMC, SHEC, SICC, SIVC, SLBC, SNTS, SOGC, SPHC, STAC, STBC, SVOC, TTLC, TTLS, UNLC, UNXC.
+**Général (33)** : ABJC, BNBC, CABC, CFAC, CIEC, FTSC, LNBB, NEIC, NTLC, ONTBF, ORAC, PALC, PRSC, SAFC, SCRC, SDCC, SDSC, SEMC, SHEC, SICC, SIVC, SLBC, SMBC, SNTS, SOGC, SPHC, STAC, STBC, SVOC, TTLC, TTLS, UNLC, UNXC.
 
-`*` **À confirmer par l'utilisateur** :
-- **SMBC** (SMB CI) : classé banque par défaut (apparaît dans les communiqués bancaires) — à confirmer.
-- **SAFC** (SAFCA) : crédit-bail/financier ; classé `general` par prudence (pas SYSCOHADA bancaire strict) — à confirmer ; pourrait passer `banque`.
+**Notes de classification (confirmées par l'utilisateur le 2026-06-08)** :
+- **SMBC** = Société Multinationale de Bitumes → `general` (Industrie), PAS une banque.
+- **SAFC** (SAFCA, crédit-bail) → `general` (Finance).
 
 Le `secteur` BRVM fin (Télécom, Agro-industrie, Distribution, Énergie, BTP, Finance…) sera renseigné dans le même mapping (table de correspondance code → `{famille_comptable, secteur}`).
 
