@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
+import MobileNav from '@/components/MobileNav';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -23,7 +24,10 @@ export default function ConditionalShell({
   return (
     <div className="flex min-h-screen">
       <Sidebar isPremium={isPremium} />
-      <main className="flex-1 min-w-0">{children}</main>
+      <div className="flex-1 min-w-0">
+        <MobileNav isPremium={isPremium} />
+        <main className="min-w-0">{children}</main>
+      </div>
     </div>
   );
 }

@@ -1,62 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-interface NavItem { href: string; label: string; premium?: boolean; }
-interface NavGroup { label: string; items: NavItem[]; }
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    label: 'Marché',
-    items: [
-      { href: '/dashboard',   label: 'Dashboard' },
-      { href: '/actions',     label: 'Actions' },
-      { href: '/obligations', label: 'Obligations' },
-      { href: '/dividendes',  label: 'Dividendes' },
-      { href: '/heatmap',     label: 'Heatmap' },
-      { href: '/secteurs',    label: 'Secteurs' },
-    ],
-  },
-  {
-    label: 'Analyse',
-    items: [
-      { href: '/signaux',      label: 'Signaux' },
-      { href: '/scanner',      label: 'Scanner' },
-      { href: '/fondamentaux', label: 'Fondamentaux' },
-      { href: '/notations',    label: 'Notations' },
-      { href: '/backtest',     label: 'Backtest' },
-    ],
-  },
-  {
-    label: 'Gestion',
-    items: [
-      { href: '/portefeuille',      label: 'Portefeuille' },
-      { href: '/calendrier',        label: 'Calendrier' },
-      { href: '/dashboard/reports', label: 'Rapports' },
-    ],
-  },
-  {
-    label: 'Premium',
-    items: [
-      { href: '/assistant',             label: 'Assistant IA',  premium: true },
-      { href: '/premium/diagnostic',    label: 'Diagnostic IA', premium: true },
-      { href: '/premium/classements',   label: 'Classements',   premium: true },
-      { href: '/premium/calendrier',    label: 'Dates clés',    premium: true },
-      { href: '/premium/anomalies',     label: 'Anomalies',     premium: true },
-      { href: '/premium/backtesting',   label: 'Backtesting',   premium: true },
-      { href: '/premium/correlations',  label: 'Corrélations',  premium: true },
-      { href: '/premium/outils',        label: 'Outils Pro',    premium: true },
-    ],
-  },
-  {
-    label: 'Admin',
-    items: [
-      { href: '/admin/import-fondamentaux', label: 'Import IA' },
-      { href: '/admin/cles-api',            label: 'Clés API' },
-      { href: '/methodologie',              label: 'Méthodologie' },
-    ],
-  },
-];
+import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
@@ -92,10 +37,7 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
             </p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
-                const active =
-                  item.href === '/dashboard'
-                    ? pathname === '/dashboard'
-                    : pathname.startsWith(item.href);
+                const active = isNavItemActive(item.href, pathname);
                 const locked = item.premium && !isPremium;
                 if (locked) {
                   return (
