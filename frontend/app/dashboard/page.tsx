@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import IndexCard from '@/components/IndexCard';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
+import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import DailyBrief from '@/components/DailyBrief';
@@ -32,7 +32,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, brief: null };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, brief: null, ticker: [] as TickerLine[] };
 
   // Date précédente pour le delta volume
   const { data: prevDateRow } = await supabase
@@ -105,6 +105,31 @@ async function getData() {
     topSectorPerfs,
   });
 
+  // Ticker permanent : actions + obligations de la dernière séance disponible
+  const { data: oblRows } = await supabase
+    .from('brvm_obligations_daily')
+    .select('*')
+    .order('date_marche', { ascending: false })
+    .limit(80);
+  const oblLatest = oblRows && oblRows.length > 0 ? (oblRows[0] as Record<string, unknown>).date_marche : null;
+  const obligations = ((oblRows ?? []) as Record<string, unknown>[]).filter((o) => o.date_marche === oblLatest);
+
+  const nfmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+  const ticker: TickerLine[] = [
+    ...typedActions
+      .filter((a) => a.cours_jour != null)
+      .map((a) => ({ code: a.code, value: nfmt(a.cours_jour as number), variation: a.variation_pct ?? null, kind: 'action' as const })),
+    ...obligations
+      .filter((o) => o.cours_jour != null)
+      .map((o) => {
+        const cours = o.cours_jour as number;
+        const prev = (o.cours_precedent ?? null) as number | null;
+        const variation =
+          (o.variation_pct as number | null) ?? (prev != null && prev > 0 ? ((cours - prev) / prev) * 100 : null);
+        return { code: String(o.code), value: nfmt(cours), variation, kind: 'obligation' as const };
+      }),
+  ];
+
   return {
     lastDate,
     actions: typedActions,
@@ -113,6 +138,7 @@ async function getData() {
     prevValeur,
     sparklines: sparkMap,
     brief,
+    ticker,
   };
 }
 
@@ -130,7 +156,7 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur, sparklines, brief } = await getData();
+  const { lastDate, actions, signals, prevValeur, brief, ticker } = await getData();
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
@@ -157,10 +183,7 @@ export default async function Dashboard() {
   const withVar = actions.filter((a) => a.variation_pct != null);
   const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 5);
   const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 5);
-  const brvm30  = indices.find((i) => i.code === 'BRVM30');
-  const brvmc   = indices.find((i) => i.code === 'BRVMC');
 
-  const volTotal = actions.reduce((s, a) => s + (a.valeur_echangee ?? 0), 0);
   const dateLabel = new Date(lastDate).toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
   });
@@ -210,32 +233,13 @@ export default async function Dashboard() {
           </nav>
         </header>
 
-        {/* ── Séparateur or ─────────────────────────────────────────────── */}
-        <div className="h-px bg-gold-line opacity-40" />
+        {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
+        <DashboardTicker items={ticker} />
 
-        {/* ── Indices BRVM30 + BRVMC — double col égale ───────────────────── */}
-        <section aria-label="Indices BRVM">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Indices phares</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <IndexCard
-              code="BRVM30"
-              label="BRVM 30"
-              valeur={brvm30?.valeur ?? null}
-              variation_pct={brvm30?.variation_pct ?? null}
-              valeur_echangee={volTotal / 2}
-              date_seance={lastDate}
-              sparkline={sparklines?.['BRVM30']}
-            />
-            <IndexCard
-              code="BRVMC"
-              label="BRVM Composite"
-              valeur={brvmc?.valeur ?? null}
-              variation_pct={brvmc?.variation_pct ?? null}
-              valeur_echangee={volTotal}
-              date_seance={lastDate}
-              sparkline={sparklines?.['BRVMC']}
-            />
-          </div>
+        {/* ── État du marché (sous le titre) ──────────────────────────────── */}
+        <section aria-label="État du marché">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">État du marché</p>
+          <MarketStateCard stats={stats} />
         </section>
 
         {/* ── Évolution hebdomadaire (bougies + tendance + RSI/MACD) ──────── */}
@@ -257,12 +261,6 @@ export default async function Dashboard() {
             <DailyBrief brief={brief} />
           </section>
         )}
-
-        {/* ── État du marché ─────────────────────────────────────────────── */}
-        <section aria-label="État du marché">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">État du marché</p>
-          <MarketStateCard stats={stats} />
-        </section>
 
         {/* ── Bento : Top movers (2 cols) ─────────────────────────────────── */}
         <section aria-label="Meilleurs et pires mouvements">
