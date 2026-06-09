@@ -2,60 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Polices chargées via next/font (layout.tsx) → variables --font-display / --font-sans / --font-mono */
+/* ── Polices « Taste » : Bespoke Serif (display) + Supreme (body) + JetBrains Mono ── */
+@import url("https://api.fontshare.com/v2/css?f[]=supreme@400,500,700,800&f[]=bespoke-serif@400,500,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 :root {
   color-scheme: dark;
-  --grain-opacity: 0.025;
+  --font-display: "Bespoke Serif", Georgia, serif;
+  --font-sans: "Supreme", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --content: 1480px;
+  --ease: 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-  background-color: #07080a;
-  color: #ece4d3;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  min-height: 100dvh;
+  color: #efe7d8;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Atmosphère minérale : halo or + voile saphir + dégradé obsidienne */
+  background:
+    radial-gradient(circle at 16% 0%, rgba(208, 162, 49, 0.13), transparent 26%),
+    radial-gradient(circle at 82% 6%, rgba(139, 172, 255, 0.08), transparent 24%),
+    linear-gradient(180deg, #09090b 0%, #060607 55%, #09090a 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
-/* Atmosphère : grain minéral très subtil sur toute la page (texture, profondeur). */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: var(--grain-opacity);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-body > * { position: relative; z-index: 1; }
-
-/* Titres — display noble (Fraunces). À appliquer via .font-display sur les H1/H2 de marque. */
-.font-display { font-family: var(--font-display), Georgia, serif; }
+/* Titres — Bespoke Serif */
+.font-display { font-family: var(--font-display); }
 
 /* Chiffres financiers — mono tabulaire */
 .tabular {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
 
-/* Surtitre éditorial (overline doré) */
+/* Surtitre éditorial (mono, espacé) */
 .overline {
+  font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
 }
 
-/* Filet doré décoratif (séparateurs de section) */
+/* Filet doré décoratif */
 .gold-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(200, 164, 92, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(208, 162, 49, 0.55), transparent);
 }
 
-/* Texte doré à reflet (titres de consécration) */
+/* Texte doré à reflet (consécration) */
 .text-gold-shimmer {
-  background: linear-gradient(100deg, #8a6d35 0%, #e3c98c 45%, #c8a45c 55%, #8a6d35 100%);
+  background: linear-gradient(100deg, #8a6d35 0%, #f4d57b 45%, #d0a231 55%, #8a6d35 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -63,14 +65,12 @@ body > * { position: relative; z-index: 1; }
   color: transparent;
 }
 
-/* Sélection — or */
-::selection { background: rgba(200, 164, 92, 0.28); color: #ece4d3; }
+::selection { background: rgba(208, 162, 49, 0.28); color: #efe7d8; }
 
-/* Focus ring global — or */
-*:focus-visible {
-  outline: 2px solid rgba(200, 164, 92, 0.7);
-  outline-offset: 2px;
-  border-radius: 4px;
+:focus-visible {
+  outline: 2px solid #f4d57b;
+  outline-offset: 3px;
+  border-radius: 0.5rem;
 }
 
 /* Select commun */
@@ -80,51 +80,42 @@ body > * { position: relative; z-index: 1; }
   border-radius: 0.5rem;
   padding: 0.4rem 0.65rem;
   font-size: 0.875rem;
-  color: #ece4d3;
+  color: #efe7d8;
   width: 100%;
   outline: none;
   transition: border-color 0.15s;
 }
-.select-field:focus { border-color: #c8a45c; }
-.select-field option { background-color: #0e1014; }
+.select-field:focus { border-color: #d0a231; }
+.select-field option { background-color: #0e0e12; }
 
 /* Skeleton shimmer */
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: #0e1014;
-  border-radius: 6px;
-}
+.skeleton { position: relative; overflow: hidden; background: #0e0e12; border-radius: 6px; }
 .skeleton::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, #15181e 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #16161b 50%, transparent 100%);
   animation: shimmer 1.4s infinite;
 }
-@keyframes shimmer {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(63, 225, 139, 0.55); } 60% { box-shadow: 0 0 0 10px rgba(63, 225, 139, 0); } }
 
-/* Scrollbar — discrète, accent or au survol */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #20242d; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(200, 164, 92, 0.4); }
+::-webkit-scrollbar-thumb:hover { background: rgba(208, 162, 49, 0.4); }
 
 /* Impression PDF */
 @media print {
-  body::before { display: none !important; }
-  aside { display: none !important; }
-  .no-print { display: none !important; }
-  body { background: #fff; color: #000; }
+  aside, .no-print { display: none !important; }
+  body { background: #fff !important; color: #000; }
   .bg-surface, .bg-bg, .bg-onyx, .bg-obsidian { background: #fff !important; }
   .border-border { border-color: #ccc !important; }
   main { width: 100% !important; }
 }
 
-/* Respect des préférences de mouvement réduit */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

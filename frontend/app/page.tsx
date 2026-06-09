@@ -1,30 +1,25 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import LandingTicker, { type TickerItem } from '@/components/landing/LandingTicker';
+import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
+import { SovereignIndexCards } from '@/components/landing/taste/SovereignIndexCards';
+import { TopMoversGallery } from '@/components/landing/taste/TopMoversGallery';
+import { SignalDeskPremium } from '@/components/landing/taste/SignalDeskPremium';
+import { PremiumCircle } from '@/components/landing/taste/PremiumCircle';
+import type { TickItem, IndexCard, Mover, SignalRow } from '@/components/landing/taste/types';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'BRVM Analyst Pro — La maison de marché premium de l’UEMOA',
   description:
-    "Terminal d'analyse institutionnel pour la Bourse Régionale des Valeurs Mobilières : cours, signaux, fondamentaux, diagnostic IA.",
+    "Terminal boursier BRVM·UEMOA : indices, cours, signaux explicables, diagnostic IA et Cercle Premium.",
 };
 
-interface IndexLine {
-  code: string;
-  libelle: string;
-  valeur: number | null;
-  variation: number | null;
-}
+const nf = (n: number, d = 0) => n.toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: d });
 
-async function getMarketData(): Promise<{
-  ticker: TickerItem[];
-  indices: IndexLine[];
-  asOf: string | null;
-  nbActions: number;
-}> {
+async function getData() {
   const supabase = createClient();
 
-  // Dernière séance des actions
+  // Dernière séance
   const { data: lastDay } = await supabase
     .from('brvm_actions_daily')
     .select('date_marche')
@@ -33,8 +28,11 @@ async function getMarketData(): Promise<{
     .maybeSingle();
   const asOf = (lastDay?.date_marche as string | undefined) ?? null;
 
-  let ticker: TickerItem[] = [];
+  let ticks: TickItem[] = [];
+  let gainers: Mover[] = [];
+  let losers: Mover[] = [];
   let nbActions = 0;
+
   if (asOf) {
     const { data: rows } = await supabase
       .from('brvm_actions_daily')
@@ -43,226 +41,185 @@ async function getMarketData(): Promise<{
       .order('variation_pct', { ascending: false });
     const all = (rows ?? []) as { code: string; cours_jour: number | null; variation_pct: number | null }[];
     nbActions = all.length;
-    // Ticker = plus forts mouvements (haut + bas) pour la vivacité
-    const top = all.slice(0, 8);
-    const bottom = all.slice(-8).reverse();
-    ticker = [...top, ...bottom].map((r) => ({ code: r.code, cours: r.cours_jour, variation: r.variation_pct }));
+    const withVar = all.filter((r) => r.variation_pct != null);
+    const toMover = (r: { code: string; cours_jour: number | null; variation_pct: number | null }, dir: 'up' | 'down'): Mover => ({
+      sym: r.code,
+      dir,
+      price: r.cours_jour != null ? nf(r.cours_jour) : '—',
+      pct: `${(r.variation_pct ?? 0) >= 0 ? '+' : ''}${(r.variation_pct ?? 0).toFixed(2)}%`,
+    });
+    gainers = withVar.slice(0, 4).map((r) => toMover(r, 'up'));
+    losers = withVar.slice(-4).reverse().map((r) => toMover(r, 'down'));
+    ticks = [...gainers, ...losers].map((m) => ({ sym: m.sym, val: m.price, dir: m.dir, pct: m.pct }));
   }
 
-  // Indices (défensif sur les colonnes)
-  let indices: IndexLine[] = [];
-  const { data: idxDay } = await supabase
+  // Indices
+  let indices: IndexCard[] = [];
+  const { data: idxRows } = await supabase
     .from('brvm_indices_daily')
     .select('*')
     .order('date_marche', { ascending: false })
     .limit(20);
-  if (idxDay && idxDay.length > 0) {
-    const latestDate = (idxDay[0] as Record<string, unknown>).date_marche;
-    indices = (idxDay as Record<string, unknown>[])
-      .filter((r) => r.date_marche === latestDate)
-      .slice(0, 4)
-      .map((r) => ({
-        code: String(r.code ?? ''),
-        libelle: String(r.libelle ?? r.code ?? ''),
-        valeur: (r.valeur ?? r.cloture ?? null) as number | null,
-        variation: (r.variation_pct ?? null) as number | null,
-      }));
+  if (idxRows && idxRows.length > 0) {
+    const latest = (idxRows[0] as Record<string, unknown>).date_marche;
+    indices = (idxRows as Record<string, unknown>[])
+      .filter((r) => r.date_marche === latest)
+      .slice(0, 2)
+      .map((r, i) => {
+        const v = (r.valeur ?? r.cloture ?? null) as number | null;
+        const pct = (r.variation_pct ?? null) as number | null;
+        const dir: 'up' | 'down' = (pct ?? 0) >= 0 ? 'up' : 'down';
+        return {
+          name: String(r.libelle ?? r.code ?? 'Indice'),
+          value: v != null ? nf(v, 2) : '—',
+          move: pct != null ? `${dir === 'up' ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%` : '—',
+          dir,
+          desc:
+            i === 0
+              ? 'L’indice principal de la cote, traité comme un objet de séance premium.'
+              : 'Hiérarchie secondaire, lisible, avec air et tension visuelle.',
+          featured: i === 0,
+        } satisfies IndexCard;
+      });
   }
 
-  return { ticker, indices, asOf, nbActions };
+  // Signaux récents
+  let signals: SignalRow[] = [];
+  const { data: sigDay } = await supabase
+    .from('signals_daily')
+    .select('*')
+    .order('date_marche', { ascending: false })
+    .limit(60);
+  if (sigDay && sigDay.length > 0) {
+    const latest = (sigDay[0] as Record<string, unknown>).date_marche;
+    const norm = (v: unknown): SignalRow['action'] | null => {
+      const s = String(v ?? '').toUpperCase();
+      if (s.includes('BUY') || s.includes('ACHAT')) return 'BUY';
+      if (s.includes('SELL') || s.includes('VENTE')) return 'SELL';
+      if (s.includes('HOLD') || s.includes('CONSERV') || s.includes('NEUTRE')) return 'HOLD';
+      return null;
+    };
+    const rows = (sigDay as Record<string, unknown>[]).filter((r) => r.date_marche === latest);
+    signals = rows
+      .map((r) => {
+        const action = norm(r.signal ?? r.action ?? r.recommandation);
+        const scoreRaw = (r.score ?? r.confiance ?? r.score_total ?? null) as number | null;
+        if (!action) return null;
+        return {
+          action,
+          code: String(r.code ?? ''),
+          title:
+            action === 'BUY'
+              ? 'Conditions d’accumulation réunies'
+              : action === 'SELL'
+                ? 'Tension technique en repli'
+                : 'Momentum surveillé, sans excès',
+          score: scoreRaw != null ? Math.round(Math.abs(scoreRaw) <= 1 ? scoreRaw * 100 : scoreRaw) : 0,
+        } satisfies SignalRow;
+      })
+      .filter((s): s is SignalRow => s != null)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+  }
+
+  return { ticks, indices, gainers, losers, signals, asOf, nbActions };
 }
 
-const PILLARS = [
-  {
-    kicker: 'Marché',
-    title: 'Le pouls de la cote',
-    body: 'Cours actualisés, indices, heatmap sectorielle, obligations et dividendes — la séance régionale, lisible d’un regard.',
-    href: '/dashboard',
-    accent: 'text-up',
-  },
-  {
-    kicker: 'Analyse',
-    title: 'La conviction, étayée',
-    body: 'Signaux explicables, scanner technique, fondamentaux par secteur, notations et backtest. Chaque décision, documentée.',
-    href: '/signaux',
-    accent: 'text-sapphire',
-  },
-  {
-    kicker: 'Premium · IA',
-    title: 'Le diagnostic d’une maison',
-    body: 'Diagnostic financier sell-side généré par IA, classements, anomalies, corrélations. L’intelligence d’un bureau d’études, intégrée.',
-    href: '/premium/diagnostic',
-    accent: 'text-gold',
-  },
+const UNIVERSE = [
+  { kicker: 'Marché', title: 'Le pouls de la cote', body: 'Cours, indices, heatmap sectorielle, obligations, dividendes.', href: '/dashboard', accent: 'text-up' },
+  { kicker: 'Analyse', title: 'La conviction étayée', body: 'Signaux explicables, scanner, fondamentaux, notations, backtest.', href: '/signaux', accent: 'text-sapphire' },
+  { kicker: 'Premium · IA', title: 'Le diagnostic d’une maison', body: 'Diagnostic sell-side IA, classements, anomalies, corrélations.', href: '/premium/diagnostic', accent: 'text-gold-2' },
 ];
 
 export default async function Landing() {
-  const { ticker, indices, asOf, nbActions } = await getMarketData();
+  const { ticks, indices, gainers, losers, signals, asOf, nbActions } = await getData();
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
 
   return (
-    <div className="min-h-screen bg-bg text-ivory overflow-x-hidden">
-      {/* Halo d'atmosphère */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[640px] bg-obsidian-glow" />
+    <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
+      <TasteTopbar ticks={ticks} />
 
-      {/* ── Barre de marque ───────────────────────────────────────────── */}
-      <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg border border-gold/30 bg-gradient-to-b from-gold/15 to-transparent">
-            <span className="font-display text-lg font-semibold text-gold">B</span>
-          </div>
-          <div className="leading-none">
-            <p className="font-display text-base font-semibold tracking-tight text-ivory">BRVM Analyst</p>
-            <p className="overline text-gold/80">Pro · UEMOA</p>
-          </div>
-        </div>
-        <nav className="flex items-center gap-2">
-          <Link
-            href="/login"
-            className="rounded-lg px-4 py-2 text-sm text-muted transition-colors hover:text-ivory"
-          >
-            Se connecter
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-2 text-sm font-medium text-gold transition-all hover:bg-gold/20 hover:shadow-gold-sm active:scale-95"
-          >
-            Accès au terminal
-          </Link>
-        </nav>
-      </header>
-
-      {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 pt-16 pb-12 md:pt-24">
-        <p className="overline mb-6 text-gold/80 animate-rise-in">Bourse Régionale des Valeurs Mobilières — UEMOA</p>
-        <h1 className="font-display text-display-xl max-w-4xl text-ivory animate-rise-in" style={{ animationDelay: '60ms' }}>
-          La maison de marché<br />
-          <span className="text-gold-shimmer animate-gold-sweep bg-[length:200%_auto]">premium</span> de l’Afrique de l’Ouest.
-        </h1>
-        <p
-          className="mt-7 max-w-2xl text-lg leading-relaxed text-muted animate-rise-in"
-          style={{ animationDelay: '140ms' }}
+      {/* ── Ouverture : hero ─────────────────────────────────────────── */}
+      <section
+        className="relative mb-4 mt-4 overflow-hidden rounded-[2.6rem] border border-white/10 p-5 md:p-8"
+        style={{ background: 'radial-gradient(circle at 72% 28%,rgba(208,162,49,0.13),transparent 24%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.022))', boxShadow: '0 22px 60px rgba(0,0,0,0.36)' }}
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-4 top-0 select-none font-display"
+          style={{ fontSize: 'clamp(5rem,14vw,10rem)', lineHeight: 0.8, letterSpacing: '-0.12em', color: 'rgba(255,255,255,0.035)' }}
         >
-          Un terminal institutionnel pour lire la BRVM avec la rigueur d’un bureau d’études :
-          cours, signaux explicables, fondamentaux par secteur et diagnostic IA — réunis dans une seule maison.
-        </p>
-        <div className="mt-9 flex flex-wrap items-center gap-3 animate-rise-in" style={{ animationDelay: '220ms' }}>
-          <Link
-            href="/dashboard"
-            className="group inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3 text-sm font-semibold text-obsidian shadow-gold transition-all hover:bg-gold-soft active:scale-95"
-          >
-            Entrer dans le terminal
-            <span className="transition-transform group-hover:translate-x-0.5">→</span>
-          </Link>
-          <Link
-            href="/premium/diagnostic"
-            className="inline-flex items-center gap-2 rounded-xl border border-border-strong px-6 py-3 text-sm font-medium text-ivory transition-colors hover:border-gold/40 hover:text-gold"
-          >
-            Voir le diagnostic IA
-          </Link>
+          UEMOA
+        </span>
+        <div className="relative z-10">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-gold-2" style={{ background: 'rgba(208,162,49,0.09)', borderColor: 'rgba(208,162,49,0.26)' }}>
+            <span className="h-2 w-2 rounded-full" style={{ background: '#3fe18b', animation: 'pulse 2.5s infinite' }} />
+            {dateLabel ? `Séance · ${dateLabel} · BRVM` : 'Bourse Régionale · UEMOA'}
+          </div>
+          <h1 className="mb-4 font-display" style={{ fontSize: 'clamp(3rem,6.3vw,6.8rem)', lineHeight: 0.9, letterSpacing: '-0.08em', maxWidth: '11ch' }}>
+            La maison de marché <span className="text-gold-shimmer animate-gold-sweep">premium</span> de l’Afrique de l’Ouest.
+          </h1>
+          <p className="mb-5 max-w-[60ch] text-base leading-[1.75] text-muted">
+            Terminal boursier BRVM·UEMOA. Indices, cours, signaux explicables, diagnostic IA et Cercle Premium —
+            réunis dans une seule maison.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/dashboard" className="inline-flex min-h-[44px] items-center rounded-full px-5 text-sm font-bold text-[#09090b] shadow-gold" style={{ background: 'linear-gradient(180deg,#f4d57b,#d0a231)' }}>
+              Explorer les univers
+            </Link>
+            <Link href="/signaux" className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm text-muted transition-all hover:bg-white/[0.06]">
+              Signaux récents
+            </Link>
+            <Link href="/signup" className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm text-muted transition-all hover:bg-white/[0.06]">
+              Rejoindre le cercle
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ── Ticker live ───────────────────────────────────────────────── */}
-      <div className="relative z-10">
-        <LandingTicker items={ticker} />
+      {/* ── Univers du produit ───────────────────────────────────────── */}
+      <section className="mb-4 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.06] md:grid-cols-3">
+        {UNIVERSE.map((u) => (
+          <Link key={u.kicker} href={u.href} className="group bg-[#0b0b0d] p-6 transition-colors hover:bg-[#101013]">
+            <p className={`overline ${u.accent}`}>{u.kicker}</p>
+            <h3 className="mt-3 font-display text-2xl text-ivory">{u.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{u.body}</p>
+            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors group-hover:text-gold-2">
+              Explorer <span className="transition-transform group-hover:translate-x-0.5">→</span>
+            </span>
+          </Link>
+        ))}
+      </section>
+
+      {/* ── Corps : breadth (indices) | movers + signaux ─────────────── */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
+        <div className="flex flex-col gap-4">
+          <SovereignIndexCards indices={indices} />
+          <div className="hidden lg:block">
+            <TopMoversGallery gainers={gainers} losers={losers} />
+          </div>
+        </div>
+        <div className="flex flex-col gap-4">
+          <SignalDeskPremium signals={signals} />
+          <div className="lg:hidden">
+            <TopMoversGallery gainers={gainers} losers={losers} />
+          </div>
+        </div>
       </div>
 
-      {/* ── Preuve vivante : indices + état de séance ─────────────────── */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 py-16">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="overline text-gold/70">La séance, en direct</p>
-            <h2 className="font-display mt-2 text-display-lg text-ivory">Le marché, sans détour</h2>
-          </div>
-          {dateLabel && (
-            <p className="hidden text-sm text-muted sm:block">
-              Dernière séance · <span className="text-ivory">{dateLabel}</span>
-            </p>
-          )}
-        </div>
+      {/* ── Consécration : Cercle Premium ────────────────────────────── */}
+      <div className="mt-4">
+        <PremiumCircle />
+      </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {indices.map((idx) => {
-            const up = (idx.variation ?? 0) >= 0;
-            return (
-              <div
-                key={idx.code}
-                className="rounded-panel border border-border bg-surface p-5 shadow-card transition-all hover:border-gold/30"
-              >
-                <p className="text-xs text-muted">{idx.libelle}</p>
-                <p className="tabular mt-3 text-2xl font-semibold text-ivory">
-                  {idx.valeur != null ? idx.valeur.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) : '—'}
-                </p>
-                <p className={`tabular mt-1 text-sm font-medium ${up ? 'text-up' : 'text-down'}`}>
-                  {idx.variation != null ? `${up ? '▲' : '▼'} ${Math.abs(idx.variation).toFixed(2)} %` : ''}
-                </p>
-              </div>
-            );
-          })}
-          {/* Carte récap valeurs suivies */}
-          <div className="rounded-panel border border-gold/20 bg-gradient-to-b from-gold/[0.06] to-transparent p-5 shadow-card">
-            <p className="text-xs text-gold/80">Valeurs suivies</p>
-            <p className="tabular mt-3 text-2xl font-semibold text-ivory">{nbActions || 47}</p>
-            <p className="mt-1 text-sm text-muted">actions de la cote régionale</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Les trois piliers ─────────────────────────────────────────── */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-20">
-        <div className="gold-rule mb-12" />
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border md:grid-cols-3">
-          {PILLARS.map((p) => (
-            <Link
-              key={p.kicker}
-              href={p.href}
-              className="group relative bg-surface p-8 transition-colors hover:bg-elevated"
-            >
-              <p className={`overline ${p.accent}`}>{p.kicker}</p>
-              <h3 className="font-display mt-4 text-2xl text-ivory">{p.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted">{p.body}</p>
-              <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors group-hover:text-gold">
-                Explorer <span className="transition-transform group-hover:translate-x-0.5">→</span>
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Bande de consécration premium ─────────────────────────────── */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-24">
-        <div className="relative overflow-hidden rounded-panel border border-gold/25 bg-gradient-to-br from-gold/[0.08] via-surface to-surface p-10 shadow-gold md:p-14">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
-          <p className="overline relative text-gold">Cercle premium</p>
-          <h2 className="font-display relative mt-4 max-w-2xl text-display-lg text-ivory">
-            L’intelligence d’une maison d’investissement, à votre table.
-          </h2>
-          <p className="relative mt-5 max-w-xl text-base leading-relaxed text-muted">
-            Diagnostic financier sell-side généré par IA, classements propriétaires, détection d’anomalies et corrélations.
-            Réservé aux membres du cercle.
-          </p>
-          <Link
-            href="/signup"
-            className="relative mt-8 inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3 text-sm font-semibold text-obsidian shadow-gold transition-all hover:bg-gold-soft active:scale-95"
-          >
-            Rejoindre le cercle <span>→</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ── Pied ──────────────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted sm:flex-row">
-          <p>© {new Date().getFullYear()} BRVM Analyst Pro · UEMOA</p>
-          <nav className="flex items-center gap-5">
-            <Link href="/methodologie" className="transition-colors hover:text-ivory">Méthodologie</Link>
-            <Link href="/mentions-legales" className="transition-colors hover:text-ivory">Mentions légales</Link>
-            <Link href="/confidentialite" className="transition-colors hover:text-ivory">Confidentialité</Link>
-          </nav>
-        </div>
+      <footer className="mt-2 flex flex-wrap items-center justify-between gap-4 pb-8 pt-5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
+        <span>© {new Date().getFullYear()} BRVM Analyst Pro · UEMOA · {nbActions || 47} valeurs</span>
+        <span className="flex gap-4">
+          <Link href="/methodologie" className="transition-colors hover:text-ivory">Méthodologie</Link>
+          <Link href="/mentions-legales" className="transition-colors hover:text-ivory">Mentions légales</Link>
+        </span>
       </footer>
     </div>
   );
