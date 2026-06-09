@@ -58,48 +58,54 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
+const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+
 export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-52 shrink-0 hidden md:flex flex-col border-r border-border bg-surface h-screen sticky top-0">
-      {/* Logo */}
-      <div className="px-4 py-5 border-b border-border">
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded bg-accent flex items-center justify-center shrink-0">
-            <span className="text-white text-[10px] font-bold tracking-tight">B</span>
+    <aside className="w-56 shrink-0 hidden md:flex flex-col h-screen sticky top-0 bg-gradient-to-b from-surface to-bg border-r border-border">
+      {/* Marque — logo double-bezel */}
+      <div className="px-4 py-5">
+        <div className="flex items-center gap-3">
+          <div className="grid h-9 w-9 place-items-center rounded-xl border border-gold/30 bg-gradient-to-b from-gold/15 to-transparent shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
+            <span className="font-display text-base font-semibold text-gold">B</span>
           </div>
           <div className="leading-none">
-            <span className="text-sm font-semibold text-white">BRVM</span>
-            <span className="text-sm font-semibold text-accent"> Analyst</span>
+            <p className="font-display text-sm font-semibold tracking-tight text-ivory">BRVM Analyst</p>
+            <p className="overline mt-1 text-[9px] text-gold/70">Pro · UEMOA</p>
           </div>
         </div>
-        <p className="text-[10px] text-faint mt-1.5 tracking-wider uppercase">Pro · UEMOA</p>
       </div>
+      <div className="mx-4 h-px bg-gold-line opacity-60" />
 
-      {/* Nav groups */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-5">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
-            <p className="text-[10px] font-semibold text-faint uppercase tracking-widest px-2 mb-1.5">
-              {group.label === 'Premium'
-                ? <span className="flex items-center gap-1">Premium <span className="text-warn">★</span></span>
-                : group.label}
+            <p className="overline px-2 mb-2 text-[9px] text-faint">
+              {group.label === 'Premium' ? (
+                <span className="flex items-center gap-1.5 text-gold/70">Premium <span className="text-gold">✦</span></span>
+              ) : (
+                group.label
+              )}
             </p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
-                const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+                const active =
+                  item.href === '/dashboard'
+                    ? pathname === '/dashboard'
+                    : pathname.startsWith(item.href);
                 const locked = item.premium && !isPremium;
                 if (locked) {
                   return (
                     <Link
                       key={item.href}
                       href="/premium/upgrade"
-                      className="flex items-center gap-2.5 px-2 py-1 rounded text-sm text-faint hover:text-warn hover:bg-warn/5 transition-all"
+                      className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-faint hover:text-gold hover:bg-gold/[0.06] ${EASE}`}
                     >
-                      <span className="w-1 h-1 rounded-full shrink-0 opacity-0" />
                       {item.label}
-                      <span className="ml-auto text-[10px]">🔒</span>
+                      <span className="ml-auto text-[9px] opacity-60 group-hover:opacity-100">🔒</span>
                     </Link>
                   );
                 }
@@ -108,15 +114,24 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
                     key={item.href}
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
-                    className={`flex items-center gap-2.5 px-2 py-1 rounded text-sm transition-all ${
-                      active ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-white hover:bg-white/5'
+                    className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm ${EASE} ${
+                      active
+                        ? 'bg-gold/[0.10] text-gold font-medium shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]'
+                        : 'text-muted hover:text-ivory hover:bg-white/[0.03] hover:translate-x-0.5'
                     }`}
                   >
-                    {active
-                      ? <span className="w-1 h-1 rounded-full bg-accent shrink-0" />
-                      : <span className="w-1 h-1 rounded-full shrink-0 opacity-0" />}
+                    {/* Barre or de l'élément actif */}
+                    <span
+                      className={`absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-full bg-gold ${EASE} ${
+                        active ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
                     {item.label}
-                    {item.premium && <span className="ml-auto text-[9px] text-warn font-semibold">PRO</span>}
+                    {item.premium && (
+                      <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[8px] font-semibold tracking-wide text-gold">
+                        PRO
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -125,9 +140,9 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-4 py-3 border-t border-border">
-        <p className="text-[10px] text-faint">Données BRVM · BDFIN</p>
+      {/* Pied */}
+      <div className="px-4 py-3.5 border-t border-border">
+        <p className="overline text-[9px] text-faint">Données BRVM · BDFIN</p>
       </div>
     </aside>
   );
