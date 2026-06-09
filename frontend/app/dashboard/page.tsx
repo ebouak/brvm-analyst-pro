@@ -6,6 +6,9 @@ import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import DailyBrief from '@/components/DailyBrief';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
+import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
+import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
+import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
@@ -162,6 +165,11 @@ export default async function Dashboard() {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
   });
 
+  const [weekly30, weeklyC] = await Promise.all([
+    getWeeklyIndex('BRVM30', 'BRVM 30 — Évolution hebdomadaire'),
+    getWeeklyIndex('BRVMC', 'BRVM Composite — Évolution hebdomadaire'),
+  ]);
+
   return (
     <div className="min-h-screen bg-bg">
       {/* ── Halo atmosphérique ────────────────────────────────────────────── */}
@@ -230,6 +238,15 @@ export default async function Dashboard() {
           </div>
         </section>
 
+        {/* ── Évolution hebdomadaire (bougies + tendance + RSI/MACD) ──────── */}
+        <section aria-label="Évolution hebdomadaire des indices">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Évolution hebdomadaire</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <WeeklyIndexChart {...weekly30} />
+            <WeeklyIndexChart {...weeklyC} />
+          </div>
+        </section>
+
         {/* ── Brief narratif ─────────────────────────────────────────────── */}
         {brief && (
           <section aria-label="Brief de séance">
@@ -260,6 +277,12 @@ export default async function Dashboard() {
         <section aria-label="Signaux récents">
           <p className="overline text-muted mb-4 tracking-[0.16em]">Signaux actionnables</p>
           <RecentSignalsCard signals={signals as SignalDaily[]} />
+        </section>
+
+        {/* ── Composition du portefeuille utilisateur ─────────────────────── */}
+        <section aria-label="Composition du portefeuille">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Mon portefeuille</p>
+          <PortfolioComposition />
         </section>
 
         {/* ── Pied de page premium ───────────────────────────────────────── */}
