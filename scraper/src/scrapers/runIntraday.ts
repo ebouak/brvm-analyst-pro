@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { logger } from '../logger.js';
 import { parseBrvmPublic } from './brvmPublic.js';
-import { upsertActions } from '../persistence/repository.js';
+import { upsertActions, upsertIndices } from '../persistence/repository.js';
 
 const BRVM_PUBLIC_URL = 'https://www.brvm.org/fr/cours-actions/0';
 
@@ -18,7 +18,7 @@ async function getHtml(mock: boolean): Promise<string> {
   return resp.text();
 }
 
-export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbActions: number }> {
+export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbActions: number; nbIndices: number }> {
   const mock = opts.mock ?? false;
   const today = new Date().toISOString().slice(0, 10);
   const html = await getHtml(mock);
@@ -31,7 +31,11 @@ export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbAc
 
   if (!mock) {
     await upsertActions(snapshot);
+    if (snapshot.indices.length > 0) await upsertIndices(snapshot);
   }
-  logger.info({ nbActions: snapshot.actions.length, date: today, mock }, 'intraday terminé');
-  return { nbActions: snapshot.actions.length };
+  logger.info(
+    { nbActions: snapshot.actions.length, nbIndices: snapshot.indices.length, date: today, mock },
+    'intraday terminé',
+  );
+  return { nbActions: snapshot.actions.length, nbIndices: snapshot.indices.length };
 }
