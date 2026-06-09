@@ -4,6 +4,13 @@ import YieldCurveChart, { type CurvePoint } from '@/components/YieldCurveChart';
 import YieldComparison, { type DividendYield } from '@/components/YieldComparison';
 import { yieldToMaturity, durations, yearsTo } from '@/lib/bonds';
 import type { ObligationDaily, Dividend } from '@/lib/types';
+import {
+  SectionHeader,
+  PremiumPanel,
+  MetricCard,
+  EmptyStatePremium,
+  StatPill,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Obligations' };
@@ -71,11 +78,17 @@ export default async function ObligationsPage() {
 
   if (!lastDate) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-2">Marché obligataire</h1>
-        <div className="bg-surface border border-border rounded-xl p-8 text-center text-muted">
-          Aucune donnée obligataire. Lancez le scraper pour alimenter la base.
-        </div>
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <SectionHeader
+          kicker="Instruments de taux"
+          title="Marché obligataire"
+          subtitle="YTM, duration modifiée et courbe des taux — BRVM"
+        />
+        <EmptyStatePremium
+          icon="◎"
+          title="Aucune donnée obligataire"
+          hint="Lancez le scraper pour alimenter la base avec les séances récentes."
+        />
       </div>
     );
   }
@@ -85,23 +98,92 @@ export default async function ObligationsPage() {
     .filter((r) => r.ytm != null && r.yearsToMaturity != null)
     .map((r) => ({ emetteur: r.emetteur ?? 'Autre', code: r.code, x: r.yearsToMaturity!, y: r.ytm! }));
 
+  // KPIs de synthèse
+  const avgDuration = (() => {
+    const durs = rows.map((r) => r.modifiedDuration).filter((d): d is number => d != null);
+    return durs.length ? durs.reduce((a, b) => a + b, 0) / durs.length : null;
+  })();
+  const minYtm = rows.map((r) => r.ytm).filter((y): y is number => y != null).reduce((a, b) => Math.min(a, b), Infinity);
+  const maxYtm = rows.map((r) => r.ytm).filter((y): y is number => y != null).reduce((a, b) => Math.max(a, b), -Infinity);
+
   return (
-    <div className="p-6 space-y-5">
-      <div className="flex items-end justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-semibold">Marché obligataire</h1>
-        <p className="text-xs text-muted">Séance : <span className="tabular">{lastDate}</span> · {rows.length} lignes</p>
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      {/* En-tête de page */}
+      <SectionHeader
+        kicker="Instruments de taux"
+        title="Marché obligataire"
+        subtitle="YTM, duration modifiée et courbe des taux — BRVM"
+        actions={
+          <div className="flex items-center gap-2">
+            <StatPill tone="neutral">
+              <span className="tabular">{rows.length}</span>&nbsp;ligne{rows.length !== 1 ? 's' : ''}
+            </StatPill>
+            <StatPill tone="sapphire">
+              Séance <span className="tabular ml-1">{lastDate}</span>
+            </StatPill>
+          </div>
+        }
+      />
+
+      {/* Séparateur doré */}
+      <div className="h-px bg-gold-line" />
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <MetricCard
+          label="YTM moyen"
+          value={avgBondYtm != null ? `${avgBondYtm.toFixed(2)}%` : '—'}
+          accent="gold"
+        />
+        <MetricCard
+          label="YTM min"
+          value={isFinite(minYtm) ? `${minYtm.toFixed(2)}%` : '—'}
+          accent="emerald"
+        />
+        <MetricCard
+          label="YTM max"
+          value={isFinite(maxYtm) ? `${maxYtm.toFixed(2)}%` : '—'}
+          accent="sapphire"
+        />
+        <MetricCard
+          label="Duration moy."
+          value={avgDuration != null ? `${avgDuration.toFixed(2)}` : '—'}
+          unit="ans"
+          accent="neutral"
+        />
       </div>
 
-      {curve.length > 0 && <YieldCurveChart data={curve} />}
+      {/* Courbe des taux */}
+      {curve.length > 0 && (
+        <PremiumPanel glow>
+          <div className="p-5">
+            <p className="overline text-gold/70 mb-4">Courbe des taux</p>
+            <YieldCurveChart data={curve} />
+          </div>
+        </PremiumPanel>
+      )}
 
-      <ObligationsTable rows={rows} />
+      {/* Tableau des obligations */}
+      <PremiumPanel>
+        <div className="p-5">
+          <p className="overline text-faint mb-4">Obligations cotées</p>
+          <ObligationsTable rows={rows} />
+        </div>
+      </PremiumPanel>
 
-      <YieldComparison avgBondYtm={avgBondYtm} dividendYields={dividendYields} />
+      {/* Comparatif rendements */}
+      <PremiumPanel>
+        <div className="p-5">
+          <p className="overline text-faint mb-4">Comparatif rendements obligataires vs dividendes</p>
+          <YieldComparison avgBondYtm={avgBondYtm} dividendYields={dividendYields} />
+        </div>
+      </PremiumPanel>
 
-      <p className="text-[11px] text-muted">
+      {/* Note méthodologique */}
+      <p className="text-[11px] text-faint leading-relaxed border-l-2 border-border pl-3">
         YTM et duration modifiée calculés sous hypothèses (nominal 10 000 FCFA, coupon annuel) — voir docs/REPORTS.md.
-        Le comparatif rendement obligataire vs rendement dividende des actions nécessite l’ingestion des dividendes
-        (brique future §6.8) ; les YTM ci-dessus en fournissent déjà le côté obligataire.
+        Le comparatif rendement obligataire vs rendement dividende des actions nécessite l'ingestion des dividendes ;
+        les YTM ci-dessus en fournissent le côté obligataire.
       </p>
     </div>
   );

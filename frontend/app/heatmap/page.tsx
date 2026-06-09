@@ -5,16 +5,26 @@ import brvmSectors from '@/lib/brvmSectors.json';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
+import {
+  SectionHeader,
+  PremiumPanel,
+  EmptyStatePremium,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Heatmap marché — BRVM Analyst Pro' };
 
-const GRADIENT_STOPS: { pct: number; color: string; label: string }[] = [
-  { pct: -8, color: '#f44336', label: '-8%' },
-  { pct: -4, color: '#b03028', label: '-4%' },
-  { pct: 0, color: '#232733', label: '0%' },
-  { pct: 4, color: '#007a33', label: '+4%' },
-  { pct: 8, color: '#00c853', label: '+8%' },
+/**
+ * Légende du gradient : émeraude (#16b46a) / rubis (#e24b4b)
+ * Alignés sur colorForVariation() dans lib/heatmap.ts (seuil MAX_VAR = 8 %).
+ * bgClass = classe Tailwind arbitraire statique pour éviter tout style inline.
+ */
+const GRADIENT_STOPS: { pct: number; bgClass: string; label: string }[] = [
+  { pct: -8, bgClass: 'bg-down',                        label: '−8 %' },
+  { pct: -4, bgClass: 'bg-[#8a2828]',                   label: '−4 %' },
+  { pct:  0, bgClass: 'bg-border-strong',                label:  '0 %' },
+  { pct:  4, bgClass: 'bg-[#0d6b3f]',                   label: '+4 %' },
+  { pct:  8, bgClass: 'bg-up',                           label: '+8 %' },
 ];
 
 interface PageProps {
@@ -73,110 +83,123 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
   const { lastDate, rows, allSectors } = await getData(secteurParam);
 
   return (
-    <div className="flex flex-col gap-4 p-4 h-full" style={{ minHeight: '100vh', background: '#0f1117' }}>
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-bold" style={{ color: '#e6e9f0' }}>
-            Heatmap marché
-          </h1>
-          {lastDate && (
-            <p className="text-xs mt-0.5" style={{ color: '#8b93a7' }}>
-              Séance du {fmtDateFR(lastDate)}
-            </p>
+    <div className="min-h-screen bg-bg flex flex-col">
+      {/* ── Glow atmosphérique ─────────────────────────────────────────────── */}
+      <div className="pointer-events-none fixed inset-0 bg-obsidian-glow" aria-hidden />
+
+      <div className="relative flex flex-col flex-1 max-w-7xl w-full mx-auto px-6 py-8 gap-6">
+
+        {/* ── En-tête + filtres secteur ──────────────────────────────────── */}
+        <div className="animate-rise-in flex flex-wrap items-end justify-between gap-5">
+          <SectionHeader
+            kicker="BRVM · Cartographie"
+            title="Heatmap marché"
+            subtitle={lastDate ? `Séance du ${fmtDateFR(lastDate)}` : undefined}
+          />
+
+          {/* Chips secteur ─────────────────── */}
+          {allSectors.length > 0 && (
+            <div className="flex flex-wrap gap-2 max-w-xl">
+              <Link
+                href="/heatmap"
+                className={[
+                  'px-3 py-1 rounded-chip text-xs font-medium transition-all duration-200',
+                  secteurParam == null
+                    ? 'bg-gold text-obsidian shadow-gold-sm'
+                    : 'bg-elevated border border-border text-muted hover:border-border-strong hover:text-ivory',
+                ].join(' ')}
+              >
+                Tous
+              </Link>
+              {allSectors.map((s) => (
+                <Link
+                  key={s}
+                  href={`/heatmap?secteur=${encodeURIComponent(s)}`}
+                  className={[
+                    'px-3 py-1 rounded-chip text-xs font-medium transition-all duration-200',
+                    secteurParam === s
+                      ? 'bg-gold text-obsidian shadow-gold-sm'
+                      : 'bg-elevated border border-border text-muted hover:border-border-strong hover:text-ivory',
+                  ].join(' ')}
+                >
+                  {s}
+                </Link>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Sector filter chips */}
-        {allSectors.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/heatmap"
-              className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-              style={
-                secteurParam == null
-                  ? { background: '#e6e9f0', color: '#0f1117' }
-                  : { background: '#232733', color: '#8b93a7' }
-              }
-            >
-              Tous
-            </Link>
-            {allSectors.map((s) => (
-              <Link
-                key={s}
-                href={`/heatmap?secteur=${encodeURIComponent(s)}`}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-                style={
-                  secteurParam === s
-                    ? { background: '#e6e9f0', color: '#0f1117' }
-                    : { background: '#232733', color: '#8b93a7' }
-                }
+        {/* Règle dorée */}
+        <div className="h-px bg-gold-line -mt-2" />
+
+        {/* ── Corps : treemap ou état vide ──────────────────────────────────── */}
+        {!lastDate ? (
+          <div className="animate-rise-in [animation-delay:0.10s] flex-1 flex items-center justify-center">
+            <EmptyStatePremium
+              icon="◈"
+              title="Aucune séance disponible"
+              hint="Les données de marché apparaîtront ici dès la prochaine collecte."
+              action={{ href: '/', label: "Retour à l'accueil" }}
+            />
+          </div>
+        ) : (
+          <div className="animate-rise-in [animation-delay:0.08s] flex-1 flex flex-col gap-4">
+            <PremiumPanel>
+              <div className="p-4 min-h-[420px]">
+                <HeatmapGrid rows={rows} logos={brvmLogos as Record<string, string>} />
+              </div>
+            </PremiumPanel>
+
+            {/* ── Légende gradient ─────────────────────────────────────────── */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-1">
+              <span className="text-xs text-faint whitespace-nowrap">Variation du jour :</span>
+
+              {/* Barre de gradient continue — segments colorés juxtaposés */}
+              <div
+                className="flex flex-1 min-w-[160px] max-w-xs h-3 rounded-full overflow-hidden"
+                title="Du rubis (baisse max) à l'émeraude (hausse max)"
               >
-                {s}
-              </Link>
-            ))}
+                {GRADIENT_STOPS.map((stop) => (
+                  <div key={stop.pct} className={`flex-1 ${stop.bgClass}`} />
+                ))}
+              </div>
+
+              {/* Étiquettes */}
+              <div className="flex items-center gap-3 text-xs tabular">
+                {GRADIENT_STOPS.map((stop) => (
+                  <span key={stop.pct} className="flex items-center gap-1">
+                    <span className={`inline-block w-2.5 h-2.5 rounded-sm ${stop.bgClass}`} />
+                    <span className="text-muted">{stop.label}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Secteur vide après filtre ─────────────────────────────────── */}
+            {rows.length === 0 && secteurParam && (
+              <div className="animate-rise-in [animation-delay:0.04s]">
+                <EmptyStatePremium
+                  icon="◌"
+                  title={`Aucune action dans « ${secteurParam} »`}
+                  hint="Ce secteur ne comporte pas d'actions cotées pour cette séance."
+                  action={{ href: '/heatmap', label: 'Voir tous les secteurs' }}
+                />
+              </div>
+            )}
           </div>
         )}
+
+        {/* ── Pied de page discret ─────────────────────────────────────────── */}
+        <footer className="pt-4 pb-2 flex items-center justify-between border-t border-border text-xs text-faint">
+          <span>BRVM Analyst Pro</span>
+          {lastDate && (
+            <span>
+              Données au{' '}
+              <span className="text-muted">{fmtDateFR(lastDate)}</span>
+            </span>
+          )}
+        </footer>
       </div>
-
-      {/* Treemap or empty state */}
-      {!lastDate ? (
-        <div
-          className="flex flex-col items-center justify-center gap-4 rounded-lg flex-1"
-          style={{ minHeight: 400, background: '#161922', border: '1px solid #232733' }}
-        >
-          <p style={{ color: '#8b93a7' }}>Aucune séance disponible.</p>
-          <Link href="/" className="text-sm underline" style={{ color: '#4a9eff' }}>
-            Retour à l&apos;accueil
-          </Link>
-        </div>
-      ) : (
-        <div className="rounded-lg p-4" style={{ background: '#161922', border: '1px solid #232733', flex: 1 }}>
-          <HeatmapGrid rows={rows} logos={brvmLogos as Record<string, string>} />
-        </div>
-      )}
-
-      {/* Gradient legend */}
-      {lastDate && (
-        <div className="flex items-center gap-3 px-2">
-          <span className="text-xs" style={{ color: '#8b93a7', whiteSpace: 'nowrap' }}>
-            Variation :
-          </span>
-          <div className="flex items-center gap-1 flex-1 max-w-xs">
-            {GRADIENT_STOPS.map((stop, idx) => (
-              <div key={stop.pct} className="flex items-center gap-1">
-                <div
-                  className="rounded-sm"
-                  style={{
-                    width: idx === 0 || idx === GRADIENT_STOPS.length - 1 ? 32 : 24,
-                    height: 12,
-                    background: stop.color,
-                  }}
-                />
-                <span className="text-xs" style={{ color: '#8b93a7' }}>
-                  {stop.label}
-                </span>
-              </div>
-            ))}
-          </div>
-          <span className="text-xs" style={{ color: '#8b93a7' }}>
-            Couleur = variation du jour
-          </span>
-        </div>
-      )}
-
-      {/* Fallback note when filtered to an empty sector */}
-      {lastDate && rows.length === 0 && secteurParam && (
-        <div
-          className="rounded-lg p-6 text-center"
-          style={{ background: '#161922', border: '1px solid #232733', color: '#8b93a7' }}
-        >
-          Aucune action dans le secteur &laquo;{secteurParam}&raquo; pour cette séance.{' '}
-          <Link href="/heatmap" className="underline" style={{ color: '#4a9eff' }}>
-            Voir tous les secteurs
-          </Link>
-        </div>
-      )}
     </div>
   );
 }

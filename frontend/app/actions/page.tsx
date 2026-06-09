@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import ActionsTable from '@/components/ActionsTable';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
+import { SectionHeader, EmptyStatePremium, PremiumPanel, StatPill, PremiumCTA } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Marché Actions' };
@@ -47,30 +48,54 @@ export default async function ActionsPage() {
 
   if (!lastDate) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-2">Marché actions</h1>
-        <div className="bg-surface border border-border rounded-xl p-8 text-center text-muted">
-          Aucune donnée. Lancez le scraper pour alimenter la base.
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <SectionHeader
+          kicker="BRVM · Cote officielle"
+          title="Marché Actions"
+          subtitle="Tableau de bord des valeurs cotées sur la Bourse Régionale des Valeurs Mobilières."
+        />
+        <div className="mt-10">
+          <EmptyStatePremium
+            title="Aucune séance disponible"
+            hint="Lancez le scraper pour alimenter la base de données."
+            icon="◈"
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-end justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-semibold">Marché actions</h1>
-        <div className="flex items-center gap-3">
-          <a href="/actions/compare" className="text-xs text-up hover:underline">
-            Comparer des titres →
-          </a>
-          <p className="text-xs text-muted">
-            Séance : <span className="tabular">{lastDate}</span> ·{' '}
-            {actions.length} titres
-          </p>
-        </div>
-      </div>
-      <ActionsTable actions={actions} signals={signals} />
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      {/* ── En-tête de page ─────────────────────────────────────────────── */}
+      <SectionHeader
+        kicker="BRVM · Cote officielle"
+        title="Marché Actions"
+        subtitle="Toutes les valeurs cotées — cours, volumes, performances et signaux assistés."
+        actions={
+          <>
+            <div className="flex items-center gap-2">
+              <StatPill tone="neutral">
+                <span className="tabular">{actions.length}</span>&nbsp;titres
+              </StatPill>
+              <StatPill tone="gold">
+                Séance&nbsp;<span className="tabular">{lastDate}</span>
+              </StatPill>
+            </div>
+            <PremiumCTA href="/actions/compare" variant="ghost">
+              Comparer des titres
+            </PremiumCTA>
+          </>
+        }
+      />
+
+      {/* ── Filet doré de séparation ────────────────────────────────────── */}
+      <div className="gold-rule" />
+
+      {/* ── Tableau principal ────────────────────────────────────────────── */}
+      <PremiumPanel>
+        <ActionsTable actions={actions} signals={signals} />
+      </PremiumPanel>
     </div>
   );
 }
