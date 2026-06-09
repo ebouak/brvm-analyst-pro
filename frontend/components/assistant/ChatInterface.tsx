@@ -136,28 +136,31 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-surface rounded-t-xl">
-        <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
-          <span className="text-accent text-sm font-bold">IA</span>
+      {/* Header — double-bezel inner strip */}
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border/60 bg-elevated/50">
+        {/* Avatar double-bezel */}
+        <div className="rounded-xl border border-gold/20 bg-gold/[0.06] p-0.5 shrink-0">
+          <div className="w-8 h-8 rounded-[calc(0.75rem-2px)] bg-elevated flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
+            <span className="text-gold text-xs font-bold font-display">IA</span>
+          </div>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-white">Analyste BRVM IA</h2>
+          <h2 className="text-sm font-semibold text-ivory">Analyste BRVM IA</h2>
           <p className="text-[11px] text-faint">Analyse technique · Fondamentale · Macro UEMOA</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeProvider && (
-            <span className="px-2 py-0.5 bg-up/10 text-up rounded-chip text-[10px] font-mono uppercase tracking-wide">
+            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/10 px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wide text-up">
               {activeProvider}
             </span>
           )}
           {noKey && (
-            <span className="px-2 py-0.5 bg-down/10 text-down rounded-chip text-[10px]">
-              Aucune clé — <a href="/admin/cles-api" className="underline">configurer</a>
+            <span className="inline-flex items-center rounded-full border border-down/30 bg-down/10 px-2.5 py-0.5 text-[10px] text-down">
+              Aucune clé — <a href="/admin/cles-api" className="underline ml-1">configurer</a>
             </span>
           )}
           {symbole && (
-            <span className="px-2.5 py-1 bg-accent/10 text-accent rounded-chip text-xs font-mono font-semibold">
+            <span className="inline-flex items-center rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-xs font-mono font-semibold text-gold">
               {symbole}
             </span>
           )}
@@ -165,33 +168,33 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-bg">
+      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 bg-bg/60">
         {messages.length === 0 && (
-          <div className="py-6">
-            <p className="text-center text-faint text-xs mb-5 uppercase tracking-widest">Posez une question ou choisissez un template</p>
-            {/* Raccourcis symboles */}
-            <div className="flex gap-2 mb-5 flex-wrap justify-center">
+          <div className="py-8">
+            <p className="text-center text-faint text-[10px] mb-6 uppercase tracking-widest">Posez une question ou choisissez un template</p>
+            {/* Symbol shortcuts */}
+            <div className="flex gap-2 mb-6 flex-wrap justify-center">
               {['PALC', 'SNTS', 'BOAC', 'ORAC', 'SGBC', 'CIEC'].map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => { setSymbole(s); sendMessage(`Analyse complète de ${s} sur la BRVM.`); }}
-                  className="px-3 py-1.5 text-xs font-mono rounded-chip border border-border text-muted hover:text-accent hover:border-accent/40 transition-colors"
+                  className="px-3 py-1.5 text-xs font-mono rounded-full border border-border text-muted hover:text-gold hover:border-gold/40 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
                 >
                   {s}
                 </button>
               ))}
             </div>
             {/* Templates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-2xl mx-auto">
               {PROMPTS_TEMPLATES.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => handleTemplate(t)}
-                  className="text-left p-3 rounded-card border border-border bg-surface hover:border-accent/30 hover:bg-elevated transition-all active:scale-[0.98]"
+                  className="text-left p-4 rounded-card border border-border bg-elevated/60 hover:border-gold/30 hover:bg-elevated transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-card"
                 >
-                  <span className="font-medium text-sm block text-white">{t.titre}</span>
+                  <span className="font-semibold text-sm block text-ivory mb-0.5">{t.titre}</span>
                   <span className="text-xs text-muted">{t.description}</span>
                 </button>
               ))}
@@ -204,15 +207,15 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 msg.role === 'user'
-                  ? 'bg-accent text-white rounded-br-sm'
-                  : 'bg-surface border border-border text-white rounded-bl-sm'
+                  ? 'bg-gold text-obsidian rounded-br-sm shadow-gold'
+                  : 'bg-elevated border border-border/60 text-ivory rounded-bl-sm shadow-card'
               }`}
             >
               {msg.loading && !msg.content ? (
-                <span className="inline-flex gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:0ms]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:150ms]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:300ms]" />
+                <span className="inline-flex gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-bounce [animation-delay:300ms]" />
                 </span>
               ) : (
                 <>
@@ -228,32 +231,36 @@ export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string 
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 border-t border-border bg-surface rounded-b-xl">
+      {/* Input bar */}
+      <div className="px-5 py-4 border-t border-border/60 bg-elevated/50">
         <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="flex gap-2">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={symbole ? `Question sur ${symbole}…` : 'Analysez PALC, screener opportunités, rapport hebdo…'}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-white text-sm placeholder:text-faint focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-ivory text-sm placeholder:text-faint focus:outline-none focus:border-gold/40 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50"
           />
           {loading ? (
-            <button type="button" onClick={stop} className="px-4 py-2.5 bg-down/20 text-down border border-down/30 rounded-xl text-sm font-medium hover:bg-down/30 transition-colors">
+            <button
+              type="button"
+              onClick={stop}
+              className="px-4 py-2.5 bg-down/15 text-down border border-down/30 rounded-xl text-sm font-medium hover:bg-down/25 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            >
               Stop
             </button>
           ) : (
             <button
               type="submit"
               disabled={!input.trim()}
-              className="px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-medium disabled:opacity-40 hover:bg-accent-dim transition-colors active:scale-95"
+              className="group px-4 py-2.5 bg-gold text-obsidian rounded-xl text-sm font-semibold shadow-gold disabled:opacity-40 hover:bg-gold-soft transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]"
             >
               Envoyer
             </button>
           )}
         </form>
-        <p className="text-[10px] text-faint mt-1.5 px-1">
-          ⚠️ Outil d'aide à l'analyse. Pas un conseil en investissement.
+        <p className="text-[10px] text-faint mt-2 px-1">
+          Outil d&apos;aide à l&apos;analyse. Ne constitue pas un conseil en investissement.
         </p>
       </div>
     </div>

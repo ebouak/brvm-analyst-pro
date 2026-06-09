@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import PdfDropzone from '@/components/import/PdfDropzone';
 import ImportRow from '@/components/import/ImportRow';
 import BatchImportPanel from '@/components/import/BatchImportPanel';
+import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 
 interface Queued { id: string; file: File; }
 
@@ -21,31 +22,79 @@ export default function ImportFondamentauxPage() {
     });
   }, []);
 
-  function addFiles(accepted: File[]) {
-    setFiles((prev) => [
-      ...prev,
-      ...accepted.map((file) => ({ id: `${file.name}-${Date.now()}-${Math.random()}`, file })),
-    ]);
-  }
-
   if (authed === false) {
-    return <div className="p-6 text-muted">Connectez-vous pour importer des fondamentaux.</div>;
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <PremiumPanel className="px-6 py-5">
+          <p className="text-sm text-muted">Connectez-vous pour importer des fondamentaux.</p>
+        </PremiumPanel>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-4 max-w-3xl">
-      <div>
-        <h1 className="text-2xl font-semibold">📥 Import fondamentaux (IA)</h1>
-        <p className="text-sm text-muted">
-          Déposez des PDF d'états financiers : analyse par IA (DeepSeek → Mistral → Grok),
-          écriture automatique si les valeurs sont plausibles, validation sinon.
+    <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+
+      {/* En-tête de page */}
+      <SectionHeader
+        kicker="Administration"
+        title="Import fondamentaux"
+        subtitle="Déposez des PDF d'états financiers. Analyse par IA (DeepSeek → Mistral → Grok), écriture automatique si les valeurs sont plausibles, validation sinon."
+      />
+
+      {/* Filet or décoratif */}
+      <div className="gold-rule" />
+
+      {/* Import batch */}
+      <div className="space-y-1.5">
+        <p className="overline text-faint">Import groupé</p>
+        <PremiumPanel className="p-5">
+          <BatchImportPanel />
+        </PremiumPanel>
+      </div>
+
+      {/* Zone de dépôt PDF */}
+      <div className="space-y-1.5">
+        <p className="overline text-faint">Dépôt de fichiers</p>
+        <PremiumPanel className="p-5">
+          <PdfDropzone onFiles={(accepted) =>
+            setFiles((prev) => [
+              ...prev,
+              ...accepted.map((file) => ({ id: `${file.name}-${Date.now()}-${Math.random()}`, file })),
+            ])
+          } />
+        </PremiumPanel>
+      </div>
+
+      {/* Queue de traitement */}
+      {files.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <p className="overline text-faint">En attente de traitement</p>
+            <span className="tabular text-[11px] text-muted border border-border rounded-full px-2.5 py-0.5">
+              {files.length} fichier{files.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          <PremiumPanel className="divide-y divide-border/40">
+            {files.map((q) => (
+              <div key={q.id} className="px-5 py-3 transition-colors duration-200 hover:bg-elevated/60">
+                <ImportRow file={q.file} validCodes={validCodes} />
+              </div>
+            ))}
+          </PremiumPanel>
+        </div>
+      )}
+
+      {/* Note pipeline IA */}
+      <div className="flex items-start gap-3 rounded-card border border-border/50 bg-surface/60 px-4 py-3 shadow-card">
+        <span className="mt-0.5 shrink-0 text-gold/60 text-xs">◈</span>
+        <p className="text-xs text-faint leading-relaxed">
+          Pipeline IA&nbsp;: <span className="text-muted">DeepSeek → Mistral → Grok</span>.
+          Écriture automatique si plausibilité &gt;&nbsp;95&nbsp;%. Les valeurs hors seuil sont soumises
+          à validation manuelle avant persistance.
         </p>
       </div>
-      <BatchImportPanel />
-      <PdfDropzone onFiles={addFiles} />
-      <div className="space-y-2">
-        {files.map((q) => <ImportRow key={q.id} file={q.file} validCodes={validCodes} />)}
-      </div>
+
     </div>
   );
 }
