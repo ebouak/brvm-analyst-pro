@@ -9,6 +9,13 @@ import BriefAssistant from '@/components/dashboard/BriefAssistant';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
+import {
+  SectionHeader,
+  EmptyStatePremium,
+  PremiumCTA,
+  StatPill,
+  PremiumPanel,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard — BRVM Analyst Pro' };
@@ -34,7 +41,6 @@ async function getData() {
   const prevDate = prevDateRow?.[0]?.date_marche ?? null;
 
   // Les indices ne sont pas toujours scrapés à la même date que les cours.
-  // On prend leur PROPRE dernière date disponible (sinon le bloc reste vide).
   const { data: lastIdxRow } = await supabase
     .from('brvm_indices_daily')
     .select('date_marche')
@@ -60,33 +66,29 @@ async function getData() {
             .select('valeur_echangee')
             .eq('date_marche', prevDate)
         : Promise.resolve({ data: [] }),
-      // Sparkline 7 dernières séances pour les 2 indices
       supabase
         .from('brvm_indices_daily')
         .select('code, valeur, date_marche')
         .in('code', ['BRVM30', 'BRVMC'])
         .order('date_marche', { ascending: false })
-        .limit(14), // 7 par indice
+        .limit(14),
     ]);
 
   const prevValeur = prevDate
     ? ((prevActions ?? []) as ActionDaily[]).reduce((s, a) => s + (a.valeur_echangee ?? 0), 0)
     : null;
 
-  // Sparklines : dernières 7 valeurs par indice (oldest→newest)
   const sparkMap: Record<string, number[]> = {};
   for (const row of ((indicesHist ?? []) as { code: string; valeur: number | null; date_marche: string }[])) {
     if (row.valeur == null) continue;
     (sparkMap[row.code] ??= []).push(row.valeur);
   }
-  // Les rows sont desc (newest first) → inverser pour avoir oldest→newest
   Object.keys(sparkMap).forEach((k) => sparkMap[k]!.reverse());
 
   const typedActions = (actions ?? []) as ActionDaily[];
   const typedIndices = (indices ?? []) as IndiceDaily[];
   const typedSignals = (signals ?? []) as SignalDaily[];
 
-  // Brief narratif
   const topSectorPerfs = computeTopSectorPerfs(typedActions);
   const brief = generateBrief({
     date: lastDate,
@@ -127,18 +129,22 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 export default async function Dashboard() {
   const { lastDate, actions, indices, signals, prevValeur, sparklines, brief } = await getData();
 
+  /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
     return (
-      <div className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-4">📊 Dashboard</h1>
-        <div className="bg-surface border border-border rounded-xl p-10 text-center space-y-3">
-          <p className="text-muted">Aucune donnée de marché disponible.</p>
-          <p className="text-xs text-muted">
-            Lancez <code className="text-up bg-up/10 px-1 rounded">npm run scrape:daily</code> côté scraper pour alimenter la base.
-          </p>
-          <Link href="/actions" className="inline-block mt-2 text-xs text-up border border-up/30 rounded px-3 py-1.5 hover:bg-up/10">
-            Actualiser
-          </Link>
+      <div className="min-h-screen bg-bg">
+        <div className="max-w-7xl mx-auto px-6 py-16 space-y-8">
+          <SectionHeader
+            kicker="Tableau de bord"
+            title="Marché BRVM"
+            subtitle="Bourse Régionale des Valeurs Mobilières — UEMOA"
+          />
+          <EmptyStatePremium
+            icon="◈"
+            title="Aucune donnée de séance"
+            hint="Lancez le scraper pour alimenter la base de données de marché."
+            action={{ href: '/actions', label: 'Actualiser' }}
+          />
         </div>
       </div>
     );
@@ -151,79 +157,133 @@ export default async function Dashboard() {
   const brvm30  = indices.find((i) => i.code === 'BRVM30');
   const brvmc   = indices.find((i) => i.code === 'BRVMC');
 
-  // Volume total pour les indices
   const volTotal = actions.reduce((s, a) => s + (a.valeur_echangee ?? 0), 0);
   const dateLabel = new Date(lastDate).toLocaleDateString('fr-FR', {
-    weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
   });
 
   return (
-    <div className="p-6 space-y-5 max-w-5xl mx-auto">
-      {/* ── En-tête ── */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold">📊 Dashboard</h1>
-          <p className="text-xs text-muted mt-0.5">Séance du {dateLabel}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/signaux" className="text-xs border border-border rounded px-2 py-1 text-muted hover:text-white hover:border-up/40 transition">
-            🔔 Signaux
-          </Link>
-          <Link href="/portefeuille" className="text-xs border border-border rounded px-2 py-1 text-muted hover:text-white hover:border-up/40 transition">
-            👤 Portefeuille
-          </Link>
-        </div>
-      </div>
+    <div className="min-h-screen bg-bg">
+      {/* ── Halo atmosphérique ────────────────────────────────────────────── */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 bg-obsidian-glow"
+        aria-hidden
+      />
 
-      {/* ── Indices ── */}
-      <div className="grid grid-cols-2 gap-4">
-        <IndexCard
-          code="BRVM30"
-          label="BRVM 30"
-          valeur={brvm30?.valeur ?? null}
-          variation_pct={brvm30?.variation_pct ?? null}
-          valeur_echangee={volTotal / 2}
-          date_seance={lastDate}
-          sparkline={sparklines?.['BRVM30']}
-        />
-        <IndexCard
-          code="BRVMC"
-          label="BRVM Composite"
-          valeur={brvmc?.valeur ?? null}
-          variation_pct={brvmc?.variation_pct ?? null}
-          valeur_echangee={volTotal}
-          date_seance={lastDate}
-          sparkline={sparklines?.['BRVMC']}
-        />
-      </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10 space-y-8">
 
-      {/* ── Brief narratif ── */}
-      {brief && (
-        <div>
-          <DailyBrief brief={brief} />
-          <div className="flex justify-end mt-2"><BriefAssistant /></div>
-        </div>
-      )}
+        {/* ── En-tête : titre éditorial + nav pills ───────────────────────── */}
+        <header className="flex flex-wrap items-end justify-between gap-5 pb-2">
+          <div>
+            {/* Eyebrow dorée */}
+            <p className="overline text-gold/60 mb-2 tracking-[0.22em]">
+              Bourse Régionale des Valeurs Mobilières
+            </p>
+            <h1 className="font-display text-3xl md:text-4xl text-ivory tracking-tight leading-none">
+              Tableau de bord
+            </h1>
+            {/* Date pill */}
+            <div className="mt-3 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-gold/[0.06] px-3 py-1 text-[11px] font-medium text-gold/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-up animate-pulse" />
+                Séance du {dateLabel}
+              </span>
+            </div>
+          </div>
 
-      {/* ── État du marché ── */}
-      <MarketStateCard stats={stats} />
+          {/* Actions nav */}
+          <nav className="flex items-center gap-2" aria-label="Navigation rapide">
+            <PremiumCTA href="/signaux" variant="ghost">
+              Signaux
+            </PremiumCTA>
+            <PremiumCTA href="/portefeuille" variant="ghost">
+              Portefeuille
+            </PremiumCTA>
+          </nav>
+        </header>
 
-      {/* ── Top movers ── */}
-      <div className="grid grid-cols-2 gap-4">
-        <TopMovers title="🔥 Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} />
-        <TopMovers title="📉 Top 5 baisses"  rows={losers}  signals={signals as SignalDaily[]} />
-      </div>
+        {/* ── Séparateur or ─────────────────────────────────────────────── */}
+        <div className="h-px bg-gold-line opacity-40" />
 
-      {/* ── Signaux récents ── */}
-      <RecentSignalsCard signals={signals as SignalDaily[]} />
+        {/* ── Indices BRVM30 + BRVMC — double col égale ───────────────────── */}
+        <section aria-label="Indices BRVM">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Indices phares</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <IndexCard
+              code="BRVM30"
+              label="BRVM 30"
+              valeur={brvm30?.valeur ?? null}
+              variation_pct={brvm30?.variation_pct ?? null}
+              valeur_echangee={volTotal / 2}
+              date_seance={lastDate}
+              sparkline={sparklines?.['BRVM30']}
+            />
+            <IndexCard
+              code="BRVMC"
+              label="BRVM Composite"
+              valeur={brvmc?.valeur ?? null}
+              variation_pct={brvmc?.variation_pct ?? null}
+              valeur_echangee={volTotal}
+              date_seance={lastDate}
+              sparkline={sparklines?.['BRVMC']}
+            />
+          </div>
+        </section>
 
-      {/* ── Pied de page ── */}
-      <div className="flex items-center justify-between text-xs text-muted border-t border-border/50 pt-3">
-        <span>📅 Dernière mise à jour : {dateLabel}</span>
-        <div className="flex gap-3">
-          <Link href="/" className="hover:text-up">🔄 Actualiser</Link>
-          <Link href="/parametres/compte" className="hover:text-up">⚙️ Paramètres</Link>
-        </div>
+        {/* ── Brief narratif ─────────────────────────────────────────────── */}
+        {brief && (
+          <section aria-label="Brief de séance">
+            <div className="flex items-center justify-between mb-4">
+              <p className="overline text-muted tracking-[0.16em]">Brief analytique</p>
+              <BriefAssistant />
+            </div>
+            <DailyBrief brief={brief} />
+          </section>
+        )}
+
+        {/* ── État du marché ─────────────────────────────────────────────── */}
+        <section aria-label="État du marché">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">État du marché</p>
+          <MarketStateCard stats={stats} />
+        </section>
+
+        {/* ── Bento : Top movers (2 cols) ─────────────────────────────────── */}
+        <section aria-label="Meilleurs et pires mouvements">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Mouvements du jour</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" />
+            <TopMovers title="Top 5 baisses"  rows={losers}  signals={signals as SignalDaily[]} direction="down" />
+          </div>
+        </section>
+
+        {/* ── Signaux récents ────────────────────────────────────────────── */}
+        <section aria-label="Signaux récents">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Signaux actionnables</p>
+          <RecentSignalsCard signals={signals as SignalDaily[]} />
+        </section>
+
+        {/* ── Pied de page premium ───────────────────────────────────────── */}
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-6">
+          <p className="text-xs text-faint">
+            Dernière mise à jour :{' '}
+            <span className="tabular text-muted">{dateLabel}</span>
+          </p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="text-xs text-faint hover:text-gold transition-colors duration-200"
+            >
+              Actualiser
+            </Link>
+            <Link
+              href="/parametres/compte"
+              className="text-xs text-faint hover:text-gold transition-colors duration-200"
+            >
+              Paramètres
+            </Link>
+          </div>
+        </footer>
+
       </div>
     </div>
   );

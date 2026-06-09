@@ -30,21 +30,21 @@ export default function IndexCard({
   const sign    = !neutral && up ? '+' : '';
 
   const Icon = neutral ? Minus : up ? TrendingUp : TrendingDown;
-  const iconColor = neutral ? 'text-muted' : up ? 'text-up' : 'text-down';
 
-  // Sparkline SVG miniature (40×20)
   const sparkSvg = sparkline && sparkline.length >= 2 ? (() => {
     const min = Math.min(...sparkline);
     const max = Math.max(...sparkline);
     const range = max - min || 1;
-    const w = 80, h = 24;
+    const w = 120, h = 32;
     const pts = sparkline.map((v, i) => {
       const x = (i / (sparkline.length - 1)) * w;
-      const y = h - ((v - min) / range) * h;
-      return `${x},${y}`;
+      const y = h - ((v - min) / range) * (h - 4) - 2;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
     }).join(' ');
-    const lastColor = (sparkline[sparkline.length - 1]! >= sparkline[0]!) ? '#00c853' : '#f44336';
-    return { pts, lastColor, w, h };
+    const trending = (sparkline[sparkline.length - 1]! >= sparkline[0]!);
+    const lineColor = trending ? '#16b46a' : '#e24b4b';
+    const fillId = `spark-fill-${label.replace(/\s/g, '')}`;
+    return { pts, lineColor, fillId, w, h };
   })() : null;
 
   const displayDate = date_seance
@@ -52,49 +52,106 @@ export default function IndexCard({
     : date_marche ?? null;
 
   return (
-    <div className="bg-surface border border-border hover:border-up/40 rounded-xl p-4 transition-colors group">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-1">
-        <span className="text-xs text-muted font-medium">{label}</span>
-        <Icon size={16} className={`${iconColor} opacity-70 group-hover:opacity-100 transition-opacity`} />
-      </div>
+    /* Outer shell — double-bezel */
+    <div
+      className={`
+        rounded-panel p-1.5 border transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+        ${up && !neutral
+          ? 'border-up/20 bg-up/[0.03] hover:border-up/40 hover:shadow-emerald'
+          : neutral
+          ? 'border-border bg-border/30 hover:border-border-strong'
+          : 'border-down/20 bg-down/[0.03] hover:border-down/30'
+        }
+        group
+      `}
+    >
+      {/* Inner core */}
+      <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
 
-      {/* Valeur principale */}
-      <div className="tabular text-2xl font-semibold leading-tight">
-        {fmtNumber(valeur, 2)}
-      </div>
-
-      {/* Variation */}
-      <div className={`tabular text-sm mt-1 font-medium ${color} flex items-center gap-1`}>
-        {!neutral && <Icon size={12} />}
-        {sign}{variation_pct?.toFixed(2) ?? '—'}%
-      </div>
-
-      {/* Sparkline */}
-      {sparkSvg && (
-        <div className="mt-2 opacity-60 group-hover:opacity-100 transition-opacity">
-          <svg viewBox={`0 0 ${sparkSvg.w} ${sparkSvg.h}`} width="100%" height={sparkSvg.h} preserveAspectRatio="none">
-            <polyline
-              points={sparkSvg.pts}
-              fill="none"
-              stroke={sparkSvg.lastColor}
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          </svg>
+        {/* Header row */}
+        <div className="flex items-start justify-between mb-1">
+          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-muted">{label}</p>
+          <span
+            className={`
+              grid h-7 w-7 place-items-center rounded-full border transition-all duration-300
+              ${neutral
+                ? 'border-border bg-elevated text-muted'
+                : up
+                ? 'border-up/25 bg-up/10 text-up'
+                : 'border-down/25 bg-down/10 text-down'
+              }
+            `}
+          >
+            <Icon size={13} />
+          </span>
         </div>
-      )}
 
-      {/* Footer */}
-      <div className="mt-3 pt-2 border-t border-border/50 flex items-center justify-between text-xs text-muted">
-        <span>
-          Vol :{' '}
-          <span className="tabular text-white/70">{fmtFcfa(valeur_echangee)} FCFA</span>
-        </span>
-        {displayDate && (
-          <span className="tabular text-faint">MàJ : {displayDate}</span>
+        {/* Valeur principale */}
+        <div className="tabular text-[2rem] font-semibold text-ivory leading-none tracking-tight mt-3">
+          {fmtNumber(valeur, 2)}
+        </div>
+
+        {/* Variation pill */}
+        <div className="mt-2.5 flex items-center gap-1.5">
+          <span
+            className={`
+              inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold tabular
+              ${neutral
+                ? 'border-border bg-elevated text-muted'
+                : up
+                ? 'border-up/30 bg-up/10 text-up'
+                : 'border-down/30 bg-down/10 text-down'
+              }
+            `}
+          >
+            <Icon size={10} />
+            {sign}{variation_pct?.toFixed(2) ?? '—'}%
+          </span>
+        </div>
+
+        {/* Sparkline premium */}
+        {sparkSvg && (
+          <div className="mt-4 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+            <svg
+              viewBox={`0 0 ${sparkSvg.w} ${sparkSvg.h}`}
+              width="100%"
+              height={sparkSvg.h}
+              preserveAspectRatio="none"
+              aria-hidden
+            >
+              <defs>
+                <linearGradient id={sparkSvg.fillId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={sparkSvg.lineColor} stopOpacity="0.18" />
+                  <stop offset="100%" stopColor={sparkSvg.lineColor} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <polygon
+                points={`0,${sparkSvg.h} ${sparkSvg.pts} ${sparkSvg.w},${sparkSvg.h}`}
+                fill={`url(#${sparkSvg.fillId})`}
+              />
+              <polyline
+                points={sparkSvg.pts}
+                fill="none"
+                stroke={sparkSvg.lineColor}
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
         )}
+
+        {/* Footer */}
+        <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
+          <span className="text-[11px] text-muted">
+            Vol{' '}
+            <span className="tabular text-ivory/70 font-medium">{fmtFcfa(valeur_echangee)} FCFA</span>
+          </span>
+          {displayDate && (
+            <span className="tabular text-[10px] text-faint">{displayDate}</span>
+          )}
+        </div>
+
       </div>
     </div>
   );

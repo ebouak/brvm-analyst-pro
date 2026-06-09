@@ -1,6 +1,16 @@
 import { createClient } from '@/lib/supabase/server';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
+import {
+  SectionHeader,
+  EmptyStatePremium,
+  PremiumPanel,
+  MetricCard,
+  SignalBadge,
+  StatPill,
+  PremiumCTA,
+  Eyebrow,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Signaux — BRVM Analyst Pro' };
@@ -54,13 +64,18 @@ export default async function SignauxPage() {
 
   if (!lastDate) {
     return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-2">🔔 Signaux d'opportunité</h1>
-        <div className="bg-surface border border-border rounded-xl p-10 text-center space-y-2">
-          <p className="text-muted">Aucun signal généré pour le moment.</p>
-          <p className="text-xs text-muted">
-            Lancez <code className="text-up bg-up/10 px-1 rounded">npm run score</code> côté scraper.
-          </p>
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <SectionHeader
+          kicker="BRVM · Moteur de signaux"
+          title="Signaux d'opportunité"
+          subtitle="Détection assistée d'opportunités d'entrée et de sortie sur le marché actions."
+        />
+        <div className="mt-10">
+          <EmptyStatePremium
+            title="Aucun signal généré"
+            hint={`Lancez npm run score côté scraper pour alimenter les signaux.`}
+            icon="◈"
+          />
         </div>
       </div>
     );
@@ -71,71 +86,114 @@ export default async function SignauxPage() {
     return acc;
   }, {});
 
+  const buyCount  = counts.BUY  ?? 0;
+  const holdCount = counts.HOLD ?? 0;
+  const sellCount = counts.SELL ?? 0;
+  const total     = rows.length;
+
   return (
-    <div className="p-5 space-y-4 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold">🔔 Signaux d'opportunité</h1>
-          <p className="text-xs text-muted mt-0.5">Séance : <span className="tabular">{lastDate}</span></p>
-        </div>
-        <div className="flex items-center gap-2">
-          <a href="/signaux" className="text-xs border border-border rounded px-2 py-1 text-muted hover:text-white transition">
-            🔄 Actualiser
-          </a>
-        </div>
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+
+      {/* ── En-tête de page ─────────────────────────────────────────────── */}
+      <SectionHeader
+        kicker="BRVM · Moteur de signaux"
+        title="Signaux d'opportunité"
+        subtitle="Détection assistée d'opportunités d'entrée et de sortie — scoring multi-facteurs explicable."
+        actions={
+          <>
+            <StatPill tone="gold">
+              Séance&nbsp;<span className="tabular">{lastDate}</span>
+            </StatPill>
+            <PremiumCTA href="/signaux" variant="ghost">
+              Actualiser
+            </PremiumCTA>
+          </>
+        }
+      />
+
+      {/* ── Filet doré de séparation ────────────────────────────────────── */}
+      <div className="gold-rule" />
+
+      {/* ── Métriques KPI ───────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <MetricCard
+          label="Titres analysés"
+          value={String(total)}
+          unit="titres"
+          accent="neutral"
+        />
+        <MetricCard
+          label="Signaux ACHAT"
+          value={String(buyCount)}
+          delta={total > 0 ? `${Math.round((buyCount / total) * 100)} % du marché` : undefined}
+          deltaDir="up"
+          accent="emerald"
+        />
+        <MetricCard
+          label="Signaux CONSERVER"
+          value={String(holdCount)}
+          delta={total > 0 ? `${Math.round((holdCount / total) * 100)} % du marché` : undefined}
+          deltaDir="flat"
+          accent="neutral"
+        />
+        <MetricCard
+          label="Signaux VENTE"
+          value={String(sellCount)}
+          delta={total > 0 ? `${Math.round((sellCount / total) * 100)} % du marché` : undefined}
+          deltaDir="down"
+          accent="sapphire"
+        />
       </div>
 
-      {/* Compteurs */}
-      <div className="grid grid-cols-3 gap-3 max-w-sm">
-        <StatPill label="🟢 Achat"    value={counts.BUY  ?? 0} cls="border-up/30 text-up bg-up/5" />
-        <StatPill label="⚪ Attente"   value={counts.HOLD ?? 0} cls="border-border text-muted" />
-        <StatPill label="🔴 Vente"    value={counts.SELL ?? 0} cls="border-down/30 text-down bg-down/5" />
-      </div>
+      {/* ── Tableau interactif avec filtres ─────────────────────────────── */}
+      <PremiumPanel>
+        <SignalsTable rows={rows} />
+      </PremiumPanel>
 
-      {/* Table interactive avec filtres */}
-      <SignalsTable rows={rows} />
+      {/* ── Légende de lecture ──────────────────────────────────────────── */}
+      <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-4">
+        <Eyebrow>Comment lire les signaux ?</Eyebrow>
 
-      {/* Légende */}
-      <div className="bg-surface border border-border rounded-xl p-4">
-        <h3 className="text-sm font-semibold mb-3">💡 Comment lire les signaux ?</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-start gap-3">
-            <span className="text-up mt-0.5 shrink-0">🟢 BUY</span>
-            <div>
-              <span className="text-white font-medium">Score &gt; +0.60</span>
-              <span className="text-muted ml-2">— Opportunité d'achat détectée</span>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* BUY */}
+          <div className="rounded-[calc(0.75rem-2px)] border border-up/15 bg-up/[0.04] px-4 py-3 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <SignalBadge signal="BUY" />
             </div>
+            <p className="tabular text-sm font-semibold text-ivory">Score &gt; +0.60</p>
+            <p className="text-xs text-muted leading-relaxed">
+              Opportunité d'achat détectée — momentum positif et valorisation favorable.
+            </p>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-muted mt-0.5 shrink-0">⚪ HOLD</span>
-            <div>
-              <span className="text-white font-medium">-0.60 ≤ Score ≤ +0.60</span>
-              <span className="text-muted ml-2">— Attente / Surveillance</span>
+
+          {/* HOLD */}
+          <div className="rounded-[calc(0.75rem-2px)] border border-warn/15 bg-warn/[0.04] px-4 py-3 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <SignalBadge signal="HOLD" />
             </div>
+            <p className="tabular text-sm font-semibold text-ivory">−0.60 ≤ Score ≤ +0.60</p>
+            <p className="text-xs text-muted leading-relaxed">
+              Attente & surveillance — signal insuffisant pour déclencher une action.
+            </p>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-down mt-0.5 shrink-0">🔴 SELL</span>
-            <div>
-              <span className="text-white font-medium">Score &lt; -0.60</span>
-              <span className="text-muted ml-2">— Opportunité de vente détectée</span>
+
+          {/* SELL */}
+          <div className="rounded-[calc(0.75rem-2px)] border border-down/15 bg-down/[0.04] px-4 py-3 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <SignalBadge signal="SELL" />
             </div>
+            <p className="tabular text-sm font-semibold text-ivory">Score &lt; −0.60</p>
+            <p className="text-xs text-muted leading-relaxed">
+              Opportunité de sortie détectée — dégradation des indicateurs de tendance.
+            </p>
           </div>
         </div>
-        <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted italic">
-          ⚠️ Les signaux sont calculés automatiquement à partir d'indicateurs techniques et ne constituent
+
+        <div className="border-t border-border/40 pt-3 text-xs text-faint italic leading-relaxed">
+          Les signaux sont calculés automatiquement à partir d'indicateurs techniques et ne constituent
           pas un conseil en investissement. Consultez un conseiller agréé COSUMAF avant toute décision.
         </div>
       </div>
-    </div>
-  );
-}
-
-function StatPill({ label, value, cls }: { label: string; value: number; cls: string }) {
-  return (
-    <div className={`border rounded-xl p-3 text-center ${cls}`}>
-      <div className="tabular text-2xl font-bold leading-none">{value}</div>
-      <div className="text-xs mt-1 opacity-80">{label}</div>
     </div>
   );
 }

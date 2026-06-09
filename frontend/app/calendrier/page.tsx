@@ -7,6 +7,13 @@ import {
 import CalendarFilters from '@/components/CalendarFilters';
 import CalendarTimeline from '@/components/CalendarTimeline';
 import CalendarTable from '@/components/CalendarTable';
+import {
+  SectionHeader,
+  PremiumPanel,
+  Eyebrow,
+  StatPill,
+  EmptyStatePremium,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Calendrier — BRVM Analyst Pro' };
@@ -99,20 +106,52 @@ async function getData(daysN: number): Promise<{
   return { items, countExDates, countPayments, countEvents };
 }
 
-/* ─── Stats card ─────────────────────────────────────────────────────────── */
-function StatCard({
+/* ─── KPI card premium ────────────────────────────────────────────────────── */
+function CalendarKpiCard({
   label,
   value,
-  color,
+  tone,
+  icon,
 }: {
   label: string;
   value: number;
-  color: string;
+  tone: 'gold' | 'emerald' | 'sapphire';
+  icon: string;
 }) {
+  const styles = {
+    gold: {
+      outer: 'border-gold/20 bg-gold/[0.04]',
+      inner: 'border-gold/10',
+      number: 'text-gold',
+      icon: 'border-gold/20 bg-gold/[0.08] text-gold/60',
+    },
+    emerald: {
+      outer: 'border-up/20 bg-up/[0.04]',
+      inner: 'border-up/10',
+      number: 'text-up',
+      icon: 'border-up/20 bg-up/[0.08] text-up/60',
+    },
+    sapphire: {
+      outer: 'border-sapphire/20 bg-sapphire/[0.04]',
+      inner: 'border-sapphire/10',
+      number: 'text-sapphire',
+      icon: 'border-sapphire/20 bg-sapphire/[0.08] text-sapphire/60',
+    },
+  }[tone];
+
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 flex flex-col gap-1">
-      <span className={`text-3xl font-bold tabular ${color}`}>{value}</span>
-      <span className="text-xs text-muted">{label}</span>
+    <div className={`rounded-panel border p-1.5 ${styles.outer} transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.01]`}>
+      <div className={`rounded-[calc(1.125rem-0.375rem)] border ${styles.inner} bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5`}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-widest font-semibold text-faint">{label}</p>
+            <p className={`tabular text-4xl font-bold mt-2 leading-none ${styles.number}`}>{value}</p>
+          </div>
+          <div className={`grid h-10 w-10 place-items-center rounded-full border text-base flex-shrink-0 ${styles.icon}`}>
+            {icon}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -139,39 +178,106 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
     type as 'dividende' | 'event' | 'all',
   );
 
+  const totalFiltered = filtered.length;
+
   return (
-    <div className="min-h-screen bg-bg px-4 py-8 max-w-5xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">
-          📅 Calendrier économique BRVM
-        </h1>
-        <p className="text-sm text-muted mt-1">
-          Dividendes et événements de marché sur les {daysN} prochains jours
-        </p>
+    <div className="min-h-screen bg-bg">
+      {/* ── En-tête ────────────────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-6 animate-rise-in">
+        <SectionHeader
+          kicker="Marché BRVM"
+          title="Calendrier économique"
+          subtitle={`Dividendes et événements corporatifs sur les ${daysN} prochains jours.`}
+          actions={
+            <StatPill tone={totalFiltered > 0 ? 'gold' : 'neutral'}>
+              {totalFiltered} événement{totalFiltered > 1 ? 's' : ''}
+            </StatPill>
+          }
+        />
+        <div className="gold-rule mt-6" />
       </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Ex-dates à venir" value={countExDates} color="text-warn" />
-        <StatCard label="Paiements à venir" value={countPayments} color="text-up" />
-        <StatCard label="Événements à venir" value={countEvents} color="text-blue" />
+      <div className="max-w-7xl mx-auto px-6 pb-12 space-y-8">
+
+        {/* ── KPI ──────────────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-rise-in">
+          <CalendarKpiCard
+            label="Ex-dates à venir"
+            value={countExDates}
+            tone="gold"
+            icon="◈"
+          />
+          <CalendarKpiCard
+            label="Paiements à venir"
+            value={countPayments}
+            tone="emerald"
+            icon="◉"
+          />
+          <CalendarKpiCard
+            label="Événements de marché"
+            value={countEvents}
+            tone="sapphire"
+            icon="◎"
+          />
+        </div>
+
+        {/* ── Filtres ───────────────────────────────────────────────────────── */}
+        <PremiumPanel>
+          <div className="px-5 py-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Eyebrow className="text-gold/50">Filtres</Eyebrow>
+            </div>
+            <CalendarFilters
+              type={type}
+              days={String(daysN)}
+              view={view}
+              totalItems={filtered.length}
+            />
+          </div>
+        </PremiumPanel>
+
+        {/* ── Vue principale ────────────────────────────────────────────────── */}
+        {filtered.length === 0 ? (
+          <EmptyStatePremium
+            icon="◎"
+            title="Aucun événement sur cette période"
+            hint={`Aucun dividende ni événement de marché trouvé pour les ${daysN} prochains jours avec les filtres sélectionnés.`}
+          />
+        ) : (
+          <div className="animate-rise-in">
+            {view === 'timeline' ? (
+              <CalendarTimeline items={filtered} />
+            ) : (
+              <CalendarTable items={filtered} />
+            )}
+          </div>
+        )}
+
+        {/* ── Légende ───────────────────────────────────────────────────────── */}
+        {filtered.length > 0 && (
+          <div className="gold-rule" />
+        )}
+        {filtered.length > 0 && (
+          <div className="flex flex-wrap items-center gap-4">
+            <Eyebrow className="text-faint">Légende</Eyebrow>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+                <span className="h-1.5 w-4 rounded-full bg-gold/60 inline-block" />
+                Ex-date dividende
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+                <span className="h-1.5 w-4 rounded-full bg-up/60 inline-block" />
+                Paiement dividende
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+                <span className="h-1.5 w-4 rounded-full bg-sapphire/60 inline-block" />
+                Événement corporatif
+              </span>
+            </div>
+          </div>
+        )}
+
       </div>
-
-      {/* Filtres */}
-      <CalendarFilters
-        type={type}
-        days={String(daysN)}
-        view={view}
-        totalItems={filtered.length}
-      />
-
-      {/* Vue principale */}
-      {view === 'timeline' ? (
-        <CalendarTimeline items={filtered} />
-      ) : (
-        <CalendarTable items={filtered} />
-      )}
     </div>
   );
 }

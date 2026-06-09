@@ -2,6 +2,12 @@ export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
 import NotationsGrid from './NotationsGrid';
+import {
+  SectionHeader,
+  MetricCard,
+  EmptyStatePremium,
+  StatPill,
+} from '@/components/ui/premium';
 
 // Classification officielle BRVM (richbourse.com)
 const COMPANIES: { ticker: string; name: string; sector: string }[] = [
@@ -114,36 +120,56 @@ export default async function NotationsPage() {
 
   const totalNoted = data.filter((d) => d.note !== null).length;
   const totalHistory = data.reduce((acc, d) => acc + d.history.length, 0);
+  const coverageRatio = Math.round((totalNoted / COMPANIES.length) * 100);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* Header */}
-      <div className="bg-surface border border-border rounded-xl p-6">
-        <p className="text-xs text-muted uppercase tracking-widest mb-1">
-          BRVM · Bourse Régionale des Valeurs Mobilières
-        </p>
-        <h1 className="text-2xl font-bold text-white">Notations Financières</h1>
-        <p className="text-sm text-muted mt-1">
-          {COMPANIES.length} sociétés cotées · Agences : BloomField Investment, GCR Ratings
-        </p>
+      <SectionHeader
+        kicker="BRVM · Agences de notation"
+        title="Notations financières"
+        subtitle={`${COMPANIES.length} sociétés cotées — BloomField Investment · GCR Ratings`}
+        actions={
+          <div className="flex items-center gap-2">
+            <StatPill tone="gold">{coverageRatio}% couverture</StatPill>
+          </div>
+        }
+      />
 
-        <div className="flex gap-8 mt-5">
-          <div>
-            <p className="tabular text-2xl font-bold text-info">{totalNoted}</p>
-            <p className="text-xs text-muted">sociétés notées</p>
-          </div>
-          <div>
-            <p className="tabular text-2xl font-bold text-faint">{COMPANIES.length - totalNoted}</p>
-            <p className="text-xs text-muted">sans notation</p>
-          </div>
-          <div>
-            <p className="tabular text-2xl font-bold text-up">{totalHistory}</p>
-            <p className="text-xs text-muted">notations historiques</p>
-          </div>
-        </div>
+      <div className="gold-rule" />
+
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <MetricCard
+          label="Sociétés notées"
+          value={String(totalNoted)}
+          unit={`/ ${COMPANIES.length}`}
+          accent="gold"
+        />
+        <MetricCard
+          label="Sans notation"
+          value={String(COMPANIES.length - totalNoted)}
+          unit="titres"
+          accent="neutral"
+        />
+        <MetricCard
+          label="Notations historiques"
+          value={String(totalHistory)}
+          unit="entrées"
+          accent="emerald"
+        />
       </div>
 
-      <NotationsGrid data={data} />
+      {/* Content or empty state */}
+      {data.length === 0 ? (
+        <EmptyStatePremium
+          icon="◈"
+          title="Aucune notation disponible"
+          hint="Ingérez les notations via le scraper ou vérifiez la connexion Supabase."
+        />
+      ) : (
+        <NotationsGrid data={data} />
+      )}
     </div>
   );
 }

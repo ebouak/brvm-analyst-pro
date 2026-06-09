@@ -5,43 +5,79 @@ interface Props {
   brief: Brief;
 }
 
-const toneStyles: Record<Brief['tone'], string> = {
-  positive: 'border-l-2 border-l-up/40',
-  negative: 'border-l-2 border-l-down/40',
-  neutral:  'border-l-2 border-l-border',
-};
-
-const toneBadge: Record<Brief['tone'], { label: string; cls: string }> = {
-  positive: { label: 'Marché porteur',   cls: 'text-up   bg-up/10'   },
-  negative: { label: 'Marché défavorable', cls: 'text-down bg-down/10' },
-  neutral:  { label: 'Marché neutre',    cls: 'text-warn  bg-warn/10' },
+const toneConfig: Record<Brief['tone'], {
+  bar: string;
+  badge: string;
+  label: string;
+  glow: string;
+  dot: string;
+}> = {
+  positive: {
+    bar:   'border-l-up/50',
+    badge: 'border-up/25 bg-up/10 text-up',
+    label: 'Marché porteur',
+    glow:  'rgba(22,180,106,0.04)',
+    dot:   'bg-up',
+  },
+  negative: {
+    bar:   'border-l-down/50',
+    badge: 'border-down/25 bg-down/10 text-down',
+    label: 'Marché défavorable',
+    glow:  'rgba(226,75,75,0.04)',
+    dot:   'bg-down',
+  },
+  neutral: {
+    bar:   'border-l-warn/40',
+    badge: 'border-warn/25 bg-warn/10 text-warn',
+    label: 'Marché neutre',
+    glow:  'rgba(224,169,58,0.04)',
+    dot:   'bg-warn',
+  },
 };
 
 export default function DailyBrief({ brief }: Props) {
   const paragraphs = [brief.summary, brief.sectors, brief.signals].filter(Boolean);
-  const badge = toneBadge[brief.tone];
+  const cfg = toneConfig[brief.tone];
 
   return (
-    <div
-      className={`bg-surface border border-border rounded-xl p-5 ${toneStyles[brief.tone]}`}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-        <h2 className="text-sm font-semibold text-white">
-          Brief — Séance du {fmtDateFR(brief.date)}
-        </h2>
-        <span className={`text-[11px] font-medium px-2 py-0.5 rounded ${badge.cls}`}>
-          {badge.label}
-        </span>
-      </div>
+    /* Outer shell — double-bezel, tone-tinted */
+    <div className={`rounded-panel border border-border/60 p-1.5 bg-border/25 transition-all duration-300`}>
+      {/* Inner core — left accent bar + content */}
+      <div
+        className={`
+          rounded-[calc(1.125rem-0.375rem)] bg-surface
+          shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
+          border-l-2 ${cfg.bar}
+          px-5 py-5
+        `}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+          <div className="flex items-center gap-2.5">
+            <span className={`h-2 w-2 rounded-full ${cfg.dot} shrink-0`} />
+            <h2 className="font-display text-base text-ivory leading-none">
+              Brief — <span className="text-muted font-sans font-normal text-sm">Séance du {fmtDateFR(brief.date)}</span>
+            </h2>
+          </div>
+          <span
+            className={`
+              inline-flex items-center rounded-full border px-3 py-0.5
+              text-[10px] font-semibold tracking-wide uppercase
+              ${cfg.badge}
+            `}
+          >
+            {cfg.label}
+          </span>
+        </div>
 
-      {/* Paragraphs */}
-      <div className="space-y-2.5">
-        {paragraphs.map((para, i) => (
-          <p key={i} className="text-sm text-white/90 leading-relaxed">
-            {para}
-          </p>
-        ))}
+        {/* Paragraphs */}
+        <div className="space-y-3">
+          {paragraphs.map((para, i) => (
+            <p key={i} className="text-sm text-ivory/85 leading-relaxed">
+              {para}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   );

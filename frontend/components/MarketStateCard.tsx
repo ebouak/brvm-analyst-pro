@@ -12,16 +12,50 @@ export interface MarketStats {
 }
 
 function BreadthBadge({ ratio }: { ratio: number }) {
-  const color = ratio >= 60 ? 'text-up border-up/30 bg-up/10'
-    : ratio <= 40 ? 'text-down border-down/30 bg-down/10'
-    : 'text-warn border-warn/30 bg-warn/10';
-  const label = ratio >= 60 ? 'Haussier' : ratio <= 40 ? 'Baissier' : 'Neutre';
+  const { cls, label } = ratio >= 60
+    ? { cls: 'border-up/25 bg-up/10 text-up',     label: 'Haussier' }
+    : ratio <= 40
+    ? { cls: 'border-down/25 bg-down/10 text-down', label: 'Baissier' }
+    : { cls: 'border-warn/25 bg-warn/10 text-warn', label: 'Neutre'   };
+
   return (
-    <span className={`inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 tabular ${color}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-[10px] font-semibold tracking-wide uppercase tabular ${cls}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${ratio >= 60 ? 'bg-up' : ratio <= 40 ? 'bg-down' : 'bg-warn'}`} />
       {label} {ratio.toFixed(0)}%
     </span>
   );
 }
+
+const PILL_CONFIGS = [
+  {
+    key: 'hausses',
+    label: 'Hausse',
+    icon: (s: number) => <TrendingUp size={s} />,
+    cls: 'border-up/20 bg-up/[0.07] text-up hover:bg-up/12 hover:border-up/30',
+    valueCls: 'text-up',
+  },
+  {
+    key: 'baisses',
+    label: 'Baisse',
+    icon: (s: number) => <TrendingDown size={s} />,
+    cls: 'border-down/20 bg-down/[0.07] text-down hover:bg-down/12 hover:border-down/30',
+    valueCls: 'text-down',
+  },
+  {
+    key: 'stables',
+    label: 'Stable',
+    icon: (s: number) => <Minus size={s} />,
+    cls: 'border-border bg-elevated text-muted hover:border-border-strong',
+    valueCls: 'text-muted',
+  },
+  {
+    key: 'total',
+    label: 'Titres',
+    icon: (s: number) => <Activity size={s} />,
+    cls: 'border-border-strong bg-elevated text-ivory/70 hover:border-gold/20',
+    valueCls: 'text-ivory',
+  },
+] as const;
 
 export default function MarketStateCard({ stats }: { stats: MarketStats }) {
   const volPct = stats.volumePrev && stats.volumePrev > 0
@@ -33,86 +67,101 @@ export default function MarketStateCard({ stats }: { stats: MarketStats }) {
     ? (stats.hausses / (stats.hausses + stats.baisses)) * 100
     : 50;
 
-  const pills = [
-    {
-      icon: <TrendingUp size={14} />,
-      value: stats.hausses,
-      label: 'Hausse',
-      cls: 'bg-up/10 text-up border border-up/20 hover:bg-up/15',
-    },
-    {
-      icon: <TrendingDown size={14} />,
-      value: stats.baisses,
-      label: 'Baisse',
-      cls: 'bg-down/10 text-down border border-down/20 hover:bg-down/15',
-    },
-    {
-      icon: <Minus size={14} />,
-      value: stats.stables,
-      label: 'Stable',
-      cls: 'bg-muted/10 text-muted border border-border hover:bg-muted/15',
-    },
-    {
-      icon: <Activity size={14} />,
-      value: stats.total,
-      label: 'Titres',
-      cls: 'bg-surface text-white/80 border border-border hover:border-border/80',
-    },
-  ];
+  const hPct = stats.total > 0 ? (stats.hausses / stats.total) * 100 : 0;
+  const bPct = stats.total > 0 ? (stats.baisses / stats.total) * 100 : 0;
+  const sPct = Math.max(0, 100 - hPct - bPct);
 
-  // Barre de breadth empilée
-  const hPct  = stats.total > 0 ? (stats.hausses / stats.total) * 100 : 0;
-  const bPct  = stats.total > 0 ? (stats.baisses / stats.total) * 100 : 0;
-  const sPct  = Math.max(0, 100 - hPct - bPct);
+  const values: Record<string, number> = {
+    hausses: stats.hausses,
+    baisses: stats.baisses,
+    stables: stats.stables,
+    total:   stats.total,
+  };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold flex items-center gap-1.5">
-          <Activity size={14} className="text-muted" />
-          État du marché
-        </h3>
-        {stats.hausses + stats.baisses > 0 && <BreadthBadge ratio={breadth} />}
-      </div>
+    /* Outer shell */
+    <div className="rounded-panel border border-border bg-border/30 p-1.5">
+      {/* Inner core */}
+      <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-5 py-5">
 
-      {/* Pills */}
-      <div className="grid grid-cols-4 gap-2 mb-3">
-        {pills.map((p) => (
-          <div
-            key={p.label}
-            className={`rounded-lg px-2 py-2.5 text-center transition-colors cursor-default ${p.cls}`}
-          >
-            <div className="flex justify-center mb-1 opacity-70">{p.icon}</div>
-            <div className="text-base font-bold tabular leading-none">{p.value}</div>
-            <div className="text-[10px] mt-1 opacity-70">{p.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Barre empilée breadth */}
-      {stats.total > 0 && (
-        <div className="flex h-1.5 rounded-full overflow-hidden mb-3 gap-px">
-          <div className="bg-up/70 transition-all" style={{ width: `${hPct}%` }} />
-          <div className="bg-muted/40 transition-all" style={{ width: `${sPct}%` }} />
-          <div className="bg-down/70 transition-all" style={{ width: `${bPct}%` }} />
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-muted pt-2 border-t border-border/50">
-        <span>
-          Volume :{' '}
-          <span className="tabular text-white/80">{fmtFcfa(stats.volumeTotal)} FCFA</span>
-          {volPct != null && (
-            <span className={`ml-1 tabular ${volUp ? 'text-up' : 'text-down'}`}>
-              {volUp ? '▲' : '▼'}{Math.abs(volPct).toFixed(1)}%
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <span className="grid h-7 w-7 place-items-center rounded-full border border-border-strong bg-elevated text-muted">
+              <Activity size={13} />
             </span>
-          )}
-        </span>
-        <span className="flex items-center gap-1">
-          <BarChart3 size={11} />
-          Tx : <span className="tabular text-white/80 ml-0.5">{fmtNumber(stats.transactions)}</span>
-        </span>
+            <h3 className="text-sm font-semibold text-ivory">État du marché</h3>
+          </div>
+          {stats.hausses + stats.baisses > 0 && <BreadthBadge ratio={breadth} />}
+        </div>
+
+        {/* KPI pills — 4 colonnes */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          {PILL_CONFIGS.map((cfg) => (
+            <div
+              key={cfg.key}
+              className={`
+                rounded-card border px-3 py-3 text-center
+                transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+                cursor-default ${cfg.cls}
+              `}
+            >
+              <div className="flex justify-center mb-2 opacity-60">
+                {cfg.icon(14)}
+              </div>
+              <div className={`tabular text-xl font-bold leading-none ${cfg.valueCls}`}>
+                {values[cfg.key]}
+              </div>
+              <div className="text-[10px] uppercase tracking-wider mt-1.5 opacity-60 font-medium">
+                {cfg.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Barre breadth empilée — premium (SVG pour éviter inline styles) */}
+        {stats.total > 0 && (
+          <div className="mb-5">
+            <svg
+              viewBox="0 0 100 8"
+              width="100%"
+              height="8"
+              preserveAspectRatio="none"
+              className="rounded-full overflow-hidden"
+              aria-hidden
+            >
+              {/* hausse — émeraude */}
+              <rect x="0" y="0" width={hPct} height="8" fill="rgba(22,180,106,0.55)" rx="4" />
+              {/* stable — neutre */}
+              <rect x={hPct} y="0" width={sPct} height="8" fill="rgba(152,147,132,0.25)" />
+              {/* baisse — rubis */}
+              <rect x={hPct + sPct} y="0" width={bPct} height="8" fill="rgba(226,75,75,0.55)" rx="4" />
+            </svg>
+            <div className="flex justify-between mt-1.5 text-[10px] text-faint">
+              <span>{hPct.toFixed(0)}% hausse</span>
+              <span>{bPct.toFixed(0)}% baisse</span>
+            </div>
+          </div>
+        )}
+
+        {/* Footer — volume + transactions */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/40 text-xs text-muted">
+          <span>
+            Volume{' '}
+            <span className="tabular text-ivory/80 font-medium">{fmtFcfa(stats.volumeTotal)} FCFA</span>
+            {volPct != null && (
+              <span className={`ml-1.5 tabular font-semibold ${volUp ? 'text-up' : 'text-down'}`}>
+                {volUp ? '▲' : '▼'}{Math.abs(volPct).toFixed(1)}%
+              </span>
+            )}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <BarChart3 size={11} className="text-faint" />
+            Transactions{' '}
+            <span className="tabular text-ivory/80 font-medium">{fmtNumber(stats.transactions)}</span>
+          </span>
+        </div>
+
       </div>
     </div>
   );

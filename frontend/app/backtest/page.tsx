@@ -4,6 +4,13 @@ import type { SignalLabel } from '@/lib/types';
 import BacktestChart from '@/components/BacktestChart';
 import BacktestMetrics from '@/components/BacktestMetrics';
 import BacktestExport from '@/components/BacktestExport';
+import {
+  SectionHeader,
+  PremiumPanel,
+  EmptyStatePremium,
+  StatPill,
+  Eyebrow,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Backtest' };
@@ -94,6 +101,10 @@ interface PageProps {
   };
 }
 
+/* ── Shared input/select class ──────────────────────────────────────────── */
+const inputCls =
+  'bg-bg border border-border rounded-lg px-3 py-2 text-sm text-ivory placeholder:text-faint focus:outline-none focus:border-gold/50 transition-colors duration-200';
+
 export default async function BacktestPage({ searchParams }: PageProps) {
   const supabase = createClient();
 
@@ -156,174 +167,193 @@ export default async function BacktestPage({ searchParams }: PageProps) {
     }
   }
 
+  /* ── Couverture badge ─────────────────────────────────────────────────── */
+  const coverageTone =
+    closes.length >= 500 ? 'emerald' : closes.length >= 250 ? 'gold' : 'neutral';
+
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-end justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-semibold">Backtest de stratégie</h1>
-        <p className="text-xs text-muted">
-          Signal : variation &gt; 2% → BUY, &lt; -2% → SELL, sinon HOLD
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      {/* Header */}
+      <SectionHeader
+        kicker="BRVM · Simulation de stratégie"
+        title="Backtest"
+        subtitle="Signal momentum : variation > 2 % → ACHAT · < −2 % → VENTE · sinon CONSERVER"
+      />
 
-      <form method="GET" action="" className="flex flex-wrap items-end gap-3">
-        {/* Instrument */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="code" className="text-xs text-muted">Instrument</label>
-          <select
-            id="code"
-            name="code"
-            defaultValue={selectedCode}
-            className="bg-surface border border-border rounded px-3 py-2 text-sm text-white min-w-[180px]"
+      <div className="gold-rule" />
+
+      {/* Form panel */}
+      <PremiumPanel>
+        <form method="GET" action="" className="p-5 flex flex-wrap items-end gap-4">
+          {/* Instrument */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="code" className="overline text-faint text-[10px]">Instrument</label>
+            <select
+              id="code"
+              name="code"
+              defaultValue={selectedCode}
+              className={`${inputCls} min-w-[200px]`}
+            >
+              <option value="">— Choisir un titre —</option>
+              {instrumentList.map((ins) => (
+                <option key={ins.code} value={ins.code}>
+                  {ins.code}{ins.designation ? ` – ${ins.designation}` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date From */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="dateFrom" className="overline text-faint text-[10px]">Du</label>
+            <input
+              id="dateFrom"
+              type="date"
+              name="dateFrom"
+              defaultValue={dateFrom}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Date To */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="dateTo" className="overline text-faint text-[10px]">Au</label>
+            <input
+              id="dateTo"
+              type="date"
+              name="dateTo"
+              defaultValue={dateTo}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Period */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="period" className="overline text-faint text-[10px]">Période (si sans dates)</label>
+            <select
+              id="period"
+              name="period"
+              defaultValue={period}
+              className={inputCls}
+            >
+              <option value="1M">1 mois</option>
+              <option value="3M">3 mois</option>
+              <option value="6M">6 mois</option>
+              <option value="1A">1 an</option>
+              <option value="max">Max</option>
+            </select>
+          </div>
+
+          {/* Frais */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="fees" className="overline text-faint text-[10px]">Frais</label>
+            <input
+              id="fees"
+              type="number"
+              name="fees"
+              step="0.001"
+              min="0"
+              max="0.1"
+              defaultValue={feesPct}
+              className={`${inputCls} w-24`}
+            />
+          </div>
+
+          {/* Slippage */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="slippage" className="overline text-faint text-[10px]">Slippage</label>
+            <input
+              id="slippage"
+              type="number"
+              name="slippage"
+              step="0.001"
+              min="0"
+              max="0.1"
+              defaultValue={slippagePct}
+              className={`${inputCls} w-24`}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="px-5 py-2 rounded-lg bg-gold text-obsidian text-sm font-semibold shadow-gold transition-all duration-200 hover:bg-gold-soft active:scale-[0.98]"
           >
-            <option value="">-- Choisir --</option>
-            {instrumentList.map((ins) => (
-              <option key={ins.code} value={ins.code}>
-                {ins.code}{ins.designation ? ` – ${ins.designation}` : ''}
-              </option>
-            ))}
-          </select>
-        </div>
+            Analyser
+          </button>
+        </form>
+      </PremiumPanel>
 
-        {/* Date range */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="dateFrom" className="text-xs text-muted">Du</label>
-          <input
-            id="dateFrom"
-            type="date"
-            name="dateFrom"
-            defaultValue={dateFrom}
-            className="bg-surface border border-border rounded px-3 py-2 text-sm text-white"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="dateTo" className="text-xs text-muted">Au</label>
-          <input
-            id="dateTo"
-            type="date"
-            name="dateTo"
-            defaultValue={dateTo}
-            className="bg-surface border border-border rounded px-3 py-2 text-sm text-white"
-          />
-        </div>
-
-        {/* Fallback period when no date range */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="period" className="text-xs text-muted">Période (si sans dates)</label>
-          <select
-            id="period"
-            name="period"
-            defaultValue={period}
-            className="bg-surface border border-border rounded px-3 py-2 text-sm text-white"
-          >
-            <option value="1M">1 mois</option>
-            <option value="3M">3 mois</option>
-            <option value="6M">6 mois</option>
-            <option value="1A">1 an</option>
-            <option value="max">Max</option>
-          </select>
-        </div>
-
-        {/* Frais */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="fees" className="text-xs text-muted">Frais</label>
-          <input
-            id="fees"
-            type="number"
-            name="fees"
-            step="0.001"
-            min="0"
-            max="0.1"
-            defaultValue={feesPct}
-            className="bg-surface border border-border rounded px-3 py-2 text-sm text-white w-24"
-          />
-        </div>
-
-        {/* Slippage */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="slippage" className="text-xs text-muted">Slippage</label>
-          <input
-            id="slippage"
-            type="number"
-            name="slippage"
-            step="0.001"
-            min="0"
-            max="0.1"
-            defaultValue={slippagePct}
-            className="bg-surface border border-border rounded px-3 py-2 text-sm text-white w-24"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="px-4 py-2 rounded bg-up text-black text-sm font-semibold hover:opacity-90"
-        >
-          Analyser
-        </button>
-      </form>
-
+      {/* Empty state — no instrument selected */}
       {!selectedCode && (
-        <div className="bg-surface border border-border rounded-xl p-8 text-center text-muted">
-          Sélectionnez un instrument pour lancer le backtest.
-        </div>
+        <EmptyStatePremium
+          icon="◈"
+          title="Sélectionnez un instrument"
+          hint="Choisissez une action BRVM et configurez la période pour lancer la simulation."
+        />
       )}
 
+      {/* Empty state — no price history */}
       {selectedCode && noData && (
-        <div className="bg-surface border border-border rounded-xl p-8 text-center space-y-3">
-          <p className="text-muted">
-            Aucun historique de cours disponible pour{' '}
-            <span className="tabular text-white">{selectedCode}</span> sur cette période.
-          </p>
-          <p className="text-xs text-muted">
-            Lancez le backfill dans <code className="text-up bg-up/10 px-1 rounded">scraper/</code> :
-          </p>
-          <pre className="text-xs font-mono bg-surface border border-border rounded px-3 py-2 text-up select-all inline-block">
-            npm run backfill -- {selectedCode} --from=2023-01-01
-          </pre>
-        </div>
+        <PremiumPanel>
+          <div className="p-8 text-center space-y-4">
+            <p className="text-muted text-sm">
+              Aucun historique de cours pour{' '}
+              <span className="tabular text-ivory font-semibold">{selectedCode}</span>{' '}
+              sur cette période.
+            </p>
+            <p className="text-xs text-faint">
+              Lancez le backfill dans le scraper :
+            </p>
+            <pre className="text-xs font-mono bg-bg border border-border rounded-lg px-4 py-3 text-up select-all inline-block">
+              npm run backfill -- {selectedCode} --from=2023-01-01
+            </pre>
+          </div>
+        </PremiumPanel>
       )}
 
-      {/* Indicateur couverture données */}
+      {/* Coverage indicator */}
       {result && closes.length > 0 && (
-        <div className="flex items-center gap-3 text-xs text-muted flex-wrap">
-          <span>
-            📅 {dates[0]} → {dates[dates.length - 1]}
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs text-faint tabular">
+            {dates[0]} → {dates[dates.length - 1]}
           </span>
-          <span className={`tabular border rounded px-1.5 py-0.5 ${
-            closes.length >= 500 ? 'border-up/30 text-up' :
-            closes.length >= 250 ? 'border-warn/30 text-warn' :
-            'border-down/30 text-down'
-          }`}>
+          <StatPill tone={coverageTone}>
             {closes.length} séances
-            {closes.length < 250 && ' — historique court'}
-            {closes.length >= 250 && closes.length < 500 && ' — ~1 an'}
-            {closes.length >= 500 && ' — 2+ ans ✓'}
-          </span>
+            {closes.length < 250 && ' · historique court'}
+            {closes.length >= 250 && closes.length < 500 && ' · ~1 an'}
+            {closes.length >= 500 && ' · 2+ ans'}
+          </StatPill>
         </div>
       )}
 
+      {/* Results */}
       {result && (
         <>
-          <p className="text-sm text-muted">
-            Instrument : <span className="text-white">{selectedCode}</span>
+          {/* Instrument label */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <Eyebrow>{selectedCode}</Eyebrow>
             {designation && designation !== selectedCode && (
-              <> — <span className="text-white">{designation}</span></>
+              <span className="text-sm text-muted">{designation}</span>
             )}
             {(feesPct > 0 || slippagePct > 0) && (
-              <span className="ml-2 text-xs">
-                (frais {(feesPct * 100).toFixed(2)}%
-                {slippagePct > 0 ? ` + slippage ${(slippagePct * 100).toFixed(2)}%` : ''})
-              </span>
+              <StatPill tone="neutral">
+                frais {(feesPct * 100).toFixed(2)}%
+                {slippagePct > 0 ? ` · slippage ${(slippagePct * 100).toFixed(2)}%` : ''}
+              </StatPill>
             )}
-          </p>
+          </div>
 
-          {/* Chart full width */}
-          <BacktestChart
-            equityCurve={result.equityCurve}
-            closes={closes}
-            dates={dates}
-            drawdownPeriods={result.drawdownPeriods}
-          />
+          {/* Chart */}
+          <PremiumPanel glow>
+            <div className="p-4">
+              <BacktestChart
+                equityCurve={result.equityCurve}
+                closes={closes}
+                dates={dates}
+                drawdownPeriods={result.drawdownPeriods}
+              />
+            </div>
+          </PremiumPanel>
 
           {/* Metrics */}
           <BacktestMetrics result={result} />
@@ -332,46 +362,48 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           {(() => {
             const { strengths, limits } = generateNarrative(result, selectedCode);
             return (
-              <div className="bg-surface border border-border rounded-xl p-5">
-                <h3 className="text-sm font-semibold mb-3">💡 Synthèse</h3>
-                <div className="space-y-4 text-sm">
-                  {strengths.length > 0 && (
-                    <div>
-                      <p className="text-xs text-muted uppercase tracking-wide mb-1">Points forts</p>
-                      <ul className="space-y-1">
-                        {strengths.map((s, i) => (
-                          <li key={i} className="flex gap-2">
-                            <span className="text-up">•</span>
-                            <span>{s}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {limits.length > 0 && (
-                    <div>
-                      <p className="text-xs text-muted uppercase tracking-wide mb-1">Limites</p>
-                      <ul className="space-y-1">
-                        {limits.map((l, i) => (
-                          <li key={i} className="flex gap-2">
-                            <span className="text-muted">•</span>
-                            <span>{l}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  <p className="text-xs text-muted italic border-t border-border/50 pt-3">
-                    ⚠️ Les résultats passés ne garantissent pas les performances futures.
-                    Ce backtest est fourni à titre informatif uniquement.
-                  </p>
+              <PremiumPanel>
+                <div className="p-5 space-y-4">
+                  <p className="overline text-gold/70 text-[10px]">Synthèse qualitative</p>
+                  <div className="space-y-4 text-sm">
+                    {strengths.length > 0 && (
+                      <div>
+                        <p className="overline text-faint text-[10px] mb-2">Points forts</p>
+                        <ul className="space-y-1.5">
+                          {strengths.map((s, i) => (
+                            <li key={i} className="flex gap-2 items-start">
+                              <span className="text-up mt-0.5 shrink-0">▸</span>
+                              <span className="text-ivory">{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {limits.length > 0 && (
+                      <div>
+                        <p className="overline text-faint text-[10px] mb-2">Limites</p>
+                        <ul className="space-y-1.5">
+                          {limits.map((l, i) => (
+                            <li key={i} className="flex gap-2 items-start">
+                              <span className="text-muted mt-0.5 shrink-0">▸</span>
+                              <span className="text-muted">{l}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <p className="text-xs text-faint italic border-t border-border/50 pt-3">
+                      Les résultats passés ne garantissent pas les performances futures.
+                      Ce backtest est fourni à titre informatif uniquement.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </PremiumPanel>
             );
           })()}
 
           {/* Actions */}
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-3 flex-wrap">
             <BacktestExport
               equityCurve={result.equityCurve}
               closes={closes}
@@ -380,9 +412,9 @@ export default async function BacktestPage({ searchParams }: PageProps) {
             />
             <a
               href="/backtest"
-              className="text-xs border border-border text-muted rounded px-3 py-1.5 hover:text-up hover:border-up/40 transition"
+              className="text-xs border border-border text-muted rounded-lg px-4 py-2 hover:text-gold hover:border-gold/40 transition-all duration-200"
             >
-              🧪 Tester un autre
+              Tester un autre titre
             </a>
           </div>
         </>

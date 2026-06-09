@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import FundamentalsTable, { type ScreenerRow } from '@/components/fundamentals/FundamentalsTable';
+import {
+  SectionHeader,
+  MetricCard,
+  EmptyStatePremium,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Analyse fondamentale' };
@@ -16,7 +21,6 @@ async function getData(): Promise<ScreenerRow[]> {
 
   const lastCours: Record<string, number | null> = {};
   for (const q of (quotes ?? []) as { code: string; cours_jour: number | null }[]) if (!(q.code in lastCours)) lastCours[q.code] = q.cours_jour;
-  // Meilleur exercice par code : le plus récent dont les données sont plausibles.
   type FundDbRow = { code: string; year: number | null; revenue: number | null; net_income: number | null; equity: number | null; debt: number | null; is_manual: boolean | null };
   const byCode: Record<string, FundDbRow[]> = {};
   for (const f of (funds ?? []) as FundDbRow[]) (byCode[f.code] ??= []).push(f);
@@ -37,13 +41,69 @@ async function getData(): Promise<ScreenerRow[]> {
 
 export default async function FondamentauxPage() {
   const rows = await getData();
+
+  const withData = rows.filter((r) => r.per !== null || r.pb !== null || r.roe !== null);
+  const withDiv = rows.filter((r) => r.rendementDiv !== null && (r.rendementDiv ?? 0) > 0);
+  const avgROE = withData.length > 0
+    ? withData.filter((r) => r.roe !== null).reduce((s, r) => s + (r.roe ?? 0), 0) / Math.max(1, withData.filter((r) => r.roe !== null).length)
+    : null;
+
   return (
-    <div className="p-6 space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">🏦 Analyse fondamentale</h1>
-        <p className="text-sm text-muted">Ratios clés des 48 actions BRVM — triez et filtrez par secteur.</p>
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      {/* Header */}
+      <SectionHeader
+        kicker="BRVM · Ratios fondamentaux"
+        title="Analyse fondamentale"
+        subtitle="PER, P/B, ROE, marge nette et rendement du dividende pour les actions cotées. Triez et filtrez par secteur."
+      />
+
+      {/* Gold rule */}
+      <div className="gold-rule" />
+
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <MetricCard
+          label="Actions couvertes"
+          value={String(rows.length)}
+          unit="titres"
+          accent="gold"
+        />
+        <MetricCard
+          label="Avec données fondamentales"
+          value={String(withData.length)}
+          unit="titres"
+          accent="sapphire"
+        />
+        <MetricCard
+          label="Versent un dividende"
+          value={String(withDiv.length)}
+          unit="titres"
+          accent="emerald"
+        />
+        <MetricCard
+          label="ROE moyen (univers)"
+          value={avgROE !== null ? `${avgROE.toFixed(1)}%` : '—'}
+          accent="neutral"
+        />
       </div>
-      <FundamentalsTable rows={rows} />
+
+      {/* Table or empty state */}
+      {rows.length === 0 ? (
+        <EmptyStatePremium
+          icon="◈"
+          title="Aucune donnée fondamentale"
+          hint="Lancez l'ingestion des fondamentaux via le scraper, ou vérifiez la connexion Supabase."
+        />
+      ) : (
+        <div className="rounded-panel border border-border bg-surface shadow-card overflow-hidden">
+          <FundamentalsTable rows={rows} />
+        </div>
+      )}
+
+      {/* Disclaimer */}
+      <p className="text-xs text-faint italic text-center">
+        Données issues des rapports annuels et communiqués officiels BRVM. Les ratios sont calculés sur le dernier exercice disponible.
+      </p>
     </div>
   );
 }
