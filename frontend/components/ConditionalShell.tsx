@@ -3,8 +3,8 @@
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 
-/** Routes affichées en plein écran, sans la sidebar (landing publique). */
-const BARE_ROUTES = new Set<string>(['/']);
+/** Routes affichées en plein écran, sans la sidebar (landing + auth). */
+const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
 
 /**
  * Décide d'envelopper ou non les pages dans le shell applicatif (sidebar + main).

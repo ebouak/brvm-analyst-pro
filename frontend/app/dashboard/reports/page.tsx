@@ -2,6 +2,13 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import type { MarketEvent } from '@/lib/types';
 import { deleteSnapshot } from './snapshots/actions';
+import {
+  SectionHeader,
+  PremiumPanel,
+  EmptyStatePremium,
+  Eyebrow,
+  StatPill,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,47 +40,126 @@ function snapshotHref(snap: { report_type: string; params: Record<string, string
   return '/dashboard/reports';
 }
 
+const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+
 export default async function ReportsHome() {
   const { events, lastDate, secteurs, snapshots } = await getRecent();
-  const cards = [
-    { href: '/dashboard/reports/market/daily', title: 'Rapport marché journalier', desc: 'Synthèse de séance, indices, top movers, breadth, événements.' },
-    { href: '/dashboard/reports/events', title: 'Événements de marché', desc: 'Listing filtrable des communiqués, avis et annonces émetteurs.' },
-    { href: '/actions', title: 'Rapport par instrument', desc: 'Choisissez un titre dans le marché actions pour son rapport détaillé.' },
-  ];
-  return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Rapports & Événements</h1>
 
-      <div className="grid md:grid-cols-3 gap-4">
-        {cards.map((c) => (
-          <Link key={c.href} href={c.href} className="bg-surface border border-border rounded-xl p-4 hover:border-up/50 transition">
-            <h3 className="font-medium">{c.title}</h3>
-            <p className="text-xs text-muted mt-1">{c.desc}</p>
-          </Link>
-        ))}
+  const cards = [
+    {
+      href: '/dashboard/reports/market/daily',
+      title: 'Rapport marché journalier',
+      desc: 'Synthèse de séance, indices, top movers, breadth, événements.',
+      kicker: 'Marché',
+      icon: '▦',
+    },
+    {
+      href: '/dashboard/reports/events',
+      title: 'Événements de marché',
+      desc: 'Listing filtrable des communiqués, avis et annonces émetteurs.',
+      kicker: 'Communiqués',
+      icon: '◈',
+    },
+    {
+      href: '/actions',
+      title: 'Rapport par instrument',
+      desc: 'Choisissez un titre dans le marché actions pour son rapport détaillé.',
+      kicker: 'Instrument',
+      icon: '◎',
+    },
+  ];
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+
+      {/* ── En-tête ── */}
+      <SectionHeader
+        kicker="Centre de rapports"
+        title="Rapports & Événements"
+        subtitle="Synthèses de marché, analyses sectorielles et communiqués d'émetteurs BRVM/UEMOA."
+        actions={
+          lastDate && (
+            <StatPill tone="neutral">
+              Dernière séance : <span className="tabular ml-1 text-ivory">{lastDate}</span>
+            </StatPill>
+          )
+        }
+      />
+
+      {/* ── Accès rapide ── */}
+      <div>
+        <Eyebrow className="mb-4">Accès rapide</Eyebrow>
+        <div className="grid md:grid-cols-3 gap-4">
+          {cards.map((c) => (
+            <Link
+              key={c.href}
+              href={c.href}
+              className={`group flex flex-col gap-3 bg-surface border border-border rounded-card p-5 shadow-card ${EASE} hover:border-gold/30 hover:shadow-[0_0_0_1px_rgba(183,140,78,0.1)]`}
+            >
+              <div className="flex items-start justify-between">
+                <span className="grid h-9 w-9 place-items-center rounded-lg border border-gold/20 bg-gold/[0.06] text-base text-gold/70">
+                  {c.icon}
+                </span>
+                <StatPill tone="neutral">{c.kicker}</StatPill>
+              </div>
+              <div>
+                <h3 className="font-display text-sm font-semibold text-ivory group-hover:text-gold/90 transition-colors">
+                  {c.title}
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted">{c.desc}</p>
+              </div>
+              <span className={`self-start text-xs font-medium text-gold/60 ${EASE} group-hover:translate-x-0.5`}>
+                Accéder →
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
 
+      {/* ── Rapports sauvegardés ── */}
       {snapshots.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-2">Mes rapports sauvegardés</h2>
-          <div className="space-y-2">
-            {snapshots.map((snap) => (
-              <div key={snap.id} className="flex items-center justify-between bg-surface border border-border rounded-lg px-3 py-2">
-                <Link href={snapshotHref(snap)} className="text-sm hover:text-up">{snap.title}</Link>
-                <form action={deleteSnapshot}><input type="hidden" name="id" value={snap.id} /><button className="text-xs text-down hover:underline">×</button></form>
-              </div>
-            ))}
-          </div>
+          <Eyebrow className="mb-4">Mes rapports sauvegardés</Eyebrow>
+          <PremiumPanel>
+            <div className="divide-y divide-border">
+              {snapshots.map((snap) => (
+                <div
+                  key={snap.id}
+                  className={`flex items-center justify-between px-5 py-3 ${EASE} hover:bg-elevated/60`}
+                >
+                  <Link
+                    href={snapshotHref(snap)}
+                    className={`text-sm text-ivory/80 hover:text-gold truncate ${EASE}`}
+                  >
+                    {snap.title}
+                  </Link>
+                  <form action={deleteSnapshot}>
+                    <input type="hidden" name="id" value={snap.id} />
+                    <button
+                      className={`ml-4 shrink-0 rounded-md border border-border px-2 py-0.5 text-xs text-down ${EASE} hover:border-down/30 hover:bg-down/10`}
+                      type="submit"
+                    >
+                      Supprimer
+                    </button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          </PremiumPanel>
         </div>
       )}
 
+      {/* ── Secteurs ── */}
       {secteurs.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-2">Rapports sectoriels</h2>
+          <Eyebrow className="mb-4">Rapports sectoriels</Eyebrow>
           <div className="flex flex-wrap gap-2">
             {secteurs.map((sec) => (
-              <Link key={sec} href={`/dashboard/reports/sector/${encodeURIComponent(sec)}`}
-                className="text-xs border border-border rounded px-3 py-1.5 text-muted hover:text-up hover:border-up/50">
+              <Link
+                key={sec}
+                href={`/dashboard/reports/sector/${encodeURIComponent(sec)}`}
+                className={`rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-medium text-muted shadow-card ${EASE} hover:border-gold/40 hover:bg-gold/[0.04] hover:text-gold`}
+              >
                 {sec}
               </Link>
             ))}
@@ -81,28 +167,43 @@ export default async function ReportsHome() {
         </div>
       )}
 
+      {/* ── Événements récents ── */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold">Événements récents</h2>
-          <Link href="/dashboard/reports/events" className="text-xs text-up">Tout voir →</Link>
+        <div className="flex items-center justify-between mb-4">
+          <Eyebrow>Événements récents</Eyebrow>
+          <Link
+            href="/dashboard/reports/events"
+            className={`text-xs font-medium text-gold/70 ${EASE} hover:text-gold`}
+          >
+            Tout voir →
+          </Link>
         </div>
+
         {events.length === 0 ? (
-          <div className="bg-surface border border-border rounded-xl p-6 text-center text-muted text-sm">
-            Aucun événement ingéré. Lancez <code className="text-up">npm run events:mock</code> côté scraper.
-          </div>
+          <EmptyStatePremium
+            icon="◈"
+            title="Aucun événement ingéré"
+            hint="Lancez npm run events:mock côté scraper pour peupler les données."
+            action={{ href: '/dashboard/reports/events', label: 'Explorer' }}
+          />
         ) : (
-          <div className="space-y-2">
-            {events.map((e) => (
-              <Link key={e.id} href={`/dashboard/reports/events/${e.id}`}
-                className="flex items-center justify-between bg-surface border border-border rounded-lg px-3 py-2 hover:border-up/40">
-                <span className="text-sm truncate">{e.title}</span>
-                <span className="text-xs text-muted tabular ml-3 shrink-0">{e.event_date}</span>
-              </Link>
-            ))}
-          </div>
+          <PremiumPanel>
+            <div className="divide-y divide-border">
+              {events.map((e) => (
+                <Link
+                  key={e.id}
+                  href={`/dashboard/reports/events/${e.id}`}
+                  className={`flex items-center justify-between px-5 py-3 ${EASE} hover:bg-elevated/60`}
+                >
+                  <span className="text-sm text-ivory/80 truncate">{e.title}</span>
+                  <span className="tabular ml-4 shrink-0 text-xs text-muted">{e.event_date}</span>
+                </Link>
+              ))}
+            </div>
+          </PremiumPanel>
         )}
       </div>
-      {lastDate && <p className="text-xs text-muted">Dernière séance disponible : {lastDate}</p>}
+
     </div>
   );
 }

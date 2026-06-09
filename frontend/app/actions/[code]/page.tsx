@@ -19,6 +19,15 @@ import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
 import TechnicalSummary from '@/components/TechnicalSummary';
 import NotationBadge from '@/components/NotationBadge';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
+import {
+  SectionHeader,
+  PremiumPanel,
+  MetricCard,
+  StatPill,
+  EmptyStatePremium,
+  PremiumCTA,
+  Eyebrow,
+} from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,11 +119,19 @@ export default async function InstrumentPage({
 
   if (rows.length === 0) {
     return (
-      <div className="p-6">
-        <Link href="/actions" className="text-xs text-up">← Marché actions</Link>
-        <div className="mt-4 bg-surface border border-border rounded-xl p-10 text-center text-muted">
-          Aucun historique pour {code}.
-        </div>
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+        <Link
+          href="/actions"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        >
+          ← Marché actions
+        </Link>
+        <EmptyStatePremium
+          title={`Aucun historique pour ${code}`}
+          hint="Les données seront disponibles après la prochaine collecte."
+          icon="◈"
+          action={{ href: '/actions', label: 'Retour au marché' }}
+        />
       </div>
     );
   }
@@ -240,76 +257,144 @@ export default async function InstrumentPage({
   ].filter((d) => d.ok !== undefined);
 
   return (
-    <div className="px-4 py-6 space-y-5 max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-6 animate-rise-in">
 
-      {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3 min-w-0">
-          <Link href="/actions" className="text-faint hover:text-muted text-sm shrink-0">← Marché</Link>
-          <span className="text-faint text-sm">·</span>
-          {LOGOS[code] && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={LOGOS[code]} alt={code} width={32} height={32} className="w-8 h-8 rounded-lg object-contain shrink-0 bg-white p-0.5" />
-          )}
-          <div className="min-w-0">
-            <h1 className="text-lg font-semibold tracking-tight leading-tight">{code}</h1>
-            <p className="text-xs text-muted truncate">{instrument?.designation ?? last.designation ?? ''}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+      {/* ══════════════════════════════════════════════════
+          BREADCRUMB + ACTIONS RAPIDES
+      ══════════════════════════════════════════════════ */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-xs text-faint">
+          <Link
+            href="/actions"
+            className="hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
+            Marché actions
+          </Link>
+          <span className="text-border-strong">›</span>
+          <span className="text-muted">{code}</span>
+        </nav>
+
+        {/* Actions header */}
+        <div className="flex items-center gap-1.5 flex-wrap">
           <PublicationsModal
             code={code}
             designation={instrument?.designation}
             publications={publications}
             count={pubCount}
           />
-          <Link href="/portefeuille" className="text-xs border border-border rounded-chip px-2.5 py-1 text-muted hover:border-up/40 hover:text-up transition-colors">
+          <Link
+            href="/portefeuille"
+            className="inline-flex items-center gap-1 text-[11px] border border-border rounded-full px-3 py-1 text-muted hover:border-gold/40 hover:text-gold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
             Watchlist
           </Link>
-          <Link href="/portefeuille" className="text-xs border border-border rounded-chip px-2.5 py-1 text-muted hover:border-up/40 hover:text-up transition-colors">
+          <Link
+            href="/portefeuille"
+            className="inline-flex items-center gap-1 text-[11px] border border-border rounded-full px-3 py-1 text-muted hover:border-gold/40 hover:text-gold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
             Alertes
           </Link>
           <Link
             href={`/actions/${code}/financials`}
-            className="text-xs border border-border rounded-chip px-2.5 py-1 text-muted hover:border-up/40 hover:text-up transition-colors"
+            className="inline-flex items-center gap-1 text-[11px] border border-gold/30 bg-gold/[0.06] rounded-full px-3 py-1 text-gold hover:bg-gold/10 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Financials →
           </Link>
         </div>
       </div>
 
-      {/* ── Cotation + méta ── */}
-      <div className="bg-surface border border-border rounded-xl p-5">
-        {/* Méta chips */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {pays && <span className="text-[11px] border border-border rounded-chip px-2 py-0.5 text-faint">{pays}</span>}
-          {secteur && <span className="text-[11px] border border-border rounded-chip px-2 py-0.5 text-faint">{secteur}</span>}
-          <span className="text-[11px] border border-border rounded-chip px-2 py-0.5 text-faint">Action</span>
-        </div>
+      {/* ══════════════════════════════════════════════════
+          HERO — COTATION PRINCIPALE
+      ══════════════════════════════════════════════════ */}
+      {/* Outer shell double-bezel */}
+      <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+        <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] overflow-hidden">
+          {/* Glow atmosphérique */}
+          <div
+            className={`absolute inset-0 pointer-events-none ${
+              up ? 'bg-emerald-veil' : '[background:radial-gradient(120%_60%_at_80%_-10%,rgba(226,75,75,0.06),transparent_55%)]'
+            }`}
+          />
+          <div className="relative px-5 pt-5 pb-6 md:px-7 md:pt-7">
+            {/* Logo + identité instrument */}
+            <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
+              <div className="flex items-center gap-3.5 min-w-0">
+                {LOGOS[code] ? (
+                  /* Double-bezel logo */
+                  <div className="rounded-xl border border-border/60 bg-border/40 p-1 shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={LOGOS[code]}
+                      alt={code}
+                      width={36}
+                      height={36}
+                      className="w-9 h-9 rounded-lg object-contain bg-white/90 p-0.5"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-11 h-11 rounded-xl border border-border/60 bg-elevated grid place-items-center shrink-0">
+                    <span className="text-gold/60 text-sm font-display font-medium">{code.slice(0, 2)}</span>
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-[11px] text-faint uppercase tracking-[0.18em] mb-0.5">BRVM · Action</p>
+                  <h1 className="font-display text-xl md:text-2xl text-ivory tracking-tight leading-tight">
+                    {code}
+                  </h1>
+                  <p className="text-xs text-muted truncate max-w-xs mt-0.5">
+                    {instrument?.designation ?? last.designation ?? ''}
+                  </p>
+                </div>
+              </div>
 
-        {/* Prix principal */}
-        <div className="flex items-baseline gap-3 mb-4">
-          <span className="font-mono text-4xl font-bold tracking-tight tabular">{fmtNumber(last.cours_jour)}</span>
-          <span className="text-muted text-sm">FCFA</span>
-          {varAbs != null && (
-            <span className={`font-mono text-sm font-semibold tabular ${up ? 'text-up' : 'text-down'}`}>
-              {up ? '+' : ''}{fmtNumber(varAbs)} ({up ? '+' : ''}{(last.variation_pct ?? 0).toFixed(2)}%)
-            </span>
-          )}
-        </div>
-        <p className="text-[11px] text-faint mb-4">Séance du {last.date_marche}</p>
+              {/* Chips méta */}
+              <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                {pays && <StatPill tone="neutral">{pays}</StatPill>}
+                {secteur && <StatPill tone="sapphire">{secteur}</StatPill>}
+                <StatPill tone="gold">Action</StatPill>
+              </div>
+            </div>
 
-        {/* Métriques de séance */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-border/40 pt-4">
-          <Metric label="Clôture préc." value={fmtNumber(last.cours_precedent) + ' FCFA'} />
-          <Metric label="Volume du jour" value={fmtNumber(last.volume) + ' titres'} />
-          <Metric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
-          <Metric label="Transactions" value={fmtNumber(last.nb_transactions)} />
-          {volMoyen != null && <Metric label="Vol. moyen 20j" value={fmtNumber(volMoyen) + ' titres'} />}
-          {capitalisation != null && <Metric label="Capitalisation" value={fmtNumber(Math.round(capitalisation)) + ' MFCFA'} />}
-          {shares != null && <Metric label="Titres totaux" value={fmtNumber(shares)} />}
-          {instrument?.flottant != null && <Metric label="Titres flottant" value={fmtNumber(instrument.flottant)} />}
-          {divYield != null && <Metric label="Rdt dividende" value={divYield.toFixed(2) + '%'} />}
+            {/* Prix principal */}
+            <div className="flex flex-wrap items-end gap-x-4 gap-y-1 mb-1.5">
+              <span className="tabular font-mono text-4xl md:text-5xl font-bold tracking-tight text-ivory leading-none">
+                {fmtNumber(last.cours_jour)}
+              </span>
+              <span className="text-muted text-base mb-1">FCFA</span>
+              {varAbs != null && (
+                <span
+                  className={`tabular font-mono text-base font-semibold mb-1 ${
+                    up ? 'text-up' : 'text-down'
+                  }`}
+                >
+                  {up ? '+' : ''}{fmtNumber(varAbs)}{' '}
+                  <span className="text-sm opacity-80">
+                    ({up ? '+' : ''}{(last.variation_pct ?? 0).toFixed(2)}%)
+                  </span>
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-faint">
+              Séance du <span className="text-muted">{last.date_marche}</span>
+            </p>
+
+            {/* Séparateur or */}
+            <div className="mt-5 h-px bg-gold-line opacity-40" />
+
+            {/* Grille métriques de séance */}
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-4">
+              <SessionMetric label="Clôture préc." value={fmtNumber(last.cours_precedent)} unit="FCFA" />
+              <SessionMetric label="Volume du jour" value={fmtNumber(last.volume)} unit="titres" />
+              <SessionMetric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
+              <SessionMetric label="Transactions" value={fmtNumber(last.nb_transactions)} />
+              {volMoyen != null && <SessionMetric label="Vol. moyen 20j" value={fmtNumber(volMoyen)} unit="titres" />}
+              {capitalisation != null && <SessionMetric label="Capitalisation" value={fmtNumber(Math.round(capitalisation))} unit="MFCFA" accent />}
+              {shares != null && <SessionMetric label="Titres totaux" value={fmtNumber(shares)} />}
+              {instrument?.flottant != null && <SessionMetric label="Titres flottant" value={fmtNumber(instrument.flottant)} />}
+              {divYield != null && <SessionMetric label="Rdt dividende" value={divYield.toFixed(2)} unit="%" accent />}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -323,298 +408,498 @@ export default async function InstrumentPage({
 
       {/* ── Bannière données insuffisantes ── */}
       {rows.length < 20 && (
-        <div className="border border-warn/20 bg-warn/5 rounded-xl px-4 py-3 space-y-2">
-          <p className="text-xs text-warn font-medium">
-            Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
-          </p>
-          <pre className="text-xs font-mono bg-surface border border-border rounded px-3 py-2 text-up select-all overflow-x-auto">
+        <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-warn text-base leading-none">⚠</span>
+            <p className="text-xs text-warn font-medium">
+              Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
+            </p>
+          </div>
+          <pre className="text-xs font-mono bg-surface border border-border rounded-lg px-4 py-3 text-up select-all overflow-x-auto">
             npm run backfill -- {code} --from=2023-01-01
           </pre>
         </div>
       )}
 
-      {/* ── Graphique ── */}
-      <PriceChart
-        data={priceData}
-        designation={instrument?.designation ?? last.designation ?? code}
-        markers={chartMarkers}
-      />
-      <EventMarkerLegend markers={chartMarkers} />
-
-      {/* ── Configuration technique ── */}
-      <TechnicalSummary result={technicalSummary} />
-
-      {/* ── Indicateurs + Détections ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Indicateurs */}
-        <div className="bg-surface border border-border rounded-xl p-5">
-          <p className="text-xs text-muted uppercase tracking-widest mb-4">Indicateurs</p>
-          {/* RSI */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-muted">RSI (14)</span>
-              <span className={`tabular font-semibold font-mono ${
-                lastRsi == null ? 'text-faint' :
-                lastRsi < 30 ? 'text-up' :
-                lastRsi > 70 ? 'text-down' : 'text-white'
-              }`}>
-                {lastRsi != null ? lastRsi.toFixed(0) : '—'}
-              </span>
-            </div>
-            <div className="relative h-1.5 bg-border rounded-full overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-[30%] bg-up/20" />
-              <div className="absolute right-0 top-0 bottom-0 w-[30%] bg-down/20" />
-              {lastRsi != null && (
-                <RsiCursor rsi={lastRsi} />
-              )}
-            </div>
-            <div className="flex justify-between text-[10px] text-faint mt-1">
-              <span>Survente &lt;30</span><span>Surachat &gt;70</span>
-            </div>
+      {/* ══════════════════════════════════════════════════
+          GRAPHIQUE COURS
+      ══════════════════════════════════════════════════ */}
+      <div>
+        <Eyebrow className="mb-3">Cours & Volume</Eyebrow>
+        <PremiumPanel className="p-0 overflow-hidden">
+          <div className="px-4 py-4 md:px-5">
+            <PriceChart
+              data={priceData}
+              designation={instrument?.designation ?? last.designation ?? code}
+              markers={chartMarkers}
+            />
           </div>
-          {/* MACD */}
-          {lastMacd && (
-            <div className="border-t border-border/30 pt-4">
-              <p className="text-xs text-muted mb-2">MACD</p>
-              <div className="grid grid-cols-3 gap-2 text-xs text-center">
-                <div>
-                  <div className="text-faint text-[11px] mb-0.5">Ligne</div>
-                  <div className="tabular font-mono">{lastMacd.macd?.toFixed(0) ?? '—'}</div>
+        </PremiumPanel>
+        <div className="mt-2">
+          <EventMarkerLegend markers={chartMarkers} />
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          CONFIGURATION TECHNIQUE (TechnicalSummary)
+      ══════════════════════════════════════════════════ */}
+      <div>
+        <Eyebrow className="mb-3">Configuration technique</Eyebrow>
+        <TechnicalSummary result={technicalSummary} />
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          INDICATEURS + DÉTECTIONS (grille 2 col)
+      ══════════════════════════════════════════════════ */}
+      <div>
+        <Eyebrow className="mb-3">Analyse technique</Eyebrow>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* ── Indicateurs ── */}
+          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
+              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Indicateurs</p>
+
+              {/* RSI */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between text-xs mb-2">
+                  <span className="text-muted">RSI (14)</span>
+                  <span
+                    className={`tabular font-semibold font-mono ${
+                      lastRsi == null ? 'text-faint' :
+                      lastRsi < 30 ? 'text-up' :
+                      lastRsi > 70 ? 'text-down' : 'text-ivory'
+                    }`}
+                  >
+                    {lastRsi != null ? lastRsi.toFixed(0) : '—'}
+                  </span>
                 </div>
-                <div>
-                  <div className="text-faint text-[11px] mb-0.5">Signal</div>
-                  <div className="tabular font-mono">{lastMacd.signal?.toFixed(0) ?? '—'}</div>
+                {/* Barre RSI premium */}
+                <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
+                  <div className="absolute left-0 top-0 bottom-0 w-[30%] rounded-l-full bg-gradient-to-r from-up/35 to-up/[0.08]" />
+                  <div className="absolute right-0 top-0 bottom-0 w-[30%] rounded-r-full bg-gradient-to-l from-down/35 to-down/[0.08]" />
+                  {lastRsi != null && <RsiCursor rsi={lastRsi} />}
                 </div>
-                <div>
-                  <div className="text-faint text-[11px] mb-0.5">Histog.</div>
-                  <div className={`tabular font-mono font-semibold ${(lastMacd.hist ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
-                    {lastMacd.hist != null ? (lastMacd.hist >= 0 ? '+' : '') + lastMacd.hist.toFixed(0) : '—'}
+                <div className="flex justify-between text-[10px] text-faint mt-1.5">
+                  <span>Survente &lt;30</span>
+                  <span>Équilibre</span>
+                  <span>Surachat &gt;70</span>
+                </div>
+              </div>
+
+              {/* Moyennes mobiles */}
+              <div className="border-t border-border/30 pt-4 mb-4">
+                <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Moyennes mobiles</p>
+                <div className="space-y-2">
+                  {[
+                    { label: 'MA 20', val: lastMa20 },
+                    { label: 'MA 50', val: lastMa50 },
+                    { label: 'MA 200', val: lastMa200 },
+                  ].map(({ label, val }) => (
+                    <div key={label} className="flex items-center justify-between text-xs">
+                      <span className="text-muted">{label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="tabular font-mono text-ivory">
+                          {val != null ? fmtNumber(val) : '—'}
+                        </span>
+                        {val != null && last.cours_jour != null && (
+                          <span className={`text-[10px] ${last.cours_jour >= val ? 'text-up' : 'text-down'}`}>
+                            {last.cours_jour >= val ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* MACD */}
+              {lastMacd && (
+                <div className="border-t border-border/30 pt-4">
+                  <p className="text-[11px] text-faint uppercase tracking-wider mb-3">MACD</p>
+                  <div className="grid grid-cols-3 gap-2 text-xs text-center">
+                    <MacdCell label="Ligne" value={lastMacd.macd?.toFixed(0) ?? '—'} />
+                    <MacdCell label="Signal" value={lastMacd.signal?.toFixed(0) ?? '—'} />
+                    <MacdCell
+                      label="Histog."
+                      value={lastMacd.hist != null
+                        ? (lastMacd.hist >= 0 ? '+' : '') + lastMacd.hist.toFixed(0)
+                        : '—'}
+                      accent={(lastMacd.hist ?? 0) >= 0 ? 'up' : 'down'}
+                    />
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Détections ── */}
+          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
+              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Détections actives</p>
+              <div className="space-y-2.5">
+                {detections.map((d) => (
+                  <div
+                    key={d.label}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                      d.ok
+                        ? 'bg-up/5 border border-up/15'
+                        : 'border border-transparent'
+                    }`}
+                  >
+                    <span
+                      className={`text-[10px] shrink-0 leading-none ${
+                        d.ok ? 'text-up' : 'text-border-strong'
+                      }`}
+                    >
+                      {d.ok ? '●' : '○'}
+                    </span>
+                    <span
+                      className={`text-xs ${
+                        d.ok ? 'text-ivory' : 'text-faint'
+                      }`}
+                    >
+                      {d.label}
+                    </span>
+                  </div>
+                ))}
+                {detections.every((d) => !d.ok) && (
+                  <p className="text-xs text-faint italic mt-2">Aucune détection active.</p>
+                )}
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Détections */}
-        <div className="bg-surface border border-border rounded-xl p-5">
-          <p className="text-xs text-muted uppercase tracking-widest mb-4">Détections actives</p>
-          <div className="space-y-2">
-            {detections.map((d) => (
-              <div key={d.label} className="flex items-center gap-2.5 text-xs">
-                <span className={`text-[10px] font-bold w-3 text-center shrink-0 ${d.ok ? 'text-up' : 'text-faint'}`}>
-                  {d.ok ? '●' : '○'}
-                </span>
-                <span className={d.ok ? 'text-white' : 'text-faint'}>{d.label}</span>
-              </div>
-            ))}
-            {detections.every((d) => !d.ok) && (
-              <p className="text-xs text-faint italic">Aucune détection active.</p>
-            )}
           </div>
         </div>
       </div>
 
-      {/* ── Signal du jour ── */}
-      {signal ? (
-        <SignalPanel signal={signal} />
-      ) : (
-        <div className="bg-surface border border-border rounded-xl p-5">
-          <p className="text-xs text-muted uppercase tracking-widest mb-1">Signal du jour</p>
-          <p className="text-xs text-faint">Aucun signal calculé pour cette séance.</p>
-        </div>
-      )}
+      {/* ══════════════════════════════════════════════════
+          SIGNAL DU JOUR
+      ══════════════════════════════════════════════════ */}
+      <div>
+        <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
+        {signal ? (
+          <SignalPanel signal={signal} />
+        ) : (
+          <div className="rounded-panel border border-border bg-surface shadow-card p-6">
+            <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-1.5">Signal du jour</p>
+            <p className="text-xs text-faint">Aucun signal calculé pour cette séance.</p>
+          </div>
+        )}
+      </div>
 
-      {/* ── Fondamentaux (analyse complète style T212) ── */}
+      {/* ══════════════════════════════════════════════════
+          FONDAMENTAUX
+      ══════════════════════════════════════════════════ */}
       {fundamentals.length > 0 && (() => {
-        // Meilleur exercice : le plus récent dont les données sont plausibles.
         const latest = pickBestFundamental(fundamentals)!;
-        const closes = rows.map((r) => r.cours_jour).filter((c): c is number => c != null);
+        const closePrices = rows.map((r) => r.cours_jour).filter((c): c is number => c != null);
         const range52 = {
-          low: closes.length ? Math.min(...closes) : null,
-          high: closes.length ? Math.max(...closes) : null,
+          low: closePrices.length ? Math.min(...closePrices) : null,
+          high: closePrices.length ? Math.max(...closePrices) : null,
           current: last.cours_jour ?? null,
         };
         return (
-          <FundamentalsPanel
-            code={code}
-            year={latest.year}
-            inputs={{
-              cours: last.cours_jour ?? null,
-              shares: instrument?.shares ?? null,
-              revenue: latest.revenue,
-              net_income: latest.net_income,
-              equity: latest.equity,
-              debt: latest.debt,
-              dividende: lastDiv?.montant ?? null,
-            }}
-            sharesSource={instrument?.shares_source ?? null}
-            isManual={latest.is_manual ?? false}
-            history={fundamentals
-              // Croissance : ne comparer que des exercices de même source (manuel vs auto).
-              .filter((f) => (f.is_manual ?? false) === (latest.is_manual ?? false))
-              .map((f) => ({ year: f.year ?? 0, revenue: f.revenue, net_income: f.net_income }))}
-            sourceUrl={null}
-            range52={range52}
-          />
+          <div>
+            <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
+            <FundamentalsPanel
+              code={code}
+              year={latest.year}
+              inputs={{
+                cours: last.cours_jour ?? null,
+                shares: instrument?.shares ?? null,
+                revenue: latest.revenue,
+                net_income: latest.net_income,
+                equity: latest.equity,
+                debt: latest.debt,
+                dividende: lastDiv?.montant ?? null,
+              }}
+              sharesSource={instrument?.shares_source ?? null}
+              isManual={latest.is_manual ?? false}
+              history={fundamentals
+                .filter((f) => (f.is_manual ?? false) === (latest.is_manual ?? false))
+                .map((f) => ({ year: f.year ?? 0, revenue: f.revenue, net_income: f.net_income }))}
+              sourceUrl={null}
+              range52={range52}
+            />
+          </div>
         );
       })()}
 
-      {/* ── Dividendes + Événements ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Dividendes */}
-        <div className="bg-surface border border-border rounded-xl p-5">
-          <p className="text-xs text-muted uppercase tracking-widest mb-4">Dividendes</p>
-          {lastDiv ? (
-            <div className="space-y-0">
-              <Row label="Rendement estimé" value={divYield != null ? divYield.toFixed(2) + ' %' : '—'} highlight />
-              <Row label="Montant" value={fmtNumber(lastDiv.montant) + ' FCFA'} />
-              <Row label="Ex-date" value={lastDiv.ex_date ?? '—'} />
-              {lastDiv.payment_date && <Row label="Paiement" value={lastDiv.payment_date} />}
-              <p className="text-[10px] text-faint pt-2">Rendement calculé sur le cours actuel</p>
-            </div>
-          ) : (
-            <p className="text-xs text-faint italic">Aucun dividende enregistré.</p>
-          )}
-        </div>
+      {/* ══════════════════════════════════════════════════
+          DIVIDENDES + ÉVÉNEMENTS
+      ══════════════════════════════════════════════════ */}
+      <div>
+        <Eyebrow className="mb-3">Corporate & Dividendes</Eyebrow>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        {/* Événements */}
-        <div className="bg-surface border border-border rounded-xl p-5">
-          <p className="text-xs text-muted uppercase tracking-widest mb-4">Événements récents</p>
-          {events.length > 0 ? (
-            <div className="space-y-3">
-              {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
-                <div key={e.id} className="border-b border-border/30 pb-3 last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] text-faint">{e.event_date}</span>
-                    <span className="text-[10px] border border-border/60 rounded px-1.5 py-px text-faint">{e.event_type}</span>
+          {/* Dividendes */}
+          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
+              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Dividendes</p>
+              {lastDiv ? (
+                <div>
+                  {/* Rendement en vedette */}
+                  {divYield != null && (
+                    <div className="mb-4 flex items-baseline gap-2">
+                      <span className="tabular font-mono text-3xl font-bold text-up leading-none">
+                        {divYield.toFixed(2)}%
+                      </span>
+                      <span className="text-xs text-muted">rendement estimé</span>
+                    </div>
+                  )}
+                  <div className="space-y-0 border-t border-border/30 pt-3">
+                    <DivRow label="Montant" value={fmtNumber(lastDiv.montant) + ' FCFA'} />
+                    <DivRow label="Ex-date" value={lastDiv.ex_date ?? '—'} />
+                    {lastDiv.payment_date && <DivRow label="Paiement" value={lastDiv.payment_date} />}
                   </div>
-                  <p className="text-xs text-muted line-clamp-2 mb-1">{e.title}</p>
-                  <Link href={`/dashboard/reports/events/${e.id}`} className="text-[11px] text-up hover:underline">Lire →</Link>
+                  <p className="text-[10px] text-faint mt-3">Rendement calculé sur le cours actuel</p>
                 </div>
-              ))}
+              ) : (
+                <p className="text-xs text-faint italic">Aucun dividende enregistré.</p>
+              )}
             </div>
-          ) : (
-            <p className="text-xs text-faint italic">Aucun événement récent.</p>
-          )}
+          </div>
+
+          {/* Événements */}
+          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
+              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Événements récents</p>
+              {events.length > 0 ? (
+                <div className="space-y-3.5">
+                  {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
+                    <div key={e.id} className="border-b border-border/30 pb-3.5 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] text-faint tabular">{e.event_date}</span>
+                        <span className="text-[10px] border border-border/60 rounded-full px-2 py-px text-faint">
+                          {e.event_type}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted line-clamp-2 mb-1.5">{e.title}</p>
+                      <Link
+                        href={`/dashboard/reports/events/${e.id}`}
+                        className="text-[11px] text-gold/70 hover:text-gold transition-colors duration-300"
+                      >
+                        Lire l'analyse →
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-faint italic">Aucun événement récent.</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Graphiques indicateurs ── */}
-      <IndicatorCharts data={indicatorData} />
+      {/* ══════════════════════════════════════════════════
+          GRAPHIQUES INDICATEURS (RSI/MACD historiques)
+      ══════════════════════════════════════════════════ */}
+      <div>
+        <Eyebrow className="mb-3">Indicateurs historiques</Eyebrow>
+        <PremiumPanel className="p-0 overflow-hidden">
+          <div className="px-4 py-4 md:px-5">
+            <IndicatorCharts data={indicatorData} />
+          </div>
+        </PremiumPanel>
+      </div>
 
-      {/* ── Actions rapides ── */}
-      <div className="bg-surface border border-border rounded-xl p-5">
-        <p className="text-xs text-muted uppercase tracking-widest mb-4">Actions</p>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { href: '/portefeuille', label: 'Ajouter à la watchlist' },
-            { href: '/portefeuille', label: 'Créer une alerte prix' },
-            { href: `/api/export/actions/${code}`, label: 'Exporter CSV', external: true },
-            { href: `/backtest?code=${code}`, label: 'Lancer un backtest' },
-            { href: `/assistant?symbole=${code}`, label: 'Analyser avec l\'IA' },
-          ].map(({ href, label, external }) =>
-            external ? (
-              <a key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-up/30 hover:text-white transition-colors">
-                {label}
-              </a>
-            ) : (
-              <Link key={label} href={href} className="text-xs border border-border rounded-lg px-3 py-2.5 text-muted hover:border-up/30 hover:text-white transition-colors">
-                {label}
-              </Link>
-            )
-          )}
+      {/* ══════════════════════════════════════════════════
+          ACTIONS RAPIDES
+      ══════════════════════════════════════════════════ */}
+      <div>
+        <Eyebrow className="mb-3">Actions</Eyebrow>
+        <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+          <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+              {[
+                { href: '/portefeuille', label: 'Ajouter à la watchlist', icon: '★' },
+                { href: '/portefeuille', label: 'Créer une alerte prix', icon: '◎' },
+                { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: '↓', external: true },
+                { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: '⌛' },
+                { href: `/assistant?symbole=${code}`, label: "Analyser avec l'IA", icon: '◈' },
+              ].map(({ href, label, icon, external }) => {
+                const cls =
+                  'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+                const inner = (
+                  <>
+                    <span className="text-gold/50 group-hover:text-gold/80 transition-colors duration-300 text-sm leading-none shrink-0">
+                      {icon}
+                    </span>
+                    <span>{label}</span>
+                    <span className="ml-auto text-border-strong group-hover:text-gold/40 transition-colors duration-300">→</span>
+                  </>
+                );
+                return external ? (
+                  <a key={label} href={href} className={cls}>{inner}</a>
+                ) : (
+                  <Link key={label} href={href} className={cls}>{inner}</Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
+      </div>
+
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SOUS-COMPOSANTS
+// ══════════════════════════════════════════════════════════════════
+
+/** Métrique de séance — affichage compact dans le hero */
+function SessionMetric({
+  label,
+  value,
+  unit,
+  accent,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="py-0.5">
+      <p className="text-[10px] text-faint uppercase tracking-[0.12em] mb-1">{label}</p>
+      <div className="flex items-baseline gap-1">
+        <span className={`tabular font-mono text-sm font-semibold leading-tight ${accent ? 'text-gold' : 'text-ivory'}`}>
+          {value}
+        </span>
+        {unit && <span className="text-[10px] text-faint">{unit}</span>}
       </div>
     </div>
   );
 }
 
-// ── Sous-composants ────────────────────────────────────────────
-
-function Metric({ label, value }: { label: string; value: string }) {
+/** Cellule MACD */
+function MacdCell({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: 'up' | 'down';
+}) {
   return (
-    <div className="py-1">
-      <div className="text-[11px] text-faint mb-0.5">{label}</div>
-      <div className="tabular text-sm font-medium font-mono">{value}</div>
+    <div className="bg-elevated rounded-lg py-2.5 px-2">
+      <div className="text-faint text-[10px] mb-1">{label}</div>
+      <div
+        className={`tabular font-mono text-sm font-semibold ${
+          accent === 'up' ? 'text-up' : accent === 'down' ? 'text-down' : 'text-ivory'
+        }`}
+      >
+        {value}
+      </div>
     </div>
   );
 }
 
-function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+/** Ligne dividende */
+function DivRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+    <div className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
       <span className="text-xs text-muted">{label}</span>
-      <span className={`tabular text-xs font-mono ${highlight ? 'text-up font-semibold' : 'text-white'}`}>{value}</span>
+      <span className="tabular font-mono text-xs text-ivory">{value}</span>
     </div>
   );
 }
 
+/** Panel signal du jour — premium */
 function SignalPanel({ signal }: { signal: SignalDaily }) {
   const subScores = (signal as SignalDaily & { inputs?: Record<string, number> | null }).inputs ?? null;
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-5">
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <p className="text-xs text-muted uppercase tracking-widest">Signal du jour</p>
-        <SignalBadge signal={signal.signal} confiance={signal.confiance} />
-        <span className="ml-auto tabular text-[11px] text-faint font-mono">
-          {signal.score_total != null ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2) : '—'} / 1.00
-          {' · '}{signal.date_marche}
-        </span>
+    <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+      <div
+        className={`rounded-[calc(1.125rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 md:p-6 overflow-hidden relative ${
+          signal.signal === 'BUY'
+            ? 'bg-[linear-gradient(135deg,rgba(22,180,106,0.04)_0%,#0e1014_40%)]'
+            : signal.signal === 'SELL'
+            ? 'bg-[linear-gradient(135deg,rgba(226,75,75,0.04)_0%,#0e1014_40%)]'
+            : 'bg-surface'
+        }`}
+      >
+        {/* Header signal */}
+        <div className="flex items-center gap-3 mb-5 flex-wrap">
+          <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em]">Signal du jour</p>
+          <SignalBadge signal={signal.signal} confiance={signal.confiance} />
+          <span className="ml-auto tabular text-[11px] text-faint font-mono">
+            {signal.score_total != null
+              ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2)
+              : '—'}
+            {' / 1.00 · '}{signal.date_marche}
+          </span>
+        </div>
+
+        <p className="text-sm text-muted mb-5 leading-relaxed">
+          {signal.explication ?? 'Signal calculé automatiquement.'}
+        </p>
+
+        {/* Sous-scores */}
+        {(() => {
+          const subScoreRows = [
+            { label: 'variation_norm', val: signal.score_variation },
+            { label: 'volume_signal', val: signal.score_volume },
+            { label: 'rsi_signal', val: signal.score_rsi },
+            { label: 'bonus_tendance', val: signal.bonus_tendance },
+            { label: 'penalite_liquidite', val: signal.penalite_liquidite != null ? -signal.penalite_liquidite : null },
+          ].filter((r) => r.val != null);
+
+          if (subScoreRows.length === 0) return null;
+          return (
+            <div className="border-t border-border/30 pt-4 mb-4">
+              <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Sous-scores</p>
+              <div className="space-y-2">
+                {subScoreRows.map(({ label, val }) => (
+                  <div key={label} className="flex items-center justify-between text-xs">
+                    <span className="text-muted font-mono">{label}</span>
+                    <span
+                      className={`tabular font-mono font-semibold ${
+                        (val as number) >= 0 ? 'text-up' : 'text-down'
+                      }`}
+                    >
+                      {(val as number) >= 0 ? '+' : ''}{(val as number).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {subScores && (() => {
+          const entries = Object.entries(subScores).filter(([, v]) => v != null);
+          if (entries.length === 0) return null;
+          return (
+            <div className="border-t border-border/30 pt-4 mb-4">
+              <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Indicateurs utilisés</p>
+              <div className="space-y-2">
+                {entries.slice(0, 6).map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between text-xs">
+                    <span className="text-muted font-mono">{k}</span>
+                    <span className="tabular font-mono text-faint">
+                      {typeof v === 'number' ? v.toFixed(3) : String(v)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        <div className="border-t border-border/30 pt-4 flex items-center justify-between">
+          <Link
+            href="/signaux"
+            className="text-xs text-gold/70 hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
+            Voir tous les signaux →
+          </Link>
+        </div>
       </div>
-
-      <p className="text-sm text-muted mb-4 leading-relaxed">{signal.explication ?? 'Signal calculé automatiquement.'}</p>
-
-      {/* Sous-scores */}
-      {(() => {
-        const subScoreRows = [
-          { label: 'variation_norm', val: signal.score_variation },
-          { label: 'volume_signal', val: signal.score_volume },
-          { label: 'rsi_signal', val: signal.score_rsi },
-          { label: 'bonus_tendance', val: signal.bonus_tendance },
-          { label: 'penalite_liquidite', val: signal.penalite_liquidite != null ? -signal.penalite_liquidite : null },
-        ].filter((r) => r.val != null);
-
-        if (subScoreRows.length === 0) return null;
-        return (
-          <div className="border-t border-border/30 pt-4 mb-4">
-            <p className="text-[11px] text-faint uppercase tracking-wider mb-2">Sous-scores</p>
-            <div className="space-y-1.5">
-              {subScoreRows.map(({ label, val }) => (
-                <div key={label} className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-mono">{label}</span>
-                  <span className={`tabular font-mono font-semibold ${(val as number) >= 0 ? 'text-up' : 'text-down'}`}>
-                    {(val as number) >= 0 ? '+' : ''}{(val as number).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
-
-      {subScores && (() => {
-        const entries = Object.entries(subScores).filter(([, v]) => v != null);
-        if (entries.length === 0) return null;
-        return (
-          <div className="border-t border-border/30 pt-4 mb-4">
-            <p className="text-[11px] text-faint uppercase tracking-wider mb-2">Indicateurs utilisés</p>
-            <div className="space-y-1.5">
-              {entries.slice(0, 6).map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between text-xs">
-                  <span className="text-muted font-mono">{k}</span>
-                  <span className="tabular font-mono text-faint">{typeof v === 'number' ? v.toFixed(3) : String(v)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
-
-      <Link href="/signaux" className="text-xs text-up hover:underline transition-opacity opacity-80 hover:opacity-100">
-        Voir tous les signaux →
-      </Link>
     </div>
   );
 }
