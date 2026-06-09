@@ -93,7 +93,7 @@ export default async function PortfolioComposition() {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[640px] text-sm" aria-label="Composition du portefeuille par action">
             <thead>
               <tr className="border-b border-border/60 text-left">
                 {['Action', 'Quantité', 'Prix moyen', 'Cours actuel', 'Performance', 'Valeur totale'].map((h, i) => (

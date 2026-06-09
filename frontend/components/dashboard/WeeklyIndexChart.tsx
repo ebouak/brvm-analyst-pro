@@ -49,7 +49,10 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
   const up = (lastVar ?? 0) >= 0;
 
   return (
-    <section className="overflow-hidden rounded-panel border border-border bg-surface shadow-card">
+    <section
+      className="overflow-hidden rounded-panel border border-border bg-surface shadow-card"
+      aria-label={`${title} — évolution hebdomadaire en bougies`}
+    >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-3">
         <div className="flex items-baseline gap-3">
           <h3 className="font-display text-base text-ivory">{title}</h3>

@@ -15,10 +15,15 @@ export default function DashboardTicker({ items }: { items: TickerLine[] }) {
   const loop = [...items, ...items];
 
   return (
-    <div className="relative overflow-hidden rounded-full border border-border bg-surface/70 py-2.5 shadow-card">
+    <div
+      className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2.5 shadow-card"
+      role="marquee"
+      aria-label="Cours des actions et obligations en défilement"
+    >
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-bg to-transparent" />
-      <div className="flex w-max animate-ticker gap-7 px-6 font-mono">
+      {/* Défilement permanent — se met en pause au survol pour la lisibilité */}
+      <div className="flex w-max animate-ticker gap-7 px-6 font-mono group-hover:[animation-play-state:paused]">
         {loop.map((it, i) => {
           const up = (it.variation ?? 0) >= 0;
           return (
