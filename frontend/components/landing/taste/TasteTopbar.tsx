@@ -43,8 +43,8 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
         </Link>
         <Link
           href="/premium/diagnostic"
-          className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#09090b] shadow-gold"
-          style={{ background: 'linear-gradient(180deg,#f4d57b,#d0a231)' }}
+          className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold"
+          style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
         >
           Diagnostic IA
         </Link>

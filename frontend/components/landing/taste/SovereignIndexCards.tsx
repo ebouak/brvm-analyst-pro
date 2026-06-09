@@ -18,7 +18,7 @@ export function SovereignIndexCards({ indices }: { indices: IndexCard[] }) {
             className="relative flex min-h-[190px] flex-col justify-between overflow-hidden rounded-card border p-4"
             style={
               idx.featured
-                ? { background: 'linear-gradient(135deg,rgba(208,162,49,0.16),rgba(208,162,49,0.05) 36%,rgba(255,255,255,0.03))', borderColor: 'rgba(208,162,49,0.22)', boxShadow: '0 0 0 1px rgba(208,162,49,0.14), 0 24px 80px rgba(208,162,49,0.11)' }
+                ? { background: 'linear-gradient(135deg,rgba(86,215,253,0.16),rgba(86,215,253,0.05) 36%,rgba(255,255,255,0.03))', borderColor: 'rgba(86,215,253,0.22)', boxShadow: '0 0 0 1px rgba(86,215,253,0.14), 0 24px 80px rgba(86,215,253,0.11)' }
                 : { background: 'linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.022))', borderColor: 'rgba(255,255,255,0.06)' }
             }
           >

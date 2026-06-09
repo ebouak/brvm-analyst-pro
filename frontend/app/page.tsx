@@ -144,7 +144,7 @@ export default async function Landing() {
       {/* ── Ouverture : hero ─────────────────────────────────────────── */}
       <section
         className="relative mb-4 mt-4 overflow-hidden rounded-[2.6rem] border border-white/10 p-5 md:p-8"
-        style={{ background: 'radial-gradient(circle at 72% 28%,rgba(208,162,49,0.13),transparent 24%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.022))', boxShadow: '0 22px 60px rgba(0,0,0,0.36)' }}
+        style={{ background: 'radial-gradient(circle at 72% 28%,rgba(86,215,253,0.13),transparent 24%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.022))', boxShadow: '0 22px 60px rgba(0,0,0,0.36)' }}
       >
         <span
           aria-hidden
@@ -154,7 +154,7 @@ export default async function Landing() {
           UEMOA
         </span>
         <div className="relative z-10">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-gold-2" style={{ background: 'rgba(208,162,49,0.09)', borderColor: 'rgba(208,162,49,0.26)' }}>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-gold-2" style={{ background: 'rgba(86,215,253,0.09)', borderColor: 'rgba(86,215,253,0.26)' }}>
             <span className="h-2 w-2 rounded-full" style={{ background: '#3fe18b', animation: 'pulse 2.5s infinite' }} />
             {dateLabel ? `Séance · ${dateLabel} · BRVM` : 'Bourse Régionale · UEMOA'}
           </div>
@@ -166,7 +166,7 @@ export default async function Landing() {
             réunis dans une seule maison.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/dashboard" className="inline-flex min-h-[44px] items-center rounded-full px-5 text-sm font-bold text-[#09090b] shadow-gold" style={{ background: 'linear-gradient(180deg,#f4d57b,#d0a231)' }}>
+            <Link href="/dashboard" className="inline-flex min-h-[44px] items-center rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold" style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}>
               Explorer les univers
             </Link>
             <Link href="/signaux" className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm text-muted transition-all hover:bg-white/[0.06]">

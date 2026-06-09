@@ -1,8 +1,9 @@
 import type { Config } from 'tailwindcss';
 
 // ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  BRVM Analyst Pro — Design System « Taste » (maison de marché premium)     ║
-// ║  Obsidienne chaude · ivoire · or riche (#d0a231/#f4d57b) · émeraude/saphir ║
+// ║  BRVM Analyst Pro — Design System « DeFi Cyan »                            ║
+// ║  Noir profond #030303 · teal #112B33 · cyan #56D7FD · ivoire #FCFCFC       ║
+// ║  (les tokens 'gold'/'accent' portent désormais le cyan — compat conservée) ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
@@ -11,48 +12,50 @@ const config: Config = {
     extend: {
       colors: {
         // ── Surfaces ───────────────────────────────────────────────────────
-        bg:       '#060607',
-        surface:  '#0e0e12',
-        elevated: '#16161b',
-        sunken:   '#050506',
-        border:   '#20202a',
-        'border-strong': '#2c2c38',
+        bg:       '#030303',
+        surface:  '#0a1417',
+        elevated: '#112b33',
+        sunken:   '#020303',
+        border:   '#1b2a30',
+        'border-strong': '#2a3d44',
 
-        obsidian: '#060607',
-        onyx:     '#0e0e12',
-        graphite: '#16161b',
+        obsidian: '#030303',
+        onyx:     '#0a1417',
+        graphite: '#112b33',
 
-        // ── Or riche — consécration ───────────────────────────────────────
-        accent:        '#d0a231',
-        'accent-dim':  '#9c7d3f',
-        'accent-glow': '#d0a23124',
-        gold:          '#d0a231',
-        'gold-2':      '#f4d57b',
-        'gold-soft':   '#f4d57b',
-        'gold-deep':   '#8a6d35',
+        // ── Cyan — accent / CTA / consécration (porté par 'accent'+'gold') ──
+        accent:        '#56d7fd',
+        'accent-dim':  '#2fa9cf',
+        'accent-glow': '#56d7fd24',
+        gold:          '#56d7fd',
+        'gold-2':      '#8fe6ff',
+        'gold-soft':   '#8fe6ff',
+        'gold-deep':   '#2a8aa8',
+        cyan:          '#56d7fd',
+        'cyan-soft':   '#8fe6ff',
 
         // ── Émeraude — rendement / hausse ─────────────────────────────────
         up:       '#3fe18b',
         emerald:  '#3fe18b',
         'emerald-soft': '#7af0b3',
 
-        // ── Saphir — signal / secondaire ──────────────────────────────────
-        info:     '#8bacff',
-        sapphire: '#8bacff',
-        'sapphire-soft': '#b3c8ff',
-        blue:     '#8bacff',
+        // ── Saphir/Info — désormais cyan ──────────────────────────────────
+        info:     '#56d7fd',
+        sapphire: '#56d7fd',
+        'sapphire-soft': '#8fe6ff',
+        blue:     '#56d7fd',
 
         // ── Rubis — baisse ────────────────────────────────────────────────
-        down:   '#ff7567',
-        ruby:   '#ff7567',
-        warn:   '#e0a93a',
+        down:   '#ff6b6b',
+        ruby:   '#ff6b6b',
+        warn:   '#f0b23a',
         purple: '#8b6fc2',
 
-        // ── Texte — ivoire ────────────────────────────────────────────────
-        white:  '#efe7d8',
-        ivory:  '#efe7d8',
-        muted:  '#baaf9f',
-        faint:  '#756d61',
+        // ── Texte ─────────────────────────────────────────────────────────
+        white:  '#fcfcfc',
+        ivory:  '#fcfcfc',
+        muted:  '#b5b5b5',
+        faint:  '#5c6b70',
       },
 
       fontFamily: {
@@ -61,8 +64,8 @@ const config: Config = {
         mono:    ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       fontSize: {
-        'display-xl': ['clamp(3rem, 6.3vw, 6.8rem)', { lineHeight: '0.9', letterSpacing: '-0.08em', fontWeight: '500' }],
-        'display-lg': ['clamp(2rem, 3.4vw, 3.4rem)', { lineHeight: '0.94', letterSpacing: '-0.06em', fontWeight: '500' }],
+        'display-xl': ['clamp(3rem, 6.3vw, 6.8rem)', { lineHeight: '0.9', letterSpacing: '-0.06em', fontWeight: '500' }],
+        'display-lg': ['clamp(2rem, 3.4vw, 3.4rem)', { lineHeight: '0.94', letterSpacing: '-0.04em', fontWeight: '500' }],
         'heading-lg': ['24px', { lineHeight: '1.3', fontWeight: '600' }],
         'heading-md': ['20px', { lineHeight: '1.4', fontWeight: '600' }],
         'heading-sm': ['16px', { lineHeight: '1.5', fontWeight: '600' }],
@@ -75,20 +78,20 @@ const config: Config = {
       letterSpacing: { overline: '0.18em' },
       spacing: { section: '24px', card: '16px', gutter: '32px' },
       maxWidth: { content: '1480px' },
-      borderRadius: { card: '1.2rem', panel: '1.65rem', xl2: '2rem', chip: '0.7rem', full: '9999px' },
+      borderRadius: { card: '1.1rem', panel: '1.5rem', xl2: '1.8rem', chip: '0.6rem', full: '9999px' },
 
       boxShadow: {
-        card:   '0 10px 24px rgba(0,0,0,0.22)',
-        panel:  '0 22px 60px rgba(0,0,0,0.36)',
+        card:   '0 10px 24px rgba(0,0,0,0.35)',
+        panel:  '0 22px 60px rgba(0,0,0,0.45)',
         modal:  '0 24px 80px -16px rgba(0,0,0,0.85)',
-        gold:   '0 0 0 1px rgba(208,162,49,0.14), 0 24px 80px rgba(208,162,49,0.11)',
-        'gold-sm': '0 0 0 1px rgba(208,162,49,0.4)',
+        gold:   '0 0 0 1px rgba(86,215,253,0.22), 0 16px 50px rgba(86,215,253,0.14)',
+        'gold-sm': '0 0 0 1px rgba(86,215,253,0.45)',
         emerald: '0 0 0 1px rgba(63,225,139,0.18), 0 8px 28px -10px rgba(63,225,139,0.3)',
       },
 
       backgroundImage: {
-        'gold-line': 'linear-gradient(90deg, transparent, rgba(208,162,49,0.55), transparent)',
-        'obsidian-glow': 'radial-gradient(120% 80% at 50% -10%, rgba(208,162,49,0.12), transparent 60%)',
+        'gold-line': 'linear-gradient(90deg, transparent, rgba(86,215,253,0.5), transparent)',
+        'obsidian-glow': 'radial-gradient(120% 80% at 50% -10%, rgba(86,215,253,0.10), transparent 60%)',
         'emerald-veil': 'radial-gradient(80% 60% at 100% 0%, rgba(63,225,139,0.08), transparent 70%)',
       },
 

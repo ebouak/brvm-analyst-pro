@@ -12,10 +12,10 @@ export function PremiumCircle() {
     <section
       className="relative overflow-hidden rounded-panel border p-5 md:p-8"
       style={{
-        borderColor: 'rgba(208,162,49,0.18)',
+        borderColor: 'rgba(86,215,253,0.18)',
         background:
-          'radial-gradient(circle at 74% 24%, rgba(208,162,49,0.18), transparent 24%), linear-gradient(135deg, rgba(208,162,49,0.17), rgba(208,162,49,0.05) 36%, rgba(255,255,255,0.025))',
-        boxShadow: '0 0 0 1px rgba(208,162,49,0.14), 0 24px 80px rgba(208,162,49,0.11)',
+          'radial-gradient(circle at 74% 24%, rgba(86,215,253,0.18), transparent 24%), linear-gradient(135deg, rgba(86,215,253,0.17), rgba(86,215,253,0.05) 36%, rgba(255,255,255,0.025))',
+        boxShadow: '0 0 0 1px rgba(86,215,253,0.14), 0 24px 80px rgba(86,215,253,0.11)',
       }}
     >
       <span
@@ -36,8 +36,8 @@ export function PremiumCircle() {
         <div className="mb-4 flex flex-wrap gap-3">
           <Link
             href="/signup"
-            className="inline-flex min-h-[44px] items-center rounded-full px-5 text-sm font-bold text-[#09090b] shadow-gold"
-            style={{ background: 'linear-gradient(180deg,#f4d57b,#d0a231)' }}
+            className="inline-flex min-h-[44px] items-center rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold"
+            style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
           >
             Rejoindre le cercle
           </Link>

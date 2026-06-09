@@ -17,15 +17,15 @@
 
 body {
   min-height: 100dvh;
-  color: #efe7d8;
+  color: #fcfcfc;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Atmosphère minérale : halo or + voile saphir + dégradé obsidienne */
+  /* Atmosphère DeFi : halo cyan + voile teal sur noir profond */
   background:
-    radial-gradient(circle at 16% 0%, rgba(208, 162, 49, 0.13), transparent 26%),
-    radial-gradient(circle at 82% 6%, rgba(139, 172, 255, 0.08), transparent 24%),
-    linear-gradient(180deg, #09090b 0%, #060607 55%, #09090a 100%);
+    radial-gradient(circle at 14% -2%, rgba(86, 215, 253, 0.10), transparent 26%),
+    radial-gradient(circle at 86% 4%, rgba(17, 43, 51, 0.55), transparent 30%),
+    linear-gradient(180deg, #050709 0%, #030303 55%, #04070a 100%);
   background-attachment: fixed;
   overflow-x: hidden;
 }
@@ -55,9 +55,9 @@ body {
   background: linear-gradient(90deg, transparent, rgba(208, 162, 49, 0.55), transparent);
 }
 
-/* Texte doré à reflet (consécration) */
+/* Texte cyan à reflet (accent) */
 .text-gold-shimmer {
-  background: linear-gradient(100deg, #8a6d35 0%, #f4d57b 45%, #d0a231 55%, #8a6d35 100%);
+  background: linear-gradient(100deg, #2a8aa8 0%, #8fe6ff 45%, #56d7fd 55%, #2a8aa8 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -65,10 +65,10 @@ body {
   color: transparent;
 }
 
-::selection { background: rgba(208, 162, 49, 0.28); color: #efe7d8; }
+::selection { background: rgba(86, 215, 253, 0.26); color: #fcfcfc; }
 
 :focus-visible {
-  outline: 2px solid #f4d57b;
+  outline: 2px solid #56d7fd;
   outline-offset: 3px;
   border-radius: 0.5rem;
 }
@@ -85,8 +85,8 @@ body {
   outline: none;
   transition: border-color 0.15s;
 }
-.select-field:focus { border-color: #d0a231; }
-.select-field option { background-color: #0e0e12; }
+.select-field:focus { border-color: #56d7fd; }
+.select-field option { background-color: #0a1417; }
 
 /* Skeleton shimmer */
 .skeleton { position: relative; overflow: hidden; background: #0e0e12; border-radius: 6px; }
@@ -105,7 +105,7 @@ body {
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #20242d; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(208, 162, 49, 0.4); }
+::-webkit-scrollbar-thumb:hover { background: rgba(86, 215, 253, 0.4); }
 
 /* Impression PDF */
 @media print {
