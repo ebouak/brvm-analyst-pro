@@ -67,6 +67,13 @@ const THEME = {
 type IndicatorKey = 'ma20' | 'ma50' | 'ma200' | 'ema9' | 'ema21' | 'bb' | 'donchian' | 'rsi' | 'macd';
 type PeriodKey = '1M' | '3M' | '6M' | '1A' | '2A' | 'MAX';
 type ResolutionKey = '1J' | '1S';
+type DrawTool = 'select' | 'hline' | 'vline' | 'tline' | 'erase';
+
+interface Pt { time: string; price: number }
+type Drawing =
+  | { id: string; kind: 'hline'; price: number; color: string }
+  | { id: string; kind: 'vline'; time: string; color: string }
+  | { id: string; kind: 'tline'; p1: Pt; p2: Pt; color: string };
 
 const DEFAULT_VISIBLE: IndicatorKey[] = ['ma20', 'ma50', 'ma200'];
 
@@ -99,6 +106,14 @@ const RESOLUTIONS: { key: ResolutionKey; label: string }[] = [
   { key: '1J', label: 'Jour' },
   { key: '1S', label: 'Semaine' },
 ];
+const DRAW_TOOLS: { key: DrawTool; label: string; title: string }[] = [
+  { key: 'select', label: '↖', title: 'Sélection' },
+  { key: 'hline',  label: '—', title: 'Ligne horizontale' },
+  { key: 'vline',  label: '|', title: 'Ligne verticale' },
+  { key: 'tline',  label: '╱', title: 'Ligne de tendance' },
+  { key: 'erase',  label: '⌫', title: 'Effacer' },
+];
+const DRAW_COLOR = '#56D7FD'; // cyan
 
 /** Agrège des séances journalières en bougies hebdomadaires (lundi ISO). */
 function toWeeklyBars(pts: PricePoint[]): PricePoint[] {
@@ -184,14 +199,130 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
   const mainRef = useRef<HTMLDivElement>(null);
   const rsiRef = useRef<HTMLDivElement>(null);
   const macdRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const priceSeriesRef = useRef<ReturnType<IChartApi['addSeries']> | null>(null) as React.MutableRefObject<any>;
+  const crosshairPt = useRef<Pt | null>(null);
+  const tlineFirstPt = useRef<Pt | null>(null);
 
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState<Set<IndicatorKey>>(new Set(DEFAULT_VISIBLE));
   const [period, setPeriod] = useState<PeriodKey>('1A');
   const [chartType, setChartType] = useState<'line' | 'candle'>('line');
   const [resolution, setResolution] = useState<ResolutionKey>('1J');
+  const [drawTool, setDrawTool] = useState<DrawTool>('select');
+  const [drawings, setDrawings] = useState<Drawing[]>([]);
+  const [draftLine, setDraftLine] = useState<Pt | null>(null); // first point of tline in progress
 
   useEffect(() => { setMounted(true); }, []);
+
+  // ── SVG overlay renderer ──────────────────────────────────────────────────
+  function renderSvgOverlay(overrideDrawings?: Drawing[], draftPt?: Pt | null) {
+    const svg = svgRef.current;
+    const chart = chartRef.current;
+    const series = priceSeriesRef.current;
+    if (!svg || !chart || !series) return;
+
+    const all = overrideDrawings ?? drawings;
+    const mainEl = mainRef.current;
+    if (!mainEl) return;
+    const w = mainEl.clientWidth;
+    const h = mainEl.clientHeight;
+    svg.setAttribute('width', String(w));
+    svg.setAttribute('height', String(h));
+
+    function toXY(pt: Pt): { x: number; y: number } | null {
+      const x = chart!.timeScale().timeToCoordinate(pt.time as Time);
+      const y = series!.priceToCoordinate(pt.price);
+      if (x === null || y === null) return null;
+      return { x, y };
+    }
+
+    const lines: string[] = [];
+    for (const d of all) {
+      if (d.kind === 'hline') {
+        const y = series.priceToCoordinate(d.price);
+        if (y === null) continue;
+        lines.push(`<line x1="0" y1="${y.toFixed(1)}" x2="${w}" y2="${y.toFixed(1)}" stroke="${d.color}" stroke-width="1" stroke-dasharray="4 3" />`);
+        lines.push(`<text x="4" y="${(y - 3).toFixed(1)}" fill="${d.color}" font-size="9" font-family="monospace">${d.price.toFixed(0)}</text>`);
+      } else if (d.kind === 'vline') {
+        const x = chart.timeScale().timeToCoordinate(d.time as Time);
+        if (x === null) continue;
+        lines.push(`<line x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="${h}" stroke="${d.color}" stroke-width="1" stroke-dasharray="4 3" />`);
+        lines.push(`<text x="${(x + 3).toFixed(1)}" y="12" fill="${d.color}" font-size="9" font-family="monospace">${d.time}</text>`);
+      } else if (d.kind === 'tline') {
+        const a = toXY(d.p1);
+        const b = toXY(d.p2);
+        if (!a || !b) continue;
+        // Extend line across the chart
+        const dx = b.x - a.x; const dy = b.y - a.y;
+        let x1 = a.x, y1 = a.y, x2 = b.x, y2 = b.y;
+        if (dx !== 0) {
+          const t0 = (0 - a.x) / dx; const tw = (w - a.x) / dx;
+          const tMin = Math.min(t0, tw); const tMax = Math.max(t0, tw);
+          x1 = a.x + tMin * dx; y1 = a.y + tMin * dy;
+          x2 = a.x + tMax * dx; y2 = a.y + tMax * dy;
+        }
+        lines.push(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${d.color}" stroke-width="1.5" />`);
+        lines.push(`<circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="3" fill="${d.color}" />`);
+        lines.push(`<circle cx="${b.x.toFixed(1)}" cy="${b.y.toFixed(1)}" r="3" fill="${d.color}" />`);
+      }
+    }
+    // Draft: first point of tline
+    const dp = draftPt ?? (tlineFirstPt.current ? (crosshairPt.current ? null : null) : null);
+    if (draftLine) {
+      const a = toXY(draftLine);
+      if (a) lines.push(`<circle cx="${a.x.toFixed(1)}" cy="${a.y.toFixed(1)}" r="4" fill="none" stroke="${DRAW_COLOR}" stroke-width="1.5" stroke-dasharray="3 2" />`);
+    }
+    svg.innerHTML = lines.join('');
+  }
+
+  // Re-render SVG whenever drawings or draftLine change
+  useEffect(() => { renderSvgOverlay(); }, [drawings, draftLine]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Drawing interaction helpers ───────────────────────────────────────────
+  function handleChartClick() {
+    const pt = crosshairPt.current;
+    if (!pt || drawTool === 'select') return;
+    if (drawTool === 'erase') return;
+
+    if (drawTool === 'hline') {
+      const d: Drawing = { id: crypto.randomUUID(), kind: 'hline', price: pt.price, color: DRAW_COLOR };
+      const next = [...drawings, d];
+      setDrawings(next);
+      renderSvgOverlay(next);
+    } else if (drawTool === 'vline') {
+      const d: Drawing = { id: crypto.randomUUID(), kind: 'vline', time: pt.time, color: DRAW_COLOR };
+      const next = [...drawings, d];
+      setDrawings(next);
+      renderSvgOverlay(next);
+    } else if (drawTool === 'tline') {
+      if (!draftLine) {
+        setDraftLine(pt);
+        tlineFirstPt.current = pt;
+      } else {
+        const d: Drawing = { id: crypto.randomUUID(), kind: 'tline', p1: draftLine, p2: pt, color: DRAW_COLOR };
+        const next = [...drawings, d];
+        setDrawings(next);
+        setDraftLine(null);
+        tlineFirstPt.current = null;
+        renderSvgOverlay(next);
+      }
+    }
+  }
+
+  function handleChartMouseMove() {
+    if (drawTool !== 'select') renderSvgOverlay();
+  }
+
+  function handleDrawingClick(id: string) {
+    if (drawTool !== 'erase') return;
+    const next = drawings.filter((d) => d.id !== id);
+    setDrawings(next);
+    renderSvgOverlay(next);
+  }
+  void handleDrawingClick; // used in SVG — kept for future pointer-events integration
 
   // ── Chart creation ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -246,6 +377,8 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
     volSeries.setData(volData);
 
     // Price series: area or candlestick
+    chartRef.current = main;
+
     // Keep a reference to apply markers on
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let priceSeries: ReturnType<typeof main.addSeries<any>> | null = null;
@@ -280,6 +413,18 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       s.setData(areaData);
       priceSeries = s;
     }
+
+    priceSeriesRef.current = priceSeries;
+
+    // ── Crosshair tracking for drawing tools ──────────────────────────────
+    main.subscribeCrosshairMove((param) => {
+      if (!param.point || !priceSeriesRef.current) { crosshairPt.current = null; return; }
+      const price = priceSeriesRef.current.coordinateToPrice(param.point.y);
+      if (param.time && price !== null) {
+        crosshairPt.current = { time: param.time as string, price };
+      }
+    });
+    main.timeScale().subscribeVisibleTimeRangeChange(() => renderSvgOverlay());
 
     // ── Event markers ─────────────────────────────────────────────────────
     if (markers.length > 0 && priceSeries) {
@@ -581,6 +726,39 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
         </div>
       </div>
 
+      {/* ── Drawing toolbar ── */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] text-muted uppercase tracking-wide mr-1">Tracé</span>
+        {DRAW_TOOLS.map(({ key, label, title }) => (
+          <button
+            key={key}
+            type="button"
+            title={title}
+            onClick={() => { setDrawTool(key); if (key !== 'tline') { setDraftLine(null); tlineFirstPt.current = null; } }}
+            className={`text-xs px-2.5 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-cyan/40 ${
+              drawTool === key
+                ? 'bg-cyan/20 text-cyan border-cyan/40'
+                : 'border-border text-muted hover:border-cyan/40 hover:text-cyan'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+        {drawings.length > 0 && (
+          <button
+            type="button"
+            title="Tout effacer"
+            onClick={() => { setDrawings([]); setDraftLine(null); renderSvgOverlay([]); }}
+            className="text-xs px-2 py-0.5 rounded border border-border text-muted hover:border-down/40 hover:text-down transition"
+          >
+            Tout effacer
+          </button>
+        )}
+        {draftLine && (
+          <span className="text-[10px] text-cyan ml-1 animate-pulse">Cliquer pour le 2ᵉ point…</span>
+        )}
+      </div>
+
       {/* ── Indicator toggles ── */}
       <div className="space-y-1.5">
         <div className="flex flex-wrap gap-1.5 items-center">
@@ -625,8 +803,18 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
         </div>
       </div>
 
-      {/* ── Main chart ── */}
-      <div ref={mainRef} />
+      {/* ── Main chart + drawing overlay ── */}
+      <div
+        className={`relative ${drawTool !== 'select' ? 'cursor-crosshair' : 'cursor-default'}`}
+        onClick={handleChartClick}
+        onMouseMove={handleChartMouseMove}
+      >
+        <div ref={mainRef} />
+        <svg
+          ref={svgRef}
+          className="absolute top-0 left-0 pointer-events-none overflow-visible z-10"
+        />
+      </div>
 
       {/* ── RSI sub-chart ── */}
       {visible.has('rsi') && (
