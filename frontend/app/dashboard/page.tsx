@@ -143,7 +143,7 @@ async function getData() {
   const ticker: TickerLine[] = [
     ...typedActions
       .filter((a) => a.cours_jour != null)
-      .map((a) => ({ code: a.code, value: nfmt(a.cours_jour as number), variation: a.variation_pct ?? null, kind: 'action' as const })),
+      .map((a) => ({ code: a.code, value: nfmt(a.cours_jour as number), variation: a.variation_pct ?? null, kind: 'action' as const, spark: sparklines[a.code]?.slice(-7) })),
     ...obligations
       .filter((o) => o.cours_jour != null)
       .map((o) => {

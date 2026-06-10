@@ -66,6 +66,7 @@ const THEME = {
 
 type IndicatorKey = 'ma20' | 'ma50' | 'ma200' | 'ema9' | 'ema21' | 'bb' | 'donchian' | 'rsi' | 'macd';
 type PeriodKey = '1M' | '3M' | '6M' | '1A' | '2A' | 'MAX';
+type ResolutionKey = '1J' | '1S';
 
 const DEFAULT_VISIBLE: IndicatorKey[] = ['ma20', 'ma50', 'ma200'];
 
@@ -94,6 +95,36 @@ const OSCILLATOR_INDICATORS: { key: IndicatorKey; label: string }[] = [
 ];
 
 const PERIODS: PeriodKey[] = ['1M', '3M', '6M', '1A', '2A', 'MAX'];
+const RESOLUTIONS: { key: ResolutionKey; label: string }[] = [
+  { key: '1J', label: 'Jour' },
+  { key: '1S', label: 'Semaine' },
+];
+
+/** Agrège des séances journalières en bougies hebdomadaires (lundi ISO). */
+function toWeeklyBars(pts: PricePoint[]): PricePoint[] {
+  const byWeek = new Map<string, { opens: number[]; highs: number[]; lows: number[]; closes: number[]; volumes: number[] }>();
+  for (const p of pts) {
+    if (!p.close) continue;
+    const d = new Date(p.date);
+    // Décalage vers le lundi de la semaine
+    const day = d.getDay() || 7;
+    d.setDate(d.getDate() - day + 1);
+    const key = d.toISOString().slice(0, 10);
+    if (!byWeek.has(key)) byWeek.set(key, { opens: [], highs: [], lows: [], closes: [], volumes: [] });
+    const w = byWeek.get(key)!;
+    w.closes.push(p.close);
+    w.volumes.push(p.volume ?? 0);
+  }
+  const result: PricePoint[] = [];
+  for (const [date, w] of [...byWeek.entries()].sort()) {
+    result.push({
+      date,
+      close: w.closes[w.closes.length - 1] ?? null,
+      volume: w.volumes.reduce((a, b) => a + b, 0),
+    });
+  }
+  return result;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -158,6 +189,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
   const [visible, setVisible] = useState<Set<IndicatorKey>>(new Set(DEFAULT_VISIBLE));
   const [period, setPeriod] = useState<PeriodKey>('1A');
   const [chartType, setChartType] = useState<'line' | 'candle'>('line');
+  const [resolution, setResolution] = useState<ResolutionKey>('1J');
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -165,11 +197,14 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
   useEffect(() => {
     if (!mounted || !mainRef.current || data.length === 0) return;
 
+    // Résolution : agrégation hebdomadaire si sélectionnée
+    const resolved = resolution === '1S' ? toWeeklyBars(data) : data;
+
     // Slice data by selected period
     const maxBars = PERIOD_BARS[period];
     const sliced = maxBars === Number.POSITIVE_INFINITY
-      ? data
-      : data.slice(Math.max(0, data.length - maxBars));
+      ? resolved
+      : resolved.slice(Math.max(0, resolved.length - maxBars));
 
     const dates = sliced.map((d) => d.date);
     // Use 0 only for indicator calc, but track which indices have real close
@@ -441,7 +476,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       rsiChart?.remove();
       macdChart?.remove();
     };
-  }, [mounted, data, visible, period, chartType, markers]);
+  }, [mounted, data, visible, period, chartType, resolution, markers]);
 
   // ── Toggle helper ─────────────────────────────────────────────────────────
   function toggle(key: IndicatorKey) {
@@ -490,8 +525,26 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
           )}
         </div>
 
-        {/* Controls: chart type + period */}
-        <div className="flex items-center gap-2">
+        {/* Controls: resolution + chart type + period */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Résolution temporelle */}
+          <div className="flex gap-0.5 border border-border rounded overflow-hidden">
+            {RESOLUTIONS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setResolution(key)}
+                className={`text-xs px-2.5 py-0.5 transition ${
+                  resolution === key
+                    ? 'bg-cyan/20 text-cyan'
+                    : 'text-muted hover:text-cyan'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* Type de graphique */}
           <div className="flex gap-0.5 border border-border rounded overflow-hidden">
             {(['line', 'candle'] as const).map((t) => (
               <button
@@ -508,6 +561,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
               </button>
             ))}
           </div>
+          {/* Période */}
           <div className="flex gap-1">
             {PERIODS.map((p) => (
               <button
