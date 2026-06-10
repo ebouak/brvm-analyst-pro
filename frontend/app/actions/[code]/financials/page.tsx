@@ -96,9 +96,14 @@ export default async function FinancialsPage({ params }: Props) {
               {VERDICT_LABELS[valuation.verdict]}
             </span>
           </div>
-          {valuation.grahamNumber != null && (
+          {valuation.grahamNumber !== null && (
             <div className="text-xs text-muted">
               Graham : <span className="tabular text-ivory font-medium">{Math.round(valuation.grahamNumber).toLocaleString('fr-FR')} FCFA</span>
+            </div>
+          )}
+          {valuation.dcfValue != null && (
+            <div className="text-xs text-muted">
+              DCF estimé : <span className="tabular text-ivory font-medium">{Math.round(valuation.dcfValue).toLocaleString('fr-FR')} FCFA</span>
             </div>
           )}
           {valuation.marginOfSafety !== null && (

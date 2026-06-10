@@ -12,7 +12,7 @@ export interface ValuationResult {
 
 /**
  * Graham Number = sqrt(22.5 × BPA × VCA)
- * VCA (Valeur Comptable par Action) = capitaux_propres / shares
+ * Ici VCA est dérivé du ratio cours/PB (valeur comptable implicite par action).
  */
 export function grahamNumber(
   bpa: number | null,
@@ -61,7 +61,7 @@ export function computeValuation(
   const scores: number[] = [];
 
   if (marginOfSafety !== null) {
-    // +50 si MOS > 30%, 0 si MOS < -30%
+    // score 100 si MOS ≥ 50%, score 0 si MOS ≤ -50%
     scores.push(Math.max(0, Math.min(100, 50 + marginOfSafety)));
   }
   if (ratios.per !== null) {
