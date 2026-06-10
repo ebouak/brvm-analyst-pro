@@ -23,13 +23,18 @@ export default function OnboardingModal() {
   const [horizon, setHorizon] = useState<string>('moyen');
   const [debutant, setDebutant] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   function submit() {
     const fd = new FormData();
     fd.set('profil', profil);
     fd.set('horizon', horizon);
     fd.set('mode_debutant', String(debutant));
-    startTransition(() => { void saveInvestorProfile(fd); });
+    setError(null);
+    startTransition(async () => {
+      const res = await saveInvestorProfile(fd);
+      if (res?.error) setError(res.error);
+    });
   }
 
   return (
@@ -112,6 +117,9 @@ export default function OnboardingModal() {
                 </button>
               ))}
             </div>
+            {error && (
+              <p className="text-xs text-down">{error}</p>
+            )}
             <div className="flex gap-2">
               <button type="button" onClick={() => setStep(2)}
                 className="flex-1 py-2.5 rounded-xl border border-border text-muted text-sm hover:border-cyan/30 transition">

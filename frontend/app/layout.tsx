@@ -27,23 +27,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   let isPremium = user?.email === 'ebouak@gmail.com';
+  let onboardingDone = true;
   if (user && !isPremium) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('is_premium')
+      .select('is_premium, onboarding_done')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
     isPremium = profile?.is_premium ?? false;
-  }
-
-  let onboardingDone = true;
-  if (user) {
-    const { data: profileRow } = await supabase
+    onboardingDone = profile?.onboarding_done ?? false;
+  } else if (user && isPremium) {
+    const { data: profile } = await supabase
       .from('profiles')
       .select('onboarding_done')
       .eq('id', user.id)
       .maybeSingle();
-    onboardingDone = profileRow?.onboarding_done ?? false;
+    onboardingDone = profile?.onboarding_done ?? true; // superadmin = skip onboarding
   }
 
   return (

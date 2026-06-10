@@ -18,6 +18,6 @@ export async function saveInvestorProfile(formData: FormData) {
     .eq('id', user.id);
 
   if (error) return { error: error.message };
-  revalidatePath('/dashboard');
+  revalidatePath('/', 'layout');
   return { success: true };
 }
