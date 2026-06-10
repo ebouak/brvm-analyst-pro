@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import { createHash } from 'node:crypto';
 import { parseFrNumber, parseFrInt } from '../utils/parseNumber.js';
-import type { MarketSnapshot, ActionRow, IndiceRow, MarketDate } from '../types.js';
+import type { MarketSnapshot, ActionRow, IndiceRow, MarketSummary, MarketDate } from '../types.js';
 
 /** Libellés d'indices brvm.org -> code interne. */
 const INDEX_MAP: Record<string, { code: string; libelle: string }> = {
@@ -72,29 +72,61 @@ export function parseBrvmPublic(html: string, date: MarketDate): MarketSnapshot 
     });
   }
 
-  // ── Indices : table « Activités du marché » (libellé | valeur | variation) ──
-  // valeur_precedente dérivée de la variation officielle (prev = valeur / (1 + var/100)).
+  // ── Table « Activités du marché » : indices + totaux de séance ──────────────
+  // Sélection par contenu d'en-tête (« activités du marché »), jamais par classe.
+  let activity = $();
+  $('table').each((_, t) => {
+    const head = normHeader($(t).find('thead th, caption').first().text());
+    if (head.includes('activites du marche')) { activity = $(t); return false; }
+  });
+  // Repli : ancienne sélection par classe si le markup change.
+  if (activity.length === 0) activity = $('table.activity');
+
   const indices: IndiceRow[] = [];
-  $('table.activity tr').each((_, tr) => {
+  const summary: MarketSummary = {
+    valeur_transactions: null,
+    capitalisation_actions: null,
+    capitalisation_obligations: null,
+  };
+
+  activity.find('tr').each((_, tr) => {
     const tds = $(tr).find('td');
     if (tds.length < 2) return;
-    const key = $(tds[0]).text().toLowerCase().replace(/\s+/g, '');
+    const rawLabel = $(tds[0]).text();
+    const key = rawLabel.toLowerCase().replace(/\s+/g, '');
+    const label = normHeader(rawLabel);
+
+    // Indice connu ?
     const m = INDEX_MAP[key];
-    if (!m) return;
-    const valeur = parseFrNumber($(tds[1]).text());
-    const variation_pct = tds.length >= 3 ? parseFrNumber($(tds[2]).text()) : null;
-    const valeur_precedente =
-      valeur != null && variation_pct != null && variation_pct !== -100
-        ? Number((valeur / (1 + variation_pct / 100)).toFixed(2))
-        : null;
-    indices.push({ code: m.code, libelle: m.libelle, valeur, valeur_precedente, variation_pct });
+    if (m) {
+      const valeur = parseFrNumber($(tds[1]).text());
+      const variation_pct = tds.length >= 3 ? parseFrNumber($(tds[2]).text()) : null;
+      const valeur_precedente =
+        valeur != null && variation_pct != null && variation_pct !== -100
+          ? Number((valeur / (1 + variation_pct / 100)).toFixed(2))
+          : null;
+      indices.push({ code: m.code, libelle: m.libelle, valeur, valeur_precedente, variation_pct });
+      return;
+    }
+
+    // Totaux de séance (FCFA).
+    const val = parseFrNumber($(tds[1]).text());
+    if (label.includes('valeur des transactions')) summary.valeur_transactions = val;
+    else if (label.includes('capitalisation') && label.includes('obligation')) summary.capitalisation_obligations = val;
+    else if (label.includes('capitalisation') && label.includes('action')) summary.capitalisation_actions = val;
   });
+
+  const hasSummary =
+    summary.valeur_transactions != null ||
+    summary.capitalisation_actions != null ||
+    summary.capitalisation_obligations != null;
 
   return {
     date_marche: date,
     actions,
     obligations: [],
     indices,
+    summary: hasSummary ? summary : null,
     hash_source: createHash('sha256').update(html).digest('hex'),
     is_mock: false,
   };

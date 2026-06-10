@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { logger } from '../logger.js';
 import { parseBrvmPublic } from './brvmPublic.js';
-import { upsertActions, upsertIndices } from '../persistence/repository.js';
+import { upsertActions, upsertIndices, upsertMarketSummary } from '../persistence/repository.js';
 
 const BRVM_PUBLIC_URL = 'https://www.brvm.org/fr/cours-actions/0';
 
@@ -29,12 +29,14 @@ export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbAc
     throw new Error('intraday : aucune action parsée (page brvm.org inattendue ?)');
   }
 
+  let nbSummary = 0;
   if (!mock) {
     await upsertActions(snapshot);
     if (snapshot.indices.length > 0) await upsertIndices(snapshot);
+    nbSummary = await upsertMarketSummary(snapshot);
   }
   logger.info(
-    { nbActions: snapshot.actions.length, nbIndices: snapshot.indices.length, date: today, mock },
+    { nbActions: snapshot.actions.length, nbIndices: snapshot.indices.length, nbSummary, date: today, mock },
     'intraday terminé',
   );
   return { nbActions: snapshot.actions.length, nbIndices: snapshot.indices.length };

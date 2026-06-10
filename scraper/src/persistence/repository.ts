@@ -113,6 +113,26 @@ export async function upsertIndices(snapshot: MarketSnapshot): Promise<number> {
   return rows.length;
 }
 
+/** Totaux de séance (« Activités du marché ») -> brvm_market_summary. */
+export async function upsertMarketSummary(snapshot: MarketSnapshot): Promise<number> {
+  if (!snapshot.summary) return 0;
+  const sb = getSupabase();
+  const { error } = await sb
+    .from('brvm_market_summary')
+    .upsert(
+      {
+        date_marche: snapshot.date_marche,
+        valeur_transactions: snapshot.summary.valeur_transactions,
+        capitalisation_actions: snapshot.summary.capitalisation_actions,
+        capitalisation_obligations: snapshot.summary.capitalisation_obligations,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'date_marche' },
+    );
+  if (error) throw new Error(`upsert brvm_market_summary: ${error.message}`);
+  return 1;
+}
+
 /** Persiste l'ensemble d'un snapshot (référentiel + 3 tables marché). */
 export async function persistSnapshot(snapshot: MarketSnapshot): Promise<{
   nb_actions: number;

@@ -47,4 +47,10 @@ describe('parseBrvmPublic', () => {
     const i30 = snap.indices.find((i) => i.code === 'BRVM30')!;
     expect(i30.valeur).toBeCloseTo(204.78, 2);
   });
+
+  it('extrait les totaux de séance (valeur des transactions)', () => {
+    const snap = parseBrvmPublic(html, '2026-06-09');
+    expect(snap.summary).not.toBeNull();
+    expect(snap.summary!.valeur_transactions).toBe(2_186_919_090);
+  });
 });

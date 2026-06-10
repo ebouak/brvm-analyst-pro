@@ -58,12 +58,24 @@ export interface IndiceRow {
   variation_pct: number | null;
 }
 
+/** Totaux de séance publiés par brvm.org (« Activités du marché »). */
+export interface MarketSummary {
+  /** Valeur des transactions du jour, en FCFA (total marché). */
+  valeur_transactions: number | null;
+  /** Capitalisation des actions, en FCFA. */
+  capitalisation_actions: number | null;
+  /** Capitalisation des obligations, en FCFA. */
+  capitalisation_obligations: number | null;
+}
+
 /** Résultat brut d'un scrape d'une page marché. */
 export interface MarketSnapshot {
   date_marche: MarketDate;
   actions: ActionRow[];
   obligations: ObligationRow[];
   indices: IndiceRow[];
+  /** Totaux de séance (« Activités du marché ») — null si non parsés. */
+  summary?: MarketSummary | null;
   /** Hash SHA-256 du HTML source — détecte les changements de markup / doublons. */
   hash_source: string;
   /** true si les données proviennent des fixtures mock. */
