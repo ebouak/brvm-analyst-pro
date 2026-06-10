@@ -9,6 +9,7 @@ import {
 } from './actions';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import PortefeuilleModals from '@/components/PortefeuilleModals';
+import Sparkline from '@/components/Sparkline';
 import PortefeuilleExport from '@/components/PortefeuilleExport';
 import PortfolioTabs from '@/components/portfolio/PortfolioTabs';
 import PositionRowActions from '@/components/PositionRowActions';
@@ -130,7 +131,15 @@ async function getData(activeWlId?: string) {
     }
   }
 
-  return { email: user.email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, instrumentsList };
+  // Sparklines par code : 10 dernières séances (chronologiques), dérivées de historicalByDate
+  const sparklines: Record<string, number[]> = {};
+  const sortedDates = Object.keys(historicalByDate).sort().slice(-10);
+  for (const code of positionCodes) {
+    const pts = sortedDates.map((d) => historicalByDate[d]?.[code]).filter((v): v is number => v != null);
+    if (pts.length >= 2) sparklines[code] = pts;
+  }
+
+  return { email: user.email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList };
 }
 
 export default async function PortefeuillePage({
@@ -138,7 +147,7 @@ export default async function PortefeuillePage({
 }: {
   searchParams?: { wl?: string };
 }) {
-  const { email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, instrumentsList } = await getData(searchParams?.wl);
+  const { email, pos, items, lastPrice, lastPriceDate, secteurByCode, watchlists, activeWl, alertsList, historicalByDate, sparklines, instrumentsList } = await getData(searchParams?.wl);
 
   // Liquidités stockées comme position spéciale ; séparées des actions.
   const liqPos = pos.find((p) => p.code === 'LIQUIDITES') ?? null;
@@ -350,6 +359,7 @@ export default async function PortefeuillePage({
                           <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-faint font-semibold">Secteur</th>
                           <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold">Qté</th>
                           <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold" title="Prix de Revient Unitaire">PRU</th>
+                          <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold hidden sm:table-cell">30j</th>
                           <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold" title="Dernier cours connu">Cours</th>
                           <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold hidden md:table-cell" title="Date d'achat">Entrée</th>
                           <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold hidden md:table-cell" title="Date du dernier cours">Date cours</th>
@@ -377,6 +387,11 @@ export default async function PortefeuillePage({
                             </td>
                             <td className="px-4 py-3 text-right tabular text-ivory">{fmtNumber(r.quantite)}</td>
                             <td className="px-4 py-3 text-right tabular text-muted">{fmtNumber(r.prix_entree)}</td>
+                            <td className="px-4 py-3 text-center hidden sm:table-cell">
+                              {sparklines[r.code] ? (
+                                <Sparkline data={sparklines[r.code]!} up={(r.pnlPct ?? 0) >= 0} width={64} height={22} />
+                              ) : <span className="text-faint text-xs">—</span>}
+                            </td>
                             <td className="px-4 py-3 text-right tabular text-ivory">{fmtNumber(r.last)}</td>
                             <td className="px-4 py-3 text-center tabular text-xs text-faint hidden md:table-cell">{r.date_entree ?? '—'}</td>
                             <td className="px-4 py-3 text-center tabular text-xs text-faint hidden md:table-cell">{lastPriceDate[r.code] ?? '—'}</td>
@@ -400,6 +415,7 @@ export default async function PortefeuillePage({
                             <td className="px-4 py-3 text-right text-faint">—</td>
                             <td className="px-4 py-3 text-right text-faint">—</td>
                             <td className="px-4 py-3 text-right text-faint">—</td>
+                            <td className="px-4 py-3 text-center hidden sm:table-cell">—</td>
                             <td className="px-4 py-3 text-center text-faint hidden md:table-cell">—</td>
                             <td className="px-4 py-3 text-center text-faint hidden md:table-cell">—</td>
                             <td className="px-4 py-3 text-right tabular text-ivory">{fmtFcfa(liquidites)}</td>
@@ -411,7 +427,7 @@ export default async function PortefeuillePage({
                         {/* Ligne TOTAL */}
                         {(rows.length > 0 || liquidites != null) && (
                           <tr className="border-t border-border-strong bg-elevated/50">
-                            <td className="px-4 py-3 text-[10px] uppercase tracking-widest text-faint font-semibold" colSpan={7}>
+                            <td className="px-4 py-3 text-[10px] uppercase tracking-widest text-faint font-semibold" colSpan={8}>
                               Total portefeuille
                             </td>
                             <td className="px-4 py-3 text-right tabular text-ivory font-bold">{fmtFcfa(totalValue)}</td>

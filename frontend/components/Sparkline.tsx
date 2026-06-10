@@ -1,6 +1,4 @@
-'use client';
-
-/** Mini sparkline SVG inline — données de cours (tableau de nombres). */
+/** Mini sparkline SVG inline — données de cours (tableau de nombres). Server Component. */
 export default function Sparkline({
   data,
   width = 64,
