@@ -33,7 +33,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, prevBreadth: null as number | null, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, brief: null, ticker: [] as TickerLine[] };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, prevBreadth: null as number | null, sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, brief: null, ticker: [] as TickerLine[] };
 
   // Date précédente pour le delta volume
   const { data: prevDateRow } = await supabase
@@ -106,6 +106,21 @@ async function getData() {
     topSectorPerfs,
   });
 
+  // Historique cours (10 dernières séances) pour tous les codes — sparklines TopMovers
+  const { data: histRows } = await supabase
+    .from('brvm_actions_daily')
+    .select('code, cours_jour, date_marche')
+    .not('cours_jour', 'is', null)
+    .order('date_marche', { ascending: false })
+    .limit(10 * 47); // max 47 actions × 10 séances
+
+  const sparklines: Record<string, number[]> = {};
+  for (const row of (histRows ?? []) as { code: string; cours_jour: number; date_marche: string }[]) {
+    (sparklines[row.code] ??= []).push(row.cours_jour);
+  }
+  // reverse: on a trié desc → on remet chronologique
+  for (const k of Object.keys(sparklines)) sparklines[k]!.reverse();
+
   // Totaux de séance réels (valeur des transactions, capitalisations) — 2 dernières pour le delta
   const { data: summaryRows } = await supabase
     .from('brvm_market_summary')
@@ -147,6 +162,7 @@ async function getData() {
     signals: typedSignals,
     prevValeur,
     prevBreadth,
+    sparklines,
     summary,
     summaryPrev,
     brief,
@@ -192,7 +208,7 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, summary, summaryPrev, brief, ticker } = await getData();
+  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker } = await getData();
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
@@ -310,10 +326,10 @@ export default async function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
             {/* Col 1 — Top hausses */}
-            <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" />
+            <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" sparklines={sparklines} />
 
             {/* Col 2 — Top baisses */}
-            <TopMovers title="Top 5 baisses" rows={losers} signals={signals as SignalDaily[]} direction="down" />
+            <TopMovers title="Top 5 baisses" rows={losers} signals={signals as SignalDaily[]} direction="down" sparklines={sparklines} />
 
             {/* Col 3 — Graphiques indices empilés */}
             <div className="space-y-4">

@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown } from '@/components/icons';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber } from '@/lib/format';
 import SignalBadge from '@/components/SignalBadge';
+import Sparkline from '@/components/Sparkline';
 
 function RankCircle({ n, direction }: { n: number; direction?: 'up' | 'down' }) {
   const cls = direction === 'up'
@@ -36,11 +37,13 @@ function Row({
   a,
   signal,
   direction,
+  sparkData,
 }: {
   rank: number;
   a: ActionDaily;
   signal?: SignalDaily | null;
   direction?: 'up' | 'down';
+  sparkData?: number[];
 }) {
   const up = (a.variation_pct ?? 0) >= 0;
   const Icon = up ? TrendingUp : TrendingDown;
@@ -63,13 +66,20 @@ function Row({
           <span className="text-sm font-semibold text-ivory">{a.code}</span>
           <CountryBadge pays={a.pays} />
         </div>
-        <div className="text-[11px] text-faint truncate hidden sm:block max-w-[130px] mt-px">
+        <div className="text-[11px] text-faint truncate hidden sm:block max-w-[100px] mt-px">
           {a.designation ?? '—'}
         </div>
       </div>
 
+      {/* Mini sparkline — 10 séances */}
+      {sparkData && sparkData.length >= 2 && (
+        <div className="hidden sm:block shrink-0">
+          <Sparkline data={sparkData} up={up} width={60} height={22} />
+        </div>
+      )}
+
       {/* Signal badge */}
-      <div className="hidden md:block shrink-0">
+      <div className="hidden lg:block shrink-0">
         {signal ? (
           <SignalBadge signal={signal.signal} confiance={signal.confiance} />
         ) : (
@@ -78,7 +88,7 @@ function Row({
       </div>
 
       {/* Cours + variation */}
-      <div className="text-right shrink-0 ml-auto">
+      <div className="text-right shrink-0">
         <div className="tabular text-sm font-semibold text-ivory">{fmtNumber(a.cours_jour)}</div>
         <div
           className={`
@@ -99,11 +109,13 @@ export default function TopMovers({
   rows,
   signals = [],
   direction,
+  sparklines = {},
 }: {
   title: string;
   rows: ActionDaily[];
   signals?: SignalDaily[];
   direction?: 'up' | 'down';
+  sparklines?: Record<string, number[]>;
 }) {
   const sigMap = new Map(signals.map((s) => [s.code, s]));
   const accentBar = direction === 'up'
@@ -149,7 +161,7 @@ export default function TopMovers({
         ) : (
           <div className="space-y-0.5">
             {rows.map((a, i) => (
-              <Row key={a.code} rank={i + 1} a={a} signal={sigMap.get(a.code)} direction={direction} />
+              <Row key={a.code} rank={i + 1} a={a} signal={sigMap.get(a.code)} direction={direction} sparkData={sparklines[a.code]} />
             ))}
           </div>
         )}
