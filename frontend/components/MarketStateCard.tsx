@@ -1,5 +1,6 @@
 import { BarChart3, TrendingUp, TrendingDown, Minus, Activity } from '@/components/icons';
 import { fmtFcfa, fmtNumber } from '@/lib/format';
+import SentimentGauge from '@/components/dashboard/SentimentGauge';
 
 export interface MarketStats {
   hausses: number;
@@ -57,7 +58,15 @@ const PILL_CONFIGS = [
   },
 ] as const;
 
-export default function MarketStateCard({ stats }: { stats: MarketStats }) {
+export default function MarketStateCard({
+  stats,
+  sentimentScore,
+  sentimentDelta,
+}: {
+  stats: MarketStats;
+  sentimentScore?: number;
+  sentimentDelta?: number | null;
+}) {
   const volPct = stats.volumePrev && stats.volumePrev > 0
     ? ((stats.volumeTotal - stats.volumePrev) / stats.volumePrev) * 100
     : null;
@@ -95,6 +104,8 @@ export default function MarketStateCard({ stats }: { stats: MarketStats }) {
           {stats.hausses + stats.baisses > 0 && <BreadthBadge ratio={breadth} />}
         </div>
 
+        <div className={sentimentScore != null ? 'grid gap-4 lg:grid-cols-[1fr_minmax(0,200px)] lg:items-center' : ''}>
+        <div>
         {/* KPI pills — 4 colonnes */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3">
           {PILL_CONFIGS.map((cfg) => (
@@ -158,6 +169,15 @@ export default function MarketStateCard({ stats }: { stats: MarketStats }) {
             Transactions{' '}
             <span className="tabular text-ivory/80 font-medium">{fmtNumber(stats.transactions)}</span>
           </span>
+        </div>
+        </div>
+
+        {/* Jauge de sentiment (dérivée du breadth) */}
+        {sentimentScore != null && (
+          <div className="border-t border-border/40 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-4">
+            <SentimentGauge score={sentimentScore} delta={sentimentDelta} />
+          </div>
+        )}
         </div>
 
       </div>

@@ -9,16 +9,26 @@ const AXIS_NAME = { color: '#8b93a7' };
 
 function ChartCard({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
-    <div className="bg-surface border border-border rounded-xl p-5 mb-6">
-      <h2 className="text-sm font-semibold text-white mb-0.5">{title}</h2>
-      <p className="text-xs text-muted mb-4">{desc}</p>
+    <div className="rounded-card border border-border bg-elevated/60 p-5 mb-6 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-gold/30 shadow-card">
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-1 h-8 rounded-full bg-gold/40 shrink-0 mt-0.5" />
+        <div>
+          <h2 className="text-sm font-semibold text-ivory mb-0.5">{title}</h2>
+          <p className="text-xs text-muted">{desc}</p>
+        </div>
+      </div>
       {children}
     </div>
   );
 }
 
 function EmptyState() {
-  return <div className="py-10 text-center text-muted text-sm">Données insuffisantes pour cette analyse.</div>;
+  return (
+    <div className="py-12 text-center">
+      <div className="mx-auto grid h-10 w-10 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-gold/60 text-base mb-3">◇</div>
+      <p className="text-muted text-sm">Données insuffisantes pour cette analyse.</p>
+    </div>
+  );
 }
 
 export function AnomalieCharts({

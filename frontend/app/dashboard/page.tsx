@@ -32,7 +32,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, brief: null, ticker: [] as TickerLine[] };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, prevBreadth: null as number | null, brief: null, ticker: [] as TickerLine[] };
 
   // Date précédente pour le delta volume
   const { data: prevDateRow } = await supabase
@@ -52,7 +52,7 @@ async function getData() {
     .limit(1);
   const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
-  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }, { data: indicesHist }] =
+  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }] =
     await Promise.all([
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
       supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastIdxDate),
@@ -66,27 +66,27 @@ async function getData() {
       prevDate
         ? supabase
             .from('brvm_actions_daily')
-            .select('valeur_echangee')
+            .select('valeur_echangee, variation_pct')
             .eq('date_marche', prevDate)
         : Promise.resolve({ data: [] }),
-      supabase
-        .from('brvm_indices_daily')
-        .select('code, valeur, date_marche')
-        .in('code', ['BRVM30', 'BRVMC'])
-        .order('date_marche', { ascending: false })
-        .limit(14),
     ]);
 
+  const prevRows = (prevActions ?? []) as { valeur_echangee: number | null; variation_pct: number | null }[];
   const prevValeur = prevDate
-    ? ((prevActions ?? []) as ActionDaily[]).reduce((s, a) => s + (a.valeur_echangee ?? 0), 0)
+    ? prevRows.reduce((s, a) => s + (a.valeur_echangee ?? 0), 0)
     : null;
 
-  const sparkMap: Record<string, number[]> = {};
-  for (const row of ((indicesHist ?? []) as { code: string; valeur: number | null; date_marche: string }[])) {
-    if (row.valeur == null) continue;
-    (sparkMap[row.code] ??= []).push(row.valeur);
+  // Sentiment de la veille (breadth) pour dériver le delta « vs veille »
+  let prevBreadth: number | null = null;
+  if (prevDate && prevRows.length > 0) {
+    let h = 0, b = 0;
+    for (const a of prevRows) {
+      const v = a.variation_pct ?? 0;
+      if (v > 0) h++;
+      else if (v < 0) b++;
+    }
+    prevBreadth = h + b > 0 ? (h / (h + b)) * 100 : null;
   }
-  Object.keys(sparkMap).forEach((k) => sparkMap[k]!.reverse());
 
   const typedActions = (actions ?? []) as ActionDaily[];
   const typedIndices = (indices ?? []) as IndiceDaily[];
@@ -136,7 +136,7 @@ async function getData() {
     indices: typedIndices,
     signals: typedSignals,
     prevValeur,
-    sparklines: sparkMap,
+    prevBreadth,
     brief,
     ticker,
   };
@@ -156,7 +156,7 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, signals, prevValeur, brief, ticker } = await getData();
+  const { lastDate, actions, signals, prevValeur, prevBreadth, brief, ticker } = await getData();
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
@@ -181,8 +181,14 @@ export default async function Dashboard() {
 
   const stats = marketStats(actions, prevValeur);
   const withVar = actions.filter((a) => a.variation_pct != null);
-  const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 4);
-  const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 4);
+  const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 5);
+  const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 5);
+
+  // Sentiment 0..100 dérivé du breadth (hausses / (hausses+baisses)) ; delta vs veille en points
+  const sentimentScore = stats.hausses + stats.baisses > 0
+    ? (stats.hausses / (stats.hausses + stats.baisses)) * 100
+    : 50;
+  const sentimentDelta = prevBreadth != null ? sentimentScore - prevBreadth : null;
 
   const dateLabel = new Date(lastDate).toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
@@ -238,7 +244,7 @@ export default async function Dashboard() {
 
         {/* ── État du marché (sous le titre) ──────────────────────────────── */}
         <section aria-label="État du marché">
-          <MarketStateCard stats={stats} />
+          <MarketStateCard stats={stats} sentimentScore={sentimentScore} sentimentDelta={sentimentDelta} />
         </section>
 
         {/* ── Évolution hebdomadaire (bougies + tendance + RSI/MACD) ──────── */}
