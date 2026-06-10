@@ -15,6 +15,8 @@ import {
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Backtest' };
 
+type BacktestResultEx = BacktestResult & { hasRealSignals?: boolean };
+
 type Period = '1M' | '3M' | '6M' | '1A' | 'max';
 
 function isPeriod(s: unknown): s is Period {
@@ -124,7 +126,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
   const feesPct = parseFloat(searchParams.fees ?? '0.006');
   const slippagePct = parseFloat(searchParams.slippage ?? '0');
 
-  let result: BacktestResult | null = null;
+  let result: BacktestResultEx | null = null;
   let designation = '';
   let noData = false;
   let closes: number[] = [];
@@ -134,36 +136,50 @@ export default async function BacktestPage({ searchParams }: PageProps) {
     designation =
       instrumentList.find((i) => i.code === selectedCode)?.designation ?? selectedCode;
 
-    let query = supabase
-      .from('brvm_actions_daily')
-      .select('cours_jour, date_marche')
-      .eq('code', selectedCode)
-      .order('date_marche', { ascending: true })
-      .not('cours_jour', 'is', null);
+    // Fetch prix ET signaux en parallèle
+    const [{ data: rows }, { data: sigRows }] = await Promise.all([
+      (() => {
+        let q = supabase
+          .from('brvm_actions_daily')
+          .select('cours_jour, date_marche')
+          .eq('code', selectedCode)
+          .order('date_marche', { ascending: true })
+          .not('cours_jour', 'is', null);
+        if (dateFrom) q = q.gte('date_marche', dateFrom);
+        else { const fd = periodToDate(period); if (fd) q = q.gte('date_marche', fd); }
+        if (dateTo) q = q.lte('date_marche', dateTo);
+        return q;
+      })(),
+      (() => {
+        let q = supabase
+          .from('signals_daily')
+          .select('signal, date_marche')
+          .eq('code', selectedCode)
+          .order('date_marche', { ascending: true });
+        if (dateFrom) q = q.gte('date_marche', dateFrom);
+        else { const fd = periodToDate(period); if (fd) q = q.gte('date_marche', fd); }
+        if (dateTo) q = q.lte('date_marche', dateTo);
+        return q;
+      })(),
+    ]);
 
-    if (dateFrom) {
-      query = query.gte('date_marche', dateFrom);
-    } else {
-      const fromDate = periodToDate(period);
-      if (fromDate) {
-        query = query.gte('date_marche', fromDate);
-      }
-    }
-
-    if (dateTo) {
-      query = query.lte('date_marche', dateTo);
-    }
-
-    const { data: rows } = await query;
     const priceRows = (rows ?? []) as { cours_jour: number; date_marche: string }[];
+    const signalMap = new Map(
+      ((sigRows ?? []) as { signal: SignalLabel; date_marche: string }[]).map((s) => [s.date_marche, s.signal])
+    );
 
     if (priceRows.length < 2) {
       noData = true;
     } else {
       closes = priceRows.map((r) => r.cours_jour);
       dates = priceRows.map((r) => r.date_marche);
-      const signals = simpleSignal(closes);
+      const hasRealSignals = dates.some((d) => signalMap.has(d));
+      // Use real signal when available, fallback to simpleSignal otherwise
+      const signals: SignalLabel[] = dates.map((d, i) =>
+        signalMap.has(d) ? signalMap.get(d)! : simpleSignal(closes)[i]!
+      );
       result = runBacktest({ closes, signals, dates, feesPct, slippagePct });
+      (result as BacktestResultEx).hasRealSignals = hasRealSignals;
     }
   }
 
@@ -323,6 +339,13 @@ export default async function BacktestPage({ searchParams }: PageProps) {
             {closes.length >= 250 && closes.length < 500 && ' · ~1 an'}
             {closes.length >= 500 && ' · 2+ ans'}
           </StatPill>
+          {result && (
+            <StatPill tone={(result as BacktestResultEx).hasRealSignals ? 'emerald' : 'neutral'}>
+              {(result as BacktestResultEx).hasRealSignals
+                ? 'Signaux BRVM Analyst Pro'
+                : 'Signal momentum (fallback)'}
+            </StatPill>
+          )}
         </div>
       )}
 

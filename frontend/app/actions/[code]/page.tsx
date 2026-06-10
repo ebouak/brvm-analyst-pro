@@ -296,6 +296,12 @@ export default async function InstrumentPage({
             Alertes
           </Link>
           <Link
+            href={`/backtest?code=${code}`}
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted hover:border-cyan/40 hover:text-cyan transition"
+          >
+            ◈ Backtester
+          </Link>
+          <Link
             href={`/actions/${code}/financials`}
             className="inline-flex items-center gap-1 text-[11px] border border-gold/30 bg-gold/[0.06] rounded-full px-3 py-1 text-gold hover:bg-gold/10 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
