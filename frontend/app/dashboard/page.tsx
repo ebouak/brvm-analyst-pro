@@ -181,16 +181,16 @@ export default async function Dashboard() {
 
   const stats = marketStats(actions, prevValeur);
   const withVar = actions.filter((a) => a.variation_pct != null);
-  const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 5);
-  const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 5);
+  const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 4);
+  const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 4);
 
   const dateLabel = new Date(lastDate).toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
   });
 
   const [weekly30, weeklyC] = await Promise.all([
-    getWeeklyIndex('BRVM30', 'BRVM 30 — Évolution hebdomadaire'),
-    getWeeklyIndex('BRVMC', 'BRVM Composite — Évolution hebdomadaire'),
+    getWeeklyIndex('BRVM30', 'BRVM 30'),
+    getWeeklyIndex('BRVMC', 'BRVM Composite'),
   ]);
 
   return (
@@ -238,7 +238,6 @@ export default async function Dashboard() {
 
         {/* ── État du marché (sous le titre) ──────────────────────────────── */}
         <section aria-label="État du marché">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">État du marché</p>
           <MarketStateCard stats={stats} />
         </section>
 

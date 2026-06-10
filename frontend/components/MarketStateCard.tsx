@@ -82,13 +82,13 @@ export default function MarketStateCard({ stats }: { stats: MarketStats }) {
     /* Outer shell */
     <div className="rounded-panel border border-border bg-border/30 p-1.5">
       {/* Inner core */}
-      <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-5 py-5">
+      <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-4 py-3.5">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-full border border-border-strong bg-elevated text-muted">
-              <Activity size={13} />
+            <span className="grid h-6 w-6 place-items-center rounded-full border border-border-strong bg-elevated text-muted">
+              <Activity size={12} />
             </span>
             <h3 className="text-sm font-semibold text-ivory">État du marché</h3>
           </div>
@@ -96,24 +96,22 @@ export default function MarketStateCard({ stats }: { stats: MarketStats }) {
         </div>
 
         {/* KPI pills — 4 colonnes */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3">
           {PILL_CONFIGS.map((cfg) => (
             <div
               key={cfg.key}
               className={`
-                rounded-card border px-3 py-3 text-center
+                flex items-center justify-between rounded-card border px-3 py-2
                 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
                 cursor-default ${cfg.cls}
               `}
             >
-              <div className="flex justify-center mb-2 opacity-60">
-                {cfg.icon(14)}
+              <div className="flex items-center gap-1.5 opacity-70">
+                {cfg.icon(13)}
+                <span className="text-[10px] uppercase tracking-wider opacity-80 font-medium">{cfg.label}</span>
               </div>
-              <div className={`tabular text-xl font-bold leading-none ${cfg.valueCls}`}>
+              <div className={`tabular text-lg font-bold leading-none ${cfg.valueCls}`}>
                 {values[cfg.key]}
-              </div>
-              <div className="text-[10px] uppercase tracking-wider mt-1.5 opacity-60 font-medium">
-                {cfg.label}
               </div>
             </div>
           ))}
@@ -121,7 +119,7 @@ export default function MarketStateCard({ stats }: { stats: MarketStats }) {
 
         {/* Barre breadth empilée — premium (SVG pour éviter inline styles) */}
         {stats.total > 0 && (
-          <div className="mb-5">
+          <div className="mb-3">
             <svg
               viewBox="0 0 100 8"
               width="100%"

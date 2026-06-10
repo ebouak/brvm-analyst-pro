@@ -53,20 +53,24 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
       className="overflow-hidden rounded-panel border border-border bg-surface shadow-card"
       aria-label={`${title} — évolution hebdomadaire en bougies`}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-3">
-        <div className="flex items-baseline gap-3">
-          <h3 className="font-display text-base text-ivory">{title}</h3>
-          <span className="overline text-faint">{code}</span>
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-border/60 px-4 py-2.5">
+        <div className="flex items-baseline gap-2">
+          <span className="inline-block h-2 w-2 rounded-full bg-cyan shadow-[0_0_8px_#56d7fd]" aria-hidden />
+          <h3 className="font-display text-sm text-ivory">{title}</h3>
+          <span className="tabular text-base font-semibold text-ivory">{lastValue}</span>
+          {lastVar != null && (
+            <span className={`tabular text-xs font-medium ${up ? 'text-up' : 'text-down'}`}>
+              {up ? '▲' : '▼'}{Math.abs(lastVar).toFixed(2)}%
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <span className="tabular text-lg font-semibold text-ivory">{lastValue}</span>
-            {lastVar != null && (
-              <span className={`tabular ml-2 text-xs font-medium ${up ? 'text-up' : 'text-down'}`}>
-                {up ? '▲' : '▼'} {Math.abs(lastVar).toFixed(2)}%
-              </span>
-            )}
-          </div>
+        <div className="flex items-center gap-2 font-mono text-[10px]">
+          <span className="rounded-full border border-border bg-elevated px-1.5 py-0.5 text-faint">
+            RSI <span className={rsi == null ? 'text-faint' : 'text-muted'}>{rsi != null ? rsi.toFixed(0) : '—'}</span>
+          </span>
+          <span className="rounded-full border border-border bg-elevated px-1.5 py-0.5 text-faint">
+            MACD <span className={macd == null ? 'text-faint' : 'text-muted'}>{macd != null ? macd.toFixed(2) : '—'}</span>
+          </span>
           <div className="flex rounded-full border border-border-strong p-0.5">
             {([1, 3] as const).map((w) => (
               <button
@@ -74,7 +78,7 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
                 type="button"
                 onClick={() => setWeeks(w)}
                 aria-pressed={weeks === w}
-                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all ${
                   weeks === w ? 'bg-cyan text-[#03222b]' : 'text-muted hover:text-ivory'
                 }`}
               >
@@ -85,11 +89,11 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
         </div>
       </header>
 
-      <div className="px-2 pt-4">
+      <div className="px-2 pb-2 pt-3">
         {data.length === 0 ? (
-          <div className="py-16 text-center text-sm text-muted">Historique de l’indice indisponible.</div>
+          <div className="py-12 text-center text-sm text-muted">Historique de l’indice indisponible.</div>
         ) : (
-          <ResponsiveContainer width="100%" height={236}>
+          <ResponsiveContainer width="100%" height={168}>
             <ComposedChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
               <defs>
                 <linearGradient id={`trend-${code}`} x1="0" y1="0" x2="0" y2="1">
@@ -148,21 +152,6 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
         )}
       </div>
 
-      {/* Indicateurs techniques + repère jour courant */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 px-4 py-3">
-        <div className="flex items-center gap-2 text-[11px] text-faint">
-          <span className="inline-block h-2 w-2 rounded-full bg-cyan shadow-[0_0_8px_#56d7fd]" />
-          Jour courant ({data[lastIdx]?.label ?? '—'}) mis en évidence
-        </div>
-        <div className="flex items-center gap-2 font-mono text-[11px]">
-          <span className="rounded-full border border-border bg-elevated px-2 py-0.5 text-muted">
-            RSI <span className={rsi == null ? 'text-faint' : 'text-ivory'}>{rsi != null ? rsi.toFixed(0) : '—'}</span>
-          </span>
-          <span className="rounded-full border border-border bg-elevated px-2 py-0.5 text-muted">
-            MACD <span className={macd == null ? 'text-faint' : 'text-ivory'}>{macd != null ? macd.toFixed(2) : '—'}</span>
-          </span>
-        </div>
-      </div>
     </section>
   );
 }

@@ -49,7 +49,7 @@ function Row({
     <Link
       href={`/actions/${encodeURIComponent(a.code)}`}
       className="
-        group flex items-center gap-3 py-2.5 px-3 rounded-card
+        group flex items-center gap-3 py-2 px-3 rounded-card
         border border-transparent
         hover:bg-elevated hover:border-border/50
         transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
@@ -121,11 +121,11 @@ export default function TopMovers({
           rounded-[calc(1.125rem-0.375rem)] bg-surface
           shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]
           border-l-2 ${accentBar}
-          px-2 py-4
+          px-2 py-3
         `}
       >
         {/* Header */}
-        <div className="flex items-center gap-2 px-3 mb-3">
+        <div className="flex items-center gap-2 px-3 mb-2">
           <span
             className={`
               grid h-5 w-5 place-items-center rounded-full border text-[10px]
