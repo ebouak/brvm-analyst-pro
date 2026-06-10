@@ -3,6 +3,7 @@ import './globals.css';
 import ConditionalShell from '@/components/ConditionalShell';
 import CommandPaletteProvider from '@/components/CommandPaletteProvider';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
+import OnboardingModal from '@/components/OnboardingModal';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
@@ -35,12 +36,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     isPremium = profile?.is_premium ?? false;
   }
 
+  let onboardingDone = true;
+  if (user) {
+    const { data: profileRow } = await supabase
+      .from('profiles')
+      .select('onboarding_done')
+      .eq('id', user.id)
+      .maybeSingle();
+    onboardingDone = profileRow?.onboarding_done ?? false;
+  }
+
   return (
     <html lang="fr" className="dark">
       <body className="text-white antialiased font-sans">
         <ConditionalShell isPremium={isPremium}>{children}</ConditionalShell>
         <CommandPaletteProvider />
         <ServiceWorkerRegister />
+        {user && !onboardingDone && <OnboardingModal />}
       </body>
     </html>
   );
