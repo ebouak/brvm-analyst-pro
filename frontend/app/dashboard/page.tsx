@@ -162,7 +162,7 @@ export default async function Dashboard() {
   if (!lastDate) {
     return (
       <div className="min-h-screen bg-bg">
-        <div className="max-w-7xl mx-auto px-6 py-16 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-8">
           <SectionHeader
             kicker="Tableau de bord"
             title="Marché BRVM"
@@ -201,7 +201,7 @@ export default async function Dashboard() {
         aria-hidden
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10 space-y-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6 sm:space-y-8">
 
         {/* ── En-tête : titre éditorial + nav pills ───────────────────────── */}
         <header className="flex flex-wrap items-end justify-between gap-5 pb-2">
