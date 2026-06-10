@@ -190,6 +190,16 @@ export default async function Dashboard() {
     : 50;
   const sentimentDelta = prevBreadth != null ? sentimentScore - prevBreadth : null;
 
+  // Détail des valeurs par mouvement (pour les info-bulles au survol)
+  const toMover = (a: ActionDaily) => ({ code: a.code, cours: a.cours_jour ?? null, variation: a.variation_pct ?? 0 });
+  const breakdown = {
+    hausses: withVar.filter((a) => (a.variation_pct ?? 0) > 0)
+      .sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).map(toMover),
+    baisses: withVar.filter((a) => (a.variation_pct ?? 0) < 0)
+      .sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).map(toMover),
+    stables: withVar.filter((a) => (a.variation_pct ?? 0) === 0).map(toMover),
+  };
+
   const dateLabel = new Date(lastDate).toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
   });
@@ -244,7 +254,7 @@ export default async function Dashboard() {
 
         {/* ── État du marché (sous le titre) ──────────────────────────────── */}
         <section aria-label="État du marché">
-          <MarketStateCard stats={stats} sentimentScore={sentimentScore} sentimentDelta={sentimentDelta} />
+          <MarketStateCard stats={stats} sentimentScore={sentimentScore} sentimentDelta={sentimentDelta} breakdown={breakdown} />
         </section>
 
         {/* ── Évolution hebdomadaire (bougies + tendance + RSI/MACD) ──────── */}

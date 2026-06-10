@@ -12,6 +12,45 @@ export interface MarketStats {
   transactions: number;
 }
 
+export interface Mover { code: string; cours: number | null; variation: number }
+export interface Breakdown { hausses: Mover[]; baisses: Mover[]; stables: Mover[] }
+
+/** Info-bulle (CSS pur) listant les valeurs d'un mouvement, au survol/focus de la pastille. */
+function MoverTooltip({ rows, label }: { rows: Mover[]; label: string }) {
+  if (rows.length === 0) return null;
+  return (
+    <div
+      role="tooltip"
+      className="
+        pointer-events-none absolute left-1/2 top-full z-30 mt-2 w-56 -translate-x-1/2
+        origin-top scale-95 opacity-0 transition-all duration-150
+        group-hover:scale-100 group-hover:opacity-100
+        group-focus-within:scale-100 group-focus-within:opacity-100
+        rounded-card border border-border-strong bg-elevated p-2 shadow-modal
+      "
+    >
+      <div className="mb-1.5 flex items-center justify-between px-1">
+        <span className="text-[10px] uppercase tracking-wider text-faint">{label}</span>
+        <span className="tabular text-[10px] text-muted">{rows.length}</span>
+      </div>
+      <div className="max-h-48 space-y-0.5 overflow-y-auto pr-0.5">
+        {rows.map((m) => {
+          const up = m.variation > 0;
+          const flat = m.variation === 0;
+          return (
+            <div key={m.code} className="flex items-center justify-between gap-2 rounded px-1 py-0.5 text-xs hover:bg-surface">
+              <span className="font-medium text-ivory/85">{m.code}</span>
+              <span className={`tabular font-medium ${flat ? 'text-muted' : up ? 'text-up' : 'text-down'}`}>
+                {up ? '+' : ''}{m.variation.toFixed(2)}%
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BreadthBadge({ ratio }: { ratio: number }) {
   const { cls, label } = ratio >= 60
     ? { cls: 'border-up/25 bg-up/10 text-up',     label: 'Haussier' }
@@ -62,10 +101,12 @@ export default function MarketStateCard({
   stats,
   sentimentScore,
   sentimentDelta,
+  breakdown,
 }: {
   stats: MarketStats;
   sentimentScore?: number;
   sentimentDelta?: number | null;
+  breakdown?: Breakdown;
 }) {
   const volPct = stats.volumePrev && stats.volumePrev > 0
     ? ((stats.volumeTotal - stats.volumePrev) / stats.volumePrev) * 100
@@ -108,24 +149,37 @@ export default function MarketStateCard({
         <div>
         {/* KPI pills — 4 colonnes */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3">
-          {PILL_CONFIGS.map((cfg) => (
-            <div
-              key={cfg.key}
-              className={`
-                flex items-center justify-between rounded-card border px-3 py-2
-                transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
-                cursor-default ${cfg.cls}
-              `}
-            >
-              <div className="flex items-center gap-1.5 opacity-70">
-                {cfg.icon(13)}
-                <span className="text-[10px] uppercase tracking-wider opacity-80 font-medium">{cfg.label}</span>
+          {PILL_CONFIGS.map((cfg) => {
+            const rows = breakdown
+              ? cfg.key === 'hausses' ? breakdown.hausses
+              : cfg.key === 'baisses' ? breakdown.baisses
+              : cfg.key === 'stables' ? breakdown.stables
+              : []
+              : [];
+            const interactive = rows.length > 0;
+            return (
+              <div
+                key={cfg.key}
+                tabIndex={interactive ? 0 : undefined}
+                aria-label={interactive ? `${cfg.label} : ${values[cfg.key]} valeurs` : undefined}
+                className={`
+                  group relative flex items-center justify-between rounded-card border px-3 py-2
+                  transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+                  outline-none focus-visible:ring-2 focus-visible:ring-gold/40
+                  ${interactive ? 'cursor-help' : 'cursor-default'} ${cfg.cls}
+                `}
+              >
+                <div className="flex items-center gap-1.5 opacity-70">
+                  {cfg.icon(13)}
+                  <span className="text-[10px] uppercase tracking-wider opacity-80 font-medium">{cfg.label}</span>
+                </div>
+                <div className={`tabular text-lg font-bold leading-none ${cfg.valueCls}`}>
+                  {values[cfg.key]}
+                </div>
+                {interactive && <MoverTooltip rows={rows} label={cfg.label} />}
               </div>
-              <div className={`tabular text-lg font-bold leading-none ${cfg.valueCls}`}>
-                {values[cfg.key]}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Barre breadth empilée — premium (SVG pour éviter inline styles) */}
