@@ -8,6 +8,7 @@ import DailyBrief from '@/components/DailyBrief';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
 import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
 import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
+import IndexStrip from '@/components/dashboard/IndexStrip';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
@@ -143,20 +144,37 @@ async function getData() {
 }
 
 function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketStats {
-  let hausses = 0, baisses = 0, stables = 0, volumeTotal = 0, transactions = 0;
+  let hausses = 0, baisses = 0, stables = 0;
+  let valeurReelle = 0, valeurEstimee = 0, titresEchanges = 0, transactions = 0;
+  let hasValeur = false, hasTransactions = false, hasTitres = false;
   for (const a of actions) {
     const v = a.variation_pct ?? 0;
     if (v > 0) hausses++;
     else if (v < 0) baisses++;
     else stables++;
-    volumeTotal += a.valeur_echangee ?? 0;
-    transactions += a.nb_transactions ?? 0;
+
+    if (a.valeur_echangee != null) { valeurReelle += a.valeur_echangee; hasValeur = true; }
+    if (a.volume != null) {
+      titresEchanges += a.volume; hasTitres = true;
+      if (a.cours_jour != null) valeurEstimee += a.cours_jour * a.volume;
+    }
+    if (a.nb_transactions != null) { transactions += a.nb_transactions; hasTransactions = true; }
   }
-  return { hausses, baisses, stables, total: actions.length, volumeTotal, volumePrev: prevValeur, transactions };
+
+  // Valeur échangée : réelle si disponible, sinon estimée (cours × titres)
+  const volumeTotal = hasValeur ? valeurReelle : (hasTitres ? valeurEstimee : null);
+  return {
+    hausses, baisses, stables, total: actions.length,
+    volumeTotal,
+    volumeEstimated: !hasValeur && hasTitres,
+    volumePrev: prevValeur,
+    titresEchanges: hasTitres ? titresEchanges : null,
+    transactions: hasTransactions ? transactions : null,
+  };
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, signals, prevValeur, prevBreadth, brief, ticker } = await getData();
+  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, brief, ticker } = await getData();
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
@@ -251,6 +269,11 @@ export default async function Dashboard() {
 
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
         <DashboardTicker items={ticker} />
+
+        {/* ── Indices BRVM (réels) ────────────────────────────────────────── */}
+        <section aria-label="Indices BRVM">
+          <IndexStrip indices={indices} />
+        </section>
 
         {/* ── État du marché (sous le titre) ──────────────────────────────── */}
         <section aria-label="État du marché">

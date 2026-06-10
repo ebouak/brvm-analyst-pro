@@ -7,9 +7,11 @@ export interface MarketStats {
   baisses: number;
   stables: number;
   total: number;
-  volumeTotal: number;
+  volumeTotal: number | null;
+  volumeEstimated: boolean;
   volumePrev: number | null;
-  transactions: number;
+  titresEchanges: number | null;
+  transactions: number | null;
 }
 
 export interface Mover { code: string; cours: number | null; variation: number }
@@ -108,7 +110,8 @@ export default function MarketStateCard({
   sentimentDelta?: number | null;
   breakdown?: Breakdown;
 }) {
-  const volPct = stats.volumePrev && stats.volumePrev > 0
+  // Delta volume : seulement si valeur réelle (non estimée) et veille comparable
+  const volPct = !stats.volumeEstimated && stats.volumeTotal != null && stats.volumePrev && stats.volumePrev > 0
     ? ((stats.volumeTotal - stats.volumePrev) / stats.volumePrev) * 100
     : null;
   const volUp = (volPct ?? 0) >= 0;
@@ -207,21 +210,40 @@ export default function MarketStateCard({
           </div>
         )}
 
-        {/* Footer — volume + transactions */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/40 text-xs text-muted">
-          <span>
-            Volume{' '}
-            <span className="tabular text-ivory/80 font-medium">{fmtFcfa(stats.volumeTotal)} FCFA</span>
+        {/* Footer — valeur échangée + titres + transactions (gestion des absences) */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-3 border-t border-border/40 text-xs text-muted">
+          <span title={stats.volumeEstimated ? 'Estimation : cours × titres échangés (valeur officielle non publiée en intraday)' : undefined}>
+            Valeur échangée{' '}
+            {stats.volumeTotal != null ? (
+              <span className="tabular text-ivory/80 font-medium">
+                {stats.volumeEstimated && <span className="text-faint">≈ </span>}
+                {fmtFcfa(stats.volumeTotal)} FCFA
+              </span>
+            ) : (
+              <span className="text-faint">non disponible</span>
+            )}
             {volPct != null && (
               <span className={`ml-1.5 tabular font-semibold ${volUp ? 'text-up' : 'text-down'}`}>
                 {volUp ? '▲' : '▼'}{Math.abs(volPct).toFixed(1)}%
               </span>
             )}
           </span>
+          <span>
+            Titres échangés{' '}
+            {stats.titresEchanges != null ? (
+              <span className="tabular text-ivory/80 font-medium">{fmtNumber(stats.titresEchanges)}</span>
+            ) : (
+              <span className="text-faint">—</span>
+            )}
+          </span>
           <span className="flex items-center gap-1.5">
             <BarChart3 size={11} className="text-faint" />
             Transactions{' '}
-            <span className="tabular text-ivory/80 font-medium">{fmtNumber(stats.transactions)}</span>
+            {stats.transactions != null ? (
+              <span className="tabular text-ivory/80 font-medium">{fmtNumber(stats.transactions)}</span>
+            ) : (
+              <span className="text-faint">—</span>
+            )}
           </span>
         </div>
         </div>
