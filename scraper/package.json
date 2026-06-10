@@ -36,7 +36,8 @@
     "notations": "tsx src/index.ts notations",
     "notations:mock": "tsx src/index.ts notations --mock",
     "details": "tsx src/index.ts details",
-    "details:mock": "tsx src/index.ts details --mock"
+    "details:mock": "tsx src/index.ts details --mock",
+    "news": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts news"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

@@ -193,3 +193,15 @@ export async function logScrapeRun(record: ScrapeRunRecord): Promise<void> {
 }
 
 export type { ScrapeStatus };
+
+import type { NewsItem } from '../scrapers/brvmNews.js';
+
+export async function upsertNews(items: NewsItem[]): Promise<number> {
+  if (items.length === 0) return 0;
+  const sb = getSupabase();
+  const { error } = await sb
+    .from('brvm_news')
+    .upsert(items, { onConflict: 'dedupe_hash', ignoreDuplicates: true });
+  if (error) throw new Error(`upsert brvm_news: ${error.message}`);
+  return items.length;
+}

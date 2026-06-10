@@ -8,6 +8,7 @@ import BriefAssistant from '@/components/dashboard/BriefAssistant';
 import KeyMetrics from '@/components/dashboard/KeyMetrics';
 import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
 import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
+import NewsFeed from '@/components/dashboard/NewsFeed';
 import IndexStrip from '@/components/dashboard/IndexStrip';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
@@ -363,6 +364,12 @@ export default async function Dashboard() {
         <section aria-label="Signaux récents">
           <p className="overline text-muted mb-4 tracking-[0.16em]">Signaux actionnables</p>
           <RecentSignalsCard signals={signals as SignalDaily[]} />
+        </section>
+
+        {/* ── Fil d'actualités BRVM / COSUMAF ────────────────────────────── */}
+        <section aria-label="Actualités">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Actualités</p>
+          <NewsFeed />
         </section>
 
         {/* ── Composition du portefeuille utilisateur ─────────────────────── */}

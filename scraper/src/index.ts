@@ -130,10 +130,15 @@ async function main(): Promise<number> {
       const res = await runDetails({ codes, mock });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'news': {
+      const { runNews } = await import('./scrapers/runNews.js');
+      await runNews();
+      return 0;
+    }
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate | notations | details',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate | notations | details | news',
       );
       return 1;
   }
