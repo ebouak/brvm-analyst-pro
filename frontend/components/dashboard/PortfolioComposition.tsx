@@ -18,19 +18,15 @@ async function getComposition(): Promise<{ logged: boolean; rows: Row[]; total: 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { logged: false, rows: [], total: 0 };
 
-  // Portefeuille par défaut
-  const { data: wls } = await supabase.from('watchlists').select('id, is_default').eq('user_id', user.id);
-  const lists = (wls ?? []) as { id: string; is_default: boolean | null }[];
-  const active = lists.find((w) => w.is_default) ?? lists[0] ?? null;
-  if (!active) return { logged: true, rows: [], total: 0 };
-
+  // Positions de portefeuille (table principale, gérée depuis /portefeuille)
   const { data: items } = await supabase
-    .from('watchlist_items')
+    .from('portfolios_positions')
     .select('code, quantite, prix_entree')
-    .eq('watchlist_id', active.id);
+    .eq('user_id', user.id)
+    .gt('quantite', 0);
   const positions = (items ?? []).filter(
     (i): i is { code: string; quantite: number; prix_entree: number } =>
-      i.quantite != null && i.quantite > 0 && i.prix_entree != null,
+      i.quantite != null && i.prix_entree != null,
   );
   if (positions.length === 0) return { logged: true, rows: [], total: 0 };
 
