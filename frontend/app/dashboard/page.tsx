@@ -4,8 +4,8 @@ import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard'
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
-import DailyBrief from '@/components/DailyBrief';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
+import KeyMetrics from '@/components/dashboard/KeyMetrics';
 import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
 import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
 import IndexStrip from '@/components/dashboard/IndexStrip';
@@ -33,7 +33,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, prevBreadth: null as number | null, brief: null, ticker: [] as TickerLine[] };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, prevBreadth: null as number | null, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, brief: null, ticker: [] as TickerLine[] };
 
   // Date précédente pour le delta volume
   const { data: prevDateRow } = await supabase
@@ -106,6 +106,15 @@ async function getData() {
     topSectorPerfs,
   });
 
+  // Totaux de séance réels (valeur des transactions, capitalisations) — 2 dernières pour le delta
+  const { data: summaryRows } = await supabase
+    .from('brvm_market_summary')
+    .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
+    .order('date_marche', { ascending: false })
+    .limit(2);
+  const summary = (summaryRows?.[0] ?? null) as MarketSummaryRow | null;
+  const summaryPrev = (summaryRows?.[1] ?? null) as MarketSummaryRow | null;
+
   // Ticker permanent : actions + obligations de la dernière séance disponible
   const { data: oblRows } = await supabase
     .from('brvm_obligations_daily')
@@ -138,9 +147,18 @@ async function getData() {
     signals: typedSignals,
     prevValeur,
     prevBreadth,
+    summary,
+    summaryPrev,
     brief,
     ticker,
   };
+}
+
+interface MarketSummaryRow {
+  date_marche: string;
+  valeur_transactions: number | null;
+  capitalisation_actions: number | null;
+  capitalisation_obligations: number | null;
 }
 
 function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketStats {
@@ -174,7 +192,7 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, brief, ticker } = await getData();
+  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, summary, summaryPrev, brief, ticker } = await getData();
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
@@ -198,6 +216,12 @@ export default async function Dashboard() {
   }
 
   const stats = marketStats(actions, prevValeur);
+  // Valeur échangée réelle (brvm.org) prioritaire sur l'estimation per-instrument
+  if (summary?.valeur_transactions != null) {
+    stats.volumeTotal = summary.valeur_transactions;
+    stats.volumeEstimated = false;
+    stats.volumePrev = summaryPrev?.valeur_transactions ?? null;
+  }
   const withVar = actions.filter((a) => a.variation_pct != null);
   const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 5);
   const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 5);
@@ -280,32 +304,42 @@ export default async function Dashboard() {
           <MarketStateCard stats={stats} sentimentScore={sentimentScore} sentimentDelta={sentimentDelta} breakdown={breakdown} />
         </section>
 
-        {/* ── Évolution hebdomadaire (bougies + tendance + RSI/MACD) ──────── */}
-        <section aria-label="Évolution hebdomadaire des indices">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Évolution hebdomadaire</p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <WeeklyIndexChart {...weekly30} />
-            <WeeklyIndexChart {...weeklyC} />
-          </div>
-        </section>
+        {/* ── Rangée principale : 4 colonnes (hausses · baisses · graphiques · brief) ── */}
+        <section aria-label="Séance du jour">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Séance du jour</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
-        {/* ── Brief narratif ─────────────────────────────────────────────── */}
-        {brief && (
-          <section aria-label="Brief de séance">
-            <div className="flex items-center justify-between mb-4">
-              <p className="overline text-muted tracking-[0.16em]">Brief analytique</p>
-              <BriefAssistant />
-            </div>
-            <DailyBrief brief={brief} />
-          </section>
-        )}
-
-        {/* ── Bento : Top movers (2 cols) ─────────────────────────────────── */}
-        <section aria-label="Meilleurs et pires mouvements">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Mouvements du jour</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Col 1 — Top hausses */}
             <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" />
-            <TopMovers title="Top 5 baisses"  rows={losers}  signals={signals as SignalDaily[]} direction="down" />
+
+            {/* Col 2 — Top baisses */}
+            <TopMovers title="Top 5 baisses" rows={losers} signals={signals as SignalDaily[]} direction="down" />
+
+            {/* Col 3 — Graphiques indices empilés */}
+            <div className="space-y-4">
+              <WeeklyIndexChart {...weekly30} />
+              <WeeklyIndexChart {...weeklyC} />
+            </div>
+
+            {/* Col 4 — Brief analytique + repères clés */}
+            <div className="rounded-panel border border-border bg-border/30 p-1.5">
+              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-4 py-4 h-full flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-ivory">Brief analytique</h3>
+                  <BriefAssistant />
+                </div>
+
+                <KeyMetrics summary={summary} summaryPrev={summaryPrev} />
+
+                {brief?.summary && (
+                  <div className="border-t border-border/40 pt-3">
+                    <p className="overline text-faint mb-1.5">Analyse du jour</p>
+                    <p className="text-[13px] leading-relaxed text-ivory/80">{brief.summary}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
         </section>
 
