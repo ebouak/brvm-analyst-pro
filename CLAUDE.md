@@ -143,6 +143,42 @@ passent un contrôle syntaxique esbuild) :
 - Dividendes (ingestion mock + dérivation des communiqués, rendement dividende).
 - Alertes (évaluation + notifications email/telegram/console + journal).
 
+### Ajouts (passage 2026-06) — vérifiés (build Next + tsc verts, tests scraper)
+
+- **Refonte UI complète « DeFi cyan »** : design system global (`tailwind.config.ts`
+  + `app/globals.css`), tokens revalués (mêmes noms) — `bg`#030303, `surface`#0a1417,
+  `accent`/`gold`/`info`=cyan #56D7FD, `up`#3fe18b, `down`#ff6b6b, texte #FCFCFC.
+  Fonts via @import : Bespoke Serif (`font-display`) + Supreme (`font-sans`) +
+  JetBrains Mono (`.tabular`). Kit réutilisable `@/components/ui/premium`
+  (SectionHeader, PremiumPanel, MetricCard, SignalBadge, EmptyStatePremium, etc.).
+  ~30 pages + shell refondus. (Historique des thèmes dans `docs/superpowers/specs/`.)
+- **Routing** : `/` = **landing page publique** (`app/page.tsx`, composants
+  `components/landing/taste/`), **`/dashboard`** = tableau de bord. Shell conditionnel
+  (`components/ConditionalShell.tsx`) : `/`, `/login`, `/signup` en plein écran.
+  Nav unique `lib/nav.ts` (sidebar desktop + `MobileNav` tiroir mobile).
+- **Cours quasi temps réel (intraday)** : parser **brvm.org public**
+  (`scraper/src/scrapers/brvmPublic.ts`, mapping par libellé) → upsert
+  `brvm_actions_daily` **+ brvm_indices_daily** (indices BRVM-C/BRVM-30, veille
+  dérivée de la variation). Commande `npm run intraday[:mock]` + workflow
+  `.github/workflows/intraday.yml` (cron 15 min en séance). **Secrets repo requis :
+  `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`.**
+- **Fondamentaux par famille comptable** (migration `0025`) : `famille_comptable`
+  (banque/assurance/general) + `lignes_specifiques jsonb` sur income/balance.
+  Extraction LLM (DeepSeek→Mistral) depuis les PDF de `publications` (pipeline
+  `frontend/lib/import/full*`, route `/api/import-batch`, OCR Mistral en repli
+  pour PDF scannés via `lib/import/ocr.ts`). Garde-fous stricts (magnitude, bilan
+  équilibré, cohérence résultat/BPA). **Couverture : 44/48 sociétés** (4 sans
+  publication source). PALC = `pdf-verified` (référence, jamais écrasé).
+- **Diagnostic IA Premium** (migration `0024` `diagnostic_reports`, TTL 7j) :
+  route streaming `/api/diagnostic/[code]` (cascade DeepSeek/Mistral/Grok via
+  `lib/server/apiKeys`), métriques `lib/diagnostic/`, page `/premium/diagnostic/[code]`.
+  Vérifié bout-en-bout (PALC). Réservé premium + super-admin `ebouak@gmail.com`.
+- **Dashboard enrichi** : ticker permanent (actions+obligations), État du marché,
+  graphiques hebdo indices (vraies bougies open=veille/close + tendance + RSI/MACD
+  + sélecteur 1W/3W), Brief labellisé, composition portefeuille, signaux.
+- **Export** : XLS (ExcelJS) + PDF (page `/print` + `window.print`) sur la fiche
+  financials. Clés LLM stockées en table `api_keys` (lues via `resolveApiKey`).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
@@ -151,8 +187,10 @@ passent un contrôle syntaxique esbuild) :
   **valeurs par défaut** basées sur les conventions WebForms. À confirmer sur le
   markup réel (voir `docs/SCRAPER.md` §4). Le mode `--mock` permet de tout
   développer sans cette dépendance.
-- **OHLCV** : BDFIN ne fournit pas open/high/low intraday — uniquement la
-  clôture. Les graphiques sont des courbes de clôture + volume (pas de bougies).
+- **OHLCV** : les sources (BDFIN, brvm.org) ne fournissent pas high/low intraday.
+  Les bougies hebdo des indices (dashboard) sont construites avec open = clôture
+  veille et close = valeur du jour (corps réel, sans mèches) — honnête, pas de
+  high/low inventés. Les cours actions restent des courbes de clôture + volume.
 - **mv_signal_inputs** ne matérialise que la dernière séance : le scoring d'une
   date passée précise est partiel (voir `docs/SCORING.md` §6).
 - **Comparatif dividendes** : dépend de l'ingestion des dividendes (mock fourni).
@@ -164,17 +202,21 @@ passent un contrôle syntaxique esbuild) :
 
 ## 10. Prochaines tâches prioritaires
 
-1. **Backtesting de stratégie** (§6.8) — NON IMPLÉMENTÉ. Plan : `lib/backtest.ts`
-   (simulation long-only à partir d'une série + signaux : equity curve,
-   rendement total/annualisé, max drawdown, win rate, vs buy&hold), CLI scraper
-   `backtest <CODE>`, page `/backtest`. Réutiliser `scoring/score.ts` recalculé
-   en fenêtre glissante sur l'historique.
-2. Calibrer les sélecteurs réels de BDFIN et brvm.org (puis figer des fixtures
-   de régression).
-3. Planifier les workers (cron) : `score`, `events`, `dividends`, `alerts`,
-   refresh des vues — voir `docs/DEPLOYMENT.md`.
-4. Tests d'intégration frontend (Playwright) et exécution réelle de `npm build`.
-5. V3 module rapports : sentiment réel, corrélation événements/signaux.
+1. **Activer le cron intraday en prod** : ajouter les secrets repo GitHub
+   `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (Settings → Secrets → Actions).
+   Le workflow `.github/workflows/intraday.yml` existe déjà ; sans secrets il
+   échoue à l'écriture mais ne corrompt rien. L'historique des indices s'étoffera
+   séance après séance → active RSI(14)/MACD sur les graphiques hebdo.
+2. **Fondamentaux des 4 sociétés sans source** (BICB, BOAB, CABC, SVOC) : aucune
+   publication d'états financiers en base → nécessite de fournir/scraper les PDF
+   avant extraction (ne jamais inventer de chiffres).
+3. Planifier les autres workers (cron) : `score`, `events`, `dividends`, `alerts`,
+   refresh des vues — même mécanique GitHub Actions que l'intraday.
+4. Tests d'intégration frontend (Playwright). `npm run build` Next est désormais
+   exécuté à chaque passage (vert).
+5. Calibrer les sélecteurs **BDFIN** (auth Forms) si on réactive cette source ;
+   `brvm.org` public est déjà calibré (parser + fixture de régression).
+6. V3 module rapports : sentiment réel, corrélation événements/signaux.
 
 ## 11. Précautions avant modification
 
