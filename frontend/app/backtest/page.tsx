@@ -137,6 +137,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       instrumentList.find((i) => i.code === selectedCode)?.designation ?? selectedCode;
 
     // Fetch prix ET signaux en parallèle
+    const fromDate = dateFrom || periodToDate(period) || null;
     const [{ data: rows }, { data: sigRows }] = await Promise.all([
       (() => {
         let q = supabase
@@ -145,8 +146,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           .eq('code', selectedCode)
           .order('date_marche', { ascending: true })
           .not('cours_jour', 'is', null);
-        if (dateFrom) q = q.gte('date_marche', dateFrom);
-        else { const fd = periodToDate(period); if (fd) q = q.gte('date_marche', fd); }
+        if (fromDate) q = q.gte('date_marche', fromDate);
         if (dateTo) q = q.lte('date_marche', dateTo);
         return q;
       })(),
@@ -156,16 +156,18 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           .select('signal, date_marche')
           .eq('code', selectedCode)
           .order('date_marche', { ascending: true });
-        if (dateFrom) q = q.gte('date_marche', dateFrom);
-        else { const fd = periodToDate(period); if (fd) q = q.gte('date_marche', fd); }
+        if (fromDate) q = q.gte('date_marche', fromDate);
         if (dateTo) q = q.lte('date_marche', dateTo);
         return q;
       })(),
     ]);
 
     const priceRows = (rows ?? []) as { cours_jour: number; date_marche: string }[];
+    const VALID_SIGNALS = new Set(['BUY', 'HOLD', 'SELL']);
     const signalMap = new Map(
-      ((sigRows ?? []) as { signal: SignalLabel; date_marche: string }[]).map((s) => [s.date_marche, s.signal])
+      (sigRows ?? [])
+        .filter((s): s is { signal: SignalLabel; date_marche: string } => VALID_SIGNALS.has((s as { signal: string }).signal))
+        .map((s) => [s.date_marche, s.signal])
     );
 
     if (priceRows.length < 2) {
@@ -175,11 +177,11 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       dates = priceRows.map((r) => r.date_marche);
       const hasRealSignals = dates.some((d) => signalMap.has(d));
       // Use real signal when available, fallback to simpleSignal otherwise
+      const fallback = simpleSignal(closes);
       const signals: SignalLabel[] = dates.map((d, i) =>
-        signalMap.has(d) ? signalMap.get(d)! : simpleSignal(closes)[i]!
+        signalMap.get(d) ?? fallback[i]!
       );
-      result = runBacktest({ closes, signals, dates, feesPct, slippagePct });
-      (result as BacktestResultEx).hasRealSignals = hasRealSignals;
+      result = { ...runBacktest({ closes, signals, dates, feesPct, slippagePct }), hasRealSignals };
     }
   }
 
@@ -340,8 +342,8 @@ export default async function BacktestPage({ searchParams }: PageProps) {
             {closes.length >= 500 && ' · 2+ ans'}
           </StatPill>
           {result && (
-            <StatPill tone={(result as BacktestResultEx).hasRealSignals ? 'emerald' : 'neutral'}>
-              {(result as BacktestResultEx).hasRealSignals
+            <StatPill tone={result.hasRealSignals ? 'emerald' : 'neutral'}>
+              {result.hasRealSignals
                 ? 'Signaux BRVM Analyst Pro'
                 : 'Signal momentum (fallback)'}
             </StatPill>
