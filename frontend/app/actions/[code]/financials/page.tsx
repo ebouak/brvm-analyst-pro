@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
+import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financials/valuation';
 import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
@@ -39,6 +40,13 @@ export default async function FinancialsPage({ params }: Props) {
     balance: latestBalance,
     cashflow: latestCashflow,
   });
+
+  const valuation = computeValuation(
+    ratios,
+    data.latestDaily?.cours_jour ?? null,
+    latestCashflow?.flux_tresorerie_disponible ?? null,
+    data.instrument.shares,
+  );
 
   return (
     <div className="min-h-screen bg-bg">
@@ -78,6 +86,36 @@ export default async function FinancialsPage({ params }: Props) {
             balanceSheets={data.balanceSheets}
             cashFlowStatements={data.cashFlowStatements}
           />
+        </div>
+
+        {/* Panneau valorisation */}
+        <div className="bg-surface border border-border rounded-xl p-4 flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted uppercase tracking-wide">Valorisation</span>
+            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${VERDICT_COLORS[valuation.verdict]}`}>
+              {VERDICT_LABELS[valuation.verdict]}
+            </span>
+          </div>
+          {valuation.grahamNumber != null && (
+            <div className="text-xs text-muted">
+              Graham : <span className="tabular text-ivory font-medium">{Math.round(valuation.grahamNumber).toLocaleString('fr-FR')} FCFA</span>
+            </div>
+          )}
+          {valuation.marginOfSafety !== null && (
+            <div className="text-xs text-muted">
+              Marge sécurité : <span className={`tabular font-medium ${valuation.marginOfSafety >= 0 ? 'text-up' : 'text-down'}`}>
+                {valuation.marginOfSafety >= 0 ? '+' : ''}{valuation.marginOfSafety.toFixed(1)}%
+              </span>
+            </div>
+          )}
+          {valuation.scoreValorisation !== null && (
+            <div className="text-xs text-muted">
+              Score : <span className="tabular text-ivory font-medium">{Math.round(valuation.scoreValorisation)}/100</span>
+            </div>
+          )}
+          {valuation.verdict === 'inconnu' && (
+            <p className="text-xs text-faint">BPA, PB ou FCF manquants pour calculer la valorisation.</p>
+          )}
         </div>
 
         {/* 52-week range */}
