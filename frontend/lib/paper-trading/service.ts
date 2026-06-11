@@ -42,6 +42,31 @@ export class PaperTradingClientService {
     return res.json();
   }
 
+  async openPosition(code: string): Promise<Position> {
+    const res = await fetch('/api/paper-trading/positions', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || "Échec de l'ouverture");
+    }
+    const json = await res.json();
+    return json.position;
+  }
+
+  async closePosition(id: string): Promise<{ pnl: number; pnl_pct: number }> {
+    const res = await fetch(`/api/paper-trading/positions/${id}/close`, {
+      method: 'POST',
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Échec de la fermeture');
+    }
+    return res.json();
+  }
+
   async getStats(): Promise<{ stats: Stats | null; account: Account | null }> {
     const res = await fetch('/api/paper-trading/stats', {
       method: 'GET',

@@ -7,11 +7,15 @@ import { useState } from 'react';
 interface PaperTradingJournalProps {
   openPositions: Position[];
   closedPositions: Position[];
+  onClose?: (id: string) => void;
+  busy?: boolean;
 }
 
 export function PaperTradingJournal({
   openPositions,
   closedPositions,
+  onClose,
+  busy,
 }: PaperTradingJournalProps) {
   const [showOpen, setShowOpen] = useState(true);
 
@@ -56,6 +60,9 @@ export function PaperTradingJournal({
               <th className="px-4 py-2 text-muted font-semibold text-right">
                 Partages
               </th>
+              {showOpen && onClose && (
+                <th className="px-4 py-2 text-muted font-semibold text-right">Action</th>
+              )}
               {!showOpen && (
                 <>
                   <th className="px-4 py-2 text-muted font-semibold text-right">
@@ -79,7 +86,7 @@ export function PaperTradingJournal({
             {positions.length === 0 ? (
               <tr>
                 <td
-                  colSpan={showOpen ? 4 : 9}
+                  colSpan={showOpen ? (onClose ? 5 : 4) : 9}
                   className="px-4 py-4 text-center text-muted"
                 >
                   Aucun trade
@@ -103,6 +110,18 @@ export function PaperTradingJournal({
                   <td className="px-4 py-3 text-right tabular text-muted">
                     {fmtNumber(pos.num_shares, 2)}
                   </td>
+                  {showOpen && onClose && (
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => onClose(pos.id)}
+                        className="text-xs px-3 py-1 rounded border border-down/40 text-down hover:bg-down/10 transition disabled:opacity-40"
+                      >
+                        Fermer
+                      </button>
+                    </td>
+                  )}
                   {!showOpen && (
                     <>
                       <td className="px-4 py-3 text-right tabular text-white">

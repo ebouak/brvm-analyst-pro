@@ -15,32 +15,80 @@ import { paperTradingService } from '@/lib/paper-trading/service';
 import { Account, Position, Stats } from '@/lib/paper-trading/types';
 import { PaperTradingJournal } from './PaperTradingJournal';
 
+interface TradableAction { code: string; designation: string | null; cours_jour: number | null }
+
 export function PaperTradingDashboard() {
   const [account, setAccount] = useState<Account | null>(null);
   const [positions, setPositions] = useState<Position[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [tradable, setTradable] = useState<TradableAction[]>([]);
+  const [selectedCode, setSelectedCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    try {
+      const [posData, statsData] = await Promise.all([
+        paperTradingService.getPositions(),
+        paperTradingService.getStats(),
+      ]);
+      setPositions(posData.positions);
+      setAccount(posData.account);
+      setStats(statsData.stats);
+    } catch (err) {
+      console.error('Failed to load paper trading data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [posData, statsData] = await Promise.all([
-          paperTradingService.getPositions(),
-          paperTradingService.getStats(),
-        ]);
-
-        setPositions(posData.positions);
-        setAccount(posData.account);
-        setStats(statsData.stats);
-      } catch (error) {
-        console.error('Failed to load paper trading data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     load();
   }, []);
+
+  async function openModal() {
+    setError(null);
+    setShowModal(true);
+    if (tradable.length === 0) {
+      try {
+        const res = await fetch('/api/paper-trading/tradable');
+        const json = await res.json();
+        setTradable(json.actions ?? []);
+      } catch {
+        setError('Impossible de charger la liste des actions.');
+      }
+    }
+  }
+
+  async function handleOpen() {
+    if (!selectedCode) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await paperTradingService.openPosition(selectedCode);
+      setShowModal(false);
+      setSelectedCode('');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Échec de l'ouverture");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleClose(id: string) {
+    setBusy(true);
+    try {
+      await paperTradingService.closePosition(id);
+      await load();
+    } catch (err) {
+      console.error('close failed', err);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -83,6 +131,75 @@ export function PaperTradingDashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Barre d'action */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <p className="text-xs text-muted">
+          Ouvrez une position fictive (10% du capital) pour tester un signal au cours du jour.
+        </p>
+        <button
+          type="button"
+          onClick={openModal}
+          className="bg-info hover:bg-info/90 text-black font-medium px-4 py-2 rounded-lg transition active:scale-95"
+        >
+          + Ouvrir une position
+        </button>
+      </div>
+
+      {/* Modale ouverture */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-elevated border border-border rounded-xl p-6 w-full max-w-md space-y-4">
+            <h3 className="text-lg font-semibold text-white">Ouvrir une position</h3>
+            <div className="space-y-2">
+              <label className="text-xs text-muted">Action</label>
+              <select
+                aria-label="Choisir une action à acheter"
+                value={selectedCode}
+                onChange={(e) => setSelectedCode(e.target.value)}
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white"
+              >
+                <option value="">— Choisir une action —</option>
+                {tradable.map((a) => (
+                  <option key={a.code} value={a.code}>
+                    {a.code} — {a.designation ?? ''} ({fmtNumber(a.cours_jour)} FCFA)
+                  </option>
+                ))}
+              </select>
+              {account && selectedCode && (() => {
+                const a = tradable.find((x) => x.code === selectedCode);
+                if (!a?.cours_jour) return null;
+                const montant = account.capital_current * 0.1;
+                const titres = montant / a.cours_jour;
+                return (
+                  <p className="text-xs text-muted">
+                    Investissement : <span className="text-white tabular">{fmtFcfa(montant)}</span>{' '}
+                    ≈ <span className="text-white tabular">{fmtNumber(titres, 1)}</span> titres
+                  </p>
+                );
+              })()}
+            </div>
+            {error && <p className="text-xs text-down">{error}</p>}
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => { setShowModal(false); setError(null); }}
+                className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white transition text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={!selectedCode || busy}
+                onClick={handleOpen}
+                className="px-4 py-2 rounded-lg bg-info text-black font-medium disabled:opacity-40 transition text-sm"
+              >
+                {busy ? 'Ouverture…' : 'Ouvrir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-surface border border-border rounded-lg p-4">
@@ -201,6 +318,8 @@ export function PaperTradingDashboard() {
         <PaperTradingJournal
           openPositions={openPositions}
           closedPositions={closedPositions}
+          onClose={handleClose}
+          busy={busy}
         />
       </div>
     </div>
