@@ -37,7 +37,9 @@
     "notations:mock": "tsx src/index.ts notations --mock",
     "details": "tsx src/index.ts details",
     "details:mock": "tsx src/index.ts details --mock",
-    "news": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts news"
+    "news": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts news",
+    "monthly-reports": "tsx src/index.ts monthly-reports",
+    "monthly-reports:test": "tsx src/index.ts monthly-reports --dry-run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -45,6 +47,7 @@
     "axios-cookiejar-support": "^5.0.3",
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.5",
+    "pdfkit": "^0.13.0",
     "pino": "^9.4.0",
     "pino-pretty": "^11.2.2",
     "playwright": "^1.60.0",
@@ -54,6 +57,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
+    "@types/pdfkit": "^0.12.11",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",

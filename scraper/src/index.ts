@@ -21,6 +21,9 @@
  *   tsx src/index.ts backfill SNTS ETIT    # backfill codes spécifiques
  *   tsx src/index.ts backfill --from=2022-01-01  # depuis une date
  *   tsx src/index.ts backfill --dry-run    # simuler sans écrire
+ *   tsx src/index.ts monthly-reports       # générer rapports PDF mensuels
+ *   tsx src/index.ts monthly-reports 2026-06  # mois spécifique
+ *   tsx src/index.ts monthly-reports --dry-run # mode test (sans email/DB)
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
@@ -41,6 +44,7 @@ import { runNotations } from './notations/runNotations.js';
 import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
 import { runValidation } from './validation/runValidation.js';
+import { runMonthlyReports } from './runners/runMonthlyReports.js';
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
 
@@ -135,10 +139,17 @@ async function main(): Promise<number> {
       await runNews();
       return 0;
     }
+    case 'monthly-reports': {
+      const dryRun = rest.includes('--dry-run');
+      const month = positional[0];
+      const res = await runMonthlyReports({ month, dryRun });
+      logger.info(res, 'Monthly reports generation complete');
+      return res.status === 'failed' ? 1 : 0;
+    }
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate | notations | details | news',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate | notations | details | news | monthly-reports',
       );
       return 1;
   }
