@@ -39,6 +39,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/portefeuille', label: 'Portefeuille' },
       { href: '/calendrier', label: 'Calendrier' },
       { href: '/dashboard/reports', label: 'Rapports' },
+      { href: '/premium/reports', label: 'Rapports Mensuels', premium: true },
     ],
   },
   {
