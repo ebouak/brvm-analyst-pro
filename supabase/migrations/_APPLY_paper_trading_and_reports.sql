@@ -210,7 +210,7 @@ select
     then ((a.cours_jour - p.entry_price) / p.entry_price) * 100
     else 0
   end as unrealized_pnl_pct,
-  extract(day from now()::date - p.entry_date)::integer as days_open,
+  (now()::date - p.entry_date)::integer as days_open,
   p.created_at
 from public.paper_trading_positions p
 join public.brvm_actions_daily a on p.code = a.code
