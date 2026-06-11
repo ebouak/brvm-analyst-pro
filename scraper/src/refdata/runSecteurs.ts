@@ -32,7 +32,7 @@ export const SECTEURS: Record<string, string> = {
   // Services publics
   CIEC: 'Services publics', SDCC: 'Services publics',
   // Énergie
-  SHEC: 'Énergie', TTLC: 'Énergie',
+  SHEC: 'Énergie', TTLC: 'Énergie', TTLS: 'Énergie',
   // Consommation de base (agro-alimentaire, boissons)
   PALC: 'Consommation de base', SCRC: 'Consommation de base',
   SICC: 'Consommation de base', NTLC: 'Consommation de base',
@@ -42,7 +42,7 @@ export const SECTEURS: Record<string, string> = {
   BNBC: 'Consommation discrétionnaire', CFAC: 'Consommation discrétionnaire',
   PRSC: 'Consommation discrétionnaire', NEIC: 'Consommation discrétionnaire',
   LNBB: 'Consommation discrétionnaire', ABJC: 'Consommation discrétionnaire',
-  STBC: 'Consommation discrétionnaire',
+  STBC: 'Consommation discrétionnaire', UNXC: 'Consommation discrétionnaire',
   // Industriels
   CABC: 'Industriels', FTSC: 'Industriels', SEMC: 'Industriels',
   SIVC: 'Industriels', SDSC: 'Industriels', SMBC: 'Industriels',

@@ -45,7 +45,7 @@ import { runNotations } from './notations/runNotations.js';
 import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
 import { runValidation } from './validation/runValidation.js';
-import { runMonthlyReports } from './runners/runMonthlyReports.js';
+// runMonthlyReports importé dynamiquement (dépend de pdfkit) — voir case 'monthly-reports'.
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
 
@@ -147,6 +147,7 @@ async function main(): Promise<number> {
     case 'monthly-reports': {
       const dryRun = rest.includes('--dry-run');
       const month = positional[0];
+      const { runMonthlyReports } = await import('./runners/runMonthlyReports.js');
       const res = await runMonthlyReports({ month, dryRun });
       logger.info(res, 'Monthly reports generation complete');
       return res.status === 'failed' ? 1 : 0;

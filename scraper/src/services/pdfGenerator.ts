@@ -8,8 +8,7 @@
  * - Fournir un stream lisible (pour upload Vercel Blob / S3)
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const PDFDocument = require('pdfkit') as any;
+import PDFDocument from 'pdfkit';
 import { Readable } from 'stream';
 
 export interface MonthlyReportData {
