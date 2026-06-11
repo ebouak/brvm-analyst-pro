@@ -60,42 +60,12 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border">
-              <th
-                className="px-4 py-2 text-left text-muted font-normal cursor-pointer hover:text-ivory"
-                onClick={() => toggleSort('code')}
-              >
-                Code {sortKey === 'code' && (sortDir === 'desc' ? '▼' : '▲')}
-              </th>
-              <th
-                className="px-4 py-2 text-right text-muted font-normal cursor-pointer hover:text-ivory tabular"
-                onClick={() => toggleSort('cours_jour')}
-              >
-                Prix {sortKey === 'cours_jour' && (sortDir === 'desc' ? '▼' : '▲')}
-              </th>
-              <th
-                className="px-4 py-2 text-right text-muted font-normal cursor-pointer hover:text-ivory"
-                onClick={() => toggleSort('variation_pct')}
-              >
-                Var % {sortKey === 'variation_pct' && (sortDir === 'desc' ? '▼' : '▲')}
-              </th>
-              <th
-                className="px-4 py-2 text-right text-muted font-normal cursor-pointer hover:text-ivory"
-                onClick={() => toggleSort('rsi')}
-              >
-                RSI {sortKey === 'rsi' && (sortDir === 'desc' ? '▼' : '▲')}
-              </th>
-              <th
-                className="px-4 py-2 text-right text-muted font-normal cursor-pointer hover:text-ivory"
-                onClick={() => toggleSort('score_signal')}
-              >
-                Score {sortKey === 'score_signal' && (sortDir === 'desc' ? '▼' : '▲')}
-              </th>
-              <th
-                className="px-4 py-2 text-right text-muted font-normal cursor-pointer hover:text-ivory"
-                onClick={() => toggleSort('rendement_dividende')}
-              >
-                Div % {sortKey === 'rendement_dividende' && (sortDir === 'desc' ? '▼' : '▲')}
-              </th>
+              <SortableTh label="Code" k="code" align="left" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Prix" k="cours_jour" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Var %" k="variation_pct" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <SortableTh label="RSI" k="rsi" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Score" k="score_signal" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Div %" k="rendement_dividende" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <th className="px-4 py-2 text-right text-muted font-normal">Actions</th>
             </tr>
           </thead>
@@ -144,5 +114,40 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
         </table>
       </div>
     </div>
+  );
+}
+
+/** En-tête de colonne triable, accessible au clavier (bouton + aria-sort). */
+function SortableTh({
+  label,
+  k,
+  align,
+  sortKey,
+  sortDir,
+  onSort,
+}: {
+  label: string;
+  k: SortKey;
+  align: 'left' | 'right';
+  sortKey: SortKey;
+  sortDir: 'asc' | 'desc';
+  onSort: (key: SortKey) => void;
+}) {
+  const active = sortKey === k;
+  return (
+    <th
+      scope="col"
+      aria-sort={active ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none'}
+      className={`px-4 py-2 text-muted font-normal ${align === 'right' ? 'text-right' : 'text-left'}`}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(k)}
+        className={`inline-flex items-center gap-1 hover:text-ivory transition focus:outline-none focus:ring-1 focus:ring-accent/50 rounded ${align === 'right' ? 'flex-row-reverse' : ''} ${active ? 'text-ivory' : ''}`}
+      >
+        <span>{label}</span>
+        {active && <span aria-hidden="true">{sortDir === 'desc' ? '▼' : '▲'}</span>}
+      </button>
+    </th>
   );
 }

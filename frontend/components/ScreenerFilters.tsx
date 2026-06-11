@@ -69,7 +69,7 @@ export default function ScreenerFilters({
             value={filters.rsiMin}
             onChange={(e) => handleChange('rsiMin', parseInt(e.target.value) || 0)}
             placeholder="Min"
-            className="flex-1 bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint"
+            className="flex-1 bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint focus:outline-none focus:ring-1 focus:ring-accent transition"
             aria-label="RSI minimum"
           />
           <input
@@ -80,7 +80,7 @@ export default function ScreenerFilters({
             value={filters.rsiMax}
             onChange={(e) => handleChange('rsiMax', parseInt(e.target.value) || 100)}
             placeholder="Max"
-            className="flex-1 bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint"
+            className="flex-1 bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint focus:outline-none focus:ring-1 focus:ring-accent transition"
             aria-label="RSI maximum"
           />
         </div>
@@ -115,7 +115,7 @@ export default function ScreenerFilters({
           value={filters.dividendMin}
           onChange={(e) => handleChange('dividendMin', parseFloat(e.target.value) || 0)}
           placeholder="0"
-          className="w-full bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint"
+          className="w-full bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint focus:outline-none focus:ring-1 focus:ring-accent transition"
           aria-label="Minimum dividend percentage"
         />
       </div>
@@ -128,7 +128,7 @@ export default function ScreenerFilters({
               <button
                 key={p.name}
                 type="button"
-                className={`text-xs px-2 py-1 rounded border transition ${
+                className={`text-xs px-2 py-1 rounded border transition active:scale-95 focus:outline-none focus:ring-1 focus:ring-accent/50 ${
                   p.isPremium ? 'border-accent/40 text-accent bg-accent/10 hover:border-accent/60' : 'border-border text-muted hover:border-accent/30'
                 }`}
                 onClick={() => applyPreset(p)}
