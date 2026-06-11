@@ -1,0 +1,40 @@
+name: Enrichissement quotidien BRVM
+
+# Tourne à l'ouverture et à la fermeture de la séance BRVM (heure UTC = Abidjan).
+# - Détail de cotation Sika (ouverture, +haut, +bas, beta, valorisation, capital)
+# - Actualités (Sika Finance + brvm.org officiel + cosumaf)
+# - Secteurs (référentiel ICB BRVM, idempotent)
+on:
+  schedule:
+    - cron: '15 9 * * 1-5'   # ouverture ~09:15 UTC
+    - cron: '0 16 * * 1-5'   # fermeture ~16:00 UTC
+  workflow_dispatch: {}      # déclenchement manuel
+
+concurrency:
+  group: daily-enrich
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NODE_TLS_REJECT_UNAUTHORIZED: '0' # brvm.org a une chaîne TLS incomplète
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+      - name: Secteurs (référentiel)
+        working-directory: scraper
+        run: npx tsx src/index.ts secteurs
+      - name: Détail cotation (Sika)
+        working-directory: scraper
+        run: npx tsx src/index.ts cotations
+      - name: Actualités (Sika + brvm.org + cosumaf)
+        working-directory: scraper
+        run: npx tsx src/index.ts news
