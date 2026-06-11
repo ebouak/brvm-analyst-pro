@@ -30,10 +30,13 @@ export function BeginnerModeProvider({ children, initial = false }: { children: 
     });
   }
 
-  // Avoid hydration mismatch by not rendering until mounted
-  if (!mounted) return <>{children}</>;
-
-  return <Ctx.Provider value={{ beginner, toggle }}>{children}</Ctx.Provider>;
+  // Always render provider to avoid context errors in children
+  // Use initial default value when not mounted to prevent hydration mismatch
+  return (
+    <Ctx.Provider value={mounted ? { beginner, toggle } : { beginner: initial, toggle: () => {} }}>
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 export function useBeginnerMode() {
