@@ -48,6 +48,16 @@ export function PaperTradingDashboard() {
     load();
   }, []);
 
+  // Fermeture de la modale à la touche Échap
+  useEffect(() => {
+    if (!showModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setShowModal(false); setError(null); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showModal]);
+
   async function openModal() {
     setError(null);
     setShowModal(true);
@@ -92,7 +102,17 @@ export function PaperTradingDashboard() {
 
   if (loading) {
     return (
-      <div className="text-muted text-center py-8">Chargement...</div>
+      <div className="space-y-8" aria-busy="true">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="bg-surface border border-border rounded-lg p-4 space-y-3">
+              <div className="animate-pulse h-3 w-24 bg-border rounded" />
+              <div className="animate-pulse h-7 w-32 bg-border rounded" />
+            </div>
+          ))}
+        </div>
+        <div className="animate-pulse bg-surface border border-border rounded-lg h-72" />
+      </div>
     );
   }
 
@@ -139,7 +159,7 @@ export function PaperTradingDashboard() {
         <button
           type="button"
           onClick={openModal}
-          className="bg-info hover:bg-info/90 text-black font-medium px-4 py-2 rounded-lg transition active:scale-95"
+          className="bg-info hover:bg-info/90 text-bg font-medium px-4 py-2 rounded-lg transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-info/50"
         >
           + Ouvrir une position
         </button>
@@ -147,8 +167,17 @@ export function PaperTradingDashboard() {
 
       {/* Modale ouverture */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-elevated border border-border rounded-xl p-6 w-full max-w-md space-y-4">
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => { setShowModal(false); setError(null); }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Ouvrir une position"
+            onClick={(e) => e.stopPropagation()}
+            className="bg-elevated border border-border rounded-xl p-6 w-full max-w-md space-y-4"
+          >
             <h3 className="text-lg font-semibold text-white">Ouvrir une position</h3>
             <div className="space-y-2">
               <label className="text-xs text-muted">Action</label>
@@ -156,7 +185,7 @@ export function PaperTradingDashboard() {
                 aria-label="Choisir une action à acheter"
                 value={selectedCode}
                 onChange={(e) => setSelectedCode(e.target.value)}
-                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-info/50"
               >
                 <option value="">— Choisir une action —</option>
                 {tradable.map((a) => (
@@ -183,7 +212,7 @@ export function PaperTradingDashboard() {
               <button
                 type="button"
                 onClick={() => { setShowModal(false); setError(null); }}
-                className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white transition text-sm"
+                className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-border"
               >
                 Annuler
               </button>
@@ -191,7 +220,7 @@ export function PaperTradingDashboard() {
                 type="button"
                 disabled={!selectedCode || busy}
                 onClick={handleOpen}
-                className="px-4 py-2 rounded-lg bg-info text-black font-medium disabled:opacity-40 transition text-sm"
+                className="px-4 py-2 rounded-lg bg-info text-bg font-medium disabled:opacity-40 transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-info/50"
               >
                 {busy ? 'Ouverture…' : 'Ouvrir'}
               </button>

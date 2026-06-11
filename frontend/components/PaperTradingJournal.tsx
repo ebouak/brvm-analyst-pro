@@ -26,20 +26,24 @@ export function PaperTradingJournal({
       {/* Toggle */}
       <div className="flex gap-2">
         <button
+          type="button"
+          aria-pressed={showOpen}
           onClick={() => setShowOpen(true)}
-          className={`px-4 py-2 rounded transition ${
+          className={`px-4 py-2 rounded transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-info/50 ${
             showOpen
-              ? 'bg-info text-white'
+              ? 'bg-info text-bg'
               : 'bg-surface border border-border text-muted hover:text-white'
           }`}
         >
           Positions ouvertes ({openPositions.length})
         </button>
         <button
+          type="button"
+          aria-pressed={!showOpen}
           onClick={() => setShowOpen(false)}
-          className={`px-4 py-2 rounded transition ${
+          className={`px-4 py-2 rounded transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-info/50 ${
             !showOpen
-              ? 'bg-info text-white'
+              ? 'bg-info text-bg'
               : 'bg-surface border border-border text-muted hover:text-white'
           }`}
         >
@@ -115,8 +119,9 @@ export function PaperTradingJournal({
                       <button
                         type="button"
                         disabled={busy}
+                        aria-label={`Fermer la position ${pos.code}`}
                         onClick={() => onClose(pos.id)}
-                        className="text-xs px-3 py-1 rounded border border-down/40 text-down hover:bg-down/10 transition disabled:opacity-40"
+                        className="text-xs px-3 py-1 rounded border border-down/40 text-down hover:bg-down/10 active:scale-95 transition disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-down/50"
                       >
                         Fermer
                       </button>
