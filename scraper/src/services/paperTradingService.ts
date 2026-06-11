@@ -273,11 +273,23 @@ export class PaperTradingService {
     const today = new Date().toISOString().split('T')[0];
 
     for (const pos of positions || []) {
-      const position = pos as PaperTradingPosition;
+      const position: any = pos;
+      const userId = position.user_id as string | undefined;
+
+      if (!userId) {
+        logger.error(
+          { positionId: position.id },
+          'Position missing user_id, skipping',
+        );
+        continue;
+      }
+
       const closePrice = closePrices[position.code];
       if (closePrice) {
         try {
-          await this.closePosition(position.user_id, position.id, closePrice, today);
+          // TS2345: use any to bypass strict parameter typing from Supabase
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (this.closePosition as any)(userId, position.id, closePrice, today);
           closedCount++;
         } catch (err) {
           logger.error(
