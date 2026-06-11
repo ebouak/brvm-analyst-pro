@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
+import BeginnerToggle from '@/components/BeginnerToggle';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
@@ -71,6 +72,9 @@ export default function MobileNav({ isPremium = false }: { isPremium?: boolean }
             open ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
           }`}
         >
+          <div className="flex justify-center mb-6">
+            <BeginnerToggle />
+          </div>
           <div className="space-y-6">
             {NAV_GROUPS.map((group) => (
               <div key={group.label}>

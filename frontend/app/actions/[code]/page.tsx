@@ -11,6 +11,7 @@ import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
+import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
@@ -491,6 +492,7 @@ export default async function InstrumentPage({
                   <span>Équilibre</span>
                   <span>Surachat &gt;70</span>
                 </div>
+                <BeginnerHint text="RSI < 30 = l'action est potentiellement survendue (bon point d'entrée possible). RSI > 70 = suracheté (prudence)." />
               </div>
 
               {/* Moyennes mobiles */}
@@ -534,6 +536,7 @@ export default async function InstrumentPage({
                       accent={(lastMacd.hist ?? 0) >= 0 ? 'up' : 'down'}
                     />
                   </div>
+                  <BeginnerHint text="MACD positif = tendance haussière. MACD négatif = tendance baissière." />
                 </div>
               )}
             </div>
@@ -840,6 +843,8 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
             {' / 1.00 · '}{signal.date_marche}
           </span>
         </div>
+
+        <BeginnerHint text="Score > 60 = signal favorable. Score < 40 = signal défavorable. Entre les deux = neutre." />
 
         <p className="text-sm text-muted mb-5 leading-relaxed">
           {signal.explication ?? 'Signal calculé automatiquement.'}

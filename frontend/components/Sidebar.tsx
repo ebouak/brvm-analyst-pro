@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
+import BeginnerToggle from '@/components/BeginnerToggle';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
@@ -83,8 +84,11 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
       </nav>
 
       {/* Pied */}
-      <div className="px-4 py-3.5 border-t border-border">
-        <p className="overline text-[9px] text-faint">Données BRVM · BDFIN</p>
+      <div className="px-4 py-3.5 border-t border-border space-y-3">
+        <div className="flex justify-center">
+          <BeginnerToggle />
+        </div>
+        <p className="overline text-[9px] text-faint text-center">Données BRVM · BDFIN</p>
       </div>
     </aside>
   );
