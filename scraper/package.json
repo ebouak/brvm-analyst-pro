@@ -28,6 +28,8 @@
     "publications": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications",
     "publications:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications --mock",
     "shares": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts shares",
+    "secteurs": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts secteurs",
+    "news": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts news",
     "alerts": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts alerts",
     "alerts:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts alerts --mock",
     "backfill": "tsx src/index.ts backfill",

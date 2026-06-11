@@ -36,6 +36,7 @@ import { runScoring } from './scoring/runScoring.js';
 import { runEvents } from './events/runEvents.js';
 import { runDividends } from './dividends/runDividends.js';
 import { runShares } from './shares/runShares.js';
+import { runSecteurs } from './refdata/runSecteurs.js';
 import { runAlerts } from './alerts/runAlerts.js';
 import { runBacktestCmd } from './backtesting/runBacktest.js';
 import { runPublications } from './publications/runPublications.js';
@@ -139,6 +140,10 @@ async function main(): Promise<number> {
       await runNews();
       return 0;
     }
+    case 'secteurs': {
+      const res = await runSecteurs();
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'monthly-reports': {
       const dryRun = rest.includes('--dry-run');
       const month = positional[0];
@@ -149,7 +154,7 @@ async function main(): Promise<number> {
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | alerts | publications | backtest | backfill | validate | notations | details | news | monthly-reports',
+        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | secteurs | alerts | publications | backtest | backfill | validate | notations | details | news | monthly-reports',
       );
       return 1;
   }
