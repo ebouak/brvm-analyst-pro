@@ -17,6 +17,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/actions', label: 'Actions' },
       { href: '/obligations', label: 'Obligations' },
       { href: '/dividendes', label: 'Dividendes' },
+      { href: '/dividendes/calendrier', label: 'Calendrier dividendes' },
       { href: '/heatmap', label: 'Heatmap' },
       { href: '/secteurs', label: 'Secteurs' },
     ],

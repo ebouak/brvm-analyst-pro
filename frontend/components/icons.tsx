@@ -20,3 +20,9 @@ export function Activity({ size = 14, ...p }: P) {
 export function BarChart3({ size = 14, ...p }: P) {
   return <svg {...base(size)} {...p}><rect x="18" y="3" width="4" height="18"/><rect x="10" y="8" width="4" height="13"/><rect x="2" y="13" width="4" height="8"/></svg>;
 }
+export function ChevronLeft({ size = 14, ...p }: P) {
+  return <svg {...base(size)} {...p}><polyline points="15 18 9 12 15 6"/></svg>;
+}
+export function ChevronRight({ size = 14, ...p }: P) {
+  return <svg {...base(size)} {...p}><polyline points="9 18 15 12 9 6"/></svg>;
+}
