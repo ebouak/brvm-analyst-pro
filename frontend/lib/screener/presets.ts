@@ -7,7 +7,7 @@ export interface ScreenerPreset {
     rsiMax?: number;
     volumeGtAvg?: boolean;
     scoreMin?: number;
-    secteurs?: string[];
+    secteur?: string;
     dividendMin?: number;
   };
 }

@@ -28,7 +28,7 @@ export function applyFilters(
       return false;
 
     // Sector filter
-    if (filters.secteurs?.length && !filters.secteurs.includes(a.secteur ?? '')) return false;
+    if (filters.secteur && a.secteur !== filters.secteur) return false;
 
     // Dividend filter
     if (

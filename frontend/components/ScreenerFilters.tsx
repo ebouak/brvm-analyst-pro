@@ -37,6 +37,7 @@ export default function ScreenerFilters({
       rsiMax: newFilters.rsiMax < 100 ? newFilters.rsiMax : undefined,
       scoreMin: newFilters.scoreMin > 0 ? newFilters.scoreMin : undefined,
       dividendMin: newFilters.dividendMin > 0 ? newFilters.dividendMin : undefined,
+      secteur: newFilters.secteur ? newFilters.secteur : undefined,
     };
     onFilterChange(filterObj);
   };
