@@ -14,6 +14,8 @@ export interface ActionDaily {
   ouverture?: number | null;
   plus_haut?: number | null;
   plus_bas?: number | null;
+  beta_1an?: number | null;
+  valorisation?: number | null;
 }
 
 export interface IndiceDaily {

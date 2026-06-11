@@ -232,10 +232,13 @@ export default async function InstrumentPage({
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
     ? (lastDiv.montant / last.cours_jour) * 100 : null;
 
-  // Capitalisation boursière = cours × shares (en MFCFA)
+  // Capitalisation boursière en MFCFA : valorisation scrapée (Sika) en priorité,
+  // sinon calcul cours × shares.
   const shares = instrument?.shares ?? null;
-  const capitalisation = shares != null && last.cours_jour != null
-    ? (last.cours_jour * shares) / 1_000_000 : null;
+  const capitalisation = last.valorisation != null
+    ? last.valorisation / 1_000_000
+    : (shares != null && last.cours_jour != null
+        ? (last.cours_jour * shares) / 1_000_000 : null);
 
   // Volume moyen 20j
   const recentVols = rows.slice(-20).map((r) => r.volume).filter((v): v is number => v != null);
@@ -391,10 +394,14 @@ export default async function InstrumentPage({
 
             {/* Grille métriques de séance */}
             <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-4">
+              {last.ouverture != null && <SessionMetric label="Ouverture" value={fmtNumber(last.ouverture)} unit="FCFA" />}
+              {last.plus_haut != null && <SessionMetric label="Plus haut" value={fmtNumber(last.plus_haut)} unit="FCFA" />}
+              {last.plus_bas != null && <SessionMetric label="Plus bas" value={fmtNumber(last.plus_bas)} unit="FCFA" />}
               <SessionMetric label="Clôture préc." value={fmtNumber(last.cours_precedent)} unit="FCFA" />
               <SessionMetric label="Volume du jour" value={fmtNumber(last.volume)} unit="titres" />
               <SessionMetric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
               <SessionMetric label="Transactions" value={fmtNumber(last.nb_transactions)} />
+              {last.beta_1an != null && <SessionMetric label="Beta 1 an" value={last.beta_1an.toFixed(2)} />}
               {volMoyen != null && <SessionMetric label="Vol. moyen 20j" value={fmtNumber(volMoyen)} unit="titres" />}
               {capitalisation != null && <SessionMetric label="Capitalisation" value={fmtNumber(Math.round(capitalisation))} unit="MFCFA" accent />}
               {shares != null && <SessionMetric label="Titres totaux" value={fmtNumber(shares)} />}

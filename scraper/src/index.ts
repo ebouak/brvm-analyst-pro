@@ -144,6 +144,12 @@ async function main(): Promise<number> {
       const res = await runSecteurs();
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'cotations': {
+      const { runCotations } = await import('./scrapers/runCotations.js');
+      const codes = positional.length > 0 ? positional : undefined;
+      const res = await runCotations({ codes });
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'monthly-reports': {
       const dryRun = rest.includes('--dry-run');
       const month = positional[0];
