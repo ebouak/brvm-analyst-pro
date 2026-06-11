@@ -3,6 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import CompareChart, { type ComparePoint, type NormMode, type PeriodKey } from '@/components/CompareChart';
 import CompareSelector from '@/components/CompareSelector';
 import CompareStats from '@/components/CompareStats';
+import { loadCompanyFinancials } from '@/lib/financials/queries';
+import { calculateFundamentals } from '@/lib/financials/fundamentals';
+import CompareFundamentals from '@/components/CompareFundamentals';
+import CompareVerdict from '@/components/CompareVerdict';
 import type { ActionDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -102,6 +106,48 @@ export default async function ComparePage({
     return { code, designation: instr?.designation ?? null };
   });
 
+  // Load fundamentals for comparison
+  const fundamentals = await Promise.all(
+    codes.map(async (code) => {
+      const f = await loadCompanyFinancials(code);
+      if (!f) return null;
+      const latestIncome = f.incomeStatements[0] ?? null;
+      const prevIncome = f.incomeStatements[1] ?? null;
+      const latestBalance = f.balanceSheets[0] ?? null;
+      const latestCashflow = f.cashFlowStatements[0] ?? null;
+      const ratios = calculateFundamentals({
+        coursActuel: f.latestDaily?.cours_jour ?? null,
+        shares: f.instrument.shares,
+        cours_bas_52s: f.latestDaily?.cours_bas_52s ?? null,
+        cours_haut_52s: f.latestDaily?.cours_haut_52s ?? null,
+        income: latestIncome,
+        incomePrev: prevIncome,
+        balance: latestBalance,
+        cashflow: latestCashflow,
+      });
+      // Calculate performance for the selected period
+      const seriesForCode = (seriesMap as Record<string, ActionDaily[]>)[code] ?? [];
+      let perfPct: number | null = null;
+      if (seriesForCode.length >= 2) {
+        const firstPrice = seriesForCode[0]?.cours_jour ?? null;
+        const lastPrice = seriesForCode[seriesForCode.length - 1]?.cours_jour ?? null;
+        if (firstPrice && lastPrice) {
+          perfPct = ((lastPrice - firstPrice) / firstPrice) * 100;
+        }
+      }
+      return {
+        code,
+        designation: f.instrument.designation,
+        ratios,
+        coursActuel: f.latestDaily?.cours_jour ?? null,
+        fcf: latestCashflow?.flux_tresorerie_disponible ?? null,
+        shares: f.instrument.shares,
+        perfPct,
+      };
+    })
+  );
+  const fundaRows = fundamentals.filter(Boolean) as NonNullable<typeof fundamentals[number]>[];
+
   return (
     <div className="p-6 space-y-5">
       {/* Header */}
@@ -139,6 +185,12 @@ export default async function ComparePage({
         <>
           <CompareChart data={rows} codes={codes} mode={mode} period={period} meta={meta} />
           <CompareStats rows={rows} codes={codes} meta={meta} />
+          {fundaRows.length >= 2 && (
+            <>
+              <CompareVerdict rows={fundaRows} />
+              <CompareFundamentals rows={fundaRows} />
+            </>
+          )}
         </>
       )}
     </div>
