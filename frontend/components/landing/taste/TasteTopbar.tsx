@@ -36,6 +36,24 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
 
       <div className="flex shrink-0 items-center gap-2">
         <Link
+          href="/societes"
+          className="hidden min-h-[42px] items-center px-3 text-sm text-muted transition-colors hover:text-ivory lg:inline-flex"
+        >
+          Sociétés
+        </Link>
+        <Link
+          href="/simulateur"
+          className="hidden min-h-[42px] items-center px-3 text-sm text-muted transition-colors hover:text-ivory lg:inline-flex"
+        >
+          Simulateur
+        </Link>
+        <Link
+          href="/brief"
+          className="hidden min-h-[42px] items-center px-3 text-sm text-muted transition-colors hover:text-ivory xl:inline-flex"
+        >
+          Brief
+        </Link>
+        <Link
           href="/login"
           className="hidden min-h-[42px] items-center rounded-full border border-white/10 bg-white/[0.03] px-4 text-sm text-muted transition-all hover:bg-white/[0.06] sm:inline-flex"
         >
