@@ -51,6 +51,7 @@ import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
 import { runValidation } from './validation/runValidation.js';
 import { runPaperTradingAuto } from './runners/runPaperTradingAuto.js';
+import { runBrief } from './brief/runBrief.js';
 // runMonthlyReports importé dynamiquement (dépend de pdfkit) — voir case 'monthly-reports'.
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
@@ -108,6 +109,10 @@ async function main(): Promise<number> {
     }
     case 'alerts': {
       const res = await runAlerts({ mock });
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'brief': {
+      const res = await runBrief();
       return res.status === 'failed' ? 1 : 0;
     }
     case 'publications': {

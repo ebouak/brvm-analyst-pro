@@ -38,3 +38,12 @@ jobs:
       - name: Actualités (Sika + brvm.org + cosumaf)
         working-directory: scraper
         run: npx tsx src/index.ts news
+
+      # Brief quotidien : idempotent (skip si déjà envoyé pour la séance).
+      # Envoyé après la fermeture (run 16h) ; no-op au run d'ouverture.
+      - name: Brief de séance (Telegram + archive)
+        working-directory: scraper
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: npx tsx src/index.ts brief

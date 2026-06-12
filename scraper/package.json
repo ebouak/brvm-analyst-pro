@@ -40,6 +40,7 @@
     "details": "tsx src/index.ts details",
     "details:mock": "tsx src/index.ts details --mock",
     "news": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts news",
+    "brief": "tsx src/index.ts brief",
     "monthly-reports": "tsx src/index.ts monthly-reports",
     "monthly-reports:test": "tsx src/index.ts monthly-reports --dry-run",
     "bdfin:instruments": "tsx src/index.ts bdfin:instruments",
