@@ -41,7 +41,8 @@
     "details:mock": "tsx src/index.ts details --mock",
     "news": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts news",
     "monthly-reports": "tsx src/index.ts monthly-reports",
-    "monthly-reports:test": "tsx src/index.ts monthly-reports --dry-run"
+    "monthly-reports:test": "tsx src/index.ts monthly-reports --dry-run",
+    "obscura:start": "obscura serve --port 9222 --stealth"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
