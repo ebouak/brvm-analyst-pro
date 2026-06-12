@@ -1,165 +1,89 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Replay intraday scrape for a specific hour that was missed.
+ * Relance manuelle du scrape intraday.
  *
- * Usage: POST /api/cron/intraday-replay
- * Body: { "hour": 10 }  // 10:00-10:59 UTC
+ * Le frontend ne scrape jamais lui-même (découplage : il ne lit que Supabase).
+ * Cette route déclenche le workflow GitHub Actions `intraday.yml` via
+ * l'API GitHub (workflow_dispatch), qui exécute le scraper.
  *
- * Protected by CRON_SECRET header.
+ * Usage : POST /api/cron/intraday-replay
+ *   Header : Authorization: Bearer <CRON_SECRET>
+ *
+ * Variables d'environnement requises (Vercel) :
+ *   CRON_SECRET            — jeton d'autorisation de cette route
+ *   GITHUB_DISPATCH_TOKEN  — PAT GitHub avec scope `actions:write` (optionnel ;
+ *                            sans lui la route répond 501)
  */
-export async function POST(request: NextRequest) {
-  try {
-    // Verify authorization token
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const expectedToken = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
 
-    if (!token || !expectedToken || token !== expectedToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Provide valid CRON_SECRET.' },
-        { status: 401 }
-      );
-    }
+const GITHUB_REPO = 'ebouak/brvm-analyst-pro';
+const WORKFLOW_FILE = 'intraday.yml';
 
-    const body = await request.json().catch(() => ({}));
-    const { hour } = body;
+function checkAuth(request: NextRequest): NextResponse | null {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  const expectedToken = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
+  if (!token || !expectedToken || token !== expectedToken) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Provide valid CRON_SECRET.' },
+      { status: 401 }
+    );
+  }
+  return null;
+}
 
-    if (hour === undefined || typeof hour !== 'number' || hour < 0 || hour > 23) {
-      return NextResponse.json(
-        { error: 'Invalid hour. Must be 0-23.' },
-        { status: 400 }
-      );
-    }
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const authError = checkAuth(request);
+  if (authError) return authError;
 
-    console.log(`[REPLAY] Starting intraday catch-up for hour ${hour}:00 UTC`);
-
-    // Import scraper CLI
-    const { spawn } = await import('child_process');
-
-    return new Promise((resolve) => {
-      const proc = spawn('npm', ['run', 'intraday'], {
-        cwd: process.cwd() + '/scraper',
-        stdio: 'pipe',
-        env: {
-          ...process.env,
-          SUPABASE_URL: process.env.SUPABASE_URL,
-          SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-          LOG_LEVEL: 'info',
-          NODE_ENV: 'production',
-        },
-      });
-
-      let output = '';
-      let errorOutput = '';
-
-      proc.stdout?.on('data', (data) => {
-        output += data.toString();
-      });
-
-      proc.stderr?.on('data', (data) => {
-        errorOutput += data.toString();
-      });
-
-      proc.on('close', (code) => {
-        if (code === 0) {
-          console.log(`[REPLAY] ✅ Catch-up succeeded for hour ${hour}`);
-          resolve(
-            NextResponse.json(
-              {
-                status: 'success',
-                hour,
-                message: `Intraday scrape replayed for hour ${hour}:00 UTC`,
-                output: output.slice(-500), // Last 500 chars
-              },
-              { status: 200 }
-            )
-          );
-        } else {
-          console.error(`[REPLAY] ❌ Catch-up failed for hour ${hour}:`, errorOutput);
-          resolve(
-            NextResponse.json(
-              {
-                status: 'error',
-                hour,
-                message: `Intraday scrape failed for hour ${hour}`,
-                error: errorOutput.slice(-500),
-              },
-              { status: 500 }
-            )
-          );
-        }
-      });
-
-      // Timeout after 5 minutes
-      const timeout = setTimeout(() => {
-        proc.kill();
-        resolve(
-          NextResponse.json(
-            {
-              status: 'error',
-              hour,
-              message: 'Intraday scrape timed out after 5 minutes',
-            },
-            { status: 504 }
-          )
-        );
-      }, 5 * 60 * 1000);
-
-      proc.on('close', () => clearTimeout(timeout));
-    });
-  } catch (error) {
-    console.error('[REPLAY] Error:', error);
+  const ghToken = process.env.GITHUB_DISPATCH_TOKEN;
+  if (!ghToken) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'GITHUB_DISPATCH_TOKEN non configuré sur Vercel.',
+        alternative: `Déclencher manuellement : https://github.com/${GITHUB_REPO}/actions/workflows/${WORKFLOW_FILE}`,
       },
+      { status: 501 }
+    );
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${WORKFLOW_FILE}/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${ghToken}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+        body: JSON.stringify({ ref: 'main' }),
+      }
+    );
+
+    if (res.status === 204) {
+      return NextResponse.json({
+        status: 'success',
+        message: `Workflow ${WORKFLOW_FILE} déclenché. Suivi : https://github.com/${GITHUB_REPO}/actions`,
+      });
+    }
+
+    const detail = await res.text();
+    return NextResponse.json(
+      { status: 'error', message: `GitHub API ${res.status}`, detail: detail.slice(0, 300) },
+      { status: 502 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 }
 
-/**
- * GET endpoint to check if manual replay is available
- */
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const hour = searchParams.get('hour');
-
-  if (!hour) {
-    return NextResponse.json(
-      {
-        message: 'Manual intraday replay endpoint',
-        usage: 'POST /api/cron/intraday-replay with Authorization header',
-        body: { hour: '0-23 (UTC)' },
-        example: 'curl -X POST http://localhost:3000/api/cron/intraday-replay -H "Authorization: Bearer YOUR_CRON_SECRET" -H "Content-Type: application/json" -d \'{"hour":10}\'',
-      },
-      { status: 200 }
-    );
-  }
-
-  // Optionally support GET-based query
-  if (typeof hour === 'string') {
-    const h = parseInt(hour, 10);
-    if (isNaN(h) || h < 0 || h > 23) {
-      return NextResponse.json({ error: 'Invalid hour parameter' }, { status: 400 });
-    }
-
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const expectedToken = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
-
-    if (!token || !expectedToken || token !== expectedToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Redirect to POST
-    return NextResponse.redirect(
-      new URL('/api/cron/intraday-replay', request.url),
-      { status: 307 }
-    );
-  }
-
-  return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+export async function GET(): Promise<NextResponse> {
+  return NextResponse.json({
+    message: 'Relance manuelle du scrape intraday (via GitHub Actions)',
+    usage: 'POST /api/cron/intraday-replay avec header Authorization: Bearer <CRON_SECRET>',
+    workflow: `https://github.com/${GITHUB_REPO}/actions/workflows/${WORKFLOW_FILE}`,
+  });
 }
