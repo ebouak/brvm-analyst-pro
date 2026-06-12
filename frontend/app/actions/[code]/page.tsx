@@ -9,6 +9,7 @@ import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
+import RatingBadge from '@/components/RatingBadge';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { BeginnerHint } from '@/components/BeginnerHint';
@@ -843,6 +844,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
         <div className="flex items-center gap-3 mb-5 flex-wrap">
           <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em]">Signal du jour</p>
           <SignalBadge signal={signal.signal} confiance={signal.confiance} />
+          <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           <span className="ml-auto tabular text-[11px] text-faint font-mono">
             {signal.score_total != null
               ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2)

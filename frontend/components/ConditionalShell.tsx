@@ -7,9 +7,13 @@ import MobileNav from '@/components/MobileNav';
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
 
+/** Sections publiques SEO : plein écran avec leur propre header (PublicShell). */
+const BARE_PREFIXES = ['/societes', '/simulateur', '/brief'];
+
 /**
  * Décide d'envelopper ou non les pages dans le shell applicatif (sidebar + main).
- * La landing (`/`) est rendue plein écran ; toutes les autres pages gardent le shell.
+ * La landing (`/`) et les pages publiques sont rendues plein écran ;
+ * toutes les autres pages gardent le shell.
  */
 export default function ConditionalShell({
   isPremium,
@@ -19,7 +23,8 @@ export default function ConditionalShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  if (BARE_ROUTES.has(pathname)) return <>{children}</>;
+  if (BARE_ROUTES.has(pathname) || BARE_PREFIXES.some((p) => pathname.startsWith(p)))
+    return <>{children}</>;
 
   return (
     <div className="flex min-h-screen">
