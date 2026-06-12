@@ -1,0 +1,90 @@
+name: Monthly Reports Generation
+
+# Run on the 1st of each month at 08:00 UTC
+on:
+  schedule:
+    - cron: '0 8 1 * *'  # 1st of every month at 08:00 UTC
+  workflow_dispatch:     # Manual trigger
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+      ALERTS_EMAIL_TO: ${{ secrets.ALERTS_EMAIL_TO }}
+      LOG_LEVEL: info
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install scraper dependencies
+        working-directory: scraper
+        run: npm ci
+
+      - name: Generate monthly reports
+        working-directory: scraper
+        run: |
+          # Get the previous month (since we run on 1st, we want last month's report)
+          PREV_MONTH=$(date -d "last month" +%Y-%m)
+          echo "Generating reports for: $PREV_MONTH"
+          npm run monthly-reports -- $PREV_MONTH
+
+      - name: Verify reports were created
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          PREV_MONTH=$(date -d "last month" +%Y-%m)
+          npx tsx -e "
+          import { createClient } from '@supabase/supabase-js';
+          const client = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+          const { count, error } = await client
+            .from('monthly_reports')
+            .select('*', { count: 'exact', head: true })
+            .eq('month', '$PREV_MONTH');
+
+          if (error) {
+            console.error('Query failed:', error);
+            process.exit(1);
+          }
+
+          if (!count || count === 0) {
+            console.error('❌ No reports created for $PREV_MONTH');
+            process.exit(1);
+          }
+
+          console.log(\`✅ Monthly reports created successfully: \${count} users\`);
+          "
+
+      - name: Notify failure on Slack (optional)
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            MONTH=$(date -d "last month" +"%B %Y")
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ Monthly reports generation FAILED for $MONTH. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi
+
+      - name: Notify success on Slack (optional)
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            MONTH=$(date -d "last month" +"%B %Y")
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"✅ Monthly reports generated successfully for $MONTH\"}"
+          fi
