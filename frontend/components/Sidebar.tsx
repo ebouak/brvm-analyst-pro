@@ -6,8 +6,15 @@ import BeginnerToggle from '@/components/BeginnerToggle';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
-export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) {
+export default function Sidebar({
+  isPremium = false,
+  isAdmin = false,
+}: {
+  isPremium?: boolean;
+  isAdmin?: boolean;
+}) {
   const pathname = usePathname();
+  const groups = NAV_GROUPS.filter((g) => !g.adminOnly || isAdmin);
 
   return (
     <aside className="w-56 shrink-0 hidden md:flex flex-col h-screen sticky top-0 bg-gradient-to-b from-surface to-bg border-r border-border">
@@ -27,7 +34,7 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-5">
-        {NAV_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.label}>
             <p className="overline px-2 mb-2 text-[9px] text-faint">
               {group.label === 'Premium' ? (
@@ -85,6 +92,14 @@ export default function Sidebar({ isPremium = false }: { isPremium?: boolean }) 
 
       {/* Pied */}
       <div className="px-4 py-3.5 border-t border-border space-y-3">
+        <div className="flex justify-center gap-4 text-[11px]">
+          <Link href="/methodologie" className="text-faint hover:text-muted transition-colors">
+            Méthodologie
+          </Link>
+          <Link href="/parametres/compte" className="text-faint hover:text-muted transition-colors">
+            Paramètres
+          </Link>
+        </div>
         <div className="flex justify-center">
           <BeginnerToggle />
         </div>

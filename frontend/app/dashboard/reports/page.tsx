@@ -183,7 +183,7 @@ export default async function ReportsHome() {
           <EmptyStatePremium
             icon="◈"
             title="Aucun événement ingéré"
-            hint="Lancez npm run events:mock côté scraper pour peupler les données."
+            hint="Les événements de marché sont ingérés automatiquement chaque jour ouvré."
             action={{ href: '/dashboard/reports/events', label: 'Explorer' }}
           />
         ) : (

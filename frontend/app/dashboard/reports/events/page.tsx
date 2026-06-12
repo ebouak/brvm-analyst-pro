@@ -45,7 +45,7 @@ export default async function EventsListPage({
 
       {events.length === 0 ? (
         <div className="bg-surface border border-border rounded-xl p-8 text-center text-muted">
-          Aucun événement. Lancez l’ingestor (<code className="text-up">npm run events:mock</code>).
+          Aucun événement de marché pour le moment. Les communiqués sont ingérés automatiquement.
         </div>
       ) : (
         <div className="bg-surface border border-border rounded-xl overflow-hidden">

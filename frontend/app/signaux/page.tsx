@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
@@ -12,11 +12,12 @@ import {
   Eyebrow,
 } from '@/components/ui/premium';
 
-export const dynamic = 'force-dynamic';
+// Données publiques recalculées après clôture : ISR 5 min (audit 2026-06-12)
+export const revalidate = 300;
 export const metadata = { title: 'Signaux — BRVM Analyst Pro' };
 
 async function getData() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
 
   const { data: lastRow } = await supabase
     .from('signals_daily')
@@ -73,7 +74,7 @@ export default async function SignauxPage() {
         <div className="mt-10">
           <EmptyStatePremium
             title="Aucun signal généré"
-            hint={`Lancez npm run score côté scraper pour alimenter les signaux.`}
+            hint="Les signaux sont calculés automatiquement après chaque clôture de séance."
             icon="◈"
           />
         </div>

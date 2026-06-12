@@ -27,7 +27,8 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  let isPremium = user?.email === 'ebouak@gmail.com';
+  const isAdmin = user?.email === 'ebouak@gmail.com';
+  let isPremium = isAdmin;
   let onboardingDone = true;
   let initialBeginner = false;
   if (user && !isPremium) {
@@ -53,7 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="fr" className="dark">
       <body className="text-white antialiased font-sans">
         <BeginnerModeProvider initial={initialBeginner}>
-          <ConditionalShell isPremium={isPremium}>{children}</ConditionalShell>
+          <ConditionalShell isPremium={isPremium} isAdmin={isAdmin}>{children}</ConditionalShell>
           <CommandPaletteProvider />
           <ServiceWorkerRegister />
           {user && !onboardingDone && <OnboardingModal />}

@@ -6,9 +6,17 @@ export interface NavItem {
 export interface NavGroup {
   label: string;
   items: NavItem[];
+  /** Visible uniquement pour le super-admin. */
+  adminOnly?: boolean;
 }
 
-/** Architecture de navigation du produit — source unique (sidebar desktop + nav mobile). */
+/**
+ * Architecture de navigation du produit — source unique (sidebar desktop + nav mobile).
+ * Cible de l'audit 2026-06-12 : 21 entrées, zéro doublon fonctionnel.
+ * Les anciennes URL (/scanner, /dividendes/calendrier, /premium/calendrier,
+ * /dashboard/reports, /premium/backtesting) restent servies jusqu'à leur fusion,
+ * mais ne sont plus proposées dans le menu.
+ */
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Marché',
@@ -16,17 +24,15 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/actions', label: 'Actions' },
       { href: '/obligations', label: 'Obligations' },
-      { href: '/dividendes', label: 'Dividendes' },
-      { href: '/dividendes/calendrier', label: 'Calendrier dividendes' },
-      { href: '/heatmap', label: 'Heatmap' },
       { href: '/secteurs', label: 'Secteurs' },
+      { href: '/heatmap', label: 'Heatmap' },
+      { href: '/actualites', label: 'Actualités' },
     ],
   },
   {
     label: 'Analyse',
     items: [
       { href: '/signaux', label: 'Signaux' },
-      { href: '/scanner', label: 'Scanner' },
       { href: '/screener', label: 'Screener' },
       { href: '/fondamentaux', label: 'Fondamentaux' },
       { href: '/notations', label: 'Notations' },
@@ -34,34 +40,45 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: 'Revenus',
+    items: [
+      { href: '/dividendes', label: 'Dividendes' },
+      { href: '/calendrier', label: 'Calendrier' },
+    ],
+  },
+  {
     label: 'Gestion',
     items: [
       { href: '/portefeuille', label: 'Portefeuille' },
-      { href: '/calendrier', label: 'Calendrier' },
-      { href: '/dashboard/reports', label: 'Rapports' },
-      { href: '/premium/reports', label: 'Rapports Mensuels', premium: true },
+      { href: '/premium/paper-trading', label: 'Paper Trading', premium: true },
+      { href: '/reports', label: 'Rapports' },
+      { href: '/premium/reports', label: 'Rapports mensuels', premium: true },
     ],
   },
   {
     label: 'Premium',
     items: [
-      { href: '/assistant', label: 'Assistant IA', premium: true },
       { href: '/premium/diagnostic', label: 'Diagnostic IA', premium: true },
-      { href: '/premium/paper-trading', label: 'Paper Trading', premium: true },
+      { href: '/assistant', label: 'Assistant IA', premium: true },
       { href: '/premium/classements', label: 'Classements', premium: true },
-      { href: '/premium/calendrier', label: 'Dates clés', premium: true },
       { href: '/premium/anomalies', label: 'Anomalies', premium: true },
-      { href: '/premium/backtesting', label: 'Backtesting', premium: true },
-      { href: '/premium/correlations', label: 'Corrélations', premium: true },
       { href: '/premium/outils', label: 'Outils Pro', premium: true },
     ],
   },
   {
+    label: 'Découverte',
+    items: [
+      { href: '/societes', label: 'Sociétés (public)' },
+      { href: '/simulateur', label: 'Simulateur' },
+      { href: '/brief', label: 'Brief quotidien' },
+    ],
+  },
+  {
     label: 'Admin',
+    adminOnly: true,
     items: [
       { href: '/admin/import-fondamentaux', label: 'Import IA' },
       { href: '/admin/cles-api', label: 'Clés API' },
-      { href: '/methodologie', label: 'Méthodologie' },
     ],
   },
 ];

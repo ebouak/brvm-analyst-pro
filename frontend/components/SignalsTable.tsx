@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { SignalDaily } from '@/lib/types';
 import { fmtNumber } from '@/lib/format';
 import SignalBadge from './SignalBadge';
+import RatingBadge from './RatingBadge';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
 import brvmLogos from '@/lib/brvmLogos.json';
@@ -250,7 +251,10 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
     <tr className="border-b border-border/40 hover:bg-bg/50 transition-colors group">
       {/* Signal */}
       <td className="px-3 py-2 text-center">
-        <SignalBadge signal={s.signal} small />
+        <span className="inline-flex items-center gap-1.5">
+          <SignalBadge signal={s.signal} small />
+          <RatingBadge scoreTotal={s.score_total} confiance={s.confiance} />
+        </span>
       </td>
 
       {/* Instrument */}

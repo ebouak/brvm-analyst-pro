@@ -430,9 +430,10 @@ export default async function InstrumentPage({
               Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
             </p>
           </div>
-          <pre className="text-xs font-mono bg-surface border border-border rounded-lg px-4 py-3 text-up select-all overflow-x-auto">
-            npm run backfill -- {code} --from=2023-01-01
-          </pre>
+          <p className="text-xs text-faint">
+            L&apos;historique s&apos;étoffe automatiquement séance après séance ; les indicateurs
+            s&apos;activeront dès que la profondeur sera suffisante.
+          </p>
         </div>
       )}
 

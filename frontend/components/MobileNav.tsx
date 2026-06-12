@@ -12,9 +12,16 @@ const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
  * Navigation mobile (md:hidden) : barre supérieure + tiroir plein écran.
  * Réutilise NAV_GROUPS (même architecture que la sidebar desktop).
  */
-export default function MobileNav({ isPremium = false }: { isPremium?: boolean }) {
+export default function MobileNav({
+  isPremium = false,
+  isAdmin = false,
+}: {
+  isPremium?: boolean;
+  isAdmin?: boolean;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const groups = NAV_GROUPS.filter((g) => !g.adminOnly || isAdmin);
 
   // Ferme le tiroir à chaque navigation + bloque le scroll quand ouvert.
   useEffect(() => {
@@ -76,7 +83,7 @@ export default function MobileNav({ isPremium = false }: { isPremium?: boolean }
             <BeginnerToggle />
           </div>
           <div className="space-y-6">
-            {NAV_GROUPS.map((group) => (
+            {groups.map((group) => (
               <div key={group.label}>
                 <p className="overline mb-2 px-1 text-[9px] text-faint">
                   {group.label === 'Premium' ? (

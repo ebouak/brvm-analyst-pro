@@ -17,9 +17,11 @@ const BARE_PREFIXES = ['/societes', '/simulateur', '/brief'];
  */
 export default function ConditionalShell({
   isPremium,
+  isAdmin = false,
   children,
 }: {
   isPremium: boolean;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -28,9 +30,9 @@ export default function ConditionalShell({
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar isPremium={isPremium} />
+      <Sidebar isPremium={isPremium} isAdmin={isAdmin} />
       <div className="flex-1 min-w-0">
-        <MobileNav isPremium={isPremium} />
+        <MobileNav isPremium={isPremium} isAdmin={isAdmin} />
         <main className="min-w-0">{children}</main>
       </div>
     </div>

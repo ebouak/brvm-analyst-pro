@@ -320,11 +320,9 @@ export default async function BacktestPage({ searchParams }: PageProps) {
               sur cette période.
             </p>
             <p className="text-xs text-faint">
-              Lancez le backfill dans le scraper :
+              L&apos;historique de cette valeur s&apos;étoffe automatiquement séance après séance —
+              choisissez une période plus courte ou une autre valeur en attendant.
             </p>
-            <pre className="text-xs font-mono bg-bg border border-border rounded-lg px-4 py-3 text-up select-all inline-block">
-              npm run backfill -- {selectedCode} --from=2023-01-01
-            </pre>
           </div>
         </PremiumPanel>
       )}
