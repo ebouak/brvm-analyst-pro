@@ -14,13 +14,13 @@ const INSTRUMENTS_TABLE_SELECTORS = {
 };
 
 const INSTRUMENTS_COLUMN_SPEC: Record<string, string[]> = {
-  code: ['Code', 'code'],
-  designation: ['Désignation', 'designation', 'Name'],
-  pays: ['Pays', 'pays', 'Country'],
-  secteur: ['Secteur', 'secteur', 'Sector'],
-  type: ['Type', 'type'],
-  statut: ['Statut', 'statut', 'Status'],
-  isin: ['ISIN', 'isin'],
+  code: ['code', 'symbole', 'ticker'],
+  designation: ['designation', 'libelle', 'titre', 'societe', 'valeur'],
+  pays: ['pays', 'country'],
+  secteur: ['secteur', 'activite', 'sector'],
+  type: ['type', 'categorie'],
+  statut: ['statut', 'status', 'etat'],
+  isin: ['isin', 'code isin'],
 };
 
 const MARKET_TABLE_SELECTORS = {
@@ -31,14 +31,14 @@ const MARKET_TABLE_SELECTORS = {
 };
 
 const MARKET_COLUMN_SPEC: Record<string, string[]> = {
-  code: ['Code', 'code'],
-  designation: ['Désignation', 'designation', 'Name'],
-  cours_jour: ['Cours jour', 'cours', 'Close'],
-  cours_precedent: ['Cours précédent', 'previous', 'Prev Close'],
-  variation_pct: ['Variation %', 'var%', '%Var'],
-  volume: ['Volume', 'volume'],
-  nb_transactions: ['Nb Transactions', 'transactions', 'Trades'],
-  valeur_echangee: ['Valeur échangée', 'valeur', 'Turnover'],
+  code: ['code', 'symbole', 'ticker'],
+  designation: ['designation', 'libelle', 'titre', 'societe', 'valeur'],
+  cours_jour: ['cours jour', 'cours du jour', 'cloture', 'dernier cours', 'cours'],
+  cours_precedent: ['cours precedent', 'cours veille', 'precedent', 'cloture veille', 'cloture precedente'],
+  variation_pct: ['variation', 'var', '%var'],
+  volume: ['volume', 'volume echange', 'titres echanges', 'quantite echangee', 'quantite'],
+  nb_transactions: ['nombre transactions', 'nb transactions', 'transactions', 'nombre de transactions'],
+  valeur_echangee: ['valeur echangee', 'valeur echange', 'montant', 'capitaux'],
 };
 
 /**
