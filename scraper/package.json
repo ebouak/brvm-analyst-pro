@@ -5,7 +5,7 @@
   "description": "Scraper BDFIN BRVM (ASP.NET WebForms) pour BRVM Analyst Pro — collecte actions, obligations, indices, événements.",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
