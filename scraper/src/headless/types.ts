@@ -1,5 +1,16 @@
 // scraper/src/headless/types.ts
 
+export type CookieObject = {
+  name: string;
+  value: string;
+  domain?: string;
+  path?: string;
+  expires?: number;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: 'Strict' | 'Lax' | 'None';
+};
+
 export interface HeadlessPage {
   goto(url: string, options?: { waitUntil?: 'networkidle0' | 'networkidle2' | 'domcontentloaded' }): Promise<void>;
   content(): Promise<string>;
@@ -9,12 +20,13 @@ export interface HeadlessPage {
   waitForSelector(selector: string, options?: { timeout?: number }): Promise<void>;
   click(selector: string): Promise<void>;
   type(selector: string, text: string, options?: { delay?: number }): Promise<void>;
-  cookies(): Promise<Array<{ name: string; value: string; domain?: string; path?: string; expires?: number; httpOnly?: boolean; secure?: boolean; sameSite?: string }>>;
-  setCookie(cookie: { name: string; value: string; domain?: string; path?: string; expires?: number; httpOnly?: boolean; secure?: boolean; sameSite?: string }): Promise<void>;
+  cookies(): Promise<CookieObject[]>;
+  setCookie(cookie: CookieObject): Promise<void>;
   close(): Promise<void>;
 }
 
 export interface HeadlessBrowser {
+  connect(): Promise<void>;
   newPage(): Promise<HeadlessPage>;
   close(): Promise<void>;
 }

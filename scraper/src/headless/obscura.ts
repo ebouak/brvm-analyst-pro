@@ -2,7 +2,7 @@
 import puppeteer from 'puppeteer';
 import type { Browser, Page, ConnectOptions } from 'puppeteer';
 import { logger } from '../logger.js';
-import type { HeadlessBrowser, HeadlessPage, HeadlessConfig } from './types.js';
+import type { HeadlessBrowser, HeadlessPage, HeadlessConfig, CookieObject } from './types.js';
 import { HeadlessError } from './types.js';
 
 const log = logger.child({ module: 'headless:obscura' });
@@ -74,17 +74,17 @@ class ObscuraPage implements HeadlessPage {
     }
   }
 
-  async cookies(): Promise<Array<{ name: string; value: string; domain?: string; path?: string; expires?: number; httpOnly?: boolean; secure?: boolean; sameSite?: string }>> {
+  async cookies(): Promise<CookieObject[]> {
     try {
-      return await this.page.cookies();
+      return (await this.page.cookies()) as CookieObject[];
     } catch (err) {
       throw new HeadlessError('Failed to get cookies', err as Error);
     }
   }
 
-  async setCookie(cookie: { name: string; value: string; domain?: string; path?: string; expires?: number; httpOnly?: boolean; secure?: boolean; sameSite?: string }): Promise<void> {
+  async setCookie(cookie: CookieObject): Promise<void> {
     try {
-      await this.page.setCookie(cookie as Parameters<typeof this.page.setCookie>[0]);
+      await this.page.setCookie(cookie);
     } catch (err) {
       throw new HeadlessError(`Failed to set cookie "${cookie.name}"`, err as Error);
     }
