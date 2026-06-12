@@ -1,0 +1,100 @@
+name: Intraday Watchdog (Catch-up)
+
+# Run every 30 minutes to check if intraday scrape is up-to-date
+on:
+  schedule:
+    - cron: '*/30 9-16 * * 1-5'  # Check every 30 min during trading hours
+  workflow_dispatch:
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+
+      - name: Check intraday data freshness
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        id: check
+        run: |
+          npx tsx -e "
+          import { createClient } from '@supabase/supabase-js';
+
+          const url = process.env.SUPABASE_URL;
+          const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+          if (!url || !key) {
+            console.error('❌ Missing SUPABASE_URL or SERVICE_ROLE_KEY');
+            process.exit(1);
+          }
+
+          const client = createClient(url, key);
+
+          // Check if we have data from the last 30 minutes
+          const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+          const { data, error } = await client
+            .from('brvm_actions_daily')
+            .select('updated_at')
+            .gte('updated_at', thirtyMinutesAgo.toISOString())
+            .order('updated_at', { ascending: false })
+            .limit(1);
+
+          if (error) {
+            console.error('❌ Database query failed:', error.message);
+            process.exit(1);
+          }
+
+          if (!data || data.length === 0) {
+            console.log('🔴 STALE: No data updated in last 30 minutes');
+            console.log('Setting needsRetrigger=true');
+            process.stdout.write('needsRetrigger=true\n');
+            process.exit(0);  // Don't fail, just flag it
+          }
+
+          const lastUpdate = new Date(data[0].updated_at);
+          const minutesOld = Math.floor((Date.now() - lastUpdate.getTime()) / 60000);
+
+          if (minutesOld > 20) {
+            console.log(\`⚠️ STALE: Data is \${minutesOld} minutes old\`);
+            process.stdout.write('needsRetrigger=true\n');
+            process.exit(0);
+          }
+
+          console.log(\`✅ FRESH: Data updated \${minutesOld} minutes ago\`);
+          process.stdout.write('needsRetrigger=false\n');
+          " >> $GITHUB_OUTPUT
+
+      - name: Trigger intraday catch-up
+        if: steps.check.outputs.needsRetrigger == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('🔄 Triggering intraday catch-up workflow...');
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'intraday.yml',
+              ref: 'main'
+            });
+            console.log('✅ Catch-up workflow triggered');
+
+      - name: Notify Slack if stale
+        if: steps.check.outputs.needsRetrigger == 'true'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ Intraday data is stale (>20 min). Catch-up triggered. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi

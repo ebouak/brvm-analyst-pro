@@ -11,6 +11,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -32,6 +33,64 @@ jobs:
         working-directory: scraper
         run: npm ci
 
-      - name: Run daily full scrape
+      - name: Run daily full scrape (with retry)
         working-directory: scraper
-        run: npm run daily:full
+        run: |
+          MAX_RETRIES=2
+          RETRY_DELAY=60
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $attempt/$MAX_RETRIES..."
+            if npm run daily:full; then
+              echo "✅ Daily full scrape succeeded"
+              exit 0
+            else
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                echo "⚠️ Attempt $attempt failed, retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+          echo "❌ Daily full scrape failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Verify data was inserted
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        if: success()
+        run: |
+          npx tsx -e "
+          import { createClient } from '@supabase/supabase-js';
+          const client = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+          const today = new Date().toISOString().split('T')[0];
+
+          const { count: actions } = await client
+            .from('brvm_actions_daily')
+            .select('*', { count: 'exact', head: true })
+            .eq('date_marche', today);
+
+          const { count: communiques } = await client
+            .from('brvm_communiques')
+            .select('*', { count: 'exact', head: true })
+            .gte('date_publication', today);
+
+          console.log(\`✅ Data verified: \${actions} actions, \${communiques} communiques for \${today}\`);
+
+          if (!actions) {
+            console.error('❌ No action data found for today');
+            process.exit(1);
+          }
+          "
+
+      - name: Notify failure on Slack (optional)
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            SCHEDULE_TIME=$(date -u +'%H:%M UTC')
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ Daily BRVM scrape FAILED at $SCHEDULE_TIME. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi

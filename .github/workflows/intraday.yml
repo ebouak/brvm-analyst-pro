@@ -13,6 +13,9 @@ concurrency:
 jobs:
   intraday:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,9 +24,67 @@ jobs:
       - name: Install scraper deps
         working-directory: scraper
         run: npm ci
-      - name: Run intraday
+
+      - name: Run intraday (with retry)
         working-directory: scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npm run intraday
+        run: |
+          MAX_RETRIES=3
+          RETRY_DELAY=30
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $attempt/$MAX_RETRIES..."
+            if npm run intraday; then
+              echo "✅ Intraday scrape succeeded"
+              exit 0
+            else
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                echo "⚠️ Attempt $attempt failed, retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+          echo "❌ Intraday scrape failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Check data freshness
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        if: success()
+        run: |
+          # Verify that data from this hour exists in the database
+          npx tsx -e "
+          import { createClient } from '@supabase/supabase-js';
+          const url = process.env.SUPABASE_URL;
+          const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          const client = createClient(url, key);
+          const now = new Date();
+          const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+          const { count, error } = await client
+            .from('brvm_actions_daily')
+            .select('*', { count: 'exact', head: true })
+            .gte('updated_at', hourAgo.toISOString());
+          if (error) {
+            console.error('Data freshness check failed:', error);
+            process.exit(1);
+          }
+          if ((count || 0) < 10) {
+            console.warn('⚠️ WARNING: Less than 10 records updated in last hour. Data may be stale.');
+            process.exit(1);
+          }
+          console.log('✅ Data freshness verified:', count, 'records updated in last hour');
+          "
+
+      - name: Notify failure on Slack (optional)
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ Intraday scrape FAILED after 3 retries at $(date -u +'%H:%M UTC'). Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi
