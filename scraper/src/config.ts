@@ -32,6 +32,12 @@ const schema = z.object({
     .string()
     .default('BRVMAnalystPro-Scraper/0.1 (+contact@example.com)'),
 
+  OBSCURA_CDP_URL: z
+    .string()
+    .url()
+    .default('ws://localhost:9222')
+    .describe('Obscura CDP WebSocket URL for headless browser'),
+
   SUPABASE_URL: z.string().optional().default(''),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional().default(''),
 
