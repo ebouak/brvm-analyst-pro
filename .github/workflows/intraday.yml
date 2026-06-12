@@ -54,29 +54,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         if: success()
-        run: |
-          # Verify that data from this hour exists in the database
-          npx tsx -e "
-          import { createClient } from '@supabase/supabase-js';
-          const url = process.env.SUPABASE_URL;
-          const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          const client = createClient(url, key);
-          const now = new Date();
-          const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-          const { count, error } = await client
-            .from('brvm_actions_daily')
-            .select('*', { count: 'exact', head: true })
-            .gte('updated_at', hourAgo.toISOString());
-          if (error) {
-            console.error('Data freshness check failed:', error);
-            process.exit(1);
-          }
-          if ((count || 0) < 10) {
-            console.warn('⚠️ WARNING: Less than 10 records updated in last hour. Data may be stale.');
-            process.exit(1);
-          }
-          console.log('✅ Data freshness verified:', count, 'records updated in last hour');
-          "
+        run: npx tsx scripts/verify-data.ts intraday
 
       - name: Notify failure on Slack (optional)
         if: failure()

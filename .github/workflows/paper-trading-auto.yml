@@ -35,24 +35,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          npx tsx -e "
-          import { createClient } from '@supabase/supabase-js';
-          const client = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-          const today = new Date().toISOString().split('T')[0];
-
-          const { count } = await client
-            .from('paper_trading_positions')
-            .select('*', { count: 'exact', head: true })
-            .eq('entry_date', today)
-            .eq('status', 'open');
-
-          if ((count || 0) > 0) {
-            console.log(\`✅ \${count} positions opened today\`);
-          } else {
-            console.log('ℹ️ No positions opened today (no strong signals or all accounts inactive)');
-          }
-          "
+        run: npx tsx scripts/verify-data.ts paper
 
       - name: Notify failure on Slack (optional)
         if: failure()

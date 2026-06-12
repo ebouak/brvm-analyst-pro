@@ -59,29 +59,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         if: success()
-        run: |
-          npx tsx -e "
-          import { createClient } from '@supabase/supabase-js';
-          const client = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-          const today = new Date().toISOString().split('T')[0];
-
-          const { count: actions } = await client
-            .from('brvm_actions_daily')
-            .select('*', { count: 'exact', head: true })
-            .eq('date_marche', today);
-
-          const { count: communiques } = await client
-            .from('brvm_communiques')
-            .select('*', { count: 'exact', head: true })
-            .gte('date_publication', today);
-
-          console.log(\`✅ Data verified: \${actions} actions, \${communiques} communiques for \${today}\`);
-
-          if (!actions) {
-            console.error('❌ No action data found for today');
-            process.exit(1);
-          }
-          "
+        run: npx tsx scripts/verify-data.ts daily
 
       - name: Notify failure on Slack (optional)
         if: failure()

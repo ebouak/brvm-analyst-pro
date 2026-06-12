@@ -43,27 +43,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           PREV_MONTH=$(date -d "last month" +%Y-%m)
-          npx tsx -e "
-          import { createClient } from '@supabase/supabase-js';
-          const client = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-          const { count, error } = await client
-            .from('monthly_reports')
-            .select('*', { count: 'exact', head: true })
-            .eq('month', '$PREV_MONTH');
-
-          if (error) {
-            console.error('Query failed:', error);
-            process.exit(1);
-          }
-
-          if (!count || count === 0) {
-            console.error('❌ No reports created for $PREV_MONTH');
-            process.exit(1);
-          }
-
-          console.log(\`✅ Monthly reports created successfully: \${count} users\`);
-          "
+          npx tsx scripts/verify-data.ts monthly "$PREV_MONTH"
 
       - name: Notify failure on Slack (optional)
         if: failure()
