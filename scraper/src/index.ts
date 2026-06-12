@@ -112,7 +112,7 @@ async function main(): Promise<number> {
       return res.status === 'failed' ? 1 : 0;
     }
     case 'brief': {
-      const res = await runBrief();
+      const res = await runBrief({ force: rest.includes('--force') });
       return res.status === 'failed' ? 1 : 0;
     }
     case 'publications': {

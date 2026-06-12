@@ -1,14 +1,15 @@
 /**
- * Worker brief quotidien : charge les données de la dernière séance,
- * compose le brief (compose.ts, pur), l'archive dans brief_daily et
- * l'envoie sur Telegram (canal existant alerts/channels).
+ * Worker note de conjoncture : charge les données de la dernière séance,
+ * construit les données structurées + le texte (compose.ts, pur), archive
+ * dans brief_daily (contenu + data jsonb) et envoie sur Telegram —
+ * en photo (image OG de la note) avec légende, repli texte simple.
  *
- * Idempotent : si le brief de la séance est déjà envoyé (sent_at non null),
- * le run est un no-op — l'étape peut donc tourner à chaque passage du cron.
+ * Idempotent : si la note de la séance est déjà envoyée (sent_at non null),
+ * no-op — sauf avec { force: true } (CLI : brief --force).
  */
 import { getSupabase } from '../persistence/supabase.js';
 import { dispatch } from '../alerts/channels.js';
-import { composeBrief } from './compose.js';
+import { buildBriefData, composeBriefText } from './compose.js';
 import { logger } from '../logger.js';
 
 export interface BriefRunResult {
@@ -16,10 +17,28 @@ export interface BriefRunResult {
   dateMarche?: string;
 }
 
-export async function runBrief(): Promise<BriefRunResult> {
+const SITE_URL = process.env.SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+
+/** Envoie la note en photo Telegram (image OG) ; retourne false si non configuré/échec. */
+async function sendTelegramPhoto(caption: string, imageUrl: string): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return false;
+  try {
+    const resp = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, photo: imageUrl, caption: caption.slice(0, 1024) }),
+    });
+    return resp.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function runBrief(opts: { force?: boolean } = {}): Promise<BriefRunResult> {
   const supabase = getSupabase();
 
-  // Dernière séance disponible
   const { data: lastRow, error: lastErr } = await supabase
     .from('brvm_actions_daily')
     .select('date_marche')
@@ -36,19 +55,19 @@ export async function runBrief(): Promise<BriefRunResult> {
   }
   const dateMarche = lastRow.date_marche as string;
 
-  // Déjà envoyé ? (idempotence)
-  const { data: existing } = await supabase
-    .from('brief_daily')
-    .select('sent_at')
-    .eq('date_marche', dateMarche)
-    .maybeSingle();
-  if (existing?.sent_at) {
-    logger.info({ dateMarche }, 'brief: déjà envoyé pour cette séance — skip');
-    return { status: 'skipped', dateMarche };
+  if (!opts.force) {
+    const { data: existing } = await supabase
+      .from('brief_daily')
+      .select('sent_at')
+      .eq('date_marche', dateMarche)
+      .maybeSingle();
+    if (existing?.sent_at) {
+      logger.info({ dateMarche }, 'brief: déjà envoyé pour cette séance — skip');
+      return { status: 'skipped', dateMarche };
+    }
   }
 
-  // Données de la séance
-  const [{ data: actions }, { data: indices }, { data: news }] = await Promise.all([
+  const [{ data: actions }, { data: indices }, { data: news }, { data: summary }] = await Promise.all([
     supabase
       .from('brvm_actions_daily')
       .select('code, variation_pct, volume')
@@ -59,13 +78,18 @@ export async function runBrief(): Promise<BriefRunResult> {
       .eq('date_marche', dateMarche),
     supabase
       .from('brvm_news')
-      .select('titre')
+      .select('titre, source, source_url')
       .gte('date_publication', dateMarche)
       .order('date_publication', { ascending: false })
-      .limit(2),
+      .limit(4),
+    supabase
+      .from('brvm_market_summary')
+      .select('valeur_transactions, capitalisation_actions, capitalisation_obligations')
+      .eq('date_marche', dateMarche)
+      .maybeSingle(),
   ]);
 
-  const contenu = composeBrief({
+  const data = buildBriefData({
     dateMarche,
     actions: (actions ?? []) as { code: string; variation_pct: number | null; volume: number | null }[],
     indices: (indices ?? []).map((i) => ({
@@ -73,24 +97,31 @@ export async function runBrief(): Promise<BriefRunResult> {
       valeur: (i as { valeur?: number | null }).valeur ?? null,
       variation_pct: i.variation_pct as number | null,
     })),
-    news: (news ?? []) as { titre: string }[],
-    siteUrl: process.env.SITE_URL,
+    news: (news ?? []) as { titre: string; source: string | null; source_url: string | null }[],
+    marketSummary: summary ?? null,
+    siteUrl: SITE_URL,
   });
 
-  if (!contenu) {
-    logger.warn({ dateMarche }, 'brief: données insuffisantes — pas de brief');
+  if (!data) {
+    logger.warn({ dateMarche }, 'brief: données insuffisantes — pas de note');
     return { status: 'no-data', dateMarche };
   }
 
-  // Envoi (Telegram si configuré, sinon console — cf. channels.ts)
-  const results = await dispatch({ subject: '', body: contenu });
-  const sent = results.some((r) => r.status === 'sent') || results.every((r) => r.channel === 'console');
+  const contenu = composeBriefText(data, SITE_URL);
 
-  // Archive (upsert idempotent sur date_marche)
+  // Envoi : photo (image OG de la note) en priorité, sinon texte via dispatch.
+  const imageUrl = `${SITE_URL}/api/og/brief?date=${dateMarche}`;
+  let sent = await sendTelegramPhoto(contenu, imageUrl);
+  if (!sent) {
+    const results = await dispatch({ subject: '', body: contenu });
+    sent = results.some((r) => r.status === 'sent') || results.every((r) => r.channel === 'console');
+  }
+
   const { error: upErr } = await supabase.from('brief_daily').upsert(
     {
       date_marche: dateMarche,
       contenu,
+      data,
       sent_at: sent ? new Date().toISOString() : null,
     },
     { onConflict: 'date_marche' },
@@ -100,6 +131,6 @@ export async function runBrief(): Promise<BriefRunResult> {
     return { status: 'failed', dateMarche };
   }
 
-  logger.info({ dateMarche, channels: results.map((r) => `${r.channel}:${r.status}`) }, 'brief envoyé');
+  logger.info({ dateMarche, sent }, 'note de conjoncture archivée');
   return { status: 'sent', dateMarche };
 }

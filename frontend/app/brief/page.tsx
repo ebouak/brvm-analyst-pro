@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import { fmtDateFR } from '@/lib/format';
@@ -60,16 +61,19 @@ export default async function BriefPage() {
             {list.map((b) => {
               const waText = encodeURIComponent(b.contenu);
               return (
-                <article key={b.date_marche} className="bg-surface border border-border rounded-xl p-5">
+                <article key={b.date_marche} className="bg-surface border border-border rounded-xl p-5 hover:border-accent/30 transition-colors">
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <h2 className="text-sm text-accent font-medium">
-                      Séance du {fmtDateFR(b.date_marche)}
-                    </h2>
+                    <Link
+                      href={`/brief/${b.date_marche}`}
+                      className="text-sm text-accent font-medium hover:text-gold-2 transition-colors"
+                    >
+                      Note de conjoncture — séance du {fmtDateFR(b.date_marche)} →
+                    </Link>
                     <a
                       href={`https://wa.me/?text=${waText}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[11px] px-2.5 py-1 rounded-md border border-border text-muted hover:text-white hover:border-border-strong transition-colors"
+                      className="text-[11px] px-2.5 py-1 rounded-md border border-border text-muted hover:text-white hover:border-border-strong transition-colors shrink-0"
                       aria-label={`Partager le brief du ${fmtDateFR(b.date_marche)} sur WhatsApp`}
                     >
                       Partager sur WhatsApp
