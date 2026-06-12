@@ -42,7 +42,7 @@ export async function loginViaHeadless(browser: HeadlessBrowser, baseUrl: string
       await page.waitForSelector(LOGIN_SELECTORS.loginPageIndicator, { timeout: 5000 });
     } catch {
       const content = await page.content();
-      if (!content.includes('login') && !content.includes('Login')) {
+      if (!content.toLowerCase().includes('login')) {
         throw new HeadlessAuthError('Login page did not load — may already be authenticated or page structure changed');
       }
     }
@@ -62,16 +62,24 @@ export async function loginViaHeadless(browser: HeadlessBrowser, baseUrl: string
 
     // Wait for redirect or dashboard indicators
     try {
-      await page.waitForSelector('body', { timeout }); // Wait for page load
+      // Wait for body to ensure page loaded
+      await page.waitForSelector('body', { timeout });
       const finalUrl = await page.evaluate(() => window.location.href);
       log.info({ finalUrl }, 'Login complete, redirected');
 
       // Harvest cookies
       const cookies = await page.cookies();
+
+      // Validate success: URL should NOT contain login path (case-insensitive)
+      const loginPathLower = loginPath.toLowerCase();
+      const urlLower = finalUrl.toLowerCase();
+      const loginPathNormalized = loginPathLower.replace(/^\//, '');
+      const success = !urlLower.includes('login') && !urlLower.includes(loginPathNormalized);
+
       const result: HeadlessAuthResult = {
         cookies: cookies.map((c) => ({ name: c.name, value: c.value })),
         finalUrl,
-        success: !finalUrl.includes('login') && !finalUrl.includes('Login'),
+        success,
       };
 
       if (!result.success) {
