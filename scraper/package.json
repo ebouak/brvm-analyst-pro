@@ -47,6 +47,8 @@
     "bdfin:market:date": "tsx src/index.ts bdfin:market:date",
     "daily:full": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts daily:full",
     "daily:full:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts daily:full --mock",
+    "paper-trading:auto": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts paper-trading:auto",
+    "paper-trading:auto:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts paper-trading:auto --mock",
     "obscura:start": "obscura serve --port 9222 --stealth"
   },
   "dependencies": {

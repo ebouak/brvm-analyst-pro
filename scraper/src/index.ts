@@ -26,6 +26,8 @@
  *   tsx src/index.ts monthly-reports       # générer rapports PDF mensuels
  *   tsx src/index.ts monthly-reports 2026-06  # mois spécifique
  *   tsx src/index.ts monthly-reports --dry-run # mode test (sans email/DB)
+ *   tsx src/index.ts paper-trading:auto    # ouvrir positions depuis signaux forts
+ *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
@@ -48,6 +50,7 @@ import { runNotations } from './notations/runNotations.js';
 import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
 import { runValidation } from './validation/runValidation.js';
+import { runPaperTradingAuto } from './runners/runPaperTradingAuto.js';
 // runMonthlyReports importé dynamiquement (dépend de pdfkit) — voir case 'monthly-reports'.
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
@@ -165,6 +168,11 @@ async function main(): Promise<number> {
       const { runMonthlyReports } = await import('./runners/runMonthlyReports.js');
       const res = await runMonthlyReports({ month, dryRun });
       logger.info(res, 'Monthly reports generation complete');
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'paper-trading:auto': {
+      const res = await runPaperTradingAuto();
+      console.log(JSON.stringify(res, null, 2));
       return res.status === 'failed' ? 1 : 0;
     }
     default:

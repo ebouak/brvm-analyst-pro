@@ -17,9 +17,9 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { ReportNarrator, createReportNarrator } from '../services/reportNarrator.js';
 import { generateMonthlyReportPDF, pdfToBuffer, type MonthlyReportData } from '../services/pdfGenerator.js';
-import { dispatch } from '../alerts/channels.js';
 import { logger } from '../logger.js';
 import { PaperTradingService } from '../services/paperTradingService.js';
+import { EmailService } from '../services/emailService.js';
 
 export interface MonthlyReportRunOptions {
   month?: string; // Override month (YYYY-MM format), default = current month
@@ -41,6 +41,7 @@ export async function runMonthlyReports(
   const supabase = getSupabase();
   const narrator = createReportNarrator();
   const paperTradingService = new PaperTradingService();
+  const emailService = new EmailService();
 
   const now = new Date();
   const month = opts.month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -81,6 +82,7 @@ export async function runMonthlyReports(
           month,
           narrator,
           paperTradingService,
+          emailService,
           opts.dryRun || false,
         );
 
@@ -124,6 +126,7 @@ async function generateReportForUser(
   month: string,
   narrator: ReturnType<typeof createReportNarrator>,
   paperTradingService: PaperTradingService,
+  emailService: EmailService,
   dryRun: boolean,
 ): Promise<void> {
   logger.info({ userId, month }, 'Generating report for user');
@@ -295,7 +298,7 @@ async function generateReportForUser(
     }
 
     // 11. Envoyer l'email
-    await sendReportEmail(email, fullName, month, pdfUrl);
+    await sendReportEmail(emailService, email, fullName, month, pdfUrl, account.pnl_pct);
   }
 
   logger.info(
@@ -320,29 +323,36 @@ async function uploadPdfToBlob(buffer: Buffer, userId: string, month: string): P
 }
 
 async function sendReportEmail(
+  emailService: EmailService,
   email: string,
   name: string,
   month: string,
   pdfUrl: string,
+  pnlPct: number,
 ): Promise<void> {
   const monthName = getMonthName(month);
   const subject = `BRVM Analyst Pro — Rapport ${monthName}`;
-  const body = `Bonjour ${name},
 
-Votre rapport de synthèse pour ${monthName} est prêt.
+  const { html, text } = emailService.buildMonthlyReportEmail({
+    userName: name,
+    month,
+    pdfUrl,
+    pnlPct,
+  });
 
-Télécharger le rapport PDF: ${pdfUrl}
-
-Consulter en ligne: https://brvm.app/premium/reports/${month}
-
-Cordialement,
-BRVM Analyst Pro`;
-
-  await dispatch({
+  const result = await emailService.send({
     to: email,
     subject,
-    body,
+    html,
+    text,
   });
+
+  if (!result.success) {
+    logger.warn(
+      { email, month, error: result.error },
+      'Failed to send email, but report was created'
+    );
+  }
 }
 
 async function getTopSectorsByRsi(
