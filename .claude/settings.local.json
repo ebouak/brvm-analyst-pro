@@ -72,7 +72,17 @@
       "Bash(node ocrtest.mjs)",
       "Bash(node ocr-backfill.mjs STAC,BOAB)",
       "Bash(node ocr-backfill.mjs)",
-      "Bash(node -e \"const pkg = require\\('./scraper/package.json'\\); console.log\\('Script added:', pkg.scripts['obscura:start']\\)\")"
+      "Bash(node -e \"const pkg = require\\('./scraper/package.json'\\); console.log\\('Script added:', pkg.scripts['obscura:start']\\)\")",
+      "Bash(grep -E \"^$|passed|failed|Test Files\")",
+      "Bash(Get-ChildItem supabase/migrations)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(Sort-Object)",
+      "Bash(powershell -Command \"sqlparse -f human c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\supabase\\\\migrations\\\\0032_brvm_documents.sql 2>&1 || echo 'Syntax validator not available, checking manually'\")",
+      "PowerShell($comm = Get-Content \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\src\\\\scrapers\\\\communiques.ts\" -ErrorAction SilentlyContinue; $bull = Get-Content \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\\\\src\\\\scrapers\\\\bulletins.ts\" -ErrorAction SilentlyContinue; Write-Host \"communiques.ts: $\\($comm.Count\\) lines\"; Write-Host \"bulletins.ts: $\\($bull.Count\\) lines\")",
+      "Bash(cd /mnt/c/Users/adego/OneDrive/Documents/brvm-analyst-pro/scraper && npx tsc --noEmit src/persistence/repository.ts src/runners/runCommuniques.ts src/runners/runBulletins.ts --skipLibCheck 2>&1 || echo \"Check complete\")",
+      "Bash(node -c frontend/app/api/cron/brvm/route.ts)",
+      "Bash(python -m yaml .github/workflows/daily-brvm.yml)",
+      "Bash(python3 -c \"import yaml; yaml.safe_load\\(open\\('.github/workflows/daily-brvm.yml'\\)\\)\")"
     ]
   }
 }

@@ -1,0 +1,37 @@
+name: Daily BRVM Scrape
+
+on:
+  schedule:
+    # 09:15 UTC (market open ~09:30 Abidjan)
+    - cron: '15 9 * * 1-5'
+    # 16:00 UTC (market close ~16:00 Abidjan)
+    - cron: '0 16 * * 1-5'
+  workflow_dispatch: {}
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BDFIN_USERNAME: ${{ secrets.BDFIN_USERNAME }}
+      BDFIN_PASSWORD: ${{ secrets.BDFIN_PASSWORD }}
+      BDFIN_BASE_URL: https://bdfin.brvm.org
+      BDFIN_LOGIN_PATH: /login.aspx
+      BDFIN_MARKET_PATH: /ActivityMarket.aspx
+      HTTP_TIMEOUT_MS: 30000
+      LOG_LEVEL: info
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install scraper dependencies
+        working-directory: scraper
+        run: npm ci
+
+      - name: Run daily full scrape
+        working-directory: scraper
+        run: npm run daily:full
