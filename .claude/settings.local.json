@@ -71,7 +71,8 @@
       "Bash(./belt.exe version *)",
       "Bash(node ocrtest.mjs)",
       "Bash(node ocr-backfill.mjs STAC,BOAB)",
-      "Bash(node ocr-backfill.mjs)"
+      "Bash(node ocr-backfill.mjs)",
+      "Bash(node -e \"const pkg = require\\('./scraper/package.json'\\); console.log\\('Script added:', pkg.scripts['obscura:start']\\)\")"
     ]
   }
 }

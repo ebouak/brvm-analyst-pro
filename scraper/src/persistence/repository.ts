@@ -13,8 +13,41 @@ import type {
 } from '../types.js';
 
 /** Upsert du référentiel instruments (table brvm_instruments). */
-export async function upsertInstruments(snapshot: MarketSnapshot): Promise<void> {
+export async function upsertInstruments(snapshot: MarketSnapshot): Promise<void>;
+export async function upsertInstruments(instruments: Array<{
+  code: string;
+  designation: string;
+  pays: string;
+  secteur: string;
+  type: string;
+  statut: string;
+  isin?: string;
+  scraped_at: string;
+}>): Promise<number>;
+export async function upsertInstruments(snapshotOrInstruments: any): Promise<void | number> {
   const sb = getSupabase();
+
+  // Overload: array of instruments (from BDFIN scrapers)
+  if (Array.isArray(snapshotOrInstruments)) {
+    const instruments = snapshotOrInstruments;
+    if (instruments.length === 0) return 0;
+    const rows = instruments.map((i) => ({
+      code: i.code,
+      designation: i.designation,
+      pays: i.pays,
+      secteur: i.secteur,
+      type: i.type,
+      actif: true,
+    }));
+    const { error } = await sb
+      .from('brvm_instruments')
+      .upsert(rows, { onConflict: 'code' });
+    if (error) throw new Error(`upsert brvm_instruments: ${error.message}`);
+    return rows.length;
+  }
+
+  // Original overload: MarketSnapshot
+  const snapshot = snapshotOrInstruments as MarketSnapshot;
   const rows = [
     ...snapshot.actions.map((a) => ({
       code: a.code,
@@ -48,8 +81,34 @@ export async function upsertInstruments(snapshot: MarketSnapshot): Promise<void>
   if (error) throw new Error(`upsert brvm_instruments: ${error.message}`);
 }
 
-export async function upsertActions(snapshot: MarketSnapshot): Promise<number> {
+export async function upsertActions(snapshot: MarketSnapshot): Promise<number>;
+export async function upsertActions(actions: Array<{
+  code: string;
+  designation: string;
+  cours_jour: number;
+  cours_precedent: number;
+  variation_pct: number;
+  volume: number;
+  nb_transactions: number;
+  valeur_echangee: number;
+  date_marche: string;
+}>): Promise<number>;
+export async function upsertActions(snapshotOrActions: any): Promise<number> {
   const sb = getSupabase();
+
+  // Overload: array of actions with date_marche (from BDFIN scrapers)
+  if (Array.isArray(snapshotOrActions)) {
+    const actions = snapshotOrActions;
+    if (actions.length === 0) return 0;
+    const { error } = await sb
+      .from('brvm_actions_daily')
+      .upsert(actions, { onConflict: 'code,date_marche' });
+    if (error) throw new Error(`upsert brvm_actions_daily: ${error.message}`);
+    return actions.length;
+  }
+
+  // Original overload: MarketSnapshot
+  const snapshot = snapshotOrActions as MarketSnapshot;
   if (snapshot.actions.length === 0) return 0;
   const rows = snapshot.actions.map((a) => ({
     code: a.code,
@@ -71,10 +130,34 @@ export async function upsertActions(snapshot: MarketSnapshot): Promise<number> {
   return rows.length;
 }
 
-export async function upsertObligations(
-  snapshot: MarketSnapshot,
-): Promise<number> {
+export async function upsertObligations(snapshot: MarketSnapshot): Promise<number>;
+export async function upsertObligations(obligations: Array<{
+  code: string;
+  designation: string;
+  cours_jour: number;
+  cours_precedent: number;
+  variation_pct: number;
+  volume: number;
+  nb_transactions: number;
+  valeur_echangee: number;
+  date_marche: string;
+}>): Promise<number>;
+export async function upsertObligations(snapshotOrObligations: any): Promise<number> {
   const sb = getSupabase();
+
+  // Overload: array of obligations with date_marche (from BDFIN scrapers)
+  if (Array.isArray(snapshotOrObligations)) {
+    const obligations = snapshotOrObligations;
+    if (obligations.length === 0) return 0;
+    const { error } = await sb
+      .from('brvm_obligations_daily')
+      .upsert(obligations, { onConflict: 'code,date_marche' });
+    if (error) throw new Error(`upsert brvm_obligations_daily: ${error.message}`);
+    return obligations.length;
+  }
+
+  // Original overload: MarketSnapshot
+  const snapshot = snapshotOrObligations as MarketSnapshot;
   if (snapshot.obligations.length === 0) return 0;
   const rows = snapshot.obligations.map((o) => ({
     code: o.code,
