@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
+import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
@@ -260,6 +261,9 @@ export default async function Landing() {
           </p>
         </aside>
       </section>
+
+      {/* ── ÉCRANS RÉELS DE LA PLATEFORME ─────────────────────────────── */}
+      <ScreensShowcase />
 
       {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
       <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.06] md:grid-cols-3">
