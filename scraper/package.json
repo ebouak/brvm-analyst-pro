@@ -42,6 +42,9 @@
     "news": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts news",
     "monthly-reports": "tsx src/index.ts monthly-reports",
     "monthly-reports:test": "tsx src/index.ts monthly-reports --dry-run",
+    "bdfin:instruments": "tsx src/index.ts bdfin:instruments",
+    "bdfin:market": "tsx src/index.ts bdfin:market",
+    "bdfin:market:date": "tsx src/index.ts bdfin:market:date",
     "obscura:start": "obscura serve --port 9222 --stealth"
   },
   "dependencies": {
