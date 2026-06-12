@@ -53,6 +53,7 @@
     "pino": "^9.4.0",
     "pino-pretty": "^11.2.2",
     "playwright": "^1.60.0",
+    "puppeteer": "^25.1.0",
     "tough-cookie": "^5.0.0",
     "ws": "^8.21.0",
     "zod": "^3.23.8"
@@ -60,6 +61,7 @@
   "devDependencies": {
     "@types/node": "^22.7.4",
     "@types/pdfkit": "^0.12.11",
+    "@types/puppeteer": "^5.4.7",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
