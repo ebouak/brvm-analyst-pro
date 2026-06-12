@@ -24,6 +24,7 @@ create index if not exists idx_fundamentals_code on public.fundamentals (code, y
 
 alter table public.fundamentals enable row level security;
 
+drop policy if exists "lecture publique fundamentals" on public.fundamentals;
 create policy "lecture publique fundamentals"
   on public.fundamentals for select using (true);
 -- écriture réservée au service_role (pipeline d'extraction).

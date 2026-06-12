@@ -13,5 +13,6 @@ comment on table public.brvm_market_summary is
 
 alter table public.brvm_market_summary enable row level security;
 
+drop policy if exists "lecture publique market summary" on public.brvm_market_summary;
 create policy "lecture publique market summary"
   on public.brvm_market_summary for select using (true);

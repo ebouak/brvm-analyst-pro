@@ -34,10 +34,12 @@ create index if not exists idx_notiflog_user on public.notifications_log (user_i
 alter table public.dividends         enable row level security;
 alter table public.notifications_log enable row level security;
 
+drop policy if exists "lecture publique dividends" on public.dividends;
 create policy "lecture publique dividends"
   on public.dividends for select using (true);
 -- écriture dividends réservée au service_role (ingestor).
 
+drop policy if exists "notifications_log: proprietaire seul - select" on public.notifications_log;
 create policy "notifications_log: proprietaire seul - select"
   on public.notifications_log for select to authenticated
   using (user_id = auth.uid());

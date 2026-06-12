@@ -12,9 +12,11 @@ create table if not exists public.diagnostic_reports (
 
 alter table public.diagnostic_reports enable row level security;
 
+drop policy if exists "lecture publique diagnostic_reports" on public.diagnostic_reports;
 create policy "lecture publique diagnostic_reports"
   on public.diagnostic_reports for select using (true);
 
+drop policy if exists "ecriture service_role diagnostic_reports" on public.diagnostic_reports;
 create policy "ecriture service_role diagnostic_reports"
   on public.diagnostic_reports for all using (auth.role() = 'service_role');
 

@@ -16,6 +16,7 @@ comment on table public.brvm_emetteurs is
 
 -- RLS : lecture publique, écriture réservée au service_role.
 alter table public.brvm_emetteurs enable row level security;
+drop policy if exists "lecture publique emetteurs" on public.brvm_emetteurs;
 create policy "lecture publique emetteurs"
   on public.brvm_emetteurs for select using (true);
 

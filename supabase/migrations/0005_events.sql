@@ -67,12 +67,16 @@ alter table public.market_events            enable row level security;
 alter table public.market_event_instruments enable row level security;
 alter table public.report_snapshots         enable row level security;
 
+drop policy if exists "lecture publique events" on public.market_events;
 create policy "lecture publique events"
   on public.market_events for select using (true);
+
+drop policy if exists "lecture publique event_instruments" on public.market_event_instruments;
 create policy "lecture publique event_instruments"
   on public.market_event_instruments for select using (true);
 -- écriture events réservée au service_role (ingestor) -> aucune policy write.
 
+drop policy if exists "report_snapshots: proprietaire seul - all" on public.report_snapshots;
 create policy "report_snapshots: proprietaire seul - all"
   on public.report_snapshots for all to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());

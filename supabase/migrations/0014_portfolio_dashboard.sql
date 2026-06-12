@@ -109,43 +109,64 @@ alter table public.portfolio_movements enable row level security;
 alter table public.portfolio_positions enable row level security;
 
 -- Table 1: portfolio_monthly_tracking
+drop policy if exists "portfolio_monthly_tracking: proprietaire seul - select" on public.portfolio_monthly_tracking;
 create policy "portfolio_monthly_tracking: proprietaire seul - select"
   on public.portfolio_monthly_tracking for select to authenticated
   using (user_id = auth.uid());
+
+drop policy if exists "portfolio_monthly_tracking: proprietaire seul - insert" on public.portfolio_monthly_tracking;
 create policy "portfolio_monthly_tracking: proprietaire seul - insert"
   on public.portfolio_monthly_tracking for insert to authenticated
   with check (user_id = auth.uid());
+
+drop policy if exists "portfolio_monthly_tracking: proprietaire seul - update" on public.portfolio_monthly_tracking;
 create policy "portfolio_monthly_tracking: proprietaire seul - update"
   on public.portfolio_monthly_tracking for update to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists "portfolio_monthly_tracking: proprietaire seul - delete" on public.portfolio_monthly_tracking;
 create policy "portfolio_monthly_tracking: proprietaire seul - delete"
   on public.portfolio_monthly_tracking for delete to authenticated
   using (user_id = auth.uid());
 
 -- Table 2: portfolio_movements
+drop policy if exists "portfolio_movements: proprietaire seul - select" on public.portfolio_movements;
 create policy "portfolio_movements: proprietaire seul - select"
   on public.portfolio_movements for select to authenticated
   using (user_id = auth.uid());
+
+drop policy if exists "portfolio_movements: proprietaire seul - insert" on public.portfolio_movements;
 create policy "portfolio_movements: proprietaire seul - insert"
   on public.portfolio_movements for insert to authenticated
   with check (user_id = auth.uid());
+
+drop policy if exists "portfolio_movements: proprietaire seul - update" on public.portfolio_movements;
 create policy "portfolio_movements: proprietaire seul - update"
   on public.portfolio_movements for update to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists "portfolio_movements: proprietaire seul - delete" on public.portfolio_movements;
 create policy "portfolio_movements: proprietaire seul - delete"
   on public.portfolio_movements for delete to authenticated
   using (user_id = auth.uid());
 
 -- Table 3: portfolio_positions
+drop policy if exists "portfolio_positions: proprietaire seul - select" on public.portfolio_positions;
 create policy "portfolio_positions: proprietaire seul - select"
   on public.portfolio_positions for select to authenticated
   using (user_id = auth.uid());
+
+drop policy if exists "portfolio_positions: proprietaire seul - insert" on public.portfolio_positions;
 create policy "portfolio_positions: proprietaire seul - insert"
   on public.portfolio_positions for insert to authenticated
   with check (user_id = auth.uid());
+
+drop policy if exists "portfolio_positions: proprietaire seul - update" on public.portfolio_positions;
 create policy "portfolio_positions: proprietaire seul - update"
   on public.portfolio_positions for update to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists "portfolio_positions: proprietaire seul - delete" on public.portfolio_positions;
 create policy "portfolio_positions: proprietaire seul - delete"
   on public.portfolio_positions for delete to authenticated
   using (user_id = auth.uid());

@@ -146,13 +146,19 @@ alter table public.technical_indicators  enable row level security;
 alter table public.data_quality_alerts   enable row level security;
 alter table public.backtest_runs         enable row level security;
 
+drop policy if exists "lecture publique market_calendar" on public.market_calendar;
 create policy "lecture publique market_calendar"
   on public.market_calendar for select using (true);
+
+drop policy if exists "lecture publique technical_indicators" on public.technical_indicators;
 create policy "lecture publique technical_indicators"
   on public.technical_indicators for select using (true);
+
+drop policy if exists "lecture authentifiee data_quality_alerts" on public.data_quality_alerts;
 create policy "lecture authentifiee data_quality_alerts"
   on public.data_quality_alerts for select to authenticated using (true);
 
+drop policy if exists "backtest_runs: proprietaire seul - all" on public.backtest_runs;
 create policy "backtest_runs: proprietaire seul - all"
   on public.backtest_runs for all to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());

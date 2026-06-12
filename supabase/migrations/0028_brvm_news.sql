@@ -14,4 +14,5 @@ create table if not exists public.brvm_news (
 create index if not exists idx_brvm_news_date on public.brvm_news (date_publication desc);
 create index if not exists idx_brvm_news_code on public.brvm_news (instrument_code);
 alter table public.brvm_news enable row level security;
+drop policy if exists "actualites publiques" on public.brvm_news;
 create policy "actualites publiques" on public.brvm_news for select using (true);

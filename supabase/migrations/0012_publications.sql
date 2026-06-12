@@ -13,4 +13,5 @@ create table if not exists public.publications (
 create index if not exists idx_publications_code on public.publications (code, date_publication desc);
 create index if not exists idx_publications_date on public.publications (date_publication desc);
 alter table public.publications enable row level security;
+drop policy if exists "lecture publique publications" on public.publications;
 create policy "lecture publique publications" on public.publications for select using (true);

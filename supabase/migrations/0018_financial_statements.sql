@@ -117,6 +117,12 @@ alter table public.income_statements    enable row level security;
 alter table public.balance_sheets       enable row level security;
 alter table public.cash_flow_statements enable row level security;
 
+-- Drop policies if they exist (idempotence for re-application)
+drop policy if exists "lecture publique income_statements"    on public.income_statements;
+drop policy if exists "lecture publique balance_sheets"       on public.balance_sheets;
+drop policy if exists "lecture publique cash_flow_statements" on public.cash_flow_statements;
+
+-- Create policies
 create policy "lecture publique income_statements"    on public.income_statements    for select using (true);
 create policy "lecture publique balance_sheets"       on public.balance_sheets       for select using (true);
 create policy "lecture publique cash_flow_statements" on public.cash_flow_statements for select using (true);

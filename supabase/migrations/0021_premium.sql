@@ -14,6 +14,7 @@ create table if not exists public.profiles (
 alter table public.profiles enable row level security;
 
 -- L'utilisateur peut lire son propre profil
+drop policy if exists "profil lisible par le propriétaire" on public.profiles;
 create policy "profil lisible par le propriétaire"
   on public.profiles for select
   using (auth.uid() = id);

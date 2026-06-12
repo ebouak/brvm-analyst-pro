@@ -40,6 +40,7 @@ create index if not exists scraper_logs_function_status_idx
 -- Écriture uniquement via service_role (bypass RLS — scraper backend).
 alter table public.scraper_logs enable row level security;
 
+drop policy if exists "lecture authentifiee scraper_logs" on public.scraper_logs;
 create policy "lecture authentifiee scraper_logs"
   on public.scraper_logs
   for select
