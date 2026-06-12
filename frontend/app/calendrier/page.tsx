@@ -5,6 +5,8 @@ import {
   type CalendarItem,
 } from '@/lib/calendarHelpers';
 import CalendarFilters from '@/components/CalendarFilters';
+import ViewTabs from '@/components/ViewTabs';
+import { CALENDAR_TABS } from '@/lib/calendarTabs';
 import CalendarTimeline from '@/components/CalendarTimeline';
 import CalendarTable from '@/components/CalendarTable';
 import {
@@ -194,6 +196,9 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
             </StatPill>
           }
         />
+        <div className="mt-4">
+          <ViewTabs tabs={CALENDAR_TABS} current="/calendrier" />
+        </div>
         <div className="gold-rule mt-6" />
       </div>
 

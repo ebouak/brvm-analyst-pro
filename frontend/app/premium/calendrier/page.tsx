@@ -1,4 +1,6 @@
 import { getDatesClés, type TypeDate } from '@/lib/premium/calendrier';
+import ViewTabs from '@/components/ViewTabs';
+import { CALENDAR_TABS } from '@/lib/calendarTabs';
 import {
   SectionHeader,
   PremiumPanel,
@@ -104,6 +106,7 @@ export default async function CalendrierPremiumPage() {
           subtitle="Publications, dividendes et Assemblées Générales sur 12 mois."
           actions={<StatPill tone="gold">✦ Premium</StatPill>}
         />
+        <ViewTabs tabs={CALENDAR_TABS} current="/premium/calendrier" />
 
         {/* Légende des types */}
         <PremiumPanel className="p-4">

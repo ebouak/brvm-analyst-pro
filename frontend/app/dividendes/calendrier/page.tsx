@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { SectionHeader } from '@/components/ui/premium';
+import ViewTabs from '@/components/ViewTabs';
+import { CALENDAR_TABS } from '@/lib/calendarTabs';
 import { DividendCalendar } from '@/components/DividendCalendar';
 import { EmptyStatePremium } from '@/components/ui/premium';
 import type { DividendCalendarEvent } from '@/lib/dividend/calendar';
@@ -118,6 +120,7 @@ export default async function DividendCalendarPage() {
           title="Dividendes"
           subtitle="Calendrier annuel interactif · dates de détachement, taux et rendements estimés"
         />
+        <ViewTabs tabs={CALENDAR_TABS} current="/dividendes/calendrier" />
 
         {dividends.length === 0 ? (
           <EmptyStatePremium
