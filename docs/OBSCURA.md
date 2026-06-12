@@ -55,14 +55,31 @@ BDFIN_LOGIN_PATH=/login.aspx
 BDFIN_MARKET_PATH=/ActivityMarket.aspx
 ```
 
-3. **Test headless auth:**
+3. **Test headless auth** (when integrated into scraper):
 
-```bash
-cd scraper
-npm run bdfin:login:headless
+Headless authentication will be integrated into the BDFIN instruments and market scrapers in Task 2.
+
+For manual testing during development, you can use:
+
+```typescript
+import { loginViaHeadless } from './src/client/bdfinAuthHeadless.js';
+import { ObscuraBrowser } from './src/headless/obscura.js';
+
+const config = { cdpUrl: 'ws://localhost:9222', stealth: true };
+const browser = new ObscuraBrowser(config);
+await browser.connect();
+
+const result = await loginViaHeadless(
+  browser,
+  process.env.BDFIN_BASE_URL,
+  process.env.BDFIN_LOGIN_PATH,
+  process.env.BDFIN_USERNAME,
+  process.env.BDFIN_PASSWORD,
+);
+
+console.log('Auth result:', result.success ? 'Success' : 'Failed');
+await browser.close();
 ```
-
-Expected: Login succeeds, session cookies returned
 
 ## Field Selector Calibration
 
@@ -81,7 +98,7 @@ const LOGIN_SELECTORS = {
 ### How to find correct selectors
 
 1. Start Obscura: `npm run obscura:start`
-2. Open browser DevTools to `ws://localhost:9222` (via [Puppeteer DevTools](https://chromedevtools.github.io/devtools-protocol/))
+2. Open browser DevTools to `ws://localhost:9222` (via [Chrome Remote Debugging](https://chromedevtools.github.io/devtools-protocol/))
 3. Navigate to login page manually
 4. Inspect HTML in DevTools
 5. Copy actual `id` attributes
@@ -107,7 +124,7 @@ npm run obscura:start
 1. Check BDFIN login page HTML (open in regular Chrome)
 2. Verify selectors match actual `id` attributes
 3. Update `LOGIN_SELECTORS` in `bdfinAuthHeadless.ts`
-4. Test again: `npm run bdfin:login:headless`
+4. Re-run your test script using the code example from the "Test headless auth" section above
 
 ### Login succeeds but no session data
 
