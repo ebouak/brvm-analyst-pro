@@ -20,11 +20,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install scraper dependencies
         working-directory: scraper
-        run: npm ci
+        run: npm install
 
       - name: Auto-open positions from today's signals
         working-directory: scraper

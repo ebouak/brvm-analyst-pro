@@ -49,12 +49,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: scraper/package-lock.json
 
       - name: Installer les dépendances
-        run: cd scraper && npm ci
+        run: cd scraper && npm install
 
       - name: Installer Chromium (Playwright)
         run: cd scraper && npx playwright install chromium --with-deps
@@ -158,12 +158,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: scraper/package-lock.json
 
       - name: Installer les dépendances
-        run: cd scraper && npm ci
+        run: cd scraper && npm install
 
       - name: 1 · Re-calculer les signaux
         run: cd scraper && npm run score
@@ -200,12 +200,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: scraper/package-lock.json
 
       - name: Installer les dépendances
-        run: cd scraper && npm ci
+        run: cd scraper && npm install
 
       - name: Installer Chromium (Playwright)
         run: cd scraper && npx playwright install chromium --with-deps
