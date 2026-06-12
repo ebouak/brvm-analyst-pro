@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'frontend/**'
+  workflow_dispatch: {}
 
 jobs:
   deploy:
@@ -17,7 +18,7 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Deploy to Vercel (Production)
-        working-directory: frontend
+        # Pas de working-directory : le projet Vercel a deja "Root Directory = frontend"
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
