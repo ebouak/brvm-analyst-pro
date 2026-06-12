@@ -3,8 +3,15 @@ name: Intraday Watchdog (Catch-up)
 # Run every 30 minutes to check if intraday scrape is up-to-date
 on:
   schedule:
-    - cron: '*/30 9-16 * * 1-5'  # Check every 30 min during trading hours
+    # Borné à la séance (intraday tourne 9h-15h45) : après la clôture les
+    # données sont légitimement "stale", inutile de redéclencher.
+    - cron: '*/30 9-15 * * 1-5'
   workflow_dispatch:
+
+# Requis pour déclencher intraday.yml via createWorkflowDispatch
+permissions:
+  actions: write
+  contents: read
 
 jobs:
   watchdog:
