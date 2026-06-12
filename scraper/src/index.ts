@@ -4,6 +4,8 @@
  * Usage :
  *   tsx src/index.ts daily                 # scrape la séance courante
  *   tsx src/index.ts daily --mock          # données mock (sans BDFIN)
+ *   tsx src/index.ts daily:full            # orchestration complète (5 étapes)
+ *   tsx src/index.ts daily:full 2025-05-20 # avec date cible
  *   tsx src/index.ts date 2025-05-20       # scrape une date précise (reprise)
  *   tsx src/index.ts date 2025-05-20 --mock
  *   tsx src/index.ts score                 # génère les signaux (séance courante)
@@ -32,6 +34,7 @@
 import './polyfills.js';
 
 import { runDaily } from './runners/runDaily.js';
+import { runDailyFull } from './runners/runDailyFull.js';
 import { runScoring } from './scoring/runScoring.js';
 import { runEvents } from './events/runEvents.js';
 import { runDividends } from './dividends/runDividends.js';
@@ -59,6 +62,12 @@ async function main(): Promise<number> {
     case undefined: {
       const res = await runDaily({ mock });
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'daily:full': {
+      logger.info('Executing daily full scrape');
+      const result = await runDailyFull(positional[0]);
+      console.log(JSON.stringify(result, null, 2));
+      return result.status === 'failed' ? 1 : 0;
     }
     case 'date': {
       const date = positional[0];
@@ -161,7 +170,7 @@ async function main(): Promise<number> {
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | date | score | events | dividends | shares | secteurs | alerts | publications | backtest | backfill | validate | notations | details | news | monthly-reports',
+        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | publications | backtest | backfill | validate | notations | details | news | monthly-reports',
       );
       return 1;
   }

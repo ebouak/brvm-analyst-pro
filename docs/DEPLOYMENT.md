@@ -1,196 +1,468 @@
-# Déploiement & monitoring
+# Deployment Guide — BRVM Analyst Pro
 
-## 1. Base de données (Supabase)
+This document describes how to deploy and schedule the scraper's daily data collection pipeline.
 
-Appliquez les migrations dans l'ordre :
+## Overview
 
-```bash
-# via Supabase CLI
-supabase db push
-# ou manuellement, dans l'éditeur SQL, exécuter dans l'ordre :
-#   0001_init.sql  → tables + contraintes + triggers
-#   0002_views.sql → vues matérialisées + refresh_market_views()
-#   0003_rls.sql   → Row Level Security (lecture publique marché, privé user)
-#   0004_cron.sql  → pg_cron (optionnel, voir ci-dessous)
-```
+The scraper operates in **two modes**:
 
-## 2. Scraper — options de planification
+1. **Manual / On-Demand**: Run individual commands (e.g., `npm run scrape:daily` in the `scraper` directory).
+2. **Scheduled / Automated**: Use GitHub Actions cron jobs or Vercel Cron to orchestrate multi-step daily pipelines.
 
-### Option A (recommandée) : cron externe appelant le worker Node
+The **primary pipeline** is `daily:full`, which orchestrates 5 sequential steps:
+1. BDFIN Instruments (reference data)
+2. BDFIN Market (trades, prices, volumes)
+3. Communiqués (official announcements)
+4. Bulletins (market reports)
+5. News (BRVM.org articles)
 
-Le worker tourne mieux en environnement Node complet (cookie jar, axios).
-Planifiez-le via **GitHub Actions** ou **Vercel Cron** :
+---
 
-`.github/workflows/scrape.yml` (exemple) :
+## GitHub Actions Setup (Recommended)
+
+### Prerequisites
+
+- GitHub repository with Actions enabled.
+- Secrets stored in **Settings → Secrets → Actions**.
+
+### Required Secrets
+
+Add these secrets to your GitHub Actions environment:
+
+| Secret | Value | Notes |
+|--------|-------|-------|
+| `SUPABASE_URL` | `https://your-project.supabase.co` | PostgreSQL endpoint |
+| `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbGc...` | Service role API key (backend only) |
+| `OBSCURA_CDP_URL` | `http://...` | (Optional) Chrome DevTools Protocol for headless browser |
+
+**⚠️ Security**: Never commit these secrets. Use GitHub's **Settings** UI only.
+
+### Workflow File Example
+
+Create `.github/workflows/scraper-daily.yml`:
 
 ```yaml
-name: scrape-bdfin
+name: Daily Scraper Pipeline
+
 on:
   schedule:
-    - cron: '0 18 * * 1-5'   # 18h00 UTC, lun-ven (après clôture BRVM)
-  workflow_dispatch:
-    inputs:
-      date: { description: 'Date à reprendre (YYYY-MM-DD)', required: false }
+    # 06:00 UTC = 07:00 CET = 08:00 CEST
+    - cron: '0 6 * * 1-5'  # Monday to Friday
+  workflow_dispatch:        # Manual trigger in Actions tab
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: cd scraper && npm ci
-      - run: |
-          cd scraper
-          if [ -n "${{ inputs.date }}" ]; then
-            npm run scrape:date -- "${{ inputs.date }}"
-          else
-            npm run scrape:daily
-          fi
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Install dependencies
+        working-directory: scraper
+        run: npm ci
+
+      - name: Run daily:full pipeline
+        working-directory: scraper
         env:
-          BDFIN_BASE_URL: ${{ secrets.BDFIN_BASE_URL }}
-          BDFIN_USERNAME: ${{ secrets.BDFIN_USERNAME }}
-          BDFIN_PASSWORD: ${{ secrets.BDFIN_PASSWORD }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OBSCURA_CDP_URL: ${{ secrets.OBSCURA_CDP_URL }}
+          LOG_LEVEL: info
+        run: |
+          npm run scrape:daily:full 2>&1 | tee scraper.log
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: scraper-logs
+          path: scraper/scraper.log
+          retention-days: 7
+
+      - name: Notify on failure (optional)
+        if: failure()
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{"text":"⚠️ Daily scraper failed. Check: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
 ```
 
-> Tous les secrets vont dans **GitHub → Settings → Secrets and variables →
-> Actions**. Jamais dans le repo.
+### npm Script
 
-### Option B : pg_cron + Edge Function
+In `scraper/package.json`, add:
 
-`0004_cron.sql` planifie un `net.http_post` vers une Edge Function
-`scrape-daily`. Cette piste est viable si vous portez la logique de scraping
-en Deno (Edge Functions). Tenez compte des limites de durée d'exécution.
-
-## 3. Rafraîchissement des vues
-
-Après chaque run, rafraîchissez les vues matérialisées :
-
-```sql
-select public.refresh_market_views();
+```json
+{
+  "scripts": {
+    "scrape:daily:full": "tsx src/index.ts daily:full"
+  }
+}
 ```
 
-`0004_cron.sql` le planifie à 18h05 UTC. Vous pouvez aussi l'appeler depuis le
-worker après l'upsert (via une RPC Supabase) si vous préférez le couplage.
+---
 
-## 4. Frontend (Vercel)
+## Vercel Cron Alternative
 
-Le frontend Next.js ne lit QUE Supabase (jamais BDFIN directement, §11).
-Variables côté frontend : `NEXT_PUBLIC_SUPABASE_URL`,
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` (clé anon, soumise à la RLS). La clé
-`service_role` ne doit JAMAIS être exposée au frontend.
+If you prefer **Vercel** for scheduling (e.g., serverless functions):
 
-## 5. Monitoring (§12.8)
+### Setup
 
-Indicateurs à surveiller, tous dérivés de `scrape_runs` :
+1. Install Vercel CLI: `npm install -g vercel`
+2. Deploy the scraper as an **API route** in the frontend project:
 
-```sql
--- Dernier run par jour, statut et comptages
-select date_marche, status, nb_actions, nb_obligations, nb_indices,
-       finished_at, message_erreur
-from scrape_runs
-order by created_at desc
-limit 30;
+```typescript
+// frontend/app/api/cron/daily-full/route.ts
+import { NextRequest, NextResponse } from 'next/server';
 
--- Alerte : aucun run "success" aujourd'hui
-select count(*) = 0 as manque_run_du_jour
-from scrape_runs
-where date_marche = current_date and status = 'success';
+export const runtime = 'nodejs';
 
--- Alerte : chute anormale du nombre d'actions (markup cassé ?)
-select date_marche, nb_actions
-from scrape_runs
-where status in ('success','partial')
-order by created_at desc limit 10;
+export async function POST(request: NextRequest) {
+  // Verify Vercel's cron secret
+  if (request.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { runDailyFull } = await import('../../runners/runDailyFull.js');
+    const result = await runDailyFull();
+
+    return NextResponse.json({
+      status: result.status,
+      summary: result.summary,
+      errors: result.errors,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 },
+    );
+  }
+}
 ```
 
-Recommandations :
-- Faites échouer le job CI (exit code 1) si le run échoue → notification
-  GitHub/Vercel native.
-- Branchez une alerte (email/Slack/Telegram, cf. §6.8) sur `status='failed'`
-  ou `nb_actions` anormalement bas.
-- Surveillez `hash_source` identique plusieurs jours → séance non publiée ou
-  scraping figé.
+3. In `vercel.json`, configure cron:
 
-## 5. Supabase Edge Functions
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily-full",
+      "schedule": "0 6 * * 1-5"
+    }
+  ]
+}
+```
 
-Trois Edge Functions dans `supabase/functions/` :
+4. Redeploy: `vercel deploy --prod`
 
-| Fonction | Rôle | Déclenchement |
-| --- | --- | --- |
-| `scrape-daily` | Appelle le runner externe via webhook | 18h45 UTC lun-ven |
-| `score-daily` | Calcule les signaux + détecte les nouveaux | 19h15 UTC lun-ven |
-| `alert-signals` | Envoie les nouveaux signaux au webhook Slack/Discord | Appelée par score-daily |
+---
 
-### Déploiement
+## Manual Execution
+
+### Single Step
+
+Run individual components:
 
 ```bash
-# Installer la CLI Supabase et s'authentifier
-supabase login
+cd scraper
 
-# Lier le projet local
-supabase link --project-ref <votre-project-ref>
+# Scrape instruments (reference data)
+npm run scrape:details SNTS ETIT
 
-# Déployer les 3 fonctions
-supabase functions deploy scrape-daily
-supabase functions deploy score-daily
-supabase functions deploy alert-signals
+# Scrape market data for a specific date
+npm run scrape:date -- 2025-06-10
+
+# Score signals
+npm run score
+
+# Ingest events/news
+npm run events
+npm run news
 ```
 
-### Secrets à configurer (Dashboard → Settings → Secrets)
+### Full Pipeline
 
-```text
-SCRAPER_WEBHOOK_URL      : URL GitHub Actions dispatch (ou runner dédié)
-SCRAPER_WEBHOOK_TOKEN    : token Bearer pour le webhook scraper
-ALERT_WEBHOOK_URL        : endpoint Slack/Discord/custom pour les alertes
-ALERT_SIGNALS_URL        : URL interne de la function alert-signals
-                           ex: https://<ref>.supabase.co/functions/v1/alert-signals
+```bash
+cd scraper
+npm run scrape:daily:full
+
+# With a specific date:
+npm run scrape:daily:full 2025-06-10
 ```
 
-### Scheduling (pg_cron ou Supabase Scheduled Functions)
+---
+
+## Monitoring
+
+### Checking Logs
+
+#### GitHub Actions
+
+1. Open **Actions** tab → select the workflow run
+2. Expand the **"Run daily:full pipeline"** step
+3. Logs are printed in real-time; failures are flagged
+
+#### Console / Local
+
+```bash
+# Mock mode (no external dependencies)
+npm run scrape:daily:full --mock
+
+# Real mode with verbose logging
+LOG_LEVEL=debug npm run scrape:daily:full
+```
+
+### Structured Output
+
+The CLI returns JSON on success:
+
+```json
+{
+  "startedAt": "2025-06-10T06:15:30.000Z",
+  "finishedAt": "2025-06-10T06:22:45.000Z",
+  "status": "success",
+  "results": {
+    "bdfinInstruments": { "status": "success", "count": 48 },
+    "bdfinMarket": { "status": "success", "actions": 45, "obligations": 15 },
+    "communiques": { "status": "success", "count": 3 },
+    "bulletins": { "status": "success", "count": 1 },
+    "news": { "status": "success" }
+  },
+  "errors": [],
+  "summary": {
+    "totalSteps": 5,
+    "successfulSteps": 5,
+    "failedSteps": 0
+  }
+}
+```
+
+Exit codes:
+- **0** = Success or Partial completion
+- **1** = Failed (all steps failed)
+
+### Database Verification
+
+Check that data was written:
 
 ```sql
--- Ajouter dans 0004_cron.sql ou via le dashboard Supabase
-select cron.schedule('scrape-daily',  '45 18 * * 1-5',
-  $$select net.http_post(url:='https://<ref>.supabase.co/functions/v1/scrape-daily',
-    headers:='{"Authorization":"Bearer <anon_key>"}'::jsonb)$$);
+-- PostgreSQL via Supabase SQL Editor
 
-select cron.schedule('score-daily',   '15 19 * * 1-5',
-  $$select net.http_post(url:='https://<ref>.supabase.co/functions/v1/score-daily',
-    headers:='{"Authorization":"Bearer <anon_key>"}'::jsonb)$$);
+-- Market data (actions & obligations)
+SELECT MAX(date_marche) FROM brvm_actions_daily;
+SELECT COUNT(*) FROM brvm_obligations_daily WHERE date_marche = CURRENT_DATE;
+
+-- Reference data
+SELECT COUNT(*) FROM instruments;
+
+-- Recent events
+SELECT COUNT(*) FROM events WHERE DATE(created_at) = CURRENT_DATE;
+
+-- Check scrape_runs for audit trail
+SELECT * FROM scrape_runs ORDER BY started_at DESC LIMIT 5;
 ```
 
-### Monitoring des runs (table scraper_logs — migration 0007)
+---
 
-```sql
--- Dernier run de chaque fonction
-select * from v_scraper_last_runs;
+## Troubleshooting
 
--- Workers silencieux depuis plus de 30h
-select * from v_scraper_stale;
+### Common Issues
 
--- Tous les runs en erreur des 24 dernières heures
-select function_name, run_at, error_message
-from scraper_logs
-where status = 'error' and run_at > now() - interval '24 hours'
-order by run_at desc;
+#### 1. **"SUPABASE_URL not found" or "SERVICE_ROLE_KEY missing"**
+
+**Cause**: Secrets not configured in GitHub Actions.
+
+**Fix**:
+```bash
+# GitHub CLI
+gh secret set SUPABASE_URL --body "https://xxxx.supabase.co"
+gh secret set SUPABASE_SERVICE_ROLE_KEY --body "eyJhbGc..."
 ```
 
-## 6. Planification des workers complémentaires
+#### 2. **"Obscura browser failed to connect"**
 
-En plus du scraping de séance, planifier (cron externe ou pg_cron + Edge) :
+**Cause**: `OBSCURA_CDP_URL` is not set, or headless browser is unreachable.
+
+**Fix**:
+- For **BDFIN only**: Configure `OBSCURA_CDP_URL` secret.
+- For **public data only**: Comment out BDFIN steps in the workflow (instruments & market).
+- **Fallback**: The pipeline continues without BDFIN data; other steps (communiqués, bulletins, news) proceed.
+
+#### 3. **"Timeout after 30 minutes"**
+
+**Cause**: One step is hanging (e.g., slow network, infinite loop).
+
+**Fix**:
+```yaml
+# Increase timeout in workflow
+timeout-minutes: 45
+
+# Or run steps in parallel (not recommended if they share DB writes)
+```
+
+#### 4. **"Duplicate key violation" in DB**
+
+**Cause**: A step ran twice on the same date, and idempotence keys are incorrect.
+
+**Fix**:
+- Check that upsert conditions in `scraper/src/persistence/*.ts` use correct conflict keys.
+- Verify schema migrations match insert columns.
+- Example for actions:
+  ```sql
+  INSERT INTO brvm_actions_daily (code, date_marche, ...)
+  ON CONFLICT (code, date_marche) DO UPDATE SET ...
+  ```
+
+#### 5. **"News or Communiqués scraper fails consistently"**
+
+**Cause**: BRVM.org or mediacentre.brvm.org layout has changed.
+
+**Fix**:
+1. Check the source HTML (open in browser, inspect).
+2. Update parsers in `scraper/src/parsers/` and `scraper/src/scrapers/`.
+3. Add a test fixture to prevent regression:
+   ```bash
+   # Capture current HTML
+   curl https://mediacentre.brvm.org > fixture.html
+   # Add to tests/fixtures/ and test against it
+   ```
+
+#### 6. **"Memory leak" or "process hangs"**
+
+**Cause**: Browser (Obscura) or HTTP pool not closing.
+
+**Fix**:
+- Ensure `browser.close()` is always called (in `finally` block).
+- Check for unclosed database connections: `await client.end()`.
+
+---
+
+## Alerting & Notifications
+
+### Email Notification (Optional)
+
+Configure via environment variables:
+
+```bash
+RESEND_API_KEY=re_xxxx
+ALERTS_EMAIL_FROM=scraper@example.com
+ALERTS_EMAIL_TO=admin@example.com
+```
+
+In the workflow:
 
 ```yaml
-# Exemples de cadence (UTC, jours ouvrés)
-score:      "10 18 * * 1-5"   # après le scraping de séance
-events:     "30 18 * * 1-5"   # ingestion des communiqués/avis
-dividends:  "40 18 * * 1-5"   # dérivation depuis les événements
-alerts:     "*/30 9-17 * * 1-5"  # évaluation fréquente en séance
+- name: Send failure email
+  if: failure()
+  env:
+    RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+  run: |
+    npm run alerts --mock  # or custom notification script
 ```
 
-Chaque commande (`npm run score`, `events`, `dividends`, `alerts`) renvoie un
-code de sortie exploitable par le planificateur. Les notifications d'alertes
-utilisent les canaux configurés (`RESEND_API_KEY`, `TELEGRAM_*`) avec repli
-console. Le journal `notifications_log` permet l'audit et l'anti-spam
-(`alerts.declenchee_le`).
+### Slack Integration
+
+```yaml
+- name: Notify Slack on failure
+  if: failure()
+  env:
+    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  run: |
+    curl -X POST $SLACK_WEBHOOK \
+      -H 'Content-Type: application/json' \
+      -d '{
+        "text": "Scraper failed at '${{ job.status }}'",
+        "details": "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      }'
+```
+
+---
+
+## Rollback & Recovery
+
+If a day's data is corrupted:
+
+### 1. Identify the bad date
+```sql
+SELECT date_marche, COUNT(*) FROM brvm_actions_daily 
+GROUP BY date_marche ORDER BY date_marche DESC LIMIT 5;
+```
+
+### 2. Delete (if necessary)
+```sql
+DELETE FROM brvm_actions_daily WHERE date_marche = '2025-06-09';
+DELETE FROM brvm_obligations_daily WHERE date_marche = '2025-06-09';
+DELETE FROM events WHERE DATE(created_at) = '2025-06-09';
+```
+
+### 3. Re-run for that date
+```bash
+npm run scrape:daily:full 2025-06-09
+```
+
+---
+
+## Performance Tuning
+
+### Typical Execution Time
+
+| Step | Duration | Notes |
+|------|----------|-------|
+| BDFIN Instruments | 30s | Headless browser + parsing |
+| BDFIN Market | 2–5m | Depends on trading volume |
+| Communiqués | 10–20s | BRVM.org scrape |
+| Bulletins | 5–10s | Static page parse |
+| News | 5–10s | Feed parsing |
+| **Total** | **3–7 minutes** | Can be faster with parallel execution |
+
+### Optimization Tips
+
+1. **Parallel execution** (use GitHub Actions matrix):
+   ```yaml
+   strategy:
+     matrix:
+       step: [instruments, market, communiques, bulletins, news]
+   ```
+   (⚠️ Requires careful DB locking; not recommended.)
+
+2. **Caching**:
+   ```yaml
+   - uses: actions/cache@v3
+     with:
+       path: scraper/node_modules
+       key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+   ```
+
+3. **Reduce logging overhead**:
+   ```bash
+   LOG_LEVEL=warn npm run scrape:daily:full
+   ```
+
+---
+
+## Checklist Before Production
+
+- [ ] Secrets configured in GitHub (SUPABASE_URL, SERVICE_ROLE_KEY)
+- [ ] Workflow file `.github/workflows/scraper-daily.yml` committed
+- [ ] `npm run scrape:daily:full --mock` runs without errors
+- [ ] Database migrations applied (`supabase/migrations/*` in Supabase)
+- [ ] RLS policies configured (if using row-level security)
+- [ ] Monitoring / alerting set up (optional: Slack, email)
+- [ ] Tested with a recent real date: `npm run scrape:daily:full 2025-06-10`
+- [ ] Cron schedule verified (correct timezone, business days only)
+
+---
+
+## References
+
+- **CLAUDE.md** — Project overview & stack
+- **SCRAPER.md** — Scraper architecture & modules
+- **SCORING.md** — Signal generation
+- **RECOVERY.md** — Disaster recovery & database repair
