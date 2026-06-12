@@ -37,21 +37,24 @@ export function parseNotationPage(html: string, sourceUrl: string): ParsedNotati
   const $ = cheerio.load(html);
 
   // Find table with "agence" in its headers
-  let tableEl: cheerio.Cheerio<cheerio.Element> | null = null;
+  // (cheerio ≥1.1 n'exporte plus le type Element ; on passe par une variable
+  // intermédiaire pour contourner le narrowing TS de l'assignation en callback)
+  let found: cheerio.Cheerio<any> | null = null;
   $('table').each((_, tbl) => {
     const allTh = $(tbl).find('th').map((_, el) => $(el).text().toLowerCase()).toArray().join(' ');
     if (allTh.includes('agence')) {
-      tableEl = $(tbl);
+      found = $(tbl);
       return false as unknown as void;
     }
   });
 
+  const tableEl = found as cheerio.Cheerio<any> | null;
   if (!tableEl) return null;
 
   const history: NotationHistoryEntry[] = [];
   let agence = '';
 
-  for (const row of tableEl!.find('tr').toArray()) {
+  for (const row of tableEl.find('tr').toArray()) {
     if (history.length >= 3) break;
     const cells = $(row).find('td');
     if (cells.length < 3) continue;

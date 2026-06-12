@@ -126,14 +126,16 @@ export default function SimulatorClient({
         </div>
 
         <div>
-          <p className="text-xs text-muted mb-1.5">Montant investi (FCFA)</p>
-          <div className="flex flex-wrap gap-2">
+          <label htmlFor="sim-amount" className="block text-xs text-muted mb-1.5">
+            Montant investi (FCFA)
+          </label>
+          <div className="flex flex-wrap gap-2 mb-2.5">
             {AMOUNTS.map((a) => (
               <button
                 key={a}
                 type="button"
                 onClick={() => setAmount(a)}
-                aria-pressed={amount === a}
+                aria-pressed={amount === a ? 'true' : 'false'}
                 className={`px-3.5 py-2 rounded-lg border text-sm tabular transition-colors active:scale-95 ${
                   amount === a
                     ? 'border-accent bg-accent/10 text-accent'
@@ -144,6 +146,21 @@ export default function SimulatorClient({
               </button>
             ))}
           </div>
+          <input
+            id="sim-amount"
+            type="number"
+            inputMode="numeric"
+            min={1000}
+            step={1000}
+            value={amount}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (Number.isFinite(v) && v >= 0) setAmount(v);
+            }}
+            placeholder="Ou saisissez un montant libre…"
+            className="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-sm text-white tabular focus:outline-none focus:ring-2 focus:ring-accent/50"
+            aria-label="Montant personnalisé en FCFA"
+          />
         </div>
 
         <div>
@@ -154,7 +171,7 @@ export default function SimulatorClient({
                 key={p.years}
                 type="button"
                 onClick={() => setYears(p.years)}
-                aria-pressed={years === p.years}
+                aria-pressed={years === p.years ? 'true' : 'false'}
                 className={`px-3.5 py-2 rounded-lg border text-sm transition-colors active:scale-95 ${
                   years === p.years
                     ? 'border-accent bg-accent/10 text-accent'

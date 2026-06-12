@@ -96,7 +96,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     alternates: { canonical: `${SITE_URL}/societes/${code}` },
-    openGraph: { title, description, url: `${SITE_URL}/societes/${code}`, type: 'website' },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/societes/${code}`,
+      type: 'website',
+      images: [{ url: `${SITE_URL}/api/og/societe?code=${code}`, width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image' },
   };
 }
 

@@ -107,13 +107,29 @@ body {
 ::-webkit-scrollbar-thumb { background: #20242d; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(86, 215, 253, 0.4); }
 
-/* Impression PDF */
+/* Impression PDF — thème clair lisible (notes de conjoncture, fiches) */
 @media print {
   aside, .no-print { display: none !important; }
-  body { background: #fff !important; color: #000; }
-  .bg-surface, .bg-bg, .bg-onyx, .bg-obsidian { background: #fff !important; }
-  .border-border { border-color: #ccc !important; }
-  main { width: 100% !important; }
+  body, .bg-bg { background: #fff !important; color: #111 !important; }
+  .bg-surface, .bg-onyx, .bg-obsidian, .bg-elevated\/60 { background: #fff !important; }
+  .bg-elevated { background: #eceff3 !important; }
+  .border-border, .border-border\/40, .border-border\/60 { border-color: #d4d8de !important; }
+  main { width: 100% !important; max-width: none !important; padding: 0 !important; }
+
+  /* Texte : tout passe en encre sombre */
+  .text-white, .text-ivory, .text-accent,
+  .text-white\/90, .text-accent\/70 { color: #111 !important; }
+  .text-faint, .text-muted { color: #555 !important; }
+
+  /* Couleurs financières conservées (hausse/baisse lisibles sur papier) */
+  .text-up { color: #15803d !important; }
+  .text-down { color: #b91c1c !important; }
+  .bg-up\/70, .bg-up\/80 { background: #16a34a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bg-down\/70, .bg-down\/80 { background: #dc2626 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Pas d'ombres ni d'effets à l'impression */
+  * { box-shadow: none !important; text-shadow: none !important; }
+  a { text-decoration: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -178,7 +178,7 @@ async function main(): Promise<number> {
     case 'paper-trading:auto': {
       const res = await runPaperTradingAuto();
       console.log(JSON.stringify(res, null, 2));
-      return res.status === 'failed' ? 1 : 0;
+      return res.status === 'error' ? 1 : 0;
     }
     default:
       logger.error(

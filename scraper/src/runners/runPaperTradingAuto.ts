@@ -1,14 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { logger } from '../logger.js';
+
+// Client non typé par schéma (les génériques stricts de supabase-js 2.108+
+// rendraient chaque .from() "never" sans codegen de types DB).
+type Db = SupabaseClient<any, any, any>;
 
 const log = logger.child({ module: 'runPaperTradingAuto' });
 
 interface SignalDaily {
   id: number;
   code: string;
-  date: string;
-  signal_strength: number;
-  signal_type: string;
+  date_marche: string;
+  score_total: number;
 }
 
 interface PaperTradingAccount {
@@ -39,23 +42,36 @@ export async function runPaperTradingAuto(): Promise<{
   let skipped = 0;
 
   try {
-    // Get today's date
-    const today = new Date().toISOString().split('T')[0];
+    // Dernière séance scorée (les signaux peuvent dater de la veille un week-end)
+    const { data: lastSig } = await supabase
+      .from('signals_daily')
+      .select('date_marche')
+      .order('date_marche', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!lastSig) {
+      log.info('No signals in database yet');
+      return { status: 'success', opened: 0, skipped: 0, errors: [] };
+    }
+    const today = lastSig.date_marche as string;
 
-    // Fetch all strong signals from today
+    // Signaux d'achat forts de la séance : BUY, score >= seuil, confiance suffisante
+    // (schéma réel signals_daily : signal/score_total/confiance — cf. scoring §9)
     const { data: signals, error: signalError } = await supabase
       .from('signals_daily')
-      .select('id, code, date_signal, signal_strength, signal_type')
-      .eq('date_signal', today)
-      .gte('signal_strength', SIGNAL_THRESHOLD)
-      .order('signal_strength', { ascending: false });
+      .select('id, code, date_marche, score_total')
+      .eq('date_marche', today)
+      .eq('signal', 'BUY')
+      .gte('score_total', SIGNAL_THRESHOLD)
+      .gte('confiance', 0.4)
+      .order('score_total', { ascending: false });
 
     if (signalError) {
       throw new Error(`Failed to fetch signals: ${signalError.message}`);
     }
 
     if (!signals || signals.length === 0) {
-      log.info(`No strong signals today (threshold: ${SIGNAL_THRESHOLD})`);
+      log.info(`No strong BUY signals for ${today} (threshold: ${SIGNAL_THRESHOLD})`);
       return { status: 'success', opened: 0, skipped: 0, errors: [] };
     }
 
@@ -102,7 +118,7 @@ export async function runPaperTradingAuto(): Promise<{
 }
 
 async function processSignal(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Db,
   signal: SignalDaily,
   today: string
 ): Promise<void> {

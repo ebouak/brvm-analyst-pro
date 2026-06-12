@@ -82,7 +82,20 @@
       "Bash(cd /mnt/c/Users/adego/OneDrive/Documents/brvm-analyst-pro/scraper && npx tsc --noEmit src/persistence/repository.ts src/runners/runCommuniques.ts src/runners/runBulletins.ts --skipLibCheck 2>&1 || echo \"Check complete\")",
       "Bash(node -c frontend/app/api/cron/brvm/route.ts)",
       "Bash(python -m yaml .github/workflows/daily-brvm.yml)",
-      "Bash(python3 -c \"import yaml; yaml.safe_load\\(open\\('.github/workflows/daily-brvm.yml'\\)\\)\")"
+      "Bash(python3 -c \"import yaml; yaml.safe_load\\(open\\('.github/workflows/daily-brvm.yml'\\)\\)\")",
+      "PowerShell(gh run list --repo ebouak/brvm-analyst-pro --limit 4)",
+      "PowerShell(gh run view 27424787257 --repo ebouak/brvm-analyst-pro --json status,conclusion 2>&1)",
+      "PowerShell(gh run view 27427002694 --repo ebouak/brvm-analyst-pro --json status,conclusion 2>&1)",
+      "PowerShell(gh run list --repo ebouak/brvm-analyst-pro --limit 6)",
+      "PowerShell(gh run view 27429002409 --repo ebouak/brvm-analyst-pro --log-failed 2>&1)",
+      "PowerShell($urls = @\\(\"https://frontend-zeta-ten-22.vercel.app/societes\", \"https://frontend-zeta-ten-22.vercel.app/simulateur\", \"https://frontend-zeta-ten-22.vercel.app/sitemap.xml\"\\); foreach \\($u in $urls\\) { try { $r = Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 30 -MaximumRedirection 0 -ErrorAction Stop; Write-Host \"$\\($r.StatusCode\\) $u \\($\\($r.Content.Length\\) octets\\)\" } catch { $code = $_.Exception.Response.StatusCode.value__; Write-Host \"$code $u\" } })",
+      "PowerShell($urls = @\\(\"https://frontend-zeta-ten-22.vercel.app/societes\", \"https://frontend-zeta-ten-22.vercel.app/societes/SNTS\", \"https://frontend-zeta-ten-22.vercel.app/simulateur\", \"https://frontend-zeta-ten-22.vercel.app/simulateur/SNTS\", \"https://frontend-zeta-ten-22.vercel.app/brief\", \"https://frontend-zeta-ten-22.vercel.app/sitemap.xml\", \"https://frontend-zeta-ten-22.vercel.app/robots.txt\"\\); foreach \\($u in $urls\\) { try { $r = Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop; Write-Host \"✅ $\\($r.StatusCode\\)  $u\" } catch { Write-Host \"❌ $\\($_.Exception.Response.StatusCode.value__\\)  $u\" } })",
+      "Bash([ -s \"$f1\" ])",
+      "Bash(grep -qE 'OK /|X /' C:/Users/adego/AppData/Local/Temp/claude/c--Users-adego-OneDrive-Documents-brvm-analyst-pro/fbf2fb5b-f56e-494c-b0a9-85725b05bbc2/tasks/bijxvmwcy.output)",
+      "Bash(sleep 5)",
+      "Bash(echo \"=== SCAN PAGES APP ===\")",
+      "Bash(cat C:/Users/adego/AppData/Local/Temp/claude/c--Users-adego-OneDrive-Documents-brvm-analyst-pro/fbf2fb5b-f56e-494c-b0a9-85725b05bbc2/tasks/bijxvmwcy.output)",
+      "PowerShell(cd \"C:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\scraper\"; $env:CHECK_PAGES = \"/dashboard,/actions,/actions/SNTS,/screener,/heatmap,/signaux,/obligations,/dividendes,/actualites,/secteurs,/calendrier,/fondamentaux\"; npx tsx scripts/check-pages.ts 2>&1 | Select-String -Pattern \"^✅|^❌|·\" | Select-Object -First 30)"
     ]
   }
 }
