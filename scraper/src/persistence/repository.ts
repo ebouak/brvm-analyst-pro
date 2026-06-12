@@ -288,3 +288,39 @@ export async function upsertNews(items: NewsItem[]): Promise<number> {
   if (error) throw new Error(`upsert brvm_news: ${error.message}`);
   return items.length;
 }
+
+export async function upsertCommuniques(items: Array<{
+  dedupe_hash: string;
+  titre: string;
+  date_publication: string;
+  emetteur?: string;
+  categorie: string;
+  source_url: string;
+  document_url?: string;
+  resume?: string;
+}>): Promise<number> {
+  const sb = getSupabase();
+  if (items.length === 0) return 0;
+  const { error } = await sb
+    .from('brvm_communiques')
+    .upsert(items, { onConflict: 'dedupe_hash' });
+  if (error) throw new Error(`upsert brvm_communiques: ${error.message}`);
+  return items.length;
+}
+
+export async function upsertBulletins(items: Array<{
+  dedupe_hash: string;
+  date_bulletin: string;
+  numero?: string;
+  source_url: string;
+  document_url?: string;
+  resume?: string;
+}>): Promise<number> {
+  const sb = getSupabase();
+  if (items.length === 0) return 0;
+  const { error } = await sb
+    .from('brvm_bulletins')
+    .upsert(items, { onConflict: 'dedupe_hash' });
+  if (error) throw new Error(`upsert brvm_bulletins: ${error.message}`);
+  return items.length;
+}
