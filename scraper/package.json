@@ -61,7 +61,7 @@
     "pino": "^9.4.0",
     "pino-pretty": "^11.2.2",
     "playwright": "^1.60.0",
-    "puppeteer": "^25.1.0",
+    "puppeteer": "^23.5.0",
     "tough-cookie": "^5.0.0",
     "ws": "^8.21.0",
     "zod": "^3.23.8"
