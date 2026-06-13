@@ -32,6 +32,10 @@ jobs:
       - name: Secteurs (référentiel)
         working-directory: scraper
         run: npx tsx src/index.ts secteurs
+      - name: Nombre de titres (brvm.org capitalisations)
+        working-directory: scraper
+        run: npx tsx src/index.ts shares
+        continue-on-error: true
       - name: Détail cotation (Sika)
         working-directory: scraper
         run: npx tsx src/index.ts cotations

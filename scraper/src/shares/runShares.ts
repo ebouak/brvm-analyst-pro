@@ -1,18 +1,19 @@
 /**
- * Met à jour brvm_instruments.shares. Cascade : sikafinance (capi/cours).
+ * Met à jour brvm_instruments.shares depuis la page officielle des
+ * capitalisations BRVM (brvm.org, colonne « Nombre de titres »).
  * Ne JAMAIS écraser une valeur shares_source='manual'.
  */
 import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
-import { fetchSharesFromSikafinance } from './sikafinance.js';
+import { fetchSharesFromBrvm } from './brvmCapitalisations.js';
 
 export interface SharesRunResult { status: 'success' | 'failed'; nb: number; message: string | null; }
 
 export async function runShares(): Promise<SharesRunResult> {
   const cfg = getConfig();
   try {
-    const rows = await fetchSharesFromSikafinance();
+    const rows = await fetchSharesFromBrvm();
     if (cfg.DRY_RUN) { logger.warn({ count: rows.length }, 'DRY_RUN — shares non écrits'); return { status: 'success', nb: rows.length, message: null }; }
     const sb = getSupabase();
 
