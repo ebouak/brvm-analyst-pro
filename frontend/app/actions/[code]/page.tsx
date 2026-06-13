@@ -21,6 +21,8 @@ import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
 import TechnicalSummary from '@/components/TechnicalSummary';
 import NotationBadge from '@/components/NotationBadge';
 import SignalAnalysis from '@/components/SignalAnalysis';
+import ValuationPanel from '@/components/ValuationPanel';
+import { getValuation } from '@/lib/valuation/server';
 import { readTechnical } from '@/lib/signal/technical';
 import { analyzeDividendTiming } from '@/lib/signal/dividendTiming';
 import { readPosition } from '@/lib/signal/position';
@@ -136,6 +138,7 @@ export default async function InstrumentPage({
   const code = decodeURIComponent(params.code).toUpperCase();
   const fromDate = searchParams.from ?? '';
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
+  const valuation = await getValuation(code).catch(() => null);
 
   if (rows.length === 0) {
     return (
@@ -660,6 +663,16 @@ export default async function InstrumentPage({
           </div>
         )}
       </div>
+
+      {/* ══════════════════════════════════════════════════
+          VALORISATION FONDAMENTALE
+      ══════════════════════════════════════════════════ */}
+      {valuation && valuation.metrics.reliable && (
+        <div>
+          <Eyebrow className="mb-3">Valorisation</Eyebrow>
+          <ValuationPanel v={valuation} />
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════
           FONDAMENTAUX

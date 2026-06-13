@@ -58,6 +58,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Premium',
     items: [
+      { href: '/premium/valorisation', label: 'Valorisation', premium: true },
       { href: '/premium/diagnostic', label: 'Diagnostic IA', premium: true },
       { href: '/assistant', label: 'Assistant IA', premium: true },
       { href: '/premium/classements', label: 'Classements', premium: true },
