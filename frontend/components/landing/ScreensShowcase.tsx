@@ -13,7 +13,7 @@ const SCREENS = [
   { src: '/screens/landing.png', label: 'Le marché en direct' },
 ];
 
-const CYCLE = 20; // secondes (5 écrans × 4 s)
+const CYCLE = 20; // secondes (5 écrans × 4 s) — utilisé par le repli sans vidéo
 
 export default function ScreensShowcase() {
   return (
@@ -21,34 +21,39 @@ export default function ScreensShowcase() {
       <p className="overline mb-3 text-gold-2 text-center">La plateforme en action</p>
       <div
         className="relative overflow-hidden rounded-panel border border-white/10"
-        style={{ aspectRatio: '16/10', boxShadow: '0 22px 60px rgba(0,0,0,0.4)' }}
+        style={{ aspectRatio: '16/9', boxShadow: '0 22px 60px rgba(0,0,0,0.4)' }}
       >
-        {SCREENS.map((s, i) => (
-          <figure
-            key={s.src}
-            className="absolute inset-0 m-0 opacity-0"
-            style={{
-              animation: `showcase-fade ${CYCLE}s linear infinite`,
-              animationDelay: `${i * (CYCLE / SCREENS.length)}s`,
-            }}
-          >
-            <Image
-              src={s.src}
-              alt={s.label}
-              fill
-              sizes="(max-width: 1100px) 100vw, 1080px"
-              className="object-cover object-top"
-              priority={i === 0}
-            />
-            <figcaption
-              className="absolute bottom-0 left-0 right-0 px-5 py-3 text-sm font-medium text-ivory"
-              style={{ background: 'linear-gradient(0deg, rgba(3,3,3,0.92), rgba(3,3,3,0))' }}
+        {/* Vidéo générée depuis les écrans réels (remotion/ + ffmpeg).
+            Muette + autoplay + loop : autorisé par tous les navigateurs.
+            Le diaporama CSS ci-dessous sert de repli si la vidéo ne charge pas. */}
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src="/landing-video.mp4"
+          poster="/screens/landing.png"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-label="Démonstration des fonctionnalités : sociétés notées, fiches, simulateur et note de conjoncture"
+        >
+          {/* Repli diaporama si <video> non supporté */}
+          {SCREENS.map((s, i) => (
+            <figure
+              key={s.src}
+              className="absolute inset-0 m-0 opacity-0"
+              style={{
+                animation: `showcase-fade ${CYCLE}s linear infinite`,
+                animationDelay: `${i * (CYCLE / SCREENS.length)}s`,
+              }}
             >
-              {s.label}
-            </figcaption>
-          </figure>
-        ))}
+              <Image src={s.src} alt={s.label} fill className="object-cover object-top" />
+            </figure>
+          ))}
+        </video>
       </div>
+      <p className="mt-2 text-center text-[11px] text-faint">
+        Écrans réels de la plateforme — sociétés notées A–F, fiche, simulateur, note de conjoncture.
+      </p>
     </section>
   );
 }
