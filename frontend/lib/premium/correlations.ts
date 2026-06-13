@@ -1,116 +1,168 @@
 import { createClient } from '@/lib/supabase/server';
+import { returns, pearson, beta, rollingCorr } from './correlationMath';
+import { readCommodityMacro, type CommodityMacro } from './agroMacro';
 
-// Commodity-linked BRVM stocks
-const MATIERE_ACTIONS: Record<string, { codes: string[]; label: string; couleur: string }> = {
-  huile_palme: { codes: ['PALC', 'SOGC'], label: "Huile de palme (PALMCI / SOGB)", couleur: '#f59e0b' },
-  caoutchouc:  { codes: ['SAPH', 'SOGB'], label: "Caoutchouc (SAPH / SOGB)",         couleur: '#22c55e' },
-  sucre:        { codes: ['STAC', 'SUCR'], label: "Sucre (SUCRIVOIRE)",                couleur: '#e879f9' },
-  cacao:        { codes: ['CFAC'],         label: "Cacao / Agro",                       couleur: '#a16207' },
+/**
+ * Filières agro BRVM ↔ matière première sous-jacente (commodity_prices).
+ * Les codes sont les producteurs cotés ; la corrélation est calculée sur les
+ * VARIATIONS mensuelles communes (vraies données — plus aucune série fabriquée).
+ */
+const FILIERES: Record<string, { commodity: string; codes: string[]; label: string; commodityLabel: string; couleur: string }> = {
+  huile_palme: { commodity: 'palm_oil', codes: ['PALC', 'SOGC'], label: 'Huile de palme (PALMCI / SOGB)', commodityLabel: 'Huile de palme', couleur: '#f59e0b' },
+  caoutchouc:  { commodity: 'rubber',   codes: ['SAPH', 'SOGB'], label: 'Caoutchouc (SAPH / SOGB)', commodityLabel: 'Caoutchouc', couleur: '#22c55e' },
+  sucre:       { commodity: 'sugar',    codes: ['STAC', 'SUCR'], label: 'Sucre (SUCRIVOIRE)', commodityLabel: 'Sucre', couleur: '#e879f9' },
+  cacao:       { commodity: 'cocoa',    codes: ['CFAC'],         label: 'Cacao / Agro', commodityLabel: 'Cacao', couleur: '#a16207' },
 };
 
 export interface CorrelationPoint {
-  date: string;
-  cours: number;       // cours normalisé (base 100)
-  commodity: number;   // commodity normalisée (base 100, simulée si absente)
+  date: string;      // YYYY-MM
+  cours: number;     // action, base 100
+  commodity: number; // matière première réelle, base 100
 }
 
 export interface CorrelationSerie {
   matiere: string;
   label: string;
+  commodityLabel: string;
   couleur: string;
-  coefficient: number; // -1 à 1
+  coefficient: number;            // Pearson sur variations mensuelles
+  beta: number | null;
+  nMonths: number;
+  dataAvailable: boolean;
   points: CorrelationPoint[];
+  rolling: { date: string; corr: number }[];
+  macro: CommodityMacro;
   codes: string[];
+  commodityUnit: string | null;
 }
 
-// Pearson correlation coefficient
-function pearson(xs: number[], ys: number[]): number {
-  const n = Math.min(xs.length, ys.length);
-  if (n < 5) return 0;
-  const mx = xs.slice(0, n).reduce((s, v) => s + v, 0) / n;
-  const my = ys.slice(0, n).reduce((s, v) => s + v, 0) / n;
-  let num = 0, dx = 0, dy = 0;
-  for (let i = 0; i < n; i++) {
-    const xi = xs[i]! - mx;
-    const yi = ys[i]! - my;
-    num += xi * yi;
-    dx += xi * xi;
-    dy += yi * yi;
-  }
-  const denom = Math.sqrt(dx * dy);
-  return denom === 0 ? 0 : num / denom;
+function monthKey(d: string): string {
+  return d.slice(0, 7); // YYYY-MM
 }
 
-// Normalize series to base 100 from first valid point
-function normalise(series: number[]): number[] {
-  const first = series.find((v) => v > 0);
-  if (!first) return series.map(() => 100);
-  return series.map((v) => (v > 0 ? (v / first) * 100 : 100));
-}
-
-// Generate synthetic commodity trend: correlated ~0.6 with BRVM data + noise
-function synthCommodity(coursSeries: number[], targetCorr = 0.65): number[] {
-  // Create a proxy: 65% stock trend + 35% random walk
-  const n = coursSeries.length;
-  if (n === 0) return [];
-  const normed = normalise(coursSeries);
-  return normed.map((v, i) => {
-    const noise = 1 + (Math.sin(i * 0.3) * 0.04 + Math.cos(i * 0.17) * 0.03) * (1 - targetCorr);
-    return v * (targetCorr + noise * (1 - targetCorr));
-  });
+function normalise(levels: number[]): number[] {
+  const first = levels.find((v) => v > 0);
+  if (!first) return levels.map(() => 100);
+  return levels.map((v) => (v > 0 ? (v / first) * 100 : 100));
 }
 
 export async function getCorrelationsData(): Promise<CorrelationSerie[]> {
   const supabase = createClient();
-  const since = new Date(Date.now() - 365 * 86400 * 1000).toISOString().split('T')[0];
+  const since = new Date(Date.now() - 5 * 365 * 86400 * 1000).toISOString().slice(0, 10);
 
   const result: CorrelationSerie[] = [];
 
-  for (const [matiere, meta] of Object.entries(MATIERE_ACTIONS)) {
-    // Fetch price series for each code, pick the one with most data
-    const series = await supabase
+  for (const [matiere, meta] of Object.entries(FILIERES)) {
+    // 1) Prix mensuels réels de la matière première.
+    const { data: commo } = await supabase
+      .from('commodity_prices')
+      .select('date, price, unit')
+      .eq('commodity', meta.commodity)
+      .gte('date', since)
+      .order('date', { ascending: true });
+
+    const commoRows = (commo ?? []) as { date: string; price: number; unit: string | null }[];
+    const commodityUnit = commoRows[0]?.unit ?? null;
+    const commoByMonth = new Map<string, number>();
+    for (const r of commoRows) commoByMonth.set(monthKey(r.date), r.price);
+
+    // 2) Cours des actions agro → moyenne mensuelle.
+    const { data: acts } = await supabase
       .from('brvm_actions_daily')
-      .select('code, cours_cloture, date_marche')
+      .select('code, cours_jour, date_marche')
       .in('code', meta.codes)
       .gte('date_marche', since)
+      .not('cours_jour', 'is', null)
       .order('date_marche', { ascending: true });
 
-    const rows = series.data ?? [];
-    if (rows.length === 0) continue;
-
-    // Average across codes per date
-    const byDate = new Map<string, number[]>();
-    for (const r of rows) {
-      const c = r.cours_cloture as number;
-      if (!c) continue;
-      if (!byDate.has(r.date_marche)) byDate.set(r.date_marche, []);
-      byDate.get(r.date_marche)!.push(c);
+    const stockMonth = new Map<string, number[]>();
+    for (const r of (acts ?? []) as { cours_jour: number; date_marche: string }[]) {
+      const k = monthKey(r.date_marche);
+      if (!stockMonth.has(k)) stockMonth.set(k, []);
+      stockMonth.get(k)!.push(r.cours_jour);
     }
-    const dates = [...byDate.keys()].sort();
-    const avgCours = dates.map((d) => {
-      const vals = byDate.get(d)!;
-      return vals.reduce((s, v) => s + v, 0) / vals.length;
-    });
+    const stockByMonth = new Map<string, number>();
+    for (const [k, vals] of stockMonth) stockByMonth.set(k, vals.reduce((s, v) => s + v, 0) / vals.length);
 
-    const normedCours = normalise(avgCours);
-    const synth = synthCommodity(avgCours);
-    const coeff = pearson(normedCours, synth);
+    // 3) Mois communs (intersection), triés.
+    const commonMonths = [...stockByMonth.keys()].filter((k) => commoByMonth.has(k)).sort();
 
-    const points: CorrelationPoint[] = dates.map((date, i) => ({
-      date,
-      cours: normedCours[i] ?? 100,
-      commodity: synth[i] ?? 100,
+    const macro = readCommodityMacro(
+      commoRows.map((r) => r.price),
+      meta.commodityLabel,
+      null,
+    );
+
+    if (commonMonths.length < 6) {
+      // Données insuffisantes : état honnête, aucune corrélation fabriquée.
+      result.push({
+        matiere, label: meta.label, commodityLabel: meta.commodityLabel, couleur: meta.couleur,
+        coefficient: 0, beta: null, nMonths: commonMonths.length, dataAvailable: false,
+        points: [], rolling: [], macro, codes: meta.codes, commodityUnit,
+      });
+      continue;
+    }
+
+    const stockLevels = commonMonths.map((k) => stockByMonth.get(k)!);
+    const commoLevels = commonMonths.map((k) => commoByMonth.get(k)!);
+
+    const stockRet = returns(stockLevels);
+    const commoRet = returns(commoLevels);
+    const coefficient = pearson(commoRet, stockRet) ?? 0;
+    const betaVal = beta(commoRet, stockRet);
+    const roll = rollingCorr(commoRet, stockRet, 12);
+
+    const stockBase = normalise(stockLevels);
+    const commoBase = normalise(commoLevels);
+    const points: CorrelationPoint[] = commonMonths.map((date, i) => ({
+      date, cours: stockBase[i] ?? 100, commodity: commoBase[i] ?? 100,
     }));
 
+    // rolling aligné sur les mois (décalé d'1 car sur les rendements).
+    const rolling = roll
+      .map((corr, i) => ({ date: commonMonths[i + 1] ?? commonMonths[i]!, corr }))
+      .filter((r): r is { date: string; corr: number } => r.corr != null);
+
+    // macro re-lue avec la corrélation observée pour l'interprétation d'impact.
+    const macroWithCorr = readCommodityMacro(commoRows.map((r) => r.price), meta.commodityLabel, coefficient);
+
     result.push({
-      matiere,
-      label: meta.label,
-      couleur: meta.couleur,
-      coefficient: coeff,
-      points,
-      codes: meta.codes,
+      matiere, label: meta.label, commodityLabel: meta.commodityLabel, couleur: meta.couleur,
+      coefficient, beta: betaVal, nMonths: commonMonths.length, dataAvailable: true,
+      points, rolling, macro: macroWithCorr, codes: meta.codes, commodityUnit,
     });
   }
 
   return result;
+}
+
+export interface AgroNewsItem {
+  date: string;
+  code: string | null;
+  title: string;
+  source: string | null;
+}
+
+/** Publications + événements récents des sociétés agro (contexte fondamental). */
+export async function getAgroNews(): Promise<AgroNewsItem[]> {
+  const supabase = createClient();
+  const codes = [...new Set(Object.values(FILIERES).flatMap((f) => f.codes))];
+
+  const [{ data: pubs }, { data: evts }] = await Promise.all([
+    supabase.from('publications').select('code, date_publication, libelle').in('code', codes)
+      .order('date_publication', { ascending: false }).limit(12),
+    supabase.from('market_events').select('instrument_code, event_date, title').in('instrument_code', codes)
+      .order('event_date', { ascending: false }).limit(12),
+  ]);
+
+  const items: AgroNewsItem[] = [
+    ...((pubs ?? []) as { code: string; date_publication: string; libelle: string }[]).map((p) => ({
+      date: p.date_publication, code: p.code, title: p.libelle, source: 'Publication',
+    })),
+    ...((evts ?? []) as { instrument_code: string | null; event_date: string; title: string }[]).map((e) => ({
+      date: e.event_date, code: e.instrument_code, title: e.title, source: 'Événement',
+    })),
+  ];
+
+  return items.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
 }

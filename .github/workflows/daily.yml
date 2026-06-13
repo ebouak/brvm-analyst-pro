@@ -42,6 +42,10 @@ jobs:
         working-directory: scraper
         run: npx tsx src/index.ts obligations
         continue-on-error: true
+      - name: Matières premières (World Bank Pink Sheet — mensuel, idempotent)
+        working-directory: scraper
+        run: npx tsx src/index.ts commodities
+        continue-on-error: true
       - name: Dividendes (Sika Finance — idempotent)
         working-directory: scraper
         run: npx tsx src/index.ts dividends
