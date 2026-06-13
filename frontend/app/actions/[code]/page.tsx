@@ -20,6 +20,11 @@ import { computeTechnicalSummary } from '@/lib/technicalSummary';
 import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
 import TechnicalSummary from '@/components/TechnicalSummary';
 import NotationBadge from '@/components/NotationBadge';
+import SignalAnalysis from '@/components/SignalAnalysis';
+import { readTechnical } from '@/lib/signal/technical';
+import { analyzeDividendTiming } from '@/lib/signal/dividendTiming';
+import { readPosition } from '@/lib/signal/position';
+import { synthesize } from '@/lib/signal/synthesis';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -48,7 +53,18 @@ async function getData(code: string, fromDate?: string) {
 
   if (fromDate) histQuery = histQuery.gte('date_marche', fromDate);
 
-  const [{ data: hist }, { data: instr }, { data: sig }, { data: divs }, { data: evts }, { data: pubs }, { count: pubCount }, { data: fundsRows }] =
+  // Position de l'utilisateur connecté (pour une lecture du signal selon le PRU).
+  const { data: { user } } = await supabase.auth.getUser();
+  const positionPromise = user
+    ? supabase
+        .from('portfolios_positions')
+        .select('quantite, prix_entree')
+        .eq('user_id', user.id)
+        .eq('code', code)
+        .maybeSingle()
+    : Promise.resolve({ data: null });
+
+  const [{ data: hist }, { data: instr }, { data: sig }, { data: divs }, { data: evts }, { data: pubs }, { count: pubCount }, { data: fundsRows }, { data: position }] =
     await Promise.all([
       histQuery,
       supabase.from('brvm_instruments').select('*').eq('code', code).maybeSingle(),
@@ -63,7 +79,7 @@ async function getData(code: string, fromDate?: string) {
         .select('montant, ex_date, payment_date, exercice')
         .eq('code', code)
         .order('ex_date', { ascending: false })
-        .limit(1),
+        .limit(6),
       supabase
         .from('market_events')
         .select('id, title, event_date, event_type, sentiment')
@@ -86,6 +102,7 @@ async function getData(code: string, fromDate?: string) {
         .eq('code', code)
         .order('year', { ascending: false })
         .limit(6),
+      positionPromise,
     ]);
 
   return {
@@ -105,6 +122,7 @@ async function getData(code: string, fromDate?: string) {
       equity: number | null; cash: number | null; debt: number | null; bfr: number | null;
       source_file: string | null; is_manual: boolean | null;
     }>,
+    position: (position ?? null) as { quantite: number; prix_entree: number } | null,
   };
 }
 
@@ -117,7 +135,7 @@ export default async function InstrumentPage({
 }) {
   const code = decodeURIComponent(params.code).toUpperCase();
   const fromDate = searchParams.from ?? '';
-  const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals } = await getData(code, fromDate || undefined);
+  const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
 
   if (rows.length === 0) {
     return (
@@ -593,10 +611,48 @@ export default async function InstrumentPage({
       {/* ══════════════════════════════════════════════════
           SIGNAL DU JOUR
       ══════════════════════════════════════════════════ */}
-      <div>
+      <div className="space-y-4">
         <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
         {signal ? (
-          <SignalPanel signal={signal} />
+          <>
+            {(() => {
+              const inp = (signal as SignalDaily & { inputs?: Record<string, number | boolean> | null }).inputs ?? {};
+              const num = (k: string): number | null => (typeof inp[k] === 'number' ? (inp[k] as number) : null);
+              const technical = readTechnical({
+                signal: signal.signal,
+                rsi: num('rsi'),
+                ma20: num('ma20'),
+                ma50: num('ma50'),
+                volumeRatio: num('volume_ratio'),
+                variationPct: num('variation_pct'),
+                incomplet: inp.incomplet === true,
+              });
+              const dividend = analyzeDividendTiming(
+                dividends as { montant: number; ex_date: string | null; payment_date: string | null; exercice: number | null }[],
+                last.cours_jour ?? null,
+                new Date().toISOString().slice(0, 10),
+              );
+              const positionCtx = readPosition(position, last.cours_jour ?? null, signal.signal);
+              const synthesis = synthesize({
+                signal: signal.signal,
+                confiance: signal.confiance,
+                incomplet: inp.incomplet === true,
+                technical,
+                position: positionCtx,
+                dividend,
+              });
+              return (
+                <SignalAnalysis
+                  signal={signal.signal}
+                  synthesis={synthesis}
+                  technical={technical}
+                  position={positionCtx}
+                  dividend={dividend}
+                />
+              );
+            })()}
+            <SignalPanel signal={signal} />
+          </>
         ) : (
           <div className="rounded-panel border border-border bg-surface shadow-card p-6">
             <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-1.5">Signal du jour</p>

@@ -180,6 +180,8 @@ export function computeScore(input: ScoreInput): ScoreResult {
     volumeRatio,
     bonusTendance,
     penaliteLiquidite,
+    trendUp: ma20 != null && ma50 != null && ma20 > ma50,
+    trendDown: ma20 != null && ma50 != null && ma20 < ma50,
   });
 
   return {
@@ -217,6 +219,8 @@ function buildExplanation(a: {
   volumeRatio: number | null;
   bonusTendance: number;
   penaliteLiquidite: number;
+  trendUp: boolean;
+  trendDown: boolean;
 }): string {
   if (a.incomplet) {
     return (
@@ -244,7 +248,16 @@ function buildExplanation(a: {
       : a.signal === 'SELL'
         ? 'Signal vendeur'
         : 'Pas de signal franc (HOLD)';
-  return `${intro}. Facteurs : ${parts.join(' ; ')}.`;
+
+  // Clause de tension : court terme vs tendance de fond divergents.
+  let tension = '';
+  if (a.signal === 'SELL' && a.trendUp) {
+    tension = ' À nuancer : la tendance de fond reste haussière (MA20 > MA50) — plutôt une correction technique qu\'un retournement.';
+  } else if (a.signal === 'BUY' && a.trendDown) {
+    tension = ' À nuancer : la tendance de fond reste baissière (MA20 < MA50) — un rebond est possible sans garantie de retournement.';
+  }
+
+  return `${intro}. Facteurs : ${parts.join(' ; ')}.${tension}`;
 }
 
 function round4(n: number): number {
