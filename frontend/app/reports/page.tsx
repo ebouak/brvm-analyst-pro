@@ -2,6 +2,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ReportConfig, { type ReportParams } from './ReportConfig';
+import ViewTabs from '@/components/ViewTabs';
+import { REPORT_TABS } from '@/lib/reportTabs';
 import ReportView, { type ReportData } from './ReportView';
 import { filterEventsByPeriod } from '@/lib/reportUtils';
 import { exportReportPDF } from './export/exportPDF';
@@ -154,6 +156,7 @@ export default function ReportsPage() {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Rapports interactifs</h1>
+      <ViewTabs tabs={REPORT_TABS} current="/reports" />
 
       {loadingInstruments ? (
         <p className="text-sm text-muted">Chargement des instruments…</p>

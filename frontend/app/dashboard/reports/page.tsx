@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import type { MarketEvent } from '@/lib/types';
 import { deleteSnapshot } from './snapshots/actions';
+import ViewTabs from '@/components/ViewTabs';
+import { REPORT_TABS } from '@/lib/reportTabs';
 import {
   SectionHeader,
   PremiumPanel,
@@ -85,6 +87,7 @@ export default async function ReportsHome() {
           )
         }
       />
+      <ViewTabs tabs={REPORT_TABS} current="/dashboard/reports" />
 
       {/* ── Accès rapide ── */}
       <div>

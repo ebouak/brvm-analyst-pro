@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import { fmtFcfa, fmtNumber, fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
+import ViewTabs from '@/components/ViewTabs';
+import { REPORT_TABS } from '@/lib/reportTabs';
 
 export const metadata = {
   title: 'Archive Rapports | BRVM Analyst Pro',
@@ -59,6 +61,9 @@ export default async function ReportsArchivePage() {
           title="Archive des rapports"
           subtitle="Consultez tous vos rapports mensuels BRVM Analyst Pro"
         />
+        <div className="mt-4">
+          <ViewTabs tabs={REPORT_TABS} current="/premium/reports" />
+        </div>
 
         {reportList.length === 0 ? (
           <div className="mt-8">
