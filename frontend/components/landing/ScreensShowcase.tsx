@@ -29,7 +29,7 @@ export default function ScreensShowcase() {
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src="/landing-video.mp4"
-          poster="/screens/landing.png"
+          poster="/screens/app-dashboard.png"
           autoPlay
           muted
           loop
@@ -52,7 +52,7 @@ export default function ScreensShowcase() {
         </video>
       </div>
       <p className="mt-2 text-center text-[11px] text-faint">
-        Écrans réels de la plateforme — sociétés notées A–F, fiche, simulateur, note de conjoncture.
+        Écrans réels de l&apos;application — tableau de bord, fiche instrument, signaux, heatmap, screener.
       </p>
     </section>
   );

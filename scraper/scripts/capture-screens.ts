@@ -10,13 +10,25 @@ import { mkdirSync } from 'node:fs';
 const BASE = process.env.CHECK_BASE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
 const OUT = path.resolve(import.meta.dirname ?? __dirname, '../../frontend/public/screens');
 
-const SHOTS: { name: string; path: string; fullPage?: boolean }[] = [
+// Écrans RÉELS de l'application (la vidéo de la landing montre le produit,
+// pas les pages d'acquisition). CHECK_SET=public pour recapturer les publiques.
+const APP_SHOTS: { name: string; path: string }[] = [
+  { name: 'app-dashboard', path: '/dashboard' },
+  { name: 'app-fiche-snts', path: '/actions/SNTS' },
+  { name: 'app-signaux', path: '/signaux' },
+  { name: 'app-heatmap', path: '/heatmap' },
+  { name: 'app-screener', path: '/screener' },
+];
+
+const PUBLIC_SHOTS: { name: string; path: string }[] = [
   { name: 'landing', path: '/' },
   { name: 'societes', path: '/societes' },
   { name: 'fiche-snts', path: '/societes/SNTS' },
   { name: 'simulateur', path: '/simulateur/SNTS' },
   { name: 'note-conjoncture', path: '/brief/2026-06-12' },
 ];
+
+const SHOTS = process.env.CHECK_SET === 'public' ? PUBLIC_SHOTS : APP_SHOTS;
 
 async function main(): Promise<void> {
   mkdirSync(OUT, { recursive: true });
@@ -29,7 +41,7 @@ async function main(): Promise<void> {
   for (const shot of SHOTS) {
     try {
       await page.goto(`${BASE}${shot.path}`, { waitUntil: 'networkidle', timeout: 60000 });
-      await page.waitForTimeout(1200); // polices + transitions
+      await page.waitForTimeout(2500); // polices + graphiques client (ECharts/Recharts)
       const file = path.join(OUT, `${shot.name}.png`);
       await page.screenshot({ path: file, fullPage: false });
       console.log(`✅ ${shot.name} ← ${shot.path}`);
