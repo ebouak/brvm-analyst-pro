@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import ObligationsTable, { type ObligationRow } from '@/components/ObligationsTable';
 import YieldCurveChart, { type CurvePoint } from '@/components/YieldCurveChart';
 import YieldComparison, { type DividendYield } from '@/components/YieldComparison';
@@ -12,11 +12,13 @@ import {
   StatPill,
 } from '@/components/ui/premium';
 
-export const dynamic = 'force-dynamic';
+// Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
+// par l'intraday : ISR 5 min (audit 2026-06-12).
+export const revalidate = 300;
 export const metadata = { title: 'Obligations' };
 
 async function getData() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
   const { data: lastRow } = await supabase
     .from('brvm_obligations_daily').select('date_marche')
     .order('date_marche', { ascending: false }).limit(1);

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import { aggregateBySector } from '@/lib/sectors';
 import SectorCard from '@/components/SectorCard';
 import SectorRankingTable from '@/components/SectorRankingTable';
@@ -11,11 +11,13 @@ import {
   Eyebrow,
 } from '@/components/ui/premium';
 
-export const dynamic = 'force-dynamic';
+// Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
+// par l'intraday : ISR 5 min (audit 2026-06-12).
+export const revalidate = 300;
 export const metadata = { title: 'Secteurs — BRVM Analyst Pro' };
 
 async function getData() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
 
   // Dernière date disponible
   const { data: lastRow } = await supabase

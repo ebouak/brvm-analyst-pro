@@ -1,6 +1,8 @@
-export const dynamic = 'force-dynamic';
+// Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
+// par l'intraday : ISR 5 min (audit 2026-06-12).
+export const revalidate = 300;
 
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import NotationsGrid from './NotationsGrid';
 import {
   SectionHeader,
@@ -85,7 +87,7 @@ export interface InstrumentNotation {
 }
 
 export default async function NotationsPage() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
 
   const { data: instruments } = await supabase
     .from('brvm_instruments')

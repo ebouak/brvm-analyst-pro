@@ -1,13 +1,15 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import ActionsTable from '@/components/ActionsTable';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { SectionHeader, EmptyStatePremium, PremiumPanel, StatPill, PremiumCTA } from '@/components/ui/premium';
 
-export const dynamic = 'force-dynamic';
+// Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
+// par l'intraday : ISR 5 min (audit 2026-06-12).
+export const revalidate = 300;
 export const metadata = { title: 'Marché Actions' };
 
 async function getData() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
   const { data: lastRow } = await supabase
     .from('brvm_actions_daily')
     .select('date_marche')

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import FundamentalsTable, { type ScreenerRow } from '@/components/fundamentals/FundamentalsTable';
 import {
@@ -7,11 +7,13 @@ import {
   EmptyStatePremium,
 } from '@/components/ui/premium';
 
-export const dynamic = 'force-dynamic';
+// Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
+// par l'intraday : ISR 5 min (audit 2026-06-12).
+export const revalidate = 300;
 export const metadata = { title: 'Analyse fondamentale' };
 
 async function getData(): Promise<ScreenerRow[]> {
-  const sb = createClient();
+  const sb = createPublicClient();
   const [{ data: instruments }, { data: funds }, { data: quotes }, { data: divs }] = await Promise.all([
     sb.from('brvm_instruments').select('code, designation, secteur, shares').eq('type', 'action').eq('actif', true),
     sb.from('fundamentals').select('code, year, revenue, net_income, equity, debt, is_manual').order('year', { ascending: false }),
