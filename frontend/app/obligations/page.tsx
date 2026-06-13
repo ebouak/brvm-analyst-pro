@@ -2,7 +2,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import ObligationsTable, { type ObligationRow } from '@/components/ObligationsTable';
 import YieldCurveChart, { type CurvePoint } from '@/components/YieldCurveChart';
 import YieldComparison, { type DividendYield } from '@/components/YieldComparison';
-import { yieldToMaturity, durations, yearsTo } from '@/lib/bonds';
+import { yieldToMaturity, durations, yearsTo, parseObligationDesignation } from '@/lib/bonds';
 import type { ObligationDaily, Dividend } from '@/lib/types';
 import {
   SectionHeader,
@@ -29,19 +29,28 @@ async function getData() {
   const obls = (data ?? []) as ObligationDaily[];
 
   const rows: ObligationRow[] = obls.map((o) => {
-    const years = yearsTo(o.maturite);
+    // Champs souvent vides en base : on les dérive de la désignation
+    // (« ÉMETTEUR coupon% début-fin ») quand ils manquent.
+    const parsed = parseObligationDesignation(o.designation);
+    const emetteur = o.emetteur ?? parsed.emetteur;
+    const tauxPct = o.taux_pct ?? parsed.couponPct;
+    const maturite = o.maturite ?? parsed.maturite;
+
+    const years = yearsTo(maturite);
     let ytm: number | null = null;
     let modDur: number | null = null;
-    if (o.cours_jour != null && o.taux_pct != null && years != null) {
-      ytm = yieldToMaturity({ prix: o.cours_jour, couponRatePct: o.taux_pct, yearsToMaturity: years });
+    if (o.cours_jour != null && tauxPct != null && years != null) {
+      // Le prix est coté en % du pair → base nominale 100 (pas 10 000).
+      const inputs = { prix: o.cours_jour, couponRatePct: tauxPct, yearsToMaturity: years, face: 100 };
+      ytm = yieldToMaturity(inputs);
       if (ytm != null) {
-        const d = durations({ prix: o.cours_jour, couponRatePct: o.taux_pct, yearsToMaturity: years }, ytm);
+        const d = durations(inputs, ytm);
         modDur = d?.modified ?? null;
       }
     }
     return {
-      code: o.code, designation: o.designation, emetteur: o.emetteur,
-      taux_pct: o.taux_pct, maturite: o.maturite, cours_jour: o.cours_jour,
+      code: o.code, designation: o.designation, emetteur,
+      taux_pct: tauxPct, maturite, cours_jour: o.cours_jour,
       volume: o.volume, yearsToMaturity: years, ytm, modifiedDuration: modDur,
     };
   });

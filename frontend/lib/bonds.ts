@@ -92,3 +92,35 @@ export function yearsTo(maturityIso: string | null, from = new Date()): number |
 }
 
 function round4(n: number): number { return Math.round(n * 10000) / 10000; }
+
+/**
+ * Dérive émetteur / coupon / maturité depuis la désignation d'une obligation
+ * quand les colonnes dédiées sont vides. Les désignations BRVM suivent le
+ * format « <ÉMETTEUR> <coupon>% <annéeDébut>-<annéeFin> », ex :
+ *   « BIDC-EBID 6,40% 2019-2026 » ou « FIDELIS FINANCE ... 2 - 7% 2025-2030 ».
+ * La maturité retournée est le 31 décembre de l'année de fin (seule l'année
+ * est connue). Renvoie des champs null si le motif n'est pas reconnu.
+ */
+export function parseObligationDesignation(designation: string | null): {
+  emetteur: string | null;
+  couponPct: number | null;
+  maturite: string | null;
+} {
+  if (!designation) return { emetteur: null, couponPct: null, maturite: null };
+  const m = designation.match(/(\d{1,2}(?:[.,]\d+)?)\s*%\s*(\d{4})\s*-\s*(\d{4})/);
+  if (!m) return { emetteur: null, couponPct: null, maturite: null };
+
+  const couponPct = parseFloat(m[1]!.replace(',', '.'));
+  const endYear = m[3]!;
+  const maturite = `${endYear}-12-31`;
+
+  // Émetteur = tout ce qui précède le coupon, sans tiret/séparateur traînant.
+  const emetteur =
+    designation.slice(0, m.index ?? 0).replace(/[\s-]+$/, '').trim() || null;
+
+  return {
+    emetteur,
+    couponPct: Number.isFinite(couponPct) ? couponPct : null,
+    maturite,
+  };
+}
