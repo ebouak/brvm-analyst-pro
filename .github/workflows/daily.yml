@@ -38,6 +38,10 @@ jobs:
       - name: Actualités (Sika + brvm.org + cosumaf)
         working-directory: scraper
         run: npx tsx src/index.ts news
+      - name: Dividendes (Sika Finance — idempotent)
+        working-directory: scraper
+        run: npx tsx src/index.ts dividends
+        continue-on-error: true
 
       # Brief quotidien : idempotent (skip si déjà envoyé pour la séance).
       # Envoyé après la fermeture (run 16h) ; no-op au run d'ouverture.

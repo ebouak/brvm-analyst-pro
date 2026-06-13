@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
+import NewsTicker from '@/components/NewsTicker';
+import NewsletterForm from '@/components/NewsletterForm';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
@@ -170,21 +172,18 @@ export default async function Landing() {
     <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
       <TasteTopbar ticks={ticks} />
 
+      {/* ── TICKER ACTUALITÉS ─────────────────────────────────────────── */}
+      <NewsTicker className="mt-3 -mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
+
       {/* ── HERO : promesse + preuve en direct ───────────────────────── */}
       <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
         <div>
-          <div
-            className="mb-5 inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-gold-2"
-            style={{ background: 'rgba(86,215,253,0.09)', borderColor: 'rgba(86,215,253,0.26)' }}
-          >
-            <span className="h-2 w-2 rounded-full" style={{ background: '#3fe18b', animation: 'pulse 2.5s infinite' }} />
+          <div className="landing-hero-badge mb-5 inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-gold-2">
+            <span className="h-2 w-2 rounded-full bg-up animate-pulse" />
             {dateLabel ? `Séance du ${dateLabel}` : 'Bourse Régionale des Valeurs Mobilières'}
           </div>
 
-          <h1
-            className="mb-5 font-display text-ivory"
-            style={{ fontSize: 'clamp(2.6rem,5.4vw,4.6rem)', lineHeight: 1.02, letterSpacing: '-0.05em' }}
-          >
+          <h1 className="mb-5 font-display text-ivory text-display-lg">
             Décidez sur la BRVM avec des <span className="text-gold-shimmer animate-gold-sweep">données</span>,
             pas des rumeurs.
           </h1>
@@ -227,14 +226,7 @@ export default async function Landing() {
         </div>
 
         {/* Carte séance live — le produit en démonstration */}
-        <aside
-          className="rounded-panel border border-white/10 p-5"
-          style={{
-            background:
-              'radial-gradient(circle at 80% 0%,rgba(86,215,253,0.10),transparent 40%),linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))',
-            boxShadow: '0 22px 60px rgba(0,0,0,0.36)',
-          }}
-        >
+        <aside className="landing-live-card rounded-panel border border-white/10 p-5">
           <div className="mb-4 flex items-center justify-between">
             <p className="overline text-gold-2">La séance, en direct</p>
             <Link href="/societes" className="text-[11px] text-muted transition-colors hover:text-ivory">
@@ -280,17 +272,11 @@ export default async function Landing() {
       </section>
 
       {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
-      <section
-        className="mt-10 overflow-hidden rounded-panel border border-white/10 p-6 md:p-10"
-        style={{
-          background:
-            'radial-gradient(circle at 15% 50%,rgba(63,225,139,0.06),transparent 45%),linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.015))',
-        }}
-      >
+      <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-white/10 p-6 md:p-10">
         <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
           <div>
             <p className="overline mb-3 text-gold-2">Simulateur</p>
-            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl" style={{ letterSpacing: '-0.03em' }}>
+            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
               Et si vous aviez investi&nbsp;?
             </h2>
             <p className="mb-6 max-w-[46ch] text-sm leading-relaxed text-muted">
@@ -306,7 +292,7 @@ export default async function Landing() {
           </div>
 
           {simulation ? (
-            <div className="rounded-2xl border border-white/[0.08] bg-black/30 p-6">
+            <div className="landing-sim-result rounded-2xl p-6 border">
               <p className="mb-1 text-xs text-muted">1 000 000 FCFA dans SONATEL il y a 5 ans, aujourd&apos;hui :</p>
               <p className="tabular font-display text-4xl font-bold text-ivory md:text-5xl">
                 {fmtNumber(Math.round(simulation.finalValue))} <span className="text-lg text-muted">FCFA</span>
@@ -331,7 +317,7 @@ export default async function Landing() {
         <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center">
           <div>
             <p className="overline mb-3 text-gold-2">Brief quotidien</p>
-            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl" style={{ letterSpacing: '-0.03em' }}>
+            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
               La séance résumée en 30 secondes, chaque soir.
             </h2>
             <p className="mb-6 max-w-[44ch] text-sm leading-relaxed text-muted">
@@ -344,7 +330,7 @@ export default async function Landing() {
               Lire les derniers briefs →
             </Link>
           </div>
-          <div className="rounded-panel border border-white/10 bg-black/30 p-5">
+          <div className="landing-brief-card rounded-panel border p-5">
             <pre className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-ivory/90">
               {briefLines.join('\n')}
             </pre>
@@ -363,23 +349,26 @@ export default async function Landing() {
         </div>
         <Link
           href="/premium/diagnostic"
-          className="inline-flex min-h-[44px] shrink-0 items-center rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-          style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
+          className="landing-hero-cta inline-flex min-h-[44px] shrink-0 items-center rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
         >
           Découvrir le diagnostic IA
         </Link>
       </section>
 
+      {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
+      <section className="mt-10">
+        <NewsletterForm source="landing" />
+      </section>
+
       {/* ── CTA FINAL ─────────────────────────────────────────────────── */}
       <section className="mt-12 text-center">
-        <h2 className="mx-auto mb-3 max-w-[24ch] font-display text-3xl text-ivory md:text-4xl" style={{ letterSpacing: '-0.04em' }}>
+        <h2 className="mx-auto mb-3 max-w-[24ch] font-display text-3xl text-ivory md:text-4xl [letter-spacing:-0.04em]">
           Votre prochaine décision mérite mieux qu&apos;une intuition.
         </h2>
         <p className="mb-6 text-sm text-muted">Compte gratuit · aucune carte bancaire · 1 minute.</p>
         <Link
           href="/signup"
-          className="inline-flex min-h-[50px] items-center rounded-full px-8 text-base font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-          style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
+          className="landing-hero-cta inline-flex min-h-[50px] items-center rounded-full px-8 text-base font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
         >
           Créer mon compte gratuit
         </Link>

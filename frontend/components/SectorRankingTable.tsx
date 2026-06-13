@@ -11,24 +11,38 @@ interface Props {
   perfs: SectorPerf[];
 }
 
-const COLS: { key: Col; label: string }[] = [
-  { key: 'secteur', label: 'Secteur' },
-  { key: 'count', label: '# Act.' },
-  { key: 'coursMean', label: 'Cours moy.' },
-  { key: 'varDay', label: 'Jour %' },
-  { key: 'var5d', label: '5j %' },
-  { key: 'var30d', label: '30j %' },
-  { key: 'var90d', label: '90j %' },
-  { key: 'var1y', label: '1A %' },
-  { key: 'volumeDay', label: 'Vol. jour' },
+const COLS: { key: Col; label: string; tooltip: string }[] = [
+  { key: 'secteur', label: 'Secteur', tooltip: 'Secteur économique ICB' },
+  { key: 'count', label: '# Act.', tooltip: "Nombre d'actions cotées dans ce secteur" },
+  { key: 'coursMean', label: 'Cours moy.', tooltip: 'Cours de clôture moyen pondéré des actions du secteur (FCFA)' },
+  { key: 'varDay', label: 'Jour %', tooltip: 'Variation moyenne des cours ce jour — moyenne arithmétique des variations individuelles' },
+  { key: 'var5d', label: '5j %', tooltip: 'Performance sectorielle sur 5 jours de bourse — variation du cours moyen vs il y a 5 séances' },
+  { key: 'var30d', label: '30j %', tooltip: 'Performance sur 30 jours calendaires — bon indicateur de tendance à moyen terme' },
+  { key: 'var90d', label: '90j %', tooltip: 'Performance trimestrielle (90 jours calendaires) — tendance structurelle' },
+  { key: 'var1y', label: '1A %', tooltip: 'Performance sur 1 an calendaire — reflète le cycle annuel complet' },
+  { key: 'volumeDay', label: 'Vol. jour', tooltip: 'Valeur échangée cumulée du secteur ce jour (en FCFA) — mesure la liquidité sectorielle' },
 ];
 
 function VarCell({ v }: { v: number | null }) {
-  if (v == null) return <span className="text-[#8b93a7]">—</span>;
-  const color = v >= 0 ? '#00c853' : '#f44336';
+  if (v == null) return <span className="text-faint">—</span>;
+  const cls = v >= 0 ? 'text-up' : 'text-down';
   return (
-    <span className="tabular-nums font-medium" style={{ color }}>
+    <span className={`tabular font-medium ${cls}`}>
       {v >= 0 ? '+' : ''}{v.toFixed(2)}%
+    </span>
+  );
+}
+
+function ColTooltip({ text }: { text: string }) {
+  return (
+    <span className="group/tip relative inline-flex items-center ml-1">
+      <span className="text-faint/60 text-[9px] cursor-help select-none">(?)</span>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-20 w-52 rounded-lg border border-border bg-elevated px-3 py-2 text-xs text-muted leading-relaxed opacity-0 transition-opacity group-hover/tip:opacity-100 shadow-modal"
+      >
+        {text}
+      </span>
     </span>
   );
 }
@@ -59,41 +73,44 @@ export default function SectorRankingTable({ perfs }: Props) {
   });
 
   return (
-    <div className="overflow-x-auto rounded-lg" style={{ border: '1px solid #232733' }}>
+    <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-sm">
         <thead>
-          <tr style={{ background: '#161922', borderBottom: '1px solid #232733' }}>
+          <tr className="bg-elevated/80 border-b border-border">
             {COLS.map((col) => (
               <th
                 key={col.key}
-                onClick={() => handleSort(col.key)}
-                className="px-4 py-3 text-left font-medium text-[#8b93a7] cursor-pointer select-none whitespace-nowrap hover:text-[#e6e9f0] transition-colors"
+                className="px-4 py-3 text-left whitespace-nowrap"
               >
-                {col.label}
-                {sortCol === col.key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+                <button
+                  type="button"
+                  onClick={() => handleSort(col.key)}
+                  className="inline-flex items-center gap-0.5 font-medium text-muted hover:text-ivory transition-colors cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-gold/40 rounded"
+                  aria-label={`Trier par ${col.label}`}
+                >
+                  {col.label}
+                  {sortCol === col.key ? (
+                    <span className="text-gold ml-0.5">{sortDir === 'asc' ? ' ↑' : ' ↓'}</span>
+                  ) : null}
+                </button>
+                <ColTooltip text={col.tooltip} />
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {sorted.map((p) => {
-            const href = `/actions?secteur=${encodeURIComponent(p.secteur)}`;
+          {sorted.map((p, idx) => {
+            const href = `/heatmap?secteur=${encodeURIComponent(p.secteur)}`;
+            const rowBg = idx % 2 === 0 ? '' : 'bg-elevated/20';
             return (
-              <tr
-                key={p.secteur}
-                className="border-b transition-colors hover:bg-[#1a1f2b]"
-                style={{ borderColor: '#232733' }}
-              >
-                <td className="px-4 py-3 font-medium">
-                  <Link
-                    href={href}
-                    className="text-[#42a5f5] hover:underline whitespace-nowrap"
-                  >
+              <tr key={p.secteur} className={`border-b border-border/50 transition-colors hover:bg-gold/[0.03] ${rowBg}`}>
+                <td className="px-4 py-3 font-medium whitespace-nowrap">
+                  <Link href={href} className="text-gold hover:underline">
                     {p.secteur}
                   </Link>
                 </td>
-                <td className="px-4 py-3 tabular-nums text-[#e6e9f0]">{p.count}</td>
-                <td className="px-4 py-3 tabular-nums text-[#e6e9f0]">
+                <td className="px-4 py-3 tabular text-muted">{p.count}</td>
+                <td className="px-4 py-3 tabular text-ivory">
                   {p.coursMean != null ? fmtNumber(p.coursMean, 0) : '—'}
                 </td>
                 <td className="px-4 py-3"><VarCell v={p.varDay} /></td>
@@ -101,7 +118,7 @@ export default function SectorRankingTable({ perfs }: Props) {
                 <td className="px-4 py-3"><VarCell v={p.var30d} /></td>
                 <td className="px-4 py-3"><VarCell v={p.var90d} /></td>
                 <td className="px-4 py-3"><VarCell v={p.var1y} /></td>
-                <td className="px-4 py-3 tabular-nums text-[#e6e9f0] whitespace-nowrap">
+                <td className="px-4 py-3 tabular text-ivory whitespace-nowrap">
                   {fmtFcfa(p.volumeDay)} FCFA
                 </td>
               </tr>
@@ -109,7 +126,7 @@ export default function SectorRankingTable({ perfs }: Props) {
           })}
           {sorted.length === 0 && (
             <tr>
-              <td colSpan={COLS.length} className="px-4 py-8 text-center text-[#8b93a7]">
+              <td colSpan={COLS.length} className="px-4 py-8 text-center text-faint">
                 Aucune donnée disponible.
               </td>
             </tr>

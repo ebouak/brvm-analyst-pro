@@ -3,7 +3,9 @@ import { aggregateBySector } from '@/lib/sectors';
 import SectorCard from '@/components/SectorCard';
 import SectorRankingTable from '@/components/SectorRankingTable';
 import SectorRotation from '@/components/SectorRotation';
+import NewsletterForm from '@/components/NewsletterForm';
 import { fmtDateFR } from '@/lib/format';
+import Link from 'next/link';
 import {
   SectionHeader,
   PremiumPanel,
@@ -71,6 +73,8 @@ export default async function SecteursPage() {
   const { lastDate, perfs } = await getData();
 
   const top4 = perfs.slice(0, 4);
+  const best = perfs[0] ?? null;
+  const worst = perfs[perfs.length - 1] ?? null;
 
   return (
     <div className="min-h-screen bg-bg">
@@ -114,15 +118,21 @@ export default async function SecteursPage() {
                     Secteurs en tête du jour
                   </h2>
                 </div>
-                <div className="hidden sm:flex items-center gap-3 text-xs text-faint">
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 rounded-full bg-up/60" />
-                    Hausse
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 rounded-full bg-down/60" />
-                    Baisse
-                  </span>
+                <div className="hidden sm:flex items-center gap-4 text-xs">
+                  {best && best.varDay != null && (
+                    <span className="flex items-center gap-1.5 text-up">
+                      <span className="inline-block w-2 h-2 rounded-full bg-up/60" />
+                      Meilleur : <strong>{best.secteur}</strong>
+                      <span className="tabular">+{best.varDay.toFixed(2)}%</span>
+                    </span>
+                  )}
+                  {worst && worst.varDay != null && worst.secteur !== best?.secteur && (
+                    <span className="flex items-center gap-1.5 text-down">
+                      <span className="inline-block w-2 h-2 rounded-full bg-down/60" />
+                      Pire : <strong>{worst.secteur}</strong>
+                      <span className="tabular">{worst.varDay.toFixed(2)}%</span>
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -171,6 +181,25 @@ export default async function SecteursPage() {
             </section>
           </>
         )}
+
+        {/* ── Lien heatmap ────────────────────────────────────────────────── */}
+        <div className="animate-rise-in [animation-delay:0.42s] flex items-center justify-between rounded-xl border border-border/50 bg-elevated/30 px-5 py-3.5">
+          <div>
+            <p className="text-sm font-medium text-ivory">Voir la cartographie visuelle</p>
+            <p className="text-xs text-muted">Heatmap — taille proportionnelle à la capitalisation, couleur = variation</p>
+          </div>
+          <Link
+            href="/heatmap"
+            className="shrink-0 rounded-lg border border-gold/30 px-4 py-2 text-xs font-semibold text-gold hover:bg-gold/10 transition-colors"
+          >
+            Ouvrir la heatmap →
+          </Link>
+        </div>
+
+        {/* ── Newsletter ───────────────────────────────────────────────────── */}
+        <div className="animate-rise-in [animation-delay:0.46s]">
+          <NewsletterForm source="secteurs" />
+        </div>
 
         {/* ── Pied de page discret ─────────────────────────────────────────── */}
         <footer className="pt-4 pb-6 flex items-center justify-between border-t border-border text-xs text-faint">

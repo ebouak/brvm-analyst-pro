@@ -9,6 +9,10 @@ export interface SectorPerf {
   var1y: number | null;
   volumeDay: number;
   sparkline30d: number[]; // perf cumulée j-30 → j (index 0 = le plus ancien)
+  topHausse: { code: string; pct: number } | null;
+  topBaisse: { code: string; pct: number } | null;
+  hausses: number;
+  baisses: number;
 }
 
 type Row = {
@@ -84,6 +88,10 @@ export function aggregateBySector(rows: Row[], lastDate: string): SectorPerf[] {
     const var1ys: number[] = [];
     const coursToday: number[] = [];
     let volumeDay = 0;
+    let hausses = 0;
+    let baisses = 0;
+    let topHausse: { code: string; pct: number } | null = null;
+    let topBaisse: { code: string; pct: number } | null = null;
 
     for (const code of codes) {
       const codeRows = byCode.get(code)!;
@@ -93,7 +101,17 @@ export function aggregateBySector(rows: Row[], lastDate: string): SectorPerf[] {
       if (closeToday != null) coursToday.push(closeToday);
 
       // Variation jour
-      if (todayRow?.variation_pct != null) dayVars.push(todayRow.variation_pct);
+      if (todayRow?.variation_pct != null) {
+        const v = todayRow.variation_pct;
+        dayVars.push(v);
+        if (v > 0) {
+          hausses++;
+          if (!topHausse || v > topHausse.pct) topHausse = { code, pct: v };
+        } else if (v < 0) {
+          baisses++;
+          if (!topBaisse || v < topBaisse.pct) topBaisse = { code, pct: v };
+        }
+      }
 
       // Volume jour
       if (todayRow?.valeur_echangee != null) volumeDay += todayRow.valeur_echangee;
@@ -154,6 +172,10 @@ export function aggregateBySector(rows: Row[], lastDate: string): SectorPerf[] {
       var1y: avg(var1ys),
       volumeDay,
       sparkline30d,
+      topHausse,
+      topBaisse,
+      hausses,
+      baisses,
     });
   }
 

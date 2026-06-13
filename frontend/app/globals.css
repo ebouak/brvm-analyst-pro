@@ -109,6 +109,34 @@ body {
   100% { opacity: 0; }
 }
 
+/* ── Landing page — sections complexes ─────────────────────────────────── */
+.landing-hero-badge {
+  background: rgba(86,215,253,0.09);
+  border-color: rgba(86,215,253,0.26);
+}
+.landing-hero-cta {
+  background: linear-gradient(180deg,#8fe6ff,#56d7fd);
+}
+.landing-live-card {
+  background:
+    radial-gradient(circle at 80% 0%,rgba(86,215,253,0.10),transparent 40%),
+    linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015));
+  box-shadow: 0 22px 60px rgba(0,0,0,0.36);
+}
+.landing-sim-section {
+  background:
+    radial-gradient(circle at 15% 50%,rgba(63,225,139,0.06),transparent 45%),
+    linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.015));
+}
+.landing-sim-result {
+  background: rgba(0,0,0,0.30);
+  border-color: rgba(255,255,255,0.08);
+}
+.landing-brief-card {
+  background: rgba(0,0,0,0.30);
+  border-color: rgba(255,255,255,0.10);
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }

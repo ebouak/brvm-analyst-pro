@@ -1,3 +1,4 @@
+import type React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import HeatmapGrid from '@/components/HeatmapGrid';
 import brvmLogos from '@/lib/brvmLogos.json';
@@ -10,6 +11,17 @@ import {
   PremiumPanel,
   EmptyStatePremium,
 } from '@/components/ui/premium';
+
+interface SectorStat {
+  secteur: string;
+  count: number;
+  hausses: number;
+  baisses: number;
+  avgVar: number;
+  volume: number;
+  topHausse: { code: string; pct: number } | null;
+  topBaisse: { code: string; pct: number } | null;
+}
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Heatmap marché — BRVM Analyst Pro' };
@@ -75,12 +87,35 @@ async function getData(secteur: string | null) {
 
   const rows = secteur ? enriched.filter((r) => r.secteur === secteur) : enriched;
 
-  return { lastDate, rows, allSectors };
+  // Statistiques par secteur pour le panel d'information
+  const sectorMap = new Map<string, SectorStat>();
+  for (const r of enriched) {
+    const sec = r.secteur ?? 'Autre';
+    if (!sectorMap.has(sec)) {
+      sectorMap.set(sec, { secteur: sec, count: 0, hausses: 0, baisses: 0, avgVar: 0, volume: 0, topHausse: null, topBaisse: null });
+    }
+    const s = sectorMap.get(sec)!;
+    const v = (r as { variation_pct?: number | null }).variation_pct ?? 0;
+    const vol = (r as { volume?: number | null }).volume ?? 0;
+    s.count++;
+    s.avgVar += v;
+    s.volume += vol;
+    if (v > 0) { s.hausses++; if (!s.topHausse || v > s.topHausse.pct) s.topHausse = { code: r.code, pct: v }; }
+    if (v < 0) { s.baisses++; if (!s.topBaisse || v < s.topBaisse.pct) s.topBaisse = { code: r.code, pct: v }; }
+  }
+  const sectorStats: SectorStat[] = Array.from(sectorMap.values()).map((s) => ({
+    ...s,
+    avgVar: s.count > 0 ? s.avgVar / s.count : 0,
+  })).sort((a, b) => b.avgVar - a.avgVar);
+
+  return { lastDate, rows, allSectors, sectorStats } as const;
 }
 
 export default async function HeatmapPage({ searchParams }: PageProps) {
   const secteurParam = typeof searchParams.secteur === 'string' ? searchParams.secteur : null;
-  const { lastDate, rows, allSectors } = await getData(secteurParam);
+  const result = await getData(secteurParam);
+  const { lastDate, rows, allSectors } = result;
+  const sectorStats: SectorStat[] = result.sectorStats ?? [];
 
   return (
     <div className="min-h-screen bg-bg flex flex-col">
@@ -174,6 +209,58 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
                 ))}
               </div>
             </div>
+
+            {/* ── Panel statistiques sectorielles ──────────────────────────── */}
+            {sectorStats.length > 0 && (
+              <div className="animate-rise-in [animation-delay:0.14s]">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-muted">
+                    Performance par secteur
+                  </span>
+                  <span className="text-[10px] text-faint">
+                    Taille = part du volume · couleur = variation moyenne
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {sectorStats.map((s) => {
+                    const avg = s.avgVar;
+                    const color = avg > 0 ? 'text-up' : avg < 0 ? 'text-down' : 'text-muted';
+                    const borderColor = avg > 0 ? 'border-up/30' : avg < 0 ? 'border-down/30' : 'border-border';
+                    const breadth = s.count > 0 ? (s.hausses / s.count) * 100 : 0;
+                    return (
+                      <Link
+                        key={s.secteur}
+                        href={secteurParam === s.secteur ? '/heatmap' : `/heatmap?secteur=${encodeURIComponent(s.secteur)}`}
+                        className={`group flex flex-col gap-2 rounded-xl border bg-elevated/50 p-3.5 transition-all duration-200 hover:bg-elevated ${borderColor} ${secteurParam === s.secteur ? 'ring-1 ring-gold/40' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-xs font-semibold text-ivory leading-tight">{s.secteur}</span>
+                          <span className={`tabular text-xs font-bold shrink-0 ${color}`}>
+                            {avg >= 0 ? '+' : ''}{avg.toFixed(2)}%
+                          </span>
+                        </div>
+                        {/* Barre breadth : hausses/total */}
+                        <div className="h-1.5 rounded-full bg-border overflow-hidden">
+                          {/* eslint-disable-next-line react/forbid-dom-props */}
+                          <div
+                            className="h-full rounded-full bg-up transition-all [width:var(--breadth)]"
+                            style={{ '--breadth': `${breadth.toFixed(0)}%` } as React.CSSProperties}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-faint">
+                          <span>{s.hausses}↑ {s.baisses}↓ {s.count - s.hausses - s.baisses}→</span>
+                          {s.topHausse && (
+                            <span className="text-up/80">
+                              ↑ {s.topHausse.code} +{s.topHausse.pct.toFixed(1)}%
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* ── Secteur vide après filtre ─────────────────────────────────── */}
             {rows.length === 0 && secteurParam && (
