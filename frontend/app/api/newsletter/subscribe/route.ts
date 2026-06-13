@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+
+function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Prefer service_role (bypasses RLS); fall back to anon if unavailable
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error('Supabase env vars manquantes');
+  return createSupabaseClient(url, key, { auth: { persistSession: false } });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,15 +17,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email invalide.' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = getAdminClient();
 
-    // Upsert: si déjà inscrit, on renvoie OK sans erreur (pas de doublon visible)
+    // Insert simple ; un doublon (déjà inscrit) est traité comme un succès.
+    // On évite l'upsert ON CONFLICT qui déclenche la policy RLS UPDATE et
+    // échoue côté clé anon (fallback sans service_role).
     const { error } = await supabase
       .from('newsletter_subscribers')
-      .upsert({ email: email.toLowerCase().trim(), source }, { onConflict: 'email', ignoreDuplicates: true });
+      .insert({ email: email.toLowerCase().trim(), source });
 
-    if (error) {
-      console.error('[newsletter] upsert error', error);
+    if (error && error.code !== '23505') {
+      console.error('[newsletter] insert error', JSON.stringify(error));
       return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
     }
 

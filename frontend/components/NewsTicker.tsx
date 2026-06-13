@@ -41,7 +41,7 @@ export default async function NewsTicker({ className = '' }: Props) {
 
       {/* Défilement CSS */}
       <div className="flex-1 overflow-hidden relative">
-        <div className="flex whitespace-nowrap animate-ticker" style={{ animationDuration: `${Math.max(30, items.length * 5)}s` }}>
+        <div className="flex whitespace-nowrap animate-ticker" style={{ animationDuration: `${Math.max(15, items.length * 2)}s` }}>
           {all.map((item, i) => (
             <span key={`${item.id}-${i}`} className="inline-flex items-center gap-3 px-5">
               {item.source_url ? (

@@ -8,7 +8,7 @@ export interface DividendCalendarEvent {
   code: string;
   designation: string | null;
   secteur: string | null;
-  taux: number; // percentage per 100 (e.g., 3.5 for 3.5%)
+  taux: number | null; // rendement estimé (null si cours indisponible)
   ex_date: string; // ISO date YYYY-MM-DD
   payment_date: string; // ISO date YYYY-MM-DD
   cours_jour: number | null; // for rendement calculation

@@ -49,6 +49,7 @@ import { runBackfill } from './backfill/runBackfill.js';
 import { runNotations } from './notations/runNotations.js';
 import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
+import { runObligations } from './scrapers/runObligations.js';
 import { runValidation } from './validation/runValidation.js';
 import { runPaperTradingAuto } from './runners/runPaperTradingAuto.js';
 import { runBrief } from './brief/runBrief.js';
@@ -97,6 +98,10 @@ async function main(): Promise<number> {
     }
     case 'dividends': {
       const res = await runDividends({ mock });
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'obligations': {
+      const res = await runObligations({ mock });
       return res.status === 'failed' ? 1 : 0;
     }
     case 'intraday': {

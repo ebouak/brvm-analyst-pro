@@ -38,6 +38,10 @@ jobs:
       - name: Actualités (Sika + brvm.org + cosumaf)
         working-directory: scraper
         run: npx tsx src/index.ts news
+      - name: Obligations (Sika Finance — taux fixes + variables)
+        working-directory: scraper
+        run: npx tsx src/index.ts obligations
+        continue-on-error: true
       - name: Dividendes (Sika Finance — idempotent)
         working-directory: scraper
         run: npx tsx src/index.ts dividends

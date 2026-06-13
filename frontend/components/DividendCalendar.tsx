@@ -221,8 +221,11 @@ export function DividendCalendar({
                       {/* Dividend badge */}
                       {hasDividends && (
                         <div className="mt-1">
-                          <div className="text-xs font-bold text-info">
-                            {day.dividends[0].taux?.toFixed(1)}%
+                          <div className="text-[10px] font-bold text-info leading-tight">
+                            {(day.dividends[0].montant >= 1000
+                              ? `${(day.dividends[0].montant / 1000).toFixed(0)}k`
+                              : day.dividends[0].montant.toFixed(0)
+                            )} F
                           </div>
                           {day.dividends.length > 1 && (
                             <div className="text-xs text-info/70">
@@ -258,16 +261,16 @@ export function DividendCalendar({
                                 {/* Details grid */}
                                 <div className="mt-2 space-y-1 text-xs">
                                   <div className="flex justify-between">
-                                    <span className="text-muted">Taux:</span>
-                                    <span className="font-semibold text-info">
-                                      {div.taux?.toFixed(2)}%
+                                    <span className="text-muted">Montant:</span>
+                                    <span className="font-semibold text-ivory">
+                                      {div.montant.toLocaleString('fr-FR')} FCFA
                                     </span>
                                   </div>
 
                                   {estimatedYield(div) !== null && (
                                     <div className="flex justify-between">
                                       <span className="text-muted">Rendement:</span>
-                                      <span className="font-semibold text-emerald-400">
+                                      <span className="font-semibold text-up">
                                         {estimatedYield(div)?.toFixed(2)}%
                                       </span>
                                     </div>

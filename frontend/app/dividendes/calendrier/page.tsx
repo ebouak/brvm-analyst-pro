@@ -86,17 +86,12 @@ async function getDividends(): Promise<DividendCalendarEvent[]> {
       rendement = (div.montant / cours) * 100;
     }
 
-    // Estimate taux from montant and typical share price
-    // This is a fallback; ideally taux should be in the table
-    // For now, we use a placeholder calculation
-    const estimatedTaux = rendement ?? 0;
-
     return {
       id: div.id,
       code: div.code,
       designation: instrument?.designation ?? null,
       secteur: instrument?.secteur ?? null,
-      taux: estimatedTaux,
+      taux: rendement,
       ex_date: div.ex_date,
       payment_date: div.payment_date,
       cours_jour: cours,
