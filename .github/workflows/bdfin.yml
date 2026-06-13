@@ -1,0 +1,45 @@
+name: Scrape BDFIN (séance quotidienne)
+
+# Source autoritaire bfin.brvm.org (base de données financières BRVM) :
+# actions + obligations + indices avec volume, nombre de transactions et
+# valeur échangée. Tourne après la clôture (heure UTC = Abidjan).
+#
+# SECRETS REQUIS (Settings → Secrets → Actions) :
+#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, BDFIN_USERNAME, BDFIN_PASSWORD
+on:
+  schedule:
+    - cron: '30 16 * * 1-5'   # ~16:30 UTC, après la clôture BRVM
+  workflow_dispatch: {}
+
+concurrency:
+  group: bdfin-daily
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BDFIN_BASE_URL: https://bfin.brvm.org
+      BDFIN_LOGIN_PATH: /Login.aspx
+      BDFIN_MARKET_PATH: /Activites_marche.aspx
+      BDFIN_USERNAME: ${{ secrets.BDFIN_USERNAME }}
+      BDFIN_PASSWORD: ${{ secrets.BDFIN_PASSWORD }}
+      USE_MOCK: 'false'
+      DRY_RUN: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+      - name: Séance BDFIN (actions + obligations + indices)
+        working-directory: scraper
+        run: npx tsx src/index.ts daily
+      - name: Scoring des signaux
+        working-directory: scraper
+        run: npx tsx src/index.ts score
+        continue-on-error: true
