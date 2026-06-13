@@ -6,6 +6,20 @@ export interface BacktestInput {
   dates?: string[];      // optional ISO dates for each close point
   feesPct?: number;      // default 0 (e.g. 0.006 = 0.6%)
   slippagePct?: number;  // default 0
+  riskFreeRate?: number; // taux sans risque annuel (défaut 0.06 UEMOA)
+}
+
+/** Un aller-retour (entrée BUY → sortie SELL ou clôture au dernier cours). */
+export interface Trade {
+  entryIndex: number;
+  exitIndex: number | null;   // null = position encore ouverte en fin de période
+  entryDate?: string;
+  exitDate?: string;
+  entryPrice: number;         // net frais/slippage d'entrée
+  exitPrice: number | null;   // net frais/slippage de sortie
+  returnPct: number | null;   // rendement net du trade
+  bars: number | null;        // durée en séances
+  win: boolean | null;
 }
 
 export interface BacktestResult {
@@ -18,10 +32,18 @@ export interface BacktestResult {
   numTrades: number;
   buyAndHoldReturn: number;
   sharpeRatio: number | null;
+  sortinoRatio: number | null;
+  calmarRatio: number | null;
   drawdownPeriods: { start: number; end: number }[];
+  trades: Trade[];
+  avgWinPct: number | null;
+  avgLossPct: number | null;
+  bestTradePct: number | null;
+  worstTradePct: number | null;
+  riskFreeRate: number;
 }
 
-const EMPTY_RESULT = (n: number): BacktestResult => ({
+const EMPTY_RESULT = (n: number, riskFreeRate: number): BacktestResult => ({
   equityCurve: Array.from({ length: n }, (_, i) => ({ date_index: i, value: 100 })),
   totalReturn: 0,
   annualizedReturn: 0,
@@ -31,7 +53,15 @@ const EMPTY_RESULT = (n: number): BacktestResult => ({
   numTrades: 0,
   buyAndHoldReturn: 0,
   sharpeRatio: null,
+  sortinoRatio: null,
+  calmarRatio: null,
   drawdownPeriods: [],
+  trades: [],
+  avgWinPct: null,
+  avgLossPct: null,
+  bestTradePct: null,
+  worstTradePct: null,
+  riskFreeRate,
 });
 
 function stddev(values: number[]): number {
@@ -42,7 +72,7 @@ function stddev(values: number[]): number {
 }
 
 export function runBacktest(input: BacktestInput): BacktestResult {
-  const { closes, signals, dates, feesPct = 0, slippagePct = 0 } = input;
+  const { closes, signals, dates, feesPct = 0, slippagePct = 0, riskFreeRate = 0.06 } = input;
 
   if (closes.length !== signals.length) {
     throw new Error(
@@ -53,7 +83,7 @@ export function runBacktest(input: BacktestInput): BacktestResult {
   const n = closes.length;
 
   if (n < 2) {
-    return EMPTY_RESULT(n);
+    return EMPTY_RESULT(n, riskFreeRate);
   }
 
   const equityCurve: { date_index: number; date?: string; value: number }[] = [];
@@ -62,6 +92,7 @@ export function runBacktest(input: BacktestInput): BacktestResult {
   let equity = 100;
   let inPosition = false;
   let entryPrice = 0;
+  let entryIndex = 0;
 
   let numTrades = 0;
   let winningTrades = 0;
@@ -69,6 +100,8 @@ export function runBacktest(input: BacktestInput): BacktestResult {
 
   let peakEquity = 100;
   let maxDrawdown = 0;
+
+  const trades: Trade[] = [];
 
   for (let i = 0; i < n; i++) {
     const signal = signals[i];
@@ -78,13 +111,26 @@ export function runBacktest(input: BacktestInput): BacktestResult {
       inPosition = true;
       // Apply fees + slippage on entry
       entryPrice = price * (1 + feesPct + slippagePct);
+      entryIndex = i;
       numTrades++;
     } else if (inPosition && signal === 'SELL') {
       // Apply fees + slippage on exit
       const effectiveSellPrice = price * (1 - feesPct - slippagePct);
-      if (effectiveSellPrice > entryPrice) winningTrades++;
+      const win = effectiveSellPrice > entryPrice;
+      if (win) winningTrades++;
       closedTrades++;
       inPosition = false;
+      const tr: Trade = {
+        entryIndex,
+        exitIndex: i,
+        entryPrice,
+        exitPrice: effectiveSellPrice,
+        returnPct: effectiveSellPrice / entryPrice - 1,
+        bars: i - entryIndex,
+        win,
+      };
+      if (dates) { if (dates[entryIndex] !== undefined) tr.entryDate = dates[entryIndex]; if (dates[i] !== undefined) tr.exitDate = dates[i]; }
+      trades.push(tr);
     }
 
     let dayReturn = 0;
@@ -132,6 +178,22 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     drawdownPeriods.push({ start: ddStart, end: equityCurve.length - 1 });
   }
 
+  // Position encore ouverte en fin de période : trade latent clôturé au dernier cours.
+  if (inPosition) {
+    const lastPrice = closes[n - 1]! * (1 - feesPct - slippagePct);
+    const tr: Trade = {
+      entryIndex,
+      exitIndex: null,
+      entryPrice,
+      exitPrice: lastPrice,
+      returnPct: lastPrice / entryPrice - 1,
+      bars: n - 1 - entryIndex,
+      win: lastPrice > entryPrice,
+    };
+    if (dates) { if (dates[entryIndex] !== undefined) tr.entryDate = dates[entryIndex]; }
+    trades.push(tr);
+  }
+
   const finalEquity = equity;
   const totalReturn = finalEquity / 100 - 1;
   const annualizedReturn = Math.pow(finalEquity / 100, 252 / n) - 1;
@@ -142,7 +204,24 @@ export function runBacktest(input: BacktestInput): BacktestResult {
 
   const buyAndHoldReturn = (closes[n - 1]! - closes[0]!) / closes[0]!;
 
-  const sharpeRatio = vol === 0 ? null : annualizedReturn / vol;
+  // Sharpe / Sortino en EXCÈS sur le taux sans risque (best practice analyste).
+  const rfDaily = Math.pow(1 + riskFreeRate, 1 / 252) - 1;
+  const excessAnnual = annualizedReturn - riskFreeRate;
+  const sharpeRatio = vol === 0 ? null : excessAnnual / vol;
+
+  // Downside deviation : écart-type des rendements sous le seuil sans risque.
+  const downside = dailyReturns.map((r) => Math.min(0, r - rfDaily));
+  const downsideVar = downside.reduce((s, v) => s + v * v, 0) / downside.length;
+  const downsideDev = Math.sqrt(downsideVar) * Math.sqrt(252);
+  const sortinoRatio = downsideDev === 0 ? null : excessAnnual / downsideDev;
+
+  const calmarRatio = maxDrawdown === 0 ? null : annualizedReturn / maxDrawdown;
+
+  // Statistiques d'exécution (sur trades avec rendement connu).
+  const rets = trades.map((t) => t.returnPct).filter((r): r is number => r != null);
+  const wins = rets.filter((r) => r > 0);
+  const losses = rets.filter((r) => r <= 0);
+  const avg = (arr: number[]): number | null => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
 
   return {
     equityCurve,
@@ -154,6 +233,14 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     numTrades,
     buyAndHoldReturn,
     sharpeRatio,
+    sortinoRatio,
+    calmarRatio,
     drawdownPeriods,
+    trades,
+    avgWinPct: avg(wins),
+    avgLossPct: avg(losses),
+    bestTradePct: rets.length ? Math.max(...rets) : null,
+    worstTradePct: rets.length ? Math.min(...rets) : null,
+    riskFreeRate,
   };
 }

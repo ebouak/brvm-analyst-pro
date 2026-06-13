@@ -1,14 +1,20 @@
 'use client';
 import EChart from './EChart';
 
+interface TradeMarker {
+  entryIndex: number;
+  exitIndex: number | null;
+}
+
 interface Props {
   equityCurve: { date_index: number; date?: string; value: number }[];
   closes: number[];
   dates?: string[];
   drawdownPeriods?: { start: number; end: number }[];
+  trades?: TradeMarker[];
 }
 
-export default function BacktestChart({ equityCurve, closes, dates, drawdownPeriods }: Props) {
+export default function BacktestChart({ equityCurve, closes, dates, drawdownPeriods, trades }: Props) {
   if (equityCurve.length === 0 || closes.length === 0) {
     return <div className="text-muted text-sm p-4">Aucune donnée à afficher.</div>;
   }
@@ -24,6 +30,22 @@ export default function BacktestChart({ equityCurve, closes, dates, drawdownPeri
     { xAxis: labels[d.start] ?? String(d.start) },
     { xAxis: labels[Math.min(d.end, labels.length - 1)] ?? String(d.end) },
   ] as [{ xAxis: string }, { xAxis: string }]);
+
+  // Marqueurs BUY (entrée) / SELL (sortie) sur la courbe de stratégie.
+  const tradePoints = (trades ?? []).flatMap((t) => {
+    const pts: { name: string; xAxis: string; yAxis: number; itemStyle: { color: string } }[] = [];
+    const entryLabel = labels[t.entryIndex];
+    if (entryLabel !== undefined && strategie[t.entryIndex] !== undefined) {
+      pts.push({ name: 'BUY', xAxis: entryLabel, yAxis: strategie[t.entryIndex]!, itemStyle: { color: '#00c853' } });
+    }
+    if (t.exitIndex != null) {
+      const exitLabel = labels[t.exitIndex];
+      if (exitLabel !== undefined && strategie[t.exitIndex] !== undefined) {
+        pts.push({ name: 'SELL', xAxis: exitLabel, yAxis: strategie[t.exitIndex]!, itemStyle: { color: '#f44336' } });
+      }
+    }
+    return pts;
+  });
 
   return (
     <div className="bg-surface border border-border rounded-xl p-4 min-h-[420px]">

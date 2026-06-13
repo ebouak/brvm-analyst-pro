@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { runBacktest, type BacktestResult } from '@/lib/backtest';
+import { synthesizeBacktest, type BenchmarkSet } from '@/lib/backtest/interpret';
 import type { SignalLabel } from '@/lib/types';
 import BacktestChart from '@/components/BacktestChart';
 import BacktestMetrics from '@/components/BacktestMetrics';
+import BacktestSynthesis from '@/components/BacktestSynthesis';
+import BacktestTrades from '@/components/BacktestTrades';
 import BacktestExport from '@/components/BacktestExport';
 import {
   SectionHeader,
@@ -16,6 +19,9 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Backtest' };
 
 type BacktestResultEx = BacktestResult & { hasRealSignals?: boolean };
+
+/** Taux sans risque annuel de référence (obligations d'État UEMOA ~6 %). */
+const RISK_FREE_RATE = 0.06;
 
 type Period = '1M' | '3M' | '6M' | '1A' | 'max';
 
@@ -44,47 +50,6 @@ function simpleSignal(closes: number[]): SignalLabel[] {
     if (variationPct < -2) return 'SELL';
     return 'HOLD';
   });
-}
-
-function generateNarrative(
-  result: BacktestResult,
-  _code: string
-): { strengths: string[]; limits: string[] } {
-  const strengths: string[] = [];
-  const limits: string[] = [];
-
-  const outperformance = result.totalReturn - result.buyAndHoldReturn;
-  if (outperformance > 0) {
-    strengths.push(
-      `Surperforme le Buy & Hold de ${(outperformance * 100).toFixed(1)} points`
-    );
-  } else {
-    limits.push(
-      `Sous-performe le Buy & Hold de ${Math.abs(outperformance * 100).toFixed(1)} points`
-    );
-  }
-
-  if (result.maxDrawdown < 0.15) {
-    strengths.push(`Drawdown maîtrisé (${(result.maxDrawdown * 100).toFixed(1)}%)`);
-  } else {
-    limits.push(`Drawdown élevé (${(result.maxDrawdown * 100).toFixed(1)}%)`);
-  }
-
-  if (result.winRate >= 0.55) {
-    strengths.push(`Win rate favorable (${(result.winRate * 100).toFixed(0)}%)`);
-  }
-
-  if (result.numTrades < 10) {
-    limits.push(
-      `Peu de trades (${result.numTrades}) — résultats peu significatifs statistiquement`
-    );
-  }
-
-  if (result.sharpeRatio !== null && result.sharpeRatio > 1) {
-    strengths.push(`Bon ratio Sharpe (${result.sharpeRatio.toFixed(2)})`);
-  }
-
-  return { strengths, limits };
 }
 
 interface Instrument {
@@ -131,14 +96,15 @@ export default async function BacktestPage({ searchParams }: PageProps) {
   let noData = false;
   let closes: number[] = [];
   let dates: string[] = [];
+  let benchmarks: BenchmarkSet = { buyHoldReturn: 0, indexReturn: null, riskFreeReturn: 0 };
 
   if (selectedCode) {
     designation =
       instrumentList.find((i) => i.code === selectedCode)?.designation ?? selectedCode;
 
-    // Fetch prix ET signaux en parallèle
+    // Fetch prix, signaux ET indice de marché (BRVM-C) en parallèle
     const fromDate = dateFrom || periodToDate(period) || null;
-    const [{ data: rows }, { data: sigRows }] = await Promise.all([
+    const [{ data: rows }, { data: sigRows }, { data: idxRows }] = await Promise.all([
       (() => {
         let q = supabase
           .from('brvm_actions_daily')
@@ -156,6 +122,17 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           .select('signal, date_marche')
           .eq('code', selectedCode)
           .order('date_marche', { ascending: true });
+        if (fromDate) q = q.gte('date_marche', fromDate);
+        if (dateTo) q = q.lte('date_marche', dateTo);
+        return q;
+      })(),
+      (() => {
+        let q = supabase
+          .from('brvm_indices_daily')
+          .select('valeur, date_marche')
+          .eq('code', 'BRVMC')
+          .order('date_marche', { ascending: true })
+          .not('valeur', 'is', null);
         if (fromDate) q = q.gte('date_marche', fromDate);
         if (dateTo) q = q.lte('date_marche', dateTo);
         return q;
@@ -181,7 +158,13 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       const signals: SignalLabel[] = dates.map((d, i) =>
         signalMap.get(d) ?? fallback[i]!
       );
-      result = { ...runBacktest({ closes, signals, dates, feesPct, slippagePct }), hasRealSignals };
+      result = { ...runBacktest({ closes, signals, dates, feesPct, slippagePct, riskFreeRate: RISK_FREE_RATE }), hasRealSignals };
+
+      // Benchmarks : rendement BRVM-C sur la fenêtre + sans-risque dérivé.
+      const idxValues = ((idxRows ?? []) as { valeur: number }[]).map((r) => r.valeur).filter((v) => v != null && v > 0);
+      const indexReturn = idxValues.length >= 2 ? (idxValues[idxValues.length - 1]! - idxValues[0]!) / idxValues[0]! : null;
+      const riskFreeReturn = Math.pow(1 + RISK_FREE_RATE, closes.length / 252) - 1;
+      benchmarks = { buyHoldReturn: result.buyAndHoldReturn, indexReturn, riskFreeReturn };
     }
   }
 
@@ -366,7 +349,14 @@ export default async function BacktestPage({ searchParams }: PageProps) {
             )}
           </div>
 
-          {/* Chart */}
+          {/* Synthèse + comparaison aux repères */}
+          <BacktestSynthesis
+            synthesis={synthesizeBacktest(result, benchmarks, closes.length)}
+            strategyReturn={result.totalReturn}
+            benchmarks={benchmarks}
+          />
+
+          {/* Chart avec marqueurs BUY/SELL */}
           <PremiumPanel glow>
             <div className="p-4">
               <BacktestChart
@@ -374,56 +364,20 @@ export default async function BacktestPage({ searchParams }: PageProps) {
                 closes={closes}
                 dates={dates}
                 drawdownPeriods={result.drawdownPeriods}
+                trades={result.trades}
               />
             </div>
           </PremiumPanel>
 
-          {/* Metrics */}
+          {/* Métriques pédagogiques */}
           <BacktestMetrics result={result} />
 
-          {/* Narrative */}
-          {(() => {
-            const { strengths, limits } = generateNarrative(result, selectedCode);
-            return (
-              <PremiumPanel>
-                <div className="p-5 space-y-4">
-                  <p className="overline text-gold/70 text-[10px]">Synthèse qualitative</p>
-                  <div className="space-y-4 text-sm">
-                    {strengths.length > 0 && (
-                      <div>
-                        <p className="overline text-faint text-[10px] mb-2">Points forts</p>
-                        <ul className="space-y-1.5">
-                          {strengths.map((s, i) => (
-                            <li key={i} className="flex gap-2 items-start">
-                              <span className="text-up mt-0.5 shrink-0">▸</span>
-                              <span className="text-ivory">{s}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {limits.length > 0 && (
-                      <div>
-                        <p className="overline text-faint text-[10px] mb-2">Limites</p>
-                        <ul className="space-y-1.5">
-                          {limits.map((l, i) => (
-                            <li key={i} className="flex gap-2 items-start">
-                              <span className="text-muted mt-0.5 shrink-0">▸</span>
-                              <span className="text-muted">{l}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <p className="text-xs text-faint italic border-t border-border/50 pt-3">
-                      Les résultats passés ne garantissent pas les performances futures.
-                      Ce backtest est fourni à titre informatif uniquement.
-                    </p>
-                  </div>
-                </div>
-              </PremiumPanel>
-            );
-          })()}
+          {/* Détail des trades */}
+          <BacktestTrades
+            trades={result.trades}
+            bestTradePct={result.bestTradePct}
+            worstTradePct={result.worstTradePct}
+          />
 
           {/* Actions */}
           <div className="flex gap-3 flex-wrap">
