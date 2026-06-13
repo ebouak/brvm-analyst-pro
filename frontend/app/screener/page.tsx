@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import ScreenerFilters from '@/components/ScreenerFilters';
+import ViewTabs from '@/components/ViewTabs';
+import { FILTER_TABS } from '@/lib/filterTabs';
 import ScreenerResults from '@/components/ScreenerResults';
 import { applyFilters, type ActionRow } from '@/lib/screener/filters';
 import type { ScreenerPreset } from '@/lib/screener/presets';
@@ -98,16 +100,24 @@ export default function ScreenerPage() {
           });
         }
 
-        // Combine into ActionRow with signals
+        // Combine into ActionRow with signals.
+        // Échelles : score_rsi et score_total sont des sous-scores ∈ [-1, +1]
+        // (cf. scoring §9 : score_rsi = clamp((50 − RSI)/20)). Les filtres et
+        // presets attendent un RSI 0-100 et un score en % — on convertit ici,
+        // sinon aucun preset ne matche jamais (bug corrigé 2026-06-13).
         const enriched: ActionRow[] = (actions || []).map((a) => {
           const sig = signalMap[a.code];
+          const rsiEstime =
+            sig?.score_rsi != null
+              ? Math.max(0, Math.min(100, 50 - 20 * sig.score_rsi))
+              : null;
           return {
             code: a.code,
             cours_jour: a.cours_jour,
             variation_pct: a.variation_pct,
-            rsi: sig?.score_rsi ?? null,
+            rsi: rsiEstime,
             volume: a.volume,
-            score_signal: sig?.score_total ?? null,
+            score_signal: sig?.score_total != null ? Math.round(sig.score_total * 100) : null,
             secteur: a.secteur,
             rendement_dividende: latestDividendByCode[a.code] ?? null,
           };
@@ -165,6 +175,7 @@ export default function ScreenerPage() {
         title="Screener multi-critères"
         subtitle="Filtrez les actions par RSI, volume, score, secteur, dividende"
       />
+      <ViewTabs tabs={FILTER_TABS} current="/screener" />
 
       <div className="gold-rule" />
 

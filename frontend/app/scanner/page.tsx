@@ -7,6 +7,8 @@ import {
   type ScanRow,
 } from '@/lib/scanner';
 import ScannerForm from '@/components/ScannerForm';
+import ViewTabs from '@/components/ViewTabs';
+import { FILTER_TABS } from '@/lib/filterTabs';
 import ScannerResults from '@/components/ScannerResults';
 import {
   SectionHeader,
@@ -166,6 +168,7 @@ export default async function ScannerPage({ searchParams }: PageProps) {
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* ── En-tête de page ─────────────────────────────────────────────── */}
       <ScannerPageHeader universeSize={codes.length} />
+      <ViewTabs tabs={FILTER_TABS} current="/scanner" />
 
       {/* ── Filet doré de séparation ────────────────────────────────────── */}
       <div className="gold-rule" />
