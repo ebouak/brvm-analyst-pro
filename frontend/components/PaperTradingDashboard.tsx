@@ -14,6 +14,7 @@ import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { paperTradingService } from '@/lib/paper-trading/service';
 import { Account, Position, Stats } from '@/lib/paper-trading/types';
 import { PaperTradingJournal } from './PaperTradingJournal';
+import { AnimatedValue } from '@/components/AnimatedValue';
 
 interface TradableAction { code: string; designation: string | null; cours_jour: number | null }
 
@@ -239,7 +240,7 @@ export function PaperTradingDashboard() {
         <div className="bg-surface border border-border rounded-lg p-4">
           <div className="text-xs text-muted mb-1">Valeur totale (cash + positions)</div>
           <div className="text-2xl font-semibold text-white tabular">
-            {fmtFcfa(equityTotal)}
+            <AnimatedValue value={equityTotal} format={{ maximumFractionDigits: 0 }} suffix=" FCFA" />
           </div>
           <div className="text-xs text-muted mt-1">
             Cash {fmtFcfa(account.capital_current)} · latent{' '}
@@ -254,7 +255,7 @@ export function PaperTradingDashboard() {
               totalPnl >= 0 ? 'text-up' : 'text-down'
             }`}
           >
-            {totalPnl >= 0 ? '+' : ''}{fmtFcfa(totalPnl)}
+            <AnimatedValue value={totalPnl} format={{ maximumFractionDigits: 0 }} suffix=" FCFA" signed />
           </div>
           <div className="text-xs text-muted mt-1">
             Réalisé {fmtFcfa(account.pnl_total)} · {openPositions.length} position{openPositions.length !== 1 ? 's' : ''} ouverte{openPositions.length !== 1 ? 's' : ''}

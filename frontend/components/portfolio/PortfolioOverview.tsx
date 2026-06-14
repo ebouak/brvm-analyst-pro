@@ -6,6 +6,8 @@ import {
 } from 'recharts';
 import type { PortfolioState } from '@/lib/portfolio/derive';
 import { fmtFcfa } from '@/lib/format';
+import { AnimatedValue } from '@/components/AnimatedValue';
+import type { ReactNode } from 'react';
 
 function pct(v: number | null): string {
   if (v == null) return '—';
@@ -52,11 +54,16 @@ export default function PortfolioOverview({ state, isLoading = false }: Props) {
     <div className="space-y-6">
       {/* KPIs dérivés */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <Kpi label="Valorisation" value={fmtFcfa(state.currentValue)} unit="FCFA" />
-        <Kpi label="Capital investi" value={fmtFcfa(state.investedCapital)} unit="FCFA" />
-        <Kpi label="P&L latent" value={fmtFcfa(state.latentPnl)} unit="FCFA" cls={pnlClass(state.latentPnl)} />
-        <Kpi label="Rendement total" value={pct(state.totalReturn)} cls={pnlClass(state.totalReturn)} />
-        <Kpi label="Max drawdown" value={`-${(state.maxDrawdown * 100).toFixed(1)}%`} cls="text-down" />
+        <Kpi label="Valorisation" unit="FCFA"
+          value={<AnimatedValue value={state.currentValue} format={{ maximumFractionDigits: 0 }} />} />
+        <Kpi label="Capital investi" unit="FCFA"
+          value={<AnimatedValue value={state.investedCapital} format={{ maximumFractionDigits: 0 }} />} />
+        <Kpi label="P&L latent" unit="FCFA" cls={pnlClass(state.latentPnl)}
+          value={<AnimatedValue value={state.latentPnl} format={{ maximumFractionDigits: 0 }} signed />} />
+        <Kpi label="Rendement total" cls={pnlClass(state.totalReturn)}
+          value={<AnimatedValue value={state.totalReturn * 100} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} suffix="%" signed />} />
+        <Kpi label="Max drawdown" cls="text-down"
+          value={<AnimatedValue value={-state.maxDrawdown * 100} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} suffix="%" />} />
       </div>
 
       {/* Courbe d'équité (base 100) — auto-dérivée */}
@@ -141,7 +148,7 @@ export default function PortfolioOverview({ state, isLoading = false }: Props) {
   );
 }
 
-function Kpi({ label, value, unit, cls }: { label: string; value: string; unit?: string; cls?: string }) {
+function Kpi({ label, value, unit, cls }: { label: string; value: ReactNode; unit?: string; cls?: string }) {
   return (
     <div className="bg-bg/40 border border-border/60 rounded-xl p-4">
       <div className="text-xs text-muted mb-1">{label}</div>
