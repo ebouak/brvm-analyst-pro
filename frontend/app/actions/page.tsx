@@ -1,5 +1,6 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import ActionsTable from '@/components/ActionsTable';
+import brvmSectors from '@/lib/brvmSectors.json';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { SectionHeader, EmptyStatePremium, PremiumPanel, StatPill, PremiumCTA } from '@/components/ui/premium';
 
@@ -24,14 +25,16 @@ async function getData() {
     supabase.from('brvm_instruments').select('code, secteur, pays').eq('type', 'action'),
   ]);
 
-  // Enrichit chaque ligne daily avec le secteur/pays de brvm_instruments (source de vérité)
+  // Secteur : classification fiable brvmSectors.json (GICS par ticker, comme la
+  // heatmap) en priorité, car brvm_instruments.secteur est quasi vide (1/48).
+  const sectorByCode = brvmSectors as Record<string, string>;
   const instrMap: Record<string, { secteur: string | null; pays: string | null }> = {};
   for (const i of (instruments ?? []) as { code: string; secteur: string | null; pays: string | null }[]) {
     instrMap[i.code] = { secteur: i.secteur, pays: i.pays };
   }
   const enrichedActions = ((actions ?? []) as ActionDaily[]).map((a) => ({
     ...a,
-    secteur: instrMap[a.code]?.secteur ?? a.secteur ?? null,
+    secteur: sectorByCode[a.code] ?? instrMap[a.code]?.secteur ?? a.secteur ?? null,
     pays: instrMap[a.code]?.pays ?? a.pays ?? null,
   }));
 
