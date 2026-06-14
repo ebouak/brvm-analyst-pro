@@ -11,9 +11,13 @@ interface Message {
 
 const NO_ARG_IDS = new Set(['screener', 'rapport-hebdo', 'anomalies', 'backtesting-div']);
 
-export function ChatInterface({ symbolePreselect }: { symbolePreselect?: string }) {
+export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePreselect?: string; questionPreset?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState(symbolePreselect ? `Analyse complète de ${symbolePreselect}` : '');
+  const [input, setInput] = useState(
+    questionPreset
+      ? (symbolePreselect ? `${questionPreset} (${symbolePreselect})` : questionPreset)
+      : (symbolePreselect ? `Analyse complète de ${symbolePreselect}` : ''),
+  );
   const [loading, setLoading] = useState(false);
   const [symbole, setSymbole] = useState(symbolePreselect ?? '');
   const [activeProvider, setActiveProvider] = useState<string | null>(null);

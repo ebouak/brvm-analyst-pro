@@ -7,11 +7,11 @@ export const metadata = {
 };
 
 interface Props {
-  searchParams: Promise<{ symbole?: string }>;
+  searchParams: Promise<{ symbole?: string; q?: string }>;
 }
 
 export default async function AssistantPage({ searchParams }: Props) {
-  const { symbole } = await searchParams;
+  const { symbole, q } = await searchParams;
   const sym = symbole?.toUpperCase();
 
   return (
@@ -39,7 +39,7 @@ export default async function AssistantPage({ searchParams }: Props) {
       {/* Chat container — double-bezel */}
       <div className="rounded-panel border p-1.5 border-gold/20 bg-gold/[0.03]">
         <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] overflow-hidden">
-          <ChatInterface symbolePreselect={sym} />
+          <ChatInterface symbolePreselect={sym} questionPreset={q} />
         </div>
       </div>
 

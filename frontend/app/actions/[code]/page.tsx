@@ -7,6 +7,8 @@ const LOGOS = brvmLogos as Record<string, string>;
 import PriceChart, { type PricePoint, type ChartMarker } from '@/components/PriceChart';
 import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
+import IndicatorCommentary from '@/components/IndicatorCommentary';
+import { readIndicators } from '@/lib/indicators/commentary';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import RatingBadge from '@/components/RatingBadge';
@@ -789,8 +791,18 @@ export default async function InstrumentPage({
       <div>
         <Eyebrow className="mb-3">Indicateurs historiques</Eyebrow>
         <PremiumPanel className="p-0 overflow-hidden">
-          <div className="px-4 py-4 md:px-5">
+          <div className="px-4 py-4 md:px-5 space-y-4">
             <IndicatorCharts data={indicatorData} />
+            {(() => {
+              const lastOf = (arr: (number | null)[]) => { for (let k = arr.length - 1; k >= 0; k--) if (arr[k] != null) return arr[k]!; return null; };
+              const reading = readIndicators({
+                rsi: lastOf(indicatorData.map((d) => d.rsi)),
+                macd: lastOf(indicatorData.map((d) => d.macd)),
+                ma20: lastOf(ma20),
+                ma50: lastOf(ma50),
+              });
+              return <IndicatorCommentary reading={reading} code={code} />;
+            })()}
           </div>
         </PremiumPanel>
       </div>
