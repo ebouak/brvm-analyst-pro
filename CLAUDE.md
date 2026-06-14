@@ -233,3 +233,17 @@ passent un contrôle syntaxique esbuild) :
   policies si on ajoute une table user-scopée.
 - **Cohérence colonnes** : un upsert doit refléter exactement les colonnes de la
   migration correspondante.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues (`ebouak/brvm-analyst-pro`, via `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Cinq rôles canoniques (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context (`CONTEXT.md` + `docs/adr/` à la racine). See `docs/agents/domain.md`.
