@@ -42,7 +42,7 @@ export class PaperTradingClientService {
     return res.json();
   }
 
-  async openPosition(code: string, amount?: number): Promise<Position> {
+  async openPosition(code: string, amount?: number): Promise<{ position: Position; reinforced: boolean }> {
     const res = await fetch('/api/paper-trading/positions', {
       method: 'POST',
       body: JSON.stringify(amount != null ? { code, amount } : { code }),
@@ -53,7 +53,7 @@ export class PaperTradingClientService {
       throw new Error(error.error || "Échec de l'ouverture");
     }
     const json = await res.json();
-    return json.position;
+    return { position: json.position, reinforced: Boolean(json.reinforced) };
   }
 
   async closePosition(id: string): Promise<{ pnl: number; pnl_pct: number }> {

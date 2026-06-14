@@ -32,6 +32,7 @@ export function PaperTradingDashboard() {
   const [amountInput, setAmountInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function load() {
     try {
@@ -83,11 +84,14 @@ export function PaperTradingDashboard() {
     setError(null);
     try {
       const amt = parseFloat(amountInput);
-      await paperTradingService.openPosition(selectedCode, Number.isFinite(amt) && amt > 0 ? amt : undefined);
+      const code = selectedCode;
+      const { reinforced } = await paperTradingService.openPosition(code, Number.isFinite(amt) && amt > 0 ? amt : undefined);
       setShowModal(false);
       setSelectedCode('');
       setAmountInput('');
       await load();
+      setSuccess(reinforced ? `Position renforcée sur ${code} ✓` : `Position ouverte sur ${code} ✓`);
+      setTimeout(() => setSuccess(null), 4000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Échec de l'ouverture");
     } finally {
@@ -163,6 +167,13 @@ export function PaperTradingDashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Bannière de confirmation */}
+      {success && (
+        <div role="status" className="rounded-lg border border-up/40 bg-up/10 px-4 py-2.5 text-sm font-medium text-up">
+          {success}
+        </div>
+      )}
+
       {/* Barre d'action */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-xs text-muted">
