@@ -132,8 +132,41 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const rows = positions || [];
+
+    // Valorise les positions OUVERTES au dernier cours connu (P&L latent).
+    const openCodes = [...new Set(rows.filter((p) => p.status === 'open').map((p) => p.code))];
+    const lastCours: Record<string, number> = {};
+    if (openCodes.length > 0) {
+      const { data: lastDateRow } = await supabase
+        .from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1);
+      const lastDate = (lastDateRow as { date_marche: string }[] | null)?.[0]?.date_marche ?? null;
+      if (lastDate) {
+        const { data: quotes } = await supabase
+          .from('brvm_actions_daily').select('code, cours_jour').eq('date_marche', lastDate).in('code', openCodes);
+        for (const q of (quotes ?? []) as { code: string; cours_jour: number | null }[]) {
+          if (q.cours_jour != null) lastCours[q.code] = q.cours_jour;
+        }
+      }
+    }
+
+    const enriched = rows.map((p) => {
+      if (p.status !== 'open') return p;
+      const cours = lastCours[p.code] ?? p.entry_price;
+      const currentValue = cours * p.num_shares;
+      const cost = p.entry_price * p.num_shares;
+      const latentPnl = currentValue - cost;
+      return {
+        ...p,
+        current_price: cours,
+        current_value: currentValue,
+        pnl: latentPnl,
+        pnl_pct: cost > 0 ? (latentPnl / cost) * 100 : 0,
+      };
+    });
+
     return NextResponse.json(
-      { positions: positions || [], account },
+      { positions: enriched, account },
       { status: 200 }
     );
   } catch (error) {

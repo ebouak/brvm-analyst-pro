@@ -149,6 +149,11 @@ export function PaperTradingDashboard() {
   const openPositions = positions.filter((p) => p.status === 'open');
   const closedPositions = positions.filter((p) => p.status === 'closed');
 
+  // P&L latent des positions ouvertes (valorisées au cours courant par l'API).
+  const latentPnl = openPositions.reduce((s, p) => s + (typeof (p as { pnl?: number }).pnl === 'number' ? (p as { pnl: number }).pnl : 0), 0);
+  const equityTotal = account.capital_current + latentPnl;
+  const totalPnl = account.pnl_total + latentPnl;
+
   return (
     <div className="space-y-8">
       {/* Barre d'action */}
@@ -232,30 +237,27 @@ export function PaperTradingDashboard() {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">Solde portefeuille</div>
+          <div className="text-xs text-muted mb-1">Valeur totale (cash + positions)</div>
           <div className="text-2xl font-semibold text-white tabular">
-            {fmtFcfa(account.capital_current)}
+            {fmtFcfa(equityTotal)}
           </div>
           <div className="text-xs text-muted mt-1">
-            Initial: {fmtFcfa(account.capital_initial)}
+            Cash {fmtFcfa(account.capital_current)} · latent{' '}
+            <span className={latentPnl >= 0 ? 'text-up' : 'text-down'}>{latentPnl >= 0 ? '+' : ''}{fmtFcfa(latentPnl)}</span>
           </div>
         </div>
 
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">P&L Total</div>
+          <div className="text-xs text-muted mb-1">P&L Total (réalisé + latent)</div>
           <div
             className={`text-2xl font-semibold tabular ${
-              account.pnl_total >= 0 ? 'text-up' : 'text-down'
+              totalPnl >= 0 ? 'text-up' : 'text-down'
             }`}
           >
-            {fmtFcfa(account.pnl_total)}
+            {totalPnl >= 0 ? '+' : ''}{fmtFcfa(totalPnl)}
           </div>
-          <div
-            className={`text-xs mt-1 ${
-              account.pnl_pct >= 0 ? 'text-up' : 'text-down'
-            }`}
-          >
-            {fmtNumber(account.pnl_pct, 2)}%
+          <div className="text-xs text-muted mt-1">
+            Réalisé {fmtFcfa(account.pnl_total)} · {openPositions.length} position{openPositions.length !== 1 ? 's' : ''} ouverte{openPositions.length !== 1 ? 's' : ''}
           </div>
         </div>
 
