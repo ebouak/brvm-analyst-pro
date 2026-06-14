@@ -1,0 +1,33 @@
+name: Tests e2e (Playwright)
+
+# Tests « smoke » des parcours critiques sur un build de production.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install deps
+        run: npm install
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+      - name: Build
+        run: npm run build
+      - name: Run e2e
+        run: npm run e2e
