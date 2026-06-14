@@ -170,19 +170,27 @@ export async function createAlert(formData: FormData) {
   const { supabase, user } = await requireUser();
   const code = String(formData.get('code')).toUpperCase().trim();
   const type = String(formData.get('type'));
-  const seuil = Number(formData.get('seuil'));
   const actif = formData.get('actif') === 'true';
 
-  if (!['prix_au_dessus', 'prix_en_dessous', 'variation'].includes(type)) {
+  const PRICE_TYPES = ['prix_au_dessus', 'prix_en_dessous', 'variation'];
+  const SMART_TYPES = ['signal_achat', 'signal_vente', 'rsi_survente', 'rsi_surachat', 'dividende_proche'];
+  if (![...PRICE_TYPES, ...SMART_TYPES].includes(type)) {
     throw new Error('Type d\'alerte invalide');
   }
-  if (seuil <= 0) throw new Error('Seuil doit être positif');
+
+  // Seuil obligatoire pour les types prix ; optionnel pour les types intelligents
+  // (défauts à l'évaluation : RSI 30/70, dividende 7 jours ; signal = aucun).
+  const rawSeuil = formData.get('seuil');
+  const seuilNum = rawSeuil != null && String(rawSeuil).trim() !== '' ? Number(rawSeuil) : null;
+  if (PRICE_TYPES.includes(type) && (seuilNum == null || seuilNum <= 0)) {
+    throw new Error('Seuil doit être positif');
+  }
 
   const { error } = await supabase.from('alerts').insert({
     user_id: user.id,
     code,
     type,
-    seuil,
+    seuil: seuilNum,
     actif,
   });
   if (error) throw new Error(error.message);

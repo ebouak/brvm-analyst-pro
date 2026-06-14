@@ -9,12 +9,24 @@ interface Props {
   instruments: { code: string; designation: string | null }[];
 }
 
+type AlertType =
+  | 'prix_au_dessus' | 'prix_en_dessous' | 'variation'
+  | 'signal_achat' | 'signal_vente' | 'rsi_survente' | 'rsi_surachat' | 'dividende_proche';
+
+const SMART_TYPES: AlertType[] = ['signal_achat', 'signal_vente', 'rsi_survente', 'rsi_surachat', 'dividende_proche'];
+const SEUIL_HINT: Partial<Record<AlertType, string>> = {
+  rsi_survente: 'Seuil RSI (défaut 30)', rsi_surachat: 'Seuil RSI (défaut 70)', dividende_proche: 'Jours avant détachement (défaut 7)',
+};
+
 export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [alertType, setAlertType] = useState<'prix_au_dessus' | 'prix_en_dessous' | 'variation'>('prix_au_dessus');
+  const [alertType, setAlertType] = useState<AlertType>('prix_au_dessus');
   const [isActive, setIsActive] = useState(true);
 
   if (!isOpen) return null;
+
+  const isSmart = SMART_TYPES.includes(alertType);
+  const noSeuil = alertType === 'signal_achat' || alertType === 'signal_vente';
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -48,24 +60,40 @@ export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
           <div>
             <label htmlFor="am-type" className="block text-sm font-medium mb-1">Type d'alerte *</label>
             <select id="am-type" value={alertType}
-              onChange={(e) => setAlertType(e.target.value as typeof alertType)}
+              onChange={(e) => setAlertType(e.target.value as AlertType)}
               className="w-full bg-bg border border-border rounded px-3 py-2 text-sm">
-              <option value="prix_au_dessus">↑ Au-dessus d'un prix</option>
-              <option value="prix_en_dessous">↓ En-dessous d'un prix</option>
-              <option value="variation">↕ Variation en %</option>
+              <optgroup label="Prix">
+                <option value="prix_au_dessus">↑ Au-dessus d'un prix</option>
+                <option value="prix_en_dessous">↓ En-dessous d'un prix</option>
+                <option value="variation">↕ Variation en %</option>
+              </optgroup>
+              <optgroup label="Intelligentes">
+                <option value="signal_achat">★ Signal passe à ACHAT</option>
+                <option value="signal_vente">★ Signal passe à VENTE</option>
+                <option value="rsi_survente">RSI en survente</option>
+                <option value="rsi_surachat">RSI en surachat</option>
+                <option value="dividende_proche">Détachement de dividende proche</option>
+              </optgroup>
             </select>
           </div>
 
-          <div>
-            <label htmlFor="am-seuil" className="block text-sm font-medium mb-1">Seuil *</label>
-            <input id="am-seuil" name="seuil" type="number"
-              placeholder={alertType === 'variation' ? 'ex : 5 (%)' : 'ex : 12500'}
-              required step="any"
-              className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
-            {alertType === 'variation' && (
-              <p className="text-xs text-muted mt-1">Variation en pourcentage depuis la création</p>
-            )}
-          </div>
+          {!noSeuil && (
+            <div>
+              <label htmlFor="am-seuil" className="block text-sm font-medium mb-1">
+                Seuil {isSmart ? '(optionnel)' : '*'}
+              </label>
+              <input id="am-seuil" name="seuil" type="number"
+                placeholder={SEUIL_HINT[alertType] ?? (alertType === 'variation' ? 'ex : 5 (%)' : 'ex : 12500')}
+                required={!isSmart} step="any"
+                className="w-full bg-bg border border-border rounded px-3 py-2 text-sm" />
+              {alertType === 'variation' && (
+                <p className="text-xs text-muted mt-1">Variation en pourcentage depuis la création</p>
+              )}
+              {isSmart && (
+                <p className="text-xs text-muted mt-1">Laissez vide pour utiliser la valeur par défaut.</p>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-3">
             <input id="am-actif" type="checkbox" checked={isActive}
