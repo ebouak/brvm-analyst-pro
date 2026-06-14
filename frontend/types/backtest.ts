@@ -58,6 +58,8 @@ export interface BacktestReport {
   trades: BacktestTrade[];
   strategyRule: BacktestStrategyRule;
   summary: BacktestSummary;
+  /** Courbe d'équité (base 100) — optionnelle, pour le mini-sparkline. */
+  equityCurve?: number[];
 }
 
 export type BacktestInfographicVariant = 'full' | 'compact';

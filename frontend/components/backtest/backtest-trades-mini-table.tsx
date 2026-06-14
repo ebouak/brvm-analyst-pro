@@ -33,7 +33,10 @@ export function BacktestTradesMiniTable({ trades }: { trades: BacktestTrade[] })
                   {formatPercent(t.returnPct)}
                 </td>
                 <td className="py-2 text-right">
-                  <span className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS[t.result].cls}`}>
+                  <span
+                    aria-label={`Trade ${STATUS[t.result].label.toLowerCase()}`}
+                    className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS[t.result].cls}`}
+                  >
                     {STATUS[t.result].label}
                   </span>
                 </td>

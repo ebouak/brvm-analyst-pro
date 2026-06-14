@@ -20,7 +20,11 @@ export function RiskBlock({ risk, showRiskDetails = false }: { risk: BacktestRis
       <div className="mb-3 flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Risque</p>
         {risk.riskLevel && (
-          <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${toneSoftClass[tone]} ${toneTextClass[tone]}`}>
+          <span
+            role="status"
+            aria-label={`Niveau de risque : ${RISK_LABEL[risk.riskLevel].toLowerCase()}`}
+            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${toneSoftClass[tone]} ${toneTextClass[tone]}`}
+          >
             {RISK_LABEL[risk.riskLevel]}
           </span>
         )}

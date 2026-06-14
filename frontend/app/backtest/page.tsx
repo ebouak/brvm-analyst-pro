@@ -7,6 +7,9 @@ import BacktestMetrics from '@/components/BacktestMetrics';
 import BacktestSynthesis from '@/components/BacktestSynthesis';
 import BacktestTrades from '@/components/BacktestTrades';
 import BacktestExport from '@/components/BacktestExport';
+import { BacktestInfographic } from '@/components/backtest/backtest-infographic';
+import { ShareableInfographic } from '@/components/backtest/share-button';
+import { toBacktestReport } from '@/lib/backtest-adapter';
 import {
   SectionHeader,
   PremiumPanel,
@@ -378,6 +381,31 @@ export default async function BacktestPage({ searchParams }: PageProps) {
             bestTradePct={result.bestTradePct}
             worstTradePct={result.worstTradePct}
           />
+
+          {/* Fiche partageable (infographie claire, exportable en image) */}
+          {(() => {
+            const PERIOD_LABEL: Record<Period, string> = {
+              '1M': '1 mois', '3M': '3 mois', '6M': '6 mois', '1A': '1 an', 'max': 'historique complet',
+            };
+            const report = toBacktestReport({
+              code: selectedCode,
+              designation: designation || selectedCode,
+              result,
+              benchmarks,
+              synthesis: synthesizeBacktest(result, benchmarks, closes.length),
+              dates,
+              feesPct,
+              periodLabel: PERIOD_LABEL[period],
+            });
+            return (
+              <div>
+                <Eyebrow className="mb-3">Fiche partageable</Eyebrow>
+                <ShareableInfographic filename={`backtest-${selectedCode}`}>
+                  <BacktestInfographic report={report} variant="full" />
+                </ShareableInfographic>
+              </div>
+            );
+          })()}
 
           {/* Actions */}
           <div className="flex gap-3 flex-wrap">
