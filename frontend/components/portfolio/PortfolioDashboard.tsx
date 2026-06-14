@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { fmtDateFR } from '@/lib/format';
 import PortfolioOverview from '@/components/portfolio/PortfolioOverview';
+import PortfolioOptimizer from '@/components/portfolio/PortfolioOptimizer';
 import MovementsForm from '@/components/portfolio/MovementsForm';
 import { usePortfolioState } from '@/lib/portfolio/queries';
 
-type Tab = 'overview' | 'mouvements';
+type Tab = 'overview' | 'optimisation' | 'mouvements';
 
 /**
  * Onglet « Analyse & suivi » — entièrement dérivé des positions réelles
@@ -61,12 +62,16 @@ export default function PortfolioDashboard() {
       {/* Sous-onglets consolidés (plus de doublon ni de saisie manuelle) */}
       <div className="flex gap-2 border-b border-border">
         <TabBtn active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>📊 Vue d&apos;ensemble</TabBtn>
+        <TabBtn active={activeTab === 'optimisation'} onClick={() => setActiveTab('optimisation')}>🎯 Optimisation</TabBtn>
         <TabBtn active={activeTab === 'mouvements'} onClick={() => setActiveTab('mouvements')}>💸 Mouvements</TabBtn>
       </div>
 
       <div className="space-y-6">
         {activeTab === 'overview' && (
           <PortfolioOverview state={stateQuery.data} isLoading={stateQuery.isLoading} />
+        )}
+        {activeTab === 'optimisation' && (
+          <PortfolioOptimizer userId={userId} />
         )}
         {activeTab === 'mouvements' && (
           <div className="space-y-3">
