@@ -11,7 +11,7 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
-import { isTriggered, type AlertType } from './evaluate.js';
+import { isTriggered, isSmartTriggered, isSmartType, type AlertType, type SmartContext } from './evaluate.js';
 import { dispatch } from './channels.js';
 
 interface AlertRow {
@@ -19,7 +19,7 @@ interface AlertRow {
   user_id: string;
   code: string;
   type: AlertType;
-  seuil: number;
+  seuil: number | null;
   actif: boolean;
   declenchee_le: string | null;
 }
@@ -62,16 +62,41 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
       }
     }
 
+    // Contexte « intelligent » par code : signal du jour + RSI + jours avant détachement.
+    const smartByCode: Record<string, SmartContext> = {};
+    const hasSmart = rows.some((r) => isSmartType(r.type));
+    if (hasSmart) {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: sigs } = await sb
+        .from('signals_daily').select('code, signal, inputs, date_marche')
+        .in('code', codes).order('date_marche', { ascending: false });
+      for (const s of (sigs ?? []) as { code: string; signal: SmartContext['signal']; inputs: { rsi?: number } | null }[]) {
+        if (smartByCode[s.code]) continue; // garde le plus récent
+        smartByCode[s.code] = { signal: s.signal, rsi: typeof s.inputs?.rsi === 'number' ? s.inputs.rsi : null, daysToExDividend: null };
+      }
+      const { data: divs } = await sb
+        .from('dividends').select('code, ex_date').in('code', codes).not('ex_date', 'is', null).gte('ex_date', today).order('ex_date', { ascending: true });
+      for (const d of (divs ?? []) as { code: string; ex_date: string }[]) {
+        const days = Math.round((Date.parse(d.ex_date) - Date.parse(today)) / 86_400_000);
+        if (!smartByCode[d.code]) smartByCode[d.code] = { signal: null, rsi: null, daysToExDividend: days };
+        else if (smartByCode[d.code]!.daysToExDividend == null) smartByCode[d.code]!.daysToExDividend = days;
+      }
+    }
+
     let triggered = 0;
     for (const a of rows) {
       const px = priceByCode[a.code] ?? { cours: null, variation: null };
-      if (!isTriggered({ type: a.type, seuil: a.seuil }, px.cours, px.variation)) continue;
+      const smart = smartByCode[a.code] ?? { signal: null, rsi: null, daysToExDividend: null };
+      const fires = isSmartType(a.type)
+        ? isSmartTriggered({ type: a.type, seuil: a.seuil }, smart)
+        : isTriggered({ type: a.type, seuil: a.seuil }, px.cours, px.variation);
+      if (!fires) continue;
       // Anti-spam : ne pas re-notifier si déjà déclenchée aujourd'hui.
       if (a.declenchee_le && a.declenchee_le.slice(0, 10) === (lastDate ?? '')) continue;
 
       triggered++;
       const subject = `Alerte ${a.code}`;
-      const body = describeAlert(a, px);
+      const body = describeAlert(a, px, smart);
       const results = await dispatch({ subject, body, code: a.code, to: null });
 
       if (!cfg.DRY_RUN) {
@@ -94,8 +119,20 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
   }
 }
 
-function describeAlert(a: AlertRow, px: { cours: number | null; variation: number | null }): string {
-  if (a.type === 'prix_au_dessus') return `${a.code} a atteint ou dépassé ${a.seuil} (cours ${px.cours ?? '?'}).`;
-  if (a.type === 'prix_en_dessous') return `${a.code} est repassé sous ${a.seuil} (cours ${px.cours ?? '?'}).`;
-  return `${a.code} a varié de ${px.variation ?? '?'}% (seuil ${a.seuil}%).`;
+function describeAlert(
+  a: AlertRow,
+  px: { cours: number | null; variation: number | null },
+  smart: SmartContext,
+): string {
+  switch (a.type) {
+    case 'prix_au_dessus': return `${a.code} a atteint ou dépassé ${a.seuil} (cours ${px.cours ?? '?'}).`;
+    case 'prix_en_dessous': return `${a.code} est repassé sous ${a.seuil} (cours ${px.cours ?? '?'}).`;
+    case 'variation': return `${a.code} a varié de ${px.variation ?? '?'}% (seuil ${a.seuil}%).`;
+    case 'signal_achat': return `${a.code} : signal quantitatif passé à ACHAT.`;
+    case 'signal_vente': return `${a.code} : signal quantitatif passé à VENTE.`;
+    case 'rsi_survente': return `${a.code} : RSI en survente (${smart.rsi?.toFixed(0) ?? '?'}) — rebond possible.`;
+    case 'rsi_surachat': return `${a.code} : RSI en surachat (${smart.rsi?.toFixed(0) ?? '?'}) — prudence.`;
+    case 'dividende_proche': return `${a.code} : détachement de dividende dans ${smart.daysToExDividend ?? '?'} jour(s).`;
+    default: return `${a.code} : alerte déclenchée.`;
+  }
 }
