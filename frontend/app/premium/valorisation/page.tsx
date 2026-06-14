@@ -1,4 +1,5 @@
 import { getMarketValuations } from '@/lib/valuation/server';
+import { getMarketScoring } from '@/lib/scoring/server';
 import ValuationScreener from '@/components/premium/ValuationScreener';
 import {
   SectionHeader,
@@ -12,7 +13,8 @@ export const revalidate = 3600;
 export const metadata = { title: 'Valorisation — BRVM Analyst Pro' };
 
 export default async function ValorisationPage() {
-  const all = await getMarketValuations();
+  const [all, scoringMap] = await Promise.all([getMarketValuations(), getMarketScoring()]);
+  const scoring = Object.fromEntries(scoringMap);
   const valuable = all.filter((c) => c.metrics.reliable && c.fairValue.upside != null);
   const decotes = valuable.filter((c) => c.verdict.stance === 'decote').length;
   const cheapest = [...valuable].sort((a, b) => (b.fairValue.upside ?? -Infinity) - (a.fairValue.upside ?? -Infinity))[0];
@@ -42,7 +44,7 @@ export default async function ValorisationPage() {
         <EmptyStatePremium icon="◎" title="Aucune donnée fondamentale" hint="Les états financiers alimenteront cette analyse." />
       ) : (
         <PremiumPanel glow className="p-5">
-          <ValuationScreener data={all} />
+          <ValuationScreener data={all} scoring={scoring} />
         </PremiumPanel>
       )}
     </div>

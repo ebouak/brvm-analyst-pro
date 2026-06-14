@@ -26,10 +26,14 @@ import type { MarketSnapshot, MarketDate } from '../types.js';
  * Beaucoup de pages BDFIN affichent par défaut la dernière séance ; pour
  * l'historique, un postback sur le calendrier/bouton est nécessaire.
  */
+/**
+ * Sélecteur de séance sur Activites_marche.aspx : c'est un <select> ASP.NET
+ * (AutoPostBack) dont les valeurs d'option sont au format YYYYMMDD
+ * (ex. « 20260612 » = 12/06/2026). Le changement de date se fait par postback
+ * avec __EVENTTARGET = nom du déroulant. (Calibré sur le markup réel 2026-06-14.)
+ */
 export const MARKET_DATE_FIELDS = {
-  dateInput: 'ctl00$ContentPlaceHolder1$txtDate',
-  submit: 'ctl00$ContentPlaceHolder1$btnAfficher',
-  submitValue: 'Afficher',
+  dateSelect: 'ctl00$Main$DropDownList1',
 } as const;
 
 function snapshotFromHtml(html: string, date: MarketDate): MarketSnapshot {
@@ -73,16 +77,14 @@ export async function scrapeDate(
   const firstHtml = await getAuthenticated(http, cfg.BDFIN_MARKET_PATH);
   const state = extractAspNetState(firstHtml);
 
-  // 2) Convertir la date ISO -> jj/mm/aaaa pour le champ du formulaire.
-  const [y, m, d] = date.split('-');
-  const frDate = `${d}/${m}/${y}`;
+  // 2) Valeur d'option du déroulant = YYYYMMDD ; postback via __EVENTTARGET.
+  const ymd = date.replace(/-/g, '');
 
-  const form = buildPostback(state, MARKET_DATE_FIELDS.submit, '', {
-    [MARKET_DATE_FIELDS.dateInput]: frDate,
-    [MARKET_DATE_FIELDS.submit]: MARKET_DATE_FIELDS.submitValue,
+  const form = buildPostback(state, MARKET_DATE_FIELDS.dateSelect, '', {
+    [MARKET_DATE_FIELDS.dateSelect]: ymd,
   });
 
-  logger.info({ date, frDate }, 'Postback sélection de date');
+  logger.info({ date, ymd }, 'Postback sélection de date');
   const resp = await http.postForm(cfg.BDFIN_MARKET_PATH, form);
 
   if (looksLikeLoginPage(resp.data)) {

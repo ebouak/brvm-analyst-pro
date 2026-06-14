@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { CompanyValuation } from '@/lib/valuation/server';
+import type { CompanyScoring } from '@/lib/scoring/server';
 
 function pct(v: number | null, d = 0): string {
   if (v == null) return '—';
@@ -20,7 +21,7 @@ const STANCE_LABEL: Record<CompanyValuation['verdict']['stance'], { txt: string;
   indisponible: { txt: 'n/d', cls: 'text-muted bg-surface border-border' },
 };
 
-export default function ValuationScreener({ data }: { data: CompanyValuation[] }) {
+export default function ValuationScreener({ data, scoring = {} }: { data: CompanyValuation[]; scoring?: Record<string, CompanyScoring> }) {
   const [sortKey, setSortKey] = useState<SortKey>('upside');
   const [onlyValuable, setOnlyValuable] = useState(true);
 
@@ -69,7 +70,8 @@ export default function ValuationScreener({ data }: { data: CompanyValuation[] }
               <Th k="per" label="P/E" />
               <Th k="pbr" label="P/B" />
               <Th k="roe" label="ROE" />
-              <Th k="quality" label="Qualité" />
+              <th className="text-right py-2 px-3">F-Score</th>
+              <th className="text-right py-2 px-3">Altman Z</th>
               <th className="text-right py-2 px-3">Verdict</th>
             </tr>
           </thead>
@@ -86,7 +88,17 @@ export default function ValuationScreener({ data }: { data: CompanyValuation[] }
                   <td className="py-2 px-3 text-right tabular text-ivory">{num(c.metrics.per, 1)}</td>
                   <td className="py-2 px-3 text-right tabular text-ivory">{num(c.metrics.pbr, 2)}</td>
                   <td className="py-2 px-3 text-right tabular text-ivory">{pct(c.metrics.roe, 1)}</td>
-                  <td className="py-2 px-3 text-right tabular text-muted">{c.quality.score}/{c.quality.max}</td>
+                  <td className="py-2 px-3 text-right tabular text-muted">
+                    {scoring[c.code]?.fscore?.reliable ? `${scoring[c.code]!.fscore!.score}/9` : '—'}
+                  </td>
+                  <td className="py-2 px-3 text-right tabular">
+                    {(() => {
+                      const a = scoring[c.code]?.altman;
+                      if (!a?.applicable || a.zone == null) return <span className="text-faint">—</span>;
+                      const cls = a.zone === 'safe' ? 'text-up' : a.zone === 'grey' ? 'text-warn' : 'text-down';
+                      return <span className={cls}>{a.z}</span>;
+                    })()}
+                  </td>
                   <td className="py-2 px-3 text-right">
                     <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${s.cls}`}>{s.txt}</span>
                   </td>

@@ -1,4 +1,6 @@
 import type { CompanyValuation } from '@/lib/valuation/server';
+import type { CompanyScoring } from '@/lib/scoring/server';
+import type { AltmanZone } from '@/lib/scoring/altman';
 import { fmtFcfa } from '@/lib/format';
 
 function pct(v: number | null, d = 0): string {
@@ -16,8 +18,14 @@ const STANCE_STYLE: Record<CompanyValuation['verdict']['stance'], string> = {
   indisponible: 'text-muted border-border bg-surface',
 };
 
+const ZONE_STYLE: Record<AltmanZone, { txt: string; cls: string }> = {
+  safe: { txt: 'Sain', cls: 'text-up bg-up/10 border-up/30' },
+  grey: { txt: 'Zone grise', cls: 'text-warn bg-warn/10 border-warn/30' },
+  distress: { txt: 'Risque de détresse', cls: 'text-down bg-down/10 border-down/30' },
+};
+
 /** Bloc valorisation fondamentale d'une société (fiche premium). */
-export default function ValuationPanel({ v }: { v: CompanyValuation }) {
+export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; scoring?: CompanyScoring | null }) {
   const { metrics: m, fairValue: fv, quality: q, verdict } = v;
 
   const ratios: { label: string; value: string }[] = [
@@ -58,6 +66,39 @@ export default function ValuationPanel({ v }: { v: CompanyValuation }) {
             </div>
           ))}
         </div>
+
+        {/* Santé financière : Piotroski F-Score + Altman Z */}
+        {scoring && (scoring.fscore?.reliable || scoring.altman?.applicable) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {scoring.fscore?.reliable && (
+              <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] uppercase tracking-wider text-faint">Piotroski F-Score</span>
+                  <span className="tabular text-sm font-semibold text-ivory">{scoring.fscore.score}/9 · {scoring.fscore.label}</span>
+                </div>
+                <div className="flex gap-0.5">
+                  {scoring.fscore.criteria.map((c, i) => (
+                    <span key={i} title={c.label} className={`h-1.5 flex-1 rounded-full ${c.pass ? 'bg-up' : 'bg-border'}`} />
+                  ))}
+                </div>
+                <p className="mt-1.5 text-[10px] text-faint">Solidité fondamentale : rentabilité, levier, efficience (9 critères).</p>
+              </div>
+            )}
+            <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] uppercase tracking-wider text-faint">Altman Z-Score</span>
+                {scoring.altman?.applicable && scoring.altman.zone ? (
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${ZONE_STYLE[scoring.altman.zone].cls}`}>
+                    {scoring.altman.z} · {ZONE_STYLE[scoring.altman.zone].txt}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-faint">non applicable</span>
+                )}
+              </div>
+              <p className="mt-1.5 text-[10px] text-faint">{scoring.altman?.note ?? 'Risque de détresse financière (modèle Z″ marchés émergents).'}</p>
+            </div>
+          </div>
+        )}
 
         {/* Verdict détaillé */}
         <div className="border-t border-border/30 pt-4 space-y-2">
