@@ -306,6 +306,13 @@ export default async function Dashboard() {
             <PremiumCTA href="/portefeuille" variant="ghost">
               Portefeuille
             </PremiumCTA>
+            <Link
+              href="/terminal"
+              className="inline-flex min-h-[42px] items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 text-sm font-medium text-cyan-200 transition-all hover:bg-cyan-400/[0.12]"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 animate-pulse" />
+              Terminal
+            </Link>
           </nav>
         </header>
 

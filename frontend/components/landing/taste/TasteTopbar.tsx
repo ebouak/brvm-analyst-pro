@@ -54,9 +54,10 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
           Brief
         </Link>
         <Link
-          href="/login"
-          className="hidden min-h-[42px] items-center rounded-full border border-white/10 bg-white/[0.03] px-4 text-sm text-muted transition-all hover:bg-white/[0.06] sm:inline-flex"
+          href="/terminal"
+          className="hidden min-h-[42px] items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 text-sm font-medium text-cyan-200 transition-all hover:bg-cyan-400/[0.12] sm:inline-flex"
         >
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 animate-pulse" />
           Terminal
         </Link>
         <Link
