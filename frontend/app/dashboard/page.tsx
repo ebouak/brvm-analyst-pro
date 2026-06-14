@@ -22,6 +22,7 @@ import {
   StatPill,
   PremiumPanel,
 } from '@/components/ui/premium';
+import { BeamButton } from '@/components/ui/beam-button';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard — BRVM Analyst Pro' };
@@ -300,19 +301,8 @@ export default async function Dashboard() {
 
           {/* Actions nav */}
           <nav className="flex items-center gap-2" aria-label="Navigation rapide">
-            <PremiumCTA href="/signaux" variant="ghost">
-              Signaux
-            </PremiumCTA>
-            <PremiumCTA href="/portefeuille" variant="ghost">
-              Portefeuille
-            </PremiumCTA>
-            <Link
-              href="/terminal"
-              className="inline-flex min-h-[42px] items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 text-sm font-medium text-cyan-200 transition-all hover:bg-cyan-400/[0.12]"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 animate-pulse" />
-              Terminal
-            </Link>
+            <BeamButton href="/signaux">Signaux</BeamButton>
+            <BeamButton href="/portefeuille">Portefeuille</BeamButton>
           </nav>
         </header>
 

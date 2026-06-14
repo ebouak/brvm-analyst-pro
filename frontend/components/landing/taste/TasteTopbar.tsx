@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BrandLogo } from './BrandLogo';
+import { BeamButton } from '@/components/ui/beam-button';
 import type { TickItem } from './types';
 
 /** Header flottant en pilule + ticker de séance (données réelles) + accès. */
@@ -35,31 +36,10 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <Link
-          href="/societes"
-          className="hidden min-h-[42px] items-center px-3 text-sm text-muted transition-colors hover:text-ivory lg:inline-flex"
-        >
-          Sociétés
-        </Link>
-        <Link
-          href="/simulateur"
-          className="hidden min-h-[42px] items-center px-3 text-sm text-muted transition-colors hover:text-ivory lg:inline-flex"
-        >
-          Simulateur
-        </Link>
-        <Link
-          href="/brief"
-          className="hidden min-h-[42px] items-center px-3 text-sm text-muted transition-colors hover:text-ivory xl:inline-flex"
-        >
-          Brief
-        </Link>
-        <Link
-          href="/terminal"
-          className="hidden min-h-[42px] items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 text-sm font-medium text-cyan-200 transition-all hover:bg-cyan-400/[0.12] sm:inline-flex"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 animate-pulse" />
-          Terminal
-        </Link>
+        <BeamButton href="/societes" className="hidden lg:inline-flex">Sociétés</BeamButton>
+        <BeamButton href="/simulateur" className="hidden lg:inline-flex">Simulateur</BeamButton>
+        <BeamButton href="/brief" className="hidden xl:inline-flex">Brief</BeamButton>
+        <BeamButton href="/login" className="hidden sm:inline-flex">Terminal</BeamButton>
         <Link
           href="/premium/diagnostic"
           className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold"

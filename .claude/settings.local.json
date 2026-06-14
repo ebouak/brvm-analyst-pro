@@ -103,7 +103,14 @@
       "Bash(DOTENV_CONFIG_PATH=.env.local USE_MOCK=false npx tsx _t.mjs)",
       "Bash(echo \"exit=$?\")",
       "Bash(cat _t_out.txt)",
-      "Bash(rm -f _t.mjs _t_out.txt)"
+      "Bash(rm -f _t.mjs _t_out.txt)",
+      "Bash(node -e \"const s=require\\('./lib/brvmSectors.json'\\); const k=Object.keys\\(s\\); console.log\\('codes dans brvmSectors.json:',k.length\\); console.log\\('échantillon écran:',['NEIC','SCRC','SPHC','SLBC','PALC','SDCC'].map\\(c=>c+'='+\\(s[c]||'MANQUANT'\\)\\).join\\(', '\\)\\);\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('playwright dep:', \\(p.devDependencies&&\\(p.devDependencies['@playwright/test']||p.devDependencies.playwright\\)\\)||'\\(none\\)'\\); console.log\\('e2e script:', p.scripts.e2e||p.scripts['test:e2e']||'\\(none\\)'\\); console.log\\('start script:', p.scripts.start\\);\")",
+      "Bash(node -e \"console.log\\(require\\('@playwright/test/package.json'\\).version\\)\")",
+      "Bash(echo \"playwright installed: $\\(node -e \"console.log\\(require\\('@playwright/test/package.json'\\).version\\)\"\\)\")",
+      "Bash(grep -q \"playwright-report\" .gitignore)",
+      "Bash(printf \"\\\\n# Playwright\\\\n/test-results/\\\\n/playwright-report/\\\\n/blob-report/\\\\n/playwright/.cache/\\\\n\")",
+      "Bash(git -C .. check-ignore frontend/test-results frontend/playwright-report)"
     ]
   }
 }
