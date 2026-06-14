@@ -189,6 +189,23 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
                 </button>
               ))}
             </div>
+            {/* Questions portefeuille (contexte utilisateur injecté) */}
+            <div className="flex gap-2 mb-6 flex-wrap justify-center">
+              {[
+                'Quelle est la plus-value de mon portefeuille ?',
+                'Quelles positions renforcer ou alléger ?',
+                'Mon portefeuille est-il bien diversifié ?',
+              ].map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => sendMessage(q)}
+                  className="px-3 py-1.5 text-xs rounded-full border border-gold/30 bg-gold/[0.05] text-gold/90 hover:bg-gold/10 transition-colors"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
             {/* Templates */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-2xl mx-auto">
               {PROMPTS_TEMPLATES.map((t) => (

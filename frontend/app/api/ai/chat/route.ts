@@ -2,6 +2,51 @@ import { NextRequest } from 'next/server';
 import { resolveApiKey, type LlmProvider } from '@/lib/server/apiKeys';
 import { runTool } from '@/lib/briefTools';
 import { SYSTEM_PROMPT_ANALYSTE } from '@/lib/ai/prompts';
+import { createClient } from '@/lib/supabase/server';
+
+const LIQUIDITES_CODE = 'LIQUIDITES';
+
+/**
+ * Contexte portefeuille de l'utilisateur connecté (positions valorisées + P&L)
+ * — injecté quand la question le concerne. Soumis à la RLS (auth.uid()).
+ */
+async function buildPortfolioContext(): Promise<string> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return '\n[PORTEFEUILLE] Utilisateur non connecté — impossible d\'accéder au portefeuille.';
+
+    const { data: pos } = await supabase
+      .from('portfolios_positions').select('code, quantite, prix_entree').eq('user_id', user.id);
+    const rows = ((pos ?? []) as { code: string; quantite: number; prix_entree: number }[]).filter((p) => p.code !== LIQUIDITES_CODE);
+    if (rows.length === 0) return '\n[PORTEFEUILLE] Aucune position enregistrée.';
+
+    const codes = [...new Set(rows.map((r) => r.code))];
+    const { data: lastDateRow } = await supabase.from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1);
+    const lastDate = (lastDateRow as { date_marche: string }[] | null)?.[0]?.date_marche ?? null;
+    const priceByCode: Record<string, number> = {};
+    if (lastDate) {
+      const { data: q } = await supabase.from('brvm_actions_daily').select('code, cours_jour').eq('date_marche', lastDate).in('code', codes);
+      for (const x of (q ?? []) as { code: string; cours_jour: number | null }[]) if (x.cours_jour != null) priceByCode[x.code] = x.cours_jour;
+    }
+
+    let totalVal = 0, totalCost = 0;
+    const lines = rows.map((p) => {
+      const cours = priceByCode[p.code] ?? p.prix_entree;
+      const valeur = p.quantite * cours, cost = p.quantite * p.prix_entree;
+      totalVal += valeur; totalCost += cost;
+      return { code: p.code, qte: p.quantite, pru: p.prix_entree, cours, valeur: Math.round(valeur), pnl: Math.round(valeur - cost), pnlPct: cost > 0 ? +(((valeur - cost) / cost) * 100).toFixed(1) : 0 };
+    });
+    const pnl = totalVal - totalCost;
+    return `\n[PORTEFEUILLE UTILISATEUR] valorisation=${Math.round(totalVal)} FCFA · capital investi=${Math.round(totalCost)} FCFA · P&L latent=${Math.round(pnl)} FCFA (${totalCost > 0 ? ((pnl / totalCost) * 100).toFixed(1) : '0'}%)\nPositions: ${JSON.stringify(lines)}`;
+  } catch {
+    return '';
+  }
+}
+
+function mentionsPortfolio(text: string): boolean {
+  return /portefeuille|portfolio|plus-?value|mes? position|mon portefeuille|ma position|r[ée]['é]?quilibr|renforcer|mes titres|mon capital/i.test(text);
+}
 
 export const maxDuration = 60;
 
@@ -162,9 +207,13 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'messages requis' }, { status: 400 });
   }
 
-  // 3. Charger les données temps réel BRVM en parallèle du build messages
+  // 3. Charger les données temps réel BRVM + (si pertinent) le portefeuille user
   const lastQuestion = body.messages[body.messages.length - 1]?.content ?? '';
-  const ctx = await buildRichContext(lastQuestion);
+  const [marketCtx, portfolioCtx] = await Promise.all([
+    buildRichContext(lastQuestion),
+    mentionsPortfolio(lastQuestion) ? buildPortfolioContext() : Promise.resolve(''),
+  ]);
+  const ctx = marketCtx + portfolioCtx;
 
   // 4. Construire la conversation avec contexte données injecté
   const messages = [
