@@ -808,6 +808,7 @@ export default async function InstrumentPage({
                 { href: '/portefeuille', label: 'Créer une alerte prix', icon: '◎' },
                 { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: '↓', external: true },
                 { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: '⌛' },
+                { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: '▤', external: true },
                 { href: `/assistant?symbole=${code}`, label: "Analyser avec l'IA", icon: '◈' },
               ].map(({ href, label, icon, external }) => {
                 const cls =
