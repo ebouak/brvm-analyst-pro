@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimateNumber } from '@/components/animated-blur-number';
 
 /**
- * Valeur numérique animée (comptage flou chiffre par chiffre) :
- *  - effet d'apparition depuis 0 au montage ;
- *  - ré-animation à chaque changement de valeur (rafraîchissement live).
+ * Valeur numérique animée par COMPTAGE progressif (tween 0 → valeur), de sorte
+ * que tous les chiffres roulent visiblement avec le flou d'AnimateNumber — à
+ * l'apparition comme à chaque changement de valeur (rafraîchissement live).
  *
- * Démarre à 0 côté SSR ET client → aucune dérive d'hydratation.
+ * Démarre à 0 (SSR + client) → aucune dérive d'hydratation. Respecte
+ * prefers-reduced-motion (affiche directement la valeur finale).
  */
 export function AnimatedValue({
   value,
@@ -16,7 +17,7 @@ export function AnimatedValue({
   locale = 'fr-FR',
   suffix,
   signed = false,
-  duration = 700,
+  rampMs = 750,
   blur = 14,
   className,
 }: {
@@ -25,15 +26,31 @@ export function AnimatedValue({
   locale?: string;
   suffix?: string;
   signed?: boolean;
-  duration?: number;
+  rampMs?: number;
   blur?: number;
   className?: string;
 }) {
   const [v, setV] = useState(0);
+  const fromRef = useRef(0);
+
   useEffect(() => {
-    const id = requestAnimationFrame(() => setV(value));
-    return () => cancelAnimationFrame(id);
-  }, [value]);
+    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || value === fromRef.current) { setV(value); fromRef.current = value; return; }
+
+    const from = fromRef.current;
+    const to = value;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / rampMs);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      setV(from + (to - from) * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else { setV(to); fromRef.current = to; }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, rampMs]);
 
   const prefix = signed && value > 0 ? '+' : undefined;
 
@@ -44,7 +61,7 @@ export function AnimatedValue({
       locale={locale}
       prefix={prefix}
       suffix={suffix}
-      duration={duration}
+      duration={160}
       blur={blur}
       className={className}
     />
