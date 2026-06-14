@@ -49,10 +49,22 @@ export function usePortfolioState(userId: string): HookState<PortfolioState> {
         const rows = (raw ?? []) as Array<{ code: string; quantite: number; prix_entree: number; date_entree: string | null }>;
         const codes = [...new Set(rows.map((r) => r.code).filter((c) => c && c !== LIQUIDITES_CODE))];
 
+        // Borne l'historique à partir de la plus ancienne date d'entrée : la
+        // courbe d'équité n'a pas besoin d'avant, et cela évite le plafond de
+        // 1000 lignes de Supabase qui, en tri ascendant non borné, renvoyait les
+        // cours LES PLUS ANCIENS (→ dernier cours faux). Repli : 1 an glissant.
+        const entryDates = rows
+          .filter((r) => r.code !== LIQUIDITES_CODE)
+          .map((r) => r.date_entree)
+          .filter((d): d is string => !!d)
+          .sort();
+        const since = entryDates[0] ?? new Date(Date.now() - 365 * 86_400_000).toISOString().slice(0, 10);
+
         const [histRes, refRes] = await Promise.all([
           codes.length
             ? sb.from('brvm_actions_daily').select('code, cours_jour, date_marche')
-                .in('code', codes).not('cours_jour', 'is', null).order('date_marche', { ascending: true })
+                .in('code', codes).gte('date_marche', since).not('cours_jour', 'is', null)
+                .order('date_marche', { ascending: true }).limit(5000)
             : Promise.resolve({ data: [] as { code: string; cours_jour: number; date_marche: string }[] }),
           sb.from('brvm_reference').select('symbole, secteur'),
         ]);
