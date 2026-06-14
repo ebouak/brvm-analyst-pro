@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -26,6 +29,7 @@ export function PaperTradingDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [tradable, setTradable] = useState<TradableAction[]>([]);
   const [selectedCode, setSelectedCode] = useState('');
+  const [amountInput, setAmountInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,9 +82,11 @@ export function PaperTradingDashboard() {
     setBusy(true);
     setError(null);
     try {
-      await paperTradingService.openPosition(selectedCode);
+      const amt = parseFloat(amountInput);
+      await paperTradingService.openPosition(selectedCode, Number.isFinite(amt) && amt > 0 ? amt : undefined);
       setShowModal(false);
       setSelectedCode('');
+      setAmountInput('');
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Échec de l'ouverture");
@@ -203,13 +209,29 @@ export function PaperTradingDashboard() {
               {account && selectedCode && (() => {
                 const a = tradable.find((x) => x.code === selectedCode);
                 if (!a?.cours_jour) return null;
-                const montant = account.capital_current * 0.1;
+                const parsed = parseFloat(amountInput);
+                const montant = Number.isFinite(parsed) && parsed > 0 ? parsed : account.capital_current * 0.1;
                 const titres = montant / a.cours_jour;
+                const dejaOuverte = openPositions.some((p) => p.code === selectedCode);
                 return (
-                  <p className="text-xs text-muted">
-                    Investissement : <span className="text-white tabular">{fmtFcfa(montant)}</span>{' '}
-                    ≈ <span className="text-white tabular">{fmtNumber(titres, 1)}</span> titres
-                  </p>
+                  <div className="space-y-2">
+                    <label className="block text-xs text-muted">Montant à investir (FCFA)</label>
+                    <input
+                      type="number" min="0" step="1000"
+                      value={amountInput}
+                      onChange={(e) => setAmountInput(e.target.value)}
+                      placeholder={`Défaut : ${Math.round(account.capital_current * 0.1).toLocaleString('fr-FR')} (10 % du capital)`}
+                      aria-label="Montant à investir en FCFA"
+                      className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-info/50"
+                    />
+                    <p className="text-xs text-muted">
+                      ≈ <span className="text-white tabular">{fmtNumber(titres, 1)}</span> titres au cours de{' '}
+                      <span className="text-white tabular">{fmtNumber(a.cours_jour)}</span> FCFA
+                    </p>
+                    {dejaOuverte && (
+                      <p className="text-xs text-info">ℹ️ Position déjà ouverte : cet achat la renforcera (prix moyen pondéré).</p>
+                    )}
+                  </div>
                 );
               })()}
             </div>
@@ -240,7 +262,7 @@ export function PaperTradingDashboard() {
         <div className="bg-surface border border-border rounded-lg p-4">
           <div className="text-xs text-muted mb-1">Valeur totale (cash + positions)</div>
           <div className="text-2xl font-semibold text-white tabular">
-            <AnimatedValue value={equityTotal} format={{ maximumFractionDigits: 0 }} suffix=" FCFA" />
+            <AnimatedValue value={equityTotal} format={{ maximumFractionDigits: 0 }} suffix={' FCFA'} />
           </div>
           <div className="text-xs text-muted mt-1">
             Cash {fmtFcfa(account.capital_current)} · latent{' '}
@@ -255,7 +277,7 @@ export function PaperTradingDashboard() {
               totalPnl >= 0 ? 'text-up' : 'text-down'
             }`}
           >
-            <AnimatedValue value={totalPnl} format={{ maximumFractionDigits: 0 }} suffix=" FCFA" signed />
+            <AnimatedValue value={totalPnl} format={{ maximumFractionDigits: 0 }} suffix={' FCFA'} signed />
           </div>
           <div className="text-xs text-muted mt-1">
             Réalisé {fmtFcfa(account.pnl_total)} · {openPositions.length} position{openPositions.length !== 1 ? 's' : ''} ouverte{openPositions.length !== 1 ? 's' : ''}
@@ -301,8 +323,36 @@ export function PaperTradingDashboard() {
               />
             </LineChart>
           </ResponsiveContainer>
+        ) : openPositions.length > 0 ? (
+          /* Pas encore de trade fermé : on montre le P&L latent par position. */
+          <ResponsiveContainer width="100%" height={Math.max(160, openPositions.length * 56)}>
+            <BarChart
+              layout="vertical"
+              data={openPositions.map((p) => ({ code: p.code, pnl: Math.round((p as { pnl?: number }).pnl ?? 0) }))}
+              margin={{ left: 12, right: 24, top: 8, bottom: 8 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#232733" horizontal={false} />
+              <XAxis type="number" stroke="#8b93a7" tickFormatter={(v) => fmtFcfa(v as number)} />
+              <YAxis type="category" dataKey="code" stroke="#8b93a7" width={56} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#161922', border: '1px solid #232733' }}
+                labelStyle={{ color: '#e6e9f0' }}
+                formatter={(value) => [fmtFcfa(value as number), 'P&L latent']}
+              />
+              <Bar dataKey="pnl" isAnimationActive={false}>
+                {openPositions.map((p) => (
+                  <Cell key={p.code} fill={((p as { pnl?: number }).pnl ?? 0) >= 0 ? '#3fe18b' : '#ff6b6b'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         ) : (
-          <p className="text-muted text-center py-8">Aucun trade complété</p>
+          <p className="text-muted text-center py-8">Aucune position ni trade pour l’instant.</p>
+        )}
+        {equityCurve.length === 0 && openPositions.length > 0 && (
+          <p className="mt-2 text-center text-xs text-faint">
+            P&L latent des positions ouvertes. La courbe d’équité apparaîtra dès le premier trade clôturé.
+          </p>
         )}
       </div>
 

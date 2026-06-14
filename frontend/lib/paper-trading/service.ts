@@ -42,10 +42,10 @@ export class PaperTradingClientService {
     return res.json();
   }
 
-  async openPosition(code: string): Promise<Position> {
+  async openPosition(code: string, amount?: number): Promise<Position> {
     const res = await fetch('/api/paper-trading/positions', {
       method: 'POST',
-      body: JSON.stringify({ code }),
+      body: JSON.stringify(amount != null ? { code, amount } : { code }),
       headers: { 'Content-Type': 'application/json' },
     });
     if (!res.ok) {

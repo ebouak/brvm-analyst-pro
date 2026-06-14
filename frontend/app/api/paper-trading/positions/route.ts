@@ -16,11 +16,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = (await request.json()) as { code?: string };
+    const body = (await request.json()) as { code?: string; amount?: number };
     const code = (body.code ?? '').trim().toUpperCase();
     if (!code) {
       return NextResponse.json({ error: 'Code requis' }, { status: 400 });
     }
+    const requestedAmount = typeof body.amount === 'number' && body.amount > 0 ? body.amount : null;
 
     // Compte
     const { data: account } = await supabase
@@ -45,19 +46,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Aucun cours pour ${code}` }, { status: 400 });
     }
 
-    // Interdit les doublons ouverts sur le même code
+    const amountToInvest = requestedAmount ?? account.capital_current * 0.1;
+    const numShares = amountToInvest / entryPrice;
+
+    // Position déjà ouverte sur ce code : on RENFORCE (moyenne pondérée du PRU)
+    // au lieu de bloquer.
     const { data: existing } = await supabase
       .from('paper_trading_positions')
-      .select('id')
+      .select('id, num_shares, entry_price')
       .eq('account_id', account.id)
       .eq('code', code)
       .eq('status', 'open')
-      .limit(1);
-    if (existing && existing.length > 0) {
-      return NextResponse.json({ error: `Position déjà ouverte sur ${code}` }, { status: 409 });
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      const old = existing as { id: string; num_shares: number; entry_price: number };
+      const totalShares = old.num_shares + numShares;
+      const avgEntry = totalShares > 0 ? (old.num_shares * old.entry_price + numShares * entryPrice) / totalShares : entryPrice;
+      const { data: position, error } = await supabase
+        .from('paper_trading_positions')
+        .update({ num_shares: totalShares, entry_price: avgEntry })
+        .eq('id', old.id)
+        .select()
+        .single();
+      if (error) {
+        console.error('Reinforce position error:', error);
+        return NextResponse.json({ error: 'Échec du renforcement de position' }, { status: 500 });
+      }
+      return NextResponse.json({ position, reinforced: true }, { status: 200 });
     }
 
-    const numShares = (account.capital_current * 0.1) / entryPrice;
     const { data: position, error } = await supabase
       .from('paper_trading_positions')
       .insert({

@@ -62,7 +62,7 @@ export function PaperTradingJournal({
                 Prix entrée
               </th>
               <th className="px-4 py-2 text-muted font-semibold text-right">
-                Partages
+                Quantité
               </th>
               {showOpen && onClose && (
                 <th className="px-4 py-2 text-muted font-semibold text-right">Action</th>
