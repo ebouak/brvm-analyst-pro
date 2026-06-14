@@ -47,7 +47,14 @@ export async function POST(request: NextRequest) {
     }
 
     const amountToInvest = requestedAmount ?? account.capital_current * 0.1;
-    const numShares = amountToInvest / entryPrice;
+    // On achète des actions ENTIÈRES (impossible de détenir une fraction d'action).
+    const numShares = Math.floor(amountToInvest / entryPrice);
+    if (numShares < 1) {
+      return NextResponse.json(
+        { error: `Montant insuffisant : il faut au moins ${Math.round(entryPrice).toLocaleString('fr-FR')} FCFA pour 1 titre de ${code}.` },
+        { status: 400 },
+      );
+    }
 
     // Position déjà ouverte sur ce code : on RENFORCE (moyenne pondérée du PRU)
     // au lieu de bloquer.

@@ -112,7 +112,7 @@ export function PaperTradingJournal({
                     {fmtFcfa(pos.entry_price)}
                   </td>
                   <td className="px-4 py-3 text-right tabular text-muted">
-                    {fmtNumber(pos.num_shares, 2)}
+                    {fmtNumber(pos.num_shares, 0)}
                   </td>
                   {showOpen && onClose && (
                     <td className="px-4 py-3 text-right">

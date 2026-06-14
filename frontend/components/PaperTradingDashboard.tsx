@@ -222,7 +222,8 @@ export function PaperTradingDashboard() {
                 if (!a?.cours_jour) return null;
                 const parsed = parseFloat(amountInput);
                 const montant = Number.isFinite(parsed) && parsed > 0 ? parsed : account.capital_current * 0.1;
-                const titres = montant / a.cours_jour;
+                const titres = Math.floor(montant / a.cours_jour);
+                const investiReel = titres * a.cours_jour;
                 const dejaOuverte = openPositions.some((p) => p.code === selectedCode);
                 return (
                   <div className="space-y-2">
@@ -236,9 +237,15 @@ export function PaperTradingDashboard() {
                       className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-info/50"
                     />
                     <p className="text-xs text-muted">
-                      ≈ <span className="text-white tabular">{fmtNumber(titres, 1)}</span> titres au cours de{' '}
+                      <span className="text-white tabular">{titres}</span> titre{titres > 1 ? 's' : ''} au cours de{' '}
                       <span className="text-white tabular">{fmtNumber(a.cours_jour)}</span> FCFA
+                      {titres > 0 && investiReel !== montant && (
+                        <> · investi réel <span className="text-white tabular">{fmtFcfa(investiReel)}</span> FCFA</>
+                      )}
                     </p>
+                    {titres < 1 && (
+                      <p className="text-xs text-down">Montant insuffisant pour acheter au moins 1 titre.</p>
+                    )}
                     {dejaOuverte && (
                       <p className="text-xs text-info">ℹ️ Position déjà ouverte : cet achat la renforcera (prix moyen pondéré).</p>
                     )}
