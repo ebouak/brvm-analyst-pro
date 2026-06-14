@@ -64,6 +64,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/premium/classements', label: 'Classements', premium: true },
       { href: '/premium/anomalies', label: 'Anomalies', premium: true },
       { href: '/premium/correlations', label: 'Corrélations', premium: true },
+      { href: '/premium/comparateur', label: 'Comparateur', premium: true },
       { href: '/premium/outils', label: 'Outils Pro', premium: true },
     ],
   },
