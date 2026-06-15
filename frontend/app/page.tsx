@@ -41,6 +41,7 @@ async function getData() {
   let ticks: TickItem[] = [];
   let hausses: MoverRow[] = [];
   let baisses: MoverRow[] = [];
+  let flatTop: MoverRow[] = [];
   let nbActions = 0;
   let volumeTotal = 0;
 
@@ -67,7 +68,18 @@ async function getData() {
     });
     hausses = withVar.filter((r) => (r.variation_pct ?? 0) > 0).slice(0, 3).map(toRow);
     baisses = withVar.filter((r) => (r.variation_pct ?? 0) < 0).slice(-3).reverse().map(toRow);
-    ticks = [...hausses, ...baisses].map((m) => ({
+    // Repli « séance peu animée » : la BRVM est peu liquide, beaucoup de titres
+    // ne s'échangent pas → variation 0 % fréquente et légitime. Sans mover signé,
+    // on montre quand même la séance via les plus gros volumes (jamais vide alors
+    // que des données existent).
+    if (hausses.length === 0 && baisses.length === 0) {
+      flatTop = [...all]
+        .sort((a, b) => (b.volume ?? 0) - (a.volume ?? 0))
+        .slice(0, 6)
+        .map(toRow);
+    }
+    const tickSource = hausses.length || baisses.length ? [...hausses, ...baisses] : flatTop;
+    ticks = tickSource.map((m) => ({
       sym: m.code,
       val: m.cours != null ? nf(m.cours) : '—',
       dir: m.pct >= 0 ? ('up' as const) : ('down' as const),
@@ -110,7 +122,7 @@ async function getData() {
     /* pas de simulation si données indisponibles */
   }
 
-  return { asOf, ticks, hausses, baisses, nbActions, volumeTotal, brief, simulation };
+  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation };
 }
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
@@ -161,7 +173,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, hausses, baisses, nbActions, volumeTotal, brief, simulation } = await getData();
+  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation } = await getData();
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
@@ -229,9 +241,7 @@ export default async function Landing() {
             </Link>
           </div>
 
-          {hausses.length === 0 && baisses.length === 0 ? (
-            <p className="py-10 text-center text-sm text-faint">Prochaine séance : lundi 09h00 GMT.</p>
-          ) : (
+          {hausses.length > 0 || baisses.length > 0 ? (
             <div className="space-y-2">
               {hausses.map((m) => (
                 <MoverLine key={m.code} m={m} />
@@ -241,6 +251,17 @@ export default async function Landing() {
                 <MoverLine key={m.code} m={m} />
               ))}
             </div>
+          ) : flatTop.length > 0 ? (
+            <div className="space-y-2">
+              <p className="mb-1 text-[11px] text-muted">Séance peu animée — cours stables (titres les plus échangés) :</p>
+              {flatTop.map((m) => (
+                <MoverLine key={m.code} m={m} />
+              ))}
+            </div>
+          ) : (
+            <p className="py-10 text-center text-sm text-faint">
+              {dateLabel ? `Séance du ${dateLabel} — données en cours de consolidation.` : 'Données de séance indisponibles pour le moment.'}
+            </p>
           )}
 
           <p className="mt-4 text-[10px] leading-relaxed text-faint">
