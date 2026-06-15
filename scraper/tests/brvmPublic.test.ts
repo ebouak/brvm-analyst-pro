@@ -2,10 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { parseBrvmPublic } from '../src/scrapers/brvmPublic.js';
+import { parseBrvmPublic, parseBrvmResumeIndices } from '../src/scrapers/brvmPublic.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const html = readFileSync(join(here, 'fixtures', 'brvm-public.html'), 'utf8');
+const resumeHtml = readFileSync(join(here, 'fixtures', 'brvm-resume.html'), 'utf8');
 
 describe('parseBrvmPublic', () => {
   it('extrait les actions avec le bon mapping', () => {
@@ -52,5 +53,50 @@ describe('parseBrvmPublic', () => {
     const snap = parseBrvmPublic(html, '2026-06-09');
     expect(snap.summary).not.toBeNull();
     expect(snap.summary!.valeur_transactions).toBe(2_186_919_090);
+  });
+});
+
+describe('parseBrvmResumeIndices', () => {
+  it('extrait les 11 indices (4 principaux + 7 sectoriels)', () => {
+    const indices = parseBrvmResumeIndices(resumeHtml);
+    const codes = indices.map((i) => i.code).sort();
+    expect(codes).toEqual(
+      [
+        'BRVMC', 'BRVM30', 'BRVMPRES', 'BRVMPRIN',
+        'BRVMCBASE', 'BRVMCDISC', 'BRVMENER', 'BRVMINDU',
+        'BRVMFINS', 'BRVMSPUB', 'BRVMTELE',
+      ].sort(),
+    );
+    expect(indices.length).toBe(11);
+  });
+
+  it('mappe valeur (Fermeture), valeur_precedente (Fermeture précédente) et variation', () => {
+    const indices = parseBrvmResumeIndices(resumeHtml);
+    const byCode = (c: string) => indices.find((i) => i.code === c)!;
+
+    const composite = byCode('BRVMC');
+    expect(composite.libelle).toBe('BRVM Composite');
+    expect(composite.valeur).toBeCloseTo(436.06, 2);
+    expect(composite.valeur_precedente).toBeCloseTo(436.67, 2);
+    expect(composite.variation_pct).toBeCloseTo(-0.14, 2);
+
+    const prestige = byCode('BRVMPRES');
+    expect(prestige.valeur).toBeCloseTo(118.75, 2);
+    expect(prestige.variation_pct).toBeCloseTo(0.3, 2);
+
+    const ener = byCode('BRVMENER');
+    expect(ener.libelle).toBe('BRVM - Énergie');
+    expect(ener.valeur).toBeCloseTo(212.0, 2);
+    expect(ener.valeur_precedente).toBeCloseTo(210.75, 2);
+    expect(ener.variation_pct).toBeCloseTo(0.59, 2);
+
+    const tele = byCode('BRVMTELE');
+    expect(tele.valeur).toBeCloseTo(159.9, 2);
+    expect(tele.variation_pct).toBeCloseTo(-0.31, 2);
+  });
+
+  it('ignore les lignes inconnues et renvoie [] si aucune table « Nom/Fermeture »', () => {
+    expect(parseBrvmResumeIndices('<table><thead><tr><th>Autre</th></tr></thead><tbody></tbody></table>')).toEqual([]);
+    expect(parseBrvmResumeIndices('<html><body>rien</body></html>')).toEqual([]);
   });
 });

@@ -1,0 +1,51 @@
+<!--
+  Fixture de régression : page publique brvm.org « Résumé » (https://www.brvm.org/fr/resume).
+  Contient les deux tableaux « Indices » (4 indices principaux) et « Indices sectoriels »
+  (7 indices sectoriels), colonnes : Nom | Fermeture précédente | Fermeture | Variation (%)
+  | Variation 31 décembre (%).
+
+  ATTENTION : structure reconstruite d'après le markup connu de la page (libellés des
+  indices, ordre des colonnes). Les VALEURS numériques sont illustratives. À VALIDER
+  contre le HTML live (les classes CSS / l'imbrication exacte des tables peuvent différer) :
+  le parser mappe par LIBELLÉ d'en-tête normalisé (jamais par index), il doit donc rester
+  robuste à des changements de classes — mais re-télécharger la page réelle reste recommandé
+  pour figer une fixture pleinement fidèle.
+-->
+<div class="region region-content">
+
+  <table class="table table-hover table-striped indices">
+    <thead><tr>
+      <th>Nom</th>
+      <th class="text-right">Fermeture précédente</th>
+      <th class="text-right">Fermeture</th>
+      <th class="text-right">Variation (%)</th>
+      <th class="text-right">Variation 31 décembre (%)</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>BRVM Composite</td><td class="text-right">436,67</td><td class="text-right">436,06</td><td class="text-right">-0,14</td><td class="text-right">12,35</td></tr>
+      <tr><td>BRVM 30</td><td class="text-right">205,38</td><td class="text-right">204,78</td><td class="text-right">-0,29</td><td class="text-right">10,12</td></tr>
+      <tr><td>BRVM Prestige</td><td class="text-right">118,40</td><td class="text-right">118,75</td><td class="text-right">0,30</td><td class="text-right">8,44</td></tr>
+      <tr><td>BRVM Principal</td><td class="text-right">98,10</td><td class="text-right">97,95</td><td class="text-right">-0,15</td><td class="text-right">5,67</td></tr>
+    </tbody>
+  </table>
+
+  <table class="table table-hover table-striped indices-sectoriels">
+    <thead><tr>
+      <th>Nom</th>
+      <th class="text-right">Fermeture précédente</th>
+      <th class="text-right">Fermeture</th>
+      <th class="text-right">Variation (%)</th>
+      <th class="text-right">Variation 31 décembre (%)</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>BRVM - Consommation de base</td><td class="text-right">120,55</td><td class="text-right">121,02</td><td class="text-right">0,39</td><td class="text-right">3,21</td></tr>
+      <tr><td>BRVM - Consommation discrétionnaire</td><td class="text-right">88,30</td><td class="text-right">88,10</td><td class="text-right">-0,23</td><td class="text-right">-1,40</td></tr>
+      <tr><td>BRVM - Énergie</td><td class="text-right">210,75</td><td class="text-right">212,00</td><td class="text-right">0,59</td><td class="text-right">15,80</td></tr>
+      <tr><td>BRVM - Industriels</td><td class="text-right">145,20</td><td class="text-right">144,90</td><td class="text-right">-0,21</td><td class="text-right">6,02</td></tr>
+      <tr><td>BRVM - Services financiers</td><td class="text-right">95,60</td><td class="text-right">95,80</td><td class="text-right">0,21</td><td class="text-right">9,14</td></tr>
+      <tr><td>BRVM - Services publics</td><td class="text-right">330,10</td><td class="text-right">329,50</td><td class="text-right">-0,18</td><td class="text-right">4,75</td></tr>
+      <tr><td>BRVM - Télécommunications</td><td class="text-right">160,40</td><td class="text-right">159,90</td><td class="text-right">-0,31</td><td class="text-right">7,33</td></tr>
+    </tbody>
+  </table>
+
+</div>

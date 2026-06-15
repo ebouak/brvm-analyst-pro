@@ -3,11 +3,54 @@ import { createHash } from 'node:crypto';
 import { parseFrNumber, parseFrInt } from '../utils/parseNumber.js';
 import type { MarketSnapshot, ActionRow, IndiceRow, MarketSummary, MarketDate } from '../types.js';
 
-/** Libellés d'indices brvm.org -> code interne. */
+/** Libellés d'indices brvm.org -> code interne (table « Activités du marché »). */
 const INDEX_MAP: Record<string, { code: string; libelle: string }> = {
   'brvm-c': { code: 'BRVMC', libelle: 'BRVM Composite' },
   'brvm-30': { code: 'BRVM30', libelle: 'BRVM 30' },
 };
+
+/**
+ * Indices de la page « Résumé » (https://www.brvm.org/fr/resume) — tableaux
+ * « Indices » (4 principaux) + « Indices sectoriels » (7).
+ * Mapping par NOM normalisé (cf. normName) -> code interne stable.
+ *
+ * Codes internes :
+ *   BRVMC      BRVM Composite              | BRVM30     BRVM 30
+ *   BRVMPRES   BRVM Prestige               | BRVMPRIN   BRVM Principal
+ *   BRVMCBASE  Consommation de base        | BRVMCDISC  Consommation discrétionnaire
+ *   BRVMENER   Énergie                     | BRVMINDU   Industriels
+ *   BRVMFINS   Services financiers         | BRVMSPUB   Services publics
+ *   BRVMTELE   Télécommunications
+ */
+const RESUME_INDEX_MAP: Record<string, { code: string; libelle: string }> = {
+  'brvm composite': { code: 'BRVMC', libelle: 'BRVM Composite' },
+  'brvm 30': { code: 'BRVM30', libelle: 'BRVM 30' },
+  'brvm prestige': { code: 'BRVMPRES', libelle: 'BRVM Prestige' },
+  'brvm principal': { code: 'BRVMPRIN', libelle: 'BRVM Principal' },
+  'consommation de base': { code: 'BRVMCBASE', libelle: 'BRVM - Consommation de base' },
+  'consommation discretionnaire': { code: 'BRVMCDISC', libelle: 'BRVM - Consommation discrétionnaire' },
+  energie: { code: 'BRVMENER', libelle: 'BRVM - Énergie' },
+  industriels: { code: 'BRVMINDU', libelle: 'BRVM - Industriels' },
+  'services financiers': { code: 'BRVMFINS', libelle: 'BRVM - Services financiers' },
+  'services publics': { code: 'BRVMSPUB', libelle: 'BRVM - Services publics' },
+  telecommunications: { code: 'BRVMTELE', libelle: 'BRVM - Télécommunications' },
+};
+
+/**
+ * Normalise un NOM d'indice de la page « Résumé » : minuscule, sans accents,
+ * sans parenthèses, et on retire un préfixe « brvm - » éventuel des sectoriels
+ * (« BRVM - Énergie » -> « energie ») pour la correspondance dans RESUME_INDEX_MAP.
+ */
+function normName(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\(.*?\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^brvm\s*[-–]\s*/, '');
+}
 
 /** Normalise un libellé d'en-tête (minuscule, sans accents ni parenthèses). */
 function normHeader(s: string): string {
@@ -130,4 +173,66 @@ export function parseBrvmPublic(html: string, date: MarketDate): MarketSnapshot 
     hash_source: createHash('sha256').update(html).digest('hex'),
     is_mock: false,
   };
+}
+
+/**
+ * Parse la page publique « Résumé » brvm.org (tableaux « Indices » + « Indices
+ * sectoriels ») et retourne les 11 indices (4 principaux + 7 sectoriels).
+ *
+ * Mapping des colonnes par LIBELLÉ d'en-tête normalisé (jamais par index) :
+ * colonnes attendues « Nom | Fermeture précédente | Fermeture | Variation (%)
+ * | Variation 31 décembre (%) ». La colonne « Variation 31 décembre » (YTD)
+ * est ignorée (pas de colonne dédiée dans brvm_indices_daily — YAGNI).
+ *
+ * Les lignes inconnues (non présentes dans RESUME_INDEX_MAP) sont ignorées.
+ */
+export function parseBrvmResumeIndices(html: string): IndiceRow[] {
+  const $ = cheerio.load(html);
+  const out: IndiceRow[] = [];
+  const seen = new Set<string>();
+
+  // Repère toute table dont l'en-tête contient « nom » + « fermeture »
+  // (les deux tables « Indices » et « Indices sectoriels » partagent ce schéma).
+  $('table').each((_, t) => {
+    const headers: string[] = [];
+    $(t)
+      .find('thead th')
+      .each((_, th) => {
+        headers.push(normHeader($(th).text()));
+      });
+    if (headers.length === 0) return;
+
+    const hasNom = headers.some((h) => h.includes('nom'));
+    const hasFermeture = headers.some((h) => h.includes('fermeture'));
+    if (!hasNom || !hasFermeture) return;
+
+    const col = (pred: (h: string) => boolean) => headers.findIndex(pred);
+    const iNom = col((h) => h.includes('nom'));
+    // « Fermeture précédente » = veille ; « Fermeture » (sans « precedente ») = valeur du jour.
+    const iPrec = col((h) => h.includes('fermeture') && h.includes('precedente'));
+    const iFerm = col((h) => h.includes('fermeture') && !h.includes('precedente'));
+    // « Variation (%) » du jour, en excluant « Variation 31 décembre » (YTD).
+    const iVar = col((h) => h.includes('variation') && !h.includes('decembre') && !h.includes('31'));
+
+    $(t)
+      .find('tbody tr')
+      .each((_, tr) => {
+        const tds = $(tr).find('td');
+        const cell = (i: number) => (i >= 0 && i < tds.length ? $(tds[i]).text().trim() : '');
+        const rawName = cell(iNom);
+        if (!rawName) return;
+        const m = RESUME_INDEX_MAP[normName(rawName)];
+        if (!m || seen.has(m.code)) return;
+        seen.add(m.code);
+        out.push({
+          code: m.code,
+          libelle: m.libelle,
+          valeur: parseFrNumber(cell(iFerm)),
+          valeur_precedente: parseFrNumber(cell(iPrec)),
+          variation_pct: parseFrNumber(cell(iVar)),
+        });
+      });
+  });
+
+  return out;
 }
