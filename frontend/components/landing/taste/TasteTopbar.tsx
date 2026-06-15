@@ -39,7 +39,7 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
         <BeamButton href="/societes" className="hidden lg:inline-flex">Sociétés</BeamButton>
         <BeamButton href="/simulateur" className="hidden lg:inline-flex">Simulateur</BeamButton>
         <BeamButton href="/brief" className="hidden xl:inline-flex">Brief</BeamButton>
-        <BeamButton href="/login" className="hidden sm:inline-flex">Terminal</BeamButton>
+        <BeamButton href="/login" className="hidden sm:inline-flex">Connexion</BeamButton>
         <Link
           href="/premium/diagnostic"
           className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold"
