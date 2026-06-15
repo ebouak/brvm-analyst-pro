@@ -175,3 +175,13 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Prose des pages légales */
+@layer components {
+  .legal-prose h2 { @apply font-display text-lg font-semibold text-white mt-8 mb-2; }
+  .legal-prose h3 { @apply font-semibold text-white/90 mt-4 mb-1; }
+  .legal-prose p { @apply text-white/70; }
+  .legal-prose ul { @apply list-disc space-y-1 pl-5 text-white/70; }
+  .legal-prose a { @apply text-[#56d7fd] underline; }
+  .legal-prose strong { @apply text-white/90; }
+}
