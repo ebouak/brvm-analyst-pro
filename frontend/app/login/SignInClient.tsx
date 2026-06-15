@@ -22,6 +22,8 @@ export default function SignInClient({
   return (
     <SignInPage
       showNavbar={false}
+      // Doit correspondre au réglage Supabase « Email OTP Length ».
+      codeLength={8}
       // Cyan DeFi pour coller au thème.
       dotColors={[
         [86, 215, 253],

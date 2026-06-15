@@ -34,6 +34,8 @@ interface SignInPageProps {
   subtitle?: React.ReactNode;
   /** Masque la mini-navbar de démo (par défaut affichée). */
   showNavbar?: boolean;
+  /** Nombre de caractères du code OTP (doit correspondre au réglage Supabase). Défaut 6. */
+  codeLength?: number;
   /** Couleur cyan des points (RGB). Par défaut blanc. */
   dotColors?: number[][];
   /** Envoie le code à l'adresse. Retourne `{ error }` pour bloquer le passage à l'étape code. */
@@ -513,6 +515,7 @@ export const SignInPage = ({
   title = "Welcome Developer",
   subtitle = "Your sign in component",
   showNavbar = true,
+  codeLength = 6,
   dotColors,
   onRequestCode,
   onVerifyCode,
@@ -520,9 +523,13 @@ export const SignInPage = ({
   onSuccess,
   onResend,
 }: SignInPageProps) => {
+  const emptyCode = useMemo(
+    () => Array.from({ length: codeLength }, () => ""),
+    [codeLength],
+  );
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"email" | "code" | "success">("email");
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [code, setCode] = useState<string[]>(emptyCode);
   const codeInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [initialCanvasVisible, setInitialCanvasVisible] = useState(true);
@@ -587,13 +594,13 @@ export const SignInPage = ({
         const res = await onVerifyCode(fullCode, email);
         if (res && res.error) {
           setError(res.error);
-          setCode(["", "", "", "", "", ""]);
+          setCode(emptyCode);
           codeInputRefs.current[0]?.focus();
           return;
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Code invalide.");
-        setCode(["", "", "", "", "", ""]);
+        setCode(emptyCode);
         codeInputRefs.current[0]?.focus();
         return;
       } finally {
@@ -610,12 +617,12 @@ export const SignInPage = ({
       setCode(newCode);
 
       // Focus next input if value is entered
-      if (value && index < 5) {
+      if (value && index < codeLength - 1) {
         codeInputRefs.current[index + 1]?.focus();
       }
 
       // Check if code is complete
-      if (index === 5 && value) {
+      if (index === codeLength - 1 && value) {
         const isComplete = newCode.every(digit => digit.length === 1);
         if (isComplete) {
           void verifyComplete(newCode.join(""));
@@ -632,20 +639,20 @@ export const SignInPage = ({
 
   // Coller le code complet (depuis l'e-mail) remplit toutes les cases d'un coup.
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, codeLength);
     if (!pasted) return;
     e.preventDefault();
-    const newCode = ["", "", "", "", "", ""];
+    const newCode = [...emptyCode];
     for (let i = 0; i < pasted.length; i++) newCode[i] = pasted[i];
     setCode(newCode);
-    const lastIdx = Math.min(pasted.length, 6) - 1;
+    const lastIdx = Math.min(pasted.length, codeLength) - 1;
     codeInputRefs.current[lastIdx]?.focus();
-    if (pasted.length === 6) void verifyComplete(newCode.join(""));
+    if (pasted.length === codeLength) void verifyComplete(newCode.join(""));
   };
 
   const handleBackClick = () => {
     setStep("email");
-    setCode(["", "", "", "", "", ""]);
+    setCode(emptyCode);
     // Reset animations if going back
     setReverseCanvasVisible(false);
     setInitialCanvasVisible(true);
@@ -802,7 +809,7 @@ export const SignInPage = ({
                                   </div>
                                 )}
                               </div>
-                              {i < 5 && <span className="text-white/20 text-xl">|</span>}
+                              {i < codeLength - 1 && <span className="text-white/20 text-xl">|</span>}
                             </div>
                           ))}
                         </div>
