@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
+import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
 import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
@@ -193,14 +194,8 @@ export default async function Landing() {
             publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
           </p>
 
-          <div className="mb-8 flex flex-wrap gap-3">
-            <Link
-              href="/signup"
-              className="inline-flex min-h-[48px] items-center rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-              style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
-            >
-              Créer un compte gratuit
-            </Link>
+          <div className="mb-8 flex flex-wrap items-center gap-3">
+            <HeroPulseCTA />
             <Link
               href="/societes"
               className="inline-flex min-h-[48px] items-center rounded-full border border-white/10 bg-white/[0.03] px-6 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-white/[0.06]"

@@ -110,7 +110,8 @@
       "Bash(echo \"playwright installed: $\\(node -e \"console.log\\(require\\('@playwright/test/package.json'\\).version\\)\"\\)\")",
       "Bash(grep -q \"playwright-report\" .gitignore)",
       "Bash(printf \"\\\\n# Playwright\\\\n/test-results/\\\\n/playwright-report/\\\\n/blob-report/\\\\n/playwright/.cache/\\\\n\")",
-      "Bash(git -C .. check-ignore frontend/test-results frontend/playwright-report)"
+      "Bash(git -C .. check-ignore frontend/test-results frontend/playwright-report)",
+      "Bash(npx next *)"
     ]
   }
 }
