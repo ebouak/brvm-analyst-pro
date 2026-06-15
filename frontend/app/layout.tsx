@@ -5,6 +5,8 @@ import CommandPaletteProvider from '@/components/CommandPaletteProvider';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import OnboardingModal from '@/components/OnboardingModal';
 import { BeginnerModeProvider } from '@/lib/beginner-mode';
+import { ConsentProvider } from '@/components/consent/ConsentProvider';
+import { CookieBanner } from '@/components/consent/CookieBanner';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
@@ -53,12 +55,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="fr" className="dark">
       <body className="text-white antialiased font-sans">
-        <BeginnerModeProvider initial={initialBeginner}>
-          <ConditionalShell isPremium={isPremium} isAdmin={isAdmin}>{children}</ConditionalShell>
-          <CommandPaletteProvider />
-          <ServiceWorkerRegister />
-          {user && !onboardingDone && <OnboardingModal />}
-        </BeginnerModeProvider>
+        <ConsentProvider>
+          <BeginnerModeProvider initial={initialBeginner}>
+            <ConditionalShell isPremium={isPremium} isAdmin={isAdmin}>{children}</ConditionalShell>
+            <CommandPaletteProvider />
+            <ServiceWorkerRegister />
+            {user && !onboardingDone && <OnboardingModal />}
+            <CookieBanner />
+          </BeginnerModeProvider>
+        </ConsentProvider>
       </body>
     </html>
   );
