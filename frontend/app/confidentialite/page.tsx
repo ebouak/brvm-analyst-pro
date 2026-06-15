@@ -1,98 +1,82 @@
-import Link from 'next/link';
-import { SectionHeader } from '@/components/ui/premium';
+import type { Metadata } from 'next';
+import { LegalPage } from '@/components/legal/LegalPage';
+import { Placeholder } from '@/components/legal/Placeholder';
+import { CONSENT_CATEGORIES } from '@/lib/consent/registry';
 
-export const metadata = { title: 'Politique de confidentialité' };
-
-function GoldRule() {
-  return <hr className="gold-rule" />;
-}
-
-function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-3">
-      <h2 className="font-display text-base font-semibold text-ivory">{title}</h2>
-      <div className="text-sm leading-relaxed text-muted">{children}</div>
-    </section>
-  );
-}
+export const metadata: Metadata = { title: 'Politique de confidentialité' };
 
 export default function ConfidentialitePage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+    <LegalPage title="Politique de confidentialité" updatedAt="2026-06-15">
+      <section>
+        <h2>Responsable de traitement</h2>
+        <p>
+          Le responsable du traitement des données est <Placeholder>raison sociale</Placeholder>,
+          joignable à l&apos;adresse <Placeholder>email de contact</Placeholder>.
+        </p>
+      </section>
 
-      <SectionHeader
-        kicker="Protection des données"
-        title="Politique de confidentialité"
-        subtitle="BRVM Analyst Pro respecte les principes de la réglementation UEMOA sur la protection des données personnelles et les bonnes pratiques RGPD."
-      />
+      <section>
+        <h2>Données collectées</h2>
+        <ul>
+          <li><strong>Compte</strong> : adresse e-mail, identifiant de session.</li>
+          <li><strong>Usage</strong> : watchlist, portefeuille, simulations de paper-trading, préférences.</li>
+          <li><strong>Newsletter</strong> : adresse e-mail, si vous y consentez.</li>
+        </ul>
+      </section>
 
-      <GoldRule />
+      <section>
+        <h2>Finalités et base légale</h2>
+        <ul>
+          <li>Fourniture du service et gestion du compte — exécution du contrat.</li>
+          <li>Envoi de la newsletter — consentement.</li>
+          <li>Sécurité et prévention de la fraude — intérêt légitime.</li>
+        </ul>
+      </section>
 
-      <LegalSection title="Données collectées">
-        <ul className="space-y-1.5 pl-4 list-none">
-          {[
-            'Adresse e-mail (création de compte)',
-            'Watchlists et positions de portefeuille (saisies par vous)',
-            'Alertes configurées et journal des notifications envoyées',
-            'Identifiants techniques (id utilisateur Supabase, horodatages)',
-          ].map((item) => (
-            <li key={item} className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-gold/50 text-xs">◆</span>
-              <span>{item}</span>
+      <section>
+        <h2>Durées de conservation</h2>
+        <p>
+          Les données de compte sont conservées tant que le compte est actif, puis supprimées
+          ou anonymisées dans un délai raisonnable après sa fermeture. Les données de
+          newsletter sont conservées jusqu&apos;au désabonnement.
+        </p>
+      </section>
+
+      <section>
+        <h2>Destinataires et sous-traitants</h2>
+        <ul>
+          <li><strong>Supabase</strong> — hébergement base de données et authentification.</li>
+          <li><strong>Vercel</strong> — hébergement de l&apos;application.</li>
+          <li><strong>Resend</strong> — envoi des e-mails transactionnels et newsletter.</li>
+        </ul>
+        <p>Certains prestataires peuvent traiter des données hors UEMOA, avec les garanties appropriées.</p>
+      </section>
+
+      <section>
+        <h2>Vos droits</h2>
+        <p>
+          Conformément à la réglementation applicable, vous disposez d&apos;un droit d&apos;accès, de
+          rectification, d&apos;effacement, d&apos;opposition, de limitation et de portabilité. Pour les
+          exercer, écrivez à <Placeholder>email de contact</Placeholder>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Cookies</h2>
+        <p>Le site utilise les catégories de cookies suivantes :</p>
+        <ul>
+          {CONSENT_CATEGORIES.map((cat) => (
+            <li key={cat.id}>
+              <strong>{cat.label}</strong> — {cat.description}
+              {cat.cookies.length > 0 && (
+                <> {' '}({cat.cookies.map((c) => c.name).join(', ')})</>
+              )}
             </li>
           ))}
         </ul>
-      </LegalSection>
-
-      <GoldRule />
-
-      <LegalSection title="Finalités">
-        <p>
-          Vos données servent exclusivement à fournir le service : gestion de
-          votre compte, suivi de vos positions, notifications d'alertes,
-          journalisation pour audit.
-        </p>
-        <p className="mt-2 font-medium text-ivory/80">
-          Aucune revente. Aucun marketing tiers.
-        </p>
-      </LegalSection>
-
-      <GoldRule />
-
-      <LegalSection title="Conservation">
-        <p>
-          Données de compte conservées tant que votre compte est actif. Données
-          transactionnelles simulées : 5 ans maximum. Journal des notifications :
-          12 mois glissants.
-        </p>
-      </LegalSection>
-
-      <GoldRule />
-
-      <LegalSection title="Vos droits">
-        <p>
-          Vous disposez d'un droit d'accès, de rectification et de suppression.
-          Vous pouvez exercer ces droits depuis la page{' '}
-          <Link
-            href="/parametres/compte"
-            className="text-gold/80 underline underline-offset-2 hover:text-gold transition-colors"
-          >
-            Paramètres / Compte
-          </Link>{' '}
-          : export JSON de toutes vos données, ou suppression définitive (cascade RLS).
-        </p>
-      </LegalSection>
-
-      <GoldRule />
-
-      <LegalSection title="Sécurité">
-        <p>
-          L'isolation des données entre utilisateurs est garantie par Row Level
-          Security (RLS) PostgreSQL. Les secrets serveur ne sont jamais exposés
-          au navigateur.
-        </p>
-      </LegalSection>
-
-    </div>
+        <p>Vous pouvez modifier vos choix à tout moment via le lien « Gérer mes cookies » en pied de page.</p>
+      </section>
+    </LegalPage>
   );
 }
