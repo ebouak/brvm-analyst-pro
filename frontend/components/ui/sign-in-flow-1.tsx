@@ -28,6 +28,24 @@ interface ShaderProps {
 
 interface SignInPageProps {
   className?: string;
+  /** Titre principal de l'écran e-mail. */
+  title?: React.ReactNode;
+  /** Sous-titre de l'écran e-mail. */
+  subtitle?: React.ReactNode;
+  /** Masque la mini-navbar de démo (par défaut affichée). */
+  showNavbar?: boolean;
+  /** Couleur cyan des points (RGB). Par défaut blanc. */
+  dotColors?: number[][];
+  /** Envoie le code à l'adresse. Retourne `{ error }` pour bloquer le passage à l'étape code. */
+  onRequestCode?: (email: string) => Promise<{ error?: string } | void>;
+  /** Vérifie le code saisi. Retourne `{ error }` pour rejeter (et vider le champ). */
+  onVerifyCode?: (code: string, email: string) => Promise<{ error?: string } | void>;
+  /** Connexion via Google (OAuth). */
+  onGoogle?: () => void | Promise<void>;
+  /** Action du bouton final « Continuer ». */
+  onSuccess?: () => void;
+  /** Renvoi du code. */
+  onResend?: (email: string) => void | Promise<void>;
 }
       
 export const CanvasRevealEffect = ({
@@ -490,7 +508,18 @@ function MiniNavbar() {
   );
 }
 
-export const SignInPage = ({ className }: SignInPageProps) => {
+export const SignInPage = ({
+  className,
+  title = "Welcome Developer",
+  subtitle = "Your sign in component",
+  showNavbar = true,
+  dotColors,
+  onRequestCode,
+  onVerifyCode,
+  onGoogle,
+  onSuccess,
+  onResend,
+}: SignInPageProps) => {
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"email" | "code" | "success">("email");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -498,12 +527,47 @@ export const SignInPage = ({ className }: SignInPageProps) => {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [initialCanvasVisible, setInitialCanvasVisible] = useState(true);
   const [reverseCanvasVisible, setReverseCanvasVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const canvasColors = dotColors ?? [
+    [255, 255, 255],
+    [255, 255, 255],
+  ];
+
+  const runSuccessAnimation = () => {
+    // First show the new reverse canvas
+    setReverseCanvasVisible(true);
+    // Then hide the original canvas after a small delay
+    setTimeout(() => {
+      setInitialCanvasVisible(false);
+    }, 50);
+    // Transition to success screen after animation
+    setTimeout(() => {
+      setStep("success");
+    }, 2000);
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setStep("code");
+    if (!email || submitting) return;
+    setError(null);
+    if (onRequestCode) {
+      setSubmitting(true);
+      try {
+        const res = await onRequestCode(email);
+        if (res && res.error) {
+          setError(res.error);
+          return;
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Une erreur est survenue.");
+        return;
+      } finally {
+        setSubmitting(false);
+      }
     }
+    setStep("code");
   };
 
   // Focus first input when code screen appears
@@ -515,33 +579,46 @@ export const SignInPage = ({ className }: SignInPageProps) => {
     }
   }, [step]);
 
+  const verifyComplete = async (fullCode: string) => {
+    setError(null);
+    if (onVerifyCode) {
+      setSubmitting(true);
+      try {
+        const res = await onVerifyCode(fullCode, email);
+        if (res && res.error) {
+          setError(res.error);
+          setCode(["", "", "", "", "", ""]);
+          codeInputRefs.current[0]?.focus();
+          return;
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Code invalide.");
+        setCode(["", "", "", "", "", ""]);
+        codeInputRefs.current[0]?.focus();
+        return;
+      } finally {
+        setSubmitting(false);
+      }
+    }
+    runSuccessAnimation();
+  };
+
   const handleCodeChange = (index: number, value: string) => {
     if (value.length <= 1) {
       const newCode = [...code];
       newCode[index] = value;
       setCode(newCode);
-      
+
       // Focus next input if value is entered
       if (value && index < 5) {
         codeInputRefs.current[index + 1]?.focus();
       }
-      
+
       // Check if code is complete
       if (index === 5 && value) {
         const isComplete = newCode.every(digit => digit.length === 1);
         if (isComplete) {
-          // First show the new reverse canvas
-          setReverseCanvasVisible(true);
-          
-          // Then hide the original canvas after a small delay
-          setTimeout(() => {
-            setInitialCanvasVisible(false);
-          }, 50);
-          
-          // Transition to success screen after animation
-          setTimeout(() => {
-            setStep("success");
-          }, 2000);
+          void verifyComplete(newCode.join(""));
         }
       }
     }
@@ -570,10 +647,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
             <CanvasRevealEffect
               animationSpeed={3}
               containerClassName="bg-black"
-              colors={[
-                [255, 255, 255],
-                [255, 255, 255],
-              ]}
+              colors={canvasColors}
               dotSize={6}
               reverse={false}
             />
@@ -586,10 +660,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
             <CanvasRevealEffect
               animationSpeed={4}
               containerClassName="bg-black"
-              colors={[
-                [255, 255, 255],
-                [255, 255, 255],
-              ]}
+              colors={canvasColors}
               dotSize={6}
               reverse={true}
             />
@@ -603,7 +674,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
       {/* Content Layer */}
       <div className="relative z-10 flex flex-col flex-1">
         {/* Top navigation */}
-        <MiniNavbar />
+        {showNavbar && <MiniNavbar />}
 
         {/* Main content container */}
         <div className="flex flex-1 flex-col lg:flex-row ">
@@ -621,15 +692,19 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
-                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">Welcome Developer</h1>
-                      <p className="text-[1.8rem] text-white/70 font-light">Your sign in component</p>
+                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">{title}</h1>
+                      <p className="text-[1.8rem] text-white/70 font-light">{subtitle}</p>
                     </div>
-                    
-                    
+
+
                     <div className="space-y-4">
-                      <button className="backdrop-blur-[2px] w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full py-3 px-4 transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => onGoogle?.()}
+                        className="backdrop-blur-[2px] w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full py-3 px-4 transition-colors"
+                      >
                         <span className="text-lg">G</span>
-                        <span>Sign in with Google</span>
+                        <span>Continuer avec Google</span>
                       </button>
                       
                       <div className="flex items-center gap-4">
@@ -664,9 +739,13 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                         </div>
                       </form>
                     </div>
-                    
+
+                    {error && (
+                      <p className="text-sm text-red-400" role="alert">{error}</p>
+                    )}
+
                     <p className="text-xs text-white/40 pt-10">
-                      By signing up, you agree to the <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">MSA</Link>, <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Product Terms</Link>, <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Policies</Link>, <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Privacy Notice</Link>, and <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Cookie Notice</Link>.
+                      En continuant, vous acceptez nos <Link href="/cgu" className="underline text-white/40 hover:text-white/60 transition-colors">Conditions</Link> et notre <Link href="/confidentialite" className="underline text-white/40 hover:text-white/60 transition-colors">Politique de confidentialité</Link>.
                     </p>
                   </motion.div>
                 ) : step === "code" ? (
@@ -679,8 +758,8 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
-                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">We sent you a code</h1>
-                      <p className="text-[1.25rem] text-white/50 font-light">Please enter it</p>
+                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">Code envoyé</h1>
+                      <p className="text-[1.25rem] text-white/50 font-light">Saisissez le code reçu par e-mail</p>
                     </div>
                     
                     <div className="w-full">
@@ -716,41 +795,47 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                       </div>
                     </div>
                     
+                    {error && (
+                      <p className="text-sm text-red-400" role="alert">{error}</p>
+                    )}
+
                     <div>
-                      <motion.p 
+                      <motion.p
+                        onClick={() => onResend?.(email)}
                         className="text-white/50 hover:text-white/70 transition-colors cursor-pointer text-sm"
                         whileHover={{ scale: 1.02 }}
                         transition={{ duration: 0.2 }}
                       >
-                        Resend code
+                        Renvoyer le code
                       </motion.p>
                     </div>
-                    
+
                     <div className="flex w-full gap-3">
-                      <motion.button 
+                      <motion.button
                         onClick={handleBackClick}
                         className="rounded-full bg-white text-black font-medium px-8 py-3 hover:bg-white/90 transition-colors w-[30%]"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         transition={{ duration: 0.2 }}
                       >
-                        Back
+                        Retour
                       </motion.button>
-                      <motion.button 
+                      <motion.button
+                        onClick={() => { if (code.every(d => d !== "") && !submitting) void verifyComplete(code.join("")); }}
                         className={`flex-1 rounded-full font-medium py-3 border transition-all duration-300 ${
-                          code.every(d => d !== "") 
-                          ? "bg-white text-black border-transparent hover:bg-white/90 cursor-pointer" 
+                          code.every(d => d !== "") && !submitting
+                          ? "bg-white text-black border-transparent hover:bg-white/90 cursor-pointer"
                           : "bg-[#111] text-white/50 border-white/10 cursor-not-allowed"
                         }`}
-                        disabled={!code.every(d => d !== "")}
+                        disabled={!code.every(d => d !== "") || submitting}
                       >
-                        Continue
+                        {submitting ? "Vérification…" : "Valider"}
                       </motion.button>
                     </div>
-                    
+
                     <div className="pt-16">
                       <p className="text-xs text-white/40">
-                        By signing up, you agree to the <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">MSA</Link>, <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Product Terms</Link>, <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Policies</Link>, <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Privacy Notice</Link>, and <Link href="#" className="underline text-white/40 hover:text-white/60 transition-colors">Cookie Notice</Link>.
+                        En continuant, vous acceptez nos <Link href="/cgu" className="underline text-white/40 hover:text-white/60 transition-colors">Conditions</Link> et notre <Link href="/confidentialite" className="underline text-white/40 hover:text-white/60 transition-colors">Politique de confidentialité</Link>.
                       </p>
                     </div>
                   </motion.div>
@@ -763,8 +848,8 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
-                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">You're in!</h1>
-                      <p className="text-[1.25rem] text-white/50 font-light">Welcome</p>
+                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">Vous êtes connecté !</h1>
+                      <p className="text-[1.25rem] text-white/50 font-light">Bienvenue</p>
                     </div>
                     
                     <motion.div 
@@ -780,13 +865,14 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                       </div>
                     </motion.div>
                     
-                    <motion.button 
+                    <motion.button
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 1 }}
+                      onClick={() => onSuccess?.()}
                       className="w-full rounded-full bg-white text-black font-medium py-3 hover:bg-white/90 transition-colors"
                     >
-                      Continue to Dashboard
+                      Accéder au tableau de bord
                     </motion.button>
                   </motion.div>
                 )}
