@@ -33,8 +33,13 @@ export function serialize(choice: ConsentChoice): string {
 export function parse(raw: string | null): ConsentChoice | null {
   if (!raw) return null;
   try {
-    const obj = JSON.parse(raw) as Partial<ConsentChoice>;
-    if (obj.version !== CONSENT_VERSION || typeof obj.granted !== 'object' || !obj.granted) {
+    const obj = JSON.parse(raw) as unknown as Partial<ConsentChoice>;
+    if (
+      obj.version !== CONSENT_VERSION ||
+      typeof obj.timestamp !== 'string' ||
+      typeof obj.granted !== 'object' ||
+      !obj.granted
+    ) {
       return null;
     }
     return obj as ConsentChoice;

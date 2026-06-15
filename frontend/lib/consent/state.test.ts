@@ -29,7 +29,7 @@ describe('consent state', () => {
   });
 
   it('parse renvoie null si version périmée', () => {
-    const stale = JSON.stringify({ version: 0, timestamp: 'x', granted: {} });
+    const stale = JSON.stringify({ version: CONSENT_VERSION - 1, timestamp: 'x', granted: {} });
     expect(parse(stale)).toBeNull();
   });
 

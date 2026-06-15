@@ -22,7 +22,7 @@ export interface ConsentCategory {
 
 /** Incrémenter pour forcer un re-consentement (changement de finalités). */
 export const CONSENT_VERSION = 1;
-export const CONSENT_STORAGE_KEY = 'brvm-consent-v1';
+export const CONSENT_STORAGE_KEY = `brvm-consent-v${CONSENT_VERSION}`;
 
 export const CONSENT_CATEGORIES: ConsentCategory[] = [
   {
