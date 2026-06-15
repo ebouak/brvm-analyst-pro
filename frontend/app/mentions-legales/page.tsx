@@ -44,7 +44,7 @@ export default function MentionsLegalesPage() {
       <section>
         <h2>Propriété intellectuelle</h2>
         <p>
-          L'ensemble des éléments du site (textes, analyses, interface, logos, code) est
+          L&apos;ensemble des éléments du site (textes, analyses, interface, logos, code) est
           protégé par le droit de la propriété intellectuelle. Toute reproduction ou
           réutilisation non autorisée est interdite.
         </p>
@@ -54,8 +54,8 @@ export default function MentionsLegalesPage() {
         <h2>Sources de données</h2>
         <p>
           Les données de marché proviennent de la BRVM et du portail BDFIN. BRVM Analyst Pro
-          n'est ni affilié ni endossé par la BRVM. Les données sont fournies sans garantie
-          d'exhaustivité ni d'exactitude.
+          n&apos;est ni affilié ni endossé par la BRVM. Les données sont fournies sans garantie
+          d&apos;exhaustivité ni d&apos;exactitude.
         </p>
       </section>
     </LegalPage>
