@@ -8,7 +8,14 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { SignInPage } from '@/components/ui/sign-in-flow-1';
 
-export default function SignInClient() {
+export default function SignInClient({
+  subscribeNewsletter = false,
+  subtitle = 'Connexion ou inscription',
+}: {
+  /** Abonne l'e-mail à la newsletter après une première vérification réussie (flux signup). */
+  subscribeNewsletter?: boolean;
+  subtitle?: string;
+}) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -21,7 +28,7 @@ export default function SignInClient() {
         [86, 215, 253],
       ]}
       title="BRVM Analyst Pro"
-      subtitle="Connexion ou inscription"
+      subtitle={subtitle}
       onGoogle={async () => {
         await supabase.auth.signInWithOAuth({
           provider: 'google',
@@ -44,12 +51,21 @@ export default function SignInClient() {
         });
       }}
       onVerifyCode={async (token, email) => {
+        const normalized = email.toLowerCase().trim();
         const { error } = await supabase.auth.verifyOtp({
-          email: email.toLowerCase().trim(),
+          email: normalized,
           token,
           type: 'email',
         });
         if (error) return { error: error.message };
+        // Flux signup : auto-abonnement newsletter (best-effort, ne bloque pas).
+        if (subscribeNewsletter) {
+          void fetch('/api/newsletter/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: normalized, source: 'signup' }),
+          }).catch(() => null);
+        }
       }}
       onSuccess={() => {
         router.push('/dashboard');
