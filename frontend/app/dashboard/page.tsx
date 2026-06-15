@@ -10,7 +10,7 @@ import KeyMetrics from '@/components/dashboard/KeyMetrics';
 import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
 import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
 import NewsFeed from '@/components/dashboard/NewsFeed';
-import IndexStrip from '@/components/dashboard/IndexStrip';
+import MarketIndices from '@/components/dashboard/MarketIndices';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
@@ -312,9 +312,9 @@ export default async function Dashboard() {
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
         <DashboardTicker items={ticker} />
 
-        {/* ── Indices BRVM (réels) ────────────────────────────────────────── */}
+        {/* ── Indices BRVM (réels — 4 principaux + 7 sectoriels) ──────────── */}
         <section aria-label="Indices BRVM">
-          <IndexStrip indices={indices} />
+          <MarketIndices indices={indices} />
         </section>
 
         {/* ── État du marché (sous le titre) ──────────────────────────────── */}
