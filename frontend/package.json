@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.4",
+    "@react-three/fiber": "^8.18.0",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
     "@types/web-push": "^3.6.4",
@@ -31,6 +32,7 @@
     "react-dropzone": "^14.2.3",
     "recharts": "^2.10.3",
     "tailwind-merge": "^3.6.0",
+    "three": "^0.160.1",
     "web-push": "^3.6.7",
     "zod": "^3.22.4"
   },
@@ -39,6 +41,7 @@
     "@types/node": "^22.7.4",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.184.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
