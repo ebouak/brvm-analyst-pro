@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CONSENT_CATEGORIES, CONSENT_VERSION, type ConsentCategoryId } from '@/lib/consent/registry';
 import { useConsent } from './ConsentProvider';
 
@@ -12,12 +12,20 @@ export function CookiePreferences() {
     return base;
   });
 
+  useEffect(() => {
+    if (!isPrefsOpen) return;
+    const base = {} as Record<ConsentCategoryId, boolean>;
+    for (const c of CONSENT_CATEGORIES) base[c.id] = c.required ? true : choice?.granted[c.id] ?? false;
+    setGranted(base);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPrefsOpen]);
+
   if (!isPrefsOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="Préférences cookies">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="cookie-prefs-title">
       <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0a1417] p-6 shadow-2xl">
-        <h2 className="font-display text-xl font-semibold text-white">Préférences cookies</h2>
+        <h2 id="cookie-prefs-title" className="font-display text-xl font-semibold text-white">Préférences cookies</h2>
         <p className="mt-1 text-sm text-white/60">Choisissez les catégories que vous autorisez. Les cookies strictement nécessaires restent toujours actifs.</p>
 
         <div className="mt-5 space-y-3">
@@ -34,6 +42,7 @@ export function CookiePreferences() {
                     className="peer sr-only"
                     checked={granted[cat.id]}
                     disabled={cat.required}
+                    aria-label={cat.label}
                     onChange={(e) => setGranted((g) => ({ ...g, [cat.id]: e.target.checked }))}
                   />
                   <span className="h-5 w-9 rounded-full bg-white/15 transition-colors peer-checked:bg-[#56d7fd] peer-disabled:opacity-50 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4" />

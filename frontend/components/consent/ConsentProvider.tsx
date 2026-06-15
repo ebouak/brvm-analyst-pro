@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { CONSENT_STORAGE_KEY, type ConsentCategoryId } from '@/lib/consent/registry';
 import {
   type ConsentChoice,
@@ -45,15 +45,21 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const value: ConsentContextValue = {
-    choice,
-    needsChoice: hydrated && choice === null,
-    open: () => setPrefsOpen(true),
-    close: () => setPrefsOpen(false),
-    isPrefsOpen,
-    save,
-    has: (id) => hasCategory(choice, id),
-  };
+  const open = useCallback(() => setPrefsOpen(true), []);
+  const close = useCallback(() => setPrefsOpen(false), []);
+
+  const value = useMemo<ConsentContextValue>(
+    () => ({
+      choice,
+      needsChoice: hydrated && choice === null,
+      open,
+      close,
+      isPrefsOpen,
+      save,
+      has: (id) => hasCategory(choice, id),
+    }),
+    [choice, hydrated, isPrefsOpen, save, open, close],
+  );
 
   return <ConsentContext.Provider value={value}>{children}</ConsentContext.Provider>;
 }
