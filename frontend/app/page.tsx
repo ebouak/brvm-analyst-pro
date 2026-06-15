@@ -369,16 +369,6 @@ export default async function Landing() {
         </Link>
       </section>
 
-      <footer className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.06] pb-8 pt-6 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-faint">
-        <span>© {new Date().getFullYear()} BRVM Analyst Pro · UEMOA · {nbActions || 48} valeurs</span>
-        <span className="flex gap-4">
-          <Link href="/societes" className="transition-colors hover:text-ivory">Sociétés</Link>
-          <Link href="/simulateur" className="transition-colors hover:text-ivory">Simulateur</Link>
-          <Link href="/brief" className="transition-colors hover:text-ivory">Brief</Link>
-          <Link href="/methodologie" className="transition-colors hover:text-ivory">Méthodologie</Link>
-          <Link href="/mentions-legales" className="transition-colors hover:text-ivory">Mentions légales</Link>
-        </span>
-      </footer>
     </div>
   );
 }

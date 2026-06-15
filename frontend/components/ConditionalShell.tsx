@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
+import Footer from '@/components/Footer';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -10,10 +11,21 @@ const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
 /** Sections publiques SEO : plein écran avec leur propre header (PublicShell). */
 const BARE_PREFIXES = ['/societes', '/simulateur', '/brief'];
 
+/** Pages légales : publiques, plein écran, AVEC footer. */
+const LEGAL_PREFIXES = ['/mentions-legales', '/cgu', '/confidentialite'];
+
+/** Routes publiques qui doivent afficher le footer global. */
+function showsFooter(pathname: string): boolean {
+  if (pathname === '/login' || pathname === '/signup') return false;
+  if (pathname === '/') return true;
+  return [...BARE_PREFIXES, ...LEGAL_PREFIXES].some((p) => pathname.startsWith(p));
+}
+
 /**
  * Décide d'envelopper ou non les pages dans le shell applicatif (sidebar + main).
- * La landing (`/`) et les pages publiques sont rendues plein écran ;
- * toutes les autres pages gardent le shell.
+ * La landing (`/`), les pages publiques et les pages légales sont rendues plein
+ * écran ; toutes les autres pages gardent le shell. Le footer global s'affiche
+ * sur les routes publiques (jamais dans l'app authentifiée, ni sur /login·/signup).
  */
 export default function ConditionalShell({
   isPremium,
@@ -25,8 +37,19 @@ export default function ConditionalShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  if (BARE_ROUTES.has(pathname) || BARE_PREFIXES.some((p) => pathname.startsWith(p)))
-    return <>{children}</>;
+  const bare =
+    BARE_ROUTES.has(pathname) ||
+    BARE_PREFIXES.some((p) => pathname.startsWith(p)) ||
+    LEGAL_PREFIXES.some((p) => pathname.startsWith(p));
+
+  if (bare) {
+    return (
+      <>
+        {children}
+        {showsFooter(pathname) && <Footer />}
+      </>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">
