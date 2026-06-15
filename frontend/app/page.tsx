@@ -6,9 +6,11 @@ import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import NewsletterForm from '@/components/NewsletterForm';
+import { LandingIndices } from '@/components/landing/LandingIndices';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
+import type { IndiceDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -44,6 +46,23 @@ async function getData() {
   let flatTop: MoverRow[] = [];
   let nbActions = 0;
   let volumeTotal = 0;
+
+  // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
+  let indices: IndiceDaily[] = [];
+  const { data: lastIdx } = await supabase
+    .from('brvm_indices_daily')
+    .select('date_marche')
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
+  if (idxDate) {
+    const { data: idxRows } = await supabase
+      .from('brvm_indices_daily')
+      .select('*')
+      .eq('date_marche', idxDate);
+    indices = (idxRows ?? []) as IndiceDaily[];
+  }
 
   if (asOf) {
     const [{ data: rows }, { data: sigs }] = await Promise.all([
@@ -122,7 +141,7 @@ async function getData() {
     /* pas de simulation si données indisponibles */
   }
 
-  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation };
+  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices };
 }
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
@@ -173,7 +192,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation } = await getData();
+  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices } = await getData();
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
@@ -269,6 +288,9 @@ export default async function Landing() {
           </p>
         </aside>
       </section>
+
+      {/* ── INDICES BRVM (11, groupés principaux + sectoriels) ────────── */}
+      <LandingIndices indices={indices} />
 
       {/* ── ÉCRANS RÉELS DE LA PLATEFORME ─────────────────────────────── */}
       <ScreensShowcase />
