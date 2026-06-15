@@ -630,6 +630,19 @@ export const SignInPage = ({
     }
   };
 
+  // Coller le code complet (depuis l'e-mail) remplit toutes les cases d'un coup.
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+    e.preventDefault();
+    const newCode = ["", "", "", "", "", ""];
+    for (let i = 0; i < pasted.length; i++) newCode[i] = pasted[i];
+    setCode(newCode);
+    const lastIdx = Math.min(pasted.length, 6) - 1;
+    codeInputRefs.current[lastIdx]?.focus();
+    if (pasted.length === 6) void verifyComplete(newCode.join(""));
+  };
+
   const handleBackClick = () => {
     setStep("email");
     setCode(["", "", "", "", "", ""]);
@@ -779,6 +792,7 @@ export const SignInPage = ({
                                   value={digit}
                                   onChange={e => handleCodeChange(i, e.target.value)}
                                   onKeyDown={e => handleKeyDown(i, e)}
+                                  onPaste={handlePaste}
                                   className="w-8 text-center text-xl bg-transparent text-white border-none focus:outline-none focus:ring-0 appearance-none"
                                   style={{ caretColor: 'transparent' }}
                                 />
