@@ -7,6 +7,7 @@ const PRODUIT = [
   { href: '/simulateur', label: 'Simulateur' },
   { href: '/brief', label: 'Brief du jour' },
   { href: '/methodologie', label: 'Méthodologie' },
+  { href: '/pricing', label: 'Tarifs' },
 ];
 
 const LEGAL = [
