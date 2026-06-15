@@ -37,8 +37,10 @@ export default function ConditionalShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  // /admin a sa propre console (layout dédié) → pas de shell applicatif ni footer.
   const bare =
     BARE_ROUTES.has(pathname) ||
+    pathname.startsWith('/admin') ||
     BARE_PREFIXES.some((p) => pathname.startsWith(p)) ||
     LEGAL_PREFIXES.some((p) => pathname.startsWith(p));
 
