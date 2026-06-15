@@ -5,13 +5,13 @@
 -- Principe : pg_cron (dans Supabase, très fiable) appelle l'API GitHub
 -- workflow_dispatch toutes les 15 min en séance, ce qui lance le workflow
 -- `intraday.yml`. Le PAT GitHub n'apparaît JAMAIS en clair : il est lu depuis
--- Supabase Vault (secret « github_actions_pat »).
+-- Supabase Vault (secret « github_pat_brvm »).
 --
 -- PRÉREQUIS (à faire UNE FOIS, voir aussi les instructions hors-SQL) :
 --   1. Créer un PAT GitHub *fine-grained* limité au repo ebouak/brvm-analyst-pro
 --      avec la permission « Actions : Read and write ».
 --   2. L'enregistrer dans Vault :
---        select vault.create_secret('<COLLER_LE_PAT_ICI>', 'github_actions_pat');
+--        select vault.create_secret('<COLLER_LE_PAT_ICI>', 'github_pat_brvm');
 --   3. Appliquer cette migration.
 -- ============================================================================
 
@@ -30,11 +30,11 @@ declare
 begin
   select decrypted_secret into v_pat
   from vault.decrypted_secrets
-  where name = 'github_actions_pat'
+  where name = 'github_pat_brvm'
   limit 1;
 
   if v_pat is null then
-    raise warning 'trigger_intraday_workflow: secret Vault « github_actions_pat » introuvable — rien envoyé';
+    raise warning 'trigger_intraday_workflow: secret Vault « github_pat_brvm » introuvable — rien envoyé';
     return;
   end if;
 
