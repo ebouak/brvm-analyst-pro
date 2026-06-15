@@ -41,7 +41,9 @@ interface SignInPageProps {
   /** Envoie le code à l'adresse. Retourne `{ error }` pour bloquer le passage à l'étape code. */
   onRequestCode?: (email: string) => Promise<{ error?: string } | void>;
   /** Vérifie le code saisi. Retourne `{ error }` pour rejeter (et vider le champ). */
-  onVerifyCode?: (code: string, email: string) => Promise<{ error?: string } | void>;
+  onVerifyCode?: (code: string, email: string, opts?: { newsletter: boolean }) => Promise<{ error?: string } | void>;
+  /** Affiche la case « inscription newsletter » (cochée par défaut) sous l'e-mail. */
+  showNewsletterOptIn?: boolean;
   /** Connexion via Google (OAuth). */
   onGoogle?: () => void | Promise<void>;
   /** Action du bouton final « Continuer ». */
@@ -522,6 +524,7 @@ export const SignInPage = ({
   onGoogle,
   onSuccess,
   onResend,
+  showNewsletterOptIn = false,
 }: SignInPageProps) => {
   const emptyCode = useMemo(
     () => Array.from({ length: codeLength }, () => ""),
@@ -536,6 +539,7 @@ export const SignInPage = ({
   const [reverseCanvasVisible, setReverseCanvasVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
 
   const canvasColors = dotColors ?? [
     [255, 255, 255],
@@ -591,7 +595,7 @@ export const SignInPage = ({
     if (onVerifyCode) {
       setSubmitting(true);
       try {
-        const res = await onVerifyCode(fullCode, email);
+        const res = await onVerifyCode(fullCode, email, { newsletter });
         if (res && res.error) {
           setError(res.error);
           setCode(emptyCode);
@@ -759,6 +763,18 @@ export const SignInPage = ({
                         </div>
                       </form>
                     </div>
+
+                    {showNewsletterOptIn && (
+                      <label className="flex cursor-pointer items-center justify-center gap-2.5 text-sm text-white/70">
+                        <input
+                          type="checkbox"
+                          checked={newsletter}
+                          onChange={(e) => setNewsletter(e.target.checked)}
+                          className="h-4 w-4 cursor-pointer rounded border-white/20 bg-white/5 accent-[#56d7fd]"
+                        />
+                        <span>Recevoir la newsletter hebdomadaire BRVM</span>
+                      </label>
+                    )}
 
                     {error && (
                       <p className="text-sm text-red-400" role="alert">{error}</p>

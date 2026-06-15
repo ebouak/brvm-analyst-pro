@@ -31,6 +31,7 @@ export default function SignInClient({
       ]}
       title="BRVM Analyst Pro"
       subtitle={subtitle}
+      showNewsletterOptIn={subscribeNewsletter}
       onGoogle={async () => {
         await supabase.auth.signInWithOAuth({
           provider: 'google',
@@ -52,7 +53,7 @@ export default function SignInClient({
           options: { shouldCreateUser: true },
         });
       }}
-      onVerifyCode={async (token, email) => {
+      onVerifyCode={async (token, email, opts) => {
         const normalized = email.toLowerCase().trim();
         const { error } = await supabase.auth.verifyOtp({
           email: normalized,
@@ -60,8 +61,8 @@ export default function SignInClient({
           type: 'email',
         });
         if (error) return { error: error.message };
-        // Flux signup : auto-abonnement newsletter (best-effort, ne bloque pas).
-        if (subscribeNewsletter) {
+        // Flux signup : abonnement newsletter si la case est cochée (best-effort).
+        if (subscribeNewsletter && opts?.newsletter) {
           void fetch('/api/newsletter/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
