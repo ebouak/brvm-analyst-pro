@@ -80,6 +80,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Admin',
     adminOnly: true,
     items: [
+      { href: '/admin', label: "Vue d'ensemble" },
       { href: '/admin/import-fondamentaux', label: 'Import IA' },
       { href: '/admin/cles-api', label: 'Clés API' },
     ],
@@ -88,5 +89,8 @@ export const NAV_GROUPS: NavGroup[] = [
 
 /** Détection d'item actif cohérente sidebar/mobile. */
 export function isNavItemActive(href: string, pathname: string): boolean {
-  return href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
+  // Routes à correspondance exacte (sinon « /admin » resterait actif sur ses
+  // sous-pages /admin/cles-api, etc., et « /dashboard » sur /dashboard/*).
+  if (href === '/dashboard' || href === '/admin') return pathname === href;
+  return pathname.startsWith(href);
 }
