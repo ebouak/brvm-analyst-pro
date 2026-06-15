@@ -1,83 +1,63 @@
-import { SectionHeader } from '@/components/ui/premium';
+import type { Metadata } from 'next';
+import { LegalPage } from '@/components/legal/LegalPage';
+import { Placeholder } from '@/components/legal/Placeholder';
 
-export const metadata = { title: 'Mentions légales' };
-
-function GoldRule() {
-  return <hr className="gold-rule" />;
-}
-
-function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-3">
-      <h2 className="font-display text-base font-semibold text-ivory">{title}</h2>
-      <div className="text-sm leading-relaxed text-muted">{children}</div>
-    </section>
-  );
-}
+export const metadata: Metadata = { title: 'Mentions légales' };
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
-
-      <SectionHeader
-        kicker="Informations légales"
-        title="Mentions légales"
-        subtitle="Document régissant les conditions d'édition et d'utilisation de la plateforme BRVM Analyst Pro."
-      />
-
-      <GoldRule />
-
-      <LegalSection title="Éditeur">
+    <LegalPage title="Mentions légales" updatedAt="2026-06-15">
+      <section>
+        <h2>Éditeur du service</h2>
         <p>
-          BRVM Analyst Pro — Plateforme d'analyse financière BRVM/UEMOA.
-          Service édité par Jean-Yves EBOUA.
+          Le service <strong>BRVM Analyst Pro</strong> est édité par{' '}
+          <Placeholder>raison sociale</Placeholder>, société{' '}
+          <Placeholder>forme juridique (SARL, SAS…)</Placeholder> au capital de{' '}
+          <Placeholder>montant du capital</Placeholder>, immatriculée au RCCM sous le numéro{' '}
+          <Placeholder>numéro RCCM</Placeholder>, dont le siège social est situé{' '}
+          <Placeholder>adresse du siège</Placeholder>.
         </p>
-        <p className="mt-2">
-          Contact :{' '}
-          <a
-            href="mailto:contact@brvm-analyst.pro"
-            className="text-gold/80 underline underline-offset-2 hover:text-gold transition-colors"
-          >
-            contact@brvm-analyst.pro
-          </a>
-        </p>
-      </LegalSection>
-
-      <GoldRule />
-
-      <LegalSection title="Hébergement">
         <p>
-          Application hébergée sur Vercel (vercel.com). Base de données hébergée
-          sur Supabase (supabase.com).
+          Numéro de contribuable / identifiant fiscal : <Placeholder>NCC / IFU</Placeholder>.<br />
+          Adresse e-mail : <Placeholder>email de contact</Placeholder> — Téléphone :{' '}
+          <Placeholder>téléphone</Placeholder>.
         </p>
-      </LegalSection>
+      </section>
 
-      <GoldRule />
+      <section>
+        <h2>Directeur de la publication</h2>
+        <p><Placeholder>nom du directeur de la publication</Placeholder>.</p>
+      </section>
 
-      <LegalSection title="Sources de données">
+      <section>
+        <h2>Hébergement</h2>
         <p>
-          Données de marché collectées auprès du portail BDFIN de la BRVM
-          (Bourse Régionale des Valeurs Mobilières). Les signaux et indicateurs
-          fournis sont à titre informatif et ne constituent pas un conseil en
-          investissement personnalisé.
+          Application hébergée par <strong>Vercel Inc.</strong>, 340 S Lemon Ave #4133,
+          Walnut, CA 91789, États-Unis (<a href="https://vercel.com">vercel.com</a>).
         </p>
-      </LegalSection>
-
-      <GoldRule />
-
-      <LegalSection title="Avertissement réglementaire">
         <p>
-          L'utilisation de cette plateforme se fait sous votre seule
-          responsabilité. Les performances passées ne préjugent pas des
-          performances futures.
+          Base de données et authentification hébergées par <strong>Supabase Inc.</strong>
+          (<a href="https://supabase.com">supabase.com</a>).
         </p>
-        <p className="mt-2">
-          Conformément à la réglementation COSUMAF et UEMOA, aucune information
-          diffusée sur cette plateforme ne doit être interprétée comme une
-          recommandation d'achat ou de vente de valeurs mobilières.
-        </p>
-      </LegalSection>
+      </section>
 
-    </div>
+      <section>
+        <h2>Propriété intellectuelle</h2>
+        <p>
+          L'ensemble des éléments du site (textes, analyses, interface, logos, code) est
+          protégé par le droit de la propriété intellectuelle. Toute reproduction ou
+          réutilisation non autorisée est interdite.
+        </p>
+      </section>
+
+      <section>
+        <h2>Sources de données</h2>
+        <p>
+          Les données de marché proviennent de la BRVM et du portail BDFIN. BRVM Analyst Pro
+          n'est ni affilié ni endossé par la BRVM. Les données sont fournies sans garantie
+          d'exhaustivité ni d'exactitude.
+        </p>
+      </section>
+    </LegalPage>
   );
 }
