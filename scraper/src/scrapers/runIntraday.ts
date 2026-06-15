@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { logger } from '../logger.js';
 import { parseBrvmPublic, parseBrvmResumeIndices } from './brvmPublic.js';
-import { upsertInstruments, upsertActions, upsertIndices, upsertMarketSummary } from '../persistence/repository.js';
+import { ensureIndexInstruments, upsertActions, upsertIndices, upsertMarketSummary } from '../persistence/repository.js';
 import type { IndiceRow } from '../types.js';
 
 const BRVM_PUBLIC_URL = 'https://www.brvm.org/fr/cours-actions/0';
@@ -66,10 +66,11 @@ export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbAc
 
   let nbSummary = 0;
   if (!mock) {
-    // Garantit que les instruments (actions + indices, dont les nouveaux indices
-    // sectoriels) existent dans brvm_instruments AVANT les tables _daily qui les
-    // référencent par clé étrangère (sinon violation FK brvm_indices_daily_code_fkey).
-    await upsertInstruments(snapshot);
+    // Crée seulement les instruments d'indices MANQUANTS (les nouveaux sectoriels),
+    // sans toucher aux lignes existantes — sinon on écraserait secteur/pays des
+    // actions (renseignés par le scrape quotidien) → « secteur Inconnu ». Les
+    // instruments d'actions existent déjà ; pas besoin de les réécrire ici.
+    await ensureIndexInstruments(snapshot.indices);
     await upsertActions(snapshot);
     if (snapshot.indices.length > 0) await upsertIndices(snapshot);
     nbSummary = await upsertMarketSummary(snapshot);

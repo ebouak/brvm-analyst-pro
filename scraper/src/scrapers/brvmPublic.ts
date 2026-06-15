@@ -22,11 +22,13 @@ const INDEX_MAP: Record<string, { code: string; libelle: string }> = {
  *   BRVMFINS   Services financiers         | BRVMSPUB   Services publics
  *   BRVMTELE   Télécommunications
  */
+// Clés = sortie de normName() (préfixe « brvm - » retiré) : « BRVM - COMPOSITE »
+// -> « composite », « BRVM-30 » -> « 30 », « BRVM - PRESTIGE » -> « prestige ».
 const RESUME_INDEX_MAP: Record<string, { code: string; libelle: string }> = {
-  'brvm composite': { code: 'BRVMC', libelle: 'BRVM Composite' },
-  'brvm 30': { code: 'BRVM30', libelle: 'BRVM 30' },
-  'brvm prestige': { code: 'BRVMPRES', libelle: 'BRVM Prestige' },
-  'brvm principal': { code: 'BRVMPRIN', libelle: 'BRVM Principal' },
+  composite: { code: 'BRVMC', libelle: 'BRVM Composite' },
+  '30': { code: 'BRVM30', libelle: 'BRVM 30' },
+  prestige: { code: 'BRVMPRES', libelle: 'BRVM Prestige' },
+  principal: { code: 'BRVMPRIN', libelle: 'BRVM Principal' },
   'consommation de base': { code: 'BRVMCBASE', libelle: 'BRVM - Consommation de base' },
   'consommation discretionnaire': { code: 'BRVMCDISC', libelle: 'BRVM - Consommation discrétionnaire' },
   energie: { code: 'BRVMENER', libelle: 'BRVM - Énergie' },

@@ -12,6 +12,29 @@ import type {
   ScrapeStatus,
 } from '../types.js';
 
+/**
+ * Insère UNIQUEMENT les instruments d'indices manquants (ON CONFLICT DO NOTHING).
+ * Ne met JAMAIS à jour les lignes existantes : préserve secteur/pays/designation
+ * renseignés par le scrape quotidien (l'intraday, issu de la page cours publique,
+ * n'a pas ces infos et les écraserait sinon — cf. régression « secteur Inconnu »).
+ */
+export async function ensureIndexInstruments(
+  indices: Array<{ code: string; libelle: string }>,
+): Promise<void> {
+  if (indices.length === 0) return;
+  const sb = getSupabase();
+  const rows = indices.map((i) => ({
+    code: i.code,
+    designation: i.libelle,
+    type: 'indice' as const,
+    actif: true,
+  }));
+  const { error } = await sb
+    .from('brvm_instruments')
+    .upsert(rows, { onConflict: 'code', ignoreDuplicates: true });
+  if (error) throw new Error(`ensure index instruments: ${error.message}`);
+}
+
 /** Upsert du référentiel instruments (table brvm_instruments). */
 export async function upsertInstruments(snapshot: MarketSnapshot): Promise<void>;
 export async function upsertInstruments(instruments: Array<{
