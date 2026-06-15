@@ -57,16 +57,58 @@ import { runBrief } from './brief/runBrief.js';
 // runMonthlyReports importé dynamiquement (dépend de pdfkit) — voir case 'monthly-reports'.
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
+import { withMonitoring, type MonitoredResult, type SourceRef } from './monitoring/recordRun.js';
+import { createSupabaseMonitoringClient } from './monitoring/supabaseClient.js';
 
 async function main(): Promise<number> {
   const [, , command, ...rest] = process.argv;
   const mock = rest.includes('--mock');
   const positional = rest.filter((a) => !a.startsWith('--'));
 
+  const triggerType = rest.find((a) => a.startsWith('--trigger='))?.split('=')[1] ?? 'manual';
+
+  /**
+   * Enrobe un runner cron avec le monitoring (scraper_runs/errors).
+   * Neutralisé en mock (aucune écriture) et tolérant aux pannes de monitoring :
+   * l'erreur du runner remonte telle quelle (relancée par withMonitoring).
+   */
+  async function monitored<T>(
+    source: SourceRef,
+    run: () => Promise<MonitoredResult<T>>,
+  ): Promise<T> {
+    if (mock) return (await run()).value;
+    const client = createSupabaseMonitoringClient();
+    return (await withMonitoring(client, source, triggerType, run)).value;
+  }
+
   switch (command) {
     case 'daily':
     case undefined: {
-      const res = await runDaily({ mock });
+      const res = await monitored(
+        { code: 'daily', label: 'Séance quotidienne (BDFIN)' },
+        async () => {
+          const r = await runDaily({ mock });
+          // ScrapeStatus includes 'mock' — map it to 'success' for RunOutcome.
+          const outcomeStatus =
+            r.status === 'failed' ? 'failed' : r.status === 'partial' ? 'partial' : 'success';
+          const total = r.nb_actions + r.nb_obligations + r.nb_indices;
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: total,
+              rows_upserted: total,
+              metadata: {
+                status: r.status,
+                nb_actions: r.nb_actions,
+                nb_obligations: r.nb_obligations,
+                nb_indices: r.nb_indices,
+                date_marche: r.date_marche,
+              },
+            },
+          };
+        },
+      );
       return res.status === 'failed' ? 1 : 0;
     }
     case 'daily:full': {
@@ -90,19 +132,83 @@ async function main(): Promise<number> {
         logger.error('Usage: score [<YYYY-MM-DD>] [--mock]');
         return 1;
       }
-      const res = await runScoring({ date, mock });
+      const res = await monitored(
+        { code: 'score', label: 'Scoring / signaux' },
+        async () => {
+          const r = await runScoring({ date, mock });
+          // ScoringRunResult.status includes 'mock' — map it to 'success'.
+          const outcomeStatus = r.status === 'failed' ? 'failed' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.nb_signaux,
+              rows_upserted: r.nb_signaux,
+              metadata: { status: r.status, nb_signaux: r.nb_signaux, date_marche: r.date_marche },
+            },
+          };
+        },
+      );
       return res.status === 'failed' ? 1 : 0;
     }
     case 'events': {
-      const res = await runEvents({ mock });
+      const res = await monitored(
+        { code: 'events', label: 'Événements BRVM' },
+        async () => {
+          const r = await runEvents({ mock });
+          // EventsRunResult.status includes 'mock' — map it to 'success'.
+          const outcomeStatus = r.status === 'failed' ? 'failed' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.nb_events,
+              rows_upserted: r.nb_events,
+              metadata: { status: r.status, nb_events: r.nb_events },
+            },
+          };
+        },
+      );
       return res.status === 'failed' ? 1 : 0;
     }
     case 'dividends': {
-      const res = await runDividends({ mock });
+      const res = await monitored(
+        { code: 'dividends', label: 'Dividendes' },
+        async () => {
+          const r = await runDividends({ mock });
+          // DividendsRunResult.status includes 'mock' — map it to 'success'.
+          const outcomeStatus = r.status === 'failed' ? 'failed' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.nb,
+              rows_upserted: r.nb,
+              metadata: { status: r.status, nb: r.nb },
+            },
+          };
+        },
+      );
       return res.status === 'failed' ? 1 : 0;
     }
     case 'obligations': {
-      const res = await runObligations({ mock });
+      const res = await monitored(
+        { code: 'obligations', label: 'Obligations' },
+        async () => {
+          const r = await runObligations({ mock });
+          // ObligationsRunResult.status includes 'mock' — map it to 'success'.
+          const outcomeStatus = r.status === 'failed' ? 'failed' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.nb,
+              rows_upserted: r.nb,
+              metadata: { status: r.status, nb: r.nb },
+            },
+          };
+        },
+      );
       return res.status === 'failed' ? 1 : 0;
     }
     case 'commodities': {
@@ -110,7 +216,21 @@ async function main(): Promise<number> {
       return res.status === 'failed' ? 1 : 0;
     }
     case 'intraday': {
-      const res = await runIntraday({ mock });
+      const res = await monitored(
+        { code: 'intraday', label: 'Cours intraday (brvm.org)' },
+        async () => {
+          const r = await runIntraday({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.nbActions > 0 ? 'success' : 'failed',
+              rows_extracted: r.nbActions + r.nbIndices,
+              rows_upserted: r.nbActions + r.nbIndices,
+              metadata: { nbActions: r.nbActions, nbIndices: r.nbIndices },
+            },
+          };
+        },
+      );
       return res.nbActions > 0 ? 0 : 1;
     }
     case 'shares': {
