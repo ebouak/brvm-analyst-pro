@@ -2,8 +2,14 @@ name: Cours intraday BRVM
 
 on:
   schedule:
-    # Toutes les 15 min, lun-ven, 09:00–15:45 UTC (séance BRVM ~09:00–15:00 GMT + marge)
-    - cron: '*/15 9-15 * * 1-5'
+    # Séance BRVM ~09:00–15:00 GMT (Abidjan = UTC). Lun-ven.
+    # Deux séries décalées hors du top-of-hour (:00/:15/:30/:45 sont les minutes
+    # les plus congestionnées chez GitHub → ticks souvent retardés ou SAUTÉS).
+    # Résultat : ~un déclenchement toutes les 7-8 min. Les runs sont idempotents
+    # et protégés par `concurrency`, donc le doublon éventuel est sans risque et
+    # couvre la perte d'un tick planifié.
+    - cron: '3,18,33,48 9-15 * * 1-5'
+    - cron: '10,25,40,55 9-15 * * 1-5'
   workflow_dispatch: {} # déclenchement manuel possible
 
 concurrency:
@@ -17,8 +23,8 @@ jobs:
     strategy:
       max-parallel: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Install scraper deps

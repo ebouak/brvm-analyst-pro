@@ -5,7 +5,9 @@ on:
   schedule:
     # Borné à la séance (intraday tourne 9h-15h45) : après la clôture les
     # données sont légitimement "stale", inutile de redéclencher.
-    - cron: '*/30 9-15 * * 1-5'
+    # Minutes décalées (:13/:43) hors du top/half-of-hour congestionné, sinon
+    # le watchdog lui-même est sujet aux ticks `schedule` sautés par GitHub.
+    - cron: '13,43 9-15 * * 1-5'
   workflow_dispatch:
 
 # Requis pour déclencher intraday.yml via createWorkflowDispatch
@@ -18,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 
