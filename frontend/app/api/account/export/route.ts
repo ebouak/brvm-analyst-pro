@@ -11,19 +11,38 @@ export async function GET() {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
   }
 
-  const [watchlists, items, positions, alerts, notifs, snapshots, backtests] =
-    await Promise.all([
-      supabase.from('watchlists').select('*').eq('user_id', user.id),
-      supabase
-        .from('watchlist_items')
-        .select('*, watchlists!inner(user_id)')
-        .eq('watchlists.user_id', user.id),
-      supabase.from('portfolios_positions').select('*').eq('user_id', user.id),
-      supabase.from('alerts').select('*').eq('user_id', user.id),
-      supabase.from('notifications_log').select('*').eq('user_id', user.id),
-      supabase.from('report_snapshots').select('*').eq('user_id', user.id),
-      supabase.from('backtest_runs').select('*').eq('user_id', user.id),
-    ]);
+  const [
+    profile,
+    watchlists,
+    items,
+    positions,
+    alerts,
+    notifs,
+    snapshots,
+    backtests,
+    push,
+    ptAccounts,
+    ptPositions,
+    subscriptions,
+    transactions,
+  ] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id),
+    supabase.from('watchlists').select('*').eq('user_id', user.id),
+    supabase
+      .from('watchlist_items')
+      .select('*, watchlists!inner(user_id)')
+      .eq('watchlists.user_id', user.id),
+    supabase.from('portfolios_positions').select('*').eq('user_id', user.id),
+    supabase.from('alerts').select('*').eq('user_id', user.id),
+    supabase.from('notifications_log').select('*').eq('user_id', user.id),
+    supabase.from('report_snapshots').select('*').eq('user_id', user.id),
+    supabase.from('backtest_runs').select('*').eq('user_id', user.id),
+    supabase.from('push_subscriptions').select('*').eq('user_id', user.id),
+    supabase.from('paper_trading_accounts').select('*').eq('user_id', user.id),
+    supabase.from('paper_trading_positions').select('*').eq('user_id', user.id),
+    supabase.from('subscriptions').select('*').eq('user_id', user.id),
+    supabase.from('billing_transactions').select('*').eq('user_id', user.id),
+  ]);
 
   const payload = {
     exported_at: new Date().toISOString(),
@@ -32,6 +51,7 @@ export async function GET() {
       email: user.email,
       created_at: user.created_at,
     },
+    profile: profile.data ?? [],
     watchlists: watchlists.data ?? [],
     watchlist_items: items.data ?? [],
     portfolio_positions: positions.data ?? [],
@@ -39,6 +59,11 @@ export async function GET() {
     notifications_log: notifs.data ?? [],
     report_snapshots: snapshots.data ?? [],
     backtest_runs: backtests.data ?? [],
+    push_subscriptions: push.data ?? [],
+    paper_trading_accounts: ptAccounts.data ?? [],
+    paper_trading_positions: ptPositions.data ?? [],
+    subscriptions: subscriptions.data ?? [],
+    billing_transactions: transactions.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

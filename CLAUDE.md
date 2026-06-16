@@ -271,6 +271,40 @@ scraper verts.
 - **Cohérence colonnes** : un upsert doit refléter exactement les colonnes de la
   migration correspondante.
 
+## 12. RGPD / Protection des données (by design)
+
+SaaS traitant des données personnelles → conformité RGPD **by design**. Détail et
+inventaire des traitements : `docs/RGPD.md`.
+
+### Règles produit
+
+- **Minimiser** les données collectées ; ne jamais ajouter un champ personnel sans
+  finalité explicite.
+- Prévoir une **durée de conservation** pour chaque table contenant des données
+  personnelles.
+- Identifier la **base légale** dès qu'une feature touche au marketing, au
+  recrutement ou au profiling.
+- Éviter les **SDK/traceurs tiers** non justifiés.
+- Tout nouveau traitement prévoit : **information** utilisateur, **export**,
+  **rectification**, **suppression**.
+- Aucun **log** ne contient mot de passe, token, pièce d'identité ou donnée
+  sensible (le logger scraper masque déjà les secrets).
+- Les **cookies/traceurs non essentiels** sont bloqués sans consentement
+  (`components/consent/` : `ConsentProvider`, `CookieBanner`, `CookiePreferences`).
+
+### Règles techniques
+
+- Proposer les changements **SQL avec impact RGPD** (nouvelle donnée perso → finalité,
+  rétention, RLS owner, base légale).
+- Vérifier **RLS, permissions, rétention, audit logs, secrets** à chaque feature.
+- Droits utilisateur câblés : **export** `GET /api/account/export`, **suppression**
+  `DELETE /api/account/delete` (doivent couvrir toute nouvelle table user-scopée).
+
+### Mini-checklist obligatoire (toute nouvelle feature touchant des données perso)
+
+> Données collectées · Finalité · Base légale · Conservation · Droits (accès/export/
+> rectif/suppression) · Sécurité (RLS, service-role server-only, pas de secret en log).
+
 ## Agent skills
 
 ### Issue tracker

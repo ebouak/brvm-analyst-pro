@@ -16,6 +16,11 @@ export async function DELETE() {
 
   // Les FK on delete cascade depuis auth.users feront le reste si on supprime
   // le compte ; ici on purge explicitement les tables user-scopées.
+  // RGPD : on purge toutes les données personnelles révocables. Les
+  // `paper_trading_positions` sont supprimées avant `paper_trading_accounts` (FK).
+  // Exclus volontairement (cf. docs/RGPD.md) :
+  //   - subscriptions / billing_transactions : conservation légale (comptabilité) ;
+  //   - profiles + compte auth.users : nécessite la service_role (worker/support).
   const tables = [
     'watchlist_items', // via watchlists
     'watchlists',
@@ -24,6 +29,9 @@ export async function DELETE() {
     'notifications_log',
     'report_snapshots',
     'backtest_runs',
+    'push_subscriptions',
+    'paper_trading_positions',
+    'paper_trading_accounts',
   ] as const;
 
   for (const t of tables) {
@@ -42,11 +50,18 @@ export async function DELETE() {
     await supabase.from(t).delete().eq('user_id', user.id);
   }
 
+  // Newsletter : clé naturelle = email (consentement marketing distinct).
+  if (user.email) {
+    await supabase.from('newsletter_subscribers').delete().eq('email', user.email);
+  }
+
   await supabase.auth.signOut();
 
   return NextResponse.json({
     status: 'success',
     message:
-      'Toutes vos données applicatives ont été supprimées. Pour la suppression définitive du compte d\'authentification, contactez le support.',
+      'Toutes vos données applicatives ont été supprimées. Les justificatifs de ' +
+      'paiement sont conservés pour obligation comptable légale. Pour la suppression ' +
+      'définitive du compte d\'authentification, contactez le support.',
   });
 }
