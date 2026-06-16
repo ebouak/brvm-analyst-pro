@@ -2,6 +2,8 @@
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@react-pdf/renderer', 'docx'],
+    // Permet l'upload de PDF/images via Server Action (défaut 1 Mo trop bas).
+    serverActions: { bodySizeLimit: '10mb' },
   },
   async redirects() {
     return [
