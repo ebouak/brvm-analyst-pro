@@ -179,6 +179,39 @@ passent un contrôle syntaxique esbuild) :
 - **Export** : XLS (ExcelJS) + PDF (page `/print` + `window.print`) sur la fiche
   financials. Clés LLM stockées en table `api_keys` (lues via `resolveApiKey`).
 
+### Ajouts (passage 2026-06-16) — Console admin, RBAC, billing, monitoring
+
+Voir `docs/ADMIN_BILLING.md` pour le détail. Build Next vert, tsc vert, 244 tests
+scraper verts.
+
+- **Lot 1 — Admin & RBAC** (migration `0041_admin_billing_rbac.sql`, appliquée prod) :
+  15 tables (plans/features, organizations, subscriptions, billing_transactions,
+  admin_roles/permissions/role_permissions/user_roles, admin_audit_logs,
+  scraper_sources/runs/run_steps/errors) + RLS + seed (3 plans, 5 rôles, 16
+  permissions, `ebouak@gmail.com`=super_admin). RBAC serveur dans
+  `lib/server/rbac.ts` (`requireAdmin`, `requirePermission(code)`, super_admin
+  bypass). Console admin sous `/admin/*` avec layout dédié (`components/admin/AdminShell`).
+- **Lot 2 — Pages admin données réelles** : `/admin/users` (profiles + KPIs),
+  `/admin/subscriptions` (plan joint + email enrichi), `/admin/payments`
+  (transactions + KPIs encaissement). Couche données isolée dans `lib/admin/`.
+- **Lot 3 — Monitoring scraping** : module `scraper/src/monitoring/`
+  (`buildRunRecord` pur + `withMonitoring` wrapper injectable + adaptateur
+  Supabase). 6 commandes cron instrumentées (`intraday/daily/score/events/
+  dividends/obligations`) → écrivent dans `scraper_runs`/`scraper_errors`
+  (neutralisé en `--mock`, tolérant aux pannes, flag `--trigger=`). Dashboards
+  `/admin/scraping` (KPIs 24h + runs + incidents) et `/admin/audit-logs`.
+- **Lot 4 — Checkout + billing (provider-agnostic)** : abstraction
+  `lib/billing/PaymentProvider` + provider `manual` (défaut, intention `pending`
+  + confirmation admin). Pages `/account/plan` (souscription self-service) et
+  `/account/billing` (historique, service-role filtré par user). Boutons
+  Confirmer/Rejeter sur `/admin/payments` (`subscriptions.write`) →
+  `activateSubscription` (txn `paid`, sub `active`, premium). Branchable
+  CinetPay/PayDunya via `lib/billing/provider.ts` (env `PAYMENT_PROVIDER`).
+- **Pricing** : page publique `/pricing` (3 plans, comparatif, FAQ) lue depuis
+  `subscription_plans`.
+- **Prérequis prod** : le projet **frontend Vercel** doit avoir
+  `SUPABASE_SERVICE_ROLE_KEY` (présente — admin + billing l'utilisent server-side).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
@@ -202,21 +235,25 @@ passent un contrôle syntaxique esbuild) :
 
 ## 10. Prochaines tâches prioritaires
 
-1. **Activer le cron intraday en prod** : ajouter les secrets repo GitHub
-   `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (Settings → Secrets → Actions).
-   Le workflow `.github/workflows/intraday.yml` existe déjà ; sans secrets il
-   échoue à l'écriture mais ne corrompt rien. L'historique des indices s'étoffera
-   séance après séance → active RSI(14)/MACD sur les graphiques hebdo.
+1. **Brancher un provider de paiement live** (CinetPay ou PayDunya) : implémenter
+   `lib/billing/<provider>.ts`, l'ajouter au registry, définir `PAYMENT_PROVIDER`,
+   et faire appeler `activateSubscription` par le webhook du provider. Le flux
+   manuel (intention + confirmation admin) fonctionne déjà. Voir `docs/ADMIN_BILLING.md` §4.
 2. **Fondamentaux des 4 sociétés sans source** (BICB, BOAB, CABC, SVOC) : aucune
    publication d'états financiers en base → nécessite de fournir/scraper les PDF
    avant extraction (ne jamais inventer de chiffres).
 3. Planifier les autres workers (cron) : `score`, `events`, `dividends`, `alerts`,
-   refresh des vues — même mécanique GitHub Actions que l'intraday.
-4. Tests d'intégration frontend (Playwright). `npm run build` Next est désormais
-   exécuté à chaque passage (vert).
+   refresh des vues — même mécanique pg_cron/GitHub Actions que l'intraday. Ces
+   commandes écrivent désormais dans `scraper_runs` (monitoring `/admin/scraping`).
+4. **Tests d'intégration frontend (Playwright)** — non installé (décision d'infra
+   à prendre : nouvelle dépendance + config + CI). `tsc` + `npm run build` Next
+   sont exécutés à chaque passage (verts).
 5. Calibrer les sélecteurs **BDFIN** (auth Forms) si on réactive cette source ;
    `brvm.org` public est déjà calibré (parser + fixture de régression).
 6. V3 module rapports : sentiment réel, corrélation événements/signaux.
+
+> Cron intraday : déjà actif via **pg_cron + pg_net** (secret Vault `github_pat_brvm`
+> déclenchant `intraday.yml`). L'historique des indices s'étoffe séance après séance.
 
 ## 11. Précautions avant modification
 
