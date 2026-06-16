@@ -1,12 +1,13 @@
 /**
- * Runner obligations depuis Sika Finance.
+ * Runner obligations depuis le portail public brvm.org.
  * Écrit dans brvm_obligations_daily (code, date_marche) — idempotent.
- * Utilisé en remplacement du scraper BDFIN (auth non calibrée).
+ * Remplace sikafinance (page obligations supprimée → 404, juin 2026) et BDFIN
+ * (auth non calibrée).
  */
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
-import { upsertObligations } from '../persistence/repository.js';
-import { fetchSikaObligations } from './sikaObligations.js';
+import { ensureObligationInstruments, upsertObligations } from '../persistence/repository.js';
+import { fetchBrvmObligations } from './brvmObligations.js';
 import type { MarketSnapshot, ObligationRow } from '../types.js';
 
 const log = logger.child({ module: 'runObligations' });
@@ -35,9 +36,9 @@ export async function runObligations(opts: { mock?: boolean } = {}): Promise<Obl
       return { status: 'mock', nb: rows.length, message: null };
     }
 
-    const fetched: ObligationRow[] = await fetchSikaObligations();
+    const fetched: ObligationRow[] = await fetchBrvmObligations();
     if (fetched.length === 0) {
-      log.warn('Aucune obligation parsée depuis Sika Finance');
+      log.warn('Aucune obligation parsée depuis brvm.org');
       return { status: 'failed', nb: 0, message: 'Aucune obligation parsée' };
     }
 
@@ -56,8 +57,10 @@ export async function runObligations(opts: { mock?: boolean } = {}): Promise<Obl
       hash_source: '',
       is_mock: false,
     };
+    // Crée d'abord les instruments d'obligations manquants (FK code → brvm_instruments).
+    await ensureObligationInstruments(fetched.map((o) => ({ code: o.code, designation: o.designation })));
     const nb = await upsertObligations(snapshot);
-    log.info({ nb, date: today }, 'Obligations Sika écrites');
+    log.info({ nb, date: today }, 'Obligations brvm.org écrites');
     return { status: 'success', nb, message: null };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

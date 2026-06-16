@@ -35,6 +35,29 @@ export async function ensureIndexInstruments(
   if (error) throw new Error(`ensure index instruments: ${error.message}`);
 }
 
+/**
+ * Crée les instruments d'obligations MANQUANTS (INSERT only) pour satisfaire la
+ * FK brvm_obligations_daily.code → brvm_instruments.code. Ne touche pas aux lignes
+ * existantes (même posture que ensureIndexInstruments).
+ */
+export async function ensureObligationInstruments(
+  obligations: Array<{ code: string; designation: string }>,
+): Promise<void> {
+  if (obligations.length === 0) return;
+  const sb = getSupabase();
+  // Dédoublonnage par code (la page peut lister un code plusieurs fois).
+  const byCode = new Map<string, { code: string; designation: string; type: 'obligation'; actif: boolean }>();
+  for (const o of obligations) {
+    if (!byCode.has(o.code)) {
+      byCode.set(o.code, { code: o.code, designation: o.designation, type: 'obligation', actif: true });
+    }
+  }
+  const { error } = await sb
+    .from('brvm_instruments')
+    .upsert([...byCode.values()], { onConflict: 'code', ignoreDuplicates: true });
+  if (error) throw new Error(`ensure obligation instruments: ${error.message}`);
+}
+
 /** Upsert du référentiel instruments (table brvm_instruments). */
 export async function upsertInstruments(snapshot: MarketSnapshot): Promise<void>;
 export async function upsertInstruments(instruments: Array<{
