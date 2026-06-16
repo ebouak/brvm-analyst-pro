@@ -9,32 +9,35 @@ import { individualHtml, textToHtml } from '@/lib/email/templates';
 
 type R = { ok: boolean; message?: string };
 
-export async function assignRole(userId: string, roleCode: string): Promise<R> {
+/** Attribue ou révoque un rôle admin (réservé super_admin, journalisé). Factorise
+ *  les deux chemins quasi identiques pour éviter toute divergence future. */
+async function changeRole(userId: string, roleCode: string, op: 'assign' | 'revoke'): Promise<R> {
   const ctx = await requirePermission('users.write');
   if (!ctx.isSuperAdmin) return { ok: false, message: 'Réservé au super administrateur.' };
   const db = getServiceClient();
   const { data: role } = await db.from('admin_roles').select('id').eq('code', roleCode).maybeSingle();
   if (!role) return { ok: false, message: 'Rôle inconnu.' };
-  const { error } = await db
-    .from('admin_user_roles')
-    .upsert({ user_id: userId, role_id: role.id }, { onConflict: 'user_id,role_id', ignoreDuplicates: true });
+  const { error } =
+    op === 'assign'
+      ? await db
+          .from('admin_user_roles')
+          .upsert({ user_id: userId, role_id: role.id }, { onConflict: 'user_id,role_id', ignoreDuplicates: true })
+      : await db.from('admin_user_roles').delete().eq('user_id', userId).eq('role_id', role.id);
   if (error) return { ok: false, message: error.message };
-  await recordAudit(ctx, { action: 'role.assign', resourceType: 'user', resourceId: userId, targetUserId: userId, severity: 'warning', metadata: { roleCode } });
+  await recordAudit(ctx, {
+    action: op === 'assign' ? 'role.assign' : 'role.revoke',
+    resourceType: 'user', resourceId: userId, targetUserId: userId, severity: 'warning', metadata: { roleCode },
+  });
   revalidatePath(`/admin/users/${userId}`);
   return { ok: true };
 }
 
+export async function assignRole(userId: string, roleCode: string): Promise<R> {
+  return changeRole(userId, roleCode, 'assign');
+}
+
 export async function revokeRole(userId: string, roleCode: string): Promise<R> {
-  const ctx = await requirePermission('users.write');
-  if (!ctx.isSuperAdmin) return { ok: false, message: 'Réservé au super administrateur.' };
-  const db = getServiceClient();
-  const { data: role } = await db.from('admin_roles').select('id').eq('code', roleCode).maybeSingle();
-  if (!role) return { ok: false, message: 'Rôle inconnu.' };
-  const { error } = await db.from('admin_user_roles').delete().eq('user_id', userId).eq('role_id', role.id);
-  if (error) return { ok: false, message: error.message };
-  await recordAudit(ctx, { action: 'role.revoke', resourceType: 'user', resourceId: userId, targetUserId: userId, severity: 'warning', metadata: { roleCode } });
-  revalidatePath(`/admin/users/${userId}`);
-  return { ok: true };
+  return changeRole(userId, roleCode, 'revoke');
 }
 
 export async function setPremium(userId: string, value: boolean): Promise<R> {
