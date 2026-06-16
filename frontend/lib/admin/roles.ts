@@ -1,4 +1,4 @@
-import { getServiceClient } from '@/lib/billing/serviceClient.js';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export interface RoleDef {
   code: string;

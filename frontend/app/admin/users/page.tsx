@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
 import { loadUsers } from '@/lib/admin/users';
@@ -46,6 +47,7 @@ export default async function Page() {
                 <th className="px-4 py-3 font-medium">Profil</th>
                 <th className="px-4 py-3 font-medium">Onboarding</th>
                 <th className="px-4 py-3 font-medium">Inscription</th>
+                <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -58,6 +60,9 @@ export default async function Page() {
                   <td className="px-4 py-2.5 text-muted">{u.profil ?? DASH}</td>
                   <td className="px-4 py-2.5 text-muted">{u.onboarding_done ? 'Oui' : 'Non'}</td>
                   <td className="px-4 py-2.5 text-muted tabular">{fmtDate(u.created_at)}</td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/admin/users/${u.id}`} className="text-accent hover:underline">Gérer</Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
