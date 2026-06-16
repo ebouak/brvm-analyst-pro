@@ -65,7 +65,8 @@ async function main(): Promise<number> {
   const mock = rest.includes('--mock');
   const positional = rest.filter((a) => !a.startsWith('--'));
 
-  const triggerType = rest.find((a) => a.startsWith('--trigger='))?.split('=')[1] ?? 'manual';
+  const triggerType =
+    rest.find((a) => a.startsWith('--trigger='))?.split('=')[1] ?? process.env.SCRAPER_TRIGGER ?? 'manual';
 
   /**
    * Enrobe un runner cron avec le monitoring (scraper_runs/errors).

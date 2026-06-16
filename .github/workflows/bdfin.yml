@@ -1,5 +1,9 @@
 name: Scrape BDFIN (séance quotidienne)
 
+# Étiquette le déclencheur pour le monitoring scraper_runs (schedule → cron).
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
 # Source autoritaire bfin.brvm.org (base de données financières BRVM) :
 # actions + obligations + indices avec volume, nombre de transactions et
 # valeur échangée. Tourne après la clôture (heure UTC = Abidjan).

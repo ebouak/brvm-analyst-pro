@@ -1,5 +1,9 @@
 name: Cours intraday BRVM
 
+# Étiquette le déclencheur pour le monitoring scraper_runs (schedule → cron).
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
 on:
   schedule:
     # Séance BRVM ~09:00–15:00 GMT (Abidjan = UTC). Lun-ven.

@@ -1,5 +1,9 @@
 name: BRVM — Scraping & Signaux
 
+# Étiquette le déclencheur pour le monitoring scraper_runs (schedule → cron).
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
 on:
   schedule:
     # ── 1. Post-clôture BRVM (13h GMT → 13h30 UTC) ──────────────────

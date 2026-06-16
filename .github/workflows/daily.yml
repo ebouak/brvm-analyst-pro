@@ -1,5 +1,9 @@
 name: Enrichissement quotidien BRVM
 
+# Étiquette le déclencheur pour le monitoring scraper_runs (schedule → cron).
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
 # Tourne à l'ouverture et à la fermeture de la séance BRVM (heure UTC = Abidjan).
 # - Détail de cotation Sika (ouverture, +haut, +bas, beta, valorisation, capital)
 # - Actualités (Sika Finance + brvm.org officiel + cosumaf)
