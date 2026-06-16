@@ -77,6 +77,13 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: 'Compte',
+    items: [
+      { href: '/account/plan', label: 'Mon abonnement' },
+      { href: '/account/billing', label: 'Facturation' },
+    ],
+  },
+  {
     label: 'Admin',
     adminOnly: true,
     items: [

@@ -8,6 +8,7 @@ function getAdminClient() {
 
 export interface PaymentRow {
   id: string;
+  subscription_id: string | null;
   user_email: string | null;
   provider: string;
   amount: number;
@@ -28,7 +29,7 @@ export async function loadPayments(limit = 100): Promise<PaymentsDashboard> {
   const db = getAdminClient();
   const { data } = await db
     .from('billing_transactions')
-    .select('id, user_id, provider, amount, currency, status, payment_method, paid_at, created_at')
+    .select('id, subscription_id, user_id, provider, amount, currency, status, payment_method, paid_at, created_at')
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -44,6 +45,7 @@ export async function loadPayments(limit = 100): Promise<PaymentsDashboard> {
 
   const payments: PaymentRow[] = rows.map((r) => ({
     id: r.id as string,
+    subscription_id: (r.subscription_id as string) ?? null,
     user_email: emailById.get(r.user_id as string) ?? null,
     provider: r.provider as string,
     amount: Number(r.amount ?? 0),

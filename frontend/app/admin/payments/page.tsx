@@ -1,6 +1,7 @@
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
 import { loadPayments } from '@/lib/admin/payments';
+import { PaymentRowActions } from './PaymentRowActions';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Paiements — Administration' };
@@ -55,6 +56,7 @@ export default async function Page() {
                 <th className="px-4 py-3 font-medium">Statut</th>
                 <th className="px-4 py-3 font-medium">Méthode</th>
                 <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -68,6 +70,11 @@ export default async function Page() {
                     <td className="px-4 py-2.5"><StatPill tone={st.tone}>{st.label}</StatPill></td>
                     <td className="px-4 py-2.5 text-muted">{p.payment_method ?? DASH}</td>
                     <td className="px-4 py-2.5 text-muted tabular">{fmtDate(p.paid_at ?? p.created_at)}</td>
+                    <td className="px-4 py-2.5">
+                      {p.status === 'pending'
+                        ? <PaymentRowActions subscriptionId={p.subscription_id} />
+                        : <span className="text-faint">—</span>}
+                    </td>
                   </tr>
                 );
               })}
