@@ -6,6 +6,7 @@ import { recordAudit } from '@/lib/server/audit';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { sendEmail } from '@/lib/server/email';
 import { individualHtml, textToHtml } from '@/lib/email/templates';
+import { validateUploads } from '@/lib/email/uploads';
 
 type R = { ok: boolean; message?: string };
 
@@ -54,14 +55,39 @@ export async function setPremium(userId: string, value: boolean): Promise<R> {
   return { ok: true };
 }
 
-export async function sendUserEmail(userId: string, subject: string, body: string): Promise<R> {
+const USER_EMAIL_ALLOWED = ['application/pdf', 'image/png', 'image/jpeg'];
+const USER_EMAIL_MAX_TOTAL = 8 * 1024 * 1024;
+const USER_EMAIL_MAX_FILES = 5;
+
+export async function sendUserEmail(formData: FormData): Promise<R> {
   const ctx = await requirePermission('users.write');
-  if (!subject.trim() || !body.trim()) return { ok: false, message: 'Sujet et corps requis.' };
+  const userId = String(formData.get('userId') ?? '');
+  const subject = String(formData.get('subject') ?? '').trim();
+  const body = String(formData.get('body') ?? '').trim();
+  if (!userId) return { ok: false, message: 'Utilisateur manquant.' };
+  if (!subject || !body) return { ok: false, message: 'Sujet et corps requis.' };
+
+  const files = formData.getAll('attachments').filter((f): f is File => f instanceof File && f.size > 0);
+  const v = validateUploads(files.map((f) => ({ name: f.name, type: f.type, size: f.size })), {
+    maxFiles: USER_EMAIL_MAX_FILES, maxTotalBytes: USER_EMAIL_MAX_TOTAL, allowed: USER_EMAIL_ALLOWED,
+  });
+  if (!v.ok) return { ok: false, message: v.message };
+
   const db = getServiceClient();
   const { data: profile } = await db.from('profiles').select('email').eq('id', userId).maybeSingle();
   const email = profile?.email as string | undefined;
-  if (!email) return { ok: false, message: "Email de l'utilisateur introuvable." };
-  const res = await sendEmail({ to: email, subject, html: individualHtml(textToHtml(body)) });
-  await recordAudit(ctx, { action: 'email.individual', resourceType: 'user', resourceId: userId, targetUserId: userId, severity: 'info', metadata: { subject, ok: res.ok, error: res.error ?? null } });
-  return res.ok ? { ok: true } : { ok: false, message: res.error ?? "Échec de l'envoi." };
+  if (!email) return { ok: false, message: 'Email de l’utilisateur introuvable.' };
+
+  const attachments = await Promise.all(
+    files.map(async (f) => ({ filename: f.name, content: Buffer.from(await f.arrayBuffer()).toString('base64') })),
+  );
+  const res = await sendEmail({
+    to: email, subject, html: individualHtml(textToHtml(body)),
+    ...(attachments.length ? { attachments } : {}),
+  });
+  await recordAudit(ctx, {
+    action: 'email.individual', resourceType: 'user', resourceId: userId, targetUserId: userId, severity: 'info',
+    metadata: { subject, attachments: files.map((f) => f.name), ok: res.ok, error: res.error ?? null },
+  });
+  return res.ok ? { ok: true } : { ok: false, message: res.error ?? 'Échec de l’envoi.' };
 }
