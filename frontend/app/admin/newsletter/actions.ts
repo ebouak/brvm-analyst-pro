@@ -43,6 +43,11 @@ export async function sendCampaign(subject: string, body: string): Promise<R & {
     action: 'newsletter.campaign', resourceType: 'newsletter', severity: 'warning',
     metadata: { subject, recipients: recipients.length, sent: res.sent, ok: res.ok, error: res.error ?? null },
   });
-  if (!res.ok) return { ok: false, message: res.error ?? "Échec de l'envoi.", sent: res.sent };
+  if (!res.ok) {
+    const partial = res.sent > 0
+      ? `Envoi partiel : ${res.sent}/${recipients.length} envoyés. ${res.error ?? ''}`.trim()
+      : (res.error ?? "Échec de l'envoi.");
+    return { ok: false, message: partial, sent: res.sent };
+  }
   return { ok: true, sent: res.sent };
 }

@@ -27,11 +27,12 @@ export async function sendBatch(messages: EmailMessage[]): Promise<EmailResult> 
   const key = process.env.RESEND_API_KEY;
   if (!key) return { ok: false, sent: 0, error: 'RESEND_API_KEY non configurée' };
   if (messages.length === 0) return { ok: true, sent: 0 };
+  const from = fromAddress();
   let sent = 0;
   let firstErr: string | undefined;
   for (let i = 0; i < messages.length; i += 50) {
     const chunk = messages.slice(i, i + 50).map((m) => ({
-      from: fromAddress(), to: m.to, subject: m.subject, html: m.html,
+      from, to: m.to, subject: m.subject, html: m.html,
     }));
     try {
       const res = await fetch('https://api.resend.com/emails/batch', {
@@ -45,5 +46,7 @@ export async function sendBatch(messages: EmailMessage[]): Promise<EmailResult> 
       if (!firstErr) firstErr = (e as Error).message;
     }
   }
-  return { ok: sent > 0, sent, error: sent < messages.length ? firstErr : undefined };
+  // ok = livraison COMPLÈTE uniquement : un envoi partiel ne doit jamais être
+  // rapporté comme un succès (l'appelant ne verrait pas les destinataires manqués).
+  return { ok: sent === messages.length, sent, error: sent < messages.length ? firstErr : undefined };
 }

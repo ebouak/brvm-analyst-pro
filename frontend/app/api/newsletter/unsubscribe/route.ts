@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,15 +13,18 @@ function page(message: string): NextResponse {
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
   if (!token) return page('Lien de désabonnement invalide.');
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return page('Service indisponible.');
-  const db = createSupabaseClient(url, key, { auth: { persistSession: false } });
+  let db;
+  try {
+    db = getServiceClient();
+  } catch {
+    return page('Service indisponible.');
+  }
+  // .select('id') (pas 'email') : on a juste besoin de savoir si une ligne a matché.
   const { data, error } = await db
     .from('newsletter_subscribers')
     .update({ confirmed: false })
     .eq('confirm_token', token)
-    .select('email');
+    .select('id');
   if (error) return page('Une erreur est survenue. Réessayez plus tard.');
   if (!data || data.length === 0) return page('Lien de désabonnement inconnu ou déjà utilisé.');
   return page('Vous êtes désabonné de la newsletter. À bientôt.');
