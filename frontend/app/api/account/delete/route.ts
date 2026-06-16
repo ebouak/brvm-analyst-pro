@@ -1,26 +1,27 @@
 // DELETE /api/account/delete
-// Supprime toutes les données utilisateur (cascade RLS) puis déconnecte.
-// La suppression du compte auth.users nécessite la service_role : ici on se
-// contente de purger les données applicatives et de signaler la déconnexion.
-// La suppression définitive du compte auth doit être déclenchée côté serveur
-// admin (worker dédié) ou via le dashboard Supabase.
+// Suppression DÉFINITIVE du compte et de toutes les données personnelles (RGPD,
+// droit à l'effacement). Étapes :
+//   1. purge explicite des tables applicatives user-scopées (belt & suspenders) ;
+//   2. désabonnement newsletter (clé = email) via service_role ;
+//   3. suppression du compte auth.users via service_role → cascade FK sur le
+//      reste (profil, abonnements, etc.). `billing_transactions.user_id` passe à
+//      NULL (justificatif conservé mais anonymisé : obligation comptable légale).
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export async function DELETE() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
   }
 
-  // Les FK on delete cascade depuis auth.users feront le reste si on supprime
-  // le compte ; ici on purge explicitement les tables user-scopées.
-  // RGPD : on purge toutes les données personnelles révocables. Les
-  // `paper_trading_positions` sont supprimées avant `paper_trading_accounts` (FK).
-  // Exclus volontairement (cf. docs/RGPD.md) :
-  //   - subscriptions / billing_transactions : conservation légale (comptabilité) ;
-  //   - profiles + compte auth.users : nécessite la service_role (worker/support).
+  // 1. Purge explicite (anon/RLS) des tables user-scopées. Redondant avec les
+  //    cascades FK de l'étape 3, mais protège les tables sans cascade.
+  //    `paper_trading_positions` avant `paper_trading_accounts` (FK).
   const tables = [
     'watchlist_items', // via watchlists
     'watchlists',
@@ -36,7 +37,6 @@ export async function DELETE() {
 
   for (const t of tables) {
     if (t === 'watchlist_items') {
-      // delete via parent watchlist user_id
       const { data: wls } = await supabase
         .from('watchlists')
         .select('id')
@@ -50,18 +50,34 @@ export async function DELETE() {
     await supabase.from(t).delete().eq('user_id', user.id);
   }
 
-  // Newsletter : clé naturelle = email (consentement marketing distinct).
+  const admin = getServiceClient();
+
+  // 2. Newsletter (clé naturelle = email, consentement marketing distinct).
   if (user.email) {
-    await supabase.from('newsletter_subscribers').delete().eq('email', user.email);
+    await admin.from('newsletter_subscribers').delete().eq('email', user.email);
   }
 
-  await supabase.auth.signOut();
+  // 3. Suppression définitive du compte auth (cascade FK : profil + données ;
+  //    billing_transactions.user_id → NULL = anonymisé, conservé pour la compta).
+  const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
+  if (delErr) {
+    return NextResponse.json(
+      { error: `Suppression du compte impossible : ${delErr.message}` },
+      { status: 500 },
+    );
+  }
+
+  // La session est désormais invalide ; signOut best-effort.
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    /* session déjà invalidée par la suppression */
+  }
 
   return NextResponse.json({
     status: 'success',
     message:
-      'Toutes vos données applicatives ont été supprimées. Les justificatifs de ' +
-      'paiement sont conservés pour obligation comptable légale. Pour la suppression ' +
-      'définitive du compte d\'authentification, contactez le support.',
+      'Votre compte et vos données personnelles ont été supprimés. Les justificatifs ' +
+      'de paiement sont conservés de façon anonymisée pour obligation comptable légale.',
   });
 }

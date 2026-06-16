@@ -63,10 +63,14 @@ Audit initial : 2026-06-16.
 | # | Sévérité | Constat | Statut |
 |---|---|---|---|
 | 1 | P1 | Export/suppression ne couvraient pas `push_subscriptions`, `paper_trading_*`, newsletter | **Corrigé** (export + delete étendus) |
-| 2 | P2 | Pas de purge planifiée de `admin_audit_logs` (IP/UA) ni `notifications_log` | À faire (cron de rétention 12 mois) |
-| 3 | P2 | `subscriptions`/`billing_transactions` non supprimés à l'effacement | **Voulu** — base légale obligation comptable (documenté) |
-| 4 | P2 | Suppression définitive du compte `auth.users` non automatisée | À faire (worker service-role déclenché par demande) |
+| 2 | P2 | Pas de purge planifiée de `admin_audit_logs` (IP/UA) ni `notifications_log` | **Corrigé** — migration `0042_rgpd_retention.sql` (fonction + pg_cron mensuel, 12 mois)¹ |
+| 3 | P2 | `subscriptions`/`billing_transactions` non supprimés à l'effacement | **Voulu** — base légale obligation comptable ; `billing_transactions.user_id` anonymisé (→ NULL) à la suppression du compte |
+| 4 | P2 | Suppression définitive du compte `auth.users` non automatisée | **Corrigé** — `DELETE /api/account/delete` appelle `auth.admin.deleteUser` (service-role) → cascade FK |
 | 5 | Info | Bannière cookies présente, zéro traceur tiers | Conforme |
+
+¹ La migration `0042` planifie des suppressions récurrentes : à appliquer
+explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
+`public.purge_rgpd_retention()` via un planificateur externe.
 
 ## 6. Mini-checklists par feature récente
 
