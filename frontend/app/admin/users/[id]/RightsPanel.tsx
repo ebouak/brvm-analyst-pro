@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import { assignRole, revokeRole, setPremium, sendUserEmail } from './actions';
 import type { RoleDef } from '@/lib/admin/roles';
 
@@ -13,6 +13,7 @@ export function RightsPanel({
   const [msg, setMsg] = useState<string | null>(null);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const attachRef = useRef<HTMLInputElement>(null);
 
   function run(p: Promise<{ ok: boolean; message?: string }>, okMsg: string) {
     setMsg(null);
@@ -70,9 +71,21 @@ export function RightsPanel({
           value={body} onChange={(e) => setBody(e.target.value)} placeholder="Message…" rows={5}
           className="mt-2 w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-ivory"
         />
+        <label className="mt-2 block text-xs text-muted">
+          Pièces jointes (PDF, images)
+          <input ref={attachRef} type="file" multiple accept="application/pdf,image/png,image/jpeg"
+            className="mt-1 block w-full text-xs text-muted file:mr-2 file:rounded file:border-0 file:bg-border file:px-2 file:py-1 file:text-ivory" />
+        </label>
         <button
           type="button" disabled={pending || !subject.trim() || !body.trim()}
-          onClick={() => run(sendUserEmail(userId, subject, body), 'Email envoyé.')}
+          onClick={() => {
+            const fd = new FormData();
+            fd.set('userId', userId);
+            fd.set('subject', subject);
+            fd.set('body', body);
+            for (const f of Array.from(attachRef.current?.files ?? [])) fd.append('attachments', f);
+            run(sendUserEmail(fd), 'Email envoyé.');
+          }}
           className="mt-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-obsidian transition active:scale-95 disabled:opacity-50"
         >
           Envoyer

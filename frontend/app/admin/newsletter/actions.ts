@@ -6,6 +6,8 @@ import { recordAudit } from '@/lib/server/audit';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { sendBatch } from '@/lib/server/email';
 import { campaignHtml, textToHtml, siteUrl } from '@/lib/email/templates';
+import { validateUploads } from '@/lib/email/uploads';
+import { uploadInlineImage } from '@/lib/server/storage';
 
 type R = { ok: boolean; message?: string };
 
@@ -20,28 +22,68 @@ export async function unsubscribeSubscriber(id: string): Promise<R> {
   return { ok: true };
 }
 
-/** Envoie une campagne à tous les abonnés confirmés (footer désabonnement). */
-export async function sendCampaign(subject: string, body: string): Promise<R & { sent?: number }> {
+const ATTACH_ALLOWED = ['application/pdf', 'image/png', 'image/jpeg'];
+const INLINE_ALLOWED = ['image/png', 'image/jpeg'];
+const MAX_TOTAL = 8 * 1024 * 1024;
+const MAX_INLINE = 2 * 1024 * 1024;
+const MAX_FILES = 5;
+
+/** Envoie une campagne (abonnés confirmés) avec pièces jointes + images inline. */
+export async function sendCampaign(formData: FormData): Promise<R & { sent?: number }> {
   const ctx = await requirePermission('content.publish');
-  if (!subject.trim() || !body.trim()) return { ok: false, message: 'Sujet et corps requis.' };
+  const subject = String(formData.get('subject') ?? '').trim();
+  const body = String(formData.get('body') ?? '').trim();
+  if (!subject || !body) return { ok: false, message: 'Sujet et corps requis.' };
+
+  const attachFiles = formData.getAll('attachments').filter((f): f is File => f instanceof File && f.size > 0);
+  const inlineFiles = formData.getAll('inlineImages').filter((f): f is File => f instanceof File && f.size > 0);
+
+  const meta = (f: File) => ({ name: f.name, type: f.type, size: f.size });
+  const vAll = validateUploads([...attachFiles, ...inlineFiles].map(meta), {
+    maxFiles: MAX_FILES, maxTotalBytes: MAX_TOTAL, allowed: ATTACH_ALLOWED,
+  });
+  if (!vAll.ok) return { ok: false, message: vAll.message };
+  const vInline = validateUploads(inlineFiles.map(meta), {
+    maxFiles: MAX_FILES, maxTotalBytes: MAX_TOTAL, maxFileBytes: MAX_INLINE, allowed: INLINE_ALLOWED,
+  });
+  if (!vInline.ok) return { ok: false, message: vInline.message };
+
   const db = getServiceClient();
-  const { data } = await db
-    .from('newsletter_subscribers')
-    .select('email, confirm_token')
-    .eq('confirmed', true);
+  const { data } = await db.from('newsletter_subscribers').select('email, confirm_token').eq('confirmed', true);
   const recipients = (data ?? []) as { email: string; confirm_token: string }[];
   if (recipients.length === 0) return { ok: false, message: 'Aucun abonné confirmé.' };
-  const bodyHtml = textToHtml(body);
+
+  // Images inline : upload → URLs → ajout au corps.
+  let imagesHtml = '';
+  for (const img of inlineFiles) {
+    const url = await uploadInlineImage(img);
+    imagesHtml += `<img src="${url}" alt="" style="max-width:100%;margin-top:16px" />`;
+  }
+  const bodyHtml = textToHtml(body) + imagesHtml;
+
+  // Pièces jointes : base64.
+  const attachments = await Promise.all(
+    attachFiles.map(async (f) => ({
+      filename: f.name,
+      content: Buffer.from(await f.arrayBuffer()).toString('base64'),
+    })),
+  );
+
   const base = siteUrl();
   const messages = recipients.map((r) => ({
     to: r.email,
     subject,
     html: campaignHtml(bodyHtml, `${base}/api/newsletter/unsubscribe?token=${r.confirm_token}`),
+    ...(attachments.length ? { attachments } : {}),
   }));
   const res = await sendBatch(messages);
   await recordAudit(ctx, {
     action: 'newsletter.campaign', resourceType: 'newsletter', severity: 'warning',
-    metadata: { subject, recipients: recipients.length, sent: res.sent, ok: res.ok, error: res.error ?? null },
+    metadata: {
+      subject, recipients: recipients.length, sent: res.sent,
+      attachments: attachFiles.map((f) => f.name), inlineImages: inlineFiles.length,
+      ok: res.ok, error: res.error ?? null,
+    },
   });
   if (!res.ok) {
     const partial = res.sent > 0
