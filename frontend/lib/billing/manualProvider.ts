@@ -28,12 +28,14 @@ export const manualProvider: PaymentProvider = {
       return { ok: false, status: 'error', message: 'Tarif indisponible pour ce cycle.' };
     }
 
-    // Idempotence : pas de second abonnement si un pending/active existe déjà.
+    // Idempotence : pas de second abonnement si un pending/active PAYANT existe
+    // déjà. L'abonnement « free » (trace du choix gratuit) ne bloque pas l'upgrade.
     const { data: existing } = await db
       .from('subscriptions')
-      .select('id')
+      .select('id, subscription_plans!inner(code)')
       .eq('user_id', req.userId)
       .in('status', ['pending', 'active'])
+      .neq('subscription_plans.code', 'free')
       .limit(1);
     if (existing && existing.length > 0) {
       return {

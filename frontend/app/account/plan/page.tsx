@@ -33,10 +33,13 @@ export default async function Page() {
       .neq('code', 'free')
       .order('sort_order', { ascending: true }),
     db
+      // Exclut l'abonnement « free » (trace du choix gratuit) : seul un
+      // abonnement payant pending/active bloque une nouvelle souscription.
       .from('subscriptions')
-      .select('id, status, billing_cycle, renews_at')
+      .select('id, status, billing_cycle, renews_at, subscription_plans!inner(code)')
       .eq('user_id', user.id)
       .in('status', ['pending', 'active'])
+      .neq('subscription_plans.code', 'free')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),

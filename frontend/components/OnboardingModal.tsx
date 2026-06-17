@@ -34,6 +34,7 @@ export default function OnboardingModal() {
     fd.set('profil', profil);
     fd.set('horizon', horizon);
     fd.set('mode_debutant', String(debutant));
+    fd.set('formule', formule);
     setError(null);
     startTransition(async () => {
       const res = await saveInvestorProfile(fd);
@@ -127,6 +128,12 @@ export default function OnboardingModal() {
                 </button>
               ))}
             </div>
+            {debutant && (
+              <a href="/debutant" target="_blank" rel="noopener noreferrer"
+                className="block rounded-xl border border-cyan/20 bg-cyan/5 px-4 py-2.5 text-xs text-cyan hover:bg-cyan/10 transition">
+                🌱 Débuter en bourse à la BRVM — guide pas à pas &amp; accompagnement →
+              </a>
+            )}
             <div className="flex gap-2">
               <button type="button" onClick={() => setStep(2)}
                 className="flex-1 py-2.5 rounded-xl border border-border text-muted text-sm hover:border-cyan/30 transition">
