@@ -18,6 +18,9 @@ export default function PublicShell({ children }: { children: React.ReactNode })
             <Link href="/societes" className="text-muted hover:text-white transition-colors hidden sm:block">
               Sociétés
             </Link>
+            <Link href="/comparateur-sgi" className="text-muted hover:text-white transition-colors hidden sm:block">
+              SGI
+            </Link>
             <Link href="/simulateur" className="text-muted hover:text-white transition-colors hidden sm:block">
               Simulateur
             </Link>
@@ -42,6 +45,9 @@ export default function PublicShell({ children }: { children: React.ReactNode })
         >
           <Link href="/societes" className="text-muted hover:text-white transition-colors shrink-0">
             Sociétés
+          </Link>
+          <Link href="/comparateur-sgi" className="text-muted hover:text-white transition-colors shrink-0">
+            SGI
           </Link>
           <Link href="/simulateur" className="text-muted hover:text-white transition-colors shrink-0">
             Simulateur

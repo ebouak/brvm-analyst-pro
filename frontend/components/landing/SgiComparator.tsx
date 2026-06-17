@@ -171,7 +171,7 @@ const FAQ: { q: string; r: string; open?: boolean }[] = [
 
 /* ── Section principale ────────────────────────────────────────────────── */
 
-export default function SgiComparator() {
+export default function SgiComparator({ className = 'scroll-mt-24' }: { className?: string }) {
   const [filtreP, setFiltreP] = useState<'ALL' | keyof typeof PAYS>('ALL');
   const [recherche, setRecherche] = useState('');
 
@@ -187,7 +187,7 @@ export default function SgiComparator() {
   const chips: ('ALL' | keyof typeof PAYS)[] = ['ALL', ...(Object.keys(PAYS) as (keyof typeof PAYS)[])];
 
   return (
-    <section id="comparateur-sgi" className="mt-16 scroll-mt-24">
+    <section id="comparateur-sgi" className={className}>
       {/* En-tête */}
       <p className="overline mb-3 text-gold-2">Comparateur · BRVM / UEMOA</p>
       <h2 className="mb-3 max-w-[18ch] font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">

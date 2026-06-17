@@ -6,7 +6,6 @@ import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
-import SgiComparator from '@/components/landing/SgiComparator';
 import NewsletterForm from '@/components/NewsletterForm';
 import { LandingIndices } from '@/components/landing/LandingIndices';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
@@ -479,8 +478,38 @@ export default async function Landing() {
         </article>
       </section>
 
-      {/* ── COMPARATEUR DES SGI (annuaire UEMOA + critères + FAQ) ──────── */}
-      <SgiComparator />
+      {/* ── ACCROCHE COMPARATEUR SGI (le détail vit sur /comparateur-sgi) ─ */}
+      <section className="mt-10 overflow-hidden rounded-panel border border-accent/20 bg-gradient-to-br from-accent/[0.06] to-transparent p-6 md:p-8">
+        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[1.4fr_auto]">
+          <div>
+            <p className="overline mb-3 text-gold-2">Comparateur · BRVM / UEMOA</p>
+            <h2 className="mb-3 max-w-[20ch] font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
+              Choisir sa SGI, sans <span className="text-accent">improviser</span>.
+            </h2>
+            <p className="mb-5 max-w-[58ch] text-sm leading-relaxed text-muted">
+              Pour acheter ou vendre à la BRVM, une seule porte d&apos;entrée : une SGI agréée. Notre annuaire
+              complet — classé par pays, avec type, groupe, dépôt minimum indicatif, 6 critères de choix et une FAQ —
+              vous aide à décider sur des faits.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/comparateur-sgi"
+                className="landing-hero-cta inline-flex min-h-[46px] items-center gap-1.5 rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
+              >
+                Comparer les SGI <span aria-hidden>→</span>
+              </Link>
+              <span className="font-mono text-[12px] text-faint">22 SGI · 7 pays UEMOA</span>
+            </div>
+          </div>
+          <div className="hidden md:flex md:flex-col md:gap-2 md:border-l md:border-white/10 md:pl-6">
+            {['Côte d’Ivoire · 12', 'Sénégal · 4', 'Burkina Faso · 2', 'Mali · Bénin · Togo · Niger'].map((l) => (
+              <span key={l} className="font-mono text-[12.5px] text-muted">
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
       <section className="mt-10">
