@@ -23,41 +23,42 @@ const PAYS: Record<string, Pays> = {
   NE: { nom: 'Niger', iso: 'ne' },
 };
 
-const DEPOT_BANQUE = '≈ 500 000 FCFA';
-const DEPOT_INDEP = '≈ 100 000 FCFA';
-
 interface Sgi {
   nom: string;
   pays: keyof typeof PAYS;
   type: 'Banque' | 'Indépendante';
   groupe: string;
   logo?: string;
-  depotMin?: string;
+  depotMin: string;
+  /** 'indicatif' = ordre de grandeur ; 'relevé' = constaté, à reconfirmer. */
+  depotMinSource: 'indicatif' | 'relevé';
+  siteWeb?: string;
+  ficheBRVM?: string;
 }
 
 const SGI: Sgi[] = [
-  { nom: 'Atlantique Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe Banque Atlantique', logo: '/sgi/atlantique-finance.svg' },
-  { nom: 'BICI Bourse', pays: 'CI', type: 'Banque', groupe: 'BICICI · BNP Paribas', logo: '/sgi/bici-bourse.svg' },
-  { nom: 'BNI Finances', pays: 'CI', type: 'Banque', groupe: "Banque Nationale d'Investissement", logo: '/sgi/bni-finances.svg' },
-  { nom: 'BOA Capital Securities', pays: 'CI', type: 'Banque', groupe: 'Groupe Bank of Africa', logo: '/sgi/boa-capital-securities.svg' },
-  { nom: 'Bridge Securities', pays: 'CI', type: 'Banque', groupe: 'Bridge Bank Group', logo: '/sgi/bridge-securities.svg' },
-  { nom: 'EDC Investment Corporation', pays: 'CI', type: 'Banque', groupe: 'Groupe Ecobank', logo: '/sgi/edc-investment-corporation.svg' },
-  { nom: 'NSIA Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe NSIA · devient NSIA Capital (2026)', logo: '/sgi/nsia-finance.svg' },
-  { nom: 'SOGEBOURSE', pays: 'CI', type: 'Banque', groupe: "Société Générale Côte d'Ivoire", logo: '/sgi/sogebourse.svg' },
-  { nom: 'Hudson & Cie', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/hudson-cie.svg' },
-  { nom: 'Phoenix Capital Management', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/phoenix-capital-management.svg' },
-  { nom: 'Africaine de Bourse', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/africaine-de-bourse.svg' },
-  { nom: 'Sirius Capital', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sirius-capital.svg' },
-  { nom: 'CGF Bourse', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante · pionnière', logo: '/sgi/cgf-bourse.svg' },
-  { nom: 'Impaxis Securities', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/impaxis-securities.svg' },
-  { nom: 'Everest Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/everest-finance.svg' },
-  { nom: 'Invictus Capital & Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/invictus-capital-finance.svg' },
-  { nom: 'Coris Bourse', pays: 'BF', type: 'Banque', groupe: 'Groupe Coris Bank International', logo: '/sgi/coris-bourse.svg' },
-  { nom: 'SBIF', pays: 'BF', type: 'Indépendante', groupe: "Sté Burkinabè d'Intermédiation Financière", logo: '/sgi/sbif.svg' },
-  { nom: 'SGI Mali', pays: 'ML', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-mali.svg' },
-  { nom: 'SGI Bénin', pays: 'BJ', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-benin.svg' },
-  { nom: 'SGI Togo', pays: 'TG', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-togo.svg' },
-  { nom: 'SGI Niger', pays: 'NE', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-niger.svg' },
+  { nom: 'Atlantique Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe Banque Atlantique', logo: '/sgi/atlantique-finance.svg', depotMin: '2 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.atlantiquefinance.net', ficheBRVM: 'https://www.brvm.org/fr/sgi-atlantique-finance' },
+  { nom: 'BICI Bourse', pays: 'CI', type: 'Banque', groupe: 'BICICI · BNP Paribas', logo: '/sgi/bici-bourse.svg', depotMin: 'Pas de minimum', depotMinSource: 'relevé', siteWeb: 'https://www.bicibourse.ci', ficheBRVM: 'https://www.brvm.org/fr/sgi-bici-bourse' },
+  { nom: 'BNI Finances', pays: 'CI', type: 'Banque', groupe: "Banque Nationale d'Investissement", logo: '/sgi/bni-finances.svg', depotMin: '1 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.bni.ci' },
+  { nom: 'BOA Capital Securities', pays: 'CI', type: 'Banque', groupe: 'Groupe Bank of Africa', logo: '/sgi/boa-capital-securities.svg', depotMin: 'Pas de minimum', depotMinSource: 'relevé', siteWeb: 'https://www.bmcecapital.com' },
+  { nom: 'Bridge Securities', pays: 'CI', type: 'Banque', groupe: 'Bridge Bank Group', logo: '/sgi/bridge-securities.svg', depotMin: '≈ 500 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'EDC Investment Corporation', pays: 'CI', type: 'Banque', groupe: 'Groupe Ecobank', logo: '/sgi/edc-investment-corporation.svg', depotMin: '1 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.ecobank.com', ficheBRVM: 'https://www.brvm.org/fr/sgi-edc-investment-corporation' },
+  { nom: 'NSIA Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe NSIA · devient NSIA Capital (2026)', logo: '/sgi/nsia-finance.svg', depotMin: '≈ 500 000 FCFA', depotMinSource: 'indicatif', siteWeb: 'https://nsiafinance.com', ficheBRVM: 'https://www.brvm.org/fr/sgi-nsia-finance' },
+  { nom: 'SOGEBOURSE', pays: 'CI', type: 'Banque', groupe: "Société Générale Côte d'Ivoire", logo: '/sgi/sogebourse.svg', depotMin: '≈ 500 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'Hudson & Cie', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/hudson-cie.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'Phoenix Capital Management', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/phoenix-capital-management.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'Africaine de Bourse', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/africaine-de-bourse.svg', depotMin: '1 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.sib.ci' },
+  { nom: 'Sirius Capital', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sirius-capital.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'CGF Bourse', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante · pionnière', logo: '/sgi/cgf-bourse.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', siteWeb: 'https://www.cgfbourse.com', ficheBRVM: 'https://www.brvm.org/fr/sgi-cgf-bourse' },
+  { nom: 'Impaxis Securities', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/impaxis-securities.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', siteWeb: 'https://www.impaxis-securities.com' },
+  { nom: 'Everest Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/everest-finance.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', siteWeb: 'https://www.everestfin.com' },
+  { nom: 'Invictus Capital & Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/invictus-capital-finance.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'Coris Bourse', pays: 'BF', type: 'Banque', groupe: 'Groupe Coris Bank International', logo: '/sgi/coris-bourse.svg', depotMin: '≈ 500 000 FCFA', depotMinSource: 'indicatif', siteWeb: 'https://coris-bourse.com', ficheBRVM: 'https://www.brvm.org/fr/sgi-coris-bourse-sa' },
+  { nom: 'SBIF', pays: 'BF', type: 'Indépendante', groupe: "Sté Burkinabè d'Intermédiation Financière", logo: '/sgi/sbif.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'SGI Mali', pays: 'ML', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-mali.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'SGI Bénin', pays: 'BJ', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-benin.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'SGI Togo', pays: 'TG', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-togo.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', ficheBRVM: 'https://www.brvm.org/fr/sgi-togo' },
+  { nom: 'SGI Niger', pays: 'NE', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-niger.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
 ];
 
 /* ── Helpers monogramme / couleur stable ───────────────────────────────── */
@@ -88,8 +89,12 @@ function flagUrl(code: keyof typeof PAYS): string {
 
 function SgiCard({ s }: { s: Sgi }) {
   const p = PAYS[s.pays];
-  const depot = s.depotMin || (s.type === 'Banque' ? DEPOT_BANQUE : DEPOT_INDEP);
   const h = hueOf(s.nom);
+  const lien = s.ficheBRVM
+    ? { href: s.ficheBRVM, label: 'Fiche BRVM' }
+    : s.siteWeb
+      ? { href: s.siteWeb, label: 'Site officiel' }
+      : null;
   return (
     <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-5 transition-all hover:-translate-y-0.5 hover:border-accent/35 hover:bg-white/[0.05]">
       <div className="mb-3.5 flex items-start justify-between gap-3">
@@ -142,7 +147,13 @@ function SgiCard({ s }: { s: Sgi }) {
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-faint">Dépôt min.</dt>
           <dd className="tabular text-[12.5px] font-medium text-ivory/90">
-            {depot} <span className="ml-0.5 text-[10px] not-italic text-faint">indic.</span>
+            {s.depotMin}{' '}
+            <span
+              className="ml-0.5 text-[10px] not-italic text-faint"
+              title={s.depotMinSource === 'relevé' ? 'Constaté, à reconfirmer auprès de la SGI' : 'Ordre de grandeur du marché'}
+            >
+              {s.depotMinSource === 'relevé' ? 'relevé*' : 'indic.'}
+            </span>
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
@@ -156,6 +167,18 @@ function SgiCard({ s }: { s: Sgi }) {
           <dd className="tabular text-[12.5px] font-medium text-accent/80">à confirmer</dd>
         </div>
       </dl>
+
+      {lien && (
+        <a
+          href={lien.href}
+          rel="nofollow noopener"
+          target="_blank"
+          className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11.5px] text-accent/80 transition-colors hover:text-accent"
+        >
+          {lien.label}
+          <span aria-hidden>↗</span>
+        </a>
+      )}
     </article>
   );
 }
@@ -328,8 +351,10 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
         {/* Note */}
         <div className="mt-7 rounded-xl border border-white/10 border-l-2 border-l-accent bg-white/[0.02] px-5 py-4 text-[14.5px] leading-relaxed text-muted">
           <b className="text-ivory">Liste non exhaustive et données indicatives.</b> Cet annuaire reprend les
-          principales SGI agréées à la BRVM à partir de sources publiques. Les dépôts minimums affichés sont des
-          estimations de marché par profil de SGI, pas des barèmes officiels. Pour la liste à jour et les barèmes
+          principales SGI agréées à la BRVM à partir de sources publiques. Les dépôts marqués{' '}
+          <span className="font-mono text-[12px] text-faint">indic.</span> sont des ordres de grandeur par profil de
+          SGI ; ceux marqués <span className="font-mono text-[12px] text-faint">relevé*</span> ont été constatés mais
+          restent à reconfirmer. Aucun n&apos;est un barème officiel. Pour la liste à jour et les barèmes
           précis, consultez{' '}
           <a href="https://www.brvm.org/fr/intervenants/sgi/tous" rel="nofollow noopener" target="_blank" className="text-accent hover:underline">
             brvm.org
