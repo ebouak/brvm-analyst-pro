@@ -265,26 +265,26 @@ function Cell({
   glow?: 'cyan' | 'emerald' | 'rose';
 }) {
   return (
-    <div className="relative flex flex-col gap-2.5 px-5 py-4 sm:px-6 sm:py-5">
-      <div className="flex items-center gap-2">
-        <span
-          className={[
-            'grid h-6 w-6 place-items-center rounded-full border text-[11px]',
-            glow === 'emerald'
-              ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
-              : glow === 'rose'
-              ? 'border-rose-400/25 bg-rose-400/10 text-rose-300'
-              : glow === 'cyan'
-              ? 'border-cyan-300/30 bg-cyan-300/10 text-cyan-200'
-              : 'border-white/12 bg-white/[0.04] text-slate-300',
-          ].join(' ')}
-        >
-          {icon}
-        </span>
-        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{label}</span>
+    <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5">
+      <span
+        className={[
+          'grid h-7 w-7 flex-none place-items-center rounded-full border text-[11px]',
+          glow === 'emerald'
+            ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+            : glow === 'rose'
+            ? 'border-rose-400/25 bg-rose-400/10 text-rose-300'
+            : glow === 'cyan'
+            ? 'border-cyan-300/30 bg-cyan-300/10 text-cyan-200'
+            : 'border-white/12 bg-white/[0.04] text-slate-300',
+        ].join(' ')}
+      >
+        {icon}
+      </span>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</span>
+        <span className={`truncate font-display text-base leading-tight tracking-tight ${valueClass}`}>{value}</span>
+        <span className="truncate text-[10.5px] leading-tight text-slate-400">{sub}</span>
       </div>
-      <div className={`font-display text-2xl leading-none tracking-tight sm:text-[1.7rem] ${valueClass}`}>{value}</div>
-      <div className="text-[11.5px] leading-tight text-slate-400">{sub}</div>
     </div>
   );
 }
@@ -315,7 +315,7 @@ export default function MarketSessionBanner({ className = '' }: { className?: st
   return (
     <section
       aria-label="État de la séance BRVM en temps réel"
-      className={`group/banner relative overflow-hidden rounded-[1.5rem] border border-white/[0.08] bg-[#080d1a] ${className}`}
+      className={`group/banner relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#080d1a] ${className}`}
     >
       {/* Halo lumineux maîtrisé (cyan + emerald) */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -358,20 +358,16 @@ export default function MarketSessionBanner({ className = '' }: { className?: st
           />
         </div>
 
-        {/* Pied : badge de synchronisation live */}
-        <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] px-5 py-2.5 sm:px-6">
-          <span className="inline-flex items-center gap-2 text-[11px] font-medium text-slate-300">
-            <span className="relative flex h-2 w-2">
-              <span className={`absolute inline-flex h-full w-full rounded-full ${phase?.open ? 'bg-emerald-400' : 'bg-cyan-400'} opacity-60 ${phase ? 'animate-ping' : ''}`} />
-              <span className={`relative inline-flex h-2 w-2 rounded-full ${phase?.open ? 'bg-emerald-400' : 'bg-cyan-400'}`} />
-            </span>
-            Marché BRVM synchronisé
-          </span>
-          <span className="hidden text-[10px] uppercase tracking-[0.2em] text-slate-500 sm:inline">
-            BRVM · UEMOA
-          </span>
-        </div>
       </div>
+
+      {/* Pastille live discrète (coin) */}
+      <span
+        aria-label="Marché BRVM synchronisé en direct"
+        className="pointer-events-none absolute right-3 top-3 flex h-2 w-2"
+      >
+        <span className={`absolute inline-flex h-full w-full rounded-full ${phase?.open ? 'bg-emerald-400' : 'bg-cyan-400'} opacity-60 ${phase ? 'animate-ping' : ''}`} />
+        <span className={`relative inline-flex h-2 w-2 rounded-full ${phase?.open ? 'bg-emerald-400' : 'bg-cyan-400'}`} />
+      </span>
     </section>
   );
 }
