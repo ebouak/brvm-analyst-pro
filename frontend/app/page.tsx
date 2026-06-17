@@ -29,6 +29,14 @@ interface MoverRow {
   confiance: number | null;
 }
 
+interface NewsCardItem {
+  id: string;
+  titre: string;
+  date_publication: string | null;
+  source_url: string | null;
+  instrument_code: string | null;
+}
+
 async function getData() {
   const supabase = createClient();
 
@@ -141,7 +149,15 @@ async function getData() {
     /* pas de simulation si données indisponibles */
   }
 
-  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices };
+  // Actualités du marché (4 dernières) pour la section cartes
+  const { data: newsRows } = await supabase
+    .from('brvm_news')
+    .select('id, titre, date_publication, source_url, instrument_code')
+    .order('date_publication', { ascending: false })
+    .limit(4);
+  const news = (newsRows ?? []) as NewsCardItem[];
+
+  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news };
 }
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
@@ -192,7 +208,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices } = await getData();
+  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news } = await getData();
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
@@ -376,21 +392,86 @@ export default async function Landing() {
         </section>
       )}
 
-      {/* ── PREMIUM (une ligne, sans noyer le gratuit) ────────────────── */}
-      <section className="mt-10 flex flex-col items-start justify-between gap-4 rounded-panel border border-accent/25 bg-accent/[0.04] p-6 md:flex-row md:items-center">
-        <div>
-          <p className="overline mb-1 text-gold-2">Premium</p>
-          <p className="max-w-[58ch] text-sm leading-relaxed text-muted">
-            <span className="text-ivory">Diagnostic IA façon sell-side sur chaque société</span> — valorisation,
-            forces, risques — plus rapports mensuels PDF et paper trading automatique.
+      {/* ── 3 CARTES : Analyse · Premium · Actualités ─────────────────── */}
+      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {/* Carte 1 — Analyse exclusive → inscription */}
+        <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-accent/40 hover:bg-white/[0.05]">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-up/30 bg-up/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-up">
+            <span className="h-1.5 w-1.5 rounded-full bg-up animate-pulse" /> Données temps réel
+          </span>
+          <h3 className="mt-4 font-display text-xl text-ivory">Accédez à des analyses exclusives</h3>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
+            Note A–F sur chaque action, signaux quantitatifs, watchlist et alertes. L&apos;essentiel est
+            gratuit — créez votre compte en 1 minute.
           </p>
-        </div>
-        <Link
-          href="/premium/diagnostic"
-          className="landing-hero-cta inline-flex min-h-[44px] shrink-0 items-center rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-        >
-          Découvrir le diagnostic IA
-        </Link>
+          <Link
+            href="/signup"
+            className="mt-5 inline-flex min-h-[44px] w-fit items-center gap-1.5 rounded-full border border-up/40 px-5 text-sm font-semibold text-up transition-colors hover:bg-up/10"
+          >
+            Espace Analyse <span aria-hidden>→</span>
+          </Link>
+        </article>
+
+        {/* Carte 2 — Premium → pricing */}
+        <article className="flex flex-col rounded-panel border border-accent/25 bg-accent/[0.05] p-6 transition-all hover:border-accent/50">
+          <p className="overline text-gold-2">Premium</p>
+          <h3 className="mt-3 font-display text-xl text-ivory">Passez à Premium</h3>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
+            Diagnostic IA façon sell-side sur chaque société — valorisation, forces, risques —
+            rapports mensuels PDF et paper trading automatique.
+          </p>
+          <Link
+            href="/pricing"
+            className="landing-hero-cta mt-5 inline-flex min-h-[44px] w-fit items-center gap-1.5 rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
+          >
+            Découvrir <span aria-hidden>→</span>
+          </Link>
+        </article>
+
+        {/* Carte 3 — Actualités du marché (vraies données brvm_news) */}
+        <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-xl text-ivory">Actualités du Marché</h3>
+            <Link href="/actualites" className="text-[11px] text-muted transition-colors hover:text-ivory">
+              Tout voir →
+            </Link>
+          </div>
+          {news.length > 0 ? (
+            <ul className="mt-4 flex-1 space-y-3">
+              {news.slice(0, 3).map((n) => {
+                const dateLabelN = n.date_publication
+                  ? new Date(n.date_publication).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+                  : null;
+                const inner = (
+                  <>
+                    <p className="line-clamp-2 text-sm leading-snug text-ivory/90 transition-colors group-hover:text-gold-2">
+                      {n.titre}
+                    </p>
+                    <p className="mt-1 flex items-center gap-2 text-[10px] text-faint">
+                      {n.instrument_code && <span className="tabular font-medium text-muted">{n.instrument_code}</span>}
+                      {dateLabelN && <span>{dateLabelN}</span>}
+                    </p>
+                  </>
+                );
+                return (
+                  <li key={n.id} className="border-b border-white/[0.06] pb-3 last:border-0 last:pb-0">
+                    {n.source_url ? (
+                      <a href={n.source_url} target="_blank" rel="noopener noreferrer" className="group block">
+                        {inner}
+                      </a>
+                    ) : (
+                      <div className="group">{inner}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="mt-4 flex-1 py-6 text-center text-sm text-faint">
+              Aucune actualité disponible pour le moment.
+            </p>
+          )}
+        </article>
       </section>
 
       {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
