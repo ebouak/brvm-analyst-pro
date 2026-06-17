@@ -28,9 +28,9 @@ export default async function PricingPage() {
   return (
     <div className="min-h-screen bg-bg">
       <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <Link href="/" className="flex items-center gap-2" aria-label="BRVM Analyst Pro">
+        <Link href="/" className="flex items-center gap-2" aria-label="WESTBOURSE">
           <span className="grid h-8 w-8 place-items-center rounded-lg border border-accent/40 bg-accent/10 font-display text-lg font-bold text-accent">B</span>
-          <span className="font-display font-semibold text-ivory">BRVM Analyst Pro</span>
+          <span className="font-display font-semibold text-ivory">WESTBOURSE</span>
         </Link>
         <Link href="/login" className="text-sm text-muted transition-colors hover:text-ivory">
           Connexion

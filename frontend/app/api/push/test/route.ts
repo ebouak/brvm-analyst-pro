@@ -52,7 +52,7 @@ export async function POST() {
   }
 
   const payload = JSON.stringify({
-    title: 'BRVM Analyst Pro',
+    title: 'WESTBOURSE',
     body: 'Test de notification push — tout fonctionne correctement !',
     url: '/dashboard',
     tag: 'brvm-test',

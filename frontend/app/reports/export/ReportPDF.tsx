@@ -76,7 +76,7 @@ export function ReportPDF({ data, generatedAt }: Props) {
       <Page size="A4" style={styles.page}>
         {/* En-tête */}
         <View style={styles.header}>
-          <Text style={styles.brand}>BRVM Analyst Pro</Text>
+          <Text style={styles.brand}>WESTBOURSE</Text>
           <View>
             <Text style={styles.meta}>
               Période : {data.dateFrom} → {data.dateTo}

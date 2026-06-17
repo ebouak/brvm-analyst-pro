@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/premium';
 
 export const revalidate = 3600;
-export const metadata = { title: 'Valorisation — BRVM Analyst Pro' };
+export const metadata = { title: 'Valorisation — WESTBOURSE' };
 
 export default async function ValorisationPage() {
   const [all, scoringMap] = await Promise.all([getMarketValuations(), getMarketScoring()]);

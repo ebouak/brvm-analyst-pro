@@ -14,7 +14,7 @@ import {
 
 // Données publiques recalculées après clôture : ISR 5 min (audit 2026-06-12)
 export const revalidate = 300;
-export const metadata = { title: 'Signaux — BRVM Analyst Pro' };
+export const metadata = { title: 'Signaux — WESTBOURSE' };
 
 async function getData() {
   const supabase = createPublicClient();

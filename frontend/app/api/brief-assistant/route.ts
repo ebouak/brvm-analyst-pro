@@ -11,7 +11,7 @@ const ORDER: { provider: LlmProvider; url: string; model: string }[] = [
   { provider: 'xai',     url: 'https://api.x.ai/v1/chat/completions', model: 'grok-2-latest' },
 ];
 
-const SYSTEM = `Tu es BRVM Analyst, un assistant financier expert de la Bourse Régionale des Valeurs Mobilières (UEMOA).
+const SYSTEM = `Tu es WESTBOURSE, un assistant financier expert de la Bourse Régionale des Valeurs Mobilières (UEMOA).
 
 Tes capacités :
 - Accès temps réel à toutes les données du marché via tes outils

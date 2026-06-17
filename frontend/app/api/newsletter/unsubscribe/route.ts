@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 function page(message: string): NextResponse {
   const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Désabonnement</title></head>` +
     `<body style="font-family:sans-serif;background:#0b0b0d;color:#eee;display:grid;place-items:center;height:100vh;margin:0">` +
-    `<div style="text-align:center;max-width:420px;padding:24px"><h1 style="color:#56d7fd">BRVM Analyst Pro</h1><p>${message}</p></div></body></html>`;
+    `<div style="text-align:center;max-width:420px;padding:24px"><h1 style="color:#56d7fd">WESTBOURSE</h1><p>${message}</p></div></body></html>`;
   return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 

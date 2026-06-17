@@ -45,7 +45,7 @@ export default async function RapportPage({ params }: Props) {
       {/* En-tête */}
       <div className="flex items-start justify-between mb-5 border-b-2 border-gray-900 pb-3">
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">BRVM Analyst Pro · Note d&apos;analyse</p>
+          <p className="text-[10px] text-gray-500 uppercase tracking-widest">WESTBOURSE · Note d&apos;analyse</p>
           <h1 className="text-2xl font-bold mt-1">{code} — {designation}</h1>
           <p className="text-xs text-gray-500 mt-0.5">{secteur}</p>
         </div>
@@ -123,7 +123,7 @@ export default async function RapportPage({ params }: Props) {
       )}
 
       <p className="text-[10px] text-gray-400 mt-6 border-t pt-2 italic">
-        Source : BRVM Analyst Pro · {today}. Valorisation par multiples sectoriels et DDM. Les performances passées ne préjugent pas des résultats futurs.
+        Source : WESTBOURSE · {today}. Valorisation par multiples sectoriels et DDM. Les performances passées ne préjugent pas des résultats futurs.
       </p>
     </div>
   );

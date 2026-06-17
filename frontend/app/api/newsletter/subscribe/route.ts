@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           from: process.env.ALERTS_EMAIL_FROM ?? 'noreply@brvm.resend.dev',
           to: email,
-          subject: '📊 Bienvenue sur BRVM Analyst Pro — Confirmez votre inscription',
+          subject: '📊 Bienvenue sur WESTBOURSE — Confirmez votre inscription',
           html: `
             <div style="font-family:sans-serif;max-width:520px;margin:auto;color:#1a1a2e">
-              <h2 style="color:#c9a227">Bienvenue sur BRVM Analyst Pro</h2>
+              <h2 style="color:#c9a227">Bienvenue sur WESTBOURSE</h2>
               <p>Vous êtes bien inscrit(e) à notre newsletter hebdomadaire sur les marchés BRVM.</p>
               <p>Vous recevrez chaque semaine :</p>
               <ul>

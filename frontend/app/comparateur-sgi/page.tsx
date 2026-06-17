@@ -7,7 +7,7 @@ export const dynamic = 'force-static';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
 
 export const metadata: Metadata = {
-  title: 'Comparateur des SGI BRVM — choisir son courtier UEMOA | BRVM Analyst Pro',
+  title: 'Comparateur des SGI BRVM — choisir son courtier UEMOA | WESTBOURSE',
   description:
     "Annuaire et comparateur des SGI agréées à la BRVM, classées par pays UEMOA : Côte d'Ivoire, Sénégal, Burkina Faso, Mali, Bénin, Togo, Niger. Type, groupe, dépôt minimum indicatif et critères pour choisir votre courtier.",
   keywords: [

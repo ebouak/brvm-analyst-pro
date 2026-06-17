@@ -10,7 +10,7 @@ export default function MentionsLegalesPage() {
       <section>
         <h2>Éditeur du service</h2>
         <p>
-          Le service <strong>BRVM Analyst Pro</strong> est édité par{' '}
+          Le service <strong>WESTBOURSE</strong> est édité par{' '}
           <Placeholder>raison sociale</Placeholder>, société{' '}
           <Placeholder>forme juridique (SARL, SAS…)</Placeholder> au capital de{' '}
           <Placeholder>montant du capital</Placeholder>, immatriculée au RCCM sous le numéro{' '}
@@ -53,7 +53,7 @@ export default function MentionsLegalesPage() {
       <section>
         <h2>Sources de données</h2>
         <p>
-          Les données de marché proviennent de la BRVM et du portail BDFIN. BRVM Analyst Pro
+          Les données de marché proviennent de la BRVM et du portail BDFIN. WESTBOURSE
           n&apos;est ni affilié ni endossé par la BRVM. Les données sont fournies sans garantie
           d&apos;exhaustivité ni d&apos;exactitude.
         </p>

@@ -25,7 +25,7 @@ import {
 import { BeamButton } from '@/components/ui/beam-button';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Dashboard — BRVM Analyst Pro' };
+export const metadata = { title: 'Dashboard — WESTBOURSE' };
 
 async function getData() {
   const supabase = createClient();

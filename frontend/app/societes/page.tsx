@@ -8,7 +8,7 @@ export const revalidate = 900;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
 
 export const metadata: Metadata = {
-  title: 'Les 48 sociétés cotées à la BRVM — Cours, notes et analyses | BRVM Analyst Pro',
+  title: 'Les 48 sociétés cotées à la BRVM — Cours, notes et analyses | WESTBOURSE',
   description:
     'Annuaire complet des sociétés cotées à la Bourse Régionale des Valeurs Mobilières (BRVM) : cours en quasi temps réel, note BRVM A–F, secteur et pays. Analyse gratuite.',
   alternates: { canonical: `${SITE_URL}/societes` },

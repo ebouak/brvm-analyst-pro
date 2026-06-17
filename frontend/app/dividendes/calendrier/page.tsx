@@ -8,7 +8,7 @@ import { EmptyStatePremium } from '@/components/ui/premium';
 import type { DividendCalendarEvent } from '@/lib/dividend/calendar';
 
 export const metadata: Metadata = {
-  title: 'Calendrier des Dividendes | BRVM Analyst Pro',
+  title: 'Calendrier des Dividendes | WESTBOURSE',
   description: 'Calendrier annuel interactif des dividendes avec dates de détachement, taux et rendements estimés',
 };
 

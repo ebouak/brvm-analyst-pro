@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       >
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', fontSize: 28, color: accent, fontWeight: 700 }}>
-            BRVM Analyst Pro · Simulateur
+            WESTBOURSE · Simulateur
           </div>
           <div style={{ display: 'flex', fontSize: 40, color: '#fcfcfc', marginTop: 28, lineHeight: 1.3 }}>
             {`Si vous aviez investi ${fmtMontant} FCFA dans ${designation} il y a ${annees} an${annees > 1 ? 's' : ''}…`}

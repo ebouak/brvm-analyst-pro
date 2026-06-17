@@ -1,6 +1,6 @@
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
 
-export const metadata = { title: 'Méthodologie — BRVM Analyst Pro' };
+export const metadata = { title: 'Méthodologie — WESTBOURSE' };
 
 export default function MethodologiePage() {
   return (
@@ -179,7 +179,7 @@ export default function MethodologiePage() {
           <h3 className="overline text-warn/80">Avertissement légal — COSUMAF</h3>
         </div>
         <p className="text-xs text-faint leading-relaxed">
-          Les données, analyses, signaux et résultats de backtesting fournis par BRVM Analyst Pro sont à titre{' '}
+          Les données, analyses, signaux et résultats de backtesting fournis par WESTBOURSE sont à titre{' '}
           <span className="text-muted font-medium">informatif uniquement</span> et ne constituent pas un conseil en
           investissement au sens de la réglementation COSUMAF (Commission de Surveillance du Marché Financier de
           l&apos;Afrique Centrale) ni de l&apos;UMOA. Les performances passées ne préjugent pas des performances

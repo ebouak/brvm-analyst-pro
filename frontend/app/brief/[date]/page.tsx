@@ -45,7 +45,7 @@ async function getBrief(date: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const title = `Note de conjoncture BRVM — séance du ${fmtDateFR(params.date)} | BRVM Analyst Pro`;
+  const title = `Note de conjoncture BRVM — séance du ${fmtDateFR(params.date)} | WESTBOURSE`;
   const description =
     'Tendance du marché, hausses et baisses, valeur des transactions, capitalisations et actualités de la séance BRVM.';
   return {

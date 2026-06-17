@@ -328,7 +328,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           {result && (
             <StatPill tone={result.hasRealSignals ? 'emerald' : 'neutral'}>
               {result.hasRealSignals
-                ? 'Signaux BRVM Analyst Pro'
+                ? 'Signaux WESTBOURSE'
                 : 'Signal momentum (fallback)'}
             </StatPill>
           )}

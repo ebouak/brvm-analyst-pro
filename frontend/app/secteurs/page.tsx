@@ -16,7 +16,7 @@ import {
 // Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
 // par l'intraday : ISR 5 min (audit 2026-06-12).
 export const revalidate = 300;
-export const metadata = { title: 'Secteurs — BRVM Analyst Pro' };
+export const metadata = { title: 'Secteurs — WESTBOURSE' };
 
 async function getData() {
   const supabase = createPublicClient();
@@ -203,7 +203,7 @@ export default async function SecteursPage() {
 
         {/* ── Pied de page discret ─────────────────────────────────────────── */}
         <footer className="pt-4 pb-6 flex items-center justify-between border-t border-border text-xs text-faint">
-          <span>BRVM Analyst Pro</span>
+          <span>WESTBOURSE</span>
           {lastDate && (
             <span>
               Données au{' '}

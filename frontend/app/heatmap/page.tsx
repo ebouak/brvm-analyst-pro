@@ -24,7 +24,7 @@ interface SectorStat {
 }
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Heatmap marché — BRVM Analyst Pro' };
+export const metadata = { title: 'Heatmap marché — WESTBOURSE' };
 
 /**
  * Légende du gradient : émeraude (#16b46a) / rubis (#e24b4b)
@@ -244,7 +244,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
 
         {/* ── Pied de page discret ─────────────────────────────────────────── */}
         <footer className="pt-4 pb-2 flex items-center justify-between border-t border-border text-xs text-faint">
-          <span>BRVM Analyst Pro</span>
+          <span>WESTBOURSE</span>
           {lastDate && (
             <span>
               Données au{' '}

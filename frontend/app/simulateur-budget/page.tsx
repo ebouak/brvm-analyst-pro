@@ -11,7 +11,7 @@ export const revalidate = 900;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
 
 export const metadata: Metadata = {
-  title: "Simulateur de budget BRVM — que faire de votre argent ? | BRVM Analyst Pro",
+  title: "Simulateur de budget BRVM — que faire de votre argent ? | WESTBOURSE",
   description:
     "Entrez votre budget et vos frais SGI : obtenez trois portefeuilles BRVM optimisés (dividende, croissance, équilibré) avec le détail action par action, dividendes nets d'IRVM et retour total estimé. Cours réels, gratuit.",
   keywords: [

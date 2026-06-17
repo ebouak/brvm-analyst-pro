@@ -19,9 +19,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     .select('designation')
     .eq('code', code)
     .maybeSingle();
-  if (!instr) return { title: 'Simulateur — BRVM Analyst Pro' };
+  if (!instr) return { title: 'Simulateur — WESTBOURSE' };
 
-  const title = `Et si vous aviez investi dans ${instr.designation} (${code}) ? | BRVM Analyst Pro`;
+  const title = `Et si vous aviez investi dans ${instr.designation} (${code}) ? | WESTBOURSE`;
   const description = `Simulez un investissement dans l'action ${instr.designation} cotée à la BRVM : plus-value, dividendes perçus, rendement annualisé.`;
 
   // OG image dynamique avec le résultat si les paramètres de partage sont présents

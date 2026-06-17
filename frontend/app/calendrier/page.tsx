@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Calendrier — BRVM Analyst Pro' };
+export const metadata = { title: 'Calendrier — WESTBOURSE' };
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface RawDividend {

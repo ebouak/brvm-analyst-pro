@@ -29,7 +29,7 @@ export default function SignInClient({
         [86, 215, 253],
         [86, 215, 253],
       ]}
-      title="BRVM Analyst Pro"
+      title="WESTBOURSE"
       subtitle={subtitle}
       showNewsletterOptIn={subscribeNewsletter}
       onGoogle={async () => {

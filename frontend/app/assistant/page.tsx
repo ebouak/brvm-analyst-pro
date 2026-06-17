@@ -2,7 +2,7 @@ import { ChatInterface } from '@/components/assistant/ChatInterface';
 import { SectionHeader, StatPill, PremiumPanel } from '@/components/ui/premium';
 
 export const metadata = {
-  title: 'Assistant IA Analyste | BRVM Analyst Pro',
+  title: 'Assistant IA Analyste | WESTBOURSE',
   description: 'Analyse technique et fondamentale des actions BRVM par IA',
 };
 

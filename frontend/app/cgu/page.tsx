@@ -19,7 +19,7 @@ export default function CguPage() {
         <h2>1. Objet</h2>
         <p>
           Les présentes conditions générales d&apos;utilisation (« CGU ») régissent l&apos;accès et
-          l&apos;utilisation du service BRVM Analyst Pro (« le Service »), édité par{' '}
+          l&apos;utilisation du service WESTBOURSE (« le Service »), édité par{' '}
           <Placeholder>raison sociale</Placeholder>. En utilisant le Service, l&apos;utilisateur
           accepte sans réserve les présentes CGU.
         </p>

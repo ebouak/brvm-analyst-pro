@@ -6,7 +6,7 @@ import ViewTabs from '@/components/ViewTabs';
 import { REPORT_TABS } from '@/lib/reportTabs';
 
 export const metadata = {
-  title: 'Archive Rapports | BRVM Analyst Pro',
+  title: 'Archive Rapports | WESTBOURSE',
 };
 
 interface MonthlyReport {
@@ -59,7 +59,7 @@ export default async function ReportsArchivePage() {
         <SectionHeader
           kicker="Gestion de portefeuille"
           title="Archive des rapports"
-          subtitle="Consultez tous vos rapports mensuels BRVM Analyst Pro"
+          subtitle="Consultez tous vos rapports mensuels WESTBOURSE"
         />
         <div className="mt-4">
           <ViewTabs tabs={REPORT_TABS} current="/premium/reports" />

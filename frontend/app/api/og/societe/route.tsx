@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', fontSize: 24, color: accent, fontWeight: 700 }}>
-              BRVM Analyst Pro
+              WESTBOURSE
             </div>
             <div style={{ display: 'flex', fontSize: 52, color: '#fcfcfc', fontWeight: 800, marginTop: 20, maxWidth: 800 }}>
               {designation}

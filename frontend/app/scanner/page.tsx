@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Scanner technique — BRVM Analyst Pro' };
+export const metadata = { title: 'Scanner technique — WESTBOURSE' };
 
 interface PageProps {
   searchParams: Record<string, string | undefined>;

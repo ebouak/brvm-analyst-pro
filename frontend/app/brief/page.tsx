@@ -10,7 +10,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-
 const TELEGRAM_CHANNEL_URL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? '';
 
 export const metadata: Metadata = {
-  title: 'Brief quotidien BRVM — Résumé de séance | BRVM Analyst Pro',
+  title: 'Brief quotidien BRVM — Résumé de séance | WESTBOURSE',
   description:
     'Le résumé quotidien de la séance BRVM : indices, plus fortes hausses et baisses, volumes et actualités. Gratuit, généré automatiquement depuis les données officielles.',
   alternates: { canonical: `${SITE_URL}/brief` },

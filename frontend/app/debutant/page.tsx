@@ -120,7 +120,7 @@ export default function DebutantPage() {
           <LeadForm />
         </div>
         <p className="mt-4 text-center text-xs text-[#9b958c]">
-          BRVM Analyst Pro est un outil d’aide à la décision. Les ordres de bourse sont
+          WESTBOURSE est un outil d’aide à la décision. Les ordres de bourse sont
           passés par une SGI agréée. Investir comporte un risque de perte en capital.
         </p>
       </section>

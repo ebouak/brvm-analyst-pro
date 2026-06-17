@@ -8,7 +8,7 @@ export const revalidate = 3600;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
 
 export const metadata: Metadata = {
-  title: 'Simulateur BRVM — Et si vous aviez investi ? | BRVM Analyst Pro',
+  title: 'Simulateur BRVM — Et si vous aviez investi ? | WESTBOURSE',
   description:
     "Calculez ce qu'aurait rapporté un investissement dans une action BRVM (SONATEL, SGBCI, PALC…) : plus-value, dividendes perçus et rendement annualisé. Gratuit.",
   alternates: { canonical: `${SITE_URL}/simulateur` },
