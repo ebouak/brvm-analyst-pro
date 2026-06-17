@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BrandLogo } from './BrandLogo';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import { BeamButton } from '@/components/ui/beam-button';
 import type { TickItem } from './types';
 
@@ -9,10 +9,10 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
   return (
     <header className="sticky top-3 z-40 flex items-center gap-4 rounded-full border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.03] px-4 py-3 shadow-card backdrop-blur-xl">
       <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="WESTBOURSE">
-        <BrandLogo size={42} />
-        <div className="hidden sm:block">
-          <div className="overline text-gold-2">WESTBOURSE · UEMOA</div>
-          <div className="font-display text-[0.95rem] font-semibold text-ivory">Grand salon de marché</div>
+        <AnimatedLogo size={42} variant="mark" animate={false} />
+        <div className="hidden leading-tight sm:block">
+          <div className="font-display text-[1.05rem] font-semibold tracking-tight text-ivory">WESTBOURSE</div>
+          <div className="overline text-gold-2">UEMOA</div>
         </div>
       </Link>
 

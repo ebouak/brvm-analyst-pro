@@ -15,7 +15,7 @@ import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { IndiceDaily } from '@/lib/types';
-import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import { HeroSpotlight } from '@/components/landing/HeroSpotlight';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -240,37 +240,16 @@ export default async function Landing() {
       {/* ── BANDEAU MARCHÉ — état de séance temps réel ────────────────── */}
       <MarketSessionBanner className="mt-4" />
 
-      {/* ── HERO : promesse + preuve en direct ───────────────────────── */}
+      {/* ── HERO : photo immersive + carte Afrique + logo BRVM clignotant ── */}
+      <HeroSpotlight dateLabel={dateLabel} ticks={ticks} />
+
+      {/* ── PREUVE EN DIRECT : promesse chiffrée + séance live ─────────── */}
       <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
         <div>
-          <div className="mb-6">
-            <AnimatedLogo size={72} variant="lockup" animate loop={false} background={false} />
-          </div>
-
-          <div className="landing-hero-badge mb-5 inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-gold-2">
-            <span className="h-2 w-2 rounded-full bg-up animate-pulse" />
-            {dateLabel ? `Séance du ${dateLabel}` : 'Bourse Régionale des Valeurs Mobilières'}
-          </div>
-
-          <h1 className="mb-5 font-display text-ivory text-display-lg">
-            Décidez sur la BRVM avec des <span className="text-gold-shimmer animate-gold-sweep">données</span>,
-            pas des rumeurs.
-          </h1>
-
           <p className="mb-7 max-w-[56ch] text-base leading-[1.75] text-muted">
             Cours actualisés toutes les 15 minutes, note A–F sur chaque action, fondamentaux extraits des
             publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
           </p>
-
-          <div className="mb-8 flex flex-wrap items-center gap-3">
-            <HeroPulseCTA />
-            <Link
-              href="/societes"
-              className="inline-flex min-h-[48px] items-center rounded-full border border-white/10 bg-white/[0.03] px-6 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-white/[0.06]"
-            >
-              Explorer sans compte →
-            </Link>
-          </div>
 
           {/* Preuves chiffrées réelles */}
           <dl className="grid max-w-md grid-cols-3 gap-4 border-t border-white/[0.07] pt-5">

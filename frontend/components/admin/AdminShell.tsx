@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { adminBreadcrumb, type AdminNavItem } from '@/lib/admin-nav';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 function isActive(href: string, pathname: string): boolean {
   if (href === '/admin') return pathname === '/admin';
@@ -29,7 +30,7 @@ export function AdminShell({
       {/* Sidebar admin */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-surface/60 lg:flex">
         <Link href="/admin" className="flex items-center gap-2 border-b border-border px-5 py-4">
-          <span className="grid h-8 w-8 place-items-center rounded-lg border border-accent/40 bg-accent/10 font-display text-lg font-bold text-accent">B</span>
+          <AnimatedLogo size={34} variant="mark" animate={false} />
           <div className="leading-tight">
             <div className="text-sm font-semibold text-ivory">Console admin</div>
             <div className="overline text-faint">WESTBOURSE</div>

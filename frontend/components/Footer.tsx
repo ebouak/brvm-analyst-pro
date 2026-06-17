@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { FooterCookieLink } from '@/components/FooterCookieLink';
 import { FINANCIAL_DISCLAIMER } from '@/lib/legal/disclaimer';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 const PRODUIT = [
   { href: '/societes', label: 'Sociétés' },
@@ -23,7 +24,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg border border-[#56d7fd]/40 bg-[#56d7fd]/10 font-display text-lg font-bold text-[#56d7fd]">B</span>
+            <AnimatedLogo size={34} variant="mark" animate={false} />
             <span className="font-display font-semibold text-white">WESTBOURSE</span>
           </div>
           <p className="mt-3 max-w-xs text-xs text-white/45">Analyse et aide à la décision d&apos;investissement sur la BRVM (UEMOA).</p>

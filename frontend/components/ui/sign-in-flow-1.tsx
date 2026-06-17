@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
 
 import * as THREE from "three";
 
@@ -716,6 +717,9 @@ export const SignInPage = ({
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
+                      <div className="mb-4 flex justify-center">
+                        <AnimatedLogo size={56} variant="mark" animate={false} />
+                      </div>
                       <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">{title}</h1>
                       <p className="text-[1.8rem] text-white/70 font-light">{subtitle}</p>
                     </div>

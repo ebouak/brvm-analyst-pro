@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
 import BeginnerToggle from '@/components/BeginnerToggle';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
@@ -21,9 +22,7 @@ export default function Sidebar({
       {/* Marque — logo double-bezel */}
       <div className="px-4 py-5">
         <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-xl border border-gold/30 bg-gradient-to-b from-gold/15 to-transparent shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
-            <span className="font-display text-base font-semibold text-gold">B</span>
-          </div>
+          <AnimatedLogo size={38} variant="mark" animate={false} />
           <div className="leading-none">
             <p className="font-display text-sm font-semibold tracking-tight text-ivory">WESTBOURSE</p>
             <p className="overline mt-1 text-[9px] text-gold/70">Pro · UEMOA</p>

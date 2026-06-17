@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
 import BeginnerToggle from '@/components/BeginnerToggle';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
@@ -39,9 +40,7 @@ export default function MobileNav({
       {/* Barre supérieure */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-bg/90 px-4 py-3 backdrop-blur-md">
         <Link href="/dashboard" className="flex items-center gap-2.5" aria-label="Accueil">
-          <div className="grid h-8 w-8 place-items-center rounded-lg border border-gold/30 bg-gradient-to-b from-gold/15 to-transparent">
-            <span className="font-display text-sm font-semibold text-gold">B</span>
-          </div>
+          <AnimatedLogo size={34} variant="mark" animate={false} />
           <span className="font-display text-sm font-semibold tracking-tight text-ivory">WESTBOURSE</span>
         </Link>
         <button
