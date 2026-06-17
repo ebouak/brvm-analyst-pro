@@ -6,9 +6,16 @@ import { groupBySector, colorForVariation, nodeWeight } from '@/lib/heatmap';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtFcfa, fmtNumber } from '@/lib/format';
 
+/** Filtre couleur : toutes, hausses (vert) ou baisses (rouge) uniquement. */
+export type ColorFilter = 'all' | 'up' | 'down';
+
 interface Props {
   data: HeatmapNode[];
   height?: number;
+  /** Logos par code (chemins /logos/XXX.ext) — affichés dans les tuiles. */
+  logos?: Record<string, string | null>;
+  /** Filtre couleur appliqué avant le rendu. */
+  colorFilter?: ColorFilter;
 }
 
 /** Custom fields we embed into each leaf node for tooltip/click access. */
@@ -21,8 +28,16 @@ interface LeafExtra {
   capitalisation: number | null;
 }
 
-export default function HeatmapTreemap({ data, height = 600 }: Props) {
+export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFilter = 'all' }: Props) {
   const router = useRouter();
+
+  // Filtre couleur : on retire les tuiles hors-catégorie avant tout regroupement.
+  const filtered =
+    colorFilter === 'up'
+      ? data.filter((n) => (n.variation_pct ?? 0) > 0)
+      : colorFilter === 'down'
+      ? data.filter((n) => (n.variation_pct ?? 0) < 0)
+      : data;
 
   if (!data.length) {
     return (
@@ -35,41 +50,72 @@ export default function HeatmapTreemap({ data, height = 600 }: Props) {
     );
   }
 
-  const sectors = groupBySector(data);
+  if (!filtered.length) {
+    return (
+      <div
+        className="flex items-center justify-center text-sm rounded-lg"
+        style={{ height, color: '#8b93a7', background: '#161922' }}
+      >
+        {colorFilter === 'up' ? 'Aucune hausse sur cette séance.' : 'Aucune baisse sur cette séance.'}
+      </div>
+    );
+  }
+
+  const sectors = groupBySector(filtered);
 
   // Build the ECharts treemap data. We cast once at assignment because ECharts'
   // internal TreemapSeriesNodeItemOption is too narrow for our extra fields
-  // (custom tooltip data, rich-label overflow literal union, etc.).
+  // (custom tooltip data, per-node rich labels with logo images, etc.).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const treemapData: any[] = sectors.map((sector) => ({
     name: sector.name,
     itemStyle: { color: 'transparent', borderColor: '#0f1117', borderWidth: 3 },
     upperLabel: { show: true, color: '#8b93a7', fontSize: 11, fontWeight: 'bold' as const },
-    children: sector.children.map((node) => ({
-      name: node.code,
-      value: Math.max(nodeWeight(node), 1),
-      // Extra fields for tooltip + click handler
-      code: node.code,
-      designation: node.designation,
-      variation_pct: node.variation_pct,
-      cours_jour: node.cours_jour,
-      volume: node.volume,
-      capitalisation: node.capitalisation ?? null,
-      itemStyle: { color: colorForVariation(node.variation_pct) },
-      label: {
-        show: true,
-        formatter: () => {
-          const varStr =
-            node.variation_pct != null
-              ? `${node.variation_pct >= 0 ? '+' : ''}${node.variation_pct.toFixed(2)}%`
-              : '';
-          return `{code|${node.code}}\n{var|${varStr}}`;
+    children: sector.children.map((node) => {
+      const varStr =
+        node.variation_pct != null
+          ? `${node.variation_pct >= 0 ? '+' : ''}${node.variation_pct.toFixed(2)}%`
+          : '';
+      const logoUrl = logos[node.code];
+
+      // Rich label : logo (si dispo) au-dessus du code + variation. Le rich doit
+      // être porté par CHAQUE nœud — sinon ECharts affiche le markup brut.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rich: any = {
+        code: { color: '#ffffff', fontSize: 12, fontWeight: 'bold', lineHeight: 16 },
+        var: { color: '#e6e9f0', fontSize: 10, lineHeight: 14 },
+      };
+      let formatter = `{code|${node.code}}\n{var|${varStr}}`;
+      if (logoUrl) {
+        rich.logo = {
+          height: 22,
+          width: 22,
+          align: 'center',
+          backgroundColor: { image: logoUrl },
+        };
+        formatter = `{logo|}\n{code|${node.code}}\n{var|${varStr}}`;
+      }
+
+      return {
+        name: node.code,
+        value: Math.max(nodeWeight(node), 1),
+        // Extra fields for tooltip + click handler
+        code: node.code,
+        designation: node.designation,
+        variation_pct: node.variation_pct,
+        cours_jour: node.cours_jour,
+        volume: node.volume,
+        capitalisation: node.capitalisation ?? null,
+        itemStyle: { color: colorForVariation(node.variation_pct) },
+        label: {
+          show: true,
+          formatter,
+          rich,
+          color: '#ffffff',
+          overflow: 'truncate' as const,
         },
-        color: '#ffffff',
-        fontSize: 11,
-        overflow: 'truncate' as const,
-      },
-    })),
+      };
+    }),
   }));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -131,14 +177,8 @@ export default function HeatmapTreemap({ data, height = 600 }: Props) {
             },
           },
           {
-            // Leaf level
+            // Leaf level — bordures (le label/rich est porté par chaque nœud).
             itemStyle: { borderColor: '#232733', borderWidth: 1, gapWidth: 1 },
-            label: {
-              rich: {
-                code: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' as const, lineHeight: 18 },
-                var: { color: '#e6e9f0', fontSize: 10, lineHeight: 14 },
-              },
-            },
           },
         ],
       },

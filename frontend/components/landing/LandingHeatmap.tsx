@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import HeatmapTreemap from '@/components/HeatmapTreemap';
+import brvmLogos from '@/lib/brvmLogos.json';
 import type { HeatmapNode } from '@/lib/heatmap';
 
 /**
@@ -32,7 +33,7 @@ export default function LandingHeatmap({ rows, dateLabel }: { rows: HeatmapNode[
       </div>
 
       <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-2">
-        <HeatmapTreemap data={rows} height={420} />
+        <HeatmapTreemap data={rows} height={420} logos={brvmLogos as Record<string, string>} />
       </div>
 
       <p className="mt-3 text-[10px] leading-relaxed text-faint">
