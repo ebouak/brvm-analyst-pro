@@ -16,6 +16,8 @@ interface Props {
   logos?: Record<string, string | null>;
   /** Filtre couleur appliqué avant le rendu. */
   colorFilter?: ColorFilter;
+  /** Ratio largeur/hauteur estimé du conteneur (sert au dimensionnement des logos). */
+  aspect?: number;
 }
 
 /** Custom fields we embed into each leaf node for tooltip/click access. */
@@ -28,7 +30,7 @@ interface LeafExtra {
   capitalisation: number | null;
 }
 
-export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFilter = 'all' }: Props) {
+export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFilter = 'all', aspect = 2 }: Props) {
   const router = useRouter();
 
   // Filtre couleur : on retire les tuiles hors-catégorie avant tout regroupement.
@@ -63,6 +65,19 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
 
   const sectors = groupBySector(filtered);
 
+  // Dimensionnement proportionnel des logos : on estime la surface en pixels de
+  // chaque tuile à partir de sa part de capitalisation et des dimensions
+  // estimées du conteneur (hauteur réelle × ratio largeur/hauteur). Le côté
+  // ≈ √(surface) donne une taille de logo cohérente avec la tuile — et l'on
+  // masque le logo sur les tuiles trop petites (sinon il déborde et paraît
+  // « cassé »).
+  const estW = height * aspect;
+  const estH = height;
+  const grandTotal = sectors.reduce(
+    (sum, s) => sum + s.children.reduce((c, n) => c + Math.max(nodeWeight(n), 1), 0),
+    0,
+  );
+
   // Build the ECharts treemap data. We cast once at assignment because ECharts'
   // internal TreemapSeriesNodeItemOption is too narrow for our extra fields
   // (custom tooltip data, per-node rich labels with logo images, etc.).
@@ -78,18 +93,25 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
           : '';
       const logoUrl = logos[node.code];
 
-      // Rich label : logo (si dispo) au-dessus du code + variation. Le rich doit
-      // être porté par CHAQUE nœud — sinon ECharts affiche le markup brut.
+      // Côté estimé de la tuile (px) → taille de logo et de police proportionnelles.
+      const weight = Math.max(nodeWeight(node), 1);
+      const side = grandTotal > 0 ? Math.sqrt((weight / grandTotal) * estW * estH) : 0;
+      const logoPx = Math.round(Math.min(72, side * 0.42));
+      const codeFont = Math.round(Math.min(22, Math.max(11, side * 0.13)));
+      const varFont = Math.max(9, codeFont - 3);
+
+      // Rich label : logo (si la tuile est assez grande) au-dessus du code + variation.
+      // Le rich doit être porté par CHAQUE nœud — sinon ECharts affiche le markup brut.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rich: any = {
-        code: { color: '#ffffff', fontSize: 12, fontWeight: 'bold', lineHeight: 16 },
-        var: { color: '#e6e9f0', fontSize: 10, lineHeight: 14 },
+        code: { color: '#ffffff', fontSize: codeFont, fontWeight: 'bold', lineHeight: codeFont + 4 },
+        var: { color: '#e6e9f0', fontSize: varFont, lineHeight: varFont + 4 },
       };
       let formatter = `{code|${node.code}}\n{var|${varStr}}`;
-      if (logoUrl) {
+      if (logoUrl && logoPx >= 18) {
         rich.logo = {
-          height: 22,
-          width: 22,
+          height: logoPx,
+          width: logoPx,
           align: 'center',
           backgroundColor: { image: logoUrl },
         };
