@@ -42,7 +42,7 @@ const SGI: Sgi[] = [
   { nom: 'BOA Capital Securities', pays: 'CI', type: 'Banque', groupe: 'Groupe Bank of Africa', logo: '/sgi/boa-capital-securities.svg' },
   { nom: 'Bridge Securities', pays: 'CI', type: 'Banque', groupe: 'Bridge Bank Group', logo: '/sgi/bridge-securities.svg' },
   { nom: 'EDC Investment Corporation', pays: 'CI', type: 'Banque', groupe: 'Groupe Ecobank', logo: '/sgi/edc-investment-corporation.svg' },
-  { nom: 'NSIA Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe NSIA', logo: '/sgi/nsia-finance.svg' },
+  { nom: 'NSIA Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe NSIA · devient NSIA Capital (2026)', logo: '/sgi/nsia-finance.svg' },
   { nom: 'SOGEBOURSE', pays: 'CI', type: 'Banque', groupe: "Société Générale Côte d'Ivoire", logo: '/sgi/sogebourse.svg' },
   { nom: 'Hudson & Cie', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/hudson-cie.svg' },
   { nom: 'Phoenix Capital Management', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/phoenix-capital-management.svg' },
@@ -94,17 +94,28 @@ function SgiCard({ s }: { s: Sgi }) {
     <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-5 transition-all hover:-translate-y-0.5 hover:border-accent/35 hover:bg-white/[0.05]">
       <div className="mb-3.5 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          {s.logo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={s.logo} alt={`Logo ${s.nom}`} loading="lazy" className="h-11 w-11 flex-none rounded-[11px] object-contain" />
-          ) : (
-            <span
-              className="grid h-11 w-11 flex-none place-items-center rounded-[11px] border font-display text-sm font-bold"
-              style={{ background: `hsl(${h},34%,13%)`, borderColor: `hsl(${h},42%,30%)`, color: `hsl(${h},60%,70%)` }}
-            >
+          {/* Tuile : monogramme de repli dessous, logo (officiel ou placeholder) par-dessus.
+              Si le fichier est absent/cassé, l'img se masque et le monogramme reste visible. */}
+          <span
+            className="relative h-11 w-11 flex-none overflow-hidden rounded-[11px] border"
+            style={{ background: `hsl(${h},34%,13%)`, borderColor: `hsl(${h},42%,30%)`, color: `hsl(${h},60%,70%)` }}
+          >
+            <span className="absolute inset-0 grid place-items-center font-display text-sm font-bold" aria-hidden>
               {monogram(s.nom)}
             </span>
-          )}
+            {s.logo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={s.logo}
+                alt={`Logo ${s.nom}`}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
+          </span>
           <div className="min-w-0">
             <h3 className="font-display text-[1.05rem] leading-tight text-ivory">{s.nom}</h3>
             <p className="mt-1 text-[12.5px] text-muted">{s.groupe}</p>
@@ -197,6 +208,20 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
         Pour acheter ou vendre une action à la BRVM, une seule porte d&apos;entrée : une SGI agréée. Voici l&apos;annuaire
         complet, classé par pays, avec les critères pour décider sur des faits — pas sur une réputation.
       </p>
+
+      {/* Repères chiffrés */}
+      <dl className="mb-2 flex flex-wrap gap-x-10 gap-y-4 border-t border-white/[0.07] pt-5">
+        {[
+          ['8', "pays de l'UEMOA"],
+          [`${SGI.length}`, 'SGI référencées'],
+          ['1', 'marché unifié'],
+        ].map(([num, lab]) => (
+          <div key={lab} className="min-w-[88px]">
+            <dt className="font-display text-3xl leading-none text-ivory">{num}</dt>
+            <dd className="mt-2 font-mono text-[11px] uppercase tracking-wide text-faint">{lab}</dd>
+          </div>
+        ))}
+      </dl>
 
       {/* Rôle de la SGI */}
       <div className="grid grid-cols-1 gap-6 rounded-panel border border-white/10 bg-white/[0.02] p-6 md:grid-cols-[1.45fr_1fr] md:items-center md:p-8">
