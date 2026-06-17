@@ -15,10 +15,11 @@ import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { IndiceDaily } from '@/lib/types';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
-  title: 'BRVM Analyst Pro — Décidez sur la BRVM avec des données, pas des rumeurs',
+  title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
   description:
     'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit — créez votre compte en 1 minute.',
 };
@@ -242,6 +243,10 @@ export default async function Landing() {
       {/* ── HERO : promesse + preuve en direct ───────────────────────── */}
       <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
         <div>
+          <div className="mb-6">
+            <AnimatedLogo size={72} variant="lockup" animate loop={false} background={false} />
+          </div>
+
           <div className="landing-hero-badge mb-5 inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-gold-2">
             <span className="h-2 w-2 rounded-full bg-up animate-pulse" />
             {dateLabel ? `Séance du ${dateLabel}` : 'Bourse Régionale des Valeurs Mobilières'}

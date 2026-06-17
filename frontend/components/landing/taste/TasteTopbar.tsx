@@ -8,10 +8,10 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
   const doubled = [...ticks, ...ticks];
   return (
     <header className="sticky top-3 z-40 flex items-center gap-4 rounded-full border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.03] px-4 py-3 shadow-card backdrop-blur-xl">
-      <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="BRVM Analyst Pro">
+      <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="WESTBOURSE">
         <BrandLogo size={42} />
         <div className="hidden sm:block">
-          <div className="overline text-gold-2">BRVM Analyst Pro · UEMOA</div>
+          <div className="overline text-gold-2">WESTBOURSE · UEMOA</div>
           <div className="font-display text-[0.95rem] font-semibold text-ivory">Grand salon de marché</div>
         </div>
       </Link>
