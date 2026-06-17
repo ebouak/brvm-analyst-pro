@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { saveInvestorProfile } from '@/app/onboarding/actions';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 const PROFILS = [
   { key: 'prudent', label: 'Prudent', desc: 'Préserver le capital, faible volatilité' },
@@ -18,10 +19,13 @@ const HORIZONS = [
 ] as const;
 
 export default function OnboardingModal() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>(1);
   const [profil, setProfil] = useState<string>('modere');
   const [horizon, setHorizon] = useState<string>('moyen');
-  const [debutant, setDebutant] = useState(false);
+  // Défaut « mode débutant » : un nouveau compte arrive en explications simplifiées.
+  const [debutant, setDebutant] = useState(true);
+  const [formule, setFormule] = useState<'gratuit' | 'premium'>('gratuit');
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +37,13 @@ export default function OnboardingModal() {
     setError(null);
     startTransition(async () => {
       const res = await saveInvestorProfile(fd);
-      if (res?.error) setError(res.error);
+      if (res?.error) {
+        setError(res.error);
+        return;
+      }
+      // Le compte reste gratuit par défaut (aucun abonnement). « Premium » dirige
+      // vers le flux de souscription existant ; « Gratuit » ferme simplement.
+      if (formule === 'premium') router.push('/account/plan');
     });
   }
 
@@ -44,7 +54,7 @@ export default function OnboardingModal() {
         {step === 1 && (
           <>
             <div className="space-y-1">
-              <p className="text-[10px] text-faint uppercase tracking-wide">Bienvenue · Étape 1/3</p>
+              <p className="text-[10px] text-faint uppercase tracking-wide">Bienvenue · Étape 1/4</p>
               <h2 className="text-lg font-semibold text-ivory">Quel est votre profil ?</h2>
               <p className="text-xs text-muted">Personnalise vos signaux et recommandations.</p>
             </div>
@@ -69,7 +79,7 @@ export default function OnboardingModal() {
         {step === 2 && (
           <>
             <div className="space-y-1">
-              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 2/3</p>
+              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 2/4</p>
               <h2 className="text-lg font-semibold text-ivory">Votre horizon d&apos;investissement ?</h2>
             </div>
             <div className="space-y-2">
@@ -99,7 +109,7 @@ export default function OnboardingModal() {
         {step === 3 && (
           <>
             <div className="space-y-1">
-              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 3/3</p>
+              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 3/4</p>
               <h2 className="text-lg font-semibold text-ivory">Votre niveau d&apos;expérience ?</h2>
               <p className="text-xs text-muted">Le mode débutant remplace le jargon par des explications simples.</p>
             </div>
@@ -117,17 +127,51 @@ export default function OnboardingModal() {
                 </button>
               ))}
             </div>
-            {error && (
-              <p className="text-xs text-down">{error}</p>
-            )}
             <div className="flex gap-2">
               <button type="button" onClick={() => setStep(2)}
                 className="flex-1 py-2.5 rounded-xl border border-border text-muted text-sm hover:border-cyan/30 transition">
                 ← Retour
               </button>
+              <button type="button" onClick={() => setStep(4)}
+                className="flex-1 py-2.5 rounded-xl bg-cyan/90 text-bg font-semibold text-sm hover:bg-cyan transition">
+                Suivant →
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <div className="space-y-1">
+              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 4/4</p>
+              <h2 className="text-lg font-semibold text-ivory">Choisissez votre formule</h2>
+              <p className="text-xs text-muted">Vous pouvez démarrer gratuitement et passer Premium à tout moment.</p>
+            </div>
+            <div className="space-y-2">
+              {[
+                { val: 'gratuit' as const, label: 'Gratuit', desc: 'Accès aux fonctionnalités de base, sans carte bancaire' },
+                { val: 'premium' as const, label: 'Premium', desc: 'Diagnostic IA, outils avancés et rapports — voir les offres' },
+              ].map(({ val, label, desc }) => (
+                <button key={val} type="button" onClick={() => setFormule(val)}
+                  className={`w-full text-left px-4 py-3 rounded-xl border transition ${
+                    formule === val ? 'border-cyan/50 bg-cyan/10 text-ivory' : 'border-border text-muted hover:border-cyan/30'
+                  }`}>
+                  <span className="font-semibold text-sm">{label}</span>
+                  <span className="text-xs text-faint ml-2">{desc}</span>
+                </button>
+              ))}
+            </div>
+            {error && (
+              <p className="text-xs text-down">{error}</p>
+            )}
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setStep(3)}
+                className="flex-1 py-2.5 rounded-xl border border-border text-muted text-sm hover:border-cyan/30 transition">
+                ← Retour
+              </button>
               <button type="button" onClick={submit} disabled={pending}
                 className="flex-1 py-2.5 rounded-xl bg-up/90 text-bg font-semibold text-sm hover:bg-up transition disabled:opacity-50">
-                {pending ? 'Enregistrement…' : 'Commencer →'}
+                {pending ? 'Enregistrement…' : formule === 'premium' ? 'Voir les offres Premium →' : 'Commencer gratuitement →'}
               </button>
             </div>
           </>
