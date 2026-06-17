@@ -111,7 +111,9 @@
       "Bash(grep -q \"playwright-report\" .gitignore)",
       "Bash(printf \"\\\\n# Playwright\\\\n/test-results/\\\\n/playwright-report/\\\\n/blob-report/\\\\n/playwright/.cache/\\\\n\")",
       "Bash(git -C .. check-ignore frontend/test-results frontend/playwright-report)",
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "Bash(NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx src/index.ts secteurs)",
+      "Bash(echo \"EXIT_OBL=$?\")"
     ]
   }
 }

@@ -19,6 +19,7 @@ export type PermissionCode =
   | 'billing.read' | 'billing.refund'
   | 'scraping.read' | 'scraping.retry' | 'scraping.configure'
   | 'content.read' | 'content.write' | 'content.publish'
+  | 'leads.read' | 'leads.write'
   | 'audit.read'
   | 'settings.read' | 'settings.write';
 

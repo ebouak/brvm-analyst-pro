@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
+import BeginnerBanner from '@/components/BeginnerBanner';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -16,6 +17,7 @@ const BARE_PREFIXES = [
   '/brief',
   '/pricing',
   '/comparateur-sgi',
+  '/debutant',
 ];
 
 /** Pages légales : publiques, plein écran, AVEC footer. */
@@ -24,6 +26,8 @@ const LEGAL_PREFIXES = ['/mentions-legales', '/cgu', '/confidentialite'];
 /** Routes publiques qui doivent afficher le footer global. */
 function showsFooter(pathname: string): boolean {
   if (pathname === '/login' || pathname === '/signup') return false;
+  // /debutant a son propre thème clair (cream/teal) → pas du footer global sombre.
+  if (pathname.startsWith('/debutant')) return false;
   if (pathname === '/') return true;
   return [...BARE_PREFIXES, ...LEGAL_PREFIXES].some((p) => pathname.startsWith(p));
 }
@@ -54,6 +58,7 @@ export default function ConditionalShell({
   if (bare) {
     return (
       <>
+        {pathname === '/' && <BeginnerBanner />}
         {children}
         {showsFooter(pathname) && <Footer />}
       </>
