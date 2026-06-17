@@ -36,28 +36,28 @@ interface Sgi {
 }
 
 const SGI: Sgi[] = [
-  { nom: 'Atlantique Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe Banque Atlantique' },
-  { nom: 'BICI Bourse', pays: 'CI', type: 'Banque', groupe: 'BICICI · BNP Paribas' },
-  { nom: 'BNI Finances', pays: 'CI', type: 'Banque', groupe: "Banque Nationale d'Investissement" },
-  { nom: 'BOA Capital Securities', pays: 'CI', type: 'Banque', groupe: 'Groupe Bank of Africa' },
-  { nom: 'Bridge Securities', pays: 'CI', type: 'Banque', groupe: 'Bridge Bank Group' },
-  { nom: 'EDC Investment Corporation', pays: 'CI', type: 'Banque', groupe: 'Groupe Ecobank' },
-  { nom: 'NSIA Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe NSIA' },
-  { nom: 'SOGEBOURSE', pays: 'CI', type: 'Banque', groupe: "Société Générale Côte d'Ivoire" },
-  { nom: 'Hudson & Cie', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'Phoenix Capital Management', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'Africaine de Bourse', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'Sirius Capital', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'CGF Bourse', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante · pionnière' },
-  { nom: 'Impaxis Securities', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'Everest Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'Invictus Capital & Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'Coris Bourse', pays: 'BF', type: 'Banque', groupe: 'Groupe Coris Bank International' },
-  { nom: 'SBIF', pays: 'BF', type: 'Indépendante', groupe: "Sté Burkinabè d'Intermédiation Financière" },
-  { nom: 'SGI Mali', pays: 'ML', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'SGI Bénin', pays: 'BJ', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'SGI Togo', pays: 'TG', type: 'Indépendante', groupe: 'Maison indépendante' },
-  { nom: 'SGI Niger', pays: 'NE', type: 'Indépendante', groupe: 'Maison indépendante' },
+  { nom: 'Atlantique Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe Banque Atlantique', logo: '/sgi/atlantique-finance.svg' },
+  { nom: 'BICI Bourse', pays: 'CI', type: 'Banque', groupe: 'BICICI · BNP Paribas', logo: '/sgi/bici-bourse.svg' },
+  { nom: 'BNI Finances', pays: 'CI', type: 'Banque', groupe: "Banque Nationale d'Investissement", logo: '/sgi/bni-finances.svg' },
+  { nom: 'BOA Capital Securities', pays: 'CI', type: 'Banque', groupe: 'Groupe Bank of Africa', logo: '/sgi/boa-capital-securities.svg' },
+  { nom: 'Bridge Securities', pays: 'CI', type: 'Banque', groupe: 'Bridge Bank Group', logo: '/sgi/bridge-securities.svg' },
+  { nom: 'EDC Investment Corporation', pays: 'CI', type: 'Banque', groupe: 'Groupe Ecobank', logo: '/sgi/edc-investment-corporation.svg' },
+  { nom: 'NSIA Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe NSIA', logo: '/sgi/nsia-finance.svg' },
+  { nom: 'SOGEBOURSE', pays: 'CI', type: 'Banque', groupe: "Société Générale Côte d'Ivoire", logo: '/sgi/sogebourse.svg' },
+  { nom: 'Hudson & Cie', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/hudson-cie.svg' },
+  { nom: 'Phoenix Capital Management', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/phoenix-capital-management.svg' },
+  { nom: 'Africaine de Bourse', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/africaine-de-bourse.svg' },
+  { nom: 'Sirius Capital', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sirius-capital.svg' },
+  { nom: 'CGF Bourse', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante · pionnière', logo: '/sgi/cgf-bourse.svg' },
+  { nom: 'Impaxis Securities', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/impaxis-securities.svg' },
+  { nom: 'Everest Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/everest-finance.svg' },
+  { nom: 'Invictus Capital & Finance', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/invictus-capital-finance.svg' },
+  { nom: 'Coris Bourse', pays: 'BF', type: 'Banque', groupe: 'Groupe Coris Bank International', logo: '/sgi/coris-bourse.svg' },
+  { nom: 'SBIF', pays: 'BF', type: 'Indépendante', groupe: "Sté Burkinabè d'Intermédiation Financière", logo: '/sgi/sbif.svg' },
+  { nom: 'SGI Mali', pays: 'ML', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-mali.svg' },
+  { nom: 'SGI Bénin', pays: 'BJ', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-benin.svg' },
+  { nom: 'SGI Togo', pays: 'TG', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-togo.svg' },
+  { nom: 'SGI Niger', pays: 'NE', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-niger.svg' },
 ];
 
 /* ── Helpers monogramme / couleur stable ───────────────────────────────── */
@@ -96,7 +96,7 @@ function SgiCard({ s }: { s: Sgi }) {
         <div className="flex min-w-0 items-start gap-3">
           {s.logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={s.logo} alt={`Logo ${s.nom}`} loading="lazy" className="h-11 w-11 flex-none rounded-[11px] border border-white/10 bg-white object-contain p-1" />
+            <img src={s.logo} alt={`Logo ${s.nom}`} loading="lazy" className="h-11 w-11 flex-none rounded-[11px] object-contain" />
           ) : (
             <span
               className="grid h-11 w-11 flex-none place-items-center rounded-[11px] border font-display text-sm font-bold"
