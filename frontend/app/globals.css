@@ -185,3 +185,30 @@ body {
   .legal-prose a { @apply text-[#56d7fd] underline; }
   .legal-prose strong { @apply text-white/90; }
 }
+
+/* ----- WESTBOURSE animated logo (stroke-draw) ----- */
+.wslogo-anim .wslogo-w { stroke-dasharray: 220; stroke-dashoffset: 220; animation: wslogo-draw 1.8s ease-in-out forwards; }
+.wslogo-anim .wslogo-shaft { stroke-dasharray: 60; stroke-dashoffset: 60; animation: wslogo-draw 1.8s ease-in-out forwards; animation-delay: .55s; }
+.wslogo-anim .wslogo-head { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; animation: wslogo-pop 1.8s ease-in-out forwards; animation-delay: .85s; }
+
+.wslogo-loop .wslogo-w,
+.wslogo-loop .wslogo-shaft,
+.wslogo-loop .wslogo-head { animation-iteration-count: infinite; }
+
+@keyframes wslogo-draw {
+  0% { stroke-dashoffset: var(--ws-len, 220); }
+  50% { stroke-dashoffset: 0; }
+  88% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes wslogo-pop {
+  0%, 18% { opacity: 0; transform: scale(.2) translateY(6px); }
+  40%, 88% { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wslogo-anim .wslogo-w,
+  .wslogo-anim .wslogo-shaft { stroke-dashoffset: 0; animation: none; }
+  .wslogo-anim .wslogo-head { opacity: 1; transform: none; animation: none; }
+}
