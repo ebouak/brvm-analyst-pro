@@ -1,6 +1,6 @@
 {
-  "name": "BRVM Analyst Pro",
-  "short_name": "BRVM Analyst",
+  "name": "WESTBOURSE",
+  "short_name": "WESTBOURSE",
   "description": "Plateforme d'analyse et d'aide à la décision sur la BRVM",
   "start_url": "/",
   "display": "standalone",

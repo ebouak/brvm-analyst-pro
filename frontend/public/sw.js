@@ -1,4 +1,4 @@
-/* Service Worker — BRVM Analyst Pro
+/* Service Worker — WESTBOURSE
  * Gère : cache offline (stale-while-revalidate) + Web Push notifications
  */
 
@@ -82,7 +82,7 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'BRVM Analyst Pro', {
+    self.registration.showNotification(data.title || 'WESTBOURSE', {
       body: data.body || '',
       icon: '/icon.svg',
       badge: '/icon.svg',
