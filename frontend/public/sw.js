@@ -78,7 +78,7 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data.json();
   } catch {
-    data = { title: 'BRVM Analyst', body: event.data.text() };
+    data = { title: 'WESTBOURSE', body: event.data.text() };
   }
 
   event.waitUntil(
