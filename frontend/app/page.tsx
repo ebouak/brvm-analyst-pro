@@ -6,6 +6,7 @@ import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
+import SgiComparator from '@/components/landing/SgiComparator';
 import NewsletterForm from '@/components/NewsletterForm';
 import { LandingIndices } from '@/components/landing/LandingIndices';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
@@ -477,6 +478,9 @@ export default async function Landing() {
           )}
         </article>
       </section>
+
+      {/* ── COMPARATEUR DES SGI (annuaire UEMOA + critères + FAQ) ──────── */}
+      <SgiComparator />
 
       {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
       <section className="mt-10">
