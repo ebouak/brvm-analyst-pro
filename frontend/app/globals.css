@@ -212,3 +212,5 @@ body {
   .wslogo-anim .wslogo-shaft { stroke-dashoffset: 0; animation: none; }
   .wslogo-anim .wslogo-head { opacity: 1; transform: none; animation: none; }
 }
+
+@keyframes wslogo-splash-out { to { opacity: 0; visibility: hidden; } }

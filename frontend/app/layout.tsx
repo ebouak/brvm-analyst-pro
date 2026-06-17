@@ -6,19 +6,20 @@ import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import OnboardingModal from '@/components/OnboardingModal';
 import { BeginnerModeProvider } from '@/lib/beginner-mode';
 import { ConsentProvider } from '@/components/consent/ConsentProvider';
+import SplashScreen from '@/components/brand/SplashScreen';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
-  // UX fix: template de titre pour que chaque page affiche "Page | BRVM Analyst Pro".
-  title: { default: 'BRVM Analyst Pro', template: '%s | BRVM Analyst Pro' },
+  // UX fix: template de titre pour que chaque page affiche "Page | WESTBOURSE".
+  title: { default: 'WESTBOURSE', template: '%s | WESTBOURSE' },
   description: "Plateforme d'analyse et d'aide à la décision d'investissement sur la BRVM (UEMOA).",
   icons: { icon: '/favicon.svg' },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'BRVM Analyst',
+    title: 'WESTBOURSE',
   },
 };
 
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="fr" className="dark">
       <body className="text-white antialiased font-sans">
+        <SplashScreen />
         <ConsentProvider>
           <BeginnerModeProvider initial={initialBeginner}>
             <ConditionalShell isPremium={isPremium} isAdmin={isAdmin}>{children}</ConditionalShell>
