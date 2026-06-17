@@ -5,6 +5,7 @@ import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
 import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
+import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
 import NewsletterForm from '@/components/NewsletterForm';
 import { LandingIndices } from '@/components/landing/LandingIndices';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
@@ -222,6 +223,9 @@ export default async function Landing() {
 
       {/* ── TICKER ACTUALITÉS ─────────────────────────────────────────── */}
       <NewsTicker className="mt-3 -mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
+
+      {/* ── BANDEAU MARCHÉ — état de séance temps réel ────────────────── */}
+      <MarketSessionBanner className="mt-4" />
 
       {/* ── HERO : promesse + preuve en direct ───────────────────────── */}
       <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
