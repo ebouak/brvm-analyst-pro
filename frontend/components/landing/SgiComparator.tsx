@@ -406,6 +406,22 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
           ))}
         </div>
       </div>
+
+      {/* Outil associé : simulateur de budget */}
+      <a
+        href="/simulateur-budget"
+        className="mt-12 flex flex-col items-start justify-between gap-4 rounded-2xl border border-accent/25 bg-accent/[0.05] p-6 transition-colors hover:border-accent/45 sm:flex-row sm:items-center"
+      >
+        <div>
+          <p className="overline mb-1.5 text-gold-2">Outil associé</p>
+          <h3 className="mb-1.5 font-display text-xl text-ivory">Que faire de votre budget ?</h3>
+          <p className="max-w-[60ch] text-[14px] leading-relaxed text-muted">
+            Une fois votre SGI choisie, entrez votre montant et vos frais de courtage : le simulateur compose trois
+            portefeuilles BRVM (dividende, croissance, équilibré) à partir des cours réels.
+          </p>
+        </div>
+        <span className="flex-none font-mono text-[13px] text-accent">Ouvrir le simulateur →</span>
+      </a>
     </section>
   );
 }

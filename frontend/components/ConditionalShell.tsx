@@ -9,7 +9,14 @@ import Footer from '@/components/Footer';
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
 
 /** Sections publiques SEO : plein écran avec leur propre header (PublicShell). */
-const BARE_PREFIXES = ['/societes', '/simulateur', '/brief', '/pricing', '/comparateur-sgi'];
+const BARE_PREFIXES = [
+  '/societes',
+  '/simulateur',
+  '/simulateur-budget',
+  '/brief',
+  '/pricing',
+  '/comparateur-sgi',
+];
 
 /** Pages légales : publiques, plein écran, AVEC footer. */
 const LEGAL_PREFIXES = ['/mentions-legales', '/cgu', '/confidentialite'];

@@ -24,6 +24,9 @@ export default function PublicShell({ children }: { children: React.ReactNode })
             <Link href="/simulateur" className="text-muted hover:text-white transition-colors hidden sm:block">
               Simulateur
             </Link>
+            <Link href="/simulateur-budget" className="text-muted hover:text-white transition-colors hidden md:block">
+              Budget
+            </Link>
             <Link href="/brief" className="text-muted hover:text-white transition-colors hidden md:block">
               Brief
             </Link>
@@ -51,6 +54,9 @@ export default function PublicShell({ children }: { children: React.ReactNode })
           </Link>
           <Link href="/simulateur" className="text-muted hover:text-white transition-colors shrink-0">
             Simulateur
+          </Link>
+          <Link href="/simulateur-budget" className="text-muted hover:text-white transition-colors shrink-0">
+            Budget
           </Link>
           <Link href="/brief" className="text-muted hover:text-white transition-colors shrink-0">
             Brief
