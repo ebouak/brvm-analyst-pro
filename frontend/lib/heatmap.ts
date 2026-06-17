@@ -6,12 +6,29 @@ export interface HeatmapNode {
   variation_pct: number | null;
   cours_jour: number | null;
   volume: number | null;
+  /** Capitalisation boursière (shares × cours), si connue. Sert au dimensionnement. */
+  capitalisation?: number | null;
 }
 
 export interface SectorGroup {
   name: string;
   children: HeatmapNode[];
   totalValeur: number;
+  totalWeight: number;
+}
+
+/**
+ * Poids d'un nœud pour le dimensionnement du treemap : on privilégie la
+ * capitalisation boursière (comme TradingView « market_cap »), à défaut la
+ * valeur échangée, à défaut 1 (jamais 0, sinon la tuile disparaît). Aucune
+ * valeur inventée : un nœud sans capitalisation retombe simplement sur la
+ * valeur échangée réelle.
+ */
+export function nodeWeight(n: HeatmapNode): number {
+  const cap = n.capitalisation;
+  if (cap != null && cap > 0) return cap;
+  if (n.valeur_echangee != null && n.valeur_echangee > 0) return n.valeur_echangee;
+  return 1;
 }
 
 export function groupBySector(rows: HeatmapNode[]): SectorGroup[] {
@@ -27,11 +44,12 @@ export function groupBySector(rows: HeatmapNode[]): SectorGroup[] {
   const groups: SectorGroup[] = [];
   for (const [name, children] of map.entries()) {
     const totalValeur = children.reduce((sum, n) => sum + (n.valeur_echangee ?? 0), 0);
-    groups.push({ name, children, totalValeur });
+    const totalWeight = children.reduce((sum, n) => sum + nodeWeight(n), 0);
+    groups.push({ name, children, totalValeur, totalWeight });
   }
 
-  // Sort sectors by total value descending
-  groups.sort((a, b) => b.totalValeur - a.totalValeur);
+  // Tri des secteurs par poids (capitalisation) décroissant.
+  groups.sort((a, b) => b.totalWeight - a.totalWeight);
 
   return groups;
 }

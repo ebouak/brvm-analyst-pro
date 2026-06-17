@@ -1,8 +1,8 @@
 import type React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import HeatmapGrid from '@/components/HeatmapGrid';
+import HeatmapViews from '@/components/HeatmapViews';
 import brvmLogos from '@/lib/brvmLogos.json';
-import brvmSectors from '@/lib/brvmSectors.json';
+import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
@@ -45,42 +45,8 @@ interface PageProps {
 
 async function getData(secteur: string | null) {
   const supabase = createClient();
-
-  const { data: lastRow } = await supabase
-    .from('brvm_actions_daily')
-    .select('date_marche')
-    .order('date_marche', { ascending: false })
-    .limit(1);
-
-  const lastDate = lastRow?.[0]?.date_marche ?? null;
+  const { lastDate, rows: enriched } = await loadHeatmap(supabase);
   if (!lastDate) return { lastDate: null, rows: [] as HeatmapNode[], allSectors: [] as string[] };
-
-  // Référentiel : le secteur fiable vit dans brvm_instruments (celui de
-  // brvm_actions_daily est quasi vide). On l'utilise pour filtrer les actifs
-  // ET enrichir le secteur de chaque ligne.
-  const { data: instruments } = await supabase
-    .from('brvm_instruments')
-    .select('code, secteur, actif')
-    .eq('actif', true);
-
-  const activeCodes = new Set<string>((instruments ?? []).map((i: { code: string }) => i.code));
-  const sectorByCode = new Map<string, string>(
-    (instruments ?? [])
-      .filter((i: { secteur: string | null }) => i.secteur != null && i.secteur.length > 0)
-      .map((i: { code: string; secteur: string | null }) => [i.code, i.secteur as string]),
-  );
-
-  const { data: actions } = await supabase
-    .from('brvm_actions_daily')
-    .select('code, designation, secteur, pays, cours_jour, variation_pct, volume, valeur_echangee')
-    .eq('date_marche', lastDate);
-
-  // Secteur : classification fiable du fichier brvmSectors (GICS, par ticker),
-  // sinon référentiel Supabase, sinon « Autre ».
-  const logoSectors = brvmSectors as Record<string, string>;
-  const enriched: HeatmapNode[] = ((actions ?? []) as HeatmapNode[])
-    .filter((r) => !activeCodes.size || activeCodes.has(r.code))
-    .map((r) => ({ ...r, secteur: logoSectors[r.code] ?? sectorByCode.get(r.code) ?? r.secteur ?? 'Autre' }));
 
   // Liste complète des secteurs (avant filtre) pour les chips.
   const allSectors = Array.from(new Set<string>(enriched.map((r) => r.secteur ?? 'Autre'))).sort();
@@ -181,7 +147,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
           <div className="animate-rise-in [animation-delay:0.08s] flex-1 flex flex-col gap-4">
             <PremiumPanel>
               <div className="p-4 min-h-[420px]">
-                <HeatmapGrid rows={rows} logos={brvmLogos as Record<string, string>} />
+                <HeatmapViews rows={rows} logos={brvmLogos as Record<string, string>} />
               </div>
             </PremiumPanel>
 

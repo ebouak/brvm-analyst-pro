@@ -8,6 +8,9 @@ import NewsTicker from '@/components/NewsTicker';
 import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
 import NewsletterForm from '@/components/NewsletterForm';
 import { LandingIndices } from '@/components/landing/LandingIndices';
+import LandingHeatmap from '@/components/landing/LandingHeatmap';
+import { loadHeatmap } from '@/lib/heatmapData';
+import type { HeatmapNode } from '@/lib/heatmap';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
@@ -158,7 +161,16 @@ async function getData() {
     .limit(4);
   const news = (newsRows ?? []) as NewsCardItem[];
 
-  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news };
+  // Cartographie du marché (treemap landing) — même chargement que /heatmap.
+  let heatmapRows: HeatmapNode[] = [];
+  try {
+    const { rows } = await loadHeatmap(supabase);
+    heatmapRows = rows;
+  } catch {
+    /* pas de cartographie si données indisponibles */
+  }
+
+  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows };
 }
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
@@ -209,7 +221,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news } = await getData();
+  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getData();
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
@@ -311,6 +323,9 @@ export default async function Landing() {
 
       {/* ── INDICES BRVM (11, groupés principaux + sectoriels) ────────── */}
       <LandingIndices indices={indices} />
+
+      {/* ── CARTOGRAPHIE DU MARCHÉ (treemap façon TradingView) ────────── */}
+      <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
 
       {/* ── ÉCRANS RÉELS DE LA PLATEFORME ─────────────────────────────── */}
       <ScreensShowcase />

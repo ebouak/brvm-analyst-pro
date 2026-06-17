@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import EChart from '@/components/EChart';
-import { groupBySector, colorForVariation } from '@/lib/heatmap';
+import { groupBySector, colorForVariation, nodeWeight } from '@/lib/heatmap';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtFcfa, fmtNumber } from '@/lib/format';
 
@@ -18,6 +18,7 @@ interface LeafExtra {
   variation_pct: number | null;
   cours_jour: number | null;
   volume: number | null;
+  capitalisation: number | null;
 }
 
 export default function HeatmapTreemap({ data, height = 600 }: Props) {
@@ -46,13 +47,14 @@ export default function HeatmapTreemap({ data, height = 600 }: Props) {
     upperLabel: { show: true, color: '#8b93a7', fontSize: 11, fontWeight: 'bold' as const },
     children: sector.children.map((node) => ({
       name: node.code,
-      value: Math.max(node.valeur_echangee ?? 1, 1),
+      value: Math.max(nodeWeight(node), 1),
       // Extra fields for tooltip + click handler
       code: node.code,
       designation: node.designation,
       variation_pct: node.variation_pct,
       cours_jour: node.cours_jour,
       volume: node.volume,
+      capitalisation: node.capitalisation ?? null,
       itemStyle: { color: colorForVariation(node.variation_pct) },
       label: {
         show: true,
@@ -87,6 +89,9 @@ export default function HeatmapTreemap({ data, height = 600 }: Props) {
       `<div>Prix : <b>${fmtFcfa(d.cours_jour)} FCFA</b></div>`,
       `<div>Variation : ${varStr}</div>`,
       `<div>Volume : <b>${fmtNumber(d.volume ?? 0)}</b> titres</div>`,
+      d.capitalisation != null
+        ? `<div>Capitalisation : <b>${fmtFcfa(d.capitalisation)} FCFA</b></div>`
+        : '',
       `</div>`,
     ].join('');
   };
