@@ -28,7 +28,7 @@ export default async function ClesApiPage() {
       <SectionHeader
         kicker="Administration"
         title="Clés API"
-        subtitle="Configurez les clés des fournisseurs IA utilisés pour l'extraction de fondamentaux (DeepSeek, Mistral, Grok)."
+        subtitle="Configurez les clés des fournisseurs IA (extraction de fondamentaux : DeepSeek, Mistral, Grok) et de Resend (envoi d'emails newsletter/individuels)."
       />
 
       {/* Filet or décoratif */}

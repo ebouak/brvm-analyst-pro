@@ -1,3 +1,5 @@
+import { resolveResendKey } from './apiKeys';
+
 export interface EmailAttachment {
   filename: string;
   /** Contenu encodé en base64. */
@@ -17,7 +19,7 @@ function fromAddress(): string {
 
 /** Envoie un email unique via Resend. Échec explicite si la clé manque. */
 export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
-  const key = process.env.RESEND_API_KEY;
+  const key = await resolveResendKey();
   if (!key) return { ok: false, sent: 0, error: 'RESEND_API_KEY non configurée' };
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -40,7 +42,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
 
 /** Envoie une liste de messages par lots de 50 (endpoint batch Resend). Tolérant. */
 export async function sendBatch(messages: EmailMessage[]): Promise<EmailResult> {
-  const key = process.env.RESEND_API_KEY;
+  const key = await resolveResendKey();
   if (!key) return { ok: false, sent: 0, error: 'RESEND_API_KEY non configurée' };
   if (messages.length === 0) return { ok: true, sent: 0 };
   const from = fromAddress();

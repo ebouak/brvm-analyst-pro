@@ -3,10 +3,10 @@ import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createSb } from '@supabase/supabase-js';
 import { requireAdmin } from '@/lib/server/admin';
 
-const PROVIDERS = ['deepseek', 'mistral', 'xai'] as const;
+const PROVIDERS = ['deepseek', 'mistral', 'xai', 'resend'] as const;
 type Provider = (typeof PROVIDERS)[number];
 const ENV_VAR: Record<Provider, string> = {
-  deepseek: 'DEEPSEEK_API_KEY', mistral: 'MISTRAL_API_KEY', xai: 'XAI_API_KEY',
+  deepseek: 'DEEPSEEK_API_KEY', mistral: 'MISTRAL_API_KEY', xai: 'XAI_API_KEY', resend: 'RESEND_API_KEY',
 };
 
 function admin() {
