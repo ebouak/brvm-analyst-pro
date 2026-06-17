@@ -1,4 +1,5 @@
 import type { TechnicalSummaryResult, SignalDirection } from '@/lib/technicalSummary';
+import TechnicalGauge from '@/components/TechnicalGauge';
 
 function dirIcon(dir: SignalDirection): string {
   switch (dir) {
@@ -40,6 +41,14 @@ export default function TechnicalSummary({ result }: { result: TechnicalSummaryR
   return (
     <div className="bg-surface border border-border rounded-xl p-5">
       <p className="text-xs text-muted uppercase tracking-widest mb-4">Analyse technique</p>
+
+      {/* Jauge de synthèse (verdict global type speedomètre) */}
+      <div className="mb-5 pb-5 border-b border-border/30">
+        <TechnicalGauge result={result} />
+        <p className="mt-3 text-[10px] text-faint text-center leading-relaxed">
+          Synthèse des 7 indicateurs ci-dessous · horizon séance quotidienne
+        </p>
+      </div>
 
       {/* Grille de signaux */}
       <div className="grid grid-cols-1 gap-0 mb-4">

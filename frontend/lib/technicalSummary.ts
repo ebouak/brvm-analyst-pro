@@ -177,3 +177,36 @@ export function computeTechnicalSummary(p: TechnicalSummaryParams): TechnicalSum
 
   return { signals, trend, confidence, bullCount, bearCount, neutCount };
 }
+
+// ── Verdict synthétique pour la jauge (type « speedomètre ») ────────────────
+export type VerdictTone = 'strong-sell' | 'sell' | 'neutral' | 'buy' | 'strong-buy';
+
+export interface TechnicalVerdict {
+  label: string;      // libellé FR affiché
+  tone: VerdictTone;  // pour le style
+  position: number;   // 0 (vente forte) → 1 (achat fort), pour l'aiguille
+  score: number;      // -1 → 1, balance haussiers/baissiers
+}
+
+/**
+ * Dérive un verdict global (Vente forte … Achat fort) à partir du décompte des
+ * signaux. Score = (haussiers - baissiers) / total des signaux valides, borné
+ * à [-1, 1]. Honnête : si aucun signal valide, verdict neutre, aiguille au centre.
+ */
+export function technicalVerdict(
+  r: Pick<TechnicalSummaryResult, 'bullCount' | 'bearCount' | 'neutCount'>,
+): TechnicalVerdict {
+  const total = r.bullCount + r.bearCount + r.neutCount;
+  const score = total > 0 ? (r.bullCount - r.bearCount) / total : 0;
+  const position = (score + 1) / 2;
+
+  let tone: VerdictTone;
+  let label: string;
+  if (score <= -0.5) { tone = 'strong-sell'; label = 'Vente forte'; }
+  else if (score < -0.15) { tone = 'sell'; label = 'Vente'; }
+  else if (score <= 0.15) { tone = 'neutral'; label = 'Neutre'; }
+  else if (score < 0.5) { tone = 'buy'; label = 'Achat'; }
+  else { tone = 'strong-buy'; label = 'Achat fort'; }
+
+  return { label, tone, position, score };
+}
