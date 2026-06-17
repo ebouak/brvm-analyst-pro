@@ -21,7 +21,7 @@ export function campaignHtml(bodyHtml: string, unsubscribeUrl: string): string {
   return wrap(
     `${bodyHtml}` +
       `<hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>` +
-      `<p style="color:#888;font-size:12px">Vous recevez cet email car vous êtes inscrit à la newsletter BRVM Analyst Pro. ` +
+      `<p style="color:#888;font-size:12px">Vous recevez cet email car vous êtes inscrit à la newsletter WESTBOURSE.` +
       `<a href="${unsubscribeUrl}" style="color:#888">Se désabonner</a>.</p>`,
   );
 }
@@ -31,6 +31,6 @@ export function individualHtml(bodyHtml: string): string {
   return wrap(
     `${bodyHtml}` +
       `<hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>` +
-      `<p style="color:#888;font-size:12px">BRVM Analyst Pro</p>`,
+      `<p style="color:#888;font-size:12px">WESTBOURSE</p>`,
   );
 }

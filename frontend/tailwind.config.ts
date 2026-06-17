@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 // ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  BRVM Analyst Pro — Design System « DeFi Cyan »                            ║
+// ║  WESTBOURSE — Design System « DeFi Cyan »                                  ║
 // ║  Noir profond #030303 · teal #112B33 · cyan #56D7FD · ivoire #FCFCFC       ║
 // ║  (les tokens 'gold'/'accent' portent désormais le cyan — compat conservée) ║
 // ╚══════════════════════════════════════════════════════════════════════════╝

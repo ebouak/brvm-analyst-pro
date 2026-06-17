@@ -50,7 +50,7 @@ export async function genererDocx(data: AnalyseStructuree): Promise<Buffer> {
 
   // ── Titre ──
   children.push(
-    new Paragraph({ children: [new TextRun({ text: 'BRVM Analyst Pro', size: 18, color: CL.vert, font: 'Calibri' })], spacing: { after: 80 } }),
+    new Paragraph({ children: [new TextRun({ text: 'WESTBOURSE', size: 18, color: CL.vert, font: 'Calibri' })], spacing: { after: 80 } }),
     new Paragraph({ children: [new TextRun({ text: `${data.nomComplet} (${data.symbole})`, bold: true, size: 36, color: CL.fond, font: 'Calibri' })], heading: HeadingLevel.HEADING_1, spacing: { after: 80 } }),
     new Paragraph({ children: [new TextRun({ text: `Analyse financière complète · ${data.date}`, size: 20, color: CL.gris, font: 'Calibri' })], spacing: { after: 300 } }),
   );
@@ -118,7 +118,7 @@ export async function genererDocx(data: AnalyseStructuree): Promise<Buffer> {
       properties: { page: { margin: { top: 720, bottom: 720, left: 900, right: 900 } } },
       headers: {
         default: new Header({
-          children: [new Paragraph({ children: [new TextRun({ text: `BRVM Analyst Pro — ${data.symbole} · ${data.date}`, size: 16, color: CL.gris, font: 'Calibri' })] })],
+          children: [new Paragraph({ children: [new TextRun({ text: `WESTBOURSE — ${data.symbole} · ${data.date}`, size: 16, color: CL.gris, font: 'Calibri' })] })],
         }),
       },
       footers: {

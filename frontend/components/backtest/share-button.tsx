@@ -22,7 +22,7 @@ export function ShareableInfographic({ children, filename = 'backtest' }: { chil
       // Partage natif si disponible, sinon téléchargement.
       const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean; share?: (d: unknown) => Promise<void> };
       if (nav.canShare?.({ files: [file] }) && nav.share) {
-        await nav.share({ files: [file], title: 'Backtest BRVM Analyst Pro' });
+        await nav.share({ files: [file], title: 'Backtest WESTBOURSE' });
       } else {
         const a = document.createElement('a');
         a.href = dataUrl;

@@ -25,7 +25,7 @@ export default function Sidebar({
             <span className="font-display text-base font-semibold text-gold">B</span>
           </div>
           <div className="leading-none">
-            <p className="font-display text-sm font-semibold tracking-tight text-ivory">BRVM Analyst</p>
+            <p className="font-display text-sm font-semibold tracking-tight text-ivory">WESTBOURSE</p>
             <p className="overline mt-1 text-[9px] text-gold/70">Pro · UEMOA</p>
           </div>
         </div>

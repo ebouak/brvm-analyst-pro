@@ -43,7 +43,7 @@ export async function generateXlsxBlob(params: {
 }): Promise<Blob> {
   const { code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements } = params;
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'BRVM Analyst Pro';
+  wb.creator = 'WESTBOURSE';
   wb.created = new Date();
 
   // Feuille 1 : Résumé
@@ -55,7 +55,7 @@ export async function generateXlsxBlob(params: {
   ws1.getCell('A1').font = { bold: true, size: 14, name: 'Calibri' };
   ws1.getCell('A2').value = secteur ?? '';
   ws1.getCell('A2').font = { color: { argb: MUT }, size: 10, name: 'Calibri' };
-  ws1.getCell('A3').value = `Généré le ${new Date().toLocaleDateString('fr-FR')} — BRVM Analyst Pro`;
+  ws1.getCell('A3').value = `Généré le ${new Date().toLocaleDateString('fr-FR')} — WESTBOURSE`;
   ws1.getCell('A3').font = { color: { argb: MUT }, size: 9, italic: true, name: 'Calibri' };
 
   const ratioRows: [string, string][] = [

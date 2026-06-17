@@ -24,7 +24,7 @@ export default function Footer() {
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-lg border border-[#56d7fd]/40 bg-[#56d7fd]/10 font-display text-lg font-bold text-[#56d7fd]">B</span>
-            <span className="font-display font-semibold text-white">BRVM Analyst Pro</span>
+            <span className="font-display font-semibold text-white">WESTBOURSE</span>
           </div>
           <p className="mt-3 max-w-xs text-xs text-white/45">Analyse et aide à la décision d&apos;investissement sur la BRVM (UEMOA).</p>
         </div>
@@ -59,7 +59,7 @@ export default function Footer() {
 
       <div className="mx-auto mt-10 max-w-6xl border-t border-white/5 pt-6">
         <p className="text-[11px] leading-relaxed text-white/35">{FINANCIAL_DISCLAIMER}</p>
-        <p className="mt-3 text-[11px] text-white/30">© {year} BRVM Analyst Pro. Tous droits réservés.</p>
+        <p className="mt-3 text-[11px] text-white/30">© {year} WESTBOURSE. Tous droits réservés.</p>
       </div>
     </footer>
   );

@@ -1,4 +1,4 @@
-# BRVM Analyst Pro — Frontend (Next.js 14)
+# WESTBOURSE — Frontend (Next.js 14)
 
 Interface d'analyse BRVM. Lit **uniquement Supabase** (jamais BDFIN
 directement, cf. cahier des charges §11). Thème dark orienté finance (§10).

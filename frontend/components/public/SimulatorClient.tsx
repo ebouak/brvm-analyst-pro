@@ -88,7 +88,7 @@ export default function SimulatorClient({
   const share = useCallback(async () => {
     if (!result) return;
     const company = companies.find((c) => c.code === code);
-    const text = `📈 Si j'avais investi ${fmtNumber(amount)} FCFA dans ${company?.designation ?? code} il y a ${years} an${years > 1 ? 's' : ''}, j'aurais aujourd'hui ${fmtNumber(Math.round(result.finalValue))} FCFA (${result.totalReturnPct >= 0 ? '+' : ''}${fmtNumber(result.totalReturnPct, 1)} %). Calculé sur BRVM Analyst Pro :`;
+    const text = `📈 Si j'avais investi ${fmtNumber(amount)} FCFA dans ${company?.designation ?? code} il y a ${years} an${years > 1 ? 's' : ''}, j'aurais aujourd'hui ${fmtNumber(Math.round(result.finalValue))} FCFA (${result.totalReturnPct >= 0 ? '+' : ''}${fmtNumber(result.totalReturnPct, 1)} %). Calculé sur WESTBOURSE :`;
     const url = `${window.location.origin}/simulateur/${code}?montant=${amount}&annees=${years}`;
     if (navigator.share) {
       try {

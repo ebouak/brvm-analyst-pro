@@ -42,7 +42,7 @@ export default function MobileNav({
           <div className="grid h-8 w-8 place-items-center rounded-lg border border-gold/30 bg-gradient-to-b from-gold/15 to-transparent">
             <span className="font-display text-sm font-semibold text-gold">B</span>
           </div>
-          <span className="font-display text-sm font-semibold tracking-tight text-ivory">BRVM Analyst</span>
+          <span className="font-display text-sm font-semibold tracking-tight text-ivory">WESTBOURSE</span>
         </Link>
         <button
           type="button"

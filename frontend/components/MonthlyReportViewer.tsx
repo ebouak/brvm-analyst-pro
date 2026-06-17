@@ -56,7 +56,7 @@ export function MonthlyReportViewer({ report, pdfUrl }: MonthlyReportViewerProps
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="font-display text-2xl md:text-3xl text-ivory capitalize">{monthName}</h2>
-          <p className="mt-1 text-sm text-muted">Rapport de synthèse BRVM Analyst Pro</p>
+          <p className="mt-1 text-sm text-muted">Rapport de synthèse WESTBOURSE</p>
         </div>
         {pdfUrl && (
           <a

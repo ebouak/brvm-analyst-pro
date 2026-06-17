@@ -159,13 +159,13 @@ export const PdfAnalyseDocument = ({ data }: { data: AnalyseStructuree }) => {
   const scoreNote = data.scoreConviction >= 7 ? 'Achat fort' : data.scoreConviction >= 5 ? 'A surveiller' : 'Neutre / Eviter';
 
   return (
-    <Document title={`Analyse BRVM — ${data.symbole || data.titreRapport} — ${data.date}`} author="BRVM Analyst Pro">
+    <Document title={`Analyse BRVM — ${data.symbole || data.titreRapport} — ${data.date}`} author="WESTBOURSE">
       <Page size="A4" style={s.page}>
 
         {/* HEADER */}
         <View style={s.header}>
           <View style={{ flex: 1 }}>
-            <Text style={s.brand}>BRVM ANALYST PRO</Text>
+            <Text style={s.brand}>WESTBOURSE</Text>
             <Text style={s.titre}>{data.titreRapport}</Text>
             <Text style={s.sousTitre}>
               {data.symbole ? `${data.symbole} · ` : ''}{data.typeAnalyse === 'screener' ? 'Screener multi-actions' : 'Analyse financière complète'}
@@ -258,7 +258,7 @@ export const PdfAnalyseDocument = ({ data }: { data: AnalyseStructuree }) => {
         {/* FOOTER */}
         <View style={s.footer}>
           <Text style={s.footerL}>{data.disclaimer}</Text>
-          <Text style={s.footerR}>BRVM Analyst Pro</Text>
+          <Text style={s.footerR}>WESTBOURSE</Text>
         </View>
         <Text style={s.pageNum} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
       </Page>

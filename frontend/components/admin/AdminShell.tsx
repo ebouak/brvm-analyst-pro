@@ -32,7 +32,7 @@ export function AdminShell({
           <span className="grid h-8 w-8 place-items-center rounded-lg border border-accent/40 bg-accent/10 font-display text-lg font-bold text-accent">B</span>
           <div className="leading-tight">
             <div className="text-sm font-semibold text-ivory">Console admin</div>
-            <div className="overline text-faint">BRVM Analyst Pro</div>
+            <div className="overline text-faint">WESTBOURSE</div>
           </div>
         </Link>
         <nav className="flex-1 space-y-0.5 p-3" aria-label="Navigation administration">
