@@ -29,6 +29,8 @@ export interface DcfPageData {
     betaObs: number;
     fcfYears: number;
     available: boolean; // au moins un FCF + actions
+    /** FCF approché par le résultat net (flux détaillés indisponibles). */
+    fcfProxy: boolean;
   };
   /** Liste des pays disponibles pour le sélecteur de prime de risque. */
   countries: RiskPremiumRow[];
@@ -140,11 +142,35 @@ export async function getDcfData(code: string): Promise<DcfPageData | null> {
   const countries = (premiumsRes.data ?? []) as RiskPremiumRow[];
   const country = countries.find((c) => c.pays === DEFAULT_COUNTRY) ?? countries[0] ?? null;
 
-  // FCF history (du plus ancien au plus récent).
+  // FCF history (du plus ancien au plus récent). Priorité aux flux réels ;
+  // à défaut (flux détaillés vides), proxy = résultat net réel par exercice,
+  // explicitement étiqueté (N'INVENTE RIEN : le résultat net est une donnée réelle).
+  const netIncomeByPeriode = new Map<string, number>();
+  for (const inc of fin.incomeStatements) {
+    if (inc.resultat_net != null) netIncomeByPeriode.set(inc.periode, inc.resultat_net);
+  }
+  let fcfProxy = false;
   const fcfHistory = [...fin.cashFlowStatements]
     .reverse()
-    .map(deriveFcf)
+    .map((cf) => {
+      const real = deriveFcf(cf);
+      if (real != null) return real;
+      const proxy = netIncomeByPeriode.get(cf.periode);
+      if (proxy != null) {
+        fcfProxy = true;
+        return proxy;
+      }
+      return null;
+    })
     .filter((v): v is number => v != null);
+
+  // Si aucune ligne de flux mais des résultats nets existent, bâtir l'historique
+  // directement depuis le résultat net (cas où cash_flow_statements est absent).
+  if (fcfHistory.length === 0 && netIncomeByPeriode.size > 0) {
+    const periodes = [...netIncomeByPeriode.keys()].sort();
+    for (const p of periodes) fcfHistory.push(netIncomeByPeriode.get(p)!);
+    fcfProxy = true;
+  }
 
   const latestBalance = fin.balanceSheets[0];
   const latestIncome = fin.incomeStatements[0];
@@ -200,6 +226,7 @@ export async function getDcfData(code: string): Promise<DcfPageData | null> {
       betaObs: Math.max(0, Math.min(stock.length, market.length) - 1),
       fcfYears: fcfHistory.length,
       available: fcfHistory.length > 0 && shares != null && shares > 0,
+      fcfProxy,
     },
     countries,
   };

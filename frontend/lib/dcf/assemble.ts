@@ -71,9 +71,13 @@ export function netDebtOf(totalDebt: number | null, cash: number | null): number
   return (totalDebt ?? 0) - (cash ?? 0);
 }
 
-/** Coût de la dette avant impôt = charges financières / dette financière. null si non dérivable. */
+/**
+ * Coût de la dette avant impôt = charges financières / dette financière.
+ * null si non dérivable — y compris quand les charges sont ≤ 0 (c'est alors un
+ * PRODUIT financier net, pas un coût : on n'en fabrique pas un Kd négatif).
+ */
 export function costOfDebtOf(interestExpense: number | null, totalDebt: number | null): number | null {
-  if (interestExpense == null || totalDebt == null || totalDebt <= 0) return null;
+  if (interestExpense == null || interestExpense <= 0 || totalDebt == null || totalDebt <= 0) return null;
   return interestExpense / totalDebt;
 }
 

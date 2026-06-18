@@ -39,7 +39,7 @@ export default function DcfClient({
   raw: AssembleRawInputs;
   defaults: AssembleAssumptions;
   countries: RiskPremiumRow[];
-  meta: { riskFreeSource: 'souverain' | 'repli'; riskPremiumCountry: string; moodyRating: string | null; betaObs: number };
+  meta: { riskFreeSource: 'souverain' | 'repli'; riskPremiumCountry: string; moodyRating: string | null; betaObs: number; fcfProxy?: boolean };
   cours: number | null;
 }) {
   const [pays, setPays] = useState(meta.riskPremiumCountry);
@@ -78,6 +78,15 @@ export default function DcfClient({
 
   return (
     <div className="space-y-6">
+      {/* Avertissement proxy FCF (honnêteté : flux détaillés indisponibles) */}
+      {meta.fcfProxy && (
+        <div className="rounded-xl border border-info/30 bg-info/5 px-4 py-3 text-xs text-info">
+          ⓘ Flux de trésorerie détaillés indisponibles pour cette société : le FCF est{' '}
+          <strong>approché par le résultat net</strong> (donnée réelle). La juste-valeur est donc
+          indicative — affinez les hypothèses ou importez le tableau de flux pour un calcul exact.
+        </div>
+      )}
+
       {/* Juste-valeur — hero */}
       <div className="rounded-xl border border-border bg-surface p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">

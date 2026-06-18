@@ -12,6 +12,9 @@ describe('helpers dérivés', () => {
     expect(costOfDebtOf(80, 1000)).toBeCloseTo(0.08, 10);
     expect(costOfDebtOf(80, 0)).toBeNull();
     expect(costOfDebtOf(null, 1000)).toBeNull();
+    // Charges ≤ 0 = produit financier net → pas de Kd fabriqué.
+    expect(costOfDebtOf(-7957, 1000)).toBeNull();
+    expect(costOfDebtOf(0, 1000)).toBeNull();
   });
 
   it('fcfCagr ; null si signe non monotone ou < 2 points', () => {
