@@ -16,10 +16,20 @@ export async function POST(req: NextRequest) {
       page?: string;
     };
 
-    const clean = (s: string, max: number) => String(s).trim().slice(0, max);
-    const p = clean(prenom, 80);
-    const e = clean(email, 160);
-    const m = clean(message, 1200);
+    // Champs mono-ligne (prénom, email, page) : retire TOUT caractère de
+    // contrôle, CR/LF inclus — défense en profondeur contre l'injection
+    // d'en-têtes email via le sujet. Le message autorise les retours-ligne
+    // mais retire les autres caractères de contrôle.
+    // eslint-disable-next-line no-control-regex
+    const stripCtl = (s: string) => String(s).replace(/[\x00-\x1f\x7f]/g, ' ');
+    // eslint-disable-next-line no-control-regex
+    const stripCtlKeepNl = (s: string) => String(s).replace(/[\x00-\x09\x0b-\x1f\x7f]/g, ' ');
+    const oneLine = (s: string, max: number) => stripCtl(s).trim().slice(0, max);
+
+    const p = oneLine(prenom, 80);
+    const e = oneLine(email, 160);
+    const pageLabel = oneLine(page, 200);
+    const m = stripCtlKeepNl(String(message)).trim().slice(0, 1200);
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) {
       return NextResponse.json({ error: 'Email invalide.' }, { status: 400 });
@@ -40,7 +50,7 @@ export async function POST(req: NextRequest) {
           <h2 style="color:#2a8aa8">Nouveau message depuis l'encart de contact</h2>
           <p><strong>Prénom :</strong> ${esc(p) || '—'}</p>
           <p><strong>Email :</strong> ${esc(e)}</p>
-          <p><strong>Page :</strong> ${esc(page) || '—'}</p>
+          <p><strong>Page :</strong> ${esc(pageLabel) || '—'}</p>
           <p><strong>Message :</strong></p>
           <p style="white-space:pre-wrap;border-left:3px solid #56d7fd;padding-left:12px">${esc(m)}</p>
         </div>
