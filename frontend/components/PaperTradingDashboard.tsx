@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   BarChart,
   Bar,
   Cell,
@@ -11,12 +11,14 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { paperTradingService } from '@/lib/paper-trading/service';
 import { Account, Position, OpenPosition, Stats } from '@/lib/paper-trading/types';
 import { PaperTradingJournal } from './PaperTradingJournal';
+import { InfoTip } from '@/components/paper-trading/InfoTip';
 import { AnimatedValue } from '@/components/AnimatedValue';
 
 interface TradableAction { code: string; designation: string | null; cours_jour: number | null }
@@ -33,6 +35,12 @@ export function PaperTradingDashboard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  // Position dont la fermeture est en attente de confirmation (V2 : aperçu latent→réalisé).
+  const [confirmClose, setConfirmClose] = useState<OpenPosition | null>(null);
+  // Courbe : équité réalisée seule, ou valeur du portefeuille (latent inclus).
+  const [curveWithLatent, setCurveWithLatent] = useState(false);
+  // Période affichée sur la courbe : jour (7j) / mois (30j) / année (365j) / tout.
+  const [curvePeriod, setCurvePeriod] = useState<'J' | 'M' | 'A' | 'Tout'>('Tout');
 
   async function load() {
     try {
@@ -63,6 +71,16 @@ export function PaperTradingDashboard() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [showModal]);
+
+  // Fermeture de la modale de confirmation à la touche Échap
+  useEffect(() => {
+    if (!confirmClose) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setConfirmClose(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [confirmClose]);
 
   async function openModal() {
     setError(null);
@@ -103,6 +121,7 @@ export function PaperTradingDashboard() {
     setBusy(true);
     try {
       await paperTradingService.closePosition(id);
+      setConfirmClose(null);
       await load();
     } catch (err) {
       console.error('close failed', err);
@@ -135,27 +154,33 @@ export function PaperTradingDashboard() {
     );
   }
 
-  // Build equity curve from closed positions
-  const equityCurve = positions
+  // Construit la courbe d'équité à partir des trades fermés, en conservant le
+  // timestamp (pour le filtre de période) et un point de départ (capital initial).
+  type CurvePoint = { ts: number; date: string; equity: number };
+  const closedSorted = positions
     .filter((p) => p.status === 'closed')
-    .sort(
-      (a, b) =>
-        new Date(a.exit_date!).getTime() - new Date(b.exit_date!).getTime()
-    )
-    .reduce(
-      (acc: any[], pos) => {
-        const prevEquity =
-          acc.length > 0 ? acc[acc.length - 1].equity : account.capital_initial;
-        return [
-          ...acc,
-          {
-            date: new Date(pos.exit_date!).toLocaleDateString('fr-FR'),
-            equity: prevEquity + pos.pnl,
-          },
-        ];
-      },
-      []
-    );
+    .sort((a, b) => new Date(a.exit_date!).getTime() - new Date(b.exit_date!).getTime());
+
+  const equityCurve: CurvePoint[] = closedSorted.reduce((acc: CurvePoint[], pos) => {
+    const prevEquity = acc.length > 0 ? acc[acc.length - 1].equity : account.capital_initial;
+    const d = new Date(pos.exit_date!);
+    acc.push({
+      ts: d.getTime(),
+      date: d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+      equity: prevEquity + pos.pnl,
+    });
+    return acc;
+  }, []);
+
+  // Point d'origine : capital de départ, daté du premier trade.
+  const originPoint: CurvePoint | null =
+    equityCurve.length > 0
+      ? {
+          ts: new Date(closedSorted[0].entry_date).getTime(),
+          date: 'Départ',
+          equity: account.capital_initial,
+        }
+      : null;
 
   // L'API enrichit les positions ouvertes (current_price/current_value, pnl = latent).
   const openPositions = positions.filter((p) => p.status === 'open') as OpenPosition[];
@@ -165,6 +190,25 @@ export function PaperTradingDashboard() {
   const latentPnl = openPositions.reduce((s, p) => s + (typeof p.pnl === 'number' ? p.pnl : 0), 0);
   const equityTotal = account.capital_current + latentPnl;
   const totalPnl = account.pnl_total + latentPnl;
+
+  // Fenêtre temporelle selon la période choisie (J=7j, M=30j, A=365j, Tout).
+  const periodDays: Record<typeof curvePeriod, number | null> = { J: 7, M: 30, A: 365, Tout: null };
+  const windowMs = periodDays[curvePeriod] != null ? periodDays[curvePeriod]! * 86_400_000 : null;
+  const cutoff = windowMs != null ? Date.now() - windowMs : 0;
+
+  // Courbe affichée : origine (capital de départ) + trades fermés filtrés par
+  // période, puis éventuel point « Aujourd'hui » incluant le P&L latent.
+  const filteredCurve = windowMs != null ? equityCurve.filter((p) => p.ts >= cutoff) : equityCurve;
+  const displayedCurve: CurvePoint[] = [
+    ...(originPoint && (windowMs == null || originPoint.ts >= cutoff) ? [originPoint] : []),
+    ...filteredCurve,
+    ...(curveWithLatent && openPositions.length > 0
+      ? [{ ts: Date.now(), date: "Aujourd'hui", equity: account.capital_initial + totalPnl }]
+      : []),
+  ];
+  // Gains cumulés sur la courbe affichée (dernier point − capital de départ).
+  const curveGain =
+    displayedCurve.length > 0 ? displayedCurve[displayedCurve.length - 1].equity - account.capital_initial : 0;
 
   return (
     <div className="space-y-8">
@@ -294,10 +338,73 @@ export function PaperTradingDashboard() {
         </div>
       )}
 
+      {/* Modale de confirmation de fermeture (aperçu latent → réalisé) */}
+      {confirmClose && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => setConfirmClose(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Fermer la position ${confirmClose.code}`}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-elevated border border-border rounded-xl p-6 w-full max-w-md space-y-4"
+          >
+            <h3 className="text-lg font-semibold text-white">
+              Fermer la position {confirmClose.code} ?
+            </h3>
+            <p className="text-sm text-muted">
+              La position sera vendue au cours du jour de{' '}
+              <span className="text-white tabular">{fmtFcfa(confirmClose.current_price)}</span> FCFA.
+              Votre P&amp;L latent de{' '}
+              <span className={`tabular font-semibold ${confirmClose.pnl >= 0 ? 'text-up' : 'text-down'}`}>
+                {confirmClose.pnl >= 0 ? '+' : ''}
+                {fmtFcfa(confirmClose.pnl)}
+              </span>{' '}
+              deviendra <span className="text-info">réalisé</span> et s'inscrira définitivement dans
+              votre performance.
+            </p>
+            <div className="rounded-lg border border-border bg-surface px-3 py-2.5 text-xs text-muted space-y-1">
+              <div className="flex justify-between">
+                <span>Investi</span>
+                <span className="tabular text-white">
+                  {fmtFcfa(confirmClose.entry_price * confirmClose.num_shares)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Encaissé (au cours du jour)</span>
+                <span className="tabular text-white">{fmtFcfa(confirmClose.current_value)}</span>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setConfirmClose(null)}
+                className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-border"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => handleClose(confirmClose.id)}
+                className="px-4 py-2 rounded-lg bg-down text-bg font-medium disabled:opacity-40 transition text-sm active:scale-95 focus:outline-none focus:ring-2 focus:ring-down/50"
+              >
+                {busy ? 'Fermeture…' : 'Confirmer la fermeture'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">Valeur du portefeuille</div>
+          <div className="text-xs text-muted mb-1 inline-flex items-center gap-1">
+            Valeur du portefeuille
+            <InfoTip label="Liquidités disponibles + valeur actuelle de vos positions ouvertes." />
+          </div>
           <div className="text-2xl font-semibold text-white tabular">
             <AnimatedValue value={equityTotal} format={{ maximumFractionDigits: 0 }} suffix={' FCFA'} />
           </div>
@@ -307,7 +414,10 @@ export function PaperTradingDashboard() {
         </div>
 
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">Performance totale</div>
+          <div className="text-xs text-muted mb-1 inline-flex items-center gap-1">
+            Performance totale
+            <InfoTip label="Somme de vos gains/pertes réalisés (trades fermés) et latents (positions encore ouvertes)." />
+          </div>
           <div
             className={`text-2xl font-semibold tabular ${
               totalPnl >= 0 ? 'text-up' : 'text-down'
@@ -325,7 +435,10 @@ export function PaperTradingDashboard() {
         </div>
 
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">Taux de réussite</div>
+          <div className="text-xs text-muted mb-1 inline-flex items-center gap-1">
+            Taux de réussite
+            <InfoTip label="Part de vos trades fermés terminés en gain." />
+          </div>
           <div className="text-2xl font-semibold text-info tabular">
             {stats ? fmtNumber(stats.winRate, 1) : '0'}%
           </div>
@@ -337,31 +450,97 @@ export function PaperTradingDashboard() {
 
       {/* Equity Curve */}
       <div className="bg-surface border border-border rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">
-          Courbe de performance
-        </h3>
+        <div className="mb-4 flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="text-lg font-semibold text-white">Courbe de performance</h3>
+            {equityCurve.length > 0 && (
+              <p className="mt-0.5 text-xs text-muted">
+                Capital de départ {fmtFcfa(account.capital_initial)} ·{' '}
+                <span className={curveGain >= 0 ? 'text-up' : 'text-down'}>
+                  {curveGain >= 0 ? 'gain' : 'perte'} {curveGain >= 0 ? '+' : ''}
+                  {fmtFcfa(curveGain)}
+                </span>
+              </p>
+            )}
+          </div>
+          {equityCurve.length > 0 && (
+            <div className="flex flex-col items-end gap-2">
+              {openPositions.length > 0 && (
+                <div className="flex rounded-lg border border-border overflow-hidden text-xs">
+                  <button
+                    type="button"
+                    aria-pressed={!curveWithLatent}
+                    onClick={() => setCurveWithLatent(false)}
+                    className={`px-3 py-1.5 transition ${!curveWithLatent ? 'bg-info text-bg' : 'text-muted hover:text-white'}`}
+                  >
+                    Équité réalisée
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={curveWithLatent}
+                    onClick={() => setCurveWithLatent(true)}
+                    className={`px-3 py-1.5 transition ${curveWithLatent ? 'bg-info text-bg' : 'text-muted hover:text-white'}`}
+                  >
+                    Valeur portefeuille
+                  </button>
+                </div>
+              )}
+              <div className="flex rounded-lg border border-border overflow-hidden text-xs">
+                {(['J', 'M', 'A', 'Tout'] as const).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    aria-pressed={curvePeriod === p}
+                    onClick={() => setCurvePeriod(p)}
+                    className={`px-3 py-1.5 transition ${curvePeriod === p ? 'bg-info text-bg' : 'text-muted hover:text-white'}`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         {equityCurve.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={equityCurve}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#232733" />
-              <XAxis dataKey="date" stroke="#8b93a7" />
-              <YAxis stroke="#8b93a7" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#161922',
-                  border: '1px solid #232733',
-                }}
-                labelStyle={{ color: '#e6e9f0' }}
-                formatter={(value) => fmtFcfa(value as number)}
+            <AreaChart data={displayedCurve} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#56D7FD" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#56D7FD" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#232733" vertical={false} />
+              <XAxis dataKey="date" stroke="#8b93a7" tick={{ fontSize: 11 }} />
+              <YAxis
+                stroke="#8b93a7"
+                tick={{ fontSize: 11 }}
+                width={72}
+                domain={['auto', 'auto']}
+                tickFormatter={(v) => fmtFcfa(v as number)}
               />
-              <Line
+              <Tooltip
+                contentStyle={{ backgroundColor: '#161922', border: '1px solid #232733' }}
+                labelStyle={{ color: '#e6e9f0' }}
+                formatter={(value) => [fmtFcfa(value as number), 'Équité']}
+              />
+              <ReferenceLine
+                y={account.capital_initial}
+                stroke="#8b93a7"
+                strokeDasharray="4 4"
+                label={{ value: 'Départ', position: 'insideTopLeft', fill: '#8b93a7', fontSize: 10 }}
+              />
+              <Area
                 type="monotone"
                 dataKey="equity"
                 stroke="#56D7FD"
+                strokeWidth={2}
+                fill="url(#equityFill)"
                 isAnimationActive={false}
-                dot={false}
+                dot={{ r: 2, fill: '#56D7FD' }}
+                activeDot={{ r: 4 }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         ) : openPositions.length > 0 ? (
           /* Pas encore de trade fermé : on montre le P&L latent par position. */
@@ -434,7 +613,10 @@ export function PaperTradingDashboard() {
           openPositions={openPositions}
           closedPositions={closedPositions}
           portfolioValue={equityTotal}
-          onClose={handleClose}
+          onClose={(id) => {
+            const pos = openPositions.find((p) => p.id === id);
+            if (pos) setConfirmClose(pos);
+          }}
           busy={busy}
         />
       </div>

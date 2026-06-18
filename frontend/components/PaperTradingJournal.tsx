@@ -2,6 +2,7 @@
 
 import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
 import { Position, OpenPosition } from '@/lib/paper-trading/types';
+import { InfoTip } from '@/components/paper-trading/InfoTip';
 import { useState } from 'react';
 
 interface PaperTradingJournalProps {
@@ -101,14 +102,39 @@ function OpenPositionsTable({
           <tr className="border-b border-border bg-elevated/40 text-xs text-muted">
             <th className="px-3 py-2.5 text-left font-semibold">Valeur</th>
             <th className="px-3 py-2.5 text-left font-semibold">Entrée</th>
-            <th className="px-3 py-2.5 text-right font-semibold">Prix d’entrée</th>
-            <th className="px-3 py-2.5 text-right font-semibold">Cours du jour</th>
-            <th className="px-3 py-2.5 text-right font-semibold">Écart</th>
+            <th className="px-3 py-2.5 text-right font-semibold">
+              <span className="inline-flex items-center gap-1">
+                Prix d’entrée
+                <InfoTip label="Votre prix de revient unitaire moyen (PRU)." />
+              </span>
+            </th>
+            <th className="px-3 py-2.5 text-right font-semibold">
+              <span className="inline-flex items-center gap-1">
+                Cours du jour
+                <InfoTip label="Dernier cours connu de la valeur sur la BRVM." />
+              </span>
+            </th>
+            <th className="px-3 py-2.5 text-right font-semibold">
+              <span className="inline-flex items-center gap-1">
+                Écart
+                <InfoTip label="Variation du cours depuis votre entrée." />
+              </span>
+            </th>
             <th className="px-3 py-2.5 text-right font-semibold">Qté</th>
             <th className="px-3 py-2.5 text-right font-semibold">Investi</th>
             <th className="px-3 py-2.5 text-right font-semibold">Valeur actuelle</th>
-            <th className="px-3 py-2.5 text-right font-semibold">P&amp;L latent</th>
-            <th className="px-3 py-2.5 text-right font-semibold">Poids</th>
+            <th className="px-3 py-2.5 text-right font-semibold">
+              <span className="inline-flex items-center gap-1">
+                P&amp;L latent
+                <InfoTip label="Gain ou perte sur le papier si vous fermiez maintenant. = Valeur actuelle − Montant investi." />
+              </span>
+            </th>
+            <th className="px-3 py-2.5 text-right font-semibold">
+              <span className="inline-flex items-center gap-1">
+                Poids
+                <InfoTip label="Part de cette position dans la valeur totale du portefeuille." />
+              </span>
+            </th>
             {onClose && <th className="px-3 py-2.5 text-right font-semibold sr-only">Action</th>}
           </tr>
         </thead>
