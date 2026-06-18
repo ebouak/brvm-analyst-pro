@@ -187,8 +187,11 @@ pièces jointes, recherche plein-texte avancée, réputation/badges. À reconsid
 
 ## 10. Risques & limites
 
-- **Spam/abus** : atténué par publication connectée + signalement + masquage admin ;
-  pas de rate-limiting en v1 (à ajouter si volume).
+- **Spam/abus** : publication connectée + signalement + masquage admin + **anti-flood
+  léger v1** : délai minimal serveur entre deux publications d'un même utilisateur
+  (≥ 20 s) et plafond (≤ 5 sujets / heure). Vérifié côté serveur via la date du
+  dernier `forum_posts`/`forum_topics` de l'auteur ; message clair si dépassé.
+  Fonction pure `lib/forum/rateLimit.ts` testée.
 - **Responsabilité éditoriale** : la post-modération implique un délai de réaction ;
   acceptable pour une petite communauté.
 - **`display_name` non renseigné** : repli « Membre » ; proposer de le définir à la
