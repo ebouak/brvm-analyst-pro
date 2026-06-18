@@ -1,16 +1,20 @@
 import type { WaccInputs, WaccResult } from './types';
 
 /**
- * Coût des fonds propres par le MEDAF augmenté du risque pays :
- *   Ke = rf + β·ERP + CRP
+ * Coût des fonds propres par le MEDAF :
+ *   Ke = rf + β·ERP_total
+ *
+ * IMPORTANT : `equityRiskPremium` est la prime de risque actions TOTALE Damodaran,
+ * qui INCLUT déjà la prime de risque pays (ERP_total = ERP mûr + CRP). On ne
+ * rajoute donc PAS le CRP séparément (ce serait le compter deux fois). Le CRP
+ * n'est qu'une composante affichée pour la transparence.
  */
 export function costOfEquity(
   riskFree: number,
   beta: number,
   equityRiskPremium: number,
-  countryRiskPremium: number,
 ): number {
-  return riskFree + beta * equityRiskPremium + countryRiskPremium;
+  return riskFree + beta * equityRiskPremium;
 }
 
 /**
@@ -26,14 +30,14 @@ export function computeWacc(inputs: WaccInputs): WaccResult {
     riskFree,
     beta,
     equityRiskPremium,
-    countryRiskPremium,
     costOfDebtPreTax,
     taxRate,
     marketValueEquity,
     marketValueDebt,
   } = inputs;
 
-  const ke = costOfEquity(riskFree, beta, equityRiskPremium, countryRiskPremium);
+  // ERP_total inclut déjà le risque pays → pas d'ajout séparé du CRP.
+  const ke = costOfEquity(riskFree, beta, equityRiskPremium);
 
   const e = Math.max(0, marketValueEquity);
   const d = Math.max(0, marketValueDebt);

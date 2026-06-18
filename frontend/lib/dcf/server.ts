@@ -21,6 +21,8 @@ export interface DcfPageData {
   designation: string | null;
   secteur: string | null;
   raw: AssembleRawInputs;
+  /** Inputs « borne haute » (FCF = flux d'exploitation) en mode fourchette. */
+  rawHigh: AssembleRawInputs | null;
   defaults: AssembleAssumptions;
   meta: {
     riskFreeSource: 'souverain' | 'repli';
@@ -29,8 +31,10 @@ export interface DcfPageData {
     betaObs: number;
     fcfYears: number;
     available: boolean; // au moins un FCF + actions
-    /** FCF approché par le résultat net (flux détaillés indisponibles). */
+    /** FCF approché (flux détaillés indisponibles). */
     fcfProxy: boolean;
+    /** reel = FCF réel ; fourchette = [résultat net ; flux d'exploitation] ; proxy = résultat net seul. */
+    fcfMode: 'reel' | 'fourchette' | 'proxy_resultat_net';
   };
   /** Liste des pays disponibles pour le sélecteur de prime de risque. */
   countries: RiskPremiumRow[];
@@ -142,35 +146,40 @@ export async function getDcfData(code: string): Promise<DcfPageData | null> {
   const countries = (premiumsRes.data ?? []) as RiskPremiumRow[];
   const country = countries.find((c) => c.pays === DEFAULT_COUNTRY) ?? countries[0] ?? null;
 
-  // FCF history (du plus ancien au plus récent). Priorité aux flux réels ;
-  // à défaut (flux détaillés vides), proxy = résultat net réel par exercice,
-  // explicitement étiqueté (N'INVENTE RIEN : le résultat net est une donnée réelle).
+  // FCF history (du plus ancien au plus récent). N'INVENTE RIEN : toutes les
+  // séries ci-dessous sont des données réelles. Hiérarchie :
+  //   1. FCF réel (flux disponible, ou flux d'exploitation − CapEx réels) → valeur unique.
+  //   2. Sinon, si flux d'exploitation présent mais CapEx absent → FOURCHETTE :
+  //      borne basse = résultat net (prudent), borne haute = flux d'exploitation.
+  //   3. Sinon, si seul le résultat net existe → proxy unique (résultat net), étiqueté.
   const netIncomeByPeriode = new Map<string, number>();
   for (const inc of fin.incomeStatements) {
     if (inc.resultat_net != null) netIncomeByPeriode.set(inc.periode, inc.resultat_net);
   }
-  let fcfProxy = false;
-  const fcfHistory = [...fin.cashFlowStatements]
-    .reverse()
-    .map((cf) => {
-      const real = deriveFcf(cf);
-      if (real != null) return real;
-      const proxy = netIncomeByPeriode.get(cf.periode);
-      if (proxy != null) {
-        fcfProxy = true;
-        return proxy;
-      }
-      return null;
-    })
-    .filter((v): v is number => v != null);
+  const cfAsc = [...fin.cashFlowStatements].reverse();
 
-  // Si aucune ligne de flux mais des résultats nets existent, bâtir l'historique
-  // directement depuis le résultat net (cas où cash_flow_statements est absent).
-  if (fcfHistory.length === 0 && netIncomeByPeriode.size > 0) {
-    const periodes = [...netIncomeByPeriode.keys()].sort();
-    for (const p of periodes) fcfHistory.push(netIncomeByPeriode.get(p)!);
-    fcfProxy = true;
+  const realFcf = cfAsc.map(deriveFcf).filter((v): v is number => v != null);
+  const operatingFlux = cfAsc
+    .map((cf) => cf.flux_exploitation)
+    .filter((v): v is number => v != null);
+  const netIncomeAsc = [...netIncomeByPeriode.keys()].sort().map((p) => netIncomeByPeriode.get(p)!);
+
+  let fcfMode: 'reel' | 'fourchette' | 'proxy_resultat_net' = 'reel';
+  let fcfHistory: number[] = [];
+  let fcfHistoryHigh: number[] | null = null;
+
+  if (realFcf.length > 0) {
+    fcfMode = 'reel';
+    fcfHistory = realFcf;
+  } else if (operatingFlux.length > 0 && netIncomeAsc.length > 0) {
+    fcfMode = 'fourchette';
+    fcfHistory = netIncomeAsc; // borne basse (prudente)
+    fcfHistoryHigh = operatingFlux; // borne haute (flux d'exploitation, CapEx absent)
+  } else if (netIncomeAsc.length > 0) {
+    fcfMode = 'proxy_resultat_net';
+    fcfHistory = netIncomeAsc;
   }
+  const fcfProxy = fcfMode !== 'reel';
 
   const latestBalance = fin.balanceSheets[0];
   const latestIncome = fin.incomeStatements[0];
@@ -213,11 +222,15 @@ export async function getDcfData(code: string): Promise<DcfPageData | null> {
     fallbackBeta: 1.0,
   };
 
+  const rawHigh: AssembleRawInputs | null =
+    fcfHistoryHigh && fcfHistoryHigh.length > 0 ? { ...raw, fcfHistory: fcfHistoryHigh } : null;
+
   return {
     code: fin.instrument.code,
     designation: fin.instrument.designation,
     secteur: fin.instrument.secteur,
     raw,
+    rawHigh,
     defaults,
     meta: {
       riskFreeSource: sovereignRf != null ? 'souverain' : 'repli',
@@ -227,6 +240,7 @@ export async function getDcfData(code: string): Promise<DcfPageData | null> {
       fcfYears: fcfHistory.length,
       available: fcfHistory.length > 0 && shares != null && shares > 0,
       fcfProxy,
+      fcfMode,
     },
     countries,
   };

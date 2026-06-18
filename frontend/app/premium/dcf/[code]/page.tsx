@@ -67,6 +67,7 @@ export default async function DcfPage({ params }: Props) {
       {data.meta.available ? (
         <DcfClient
           raw={data.raw}
+          rawHigh={data.rawHigh}
           defaults={data.defaults}
           countries={data.countries}
           meta={data.meta}

@@ -31,15 +31,17 @@ function Row({ label, value, tag }: { label: string; value: string; tag?: 'reel'
 
 export default function DcfClient({
   raw,
+  rawHigh,
   defaults,
   countries,
   meta,
   cours,
 }: {
   raw: AssembleRawInputs;
+  rawHigh?: AssembleRawInputs | null;
   defaults: AssembleAssumptions;
   countries: RiskPremiumRow[];
-  meta: { riskFreeSource: 'souverain' | 'repli'; riskPremiumCountry: string; moodyRating: string | null; betaObs: number; fcfProxy?: boolean };
+  meta: { riskFreeSource: 'souverain' | 'repli'; riskPremiumCountry: string; moodyRating: string | null; betaObs: number; fcfProxy?: boolean; fcfMode?: 'reel' | 'fourchette' | 'proxy_resultat_net' };
   cours: number | null;
 }) {
   const [pays, setPays] = useState(meta.riskPremiumCountry);
@@ -48,18 +50,18 @@ export default function DcfClient({
   const [years, setYears] = useState(defaults.years);
   const [terminal, setTerminal] = useState(defaults.terminalGrowth);
   const [betaOverrideStr, setBetaOverrideStr] = useState('');
+  // Base FCF active pour le détail : prudente (résultat net) ou haute (flux d'exploitation).
+  const [fcfBase, setFcfBase] = useState<'bas' | 'haut'>('bas');
 
   const country = countries.find((c) => c.pays === pays) ?? null;
+  const isRange = !!rawHigh && rawHigh.fcfHistory.length > 0;
 
-  const effectiveRaw: AssembleRawInputs = useMemo(
-    () => ({
-      ...raw,
-      equityRiskPremium: country?.equity_risk_prem ?? raw.equityRiskPremium,
-      countryRiskPremium: country?.country_risk_prem ?? raw.countryRiskPremium,
-      taxRate: country?.taux_is ?? raw.taxRate,
-    }),
-    [raw, country],
-  );
+  const withCountry = (x: AssembleRawInputs): AssembleRawInputs => ({
+    ...x,
+    equityRiskPremium: country?.equity_risk_prem ?? x.equityRiskPremium,
+    countryRiskPremium: country?.country_risk_prem ?? x.countryRiskPremium,
+    taxRate: country?.taux_is ?? x.taxRate,
+  });
 
   const betaOverride = betaOverrideStr.trim() === '' ? undefined : Number(betaOverrideStr);
   const assumptions: AssembleAssumptions = {
@@ -71,19 +73,41 @@ export default function DcfClient({
     betaOverride: Number.isFinite(betaOverride) ? betaOverride : undefined,
   };
 
-  const r = useMemo(() => assembleDcf(effectiveRaw, assumptions), [effectiveRaw, assumptions]);
+  const activeRaw = fcfBase === 'haut' && rawHigh ? rawHigh : raw;
+  const r = useMemo(() => assembleDcf(withCountry(activeRaw), assumptions), [activeRaw, country, assumptions]);
+
+  // Bornes de la fourchette (mêmes hypothèses, seule la base FCF change).
+  const fairLow = useMemo(() => assembleDcf(withCountry(raw), assumptions).dcf?.fairValuePerShare ?? null, [raw, country, assumptions]);
+  const fairHigh = useMemo(
+    () => (rawHigh ? assembleDcf(withCountry(rawHigh), assumptions).dcf?.fairValuePerShare ?? null : null),
+    [rawHigh, country, assumptions],
+  );
+  const rangeLo = fairLow != null && fairHigh != null ? Math.min(fairLow, fairHigh) : fairLow;
+  const rangeHi = fairLow != null && fairHigh != null ? Math.max(fairLow, fairHigh) : fairHigh;
+  const upsideLo = rangeLo != null && cours ? rangeLo / cours - 1 : null;
+  const upsideHi = rangeHi != null && cours ? rangeHi / cours - 1 : null;
 
   const fair = r.dcf?.fairValuePerShare ?? null;
   const upTone = r.upside == null ? 'text-muted' : r.upside > 0 ? 'text-up' : 'text-down';
 
   return (
     <div className="space-y-6">
-      {/* Avertissement proxy FCF (honnêteté : flux détaillés indisponibles) */}
+      {/* Avertissement honnêteté selon le mode FCF */}
       {meta.fcfProxy && (
         <div className="rounded-xl border border-info/30 bg-info/5 px-4 py-3 text-xs text-info">
-          ⓘ Flux de trésorerie détaillés indisponibles pour cette société : le FCF est{' '}
-          <strong>approché par le résultat net</strong> (donnée réelle). La juste-valeur est donc
-          indicative — affinez les hypothèses ou importez le tableau de flux pour un calcul exact.
+          {isRange ? (
+            <>
+              ⓘ CapEx indisponible en base : la juste-valeur est donnée en{' '}
+              <strong>fourchette</strong> entre une borne basse (FCF ≈ résultat net, prudent) et une
+              borne haute (FCF ≈ flux d'exploitation, sans CapEx). Les deux bornes sont des données
+              réelles ; la vraie valeur se situe entre les deux.
+            </>
+          ) : (
+            <>
+              ⓘ Flux de trésorerie détaillés indisponibles : le FCF est{' '}
+              <strong>approché par le résultat net</strong> (donnée réelle). Juste-valeur indicative.
+            </>
+          )}
         </div>
       )}
 
@@ -91,9 +115,17 @@ export default function DcfClient({
       <div className="rounded-xl border border-border bg-surface p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted">Juste-valeur estimée (DCF)</p>
+            <p className="text-xs uppercase tracking-wider text-muted">
+              {isRange ? 'Fourchette de juste-valeur (DCF)' : 'Juste-valeur estimée (DCF)'}
+            </p>
             <p className="mt-1 text-3xl font-semibold tabular text-white">
-              {fair != null ? `${fmtFcfa(fair)} FCFA` : 'Non calculable'}
+              {isRange
+                ? rangeLo != null && rangeHi != null
+                  ? `${fmtFcfa(rangeLo)} – ${fmtFcfa(rangeHi)} FCFA`
+                  : 'Non calculable'
+                : fair != null
+                  ? `${fmtFcfa(fair)} FCFA`
+                  : 'Non calculable'}
             </p>
             {cours != null && (
               <p className="mt-1 text-sm text-muted">
@@ -103,10 +135,49 @@ export default function DcfClient({
           </div>
           <div className="text-right">
             <p className="text-xs uppercase tracking-wider text-muted">Potentiel</p>
-            <p className={`text-3xl font-semibold tabular ${upTone}`}>{pct(r.upside, 1, true)}</p>
+            {isRange ? (
+              <p className="text-2xl font-semibold tabular text-white">
+                {pct(upsideLo, 0, true)} … {pct(upsideHi, 0, true)}
+              </p>
+            ) : (
+              <p className={`text-3xl font-semibold tabular ${upTone}`}>{pct(r.upside, 1, true)}</p>
+            )}
             {r.dcf?.error && <p className="mt-1 text-xs text-down">{labelError(r.dcf.error)}</p>}
           </div>
         </div>
+
+        {/* Toggle base FCF (mode fourchette) */}
+        {isRange && (
+          <div className="mt-4 flex items-center gap-2 text-xs">
+            <span className="text-muted">Détail sur la base :</span>
+            <div className="flex rounded-lg border border-border overflow-hidden">
+              {(() => {
+                const basActive = fcfBase === 'bas';
+                const hautActive = fcfBase === 'haut';
+                return (
+                  <>
+                    <button
+                      type="button"
+                      aria-pressed={basActive ? 'true' : 'false'}
+                      onClick={() => setFcfBase('bas')}
+                      className={`px-3 py-1.5 transition ${basActive ? 'bg-info text-bg' : 'text-muted hover:text-white'}`}
+                    >
+                      Prudent (résultat net)
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={hautActive ? 'true' : 'false'}
+                      onClick={() => setFcfBase('haut')}
+                      className={`px-3 py-1.5 transition ${hautActive ? 'bg-info text-bg' : 'text-muted hover:text-white'}`}
+                    >
+                      Haut (flux d'exploitation)
+                    </button>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -119,8 +190,8 @@ export default function DcfClient({
             value={fmtNumber(r.betaUsed, 2)}
             tag={betaOverride != null || r.betaEstimated ? 'hypothese' : 'reel'}
           />
-          <Row label="Prime de risque actions (ERP)" value={pct(effectiveRaw.equityRiskPremium, 2)} tag="reel" />
-          <Row label="Prime de risque pays (CRP)" value={pct(effectiveRaw.countryRiskPremium, 2)} tag="reel" />
+          <Row label="Prime de risque actions (ERP, risque pays inclus)" value={pct(country?.equity_risk_prem ?? raw.equityRiskPremium, 2)} tag="reel" />
+          <Row label="dont prime de risque pays (CRP)" value={pct(country?.country_risk_prem ?? raw.countryRiskPremium, 2)} tag="reel" />
           <div className="my-2 h-px bg-border" />
           <Row label="Coût des fonds propres (Ke)" value={pct(r.wacc.costOfEquity, 2)} />
           <Row
