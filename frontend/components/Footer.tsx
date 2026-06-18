@@ -18,56 +18,94 @@ const LEGAL = [
   { href: '/confidentialite', label: 'Confidentialité' },
 ];
 
+/** Lien de footer premium : soulignement cyan qui se déploie + léger décalage au survol. */
+function FooterLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="group/link relative inline-flex w-fit items-center text-white/55 transition-all duration-200 hover:translate-x-0.5 hover:text-white focus:outline-none focus-visible:text-white"
+    >
+      {label}
+      <span className="pointer-events-none absolute -bottom-0.5 left-0 h-px w-0 bg-gradient-to-r from-[#56d7fd] to-transparent transition-all duration-300 ease-out group-hover/link:w-full" />
+    </Link>
+  );
+}
+
+/** En-tête de colonne avec point d'accent qui s'allume au survol de la colonne. */
+function ColHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-white/35">
+      <span className="h-1 w-1 rounded-full bg-white/20 transition-colors duration-300 group-hover/col:bg-[#56d7fd]" />
+      {children}
+    </p>
+  );
+}
+
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="border-t border-white/10 bg-[#06090b] px-6 py-12 text-sm">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
+    <footer className="relative overflow-hidden border-t border-white/10 bg-[#06090b] px-6 py-12 text-sm">
+      {/* Filet dégradé animé en haut */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#56d7fd]/60 to-transparent footer-sheen" />
+      {/* Halo cyan diffus en fond */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[40rem] -translate-x-1/2 rounded-full bg-[#56d7fd]/[0.04] blur-3xl" />
+
+      <div className="relative mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
         <div className="col-span-2 md:col-span-1">
           <Link
             href="/"
             aria-label="WESTBOURSE — accueil"
-            className="group inline-flex items-center gap-2 rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#56d7fd]/50"
+            className="group inline-flex items-center gap-2 rounded-lg transition-all duration-300 hover:[filter:drop-shadow(0_0_10px_rgba(86,215,253,0.45))] focus:outline-none focus:ring-2 focus:ring-[#56d7fd]/50"
           >
-            <AnimatedLogo size={34} variant="mark" animate={false} />
-            <span className="font-display font-semibold text-white transition-colors group-hover:text-[#56d7fd]">WESTBOURSE</span>
+            <span className="transition-transform duration-300 group-hover:scale-105">
+              <AnimatedLogo size={34} variant="mark" animate={false} />
+            </span>
+            <span className="font-display font-semibold text-white transition-colors duration-300 group-hover:text-[#56d7fd]">
+              WESTBOURSE
+            </span>
           </Link>
-          <p className="mt-3 max-w-xs text-xs text-white/45">Analyse et aide à la décision d&apos;investissement sur la BRVM (UEMOA).</p>
+          <p className="mt-3 max-w-xs text-xs text-white/45">
+            Analyse et aide à la décision d&apos;investissement sur la BRVM (UEMOA).
+          </p>
           <div className="mt-4">
             <p className="mb-2 text-xs uppercase tracking-wider text-white/35">Suivez-nous</p>
             <SocialLinks />
           </div>
         </div>
 
-        <nav aria-label="Produit">
-          <p className="text-xs uppercase tracking-wider text-white/35">Produit</p>
+        <nav aria-label="Produit" className="group/col">
+          <ColHeader>Produit</ColHeader>
           <ul className="mt-3 space-y-2">
             {PRODUIT.map((l) => (
-              <li key={l.href}><Link href={l.href} className="text-white/55 transition-colors hover:text-white">{l.label}</Link></li>
+              <li key={l.href}>
+                <FooterLink href={l.href} label={l.label} />
+              </li>
             ))}
           </ul>
         </nav>
 
-        <nav aria-label="Légal">
-          <p className="text-xs uppercase tracking-wider text-white/35">Légal</p>
+        <nav aria-label="Légal" className="group/col">
+          <ColHeader>Légal</ColHeader>
           <ul className="mt-3 space-y-2">
             {LEGAL.map((l) => (
-              <li key={l.href}><Link href={l.href} className="text-white/55 transition-colors hover:text-white">{l.label}</Link></li>
+              <li key={l.href}>
+                <FooterLink href={l.href} label={l.label} />
+              </li>
             ))}
             <li><FooterCookieLink /></li>
           </ul>
         </nav>
 
-        <nav aria-label="Compte">
-          <p className="text-xs uppercase tracking-wider text-white/35">Compte</p>
+        <nav aria-label="Compte" className="group/col">
+          <ColHeader>Compte</ColHeader>
           <ul className="mt-3 space-y-2">
-            <li><Link href="/login" className="text-white/55 transition-colors hover:text-white">Connexion</Link></li>
-            <li><Link href="/signup" className="text-white/55 transition-colors hover:text-white">Créer un compte</Link></li>
+            <li><FooterLink href="/login" label="Connexion" /></li>
+            <li><FooterLink href="/signup" label="Créer un compte" /></li>
           </ul>
         </nav>
       </div>
 
-      <div className="mx-auto mt-10 max-w-6xl border-t border-white/5 pt-6">
+      <div className="relative mx-auto mt-10 max-w-6xl border-t border-white/5 pt-6">
         <p className="text-[11px] leading-relaxed text-white/35">{FINANCIAL_DISCLAIMER}</p>
         <p className="mt-3 text-[11px] text-white/30">© {year} WESTBOURSE. Tous droits réservés.</p>
       </div>
