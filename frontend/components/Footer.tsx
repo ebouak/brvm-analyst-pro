@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { FooterCookieLink } from '@/components/FooterCookieLink';
 import { FINANCIAL_DISCLAIMER } from '@/lib/legal/disclaimer';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import { SocialLinks } from '@/components/SocialLinks';
 
 const PRODUIT = [
   { href: '/societes', label: 'Sociétés' },
@@ -23,11 +24,19 @@ export default function Footer() {
     <footer className="border-t border-white/10 bg-[#06090b] px-6 py-12 text-sm">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
         <div className="col-span-2 md:col-span-1">
-          <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            aria-label="WESTBOURSE — accueil"
+            className="group inline-flex items-center gap-2 rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#56d7fd]/50"
+          >
             <AnimatedLogo size={34} variant="mark" animate={false} />
-            <span className="font-display font-semibold text-white">WESTBOURSE</span>
-          </div>
+            <span className="font-display font-semibold text-white transition-colors group-hover:text-[#56d7fd]">WESTBOURSE</span>
+          </Link>
           <p className="mt-3 max-w-xs text-xs text-white/45">Analyse et aide à la décision d&apos;investissement sur la BRVM (UEMOA).</p>
+          <div className="mt-4">
+            <p className="mb-2 text-xs uppercase tracking-wider text-white/35">Suivez-nous</p>
+            <SocialLinks />
+          </div>
         </div>
 
         <nav aria-label="Produit">
