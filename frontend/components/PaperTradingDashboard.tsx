@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { paperTradingService } from '@/lib/paper-trading/service';
-import { Account, Position, Stats } from '@/lib/paper-trading/types';
+import { Account, Position, OpenPosition, Stats } from '@/lib/paper-trading/types';
 import { PaperTradingJournal } from './PaperTradingJournal';
 import { AnimatedValue } from '@/components/AnimatedValue';
 
@@ -157,11 +157,12 @@ export function PaperTradingDashboard() {
       []
     );
 
-  const openPositions = positions.filter((p) => p.status === 'open');
+  // L'API enrichit les positions ouvertes (current_price/current_value, pnl = latent).
+  const openPositions = positions.filter((p) => p.status === 'open') as OpenPosition[];
   const closedPositions = positions.filter((p) => p.status === 'closed');
 
   // P&L latent des positions ouvertes (valorisées au cours courant par l'API).
-  const latentPnl = openPositions.reduce((s, p) => s + (typeof (p as { pnl?: number }).pnl === 'number' ? (p as { pnl: number }).pnl : 0), 0);
+  const latentPnl = openPositions.reduce((s, p) => s + (typeof p.pnl === 'number' ? p.pnl : 0), 0);
   const equityTotal = account.capital_current + latentPnl;
   const totalPnl = account.pnl_total + latentPnl;
 
@@ -174,17 +175,35 @@ export function PaperTradingDashboard() {
         </div>
       )}
 
-      {/* Barre d'action */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <p className="text-xs text-muted">
-          Ouvrez une position fictive (10% du capital) pour tester un signal au cours du jour.
-        </p>
+      {/* En-tête pédagogique */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <details className="group min-w-0 flex-1">
+          <summary className="cursor-pointer list-none text-sm font-medium text-info marker:content-none">
+            <span className="underline decoration-dotted underline-offset-4">Comment ça marche ?</span>
+          </summary>
+          <ol className="mt-3 max-w-2xl space-y-1.5 text-xs text-muted">
+            <li>
+              <span className="text-white">1.</span> Vous ouvrez une position fictive — par défaut
+              10 % de votre capital simulé, converti en titres au cours du jour.
+            </li>
+            <li>
+              <span className="text-white">2.</span> Tant qu'elle est ouverte, votre gain ou perte
+              est <span className="text-info">latent</span> : il varie chaque jour avec le cours,
+              rien n'est encore acquis.
+            </li>
+            <li>
+              <span className="text-white">3.</span> Quand vous fermez la position, le gain ou la
+              perte devient <span className="text-info">réalisé</span> : il s'inscrit définitivement
+              dans votre performance.
+            </li>
+          </ol>
+        </details>
         <button
           type="button"
           onClick={openModal}
           className="bg-info hover:bg-info/90 text-bg font-medium px-4 py-2 rounded-lg transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-info/50"
         >
-          + Ouvrir une position
+          + Ouvrir une position fictive
         </button>
       </div>
 
@@ -278,18 +297,17 @@ export function PaperTradingDashboard() {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">Valeur totale (cash + positions)</div>
+          <div className="text-xs text-muted mb-1">Valeur du portefeuille</div>
           <div className="text-2xl font-semibold text-white tabular">
             <AnimatedValue value={equityTotal} format={{ maximumFractionDigits: 0 }} suffix={' FCFA'} />
           </div>
           <div className="text-xs text-muted mt-1">
-            Cash {fmtFcfa(account.capital_current)} · latent{' '}
-            <span className={latentPnl >= 0 ? 'text-up' : 'text-down'}>{latentPnl >= 0 ? '+' : ''}{fmtFcfa(latentPnl)}</span>
+            Liquidités {fmtFcfa(account.capital_current)} · investi {fmtFcfa(equityTotal - account.capital_current)}
           </div>
         </div>
 
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">P&L Total (réalisé + latent)</div>
+          <div className="text-xs text-muted mb-1">Performance totale</div>
           <div
             className={`text-2xl font-semibold tabular ${
               totalPnl >= 0 ? 'text-up' : 'text-down'
@@ -298,17 +316,21 @@ export function PaperTradingDashboard() {
             <AnimatedValue value={totalPnl} format={{ maximumFractionDigits: 0 }} suffix={' FCFA'} signed />
           </div>
           <div className="text-xs text-muted mt-1">
-            Réalisé {fmtFcfa(account.pnl_total)} · {openPositions.length} position{openPositions.length !== 1 ? 's' : ''} ouverte{openPositions.length !== 1 ? 's' : ''}
+            dont réalisé {fmtFcfa(account.pnl_total)} · latent{' '}
+            <span className={latentPnl >= 0 ? 'text-up' : 'text-down'}>
+              {latentPnl >= 0 ? '+' : ''}
+              {fmtFcfa(latentPnl)}
+            </span>
           </div>
         </div>
 
         <div className="bg-surface border border-border rounded-lg p-4">
-          <div className="text-xs text-muted mb-1">Win Rate</div>
+          <div className="text-xs text-muted mb-1">Taux de réussite</div>
           <div className="text-2xl font-semibold text-info tabular">
-            {stats ? fmtNumber(stats.winRate, 1) : 'N/A'}%
+            {stats ? fmtNumber(stats.winRate, 1) : '0'}%
           </div>
           <div className="text-xs text-muted mt-1">
-            {stats ? `${stats.winningTrades}/${stats.totalTrades} trades` : '—'}
+            {stats ? `${stats.winningTrades}/${stats.totalTrades} trades gagnants` : 'aucun trade fermé'}
           </div>
         </div>
       </div>
@@ -374,42 +396,35 @@ export function PaperTradingDashboard() {
         )}
       </div>
 
-      {/* Trade Stats */}
+      {/* Statistiques détaillées (repliées) */}
       {stats && stats.totalTrades > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-surface border border-border rounded-lg p-4">
-            <p className="text-xs text-muted mb-1">Avg Win</p>
-            <p
-              className={`text-lg font-semibold tabular ${
-                stats.avgWin >= 0 ? 'text-up' : 'text-down'
-              }`}
-            >
-              {fmtFcfa(stats.avgWin)}
-            </p>
+        <details className="group">
+          <summary className="cursor-pointer list-none text-sm font-medium text-muted hover:text-white marker:content-none">
+            <span className="underline decoration-dotted underline-offset-4">Statistiques détaillées</span>
+          </summary>
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-surface border border-border rounded-lg p-4">
+              <p className="text-xs text-muted mb-1">Gain moyen</p>
+              <p className={`text-lg font-semibold tabular ${stats.avgWin >= 0 ? 'text-up' : 'text-down'}`}>
+                {fmtFcfa(stats.avgWin)}
+              </p>
+            </div>
+            <div className="bg-surface border border-border rounded-lg p-4">
+              <p className="text-xs text-muted mb-1">Perte moyenne</p>
+              <p className={`text-lg font-semibold tabular ${stats.avgLoss >= 0 ? 'text-up' : 'text-down'}`}>
+                {fmtFcfa(stats.avgLoss)}
+              </p>
+            </div>
+            <div className="bg-surface border border-border rounded-lg p-4">
+              <p className="text-xs text-muted mb-1">Meilleur trade</p>
+              <p className="text-lg font-semibold text-up tabular">{fmtFcfa(stats.bestTrade)}</p>
+            </div>
+            <div className="bg-surface border border-border rounded-lg p-4">
+              <p className="text-xs text-muted mb-1">Pire trade</p>
+              <p className="text-lg font-semibold text-down tabular">{fmtFcfa(stats.worstTrade)}</p>
+            </div>
           </div>
-          <div className="bg-surface border border-border rounded-lg p-4">
-            <p className="text-xs text-muted mb-1">Avg Loss</p>
-            <p
-              className={`text-lg font-semibold tabular ${
-                stats.avgLoss >= 0 ? 'text-up' : 'text-down'
-              }`}
-            >
-              {fmtFcfa(stats.avgLoss)}
-            </p>
-          </div>
-          <div className="bg-surface border border-border rounded-lg p-4">
-            <p className="text-xs text-muted mb-1">Best Trade</p>
-            <p className="text-lg font-semibold text-up tabular">
-              {fmtFcfa(stats.bestTrade)}
-            </p>
-          </div>
-          <div className="bg-surface border border-border rounded-lg p-4">
-            <p className="text-xs text-muted mb-1">Worst Trade</p>
-            <p className="text-lg font-semibold text-down tabular">
-              {fmtFcfa(stats.worstTrade)}
-            </p>
-          </div>
-        </div>
+        </details>
       )}
 
       {/* Journal */}
@@ -418,6 +433,7 @@ export function PaperTradingDashboard() {
         <PaperTradingJournal
           openPositions={openPositions}
           closedPositions={closedPositions}
+          portfolioValue={equityTotal}
           onClose={handleClose}
           busy={busy}
         />
