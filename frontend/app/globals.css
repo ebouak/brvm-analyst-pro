@@ -107,6 +107,8 @@ body {
 }
 .brvm-blink { animation: brvmblink 1.5s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .brvm-blink { animation: none; } }
+/* Encart de contact non-intrusif (slide-in bas-droite) */
+@keyframes nudgeIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 /* Diaporama landing : chaque écran visible ~20 % du cycle, fondu enchaîné */
 @keyframes showcase-fade {
   0% { opacity: 0; z-index: 2; }

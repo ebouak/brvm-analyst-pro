@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import Footer from '@/components/Footer';
 import BeginnerBanner from '@/components/BeginnerBanner';
+import ContactNudge from '@/components/contact/ContactNudge';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -48,6 +49,9 @@ export default function ConditionalShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  // Encart de contact : partout sauf authentification et console admin.
+  const showNudge =
+    pathname !== '/login' && pathname !== '/signup' && !pathname.startsWith('/admin');
   // /admin a sa propre console (layout dédié) → pas de shell applicatif ni footer.
   const bare =
     BARE_ROUTES.has(pathname) ||
@@ -61,6 +65,7 @@ export default function ConditionalShell({
         {pathname === '/' && <BeginnerBanner />}
         {children}
         {showsFooter(pathname) && <Footer />}
+        {showNudge && <ContactNudge />}
       </>
     );
   }
@@ -72,6 +77,7 @@ export default function ConditionalShell({
         <MobileNav isPremium={isPremium} isAdmin={isAdmin} />
         <main className="min-w-0">{children}</main>
       </div>
+      {showNudge && <ContactNudge />}
     </div>
   );
 }
