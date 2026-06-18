@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { RATING_DISCLAIMER } from '@/lib/rating';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 /**
  * Shell des pages publiques SEO (/societes, /simulateur, /brief) :
@@ -11,8 +12,15 @@ export default function PublicShell({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-bg flex flex-col">
       <header className="border-b border-border/60 bg-surface/60 backdrop-blur sticky top-0 z-40 print:hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between gap-4">
-          <Link href="/" className="font-display text-white text-lg tracking-tight hover:text-accent transition-colors">
-            BRVM <span className="text-accent">Analyst Pro</span>
+          <Link
+            href="/"
+            aria-label="WESTBOURSE — accueil"
+            className="group flex items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
+          >
+            <AnimatedLogo size={30} variant="mark" animate={false} />
+            <span className="font-display text-white text-lg tracking-tight transition-colors group-hover:text-accent">
+              WESTBOURSE
+            </span>
           </Link>
           <nav className="flex items-center gap-2 md:gap-4 text-sm" aria-label="Navigation principale">
             <Link href="/societes" className="text-muted hover:text-white transition-colors hidden sm:block">

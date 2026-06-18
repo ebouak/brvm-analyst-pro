@@ -32,7 +32,7 @@ export default function UpgradePage() {
           Pour souscrire, contactez-nous. Votre accès sera activé sous 24h.
         </p>
         <a
-          href="mailto:ebouak@gmail.com?subject=Abonnement%20Premium%20BRVM%20Analyst%20Pro"
+          href="mailto:ebouak@gmail.com?subject=Abonnement%20Premium%20WESTBOURSE"
           className="inline-block px-6 py-2.5 bg-accent text-white rounded-xl text-sm font-medium hover:bg-accent/90 transition-colors"
         >
           Contacter pour souscrire
