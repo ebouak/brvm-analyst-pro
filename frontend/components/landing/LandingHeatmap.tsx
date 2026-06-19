@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import HeatmapTreemap from '@/components/HeatmapTreemap';
+import HeatmapTreemap from '@/components/HeatmapTreemapLazy';
 import brvmLogos from '@/lib/brvmLogos.json';
 import type { HeatmapNode } from '@/lib/heatmap';
 

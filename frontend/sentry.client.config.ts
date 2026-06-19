@@ -10,8 +10,6 @@ Sentry.init({
   enabled: process.env.NODE_ENV === 'production' && !!dsn,
   // Traçage des performances : 10 % en prod (quota maîtrisé).
   tracesSampleRate: 0.1,
-  // Session Replay : 10 % des sessions, 100 % de celles avec erreur.
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-  integrations: [Sentry.replayIntegration()],
+  // Session Replay retiré pour alléger le bundle client (perf mobile).
+  // Réactivable plus tard via Sentry.replayIntegration() si besoin de debug visuel.
 });
