@@ -1,9 +1,13 @@
+const { withSentryConfig } = require('@sentry/nextjs');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@react-pdf/renderer', 'docx'],
     // Permet l'upload de PDF/images via Server Action (défaut 1 Mo trop bas).
     serverActions: { bodySizeLimit: '10mb' },
+    // Active instrumentation.ts (init Sentry serveur/edge) sous Next 14.
+    instrumentationHook: true,
   },
   async redirects() {
     return [
@@ -13,4 +17,12 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+// Wrap Sentry : capture runtime (erreurs client/serveur/edge) toujours active.
+// L'upload des source maps ne s'exécute que si SENTRY_ORG/PROJECT/AUTH_TOKEN sont
+// définis (en CI/Vercel) — sinon ignoré, le build reste vert.
+module.exports = withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+});
