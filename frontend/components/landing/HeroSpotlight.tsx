@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
 import type { TickItem } from '@/components/landing/taste/types';
 
@@ -15,12 +16,17 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
 
   return (
     <section className="relative mt-6 h-[clamp(420px,56vw,480px)] overflow-hidden rounded-panel border border-white/10">
-      {/* Photo + voiles */}
-      <img
+      {/* Photo + voiles — élément LCP : next/image optimisé (AVIF/WebP), preload
+          via priority, dimensionné selon le viewport. */}
+      <Image
         src="/landing/hero-investisseur.jpg"
         alt=""
         aria-hidden
-        className="absolute inset-0 h-full w-full object-cover object-[30%_30%] [filter:saturate(.92)_brightness(.55)_contrast(1.04)]"
+        fill
+        priority
+        quality={70}
+        sizes="100vw"
+        className="object-cover object-[30%_30%] [filter:saturate(.92)_brightness(.55)_contrast(1.04)]"
       />
       <div
         className="absolute inset-0"
