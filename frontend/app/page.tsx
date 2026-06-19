@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
 import ScreensShowcase from '@/components/landing/ScreensShowcase';
@@ -17,7 +17,10 @@ import type { TickItem } from '@/components/landing/taste/types';
 import type { IndiceDaily } from '@/lib/types';
 import { HeroSpotlight } from '@/components/landing/HeroSpotlight';
 
-export const dynamic = 'force-dynamic';
+// ISR : la landing n'affiche que des données publiques (marché). On la met en
+// cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
+// HTML servi instantanément, gros gain LCP/Speed Index sur mobile.
+export const revalidate = 300;
 export const metadata = {
   title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
   description:
@@ -43,7 +46,7 @@ interface NewsCardItem {
 }
 
 async function getData() {
-  const supabase = createClient();
+  const supabase = createPublicClient();
 
   const { data: lastDay } = await supabase
     .from('brvm_actions_daily')
