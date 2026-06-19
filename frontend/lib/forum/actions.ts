@@ -30,7 +30,7 @@ export async function createTopic(input: { title: string; body: string; instrume
     author_id: user.id, title: v.value.title, body: v.value.body,
     instrument_code: link.value.instrumentCode, event_id: link.value.eventId,
   }).select('id').single();
-  if (error) return { error: "Creation impossible." };
+  if (error) return { error: "Création impossible." };
   revalidatePath('/forum');
   return { id: data!.id as string };
 }
@@ -47,7 +47,7 @@ export async function createPost(input: { topicId: string; body: string }) {
   if (!rate.ok) return { error: rate.error };
 
   const { error } = await supabase.from('forum_posts').insert({ topic_id: input.topicId, author_id: user.id, body: v.value.body });
-  if (error) return { error: "Reponse impossible." };
+  if (error) return { error: "Réponse impossible." };
   await supabase.from('forum_topics').update({ last_activity_at: new Date().toISOString() }).eq('id', input.topicId);
   revalidatePath(`/forum/${input.topicId}`);
   return { ok: true };
