@@ -55,6 +55,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="fr" className="dark">
+      <head>
+        {/* Polices chargées en <link> (découverte immédiate) plutôt qu'en @import
+            CSS render-blocking. preconnect réchauffe les connexions → meilleur FCP. */}
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=supreme@400,500,700,800&f[]=bespoke-serif@400,500,700&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+        />
+      </head>
       <body className="text-white antialiased font-sans">
         <SplashScreen />
         <ConsentProvider>

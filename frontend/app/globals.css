@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Polices « Taste » : Bespoke Serif (display) + Supreme (body) + JetBrains Mono ── */
-@import url("https://api.fontshare.com/v2/css?f[]=supreme@400,500,700,800&f[]=bespoke-serif@400,500,700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
+/* Polices « Taste » (Bespoke Serif + Supreme + JetBrains Mono) chargées via
+   <link rel="stylesheet"> + preconnect dans app/layout.tsx (head) — plus rapide
+   que des @import CSS render-blocking. */
 
 :root {
   color-scheme: dark;
