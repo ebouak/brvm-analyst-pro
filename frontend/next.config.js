@@ -9,6 +9,10 @@ const nextConfig = {
     // Active instrumentation.ts (init Sentry serveur/edge) sous Next 14.
     instrumentationHook: true,
   },
+  // ESLint disponible via `npm run lint` mais NON bloquant au build : le code
+  // existant n'a jamais été linté → on évite de casser les déploiements Vercel.
+  // À durcir progressivement (corriger puis passer à false).
+  eslint: { ignoreDuringBuilds: true },
   async redirects() {
     return [
       // Squelette premium fusionné avec la vraie page backtest (audit 2026-06-12)
