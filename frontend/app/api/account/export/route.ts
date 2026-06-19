@@ -25,6 +25,8 @@ export async function GET() {
     ptPositions,
     subscriptions,
     transactions,
+    forumTopics,
+    forumPosts,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -42,6 +44,8 @@ export async function GET() {
     supabase.from('paper_trading_positions').select('*').eq('user_id', user.id),
     supabase.from('subscriptions').select('*').eq('user_id', user.id),
     supabase.from('billing_transactions').select('*').eq('user_id', user.id),
+    supabase.from('forum_topics').select('*').eq('author_id', user.id),
+    supabase.from('forum_posts').select('*').eq('author_id', user.id),
   ]);
 
   const payload = {
@@ -64,6 +68,8 @@ export async function GET() {
     paper_trading_positions: ptPositions.data ?? [],
     subscriptions: subscriptions.data ?? [],
     billing_transactions: transactions.data ?? [],
+    forum_topics: forumTopics.data ?? [],
+    forum_posts: forumPosts.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

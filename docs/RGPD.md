@@ -22,6 +22,7 @@ Audit initial : 2026-06-16.
 | `subscriptions` | user_id, plan, statut | Abonnement | Contrat | Durée légale comptable | ✅ | ❌ (obligation légale) |
 | `billing_transactions` | user_id, montant, provider | Facturation | **Obligation légale** (compta) | ~10 ans (selon juridiction) | ✅ | ❌ (obligation légale) |
 | `admin_audit_logs` | actor/target user_id, **ip_address**, **user_agent** | Sécurité / traçabilité admin | Intérêt légitime | 12 mois (recommandé) | n/a (admin) | Purge planifiée (à mettre en place) |
+| `forum_topics` / `forum_posts` | pseudonyme (`display_name`), contenu des messages, horodatage | Discussion communautaire | Intérêt légitime + action volontaire de l'utilisateur | Jusqu'à suppression par l'auteur ou masquage admin | ✅ (`/api/account/export`) | Anonymisation automatique à la suppression du compte (`author_id` → NULL, affichage « Utilisateur supprimé ») |
 
 > IP et user-agent (`admin_audit_logs`) sont des données personnelles : limiter la
 > rétention et ne pas les exposer hors admin.

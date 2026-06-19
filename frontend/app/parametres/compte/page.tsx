@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import NotificationButton from '@/components/NotificationButton';
 import { SectionHeader } from '@/components/ui/premium';
+import { saveDisplayName } from './displayNameAction';
 
 export default function ComptePage() {
   const [busy, setBusy] = useState<string | null>(null);
@@ -87,6 +88,39 @@ export default function ComptePage() {
             'Exporter (JSON)'
           )}
         </button>
+      </section>
+
+      {/* Section pseudonyme forum */}
+      <section className="bg-surface border border-border rounded-card shadow-card p-6 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-sapphire/20 bg-sapphire/[0.06] text-sapphire/80 text-base">
+            ✎
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-display text-base font-semibold text-ivory tracking-tight">
+              Pseudonyme du forum
+            </h2>
+            <p className="mt-1 text-sm text-muted leading-relaxed">
+              Choisissez le nom affiché sur vos discussions (40 caractères max).
+              Laissez vide pour apparaître comme « Anonyme ».
+            </p>
+          </div>
+        </div>
+        <form action={saveDisplayName} className="flex items-center gap-3">
+          <input
+            type="text"
+            name="display_name"
+            maxLength={40}
+            placeholder="Votre pseudonyme…"
+            className="flex-1 rounded-lg border border-border bg-elevated px-3 py-2 text-sm text-ivory placeholder:text-faint focus:border-sapphire/50 focus:outline-none transition-colors"
+          />
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-sapphire/30 bg-sapphire/10 text-sapphire text-sm font-medium transition-all duration-200 hover:bg-sapphire/20 active:scale-95"
+          >
+            Enregistrer
+          </button>
+        </form>
       </section>
 
       {/* Section notifications */}
