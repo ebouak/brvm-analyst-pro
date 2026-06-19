@@ -93,6 +93,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/import-fondamentaux', label: 'Import IA' },
       { href: '/admin/cles-api', label: 'Clés API' },
       { href: '/admin/newsletter', label: 'Newsletter' },
+      { href: '/admin/forum', label: 'Modération forum' },
     ],
   },
 ];
