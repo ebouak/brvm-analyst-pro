@@ -143,8 +143,12 @@ export default function ScreenerPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-muted text-sm">Chargement du screener...</div>
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6" aria-busy="true">
+        <SectionHeader kicker="Outils" title="Screener multi-critères" subtitle="Filtrez les actions par RSI, volume, score, secteur, dividende" />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="h-72 rounded-xl bg-surface border border-border animate-pulse" />
+          <div className="lg:col-span-3 h-72 rounded-xl bg-surface border border-border animate-pulse" />
+        </div>
       </div>
     );
   }
