@@ -12,6 +12,8 @@ import { readIndicators } from '@/lib/indicators/commentary';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import RatingBadge from '@/components/RatingBadge';
+import { VerdictBand } from '@/components/actions/VerdictBand';
+import { FicheStickyNav } from '@/components/actions/FicheStickyNav';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { BeginnerHint } from '@/components/BeginnerHint';
@@ -26,6 +28,8 @@ import SignalAnalysis from '@/components/SignalAnalysis';
 import ValuationPanel from '@/components/ValuationPanel';
 import { getValuation } from '@/lib/valuation/server';
 import { getScoring } from '@/lib/scoring/server';
+import { listTopics } from '@/lib/forum/server';
+import { ForumTopicList } from '@/components/forum/ForumTopicList';
 import { readTechnical } from '@/lib/signal/technical';
 import { analyzeDividendTiming } from '@/lib/signal/dividendTiming';
 import { readPosition } from '@/lib/signal/position';
@@ -145,6 +149,7 @@ export default async function InstrumentPage({
     getValuation(code).catch(() => null),
     getScoring(code).catch(() => null),
   ]);
+  const { topics: forumTopics, authors: forumAuthors } = await listTopics(0, code);
 
   if (rows.length === 0) {
     return (
@@ -276,6 +281,25 @@ export default async function InstrumentPage({
   const pays = instrument?.pays ?? last.pays ?? null;
   const secteur = instrument?.secteur ?? last.secteur ?? null;
 
+  // Bandeau verdict : sparkline 30j + plage observée (min/max de l'historique disponible).
+  const closeHist = rows.map((r) => r.cours_jour).filter((c): c is number => c != null && c > 0);
+  const sparkData = closeHist.slice(-30);
+  const low52 = closeHist.length ? Math.min(...closeHist) : null;
+  const high52 = closeHist.length ? Math.max(...closeHist) : null;
+  const verdictLine = signal
+    ? `Signal ${signal.signal}${signal.score_total != null ? ` · score ${signal.score_total.toFixed(0)}` : ''}. ` +
+      `Tendance récente ${up ? 'haussière' : 'baissière'} (${(last.variation_pct ?? 0) >= 0 ? '+' : ''}${(last.variation_pct ?? 0).toFixed(2)}% sur la séance).`
+    : null;
+
+  // Ancres de navigation (uniquement les sections réellement rendues).
+  const navSections = [
+    { id: 'cours', label: 'Cours' },
+    { id: 'technique', label: 'Technique' },
+    ...(valuation && valuation.metrics.reliable ? [{ id: 'valorisation', label: 'Valorisation' }] : []),
+    ...(fundamentals.length > 0 ? [{ id: 'fondamentaux', label: 'Fondamentaux' }] : []),
+    { id: 'discussions', label: 'Discussions' },
+  ];
+
   // Détections sous forme de checklist
   const detections = [
     { label: 'Momentum haussier', ok: up && (last.variation_pct ?? 0) > 1 },
@@ -342,6 +366,15 @@ export default async function InstrumentPage({
         </div>
       </div>
 
+      {/* ── Navigation d'ancres collante (+ mini-header au scroll) ── */}
+      <FicheStickyNav
+        code={code}
+        cours={last.cours_jour}
+        variationPct={last.variation_pct}
+        up={up}
+        sections={navSections}
+      />
+
       {/* ══════════════════════════════════════════════════
           HERO — COTATION PRINCIPALE
       ══════════════════════════════════════════════════ */}
@@ -390,7 +423,7 @@ export default async function InstrumentPage({
               <div className="flex items-center gap-1.5 flex-wrap shrink-0">
                 {pays && <StatPill tone="neutral">{pays}</StatPill>}
                 {secteur && <StatPill tone="sapphire">{secteur}</StatPill>}
-                <StatPill tone="gold">Action</StatPill>
+                {divYield != null && <StatPill tone="gold">Rdt {divYield.toFixed(1)}%</StatPill>}
               </div>
             </div>
 
@@ -440,6 +473,19 @@ export default async function InstrumentPage({
         </div>
       </div>
 
+      {/* ── Bandeau verdict (note + signal + tendance + plage + synthèse) ── */}
+      <VerdictBand
+        signal={signal?.signal ?? null}
+        scoreTotal={signal?.score_total ?? null}
+        confiance={signal?.confiance ?? null}
+        sparkData={sparkData}
+        up={up}
+        cours={last.cours_jour}
+        low52={low52}
+        high52={high52}
+        synthesisLine={verdictLine}
+      />
+
       {/* ── Notation financière ── */}
       {instrument?.notation_json && (
         <NotationBadge
@@ -467,7 +513,7 @@ export default async function InstrumentPage({
       {/* ══════════════════════════════════════════════════
           GRAPHIQUE COURS
       ══════════════════════════════════════════════════ */}
-      <div>
+      <div id="cours" className="scroll-mt-24">
         <Eyebrow className="mb-3">Cours & Volume</Eyebrow>
         <PremiumPanel className="p-0 overflow-hidden">
           <div className="px-4 py-4 md:px-5">
@@ -486,7 +532,7 @@ export default async function InstrumentPage({
       {/* ══════════════════════════════════════════════════
           CONFIGURATION TECHNIQUE (TechnicalSummary)
       ══════════════════════════════════════════════════ */}
-      <div>
+      <div id="technique" className="scroll-mt-24">
         <Eyebrow className="mb-3">Configuration technique</Eyebrow>
         <TechnicalSummary result={technicalSummary} />
       </div>
@@ -674,7 +720,7 @@ export default async function InstrumentPage({
           VALORISATION FONDAMENTALE
       ══════════════════════════════════════════════════ */}
       {valuation && valuation.metrics.reliable && (
-        <div>
+        <div id="valorisation" className="scroll-mt-24">
           <Eyebrow className="mb-3">Valorisation</Eyebrow>
           <ValuationPanel v={valuation} scoring={scoring} />
         </div>
@@ -692,7 +738,7 @@ export default async function InstrumentPage({
           current: last.cours_jour ?? null,
         };
         return (
-          <div>
+          <div id="fondamentaux" className="scroll-mt-24">
             <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
             <FundamentalsPanel
               code={code}
@@ -844,6 +890,17 @@ export default async function InstrumentPage({
           </div>
         </div>
       </div>
+
+      {/* ══════════════════════════════════════════════════
+          DISCUSSIONS FORUM
+      ══════════════════════════════════════════════════ */}
+      <section id="discussions" className="mt-8 space-y-3 scroll-mt-24">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Discussions</h2>
+          <Link href="/forum/nouveau" className="text-sm text-info hover:underline">Démarrer une discussion</Link>
+        </div>
+        <ForumTopicList topics={forumTopics} authors={forumAuthors} />
+      </section>
 
     </div>
   );
