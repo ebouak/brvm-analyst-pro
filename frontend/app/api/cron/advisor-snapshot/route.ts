@@ -1,8 +1,10 @@
 // GET /api/cron/advisor-snapshot
 // Calcule les recommandations du jour et les enregistre dans advisor_history,
 // puis renvoie les BASCULES vs le snapshot précédent (base des alertes).
-// Protégé par CRON_SECRET (header x-cron-secret ou ?secret=). À déclencher par
-// un cron quotidien (Vercel Cron ou GitHub Actions) après la séance.
+// Protégé par CRON_SECRET. Vercel Cron injecte automatiquement
+// `Authorization: Bearer <CRON_SECRET>` ; déclenchement manuel possible via
+// header x-cron-secret ou ?secret=. Planifié dans vercel.json (jours ouvrés,
+// après la séance).
 import { NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { createPublicClient } from '@/lib/supabase/public';
@@ -13,7 +15,9 @@ export const maxDuration = 60;
 
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  const provided = req.headers.get('x-cron-secret') ?? new URL(req.url).searchParams.get('secret');
+  const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+  const provided =
+    bearer ?? req.headers.get('x-cron-secret') ?? new URL(req.url).searchParams.get('secret');
   if (!secret || provided !== secret) {
     return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
   }
