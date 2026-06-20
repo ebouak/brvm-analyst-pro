@@ -31,6 +31,12 @@ const ENDPOINTS: Endpoint[] = [
     desc: 'Indices BRVM de la dernière séance (BRVM-Composite, BRVM-30, sectoriels).',
     example: '{ "date": "2026-06-19", "indices": [{ "code": "BRVMC", "nom": "BRVM Composite", "valeur": 438.68, "variation_pct": 0.5 }] }',
   },
+  {
+    method: 'GET',
+    path: '/api/public/v1/obligations',
+    desc: 'Obligations cotées de la dernière séance, avec YTM et duration modifiée dérivés.',
+    example: '{ "date": "2026-06-19", "count": 30, "obligations": [{ "code": "...", "emetteur": "ETAT DU SENEGAL", "taux_coupon_pct": 6.5, "maturite": "2028-12-31", "cours": 99.5, "ytm_pct": 6.7, "duration_modifiee": 2.4 }] }',
+  },
 ];
 
 export default function DevelopersPage() {
@@ -59,6 +65,7 @@ export default function DevelopersPage() {
           <code className="mt-1 block font-mono text-sm text-accent">https://westbourse.com</code>
           <p className="mt-3 text-xs text-faint">
             Données fournies à titre informatif (dernière séance consolidée). Pas de garantie temps réel.
+            Limite indicative : <strong>60 requêtes/minute</strong> par IP (réponses mises en cache 5 min).
             Voir <Link href="/mentions-legales" className="text-accent underline">mentions légales</Link>.
           </p>
         </div>

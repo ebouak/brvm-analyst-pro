@@ -1,11 +1,12 @@
 // GET /api/public/v1/actions
 // Liste des actions de la dernière séance (données de marché publiques BRVM).
 import { createPublicClient } from '@/lib/supabase/public';
-import { apiJson, apiError } from '@/lib/publicApi';
+import { apiJson, apiError, checkRateLimit, tooManyRequests } from '@/lib/publicApi';
 
 export const revalidate = 300;
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (!checkRateLimit(req)) return tooManyRequests();
   const sb = createPublicClient();
   const { data: lastRow } = await sb
     .from('brvm_actions_daily')

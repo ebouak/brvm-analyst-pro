@@ -1,6 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
+import ExportButton from '@/components/ExportButton';
+import type { CsvColumn } from '@/lib/export';
 
 export interface ObligationRow {
   code: string;
@@ -16,6 +18,19 @@ export interface ObligationRow {
 }
 
 type SortKey = 'code' | 'taux_pct' | 'ytm' | 'yearsToMaturity' | 'volume';
+
+const CSV_COLUMNS: CsvColumn<ObligationRow>[] = [
+  { header: 'Code', accessor: (o) => o.code },
+  { header: 'Désignation', accessor: (o) => o.designation ?? '' },
+  { header: 'Émetteur', accessor: (o) => o.emetteur ?? '' },
+  { header: 'Coupon %', accessor: (o) => o.taux_pct ?? '' },
+  { header: 'Maturité', accessor: (o) => o.maturite ?? '' },
+  { header: 'Années', accessor: (o) => o.yearsToMaturity ?? '' },
+  { header: 'Prix', accessor: (o) => o.cours_jour ?? '' },
+  { header: 'YTM %', accessor: (o) => o.ytm ?? '' },
+  { header: 'Duration modifiée', accessor: (o) => o.modifiedDuration ?? '' },
+  { header: 'Volume', accessor: (o) => o.volume ?? '' },
+];
 
 export default function ObligationsTable({ rows }: { rows: ObligationRow[] }) {
   const [emetteur, setEmetteur] = useState('');
@@ -63,6 +78,11 @@ export default function ObligationsTable({ rows }: { rows: ObligationRow[] }) {
           {emetteurs.map((e) => <option key={e} value={e}>{e}</option>)}
         </select>
         <span className="text-xs text-muted ml-auto">{list.length} obligations</span>
+        <ExportButton<ObligationRow>
+          filename={`obligations_${new Date().toISOString().slice(0, 10)}.csv`}
+          rows={list}
+          columns={CSV_COLUMNS}
+        />
       </div>
 
       <div className="bg-surface border border-border rounded-xl overflow-hidden">

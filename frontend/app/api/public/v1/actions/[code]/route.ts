@@ -1,11 +1,12 @@
 // GET /api/public/v1/actions/[code]
 // Cours actuel + historique récent (90 dernières séances) d'une action BRVM.
 import { createPublicClient } from '@/lib/supabase/public';
-import { apiJson, apiError } from '@/lib/publicApi';
+import { apiJson, apiError, checkRateLimit, tooManyRequests } from '@/lib/publicApi';
 
 export const revalidate = 300;
 
-export async function GET(_req: Request, { params }: { params: { code: string } }) {
+export async function GET(req: Request, { params }: { params: { code: string } }) {
+  if (!checkRateLimit(req)) return tooManyRequests();
   const code = params.code.toUpperCase();
   const sb = createPublicClient();
 
