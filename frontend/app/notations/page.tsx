@@ -4,6 +4,7 @@ export const revalidate = 300;
 
 import { createPublicClient } from '@/lib/supabase/public';
 import NotationsGrid from './NotationsGrid';
+import NotationsExport from '@/components/NotationsExport';
 import {
   SectionHeader,
   MetricCard,
@@ -134,6 +135,7 @@ export default async function NotationsPage() {
         actions={
           <div className="flex items-center gap-2">
             <StatPill tone="gold">{coverageRatio}% couverture</StatPill>
+            <NotationsExport rows={data} />
           </div>
         }
       />
