@@ -32,6 +32,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Analyse',
     items: [
+      { href: '/conseiller', label: 'Conseiller' },
       { href: '/signaux', label: 'Signaux' },
       { href: '/screener', label: 'Screener' },
       { href: '/fondamentaux', label: 'Fondamentaux' },
