@@ -1,0 +1,37 @@
+// GET /api/public/v1/actions
+// Liste des actions de la dernière séance (données de marché publiques BRVM).
+import { createPublicClient } from '@/lib/supabase/public';
+import { apiJson, apiError } from '@/lib/publicApi';
+
+export const revalidate = 300;
+
+export async function GET() {
+  const sb = createPublicClient();
+  const { data: lastRow } = await sb
+    .from('brvm_actions_daily')
+    .select('date_marche')
+    .order('date_marche', { ascending: false })
+    .limit(1);
+  const date = lastRow?.[0]?.date_marche ?? null;
+  if (!date) return apiError('Aucune séance disponible.', 404);
+
+  const { data } = await sb
+    .from('brvm_actions_daily')
+    .select('code, designation, cours_jour, variation_pct, volume, valeur_echangee')
+    .eq('date_marche', date)
+    .order('code');
+
+  return apiJson({
+    source: 'WESTBOURSE — BRVM',
+    date,
+    count: data?.length ?? 0,
+    actions: (data ?? []).map((a) => ({
+      code: a.code,
+      nom: a.designation,
+      cours: a.cours_jour,
+      variation_pct: a.variation_pct,
+      volume: a.volume,
+      valeur_echangee: a.valeur_echangee,
+    })),
+  });
+}

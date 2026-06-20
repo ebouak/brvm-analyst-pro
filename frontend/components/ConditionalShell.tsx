@@ -19,6 +19,7 @@ const BARE_PREFIXES = [
   '/pricing',
   '/comparateur-sgi',
   '/debutant',
+  '/developers',
 ];
 
 /** Pages légales : publiques, plein écran, AVEC footer. */

@@ -10,6 +10,7 @@ const PRODUIT = [
   { href: '/brief', label: 'Brief du jour' },
   { href: '/methodologie', label: 'Méthodologie' },
   { href: '/pricing', label: 'Tarifs' },
+  { href: '/developers', label: 'API développeurs' },
 ];
 
 const LEGAL = [
