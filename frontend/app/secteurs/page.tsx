@@ -1,5 +1,6 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import { aggregateBySector } from '@/lib/sectors';
+import SectorsExport from '@/components/SectorsExport';
 import SectorCard from '@/components/SectorCard';
 import SectorRankingTable from '@/components/SectorRankingTable';
 import SectorRotation from '@/components/SectorRotation';
@@ -97,6 +98,12 @@ export default async function SecteursPage() {
           {/* Règle dorée ────────────────────────── */}
           <div className="mt-5 h-px bg-gold-line" />
         </div>
+
+        {perfs.length > 0 && (
+          <div className="flex justify-end -mt-4">
+            <SectorsExport rows={perfs} />
+          </div>
+        )}
 
         {perfs.length === 0 ? (
           <div className="animate-rise-in [animation-delay:0.10s]">
