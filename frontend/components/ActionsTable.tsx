@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import SignalBadge from './SignalBadge';
+import Sparkline from './Sparkline';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
 import brvmLogos from '@/lib/brvmLogos.json';
@@ -37,9 +38,11 @@ const selectCls =
 export default function ActionsTable({
   actions,
   signals,
+  sparklines = {},
 }: {
   actions: ActionDaily[];
   signals: Record<string, SignalDaily>;
+  sparklines?: Record<string, number[]>;
 }) {
   const [q, setQ] = useState('');
   const [pays, setPays] = useState('');
@@ -161,6 +164,7 @@ export default function ActionsTable({
               <th className="overline px-4 py-3 text-left text-faint">Secteur</th>
               <Th k="cours_jour" label="Cours" right />
               <Th k="variation_pct" label="Var %" right />
+              <th className="overline px-4 py-3 text-center text-faint">Tendance 30j</th>
               <Th k="volume" label="Volume" right />
               <Th k="valeur_echangee" label="Valeur" right />
               <th className="overline px-4 py-3 text-center text-faint">Signal</th>
@@ -169,7 +173,7 @@ export default function ActionsTable({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-16 text-center text-muted text-sm">
+                <td colSpan={8} className="px-4 py-16 text-center text-muted text-sm">
                   Aucun titre ne correspond aux filtres sélectionnés.
                 </td>
               </tr>
@@ -234,6 +238,17 @@ export default function ActionsTable({
                       <span className="text-[10px] opacity-70">{up ? '▲' : '▼'}</span>
                       {up ? '+' : ''}{varPct.toFixed(2)}%
                     </span>
+                  </td>
+
+                  {/* ── Tendance 30j (sparkline) ──────────────────────── */}
+                  <td className="px-4 py-3">
+                    <div className="flex justify-center">
+                      {(sparklines[a.code]?.length ?? 0) >= 2 ? (
+                        <Sparkline data={sparklines[a.code]!} up={up} width={72} height={24} />
+                      ) : (
+                        <span className="text-faint text-xs">—</span>
+                      )}
+                    </div>
                   </td>
 
                   {/* ── Volume ────────────────────────────────────────── */}

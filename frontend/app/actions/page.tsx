@@ -17,7 +17,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], signals: {} as Record<string, SignalDaily> };
+  if (!lastDate) return { lastDate: null, actions: [] as ActionDaily[], signals: {} as Record<string, SignalDaily>, sparklines: {} as Record<string, number[]> };
 
   const [{ data: actions }, { data: signals }, { data: instruments }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
@@ -41,15 +41,33 @@ async function getData() {
   const sigMap: Record<string, SignalDaily> = {};
   for (const s of (signals ?? []) as SignalDaily[]) sigMap[s.code] = s;
 
+  // ── Sparklines : ~30 dernières séances de cours par titre (colonne Tendance 30j) ──
+  const since = new Date(lastDate);
+  since.setDate(since.getDate() - 50);
+  const sinceIso = since.toISOString().slice(0, 10);
+  const { data: hist } = await supabase
+    .from('brvm_actions_daily')
+    .select('code, date_marche, cours_jour')
+    .gte('date_marche', sinceIso)
+    .lte('date_marche', lastDate)
+    .order('date_marche', { ascending: true });
+  const sparklines: Record<string, number[]> = {};
+  for (const r of (hist ?? []) as { code: string; cours_jour: number | null }[]) {
+    if (r.cours_jour == null) continue;
+    (sparklines[r.code] ??= []).push(r.cours_jour);
+  }
+  for (const k of Object.keys(sparklines)) sparklines[k] = sparklines[k]!.slice(-30);
+
   return {
     lastDate,
     actions: enrichedActions,
     signals: sigMap,
+    sparklines,
   };
 }
 
 export default async function ActionsPage() {
-  const { lastDate, actions, signals } = await getData();
+  const { lastDate, actions, signals, sparklines } = await getData();
 
   if (!lastDate) {
     return (
@@ -97,9 +115,9 @@ export default async function ActionsPage() {
       {/* ── Filet doré de séparation ────────────────────────────────────── */}
       <div className="gold-rule" />
 
-      {/* ── Tableau principal ────────────────────────────────────────────── */}
+      {/* ── Tableau principal (avec colonne Tendance 30j) ───────────────── */}
       <PremiumPanel>
-        <ActionsTable actions={actions} signals={signals} />
+        <ActionsTable actions={actions} signals={signals} sparklines={sparklines} />
       </PremiumPanel>
     </div>
   );
