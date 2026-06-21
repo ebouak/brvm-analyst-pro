@@ -77,6 +77,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/simulateur', label: 'Simulateur' },
       { href: '/brief', label: 'Brief quotidien' },
       { href: '/forum', label: 'Forum' },
+      { href: '/formations', label: 'Formations' },
     ],
   },
   {
