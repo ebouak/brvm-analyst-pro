@@ -4,6 +4,7 @@
   "installCommand": "npm install",
   "outputDirectory": ".next",
   "crons": [
-    { "path": "/api/cron/advisor-snapshot", "schedule": "0 18 * * 1-5" }
+    { "path": "/api/cron/advisor-snapshot", "schedule": "0 18 * * 1-5" },
+    { "path": "/api/cron/rapport-highlights", "schedule": "0 4 * * 1" }
   ]
 }

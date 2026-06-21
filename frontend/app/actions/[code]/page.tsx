@@ -363,6 +363,12 @@ export default async function InstrumentPage({
           >
             Financials →
           </Link>
+          <Link
+            href={`/actions/${code}/revue`}
+            className="inline-flex items-center gap-1 text-[11px] border border-info/30 bg-info/[0.06] rounded-full px-3 py-1 text-info hover:bg-info/10 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
+            Revue de résultats →
+          </Link>
         </div>
       </div>
 
