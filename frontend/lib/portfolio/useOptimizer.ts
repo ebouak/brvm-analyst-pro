@@ -6,8 +6,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { LIQUIDITES_CODE } from './queries';
 import { optimize, type OptimizeResult } from './optimize';
 
+export interface OptimizerPosition { code: string; value: number; price: number }
+
 interface State {
   data: OptimizeResult | null;
+  positions: OptimizerPosition[]; // valeur de marché + dernier cours, alignés sur data.codes
+  totalValue: number;
   isLoading: boolean;
   error: string | null;
   insufficient: boolean; // < 2 positions ou historique trop court
@@ -45,12 +49,12 @@ function alignedReturns(
 }
 
 export function usePortfolioOptimizer(userId: string): State {
-  const [state, setState] = useState<State>({ data: null, isLoading: true, error: null, insufficient: false });
+  const [state, setState] = useState<State>({ data: null, positions: [], totalValue: 0, isLoading: true, error: null, insufficient: false });
   const clientRef = useRef<SupabaseClient | null>(null);
 
   useEffect(() => {
     if (!clientRef.current) clientRef.current = createClient();
-    if (!userId) { setState({ data: null, isLoading: false, error: null, insufficient: true }); return; }
+    if (!userId) { setState({ data: null, positions: [], totalValue: 0, isLoading: false, error: null, insufficient: true }); return; }
     const sb = clientRef.current!;
 
     (async () => {
@@ -60,7 +64,7 @@ export function usePortfolioOptimizer(userId: string): State {
           .from('portfolios_positions').select('code, quantite, prix_entree').eq('user_id', userId);
         const rows = (raw ?? []).filter((r) => r.code !== LIQUIDITES_CODE) as { code: string; quantite: number; prix_entree: number }[];
         const codes = [...new Set(rows.map((r) => r.code))];
-        if (codes.length < 2) { setState({ data: null, isLoading: false, error: null, insufficient: true }); return; }
+        if (codes.length < 2) { setState({ data: null, positions: [], totalValue: 0, isLoading: false, error: null, insufficient: true }); return; }
 
         const since = new Date(Date.now() - 2 * 365 * 86_400_000).toISOString().slice(0, 10);
         const { data: hist } = await sb
@@ -75,7 +79,7 @@ export function usePortfolioOptimizer(userId: string): State {
         }
 
         const returns = alignedReturns(histByCode, codes);
-        if (!returns) { setState({ data: null, isLoading: false, error: null, insufficient: true }); return; }
+        if (!returns) { setState({ data: null, positions: [], totalValue: 0, isLoading: false, error: null, insufficient: true }); return; }
 
         // Poids actuels = valeur de marché (quantité × dernier cours).
         const lastCours = (code: string) => { const s = histByCode.get(code); return s && s.length ? s[s.length - 1]!.cours : 0; };
@@ -84,9 +88,15 @@ export function usePortfolioOptimizer(userId: string): State {
         const currentWeights = codes.map((c) => (values[c] ?? 0) / totalVal);
 
         const assets = codes.map((code, i) => ({ code, returns: returns[i]! }));
-        setState({ data: optimize(assets, currentWeights, 0.06), isLoading: false, error: null, insufficient: false });
+        const positions = codes.map((code) => ({ code, value: values[code] ?? 0, price: lastCours(code) }));
+        setState({
+          data: optimize(assets, currentWeights, 0.06),
+          positions,
+          totalValue: totalVal,
+          isLoading: false, error: null, insufficient: false,
+        });
       } catch (err) {
-        setState({ data: null, isLoading: false, error: err instanceof Error ? err.message : 'Unknown error', insufficient: false });
+        setState({ data: null, positions: [], totalValue: 0, isLoading: false, error: err instanceof Error ? err.message : 'Unknown error', insufficient: false });
       }
     })();
   }, [userId]);
