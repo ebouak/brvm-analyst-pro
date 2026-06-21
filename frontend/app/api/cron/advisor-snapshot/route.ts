@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { createPublicClient } from '@/lib/supabase/public';
 import { getAdvisorRecommendations } from '@/lib/advisor/server';
+import { notifyFlips } from '@/lib/advisor/notify';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -63,5 +64,9 @@ export async function GET(req: Request) {
   const { error } = await admin.from('advisor_history').upsert(rows, { onConflict: 'date_marche,code' });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json({ date, stored: rows.length, prevDate, flips });
+  // Notifications multi-canal (Telegram/WhatsApp/Email) — seulement s'il y a des
+  // bascules ET au moins un canal configuré. Tolérant : n'échoue jamais le cron.
+  const notified = await notifyFlips(flips, date);
+
+  return NextResponse.json({ date, stored: rows.length, prevDate, flips, notified });
 }
