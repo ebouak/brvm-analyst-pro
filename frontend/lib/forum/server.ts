@@ -31,6 +31,23 @@ export async function getTopic(id: string): Promise<{ topic: ForumTopic; posts: 
   return { topic: topic as ForumTopic, posts: list, authors };
 }
 
+/** Compteurs de votes par réponse + l'ensemble voté par l'utilisateur courant. */
+export async function getPostVotes(
+  postIds: string[],
+  userId: string | null,
+): Promise<{ counts: Map<string, number>; mine: Set<string> }> {
+  const counts = new Map<string, number>();
+  const mine = new Set<string>();
+  if (postIds.length === 0) return { counts, mine };
+  const supabase = createPublicClient();
+  const { data } = await supabase.from('forum_post_votes').select('post_id, user_id').in('post_id', postIds);
+  for (const v of (data ?? []) as { post_id: string; user_id: string }[]) {
+    counts.set(v.post_id, (counts.get(v.post_id) ?? 0) + 1);
+    if (userId && v.user_id === userId) mine.add(v.post_id);
+  }
+  return { counts, mine };
+}
+
 /** Profils (pseudonymes) des auteurs, indexés par id. */
 async function loadAuthors(ids: (string | null)[]): Promise<Map<string, AuthorProfile>> {
   const unique = [...new Set(ids.filter((x): x is string => !!x))];

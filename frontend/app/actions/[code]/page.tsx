@@ -370,6 +370,12 @@ export default async function InstrumentPage({
           >
             Revue de résultats →
           </Link>
+          <Link
+            href={`/forum?code=${code}`}
+            className="inline-flex items-center gap-1 text-[11px] border border-border bg-surface rounded-full px-3 py-1 text-muted hover:text-white hover:border-info/40 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
+            💬 Discuter de cette valeur →
+          </Link>
         </div>
       </div>
 

@@ -6,14 +6,18 @@ describe('displayName', () => {
   it('utilise le pseudonyme si présent', () => {
     expect(displayName({ id: 'u1', display_name: 'Koffi' })).toBe('Koffi');
   });
-  it("repli « Membre » si pseudonyme absent (jamais l'email)", () => {
-    expect(displayName({ id: 'u1', display_name: null })).toBe('Membre');
+  it("repli pseudo DISTINCT et stable si pseudonyme absent (jamais l'email)", () => {
+    const a = displayName({ id: 'u1', display_name: null });
+    const b = displayName({ id: 'u2', display_name: null });
+    expect(a).toMatch(/^Membre-[0-9A-Z]{4}$/);
+    expect(a).not.toBe(b); // deux auteurs → deux pseudos distincts
+    expect(displayName({ id: 'u1', display_name: null })).toBe(a); // stable
   });
   it('« Utilisateur supprimé » si auteur null (anonymisé)', () => {
     expect(displayName(null)).toBe('Utilisateur supprimé');
   });
   it('trim et repli si pseudonyme vide', () => {
-    expect(displayName({ id: 'u1', display_name: '   ' })).toBe('Membre');
+    expect(displayName({ id: 'u1', display_name: '   ' })).toMatch(/^Membre-[0-9A-Z]{4}$/);
   });
 });
 

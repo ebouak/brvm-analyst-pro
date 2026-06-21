@@ -3,9 +3,11 @@ import type { ForumTopic, ForumPost, AuthorProfile } from '@/lib/forum/types';
 import { ReportButton } from './ReportButton';
 import { ForumReplyForm } from './ForumReplyForm';
 import { Avatar } from './Avatar';
+import { VoteButton } from './VoteButton';
 
-export function ForumThread({ topic, posts, authors, canPost }: {
+export function ForumThread({ topic, posts, authors, canPost, voteCounts, myVotes }: {
   topic: ForumTopic; posts: ForumPost[]; authors: Map<string, AuthorProfile>; canPost: boolean;
+  voteCounts?: Map<string, number>; myVotes?: Set<string>;
 }) {
   const profileOf = (id: string | null) => (id ? authors.get(id) ?? null : null);
 
@@ -44,7 +46,15 @@ export function ForumThread({ topic, posts, authors, canPost }: {
                 {' · '}{relativeTimeFR(p.created_at)}{p.edited_at ? ' · modifié' : ''}
               </p>
               <p className="mt-1.5 whitespace-pre-wrap text-sm text-white/90">{p.body}</p>
-              <div className="mt-2"><ReportButton targetType="post" targetId={p.id} /></div>
+              <div className="mt-2 flex items-center gap-3">
+                <VoteButton
+                  postId={p.id}
+                  initialCount={voteCounts?.get(p.id) ?? 0}
+                  initialVoted={myVotes?.has(p.id) ?? false}
+                  canVote={canPost}
+                />
+                <ReportButton targetType="post" targetId={p.id} />
+              </div>
             </div>
           </div>
         ))}

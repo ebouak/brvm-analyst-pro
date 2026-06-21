@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createTopic } from '@/lib/forum/actions';
 
-export function ForumNewTopicForm({ instruments }: { instruments: { code: string; designation: string | null }[] }) {
+export function ForumNewTopicForm({ instruments, initialCode = '' }: { instruments: { code: string; designation: string | null }[]; initialCode?: string }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(initialCode);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   return (
