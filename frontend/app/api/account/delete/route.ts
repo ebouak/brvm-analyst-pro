@@ -33,6 +33,7 @@ export async function DELETE() {
     'push_subscriptions',
     'paper_trading_positions',
     'paper_trading_accounts',
+    'investment_theses',
   ] as const;
 
   for (const t of tables) {

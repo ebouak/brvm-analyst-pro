@@ -34,6 +34,7 @@ import { readTechnical } from '@/lib/signal/technical';
 import { analyzeDividendTiming } from '@/lib/signal/dividendTiming';
 import { readPosition } from '@/lib/signal/position';
 import { synthesize } from '@/lib/signal/synthesis';
+import ThesisPanel from '@/components/theses/ThesisPanel';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -533,6 +534,14 @@ export default async function InstrumentPage({
         <div className="mt-2">
           <EventMarkerLegend markers={chartMarkers} />
         </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          MA THÈSE D'INVESTISSEMENT (suivi de conviction)
+      ══════════════════════════════════════════════════ */}
+      <div id="these" className="scroll-mt-24">
+        <Eyebrow className="mb-3">Ma thèse</Eyebrow>
+        <ThesisPanel code={code} coursActuel={last.cours_jour ?? null} />
       </div>
 
       {/* ══════════════════════════════════════════════════

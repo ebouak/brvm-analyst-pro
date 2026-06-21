@@ -156,6 +156,39 @@ export default async function RevuePage({ params }: Props) {
           : "Aucun dividende récent connu en base pour cette valeur."}
       </p>
 
+      {/* Avant la prochaine publication (earnings preview qualitatif) */}
+      {d.years.length >= 2 && latest && prev && (
+        <>
+          <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1 mt-5">
+            Avant la prochaine publication — à surveiller
+          </h2>
+          <ul className="text-sm text-gray-700 list-disc pl-5 mb-2 space-y-1">
+            <li>
+              <b>Trajectoire récente</b> : chiffre d&apos;affaires {yoy(latest.revenu, prev.revenu)} et résultat net{' '}
+              {yoy(latest.resultatNet, prev.resultatNet)} sur le dernier exercice connu ({latest.periode}).
+              {' '}À publication, vérifier si cette tendance se poursuit ou s&apos;inverse.
+            </li>
+            {d.dividends.length >= 2 && (
+              <li>
+                <b>Dividende</b> : sur les derniers exercices connus, il s&apos;est situé entre{' '}
+                {fcfa(Math.min(...d.dividends.map((x) => x.montant)))} et {fcfa(Math.max(...d.dividends.map((x) => x.montant)))}.
+                {' '}Repère, à confirmer par l&apos;affectation du résultat (pas une prévision).
+              </li>
+            )}
+            {d.profil.cyclique && (
+              <li><b>Activité cyclique</b> : surveiller la position dans le cycle (campagne, cours des matières premières) plutôt que le seul exercice.</li>
+            )}
+            {d.highlights?.items.slice(0, 2).map((it, i) => (
+              <li key={i}><b>{it.titre}</b>{it.titre && it.detail ? ' : ' : ''}{it.detail}</li>
+            ))}
+          </ul>
+          <p className="text-[10px] text-gray-400 mb-4 italic">
+            Repères qualitatifs dérivés de l&apos;historique réel — il ne s&apos;agit PAS d&apos;un consensus
+            d&apos;analystes ni d&apos;une prévision chiffrée.
+          </p>
+        </>
+      )}
+
       <p className="text-[10px] text-gray-400 mt-6 border-t pt-2 italic">
         Source : WESTBOURSE · {today}. Données dérivées de publications réelles (états financiers, rapports
         d&apos;activité, cours BRVM) — aucune valeur inventée. Les ordres s&apos;exécutent via une SGI agréée.
