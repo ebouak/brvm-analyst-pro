@@ -59,7 +59,9 @@ async function callLlm(text: string): Promise<{ synthese?: string; highlights?: 
 }
 
 async function processCode(admin: ReturnType<typeof getServiceClient>, code: string, mistralKey: string) {
-  // Rapport le plus pertinent : on privilégie un « Rapport Annuel Intégré », sinon le plus récent.
+  // On privilégie un rapport d'activité TRIMESTRIEL/SEMESTRIEL récent (court →
+  // OCR rapide et fiable, qualitatif frais) ; le rapport annuel intégré (souvent
+  // 60+ pages) n'est qu'un repli car son OCR dépasse parfois la limite de durée.
   const { data: pubs } = await admin
     .from('publications')
     .select('libelle, source_url, date_publication')
@@ -68,7 +70,12 @@ async function processCode(admin: ReturnType<typeof getServiceClient>, code: str
     .order('date_publication', { ascending: false })
     .limit(10);
   const list = (pubs ?? []) as Array<{ libelle: string; source_url: string; date_publication: string }>;
-  const chosen = list.find((p) => /annuel|int[ée]gr/i.test(p.libelle)) ?? list[0];
+  const isAnnuel = (l: string) => /annuel|int[ée]gr/i.test(l);
+  const isAttestation = (l: string) => /attestation/i.test(l);
+  const chosen =
+    list.find((p) => !isAnnuel(p.libelle) && !isAttestation(p.libelle)) ??
+    list.find((p) => !isAttestation(p.libelle)) ??
+    list[0];
   if (!chosen?.source_url) return { code, status: 'pas-de-rapport' };
 
   let text = '';
