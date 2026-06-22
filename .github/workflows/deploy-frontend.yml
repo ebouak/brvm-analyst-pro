@@ -1,11 +1,9 @@
 name: Deploy Frontend to Vercel
 
+# Déclenchement manuel uniquement : le déploiement de prod passe par le Vercel
+# Deploy Hook (sans VERCEL_TOKEN). Pour réactiver le déploiement CLI sur push,
+# régénérer le secret GitHub VERCEL_TOKEN puis remettre le bloc `push:` ci-dessous.
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
   workflow_dispatch: {}
 
 jobs:

@@ -1,12 +1,10 @@
 name: Tests e2e (Playwright)
 
 # Tests « smoke » des parcours critiques sur un build de production.
+# Manuel uniquement tant que l'install Playwright n'est pas finalisée (évite des
+# échecs rouges à chaque push). Réactiver le bloc `push:` une fois Playwright prêt.
 on:
   workflow_dispatch: {}
-  push:
-    branches: [main]
-    paths:
-      - 'frontend/**'
 
 jobs:
   e2e:
