@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
@@ -6,6 +7,7 @@ import BeginnerToggle from '@/components/BeginnerToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+const COLLAPSE_KEY = 'wb_nav_collapsed';
 
 export default function Sidebar({
   isPremium = false,
@@ -16,6 +18,22 @@ export default function Sidebar({
 }) {
   const pathname = usePathname();
   const groups = NAV_GROUPS.filter((g) => !g.adminOnly || isAdmin);
+
+  // Groupes repliés (persistés). Un groupe contenant la route active est forcé ouvert.
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(COLLAPSE_KEY);
+      if (raw) setCollapsed(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+  function toggle(label: string) {
+    setCollapsed((prev) => {
+      const next = { ...prev, [label]: !prev[label] };
+      try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
+    });
+  }
 
   return (
     <aside className="w-56 shrink-0 hidden md:flex flex-col h-screen sticky top-0 bg-gradient-to-b from-surface to-bg border-r border-border">
@@ -32,17 +50,30 @@ export default function Sidebar({
       <div className="mx-4 h-px bg-gold-line opacity-60" />
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-5">
-        {groups.map((group) => (
+      <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-2">
+        {groups.map((group) => {
+          const hasActive = group.items.some((it) => isNavItemActive(it.href, pathname));
+          const isOpen = hasActive || !collapsed[group.label]; // actif toujours ouvert
+          return (
           <div key={group.label}>
-            <p className="overline px-2 mb-2 text-[9px] text-faint">
-              {group.label === 'Premium' ? (
-                <span className="flex items-center gap-1.5 text-gold/70">Premium <span className="text-gold">✦</span></span>
-              ) : (
-                group.label
+            <button
+              type="button"
+              onClick={() => toggle(group.label)}
+              aria-expanded={isOpen ? 'true' : 'false'}
+              className={`group/h flex w-full items-center justify-between px-2 mb-1.5 ${EASE} ${hasActive ? 'cursor-default' : 'cursor-pointer hover:text-muted'}`}
+            >
+              <span className="overline text-[9px] text-faint">
+                {group.label === 'Premium' ? (
+                  <span className="flex items-center gap-1.5 text-gold/70">Premium <span className="text-gold">✦</span></span>
+                ) : (
+                  group.label
+                )}
+              </span>
+              {!hasActive && (
+                <span className={`text-[8px] text-faint ${EASE} ${isOpen ? 'rotate-0' : '-rotate-90'}`}>▾</span>
               )}
-            </p>
-            <div className="space-y-0.5">
+            </button>
+            <div className={`space-y-0.5 ${isOpen ? '' : 'hidden'}`}>
               {group.items.map((item) => {
                 const active = isNavItemActive(item.href, pathname);
                 const locked = item.premium && !isPremium;
@@ -86,7 +117,8 @@ export default function Sidebar({
               })}
             </div>
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* Pied */}
