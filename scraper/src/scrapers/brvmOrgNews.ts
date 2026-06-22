@@ -81,6 +81,12 @@ async function fetchArticle(href: string): Promise<NewsItem | null> {
     const bodyText = $('.field-name-body, .region-content, article').first().text();
     const date = extractPublicationDate($, bodyText);
     const slug = href.split('/').filter(Boolean).pop() ?? href;
+    // og:image de l'article (illustration) si disponible.
+    const ogImage = $('meta[property="og:image"]').first().attr('content')
+      ?? $('meta[name="twitter:image"]').first().attr('content') ?? null;
+    const imageUrl = ogImage && /^https?:\/\//i.test(ogImage)
+      ? ogImage
+      : ogImage ? `${BASE}${ogImage.startsWith('/') ? '' : '/'}${ogImage}` : null;
     return {
       dedupe_hash: hashItem(slug),
       titre,
@@ -89,6 +95,7 @@ async function fetchArticle(href: string): Promise<NewsItem | null> {
       source_url: url,
       resume: para && para.length > 5 ? para.slice(0, 500) : null,
       instrument_code: null,
+      image_url: imageUrl,
     };
   } catch (err) {
     log.warn({ url, err: err instanceof Error ? err.message : String(err) }, 'article brvm.org échec');

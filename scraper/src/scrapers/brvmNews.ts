@@ -13,6 +13,7 @@ export interface NewsItem {
   source_url: string | null;
   resume: string | null;
   instrument_code: string | null;
+  image_url?: string | null; // og:image de l'article (si disponible)
 }
 
 function hashItem(titre: string, date: string, source: string): string {

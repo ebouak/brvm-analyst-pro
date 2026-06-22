@@ -179,13 +179,18 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
             {/* ── Panel statistiques sectorielles ──────────────────────────── */}
             {sectorStats.length > 0 && (
               <div className="animate-rise-in [animation-delay:0.14s]">
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
                   <span className="text-xs font-semibold uppercase tracking-widest text-muted">
                     Performance par secteur
                   </span>
-                  <span className="text-[10px] text-faint">
-                    Taille = part du volume · couleur = variation moyenne
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-faint hidden sm:inline">
+                      Cliquez pour filtrer la carte
+                    </span>
+                    <Link href="/secteurs" className="text-[11px] text-info hover:underline">
+                      Analyse sectorielle complète →
+                    </Link>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {sectorStats.map((s) => {
