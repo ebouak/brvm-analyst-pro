@@ -136,7 +136,15 @@ export default async function RevuePage({ params }: Props) {
             ))}
           </ul>
           {d.highlights.source_libelle && (
-            <p className="text-[10px] text-gray-400 mb-4">Source : {d.highlights.source_libelle} (rapport d&apos;activité publié).</p>
+            <p className="text-[10px] text-gray-400 mb-4">
+              Source :{' '}
+              {d.highlights.source_url ? (
+                <a href={d.highlights.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                  {d.highlights.source_libelle}
+                </a>
+              ) : d.highlights.source_libelle}
+              {' '}(document publié à la BRVM).
+            </p>
           )}
         </>
       )}
