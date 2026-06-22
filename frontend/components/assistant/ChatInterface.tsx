@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { PROMPTS_TEMPLATES } from '@/lib/ai/prompts';
 import { ExportButton } from './ExportButton';
+import { MarkdownMessage } from './MarkdownMessage';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -10,6 +11,39 @@ interface Message {
 }
 
 const NO_ARG_IDS = new Set(['screener', 'rapport-hebdo', 'anomalies', 'backtesting-div']);
+
+/** Ouvre un écran HTML propre et imprimable à partir du message déjà rendu. */
+function printAnalyse(index: number, symbole?: string) {
+  const src = document.getElementById(`assistant-msg-${index}`);
+  if (!src) return;
+  const node = src.cloneNode(true) as HTMLElement;
+  node.querySelectorAll('button').forEach((b) => b.remove()); // retire boutons Export/Imprimer
+  const date = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const w = window.open('', '_blank', 'width=820,height=900');
+  if (!w) return;
+  w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8">
+    <title>Analyse ${symbole ?? ''} — WESTBOURSE</title>
+    <style>
+      body{font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;max-width:760px;margin:24px auto;padding:0 20px;line-height:1.55}
+      header{border-bottom:2px solid #1a1a1a;padding-bottom:8px;margin-bottom:16px}
+      .kick{font-size:11px;letter-spacing:.5px;color:#777;text-transform:uppercase}
+      h1{font-size:20px;margin:2px 0}
+      table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13px}
+      th,td{border:1px solid #ddd;padding:6px 9px;text-align:left}
+      thead th{background:#f3f3f3}
+      h2{font-size:15px;border-bottom:1px solid #ddd;padding-bottom:3px;margin-top:18px}
+      .foot{margin-top:24px;border-top:1px solid #eee;padding-top:8px;font-size:11px;color:#888;font-style:italic}
+      @media print{body{margin:0}}
+    </style></head><body>
+    <header><div class="kick">WESTBOURSE · Assistant IA${symbole ? ' · ' + symbole : ''}</div>
+    <h1>Analyse${symbole ? ' — ' + symbole : ''}</h1><div class="kick">${date}</div></header>
+    ${node.innerHTML}
+    <div class="foot">Document généré par l'assistant WESTBOURSE — dérivé de données réelles. Ne constitue pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures.</div>
+    </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
+}
 
 export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePreselect?: string; questionPreset?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -226,6 +260,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
+              id={`assistant-msg-${i}`}
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-gold text-obsidian rounded-br-sm shadow-gold'
@@ -240,9 +275,20 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
                 </span>
               ) : (
                 <>
-                  <pre className="whitespace-pre-wrap font-sans text-sm">{msg.content}</pre>
+                  {msg.role === 'assistant'
+                    ? <MarkdownMessage content={msg.content} />
+                    : <pre className="whitespace-pre-wrap font-sans text-sm">{msg.content}</pre>}
                   {msg.role === 'assistant' && msg.content.length > 200 && (
-                    <ExportButton texteAnalyse={msg.content} symbole={symbole || symbolePreselect} />
+                    <div className="mt-2 flex gap-2">
+                      <ExportButton texteAnalyse={msg.content} symbole={symbole || symbolePreselect} />
+                      <button
+                        type="button"
+                        onClick={() => printAnalyse(i, symbole || symbolePreselect)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-[11px] text-muted hover:text-white hover:border-gold/40"
+                      >
+                        🖨️ Imprimer
+                      </button>
+                    </div>
                   )}
                 </>
               )}
