@@ -70,7 +70,7 @@ export default function SignInClient({
       }}
       onRequestCode={async (email) => {
         const captchaToken = await freshToken();
-        if (!captchaToken) return { error: 'Vérification anti-robot en cours, réessayez dans un instant.' };
+        if (!captchaToken) return { error: 'La vérification anti-robot n’a pas pu se charger. Utilisez « Continuer avec Google » ci-dessus, ou réessayez dans quelques instants.' };
         const { error } = await supabase.auth.signInWithOtp({
           email: email.toLowerCase().trim(),
           options: { shouldCreateUser: true, captchaToken },
