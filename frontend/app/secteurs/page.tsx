@@ -19,6 +19,32 @@ import {
 export const revalidate = 300;
 export const metadata = { title: 'Secteurs — WESTBOURSE' };
 
+interface ActionRow {
+  code: string; secteur: string | null; date_marche: string;
+  cours_jour: number | null; variation_pct: number | null; valeur_echangee: number | null;
+}
+
+/** Récupère toutes les lignes depuis `fromDate` en paginant (plafond 1000/req). */
+async function fetchAllActionsSince(
+  supabase: ReturnType<typeof createPublicClient>,
+  fromDate: string,
+): Promise<ActionRow[]> {
+  const PAGE = 1000;
+  const all: ActionRow[] = [];
+  for (let from = 0; from < 50000; from += PAGE) {
+    const { data } = await supabase
+      .from('brvm_actions_daily')
+      .select('code, secteur, date_marche, cours_jour, variation_pct, valeur_echangee')
+      .gte('date_marche', fromDate)
+      .order('date_marche', { ascending: true })
+      .range(from, from + PAGE - 1);
+    const batch = (data ?? []) as ActionRow[];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return all;
+}
+
 async function getData() {
   const supabase = createPublicClient();
 
@@ -37,12 +63,11 @@ async function getData() {
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
   const fromDate = oneYearAgo.toISOString().slice(0, 10);
 
-  const [{ data: rows }, { data: instruments }] = await Promise.all([
-    supabase
-      .from('brvm_actions_daily')
-      .select('code, secteur, date_marche, cours_jour, variation_pct, valeur_echangee')
-      .gte('date_marche', fromDate)
-      .order('date_marche', { ascending: true }),
+  // ⚠️ PostgREST plafonne à 1000 lignes/réponse. Sur 1 an × ~47 actions (~12k
+  // lignes), un fetch unique trié ASC ne renvoyait que le 1er mois → la dernière
+  // séance était tronquée → 0 hausse / 0 baisse / Vol 0. On pagine via .range().
+  const [rows, { data: instruments }] = await Promise.all([
+    fetchAllActionsSince(supabase, fromDate),
     supabase.from('brvm_instruments').select('code, secteur'),
   ]);
 
@@ -52,7 +77,7 @@ async function getData() {
   for (const i of (instruments ?? []) as { code: string; secteur: string | null }[]) {
     sectorByCode[i.code] = i.secteur;
   }
-  const enriched = (rows ?? []).map((r) => ({
+  const enriched = rows.map((r) => ({
     ...r,
     secteur: r.secteur ?? sectorByCode[r.code] ?? null,
   }));

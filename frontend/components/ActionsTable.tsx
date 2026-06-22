@@ -11,7 +11,8 @@ import brvmLogos from '@/lib/brvmLogos.json';
 
 const LOGOS = brvmLogos as Record<string, string>;
 
-type SortKey = 'code' | 'variation_pct' | 'cours_jour' | 'volume' | 'valeur_echangee';
+type SortKey = 'code' | 'secteur' | 'variation_pct' | 'cours_jour' | 'volume' | 'valeur_echangee';
+const STRING_KEYS = new Set<SortKey>(['code', 'secteur']);
 
 const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
   { header: 'Code', accessor: (r) => r.code },
@@ -39,14 +40,16 @@ export default function ActionsTable({
   actions,
   signals,
   sparklines = {},
+  initialSecteur = '',
 }: {
   actions: ActionDaily[];
   signals: Record<string, SignalDaily>;
   sparklines?: Record<string, number[]>;
+  initialSecteur?: string;
 }) {
   const [q, setQ] = useState('');
   const [pays, setPays] = useState('');
-  const [secteur, setSecteur] = useState('');
+  const [secteur, setSecteur] = useState(initialSecteur);
   const [minVol, setMinVol] = useState(0);
   const [perf, setPerf] = useState<'all' | 'up' | 'down'>('all');
   const [sortKey, setSortKey] = useState<SortKey>('variation_pct');
@@ -72,8 +75,9 @@ export default function ActionsTable({
       return true;
     });
     r = [...r].sort((a, b) => {
-      const av = a[sortKey] ?? (sortKey === 'code' ? '' : 0);
-      const bv = b[sortKey] ?? (sortKey === 'code' ? '' : 0);
+      const fallback = STRING_KEYS.has(sortKey) ? '' : 0;
+      const av = a[sortKey] ?? fallback;
+      const bv = b[sortKey] ?? fallback;
       const cmp = typeof av === 'string' ? av.localeCompare(bv as string) : (av as number) - (bv as number);
       return asc ? cmp : -cmp;
     });
@@ -90,7 +94,7 @@ export default function ActionsTable({
     <th
       onClick={() => toggleSort(k)}
       className={`
-        overline px-4 py-3 cursor-pointer select-none
+        overline px-4 py-3 cursor-pointer select-none whitespace-nowrap
         text-faint hover:text-gold/80 ${EASE}
         ${right ? 'text-right' : 'text-left'}
         ${sortKey === k ? 'text-gold/70' : ''}
@@ -161,13 +165,13 @@ export default function ActionsTable({
           <thead className="border-b border-border/60 bg-bg/60">
             <tr>
               <Th k="code" label="Titre" />
-              <th className="overline px-4 py-3 text-left text-faint">Secteur</th>
+              <Th k="secteur" label="Secteur" />
               <Th k="cours_jour" label="Cours" right />
               <Th k="variation_pct" label="Var %" right />
-              <th className="overline px-4 py-3 text-center text-faint">Tendance 30j</th>
+              <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">Tendance 30j</th>
               <Th k="volume" label="Volume" right />
               <Th k="valeur_echangee" label="Valeur" right />
-              <th className="overline px-4 py-3 text-center text-faint">Signal</th>
+              <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">Signal</th>
             </tr>
           </thead>
           <tbody>

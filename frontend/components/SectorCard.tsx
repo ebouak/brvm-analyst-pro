@@ -115,6 +115,14 @@ export default function SectorCard({ perf }: Props) {
       </div>
 
       <Sparkline data={sparkline30d} />
+
+      {/* Navigation contextuelle : voir les actions de ce secteur */}
+      <Link
+        href={`/actions?secteur=${encodeURIComponent(secteur)}`}
+        className="mt-1 inline-flex items-center gap-1 text-[11px] text-info hover:underline"
+      >
+        Voir les actions de ce secteur →
+      </Link>
     </div>
   );
 }

@@ -66,8 +66,9 @@ async function getData() {
   };
 }
 
-export default async function ActionsPage() {
+export default async function ActionsPage({ searchParams }: { searchParams?: { secteur?: string } }) {
   const { lastDate, actions, signals, sparklines } = await getData();
+  const initialSecteur = searchParams?.secteur ?? '';
 
   if (!lastDate) {
     return (
@@ -105,7 +106,7 @@ export default async function ActionsPage() {
                 Séance&nbsp;<span className="tabular">{lastDate}</span>
               </StatPill>
             </div>
-            <PremiumCTA href="/actions/compare" variant="ghost">
+            <PremiumCTA href="/actions/compare" variant="gold">
               Comparer des titres
             </PremiumCTA>
           </>
@@ -117,7 +118,7 @@ export default async function ActionsPage() {
 
       {/* ── Tableau principal (avec colonne Tendance 30j) ───────────────── */}
       <PremiumPanel>
-        <ActionsTable actions={actions} signals={signals} sparklines={sparklines} />
+        <ActionsTable actions={actions} signals={signals} sparklines={sparklines} initialSecteur={initialSecteur} />
       </PremiumPanel>
     </div>
   );
