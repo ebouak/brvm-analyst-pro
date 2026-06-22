@@ -35,6 +35,7 @@ import { analyzeDividendTiming } from '@/lib/signal/dividendTiming';
 import { readPosition } from '@/lib/signal/position';
 import { synthesize } from '@/lib/signal/synthesis';
 import ThesisPanel from '@/components/theses/ThesisPanel';
+import ActionMenu from '@/components/actions/ActionMenu';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -334,48 +335,28 @@ export default async function InstrumentPage({
 
         {/* Actions header */}
         <div className="flex items-center gap-1.5 flex-wrap">
+          {/* Actions primaires (pleines) */}
+          <Link
+            href={`/actions/${code}/revue`}
+            className="inline-flex items-center gap-1 text-[11px] font-medium border border-info/40 bg-info/[0.12] rounded-full px-3 py-1 text-info hover:bg-info/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
+            Revue de résultats →
+          </Link>
+          <Link
+            href={`/actions/${code}/financials`}
+            className="inline-flex items-center gap-1 text-[11px] font-medium border border-gold/40 bg-gold/[0.12] rounded-full px-3 py-1 text-gold hover:bg-gold/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
+            États financiers →
+          </Link>
+          {/* Action contextuelle : publications */}
           <PublicationsModal
             code={code}
             designation={instrument?.designation}
             publications={publications}
             count={pubCount}
           />
-          <Link
-            href="/portefeuille"
-            className="inline-flex items-center gap-1 text-[11px] border border-border rounded-full px-3 py-1 text-muted hover:border-gold/40 hover:text-gold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Watchlist
-          </Link>
-          <Link
-            href="/portefeuille"
-            className="inline-flex items-center gap-1 text-[11px] border border-border rounded-full px-3 py-1 text-muted hover:border-gold/40 hover:text-gold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Alertes
-          </Link>
-          <Link
-            href={`/backtest?code=${code}`}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-border text-muted hover:border-cyan/40 hover:text-cyan transition"
-          >
-            ◈ Backtester
-          </Link>
-          <Link
-            href={`/actions/${code}/financials`}
-            className="inline-flex items-center gap-1 text-[11px] border border-gold/30 bg-gold/[0.06] rounded-full px-3 py-1 text-gold hover:bg-gold/10 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Financials →
-          </Link>
-          <Link
-            href={`/actions/${code}/revue`}
-            className="inline-flex items-center gap-1 text-[11px] border border-info/30 bg-info/[0.06] rounded-full px-3 py-1 text-info hover:bg-info/10 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Revue de résultats →
-          </Link>
-          <Link
-            href={`/forum?code=${code}`}
-            className="inline-flex items-center gap-1 text-[11px] border border-border bg-surface rounded-full px-3 py-1 text-muted hover:text-white hover:border-info/40 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            💬 Discuter de cette valeur →
-          </Link>
+          {/* Actions secondaires regroupées */}
+          <ActionMenu code={code} />
         </div>
       </div>
 
