@@ -12,6 +12,7 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.5.3",
     "@react-pdf/renderer": "^3.4.4",
     "@react-three/fiber": "^8.18.0",
     "@sentry/nextjs": "^10.59.0",
