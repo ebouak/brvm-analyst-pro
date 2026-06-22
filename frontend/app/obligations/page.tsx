@@ -40,8 +40,9 @@ async function getData() {
     let ytm: number | null = null;
     let modDur: number | null = null;
     if (o.cours_jour != null && tauxPct != null && years != null) {
-      // Le prix est coté en % du pair → base nominale 100 (pas 10 000).
-      const inputs = { prix: o.cours_jour, couponRatePct: tauxPct, yearsToMaturity: years, face: 100 };
+      // Le cours BRVM est coté sur la base du nominal (≈ 10 000 FCFA au pair),
+      // PAS en % de 100 → utiliser face = 10 000 pour que le solveur YTM converge.
+      const inputs = { prix: o.cours_jour, couponRatePct: tauxPct, yearsToMaturity: years, face: 10000 };
       ytm = yieldToMaturity(inputs);
       if (ytm != null) {
         const d = durations(inputs, ytm);
@@ -78,7 +79,9 @@ async function getData() {
     }
   }
 
-  const ytms = rows.map((r) => r.ytm).filter((y): y is number => y != null);
+  // On écarte les YTM aberrants (prix illiquides/au pair sur titres quasi échus,
+  // solveur au plafond) pour des KPI crédibles : plage plausible 0–25 %.
+  const ytms = rows.map((r) => r.ytm).filter((y): y is number => y != null && y > 0 && y < 25);
   const avgBondYtm = ytms.length ? ytms.reduce((x, y) => x + y, 0) / ytms.length : null;
 
   return { lastDate, rows, dividendYields, avgBondYtm };
@@ -106,7 +109,7 @@ export default async function ObligationsPage() {
 
   // Points pour la courbe des taux (YTM vs maturité par émetteur).
   const curve: CurvePoint[] = rows
-    .filter((r) => r.ytm != null && r.yearsToMaturity != null)
+    .filter((r) => r.ytm != null && r.ytm > 0 && r.ytm < 25 && r.yearsToMaturity != null)
     .map((r) => ({ emetteur: r.emetteur ?? 'Autre', code: r.code, x: r.yearsToMaturity!, y: r.ytm! }));
 
   // KPIs de synthèse
@@ -114,8 +117,9 @@ export default async function ObligationsPage() {
     const durs = rows.map((r) => r.modifiedDuration).filter((d): d is number => d != null);
     return durs.length ? durs.reduce((a, b) => a + b, 0) / durs.length : null;
   })();
-  const minYtm = rows.map((r) => r.ytm).filter((y): y is number => y != null).reduce((a, b) => Math.min(a, b), Infinity);
-  const maxYtm = rows.map((r) => r.ytm).filter((y): y is number => y != null).reduce((a, b) => Math.max(a, b), -Infinity);
+  const plausibleYtms = rows.map((r) => r.ytm).filter((y): y is number => y != null && y > 0 && y < 25);
+  const minYtm = plausibleYtms.reduce((a, b) => Math.min(a, b), Infinity);
+  const maxYtm = plausibleYtms.reduce((a, b) => Math.max(a, b), -Infinity);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
