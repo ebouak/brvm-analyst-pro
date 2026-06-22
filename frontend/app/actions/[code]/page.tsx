@@ -712,8 +712,8 @@ export default async function InstrumentPage({
           </>
         ) : (
           <div className="rounded-panel border border-border bg-surface shadow-card p-6">
-            <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-1.5">Signal du jour</p>
-            <p className="text-xs text-faint">Aucun signal calculé pour cette séance.</p>
+            <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-1.5">Signal quantitatif</p>
+            <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
           </div>
         )}
       </div>
@@ -988,14 +988,14 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
       >
         {/* Header signal */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
-          <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em]">Signal du jour</p>
+          <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em]">Signal quantitatif</p>
           <SignalBadge signal={signal.signal} confiance={signal.confiance} />
           <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           <span className="ml-auto tabular text-[11px] text-faint font-mono">
             {signal.score_total != null
               ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2)
               : '—'}
-            {' / 1.00 · '}{signal.date_marche}
+            {' / 1.00 · dernière séance scorée '}{signal.date_marche}
           </span>
         </div>
 

@@ -30,7 +30,10 @@ export function FicheStickyNav({
   }, []);
 
   return (
-    <nav className="sticky top-0 z-30 -mx-4 flex items-center gap-3 overflow-x-auto border-b border-border/60 bg-bg/80 px-4 py-2 backdrop-blur md:-mx-6 md:px-6">
+    {/* Fond OPAQUE (pas de backdrop-blur) : un backdrop-filter collant par-dessus
+        le canvas du graphique provoque des artefacts de compositing (zones noires
+        au scroll) sur Chromium. Le fond plein évite ce bug. */}
+    <nav className="sticky top-0 z-30 -mx-4 flex items-center gap-3 overflow-x-auto border-b border-border/60 bg-bg px-4 py-2 md:-mx-6 md:px-6">
       {compact && cours != null && (
         <span className="mr-1 flex shrink-0 items-center gap-2 border-r border-border/60 pr-3">
           <span className="text-sm font-semibold text-ivory">{code}</span>

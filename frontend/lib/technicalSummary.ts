@@ -51,7 +51,7 @@ function phrase(id: TechnicalSignal['id'], direction: SignalDirection, value: nu
         ? 'La MACD évolue en dessous de sa ligne de signal'
         : 'La MACD est proche de sa ligne de signal';
     case 'dmi':
-      if (direction === 'na') return '+DI/-DI indisponibles (données OHLCV manquantes)';
+      if (direction === 'na') return 'Indicateur de tendance directionnelle non calculable : la BRVM ne publie pas les plus-hauts/plus-bas intraday.';
       return direction === 'up'
         ? `+DI (${v}) est au-dessus de -DI : tendance haussière`
         : direction === 'down'
