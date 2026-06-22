@@ -34,6 +34,37 @@ function parseDateFromText(text: string): string | null {
   return mois ? `${m[3]}-${mois}-${m[1]!.padStart(2, '0')}` : null;
 }
 
+/** Une date de publication ne peut pas être dans le futur : on la rejette sinon. */
+function notFuture(date: string | null): string | null {
+  if (!date) return null;
+  return date <= new Date().toISOString().slice(0, 10) ? date : null;
+}
+
+/**
+ * Date de publication réelle de l'article, par ordre de fiabilité :
+ *  1) attribut <time datetime="…"> (ISO) ;
+ *  2) élément de date Drupal (.date-display-single / .submitted / .post-date) ;
+ *  3) première date littérale du corps — UNIQUEMENT si elle n'est pas future
+ *     (évite de capter une date d'échéance citée dans le texte) ;
+ *  4) repli : aujourd'hui.
+ */
+function extractPublicationDate($: cheerio.CheerioAPI, bodyText: string): string {
+  const iso = $('time[datetime]').first().attr('datetime');
+  if (iso) {
+    const d = iso.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d) && notFuture(d)) return d;
+  }
+  const meta = $('.date-display-single, .submitted, .field-name-post-date, .node__meta time')
+    .first().text();
+  const fromMeta = notFuture(parseDateFromText(meta));
+  if (fromMeta) return fromMeta;
+
+  const fromBody = notFuture(parseDateFromText(bodyText));
+  if (fromBody) return fromBody;
+
+  return new Date().toISOString().slice(0, 10);
+}
+
 function hashItem(slug: string): string {
   return createHash('sha256').update(`brvmorg|${slug}`).digest('hex');
 }
@@ -48,7 +79,7 @@ async function fetchArticle(href: string): Promise<NewsItem | null> {
     const para = $('.field-name-body p, .content p, article p, .region-content p')
       .first().text().replace(/\s+/g, ' ').trim();
     const bodyText = $('.field-name-body, .region-content, article').first().text();
-    const date = parseDateFromText(bodyText) ?? new Date().toISOString().slice(0, 10);
+    const date = extractPublicationDate($, bodyText);
     const slug = href.split('/').filter(Boolean).pop() ?? href;
     return {
       dedupe_hash: hashItem(slug),
