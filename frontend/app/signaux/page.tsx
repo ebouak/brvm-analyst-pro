@@ -1,5 +1,6 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
+import { fmtDateFR } from '@/lib/format';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -103,7 +104,7 @@ export default async function SignauxPage() {
         actions={
           <>
             <StatPill tone="gold">
-              Séance&nbsp;<span className="tabular">{lastDate}</span>
+              Dernière séance scorée&nbsp;<span className="tabular">{fmtDateFR(lastDate)}</span>
             </StatPill>
             <PremiumCTA href="/signaux" variant="ghost">
               Actualiser
@@ -145,6 +146,16 @@ export default async function SignauxPage() {
           accent="sapphire"
         />
       </div>
+
+      {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
+      {total > 0 && buyCount === 0 && (
+        <div className="rounded-xl border border-info/25 bg-info/[0.06] px-4 py-3 text-sm text-muted">
+          <span className="font-medium text-white">Aucune opportunité d&apos;achat détectée sur cette séance.</span>{' '}
+          Le moteur n&apos;a trouvé aucun titre réunissant les conditions d&apos;un signal d&apos;achat —
+          c&apos;est un état de marché normal (phase neutre ou prudente), pas une anomalie. Les titres
+          en <span className="text-white">Conserver</span> restent à surveiller pour un futur point d&apos;entrée.
+        </div>
+      )}
 
       {/* ── Tableau interactif avec filtres ─────────────────────────────── */}
       <PremiumPanel>
