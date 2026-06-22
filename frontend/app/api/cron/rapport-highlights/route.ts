@@ -122,9 +122,24 @@ export async function GET(req: Request) {
     codes = [one.toUpperCase()];
   } else {
     // Sociétés disposant d'au moins un rapport ; lot borné (durée).
+    // Priorité aux NON encore extraites, puis aux plus anciennes → chaque
+    // passage (cron hebdo ou amorçage manuel) avance et rafraîchit le stock.
     const limit = Number(url.searchParams.get('limit') ?? 8);
-    const { data } = await admin.from('publications').select('code').eq('type_publication', 'rapport').limit(2000);
-    codes = [...new Set(((data ?? []) as Array<{ code: string }>).map((r) => r.code))].slice(0, limit);
+    const [{ data: pubRows }, { data: hlRows }] = await Promise.all([
+      admin.from('publications').select('code').eq('type_publication', 'rapport').limit(2000),
+      admin.from('rapport_highlights').select('code, updated_at'),
+    ]);
+    const withRapport = [...new Set(((pubRows ?? []) as Array<{ code: string }>).map((r) => r.code))];
+    const updatedAt = new Map(((hlRows ?? []) as Array<{ code: string; updated_at: string }>).map((r) => [r.code, r.updated_at]));
+    codes = withRapport
+      .sort((a, b) => {
+        const ua = updatedAt.get(a); const ub = updatedAt.get(b);
+        if (!ua && ub) return -1;            // a non extrait → priorité
+        if (ua && !ub) return 1;
+        if (!ua && !ub) return a.localeCompare(b);
+        return ua!.localeCompare(ub!);       // plus ancien d'abord
+      })
+      .slice(0, limit);
   }
 
   const results = [];
