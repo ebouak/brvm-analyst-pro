@@ -757,10 +757,10 @@ export const SignInPage = ({
                           >
                             <span className="relative w-full h-full block overflow-hidden">
                               <span className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-full">
-                                â†’
+                                →
                               </span>
                               <span className="absolute inset-0 flex items-center justify-center transition-transform duration-300 -translate-x-full group-hover:translate-x-0">
-                                â†’
+                                →
                               </span>
                             </span>
                           </button>
