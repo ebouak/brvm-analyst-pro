@@ -26,21 +26,21 @@ export default async function ConseillerPage() {
         kicker="Bot conseiller"
         title="Conseiller BRVM"
         subtitle="Une recommandation unifiée par action — Acheter / Conserver / Vendre — qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
-        actions={<StatPill tone="gold">✦ Synthèse</StatPill>}
+        actions={<StatPill tone="neutral"><span className="tabular">{rows.length}</span>&nbsp;valeurs analysées</StatPill>}
       />
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-panel border border-up/30 bg-up/5 px-4 py-3">
-          <p className="overline text-up/80">À acheter</p>
-          <p className="mt-1 tabular text-2xl font-semibold text-up">{counts.acheter}</p>
+        <div className="rounded-panel border-2 border-up/40 bg-up/10 px-4 py-3">
+          <p className="overline text-up flex items-center gap-1">▲ À acheter</p>
+          <p className="mt-1 tabular text-3xl font-bold text-up">{counts.acheter}</p>
         </div>
         <div className="rounded-panel border border-border bg-surface px-4 py-3">
-          <p className="overline text-faint">À conserver</p>
-          <p className="mt-1 tabular text-2xl font-semibold text-white">{counts.conserver}</p>
+          <p className="overline text-muted flex items-center gap-1">■ À conserver</p>
+          <p className="mt-1 tabular text-3xl font-bold text-white">{counts.conserver}</p>
         </div>
-        <div className="rounded-panel border border-down/30 bg-down/5 px-4 py-3">
-          <p className="overline text-down/80">À vendre</p>
-          <p className="mt-1 tabular text-2xl font-semibold text-down">{counts.vendre}</p>
+        <div className="rounded-panel border-2 border-down/40 bg-down/10 px-4 py-3">
+          <p className="overline text-down flex items-center gap-1">▼ À vendre</p>
+          <p className="mt-1 tabular text-3xl font-bold text-down">{counts.vendre}</p>
         </div>
       </div>
 

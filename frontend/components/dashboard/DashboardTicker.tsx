@@ -45,13 +45,21 @@ export default function DashboardTicker({ items }: { items: TickerLine[] }) {
       <div className="flex w-max animate-ticker items-center gap-6 px-6 font-mono group-hover:[animation-play-state:paused]">
         {loop.map((it, i) => {
           const up = (it.variation ?? 0) >= 0;
+          // Pastille de section au début et à chaque changement Actions↔Obligations.
+          const showLabel = i === 0 || loop[i - 1]!.kind !== it.kind;
           return (
+            <span key={`seg-${it.code}-${i}`} className="contents">
+            {showLabel && (
+              <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                it.kind === 'action' ? 'border-info/40 bg-info/10 text-info' : 'border-gold/40 bg-gold/10 text-gold'
+              }`}>
+                {it.kind === 'action' ? '◆ Actions' : '◆ Obligations'}
+              </span>
+            )}
             <Link
-              key={`${it.code}-${i}`}
               href={it.kind === 'action' ? `/actions/${it.code}` : '/obligations'}
               className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] font-bold transition-opacity hover:opacity-100"
             >
-              {it.kind === 'obligation' && <span className="text-[9px] text-faint">◆</span>}
               <span className="text-muted">{it.code}</span>
               {it.kind === 'action' && it.spark && <TickerSpark data={it.spark} up={up} />}
               <span className="text-ivory">{it.value}</span>
@@ -61,6 +69,7 @@ export default function DashboardTicker({ items }: { items: TickerLine[] }) {
                 </span>
               )}
             </Link>
+            </span>
           );
         })}
       </div>
