@@ -161,6 +161,7 @@ async function getData() {
   const { data: newsRows } = await supabase
     .from('brvm_news')
     .select('id, titre, date_publication, source_url, instrument_code')
+    .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
     .order('date_publication', { ascending: false })
     .limit(4);
   const news = (newsRows ?? []) as NewsCardItem[];

@@ -29,6 +29,7 @@ export default async function ActualitesPage() {
   const { data } = await supabase
     .from('brvm_news')
     .select('id, titre, date_publication, source, source_url, resume, instrument_code')
+    .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
     .order('date_publication', { ascending: false })
     .limit(100);
 
