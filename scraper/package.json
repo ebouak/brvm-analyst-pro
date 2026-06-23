@@ -55,7 +55,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
     "axios": "^1.7.7",
-    "axios-cookiejar-support": "^5.0.3",
+    "axios-cookiejar-support": "^7.0.0",
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.5",
     "pdfkit": "^0.13.0",
