@@ -53,6 +53,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/portefeuille', label: 'Portefeuille' },
       { href: '/premium/paper-trading', label: 'Paper Trading', premium: true },
       { href: '/reports', label: 'Rapports' },
+      { href: '/rapports/builder', label: 'Constructeur de rapport' },
       { href: '/premium/reports', label: 'Rapports mensuels', premium: true },
     ],
   },
