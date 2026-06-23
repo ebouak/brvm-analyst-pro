@@ -38,6 +38,15 @@ export async function PATCH(req: Request) {
 
   // Écriture via service_role sur la SEULE ligne de l'utilisateur (upsert idempotent).
   const admin = getServiceClient();
+
+  // `preferences` est un seul jsonb écrit par plusieurs éditeurs (profil, dashboard) :
+  // fusion top-level pour ne pas écraser les clés non envoyées.
+  if ('preferences' in patch && patch.preferences && typeof patch.preferences === 'object') {
+    const { data: existing } = await admin.from('profiles').select('preferences').eq('id', user.id).maybeSingle();
+    const prev = (existing?.preferences ?? {}) as Record<string, unknown>;
+    patch.preferences = { ...prev, ...(patch.preferences as Record<string, unknown>) };
+  }
+
   const { error } = await admin.from('profiles')
     .upsert({ id: user.id, email: user.email, ...patch }, { onConflict: 'id' });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

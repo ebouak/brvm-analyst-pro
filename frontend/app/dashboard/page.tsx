@@ -4,6 +4,7 @@ import NewsTicker from '@/components/NewsTicker';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
+import { resolveLayout, type WidgetKey, type DashboardLayout } from '@/lib/dashboard/widgets';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
@@ -218,10 +219,13 @@ export default async function Dashboard() {
   const supa = createClient();
   const { data: { user } } = await supa.auth.getUser();
   let favoriteSectors: string[] = [];
+  let dashboardLayout: DashboardLayout | null = null;
   if (user) {
-    const { data: prof } = await supa.from('profiles').select('favorite_sectors').eq('id', user.id).maybeSingle();
+    const { data: prof } = await supa.from('profiles').select('favorite_sectors, preferences').eq('id', user.id).maybeSingle();
     favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
+    dashboardLayout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
   }
+  const layout = resolveLayout(dashboardLayout);
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
@@ -280,6 +284,75 @@ export default async function Dashboard() {
     getWeeklyIndex('BRVMC', 'BRVM Composite'),
   ]);
 
+  // Widgets configurables (ordre + visibilité pilotés par le layout utilisateur).
+  const sections: Record<WidgetKey, React.ReactNode> = {
+    secteurs: user ? (
+      <section aria-label="Vos secteurs">
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="font-display text-lg text-white">Vos secteurs</h2>
+          <span className="rounded-full bg-gradient-to-r from-accent to-up px-2 py-0.5 text-[9px] font-bold text-bg">PERSO</span>
+        </div>
+        <FavoriteSectors favorites={favoriteSectors} />
+      </section>
+    ) : null,
+    indices: (
+      <section aria-label="Indices BRVM">
+        <MarketIndices indices={indices} />
+      </section>
+    ),
+    etat: (
+      <section aria-label="État du marché">
+        <MarketStateCard stats={stats} sentimentScore={sentimentScore} sentimentDelta={sentimentDelta} breakdown={breakdown} />
+      </section>
+    ),
+    seance: (
+      <section aria-label="Séance du jour">
+        <p className="overline text-muted mb-4 tracking-[0.16em]">Séance du jour</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" sparklines={sparklines} />
+          <TopMovers title="Top 5 baisses" rows={losers} signals={signals as SignalDaily[]} direction="down" sparklines={sparklines} />
+          <div className="space-y-4">
+            <WeeklyIndexChart {...weekly30} />
+            <WeeklyIndexChart {...weeklyC} />
+          </div>
+          <div className="rounded-panel border border-border bg-border/30 p-1.5">
+            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-4 py-4 h-full flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-ivory">Brief analytique</h3>
+                <BriefAssistant />
+              </div>
+              <KeyMetrics summary={summary} summaryPrev={summaryPrev} />
+              {brief?.summary && (
+                <div className="border-t border-border/40 pt-3">
+                  <p className="overline text-faint mb-1.5">Analyse du jour</p>
+                  <p className="text-[13px] leading-relaxed text-ivory/80">{brief.summary}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    ),
+    signaux: (
+      <section aria-label="Signaux récents">
+        <p className="overline text-muted mb-4 tracking-[0.16em]">Signaux actionnables</p>
+        <RecentSignalsCard signals={signals as SignalDaily[]} />
+      </section>
+    ),
+    actus: (
+      <section aria-label="Actualités">
+        <p className="overline text-muted mb-4 tracking-[0.16em]">Actualités</p>
+        <NewsFeed />
+      </section>
+    ),
+    portefeuille: (
+      <section aria-label="Composition du portefeuille">
+        <p className="overline text-muted mb-4 tracking-[0.16em]">Mon portefeuille</p>
+        <PortfolioComposition />
+      </section>
+    ),
+  };
+
   return (
     <div className="min-h-screen bg-bg">
       {/* ── Halo atmosphérique ────────────────────────────────────────────── */}
@@ -313,6 +386,11 @@ export default async function Dashboard() {
           <nav className="flex items-center gap-2" aria-label="Navigation rapide">
             <BeamButton href="/signaux">Signaux</BeamButton>
             <BeamButton href="/portefeuille">Portefeuille</BeamButton>
+            {user && (
+              <Link href="/dashboard/personnaliser" className="rounded-full border border-border px-3 py-1.5 text-xs text-muted hover:text-accent hover:border-accent/40 transition-colors" title="Personnaliser le tableau de bord">
+                ⚙︎ Personnaliser
+              </Link>
+            )}
           </nav>
         </header>
 
@@ -322,83 +400,10 @@ export default async function Dashboard() {
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
         <DashboardTicker items={ticker} />
 
-        {/* ── Vos secteurs (paramétrage intelligent) ──────────────────────── */}
-        {user && (
-          <section aria-label="Vos secteurs">
-            <div className="mb-3 flex items-center gap-2">
-              <h2 className="font-display text-lg text-white">Vos secteurs</h2>
-              <span className="rounded-full bg-gradient-to-r from-accent to-up px-2 py-0.5 text-[9px] font-bold text-bg">PERSO</span>
-            </div>
-            <FavoriteSectors favorites={favoriteSectors} />
-          </section>
-        )}
-
-        {/* ── Indices BRVM (réels — 4 principaux + 7 sectoriels) ──────────── */}
-        <section aria-label="Indices BRVM">
-          <MarketIndices indices={indices} />
-        </section>
-
-        {/* ── État du marché (sous le titre) ──────────────────────────────── */}
-        <section aria-label="État du marché">
-          <MarketStateCard stats={stats} sentimentScore={sentimentScore} sentimentDelta={sentimentDelta} breakdown={breakdown} />
-        </section>
-
-        {/* ── Rangée principale : 4 colonnes (hausses · baisses · graphiques · brief) ── */}
-        <section aria-label="Séance du jour">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Séance du jour</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-
-            {/* Col 1 — Top hausses */}
-            <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" sparklines={sparklines} />
-
-            {/* Col 2 — Top baisses */}
-            <TopMovers title="Top 5 baisses" rows={losers} signals={signals as SignalDaily[]} direction="down" sparklines={sparklines} />
-
-            {/* Col 3 — Graphiques indices empilés */}
-            <div className="space-y-4">
-              <WeeklyIndexChart {...weekly30} />
-              <WeeklyIndexChart {...weeklyC} />
-            </div>
-
-            {/* Col 4 — Brief analytique + repères clés */}
-            <div className="rounded-panel border border-border bg-border/30 p-1.5">
-              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-4 py-4 h-full flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-ivory">Brief analytique</h3>
-                  <BriefAssistant />
-                </div>
-
-                <KeyMetrics summary={summary} summaryPrev={summaryPrev} />
-
-                {brief?.summary && (
-                  <div className="border-t border-border/40 pt-3">
-                    <p className="overline text-faint mb-1.5">Analyse du jour</p>
-                    <p className="text-[13px] leading-relaxed text-ivory/80">{brief.summary}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ── Signaux récents ────────────────────────────────────────────── */}
-        <section aria-label="Signaux récents">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Signaux actionnables</p>
-          <RecentSignalsCard signals={signals as SignalDaily[]} />
-        </section>
-
-        {/* ── Fil d'actualités BRVM / COSUMAF ────────────────────────────── */}
-        <section aria-label="Actualités">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Actualités</p>
-          <NewsFeed />
-        </section>
-
-        {/* ── Composition du portefeuille utilisateur ─────────────────────── */}
-        <section aria-label="Composition du portefeuille">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Mon portefeuille</p>
-          <PortfolioComposition />
-        </section>
+        {/* ── Widgets configurables (ordre + visibilité via /dashboard/personnaliser) ── */}
+        {layout.map((key) => (
+          <div key={key}>{sections[key]}</div>
+        ))}
 
         {/* ── Pied de page premium ───────────────────────────────────────── */}
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-6">
