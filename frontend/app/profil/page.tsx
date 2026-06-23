@@ -20,6 +20,7 @@ export default async function ProfilPage() {
       <ProfileClient
         email={user.email ?? ''}
         isPremium={Boolean(profile.is_premium)}
+        initialPreferences={(profile.preferences as Record<string, unknown>) ?? {}}
         initial={{
           display_name: (profile.display_name as string) ?? null,
           avatar_url: (profile.avatar_url as string) ?? null,

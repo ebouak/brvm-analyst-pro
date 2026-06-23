@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import NewsTicker from '@/components/NewsTicker';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
+import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
@@ -213,6 +214,15 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 export default async function Dashboard() {
   const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker } = await getData();
 
+  // Secteurs favoris de l'utilisateur (paramétrage intelligent).
+  const supa = createClient();
+  const { data: { user } } = await supa.auth.getUser();
+  let favoriteSectors: string[] = [];
+  if (user) {
+    const { data: prof } = await supa.from('profiles').select('favorite_sectors').eq('id', user.id).maybeSingle();
+    favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
+  }
+
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
     return (
@@ -311,6 +321,17 @@ export default async function Dashboard() {
 
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
         <DashboardTicker items={ticker} />
+
+        {/* ── Vos secteurs (paramétrage intelligent) ──────────────────────── */}
+        {user && (
+          <section aria-label="Vos secteurs">
+            <div className="mb-3 flex items-center gap-2">
+              <h2 className="font-display text-lg text-white">Vos secteurs</h2>
+              <span className="rounded-full bg-gradient-to-r from-accent to-up px-2 py-0.5 text-[9px] font-bold text-bg">PERSO</span>
+            </div>
+            <FavoriteSectors favorites={favoriteSectors} />
+          </section>
+        )}
 
         {/* ── Indices BRVM (réels — 4 principaux + 7 sectoriels) ──────────── */}
         <section aria-label="Indices BRVM">

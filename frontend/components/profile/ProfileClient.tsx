@@ -28,13 +28,26 @@ async function resize(file: File, max = 400): Promise<Blob> {
   return new Promise((res) => canvas.toBlob((b) => res(b!), 'image/jpeg', 0.85));
 }
 
-export default function ProfileClient({ initial, email, isPremium }: { initial: Profile; email: string; isPremium: boolean }) {
+interface Prefs {
+  briefFrequency?: 'daily' | 'weekly' | 'off';
+  notify?: { signaux?: boolean; briefHebdo?: boolean; alertesPrix?: boolean; actus?: boolean };
+}
+const BRIEF = [{ v: 'daily', l: 'Quotidien' }, { v: 'weekly', l: 'Hebdomadaire' }, { v: 'off', l: 'Désactivé' }] as const;
+
+export default function ProfileClient({ initial, email, isPremium, initialPreferences = {} }: { initial: Profile; email: string; isPremium: boolean; initialPreferences?: Prefs }) {
   const [avatar, setAvatar] = useState(initial.avatar_url);
   const [name, setName] = useState(initial.display_name ?? '');
   const [bio, setBio] = useState(initial.bio ?? '');
   const [location, setLocation] = useState(initial.location ?? '');
   const [level, setLevel] = useState(initial.experience_level ?? '');
   const [sectors, setSectors] = useState<string[]>(initial.favorite_sectors ?? []);
+  const [briefFreq, setBriefFreq] = useState<string>(initialPreferences.briefFrequency ?? 'weekly');
+  const [notify, setNotify] = useState({
+    signaux: initialPreferences.notify?.signaux ?? false,
+    briefHebdo: initialPreferences.notify?.briefHebdo ?? false,
+    alertesPrix: initialPreferences.notify?.alertesPrix ?? false,
+    actus: initialPreferences.notify?.actus ?? true,
+  });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -56,13 +69,20 @@ export default function ProfileClient({ initial, email, isPremium }: { initial: 
 
   async function save() {
     setSaving(true); setMsg(null);
+    const preferences: Prefs = { briefFrequency: briefFreq as Prefs['briefFrequency'], notify };
     const r = await fetch('/api/profile', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ display_name: name, bio, location, experience_level: level || null, favorite_sectors: sectors }),
+      body: JSON.stringify({ display_name: name, bio, location, experience_level: level || null, favorite_sectors: sectors, preferences }),
     });
+    // Le toggle « brief hebdo » (dé)abonne réellement la newsletter.
+    void fetch(notify.briefHebdo ? '/api/newsletter/subscribe' : '/api/newsletter/unsubscribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source: 'profil' }),
+    }).catch(() => null);
     setSaving(false);
     setMsg(r.ok ? '✓ Profil enregistré' : 'Échec de l’enregistrement');
   }
+  const setNotif = (k: keyof typeof notify) => setNotify((s) => ({ ...s, [k]: !s[k] }));
 
   const toggleSector = (s: string) => setSectors((cur) => cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]);
   const inputCls = 'w-full rounded-lg border border-border bg-bg/40 px-3 py-2 text-sm text-ivory placeholder:text-faint focus:border-accent/40 focus:outline-none';
@@ -123,6 +143,35 @@ export default function ProfileClient({ initial, email, isPremium }: { initial: 
             ))}
           </div>
         </div>
+        {/* ── Préférences intelligentes ── */}
+        <div className="border-t border-border/60 pt-4 space-y-4">
+          <div>
+            <p className="text-xs text-muted mb-1.5">Brief analytique</p>
+            <div className="flex gap-2">
+              {BRIEF.map((b) => (
+                <button key={b.v} type="button" onClick={() => setBriefFreq(b.v)}
+                  className={`text-xs px-3 py-1.5 rounded-lg border ${briefFreq === b.v ? 'border-accent text-accent bg-accent/10' : 'border-border text-muted'}`}>
+                  {b.l}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-muted mb-1">Notifications email</p>
+            {([
+              ['signaux', "Signaux d'achat détectés", 'activé — livraison bientôt'],
+              ['briefHebdo', 'Brief hebdomadaire du marché', '(dé)abonne la newsletter'],
+              ['alertesPrix', 'Alertes de prix sur mes titres', 'activé — livraison bientôt'],
+              ['actus', 'Actualités importantes', ''],
+            ] as [keyof typeof notify, string, string][]).map(([k, label, sub]) => (
+              <label key={k} className="flex items-center justify-between border-b border-border/40 py-2 cursor-pointer">
+                <span><span className="text-sm text-ivory">{label}</span>{sub && <span className="block text-[10px] text-faint">{sub}</span>}</span>
+                <input type="checkbox" checked={notify[k]} onChange={() => setNotif(k)} className="accent-accent h-4 w-4" />
+              </label>
+            ))}
+          </div>
+        </div>
+
         <div className="flex items-center gap-3 pt-1">
           <button type="button" onClick={save} disabled={saving}
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-50">
