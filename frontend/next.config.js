@@ -19,6 +19,23 @@ const nextConfig = {
       { source: '/premium/backtesting', destination: '/backtest', permanent: true },
     ];
   },
+  // En-têtes de sécurité HTTP sur toutes les routes. (Étaient définis dans un
+  // next.config.mjs ignoré — Next ne lit que ce next.config.js → ils n'étaient
+  // jamais servis. Consolidés ici.)
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' }, // anti-clickjacking
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        ],
+      },
+    ];
+  },
 };
 
 // Wrap Sentry : capture runtime (erreurs client/serveur/edge) toujours active.
