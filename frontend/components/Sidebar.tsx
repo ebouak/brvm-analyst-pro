@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
 import BeginnerToggle from '@/components/BeginnerToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import UserAvatarMenu from '@/components/profile/UserAvatarMenu';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 const COLLAPSE_KEY = 'wb_nav_collapsed';
@@ -123,6 +124,8 @@ export default function Sidebar({
 
       {/* Pied */}
       <div className="px-4 py-3.5 border-t border-border space-y-3">
+        {/* Menu utilisateur (avatar + badge + déconnexion) */}
+        <UserAvatarMenu />
         <div className="flex justify-center gap-4 text-[11px]">
           <Link href="/methodologie" className="text-faint hover:text-muted transition-colors">
             Méthodologie
