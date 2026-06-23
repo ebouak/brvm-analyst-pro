@@ -39,7 +39,7 @@ jobs:
 
       - name: Trigger intraday catch-up
         if: steps.check.outputs.needsRetrigger == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             console.log('🔄 Triggering intraday catch-up workflow...');
