@@ -2,6 +2,8 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Retire l'en-tête de fingerprinting `X-Powered-By: Next.js`.
+  poweredByHeader: false,
   experimental: {
     serverComponentsExternalPackages: ['@react-pdf/renderer', 'docx'],
     // Permet l'upload de PDF/images via Server Action (défaut 1 Mo trop bas).
