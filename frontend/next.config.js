@@ -54,6 +54,14 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
           { key: 'Content-Security-Policy', value: csp },
+          // Isolation du contexte de navigation (anti XS-Leaks / cross-window).
+          // 'allow-popups' préserve les flux OAuth/popup éventuels.
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+          // Trusted Types en REPORT-ONLY : signale les écritures DOM dangereuses
+          // (sinks XSS type innerHTML) sans rien bloquer. À promouvoir en
+          // 'require-trusted-types-for' dans la CSP bloquante une fois le code
+          // (et les libs) confirmés sans violation.
+          { key: 'Content-Security-Policy-Report-Only', value: "require-trusted-types-for 'script'; trusted-types 'allow-duplicates' default dompurify nextjs" },
         ],
       },
     ];
