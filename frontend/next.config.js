@@ -25,23 +25,23 @@ const nextConfig = {
   // next.config.mjs ignoré — Next ne lit que ce next.config.js → ils n'étaient
   // jamais servis. Consolidés ici.)
   async headers() {
-    // CSP avec allowlist des tiers réellement utilisés (Turnstile, TradingView,
-    // Supabase, Sentry, Google Fonts). Déployée en REPORT-ONLY : elle n'empêche
-    // rien mais signale les violations (console navigateur) → on vérifie qu'aucun
-    // composant ne casse, PUIS on passe la clé en 'Content-Security-Policy'
-    // (mode bloquant). 'unsafe-inline'/'unsafe-eval' requis par Next + libs de chart.
+    // CSP en mode BLOQUANT. Allowlist vérifiée contre les origines réellement
+    // chargées par le navigateur : polices (Google Fonts + Fontshare), Turnstile,
+    // Supabase, Sentry, replays formations (YouTube/Vimeo). 'unsafe-inline'/
+    // 'unsafe-eval' requis par Next + lightweight-charts. (DeepSeek/Resend sont
+    // appelés côté serveur → hors CSP navigateur.)
     const csp = [
       "default-src 'self'",
       "base-uri 'self'",
       "object-src 'none'",
       "frame-ancestors 'none'",
       "form-action 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://s3.tradingview.com https://s.tradingview.com https://www.tradingview-widget.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' data: https://fonts.gstatic.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
+      "font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.de.sentry.io https://challenges.cloudflare.com",
-      "frame-src https://challenges.cloudflare.com https://*.tradingview.com https://www.tradingview-widget.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.de.sentry.io https://challenges.cloudflare.com https://api.fontshare.com",
+      "frame-src https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "worker-src 'self' blob:",
     ].join('; ');
     return [
@@ -53,7 +53,7 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-          { key: 'Content-Security-Policy-Report-Only', value: csp },
+          { key: 'Content-Security-Policy', value: csp },
         ],
       },
     ];
