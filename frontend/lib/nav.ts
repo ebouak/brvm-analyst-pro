@@ -78,6 +78,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/brief', label: 'Brief quotidien' },
       { href: '/forum', label: 'Forum' },
       { href: '/formations', label: 'Formations' },
+      { href: '/saisonnalite', label: 'Saisonnalité' },
     ],
   },
   {

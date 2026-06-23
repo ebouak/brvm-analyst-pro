@@ -36,6 +36,8 @@ import { readPosition } from '@/lib/signal/position';
 import { synthesize } from '@/lib/signal/synthesis';
 import ThesisPanel from '@/components/theses/ThesisPanel';
 import ActionMenu from '@/components/actions/ActionMenu';
+import SeasonalityCard from '@/components/seasonality/SeasonalityCard';
+import { getMonthlyReturns } from '@/lib/seasonality/server';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -314,6 +316,9 @@ export default async function InstrumentPage({
     { label: 'Cassure baissière 20j', ok: det.breakoutDown },
   ].filter((d) => d.ok !== undefined);
 
+  // Saisonnalité (série mensuelle compacte ; React.cache déduplique avec /saisonnalite).
+  const seasonalityReturns = await getMonthlyReturns(code).catch(() => []);
+
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-6 animate-rise-in">
 
@@ -529,6 +534,14 @@ export default async function InstrumentPage({
       <div id="these" className="scroll-mt-24">
         <Eyebrow className="mb-3">Ma thèse</Eyebrow>
         <ThesisPanel code={code} coursActuel={last.cours_jour ?? null} />
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          SAISONNALITÉ (encart résumé → page complète)
+      ══════════════════════════════════════════════════ */}
+      <div id="saisonnalite" className="scroll-mt-24">
+        <Eyebrow className="mb-3">Saisonnalité</Eyebrow>
+        <SeasonalityCard code={code} returns={seasonalityReturns} />
       </div>
 
       {/* ══════════════════════════════════════════════════
