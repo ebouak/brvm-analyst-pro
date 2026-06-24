@@ -22,6 +22,20 @@ export function checkStatement(s: YearStatement, estBanque: boolean): GuardResul
     reasons.push('bilan déséquilibré (actif != passif)');
   }
 
+  // 2bis. Réconciliation des sous-totaux du passif : capitaux propres + passif non courant
+  // + passif courant doivent reconstituer le total passif (tolérance 2% pour l'écart de
+  // conversion SYSCOHADA). Un manque significatif trahit l'oubli de la « Trésorerie passif »
+  // (banques, établissements financiers et crédits de trésorerie / découverts) dans passif_courant —
+  // le défaut classique : total_passif lu sur la ligne « TOTAL GÉNÉRAL » reste juste, mais
+  // les composantes ne somment pas. C'est précisément ce que le contrôle 2 ne détecte pas.
+  if (s.total_passif != null && s.total_capitaux_propres != null
+      && s.passif_courant != null && s.passif_non_courant != null) {
+    const somme = s.total_capitaux_propres + s.passif_non_courant + s.passif_courant;
+    if (rel(somme, s.total_passif) > 0.02) {
+      reasons.push('sous-totaux du passif ne réconcilient pas le total (découverts/trésorerie passif manquants dans passif_courant ?)');
+    }
+  }
+
   // 3. Cohérence résultat : resultat_net ≈ resultat_avant_impots + impots (impots signé négatif = charge)
   // Agnostique au signe des impôts : certains PDF présentent l'impôt en charge
   // négative (RN = RAI + impôts), d'autres en valeur positive (RN = RAI − impôts).

@@ -14,7 +14,15 @@ export const FULL_SYSTEM_PROMPT =
   "BANQUES (est_banque=true) : le 'revenu_total' = Produit Net Bancaire (PNB) ; cout_ventes et marge_brute peuvent être null ; " +
   "le bilan utilise prêts/dépôts -- mappe les dépôts clients vers dette_court_terme, les prêts clients vers creances_clients, les immobilisations vers immobilisations_nettes.\n" +
   "INDUSTRIELS (est_banque=false) : mapping SYSCOHADA classique.\n\n" +
-  "COHÉRENCE OBLIGATOIRE : total_actifs = total_passif ; resultat_net = resultat_avant_impots - impots (impots en valeur positive de charge) ; " +
+  "TRÉSORERIE PASSIF (CRITIQUE) : en SYSCOHADA, le bas du passif comporte une rubrique 'Trésorerie-Passif' " +
+  "(banques crédits d'escompte ; banques, établissements financiers et crédits de trésorerie ; découverts). " +
+  "Ces montants sont des dettes À COURT TERME : INCLUS-les dans passif_courant ET reporte-les dans dette_court_terme. " +
+  "Ne les oublie jamais — chez les distributeurs ils financent le BFR et pèsent souvent plus que le passif circulant 'classique'. " +
+  "Ainsi passif_courant = (passif circulant : fournisseurs, clients avances, dettes fiscales/sociales, autres dettes) + (trésorerie passif).\n\n" +
+  "COHÉRENCE OBLIGATOIRE : total_actifs = total_passif ; " +
+  "total_passif = total_capitaux_propres + passif_non_courant + passif_courant (à l'écart de conversion près) — " +
+  "si cette somme est nettement inférieure au total, c'est que la trésorerie passif a été oubliée dans passif_courant ; " +
+  "resultat_net = resultat_avant_impots - impots (impots en valeur positive de charge) ; " +
   "marge_brute = revenu_total - cout_ventes quand applicable. Si une ligne est absente du document, mets null (n'invente jamais).";
 
 export function fullUserPrompt(symbol: string, text: string): string {
