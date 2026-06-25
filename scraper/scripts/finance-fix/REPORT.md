@@ -10,3 +10,4 @@ Source unique = états financiers audités SYSCOHADA. Fiches MADIS = contrôle c
 | PRSC (Tractafric) | 2023→2025 | ✅ verts | aucun (CA/REX/RN/BPA match) | 2024/2025 PDF FCFA, 2023 PDF millions ; actions 10 240 000 ; seul 2023 était fautif à l audit |
 | SMBC (SMB Bitumes) | 2020→2025 | ✅ tous verts | aucun (CA/RN match exact) | états synthèse condensés (qq lignes null) ; découverts inclus ; D&A=EBE−REX |
 | SHEC (Vivo Energy) | 2020→2023 | ✅ verts | aucun (RN match ; CA 2020 +0,18%) | 2024/2025 non publiés ; PDF 2022 erroné (AGL) écarté ; TAFIRE → certains flux null ; actions/BPA null |
+| UNXC (Uniwax) | 2020→2024 | ✅ verts | aucun (CA/RN dans tolérance) | 2020-2022 états résumés (qq null) ; déficits 2022-24 réels ; structure normalisée |
