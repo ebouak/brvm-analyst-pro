@@ -7,24 +7,25 @@ import { logger } from '../logger.js';
 const log = logger.child({ module: 'runNews' });
 
 export async function runNews(): Promise<void> {
-  log.info('Démarrage scraping actualités (Sika Finance + brvm.org + COSUMAF)');
-  // Sources : Sika Finance (marché), brvm.org (communiqués officiels), cosumaf.
-  const [sika, brvmOrg, officiels] = await Promise.all([
-    scrapeSikaNews(),
+  log.info('Démarrage scraping actualités (brvm.org PRIORITAIRE + Sika Finance + COSUMAF)');
+  // Sources : brvm.org (officiel), Sika Finance (marché), cosumaf.
+  // Prioriser brvm.org : 20 articles ; Sika max 5 (complémentaire).
+  const [brvmOrg, sika, officiels] = await Promise.all([
     scrapeBrvmOrgNews(),
+    scrapeSikaNews(),
     scrapeAllNews(),
   ]);
 
-  // Dédup global par dedupe_hash.
-  const byHash = new Map<string, (typeof sika)[number]>();
-  for (const item of [...sika, ...brvmOrg, ...officiels]) {
+  // Dédup global par dedupe_hash — brvm.org en priorité, complété par Sika puis officiels.
+  const byHash = new Map<string, (typeof brvmOrg)[number]>();
+  for (const item of [...brvmOrg, ...sika, ...officiels]) {
     if (!byHash.has(item.dedupe_hash)) byHash.set(item.dedupe_hash, item);
   }
   const items = [...byHash.values()];
 
   const nb = await upsertNews(items);
   log.info(
-    { nb, sika: sika.length, brvmOrg: brvmOrg.length, officiels: officiels.length },
+    { nb, brvmOrg: brvmOrg.length, sika: sika.length, officiels: officiels.length },
     'Actualités insérées/ignorées',
   );
 }

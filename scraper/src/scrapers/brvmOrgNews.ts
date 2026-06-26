@@ -19,7 +19,7 @@ const log = logger.child({ module: 'brvmOrgNews' });
 const BASE = 'https://www.brvm.org';
 const LIST = `${BASE}/fr/mediacentre/actualites`;
 const H = { 'User-Agent': 'Mozilla/5.0 (compatible; BRVMAnalystPro/1.0)' };
-const MAX_ARTICLES = 12;
+const MAX_ARTICLES = 20;
 
 const MOIS: Record<string, string> = {
   janvier: '01', février: '02', fevrier: '02', mars: '03', avril: '04',
