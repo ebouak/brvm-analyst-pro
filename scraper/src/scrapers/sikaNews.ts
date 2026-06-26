@@ -93,7 +93,7 @@ async function scrapeFeed(url: string, label: string): Promise<NewsItem[]> {
   }
 }
 
-/** Récupère actualités + communiqués BRVM depuis Sika Finance. Limité à 5 (complémentaire — priorité à brvm.org). */
+/** Récupère actualités + communiqués BRVM depuis Sika Finance (source marché quotidien). */
 export async function scrapeSikaNews(): Promise<NewsItem[]> {
   const batches = await Promise.all(SOURCES.map((s) => scrapeFeed(s.url, s.label)));
   // Dédup par dedupe_hash (un même article peut figurer dans deux fils).
@@ -101,7 +101,7 @@ export async function scrapeSikaNews(): Promise<NewsItem[]> {
   for (const item of batches.flat()) {
     if (!byHash.has(item.dedupe_hash)) byHash.set(item.dedupe_hash, item);
   }
-  const all = [...byHash.values()].slice(0, 5); // Limiter à 5 (complémentaire à brvm.org officiel)
+  const all = [...byHash.values()];
   log.info({ total: all.length }, 'Sika Finance : actualités consolidées');
   return all;
 }
