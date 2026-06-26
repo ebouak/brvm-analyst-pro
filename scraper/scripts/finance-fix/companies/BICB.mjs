@@ -1,4 +1,4 @@
-// BIIC — Banque Internationale Pour L'Industrie et Le Commerce (banque). IFRS, FCFA millions → bruts.
+// BICB — Banque Internationale Pour L'Industrie et Le Commerce du Bénin (banque). IFRS, FCFA millions → bruts.
 // Source : Rapport d'activités annuel et états financiers IFRS 2025 (états audités, Bénin).
 // ⚠️ IFRS (non SYSCOHADA) — structure bancaire : marges nettes d'intérêts, coût du risque, commissions.
 // ⚠️ Première adoption IFRS : date d'ouverture 01.01.2024 (retraité depuis publié 01.01.2024 SYSCOHADA).
@@ -54,7 +54,7 @@ export default {
       stocks: null,
       creances_clients: 672147000000, // Prêts et créances sur clientèle
       tresorerie_equivalents: 28473000000,
-      total_passif: 1251530000000,
+      total_passif: 1336706000000, // total passif + CP = total actif (équilibre bilan)
       total_capitaux_propres: 85176000000,
       capital_social: 82514000000,
       reserves_benefices_non_repartis: 515000000, // Réserves spéciales à l'ouverture
@@ -76,7 +76,7 @@ export default {
       stocks: null,
       creances_clients: 838691000000, // Prêts et créances sur clientèle
       tresorerie_equivalents: 30060000000,
-      total_passif: 1402230000000,
+      total_passif: 1516850000000, // total passif + CP = total actif
       total_capitaux_propres: 114620000000,
       capital_social: 82514000000,
       reserves_benefices_non_repartis: 2303000000,
@@ -98,7 +98,7 @@ export default {
       stocks: null,
       creances_clients: 1151536000000, // Prêts et créances sur clientèle
       tresorerie_equivalents: 41067000000,
-      total_passif: 1709482000000,
+      total_passif: 1844600000000, // total passif + CP = total actif
       total_capitaux_propres: 135118000000,
       capital_social: 82514000000,
       reserves_benefices_non_repartis: 6854000000,
