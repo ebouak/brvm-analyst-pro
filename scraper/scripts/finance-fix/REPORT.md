@@ -17,3 +17,4 @@ Source unique = états financiers audités SYSCOHADA. Fiches MADIS = contrôle c
 | NTLC (Nestlé CI) | 2022→2025 | ✅ verts | aucun | Income MADIS 4 ans OK ; balance sous-totaux MADIS faux (PNC=CP) → null ; cash null |
 | UNLC (Unilever CI) | 2022→2023 | ✅ verts | MADIS fiche externe erronée (CA ×2) — données PDF/DB correctes | 2024-2025 non publiés ; CP 2022 négatif réel ; découverts 2022 corrigés |
 | BICB (BIIC Bénin) | 2024→2025 | ✅ verts | N/A (IFRS, pas MADIS) | Banque IFRS (première adoption 01.01.2024) ; structure bancaire ; BPA 503/627 ; flux trésorerie non fournis |
+| BOAB (BOA Bénin) | 2021→2025 | ✅ verts | N/A (SYSCOHADA bancaire) | 5 ans ; augmentation capital 2024 (20 280→40 561 M) ; BPA non fourni ; flux non fournis |
