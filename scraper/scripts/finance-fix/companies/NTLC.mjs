@@ -1,22 +1,63 @@
-// NTLC — Nestlé Côte d'Ivoire (alimentaire). Etats audités SYSCOHADA, FCFA bruts.
-// Sources (bfin.brvm.org) : PDF 2025 (annule et remplace 2024).
-// ⚠️ PIÈGE : Layout compte de résultat atypique (noms colonnes/lignes non-standard).
-//    Lire avec soin : identifier REX, D&A, RN par logique métier, pas par position.
-// Capital : 2 340 000 000 F CFA (nominal à déterminer).
-// Note : 2024 PDF obsolète (ne pas utiliser).
+// NTLC — Nestlé Côte d'Ivoire (alimentaire). SYSCOHADA, FCFA bruts.
+// Source : données MADIS (2022-2025 income en base, balance partielle, cash null).
+// ⚠️ Balance 2022-2023 MADIS : PNC semble inclure CP (CP=59.9 Mds répété = ecart 34-35%).
+//    Données structurellement suspectes → sous-totaux bilan mis à null pour 2022-2023.
+// ⚠️ Balance 2024-2025 : CP/PNC/PC entièrement null en MADIS.
+// ⚠️ Cash-flow MADIS : entièrement null pour toutes années.
+// → Income conservé (valeurs raisonnables, CA 200-233 Mds, RN 16-18 Mds).
+// → Balance : total_actifs/total_passif conservés ; sous-totaux = null (données MADIS fausses).
 export default {
   ebe: {},
 
   income: [
     {
-      periode: '2025',
-      revenu_total: null, // à extraire PDF 2025 (SYSCOHADA, layout atypique)
+      periode: '2022',
+      revenu_total: 206734071633,
       cout_ventes: null,
-      resultat_exploitation: null,
+      resultat_exploitation: 29119596834,
       charges_financieres_nettes: null,
       resultat_avant_impots: null,
       impots: null,
-      resultat_net: null,
+      resultat_net: 16627044028,
+      actions_en_circulation: null,
+      benefice_par_action: null,
+      dividende_par_action: 0,
+    },
+    {
+      periode: '2023',
+      revenu_total: 203618293047,
+      cout_ventes: null,
+      resultat_exploitation: 30164175277,
+      charges_financieres_nettes: null,
+      resultat_avant_impots: null,
+      impots: null,
+      resultat_net: 16556698463,
+      actions_en_circulation: null,
+      benefice_par_action: null,
+      dividende_par_action: 0,
+    },
+    {
+      periode: '2024',
+      revenu_total: 220113267165,
+      cout_ventes: null,
+      resultat_exploitation: 35276845649,
+      charges_financieres_nettes: null,
+      resultat_avant_impots: null,
+      impots: null,
+      resultat_net: 18149967087,
+      actions_en_circulation: null,
+      benefice_par_action: null,
+      dividende_par_action: 0,
+    },
+    {
+      periode: '2025',
+      revenu_total: 233261162741,
+      cout_ventes: null,
+      resultat_exploitation: 37687318144,
+      charges_financieres_nettes: null,
+      resultat_avant_impots: null,
+      impots: null,
+      resultat_net: 18426899479,
       actions_en_circulation: null,
       benefice_par_action: null,
       dividende_par_action: 0,
@@ -25,8 +66,10 @@ export default {
 
   balance: [
     {
-      periode: '2025',
-      total_actifs: null,
+      // MADIS balance 2022-2023 structurellement faux (PNC inclut CP, ratio 34%) → uniquement total_actifs/total_passif fiables
+      // Sous-totaux (CP, PNC, PC, DCT) = null car données source erronées — ne pas inventer
+      periode: '2022',
+      total_actifs: 173973911073,
       total_actif_non_courant: null,
       actifs_incorporels: null,
       immobilisations_nettes: null,
@@ -35,9 +78,75 @@ export default {
       stocks: null,
       creances_clients: null,
       tresorerie_equivalents: null,
-      total_passif: null,
+      total_passif: 173973911073,
       total_capitaux_propres: null,
-      capital_social: 2340000000,
+      capital_social: null,
+      reserves_benefices_non_repartis: null,
+      passif_non_courant: null,
+      dette_long_terme: null,
+      passif_courant: null,
+      dette_court_terme: null,
+      fournisseurs: null,
+      autres_passifs_courants: null,
+    },
+    {
+      periode: '2023',
+      total_actifs: 170340779234,
+      total_actif_non_courant: null,
+      actifs_incorporels: null,
+      immobilisations_nettes: null,
+      investissements_long_terme: null,
+      total_actif_circulant: null,
+      stocks: null,
+      creances_clients: null,
+      tresorerie_equivalents: null,
+      total_passif: 170340779234,
+      total_capitaux_propres: null,
+      capital_social: null,
+      reserves_benefices_non_repartis: null,
+      passif_non_courant: null,
+      dette_long_terme: null,
+      passif_courant: null,
+      dette_court_terme: null,
+      fournisseurs: null,
+      autres_passifs_courants: null,
+    },
+    {
+      periode: '2024',
+      total_actifs: 177852053839,
+      total_actif_non_courant: null,
+      actifs_incorporels: null,
+      immobilisations_nettes: null,
+      investissements_long_terme: null,
+      total_actif_circulant: null,
+      stocks: null,
+      creances_clients: null,
+      tresorerie_equivalents: null,
+      total_passif: 177852053839,
+      total_capitaux_propres: null,
+      capital_social: null,
+      reserves_benefices_non_repartis: null,
+      passif_non_courant: null,
+      dette_long_terme: null,
+      passif_courant: null,
+      dette_court_terme: null,
+      fournisseurs: null,
+      autres_passifs_courants: null,
+    },
+    {
+      periode: '2025',
+      total_actifs: 189958727992,
+      total_actif_non_courant: null,
+      actifs_incorporels: null,
+      immobilisations_nettes: null,
+      investissements_long_terme: null,
+      total_actif_circulant: null,
+      stocks: null,
+      creances_clients: null,
+      tresorerie_equivalents: null,
+      total_passif: 189958727992,
+      total_capitaux_propres: null,
+      capital_social: null,
       reserves_benefices_non_repartis: null,
       passif_non_courant: null,
       dette_long_terme: null,
@@ -48,21 +157,5 @@ export default {
     },
   ],
 
-  cash: [
-    {
-      periode: '2025',
-      flux_exploitation: null,
-      resultat_net: null,
-      depreciation_amortissement: null,
-      variation_bfr: null,
-      flux_investissement: null,
-      investissements_ppe: null,
-      flux_financement: null,
-      remboursement_dette: null,
-      dividendes_verses: null,
-      variation_tresorerie: null,
-      tresorerie_debut_periode: null,
-      tresorerie_fin_periode: null,
-    },
-  ],
+  cash: [], // cash MADIS entièrement null — pas d'upsert
 };
