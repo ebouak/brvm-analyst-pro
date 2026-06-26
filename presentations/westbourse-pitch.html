@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WESTBOURSE — Pitch produit</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+@import url("https://api.fontshare.com/v2/css?f[]=supreme@400,500,700,800&f[]=bespoke-serif@400,500,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+:root{
+  --bg:#030303; --surface:#0a1417; --border:rgba(255,255,255,.10);
+  --cyan:#56d7fd; --cyan2:#8fe6ff; --cyan-deep:#2a8aa8;
+  --up:#3fe18b; --down:#ff6b6b; --ivory:#fcfcfc; --muted:#b5b5b5; --faint:#5c6b70;
+  --disp:"Bespoke Serif",Georgia,serif; --sans:"Supreme",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg); color:var(--ivory); font-family:var(--sans); overflow:hidden;
+}
+.slide-deck{position:relative;width:100vw;height:100vh;overflow:hidden;}
+@media(min-width:769px){.slide-deck{max-width:calc(100vh*16/9);max-height:calc(100vw*9/16);margin:auto;position:absolute;inset:0;}}
+.slide{
+  position:absolute;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:64px;opacity:0;visibility:hidden;transition:opacity .45s;overflow:hidden;
+  background:
+    radial-gradient(60% 60% at 16% 4%,rgba(86,215,253,.12),transparent 60%),
+    linear-gradient(180deg,#050709,#030303 55%,#04070a);
+}
+.slide.active{opacity:1;visibility:visible;}
+.slide-content{width:100%;max-width:980px;max-height:100%;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;}
+h1,h2{font-family:var(--disp);font-weight:500;letter-spacing:-.03em;line-height:1.05;}
+.kicker{font:700 11px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--cyan2);
+  background:rgba(86,215,253,.09);border:1px solid rgba(86,215,253,.26);border-radius:999px;padding:8px 14px;display:inline-flex;align-items:center;gap:8px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 10px var(--up);}
+.title-xl{font-size:clamp(40px,7vw,86px);}
+.hl{background:linear-gradient(100deg,var(--cyan-deep),var(--cyan2) 45%,var(--cyan) 55%,var(--cyan-deep));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.lead{font:400 clamp(15px,2.2vw,20px)/1.6 var(--sans);color:var(--muted);max-width:62ch;}
+.brand{font:800 13px/1 var(--mono);letter-spacing:.42em;color:var(--ivory);}
+.cols{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:100%;margin-top:8px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 20px;text-align:left;}
+.card h3{font:700 15px var(--sans);color:var(--ivory);margin-bottom:6px;display:flex;align-items:center;gap:9px;}
+.card p{font:400 13px/1.5 var(--sans);color:var(--muted);}
+.tag{font:700 11px var(--mono);color:var(--cyan);border:1px solid rgba(86,215,253,.3);border-radius:6px;padding:2px 7px;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;width:100%;}
+.stat .v{font:500 clamp(34px,6vw,64px)/1 var(--disp);color:var(--ivory);}
+.stat .v.cy{color:var(--cyan);}
+.stat .l{font:400 12px var(--sans);color:var(--faint);margin-top:8px;}
+.chart-wrap{width:min(86%,640px);height:clamp(200px,38vh,320px);margin-top:10px;}
+.cta-btn{margin-top:14px;display:inline-flex;align-items:center;gap:10px;font:700 16px var(--sans);color:#03222b;
+  background:linear-gradient(180deg,var(--cyan2),var(--cyan));padding:16px 28px;border-radius:999px;
+  box-shadow:0 0 0 1px rgba(86,215,253,.22),0 16px 50px rgba(86,215,253,.16);}
+.sub-note{font:400 12px var(--sans);color:var(--faint);}
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--cyan);transition:width .3s;z-index:1000;}
+.nav-controls{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px;z-index:1000;}
+.nav-btn{background:rgba(86,215,253,.12);border:1px solid rgba(86,215,253,.25);color:var(--ivory);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;}
+.nav-btn:hover{background:rgba(86,215,253,.22);}
+.slide-counter{color:var(--muted);font:500 13px var(--mono);}
+.animate-stagger>*{opacity:0;animation:fadeUp .5s ease-out forwards;}
+.animate-stagger>*:nth-child(1){animation-delay:.08s;}
+.animate-stagger>*:nth-child(2){animation-delay:.18s;}
+.animate-stagger>*:nth-child(3){animation-delay:.28s;}
+.animate-stagger>*:nth-child(4){animation-delay:.38s;}
+.animate-stagger>*:nth-child(5){animation-delay:.48s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:768px){.slide{padding:32px 22px;}.cols,.stats{grid-template-columns:1fr;gap:14px;}}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-deck">
+
+  <!-- 1 — HOOK -->
+  <div class="slide active">
+    <div class="slide-content animate-stagger">
+      <span class="brand">W E S T B O U R S E</span>
+      <span class="kicker"><span class="dot"></span>BRVM · UEMOA</span>
+      <h1 class="title-xl">Décidez sur la BRVM avec des <span class="hl">données</span>, pas des rumeurs.</h1>
+      <p class="lead">L'intelligence de marché de la Bourse Régionale des Valeurs Mobilières, enfin accessible à tous les investisseurs ouest-africains.</p>
+    </div>
+  </div>
+
+  <!-- 2 — PROBLÈME -->
+  <div class="slide">
+    <div class="slide-content animate-stagger">
+      <span class="kicker">Le problème</span>
+      <h2 class="title-xl" style="font-size:clamp(30px,5vw,58px)">Investir à l'aveugle, ça coûte cher.</h2>
+      <div class="cols">
+        <div class="card"><h3>📉 Données dispersées</h3><p>Cours en retard, PDF illisibles, aucune source unique fiable pour suivre les 48 sociétés cotées.</p></div>
+        <div class="card"><h3>🗣️ Décisions sur rumeur</h3><p>Faute d'analyse structurée, l'épargnant suit le bouche-à-oreille plutôt que les fondamentaux.</p></div>
+        <div class="card"><h3>🧮 Pas d'outils</h3><p>Ni notation, ni simulateur, ni comparatif : impossible d'évaluer une action objectivement.</p></div>
+        <div class="card"><h3>⏱️ Temps perdu</h3><p>Des heures à compiler manuellement ce qui devrait tenir sur un seul écran.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 — SOLUTION -->
+  <div class="slide">
+    <div class="slide-content animate-stagger">
+      <span class="kicker">La solution</span>
+      <h2 class="title-xl" style="font-size:clamp(30px,5vw,58px)">Tout le marché, <span class="hl">analysé pour vous</span>.</h2>
+      <div class="cols">
+        <div class="card"><h3><span class="tag">15 min</span> Cours quasi temps réel</h3><p>Actions, obligations et indices BRVM rafraîchis toutes les 15 minutes en séance.</p></div>
+        <div class="card"><h3><span class="tag">A–F</span> Note quantitative</h3><p>Chaque action notée chaque jour selon des signaux explicables — jamais d'opinion inventée.</p></div>
+        <div class="card"><h3><span class="tag">✓</span> Fondamentaux vérifiés</h3><p>États financiers extraits des publications officielles : CA, résultat net, PER, ROE, dividendes.</p></div>
+        <div class="card"><h3><span class="tag">∿</span> Simulateur</h3><p>Paper-trading, alertes et suivi de portefeuille pour s'entraîner sans risque.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 — PREUVE -->
+  <div class="slide">
+    <div class="slide-content animate-stagger">
+      <span class="kicker">La preuve</span>
+      <h2 class="title-xl" style="font-size:clamp(30px,5vw,54px)">Des données réelles, vérifiées.</h2>
+      <div class="stats">
+        <div class="stat"><div class="v cy">48</div><div class="l">sociétés cotées suivies</div></div>
+        <div class="stat"><div class="v">15 min</div><div class="l">fréquence des cours</div></div>
+        <div class="stat"><div class="v cy">44/48</div><div class="l">fondamentaux extraits des publications</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="coverageChart"></canvas></div>
+      <p class="sub-note">Couverture fondamentaux par famille comptable — données vérifiées (pdf-verified).</p>
+    </div>
+  </div>
+
+  <!-- 5 — CTA -->
+  <div class="slide">
+    <div class="slide-content animate-stagger">
+      <span class="kicker"><span class="dot"></span>Gratuit pour commencer</span>
+      <h2 class="title-xl">Analysez. <span class="hl">Simulez.</span> Investissez.</h2>
+      <p class="lead">Cours, notes et fondamentaux gratuits. Créez votre compte en une minute et prenez des décisions éclairées sur la BRVM.</p>
+      <a class="cta-btn" href="https://westbourse.com/signup">Créer mon compte gratuit →</a>
+      <span class="brand" style="margin-top:18px;opacity:.7">W E S T B O U R S E · UEMOA</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()" aria-label="Précédent">←</button>
+  <span class="slide-counter"><span id="current">1</span> / <span id="total">5</span></span>
+  <button class="nav-btn" onclick="nextSlide()" aria-label="Suivant">→</button>
+</div>
+
+<script>
+let current=1;
+const total=document.querySelectorAll('.slide').length;
+document.getElementById('total').textContent=total;
+let chartDone=false;
+function showSlide(n){
+  if(n<1)n=1; if(n>total)n=total; current=n;
+  document.querySelectorAll('.slide').forEach((s,i)=>{
+    const on=i===n-1; s.classList.toggle('active',on);
+    if(on){ s.querySelectorAll('.animate-stagger').forEach(g=>{g.style.animation='none';g.offsetHeight;g.style.animation='';
+      g.querySelectorAll('*').forEach(c=>{c.style.animation='none';c.offsetHeight;c.style.animation='';});}); }
+  });
+  document.getElementById('current').textContent=n;
+  document.getElementById('progressBar').style.width=(n/total*100)+'%';
+  if(n===4&&!chartDone){drawChart();chartDone=true;}
+}
+function nextSlide(){showSlide(current+1);}
+function prevSlide(){showSlide(current-1);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();nextSlide();}
+  if(e.key==='ArrowLeft'){e.preventDefault();prevSlide();}
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.nav-controls')&&!e.target.closest('a'))nextSlide();});
+function drawChart(){
+  new Chart(document.getElementById('coverageChart'),{
+    type:'bar',
+    data:{labels:['Banque','Assurance','Général','Total'],
+      datasets:[{label:'Sociétés couvertes',data:[12,5,27,44],
+        backgroundColor:['rgba(86,215,253,.85)','rgba(86,215,253,.6)','rgba(86,215,253,.45)','rgba(63,225,139,.85)'],
+        borderRadius:8,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{color:'#b5b5b5',font:{family:'JetBrains Mono'}}},
+        y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5c6b70'},beginAtZero:true}}}
+  });
+}
+showSlide(1);
+</script>
+</body>
+</html>

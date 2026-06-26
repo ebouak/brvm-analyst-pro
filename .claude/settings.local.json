@@ -113,7 +113,15 @@
       "Bash(git -C .. check-ignore frontend/test-results frontend/playwright-report)",
       "Bash(npx next *)",
       "Bash(NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx src/index.ts secteurs)",
-      "Bash(echo \"EXIT_OBL=$?\")"
+      "Bash(echo \"EXIT_OBL=$?\")",
+      "Bash(grep -rln \"portfolios_positions\" frontend/app/api)",
+      "Bash(grep -rln \"unstable_cache\\\\|from 'react'.*cache\\\\|cache\\(\" frontend/lib/portfolio frontend/app/portefeuille)",
+      "Bash(grep -rln \"getServiceClient\\\\|service_role\" frontend/lib/portfolio frontend/app/portefeuille)",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\adego\\\\OneDrive\\\\Documents\\\\brvm-analyst-pro\\\\frontend\"; npx tsc --noEmit 2>&1 | Select-Object -First 15; Write-Output \"tsc-exit:$LASTEXITCODE\")",
+      "Bash(grep -nB3 -A6 \"Syntax Error\" \"C:/Users/adego/AppData/Local/Temp/claude/c--Users-adego-OneDrive-Documents-brvm-analyst-pro/fbf2fb5b-f56e-494c-b0a9-85725b05bbc2/tasks/boovr1ibf.output\")",
+      "Bash(curl -s \"http://localhost:3001/parametres/compte\")",
+      "Bash(grep -oE \"Apparence|Syst\\\\\\\\\\\\\\\\?ème|Sombre|Clair|Pseudonyme\")",
+      "Bash(curl -s --max-time 30 \"http://localhost:3010/actions/PALC/revue\")"
     ]
   }
 }

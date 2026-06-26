@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Proposition design-sync — Kit premium WESTBOURSE</title>
+<style>
+  :root{
+    --bg:#030303; --surface:#0a1417; --elevated:#112b33;
+    --border:#1b2a30; --border-strong:#2a3d44;
+    --gold:#56d7fd; --gold-soft:#8fe6ff; --gold-deep:#2a8aa8;
+    --sapphire:#56d7fd; --up:#3fe18b; --down:#ff6b6b; --warn:#f0b23a;
+    --ivory:#fcfcfc; --muted:#b5b5b5; --faint:#5c6b70; --obsidian:#030303;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ivory);
+    font-family:'Supreme',-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.5;padding:48px 24px 80px;
+    background-image:radial-gradient(120% 80% at 50% -10%, rgba(86,215,253,0.10), transparent 60%);}
+  .wrap{max-width:1080px;margin:0 auto}
+  .display{font-family:Georgia,'Bespoke Serif',serif;font-weight:500;letter-spacing:-0.03em}
+  .tabular{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  .overline{font-size:10px;letter-spacing:.18em;font-weight:700;text-transform:uppercase}
+  .lead{font-size:13px;color:var(--muted);max-width:60ch}
+  /* ── page header ── */
+  .doc-head{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:40px}
+  .doc-head .ey{color:rgba(86,215,253,.7);margin-bottom:10px}
+  .doc-head h1{font-size:30px}
+  /* ── component card frame (= preview card uploadée) ── */
+  .card{border:1px solid var(--border);border-radius:1.1rem;background:var(--surface);
+    margin-bottom:22px;overflow:hidden;box-shadow:0 1px 0 rgba(255,255,255,.03)}
+  .card-bar{display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;border-bottom:1px solid var(--border);background:rgba(17,43,51,.35)}
+  .card-bar .name{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold)}
+  .card-bar .tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .card-stage{padding:34px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+  .card-desc{padding:0 18px 16px;font-size:12px;color:var(--muted)}
+  /* ── real component styles (from premium.tsx) ── */
+  .eyebrow{color:rgba(86,215,253,.7)}
+  .sec h1{font-size:24px;font-weight:600;letter-spacing:-.02em}
+  .sec .sub{margin-top:8px;font-size:13px;color:var(--muted);max-width:42rem}
+  .panel{border:1px solid var(--border);background:rgba(27,42,48,.4);border-radius:1.5rem;padding:6px;min-width:280px}
+  .panel.glow{border-color:rgba(86,215,253,.25);background:rgba(86,215,253,.04)}
+  .panel-core{border-radius:1.125rem;background:var(--surface);box-shadow:inset 0 1px 1px rgba(255,255,255,.04);padding:22px}
+  .metric{border:1px solid var(--border);background:var(--surface);border-radius:1.1rem;padding:16px;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:border-color .3s}
+  .metric:hover{border-color:rgba(86,215,253,.3)}
+  .metric .lbl{font-size:12px;color:var(--muted)}
+  .metric .val{display:flex;align-items:baseline;gap:6px;margin-top:10px}
+  .metric .val .v{font-size:24px;font-weight:600}
+  .metric .val .u{font-size:12px;color:var(--faint)}
+  .metric .dl{margin-top:4px;font-size:12px;font-weight:500}
+  .up{color:var(--up)} .down{color:var(--down)} .muted{color:var(--muted)}
+  .badge{display:inline-flex;align-items:center;border-radius:999px;border:1px solid;padding:2px 10px;font-size:10px;font-weight:600;letter-spacing:.04em}
+  .b-buy{border-color:rgba(63,225,139,.3);background:rgba(63,225,139,.1);color:var(--up)}
+  .b-sell{border-color:rgba(255,107,107,.3);background:rgba(255,107,107,.1);color:var(--down)}
+  .b-hold{border-color:rgba(240,178,58,.3);background:rgba(240,178,58,.1);color:var(--warn)}
+  .pill{display:inline-flex;align-items:center;border-radius:999px;border:1px solid;padding:2px 8px;font-size:10px;font-weight:500}
+  .p-gold{border-color:rgba(86,215,253,.3);background:rgba(86,215,253,.1);color:var(--gold)}
+  .p-em{border-color:rgba(63,225,139,.3);background:rgba(63,225,139,.1);color:var(--up)}
+  .p-neutral{border-color:var(--border);background:var(--elevated);color:var(--muted)}
+  .empty{border:1px solid var(--border);background:var(--surface);border-radius:1.5rem;padding:42px;text-align:center;min-width:340px}
+  .empty .ic{margin:0 auto;width:48px;height:48px;display:grid;place-items:center;border-radius:999px;border:1px solid rgba(86,215,253,.2);background:rgba(86,215,253,.06);color:rgba(86,215,253,.7);font-size:18px}
+  .empty .t{margin-top:16px;font-size:16px}
+  .empty .h{margin-top:6px;font-size:13px;color:var(--muted)}
+  .cta{display:inline-flex;align-items:center;gap:8px;border-radius:999px;background:var(--gold);color:var(--obsidian);padding:8px 8px 8px 20px;font-size:14px;font-weight:600;text-decoration:none;box-shadow:0 0 0 1px rgba(86,215,253,.22),0 16px 50px rgba(86,215,253,.14)}
+  .cta .arr{display:grid;place-items:center;width:28px;height:28px;border-radius:999px;background:rgba(3,3,3,.15)}
+  .cta.ghost{background:transparent;color:var(--ivory);border:1px solid var(--border-strong);border-radius:12px;padding:10px 20px;box-shadow:none}
+  .empty .ecta{display:inline-flex;align-items:center;gap:6px;margin-top:20px;border-radius:10px;background:var(--gold);color:var(--obsidian);padding:8px 16px;font-size:14px;font-weight:600;text-decoration:none}
+  .note{margin-top:36px;border:1px dashed var(--border-strong);border-radius:12px;padding:16px 18px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="doc-head">
+    <p class="overline ey">Proposition design-sync · aperçu local</p>
+    <h1 class="display">Kit premium WESTBOURSE — 8 composants</h1>
+    <p class="lead" style="margin-top:10px">
+      Voici exactement ce qui serait synchronisé vers un projet claude.ai/design : une carte d'aperçu
+      par composant de <code>components/ui/premium.tsx</code>, rendue avec vos vrais tokens « DeFi Cyan ».
+      Rien n'est encore envoyé — c'est une maquette locale pour validation.
+    </p>
+  </div>
+
+  <!-- SectionHeader -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;SectionHeader /&gt;</span><span class="tag">server · titre de page</span></div>
+    <div class="card-stage">
+      <div class="sec">
+        <p class="overline eyebrow" style="margin-bottom:8px">MARCHÉ ACTIONS</p>
+        <h1 class="display">Vue d'ensemble BRVM</h1>
+        <p class="sub">Suivi quotidien des 48 sociétés cotées — cours quasi temps réel, signaux et fondamentaux vérifiés.</p>
+      </div>
+    </div>
+    <p class="card-desc">Titre éditorial display + eyebrow doré + sous-titre + zone d'actions optionnelle.</p>
+  </div>
+
+  <!-- PremiumPanel -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;PremiumPanel /&gt;</span><span class="tag">server · conteneur double-bezel</span></div>
+    <div class="card-stage">
+      <div class="panel"><div class="panel-core">Panel standard — coque + cœur laqué.</div></div>
+      <div class="panel glow"><div class="panel-core">Panel <code>glow</code> — halo cyan de consécration.</div></div>
+    </div>
+    <p class="card-desc">Conteneur signature à double liseré. Variante <code>glow</code> pour mise en avant.</p>
+  </div>
+
+  <!-- MetricCard -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;MetricCard /&gt;</span><span class="tag">server · KPI</span></div>
+    <div class="card-stage">
+      <div class="metric"><p class="lbl">Capitalisation</p><div class="val"><span class="v tabular">8 420</span><span class="u">Mds FCFA</span></div><p class="dl tabular up">▲ +2,3 %</p></div>
+      <div class="metric"><p class="lbl">Volume séance</p><div class="val"><span class="v tabular">1,21</span><span class="u">Mds</span></div><p class="dl tabular down">▼ −0,8 %</p></div>
+      <div class="metric"><p class="lbl">BRVM-30</p><div class="val"><span class="v tabular">112,4</span></div><p class="dl tabular muted">— stable</p></div>
+    </div>
+    <p class="card-desc">Valeur mono <code>.tabular</code> + delta coloré up/down/flat. 4 accents au survol.</p>
+  </div>
+
+  <!-- SignalBadge -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;SignalBadge /&gt;</span><span class="tag">server · statut signal</span></div>
+    <div class="card-stage">
+      <span class="badge b-buy">ACHAT</span>
+      <span class="badge b-hold">CONSERVER</span>
+      <span class="badge b-sell">VENTE</span>
+    </div>
+    <p class="card-desc">Pastille BUY/HOLD/SELL → libellé FR statutaire coloré.</p>
+  </div>
+
+  <!-- StatPill -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;StatPill /&gt;</span><span class="tag">server · micro-badge</span></div>
+    <div class="card-stage">
+      <span class="pill p-gold">Premium</span>
+      <span class="pill p-em">+12 % YTD</span>
+      <span class="pill p-neutral">Secteur Banque</span>
+    </div>
+    <p class="card-desc">Micro-badge informatif — 4 tons (gold/emerald/sapphire/neutral).</p>
+  </div>
+
+  <!-- Eyebrow -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;Eyebrow /&gt;</span><span class="tag">server · surtitre</span></div>
+    <div class="card-stage"><p class="overline eyebrow">ANALYSE FONDAMENTALE</p></div>
+    <p class="card-desc">Surtitre éditorial doré, espacé — ouvre une section.</p>
+  </div>
+
+  <!-- EmptyStatePremium -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;EmptyStatePremium /&gt;</span><span class="tag">server · état vide</span></div>
+    <div class="card-stage">
+      <div class="empty">
+        <div class="ic">◇</div>
+        <p class="t display">Aucune donnée disponible</p>
+        <p class="h">La base se remplit séance après séance.</p>
+        <a class="ecta" href="#">Explorer le marché <span>→</span></a>
+      </div>
+    </div>
+    <p class="card-desc">État vide soigné — icône, titre, indice et action optionnelle.</p>
+  </div>
+
+  <!-- PremiumCTA -->
+  <div class="card">
+    <div class="card-bar"><span class="name">&lt;PremiumCTA /&gt;</span><span class="tag">server · bouton signature</span></div>
+    <div class="card-stage">
+      <a class="cta" href="#">Créer mon compte <span class="arr">→</span></a>
+      <a class="cta ghost" href="#">Explorer sans compte</a>
+    </div>
+    <p class="card-desc">Bouton magnétique (pastille icône) — variantes <code>gold</code> et <code>ghost</code>.</p>
+  </div>
+
+  <div class="note">
+    <strong>Ce que ferait le sync complet :</strong> compiler ces 8 composants en bundle, joindre les
+    tokens + polices + types <code>.d.ts</code> + fiches d'usage <code>.prompt.md</code>, créer un
+    projet claude.ai/design et y téléverser ces cartes. L'agent de design construirait alors des écrans
+    on-brand avec vos vrais composants. Valide cette maquette et je lance le sync réel.
+  </div>
+
+</div>
+</body>
+</html>

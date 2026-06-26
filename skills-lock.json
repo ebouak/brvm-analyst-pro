@@ -7,6 +7,30 @@
       "skillPath": ".agents/skills/belt/SKILL.md",
       "computedHash": "089aafb91641896947cc004126ef31b806f109d514107fa683203ae5d3f706e2"
     },
+    "catalyst-calendar": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/equity-research/skills/catalyst-calendar/SKILL.md",
+      "computedHash": "b56b8759cd829a95f4b93b249b0528bfd32c2a38147d9982b0a1302f267aace8"
+    },
+    "comps-analysis": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/financial-analysis/skills/comps-analysis/SKILL.md",
+      "computedHash": "3295e161a85b11449b73f330e2aefc5a835d8b9d797c31246030d5494abf3912"
+    },
+    "earnings-analysis": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/equity-research/skills/earnings-analysis/SKILL.md",
+      "computedHash": "4870cd3deb93e4f0cb84b002b29741ac8a2616b0888cee011cb92a65f5cc2ab2"
+    },
+    "earnings-preview": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/equity-research/skills/earnings-preview/SKILL.md",
+      "computedHash": "dabac831f1012817daab0b6c385eeafe36b6d806a4de44e51d811f09a11ac0a5"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
@@ -19,6 +43,30 @@
       "skillPath": "skills/soft-skill/SKILL.md",
       "computedHash": "f730e4132775f13eea19e3dc39afc6bb453cfc0498872b127ad8f0d47cfd802d"
     },
+    "ic-memo": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/private-equity/skills/ic-memo/SKILL.md",
+      "computedHash": "84743ef7e6df89b1fe4849eb223b391f8e0a8c55f1ca8a1a21b152f115c96930"
+    },
+    "initiating-coverage": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/equity-research/skills/initiating-coverage/SKILL.md",
+      "computedHash": "1606168a858e6a1a7ad9dc52e570010f684bc5fee8bee51292bcfef477a94721"
+    },
+    "portfolio-monitoring": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/private-equity/skills/portfolio-monitoring/SKILL.md",
+      "computedHash": "eb902dc3ad22bd98620ee1a573535d25ecda0a30790e588dc24d1203981391ce"
+    },
+    "portfolio-rebalance": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/wealth-management/skills/portfolio-rebalance/SKILL.md",
+      "computedHash": "3ce8056404b7fc737acc22737798eb17e26fd70a35608d992ccd4ac28eb19959"
+    },
     "redesign-existing-projects": {
       "source": "leonxlnx/taste-skill",
       "sourceType": "github",
@@ -30,6 +78,24 @@
       "sourceType": "github",
       "skillPath": "tools/video/remotion-render/SKILL.md",
       "computedHash": "9a00df8ceabf3033451cf0c4d41cdda5f38024822de07ea69884055611064ffe"
+    },
+    "skill-creator": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/financial-analysis/skills/skill-creator/SKILL.md",
+      "computedHash": "3893f9b73632f3099e81f5d5d4b3b59a813d06a8da1f08ebb6624a5a70578232"
+    },
+    "thesis-tracker": {
+      "source": "anthropics/financial-services-plugins",
+      "sourceType": "github",
+      "skillPath": "plugins/vertical-plugins/equity-research/skills/thesis-tracker/SKILL.md",
+      "computedHash": "c9c5aa5bfceba2ddcaadb3659d849ec08460715b3ecb792bd3863967452252dc"
+    },
+    "trading212-api": {
+      "source": "trading212-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/trading212-api/skills/trading212-api/SKILL.md",
+      "computedHash": "451aaf25f9e09025d93b891f4864d421fa7c8a77fd3a270cae97caa490792d90"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",

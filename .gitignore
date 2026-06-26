@@ -32,3 +32,6 @@ supabase/.temp/
 # Skills installés (contenu volumineux / machine — reproductible via skills-lock.json)
 .agents/
 .claude/skills/
+
+# Visual companion brainstorming artifacts
+.superpowers/
