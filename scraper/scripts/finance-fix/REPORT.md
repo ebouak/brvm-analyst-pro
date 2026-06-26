@@ -11,3 +11,8 @@ Source unique = états financiers audités SYSCOHADA. Fiches MADIS = contrôle c
 | SMBC (SMB Bitumes) | 2020→2025 | ✅ tous verts | aucun (CA/RN match exact) | états synthèse condensés (qq lignes null) ; découverts inclus ; D&A=EBE−REX |
 | SHEC (Vivo Energy) | 2020→2023 | ✅ verts | aucun (RN match ; CA 2020 +0,18%) | 2024/2025 non publiés ; PDF 2022 erroné (AGL) écarté ; TAFIRE → certains flux null ; actions/BPA null |
 | UNXC (Uniwax) | 2020→2024 | ✅ verts | aucun (CA/RN dans tolérance) | 2020-2022 états résumés (qq null) ; déficits 2022-24 réels ; structure normalisée |
+| ONTBF (ONATEL) | 2020→2024 | ✅ verts | aucun | 2022-2023 PDF audité ; 2020-2021 MADIS CA+RN ; découverts inclus passif_courant |
+| TTLC (TotalEnergies) | 2022→2025 | ✅ verts | aucun | MADIS income+cash OK ; bilan 2024 PNC suspect → sous-totaux 2024-2025 null ; découverts 2022-2023 corrigés |
+| CFAC (CFAO Motors CI) | 2022→2023 | ✅ verts | aucun | MADIS 2022-2023 ; 2024-2025 non disponibles ; confusion TRACTAFRIC documentée (piège site BRVM) |
+| NTLC (Nestlé CI) | 2022→2025 | ✅ verts | aucun | Income MADIS 4 ans OK ; balance sous-totaux MADIS faux (PNC=CP) → null ; cash null |
+| UNLC (Unilever CI) | 2022→2023 | ✅ verts | MADIS fiche externe erronée (CA ×2) — données PDF/DB correctes | 2024-2025 non publiés ; CP 2022 négatif réel ; découverts 2022 corrigés |
