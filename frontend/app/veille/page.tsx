@@ -37,9 +37,7 @@ async function fetchVeilleData() {
     )
     .gte('date_publication', since7d)
     .lte('date_publication', today)
-    .eq('hidden', false)
     .order('date_publication', { ascending: false })
-    .order('score_impact', { ascending: false })
     .limit(200);
 
   const items = (news ?? []) as unknown as VeilleNews[];
