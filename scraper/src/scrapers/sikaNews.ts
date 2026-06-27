@@ -78,6 +78,7 @@ async function scrapeFeed(url: string, label: string): Promise<NewsItem[]> {
         titre,
         date_publication: parseDate(dateAttr),
         source: 'brvm',
+        source_label: 'Sika Finance',
         source_url: href,
         resume: resume && resume.length > 5 ? resume.slice(0, 500) : null,
         instrument_code: null,

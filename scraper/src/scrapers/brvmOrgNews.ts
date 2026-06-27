@@ -92,6 +92,7 @@ async function fetchArticle(href: string): Promise<NewsItem | null> {
       titre,
       date_publication: date,
       source: 'brvm',
+      source_label: 'BRVM Officiel',
       source_url: url,
       resume: para && para.length > 5 ? para.slice(0, 500) : null,
       instrument_code: null,

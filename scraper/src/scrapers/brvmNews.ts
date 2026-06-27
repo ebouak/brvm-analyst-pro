@@ -9,11 +9,15 @@ export interface NewsItem {
   dedupe_hash: string;
   titre: string;
   date_publication: string; // YYYY-MM-DD
-  source: 'brvm' | 'cosumaf';
+  source: 'brvm' | 'cosumaf' | 'autre';
   source_url: string | null;
   resume: string | null;
   instrument_code: string | null;
-  image_url?: string | null; // og:image de l'article (si disponible)
+  image_url?: string | null;
+  source_label?: string | null;
+  sentiment?: 'positif' | 'négatif' | 'neutre' | null;
+  score_impact?: number | null;
+  ticker_codes?: string[] | null;
 }
 
 function hashItem(titre: string, date: string, source: string): string {

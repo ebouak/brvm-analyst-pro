@@ -1,0 +1,55 @@
+name: Veille BRVM — Pipeline quotidien
+
+on:
+  schedule:
+    # Lundi–vendredi à 07:00 UTC (08:00 Abidjan/Dakar)
+    - cron: '0 7 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (pas d''export Supabase)'
+        required: false
+        default: 'false'
+
+jobs:
+  veille:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: veille
+        run: |
+          pip install feedparser requests beautifulsoup4 pyyaml lxml
+
+      - name: Run pipeline
+        working-directory: veille
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Lance le pipeline de collecte (brvm_pipeline.py doit être copié ici)
+          if [ -f brvm_pipeline.py ]; then
+            python brvm_pipeline.py --once
+          else
+            echo "Pipeline non trouvé — skip collecte"
+          fi
+
+      - name: Export to Supabase
+        working-directory: veille
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "Dry run — export Supabase ignoré"
+          else
+            python supabase_writer.py
+          fi

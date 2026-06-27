@@ -27,6 +27,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/secteurs', label: 'Secteurs' },
       { href: '/heatmap', label: 'Heatmap' },
       { href: '/actualites', label: 'Actualités' },
+      { href: '/veille', label: 'Veille Intelligence' },
     ],
   },
   {

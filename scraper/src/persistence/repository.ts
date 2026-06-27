@@ -328,8 +328,20 @@ import type { NewsItem } from '../scrapers/brvmNews.js';
 export async function upsertNews(items: NewsItem[]): Promise<number> {
   if (items.length === 0) return 0;
   const sb = getSupabase();
-  // Exclude image_url (column doesn't exist in brvm_news table yet)
-  const rows = items.map(({ image_url, ...rest }) => rest);
+  const rows = items.map((item) => ({
+    dedupe_hash: item.dedupe_hash,
+    titre: item.titre,
+    date_publication: item.date_publication,
+    source: item.source,
+    source_url: item.source_url,
+    resume: item.resume,
+    instrument_code: item.instrument_code,
+    ...(item.image_url !== undefined ? { image_url: item.image_url } : {}),
+    ...(item.source_label !== undefined ? { source_label: item.source_label } : {}),
+    ...(item.sentiment !== undefined ? { sentiment: item.sentiment } : {}),
+    ...(item.score_impact !== undefined ? { score_impact: item.score_impact } : {}),
+    ...(item.ticker_codes !== undefined ? { ticker_codes: item.ticker_codes } : {}),
+  }));
   const { error } = await sb
     .from('brvm_news')
     .upsert(rows, { onConflict: 'dedupe_hash', ignoreDuplicates: true });
