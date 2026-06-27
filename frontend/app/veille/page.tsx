@@ -42,7 +42,7 @@ async function fetchVeilleData() {
     .order('score_impact', { ascending: false })
     .limit(200);
 
-  const items = (news ?? []) as VeilleNews[];
+  const items = (news ?? []) as unknown as VeilleNews[];
   const todayItems = items.filter((n) => n.date_publication === today);
   const alertes = items.filter((n) => (n.score_impact ?? 0) >= 70);
 
