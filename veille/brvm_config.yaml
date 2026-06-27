@@ -1,0 +1,946 @@
+# ================================================================
+# WestBourse – Configuration Veille BRVM v3
+# 150+ sources · Sites officiels des 47 sociétés · Flux matières premières
+# Agences de notation · Banques centrales · Presse africaine
+# ================================================================
+
+# ----------------------------------------------------------------
+# 1. SOURCES RSS GÉNÉRALES
+# ----------------------------------------------------------------
+sources:
+  rss_general:
+
+    # ── FINANCE / BOURSE AFRIQUE (priorité maximale) ───────────
+    - name: "Agence Ecofin – Finance"
+      url: "https://www.agenceecofin.com/feeds/Finance.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Agence Ecofin – Bourse"
+      url: "https://www.agenceecofin.com/feeds/Bourse.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Agence Ecofin – Entreprises"
+      url: "https://www.agenceecofin.com/feeds/Gestion-Publique.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Agence Ecofin – Agro"
+      url: "https://www.agenceecofin.com/feeds/Agro.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Agence Ecofin – Télécom"
+      url: "https://www.agenceecofin.com/feeds/Telecom.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Agence Ecofin – Energie"
+      url: "https://www.agenceecofin.com/feeds/Energie.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Sika Finance – Actualités"
+      url: "https://www.sikafinance.com/rss/actu"
+      priorite: 1  langue: "fr"
+
+    - name: "Sika Finance – Analyses"
+      url: "https://www.sikafinance.com/rss/analyse"
+      priorite: 1  langue: "fr"
+
+    - name: "Sika Finance – Communiqués"
+      url: "https://www.sikafinance.com/rss/communique"
+      priorite: 1  langue: "fr"
+
+    - name: "Financial Afrik"
+      url: "https://www.financialafrik.com/feed/"
+      priorite: 1  langue: "fr"
+
+    - name: "African Markets"
+      url: "https://www.african-markets.com/en/rss/rss.xml"
+      priorite: 1  langue: "en"
+
+    - name: "Africa Finance"
+      url: "https://www.africa-finance.com/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Business 24 Africa"
+      url: "https://business24africa.net/feed/"
+      priorite: 2  langue: "fr"
+
+    # ── CÔTE D'IVOIRE ──────────────────────────────────────────
+    - name: "Fraternité Matin – Économie"
+      url: "https://www.fratmat.info/rss/economie"
+      priorite: 1  langue: "fr"
+
+    - name: "Fraternité Matin – Entreprises"
+      url: "https://www.fratmat.info/rss/societes"
+      priorite: 1  langue: "fr"
+
+    - name: "Abidjan.net – Économie"
+      url: "https://news.abidjan.net/rss/economie.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Abidjan.net – Entreprises"
+      url: "https://news.abidjan.net/rss/entreprises.xml"
+      priorite: 1  langue: "fr"
+
+    - name: "Connectionivoirienne"
+      url: "https://www.connectionivoirienne.net/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Koaci"
+      url: "https://koaci.com/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Le Patriote CI"
+      url: "https://lepatriote-ci.com/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Nord-Sud Quotidien"
+      url: "https://nordsudquotidien.com/feed/"
+      priorite: 3  langue: "fr"
+
+    - name: "L'Intelligent d'Abidjan"
+      url: "https://www.lintelligentdabidjan.info/feed/"
+      priorite: 3  langue: "fr"
+
+    # ── SÉNÉGAL ────────────────────────────────────────────────
+    - name: "Financial Afrik – Sénégal"
+      url: "https://www.financialafrik.com/category/senegal/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Seneplus"
+      url: "https://www.seneplus.com/rss.xml"
+      priorite: 2  langue: "fr"
+
+    - name: "Senenews – Économie"
+      url: "https://www.senenews.com/category/economie/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Dakar Actu"
+      url: "https://www.dakaractu.com/rss/economie.xml"
+      priorite: 3  langue: "fr"
+
+    # ── BURKINA FASO ───────────────────────────────────────────
+    - name: "L'Économiste du Faso"
+      url: "https://www.leconomistedufaso.bf/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Lefaso.net – Économie"
+      url: "https://lefaso.net/rss/economie"
+      priorite: 2  langue: "fr"
+
+    - name: "Fasozine"
+      url: "https://www.fasozine.com/feed/"
+      priorite: 3  langue: "fr"
+
+    # ── TOGO ───────────────────────────────────────────────────
+    - name: "Togonews"
+      url: "https://togonews.tg/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Icilome Togo"
+      url: "https://www.icilome.com/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Togo First"
+      url: "https://www.togofirst.com/fr/rss"
+      priorite: 2  langue: "fr"
+
+    # ── BÉNIN ──────────────────────────────────────────────────
+    - name: "La Nation Bénin"
+      url: "https://lanationbenin.info/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Bénin Web TV"
+      url: "https://beninwebtv.com/feed/"
+      priorite: 3  langue: "fr"
+
+    # ── MALI ───────────────────────────────────────────────────
+    - name: "Mali Actu – Économie"
+      url: "https://maliactu.net/category/economie/feed/"
+      priorite: 2  langue: "fr"
+
+    - name: "Journal du Mali"
+      url: "https://www.journaldumali.com/feed/"
+      priorite: 3  langue: "fr"
+
+    # ── NIGER ──────────────────────────────────────────────────
+    - name: "Nigerdiaspora"
+      url: "https://nigerdiaspora.net/feed/"
+      priorite: 3  langue: "fr"
+
+    # ── INTERNATIONALE ─────────────────────────────────────────
+    - name: "Jeune Afrique – Économie"
+      url: "https://www.jeuneafrique.com/feed/category/economie-entreprises/"
+      priorite: 1  langue: "fr"
+
+    - name: "Jeune Afrique – Afrique de l'Ouest"
+      url: "https://www.jeuneafrique.com/feed/category/afrique-de-louest/"
+      priorite: 1  langue: "fr"
+
+    - name: "RFI Économie"
+      url: "https://www.rfi.fr/fr/rss/economie"
+      priorite: 2  langue: "fr"
+
+    - name: "Africanews – Business"
+      url: "https://fr.africanews.com/rss/business"
+      priorite: 2  langue: "fr"
+
+    - name: "Le Monde Afrique"
+      url: "https://www.lemonde.fr/afrique/rss_full.xml"
+      priorite: 2  langue: "fr"
+
+    - name: "Reuters Africa"
+      url: "https://feeds.reuters.com/reuters/AFRICANews"
+      priorite: 2  langue: "en"
+
+  # ── FLUX MATIÈRES PREMIÈRES (impact direct sur valeurs cotées) ──
+  rss_commodites:
+
+    - name: "Bourse des matières premières – Huile de palme"
+      url: "https://news.google.com/rss/search?q=huile+palme+prix+marché&hl=fr&gl=FR&ceid=FR:fr"
+      matiere: "huile_palme"
+      tickers_impactes: ["PALC", "SOGB", "SIFCA", "TTRC"]
+      priorite: 1  langue: "fr"
+
+    - name: "Caoutchouc naturel – Prix mondiaux"
+      url: "https://news.google.com/rss/search?q=caoutchouc+naturel+prix+marché&hl=fr&gl=FR&ceid=FR:fr"
+      matiere: "caoutchouc"
+      tickers_impactes: ["SOGB", "SAPH"]
+      priorite: 1  langue: "fr"
+
+    - name: "Cacao BRVM – Marchés"
+      url: "https://news.google.com/rss/search?q=cacao+prix+Côte+Ivoire+marché&hl=fr&gl=CI&ceid=CI:fr"
+      matiere: "cacao"
+      tickers_impactes: ["NEIC", "SIFCA"]
+      priorite: 1  langue: "fr"
+
+    - name: "Pétrole brut – Impact Afrique de l'Ouest"
+      url: "https://news.google.com/rss/search?q=pétrole+brut+Afrique+Ouest+prix&hl=fr&gl=FR&ceid=FR:fr"
+      matiere: "petrole"
+      tickers_impactes: ["TTLS", "SVOC"]
+      priorite: 1  langue: "fr"
+
+    - name: "Bière et boissons – Marché Afrique"
+      url: "https://news.google.com/rss/search?q=bière+brasserie+Afrique+marché&hl=fr&gl=FR&ceid=FR:fr"
+      matiere: "boissons"
+      tickers_impactes: ["SLBC", "BRVBC"]
+      priorite: 2  langue: "fr"
+
+    - name: "Électricité et eau – Utilities Afrique"
+      url: "https://news.google.com/rss/search?q=électricité+eau+concession+Afrique+Ouest&hl=fr&gl=FR&ceid=FR:fr"
+      matiere: "utilities"
+      tickers_impactes: ["CIEC", "SDCC"]
+      priorite: 2  langue: "fr"
+
+    - name: "Telecom Afrique – Abonnés et revenus"
+      url: "https://news.google.com/rss/search?q=télécom+Mobile+Money+UEMOA+résultats&hl=fr&gl=FR&ceid=FR:fr"
+      matiere: "telecom"
+      tickers_impactes: ["SNTS", "ONTCI", "MTNCI", "ONTBF"]
+      priorite: 1  langue: "fr"
+
+    - name: "Banques UEMOA – Résultats et crédits"
+      url: "https://news.google.com/rss/search?q=banques+UEMOA+résultats+crédit+2026&hl=fr&gl=CI&ceid=CI:fr"
+      matiere: "banking"
+      tickers_impactes: ["ETIT", "CBIBF", "SGBC", "NSBC", "BACI"]
+      priorite: 1  langue: "fr"
+
+  # ── AGENCES DE NOTATION ET INSTITUTIONS ────────────────────
+  rss_institutions:
+
+    - name: "Bloomfield Investment – Notes & Rapports"
+      url: "https://news.google.com/rss/search?q=Bloomfield+Investment+notation+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+      type: "notation"
+      priorite: 1  langue: "fr"
+
+    - name: "WARA – West Africa Rating Agency"
+      url: "https://news.google.com/rss/search?q=WARA+notation+Afrique+Ouest+BRVM&hl=fr&gl=FR&ceid=FR:fr"
+      type: "notation"
+      priorite: 1  langue: "fr"
+
+    - name: "BCEAO – Publications et décisions"
+      url: "https://news.google.com/rss/search?q=BCEAO+taux+directeur+politique+monétaire&hl=fr&gl=FR&ceid=FR:fr"
+      type: "banque_centrale"
+      priorite: 1  langue: "fr"
+
+    - name: "UEMOA – Actualités économiques"
+      url: "https://news.google.com/rss/search?q=UEMOA+économie+PIB+croissance+2026&hl=fr&gl=FR&ceid=FR:fr"
+      type: "institution"
+      priorite: 1  langue: "fr"
+
+    - name: "FMI – Afrique de l'Ouest"
+      url: "https://news.google.com/rss/search?q=FMI+Afrique+Ouest+UEMOA+rapport&hl=fr&gl=FR&ceid=FR:fr"
+      type: "institution_internationale"
+      priorite: 2  langue: "fr"
+
+    - name: "Banque Mondiale – Côte d'Ivoire"
+      url: "https://news.google.com/rss/search?q=Banque+Mondiale+Côte+Ivoire+financement&hl=fr&gl=FR&ceid=FR:fr"
+      type: "institution_internationale"
+      priorite: 2  langue: "fr"
+
+    - name: "Fitch Moody's S&P – Notes Afrique Ouest"
+      url: "https://news.google.com/rss/search?q=Fitch+Moodys+notation+crédit+Côte+Ivoire+Sénégal&hl=fr&gl=FR&ceid=FR:fr"
+      type: "notation_internationale"
+      priorite: 2  langue: "fr"
+
+  # ── SCRAPING OFFICIEL ──────────────────────────────────────
+  scraping_institutionnel:
+
+    - name: "BRVM – Actualités"
+      url: "https://www.brvm.org/fr/actualites"
+      sel_items: ".views-row"
+      sel_titre: "h3 a"
+      sel_date: ".date-display-single"
+      sel_resume: ".field-content p"
+      frequence_min: 20
+      priorite: 1
+
+    - name: "BRVM – Communiqués"
+      url: "https://www.brvm.org/fr/communiques"
+      sel_items: ".views-row"
+      sel_titre: "h3 a"
+      sel_date: ".date-display-single"
+      frequence_min: 30
+      priorite: 1
+
+    - name: "BRVM – Avis de marché"
+      url: "https://www.brvm.org/fr/avis-de-marche"
+      sel_items: ".views-row"
+      sel_titre: "h3 a"
+      sel_date: ".date-display-single"
+      frequence_min: 60
+      priorite: 1
+
+    - name: "CREPMF – Publications"
+      url: "https://www.crepmf.org/index.php/actualites"
+      sel_items: "article, .post"
+      sel_titre: "h2 a, h3 a"
+      sel_date: ".post-date, .entry-date"
+      frequence_min: 60
+      priorite: 1
+
+    - name: "CREPMF – Décisions et sanctions"
+      url: "https://www.crepmf.org/index.php/decisions"
+      sel_items: "article, .views-row"
+      sel_titre: "h2 a, h3 a"
+      sel_date: ".date"
+      frequence_min: 120
+      priorite: 1
+
+    - name: "UEMOA – Actualités"
+      url: "https://www.uemoa.int/fr/actualites"
+      sel_items: ".news-item, article"
+      sel_titre: "h3 a, h2 a"
+      sel_date: ".date, .entry-date"
+      frequence_min: 120
+      priorite: 2
+
+    - name: "BCEAO – Communiqués"
+      url: "https://www.bceao.int/fr/communications"
+      sel_items: ".views-row, article"
+      sel_titre: "h3 a, .title a"
+      sel_date: ".date"
+      frequence_min: 180
+      priorite: 1
+
+# ----------------------------------------------------------------
+# 2. SITES OFFICIELS DES 47 SOCIÉTÉS COTÉES
+#    (pages presse, investisseurs, communiqués)
+# ----------------------------------------------------------------
+sites_societes:
+
+  # ── TÉLÉCOM ────────────────────────────────────────────────
+  - ticker: "SNTS"
+    site_presse: "https://www.sonatel.sn/fr/presse"
+    sel_items: ".press-item, article, .actualite"
+    sel_titre: "h2 a, h3 a, .titre a"
+    sel_date: ".date, time"
+    site_ir: "https://www.sonatel.sn/fr/investisseurs"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Sonatel+Orange+Sénégal+BRVM&hl=fr&gl=SN&ceid=SN:fr"
+
+  - ticker: "ONTCI"
+    site_presse: "https://www.orange.ci/presse"
+    sel_items: ".press-release, article, .actu-item"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    site_ir: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Orange+Côte+Ivoire+BRVM+résultats&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "MTNCI"
+    site_presse: "https://www.mtn.ci/fr/media"
+    sel_items: ".media-item, article"
+    sel_titre: "h2 a, h3 a, .title"
+    sel_date: ".date, time"
+    site_ir: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=MTN+Côte+Ivoire+BRVM+résultats&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "ONTBF"
+    site_presse: "https://www.orange.bf/presse"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Orange+Burkina+Faso+BRVM&hl=fr&gl=BF&ceid=BF:fr"
+
+  # ── BANQUES ────────────────────────────────────────────────
+  - ticker: "ETIT"
+    site_presse: "https://www.ecobank.com/news"
+    sel_items: ".news-item, article, .press-item"
+    sel_titre: "h2 a, h3 a, .title a"
+    sel_date: ".date, time, .published"
+    site_ir: "https://www.ecobank.com/investors"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Ecobank+Transnational+résultats+bourse&hl=fr&gl=TG&ceid=TG:fr"
+
+  - ticker: "CBIBF"
+    site_presse: "https://corisbankinternational.com/actualites"
+    sel_items: "article, .actualite, .post"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Coris+Bank+International+BRVM&hl=fr&gl=BF&ceid=BF:fr"
+
+  - ticker: "SGBC"
+    site_presse: "https://particuliers.societegenerale.ci/actualites"
+    sel_items: "article, .actu"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Société+Générale+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "BACI"
+    site_presse: "https://www.bicici.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=BICICI+BNP+Paribas+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "NSBC"
+    site_presse: "https://www.nsiabanque.ci/actualites"
+    sel_items: "article, .actualite, .post"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=NSIA+Banque+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "BOAB"
+    site_presse: "https://www.boadirect.com/bj/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Bank+of+Africa+Bénin+BRVM&hl=fr&gl=BJ&ceid=BJ:fr"
+
+  - ticker: "BOABF"
+    site_presse: "https://www.boadirect.com/bf/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Bank+of+Africa+Burkina+BRVM&hl=fr&gl=BF&ceid=BF:fr"
+
+  - ticker: "BOAS"
+    site_presse: "https://www.boadirect.com/sn/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Bank+of+Africa+Sénégal+bourse&hl=fr&gl=SN&ceid=SN:fr"
+
+  - ticker: "BOAM"
+    site_presse: "https://www.boadirect.com/ml/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Bank+of+Africa+Mali+bourse&hl=fr&gl=ML&ceid=ML:fr"
+
+  - ticker: "BOAN"
+    site_presse: "https://www.boadirect.com/ne/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Bank+of+Africa+Niger+bourse&hl=fr&gl=NE&ceid=NE:fr"
+
+  - ticker: "ORGT"
+    site_presse: "https://www.orabank.net/tg/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Orabank+Togo+BRVM&hl=fr&gl=TG&ceid=TG:fr"
+
+  # ── ÉNERGIE ────────────────────────────────────────────────
+  - ticker: "TTLS"
+    site_presse: "https://totalenergies.ci/nos-actualites"
+    sel_items: "article, .actualite, .news"
+    sel_titre: "h2 a, h3 a, .card-title"
+    sel_date: ".date, time"
+    rss_officiel: "https://totalenergies.ci/rss"
+    google_news: "https://news.google.com/rss/search?q=TotalEnergies+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SVOC"
+    site_presse: "https://www.vivoenergy.com/en/media/"
+    sel_items: "article, .media-item"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Vivo+Energy+Côte+Ivoire+Shell+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── UTILITIES ──────────────────────────────────────────────
+  - ticker: "CIEC"
+    site_presse: "https://www.cie.ci/actualites"
+    sel_items: "article, .actualite, .post"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    site_ir: "https://www.cie.ci/investisseurs"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=CIE+électricité+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SDCC"
+    site_presse: "https://www.sodeci.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SODECI+eau+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── AGROALIMENTAIRE / AGRICULTURE ─────────────────────────
+  - ticker: "PALC"
+    site_presse: "https://www.palmci.ci/actualites"
+    sel_items: "article, .actualite, .news-item"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=PALMCI+BRVM+palmier+huile&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SAPH"
+    site_presse: "https://www.saph.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SAPH+hévéas+BRVM+Côte+Ivoire&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SOGB"
+    site_presse: "https://www.sogb.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SOGB+caoutchouc+BRVM+Côte+Ivoire&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SIFCA"
+    site_presse: "https://www.groupesifca.com/actualites"
+    sel_items: "article, .actualite, .news"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SIFCA+groupe+Côte+Ivoire+bourse&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "NEIC"
+    site_presse: "https://www.nestle-civ.com/fr/media"
+    sel_items: "article, .media-item, .press-release"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Nestlé+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── BOISSONS ───────────────────────────────────────────────
+  - ticker: "SLBC"
+    site_presse: "https://www.solibra.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SOLIBRA+brasserie+BRVM+Côte+Ivoire&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "BRVBC"
+    site_presse: "https://www.brassivoire.ci/presse"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Brassivoire+BRVM+Côte+Ivoire&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── DISTRIBUTION ───────────────────────────────────────────
+  - ticker: "CFAC"
+    site_presse: "https://www.cfaogroup.com/fr/presse"
+    sel_items: "article, .press-release, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=CFAO+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── TRANSPORT ──────────────────────────────────────────────
+  - ticker: "SDSC"
+    site_presse: "https://www.bollore-logistics.com/fr/presse"
+    sel_items: "article, .press-item"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Bolloré+Transport+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── INDUSTRIE ──────────────────────────────────────────────
+  - ticker: "UNLC"
+    site_presse: "https://www.unilever-civ.com/actualites"
+    sel_items: "article, .news"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Unilever+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SIVC"
+    site_presse: "https://www.airliquide.com/ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Air+Liquide+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── ASSURANCE ──────────────────────────────────────────────
+  - ticker: "GNBC"
+    site_presse: "https://www.nsia.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date, time"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=NSIA+assurance+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  # ── AUTRES (même structure Google News pour couverture complète) ──
+  - ticker: "SIAB"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SIA+Bénin+investissement+BRVM&hl=fr&gl=BJ&ceid=BJ:fr"
+
+  - ticker: "BICC"
+    site_presse: "https://www.bic-ci.com/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=BIC+CI+banque+BRVM+Abidjan&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "STBC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=STBCI+BRVM+Abidjan+banque&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SMBC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SMB+bitumes+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SIER"
+    site_presse: "https://www.sicogi.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SICOGI+immobilier+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SETC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SETAO+travaux+publics+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "FTSC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=FILTISAC+BRVM+Abidjan&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SHEC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SITAB+tabac+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "CABC"
+    site_presse: "https://www.sicable.ci/actualites"
+    sel_items: "article, .actualite"
+    sel_titre: "h2 a, h3 a"
+    sel_date: ".date"
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SICABLE+câbles+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "ABJM"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Abidjan+Catering+aéroport+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "BNBC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=Bernabé+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "STAC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SITAS+transport+aérien+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "PRSC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=PRESTIGE+CI+transport+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "TTRC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=TRITURAF+BRVM+Abidjan&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "SICC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=SICC+coco+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+
+  - ticker: "WOYOC"
+    site_presse: null
+    rss_officiel: null
+    google_news: "https://news.google.com/rss/search?q=MOVIS+technologie+BRVM+Abidjan&hl=fr&gl=CI&ceid=CI:fr"
+
+# ----------------------------------------------------------------
+# 3. DÉFINITION DES 47 VALEURS
+# ----------------------------------------------------------------
+valeurs:
+  - {ticker: "PALC",  nom: "PALMCI",       secteur: "Agriculture",    pays: "CI",
+     mots_cles: ["PALMCI","Palmeries Côte Ivoire","palmier huile CI BRVM"],
+     alertes_specifiques: ["dividende","résultats","palmier","huile palme","AGO"]}
+
+  - {ticker: "SOGB",  nom: "SOGB",         secteur: "Agriculture",    pays: "CI",
+     mots_cles: ["SOGB","Grand Béréby","caoutchouc Côte Ivoire BRVM"],
+     alertes_specifiques: ["caoutchouc","hévéa","résultats","dividende"]}
+
+  - {ticker: "SAPH",  nom: "SAPH",         secteur: "Agriculture",    pays: "CI",
+     mots_cles: ["SAPH","Plantations Hévéas","hévéa Côte Ivoire"],
+     alertes_specifiques: ["hévéa","plantation","résultats","AGO"]}
+
+  - {ticker: "SIFCA", nom: "SIFCA",        secteur: "Agriculture",    pays: "CI",
+     mots_cles: ["SIFCA","groupe SIFCA","SIFCA BRVM"],
+     alertes_specifiques: ["SIFCA","résultats","acquisition","partenariat"]}
+
+  - {ticker: "SICC",  nom: "SICC",         secteur: "Agriculture",    pays: "CI",
+     mots_cles: ["SICC","Ivoirienne Coco","SICC BRVM"],
+     alertes_specifiques: ["coco","résultats"]}
+
+  - {ticker: "TTRC",  nom: "TRITURAF",     secteur: "Agro-industrie", pays: "CI",
+     mots_cles: ["TRITURAF","TTRC BRVM"],
+     alertes_specifiques: ["trituration","oléagineux","résultats"]}
+
+  - {ticker: "SGBC",  nom: "SGB CI",       secteur: "Banque",         pays: "CI",
+     mots_cles: ["Société Générale Côte Ivoire","SGBCI","SGB CI BRVM"],
+     alertes_specifiques: ["résultats","PNB","dividende","AGO"]}
+
+  - {ticker: "BICC",  nom: "BIC CI",       secteur: "Banque",         pays: "CI",
+     mots_cles: ["BIC CI","Banque Internationale Commerce Côte Ivoire"],
+     alertes_specifiques: ["résultats","crédit","dividende"]}
+
+  - {ticker: "ETIT",  nom: "Ecobank TI",   secteur: "Banque",         pays: "TG",
+     mots_cles: ["Ecobank Transnational","ETI BRVM","Ecobank résultats"],
+     alertes_specifiques: ["résultats","dividende","AGE","acquisition","rachat"]}
+
+  - {ticker: "BOAB",  nom: "BOA Bénin",    secteur: "Banque",         pays: "BJ",
+     mots_cles: ["Bank of Africa Bénin","BOA Bénin BRVM"],
+     alertes_specifiques: ["résultats","dividende","fusion"]}
+
+  - {ticker: "BOABF", nom: "BOA Burkina",  secteur: "Banque",         pays: "BF",
+     mots_cles: ["Bank of Africa Burkina","BOA Burkina BRVM"],
+     alertes_specifiques: ["résultats","dividende"]}
+
+  - {ticker: "BOAN",  nom: "BOA Niger",    secteur: "Banque",         pays: "NE",
+     mots_cles: ["Bank of Africa Niger","BOA Niger BRVM"],
+     alertes_specifiques: ["résultats","dividende"]}
+
+  - {ticker: "BOAS",  nom: "BOA Sénégal",  secteur: "Banque",         pays: "SN",
+     mots_cles: ["Bank of Africa Sénégal","BOA Sénégal BRVM"],
+     alertes_specifiques: ["résultats","dividende"]}
+
+  - {ticker: "BOAM",  nom: "BOA Mali",     secteur: "Banque",         pays: "ML",
+     mots_cles: ["Bank of Africa Mali","BOA Mali BRVM"],
+     alertes_specifiques: ["résultats","dividende"]}
+
+  - {ticker: "CBIBF", nom: "CORIS BANK",   secteur: "Banque",         pays: "BF",
+     mots_cles: ["Coris Bank International","CBIBF BRVM"],
+     alertes_specifiques: ["résultats","dividende","expansion","filiale"]}
+
+  - {ticker: "ORGT",  nom: "ORABANK TG",   secteur: "Banque",         pays: "TG",
+     mots_cles: ["Orabank Togo","ORGT BRVM"],
+     alertes_specifiques: ["résultats","dividende"]}
+
+  - {ticker: "NSBC",  nom: "NSIA BANQUE",  secteur: "Banque",         pays: "CI",
+     mots_cles: ["NSIA Banque CI","NSBC BRVM"],
+     alertes_specifiques: ["résultats","dividende","NSIA"]}
+
+  - {ticker: "BACI",  nom: "BICICI",       secteur: "Banque",         pays: "CI",
+     mots_cles: ["BICICI","BNP Paribas Côte Ivoire","BACI BRVM"],
+     alertes_specifiques: ["résultats","dividende","BNP"]}
+
+  - {ticker: "STBC",  nom: "STB CI",       secteur: "Banque",         pays: "CI",
+     mots_cles: ["STBCI","STB CI BRVM"],
+     alertes_specifiques: ["résultats","dividende"]}
+
+  - {ticker: "SMBC",  nom: "SMB",          secteur: "BTP",            pays: "CI",
+     mots_cles: ["Société Multinationale Bitumes","SMB CI BRVM"],
+     alertes_specifiques: ["bitume","BTP","infrastructure","résultats"]}
+
+  - {ticker: "CFAC",  nom: "CFAO CI",      secteur: "Distribution",   pays: "CI",
+     mots_cles: ["CFAO Côte Ivoire","CFAO Motors","CFAC BRVM"],
+     alertes_specifiques: ["automobile","résultats","Toyota","Peugeot"]}
+
+  - {ticker: "ABJM",  nom: "ABJ CATERING", secteur: "Distribution",   pays: "CI",
+     mots_cles: ["Abidjan Catering","ABJM BRVM"],
+     alertes_specifiques: ["aéroport","catering","résultats"]}
+
+  - {ticker: "BNBC",  nom: "BERNABÉ CI",   secteur: "Distribution",   pays: "CI",
+     mots_cles: ["Bernabé Côte Ivoire","BNBC BRVM"],
+     alertes_specifiques: ["BTP","quincaillerie","résultats"]}
+
+  - {ticker: "TTLS",  nom: "TOTAL CI",     secteur: "Energie",        pays: "CI",
+     mots_cles: ["TotalEnergies Côte Ivoire","Total CI","TTLS BRVM"],
+     alertes_specifiques: ["carburant","pétrole","résultats","dividende"]}
+
+  - {ticker: "SVOC",  nom: "VIVO ENERGY",  secteur: "Energie",        pays: "CI",
+     mots_cles: ["Vivo Energy Côte Ivoire","Shell CI","SVOC BRVM"],
+     alertes_specifiques: ["Shell","carburant","résultats"]}
+
+  - {ticker: "SIER",  nom: "SICOGI",       secteur: "Immobilier",     pays: "CI",
+     mots_cles: ["SICOGI","Ivoirienne Construction","SIER BRVM"],
+     alertes_specifiques: ["logement","immobilier","résultats"]}
+
+  - {ticker: "SETC",  nom: "SETAO",        secteur: "BTP",            pays: "CI",
+     mots_cles: ["SETAO","Travaux Publics Afrique Ouest","SETC BRVM"],
+     alertes_specifiques: ["infrastructure","contrat","résultats"]}
+
+  - {ticker: "UNLC",  nom: "UNILEVER CI",  secteur: "Industrie",      pays: "CI",
+     mots_cles: ["Unilever Côte Ivoire","UNLC BRVM"],
+     alertes_specifiques: ["Omo","Maggi","résultats","dividende"]}
+
+  - {ticker: "SLBC",  nom: "SOLIBRA",      secteur: "Boissons",       pays: "CI",
+     mots_cles: ["SOLIBRA","brasserie Côte Ivoire","SLBC BRVM"],
+     alertes_specifiques: ["bière","Heineken","résultats","dividende"]}
+
+  - {ticker: "BRVBC", nom: "BRASSIVOIRE",  secteur: "Boissons",       pays: "CI",
+     mots_cles: ["Brassivoire","BRVBC BRVM"],
+     alertes_specifiques: ["bière","résultats","investissement"]}
+
+  - {ticker: "NEIC",  nom: "NESTLÉ CI",    secteur: "Agroalimentaire",pays: "CI",
+     mots_cles: ["Nestlé Côte Ivoire","NEIC BRVM"],
+     alertes_specifiques: ["Milo","cacao","résultats","dividende"]}
+
+  - {ticker: "SIVC",  nom: "AIR LIQUIDE",  secteur: "Chimie",         pays: "CI",
+     mots_cles: ["Air Liquide Côte Ivoire","SIVC BRVM"],
+     alertes_specifiques: ["gaz industriel","résultats","contrat"]}
+
+  - {ticker: "FTSC",  nom: "FILTISAC",     secteur: "Industrie",      pays: "CI",
+     mots_cles: ["FILTISAC","FTSC BRVM"],
+     alertes_specifiques: ["emballage","résultats"]}
+
+  - {ticker: "SHEC",  nom: "SITAB",        secteur: "Tabac",          pays: "CI",
+     mots_cles: ["SITAB Côte Ivoire","tabac BRVM"],
+     alertes_specifiques: ["tabac","Philip Morris","résultats"]}
+
+  - {ticker: "CABC",  nom: "SICABLE",      secteur: "Industrie",      pays: "CI",
+     mots_cles: ["SICABLE","Câbles Côte Ivoire","CABC BRVM"],
+     alertes_specifiques: ["câble","électricité","résultats","contrat"]}
+
+  - {ticker: "CIEC",  nom: "CIE",          secteur: "Electricité",    pays: "CI",
+     mots_cles: ["CIE Côte Ivoire","Compagnie Ivoirienne Electricité","CIEC BRVM"],
+     alertes_specifiques: ["délestage","résultats","concession","tarif"]}
+
+  - {ticker: "SDCC",  nom: "SODECI",       secteur: "Eau",            pays: "CI",
+     mots_cles: ["SODECI","Distribution Eau Côte Ivoire","SDCC BRVM"],
+     alertes_specifiques: ["eau potable","concession","résultats","tarif"]}
+
+  - {ticker: "SNTS",  nom: "SONATEL",      secteur: "Telecom",        pays: "SN",
+     mots_cles: ["Sonatel Sénégal","Orange Sénégal","SONATEL BRVM"],
+     alertes_specifiques: ["résultats","dividende","5G","abonnés","Mobile Money"]}
+
+  - {ticker: "ONTBF", nom: "ORANGE BF",    secteur: "Telecom",        pays: "BF",
+     mots_cles: ["Orange Burkina Faso","ONTBF BRVM"],
+     alertes_specifiques: ["résultats","abonnés","réseau"]}
+
+  - {ticker: "ONTCI", nom: "ORANGE CI",    secteur: "Telecom",        pays: "CI",
+     mots_cles: ["Orange Côte Ivoire","Orange CI BRVM"],
+     alertes_specifiques: ["résultats","5G","Orange Money","dividende"]}
+
+  - {ticker: "MTNCI", nom: "MTN CI",       secteur: "Telecom",        pays: "CI",
+     mots_cles: ["MTN Côte Ivoire","MTN CI BRVM"],
+     alertes_specifiques: ["résultats","MoMo","5G","dividende","augmentation capital"]}
+
+  - {ticker: "SDSC",  nom: "BOLLORÉ TL",   secteur: "Transport",      pays: "CI",
+     mots_cles: ["Bolloré Côte Ivoire","Bolloré Transport","SDSC BRVM"],
+     alertes_specifiques: ["port","logistique","MSC","cession","résultats"]}
+
+  - {ticker: "STAC",  nom: "SITAS CI",     secteur: "Transport",      pays: "CI",
+     mots_cles: ["SITAS Côte Ivoire","STAC BRVM","transport aérien CI"],
+     alertes_specifiques: ["aviation","aéroport","résultats"]}
+
+  - {ticker: "PRSC",  nom: "PRESTIGE CI",  secteur: "Transport",      pays: "CI",
+     mots_cles: ["Prestige CI transport","PRSC BRVM"],
+     alertes_specifiques: ["transport","bus","résultats"]}
+
+  - {ticker: "GNBC",  nom: "NSIA CI",      secteur: "Assurance",      pays: "CI",
+     mots_cles: ["NSIA assurance Côte Ivoire","GNBC BRVM"],
+     alertes_specifiques: ["assurance","primes","résultats","sinistre"]}
+
+  - {ticker: "SIAB",  nom: "SIA BÉNIN",    secteur: "Assurance",      pays: "BJ",
+     mots_cles: ["SIA Bénin BRVM","SIAB"],
+     alertes_specifiques: ["assurance","résultats"]}
+
+  - {ticker: "WOYOC", nom: "MOVIS",        secteur: "Technologie",    pays: "CI",
+     mots_cles: ["MOVIS BRVM","WOYOC","tech Côte Ivoire bourse"],
+     alertes_specifiques: ["technologie","levée de fonds","résultats"]}
+
+# ----------------------------------------------------------------
+# 4. ALERTES CRITIQUES GLOBALES
+# ----------------------------------------------------------------
+alertes_critiques:
+  - "assemblée générale extraordinaire"
+  - "augmentation de capital"
+  - "OPA"  - "OPE"  - "introduction en bourse"
+  - "suspension de cotation"  - "radiation"
+  - "fusion"  - "acquisition"  - "rachat d'actions"
+  - "dividende exceptionnel"  - "dividende"
+  - "résultats annuels"  - "résultats semestriels"
+  - "avertissement sur résultats"  - "profit warning"
+  - "faillite"  - "redressement judiciaire"
+  - "changement de direction"  - "démission"
+  - "notation"  - "dégradation"  - "rehaussement"
+  - "BCEAO"  - "taux directeur"
+
+alertes_mots_cles_generaux:
+  - "BRVM"  - "bourse Abidjan"  - "UEMOA"
+  - "CREPMF"  - "marché financier"  - "cotation"
+  - "dividende"  - "résultats"  - "Abidjan"
+  - "BCEAO"  - "émission obligataire"
+
+# ----------------------------------------------------------------
+# 5. PARAMÈTRES PIPELINE
+# ----------------------------------------------------------------
+pipeline:
+  frequence_rss_minutes: 30
+  frequence_google_news_minutes: 45
+  frequence_sites_societes_minutes: 120
+  frequence_commodites_minutes: 60
+  frequence_institutions_minutes: 180
+  retention_jours: 90
+  max_workers: 15
+  timeout_seconds: 15
+  user_agent: "WestBourse-Bot/3.0 (+https://westbourse.com/bot)"
+
+  stockage:
+    type: "sqlite"
+    chemin: "./data/westbourse_veille.db"
+    backup_json: "./data/backup/"
+
+  output:
+    chemin_json: "./output/feed.json"
+    chemin_alertes: "./output/alertes.json"
+    chemin_stats: "./output/stats.json"
+    chemin_commodites: "./output/commodites.json"
+    webhook_url: ""
+
+  notifications:
+    email: ""
+    telegram_bot_token: ""
+    telegram_chat_id: ""
