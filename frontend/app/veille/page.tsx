@@ -31,10 +31,7 @@ async function fetchVeilleData() {
 
   const { data: news } = await sb
     .from('brvm_news')
-    .select(
-      'id,titre,date_publication,source,source_label,source_url,resume,' +
-        'instrument_code,secteur,sentiment,score_impact,ticker_codes,image_url,created_at',
-    )
+    .select('*')
     .gte('date_publication', since7d)
     .lte('date_publication', today)
     .order('date_publication', { ascending: false })
