@@ -1,12 +1,23 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { VeilleNews } from '@/app/veille/page.tsx';
 
 type View = 'flux' | 'heatmap' | 'alertes' | 'matieres' | 'sources';
 type Period = 7 | 30 | 90 | 365;
 
+const BRVM_TOTAL_TICKERS = 47;
 const MATIERES_SECTEURS = new Set(['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities']);
+
+const SOURCE_COLOR_CLASSES = [
+  'bg-[#56d7fd]','bg-[#4ade80]','bg-[#f59e0b]','bg-[#f472b6]',
+  'bg-[#a78bfa]','bg-[#fb923c]','bg-[#34d399]','bg-[#60a5fa]',
+];
+function sourceColorClass(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return SOURCE_COLOR_CLASSES[Math.abs(h) % SOURCE_COLOR_CLASSES.length];
+}
 
 /* ── Badge tickers ── */
 const BADGE_COLORS = [
@@ -190,6 +201,13 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
   const [sentimentFilter, setSentimentFilter] = useState('');
   const [search, setSearch] = useState('');
   const [showAlertes, setShowAlertes] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<string | null>(null);
+  const [activeStatFilter, setActiveStatFilter] = useState<'alertes' | 'gnews' | 'sites_off' | null>(null);
+
+  useEffect(() => {
+    setSourceFilter(null);
+    setActiveStatFilter(null);
+  }, [period]);
 
   // 1. Filtrage par période (côté client)
   const news = useMemo(() => {
@@ -201,10 +219,11 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
   const alertes = useMemo(() => news.filter((n) => (n.score_impact ?? 0) >= 70), [news]);
   const alertesCritiques = alertes.slice(0, 3);
 
-  // 3. Flux filtré (secteur, sentiment, recherche, alertes) — calculé en premier
+  // 3. Flux filtré (secteur, source, stat, sentiment, recherche, alertes) — calculé en premier
   const filtered = useMemo(() => {
     let items = showAlertes ? alertes : news;
     if (secteurFilter) items = items.filter((n) => n.secteur === secteurFilter);
+    if (sourceFilter) items = items.filter((n) => (n.source_label ?? n.source) === sourceFilter);
     if (sentimentFilter) items = items.filter((n) => n.sentiment === sentimentFilter);
     if (search) {
       const q = search.toLowerCase();
@@ -215,8 +234,11 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
         (n.source_label ?? '').toLowerCase().includes(q),
       );
     }
+    if (activeStatFilter === 'alertes') items = items.filter((n) => (n.score_impact ?? 0) >= 70);
+    if (activeStatFilter === 'gnews') items = items.filter((n) => n.source_type === 'google_news');
+    if (activeStatFilter === 'sites_off') items = items.filter((n) => ['site_officiel', 'institution'].includes(n.source_type ?? ''));
     return items;
-  }, [news, alertes, showAlertes, secteurFilter, sentimentFilter, search]);
+  }, [news, alertes, showAlertes, secteurFilter, sourceFilter, sentimentFilter, search, activeStatFilter]);
 
   // 4. Stats depuis le flux filtré — réactif aux filtres
   const stats = useMemo(() => {
@@ -248,7 +270,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([secteur, count]) => ({ secteur, count }));
   }, [news]);
 
-  // 6. Sources depuis le flux filtré
+  // 6. Sources depuis le flux filtré (pour la vue Sources)
   const topSources = useMemo(() => {
     const map = new Map<string, number>();
     for (const n of filtered) {
@@ -259,8 +281,20 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([label, count]) => ({ label, count }));
   }, [filtered]);
 
+  // 7. Top sources sidebar — depuis news (période uniquement, hors filtres source/stat)
+  const sidebarSources = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of news) {
+      const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
+        ? n.source_label : n.source ?? 'Autre';
+      map.set(lbl, (map.get(lbl) ?? 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
+  }, [news]);
+
   const reset = useCallback(() => {
-    setSecteurFilter(''); setSentimentFilter(''); setSearch(''); setShowAlertes(false);
+    setSecteurFilter(''); setSentimentFilter(''); setSearch('');
+    setShowAlertes(false); setSourceFilter(null); setActiveStatFilter(null);
   }, []);
 
   const lastItem = news[0];
@@ -307,21 +341,65 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
 
       {/* Stats bar */}
       <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-        {[
-          { label: period === 365 ? 'ARTICLES 1 AN' : `ARTICLES ${period}J`, val: stats.total, cls: 'text-foreground' },
-          { label: "AUJOURD'HUI", val: stats.today, cls: 'text-[#3fe18b]' },
-          { label: 'ALERTES', val: stats.alertes, cls: 'text-[#ff6b6b]' },
-          { label: 'COUVERTS', val: `${stats.covered}/${stats.totalSocietes}`, cls: 'text-accent' },
-          { label: 'SANS ACTU', val: stats.totalSocietes - stats.covered, cls: 'text-muted' },
-          { label: 'G.NEWS', val: stats.gnews, cls: 'text-[#56d7fd]' },
-          { label: 'SITES OFF.', val: stats.sitesOff, cls: 'text-[#c77dff]' },
-          { label: 'MATIÈRES', val: stats.matieres, cls: 'text-[#ffd166]' },
-        ].map((s) => (
-          <div key={s.label} className="bg-surface border border-border rounded-lg p-3 text-center">
-            <p className="text-[9px] uppercase tracking-widest text-muted">{s.label}</p>
-            <p className={`text-xl font-bold tabular mt-0.5 ${s.cls}`}>{s.val}</p>
-          </div>
-        ))}
+        {/* ARTICLES — reset filtres */}
+        <button type="button" onClick={reset}
+          className="bg-surface border border-border rounded-lg p-3 text-center cursor-pointer hover:border-accent/40 transition-colors">
+          <p className="text-[9px] uppercase tracking-widest text-muted">{period === 365 ? 'ARTICLES 1 AN' : `ARTICLES ${period}J`}</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-foreground">{stats.total}</p>
+        </button>
+        {/* AUJOURD'HUI — non filtrable */}
+        <div className="bg-surface border border-border rounded-lg p-3 text-center" title="Articles publiés aujourd'hui">
+          <p className="text-[9px] uppercase tracking-widest text-muted">AUJOURD'HUI</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-[#3fe18b]">{stats.today}</p>
+        </div>
+        {/* ALERTES — filtrable */}
+        <button type="button"
+          onClick={() => setActiveStatFilter(p => p === 'alertes' ? null : 'alertes')}
+          className={`bg-surface border rounded-lg p-3 text-center cursor-pointer transition-all hover:opacity-80 ${
+            activeStatFilter === 'alertes' ? 'border-[#ff6b6b] ring-1 ring-[#ff6b6b]/40' : 'border-border'
+          }`}
+          title="Filtrer par articles en alerte">
+          <p className="text-[9px] uppercase tracking-widest text-muted">ALERTES</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-[#ff6b6b]">{stats.alertes}</p>
+        </button>
+        {/* COUVERTS — non filtrable */}
+        <div className="bg-surface border border-border rounded-lg p-3 text-center" title={`${stats.covered} tickers BRVM couverts sur la période`}>
+          <p className="text-[9px] uppercase tracking-widest text-muted">COUVERTS</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-accent">{stats.covered}/{BRVM_TOTAL_TICKERS}</p>
+        </div>
+        {/* SANS ACTU — non filtrable, compteur informatif */}
+        <div className="bg-surface border border-border rounded-lg p-3 text-center"
+          title={`${BRVM_TOTAL_TICKERS - stats.covered} valeurs BRVM sans aucun article sur la période`}>
+          <p className="text-[9px] uppercase tracking-widest text-muted">SANS ACTU</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-[#f59e0b]">{BRVM_TOTAL_TICKERS - stats.covered}</p>
+        </div>
+        {/* G.NEWS — filtrable */}
+        <button type="button"
+          onClick={() => setActiveStatFilter(p => p === 'gnews' ? null : 'gnews')}
+          className={`bg-surface border rounded-lg p-3 text-center cursor-pointer transition-all hover:opacity-80 ${
+            activeStatFilter === 'gnews' ? 'border-[#56d7fd] ring-1 ring-[#56d7fd]/40' : 'border-border'
+          }`}
+          title="Filtrer par sources Google News">
+          <p className="text-[9px] uppercase tracking-widest text-muted">G.NEWS</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-[#56d7fd]">{stats.gnews}</p>
+        </button>
+        {/* SITES OFF. — filtrable */}
+        <button type="button"
+          onClick={() => setActiveStatFilter(p => p === 'sites_off' ? null : 'sites_off')}
+          className={`bg-surface border rounded-lg p-3 text-center cursor-pointer transition-all hover:opacity-80 ${
+            activeStatFilter === 'sites_off' ? 'border-[#c77dff] ring-1 ring-[#c77dff]/40' : 'border-border'
+          }`}
+          title="Filtrer par sites officiels et institutions">
+          <p className="text-[9px] uppercase tracking-widest text-muted">SITES OFF.</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-[#c77dff]">{stats.sitesOff}</p>
+        </button>
+        {/* MATIÈRES — non filtrable (vue dédiée) */}
+        <button type="button" onClick={() => setView('matieres')}
+          className="bg-surface border border-border rounded-lg p-3 text-center cursor-pointer hover:border-[#ffd166]/40 transition-colors"
+          title="Voir la vue Matières premières">
+          <p className="text-[9px] uppercase tracking-widest text-muted">MATIÈRES</p>
+          <p className="text-xl font-bold tabular mt-0.5 text-[#ffd166]">{stats.matieres}</p>
+        </button>
       </div>
 
       {/* Filters */}
@@ -404,6 +482,39 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
             ))}
           </div>
 
+          {sidebarSources.length > 0 && (
+            <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5" id="top-sources-section">
+              <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Top Sources</p>
+              {sidebarSources.map(([name, count]) => {
+                const isActive = sourceFilter === name;
+                const colorCls = sourceColorClass(name);
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => {
+                      setSourceFilter(p => p === name ? null : name);
+                      setSecteurFilter('');
+                      setActiveStatFilter(null);
+                    }}
+                    title={`Filtrer par : ${name}`}
+                    className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                      isActive ? 'bg-accent/10 text-accent font-semibold' : 'text-muted hover:text-foreground hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${colorCls}`} />
+                      <span className="truncate">{name}</span>
+                    </span>
+                    <span className={`tabular shrink-0 ml-1 px-1.5 rounded text-[10px] ${isActive ? 'bg-accent/20 text-accent' : 'bg-white/5 text-muted'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {secteurs.length > 0 && (
             <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5">
               <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Secteurs</p>
@@ -411,7 +522,11 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                 <button
                   key={s.secteur}
                   type="button"
-                  onClick={() => setSecteurFilter(secteurFilter === s.secteur ? '' : s.secteur)}
+                  onClick={() => {
+                    setSecteurFilter(secteurFilter === s.secteur ? '' : s.secteur);
+                    setSourceFilter(null);
+                    setActiveStatFilter(null);
+                  }}
                   className={`w-full flex items-center justify-between px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
                     secteurFilter === s.secteur ? 'text-accent font-semibold' : 'text-muted hover:text-foreground'
                   }`}
@@ -452,9 +567,23 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
           {/* Flux / Alertes */}
           {(view === 'flux' || view === 'alertes') && (
             <>
-              <p className="text-xs text-muted">
-                {view === 'alertes' ? `Alertes — ${alertes.length}` : `Flux — ${filtered.length} résultat(s)`}
-              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-muted">
+                  {view === 'alertes' ? `Alertes — ${alertes.length}` : `Flux — ${filtered.length} résultat(s)`}
+                </span>
+                {sourceFilter && (
+                  <button type="button" onClick={() => setSourceFilter(null)}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/15 text-accent text-[10px] font-medium hover:bg-accent/25 transition-colors cursor-pointer">
+                    Source: {sourceFilter} ×
+                  </button>
+                )}
+                {activeStatFilter && (
+                  <button type="button" onClick={() => setActiveStatFilter(null)}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f59e0b]/15 text-[#f59e0b] text-[10px] font-medium hover:bg-[#f59e0b]/25 transition-colors cursor-pointer">
+                    {activeStatFilter.toUpperCase()} ×
+                  </button>
+                )}
+              </div>
               {(view === 'alertes' ? alertes : filtered).length === 0 ? (
                 <p className="text-center text-muted text-sm py-10">Aucun article sur cette période avec ces filtres.</p>
               ) : (
