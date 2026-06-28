@@ -407,7 +407,7 @@ def publish_supabase(
         "dedupe_hash": dedupe_hash,
         "titre": titre[:500],
         "date_publication": date_pub,
-        "source": "westbourse",
+        "source": "autre",
         "source_label": "WESTBOURSE PRO",
         "source_type": "analyse",
         "source_url": f"/weekly/{slug}.html",
