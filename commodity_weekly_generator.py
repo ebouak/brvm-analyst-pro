@@ -9,7 +9,7 @@ Pipeline :
   2. Snapshot World Bank CMO Pink Sheet (mensuel)
   3. Articles brvm_news récents liés aux commodités
   4. Score exposition BRVM par ticker
-  5. Appel Claude (claude-sonnet-4-6) → HTML article
+  5. Appel DeepSeek (deepseek-chat) → HTML article
   6. Sauvegarde public/weekly/<slug>.html
   7. Upsert brvm_news (content_html + slug + metadata)
 
@@ -18,12 +18,12 @@ Usage:
     python commodity_weekly_generator.py --dry-run # sans écriture
 
 Secrets requis (variables d'environnement) :
-    ANTHROPIC_API_KEY
+    DEEPSEEK_API_KEY
     NEXT_PUBLIC_SUPABASE_URL  (ou SUPABASE_URL)
     SUPABASE_SERVICE_ROLE_KEY
 
 Dépendances :
-    pip install yfinance anthropic requests pandas openpyxl
+    pip install yfinance openai requests pandas openpyxl
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ WB_COMMODITIES = {
 
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL") or os.environ.get("SUPABASE_URL", "")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
-ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 
 
 # ── 1. Prix yfinance ──────────────────────────────────────────────────────────
@@ -308,21 +308,21 @@ Génère uniquement le HTML de l'article, sans markdown, sans code fence.
 """
 
 
-# ── 6. Appel Claude ──────────────────────────────────────────────────────────
+# ── 6. Appel DeepSeek ────────────────────────────────────────────────────────
 
-def call_claude(prompt: str) -> str:
-    if not ANTHROPIC_KEY:
-        raise RuntimeError("ANTHROPIC_API_KEY non définie")
+def call_deepseek(prompt: str) -> str:
+    if not DEEPSEEK_KEY:
+        raise RuntimeError("DEEPSEEK_API_KEY non définie")
 
-    import anthropic
+    from openai import OpenAI
 
-    client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
-    msg = client.messages.create(
-        model="claude-sonnet-4-6",
+    client = OpenAI(api_key=DEEPSEEK_KEY, base_url="https://api.deepseek.com")
+    resp = client.chat.completions.create(
+        model="deepseek-chat",
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
-    return msg.content[0].text
+    return resp.choices[0].message.content
 
 
 # ── 7. Assemblage HTML final ──────────────────────────────────────────────────
@@ -490,10 +490,10 @@ def main():
     prompt = build_prompt(year, week, yf_prices, wb_snapshot, brvm_scores, articles)
 
     if args.dry_run:
-        log.info("[DRY-RUN] Appel Claude ignoré")
-        article_html = "<article><p>[DRY-RUN] Contenu Claude non généré.</p></article>"
+        log.info("[DRY-RUN] Appel DeepSeek ignoré")
+        article_html = "<article><p>[DRY-RUN] Contenu DeepSeek non généré.</p></article>"
     else:
-        article_html = call_claude(prompt)
+        article_html = call_deepseek(prompt)
 
     # Étape 6 : HTML final
     title = f"Matières premières BRVM – Semaine {week:02d}/{year} | WestBourse"
