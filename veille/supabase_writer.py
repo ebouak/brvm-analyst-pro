@@ -1,13 +1,9 @@
 """
-Adaptateur : exporte les articles du pipeline brvm_pipeline.py vers la table
-brvm_news de Supabase.
-
-Source privilégiée : output/feed.json (produit par brvm_pipeline.py)
-  → contient titre, url, source, sentiment, valeurs[], matiere, hash, date_pub, resume
+Exporte les articles de output/feed.json (pipeline brvm_pipeline.py) vers brvm_news.
 
 Variables d'environnement requises :
     SUPABASE_URL              https://<ref>.supabase.co
-    SUPABASE_SERVICE_ROLE_KEY  (clé service_role — jamais exposée au frontend)
+    SUPABASE_SERVICE_ROLE_KEY  (clé service_role)
 """
 
 from __future__ import annotations
@@ -20,60 +16,71 @@ from datetime import datetime, timezone
 from typing import Any
 
 import requests
+import yaml
 
 log = logging.getLogger(__name__)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
-SENTIMENT_POSITIF = [
-    "hausse", "progression", "bénéfice", "croissance", "résultats positifs",
-    "dividende", "augmentation", "record", "fort", "rebond", "profit",
-]
-SENTIMENT_NEGATIF = [
-    "baisse", "chute", "perte", "déficit", "recul", "déclin", "faillite",
-    "sanction", "avertissement", "difficultés", "risque", "incertitude",
-]
+# ── Chargement du référentiel YAML (ticker → secteur BRVM) ───────────────────
+def _load_ticker_secteur_map(yaml_path: str = "brvm_config.yaml") -> dict[str, str]:
+    """Retourne {ticker: secteur_BRVM} depuis brvm_config.yaml."""
+    try:
+        with open(yaml_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        return {v["ticker"]: v.get("secteur", "") for v in cfg.get("valeurs", [])}
+    except Exception as e:
+        log.warning("Impossible de charger %s : %s", yaml_path, e)
+        return {}
+
+TICKER_SECTEUR: dict[str, str] = {}
+
+
+# ── Sentiment ────────────────────────────────────────────────────────────────
+SENTIMENT_POSITIF = ["hausse", "progression", "bénéfice", "croissance", "dividende",
+                     "augmentation", "record", "rebond", "profit", "fort"]
+SENTIMENT_NEGATIF = ["baisse", "chute", "perte", "déficit", "recul", "déclin",
+                     "faillite", "sanction", "avertissement", "difficultés", "risque"]
 
 
 def _sentiment_fallback(titre: str, resume: str | None) -> str:
     text = (titre + " " + (resume or "")).lower()
     pos = sum(1 for w in SENTIMENT_POSITIF if w in text)
     neg = sum(1 for w in SENTIMENT_NEGATIF if w in text)
-    if pos > neg:
-        return "positif"
-    if neg > pos:
-        return "négatif"
-    return "neutre"
-
-
-def _score_impact(ticker_codes: list[str], sentiment: str, source_label: str) -> int:
-    score = 30
-    score += min(len(ticker_codes) * 10, 25)
-    if sentiment in ("positif", "négatif"):
-        score += 15
-    src = source_label.lower()
-    if "officiel" in src or "brvm" in src or "cosumaf" in src:
-        score += 15
-    return min(score, 100)
+    return "positif" if pos > neg else "négatif" if neg > pos else "neutre"
 
 
 def _norm_sentiment(raw: str | None) -> str:
-    """Normalise le sentiment (pipeline écrit 'negatif' sans accent)."""
     return {"negatif": "négatif", "positif": "positif", "neutre": "neutre"}.get(
         raw or "neutre", "neutre"
     )
 
 
+def _score_impact(ticker_codes: list[str], sentiment: str, source_type: str) -> int:
+    score = 30
+    score += min(len(ticker_codes) * 10, 25)
+    if sentiment in ("positif", "négatif"):
+        score += 15
+    if source_type == "site_officiel":
+        score += 15
+    elif source_type == "institution":
+        score += 10
+    return min(score, 100)
+
+
+# ── Mapping principal ────────────────────────────────────────────────────────
 def map_feed_article(art: dict[str, Any]) -> dict[str, Any]:
     """
-    Convertit un article du feed.json pipeline vers le schéma brvm_news.
-    feed.json columns: titre, url, source, source_type, date_pub, resume,
-                       sentiment, valeurs[], matiere, hash, est_alerte, pertinence
+    Convertit un article feed.json → ligne brvm_news.
+    feed.json keys: titre, url, source (nom), source_type, date_pub, resume,
+                    sentiment, valeurs[], matiere, hash, est_alerte, pertinence
     """
     titre = art.get("titre") or ""
     resume = art.get("resume") or None
-    source_label = art.get("source") or "Inconnu"
+    # source_label = nom réel de la source (flux RSS, Google News, site officiel…)
+    source_label = (art.get("source") or "Inconnu").strip()[:200]
+    source_type = art.get("source_type") or "rss"
 
     # date_publication : YYYY-MM-DD
     pub_raw = art.get("date_pub") or art.get("date_publication")
@@ -90,30 +97,32 @@ def map_feed_article(art: dict[str, Any]) -> dict[str, Any]:
     raw_sent = art.get("sentiment") or _sentiment_fallback(titre, resume)
     sentiment = _norm_sentiment(raw_sent)
 
-    # Tickers (feed.json stocke la liste dans "valeurs")
+    # Tickers depuis "valeurs" (pipeline) — instrument_code = null (FK brvm_instruments)
     ticker_codes: list[str] = art.get("valeurs") or []
-    # instrument_code a une FK → brvm_instruments, on la laisse null pour éviter les violations
-    instrument_code = None
 
-    # Secteur depuis matiere (commodité) ou None
-    secteur = art.get("matiere") or None
+    # Secteur BRVM : depuis YAML si tickers disponibles, sinon matiere (commodités)
+    secteur: str | None = None
+    if ticker_codes and TICKER_SECTEUR:
+        secteur = TICKER_SECTEUR.get(ticker_codes[0])
+    if not secteur:
+        secteur = art.get("matiere") or None
 
-    # dedupe_hash : utiliser celui du pipeline
     dedupe_hash = art.get("hash") or hashlib.sha256(
         f"{source_label}|{titre}".encode()
     ).hexdigest()
 
-    score = _score_impact(ticker_codes, sentiment, source_label)
+    score = _score_impact(ticker_codes, sentiment, source_type)
 
     return {
         "dedupe_hash": dedupe_hash,
         "titre": titre[:500],
         "date_publication": date_pub,
         "source": "brvm",
-        "source_label": source_label[:200],
+        "source_label": source_label,
+        "source_type": source_type,
         "source_url": art.get("url") or None,
         "resume": resume[:1000] if resume else None,
-        "instrument_code": instrument_code,
+        "instrument_code": None,  # FK brvm_instruments — null pour éviter violation
         "secteur": secteur,
         "sentiment": sentiment,
         "score_impact": score,
@@ -121,10 +130,10 @@ def map_feed_article(art: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# ── Export Supabase ──────────────────────────────────────────────────────────
 def upsert_to_supabase(rows: list[dict[str, Any]]) -> int:
-    """Upsert des rows déjà mappés dans brvm_news. Retourne le nombre envoyé."""
     if not SUPABASE_URL or not SERVICE_KEY:
-        log.error("SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY non définis — export annulé")
+        log.error("SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY non définis")
         return 0
     if not rows:
         return 0
@@ -152,7 +161,11 @@ def upsert_to_supabase(rows: list[dict[str, Any]]) -> int:
 
 
 def export_from_feed(feed_path: str = "output/feed.json") -> int:
-    """Lit feed.json (produit par le pipeline) et exporte vers Supabase."""
+    """Lit feed.json et exporte vers Supabase."""
+    global TICKER_SECTEUR
+    TICKER_SECTEUR = _load_ticker_secteur_map()
+    log.info("Référentiel secteurs chargé : %d tickers", len(TICKER_SECTEUR))
+
     if not os.path.exists(feed_path):
         log.error("feed.json introuvable : %s", feed_path)
         return 0
@@ -163,7 +176,7 @@ def export_from_feed(feed_path: str = "output/feed.json") -> int:
     articles = data.get("articles", [])
     log.info("Lu %d articles depuis %s", len(articles), feed_path)
 
-    # Mapper + dédoublonner par dedupe_hash
+    # Mapper + dédoublonner
     seen: set[str] = set()
     rows: list[dict[str, Any]] = []
     for art in articles:
@@ -173,14 +186,18 @@ def export_from_feed(feed_path: str = "output/feed.json") -> int:
             seen.add(h)
             rows.append(row)
 
-    log.info("Après déduplication : %d articles uniques", len(rows))
-    log.info(
-        "  Avec tickers : %d | Avec secteur : %d | Sentiment pos/neg : %d/%d",
-        sum(1 for r in rows if r["ticker_codes"]),
-        sum(1 for r in rows if r["secteur"]),
-        sum(1 for r in rows if r["sentiment"] == "positif"),
-        sum(1 for r in rows if r["sentiment"] == "négatif"),
-    )
+    # Stats de contrôle
+    by_type: dict[str, int] = {}
+    for r in rows:
+        by_type[r.get("source_type", "?")] = by_type.get(r.get("source_type", "?"), 0) + 1
+    secteurs_brvm = sum(1 for r in rows if r["secteur"] and r["secteur"] not in
+                        {"petrole","caoutchouc","huile_palme","coton","cacao","utilities","metaux"})
+    log.info("Après dédup : %d articles | %d avec tickers | %d secteurs BRVM | types: %s",
+             len(rows),
+             sum(1 for r in rows if r["ticker_codes"]),
+             secteurs_brvm,
+             by_type)
+
     return upsert_to_supabase(rows)
 
 

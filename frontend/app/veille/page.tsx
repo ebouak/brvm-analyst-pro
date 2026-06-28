@@ -11,6 +11,7 @@ export type VeilleNews = {
   date_publication: string;
   source: string;
   source_label: string | null;
+  source_type: string | null;
   source_url: string | null;
   resume: string | null;
   instrument_code: string | null;
@@ -47,6 +48,8 @@ async function fetchVeilleData() {
     for (const t of n.ticker_codes ?? []) coveredTickers.add(t);
   }
 
+  // Secteurs (hors matières premières → gardées pour vue Matières)
+  const MATIERES_TYPES = new Set(['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities']);
   const secteurMap = new Map<string, number>();
   for (const n of items) {
     if (n.secteur) secteurMap.set(n.secteur, (secteurMap.get(n.secteur) ?? 0) + 1);
@@ -55,15 +58,23 @@ async function fetchVeilleData() {
     .sort((a, b) => b[1] - a[1])
     .map(([secteur, count]) => ({ secteur, count }));
 
+  // Sources distinctes (via source_label)
   const sourceMap = new Map<string, number>();
   for (const n of items) {
-    const lbl = n.source_label ?? n.source;
+    const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
+      ? n.source_label
+      : n.source ?? 'Autre';
     sourceMap.set(lbl, (sourceMap.get(lbl) ?? 0) + 1);
   }
   const topSources = [...sourceMap.entries()]
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 8)
+    .slice(0, 20)
     .map(([label, count]) => ({ label, count }));
+
+  // Compteurs par source_type
+  const gnews = items.filter((n) => n.source_type === 'google_news').length;
+  const sitesOff = items.filter((n) => n.source_type === 'site_officiel').length;
+  const matieres = items.filter((n) => n.source_type === 'commodite').length;
 
   return {
     news: items,
@@ -73,6 +84,9 @@ async function fetchVeilleData() {
       alertes: alertes.length,
       covered: coveredTickers.size,
       totalSocietes: 47,
+      gnews,
+      sitesOff,
+      matieres,
     },
     secteurs,
     topSources,
