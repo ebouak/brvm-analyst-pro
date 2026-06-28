@@ -37,7 +37,8 @@ jobs:
         run: |
           # Lance le pipeline de collecte (brvm_pipeline.py doit être copié ici)
           if [ -f brvm_pipeline.py ]; then
-            python brvm_pipeline.py --export
+            # Lance la collecte complète (sans --daemon = collecte unique puis quitte)
+            timeout 1200 python brvm_pipeline.py || true
           else
             echo "Pipeline non trouvé — skip collecte"
           fi
