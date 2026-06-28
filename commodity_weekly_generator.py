@@ -473,7 +473,7 @@ def publish_supabase(
         "ticker_codes": ticker_codes,
         "content_html": article_html,
         "slug": slug,
-        "metadata": json.dumps({
+        "metadata": {
             "type": "commodity_weekly",
             "year": year,
             "week": week,
@@ -481,7 +481,7 @@ def publish_supabase(
             "yf_prices": yf_prices or {},
             "wb_snapshot": wb_snapshot or {},
             "brvm_scores": brvm_scores,
-        }),
+        },
     }
 
     url = f"{SUPABASE_URL}/rest/v1/brvm_news?on_conflict=dedupe_hash"
