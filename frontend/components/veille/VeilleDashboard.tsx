@@ -88,7 +88,7 @@ function ArticleCard({ item }: { item: VeilleNews }) {
 }
 
 /* ── Heatmap ── */
-function HeatmapView({ news }: { news: VeilleNews[] }) {
+function HeatmapView({ news, onSelect }: { news: VeilleNews[]; onSelect: (code: string) => void }) {
   const tickers = useMemo(() => {
     const map = new Map<string, { count: number; pos: number; neg: number }>();
     for (const n of news) {
@@ -109,15 +109,21 @@ function HeatmapView({ news }: { news: VeilleNews[] }) {
       {tickers.map(([code, { count, pos, neg }]) => {
         const dom = pos > neg ? 'up' : neg > pos ? 'down' : 'neu';
         const cls = dom === 'up'
-          ? 'bg-[#3fe18b]/15 border-[#3fe18b]/40 text-[#3fe18b]'
+          ? 'bg-[#3fe18b]/15 border-[#3fe18b]/40 text-[#3fe18b] hover:bg-[#3fe18b]/30'
           : dom === 'down'
-          ? 'bg-[#ff6b6b]/15 border-[#ff6b6b]/40 text-[#ff6b6b]'
-          : 'bg-surface border-border text-muted';
+          ? 'bg-[#ff6b6b]/15 border-[#ff6b6b]/40 text-[#ff6b6b] hover:bg-[#ff6b6b]/30'
+          : 'bg-surface border-border text-muted hover:bg-white/10 hover:text-foreground';
         return (
-          <div key={code} className={`rounded-lg border p-2.5 text-center ${cls}`} title={`${count} article(s)`}>
+          <button
+            key={code}
+            type="button"
+            onClick={() => onSelect(code)}
+            className={`rounded-lg border p-2.5 text-center cursor-pointer transition-all hover:scale-105 active:scale-95 ${cls}`}
+            title={`${count} article(s) · cliquer pour filtrer`}
+          >
             <p className="text-xs font-mono font-bold">{code}</p>
             <p className="text-[10px] mt-0.5 opacity-70">{count}</p>
-          </div>
+          </button>
         );
       })}
     </div>
@@ -468,7 +474,10 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-[#ff6b6b]/30 inline-block" />Négatif</span>
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-border inline-block" />Neutre</span>
               </div>
-              <HeatmapView news={filtered} />
+              <HeatmapView
+                news={filtered}
+                onSelect={(code) => { setSearch(code); setView('flux'); }}
+              />
             </div>
           )}
 
