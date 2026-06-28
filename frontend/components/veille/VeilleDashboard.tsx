@@ -185,59 +185,17 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
   const [search, setSearch] = useState('');
   const [showAlertes, setShowAlertes] = useState(false);
 
-  // Filtrage par période (côté client)
+  // 1. Filtrage par période (côté client)
   const news = useMemo(() => {
     const cutoff = new Date(Date.now() - period * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     return allNews.filter((n) => n.date_publication >= cutoff);
   }, [allNews, period]);
 
-  // Stats calculées depuis la période sélectionnée
-  const stats = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const todayItems = news.filter((n) => n.date_publication === today);
-    const alertes = news.filter((n) => (n.score_impact ?? 0) >= 70);
-    const covered = new Set<string>();
-    for (const n of news) {
-      if (n.instrument_code) covered.add(n.instrument_code);
-      for (const t of n.ticker_codes ?? []) covered.add(t);
-    }
-    return {
-      total: news.length,
-      today: todayItems.length,
-      alertes: alertes.length,
-      covered: covered.size,
-      totalSocietes: 47,
-      gnews: news.filter((n) => n.source_type === 'google_news').length,
-      sitesOff: news.filter((n) => n.source_type === 'site_officiel' || n.source_type === 'institution').length,
-      matieres: news.filter((n) => n.source_type === 'commodite').length,
-    };
-  }, [news]);
-
+  // 2. Alertes depuis la période complète (compteur global, non affecté par les filtres)
   const alertes = useMemo(() => news.filter((n) => (n.score_impact ?? 0) >= 70), [news]);
   const alertesCritiques = alertes.slice(0, 3);
 
-  // Secteurs BRVM (hors matières)
-  const secteurs = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const n of news) {
-      if (n.secteur && !MATIERES_SECTEURS.has(n.secteur))
-        map.set(n.secteur, (map.get(n.secteur) ?? 0) + 1);
-    }
-    return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([secteur, count]) => ({ secteur, count }));
-  }, [news]);
-
-  // Sources distinctes
-  const topSources = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const n of news) {
-      const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
-        ? n.source_label : n.source ?? 'Autre';
-      map.set(lbl, (map.get(lbl) ?? 0) + 1);
-    }
-    return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([label, count]) => ({ label, count }));
-  }, [news]);
-
-  // Flux filtré
+  // 3. Flux filtré (secteur, sentiment, recherche, alertes) — calculé en premier
   const filtered = useMemo(() => {
     let items = showAlertes ? alertes : news;
     if (secteurFilter) items = items.filter((n) => n.secteur === secteurFilter);
@@ -253,6 +211,47 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     }
     return items;
   }, [news, alertes, showAlertes, secteurFilter, sentimentFilter, search]);
+
+  // 4. Stats depuis le flux filtré — réactif aux filtres
+  const stats = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const covered = new Set<string>();
+    for (const n of filtered) {
+      if (n.instrument_code) covered.add(n.instrument_code);
+      for (const t of n.ticker_codes ?? []) covered.add(t);
+    }
+    return {
+      total: filtered.length,
+      today: filtered.filter((n) => n.date_publication === today).length,
+      alertes: alertes.length, // toujours depuis la période complète
+      covered: covered.size,
+      totalSocietes: 47,
+      gnews: filtered.filter((n) => n.source_type === 'google_news').length,
+      sitesOff: filtered.filter((n) => n.source_type === 'site_officiel' || n.source_type === 'institution').length,
+      matieres: filtered.filter((n) => n.source_type === 'commodite').length,
+    };
+  }, [filtered, alertes]);
+
+  // 5. Secteurs sidebar depuis news complet (pour pouvoir naviguer entre secteurs)
+  const secteurs = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of news) {
+      if (n.secteur && !MATIERES_SECTEURS.has(n.secteur))
+        map.set(n.secteur, (map.get(n.secteur) ?? 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([secteur, count]) => ({ secteur, count }));
+  }, [news]);
+
+  // 6. Sources depuis le flux filtré
+  const topSources = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of filtered) {
+      const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
+        ? n.source_label : n.source ?? 'Autre';
+      map.set(lbl, (map.get(lbl) ?? 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([label, count]) => ({ label, count }));
+  }, [filtered]);
 
   const reset = useCallback(() => {
     setSecteurFilter(''); setSentimentFilter(''); setSearch(''); setShowAlertes(false);
@@ -469,7 +468,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-[#ff6b6b]/30 inline-block" />Négatif</span>
                 <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-border inline-block" />Neutre</span>
               </div>
-              <HeatmapView news={news} />
+              <HeatmapView news={filtered} />
             </div>
           )}
 
@@ -485,7 +484,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
             </div>
           )}
 
-          {view === 'matieres' && <MatieresView news={news} />}
+          {view === 'matieres' && <MatieresView news={filtered} />}
         </div>
       </div>
     </div>
