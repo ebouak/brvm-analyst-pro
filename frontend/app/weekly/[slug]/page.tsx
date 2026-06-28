@@ -6,7 +6,7 @@ import {
   BrvmExposureChart,
 } from '@/components/weekly/CommodityCharts';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 interface WeeklyArticle {
   id: string;
@@ -70,7 +70,7 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
             )}
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-[#FCFCFC] leading-tight mb-4" style={{ fontFamily: "'Bespoke Serif', Georgia, serif" }}>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#FCFCFC] leading-tight mb-4 [font-family:var(--font-display)]">
             {article.titre}
           </h1>
 

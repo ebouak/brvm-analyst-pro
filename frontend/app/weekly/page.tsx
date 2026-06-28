@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader } from '@/components/ui/premium';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Analyses Hebdo Matières Premières — WESTBOURSE' };
 
 interface WeeklyArticle {
