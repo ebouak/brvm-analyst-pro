@@ -76,10 +76,10 @@ class CommodityPrice:
     @property
     def signal(self) -> str:
         if self.weekly_change_pct > 2:
-            return "Haussier"
+            return "HAUSSE"
         elif self.weekly_change_pct < -2:
-            return "Baissier"
-        return "Neutre"
+            return "BAISSE"
+        return "STABLE"
 
     def to_prompt_line(self) -> str:
         sign = "+" if self.weekly_change_pct >= 0 else ""
@@ -308,12 +308,12 @@ def build_wb_summary(wb_snapshot: dict) -> dict:
     return summary
 
 
-# ── 5. Prompt DeepSeek ────────────────────────────────────────────────────────
+# ── 5. Prompt DeepSeek + Builders visuels Python ─────────────────────────────
 
-def build_prompt(prices: list, wb: dict, articles: list, brvm_scores: dict) -> str:
+def build_editorial_prompt(prices: list, wb: dict, articles: list, brvm_scores: dict) -> str:
     """
-    Construit le prompt envoyé à DeepSeek pour générer le content_html.
-    Produit du HTML self-contained : styles inline + SVG charts.
+    DeepSeek génère UNIQUEMENT le texte éditorial (synthèse + 8 analyses + réactions + perspectives).
+    Python construit séparément le SVG, les tables et le footer.
     """
     now = datetime.now(timezone(timedelta(hours=1)))
     week_num = now.isocalendar()[1]
@@ -321,173 +321,148 @@ def build_prompt(prices: list, wb: dict, articles: list, brvm_scores: dict) -> s
 
     price_lines = "\n".join(f"  - {p.to_prompt_line()}" for p in prices)
 
-    wb_lines = ""
+    wb_ctx = ""
     if wb:
-        wb_lines = f"\nDonnées World Bank ({wb.get('month', 'N/A')}) :"
-        for k, v in wb.items():
-            if k != "month" and v:
-                wb_lines += f"\n  - {k}: {v:.1f}"
+        wb_ctx = f"\nBanque Mondiale ({wb.get('month','')}) : "
+        wb_ctx += ", ".join(f"{k}={v:.1f}" for k, v in wb.items() if k != "month" and v)
 
-    art_lines = ""
+    art_ctx = ""
     if articles:
-        art_lines = "\nActualités commodités semaine (sources BRVM/Afrique) :"
-        for a in articles[:8]:
-            art_lines += f"\n  - [{a.get('source_label','')}] {a.get('titre','')[:130]}"
+        art_ctx = "\nActualités commodités BRVM (7 derniers jours) :"
+        for a in articles[:6]:
+            art_ctx += f"\n  [{a.get('source_label','')}] {a.get('titre','')[:130]}"
 
-    brvm_lines = "\nImpact BRVM (top valeurs scorées) :"
-    for tk, score in list(brvm_scores.items())[:6]:
-        brvm_lines += f"\n  - {tk}: {score}/10"
+    top_brvm = ", ".join(f"{tk}({s}/10)" for tk, s in list(brvm_scores.items())[:5])
 
-    svg_data = [
-        {"label": p.label[:6], "pct": round(p.weekly_change_pct, 1),
-         "color": "#10b981" if p.weekly_change_pct >= 0 else "#ef4444"}
-        for p in prices
-    ]
-    svg_chart = _build_svg_barchart(svg_data)
-    price_table_html = _build_price_table_html(prices)
-    brvm_table_html = _build_brvm_table_html(prices, brvm_scores)
+    return f"""Tu es rédacteur senior marchés/commodities pour WestBourse (BRVM Abidjan).
+Génère l'analyse éditoriale des matières premières — Semaine {week_num}/{year}.
 
-    return f"""Tu es rédacteur senior spécialisé marchés financiers Afrique / UEMOA pour WestBourse.
-Génère l'analyse hebdomadaire des matières premières et leur impact BRVM pour la semaine {week_num}/{year}.
-
-DONNÉES DE MARCHÉ (yfinance, vendredi clôture) :
+DONNÉES :
 {price_lines}
-{wb_lines}
-{art_lines}
-{brvm_lines}
+{wb_ctx}
+{art_ctx}
+Top BRVM scorées : {top_brvm}
 
-CONTRAINTES HTML ABSOLUES — RESPECTE CHAQUE POINT :
-
-1. STRUCTURE : commence par <article> et termine par </article>. RIEN avant ni après.
-
-2. STYLES 100% INLINE : n'utilise AUCUNE balise <style>, AUCUNE classe CSS externe.
-   Tous les styles via attribut style="..." directement sur chaque élément.
-
-3. GRAPHIQUES : n'utilise JAMAIS <canvas>, Chart.js, ou toute librairie JS externe.
-   Les graphiques sont déjà fournis en SVG inline — insère-les tels quels là où indiqué.
-
-4. LONGUEUR : 900 à 1200 mots de texte éditorial (hors balises).
+CONSIGNE STRICTE :
+- Produis UNIQUEMENT les sections texte ci-dessous.
+- Styles CSS 100% INLINE sur chaque balise (pas de <style>, pas de class externe).
+- Commence par <section> et termine par </section>.
+- Aucune table de prix, aucun graphique (déjà générés par le système).
+- Longueur : 800 à 1100 mots de texte éditorial.
 
 STRUCTURE EXACTE À PRODUIRE :
 
-<article style="font-family: 'Segoe UI', system-ui, sans-serif; max-width: 860px; margin: 0 auto; color: #1e293b; line-height: 1.7;">
+<section style="font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;line-height:1.75;">
 
   <!-- SYNTHÈSE EXÉCUTIVE -->
-  <section style="background: #f8fafc; border-left: 4px solid #1d4ed8; padding: 16px 20px; margin-bottom: 28px; border-radius: 0 8px 8px 0;">
-    <p style="font-size: 11px; font-weight: 700; color: #1d4ed8; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8px;">Synthèse exécutive — Semaine {week_num}/{year}</p>
-    <p style="margin: 0; font-size: 15px; color: #0f172a; font-weight: 500;">[2-3 phrases résumant les faits saillants de la semaine]</p>
-  </section>
+  <div style="background:#eff6ff;border-left:4px solid #1d4ed8;padding:16px 20px;margin-bottom:28px;border-radius:0 8px 8px 0;">
+    <p style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px 0;">Synthèse exécutive — Semaine {week_num}/{year}</p>
+    <p style="margin:0;font-size:15px;color:#0f172a;font-weight:500;">[2-3 phrases résumant les faits saillants : quelle matière a dominé, quel impact BRVM, ton général]</p>
+  </div>
 
-  <!-- GRAPHIQUE SVG — INSÈRE ICI EXACTEMENT CE SVG : -->
-  {svg_chart}
-
-  <!-- TABLEAU PRIX — INSÈRE ICI EXACTEMENT CE HTML : -->
-  {price_table_html}
-
-  <!-- ANALYSE PAR MATIÈRE : répète ce bloc pour chaque matière (8 blocs) -->
-  <section style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px;">
-    <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;">
-      <span style="font-size: 11px; color: #64748b; font-weight: 600;">[FAMILLE]  [TICKER]</span>
+  <!-- ANALYSE PAR MATIÈRE : un bloc par matière (8 blocs total) -->
+  <div style="border:1px solid #e2e8f0;border-radius:8px;padding:18px 20px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <span style="font-size:11px;color:#64748b;font-weight:600;">[FAMILLE EX: Agriculture]</span>
+      <code style="font-size:10px;background:#f1f5f9;padding:2px 6px;border-radius:4px;color:#475569;">[TICKER EX: CC=F]</code>
     </div>
-    <h3 style="font-size: 16px; font-weight: 700; color: [#10b981 si hausse | #ef4444 si baisse | #f59e0b si stable]; margin: 0 0 10px;">
+    <h3 style="font-size:16px;font-weight:700;margin:0 0 10px 0;color:[#10b981 si hausse | #ef4444 si baisse | #d97706 si stable];">
       [LABEL] : [PRIX] [UNITÉ] — Δ5j [VARIATION%]
     </h3>
-    <p style="margin: 0; font-size: 14px; color: #334155;">[Analyse 3-4 phrases : facteurs prix, contexte macro, lien BRVM]</p>
-  </section>
-
-  <!-- TABLEAU IMPACT BRVM — INSÈRE ICI EXACTEMENT CE HTML : -->
-  {brvm_table_html}
+    <p style="margin:0;font-size:14px;color:#334155;">[Analyse 3-4 phrases : facteurs prix, contexte géopolitique/météo/offre-demande, corrélation BRVM nominée]</p>
+  </div>
 
   <!-- RÉACTIONS DE MARCHÉ -->
-  <section style="margin: 24px 0;">
-    <h2 style="font-size: 17px; font-weight: 700; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 14px;">Réactions de marché observées</h2>
-    <p style="font-size: 14px; color: #334155;">[3-4 phrases sur les mouvements BRVM de la semaine]</p>
-  </section>
+  <div style="margin:28px 0 20px;">
+    <h2 style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin-bottom:14px;">Réactions de marché observées</h2>
+    <p style="font-size:14px;color:#334155;">[3-4 phrases sur les mouvements observés sur la BRVM cette semaine en lien avec les matières premières]</p>
+  </div>
 
   <!-- PERSPECTIVES -->
-  <section style="background: #eff6ff; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;">
-    <h2 style="font-size: 17px; font-weight: 700; color: #1d4ed8; margin: 0 0 10px;">Perspectives — Semaine {week_num + 1}</h2>
-    <p style="font-size: 14px; color: #1e40af; margin: 0 0 8px;">[Scénario central 2-3 phrases]</p>
-    <p style="font-size: 14px; color: #0f172a; margin: 0;"><strong>Recommandation WestBourse :</strong> [recommandation 1 phrase]</p>
-  </section>
+  <div style="background:#f0fdf4;border-radius:8px;padding:18px 20px;margin-bottom:20px;">
+    <h2 style="font-size:18px;font-weight:700;color:#065f46;margin:0 0 12px 0;">Perspectives — Semaine {week_num + 1}/{year}</h2>
+    <p style="font-size:14px;color:#064e3b;margin:0 0 10px 0;">[Scénario central 2-3 phrases : tendances attendues sur les principales matières]</p>
+    <p style="font-size:14px;color:#064e3b;margin:0 0 10px 0;">[Risques à surveiller 1-2 phrases]</p>
+    <p style="font-size:14px;color:#0f172a;margin:0;"><strong>Recommandation WestBourse :</strong> [1 phrase d'orientation portefeuille claire et actionnable]</p>
+  </div>
 
-  <!-- DISCLAIMER -->
-  <footer style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px;">
-    <p style="font-size: 11px; color: #94a3b8; margin: 0 0 4px;">
-      <strong style="color: #64748b;">Avertissement légal :</strong> Ce document est produit à titre informatif uniquement par WestBourse.
-      Il ne constitue pas un conseil en investissement ni une sollicitation à acheter ou vendre des instruments financiers.
-      Les performances passées ne préjugent pas des résultats futurs.
-    </p>
-    <p style="font-size: 11px; color: #94a3b8; margin: 0;">© {year} WestBourse — Plateforme d'analyse de la BRVM. Tous droits réservés.</p>
-  </footer>
-
-</article>
-
-RAPPEL FINAL : styles 100% inline, pas de <style>, pas de <canvas>, pas de Chart.js.
-Les blocs SVG et tables HTML fournis ci-dessus doivent être copiés tels quels dans l'output.
-"""
+</section>"""
 
 
-def _build_svg_barchart(data: list[dict]) -> str:
-    """SVG inline de barres — variation % hebdomadaire. Zero dépendance JS."""
-    width, height = 760, 200
-    padding_left, padding_bottom, padding_top = 50, 40, 20
-    bar_area_width = width - padding_left - 20
-    n = max(len(data), 1)
-    bar_width = min(60, bar_area_width // n - 8)
-    spacing = bar_area_width // n
-    max_abs = max((abs(d["pct"]) for d in data), default=1) or 1
-    zero_y = padding_top + (height - padding_top - padding_bottom) // 2
+def build_svg_barchart(prices: list) -> str:
+    """Graphique barres SVG inline — variation % hebdomadaire. Zero dépendance JS."""
+    W, H = 740, 220
+    PL, PR, PT, PB = 44, 16, 24, 44
+    chart_w = W - PL - PR
+    chart_h = H - PT - PB
+    n = max(len(prices), 1)
+    slot = chart_w // n
+    bw = min(52, slot - 10)
+    max_abs = max(abs(p.weekly_change_pct) for p in prices) or 1
+    zero_y = PT + chart_h // 2
 
-    bars = labels = values = ""
-    for i, d in enumerate(data):
-        x = padding_left + i * spacing + (spacing - bar_width) // 2
-        bar_h = max(2, int(abs(d["pct"]) / max_abs * (height - padding_top - padding_bottom) / 2))
-        y = (zero_y - bar_h) if d["pct"] >= 0 else zero_y
-        lx = x + bar_width // 2
-        bars += f'<rect x="{x}" y="{y}" width="{bar_width}" height="{bar_h}" fill="{d["color"]}" rx="3" opacity="0.9"/>'
-        labels += (f'<text x="{lx}" y="{height - padding_bottom + 14}" text-anchor="middle" '
-                   f'font-size="10" fill="#64748b" font-family="system-ui">{d["label"]}</text>')
-        vy = (y - 4) if d["pct"] >= 0 else (y + bar_h + 13)
-        sign = "+" if d["pct"] >= 0 else ""
-        values += (f'<text x="{lx}" y="{vy}" text-anchor="middle" font-size="10" '
-                   f'fill="{d["color"]}" font-weight="700" font-family="system-ui">'
-                   f'{sign}{d["pct"]}%</text>')
+    grid = ""
+    for pct_ref, label in [
+        (max_abs, f"+{max_abs:.0f}%"), (max_abs / 2, f"+{max_abs/2:.0f}%"),
+        (0, "0%"), (-max_abs / 2, f"-{max_abs/2:.0f}%"), (-max_abs, f"-{max_abs:.0f}%"),
+    ]:
+        gy = zero_y - int(pct_ref / max_abs * chart_h / 2)
+        grid += (f'<line x1="{PL}" y1="{gy}" x2="{W - PR}" y2="{gy}" '
+                 f'stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>'
+                 f'<text x="{PL - 4}" y="{gy + 4}" text-anchor="end" '
+                 f'font-size="9" fill="#94a3b8" font-family="system-ui">{label}</text>')
 
-    zero_line = (f'<line x1="{padding_left}" y1="{zero_y}" x2="{width-10}" y2="{zero_y}" '
-                 f'stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>')
-    return (f'<div style="margin:0 0 24px;background:#f8fafc;border:1px solid #e2e8f0;'
-            f'border-radius:8px;padding:16px;">'
-            f'<p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.08em;margin:0 0 12px;">Variations hebdomadaires des matières premières (%)</p>'
-            f'<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" '
-            f'style="width:100%;max-width:{width}px;display:block;">'
-            f'{zero_line}{bars}{labels}{values}</svg></div>')
+    bars = ""
+    for i, p in enumerate(prices):
+        pct = round(p.weekly_change_pct, 1)
+        color = "#10b981" if pct >= 0 else "#ef4444"
+        cx = PL + i * slot + slot // 2
+        bx = cx - bw // 2
+        bar_h = max(2, int(abs(pct) / max_abs * chart_h / 2))
+        by = zero_y - bar_h if pct >= 0 else zero_y
+        sign = "+" if pct >= 0 else ""
+        vy = by - 5 if pct >= 0 else by + bar_h + 12
+        bars += (
+            f'<rect x="{bx}" y="{by}" width="{bw}" height="{bar_h}" fill="{color}" rx="3" opacity="0.88"/>'
+            f'<text x="{cx}" y="{vy}" text-anchor="middle" font-size="10" '
+            f'fill="{color}" font-weight="700" font-family="system-ui">{sign}{pct}%</text>'
+            f'<text x="{cx}" y="{H - PB + 14}" text-anchor="middle" '
+            f'font-size="10" fill="#64748b" font-family="system-ui">{p.label[:7]}</text>'
+        )
+    zero_line = (f'<line x1="{PL}" y1="{zero_y}" x2="{W - PR}" y2="{zero_y}" '
+                 f'stroke="#94a3b8" stroke-width="1.5"/>')
+    return (
+        f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:20px;">'
+        f'<p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px 0;">Variations hebdomadaires des matières premières (%)</p>'
+        f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">'
+        f'{grid}{zero_line}{bars}</svg></div>'
+    )
 
 
-def _build_price_table_html(prices: list) -> str:
+def build_price_table(prices: list) -> str:
     """Table des prix avec styles 100% inline."""
     rows = ""
     for p in prices:
         color = "#10b981" if p.weekly_change_pct >= 0 else "#ef4444"
         sign = "+" if p.weekly_change_pct >= 0 else ""
         arrow = "▲" if p.weekly_change_pct >= 0 else "▼"
-        bg = "#f0fdf4" if p.weekly_change_pct >= 0 else "#fef2f2"
+        sig_bg = "#f0fdf4" if p.signal == "HAUSSE" else "#fef2f2" if p.signal == "BAISSE" else "#fefce8"
+        sig_col = "#059669" if p.signal == "HAUSSE" else "#dc2626" if p.signal == "BAISSE" else "#d97706"
         rows += (
             f'<tr>'
             f'<td style="padding:10px 12px;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9;">{p.label}</td>'
-            f'<td style="padding:10px 12px;font-family:monospace;color:#64748b;border-bottom:1px solid #f1f5f9;font-size:12px;">{p.ticker}</td>'
-            f'<td style="padding:10px 12px;font-weight:700;border-bottom:1px solid #f1f5f9;">{p.current:.2f} <span style="font-size:11px;color:#94a3b8;font-weight:400;">{p.unit}</span></td>'
-            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">{p.week_low:.2f} – {p.week_high:.2f}</td>'
+            f'<td style="padding:10px 12px;font-family:monospace;font-size:11px;color:#64748b;border-bottom:1px solid #f1f5f9;">{p.ticker}</td>'
+            f'<td style="padding:10px 12px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;">{p.current:.2f} <span style="font-size:11px;font-weight:400;color:#94a3b8;">{p.unit}</span></td>'
+            f'<td style="padding:10px 12px;color:#475569;border-bottom:1px solid #f1f5f9;">{p.week_low:.2f} – {p.week_high:.2f}</td>'
             f'<td style="padding:10px 12px;font-weight:700;color:{color};border-bottom:1px solid #f1f5f9;">{arrow} {sign}{p.weekly_change_pct:.1f}%</td>'
             f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">'
-            f'<span style="background:{bg};color:{color};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;">{p.signal}</span>'
+            f'<span style="background:{sig_bg};color:{sig_col};padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;">{p.signal}</span>'
             f'</td></tr>'
         )
     th = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
     return (
         f'<div style="overflow-x:auto;margin-bottom:28px;">'
-        f'<table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
+        f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
         f'<thead><tr style="background:#0f172a;">'
         f'<th {th}>Matière</th><th {th}>Ticker</th><th {th}>Cours</th>'
         f'<th {th}>Range 5j</th><th {th}>Var. hebdo</th><th {th}>Signal</th>'
@@ -495,69 +470,98 @@ def _build_price_table_html(prices: list) -> str:
     )
 
 
-def _build_brvm_table_html(prices: list, brvm_scores: dict) -> str:
-    """Table impact BRVM avec styles 100% inline."""
-    price_map = {p.ticker: p for p in prices}
+def build_brvm_table(prices: list, brvm_scores: dict) -> str:
+    """Table impact BRVM avec barres de score visuelles."""
     BRVM_EXPOSURE = {
         "NEIC":  {"CC=F": 4, "SB=F": 2},
         "SIFCA": {"CC=F": 4, "CL=F": 1},
-        "PALC":  {"CC=F": 1},
-        "SOGB":  {"CC=F": 1},
-        "SAPH":  {"CC=F": 1},
+        "PALC":  {"CC=F": 1}, "SOGB": {"CC=F": 1}, "SAPH": {"CC=F": 1},
         "TTLS":  {"CL=F": 5, "BZ=F": 5},
         "SVOC":  {"CL=F": 5, "BZ=F": 5},
-        "SLBC":  {"SB=F": 2},
-        "BRVBC": {"SB=F": 2},
+        "SLBC":  {"SB=F": 2}, "BRVBC": {"SB=F": 2},
     }
     LABELS = {
         "CC=F": "Cacao", "CL=F": "Pétrole WTI", "BZ=F": "Brent",
-        "KC=F": "Café", "SB=F": "Sucre", "CT=F": "Coton",
-        "GC=F": "Or", "SI=F": "Argent",
+        "KC=F": "Café", "SB=F": "Sucre", "CT=F": "Coton", "GC=F": "Or", "SI=F": "Argent",
     }
+    pm = {p.ticker: p for p in prices}
     rows = ""
     for tk, score in list(brvm_scores.items())[:8]:
         exp = BRVM_EXPOSURE.get(tk, {})
         matieres = ", ".join(LABELS.get(ct, ct) for ct in exp)
-        weighted = sum(
-            (price_map[ct].weekly_change_pct if ct in price_map else 0) * w
-            for ct, w in exp.items()
-        )
+        weighted = sum((pm[ct].weekly_change_pct if ct in pm else 0) * w for ct, w in exp.items())
         if weighted > 0.5:
-            tendance, t_color = "Favorable", "#059669"
+            tend, t_col, bar_col = "Favorable", "#059669", "#10b981"
         elif weighted < -0.5:
-            tendance, t_color = "Défavorable", "#dc2626"
+            tend, t_col, bar_col = "Défavorable", "#dc2626", "#ef4444"
         else:
-            tendance, t_color = "Neutre", "#d97706"
-        detail = "; ".join(
-            f"{LABELS.get(ct, ct)} {'+' if (price_map[ct].weekly_change_pct if ct in price_map else 0) >= 0 else ''}"
-            f"{price_map[ct].weekly_change_pct:.1f}%"
-            for ct in exp if ct in price_map
+            tend, t_col, bar_col = "Neutre", "#d97706", "#f59e0b"
+        detail = " | ".join(
+            f"{LABELS.get(ct, ct)} {'+' if (pm[ct].weekly_change_pct if ct in pm else 0) >= 0 else ''}"
+            f"{pm[ct].weekly_change_pct:.1f}%"
+            for ct in exp if ct in pm
         )
-        bar_w = min(int(score * 8), 60)
-        bar_color = "#10b981" if weighted > 0 else "#ef4444" if weighted < 0 else "#f59e0b"
+        bar_w = min(int(score * 9), 80)
         rows += (
             f'<tr>'
             f'<td style="padding:10px 12px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;">{tk}</td>'
-            f'<td style="padding:10px 12px;color:#475569;border-bottom:1px solid #f1f5f9;font-size:13px;">{matieres}</td>'
+            f'<td style="padding:10px 12px;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;">{matieres}</td>'
             f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">'
-            f'<div style="display:flex;align-items:center;gap:6px;">'
-            f'<div style="width:{bar_w}px;height:6px;background:{bar_color};border-radius:3px;"></div>'
-            f'<span style="font-size:12px;color:#64748b;">{score}/10</span></div></td>'
-            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;color:{t_color};font-weight:700;">{tendance}</td>'
-            f'<td style="padding:10px 12px;font-size:12px;color:{t_color};border-bottom:1px solid #f1f5f9;">{detail}</td>'
+            f'<div style="display:flex;align-items:center;gap:8px;">'
+            f'<div style="width:{bar_w}px;height:7px;background:{bar_col};border-radius:4px;"></div>'
+            f'<span style="font-size:12px;color:#64748b;font-weight:600;">{score}/10</span>'
+            f'</div></td>'
+            f'<td style="padding:10px 12px;font-weight:700;color:{t_col};border-bottom:1px solid #f1f5f9;">{tend}</td>'
+            f'<td style="padding:10px 12px;font-size:12px;color:{t_col};border-bottom:1px solid #f1f5f9;">{detail}</td>'
             f'</tr>'
         )
     th = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
     return (
-        f'<section style="margin-bottom:28px;">'
-        f'<h2 style="font-size:17px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin-bottom:14px;">Impact sur les valeurs BRVM exposées</h2>'
-        f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Scores d\'exposition (1 à 10) calculés par WestBourse selon la corrélation CA / prix des commodités.</p>'
+        f'<div style="margin-bottom:28px;">'
+        f'<h2 style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin-bottom:14px;">Impact sur les valeurs BRVM exposées</h2>'
+        f'<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Scores d\'exposition (0–10) calculés par WestBourse selon la corrélation chiffre d\'affaires × prix commodités.</p>'
         f'<div style="overflow-x:auto;">'
-        f'<table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
+        f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
         f'<thead><tr style="background:#0f172a;">'
         f'<th {th}>Valeur</th><th {th}>Matières liées</th><th {th}>Score exposition</th>'
-        f'<th {th}>Tendance</th><th {th}>Détail variation</th>'
-        f'</tr></thead><tbody>{rows}</tbody></table></div></section>'
+        f'<th {th}>Tendance semaine</th><th {th}>Détail variation</th>'
+        f'</tr></thead><tbody>{rows}</tbody></table></div></div>'
+    )
+
+
+def build_footer(year: int) -> str:
+    return (
+        f'<footer style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;">'
+        f'<p style="font-size:11px;color:#94a3b8;margin:0 0 4px 0;">'
+        f'<strong style="color:#64748b;">Avertissement légal :</strong> Ce document est produit à titre informatif '
+        f'uniquement par WestBourse. Il ne constitue pas un conseil en investissement ni une sollicitation '
+        f'à acheter ou vendre des instruments financiers. Les performances passées ne préjugent pas des '
+        f'résultats futurs. Sources : yfinance, Banque Mondiale CMO Pink Sheet, actualités sectorielles BRVM.'
+        f'</p>'
+        f'<p style="font-size:11px;color:#94a3b8;margin:0;">© {year} WestBourse — Plateforme d\'analyse de la BRVM. Tous droits réservés.</p>'
+        f'</footer>'
+    )
+
+
+def assemble_content_html(editorial_html: str, prices: list, brvm_scores: dict) -> str:
+    """
+    Assemble le HTML final : visuels Python + texte DeepSeek.
+    Structure : <article> SVG + table prix + éditorial + table BRVM + footer </article>
+    """
+    year = datetime.now(timezone(timedelta(hours=1))).year
+    text = editorial_html.strip()
+    if not text.startswith("<section"):
+        text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
+                f'color:#1e293b;line-height:1.75;">{text}</section>')
+    return (
+        '<article style="font-family:\'Segoe UI\',system-ui,sans-serif;'
+        'max-width:860px;margin:0 auto;color:#1e293b;line-height:1.75;">\n'
+        + build_svg_barchart(prices) + "\n"
+        + build_price_table(prices) + "\n"
+        + text + "\n"
+        + build_brvm_table(prices, brvm_scores) + "\n"
+        + build_footer(year) + "\n"
+        + "</article>"
     )
 
 
@@ -749,13 +753,15 @@ def main():
     wb_summary = build_wb_summary(wb_snapshot)
     # Convertir scores 0-100 → 0-10 pour le prompt et les tables
     brvm_scores_simple = {tk: round(v["score"] / 10, 1) for tk, v in brvm_scores.items()}
-    prompt = build_prompt(prices, wb_summary, articles, brvm_scores_simple)
+    prompt = build_editorial_prompt(prices, wb_summary, articles, brvm_scores_simple)
 
     if args.dry_run:
         log.info("[DRY-RUN] Appel DeepSeek ignoré")
-        article_html = "<article><p>[DRY-RUN] Contenu DeepSeek non généré.</p></article>"
+        editorial_html = "<section><p>[DRY-RUN] Contenu éditorial non généré.</p></section>"
     else:
-        article_html = call_deepseek(prompt)
+        editorial_html = call_deepseek(prompt)
+
+    article_html = assemble_content_html(editorial_html, prices, brvm_scores_simple)
 
     # Étape 6 : HTML final
     title = f"Matières premières BRVM – Semaine {week:02d}/{year} | WestBourse"
