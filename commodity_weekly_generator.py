@@ -250,58 +250,110 @@ def build_prompt(
     yf_prices: dict, wb_snapshot: dict,
     brvm_scores: dict, articles: list[dict],
 ) -> str:
+    # Trier par variation absolue pour mettre en avant les mouvements forts
+    yf_sorted = sorted(yf_prices.items(), key=lambda x: abs(x[1].get("variation_5j_pct", 0)), reverse=True)
     yf_lines = "\n".join(
-        f"- {d['nom']} ({sym}): {d['prix_actuel']} {d['unite']} "
-        f"(Δ5j: {d['variation_5j_pct']:+.1f}%)"
-        for sym, d in yf_prices.items()
+        f"- {d['nom']} ({sym}): {d['prix_actuel']} {d['unite']} — "
+        f"variation 5j : {'↑' if d['variation_5j_pct'] >= 0 else '↓'} {d['variation_5j_pct']:+.2f}%"
+        for sym, d in yf_sorted
     )
+
+    wb_sorted = sorted(wb_snapshot.items(), key=lambda x: abs(x[1].get("variation_mensuelle_pct", 0)), reverse=True)
     wb_lines = "\n".join(
-        f"- {d['nom']}: {d['prix_actuel']} (Δm: {d.get('variation_mensuelle_pct', 0):+.1f}%, période: {d.get('periode', '?')})"
-        for d in wb_snapshot.values()
+        f"- {d['nom']}: {d['prix_actuel']} USD (vs {d.get('prix_mois_precedent', '?')} mois préc.) — "
+        f"Δm {'↑' if d.get('variation_mensuelle_pct', 0) >= 0 else '↓'} {d.get('variation_mensuelle_pct', 0):+.2f}%"
+        for _, d in wb_sorted
     )
+
     brvm_lines = "\n".join(
-        f"- {ticker}: score {info['score']}/100 | matières: {', '.join(info['commodites'][:3])}"
+        f"- {ticker}: score exposition {info['score']}/100 | liée à : {', '.join(dict.fromkeys(info['commodites'][:3]))}"
         for ticker, info in list(brvm_scores.items())[:8]
     )
+
     art_lines = "\n".join(
-        f"- [{a.get('source_label', '?')}] {a.get('titre', '')[:120]}"
-        for a in articles[:10]
+        f"- [{a.get('source_label', '?')}] {a.get('titre', '')[:130]}"
+        for a in articles[:12]
     )
 
-    return f"""Tu es l'analyste en chef de WestBourse, plateforme spécialisée sur la BRVM (Bourse Régionale des Valeurs Mobilières, UEMOA).
+    date_str = datetime.now(timezone.utc).strftime("%d %B %Y")
 
-Génère un article HTML complet, professionnel et factuel sur l'impact des matières premières sur la BRVM pour la semaine {week} de {year}.
+    return f"""Tu es l'analyste en chef de WESTBOURSE, plateforme d'analyse boursière spécialisée sur la BRVM (Bourse Régionale des Valeurs Mobilières, UEMOA), reconnue pour la rigueur et la clarté de ses analyses.
 
-## DONNÉES DISPONIBLES
+Génère un article d'analyse hebdomadaire **HTML complet**, professionnel, factuel et bien rédigé, sur l'impact des matières premières clés sur la BRVM — pour la semaine {week:02d} de {year}, publié le {date_str}.
 
-### Prix futures yfinance (variation 5 jours)
-{yf_lines if yf_lines else "Données indisponibles cette semaine."}
+═══════════════════════════════════════════
+DONNÉES DE MARCHÉ — À CITER EXACTEMENT
+═══════════════════════════════════════════
 
-### Données World Bank CMO Pink Sheet (variation mensuelle)
-{wb_lines if wb_lines else "Données indisponibles."}
+▌ PRIX FUTURES (yfinance, variation sur 5 jours ouvrés)
+{yf_lines if yf_lines else "Données non disponibles cette semaine."}
 
-### Valeurs BRVM les plus exposées
-{brvm_lines if brvm_lines else "Aucune exposition calculée."}
+▌ PRIX BANQUE MONDIALE CMO Pink Sheet (variation mensuelle)
+{wb_lines if wb_lines else "Données non disponibles."}
 
-### Articles récents (contexte)
-{art_lines if art_lines else "Aucun article récent disponible."}
+▌ VALEURS BRVM LES PLUS EXPOSÉES (score 0-100)
+{brvm_lines if brvm_lines else "Exposition non calculée."}
 
-## INSTRUCTIONS DE RÉDACTION
+▌ ACTUALITÉS SECTORIELLES RÉCENTES (contexte)
+{art_lines if art_lines else "Aucun article sectoriel récent."}
 
-1. L'article doit être **factuel** : ne jamais inventer de chiffres ni extrapoler des prix non fournis.
-2. Structure HTML attendue :
-   - `<header>` avec titre, sous-titre, date de publication
-   - `<section id="synthese">` : synthèse exécutive (3-4 phrases)
-   - `<section id="marches">` : analyse par matière première (une sous-section par commodité avec données)
-   - `<section id="brvm-impact">` : impact sur les valeurs BRVM (tableau ou liste)
-   - `<section id="perspectives">` : perspectives pour la semaine à venir (prudent, non spéculatif)
-   - `<footer>` : avertissement légal + copyright WestBourse
-3. Utilise des classes CSS sémantiques : `.price-up`, `.price-down`, `.ticker-badge`, `.commodity-card`
-4. Langue : **français professionnel**
-5. Longueur : 600-900 mots de contenu (hors balises)
-6. NE PAS inclure `<html>`, `<head>`, `<body>` — article embarqué dans une page existante
+═══════════════════════════════════════════
+INSTRUCTIONS RÉDACTIONNELLES
+═══════════════════════════════════════════
 
-Génère uniquement le HTML de l'article, sans markdown, sans code fence.
+STYLE : Ton éditorial premium, direct, sans jargon superflu. Phrases courtes. Chaque paragraphe apporte une information. Vocabulaire précis de l'analyste marché. Utilise des formulations comme « La semaine a été marquée par... », « Le mouvement est significatif car... », « Les investisseurs exposés à... ».
+
+CONTRAINTES ABSOLUES :
+- Ne citer QUE les chiffres fournis ci-dessus — zéro invention, zéro extrapolation
+- Si une donnée manque, l'indiquer honnêtement (ex : « données non disponibles cette semaine »)
+- Longueur : 700–950 mots de contenu réel (hors balises HTML)
+- Ne PAS inclure <html>, <head>, <body> — fragment embarqué dans une page existante
+
+STRUCTURE HTML REQUISE (dans cet ordre) :
+
+<header class="article-header">
+  <h1 class="article-title">...</h1>
+  <p class="article-lead">Sous-titre accrocheur en 1 phrase</p>
+  <div class="article-meta"><span class="meta-date">...</span> · <span class="meta-source">WESTBOURSE PRO</span></div>
+</header>
+
+<section id="synthese" class="article-section">
+  <h2>Synthèse de la semaine</h2>
+  <!-- 3-4 phrases : les 2-3 faits les plus marquants, chiffrés, avec implication BRVM -->
+</section>
+
+<section id="marches" class="article-section">
+  <h2>Analyse des matières premières</h2>
+  <!-- Une <div class="commodity-card"> par matière première significative :
+       - Titre matière + variation (span.price-up ou .price-down)
+       - 1-2 paragraphes d'analyse causale (pourquoi ce mouvement ?)
+       - Implication directe sur la filière BRVM concernée -->
+</section>
+
+<section id="brvm-impact" class="article-section">
+  <h2>Valeurs BRVM à surveiller</h2>
+  <!-- Tableau HTML ou liste structurée avec :
+       - Code ticker (span.ticker-badge)
+       - Matière première liée
+       - Sens de l'impact (hausse/baisse prix comm. → ?)
+       - Degré d'exposition (score fourni)
+  Terminer par 1 paragraphe de contexte marché BRVM -->
+</section>
+
+<section id="perspectives" class="article-section">
+  <h2>Points de vigilance pour la semaine à venir</h2>
+  <!-- 3 bullet-points max — évènements agenda, publications, dates clés —
+       NE PAS pronostiquer les prix, rester factuel sur les catalyseurs possibles -->
+</section>
+
+CLASSES CSS À UTILISER :
+- .price-up → variation positive (vert #3fe18b)
+- .price-down → variation négative (rouge #ff6b6b)
+- .ticker-badge → code ticker BRVM (monospace, badge cyan)
+- .commodity-card → encart par matière première
+- .article-section, .article-header, .article-title, .article-lead, .article-meta
+
+Génère UNIQUEMENT le fragment HTML. Pas de markdown, pas de code fence, pas de commentaire hors HTML.
 """
 
 
@@ -388,6 +440,8 @@ def save_html(html: str, slug: str, dry_run: bool = False) -> Path:
 def publish_supabase(
     slug: str, titre: str, article_html: str,
     year: int, week: int, brvm_scores: dict,
+    yf_prices: dict | None = None,
+    wb_snapshot: dict | None = None,
     dry_run: bool = False,
 ) -> bool:
     if dry_run:
@@ -424,6 +478,9 @@ def publish_supabase(
             "year": year,
             "week": week,
             "tickers_count": len(ticker_codes),
+            "yf_prices": yf_prices or {},
+            "wb_snapshot": wb_snapshot or {},
+            "brvm_scores": brvm_scores,
         }),
     }
 
@@ -513,6 +570,8 @@ def main():
         year=year,
         week=week,
         brvm_scores=brvm_scores,
+        yf_prices=yf_prices,
+        wb_snapshot=wb_snapshot,
         dry_run=args.dry_run,
     )
 

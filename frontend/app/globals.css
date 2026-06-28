@@ -233,3 +233,28 @@ body {
 }
 
 @keyframes wslogo-splash-out { to { opacity: 0; visibility: hidden; } }
+
+/* ── Weekly article content ────────────────────────────────────────────────── */
+.weekly-content { font-family: var(--font-sans); color: #FCFCFC; line-height: 1.75; }
+.weekly-content .article-header { margin-bottom: 2rem; }
+.weekly-content .article-title { font-family: var(--font-display); font-size: 1.75rem; color: #56D7FD; line-height: 1.25; margin-bottom: 0.5rem; }
+.weekly-content .article-lead { font-size: 1.1rem; color: #9ca3af; margin-bottom: 0.75rem; }
+.weekly-content .article-meta { font-size: 0.85rem; color: #6b7280; }
+.weekly-content .meta-source { color: #56D7FD; }
+.weekly-content .article-section { margin-bottom: 2.5rem; }
+.weekly-content .article-section h2 { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #56D7FD; border-bottom: 1px solid #1a2a30; padding-bottom: 0.5rem; margin-bottom: 1.25rem; }
+.weekly-content .article-section h3 { font-size: 1rem; font-weight: 600; color: #FCFCFC; margin: 1.25rem 0 0.5rem; }
+.weekly-content .article-section p { color: #d1d5db; margin-bottom: 0.875rem; }
+.weekly-content .commodity-card { background: #0a1417; border: 1px solid #1a2a30; border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1rem 0; }
+.weekly-content .commodity-card h3 { margin-top: 0; }
+.weekly-content .price-up { color: #3fe18b; font-weight: 600; font-family: var(--font-mono); }
+.weekly-content .price-down { color: #ff6b6b; font-weight: 600; font-family: var(--font-mono); }
+.weekly-content .ticker-badge { display: inline-block; background: #0a1417; border: 1px solid #56D7FD33; color: #56D7FD; padding: 1px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.8em; margin: 0 2px; }
+.weekly-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+.weekly-content th { background: #0a1417; color: #56D7FD; font-weight: 600; text-align: left; padding: 0.6rem 0.875rem; border-bottom: 2px solid #1a2a30; }
+.weekly-content td { padding: 0.6rem 0.875rem; border-bottom: 1px solid #111d21; color: #d1d5db; }
+.weekly-content tr:hover td { background: #0a1417; }
+.weekly-content ul, .weekly-content ol { padding-left: 1.5rem; color: #d1d5db; margin-bottom: 0.875rem; }
+.weekly-content li { margin-bottom: 0.3rem; }
+.weekly-content strong { color: #FCFCFC; font-weight: 600; }
+.weekly-content footer { font-size: 0.78rem; color: #4b5563; border-top: 1px solid #1a2a30; padding-top: 1rem; margin-top: 2rem; line-height: 1.6; }
