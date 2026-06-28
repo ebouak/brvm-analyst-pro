@@ -136,7 +136,15 @@ def export_to_supabase(articles: list[dict[str, Any]]) -> int:
         log.error("SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY non définis — export annulé")
         return 0
 
-    rows = [map_article_to_row(a) for a in articles]
+    rows_raw = [map_article_to_row(a) for a in articles]
+    # Dédoublonner par dedupe_hash (le pipeline peut stocker des doublons internes)
+    seen: set[str] = set()
+    rows = []
+    for r in rows_raw:
+        h = r.get("dedupe_hash", "")
+        if h and h not in seen:
+            seen.add(h)
+            rows.append(r)
     if not rows:
         return 0
 
