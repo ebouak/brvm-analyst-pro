@@ -186,8 +186,7 @@ def fetch_supabase_articles(days: int = 14) -> list[dict]:
     url = (
         f"{SUPABASE_URL}/rest/v1/brvm_news"
         f"?date_publication=gte.{cutoff}"
-        f"&hidden=is.false"
-        f"&select=titre,resume,source_label,date_publication,ticker_codes,secteur,commodity"
+        f"&select=titre,resume,source_label,date_publication,ticker_codes,secteur"
         f"&order=date_publication.desc"
         f"&limit=50"
     )
@@ -201,12 +200,7 @@ def fetch_supabase_articles(days: int = 14) -> list[dict]:
         articles = resp.json()
         # Filtrer : secteurs liés aux matières premières
         secteurs_cibles = {"Agriculture", "Energie", "Agroalimentaire", "Agro-industrie"}
-        commodite_keys = {"petrole", "cacao", "huile_palme", "caoutchouc", "coton"}
-        return [
-            a for a in articles
-            if (a.get("secteur") in secteurs_cibles)
-            or (a.get("commodity") in commodite_keys)
-        ]
+        return [a for a in articles if a.get("secteur") in secteurs_cibles]
     except Exception as e:
         log.warning("Supabase fetch erreur : %s", e)
         return []
