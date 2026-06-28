@@ -12,7 +12,7 @@ on:
         default: false
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate:
@@ -42,6 +42,20 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python commodity_weekly_generator.py ${{ inputs.dry_run == true && '--dry-run' || '' }}
+
+      - name: Commiter et pousser l'article HTML
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/weekly/
+          if git diff --cached --quiet; then
+            echo "Aucun fichier nouveau à commiter"
+          else
+            SLUG=$(ls frontend/public/weekly/*.html | head -1 | xargs basename .html 2>/dev/null || echo "weekly")
+            git commit -m "feat(weekly): article matières premières BRVM $(date +'S%V/%Y') [bot]"
+            git push origin main
+          fi
 
       - name: Upload article HTML (artefact)
         uses: actions/upload-artifact@v4
