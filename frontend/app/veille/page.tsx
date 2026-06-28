@@ -2,7 +2,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import VeilleDashboard from '@/components/veille/VeilleDashboard';
 import { SectionHeader } from '@/components/ui/premium';
 
-export const revalidate = 300;
+export const revalidate = 60;
 export const metadata = { title: 'Veille Intelligence BRVM — WESTBOURSE' };
 
 export type VeilleNews = {

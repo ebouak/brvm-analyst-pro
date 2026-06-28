@@ -287,7 +287,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
             key={p.val}
             type="button"
             onClick={() => setPeriod(p.val)}
-            className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors ${
+            className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors cursor-pointer ${
               period === p.val
                 ? 'bg-accent text-bg border-accent'
                 : 'bg-surface border-border text-muted hover:text-foreground'
@@ -352,19 +352,19 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
         <button
           type="button"
           onClick={() => setShowAlertes(!showAlertes)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer ${
             showAlertes ? 'bg-[#ff6b6b] border-[#ff6b6b] text-white' : 'bg-surface border-border text-muted hover:text-foreground'
           }`}
         >
           🔔 Alertes
         </button>
-        <button type="button" onClick={reset} className="px-3 py-1.5 rounded-lg text-sm border border-border text-muted hover:text-foreground transition-colors">
+        <button type="button" onClick={reset} className="px-3 py-1.5 rounded-lg text-sm border border-border text-muted hover:text-foreground transition-colors cursor-pointer">
           ✕ Reset
         </button>
         <button
           type="button"
           onClick={() => exportCSV(filtered, period)}
-          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-accent text-bg border border-accent hover:bg-accent/90 transition-colors"
+          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-accent text-bg border border-accent hover:bg-accent/90 transition-colors cursor-pointer"
         >
           ↓ CSV
         </button>
@@ -381,7 +381,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                 key={v.id}
                 type="button"
                 onClick={() => setView(v.id)}
-                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-sm transition-colors ${
+                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
                   view === v.id ? 'bg-accent/10 text-accent font-semibold' : 'text-muted hover:text-foreground hover:bg-white/5'
                 }`}
               >
@@ -406,7 +406,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                   key={s.secteur}
                   type="button"
                   onClick={() => setSecteurFilter(secteurFilter === s.secteur ? '' : s.secteur)}
-                  className={`w-full flex items-center justify-between px-2 py-1 rounded text-xs transition-colors ${
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
                     secteurFilter === s.secteur ? 'text-accent font-semibold' : 'text-muted hover:text-foreground'
                   }`}
                 >
