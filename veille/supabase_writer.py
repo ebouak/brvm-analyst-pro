@@ -2,12 +2,8 @@
 Adaptateur : exporte les articles du pipeline brvm_pipeline.py vers la table
 brvm_news de Supabase.
 
-Usage standalone (après avoir lancé brvm_pipeline.py) :
-    python supabase_writer.py
-
-Ou intégré en fin de pipeline :
-    from supabase_writer import export_to_supabase
-    export_to_supabase(articles)
+Source privilégiée : output/feed.json (produit par brvm_pipeline.py)
+  → contient titre, url, source, sentiment, valeurs[], matiere, hash, date_pub, resume
 
 Variables d'environnement requises :
     SUPABASE_URL              https://<ref>.supabase.co
@@ -20,7 +16,6 @@ import hashlib
 import json
 import logging
 import os
-import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
@@ -41,7 +36,7 @@ SENTIMENT_NEGATIF = [
 ]
 
 
-def _sentiment(titre: str, resume: str | None) -> str:
+def _sentiment_fallback(titre: str, resume: str | None) -> str:
     text = (titre + " " + (resume or "")).lower()
     pos = sum(1 for w in SENTIMENT_POSITIF if w in text)
     neg = sum(1 for w in SENTIMENT_NEGATIF if w in text)
@@ -52,47 +47,36 @@ def _sentiment(titre: str, resume: str | None) -> str:
     return "neutre"
 
 
-def _score_impact(article: dict[str, Any]) -> int:
-    """Heuristique 0-100 : sociétés/secteurs nommés + sentiment fort."""
+def _score_impact(ticker_codes: list[str], sentiment: str, source_label: str) -> int:
     score = 30
-    if article.get("instrument_code"):
-        score += 20
-    tickers = article.get("ticker_codes") or []
-    score += min(len(tickers) * 5, 20)
-    sent = article.get("sentiment", "neutre")
-    if sent in ("positif", "négatif"):
+    score += min(len(ticker_codes) * 10, 25)
+    if sentiment in ("positif", "négatif"):
         score += 15
-    source = (article.get("source_label") or "").lower()
-    if "officiel" in source or "brvm" in source or "cosumaf" in source:
+    src = source_label.lower()
+    if "officiel" in src or "brvm" in src or "cosumaf" in src:
         score += 15
     return min(score, 100)
 
 
-def _dedupe_hash(source: str, titre: str) -> str:
-    return hashlib.sha256(f"{source}|{titre}".encode()).hexdigest()
+def _norm_sentiment(raw: str | None) -> str:
+    """Normalise le sentiment (pipeline écrit 'negatif' sans accent)."""
+    return {"negatif": "négatif", "positif": "positif", "neutre": "neutre"}.get(
+        raw or "neutre", "neutre"
+    )
 
 
-def _supabase_headers() -> dict[str, str]:
-    return {
-        "apikey": SERVICE_KEY,
-        "Authorization": f"Bearer {SERVICE_KEY}",
-        "Content-Type": "application/json",
-        # merge-duplicates : upsert par la clé de conflit (dedupe_hash)
-        "Prefer": "resolution=merge-duplicates,return=minimal",
-    }
-
-
-def map_article_to_row(article: dict[str, Any], tickers: list[str] | None = None) -> dict[str, Any]:
-    """Convertit un article du pipeline (colonnes SQLite) vers le schéma brvm_news."""
-    # Colonnes SQLite du pipeline : hash, titre, url, source, source_type,
-    #   date_pub, date_collecte, resume, langue, pertinence, sentiment, est_alerte, matiere
-    titre = article.get("titre") or article.get("title") or ""
-    resume = article.get("resume") or article.get("summary") or None
-    source_label = article.get("source") or "Inconnu"
-    source_type = article.get("source_type") or "rss"
+def map_feed_article(art: dict[str, Any]) -> dict[str, Any]:
+    """
+    Convertit un article du feed.json pipeline vers le schéma brvm_news.
+    feed.json columns: titre, url, source, source_type, date_pub, resume,
+                       sentiment, valeurs[], matiere, hash, est_alerte, pertinence
+    """
+    titre = art.get("titre") or ""
+    resume = art.get("resume") or None
+    source_label = art.get("source") or "Inconnu"
 
     # date_publication : YYYY-MM-DD
-    pub_raw = article.get("date_pub") or article.get("date_publication") or article.get("published")
+    pub_raw = art.get("date_pub") or art.get("date_publication")
     if pub_raw:
         try:
             dt = datetime.fromisoformat(str(pub_raw).replace("Z", "+00:00"))
@@ -102,57 +86,56 @@ def map_article_to_row(article: dict[str, Any], tickers: list[str] | None = None
     else:
         date_pub = datetime.now(timezone.utc).date().isoformat()
 
-    # Sentiment : normaliser (pipeline stocke "negatif" sans accent)
-    raw_sent = article.get("sentiment") or _sentiment(titre, resume)
-    sentiment = {"negatif": "négatif", "positif": "positif", "neutre": "neutre"}.get(
-        raw_sent, "neutre"
-    )
+    # Sentiment normalisé
+    raw_sent = art.get("sentiment") or _sentiment_fallback(titre, resume)
+    sentiment = _norm_sentiment(raw_sent)
 
-    # Ticker principal (premier ticker associé à l'article)
-    ticker_codes = tickers or []
+    # Tickers (feed.json stocke la liste dans "valeurs")
+    ticker_codes: list[str] = art.get("valeurs") or []
     instrument_code = ticker_codes[0] if ticker_codes else None
 
-    row: dict[str, Any] = {
-        "dedupe_hash": article.get("hash") or _dedupe_hash(source_label, titre),
+    # Secteur depuis matiere (commodité) ou None
+    secteur = art.get("matiere") or None
+
+    # dedupe_hash : utiliser celui du pipeline
+    dedupe_hash = art.get("hash") or hashlib.sha256(
+        f"{source_label}|{titre}".encode()
+    ).hexdigest()
+
+    score = _score_impact(ticker_codes, sentiment, source_label)
+
+    return {
+        "dedupe_hash": dedupe_hash,
         "titre": titre[:500],
         "date_publication": date_pub,
         "source": "brvm",
         "source_label": source_label[:200],
-        "source_url": article.get("url") or article.get("source_url") or None,
-        "resume": (resume[:1000] if resume else None),
+        "source_url": art.get("url") or None,
+        "resume": resume[:1000] if resume else None,
         "instrument_code": instrument_code,
-        "secteur": article.get("matiere") or None,
+        "secteur": secteur,
         "sentiment": sentiment,
-        "score_impact": 0,
+        "score_impact": score,
         "ticker_codes": ticker_codes,
     }
-    row["score_impact"] = _score_impact({**article, **row})
-    return row
 
 
-def export_to_supabase(articles: list[dict[str, Any]]) -> int:
-    """Upsert les articles dans brvm_news. Retourne le nombre envoyé."""
+def upsert_to_supabase(rows: list[dict[str, Any]]) -> int:
+    """Upsert des rows déjà mappés dans brvm_news. Retourne le nombre envoyé."""
     if not SUPABASE_URL or not SERVICE_KEY:
         log.error("SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY non définis — export annulé")
         return 0
-
-    rows_raw = [map_article_to_row(a) for a in articles]
-    # Dédoublonner par dedupe_hash (le pipeline peut stocker des doublons internes)
-    seen: set[str] = set()
-    rows = []
-    for r in rows_raw:
-        h = r.get("dedupe_hash", "")
-        if h and h not in seen:
-            seen.add(h)
-            rows.append(r)
     if not rows:
         return 0
 
-    # ?on_conflict=dedupe_hash : upsert idempotent par la clé unique
     url = f"{SUPABASE_URL}/rest/v1/brvm_news?on_conflict=dedupe_hash"
-    headers = _supabase_headers()
+    headers = {
+        "apikey": SERVICE_KEY,
+        "Authorization": f"Bearer {SERVICE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates,return=minimal",
+    }
 
-    # Supabase accepte jusqu'à ~1000 lignes par requête.
     BATCH = 500
     total = 0
     for i in range(0, len(rows), BATCH):
@@ -162,43 +145,45 @@ def export_to_supabase(articles: list[dict[str, Any]]) -> int:
             total += len(batch)
             log.info("Supabase upsert OK : %d articles", len(batch))
         else:
-            log.error("Supabase upsert ERREUR %d : %s", resp.status_code, resp.text[:300])
+            log.error("Supabase upsert ERREUR %d : %s", resp.status_code, resp.text[:400])
 
     return total
 
 
-def export_from_sqlite(db_path: str = "data/westbourse_veille.db") -> int:
-    """Lit les articles récents de la DB SQLite et les exporte vers Supabase."""
-    if not os.path.exists(db_path):
-        log.error("SQLite introuvable : %s", db_path)
+def export_from_feed(feed_path: str = "output/feed.json") -> int:
+    """Lit feed.json (produit par le pipeline) et exporte vers Supabase."""
+    if not os.path.exists(feed_path):
+        log.error("feed.json introuvable : %s", feed_path)
         return 0
 
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
+    with open(feed_path, encoding="utf-8") as f:
+        data = json.load(f)
 
-    # Articles des 7 derniers jours
-    since = (datetime.now(timezone.utc).date().isoformat()[:10])
-    # Récupérer les tickers associés par article
-    tickers_map: dict[int, list[str]] = {}
-    for row in conn.execute("SELECT article_id, ticker FROM article_valeurs"):
-        aid = row["article_id"]
-        if aid not in tickers_map:
-            tickers_map[aid] = []
-        tickers_map[aid].append(row["ticker"])
+    articles = data.get("articles", [])
+    log.info("Lu %d articles depuis %s", len(articles), feed_path)
 
-    cur = conn.execute(
-        "SELECT * FROM articles ORDER BY date_collecte DESC LIMIT 5000"
+    # Mapper + dédoublonner par dedupe_hash
+    seen: set[str] = set()
+    rows: list[dict[str, Any]] = []
+    for art in articles:
+        row = map_feed_article(art)
+        h = row["dedupe_hash"]
+        if h and h not in seen:
+            seen.add(h)
+            rows.append(row)
+
+    log.info("Après déduplication : %d articles uniques", len(rows))
+    log.info(
+        "  Avec tickers : %d | Avec secteur : %d | Sentiment pos/neg : %d/%d",
+        sum(1 for r in rows if r["ticker_codes"]),
+        sum(1 for r in rows if r["secteur"]),
+        sum(1 for r in rows if r["sentiment"] == "positif"),
+        sum(1 for r in rows if r["sentiment"] == "négatif"),
     )
-    rows = [dict(r) for r in cur.fetchall()]
-    conn.close()
-
-    log.info("Lu %d articles depuis %s", len(rows), db_path)
-
-    mapped = [map_article_to_row(r, tickers_map.get(r["id"], [])) for r in rows]
-    return export_to_supabase(mapped)
+    return upsert_to_supabase(rows)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    n = export_from_sqlite()
+    n = export_from_feed()
     print(f"Export terminé : {n} articles envoyés vers Supabase")
