@@ -119,7 +119,8 @@ def map_feed_article(art: dict[str, Any]) -> dict[str, Any]:
         "date_publication": date_pub,
         "source": "brvm",
         "source_label": source_label,
-        "source_type": source_type,
+        # source_type ajouté après migration 0056 (ALTER TABLE ADD COLUMN source_type)
+        # "source_type": source_type,
         "source_url": art.get("url") or None,
         "resume": resume[:1000] if resume else None,
         "instrument_code": None,  # FK brvm_instruments — null pour éviter violation
