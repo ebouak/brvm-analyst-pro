@@ -64,7 +64,9 @@ WB_COMMODITIES = {
 
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL") or os.environ.get("SUPABASE_URL", "")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
-DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+# Nettoyer la clé : supprimer espaces et caractères non-ASCII (problème copier-coller)
+DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+DEEPSEEK_KEY = DEEPSEEK_KEY.encode("ascii", "ignore").decode("ascii")
 
 
 # ── 1. Prix yfinance ──────────────────────────────────────────────────────────
@@ -83,7 +85,8 @@ def fetch_yfinance_prices() -> dict[str, dict]:
             hist = yf.download(sym, period="7d", interval="1d", progress=False, auto_adjust=True)
             if hist.empty or len(hist) < 2:
                 continue
-            closes = hist["Close"].dropna()
+            # yfinance >= 0.2.x retourne un MultiIndex pour un seul ticker
+            closes = hist["Close"].squeeze().dropna()
             if len(closes) < 2:
                 continue
             prix_actuel = float(closes.iloc[-1])
