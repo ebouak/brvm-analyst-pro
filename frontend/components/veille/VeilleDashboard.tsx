@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import type { VeilleNews } from '@/app/veille/page.tsx';
 
 type View = 'flux' | 'heatmap' | 'alertes' | 'matieres' | 'sources';
-type Period = 7 | 30 | 90;
+type Period = 7 | 30 | 90 | 365;
 
 const MATIERES_SECTEURS = new Set(['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities']);
 
@@ -275,6 +275,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     { val: 7, label: '7j' },
     { val: 30, label: '30j' },
     { val: 90, label: '3 mois' },
+    { val: 365, label: '1 an' },
   ];
 
   return (
@@ -302,7 +303,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
       {/* Stats bar */}
       <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
         {[
-          { label: `ARTICLES ${period}J`, val: stats.total, cls: 'text-foreground' },
+          { label: period === 365 ? 'ARTICLES 1 AN' : `ARTICLES ${period}J`, val: stats.total, cls: 'text-foreground' },
           { label: "AUJOURD'HUI", val: stats.today, cls: 'text-[#3fe18b]' },
           { label: 'ALERTES', val: stats.alertes, cls: 'text-[#ff6b6b]' },
           { label: 'COUVERTS', val: `${stats.covered}/${stats.totalSocietes}`, cls: 'text-accent' },
