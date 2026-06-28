@@ -1,0 +1,17 @@
+# Forcer LF pour les fichiers Python/YAML (évite erreurs YAML parser Linux)
+veille/*.py text eol=lf
+veille/*.yaml text eol=lf
+veille/*.yml text eol=lf
+
+# Fichiers texte standard
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.sql text eol=lf
+*.md text eol=lf
+
+# Binaires
+*.png binary
+*.jpg binary
+*.ico binary
