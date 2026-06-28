@@ -25,76 +25,23 @@ export type VeilleNews = {
 
 async function fetchVeilleData() {
   const sb = createPublicClient();
-  const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  // 90 jours côté serveur — le client filtre ensuite par période (7j/30j/90j)
+  const since90d = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
-  const today = new Date().toISOString().slice(0, 10);
 
   const { data: news } = await sb
     .from('brvm_news')
     .select('*')
-    .gte('date_publication', since7d)
-    .lte('date_publication', today)
+    .gte('date_publication', since90d)
     .order('date_publication', { ascending: false })
-    .limit(200);
+    .limit(2000);
 
-  const items = (news ?? []) as unknown as VeilleNews[];
-  const todayItems = items.filter((n) => n.date_publication === today);
-  const alertes = items.filter((n) => (n.score_impact ?? 0) >= 70);
-
-  const coveredTickers = new Set<string>();
-  for (const n of items) {
-    if (n.instrument_code) coveredTickers.add(n.instrument_code);
-    for (const t of n.ticker_codes ?? []) coveredTickers.add(t);
-  }
-
-  // Secteurs (hors matières premières → gardées pour vue Matières)
-  const MATIERES_TYPES = new Set(['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities']);
-  const secteurMap = new Map<string, number>();
-  for (const n of items) {
-    if (n.secteur) secteurMap.set(n.secteur, (secteurMap.get(n.secteur) ?? 0) + 1);
-  }
-  const secteurs = [...secteurMap.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([secteur, count]) => ({ secteur, count }));
-
-  // Sources distinctes (via source_label)
-  const sourceMap = new Map<string, number>();
-  for (const n of items) {
-    const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
-      ? n.source_label
-      : n.source ?? 'Autre';
-    sourceMap.set(lbl, (sourceMap.get(lbl) ?? 0) + 1);
-  }
-  const topSources = [...sourceMap.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 20)
-    .map(([label, count]) => ({ label, count }));
-
-  // Compteurs par source_type
-  const gnews = items.filter((n) => n.source_type === 'google_news').length;
-  const sitesOff = items.filter((n) => n.source_type === 'site_officiel').length;
-  const matieres = items.filter((n) => n.source_type === 'commodite').length;
-
-  return {
-    news: items,
-    stats: {
-      total7d: items.length,
-      today: todayItems.length,
-      alertes: alertes.length,
-      covered: coveredTickers.size,
-      totalSocietes: 47,
-      gnews,
-      sitesOff,
-      matieres,
-    },
-    secteurs,
-    topSources,
-  };
+  return { news: (news ?? []) as unknown as VeilleNews[] };
 }
 
 export default async function VeillePage() {
-  const { news, stats, secteurs, topSources } = await fetchVeilleData();
+  const { news } = await fetchVeilleData();
 
   return (
     <div className="min-h-screen bg-bg px-4 py-6 space-y-6 max-w-7xl mx-auto">
@@ -103,12 +50,7 @@ export default async function VeillePage() {
         title="Veille BRVM"
         subtitle="Surveillance automatisée des actualités marché — mis à jour quotidiennement."
       />
-      <VeilleDashboard
-        news={news}
-        stats={stats}
-        secteurs={secteurs}
-        topSources={topSources}
-      />
+      <VeilleDashboard news={news} />
     </div>
   );
 }

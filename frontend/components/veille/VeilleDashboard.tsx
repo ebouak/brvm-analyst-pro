@@ -4,24 +4,11 @@ import { useState, useMemo, useCallback } from 'react';
 import type { VeilleNews } from '@/app/veille/page.tsx';
 
 type View = 'flux' | 'heatmap' | 'alertes' | 'matieres' | 'sources';
+type Period = 7 | 30 | 90;
 
-interface Props {
-  news: VeilleNews[];
-  stats: {
-    total7d: number;
-    today: number;
-    alertes: number;
-    covered: number;
-    totalSocietes: number;
-    gnews: number;
-    sitesOff: number;
-    matieres: number;
-  };
-  secteurs: { secteur: string; count: number }[];
-  topSources: { label: string; count: number }[];
-}
+const MATIERES_SECTEURS = new Set(['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities']);
 
-/* ── Badges tickers (couleurs distinctives par hash) ── */
+/* ── Badge tickers ── */
 const BADGE_COLORS = [
   'bg-[#ff6b35]/20 text-[#ff6b35] border border-[#ff6b35]/40',
   'bg-[#3fe18b]/20 text-[#3fe18b] border border-[#3fe18b]/40',
@@ -32,15 +19,14 @@ const BADGE_COLORS = [
   'bg-[#06d6a0]/20 text-[#06d6a0] border border-[#06d6a0]/40',
   'bg-[#118ab2]/20 text-[#118ab2] border border-[#118ab2]/40',
 ];
-function tickerColorClass(code: string) {
+function tickerColor(code: string) {
   let h = 0;
   for (let i = 0; i < code.length; i++) h = (h * 31 + code.charCodeAt(i)) & 0xffff;
   return BADGE_COLORS[h % BADGE_COLORS.length];
 }
-
 function TickerBadge({ code }: { code: string }) {
   return (
-    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${tickerColorClass(code)}`}>
+    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${tickerColor(code)}`}>
       {code}
     </span>
   );
@@ -51,77 +37,57 @@ function relativeTime(dateStr: string): string {
   const diffH = Math.floor((Date.now() - d.getTime()) / 3_600_000);
   if (diffH < 1) return '< 1h';
   if (diffH < 24) return `${diffH}h`;
-  return `${Math.floor(diffH / 24)}j`;
+  const days = Math.floor(diffH / 24);
+  if (days < 30) return `${days}j`;
+  return `${Math.floor(days / 30)}mois`;
 }
 
 /* ── Carte article ── */
 function ArticleCard({ item }: { item: VeilleNews }) {
-  const tickers = [...new Set([
-    ...(item.ticker_codes ?? []),
-  ])].slice(0, 5);
-
+  const tickers = [...new Set(item.ticker_codes ?? [])].slice(0, 5);
   const isAlerte = (item.score_impact ?? 0) >= 70;
   const sent = item.sentiment ?? 'neutre';
-
-  // Bordure gauche colorée selon sentiment
-  const borderLeft =
-    sent === 'positif' ? 'border-l-[3px] border-l-[#3fe18b]'
-    : sent === 'négatif' ? 'border-l-[3px] border-l-[#ff6b6b]'
+  const borderLeft = sent === 'positif'
+    ? 'border-l-[3px] border-l-[#3fe18b]'
+    : sent === 'négatif'
+    ? 'border-l-[3px] border-l-[#ff6b6b]'
     : 'border-l-[3px] border-l-transparent';
-
-  // Emoji sentiment
   const sentEmoji = sent === 'positif' ? '🟢' : sent === 'négatif' ? '🔴' : '⚪';
-
-  const srcLabel = item.source_label && item.source_label !== 'brvm' && item.source_label !== 'Inconnu'
+  const srcLabel = (item.source_label && item.source_label !== 'brvm' && item.source_label !== 'Inconnu')
     ? item.source_label
     : item.source ?? 'Source';
-  const timeStr = relativeTime(item.created_at ?? item.date_publication);
 
   return (
     <a
       href={item.source_url ?? '#'}
       target="_blank"
       rel="noopener noreferrer"
-      className={`block border border-border rounded-lg pl-3 pr-3 pt-3 pb-2.5 hover:border-accent/40 transition-colors group space-y-1.5 ${borderLeft} ${
-        isAlerte ? 'bg-[#ff6b6b]/5' : 'bg-surface'
-      }`}
+      className={`block border border-border rounded-lg pl-3 pr-3 pt-3 pb-2.5 hover:border-accent/40 transition-colors group space-y-1.5 ${borderLeft} ${isAlerte ? 'bg-[#ff6b6b]/5' : 'bg-surface'}`}
     >
-      {/* Titre */}
       <p className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors leading-snug line-clamp-2">
         {item.titre}
       </p>
-
-      {/* Résumé */}
       {item.resume && (
         <p className="text-xs text-muted line-clamp-2 leading-relaxed">{item.resume}</p>
       )}
-
-      {/* Meta row */}
       <div className="flex items-center gap-1.5 flex-wrap">
-        {/* Source + temps */}
         <span className="text-[11px] text-muted shrink-0">
           {srcLabel.length > 35 ? srcLabel.slice(0, 35) + '…' : srcLabel}
         </span>
-        <span className="text-[10px] text-muted/60">· il y a {timeStr}</span>
-
-        {/* Alerte tag */}
+        <span className="text-[10px] text-muted/60">· il y a {relativeTime(item.created_at ?? item.date_publication)}</span>
         {isAlerte && (
           <span className="text-[10px] bg-[#ff6b6b]/20 text-[#ff6b6b] border border-[#ff6b6b]/30 px-1.5 py-0.5 rounded font-medium ml-1">
             ALERTE
           </span>
         )}
-
-        {/* Tickers — affichés sur TOUS les articles ayant des codes */}
         {tickers.map((t) => <TickerBadge key={t} code={t} />)}
-
-        {/* Sentiment emoji en fin de ligne */}
         <span className="ml-auto text-base" title={`Sentiment : ${sent}`}>{sentEmoji}</span>
       </div>
     </a>
   );
 }
 
-/* ── Heatmap tickers ── */
+/* ── Heatmap ── */
 function HeatmapView({ news }: { news: VeilleNews[] }) {
   const tickers = useMemo(() => {
     const map = new Map<string, { count: number; pos: number; neg: number }>();
@@ -137,8 +103,7 @@ function HeatmapView({ news }: { news: VeilleNews[] }) {
     return [...map.entries()].sort((a, b) => b[1].count - a[1].count);
   }, [news]);
 
-  if (!tickers.length) return <p className="text-muted text-sm text-center py-12">Aucune couverture sur 7 jours.</p>;
-
+  if (!tickers.length) return <p className="text-muted text-sm text-center py-12">Aucune couverture sur la période.</p>;
   return (
     <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
       {tickers.map(([code, { count, pos, neg }]) => {
@@ -159,14 +124,13 @@ function HeatmapView({ news }: { news: VeilleNews[] }) {
   );
 }
 
-/* ── Matières view ── */
+/* ── Matières ── */
 function MatieresView({ news }: { news: VeilleNews[] }) {
   const items = useMemo(() => {
-    const MATIERES = ['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities'];
     const byMat = new Map<string, VeilleNews[]>();
     for (const n of news) {
       const m = n.secteur ?? '';
-      if (MATIERES.includes(m)) {
+      if (MATIERES_SECTEURS.has(m)) {
         if (!byMat.has(m)) byMat.set(m, []);
         byMat.get(m)!.push(n);
       }
@@ -174,8 +138,7 @@ function MatieresView({ news }: { news: VeilleNews[] }) {
     return [...byMat.entries()].sort((a, b) => b[1].length - a[1].length);
   }, [news]);
 
-  if (!items.length) return <p className="text-muted text-sm text-center py-12">Aucun article matière première sur 7 jours.</p>;
-
+  if (!items.length) return <p className="text-muted text-sm text-center py-12">Aucun article matière première sur la période.</p>;
   return (
     <div className="space-y-4">
       {items.map(([mat, arts]) => (
@@ -193,7 +156,7 @@ function MatieresView({ news }: { news: VeilleNews[] }) {
 }
 
 /* ── Export CSV ── */
-function exportCSV(news: VeilleNews[]) {
+function exportCSV(news: VeilleNews[], period: Period) {
   const header = 'Date,Titre,Source,Sentiment,Impact,Tickers,URL';
   const rows = news.map((n) =>
     [
@@ -209,50 +172,96 @@ function exportCSV(news: VeilleNews[]) {
   const blob = new Blob([header + '\n' + rows.join('\n')], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `veille-brvm-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `veille-brvm-${period}j-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
 }
 
 /* ── Composant principal ── */
-export default function VeilleDashboard({ news, stats, secteurs, topSources }: Props) {
+export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] }) {
+  const [period, setPeriod] = useState<Period>(30);
   const [view, setView] = useState<View>('flux');
   const [secteurFilter, setSecteurFilter] = useState('');
   const [sentimentFilter, setSentimentFilter] = useState('');
   const [search, setSearch] = useState('');
   const [showAlertes, setShowAlertes] = useState(false);
 
+  // Filtrage par période (côté client)
+  const news = useMemo(() => {
+    const cutoff = new Date(Date.now() - period * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    return allNews.filter((n) => n.date_publication >= cutoff);
+  }, [allNews, period]);
+
+  // Stats calculées depuis la période sélectionnée
+  const stats = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const todayItems = news.filter((n) => n.date_publication === today);
+    const alertes = news.filter((n) => (n.score_impact ?? 0) >= 70);
+    const covered = new Set<string>();
+    for (const n of news) {
+      if (n.instrument_code) covered.add(n.instrument_code);
+      for (const t of n.ticker_codes ?? []) covered.add(t);
+    }
+    return {
+      total: news.length,
+      today: todayItems.length,
+      alertes: alertes.length,
+      covered: covered.size,
+      totalSocietes: 47,
+      gnews: news.filter((n) => n.source_type === 'google_news').length,
+      sitesOff: news.filter((n) => n.source_type === 'site_officiel' || n.source_type === 'institution').length,
+      matieres: news.filter((n) => n.source_type === 'commodite').length,
+    };
+  }, [news]);
+
   const alertes = useMemo(() => news.filter((n) => (n.score_impact ?? 0) >= 70), [news]);
   const alertesCritiques = alertes.slice(0, 3);
 
+  // Secteurs BRVM (hors matières)
+  const secteurs = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of news) {
+      if (n.secteur && !MATIERES_SECTEURS.has(n.secteur))
+        map.set(n.secteur, (map.get(n.secteur) ?? 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([secteur, count]) => ({ secteur, count }));
+  }, [news]);
+
+  // Sources distinctes
+  const topSources = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of news) {
+      const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
+        ? n.source_label : n.source ?? 'Autre';
+      map.set(lbl, (map.get(lbl) ?? 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([label, count]) => ({ label, count }));
+  }, [news]);
+
+  // Flux filtré
   const filtered = useMemo(() => {
     let items = showAlertes ? alertes : news;
     if (secteurFilter) items = items.filter((n) => n.secteur === secteurFilter);
     if (sentimentFilter) items = items.filter((n) => n.sentiment === sentimentFilter);
     if (search) {
       const q = search.toLowerCase();
-      items = items.filter(
-        (n) =>
-          n.titre.toLowerCase().includes(q) ||
-          (n.resume ?? '').toLowerCase().includes(q) ||
-          (n.ticker_codes ?? []).some((t) => t.toLowerCase().includes(q)) ||
-          (n.source_label ?? '').toLowerCase().includes(q),
+      items = items.filter((n) =>
+        n.titre.toLowerCase().includes(q) ||
+        (n.resume ?? '').toLowerCase().includes(q) ||
+        (n.ticker_codes ?? []).some((t) => t.toLowerCase().includes(q)) ||
+        (n.source_label ?? '').toLowerCase().includes(q),
       );
     }
     return items;
   }, [news, alertes, showAlertes, secteurFilter, sentimentFilter, search]);
 
   const reset = useCallback(() => {
-    setSecteurFilter('');
-    setSentimentFilter('');
-    setSearch('');
-    setShowAlertes(false);
+    setSecteurFilter(''); setSentimentFilter(''); setSearch(''); setShowAlertes(false);
   }, []);
 
   const lastItem = news[0];
   const lastTime = lastItem ? relativeTime(lastItem.created_at ?? lastItem.date_publication) : '—';
-  const lastSrc = lastItem?.source_label && lastItem.source_label !== 'brvm'
-    ? lastItem.source_label
-    : lastItem?.source ?? '—';
+  const lastSrc = (lastItem?.source_label && lastItem.source_label !== 'brvm')
+    ? lastItem.source_label : lastItem?.source ?? '—';
 
   const VIEWS: { id: View; label: string; icon: string; count: number }[] = [
     { id: 'flux', label: 'Flux', icon: '≡', count: news.length },
@@ -262,12 +271,38 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
     { id: 'sources', label: 'Sources', icon: '⌬', count: topSources.length },
   ];
 
+  const PERIODS: { val: Period; label: string }[] = [
+    { val: 7, label: '7j' },
+    { val: 30, label: '30j' },
+    { val: 90, label: '3 mois' },
+  ];
+
   return (
     <div className="space-y-4">
-      {/* Stats bar — 8 compteurs */}
+      {/* Sélecteur de période */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted uppercase tracking-widest">Période :</span>
+        {PERIODS.map((p) => (
+          <button
+            key={p.val}
+            type="button"
+            onClick={() => setPeriod(p.val)}
+            className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors ${
+              period === p.val
+                ? 'bg-accent text-bg border-accent'
+                : 'bg-surface border-border text-muted hover:text-foreground'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+        <span className="text-xs text-muted ml-2 tabular">{allNews.length} articles chargés</span>
+      </div>
+
+      {/* Stats bar */}
       <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
         {[
-          { label: 'ARTICLES 7J', val: stats.total7d, cls: 'text-foreground' },
+          { label: `ARTICLES ${period}J`, val: stats.total, cls: 'text-foreground' },
           { label: "AUJOURD'HUI", val: stats.today, cls: 'text-[#3fe18b]' },
           { label: 'ALERTES', val: stats.alertes, cls: 'text-[#ff6b6b]' },
           { label: 'COUVERTS', val: `${stats.covered}/${stats.totalSocietes}`, cls: 'text-accent' },
@@ -300,9 +335,7 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
         >
           <option value="">Tous secteurs</option>
           {secteurs.map((s) => (
-            <option key={s.secteur} value={s.secteur}>
-              {s.secteur} ({s.count})
-            </option>
+            <option key={s.secteur} value={s.secteur}>{s.secteur} ({s.count})</option>
           ))}
         </select>
         <select
@@ -320,34 +353,27 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
           type="button"
           onClick={() => setShowAlertes(!showAlertes)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-            showAlertes
-              ? 'bg-[#ff6b6b] border-[#ff6b6b] text-white'
-              : 'bg-surface border-border text-muted hover:text-foreground'
+            showAlertes ? 'bg-[#ff6b6b] border-[#ff6b6b] text-white' : 'bg-surface border-border text-muted hover:text-foreground'
           }`}
         >
           🔔 Alertes
         </button>
-        <button
-          type="button"
-          onClick={reset}
-          className="px-3 py-1.5 rounded-lg text-sm border border-border text-muted hover:text-foreground transition-colors"
-        >
+        <button type="button" onClick={reset} className="px-3 py-1.5 rounded-lg text-sm border border-border text-muted hover:text-foreground transition-colors">
           ✕ Reset
         </button>
         <button
           type="button"
-          onClick={() => exportCSV(filtered)}
+          onClick={() => exportCSV(filtered, period)}
           className="px-3 py-1.5 rounded-lg text-sm font-medium bg-accent text-bg border border-accent hover:bg-accent/90 transition-colors"
         >
           ↓ CSV
         </button>
       </div>
 
-      {/* Body : sidebar + main */}
+      {/* Body */}
       <div className="flex gap-4">
         {/* Sidebar */}
         <div className="w-48 shrink-0 space-y-4">
-          {/* VUES */}
           <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5">
             <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Vues</p>
             {VIEWS.map((v) => (
@@ -356,9 +382,7 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
                 type="button"
                 onClick={() => setView(v.id)}
                 className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-sm transition-colors ${
-                  view === v.id
-                    ? 'bg-accent/10 text-accent font-semibold'
-                    : 'text-muted hover:text-foreground hover:bg-white/5'
+                  view === v.id ? 'bg-accent/10 text-accent font-semibold' : 'text-muted hover:text-foreground hover:bg-white/5'
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -366,11 +390,7 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
                   {v.label}
                 </span>
                 {v.count > 0 && (
-                  <span
-                    className={`text-xs tabular px-1.5 rounded ${
-                      view === v.id ? 'bg-accent/20 text-accent' : 'bg-white/5 text-muted'
-                    }`}
-                  >
+                  <span className={`text-xs tabular px-1.5 rounded ${view === v.id ? 'bg-accent/20 text-accent' : 'bg-white/5 text-muted'}`}>
                     {v.count > 999 ? '999+' : v.count}
                   </span>
                 )}
@@ -378,14 +398,10 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
             ))}
           </div>
 
-          {/* SECTEURS (uniquement secteurs BRVM — pas les matières premières) */}
-          {secteurs.filter(s => !['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities'].includes(s.secteur)).length > 0 && (
+          {secteurs.length > 0 && (
             <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5">
               <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Secteurs</p>
-              {secteurs
-                .filter(s => !['petrole','caoutchouc','huile_palme','cacao','coton','metaux','utilities'].includes(s.secteur))
-                .slice(0, 10)
-                .map((s) => (
+              {secteurs.slice(0, 10).map((s) => (
                 <button
                   key={s.secteur}
                   type="button"
@@ -402,40 +418,28 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
           )}
         </div>
 
-        {/* Main content */}
+        {/* Main */}
         <div className="flex-1 min-w-0 space-y-3">
-          {/* Dernier article */}
           {lastItem && view === 'flux' && (
             <p className="text-xs text-muted border-b border-border pb-2">
               ● Dernier : il y a {lastTime} — {lastSrc.length > 40 ? lastSrc.slice(0, 40) + '…' : lastSrc}
             </p>
           )}
 
-          {/* Alertes critiques (bandeau) */}
+          {/* Alertes critiques */}
           {view === 'flux' && alertesCritiques.length > 0 && !showAlertes && (
             <div className="bg-[#ff6b6b]/5 border border-[#ff6b6b]/30 rounded-xl p-3 space-y-2">
               <p className="text-xs font-bold text-[#ff6b6b] uppercase tracking-widest">
                 🔔 Alertes critiques ({stats.alertes})
               </p>
-              {alertesCritiques.map((n) => {
-                const tickers = (n.ticker_codes ?? []).slice(0, 3);
-                return (
-                  <a
-                    key={n.id}
-                    href={n.source_url ?? '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 group"
-                  >
-                    <div className="flex gap-1 shrink-0">
-                      {tickers.map((t) => <TickerBadge key={t} code={t} />)}
-                    </div>
-                    <span className="text-sm text-foreground group-hover:text-accent transition-colors line-clamp-1">
-                      {n.titre}
-                    </span>
-                  </a>
-                );
-              })}
+              {alertesCritiques.map((n) => (
+                <a key={n.id} href={n.source_url ?? '#'} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">
+                  <div className="flex gap-1 shrink-0">
+                    {(n.ticker_codes ?? []).slice(0, 3).map((t) => <TickerBadge key={t} code={t} />)}
+                  </div>
+                  <span className="text-sm text-foreground group-hover:text-accent transition-colors line-clamp-1">{n.titre}</span>
+                </a>
+              ))}
             </div>
           )}
 
@@ -443,14 +447,10 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
           {(view === 'flux' || view === 'alertes') && (
             <>
               <p className="text-xs text-muted">
-                {view === 'alertes'
-                  ? `Alertes — ${alertes.length} résultat(s)`
-                  : `Flux — ${filtered.length} résultat(s)`}
+                {view === 'alertes' ? `Alertes — ${alertes.length}` : `Flux — ${filtered.length} résultat(s)`}
               </p>
               {(view === 'alertes' ? alertes : filtered).length === 0 ? (
-                <p className="text-center text-muted text-sm py-10">
-                  Aucun article ne correspond à ces filtres.
-                </p>
+                <p className="text-center text-muted text-sm py-10">Aucun article sur cette période avec ces filtres.</p>
               ) : (
                 <div className="space-y-2">
                   {(view === 'alertes' ? alertes : filtered).map((n) => (
@@ -461,32 +461,21 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
             </>
           )}
 
-          {/* Heatmap */}
           {view === 'heatmap' && (
             <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
               <div className="flex gap-4 text-xs text-muted">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded bg-[#3fe18b]/30 inline-block" />Positif
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded bg-[#ff6b6b]/30 inline-block" />Négatif
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded bg-border inline-block" />Neutre
-                </span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-[#3fe18b]/30 inline-block" />Positif</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-[#ff6b6b]/30 inline-block" />Négatif</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-border inline-block" />Neutre</span>
               </div>
               <HeatmapView news={news} />
             </div>
           )}
 
-          {/* Sources */}
           {view === 'sources' && (
             <div className="space-y-2">
               {topSources.map((s, i) => (
-                <div
-                  key={s.label}
-                  className="bg-surface border border-border rounded-lg px-4 py-3 flex items-center gap-3"
-                >
+                <div key={s.label} className="bg-surface border border-border rounded-lg px-4 py-3 flex items-center gap-3">
                   <span className="text-lg font-bold tabular text-muted w-6 shrink-0">{i + 1}</span>
                   <span className="flex-1 text-sm text-foreground">{s.label}</span>
                   <span className="text-sm font-bold tabular text-accent">{s.count}</span>
@@ -495,7 +484,6 @@ export default function VeilleDashboard({ news, stats, secteurs, topSources }: P
             </div>
           )}
 
-          {/* Matières premières */}
           {view === 'matieres' && <MatieresView news={news} />}
         </div>
       </div>
