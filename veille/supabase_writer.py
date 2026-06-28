@@ -101,8 +101,11 @@ def map_article_to_row(article: dict[str, Any], tickers: list[str] | None = None
     else:
         date_pub = datetime.now(timezone.utc).date().isoformat()
 
-    # Sentiment : utiliser celui du pipeline si disponible
-    sentiment = article.get("sentiment") or _sentiment(titre, resume)
+    # Sentiment : normaliser (pipeline stocke "negatif" sans accent)
+    raw_sent = article.get("sentiment") or _sentiment(titre, resume)
+    sentiment = {"negatif": "négatif", "positif": "positif", "neutre": "neutre"}.get(
+        raw_sent, "neutre"
+    )
 
     # Ticker principal (premier ticker associé à l'article)
     ticker_codes = tickers or []
