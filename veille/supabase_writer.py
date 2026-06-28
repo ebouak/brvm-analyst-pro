@@ -81,15 +81,17 @@ def _supabase_headers() -> dict[str, str]:
     }
 
 
-def map_article_to_row(article: dict[str, Any]) -> dict[str, Any]:
-    """Convertit un article du pipeline vers le schéma brvm_news."""
-    source_label = article.get("source_label") or article.get("source") or "Inconnu"
-    titre = article.get("title") or article.get("titre") or ""
-    resume = article.get("summary") or article.get("resume") or None
-    ticker = article.get("ticker") or article.get("instrument_code") or None
+def map_article_to_row(article: dict[str, Any], tickers: list[str] | None = None) -> dict[str, Any]:
+    """Convertit un article du pipeline (colonnes SQLite) vers le schéma brvm_news."""
+    # Colonnes SQLite du pipeline : hash, titre, url, source, source_type,
+    #   date_pub, date_collecte, resume, langue, pertinence, sentiment, est_alerte, matiere
+    titre = article.get("titre") or article.get("title") or ""
+    resume = article.get("resume") or article.get("summary") or None
+    source_label = article.get("source") or "Inconnu"
+    source_type = article.get("source_type") or "rss"
 
     # date_publication : YYYY-MM-DD
-    pub_raw = article.get("published") or article.get("date_publication")
+    pub_raw = article.get("date_pub") or article.get("date_publication") or article.get("published")
     if pub_raw:
         try:
             dt = datetime.fromisoformat(str(pub_raw).replace("Z", "+00:00"))
@@ -99,22 +101,26 @@ def map_article_to_row(article: dict[str, Any]) -> dict[str, Any]:
     else:
         date_pub = datetime.now(timezone.utc).date().isoformat()
 
-    sentiment = _sentiment(titre, resume)
+    # Sentiment : utiliser celui du pipeline si disponible
+    sentiment = article.get("sentiment") or _sentiment(titre, resume)
+
+    # Ticker principal (premier ticker associé à l'article)
+    ticker_codes = tickers or []
+    instrument_code = ticker_codes[0] if ticker_codes else None
+
     row: dict[str, Any] = {
-        "dedupe_hash": _dedupe_hash(source_label, titre),
+        "dedupe_hash": article.get("hash") or _dedupe_hash(source_label, titre),
         "titre": titre[:500],
         "date_publication": date_pub,
         "source": "brvm",
         "source_label": source_label[:200],
-        "source_url": article.get("link") or article.get("source_url") or None,
+        "source_url": article.get("url") or article.get("source_url") or None,
         "resume": (resume[:1000] if resume else None),
-        "instrument_code": ticker,
-        "secteur": article.get("secteur") or None,
+        "instrument_code": instrument_code,
+        "secteur": article.get("matiere") or None,
         "sentiment": sentiment,
         "score_impact": 0,
-        "ticker_codes": article.get("ticker_codes") or (
-            [ticker] if ticker else []
-        ),
+        "ticker_codes": ticker_codes,
     }
     row["score_impact"] = _score_impact({**article, **row})
     return row
@@ -148,21 +154,35 @@ def export_to_supabase(articles: list[dict[str, Any]]) -> int:
     return total
 
 
-def export_from_sqlite(db_path: str = "brvm_veille.db") -> int:
-    """Lit tous les articles de la DB SQLite du pipeline et les exporte."""
+def export_from_sqlite(db_path: str = "data/westbourse_veille.db") -> int:
+    """Lit les articles récents de la DB SQLite et les exporte vers Supabase."""
     if not os.path.exists(db_path):
         log.error("SQLite introuvable : %s", db_path)
         return 0
 
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+
+    # Articles des 7 derniers jours
+    since = (datetime.now(timezone.utc).date().isoformat()[:10])
+    # Récupérer les tickers associés par article
+    tickers_map: dict[int, list[str]] = {}
+    for row in conn.execute("SELECT article_id, ticker FROM article_valeurs"):
+        aid = row["article_id"]
+        if aid not in tickers_map:
+            tickers_map[aid] = []
+        tickers_map[aid].append(row["ticker"])
+
     cur = conn.execute(
-        "SELECT * FROM articles ORDER BY published DESC LIMIT 5000"
+        "SELECT * FROM articles ORDER BY date_collecte DESC LIMIT 5000"
     )
-    articles = [dict(row) for row in cur.fetchall()]
+    rows = [dict(r) for r in cur.fetchall()]
     conn.close()
-    log.info("Lu %d articles depuis %s", len(articles), db_path)
-    return export_to_supabase(articles)
+
+    log.info("Lu %d articles depuis %s", len(rows), db_path)
+
+    mapped = [map_article_to_row(r, tickers_map.get(r["id"], [])) for r in rows]
+    return export_to_supabase(mapped)
 
 
 if __name__ == "__main__":
