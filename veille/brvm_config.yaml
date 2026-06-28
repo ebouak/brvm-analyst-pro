@@ -790,7 +790,7 @@ valeurs:
      alertes_specifiques: ["résultats","PNB","dividende","AGO"]}
 
   - {ticker: "BICC",  nom: "BIC CI",       secteur: "Banque",         pays: "CI",
-     mots_cles: ["BIC CI","Banque Internationale Commerce Côte Ivoire"],
+     mots_cles: ["BIC CI","Banque Internationale pour le Commerce","BICC BRVM","BIC Côte Ivoire","banque internationale commerce abidjan"],
      alertes_specifiques: ["résultats","crédit","dividende"]}
 
   - {ticker: "ETIT",  nom: "Ecobank TI",   secteur: "Banque",         pays: "TG",
@@ -834,7 +834,7 @@ valeurs:
      alertes_specifiques: ["résultats","dividende","BNP"]}
 
   - {ticker: "STBC",  nom: "STB CI",       secteur: "Banque",         pays: "CI",
-     mots_cles: ["STBCI","STB CI BRVM"],
+     mots_cles: ["STBCI","STB CI","Société Tunisienne de Banque","STB BRVM","STB CI BRVM","banque tunisienne abidjan"],
      alertes_specifiques: ["résultats","dividende"]}
 
   - {ticker: "SMBC",  nom: "SMB",          secteur: "BTP",            pays: "CI",
@@ -930,7 +930,7 @@ valeurs:
      alertes_specifiques: ["port","logistique","MSC","cession","résultats"]}
 
   - {ticker: "STAC",  nom: "SITAS CI",     secteur: "Transport",      pays: "CI",
-     mots_cles: ["SITAS Côte Ivoire","STAC BRVM","transport aérien CI"],
+     mots_cles: ["SITAS","SITAS CI","SITAS Côte Ivoire","STAC","STAC BRVM","Air Côte Ivoire transport","transport aérien Abidjan","aérien Côte Ivoire bourse"],
      alertes_specifiques: ["aviation","aéroport","résultats"]}
 
   - {ticker: "PRSC",  nom: "PRESTIGE CI",  secteur: "Transport",      pays: "CI",
@@ -942,11 +942,11 @@ valeurs:
      alertes_specifiques: ["assurance","primes","résultats","sinistre"]}
 
   - {ticker: "SIAB",  nom: "SIA BÉNIN",    secteur: "Assurance",      pays: "BJ",
-     mots_cles: ["SIA Bénin BRVM","SIAB"],
+     mots_cles: ["SIA Bénin","SIAB","Société d'Investissements Agricoles","assurance bénin bourse","SIA Bénin BRVM","SIAB BRVM"],
      alertes_specifiques: ["assurance","résultats"]}
 
   - {ticker: "WOYOC", nom: "MOVIS",        secteur: "Technologie",    pays: "CI",
-     mots_cles: ["MOVIS BRVM","WOYOC","tech Côte Ivoire bourse"],
+     mots_cles: ["MOVIS","WOYOC","MOVIS BRVM","WOYOC BRVM","technologie Côte Ivoire bourse","fintech Abidjan BRVM","MOVIS CI"],
      alertes_specifiques: ["technologie","levée de fonds","résultats"]}
 
 # ----------------------------------------------------------------
