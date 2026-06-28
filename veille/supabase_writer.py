@@ -92,7 +92,8 @@ def map_feed_article(art: dict[str, Any]) -> dict[str, Any]:
 
     # Tickers (feed.json stocke la liste dans "valeurs")
     ticker_codes: list[str] = art.get("valeurs") or []
-    instrument_code = ticker_codes[0] if ticker_codes else None
+    # instrument_code a une FK → brvm_instruments, on la laisse null pour éviter les violations
+    instrument_code = None
 
     # Secteur depuis matiere (commodité) ou None
     secteur = art.get("matiere") or None
