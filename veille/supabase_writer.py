@@ -140,7 +140,8 @@ def export_to_supabase(articles: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
 
-    url = f"{SUPABASE_URL}/rest/v1/brvm_news"
+    # ?on_conflict=dedupe_hash : upsert idempotent par la clé unique
+    url = f"{SUPABASE_URL}/rest/v1/brvm_news?on_conflict=dedupe_hash"
     headers = _supabase_headers()
 
     # Supabase accepte jusqu'à ~1000 lignes par requête.
