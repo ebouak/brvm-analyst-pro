@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import type { VeilleNews } from '@/app/veille/page';
+import { useState, useMemo, useCallback } from 'react';
+import type { VeilleNews } from '@/app/veille/page.tsx';
 
-type Tab = 'flux' | 'heatmap' | 'alertes' | 'sources';
+type View = 'flux' | 'heatmap' | 'alertes' | 'matieres' | 'sources';
 
 interface Props {
   news: VeilleNews[];
@@ -18,149 +18,130 @@ interface Props {
   topSources: { label: string; count: number }[];
 }
 
-const SENTIMENT_COLORS = {
-  positif: 'text-up bg-up/10 border-up/30',
-  négatif: 'text-down bg-down/10 border-down/30',
-  neutre: 'text-muted bg-surface border-border',
-};
-const SENTIMENT_ICONS = { positif: '▲', négatif: '▼', neutre: '●' };
-
-function sentimentClass(s: string | null) {
-  return SENTIMENT_COLORS[(s ?? 'neutre') as keyof typeof SENTIMENT_COLORS] ?? SENTIMENT_COLORS.neutre;
+/* ── Couleurs badges ticker (hash déterministe) ── */
+const BADGE_COLORS = [
+  'bg-[#ff6b35] text-white',
+  'bg-[#3fe18b] text-black',
+  'bg-[#56d7fd] text-black',
+  'bg-[#c77dff] text-white',
+  'bg-[#ffd166] text-black',
+  'bg-[#ef476f] text-white',
+  'bg-[#06d6a0] text-black',
+  'bg-[#118ab2] text-white',
+];
+function tickerColor(code: string) {
+  let h = 0;
+  for (let i = 0; i < code.length; i++) h = (h * 31 + code.charCodeAt(i)) & 0xffff;
+  return BADGE_COLORS[h % BADGE_COLORS.length];
 }
-function sentimentIcon(s: string | null) {
-  return SENTIMENT_ICONS[(s ?? 'neutre') as keyof typeof SENTIMENT_ICONS] ?? '●';
+
+function TickerBadge({ code }: { code: string }) {
+  return (
+    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${tickerColor(code)}`}>
+      {code}
+    </span>
+  );
 }
 
 function relativeTime(dateStr: string): string {
   const d = new Date(dateStr);
-  const diffH = Math.floor((Date.now() - d.getTime()) / 3600000);
-  if (diffH < 1) return "< 1h";
-  if (diffH < 24) return `${diffH}h`;
-  const diffD = Math.floor(diffH / 24);
-  return `${diffD}j`;
+  const diffH = Math.floor((Date.now() - d.getTime()) / 3_600_000);
+  if (diffH < 1) return 'il y a < 1h';
+  if (diffH < 24) return `il y a ${diffH}h`;
+  return `il y a ${Math.floor(diffH / 24)}j`;
 }
 
-function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
-  return (
-    <div className="bg-surface border border-border rounded-xl p-4 space-y-1">
-      <p className="text-muted text-xs uppercase tracking-widest">{label}</p>
-      <p className="text-2xl font-bold tabular text-foreground">{value}</p>
-      {sub && <p className="text-muted text-xs">{sub}</p>}
-    </div>
-  );
-}
+const SENT_ICON: Record<string, string> = { positif: '▲', négatif: '▼', neutre: '●' };
+const SENT_CLS: Record<string, string> = {
+  positif: 'text-[#3fe18b]',
+  négatif: 'text-[#ff6b6b]',
+  neutre: 'text-muted',
+};
 
-function NewsCard({ item }: { item: VeilleNews }) {
+/* ── Carte article ── */
+function ArticleCard({ item }: { item: VeilleNews }) {
   const tickers = [
     ...(item.instrument_code ? [item.instrument_code] : []),
     ...(item.ticker_codes ?? []).filter((t) => t !== item.instrument_code),
   ].slice(0, 4);
+
+  const isAlerte = (item.score_impact ?? 0) >= 70;
+  const sent = item.sentiment ?? 'neutre';
+  const srcLabel = item.source_label ?? item.source ?? 'Source';
+  const timeStr = relativeTime(item.created_at ?? item.date_publication);
 
   return (
     <a
       href={item.source_url ?? '#'}
       target="_blank"
       rel="noopener noreferrer"
-      className="block bg-surface border border-border rounded-xl p-4 hover:border-accent/40 transition-colors group space-y-2"
+      className={`block border rounded-lg p-3 hover:border-accent/50 transition-colors group space-y-1.5 ${
+        isAlerte
+          ? 'bg-[#ff6b6b]/5 border-[#ff6b6b]/30'
+          : 'bg-surface border-border'
+      }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-foreground leading-snug group-hover:text-accent transition-colors line-clamp-2 flex-1">
-          {item.titre}
-        </p>
-        <span
-          className={`shrink-0 text-xs px-1.5 py-0.5 rounded border font-mono tabular ${sentimentClass(item.sentiment)}`}
-        >
-          {sentimentIcon(item.sentiment)}
+      {isAlerte && (
+        <span className="text-[10px] font-bold text-[#ff6b6b] uppercase tracking-widest">
+          🔔 Alerte
         </span>
-      </div>
-
-      {item.resume && (
-        <p className="text-muted text-xs line-clamp-2">{item.resume}</p>
       )}
-
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs text-muted tabular">
-          {relativeTime(item.created_at ?? item.date_publication)}
+      <p className="text-sm font-medium text-foreground leading-snug group-hover:text-accent transition-colors line-clamp-2">
+        {item.titre}
+      </p>
+      {item.resume && (
+        <p className="text-xs text-muted line-clamp-1">{item.resume}</p>
+      )}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className={`text-[11px] font-mono ${SENT_CLS[sent]}`}>
+          {SENT_ICON[sent]}
         </span>
-        {item.source_label && (
-          <span className="text-xs bg-surface-alt px-1.5 py-0.5 rounded text-muted border border-border">
-            {item.source_label}
-          </span>
-        )}
+        <span className="text-xs text-muted">{srcLabel}</span>
+        <span className="text-xs text-muted">· {timeStr}</span>
         {item.secteur && (
-          <span className="text-xs text-info px-1.5 py-0.5 rounded bg-info/10 border border-info/20">
+          <span className="text-[10px] bg-accent/10 text-accent border border-accent/20 px-1.5 py-0.5 rounded">
             {item.secteur}
           </span>
         )}
-        {tickers.map((t) => (
-          <span
-            key={t}
-            className="text-xs font-mono tabular text-accent px-1.5 py-0.5 rounded bg-accent/10 border border-accent/20"
-          >
-            {t}
-          </span>
-        ))}
-        {(item.score_impact ?? 0) >= 70 && (
-          <span className="text-xs text-gold px-1.5 py-0.5 rounded bg-gold/10 border border-gold/20">
-            🔔 Alerte
-          </span>
-        )}
+        {tickers.map((t) => <TickerBadge key={t} code={t} />)}
+        <span className="text-[10px] text-muted ml-auto">
+          {item.source?.includes('brvm') ? 'BRVM off.' : item.source_label?.includes('Sika') ? 'RSS' : 'Web'}
+        </span>
       </div>
     </a>
   );
 }
 
+/* ── Heatmap tickers ── */
 function HeatmapView({ news }: { news: VeilleNews[] }) {
   const tickers = useMemo(() => {
-    const map = new Map<string, { count: number; sentiments: string[] }>();
+    const map = new Map<string, { count: number; pos: number; neg: number }>();
     for (const n of news) {
-      const codes = [
-        ...(n.instrument_code ? [n.instrument_code] : []),
-        ...(n.ticker_codes ?? []),
-      ];
+      const codes = [...(n.instrument_code ? [n.instrument_code] : []), ...(n.ticker_codes ?? [])];
       for (const c of codes) {
-        if (!map.has(c)) map.set(c, { count: 0, sentiments: [] });
+        if (!map.has(c)) map.set(c, { count: 0, pos: 0, neg: 0 });
         const e = map.get(c)!;
         e.count++;
-        if (n.sentiment) e.sentiments.push(n.sentiment);
+        if (n.sentiment === 'positif') e.pos++;
+        if (n.sentiment === 'négatif') e.neg++;
       }
     }
-    return [...map.entries()]
-      .sort((a, b) => b[1].count - a[1].count)
-      .map(([code, { count, sentiments }]) => {
-        const pos = sentiments.filter((s) => s === 'positif').length;
-        const neg = sentiments.filter((s) => s === 'négatif').length;
-        const dominant = pos > neg ? 'positif' : neg > pos ? 'négatif' : 'neutre';
-        return { code, count, dominant };
-      });
+    return [...map.entries()].sort((a, b) => b[1].count - a[1].count);
   }, [news]);
 
-  if (tickers.length === 0) {
-    return (
-      <p className="text-muted text-sm text-center py-12">
-        Aucune couverture sur les 7 derniers jours.
-      </p>
-    );
-  }
+  if (!tickers.length) return <p className="text-muted text-sm text-center py-12">Aucune couverture sur 7 jours.</p>;
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-      {tickers.map(({ code, count, dominant }) => {
-        const bg =
-          dominant === 'positif'
-            ? 'bg-up/20 border-up/40 text-up'
-            : dominant === 'négatif'
-              ? 'bg-down/20 border-down/40 text-down'
-              : 'bg-surface border-border text-muted';
+    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+      {tickers.map(([code, { count, pos, neg }]) => {
+        const dom = pos > neg ? 'up' : neg > pos ? 'down' : 'neu';
+        const cls = dom === 'up' ? 'bg-[#3fe18b]/20 border-[#3fe18b]/40 text-[#3fe18b]'
+          : dom === 'down' ? 'bg-[#ff6b6b]/20 border-[#ff6b6b]/40 text-[#ff6b6b]'
+          : 'bg-surface border-border text-muted';
         return (
-          <div
-            key={code}
-            className={`rounded-lg border p-3 text-center cursor-default ${bg}`}
-            title={`${count} article${count > 1 ? 's' : ''}`}
-          >
-            <p className="text-xs font-mono font-bold tabular">{code}</p>
-            <p className="text-xs mt-0.5 opacity-70">{count}</p>
+          <div key={code} className={`rounded-lg border p-2.5 text-center ${cls}`} title={`${count} article(s)`}>
+            <p className="text-xs font-mono font-bold">{code}</p>
+            <p className="text-[10px] mt-0.5 opacity-70">{count}</p>
           </div>
         );
       })}
@@ -168,247 +149,260 @@ function HeatmapView({ news }: { news: VeilleNews[] }) {
   );
 }
 
-export default function VeilleDashboard({ news, stats, secteurs, topSources }: Props) {
-  const [tab, setTab] = useState<Tab>('flux');
-  const [secteurFilter, setSecteurFilter] = useState<string>('');
-  const [sentimentFilter, setSentimentFilter] = useState<string>('');
-  const [search, setSearch] = useState('');
-
-  const alertes = useMemo(
-    () => news.filter((n) => (n.score_impact ?? 0) >= 70),
-    [news],
+/* ── Export CSV ── */
+function exportCSV(news: VeilleNews[]) {
+  const header = 'Date,Titre,Source,Sentiment,Impact,Ticker,URL';
+  const rows = news.map((n) =>
+    [
+      n.date_publication,
+      `"${n.titre.replace(/"/g, '""')}"`,
+      n.source_label ?? n.source,
+      n.sentiment ?? '',
+      n.score_impact ?? 0,
+      n.instrument_code ?? '',
+      n.source_url ?? '',
+    ].join(','),
   );
+  const blob = new Blob([header + '\n' + rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `veille-brvm-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+}
 
-  const filteredNews = useMemo(() => {
-    return news.filter((n) => {
-      if (secteurFilter && n.secteur !== secteurFilter) return false;
-      if (sentimentFilter && n.sentiment !== sentimentFilter) return false;
-      if (
-        search &&
-        !n.titre.toLowerCase().includes(search.toLowerCase()) &&
-        !(n.resume ?? '').toLowerCase().includes(search.toLowerCase())
-      )
-        return false;
-      return true;
-    });
-  }, [news, secteurFilter, sentimentFilter, search]);
+/* ── Composant principal ── */
+export default function VeilleDashboard({ news, stats, secteurs, topSources }: Props) {
+  const [view, setView] = useState<View>('flux');
+  const [secteurFilter, setSecteurFilter] = useState('');
+  const [sentimentFilter, setSentimentFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const [showAlertes, setShowAlertes] = useState(false);
 
-  const TABS = [
-    { id: 'flux' as Tab, label: 'Flux', count: news.length },
-    { id: 'heatmap' as Tab, label: 'Heatmap', count: stats.covered },
-    { id: 'alertes' as Tab, label: 'Alertes', count: stats.alertes },
-    { id: 'sources' as Tab, label: 'Sources', count: topSources.length },
+  const alertes = useMemo(() => news.filter((n) => (n.score_impact ?? 0) >= 70), [news]);
+  const alertesCritiques = alertes.slice(0, 3);
+
+  const filtered = useMemo(() => {
+    let items = showAlertes ? alertes : news;
+    if (secteurFilter) items = items.filter((n) => n.secteur === secteurFilter);
+    if (sentimentFilter) items = items.filter((n) => n.sentiment === sentimentFilter);
+    if (search) {
+      const q = search.toLowerCase();
+      items = items.filter(
+        (n) => n.titre.toLowerCase().includes(q) || (n.resume ?? '').toLowerCase().includes(q),
+      );
+    }
+    return items;
+  }, [news, alertes, showAlertes, secteurFilter, sentimentFilter, search]);
+
+  const reset = useCallback(() => {
+    setSecteurFilter('');
+    setSentimentFilter('');
+    setSearch('');
+    setShowAlertes(false);
+  }, []);
+
+  const lastItem = news[0];
+  const lastTime = lastItem ? relativeTime(lastItem.created_at ?? lastItem.date_publication) : '—';
+  const lastSrc = lastItem?.source_label ?? lastItem?.source ?? '—';
+
+  const VIEWS: { id: View; label: string; icon: string; count: number }[] = [
+    { id: 'flux', label: 'Flux', icon: '≡', count: news.length },
+    { id: 'heatmap', label: 'Heatmap', icon: '⬛', count: stats.covered },
+    { id: 'alertes', label: 'Alertes', icon: '🔔', count: stats.alertes },
+    { id: 'matieres', label: 'Matières', icon: '◈', count: 0 },
+    { id: 'sources', label: 'Sources', icon: '⌬', count: topSources.length },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <StatCard label="Articles 7j" value={stats.total7d} />
-        <StatCard label="Aujourd'hui" value={stats.today} />
-        <StatCard
-          label="Alertes"
-          value={stats.alertes}
-          sub="impact ≥ 70%"
-        />
-        <StatCard
-          label="Couverts"
-          value={`${stats.covered}/${stats.totalSocietes}`}
-          sub="sociétés 7j"
-        />
-        <StatCard
-          label="Sans actu"
-          value={stats.totalSocietes - stats.covered}
-          sub="derniers 7j"
-        />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 bg-surface border border-border rounded-xl p-1 w-fit">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`px-4 py-1.5 rounded-lg text-sm transition-colors flex items-center gap-2 ${
-              tab === t.id
-                ? 'bg-accent text-bg font-semibold'
-                : 'text-muted hover:text-foreground'
-            }`}
-          >
-            {t.label}
-            <span
-              className={`text-xs tabular px-1 rounded ${
-                tab === t.id ? 'bg-bg/30 text-bg' : 'bg-surface-alt text-muted'
-              }`}
-            >
-              {t.count}
-            </span>
-          </button>
+    <div className="space-y-4">
+      {/* Stats bar */}
+      <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
+        {[
+          { label: 'ARTICLES 7J', val: stats.total7d, cls: 'text-foreground' },
+          { label: "AUJOURD'HUI", val: stats.today, cls: 'text-[#3fe18b]' },
+          { label: 'ALERTES', val: stats.alertes, cls: 'text-[#ff6b6b]' },
+          { label: 'COUVERTS', val: `${stats.covered}/${stats.totalSocietes}`, cls: 'text-accent' },
+          { label: 'SANS ACTU', val: stats.totalSocietes - stats.covered, cls: 'text-muted' },
+        ].map((s) => (
+          <div key={s.label} className="bg-surface border border-border rounded-lg p-3 text-center">
+            <p className="text-[10px] uppercase tracking-widest text-muted">{s.label}</p>
+            <p className={`text-2xl font-bold tabular mt-0.5 ${s.cls}`}>{s.val}</p>
+          </div>
         ))}
       </div>
 
-      {/* Content */}
-      {(tab === 'flux' || tab === 'alertes') && (
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Main feed */}
-          <div className="flex-1 space-y-4 min-w-0">
-            {/* Filters (flux only) */}
-            {tab === 'flux' && (
-              <div className="flex flex-wrap gap-2">
-                <input
-                  type="search"
-                  placeholder="Rechercher…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="flex-1 min-w-48 bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-accent"
-                />
-                <select
-                  value={secteurFilter}
-                  onChange={(e) => setSecteurFilter(e.target.value)}
-                  className="bg-surface border border-border rounded-lg px-2 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent"
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <input
+          type="search"
+          placeholder="Titre, ticker, source…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 min-w-48 bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-accent"
+        />
+        <select title="Filtrer par secteur" value={secteurFilter} onChange={(e) => setSecteurFilter(e.target.value)}
+          className="bg-surface border border-border rounded-lg px-2 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent">
+          <option value="">Tous secteurs</option>
+          {secteurs.map((s) => <option key={s.secteur} value={s.secteur}>{s.secteur}</option>)}
+        </select>
+        <select title="Filtrer par sentiment" value={sentimentFilter} onChange={(e) => setSentimentFilter(e.target.value)}
+          className="bg-surface border border-border rounded-lg px-2 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent">
+          <option value="">Tout sentiment</option>
+          <option value="positif">▲ Positif</option>
+          <option value="neutre">● Neutre</option>
+          <option value="négatif">▼ Négatif</option>
+        </select>
+        <button type="button" onClick={() => setShowAlertes(!showAlertes)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+            showAlertes ? 'bg-[#ff6b6b] border-[#ff6b6b] text-white' : 'bg-surface border-border text-muted hover:text-foreground'
+          }`}>
+          🔔 Alertes
+        </button>
+        <button type="button" onClick={reset}
+          className="px-3 py-1.5 rounded-lg text-sm border border-border text-muted hover:text-foreground transition-colors">
+          ✕ Reset
+        </button>
+        <button type="button" onClick={() => exportCSV(filtered)}
+          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-accent text-bg border border-accent hover:bg-accent/90 transition-colors">
+          ↓ CSV
+        </button>
+      </div>
+
+      {/* Body : sidebar + main */}
+      <div className="flex gap-4">
+        {/* Sidebar */}
+        <div className="w-48 shrink-0 space-y-4">
+          {/* VUES */}
+          <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5">
+            <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Vues</p>
+            {VIEWS.map((v) => (
+              <button
+                key={v.id}
+                type="button" onClick={() => setView(v.id)}
+                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-sm transition-colors ${
+                  view === v.id ? 'bg-accent/10 text-accent font-semibold' : 'text-muted hover:text-foreground hover:bg-surface-alt'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="text-xs w-4">{v.icon}</span>
+                  {v.label}
+                </span>
+                {v.count > 0 && (
+                  <span className={`text-xs tabular px-1.5 rounded ${view === v.id ? 'bg-accent/20 text-accent' : 'bg-surface-alt text-muted'}`}>
+                    {v.count > 99 ? '150+' : v.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* SECTEURS */}
+          {secteurs.length > 0 && (
+            <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5">
+              <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Secteurs</p>
+              {secteurs.slice(0, 10).map((s) => (
+                <button
+                  key={s.secteur}
+                  type="button" onClick={() => setSecteurFilter(secteurFilter === s.secteur ? '' : s.secteur)}
+                  className={`w-full flex items-center justify-between px-2 py-1 rounded text-xs transition-colors ${
+                    secteurFilter === s.secteur ? 'text-accent font-semibold' : 'text-muted hover:text-foreground'
+                  }`}
                 >
-                  <option value="">Tous secteurs</option>
-                  {secteurs.map((s) => (
-                    <option key={s.secteur} value={s.secteur}>
-                      {s.secteur}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={sentimentFilter}
-                  onChange={(e) => setSentimentFilter(e.target.value)}
-                  className="bg-surface border border-border rounded-lg px-2 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent"
-                >
-                  <option value="">Tout sentiment</option>
-                  <option value="positif">▲ Positif</option>
-                  <option value="neutre">● Neutre</option>
-                  <option value="négatif">▼ Négatif</option>
-                </select>
-              </div>
-            )}
+                  <span className="truncate">{s.secteur}</span>
+                  <span className="tabular text-muted shrink-0">{s.count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-            {/* Articles */}
-            {tab === 'alertes' ? (
-              alertes.length === 0 ? (
-                <div className="text-center py-12 text-muted text-sm">
-                  Aucune alerte haute priorité sur les 7 derniers jours.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {alertes.map((n) => (
-                    <NewsCard key={n.id} item={n} />
-                  ))}
-                </div>
-              )
-            ) : filteredNews.length === 0 ? (
-              <div className="text-center py-12 text-muted text-sm">
-                Aucun article ne correspond à ces filtres.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredNews.map((n) => (
-                  <NewsCard key={n.id} item={n} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="w-full lg:w-72 shrink-0 space-y-4">
-            <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
-              <h3 className="text-xs uppercase tracking-widest text-muted font-semibold">
-                Par secteur
-              </h3>
-              {secteurs.length === 0 ? (
-                <p className="text-muted text-xs">—</p>
-              ) : (
-                <ul className="space-y-2">
-                  {secteurs.slice(0, 8).map((s) => (
-                    <li
-                      key={s.secteur}
-                      className="flex items-center justify-between text-sm cursor-pointer hover:text-accent transition-colors"
-                      onClick={() =>
-                        setSecteurFilter(secteurFilter === s.secteur ? '' : s.secteur)
-                      }
-                    >
-                      <span
-                        className={
-                          secteurFilter === s.secteur ? 'text-accent' : 'text-foreground'
-                        }
-                      >
-                        {s.secteur}
-                      </span>
-                      <span className="tabular text-xs text-muted">{s.count}</span>
-                    </li>
-                  ))}
-                </ul>
+        {/* Main content */}
+        <div className="flex-1 min-w-0 space-y-3">
+          {/* Dernier article */}
+          {lastItem && view === 'flux' && (
+            <p className="text-xs text-muted border-b border-border pb-2">
+              ● Dernier : {lastTime} — {lastSrc}
+              {lastItem.instrument_code && (
+                <span className="ml-1"><TickerBadge code={lastItem.instrument_code} /></span>
               )}
-            </div>
+            </p>
+          )}
 
-            <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
-              <h3 className="text-xs uppercase tracking-widest text-muted font-semibold">
-                Top sources
-              </h3>
-              {topSources.length === 0 ? (
-                <p className="text-muted text-xs">—</p>
+          {/* Alertes critiques (bandeau) */}
+          {view === 'flux' && alertesCritiques.length > 0 && !showAlertes && (
+            <div className="bg-[#ff6b6b]/5 border border-[#ff6b6b]/30 rounded-xl p-3 space-y-2">
+              <p className="text-xs font-bold text-[#ff6b6b] uppercase tracking-widest">
+                🔔 Alertes critiques ({stats.alertes})
+              </p>
+              {alertesCritiques.map((n) => {
+                const tickers = [
+                  ...(n.instrument_code ? [n.instrument_code] : []),
+                  ...(n.ticker_codes ?? []).filter((t) => t !== n.instrument_code),
+                ].slice(0, 2);
+                return (
+                  <a key={n.id} href={n.source_url ?? '#'} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 group">
+                    <div className="flex gap-1 shrink-0">{tickers.map((t) => <TickerBadge key={t} code={t} />)}</div>
+                    <span className="text-sm text-foreground group-hover:text-accent transition-colors line-clamp-1">
+                      {n.titre}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Flux / Alertes */}
+          {(view === 'flux' || view === 'alertes') && (
+            <>
+              <p className="text-xs text-muted">
+                {view === 'alertes' ? `Alertes ${alertes.length} résultats` : `Flux ${filtered.length} résultats`}
+              </p>
+              {(view === 'alertes' ? alertes : filtered).length === 0 ? (
+                <p className="text-center text-muted text-sm py-10">Aucun article ne correspond à ces filtres.</p>
               ) : (
-                <ul className="space-y-2">
-                  {topSources.map((s) => (
-                    <li key={s.label} className="flex items-center justify-between text-sm">
-                      <span className="text-foreground truncate max-w-40">{s.label}</span>
-                      <span className="tabular text-xs text-muted">{s.count}</span>
-                    </li>
+                <div className="space-y-2">
+                  {(view === 'alertes' ? alertes : filtered).map((n) => (
+                    <ArticleCard key={n.id} item={n} />
                   ))}
-                </ul>
+                </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
+            </>
+          )}
 
-      {tab === 'heatmap' && (
-        <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
-          <div className="flex items-center gap-4 text-xs text-muted">
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded bg-up/30 inline-block" />
-              Sentiment positif
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded bg-down/30 inline-block" />
-              Sentiment négatif
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded bg-border inline-block" />
-              Neutre / non classifié
-            </span>
-          </div>
-          <HeatmapView news={news} />
-        </div>
-      )}
-
-      {tab === 'sources' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {topSources.map((s, i) => (
-            <div
-              key={s.label}
-              className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4"
-            >
-              <span className="text-2xl font-bold tabular text-muted w-8 shrink-0">
-                {i + 1}
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{s.label}</p>
-                <p className="text-xs text-muted">
-                  {s.count} article{s.count > 1 ? 's' : ''} — 7j
-                </p>
+          {/* Heatmap */}
+          {view === 'heatmap' && (
+            <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
+              <div className="flex gap-4 text-xs text-muted">
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-[#3fe18b]/30 inline-block" />Positif</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-[#ff6b6b]/30 inline-block" />Négatif</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-border inline-block" />Neutre</span>
               </div>
-              <span className="ml-auto text-2xl font-bold tabular text-accent shrink-0">
-                {s.count}
-              </span>
+              <HeatmapView news={news} />
             </div>
-          ))}
+          )}
+
+          {/* Sources */}
+          {view === 'sources' && (
+            <div className="space-y-2">
+              {topSources.map((s, i) => (
+                <div key={s.label} className="bg-surface border border-border rounded-lg px-4 py-3 flex items-center gap-3">
+                  <span className="text-lg font-bold tabular text-muted w-6 shrink-0">{i + 1}</span>
+                  <span className="flex-1 text-sm text-foreground">{s.label}</span>
+                  <span className="text-sm font-bold tabular text-accent">{s.count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Matières (placeholder) */}
+          {view === 'matieres' && (
+            <div className="bg-surface border border-border rounded-xl p-8 text-center text-muted text-sm">
+              Données matières premières disponibles après branchement du pipeline Python complet.
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
