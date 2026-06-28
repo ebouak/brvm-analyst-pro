@@ -246,6 +246,181 @@ def fetch_supabase_articles(days: int = 14) -> list[dict]:
         return []
 
 
+# ── 3b. Corrélations BRVM ↔ Matières premières (même calcul que /premium/correlations) ──
+
+# Filières agro-industrielles BRVM : matière sous-jacente → producteurs cotés
+_FILIERES_CORR = {
+    "Huile de palme": {"commodity": "palm_oil", "codes": ["PALC", "SOGC"], "couleur": "#f59e0b"},
+    "Caoutchouc":     {"commodity": "rubber",   "codes": ["SAPH", "SOGB"], "couleur": "#22c55e"},
+    "Sucre":          {"commodity": "sugar",     "codes": ["STAC", "SUCR"], "couleur": "#e879f9"},
+    "Cacao":          {"commodity": "cocoa",     "codes": ["CFAC"],         "couleur": "#a16207"},
+}
+
+
+def _pearson(xs: list[float], ys: list[float]) -> float | None:
+    """Corrélation de Pearson sur rendements mensuels (même méthode que la page /correlations)."""
+    n = len(xs)
+    if n < 6:
+        return None
+    mx = sum(xs) / n
+    my = sum(ys) / n
+    num = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    dx = sum((x - mx) ** 2 for x in xs) ** 0.5
+    dy = sum((y - my) ** 2 for y in ys) ** 0.5
+    if dx == 0 or dy == 0:
+        return None
+    return round(num / (dx * dy), 3)
+
+
+def _monthly_returns(levels: list[float]) -> list[float]:
+    """Rendements mensuels (variation % mois sur mois). Évite les fausses corr. de tendance."""
+    return [
+        (levels[i] - levels[i - 1]) / levels[i - 1]
+        for i in range(1, len(levels))
+        if levels[i - 1] > 0
+    ]
+
+
+def fetch_brvm_correlations() -> list[dict]:
+    """
+    Calcule la corrélation Pearson (mensuelle) entre chaque filière agro BRVM
+    et sa matière première sous-jacente. Données : commodity_prices + brvm_actions_daily.
+    Retourne une liste de dicts prêts pour build_correlation_table() et le prompt.
+    """
+    if not SUPABASE_URL or not SERVICE_KEY:
+        log.warning("Supabase non configuré — skip corrélations")
+        return []
+
+    import requests
+
+    since = (datetime.now(timezone.utc).replace(year=datetime.now().year - 5)).date().isoformat()
+    headers = {"apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}"}
+
+    # 1) Tous les prix commodity (monthly) depuis 5 ans
+    commo_keys = ",".join({m["commodity"] for m in _FILIERES_CORR.values()})
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/commodity_prices"
+            f"?commodity=in.({commo_keys})&date=gte.{since}"
+            f"&select=commodity,date,price&order=date.asc&limit=5000",
+            headers=headers, timeout=20,
+        )
+        resp.raise_for_status()
+        commo_rows = resp.json()
+    except Exception as e:
+        log.warning("Supabase commodity_prices erreur : %s", e)
+        return []
+
+    # Index : commodity_key → {YYYY-MM: price}
+    commo_by_month: dict[str, dict[str, float]] = {}
+    for row in commo_rows:
+        key = row["commodity"]
+        month = row["date"][:7]
+        commo_by_month.setdefault(key, {})[month] = float(row["price"])
+
+    # 2) Cours des actions agro (journalier) → moyenne mensuelle
+    all_codes = list({c for m in _FILIERES_CORR.values() for c in m["codes"]})
+    codes_str = ",".join(all_codes)
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/brvm_actions_daily"
+            f"?code=in.({codes_str})&date_marche=gte.{since}"
+            f"&select=code,cours_jour,date_marche"
+            f"&not.cours_jour=is.null&order=date_marche.asc&limit=20000",
+            headers=headers, timeout=30,
+        )
+        resp.raise_for_status()
+        stock_rows = resp.json()
+    except Exception as e:
+        log.warning("Supabase brvm_actions_daily erreur : %s", e)
+        return []
+
+    # Index : code → {YYYY-MM: [prices...]}
+    stock_vals: dict[str, dict[str, list[float]]] = {}
+    for row in stock_rows:
+        code = row["code"]
+        month = row["date_marche"][:7]
+        val = row.get("cours_jour")
+        if val is None:
+            continue
+        stock_vals.setdefault(code, {}).setdefault(month, []).append(float(val))
+
+    # Moyenne mensuelle par code
+    stock_by_month: dict[str, dict[str, float]] = {}
+    for code, months in stock_vals.items():
+        stock_by_month[code] = {m: sum(vs) / len(vs) for m, vs in months.items()}
+
+    # 3) Calcul Pearson pour chaque filière
+    results = []
+    for label, meta in _FILIERES_CORR.items():
+        commo_m = commo_by_month.get(meta["commodity"], {})
+
+        # Moyenne mensuelle agrégée sur tous les codes de la filière
+        all_months = set(commo_m.keys())
+        for code in meta["codes"]:
+            all_months &= set(stock_by_month.get(code, {}).keys())
+        common = sorted(all_months)
+
+        if len(common) < 6:
+            results.append({
+                "matiere": label, "codes": meta["codes"], "couleur": meta["couleur"],
+                "coefficient": None, "n_months": len(common), "available": False,
+                "interpretation": "Données insuffisantes", "direction": "neutre",
+                "macro_reading": f"{label} : moins de 6 mois communs disponibles.",
+            })
+            continue
+
+        # Moyenne des actions de la filière
+        agg_stock = []
+        for m in common:
+            vals = [stock_by_month[code][m] for code in meta["codes"] if m in stock_by_month.get(code, {})]
+            agg_stock.append(sum(vals) / len(vals) if vals else 0)
+
+        commo_levels = [commo_m[m] for m in common]
+        stock_ret = _monthly_returns(agg_stock)
+        commo_ret = _monthly_returns(commo_levels)
+        min_len = min(len(stock_ret), len(commo_ret))
+        coeff = _pearson(commo_ret[:min_len], stock_ret[:min_len])
+
+        # Interprétation
+        abs_c = abs(coeff) if coeff is not None else 0
+        if abs_c > 0.7:
+            interp = "Forte"
+        elif abs_c > 0.4:
+            interp = "Modérée"
+        else:
+            interp = "Faible"
+        direction = "positive" if (coeff or 0) >= 0 else "négative"
+
+        # Lecture macro simplifiée (même logique que agroMacro.ts)
+        if len(commo_levels) >= 12:
+            change12 = (commo_levels[-1] - commo_levels[-13]) / commo_levels[-13] if commo_levels[-13] else 0
+        else:
+            change12 = 0
+        trend = "hausse" if change12 > 0.05 else "baisse" if change12 < -0.05 else "stable"
+        sign = "+" if change12 >= 0 else ""
+        if coeff and abs_c > 0.3:
+            impact = (
+                f" Marges des producteurs orientées favorablement, corrélation {coeff:+.2f}."
+                if trend == "hausse" else
+                f" Pression sur les marges, susceptible de peser sur le cours (corrélation {coeff:+.2f})."
+                if trend == "baisse" else ""
+            )
+        else:
+            impact = " Lien faible avec le cours de l'action sur la période."
+        macro = f"{label} : {sign}{change12*100:.1f}% sur 12 mois, tendance {trend}.{impact}"
+
+        results.append({
+            "matiere": label, "codes": meta["codes"], "couleur": meta["couleur"],
+            "coefficient": coeff, "n_months": min_len + 1, "available": True,
+            "interpretation": interp, "direction": direction,
+            "macro_reading": macro,
+        })
+        log.info("Corrélation %s ↔ %s : r=%.3f (%s)", label, meta["commodity"], coeff or 0, interp)
+
+    return results
+
+
 # ── 4. Score exposition BRVM ──────────────────────────────────────────────────
 
 def compute_brvm_scores(
@@ -310,7 +485,7 @@ def build_wb_summary(wb_snapshot: dict) -> dict:
 
 # ── 5. Prompt DeepSeek + Builders visuels Python ─────────────────────────────
 
-def build_editorial_prompt(prices: list, wb: dict, articles: list, brvm_scores: dict) -> str:
+def build_editorial_prompt(prices: list, wb: dict, articles: list, brvm_scores: dict, correlations: list | None = None) -> str:
     """
     DeepSeek génère UNIQUEMENT le texte éditorial (synthèse + 8 analyses + réactions + perspectives).
     Python construit séparément le SVG, les tables et le footer.
@@ -334,6 +509,18 @@ def build_editorial_prompt(prices: list, wb: dict, articles: list, brvm_scores: 
 
     top_brvm = ", ".join(f"{tk}({s}/10)" for tk, s in list(brvm_scores.items())[:5])
 
+    corr_ctx = ""
+    if correlations:
+        corr_ctx = "\nCorrélations BRVM ↔ Matières premières (Pearson, variations mensuelles) :"
+        for c in correlations:
+            if c["available"] and c["coefficient"] is not None:
+                corr_ctx += (
+                    f"\n  {c['matiere']} ({', '.join(c['codes'])}) : r={c['coefficient']:+.2f}"
+                    f" [{c['interpretation']}] — {c['macro_reading']}"
+                )
+            else:
+                corr_ctx += f"\n  {c['matiere']} ({', '.join(c['codes'])}) : données insuffisantes"
+
     return f"""Tu es rédacteur senior marchés/commodities pour WestBourse (BRVM Abidjan).
 Génère l'analyse éditoriale des matières premières — Semaine {week_num}/{year}.
 
@@ -342,12 +529,14 @@ DONNÉES :
 {wb_ctx}
 {art_ctx}
 Top BRVM scorées : {top_brvm}
+{corr_ctx}
 
 CONSIGNE STRICTE :
 - Produis UNIQUEMENT les sections texte ci-dessous.
 - Styles CSS 100% INLINE sur chaque balise (pas de <style>, pas de class externe).
 - Commence par <section> et termine par </section>.
-- Aucune table de prix, aucun graphique (déjà générés par le système).
+- Aucune table de prix, aucun graphique, aucune table de corrélation (tous déjà générés par le système).
+- Si une corrélation est forte (|r| > 0.7), cite-la explicitement dans l'analyse de la matière concernée.
 - Longueur : 800 à 1100 mots de texte éditorial.
 
 STRUCTURE EXACTE À PRODUIRE :
@@ -529,6 +718,65 @@ def build_brvm_table(prices: list, brvm_scores: dict) -> str:
     )
 
 
+def build_correlation_table(correlations: list[dict]) -> str:
+    """Table corrélations BRVM ↔ Matières premières (données réelles Supabase)."""
+    if not correlations:
+        return ""
+    rows = ""
+    for c in correlations:
+        coeff = c.get("coefficient")
+        if not c["available"] or coeff is None:
+            badge = '<span style="font-size:11px;color:#94a3b8;">n/d</span>'
+            interp_cell = '<span style="font-size:12px;color:#94a3b8;">Historique insuffisant</span>'
+        else:
+            abs_c = abs(coeff)
+            if abs_c > 0.7:
+                b_bg, b_col = ("#f0fdf4", "#059669") if coeff > 0 else ("#fef2f2", "#dc2626")
+                strength = "Forte"
+            elif abs_c > 0.4:
+                b_bg, b_col = "#fefce8", "#d97706"
+                strength = "Modérée"
+            else:
+                b_bg, b_col = "#f8fafc", "#64748b"
+                strength = "Faible"
+            sign = "+" if coeff >= 0 else ""
+            badge = (
+                f'<span style="background:{b_bg};color:{b_col};padding:2px 9px;'
+                f'border-radius:12px;font-size:11px;font-weight:700;">'
+                f'{sign}{coeff:.2f} — {strength}</span>'
+            )
+            interp_cell = (
+                f'<span style="font-size:12px;color:#475569;">'
+                f'{"Mouvement synchrone" if abs_c > 0.7 else "Corrélation partielle" if abs_c > 0.4 else "Peu corrélé"}'
+                f' · corr. {c["direction"]}</span>'
+            )
+        rows += (
+            f'<tr>'
+            f'<td style="padding:10px 12px;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9;">'
+            f'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;'
+            f'background:{c["couleur"]};margin-right:7px;vertical-align:middle;"></span>'
+            f'{c["matiere"]}</td>'
+            f'<td style="padding:10px 12px;font-family:monospace;font-size:11px;color:#64748b;border-bottom:1px solid #f1f5f9;">{", ".join(c["codes"])}</td>'
+            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">{badge}</td>'
+            f'<td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;">{interp_cell}</td>'
+            f'<td style="padding:10px 12px;font-size:11px;color:#64748b;border-bottom:1px solid #f1f5f9;">'
+            f'{c["n_months"]} mois</td>'
+            f'</tr>'
+        )
+    th = 'style="padding:10px 12px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;"'
+    return (
+        f'<div style="margin-bottom:28px;">'
+        f'<h2 style="font-size:18px;font-weight:700;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px;margin-bottom:6px;">Corrélations BRVM ↔ Matières premières</h2>'
+        f'<p style="font-size:12px;color:#64748b;margin-bottom:14px;">Corrélation de Pearson sur les variations mensuelles · Prix matières : World Bank Pink Sheet · Actions : cours moyen mensuel BRVM</p>'
+        f'<div style="overflow-x:auto;">'
+        f'<table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">'
+        f'<thead><tr style="background:#0f172a;">'
+        f'<th {th}>Filière</th><th {th}>Actions BRVM</th>'
+        f'<th {th}>Corrélation</th><th {th}>Interprétation</th><th {th}>Période</th>'
+        f'</tr></thead><tbody>{rows}</tbody></table></div></div>'
+    )
+
+
 def build_footer(year: int) -> str:
     return (
         f'<footer style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;">'
@@ -543,16 +791,22 @@ def build_footer(year: int) -> str:
     )
 
 
-def assemble_content_html(editorial_html: str, prices: list, brvm_scores: dict) -> str:
+def assemble_content_html(
+    editorial_html: str,
+    prices: list,
+    brvm_scores: dict,
+    correlations: list | None = None,
+) -> str:
     """
     Assemble le HTML final : visuels Python + texte DeepSeek.
-    Structure : <article> SVG + table prix + éditorial + table BRVM + footer </article>
+    Structure : <article> SVG + table prix + éditorial + table BRVM + table corrélations + footer </article>
     """
     year = datetime.now(timezone(timedelta(hours=1))).year
     text = editorial_html.strip()
     if not text.startswith("<section"):
         text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
                 f'color:#1e293b;line-height:1.75;">{text}</section>')
+    corr_html = build_correlation_table(correlations or [])
     return (
         '<article style="font-family:\'Segoe UI\',system-ui,sans-serif;'
         'max-width:860px;margin:0 auto;color:#1e293b;line-height:1.75;">\n'
@@ -560,6 +814,7 @@ def assemble_content_html(editorial_html: str, prices: list, brvm_scores: dict) 
         + build_price_table(prices) + "\n"
         + text + "\n"
         + build_brvm_table(prices, brvm_scores) + "\n"
+        + corr_html + "\n"
         + build_footer(year) + "\n"
         + "</article>"
     )
@@ -743,17 +998,23 @@ def main():
     log.info("    → %d articles récupérés", len(articles))
 
     # Étape 4 : Scores BRVM
-    log.info("4/6 Calcul scores exposition BRVM...")
+    log.info("4/7 Calcul scores exposition BRVM...")
     brvm_scores = compute_brvm_scores(yf_prices, wb_snapshot)
     log.info("    → %d tickers scorés", len(brvm_scores))
 
+    # Étape 4b : Corrélations BRVM ↔ Matières premières
+    log.info("4b/7 Calcul corrélations BRVM ↔ matières premières...")
+    correlations = fetch_brvm_correlations()
+    log.info("    → %d filières analysées (%d disponibles)",
+             len(correlations), sum(1 for c in correlations if c["available"]))
+
     # Étape 5 : Prompt + DeepSeek
-    log.info("5/6 Génération article via DeepSeek...")
+    log.info("5/7 Génération article via DeepSeek...")
     prices = build_prices_list(yf_prices)
     wb_summary = build_wb_summary(wb_snapshot)
     # Convertir scores 0-100 → 0-10 pour le prompt et les tables
     brvm_scores_simple = {tk: round(v["score"] / 10, 1) for tk, v in brvm_scores.items()}
-    prompt = build_editorial_prompt(prices, wb_summary, articles, brvm_scores_simple)
+    prompt = build_editorial_prompt(prices, wb_summary, articles, brvm_scores_simple, correlations)
 
     if args.dry_run:
         log.info("[DRY-RUN] Appel DeepSeek ignoré")
@@ -761,7 +1022,7 @@ def main():
     else:
         editorial_html = call_deepseek(prompt)
 
-    article_html = assemble_content_html(editorial_html, prices, brvm_scores_simple)
+    article_html = assemble_content_html(editorial_html, prices, brvm_scores_simple, correlations)
 
     # Étape 6 : HTML final
     title = f"Matières premières BRVM – Semaine {week:02d}/{year} | WestBourse"
@@ -773,7 +1034,7 @@ def main():
     full_html = build_full_html(article_html, title, description)
 
     # Étape 7 : Sauvegarde fichier
-    log.info("6/6 Sauvegarde + publication...")
+    log.info("6/7 Sauvegarde + publication...")
     save_html(full_html, slug, dry_run=args.dry_run)
 
     # Étape 8 : Upsert Supabase
