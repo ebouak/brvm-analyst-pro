@@ -77,7 +77,8 @@ def _supabase_headers() -> dict[str, str]:
         "apikey": SERVICE_KEY,
         "Authorization": f"Bearer {SERVICE_KEY}",
         "Content-Type": "application/json",
-        "Prefer": "resolution=ignore-duplicates,return=minimal",
+        # merge-duplicates : upsert par la clé de conflit (dedupe_hash)
+        "Prefer": "resolution=merge-duplicates,return=minimal",
     }
 
 
