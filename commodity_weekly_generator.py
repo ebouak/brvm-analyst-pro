@@ -43,13 +43,13 @@ log = logging.getLogger("wb-commodity-weekly")
 # ── Constantes ────────────────────────────────────────────────────────────────
 
 YFINANCE_TICKERS = {
-    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": ["SIFCA", "CFAC"]},
+    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": ["NEIC", "SIFCA", "SICC"]},
     "CL=F":  {"nom": "Pétrole WTI",    "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
     "BZ=F":  {"nom": "Pétrole Brent",  "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
     "KC=F":  {"nom": "Café",           "unite": "USc/lb",   "brvm": []},
-    "SB=F":  {"nom": "Sucre",          "unite": "USc/lb",   "brvm": []},
-    "CT=F":  {"nom": "Coton",          "unite": "USc/lb",   "brvm": []},
-    "GC=F":  {"nom": "Or",             "unite": "USD/oz",   "brvm": []},
+    "SB=F":  {"nom": "Sucre",          "unite": "USc/lb",   "brvm": ["NEIC"]},  # via Sucrivoire
+    "CT=F":  {"nom": "Coton",          "unite": "USc/lb",   "brvm": ["SIFCA", "CFAC"]},
+    "GC=F":  {"nom": "Or",             "unite": "USD/oz",   "brvm": []},  # pas de minier coté BRVM
     "SI=F":  {"nom": "Argent",         "unite": "USD/oz",   "brvm": []},
 }
 
@@ -72,12 +72,12 @@ def _photo_url(photo_id: str, w: int = 800, h: int = 450) -> str:
 
 # Huile de palme et caoutchouc: pas de futures yfinance stables → WB Pink Sheet
 WB_COMMODITIES = {
-    "COCOA":       {"nom": "Cacao",        "brvm": ["SIFCA", "CFAC"]},
-    "RUBBER_TSR20":{"nom": "Caoutchouc",   "brvm": ["SOGB", "SAPH"]},
-    "PALM_OIL":    {"nom": "Huile de palme","brvm": ["PALC", "SOGB", "SIFCA", "TTRC"]},
-    "CRUDE_OIL":   {"nom": "Pétrole brut", "brvm": ["TTLS", "SVOC"]},
-    "COTTON_A_IDX":{"nom": "Coton",        "brvm": []},
-    "GOLD":        {"nom": "Or",           "brvm": []},
+    "COCOA":       {"nom": "Cacao",         "brvm": ["NEIC", "SIFCA", "SICC"]},
+    "RUBBER_TSR20":{"nom": "Caoutchouc",    "brvm": ["SAPH", "SOGB"]},         # purs joueurs
+    "PALM_OIL":    {"nom": "Huile de palme","brvm": ["PALC", "SIFCA"]},
+    "CRUDE_OIL":   {"nom": "Pétrole brut",  "brvm": ["TTLS", "SVOC"]},
+    "COTTON_A_IDX":{"nom": "Coton",         "brvm": ["SIFCA", "CFAC"]},        # indirect
+    "GOLD":        {"nom": "Or",            "brvm": []},                        # pas de minier coté BRVM
 }
 
 @dataclass
@@ -687,13 +687,23 @@ def build_price_table(prices: list) -> str:
 
 def build_brvm_table(prices: list, brvm_scores: dict) -> str:
     """Table impact BRVM avec barres de score visuelles."""
+    # Scores d'exposition directe aux futures (1=faible, 5=très forte)
+    # Source: structure opérationnelle et filiales vérifiées
     BRVM_EXPOSURE = {
-        "SIFCA": {"CC=F": 4, "CL=F": 1},
-        "CFAC":  {"CC=F": 5},
-        "PALC":  {"CC=F": 1}, "SOGB": {"CC=F": 1}, "SAPH": {"CC=F": 1},
-        "TTLS":  {"CL=F": 5, "BZ=F": 5},
-        "SVOC":  {"CL=F": 5, "BZ=F": 5},
-        "SLBC":  {"SB=F": 2}, "BRVBC": {"SB=F": 2},
+        # ── Cacao / Sucre ──────────────────────────────────────────────
+        "NEIC":  {"CC=F": 5, "SB=F": 4},   # cacao + Sucrivoire (filiale sucre)
+        "SICC":  {"CC=F": 5},               # Cacao pur (Côte d'Ivoire)
+        "SIFCA": {"CC=F": 3, "CT=F": 2},   # agro-industrie diversifiée (cacao + coton)
+        # ── Caoutchouc ─────────────────────────────────────────────────
+        "SAPH":  {"CC=F": 1},              # caoutchouc naturel (Michelin affiliate) — proxy CC
+        "SOGB":  {"CC=F": 1},              # caoutchouc naturel — proxy CC
+        # ── Huile de palme ─────────────────────────────────────────────
+        "PALC":  {"SB=F": 1},              # huile de palme (pas de futures direct, proxy SB)
+        # ── Pétrole / Énergie ──────────────────────────────────────────
+        "TTLS":  {"CL=F": 5, "BZ=F": 5},  # Total Sénégal — distribution carburant
+        "SVOC":  {"CL=F": 5, "BZ=F": 5},  # SIR/Shell CI — raffinage + distribution
+        # ── Coton ──────────────────────────────────────────────────────
+        "CFAC":  {"CT=F": 3},              # filière coton Burkina (indirect)
     }
     LABELS = {
         "CC=F": "Cacao", "CL=F": "Pétrole WTI", "BZ=F": "Brent",
