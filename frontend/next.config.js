@@ -34,7 +34,10 @@ const nextConfig = {
       "default-src 'self'",
       "base-uri 'self'",
       "object-src 'none'",
-      "frame-ancestors 'none'",
+      // 'self' (pas 'none') pour autoriser l'embarquement same-origin : la page
+      // /formations/academy charge /academy/index.html dans un iframe. Protection
+      // anti-clickjacking tiers préservée (cohérent avec X-Frame-Options SAMEORIGIN).
+      "frame-ancestors 'self'",
       "form-action 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://cdn.plot.ly",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",

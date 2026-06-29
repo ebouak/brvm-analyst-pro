@@ -31,6 +31,8 @@ function showsFooter(pathname: string): boolean {
   if (pathname === '/login' || pathname === '/signup') return false;
   // /debutant a son propre thème clair (cream/teal) → pas du footer global sombre.
   if (pathname.startsWith('/debutant')) return false;
+  // /formations/academy est plein écran (iframe) → aucun chrome global.
+  if (pathname.startsWith('/formations/academy')) return false;
   if (pathname === '/') return true;
   return [...BARE_PREFIXES, ...LEGAL_PREFIXES].some((p) => pathname.startsWith(p));
 }
@@ -51,9 +53,12 @@ export default function ConditionalShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  // Encart de contact : partout sauf authentification et console admin.
+  // Encart de contact : partout sauf authentification, console admin et Academy plein écran.
   const showNudge =
-    pathname !== '/login' && pathname !== '/signup' && !pathname.startsWith('/admin');
+    pathname !== '/login' &&
+    pathname !== '/signup' &&
+    !pathname.startsWith('/admin') &&
+    !pathname.startsWith('/formations/academy');
   // /admin a sa propre console (layout dédié) → pas de shell applicatif ni footer.
   const bare =
     BARE_ROUTES.has(pathname) ||
