@@ -1,0 +1,429 @@
+{
+  "generated_at": "2026-06-28T01:27:47.995412Z",
+  "couverture": {
+    "PALC": {
+      "ticker": "PALC",
+      "nom": "PALMCI",
+      "secteur": "Agriculture",
+      "pays": "CI",
+      "nb_articles": 63,
+      "nb_alertes": 0,
+      "dernier": "2026-06-25T14:54:06"
+    },
+    "SOGB": {
+      "ticker": "SOGB",
+      "nom": "SOGB",
+      "secteur": "Agriculture",
+      "pays": "CI",
+      "nb_articles": 143,
+      "nb_alertes": 4,
+      "dernier": "2026-06-26T12:24:43"
+    },
+    "SAPH": {
+      "ticker": "SAPH",
+      "nom": "SAPH",
+      "secteur": "Agriculture",
+      "pays": "CI",
+      "nb_articles": 80,
+      "nb_alertes": 2,
+      "dernier": "2026-06-26T12:24:43"
+    },
+    "SIFCA": {
+      "ticker": "SIFCA",
+      "nom": "SIFCA",
+      "secteur": "Agriculture",
+      "pays": "CI",
+      "nb_articles": 195,
+      "nb_alertes": 0,
+      "dernier": "2026-06-25T14:54:06"
+    },
+    "SICC": {
+      "ticker": "SICC",
+      "nom": "SICC",
+      "secteur": "Agriculture",
+      "pays": "CI",
+      "nb_articles": 1,
+      "nb_alertes": 0,
+      "dernier": "2024-03-07T09:54:53"
+    },
+    "TTRC": {
+      "ticker": "TTRC",
+      "nom": "TRITURAF",
+      "secteur": "Agro-industrie",
+      "pays": "CI",
+      "nb_articles": 58,
+      "nb_alertes": 0,
+      "dernier": "2026-06-25T14:54:06"
+    },
+    "SGBC": {
+      "ticker": "SGBC",
+      "nom": "SGB CI",
+      "secteur": "Banque",
+      "pays": "CI",
+      "nb_articles": 98,
+      "nb_alertes": 2,
+      "dernier": "2026-06-21T06:07:00"
+    },
+    "BICC": {
+      "ticker": "BICC",
+      "nom": "BIC CI",
+      "secteur": "Banque",
+      "pays": "CI",
+      "nb_articles": 0,
+      "nb_alertes": 0,
+      "dernier": null
+    },
+    "ETIT": {
+      "ticker": "ETIT",
+      "nom": "Ecobank TI",
+      "secteur": "Banque",
+      "pays": "TG",
+      "nb_articles": 100,
+      "nb_alertes": 3,
+      "dernier": "2026-05-18T07:00:00"
+    },
+    "BOAB": {
+      "ticker": "BOAB",
+      "nom": "BOA Bénin",
+      "secteur": "Banque",
+      "pays": "BJ",
+      "nb_articles": 20,
+      "nb_alertes": 3,
+      "dernier": "2026-05-08T07:00:00"
+    },
+    "BOABF": {
+      "ticker": "BOABF",
+      "nom": "BOA Burkina",
+      "secteur": "Banque",
+      "pays": "BF",
+      "nb_articles": 34,
+      "nb_alertes": 3,
+      "dernier": "2026-06-22T07:15:34"
+    },
+    "BOAN": {
+      "ticker": "BOAN",
+      "nom": "BOA Niger",
+      "secteur": "Banque",
+      "pays": "NE",
+      "nb_articles": 34,
+      "nb_alertes": 3,
+      "dernier": "2026-06-08T07:00:00"
+    },
+    "BOAS": {
+      "ticker": "BOAS",
+      "nom": "BOA Sénégal",
+      "secteur": "Banque",
+      "pays": "SN",
+      "nb_articles": 54,
+      "nb_alertes": 6,
+      "dernier": "2026-03-22T07:00:00"
+    },
+    "BOAM": {
+      "ticker": "BOAM",
+      "nom": "BOA Mali",
+      "secteur": "Banque",
+      "pays": "ML",
+      "nb_articles": 24,
+      "nb_alertes": 4,
+      "dernier": "2025-06-09T07:00:00"
+    },
+    "CBIBF": {
+      "ticker": "CBIBF",
+      "nom": "CORIS BANK",
+      "secteur": "Banque",
+      "pays": "BF",
+      "nb_articles": 132,
+      "nb_alertes": 6,
+      "dernier": "2026-06-03T07:00:00"
+    },
+    "ORGT": {
+      "ticker": "ORGT",
+      "nom": "ORABANK TG",
+      "secteur": "Banque",
+      "pays": "TG",
+      "nb_articles": 31,
+      "nb_alertes": 2,
+      "dernier": "2025-09-24T07:00:00"
+    },
+    "NSBC": {
+      "ticker": "NSBC",
+      "nom": "NSIA BANQUE",
+      "secteur": "Banque",
+      "pays": "CI",
+      "nb_articles": 96,
+      "nb_alertes": 7,
+      "dernier": "2026-06-10T21:13:26"
+    },
+    "BACI": {
+      "ticker": "BACI",
+      "nom": "BICICI",
+      "secteur": "Banque",
+      "pays": "CI",
+      "nb_articles": 63,
+      "nb_alertes": 1,
+      "dernier": "2026-05-18T07:00:00"
+    },
+    "STBC": {
+      "ticker": "STBC",
+      "nom": "STB CI",
+      "secteur": "Banque",
+      "pays": "CI",
+      "nb_articles": 0,
+      "nb_alertes": 0,
+      "dernier": null
+    },
+    "SMBC": {
+      "ticker": "SMBC",
+      "nom": "SMB",
+      "secteur": "BTP",
+      "pays": "CI",
+      "nb_articles": 7,
+      "nb_alertes": 2,
+      "dernier": "2026-05-15T07:00:00"
+    },
+    "CFAC": {
+      "ticker": "CFAC",
+      "nom": "CFAO CI",
+      "secteur": "Distribution",
+      "pays": "CI",
+      "nb_articles": 31,
+      "nb_alertes": 3,
+      "dernier": "2026-05-13T07:00:00"
+    },
+    "ABJM": {
+      "ticker": "ABJM",
+      "nom": "ABJ CATERING",
+      "secteur": "Distribution",
+      "pays": "CI",
+      "nb_articles": 6,
+      "nb_alertes": 0,
+      "dernier": "2026-04-27T07:00:00"
+    },
+    "BNBC": {
+      "ticker": "BNBC",
+      "nom": "BERNABÉ CI",
+      "secteur": "Distribution",
+      "pays": "CI",
+      "nb_articles": 13,
+      "nb_alertes": 0,
+      "dernier": "2026-05-08T07:00:00"
+    },
+    "TTLS": {
+      "ticker": "TTLS",
+      "nom": "TOTAL CI",
+      "secteur": "Energie",
+      "pays": "CI",
+      "nb_articles": 109,
+      "nb_alertes": 2,
+      "dernier": "2026-06-26T22:30:53"
+    },
+    "SVOC": {
+      "ticker": "SVOC",
+      "nom": "VIVO ENERGY",
+      "secteur": "Energie",
+      "pays": "CI",
+      "nb_articles": 84,
+      "nb_alertes": 2,
+      "dernier": "2026-06-26T22:30:53"
+    },
+    "SIER": {
+      "ticker": "SIER",
+      "nom": "SICOGI",
+      "secteur": "Immobilier",
+      "pays": "CI",
+      "nb_articles": 1,
+      "nb_alertes": 0,
+      "dernier": "2017-11-24T08:00:00"
+    },
+    "SETC": {
+      "ticker": "SETC",
+      "nom": "SETAO",
+      "secteur": "BTP",
+      "pays": "CI",
+      "nb_articles": 12,
+      "nb_alertes": 0,
+      "dernier": "2026-04-20T12:33:55"
+    },
+    "UNLC": {
+      "ticker": "UNLC",
+      "nom": "UNILEVER CI",
+      "secteur": "Industrie",
+      "pays": "CI",
+      "nb_articles": 20,
+      "nb_alertes": 0,
+      "dernier": "2026-03-27T07:00:00"
+    },
+    "SLBC": {
+      "ticker": "SLBC",
+      "nom": "SOLIBRA",
+      "secteur": "Boissons",
+      "pays": "CI",
+      "nb_articles": 94,
+      "nb_alertes": 0,
+      "dernier": "2026-06-08T07:00:00"
+    },
+    "BRVBC": {
+      "ticker": "BRVBC",
+      "nom": "BRASSIVOIRE",
+      "secteur": "Boissons",
+      "pays": "CI",
+      "nb_articles": 77,
+      "nb_alertes": 0,
+      "dernier": "2026-06-08T07:00:00"
+    },
+    "NEIC": {
+      "ticker": "NEIC",
+      "nom": "NESTLÉ CI",
+      "secteur": "Agroalimentaire",
+      "pays": "CI",
+      "nb_articles": 127,
+      "nb_alertes": 4,
+      "dernier": "2026-06-15T07:00:00"
+    },
+    "SIVC": {
+      "ticker": "SIVC",
+      "nom": "AIR LIQUIDE",
+      "secteur": "Chimie",
+      "pays": "CI",
+      "nb_articles": 19,
+      "nb_alertes": 1,
+      "dernier": "2026-01-02T08:00:00"
+    },
+    "FTSC": {
+      "ticker": "FTSC",
+      "nom": "FILTISAC",
+      "secteur": "Industrie",
+      "pays": "CI",
+      "nb_articles": 23,
+      "nb_alertes": 3,
+      "dernier": "2026-06-23T15:25:00"
+    },
+    "SHEC": {
+      "ticker": "SHEC",
+      "nom": "SITAB",
+      "secteur": "Tabac",
+      "pays": "CI",
+      "nb_articles": 5,
+      "nb_alertes": 0,
+      "dernier": "2026-05-08T07:00:00"
+    },
+    "CABC": {
+      "ticker": "CABC",
+      "nom": "SICABLE",
+      "secteur": "Industrie",
+      "pays": "CI",
+      "nb_articles": 12,
+      "nb_alertes": 1,
+      "dernier": "2026-04-21T13:22:51"
+    },
+    "CIEC": {
+      "ticker": "CIEC",
+      "nom": "CIE",
+      "secteur": "Electricité",
+      "pays": "CI",
+      "nb_articles": 92,
+      "nb_alertes": 4,
+      "dernier": "2026-06-26T07:12:23"
+    },
+    "SDCC": {
+      "ticker": "SDCC",
+      "nom": "SODECI",
+      "secteur": "Eau",
+      "pays": "CI",
+      "nb_articles": 89,
+      "nb_alertes": 10,
+      "dernier": "2026-06-26T07:12:23"
+    },
+    "SNTS": {
+      "ticker": "SNTS",
+      "nom": "SONATEL",
+      "secteur": "Telecom",
+      "pays": "SN",
+      "nb_articles": 43,
+      "nb_alertes": 3,
+      "dernier": "2026-05-15T07:00:00"
+    },
+    "ONTBF": {
+      "ticker": "ONTBF",
+      "nom": "ORANGE BF",
+      "secteur": "Telecom",
+      "pays": "BF",
+      "nb_articles": 36,
+      "nb_alertes": 5,
+      "dernier": "2026-06-19T14:46:40"
+    },
+    "ONTCI": {
+      "ticker": "ONTCI",
+      "nom": "ORANGE CI",
+      "secteur": "Telecom",
+      "pays": "CI",
+      "nb_articles": 46,
+      "nb_alertes": 3,
+      "dernier": "2026-06-09T07:00:00"
+    },
+    "MTNCI": {
+      "ticker": "MTNCI",
+      "nom": "MTN CI",
+      "secteur": "Telecom",
+      "pays": "CI",
+      "nb_articles": 15,
+      "nb_alertes": 1,
+      "dernier": "2026-06-07T07:00:00"
+    },
+    "SDSC": {
+      "ticker": "SDSC",
+      "nom": "BOLLORÉ TL",
+      "secteur": "Transport",
+      "pays": "CI",
+      "nb_articles": 24,
+      "nb_alertes": 2,
+      "dernier": "2025-08-19T07:00:00"
+    },
+    "STAC": {
+      "ticker": "STAC",
+      "nom": "SITAS CI",
+      "secteur": "Transport",
+      "pays": "CI",
+      "nb_articles": 0,
+      "nb_alertes": 0,
+      "dernier": null
+    },
+    "PRSC": {
+      "ticker": "PRSC",
+      "nom": "PRESTIGE CI",
+      "secteur": "Transport",
+      "pays": "CI",
+      "nb_articles": 9,
+      "nb_alertes": 0,
+      "dernier": "2026-06-08T10:53:20"
+    },
+    "GNBC": {
+      "ticker": "GNBC",
+      "nom": "NSIA CI",
+      "secteur": "Assurance",
+      "pays": "CI",
+      "nb_articles": 18,
+      "nb_alertes": 0,
+      "dernier": "2026-04-22T07:00:00"
+    },
+    "SIAB": {
+      "ticker": "SIAB",
+      "nom": "SIA BÉNIN",
+      "secteur": "Assurance",
+      "pays": "BJ",
+      "nb_articles": 0,
+      "nb_alertes": 0,
+      "dernier": null
+    },
+    "WOYOC": {
+      "ticker": "WOYOC",
+      "nom": "MOVIS",
+      "secteur": "Technologie",
+      "pays": "CI",
+      "nb_articles": 0,
+      "nb_alertes": 0,
+      "dernier": null
+    }
+  },
+  "health": []
+}

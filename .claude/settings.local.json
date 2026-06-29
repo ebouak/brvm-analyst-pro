@@ -121,7 +121,8 @@
       "Bash(grep -nB3 -A6 \"Syntax Error\" \"C:/Users/adego/AppData/Local/Temp/claude/c--Users-adego-OneDrive-Documents-brvm-analyst-pro/fbf2fb5b-f56e-494c-b0a9-85725b05bbc2/tasks/boovr1ibf.output\")",
       "Bash(curl -s \"http://localhost:3001/parametres/compte\")",
       "Bash(grep -oE \"Apparence|Syst\\\\\\\\\\\\\\\\?ème|Sombre|Clair|Pseudonyme\")",
-      "Bash(curl -s --max-time 30 \"http://localhost:3010/actions/PALC/revue\")"
+      "Bash(curl -s --max-time 30 \"http://localhost:3010/actions/PALC/revue\")",
+      "Bash(GIT_EDITOR=true git rebase --continue)"
     ]
   }
 }
