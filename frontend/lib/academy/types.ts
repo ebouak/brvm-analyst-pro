@@ -27,11 +27,29 @@ export const qcmSchema = z.object({
   explication: z.string().min(1).max(600),
 });
 
+/**
+ * Graphique pédagogique illustratif. Les valeurs sont des EXEMPLES (jamais
+ * présentés comme des données de marché réelles) — la note porte l'interprétation.
+ */
+export const chartSchema = z
+  .object({
+    type: z.enum(['bar', 'line']),
+    titre: z.string().min(1).max(160),
+    labels: z.array(z.string().min(1).max(40)).min(2).max(10),
+    valeurs: z.array(z.number()).min(2).max(10),
+    unite: z.string().max(20).optional().default(''),
+    note: z.string().min(1).max(700), // interprétation pédagogique
+  })
+  .refine((c) => c.labels.length === c.valeurs.length, {
+    message: 'labels et valeurs doivent avoir la même longueur',
+  });
+
 export const lessonSchema = z.object({
   titre: z.string().min(1).max(160),
   categorie: z.enum(CATEGORIES).default('general'),
   resume: z.string().min(1).max(600),
   sections: z.array(sectionSchema).min(1).max(8),
+  chart: chartSchema.nullable().optional(),
   qcm: qcmSchema.nullable().optional(),
 });
 
@@ -52,6 +70,7 @@ export type CourseContent = z.infer<typeof courseContentSchema>;
 export type Lesson = z.infer<typeof lessonSchema>;
 export type Section = z.infer<typeof sectionSchema>;
 export type Qcm = z.infer<typeof qcmSchema>;
+export type Chart = z.infer<typeof chartSchema>;
 
 export const NIVEAU_LABEL: Record<Niveau, string> = {
   debutant: 'Débutant',

@@ -1,5 +1,6 @@
 import {
   type CourseContent,
+  type Chart,
   NIVEAU_LABEL,
   CATEGORIE_LABEL,
   SECTION_LABEL,
@@ -23,6 +24,68 @@ function paras(s: string): string {
     .filter(Boolean)
     .map((p) => `<p>${esc(p)}</p>`)
     .join('');
+}
+
+/**
+ * Rend un graphique pédagogique en SVG inline charté (aucune dépendance externe).
+ * Barres ou ligne. Les valeurs sont illustratives (la note l'indique).
+ */
+function renderChart(ch: Chart): string {
+  const W = 600, H = 300, padL = 48, padR = 18, padT = 18, padB = 52;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const n = ch.valeurs.length;
+  const maxV = Math.max(...ch.valeurs);
+  const minV = Math.min(0, ...ch.valeurs);
+  const range = maxV - minV || 1;
+  const yOf = (v: number) => padT + plotH - ((v - minV) / range) * plotH;
+  const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+
+  // 3 lignes de grille
+  const grid = [0, 0.5, 1]
+    .map((t) => {
+      const gy = padT + plotH - t * plotH;
+      const val = minV + t * range;
+      return `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="rgba(86,215,253,.12)" stroke-width="1"/>
+        <text x="${padL - 8}" y="${(gy + 3).toFixed(1)}" text-anchor="end" fill="#7a9ea8" font-size="11" font-family="JetBrains Mono,monospace">${fmt(val)}</text>`;
+    })
+    .join('');
+
+  const slot = plotW / n;
+  const xCenter = (i: number) => padL + slot * i + slot / 2;
+
+  const xLabels = ch.labels
+    .map((l, i) => `<text x="${xCenter(i).toFixed(1)}" y="${H - padB + 18}" text-anchor="middle" fill="#9ec3cc" font-size="11" font-family="Supreme,sans-serif">${esc(l.length > 12 ? l.slice(0, 11) + '…' : l)}</text>`)
+    .join('');
+
+  let series = '';
+  if (ch.type === 'bar') {
+    const bw = Math.min(46, slot * 0.6);
+    series = ch.valeurs
+      .map((v, i) => {
+        const x = xCenter(i) - bw / 2;
+        const y = yOf(v);
+        const h = yOf(minV) - y;
+        return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" rx="4" fill="#56D7FD" fill-opacity="0.85"/>
+          <text x="${xCenter(i).toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="middle" fill="#FCFCFC" font-size="11" font-family="JetBrains Mono,monospace">${fmt(v)}</text>`;
+      })
+      .join('');
+  } else {
+    const pts = ch.valeurs.map((v, i) => `${xCenter(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(' ');
+    const dots = ch.valeurs
+      .map((v, i) => `<circle cx="${xCenter(i).toFixed(1)}" cy="${yOf(v).toFixed(1)}" r="3.5" fill="#56D7FD"/>
+        <text x="${xCenter(i).toFixed(1)}" y="${(yOf(v) - 8).toFixed(1)}" text-anchor="middle" fill="#FCFCFC" font-size="10.5" font-family="JetBrains Mono,monospace">${fmt(v)}</text>`)
+      .join('');
+    series = `<polyline points="${pts}" fill="none" stroke="#56D7FD" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}`;
+  }
+
+  return `<div class="chart-wrap">
+    <h4>📈 ${esc(ch.titre)}${ch.unite ? ` <span class="chart-unit">(${esc(ch.unite)})</span>` : ''}</h4>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(ch.titre)}" class="chart-svg">
+      ${grid}${series}${xLabels}
+    </svg>
+    <p class="chart-note"><strong>Lecture :</strong> ${esc(ch.note)}</p>
+    <p class="chart-disclaimer">Valeurs illustratives à but pédagogique.</p>
+  </div>`;
 }
 
 /** CSS charte WESTBOURSE — source unique (identique au flagship Academy). */
@@ -63,6 +126,13 @@ a{color:var(--primary)}
 .section-block.piege{border-left-color:var(--down)}.section-block.piege h4{color:var(--down)}
 .section-block.retenir{border-left-color:#a98bff}.section-block.retenir h4{color:#a98bff}
 .section-block.lexique{border-left-color:#6ea8ff}.section-block.lexique h4{color:#6ea8ff}
+.chart-wrap{margin-top:14px;padding:16px 18px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}
+.chart-wrap h4{margin:0 0 10px;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary)}
+.chart-unit{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+.chart-svg{width:100%;height:auto;display:block}
+.chart-note{margin:10px 0 0;font-size:.9rem;line-height:1.6}
+.chart-note strong{color:var(--primary)}
+.chart-disclaimer{margin:6px 0 0;font-size:.74rem;color:var(--muted);font-style:italic}
 .qcm-wrap{background:var(--surface2);border-radius:14px;padding:18px;margin-top:16px;border:1px solid var(--border)}
 .qcm-q{font-weight:700;margin-bottom:12px;font-size:.95rem}
 .qcm-opts{display:flex;flex-direction:column;gap:8px}
@@ -117,6 +187,8 @@ export function renderCourseHtml(c: CourseContent): string {
         )
         .join('');
 
+      const chart = l.chart ? renderChart(l.chart) : '';
+
       const qcm = l.qcm
         ? `<div class="qcm-wrap" data-correct="${l.qcm.correct}">
              <div class="qcm-q">${esc(l.qcm.question)}</div>
@@ -134,6 +206,7 @@ export function renderCourseHtml(c: CourseContent): string {
         </div>
         <p class="summary">${esc(l.resume)}</p>
         ${sections}
+        ${chart}
         ${qcm}
       </div>`;
     })
@@ -176,7 +249,7 @@ ${FONTS}
     ${lessonsHtml}
     ${glossaire}
     <p class="small" style="margin-top:32px;border-top:1px solid var(--border);padding-top:14px">
-      Contenu pédagogique généré par IA · WestBourse Academy. À titre informatif, ne constitue pas un conseil en investissement.
+      WestBourse Academy. À titre informatif et pédagogique, ne constitue pas un conseil en investissement.
     </p>
   </main>
 </div>

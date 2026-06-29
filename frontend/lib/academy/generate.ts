@@ -47,6 +47,14 @@ Réponds avec CE schéma JSON exact (et rien d'autre) :
         { "type": "piege", "titre": "Pièges fréquents", "contenu": "..." },
         { "type": "retenir", "titre": "À retenir", "contenu": "..." }
       ],
+      "chart": {
+        "type": "bar",
+        "titre": "titre du graphique (ex. Répartition d'un portefeuille type)",
+        "labels": ["Catégorie 1", "Catégorie 2", "Catégorie 3"],
+        "valeurs": [40, 35, 25],
+        "unite": "%",
+        "note": "interprétation pédagogique du graphique en 1-2 phrases"
+      },
       "qcm": {
         "question": "question de compréhension",
         "options": ["option A", "option B", "option C", "option D"],
@@ -61,6 +69,13 @@ Réponds avec CE schéma JSON exact (et rien d'autre) :
 Contraintes :
 - Exactement ${p.nbLessons} leçon(s).
 - Chaque leçon : 3 à 5 sections parmi (definition, importance, cas, piege, lexique, retenir).
+- Chaque leçon DOIT inclure un "chart" pédagogique pertinent :
+  · "type" = "bar" (comparaison/répartition) ou "line" (évolution dans le temps)
+  · 3 à 7 paires labels/valeurs (MÊME longueur), valeurs numériques cohérentes
+  · "note" = l'interprétation à retenir du graphique
+  · Les valeurs sont des EXEMPLES ILLUSTRATIFS (ordres de grandeur réalistes), jamais
+    présentées comme des données de marché réelles. N'invente pas de cours/chiffres précis
+    d'une société nommée ; utilise des moyennes, proportions ou scénarios génériques.
 - Chaque leçon a un qcm (4 options, "correct" = index 0-based de la bonne réponse).
 - "categorie" choisie selon le contenu (general par défaut).
 - glossaire : 4 à 10 termes-clés du sujet.
