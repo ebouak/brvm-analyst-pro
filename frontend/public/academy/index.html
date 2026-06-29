@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WestBourse Academy — En cours de chargement</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=boska@400,700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#030303; --surface:#0a1417; --primary:#56D7FD; --text:#FCFCFC; --muted:#7a9ea8; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Satoshi', sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 40px; text-align: center; }
+  .logo { font-family: 'Boska', serif; font-size: 2.4rem; font-weight: 700; color: var(--primary); letter-spacing: -0.02em; }
+  .tag { display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; background: rgba(86,215,253,.12); color: var(--primary); border: 1px solid rgba(86,215,253,.25); margin-bottom: 8px; }
+  h1 { font-family: 'Boska', serif; font-size: clamp(1.6rem, 4vw, 3rem); line-height: 1.1; }
+  p { color: var(--muted); max-width: 540px; line-height: 1.65; font-size: .95rem; }
+  .steps { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; text-align: left; max-width: 480px; }
+  .step { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid rgba(86,215,253,.1); border-radius: 10px; padding: 12px 16px; }
+  .step-num { min-width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #000; font-weight: 700; font-size: .8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-text { font-size: .88rem; color: var(--text); line-height: 1.5; }
+  code { background: rgba(86,215,253,.1); color: var(--primary); padding: 1px 6px; border-radius: 4px; font-size: .82em; font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+  <div>
+    <div class="tag">WestBourse Academy</div>
+    <h1>Contenu en cours d'installation</h1>
+  </div>
+  <p>La formation interactive est prête à accueillir votre contenu.<br>Remplacez ce fichier par votre HTML complet pour activer les 44 leçons, QCM et graphiques.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Préparez votre fichier HTML complet (<strong>WestBourse Academy — Édition Définitive</strong>)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Remplacez <code>frontend/public/academy/index.html</code> par votre fichier</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">La page <code>/formations/academy</code> affichera aussitôt votre contenu en plein écran</div>
+    </div>
+  </div>
+</body>
+</html>

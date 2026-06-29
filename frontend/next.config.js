@@ -36,19 +36,19 @@ const nextConfig = {
       "object-src 'none'",
       "frame-ancestors 'none'",
       "form-action 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://cdn.plot.ly",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
       "font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com",
       "img-src 'self' data: blob: https:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.de.sentry.io https://challenges.cloudflare.com https://api.fontshare.com",
-      "frame-src https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
+      "frame-src 'self' https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "worker-src 'self' blob:",
     ].join('; ');
     return [
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' }, // anti-clickjacking
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' }, // anti-clickjacking tiers, autorise iframe same-origin
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },

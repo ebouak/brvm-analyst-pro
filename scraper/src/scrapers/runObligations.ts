@@ -1,8 +1,14 @@
 /**
  * Runner obligations depuis le portail public brvm.org.
  * Écrit dans brvm_obligations_daily (code, date_marche) — idempotent.
- * Remplace sikafinance (page obligations supprimée → 404, juin 2026) et BDFIN
- * (auth non calibrée).
+ *
+ * Source : https://www.brvm.org/fr/cours-obligations/0
+ * Colonnes disponibles : code, nom, date_emission, cours_jour, coupon_couru.
+ * Colonne « Date maturité » présente côté brvm.org mais toujours vide →
+ * maturite et emetteur dérivés depuis la désignation par parseDesignation().
+ *
+ * Sika Finance (sikafinance.com) supprimée définitivement (404, juin 2026).
+ * BDFIN (bfin.brvm.org) : auth ASP.NET non calibrée pour les obligations.
  */
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';

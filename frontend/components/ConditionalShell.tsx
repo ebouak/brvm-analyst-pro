@@ -20,6 +20,7 @@ const BARE_PREFIXES = [
   '/comparateur-sgi',
   '/debutant',
   '/developers',
+  '/formations/academy', // plein écran — l'Academy a sa propre UI (sidebar, nav)
 ];
 
 /** Pages légales : publiques, plein écran, AVEC footer. */

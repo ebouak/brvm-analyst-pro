@@ -36,6 +36,23 @@ function tauxFromName(name: string): number | null {
   return m ? parseFrNumber(m[1]) : null;
 }
 
+/**
+ * Dérive la maturité (YYYY-12-31) depuis la désignation quand la colonne
+ * brvm.org est vide. Format attendu : « ... 6,80% 2024-2029 » → « 2029-12-31 ».
+ * Supprime aussi les préfixes de type obligation (GSS, GENDER BOND, etc.)
+ * pour extraire l'émetteur propre.
+ */
+function parseDesignation(designation: string): { maturite: string | null; emetteur: string | null } {
+  const m = designation.match(/(\d{1,2}(?:[.,]\d+)?)\s*%\s*(\d{4})\s*-\s*(\d{4})/);
+  if (!m) return { maturite: null, emetteur: null };
+  const maturite = `${m[3]}-12-31`;
+  const raw = designation.slice(0, m.index ?? 0).replace(/[\s-]+$/, '').trim();
+  const emetteur = raw
+    .replace(/^(?:GSS|GREEN BOND|GENDER BOND|SOCIAL BOND|CLIMATE BOND|DIASPORA BONDS?)\s+/i, '')
+    .trim() || null;
+  return { maturite, emetteur };
+}
+
 /** Parse le HTML de la page « cours obligations » brvm.org → ObligationRow[]. */
 export function parseBrvmObligations(html: string): ObligationRow[] {
   const $ = cheerio.load(html);
@@ -78,12 +95,15 @@ export function parseBrvmObligations(html: string): ObligationRow[] {
         if (!code || seen.has(code)) return;
         const designation = cell(iNom) || code;
         seen.add(code);
+        // Date maturité : colonne brvm.org présente mais vide → dériver du nom.
+        const maturiteFromCol = iMat >= 0 ? parseFrDate(cell(iMat)) : null;
+        const parsed = parseDesignation(designation);
         out.push({
           code,
           designation,
-          emetteur: null,
+          emetteur: parsed.emetteur,
           taux_pct: tauxFromName(designation),
-          maturite: iMat >= 0 ? parseFrDate(cell(iMat)) : null,
+          maturite: maturiteFromCol ?? parsed.maturite,
           cours_precedent: null,
           cours_jour: parseFrNumber(cell(iCours)),
           volume: null,

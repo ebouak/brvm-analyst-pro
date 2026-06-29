@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
-import { SectionHeader } from '@/components/ui/premium';
+import { SectionHeader, StatPill } from '@/components/ui/premium';
 
 export const metadata = { title: 'Formations & conférences — WESTBOURSE' };
 export const revalidate = 300;
@@ -20,6 +20,34 @@ export default async function FormationsPage() {
         title="Formations & conférences"
         subtitle="Montez en compétence sur l'investissement à la BRVM : cours, replays et conférences. Accès réservé aux membres Premium."
       />
+
+      {/* ── WestBourse Academy — mise en avant permanente ─────────────────── */}
+      <Link href="/formations/academy"
+        className="group relative flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-[#56D7FD]/25 bg-gradient-to-br from-[#0a1f25] to-[#050e11] p-6 overflow-hidden hover:border-[#56D7FD]/50 transition-all">
+        {/* Halo déco */}
+        <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-[#56D7FD]/8 blur-3xl" />
+        {/* Icône */}
+        <div className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-[#56D7FD]/10 border border-[#56D7FD]/20 text-3xl">
+          🎓
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#56D7FD]">Académie</span>
+            <StatPill tone="sapphire">44 leçons · 4 niveaux</StatPill>
+            <StatPill tone="neutral">QCM interactifs</StatPill>
+          </div>
+          <h2 className="font-display text-xl text-white group-hover:text-[#56D7FD] transition-colors">
+            WestBourse Academy — Édition Intégrale
+          </h2>
+          <p className="mt-1 text-sm text-[#7a9ea8] leading-relaxed max-w-xl">
+            Formation complète en 8 sections par leçon : définition, cas réels BRVM, pièges fréquents, lexique ciblé et points à retenir. Du débutant au niveau Expert CREPMF.
+          </p>
+          <div className="mt-3 flex items-center gap-3 flex-wrap">
+            <span className="text-[11px] text-[#56D7FD] font-semibold group-hover:underline">Accéder à l'Academy →</span>
+            <span className="text-[10px] text-[#4a7a85] border border-[#1a3540] rounded px-2 py-0.5">Inclus Premium</span>
+          </div>
+        </div>
+      </Link>
 
       {formations.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-8 text-center">
