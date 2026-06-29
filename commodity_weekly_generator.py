@@ -53,6 +53,23 @@ YFINANCE_TICKERS = {
     "SI=F":  {"nom": "Argent",         "unite": "USD/oz",   "brvm": []},
 }
 
+# Photos Unsplash par commodity (IDs vérifiés, libres de droits)
+COMMODITY_PHOTOS: dict[str, str] = {
+    "CC=F": "photo-1481391319762-47dff72954d9",  # cacao pods
+    "CL=F": "photo-1611273426858-450d8e3c9fce",  # oil refinery at night
+    "BZ=F": "photo-1614850523296-d8c1af93d400",  # offshore oil rig
+    "KC=F": "photo-1447933601403-0c6688de566e",  # coffee beans close-up
+    "SB=F": "photo-1559181567-c3190ca9d5db",     # sugarcane harvest
+    "CT=F": "photo-1597916829826-02e5bb4a54e0",  # cotton field
+    "GC=F": "photo-1610375461246-83df859d849d",  # gold bars
+    "SI=F": "photo-1611091354429-99f5dc04af7b",  # silver coins
+}
+# Photo hero de fallback (marché financier Afrique)
+HERO_FALLBACK_PHOTO = "photo-1559526324-4b87b5e36e44"  # stock market board
+
+def _photo_url(photo_id: str, w: int = 800, h: int = 450) -> str:
+    return f"https://images.unsplash.com/{photo_id}?w={w}&h={h}&fit=crop&auto=format&q=80"
+
 # Huile de palme et caoutchouc: pas de futures yfinance stables → WB Pink Sheet
 WB_COMMODITIES = {
     "COCOA":       {"nom": "Cacao",        "brvm": ["NEIC", "SIFCA"]},
@@ -545,7 +562,8 @@ CONSIGNE STRICTE :
 - Commence par <section> et termine par </section>.
 - Aucune table de prix, aucun graphique, aucune table de corrélation (tous déjà générés par le système).
 - Si une corrélation est forte (|r| > 0.7), cite-la explicitement dans l'analyse de la matière concernée.
-- Longueur : 800 à 1100 mots de texte éditorial.
+- Analyse approfondie, sans limite de longueur : développe autant que nécessaire pour couvrir chaque matière, les facteurs macro, les implications BRVM et les perspectives.
+- Chaque matière : au moins 5-7 phrases d'analyse substantielle (facteurs géopolitiques, offre/demande, météo, devise, position des fonds).
 
 STRUCTURE EXACTE À PRODUIRE :
 
@@ -726,6 +744,86 @@ def build_brvm_table(prices: list, brvm_scores: dict) -> str:
     )
 
 
+def build_hero_section(prices: list, week: int, year: int) -> str:
+    """Section hero pleine largeur avec photo de la matière la plus mouvementée."""
+    if not prices:
+        return ""
+    top = max(prices, key=lambda p: abs(p.weekly_change_pct))
+    photo_id = COMMODITY_PHOTOS.get(top.ticker, HERO_FALLBACK_PHOTO)
+    photo_url = _photo_url(photo_id, 1200, 500)
+    color = "#10b981" if top.weekly_change_pct >= 0 else "#ef4444"
+    sign = "+" if top.weekly_change_pct >= 0 else ""
+    arrow = "▲" if top.weekly_change_pct >= 0 else "▼"
+    return (
+        f'<div style="position:relative;width:100%;height:320px;overflow:hidden;border-radius:12px;margin-bottom:28px;">'
+        f'<img src="{photo_url}" alt="{top.label}" loading="eager" '
+        f'style="width:100%;height:100%;object-fit:cover;display:block;"/>'
+        f'<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.72) 100%);"></div>'
+        f'<div style="position:absolute;bottom:0;left:0;right:0;padding:24px 28px;">'
+        f'<p style="margin:0 0 6px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);'
+        f'text-transform:uppercase;letter-spacing:.1em;">Matières premières BRVM — Semaine {week:02d}/{year}</p>'
+        f'<h2 style="margin:0 0 8px;font-size:26px;font-weight:800;color:#fff;line-height:1.2;">'
+        f'{top.label} : {top.current:.2f} {top.unit}</h2>'
+        f'<p style="margin:0;font-size:17px;font-weight:700;color:{color};">'
+        f'{arrow} {sign}{top.weekly_change_pct:.1f}% cette semaine — temps fort du marché</p>'
+        f'</div>'
+        f'<div style="position:absolute;top:16px;right:16px;background:rgba(0,0,0,0.45);'
+        f'backdrop-filter:blur(8px);padding:6px 14px;border-radius:20px;">'
+        f'<span style="font-size:11px;color:rgba(255,255,255,0.85);font-weight:600;">'
+        f'© Photo : <a href="https://unsplash.com" target="_blank" '
+        f'style="color:rgba(255,255,255,0.7);text-decoration:none;">Unsplash</a></span>'
+        f'</div></div>'
+    )
+
+
+def build_commodity_cards(prices: list) -> str:
+    """Grille de cartes visuelles par matière (photo + données) — remplace la table prix."""
+    cards = ""
+    for p in prices:
+        photo_id = COMMODITY_PHOTOS.get(p.ticker)
+        photo_html = ""
+        if photo_id:
+            url = _photo_url(photo_id, 500, 220)
+            photo_html = (
+                f'<div style="width:100%;height:160px;overflow:hidden;border-radius:8px 8px 0 0;">'
+                f'<img src="{url}" alt="{p.label}" loading="lazy" '
+                f'style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;"/>'
+                f'</div>'
+            )
+        color = "#10b981" if p.weekly_change_pct >= 0 else "#ef4444"
+        sign = "+" if p.weekly_change_pct >= 0 else ""
+        arrow = "▲" if p.weekly_change_pct >= 0 else "▼"
+        sig = p.signal
+        sig_bg  = "#f0fdf4" if sig == "HAUSSE" else "#fef2f2" if sig == "BAISSE" else "#fefce8"
+        sig_col = "#059669" if sig == "HAUSSE" else "#dc2626" if sig == "BAISSE" else "#d97706"
+        sig_icon = "📈" if sig == "HAUSSE" else "📉" if sig == "BAISSE" else "➡️"
+        cards += (
+            f'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;'
+            f'overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">'
+            + photo_html +
+            f'<div style="padding:14px 16px;">'
+            f'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+            f'<span style="font-size:15px;font-weight:700;color:#0f172a;">{p.label}</span>'
+            f'<code style="font-size:10px;background:#f1f5f9;padding:2px 7px;border-radius:4px;color:#475569;">{p.ticker}</code>'
+            f'</div>'
+            f'<p style="margin:0 0 6px;font-size:20px;font-weight:800;color:#0f172a;">'
+            f'{p.current:.2f} <span style="font-size:12px;font-weight:400;color:#94a3b8;">{p.unit}</span></p>'
+            f'<p style="margin:0 0 10px;font-size:15px;font-weight:700;color:{color};">'
+            f'{arrow} {sign}{p.weekly_change_pct:.1f}%</p>'
+            f'<div style="display:flex;align-items:center;justify-content:space-between;">'
+            f'<span style="font-size:11px;color:#94a3b8;">Range 5j : {p.week_low:.2f} – {p.week_high:.2f}</span>'
+            f'<span style="background:{sig_bg};color:{sig_col};padding:3px 10px;border-radius:12px;'
+            f'font-size:11px;font-weight:700;">{sig_icon} {sig}</span>'
+            f'</div>'
+            f'</div></div>'
+        )
+    return (
+        f'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px;">'
+        + cards +
+        f'</div>'
+    )
+
+
 def build_correlation_table(correlations: list[dict]) -> str:
     """Table corrélations BRVM ↔ Matières premières (données réelles Supabase)."""
     if not correlations:
@@ -805,22 +903,26 @@ def assemble_content_html(
     brvm_scores: dict,
     correlations: list | None = None,
     year: int | None = None,
+    week: int | None = None,
 ) -> str:
     """
     Assemble le HTML final : visuels Python + texte DeepSeek.
-    Structure : <article> SVG + table prix + éditorial + table BRVM + table corrélations + footer </article>
+    Structure : hero photo + SVG + cartes commodities + éditorial + tables BRVM/corrélations + footer
     """
-    year = year if year is not None else datetime.now(timezone(timedelta(hours=1))).year
+    now = datetime.now(timezone(timedelta(hours=1)))
+    year = year if year is not None else now.year
+    week_num = week if week is not None else now.isocalendar()[1]
     text = editorial_html.strip()
     if not text.startswith("<section"):
         text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
-                f'color:#1e293b;line-height:1.75;">{text}</section>')
+                f'color:#1e293b;line-height:1.8;">{text}</section>')
     corr_html = build_correlation_table(correlations or [])
     return (
         '<article style="font-family:\'Segoe UI\',system-ui,sans-serif;'
-        'max-width:860px;margin:0 auto;color:#1e293b;line-height:1.75;">\n'
+        'max-width:900px;margin:0 auto;color:#1e293b;line-height:1.8;">\n'
+        + build_hero_section(prices, week_num, year) + "\n"
         + build_svg_barchart(prices) + "\n"
-        + build_price_table(prices) + "\n"
+        + build_commodity_cards(prices) + "\n"
         + text + "\n"
         + build_brvm_table(prices, brvm_scores) + "\n"
         + corr_html + "\n"
@@ -1035,7 +1137,7 @@ def main():
         editorial_html = call_deepseek(prompt)
 
     article_html = assemble_content_html(
-        editorial_html, prices, brvm_scores_simple, correlations, year=year,
+        editorial_html, prices, brvm_scores_simple, correlations, year=year, week=week,
     )
 
     # Étape 6 : HTML final
