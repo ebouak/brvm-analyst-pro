@@ -43,7 +43,7 @@ log = logging.getLogger("wb-commodity-weekly")
 # ── Constantes ────────────────────────────────────────────────────────────────
 
 YFINANCE_TICKERS = {
-    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": ["SICC", "SIFCA"]},
+    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": ["SIFCA"]},  # SICC = coco râpé, pas cacao
     "CL=F":  {"nom": "Pétrole WTI",    "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
     "BZ=F":  {"nom": "Pétrole Brent",  "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
     "KC=F":  {"nom": "Café",           "unite": "USc/lb",   "brvm": []},
@@ -72,7 +72,7 @@ def _photo_url(photo_id: str, w: int = 800, h: int = 450) -> str:
 
 # Huile de palme et caoutchouc: pas de futures yfinance stables → WB Pink Sheet
 WB_COMMODITIES = {
-    "COCOA":       {"nom": "Cacao",         "brvm": ["SICC", "SIFCA"]},
+    "COCOA":       {"nom": "Cacao",         "brvm": ["SIFCA"]},              # pas de pur joueur cacao coté BRVM
     "RUBBER_TSR20":{"nom": "Caoutchouc",    "brvm": ["SAPH", "SOGB"]},          # SICOM/TOCOM — purs joueurs
     "PALM_OIL":    {"nom": "Huile de palme","brvm": ["PALC", "SIFCA"]},          # CPO Bursa Malaysia
     "CRUDE_OIL":   {"nom": "Pétrole brut",  "brvm": ["TTLS", "SVOC"]},
@@ -687,24 +687,25 @@ def build_price_table(prices: list) -> str:
 
 def build_brvm_table(prices: list, brvm_scores: dict) -> str:
     """Table impact BRVM avec barres de score visuelles."""
-    # Scores d'exposition directe (1=faible, 5=très forte). NEIC = éditeur, hors scope.
-    # Caoutchouc (SICOM/TOCOM) et huile de palme (CPO Bursa) sans futures yfinance :
-    # proxies CC=F et SB=F utilisés à titre indicatif uniquement.
+    # Scores d'exposition aux futures trackés (1=faible, 5=très forte).
+    # Caoutchouc (SICOM/TOCOM) et huile de palme (CPO Bursa) n'ont pas de futures
+    # yfinance dans notre liste — proxies approximatifs utilisés, labellisés comme tels.
+    # SICC (SICOR = coco râpé) : coprah sans futures direct → absent de ce mapping.
+    # NEIC (NEI-CEDA) = éditeur de livres → hors scope commodity définitivement.
     BRVM_EXPOSURE = {
-        # ── Cacao (ICE CC=F) ───────────────────────────────────────────
-        "SICC":  {"CC=F": 5},               # pur joueur cacao — quasi 100% revenus
-        "SIFCA": {"CC=F": 3, "CT=F": 2},   # agro-industrie diversifiée
-        # ── Caoutchouc naturel (SICOM/TOCOM, proxy CC=F) ───────────────
-        "SAPH":  {"CC=F": 2},              # filiale Michelin, pur caoutchouc
-        "SOGB":  {"CC=F": 2},              # pur joueur caoutchouc
-        # ── Huile de palme (CPO Bursa Malaysia, proxy SB=F) ────────────
-        "PALC":  {"SB=F": 2},              # plantation huile de palme
-        # ── Sucre brut (ICE SB=F) ──────────────────────────────────────
-        "SCRC":  {"SB=F": 4},              # Sucrivoire — partiellement prix administrés CI
-        # ── Pétrole / Énergie (WTI + Brent) ───────────────────────────
-        "TTLS":  {"CL=F": 5, "BZ=F": 5},  # Total Sénégal — distribution carburant
-        "SVOC":  {"CL=F": 5, "BZ=F": 5},  # SIR/Shell CI — raffinage + distribution
-        # ── Coton (ICE CT=F) ───────────────────────────────────────────
+        # ── Cacao ICE (CC=F) — pas de pur joueur cacao coté BRVM ───────
+        "SIFCA": {"CC=F": 1, "SB=F": 2},  # groupe agro : cacao mineur, sucre via Sucrivoire
+        # ── Caoutchouc SICOM/TOCOM (proxy CC=F, indicatif) ─────────────
+        "SAPH":  {"CC=F": 3},              # pur hévéa (filiale type Michelin)
+        "SOGB":  {"CC=F": 2},              # hévéa + palmier à huile
+        # ── Huile de palme CPO Bursa (proxy SB=F, indicatif) ───────────
+        "PALC":  {"SB=F": 3},              # PALMCI — pur joueur huile de palme
+        # ── Sucre brut ICE (SB=F) ──────────────────────────────────────
+        "SCRC":  {"SB=F": 3},              # Sucrivoire — exposition partiellement amortie
+        # ── Pétrole Brent / WTI ────────────────────────────────────────
+        "TTLS":  {"CL=F": 5, "BZ=F": 5},  # Total Sénégal — distribution
+        "SVOC":  {"CL=F": 5, "BZ=F": 5},  # Société pétrolière CI — raffinage + distribution
+        # ── Coton ICE (CT=F) ───────────────────────────────────────────
         "CFAC":  {"CT=F": 3},              # filière coton Burkina (indirect)
     }
     LABELS = {
