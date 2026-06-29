@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
@@ -90,6 +91,15 @@ export default async function Page() {
       </div>
 
       <PlanClient plans={plans} canSubscribe={canSubscribe} />
+
+      <div className="pt-2 border-t border-border">
+        <Link
+          href="/account/newsletters"
+          className="text-sm text-muted hover:text-[#56d7fd] transition-colors duration-150"
+        >
+          Gérer mes préférences newsletter →
+        </Link>
+      </div>
     </div>
   );
 }
