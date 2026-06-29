@@ -43,7 +43,7 @@ log = logging.getLogger("wb-commodity-weekly")
 # ── Constantes ────────────────────────────────────────────────────────────────
 
 YFINANCE_TICKERS = {
-    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": ["NEIC", "SIFCA"]},
+    "CC=F":  {"nom": "Cacao",          "unite": "USD/t",    "brvm": ["SIFCA", "CFAC"]},
     "CL=F":  {"nom": "Pétrole WTI",    "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
     "BZ=F":  {"nom": "Pétrole Brent",  "unite": "USD/bbl",  "brvm": ["TTLS", "SVOC"]},
     "KC=F":  {"nom": "Café",           "unite": "USc/lb",   "brvm": []},
@@ -72,7 +72,7 @@ def _photo_url(photo_id: str, w: int = 800, h: int = 450) -> str:
 
 # Huile de palme et caoutchouc: pas de futures yfinance stables → WB Pink Sheet
 WB_COMMODITIES = {
-    "COCOA":       {"nom": "Cacao",        "brvm": ["NEIC", "SIFCA"]},
+    "COCOA":       {"nom": "Cacao",        "brvm": ["SIFCA", "CFAC"]},
     "RUBBER_TSR20":{"nom": "Caoutchouc",   "brvm": ["SOGB", "SAPH"]},
     "PALM_OIL":    {"nom": "Huile de palme","brvm": ["PALC", "SOGB", "SIFCA", "TTRC"]},
     "CRUDE_OIL":   {"nom": "Pétrole brut", "brvm": ["TTLS", "SVOC"]},
@@ -688,8 +688,8 @@ def build_price_table(prices: list) -> str:
 def build_brvm_table(prices: list, brvm_scores: dict) -> str:
     """Table impact BRVM avec barres de score visuelles."""
     BRVM_EXPOSURE = {
-        "NEIC":  {"CC=F": 4, "SB=F": 2},
         "SIFCA": {"CC=F": 4, "CL=F": 1},
+        "CFAC":  {"CC=F": 5},
         "PALC":  {"CC=F": 1}, "SOGB": {"CC=F": 1}, "SAPH": {"CC=F": 1},
         "TTLS":  {"CL=F": 5, "BZ=F": 5},
         "SVOC":  {"CL=F": 5, "BZ=F": 5},
