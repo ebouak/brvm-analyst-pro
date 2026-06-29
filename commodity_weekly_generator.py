@@ -36,6 +36,28 @@ import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
+
+# ── Chargement automatique .env ───────────────────────────────────────────────
+def _load_env(*paths: str) -> None:
+    for path in paths:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, _, v = line.partition("=")
+                        if k.strip() and k.strip() not in os.environ:
+                            os.environ[k.strip()] = v.strip()
+        except FileNotFoundError:
+            pass
+
+_here = os.path.dirname(os.path.abspath(__file__))
+_load_env(
+    os.path.join(_here, "scraper", ".env.local"),
+    os.path.join(_here, "scraper", ".env"),
+    os.path.join(_here, ".env.local"),
+    os.path.join(_here, ".env"),
+)
 from pathlib import Path
 
 log = logging.getLogger("wb-commodity-weekly")
