@@ -107,8 +107,8 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-        {/* Graphiques */}
-        {hasCharts && (
+        {/* Graphiques Recharts — uniquement si content_html absent (anciens articles sans SVG intégré) */}
+        {hasCharts && !article.content_html && (
           <section>
             <h2 className="text-sm font-semibold text-cyan-400 uppercase tracking-widest mb-5">
               Données de marché
@@ -129,17 +129,12 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
           </section>
         )}
 
-        {/* Contenu éditorial */}
+        {/* Contenu éditorial (SVG + tables + texte assemblés par Python) */}
         {article.content_html ? (
-          <section>
-            <h2 className="text-sm font-semibold text-cyan-400 uppercase tracking-widest mb-5">
-              Analyse éditoriale
-            </h2>
-            <div
-              className="weekly-content prose-invert"
-              dangerouslySetInnerHTML={{ __html: article.content_html }}
-            />
-          </section>
+          <div
+            className="weekly-content"
+            dangerouslySetInnerHTML={{ __html: article.content_html }}
+          />
         ) : (
           <p className="text-gray-500 text-center py-12">Contenu non disponible.</p>
         )}

@@ -485,14 +485,22 @@ def build_wb_summary(wb_snapshot: dict) -> dict:
 
 # ── 5. Prompt DeepSeek + Builders visuels Python ─────────────────────────────
 
-def build_editorial_prompt(prices: list, wb: dict, articles: list, brvm_scores: dict, correlations: list | None = None) -> str:
+def build_editorial_prompt(
+    prices: list,
+    wb: dict,
+    articles: list,
+    brvm_scores: dict,
+    correlations: list | None = None,
+    week: int | None = None,
+    year: int | None = None,
+) -> str:
     """
     DeepSeek génère UNIQUEMENT le texte éditorial (synthèse + 8 analyses + réactions + perspectives).
     Python construit séparément le SVG, les tables et le footer.
     """
     now = datetime.now(timezone(timedelta(hours=1)))
-    week_num = now.isocalendar()[1]
-    year = now.year
+    week_num = week if week is not None else now.isocalendar()[1]
+    year = year if year is not None else now.year
 
     price_lines = "\n".join(f"  - {p.to_prompt_line()}" for p in prices)
 
@@ -796,12 +804,13 @@ def assemble_content_html(
     prices: list,
     brvm_scores: dict,
     correlations: list | None = None,
+    year: int | None = None,
 ) -> str:
     """
     Assemble le HTML final : visuels Python + texte DeepSeek.
     Structure : <article> SVG + table prix + éditorial + table BRVM + table corrélations + footer </article>
     """
-    year = datetime.now(timezone(timedelta(hours=1))).year
+    year = year if year is not None else datetime.now(timezone(timedelta(hours=1))).year
     text = editorial_html.strip()
     if not text.startswith("<section"):
         text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
@@ -1014,7 +1023,10 @@ def main():
     wb_summary = build_wb_summary(wb_snapshot)
     # Convertir scores 0-100 → 0-10 pour le prompt et les tables
     brvm_scores_simple = {tk: round(v["score"] / 10, 1) for tk, v in brvm_scores.items()}
-    prompt = build_editorial_prompt(prices, wb_summary, articles, brvm_scores_simple, correlations)
+    prompt = build_editorial_prompt(
+        prices, wb_summary, articles, brvm_scores_simple, correlations,
+        week=week, year=year,
+    )
 
     if args.dry_run:
         log.info("[DRY-RUN] Appel DeepSeek ignoré")
@@ -1022,7 +1034,9 @@ def main():
     else:
         editorial_html = call_deepseek(prompt)
 
-    article_html = assemble_content_html(editorial_html, prices, brvm_scores_simple, correlations)
+    article_html = assemble_content_html(
+        editorial_html, prices, brvm_scores_simple, correlations, year=year,
+    )
 
     # Étape 6 : HTML final
     title = f"Matières premières BRVM – Semaine {week:02d}/{year} | WestBourse"
