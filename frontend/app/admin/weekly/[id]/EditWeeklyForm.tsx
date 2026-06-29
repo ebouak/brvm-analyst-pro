@@ -56,7 +56,7 @@ export function EditWeeklyForm({ id, slug, initialTitre, initialResume, initialS
       });
       const json = (await res.json()) as { ok?: boolean; sent?: number; error?: string };
       if (!res.ok || !json.ok) {
-        setNlMsg({ ok: false, text: json.error ?? 'Erreur lors de l'envoi.' });
+        setNlMsg({ ok: false, text: json.error ?? "Erreur lors de l'envoi." });
       } else {
         const n = json.sent ?? 0;
         setNlMsg({
