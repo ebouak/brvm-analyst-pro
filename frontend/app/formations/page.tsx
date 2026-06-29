@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
+import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/server';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
 
 export const metadata = { title: 'Formations & conférences — WESTBOURSE' };
@@ -10,8 +11,13 @@ const NIVEAU_LABEL: Record<string, string> = { debutant: 'Débutant', intermedia
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
 
+const NIVEAU_COURSE: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé', expert: 'Expert' };
+
 export default async function FormationsPage() {
-  const formations = await listFormations().catch(() => [] as FormationCard[]);
+  const [formations, courses] = await Promise.all([
+    listFormations().catch(() => [] as FormationCard[]),
+    listPublishedCourses().catch(() => [] as AcademyCourseCard[]),
+  ]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
@@ -48,6 +54,32 @@ export default async function FormationsPage() {
           </div>
         </div>
       </Link>
+
+      {/* ── Cours générés (Academy IA) ────────────────────────────────────── */}
+      {courses.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <p className="overline text-faint">Cours de l&apos;Academy</p>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#56D7FD]/10 text-[#56D7FD] border border-[#56D7FD]/20">
+              {courses.length} cours
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((c) => (
+              <Link key={c.id} href={`/formations/academy/${c.slug}`}
+                className="group flex flex-col rounded-xl border border-border bg-surface p-4 hover:border-[#56D7FD]/40 transition">
+                <div className="flex items-center gap-2 text-[11px] text-faint">
+                  <span className="text-[#56D7FD]">📘 Cours</span>
+                  {c.niveau && <span>· {NIVEAU_COURSE[c.niveau] ?? c.niveau}</span>}
+                </div>
+                <h3 className="mt-1 font-display text-white group-hover:text-[#56D7FD] transition line-clamp-2">{c.titre}</h3>
+                {c.resume && <p className="mt-1 text-xs text-muted line-clamp-3">{c.resume}</p>}
+                <span className="mt-auto pt-3 text-[11px] text-[#56D7FD] group-hover:underline">Commencer →</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {formations.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-8 text-center">
