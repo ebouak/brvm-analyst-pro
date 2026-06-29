@@ -115,8 +115,11 @@ export function parseObligationDesignation(designation: string | null): {
   const maturite = `${endYear}-12-31`;
 
   // Émetteur = tout ce qui précède le coupon, sans tiret/séparateur traînant.
-  const emetteur =
-    designation.slice(0, m.index ?? 0).replace(/[\s-]+$/, '').trim() || null;
+  // Suppression des préfixes de type obligation (GSS, Green/Social/Gender Bond…).
+  const raw = designation.slice(0, m.index ?? 0).replace(/[\s-]+$/, '').trim();
+  const emetteur = raw
+    .replace(/^(?:GSS|GREEN BOND|GENDER BOND|SOCIAL BOND|CLIMATE BOND|DIASPORA BONDS?)\s+/i, '')
+    .trim() || null;
 
   return {
     emetteur,
