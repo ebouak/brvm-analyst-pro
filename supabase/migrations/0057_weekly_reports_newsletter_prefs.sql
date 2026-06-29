@@ -76,7 +76,7 @@ CREATE POLICY "admin lit newsletter_sends"
   FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM public.user_roles ur
+      SELECT 1 FROM public.admin_user_roles ur
       WHERE ur.user_id = auth.uid()
     )
   );
