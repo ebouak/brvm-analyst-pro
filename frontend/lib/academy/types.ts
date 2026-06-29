@@ -44,6 +44,13 @@ export const chartSchema = z
     message: 'labels et valeurs doivent avoir la même longueur',
   });
 
+/** Image illustrative d'une leçon — remplie côté serveur après recherche Pexels. */
+export const lessonImageSchema = z.object({
+  url: z.string().url(),
+  alt: z.string().max(300).default(''),
+  credit: z.string().max(200).default(''),
+});
+
 export const lessonSchema = z.object({
   titre: z.string().min(1).max(160),
   categorie: z.enum(CATEGORIES).default('general'),
@@ -51,6 +58,10 @@ export const lessonSchema = z.object({
   sections: z.array(sectionSchema).min(1).max(8),
   chart: chartSchema.nullable().optional(),
   qcm: qcmSchema.nullable().optional(),
+  // Mots-clés EN fournis par le LLM pour rechercher une image (ex. "stock market chart").
+  imageQuery: z.string().max(120).nullable().optional(),
+  // Rempli côté serveur après fetch Pexels (absent de la sortie LLM).
+  image: lessonImageSchema.nullable().optional(),
 });
 
 export const glossaireItemSchema = z.object({
@@ -71,6 +82,7 @@ export type Lesson = z.infer<typeof lessonSchema>;
 export type Section = z.infer<typeof sectionSchema>;
 export type Qcm = z.infer<typeof qcmSchema>;
 export type Chart = z.infer<typeof chartSchema>;
+export type LessonImage = z.infer<typeof lessonImageSchema>;
 
 export const NIVEAU_LABEL: Record<Niveau, string> = {
   debutant: 'Débutant',

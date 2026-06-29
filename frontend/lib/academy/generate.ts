@@ -1,6 +1,7 @@
 import 'server-only';
-import { resolveApiKey, type LlmProvider } from '@/lib/server/apiKeys';
+import { resolveApiKey, resolvePexelsKey, type LlmProvider } from '@/lib/server/apiKeys';
 import { courseContentSchema, type CourseContent, type Niveau, NIVEAU_LABEL } from './types';
+import { fetchPexelsImage } from './images';
 
 const ORDER: { provider: LlmProvider; url: string; model: string }[] = [
   { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
@@ -40,6 +41,7 @@ Réponds avec CE schéma JSON exact (et rien d'autre) :
       "titre": "titre de la leçon",
       "categorie": "general|income|fundamental|technical|regulatory|evaluation",
       "resume": "résumé en 1-2 phrases (max 600 car.)",
+      "imageQuery": "2-4 mots-clés EN pour illustrer la leçon (ex. 'stock market trading', 'african business finance')",
       "sections": [
         { "type": "definition", "titre": "Définition", "contenu": "..." },
         { "type": "importance", "titre": "Pourquoi c'est important", "contenu": "..." },
@@ -68,6 +70,9 @@ Réponds avec CE schéma JSON exact (et rien d'autre) :
 
 Contraintes :
 - Exactement ${p.nbLessons} leçon(s).
+- Chaque leçon a un "imageQuery" : 2 à 4 mots-clés EN concrets et illustrables
+  (objets, lieux, scènes : "trading floor", "african bank building", "financial charts").
+  Évite l'abstrait pur ; privilégie ce qu'une banque d'images photographiques peut montrer.
 - Chaque leçon : 3 à 5 sections parmi (definition, importance, cas, piege, lexique, retenir).
 - Chaque leçon DOIT inclure un "chart" pédagogique pertinent :
   · "type" = "bar" (comparaison/répartition) ou "line" (évolution dans le temps)
@@ -139,6 +144,7 @@ export async function generateCourse(p: GenerateParams): Promise<GenerateResult>
     try {
       const raw = await callLLM(cfg, key, prompt);
       const parsed = courseContentSchema.parse(extractJson(raw));
+      await enrichWithImages(parsed);
       return { content: parsed, provider: cfg.model };
     } catch (e) {
       errors.push(`${cfg.provider}: ${e instanceof Error ? e.message : String(e)}`);
@@ -147,4 +153,21 @@ export async function generateCourse(p: GenerateParams): Promise<GenerateResult>
 
   if (!anyKey) throw new Error('Aucune clé IA configurée (page Clés API).');
   throw new Error(`Génération échouée. ${errors.join(' | ')}`);
+}
+
+/**
+ * Récupère en parallèle une image Pexels par leçon (via imageQuery).
+ * Sans clé Pexels ou en cas d'échec : laisse simplement les leçons sans image.
+ */
+async function enrichWithImages(content: CourseContent): Promise<void> {
+  const pexelsKey = await resolvePexelsKey();
+  if (!pexelsKey) return; // pas de clé → cours sans images, sans erreur
+  await Promise.all(
+    content.lessons.map(async (lesson) => {
+      const q = lesson.imageQuery?.trim();
+      if (!q) return;
+      const img = await fetchPexelsImage(q, pexelsKey);
+      if (img) lesson.image = img;
+    }),
+  );
 }

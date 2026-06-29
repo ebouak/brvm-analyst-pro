@@ -41,3 +41,20 @@ export async function resolveResendKey(): Promise<string | null> {
   const { data } = await admin.from('api_keys').select('api_key').eq('provider', 'resend').maybeSingle();
   return data?.api_key ?? null;
 }
+
+/**
+ * Résout la clé Pexels (images des cours Academy). Priorité : env `PEXELS_API_KEY`,
+ * sinon table api_keys (provider='pexels'). Renvoie null si aucune source
+ * (les cours se génèrent alors sans images, sans erreur).
+ */
+export async function resolvePexelsKey(): Promise<string | null> {
+  const fromEnv = process.env.PEXELS_API_KEY;
+  if (fromEnv) return fromEnv;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const svc = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !svc) return null;
+  const admin = createClient(url, svc);
+  const { data } = await admin.from('api_keys').select('api_key').eq('provider', 'pexels').maybeSingle();
+  return data?.api_key ?? null;
+}

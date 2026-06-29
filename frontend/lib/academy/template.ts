@@ -110,6 +110,9 @@ a{color:var(--primary)}
 .lesson:hover{box-shadow:var(--shadow);border-color:rgba(86,215,253,.3)}
 .lesson-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}
 .lesson h3{margin:.1rem 0 .5rem;font-size:1.18rem;font-weight:700;font-family:'Bespoke Serif',serif}
+.lesson-img{position:relative;margin:0 0 14px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.lesson-img img{width:100%;display:block;aspect-ratio:21/9;object-fit:cover}
+.lesson-img .img-credit{position:absolute;bottom:6px;right:8px;background:rgba(3,3,3,.6);color:rgba(252,252,252,.8);font-size:.66rem;padding:2px 7px;border-radius:6px}
 .tag{display:inline-block;padding:5px 12px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;border:1px solid transparent}
 .tag.general{background:rgba(86,215,253,.12);color:#56D7FD;border-color:rgba(86,215,253,.25)}
 .tag.income{background:rgba(224,179,65,.12);color:#e0b341;border-color:rgba(224,179,65,.25)}
@@ -187,6 +190,12 @@ export function renderCourseHtml(c: CourseContent): string {
         )
         .join('');
 
+      const image = l.image
+        ? `<div class="lesson-img"><img src="${esc(l.image.url)}" alt="${esc(l.image.alt)}" loading="lazy"/>${
+            l.image.credit ? `<span class="img-credit">${esc(l.image.credit)}</span>` : ''
+          }</div>`
+        : '';
+
       const chart = l.chart ? renderChart(l.chart) : '';
 
       const qcm = l.qcm
@@ -204,6 +213,7 @@ export function renderCourseHtml(c: CourseContent): string {
           <h3>${esc(l.titre)}</h3>
           <span class="tag ${l.categorie}">${esc(CATEGORIE_LABEL[l.categorie] ?? l.categorie)}</span>
         </div>
+        ${image}
         <p class="summary">${esc(l.resume)}</p>
         ${sections}
         ${chart}
