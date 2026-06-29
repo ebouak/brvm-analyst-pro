@@ -55,13 +55,43 @@ export default async function WeeklyPage() {
         subtitle="Impact du cacao, pétrole, caoutchouc et huile de palme sur les valeurs BRVM"
       />
 
+      {/* Thesis tracker — carte permanente illustrée */}
+      <Link
+        href="/weekly/thesis"
+        className="group mt-8 flex gap-0 rounded-xl border border-[#1a2a30] overflow-hidden hover:border-cyan-500/40 transition-all duration-200 block"
+      >
+        <div className="relative hidden sm:block w-40 shrink-0 overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=320&h=200&fit=crop&auto=format&q=80"
+            alt="Matières premières"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a1417]/70" />
+        </div>
+        <div className="flex-1 bg-[#0a1417] p-5 flex items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400/70">Référentiel stratégique</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">permanent</span>
+            </div>
+            <h2 className="font-semibold text-white group-hover:text-cyan-400 transition-colors">
+              Exposition BRVM aux matières premières
+            </h2>
+            <p className="text-xs text-gray-400 mt-1">
+              Matrice de sensibilité · Fiches valeurs illustrées · Catalyseurs · SICC, SIFCA, SAPH, SOGB, PALC, SCRC, TTLS, SVOC
+            </p>
+          </div>
+          <span className="text-cyan-400 shrink-0 text-lg group-hover:translate-x-1 transition-transform">→</span>
+        </div>
+      </Link>
+
       {articles.length === 0 ? (
         <div className="mt-12 text-center text-gray-500">
           <p className="text-lg">Aucune analyse disponible pour le moment.</p>
           <p className="text-sm mt-2">Les analyses sont publiées chaque vendredi.</p>
         </div>
       ) : (
-        <div className="mt-8 grid gap-4">
+        <div className="mt-6 grid gap-4">
           {articles.map(article => {
             const meta = article.metadata as Record<string, unknown> | null;
             const week = meta?.week as number | undefined;
