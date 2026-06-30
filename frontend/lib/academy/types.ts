@@ -73,6 +73,9 @@ export const courseContentSchema = z.object({
   titre: z.string().min(1).max(200),
   niveau: z.enum(NIVEAUX),
   intro: z.string().min(1).max(1200),
+  // Visuel de couverture (bannière en tête), défini côté serveur/admin — jamais
+  // par le LLM. Stocké dans content pour survivre à la régénération (préservé).
+  coverUrl: z.string().url().nullable().optional(),
   lessons: z.array(lessonSchema).min(1).max(20),
   glossaire: z.array(glossaireItemSchema).max(40).optional().default([]),
 });

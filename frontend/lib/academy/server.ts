@@ -47,6 +47,19 @@ export async function getCourseHtml(slug: string): Promise<string | null> {
   return (data?.html as string | undefined) ?? null;
 }
 
+/** Contenu structuré d'un cours (pour re-render / préservation de la couverture). */
+export async function getCourseContent(slug: string): Promise<CourseContent | null> {
+  const sb = getServiceClient();
+  const { data } = await sb.from('academy_courses').select('content').eq('slug', slug).maybeSingle();
+  return (data?.content as CourseContent | undefined) ?? null;
+}
+
+/** URL de couverture existante d'un cours (préservée à la régénération). */
+export async function getExistingCover(slug: string): Promise<string | null> {
+  const content = await getCourseContent(slug);
+  return content?.coverUrl ?? null;
+}
+
 export interface UpsertCourseInput {
   slug: string;
   titre: string;

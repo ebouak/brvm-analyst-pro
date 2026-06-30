@@ -3,7 +3,7 @@ import { requirePermission } from '@/lib/server/rbac';
 import { recordAudit } from '@/lib/server/audit';
 import { generateCourse } from '@/lib/academy/generate';
 import { renderCourseHtml } from '@/lib/academy/template';
-import { upsertCourse } from '@/lib/academy/server';
+import { upsertCourse, getExistingCover } from '@/lib/academy/server';
 import { NIVEAUX, slugify, type Niveau } from '@/lib/academy/types';
 
 export const maxDuration = 120;
@@ -36,8 +36,12 @@ export async function POST(request: Request) {
 
   try {
     const { content, provider } = await generateCourse({ sujet, niveau, nbLessons });
-    const html = renderCourseHtml(content);
     const slug = slugify(content.titre) || slugify(sujet) || `cours-${Date.now()}`;
+
+    // Préserver la couverture existante si on régénère un cours déjà couvert.
+    const existingCover = await getExistingCover(slug);
+    if (existingCover) content.coverUrl = existingCover;
+    const html = renderCourseHtml(content);
 
     const res = await upsertCourse({
       slug,

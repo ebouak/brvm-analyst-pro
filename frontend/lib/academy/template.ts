@@ -105,6 +105,8 @@ a{color:var(--primary)}
 .hero{background:linear-gradient(135deg,#0a1f25,#050e11);border:1px solid var(--border);border-radius:28px;padding:36px;box-shadow:var(--shadow);margin-bottom:28px;position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(86,215,253,.12),transparent 70%)}
 .hero h1{font-family:'Bespoke Serif',serif;font-size:clamp(2rem,4vw,3.4rem);line-height:1.06;margin:.1em 0 .3em}
+.course-cover{margin:0 0 28px;border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
+.course-cover img{width:100%;display:block}
 .level-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;font-size:.8rem;font-weight:700;margin-bottom:16px;background:rgba(86,215,253,.12);color:#56D7FD;border:1px solid rgba(86,215,253,.25)}
 .lesson{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.3);transition:box-shadow .2s,border-color .2s}
 .lesson:hover{box-shadow:var(--shadow);border-color:rgba(86,215,253,.3)}
@@ -256,6 +258,7 @@ ${FONTS}
       <h1>${esc(c.titre)}</h1>
       ${paras(c.intro)}
     </section>
+    ${c.coverUrl ? `<div class="course-cover"><img src="${esc(c.coverUrl)}" alt="${esc(c.titre)}" loading="eager"/></div>` : ''}
     ${lessonsHtml}
     ${glossaire}
     <p class="small" style="margin-top:32px;border-top:1px solid var(--border);padding-top:14px">

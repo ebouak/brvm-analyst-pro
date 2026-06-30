@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AcademyCourseCard } from '@/lib/academy/server';
-import { setCoursePublished, deleteCourse } from './actions';
+import { setCoursePublished, deleteCourse, setCourseCover } from './actions';
 
 const NIVEAUX = [
   { v: 'debutant', l: 'Débutant' },
@@ -11,6 +11,26 @@ const NIVEAUX = [
   { v: 'avance', l: 'Avancé' },
   { v: 'expert', l: 'Expert' },
 ];
+
+/** Champ de saisie d'URL de couverture pour une ligne de cours. */
+function CoverInput({ onApply, disabled }: { onApply: (url: string) => void; disabled: boolean }) {
+  const [url, setUrl] = useState('');
+  return (
+    <div className="flex items-center gap-1.5">
+      <input
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="https://…/visuel.png"
+        aria-label="URL de couverture"
+        className="w-40 rounded border border-border bg-bg/40 px-2 py-1 text-[11px] text-ivory placeholder:text-faint"
+      />
+      <button type="button" onClick={() => onApply(url)} disabled={disabled || !url.trim()}
+        className="rounded bg-info/80 px-2 py-1 text-[11px] font-medium text-bg disabled:opacity-40">
+        Définir
+      </button>
+    </div>
+  );
+}
 
 export function AcademyAdmin({ courses }: { courses: AcademyCourseCard[] }) {
   const router = useRouter();
@@ -48,6 +68,13 @@ export function AcademyAdmin({ courses }: { courses: AcademyCourseCard[] }) {
   function remove(c: AcademyCourseCard) {
     if (!confirm(`Supprimer « ${c.titre} » ?`)) return;
     start(async () => { await deleteCourse(c.slug); router.refresh(); });
+  }
+  function applyCover(slug: string, url: string) {
+    start(async () => {
+      const r = await setCourseCover(slug, url);
+      setMsg(r.ok ? '✅ Couverture mise à jour.' : (r.message ?? 'Erreur couverture.'));
+      router.refresh();
+    });
   }
 
   return (
@@ -93,18 +120,22 @@ export function AcademyAdmin({ courses }: { courses: AcademyCourseCard[] }) {
             <tr>
               <th className="px-3 py-2 text-left">Titre</th>
               <th className="px-3 py-2 text-left">Niveau</th>
+              <th className="px-3 py-2 text-left">Couverture</th>
               <th className="px-3 py-2 text-center">Publié</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {courses.length === 0 && (
-              <tr><td colSpan={4} className="px-3 py-6 text-center text-faint">Aucun cours généré.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-6 text-center text-faint">Aucun cours généré.</td></tr>
             )}
             {courses.map((c) => (
               <tr key={c.id} className="border-t border-border/50">
                 <td className="px-3 py-2 text-white">{c.titre}</td>
                 <td className="px-3 py-2 text-muted">{c.niveau ?? '—'}</td>
+                <td className="px-3 py-2">
+                  <CoverInput onApply={(url) => applyCover(c.slug, url)} disabled={pending} />
+                </td>
                 <td className="px-3 py-2 text-center">
                   <button type="button" onClick={() => togglePub(c)} disabled={pending}
                     className={`rounded-full px-2 py-0.5 text-[11px] ${c.published ? 'bg-up/15 text-up' : 'bg-border text-faint'}`}>
