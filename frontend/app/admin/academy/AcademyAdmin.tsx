@@ -143,6 +143,8 @@ export function AcademyAdmin({ courses }: { courses: AcademyCourseCard[] }) {
                   </button>
                 </td>
                 <td className="px-3 py-2 text-right">
+                  <a href={`/admin/academy/${c.slug}/edit`}
+                    className="text-xs text-info hover:underline mr-3">Éditer</a>
                   <a href={`/formations/academy/${c.slug}`} target="_blank" rel="noopener noreferrer"
                     className="text-xs text-info hover:underline mr-3">Aperçu</a>
                   <button type="button" onClick={() => remove(c)} className="text-xs text-down hover:underline">Suppr.</button>

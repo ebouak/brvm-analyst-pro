@@ -21,6 +21,14 @@ Règles absolues :
 - Rédige en français professionnel et accessible.
 - Base-toi sur des réalités du marché BRVM/UEMOA (FCFA, SYSCOA/OHADA, CREPMF, secteurs réels).
 - Jamais d'invention de chiffres précis non vérifiables ; reste sur des concepts, mécanismes et ordres de grandeur.
+- EXACTITUDE FACTUELLE : n'affirme JAMAIS un fait spécifique non vérifiable sur une
+  société ou un événement réel (date d'introduction en bourse, montant levé, prix,
+  capitalisation…). Si tu n'es pas certain d'un fait, ne l'énonce pas.
+- Un événement futur, planifié ou incertain (ex. une IPO à venir) doit être présenté
+  EXPLICITEMENT comme « en projet / annoncé / hypothétique » — jamais comme un fait
+  passé ou acquis. Ne fabrique pas de dates ni de résultats.
+- Pour illustrer, privilégie des exemples GÉNÉRIQUES ou clairement étiquetés « cas
+  hypothétique / illustratif » plutôt que des affirmations factuelles sur une société nommée.
 - Aucun conseil d'investissement personnalisé ; uniquement de l'éducation financière.
 - Tu réponds STRICTEMENT en JSON valide, sans texte autour, sans bloc markdown.`;
 

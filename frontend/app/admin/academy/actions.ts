@@ -6,8 +6,48 @@ import { recordAudit } from '@/lib/server/audit';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { getCourseContent } from '@/lib/academy/server';
 import { renderCourseHtml } from '@/lib/academy/template';
+import { courseContentSchema } from '@/lib/academy/types';
 
 type R = { ok: boolean; message?: string };
+
+/**
+ * Met à jour le contenu d'un cours (édition manuelle), le valide (zod) puis
+ * re-rend le HTML — SANS rappeler le LLM. Conserve la couverture si l'éditeur
+ * ne l'a pas renvoyée.
+ */
+export async function updateCourseContent(slug: string, rawContent: unknown): Promise<R> {
+  const ctx = await requirePermission('content.write');
+
+  const parsed = courseContentSchema.safeParse(rawContent);
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    return { ok: false, message: `Contenu invalide : ${first?.path.join('.')} — ${first?.message}` };
+  }
+  const content = parsed.data;
+
+  // Préserver la couverture existante si absente du contenu édité.
+  if (!content.coverUrl) {
+    const existing = await getCourseContent(slug);
+    if (existing?.coverUrl) content.coverUrl = existing.coverUrl;
+  }
+
+  const html = renderCourseHtml(content);
+  const { error } = await getServiceClient()
+    .from('academy_courses')
+    .update({ titre: content.titre, niveau: content.niveau, resume: content.intro.slice(0, 280), content, html, updated_at: new Date().toISOString() })
+    .eq('slug', slug);
+  if (error) return { ok: false, message: error.message };
+
+  await recordAudit(ctx, {
+    action: 'academy.content.update',
+    resourceType: 'academy_course',
+    resourceId: slug,
+    severity: 'info',
+  });
+  revalidatePath('/admin/academy');
+  revalidatePath(`/formations/academy/${slug}`);
+  return { ok: true };
+}
 
 /**
  * Définit (ou retire si url vide) la couverture d'un cours, puis re-rend le HTML
