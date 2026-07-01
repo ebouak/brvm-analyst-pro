@@ -17,6 +17,8 @@ import type { TickItem } from '@/components/landing/taste/types';
 import type { IndiceDaily } from '@/lib/types';
 import { HeroSpotlight } from '@/components/landing/HeroSpotlight';
 import { ProofBand } from '@/components/landing/ProofBand';
+import { SocialProof } from '@/components/landing/SocialProof';
+import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
@@ -248,6 +250,9 @@ export default async function Landing() {
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand />
 
+      {/* ── PREUVE SOCIALE : communauté réelle + sources officielles ───── */}
+      <SocialProof />
+
       {/* ── ACTUALITÉS + état de séance (sous le fold) ────────────────── */}
       <NewsTicker className="mt-6 -mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
       <MarketSessionBanner className="mt-4" />
@@ -336,6 +341,9 @@ export default async function Landing() {
           </Link>
         ))}
       </section>
+
+      {/* ── APERÇU PLATEFORME : features réelles (souvent invisibles) ──── */}
+      <AppPreview />
 
       {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
       <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-white/10 p-6 md:p-10">

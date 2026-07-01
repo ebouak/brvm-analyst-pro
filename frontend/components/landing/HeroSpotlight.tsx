@@ -105,10 +105,10 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
         </h1>
 
         <p className="mb-2 font-display text-[clamp(15px,2.4vw,17px)] font-semibold leading-[1.3] tracking-[-0.01em] text-ivory">
-          Analysez. <span className="text-accent">Simulez.</span> Investissez.
+          La seule plateforme qui <span className="text-accent">note chaque action BRVM</span> chaque jour.
         </p>
         <p className="mb-5 max-w-[42ch] text-[13px] leading-[1.6] text-muted">
-          Cours, notes, fondamentaux — gratuit. Données vérifiées. Analyses quantitatives. Décisions éclairées.
+          Données officielles. Zéro opinion inventée — tout est dérivé des chiffres.
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -120,6 +120,9 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
             Explorer sans compte →
           </Link>
         </div>
+        <p className="mt-3 text-[11px] text-faint">
+          ✓ Aucune carte bancaire&nbsp;·&nbsp;✓ Compte en 1 minute&nbsp;·&nbsp;✓ Sans engagement
+        </p>
       </div>
     </section>
   );
