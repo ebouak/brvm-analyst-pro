@@ -249,65 +249,10 @@ export default async function Landing() {
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand />
 
-      {/* ── APERÇU PLATEFORME : remonté juste après le hero — c'est le vrai
-          moteur de conversion (features réelles + CTA inscription). ───── */}
-      <AppPreview />
-
-      {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.06] md:grid-cols-3">
-        {STEPS.map((s) => (
-          <Link key={s.n} href={s.href} className="group bg-[#0b0b0d] p-6 transition-colors hover:bg-[#101013]">
-            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-gold-2">{s.n}</p>
-            <h2 className="mt-3 font-display text-xl text-ivory">{s.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
-            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors group-hover:text-gold-2">
-              {s.cta} <span className="transition-transform group-hover:translate-x-0.5">→</span>
-            </span>
-          </Link>
-        ))}
-      </section>
-
-      {/* ── COMPARATEUR SGI : remonté ici (avant : enterré avant la FAQ,
-          en bas de page) — le calculateur de coût réel est un différenciateur
-          concret, il mérite la même visibilité que AppPreview/3 étapes. ──── */}
-      <section className="mt-10 overflow-hidden rounded-panel border border-accent/20 bg-gradient-to-br from-accent/[0.06] to-transparent p-6 md:p-8">
-        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[1.4fr_auto]">
-          <div>
-            <p className="overline mb-3 text-gold-2">Comparateur · BRVM / UEMOA</p>
-            <h2 className="mb-3 max-w-[22ch] font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
-              Choisir sa SGI, sans <span className="text-accent">improviser</span>.
-            </h2>
-            <p className="mb-5 max-w-[58ch] text-sm leading-relaxed text-muted">
-              Annuaire complet des 22 SGI agréées de l&apos;UEMOA — pays, type, groupe, dépôt minimum indicatif —
-              et un calculateur de coût réel (courtage, garde, tenue de compte) pour comparer sur des chiffres,
-              pas des ordres de grandeur vagues.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/comparateur-sgi"
-                className="landing-hero-cta inline-flex min-h-[46px] items-center gap-1.5 rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-              >
-                Comparer le coût réel <span aria-hidden>→</span>
-              </Link>
-              <span className="font-mono text-[12px] text-faint">22 SGI · 7 pays UEMOA</span>
-            </div>
-          </div>
-          <div className="hidden md:flex md:flex-col md:gap-2 md:border-l md:border-white/10 md:pl-6">
-            {['Côte d’Ivoire · 12', 'Sénégal · 4', 'Burkina Faso · 2', 'Mali · Bénin · Togo · Niger'].map((l) => (
-              <span key={l} className="font-mono text-[12.5px] text-muted">
-                {l}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PREUVE SOCIALE : communauté réelle + sources officielles ───── */}
-      <SocialProof />
-
       {/* ── MARCHÉ EN DIRECT : actus, séance, preuve chiffrée, indices,
-          heatmap — regroupés en un seul bloc contigu (avant : 4 sections
-          séparées par des mt-10, lecture fragmentée). ─────────────────── */}
+          heatmap — remonté juste après ProofBand (preuve de fraîcheur des
+          données, elle doit être visible tôt) ; regroupés en un seul bloc
+          contigu (avant : 4 sections séparées par des mt-10). ──────────── */}
       <section className="mt-10">
         <div className="mb-5 flex items-baseline justify-between gap-3">
           <p className="overline text-gold-2">Marché en direct</p>
@@ -382,6 +327,62 @@ export default async function Landing() {
 
         <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
       </section>
+
+      {/* ── APERÇU PLATEFORME : c'est le vrai moteur de conversion
+          (features réelles + CTA inscription). ─────────────────────────── */}
+      <AppPreview />
+
+      {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
+      <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.06] md:grid-cols-3">
+        {STEPS.map((s) => (
+          <Link key={s.n} href={s.href} className="group bg-[#0b0b0d] p-6 transition-colors hover:bg-[#101013]">
+            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-gold-2">{s.n}</p>
+            <h2 className="mt-3 font-display text-xl text-ivory">{s.title}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
+            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors group-hover:text-gold-2">
+              {s.cta} <span className="transition-transform group-hover:translate-x-0.5">→</span>
+            </span>
+          </Link>
+        ))}
+      </section>
+
+      {/* ── COMPARATEUR SGI : le calculateur de coût réel est un
+          différenciateur concret, il mérite la même visibilité que
+          AppPreview/3 étapes. ───────────────────────────────────────────── */}
+      <section className="mt-10 overflow-hidden rounded-panel border border-accent/20 bg-gradient-to-br from-accent/[0.06] to-transparent p-6 md:p-8">
+        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[1.4fr_auto]">
+          <div>
+            <p className="overline mb-3 text-gold-2">Comparateur · BRVM / UEMOA</p>
+            <h2 className="mb-3 max-w-[22ch] font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
+              Choisir sa SGI, sans <span className="text-accent">improviser</span>.
+            </h2>
+            <p className="mb-5 max-w-[58ch] text-sm leading-relaxed text-muted">
+              Annuaire complet des 22 SGI agréées de l&apos;UEMOA — pays, type, groupe, dépôt minimum indicatif —
+              et un calculateur de coût réel (courtage, garde, tenue de compte) pour comparer sur des chiffres,
+              pas des ordres de grandeur vagues.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/comparateur-sgi"
+                className="landing-hero-cta inline-flex min-h-[46px] items-center gap-1.5 rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
+              >
+                Comparer le coût réel <span aria-hidden>→</span>
+              </Link>
+              <span className="font-mono text-[12px] text-faint">22 SGI · 7 pays UEMOA</span>
+            </div>
+          </div>
+          <div className="hidden md:flex md:flex-col md:gap-2 md:border-l md:border-white/10 md:pl-6">
+            {['Côte d’Ivoire · 12', 'Sénégal · 4', 'Burkina Faso · 2', 'Mali · Bénin · Togo · Niger'].map((l) => (
+              <span key={l} className="font-mono text-[12.5px] text-muted">
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PREUVE SOCIALE : communauté réelle + sources officielles ───── */}
+      <SocialProof />
 
       {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
       <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-white/10 p-6 md:p-10">
