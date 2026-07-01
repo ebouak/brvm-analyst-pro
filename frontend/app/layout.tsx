@@ -10,10 +10,36 @@ import SplashScreen from '@/components/brand/SplashScreen';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import { createClient } from '@/lib/supabase/server';
 
+// URL canonique du site. Défaut = domaine cible westbourse.com ; surchargeable
+// via NEXT_PUBLIC_SITE_URL (mettre l'URL RÉELLEMENT servie tant que le domaine
+// n'est pas branché, sinon les canonical/OG pointent vers un domaine inactif).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://westbourse.com';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   // UX fix: template de titre pour que chaque page affiche "Page | WESTBOURSE".
-  title: { default: 'WESTBOURSE', template: '%s | WESTBOURSE' },
-  description: "Plateforme d'analyse et d'aide à la décision d'investissement sur la BRVM (UEMOA).",
+  title: {
+    default: 'WESTBOURSE — Cours BRVM, Notes A–F & Analyses Quantitatives',
+    template: '%s | WESTBOURSE',
+  },
+  description:
+    "Plateforme d'analyse BRVM : cours toutes les 15 min, notation A–F sur les actions, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit.",
+  keywords: [
+    'BRVM', 'bourse BRVM', 'cours BRVM', 'investir BRVM', 'BRVM en direct',
+    'actions UEMOA', 'bourse UEMOA', 'investissement Afrique de l’Ouest',
+    'cours bourse Côte d’Ivoire', 'SONATEL', 'ECOBANK BRVM',
+    'SGI BRVM', 'SGI BRVM comparatif', 'analyse action BRVM', 'note A-F action BRVM',
+    'simulateur bourse UEMOA', 'fondamentaux BRVM', 'diagnostic IA BRVM', 'brief BRVM quotidien',
+    'comment investir BRVM débutant', 'WESTBOURSE',
+  ],
+  authors: [{ name: 'WESTBOURSE', url: SITE_URL }],
+  creator: 'WESTBOURSE',
+  publisher: 'WESTBOURSE',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+  },
   icons: { icon: '/favicon.svg' },
   manifest: '/manifest.json',
   appleWebApp: {
@@ -21,6 +47,71 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'WESTBOURSE',
   },
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    alternateLocale: ['fr_CI', 'fr_SN'],
+    url: SITE_URL,
+    siteName: 'WESTBOURSE',
+    title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
+    description:
+      'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit — créez votre compte en 1 minute.',
+    // og:image généré automatiquement par app/opengraph-image.tsx (1200×630).
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
+    description:
+      'Cours BRVM toutes les 15 min, note A–F sur les actions, simulateur et brief quotidien. Gratuit.',
+    // twitter:image = fallback sur og:image (généré par opengraph-image.tsx).
+  },
+  alternates: { canonical: SITE_URL },
+};
+
+// JSON-LD Schema.org (Organization + WebSite + FinancialService) pour les rich snippets.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: 'WESTBOURSE',
+      url: SITE_URL,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg` },
+      description:
+        "Plateforme SaaS d'analyse et d'aide à la décision pour les investisseurs sur la BRVM (Bourse Régionale des Valeurs Mobilières — UEMOA).",
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: 'WESTBOURSE',
+      inLanguage: 'fr',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/societes?q={search_term_string}` },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'FinancialService',
+      '@id': `${SITE_URL}/#service`,
+      name: 'WESTBOURSE — Analyse BRVM',
+      url: SITE_URL,
+      description:
+        "Données de marché BRVM, notation quantitative A–F, fondamentaux d'entreprises, simulateur d'investissement et brief quotidien.",
+      areaServed: ['Côte d’Ivoire', 'Sénégal', 'Burkina Faso', 'Mali', 'Bénin', 'Togo', 'Niger', 'Guinée-Bissau'],
+      serviceType: "Plateforme d'analyse boursière",
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'XOF',
+        description: 'Accès gratuit aux cours, notes et fondamentaux BRVM',
+      },
+      provider: { '@id': `${SITE_URL}/#organization` },
+    },
+  ],
 };
 
 export const viewport: Viewport = {
@@ -71,6 +162,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className="text-white antialiased font-sans">
+        {/* JSON-LD Schema.org (rich snippets) */}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <SplashScreen />
         <ConsentProvider>
           <BeginnerModeProvider initial={initialBeginner}>

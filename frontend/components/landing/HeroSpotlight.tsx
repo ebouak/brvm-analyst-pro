@@ -115,7 +115,7 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
           <HeroPulseCTA />
           <Link
             href="/societes"
-            className="inline-flex min-h-[44px] items-center rounded-full border border-white/[0.14] bg-white/[0.03] px-5 text-[13px] font-medium text-ivory transition-all hover:border-accent/40 hover:bg-white/[0.06]"
+            className="inline-flex min-h-[44px] items-center px-2 text-[13px] font-medium text-muted underline-offset-4 transition-colors hover:text-ivory hover:underline"
           >
             Explorer sans compte →
           </Link>

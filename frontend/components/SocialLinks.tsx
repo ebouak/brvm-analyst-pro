@@ -5,7 +5,8 @@ import type { SVGProps } from 'react';
  * ⚠️ Remplacer les URLs « # » par les vrais profils WESTBOURSE.
  * WhatsApp est dérivé de NEXT_PUBLIC_WHATSAPP_NUMBER (format international sans +).
  */
-const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, '');
+// Contact WhatsApp officiel (+225 07 07 11 51 15). Surchargeable via env.
+const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '2250707115115').replace(/\D/g, '');
 
 type Social = { label: string; href: string; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element };
 

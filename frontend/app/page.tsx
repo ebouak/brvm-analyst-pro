@@ -16,6 +16,8 @@ import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { IndiceDaily } from '@/lib/types';
 import { HeroSpotlight } from '@/components/landing/HeroSpotlight';
+import { ProofBand } from '@/components/landing/ProofBand';
+import { LandingFaq } from '@/components/landing/LandingFaq';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
 // cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
@@ -238,14 +240,17 @@ export default async function Landing() {
     <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
       <TasteTopbar ticks={ticks} />
 
-      {/* ── TICKER ACTUALITÉS ─────────────────────────────────────────── */}
-      <NewsTicker className="mt-3 -mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
-
-      {/* ── BANDEAU MARCHÉ — état de séance temps réel ────────────────── */}
-      <MarketSessionBanner className="mt-4" />
-
       {/* ── HERO : photo immersive + carte Afrique + logo BRVM clignotant ── */}
+      {/* UX : proposition de valeur d'abord ; actualités externes et état de
+          séance repoussés SOUS le hero (évite la fuite d'attention above the fold). */}
       <HeroSpotlight dateLabel={dateLabel} ticks={ticks} />
+
+      {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
+      <ProofBand />
+
+      {/* ── ACTUALITÉS + état de séance (sous le fold) ────────────────── */}
+      <NewsTicker className="mt-6 -mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
+      <MarketSessionBanner className="mt-4" />
 
       {/* ── PREUVE EN DIRECT : promesse chiffrée + séance live ─────────── */}
       <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
@@ -513,6 +518,9 @@ export default async function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ── FAQ — lève les objections avant le CTA final ─────────────── */}
+      <LandingFaq />
 
       {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
       <section className="mt-10">
