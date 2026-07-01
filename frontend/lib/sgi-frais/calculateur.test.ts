@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculerCoutSGI, BRVM_DCBR_PCT } from './calculateur';
+import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum, BRVM_DCBR_PCT } from './calculateur';
 import type { SgiFrais } from './types';
 
 function mkSgi(partial: Partial<SgiFrais>): SgiFrais {
@@ -82,5 +82,43 @@ describe('calculerCoutSGI', () => {
     const sgi = mkSgi({ courtagePctMax: 1 });
     const r = calculerCoutSGI(sgi, { montant: 0, nbOrdres: 1, dureeAns: 1 });
     expect(r.pctCapital).toBe(0);
+  });
+});
+
+describe('calculerSeuilRentabilite', () => {
+  it('calcule le % de hausse nécessaire pour un aller-retour (achat + vente)', () => {
+    const sgi = mkSgi({ courtagePctMax: 1.0 });
+    const r = calculerSeuilRentabilite(sgi, 1_000_000);
+    // 2 ordres × (1,0% courtage + 0,3% réglementaire) = 2,6%
+    expect(r.seuilPct).toBeCloseTo(2.6, 6);
+  });
+
+  it('exclut la garde et la tenue de compte (aller-retour ponctuel, pas de détention)', () => {
+    const sgi = mkSgi({ courtagePctMax: 1.0, droitsGardePctMax: 5.0, tenueCompteMontant: 100_000 });
+    const r = calculerSeuilRentabilite(sgi, 1_000_000);
+    expect(r.seuilPct).toBeCloseTo(2.6, 6); // inchangé malgré garde/tenue élevées
+  });
+
+  it('seuilPct = 0 quand montant = 0', () => {
+    const sgi = mkSgi({ courtagePctMax: 1.0 });
+    const r = calculerSeuilRentabilite(sgi, 0);
+    expect(r.seuilPct).toBe(0);
+  });
+});
+
+describe('estSousDepotMinimum', () => {
+  it('vrai quand le montant est inférieur au dépôt minimum', () => {
+    const sgi = mkSgi({ depotMinimum: 500_000 });
+    expect(estSousDepotMinimum(sgi, 200_000)).toBe(true);
+  });
+
+  it('faux quand le montant est suffisant', () => {
+    const sgi = mkSgi({ depotMinimum: 500_000 });
+    expect(estSousDepotMinimum(sgi, 500_000)).toBe(false);
+  });
+
+  it('faux quand la SGI n’a pas de dépôt minimum renseigné (pas de fausse alerte)', () => {
+    const sgi = mkSgi({ depotMinimum: null });
+    expect(estSousDepotMinimum(sgi, 1000)).toBe(false);
   });
 });

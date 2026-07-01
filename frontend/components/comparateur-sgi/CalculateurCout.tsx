@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
-import { calculerCoutSGI } from '@/lib/sgi-frais/calculateur';
+import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum } from '@/lib/sgi-frais/calculateur';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { TableauResultatCout } from './TableauResultatCout';
 
@@ -121,7 +121,7 @@ export function CalculateurCout() {
                 key={nom}
                 type="button"
                 onClick={() => toggleSgi(nom)}
-                aria-pressed={active}
+                aria-pressed={active ? 'true' : 'false'}
                 className={`rounded-full border px-3 py-1 text-xs transition ${
                   active ? 'border-info bg-info/10 text-info' : 'border-border text-muted hover:text-white'
                 }`}
@@ -140,9 +140,15 @@ export function CalculateurCout() {
             const seed = SEED_PAR_NOM.get(nom);
             if (!seed) return null;
             const ov = overrides[nom] ?? {};
+            const sousDepotMin = estSousDepotMinimum(seed, montant);
             return (
               <div key={nom} className="rounded-xl border border-border bg-surface p-4 space-y-2">
                 <p className="text-sm font-medium text-white">{nom}</p>
+                {sousDepotMin && (
+                  <p className="rounded border border-warn/30 bg-warn/10 px-2 py-1 text-[11px] text-warn">
+                    ⚠ Montant inférieur au dépôt minimum de cette SGI ({seed.depotMinimum?.toLocaleString('fr-FR')} FCFA)
+                  </p>
+                )}
                 {CHAMPS.map((c) => {
                   const seedVal = seed[c.key];
                   const value = ov[c.key] ?? seedVal ?? '';
@@ -171,7 +177,28 @@ export function CalculateurCout() {
 
       {/* Résultat */}
       {selection.length >= 2 ? (
-        <TableauResultatCout resultats={resultats} sgiParNom={sgiEffectifs} />
+        <>
+          <TableauResultatCout resultats={resultats} sgiParNom={sgiEffectifs} />
+
+          {/* Seuil de rentabilité (aller-retour simple, hors frais de détention) */}
+          <div className="rounded-xl border border-border bg-surface p-4">
+            <p className="mb-2 text-xs text-muted">
+              Seuil de rentabilité — hausse du cours nécessaire pour qu&apos;un aller-retour (1 achat + 1 vente) soit
+              à l&apos;équilibre, hors frais de détention (garde, tenue de compte).
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {[...sgiEffectifs.values()].map((sgi) => {
+                const seuil = calculerSeuilRentabilite(sgi, montant);
+                return (
+                  <div key={sgi.sgiNom} className="rounded-lg border border-border bg-bg/40 px-3 py-2 text-xs">
+                    <span className="text-muted">{sgi.sgiNom} : </span>
+                    <span className="tabular font-semibold text-white">+{seuil.seuilPct.toFixed(2)}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
       ) : (
         <p className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-muted">
           Sélectionnez au moins 2 SGI pour lancer la comparaison.

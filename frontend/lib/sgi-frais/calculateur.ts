@@ -84,3 +84,27 @@ export function calculerCoutSGI(sgi: SgiFrais, input: CoutSGIInput): CoutSGIResu
     champsManquants,
   };
 }
+
+export interface SeuilRentabiliteResult {
+  sgiNom: string;
+  seuilPct: number; // % de hausse du cours nécessaire pour que l'aller-retour soit à l'équilibre
+  coutAllerRetour: number; // FCFA (courtage + réglementaire, achat + vente)
+}
+
+/**
+ * Seuil de rentabilité d'un aller-retour simple (1 achat + 1 vente au même
+ * montant) : le % de hausse du cours nécessaire pour couvrir courtage +
+ * frais réglementaires des deux opérations. N'inclut PAS la garde/tenue de
+ * compte (frais de détention, hors périmètre d'un aller-retour ponctuel).
+ */
+export function calculerSeuilRentabilite(sgi: SgiFrais, montant: number): SeuilRentabiliteResult {
+  const r = calculerCoutSGI(sgi, { montant, nbOrdres: 2, dureeAns: 0 });
+  const coutAllerRetour = r.coutCourtage + r.coutReglementaire;
+  const seuilPct = montant > 0 ? (coutAllerRetour / montant) * 100 : 0;
+  return { sgiNom: sgi.sgiNom, seuilPct, coutAllerRetour };
+}
+
+/** Alerte si le montant saisi est inférieur au dépôt minimum exigé par la SGI. */
+export function estSousDepotMinimum(sgi: SgiFrais, montant: number): boolean {
+  return sgi.depotMinimum != null && montant < sgi.depotMinimum;
+}
