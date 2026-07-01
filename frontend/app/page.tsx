@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
-import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
@@ -250,83 +249,9 @@ export default async function Landing() {
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand />
 
-      {/* ── PREUVE SOCIALE : communauté réelle + sources officielles ───── */}
-      <SocialProof />
-
-      {/* ── ACTUALITÉS + état de séance (sous le fold) ────────────────── */}
-      <NewsTicker className="mt-6 -mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
-      <MarketSessionBanner className="mt-4" />
-
-      {/* ── PREUVE EN DIRECT : promesse chiffrée + séance live ─────────── */}
-      <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
-        <div>
-          <p className="mb-7 max-w-[56ch] text-base leading-[1.75] text-muted">
-            Cours actualisés toutes les 15 minutes, note A–F sur chaque action, fondamentaux extraits des
-            publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
-          </p>
-
-          {/* Preuves chiffrées réelles */}
-          <dl className="grid max-w-md grid-cols-3 gap-4 border-t border-white/[0.07] pt-5">
-            {[
-              { v: nbActions > 0 ? String(nbActions) : '48', l: 'sociétés suivies' },
-              { v: '15 min', l: 'fréquence des cours' },
-              { v: volumeTotal > 0 ? fmtNumber(volumeTotal) : '—', l: 'titres échangés (séance)' },
-            ].map((s) => (
-              <div key={s.l}>
-                <dt className="sr-only">{s.l}</dt>
-                <dd className="tabular font-display text-2xl text-ivory">{s.v}</dd>
-                <dd className="mt-0.5 text-[11px] leading-tight text-faint">{s.l}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        {/* Carte séance live — le produit en démonstration */}
-        <aside className="landing-live-card rounded-panel border border-white/10 p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <p className="overline text-gold-2">La séance, en direct</p>
-            <Link href="/societes" className="text-[11px] text-muted transition-colors hover:text-ivory">
-              Tout voir →
-            </Link>
-          </div>
-
-          {hausses.length > 0 || baisses.length > 0 ? (
-            <div className="space-y-2">
-              {hausses.map((m) => (
-                <MoverLine key={m.code} m={m} />
-              ))}
-              <div className="my-3 border-t border-white/[0.06]" aria-hidden />
-              {baisses.map((m) => (
-                <MoverLine key={m.code} m={m} />
-              ))}
-            </div>
-          ) : flatTop.length > 0 ? (
-            <div className="space-y-2">
-              <p className="mb-1 text-[11px] text-muted">Séance peu animée — cours stables (titres les plus échangés) :</p>
-              {flatTop.map((m) => (
-                <MoverLine key={m.code} m={m} />
-              ))}
-            </div>
-          ) : (
-            <p className="py-10 text-center text-sm text-faint">
-              {dateLabel ? `Séance du ${dateLabel} — données en cours de consolidation.` : 'Données de séance indisponibles pour le moment.'}
-            </p>
-          )}
-
-          <p className="mt-4 text-[10px] leading-relaxed text-faint">
-            Données réelles de la dernière séance · note A–F dérivée des signaux quantitatifs (NR = non noté).
-          </p>
-        </aside>
-      </section>
-
-      {/* ── INDICES BRVM (11, groupés principaux + sectoriels) ────────── */}
-      <LandingIndices indices={indices} />
-
-      {/* ── CARTOGRAPHIE DU MARCHÉ (treemap façon TradingView) ────────── */}
-      <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
-
-      {/* ── ÉCRANS RÉELS DE LA PLATEFORME ─────────────────────────────── */}
-      <ScreensShowcase />
+      {/* ── APERÇU PLATEFORME : remonté juste après le hero — c'est le vrai
+          moteur de conversion (features réelles + CTA inscription). ───── */}
+      <AppPreview />
 
       {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
       <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.06] md:grid-cols-3">
@@ -342,8 +267,86 @@ export default async function Landing() {
         ))}
       </section>
 
-      {/* ── APERÇU PLATEFORME : features réelles (souvent invisibles) ──── */}
-      <AppPreview />
+      {/* ── PREUVE SOCIALE : communauté réelle + sources officielles ───── */}
+      <SocialProof />
+
+      {/* ── MARCHÉ EN DIRECT : actus, séance, preuve chiffrée, indices,
+          heatmap — regroupés en un seul bloc contigu (avant : 4 sections
+          séparées par des mt-10, lecture fragmentée). ─────────────────── */}
+      <section className="mt-10">
+        <div className="mb-5 flex items-baseline justify-between gap-3">
+          <p className="overline text-gold-2">Marché en direct</p>
+          <span className="overline text-faint">Données réelles de la dernière séance</span>
+        </div>
+
+        <NewsTicker className="-mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
+        <MarketSessionBanner className="mt-4" />
+
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
+          <div>
+            <p className="mb-7 max-w-[56ch] text-base leading-[1.75] text-muted">
+              Cours actualisés toutes les 15 minutes, note A–F sur chaque action, fondamentaux extraits des
+              publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
+            </p>
+
+            {/* Preuves chiffrées réelles */}
+            <dl className="grid max-w-md grid-cols-3 gap-4 border-t border-white/[0.07] pt-5">
+              {[
+                { v: nbActions > 0 ? String(nbActions) : '48', l: 'sociétés suivies' },
+                { v: '15 min', l: 'fréquence des cours' },
+                { v: volumeTotal > 0 ? fmtNumber(volumeTotal) : '—', l: 'titres échangés (séance)' },
+              ].map((s) => (
+                <div key={s.l}>
+                  <dt className="sr-only">{s.l}</dt>
+                  <dd className="tabular font-display text-2xl text-ivory">{s.v}</dd>
+                  <dd className="mt-0.5 text-[11px] leading-tight text-faint">{s.l}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          {/* Carte séance live — le produit en démonstration */}
+          <aside className="landing-live-card rounded-panel border border-white/10 p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="overline text-gold-2">La séance, en direct</p>
+              <Link href="/societes" className="text-[11px] text-muted transition-colors hover:text-ivory">
+                Tout voir →
+              </Link>
+            </div>
+
+            {hausses.length > 0 || baisses.length > 0 ? (
+              <div className="space-y-2">
+                {hausses.map((m) => (
+                  <MoverLine key={m.code} m={m} />
+                ))}
+                <div className="my-3 border-t border-white/[0.06]" aria-hidden />
+                {baisses.map((m) => (
+                  <MoverLine key={m.code} m={m} />
+                ))}
+              </div>
+            ) : flatTop.length > 0 ? (
+              <div className="space-y-2">
+                <p className="mb-1 text-[11px] text-muted">Séance peu animée — cours stables (titres les plus échangés) :</p>
+                {flatTop.map((m) => (
+                  <MoverLine key={m.code} m={m} />
+                ))}
+              </div>
+            ) : (
+              <p className="py-10 text-center text-sm text-faint">
+                {dateLabel ? `Séance du ${dateLabel} — données en cours de consolidation.` : 'Données de séance indisponibles pour le moment.'}
+              </p>
+            )}
+
+            <p className="mt-4 text-[10px] leading-relaxed text-faint">
+              Données réelles de la dernière séance · note A–F dérivée des signaux quantitatifs (NR = non noté).
+            </p>
+          </aside>
+        </div>
+
+        <LandingIndices indices={indices} />
+
+        <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
+      </section>
 
       {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
       <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-white/10 p-6 md:p-10">
