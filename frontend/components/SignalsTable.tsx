@@ -33,6 +33,19 @@ export interface SignalRow extends SignalDaily {
 type SignalFilter = 'ALL' | 'BUY' | 'HOLD' | 'SELL';
 type SortKey = 'score_total' | 'confiance' | 'code';
 
+const SIG_PILLS: {
+  value: SignalFilter;
+  key: 'all' | 'buy' | 'hold' | 'sell';
+  label: string;
+  activeCls: string;
+  idleCls: string;
+}[] = [
+  { value: 'ALL', key: 'all', label: 'Tous', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
+  { value: 'BUY', key: 'buy', label: '🟢 Acheter', activeCls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', idleCls: 'border-emerald-500/20 text-emerald-400/70 hover:text-emerald-400' },
+  { value: 'HOLD', key: 'hold', label: '⚪ Conserver', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
+  { value: 'SELL', key: 'sell', label: '🔴 Vendre', activeCls: 'bg-red-500/20 text-red-400 border-red-500/40', idleCls: 'border-red-500/20 text-red-400/70 hover:text-red-400' },
+];
+
 // ─── Composante principale ─────────────────────────────────────────────────
 export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
   const [sigFilter, setSigFilter]   = useState<SignalFilter>('ALL');
@@ -51,6 +64,17 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
     [...new Set(rows.map((r) => r.secteur).filter(Boolean) as string[])].sort(), [rows]);
   const paysList = useMemo(() =>
     [...new Set(rows.map((r) => r.pays).filter(Boolean) as string[])].sort(), [rows]);
+
+  // Compteurs par signal (sur l'ensemble, pour les pills de filtre rapide).
+  const counts = useMemo(() => {
+    let buy = 0, hold = 0, sell = 0;
+    for (const r of rows) {
+      if (r.signal === 'BUY') buy++;
+      else if (r.signal === 'HOLD') hold++;
+      else if (r.signal === 'SELL') sell++;
+    }
+    return { all: rows.length, buy, hold, sell };
+  }, [rows]);
 
   const filtered = useMemo(() => {
     let r = rows.filter((s) => {
@@ -93,20 +117,26 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
       {/* ── Filtres ── */}
       <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
         <h3 className="text-sm font-semibold">🔍 Filtres</h3>
-        <div className="flex flex-wrap gap-2 items-center">
-          {/* Signal type */}
-          <select
-            aria-label="Filtrer par type de signal"
-            value={sigFilter}
-            onChange={(e) => { setSigFilter(e.target.value as SignalFilter); setPage(1); }}
-            className="bg-bg border border-border rounded px-2 py-1.5 text-sm text-white focus:border-up/50 outline-none"
-          >
-            <option value="ALL">Signal : Tous</option>
-            <option value="BUY">🟢 BUY</option>
-            <option value="HOLD">⚪ HOLD</option>
-            <option value="SELL">🔴 SELL</option>
-          </select>
 
+        {/* Pills de filtre rapide par signal (avec compteurs réels) */}
+        <div className="flex flex-wrap gap-2">
+          {SIG_PILLS.map((p) => {
+            const active = sigFilter === p.value;
+            return (
+              <button
+                key={p.value}
+                type="button"
+                aria-pressed={active}
+                onClick={() => { setSigFilter(p.value); setPage(1); }}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? p.activeCls : p.idleCls}`}
+              >
+                {p.label} <span className="tabular opacity-75">({counts[p.key]})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap gap-2 items-center">
           {/* Secteur */}
           <select
             aria-label="Filtrer par secteur"
@@ -248,7 +278,11 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
   const scoreUp = (s.score_total ?? 0) >= 0;
 
   return (
-    <tr className="border-b border-border/40 hover:bg-bg/50 transition-colors group">
+    <tr
+      className={`border-b border-border/40 hover:bg-bg/50 transition-colors group ${
+        s.signal === 'BUY' ? 'bg-emerald-500/[0.06] border-l-2 border-l-emerald-500' : ''
+      }`}
+    >
       {/* Signal */}
       <td className="px-3 py-2 text-center">
         <span className="inline-flex items-center gap-1.5">
