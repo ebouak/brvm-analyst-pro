@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { createPublicClient } from '@/lib/supabase/public';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://westbourse.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [

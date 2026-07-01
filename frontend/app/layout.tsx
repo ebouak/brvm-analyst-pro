@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/server';
 // URL canonique du site. Défaut = domaine cible westbourse.com ; surchargeable
 // via NEXT_PUBLIC_SITE_URL (mettre l'URL RÉELLEMENT servie tant que le domaine
 // n'est pas branché, sinon les canonical/OG pointent vers un domaine inactif).
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://westbourse.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -38,8 +38,19 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
+  // Code de vérification Google Search Console : coller dans l'env
+  // NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION (aucun placeholder dans le source).
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
   icons: { icon: '/favicon.svg' },
   manifest: '/manifest.json',
   appleWebApp: {
@@ -110,6 +121,45 @@ const jsonLd = {
         description: 'Accès gratuit aux cours, notes et fondamentaux BRVM',
       },
       provider: { '@id': `${SITE_URL}/#organization` },
+    },
+    {
+      // FAQ — doit refléter la FAQ VISIBLE de la landing (components/landing/LandingFaq).
+      '@type': 'FAQPage',
+      '@id': `${SITE_URL}/#faq`,
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Est-ce vraiment gratuit ?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: "Oui. Les cours, la note A–F et les fondamentaux sont accessibles gratuitement après création d'un compte — sans carte bancaire. L'abonnement Premium (Diagnostic IA) est optionnel.",
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Les données sont-elles fiables ?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Les cours proviennent du portail public de la BRVM (actualisés ~15 min en séance) et les fondamentaux sont extraits des états financiers publiés par les sociétés. Aucune donnée n’est inventée.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Qu’est-ce que la note A–F ?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: "Une note quantitative calculée à partir de critères objectifs (tendance, momentum, volume, fondamentaux). Elle synthétise l'analyse, mais ne constitue pas un conseil d'investissement.",
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Comment passer à Premium ?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Depuis votre compte, via la page Tarifs. Le Premium débloque le Diagnostic IA (analyse détaillée par société), sans engagement.',
+          },
+        },
+      ],
     },
   ],
 };
