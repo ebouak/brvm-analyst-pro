@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { CalculateurCout } from '@/components/comparateur-sgi/CalculateurCout';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Comparateur des SGI BRVM — annuaire par pays UEMOA.
@@ -386,6 +387,18 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Calculateur de coût réel */}
+      <div className="mt-12">
+        <p className="overline mb-2 text-gold-2">Calculer le coût réel</p>
+        <h3 className="mb-1 font-display text-xl text-ivory">Combien coûterait votre investissement ?</h3>
+        <p className="mb-5 max-w-[64ch] text-sm leading-relaxed text-muted">
+          Comparez le coût total (courtage, frais réglementaires, droits de garde, tenue de compte) entre plusieurs
+          SGI pour un montant donné. Les champs sont pré-remplis avec des données agrégées de sources publiques,
+          modifiables et badgées selon leur niveau de confiance.
+        </p>
+        <CalculateurCout />
       </div>
 
       {/* FAQ */}
