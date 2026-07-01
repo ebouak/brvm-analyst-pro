@@ -44,6 +44,7 @@ import { runShares } from './shares/runShares.js';
 import { runSecteurs } from './refdata/runSecteurs.js';
 import { runAlerts } from './alerts/runAlerts.js';
 import { runBacktestCmd } from './backtesting/runBacktest.js';
+import { runBacktestSignals } from './scoring/runBacktestSignals.js';
 import { runPublications } from './publications/runPublications.js';
 import { runBackfill } from './backfill/runBackfill.js';
 import { runNotations } from './notations/runNotations.js';
@@ -260,6 +261,18 @@ async function main(): Promise<number> {
       const to = rest.find((a) => a.startsWith('--to='))?.split('=')[1];
       const res = await runBacktestCmd({ code, from, to, mock });
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'backtest-signals': {
+      const res = await runBacktestSignals();
+      if (res.status === 'failed') {
+        logger.error({ message: res.message }, 'backtest-signals échoué');
+        return 1;
+      }
+      logger.info(
+        { codesTraites: res.codesTraites, signauxInseres: res.signauxInseres },
+        'backtest-signals terminé',
+      );
+      return 0;
     }
     case 'backfill': {
       const dryRun = rest.includes('--dry-run');

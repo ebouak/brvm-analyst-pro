@@ -1,5 +1,7 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
+import SignalPerformance from '@/components/SignalPerformance';
+import { getBacktestStats, getRecentRealBuySignals } from '@/lib/signals/backtest';
 import { fmtDateFR } from '@/lib/format';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
@@ -62,7 +64,11 @@ async function getData() {
 }
 
 export default async function SignauxPage() {
-  const { lastDate, rows } = await getData();
+  const [{ lastDate, rows }, backtest, recentReal] = await Promise.all([
+    getData(),
+    getBacktestStats(),
+    getRecentRealBuySignals(),
+  ]);
 
   if (!lastDate) {
     return (
@@ -115,6 +121,9 @@ export default async function SignauxPage() {
 
       {/* ── Filet doré de séparation ────────────────────────────────────── */}
       <div className="gold-rule" />
+
+      {/* ── Track record : backtest méthode + signaux réels récents ────── */}
+      <SignalPerformance backtest={backtest} recentReal={recentReal} />
 
       {/* ── Métriques KPI ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
