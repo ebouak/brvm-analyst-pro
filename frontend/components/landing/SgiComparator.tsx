@@ -279,6 +279,19 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
         </ol>
       </div>
 
+      {/* Calculateur de coût réel — mis en avant juste après le rôle de la
+          SGI (avant : plus bas, après l'annuaire et les 6 critères) */}
+      <div className="mt-8">
+        <p className="overline mb-2 text-gold-2">Calculer le coût réel</p>
+        <h3 className="mb-1 font-display text-xl text-ivory">Combien coûterait votre investissement ?</h3>
+        <p className="mb-5 max-w-[64ch] text-sm leading-relaxed text-muted">
+          Comparez le coût total (courtage, frais réglementaires, droits de garde, tenue de compte) entre plusieurs
+          SGI pour un montant donné. Les champs sont pré-remplis avec des données agrégées de sources publiques,
+          modifiables et badgées selon leur niveau de confiance.
+        </p>
+        <CalculateurCout />
+      </div>
+
       {/* Annuaire : filtres + recherche */}
       <div className="mt-8">
         <p className="overline mb-2 text-gold-2">L&apos;annuaire</p>
@@ -387,18 +400,6 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Calculateur de coût réel */}
-      <div className="mt-12">
-        <p className="overline mb-2 text-gold-2">Calculer le coût réel</p>
-        <h3 className="mb-1 font-display text-xl text-ivory">Combien coûterait votre investissement ?</h3>
-        <p className="mb-5 max-w-[64ch] text-sm leading-relaxed text-muted">
-          Comparez le coût total (courtage, frais réglementaires, droits de garde, tenue de compte) entre plusieurs
-          SGI pour un montant donné. Les champs sont pré-remplis avec des données agrégées de sources publiques,
-          modifiables et badgées selon leur niveau de confiance.
-        </p>
-        <CalculateurCout />
       </div>
 
       {/* FAQ */}
