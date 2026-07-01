@@ -107,6 +107,10 @@ a{color:var(--primary)}
 .hero h1{font-family:'Bespoke Serif',serif;font-size:clamp(2rem,4vw,3.4rem);line-height:1.06;margin:.1em 0 .3em}
 .course-cover{margin:0 0 28px;border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
 .course-cover img{width:100%;display:block}
+.related{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 26px;padding:14px 16px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}
+.related-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.related a{font-size:.9rem;color:var(--primary);text-decoration:none;font-weight:600;padding:5px 12px;border:1px solid rgba(86,215,253,.25);border-radius:999px;transition:background .15s}
+.related a:hover{background:var(--accent)}
 .level-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;font-size:.8rem;font-weight:700;margin-bottom:16px;background:rgba(86,215,253,.12);color:#56D7FD;border:1px solid rgba(86,215,253,.25)}
 .lesson{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.3);transition:box-shadow .2s,border-color .2s}
 .lesson:hover{box-shadow:var(--shadow);border-color:rgba(86,215,253,.3)}
@@ -259,6 +263,13 @@ ${FONTS}
       ${paras(c.intro)}
     </section>
     ${c.coverUrl ? `<div class="course-cover"><img src="${esc(c.coverUrl)}" alt="${esc(c.titre)}" loading="eager"/></div>` : ''}
+    ${
+      c.relatedLinks && c.relatedLinks.length
+        ? `<div class="related"><span class="related-label">À lire aussi</span>${c.relatedLinks
+            .map((r) => `<a href="/formations/academy/${esc(r.slug)}" target="_top">${esc(r.label)} →</a>`)
+            .join('')}</div>`
+        : ''
+    }
     ${lessonsHtml}
     ${glossaire}
     <p class="small" style="margin-top:32px;border-top:1px solid var(--border);padding-top:14px">

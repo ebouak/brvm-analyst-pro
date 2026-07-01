@@ -76,6 +76,11 @@ export const courseContentSchema = z.object({
   // Visuel de couverture (bannière en tête), défini côté serveur/admin — jamais
   // par le LLM. Stocké dans content pour survivre à la régénération (préservé).
   coverUrl: z.string().url().nullable().optional(),
+  // Liens « À lire aussi » vers d'autres cours (navigation pleine page).
+  relatedLinks: z
+    .array(z.object({ slug: z.string().min(1), label: z.string().min(1).max(120) }))
+    .optional()
+    .default([]),
   lessons: z.array(lessonSchema).min(1).max(20),
   glossaire: z.array(glossaireItemSchema).max(40).optional().default([]),
 });
