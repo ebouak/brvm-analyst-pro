@@ -220,10 +220,19 @@ export default async function Dashboard() {
   const { data: { user } } = await supa.auth.getUser();
   let favoriteSectors: string[] = [];
   let dashboardLayout: DashboardLayout | null = null;
+  let triggeredAlerts = 0;
   if (user) {
     const { data: prof } = await supa.from('profiles').select('favorite_sectors, preferences').eq('id', user.id).maybeSingle();
     favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
     dashboardLayout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
+
+    const { count } = await supa
+      .from('alerts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('actif', true)
+      .not('declenchee_le', 'is', null);
+    triggeredAlerts = count ?? 0;
   }
   const layout = resolveLayout(dashboardLayout);
 
@@ -399,6 +408,20 @@ export default async function Dashboard() {
 
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
         <DashboardTicker items={ticker} />
+
+        {/* ── Bandeau alertes déclenchées ──────────────────────────────────── */}
+        {triggeredAlerts > 0 && (
+          <Link
+            href="/parametres/alertes"
+            className="flex w-full items-center gap-2 rounded-lg border border-down/30 bg-down/10 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
+          >
+            <span className="animate-pulse" aria-hidden>🔔</span>
+            <span>
+              {triggeredAlerts} alerte{triggeredAlerts > 1 ? 's' : ''} déclenchée{triggeredAlerts > 1 ? 's' : ''}
+            </span>
+            <span className="ml-auto">→</span>
+          </Link>
+        )}
 
         {/* ── Widgets configurables (ordre + visibilité via /dashboard/personnaliser) ── */}
         {layout.map((key) => (
