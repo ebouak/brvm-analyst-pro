@@ -5,9 +5,20 @@ import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
 import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum } from '@/lib/sgi-frais/calculateur';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { TableauResultatCout } from './TableauResultatCout';
+import { GraphiqueCoutSGI } from './GraphiqueCoutSGI';
+import { CarteRecommandee } from './CarteRecommandee';
 
 const NOMS_SGI = SGI_FRAIS_SEED.map((s) => s.sgiNom);
 const SEED_PAR_NOM = new Map(SGI_FRAIS_SEED.map((s) => [s.sgiNom, s]));
+
+const DEPOT_FILTRES = [
+  { value: 0, label: 'Tous dépôts' },
+  { value: 100_000, label: '≤ 100 000 FCFA' },
+  { value: 300_000, label: '≤ 300 000 FCFA' },
+  { value: 500_000, label: '≤ 500 000 FCFA' },
+  { value: 1_000_000, label: '≤ 1 000 000 FCFA' },
+  { value: 2_000_000, label: '≤ 2 000 000 FCFA' },
+];
 
 /** Champs numériques éditables par l'utilisateur (bascule le badge de confiance). */
 type ChampEditable = 'courtagePctMax' | 'droitsGardePctMax' | 'tenueCompteMontant' | 'fraisVirement';
@@ -30,6 +41,7 @@ export function CalculateurCout() {
   const [montant, setMontant] = useState(1_000_000);
   const [nbOrdres, setNbOrdres] = useState(4);
   const [dureeAns, setDureeAns] = useState(1);
+  const [depotMax, setDepotMax] = useState(0); // 0 = pas de filtre
   // Surcharges utilisateur par SGI (bascule confiance -> 'saisie_utilisateur' pour le champ modifié).
   const [overrides, setOverrides] = useState<Record<string, Partial<Record<ChampEditable, number>>>>({});
 
@@ -110,20 +122,42 @@ export function CalculateurCout() {
         </label>
       </div>
 
+      {/* Filtre dépôt minimum */}
+      <label className="block max-w-xs text-xs text-muted">
+        Dépôt minimum max.
+        <select
+          value={depotMax}
+          onChange={(e) => setDepotMax(Number(e.target.value))}
+          className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
+        >
+          {DEPOT_FILTRES.map((d) => (
+            <option key={d.value} value={d.value}>{d.label}</option>
+          ))}
+        </select>
+      </label>
+
       {/* Sélection des SGI (2 à 4) */}
       <div>
         <p className="mb-2 text-xs text-muted">Sélectionnez 2 à 4 SGI à comparer</p>
         <div className="flex flex-wrap gap-2">
           {NOMS_SGI.map((nom) => {
             const active = selection.includes(nom);
+            const seed = SEED_PAR_NOM.get(nom);
+            const eligible = depotMax === 0 || (seed?.depotMinimum ?? 0) <= depotMax;
             return (
               <button
                 key={nom}
                 type="button"
                 onClick={() => toggleSgi(nom)}
+                disabled={!eligible && !active}
                 aria-pressed={active ? 'true' : 'false'}
+                title={!eligible ? `Dépôt minimum ${seed?.depotMinimum?.toLocaleString('fr-FR')} FCFA — au-delà du filtre` : undefined}
                 className={`rounded-full border px-3 py-1 text-xs transition ${
-                  active ? 'border-info bg-info/10 text-info' : 'border-border text-muted hover:text-white'
+                  active
+                    ? 'border-info bg-info/10 text-info'
+                    : eligible
+                      ? 'border-border text-muted hover:text-white'
+                      : 'border-border/40 text-faint/50 cursor-not-allowed'
                 }`}
               >
                 {nom}
@@ -178,6 +212,8 @@ export function CalculateurCout() {
       {/* Résultat */}
       {selection.length >= 2 ? (
         <>
+          <CarteRecommandee resultats={resultats} sgiParNom={sgiEffectifs} montant={montant} />
+          <GraphiqueCoutSGI resultats={resultats} />
           <TableauResultatCout resultats={resultats} sgiParNom={sgiEffectifs} />
 
           {/* Seuil de rentabilité (aller-retour simple, hors frais de détention) */}
