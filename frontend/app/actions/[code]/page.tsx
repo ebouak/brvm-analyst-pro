@@ -878,7 +878,7 @@ export default async function InstrumentPage({
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
               {[
                 { href: '/portefeuille', label: 'Ajouter à la watchlist', icon: '★' },
-                { href: '/portefeuille', label: 'Créer une alerte prix', icon: '◎' },
+                { href: '/parametres/alertes', label: 'Créer une alerte prix', icon: '◎' },
                 { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: '↓', external: true },
                 { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: '⌛' },
                 { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: '▤', external: true },

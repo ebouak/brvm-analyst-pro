@@ -195,6 +195,7 @@ export async function createAlert(formData: FormData) {
   });
   if (error) throw new Error(error.message);
   revalidatePath('/portefeuille');
+  revalidatePath('/parametres/alertes');
 }
 
 export async function updateAlert(formData: FormData) {
