@@ -26,11 +26,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createPublicClient();
-    const { data: instruments } = await supabase
-      .from('brvm_instruments')
-      .select('code')
-      .eq('type', 'action')
-      .eq('actif', true);
+    const [{ data: instruments }, { data: briefs }] = await Promise.all([
+      supabase.from('brvm_instruments').select('code').eq('type', 'action').eq('actif', true),
+      supabase.from('brief_daily').select('date_marche').order('date_marche', { ascending: false }).limit(365),
+    ]);
 
     const companyPages: MetadataRoute.Sitemap = (instruments ?? []).map((i) => ({
       url: `${SITE_URL}/societes/${i.code}`,
@@ -38,7 +37,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    return [...staticPages, ...companyPages];
+    // Chaque brief de séance = une page indexable datée (contenu figé → never).
+    const briefPages: MetadataRoute.Sitemap = (briefs ?? []).map((b) => ({
+      url: `${SITE_URL}/brief/${b.date_marche}`,
+      lastModified: new Date(b.date_marche),
+      changeFrequency: 'never' as const,
+      priority: 0.7,
+    }));
+
+    return [...staticPages, ...companyPages, ...briefPages];
   } catch {
     // Base inaccessible au build : on publie au moins les pages statiques.
     return staticPages;

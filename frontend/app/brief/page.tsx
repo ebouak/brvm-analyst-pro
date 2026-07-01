@@ -6,7 +6,7 @@ import { fmtDateFR } from '@/lib/format';
 
 export const revalidate = 900;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 const TELEGRAM_CHANNEL_URL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? '';
 
 export const metadata: Metadata = {

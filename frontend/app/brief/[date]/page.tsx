@@ -8,7 +8,7 @@ import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
 
 export const revalidate = 900;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 interface BriefData {
   date_marche: string;
@@ -42,6 +42,18 @@ async function getBrief(date: string) {
     .eq('date_marche', date)
     .maybeSingle();
   return data as { date_marche: string; contenu: string; data: BriefData | null; sent_at: string | null } | null;
+}
+
+/** 5 briefs les plus récents (hors date courante) — maillage interne SEO. */
+async function getRecentBriefs(exclude: string) {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from('brief_daily')
+    .select('date_marche')
+    .neq('date_marche', exclude)
+    .order('date_marche', { ascending: false })
+    .limit(5);
+  return (data ?? []) as { date_marche: string }[];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -96,6 +108,21 @@ export default async function BriefDatePage({ params }: PageProps) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(params.date)) notFound();
   const brief = await getBrief(params.date);
   if (!brief) notFound();
+  const recent = await getRecentBriefs(params.date);
+
+  const articleLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: `Note de conjoncture BRVM — séance du ${fmtDateFR(brief.date_marche)}`,
+    datePublished: brief.sent_at ?? `${brief.date_marche}T18:00:00+00:00`,
+    dateModified: brief.sent_at ?? `${brief.date_marche}T18:00:00+00:00`,
+    inLanguage: 'fr',
+    articleSection: 'Marché BRVM',
+    author: { '@type': 'Organization', name: 'WESTBOURSE' },
+    publisher: { '@type': 'Organization', name: 'WESTBOURSE' },
+    mainEntityOfPage: `${SITE_URL}/brief/${brief.date_marche}`,
+    image: `${SITE_URL}/api/og/brief?date=${brief.date_marche}`,
+  };
 
   const d = brief.data;
   const t = d ? TENDANCE[d.tendance] : null;
@@ -111,6 +138,21 @@ export default async function BriefDatePage({ params }: PageProps) {
   return (
     <PublicShell>
       <article className="max-w-3xl mx-auto print:max-w-none">
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+        />
+
+        {/* ── Fil d'Ariane ───────────────────────────────────────────── */}
+        <nav aria-label="Fil d'Ariane" className="mb-4 flex items-center gap-2 text-xs text-muted print:hidden">
+          <Link href="/" className="hover:text-white transition-colors">Accueil</Link>
+          <span className="text-faint">/</span>
+          <Link href="/brief" className="hover:text-white transition-colors">Brief</Link>
+          <span className="text-faint">/</span>
+          <span className="text-white">{fmtDateFR(brief.date_marche)}</span>
+        </nav>
+
         {/* ── En-tête de note ─────────────────────────────────────────── */}
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -244,6 +286,37 @@ export default async function BriefDatePage({ params }: PageProps) {
           /* Brief ancien format (texte seul) */
           <section className="bg-surface border border-border rounded-xl p-5 mb-6">
             <pre className="whitespace-pre-wrap text-sm text-white/90 leading-relaxed font-sans">{brief.contenu}</pre>
+          </section>
+        )}
+
+        {/* ── CTA conversion ─────────────────────────────────────────── */}
+        <section className="mb-6 rounded-xl border border-accent/20 bg-accent/[0.04] p-5 text-center print:hidden">
+          <p className="text-sm font-medium text-white">Recevez ce brief chaque soir après la clôture.</p>
+          <p className="mt-1 text-xs text-muted">Compte gratuit · aucune carte bancaire · 1 minute.</p>
+          <Link
+            href="/signup"
+            className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-accent px-6 text-sm font-bold text-bg transition-transform active:scale-95"
+          >
+            Créer un compte gratuit
+          </Link>
+        </section>
+
+        {/* ── Briefs récents (maillage interne) ──────────────────────── */}
+        {recent.length > 0 && (
+          <section className="mb-6 border-t border-border/40 pt-6 print:hidden">
+            <h2 className="mb-3 text-sm text-muted">Briefs récents</h2>
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {recent.map((r) => (
+                <li key={r.date_marche}>
+                  <Link
+                    href={`/brief/${r.date_marche}`}
+                    className="text-sm text-accent transition-colors hover:text-gold-2"
+                  >
+                    Séance du {fmtDateFR(r.date_marche)} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
