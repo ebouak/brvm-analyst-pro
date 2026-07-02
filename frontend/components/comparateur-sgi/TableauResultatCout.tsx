@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import type { CoutSGIResult } from '@/lib/sgi-frais/calculateur';
-import type { SgiFrais, ConfianceNiveau } from '@/lib/sgi-frais/types';
+import { estSousDepotMinimum } from '@/lib/sgi-frais/calculateur';
+import type { SgiFrais, ConfianceNiveau, Frequence } from '@/lib/sgi-frais/types';
 import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS } from '@/lib/sgi-frais/types';
+import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 
-type SortKey = 'sgiNom' | 'coutCourtage' | 'coutGarde' | 'coutTenue' | 'total' | 'pctCapital';
+type SortKey = 'sgiNom' | 'pays' | 'depotMinimum' | 'courtagePct' | 'gardePct' | 'total';
+
+const FREQ_ABBR: Record<Frequence, string> = { annuel: 'an', trimestriel: 'trim', semestriel: 'sem' };
 
 function fmt(n: number): string {
   return Math.round(n).toLocaleString('fr-FR') + ' FCFA';
@@ -19,41 +23,94 @@ function Badge({ niveau }: { niveau: ConfianceNiveau }) {
   );
 }
 
+interface Row {
+  sgiNom: string;
+  pays: string;
+  type: string;
+  depotMinimum: number;
+  courtagePct: number | null;
+  gardePct: number | null;
+  gardeFreq: Frequence | null;
+  confiance: ConfianceNiveau;
+  total: number;
+  sousDepotMin: boolean;
+  champCourtageManquant: boolean;
+  champGardeManquant: boolean;
+}
+
 /**
- * Tableau comparatif du coût réel, une colonne par SGI, triable (par défaut
- * coût total croissant). Chaque cellule porte son badge de confiance —
- * jamais un chiffre sans son niveau de fiabilité affiché. Les champs
- * manquants sont signalés explicitement (jamais un 0 silencieux).
+ * Tableau comparatif du coût réel — toutes les SGI filtrées, triées par
+ * défaut par coût total croissant, triable par colonne. Les taux (courtage,
+ * conservation) sont affichés bruts pour comparer indépendamment du montant ;
+ * le Total reflète le scénario saisi. Champs manquants toujours signalés
+ * (jamais un 0 silencieux). Pas de colonne « app mobile »/« ordre en ligne » :
+ * aucune donnée vérifiée n'existe sur ces critères.
  */
 export function TableauResultatCout({
   resultats,
   sgiParNom,
+  directoryParNom,
+  montant,
 }: {
   resultats: CoutSGIResult[];
   sgiParNom: Map<string, SgiFrais>;
+  directoryParNom: Map<string, Sgi>;
+  montant: number;
 }) {
   const [sortKey, setSortKey] = useState<SortKey>('total');
   const [asc, setAsc] = useState(true);
 
+  const rows = useMemo<Row[]>(
+    () =>
+      resultats.map((r) => {
+        const sgi = sgiParNom.get(r.sgiNom);
+        const dir = directoryParNom.get(r.sgiNom);
+        const courtagePct = sgi ? sgi.courtagePctMax ?? sgi.courtagePctMin : null;
+        const gardePct = sgi ? sgi.droitsGardePctMax ?? sgi.droitsGardePctMin : null;
+        return {
+          sgiNom: r.sgiNom,
+          pays: dir ? PAYS[dir.pays].nom : '—',
+          type: dir?.type ?? '—',
+          depotMinimum: sgi?.depotMinimum ?? 0,
+          courtagePct,
+          gardePct,
+          gardeFreq: sgi?.droitsGardeFrequence ?? null,
+          confiance: sgi?.confiance ?? 'saisie_utilisateur',
+          total: r.total,
+          sousDepotMin: sgi ? estSousDepotMinimum(sgi, montant) : false,
+          champCourtageManquant: r.champsManquants.includes('courtage'),
+          champGardeManquant: r.champsManquants.includes('droits_garde'),
+        };
+      }),
+    [resultats, sgiParNom, directoryParNom, montant],
+  );
+
   const tries = useMemo(() => {
-    const arr = [...resultats];
+    const arr = [...rows];
     arr.sort((a, b) => {
       const av = a[sortKey];
       const bv = b[sortKey];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
       const cmp = typeof av === 'string' ? av.localeCompare(bv as string) : (av as number) - (bv as number);
       return asc ? cmp : -cmp;
     });
     return arr;
-  }, [resultats, sortKey, asc]);
+  }, [rows, sortKey, asc]);
 
   function toggleSort(k: SortKey) {
     if (k === sortKey) setAsc(!asc);
-    else { setSortKey(k); setAsc(true); }
+    else {
+      setSortKey(k);
+      setAsc(true);
+    }
   }
 
   const Th = ({ k, label, right }: { k: SortKey; label: string; right?: boolean }) => (
     <th
       onClick={() => toggleSort(k)}
+      aria-sort={sortKey === k ? (asc ? 'ascending' : 'descending') : 'none'}
       className={`px-3 py-2 cursor-pointer select-none hover:text-white ${right ? 'text-right' : 'text-left'}`}
     >
       {label}
@@ -61,11 +118,13 @@ export function TableauResultatCout({
     </th>
   );
 
-  // Le "moins cher" reste toujours défini par le coût total, indépendamment du tri affiché.
-  const moinsCherNom = useMemo(
-    () => (resultats.length ? [...resultats].sort((a, b) => a.total - b.total)[0]!.sgiNom : null),
-    [resultats],
-  );
+  if (tries.length === 0) {
+    return (
+      <p className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-muted">
+        Aucune SGI ne correspond à ces filtres.
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -73,84 +132,73 @@ export function TableauResultatCout({
         <table className="w-full text-sm">
           <thead className="bg-surface text-xs text-muted">
             <tr>
+              <th className="px-3 py-2 text-left">#</th>
               <Th k="sgiNom" label="SGI" />
-              <Th k="coutCourtage" label="Courtage" right />
-              <th className="px-3 py-2 text-right">Réglementaire (BRVM/DC-BR)</th>
-              <Th k="coutGarde" label="Droits de garde" right />
-              <Th k="coutTenue" label="Tenue de compte" right />
-              <th className="px-3 py-2 text-right">Virement</th>
+              <Th k="pays" label="Pays" />
+              <th className="px-3 py-2 text-left">Type</th>
+              <Th k="depotMinimum" label="Dépôt min." right />
+              <Th k="courtagePct" label="Courtage" right />
+              <Th k="gardePct" label="Conservation" right />
               <Th k="total" label="Total" right />
-              <Th k="pctCapital" label="% capital" right />
             </tr>
           </thead>
           <tbody>
-            {tries.map((r) => {
-              const sgi = sgiParNom.get(r.sgiNom);
-              const confiance = sgi?.confiance ?? 'saisie_utilisateur';
-              const estMoinsCher = r.sgiNom === moinsCherNom;
-              return (
-                <tr key={r.sgiNom} className={`border-t border-border/50 ${estMoinsCher ? 'bg-up/5' : ''}`}>
-                  <td className="px-3 py-2">
-                    <span className="font-medium text-white">{r.sgiNom}</span>
-                    {estMoinsCher && <span className="ml-2 text-[10px] text-up">★ moins cher</span>}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <div className="tabular">{fmt(r.coutCourtage)}</div>
-                    {r.champsManquants.includes('courtage') ? (
-                      <span className="text-[10px] text-warn">Non renseigné</span>
-                    ) : (
-                      <Badge niveau={confiance} />
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <div className="tabular">{fmt(r.coutReglementaire)}</div>
-                    <Badge niveau="homologue_crepmf" />
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <div className="tabular">{fmt(r.coutGarde)}</div>
-                    {r.champsManquants.includes('droits_garde') ? (
-                      <span className="text-[10px] text-warn">Non renseigné</span>
-                    ) : (
-                      <Badge niveau={confiance} />
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <div className="tabular">{fmt(r.coutTenue)}</div>
-                    {r.champsManquants.includes('tenue_compte') ? (
-                      <span className="text-[10px] text-warn">Non renseigné</span>
-                    ) : (
-                      <Badge niveau={confiance} />
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <div className="tabular">{fmt(r.coutVirement)}</div>
-                    {r.champsManquants.includes('frais_virement') ? (
-                      <span className="text-[10px] text-warn">Non renseigné</span>
-                    ) : (
-                      <Badge niveau={confiance} />
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <span className="tabular font-semibold text-white">{fmt(r.total)}</span>
-                  </td>
-                  <td className="px-3 py-2 text-right tabular text-muted">{r.pctCapital.toFixed(2)}%</td>
-                </tr>
-              );
-            })}
+            {tries.map((r, i) => (
+              <tr key={r.sgiNom} className={`border-t border-border/50 ${i === 0 ? 'bg-up/5' : ''}`}>
+                <td className="px-3 py-2 tabular text-faint">{i + 1}</td>
+                <td className="px-3 py-2">
+                  <span className="font-medium text-white">{r.sgiNom}</span>
+                  {i === 0 && <span className="ml-2 text-[10px] text-up">★ moins cher</span>}
+                  <div className="mt-0.5">
+                    <Badge niveau={r.confiance} />
+                  </div>
+                </td>
+                <td className="px-3 py-2 text-muted">{r.pays}</td>
+                <td className="px-3 py-2 text-muted">{r.type}</td>
+                <td className="px-3 py-2 text-right">
+                  <div className="tabular">{r.depotMinimum > 0 ? fmt(r.depotMinimum) : 'Aucun'}</div>
+                  {r.sousDepotMin && (
+                    <span className="text-[10px] text-warn" title="Montant investi inférieur au dépôt minimum">
+                      ⚠ insuffisant
+                    </span>
+                  )}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  {r.champCourtageManquant ? (
+                    <span className="text-[10px] text-warn">Non renseigné</span>
+                  ) : (
+                    <span className="tabular">{r.courtagePct}%</span>
+                  )}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  {r.champGardeManquant || r.gardePct == null ? (
+                    <span className="text-[10px] text-warn">Non renseigné</span>
+                  ) : (
+                    <span className="tabular">
+                      {r.gardePct}%{r.gardeFreq ? `/${FREQ_ABBR[r.gardeFreq]}` : ''}
+                    </span>
+                  )}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <span className="tabular font-semibold text-white">{fmt(r.total)}</span>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
-      {resultats.some((r) => r.champsManquants.length > 0) && (
+      {rows.some((r) => r.champCourtageManquant || r.champGardeManquant) && (
         <p className="text-[11px] text-warn">
-          ⚠ Certains champs non renseignés comptent pour 0 FCFA dans le calcul — le coût réel de ces SGI est
-          possiblement plus élevé. Renseignez-les si vous les connaissez.
+          ⚠ Certains taux non renseignés comptent pour 0 FCFA dans le Total — le coût réel de ces SGI est
+          possiblement plus élevé.
         </p>
       )}
 
       <p className="text-[11px] text-faint leading-relaxed">
-        Frais indicatifs sauf mention « barème homologué CREPMF ». Demandez toujours le barème complet écrit à la
-        SGI avant d&apos;ouvrir un compte.
+        Taux indicatifs sauf mention « barème homologué CREPMF ». Le Total inclut aussi la tenue de compte et les
+        frais de virement quand connus (non détaillés dans ce tableau). Demandez toujours le barème complet écrit à
+        la SGI avant d&apos;ouvrir un compte.
       </p>
     </div>
   );

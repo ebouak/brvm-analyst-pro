@@ -2,14 +2,24 @@
 
 import { useMemo, useState } from 'react';
 import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
-import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum } from '@/lib/sgi-frais/calculateur';
-import type { SgiFrais } from '@/lib/sgi-frais/types';
+import { calculerCoutSGI, calculerSeuilRentabilite } from '@/lib/sgi-frais/calculateur';
+import { PAYS, SGI_DIRECTORY } from '@/lib/sgi-frais/directory';
 import { TableauResultatCout } from './TableauResultatCout';
 import { GraphiqueCoutSGI } from './GraphiqueCoutSGI';
 import { CarteRecommandee } from './CarteRecommandee';
 
-const NOMS_SGI = SGI_FRAIS_SEED.map((s) => s.sgiNom);
-const SEED_PAR_NOM = new Map(SGI_FRAIS_SEED.map((s) => [s.sgiNom, s]));
+const DIRECTORY_PAR_NOM = new Map(SGI_DIRECTORY.map((s) => [s.nom, s]));
+
+const DUREE_OPTIONS = [
+  { value: 0.25, label: '3 mois' },
+  { value: 0.5, label: '6 mois' },
+  { value: 1, label: '1 an' },
+  { value: 2, label: '2 ans' },
+  { value: 3, label: '3 ans' },
+  { value: 5, label: '5 ans' },
+];
+
+const ORDRE_OPTIONS = Array.from({ length: 13 }, (_, i) => i);
 
 const DEPOT_FILTRES = [
   { value: 0, label: 'Tous dépôts' },
@@ -20,226 +30,185 @@ const DEPOT_FILTRES = [
   { value: 2_000_000, label: '≤ 2 000 000 FCFA' },
 ];
 
-/** Champs numériques éditables par l'utilisateur (bascule le badge de confiance). */
-type ChampEditable = 'courtagePctMax' | 'droitsGardePctMax' | 'tenueCompteMontant' | 'fraisVirement';
-
-const CHAMPS: { key: ChampEditable; label: string; suffix: string }[] = [
-  { key: 'courtagePctMax', label: 'Courtage (%)', suffix: '%' },
-  { key: 'droitsGardePctMax', label: 'Droits de garde (%/an)', suffix: '%' },
-  { key: 'tenueCompteMontant', label: 'Tenue de compte (FCFA/an)', suffix: 'FCFA' },
-  { key: 'fraisVirement', label: 'Frais de virement (FCFA)', suffix: 'FCFA' },
-];
+function fmtFcfa(n: number): string {
+  return Math.round(n).toLocaleString('fr-FR') + ' FCFA';
+}
 
 /**
- * Calculateur de coût réel — sélection de 2 à 4 SGI, montant, nombre
- * d'ordres, durée. Les champs sont pré-remplis avec la donnée agrégée
- * publique (seed) mais restent modifiables ; toute modification bascule
- * automatiquement le badge de cette SGI vers « estimation saisie par vous ».
+ * Calculateur de coût réel — classe automatiquement les 22 SGI par coût
+ * total pour un montant / nombre d'ordres / durée donnés, filtrable par pays
+ * et par dépôt minimum accessible. Remplace l'ancien mode « sélection
+ * manuelle de 2 à 4 SGI » : avec 22 SGI, un classement filtré est plus utile
+ * qu'une comparaison manuelle. Aucun champ inventé (pas de filtre « app
+ * mobile »/« ordre en ligne » — aucune donnée vérifiée sur ces critères) ;
+ * les taux non renseignés restent signalés, jamais silencieusement à 0.
  */
 export function CalculateurCout() {
-  const [selection, setSelection] = useState<string[]>(['SOGEBOURSE', 'BICI Bourse']);
   const [montant, setMontant] = useState(1_000_000);
-  const [nbOrdres, setNbOrdres] = useState(4);
   const [dureeAns, setDureeAns] = useState(1);
+  const [nbAchats, setNbAchats] = useState(4);
+  const [nbVentes, setNbVentes] = useState(4);
+  const [filtrePays, setFiltrePays] = useState<'ALL' | keyof typeof PAYS>('ALL');
   const [depotMax, setDepotMax] = useState(0); // 0 = pas de filtre
-  // Surcharges utilisateur par SGI (bascule confiance -> 'saisie_utilisateur' pour le champ modifié).
-  const [overrides, setOverrides] = useState<Record<string, Partial<Record<ChampEditable, number>>>>({});
 
-  function toggleSgi(nom: string) {
-    setSelection((prev) => {
-      if (prev.includes(nom)) return prev.filter((n) => n !== nom);
-      if (prev.length >= 4) return prev; // max 4
-      return [...prev, nom];
-    });
-  }
+  const nbOrdres = nbAchats + nbVentes;
 
-  function setOverride(nom: string, champ: ChampEditable, value: number | null) {
-    setOverrides((prev) => {
-      const next = { ...prev, [nom]: { ...prev[nom] } };
-      if (value == null || Number.isNaN(value)) delete next[nom][champ];
-      else next[nom][champ] = value;
-      return next;
-    });
-  }
+  const filtered = useMemo(
+    () =>
+      SGI_FRAIS_SEED.filter((sgi) => {
+        const dir = DIRECTORY_PAR_NOM.get(sgi.sgiNom);
+        if (filtrePays !== 'ALL' && dir?.pays !== filtrePays) return false;
+        if (depotMax !== 0 && (sgi.depotMinimum ?? 0) > depotMax) return false;
+        return true;
+      }),
+    [filtrePays, depotMax],
+  );
 
-  const sgiEffectifs = useMemo<Map<string, SgiFrais>>(() => {
-    const map = new Map<string, SgiFrais>();
-    for (const nom of selection) {
-      const seed = SEED_PAR_NOM.get(nom);
-      if (!seed) continue;
-      const ov = overrides[nom] ?? {};
-      const hasOverride = Object.keys(ov).length > 0;
-      map.set(nom, {
-        ...seed,
-        ...ov,
-        confiance: hasOverride ? 'saisie_utilisateur' : seed.confiance,
-      });
-    }
-    return map;
-  }, [selection, overrides]);
+  const sgiParNom = useMemo(() => new Map(filtered.map((s) => [s.sgiNom, s])), [filtered]);
 
   const resultats = useMemo(
     () =>
-      [...sgiEffectifs.values()].map((sgi) => calculerCoutSGI(sgi, { montant, nbOrdres, dureeAns })),
-    [sgiEffectifs, montant, nbOrdres, dureeAns],
+      filtered
+        .map((sgi) => calculerCoutSGI(sgi, { montant, nbOrdres, dureeAns }))
+        .sort((a, b) => a.total - b.total),
+    [filtered, montant, nbOrdres, dureeAns],
   );
 
+  const top10 = resultats.slice(0, 10);
+  const recommandee = resultats[0] ?? null;
+  const seuilRecommandee = useMemo(() => {
+    if (!recommandee) return null;
+    const sgi = sgiParNom.get(recommandee.sgiNom);
+    return sgi ? calculerSeuilRentabilite(sgi, montant) : null;
+  }, [recommandee, sgiParNom, montant]);
+
   return (
-    <div className="space-y-5">
-      {/* Paramètres */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr] lg:items-start">
+      {/* Sidebar — paramètres */}
+      <div className="space-y-5 rounded-panel border border-white/10 bg-white/[0.02] p-5 lg:sticky lg:top-24">
+        <p className="overline text-gold-2">Paramètres</p>
+
         <label className="block text-xs text-muted">
-          Montant à investir (FCFA)
+          Montant investi
+          <div className="mt-1 tabular font-display text-2xl text-info">{fmtFcfa(montant)}</div>
           <input
-            type="number"
-            min={0}
+            type="range"
+            min={50_000}
+            max={10_000_000}
             step={50_000}
             value={montant}
-            onChange={(e) => setMontant(Math.max(0, Number(e.target.value)))}
-            className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
+            onChange={(e) => setMontant(Number(e.target.value))}
+            className="mt-2 w-full accent-info"
+            aria-label="Montant investi en FCFA"
           />
         </label>
+
         <label className="block text-xs text-muted">
-          Nombre d&apos;ordres sur l&apos;année
-          <input
-            type="number"
-            min={1}
-            value={nbOrdres}
-            onChange={(e) => setNbOrdres(Math.max(1, Number(e.target.value)))}
-            className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
-          />
-        </label>
-        <label className="block text-xs text-muted">
-          Durée de détention (ans)
-          <input
-            type="number"
-            min={0.5}
-            step={0.5}
+          Durée de détention
+          <select
             value={dureeAns}
-            onChange={(e) => setDureeAns(Math.max(0.5, Number(e.target.value)))}
+            onChange={(e) => setDureeAns(Number(e.target.value))}
             className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
-          />
+          >
+            {DUREE_OPTIONS.map((d) => (
+              <option key={d.value} value={d.value}>{d.label}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-xs text-muted">
+          Nombre d&apos;achats
+          <select
+            value={nbAchats}
+            onChange={(e) => setNbAchats(Number(e.target.value))}
+            className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
+          >
+            {ORDRE_OPTIONS.map((n) => (
+              <option key={n} value={n}>{n} achat{n > 1 ? 's' : ''}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-xs text-muted">
+          Nombre de ventes
+          <select
+            value={nbVentes}
+            onChange={(e) => setNbVentes(Number(e.target.value))}
+            className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
+          >
+            {ORDRE_OPTIONS.map((n) => (
+              <option key={n} value={n}>{n} vente{n > 1 ? 's' : ''}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-xs text-muted">
+          Filtrer par pays
+          <select
+            value={filtrePays}
+            onChange={(e) => setFiltrePays(e.target.value as 'ALL' | keyof typeof PAYS)}
+            className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
+          >
+            <option value="ALL">Tous les pays UEMOA</option>
+            {Object.entries(PAYS).map(([code, p]) => (
+              <option key={code} value={code}>{p.nom}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-xs text-muted">
+          Dépôt minimum accessible
+          <select
+            value={depotMax}
+            onChange={(e) => setDepotMax(Number(e.target.value))}
+            className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
+          >
+            {DEPOT_FILTRES.map((d) => (
+              <option key={d.value} value={d.value}>{d.label}</option>
+            ))}
+          </select>
         </label>
       </div>
 
-      {/* Filtre dépôt minimum */}
-      <label className="block max-w-xs text-xs text-muted">
-        Dépôt minimum max.
-        <select
-          value={depotMax}
-          onChange={(e) => setDepotMax(Number(e.target.value))}
-          className="mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
-        >
-          {DEPOT_FILTRES.map((d) => (
-            <option key={d.value} value={d.value}>{d.label}</option>
-          ))}
-        </select>
-      </label>
+      {/* Résultats */}
+      <div className="space-y-5">
+        {recommandee ? (
+          <>
+            <CarteRecommandee
+              resultat={recommandee}
+              sgi={sgiParNom.get(recommandee.sgiNom)!}
+              directory={DIRECTORY_PAR_NOM.get(recommandee.sgiNom) ?? null}
+              montant={montant}
+              dureeAns={dureeAns}
+              seuilPct={seuilRecommandee?.seuilPct ?? null}
+            />
 
-      {/* Sélection des SGI (2 à 4) */}
-      <div>
-        <p className="mb-2 text-xs text-muted">Sélectionnez 2 à 4 SGI à comparer</p>
-        <div className="flex flex-wrap gap-2">
-          {NOMS_SGI.map((nom) => {
-            const active = selection.includes(nom);
-            const seed = SEED_PAR_NOM.get(nom);
-            const eligible = depotMax === 0 || (seed?.depotMinimum ?? 0) <= depotMax;
-            return (
-              <button
-                key={nom}
-                type="button"
-                onClick={() => toggleSgi(nom)}
-                disabled={!eligible && !active}
-                aria-pressed={active ? 'true' : 'false'}
-                title={!eligible ? `Dépôt minimum ${seed?.depotMinimum?.toLocaleString('fr-FR')} FCFA — au-delà du filtre` : undefined}
-                className={`rounded-full border px-3 py-1 text-xs transition ${
-                  active
-                    ? 'border-info bg-info/10 text-info'
-                    : eligible
-                      ? 'border-border text-muted hover:text-white'
-                      : 'border-border/40 text-faint/50 cursor-not-allowed'
-                }`}
-              >
-                {nom}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+            <GraphiqueCoutSGI
+              resultats={top10}
+              title={resultats.length > 10 ? 'Coût total par SGI (FCFA) — top 10' : 'Coût total par SGI (FCFA)'}
+            />
 
-      {/* Champs éditables par SGI sélectionnée */}
-      {selection.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {selection.map((nom) => {
-            const seed = SEED_PAR_NOM.get(nom);
-            if (!seed) return null;
-            const ov = overrides[nom] ?? {};
-            const sousDepotMin = estSousDepotMinimum(seed, montant);
-            return (
-              <div key={nom} className="rounded-xl border border-border bg-surface p-4 space-y-2">
-                <p className="text-sm font-medium text-white">{nom}</p>
-                {sousDepotMin && (
-                  <p className="rounded border border-warn/30 bg-warn/10 px-2 py-1 text-[11px] text-warn">
-                    ⚠ Montant inférieur au dépôt minimum de cette SGI ({seed.depotMinimum?.toLocaleString('fr-FR')} FCFA)
-                  </p>
-                )}
-                {CHAMPS.map((c) => {
-                  const seedVal = seed[c.key];
-                  const value = ov[c.key] ?? seedVal ?? '';
-                  return (
-                    <label key={c.key} className="block text-[11px] text-faint">
-                      {c.label}
-                      <input
-                        type="number"
-                        step="any"
-                        value={value}
-                        placeholder={seedVal == null ? 'Non publié — renseignez si connu' : undefined}
-                        onChange={(e) => {
-                          const v = e.target.value === '' ? null : Number(e.target.value);
-                          setOverride(nom, c.key, v);
-                        }}
-                        className="mt-0.5 w-full rounded border border-border bg-bg/40 p-1.5 text-xs text-ivory placeholder:text-faint"
-                      />
-                    </label>
-                  );
-                })}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs text-muted">Toutes les SGI · triées par coût total</p>
+                <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] text-faint">
+                  {resultats.length} SGI
+                </span>
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Résultat */}
-      {selection.length >= 2 ? (
-        <>
-          <CarteRecommandee resultats={resultats} sgiParNom={sgiEffectifs} montant={montant} />
-          <GraphiqueCoutSGI resultats={resultats} />
-          <TableauResultatCout resultats={resultats} sgiParNom={sgiEffectifs} />
-
-          {/* Seuil de rentabilité (aller-retour simple, hors frais de détention) */}
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <p className="mb-2 text-xs text-muted">
-              Seuil de rentabilité — hausse du cours nécessaire pour qu&apos;un aller-retour (1 achat + 1 vente) soit
-              à l&apos;équilibre, hors frais de détention (garde, tenue de compte).
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {[...sgiEffectifs.values()].map((sgi) => {
-                const seuil = calculerSeuilRentabilite(sgi, montant);
-                return (
-                  <div key={sgi.sgiNom} className="rounded-lg border border-border bg-bg/40 px-3 py-2 text-xs">
-                    <span className="text-muted">{sgi.sgiNom} : </span>
-                    <span className="tabular font-semibold text-white">+{seuil.seuilPct.toFixed(2)}%</span>
-                  </div>
-                );
-              })}
+              <TableauResultatCout
+                resultats={resultats}
+                sgiParNom={sgiParNom}
+                directoryParNom={DIRECTORY_PAR_NOM}
+                montant={montant}
+              />
             </div>
-          </div>
-        </>
-      ) : (
-        <p className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-muted">
-          Sélectionnez au moins 2 SGI pour lancer la comparaison.
-        </p>
-      )}
+          </>
+        ) : (
+          <p className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-muted">
+            Aucune SGI ne correspond à ces filtres.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

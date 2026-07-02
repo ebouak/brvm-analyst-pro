@@ -18,7 +18,13 @@ function couleurRang(i: number, n: number): string {
 }
 
 /** Graphique en barres horizontal du coût total par SGI, trié croissant. */
-export function GraphiqueCoutSGI({ resultats }: { resultats: CoutSGIResult[] }) {
+export function GraphiqueCoutSGI({
+  resultats,
+  title = 'Coût total par SGI (FCFA)',
+}: {
+  resultats: CoutSGIResult[];
+  title?: string;
+}) {
   const data = [...resultats]
     .sort((a, b) => a.total - b.total)
     .map((r) => ({ nom: r.sgiNom, total: Math.round(r.total) }));
@@ -27,7 +33,7 @@ export function GraphiqueCoutSGI({ resultats }: { resultats: CoutSGIResult[] }) 
 
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
-      <p className="mb-3 text-xs text-muted">Coût total par SGI (FCFA)</p>
+      <p className="mb-3 text-xs text-muted">{title}</p>
       <div style={{ height: Math.max(160, data.length * 36) }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ left: 8, right: 16 }}>
