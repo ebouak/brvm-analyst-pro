@@ -99,13 +99,18 @@ function SgiCard({ s }: { s: Sgi }) {
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-faint">Dépôt min.</dt>
           <dd className="tabular text-[12.5px] font-medium text-ivory/90">
-            {s.depotMin}{' '}
-            <span
-              className="ml-0.5 text-[10px] not-italic text-faint"
-              title={s.depotMinSource === 'relevé' ? 'Constaté, à reconfirmer auprès de la SGI' : 'Ordre de grandeur du marché'}
-            >
-              {s.depotMinSource === 'relevé' ? 'relevé*' : 'indic.'}
-            </span>
+            {s.depotMin}
+            {s.depotMinSource !== 'inconnu' && (
+              <>
+                {' '}
+                <span
+                  className="ml-0.5 text-[10px] not-italic text-faint"
+                  title={s.depotMinSource === 'relevé' ? 'Constaté, à reconfirmer auprès de la SGI' : 'Ordre de grandeur du marché'}
+                >
+                  {s.depotMinSource === 'relevé' ? 'relevé*' : 'indic.'}
+                </span>
+              </>
+            )}
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">

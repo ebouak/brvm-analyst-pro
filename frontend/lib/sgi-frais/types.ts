@@ -21,6 +21,12 @@ export interface SgiFrais {
   droitsGardePctMin: number | null;
   droitsGardePctMax: number | null;
   droitsGardeFrequence: Frequence | null;
+  /** Plancher par période (ex. 2 500 FCFA/trimestre) — remplace le taux
+   * proportionnel s'il est plus élevé, comme `minimumPerception` pour le
+   * courtage. Certaines SGI (ex. Sogebourse) publient une seule ligne
+   * « droits de garde » avec un plancher intégré plutôt que deux lignes
+   * distinctes garde + tenue de compte. */
+  droitsGardeMinimum: number | null;
 
   tenueCompteMontant: number | null;
   tenueCompteFrequence: Exclude<Frequence, 'semestriel'> | null;

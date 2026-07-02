@@ -26,12 +26,16 @@ export const PAYS: Record<string, Pays> = {
 export interface Sgi {
   nom: string;
   pays: keyof typeof PAYS;
-  type: 'Banque' | 'Indépendante';
+  /** 'Non déterminé' = agrément confirmé (BRVM) mais adossement bancaire non
+   * vérifié — jamais deviné à partir du nom. */
+  type: 'Banque' | 'Indépendante' | 'Non déterminé';
+  /** 'Non renseigné' quand l'affiliation n'est pas connue (jamais inventée). */
   groupe: string;
   logo?: string;
   depotMin: string;
-  /** 'indicatif' = ordre de grandeur ; 'relevé' = constaté, à reconfirmer. */
-  depotMinSource: 'indicatif' | 'relevé';
+  /** 'indicatif' = ordre de grandeur ; 'relevé' = constaté, à reconfirmer ;
+   * 'inconnu' = aucune donnée trouvée (jamais de valeur inventée). */
+  depotMinSource: 'indicatif' | 'relevé' | 'inconnu';
   siteWeb?: string;
   ficheBRVM?: string;
 }
@@ -59,4 +63,24 @@ export const SGI_DIRECTORY: Sgi[] = [
   { nom: 'SGI Bénin', pays: 'BJ', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-benin.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
   { nom: 'SGI Togo', pays: 'TG', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-togo.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', ficheBRVM: 'https://www.brvm.org/fr/sgi-togo' },
   { nom: 'SGI Niger', pays: 'NE', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sgi-niger.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+
+  // Ajouts 2026-07-02 — croisés RichBourse (liste des 40 SGI) × BRVM
+  // (brvm.org/fr/intervenants/sgi/tous, agrément actif confirmé page par page).
+  // Type/groupe/dépôt minimum non trouvés dans ces deux sources : jamais
+  // devinés à partir du nom, marqués honnêtement "Non déterminé"/"inconnu".
+  { nom: 'BSIC Capital SA', pays: 'CI', type: 'Banque', groupe: 'Groupe BSIC', depotMin: '500 000 FCFA', depotMinSource: 'relevé' },
+  { nom: 'Finance Gestion et Intermédiation (FGI)', pays: 'SN', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'ABCO Bourse', pays: 'SN', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'GEK Capital', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'Global Capital', pays: 'ML', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'Oragroup Securities', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'BIIC Financial Services (BFS)', pays: 'BJ', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'MAC African SGI', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'AfricaBourse', pays: 'BJ', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'Attijari Securities West Africa', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'Images Finances Internationales', pays: 'BF', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  // RichBourse nomme cette SGI "Matha Capital" ; nom officiel BRVM retenu.
+  { nom: 'Matha Securities', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  // RichBourse nomme cette SGI "CIFA Bourse" ; nom officiel BRVM retenu.
+  { nom: "Compagnie d'Ingénierie Financière et d'Assistance en Bourse", pays: 'ML', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
 ];

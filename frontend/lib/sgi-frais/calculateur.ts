@@ -54,11 +54,16 @@ export function calculerCoutSGI(sgi: SgiFrais, input: CoutSGIInput): CoutSGIResu
   // 2) Frais réglementaires BRVM/DC-BR — constante, toujours appliquée.
   const coutReglementaire = montant * (BRVM_DCBR_PCT / 100) * nbOrdres;
 
-  // 3) Droits de garde (conservation) — sur la durée de détention.
+  // 3) Droits de garde (conservation) — sur la durée de détention. Un
+  // plancher par période (`droitsGardeMinimum`) agit comme le minimum de
+  // perception du courtage : il remplace le taux proportionnel s'il est
+  // plus élevé (ex. Sogebourse : 2 500 FCFA/trimestre plancher intégré).
   const gardePct = sgi.droitsGardePctMax ?? sgi.droitsGardePctMin;
   if (gardePct == null) champsManquants.push('droits_garde');
   const gardeMult = sgi.droitsGardeFrequence ? (FREQ_MULT[sgi.droitsGardeFrequence] ?? 1) : 1;
-  const coutGarde = gardePct != null ? montant * (gardePct / 100) * gardeMult * dureeAns : 0;
+  const gardeParPeriode = gardePct != null ? montant * (gardePct / 100) : 0;
+  const gardePlancher = sgi.droitsGardeMinimum ?? 0;
+  const coutGarde = Math.max(gardeParPeriode, gardePlancher) * gardeMult * dureeAns;
 
   // 4) Tenue de compte — forfait, sur la durée.
   if (sgi.tenueCompteMontant == null) champsManquants.push('tenue_compte');

@@ -11,6 +11,7 @@ function mkSgi(partial: Partial<SgiFrais>): SgiFrais {
     droitsGardePctMin: null,
     droitsGardePctMax: null,
     droitsGardeFrequence: null,
+    droitsGardeMinimum: null,
     tenueCompteMontant: null,
     tenueCompteFrequence: null,
     fraisVirement: null,
@@ -69,6 +70,21 @@ describe('calculerCoutSGI', () => {
     const r = calculerCoutSGI(sgi, { montant: 1_000_000, nbOrdres: 0, dureeAns: 1 });
     // 1 000 000 * 0,5% * 4 * 1 an = 20 000
     expect(r.coutGarde).toBeCloseTo(20_000, 6);
+  });
+
+  it('le plancher de garde agit comme un minimum par période (remplace le taux proportionnel si plus élevé)', () => {
+    const sgi = mkSgi({ droitsGardePctMax: 0.5, droitsGardeFrequence: 'trimestriel', droitsGardeMinimum: 2500 });
+    // Petit montant : taux proportionnel par trimestre = 100 000 * 0,5% = 500, inférieur au plancher 2 500
+    const r = calculerCoutSGI(sgi, { montant: 100_000, nbOrdres: 0, dureeAns: 1 });
+    // plancher 2 500 × 4 trimestres × 1 an = 10 000 (pas 500 × 4 = 2 000)
+    expect(r.coutGarde).toBeCloseTo(10_000, 6);
+  });
+
+  it('le plancher de garde ne s\'applique pas si le taux proportionnel est déjà plus élevé', () => {
+    const sgi = mkSgi({ droitsGardePctMax: 0.5, droitsGardeFrequence: 'trimestriel', droitsGardeMinimum: 2500 });
+    // Gros montant : taux proportionnel par trimestre = 10 000 000 * 0,5% = 50 000, supérieur au plancher 2 500
+    const r = calculerCoutSGI(sgi, { montant: 10_000_000, nbOrdres: 0, dureeAns: 1 });
+    expect(r.coutGarde).toBeCloseTo(200_000, 6); // 50 000 × 4 trimestres
   });
 
   it('multiplie les coûts de garde et tenue par la durée de détention', () => {
