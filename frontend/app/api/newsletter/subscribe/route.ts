@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { checkRateLimit, getClientIp } from '@/lib/server/rateLimit';
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -11,6 +12,13 @@ function getAdminClient() {
 
 export async function POST(req: NextRequest) {
   try {
+    const { allowed } = await checkRateLimit({
+      route: 'newsletter-subscribe', ip: getClientIp(req), maxHits: 5, windowSeconds: 600,
+    });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' }, { status: 429 });
+    }
+
     const { email, source = 'landing' } = await req.json() as { email?: string; source?: string };
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
+import { sanitizeReportHtml } from '@/lib/sanitizeHtml';
 import {
   PriceVariationsChart,
   WorldBankChart,
@@ -133,7 +134,7 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
         {article.content_html ? (
           <div
             className="weekly-content"
-            dangerouslySetInnerHTML={{ __html: article.content_html }}
+            dangerouslySetInnerHTML={{ __html: sanitizeReportHtml(article.content_html) }}
           />
         ) : (
           <p className="text-gray-500 text-center py-12">Contenu non disponible.</p>

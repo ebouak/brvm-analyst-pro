@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/server/email';
+import { checkRateLimit, getClientIp } from '@/lib/server/rateLimit';
 
 /**
  * Encart « Salut, on se parle ? » — relais email vers la boîte support.
@@ -9,6 +10,13 @@ import { sendEmail } from '@/lib/server/email';
  */
 export async function POST(req: NextRequest) {
   try {
+    const { allowed } = await checkRateLimit({
+      route: 'contact', ip: getClientIp(req), maxHits: 5, windowSeconds: 600,
+    });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' }, { status: 429 });
+    }
+
     const { prenom = '', email = '', message = '', page = '' } = (await req.json()) as {
       prenom?: string;
       email?: string;

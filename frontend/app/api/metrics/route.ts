@@ -37,13 +37,16 @@ function render(metrics: Metric[]): string {
 }
 
 export async function GET(req: NextRequest) {
-  // Bearer optionnel pour protéger l'endpoint.
+  // Bearer requis (fail-closed) : sans METRICS_TOKEN configuré, l'endpoint
+  // est indisponible plutôt que public — il expose des comptages de tables
+  // internes (scraper_logs, data_quality_alerts…).
   const expected = process.env.METRICS_TOKEN;
-  if (expected) {
-    const auth = req.headers.get('authorization') ?? '';
-    if (auth !== `Bearer ${expected}`) {
-      return new NextResponse('unauthorized', { status: 401 });
-    }
+  if (!expected) {
+    return new NextResponse('metrics disabled: METRICS_TOKEN not configured', { status: 503 });
+  }
+  const auth = req.headers.get('authorization') ?? '';
+  if (auth !== `Bearer ${expected}`) {
+    return new NextResponse('unauthorized', { status: 401 });
   }
 
   const supabase = createClient();

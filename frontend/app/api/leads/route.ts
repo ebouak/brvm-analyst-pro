@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { validateLead } from '@/lib/leads';
+import { checkRateLimit, getClientIp } from '@/lib/server/rateLimit';
 
 /**
  * POST /api/leads — soumission du formulaire de contact /debutant.
@@ -18,6 +19,13 @@ function getAdminClient() {
 
 export async function POST(req: NextRequest) {
   try {
+    const { allowed } = await checkRateLimit({
+      route: 'leads', ip: getClientIp(req), maxHits: 3, windowSeconds: 600,
+    });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' }, { status: 429 });
+    }
+
     const body = (await req.json()) as Record<string, unknown>;
     const result = validateLead(body);
     if (!result.ok) {
