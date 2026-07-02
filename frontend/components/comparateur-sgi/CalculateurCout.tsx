@@ -87,6 +87,13 @@ export function CalculateurCout({
     [filtered, montant, nbOrdres, dureeAns],
   );
 
+  // SGI de l'annuaire SANS barème public connu : jamais classées (les classer
+  // obligerait à inventer leurs frais) — mais toujours signalées explicitement.
+  const sansBareme = useMemo(() => {
+    const avecBareme = new Set(fraisSource.map((f) => f.sgiNom));
+    return (directory ?? SGI_DIRECTORY).filter((d) => !avecBareme.has(d.nom)).map((d) => d.nom);
+  }, [directory, fraisSource]);
+
   const top10 = resultats.slice(0, 10);
   const recommandee = resultats[0] ?? null;
   const seuilRecommandee = useMemo(() => {
@@ -215,6 +222,21 @@ export function CalculateurCout({
                 montant={montant}
               />
             </div>
+
+            {sansBareme.length > 0 && (
+              <div className="rounded-xl border border-border bg-surface p-4">
+                <p className="text-xs text-muted">
+                  <span className="font-semibold text-ivory">{sansBareme.length} SGI de l&apos;annuaire ne sont pas
+                  classées</span> — aucun barème public n&apos;a encore été trouvé pour elles, et nous n&apos;inventons
+                  jamais de frais :
+                </p>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-faint">{sansBareme.join(' · ')}</p>
+                <p className="mt-1.5 text-[11px] text-faint">
+                  Leur fiche reste consultable dans l&apos;annuaire ci-dessous ; demandez-leur le barème écrit avant
+                  d&apos;ouvrir un compte.
+                </p>
+              </div>
+            )}
           </>
         ) : (
           <p className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-muted">
