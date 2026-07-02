@@ -311,6 +311,30 @@ async function main(): Promise<number> {
       const res = await runCotations({ codes });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'scrape-sgi': {
+      // Annuaire SGI RichBourse (Playwright). Manuel (pas de cron) : la liste
+      // change rarement et le site est protégé par anti-bot. --no-pdfs pour
+      // sauter le téléchargement best-effort des PDF tarifs.
+      const withPdfs = !rest.includes('--no-pdfs');
+      const { runSgiRichbourse } = await import('./sgi/runSgiRichbourse.js');
+      const res = await monitored(
+        { code: 'scrape-sgi', label: 'Annuaire SGI (RichBourse)' },
+        async () => {
+          const r = await runSgiRichbourse({ mock, withPdfs });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'success' ? ('success' as const) : ('failed' as const),
+              rows_extracted: r.scraped,
+              rows_upserted: r.inserts + r.enrichments,
+              metadata: { inserts: r.inserts, enrichments: r.enrichments, pdfsSaved: r.pdfsSaved },
+            },
+          };
+        },
+      );
+      logger.info(res, 'Scrape SGI terminé');
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'monthly-reports': {
       const dryRun = rest.includes('--dry-run');
       const month = positional[0];
