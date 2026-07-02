@@ -74,7 +74,7 @@
     "@types/pdfkit": "^0.12.11",
     "@types/puppeteer": "^5.4.7",
     "@types/ws": "^8.18.1",
-    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
     "@typescript-eslint/parser": "^8.8.0",
     "eslint": "^9.11.1",
     "obscura": "^1.0.0",
