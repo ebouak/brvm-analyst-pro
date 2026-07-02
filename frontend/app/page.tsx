@@ -14,6 +14,8 @@ import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { IndiceDaily } from '@/lib/types';
+import { getSgiDirectory } from '@/lib/sgi-frais/queries';
+import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
 import { HeroSpotlight } from '@/components/landing/HeroSpotlight';
 import { ProofBand } from '@/components/landing/ProofBand';
 import { SocialProof } from '@/components/landing/SocialProof';
@@ -230,6 +232,17 @@ const STEPS = [
 
 export default async function Landing() {
   const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getData();
+
+  // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
+  const sgiDirectory = await getSgiDirectory();
+  const sgiCount = sgiDirectory.length;
+  const sgiPaysCounts = new Map<string, number>();
+  for (const s of sgiDirectory) sgiPaysCounts.set(s.pays, (sgiPaysCounts.get(s.pays) ?? 0) + 1);
+  const sgiPaysTries = [...sgiPaysCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const sgiPaysLines = [
+    ...sgiPaysTries.slice(0, 3).map(([c, n]) => `${SGI_PAYS[c]?.nom ?? c} · ${n}`),
+    sgiPaysTries.slice(3).map(([c]) => SGI_PAYS[c]?.nom ?? c).join(' · '),
+  ].filter(Boolean);
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
@@ -357,7 +370,7 @@ export default async function Landing() {
               Choisir sa SGI, sans <span className="text-accent">improviser</span>.
             </h2>
             <p className="mb-5 max-w-[58ch] text-sm leading-relaxed text-muted">
-              Annuaire complet des 22 SGI agréées de l&apos;UEMOA — pays, type, groupe, dépôt minimum indicatif —
+              Annuaire complet des {sgiCount} SGI agréées de l&apos;UEMOA — pays, type, groupe, dépôt minimum indicatif —
               et un calculateur de coût réel (courtage, garde, tenue de compte) pour comparer sur des chiffres,
               pas des ordres de grandeur vagues.
             </p>
@@ -368,11 +381,11 @@ export default async function Landing() {
               >
                 Comparer le coût réel <span aria-hidden>→</span>
               </Link>
-              <span className="font-mono text-[12px] text-faint">22 SGI · 7 pays UEMOA</span>
+              <span className="font-mono text-[12px] text-faint">{sgiCount} SGI · 7 pays UEMOA</span>
             </div>
           </div>
           <div className="hidden md:flex md:flex-col md:gap-2 md:border-l md:border-white/10 md:pl-6">
-            {['Côte d’Ivoire · 12', 'Sénégal · 4', 'Burkina Faso · 2', 'Mali · Bénin · Togo · Niger'].map((l) => (
+            {sgiPaysLines.map((l) => (
               <span key={l} className="font-mono text-[12.5px] text-muted">
                 {l}
               </span>

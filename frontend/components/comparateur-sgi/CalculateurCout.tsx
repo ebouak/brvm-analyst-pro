@@ -34,10 +34,10 @@ function fmtFcfa(n: number): string {
 }
 
 /**
- * Calculateur de coût réel — classe automatiquement les 22 SGI par coût
- * total pour un montant / nombre d'ordres / durée donnés, filtrable par pays
- * et par dépôt minimum accessible. Remplace l'ancien mode « sélection
- * manuelle de 2 à 4 SGI » : avec 22 SGI, un classement filtré est plus utile
+ * Calculateur de coût réel — classe automatiquement toutes les SGI (avec
+ * barème connu) par coût total pour un montant / nombre d'ordres / durée
+ * donnés, filtrable par pays et par dépôt minimum accessible. Remplace
+ * l'ancien mode « sélection manuelle » : un classement filtré est plus utile
  * qu'une comparaison manuelle. Aucun champ inventé (pas de filtre « app
  * mobile »/« ordre en ligne » — aucune donnée vérifiée sur ces critères) ;
  * les taux non renseignés restent signalés, jamais silencieusement à 0.
