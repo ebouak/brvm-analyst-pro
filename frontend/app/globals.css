@@ -299,3 +299,21 @@ body {
   padding-top: 1rem; margin-top: 2rem; line-height: 1.6;
 }
 .weekly-content footer a { color: #56D7FD; }
+
+/* ── Flash temps réel (cours live) ─────────────────────────────────────────
+   Fond vert/rouge bref quand une valeur change via Supabase Realtime.
+   Respecte prefers-reduced-motion (aucune animation, valeur seule). */
+.flash-value { border-radius: 4px; padding: 0 2px; transition: background-color 120ms ease-out, color 120ms ease-out; }
+.flash-value.flash-up { animation: flash-up-kf 600ms ease-out; }
+.flash-value.flash-down { animation: flash-down-kf 600ms ease-out; }
+@keyframes flash-up-kf {
+  0% { background-color: rgba(63, 225, 139, 0.35); color: #3fe18b; }
+  100% { background-color: transparent; }
+}
+@keyframes flash-down-kf {
+  0% { background-color: rgba(255, 107, 107, 0.35); color: #ff6b6b; }
+  100% { background-color: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flash-value.flash-up, .flash-value.flash-down { animation: none; }
+}

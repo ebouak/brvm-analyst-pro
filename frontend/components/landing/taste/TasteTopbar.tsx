@@ -1,10 +1,22 @@
 import Link from 'next/link';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import { BeamButton } from '@/components/ui/beam-button';
+import { LiveTicker } from './LiveTicker';
 import type { TickItem } from './types';
+import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 
-/** Header flottant en pilule + ticker de séance (données réelles) + accès. */
-export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
+/** Header flottant en pilule + ticker de séance (données réelles) + accès.
+ *  Si `liveRows` + `dateMarche` sont fournis, le ticker se met à jour en temps
+ *  réel (Supabase Realtime) ; sinon il affiche les `ticks` statiques (SSR). */
+export function TasteTopbar({
+  ticks,
+  liveRows,
+  dateMarche,
+}: {
+  ticks: TickItem[];
+  liveRows?: RealtimeActionRow[];
+  dateMarche?: string | null;
+}) {
   const doubled = [...ticks, ...ticks];
   return (
     <header className="sticky top-3 z-40 flex items-center gap-4 rounded-full border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.03] px-4 py-3 shadow-card backdrop-blur-xl">
@@ -20,7 +32,9 @@ export function TasteTopbar({ ticks }: { ticks: TickItem[] }) {
         className="min-w-0 flex-1 overflow-hidden border-x border-white/10 px-4"
         style={{ maskImage: 'linear-gradient(90deg,transparent,black 6%,black 94%,transparent)', WebkitMaskImage: 'linear-gradient(90deg,transparent,black 6%,black 94%,transparent)' }}
       >
-        {doubled.length > 0 ? (
+        {liveRows ? (
+          <LiveTicker initialRows={liveRows} dateMarche={dateMarche ?? null} />
+        ) : doubled.length > 0 ? (
           <div className="flex w-max animate-ticker gap-8 whitespace-nowrap font-mono">
             {doubled.map((t, i) => (
               <span key={`${t.sym}-${i}`} className="inline-flex items-center gap-[0.45rem] text-[11px] font-bold">

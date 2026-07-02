@@ -1,6 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { useRealtimeActions } from '@/lib/realtime/useRealtimeActions';
+import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
+import { FlashValue } from '@/components/ui/FlashValue';
 
 export interface TickerLine {
   code: string;
@@ -8,7 +11,10 @@ export interface TickerLine {
   variation: number | null;
   kind: 'action' | 'obligation';
   spark?: number[]; // mini sparkline 5-10 séances
+  cours?: number | null; // cours brut (actions) — pour la mise à jour temps réel
 }
+
+const nfmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
 
 /** Mini sparkline SVG pour le ticker (rendu client). */
 function TickerSpark({ data, up }: { data: number[]; up: boolean }) {
@@ -29,8 +35,24 @@ function TickerSpark({ data, up }: { data: number[]; up: boolean }) {
   );
 }
 
-/** Bandeau de cours en défilement permanent (actions + obligations). */
-export default function DashboardTicker({ items }: { items: TickerLine[] }) {
+/** Bandeau de cours en défilement permanent (actions + obligations).
+ *  Si `dateMarche` est fourni, les lignes ACTIONS se mettent à jour en temps
+ *  réel (Supabase Realtime) avec flash ; les obligations restent statiques
+ *  (hors périmètre Realtime). */
+export default function DashboardTicker({
+  items,
+  dateMarche,
+}: {
+  items: TickerLine[];
+  dateMarche?: string | null;
+}) {
+  // Seed du hook : uniquement les lignes actions ayant un cours brut.
+  const actionSeed: RealtimeActionRow[] = items
+    .filter((it) => it.kind === 'action' && it.cours != null)
+    .map((it) => ({ code: it.code, cours_jour: it.cours ?? null, variation_pct: it.variation }));
+  const { rows: liveRows, flashes } = useRealtimeActions(actionSeed, dateMarche ?? null);
+  const liveByCode = new Map(liveRows.map((r) => [r.code, r]));
+
   if (items.length === 0) return null;
   const loop = [...items, ...items];
 
@@ -44,7 +66,12 @@ export default function DashboardTicker({ items }: { items: TickerLine[] }) {
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-bg to-transparent" />
       <div className="flex w-max animate-ticker items-center gap-6 px-6 font-mono group-hover:[animation-play-state:paused]">
         {loop.map((it, i) => {
-          const up = (it.variation ?? 0) >= 0;
+          // Pour les actions, on superpose la donnée temps réel si disponible.
+          const live = it.kind === 'action' ? liveByCode.get(it.code) : undefined;
+          const variation = live ? live.variation_pct : it.variation;
+          const value = live && live.cours_jour != null ? nfmt(live.cours_jour) : it.value;
+          const up = (variation ?? 0) >= 0;
+          const flashDir = it.kind === 'action' ? (flashes[it.code] ?? 'none') : 'none';
           // Pastille de section au début et à chaque changement Actions↔Obligations.
           const showLabel = i === 0 || loop[i - 1]!.kind !== it.kind;
           return (
@@ -62,10 +89,10 @@ export default function DashboardTicker({ items }: { items: TickerLine[] }) {
             >
               <span className="text-muted">{it.code}</span>
               {it.kind === 'action' && it.spark && <TickerSpark data={it.spark} up={up} />}
-              <span className="text-ivory">{it.value}</span>
-              {it.variation != null && (
+              <FlashValue direction={flashDir} className="text-ivory">{value}</FlashValue>
+              {variation != null && (
                 <span className={up ? 'text-up' : 'text-down'}>
-                  {up ? '+' : ''}{it.variation.toFixed(2)}%
+                  {up ? '+' : ''}{variation.toFixed(2)}%
                 </span>
               )}
             </Link>

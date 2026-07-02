@@ -13,6 +13,7 @@ import type { HeatmapNode } from '@/lib/heatmap';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
+import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 import type { IndiceDaily } from '@/lib/types';
 import { getSgiDirectory } from '@/lib/sgi-frais/queries';
 import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
@@ -62,6 +63,7 @@ async function getData() {
   const asOf = (lastDay?.date_marche as string | undefined) ?? null;
 
   let ticks: TickItem[] = [];
+  let tickerRows: RealtimeActionRow[] = [];
   let hausses: MoverRow[] = [];
   let baisses: MoverRow[] = [];
   let flatTop: MoverRow[] = [];
@@ -125,6 +127,8 @@ async function getData() {
       dir: m.pct >= 0 ? ('up' as const) : ('down' as const),
       pct: `${m.pct >= 0 ? '+' : ''}${m.pct.toFixed(2)}%`,
     }));
+    // Lignes brutes des mêmes symboles, pour l'abonnement temps réel du ticker.
+    tickerRows = tickSource.map((m) => ({ code: m.code, cours_jour: m.cours, variation_pct: m.pct }));
   }
 
   // Brief du jour (extrait)
@@ -180,7 +184,7 @@ async function getData() {
     /* pas de cartographie si données indisponibles */
   }
 
-  return { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows };
+  return { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows };
 }
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
@@ -231,7 +235,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getData();
+  const { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
   const sgiDirectory = await getSgiDirectory();
@@ -252,7 +256,7 @@ export default async function Landing() {
 
   return (
     <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
-      <TasteTopbar ticks={ticks} />
+      <TasteTopbar ticks={ticks} liveRows={tickerRows} dateMarche={asOf} />
 
       {/* ── HERO : photo immersive + carte Afrique + logo BRVM clignotant ── */}
       {/* UX : proposition de valeur d'abord ; actualités externes et état de

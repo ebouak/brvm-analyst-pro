@@ -148,7 +148,7 @@ async function getData() {
   const ticker: TickerLine[] = [
     ...typedActions
       .filter((a) => a.cours_jour != null)
-      .map((a) => ({ code: a.code, value: nfmt(a.cours_jour as number), variation: a.variation_pct ?? null, kind: 'action' as const, spark: sparklines[a.code]?.slice(-7) })),
+      .map((a) => ({ code: a.code, value: nfmt(a.cours_jour as number), variation: a.variation_pct ?? null, kind: 'action' as const, spark: sparklines[a.code]?.slice(-7), cours: a.cours_jour as number })),
     ...obligations
       .filter((o) => o.cours_jour != null)
       .map((o) => {
@@ -407,7 +407,7 @@ export default async function Dashboard() {
         <NewsTicker className="-mx-4 sm:-mx-6 rounded-none" />
 
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
-        <DashboardTicker items={ticker} />
+        <DashboardTicker items={ticker} dateMarche={lastDate} />
 
         {/* ── Bandeau alertes déclenchées ──────────────────────────────────── */}
         {triggeredAlerts > 0 && (
