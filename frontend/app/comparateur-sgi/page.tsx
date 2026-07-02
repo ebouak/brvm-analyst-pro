@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import PublicShell from '@/components/public/PublicShell';
 import SgiComparator from '@/components/landing/SgiComparator';
+import { getSgiDirectory, getSgiFrais } from '@/lib/sgi-frais/queries';
 
-export const dynamic = 'force-static';
+// ISR : données SGI lues depuis Supabase (repli sur les fichiers TS si vide),
+// revalidées chaque heure — l'annuaire change rarement.
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
 
@@ -30,10 +33,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ComparateurSgiPage() {
+export default async function ComparateurSgiPage() {
+  const [directory, frais] = await Promise.all([getSgiDirectory(), getSgiFrais()]);
   return (
     <PublicShell>
-      <SgiComparator className="scroll-mt-24" />
+      <SgiComparator className="scroll-mt-24" directory={directory} frais={frais} />
     </PublicShell>
   );
 }

@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { CalculateurCout } from '@/components/comparateur-sgi/CalculateurCout';
-import { PAYS, SGI_DIRECTORY as SGI, type Sgi } from '@/lib/sgi-frais/directory';
+import { PAYS, SGI_DIRECTORY, type Sgi } from '@/lib/sgi-frais/directory';
+import type { SgiFrais } from '@/lib/sgi-frais/types';
 
 /* ──────────────────────────────────────────────────────────────────────────
    Comparateur des SGI BRVM — annuaire par pays UEMOA.
@@ -162,7 +163,18 @@ const FAQ: { q: string; r: string; open?: boolean }[] = [
 
 /* ── Section principale ────────────────────────────────────────────────── */
 
-export default function SgiComparator({ className = 'scroll-mt-24' }: { className?: string }) {
+export default function SgiComparator({
+  className = 'scroll-mt-24',
+  directory,
+  frais,
+}: {
+  className?: string;
+  /** Annuaire depuis Supabase (repli sur le TS si non fourni). */
+  directory?: Sgi[];
+  /** Barèmes depuis Supabase (repli sur le TS si non fourni). */
+  frais?: SgiFrais[];
+}) {
+  const SGI = directory ?? SGI_DIRECTORY;
   const [filtreP, setFiltreP] = useState<'ALL' | keyof typeof PAYS>('ALL');
   const [recherche, setRecherche] = useState('');
 
@@ -173,7 +185,7 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
       const okQ = !q || s.nom.toLowerCase().includes(q) || s.groupe.toLowerCase().includes(q);
       return okP && okQ;
     }).sort((a, b) => (a.pays === b.pays ? a.nom.localeCompare(b.nom) : a.pays.localeCompare(b.pays)));
-  }, [filtreP, recherche]);
+  }, [SGI, filtreP, recherche]);
 
   const chips: ('ALL' | keyof typeof PAYS)[] = ['ALL', ...(Object.keys(PAYS) as (keyof typeof PAYS)[])];
 
@@ -245,7 +257,7 @@ export default function SgiComparator({ className = 'scroll-mt-24' }: { classNam
           SGI pour un montant donné. Les champs sont pré-remplis avec des données agrégées de sources publiques,
           modifiables et badgées selon leur niveau de confiance.
         </p>
-        <CalculateurCout />
+        <CalculateurCout frais={frais} directory={directory} />
       </div>
 
       {/* Annuaire : filtres + recherche */}

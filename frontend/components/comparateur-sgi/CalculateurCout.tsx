@@ -3,12 +3,11 @@
 import { useMemo, useState } from 'react';
 import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
 import { calculerCoutSGI, calculerSeuilRentabilite } from '@/lib/sgi-frais/calculateur';
-import { PAYS, SGI_DIRECTORY } from '@/lib/sgi-frais/directory';
+import { PAYS, SGI_DIRECTORY, type Sgi } from '@/lib/sgi-frais/directory';
+import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { TableauResultatCout } from './TableauResultatCout';
 import { GraphiqueCoutSGI } from './GraphiqueCoutSGI';
 import { CarteRecommandee } from './CarteRecommandee';
-
-const DIRECTORY_PAR_NOM = new Map(SGI_DIRECTORY.map((s) => [s.nom, s]));
 
 const DUREE_OPTIONS = [
   { value: 0.25, label: '3 mois' },
@@ -43,7 +42,21 @@ function fmtFcfa(n: number): string {
  * mobile »/« ordre en ligne » — aucune donnée vérifiée sur ces critères) ;
  * les taux non renseignés restent signalés, jamais silencieusement à 0.
  */
-export function CalculateurCout() {
+export function CalculateurCout({
+  frais,
+  directory,
+}: {
+  /** Barèmes depuis Supabase (repli sur le TS si non fourni). */
+  frais?: SgiFrais[];
+  /** Annuaire depuis Supabase (repli sur le TS si non fourni). */
+  directory?: Sgi[];
+}) {
+  const fraisSource = frais ?? SGI_FRAIS_SEED;
+  const directoryParNom = useMemo(
+    () => new Map((directory ?? SGI_DIRECTORY).map((s) => [s.nom, s])),
+    [directory],
+  );
+
   const [montant, setMontant] = useState(1_000_000);
   const [dureeAns, setDureeAns] = useState(1);
   const [nbAchats, setNbAchats] = useState(4);
@@ -55,13 +68,13 @@ export function CalculateurCout() {
 
   const filtered = useMemo(
     () =>
-      SGI_FRAIS_SEED.filter((sgi) => {
-        const dir = DIRECTORY_PAR_NOM.get(sgi.sgiNom);
+      fraisSource.filter((sgi) => {
+        const dir = directoryParNom.get(sgi.sgiNom);
         if (filtrePays !== 'ALL' && dir?.pays !== filtrePays) return false;
         if (depotMax !== 0 && (sgi.depotMinimum ?? 0) > depotMax) return false;
         return true;
       }),
-    [filtrePays, depotMax],
+    [fraisSource, directoryParNom, filtrePays, depotMax],
   );
 
   const sgiParNom = useMemo(() => new Map(filtered.map((s) => [s.sgiNom, s])), [filtered]);
@@ -177,7 +190,7 @@ export function CalculateurCout() {
             <CarteRecommandee
               resultat={recommandee}
               sgi={sgiParNom.get(recommandee.sgiNom)!}
-              directory={DIRECTORY_PAR_NOM.get(recommandee.sgiNom) ?? null}
+              directory={directoryParNom.get(recommandee.sgiNom) ?? null}
               montant={montant}
               dureeAns={dureeAns}
               seuilPct={seuilRecommandee?.seuilPct ?? null}
@@ -198,7 +211,7 @@ export function CalculateurCout() {
               <TableauResultatCout
                 resultats={resultats}
                 sgiParNom={sgiParNom}
-                directoryParNom={DIRECTORY_PAR_NOM}
+                directoryParNom={directoryParNom}
                 montant={montant}
               />
             </div>
