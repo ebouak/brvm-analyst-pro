@@ -3,6 +3,7 @@ import { FooterCookieLink } from '@/components/FooterCookieLink';
 import { FINANCIAL_DISCLAIMER } from '@/lib/legal/disclaimer';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import { SocialLinks } from '@/components/SocialLinks';
+import InstallPwaButton from '@/components/InstallPwaButton';
 
 const PRODUIT = [
   { href: '/societes', label: 'Sociétés' },
@@ -71,6 +72,10 @@ export default function Footer() {
           <div className="mt-4">
             <p className="mb-2 text-xs uppercase tracking-wider text-white/35">Suivez-nous</p>
             <SocialLinks />
+          </div>
+          {/* N'apparaît que si le navigateur propose l'installation PWA. */}
+          <div className="mt-4">
+            <InstallPwaButton />
           </div>
         </div>
 

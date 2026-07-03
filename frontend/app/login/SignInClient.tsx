@@ -104,7 +104,10 @@ export default function SignInClient({
         }
       }}
       onSuccess={() => {
-        router.push('/dashboard');
+        // Depuis la page d'inscription (subscribeNewsletter), on passe par le
+        // moment d'accueil « choisissez une action » ; depuis /login, direct au
+        // tableau de bord.
+        router.push(subscribeNewsletter ? '/bienvenue' : '/dashboard');
         router.refresh();
       }}
     />
