@@ -5,7 +5,7 @@ import CompaniesExplorer, { type CompanyCard } from '@/components/public/Compani
 
 export const revalidate = 900;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 export const metadata: Metadata = {
   title: 'Les 48 sociétés cotées à la BRVM — Cours, notes et analyses | WESTBOURSE',

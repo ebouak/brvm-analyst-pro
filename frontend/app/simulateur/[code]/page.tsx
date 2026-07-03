@@ -4,7 +4,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import SimulatorClient from '@/components/public/SimulatorClient';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 interface PageProps {
   params: { code: string };

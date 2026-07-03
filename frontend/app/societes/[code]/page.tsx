@@ -11,7 +11,7 @@ import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
 // ISR : aligné sur la fréquence intraday (15 min)
 export const revalidate = 900;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 interface PageProps {
   params: { code: string };

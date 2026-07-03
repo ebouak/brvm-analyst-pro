@@ -5,7 +5,7 @@ import SimulatorClient from '@/components/public/SimulatorClient';
 
 export const revalidate = 3600;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 export const metadata: Metadata = {
   title: 'Simulateur BRVM — Et si vous aviez investi ? | WESTBOURSE',

@@ -1,6 +1,6 @@
 /** URL absolue du site (pour les liens dans les emails). */
 export function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+  return process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 }
 
 /** Échappe le HTML et convertit les sauts de ligne en <br> (corps saisi par l'admin). */

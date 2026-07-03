@@ -7,7 +7,7 @@ import { getSgiDirectory, getSgiFrais } from '@/lib/sgi-frais/queries';
 // revalidées chaque heure — l'annuaire change rarement.
 export const revalidate = 3600;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 export const metadata: Metadata = {
   title: 'Comparateur des SGI BRVM — choisir son courtier UEMOA | WESTBOURSE',
