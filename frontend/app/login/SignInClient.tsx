@@ -10,16 +10,12 @@ import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { createClient } from '@/lib/supabase/client';
 import { SignInPage } from '@/components/ui/sign-in-flow-1';
 
-// Clé de site Turnstile (publique — non secrète). Surchargée par l'env si présente.
-// FIX TEMPORAIRE 2026-07-03 : repli sur la clé de TEST Cloudflare (passe toujours,
-// tout domaine) car la clé de prod n'était pas configurée pour le domaine →
-// inscriptions bloquées. Le secret Supabase est sur le secret de test associé.
-// ⚠️ Anti-bot désactivé tant que ce repli est actif. À remplacer par la vraie
-// clé via NEXT_PUBLIC_TURNSTILE_SITE_KEY (Vercel) + secret réel côté Supabase,
-// une fois le domaine ajouté au widget Turnstile (frontend-zeta-ten-22.vercel.app
-// + westbourse.com).
+// Clé de site Turnstile (publique — non secrète), lue depuis l'env
+// (NEXT_PUBLIC_TURNSTILE_SITE_KEY, définie sur Vercel). Le repli n'est que la
+// clé courante du widget Cloudflare « WESTBOURSE » (hostnames : westbourse.com,
+// www.westbourse.com, frontend-zeta-ten-22.vercel.app, localhost) — 2026-07-03.
 const TURNSTILE_SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA';
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAADvOkfhEvBYZQ45q';
 
 export default function SignInClient({
   subscribeNewsletter = false,
