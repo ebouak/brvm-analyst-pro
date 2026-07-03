@@ -18,17 +18,19 @@ export async function GET(request: NextRequest) {
   let cours: number | null = null;
   let variation: number | null = null;
   let note = 'NR';
+  let closes: number[] = [];
 
   try {
     const supabase = createPublicClient();
-    const [{ data: instr }, { data: quote }, { data: sig }] = await Promise.all([
+    const [{ data: instr }, { data: hist }, { data: sig }] = await Promise.all([
       supabase.from('brvm_instruments').select('designation, secteur').eq('code', code).maybeSingle(),
+      // Historique récent pour le mini-graphe (dernières séances, ordre croissant).
       supabase
         .from('brvm_actions_daily')
-        .select('cours_jour, variation_pct')
+        .select('cours_jour, variation_pct, date_marche')
         .eq('code', code)
         .order('date_marche', { ascending: false })
-        .limit(1),
+        .limit(30),
       supabase
         .from('signals_daily')
         .select('score_total, confiance')
@@ -40,8 +42,15 @@ export async function GET(request: NextRequest) {
       designation = instr.designation;
       secteur = (instr.secteur as string | null) ?? null;
     }
-    cours = quote?.[0]?.cours_jour ?? null;
-    variation = quote?.[0]?.variation_pct ?? null;
+    const rows = (hist ?? []) as { cours_jour: number | null; variation_pct: number | null }[];
+    cours = rows[0]?.cours_jour ?? null;
+    variation = rows[0]?.variation_pct ?? null;
+    // Remis dans l'ordre chronologique, valeurs valides uniquement.
+    closes = rows
+      .slice()
+      .reverse()
+      .map((r) => r.cours_jour)
+      .filter((v): v is number => v != null && v > 0);
     const s = sig?.[0];
     note = scoreToRating(s?.score_total, s?.confiance).note;
   } catch {
@@ -52,6 +61,25 @@ export async function GET(request: NextRequest) {
   const up = '#3fe18b';
   const down = '#ff6b6b';
   const positive = (variation ?? 0) >= 0;
+
+  // Mini-graphe (sparkline) des dernières clôtures — tendance sur la période.
+  const SW = 1080, SH = 150;
+  const trendUp = closes.length >= 2 ? closes[closes.length - 1]! >= closes[0]! : positive;
+  const sparkColor = trendUp ? up : down;
+  let sparkLine = '';
+  let sparkArea = '';
+  if (closes.length >= 2) {
+    const min = Math.min(...closes);
+    const max = Math.max(...closes);
+    const range = max - min || 1;
+    const pts = closes.map((v, i) => {
+      const x = (i / (closes.length - 1)) * SW;
+      const y = SH - ((v - min) / range) * (SH - 12) - 6;
+      return [x, y] as const;
+    });
+    sparkLine = 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L');
+    sparkArea = `${sparkLine} L${SW} ${SH} L0 ${SH} Z`;
+  }
   const noteColor = note.startsWith('A')
     ? up
     : note === 'D' || note === 'E'
@@ -91,6 +119,21 @@ export async function GET(request: NextRequest) {
             {note}
           </div>
         </div>
+
+        {/* Mini-graphe des dernières clôtures (données réelles) */}
+        {sparkLine ? (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', fontSize: 18, color: '#8b93a7', marginBottom: 6 }}>
+              {`Tendance · ${closes.length} dernières séances`}
+            </div>
+            <svg width={SW} height={SH} viewBox={`0 0 ${SW} ${SH}`}>
+              <path d={sparkArea} fill={sparkColor} fillOpacity="0.12" />
+              <path d={sparkLine} fill="none" stroke={sparkColor} strokeWidth="4" />
+            </svg>
+          </div>
+        ) : (
+          <div style={{ display: 'flex' }} />
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
