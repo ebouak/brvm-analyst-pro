@@ -60,7 +60,17 @@ export default async function ConseillerPage() {
         kicker="Bot conseiller"
         title="Conseiller BRVM"
         subtitle="Une recommandation unifiée par action — Acheter / Conserver / Vendre — qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
-        actions={<StatPill tone="neutral"><span className="tabular">{rows.length}</span>&nbsp;valeurs analysées</StatPill>}
+        actions={
+          <>
+            <StatPill tone="neutral"><span className="tabular">{rows.length}</span>&nbsp;valeurs analysées</StatPill>
+            <Link
+              href="/conseiller/track-record"
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
+            >
+              📊 Track record public →
+            </Link>
+          </>
+        }
       />
 
       <div className="grid grid-cols-3 gap-3">
