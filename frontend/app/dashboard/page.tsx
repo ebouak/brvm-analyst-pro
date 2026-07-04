@@ -308,16 +308,6 @@ export default async function Dashboard() {
     indices: (
       <section aria-label="Indices BRVM">
         <MarketIndices indices={indices} />
-        <div className="mt-4">
-          <AfricanIndicesCard
-            brvmComposite={(() => {
-              const brvmc = indices.find((i) => i.code === 'BRVMC');
-              return brvmc
-                ? { valeur: (brvmc.valeur as number | null) ?? null, variation_pct: brvmc.variation_pct ?? null }
-                : null;
-            })()}
-          />
-        </div>
       </section>
     ),
     etat: (
@@ -433,6 +423,19 @@ export default async function Dashboard() {
             <span className="ml-auto">→</span>
           </Link>
         )}
+
+        {/* ── Afrique · vue régionale — section FIXE (hors widgets configurables :
+            un layout utilisateur sauvegardé avant son ajout la masquerait) ── */}
+        <section aria-label="Indices pan-africains">
+          <AfricanIndicesCard
+            brvmComposite={(() => {
+              const brvmc = indices.find((i) => i.code === 'BRVMC');
+              return brvmc
+                ? { valeur: (brvmc.valeur as number | null) ?? null, variation_pct: brvmc.variation_pct ?? null }
+                : null;
+            })()}
+          />
+        </section>
 
         {/* ── Widgets configurables (ordre + visibilité via /dashboard/personnaliser) ── */}
         {layout.map((key) => (
