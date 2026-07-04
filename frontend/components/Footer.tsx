@@ -8,6 +8,7 @@ import InstallPwaButton from '@/components/InstallPwaButton';
 const PRODUIT = [
   { href: '/societes', label: 'Sociétés' },
   { href: '/simulateur', label: 'Simulateur' },
+  { href: '/classement', label: 'Classement papier' },
   { href: '/brief', label: 'Brief du jour' },
   { href: '/methodologie', label: 'Méthodologie' },
   { href: '/pricing', label: 'Tarifs' },

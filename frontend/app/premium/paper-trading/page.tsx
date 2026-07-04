@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PaperTradingDashboard } from '@/components/PaperTradingDashboard';
+import { PaperLeaderboard } from '@/components/PaperLeaderboard';
 import { paperTradingService } from '@/lib/paper-trading/service';
 import { Account } from '@/lib/paper-trading/types';
 
@@ -70,6 +71,7 @@ export default function PaperTradingPage() {
               Pas encore de compte paper trading. Créez-en un maintenant.
             </p>
             <button
+              type="button"
               onClick={() => setShowModal(true)}
               className="bg-info hover:bg-info/90 text-white px-6 py-2 rounded transition"
             >
@@ -95,6 +97,7 @@ export default function PaperTradingPage() {
                 {PRESET_CAPITALS.map((preset) => (
                   <button
                     key={preset.value}
+                    type="button"
                     onClick={() => handleInitialize(preset.value)}
                     className="w-full bg-surface hover:bg-surface/80 border border-border rounded p-3 text-white transition text-left text-sm font-medium"
                   >
@@ -119,6 +122,7 @@ export default function PaperTradingPage() {
                     className="flex-1 bg-surface border border-border rounded px-3 py-2 text-white text-sm placeholder:text-muted/50 focus:outline-none focus:border-info"
                   />
                   <button
+                    type="button"
                     onClick={() => {
                       if (customCapital) {
                         handleInitialize(parseInt(customCapital));
@@ -141,6 +145,11 @@ export default function PaperTradingPage() {
             <PaperTradingDashboard />
           </div>
         )}
+
+        {/* Classement anonymisé (opt-in) — visible même sans compte, en lecture */}
+        <div className="mt-8">
+          <PaperLeaderboard withControls={Boolean(account && account !== 'loading')} />
+        </div>
       </div>
     </div>
   );
