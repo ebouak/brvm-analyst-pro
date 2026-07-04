@@ -12,7 +12,7 @@ export default function LandingHeatmap({ rows, dateLabel }: { rows: HeatmapNode[
   if (!rows.length) return null;
 
   return (
-    <section className="mt-10 overflow-hidden rounded-panel border border-white/10 bg-white/[0.02] p-6 md:p-8">
+    <section className="mt-10 overflow-hidden rounded-panel border border-border bg-surface/40 p-6 md:p-8">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="overline mb-2 text-gold-2">Cartographie du marché</p>
@@ -26,13 +26,13 @@ export default function LandingHeatmap({ rows, dateLabel }: { rows: HeatmapNode[
         </div>
         <Link
           href="/heatmap"
-          className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-white/[0.06]"
+          className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-elevated/40 px-5 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-elevated/70"
         >
           Ouvrir la heatmap →
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-2">
+      <div className="rounded-2xl border border-border bg-sunken/30 p-2">
         <HeatmapTreemap data={rows} height={420} logos={brvmLogos as Record<string, string>} />
       </div>
 

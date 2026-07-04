@@ -43,14 +43,14 @@ export function PremiumCircle() {
           </Link>
           <Link
             href="/premium/diagnostic"
-            className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm text-muted transition-all hover:bg-white/[0.06]"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-elevated/40 px-5 text-sm text-muted transition-all hover:bg-elevated/70"
           >
             Voir le diagnostic IA
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {STATS.map((s) => (
-            <div key={s.label} className="rounded-card border border-white/[0.06] p-3" style={{ background: 'rgba(0,0,0,0.14)' }}>
+            <div key={s.label} className="rounded-card border border-border bg-sunken/40 p-3">
               <b className="overline mb-1 block text-faint">{s.label}</b>
               <span className="text-sm font-semibold text-ivory">{s.value}</span>
             </div>

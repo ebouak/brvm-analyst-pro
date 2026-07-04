@@ -352,7 +352,7 @@ export default async function Landing() {
       {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
       <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.06] md:grid-cols-3">
         {STEPS.map((s) => (
-          <Link key={s.n} href={s.href} className="group bg-[#0b0b0d] p-6 transition-colors hover:bg-[#101013]">
+          <Link key={s.n} href={s.href} className="group bg-surface p-6 transition-colors hover:bg-elevated">
             <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-gold-2">{s.n}</p>
             <h2 className="mt-3 font-display text-xl text-ivory">{s.title}</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
@@ -402,7 +402,7 @@ export default async function Landing() {
       <SocialProof />
 
       {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
-      <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-white/10 p-6 md:p-10">
+      <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-border p-6 md:p-10">
         <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
           <div>
             <p className="overline mb-3 text-gold-2">Simulateur</p>
@@ -435,7 +435,7 @@ export default async function Landing() {
               </p>
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/[0.08] bg-black/30 p-6 text-center">
+            <div className="rounded-2xl border border-white/[0.08] bg-sunken/30 p-6 text-center">
               <p className="text-sm text-faint">Le calcul s&apos;affichera dès que l&apos;historique sera disponible.</p>
             </div>
           )}
@@ -455,7 +455,7 @@ export default async function Landing() {
             </p>
             <Link
               href="/brief"
-              className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-white/[0.06]"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-elevated/40 px-5 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-elevated/70"
             >
               Lire les derniers briefs →
             </Link>

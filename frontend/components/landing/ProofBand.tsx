@@ -23,7 +23,7 @@ export function ProofBand({ testimonials = [] }: { testimonials?: Testimonial[] 
     <section aria-label="Preuves" className="mt-4">
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.02] sm:grid-cols-4">
         {METRICS.map((m) => (
-          <div key={m.label} className="flex flex-col items-center gap-1 bg-[#06090b] px-4 py-5 text-center">
+          <div key={m.label} className="flex flex-col items-center gap-1 bg-surface px-4 py-5 text-center">
             <span className="font-display text-[clamp(22px,3.4vw,30px)] font-semibold leading-none text-accent tabular">
               {m.value}
             </span>

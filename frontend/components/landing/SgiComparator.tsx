@@ -49,7 +49,7 @@ function SgiCard({ s }: { s: Sgi }) {
       ? { href: s.siteWeb, label: 'Site officiel' }
       : null;
   return (
-    <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-5 transition-all hover:-translate-y-0.5 hover:border-accent/35 hover:bg-white/[0.05]">
+    <article className="flex flex-col rounded-panel border border-border bg-surface/40 p-5 transition-all hover:-translate-y-0.5 hover:border-accent/35 hover:bg-elevated/60">
       <div className="mb-3.5 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           {/* Tuile : monogramme de repli dessous, logo (officiel ou placeholder) par-dessus.
@@ -86,17 +86,17 @@ function SgiCard({ s }: { s: Sgi }) {
       <div className="mb-4 flex flex-wrap gap-1.5">
         <span
           className={`rounded-md border px-2 py-1 font-mono text-[10.5px] uppercase tracking-wide ${
-            s.type === 'Banque' ? 'border-accent/25 bg-accent/10 text-accent' : 'border-white/[0.08] bg-white/[0.04] text-muted'
+            s.type === 'Banque' ? 'border-accent/25 bg-accent/10 text-accent' : 'border-border bg-elevated/40 text-muted'
           }`}
         >
           {s.type}
         </span>
-        <span className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 font-mono text-[10.5px] uppercase tracking-wide text-muted">
+        <span className="rounded-md border border-border bg-surface/40 px-2 py-1 font-mono text-[10.5px] uppercase tracking-wide text-muted">
           {p.nom}
         </span>
       </div>
 
-      <dl className="mt-auto grid gap-2.5 border-t border-white/[0.07] pt-3.5 text-[13.5px]">
+      <dl className="mt-auto grid gap-2.5 border-t border-border pt-3.5 text-[13.5px]">
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-faint">Dépôt min.</dt>
           <dd className="tabular text-[12.5px] font-medium text-ivory/90">
@@ -202,7 +202,7 @@ export default function SgiComparator({
       </p>
 
       {/* Repères chiffrés */}
-      <dl className="mb-2 flex flex-wrap gap-x-10 gap-y-4 border-t border-white/[0.07] pt-5">
+      <dl className="mb-2 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-5">
         {[
           ['8', "pays de l'UEMOA"],
           [`${SGI.length}`, 'SGI référencées'],
@@ -216,7 +216,7 @@ export default function SgiComparator({
       </dl>
 
       {/* Rôle de la SGI */}
-      <div className="grid grid-cols-1 gap-6 rounded-panel border border-white/10 bg-white/[0.02] p-6 md:grid-cols-[1.45fr_1fr] md:items-center md:p-8">
+      <div className="grid grid-cols-1 gap-6 rounded-panel border border-border bg-surface/40 p-6 md:grid-cols-[1.45fr_1fr] md:items-center md:p-8">
         <div>
           <p className="overline mb-2 text-gold-2">Le rôle de la SGI</p>
           <h3 className="mb-3 font-display text-xl text-ivory">Votre intermédiaire obligatoire</h3>
@@ -236,7 +236,7 @@ export default function SgiComparator({
             ['02', 'La SGI', ' transmet et exécute votre ordre sur la BRVM.'],
             ['03', 'Le dépositaire', ' règle, livre et conserve vos titres.'],
           ].map(([n, b, t]) => (
-            <li key={n} className="flex items-start gap-4 border-b border-white/[0.06] py-3.5 last:border-0">
+            <li key={n} className="flex items-start gap-4 border-b border-border py-3.5 last:border-0">
               <span className="w-6 flex-none font-mono text-[13px] text-accent">{n}</span>
               <span className="text-[14.5px] text-muted">
                 <b className="font-semibold text-ivory">{b}</b>
@@ -265,7 +265,7 @@ export default function SgiComparator({
         <p className="overline mb-2 text-gold-2">L&apos;annuaire</p>
         <h3 className="mb-4 font-display text-xl text-ivory">Les SGI par pays</h3>
 
-        <label className="mb-4 flex max-w-sm items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 focus-within:border-accent/40 focus-within:ring-2 focus-within:ring-accent/15">
+        <label className="mb-4 flex max-w-sm items-center gap-2.5 rounded-xl border border-border bg-surface/40 px-3.5 focus-within:border-accent/40 focus-within:ring-2 focus-within:ring-accent/15">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-none text-faint" aria-hidden>
             <circle cx="11" cy="11" r="7" />
             <path d="m21 21-4.3-4.3" />
@@ -293,7 +293,7 @@ export default function SgiComparator({
                 className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 font-mono text-[12.5px] font-medium transition-all ${
                   pressed
                     ? 'border-accent bg-accent text-[#03222b] shadow-[0_0_18px_rgba(86,215,253,0.35)]'
-                    : 'border-white/10 bg-white/[0.03] text-muted hover:border-accent/40 hover:text-ivory'
+                    : 'border-border bg-surface/40 text-muted hover:border-accent/40 hover:text-ivory'
                 }`}
               >
                 {code === 'ALL' ? (
@@ -325,13 +325,13 @@ export default function SgiComparator({
             ))}
           </div>
         ) : (
-          <div className="mt-4 rounded-panel border border-dashed border-white/10 px-5 py-14 text-center font-mono text-sm text-faint">
+          <div className="mt-4 rounded-panel border border-dashed border-border px-5 py-14 text-center font-mono text-sm text-faint">
             Aucune SGI ne correspond à votre recherche.
           </div>
         )}
 
         {/* Note */}
-        <div className="mt-7 rounded-xl border border-white/10 border-l-2 border-l-accent bg-white/[0.02] px-5 py-4 text-[14.5px] leading-relaxed text-muted">
+        <div className="mt-7 rounded-xl border border-border border-l-2 border-l-accent bg-surface/40 px-5 py-4 text-[14.5px] leading-relaxed text-muted">
           <b className="text-ivory">Liste non exhaustive et données indicatives.</b> Cet annuaire reprend les
           principales SGI agréées à la BRVM à partir de sources publiques. Les dépôts marqués{' '}
           <span className="font-mono text-[12px] text-faint">indic.</span> sont des ordres de grandeur par profil de
@@ -359,7 +359,7 @@ export default function SgiComparator({
         </p>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {CRITERES.map((c) => (
-            <div key={c.n} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+            <div key={c.n} className="flex gap-4 rounded-2xl border border-border bg-surface/40 p-5">
               <span className="flex-none font-mono text-[14px] text-accent">{c.n}</span>
               <div>
                 <h4 className="mb-1.5 font-display text-[1.1rem] text-ivory">{c.t}</h4>
@@ -374,9 +374,9 @@ export default function SgiComparator({
       <div className="mt-12">
         <p className="overline mb-2 text-gold-2">Questions fréquentes</p>
         <h3 className="mb-4 font-display text-xl text-ivory">Avant d&apos;ouvrir un compte</h3>
-        <div className="border-t border-white/[0.07]">
+        <div className="border-t border-border">
           {FAQ.map((f) => (
-            <details key={f.q} open={f.open} className="group border-b border-white/[0.07]">
+            <details key={f.q} open={f.open} className="group border-b border-border">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-display text-[1.15rem] text-ivory marker:hidden">
                 {f.q}
                 <span className="font-mono text-xl text-accent transition-transform group-open:rotate-45" aria-hidden>

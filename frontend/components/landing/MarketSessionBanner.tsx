@@ -315,7 +315,7 @@ export default function MarketSessionBanner({ className = '' }: { className?: st
   return (
     <section
       aria-label="État de la séance BRVM en temps réel"
-      className={`group/banner relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#080d1a] ${className}`}
+      className={`group/banner relative overflow-hidden rounded-2xl border border-white/[0.08] bg-surface ${className}`}
     >
       {/* Halo lumineux maîtrisé (cyan + emerald) */}
       <div aria-hidden className="pointer-events-none absolute inset-0">

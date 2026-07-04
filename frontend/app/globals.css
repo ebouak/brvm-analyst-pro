@@ -13,21 +13,106 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --content: 1480px;
   --ease: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Design tokens « DeFi Cyan » (sombre, thème par défaut) ──────────────
+     Voir docs/superpowers/specs/2026-07-03-mode-clair-design.md pour la
+     table complète sombre/clair et le raisonnement des choix de couleur.
+     Triplets RGB (pas de hex) : requis pour que les modificateurs d'opacité
+     Tailwind (bg-accent/10, text-up/80...) fonctionnent avec des couleurs
+     pilotées par variable CSS — voir la fonction withAlpha dans
+     tailwind.config.ts. */
+  --color-bg: 3 3 3;
+  --color-surface: 10 20 23;
+  --color-elevated: 17 43 51;
+  --color-sunken: 2 3 3;
+  --color-border: 27 42 48;
+  --color-border-strong: 42 61 68;
+
+  --color-accent: 86 215 253;
+  --color-accent-dim: 47 169 207;
+  --color-gold-2: 143 230 255;
+  --color-gold-deep: 42 138 168;
+
+  --color-up: 63 225 139;
+  --color-emerald-soft: 122 240 179;
+  --color-down: 255 107 107;
+  --color-warn: 240 178 58;
+  --color-purple: 139 111 194;
+
+  --color-ivory: 252 252 252;
+  --color-muted: 181 181 181;
+  --color-faint: 92 107 112;
+
+  --shadow-card: 0 10px 24px rgba(0,0,0,0.35);
+  --shadow-panel: 0 22px 60px rgba(0,0,0,0.45);
+  --shadow-modal: 0 24px 80px -16px rgba(0,0,0,0.85);
+  --shadow-gold: 0 0 0 1px rgba(86,215,253,0.22), 0 16px 50px rgba(86,215,253,0.14);
+  --shadow-gold-sm: 0 0 0 1px rgba(86,215,253,0.45);
+  --shadow-emerald: 0 0 0 1px rgba(63,225,139,0.18), 0 8px 28px -10px rgba(63,225,139,0.3);
+
+  --body-bg-gradient:
+    radial-gradient(circle at 14% -2%, rgba(86, 215, 253, 0.10), transparent 26%),
+    radial-gradient(circle at 86% 4%, rgba(17, 43, 51, 0.55), transparent 30%),
+    linear-gradient(180deg, #050709 0%, #030303 55%, #04070a 100%);
+  --obsidian-glow: radial-gradient(120% 80% at 50% -10%, rgba(86,215,253,0.10), transparent 60%);
+}
+
+/* ── Mode clair « Warm Ivory » ──────────────────────────────────────────
+   Toutes les valeurs choisies pour tenir le contraste AA (4.5:1) sur fond
+   blanc/ivoire — jamais une simple inversion des valeurs sombres. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: 250 248 244;
+  --color-surface: 255 255 255;
+  --color-elevated: 255 255 255;
+  --color-sunken: 243 240 232;
+  --color-border: 236 230 218;
+  --color-border-strong: 217 208 189;
+
+  --color-accent: 12 143 174;
+  --color-accent-dim: 10 125 153;
+  --color-gold-2: 10 125 153;
+  --color-gold-deep: 10 125 153;
+
+  --color-up: 13 138 79;
+  --color-emerald-soft: 13 138 79;
+  --color-down: 179 38 30;
+  --color-warn: 138 90 16;
+  --color-purple: 109 79 168;
+
+  --color-ivory: 43 38 32;
+  --color-muted: 107 97 82;
+  --color-faint: 168 157 138;
+
+  /* Ombres neutres discrètes — un halo cyan/vert lumineux lit comme un bug
+     sur fond clair, pas comme un effet premium. */
+  --shadow-card: 0 4px 16px rgba(20,20,10,0.08);
+  --shadow-panel: 0 10px 32px rgba(20,20,10,0.10);
+  --shadow-modal: 0 16px 48px -12px rgba(20,20,10,0.22);
+  --shadow-gold: 0 0 0 1px rgba(12,143,174,0.18), 0 4px 16px rgba(20,20,10,0.08);
+  --shadow-gold-sm: 0 0 0 1px rgba(12,143,174,0.35);
+  --shadow-emerald: 0 0 0 1px rgba(13,138,79,0.18), 0 4px 16px rgba(20,20,10,0.08);
+
+  /* Pas de halos décoratifs lumineux sur fond clair : gradient neutre discret. */
+  --body-bg-gradient:
+    radial-gradient(circle at 14% -2%, rgba(12, 143, 174, 0.03), transparent 26%),
+    linear-gradient(180deg, #fbf9f6 0%, #faf8f4 55%, #f8f5f0 100%);
+  --obsidian-glow: none;
 }
 
 body {
   min-height: 100dvh;
-  color: #fcfcfc;
+  color: rgb(var(--color-ivory));
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Atmosphère DeFi : halo cyan + voile teal sur noir profond */
-  background:
-    radial-gradient(circle at 14% -2%, rgba(86, 215, 253, 0.10), transparent 26%),
-    radial-gradient(circle at 86% 4%, rgba(17, 43, 51, 0.55), transparent 30%),
-    linear-gradient(180deg, #050709 0%, #030303 55%, #04070a 100%);
+  /* Atmosphère DeFi : halo cyan + voile teal sur noir profond (sombre) ;
+     dégradé neutre discret sans halo lumineux (clair). */
+  background: var(--body-bg-gradient);
   background-attachment: fixed;
   overflow-x: hidden;
+  transition: background-color var(--ease), color var(--ease);
 }
 
 /* Titres — Bespoke Serif */
@@ -148,12 +233,12 @@ body {
     linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.015));
 }
 .landing-sim-result {
-  background: rgba(0,0,0,0.30);
-  border-color: rgba(255,255,255,0.08);
+  background: rgb(var(--color-sunken) / 0.55);
+  border-color: rgb(var(--color-border) / 1);
 }
 .landing-brief-card {
-  background: rgba(0,0,0,0.30);
-  border-color: rgba(255,255,255,0.10);
+  background: rgb(var(--color-sunken) / 0.55);
+  border-color: rgb(var(--color-border) / 1);
 }
 
 /* Scrollbar */

@@ -33,7 +33,7 @@ function Move({ v }: { v: number }) {
 function MainCard({ i }: { i: IndiceDaily }) {
   const v = i.variation_pct ?? 0;
   return (
-    <article className="rounded-card border border-white/[0.07] bg-white/[0.025] p-4 transition-colors hover:border-accent/30 hover:bg-white/[0.04]">
+    <article className="rounded-card border border-border bg-surface/60 p-4 transition-colors hover:border-accent/30 hover:bg-elevated/40">
       <span className="overline text-faint">{LABELS[i.code] ?? i.libelle ?? i.code}</span>
       <div className="mt-2 tabular font-display text-ivory" style={{ fontSize: 'clamp(1.6rem,2.4vw,2.2rem)', lineHeight: 1, letterSpacing: '-0.04em' }}>
         {i.valeur != null ? nf(i.valeur as number) : '—'}
@@ -47,7 +47,7 @@ function MainCard({ i }: { i: IndiceDaily }) {
 function SectorCell({ i }: { i: IndiceDaily }) {
   const v = i.variation_pct ?? 0;
   return (
-    <div className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+    <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface/40 px-3 py-2.5">
       <div className="min-w-0">
         <div className="truncate text-[11px] text-muted">{LABELS[i.code] ?? i.libelle ?? i.code}</div>
         <div className="tabular text-sm font-bold text-ivory">{i.valeur != null ? nf(i.valeur as number) : '—'}</div>
@@ -69,7 +69,7 @@ export function LandingIndices({ indices }: { indices: IndiceDaily[] }) {
   if (main.length === 0 && sector.length === 0) return null;
 
   return (
-    <section className="mt-10 overflow-hidden rounded-panel border border-white/10 bg-white/[0.02] p-5 md:p-6">
+    <section className="mt-10 overflow-hidden rounded-panel border border-border bg-surface/40 p-5 md:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="overline text-gold-2">Indices BRVM</p>
         <span className="overline text-faint">{main.length + sector.length} indices · séance en direct</span>

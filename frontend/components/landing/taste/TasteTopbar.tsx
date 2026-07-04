@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import { BeamButton } from '@/components/ui/beam-button';
 import { LiveTicker } from './LiveTicker';
+import ThemeToggle from '@/components/ThemeToggle';
 import type { TickItem } from './types';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 
@@ -19,7 +20,7 @@ export function TasteTopbar({
 }) {
   const doubled = [...ticks, ...ticks];
   return (
-    <header className="sticky top-3 z-40 flex items-center gap-4 rounded-full border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.03] px-4 py-3 shadow-card backdrop-blur-xl">
+    <header className="sticky top-3 z-40 flex items-center gap-4 rounded-full border border-border bg-gradient-to-b from-elevated/70 to-elevated/40 px-4 py-3 shadow-card backdrop-blur-xl">
       <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="WESTBOURSE">
         <AnimatedLogo size={42} variant="mark" animate={false} />
         <div className="hidden leading-tight sm:block">
@@ -29,7 +30,7 @@ export function TasteTopbar({
       </Link>
 
       <div
-        className="min-w-0 flex-1 overflow-hidden border-x border-white/10 px-4"
+        className="min-w-0 flex-1 overflow-hidden border-x border-border px-4"
         style={{ maskImage: 'linear-gradient(90deg,transparent,black 6%,black 94%,transparent)', WebkitMaskImage: 'linear-gradient(90deg,transparent,black 6%,black 94%,transparent)' }}
       >
         {liveRows ? (
@@ -55,6 +56,7 @@ export function TasteTopbar({
         <BeamButton href="/simulateur" className="hidden lg:inline-flex">Simulateur</BeamButton>
         <BeamButton href="/brief" className="hidden xl:inline-flex">Brief</BeamButton>
         <BeamButton href="/login" className="hidden sm:inline-flex">Connexion</BeamButton>
+        <ThemeToggle className="hidden sm:inline-flex" />
         <Link
           href="/premium/diagnostic"
           className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold"

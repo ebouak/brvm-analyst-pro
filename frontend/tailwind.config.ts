@@ -5,58 +5,83 @@ import type { Config } from 'tailwindcss';
 // ║  Noir profond #030303 · teal #112B33 · cyan #56D7FD · ivoire #FCFCFC       ║
 // ║  (les tokens 'gold'/'accent' portent désormais le cyan — compat conservée) ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
+
+/**
+ * Compose une couleur Tailwind à partir d'une variable CSS "triplet RGB"
+ * (ex. `--color-accent: 86 215 253;`) tout en préservant les modificateurs
+ * d'opacité (`bg-accent/10`, `text-up/80`...). Nécessaire pour le mode clair
+ * (data-theme="light") : la valeur change selon le thème, mais chaque classe
+ * garde son alpha. Voir docs/superpowers/specs/2026-07-03-mode-clair-design.md.
+ */
+function withAlpha(cssVar: string) {
+  return ({ opacityValue }: { opacityValue?: string }) =>
+    opacityValue === undefined ? `rgb(var(${cssVar}))` : `rgb(var(${cssVar}) / ${opacityValue})`;
+}
+
+// Construit à part (type non contraint) : Tailwind supporte au runtime une
+// fonction `({ opacityValue }) => string` comme valeur de couleur (pattern
+// documenté, utilisé par ex. par shadcn/ui pour les couleurs pilotées par
+// variables CSS), mais les types fournis par `tailwindcss` ne l'acceptent pas
+// pour `Config['theme']['extend']['colors']` — d'où le cast unique à
+// l'insertion dans `config`, plutôt que 20+ assertions ligne par ligne.
+const themeColors = {
+  // ── Surfaces ─────────────────────────────────────────────────────────────
+  // Valeurs pilotées par variables CSS (app/globals.css) pour supporter le
+  // mode clair (data-theme="light") sans dupliquer de classes — voir
+  // docs/superpowers/specs/2026-07-03-mode-clair-design.md.
+  bg:       withAlpha('--color-bg'),
+  surface:  withAlpha('--color-surface'),
+  elevated: withAlpha('--color-elevated'),
+  sunken:   withAlpha('--color-sunken'),
+  border:   withAlpha('--color-border'),
+  'border-strong': withAlpha('--color-border-strong'),
+
+  obsidian: withAlpha('--color-bg'),
+  onyx:     withAlpha('--color-surface'),
+  graphite: withAlpha('--color-elevated'),
+
+  // ── Cyan — accent / CTA / consécration (porté par 'accent'+'gold') ────────
+  accent:        withAlpha('--color-accent'),
+  'accent-dim':  withAlpha('--color-accent-dim'),
+  'accent-glow': '#56d7fd24',
+  gold:          withAlpha('--color-accent'),
+  'gold-2':      withAlpha('--color-gold-2'),
+  'gold-soft':   withAlpha('--color-gold-2'),
+  'gold-deep':   withAlpha('--color-gold-deep'),
+  cyan:          withAlpha('--color-accent'),
+  'cyan-soft':   withAlpha('--color-gold-2'),
+
+  // ── Émeraude — rendement / hausse ──────────────────────────────────────
+  up:       withAlpha('--color-up'),
+  emerald:  withAlpha('--color-up'),
+  'emerald-soft': withAlpha('--color-emerald-soft'),
+
+  // ── Saphir/Info — désormais cyan ───────────────────────────────────────
+  info:     withAlpha('--color-accent'),
+  sapphire: withAlpha('--color-accent'),
+  'sapphire-soft': withAlpha('--color-gold-2'),
+  blue:     withAlpha('--color-accent'),
+
+  // ── Rubis — baisse ──────────────────────────────────────────────────────
+  down:   withAlpha('--color-down'),
+  ruby:   withAlpha('--color-down'),
+  warn:   withAlpha('--color-warn'),
+  purple: withAlpha('--color-purple'),
+
+  // ── Texte ───────────────────────────────────────────────────────────────
+  white:  withAlpha('--color-ivory'),
+  ivory:  withAlpha('--color-ivory'),
+  muted:  withAlpha('--color-muted'),
+  faint:  withAlpha('--color-faint'),
+};
+
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
-      colors: {
-        // ── Surfaces ───────────────────────────────────────────────────────
-        bg:       '#030303',
-        surface:  '#0a1417',
-        elevated: '#112b33',
-        sunken:   '#020303',
-        border:   '#1b2a30',
-        'border-strong': '#2a3d44',
-
-        obsidian: '#030303',
-        onyx:     '#0a1417',
-        graphite: '#112b33',
-
-        // ── Cyan — accent / CTA / consécration (porté par 'accent'+'gold') ──
-        accent:        '#56d7fd',
-        'accent-dim':  '#2fa9cf',
-        'accent-glow': '#56d7fd24',
-        gold:          '#56d7fd',
-        'gold-2':      '#8fe6ff',
-        'gold-soft':   '#8fe6ff',
-        'gold-deep':   '#2a8aa8',
-        cyan:          '#56d7fd',
-        'cyan-soft':   '#8fe6ff',
-
-        // ── Émeraude — rendement / hausse ─────────────────────────────────
-        up:       '#3fe18b',
-        emerald:  '#3fe18b',
-        'emerald-soft': '#7af0b3',
-
-        // ── Saphir/Info — désormais cyan ──────────────────────────────────
-        info:     '#56d7fd',
-        sapphire: '#56d7fd',
-        'sapphire-soft': '#8fe6ff',
-        blue:     '#56d7fd',
-
-        // ── Rubis — baisse ────────────────────────────────────────────────
-        down:   '#ff6b6b',
-        ruby:   '#ff6b6b',
-        warn:   '#f0b23a',
-        purple: '#8b6fc2',
-
-        // ── Texte ─────────────────────────────────────────────────────────
-        white:  '#fcfcfc',
-        ivory:  '#fcfcfc',
-        muted:  '#b5b5b5',
-        faint:  '#5c6b70',
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      colors: themeColors as any,
 
       fontFamily: {
         display: ['var(--font-display)', 'Georgia', 'serif'],
@@ -81,17 +106,21 @@ const config: Config = {
       borderRadius: { card: '1.1rem', panel: '1.5rem', xl2: '1.8rem', chip: '0.6rem', full: '9999px' },
 
       boxShadow: {
-        card:   '0 10px 24px rgba(0,0,0,0.35)',
-        panel:  '0 22px 60px rgba(0,0,0,0.45)',
-        modal:  '0 24px 80px -16px rgba(0,0,0,0.85)',
-        gold:   '0 0 0 1px rgba(86,215,253,0.22), 0 16px 50px rgba(86,215,253,0.14)',
-        'gold-sm': '0 0 0 1px rgba(86,215,253,0.45)',
-        emerald: '0 0 0 1px rgba(63,225,139,0.18), 0 8px 28px -10px rgba(63,225,139,0.3)',
+        // Pilotés par variable CSS : halos lumineux en sombre, ombres neutres
+        // discrètes en clair (un halo coloré lit comme un bug sur fond blanc).
+        card:   'var(--shadow-card)',
+        panel:  'var(--shadow-panel)',
+        modal:  'var(--shadow-modal)',
+        gold:   'var(--shadow-gold)',
+        'gold-sm': 'var(--shadow-gold-sm)',
+        emerald: 'var(--shadow-emerald)',
       },
 
       backgroundImage: {
         'gold-line': 'linear-gradient(90deg, transparent, rgba(86,215,253,0.5), transparent)',
-        'obsidian-glow': 'radial-gradient(120% 80% at 50% -10%, rgba(86,215,253,0.10), transparent 60%)',
+        // Neutralisé en clair (var(--obsidian-glow) ci-dessous) : un halo cyan
+        // lumineux n'a pas sa place sur fond blanc — voir globals.css.
+        'obsidian-glow': 'var(--obsidian-glow)',
         'emerald-veil': 'radial-gradient(80% 60% at 100% 0%, rgba(63,225,139,0.08), transparent 70%)',
       },
 

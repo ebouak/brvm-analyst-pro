@@ -3,10 +3,10 @@ import type { Mover } from './types';
 function MoverItem({ mover, rank }: { mover: Mover; rank: number }) {
   return (
     <article
-      className="grid items-center gap-3 rounded-card border border-white/[0.06] bg-white/[0.03] p-3 transition-all hover:bg-white/[0.06]"
+      className="grid items-center gap-3 rounded-card border border-border bg-surface/40 p-3 transition-all hover:bg-elevated/60"
       style={{ gridTemplateColumns: 'auto 1fr auto' }}
     >
-      <div className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[12px] bg-white/[0.04] font-mono text-[11px] font-bold text-muted">
+      <div className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[12px] bg-elevated/50 font-mono text-[11px] font-bold text-muted">
         {String(rank).padStart(2, '0')}
       </div>
       <div>
@@ -24,8 +24,8 @@ function MoverItem({ mover, rank }: { mover: Mover; rank: number }) {
 /** Galerie des plus forts mouvements de séance (hausses / baisses). */
 export function TopMoversGallery({ gainers, losers }: { gainers: Mover[]; losers: Mover[] }) {
   return (
-    <section className="overflow-hidden rounded-panel border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.02] shadow-card">
-      <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
+    <section className="overflow-hidden rounded-panel border border-border bg-gradient-to-b from-elevated/50 to-surface/30 shadow-card">
+      <header className="flex items-center justify-between gap-3 border-b border-border bg-surface/40 px-4 py-3">
         <span className="overline text-muted">Galerie des mouvements</span>
         <span className="overline text-faint">top hausses / baisses</span>
       </header>

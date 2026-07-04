@@ -15,7 +15,12 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
   const floats = ticks.slice(0, 4);
 
   return (
-    <section className="relative mt-6 h-[clamp(420px,56vw,480px)] overflow-hidden rounded-panel border border-white/10">
+    // Couleurs de texte FIXES (pas de tokens thème) dans toute cette section :
+    // le fond (photo + voile navy) reste volontairement sombre quel que soit
+    // le thème du site (comme le CTA « Diagnostic IA ») — un texte piloté par
+    // token deviendrait illisible en mode clair (ivory clair → quasi noir sur
+    // un fond qui, lui, ne change jamais).
+    <section className="relative mt-6 h-[clamp(420px,56vw,480px)] overflow-hidden rounded-panel border border-[rgba(255,255,255,0.1)]">
       {/* Photo + voiles — élément LCP : next/image optimisé (AVIF/WebP), preload
           via priority, dimensionné selon le viewport. */}
       <Image
@@ -70,8 +75,8 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
       {/* Cotations flottantes (réelles) */}
       {floats.map((t, i) => (
         <div key={t.sym} className={`pointer-events-none absolute hidden font-mono text-[11px] font-medium opacity-90 sm:block ${slots[i]}`}>
-          <span className="text-ivory">{t.sym}</span>{' '}
-          <span className={t.dir === 'up' ? 'text-up' : 'text-down'}>
+          <span className="text-[#fcfcfc]">{t.sym}</span>{' '}
+          <span className={t.dir === 'up' ? 'text-[#3fe18b]' : 'text-[#ff6b6b]'}>
             {t.val} {t.dir === 'up' ? '▲' : '▼'}
           </span>
         </div>
@@ -95,19 +100,19 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
 
       {/* Contenu */}
       <div className="absolute inset-0 z-[3] flex max-w-[58%] flex-col justify-center p-6 sm:p-9">
-        <span className="landing-hero-badge inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.16em] text-gold-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-up animate-pulse" />
+        <span className="landing-hero-badge inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#8fe6ff]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#3fe18b] animate-pulse" />
           {dateLabel ? `Séance du ${dateLabel}` : 'Bourse Régionale des Valeurs Mobilières'}
         </span>
 
-        <h1 className="my-4 font-display text-[clamp(26px,4.4vw,34px)] font-medium leading-[1.02] tracking-[-0.035em] text-ivory">
+        <h1 className="my-4 font-display text-[clamp(26px,4.4vw,34px)] font-medium leading-[1.02] tracking-[-0.035em] text-[#fcfcfc]">
           Décidez sur la BRVM avec des <span className="text-gold-shimmer">données</span>, pas des rumeurs.
         </h1>
 
-        <p className="mb-2 font-display text-[clamp(15px,2.4vw,17px)] font-semibold leading-[1.3] tracking-[-0.01em] text-ivory">
-          La seule plateforme qui <span className="text-accent">note chaque action BRVM</span> chaque jour.
+        <p className="mb-2 font-display text-[clamp(15px,2.4vw,17px)] font-semibold leading-[1.3] tracking-[-0.01em] text-[#fcfcfc]">
+          La seule plateforme qui <span className="text-[#56d7fd]">note chaque action BRVM</span> chaque jour.
         </p>
-        <p className="mb-5 max-w-[42ch] text-[13px] leading-[1.6] text-muted">
+        <p className="mb-5 max-w-[42ch] text-[13px] leading-[1.6] text-[#b5b5b5]">
           Données officielles. Zéro opinion inventée — tout est dérivé des chiffres.
         </p>
 
@@ -115,12 +120,12 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
           <HeroPulseCTA />
           <Link
             href="/societes"
-            className="inline-flex min-h-[44px] items-center px-2 text-[13px] font-medium text-muted underline-offset-4 transition-colors hover:text-ivory hover:underline"
+            className="inline-flex min-h-[44px] items-center px-2 text-[13px] font-medium text-[#b5b5b5] underline-offset-4 transition-colors hover:text-[#fcfcfc] hover:underline"
           >
             Explorer sans compte →
           </Link>
         </div>
-        <p className="mt-3 text-[11px] text-faint">
+        <p className="mt-3 text-[11px] text-[#5c6b70]">
           ✓ Aucune carte bancaire&nbsp;·&nbsp;✓ Compte en 1 minute&nbsp;·&nbsp;✓ Sans engagement
         </p>
       </div>

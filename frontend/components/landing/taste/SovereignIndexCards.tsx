@@ -3,8 +3,8 @@ import type { IndexCard } from './types';
 /** Indices BRVM traités comme objets de séance premium. */
 export function SovereignIndexCards({ indices }: { indices: IndexCard[] }) {
   return (
-    <section className="overflow-hidden rounded-panel border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.02] shadow-card">
-      <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
+    <section className="overflow-hidden rounded-panel border border-border bg-gradient-to-b from-elevated/50 to-surface/30 shadow-card">
+      <header className="flex items-center justify-between gap-3 border-b border-border bg-surface/40 px-4 py-3">
         <span className="overline text-muted">Indices souverains</span>
         <span className="overline text-faint">objets de séance</span>
       </header>
@@ -19,7 +19,7 @@ export function SovereignIndexCards({ indices }: { indices: IndexCard[] }) {
             style={
               idx.featured
                 ? { background: 'linear-gradient(135deg,rgba(86,215,253,0.16),rgba(86,215,253,0.05) 36%,rgba(255,255,255,0.03))', borderColor: 'rgba(86,215,253,0.22)', boxShadow: '0 0 0 1px rgba(86,215,253,0.14), 0 24px 80px rgba(86,215,253,0.11)' }
-                : { background: 'linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.022))', borderColor: 'rgba(255,255,255,0.06)' }
+                : { background: 'linear-gradient(180deg, rgb(var(--color-elevated) / 0.5), rgb(var(--color-surface) / 0.3))', borderColor: 'rgb(var(--color-border))' }
             }
           >
             <span className="overline text-faint">{idx.name}</span>

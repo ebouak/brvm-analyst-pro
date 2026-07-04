@@ -197,6 +197,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="fr" className="dark">
       <head>
+        {/* Anti-flash mode clair/sombre : pose data-theme AVANT le premier
+            paint (script synchrone, pas de defer/async) — sinon flash du
+            mauvais thème au chargement. Priorité : choix utilisateur
+            persisté (localStorage) > préférence système > sombre (défaut). */}
+        <script
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('westbourse-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();`,
+          }}
+        />
         {/* Polices chargées en <link> (découverte immédiate) plutôt qu'en @import
             CSS render-blocking. preconnect réchauffe les connexions → meilleur FCP. */}
         <link rel="preconnect" href="https://api.fontshare.com" />

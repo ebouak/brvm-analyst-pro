@@ -10,8 +10,8 @@ const STYLE: Record<SignalRow['action'], { cls: string; label: string }> = {
 /** Desk des signaux récents — conviction avec score. */
 export function SignalDeskPremium({ signals }: { signals: SignalRow[] }) {
   return (
-    <section className="overflow-hidden rounded-panel border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.02] shadow-card">
-      <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
+    <section className="overflow-hidden rounded-panel border border-border bg-gradient-to-b from-elevated/50 to-surface/30 shadow-card">
+      <header className="flex items-center justify-between gap-3 border-b border-border bg-surface/40 px-4 py-3">
         <span className="overline text-muted">Desk des signaux</span>
         <span className="overline text-faint">conviction récente</span>
       </header>
@@ -25,7 +25,7 @@ export function SignalDeskPremium({ signals }: { signals: SignalRow[] }) {
             <Link
               href={`/actions/${sig.code}`}
               key={`${sig.code}-${sig.action}`}
-              className="grid items-start gap-3 rounded-card border border-white/[0.06] bg-white/[0.03] p-4 transition-all hover:bg-white/[0.06]"
+              className="grid items-start gap-3 rounded-card border border-border bg-surface/40 p-4 transition-all hover:bg-elevated/60"
               style={{ gridTemplateColumns: 'auto 1fr auto' }}
             >
               <span className={`inline-flex min-h-[30px] min-w-[64px] items-center justify-center rounded-full border px-3 font-mono text-[10px] font-bold tracking-[0.14em] ${s.cls}`}>
