@@ -120,22 +120,22 @@ export async function runSgiRichbourse(opts: { mock?: boolean; withPdfs?: boolea
       await mkdir(PDF_DIR, { recursive: true });
       for (const t of tarifTargets) {
         try {
-          await page.goto(abs(t.tarifsUrl), { waitUntil: 'domcontentloaded' });
-          const pdfHref = await page
-            .locator('a[href$=".pdf"], a[href*=".pdf"]')
-            .first()
-            .getAttribute('href')
-            .catch(() => null);
-          if (!pdfHref) {
-            logger.warn({ slug: t.slug }, 'Pas de lien PDF direct (interstitielle pub ?) — ignoré');
-            continue;
-          }
-          const resp = await context.request.get(abs(pdfHref));
+          // L'URL « afficher-tarifs-sgi/{id}_{slug} » renvoie DIRECTEMENT le
+          // fichier (page.goto échoue avec « Download is starting ») → requête
+          // HTTP du contexte navigateur (mêmes cookies anti-bot). On vérifie la
+          // signature %PDF : une interstitielle HTML est ignorée, jamais écrite.
+          const resp = await context.request.get(abs(t.tarifsUrl), { timeout: 30_000 });
           if (!resp.ok()) {
-            logger.warn({ slug: t.slug, status: resp.status() }, 'Téléchargement PDF non OK — ignoré');
+            logger.warn({ slug: t.slug, status: resp.status() }, 'Téléchargement tarifs non OK — ignoré');
             continue;
           }
           const buf = await resp.body();
+          const contentType = resp.headers()['content-type'] ?? '';
+          const isPdf = contentType.includes('pdf') || buf.subarray(0, 5).toString('latin1').startsWith('%PDF');
+          if (!isPdf) {
+            logger.warn({ slug: t.slug, contentType }, 'Réponse tarifs non-PDF (interstitielle ?) — ignorée');
+            continue;
+          }
           await writeFile(join(PDF_DIR, `${t.slug}.pdf`), buf);
           pdfsSaved++;
         } catch (err) {

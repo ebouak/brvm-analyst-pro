@@ -38,6 +38,9 @@ export interface Sgi {
   depotMinSource: 'indicatif' | 'relevé' | 'inconnu';
   siteWeb?: string;
   ficheBRVM?: string;
+  /** Contacts collectés (RichBourse) — absents des fichiers TS seed. */
+  telephone?: string;
+  email?: string;
 }
 
 export const SGI_DIRECTORY: Sgi[] = [

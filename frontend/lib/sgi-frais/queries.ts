@@ -22,6 +22,8 @@ interface SgiDirectoryRow {
   depot_min_source: string | null;
   site_web: string | null;
   fiche_brvm: string | null;
+  telephone: string | null;
+  email: string | null;
 }
 
 interface SgiFraisRow {
@@ -57,6 +59,8 @@ function mapDirectory(r: SgiDirectoryRow): Sgi {
     depotMinSource: (r.depot_min_source as Sgi['depotMinSource']) ?? 'inconnu',
     siteWeb: r.site_web ?? undefined,
     ficheBRVM: r.fiche_brvm ?? undefined,
+    telephone: r.telephone ?? undefined,
+    email: r.email ?? undefined,
   };
 }
 
@@ -89,7 +93,7 @@ export async function getSgiDirectory(): Promise<Sgi[]> {
     const sb = createPublicClient();
     const { data, error } = await sb
       .from('sgi_directory')
-      .select('nom, pays, type, groupe, logo, depot_min, depot_min_source, site_web, fiche_brvm')
+      .select('nom, pays, type, groupe, logo, depot_min, depot_min_source, site_web, fiche_brvm, telephone, email')
       .order('nom');
     if (error || !data || data.length === 0) return SGI_DIRECTORY;
     return (data as SgiDirectoryRow[]).map(mapDirectory);

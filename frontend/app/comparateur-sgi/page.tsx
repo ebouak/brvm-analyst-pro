@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import PublicShell from '@/components/public/PublicShell';
 import SgiComparator from '@/components/landing/SgiComparator';
+import SgiMatchmaker from '@/components/comparateur-sgi/SgiMatchmaker';
 import { getSgiDirectory, getSgiFrais } from '@/lib/sgi-frais/queries';
 
 // ISR : données SGI lues depuis Supabase (repli sur les fichiers TS si vide),
@@ -37,6 +38,9 @@ export default async function ComparateurSgiPage() {
   const [directory, frais] = await Promise.all([getSgiDirectory(), getSgiFrais()]);
   return (
     <PublicShell>
+      <div className="mb-8">
+        <SgiMatchmaker directory={directory} frais={frais} />
+      </div>
       <SgiComparator className="scroll-mt-24" directory={directory} frais={frais} />
     </PublicShell>
   );

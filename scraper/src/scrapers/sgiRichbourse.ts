@@ -71,12 +71,25 @@ export function parseSgiListRows(html: string): SgiListEntry[] {
 
     const $row = $(a).closest('tr');
     const cells = $row.find('td');
-    // Le nom est soit le texte du lien lui-même, soit la 1re cellule.
+    // Le nom est soit le texte du lien lui-même, soit — quand le lien est un
+    // bouton « Détails » — la première cellule PLAUSIBLE de la ligne : on
+    // écarte le numéro de ligne (« 1 »…« 40 »), le pays et la note (« 4,9 »),
+    // jamais un index de colonne fixe (markup réel : # | Nom | Pays | Note | action).
     let nom = $(a).text().trim();
     if (!nom || /détails|details/i.test(nom)) {
-      nom = cells.length > 0 ? $(cells[0]).text().trim() : '';
+      nom = '';
+      cells.each((_, td) => {
+        const t = $(td).text().trim();
+        if (!t) return undefined;
+        if (/^\d+$/.test(t)) return undefined; // numéro de ligne
+        if (paysToIso(t)) return undefined; // pays
+        if (/^[\d,.\s]+$/.test(t)) return undefined; // note « 4,9 »
+        if (/détails|details/i.test(t)) return undefined; // bouton
+        nom = t;
+        return false;
+      });
     }
-    if (!nom) return;
+    if (!nom || /^\d+$/.test(nom)) return;
 
     // Le pays : cellule dont le texte matche un pays UEMOA.
     let paysIso: string | null = null;
