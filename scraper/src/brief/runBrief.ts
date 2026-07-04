@@ -8,7 +8,7 @@
  * no-op — sauf avec { force: true } (CLI : brief --force).
  */
 import { getSupabase } from '../persistence/supabase.js';
-import { dispatch } from '../alerts/channels.js';
+import { dispatch, sendWhatsApp } from '../alerts/channels.js';
 import { buildBriefData, composeBriefText } from './compose.js';
 import { logger } from '../logger.js';
 
@@ -115,6 +115,12 @@ export async function runBrief(opts: { force?: boolean } = {}): Promise<BriefRun
   if (!sent) {
     const results = await dispatch({ subject: '', body: contenu });
     sent = results.some((r) => r.status === 'sent') || results.every((r) => r.channel === 'console');
+  } else {
+    // Telegram photo OK → dispatch n'est pas appelé : on pousse quand même le
+    // brief texte sur WhatsApp (canal n°1 en Afrique de l'Ouest), s'il est
+    // configuré. Non bloquant : le brief est déjà considéré envoyé.
+    const wa = await sendWhatsApp({ subject: '', body: contenu });
+    if (wa) logger.info({ status: wa.status, error: wa.error }, 'brief: envoi WhatsApp');
   }
 
   const { error: upErr } = await supabase.from('brief_daily').upsert(

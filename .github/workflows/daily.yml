@@ -61,9 +61,14 @@ jobs:
 
       # Brief quotidien : idempotent (skip si déjà envoyé pour la séance).
       # Envoyé après la fermeture (run 16h) ; no-op au run d'ouverture.
-      - name: Brief de séance (Telegram + archive)
+      - name: Brief de séance (Telegram + WhatsApp + archive)
         working-directory: scraper
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # WhatsApp (Meta Cloud API) — facultatif : sans ces secrets, canal ignoré.
+          # Activation : voir docs/WHATSAPP.md.
+          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_PHONE_ID: ${{ secrets.WHATSAPP_PHONE_ID }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
         run: npx tsx src/index.ts brief

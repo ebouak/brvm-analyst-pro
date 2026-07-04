@@ -15,7 +15,7 @@ export interface Notification {
   code?: string | null;
 }
 
-export type ChannelName = 'email' | 'telegram' | 'console';
+export type ChannelName = 'email' | 'telegram' | 'whatsapp' | 'console';
 
 export interface SendResult {
   channel: ChannelName;
@@ -60,6 +60,38 @@ async function sendTelegram(n: Notification): Promise<SendResult | null> {
 }
 
 /**
+ * Envoie via WhatsApp (Meta Cloud API) si WHATSAPP_TOKEN + WHATSAPP_PHONE_ID +
+ * WHATSAPP_TO présents (mêmes variables que le canal opérateur du frontend).
+ * NB : l'envoi de texte libre ne fonctionne que dans la fenêtre de 24 h après
+ * le dernier message entrant du destinataire ; hors fenêtre, il faut un modèle
+ * (template) approuvé par Meta — voir docs/WHATSAPP.md.
+ */
+export async function sendWhatsApp(n: Notification): Promise<SendResult | null> {
+  const token = process.env.WHATSAPP_TOKEN;
+  const phoneId = process.env.WHATSAPP_PHONE_ID;
+  const to = process.env.WHATSAPP_TO;
+  if (!token || !phoneId || !to) return null;
+  try {
+    const body = n.subject ? `${n.subject}\n${n.body}` : n.body;
+    const resp = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'text',
+        // Limite Cloud API : 4096 caractères par message texte.
+        text: { body: body.slice(0, 4096) },
+      }),
+    });
+    if (!resp.ok) return { channel: 'whatsapp', status: 'failed', error: `HTTP ${resp.status}` };
+    return { channel: 'whatsapp', status: 'sent' };
+  } catch (err) {
+    return { channel: 'whatsapp', status: 'failed', error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+/**
  * Diffuse une notification sur tous les canaux configurés.
  * Renvoie la liste des résultats (au moins "console").
  */
@@ -69,6 +101,8 @@ export async function dispatch(n: Notification): Promise<SendResult[]> {
   if (email) results.push(email);
   const tg = await sendTelegram(n);
   if (tg) results.push(tg);
+  const wa = await sendWhatsApp(n);
+  if (wa) results.push(wa);
 
   if (results.length === 0) {
     // Fallback console : toujours présent.
