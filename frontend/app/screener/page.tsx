@@ -169,6 +169,16 @@ export default function ScreenerPage() {
     setFiltered(applyFilters(allActions, filters));
   };
 
+  // Filtre rapide liquidité (appliqué APRÈS les presets, côté affichage)
+  const [liqFilter, setLiqFilter] = useState<'all' | 'ab' | 'no-d'>('all');
+  const displayed = filtered.filter((a) => {
+    if (liqFilter === 'all') return true;
+    const c = a.liquidite_classe;
+    if (c == null) return true; // inconnu : jamais exclu silencieusement
+    if (liqFilter === 'ab') return c === 'A' || c === 'B';
+    return c !== 'D';
+  });
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-6" aria-busy="true">
@@ -213,8 +223,35 @@ export default function ScreenerPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <ScreenerFilters isPremium={isPremium} onFilterChange={handleFilter} />
-        <div className="lg:col-span-3">
-          <ScreenerResults results={filtered} />
+        <div className="lg:col-span-3 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs uppercase tracking-widest text-muted">Liquidité :</span>
+            {([
+              ['all', 'Toutes'],
+              ['ab', 'A + B seulement'],
+              ['no-d', 'Exclure les très illiquides (D)'],
+            ] as const).map(([val, label]) => (
+              <button
+                key={val}
+                type="button"
+                onClick={() => setLiqFilter(val)}
+                aria-pressed={liqFilter === val}
+                className={`rounded-lg border px-3 py-1 text-sm font-medium transition-colors ${
+                  liqFilter === val
+                    ? 'border-accent bg-accent text-bg'
+                    : 'border-border bg-surface text-muted hover:text-ivory'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            {liqFilter !== 'all' && (
+              <span className="tabular text-xs text-faint">
+                {filtered.length - displayed.length} titre(s) masqué(s)
+              </span>
+            )}
+          </div>
+          <ScreenerResults results={displayed} />
         </div>
       </div>
     </div>

@@ -15,7 +15,12 @@ const BADGE: Record<Action, string> = {
 };
 const BAR: Record<Action, string> = { acheter: 'bg-up', conserver: 'bg-gold', vendre: 'bg-down' };
 
-export function AdvisorCard({ row }: { row: AdvisorRow }) {
+export function AdvisorCard({ row, liquidite }: {
+  row: AdvisorRow;
+  /** Classe de liquidité A-D (lib/liquidity) — avertissement affiché sur les
+   * recommandations Acheter des titres C/D (risque de contrepartie). */
+  liquidite?: { classe: string; score: number } | null;
+}) {
   const [flipped, setFlipped] = useState(false);
   const { result } = row;
   const trendUp = row.sparkline.length >= 2 && row.sparkline[row.sparkline.length - 1]! >= row.sparkline[0]!;
@@ -37,6 +42,15 @@ export function AdvisorCard({ row }: { row: AdvisorRow }) {
             <span className="ml-auto text-[11px] text-faint">détails ↻</span>
           </div>
           {row.designation && <p className="mt-0.5 text-xs text-muted line-clamp-1">{row.designation}</p>}
+
+          {liquidite && result.action === 'acheter' && (liquidite.classe === 'C' || liquidite.classe === 'D') && (
+            <p
+              className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-warn/30 bg-warn/10 px-1.5 py-0.5 text-[10px] font-medium text-warn"
+              title={`Score de liquidité ${liquidite.score}/100 : le titre traite peu — fractionnez vos ordres et prévoyez un délai de revente.`}
+            >
+              ⚠ Liquidité {liquidite.classe === 'D' ? 'très faible' : 'faible'} — position à dimensionner
+            </p>
+          )}
 
           <div className="my-2 flex-1 flex items-center">
             {row.sparkline.length >= 2 ? (

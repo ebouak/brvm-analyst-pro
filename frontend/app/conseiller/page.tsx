@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { getAdvisorRecommendations } from '@/lib/advisor/server';
+import { createPublicClient } from '@/lib/supabase/public';
+import { computeLiquidity } from '@/lib/liquidity';
 import { getRecentChanges } from '@/lib/advisor/changes';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
 import { AdvisorCard } from '@/components/advisor/AdvisorCard';
@@ -12,8 +14,40 @@ export const revalidate = 3600;
 const ACT_LABEL: Record<Action, string> = { acheter: 'Acheter', conserver: 'Conserver', vendre: 'Vendre' };
 const ACT_COLOR: Record<Action, string> = { acheter: 'text-up', conserver: 'text-gold', vendre: 'text-down' };
 
+/** Scores de liquidité (~30 séances) pour toute la cote, en une requête. */
+async function getLiquidityMap(): Promise<Map<string, { classe: string; score: number }>> {
+  const sb = createPublicClient();
+  const d45 = new Date();
+  d45.setDate(d45.getDate() - 45);
+  const { data } = await sb
+    .from('brvm_actions_daily')
+    .select('code, date_marche, volume, cours_jour, valeur_echangee')
+    .gte('date_marche', d45.toISOString().slice(0, 10));
+  const rows = (data ?? []) as {
+    code: string; date_marche: string; volume: number | null;
+    cours_jour: number | null; valeur_echangee: number | null;
+  }[];
+  const seances = new Set(rows.map((r) => r.date_marche)).size;
+  const byCode = new Map<string, typeof rows>();
+  for (const r of rows) {
+    const list = byCode.get(r.code) ?? [];
+    list.push(r);
+    byCode.set(r.code, list);
+  }
+  const out = new Map<string, { classe: string; score: number }>();
+  for (const [code, list] of byCode) {
+    const liq = computeLiquidity(list, seances);
+    if (liq) out.set(code, { classe: liq.classe, score: liq.score });
+  }
+  return out;
+}
+
 export default async function ConseillerPage() {
-  const [rows, changes] = await Promise.all([getAdvisorRecommendations(), getRecentChanges()]);
+  const [rows, changes, liquidityMap] = await Promise.all([
+    getAdvisorRecommendations(),
+    getRecentChanges(),
+    getLiquidityMap().catch(() => new Map<string, { classe: string; score: number }>()),
+  ]);
   const counts = {
     acheter: rows.filter((r) => r.result.action === 'acheter').length,
     conserver: rows.filter((r) => r.result.action === 'conserver').length,
@@ -90,7 +124,7 @@ export default async function ConseillerPage() {
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {group.map((r) => (
-                <AdvisorCard key={r.code} row={r} />
+                <AdvisorCard key={r.code} row={r} liquidite={liquidityMap.get(r.code) ?? null} />
               ))}
             </div>
           </section>

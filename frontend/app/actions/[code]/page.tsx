@@ -18,6 +18,9 @@ import PublicationsModal, { type Publication } from '@/components/PublicationsMo
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
+import { computeLiquidity } from '@/lib/liquidity';
+import { LiquidityCard } from '@/components/LiquidityCard';
+import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
 import { computeTechnicalSummary } from '@/lib/technicalSummary';
@@ -282,6 +285,21 @@ export default async function InstrumentPage({
   const volMoyen = recentVols.length > 0
     ? Math.round(recentVols.reduce((a, b) => a + b, 0) / recentVols.length) : null;
 
+  // Liquidité (30 dernières séances déjà en mémoire) + fourchette de courtage
+  // réelle des barèmes SGI en base (pour le coût d'aller-retour).
+  const liqRows = rows.slice(-30).map((r) => ({
+    volume: r.volume ?? null,
+    cours_jour: r.cours_jour ?? null,
+    valeur_echangee: (r as { valeur_echangee?: number | null }).valeur_echangee ?? null,
+  }));
+  const liquidity = computeLiquidity(liqRows, liqRows.length);
+  const sgiFrais = await getSgiFrais().catch(() => []);
+  const courtages = sgiFrais
+    .map((f) => f.courtagePctMax ?? f.courtagePctMin)
+    .filter((c): c is number => c != null && c > 0);
+  const courtageMin = courtages.length > 0 ? Math.min(...courtages) : null;
+  const courtageMax = courtages.length > 0 ? Math.max(...courtages) : null;
+
   const pays = instrument?.pays ?? last.pays ?? null;
   const secteur = instrument?.secteur ?? last.secteur ?? null;
 
@@ -526,6 +544,14 @@ export default async function InstrumentPage({
         <div className="mt-2">
           <EventMarkerLegend markers={chartMarkers} />
         </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          LIQUIDITÉ & COÛT DE FRICTION
+      ══════════════════════════════════════════════════ */}
+      <div id="liquidite" className="scroll-mt-24">
+        <Eyebrow className="mb-3">Liquidité & coût de friction</Eyebrow>
+        <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
       </div>
 
       {/* ══════════════════════════════════════════════════
