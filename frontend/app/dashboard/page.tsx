@@ -13,6 +13,7 @@ import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
 import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
 import NewsFeed from '@/components/dashboard/NewsFeed';
 import MarketIndices from '@/components/dashboard/MarketIndices';
+import { AfricanIndicesCard } from '@/components/AfricanIndicesCard';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
@@ -307,6 +308,16 @@ export default async function Dashboard() {
     indices: (
       <section aria-label="Indices BRVM">
         <MarketIndices indices={indices} />
+        <div className="mt-4">
+          <AfricanIndicesCard
+            brvmComposite={(() => {
+              const brvmc = indices.find((i) => i.code === 'BRVMC');
+              return brvmc
+                ? { valeur: (brvmc.valeur as number | null) ?? null, variation_pct: brvmc.variation_pct ?? null }
+                : null;
+            })()}
+          />
+        </div>
       </section>
     ),
     etat: (

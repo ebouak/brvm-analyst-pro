@@ -1,0 +1,54 @@
+name: Indices pan-africains (AFX)
+
+# Étiquette le déclencheur pour le monitoring scraper_runs (schedule → cron).
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    # Places couvertes : GSE 10:00-15:00 GMT, NGX 09:30-13:30 GMT (UTC+1),
+    # NSE Kenya 06:30-12:00 GMT (UTC+3). AFX met à jour en continu.
+    # 3 passages par jour ouvré suffisent (mi-séance, clôtures, fin de journée) :
+    # minute décalée hors top-of-hour (congestion GitHub).
+    - cron: '7 12,15,17 * * 1-5'
+  workflow_dispatch: {} # déclenchement manuel possible
+
+concurrency:
+  group: african-indices
+  cancel-in-progress: false
+
+jobs:
+  african:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Run african indices (with retry)
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          MAX_RETRIES=3
+          RETRY_DELAY=30
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $attempt/$MAX_RETRIES..."
+            if npx tsx src/index.ts african; then
+              echo "✅ African indices scrape succeeded"
+              exit 0
+            else
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                echo "⚠️ Attempt $attempt failed, retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+          echo "❌ African indices scrape failed after $MAX_RETRIES attempts"
+          exit 1

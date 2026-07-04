@@ -50,6 +50,7 @@ import { runBackfill } from './backfill/runBackfill.js';
 import { runNotations } from './notations/runNotations.js';
 import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
+import { runAfricanIndices } from './scrapers/runAfricanIndices.js';
 import { runObligations } from './scrapers/runObligations.js';
 import { runCommodities } from './commodities/runCommodities.js';
 import { runValidation } from './validation/runValidation.js';
@@ -234,6 +235,24 @@ async function main(): Promise<number> {
         },
       );
       return res.nbActions > 0 ? 0 : 1;
+    }
+    case 'african': {
+      const res = await monitored(
+        { code: 'african', label: 'Indices pan-africains (AFX)' },
+        async () => {
+          const r = await runAfricanIndices({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.failures.length === 0 ? 'success' : 'partial',
+              rows_extracted: r.nb,
+              rows_upserted: r.nb,
+              metadata: { nb: r.nb, failures: r.failures },
+            },
+          };
+        },
+      );
+      return res.nb > 0 ? 0 : 1;
     }
     case 'shares': {
       const res = await runShares();
