@@ -32,7 +32,7 @@ export function SocialLinks() {
             title={label}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/55 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#56d7fd]/50 hover:bg-[#56d7fd]/10 hover:text-[#56d7fd] focus:outline-none focus:ring-2 focus:ring-[#56d7fd]/50"
+            className="group flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] text-[#fff]/70 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#56d7fd]/50 hover:bg-[#56d7fd]/10 hover:text-[#56d7fd] focus:outline-none focus:ring-2 focus:ring-[#56d7fd]/50"
           >
             <Icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
           </a>

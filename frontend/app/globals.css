@@ -81,9 +81,9 @@
   --color-warn: 138 90 16;
   --color-purple: 109 79 168;
 
-  --color-ivory: 43 38 32;
-  --color-muted: 107 97 82;
-  --color-faint: 168 157 138;
+  --color-ivory: 32 28 23;
+  --color-muted: 87 78 64;
+  --color-faint: 133 122 103;
 
   /* Ombres neutres discrètes — un halo cyan/vert lumineux lit comme un bug
      sur fond clair, pas comme un effet premium. */
@@ -220,6 +220,35 @@ body {
 }
 .landing-hero-cta {
   background: linear-gradient(180deg,#8fe6ff,#56d7fd);
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--ease), box-shadow var(--ease), filter var(--ease);
+}
+.landing-hero-cta:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 0 0 1px rgba(86,215,253,0.45), 0 14px 44px rgba(86,215,253,0.38);
+}
+.landing-hero-cta:active {
+  transform: translateY(0) scale(0.97);
+}
+/* Reflet balayant périodique — attire l'œil vers le CTA sans être intrusif. */
+.landing-hero-cta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 32%, rgba(255,255,255,0.5) 50%, transparent 68%);
+  transform: translateX(-130%);
+  animation: cta-sheen 5s ease-in-out infinite;
+}
+@keyframes cta-sheen {
+  0%, 74% { transform: translateX(-130%); }
+  94%, 100% { transform: translateX(130%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-cta::after { animation: none; }
+  .landing-hero-cta:hover { transform: none; }
 }
 .landing-live-card {
   background:

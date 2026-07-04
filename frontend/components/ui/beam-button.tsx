@@ -26,8 +26,10 @@ export function BeamButton({
         aria-hidden
         className="absolute inset-[-150%] motion-safe:animate-[spin_3.5s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_295deg,#22d3ee_338deg,#7dd3fc_352deg,transparent_360deg)]"
       />
-      {/* Cœur du bouton (recouvre le centre → seul le contour montre le faisceau) */}
-      <span className="relative inline-flex min-h-[40px] items-center rounded-full bg-[#0e1014] px-4 text-sm font-medium text-muted transition-colors group-hover:text-ivory">
+      {/* Cœur du bouton (recouvre le centre → seul le contour montre le faisceau).
+          bg-surface (token thème) : sombre en dark, blanc en mode clair — un fond
+          fixe rendrait le libellé illisible en clair. */}
+      <span className="relative inline-flex min-h-[40px] items-center rounded-full bg-surface px-4 text-sm font-medium text-muted transition-colors group-hover:text-ivory">
         {children}
       </span>
     </Link>

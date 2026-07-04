@@ -45,8 +45,7 @@ export function HeroPulseCTA() {
     >
       <Link
         href="/signup"
-        className="relative z-10 inline-flex min-h-[48px] items-center rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-        style={{ background: "linear-gradient(180deg,#8fe6ff,#56d7fd)" }}
+        className="landing-hero-cta relative z-10 inline-flex min-h-[48px] items-center rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold"
       >
         Créer un compte gratuit
       </Link>

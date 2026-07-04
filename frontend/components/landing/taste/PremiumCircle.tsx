@@ -36,8 +36,7 @@ export function PremiumCircle() {
         <div className="mb-4 flex flex-wrap gap-3">
           <Link
             href="/signup"
-            className="inline-flex min-h-[44px] items-center rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold"
-            style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
+            className="landing-hero-cta inline-flex min-h-[44px] items-center rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold"
           >
             Rejoindre le cercle
           </Link>

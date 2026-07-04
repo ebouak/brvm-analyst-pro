@@ -59,7 +59,7 @@ export function TasteTopbar({
         <ThemeToggle className="hidden sm:inline-flex" />
         <Link
           href="/premium/diagnostic"
-          className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold"
+          className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold transition-all hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(86,215,253,0.45),0_10px_32px_rgba(86,215,253,0.4)] hover:brightness-105 active:translate-y-0 active:scale-95 motion-reduce:hover:translate-y-0"
           style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
         >
           Diagnostic IA

@@ -101,7 +101,7 @@ export default function NewsletterForm({ source = 'landing', compact = false }: 
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="px-5 py-2.5 rounded-xl bg-gold text-obsidian font-semibold text-sm hover:bg-gold-2 active:scale-95 transition disabled:opacity-50 shadow-gold-sm"
+          className="px-5 py-2.5 rounded-xl bg-gold text-obsidian font-semibold text-sm hover:bg-gold-2 hover:-translate-y-0.5 hover:shadow-gold active:translate-y-0 active:scale-95 transition disabled:opacity-50 shadow-gold-sm motion-reduce:hover:translate-y-0"
         >
           {status === 'loading' ? 'Inscription…' : 'S\'abonner gratuitement'}
         </button>
