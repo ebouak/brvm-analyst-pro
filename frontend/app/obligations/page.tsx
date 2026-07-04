@@ -155,7 +155,7 @@ export default async function ObligationsPage() {
       </div>
 
       {/* Note sur les obligations amorties */}
-      <p className="text-[11px] text-gray-500 leading-relaxed border-l-2 border-[#1a2a30] pl-3">
+      <p className="text-[11px] text-faint leading-relaxed border-l-2 border-[#1a2a30] pl-3">
         <strong className="text-orange-400">YTM N/A</strong> = obligation à amortissement partiel (prix {`<`} 8 000 FCFA) — le capital remboursé périodiquement rend le calcul YTM non fiable avec nominal 10 000 FCFA.
         Les obligations cotées &quot;Au pair&quot; (cours ≈ 10 000 FCFA) ont un YTM ≈ coupon nominal.
       </p>
@@ -184,7 +184,7 @@ export default async function ObligationsPage() {
       {/* Tableau obligations échues (collapsé) */}
       {expired.length > 0 && (
         <details className="group">
-          <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-300 flex items-center gap-2 py-2 list-none">
+          <summary className="cursor-pointer text-xs text-faint hover:text-muted flex items-center gap-2 py-2 list-none">
             <span className="border border-[#1a2a30] rounded px-2 py-0.5 group-open:border-[#56D7FD]/30">
               {expired.length} obligations échues — cliquer pour afficher
             </span>
@@ -200,7 +200,7 @@ export default async function ObligationsPage() {
         </details>
       )}
 
-      <p className="text-[11px] text-gray-600 leading-relaxed border-l-2 border-[#1a2a30] pl-3">
+      <p className="text-[11px] text-faint leading-relaxed border-l-2 border-[#1a2a30] pl-3">
         YTM calculé par bisection (hypothèses : nominal 10 000 FCFA, coupon annuel, maturité = 31 déc. de l&apos;année de fin
         extraite de la désignation). Données source : scraper BRVM intraday.
       </p>

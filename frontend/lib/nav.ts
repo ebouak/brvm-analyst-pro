@@ -35,6 +35,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Analyse',
     items: [
       { href: '/conseiller', label: 'Conseiller' },
+      { href: '/conseiller/track-record', label: 'Track record' },
       { href: '/signaux', label: 'Signaux' },
       { href: '/screener', label: 'Screener' },
       { href: '/fondamentaux', label: 'Fondamentaux' },
@@ -78,6 +79,8 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Découverte',
     items: [
       { href: '/societes', label: 'Sociétés (public)' },
+      { href: '/comparateur-sgi', label: 'Choisir sa SGI' },
+      { href: '/classement', label: 'Classement papier' },
       { href: '/simulateur', label: 'Simulateur' },
       { href: '/brief', label: 'Brief quotidien' },
       { href: '/forum', label: 'Forum' },
@@ -109,6 +112,6 @@ export const NAV_GROUPS: NavGroup[] = [
 export function isNavItemActive(href: string, pathname: string): boolean {
   // Routes à correspondance exacte (sinon « /admin » resterait actif sur ses
   // sous-pages /admin/cles-api, etc., et « /dashboard » sur /dashboard/*).
-  if (href === '/dashboard' || href === '/admin') return pathname === href;
+  if (href === '/dashboard' || href === '/admin' || href === '/conseiller') return pathname === href;
   return pathname.startsWith(href);
 }

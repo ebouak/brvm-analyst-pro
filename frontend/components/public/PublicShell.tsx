@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { RATING_DISCLAIMER } from '@/lib/rating';
+import ThemeToggle from '@/components/ThemeToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 /**
@@ -38,6 +39,7 @@ export default function PublicShell({ children }: { children: React.ReactNode })
             <Link href="/brief" className="text-muted hover:text-white transition-colors hidden md:block">
               Brief
             </Link>
+            <ThemeToggle className="hidden sm:inline-flex" />
             <Link href="/login" className="text-muted hover:text-white transition-colors">
               Connexion
             </Link>

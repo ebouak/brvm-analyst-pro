@@ -56,37 +56,37 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
   const hasCharts = Object.keys(yf_prices).length > 0 || Object.keys(brvm_scores).length > 0;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-[#FCFCFC]">
+    <div className="min-h-screen bg-bg text-ivory">
       {/* Hero */}
-      <div className="border-b border-[#1a2a30] bg-[#030303]">
+      <div className="border-b border-border bg-bg">
         <div className="max-w-4xl mx-auto px-4 py-10">
           <div className="flex items-center gap-3 mb-4">
-            <a href="/weekly" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
+            <a href="/weekly" className="text-sm text-faint hover:text-accent transition-colors">
               ← Analyses hebdo
             </a>
             {week && year && (
-              <span className="text-xs font-mono text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono text-accent bg-cyan-400/10 px-2 py-0.5 rounded">
                 Semaine {String(week).padStart(2, '0')}/{year}
               </span>
             )}
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-[#FCFCFC] leading-tight mb-4 [font-family:var(--font-display)]">
+          <h1 className="text-3xl md:text-4xl font-bold text-ivory leading-tight mb-4 [font-family:var(--font-display)]">
             {article.titre}
           </h1>
 
           {article.resume && (
-            <p className="text-lg text-gray-400 leading-relaxed mb-6">{article.resume}</p>
+            <p className="text-lg text-muted leading-relaxed mb-6">{article.resume}</p>
           )}
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-faint">
             <span>
               {new Date(article.date_publication).toLocaleDateString('fr-FR', {
                 weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
               })}
             </span>
             <span>·</span>
-            <span className="text-cyan-400">{article.source_label ?? 'WESTBOURSE PRO'}</span>
+            <span className="text-accent">{article.source_label ?? 'WESTBOURSE PRO'}</span>
           </div>
 
           {/* Tickers */}
@@ -96,7 +96,7 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
                 <a
                   key={t}
                   href={`/actions/${t}`}
-                  className="font-mono text-xs px-2.5 py-1 rounded border border-cyan-500/30 text-cyan-400 bg-[#0a1417] hover:bg-cyan-400/10 transition-colors"
+                  className="font-mono text-xs px-2.5 py-1 rounded border border-cyan-500/30 text-accent bg-surface hover:bg-cyan-400/10 transition-colors"
                 >
                   {t}
                 </a>
@@ -111,7 +111,7 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
         {/* Graphiques Recharts — uniquement si content_html absent (anciens articles sans SVG intégré) */}
         {hasCharts && !article.content_html && (
           <section>
-            <h2 className="text-sm font-semibold text-cyan-400 uppercase tracking-widest mb-5">
+            <h2 className="text-sm font-semibold text-accent uppercase tracking-widest mb-5">
               Données de marché
             </h2>
             <div className="grid md:grid-cols-2 gap-4">
@@ -137,11 +137,11 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
             dangerouslySetInnerHTML={{ __html: sanitizeReportHtml(article.content_html) }}
           />
         ) : (
-          <p className="text-gray-500 text-center py-12">Contenu non disponible.</p>
+          <p className="text-faint text-center py-12">Contenu non disponible.</p>
         )}
 
         {/* Footer article */}
-        <footer className="border-t border-[#1a2a30] pt-6 text-xs text-gray-600 space-y-1">
+        <footer className="border-t border-border pt-6 text-xs text-faint space-y-1">
           <p>Les informations contenues dans cet article sont fournies à titre informatif uniquement et ne constituent pas un conseil en investissement.</p>
           <p>Sources : yfinance, Banque Mondiale CMO Pink Sheet, actualités sectorielles BRVM.</p>
           <p>© {new Date().getFullYear()} WESTBOURSE. Tous droits réservés.</p>

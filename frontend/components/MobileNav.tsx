@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
 import BeginnerToggle from '@/components/BeginnerToggle';
+import ThemeToggle from '@/components/ThemeToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
@@ -80,6 +81,7 @@ export default function MobileNav({
         >
           <div className="flex justify-center mb-6">
             <BeginnerToggle />
+            <ThemeToggle />
           </div>
           <div className="space-y-6">
             {groups.map((group) => (

@@ -249,8 +249,8 @@ export default function SgiComparator({
 
       {/* Calculateur de coût réel — mis en avant juste après le rôle de la
           SGI (avant : plus bas, après l'annuaire et les 6 critères) */}
-      <div className="mt-8">
-        <p className="overline mb-2 text-gold-2">Calculer le coût réel</p>
+      <div id="calculateur-cout" className="mt-8 scroll-mt-24">
+        <p className="overline mb-2 text-gold-2">Étape 2 · Calculer le coût réel</p>
         <h3 className="mb-1 font-display text-xl text-ivory">Combien coûterait votre investissement ?</h3>
         <p className="mb-5 max-w-[64ch] text-sm leading-relaxed text-muted">
           Comparez le coût total (courtage, frais réglementaires, droits de garde, tenue de compte) entre plusieurs

@@ -158,28 +158,28 @@ body {
   border-radius: 0.5rem;
 }
 
-/* Select commun */
+/* Select commun — tokens thème (sombre ET clair) */
 .select-field {
-  background-color: #050609;
-  border: 1px solid #20242d;
+  background-color: rgb(var(--color-sunken));
+  border: 1px solid rgb(var(--color-border));
   border-radius: 0.5rem;
   padding: 0.4rem 0.65rem;
   font-size: 0.875rem;
-  color: #efe7d8;
+  color: rgb(var(--color-ivory));
   width: 100%;
   outline: none;
   transition: border-color 0.15s;
 }
-.select-field:focus { border-color: #56d7fd; }
-.select-field option { background-color: #0a1417; }
+.select-field:focus { border-color: rgb(var(--color-accent)); }
+.select-field option { background-color: rgb(var(--color-surface)); }
 
-/* Skeleton shimmer */
-.skeleton { position: relative; overflow: hidden; background: #0e0e12; border-radius: 6px; }
+/* Skeleton shimmer — tokens thème */
+.skeleton { position: relative; overflow: hidden; background: rgb(var(--color-elevated) / 0.5); border-radius: 6px; }
 .skeleton::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, #16161b 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgb(var(--color-border) / 0.6) 50%, transparent 100%);
   animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
@@ -430,4 +430,67 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .flash-value.flash-up, .flash-value.flash-down { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EFFETS VISUELS GLOBAUX « tendance » — CSS pur, progressifs, sans JS.
+   Chaque effet respecte prefers-reduced-motion et dégrade proprement sur
+   les navigateurs sans support (@supports). Appliqués site entier.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Grain photographique subtil (texture premium, fixe, thème-neutre) ──
+   Un bruit SVG en overlay très léger casse l'aplat des grandes surfaces.
+   pointer-events:none → zéro impact interaction ; opacité minime. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+:root[data-theme="light"] body::after { opacity: 0.018; }
+@media print { body::after { display: none; } }
+
+/* ── 2. Révélation au scroll (scroll-driven animations, sans JS) ──────────
+   Les <section> et cartes .rounded-panel entrent en fondu + translation
+   quand elles approchent du viewport. Progressif : navigateurs sans
+   animation-timeline → rendu normal, rien de masqué. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    main section,
+    main .rounded-panel {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 42%;
+    }
+  }
+}
+@keyframes reveal-in {
+  from { opacity: 0.25; transform: translateY(14px) scale(0.995); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── 3. Survol premium unifié des panneaux (lift + liseré accent) ────────
+   S'applique aux conteneurs déjà stylés — pas de nouvelle classe à poser. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  a.rounded-panel, a .rounded-panel, a.rounded-card, a .rounded-card {
+    transition: transform 200ms cubic-bezier(0.32, 0.72, 0, 1), box-shadow 200ms ease, border-color 200ms ease;
+  }
+  a:hover > .rounded-panel, a.rounded-panel:hover, a:hover > .rounded-card, a.rounded-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -12px rgb(var(--color-accent) / 0.25);
+  }
+}
+
+/* ── 4. Sélection de texte à la marque ──────────────────────────────────── */
+::selection { background: rgb(var(--color-accent) / 0.3); color: rgb(var(--color-ivory)); }
+
+/* ── 5. Focus visible cohérent (clavier) ────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgb(var(--color-accent) / 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

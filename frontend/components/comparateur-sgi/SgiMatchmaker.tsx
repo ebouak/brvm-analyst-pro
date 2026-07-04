@@ -156,7 +156,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
   return (
     <section id="moteur-sgi" className="scroll-mt-24 rounded-panel border border-accent/25 bg-accent/[0.04] p-6 md:p-8">
-      <p className="overline mb-2 text-gold-2">Moteur de choix · exclusif</p>
+      <p className="overline mb-2 text-gold-2">Étape 1 · Moteur de choix — exclusif</p>
       <h3 className="mb-1 font-display text-2xl text-ivory [letter-spacing:-0.03em]">
         Quelle SGI est faite pour vous ?
       </h3>
@@ -301,10 +301,10 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
           <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-4">
             <a
-              href="#comparateur-sgi"
+              href="#calculateur-cout"
               className="rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-obsidian shadow-gold-sm transition hover:bg-gold-2"
             >
-              Affiner avec le calculateur de coût →
+              Étape 2 : chiffrer précisément avec le calculateur →
             </a>
             <button
               type="button"

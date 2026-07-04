@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_GROUPS, isNavItemActive } from '@/lib/nav';
 import BeginnerToggle from '@/components/BeginnerToggle';
+import ThemeToggle from '@/components/ThemeToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import UserAvatarMenu from '@/components/profile/UserAvatarMenu';
 
@@ -136,6 +137,9 @@ export default function Sidebar({
         </div>
         <div className="flex justify-center">
           <BeginnerToggle />
+        </div>
+        <div className="flex justify-center">
+          <ThemeToggle />
         </div>
         <p className="overline text-[9px] text-faint text-center">Données BRVM · BDFIN</p>
       </div>
