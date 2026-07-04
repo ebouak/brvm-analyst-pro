@@ -292,6 +292,50 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
   }, [news]);
 
+  // 8. « À retenir » — 3 faits DÉRIVÉS des données de la période (aucun texte
+  // inventé, convention narrative WESTBOURSE) : plus fort impact, société la
+  // plus citée, balance de sentiment.
+  const aRetenir = useMemo(() => {
+    const out: { icon: string; text: string; detail?: string }[] = [];
+    if (news.length === 0) return out;
+
+    const top = [...news].sort((a, b) => (b.score_impact ?? 0) - (a.score_impact ?? 0))[0];
+    if (top && (top.score_impact ?? 0) > 0) {
+      out.push({
+        icon: '⚡',
+        text: `Impact le plus fort (${top.score_impact}/100) : ${top.titre}`,
+        detail: `${top.source_label ?? top.source} · ${top.date_publication}`,
+      });
+    }
+
+    const parTicker = new Map<string, number>();
+    for (const n of news) {
+      for (const t of new Set([...(n.ticker_codes ?? []), ...(n.instrument_code ? [n.instrument_code] : [])])) {
+        parTicker.set(t, (parTicker.get(t) ?? 0) + 1);
+      }
+    }
+    const topTicker = [...parTicker.entries()].sort((a, b) => b[1] - a[1])[0];
+    if (topTicker && topTicker[1] >= 2) {
+      out.push({
+        icon: '🏢',
+        text: `${topTicker[0]} est la valeur la plus citée (${topTicker[1]} articles)`,
+        detail: 'Cliquez la heatmap pour le détail par société',
+      });
+    }
+
+    const pos = news.filter((n) => n.sentiment === 'positif').length;
+    const neg = news.filter((n) => n.sentiment === 'négatif').length;
+    if (pos + neg >= 5) {
+      const ratio = Math.round((pos / (pos + neg)) * 100);
+      out.push({
+        icon: ratio >= 60 ? '📈' : ratio <= 40 ? '📉' : '⚖️',
+        text: `Tonalité ${ratio >= 60 ? 'positive' : ratio <= 40 ? 'négative' : 'partagée'} : ${ratio} % d'articles positifs`,
+        detail: `${pos} positifs · ${neg} négatifs sur les articles classés`,
+      });
+    }
+    return out;
+  }, [news]);
+
   const reset = useCallback(() => {
     setSecteurFilter(''); setSentimentFilter(''); setSearch('');
     setShowAlertes(false); setSourceFilter(null); setActiveStatFilter(null);
@@ -401,6 +445,24 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
           <p className="text-xl font-bold tabular mt-0.5 text-[#ffd166]">{stats.matieres}</p>
         </button>
       </div>
+
+      {/* À retenir — synthèse DÉRIVÉE des données (jamais de texte inventé) */}
+      {aRetenir.length > 0 && (
+        <div className="rounded-panel border border-accent/25 bg-accent/[0.05] p-4">
+          <p className="overline mb-2 text-gold-2">À retenir sur la période</p>
+          <ul className="grid grid-cols-1 gap-2 md:grid-cols-3">
+            {aRetenir.map((b, i) => (
+              <li key={i} className="flex items-start gap-2 text-[13px] leading-snug text-ivory">
+                <span aria-hidden className="mt-0.5">{b.icon}</span>
+                <span>
+                  {b.text}
+                  {b.detail && <span className="block text-[11px] text-muted">{b.detail}</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">

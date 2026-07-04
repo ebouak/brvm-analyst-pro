@@ -32,6 +32,57 @@ async function fetchWeeklyArticles(): Promise<WeeklyArticle[]> {
   return (data ?? []) as WeeklyArticle[];
 }
 
+const COMMO_LABELS: Record<string, { label: string; icon: string }> = {
+  cocoa: { label: 'Cacao', icon: '🍫' },
+  palm_oil: { label: 'Huile de palme', icon: '🌴' },
+  rubber: { label: 'Caoutchouc', icon: '🛞' },
+  sugar: { label: 'Sucre', icon: '🧊' },
+  crude_brent: { label: 'Brent', icon: '🛢️' },
+  gold: { label: 'Or', icon: '🥇' },
+};
+
+interface CommoTick {
+  commodity: string;
+  label: string;
+  icon: string;
+  price: number;
+  unit: string;
+  varPct: number | null;
+  date: string;
+}
+
+/** Derniers prix mensuels Banque mondiale (table commodity_prices) + var M/M. */
+async function fetchCommodities(): Promise<CommoTick[]> {
+  const sb = createPublicClient();
+  const { data } = await sb
+    .from('commodity_prices')
+    .select('commodity, date, price, unit')
+    .order('date', { ascending: false })
+    .limit(40);
+  const rows = (data ?? []) as { commodity: string; date: string; price: number; unit: string }[];
+  const byCommo = new Map<string, { commodity: string; date: string; price: number; unit: string }[]>();
+  for (const r of rows) {
+    const list = byCommo.get(r.commodity) ?? [];
+    if (list.length < 2) { list.push(r); byCommo.set(r.commodity, list); }
+  }
+  const out: CommoTick[] = [];
+  for (const [commo, list] of byCommo) {
+    const meta = COMMO_LABELS[commo];
+    if (!meta || list.length === 0) continue;
+    const [last, prev] = list;
+    out.push({
+      commodity: commo,
+      label: meta.label,
+      icon: meta.icon,
+      price: last.price,
+      unit: last.unit,
+      varPct: prev && prev.price > 0 ? ((last.price - prev.price) / prev.price) * 100 : null,
+      date: last.date,
+    });
+  }
+  return out.sort((a, b) => a.label.localeCompare(b.label));
+}
+
 function CommodityBadges({ tickers }: { tickers: string[] | null }) {
   if (!tickers?.length) return null;
   return (
@@ -46,7 +97,7 @@ function CommodityBadges({ tickers }: { tickers: string[] | null }) {
 }
 
 export default async function WeeklyPage() {
-  const articles = await fetchWeeklyArticles();
+  const [articles, commos] = await Promise.all([fetchWeeklyArticles(), fetchCommodities()]);
 
   return (
     <div className="min-h-screen bg-[#030303] text-[#FCFCFC] px-4 py-8 max-w-5xl mx-auto">
@@ -54,6 +105,33 @@ export default async function WeeklyPage() {
         title="Analyses Hebdo – Matières Premières"
         subtitle="Impact du cacao, pétrole, caoutchouc et huile de palme sur les valeurs BRVM"
       />
+
+      {/* Prix des matières — données réelles Banque mondiale (mensuel) */}
+      {commos.length > 0 && (
+        <div className="mt-6">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {commos.map((c) => (
+              <div key={c.commodity} className="rounded-xl border border-border bg-surface/40 p-3">
+                <p className="truncate text-[11px] text-muted">
+                  <span aria-hidden className="mr-1">{c.icon}</span>{c.label}
+                </p>
+                <p className="tabular mt-1 text-lg font-bold leading-none text-ivory">
+                  {c.price.toLocaleString('fr-FR', { maximumFractionDigits: 2 })}
+                  <span className="ml-1 text-[10px] font-normal text-faint">{c.unit}</span>
+                </p>
+                <p className={`tabular mt-1 text-xs font-bold ${
+                  c.varPct == null ? 'text-faint' : c.varPct >= 0 ? 'text-up' : 'text-down'
+                }`}>
+                  {c.varPct == null ? '—' : `${c.varPct >= 0 ? '+' : ''}${c.varPct.toFixed(1)} % M/M`}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-1.5 text-[10px] text-faint">
+            Prix mensuels — source Banque mondiale (Pink Sheet), dernier point : {commos[0]?.date}.
+          </p>
+        </div>
+      )}
 
       {/* Thesis tracker — carte permanente illustrée */}
       <Link

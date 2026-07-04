@@ -153,10 +153,70 @@ export default function ReportsPage() {
     await exportReportPDF(report);
   }
 
+  // Modèles 1-clic : périodes calculées à la volée, tous titres (codes vides
+  // = univers complet, plafonné à 20 séries côté requête comme le formulaire).
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const daysAgo = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d;
+  };
+  const PRESETS: { label: string; hint: string; params: ReportParams }[] = [
+    {
+      label: '⚡ Marché — 7 derniers jours',
+      hint: 'Vue express de la semaine',
+      params: { type: 'hebdomadaire', codes: [], dateFrom: iso(daysAgo(7)), dateTo: iso(new Date()) },
+    },
+    {
+      label: '📅 Marché — 30 derniers jours',
+      hint: 'Le standard mensuel',
+      params: { type: 'mensuel', codes: [], dateFrom: iso(daysAgo(30)), dateTo: iso(new Date()) },
+    },
+    {
+      label: '📊 Trimestre écoulé',
+      hint: 'Tendances de fond + événements',
+      params: { type: 'personnalise', codes: [], dateFrom: iso(daysAgo(91)), dateTo: iso(new Date()) },
+    },
+  ];
+
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Rapports interactifs</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="overline mb-1 text-gold-2">Analyse · période & événements</p>
+          <h1 className="font-display text-2xl text-ivory [letter-spacing:-0.02em]">Rapports interactifs</h1>
+          <p className="mt-1 max-w-[58ch] text-sm text-muted">
+            Composez un rapport sur mesure (titres, période) : performances, séries de cours,
+            événements, signaux — exportable en PDF.
+          </p>
+        </div>
+        {report && !loading && (
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            className="rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-obsidian shadow-gold-sm transition hover:bg-gold-2 active:scale-95"
+          >
+            ⬇ Exporter en PDF
+          </button>
+        )}
+      </div>
       <ViewTabs tabs={REPORT_TABS} current="/reports" />
+
+      {/* Modèles 1-clic */}
+      <div className="flex flex-wrap gap-2">
+        {PRESETS.map((p) => (
+          <button
+            key={p.label}
+            type="button"
+            disabled={loading}
+            onClick={() => generate(p.params)}
+            className="group rounded-xl border border-border bg-surface/40 px-4 py-2.5 text-left transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95 disabled:opacity-50"
+          >
+            <span className="block text-sm font-medium text-ivory group-hover:text-accent">{p.label}</span>
+            <span className="block text-[11px] text-faint">{p.hint}</span>
+          </button>
+        ))}
+      </div>
 
       {loadingInstruments ? (
         <p className="text-sm text-muted">Chargement des instruments…</p>
