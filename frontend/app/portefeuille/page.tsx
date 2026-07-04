@@ -225,6 +225,12 @@ export default async function PortefeuillePage({
             subtitle="Valorisation temps réel, P&L latent et surveillance des positions BRVM."
           />
           <div className="flex items-center gap-3">
+            <Link
+              href="/portefeuille/import"
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
+            >
+              📄 Importer mon relevé SGI
+            </Link>
             <span className="text-xs text-faint">{email}</span>
             <form action={logout}>
               <button
