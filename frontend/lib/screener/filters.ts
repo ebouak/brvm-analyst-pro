@@ -9,6 +9,10 @@ export interface ActionRow {
   score_signal: number | null;
   secteur: string | null;
   rendement_dividende: number | null;
+  /** Score de liquidité 0-100 (lib/liquidity, ~30 séances) — null si inconnu. */
+  liquidite_score?: number | null;
+  /** Classe A/B/C/D dérivée du score. */
+  liquidite_classe?: string | null;
 }
 
 export function applyFilters(

@@ -17,7 +17,27 @@ const CSV_COLUMNS: CsvColumn<ActionRow>[] = [
   { header: 'Score', accessor: (r) => r.score_signal ?? '' },
   { header: 'Rendement dividende %', accessor: (r) => r.rendement_dividende ?? '' },
   { header: 'Volume', accessor: (r) => r.volume ?? '' },
+  { header: 'Liquidité (0-100)', accessor: (r) => r.liquidite_score ?? '' },
+  { header: 'Classe liquidité', accessor: (r) => r.liquidite_classe ?? '' },
 ];
+
+/** Badge de classe de liquidité (A vert → D rouge). */
+function liqBadge(classe: string | null | undefined, score: number | null | undefined) {
+  if (!classe || score == null) return <span className="text-faint">—</span>;
+  const cls =
+    classe === 'A' ? 'border-up/30 bg-up/10 text-up'
+    : classe === 'B' ? 'border-accent/30 bg-accent/10 text-accent'
+    : classe === 'C' ? 'border-warn/30 bg-warn/10 text-warn'
+    : 'border-down/30 bg-down/10 text-down';
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-bold ${cls}`}
+      title={`Score de liquidité ${score}/100 (présence en séance + valeur échangée moyenne, ~30 séances)`}
+    >
+      {classe}<span className="font-normal opacity-70">{score}</span>
+    </span>
+  );
+}
 
 /** Couleur RSI : <30 survente (vert), >70 surachat (rouge), sinon neutre. */
 function rsiClass(rsi: number | null): string {
@@ -88,6 +108,7 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
               <SortableTh label="RSI" k="rsi" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <SortableTh label="Score" k="score_signal" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <SortableTh label="Div %" k="rendement_dividende" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <SortableTh label="Liq." k="liquidite_score" align="right" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <th className="px-4 py-2 text-right text-muted font-normal"><span className="sr-only">Lien fiche</span></th>
             </tr>
           </thead>
@@ -114,6 +135,9 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
                 </td>
                 <td className="px-4 py-2.5 text-right tabular text-muted">
                   {r.rendement_dividende != null ? `${r.rendement_dividende.toFixed(2)}%` : '—'}
+                </td>
+                <td className="px-4 py-2.5 text-right">
+                  {liqBadge(r.liquidite_classe, r.liquidite_score)}
                 </td>
                 <td className="px-4 py-2.5 text-right">
                   <Link href={`/actions/${r.code}`} className="text-accent text-xs hover:underline transition whitespace-nowrap">

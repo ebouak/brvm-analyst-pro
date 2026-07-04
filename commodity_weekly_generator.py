@@ -587,14 +587,32 @@ CONSIGNE STRICTE :
 - Analyse approfondie, sans limite de longueur : développe autant que nécessaire pour couvrir chaque matière, les facteurs macro, les implications BRVM et les perspectives.
 - Chaque matière : au moins 5-7 phrases d'analyse substantielle (facteurs géopolitiques, offre/demande, météo, devise, position des fonds).
 
+STYLE D'ÉCRITURE (impératif — registre note de recherche sell-side) :
+- Phrases COURTES (max ~22 mots), voix active, présent de l'indicatif pour les faits.
+- Chaque affirmation s'appuie sur un CHIFFRE des DONNÉES ci-dessus (prix, variation, corrélation). N'invente JAMAIS un fait, un niveau de prix ou un événement absent des DONNÉES : si l'information manque, écris « non couvert par nos sources cette semaine ».
+- Structure interne de chaque analyse matière : 1) LE FAIT (mouvement chiffré), 2) POURQUOI (facteurs, en citant les actualités fournies si pertinentes), 3) IMPACT BRVM (valeurs exposées nommées avec leur ticker).
+- Tout ce qui est prédictif est au CONDITIONNEL (« pourrait », « devrait ») et attribué (« selon la tendance des 5 dernières séances »).
+- INTERDITS : « il convient de noter », « force est de constater », « dans un contexte de », « plus que jamais », « véritable », superlatifs creux, métaphores guerrières, point d'exclamation.
+- Vocabulaire pro FR : préférer « repli/rebond/consolidation » à « chute/explosion » ; toujours préciser l'unité et la période d'une variation.
+- Les tickers BRVM sont cités entre parenthèses après le nom : SAPH (SAPH), Palm CI (PALC).
+
 STRUCTURE EXACTE À PRODUIRE :
 
 <section style="font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;line-height:1.75;">
 
+  <!-- À RETENIR — 3 puces factuelles chiffrées (lecture 20 secondes) -->
+  <div style="background:#eff6ff;border-left:4px solid #1d4ed8;padding:16px 20px;margin-bottom:16px;border-radius:0 8px 8px 0;">
+    <p style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px 0;">À retenir — Semaine {week_num}/{year}</p>
+    <ul style="margin:0;padding-left:18px;font-size:14px;color:#0f172a;">
+      <li style="margin-bottom:6px;">[Fait n°1 le plus important, avec chiffre : la matière qui a le plus bougé et de combien]</li>
+      <li style="margin-bottom:6px;">[Fait n°2 : l'impact BRVM concret — valeur(s) exposée(s) nommée(s) avec ticker]</li>
+      <li style="margin:0;">[Fait n°3 : le point à surveiller la semaine prochaine, au conditionnel]</li>
+    </ul>
+  </div>
+
   <!-- SYNTHÈSE EXÉCUTIVE -->
-  <div style="background:#eff6ff;border-left:4px solid #1d4ed8;padding:16px 20px;margin-bottom:28px;border-radius:0 8px 8px 0;">
-    <p style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px 0;">Synthèse exécutive — Semaine {week_num}/{year}</p>
-    <p style="margin:0;font-size:15px;color:#0f172a;font-weight:500;">[2-3 phrases résumant les faits saillants : quelle matière a dominé, quel impact BRVM, ton général]</p>
+  <div style="border:1px solid #e2e8f0;border-radius:8px;padding:14px 20px;margin-bottom:28px;">
+    <p style="margin:0;font-size:15px;color:#0f172a;font-weight:500;">[2-3 phrases denses : quelle matière a dominé la semaine (chiffre), quel impact BRVM, tonalité générale — sans répéter mot pour mot les puces]</p>
   </div>
 
   <!-- ANALYSE PAR MATIÈRE : un bloc par matière (8 blocs total) -->
@@ -606,7 +624,9 @@ STRUCTURE EXACTE À PRODUIRE :
     <h3 style="font-size:16px;font-weight:700;margin:0 0 10px 0;color:[#10b981 si hausse | #ef4444 si baisse | #d97706 si stable];">
       [LABEL] : [PRIX] [UNITÉ] — Δ5j [VARIATION%]
     </h3>
-    <p style="margin:0;font-size:14px;color:#334155;">[Analyse 3-4 phrases : facteurs prix, contexte géopolitique/météo/offre-demande, corrélation BRVM nominée]</p>
+    <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Le fait.</strong> [1-2 phrases : le mouvement chiffré de la semaine, niveau atteint]</p>
+    <p style="margin:0 0 8px 0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Pourquoi.</strong> [2-3 phrases : facteurs offre/demande, météo, géopolitique, devise — en citant les actualités fournies quand elles existent, sinon « non couvert par nos sources cette semaine »]</p>
+    <p style="margin:0;font-size:14px;color:#334155;"><strong style="color:#0f172a;">Impact BRVM.</strong> [1-2 phrases : valeurs exposées nommées avec ticker + corrélation citée si |r| &gt; 0.7]</p>
   </div>
 
   <!-- RÉACTIONS DE MARCHÉ -->

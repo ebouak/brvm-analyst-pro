@@ -9,6 +9,7 @@ import { FILTER_TABS } from '@/lib/filterTabs';
 import ScreenerResults from '@/components/ScreenerResults';
 import { applyFilters, type ActionRow } from '@/lib/screener/filters';
 import type { ScreenerPreset } from '@/lib/screener/presets';
+import { computeLiquidity } from '@/lib/liquidity';
 
 export default function ScreenerPage() {
   const [allActions, setAllActions] = useState<ActionRow[]>([]);
@@ -52,6 +53,31 @@ export default function ScreenerPage() {
           .from('brvm_actions_daily')
           .select('code, cours_jour, variation_pct, volume, secteur')
           .eq('date_marche', marketDate);
+
+        // Liquidité : ~30 dernières séances (présence + valeur échangée moyenne)
+        const d30 = new Date();
+        d30.setDate(d30.getDate() - 45); // ~30 séances ouvrées sur 45 jours calendaires
+        const { data: histo } = await supabase
+          .from('brvm_actions_daily')
+          .select('code, date_marche, volume, cours_jour, valeur_echangee')
+          .gte('date_marche', d30.toISOString().slice(0, 10));
+
+        const histoRows = (histo ?? []) as {
+          code: string; date_marche: string; volume: number | null;
+          cours_jour: number | null; valeur_echangee: number | null;
+        }[];
+        const seances = new Set(histoRows.map((r) => r.date_marche)).size;
+        const histoByCode = new Map<string, typeof histoRows>();
+        for (const r of histoRows) {
+          const list = histoByCode.get(r.code) ?? [];
+          list.push(r);
+          histoByCode.set(r.code, list);
+        }
+        const liquidityByCode = new Map<string, { score: number; classe: string }>();
+        for (const [code, rows] of histoByCode) {
+          const liq = computeLiquidity(rows, seances);
+          if (liq) liquidityByCode.set(code, { score: liq.score, classe: liq.classe });
+        }
 
         const { data: signals } = await supabase
           .from('signals_daily')
@@ -120,6 +146,8 @@ export default function ScreenerPage() {
             score_signal: sig?.score_total != null ? Math.round(sig.score_total * 100) : null,
             secteur: a.secteur,
             rendement_dividende: latestDividendByCode[a.code] ?? null,
+            liquidite_score: liquidityByCode.get(a.code)?.score ?? null,
+            liquidite_classe: liquidityByCode.get(a.code)?.classe ?? null,
           };
         });
 

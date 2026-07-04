@@ -28,7 +28,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, rows: [] as SignalRow[] };
+  if (!lastDate) return { lastDate: null, rows: [] as SignalRow[], changes: [] as { code: string; from: string; to: string }[] };
 
   const [{ data: signals }, { data: actions }, { data: instruments }] = await Promise.all([
     supabase.from('signals_daily').select('*').eq('date_marche', lastDate),
@@ -60,11 +60,39 @@ async function getData() {
     };
   });
 
-  return { lastDate, rows };
+  // Bascules depuis la séance précédente : nouveaux BUY/SELL et signaux éteints.
+  let changes: { code: string; from: string; to: string }[] = [];
+  const { data: prevDateRow } = await supabase
+    .from('signals_daily')
+    .select('date_marche')
+    .lt('date_marche', lastDate)
+    .order('date_marche', { ascending: false })
+    .limit(1);
+  const prevDate = prevDateRow?.[0]?.date_marche ?? null;
+  if (prevDate) {
+    const { data: prevSignals } = await supabase
+      .from('signals_daily')
+      .select('code, signal')
+      .eq('date_marche', prevDate);
+    const prevMap = new Map(((prevSignals ?? []) as { code: string; signal: string }[]).map((p) => [p.code, p.signal]));
+    changes = rows
+      .filter((r) => {
+        const prev = prevMap.get(r.code);
+        return prev != null && prev !== r.signal;
+      })
+      .map((r) => ({ code: r.code, from: prevMap.get(r.code)!, to: r.signal }))
+      // Les bascules impliquant BUY ou SELL d'abord (les actionnables)
+      .sort((a, b) => {
+        const w = (c: { from: string; to: string }) => (c.to === 'BUY' || c.to === 'SELL' ? 0 : 1);
+        return w(a) - w(b);
+      });
+  }
+
+  return { lastDate, rows, changes };
 }
 
 export default async function SignauxPage() {
-  const [{ lastDate, rows }, backtest, recentReal] = await Promise.all([
+  const [{ lastDate, rows, changes }, backtest, recentReal] = await Promise.all([
     getData(),
     getBacktestStats(),
     getRecentRealBuySignals(),
@@ -155,6 +183,28 @@ export default async function SignauxPage() {
           accent="sapphire"
         />
       </div>
+
+      {/* ── Bascules depuis la séance précédente (les VRAIES nouveautés) ── */}
+      {changes.length > 0 && (
+        <div className="rounded-xl border border-accent/25 bg-accent/[0.05] px-4 py-3">
+          <p className="overline mb-2 text-gold-2">Nouveaux depuis la séance précédente</p>
+          <ul className="flex flex-wrap gap-2">
+            {changes.map((c) => (
+              <li key={c.code}>
+                <a
+                  href={`/actions/${c.code}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs transition-colors hover:border-accent/40"
+                >
+                  <span className="font-semibold text-ivory">{c.code}</span>
+                  <SignalBadge signal={c.from as 'BUY' | 'HOLD' | 'SELL'} />
+                  <span className="text-faint">→</span>
+                  <SignalBadge signal={c.to as 'BUY' | 'HOLD' | 'SELL'} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
       {total > 0 && buyCount === 0 && (

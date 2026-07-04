@@ -69,13 +69,33 @@ export default async function ConseillerPage() {
       {/* Conseils personnalisés sur le portefeuille (client, user-scoped) */}
       <MyPortfolioAdvice />
 
-      <h2 className="font-display text-lg text-white pt-2">Toute la cote</h2>
-      <p className="text-xs text-muted">Cliquez une carte pour retourner et voir la justification détaillée.</p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {rows.map((r) => (
-          <AdvisorCard key={r.code} row={r} />
-        ))}
-      </div>
+      {/* ── Toute la cote, regroupée par recommandation (l'actionnable d'abord) ── */}
+      <p className="pt-2 text-xs text-muted">Cliquez une carte pour retourner et voir la justification détaillée.</p>
+      {(['acheter', 'conserver', 'vendre'] as Action[]).map((action) => {
+        const group = rows
+          .filter((r) => r.result.action === action)
+          .sort((a, b) => b.result.conviction - a.result.conviction);
+        if (group.length === 0) return null;
+        const convictionMoy = Math.round(group.reduce((s, r) => s + r.result.conviction, 0) / group.length);
+        return (
+          <section key={action} aria-label={`Recommandations ${ACT_LABEL[action]}`}>
+            <div className="mb-3 flex items-baseline gap-3">
+              <h2 className={`font-display text-lg ${ACT_COLOR[action]}`}>
+                {action === 'acheter' ? '▲' : action === 'vendre' ? '▼' : '■'} {ACT_LABEL[action]}
+                <span className="tabular ml-2 text-sm text-faint">({group.length})</span>
+              </h2>
+              <span className="text-[11px] text-faint">
+                conviction moyenne <span className="tabular text-muted">{convictionMoy} %</span> · triées par conviction
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {group.map((r) => (
+                <AdvisorCard key={r.code} row={r} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
       <p className="text-[11px] text-faint">
         Synthèse algorithmique dérivée des données réelles (signaux, DCF, RSI, dividendes) — aucune
