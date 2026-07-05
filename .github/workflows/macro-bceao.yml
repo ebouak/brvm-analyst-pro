@@ -1,0 +1,31 @@
+name: Macro BCEAO (taux directeurs)
+
+# Décisions de politique monétaire BCEAO : quelques fois par an seulement.
+# Vérification mensuelle largement suffisante — le scraper n'écrit QUE si la
+# valeur a réellement changé (préserve la date d'effet sinon).
+on:
+  schedule:
+    - cron: '0 7 1 * *'  # le 1er de chaque mois à 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      LOG_LEVEL: info
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install scraper dependencies
+        working-directory: scraper
+        run: npm install
+
+      - name: Vérifier et mettre à jour les taux BCEAO
+        working-directory: scraper
+        run: npx tsx src/index.ts macro-bceao

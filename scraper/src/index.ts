@@ -51,6 +51,7 @@ import { runNotations } from './notations/runNotations.js';
 import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
 import { runAfricanIndices } from './scrapers/runAfricanIndices.js';
+import { runBceaoMacro } from './scrapers/runBceaoMacro.js';
 import { runObligations } from './scrapers/runObligations.js';
 import { runCommodities } from './commodities/runCommodities.js';
 import { runValidation } from './validation/runValidation.js';
@@ -256,6 +257,24 @@ async function main(): Promise<number> {
     }
     case 'shares': {
       const res = await runShares();
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'macro-bceao': {
+      const res = await monitored(
+        { code: 'macro-bceao', label: 'Taux directeurs BCEAO' },
+        async () => {
+          const r = await runBceaoMacro({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.updated.length,
+              rows_upserted: r.updated.length,
+              metadata: { updated: r.updated },
+            },
+          };
+        },
+      );
       return res.status === 'failed' ? 1 : 0;
     }
     case 'alerts': {
