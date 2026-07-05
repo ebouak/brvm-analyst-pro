@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { CalculateurCout } from '@/components/comparateur-sgi/CalculateurCout';
 import { PAYS, SGI_DIRECTORY, type Sgi } from '@/lib/sgi-frais/directory';
+import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -40,8 +41,14 @@ function flagUrl(code: keyof typeof PAYS): string {
 
 /* ── Carte SGI ─────────────────────────────────────────────────────────── */
 
-function SgiCard({ s }: { s: Sgi }) {
+function SgiCard({ s, frais }: { s: Sgi; frais?: SgiFrais }) {
   const p = PAYS[s.pays];
+  // Courtage RÉEL du barème de la SGI (cohérent avec le moteur de choix et le
+  // calculateur, qui utilisent les mêmes données) — jamais un « ≈ » générique.
+  const courtageMax = frais?.courtagePctMax ?? frais?.courtagePctMin ?? null;
+  const homologue = frais?.confiance === 'homologue_crepmf';
+  // « Bourse en ligne » mentionnée dans la grille homologuée (notes du barème).
+  const bourseEnLigne = frais?.notes?.toLowerCase().includes('bourse en ligne') ?? false;
   const h = hueOf(s.nom);
   const lien = s.ficheBRVM
     ? { href: s.ficheBRVM, label: 'Fiche BRVM' }
@@ -117,12 +124,30 @@ function SgiCard({ s }: { s: Sgi }) {
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-faint">Courtage</dt>
           <dd className="tabular text-[12.5px] font-medium text-ivory/90">
-            ≈ 1–1,5 % <span className="ml-0.5 text-[10px] not-italic text-faint">indic.</span>
+            {courtageMax != null ? (
+              <>
+                max {courtageMax.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %{' '}
+                <span
+                  className={`ml-0.5 text-[10px] not-italic ${homologue ? 'text-up' : 'text-faint'}`}
+                  title={homologue ? 'Barème homologué AMF-UMOA/CREPMF' : 'Donnée agrégée de sources publiques, à confirmer'}
+                >
+                  {homologue ? 'homologué' : 'agrégé'}
+                </span>
+              </>
+            ) : (
+              <span className="text-faint">non publié</span>
+            )}
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-faint">Ordre en ligne</dt>
-          <dd className="tabular text-[12.5px] font-medium text-accent/80">à confirmer</dd>
+          <dd className="tabular text-[12.5px] font-medium text-accent/80">
+            {bourseEnLigne ? (
+              <span className="text-up" title="« Bourse en ligne » figure dans la grille tarifaire de la SGI">oui (au barème)</span>
+            ) : (
+              'à confirmer'
+            )}
+          </dd>
         </div>
       </dl>
 
@@ -175,6 +200,13 @@ export default function SgiComparator({
   frais?: SgiFrais[];
 }) {
   const SGI = directory ?? SGI_DIRECTORY;
+  const FRAIS = frais ?? SGI_FRAIS_SEED;
+  const fraisByNom = useMemo(() => new Map(FRAIS.map((f) => [f.sgiNom, f])), [FRAIS]);
+  // Fourchette réelle des courtages max publiés — pilote la ligne de synthèse
+  // de l'annuaire (cohérence avec le moteur de choix et le calculateur).
+  const courtages = FRAIS.map((f) => f.courtagePctMax ?? f.courtagePctMin).filter((c): c is number => c != null && c > 0);
+  const ctgMin = courtages.length > 0 ? Math.min(...courtages) : null;
+  const ctgMax = courtages.length > 0 ? Math.max(...courtages) : null;
   const [filtreP, setFiltreP] = useState<'ALL' | keyof typeof PAYS>('ALL');
   const [recherche, setRecherche] = useState('');
 
@@ -312,8 +344,11 @@ export default function SgiComparator({
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2 font-mono text-[12.5px] text-faint">
           <span>{list.length > 1 ? `${list.length} SGI affichées` : `${list.length} SGI affichée`}</span>
           <span>
-            Ouverture souvent gratuite · Dépôt min. ≈ 100 k–1 M FCFA · Courtage ≈ 1–1,5 %{' '}
-            <span className="text-accent/80">(indicatif)</span>
+            Ouverture souvent gratuite · Dépôt min. ≈ 100 k–1 M FCFA · Courtage max{' '}
+            {ctgMin != null && ctgMax != null
+              ? `${ctgMin.toLocaleString('fr-FR', { maximumFractionDigits: 2 })}–${ctgMax.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`
+              : 'non publié'}{' '}
+            <span className="text-accent/80">(barèmes publiés)</span>
           </span>
         </div>
 
@@ -321,7 +356,7 @@ export default function SgiComparator({
         {list.length > 0 ? (
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((s) => (
-              <SgiCard key={s.nom} s={s} />
+              <SgiCard key={s.nom} s={s} frais={fraisByNom.get(s.nom)} />
             ))}
           </div>
         ) : (
