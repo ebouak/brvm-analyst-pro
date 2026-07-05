@@ -195,7 +195,7 @@ export default async function WeeklyPage() {
                         })}
                       </span>
                     </div>
-                    <h2 className="text-lg font-semibold text-[#FCFCFC] group-hover:text-accent transition-colors line-clamp-2">
+                    <h2 className="text-lg font-semibold text-ivory group-hover:text-accent transition-colors line-clamp-2">
                       {article.titre}
                     </h2>
                     {article.resume && (

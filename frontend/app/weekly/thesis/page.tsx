@@ -191,8 +191,8 @@ const CATALYSTS = [
 
 function dots(n: number) {
   if (n === 0) return <span className="text-gray-700">—</span>;
-  const colors = ['', 'text-gray-400', 'text-yellow-400', 'text-orange-400', 'text-emerald-400', 'text-cyan-400'];
-  return <span className={colors[n] ?? 'text-cyan-400'} title={`${n}/5`}>{'●'.repeat(n)}</span>;
+  const colors = ['', 'text-muted', 'text-yellow-400', 'text-orange-400', 'text-emerald-400', 'text-accent'];
+  return <span className={colors[n] ?? 'text-accent'} title={`${n}/5`}>{'●'.repeat(n)}</span>;
 }
 
 function ConvictionBadge({ level }: { level: string }) {
@@ -212,27 +212,27 @@ function photo(id: string, w = 600, h = 280) {
 
 export default function ThesisPage() {
   return (
-    <div className="min-h-screen bg-[#030303] text-[#FCFCFC]">
+    <div className="min-h-screen bg-bg text-ivory">
 
       {/* ── Header ── */}
-      <div className="border-b border-[#1a2a30] bg-[#030303]">
+      <div className="border-b border-border bg-[#030303]">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="flex items-center gap-3 mb-5">
-            <Link href="/weekly" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
+            <Link href="/weekly" className="text-sm text-faint hover:text-accent transition-colors">
               ← Analyses hebdo
             </Link>
             <span className="text-gray-700">·</span>
-            <span className="text-xs font-mono text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded">
+            <span className="text-xs font-mono text-accent bg-accent/10 px-2 py-0.5 rounded">
               Référentiel stratégique
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-[#FCFCFC] leading-tight mb-3" style={{ fontFamily: 'var(--font-display)' }}>
+          <h1 className="text-3xl md:text-4xl font-bold text-ivory leading-tight mb-3" style={{ fontFamily: 'var(--font-display)' }}>
             Exposition BRVM aux matières premières
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl">
+          <p className="text-muted text-lg max-w-2xl">
             Impact des cours mondiaux sur les actions BRVM : mécanismes de transmission, thesis par valeur, matrice de sensibilité et calendrier des catalyseurs.
           </p>
-          <p className="mt-3 text-xs text-gray-600 font-mono">
+          <p className="mt-3 text-xs text-faint font-mono">
             <span className="text-cyan-500/60">#FACT</span> = donnée vérifiée (profil BRVM / rapport annuel) ·{' '}
             <span className="text-amber-500/60">#MODEL</span> = analyse interne / modèle de transmission économique
           </p>
@@ -244,14 +244,14 @@ export default function ThesisPage() {
         {/* ── Matrice de sensibilité ── */}
         <section>
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400/60">Matrice de sensibilité</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Matrice de sensibilité</span>
             <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
-          <div className="overflow-x-auto rounded-xl border border-[#1a2a30]">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#0a1417] border-b border-[#1a2a30]">
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold w-24">Action</th>
+                <tr className="bg-surface border-b border-border">
+                  <th className="text-left py-3 px-4 text-muted font-semibold w-24">Action</th>
                   <th className="text-center py-3 px-3 text-amber-600 font-semibold">Cacao</th>
                   <th className="text-center py-3 px-3 text-emerald-500 font-semibold">Caoutchouc</th>
                   <th className="text-center py-3 px-3 text-orange-400 font-semibold">Huile palme</th>
@@ -263,7 +263,7 @@ export default function ThesisPage() {
               <tbody>
                 {MATRIX.map((row, i) => (
                   <tr key={row.ticker} className={`border-b border-[#0f1f24] ${i % 2 === 0 ? 'bg-[#030303]' : 'bg-[#060f12]'}`}>
-                    <td className="py-3 px-4 font-mono font-bold text-cyan-400 text-sm">{row.ticker}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-accent text-sm">{row.ticker}</td>
                     <td className="py-3 px-3 text-center">{dots(row.cacao)}</td>
                     <td className="py-3 px-3 text-center">{dots(row.caoutchouc)}</td>
                     <td className="py-3 px-3 text-center">{dots(row.palme)}</td>
@@ -274,7 +274,7 @@ export default function ThesisPage() {
                 ))}
               </tbody>
             </table>
-            <p className="px-4 py-2 text-xs text-gray-600 border-t border-[#0f1f24]">
+            <p className="px-4 py-2 text-xs text-faint border-t border-[#0f1f24]">
               ● faible · ●● modéré · ●●● fort · ●●●● très fort · ●●●●● maximum
             </p>
           </div>
@@ -283,11 +283,11 @@ export default function ThesisPage() {
         {/* ── Fiches sociétés ── */}
         <section>
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400/60">Fiches valeurs</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Fiches valeurs</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {COMPANIES.map(c => (
-              <div key={c.ticker} className="rounded-xl border border-[#1a2a30] overflow-hidden bg-[#070f12]">
+              <div key={c.ticker} className="rounded-xl border border-border overflow-hidden bg-[#070f12]">
                 {/* Photo */}
                 <div className="relative h-44 overflow-hidden">
                   <img
@@ -305,11 +305,11 @@ export default function ThesisPage() {
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <div className="flex items-end justify-between">
                       <div>
-                        <span className="font-mono text-xs text-gray-400">{c.pays}</span>
-                        <h3 className="text-white font-bold text-lg leading-tight">{c.name}</h3>
-                        <p className="text-gray-400 text-xs">{c.alias}</p>
+                        <span className="font-mono text-xs text-muted">{c.pays}</span>
+                        <h3 className="text-ivory font-bold text-lg leading-tight">{c.name}</h3>
+                        <p className="text-muted text-xs">{c.alias}</p>
                       </div>
-                      <span className="font-mono font-black text-2xl text-cyan-400">{c.ticker}</span>
+                      <span className="font-mono font-black text-2xl text-accent">{c.ticker}</span>
                     </div>
                   </div>
                 </div>
@@ -324,16 +324,16 @@ export default function ThesisPage() {
                     >
                       {c.commodity}
                     </span>
-                    <span className="text-xs text-gray-600 font-mono">{c.benchmark}</span>
+                    <span className="text-xs text-faint font-mono">{c.benchmark}</span>
                   </div>
 
                   {/* Filière */}
-                  <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">{c.filiere}</p>
+                  <p className="text-xs text-faint font-semibold uppercase tracking-wide">{c.filiere}</p>
 
                   {/* Thesis */}
                   <ul className="space-y-1">
                     {c.thesis.map((t, i) => (
-                      <li key={i} className="flex gap-2 text-xs text-gray-300">
+                      <li key={i} className="flex gap-2 text-xs text-muted">
                         <span className="text-cyan-500 mt-0.5 shrink-0">✦</span>
                         <span>{t}</span>
                       </li>
@@ -341,8 +341,8 @@ export default function ThesisPage() {
                   </ul>
 
                   {/* Risks */}
-                  <div className="border-t border-[#1a2a30] pt-3">
-                    <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-1.5">Risques</p>
+                  <div className="border-t border-border pt-3">
+                    <p className="text-[10px] text-faint uppercase tracking-wider mb-1.5">Risques</p>
                     <div className="flex flex-wrap gap-1.5">
                       {c.risks.map((r, i) => (
                         <span key={i} className="text-[11px] bg-red-950/40 text-red-400 border border-red-800/30 px-2 py-0.5 rounded">
@@ -370,14 +370,14 @@ export default function ThesisPage() {
             <span className="text-2xl">⚠️</span>
             <div>
               <p className="font-semibold text-amber-400 mb-1">Cacao — pas de pur joueur coté BRVM</p>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted">
                 Il n'existe pas à ce jour de société cotée à la BRVM dont le modèle d'affaires
                 repose exclusivement sur le cacao. Le cacao affecte l'économie ivoirienne
                 (≈ 40 % de la production mondiale) et marginalement SIFCA, mais son impact
                 est davantage <strong className="text-gray-200">macro</strong> (revenus d'export UEMOA, sentiment sur la place)
                 que <strong className="text-gray-200">micro</strong> par titre coté.
               </p>
-              <p className="text-xs text-gray-600 mt-2 font-mono">
+              <p className="text-xs text-faint mt-2 font-mono">
                 ⚠️ SICC = Société Ivoirienne de Coco Râpé (coprah), pas cacao.
               </p>
             </div>
@@ -387,7 +387,7 @@ export default function ThesisPage() {
         {/* ── Facteurs transversaux ── */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400/60">Facteurs transversaux</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Facteurs transversaux</span>
             <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -408,10 +408,10 @@ export default function ThesisPage() {
                 text: 'Pour les valeurs agro (SAPH, SOGB, PALC, SICC, SCRC, SIFCA), le volume de récolte locale peut neutraliser ou amplifier l\'impact d\'un mouvement mondial de prix.',
               },
             ].map(f => (
-              <div key={f.title} className="bg-[#0a1417] border border-[#1a2a30] rounded-xl p-4">
+              <div key={f.title} className="bg-surface border border-border rounded-xl p-4">
                 <div className="text-2xl mb-2">{f.icon}</div>
-                <h4 className="font-semibold text-white mb-2 text-sm">{f.title}</h4>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.text}</p>
+                <h4 className="font-semibold text-ivory mb-2 text-sm">{f.title}</h4>
+                <p className="text-xs text-muted leading-relaxed">{f.text}</p>
               </div>
             ))}
           </div>
@@ -420,27 +420,27 @@ export default function ThesisPage() {
         {/* ── Calendrier catalyseurs ── */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400/60">Calendrier des catalyseurs</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Calendrier des catalyseurs</span>
             <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
-          <div className="rounded-xl border border-[#1a2a30] overflow-hidden">
+          <div className="rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#0a1417] border-b border-[#1a2a30]">
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold w-36">Fréquence</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold">Événement</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold">Valeurs</th>
+                <tr className="bg-surface border-b border-border">
+                  <th className="text-left py-3 px-4 text-muted font-semibold w-36">Fréquence</th>
+                  <th className="text-left py-3 px-4 text-muted font-semibold">Événement</th>
+                  <th className="text-left py-3 px-4 text-muted font-semibold">Valeurs</th>
                 </tr>
               </thead>
               <tbody>
                 {CATALYSTS.map((c, i) => (
                   <tr key={i} className={`border-b border-[#0f1f24] ${i % 2 === 0 ? 'bg-[#030303]' : 'bg-[#060f12]'}`}>
-                    <td className="py-2.5 px-4 text-xs font-mono text-cyan-400/70">{c.freq}</td>
-                    <td className="py-2.5 px-4 text-xs text-gray-300">{c.event}</td>
+                    <td className="py-2.5 px-4 text-xs font-mono text-accent/70">{c.freq}</td>
+                    <td className="py-2.5 px-4 text-xs text-muted">{c.event}</td>
                     <td className="py-2.5 px-4">
                       <div className="flex flex-wrap gap-1">
                         {c.tickers.map(t => (
-                          <span key={t} className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-cyan-500/20 text-cyan-400/80 bg-cyan-400/5">
+                          <span key={t} className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-cyan-500/20 text-accent/80 bg-cyan-400/5">
                             {t}
                           </span>
                         ))}
@@ -454,14 +454,14 @@ export default function ThesisPage() {
         </section>
 
         {/* ── CTA vers rapport hebdo ── */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#0a1417] border border-cyan-500/20 rounded-xl p-5">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface border border-cyan-500/20 rounded-xl p-5">
           <div>
-            <p className="font-semibold text-white">Voir le dernier rapport hebdomadaire</p>
-            <p className="text-sm text-gray-400 mt-0.5">Cours en direct, analyse DeepSeek, impact BRVM mis à jour chaque semaine</p>
+            <p className="font-semibold text-ivory">Voir le dernier rapport hebdomadaire</p>
+            <p className="text-sm text-muted mt-0.5">Cours en direct, analyse DeepSeek, impact BRVM mis à jour chaque semaine</p>
           </div>
           <Link
             href="/weekly"
-            className="shrink-0 px-5 py-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-semibold text-sm hover:bg-cyan-500/20 transition-colors"
+            className="shrink-0 px-5 py-2.5 rounded-lg bg-cyan-500/10 border border-accent/30 text-accent font-semibold text-sm hover:bg-cyan-500/20 transition-colors"
           >
             Analyses hebdo →
           </Link>
