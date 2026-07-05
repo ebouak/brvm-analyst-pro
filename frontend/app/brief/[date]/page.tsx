@@ -38,10 +38,10 @@ async function getBrief(date: string) {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from('brief_daily')
-    .select('date_marche, contenu, data, sent_at')
+    .select('date_marche, contenu, data, sent_at, audio_url')
     .eq('date_marche', date)
     .maybeSingle();
-  return data as { date_marche: string; contenu: string; data: BriefData | null; sent_at: string | null } | null;
+  return data as { date_marche: string; contenu: string; data: BriefData | null; sent_at: string | null; audio_url: string | null } | null;
 }
 
 /** 5 briefs les plus récents (hors date courante) — maillage interne SEO. */
@@ -285,6 +285,15 @@ export default async function BriefDatePage({ params }: PageProps) {
         ) : (
           /* Brief ancien format (texte seul) */
           <section className="bg-surface border border-border rounded-xl p-5 mb-6">
+            {brief.audio_url && (
+              <div className="mb-4 rounded-xl border border-accent/25 bg-accent/[0.06] p-3">
+                <p className="overline mb-2 text-gold-2">🎧 Écouter le brief (1 min)</p>
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption -- transcription complète juste en dessous */}
+                <audio controls preload="none" src={brief.audio_url} className="w-full">
+                  Votre navigateur ne lit pas l&apos;audio — le texte complet est ci-dessous.
+                </audio>
+              </div>
+            )}
             <pre className="whitespace-pre-wrap text-sm text-white/90 leading-relaxed font-sans">{brief.contenu}</pre>
           </section>
         )}

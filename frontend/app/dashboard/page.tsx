@@ -14,6 +14,7 @@ import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
 import NewsFeed from '@/components/dashboard/NewsFeed';
 import MarketIndices from '@/components/dashboard/MarketIndices';
 import { AfricanIndicesCard } from '@/components/AfricanIndicesCard';
+import { MacroBanner } from '@/components/MacroBanner';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
@@ -423,6 +424,9 @@ export default async function Dashboard() {
             <span className="ml-auto">→</span>
           </Link>
         )}
+
+        {/* ── Macro UEMOA : taux BCEAO + change (section fixe) ── */}
+        <MacroBanner />
 
         {/* ── Afrique · vue régionale — section FIXE (hors widgets configurables :
             un layout utilisateur sauvegardé avant son ajout la masquerait) ── */}

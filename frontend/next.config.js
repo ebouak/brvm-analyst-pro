@@ -39,11 +39,11 @@ const nextConfig = {
       // anti-clickjacking tiers préservée (cohérent avec X-Frame-Options SAMEORIGIN).
       "frame-ancestors 'self'",
       "form-action 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://cdn.plot.ly",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://cdn.plot.ly https://eu-assets.i.posthog.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
       "font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.de.sentry.io https://challenges.cloudflare.com https://api.fontshare.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.de.sentry.io https://challenges.cloudflare.com https://api.fontshare.com https://eu.i.posthog.com https://eu-assets.i.posthog.com",
       "frame-src 'self' https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "worker-src 'self' blob:",
     ].join('; ');

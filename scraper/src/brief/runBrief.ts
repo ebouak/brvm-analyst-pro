@@ -10,6 +10,7 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { dispatch, sendWhatsApp } from '../alerts/channels.js';
 import { buildBriefData, composeBriefText } from './compose.js';
+import { generateBriefAudio } from './tts.js';
 import { logger } from '../logger.js';
 
 export interface BriefRunResult {
@@ -123,11 +124,15 @@ export async function runBrief(opts: { force?: boolean } = {}): Promise<BriefRun
     if (wa) logger.info({ status: wa.status, error: wa.error }, 'brief: envoi WhatsApp');
   }
 
+  // Brief AUDIO (TTS) — inactif sans OPENAI_API_KEY, jamais bloquant.
+  const audioUrl = await generateBriefAudio(supabase, contenu, dateMarche);
+
   const { error: upErr } = await supabase.from('brief_daily').upsert(
     {
       date_marche: dateMarche,
       contenu,
       data,
+      audio_url: audioUrl,
       sent_at: sent ? new Date().toISOString() : null,
     },
     { onConflict: 'date_marche' },

@@ -20,7 +20,10 @@ export interface ConsentCategory {
   cookies: ConsentCookie[];
 }
 
-/** Incrémenter pour forcer un re-consentement (changement de finalités). */
+/** Incrémenter pour forcer un re-consentement (changement de finalités).
+ * ⚠ À passer à 2 le jour où NEXT_PUBLIC_POSTHOG_KEY est configurée en prod :
+ * les consentements v1 ont été donnés quand la description « analytics »
+ * disait « aucun outil actif » — ils ne couvrent pas le session replay. */
 export const CONSENT_VERSION = 1;
 export const CONSENT_STORAGE_KEY = `brvm-consent-v${CONSENT_VERSION}`;
 
@@ -40,9 +43,11 @@ export const CONSENT_CATEGORIES: ConsentCategory[] = [
     id: 'analytics',
     label: 'Mesure d’audience',
     description:
-      "Statistiques de fréquentation anonymisées pour améliorer le service. Aucun outil de ce type n'est actif aujourd'hui.",
+      "Statistiques d'usage (PostHog, hébergé en Union européenne) pour comprendre et améliorer le service : pages vues, parcours, replays de session avec saisies masquées. Chargé UNIQUEMENT après votre accord ; retirable à tout moment (arrêt + purge immédiats).",
     required: false,
-    cookies: [],
+    cookies: [
+      { name: 'ph_* (localStorage)', purpose: "Identifiant de mesure d'audience PostHog", duration: '12 mois' },
+    ],
   },
   {
     id: 'marketing',

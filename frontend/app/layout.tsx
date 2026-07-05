@@ -8,6 +8,7 @@ import { BeginnerModeProvider } from '@/lib/beginner-mode';
 import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import SplashScreen from '@/components/brand/SplashScreen';
 import { CookieBanner } from '@/components/consent/CookieBanner';
+import PostHogInit from '@/components/analytics/PostHogInit';
 import { createClient } from '@/lib/supabase/server';
 
 // URL canonique du site. Défaut = domaine cible westbourse.com ; surchargeable
@@ -239,6 +240,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ServiceWorkerRegister />
             {user && !onboardingDone && <OnboardingModal />}
             <CookieBanner />
+            <PostHogInit />
           </BeginnerModeProvider>
         </ConsentProvider>
       </body>
