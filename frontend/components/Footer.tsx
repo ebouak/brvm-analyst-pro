@@ -13,6 +13,7 @@ const PRODUIT = [
   { href: '/methodologie', label: 'Méthodologie' },
   { href: '/pricing', label: 'Tarifs' },
   { href: '/developers', label: 'API développeurs' },
+  { href: '/api/rss', label: 'Flux RSS' },
 ];
 
 const LEGAL = [

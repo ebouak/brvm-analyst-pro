@@ -76,7 +76,10 @@ export const metadata: Metadata = {
       'Cours BRVM toutes les 15 min, note A–F sur les actions, simulateur et brief quotidien. Gratuit.',
     // twitter:image = fallback sur og:image (généré par opengraph-image.tsx).
   },
-  alternates: { canonical: SITE_URL },
+  alternates: {
+    canonical: SITE_URL,
+    types: { 'application/rss+xml': [{ url: `${SITE_URL}/api/rss`, title: 'WESTBOURSE — Actualités & briefs BRVM' }] },
+  },
 };
 
 // JSON-LD Schema.org (Organization + WebSite + FinancialService) pour les rich snippets.

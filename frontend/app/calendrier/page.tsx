@@ -191,9 +191,18 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
           title="Calendrier économique"
           subtitle={`Dividendes et événements corporatifs sur les ${daysN} prochains jours.`}
           actions={
-            <StatPill tone={totalFiltered > 0 ? 'gold' : 'neutral'}>
-              {totalFiltered} événement{totalFiltered > 1 ? 's' : ''}
-            </StatPill>
+            <>
+              <StatPill tone={totalFiltered > 0 ? 'gold' : 'neutral'}>
+                {totalFiltered} événement{totalFiltered > 1 ? 's' : ''}
+              </StatPill>
+              <a
+                href="/api/calendar"
+                title="Abonnez-vous dans Google Calendar / Apple / Outlook : les nouvelles ex-dates et paiements apparaîtront automatiquement"
+                className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
+              >
+                🗓 S'abonner au calendrier (.ics)
+              </a>
+            </>
           }
         />
         <div className="mt-4">
