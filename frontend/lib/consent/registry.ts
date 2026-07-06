@@ -21,10 +21,11 @@ export interface ConsentCategory {
 }
 
 /** Incrémenter pour forcer un re-consentement (changement de finalités).
- * ⚠ À passer à 2 le jour où NEXT_PUBLIC_POSTHOG_KEY est configurée en prod :
- * les consentements v1 ont été donnés quand la description « analytics »
- * disait « aucun outil actif » — ils ne couvrent pas le session replay. */
-export const CONSENT_VERSION = 1;
+ * Passé à 2 le 2026-07-06 : activation de PostHog (NEXT_PUBLIC_POSTHOG_KEY
+ * configurée en prod) — les consentements v1 disaient « aucun outil actif »
+ * et ne couvrent pas le session replay. Tous les visiteurs redemandent leur
+ * consentement une fois. */
+export const CONSENT_VERSION = 2;
 export const CONSENT_STORAGE_KEY = `brvm-consent-v${CONSENT_VERSION}`;
 
 export const CONSENT_CATEGORIES: ConsentCategory[] = [
