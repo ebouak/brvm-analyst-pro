@@ -4,10 +4,11 @@
 -- ============================================================================
 
 alter table public.diagnostic_reports
-  add column if not exists red_flag_score smallint;
+  add column if not exists red_flag_score smallint
+    check (red_flag_score between 0 and 10);
 
 create table if not exists public.diagnostic_search_cache (
-  code text not null,
+  code text not null references public.brvm_instruments(code) on update cascade,
   category text not null check (category in ('litiges', 'insiders', 'concentration_client')),
   results jsonb not null,
   fetched_at timestamptz not null default now(),
