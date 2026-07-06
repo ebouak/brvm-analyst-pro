@@ -1,6 +1,8 @@
 // frontend/lib/diagnostic/prompt.ts
 import type { IncomeStatement, BalanceSheet, CashFlowStatement } from '@/lib/financials/types';
 import type { DiagnosticMetrics } from './metrics';
+import type { RedFlagsResult } from './redFlags';
+import type { NewsCategory, NewsSignal } from './newsSignals';
 
 function fmt(n: number | null | undefined, decimals = 0): string {
   if (n == null) return 'N/D';
@@ -13,6 +15,17 @@ function pct(n: number | null | undefined): string {
 function x(n: number | null | undefined): string {
   if (n == null) return 'N/D';
   return `${n.toFixed(1)}x`;
+}
+
+const CATEGORY_LABELS: Record<NewsCategory, string> = {
+  litiges: 'Litiges',
+  insiders: 'Mouvements dirigeants/actionnaires',
+  concentration_client: 'Concentration client',
+};
+
+function formatSignals(signals: NewsSignal[] | undefined): string {
+  if (!signals || signals.length === 0) return 'non évaluable — aucune source publique trouvée';
+  return signals.map((s) => `- ${s.titre} (${s.source}, ${s.date}${s.url ? `, ${s.url}` : ''})`).join('\n');
 }
 
 export function buildDiagnosticPrompt(params: {
@@ -31,10 +44,24 @@ export function buildDiagnosticPrompt(params: {
   m: DiagnosticMetrics;
   periode_n: string;
   periode_n1: string;
+  redFlags: RedFlagsResult;
+  newsSignals: Record<NewsCategory, NewsSignal[]>;
+  webSignals: Partial<Record<NewsCategory, NewsSignal[]>>;
 }): string {
   const { code, designation, secteur, cours, cours_bas_52s, cours_haut_52s,
           inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m,
-          periode_n, periode_n1 } = params;
+          periode_n, periode_n1, redFlags, newsSignals, webSignals } = params;
+
+  const redFlagsTable = redFlags.checks.map((c) => {
+    if (!c.dataAvailable) return `| ${c.label} | non évaluable | — | ${c.evidence} |`;
+    return `| ${c.label} | ${c.triggered ? 'Déclenché' : 'OK'} | ${c.triggered ? c.severity : 0}/10 | ${c.evidence} |`;
+  }).join('\n');
+
+  const enrichmentBlocks = (Object.keys(CATEGORY_LABELS) as NewsCategory[]).map((cat) => {
+    const internal = newsSignals[cat] ?? [];
+    const source = internal.length > 0 ? internal : webSignals[cat];
+    return `**${CATEGORY_LABELS[cat]}**\n${formatSignals(source)}`;
+  }).join('\n\n');
 
   return `Tu es un analyste financier senior spécialisé sur les marchés actions africains (BRVM).
 Tu vas produire un **diagnostic financier et économique complet** de ${designation ?? code} (${code}).
@@ -89,6 +116,17 @@ Altman Z' : ${m.altman_z?.toFixed(2) ?? 'N/D'} [>2.6 sain | 1.1–2.6 gris | <1.
 Plage 52s : ${cours_bas_52s ?? 'N/D'} – ${cours_haut_52s ?? 'N/D'} FCFA
 
 ---
+## RED FLAGS (score de gravité déjà calculé : ${redFlags.overallScore ?? 'non évaluable'}/10)
+
+| Check | État | Sévérité | Preuve |
+|---|---|---|---|
+${redFlagsTable}
+
+### Signaux de veille/recherche (par catégorie non couverte par les 8 checks ci-dessus)
+
+${enrichmentBlocks}
+
+---
 ## CONTEXTE
 Secteur : ${secteur ?? 'N/D'} | Marché : BRVM/UEMOA | Référentiel : SYSCOA/OHADA | Monnaie : FCFA (1 EUR ≈ 655 FCFA)
 
@@ -102,5 +140,6 @@ Secteur : ${secteur ?? 'N/D'} | Marché : BRVM/UEMOA | Référentiel : SYSCOA/OH
 **5. VALORISATION** — DCF simplifié (WACC 12–14%, g 3–4%) + multiples relatifs + pairs BRVM
 **6. POLITIQUE DE DIVIDENDE** — durabilité, signal marché
 **7. RISQUES & CATALYSEURS** — sectoriels, opérationnels, macro UEMOA
-**8. CONCLUSION & RECOMMANDATION** — ACHAT/CONSERVER/VENDRE + objectif + horizon + stop suggéré`;
+**8. CONCLUSION & RECOMMANDATION** — ACHAT/CONSERVER/VENDRE + objectif + horizon + stop suggéré
+**9. RED FLAGS** — pour chaque check déclenché ci-dessus, rédige 2–3 phrases de contexte expliquant pourquoi c'est préoccupant. N'invente AUCUN chiffre — utilise uniquement les valeurs fournies dans le tableau. Pour les catégories de veille/recherche : si des signaux sont fournis, cite-les avec leur source et leur date ; sinon écris explicitement « non évaluable — aucune source publique trouvée ». Le score global de gravité (déjà calculé : ${redFlags.overallScore ?? 'non évaluable'}/10) doit être repris tel quel, jamais recalculé ou réinterprété.`;
 }

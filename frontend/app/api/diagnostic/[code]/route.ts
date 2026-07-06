@@ -6,6 +6,9 @@ import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeDiagnosticMetrics } from '@/lib/diagnostic/metrics';
 import { buildDiagnosticPrompt } from '@/lib/diagnostic/prompt';
+import { computeRedFlags } from '@/lib/diagnostic/redFlags';
+import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals';
+import { findWebSignals } from '@/lib/diagnostic/webSearch';
 
 export const maxDuration = 120;
 
@@ -87,6 +90,12 @@ export async function POST(req: Request, { params }: { params: { code: string } 
   });
 
   const m = computeDiagnosticMetrics({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, cours, capitalisation: ratios.capitalisation });
+  const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m });
+
+  const newsSignals = await findNewsSignals(admin, code);
+  const categoriesSansResultat = (Object.keys(newsSignals) as NewsCategory[])
+    .filter((cat) => newsSignals[cat].length === 0);
+  const webSignals = await findWebSignals(admin, code, data.instrument.designation ?? code, categoriesSansResultat);
 
   const prompt = buildDiagnosticPrompt({
     code,
@@ -98,6 +107,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m,
     periode_n: inc_n?.periode ?? 'N',
     periode_n1: inc_n1?.periode ?? 'N-1',
+    redFlags, newsSignals, webSignals,
   });
 
   const encoder = new TextEncoder();
@@ -156,7 +166,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
 
       if (full) {
         await admin.from('diagnostic_reports').upsert(
-          { code, markdown_content: full, model_used: usedModel, metrics_snapshot: m as unknown as Record<string, unknown> },
+          { code, markdown_content: full, model_used: usedModel, metrics_snapshot: m as unknown as Record<string, unknown>, red_flag_score: redFlags.overallScore },
           { onConflict: 'code' },
         );
       } else {
