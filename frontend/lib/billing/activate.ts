@@ -1,6 +1,7 @@
 import { getServiceClient } from './serviceClient';
 import { computeRenewsAt } from './dates';
 import type { BillingCycle } from './types';
+import { captureServerEvent } from '@/lib/analytics/posthogServer';
 
 /**
  * Active un abonnement : transactions pending → paid, abonnement → active
@@ -36,6 +37,13 @@ export async function activateSubscription(subscriptionId: string): Promise<{ ok
     .from('profiles')
     .update({ is_premium: true, premium_since: nowIso, updated_at: nowIso })
     .eq('id', sub.user_id);
+
+  // Ferme le funnel signup → premium (aucun navigateur ici : capture serveur,
+  // même distinctId = user_id que phIdentify côté client → fusion PostHog).
+  await captureServerEvent(sub.user_id, 'premium_activated', {
+    billing_cycle: sub.billing_cycle,
+    subscription_id: subscriptionId,
+  });
 
   return { ok: true };
 }

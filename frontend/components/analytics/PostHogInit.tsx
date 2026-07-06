@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useConsent } from '@/components/consent/ConsentProvider';
+import { markPostHogReady, markPostHogNotReady } from '@/lib/analytics/posthogClient';
 
 /**
  * PostHog (product analytics) — STRICTEMENT conditionné au consentement
@@ -33,6 +34,7 @@ export default function PostHogInit() {
           // Session replay : masque toutes les saisies par défaut (prudence RGPD).
           session_recording: { maskAllInputs: true },
         });
+        markPostHogReady();
       });
     } else if (!granted && loadedRef.current) {
       // Consentement retiré : stop + purge (droit de retrait effectif).
@@ -41,6 +43,7 @@ export default function PostHogInit() {
         posthog.reset();
       });
       loadedRef.current = false;
+      markPostHogNotReady();
     }
   }, [granted, choice]);
 

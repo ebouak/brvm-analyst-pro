@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import UserAvatar from './UserAvatar';
+import { phReset } from '@/lib/analytics/posthogClient';
 
 interface Me { email: string; displayName: string; avatarUrl: string | null; isPremium: boolean }
 
@@ -42,6 +43,8 @@ export default function UserAvatarMenu() {
 
   async function logout() {
     await createClient().auth.signOut();
+    // Évite d'attribuer la prochaine session (poste partagé) à cette personne.
+    void phReset();
     router.push('/login'); router.refresh();
   }
 

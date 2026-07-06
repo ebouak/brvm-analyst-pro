@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { createClient } from '@/lib/supabase/client';
 import { SignInPage } from '@/components/ui/sign-in-flow-1';
+import { phIdentify, phCapture } from '@/lib/analytics/posthogClient';
 
 // Clé de site Turnstile (publique — non secrète), lue depuis l'env
 // (NEXT_PUBLIC_TURNSTILE_SITE_KEY, définie sur Vercel). Le repli n'est que la
@@ -107,6 +108,14 @@ export default function SignInClient({
         }
       }}
       onSuccess={() => {
+        // Relie l'activité anonyme pré-connexion au profil identifié (PostHog
+        // fusionne automatiquement) — condition du funnel signup → premium.
+        // Best-effort : jamais bloquant pour la navigation post-auth.
+        void supabase.auth.getUser().then(({ data: { user } }) => {
+          if (!user) return;
+          phIdentify(user.id, { email: user.email });
+          if (subscribeNewsletter) phCapture('signup_completed');
+        });
         // Depuis la page d'inscription (subscribeNewsletter), on passe par le
         // moment d'accueil « choisissez une action » ; depuis /login, direct au
         // tableau de bord.
