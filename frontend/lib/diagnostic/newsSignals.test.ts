@@ -41,6 +41,12 @@ describe('matchNewsSignals', () => {
     expect(result.concentration_client).toHaveLength(0);
   });
 
+  it('ignore "poursuite" au sens de continuation (pas de litige)', () => {
+    const rows = [row({ titre: 'Poursuite de la croissance du chiffre d\'affaires au 2e trimestre' })];
+    const result = matchNewsSignals(rows);
+    expect(result.litiges).toHaveLength(0);
+  });
+
   it('un même article peut alimenter plusieurs catégories', () => {
     const rows = [row({ titre: 'Démission du PDG suite à un contentieux judiciaire' })];
     const result = matchNewsSignals(rows);

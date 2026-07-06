@@ -19,9 +19,9 @@ export interface NewsRow {
 }
 
 const KEYWORDS: Record<NewsCategory, string[]> = {
-  litiges: ['litige', 'poursuite', 'judiciaire', 'tribunal', 'contentieux', 'sanction'],
-  insiders: ['démission', 'dirigeant', 'actionnaire majoritaire', 'cession de titres', 'pdg'],
-  concentration_client: ['client principal', 'dépendance', 'contrat majeur'],
+  litiges: ['litige', 'poursuite judiciaire', 'poursuite en justice', 'judiciaire', 'tribunal', 'contentieux', 'sanction'],
+  insiders: ['démission', 'actionnaire majoritaire', 'cession de titres', 'pdg'],
+  concentration_client: ['client principal', 'dépendance client', 'dépendance à un client', 'contrat majeur'],
 };
 
 /** Fonction pure : associe chaque ligne de veille à ses catégories de red flag par mot-clé. */
@@ -51,6 +51,7 @@ export async function findNewsSignals(
   const { data } = await sb
     .from('brvm_news')
     .select('titre, resume, source_label, source, date_publication, source_url')
+    .eq('hidden', false)
     .or(`instrument_code.eq.${code},ticker_codes.cs.{${code}}`)
     .order('date_publication', { ascending: false })
     .limit(200);
