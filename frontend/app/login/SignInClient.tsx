@@ -114,7 +114,12 @@ export default function SignInClient({
         void supabase.auth.getUser().then(({ data: { user } }) => {
           if (!user) return;
           phIdentify(user.id, { email: user.email });
-          if (subscribeNewsletter) phCapture('signup_completed');
+          // plan: 'free' est un fait (tout nouveau compte démarre gratuit) —
+          // pas de propriété 'source' inventée : $initial_referrer, déjà
+          // capturé automatiquement par PostHog (autocapture), est la source
+          // fiable pour un breakdown par canal (document.referrer à ce point
+          // refléterait la navigation interne SPA, pas l'acquisition réelle).
+          if (subscribeNewsletter) phCapture('signup_completed', { plan: 'free' });
         });
         // Depuis la page d'inscription (subscribeNewsletter), on passe par le
         // moment d'accueil « choisissez une action » ; depuis /login, direct au

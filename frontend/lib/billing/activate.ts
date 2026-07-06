@@ -12,10 +12,11 @@ export async function activateSubscription(subscriptionId: string): Promise<{ ok
   const db = getServiceClient();
   const { data: sub, error } = await db
     .from('subscriptions')
-    .select('id, user_id, billing_cycle')
+    .select('id, user_id, billing_cycle, plan:subscription_plans(code, name, price_monthly, price_yearly, currency)')
     .eq('id', subscriptionId)
     .maybeSingle();
   if (error || !sub) return { ok: false, message: 'Abonnement introuvable.' };
+  const plan = Array.isArray(sub.plan) ? sub.plan[0] : sub.plan;
 
   const now = new Date();
   const nowIso = now.toISOString();
@@ -40,8 +41,13 @@ export async function activateSubscription(subscriptionId: string): Promise<{ ok
 
   // Ferme le funnel signup → premium (aucun navigateur ici : capture serveur,
   // même distinctId = user_id que phIdentify côté client → fusion PostHog).
+  // Montant/plan RÉELS (subscription_plans) — jamais une valeur générique.
   await captureServerEvent(sub.user_id, 'premium_activated', {
+    plan: plan?.code ?? null,
+    plan_name: plan?.name ?? null,
     billing_cycle: sub.billing_cycle,
+    amount: sub.billing_cycle === 'yearly' ? plan?.price_yearly ?? null : plan?.price_monthly ?? null,
+    currency: plan?.currency ?? null,
     subscription_id: subscriptionId,
   });
 

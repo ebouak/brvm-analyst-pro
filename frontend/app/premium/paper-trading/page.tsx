@@ -5,6 +5,7 @@ import { PaperTradingDashboard } from '@/components/PaperTradingDashboard';
 import { PaperLeaderboard } from '@/components/PaperLeaderboard';
 import { paperTradingService } from '@/lib/paper-trading/service';
 import { Account } from '@/lib/paper-trading/types';
+import { phCapture } from '@/lib/analytics/posthogClient';
 
 const PRESET_CAPITALS = [
   { label: '5M FCFA', value: 5_000_000 },
@@ -42,6 +43,7 @@ export default function PaperTradingPage() {
       const acc = await paperTradingService.initializeAccount(capital);
       setAccount(acc);
       setShowModal(false);
+      void phCapture('paper_trading_started', { capital_initial: capital });
     } catch (err) {
       setError((err as Error).message || 'Failed to initialize account');
     }

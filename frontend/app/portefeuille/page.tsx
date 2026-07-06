@@ -8,6 +8,7 @@ import {
   deleteAlert, updateAlert,
 } from './actions';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
+import { AddWatchForm } from '@/components/portfolio/AddWatchForm';
 import PortefeuilleModals from '@/components/PortefeuilleModals';
 import Sparkline from '@/components/Sparkline';
 import PortefeuilleExport from '@/components/PortefeuilleExport';
@@ -549,21 +550,7 @@ export default async function PortefeuillePage({
               <PremiumPanel glow>
                 <div className="p-4 space-y-3">
                   <Eyebrow className="text-gold/50">Ajouter un titre</Eyebrow>
-                  <form action={addWatchItem} className="flex flex-col gap-2">
-                    {activeWl && <input type="hidden" name="watchlist_id" value={activeWl.id} />}
-                    <PremiumField name="code" placeholder="Code BRVM (ex: SGBCI)" required />
-                    <div className="grid grid-cols-2 gap-2">
-                      <PremiumField name="prix_alerte_haut" type="number" placeholder="Alerte ▲" step="any" />
-                      <PremiumField name="prix_alerte_bas" type="number" placeholder="Alerte ▼" step="any" />
-                    </div>
-                    <PremiumField name="note" placeholder="Note (optionnel)" />
-                    <button
-                      type="submit"
-                      className="w-full rounded-chip bg-gold/90 py-2 text-xs font-semibold text-obsidian transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-gold active:scale-[0.98]"
-                    >
-                      Suivre ce titre
-                    </button>
-                  </form>
+                  <AddWatchForm action={addWatchItem} watchlistId={activeWl?.id ?? null} />
                 </div>
               </PremiumPanel>
             </div>

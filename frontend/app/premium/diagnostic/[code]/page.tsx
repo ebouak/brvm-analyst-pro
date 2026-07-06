@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import DiagnosticClient from '@/components/premium/DiagnosticClient';
+import { ViewTracker } from '@/components/analytics/ViewTracker';
 
 interface Props { params: { code: string } }
 
@@ -25,6 +26,7 @@ export default async function DiagnosticPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg">
+      <ViewTracker event="diagnostic_viewed" properties={{ code }} />
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
         <div className="flex items-center gap-2 text-sm">
