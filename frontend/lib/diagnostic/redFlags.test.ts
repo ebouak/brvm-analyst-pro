@@ -138,7 +138,19 @@ describe('computeRedFlags', () => {
     p.m = { ...p.m, payout_ratio: 80, fcf_div_cover: -0.5 };
     const c = check('dividende_non_couvert', computeRedFlags(p).checks);
     expect(c.triggered).toBe(true);
-    expect(c.severity).toBe(9);
+    expect(c.severity).toBe(8);
+  });
+
+  it('dividende_non_couvert: la sévérité croît quand la couverture FCF se dégrade (monotonicité)', () => {
+    const pMild = baseParams();
+    pMild.m = { ...pMild.m, payout_ratio: 80, fcf_div_cover: -0.1 };
+    const severityMild = check('dividende_non_couvert', computeRedFlags(pMild).checks).severity;
+
+    const pSevere = baseParams();
+    pSevere.m = { ...pSevere.m, payout_ratio: 80, fcf_div_cover: -2 };
+    const severitySevere = check('dividende_non_couvert', computeRedFlags(pSevere).checks).severity;
+
+    expect(severitySevere).toBeGreaterThan(severityMild);
   });
 
   it('dividende_non_couvert: non déclenché quand le FCF couvre largement le dividende', () => {

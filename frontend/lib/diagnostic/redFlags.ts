@@ -128,9 +128,7 @@ export function computeRedFlags(params: {
   {
     const dataAvailable = m.payout_ratio != null && m.fcf_div_cover != null;
     const triggered = dataAvailable && m.payout_ratio! > 60 && m.fcf_div_cover! < 1;
-    const severity = triggered
-      ? (m.fcf_div_cover! < 0 ? 9 : clamp(Math.round((1 - m.fcf_div_cover!) * 10), 0, 10))
-      : 0;
+    const severity = triggered ? clamp(Math.round((1 - m.fcf_div_cover!) * 5), 0, 10) : 0;
     checks.push({
       id: 'dividende_non_couvert',
       label: 'Dividende non couvert par le cash',
