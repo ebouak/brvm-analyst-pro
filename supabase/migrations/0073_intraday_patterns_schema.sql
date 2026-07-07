@@ -20,7 +20,6 @@ CREATE INDEX IF NOT EXISTS idx_engine_config_active ON public.brvm_pattern_engin
 
 -- brvm_intraday_candles_15m: Reconstructed 15-min candles
 CREATE TABLE IF NOT EXISTS public.brvm_intraday_candles_15m (
-  id BIGSERIAL,
   code TEXT NOT NULL,
   date_marche DATE NOT NULL,
   time_start TIMESTAMPTZ NOT NULL,
@@ -44,6 +43,9 @@ CREATE TABLE IF NOT EXISTS public.brvm_intraday_candles_15m (
 ) PARTITION BY RANGE (date_marche);
 
 -- Create initial partitions (2026-06, 2026-07, 2026-08, 2026-09)
+-- Partitions are organized monthly to prevent insert failures at month boundaries.
+-- New partitions must be created by month 25 of each month via supabase/scripts/create_partitions.sql
+-- Example: CREATE TABLE brvm_intraday_candles_15m_2026_10 PARTITION OF public.brvm_intraday_candles_15m FOR VALUES FROM ('2026-10-01') TO ('2026-11-01');
 CREATE TABLE IF NOT EXISTS public.brvm_intraday_candles_15m_2026_06 PARTITION OF public.brvm_intraday_candles_15m
   FOR VALUES FROM ('2026-06-01') TO ('2026-07-01');
 CREATE TABLE IF NOT EXISTS public.brvm_intraday_candles_15m_2026_07 PARTITION OF public.brvm_intraday_candles_15m
@@ -58,7 +60,6 @@ CREATE INDEX IF NOT EXISTS idx_candles_15m_quality ON public.brvm_intraday_candl
 
 -- brvm_intraday_candles_30m: Reconstructed 30-min candles (same structure)
 CREATE TABLE IF NOT EXISTS public.brvm_intraday_candles_30m (
-  id BIGSERIAL,
   code TEXT NOT NULL,
   date_marche DATE NOT NULL,
   time_start TIMESTAMPTZ NOT NULL,
@@ -91,10 +92,10 @@ CREATE TABLE IF NOT EXISTS public.brvm_intraday_candles_30m_2026_09 PARTITION OF
   FOR VALUES FROM ('2026-09-01') TO ('2026-10-01');
 
 CREATE INDEX IF NOT EXISTS idx_candles_30m_code_date ON public.brvm_intraday_candles_30m(code, date_marche);
+CREATE INDEX IF NOT EXISTS idx_candles_30m_quality ON public.brvm_intraday_candles_30m(quality_score);
 
 -- brvm_intraday_patterns_raw: Raw detections (PHASE 3A)
 CREATE TABLE IF NOT EXISTS public.brvm_intraday_patterns_raw (
-  id BIGSERIAL,
   code TEXT NOT NULL,
   date_marche DATE NOT NULL,
   pattern_type TEXT NOT NULL,
@@ -129,7 +130,6 @@ CREATE INDEX IF NOT EXISTS idx_patterns_raw_triggered ON public.brvm_intraday_pa
 
 -- brvm_intraday_patterns: Qualified patterns (PHASE 3B)
 CREATE TABLE IF NOT EXISTS public.brvm_intraday_patterns (
-  id BIGSERIAL,
   code TEXT NOT NULL,
   date_marche DATE NOT NULL,
   pattern_type TEXT NOT NULL,
