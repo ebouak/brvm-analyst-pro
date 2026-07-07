@@ -1,0 +1,80 @@
+name: Daily Alerts Evaluation
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    # Après scoring (16:00 UTC), donc ~16:30 UTC.
+    # Lun-ven uniquement (séance BRVM).
+    - cron: '30 16 * * 1-5'
+  workflow_dispatch: {}
+
+concurrency:
+  group: alerts-evaluation
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 1
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Run alerts evaluation with retry
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+          # Notification channels (all optional).
+          # If any env var is missing, that channel is silently skipped.
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALERTS_OPS_EMAIL: ${{ secrets.ALERTS_OPS_EMAIL }}
+        run: |
+          MAX_RETRIES=3
+          RETRY_DELAY=30
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $attempt/$MAX_RETRIES..."
+            if npm run alerts; then
+              echo "✅ Alerts evaluation succeeded"
+              exit 0
+            else
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                echo "⚠️ Attempt $attempt failed, retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+          echo "❌ Alerts evaluation failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Verify alerts written
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        if: success()
+        run: npx tsx scripts/verify-data.ts alerts
+
+      - name: Notify failure on Slack
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ Daily Alerts Evaluation FAILED after 3 retries at $(date -u +'%H:%M UTC'). Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi
