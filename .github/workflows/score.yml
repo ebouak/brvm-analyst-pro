@@ -1,0 +1,73 @@
+name: Daily Scoring Pipeline
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    # Après clôture séance BRVM (15:00 UTC Abidjan = 16:00 UTC GMT).
+    # Planifié à 16:00 UTC, 6 jours/semaine (lun-sam, inclut samedi pour les signaux du lundi).
+    - cron: '0 16 * * 1-6'
+  workflow_dispatch: {}
+
+concurrency:
+  group: scoring
+  cancel-in-progress: false
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      max-parallel: 1
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Run scoring with retry
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: |
+          MAX_RETRIES=3
+          RETRY_DELAY=45
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $attempt/$MAX_RETRIES..."
+            if npm run score; then
+              echo "✅ Scoring pipeline succeeded"
+              exit 0
+            else
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                echo "⚠️ Attempt $attempt failed, retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+          echo "❌ Scoring pipeline failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Verify signals written
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        if: success()
+        run: npx tsx scripts/verify-data.ts score
+
+      - name: Notify failure on Slack
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ Daily Scoring FAILED after 3 retries at $(date -u +'%H:%M UTC'). Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi
