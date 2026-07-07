@@ -349,6 +349,33 @@ async function main(): Promise<number> {
       const res = await runCotations({ codes });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'intraday:patterns': {
+      const dateArg = positional[0] || new Date().toISOString().split('T')[0];
+      const { runIntraDayPatternsBatch } = await import('./intraday/index.js');
+
+      logger.info({ date: dateArg }, `Starting intraday patterns batch`);
+      const result = await runIntraDayPatternsBatch(dateArg);
+
+      logger.info(
+        {
+          date: result.date_marche,
+          codes_processed: result.codes_processed,
+          raw_patterns: result.total_raw_patterns,
+          qualified_patterns: result.total_qualified_patterns,
+          codes_with_scores: result.codes_with_scores,
+          errors: result.errors.length,
+          duration_ms: result.duration_ms,
+        },
+        `\n=== Intraday Patterns Summary ===`,
+      );
+
+      if (result.errors.length > 0) {
+        logger.error({ errors: result.errors }, `Batch completed with errors`);
+        return result.codes_processed === 0 ? 1 : 0; // Partial success if some codes processed
+      }
+
+      return result.codes_processed > 0 ? 0 : 1;
+    }
     case 'scrape-sgi': {
       // Annuaire SGI RichBourse (Playwright). Manuel (pas de cron) : la liste
       // change rarement et le site est protégé par anti-bot. --no-pdfs pour

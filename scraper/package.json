@@ -26,6 +26,8 @@
     "dividends:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts dividends --mock",
     "intraday": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts intraday",
     "intraday:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts intraday --mock",
+    "intraday:patterns": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts intraday:patterns",
+    "intraday:patterns:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts intraday:patterns --mock",
     "publications": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications",
     "publications:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts publications --mock",
     "shares": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts shares",
