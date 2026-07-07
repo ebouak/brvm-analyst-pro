@@ -138,14 +138,18 @@ export async function POST(req: Request, { params }: { params: { code: string } 
           const reader = resp.body.getReader();
           const dec = new TextDecoder();
 
+          let streamDone = false;
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            if (done || streamDone) break;
             const chunk = dec.decode(value, { stream: true });
             for (const line of chunk.split('\n')) {
               if (!line.startsWith('data: ')) continue;
               const raw = line.slice(6).trim();
-              if (raw === '[DONE]') break;
+              if (raw === '[DONE]') {
+                streamDone = true;
+                break;
+              }
               try {
                 const j = JSON.parse(raw) as { choices?: Array<{ delta?: { content?: string } }> };
                 const text = j.choices?.[0]?.delta?.content ?? '';
