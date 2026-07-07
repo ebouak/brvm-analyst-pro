@@ -199,6 +199,42 @@ npm run scrape:daily:full 2025-06-10
 
 ---
 
+## Scheduled Workers (GitHub Actions Cron)
+
+All workers run on UTC (Supabase/GitHub Actions baseline). BRVM Abidjan is UTC+0.
+
+| Worker | Command | Schedule | Frequency | Timeout | Retries | Purpose |
+| --- | --- | --- | --- | --- | --- | --- |
+| **intraday** | `npm run intraday` | 9–15 UTC, every 7–8 min | Continuous (trading hours) | 10 min | 3× | Fetch live pricing from brvm.org public API |
+| **score** | `npm run score` | 16:00 UTC (5–6pm Abidjan) | Daily, Mon–Sat | 15 min | 3× | Calculate technical signals (RSI, MACD, MA) for all instruments |
+| **events** | `npm run events` | 08:00 UTC (9am Abidjan) | Daily, Mon–Sat | 10 min | 3× | Ingest corporate events/announcements from BDFIN |
+| **dividends** | `npm run dividends` | 09:00 UTC, Saturday | Weekly | 10 min | 2× | Ingest dividend announcements, calculate yields |
+| **alerts** | `npm run alerts` | 16:30 UTC (5:30pm Abidjan) | Daily, Mon–Fri | 10 min | 3× | Evaluate price/signal alerts, send notifications |
+
+### Monitoring & Logs
+
+All workers write `scraper_runs` table entries (one per execution) with:
+
+- `code` — job identifier (e.g., "score", "events")
+- `status` — "success" | "failure"
+- `trigger_type` — "cron" (scheduled) | "manual" | "intraday"
+- `started_at`, `completed_at` — timestamps
+- `error_message` — null on success, error details on failure
+
+View live logs: Dashboard `/admin/scraping` (only accessible to super_admin or subscriptions.write permission).
+
+### Failure Notifications (Optional)
+
+Each worker has **optional** Slack notification on failure. To enable:
+
+1. Create a Slack incoming webhook: Slack workspace → Apps → Incoming Webhooks
+2. Add GitHub secret `SLACK_WEBHOOK` with the webhook URL
+3. Workflows will automatically POST failures to that channel
+
+Without `SLACK_WEBHOOK`, no notifications are sent (workflows still succeed).
+
+---
+
 ## Monitoring
 
 ### Checking Logs
