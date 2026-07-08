@@ -6,6 +6,7 @@ import Sparkline from '@/components/Sparkline';
 import { fmtNumber } from '@/lib/format';
 import type { AdvisorRow } from '@/lib/advisor/server';
 import type { Action } from '@/lib/advisor/recommend';
+import PatternEnrichmentBadge from '@/components/advisor/PatternEnrichmentBadge';
 
 const LABEL: Record<Action, string> = { acheter: 'Acheter', conserver: 'Conserver', vendre: 'Vendre' };
 const BADGE: Record<Action, string> = {

@@ -13,6 +13,52 @@ export interface PatternScreenerData {
 }
 
 /**
+ * Get pattern score for a specific code and date (for advisor enrichment)
+ */
+export async function getPatternScoreForAdvisor(
+  code: string,
+  dateMarche: string
+): Promise<PatternScore | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('brvm_pattern_scores')
+    .select('*')
+    .eq('code', code)
+    .eq('date_marche', dateMarche)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching pattern score for ${code} on ${dateMarche}:`, error);
+    return null;
+  }
+
+  return data || null;
+}
+
+/**
+ * Get latest pattern score for a code (most recent date)
+ */
+export async function getLatestPatternScore(code: string): Promise<PatternScore | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('brvm_pattern_scores')
+    .select('*')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching latest pattern score for ${code}:`, error);
+    return null;
+  }
+
+  return data || null;
+}
+
+/**
  * Get all patterns for a given date, joined with their pattern scores
  */
 export async function getPatternsForDate(dateMarche: string): Promise<PatternScreenerData[]> {
