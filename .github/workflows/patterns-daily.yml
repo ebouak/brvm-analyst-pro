@@ -1,0 +1,86 @@
+name: Intraday Patterns — Daily Batch
+
+# Daily batch job for intraday pattern detection (PHASE 2-4 pipeline)
+# Runs post-market (after intraday price snapshots have settled)
+# Detects technical patterns and generates confidence scores for opportunistic trading
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    # Mon–Fri 15:15 UTC (post-market for BRVM, allows 15min for intraday snapshots to settle)
+    # Aligns with 16:15 Abidjan local time (market close 15:00 + 15min buffer)
+    - cron: '15 15 * * 1-5'
+  workflow_dispatch: {} # manual trigger for testing/backfill
+
+concurrency:
+  group: patterns-daily
+  cancel-in-progress: false
+
+jobs:
+  patterns-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      max-parallel: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Install dependencies
+        working-directory: scraper
+        run: npm ci
+
+      - name: Run mock patterns batch (validation)
+        working-directory: scraper
+        env:
+          LOG_LEVEL: info
+          USE_MOCK: 'true'
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "=== Mock run (validation only, no DB writes) ==="
+          npm run intraday:patterns:mock
+
+      - name: Run live patterns batch (production)
+        working-directory: scraper
+        env:
+          LOG_LEVEL: info
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "=== Live run (writing to Supabase) ==="
+          npm run intraday:patterns
+          echo "✅ Patterns batch completed successfully"
+
+      - name: Verify patterns written
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        if: success()
+        run: |
+          echo "Pattern detection complete — results logged to brvm_intraday_job_runs"
+          echo "Date: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: Notify failure on Slack (optional)
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            SUMMARY="Intraday Patterns batch FAILED at $(date -u +'%H:%M UTC')"
+            URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ $SUMMARY\nRun: $URL\"}"
+          fi

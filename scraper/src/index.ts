@@ -351,30 +351,48 @@ async function main(): Promise<number> {
     }
     case 'intraday:patterns': {
       const dateArg = positional[0] || new Date().toISOString().split('T')[0];
-      const { runIntraDayPatternsBatch } = await import('./intraday/index.js');
+      const res = await monitored(
+        { code: 'intraday:patterns', label: 'Patterns intraday (détection)' },
+        async () => {
+          const { runIntraDayPatternsBatch } = await import('./intraday/index.js');
 
-      logger.info({ date: dateArg }, `Starting intraday patterns batch`);
-      const result = await runIntraDayPatternsBatch(dateArg);
+          logger.info({ date: dateArg }, `Starting intraday patterns batch`);
+          const result = await runIntraDayPatternsBatch(dateArg);
 
-      logger.info(
-        {
-          date: result.date_marche,
-          codes_processed: result.codes_processed,
-          raw_patterns: result.total_raw_patterns,
-          qualified_patterns: result.total_qualified_patterns,
-          codes_with_scores: result.codes_with_scores,
-          errors: result.errors.length,
-          duration_ms: result.duration_ms,
+          logger.info(
+            {
+              date: result.date_marche,
+              codes_processed: result.codes_processed,
+              raw_patterns: result.total_raw_patterns,
+              qualified_patterns: result.total_qualified_patterns,
+              codes_with_scores: result.codes_with_scores,
+              errors: result.errors.length,
+              duration_ms: result.duration_ms,
+            },
+            `\n=== Intraday Patterns Summary ===`,
+          );
+
+          const outcomeStatus = result.errors.length === 0 ? 'success' : result.codes_processed > 0 ? 'partial' : 'failed';
+          return {
+            value: result,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: result.codes_processed,
+              rows_upserted: result.codes_with_scores,
+              metadata: {
+                codes_processed: result.codes_processed,
+                raw_patterns: result.total_raw_patterns,
+                qualified_patterns: result.total_qualified_patterns,
+                codes_with_scores: result.codes_with_scores,
+                errors: result.errors.length,
+                duration_ms: result.duration_ms,
+              },
+            },
+          };
         },
-        `\n=== Intraday Patterns Summary ===`,
       );
 
-      if (result.errors.length > 0) {
-        logger.error({ errors: result.errors }, `Batch completed with errors`);
-        return result.codes_processed === 0 ? 1 : 0; // Partial success if some codes processed
-      }
-
-      return result.codes_processed > 0 ? 0 : 1;
+      return res.errors.length === 0 ? 0 : res.codes_processed === 0 ? 1 : 0;
     }
     case 'scrape-sgi': {
       // Annuaire SGI RichBourse (Playwright). Manuel (pas de cron) : la liste
