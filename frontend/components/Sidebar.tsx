@@ -22,15 +22,18 @@ export default function Sidebar({
   const groups = NAV_GROUPS.filter((g) => !g.adminOnly || isAdmin);
 
   // Groupes repliés (persistés). Un groupe contenant la route active est forcé ouvert.
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [collapsed, setCollapsed] = useState<Record<string, boolean> | null>(null);
   useEffect(() => {
     try {
       const raw = localStorage.getItem(COLLAPSE_KEY);
-      if (raw) setCollapsed(JSON.parse(raw));
-    } catch { /* ignore */ }
+      setCollapsed(raw ? JSON.parse(raw) : {});
+    } catch {
+      setCollapsed({});
+    }
   }, []);
   function toggle(label: string) {
     setCollapsed((prev) => {
+      if (!prev) return { [label]: true };
       const next = { ...prev, [label]: !prev[label] };
       try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(next)); } catch { /* ignore */ }
       return next;
@@ -55,7 +58,7 @@ export default function Sidebar({
       <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-2">
         {groups.map((group) => {
           const hasActive = group.items.some((it) => isNavItemActive(it.href, pathname));
-          const isOpen = hasActive || !collapsed[group.label]; // actif toujours ouvert
+          const isOpen = hasActive || (collapsed ? !collapsed[group.label] : true); // ouvert par défaut avant hydratation
           return (
           <div key={group.label}>
             <button
