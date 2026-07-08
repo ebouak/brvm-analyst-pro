@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getPatternsForDate } from '@/lib/patterns/queries.js';
-import type { PatternScreenerData } from '@/lib/patterns/queries.js';
+import { getPatternsForDate } from '@/lib/patterns/queries';
+import type { PatternScreenerData } from '@/lib/patterns/queries';
 
 interface IntraDayPatternsTableProps {
   dateMarche?: string;

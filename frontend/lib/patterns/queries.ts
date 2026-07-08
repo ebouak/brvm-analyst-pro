@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/client.js';
-import type { IntraDayPattern, PatternScore } from './database.js';
+import { createClient } from '@/lib/supabase/client';
+import type { IntraDayPattern, PatternScore } from './database';
 
 export interface PatternScreenerData {
   code: string;

@@ -28,6 +28,8 @@
  *   tsx src/index.ts monthly-reports --dry-run # mode test (sans email/DB)
  *   tsx src/index.ts paper-trading:auto    # ouvrir positions depuis signaux forts
  *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
+ *   tsx src/index.ts veille                # monitoring BRVM Veille Intelligente
+ *   tsx src/index.ts veille [<YYYY-MM-DD>] [--mock] # date spécifique ou démo
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
@@ -57,6 +59,7 @@ import { runCommodities } from './commodities/runCommodities.js';
 import { runValidation } from './validation/runValidation.js';
 import { runPaperTradingAuto } from './runners/runPaperTradingAuto.js';
 import { runBrief } from './brief/runBrief.js';
+import { runVeille } from './runners/runVeille.js';
 // runMonthlyReports importé dynamiquement (dépend de pdfkit) — voir case 'monthly-reports'.
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
@@ -431,10 +434,40 @@ async function main(): Promise<number> {
       console.log(JSON.stringify(res, null, 2));
       return res.status === 'error' ? 1 : 0;
     }
+    case 'veille': {
+      const date = positional[0];
+      if (date && !isIsoDate(date)) {
+        logger.error('Usage: veille [<YYYY-MM-DD>] [--mock]');
+        return 1;
+      }
+      const res = await monitored(
+        { code: 'veille', label: 'BRVM Veille Intelligente' },
+        async () => {
+          const r = await runVeille({ date, mock });
+          const outcomeStatus =
+            r.status === 'failed' ? 'failed' : r.status === 'mock' ? 'success' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.digests_count,
+              rows_upserted: r.digests_count,
+              metadata: {
+                status: r.status,
+                digests: r.digests_count,
+                alerts: r.alerts_count,
+                date_marche: r.date_marche,
+              },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | publications | backtest | backfill | validate | notations | details | news | monthly-reports',
+        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | publications | backtest | backfill | validate | notations | details | news | veille | monthly-reports',
       );
       return 1;
   }

@@ -21,7 +21,8 @@ export type PermissionCode =
   | 'content.read' | 'content.write' | 'content.publish'
   | 'leads.read' | 'leads.write'
   | 'audit.read'
-  | 'settings.read' | 'settings.write';
+  | 'settings.read' | 'settings.write'
+  | 'forum.manage';
 
 export interface AdminContext {
   userId: string;

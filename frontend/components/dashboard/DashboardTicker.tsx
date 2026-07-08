@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRealtimeActions } from '@/lib/realtime/useRealtimeActions';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 import { FlashValue } from '@/components/ui/FlashValue';
+import { getPatternsByCode } from '@/lib/patterns/queries';
+import type { PatternScreenerData } from '@/lib/patterns/queries';
 
 export interface TickerLine {
   code: string;
@@ -53,6 +56,31 @@ export default function DashboardTicker({
   const { rows: liveRows, flashes } = useRealtimeActions(actionSeed, dateMarche ?? null);
   const liveByCode = new Map(liveRows.map((r) => [r.code, r]));
 
+  // Fetch patterns for action items to show badges
+  const [patternsByCode, setPatternsByCode] = useState<Record<string, PatternScreenerData[]>>({});
+  const [patternsLoading, setPatternsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadPatterns = async () => {
+      if (!dateMarche) return;
+      try {
+        setPatternsLoading(true);
+        const actionCodes = items.filter((it) => it.kind === 'action').map((it) => it.code);
+        if (actionCodes.length === 0) return;
+        const patterns = await getPatternsByCode(actionCodes, dateMarche);
+        setPatternsByCode(patterns);
+      } catch (err) {
+        console.error('Error fetching ticker patterns:', err);
+      } finally {
+        setPatternsLoading(false);
+      }
+    };
+
+    loadPatterns();
+    const interval = setInterval(loadPatterns, 300000); // Refresh every 5 minutes
+    return () => clearInterval(interval);
+  }, [items, dateMarche]);
+
   if (items.length === 0) return null;
   const loop = [...items, ...items];
 
@@ -85,9 +113,23 @@ export default function DashboardTicker({
             )}
             <Link
               href={it.kind === 'action' ? `/actions/${it.code}` : '/obligations'}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] font-bold transition-opacity hover:opacity-100"
+              className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-bold transition-opacity hover:opacity-100"
             >
               <span className="text-muted">{it.code}</span>
+              {/* Pattern badges for actions */}
+              {it.kind === 'action' && patternsByCode[it.code] && patternsByCode[it.code].length > 0 && (
+                <span className="inline-flex gap-0.5">
+                  {patternsByCode[it.code].some((p) => p.pattern_type === 'atr_extreme') && (
+                    <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">⚡</span>
+                  )}
+                  {patternsByCode[it.code].some((p) => p.pattern_type === 'bullish_consolidation') && (
+                    <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">📊</span>
+                  )}
+                  {patternsByCode[it.code].some((p) => p.pattern_type === 'breakout_impulse') && (
+                    <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">🚀</span>
+                  )}
+                </span>
+              )}
               {it.kind === 'action' && it.spark && <TickerSpark data={it.spark} up={up} />}
               <FlashValue direction={flashDir} className="text-ivory">{value}</FlashValue>
               {variation != null && (

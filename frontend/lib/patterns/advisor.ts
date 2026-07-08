@@ -1,4 +1,4 @@
-import type { PatternScore } from '@/lib/patterns/database.js';
+import type { PatternScore } from '@/lib/patterns/database';
 
 export interface AdvisorEnrichment {
   pattern_delta: number; // -5 to +5

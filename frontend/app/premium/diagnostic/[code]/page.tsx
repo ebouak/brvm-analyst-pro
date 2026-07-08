@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import DiagnosticClient from '@/components/premium/DiagnosticClient';
+import PatternDiagnostic from '@/components/premium/PatternDiagnostic';
 import { ViewTracker } from '@/components/analytics/ViewTracker';
 
 interface Props { params: { code: string } }
@@ -61,6 +62,11 @@ export default async function DiagnosticPage({ params }: Props) {
           cachedMarkdown={cached?.markdown_content ?? null}
           cachedAt={cached?.generated_at ?? null}
         />
+
+        <section className="bg-surface border border-border rounded-xl p-6 space-y-4">
+          <h2 className="text-xl font-semibold text-white">Analyse Technique</h2>
+          <PatternDiagnostic code={code} />
+        </section>
 
       </div>
     </div>

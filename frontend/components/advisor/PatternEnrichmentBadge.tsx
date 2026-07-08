@@ -3,7 +3,7 @@
 import {
   getPatternBadgeStyle,
   getPatternScoreColor,
-} from '@/lib/patterns/advisor.js';
+} from '@/lib/patterns/advisor';
 
 export interface PatternEnrichmentProps {
   pattern_delta: number;
