@@ -496,9 +496,53 @@ npm run scrape:daily:full 2025-06-09
 
 ---
 
+## Intraday Patterns Module
+
+The intraday patterns system detects technical patterns (volatility spikes, bullish consolidations) on 15-minute candles and runs daily at 15:15 UTC (post-market). See **`docs/INTRADAY_PATTERNS_OPS.md`** for full deployment, scheduling, monitoring, and troubleshooting.
+
+### Quick Start
+
+1. **Database setup:**
+   ```sql
+   -- Run migrations in Supabase SQL Editor (in order):
+   -- supabase/migrations/0073_intraday_patterns_schema.sql
+   -- supabase/migrations/0074_intraday_patterns_rls.sql
+   -- supabase/migrations/0075_seed_pattern_engine_config.sql
+   -- supabase/scripts/create_partitions.sql
+   ```
+
+2. **GitHub secrets (if not already set):**
+   ```bash
+   gh secret set SUPABASE_URL --body "https://your-project.supabase.co"
+   gh secret set SUPABASE_SERVICE_ROLE_KEY --body "eyJhbGc..."
+   ```
+
+3. **Workflow deployed:**
+   - Code pushed to main branch
+   - `.github/workflows/patterns-daily.yml` included
+
+4. **Test deployment:**
+   ```bash
+   gh workflow run patterns-daily.yml --ref main
+   ```
+
+5. **Monitor:**
+   - Admin dashboard: `/admin/scraping`
+   - Job runs table: `brvm_intraday_job_runs`
+   - Patterns table: `brvm_intraday_patterns`
+
+### Monitoring Workers Table
+
+| Worker | Command | Schedule | Purpose |
+| --- | --- | --- | --- |
+| **patterns** | `npm run intraday:patterns` | 15:15 UTC, Mon–Fri | Detect technical patterns post-market |
+
+---
+
 ## References
 
 - **CLAUDE.md** — Project overview & stack
 - **SCRAPER.md** — Scraper architecture & modules
 - **SCORING.md** — Signal generation
+- **INTRADAY_PATTERNS_OPS.md** — Intraday patterns deployment & ops guide
 - **RECOVERY.md** — Disaster recovery & database repair
