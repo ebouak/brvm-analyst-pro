@@ -13,6 +13,8 @@ import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
 import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
 import NewsFeed from '@/components/dashboard/NewsFeed';
 import MarketIndices from '@/components/dashboard/MarketIndices';
+import IntraDaySignalsWidget from '@/components/dashboard/IntraDaySignalsWidget';
+import PatternSummaryWidget from '@/components/dashboard/PatternSummaryWidget';
 import { AfricanIndicesCard } from '@/components/AfricanIndicesCard';
 import { MacroBanner } from '@/components/MacroBanner';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
@@ -439,6 +441,29 @@ export default async function Dashboard() {
                 : null;
             })()}
           />
+        </section>
+
+        {/* ── Signaux intraday — section FIXE ── */}
+        <section aria-label="Signaux intraday patterns">
+          <p className="overline text-muted mb-4 tracking-[0.16em]">Patterns intraday</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="md:col-span-1 lg:col-span-2">
+              <IntraDaySignalsWidget />
+            </div>
+            <div className="md:col-span-1 lg:col-span-1">
+              <PatternSummaryWidget />
+            </div>
+            <div className="md:col-span-2 lg:col-span-1 flex flex-col gap-3 text-xs text-muted p-4 bg-elevated/20 rounded-xl border border-border/40">
+              <p className="font-semibold text-ivory">À propos des patterns</p>
+              <p>Les signaux intraday détectent les mouvements de court terme :</p>
+              <ul className="space-y-1.5 ml-2">
+                <li>⚡ <strong>ATR Extrême</strong> — Volatilité anormale</li>
+                <li>📊 <strong>Consolidation</strong> — Zone d&apos;équilibre</li>
+                <li>🚀 <strong>Breakout</strong> — Sortie de niveau clé</li>
+              </ul>
+              <p className="pt-2 italic text-faint">Mis à jour en continu, 5 min d&apos;intervalle</p>
+            </div>
+          </div>
         </section>
 
         {/* ── Widgets configurables (ordre + visibilité via /dashboard/personnaliser) ── */}
