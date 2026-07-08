@@ -60,14 +60,16 @@ export async function getLatestPatternScore(code: string): Promise<PatternScore 
 
 /**
  * Get all patterns for a given date, joined with their pattern scores
+ * NOTE: Limited to 50 patterns max to avoid performance issues on empty/slow tables
  */
 export async function getPatternsForDate(dateMarche: string): Promise<PatternScreenerData[]> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from('brvm_intraday_patterns')
-    .select(
-      `
+  try {
+    const { data, error } = await supabase
+      .from('brvm_intraday_patterns')
+      .select(
+        `
       code,
       pattern_type,
       confidence_level,
@@ -76,68 +78,73 @@ export async function getPatternsForDate(dateMarche: string): Promise<PatternScr
       date_marche,
       validation_status
     `
-    )
-    .eq('date_marche', dateMarche)
-    .eq('validation_status', 'VALID')
-    .order('confidence_level', { ascending: false })
-    .order('quality_score', { ascending: false });
+      )
+      .eq('date_marche', dateMarche)
+      .eq('validation_status', 'VALID')
+      .order('confidence_level', { ascending: false })
+      .order('quality_score', { ascending: false })
+      .limit(50);
 
-  if (error) {
-    console.error('Error fetching patterns:', error);
+    if (error) {
+      console.error('Error fetching patterns:', error);
+      return [];
+    }
+
+    // Fetch pattern scores separately for advisor delta
+    const codes = [...new Set((data || []).map((p) => p.code))];
+    if (codes.length === 0) return [];
+
+    const { data: scores, error: scoresError } = await supabase
+      .from('brvm_pattern_scores')
+      .select('code, advisor_sub_score_delta')
+      .eq('date_marche', dateMarche)
+      .in('code', codes);
+
+    if (scoresError) {
+      console.error('Error fetching pattern scores:', scoresError);
+    }
+
+    const scoreMap = new Map<string, number>();
+    (scores || []).forEach((s) => {
+      scoreMap.set(s.code, s.advisor_sub_score_delta || 0);
+    });
+
+    // Group patterns by code to count detections per code
+    const patternsByCode = new Map<string, typeof data>();
+    (data || []).forEach((p) => {
+      const key = p.code;
+      if (!patternsByCode.has(key)) {
+        patternsByCode.set(key, []);
+      }
+      patternsByCode.get(key)!.push(p);
+    });
+
+    // Transform data for screener display (one row per code)
+    const result: PatternScreenerData[] = [];
+    patternsByCode.forEach((patterns, code) => {
+      const primary = patterns[0];
+      result.push({
+        code,
+        pattern_type: primary.pattern_type,
+        confidence_level: primary.confidence_level,
+        advisor_delta: scoreMap.get(code) || 0,
+        date_marche: primary.date_marche,
+        quality_score: primary.quality_score,
+        explanation_fr: primary.explanation_fr || 'Pattern détecté',
+        detected_count: patterns.length,
+      });
+    });
+
+    return result;
+  } catch (err) {
+    console.error('Error in getPatternsForDate:', err);
     return [];
   }
-
-  // Fetch pattern scores separately for advisor delta
-  const codes = [...new Set((data || []).map((p) => p.code))];
-  if (codes.length === 0) return [];
-
-  const { data: scores, error: scoresError } = await supabase
-    .from('brvm_pattern_scores')
-    .select('code, advisor_sub_score_delta')
-    .eq('date_marche', dateMarche)
-    .in('code', codes);
-
-  if (scoresError) {
-    console.error('Error fetching pattern scores:', scoresError);
-  }
-
-  const scoreMap = new Map<string, number>();
-  (scores || []).forEach((s) => {
-    scoreMap.set(s.code, s.advisor_sub_score_delta || 0);
-  });
-
-  // Group patterns by code to count detections per code
-  const patternsByCode = new Map<string, typeof data>();
-  (data || []).forEach((p) => {
-    const key = p.code;
-    if (!patternsByCode.has(key)) {
-      patternsByCode.set(key, []);
-    }
-    patternsByCode.get(key)!.push(p);
-  });
-
-  // Transform data for screener display (one row per code)
-  const result: PatternScreenerData[] = [];
-  patternsByCode.forEach((patterns, code) => {
-    // Take the first (most confident) pattern for display
-    const primary = patterns[0];
-    result.push({
-      code,
-      pattern_type: primary.pattern_type,
-      confidence_level: primary.confidence_level,
-      advisor_delta: scoreMap.get(code) || 0,
-      date_marche: primary.date_marche,
-      quality_score: primary.quality_score,
-      explanation_fr: primary.explanation_fr || 'Pattern détecté',
-      detected_count: patterns.length,
-    });
-  });
-
-  return result;
 }
 
 /**
  * Get patterns for multiple codes (for dashboard ticker integration)
+ * Limited to top 5 codes to avoid performance issues
  */
 export async function getPatternsByCode(
   codes: string[],
@@ -145,38 +152,47 @@ export async function getPatternsByCode(
 ): Promise<Record<string, PatternScreenerData[]>> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from('brvm_intraday_patterns')
-    .select('*')
-    .in('code', codes)
-    .eq('date_marche', dateMarche)
-    .eq('validation_status', 'VALID');
+  try {
+    // Limit to first 5 codes to avoid query bloat
+    const codesToFetch = codes.slice(0, 5);
 
-  if (error) {
-    console.error('Error fetching patterns by code:', error);
+    const { data, error } = await supabase
+      .from('brvm_intraday_patterns')
+      .select('*')
+      .in('code', codesToFetch)
+      .eq('date_marche', dateMarche)
+      .eq('validation_status', 'VALID')
+      .limit(50);
+
+    if (error) {
+      console.error('Error fetching patterns by code:', error);
+      return {};
+    }
+
+    const grouped: Record<string, PatternScreenerData[]> = {};
+    codes.forEach((code) => {
+      grouped[code] = [];
+    });
+
+    (data || []).forEach((p) => {
+      if (!grouped[p.code]) grouped[p.code] = [];
+      grouped[p.code].push({
+        code: p.code,
+        pattern_type: p.pattern_type,
+        confidence_level: p.confidence_level,
+        advisor_delta: 0,
+        date_marche: p.date_marche,
+        quality_score: p.quality_score,
+        explanation_fr: p.explanation_fr || 'Pattern détecté',
+        detected_count: 1,
+      });
+    });
+
+    return grouped;
+  } catch (err) {
+    console.error('Error in getPatternsByCode:', err);
     return {};
   }
-
-  const grouped: Record<string, PatternScreenerData[]> = {};
-  codes.forEach((code) => {
-    grouped[code] = [];
-  });
-
-  (data || []).forEach((p) => {
-    if (!grouped[p.code]) grouped[p.code] = [];
-    grouped[p.code].push({
-      code: p.code,
-      pattern_type: p.pattern_type,
-      confidence_level: p.confidence_level,
-      advisor_delta: 0, // Would fetch separately if needed
-      date_marche: p.date_marche,
-      quality_score: p.quality_score,
-      explanation_fr: p.explanation_fr || 'Pattern détecté',
-      detected_count: 1,
-    });
-  });
-
-  return grouped;
 }
 
 /**
