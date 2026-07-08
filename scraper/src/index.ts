@@ -17,6 +17,8 @@
  *   tsx src/index.ts dividends --mock      # dividendes mock
  *   tsx src/index.ts alerts                # évalue les alertes et notifie
  *   tsx src/index.ts alerts --mock         # notification de démonstration
+ *   tsx src/index.ts forum-trending        # calcule les scores de tendance du forum
+ *   tsx src/index.ts forum-trending --mock # démo (sans Supabase)
  *   tsx src/index.ts publications          # ingère les publications BDFIN
  *   tsx src/index.ts publications --mock   # publications mock
  *   tsx src/index.ts backfill              # backfill tous les codes GitHub
@@ -60,6 +62,7 @@ import { runValidation } from './validation/runValidation.js';
 import { runPaperTradingAuto } from './runners/runPaperTradingAuto.js';
 import { runBrief } from './brief/runBrief.js';
 import { runVeille } from './runners/runVeille.js';
+import { runForumTrending } from './crons/forum-trending.js';
 // runMonthlyReports importé dynamiquement (dépend de pdfkit) — voir case 'monthly-reports'.
 import { isIsoDate } from './utils/dates.js';
 import { logger } from './logger.js';
@@ -284,6 +287,29 @@ async function main(): Promise<number> {
       const res = await runAlerts({ mock });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'forum-trending': {
+      const res = await monitored(
+        { code: 'forum-trending', label: 'Forum Trending Scores' },
+        async () => {
+          const r = await runForumTrending({ mock });
+          const outcomeStatus = r.status === 'failed' ? 'failed' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.postsProcessed,
+              rows_upserted: r.postsUpdated,
+              metadata: {
+                status: r.status,
+                postsProcessed: r.postsProcessed,
+                postsUpdated: r.postsUpdated,
+              },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'brief': {
       const res = await runBrief({ force: rest.includes('--force') });
       return res.status === 'failed' ? 1 : 0;
@@ -467,7 +493,7 @@ async function main(): Promise<number> {
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | publications | backtest | backfill | validate | notations | details | news | veille | monthly-reports',
+        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | forum-trending | publications | backtest | backfill | validate | notations | details | news | veille | monthly-reports',
       );
       return 1;
   }

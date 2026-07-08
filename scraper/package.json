@@ -35,6 +35,8 @@
     "cotations": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts cotations",
     "alerts": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts alerts",
     "alerts:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts alerts --mock",
+    "forum-trending": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts forum-trending",
+    "forum-trending:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts forum-trending --mock",
     "backfill": "tsx src/index.ts backfill",
     "backfill:dry": "tsx src/index.ts backfill --dry-run",
     "validate": "tsx src/index.ts validate",

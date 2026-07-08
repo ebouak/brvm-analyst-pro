@@ -1,0 +1,64 @@
+name: Hourly Forum Trending Score Calculation
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    # Run every hour at minute 0 (00:00, 01:00, 02:00, etc. UTC)
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: forum-trending
+  cancel-in-progress: false
+
+jobs:
+  forum-trending:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 1
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Run forum trending calculation with retry
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: |
+          MAX_RETRIES=3
+          RETRY_DELAY=30
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $attempt/$MAX_RETRIES..."
+            if npm run forum-trending; then
+              echo "✅ Forum trending calculation succeeded"
+              exit 0
+            else
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                echo "⚠️ Attempt $attempt failed, retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+          echo "❌ Forum trending calculation failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Notify failure on Slack
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"⚠️ Hourly Forum Trending Calculation FAILED after 3 retries at $(date -u +'%H:%M UTC'). Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi
