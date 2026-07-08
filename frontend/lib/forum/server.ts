@@ -48,13 +48,16 @@ export async function getPostVotes(
   return { counts, mine };
 }
 
-/** Profils (pseudonymes) des auteurs, indexés par id. */
+/** Profils (pseudonymes) des auteurs, indexés par user_id. */
 async function loadAuthors(ids: (string | null)[]): Promise<Map<string, AuthorProfile>> {
   const unique = [...new Set(ids.filter((x): x is string => !!x))];
   const map = new Map<string, AuthorProfile>();
   if (unique.length === 0) return map;
   const supabase = createPublicClient();
-  const { data } = await supabase.from('profiles').select('id, display_name').in('id', unique);
-  for (const p of (data ?? []) as AuthorProfile[]) map.set(p.id, p);
+  const { data } = await supabase
+    .from('author_profiles')
+    .select('user_id, avatar_url, display_name, is_verified, reputation_score, created_at, updated_at')
+    .in('user_id', unique);
+  for (const p of (data ?? []) as AuthorProfile[]) map.set(p.user_id, p);
   return map;
 }

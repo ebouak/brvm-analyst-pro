@@ -30,7 +30,7 @@ function initials(name: string): string {
  */
 export function Avatar({ profile, size = 36 }: { profile: AuthorProfile | null; size?: number }) {
   const name = displayName(profile);
-  const [fg, bg] = profile ? PALETTE[seedIndex(profile.id)]! : ['#8b93a7', '#161922'];
+  const [fg, bg] = profile ? PALETTE[seedIndex(profile.user_id)]! : ['#8b93a7', '#161922'];
   return (
     <span
       aria-hidden="true"

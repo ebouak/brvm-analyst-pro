@@ -17,7 +17,7 @@ function shortTag(id: string): string {
 export function displayName(profile: AuthorProfile | null): string {
   if (!profile) return 'Utilisateur supprimé';
   const name = (profile.display_name ?? '').trim();
-  return name.length > 0 ? name : `Membre-${shortTag(profile.id)}`;
+  return name.length > 0 ? name : `Membre-${shortTag(profile.user_id)}`;
 }
 
 /** Temps écoulé en français compact : « à l'instant », « 3 h », « 2 j », « 5 sem ». */
