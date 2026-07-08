@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/server/rbac';
 
 export async function GET(req: Request) {
   try {
-    await requireAdmin('admin.tools');
+    await requireAdmin();
 
     const cookieStore = await cookies();
     const supabase = createServerClient(

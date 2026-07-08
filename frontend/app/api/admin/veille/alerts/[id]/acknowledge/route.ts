@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await requireAdmin('admin.tools');
+    const user = await requireAdmin();
 
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -34,7 +34,7 @@ export async function POST(
       .from('brvm_veille_alerts')
       .update({
         acknowledged_at: new Date().toISOString(),
-        acknowledged_by: user.id,
+        acknowledged_by: user.userId,
       })
       .eq('id', alertId);
 

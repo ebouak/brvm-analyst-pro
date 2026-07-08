@@ -2,7 +2,7 @@ import { requireAdmin } from '@/lib/server/rbac';
 
 export async function POST(req: Request) {
   try {
-    await requireAdmin('admin.tools');
+    await requireAdmin();
 
     const { source, query } = await req.json();
 
