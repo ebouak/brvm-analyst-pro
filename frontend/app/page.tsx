@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { unstable_cache } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
@@ -187,6 +188,13 @@ async function getData() {
   return { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows };
 }
 
+// Le layout racine lit la session (cookies) → la route est rendue dynamique et
+// l'ISR (`revalidate = 300`) est sans effet sur le HTML. On met donc les
+// DONNÉES en cache serveur 5 min : les ~10 requêtes Supabase ci-dessus ne
+// tournent plus à chaque visite. Sûr : getData n'utilise que le client public
+// (aucun cookie, aucune donnée personnalisée).
+const getCachedData = unstable_cache(getData, ['landing-data'], { revalidate: 300 });
+
 /* ── Petits composants de section (serveur) ──────────────────────────── */
 
 function MoverLine({ m }: { m: MoverRow }) {
@@ -235,7 +243,7 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getData();
+  const { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
   const sgiDirectory = await getSgiDirectory();

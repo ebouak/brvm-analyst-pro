@@ -173,29 +173,34 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const isAdmin = user?.email === 'ebouak@gmail.com';
-  let isPremium = isAdmin;
+  // Session + profil. CRITIQUE : ce bloc ne doit JAMAIS jeter — une exception
+  // ici fait tomber TOUTES les pages sur l'error boundary globale (« Une
+  // erreur est survenue »). En cas d'indisponibilité Auth/DB, on retombe sur
+  // l'état déconnecté (shell public) au lieu de casser le site.
+  let hasUser = false;
+  let isAdmin = false;
+  let isPremium = false;
   let onboardingDone = true;
   let initialBeginner = false;
-  if (user && !isPremium) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_premium, onboarding_done, mode_debutant')
-      .eq('id', user.id)
-      .maybeSingle();
-    isPremium = profile?.is_premium ?? false;
-    onboardingDone = profile?.onboarding_done ?? false;
-    initialBeginner = profile?.mode_debutant ?? false;
-  } else if (user && isPremium) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarding_done, mode_debutant')
-      .eq('id', user.id)
-      .maybeSingle();
-    onboardingDone = profile?.onboarding_done ?? true; // superadmin = skip onboarding
-    initialBeginner = profile?.mode_debutant ?? false;
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    hasUser = Boolean(user);
+    isAdmin = user?.email === 'ebouak@gmail.com';
+    isPremium = isAdmin;
+    if (user) {
+      // Une seule requête profiles (au lieu de deux variantes) — -1 round trip.
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_premium, onboarding_done, mode_debutant')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (!isPremium) isPremium = profile?.is_premium ?? false;
+      onboardingDone = profile?.onboarding_done ?? isAdmin; // superadmin = skip onboarding
+      initialBeginner = profile?.mode_debutant ?? false;
+    }
+  } catch {
+    // Auth/DB injoignable : rendu public par défaut, jamais d'écran d'erreur global.
   }
 
   return (
@@ -238,7 +243,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ConditionalShell isPremium={isPremium} isAdmin={isAdmin}>{children}</ConditionalShell>
             <CommandPaletteProvider />
             <ServiceWorkerRegister />
-            {user && !onboardingDone && <OnboardingModal />}
+            {hasUser && !onboardingDone && <OnboardingModal />}
             <CookieBanner />
             <PostHogInit />
           </BeginnerModeProvider>

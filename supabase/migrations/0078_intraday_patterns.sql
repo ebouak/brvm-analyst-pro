@@ -237,6 +237,24 @@ create table if not exists public.pattern_error_log (
 create index if not exists idx_pattern_error_log_date_phase
   on public.pattern_error_log (date_marche, phase);
 
+-- ---------------------------------------------------------------------------
+-- 10. RLS : lecture publique, écriture service_role uniquement
+-- ---------------------------------------------------------------------------
+
+alter table public.brvm_intraday_patterns enable row level security;
+alter table public.brvm_pattern_scores enable row level security;
+
+drop policy if exists "intraday_patterns_public_read" on public.brvm_intraday_patterns;
+create policy "intraday_patterns_public_read"
+  on public.brvm_intraday_patterns for select using (true);
+
+drop policy if exists "pattern_scores_public_read" on public.brvm_pattern_scores;
+create policy "pattern_scores_public_read"
+  on public.brvm_pattern_scores for select using (true);
+
+revoke insert, update, delete on public.brvm_intraday_patterns from anon, authenticated;
+revoke insert, update, delete on public.brvm_pattern_scores from anon, authenticated;
+
 -- ============================================================================
 -- End of migration 0078_intraday_patterns.sql
 -- ============================================================================
