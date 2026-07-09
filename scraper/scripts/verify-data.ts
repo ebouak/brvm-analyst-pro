@@ -7,6 +7,7 @@
  *   intraday          — bloquant : ≥ 10 cotations pour la séance du jour
  *   watchdog          — non bloquant : émet needsRetrigger=true/false (GITHUB_OUTPUT)
  *   daily             — bloquant : ≥ 1 cotation pour la séance du jour
+ *   score             — bloquant : ≥ 1 signal calculé pour la séance du jour
  *   monthly <YYYY-MM> — informatif : nb de rapports générés pour le mois
  *   paper             — informatif : nb de positions ouvertes aujourd'hui
  */
@@ -89,6 +90,23 @@ async function main(): Promise<void> {
       break;
     }
 
+    case 'score': {
+      const { count, error } = await client
+        .from('signals_daily')
+        .select('*', { count: 'exact', head: true })
+        .eq('date_marche', today);
+      if (error) {
+        console.error('❌ Échec requête:', error.message);
+        process.exit(1);
+      }
+      if ((count ?? 0) === 0) {
+        console.error(`❌ Aucun signal calculé pour ${today}`);
+        process.exit(1);
+      }
+      console.log(`✅ ${count} signaux pour la séance du ${today}`);
+      break;
+    }
+
     case 'monthly': {
       const month = process.argv[3];
       if (!month || !/^\d{4}-\d{2}$/.test(month)) {
@@ -121,7 +139,7 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | monthly | paper`);
+      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | score | monthly | paper`);
       process.exit(1);
   }
 }
