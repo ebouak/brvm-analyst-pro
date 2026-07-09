@@ -2,43 +2,46 @@
 
 import { useEffect } from 'react';
 
+/**
+ * DÉSACTIVATION COMPLÈTE du service worker.
+ *
+ * Le SW a causé de façon répétée des bundles périmés → chunks 404 → clics /
+ * navigations morts jusqu'à un vidage de cache manuel. Son seul apport restant
+ * (cache d'assets déjà couvert par le CDN Vercel, + push notifications non
+ * critiques) ne justifie pas ce risque sur un produit de données marché.
+ *
+ * Ce composant ne réenregistre plus rien : il DÉSENREGISTRE tout SW existant et
+ * purge tous les caches à chaque chargement. Résultat : n'importe quel
+ * navigateur encore coincé sur un ancien SW se répare AUTOMATIQUEMENT, sans
+ * aucune action de l'utilisateur, et le problème ne peut plus revenir.
+ */
 export default function ServiceWorkerRegister() {
   useEffect(() => {
-    if (!('serviceWorker' in navigator) || process.env.NODE_ENV !== 'production') return;
-
-    // Auto-récupération des onglets coincés sur un ANCIEN service worker.
-    // On ne recharge QUE si un SW contrôlait déjà la page (hadController) : c'est
-    // le cas « stuck » (v1/v2 sert un bundle périmé → navigations mortes). Dès
-    // que le nouveau SW prend le contrôle, on recharge UNE fois pour repartir
-    // propre. Pas de reload au tout premier install (hadController = false) ni
-    // de boucle (garde `refreshing`).
-    const hadController = !!navigator.serviceWorker.controller;
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!hadController || refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    });
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
 
     navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => {
-        // Un nouveau SW est déjà installé et attend (ancien SW encore actif) :
-        // on le force à prendre la main immédiatement → déclenche
-        // controllerchange → reload → onglet débloqué sans action utilisateur.
-        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        reg.addEventListener('updatefound', () => {
-          const nw = reg.installing;
-          if (!nw) return;
-          nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              nw.postMessage({ type: 'SKIP_WAITING' });
-            }
-          });
-        });
+      .getRegistrations()
+      .then((registrations) => {
+        const hadServiceWorker = registrations.length > 0;
+
+        // Désenregistre tout service worker existant (v1/v2/v3…).
+        for (const registration of registrations) registration.unregister();
+
+        // Purge tous les caches ouverts par les anciens SW.
+        if ('caches' in window) {
+          caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)));
+        }
+
+        // Si un SW contrôlait cette page (bundle potentiellement périmé), on
+        // recharge UNE fois après l'avoir retiré → on repart sur du frais servi
+        // directement par le CDN. Pas de boucle : au prochain chargement il n'y
+        // a plus de registration → hadServiceWorker = false.
+        if (hadServiceWorker && navigator.serviceWorker.controller) {
+          window.location.reload();
+        }
       })
-      .catch((err) => {
-        console.error('[SW] Registration failed:', err);
+      .catch(() => {
+        /* API SW indisponible (navigation privée stricte) : rien à faire. */
       });
   }, []);
 
