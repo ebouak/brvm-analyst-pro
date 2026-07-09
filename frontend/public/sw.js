@@ -1,52 +1,35 @@
 /* Service Worker — WESTBOURSE
- * Rôle : Web Push notifications + cache des seuls assets immuables.
+ * Rôle : UNIQUEMENT les Web Push notifications.
  *
- * ⚠️ NE JAMAIS remettre de cache sur le HTML ou les payloads RSC (?_rsc=) :
- * l'ancien stale-while-revalidate servait des pages d'un ANCIEN déploiement
- * → chunks JS 404, hydration cassée, clics morts jusqu'au hard-refresh.
- * (Bug corrigé 2026-07-09 — bump du nom de cache pour purger les clients.)
+ * ⚠️ AUCUN handler `fetch` : le SW n'intercepte plus RIEN (ni HTML, ni RSC,
+ * ni chunks JS, ni images). Toute mise en cache de navigation par le SW a
+ * causé des bundles périmés → chunks 404 → clics/navigations morts jusqu'au
+ * hard-refresh (2026-07-09, deux itérations). Le CDN Vercel met déjà en cache
+ * les assets `/_next/static/` avec des headers immuables ; le SW n'apportait
+ * rien et cassait la navigation. On garde donc SEULEMENT le push.
+ * NE JAMAIS rajouter d'écouteur `fetch` ici.
  */
 
-const CACHE = 'brvm-v2';
+const CACHE = 'brvm-v3';
 
-// ─── Install : activation immédiate (pas de précache HTML) ───────────────────
+// ─── Install : activation immédiate ──────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting());
 });
 
-// ─── Activate : purge des anciens caches (dont brvm-v1 périmé) ───────────────
+// ─── Activate : purge de TOUS les anciens caches (v1/v2 périmés) + claim ─────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-      )
+      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-// ─── Fetch : cache-first UNIQUEMENT pour /_next/static/ (fichiers hashés,
-// immuables par construction). Tout le reste (HTML, RSC, images, API) passe
-// directement au réseau — le CDN Vercel gère déjà leur cache correctement. ───
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
-  if (!url.pathname.startsWith('/_next/static/')) return;
-
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((resp) => {
-        if (resp.ok) {
-          const clone = resp.clone();
-          caches.open(CACHE).then((c) => c.put(event.request, clone));
-        }
-        return resp;
-      });
-    })
-  );
+// ─── Message : permet au client de forcer l'activation d'un SW en attente ────
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // ─── Push : affichage de la notification ─────────────────────────────────────
