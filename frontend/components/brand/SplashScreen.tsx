@@ -15,7 +15,8 @@ export default function SplashScreen() {
     sessionStorage.setItem(KEY, '1');
     if (reduce) return; // no splash for reduced-motion users
     setShow(true);
-    const t = setTimeout(() => setShow(false), 2200);
+    // Court : le splash ne doit jamais donner une impression de lenteur.
+    const t = setTimeout(() => setShow(false), 1000);
     return () => clearTimeout(t);
   }, []);
 
@@ -28,7 +29,7 @@ export default function SplashScreen() {
         position: 'fixed', inset: 0, zIndex: 100,
         background: '#0c1d2e', display: 'flex',
         alignItems: 'center', justifyContent: 'center',
-        animation: 'wslogo-splash-out .4s ease 1.8s forwards',
+        animation: 'wslogo-splash-out .35s ease .6s forwards',
       }}
     >
       <AnimatedLogo size={104} variant="lockup" animate loop={false} background={false} />

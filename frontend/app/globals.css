@@ -183,6 +183,8 @@ body {
   animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+/* Barre de progression indéterminée du loading global (app/loading.tsx) */
+@keyframes loading-slide { 0% { transform: translateX(-120%); } 100% { transform: translateX(420%); } }
 @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(63, 225, 139, 0.55); } 60% { box-shadow: 0 0 0 10px rgba(63, 225, 139, 0); } }
 /* Logo BRVM clignotant sur la Côte d'Ivoire (hero spotlight) */
