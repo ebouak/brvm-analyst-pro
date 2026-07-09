@@ -16,10 +16,9 @@ export async function fetchTwitterTrends(keywords: string[]): Promise<VeilleDige
   const twitterBearerToken = process.env.TWITTER_BEARER_TOKEN;
 
   if (!twitterBearerToken && !twitterApiKey) {
-    logger.info(
-      'Twitter API key not configured, using mock data'
-    );
-    return fetchTwitterTrendsMock();
+    // JAMAIS de mock en mode réel (données inventées → interdites en base).
+    logger.warn('Twitter : clé absente → source ignorée (aucune donnée)');
+    return [];
   }
 
   // Search terms relevant to BRVM and trading

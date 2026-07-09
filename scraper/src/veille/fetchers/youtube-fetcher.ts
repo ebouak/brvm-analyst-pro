@@ -11,10 +11,9 @@ export async function fetchYouTubeTutorials(keywords: string[]): Promise<VeilleD
   const youtubeApiKey = process.env.YOUTUBE_API_KEY;
 
   if (!youtubeApiKey) {
-    logger.info(
-      'YouTube API key not configured, using mock data'
-    );
-    return fetchYouTubeTutorialsMock();
+    // JAMAIS de mock en mode réel (données inventées → interdites en base).
+    logger.warn('YouTube : clé absente → source ignorée (aucune donnée)');
+    return [];
   }
 
   // Search for trading and technical analysis tutorials

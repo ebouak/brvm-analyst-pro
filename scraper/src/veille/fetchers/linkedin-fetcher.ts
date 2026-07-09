@@ -11,20 +11,17 @@ export async function fetchLinkedInIntelligence(): Promise<VeilleDigestRow[]> {
 
   const linkedinApiKey = process.env.LINKEDIN_API_KEY;
 
+  // Pas d'implémentation API LinkedIn réelle (accès partenaire requis). Tant
+  // qu'elle n'existe pas, on retourne VIDE — JAMAIS de mock en mode réel :
+  // écrire des données inventées en base violerait le principe « données
+  // honnêtes » du projet. Le mock reste dispo via fetchLinkedInIntelligenceMock
+  // pour le mode --mock explicite de l'orchestrateur.
   if (!linkedinApiKey) {
-    logger.info(
-      'LinkedIn API key not configured, using mock data'
-    );
-    return fetchLinkedInIntelligenceMock();
+    logger.warn('LinkedIn : clé absente → source ignorée (aucune donnée)');
+    return [];
   }
-
-  // LinkedIn API would require official partnership
-  // For now, return mock data
-  logger.warn(
-    'LinkedIn full API access requires special partnership. Using mock data.'
-  );
-
-  return fetchLinkedInIntelligenceMock();
+  logger.warn('LinkedIn : API réelle non implémentée (accès partenaire) → source ignorée');
+  return [];
 }
 
 /**
