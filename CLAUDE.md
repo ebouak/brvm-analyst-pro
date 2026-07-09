@@ -268,6 +268,15 @@ scraper verts.
   que les pages gèrent l'état vide.
 - **RLS** : ne pas exposer la clé `service_role` au frontend ; vérifier les
   policies si on ajoute une table user-scopée.
+- **Discipline RLS (obligatoire, pentest 2026-07-09)** : toute nouvelle **table
+  OU vue** touchant des données utilisateur = RLS activée **+ policy explicite**.
+  Les **vues** ne doivent JAMAIS être en `SECURITY DEFINER` (elles contournent la
+  RLS) → utiliser `security_invoker = true`. Sur les **fonctions** sensibles,
+  `EXECUTE` est accordé à `PUBLIC` par défaut → `revoke execute … from public`
+  (pas seulement `from anon`). Après CHAQUE migration : lancer le scan
+  `get_advisors` (type security) **et** tester la table/vue avec la **clé anon**
+  (`curl …/rest/v1/<objet>` sans login) avant de merger. Voir migrations
+  `0079`/`0080` pour le modèle.
 - **Cohérence colonnes** : un upsert doit refléter exactement les colonnes de la
   migration correspondante.
 
