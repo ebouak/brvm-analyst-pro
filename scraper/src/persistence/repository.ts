@@ -176,6 +176,29 @@ export async function upsertActions(snapshotOrActions: any): Promise<number> {
   return rows.length;
 }
 
+/**
+ * Historise une capture intraday : AJOUTE (append) une ligne par action dans
+ * brvm_intraday_snapshots, horodatée à `now()`. Contrairement à upsertActions
+ * (qui écrase brvm_actions_daily sur (code,date_marche)), on conserve ici chaque
+ * passage de séance → l'historique 15 min nécessaire à la reconstruction de
+ * chandelles et à la détection de patterns.
+ */
+export async function insertIntradaySnapshots(snapshot: MarketSnapshot): Promise<number> {
+  const sb = getSupabase();
+  const rows = snapshot.actions
+    .filter((a) => a.cours_jour != null)
+    .map((a) => ({
+      code: a.code,
+      date_marche: snapshot.date_marche,
+      close: a.cours_jour,
+      volume: a.volume ?? 0,
+    }));
+  if (rows.length === 0) return 0;
+  const { error } = await sb.from('brvm_intraday_snapshots').insert(rows);
+  if (error) throw new Error(`insert brvm_intraday_snapshots: ${error.message}`);
+  return rows.length;
+}
+
 export async function upsertObligations(snapshot: MarketSnapshot): Promise<number>;
 export async function upsertObligations(obligations: Array<{
   code: string;

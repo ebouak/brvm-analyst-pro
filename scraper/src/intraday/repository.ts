@@ -180,30 +180,35 @@ export async function loadSnapshots(
 ): Promise<Array<{ timestamp: Date; close: number; volume: number }>> {
   const client = getSupabase();
 
-  // Query brvm_actions_daily for the given code and date
-  // Note: brvm_actions_daily contains aggregated daily data, but may have
-  // intraday snapshot history in metadata or related tables.
-  // For now, return empty array as placeholder (to be implemented with full snapshot schema)
+  // Historique des captures 15 min alimenté par le scraper intraday
+  // (brvm_intraday_snapshots : une ligne par code à chaque passage de séance).
   const { data, error } = await client
-    .from('brvm_actions_daily')
-    .select('*')
+    .from('brvm_intraday_snapshots')
+    .select('captured_at, close, volume')
     .eq('code', code)
     .eq('date_marche', dateMarche)
-    .limit(1);
+    .order('captured_at', { ascending: true });
 
   if (error) {
     logger.error({ error }, `Failed to load snapshots for ${code} on ${dateMarche}`);
     return [];
   }
 
-  // TODO: Parse snapshot data from response when schema is finalized
-  if (!data || data.length === 0) {
+  const snapshots = (data ?? [])
+    .filter((r: { close: number | null }) => r.close != null)
+    .map((r: { captured_at: string; close: number; volume: number | null }) => ({
+      timestamp: new Date(r.captured_at),
+      close: Number(r.close),
+      volume: Number(r.volume ?? 0),
+    }));
+
+  if (snapshots.length === 0) {
     logger.warn(`No snapshots found for ${code} on ${dateMarche}`);
     return [];
   }
 
-  logger.info(`Loaded ${data.length} snapshots for ${code}`);
-  return [];
+  logger.info(`Loaded ${snapshots.length} snapshots for ${code}`);
+  return snapshots;
 }
 
 /**
@@ -218,11 +223,13 @@ export async function loadActiveCodes(dateMarche?: string): Promise<string[]> {
   // Query instruments that have trading activity on the given date
   const date = dateMarche || new Date().toISOString().split('T')[0];
 
+  // brvm_actions_daily a déjà une seule ligne par (code, date_marche) → les codes
+  // sont déjà distincts, pas besoin de DISTINCT (méthode inexistante dans
+  // supabase-js — c'était la cause du crash « .distinct is not a function »).
   const { data, error } = await client
     .from('brvm_actions_daily')
     .select('code')
-    .eq('date_marche', date)
-    .distinct();
+    .eq('date_marche', date);
 
   if (error) {
     logger.error({ error }, `Failed to load active codes for ${date}`);
@@ -234,7 +241,7 @@ export async function loadActiveCodes(dateMarche?: string): Promise<string[]> {
     return [];
   }
 
-  const codes = data.map((row: any) => row.code).filter(Boolean);
+  const codes = [...new Set(data.map((row: { code: string }) => row.code).filter(Boolean))];
   logger.info(`Loaded ${codes.length} active codes for ${date}`);
   return codes;
 }

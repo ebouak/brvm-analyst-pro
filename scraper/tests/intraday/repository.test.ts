@@ -1,4 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Test UNITAIRE : on mocke getSupabase pour ne JAMAIS écrire dans la vraie base.
+// (Ces tests écrivaient auparavant de faux patterns/scores PALC/SEMC en prod.)
+// Le client factice valide la chaîne .from().upsert().select() et renvoie un
+// count, ce qui exerce le mapping des colonnes sans effet de bord.
+vi.mock('../../src/persistence/supabase.js', () => ({
+  getSupabase: () => ({
+    from: () => ({
+      upsert: () => ({
+        select: () => Promise.resolve({ data: [{}], error: null, count: 1 }),
+      }),
+    }),
+  }),
+}));
+
 import { upsertRawPatterns, upsertQualifiedPatterns, upsertPatternScores } from '../../src/intraday/repository.js';
 import type { RawPattern, QualifiedPattern } from '../../src/intraday/orchestrate.js';
 import type { PatternScore } from '../../src/intraday/aggregate.js';

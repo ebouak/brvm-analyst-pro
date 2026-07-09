@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { logger } from '../logger.js';
 import { parseBrvmPublic, parseBrvmResumeIndices } from './brvmPublic.js';
-import { ensureIndexInstruments, upsertActions, upsertIndices, upsertMarketSummary } from '../persistence/repository.js';
+import { ensureIndexInstruments, upsertActions, upsertIndices, upsertMarketSummary, insertIntradaySnapshots } from '../persistence/repository.js';
 import type { IndiceRow } from '../types.js';
 
 const BRVM_PUBLIC_URL = 'https://www.brvm.org/fr/cours-actions/0';
@@ -72,6 +72,14 @@ export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbAc
     // instruments d'actions existent déjà ; pas besoin de les réécrire ici.
     await ensureIndexInstruments(snapshot.indices);
     await upsertActions(snapshot);
+    // Historise cette capture (append) pour la détection de patterns intraday.
+    // Non bloquant : un échec ne doit pas casser le scrape des cours.
+    try {
+      const nbSnap = await insertIntradaySnapshots(snapshot);
+      logger.info({ nbSnap }, 'intraday : snapshots historisés');
+    } catch (err) {
+      logger.warn({ err: (err as Error).message }, 'intraday : historisation snapshots échouée');
+    }
     if (snapshot.indices.length > 0) await upsertIndices(snapshot);
     nbSummary = await upsertMarketSummary(snapshot);
   }
