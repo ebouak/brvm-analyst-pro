@@ -16,8 +16,37 @@ import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'worldBankPinkSheet' });
 
-const PINK_SHEET_URL =
-  'https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx';
+// Le World Bank change l'identifiant du document du Pink Sheet à CHAQUE
+// publication mensuelle → une URL figée gèle les données (bug vécu : bloqué à
+// déc. 2025). On découvre donc l'URL courante depuis la page publique, avec un
+// repli sur une édition récente connue.
+const CMO_PAGE_URL = 'https://www.worldbank.org/en/research/commodity-markets';
+const PINK_SHEET_FALLBACK_URL =
+  'https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Historical-Data-Monthly.xlsx';
+const BROWSER_UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36';
+
+/** Découvre l'URL courante du fichier mensuel depuis la page publique WB. */
+async function discoverPinkSheetUrl(): Promise<string> {
+  try {
+    const res = await axios.get(CMO_PAGE_URL, {
+      responseType: 'text',
+      timeout: 40_000,
+      headers: { 'User-Agent': BROWSER_UA },
+    });
+    const m = String(res.data).match(
+      /https:\/\/thedocs\.worldbank\.org\/[^"' ]*CMO-Historical-Data-Monthly\.xlsx/i,
+    );
+    if (m) {
+      log.info({ url: m[0] }, 'URL Pink Sheet courante découverte');
+      return m[0];
+    }
+    log.warn('Lien Pink Sheet introuvable sur la page WB → URL de repli');
+  } catch (err) {
+    log.warn({ err: (err as Error).message }, 'Découverte URL Pink Sheet échouée → repli');
+  }
+  return PINK_SHEET_FALLBACK_URL;
+}
 
 export interface CommodityPriceRow {
   commodity: 'cocoa' | 'palm_oil' | 'sugar' | 'rubber';
@@ -108,10 +137,11 @@ export function parsePinkSheet(buffer: ArrayBuffer | Buffer): CommodityPriceRow[
 
 /** Télécharge puis parse le Pink Sheet. */
 export async function fetchPinkSheet(): Promise<CommodityPriceRow[]> {
-  const res = await axios.get<ArrayBuffer>(PINK_SHEET_URL, {
+  const url = await discoverPinkSheetUrl();
+  const res = await axios.get<ArrayBuffer>(url, {
     responseType: 'arraybuffer',
     timeout: 60_000,
-    headers: { 'User-Agent': 'BRVMAnalystPro/1.0' },
+    headers: { 'User-Agent': BROWSER_UA },
   });
   return parsePinkSheet(Buffer.from(res.data));
 }
