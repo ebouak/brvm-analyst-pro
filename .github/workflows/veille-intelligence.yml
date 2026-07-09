@@ -1,0 +1,45 @@
+name: Veille Intelligence (multi-sources)
+
+# Orchestrateur TypeScript de veille multi-sources (GitHub, RSS, StackOverflow,
+# Twitter, LinkedIn, YouTube) → table brvm_veille_digest, lue par /admin/veille-brvm.
+# Distinct de veille.yml (pipeline Python → brvm_news, actualités marché).
+#
+# Sources SANS clé (GitHub, RSS, StackOverflow) : actives immédiatement.
+# Sources AVEC clé (Twitter, LinkedIn, YouTube) : actives dès que les secrets
+# correspondants sont renseignés ; sinon le fetcher est ignoré (pas d'échec).
+
+on:
+  schedule:
+    # Lun–Ven 06:00 UTC (avant la veille news marché de 07:00)
+    - cron: '0 6 * * 1-5'
+  workflow_dispatch: {}
+
+concurrency:
+  group: veille-intelligence
+  cancel-in-progress: false
+
+jobs:
+  veille-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+      - name: Run veille intelligence
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Optionnels : sans eux, les fetchers correspondants sont ignorés.
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          LINKEDIN_API_KEY: ${{ secrets.LINKEDIN_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          LOG_LEVEL: info
+        run: npm run veille
