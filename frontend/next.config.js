@@ -65,11 +65,11 @@ const nextConfig = {
           // Isolation du contexte de navigation (anti XS-Leaks / cross-window).
           // 'allow-popups' préserve les flux OAuth/popup éventuels.
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
-          // Trusted Types en REPORT-ONLY : signale les écritures DOM dangereuses
-          // (sinks XSS type innerHTML) sans rien bloquer. À promouvoir en
-          // 'require-trusted-types-for' dans la CSP bloquante une fois le code
-          // (et les libs) confirmés sans violation.
-          { key: 'Content-Security-Policy-Report-Only', value: "require-trusted-types-for 'script'; trusted-types 'allow-duplicates' default dompurify nextjs" },
+          // NB : pas de CSP Trusted-Types en report-only. Next.js 14 n'est pas
+          // conforme Trusted-Types (son bundler crée des TrustedScriptURL hors
+          // policy) → l'en-tête report-only ne bloquait rien (0 protection
+          // active) et ne faisait que polluer la console. La vraie CSP bloquante
+          // ci-dessus (`Content-Security-Policy`) reste la protection effective.
         ],
       },
     ];

@@ -59,6 +59,8 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'WESTBOURSE',
   },
+  // Équivalent standard de `apple-mobile-web-app-capable` (déprécié seul).
+  other: { 'mobile-web-app-capable': 'yes' },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
