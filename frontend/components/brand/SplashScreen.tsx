@@ -27,6 +27,12 @@ export default function SplashScreen() {
       aria-hidden="true"
       style={{
         position: 'fixed', inset: 0, zIndex: 100,
+        // CRITIQUE : le splash est purement décoratif. S'il traîne (thread
+        // principal saturé au montage du dashboard : Realtime + charts + requêtes),
+        // il ne doit JAMAIS intercepter les clics — sinon toute la navigation
+        // paraît morte jusqu'à ce qu'il disparaisse. pointer-events:none garantit
+        // que les clics passent au travers quelle que soit sa durée d'affichage.
+        pointerEvents: 'none',
         background: '#0c1d2e', display: 'flex',
         alignItems: 'center', justifyContent: 'center',
         animation: 'wslogo-splash-out .35s ease .6s forwards',
