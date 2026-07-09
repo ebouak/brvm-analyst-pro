@@ -45,15 +45,13 @@ export async function runVeilleDigest(
     // Run all fetchers in parallel
     const [githubIssues, twitterTrends, soSolutions, youtubeTutorials, rssFeeds, linkedinIntel] =
       await Promise.allSettled([
-        useMock
-          ? fetchGitHubIssuesMock()
-          : fetchGitHubIssues(since),
+        // GitHub désactivé : contenu dev (issues), hors périmètre veille MARCHÉ.
+        Promise.resolve([] as VeilleDigestRow[]),
         useMock
           ? fetchTwitterTrendsMock()
           : fetchTwitterTrends(['#BRVM', 'BRVM trading', 'fintech']),
-        useMock
-          ? fetchStackOverflowSolutionsMock()
-          : fetchStackOverflowSolutions(since),
+        // StackOverflow désactivé : contenu dev, hors périmètre veille MARCHÉ.
+        Promise.resolve([] as VeilleDigestRow[]),
         useMock
           ? fetchYouTubeTutorialsMock()
           : fetchYouTubeTutorials(['intraday patterns', 'technical analysis']),

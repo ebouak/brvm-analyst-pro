@@ -8,18 +8,26 @@ import type { VeilleDigestRow } from '../types.js';
 export async function fetchRSSFeeds(since: Date): Promise<VeilleDigestRow[]> {
   const results: VeilleDigestRow[] = [];
 
-  // RSS feeds for financial news (using standard format)
+  // Flux RSS finance / économie AFRIQUE, gratuits et vérifiés (200 + items).
+  // (Les flux mondiaux Yahoo/Bloomberg/Reuters/FT étaient morts ou payants et
+  //  hors-sujet BRVM.) Objectif : veille MARCHÉ, sans aucune clé payante.
   const feeds = [
-    { url: 'https://feeds.finance.yahoo.com/rss', category: 'financial_news' },
-    { url: 'https://feeds.bloomberg.com/markets/news.rss', category: 'financial_news' },
-    { url: 'https://feeds.reuters.com/finance', category: 'financial_news' },
-    { url: 'https://news.ycombinator.com/rss', category: 'tech_news' },
-    { url: 'https://www.ft.com/?format=rss', category: 'financial_news' },
+    { url: 'https://www.financialafrik.com/feed/', category: 'afrique_finance' },
+    { url: 'https://www.jeuneafrique.com/feed/', category: 'afrique_eco' },
+    { url: 'https://www.rfi.fr/fr/afrique/rss', category: 'afrique' },
+    { url: 'https://www.rfi.fr/fr/économie/rss', category: 'economie' },
   ];
+
+  // Beaucoup de flux renvoient 403 sans User-Agent navigateur.
+  const UA =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36';
 
   for (const feed of feeds) {
     try {
-      const response = await fetch(feed.url);
+      const response = await fetch(feed.url, {
+        headers: { 'User-Agent': UA },
+        signal: AbortSignal.timeout(15000),
+      });
 
       if (!response.ok) {
         logger.warn(
@@ -115,11 +123,17 @@ function parseRSSItems(xml: string): Array<{
  */
 function stripHtml(text: string): string {
   return text
+    // Déballer les CDATA AVANT de retirer les balises (sinon <![CDATA[titre]]>
+    // est capturé comme une balise et le titre est effacé).
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
     .replace(/<[^>]*>/g, '')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .trim();
 }
@@ -128,10 +142,18 @@ function stripHtml(text: string): string {
  * Check if content is relevant to finance/trading
  */
 function isRelevantToFinance(text: string): boolean {
+  // Mots-clés FR + BRVM/UEMOA (les sources sont francophones) + quelques EN.
   const keywords = [
-    'market', 'stock', 'trading', 'finance', 'investment', 'brvm',
-    'exchange', 'prices', 'economic', 'inflation', 'interest rate',
-    'currency', 'commodity', 'oil', 'gold', 'crypto', 'portfolio',
+    // BRVM / UEMOA / marché régional
+    'brvm', 'uemoa', 'bceao', 'bourse', 'cotation', 'action', 'dividende',
+    'obligation', 'indice', 'introduction en bourse', 'sgi', 'fcfa', 'cfa',
+    'sonatel', 'ecobank', 'abidjan', 'dakar', 'côte d’ivoire', 'sénégal',
+    // finance / éco générale
+    'finance', 'économie', 'économique', 'investissement', 'banque',
+    'assurance', 'inflation', 'taux', 'marché', 'croissance', 'pib',
+    'cacao', 'coton', 'pétrole', 'or', 'matière première', 'devise',
+    // quelques termes EN
+    'market', 'stock', 'trading', 'investment', 'exchange', 'commodity',
   ];
 
   const lower = text.toLowerCase();

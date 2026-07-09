@@ -37,9 +37,21 @@ export async function upsertVeilleDigest(
       is_critical: d.is_critical || false,
     }));
 
+    // Dédoublonnage sur la clé de conflit (title, source, date_marche) : Postgres
+    // refuse deux lignes de même clé dans un seul upsert (« ON CONFLICT DO UPDATE
+    // cannot affect row a second time »). Les flux RSS partagent parfois un même
+    // article (ex. RFI Afrique / RFI Économie).
+    const seen = new Set<string>();
+    const deduped = rows.filter((r) => {
+      const k = `${r.title}|${r.source}|${r.date_marche}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+
     const { data, error } = await supabase
       .from('brvm_veille_digest')
-      .upsert(rows, {
+      .upsert(deduped, {
         onConflict: 'title,source,date_marche', // Natural key for dedup
       });
 
