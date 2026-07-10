@@ -164,13 +164,6 @@ export function MonthlyReportViewer({ report, pdfUrl }: MonthlyReportViewerProps
                 </div>
               ))}
             </div>
-
-            <div className="rounded-card border border-border bg-surface p-6">
-              <h4 className="text-sm font-semibold text-ivory mb-3">Explications</h4>
-              <p className="text-sm leading-relaxed text-muted text-justify whitespace-pre-wrap">
-                {report.signalNarrative || 'Aucune explication disponible.'}
-              </p>
-            </div>
           </>
         ) : (
           <EmptyStatePremium title="Aucun signal ce mois" hint="Vérifiez vos critères de trading" />

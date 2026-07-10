@@ -229,9 +229,6 @@ export async function buildSectorReport(
   for (const r of instr ?? []) nameMap[r.code as string] = (r.designation as string) ?? null;
 
   const days = PERIOD_DAYS[period] ?? 31;
-  const { data: lastRow } = await supabase
-    .from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1);
-  const lastDate = lastRow?.[0]?.date_marche as string | undefined;
 
   const titles: SectorTitlePerf[] = [];
   for (const code of codes) {
