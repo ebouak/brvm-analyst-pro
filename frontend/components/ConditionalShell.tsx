@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
+import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 import BeginnerBanner from '@/components/BeginnerBanner';
 import ContactNudge from '@/components/contact/ContactNudge';
@@ -82,8 +83,10 @@ export default function ConditionalShell({
       <Sidebar isPremium={isPremium} isAdmin={isAdmin} />
       <div className="flex-1 min-w-0">
         <MobileNav isPremium={isPremium} isAdmin={isAdmin} />
-        <main className="min-w-0">{children}</main>
+        {/* pb-16 : réserve la hauteur de la BottomNav mobile (56px + safe-area). */}
+        <main className="min-w-0 pb-16 md:pb-0">{children}</main>
       </div>
+      <BottomNav />
       {showNudge && <ContactNudge />}
     </div>
   );

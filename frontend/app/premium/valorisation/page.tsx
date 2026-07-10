@@ -8,6 +8,8 @@ import {
   StatPill,
   EmptyStatePremium,
 } from '@/components/ui/premium';
+import ViewTabs from '@/components/ViewTabs';
+import { VALO_TABS } from '@/lib/viewTabsPresets';
 
 export const revalidate = 3600;
 export const metadata = { title: 'Valorisation — WESTBOURSE' };
@@ -27,6 +29,7 @@ export default async function ValorisationPage() {
         subtitle="Juste-valeur estimée vs cours — multiples sectoriels (P/E, P/B) et DDM. Classement value du marché."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
+      <ViewTabs tabs={VALO_TABS} current="/premium/valorisation" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <MetricCard label="Sociétés valorisables" value={String(valuable.length)} delta={`sur ${all.length} analysées`} deltaDir="flat" accent="sapphire" />

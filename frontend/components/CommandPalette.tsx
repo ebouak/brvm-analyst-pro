@@ -8,6 +8,9 @@ interface Props {
   items: SearchItem[];
 }
 
+/** Événement global pour ouvrir la palette depuis un bouton (bottom nav mobile…). */
+export const OPEN_PALETTE_EVENT = 'westbourse:open-palette';
+
 const KIND_LABEL: Record<SearchItem['kind'], string> = {
   action: 'ACTIONS',
   secteur: 'SECTEURS',
@@ -63,7 +66,7 @@ export default function CommandPalette({ items }: Props) {
     [closePalette, router],
   );
 
-  // Global keyboard shortcut
+  // Global keyboard shortcut + ouverture externe (bottom nav mobile).
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -75,8 +78,13 @@ export default function CommandPalette({ items }: Props) {
         }
       }
     };
+    const onExternalOpen = () => openPalette();
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener(OPEN_PALETTE_EVENT, onExternalOpen);
+    return () => {
+      window.removeEventListener('keydown', handler);
+      window.removeEventListener(OPEN_PALETTE_EVENT, onExternalOpen);
+    };
   }, [open, openPalette, closePalette]);
 
   // Focus input when opening
@@ -123,17 +131,9 @@ export default function CommandPalette({ items }: Props) {
     setSelectedIndex(0);
   };
 
-  if (!open) {
-    return (
-      <button
-        onClick={openPalette}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-lg border border-[#232733] bg-[#161922] px-3 py-2 text-sm text-[#8b93a7] shadow-lg transition-colors hover:border-[#00c853]/40 hover:text-[#e6e9f0] md:hidden"
-        aria-label="Ouvrir la palette de commandes"
-      >
-        🔍
-      </button>
-    );
-  }
+  // Fermée : rien à rendre — l'ouverture se fait au clavier (⌘K/Ctrl+K) ou via
+  // l'onglet Recherche de la bottom nav mobile (OPEN_PALETTE_EVENT).
+  if (!open) return null;
 
   // Build a flat index offset per group for selected tracking
   let runningIndex = 0;

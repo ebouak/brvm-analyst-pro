@@ -5,6 +5,8 @@ export const revalidate = 300;
 import { createPublicClient } from '@/lib/supabase/public';
 import NotationsGrid from './NotationsGrid';
 import NotationsExport from '@/components/NotationsExport';
+import ViewTabs from '@/components/ViewTabs';
+import { FONDA_TABS } from '@/lib/viewTabsPresets';
 import {
   SectionHeader,
   MetricCard,
@@ -139,6 +141,7 @@ export default async function NotationsPage() {
           </div>
         }
       />
+      <ViewTabs tabs={FONDA_TABS} current="/notations" />
 
       <div className="gold-rule" />
 

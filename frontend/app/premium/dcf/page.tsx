@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { getDcfRanking } from '@/lib/dcf/ranking';
 import { fmtFcfa, fmtNumber } from '@/lib/format';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
+import ViewTabs from '@/components/ViewTabs';
+import { VALO_TABS } from '@/lib/viewTabsPresets';
 
 export const metadata = { title: 'Valorisation DCF — WESTBOURSE' };
 export const revalidate = 3600;
@@ -27,6 +29,7 @@ export default async function DcfIndexPage() {
         subtitle="Juste-valeur par flux actualisés (WACC dérivé du MEDAF) pour toute la cote. Outil de screening — cliquez une société pour la fiche détaillée (bêta réel, hypothèses ajustables)."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
+      <ViewTabs tabs={VALO_TABS} current="/premium/dcf" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-panel border border-border bg-surface px-4 py-3">

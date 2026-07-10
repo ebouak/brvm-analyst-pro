@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader } from '@/components/ui/premium';
+import ViewTabs from '@/components/ViewTabs';
+import { INTEL_TABS } from '@/lib/viewTabsPresets';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Analyses Hebdo Matières Premières — WESTBOURSE' };
@@ -105,6 +107,9 @@ export default async function WeeklyPage() {
         title="Analyses Hebdo – Matières Premières"
         subtitle="Impact du cacao, pétrole, caoutchouc et huile de palme sur les valeurs BRVM"
       />
+      <div className="mt-4">
+        <ViewTabs tabs={INTEL_TABS} current="/weekly" />
+      </div>
 
       {/* Prix des matières — données réelles Banque mondiale (mensuel) */}
       {commos.length > 0 && (

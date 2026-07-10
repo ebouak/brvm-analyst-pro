@@ -1,3 +1,5 @@
+import { NAV_GROUPS, PALETTE_EXTRA } from '@/lib/nav';
+
 export interface SearchItem {
   kind: 'action' | 'secteur' | 'page';
   label: string;
@@ -7,16 +9,30 @@ export interface SearchItem {
   emoji: string;
 }
 
+/**
+ * Pages indexées = navigation (NAV_GROUPS) + routes hors-menu (PALETTE_EXTRA).
+ * Source unique avec la sidebar : la palette ⌘K trouve TOUT, y compris les
+ * pages sorties du menu à la refonte nav 2026-07-10.
+ */
 const STATIC_PAGES: SearchItem[] = [
-  { kind: 'page', label: 'Dashboard', href: '/', searchKey: 'dashboard accueil', emoji: '📊' },
-  { kind: 'page', label: 'Actions', href: '/actions', searchKey: 'actions marché bourse', emoji: '📈' },
-  { kind: 'page', label: 'Obligations', href: '/obligations', searchKey: 'obligations dette taux', emoji: '📄' },
-  { kind: 'page', label: 'Dividendes', href: '/dividendes', searchKey: 'dividendes rendement distribution', emoji: '💰' },
-  { kind: 'page', label: 'Signaux', href: '/signaux', searchKey: 'signaux opportunités scoring', emoji: '🔬' },
-  { kind: 'page', label: 'Portefeuille', href: '/portefeuille', searchKey: 'portefeuille watchlist positions alertes', emoji: '💼' },
-  { kind: 'page', label: 'Backtest', href: '/backtest', searchKey: 'backtest stratégie simulation historique', emoji: '🧪' },
-  { kind: 'page', label: 'Rapports', href: '/dashboard/reports', searchKey: 'rapports événements analyse', emoji: '📑' },
-  { kind: 'page', label: 'Méthodologie', href: '/methodologie', searchKey: 'méthodologie scoring explications', emoji: '📖' },
+  ...NAV_GROUPS.filter((g) => !g.adminOnly).flatMap((g) =>
+    g.items.map((it) => ({
+      kind: 'page' as const,
+      label: it.label,
+      sublabel: g.label,
+      href: it.href,
+      searchKey: `${it.label} ${g.label}`.toLowerCase(),
+      emoji: '📄',
+    })),
+  ),
+  ...PALETTE_EXTRA.map((it) => ({
+    kind: 'page' as const,
+    label: it.label,
+    sublabel: 'Autres pages',
+    href: it.href,
+    searchKey: it.label.toLowerCase(),
+    emoji: '📄',
+  })),
 ];
 
 export function buildSearchItems(args: {

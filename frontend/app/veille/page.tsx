@@ -1,6 +1,8 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import VeilleDashboard from '@/components/veille/VeilleDashboard';
 import { SectionHeader } from '@/components/ui/premium';
+import ViewTabs from '@/components/ViewTabs';
+import { INTEL_TABS } from '@/lib/viewTabsPresets';
 
 export const revalidate = 60;
 export const metadata = { title: 'Veille Intelligence BRVM — WESTBOURSE' };
@@ -50,6 +52,7 @@ export default async function VeillePage() {
         title="Veille BRVM"
         subtitle="Surveillance automatisée des actualités marché — mis à jour quotidiennement."
       />
+      <ViewTabs tabs={INTEL_TABS} current="/veille" />
       <VeilleDashboard news={news} />
     </div>
   );

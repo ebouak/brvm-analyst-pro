@@ -1,6 +1,8 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader } from '@/components/ui/premium';
 import NewsList, { type NewsItem } from '@/components/actualites/NewsList';
+import ViewTabs from '@/components/ViewTabs';
+import { INTEL_TABS } from '@/lib/viewTabsPresets';
 
 // Données publiques (RLS lecture publique) rafraîchies par le scraper :
 // ISR 5 min suffit, pas besoin de rendu dynamique par visiteur.
@@ -27,6 +29,7 @@ export default async function ActualitesPage() {
         title="Actualités"
         subtitle="Communiqués officiels BRVM et COSUMAF mis à jour quotidiennement."
       />
+      <ViewTabs tabs={INTEL_TABS} current="/actualites" />
 
       {news.length === 0 ? (
         <div className="bg-surface border border-border rounded-xl p-10 text-center">

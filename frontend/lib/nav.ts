@@ -12,10 +12,15 @@ export interface NavGroup {
 
 /**
  * Architecture de navigation du produit — source unique (sidebar desktop + nav mobile).
- * Cible de l'audit 2026-06-12 : 21 entrées, zéro doublon fonctionnel.
- * Les anciennes URL (/scanner, /dividendes/calendrier, /premium/calendrier,
- * /dashboard/reports, /premium/backtesting) restent servies jusqu'à leur fusion,
- * mais ne sont plus proposées dans le menu.
+ * Refonte 2026-07-10 : 44 entrées visibles → 29. Aucune page supprimée : les
+ * vues sœurs restent accessibles par onglets (ViewTabs — INTEL_TABS, FONDA_TABS,
+ * VALO_TABS, REPORT_TABS), via le hub /premium/outils, et par la command
+ * palette ⌘K qui indexe TOUTES les routes (y compris hors menu).
+ * Sorties du menu (toujours servies) : /conseiller/track-record (lié depuis
+ * /conseiller), /veille + /weekly (onglets d'Actualités), /notations (onglet de
+ * Fondamentaux), /premium/dcf (onglet de Valorisation), /rapports/builder +
+ * /premium/reports (onglets de Rapports), /premium/classements|anomalies|
+ * correlations|comparateur + /classement + /saisonnalite (hub Outils Pro).
  */
 export const NAV_GROUPS: NavGroup[] = [
   {
@@ -26,20 +31,22 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/obligations', label: 'Obligations' },
       { href: '/secteurs', label: 'Secteurs' },
       { href: '/heatmap', label: 'Heatmap' },
-      { href: '/actualites', label: 'Actualités' },
-      { href: '/veille', label: 'Veille Intelligence' },
-      { href: '/weekly', label: 'Analyses Hebdo' },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      { href: '/actualites', label: 'Actualités & Veille' },
+      { href: '/brief', label: 'Brief quotidien' },
     ],
   },
   {
     label: 'Analyse',
     items: [
       { href: '/conseiller', label: 'Conseiller' },
-      { href: '/conseiller/track-record', label: 'Track record' },
       { href: '/signaux', label: 'Signaux' },
       { href: '/screener', label: 'Screener' },
       { href: '/fondamentaux', label: 'Fondamentaux' },
-      { href: '/notations', label: 'Notations' },
       { href: '/backtest', label: 'Backtest' },
     ],
   },
@@ -48,6 +55,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/dividendes', label: 'Dividendes' },
       { href: '/calendrier', label: 'Calendrier' },
+      { href: '/saisonnalite', label: 'Saisonnalité' },
     ],
   },
   {
@@ -57,21 +65,14 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/parametres/alertes', label: 'Mes alertes' },
       { href: '/premium/paper-trading', label: 'Paper Trading', premium: true },
       { href: '/reports', label: 'Rapports' },
-      { href: '/rapports/builder', label: 'Constructeur de rapport' },
-      { href: '/premium/reports', label: 'Rapports mensuels', premium: true },
     ],
   },
   {
     label: 'Premium',
     items: [
       { href: '/premium/valorisation', label: 'Valorisation', premium: true },
-      { href: '/premium/dcf', label: 'Valorisation DCF', premium: true },
       { href: '/premium/diagnostic', label: 'Diagnostic IA', premium: true },
       { href: '/assistant', label: 'Assistant IA', premium: true },
-      { href: '/premium/classements', label: 'Classements', premium: true },
-      { href: '/premium/anomalies', label: 'Anomalies', premium: true },
-      { href: '/premium/correlations', label: 'Corrélations', premium: true },
-      { href: '/premium/comparateur', label: 'Comparateur', premium: true },
       { href: '/premium/outils', label: 'Outils Pro', premium: true },
     ],
   },
@@ -80,12 +81,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/societes', label: 'Sociétés (public)' },
       { href: '/comparateur-sgi', label: 'Choisir sa SGI' },
-      { href: '/classement', label: 'Classement papier' },
       { href: '/simulateur', label: 'Simulateur' },
-      { href: '/brief', label: 'Brief quotidien' },
       { href: '/forum', label: 'Forum' },
       { href: '/formations', label: 'Formations' },
-      { href: '/saisonnalite', label: 'Saisonnalité' },
     ],
   },
   {
@@ -106,6 +104,33 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/forum', label: 'Modération forum' },
     ],
   },
+];
+
+/**
+ * Routes servies mais absentes du menu (refonte 2026-07-10) — indexées par la
+ * command palette ⌘K pour rester trouvables en 2 frappes.
+ */
+export const PALETTE_EXTRA: NavItem[] = [
+  { href: '/veille', label: 'Veille Intelligence' },
+  { href: '/weekly', label: 'Analyses hebdo (matières premières)' },
+  { href: '/conseiller/track-record', label: 'Track record du conseiller' },
+  { href: '/notations', label: 'Notations financières' },
+  { href: '/premium/dcf', label: 'Valorisation DCF', premium: true },
+  { href: '/rapports/builder', label: 'Constructeur de rapport' },
+  { href: '/premium/reports', label: 'Rapports mensuels', premium: true },
+  { href: '/premium/classements', label: 'Classements', premium: true },
+  { href: '/premium/anomalies', label: 'Anomalies', premium: true },
+  { href: '/premium/correlations', label: 'Corrélations', premium: true },
+  { href: '/premium/comparateur', label: 'Comparateur de titres', premium: true },
+  { href: '/classement', label: 'Classement papier (leaderboard)' },
+  { href: '/actions/compare', label: 'Comparer des actions' },
+  { href: '/dashboard/reports', label: 'Rapports & événements' },
+  { href: '/dashboard/reports/events', label: 'Événements de marché' },
+  { href: '/dividendes/calendrier', label: 'Calendrier des dividendes' },
+  { href: '/simulateur-budget', label: 'Simulateur budget' },
+  { href: '/methodologie', label: 'Méthodologie' },
+  { href: '/debutant', label: 'Guide débutant' },
+  { href: '/pricing', label: 'Tarifs' },
 ];
 
 /** Détection d'item actif cohérente sidebar/mobile. */

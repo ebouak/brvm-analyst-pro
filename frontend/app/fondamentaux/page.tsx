@@ -6,6 +6,8 @@ import {
   MetricCard,
   EmptyStatePremium,
 } from '@/components/ui/premium';
+import ViewTabs from '@/components/ViewTabs';
+import { FONDA_TABS } from '@/lib/viewTabsPresets';
 
 // Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
 // par l'intraday : ISR 5 min (audit 2026-06-12).
@@ -58,6 +60,7 @@ export default async function FondamentauxPage() {
         title="Analyse fondamentale"
         subtitle="PER, P/B, ROE, marge nette et rendement du dividende pour les actions cotées. Triez et filtrez par secteur."
       />
+      <ViewTabs tabs={FONDA_TABS} current="/fondamentaux" />
 
       {/* Gold rule */}
       <div className="gold-rule" />

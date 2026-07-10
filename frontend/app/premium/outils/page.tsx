@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getOutilsData } from '@/lib/premium/outils';
 import OutilsCharts from '@/components/premium/OutilsCharts';
 import {
@@ -32,6 +33,27 @@ export default async function OutilsPage() {
         subtitle="Saisonnalité, actions proches de leurs plus bas, réaction aux états financiers — signaux structurels de la BRVM."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
+
+      {/* ── Annuaire des outils (hub — refonte nav 2026-07-10) ──────────── */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {[
+          { href: '/premium/classements', label: 'Classements', desc: 'Tops du marché' },
+          { href: '/premium/anomalies', label: 'Anomalies', desc: 'Mouvements atypiques' },
+          { href: '/premium/correlations', label: 'Corrélations', desc: 'Titres liés' },
+          { href: '/premium/comparateur', label: 'Comparateur', desc: 'Face-à-face titres' },
+          { href: '/saisonnalite', label: 'Saisonnalité', desc: 'Mois forts / faibles' },
+          { href: '/classement', label: 'Classement papier', desc: 'Leaderboard public' },
+        ].map((t) => (
+          <Link
+            key={t.href}
+            href={t.href}
+            className="group rounded-xl border border-border bg-surface/40 px-3 py-2.5 transition-colors hover:border-gold/40 hover:bg-gold/5"
+          >
+            <span className="block text-sm font-medium text-ivory group-hover:text-gold">{t.label}</span>
+            <span className="block text-[11px] text-faint">{t.desc}</span>
+          </Link>
+        ))}
+      </div>
 
       {/* ── KPIs ──────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
