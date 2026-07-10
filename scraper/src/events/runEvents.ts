@@ -12,6 +12,7 @@ import { logger } from '../logger.js';
 import { parseEventList } from './parser.js';
 import { resolveCodes } from './resolve.js';
 import { upsertEvents, loadInstrumentRefs } from './repository.js';
+import { deriveEventsFromPublications } from './fromPublications.js';
 import { buildMockEvents } from './mock.js';
 import type { MarketEvent, EventSourceType } from './types.js';
 
@@ -44,8 +45,21 @@ export async function runEvents(opts: { mock?: boolean } = {}): Promise<EventsRu
     }
 
     const refs = await loadInstrumentRefs();
-    const http = createHttpClient();
     events = [];
+
+    // Source INTERNE prioritaire : dérivation depuis `publications` (fiable,
+    // exhaustive). Rend la page Événements complète sans dépendre du scraping
+    // calibré des pages brvm.org (best-effort ci-dessous).
+    try {
+      events.push(...(await deriveEventsFromPublications()));
+    } catch (err) {
+      logger.error(
+        { err: err instanceof Error ? err.message : String(err) },
+        'Dérivation événements depuis publications échouée — on continue',
+      );
+    }
+
+    const http = createHttpClient();
     for (const src of SOURCES) {
       try {
         const resp = await http.get(BRVM_BASE + src.path);
