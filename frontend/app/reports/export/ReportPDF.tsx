@@ -125,63 +125,74 @@ export function ReportPDF({ data, generatedAt }: Props) {
           </View>
         </View>
 
-        {/* Événements */}
-        {data.events.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Événements ({data.events.length})
-            </Text>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderCell}>Date</Text>
-              <Text style={styles.tableHeaderCell}>Type</Text>
-              <Text style={{ ...styles.tableHeaderCell, flex: 3 }}>Titre</Text>
-              <Text style={styles.tableHeaderCell}>Code</Text>
-            </View>
-            {data.events.slice(0, 20).map((e) => (
-              <View key={e.id} style={styles.row}>
-                <Text style={styles.cell}>{e.event_date}</Text>
-                <Text style={styles.cell}>{e.event_type}</Text>
-                <Text style={{ ...styles.cell, flex: 3 }}>{e.title}</Text>
-                <Text style={styles.cell}>{e.instrument_code ?? '—'}</Text>
+        {/* Événements — section toujours présente (état vide explicite). */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Événements ({data.events.length})
+          </Text>
+          {data.events.length === 0 ? (
+            <Text style={styles.muted}>Aucun événement sur la période.</Text>
+          ) : (
+            <View>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderCell}>Date</Text>
+                <Text style={styles.tableHeaderCell}>Type</Text>
+                <Text style={{ ...styles.tableHeaderCell, flex: 3 }}>Titre</Text>
+                <Text style={styles.tableHeaderCell}>Code</Text>
               </View>
-            ))}
-          </View>
-        )}
-
-        {/* Signaux */}
-        {actionable.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Signaux BUY/SELL ({actionable.length})
-            </Text>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderCell}>Date</Text>
-              <Text style={styles.tableHeaderCell}>Code</Text>
-              <Text style={styles.tableHeaderCell}>Signal</Text>
-              <Text style={styles.tableHeaderCell}>Score</Text>
+              {data.events.slice(0, 20).map((e) => (
+                <View key={e.id} style={styles.row}>
+                  <Text style={styles.cell}>{e.event_date}</Text>
+                  <Text style={styles.cell}>{e.event_type}</Text>
+                  <Text style={{ ...styles.cell, flex: 3 }}>{e.title}</Text>
+                  <Text style={styles.cell}>{e.instrument_code ?? '—'}</Text>
+                </View>
+              ))}
             </View>
-            {actionable.slice(0, 30).map((s, i) => (
-              <View key={i} style={styles.row}>
-                <Text style={styles.cell}>{s.date_marche}</Text>
-                <Text style={styles.cellBold}>{s.code}</Text>
-                <Text
-                  style={{
-                    ...styles.cell,
-                    ...(s.signal === 'BUY' ? styles.up : styles.down),
-                  }}
-                >
-                  {s.signal}
-                </Text>
-                <Text style={styles.cell}>{s.score_total.toFixed(2)}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+          )}
+        </View>
 
-        {/* Statistiques */}
-        {data.statRows.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Statistiques par titre</Text>
+        {/* Signaux — section toujours présente (état vide explicite). */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Signaux BUY/SELL ({actionable.length})
+          </Text>
+          {actionable.length === 0 ? (
+            <Text style={styles.muted}>Aucun signal BUY / SELL sur la période.</Text>
+          ) : (
+            <View>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderCell}>Date</Text>
+                <Text style={styles.tableHeaderCell}>Code</Text>
+                <Text style={styles.tableHeaderCell}>Signal</Text>
+                <Text style={styles.tableHeaderCell}>Score</Text>
+              </View>
+              {actionable.slice(0, 30).map((s, i) => (
+                <View key={i} style={styles.row}>
+                  <Text style={styles.cell}>{s.date_marche}</Text>
+                  <Text style={styles.cellBold}>{s.code}</Text>
+                  <Text
+                    style={{
+                      ...styles.cell,
+                      ...(s.signal === 'BUY' ? styles.up : styles.down),
+                    }}
+                  >
+                    {s.signal}
+                  </Text>
+                  <Text style={styles.cell}>{s.score_total.toFixed(2)}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Statistiques — section toujours présente (état vide explicite). */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Statistiques par titre</Text>
+          {data.statRows.length === 0 ? (
+            <Text style={styles.muted}>Aucune statistique disponible.</Text>
+          ) : (
+            <View>
             <View style={styles.tableHeader}>
               <Text style={styles.tableHeaderCell}>Code</Text>
               <Text style={styles.tableHeaderCell}>Rdt période</Text>
@@ -216,8 +227,9 @@ export function ReportPDF({ data, generatedAt }: Props) {
                 </View>
               );
             })}
-          </View>
-        )}
+            </View>
+          )}
+        </View>
       </Page>
     </Document>
   );
