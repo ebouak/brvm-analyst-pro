@@ -38,12 +38,17 @@ export async function buildInstrumentReport(
   code: string,
   period: Period,
 ): Promise<InstrumentReport | null> {
-  const [{ data: hist }, { data: instr }, { data: sigs }, { data: evts }] = await Promise.all([
+  const [{ data: hist }, { data: instr }, { data: sigs }, { data: evts }, { data: indRow }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('*').eq('code', code).order('date_marche', { ascending: true }).limit(2000),
     supabase.from('brvm_instruments').select('*').eq('code', code).maybeSingle(),
     supabase.from('signals_daily').select('*').eq('code', code).order('date_marche', { ascending: false }).limit(20),
     supabase.from('market_events').select('*').eq('instrument_code', code).order('event_date', { ascending: false }).limit(50),
+    // Indicateurs CANONIQUES du moteur §9 (mêmes valeurs que le signal) : le
+    // rapport les AFFICHE au lieu de recalculer les siens → plus de contradiction
+    // entre « métriques du rapport » et « signal » dans la même page.
+    supabase.from('technical_indicators').select('*').eq('instrument_code', code).order('date_marche', { ascending: false }).limit(1).maybeSingle(),
   ]);
+  const ind = indRow as Record<string, number | boolean | null> | null;
 
   const allRows = (hist ?? []) as ActionDaily[];
   if (allRows.length === 0) return null;
@@ -83,11 +88,29 @@ export async function buildInstrumentReport(
   const variance = rets.length ? rets.reduce((s, r) => s + (r - mean) ** 2, 0) / rets.length : 0;
   const volatility = rets.length ? Math.sqrt(variance) : null;
 
-  const lastRsi = rsi(closesAll, 14);
-  const ma20 = sma(closesAll, 20);
-  const ma50 = sma(closesAll, 50);
-  const macdLast = macdSeries(closesAll).slice(-1)[0] ?? { macd: null, signal: null, hist: null };
+  // Valeurs LATEST : priorité aux indicateurs CANONIQUES du moteur §9
+  // (technical_indicators) pour coller au signal ; repli sur calcul local.
+  const lastRsi = (ind?.rsi_14 as number | null) ?? rsi(closesAll, 14);
+  const ma20 = (ind?.sma_20 as number | null) ?? sma(closesAll, 20);
+  const ma50 = (ind?.sma_50 as number | null) ?? sma(closesAll, 50);
+  const ma200Val = (ind?.sma_200 as number | null) ?? sma(closesAll, 200);
+  const macdComputed = macdSeries(closesAll).slice(-1)[0] ?? { macd: null, signal: null, hist: null };
+  const macdLast = ind
+    ? {
+        macd: (ind.macd_line as number | null) ?? macdComputed.macd,
+        signal: (ind.macd_signal as number | null) ?? macdComputed.signal,
+        hist: (ind.macd_histogram as number | null) ?? macdComputed.hist,
+      }
+    : macdComputed;
   const det = detect(closesAll);
+  if (ind) {
+    // Réconcilie la détection affichée avec celle du moteur (mêmes drapeaux).
+    if (ind.is_oversold != null) det.oversold = ind.is_oversold as boolean;
+    if (ind.is_overbought != null) det.overbought = ind.is_overbought as boolean;
+    if (ind.is_golden_cross != null) det.goldenCross = ind.is_golden_cross as boolean;
+    if (ind.is_death_cross != null) det.deathCross = ind.is_death_cross as boolean;
+    if (ind.is_breakout_20d_high != null) det.breakoutUp = ind.is_breakout_20d_high as boolean;
+  }
 
   const lastVol = rows[rows.length - 1]?.volume ?? null;
   const recentAvgVol = (() => {
@@ -113,7 +136,7 @@ export async function buildInstrumentReport(
     },
     period,
     timeseries,
-    technicalIndicators: { rsi: lastRsi, ma20, ma50, ma200: sma(closesAll, 200), macd: macdLast.macd, signalLine: macdLast.signal, detection: det },
+    technicalIndicators: { rsi: lastRsi, ma20, ma50, ma200: ma200Val, macd: macdLast.macd, signalLine: macdLast.signal, detection: det },
     events: (evts ?? []) as MarketEvent[],
     signals: (sigs ?? []) as SignalDaily[],
     summary: { performancePct, trend, volatility, volumeRatio },
