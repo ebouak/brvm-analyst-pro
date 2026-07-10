@@ -25,7 +25,7 @@ export interface InstrumentReport {
   reportType: 'instrument';
   instrument: { code: string; designation: string | null; secteur: string | null; pays: string | null };
   period: Period;
-  timeseries: { date: string; close: number | null; volume: number | null; ma20: number | null; ma50: number | null; ma200: number | null; rsi: number | null }[];
+  timeseries: { date: string; close: number | null; volume: number | null; ma20: number | null; ma50: number | null; ma200: number | null; rsi: number | null; macd: number | null; signal: number | null; hist: number | null }[];
   technicalIndicators: { rsi: number | null; ma20: number | null; ma50: number | null; ma200: number | null; macd: number | null; signalLine: number | null; detection: ReturnType<typeof detect> };
   events: MarketEvent[];
   signals: SignalDaily[];
@@ -55,13 +55,16 @@ export async function buildInstrumentReport(
   const ma50A = smaSeries(closesAll, 50);
   const ma200A = smaSeries(closesAll, 200);
   const rsiA = rsiSeries(closesAll, 14);
+  const macdA = macdSeries(closesAll); // tableau aligné (nulls au début)
   const offset = allRows.length - rows.length;
 
   const timeseries = rows.map((r, i) => {
     const gi = offset + i;
+    const m = macdA[gi];
     return {
       date: r.date_marche, close: r.cours_jour, volume: r.volume,
       ma20: ma20A[gi] ?? null, ma50: ma50A[gi] ?? null, ma200: ma200A[gi] ?? null, rsi: rsiA[gi] ?? null,
+      macd: m?.macd ?? null, signal: m?.signal ?? null, hist: m?.hist ?? null,
     };
   });
 

@@ -42,7 +42,7 @@ export default async function InstrumentReportPage({
     date: t.date, close: t.close, ma20: t.ma20, ma50: t.ma50, ma200: t.ma200, volume: t.volume,
   }));
   const indicatorData: IndicatorPoint[] = report.timeseries.map((t) => ({
-    date: t.date, rsi: t.rsi, macd: null, signal: null, hist: null,
+    date: t.date, rsi: t.rsi, macd: t.macd, signal: t.signal, hist: t.hist,
   }));
 
   const det = report.technicalIndicators.detection;
