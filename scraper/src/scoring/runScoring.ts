@@ -14,7 +14,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { computeScore, type ScoreInput, type ScoreResult } from './score.js';
-import { sma, ema, rsi } from './indicators.js';
+import { sma, ema, rsi, macd } from './indicators.js';
 import { buildMockSnapshot } from '../mock/fixtures.js';
 import type { MarketDate } from '../types.js';
 
@@ -54,10 +54,12 @@ export function computeIndicators(
   const ema12 = ema(closes, 12);
   const ema26 = ema(closes, 26);
   const rsi14 = rsi(closes, 14);
-  const macdLine = ema12 != null && ema26 != null ? ema12 - ema26 : null;
-  // MACD signal = EMA(9) de la ligne MACD — approximation : on n'a pas la série de MACD ici.
-  const macdSignal = null;
-  const macdHist = null;
+  // MACD complet (ligne + signal EMA9 + histogramme) via la série EMA de la
+  // ligne MACD. macd_signal/histogram n'étaient jamais renseignés auparavant.
+  const macdFull = macd(closes);
+  const macdLine = macdFull != null ? macdFull.line : (ema12 != null && ema26 != null ? ema12 - ema26 : null);
+  const macdSignal = macdFull != null ? macdFull.signal : null;
+  const macdHist = macdFull != null ? macdFull.histogram : null;
 
   // Détection golden/death cross : compare aux SMA20/50 de la veille.
   const sma20Prev = closes.length >= 21 ? sma(closes.slice(0, -1), 20) : null;
@@ -237,6 +239,7 @@ async function upsertSignals(
     score_variation: r.score_variation,
     score_volume: r.score_volume,
     score_rsi: r.score_rsi,
+    score_macd: r.score_macd,
     bonus_tendance: r.bonus_tendance,
     penalite_liquidite: r.penalite_liquidite,
     confiance: r.confiance,

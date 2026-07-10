@@ -65,6 +65,61 @@ export function rsi(closes: number[], period = 14): number | null {
   return 100 - 100 / (1 + rs);
 }
 
+/**
+ * Série complète d'EMA (une valeur par point à partir de l'indice `period-1`).
+ * Nécessaire pour le MACD (la ligne de signal est l'EMA de la ligne MACD).
+ * Renvoie [] si l'historique est insuffisant.
+ */
+export function emaSeries(closes: number[], period: number): number[] {
+  if (period <= 0 || closes.length < period) return [];
+  const k = 2 / (period + 1);
+  const out: number[] = [];
+  let prev = closes.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  out.push(prev);
+  for (let i = period; i < closes.length; i++) {
+    prev = closes[i]! * k + prev * (1 - k);
+    out.push(prev);
+  }
+  return out;
+}
+
+/**
+ * MACD complet : ligne, signal, histogramme (dernières valeurs).
+ * MACD = EMA(fast) − EMA(slow) ; signal = EMA(signalPeriod) de la ligne MACD ;
+ * histogramme = MACD − signal. Renvoie null si l'historique est insuffisant
+ * (il faut au moins slow + signalPeriod − 1 points pour un histogramme fiable).
+ */
+export function macd(
+  closes: number[],
+  fast = 12,
+  slow = 26,
+  signalPeriod = 9,
+): { line: number; signal: number; histogram: number } | null {
+  if (closes.length < slow + signalPeriod - 1) return null;
+
+  // Séries EMA fast/slow alignées sur l'indice le plus ANCIEN commun.
+  const emaFastFull = emaSeries(closes, fast); // commence à l'indice fast-1
+  const emaSlowFull = emaSeries(closes, slow); // commence à l'indice slow-1
+  if (emaFastFull.length === 0 || emaSlowFull.length === 0) return null;
+
+  // Aligne : la série MACD commence à l'indice slow-1 (le plus tardif des deux).
+  const offset = slow - fast; // décalage de départ entre fast et slow
+  const macdLineSeries: number[] = [];
+  for (let i = 0; i < emaSlowFull.length; i++) {
+    const fastVal = emaFastFull[i + offset];
+    if (fastVal == null) break;
+    macdLineSeries.push(fastVal - emaSlowFull[i]!);
+  }
+  if (macdLineSeries.length < signalPeriod) return null;
+
+  const signalSeries = emaSeries(macdLineSeries, signalPeriod);
+  if (signalSeries.length === 0) return null;
+
+  const line = macdLineSeries[macdLineSeries.length - 1]!;
+  const signal = signalSeries[signalSeries.length - 1]!;
+  return { line, signal, histogram: line - signal };
+}
+
 /** Borne une valeur dans [min, max]. */
 export function clamp(x: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, x));

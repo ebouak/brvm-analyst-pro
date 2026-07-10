@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sma, ema, rsi, clamp } from '../src/scoring/indicators.js';
+import { sma, ema, rsi, macd, emaSeries, clamp } from '../src/scoring/indicators.js';
 import { computeScore } from '../src/scoring/score.js';
 
 describe('indicateurs', () => {
@@ -16,6 +16,12 @@ describe('indicateurs', () => {
     expect(v!).toBeLessThanOrEqual(8);
   });
 
+  it('emaSeries: une valeur par point à partir de period-1', () => {
+    const s = emaSeries([1, 2, 3, 4, 5], 3);
+    expect(s.length).toBe(3); // indices 2,3,4
+    expect(s[0]).toBeCloseTo(2, 5); // SMA(1,2,3)=2 en seed
+  });
+
   it('rsi: série strictement croissante => 100', () => {
     const closes = Array.from({ length: 20 }, (_, i) => 100 + i);
     expect(rsi(closes, 14)).toBe(100);
@@ -28,6 +34,18 @@ describe('indicateurs', () => {
 
   it('rsi: null si historique insuffisant', () => {
     expect(rsi([1, 2, 3], 14)).toBeNull();
+  });
+
+  it('macd: null si historique insuffisant, sinon histogramme cohérent', () => {
+    expect(macd([1, 2, 3])).toBeNull();
+    // Tendance haussière franche → ligne MACD > 0.
+    const up = Array.from({ length: 60 }, (_, i) => 100 + i * 2);
+    const mUp = macd(up);
+    expect(mUp).not.toBeNull();
+    expect(mUp!.line).toBeGreaterThan(0);
+    // Tendance baissière → ligne MACD < 0.
+    const down = Array.from({ length: 60 }, (_, i) => 200 - i * 2);
+    expect(macd(down)!.line).toBeLessThan(0);
   });
 
   it('clamp borne correctement', () => {
@@ -51,35 +69,48 @@ describe('computeScore', () => {
     expect(r.confiance).toBeLessThanOrEqual(0.3);
   });
 
-  it('survente + forte hausse + gros volume => BUY', () => {
-    // Série en forte baisse (RSI bas) puis rebond le dernier jour.
-    const closes = Array.from({ length: 30 }, (_, i) => 200 - i * 3);
-    closes[closes.length - 1] = closes[closes.length - 2]! + 8; // rebond
+  it('tendance haussière qui accélère + hausse + volume => BUY', () => {
+    // Hausse régulière puis accélération finale (MACD histogramme positif),
+    // ma20 > ma50 (régime haussier), jour de forte hausse confirmé au volume.
+    const closes: number[] = [];
+    for (let i = 0; i < 40; i++) closes.push(100 + i);
+    for (let i = 0; i < 20; i++) closes.push(140 + i * 4); // accélération
     const r = computeScore({
       code: 'BUY1',
       closes,
-      variation_pct: 7, // forte hausse plafonnée
-      volume: 5000,
-      avg_volume_30d: 1000, // ratio 5x
+      variation_pct: 7, // plafonnée
+      volume: 6000,
+      avg_volume_30d: 1000, // ratio 6x
     });
-    expect(r.score_rsi).not.toBeNull();
+    expect(r.score_macd).not.toBeNull();
+    expect(r.inputs.trend_norm).toBeGreaterThan(0); // régime haussier
+    expect(r.bonus_tendance).toBeGreaterThan(0); // facteur tendance positif
     expect(r.score_total).toBeGreaterThan(0.6);
     expect(r.signal).toBe('BUY');
     expect(r.explication).toContain('Opportunité');
   });
 
-  it('surachat + forte baisse + gros volume => SELL', () => {
-    const closes = Array.from({ length: 30 }, (_, i) => 100 + i * 3);
-    closes[closes.length - 1] = closes[closes.length - 2]! - 8;
+  it('tendance baissière qui accélère + baisse + volume => SELL', () => {
+    const closes: number[] = [];
+    for (let i = 0; i < 40; i++) closes.push(300 - i);
+    for (let i = 0; i < 20; i++) closes.push(260 - i * 4); // accélération baissière
     const r = computeScore({
       code: 'SELL1',
       closes,
       variation_pct: -7,
-      volume: 5000,
+      volume: 6000,
       avg_volume_30d: 1000,
     });
+    expect(r.inputs.trend_norm).toBeLessThan(0); // régime baissier
+    expect(r.bonus_tendance).toBeLessThan(0); // facteur tendance SYMÉTRIQUE (négatif)
     expect(r.score_total).toBeLessThan(-0.6);
     expect(r.signal).toBe('SELL');
+  });
+
+  it('facteur de tendance symétrique : baissier => bonus_tendance négatif', () => {
+    const down = Array.from({ length: 60 }, (_, i) => 300 - i * 2);
+    const r = computeScore({ code: 'D', closes: down, variation_pct: -1, volume: 1000, avg_volume_30d: 1000 });
+    expect(r.bonus_tendance).toBeLessThan(0);
   });
 
   it('marché calme => HOLD', () => {
@@ -107,6 +138,16 @@ describe('computeScore', () => {
     expect(r.score_total).toBeGreaterThanOrEqual(-1);
     expect(r.score_total).toBeLessThanOrEqual(1);
     expect(r.score_variation!).toBeLessThanOrEqual(1);
+    expect(r.score_macd == null || (r.score_macd >= -1 && r.score_macd <= 1)).toBe(true);
+  });
+
+  it('confiance : un HOLD central est plus franc qu\'un HOLD près du seuil', () => {
+    const flat = Array.from({ length: 60 }, () => 100);
+    const central = computeScore({ code: 'C', closes: flat, variation_pct: 0, volume: 1000, avg_volume_30d: 1000 });
+    // Score proche de 0 => HOLD franc => netteté élevée.
+    expect(central.signal).toBe('HOLD');
+    expect(Math.abs(central.score_total)).toBeLessThan(0.2);
+    expect(central.confiance).toBeGreaterThan(0.4);
   });
 
   it('pénalité de liquidité appliquée sur faible volume moyen', () => {
