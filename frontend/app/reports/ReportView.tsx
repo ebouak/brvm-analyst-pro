@@ -4,6 +4,7 @@ import MultiPriceChart, { type PriceSeries } from './sections/PriceChart';
 import EventsTable from './sections/EventsTable';
 import SignalsTable from './sections/SignalsTable';
 import StatsTable, { type StatRow } from './sections/StatsTable';
+import { periodReturn } from '@/lib/reportUtils';
 
 export interface ReportData {
   dateFrom: string;
@@ -40,6 +41,13 @@ interface Props {
 }
 
 export default function ReportView({ data, onExportPDF }: Props) {
+  // Résumé exécutif et stats par titre partagent la MÊME mesure (rendement de
+  // période, via periodReturn) → plus de contradiction entre les deux blocs.
+  const moverRows = data.statRows.map((s) => ({
+    code: s.code,
+    designation: s.designation,
+    variation_pct: periodReturn(s.closes),
+  }));
   return (
     <div className="space-y-4" id="report-root">
       <div className="flex items-center justify-between">
@@ -60,7 +68,7 @@ export default function ReportView({ data, onExportPDF }: Props) {
       </div>
 
       <ExecutiveSummary
-        rows={data.marketRows}
+        rows={moverRows}
         dateFrom={data.dateFrom}
         dateTo={data.dateTo}
       />

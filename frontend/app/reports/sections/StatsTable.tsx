@@ -1,5 +1,5 @@
 'use client';
-import { volatility20d, computeVariation, normalizeBase100 } from '@/lib/reportUtils';
+import { volatility20d, periodReturn } from '@/lib/reportUtils';
 import { sma } from '@/lib/indicators';
 
 export interface StatRow {
@@ -40,9 +40,8 @@ export default function StatsTable({ rows }: { rows: StatRow[] }) {
           </thead>
           <tbody className="divide-y divide-border">
             {rows.map((r) => {
-              const first = r.closes.find((c) => c > 0) ?? null;
               const last = r.closes.length > 0 ? r.closes[r.closes.length - 1] ?? null : null;
-              const perf = first && last ? computeVariation(first, last) : null;
+              const perf = periodReturn(r.closes);
 
               const vol20 = volatility20d(r.closes);
 

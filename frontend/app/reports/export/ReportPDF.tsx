@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 import type { ReportData } from '../ReportView';
+import { periodReturn, volatility20d } from '@/lib/reportUtils';
 
 const styles = StyleSheet.create({
   page: {
@@ -58,14 +59,16 @@ interface Props {
 }
 
 export function ReportPDF({ data, generatedAt }: Props) {
-  const withVar = data.marketRows.filter((r) => r.variation_pct != null);
-  const avgVar = withVar.length
-    ? withVar.reduce((s, r) => s + (r.variation_pct ?? 0), 0) / withVar.length
+  // Résumé exécutif dérivé des MÊMES rendements de période que le tableau de
+  // stats (source unique periodReturn) → plus de contradiction top-movers/stats.
+  const returns = data.statRows
+    .map((r) => ({ code: r.code, ret: periodReturn(r.closes) }))
+    .filter((x): x is { code: string; ret: number } => x.ret != null);
+  const avgVar = returns.length
+    ? returns.reduce((s, x) => s + x.ret, 0) / returns.length
     : null;
 
-  const sorted = [...data.marketRows]
-    .filter((r) => r.variation_pct != null)
-    .sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0));
+  const sorted = [...returns].sort((a, b) => b.ret - a.ret);
   const top3 = sorted.slice(0, 3);
   const bot3 = sorted.slice(-3).reverse();
 
@@ -90,7 +93,7 @@ export function ReportPDF({ data, generatedAt }: Props) {
           <Text style={styles.sectionTitle}>Résumé exécutif</Text>
           {avgVar != null && (
             <Text>
-              Variation moyenne marché :{' '}
+              Rendement moyen (période) :{' '}
               <Text style={avgVar >= 0 ? styles.up : styles.down}>
                 {sign(avgVar)}{avgVar.toFixed(2)} %
               </Text>
@@ -103,7 +106,7 @@ export function ReportPDF({ data, generatedAt }: Props) {
                 <View key={r.code} style={styles.row}>
                   <Text style={styles.cellBold}>{r.code}</Text>
                   <Text style={{ ...styles.cell, ...styles.up }}>
-                    +{(r.variation_pct ?? 0).toFixed(2)} %
+                    {sign(r.ret)}{r.ret.toFixed(2)} %
                   </Text>
                 </View>
               ))}
@@ -114,7 +117,7 @@ export function ReportPDF({ data, generatedAt }: Props) {
                 <View key={r.code} style={styles.row}>
                   <Text style={styles.cellBold}>{r.code}</Text>
                   <Text style={{ ...styles.cell, ...styles.down }}>
-                    {(r.variation_pct ?? 0).toFixed(2)} %
+                    {sign(r.ret)}{r.ret.toFixed(2)} %
                   </Text>
                 </View>
               ))}
@@ -186,9 +189,8 @@ export function ReportPDF({ data, generatedAt }: Props) {
               <Text style={styles.tableHeaderCell}>Vol. moy.</Text>
             </View>
             {data.statRows.map((r) => {
-              const first = r.closes.find((c) => c > 0) ?? null;
-              const last = r.closes.length > 0 ? r.closes[r.closes.length - 1] ?? null : null;
-              const perf = first && last ? ((last - first) / first) * 100 : null;
+              const perf = periodReturn(r.closes);
+              const vol20 = volatility20d(r.closes);
               return (
                 <View key={r.code} style={styles.row}>
                   <Text style={styles.cellBold}>{r.code}</Text>
@@ -200,7 +202,9 @@ export function ReportPDF({ data, generatedAt }: Props) {
                   >
                     {perf != null ? `${sign(perf)}${perf.toFixed(2)} %` : '—'}
                   </Text>
-                  <Text style={styles.cell}>—</Text>
+                  <Text style={styles.cell}>
+                    {vol20 != null ? `${(vol20 * 100).toFixed(2)} %` : '—'}
+                  </Text>
                   <Text style={styles.cell}>
                     {r.volumes.filter((v): v is number => v != null).length > 0
                       ? Math.round(

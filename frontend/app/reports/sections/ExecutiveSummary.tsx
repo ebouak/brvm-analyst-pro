@@ -36,7 +36,7 @@ export default function ExecutiveSummary({ rows, dateFrom, dateTo }: Props) {
 
       {avgVar != null && (
         <p className="text-sm">
-          Variation moyenne du marché :{' '}
+          Rendement moyen du marché (période) :{' '}
           <span className={`tabular font-medium ${avgVar >= 0 ? 'text-up' : 'text-down'}`}>
             {sign(avgVar)}{avgVar.toFixed(2)} %
           </span>

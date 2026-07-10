@@ -27,6 +27,19 @@ export function topMovers<T extends { variation_pct: number | null }>(
 }
 
 /**
+ * Rendement d'une série de clôtures sur toute la période : du premier cours
+ * non-nul à la dernière clôture. Renvoie null si l'un des deux manque (0 = jour
+ * sans cotation traité comme absent, cohérent avec le tableau de stats).
+ * Source unique de vérité partagée par le résumé exécutif et les stats par titre.
+ */
+export function periodReturn(closes: number[]): number | null {
+  const first = closes.find((c) => c > 0) ?? null;
+  const last = closes.length > 0 ? (closes[closes.length - 1] ?? null) : null;
+  if (!first || !last) return null;
+  return ((last - first) / first) * 100;
+}
+
+/**
  * Normalise une série de cours en base 100.
  * Le premier cours non-null devient 100. Les null restent null.
  */
