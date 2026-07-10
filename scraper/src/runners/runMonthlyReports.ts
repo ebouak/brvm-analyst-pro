@@ -1,117 +1,136 @@
 /**
- * Orchestrateur pour la génération de rapports mensuels PDF.
- * Exécuté le 1er de chaque mois à 08h00 UTC via cron.
+ * Orchestrateur — rapports mensuels par utilisateur (review de portefeuille).
+ * Planifié le 1er de chaque mois (cron) pour le MOIS PRÉCÉDENT.
  *
- * Pipeline:
- * 1. Récupérer tous les utilisateurs premium
- * 2. Pour chaque utilisateur:
- *    - Récupérer les données du mois (paper trading, signaux, événements)
- *    - Appeler LLM pour narrations
- *    - Générer PDF
- *    - Upload vers Vercel Blob
- *    - Sauvegarder en DB
- *    - Envoyer email
- * 3. Journaliser les résultats
+ * Approche « hybride » : tous les CHIFFRES sont dérivés des données réelles
+ * (paper trading, fondamentaux, événements) ; le LLM (DeepSeek→Mistral, sinon
+ * repli déterministe) ne fait que RÉDIGER à partir de ces faits fournis — il
+ * n'a jamais accès libre à la base et ne doit inventer aucun chiffre.
+ *
+ * Mode « génération seule » : écrit report_json dans monthly_reports.
+ * report_url et sent_at restent null (aucun PDF/email ici — branchable ensuite
+ * via l'infra notifications). Idempotent sur (user_id, month).
  */
 
 import { getSupabase } from '../persistence/supabase.js';
-import { ReportNarrator, createReportNarrator } from '../services/reportNarrator.js';
-import { generateMonthlyReportPDF, pdfToBuffer, type MonthlyReportData } from '../services/pdfGenerator.js';
+import { ReportNarrator } from '../services/reportNarrator.js';
 import { logger } from '../logger.js';
-import { PaperTradingService } from '../services/paperTradingService.js';
-import { EmailService } from '../services/emailService.js';
 
 export interface MonthlyReportRunOptions {
-  month?: string; // Override month (YYYY-MM format), default = current month
-  dryRun?: boolean; // Don't write to DB or send emails
+  month?: string; // YYYY-MM ; défaut = mois précédent (mois écoulé).
+  dryRun?: boolean; // N'écrit pas en base ; journalise seulement.
 }
 
 export interface MonthlyReportRunResult {
   status: 'success' | 'partial' | 'failed';
   usersProcessed: number;
   reportsGenerated: number;
-  emailsSent: number;
+  skipped: number; // utilisateurs sans compte paper trading
   errors: Array<{ userId: string; error: string }>;
   message: string;
+}
+
+/** report_json — forme consommée par MonthlyReportViewer (frontend). */
+interface ReportJson {
+  month: string;
+  userName?: string;
+  kpis: { pnlTotal: number; pnlPct: number; capitalCurrent: number; capitalInitial: number };
+  topSignals: Array<{
+    code: string;
+    entryPrice: number;
+    exitPrice: number;
+    entryDate: string;
+    exitDate: string;
+    pnlPct: number;
+    daysHeld: number;
+  }>;
+  signalNarrative: string;
+  fundamentals: Array<{ code: string; per?: number; pb?: number; graham?: number }>;
+  events: Array<{ title: string; date: string; impact: string }>;
+  eventNarrative: string;
+  recommendations: string;
+}
+
+type Supa = ReturnType<typeof getSupabase>;
+
+/**
+ * Construit le narrateur en résolvant les clés LLM : table api_keys (comme le
+ * frontend) puis variables d'environnement. Sans clé → repli déterministe.
+ */
+async function resolveNarrator(supabase: Supa): Promise<ReportNarrator> {
+  const keys: { deepseek?: string; mistral?: string; grok?: string } = {
+    deepseek: process.env.DEEPSEEK_API_KEY,
+    mistral: process.env.MISTRAL_API_KEY,
+    grok: process.env.GROK_API_KEY,
+  };
+  try {
+    const { data } = await supabase.from('api_keys').select('provider, api_key');
+    for (const r of (data ?? []) as { provider: string; api_key: string }[]) {
+      if (r.provider === 'deepseek' && !keys.deepseek) keys.deepseek = r.api_key;
+      if (r.provider === 'mistral' && !keys.mistral) keys.mistral = r.api_key;
+      if (r.provider === 'grok' && !keys.grok) keys.grok = r.api_key;
+    }
+  } catch (err) {
+    logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'api_keys illisible — repli déterministe possible');
+  }
+  return new ReportNarrator(keys);
 }
 
 export async function runMonthlyReports(
   opts: MonthlyReportRunOptions = {},
 ): Promise<MonthlyReportRunResult> {
   const supabase = getSupabase();
-  const narrator = createReportNarrator();
-  const paperTradingService = new PaperTradingService();
-  const emailService = new EmailService();
+  const narrator = await resolveNarrator(supabase);
+  const month = opts.month || previousMonth(new Date());
 
-  const now = new Date();
-  const month = opts.month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
-  logger.info({ month, dryRun: opts.dryRun }, 'Starting monthly reports generation');
+  logger.info({ month, dryRun: opts.dryRun }, 'Démarrage génération rapports mensuels');
 
   const result: MonthlyReportRunResult = {
     status: 'success',
     usersProcessed: 0,
     reportsGenerated: 0,
-    emailsSent: 0,
+    skipped: 0,
     errors: [],
     message: '',
   };
 
   try {
-    // 1. Récupérer tous les utilisateurs premium
+    // Utilisateurs premium (feature réservée). profiles n'a PAS de full_name.
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
-      .select('id, email, full_name')
+      .select('id, email, is_premium')
       .eq('is_premium', true);
+    if (profileError) throw new Error(`Lecture profils premium : ${profileError.message}`);
 
-    if (profileError) {
-      throw new Error(`Failed to fetch premium users: ${profileError.message}`);
-    }
+    const users = (profiles ?? []) as { id: string; email: string | null }[];
+    logger.info({ count: users.length }, 'Utilisateurs premium récupérés');
 
-    const users = profiles || [];
-    logger.info({ count: users.length }, 'Retrieved premium users');
-
-    // 2. Traiter chaque utilisateur
     for (const user of users) {
       try {
-        await generateReportForUser(
-          supabase,
-          user.id,
-          user.email,
-          user.full_name || 'Utilisateur',
-          month,
-          narrator,
-          paperTradingService,
-          emailService,
-          opts.dryRun || false,
-        );
-
+        const outcome = await generateReportForUser(supabase, user.id, user.email, month, narrator, opts.dryRun ?? false);
         result.usersProcessed++;
-        result.reportsGenerated++;
+        if (outcome === 'generated') result.reportsGenerated++;
+        else result.skipped++;
       } catch (error) {
-        logger.error({ userId: user.id, error }, 'Failed to generate report for user');
+        logger.error({ userId: user.id, error }, 'Échec génération rapport utilisateur');
         result.status = 'partial';
-        result.errors.push({
-          userId: user.id,
-          error: error instanceof Error ? error.message : String(error),
-        });
+        result.errors.push({ userId: user.id, error: error instanceof Error ? error.message : String(error) });
       }
     }
 
-    // 3. Calculer le résultat final
     if (result.errors.length === 0) {
-      result.message = `Generated and sent ${result.reportsGenerated} reports`;
+      result.message = `${result.reportsGenerated} rapport(s) généré(s), ${result.skipped} ignoré(s) (sans portefeuille)`;
     } else if (result.reportsGenerated > 0) {
-      result.message = `Generated ${result.reportsGenerated} reports, ${result.errors.length} failed`;
+      result.message = `${result.reportsGenerated} généré(s), ${result.errors.length} en échec`;
     } else {
       result.status = 'failed';
-      result.message = `No reports generated. All ${result.errors.length} users failed.`;
+      result.message = `Aucun rapport généré. ${result.errors.length} échec(s).`;
     }
 
-    logger.info(result, 'Monthly reports generation completed');
+    logger.info(result, 'Génération rapports mensuels terminée');
     return result;
   } catch (error) {
-    logger.error({ error }, 'Monthly reports generation failed');
+    logger.error({ error }, 'Génération rapports mensuels échouée');
     result.status = 'failed';
     result.message = error instanceof Error ? error.message : String(error);
     return result;
@@ -119,312 +138,239 @@ export async function runMonthlyReports(
 }
 
 async function generateReportForUser(
-  supabase: ReturnType<typeof getSupabase>,
+  supabase: Supa,
   userId: string,
-  email: string,
-  fullName: string,
+  email: string | null,
   month: string,
-  narrator: ReturnType<typeof createReportNarrator>,
-  paperTradingService: PaperTradingService,
-  emailService: EmailService,
+  narrator: ReportNarrator,
   dryRun: boolean,
-): Promise<void> {
-  logger.info({ userId, month }, 'Generating report for user');
+): Promise<'generated' | 'skipped'> {
+  const nextMonth = getNextMonth(month);
 
-  const parts = month.split('-');
-  const monthYear = parts[0] || '';
-  const monthMonth = parts[1] || '';
-  const monthNum = parseInt(monthMonth, 10);
-  const yearNum = parseInt(monthYear, 10);
-
-  // 1. Récupérer le compte paper trading
-  const account = await paperTradingService.getAccount(userId);
+  // 1. Compte paper trading (KPIs capital). Sans compte → on ignore.
+  const { data: account } = await supabase
+    .from('paper_trading_accounts')
+    .select('capital_initial, capital_current')
+    .eq('user_id', userId)
+    .maybeSingle();
   if (!account) {
-    logger.warn({ userId }, 'User has no paper trading account, skipping');
-    return;
+    logger.info({ userId }, 'Aucun compte paper trading — utilisateur ignoré');
+    return 'skipped';
   }
 
-  // 2. Récupérer les positions fermées du mois
-  const { data: positions, error: posError } = await supabase
+  // 2. Positions FERMÉES durant le mois = les trades de l'utilisateur.
+  const { data: closedRaw, error: posErr } = await supabase
     .from('paper_trading_positions')
-    .select('*')
+    .select('code, entry_price, entry_date, exit_price, exit_date, pnl, pnl_pct, days_held')
     .eq('user_id', userId)
     .eq('status', 'closed')
-    .gte('exit_date', month)
-    .lt('exit_date', getNextMonth(month));
+    .gte('exit_date', `${month}-01`)
+    .lt('exit_date', `${nextMonth}-01`);
+  if (posErr) throw new Error(`Positions : ${posErr.message}`);
+  const closed = (closedRaw ?? []) as Array<{
+    code: string; entry_price: number | null; entry_date: string; exit_price: number | null;
+    exit_date: string | null; pnl: number | null; pnl_pct: number | null; days_held: number | null;
+  }>;
 
-  if (posError) {
-    throw new Error(`Failed to fetch positions: ${posError.message}`);
-  }
+  // Top signaux du mois = SES meilleures positions clôturées (par P&L %).
+  const topSignals = [...closed]
+    .sort((a, b) => (b.pnl_pct ?? 0) - (a.pnl_pct ?? 0))
+    .slice(0, 6)
+    .map((p) => ({
+      code: p.code,
+      entryPrice: Number(p.entry_price ?? 0),
+      exitPrice: Number(p.exit_price ?? p.entry_price ?? 0),
+      entryDate: p.entry_date,
+      exitDate: p.exit_date ?? p.entry_date,
+      pnlPct: Number(p.pnl_pct ?? 0),
+      daysHeld: Number(p.days_held ?? 0),
+    }));
 
-  // 3. Récupérer les 3 meilleurs signaux du mois
-  const { data: signals, error: sigError } = await supabase
-    .from('signals_daily')
-    .select('id, code, score_total, inputs')
-    .gte('date_marche', month)
-    .lt('date_marche', getNextMonth(month))
-    .order('score_total', { ascending: false })
-    .limit(3);
+  // 3. KPIs — P&L RÉALISÉ du mois (somme des clôtures), pas le cumul all-time.
+  const pnlTotal = closed.reduce((s, p) => s + Number(p.pnl ?? 0), 0);
+  const capitalInitial = Number(account.capital_initial ?? 0);
+  const capitalCurrent = Number(account.capital_current ?? 0);
+  const pnlPct = capitalInitial > 0 ? (pnlTotal / capitalInitial) * 100 : 0;
 
-  if (sigError) {
-    throw new Error(`Failed to fetch signals: ${sigError.message}`);
-  }
+  // 4. Fondamentaux DÉRIVÉS (PER/PB/Graham) pour les titres tradés ce mois-ci.
+  const codes = [...new Set(topSignals.map((s) => s.code))];
+  const valuation = await computeValuation(supabase, codes);
+  const fundamentals = codes
+    .map((code) => ({ code, ...(valuation.get(code) ?? {}) }))
+    .filter((f) => f.per !== undefined || f.pb !== undefined || f.graham !== undefined);
 
-  // 4. Récupérer les événements du mois
-  const { data: events, error: eventError } = await supabase
-    .from('brvm_events')
-    .select('title, event_date, event_type')
-    .gte('event_date', month)
-    .lt('event_date', getNextMonth(month))
-    .limit(10);
+  // 5. Événements du mois — priorité aux titres tradés, sinon marché (importance).
+  const events = await loadMonthEvents(supabase, month, nextMonth, codes);
 
-  if (eventError) {
-    throw new Error(`Failed to fetch events: ${eventError.message}`);
-  }
-
-  // 5. Enrichir les signaux avec les fondamentaux
-  const enrichedSignals = await Promise.all(
-    (signals || []).map(async (sig) => {
-      const { data: fund } = await supabase
-        .from('fundamentals')
-        .select('per, pb, graham')
-        .eq('code', sig.code as string)
-        .eq('year', yearNum)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      return {
-        code: sig.code,
-        entryPrice: 0, // Sera enrichi depuis positions
-        exitPrice: 0,
-        entryDate: '',
-        exitDate: '',
-        pnlPct: 0,
-        daysHeld: 0,
-        fundamentals: fund
-          ? {
-              per: fund.per,
-              pb: fund.pb,
-              graham: fund.graham,
-            }
-          : undefined,
-      };
-    }),
+  // 6. Narrations hybrides (faits fournis → prose ; repli déterministe sans clé).
+  const signalNarrative = await narrator.narrateSignals(
+    topSignals.map((s) => ({ code: s.code, entryPrice: s.entryPrice, exitPrice: s.exitPrice, pnlPct: s.pnlPct, daysHeld: s.daysHeld, fundamentals: valuation.get(s.code) })),
   );
-
-  // Enrichir depuis les positions fermées
-  const posMap = new Map();
-  (positions || []).forEach((pos) => {
-    posMap.set(pos.code, pos);
-  });
-
-  enrichedSignals.forEach((sig) => {
-    const pos = posMap.get(sig.code);
-    if (pos) {
-      sig.entryPrice = pos.entry_price;
-      sig.exitPrice = pos.exit_price || pos.entry_price;
-      sig.entryDate = pos.entry_date;
-      sig.exitDate = pos.exit_date || pos.entry_date;
-      sig.pnlPct = pos.pnl_pct;
-      sig.daysHeld = pos.days_held || 0;
-    }
-  });
-
-  // 6. Générer les narrations LLM
-  const signalNarrative = await narrator.narrateSignals(enrichedSignals);
-
-  const eventNarrative = await narrator.narrateEvents(
-    (events || []).map((e) => ({
-      title: e.title,
-      date: e.event_date,
-      impact: e.event_type || 'Événement de marché',
-    })),
-  );
-
-  // Récupérer les secteurs pour recommandations
-  const topSectors = await getTopSectorsByRsi(supabase, month, getNextMonth(month));
+  const eventNarrative = await narrator.narrateEvents(events);
+  const topSectors = await getTopSectors(supabase, month, nextMonth);
   const recommendations = await narrator.generateRecommendations(topSectors);
 
-  // 7. Construire les données du rapport
-  const reportData: MonthlyReportData = {
+  // 7. Assemblage report_json (forme viewer).
+  const reportJson: ReportJson = {
     month,
-    userName: fullName,
-    kpis: {
-      pnlTotal: account.pnl_total,
-      pnlPct: account.pnl_pct,
-      capitalCurrent: account.capital_current,
-      capitalInitial: account.capital_initial,
-    },
-    topSignals: enrichedSignals.filter((s) => s.entryPrice > 0).slice(0, 3),
+    userName: email ? email.split('@')[0] : undefined,
+    kpis: { pnlTotal, pnlPct, capitalCurrent, capitalInitial },
+    topSignals,
     signalNarrative,
-    fundamentals: enrichedSignals.map((s) => ({
-      code: s.code,
-      per: s.fundamentals?.per,
-      pb: s.fundamentals?.pb,
-      graham: s.fundamentals?.graham,
-    })),
-    events: (events || []).map((e) => ({
-      title: e.title,
-      date: e.event_date,
-      impact: e.event_type || 'Événement',
-    })),
+    fundamentals,
+    events,
     eventNarrative,
     recommendations,
   };
 
-  // 8. Générer le PDF
-  const pdfStream = generateMonthlyReportPDF(reportData);
-  const pdfBuffer = await pdfToBuffer(pdfStream);
-
-  // 9. Upload vers Vercel Blob (ou S3)
-  const pdfUrl = await uploadPdfToBlob(pdfBuffer, userId, month);
-
-  // 10. Sauvegarder en BD (si non dry-run)
-  if (!dryRun) {
-    const { error: dbError } = await supabase.from('monthly_reports').upsert(
-      {
-        user_id: userId,
-        month,
-        report_url: pdfUrl,
-        report_json: reportData,
-        sent_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id,month' },
+  if (dryRun) {
+    logger.info(
+      { userId, month, closed: closed.length, pnlTotal, pnlPct: pnlPct.toFixed(2), events: events.length, fundamentals: fundamentals.length },
+      'DRY-RUN — rapport non écrit',
     );
-
-    if (dbError) {
-      throw new Error(`Failed to save report to DB: ${dbError.message}`);
-    }
-
-    // 11. Envoyer l'email
-    await sendReportEmail(emailService, email, fullName, month, pdfUrl, account.pnl_pct);
+    return 'generated';
   }
 
-  logger.info(
-    { userId, month, dryRun },
-    `Report generated for ${fullName} — ${pdfUrl}`,
+  // 8. Upsert (génération seule : report_url + sent_at restent null).
+  const { error: dbError } = await supabase.from('monthly_reports').upsert(
+    { user_id: userId, month, report_json: reportJson, report_url: null, sent_at: null },
+    { onConflict: 'user_id,month' },
   );
+  if (dbError) throw new Error(`Écriture monthly_reports : ${dbError.message}`);
+
+  logger.info({ userId, month, closed: closed.length }, 'Rapport mensuel généré');
+  return 'generated';
 }
 
-async function uploadPdfToBlob(buffer: Buffer, userId: string, month: string): Promise<string> {
-  // Pour cette implémentation, nous utilisons une URL mock.
-  // En production, cela utiliserait Vercel Blob ou S3.
-  // Exemple avec Vercel Blob (nécessite @vercel/blob):
-  //
-  // import { put } from '@vercel/blob';
-  // const filename = `reports/${month}/${userId}.pdf`;
-  // const blob = await put(filename, buffer, { access: 'public' });
-  // return blob.url;
+/**
+ * PER / P/B / Graham dérivés honnêtement : dernier exercice de `fundamentals`
+ * (net_income, equity) + nombre d'actions (`brvm_instruments.shares`) + dernier
+ * cours. Aucune valeur inventée : une métrique n'est fournie que si calculable.
+ */
+async function computeValuation(
+  supabase: Supa,
+  codes: string[],
+): Promise<Map<string, { per?: number; pb?: number; graham?: number }>> {
+  const out = new Map<string, { per?: number; pb?: number; graham?: number }>();
+  if (codes.length === 0) return out;
 
-  // Pour l'instant, retourner une URL locale fictive
-  const filename = `reports-${userId}-${month}.pdf`;
-  return `https://s3.example.com/${filename}`;
-}
+  const [{ data: funds }, { data: instr }, { data: lastDateRow }] = await Promise.all([
+    supabase.from('fundamentals').select('code, year, net_income, equity').in('code', codes).order('year', { ascending: false }),
+    supabase.from('brvm_instruments').select('code, shares').in('code', codes),
+    supabase.from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1),
+  ]);
 
-async function sendReportEmail(
-  emailService: EmailService,
-  email: string,
-  name: string,
-  month: string,
-  pdfUrl: string,
-  pnlPct: number,
-): Promise<void> {
-  const monthName = getMonthName(month);
-  const subject = `BRVM Analyst Pro — Rapport ${monthName}`;
+  const sharesByCode = new Map<string, number | null>();
+  for (const r of (instr ?? []) as { code: string; shares: number | null }[]) sharesByCode.set(r.code, r.shares);
 
-  const { html, text } = emailService.buildMonthlyReportEmail({
-    userName: name,
-    month,
-    pdfUrl,
-    pnlPct,
-  });
-
-  const result = await emailService.send({
-    to: email,
-    subject,
-    html,
-    text,
-  });
-
-  if (!result.success) {
-    logger.warn(
-      { email, month, error: result.error },
-      'Failed to send email, but report was created'
-    );
+  const fundByCode = new Map<string, { net_income: number | null; equity: number | null }>();
+  for (const r of (funds ?? []) as { code: string; net_income: number | null; equity: number | null }[]) {
+    if (!fundByCode.has(r.code)) fundByCode.set(r.code, { net_income: r.net_income, equity: r.equity }); // 1er = année la plus récente
   }
+
+  const priceByCode = new Map<string, number | null>();
+  const lastDate = (lastDateRow?.[0]?.date_marche as string | undefined) ?? undefined;
+  if (lastDate) {
+    const { data: quotes } = await supabase
+      .from('brvm_actions_daily').select('code, cours_jour').eq('date_marche', lastDate).in('code', codes);
+    for (const q of (quotes ?? []) as { code: string; cours_jour: number | null }[]) priceByCode.set(q.code, q.cours_jour);
+  }
+
+  for (const code of codes) {
+    const shares = sharesByCode.get(code);
+    const f = fundByCode.get(code);
+    const price = priceByCode.get(code);
+    if (!shares || shares <= 0 || !f) continue;
+    const metrics: { per?: number; pb?: number; graham?: number } = {};
+    const eps = f.net_income != null ? f.net_income / shares : null;
+    const bvps = f.equity != null ? f.equity / shares : null;
+    if (price != null && eps != null && eps > 0) metrics.per = price / eps;
+    if (price != null && bvps != null && bvps > 0) metrics.pb = price / bvps;
+    if (eps != null && eps > 0 && bvps != null && bvps > 0) metrics.graham = Math.sqrt(22.5 * eps * bvps);
+    if (metrics.per !== undefined || metrics.pb !== undefined || metrics.graham !== undefined) out.set(code, metrics);
+  }
+  return out;
 }
 
-async function getTopSectorsByRsi(
-  supabase: ReturnType<typeof getSupabase>,
-  startMonth: string,
-  endMonth: string,
+/** Événements du mois : ceux liés aux titres tradés, complétés par les plus importants. */
+async function loadMonthEvents(
+  supabase: Supa,
+  month: string,
+  nextMonth: string,
+  codes: string[],
+): Promise<Array<{ title: string; date: string; impact: string }>> {
+  const { data } = await supabase
+    .from('market_events')
+    .select('title, event_date, event_type, summary, importance_level, instrument_code')
+    .gte('event_date', `${month}-01`)
+    .lt('event_date', `${nextMonth}-01`)
+    .order('importance_level', { ascending: false })
+    .limit(40);
+  const rows = (data ?? []) as Array<{
+    title: string; event_date: string; event_type: string | null; summary: string | null;
+    importance_level: number | null; instrument_code: string | null;
+  }>;
+  const codeSet = new Set(codes);
+  const held = rows.filter((e) => e.instrument_code && codeSet.has(e.instrument_code));
+  const chosen = (held.length > 0 ? held : rows).slice(0, 6);
+  return chosen.map((e) => ({
+    title: e.title,
+    date: e.event_date,
+    impact: e.summary || e.event_type || 'Événement de marché',
+  }));
+}
+
+/** Secteurs les plus forts du mois (score moyen des signaux) pour les recommandations. */
+async function getTopSectors(
+  supabase: Supa,
+  month: string,
+  nextMonth: string,
 ): Promise<Array<{ sector: string; avgRsi: number; avgScore: number }>> {
   const { data, error } = await supabase
     .from('signals_daily')
-    .select(
-      `
-      code,
-      score_total,
-      inputs,
-      brvm_instruments!inner(secteur)
-    `,
-    )
-    .gte('date_marche', startMonth as string)
-    .lt('date_marche', endMonth as string);
-
+    .select('score_total, inputs, brvm_instruments!inner(secteur)')
+    .gte('date_marche', `${month}-01`)
+    .lt('date_marche', `${nextMonth}-01`);
   if (error || !data) {
-    logger.warn({ error }, 'Failed to fetch sector data');
+    logger.warn({ error }, 'Lecture secteurs échouée');
     return [];
   }
-
-  const sectorStats = new Map<string, { rsis: number[]; scores: number[] }>();
-
-  data.forEach((row) => {
-    const sector = (row.brvm_instruments as any)?.secteur || 'Autre';
-    const rsi = (row.inputs as any)?.rsi || 50;
-    const score = row.score_total || 0;
-
-    if (!sectorStats.has(sector)) {
-      sectorStats.set(sector, { rsis: [], scores: [] });
-    }
-
-    const stats = sectorStats.get(sector)!;
-    stats.rsis.push(rsi);
-    stats.scores.push(score);
-  });
-
+  const stats = new Map<string, { rsis: number[]; scores: number[] }>();
+  for (const row of data as any[]) {
+    // Le join to-one peut être typé objet ou tableau selon le client — accès souple.
+    const rel = row.brvm_instruments;
+    const sector: string = (Array.isArray(rel) ? rel[0]?.secteur : rel?.secteur) || 'Autre';
+    const rsi = typeof row.inputs?.rsi === 'number' ? row.inputs.rsi : 50;
+    const score = typeof row.score_total === 'number' ? row.score_total : 0;
+    if (!stats.has(sector)) stats.set(sector, { rsis: [], scores: [] });
+    const s = stats.get(sector)!;
+    s.rsis.push(rsi);
+    s.scores.push(score);
+  }
   const results: Array<{ sector: string; avgRsi: number; avgScore: number }> = [];
-
-  sectorStats.forEach((stats, sector) => {
-    const avgRsi = stats.rsis.reduce((a, b) => a + b, 0) / stats.rsis.length;
-    const avgScore = stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length;
-    results.push({ sector, avgRsi, avgScore });
+  stats.forEach((s, sector) => {
+    results.push({
+      sector,
+      avgRsi: s.rsis.reduce((a, b) => a + b, 0) / s.rsis.length,
+      avgScore: s.scores.reduce((a, b) => a + b, 0) / s.scores.length,
+    });
   });
-
   return results.sort((a, b) => b.avgScore - a.avgScore).slice(0, 3);
 }
 
-function getMonthName(month: string): string {
-  const parts = month.split('-');
-  const year = parts[0] || '2026';
-  const monthStr = parts[1] || '01';
-  const monthNum = parseInt(monthStr, 10);
-  const date = new Date(parseInt(year, 10), monthNum - 1, 1);
-  return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+/** Mois précédent au format YYYY-MM. */
+function previousMonth(d: Date): string {
+  const y = d.getFullYear();
+  const m = d.getMonth(); // 0-based ; le mois précédent = m (car getMonth()+1 serait le courant)
+  const date = new Date(Date.UTC(y, m - 1, 1));
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
+/** Mois suivant au format YYYY-MM (borne haute exclusive). */
 function getNextMonth(month: string): string {
-  const parts = month.split('-');
-  const year = parts[0] || '2026';
-  const monthStr = parts[1] || '01';
-  let nextMonth = parseInt(monthStr, 10) + 1;
-  let nextYear = parseInt(year, 10);
-
-  if (nextMonth > 12) {
-    nextMonth = 1;
-    nextYear++;
-  }
-
-  return `${nextYear}-${String(nextMonth).padStart(2, '0')}`;
+  const [y, m] = month.split('-').map((x) => parseInt(x, 10));
+  let nm = (m ?? 1) + 1;
+  let ny = y ?? 2026;
+  if (nm > 12) { nm = 1; ny++; }
+  return `${ny}-${String(nm).padStart(2, '0')}`;
 }

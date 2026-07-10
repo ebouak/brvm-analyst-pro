@@ -451,7 +451,27 @@ async function main(): Promise<number> {
       const dryRun = rest.includes('--dry-run');
       const month = positional[0];
       const { runMonthlyReports } = await import('./runners/runMonthlyReports.js');
-      const res = await runMonthlyReports({ month, dryRun });
+      const res = await monitored(
+        { code: 'monthly-reports', label: 'Rapports mensuels (par portefeuille)' },
+        async () => {
+          const r = await runMonthlyReports({ month, dryRun });
+          return {
+            value: r,
+            outcome: {
+              status: r.status,
+              rows_extracted: r.usersProcessed,
+              rows_upserted: r.reportsGenerated,
+              metadata: {
+                status: r.status,
+                reportsGenerated: r.reportsGenerated,
+                skipped: r.skipped,
+                errors: r.errors.length,
+                month: month ?? 'auto',
+              },
+            },
+          };
+        },
+      );
       logger.info(res, 'Monthly reports generation complete');
       return res.status === 'failed' ? 1 : 0;
     }

@@ -98,10 +98,8 @@ export default async function ReportsArchivePage() {
                         {monthName}
                       </h3>
                       <p className="mt-1 text-xs text-muted">
-                        {report.sent_at ? (
-                          <>
-                            Généré le {fmtDateFR(report.sent_at)}
-                          </>
+                        {report.report_json ? (
+                          <>Généré le {fmtDateFR(report.sent_at ?? report.created_at)}</>
                         ) : (
                           <>En cours de génération...</>
                         )}
