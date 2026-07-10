@@ -28,6 +28,9 @@ export default function OnboardingModal() {
   const [formule, setFormule] = useState<'gratuit' | 'premium'>('gratuit');
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Fermeture locale immédiate : cette modale couvre tout l'écran ; elle ne doit
+  // JAMAIS piéger l'utilisateur (sinon toute la navigation paraît morte).
+  const [dismissed, setDismissed] = useState(false);
 
   function submit() {
     const fd = new FormData();
@@ -42,15 +45,44 @@ export default function OnboardingModal() {
         setError(res.error);
         return;
       }
-      // Le compte reste gratuit par défaut (aucun abonnement). « Premium » dirige
-      // vers le flux de souscription existant ; « Gratuit » ferme simplement.
+      // Fermeture fiable : on retire la modale localement ET on rafraîchit le
+      // layout (revalidatePath côté action) → onboarding_done=true persisté.
+      setDismissed(true);
+      router.refresh();
+      // « Premium » dirige vers le flux de souscription ; « Gratuit » ferme.
       if (formule === 'premium') router.push('/account/plan');
     });
   }
 
+  /** Passer l'onboarding : ferme immédiatement + persiste onboarding_done=true
+   *  (avec des valeurs par défaut) pour qu'il ne réapparaisse pas. */
+  function skip() {
+    setDismissed(true);
+    const fd = new FormData();
+    fd.set('profil', profil);
+    fd.set('horizon', horizon);
+    fd.set('mode_debutant', String(debutant));
+    fd.set('formule', 'gratuit');
+    startTransition(async () => {
+      await saveInvestorProfile(fd).catch(() => {});
+      router.refresh();
+    });
+  }
+
+  if (dismissed) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-6">
+      <div className="relative bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-6">
+        {/* Échappatoire : fermer / passer — ne jamais bloquer l'utilisateur. */}
+        <button
+          type="button"
+          onClick={skip}
+          aria-label="Fermer et passer l’onboarding"
+          className="absolute right-3 top-3 text-faint hover:text-ivory transition text-lg leading-none active:scale-95"
+        >
+          ✕
+        </button>
 
         {step === 1 && (
           <>

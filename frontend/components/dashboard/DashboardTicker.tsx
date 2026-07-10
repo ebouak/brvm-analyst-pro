@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRealtimeActions } from '@/lib/realtime/useRealtimeActions';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
@@ -50,9 +50,19 @@ export default function DashboardTicker({
   dateMarche?: string | null;
 }) {
   // Seed du hook : uniquement les lignes actions ayant un cours brut.
-  const actionSeed: RealtimeActionRow[] = items
-    .filter((it) => it.kind === 'action' && it.cours != null)
-    .map((it) => ({ code: it.code, cours_jour: it.cours ?? null, variation_pct: it.variation }));
+  // CRITIQUE — useMemo obligatoire : sans référence stable, useRealtimeActions
+  // (qui fait `useEffect(() => setRows(initialRows), [initialRows])`) rebouclerait
+  // à l'infini (nouveau tableau à chaque rendu → effet → setRows → re-rendu → …).
+  // Cette boucle gardait React perpétuellement occupé et EMPÊCHAIT toute
+  // navigation par <Link> quand /dashboard était la page d'entrée (bug « clics
+  // morts » confirmé au navigateur). Ne jamais retirer ce useMemo.
+  const actionSeed: RealtimeActionRow[] = useMemo(
+    () =>
+      items
+        .filter((it) => it.kind === 'action' && it.cours != null)
+        .map((it) => ({ code: it.code, cours_jour: it.cours ?? null, variation_pct: it.variation })),
+    [items],
+  );
   const { rows: liveRows, flashes } = useRealtimeActions(actionSeed, dateMarche ?? null);
   const liveByCode = new Map(liveRows.map((r) => [r.code, r]));
 
@@ -113,6 +123,11 @@ export default function DashboardTicker({
             )}
             <Link
               href={it.kind === 'action' ? `/actions/${it.code}` : '/obligations'}
+              // prefetch=false : le ticker défile en continu (~100 liens dupliqués) ;
+              // sans ça, Next préfetche chaque instrument qui entre dans le viewport
+              // → flot ininterrompu de requêtes RSC qui sature le routeur et bloque
+              // la navigation par <Link> quand /dashboard est la page d'entrée.
+              prefetch={false}
               className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-bold transition-opacity hover:opacity-100"
             >
               <span className="text-muted">{it.code}</span>

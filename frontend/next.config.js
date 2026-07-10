@@ -10,11 +10,8 @@ const nextConfig = {
     serverActions: { bodySizeLimit: '10mb' },
     // Active instrumentation.ts (init Sentry serveur/edge) sous Next 14.
     instrumentationHook: true,
-    // Cache du router client : une page déjà visitée reste servie depuis le
-    // cache navigateur 30 s (dynamique) / 3 min (statique) au lieu de refaire
-    // un rendu serveur complet à CHAQUE clic — navigation avant/arrière
-    // instantanée. Les données de marché bougent au pire toutes les 15 min.
-    staleTimes: { dynamic: 30, static: 180 },
+    // NB : `staleTimes` retiré — suspecté de casser la navigation par <Link>
+    // depuis la page d'entrée /dashboard (test e2e). À réévaluer plus tard.
   },
   // ESLint disponible via `npm run lint` mais NON bloquant au build : le code
   // existant n'a jamais été linté → on évite de casser les déploiements Vercel.
