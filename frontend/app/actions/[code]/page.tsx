@@ -35,6 +35,8 @@ import { listTopics } from '@/lib/forum/server';
 import { ForumTopicList } from '@/components/forum/ForumTopicList';
 import { readTechnical } from '@/lib/signal/technical';
 import { analyzeDividendTiming } from '@/lib/signal/dividendTiming';
+import { rendementNet } from '@/lib/tax/compute';
+import { toPaysUemoa } from '@/lib/tax/rates';
 import { readPosition } from '@/lib/signal/position';
 import { synthesize } from '@/lib/signal/synthesis';
 import ThesisPanel from '@/components/theses/ThesisPanel';
@@ -303,6 +305,13 @@ export default async function InstrumentPage({
   const pays = instrument?.pays ?? last.pays ?? null;
   const secteur = instrument?.secteur ?? last.secteur ?? null;
 
+  // Rendement dividende net d'IRVM (barème sourcé lib/tax — null si taux non confirmé).
+  const paysFiscal = toPaysUemoa(pays);
+  const divNetRes = divYield != null && paysFiscal
+    ? rendementNet(divYield, paysFiscal, 'dividende_cote')
+    : ({ indisponible: true } as const);
+  const divYieldNet = divNetRes.indisponible ? null : divNetRes.valeur;
+
   // Bandeau verdict : sparkline 30j + plage observée (min/max de l'historique disponible).
   const closeHist = rows.map((r) => r.cours_jour).filter((c): c is number => c != null && c > 0);
   const sparkData = closeHist.slice(-30);
@@ -485,6 +494,7 @@ export default async function InstrumentPage({
               {shares != null && <SessionMetric label="Titres totaux" value={fmtNumber(shares)} />}
               {instrument?.flottant != null && <SessionMetric label="Titres flottant" value={fmtNumber(instrument.flottant)} />}
               {divYield != null && <SessionMetric label="Rdt dividende" value={divYield.toFixed(2)} unit="%" accent />}
+              {divYieldNet != null && <SessionMetric label="Rdt net d'IRVM" value={divYieldNet.toFixed(2)} unit="%" />}
             </div>
           </div>
         </div>
