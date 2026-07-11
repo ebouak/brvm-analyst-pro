@@ -11,8 +11,14 @@
    simplement écartée de la stratégie concernée.
    ────────────────────────────────────────────────────────────────────────── */
 
-/** Taux d'imposition des dividendes d'actions cotées (IRVM) — à confirmer. */
-export const IRVM = 0.1;
+import { BAREME } from './tax/rates';
+
+/**
+ * Taux IRVM utilisé par le simulateur (approximation mono-taux : les émetteurs
+ * BRVM sont majoritairement ivoiriens). Dérivé du barème sourcé (lib/tax) ;
+ * repli 0.10 si le taux CI n'était plus confirmé.
+ */
+export const IRVM = BAREME.CI.dividende_cote.taux ?? 0.1;
 
 export interface SimAction {
   code: string;
