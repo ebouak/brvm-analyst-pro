@@ -11,6 +11,7 @@ const PRODUIT = [
   { href: '/classement', label: 'Classement papier' },
   { href: '/brief', label: 'Brief du jour' },
   { href: '/methodologie', label: 'Méthodologie' },
+  { href: '/fiscalite', label: 'Fiscalité UEMOA' },
   { href: '/pricing', label: 'Tarifs' },
   { href: '/developers', label: 'API développeurs' },
   { href: '/api/rss', label: 'Flux RSS' },

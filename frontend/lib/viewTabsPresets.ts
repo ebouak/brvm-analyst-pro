@@ -19,6 +19,12 @@ export const FONDA_TABS: ViewTab[] = [
   { href: '/notations', label: 'Notations' },
 ];
 
+/** Espace Revenus : dividendes ↔ fiscalité. */
+export const REVENUS_TABS: ViewTab[] = [
+  { href: '/dividendes', label: 'Dividendes' },
+  { href: '/fiscalite', label: 'Fiscalité (IRVM)' },
+];
+
 /** Espace Valorisation : multiples + DCF. */
 export const VALO_TABS: ViewTab[] = [
   { href: '/premium/valorisation', label: 'Multiples', premium: true },

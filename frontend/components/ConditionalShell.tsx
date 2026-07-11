@@ -19,6 +19,7 @@ const BARE_PREFIXES = [
   '/brief',
   '/pricing',
   '/comparateur-sgi',
+  '/fiscalite',
   '/debutant',
   '/developers',
   '/formations/academy', // plein écran — l'Academy a sa propre UI (sidebar, nav)

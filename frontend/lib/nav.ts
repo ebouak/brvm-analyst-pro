@@ -128,6 +128,7 @@ export const PALETTE_EXTRA: NavItem[] = [
   { href: '/dashboard/reports/events', label: 'Événements de marché' },
   { href: '/dividendes/calendrier', label: 'Calendrier des dividendes' },
   { href: '/simulateur-budget', label: 'Simulateur budget' },
+  { href: '/fiscalite', label: 'Fiscalité des dividendes (IRVM)' },
   { href: '/methodologie', label: 'Méthodologie' },
   { href: '/debutant', label: 'Guide débutant' },
   { href: '/pricing', label: 'Tarifs' },
