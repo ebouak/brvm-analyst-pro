@@ -13,6 +13,16 @@ import {
 export const revalidate = 300;
 export const metadata = { title: 'Obligations — WESTBOURSE' };
 
+/**
+ * Émetteur souverain / institution régionale → coupons exonérés de retenue
+ * (barème lib/tax : États UEMOA, BOAD, BIDC). Détection par code + désignation.
+ */
+function isEmetteurEtat(code: string, designation: string | null, emetteur: string | null): boolean {
+  return /(TPCI|TPBJ|TPBF|TPSN|TPTG|TPNE|TPML|EOM|EOB|EOS|ETAT|TRESOR|TRÉSOR|BOAD|BIDC)/i.test(
+    `${code} ${designation ?? ''} ${emetteur ?? ''}`,
+  );
+}
+
 function toRow(o: ObligationDaily): ObligationRow {
   const parsed = parseObligationDesignation(o.designation);
   const emetteur = o.emetteur ?? parsed.emetteur;
@@ -49,6 +59,7 @@ function toRow(o: ObligationDaily): ObligationRow {
     ytm,
     modifiedDuration: modDur,
     isAmortissable,
+    couponExonere: isEmetteurEtat(o.code, o.designation, emetteur),
   };
 }
 
@@ -203,6 +214,9 @@ export default async function ObligationsPage() {
       <p className="text-[11px] text-faint leading-relaxed border-l-2 border-[#1a2a30] pl-3">
         YTM calculé par bisection (hypothèses : nominal 10 000 FCFA, coupon annuel, maturité = 31 déc. de l&apos;année de fin
         extraite de la désignation). Données source : scraper BRVM intraday.
+        Fiscalité : coupons des émetteurs souverains (États, BOAD, BIDC) <strong className="text-up">exonérés</strong> de retenue —
+        le YTM affiché est donc net. Obligations privées : retenue de 2&nbsp;% (Côte d&apos;Ivoire) à ~6&nbsp;% selon le pays de
+        l&apos;émetteur. <a href="/fiscalite" className="text-accent underline underline-offset-2">Barème et sources</a>.
       </p>
     </div>
   );

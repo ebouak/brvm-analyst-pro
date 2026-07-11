@@ -15,6 +15,8 @@ export interface ObligationRow {
   ytm: number | null;
   modifiedDuration: number | null;
   isAmortissable?: boolean;
+  /** Émetteur souverain/BOAD/BIDC → coupons exonérés de retenue (YTM = net). */
+  couponExonere?: boolean;
 }
 
 type SortKey = 'code' | 'taux_pct' | 'ytm' | 'yearsToMaturity';
@@ -180,7 +182,7 @@ export default function ObligationsTable({
                     </span>
                     <div className={`text-[10px] ${pCls}`}>{pLabel}</div>
                   </td>
-                  {/* YTM */}
+                  {/* YTM + fiscalité coupon */}
                   <td className="px-3 py-2.5 text-right font-mono text-xs">
                     {o.isAmortissable ? (
                       <span className="text-orange-400/70">N/A</span>
@@ -189,6 +191,9 @@ export default function ObligationsTable({
                     ) : (
                       <span className="text-gray-600">—</span>
                     )}
+                    <div className={`text-[10px] ${o.couponExonere ? 'text-[#3fe18b]/80' : 'text-gray-500'}`}>
+                      {o.couponExonere ? 'net (exonéré)' : 'retenue 2–6 %'}
+                    </div>
                   </td>
                 </tr>
               );
