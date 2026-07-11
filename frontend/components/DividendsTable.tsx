@@ -5,6 +5,8 @@ import type { DividendRow } from '@/lib/dividends';
 import { fmtFcfa, fmtDateFR } from '@/lib/format';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
+import { rendementNet } from '@/lib/tax/compute';
+import { toPaysUemoa } from '@/lib/tax/rates';
 
 type SortKey = 'code' | 'designation' | 'secteur' | 'pays' | 'montant' | 'rendement_pct' | 'ex_date' | 'payment_date' | 'exercice';
 
@@ -42,6 +44,8 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('ex_date');
   const [asc, setAsc] = useState(false);
   const [page, setPage] = useState(0);
+  // Toggle rendement net d'IRVM (V1 : le tri par rendement reste sur le brut).
+  const [net, setNet] = useState(false);
 
   const filtered = useMemo(() => {
     let r = rows.filter((row) => {
@@ -128,6 +132,16 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
+        <button
+          type="button"
+          onClick={() => setNet((v) => !v)}
+          aria-pressed={net ? 'true' : 'false'}
+          className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
+            net ? 'border-accent/40 bg-accent/10 text-accent' : 'border-border text-muted hover:text-white'
+          }`}
+        >
+          {net ? 'Net d’IRVM ✓' : 'Afficher net d’IRVM'}
+        </button>
         <span className="text-xs text-muted ml-auto">
           {filtered.length} dividende{filtered.length !== 1 ? 's' : ''}
         </span>
@@ -181,7 +195,17 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                   <td className="px-3 py-2 text-xs text-muted">{row.pays ?? '—'}</td>
                   <td className="px-3 py-2 text-right tabular">{fmtFcfa(row.montant)}</td>
                   <td className={`px-3 py-2 text-right tabular font-medium ${yieldColor(row.rendement_pct)}`}>
-                    {row.rendement_pct != null ? `${row.rendement_pct.toFixed(2)}%` : '—'}
+                    {(() => {
+                      if (row.rendement_pct == null) return '—';
+                      if (!net) return `${row.rendement_pct.toFixed(2)}%`;
+                      const p = toPaysUemoa(row.pays);
+                      const r = p
+                        ? rendementNet(row.rendement_pct, p, 'dividende_cote')
+                        : ({ indisponible: true } as const);
+                      return r.indisponible
+                        ? `${row.rendement_pct.toFixed(2)}%*`
+                        : `${r.valeur.toFixed(2)}%`;
+                    })()}
                   </td>
                   <td className="px-3 py-2 text-right tabular text-xs">{fmtDateFR(row.ex_date)}</td>
                   <td className="px-3 py-2 text-right tabular text-xs">{fmtDateFR(row.payment_date)}</td>
@@ -191,6 +215,13 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
             )}
           </tbody>
         </table>
+        {net && (
+          <p className="px-3 pb-2 pt-1 text-[11px] text-faint">
+            * taux non confirmé pour ce pays → rendement brut affiché. Net = brut × (1 − IRVM du
+            pays de l&apos;émetteur).{' '}
+            <Link href="/fiscalite" className="underline underline-offset-2">Détails &amp; sources</Link>.
+          </p>
+        )}
       </div>
 
       {totalPages > 1 && (

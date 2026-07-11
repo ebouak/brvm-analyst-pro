@@ -2,6 +2,8 @@ import type React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import DividendsTable from '@/components/DividendsTable';
 import DividendsTopCard from '@/components/DividendsTopCard';
+import ViewTabs from '@/components/ViewTabs';
+import { REVENUS_TABS } from '@/lib/viewTabsPresets';
 import { computeYield, groupByYear, type DividendRow } from '@/lib/dividends';
 import { fmtFcfa, fmtDateFR } from '@/lib/format';
 import { TrendingUp, Activity, BarChart3 } from '@/components/icons';
@@ -187,6 +189,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
           </StatPill>
         }
       />
+      <ViewTabs tabs={REVENUS_TABS} current="/dividendes" />
 
       {/* Séparateur doré */}
       <div className="h-px bg-gold-line" />
