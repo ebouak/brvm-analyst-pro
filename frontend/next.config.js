@@ -49,9 +49,15 @@ const nextConfig = {
       "frame-src 'self' https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "worker-src 'self' blob:",
     ].join('; ');
+
+    // CSP des pages embarquables (/embed/*) : politique identique, mais
+    // `frame-ancestors *` — c'est tout l'objet des widgets (médias partenaires).
+    const cspEmbed = csp.replace("frame-ancestors 'self'", 'frame-ancestors *');
+
     return [
       {
-        source: '/(.*)',
+        // Tout SAUF /embed : anti-clickjacking tiers intact.
+        source: '/((?!embed).*)',
         headers: [
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' }, // anti-clickjacking tiers, autorise iframe same-origin
           { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -67,6 +73,20 @@ const nextConfig = {
           // policy) → l'en-tête report-only ne bloquait rien (0 protection
           // active) et ne faisait que polluer la console. La vraie CSP bloquante
           // ci-dessus (`Content-Security-Policy`) reste la protection effective.
+        ],
+      },
+      {
+        // Widgets embarquables par des sites tiers.
+        // AUCUN X-Frame-Options ici : l'en-tête legacy PRIME sur la CSP dans
+        // tous les navigateurs — le laisser annulerait silencieusement
+        // l'ouverture. Pas de COOP non plus (isolerait l'iframe du parent).
+        // Pages en lecture seule, sans session ni formulaire : rien à détourner.
+        source: '/embed/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'Content-Security-Policy', value: cspEmbed },
         ],
       },
     ];
