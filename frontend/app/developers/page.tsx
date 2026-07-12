@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import ApiAccessForm from '@/components/developers/ApiAccessForm';
 
 export const metadata = {
   title: 'API Développeurs — WESTBOURSE',
-  description: 'API REST publique des données de marché BRVM : actions, indices, historiques. JSON, gratuit, sans clé.',
+  description:
+    "API REST des données de marché BRVM : actions, indices, obligations. JSON, accès gratuit sur autorisation (clé délivrée après examen de la demande).",
 };
 
 interface Endpoint {
@@ -70,23 +72,37 @@ export default function DevelopersPage() {
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
         <div>
           <p className="overline text-faint mb-2">Développeurs</p>
-          <h1 className="font-display text-3xl text-white">API publique BRVM</h1>
+          <h1 className="font-display text-3xl text-white">API BRVM</h1>
           <p className="mt-3 max-w-2xl text-muted leading-relaxed">
-            API REST <strong>gratuite, sans clé, en JSON</strong> sur les données de marché de la BRVM
-            (Bourse Régionale des Valeurs Mobilières, UEMOA). CORS ouvert, réponses mises en cache 5 min.
-            Idéale pour vos scripts, dashboards et bots.
+            API REST JSON sur les données de marché de la BRVM (Bourse Régionale des Valeurs
+            Mobilières, UEMOA). <strong className="text-white">Accès sur autorisation</strong> :
+            demandez une clé ci-dessous — c&apos;est gratuit pour un usage éditorial ou de recherche,
+            et cela nous permet de protéger le service et de vous prévenir en cas de changement.
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <p className="text-sm text-muted">Base URL</p>
-          <code className="mt-1 block font-mono text-sm text-accent">https://westbourse.com</code>
-          <p className="mt-3 text-xs text-faint">
-            Données fournies à titre informatif (dernière séance consolidée). Pas de garantie temps réel.
-            Limite indicative : <strong>60 requêtes/minute</strong> par IP (réponses mises en cache 5 min).
-            Voir <Link href="/mentions-legales" className="text-accent underline">mentions légales</Link>.
+        <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
+          <div>
+            <p className="text-sm text-muted">Base URL</p>
+            <code className="mt-1 block font-mono text-sm text-accent">{SITE}</code>
+          </div>
+          <div>
+            <p className="text-sm text-muted">Authentification</p>
+            <pre className="mt-1 overflow-x-auto rounded-lg border border-border/60 bg-bg p-3 text-[11px] text-faint">{`curl -H "x-api-key: wb_live_…" \\
+  ${SITE}/api/public/v1/actions/SNTS`}</pre>
+          </div>
+          <p className="text-xs text-faint">
+            Quota par défaut : <strong>1 000 requêtes/jour</strong> (réinitialisé à minuit UTC,
+            ajustable sur demande). Données fournies à titre informatif (dernière séance consolidée),
+            sans garantie temps réel. Voir les{' '}
+            <Link href="/mentions-legales" className="text-accent underline">mentions légales</Link>.
           </p>
         </div>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl text-white">Demander une clé</h2>
+          <ApiAccessForm />
+        </section>
 
         <section className="space-y-5">
           <h2 className="font-display text-xl text-white">Endpoints</h2>
@@ -105,8 +121,11 @@ export default function DevelopersPage() {
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-display text-xl text-white">Exemple</h2>
-          <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-4 text-xs text-muted">{`curl https://westbourse.com/api/public/v1/actions/SNTS`}</pre>
+          <h2 className="font-display text-xl text-white">Codes de réponse</h2>
+          <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-4 text-xs text-muted">{`200  OK
+401  Clé absente ou invalide      → demandez un accès ci-dessus
+403  Accès non actif ou révoqué   → contactez-nous
+429  Quota journalier dépassé     → réinitialisé à minuit UTC`}</pre>
         </section>
 
         <section className="space-y-4">

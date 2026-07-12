@@ -1,12 +1,19 @@
 // GET /api/public/v1/actions/[code]
 // Cours actuel + historique récent (90 dernières séances) d'une action BRVM.
 import { createPublicClient } from '@/lib/supabase/public';
-import { apiJson, apiError, checkRateLimit, tooManyRequests } from '@/lib/publicApi';
+import { apiJson, apiError, requireApiClient, apiOptions } from '@/lib/publicApi';
 
-export const revalidate = 300;
+// Aucun cache de route : la clé et le quota doivent être vérifiés à CHAQUE requête.
+export const dynamic = 'force-dynamic';
+
+/** Pré-vol CORS (en-tête x-api-key). */
+export async function OPTIONS() {
+  return apiOptions();
+}
 
 export async function GET(req: Request, { params }: { params: { code: string } }) {
-  if (!checkRateLimit(req)) return tooManyRequests();
+  const auth = await requireApiClient(req);
+  if ('response' in auth) return auth.response;
   const code = params.code.toUpperCase();
   const sb = createPublicClient();
 

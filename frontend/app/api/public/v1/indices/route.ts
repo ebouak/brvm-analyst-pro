@@ -1,12 +1,19 @@
 // GET /api/public/v1/indices
 // Indices BRVM de la dernière séance (BRVM-C, BRVM-30, sectoriels).
 import { createPublicClient } from '@/lib/supabase/public';
-import { apiJson, apiError, checkRateLimit, tooManyRequests } from '@/lib/publicApi';
+import { apiJson, apiError, requireApiClient, apiOptions } from '@/lib/publicApi';
 
-export const revalidate = 300;
+// Aucun cache de route : la clé et le quota doivent être vérifiés à CHAQUE requête.
+export const dynamic = 'force-dynamic';
+
+/** Pré-vol CORS (en-tête x-api-key). */
+export async function OPTIONS() {
+  return apiOptions();
+}
 
 export async function GET(req: Request) {
-  if (!checkRateLimit(req)) return tooManyRequests();
+  const auth = await requireApiClient(req);
+  if ('response' in auth) return auth.response;
   const sb = createPublicClient();
   const { data: lastRow } = await sb
     .from('brvm_indices_daily')
