@@ -15,6 +15,9 @@ vi.mock('../../src/intraday/repository.js', () => ({
   upsertPatternScores: vi.fn().mockResolvedValue(undefined),
   loadActiveCodes: vi.fn().mockResolvedValue(['PALC', 'NRDC']),
   loadSnapshots: vi.fn().mockResolvedValue([]),
+  // Référence du signal volume_spike : le moteur fixing la lit désormais.
+  // Sans ce mock, le pipeline part en erreur (pas de base en test).
+  loadAvgVolume20d: vi.fn().mockResolvedValue(200),
 }));
 
 vi.mock('../../src/logger.js', () => ({

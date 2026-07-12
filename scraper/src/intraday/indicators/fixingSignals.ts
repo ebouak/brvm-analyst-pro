@@ -65,9 +65,14 @@ export const FIXING_THRESHOLDS = {
  * toute la séance, un simple mouvement est en soi une information.
  * `value` = amplitude signée entre le premier et le dernier cours (%).
  */
+/**
+ * Amplitude signée de la séance. N'est PLUS un signal émis (elle est identique
+ * au momentum sur ce marché — cf. detectFixingSignals), mais reste exposée
+ * comme mesure de contexte et testée.
+ */
 export function detectPriceMove(
   samples: IntradaySample[],
-  thresholdPct: number = FIXING_THRESHOLDS.priceMovePct,
+  thresholdPct: number = FIXING_THRESHOLDS.momentumPct,
 ): PriceMoveResult {
   const closes = samples.map((s) => s.close).filter((c) => c > 0);
   const base: PriceMoveResult = {

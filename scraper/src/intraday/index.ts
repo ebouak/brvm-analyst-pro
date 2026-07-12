@@ -14,10 +14,15 @@
 
 import { logger } from '../logger.js';
 import type { Snapshot } from './reconstruct.js';
-import { reconstruct15mCandles } from './reconstruct.js';
-import { runPhase3A, qualifyPatterns } from './orchestrate.js';
+import { runFixingDetection, qualifyPatterns } from './orchestrate.js';
 import { aggregatePatterns } from './aggregate.js';
-import { upsertQualifiedPatterns, upsertPatternScores, loadActiveCodes, loadSnapshots } from './repository.js';
+import {
+  upsertQualifiedPatterns,
+  upsertPatternScores,
+  loadActiveCodes,
+  loadSnapshots,
+  loadAvgVolume20d,
+} from './repository.js';
 
 export interface IntraDayResult {
   code: string;
@@ -69,29 +74,27 @@ export async function runIntraDayPatternsForCode(
   };
 
   try {
-    // PHASE 2: Reconstruct 15m candles from snapshots
-    logger.info({ code, dateMarche }, `[PHASE 2] Reconstructing 15m candles`);
-    const candles = reconstruct15mCandles(snapshots, code, new Date(dateMarche));
-
-    if (candles.length === 0) {
-      logger.warn({ code, dateMarche }, `No candles reconstructed (insufficient snapshots)`);
+    if (snapshots.length < 2) {
+      logger.warn({ code, dateMarche }, 'Moins de 2 relevés : aucun signal calculable');
       return result;
     }
 
-    logger.debug({ code, date_marche: dateMarche, candle_count: candles.length }, `Reconstructed candles`);
+    // PHASE 3A — détection adaptée au marché de FIXING.
+    // La reconstruction en bougies 15 min a été ABANDONNÉE : le cron capture
+    // toutes les 15 min, donc chaque bougie ne contenait qu'un point
+    // (open = high = low = close) → amplitude nulle → l'ATR et la consolidation
+    // ne mesuraient rien (0 pattern en production). Voir indicators/fixingSignals.ts.
+    const avgVolume20d = await loadAvgVolume20d(code, dateMarche);
 
-    // PHASE 3A: Raw pattern detection (ATR + consolidation)
-    logger.info({ code, dateMarche }, `[PHASE 3A] Detecting raw patterns`);
-    const rawPatterns = runPhase3A(candles, code, dateMarche, engineVersion);
+    logger.info({ code, dateMarche, avgVolume20d }, '[PHASE 3A] Détection (fixing)');
+    const rawPatterns = runFixingDetection(
+      snapshots.map((s) => ({ close: s.close, volume: s.volume })),
+      { code, dateMarche, avgVolume20d, engineVersion },
+    );
     result.raw_patterns_count = rawPatterns.length;
 
-    logger.debug(
-      { code, dateMarche, pattern_count: rawPatterns.length },
-      `Raw pattern detection complete`,
-    );
-
     if (rawPatterns.length === 0) {
-      logger.info({ code, dateMarche }, `No patterns detected`);
+      logger.info({ code, dateMarche }, 'Aucun signal (titre figé ou volume normal)');
       return result;
     }
 

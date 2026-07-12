@@ -5,20 +5,44 @@
 
 import { detectATRExtremes } from './indicators/atr.js';
 import { detectConsolidationPatterns } from './indicators/consolidation.js';
+import { detectFixingSignals, type IntradaySample } from './indicators/fixingSignals.js';
 import type { Candle15m } from './reconstruct.js';
+
+/**
+ * Types de signaux.
+ *
+ * `atr_extreme` / `bullish_consolidation` sont CONSERVÉS pour les lignes déjà
+ * en base, mais ne sont plus produits : sur un marché de fixing comme la BRVM,
+ * chaque bougie de 15 min ne contient qu'un point (open = high = low = close),
+ * donc l'amplitude vraie est nulle et ces deux détecteurs ne peuvent rien
+ * mesurer (diagnostic 2026-07-12 — 0 pattern en production depuis la mise en
+ * service du cron). Voir indicators/fixingSignals.ts.
+ */
+export type PatternType =
+  | 'intraday_momentum'
+  | 'volume_spike'
+  | 'atr_extreme' // hérité — plus produit
+  | 'bullish_consolidation'; // hérité — plus produit
 
 export interface RawPattern {
   code: string;
   date_marche: string;
-  pattern_type: 'atr_extreme' | 'bullish_consolidation';
-  timeframe: '15m' | '30m';
+  pattern_type: PatternType;
+  timeframe: '15m' | '30m' | 'session';
   candle_start_time: Date;
   candle_end_time: Date;
+  /** MAGNITUDE (toujours ≥ 0) — la qualification calcule value/threshold. */
   value: number;
   threshold: number;
   is_triggered: boolean;
   engine_version: string;
   rules_version: string;
+  /**
+   * Sens du mouvement, quand il en a un (`intraday_momentum`). `value` ne porte
+   * que la magnitude : sans ce champ, une baisse de 5 % serait indiscernable
+   * d'une hausse de 5 % dans l'explication montrée à l'utilisateur.
+   */
+  direction?: 'up' | 'down';
 }
 
 export interface QualifiedPattern extends RawPattern {
@@ -118,6 +142,60 @@ export function runPhase3A(
 }
 
 /**
+ * PHASE 3A (marché de FIXING) — détection réellement applicable à la BRVM.
+ *
+ * Remplace `runPhase3A` (ATR + consolidation), qui ne pouvait rien détecter ici :
+ * avec une capture toutes les 15 min sur un marché de fixing, chaque bougie ne
+ * contient qu'un point (open = high = low = close) → amplitude vraie nulle.
+ *
+ * Travaille directement sur les relevés de séance (pas sur des bougies) :
+ *  - `intraday_momentum` : direction depuis l'ouverture (seuil 3 %) ;
+ *  - `volume_spike`      : volume de séance vs moyenne 20 j (seuil 2×).
+ *
+ * IMPORTANT : le momentum est SIGNÉ (une baisse est un signal). Comme la
+ * qualification calcule `value / threshold`, on stocke ici la **magnitude**
+ * (valeur absolue) — sinon une baisse donnerait un ratio négatif et serait
+ * qualifiée « INVALID ». Le sens est conservé dans l'explication en français.
+ */
+export function runFixingDetection(
+  samples: IntradaySample[],
+  ctx: {
+    code: string;
+    dateMarche: string;
+    avgVolume20d: number | null;
+    engineVersion: string;
+    rulesVersion?: string;
+  },
+): RawPattern[] {
+  const { code, dateMarche, avgVolume20d, engineVersion, rulesVersion = 'r2.0.0' } = ctx;
+  if (samples.length < 2) return [];
+
+  // Bornes de la séance (pas de bougie : le signal porte sur la journée entière).
+  const start = new Date(`${dateMarche}T00:00:00Z`);
+  const end = new Date(`${dateMarche}T23:59:59Z`);
+
+  return detectFixingSignals(samples, { avgVolume20d }).map((s) => ({
+    code,
+    date_marche: dateMarche,
+    pattern_type: s.type as PatternType,
+    timeframe: 'session' as const,
+    candle_start_time: start,
+    candle_end_time: end,
+    // Magnitude : la qualification fait value/threshold — un momentum négatif
+    // donnerait un ratio négatif et serait qualifié « INVALID ».
+    value: Math.abs(s.value),
+    threshold: s.threshold,
+    is_triggered: s.triggered,
+    engine_version: engineVersion,
+    rules_version: rulesVersion,
+    // Le sens est conservé à part (cf. RawPattern.direction).
+    ...(s.type === 'intraday_momentum'
+      ? { direction: (s.value >= 0 ? 'up' : 'down') as 'up' | 'down' }
+      : {}),
+  }));
+}
+
+/**
  * PHASE 3B: Qualify patterns (apply confidence rules, validate)
  *
  * Takes raw patterns from PHASE 3A and applies qualification logic:
@@ -175,19 +253,36 @@ export function qualifyPatterns(
       validationStatus = 'INVALID';
     }
 
-    // Generate French explanation
-    const patternNameFr =
-      raw.pattern_type === 'atr_extreme'
-        ? 'Volatilité extrême (ATR)'
-        : 'Consolidation haussière';
-
+    // Explication française — DÉRIVÉE des mesures, jamais générique : elle doit
+    // dire ce qui a été mesuré et de combien (le sens du mouvement est ici, car
+    // `value` ne porte que la magnitude — cf. runFixingDetection).
     const statusFr = {
-      VALID: 'Signal valide',
-      QUESTIONABLE: 'Signal modéré',
-      INVALID: 'Signal faible',
+      VALID: 'signal net',
+      QUESTIONABLE: 'signal modéré',
+      INVALID: 'signal faible',
     }[validationStatus];
 
-    const explanation_fr = `${patternNameFr}: ${statusFr} (confiance: ${confidenceLevel})`;
+    let explanation_fr: string;
+    switch (raw.pattern_type) {
+      case 'intraday_momentum': {
+        const sens = raw.direction === 'down' ? 'Baisse' : 'Hausse';
+        explanation_fr =
+          `${sens} de ${raw.value.toFixed(2)} % depuis l'ouverture ` +
+          `(seuil ${raw.threshold} %) — ${statusFr}.`;
+        break;
+      }
+      case 'volume_spike':
+        explanation_fr =
+          `Volume de séance ${raw.value.toFixed(1)}× la moyenne 20 séances ` +
+          `(seuil ${raw.threshold}×) — ${statusFr}.`;
+        break;
+      // Types hérités : plus produits, mais des lignes existent en base.
+      case 'atr_extreme':
+        explanation_fr = `Volatilité extrême (ATR) — ${statusFr}.`;
+        break;
+      default:
+        explanation_fr = `Consolidation haussière — ${statusFr}.`;
+    }
 
     return {
       ...raw,

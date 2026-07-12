@@ -40,7 +40,10 @@ export async function upsertRawPatterns(patterns: RawPattern[]): Promise<number>
     value: p.value,
     threshold: p.threshold,
     is_triggered: p.is_triggered,
-    metadata: null,
+    // `value` ne porte que la magnitude (la qualification calcule value/threshold) :
+    // le SENS du mouvement vit ici, sinon une baisse de 5 % serait indiscernable
+    // d'une hausse de 5 %.
+    metadata: p.direction ? { direction: p.direction } : null,
     engine_version: p.engine_version,
     rules_version: p.rules_version,
   }));
@@ -244,4 +247,38 @@ export async function loadActiveCodes(dateMarche?: string): Promise<string[]> {
   const codes = [...new Set(data.map((row: { code: string }) => row.code).filter(Boolean))];
   logger.info(`Loaded ${codes.length} active codes for ${date}`);
   return codes;
+}
+
+/**
+ * Moyenne des volumes quotidiens des 20 dernières séances (avant `dateMarche`).
+ *
+ * Référence du signal `volume_spike` : sans elle, aucun ratio n'est calculable
+ * et le signal n'est PAS émis (jamais de division fantaisiste). Renvoie `null`
+ * si l'historique est insuffisant.
+ */
+export async function loadAvgVolume20d(
+  code: string,
+  dateMarche: string,
+): Promise<number | null> {
+  const client = getSupabase();
+
+  const { data, error } = await client
+    .from('brvm_actions_daily')
+    .select('volume')
+    .eq('code', code)
+    .lt('date_marche', dateMarche) // strictement AVANT la séance analysée
+    .order('date_marche', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    logger.warn({ code, err: error.message }, 'loadAvgVolume20d : lecture échouée');
+    return null;
+  }
+
+  const volumes = (data ?? [])
+    .map((r: { volume: number | null }) => r.volume)
+    .filter((v): v is number => typeof v === 'number' && v > 0);
+
+  if (volumes.length === 0) return null;
+  return volumes.reduce((a, b) => a + b, 0) / volumes.length;
 }
