@@ -14,76 +14,15 @@ vi.mock('../../src/persistence/supabase.js', () => ({
   }),
 }));
 
-import { upsertRawPatterns, upsertQualifiedPatterns, upsertPatternScores } from '../../src/intraday/repository.js';
-import type { RawPattern, QualifiedPattern } from '../../src/intraday/orchestrate.js';
+import { upsertQualifiedPatterns, upsertPatternScores } from '../../src/intraday/repository.js';
+import type { QualifiedPattern } from '../../src/intraday/orchestrate.js';
 import type { PatternScore } from '../../src/intraday/aggregate.js';
 
+// NB : les tests d'upsertRawPatterns ont été retirés avec la fonction
+// (2026-07-13) — table morte, jamais lue ; la trace brute se recalcule depuis
+// les snapshots via `intraday:calibrate`.
+
 describe('Pattern Repository (Database Upserts)', () => {
-  describe('upsertRawPatterns', () => {
-    it('should return 0 for empty patterns array', async () => {
-      const result = await upsertRawPatterns([]);
-      expect(result).toBe(0);
-    });
-
-    it('should upsert raw patterns idempotently', async () => {
-      const patterns: RawPattern[] = [
-        {
-          code: 'PALC',
-          date_marche: '2026-07-07',
-          pattern_type: 'atr_extreme',
-          timeframe: '15m',
-          candle_start_time: new Date('2026-07-07T10:00:00Z'),
-          candle_end_time: new Date('2026-07-07T10:15:00Z'),
-          value: 8.5,
-          threshold: 7.5,
-          is_triggered: true,
-          engine_version: 'v1.0.0',
-          rules_version: 'r1.0.0',
-        },
-      ];
-
-      const result = await upsertRawPatterns(patterns);
-
-      expect(result).toBeGreaterThanOrEqual(0); // Count should be non-negative
-      // Note: In mock mode (DRY_RUN), returns the count of patterns; in real DB mode, returns actual insert count
-    });
-
-    it('should handle multiple raw patterns', async () => {
-      const patterns: RawPattern[] = [
-        {
-          code: 'PALC',
-          date_marche: '2026-07-07',
-          pattern_type: 'atr_extreme',
-          timeframe: '15m',
-          candle_start_time: new Date('2026-07-07T10:00:00Z'),
-          candle_end_time: new Date('2026-07-07T10:15:00Z'),
-          value: 8.5,
-          threshold: 7.5,
-          is_triggered: true,
-          engine_version: 'v1.0.0',
-          rules_version: 'r1.0.0',
-        },
-        {
-          code: 'PALC',
-          date_marche: '2026-07-07',
-          pattern_type: 'bullish_consolidation',
-          timeframe: '15m',
-          candle_start_time: new Date('2026-07-07T10:15:00Z'),
-          candle_end_time: new Date('2026-07-07T10:30:00Z'),
-          value: 0.85,
-          threshold: 0.7,
-          is_triggered: true,
-          engine_version: 'v1.0.0',
-          rules_version: 'r1.0.0',
-        },
-      ];
-
-      const result = await upsertRawPatterns(patterns);
-
-      expect(result).toBeGreaterThanOrEqual(0);
-    });
-  });
-
   describe('upsertQualifiedPatterns', () => {
     it('should return 0 for empty patterns array', async () => {
       const result = await upsertQualifiedPatterns([]);

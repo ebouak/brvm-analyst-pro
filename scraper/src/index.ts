@@ -448,6 +448,15 @@ async function main(): Promise<number> {
 
       return res.errors.length === 0 ? 0 : res.codes_processed === 0 ? 1 : 0;
     }
+    case 'intraday:calibrate': {
+      // Outil d'ANALYSE (lecture seule) : taux de déclenchement des seuils du
+      // moteur fixing sur l'historique de snapshots. Pas de monitoring : ce
+      // n'est pas un job de données, il n'écrit rien.
+      const daysArg = rest.find((a) => a.startsWith('--days='))?.split('=')[1];
+      const { runCalibrate } = await import('./intraday/runCalibrate.js');
+      const res = await runCalibrate({ days: daysArg ? parseInt(daysArg, 10) : undefined });
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'scrape-sgi': {
       // Annuaire SGI RichBourse (Playwright). Manuel (pas de cron) : la liste
       // change rarement et le site est protégé par anti-bot. --no-pdfs pour

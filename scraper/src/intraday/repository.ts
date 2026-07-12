@@ -6,64 +6,15 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
-import type { RawPattern, QualifiedPattern } from './orchestrate.js';
+import type { QualifiedPattern } from './orchestrate.js';
 import type { PatternScore } from './aggregate.js';
 
-/**
- * Upsert raw patterns (PHASE 3A results) into database
- *
- * Raw patterns are detections before qualification. They contain basic pattern
- * information: type, trigger status, and value/threshold comparison.
- *
- * @param patterns - Array of raw patterns from PHASE 3A
- * @returns Number of patterns inserted
- */
-export async function upsertRawPatterns(patterns: RawPattern[]): Promise<number> {
-  if (patterns.length === 0) return 0;
-
-  const cfg = getConfig();
-  if (cfg.DRY_RUN) {
-    logger.info(`[DRY_RUN] Would insert ${patterns.length} raw patterns`);
-    return patterns.length;
-  }
-
-  const client = getSupabase();
-
-  const records = patterns.map((p) => ({
-    code: p.code,
-    date_marche: p.date_marche,
-    pattern_type: p.pattern_type,
-    timeframe: p.timeframe,
-    candle_start_time: p.candle_start_time.toISOString(),
-    candle_end_time: p.candle_end_time.toISOString(),
-    detected_at: new Date().toISOString(),
-    value: p.value,
-    threshold: p.threshold,
-    is_triggered: p.is_triggered,
-    // `value` ne porte que la magnitude (la qualification calcule value/threshold) :
-    // le SENS du mouvement vit ici, sinon une baisse de 5 % serait indiscernable
-    // d'une hausse de 5 %.
-    metadata: p.direction ? { direction: p.direction } : null,
-    engine_version: p.engine_version,
-    rules_version: p.rules_version,
-  }));
-
-  const { data, error, count } = await client
-    .from('brvm_intraday_patterns_raw')
-    .upsert(records, {
-      onConflict: 'code,date_marche,pattern_type,timeframe,candle_start_time,engine_version',
-    })
-    .select('*', { count: 'exact' });
-
-  if (error) {
-    logger.error({ error }, `Failed to upsert raw patterns`);
-    throw error;
-  }
-
-  const insertedCount = data?.length || count || 0;
-  logger.info(`Upserted ${insertedCount} raw patterns`);
-  return insertedCount;
-}
+// NB : upsertRawPatterns (table brvm_intraday_patterns_raw) a été SUPPRIMÉ
+// (2026-07-13). La fonction n'était appelée nulle part et la table était
+// triplement redondante : `qualifyPatterns` ne filtre rien (la table qualifiée
+// contient déjà tout), la vraie donnée brute vit dans brvm_intraday_snapshots
+// (recalculable à volonté — cf. `intraday:calibrate`), et le frontend ne la
+// lisait pas. Le sens du mouvement (hausse/baisse) est porté par explanation_fr.
 
 /**
  * Upsert qualified patterns (PHASE 3B results) into database
