@@ -8,7 +8,8 @@ import TickerStrip, { type TickerItem } from '@/components/embed/TickerStrip';
 
 export const revalidate = 300;
 export const metadata: Metadata = {
-  title: 'Cours BRVM en direct — WESTBOURSE',
+  // `absolute` : évite le suffixe « | WESTBOURSE » du template racine.
+  title: { absolute: 'Cours BRVM en direct — WESTBOURSE' },
   robots: { index: false }, // widget : pas de page d'index concurrente du site
 };
 
