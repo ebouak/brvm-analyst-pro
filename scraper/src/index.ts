@@ -314,6 +314,31 @@ async function main(): Promise<number> {
       const res = await runBrief({ force: rest.includes('--force') });
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'brief:whatsapp': {
+      const { runBriefWhatsapp } = await import('./brief/runBriefWhatsapp.js');
+      const res = await monitored(
+        { code: 'brief:whatsapp', label: 'Brief quotidien — envoi WhatsApp' },
+        async () => {
+          const r = await runBriefWhatsapp({ mock });
+          const outcomeStatus = r.status === 'failed' ? 'failed' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.recipients,
+              rows_upserted: r.sent,
+              metadata: {
+                status: r.status,
+                dateMarche: r.dateMarche,
+                sent: r.sent,
+                skippedAlreadySent: r.skippedAlreadySent,
+              },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'publications': {
       const res = await runPublications({ mock });
       return res.status === 'failed' ? 1 : 0;

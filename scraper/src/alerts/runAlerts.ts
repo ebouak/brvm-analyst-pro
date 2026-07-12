@@ -12,7 +12,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { isTriggered, isSmartTriggered, isSmartType, type AlertType, type SmartContext } from './evaluate.js';
-import { dispatch } from './channels.js';
+import { dispatch, sendWhatsAppTemplate, sendWhatsAppRaw } from './channels.js';
 
 interface AlertRow {
   id: string;
@@ -83,6 +83,22 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
       }
     }
 
+    // Prefs WhatsApp par propriétaire d'alerte (opt-in RGPD) — une lecture par run.
+    const userIds = [...new Set(rows.map((r) => r.user_id))];
+    const waByUser = new Map<string, string>(); // user_id -> téléphone E.164
+    if (userIds.length > 0) {
+      const { data: prefs } = await sb
+        .from('notification_prefs')
+        .select('user_id, whatsapp_phone, whatsapp_optin, alerts_whatsapp')
+        .in('user_id', userIds)
+        .eq('whatsapp_optin', true)
+        .eq('alerts_whatsapp', true);
+      for (const p of (prefs ?? []) as { user_id: string; whatsapp_phone: string | null }[]) {
+        const phone = p.whatsapp_phone?.trim();
+        if (phone && /^\+\d{8,15}$/.test(phone)) waByUser.set(p.user_id, phone);
+      }
+    }
+
     let triggered = 0;
     for (const a of rows) {
       const px = priceByCode[a.code] ?? { cours: null, variation: null };
@@ -98,6 +114,15 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
       const subject = `Alerte ${a.code}`;
       const body = describeAlert(a, px, smart);
       const results = await dispatch({ subject, body, code: a.code, to: null });
+
+      // Canal WhatsApp PERSONNEL du propriétaire (opt-in) — en plus des canaux
+      // globaux. Template Meta d'abord (hors fenêtre 24 h), repli texte.
+      const phone = waByUser.get(a.user_id);
+      if (phone) {
+        let wa = await sendWhatsAppTemplate(phone, 'alerte_titre', [a.code, body]);
+        if (wa?.status !== 'sent') wa = (await sendWhatsAppRaw(phone, `${subject}\n${body}`)) ?? wa;
+        if (wa) results.push(wa);
+      }
 
       if (!cfg.DRY_RUN) {
         await sb.from('alerts').update({ declenchee_le: new Date().toISOString() }).eq('id', a.id);

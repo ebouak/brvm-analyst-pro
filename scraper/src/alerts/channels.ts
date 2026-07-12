@@ -59,23 +59,26 @@ async function sendTelegram(n: Notification): Promise<SendResult | null> {
   }
 }
 
-/**
- * Envoie via WhatsApp (Meta Cloud API) si WHATSAPP_TOKEN + WHATSAPP_PHONE_ID +
- * WHATSAPP_TO présents (mêmes variables que le canal opérateur du frontend).
- * NB : l'envoi de texte libre ne fonctionne que dans la fenêtre de 24 h après
- * le dernier message entrant du destinataire ; hors fenêtre, il faut un modèle
- * (template) approuvé par Meta — voir docs/WHATSAPP.md.
- */
-export async function sendWhatsApp(n: Notification): Promise<SendResult | null> {
+/** Config Cloud API commune (token + numéro d'envoi). null si non configurée. */
+function whatsAppConfig(): { token: string; phoneId: string } | null {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneId = process.env.WHATSAPP_PHONE_ID;
-  const to = process.env.WHATSAPP_TO;
-  if (!token || !phoneId || !to) return null;
+  if (!token || !phoneId) return null;
+  return { token, phoneId };
+}
+
+/**
+ * Envoi WhatsApp TEXTE à un destinataire E.164 (Meta Cloud API).
+ * NB : le texte libre ne passe que dans la fenêtre de 24 h après le dernier
+ * message entrant du destinataire ; hors fenêtre → template (ci-dessous).
+ */
+export async function sendWhatsAppRaw(to: string, body: string): Promise<SendResult | null> {
+  const cfg = whatsAppConfig();
+  if (!cfg || !to) return null;
   try {
-    const body = n.subject ? `${n.subject}\n${n.body}` : n.body;
-    const resp = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
+    const resp = await fetch(`https://graph.facebook.com/v21.0/${cfg.phoneId}/messages`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${cfg.token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messaging_product: 'whatsapp',
         to,
@@ -89,6 +92,61 @@ export async function sendWhatsApp(n: Notification): Promise<SendResult | null> 
   } catch (err) {
     return { channel: 'whatsapp', status: 'failed', error: err instanceof Error ? err.message : String(err) };
   }
+}
+
+/**
+ * Envoi WhatsApp via TEMPLATE pré-approuvé Meta (messages à l'initiative de
+ * l'entreprise, hors fenêtre 24 h — cas normal du brief/alertes).
+ * `params` remplit les variables {{1}}, {{2}}… du corps du template.
+ */
+export async function sendWhatsAppTemplate(
+  to: string,
+  templateName: string,
+  params: string[],
+  languageCode = 'fr',
+): Promise<SendResult | null> {
+  const cfg = whatsAppConfig();
+  if (!cfg || !to) return null;
+  try {
+    const resp = await fetch(`https://graph.facebook.com/v21.0/${cfg.phoneId}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${cfg.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: { code: languageCode },
+          components: [
+            {
+              type: 'body',
+              // Variables texte : Meta refuse les retours ligne et > 1024 car./variable.
+              parameters: params.map((p) => ({
+                type: 'text',
+                text: p.replace(/\s+/g, ' ').slice(0, 1024),
+              })),
+            },
+          ],
+        },
+      }),
+    });
+    if (!resp.ok) return { channel: 'whatsapp', status: 'failed', error: `HTTP ${resp.status}` };
+    return { channel: 'whatsapp', status: 'sent' };
+  } catch (err) {
+    return { channel: 'whatsapp', status: 'failed', error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+/**
+ * Canal WhatsApp GLOBAL historique (destinataire opérateur WHATSAPP_TO) —
+ * conservé pour le dispatch multi-canaux existant.
+ */
+export async function sendWhatsApp(n: Notification): Promise<SendResult | null> {
+  const to = process.env.WHATSAPP_TO;
+  if (!to) return null;
+  const body = n.subject ? `${n.subject}\n${n.body}` : n.body;
+  return sendWhatsAppRaw(to, body);
 }
 
 /**
