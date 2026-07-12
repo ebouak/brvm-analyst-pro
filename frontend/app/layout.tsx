@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import ConditionalShell from '@/components/ConditionalShell';
+import NonEmbedChrome from '@/components/layout/NonEmbedChrome';
 import CommandPaletteProvider from '@/components/CommandPaletteProvider';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import OnboardingModal from '@/components/OnboardingModal';
@@ -239,15 +240,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <SplashScreen />
+        {/* Chrome applicatif : entièrement masqué sur /embed/* (widgets tiers :
+            aucun cookie, aucun traceur). ConditionalShell reste hors du garde,
+            car c'est lui qui rend les enfants. */}
+        <NonEmbedChrome>
+          <SplashScreen />
+        </NonEmbedChrome>
         <ConsentProvider>
           <BeginnerModeProvider initial={initialBeginner}>
             <ConditionalShell isPremium={isPremium} isAdmin={isAdmin}>{children}</ConditionalShell>
-            <CommandPaletteProvider />
-            <ServiceWorkerRegister />
-            {hasUser && !onboardingDone && <OnboardingModal />}
-            <CookieBanner />
-            <PostHogInit />
+            <NonEmbedChrome>
+              <CommandPaletteProvider />
+              <ServiceWorkerRegister />
+              {hasUser && !onboardingDone && <OnboardingModal />}
+              <CookieBanner />
+              <PostHogInit />
+            </NonEmbedChrome>
           </BeginnerModeProvider>
         </ConsentProvider>
       </body>

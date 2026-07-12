@@ -20,6 +20,9 @@ const BARE_PREFIXES = [
   '/pricing',
   '/comparateur-sgi',
   '/fiscalite',
+  // Widgets embarquables : rendus nus dans des iframes tierces (ni sidebar,
+  // ni footer, ni encart de contact) — cf. spec widgets §5.
+  '/embed',
   '/debutant',
   '/developers',
   '/formations/academy', // plein écran — l'Academy a sa propre UI (sidebar, nav)
@@ -35,6 +38,8 @@ function showsFooter(pathname: string): boolean {
   if (pathname.startsWith('/debutant')) return false;
   // /formations/academy est plein écran (iframe) → aucun chrome global.
   if (pathname.startsWith('/formations/academy')) return false;
+  // /embed : widget dans une iframe tierce — un footer y serait absurde.
+  if (pathname.startsWith('/embed')) return false;
   if (pathname === '/') return true;
   return [...BARE_PREFIXES, ...LEGAL_PREFIXES].some((p) => pathname.startsWith(p));
 }
@@ -60,6 +65,7 @@ export default function ConditionalShell({
     pathname !== '/login' &&
     pathname !== '/signup' &&
     !pathname.startsWith('/admin') &&
+    !pathname.startsWith('/embed') && // widget tiers : aucun chrome
     !pathname.startsWith('/formations/academy');
   // /admin a sa propre console (layout dédié) → pas de shell applicatif ni footer.
   const bare =
