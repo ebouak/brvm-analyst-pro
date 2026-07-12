@@ -58,6 +58,11 @@ export async function DELETE() {
     await admin.from('newsletter_subscribers').delete().eq('email', user.email);
   }
 
+  // 2bis. Préférences WhatsApp (téléphone = donnée perso). Pas de policy DELETE
+  //       côté RLS (retrait = update) → purge explicite via service_role, en
+  //       plus de la cascade FK de l'étape 3.
+  await admin.from('notification_prefs').delete().eq('user_id', user.id);
+
   // 3. Suppression définitive du compte auth (cascade FK : profil + données ;
   //    billing_transactions.user_id → NULL = anonymisé, conservé pour la compta).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);

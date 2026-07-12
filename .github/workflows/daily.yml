@@ -76,3 +76,13 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
         run: npx tsx src/index.ts brief
+
+      # Brief WhatsApp par utilisateur (opt-ins notification_prefs).
+      # Idempotent (notifications_log). Sans secrets Meta : 0 envoi, jamais bloquant.
+      - name: Brief WhatsApp (opt-ins utilisateurs)
+        working-directory: scraper
+        continue-on-error: true
+        env:
+          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_PHONE_ID: ${{ secrets.WHATSAPP_PHONE_ID }}
+        run: npx tsx src/index.ts brief:whatsapp --trigger=cron

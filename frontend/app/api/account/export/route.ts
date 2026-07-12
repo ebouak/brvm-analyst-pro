@@ -28,6 +28,7 @@ export async function GET() {
     forumTopics,
     forumPosts,
     theses,
+    notifPrefs,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -48,6 +49,7 @@ export async function GET() {
     supabase.from('forum_topics').select('*').eq('author_id', user.id),
     supabase.from('forum_posts').select('*').eq('author_id', user.id),
     supabase.from('investment_theses').select('*').eq('user_id', user.id),
+    supabase.from('notification_prefs').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -73,6 +75,7 @@ export async function GET() {
     forum_topics: forumTopics.data ?? [],
     forum_posts: forumPosts.data ?? [],
     investment_theses: theses.data ?? [],
+    notification_prefs: notifPrefs.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
