@@ -532,3 +532,21 @@ body::after {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ── Ticker embarquable (/embed/ticker) ─────────────────────────────────────
+   Défilement en CSS PUR : doit fonctionner sans JavaScript (agrégateurs,
+   robots, lecteurs RSS). Aucun useEffect dans le composant — cf. test T3. */
+@keyframes wb-ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.wb-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: wb-ticker-scroll 40s linear infinite;
+}
+.wb-ticker:hover .wb-ticker-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .wb-ticker-track { animation: none; }
+  .wb-ticker { overflow-x: auto; }
+}
