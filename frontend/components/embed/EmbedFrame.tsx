@@ -1,7 +1,12 @@
 import type { EmbedTheme, EmbedLang } from '@/lib/embed/params';
 import { T } from '@/lib/embed/i18n';
 
-const SITE = 'https://westbourse.com';
+/**
+ * Origine CANONIQUE du site. `westbourse.com` redirige en 308 vers `www.` :
+ * s'en servir imposerait un saut de redirection à chaque clic sur le backlink
+ * (mauvais pour le SEO) et à chaque chargement de widget.
+ */
+export const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com';
 
 /**
  * Lien retour — l'objectif SEO du widget (backlink dofollow). L'UTM permet de

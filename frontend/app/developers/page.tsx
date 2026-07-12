@@ -40,6 +40,13 @@ const ENDPOINTS: Endpoint[] = [
 ];
 
 /**
+ * Origine CANONIQUE. `westbourse.com` redirige en 308 vers `www.` — un snippet
+ * qui l'utiliserait ferait échouer le contrôle `event.origin` de l'auto-hauteur
+ * (l'iframe est servie depuis `www.`), en silence, chez chaque partenaire.
+ */
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com';
+
+/**
  * Widgets embarquables. Le `titre` alimente l'attribut `title` de l'iframe des
  * snippets : sans lui, c'est le score d'accessibilité (WCAG 2.1 § 4.1.2) et
  * Lighthouse du média partenaire qui chute — et notre widget qu'on accuse.
@@ -125,7 +132,7 @@ export default function DevelopersPage() {
                   style={{ border: 0 }}
                   loading="lazy"
                 />
-                <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-3 text-[11px] text-faint">{`<iframe title="${w.titre}" src="https://westbourse.com${w.path}" width="100%" height="${w.h}" frameborder="0" loading="lazy"></iframe>`}</pre>
+                <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-3 text-[11px] text-faint">{`<iframe title="${w.titre}" src="${SITE}${w.path}" width="100%" height="${w.h}" frameborder="0" loading="lazy"></iframe>`}</pre>
               </div>
             </div>
           ))}
@@ -139,11 +146,11 @@ export default function DevelopersPage() {
               pourrait redimensionner le widget.
             </p>
             <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-3 text-[11px] text-faint">{`<iframe id="wb-widget" title="Cours BRVM — WESTBOURSE"
-  src="https://westbourse.com/embed/ticker" width="100%" height="56"
+  src="${SITE}/embed/ticker" width="100%" height="56"
   frameborder="0" loading="lazy"></iframe>
 <script>
   window.addEventListener('message', function (e) {
-    if (e.origin !== 'https://westbourse.com') return;   // obligatoire
+    if (e.origin !== '${SITE}') return;   // obligatoire
     if (!e.data || e.data.type !== 'wb-resize') return;
     document.getElementById('wb-widget').style.height = e.data.height + 'px';
   });
