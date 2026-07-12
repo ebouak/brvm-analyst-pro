@@ -35,11 +35,20 @@ alter table public.brvm_intraday_patterns
   add constraint brvm_intraday_patterns_timeframe_check
   check (timeframe in ('15m', '30m', '1h', 'daily', 'session'));
 
--- 2) pattern_type : la contrainte avait déjà été retirée (0082) sur `patterns`.
---    On la retire aussi sur `patterns_raw` si elle subsiste — les types évoluent
---    avec le moteur, et une contrainte figée a déjà bloqué un déploiement.
+-- 2) pattern_type : les types évoluent avec le moteur, et une contrainte figée a
+--    déjà bloqué un déploiement (cf. 0082). On la retire sur les deux tables.
 alter table public.brvm_intraday_patterns_raw
   drop constraint if exists brvm_intraday_patterns_raw_pattern_type_check;
+alter table public.brvm_intraday_patterns
+  drop constraint if exists brvm_intraday_patterns_pattern_type_check;
+
+-- 3) Purge des signaux de l'ANCIEN moteur (rules_version = r1.0.0).
+--    Leurs valeurs sont dénuées de sens : elles ont été produites par l'ATR sur
+--    des bougies d'amplitude nulle. Les laisser en base reviendrait à afficher
+--    de faux signaux à côté des vrais dans le screener.
+--    Ciblage strict sur r1.0.0 : les signaux du nouveau moteur (r2.0.0) sont intacts.
+delete from public.brvm_intraday_patterns where rules_version = 'r1.0.0';
+delete from public.brvm_intraday_patterns_raw where rules_version = 'r1.0.0';
 
 comment on column public.brvm_intraday_patterns_raw.pattern_type is
   'intraday_momentum | volume_spike (moteur fixing, r2.0.0). atr_extreme / bullish_consolidation : hérités, plus produits — inapplicables à un marché de fixing.';
