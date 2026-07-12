@@ -920,27 +920,37 @@ Expected :
 Si `/dashboard` s'affiche : **P0**, la règle `'/((?!embed).*)'` ne s'applique
 pas — corriger avant d'aller plus loin.
 
-- [ ] **Step 3 : Exécuter T2 — sonde RLS inoffensive**
+- [ ] **Step 3 : Exécuter T2 — sonde RLS**
 
 La clé anon est publique (déjà dans le JS du site) ; on vérifie qu'elle ne peut
-pas **écrire**. Sonde avec un filtre qui **ne matche rien** — jamais un INSERT
-réel, qui salirait la base :
+pas **écrire** les tables lues par les widgets.
+
+> ⚠️ **Piège : ne PAS sonder par un `PATCH`.** Sous RLS, un `UPDATE` sans policy
+> ne renvoie **pas** d'erreur : la RLS filtre les lignes, 0 ligne matche, et
+> PostgREST répond **204** — un succès. Un 204 ne prouve donc **rien**.
+> Il faut sonder par un **`INSERT`**, que la RLS refuse **explicitement**
+> (`42501 : new row violates row-level security policy`). Le payload volontairement
+> incomplet ci-dessous violerait de toute façon les contraintes NOT NULL : aucune
+> écriture n'est possible, quel que soit le résultat.
 
 ```bash
 cd frontend
-source .env.local 2>/dev/null || true
-curl -s -o /dev/null -w '%{http_code}\n' \
-  -X PATCH "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/brvm_actions_daily?code=eq.__PROBE__" \
-  -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-  -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"cours_jour": 1}'
+URL=$(grep -m1 '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '"\r')
+KEY=$(grep -m1 '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' .env.local | cut -d= -f2- | tr -d '"\r')
+for TABLE in brvm_actions_daily brvm_instruments; do
+  curl -s -w ' -> HTTP %{http_code}\n' -X POST "$URL/rest/v1/$TABLE" \
+    -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+    -H "Content-Type: application/json" -d '{"code":"__PROBE__"}' | cut -c1-90
+done
 ```
 
-Expected : **401** ou **403** (la RLS refuse l'écriture anon).
-Si **200** : **P0** — aucune donnée n'a été touchée (0 ligne ne matche
-`__PROBE__`), mais la table est ouverte en écriture : ajouter une policy
-restrictive avant tout déploiement.
+Expected (constaté le 2026-07-12) : **HTTP 401** avec
+`"code":"42501","message":"new row violates row-level security policy"` sur les
+deux tables → la clé anon est bien en **lecture seule**.
+
+Si un **201** apparaît : **P0** — la table est ouverte en écriture aux widgets
+et à quiconque lit la clé dans le HTML ; ajouter une policy restrictive avant
+tout déploiement.
 
 - [ ] **Step 4 : Exécuter T3 — rendu sans JavaScript**
 

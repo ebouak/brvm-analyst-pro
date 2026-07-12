@@ -1,0 +1,36 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Vérification embed WESTBOURSE (hors origine)</title>
+<!--
+  Test T1 — ouverture ET confinement de la CSP.
+  À servir depuis une AUTRE origine (un port différent suffit) :
+      cd frontend/scripts && python -m http.server 8081
+      puis ouvrir http://localhost:8081/embed-check.html
+
+  Attendu :
+    - les 3 widgets /embed/* S'AFFICHENT      → l'ouverture fonctionne
+    - le cadre /dashboard RESTE VIDE          → l'anti-clickjacking du site est intact
+      (console : « Refused to frame … frame-ancestors »)
+
+  Si /dashboard s'affiche : P0 — la règle '/((?!embed).*)' ne s'applique pas.
+-->
+<body style="font-family: system-ui; background: #111; color: #eee; padding: 16px">
+  <h2>✅ Doivent s'AFFICHER (widgets embarquables)</h2>
+
+  <p>Bandeau des cours</p>
+  <iframe title="Cours BRVM — WESTBOURSE" src="http://localhost:3000/embed/ticker"
+          width="100%" height="56" style="border: 0"></iframe>
+
+  <p>Heatmap du jour</p>
+  <iframe title="Heatmap BRVM — WESTBOURSE" src="http://localhost:3000/embed/heatmap"
+          width="100%" height="420" style="border: 0"></iframe>
+
+  <p>Fiche valeur</p>
+  <iframe title="Cours SNTS — WESTBOURSE" src="http://localhost:3000/embed/valeur/SNTS"
+          width="100%" height="180" style="border: 0"></iframe>
+
+  <h2>⛔ Doit rester BLOQUÉ (anti-clickjacking du site)</h2>
+  <p>Si ce cadre affiche le tableau de bord, la CSP est cassée.</p>
+  <iframe title="dashboard (doit être bloqué)" src="http://localhost:3000/dashboard"
+          width="100%" height="200" style="border: 1px dashed #f66"></iframe>
+</body>
