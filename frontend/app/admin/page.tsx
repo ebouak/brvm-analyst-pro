@@ -1,3 +1,4 @@
+import { loadAttention } from '@/lib/admin/attention';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -147,17 +148,66 @@ export default async function AdminPage() {
   if (!user) redirect('/login');
   if (!isAdminEmail(user.email)) redirect('/dashboard');
 
-  const kpis = await loadKpis();
+  const [kpis, attention] = await Promise.all([loadKpis(), loadAttention()]);
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
         kicker="Administration"
-        title="Vue d'ensemble"
-        subtitle="Indicateurs de la plateforme (lecture seule). Comptes utilisateurs, abonnés et fraîcheur des données de marché."
+        title="Poste de pilotage"
+        subtitle="Ce qui demande une décision, en premier. Puis les indicateurs de la plateforme."
       />
 
       <div className="gold-rule" />
+
+      {/* Ce qui demande votre attention — un tableau de bord qui n'affiche que des
+          compteurs dit que tout va bien sans dire ce qu'il faut FAIRE. */}
+      <section aria-labelledby="attention-heading" className="space-y-3">
+        <h2 id="attention-heading" className="overline text-faint">
+          À traiter
+        </h2>
+        {attention.length === 0 ? (
+          <div className="rounded-xl border border-up/30 bg-up/5 px-4 py-3">
+            <p className="text-sm text-up">Rien à traiter — aucune alerte en cours.</p>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {attention.map((a) => (
+              <li
+                key={a.title}
+                className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 ${
+                  a.level === 'critical'
+                    ? 'border-down/40 bg-down/5'
+                    : a.level === 'warning'
+                      ? 'border-warn/30 bg-warn/5'
+                      : 'border-border bg-surface'
+                }`}
+              >
+                <div className="min-w-0">
+                  <p
+                    className={`text-sm font-medium ${
+                      a.level === 'critical'
+                        ? 'text-down'
+                        : a.level === 'warning'
+                          ? 'text-warn'
+                          : 'text-ivory'
+                    }`}
+                  >
+                    {a.title}
+                  </p>
+                  <p className="text-xs text-muted">{a.detail}</p>
+                </div>
+                <Link
+                  href={a.href}
+                  className="shrink-0 rounded-lg border border-border bg-bg px-3 py-1.5 text-xs font-medium text-ivory transition-colors hover:border-accent/40 hover:text-accent"
+                >
+                  {a.cta} →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {/* KPIs */}
       <section aria-labelledby="kpis-heading" className="space-y-3">

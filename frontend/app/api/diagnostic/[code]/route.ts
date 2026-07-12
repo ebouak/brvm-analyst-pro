@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { checkFeature } from '@/lib/server/featureGate';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { resolveApiKey } from '@/lib/server/apiKeys';
@@ -38,8 +39,18 @@ export async function POST(req: Request, { params }: { params: { code: string } 
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
   const { data: profile } = await supa.from('profiles').select('is_premium').eq('id', user.id).single();
-  if (user.email !== 'ebouak@gmail.com' && !profile?.is_premium) {
-    return NextResponse.json({ error: 'Abonnement Premium requis' }, { status: 403 });
+  const isPremium = Boolean(profile?.is_premium);
+
+  // Accès (free/premium/désactivé) piloté depuis /admin/features — SANS consommer
+  // de quota ici : le décompte n'a lieu qu'en cas de génération réelle (une
+  // lecture du cache ne coûte aucun token — cf. plus bas).
+  const gate = await checkFeature(
+    'diagnostic_ia',
+    { id: user.id, email: user.email, isPremium },
+    { consume: false },
+  );
+  if (!gate.allowed) {
+    return NextResponse.json({ error: gate.reason }, { status: gate.status });
   }
 
   const code = params.code.toUpperCase();
@@ -61,6 +72,18 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     if (cached && Date.now() - new Date(cached.generated_at).getTime() < MAX_AGE_MS) {
       return NextResponse.json({ markdown: cached.markdown_content, cached: true, generated_at: cached.generated_at });
     }
+  }
+
+  // À partir d'ici, une génération LLM VA avoir lieu (le cache n'a pas répondu) :
+  // c'est le seul moment où le quota doit être décompté. Décompter plus tôt
+  // aurait puni la simple relecture d'un diagnostic déjà en cache.
+  const consumed = await checkFeature('diagnostic_ia', {
+    id: user.id,
+    email: user.email,
+    isPremium,
+  });
+  if (!consumed.allowed) {
+    return NextResponse.json({ error: consumed.reason }, { status: consumed.status });
   }
 
   // async-parallel : données financières et clés LLM sont indépendantes → en parallèle

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { recordAuthEvent } from '@/lib/server/authEvents';
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -12,11 +13,23 @@ function getAdminClient() {
 
 export async function login(formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: String(formData.get('email')),
+  const email = String(formData.get('email'));
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
     password: String(formData.get('password')),
   });
-  if (error) redirect('/login?error=' + encodeURIComponent(error.message));
+
+  if (error) {
+    // On journalise l'ÉCHEC : une série de tentatives ratées sur un compte est
+    // le signal d'attaque le plus exploitable — et c'est précisément ce qu'on
+    // ne voyait pas jusqu'ici.
+    await recordAuthEvent({ event: 'sign_in_failed', email });
+    redirect('/login?error=' + encodeURIComponent(error.message));
+  }
+
+  await recordAuthEvent({ event: 'sign_in', userId: data.user?.id ?? null, email });
+
   revalidatePath('/', 'layout');
   redirect('/dashboard');
 }
@@ -53,7 +66,11 @@ export async function signup(formData: FormData) {
 
 export async function logout() {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   await supabase.auth.signOut();
+  await recordAuthEvent({ event: 'sign_out', userId: user?.id ?? null, email: user?.email ?? null });
+
   revalidatePath('/', 'layout');
   redirect('/login');
 }

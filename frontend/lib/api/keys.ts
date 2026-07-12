@@ -1,12 +1,21 @@
 import { createHash, randomBytes } from 'node:crypto';
 
 /**
- * Clés de l'API publique.
+ * Clés de l'API publique — CÔTÉ SERVEUR UNIQUEMENT.
+ *
+ * (Pas de `import 'server-only'` : ce module est couvert par des tests Node
+ * purs, qui ne passent pas par le bundler Next et ne sauraient pas le résoudre.
+ * La garantie vient d'ailleurs : `node:crypto` fait échouer tout build qui
+ * tenterait de le bundler pour le navigateur — c'est exactement ce qui a
+ * détecté l'erreur ici.)
  *
  * Règle : la clé n'est JAMAIS stockée en clair. On conserve son sha256 et un
  * préfixe lisible (pour l'identifier dans la console admin). Une fuite de la
  * base ne doit pas donner accès à l'API — et personne, pas même un admin, ne
  * peut « relire » une clé : elle est affichée une seule fois, à l'approbation.
+ *
+ * Le simple affichage (masquage) vit dans `mask.ts`, sans dépendance crypto :
+ * un composant client ne doit jamais embarquer la génération de clés.
  *
  * Fonctions pures — testées dans keys.test.mjs.
  */
@@ -46,7 +55,3 @@ export function isWellFormedKey(key: string | null | undefined): boolean {
   return typeof key === 'string' && /^wb_live_[0-9a-f]{64}$/.test(key);
 }
 
-/** Masque une clé pour l'affichage (ne montre jamais le secret complet). */
-export function maskKey(prefix: string | null | undefined): string {
-  return prefix ? `${prefix}${'•'.repeat(12)}` : '—';
-}

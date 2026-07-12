@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import type { ApiClientRow } from '@/lib/admin/apiClients';
-import { maskKey } from '@/lib/api/keys';
+import { maskKey } from '@/lib/api/mask';
 import { approveClient, rejectClient, revokeClient, setQuota } from './actions';
 
 const STATUT_STYLE: Record<ApiClientRow['statut'], string> = {

@@ -1,6 +1,7 @@
 // Exécuter : cd frontend && npx tsx lib/api/keys.test.mjs
 import assert from 'node:assert';
-import { generateKey, hashKey, isWellFormedKey, maskKey } from './keys.ts';
+import { generateKey, hashKey, isWellFormedKey } from './keys.ts';
+import { maskKey } from './mask.ts';
 
 // Génération : format attendu, hash cohérent, préfixe non secret.
 const k = generateKey();

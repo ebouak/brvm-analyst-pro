@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import ApiAccessForm from '@/components/developers/ApiAccessForm';
 
+// Le formulaire de demande de clé est un composant client : la page ne peut plus
+// être prérendue statiquement (le manifeste RSC échoue au build sinon).
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'API Développeurs — WESTBOURSE',
   description:
