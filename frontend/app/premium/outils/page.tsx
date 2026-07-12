@@ -28,6 +28,7 @@ export default async function OutilsPage() {
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <SectionHeader
+        accent="gold"
         kicker="Boîte à outils"
         title="Outils Premium"
         subtitle="Saisonnalité, actions proches de leurs plus bas, réaction aux états financiers — signaux structurels de la BRVM."

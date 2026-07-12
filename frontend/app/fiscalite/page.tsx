@@ -50,6 +50,7 @@ export default function FiscalitePage() {
     <div className="min-h-screen bg-bg">
       <div className="mx-auto max-w-4xl px-4 py-10 space-y-8">
         <SectionHeader
+          accent="emerald"
           kicker="UEMOA · IRVM & IRC"
           title="Fiscalité des dividendes et obligations BRVM"
           subtitle="Ce que vous touchez vraiment, net de retenue à la source, selon le pays de l'émetteur."

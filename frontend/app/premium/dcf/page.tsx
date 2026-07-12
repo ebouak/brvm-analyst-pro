@@ -24,6 +24,7 @@ export default async function DcfIndexPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
+        accent="gold"
         kicker="Intelligence fondamentale"
         title="Valorisation DCF — classement du marché"
         subtitle="Juste-valeur par flux actualisés (WACC dérivé du MEDAF) pour toute la cote. Outil de screening — cliquez une société pour la fiche détaillée (bêta réel, hypothèses ajustables)."

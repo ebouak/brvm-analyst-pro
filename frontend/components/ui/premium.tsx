@@ -15,25 +15,44 @@ export function Eyebrow({ children, className = '' }: { children: ReactNode; cla
 }
 
 /* ── SectionHeader : titre de page/section (display) + eyebrow + actions ─── */
+/** Lueur ambiante par section (identité couleur) — placée derrière le titre. */
+const HEADER_GLOW: Record<'cyan' | 'gold' | 'emerald' | 'none', string> = {
+  cyan: 'from-[#56d7fd1f]',
+  gold: 'from-[#d0a2311f]',
+  emerald: 'from-[#3fe18b1a]',
+  none: '',
+};
+
 export function SectionHeader({
   kicker,
   title,
   subtitle,
   actions,
+  accent = 'cyan',
 }: {
   kicker?: string;
   title: string;
   subtitle?: string;
   actions?: ReactNode;
+  /** Teinte de la lueur ambiante derrière le titre (identité de section). */
+  accent?: 'cyan' | 'gold' | 'emerald' | 'none';
 }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        {kicker && <Eyebrow className="mb-2">{kicker}</Eyebrow>}
-        <h1 className="font-display text-heading-lg md:text-3xl text-ivory tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>}
+    <div className="relative">
+      {accent !== 'none' && (
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute -left-6 -top-8 -z-10 h-28 w-[min(28rem,90%)] rounded-full bg-gradient-to-br ${HEADER_GLOW[accent]} to-transparent blur-2xl`}
+        />
+      )}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          {kicker && <Eyebrow className="mb-2">{kicker}</Eyebrow>}
+          <h1 className="font-display text-heading-lg md:text-3xl text-ivory tracking-tight">{title}</h1>
+          {subtitle && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>}
+        </div>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   );
 }
@@ -49,7 +68,7 @@ export function PremiumPanel({
   glow?: boolean;
 }) {
   return (
-    <div className={`rounded-panel border p-1.5 ${glow ? 'border-gold/25 bg-gold/[0.04]' : 'border-border bg-border/40'}`}>
+    <div className={`rounded-panel border p-1.5 ${glow ? 'premium-topo border-gold/25 bg-gold/[0.04]' : 'border-border bg-border/40'}`}>
       <div
         className={`rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] ${className}`}
       >

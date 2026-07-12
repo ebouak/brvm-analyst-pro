@@ -180,6 +180,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* En-tête premium */}
       <SectionHeader
+        accent="emerald"
         kicker="Rémunération de l'actionnaire"
         title="Dividendes BRVM"
         subtitle="Historique des distributions · rendement calculé sur dernier cours disponible"
