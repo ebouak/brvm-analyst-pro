@@ -39,6 +39,17 @@ const ENDPOINTS: Endpoint[] = [
   },
 ];
 
+/**
+ * Widgets embarquables. Le `titre` alimente l'attribut `title` de l'iframe des
+ * snippets : sans lui, c'est le score d'accessibilité (WCAG 2.1 § 4.1.2) et
+ * Lighthouse du média partenaire qui chute — et notre widget qu'on accuse.
+ */
+const WIDGETS: { nom: string; path: string; h: number; titre: string }[] = [
+  { nom: 'Bandeau des cours', path: '/embed/ticker', h: 56, titre: 'Cours BRVM — WESTBOURSE' },
+  { nom: 'Heatmap du jour', path: '/embed/heatmap', h: 420, titre: 'Heatmap BRVM — WESTBOURSE' },
+  { nom: 'Fiche valeur', path: '/embed/valeur/SNTS', h: 180, titre: 'Cours SNTS — WESTBOURSE' },
+];
+
 export default function DevelopersPage() {
   return (
     <div className="min-h-screen bg-bg">
@@ -89,6 +100,55 @@ export default function DevelopersPage() {
         <section className="space-y-2">
           <h2 className="font-display text-xl text-white">Exemple</h2>
           <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-4 text-xs text-muted">{`curl https://westbourse.com/api/public/v1/actions/SNTS`}</pre>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="font-display text-xl text-white">Widgets embarquables</h2>
+          <p className="text-sm text-muted">
+            Intégrez les données BRVM sur votre site en copiant une ligne. Les widgets ne posent{' '}
+            <strong className="text-white">aucun cookie</strong> et n&apos;utilisent aucun traceur :
+            leur intégration ne déclenche pas d&apos;obligation de consentement chez vous.
+            Paramètres : <code className="text-accent">?theme=dark|light</code>,{' '}
+            <code className="text-accent">?lang=fr|en</code>, et{' '}
+            <code className="text-accent">?codes=SNTS,ETIT</code> (ticker, 20 maximum).
+          </p>
+
+          {WIDGETS.map((w) => (
+            <div key={w.path} className="rounded-xl border border-border bg-surface overflow-hidden">
+              <div className="border-b border-border px-4 py-2 text-sm text-white">{w.nom}</div>
+              <div className="space-y-3 p-4">
+                <iframe
+                  title={w.titre}
+                  src={w.path}
+                  width="100%"
+                  height={w.h}
+                  style={{ border: 0 }}
+                  loading="lazy"
+                />
+                <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-3 text-[11px] text-faint">{`<iframe title="${w.titre}" src="https://westbourse.com${w.path}" width="100%" height="${w.h}" frameborder="0" loading="lazy"></iframe>`}</pre>
+              </div>
+            </div>
+          ))}
+
+          <div className="space-y-2 rounded-xl border border-border bg-surface p-4">
+            <p className="text-sm text-white">Hauteur automatique (facultatif)</p>
+            <p className="text-xs text-muted">
+              Le widget publie sa hauteur réelle. Ce script l&apos;applique — il{' '}
+              <strong className="text-white">vérifie l&apos;origine</strong>, ce qui est
+              indispensable : sans ce contrôle, n&apos;importe quelle autre iframe de votre page
+              pourrait redimensionner le widget.
+            </p>
+            <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-3 text-[11px] text-faint">{`<iframe id="wb-widget" title="Cours BRVM — WESTBOURSE"
+  src="https://westbourse.com/embed/ticker" width="100%" height="56"
+  frameborder="0" loading="lazy"></iframe>
+<script>
+  window.addEventListener('message', function (e) {
+    if (e.origin !== 'https://westbourse.com') return;   // obligatoire
+    if (!e.data || e.data.type !== 'wb-resize') return;
+    document.getElementById('wb-widget').style.height = e.data.height + 'px';
+  });
+</script>`}</pre>
+          </div>
         </section>
       </main>
     </div>
