@@ -60,8 +60,13 @@ export default function IntraDayPatternsTable({
 
   const getPatternBadge = (type: string) => {
     const configs: Record<string, { icon: string; label: string; color: string }> = {
-      atr_extreme: { icon: '⚡', label: 'ATR Extrême', color: 'bg-up text-white' },
-      bullish_consolidation: { icon: '📊', label: 'Consolidation', color: 'bg-info text-white' },
+      // Signaux du moteur « fixing » (les seuls produits aujourd'hui).
+      intraday_momentum: { icon: '📈', label: 'Momentum', color: 'bg-up text-white' },
+      volume_spike: { icon: '🔊', label: 'Volume anormal', color: 'bg-info text-white' },
+      // Types hérités : plus produits (l'ATR ne peut rien mesurer sur un marché
+      // de fixing), mais des lignes historiques existent encore en base.
+      atr_extreme: { icon: '⚡', label: 'ATR (hérité)', color: 'bg-muted text-ivory' },
+      bullish_consolidation: { icon: '📊', label: 'Consolidation (hérité)', color: 'bg-muted text-ivory' },
     };
     const config = configs[type] || { icon: '◈', label: type, color: 'bg-muted text-ivory' };
     return (
@@ -116,8 +121,8 @@ export default function IntraDayPatternsTable({
             onChange={(e) => setFilter({ ...filter, patternType: e.target.value || undefined })}
           >
             <option value="">Tous les types</option>
-            <option value="atr_extreme">ATR Extrême</option>
-            <option value="bullish_consolidation">Consolidation</option>
+            <option value="intraday_momentum">Momentum</option>
+            <option value="volume_spike">Volume anormal</option>
           </select>
 
           <select
@@ -191,10 +196,18 @@ export default function IntraDayPatternsTable({
       {/* Help text */}
       <div className="bg-elevated/30 border border-border/50 rounded-lg p-4 space-y-2 text-xs text-muted">
         <p>
-          <strong>⚡ ATR Extrême:</strong> Pics de volatilité où le prix franchit 3× l'ATR (Average True Range).
+          <strong>📈 Momentum :</strong> le cours a bougé de plus de 3 % depuis l&apos;ouverture. Sur la
+          BRVM, la plupart des titres ne bougent pas de la journée — un tel mouvement est en soi une
+          information.
         </p>
         <p>
-          <strong>📊 Consolidation:</strong> Patterns de resserrement haussier avec 3+ bougies à corps serrés.
+          <strong>🔊 Volume anormal :</strong> volume de la séance supérieur à 2× sa moyenne des 20
+          dernières séances.
+        </p>
+        <p>
+          <strong>✦ Confluence :</strong> un titre qui bouge <em>avec</em> du volume traduit une
+          conviction ; sans volume, surtout son illiquidité. Les titres cumulant les deux signaux
+          méritent l&apos;attention.
         </p>
         <p>
           <strong>Δ Conseiller:</strong> Ajustement au score Conseiller (-5 à +5). Positif = signal haussier.
