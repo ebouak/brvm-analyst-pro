@@ -7,7 +7,6 @@ import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
-import SectorSpecificBlock from '@/components/financials/SectorSpecificBlock';
 
 interface Props {
   params: { code: string };
@@ -23,12 +22,9 @@ export default async function FinancialsPage({ params }: Props) {
   const latestBalance = data.balanceSheets[0] ?? null;
   const latestCashflow = data.cashFlowStatements[0] ?? null;
 
-  // Lignes spécifiques fusionnées (income + balance) du dernier exercice.
-  const lignesSpecifiques = {
-    ...(latestBalance?.lignes_specifiques ?? {}),
-    ...(latestIncome?.lignes_specifiques ?? {}),
-  };
-  const aLignesSpecifiques = Object.keys(lignesSpecifiques).length > 0;
+  // NB : les lignes sectorielles (PNB, primes, dépôts, provisions…) ne sont plus
+  // affichées dans un encadré séparé — elles sont désormais intégrées AU BON
+  // ENDROIT de la cascade du compte de résultat et du bilan (statementRows.ts).
 
   const ratios = calculateFundamentals({
     coursActuel: data.latestDaily?.cours_jour ?? null,
@@ -146,6 +142,7 @@ export default async function FinancialsPage({ params }: Props) {
               incomeStatements={data.incomeStatements}
               balanceSheets={data.balanceSheets}
               cashFlowStatements={data.cashFlowStatements}
+              famille={data.instrument.famille_comptable}
             />
           </div>
         </div>
@@ -202,11 +199,6 @@ export default async function FinancialsPage({ params }: Props) {
               Importer via IA
             </a>
           </div>
-        )}
-
-        {/* Lignes spécifiques à la famille comptable (banque/assurance) */}
-        {data.instrument.famille_comptable !== 'general' && aLignesSpecifiques && (
-          <SectorSpecificBlock famille={data.instrument.famille_comptable} lignes={lignesSpecifiques} />
         )}
 
         {/* Publications d'états financiers + résumé chiffres clés */}

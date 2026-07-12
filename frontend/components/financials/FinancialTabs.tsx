@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { IncomeStatement as IS, BalanceSheet as BS, CashFlowStatement as CFS } from '@/lib/financials/types';
+import type { Famille } from '@/lib/financials/sectors';
 import IncomeStatement from './IncomeStatement';
 import BalanceSheet from './BalanceSheet';
 import CashFlowStatement from './CashFlowStatement';
@@ -10,18 +11,35 @@ interface Props {
   incomeStatements: IS[];
   balanceSheets: BS[];
   cashFlowStatements: CFS[];
+  /** Famille comptable de l'émetteur : pilote la cascade des tableaux. */
+  famille: Famille;
 }
 
 type Tab = 'income' | 'balance' | 'cashflow';
 type Periode = 'annuel' | 'trimestriel';
 
-const TABS = [
-  { id: 'income' as Tab, label: 'Compte de résultat' },
-  { id: 'balance' as Tab, label: 'Bilan' },
-  { id: 'cashflow' as Tab, label: 'Liquidités' },
-];
+/** Le libellé de l'onglet suit la convention du secteur (compte d'exploitation bancaire). */
+function tabsFor(famille: Famille) {
+  const income =
+    famille === 'banque'
+      ? "Compte de résultat (bancaire)"
+      : famille === 'assurance'
+        ? 'Compte de résultat (technique)'
+        : 'Compte de résultat';
+  return [
+    { id: 'income' as Tab, label: income },
+    { id: 'balance' as Tab, label: 'Bilan' },
+    { id: 'cashflow' as Tab, label: 'Liquidités' },
+  ];
+}
 
-export default function FinancialTabs({ incomeStatements, balanceSheets, cashFlowStatements }: Props) {
+export default function FinancialTabs({
+  incomeStatements,
+  balanceSheets,
+  cashFlowStatements,
+  famille,
+}: Props) {
+  const TABS = tabsFor(famille);
   const [activeTab, setActiveTab] = useState<Tab>('income');
   const [periode, setPeriode] = useState<Periode>('annuel');
 
@@ -36,6 +54,7 @@ export default function FinancialTabs({ incomeStatements, balanceSheets, cashFlo
           {TABS.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                 activeTab === tab.id
@@ -51,6 +70,7 @@ export default function FinancialTabs({ incomeStatements, balanceSheets, cashFlo
           {(['annuel', 'trimestriel'] as const).map((p) => (
             <button
               key={p}
+              type="button"
               onClick={() => setPeriode(p)}
               className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
                 periode === p
@@ -64,8 +84,8 @@ export default function FinancialTabs({ incomeStatements, balanceSheets, cashFlo
         </div>
       </div>
 
-      {activeTab === 'income' && <IncomeStatement statements={filteredIncome} />}
-      {activeTab === 'balance' && <BalanceSheet statements={filteredBalance} />}
+      {activeTab === 'income' && <IncomeStatement statements={filteredIncome} famille={famille} />}
+      {activeTab === 'balance' && <BalanceSheet statements={filteredBalance} famille={famille} />}
       {activeTab === 'cashflow' && <CashFlowStatement statements={filteredCashflow} />}
     </div>
   );

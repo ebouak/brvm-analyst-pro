@@ -1,60 +1,30 @@
 import { BalanceSheet as BS } from '@/lib/financials/types';
-import { formatXOF } from '@/lib/financials/formatters';
+import type { Famille } from '@/lib/financials/sectors';
+import { BALANCE_ROWS, getRowValue, visibleRows } from '@/lib/financials/statementRows';
+import { formatStatementValue } from '@/lib/financials/formatters';
 
 interface Props {
   statements: BS[];
+  /** Détermine la structure du bilan (banque : dépôts/crédits ; assurance : provisions). */
+  famille: Famille;
 }
 
-interface Row {
-  key: keyof BS | '__section__';
-  label: string;
-  bold: boolean;
-  indent: boolean;
-  section?: boolean;
-}
-
-const ROWS: Row[] = [
-  { key: '__section__', label: 'ACTIF', bold: true, indent: false, section: true },
-  { key: 'total_actifs', label: 'Total des actifs', bold: true, indent: false },
-  { key: 'total_actif_circulant', label: 'Actif circulant', bold: true, indent: true },
-  { key: 'tresorerie_equivalents', label: 'Trésorerie & équivalents', bold: false, indent: true },
-  { key: 'investissements_court_terme', label: 'Investissements CT', bold: false, indent: true },
-  { key: 'creances_clients', label: 'Créances clients', bold: false, indent: true },
-  { key: 'stocks', label: 'Stocks', bold: false, indent: true },
-  { key: 'autres_actifs_courants', label: 'Autres actifs courants', bold: false, indent: true },
-  { key: 'total_actif_non_courant', label: 'Actif non courant', bold: true, indent: true },
-  { key: 'immobilisations_nettes', label: 'Immobilisations nettes', bold: false, indent: true },
-  { key: 'goodwill', label: 'Goodwill', bold: false, indent: true },
-  { key: 'actifs_incorporels', label: 'Actifs incorporels', bold: false, indent: true },
-  { key: 'investissements_long_terme', label: 'Investissements LT', bold: false, indent: true },
-  { key: 'autres_actifs_financiers', label: 'Autres actifs financiers', bold: false, indent: true },
-
-  { key: '__section__', label: 'PASSIF', bold: true, indent: false, section: true },
-  { key: 'total_passif', label: 'Total du passif', bold: true, indent: false },
-  { key: 'passif_courant', label: 'Passif courant', bold: true, indent: true },
-  { key: 'fournisseurs', label: 'Fournisseurs', bold: false, indent: true },
-  { key: 'dette_court_terme', label: 'Dettes CT', bold: false, indent: true },
-  { key: 'revenus_differes_courants', label: 'Revenus différés', bold: false, indent: true },
-  { key: 'autres_passifs_courants', label: 'Autres passifs courants', bold: false, indent: true },
-  { key: 'passif_non_courant', label: 'Passif non courant', bold: true, indent: true },
-  { key: 'dette_long_terme', label: 'Dettes LT', bold: false, indent: true },
-  { key: 'autres_passifs_non_courants', label: 'Autres passifs non courants', bold: false, indent: true },
-  { key: 'impots_differes_passifs', label: 'Impôts différés passifs', bold: false, indent: true },
-
-  { key: '__section__', label: 'CAPITAUX PROPRES', bold: true, indent: false, section: true },
-  { key: 'total_capitaux_propres', label: 'Total capitaux propres', bold: true, indent: false },
-  { key: 'capital_social', label: 'Capital social', bold: false, indent: true },
-  { key: 'reserves_benefices_non_repartis', label: 'Réserves & bénéfices non répartis', bold: false, indent: true },
-  { key: 'autres_capitaux_propres', label: 'Autres capitaux propres', bold: false, indent: true },
-  { key: 'interets_minoritaires', label: 'Intérêts minoritaires', bold: false, indent: true },
-];
-
-export default function BalanceSheet({ statements }: Props) {
+/**
+ * Bilan présenté selon la famille comptable : un bilan bancaire n'a ni stocks
+ * ni fournisseurs (crédits à l'actif, dépôts au passif) ; une assurance est
+ * dominée par ses placements et ses provisions techniques.
+ */
+export default function BalanceSheet({ statements, famille }: Props) {
   if (statements.length === 0) {
     return <p className="text-muted text-sm">Aucune donnée disponible.</p>;
   }
 
   const sorted = [...statements].sort((a, b) => a.periode.localeCompare(b.periode));
+  const rows = visibleRows(BALANCE_ROWS[famille], sorted);
+
+  if (rows.length === 0) {
+    return <p className="text-muted text-sm">Aucun poste renseigné pour cette période.</p>;
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -75,10 +45,10 @@ export default function BalanceSheet({ statements }: Props) {
           </tr>
         </thead>
         <tbody className="divide-y divide-border/40">
-          {ROWS.map((row, idx) => {
+          {rows.map((row, idx) => {
             if (row.section) {
               return (
-                <tr key={`section-${idx}`} className="bg-surface/50">
+                <tr key={`section-${row.key}`} className="bg-surface/50">
                   <td
                     colSpan={sorted.length + 1}
                     className="py-2 pr-4 text-xs uppercase tracking-widest text-gray-400 font-semibold pt-4"
@@ -95,7 +65,7 @@ export default function BalanceSheet({ statements }: Props) {
                 </td>
                 {sorted.map((s) => (
                   <td key={s.periode} className="py-2 px-3 text-right tabular-nums">
-                    {formatXOF(s[row.key as keyof BS] as number | null)}
+                    {formatStatementValue(getRowValue(row, s), row.format)}
                   </td>
                 ))}
               </tr>

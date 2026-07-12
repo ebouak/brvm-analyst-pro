@@ -14,6 +14,28 @@ export function formatXOF(value: number | null | undefined): string {
   return `${sign}${abs.toLocaleString('fr-FR')} FCFA`;
 }
 
+/**
+ * Formate une valeur d'état financier selon SON unité.
+ * Corrige deux erreurs de présentation : un nombre d'actions n'est pas un
+ * montant en FCFA, et un BPA de 1 250 FCFA ne doit pas s'écrire « 1,3 K FCFA ».
+ */
+export function formatStatementValue(
+  value: number | null | undefined,
+  format: 'xof' | 'pct' | 'count' | 'perShare' = 'xof',
+): string {
+  if (value == null) return '—';
+  switch (format) {
+    case 'pct':
+      return `${value.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+    case 'count':
+      return value.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+    case 'perShare':
+      return `${value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} FCFA`;
+    default:
+      return formatXOF(value);
+  }
+}
+
 export function formatCours(value: number | null | undefined): string {
   if (value == null) return '—';
   return value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
