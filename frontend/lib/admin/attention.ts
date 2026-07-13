@@ -1,5 +1,6 @@
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { loadCronHealth, isBroken } from './cronHealth';
 
 /**
  * « Ce qui demande votre attention » — le cœur du poste de pilotage.
@@ -46,6 +47,7 @@ export async function loadAttention(): Promise<AttentionItem[]> {
     criticalAudit,
     failedLogins,
     disabledFeatures,
+    cronJobs,
   ] = await Promise.all([
     safeCount(() =>
       db.from('api_clients').select('*', { count: 'exact', head: true }).eq('statut', 'pending'),
@@ -80,7 +82,22 @@ export async function loadAttention(): Promise<AttentionItem[]> {
     safeCount(() =>
       db.from('feature_flags').select('*', { count: 'exact', head: true }).eq('acces', 'disabled'),
     ),
+    loadCronHealth(),
   ]);
+
+  // Tâches planifiées en panne. Un cron qui échoue ne prévient personne : il se
+  // contente de ne rien faire. C'est ce silence qui a laissé un job échouer 672
+  // fois en une semaine.
+  const brokenCrons = cronJobs.filter(isBroken);
+  if (brokenCrons.length > 0) {
+    items.push({
+      level: 'critical',
+      title: `${brokenCrons.length} tâche${brokenCrons.length > 1 ? 's' : ''} planifiée${brokenCrons.length > 1 ? 's' : ''} en panne`,
+      detail: `${brokenCrons.map((j) => j.jobname).join(', ')} — en échec à la dernière exécution.`,
+      href: '/admin/scraping',
+      cta: 'Diagnostiquer',
+    });
+  }
 
   if (apiPending > 0) {
     items.push({

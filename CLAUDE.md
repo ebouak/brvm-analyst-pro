@@ -242,12 +242,12 @@ scraper verts.
 2. **Fondamentaux des 4 sociétés sans source** (BICB, BOAB, CABC, SVOC) : aucune
    publication d'états financiers en base → nécessite de fournir/scraper les PDF
    avant extraction (ne jamais inventer de chiffres).
-3. Planifier les autres workers (cron) : `score`, `events`, `dividends`, `alerts`,
-   refresh des vues — même mécanique pg_cron/GitHub Actions que l'intraday. Ces
-   commandes écrivent désormais dans `scraper_runs` (monitoring `/admin/scraping`).
-4. **Tests d'intégration frontend (Playwright)** — non installé (décision d'infra
-   à prendre : nouvelle dépendance + config + CI). `tsc` + `npm run build` Next
-   sont exécutés à chaque passage (verts).
+3. ~~Planifier les workers~~ — **FAIT** (correction 2026-07-13 : cette entrée était
+   périmée et m'a fait affirmer à tort qu'ils ne tournaient pas). `score`, `events`,
+   `dividends`, `alerts`, `bdfin`, `veille`, `macro-bceao`… sont tous planifiés en
+   **GitHub Actions** (`.github/workflows/*.yml`). **Toujours vérifier `ls .github/
+   workflows/` plutôt que de se fier à cette liste.**
+4. ~~Playwright~~ — **installé** (`e2e.yml`). Étendre la couverture si besoin.
 5. Calibrer les sélecteurs **BDFIN** (auth Forms) si on réactive cette source ;
    `brvm.org` public est déjà calibré (parser + fixture de régression).
 6. V3 module rapports : sentiment réel, corrélation événements/signaux.
