@@ -1,11 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+
+// Clé de site Turnstile — publique par nature (elle est lue dans le HTML). Le
+// secret, lui, ne vit que côté serveur (TURNSTILE_SECRET_KEY). Même clé que /login.
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '0x4AAAAAADvOkfhEvBYZQ45q';
 
 /** Demande d'accès à l'API — crée une demande `pending` examinée par un admin. */
 export default function ApiAccessForm() {
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [message, setMessage] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<TurnstileInstance | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,6 +30,7 @@ export default function ApiAccessForm() {
         organisation: fd.get('organisation'),
         site_url: fd.get('site_url'),
         motif: fd.get('motif'),
+        captchaToken,
       }),
     });
     const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
@@ -29,6 +38,10 @@ export default function ApiAccessForm() {
     if (!res.ok) {
       setState('error');
       setMessage(json.error ?? 'Envoi impossible.');
+      // Les jetons Turnstile sont à USAGE UNIQUE : sans ce reset, une seconde
+      // tentative rejouerait un jeton déjà consommé et échouerait toujours.
+      captchaRef.current?.reset();
+      setCaptchaToken(null);
       return;
     }
     setState('sent');
@@ -79,11 +92,20 @@ export default function ApiAccessForm() {
         />
       </label>
 
+      <Turnstile
+        ref={captchaRef}
+        siteKey={TURNSTILE_SITE_KEY}
+        options={{ theme: 'dark', size: 'flexible' }}
+        onSuccess={setCaptchaToken}
+        onExpire={() => setCaptchaToken(null)}
+        onError={() => setCaptchaToken(null)}
+      />
+
       {state === 'error' && <p className="text-xs text-down">{message}</p>}
 
       <button
         type="submit"
-        disabled={state === 'sending'}
+        disabled={state === 'sending' || !captchaToken}
         className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#03222b] transition active:scale-95 disabled:opacity-40"
       >
         {state === 'sending' ? 'Envoi…' : "Demander un accès"}

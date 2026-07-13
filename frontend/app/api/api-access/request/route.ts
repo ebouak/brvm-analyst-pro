@@ -3,6 +3,8 @@
 // approuve ou refuse. Aucune clé n'est délivrée ici.
 import { NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { verifyTurnstile } from '@/lib/server/turnstile';
+import { notifyRequestReceived } from '@/lib/api/notify';
 
 const MAX_LEN = { nom: 120, email: 160, organisation: 160, motif: 1000, site_url: 300 };
 
@@ -50,6 +52,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 });
   }
 
+  // Anti-robot AVANT toute écriture : sans cela, un script remplit la file de
+  // modération plus vite qu'un humain ne peut la vider.
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null;
+  const captcha = await verifyTurnstile(
+    typeof body.captchaToken === 'string' ? body.captchaToken : null,
+    ip,
+  );
+  if (!captcha.ok) return NextResponse.json({ error: captcha.error }, { status: 403 });
+
   const v = validate(body);
   if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 });
 
@@ -82,6 +93,10 @@ export async function POST(req: Request) {
     console.error('api-access/request :', error.message);
     return NextResponse.json({ error: 'Enregistrement impossible.' }, { status: 500 });
   }
+
+  // Accusé de réception. Volontairement APRÈS l'insert et non bloquant : une panne
+  // Resend ne doit pas faire perdre une demande déjà enregistrée.
+  await notifyRequestReceived(v.data.email as string, v.data.nom as string);
 
   return NextResponse.json({
     ok: true,

@@ -22,17 +22,24 @@ const STATUT_LABEL: Record<ApiClientRow['statut'], string> = {
 export function ClientRow({ c }: { c: ApiClientRow }) {
   const [pending, startTransition] = useTransition();
   const [issuedKey, setIssuedKey] = useState<string | null>(null);
+  const [emailed, setEmailed] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
   const quotaPct = c.quota_daily > 0 ? Math.min(100, (c.usage_today / c.quota_daily) * 100) : 0;
 
-  function run(fn: () => Promise<{ ok: true; key?: string } | { ok: false; error: string }>) {
+  type ActionResult = { ok: true; key?: string; emailed?: boolean } | { ok: false; error: string };
+
+  function run(fn: () => Promise<ActionResult>) {
     setError(null);
     startTransition(async () => {
       const r = await fn();
-      if (!r.ok) setError(r.error);
-      else if (r.key) setIssuedKey(r.key);
+      if (!r.ok) {
+        setError(r.error);
+        return;
+      }
+      if (r.key) setIssuedKey(r.key);
+      if (r.emailed !== undefined) setEmailed(r.emailed);
     });
   }
 
@@ -94,10 +101,27 @@ export function ClientRow({ c }: { c: ApiClientRow }) {
             Clé générée — copiez-la maintenant, elle ne sera plus jamais affichée.
           </p>
           <code className="block break-all rounded bg-bg p-2 text-[11px] text-ivory">{issuedKey}</code>
+          {/* Si l'email n'est pas parti, l'admin est le SEUL détenteur de la clé.
+              Le taire = perdre la clé au moment où il ferme la page. */}
+          {emailed === false ? (
+            <p className="rounded bg-down/10 p-2 text-[11px] font-semibold text-down">
+              ⚠ L&apos;email n&apos;a PAS pu être envoyé à {c.email}. Vous êtes le seul à
+              détenir cette clé : transmettez-la manuellement avant de quitter cette page.
+            </p>
+          ) : emailed === true ? (
+            <p className="text-[10px] text-up">✓ Clé envoyée par email à {c.email}.</p>
+          ) : null}
           <p className="text-[10px] text-faint">
             Seul son empreinte (sha256) est conservée. En cas de perte : révoquer puis réémettre.
           </p>
         </div>
+      )}
+
+      {/* Refus / révocation : l'email compte aussi, mais rien n'est perdu s'il échoue. */}
+      {!issuedKey && emailed === false && (
+        <p className="text-xs text-warn">
+          Action effectuée, mais l&apos;email de notification n&apos;a pas pu être envoyé à {c.email}.
+        </p>
       )}
 
       <div className="flex flex-wrap gap-2">

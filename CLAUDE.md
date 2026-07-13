@@ -271,9 +271,15 @@ scraper verts.
 - **Discipline RLS (obligatoire, pentest 2026-07-09)** : toute nouvelle **table
   OU vue** touchant des données utilisateur = RLS activée **+ policy explicite**.
   Les **vues** ne doivent JAMAIS être en `SECURITY DEFINER` (elles contournent la
-  RLS) → utiliser `security_invoker = true`. Sur les **fonctions** sensibles,
-  `EXECUTE` est accordé à `PUBLIC` par défaut → `revoke execute … from public`
-  (pas seulement `from anon`). Après CHAQUE migration : lancer le scan
+  RLS) → utiliser `security_invoker = true`. Sur les **fonctions** sensibles :
+  `revoke execute … from public, anon, authenticated;` — **les trois**.
+  ⚠️ **`from public` NE SUFFIT PAS** (erreur constatée en prod le 2026-07-13, corrigée
+  par la migration `0093`) : Supabase applique un `ALTER DEFAULT PRIVILEGES … GRANT ALL
+  ON FUNCTIONS TO anon, authenticated`, qui sont des grants **nominatifs aux rôles**.
+  Révoquer `PUBLIC` (le pseudo-rôle « tout le monde ») ne retire pas un grant nominatif :
+  les deux coexistent et le nominatif l'emporte. Résultat : `purge_auth_events()`,
+  `api_usage_increment()` et `feature_usage_increment()` étaient appelables en `curl`
+  anonyme **malgré** leur `revoke … from public`. Après CHAQUE migration : lancer le scan
   `get_advisors` (type security) **et** tester la table/vue avec la **clé anon**
   (`curl …/rest/v1/<objet>` sans login) avant de merger. Voir migrations
   `0079`/`0080` pour le modèle.
