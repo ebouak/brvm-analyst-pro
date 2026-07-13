@@ -4,6 +4,13 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { recordAuthEvent } from '@/lib/server/authEvents';
+import { isPasswordPwned, pwnedMessage } from '@/lib/server/pwned';
+
+/**
+ * Longueur minimale. Le plancher Supabase par défaut (6) est trop bas : la
+ * longueur est le seul facteur qui compte vraiment face à une attaque hors ligne.
+ */
+const MIN_PASSWORD_LENGTH = 10;
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -39,10 +46,23 @@ const NEUTRAL_SIGNUP_MSG = 'Si cette adresse est éligible, un email de confirma
 export async function signup(formData: FormData) {
   const supabase = createClient();
   const email = String(formData.get('email')).toLowerCase().trim();
-  const { error } = await supabase.auth.signUp({
-    email,
-    password: String(formData.get('password')),
-  });
+  const password = String(formData.get('password'));
+
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    redirect(
+      '/signup?error=' +
+        encodeURIComponent(`Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`),
+    );
+  }
+
+  // Refus des mots de passe déjà présents dans des fuites publiques.
+  // Contrôlé AVANT signUp : inutile de créer un compte pour le rejeter ensuite.
+  const pwned = await isPasswordPwned(password);
+  if (pwned.pwned) {
+    redirect('/signup?error=' + encodeURIComponent(pwnedMessage(pwned.count)));
+  }
+
+  const { error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
     // Anti-énumération : ne JAMAIS révéler si l'email existe déjà. On répond la
