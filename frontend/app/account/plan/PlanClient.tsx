@@ -22,6 +22,16 @@ export function PlanClient({ plans, canSubscribe }: { plans: PlanOption[]; canSu
     setResult(null);
     startTransition(async () => {
       const r = await startCheckout(planCode, cycle);
+
+      // Provider live (CinetPay…) : on part vers la page de paiement hébergée.
+      // `assign` et non `replace` : le bouton « retour » du navigateur doit
+      // ramener l'utilisateur ici s'il renonce à payer.
+      if (r.ok && r.redirectUrl) {
+        window.location.assign(r.redirectUrl);
+        return;
+      }
+
+      // Provider manuel (ou erreur) : on affiche les instructions sur place.
       setResult(r);
     });
   }

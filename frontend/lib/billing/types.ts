@@ -15,6 +15,12 @@ export interface CheckoutResult {
   reference?: string;
   instructions?: string;
   message?: string;
+  /**
+   * URL de paiement hébergée par le prestataire (CinetPay, PayDunya…).
+   * Absente pour le provider `manual`, qui n'a pas de page de paiement :
+   * l'appelant retombe alors sur `instructions`.
+   */
+  redirectUrl?: string;
 }
 
 export interface PaymentProvider {
