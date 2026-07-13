@@ -1,0 +1,49 @@
+name: Inflation UEMOA (Banque mondiale)
+
+# L'inflation est une donnée ANNUELLE, mais la Banque mondiale révise ses chiffres
+# en cours d'année (les valeurs provisoires sont corrigées). Un passage mensuel
+# suffit largement et capte les révisions — inutile de tourner tous les jours.
+on:
+  schedule:
+    - cron: '0 5 2 * *' # le 2 de chaque mois à 05:00 UTC
+  workflow_dispatch:
+
+jobs:
+  inflation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm ci
+
+      - name: Collecte de l'inflation UEMOA
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx src/index.ts inflation --trigger=cron
+
+      - name: Vérifier que les 8 pays sont présents
+        # Un échec silencieux serait pire que pas de données du tout : le
+        # rendement réel s'afficherait avec une inflation périmée.
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          COUNT=$(curl -s "${SUPABASE_URL}/rest/v1/macro_inflation?select=pays_code" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            | grep -o '"pays_code"' | wc -l)
+          echo "Lignes en base : $COUNT"
+          if [ "$COUNT" -lt 8 ]; then
+            echo "::error::Moins de 8 lignes d'inflation — la collecte a échoué."
+            exit 1
+          fi

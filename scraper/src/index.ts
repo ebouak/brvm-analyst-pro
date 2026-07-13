@@ -56,6 +56,11 @@ import { runDetails } from './scrapers/runDetails.js';
 import { runIntraday } from './scrapers/runIntraday.js';
 import { runAfricanIndices } from './scrapers/runAfricanIndices.js';
 import { runBceaoMacro } from './scrapers/runBceaoMacro.js';
+import { runInflation } from './scrapers/runInflation.js';
+import { UEMOA } from './parsers/worldBankInflation.js';
+
+/** 8 États membres — un pays manquant doit rendre le run « partial », pas « success ». */
+const UEMOA_COUNT = UEMOA.length;
 import { runObligations } from './scrapers/runObligations.js';
 import { runCommodities } from './commodities/runCommodities.js';
 import { runValidation } from './validation/runValidation.js';
@@ -282,6 +287,28 @@ async function main(): Promise<number> {
         },
       );
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'inflation': {
+      // runInflation lève si RIEN n'a été collecté — `monitored` enregistre alors
+      // l'échec et propage. Un retour normal signifie donc au moins un pays.
+      const r = await monitored(
+        { code: 'inflation', label: 'Inflation UEMOA (Banque mondiale)' },
+        async () => {
+          const res = await runInflation({ mock });
+          return {
+            value: res,
+            outcome: {
+              // 7 pays sur 8 valent mieux que rien, mais l'anomalie doit se voir :
+              // « partial » la fait remonter dans /admin/scraping.
+              status: res.pays === UEMOA_COUNT ? 'success' : 'partial',
+              rows_extracted: res.rows,
+              rows_upserted: res.rows,
+              metadata: { pays_collectes: res.pays },
+            },
+          };
+        },
+      );
+      return r.pays > 0 ? 0 : 1;
     }
     case 'alerts': {
       const res = await runAlerts({ mock });

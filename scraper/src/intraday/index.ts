@@ -166,7 +166,9 @@ export async function runIntraDayPatternsBatch(
   engineVersion: string = 'v1.0.0',
 ): Promise<IntraDayBatchResult> {
   const startTime = Date.now();
-  const date = dateMarche || new Date().toISOString().split('T')[0];
+  // slice(0,10) plutôt que split('T')[0] : ce dernier est typé `string | undefined`
+  // (noUncheckedIndexedAccess) et propageait l'incertitude dans tout le fichier.
+  const date = dateMarche || new Date().toISOString().slice(0, 10);
 
   logger.info({ date }, `=== Starting intraday patterns batch ===`);
 
