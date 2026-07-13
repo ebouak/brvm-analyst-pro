@@ -91,6 +91,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/account/plan', label: 'Mon abonnement' },
       { href: '/account/billing', label: 'Facturation' },
+      { href: '/account/security', label: 'Sécurité' },
     ],
   },
   {

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { ADMIN_EMAILS } from './admin-emails';
+import { getMfaStatus } from './mfa';
 
 /**
  * RBAC admin — lecture serveur des rôles/permissions (tables admin_*).
@@ -86,10 +87,35 @@ export function can(ctx: AdminContext | null, permission: PermissionCode): boole
   return ctx.permissions.has(permission);
 }
 
-/** Garde serveur : redirige si l'utilisateur n'est pas admin. Retourne le contexte. */
+/**
+ * Garde serveur : redirige si l'utilisateur n'est pas admin, OU si son second
+ * facteur n'est pas présenté. Retourne le contexte.
+ *
+ * La 2FA est EXIGÉE pour tout accès admin. Ces comptes peuvent supprimer des
+ * utilisateurs, révoquer des clés d'API et couper des fonctionnalités : un mot de
+ * passe volé ne doit pas suffire à en disposer.
+ *
+ * Deux cas distincts, deux destinations :
+ *   - il a la 2FA mais cette session est restée en aal1 → challenge (saisie du code)
+ *   - il n'a aucun facteur → inscription obligatoire
+ *
+ * `/account/security*` n'est volontairement PAS protégé par cette garde : c'est
+ * l'unique porte de sortie. L'y soumettre enfermerait l'admin dehors (ou créerait
+ * une boucle de redirection).
+ *
+ * Note : `getAdminContext()` ne fait AUCUNE de ces vérifications — il ne fait que
+ * lire les droits. C'est ce qui permet à /account/security de savoir « cet
+ * utilisateur est admin, donc la 2FA lui est obligatoire » sans se rediriger
+ * elle-même.
+ */
 export async function requireAdmin(): Promise<AdminContext> {
   const ctx = await getAdminContext();
   if (!ctx) redirect('/dashboard');
+
+  const mfa = await getMfaStatus();
+  if (mfa.needsChallenge) redirect('/account/security/verify?next=/admin');
+  if (!mfa.hasFactor) redirect('/account/security');
+
   return ctx;
 }
 
