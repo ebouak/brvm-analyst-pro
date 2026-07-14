@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { canAccess } from '@/lib/server/featureAccess';
+import { SectionLock } from '@/components/premium/SectionLock';
 import brvmLogos from '@/lib/brvmLogos.json';
 
 const LOGOS = brvmLogos as Record<string, string>;
@@ -157,7 +158,12 @@ export default async function InstrumentPage({
   // Indicateurs techniques (RSI, MACD, moyennes mobiles, lecture, explication IA).
   // Niveau requis LU EN BASE (feature_flags → `indicateurs_techniques`), éditable
   // dans /admin/features. Le cours et le volume, eux, restent publics.
-  const gateIndicateurs = await canAccess('indicateurs_techniques');
+  const [gateIndicateurs, gateSignaux, gateFonda, gateValo] = await Promise.all([
+    canAccess('indicateurs_techniques'), // verdict, config technique, RSI/MACD
+    canAccess('signaux'),                // signal quantitatif
+    canAccess('fondamentaux'),           // analyse fondamentale
+    canAccess('dcf'),                    // valorisation
+  ]);
   const fromDate = searchParams.from ?? '';
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
   const [valuation, scoring] = await Promise.all([
@@ -506,18 +512,35 @@ export default async function InstrumentPage({
         </div>
       </div>
 
-      {/* ── Bandeau verdict (note + signal + tendance + plage + synthèse) ── */}
-      <VerdictBand
-        signal={signal?.signal ?? null}
-        scoreTotal={signal?.score_total ?? null}
-        confiance={signal?.confiance ?? null}
-        sparkData={sparkData}
-        up={up}
-        cours={last.cours_jour}
-        low52={low52}
-        high52={high52}
-        synthesisLine={verdictLine}
-      />
+      {/* ── Bandeau verdict (note + signal + tendance + plage + synthèse) ──
+          Le SIGNAL et la NOTE sont du calculé : ils suivent le flag `signaux`.
+          Le cours et la plage 52 semaines, eux, restent publics — d'où un bandeau
+          allégé plutôt qu'un cadenas, pour ne pas amputer la page d'entrée. */}
+      {gateSignaux.allowed ? (
+        <VerdictBand
+          signal={signal?.signal ?? null}
+          scoreTotal={signal?.score_total ?? null}
+          confiance={signal?.confiance ?? null}
+          sparkData={sparkData}
+          up={up}
+          cours={last.cours_jour}
+          low52={low52}
+          high52={high52}
+          synthesisLine={verdictLine}
+        />
+      ) : (
+        <VerdictBand
+          signal={null}
+          scoreTotal={null}
+          confiance={null}
+          sparkData={sparkData}
+          up={up}
+          cours={last.cours_jour}
+          low52={low52}
+          high52={high52}
+          synthesisLine={null}
+        />
+      )}
 
       {/* ── Notation financière ── */}
       {instrument?.notation_json && (
@@ -591,187 +614,217 @@ export default async function InstrumentPage({
       ══════════════════════════════════════════════════ */}
       <div id="technique" className="scroll-mt-24">
         <Eyebrow className="mb-3">Configuration technique</Eyebrow>
-        <TechnicalSummary result={technicalSummary} />
+        {gateIndicateurs.allowed ? (
+          <TechnicalSummary result={technicalSummary} />
+        ) : (
+          <SectionLock
+            required={gateIndicateurs.required === 'free' ? 'premium' : gateIndicateurs.required}
+            titre="Configuration technique"
+            pitch="Tendance, momentum et niveaux clés, synthétisés."
+          />
+        )}
       </div>
 
       {/* ══════════════════════════════════════════════════
           INDICATEURS + DÉTECTIONS (grille 2 col)
       ══════════════════════════════════════════════════ */}
-      <div>
-        <Eyebrow className="mb-3">Analyse technique</Eyebrow>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {gateIndicateurs.allowed ? (
+        <div>
+          <Eyebrow className="mb-3">Analyse technique</Eyebrow>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          {/* ── Indicateurs ── */}
-          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Indicateurs</p>
+            {/* ── Indicateurs ── */}
+            <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
+                <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Indicateurs</p>
 
-              {/* RSI */}
-              <div className="mb-5">
-                <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="text-muted">RSI (14)</span>
-                  <span
-                    className={`tabular font-semibold font-mono ${
-                      lastRsi == null ? 'text-faint' :
-                      lastRsi < 30 ? 'text-up' :
-                      lastRsi > 70 ? 'text-down' : 'text-ivory'
-                    }`}
-                  >
-                    {lastRsi != null ? lastRsi.toFixed(0) : '—'}
-                  </span>
+                {/* RSI */}
+                <div className="mb-5">
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="text-muted">RSI (14)</span>
+                    <span
+                      className={`tabular font-semibold font-mono ${
+                        lastRsi == null ? 'text-faint' :
+                        lastRsi < 30 ? 'text-up' :
+                        lastRsi > 70 ? 'text-down' : 'text-ivory'
+                      }`}
+                    >
+                      {lastRsi != null ? lastRsi.toFixed(0) : '—'}
+                    </span>
+                  </div>
+                  {/* Barre RSI premium */}
+                  <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
+                    <div className="absolute left-0 top-0 bottom-0 w-[30%] rounded-l-full bg-gradient-to-r from-up/35 to-up/[0.08]" />
+                    <div className="absolute right-0 top-0 bottom-0 w-[30%] rounded-r-full bg-gradient-to-l from-down/35 to-down/[0.08]" />
+                    {lastRsi != null && <RsiCursor rsi={lastRsi} />}
+                  </div>
+                  <div className="flex justify-between text-[10px] text-faint mt-1.5">
+                    <span>Survente &lt;30</span>
+                    <span>Équilibre</span>
+                    <span>Surachat &gt;70</span>
+                  </div>
+                  <BeginnerHint text="RSI < 30 = l'action est potentiellement survendue (bon point d'entrée possible). RSI > 70 = suracheté (prudence)." />
                 </div>
-                {/* Barre RSI premium */}
-                <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
-                  <div className="absolute left-0 top-0 bottom-0 w-[30%] rounded-l-full bg-gradient-to-r from-up/35 to-up/[0.08]" />
-                  <div className="absolute right-0 top-0 bottom-0 w-[30%] rounded-r-full bg-gradient-to-l from-down/35 to-down/[0.08]" />
-                  {lastRsi != null && <RsiCursor rsi={lastRsi} />}
-                </div>
-                <div className="flex justify-between text-[10px] text-faint mt-1.5">
-                  <span>Survente &lt;30</span>
-                  <span>Équilibre</span>
-                  <span>Surachat &gt;70</span>
-                </div>
-                <BeginnerHint text="RSI < 30 = l'action est potentiellement survendue (bon point d'entrée possible). RSI > 70 = suracheté (prudence)." />
-              </div>
 
-              {/* Moyennes mobiles */}
-              <div className="border-t border-border/30 pt-4 mb-4">
-                <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Moyennes mobiles</p>
-                <div className="space-y-2">
-                  {[
-                    { label: 'MA 20', val: lastMa20 },
-                    { label: 'MA 50', val: lastMa50 },
-                    { label: 'MA 200', val: lastMa200 },
-                  ].map(({ label, val }) => (
-                    <div key={label} className="flex items-center justify-between text-xs">
-                      <span className="text-muted">{label}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="tabular font-mono text-ivory">
-                          {val != null ? fmtNumber(val) : '—'}
-                        </span>
-                        {val != null && last.cours_jour != null && (
-                          <span className={`text-[10px] ${last.cours_jour >= val ? 'text-up' : 'text-down'}`}>
-                            {last.cours_jour >= val ? '↑' : '↓'}
+                {/* Moyennes mobiles */}
+                <div className="border-t border-border/30 pt-4 mb-4">
+                  <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Moyennes mobiles</p>
+                  <div className="space-y-2">
+                    {[
+                      { label: 'MA 20', val: lastMa20 },
+                      { label: 'MA 50', val: lastMa50 },
+                      { label: 'MA 200', val: lastMa200 },
+                    ].map(({ label, val }) => (
+                      <div key={label} className="flex items-center justify-between text-xs">
+                        <span className="text-muted">{label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="tabular font-mono text-ivory">
+                            {val != null ? fmtNumber(val) : '—'}
                           </span>
-                        )}
+                          {val != null && last.cours_jour != null && (
+                            <span className={`text-[10px] ${last.cours_jour >= val ? 'text-up' : 'text-down'}`}>
+                              {last.cours_jour >= val ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* MACD */}
+                {lastMacd && (
+                  <div className="border-t border-border/30 pt-4">
+                    <p className="text-[11px] text-faint uppercase tracking-wider mb-3">MACD</p>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-center">
+                      <MacdCell label="Ligne" value={lastMacd.macd?.toFixed(0) ?? '—'} />
+                      <MacdCell label="Signal" value={lastMacd.signal?.toFixed(0) ?? '—'} />
+                      <MacdCell
+                        label="Histog."
+                        value={lastMacd.hist != null
+                          ? (lastMacd.hist >= 0 ? '+' : '') + lastMacd.hist.toFixed(0)
+                          : '—'}
+                        accent={(lastMacd.hist ?? 0) >= 0 ? 'up' : 'down'}
+                      />
+                    </div>
+                    <BeginnerHint text="MACD positif = tendance haussière. MACD négatif = tendance baissière." />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── Détections ── */}
+            <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
+                <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Détections actives</p>
+                <div className="space-y-2.5">
+                  {detections.map((d) => (
+                    <div
+                      key={d.label}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                        d.ok
+                          ? 'bg-up/5 border border-up/15'
+                          : 'border border-transparent'
+                      }`}
+                    >
+                      <span
+                        className={`text-[10px] shrink-0 leading-none ${
+                          d.ok ? 'text-up' : 'text-border-strong'
+                        }`}
+                      >
+                        {d.ok ? '●' : '○'}
+                      </span>
+                      <span
+                        className={`text-xs ${
+                          d.ok ? 'text-ivory' : 'text-faint'
+                        }`}
+                      >
+                        {d.label}
+                      </span>
                     </div>
                   ))}
+                  {detections.every((d) => !d.ok) && (
+                    <p className="text-xs text-faint italic mt-2">Aucune détection active.</p>
+                  )}
                 </div>
-              </div>
-
-              {/* MACD */}
-              {lastMacd && (
-                <div className="border-t border-border/30 pt-4">
-                  <p className="text-[11px] text-faint uppercase tracking-wider mb-3">MACD</p>
-                  <div className="grid grid-cols-3 gap-2 text-xs text-center">
-                    <MacdCell label="Ligne" value={lastMacd.macd?.toFixed(0) ?? '—'} />
-                    <MacdCell label="Signal" value={lastMacd.signal?.toFixed(0) ?? '—'} />
-                    <MacdCell
-                      label="Histog."
-                      value={lastMacd.hist != null
-                        ? (lastMacd.hist >= 0 ? '+' : '') + lastMacd.hist.toFixed(0)
-                        : '—'}
-                      accent={(lastMacd.hist ?? 0) >= 0 ? 'up' : 'down'}
-                    />
-                  </div>
-                  <BeginnerHint text="MACD positif = tendance haussière. MACD négatif = tendance baissière." />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── Détections ── */}
-          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Détections actives</p>
-              <div className="space-y-2.5">
-                {detections.map((d) => (
-                  <div
-                    key={d.label}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                      d.ok
-                        ? 'bg-up/5 border border-up/15'
-                        : 'border border-transparent'
-                    }`}
-                  >
-                    <span
-                      className={`text-[10px] shrink-0 leading-none ${
-                        d.ok ? 'text-up' : 'text-border-strong'
-                      }`}
-                    >
-                      {d.ok ? '●' : '○'}
-                    </span>
-                    <span
-                      className={`text-xs ${
-                        d.ok ? 'text-ivory' : 'text-faint'
-                      }`}
-                    >
-                      {d.label}
-                    </span>
-                  </div>
-                ))}
-                {detections.every((d) => !d.ok) && (
-                  <p className="text-xs text-faint italic mt-2">Aucune détection active.</p>
-                )}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div>
+          <Eyebrow className="mb-3">Analyse technique</Eyebrow>
+          <SectionLock
+            required={gateIndicateurs.required === 'free' ? 'premium' : gateIndicateurs.required}
+            titre="Analyse technique"
+            pitch="RSI, MACD, moyennes mobiles, bandes de Bollinger et détections de configurations."
+          />
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════
           SIGNAL DU JOUR
       ══════════════════════════════════════════════════ */}
-      <div className="space-y-4">
-        <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
-        {signal ? (
-          <>
-            {(() => {
-              const inp = (signal as SignalDaily & { inputs?: Record<string, number | boolean> | null }).inputs ?? {};
-              const num = (k: string): number | null => (typeof inp[k] === 'number' ? (inp[k] as number) : null);
-              const technical = readTechnical({
-                signal: signal.signal,
-                rsi: num('rsi'),
-                ma20: num('ma20'),
-                ma50: num('ma50'),
-                volumeRatio: num('volume_ratio'),
-                variationPct: num('variation_pct'),
-                incomplet: inp.incomplet === true,
-              });
-              const dividend = analyzeDividendTiming(
-                dividends as { montant: number; ex_date: string | null; payment_date: string | null; exercice: number | null }[],
-                last.cours_jour ?? null,
-                new Date().toISOString().slice(0, 10),
-              );
-              const positionCtx = readPosition(position, last.cours_jour ?? null, signal.signal);
-              const synthesis = synthesize({
-                signal: signal.signal,
-                confiance: signal.confiance,
-                incomplet: inp.incomplet === true,
-                technical,
-                position: positionCtx,
-                dividend,
-              });
-              return (
-                <SignalAnalysis
-                  signal={signal.signal}
-                  synthesis={synthesis}
-                  technical={technical}
-                  position={positionCtx}
-                  dividend={dividend}
-                />
-              );
-            })()}
-            <SignalPanel signal={signal} />
-          </>
-        ) : (
-          <div className="rounded-panel border border-border bg-surface shadow-card p-6">
-            <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-1.5">Signal quantitatif</p>
-            <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
-          </div>
-        )}
-      </div>
+      {gateSignaux.allowed ? (
+        <div className="space-y-4">
+          <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
+          {signal ? (
+            <>
+              {(() => {
+                const inp = (signal as SignalDaily & { inputs?: Record<string, number | boolean> | null }).inputs ?? {};
+                const num = (k: string): number | null => (typeof inp[k] === 'number' ? (inp[k] as number) : null);
+                const technical = readTechnical({
+                  signal: signal.signal,
+                  rsi: num('rsi'),
+                  ma20: num('ma20'),
+                  ma50: num('ma50'),
+                  volumeRatio: num('volume_ratio'),
+                  variationPct: num('variation_pct'),
+                  incomplet: inp.incomplet === true,
+                });
+                const dividend = analyzeDividendTiming(
+                  dividends as { montant: number; ex_date: string | null; payment_date: string | null; exercice: number | null }[],
+                  last.cours_jour ?? null,
+                  new Date().toISOString().slice(0, 10),
+                );
+                const positionCtx = readPosition(position, last.cours_jour ?? null, signal.signal);
+                const synthesis = synthesize({
+                  signal: signal.signal,
+                  confiance: signal.confiance,
+                  incomplet: inp.incomplet === true,
+                  technical,
+                  position: positionCtx,
+                  dividend,
+                });
+                return (
+                  <SignalAnalysis
+                    signal={signal.signal}
+                    synthesis={synthesis}
+                    technical={technical}
+                    position={positionCtx}
+                    dividend={dividend}
+                  />
+                );
+              })()}
+              <SignalPanel signal={signal} />
+            </>
+          ) : (
+            <div className="rounded-panel border border-border bg-surface shadow-card p-6">
+              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-1.5">Signal quantitatif</p>
+              <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
+          <SectionLock
+            required={gateSignaux.required === 'free' ? 'premium' : gateSignaux.required}
+            titre="Signal quantitatif"
+            pitch="Le signal BUY / HOLD / SELL, sa note et ses sous-scores expliqués."
+          />
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════
           VALORISATION FONDAMENTALE
@@ -779,7 +832,15 @@ export default async function InstrumentPage({
       {valuation && valuation.metrics.reliable && (
         <div id="valorisation" className="scroll-mt-24">
           <Eyebrow className="mb-3">Valorisation</Eyebrow>
-          <ValuationPanel v={valuation} scoring={scoring} />
+          {gateValo.allowed ? (
+            <ValuationPanel v={valuation} scoring={scoring} />
+          ) : (
+            <SectionLock
+              required={gateValo.required === 'free' ? 'premium' : gateValo.required}
+              titre="Valorisation"
+              pitch="Le titre est-il cher ou bon marché ? Multiples et valeur intrinsèque."
+            />
+          )}
         </div>
       )}
 
@@ -794,6 +855,20 @@ export default async function InstrumentPage({
           high: closePrices.length ? Math.max(...closePrices) : null,
           current: last.cours_jour ?? null,
         };
+        // Verrou premium : on ne rend PAS le panneau (donc aucune donnée dans le HTML).
+        if (!gateFonda.allowed) {
+          return (
+            <div id="fondamentaux" className="scroll-mt-24">
+              <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
+              <SectionLock
+                required={gateFonda.required === 'free' ? 'premium' : gateFonda.required}
+                titre="Analyse fondamentale"
+                pitch="PER, P/B, ROE, marge, endettement — et leur lecture."
+              />
+            </div>
+          );
+        }
+
         return (
           <div id="fondamentaux" className="scroll-mt-24">
             <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
