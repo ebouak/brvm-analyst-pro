@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { getEntitlements } from '@/lib/server/entitlements';
+import { AccessGate } from '@/components/premium/AccessGate';
 import { runBacktest, type BacktestResult } from '@/lib/backtest';
 import { synthesizeBacktest, type BenchmarkSet } from '@/lib/backtest/interpret';
 import type { SignalLabel } from '@/lib/types';
@@ -76,6 +78,17 @@ const inputCls =
   'bg-bg border border-border rounded-lg px-3 py-2 text-sm text-ivory placeholder:text-faint focus:outline-none focus:border-gold/50 transition-colors duration-200';
 
 export default async function BacktestPage({ searchParams }: PageProps) {
+  const ent = await getEntitlements();
+  if (!ent.isPremium) {
+    return (
+      <AccessGate
+        tier="premium"
+        feature="Le Backtest"
+        hint="Testez une stratégie sur l'historique BRVM (rendement, drawdown, comparaison au marché) avec l'abonnement Premium."
+      />
+    );
+  }
+
   const supabase = createClient();
 
   const { data: instruments } = await supabase

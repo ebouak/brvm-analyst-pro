@@ -7,9 +7,12 @@ import { SectionHeader, StatPill } from '@/components/ui/premium';
 import { AdvisorCard } from '@/components/advisor/AdvisorCard';
 import { MyPortfolioAdvice } from '@/components/advisor/MyPortfolioAdvice';
 import type { Action } from '@/lib/advisor/recommend';
+import { getEntitlements } from '@/lib/server/entitlements';
+import { AccessGate } from '@/components/premium/AccessGate';
 
 export const metadata = { title: 'Conseiller BRVM — WESTBOURSE' };
-export const revalidate = 3600;
+// Garde par utilisateur : rendu dynamique obligatoire (plus de cache partagé).
+export const dynamic = 'force-dynamic';
 
 const ACT_LABEL: Record<Action, string> = { acheter: 'Acheter', conserver: 'Conserver', vendre: 'Vendre' };
 const ACT_COLOR: Record<Action, string> = { acheter: 'text-up', conserver: 'text-gold', vendre: 'text-down' };
@@ -43,6 +46,17 @@ async function getLiquidityMap(): Promise<Map<string, { classe: string; score: n
 }
 
 export default async function ConseillerPage() {
+  const ent = await getEntitlements();
+  if (!ent.isPremium) {
+    return (
+      <AccessGate
+        tier="premium"
+        feature="Le Conseiller"
+        hint="Recommandations d'achat, de conservation et de vente, argumentées, incluses dans l'abonnement Premium."
+      />
+    );
+  }
+
   const [rows, changes, liquidityMap] = await Promise.all([
     getAdvisorRecommendations(),
     getRecentChanges(),

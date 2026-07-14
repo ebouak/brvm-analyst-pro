@@ -15,8 +15,11 @@ import {
   Eyebrow,
 } from '@/components/ui/premium';
 
-// Données publiques recalculées après clôture : ISR 5 min (audit 2026-06-12)
-export const revalidate = 300;
+import { getEntitlements } from '@/lib/server/entitlements';
+import { AccessGate } from '@/components/premium/AccessGate';
+
+// Garde par utilisateur : rendu dynamique (le cache partagé exposerait les signaux).
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Signaux — WESTBOURSE' };
 
 async function getData() {
@@ -92,6 +95,17 @@ async function getData() {
 }
 
 export default async function SignauxPage() {
+  const ent = await getEntitlements();
+  if (!ent.isPremium) {
+    return (
+      <AccessGate
+        tier="premium"
+        feature="Les Signaux"
+        hint="Signaux BUY / SELL notés, avec leur performance historique, inclus dans l'abonnement Premium."
+      />
+    );
+  }
+
   const [{ lastDate, rows, changes }, backtest, recentReal] = await Promise.all([
     getData(),
     getBacktestStats(),

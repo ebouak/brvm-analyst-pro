@@ -8,10 +8,11 @@ import {
 } from '@/components/ui/premium';
 import ViewTabs from '@/components/ViewTabs';
 import { FONDA_TABS } from '@/lib/viewTabsPresets';
+import { getEntitlements } from '@/lib/server/entitlements';
+import { AccessGate } from '@/components/premium/AccessGate';
 
-// Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
-// par l'intraday : ISR 5 min (audit 2026-06-12).
-export const revalidate = 300;
+// Garde par utilisateur : rendu dynamique.
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Analyse fondamentale' };
 
 async function getData(): Promise<ScreenerRow[]> {
@@ -44,6 +45,17 @@ async function getData(): Promise<ScreenerRow[]> {
 }
 
 export default async function FondamentauxPage() {
+  const ent = await getEntitlements();
+  if (!ent.isPremium) {
+    return (
+      <AccessGate
+        tier="premium"
+        feature="L'analyse fondamentale"
+        hint="PER, P/B, ROE, rendement du dividende et comparateur par secteur, inclus dans l'abonnement Premium."
+      />
+    );
+  }
+
   const rows = await getData();
 
   const withData = rows.filter((r) => r.per !== null || r.pb !== null || r.roe !== null);

@@ -3,15 +3,22 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { getMonthlyReturns } from '@/lib/seasonality/server';
 import SeasonalityMatrix from '@/components/seasonality/SeasonalityMatrix';
 import { SectionHeader } from '@/components/ui/premium';
+import { getEntitlements } from '@/lib/server/entitlements';
 
-export const revalidate = 3600;
+// Garde par utilisateur (essai gratuit limité vs premium complet) : dynamique.
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Saisonnalité — WESTBOURSE' };
 
 export default async function SaisonnalitePage({ searchParams }: { searchParams?: { code?: string } }) {
+  const ent = await getEntitlements();
+  const preview = !ent.isPremium;
+
   const sb = createPublicClient();
+  // Actions ET obligations : l'essai gratuit doit pouvoir porter sur l'un ou l'autre.
   const { data: instr } = await sb
-    .from('brvm_instruments').select('code, designation').eq('type', 'action').order('code');
-  const instruments = (instr ?? []) as { code: string; designation: string | null }[];
+    .from('brvm_instruments').select('code, designation, type')
+    .in('type', ['action', 'obligation']).order('code');
+  const instruments = (instr ?? []) as { code: string; designation: string | null; type: string }[];
 
   const code = (searchParams?.code ?? instruments[0]?.code ?? 'PALC').toUpperCase();
   const returns = await getMonthlyReturns(code).catch(() => []);
@@ -25,20 +32,26 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
         subtitle="Performance mensuelle moyenne d'une action sur plusieurs années — lecture statistique, à croiser avec tendance, liquidité et dividende."
       />
 
-      {/* Sélecteur de titre (form GET) */}
+      {/* Sélecteur de titre (form GET). En essai, il est désactivé : l'aperçu
+          gratuit porte sur un seul titre (le défaut), pour un seul mois. */}
       <form className="flex items-center gap-2">
         <label className="text-xs text-faint">Titre :</label>
-        <select name="code" defaultValue={code}
-          className="bg-bg border border-border rounded-lg px-3 py-1.5 text-sm text-ivory">
+        <select name="code" defaultValue={code} disabled={preview}
+          className="bg-bg border border-border rounded-lg px-3 py-1.5 text-sm text-ivory disabled:opacity-50 disabled:cursor-not-allowed">
           {instruments.map((i) => <option key={i.code} value={i.code}>{i.code} — {i.designation ?? ''}</option>)}
         </select>
-        <button type="submit" className="text-xs px-3 py-1.5 rounded-lg bg-info/15 text-info">Afficher</button>
+        {!preview && (
+          <button type="submit" className="text-xs px-3 py-1.5 rounded-lg bg-info/15 text-info">Afficher</button>
+        )}
+        {preview && (
+          <span className="text-[11px] text-faint">Choix du titre réservé au premium</span>
+        )}
       </form>
 
       <div>
         <h2 className="font-display text-lg text-white">{code} <span className="text-sm text-muted">— {designation}</span></h2>
         <div className="mt-3">
-          <SeasonalityMatrix returns={returns} />
+          <SeasonalityMatrix returns={returns} preview={preview} />
         </div>
       </div>
 

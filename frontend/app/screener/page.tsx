@@ -191,6 +191,24 @@ export default function ScreenerPage() {
     );
   }
 
+  // Screener réservé au premium. Les cours bruts restent publics sur /actions ;
+  // ce qui est premium ici, c'est le filtrage multi-critères.
+  if (!isPremium) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        <SectionHeader kicker="Outils" title="Screener multi-critères" subtitle="Filtrez les actions par RSI, volume, score, secteur, dividende" />
+        <div className="mt-10">
+          <EmptyStatePremium
+            icon="🔒"
+            title="Screener réservé au plan Premium"
+            hint="Filtrez les 47 valeurs par RSI, volume, score, secteur et rendement du dividende avec l'abonnement Premium."
+            action={{ href: '/account/plan', label: 'Passer à Premium' }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   if (allActions.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12">

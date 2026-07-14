@@ -2,9 +2,12 @@ import Link from 'next/link';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
 import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/server';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
+import { getEntitlements } from '@/lib/server/entitlements';
+import { AccessGate } from '@/components/premium/AccessGate';
 
 export const metadata = { title: 'Formations & conférences — WESTBOURSE' };
-export const revalidate = 300;
+// Garde par utilisateur (plan Platinium) : rendu dynamique.
+export const dynamic = 'force-dynamic';
 
 const TYPE_LABEL: Record<string, string> = { cours: 'Cours', conference: 'Conférence', webinaire: 'Webinaire' };
 const NIVEAU_LABEL: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' };
@@ -14,6 +17,17 @@ const fmtDate = (d: string | null) =>
 const NIVEAU_COURSE: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé', expert: 'Expert' };
 
 export default async function FormationsPage() {
+  const ent = await getEntitlements();
+  if (!ent.isPro) {
+    return (
+      <AccessGate
+        tier="pro"
+        feature="Les formations & conférences"
+        hint="Cours, webinaires et conférences de l'Académie WESTBOURSE, inclus dans le plan Platinium."
+      />
+    );
+  }
+
   const [formations, courses] = await Promise.all([
     listFormations().catch(() => [] as FormationCard[]),
     listPublishedCourses().catch(() => [] as AcademyCourseCard[]),
