@@ -113,11 +113,12 @@ const jsonLd = {
        * chaque URL au fur et à mesure de la création des comptes.
        */
       sameAs: [
-        // 'https://www.linkedin.com/company/westbourse',
+        'https://www.linkedin.com/in/westbourse-lt-745473422/',
+        // À AJOUTER dès leur création — chacun renforce l'entité :
+        // 'https://www.linkedin.com/company/westbourse',  ← LA PAGE ENTREPRISE (prioritaire)
         // 'https://x.com/westbourse',
         // 'https://www.facebook.com/westbourse',
-        // 'https://www.youtube.com/@westbourse',
-      ].filter(Boolean),
+      ],
       areaServed: [
         { '@type': 'Country', name: "Côte d'Ivoire" },
         { '@type': 'Country', name: 'Sénégal' },
