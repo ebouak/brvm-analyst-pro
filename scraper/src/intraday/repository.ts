@@ -7,6 +7,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import type { QualifiedPattern } from './orchestrate.js';
+import type { Snapshot } from './reconstruct.js';
 import type { PatternScore } from './aggregate.js';
 
 // NB : upsertRawPatterns (table brvm_intraday_patterns_raw) a été SUPPRIMÉ
@@ -52,19 +53,19 @@ export async function upsertQualifiedPatterns(patterns: QualifiedPattern[]): Pro
     rules_version: p.rules_version,
   }));
 
-  const { data, error, count } = await client
+  const { data, error } = await client
     .from('brvm_intraday_patterns')
     .upsert(records, {
       onConflict: 'code,date_marche,pattern_type,timeframe,candle_start_time,engine_version',
     })
-    .select('*', { count: 'exact' });
+    .select('*');
 
   if (error) {
     logger.error({ error }, `Failed to upsert qualified patterns`);
     throw error;
   }
 
-  const insertedCount = data?.length || count || 0;
+  const insertedCount = data?.length ?? 0;
   logger.info(`Upserted ${insertedCount} qualified patterns`);
   return insertedCount;
 }
@@ -101,19 +102,19 @@ export async function upsertPatternScores(scores: PatternScore[]): Promise<numbe
     rules_version: 'r1.0.0', // Default rules version
   }));
 
-  const { data, error, count } = await client
+  const { data, error } = await client
     .from('brvm_pattern_scores')
     .upsert(records, {
       onConflict: 'code,date_marche',
     })
-    .select('*', { count: 'exact' });
+    .select('*');
 
   if (error) {
     logger.error({ error }, `Failed to upsert pattern scores`);
     throw error;
   }
 
-  const insertedCount = data?.length || count || 0;
+  const insertedCount = data?.length ?? 0;
   logger.info(`Upserted ${insertedCount} pattern scores`);
   return insertedCount;
 }
@@ -131,7 +132,7 @@ export async function upsertPatternScores(scores: PatternScore[]): Promise<numbe
 export async function loadSnapshots(
   code: string,
   dateMarche: string,
-): Promise<Array<{ timestamp: Date; close: number; volume: number }>> {
+): Promise<Snapshot[]> {
   const client = getSupabase();
 
   // Historique des captures 15 min alimenté par le scraper intraday
@@ -148,9 +149,13 @@ export async function loadSnapshots(
     return [];
   }
 
-  const snapshots = (data ?? [])
+  const snapshots: Snapshot[] = (data ?? [])
     .filter((r: { close: number | null }) => r.close != null)
     .map((r: { captured_at: string; close: number; volume: number | null }) => ({
+      // `code` manquait : le type Snapshot l'exige et l'appelant le passait à une
+      // fonction qui l'attendait. Le trou était masqué par un type de retour
+      // inline plus permissif que Snapshot.
+      code,
       timestamp: new Date(r.captured_at),
       close: Number(r.close),
       volume: Number(r.volume ?? 0),

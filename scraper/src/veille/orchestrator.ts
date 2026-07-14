@@ -38,7 +38,7 @@ export async function runVeilleDigest(
   );
 
   const startTime = Date.now();
-  const dateStr = dateMarche.toISOString().split('T')[0];
+  const dateStr = dateMarche.toISOString().slice(0, 10);
   const since = new Date(dateMarche.getTime() - 24 * 60 * 60 * 1000);
 
   try {

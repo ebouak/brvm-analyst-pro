@@ -24,7 +24,7 @@ export async function runVeille(options: {
       ? new Date(options.date)
       : new Date();
 
-    const dateStr = dateMarche.toISOString().split('T')[0];
+    const dateStr = dateMarche.toISOString().slice(0, 10);
 
     logger.info(
       { date: dateStr, mock: options.mock },
@@ -58,7 +58,7 @@ export async function runVeille(options: {
 
     return {
       status: 'failed',
-      date_marche: new Date().toISOString().split('T')[0],
+      date_marche: new Date().toISOString().slice(0, 10),
       digests_count: 0,
       alerts_count: 0,
       duration_ms: duration,

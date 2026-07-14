@@ -98,19 +98,25 @@ function parseRSSItems(xml: string): Array<{
   let match;
 
   while ((match = itemRegex.exec(xml)) !== null) {
+    // Les groupes de capture sont `string | undefined` (noUncheckedIndexedAccess) :
+    // un <item> vide produirait un `undefined` qui plantait à l'exécution.
     const itemContent = match[1];
+    if (!itemContent) continue;
 
     const titleMatch = itemContent.match(/<title[^>]*>([\s\S]*?)<\/title>/);
     const descMatch = itemContent.match(/<description[^>]*>([\s\S]*?)<\/description>/);
     const linkMatch = itemContent.match(/<link[^>]*>([\s\S]*?)<\/link>/);
     const pubDateMatch = itemContent.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/);
 
-    if (titleMatch) {
+    // Un item sans titre exploitable est ignoré plutôt que poussé avec une
+    // chaîne vide : un article sans titre n'est pas un article.
+    const title = titleMatch?.[1];
+    if (title) {
       items.push({
-        title: stripHtml(titleMatch[1]),
-        description: descMatch ? stripHtml(descMatch[1]) : undefined,
-        link: linkMatch ? stripHtml(linkMatch[1]) : undefined,
-        pubDate: pubDateMatch ? stripHtml(pubDateMatch[1]) : undefined,
+        title: stripHtml(title),
+        description: descMatch?.[1] ? stripHtml(descMatch[1]) : undefined,
+        link: linkMatch?.[1] ? stripHtml(linkMatch[1]) : undefined,
+        pubDate: pubDateMatch?.[1] ? stripHtml(pubDateMatch[1]) : undefined,
       });
     }
   }

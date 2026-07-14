@@ -49,7 +49,7 @@ export async function upsertVeilleDigest(
       return true;
     });
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('brvm_veille_digest')
       .upsert(deduped, {
         onConflict: 'title,source,date_marche', // Natural key for dedup
@@ -63,8 +63,11 @@ export async function upsertVeilleDigest(
       throw error;
     }
 
+    // Un upsert SANS `.select()` renvoie `data: null` : l'ancien log affichait donc
+    // « stored: 0 » à chaque exécution réussie — il mentait. On journalise ce qu'on
+    // a réellement envoyé (l'erreur ayant déjà levé, ces lignes SONT écrites).
     logger.info(
-      { stored: data?.length || 0, total: digests.length },
+      { stored: deduped.length, total: digests.length },
       'Veille digests stored'
     );
   } catch (err) {

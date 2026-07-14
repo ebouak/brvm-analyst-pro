@@ -47,7 +47,12 @@ export interface VeilleAlert {
 
 export interface VeilleJobRun {
   date_marche: string;
-  source: VeilleSource;
+  /**
+   * `'orchestrator'` désigne le run AGRÉGÉ (toutes sources confondues), par
+   * opposition à un run d'une source unique. Le type ne l'admettait pas alors
+   * que le code l'écrivait déjà : le modèle mentait sur ce qu'il stockait.
+   */
+  source: VeilleSource | 'orchestrator';
   status: VeilleJobStatus;
   items_fetched: number;
   items_stored: number;

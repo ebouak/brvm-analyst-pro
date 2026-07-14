@@ -68,7 +68,7 @@ export async function fetchYouTubeTutorials(keywords: string[]): Promise<VeilleD
           url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
           relevance_score: 0.7,
           sentiment: 'neutral',
-          tags: ['youtube', 'tutorial', term.split(' ')[0]],
+          tags: ['youtube', 'tutorial', (term.split(' ')[0] ?? term)],
           full_content: {
             channel: item.snippet.channelTitle,
             published: item.snippet.publishedAt,
