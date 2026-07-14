@@ -25,7 +25,7 @@ export type FeatureCode =
 export interface FeatureFlag {
   code: string;
   label: string;
-  acces: 'free' | 'premium' | 'disabled';
+  acces: 'free' | 'premium' | 'pro' | 'disabled';
   quota_free: number | null;
   quota_premium: number | null;
   description: string | null;
@@ -84,6 +84,21 @@ export async function checkFeature(
       status: 403,
       reason: `« ${flag.label} » est réservé aux comptes premium.`,
     };
+  }
+
+  // `pro` = Platinium uniquement. Sans ce cas, un admin qui bascule une
+  // fonctionnalité en « Pro » la laisserait ouverte à tous les Premium : le
+  // réglage n'aurait AUCUN effet, en silence.
+  if (flag.acces === 'pro') {
+    const { getEntitlements } = await import('./entitlements');
+    const ent = await getEntitlements();
+    if (!ent.isPro) {
+      return {
+        allowed: false,
+        status: 403,
+        reason: `« ${flag.label} » est réservé au plan Platinium.`,
+      };
+    }
   }
 
   const quota = user.isPremium ? flag.quota_premium : flag.quota_free;

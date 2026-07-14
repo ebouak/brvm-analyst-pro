@@ -7,7 +7,7 @@ import { SectionHeader, StatPill } from '@/components/ui/premium';
 import { AdvisorCard } from '@/components/advisor/AdvisorCard';
 import { MyPortfolioAdvice } from '@/components/advisor/MyPortfolioAdvice';
 import type { Action } from '@/lib/advisor/recommend';
-import { getEntitlements } from '@/lib/server/entitlements';
+import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
 export const metadata = { title: 'Conseiller BRVM — WESTBOURSE' };
@@ -46,13 +46,15 @@ async function getLiquidityMap(): Promise<Map<string, { classe: string; score: n
 }
 
 export default async function ConseillerPage() {
-  const ent = await getEntitlements();
-  if (!ent.isPremium) {
+  // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
+  // La page ne decide rien : elle demande.
+  const gate = await canAccess('conseiller');
+  if (!gate.allowed) {
     return (
       <AccessGate
-        tier="premium"
+        required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Le Conseiller"
-        hint="Recommandations d'achat, de conservation et de vente, argumentées, incluses dans l'abonnement Premium."
+        hint="Recommandations d'achat, de conservation et de vente, argumentées."
       />
     );
   }

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { SectionHeader } from '@/components/ui/premium';
 import { AlertsManager, type UserAlert } from './AlertsManager';
 import WhatsAppPrefs from '@/components/settings/WhatsAppPrefs';
-import { getEntitlements } from '@/lib/server/entitlements';
+import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
 export const dynamic = 'force-dynamic';
@@ -14,13 +14,15 @@ export default async function AlertesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const ent = await getEntitlements();
-  if (!ent.isPremium) {
+  // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
+  // La page ne decide rien : elle demande.
+  const gate = await canAccess('alertes');
+  if (!gate.allowed) {
     return (
       <AccessGate
-        tier="premium"
+        required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Les alertes personnalisées"
-        hint="Soyez prévenu par email et WhatsApp quand un cours franchit votre seuil — inclus dans l'abonnement Premium."
+        hint="Soyez prévenu par email et WhatsApp quand un cours franchit votre seuil."
       />
     );
   }

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/premium';
 import ViewTabs from '@/components/ViewTabs';
 import { FONDA_TABS } from '@/lib/viewTabsPresets';
-import { getEntitlements } from '@/lib/server/entitlements';
+import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
 // Garde par utilisateur : rendu dynamique.
@@ -45,13 +45,15 @@ async function getData(): Promise<ScreenerRow[]> {
 }
 
 export default async function FondamentauxPage() {
-  const ent = await getEntitlements();
-  if (!ent.isPremium) {
+  // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
+  // La page ne decide rien : elle demande.
+  const gate = await canAccess('fondamentaux');
+  if (!gate.allowed) {
     return (
       <AccessGate
-        tier="premium"
+        required={gate.required === 'free' ? 'premium' : gate.required}
         feature="L'analyse fondamentale"
-        hint="PER, P/B, ROE, rendement du dividende et comparateur par secteur, inclus dans l'abonnement Premium."
+        hint="PER, P/B, ROE, rendement du dividende et comparateur par secteur."
       />
     );
   }

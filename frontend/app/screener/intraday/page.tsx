@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import IntraDayPatternsTable from '@/components/screener/IntraDayPatternsTable';
-import { createClient } from '@/lib/supabase/server';
+import { canAccess } from '@/lib/server/featureAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,14 +11,6 @@ export const metadata = {
     "Titres qui bougent et titres dont le volume s'emballe, sur la séance BRVM du jour.",
 };
 
-/** Premium requis : lu côté serveur, donc le tableau n'est pas chargé sans droit. */
-async function isPremiumUser(): Promise<boolean> {
-  const supa = createClient();
-  const { data: { user } } = await supa.auth.getUser();
-  if (!user) return false;
-  const { data } = await supa.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
-  return Boolean(data?.is_premium);
-}
 
 function PatternsSkeleton() {
   return (
@@ -31,7 +23,8 @@ function PatternsSkeleton() {
 
 export default async function IntraDayScreenerPage() {
   const todayDate = new Date().toISOString().slice(0, 10);
-  const premium = await isPremiumUser();
+  // Niveau requis LU EN BASE (feature_flags).
+  const gate = await canAccess('screener_intraday');
 
   return (
     <div className="space-y-6">
@@ -45,7 +38,7 @@ export default async function IntraDayScreenerPage() {
 
       {/* Verrou serveur : le tableau (et donc les données) n'est rendu que pour un
           abonné. Un compte gratuit reçoit l'invitation, jamais les signaux. */}
-      {premium ? (
+      {gate.allowed ? (
         <Suspense fallback={<PatternsSkeleton />}>
           <IntraDayPatternsTable dateMarche={todayDate} />
         </Suspense>

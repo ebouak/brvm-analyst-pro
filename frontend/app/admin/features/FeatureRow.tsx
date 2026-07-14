@@ -7,7 +7,7 @@ import { updateFlag } from './actions';
 export interface FlagRow {
   code: string;
   label: string;
-  acces: 'free' | 'premium' | 'disabled';
+  acces: 'free' | 'premium' | 'pro' | 'disabled';
   quota_free: number | null;
   quota_premium: number | null;
   description: string | null;
@@ -17,13 +17,15 @@ export interface FlagRow {
 
 const ACCES: { value: FlagRow['acces']; label: string; hint: string }[] = [
   { value: 'free', label: 'Gratuit', hint: 'Ouvert à tous les comptes' },
-  { value: 'premium', label: 'Premium', hint: 'Réservé aux abonnés' },
-  { value: 'disabled', label: 'Désactivé', hint: 'Coupé en production (kill switch)' },
+  { value: 'premium', label: 'Premium', hint: 'Abonnés Premium ET Platinium' },
+  { value: 'pro', label: 'Pro', hint: 'Platinium uniquement' },
+  { value: 'disabled', label: 'Désactivé', hint: 'Coupé pour TOUS, abonnés compris (kill switch)' },
 ];
 
 const STYLE: Record<FlagRow['acces'], string> = {
   free: 'border-up/30 bg-up/10 text-up',
   premium: 'border-gold/30 bg-gold/10 text-gold',
+  pro: 'border-accent/30 bg-accent/10 text-accent',
   disabled: 'border-down/30 bg-down/10 text-down',
 };
 

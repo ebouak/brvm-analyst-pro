@@ -17,7 +17,7 @@ type R = { ok: boolean; error?: string };
 export async function updateFlag(
   code: string,
   patch: {
-    acces?: 'free' | 'premium' | 'disabled';
+    acces?: 'free' | 'premium' | 'pro' | 'disabled';
     quota_free?: number | null;
     quota_premium?: number | null;
   },

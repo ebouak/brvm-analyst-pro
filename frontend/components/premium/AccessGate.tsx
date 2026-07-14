@@ -8,17 +8,31 @@ import { EmptyStatePremium } from '@/components/ui/premium';
  * simple masque visuel). L'utilisateur voit ce qu'il gagnerait, pas les données.
  */
 export function AccessGate({
-  tier,
+  required,
   feature,
   hint,
 }: {
-  /** Niveau requis, pour ajuster le message. */
-  tier: 'premium' | 'pro';
+  /** Niveau exigé, TEL QUE LU EN BASE (feature_flags) — jamais décidé par le code. */
+  required: 'premium' | 'pro' | 'disabled';
   /** Nom de la fonctionnalité, ex. « Le Conseiller ». */
   feature: string;
   hint?: string;
 }) {
-  const label = tier === 'pro' ? 'Platinium' : 'Premium';
+  // Kill switch : la fonctionnalité est coupée pour tout le monde, abonnés compris.
+  // Proposer un abonnement ici serait mensonger — payer ne débloquerait rien.
+  if (required === 'disabled') {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-16">
+        <EmptyStatePremium
+          icon="⏸"
+          title={`${feature} — temporairement indisponible`}
+          hint="Cette fonctionnalité est momentanément suspendue. Elle sera rétablie sous peu."
+        />
+      </div>
+    );
+  }
+
+  const label = required === 'pro' ? 'Platinium' : 'Premium';
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
       <EmptyStatePremium

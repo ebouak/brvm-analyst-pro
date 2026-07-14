@@ -36,16 +36,44 @@ const selectCls =
   `bg-bg border border-border rounded-lg px-3 py-1.5 text-sm text-ivory
    focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 ${EASE}`;
 
+/**
+ * Cellule verrouillée : le calcul existe, l'utilisateur n'y a pas droit.
+ * On ne floute PAS une vraie valeur — l'appelant ne la transmet même pas.
+ */
+function LockedCell() {
+  return (
+    <Link
+      href="/account/plan"
+      title="Réservé aux abonnés — cliquez pour débloquer"
+      className="inline-flex items-center gap-1 rounded-md border border-gold/25 bg-gold/5 px-2 py-0.5 text-[10px] text-gold/80 transition hover:bg-gold/10"
+    >
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+        <rect x="4" y="10" width="16" height="10" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </svg>
+      Premium
+    </Link>
+  );
+}
+
 export default function ActionsTable({
   actions,
   signals,
   sparklines = {},
   initialSecteur = '',
+  showMetrics = true,
 }: {
   actions: ActionDaily[];
   signals: Record<string, SignalDaily>;
   sparklines?: Record<string, number[]>;
   initialSecteur?: string;
+  /**
+   * Colonnes CALCULÉES (Tendance 30 j, Signal). Pilotées par `feature_flags`
+   * (`actions_metrics`) : quand elles sont refusées, l'appelant ne transmet même
+   * pas les données — les colonnes affichent un cadenas, pas une valeur floutée.
+   * Les cours bruts (cours, variation, volume) restent publics.
+   */
+  showMetrics?: boolean;
 }) {
   const [q, setQ] = useState('');
   const [pays, setPays] = useState('');
@@ -168,10 +196,14 @@ export default function ActionsTable({
               <Th k="secteur" label="Secteur" />
               <Th k="cours_jour" label="Cours" right />
               <Th k="variation_pct" label="Var %" right />
-              <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">Tendance 30j</th>
+              <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
+                Tendance 30j {!showMetrics && <span aria-label="Premium" title="Premium">🔒</span>}
+              </th>
               <Th k="volume" label="Volume" right />
               <Th k="valeur_echangee" label="Valeur" right />
-              <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">Signal</th>
+              <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
+                Signal {!showMetrics && <span aria-label="Premium" title="Premium">🔒</span>}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -244,10 +276,12 @@ export default function ActionsTable({
                     </span>
                   </td>
 
-                  {/* ── Tendance 30j (sparkline) ──────────────────────── */}
+                  {/* ── Tendance 30j (sparkline) — métrique calculée ──── */}
                   <td className="px-4 py-3">
                     <div className="flex justify-center">
-                      {(sparklines[a.code]?.length ?? 0) >= 2 ? (
+                      {!showMetrics ? (
+                        <LockedCell />
+                      ) : (sparklines[a.code]?.length ?? 0) >= 2 ? (
                         <Sparkline data={sparklines[a.code]!} up={up} width={72} height={24} />
                       ) : (
                         <span className="text-faint text-xs">—</span>
@@ -265,9 +299,13 @@ export default function ActionsTable({
                     {fmtFcfa(a.valeur_echangee)}
                   </td>
 
-                  {/* ── Signal ────────────────────────────────────────── */}
+                  {/* ── Signal — métrique calculée ────────────────────── */}
                   <td className="px-4 py-3 text-center">
-                    <SignalBadge signal={sig?.signal} confiance={sig?.confiance} small />
+                    {showMetrics ? (
+                      <SignalBadge signal={sig?.signal} confiance={sig?.confiance} small />
+                    ) : (
+                      <LockedCell />
+                    )}
                   </td>
                 </tr>
               );

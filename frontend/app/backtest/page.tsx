@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { getEntitlements } from '@/lib/server/entitlements';
+import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import { runBacktest, type BacktestResult } from '@/lib/backtest';
 import { synthesizeBacktest, type BenchmarkSet } from '@/lib/backtest/interpret';
@@ -78,13 +78,15 @@ const inputCls =
   'bg-bg border border-border rounded-lg px-3 py-2 text-sm text-ivory placeholder:text-faint focus:outline-none focus:border-gold/50 transition-colors duration-200';
 
 export default async function BacktestPage({ searchParams }: PageProps) {
-  const ent = await getEntitlements();
-  if (!ent.isPremium) {
+  // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
+  // La page ne decide rien : elle demande.
+  const gate = await canAccess('backtest');
+  if (!gate.allowed) {
     return (
       <AccessGate
-        tier="premium"
+        required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Le Backtest"
-        hint="Testez une stratégie sur l'historique BRVM (rendement, drawdown, comparaison au marché) avec l'abonnement Premium."
+        hint="Testez une stratégie sur l'historique BRVM : rendement, drawdown, comparaison au marché."
       />
     );
   }

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
 import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/server';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
-import { getEntitlements } from '@/lib/server/entitlements';
+import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
 export const metadata = { title: 'Formations & conférences — WESTBOURSE' };
@@ -17,13 +17,15 @@ const fmtDate = (d: string | null) =>
 const NIVEAU_COURSE: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé', expert: 'Expert' };
 
 export default async function FormationsPage() {
-  const ent = await getEntitlements();
-  if (!ent.isPro) {
+  // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
+  // La page ne decide rien : elle demande.
+  const gate = await canAccess('formations');
+  if (!gate.allowed) {
     return (
       <AccessGate
-        tier="pro"
+        required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Les formations & conférences"
-        hint="Cours, webinaires et conférences de l'Académie WESTBOURSE, inclus dans le plan Platinium."
+        hint="Cours, webinaires et conférences de l'Académie WESTBOURSE."
       />
     );
   }

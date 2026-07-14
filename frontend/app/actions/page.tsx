@@ -3,13 +3,23 @@ import ActionsTable from '@/components/ActionsTable';
 import brvmSectors from '@/lib/brvmSectors.json';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { SectionHeader, EmptyStatePremium, PremiumPanel, StatPill, PremiumCTA } from '@/components/ui/premium';
+import { canAccess } from '@/lib/server/featureAccess';
 
-// Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
-// par l'intraday : ISR 5 min (audit 2026-06-12).
-export const revalidate = 300;
+// Les COURS restent publics. Seules les colonnes CALCULÉES (Tendance 30 j, Signal)
+// sont soumises au flag `actions_metrics`. Rendu dynamique : le contenu dépend
+// désormais de l'utilisateur, un cache partagé servirait la version premium à tous.
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Marché Actions' };
 
-async function getData() {
+/**
+ * `withMetrics` : charge-t-on les colonnes CALCULÉES (signaux, tendance 30 j) ?
+ *
+ * Quand l'accès est refusé, on ne les interroge même PAS. Le verrou n'est donc pas
+ * un masque visuel : la donnée n'existe nulle part dans la page envoyée au
+ * navigateur. Effet de bord bienvenu : deux requêtes de moins pour un visiteur
+ * gratuit — dont l'historique complet des cours, qui est la plus lourde.
+ */
+async function getData(withMetrics: boolean) {
   const supabase = createPublicClient();
   const { data: lastRow } = await supabase
     .from('brvm_actions_daily')
@@ -21,7 +31,9 @@ async function getData() {
 
   const [{ data: actions }, { data: signals }, { data: instruments }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
-    supabase.from('signals_daily').select('*').eq('date_marche', lastDate),
+    withMetrics
+      ? supabase.from('signals_daily').select('*').eq('date_marche', lastDate)
+      : Promise.resolve({ data: null }),
     supabase.from('brvm_instruments').select('code, secteur, pays').eq('type', 'action'),
   ]);
 
@@ -42,21 +54,24 @@ async function getData() {
   for (const s of (signals ?? []) as SignalDaily[]) sigMap[s.code] = s;
 
   // ── Sparklines : ~30 dernières séances de cours par titre (colonne Tendance 30j) ──
-  const since = new Date(lastDate);
-  since.setDate(since.getDate() - 50);
-  const sinceIso = since.toISOString().slice(0, 10);
-  const { data: hist } = await supabase
-    .from('brvm_actions_daily')
-    .select('code, date_marche, cours_jour')
-    .gte('date_marche', sinceIso)
-    .lte('date_marche', lastDate)
-    .order('date_marche', { ascending: true });
+  // Non chargées sans droit : c'est la requête la plus lourde de la page.
   const sparklines: Record<string, number[]> = {};
-  for (const r of (hist ?? []) as { code: string; cours_jour: number | null }[]) {
-    if (r.cours_jour == null) continue;
-    (sparklines[r.code] ??= []).push(r.cours_jour);
+  if (withMetrics) {
+    const since = new Date(lastDate);
+    since.setDate(since.getDate() - 50);
+    const sinceIso = since.toISOString().slice(0, 10);
+    const { data: hist } = await supabase
+      .from('brvm_actions_daily')
+      .select('code, date_marche, cours_jour')
+      .gte('date_marche', sinceIso)
+      .lte('date_marche', lastDate)
+      .order('date_marche', { ascending: true });
+    for (const r of (hist ?? []) as { code: string; cours_jour: number | null }[]) {
+      if (r.cours_jour == null) continue;
+      (sparklines[r.code] ??= []).push(r.cours_jour);
+    }
+    for (const k of Object.keys(sparklines)) sparklines[k] = sparklines[k]!.slice(-30);
   }
-  for (const k of Object.keys(sparklines)) sparklines[k] = sparklines[k]!.slice(-30);
 
   return {
     lastDate,
@@ -67,7 +82,11 @@ async function getData() {
 }
 
 export default async function ActionsPage({ searchParams }: { searchParams?: { secteur?: string } }) {
-  const { lastDate, actions, signals, sparklines } = await getData();
+  // Niveau requis LU EN BASE (feature_flags → `actions_metrics`, éditable dans
+  // /admin/features). Les cours restent publics ; seules les colonnes calculées
+  // sont soumises au flag.
+  const gate = await canAccess('actions_metrics');
+  const { lastDate, actions, signals, sparklines } = await getData(gate.allowed);
   const initialSecteur = searchParams?.secteur ?? '';
 
   if (!lastDate) {
@@ -118,7 +137,13 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
 
       {/* ── Tableau principal (avec colonne Tendance 30j) ───────────────── */}
       <PremiumPanel>
-        <ActionsTable actions={actions} signals={signals} sparklines={sparklines} initialSecteur={initialSecteur} />
+        <ActionsTable
+          actions={actions}
+          signals={signals}
+          sparklines={sparklines}
+          initialSecteur={initialSecteur}
+          showMetrics={gate.allowed}
+        />
       </PremiumPanel>
     </div>
   );

@@ -3,15 +3,17 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { getMonthlyReturns } from '@/lib/seasonality/server';
 import SeasonalityMatrix from '@/components/seasonality/SeasonalityMatrix';
 import { SectionHeader } from '@/components/ui/premium';
-import { getEntitlements } from '@/lib/server/entitlements';
+import { canAccess } from '@/lib/server/featureAccess';
 
 // Garde par utilisateur (essai gratuit limité vs premium complet) : dynamique.
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Saisonnalité — WESTBOURSE' };
 
 export default async function SaisonnalitePage({ searchParams }: { searchParams?: { code?: string } }) {
-  const ent = await getEntitlements();
-  const preview = !ent.isPremium;
+  // Niveau requis LU EN BASE. En cas de refus on n'affiche pas une porte fermee :
+  // on bascule en APERCU (mois en cours seulement) — l'essai limite demande.
+  const gate = await canAccess('saisonnalite');
+  const preview = !gate.allowed;
 
   const sb = createPublicClient();
   // Actions ET obligations : l'essai gratuit doit pouvoir porter sur l'un ou l'autre.

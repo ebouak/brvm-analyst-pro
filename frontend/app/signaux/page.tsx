@@ -15,7 +15,7 @@ import {
   Eyebrow,
 } from '@/components/ui/premium';
 
-import { getEntitlements } from '@/lib/server/entitlements';
+import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
 // Garde par utilisateur : rendu dynamique (le cache partagé exposerait les signaux).
@@ -95,13 +95,15 @@ async function getData() {
 }
 
 export default async function SignauxPage() {
-  const ent = await getEntitlements();
-  if (!ent.isPremium) {
+  // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
+  // La page ne decide rien : elle demande.
+  const gate = await canAccess('signaux');
+  if (!gate.allowed) {
     return (
       <AccessGate
-        tier="premium"
+        required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Les Signaux"
-        hint="Signaux BUY / SELL notés, avec leur performance historique, inclus dans l'abonnement Premium."
+        hint="Signaux BUY / SELL notés, avec leur performance historique."
       />
     );
   }
