@@ -21,6 +21,7 @@ const BARE_PREFIXES = [
   '/comparateur-sgi',
   '/fiscalite',
   '/rendement-reel',
+  '/rendement-vrai',
   // Widgets embarquables : rendus nus dans des iframes tierces (ni sidebar,
   // ni footer, ni encart de contact) — cf. spec widgets §5.
   '/embed',

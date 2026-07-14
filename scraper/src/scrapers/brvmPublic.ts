@@ -66,6 +66,54 @@ function normHeader(s: string): string {
 }
 
 /**
+ * Cours de la veille : on ne fait PAS confiance à la colonne « Cours veille ».
+ *
+ * ── Le bug qu'elle a causé (constaté le 2026-07-14, actif depuis juin) ──
+ * brvm.org fait ROULER sa colonne « Cours veille » vers le cours du jour après la
+ * clôture. Or notre cron intraday tourne toutes les 15 min et chaque passage
+ * ÉCRASE le précédent : la dernière capture de la journée attrapait donc la valeur
+ * déjà roulée, et l'on stockait `cours_precedent == cours_jour`.
+ *
+ * Résultat visible sur la fiche d'un titre : « Clôture préc. 53 735 » + variation
+ * absolue « 0 FCFA » + badge « +6,41 % ». Trois chiffres qui se contredisent.
+ * 27 titres sur 47 étaient touchés.
+ *
+ * ── La sortie ──
+ * `variation_pct` et `cours_jour`, eux, restent JUSTES. La veille s'en déduit :
+ *     veille = clôture / (1 + variation/100)
+ * On ne garde la valeur publiée que si elle est COHÉRENTE avec cette identité —
+ * autrement dit si elle n'a pas encore été roulée. C'est exactement la logique
+ * déjà appliquée aux indices plus bas dans ce fichier.
+ *
+ * NB : la variation étant arrondie à 2 décimales par la source, la veille dérivée
+ * porte une imprécision de l'ordre du dixième de FCFA. C'est sans commune mesure
+ * avec l'erreur qu'on corrige (des milliers de FCFA), et une veille approchée à
+ * 0,1 FCFA près vaut infiniment mieux qu'une veille égale au cours du jour.
+ */
+export function resoudreVeille(
+  veillePubliee: number | null,
+  coursJour: number | null,
+  variationPct: number | null,
+): number | null {
+  // Sans cours ni variation, on ne peut rien reconstruire : on rend ce qu'on a.
+  if (coursJour == null || variationPct == null) return veillePubliee;
+
+  // −100 % ferait une division par zéro (et n'existe pas sur un marché réglementé).
+  if (variationPct <= -100) return veillePubliee;
+
+  const derivee = coursJour / (1 + variationPct / 100);
+
+  // La valeur publiée est-elle cohérente avec la variation annoncée ? Tolérance
+  // large (0,5 % ou 1 FCFA) : la source arrondit, on ne rejette pas pour un centime.
+  if (veillePubliee != null && veillePubliee > 0) {
+    const tolerance = Math.max(1, coursJour * 0.005);
+    if (Math.abs(veillePubliee - derivee) <= tolerance) return veillePubliee;
+  }
+
+  return Number(derivee.toFixed(2));
+}
+
+/**
  * Parse la page publique brvm.org (tableau « Activités du marché ») en MarketSnapshot.
  * Mapping par libellé de colonne (jamais par index). cours_jour = Cours Clôture.
  */
@@ -102,14 +150,19 @@ export function parseBrvmPublic(html: string, date: MarketDate): MarketSnapshot 
       const cell = (i: number) => (i >= 0 && i < tds.length ? $(tds[i]).text().trim() : '');
       const code = cell(iSym).toUpperCase();
       if (!code) return;
+
+      const cours_jour = parseFrNumber(cell(iCloture));
+      const variation_pct = parseFrNumber(cell(iVar));
+      const veillePubliee = parseFrNumber(cell(iVeille));
+
       actions.push({
         code,
         designation: cell(iNom),
         pays: null,
         secteur: null,
-        cours_precedent: parseFrNumber(cell(iVeille)),
-        cours_jour: parseFrNumber(cell(iCloture)),
-        variation_pct: parseFrNumber(cell(iVar)),
+        cours_precedent: resoudreVeille(veillePubliee, cours_jour, variation_pct),
+        cours_jour,
+        variation_pct,
         volume: parseFrInt(cell(iVol)),
         nb_transactions: null,
         valeur_echangee: null,

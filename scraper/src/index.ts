@@ -57,6 +57,7 @@ import { runIntraday } from './scrapers/runIntraday.js';
 import { runAfricanIndices } from './scrapers/runAfricanIndices.js';
 import { runBceaoMacro } from './scrapers/runBceaoMacro.js';
 import { runInflation } from './scrapers/runInflation.js';
+import { runDividendHistory } from './dividends/runDividendHistory.js';
 import { UEMOA } from './parsers/worldBankInflation.js';
 
 /** 8 États membres — un pays manquant doit rendre le run « partial », pas « success ». */
@@ -287,6 +288,26 @@ async function main(): Promise<number> {
         },
       );
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'dividends:history': {
+      // Historique des dividendes (5 exercices) depuis les fiches societes.
+      // Reconstruit la table apres la purge du bruit (migration 0099).
+      const r = await monitored(
+        { code: 'dividends-history', label: 'Historique des dividendes (Sikafinance)' },
+        async () => {
+          const res = await runDividendHistory({ mock });
+          return {
+            value: res,
+            outcome: {
+              status: res.echecs === 0 ? 'success' : 'partial',
+              rows_extracted: res.lignes,
+              rows_upserted: res.lignes,
+              metadata: { titres: res.titres, echecs: res.echecs },
+            },
+          };
+        },
+      );
+      return r.lignes > 0 ? 0 : 1;
     }
     case 'inflation': {
       // runInflation lève si RIEN n'a été collecté — `monitored` enregistre alors

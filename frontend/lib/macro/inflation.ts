@@ -12,9 +12,10 @@ import { realReturn, cumulativeInflation, annualizedInflation, purchasingPower }
  * gain ; le Nigérien en perd la moitié en pouvoir d'achat. Le cours, lui, est
  * identique. Aucun site de la place ne le dit.
  *
- * Toutes les données sont réelles : cours depuis 1998 (brvm_actions_daily),
- * inflation Banque mondiale (macro_inflation). Aucun chiffre n'est fabriqué —
- * si une série manque, on renvoie null et l'écran l'affiche.
+ * Toutes les données sont réelles. ATTENTION : l'historique des cours n'est DENSE
+ * qu'à partir de 2023 (10 287 lignes en 2023 contre 674 en 2022 — quelques titres
+ * épars). La fenêtre RÉELLEMENT couverte est donc calculée depuis la date du
+ * premier cours trouvé, et non depuis l'année demandée. Voir buildRealReturn.
  */
 
 export interface PaysInflation {
@@ -94,15 +95,34 @@ async function coursAnnee(code: string, annee: number, sens: 'debut' | 'fin') {
 export async function buildRealReturn(code: string, annees: number): Promise<RealReturnReport | null> {
   const db = createPublicClient();
   const anneeFin = new Date().getFullYear() - 1; // dernière année d'inflation PUBLIÉE
-  const anneeDebut = anneeFin - annees + 1;
+  const anneeDemandee = anneeFin - annees + 1;
 
   const [debut, fin] = await Promise.all([
-    coursAnnee(code, anneeDebut, 'debut'),
+    coursAnnee(code, anneeDemandee, 'debut'),
     coursAnnee(code, anneeFin, 'fin'),
   ]);
 
   // Pas d'historique suffisant : on le dit, on n'invente pas un point de départ.
   if (!debut || !fin || debut.cours_jour <= 0 || debut.date_marche >= fin.date_marche) return null;
+
+  /**
+   * ── LE BUG QUE CECI CORRIGE ──
+   * `coursAnnee(..., 'debut')` renvoie le PREMIER cours disponible à partir du
+   * 1er janvier de l'année demandée. Or l'historique des cours n'est dense qu'à
+   * partir de 2023 : une demande sur 5 ans (2021→2025) récupérait en réalité le
+   * cours du 2 janvier 2023, tout en l'ÉTIQUETANT 2021.
+   *
+   * Deux mensonges en un : la page annonçait une fenêtre de 5 ans qui n'en
+   * couvrait que 3, et annualisait en divisant par 5 — sous-estimant le rendement
+   * annuel d'un tiers.
+   *
+   * On repart donc de la date RÉELLE du premier cours, et on annualise sur la
+   * durée RÉELLEMENT écoulée. La fenêtre affichée est celle qui a servi au calcul.
+   */
+  const anneeDebut = Number.parseInt(debut.date_marche.slice(0, 4), 10);
+  const joursEcoules =
+    (new Date(fin.date_marche).getTime() - new Date(debut.date_marche).getTime()) / 86_400_000;
+  const anneesReelles = Math.max(joursEcoules / 365.25, 0.5); // garde-fou : jamais < 6 mois
 
   const { data: nomRow } = await db
     .from('brvm_actions_daily')
@@ -113,13 +133,13 @@ export async function buildRealReturn(code: string, annees: number): Promise<Rea
 
   const nominalPct = ((fin.cours_jour - debut.cours_jour) / debut.cours_jour) * 100;
   const nominalAnnualisePct =
-    (Math.pow(fin.cours_jour / debut.cours_jour, 1 / annees) - 1) * 100;
+    (Math.pow(fin.cours_jour / debut.cours_jour, 1 / anneesReelles) - 1) * 100;
 
-  // Inflation réelle de chaque pays sur exactement la même fenêtre.
+  // Inflation : sur la fenêtre RÉELLEMENT couverte, pas celle demandée.
   const { data: infl } = await db
     .from('macro_inflation')
     .select('pays_code, pays_nom, annee, taux_pct')
-    .gte('annee', anneeDebut)
+    .gte('annee', anneeDebut)   // fenêtre RÉELLE, pas celle demandée
     .lte('annee', anneeFin);
 
   const parPays = new Map<string, { nom: string; taux: number[] }>();
@@ -132,7 +152,9 @@ export async function buildRealReturn(code: string, annees: number): Promise<Rea
   const pays: PaysInflation[] = [];
   for (const [pcode, { nom, taux }] of parPays) {
     // Série incomplète = on écarte le pays plutôt que de combler les trous.
-    if (taux.length < annees) continue;
+    // Nombre d'années d'inflation attendues sur la fenêtre RÉELLE.
+    const anneesAttendues = anneeFin - anneeDebut + 1;
+    if (taux.length < anneesAttendues) continue; // série incomplète → pays écarté
 
     const cumul = cumulativeInflation(taux);
     const annualise = annualizedInflation(taux);
@@ -160,9 +182,9 @@ export async function buildRealReturn(code: string, annees: number): Promise<Rea
   return {
     code,
     nom: (nomRow as { designation: string | null } | null)?.designation ?? null,
-    anneeDebut,
+    anneeDebut,          // date RÉELLE du premier cours, pas celle demandée
     anneeFin,
-    annees,
+    annees: Math.round(anneesReelles * 10) / 10,
     coursDebut: debut.cours_jour,
     coursFin: fin.cours_jour,
     nominalPct: Math.round(nominalPct * 100) / 100,
