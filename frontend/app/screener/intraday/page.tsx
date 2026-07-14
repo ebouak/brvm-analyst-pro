@@ -1,12 +1,24 @@
 import { Suspense } from 'react';
 import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import IntraDayPatternsTable from '@/components/screener/IntraDayPatternsTable';
+import { createClient } from '@/lib/supabase/server';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Screener Intraday — WESTBOURSE',
   description:
     "Titres qui bougent et titres dont le volume s'emballe, sur la séance BRVM du jour.",
 };
+
+/** Premium requis : lu côté serveur, donc le tableau n'est pas chargé sans droit. */
+async function isPremiumUser(): Promise<boolean> {
+  const supa = createClient();
+  const { data: { user } } = await supa.auth.getUser();
+  if (!user) return false;
+  const { data } = await supa.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
+  return Boolean(data?.is_premium);
+}
 
 function PatternsSkeleton() {
   return (
@@ -17,8 +29,9 @@ function PatternsSkeleton() {
   );
 }
 
-export default function IntraDayScreenerPage() {
-  const todayDate = new Date().toISOString().split('T')[0];
+export default async function IntraDayScreenerPage() {
+  const todayDate = new Date().toISOString().slice(0, 10);
+  const premium = await isPremiumUser();
 
   return (
     <div className="space-y-6">
@@ -30,9 +43,20 @@ export default function IntraDayScreenerPage() {
         />
       </div>
 
-      <Suspense fallback={<PatternsSkeleton />}>
-        <IntraDayPatternsTable dateMarche={todayDate} />
-      </Suspense>
+      {/* Verrou serveur : le tableau (et donc les données) n'est rendu que pour un
+          abonné. Un compte gratuit reçoit l'invitation, jamais les signaux. */}
+      {premium ? (
+        <Suspense fallback={<PatternsSkeleton />}>
+          <IntraDayPatternsTable dateMarche={todayDate} />
+        </Suspense>
+      ) : (
+        <EmptyStatePremium
+          icon="⚡"
+          title="Screener intraday réservé au premium"
+          hint="Les titres qui bougent et les volumes qui s'emballent en séance sont inclus dans l'abonnement Premium."
+          action={{ href: '/account/plan', label: 'Passer à Premium' }}
+        />
+      )}
 
       <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
         <div>

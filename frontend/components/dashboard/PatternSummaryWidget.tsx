@@ -50,9 +50,12 @@ export default function PatternSummaryWidget() {
     return null;
   }
 
-  const atrCount = stats.byType['atr_extreme'] || 0;
-  const consCount = stats.byType['bullish_consolidation'] || 0;
-  const breakoutCount = stats.byType['breakout_impulse'] || 0;
+  // Types réellement produits par le moteur de fixing (voir fixingSignals.ts).
+  // Les anciennes clés (atr_extreme, bullish_consolidation, breakout_impulse) ne
+  // sont plus jamais générées → le widget affichait 0 malgré des motifs en base.
+  const momentumCount = stats.byType['intraday_momentum'] || 0;
+  const volumeCount = stats.byType['volume_spike'] || 0;
+  const moveCount = stats.byType['price_move'] || 0;
   const highConfidenceCount = stats.byConfidence['HIGH'] || 0;
 
   return (
@@ -76,34 +79,34 @@ export default function PatternSummaryWidget() {
         <div className="border-t border-border/40 pt-3">
           <p className="text-xs text-muted mb-2 font-semibold uppercase tracking-wide">Par Type</p>
           <div className="space-y-2">
-            {atrCount > 0 && (
+            {momentumCount > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-up text-xs">⚡</span>
-                  <span className="text-muted">ATR Extrême</span>
+                  <span className="text-up text-xs">📈</span>
+                  <span className="text-muted">Momentum</span>
                 </div>
-                <span className="font-mono font-bold text-up">{atrCount}</span>
+                <span className="font-mono font-bold text-up">{momentumCount}</span>
               </div>
             )}
-            {consCount > 0 && (
+            {volumeCount > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-info text-xs">📊</span>
-                  <span className="text-muted">Consolidation</span>
+                  <span className="text-info text-xs">🔊</span>
+                  <span className="text-muted">Volume anormal</span>
                 </div>
-                <span className="font-mono font-bold text-info">{consCount}</span>
+                <span className="font-mono font-bold text-info">{volumeCount}</span>
               </div>
             )}
-            {breakoutCount > 0 && (
+            {moveCount > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-accent text-xs">🚀</span>
-                  <span className="text-muted">Breakout</span>
+                  <span className="text-accent text-xs">➡️</span>
+                  <span className="text-muted">Mouvement</span>
                 </div>
-                <span className="font-mono font-bold text-accent">{breakoutCount}</span>
+                <span className="font-mono font-bold text-accent">{moveCount}</span>
               </div>
             )}
-            {atrCount === 0 && consCount === 0 && breakoutCount === 0 && (
+            {momentumCount === 0 && volumeCount === 0 && moveCount === 0 && (
               <p className="text-xs text-muted italic">Aucun motif détecté</p>
             )}
           </div>

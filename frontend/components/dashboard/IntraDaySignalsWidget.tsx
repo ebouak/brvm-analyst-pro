@@ -48,17 +48,22 @@ export default function IntraDaySignalsWidget() {
     );
   }
 
-  const atrCount = patterns.filter((p) => p.pattern_type === 'atr_extreme').length;
-  const consCount = patterns.filter((p) => p.pattern_type === 'bullish_consolidation').length;
+  // Types RÉELLEMENT produits par le moteur de fixing (fixingSignals.ts) :
+  // intraday_momentum, volume_spike, price_move. Les anciens libellés (ATR,
+  // Consolidation, Breakout) désignaient des motifs ABANDONNÉS car impossibles à
+  // mesurer sur un marché de fixing — le widget cherchait des types que le moteur
+  // ne produit plus, d'où « 0 détecté » alors que la base en contient.
+  const momentumCount = patterns.filter((p) => p.pattern_type === 'intraday_momentum').length;
+  const volumeCount = patterns.filter((p) => p.pattern_type === 'volume_spike').length;
 
   const getPatternBadge = (patternType: string) => {
     switch (patternType) {
-      case 'atr_extreme':
-        return { icon: '⚡', label: 'ATR Extrême', bgClass: 'bg-up/20', textClass: 'text-up' };
-      case 'bullish_consolidation':
-        return { icon: '📊', label: 'Consolidation', bgClass: 'bg-info/20', textClass: 'text-info' };
-      case 'breakout_impulse':
-        return { icon: '🚀', label: 'Breakout', bgClass: 'bg-accent/20', textClass: 'text-accent' };
+      case 'intraday_momentum':
+        return { icon: '📈', label: 'Momentum', bgClass: 'bg-up/20', textClass: 'text-up' };
+      case 'volume_spike':
+        return { icon: '🔊', label: 'Volume', bgClass: 'bg-info/20', textClass: 'text-info' };
+      case 'price_move':
+        return { icon: '➡️', label: 'Mouvement', bgClass: 'bg-accent/20', textClass: 'text-accent' };
       default:
         return { icon: '•', label: patternType, bgClass: 'bg-muted/20', textClass: 'text-muted' };
     }
@@ -88,16 +93,16 @@ export default function IntraDaySignalsWidget() {
         <>
           {/* Summary counts */}
           <div className="flex gap-3 text-xs border-t border-border/40 pt-3">
-            {atrCount > 0 && (
+            {momentumCount > 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-up/10">
-                <span className="text-up">⚡</span>
-                <span className="text-up font-medium">{atrCount} ATR</span>
+                <span className="text-up">📈</span>
+                <span className="text-up font-medium">{momentumCount} Momentum</span>
               </div>
             )}
-            {consCount > 0 && (
+            {volumeCount > 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-info/10">
-                <span className="text-info">📊</span>
-                <span className="text-info font-medium">{consCount} Cons.</span>
+                <span className="text-info">🔊</span>
+                <span className="text-info font-medium">{volumeCount} Volume</span>
               </div>
             )}
           </div>

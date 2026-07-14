@@ -15,6 +15,7 @@ import NewsFeed from '@/components/dashboard/NewsFeed';
 import MarketIndices from '@/components/dashboard/MarketIndices';
 import IntraDaySignalsWidget from '@/components/dashboard/IntraDaySignalsWidget';
 import PatternSummaryWidget from '@/components/dashboard/PatternSummaryWidget';
+import { PremiumLock } from '@/components/dashboard/PremiumLock';
 import { AfricanIndicesCard } from '@/components/AfricanIndicesCard';
 import { MacroBanner } from '@/components/MacroBanner';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
@@ -225,10 +226,14 @@ export default async function Dashboard() {
   let favoriteSectors: string[] = [];
   let dashboardLayout: DashboardLayout | null = null;
   let triggeredAlerts = 0;
+  // Un visiteur non connecté est traité comme non-premium. Les sections premium
+  // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
+  let isPremium = false;
   if (user) {
-    const { data: prof } = await supa.from('profiles').select('favorite_sectors, preferences').eq('id', user.id).maybeSingle();
+    const { data: prof } = await supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle();
     favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
     dashboardLayout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
+    isPremium = Boolean(prof?.is_premium);
 
     const { count } = await supa
       .from('alerts')
@@ -349,7 +354,15 @@ export default async function Dashboard() {
     signaux: (
       <section aria-label="Signaux récents">
         <p className="overline text-muted mb-4 tracking-[0.16em]">Signaux actionnables</p>
-        <RecentSignalsCard signals={signals as SignalDaily[]} />
+        {isPremium ? (
+          <RecentSignalsCard signals={signals as SignalDaily[]} />
+        ) : (
+          <PremiumLock
+            title="Signaux BUY / SELL réservés au premium"
+            pitch="Les signaux d'achat et de vente notés A–F, avec leur explication, sont inclus dans l'abonnement Premium."
+            rows={3}
+          />
+        )}
       </section>
     ),
     actus: (
@@ -448,20 +461,37 @@ export default async function Dashboard() {
           <p className="overline text-muted mb-4 tracking-[0.16em]">Patterns intraday</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="md:col-span-1 lg:col-span-2">
-              <IntraDaySignalsWidget />
+              {isPremium ? (
+                <IntraDaySignalsWidget />
+              ) : (
+                <PremiumLock
+                  title="Signaux intraday réservés au premium"
+                  pitch="Momentum et volumes anormaux détectés en séance, mis à jour toutes les 15 min."
+                  rows={4}
+                />
+              )}
             </div>
             <div className="md:col-span-1 lg:col-span-1">
-              <PatternSummaryWidget />
+              {isPremium ? (
+                <PatternSummaryWidget />
+              ) : (
+                <PremiumLock title="Synthèse des motifs" pitch="Réservée au premium." rows={3} />
+              )}
             </div>
+            {/* Le panneau explicatif reste TOUJOURS visible : il dit à l'utilisateur
+                gratuit ce dont il se prive, ce qui est le but du verrou. */}
             <div className="md:col-span-2 lg:col-span-1 flex flex-col gap-3 text-xs text-muted p-4 bg-elevated/20 rounded-xl border border-border/40">
               <p className="font-semibold text-ivory">À propos des patterns</p>
-              <p>Les signaux intraday détectent les mouvements de court terme :</p>
+              <p>Adaptés au marché de <strong>fixing</strong> de la BRVM (une fixation par séance) :</p>
               <ul className="space-y-1.5 ml-2">
-                <li>⚡ <strong>ATR Extrême</strong> — Volatilité anormale</li>
-                <li>📊 <strong>Consolidation</strong> — Zone d&apos;équilibre</li>
-                <li>🚀 <strong>Breakout</strong> — Sortie de niveau clé</li>
+                <li>📈 <strong>Momentum</strong> — Tendance intraséance marquée</li>
+                <li>🔊 <strong>Volume anormal</strong> — Pic d&apos;échanges vs moyenne 20&nbsp;j</li>
+                <li>➡️ <strong>Mouvement</strong> — Variation de prix significative</li>
               </ul>
-              <p className="pt-2 italic text-faint">Mis à jour en continu, 5 min d&apos;intervalle</p>
+              <p className="pt-2 italic text-faint">
+                Volatilité intraday (ATR, consolidation) non pertinente sur un marché de fixing.
+                Mis à jour toutes les 15&nbsp;min en séance.
+              </p>
             </div>
           </div>
         </section>
