@@ -5,12 +5,13 @@
 -- table `feature_flags` et l'écran `/admin/features` existent déjà : il suffit d'y
 -- brancher les verrous. Une case à cocher remplace un déploiement.
 --
--- Le code garde un DÉFAUT DE REPLI par fonctionnalité : si la ligne n'existe pas
--- (ou si la lecture échoue), le comportement actuel s'applique. Aucune régression
--- possible, et la page ne tombe pas si la base est indisponible.
+-- ⚠️ SANS CETTE MIGRATION, les fonctionnalités ci-dessous sont REFUSÉES à tout le
+-- monde : le code refuse ce qui n'est pas déclaré (filet de sécurité — ouvrir par
+-- défaut ferait fuir le revenu au premier incident, refuser est réversible).
 
--- 1. Nouveau niveau « pro » (plan Platinium). L'énumération n'acceptait que
---    free/premium/disabled — impossible d'exprimer « réservé au Platinium ».
+-- ── 1. Nouveau niveau « pro » (plan Platinium) ──────────────────────────────
+-- L'énumération n'acceptait que free/premium/disabled : impossible d'exprimer
+-- « réservé au Platinium ».
 alter table public.feature_flags
   drop constraint if exists feature_flags_acces_check;
 
@@ -19,11 +20,11 @@ alter table public.feature_flags
   check (acces in ('free', 'premium', 'pro', 'disabled'));
 
 comment on column public.feature_flags.acces is
-  'free = ouvert à tous · premium = abonnés Premium ou Platinium · pro = Platinium seulement · disabled = coupé (kill switch)';
+  'free = ouvert à tous · premium = abonnés Premium ou Platinium · pro = Platinium seulement · disabled = coupé pour tous (kill switch)';
 
--- 2. Déclaration des zones verrouillées. `on conflict do nothing` : on ne réécrit
---    JAMAIS un réglage déjà choisi par un administrateur — une migration ne doit
---    pas défaire un choix humain.
+-- ── 2. Déclaration des zones verrouillées ───────────────────────────────────
+-- `on conflict do nothing` : on ne réécrit JAMAIS un réglage déjà choisi par un
+-- administrateur. Une migration ne doit pas défaire un choix humain.
 insert into public.feature_flags (code, label, acces, description) values
   ('conseiller',       'Conseiller',              'premium',
    'Recommandations achat / conservation / vente, argumentées.'),
@@ -42,5 +43,22 @@ insert into public.feature_flags (code, label, acces, description) values
   ('saisonnalite',     'Saisonnalité',            'premium',
    'Matrice mensuelle. En gratuit : aperçu du mois en cours sur un seul titre.'),
   ('actions_metrics',  'Métriques & signaux actions', 'premium',
-   'Colonnes calculées de la page /actions : score, RSI, signal, liquidité, tendance.')
+   'Colonnes calculées de la page /actions : tendance 30 j et signal. Les cours restent publics.')
 on conflict (code) do nothing;
+
+-- ── 3. Backtest : 'free' → 'premium' ────────────────────────────────────────
+-- `backtest` EXISTE DÉJÀ (seed de la migration 0091, accès 'free'). Le `on conflict
+-- do nothing` ci-dessus ne l'aurait donc pas touché, et le Backtest serait resté
+-- gratuit — alors que l'onglet Analyse doit être premium dans son ensemble.
+-- On le bascule explicitement. Réversible depuis /admin/features en un clic.
+update public.feature_flags
+   set acces = 'premium',
+       label = 'Backtest de stratégie',
+       description = 'Simulation d''une stratégie sur l''historique BRVM : rendement, drawdown, comparaison au marché.',
+       updated_at = now()
+ where code = 'backtest'
+   and acces = 'free';   -- garde-fou : si un admin l'a déjà réglé autrement, on n'y touche pas
+
+-- ── Contrôle ────────────────────────────────────────────────────────────────
+-- Après exécution, vérifier que les 10 fonctionnalités apparaissent bien :
+--   select code, label, acces from public.feature_flags order by acces, code;
