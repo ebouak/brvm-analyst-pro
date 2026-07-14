@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { canAccess } from '@/lib/server/featureAccess';
 import brvmLogos from '@/lib/brvmLogos.json';
 
 const LOGOS = brvmLogos as Record<string, string>;
@@ -152,6 +153,11 @@ export default async function InstrumentPage({
   searchParams: { from?: string };
 }) {
   const code = decodeURIComponent(params.code).toUpperCase();
+
+  // Indicateurs techniques (RSI, MACD, moyennes mobiles, lecture, explication IA).
+  // Niveau requis LU EN BASE (feature_flags → `indicateurs_techniques`), éditable
+  // dans /admin/features. Le cours et le volume, eux, restent publics.
+  const gateIndicateurs = await canAccess('indicateurs_techniques');
   const fromDate = searchParams.from ?? '';
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
   const [valuation, scoring] = await Promise.all([
@@ -887,21 +893,33 @@ export default async function InstrumentPage({
       ══════════════════════════════════════════════════ */}
       <div>
         <Eyebrow className="mb-3">Indicateurs historiques</Eyebrow>
-        <PremiumPanel className="p-0 overflow-hidden">
-          <div className="px-4 py-4 md:px-5 space-y-4">
-            <IndicatorCharts data={indicatorData} />
-            {(() => {
-              const lastOf = (arr: (number | null)[]) => { for (let k = arr.length - 1; k >= 0; k--) if (arr[k] != null) return arr[k]!; return null; };
-              const reading = readIndicators({
-                rsi: lastOf(indicatorData.map((d) => d.rsi)),
-                macd: lastOf(indicatorData.map((d) => d.macd)),
-                ma20: lastOf(ma20),
-                ma50: lastOf(ma50),
-              });
-              return <IndicatorCommentary reading={reading} code={code} />;
-            })()}
-          </div>
-        </PremiumPanel>
+        {gateIndicateurs.allowed ? (
+          <PremiumPanel className="p-0 overflow-hidden">
+            <div className="px-4 py-4 md:px-5 space-y-4">
+              <IndicatorCharts data={indicatorData} />
+              {(() => {
+                const lastOf = (arr: (number | null)[]) => { for (let k = arr.length - 1; k >= 0; k--) if (arr[k] != null) return arr[k]!; return null; };
+                const reading = readIndicators({
+                  rsi: lastOf(indicatorData.map((d) => d.rsi)),
+                  macd: lastOf(indicatorData.map((d) => d.macd)),
+                  ma20: lastOf(ma20),
+                  ma50: lastOf(ma50),
+                });
+                return <IndicatorCommentary reading={reading} code={code} />;
+              })()}
+            </div>
+          </PremiumPanel>
+        ) : (
+          <EmptyStatePremium
+            icon="🔒"
+            title={`Indicateurs techniques — réservés au plan ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`}
+            hint="RSI, MACD, moyennes mobiles, lecture technique et explication par l'IA."
+            action={{
+              href: '/account/plan',
+              label: `Passer à ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`,
+            }}
+          />
+        )}
       </div>
 
       {/* ══════════════════════════════════════════════════
