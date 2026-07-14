@@ -13,8 +13,36 @@ export interface EmailMessage {
 }
 export interface EmailResult { ok: boolean; sent: number; error?: string }
 
+/**
+ * Adresse d'expédition.
+ *
+ * ⚠️ Resend REFUSE (403) tout envoi depuis un domaine non vérifié chez lui.
+ * L'ancien défaut, `noreply@brvm.resend.dev`, n'était vérifié nulle part : même
+ * avec une clé d'API valide, AUCUN email ne partait — et l'échec était silencieux
+ * (journalisé, jamais remonté). C'est pour cela que `notifications_log` ne
+ * contenait qu'une ligne « console » en un an.
+ *
+ * `onboarding@resend.dev` est l'adresse de test de Resend : elle fonctionne sans
+ * domaine, mais n'écrit QU'AU titulaire du compte. Elle dépanne l'admin ; elle ne
+ * permet PAS d'écrire à un demandeur de clé API ou à un abonné newsletter.
+ *
+ * → Pour écrire à de vrais destinataires : vérifier `westbourse.com` sur
+ *   resend.com/domains (3 enregistrements DNS), puis poser
+ *   ALERTS_EMAIL_FROM=WESTBOURSE <noreply@westbourse.com>.
+ */
+const FROM_FALLBACK = 'onboarding@resend.dev';
+
 function fromAddress(): string {
-  return process.env.ALERTS_EMAIL_FROM ?? 'noreply@brvm.resend.dev';
+  return process.env.ALERTS_EMAIL_FROM ?? FROM_FALLBACK;
+}
+
+/**
+ * true si l'expéditeur est encore l'adresse de test — donc si les emails vers des
+ * tiers ÉCHOUERONT. Permet aux écrans d'admin de le dire au lieu de laisser
+ * croire que tout va bien.
+ */
+export function isTestSender(): boolean {
+  return fromAddress().includes('resend.dev');
 }
 
 /** Envoie un email unique via Resend. Échec explicite si la clé manque. */

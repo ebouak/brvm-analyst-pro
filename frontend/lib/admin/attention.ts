@@ -1,6 +1,7 @@
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { loadCronHealth, isBroken } from './cronHealth';
+import { isTestSender } from '@/lib/server/email';
 
 /**
  * « Ce qui demande votre attention » — le cœur du poste de pilotage.
@@ -84,6 +85,21 @@ export async function loadAttention(): Promise<AttentionItem[]> {
     ),
     loadCronHealth(),
   ]);
+
+  // Expéditeur encore en adresse de test : tout email vers un TIERS (demandeur de
+  // clé API, abonné newsletter) est refusé en 403 par Resend. L'échec est
+  // silencieux côté utilisateur — d'où cette alerte, sinon on ne le découvre qu'en
+  // ratant une livraison de clé.
+  if (isTestSender()) {
+    items.push({
+      level: 'critical',
+      title: 'Emails vers l’extérieur impossibles',
+      detail:
+        'L’expéditeur est encore l’adresse de test Resend : elle n’écrit qu’à vous. Vérifiez westbourse.com sur resend.com/domains, puis posez ALERTS_EMAIL_FROM.',
+      href: '/admin/cles-api',
+      cta: 'Configurer',
+    });
+  }
 
   // Tâches planifiées en panne. Un cron qui échoue ne prévient personne : il se
   // contente de ne rien faire. C'est ce silence qui a laissé un job échouer 672
