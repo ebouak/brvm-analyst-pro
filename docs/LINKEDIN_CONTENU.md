@@ -60,11 +60,11 @@ CE QUE NOUS FAISONS AUTREMENT
   BRVM, où les dividendes rapportent 5 à 8 % par an, le cours seul ment. Nous
   calculons ce que vous avez réellement gagné : cours + dividendes réinvestis −
   impôt IRVM de votre pays − inflation de votre pays.
-  SONATEL, 2023-2025 : +69 % affiché partout. +110 % en réalité.
+  SONATEL, 2023-2025 : +69,7 % affiché partout. +109,6 % en réalité (Côte d'Ivoire).
 
 • Votre pays change tout. Même action, même cours — mais l'IRVM est à 3 % au Togo
-  et 12,5 % au Burkina, et l'inflation était de 0,8 % au Sénégal contre 9 % au
-  Niger. Nous sommes les seuls à en tenir compte.
+  et 12,5 % au Burkina, et l'inflation cumulée 2023-2025 va de 4,3 % au Burkina
+  à 12,1 % en Guinée-Bissau. Nous sommes les seuls à en tenir compte.
 
 • Aucun chiffre inventé. Quand une donnée manque, nous le disons. Nous préférons un
   écran vide à un chiffre plausible mais faux.
@@ -113,8 +113,8 @@ calcule : le rendement RÉEL — celui qui reste une fois l'impôt payé et l'in
 déduite.
 
 Un exemple qui résume tout : SONATEL, de 2023 à 2025. Partout, on vous annonce
-+69 %. C'est la performance du cours. Mais avec les dividendes réinvestis, c'est
-+110 %. Et selon que vous viviez à Cotonou ou à Bissau, ce que vous en gardez
++69,7 %. C'est la performance du cours. Mais avec les dividendes réinvestis, c'est
++109,6 %. Et selon que vous viviez à Cotonou ou à Bissau, ce que vous en gardez
 vraiment n'est pas le même montant.
 
 Un principe, et il ne se négocie pas : nous n'inventons aucun chiffre. Quand une
