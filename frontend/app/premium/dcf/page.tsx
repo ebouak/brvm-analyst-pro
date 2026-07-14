@@ -7,7 +7,7 @@ import { SectionHeader, StatPill } from '@/components/ui/premium';
 import ViewTabs from '@/components/ViewTabs';
 import { VALO_TABS } from '@/lib/viewTabsPresets';
 
-export const metadata = { title: 'Valorisation DCF — WESTBOURSE' };
+export const metadata = { title: 'Valorisation DCF' };
 export const revalidate = 3600;
 
 const pct = (v: number | null) => (v == null ? '—' : `${v >= 0 ? '+' : ''}${(v * 100).toFixed(0)} %`);

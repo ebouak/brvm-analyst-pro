@@ -4,7 +4,7 @@ import { getFormationFull } from '@/lib/formations/server';
 import { SectionHeader } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Formation — WESTBOURSE' };
+export const metadata = { title: 'Formation' };
 
 const TYPE_LABEL: Record<string, string> = { cours: 'Cours', conference: 'Conférence', webinaire: 'Webinaire' };
 

@@ -5,7 +5,7 @@ import ViewTabs from '@/components/ViewTabs';
 import { INTEL_TABS } from '@/lib/viewTabsPresets';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Analyses Hebdo Matières Premières — WESTBOURSE' };
+export const metadata = { title: 'Analyses Hebdo Matières Premières' };
 
 interface WeeklyArticle {
   id: string;

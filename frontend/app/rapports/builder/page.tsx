@@ -3,7 +3,7 @@ import { SectionHeader } from '@/components/ui/premium';
 import ReportBuilderForm from '@/components/reports/ReportBuilderForm';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Constructeur de rapport — WESTBOURSE' };
+export const metadata = { title: 'Constructeur de rapport' };
 
 export default async function ReportBuilderPage() {
   const sb = createPublicClient();

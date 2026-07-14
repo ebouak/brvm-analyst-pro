@@ -3,7 +3,7 @@ import { canAccess } from '@/lib/server/featureAccess';
 import ScreenerClient from '@/components/screener/ScreenerClient';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Screener multi-critères — WESTBOURSE' };
+export const metadata = { title: 'Screener multi-critères' };
 
 /**
  * Coquille SERVEUR du screener.

@@ -6,7 +6,7 @@ import BienvenuePicker, { type WelcomeAction } from '@/components/onboarding/Bie
 // notre analyse (note A–F + cours réel) instantanément — la valeur en 10 s.
 // Données publiques (dernière séance) ; rendu dynamique côté serveur.
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Bienvenue — WESTBOURSE', robots: { index: false } };
+export const metadata: Metadata = { title: 'Bienvenue', robots: { index: false } };
 
 async function getActions(): Promise<WelcomeAction[]> {
   const supabase = createClient();

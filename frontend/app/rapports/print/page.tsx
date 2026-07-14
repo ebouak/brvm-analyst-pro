@@ -7,7 +7,7 @@ import { fmtFcfa, fmtNumber } from '@/lib/format';
 import PrintButton from '@/components/reports/PrintButton';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Rapport — WESTBOURSE' };
+export const metadata = { title: 'Rapport' };
 
 const pct = (v: number | null | undefined) => (v == null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`);
 

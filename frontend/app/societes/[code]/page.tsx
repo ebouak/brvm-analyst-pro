@@ -88,9 +88,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .eq('code', code)
     .maybeSingle();
 
-  if (!instr) return { title: 'Société introuvable — WESTBOURSE' };
+  if (!instr) return { title: 'Société introuvable' };
 
-  const title = `Action ${instr.designation} (${code}) — Cours, dividendes, analyse | WESTBOURSE`;
+  const title = `Action ${instr.designation} (${code}) — Cours, dividendes, analyse`;
   const description = `Cours en quasi temps réel, note BRVM, fondamentaux, dividendes et actualités de ${instr.designation} (${code}) cotée à la BRVM. Analyse gratuite et données vérifiées.`;
 
   return {

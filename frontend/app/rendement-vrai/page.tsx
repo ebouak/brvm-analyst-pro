@@ -6,7 +6,7 @@ import { SectionHeader } from '@/components/ui/premium';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Rendement vrai BRVM : cours + dividendes − impôt − inflation — WESTBOURSE',
+  title: 'Rendement vrai BRVM : cours + dividendes − impôt − inflation',
   description:
     "Ce qu'une action BRVM vous a réellement rapporté : cours, dividendes réinvestis, impôt IRVM de votre pays et inflation. Le seul calcul complet du marché.",
 };

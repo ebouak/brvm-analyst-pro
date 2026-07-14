@@ -1,11 +1,17 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import { canAccess } from '@/lib/server/featureAccess';
 import { SectionLock } from '@/components/premium/SectionLock';
 import brvmLogos from '@/lib/brvmLogos.json';
 
 const LOGOS = brvmLogos as Record<string, string>;
+
+/** Origine CANONIQUE : westbourse.com redirige en 308 vers www — un canonical qui
+ *  pointerait vers la version sans www diluerait le signal entre deux URL. */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com';
 import PriceChart, { type PricePoint, type ChartMarker } from '@/components/PriceChart';
 import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
@@ -55,6 +61,65 @@ import {
   PremiumCTA,
   Eyebrow,
 } from '@/components/ui/premium';
+
+/**
+ * TITRE UNIQUE PAR TITRE COTÉ — le correctif SEO le plus important du site.
+ *
+ * Sans `generateMetadata`, les 47 fiches héritaient TOUTES du titre par défaut du
+ * layout : « WESTBOURSE — Cours BRVM, Notes A–F & Analyses Quantitatives ». Google
+ * voyait 47 pages jumelles, ne savait laquelle servir, et en piochait une au
+ * hasard : une recherche sur la marque remontait /actions/SLBC, pas l'accueil.
+ *
+ * Chaque fiche annonce désormais SA société et SON cours. C'est ce qui permet de
+ * répondre aux requêtes qui comptent : « cours SONATEL », « action BOA », etc.
+ *
+ * Le suffixe « | WESTBOURSE » est ajouté par le gabarit du layout — ne pas le
+ * remettre ici, sous peine de le voir apparaître deux fois (bug corrigé).
+ */
+export async function generateMetadata({ params }: { params: { code: string } }): Promise<Metadata> {
+  const code = decodeURIComponent(params.code).toUpperCase();
+  const sb = createPublicClient();
+
+  const [{ data: instr }, { data: last }] = await Promise.all([
+    sb.from('brvm_instruments').select('designation, secteur').eq('code', code).maybeSingle(),
+    sb.from('brvm_actions_daily').select('cours_jour, variation_pct')
+      .eq('code', code).not('cours_jour', 'is', null)
+      .order('date_marche', { ascending: false }).limit(1).maybeSingle(),
+  ]);
+
+  if (!instr) return { title: `${code} — action BRVM` };
+
+  const nom = (instr as { designation: string | null }).designation ?? code;
+  const cours = (last as { cours_jour: number | null } | null)?.cours_jour ?? null;
+  const coursTxt = cours ? `${new Intl.NumberFormat('fr-FR').format(cours)} FCFA` : null;
+
+  return {
+    title: `${nom} (${code}) — cours, dividendes et analyse BRVM`,
+    /**
+     * NOINDEX — et c'est délibéré.
+     *
+     * /actions/[code] et /societes/[code] parlent du MÊME titre coté : deux URL
+     * pour un sujet, c'est de la cannibalisation — Google ne sait laquelle servir
+     * et les deux s'affaiblissent. De plus, cette page-ci est désormais largement
+     * verrouillée : Googlebot, visiteur anonyme, n'y verrait qu'un mur de cadenas.
+     *
+     * On désigne donc explicitement /societes/[code] comme LA page publique
+     * indexable (riche, ouverte), et /actions/[code] comme l'application.
+     * `follow` reste actif : les liens sortants continuent de transmettre leur jus.
+     */
+    robots: { index: false, follow: true },
+    description: coursTxt
+      ? `${nom} (${code}) cote ${coursTxt} à la BRVM. Cours actualisé toutes les 15 min, historique, dividendes versés, saisonnalité et analyse. Données vérifiées.`
+      : `${nom} (${code}) à la BRVM : cours, historique, dividendes versés, saisonnalité et analyse. Données vérifiées.`,
+    alternates: { canonical: `${SITE_URL}/societes/${code}` },
+    openGraph: {
+      title: `${nom} (${code}) — cours BRVM`,
+      description: coursTxt ? `${coursTxt} — cours, dividendes et analyse.` : 'Cours, dividendes et analyse.',
+      url: `${SITE_URL}/actions/${code}`,
+      type: 'website',
+    },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 

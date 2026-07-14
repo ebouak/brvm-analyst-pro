@@ -35,9 +35,9 @@ async function fetchArticle(slug: string): Promise<WeeklyArticle | null> {
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const article = await fetchArticle(params.slug);
-  if (!article) return { title: 'Article introuvable — WESTBOURSE' };
+  if (!article) return { title: 'Article introuvable' };
   return {
-    title: `${article.titre} — WESTBOURSE`,
+    title: `${article.titre}`,
     description: article.resume ?? undefined,
   };
 }

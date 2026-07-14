@@ -94,10 +94,41 @@ const jsonLd = {
       '@type': 'Organization',
       '@id': `${SITE_URL}/#organization`,
       name: 'WESTBOURSE',
+      alternateName: 'West Bourse',
       url: SITE_URL,
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg` },
       description:
         "Plateforme SaaS d'analyse et d'aide à la décision pour les investisseurs sur la BRVM (Bourse Régionale des Valeurs Mobilières — UEMOA).",
+      /**
+       * `sameAs` — LA balise qui permet à Google de construire l'ENTITÉ « WESTBOURSE ».
+       *
+       * Sans elle, le moteur ne dispose d'aucune corroboration externe : il ignore
+       * si la marque existe vraiment. « Westbourse » est de surcroît à une lettre de
+       * « Westbourne » (lieu-dit britannique bien établi) — Google est donc enclin
+       * à traiter la requête comme une faute de frappe. Des profils sociaux
+       * officiels, déclarés ici, lèvent l'ambiguïté.
+       *
+       * On ne liste QUE des profils qui existent réellement : un `sameAs` pointant
+       * vers une page 404 dégrade la confiance au lieu de la construire. Ajouter
+       * chaque URL au fur et à mesure de la création des comptes.
+       */
+      sameAs: [
+        // 'https://www.linkedin.com/company/westbourse',
+        // 'https://x.com/westbourse',
+        // 'https://www.facebook.com/westbourse',
+        // 'https://www.youtube.com/@westbourse',
+      ].filter(Boolean),
+      areaServed: [
+        { '@type': 'Country', name: "Côte d'Ivoire" },
+        { '@type': 'Country', name: 'Sénégal' },
+        { '@type': 'Country', name: 'Bénin' },
+        { '@type': 'Country', name: 'Burkina Faso' },
+        { '@type': 'Country', name: 'Mali' },
+        { '@type': 'Country', name: 'Niger' },
+        { '@type': 'Country', name: 'Togo' },
+        { '@type': 'Country', name: 'Guinée-Bissau' },
+      ],
+      knowsAbout: ['BRVM', 'UEMOA', 'Bourse Régionale des Valeurs Mobilières', 'investissement', 'actions', 'obligations'],
     },
     {
       '@type': 'WebSite',

@@ -6,7 +6,7 @@ import { SectionHeader } from '@/components/ui/premium';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Rendement réel BRVM : votre gain après inflation — WESTBOURSE',
+  title: 'Rendement réel BRVM : votre gain après inflation',
   description:
     "Votre action BRVM vous a-t-elle vraiment enrichi ? Rendement réel corrigé de l'inflation, pays par pays (UEMOA). Cours réels depuis 1998, inflation Banque mondiale.",
 };

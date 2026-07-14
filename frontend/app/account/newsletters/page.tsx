@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NewsletterPrefsClient } from './NewsletterPrefsClient';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Préférences newsletter — WESTBOURSE' };
+export const metadata = { title: 'Préférences newsletter' };
 
 interface NewsletterPrefs {
   weekly_commodity: boolean;

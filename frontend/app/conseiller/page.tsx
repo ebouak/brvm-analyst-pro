@@ -10,7 +10,7 @@ import type { Action } from '@/lib/advisor/recommend';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
-export const metadata = { title: 'Conseiller BRVM — WESTBOURSE' };
+export const metadata = { title: 'Conseiller BRVM' };
 // Garde par utilisateur : rendu dynamique obligatoire (plus de cache partagé).
 export const dynamic = 'force-dynamic';
 

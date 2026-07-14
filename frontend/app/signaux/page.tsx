@@ -20,7 +20,7 @@ import { AccessGate } from '@/components/premium/AccessGate';
 
 // Garde par utilisateur : rendu dynamique (le cache partagé exposerait les signaux).
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Signaux — WESTBOURSE' };
+export const metadata = { title: 'Signaux' };
 
 async function getData() {
   const supabase = createPublicClient();

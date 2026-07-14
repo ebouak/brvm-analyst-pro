@@ -6,7 +6,7 @@ import ViewTabs from '@/components/ViewTabs';
 import { REPORT_TABS } from '@/lib/reportTabs';
 
 export const metadata = {
-  title: 'Archive Rapports | WESTBOURSE',
+  title: 'Archive Rapports',
 };
 
 interface MonthlyReport {

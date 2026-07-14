@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { PaperLeaderboard } from '@/components/PaperLeaderboard';
 
 export const metadata: Metadata = {
-  title: 'Classement paper trading BRVM — WESTBOURSE',
+  title: 'Classement paper trading BRVM',
   description:
     'Le classement anonymisé des meilleures performances de trading fictif sur la BRVM. Entraînez-vous sans risque et mesurez-vous aux autres investisseurs.',
 };

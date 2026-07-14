@@ -7,7 +7,7 @@ import { canAccess } from '@/lib/server/featureAccess';
 
 // Garde par utilisateur (essai gratuit limité vs premium complet) : dynamique.
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Saisonnalité — WESTBOURSE' };
+export const metadata = { title: 'Saisonnalité' };
 
 export default async function SaisonnalitePage({ searchParams }: { searchParams?: { code?: string } }) {
   // Niveau requis LU EN BASE. En cas de refus on n'affiche pas une porte fermee :

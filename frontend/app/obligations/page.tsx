@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/premium';
 
 export const revalidate = 300;
-export const metadata = { title: 'Obligations — WESTBOURSE' };
+export const metadata = { title: 'Obligations' };
 
 /**
  * Émetteur souverain / institution régionale → coupons exonérés de retenue

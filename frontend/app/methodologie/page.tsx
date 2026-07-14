@@ -1,6 +1,6 @@
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
 
-export const metadata = { title: 'Méthodologie — WESTBOURSE' };
+export const metadata = { title: 'Méthodologie' };
 
 export default function MethodologiePage() {
   return (

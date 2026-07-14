@@ -4,7 +4,7 @@ import PrintTrigger from '@/components/financials/PrintTrigger';
 import { PriceChart, FinancialsBars, DividendBars } from '@/components/reports/RevueCharts';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Revue de résultats — WESTBOURSE' };
+export const metadata = { title: 'Revue de résultats' };
 
 interface Props { params: { code: string } }
 

@@ -4,7 +4,7 @@ import { SectionHeader } from '@/components/ui/premium';
 import ProfileClient from '@/components/profile/ProfileClient';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Mon profil — WESTBOURSE' };
+export const metadata = { title: 'Mon profil' };
 
 export default async function ProfilPage() {
   const sb = createClient();

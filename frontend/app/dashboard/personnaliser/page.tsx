@@ -6,7 +6,7 @@ import DashboardCustomizer from '@/components/dashboard/DashboardCustomizer';
 import type { DashboardLayout } from '@/lib/dashboard/widgets';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Personnaliser le tableau de bord — WESTBOURSE' };
+export const metadata = { title: 'Personnaliser le tableau de bord' };
 
 export default async function CustomizeDashboardPage() {
   const sb = createClient();

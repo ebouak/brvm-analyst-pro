@@ -17,7 +17,7 @@ import {
 // Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
 // par l'intraday : ISR 5 min (audit 2026-06-12).
 export const revalidate = 300;
-export const metadata = { title: 'Secteurs — WESTBOURSE' };
+export const metadata = { title: 'Secteurs' };
 
 interface ActionRow {
   code: string; secteur: string | null; date_marche: string;

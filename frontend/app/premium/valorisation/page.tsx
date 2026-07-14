@@ -12,7 +12,7 @@ import ViewTabs from '@/components/ViewTabs';
 import { VALO_TABS } from '@/lib/viewTabsPresets';
 
 export const revalidate = 3600;
-export const metadata = { title: 'Valorisation — WESTBOURSE' };
+export const metadata = { title: 'Valorisation' };
 
 export default async function ValorisationPage() {
   const [all, scoringMap] = await Promise.all([getMarketValuations(), getMarketScoring()]);

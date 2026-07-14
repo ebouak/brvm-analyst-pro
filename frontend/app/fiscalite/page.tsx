@@ -5,7 +5,7 @@ import TaxCalculator from '@/components/tax/TaxCalculator';
 import { SectionHeader } from '@/components/ui/premium';
 
 export const metadata: Metadata = {
-  title: 'Fiscalité des dividendes et obligations BRVM (IRVM/IRC) — WESTBOURSE',
+  title: 'Fiscalité des dividendes et obligations BRVM (IRVM/IRC)',
   description:
     "Calculez votre dividende net d'IRVM et vos coupons obligataires nets par pays UEMOA (Côte d'Ivoire, Sénégal, Bénin…). Barème sourcé, comparatif des 8 pays.",
 };

@@ -14,7 +14,7 @@ import type { Action } from '@/lib/advisor/recommend';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Track record du Conseiller BRVM — WESTBOURSE',
+  title: 'Track record du Conseiller BRVM',
   description:
     'Toutes les bascules de recommandation du Conseiller BRVM, datées, avec la performance du cours depuis chacune. Transparence totale : les bonnes comme les mauvaises.',
 };

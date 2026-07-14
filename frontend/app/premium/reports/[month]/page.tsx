@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 export const metadata = {
-  title: 'Rapport Mensuel | WESTBOURSE',
+  title: 'Rapport Mensuel',
 };
 
 interface MonthlyReport {

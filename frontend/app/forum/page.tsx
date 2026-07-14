@@ -4,7 +4,7 @@ import { listTopics } from '@/lib/forum/server';
 import { ForumTopicList } from '@/components/forum/ForumTopicList';
 import { SectionHeader } from '@/components/ui/premium';
 
-export const metadata = { title: 'Forum — WESTBOURSE' };
+export const metadata = { title: 'Forum' };
 export const revalidate = 60;
 
 export default async function ForumPage({ searchParams }: { searchParams?: { code?: string } }) {

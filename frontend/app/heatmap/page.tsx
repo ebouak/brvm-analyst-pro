@@ -24,7 +24,7 @@ interface SectorStat {
 }
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Heatmap marché — WESTBOURSE' };
+export const metadata = { title: 'Heatmap marché' };
 
 /**
  * Légende du gradient : émeraude (#16b46a) / rubis (#e24b4b)

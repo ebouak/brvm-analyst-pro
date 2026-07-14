@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ForumNewTopicForm } from '@/components/forum/ForumNewTopicForm';
 import { SectionHeader } from '@/components/ui/premium';
 
-export const metadata = { title: 'Nouveau sujet — WESTBOURSE' };
+export const metadata = { title: 'Nouveau sujet' };
 
 export default async function NewTopicPage({ searchParams }: { searchParams?: { code?: string } }) {
   const supabase = createClient();

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Dividendes — WESTBOURSE' };
+export const metadata = { title: 'Dividendes' };
 
 interface RawDividend {
   id: string;

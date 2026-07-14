@@ -6,7 +6,7 @@ import { canAccess } from '@/lib/server/featureAccess';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Screener Intraday — WESTBOURSE',
+  title: 'Screener Intraday',
   description:
     "Titres qui bougent et titres dont le volume s'emballe, sur la séance BRVM du jour.",
 };

@@ -3,7 +3,7 @@ import AssetComparisonChart from '@/components/premium/AssetComparisonChart';
 import { SectionHeader, PremiumPanel, StatPill, EmptyStatePremium } from '@/components/ui/premium';
 
 export const revalidate = 3600;
-export const metadata = { title: 'Comparateur multi-actifs — WESTBOURSE' };
+export const metadata = { title: 'Comparateur multi-actifs' };
 
 const pct = (v: number | null, d = 1) => (v == null ? '—' : `${v >= 0 ? '+' : ''}${(v * 100).toFixed(d)}%`);
 

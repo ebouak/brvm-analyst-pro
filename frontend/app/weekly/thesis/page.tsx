@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Référentiel d\'exposition matières premières — WESTBOURSE',
+  title: 'Référentiel d\'exposition matières premières',
   description: 'Impact des cours mondiaux sur les actions BRVM exposées aux matières premières : cacao, caoutchouc, huile de palme, sucre, pétrole.',
 };
 

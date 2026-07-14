@@ -11,7 +11,7 @@ export const revalidate = 3600;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 export const metadata: Metadata = {
-  title: 'Comparateur des SGI BRVM — choisir son courtier UEMOA | WESTBOURSE',
+  title: 'Comparateur des SGI BRVM — choisir son courtier UEMOA',
   description:
     "Annuaire et comparateur des SGI agréées à la BRVM, classées par pays UEMOA : Côte d'Ivoire, Sénégal, Burkina Faso, Mali, Bénin, Togo, Niger. Type, groupe, dépôt minimum indicatif et critères pour choisir votre courtier.",
   keywords: [

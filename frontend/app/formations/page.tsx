@@ -5,7 +5,7 @@ import { SectionHeader, StatPill } from '@/components/ui/premium';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
-export const metadata = { title: 'Formations & conférences — WESTBOURSE' };
+export const metadata = { title: 'Formations & conférences' };
 // Garde par utilisateur (plan Platinium) : rendu dynamique.
 export const dynamic = 'force-dynamic';
 

@@ -5,7 +5,7 @@ import ViewTabs from '@/components/ViewTabs';
 import { INTEL_TABS } from '@/lib/viewTabsPresets';
 
 export const revalidate = 60;
-export const metadata = { title: 'Veille Intelligence BRVM — WESTBOURSE' };
+export const metadata = { title: 'Veille Intelligence BRVM' };
 
 export type VeilleNews = {
   id: string;

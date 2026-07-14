@@ -6,7 +6,7 @@ import ApiAccessForm from '@/components/developers/ApiAccessForm';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'API Développeurs — WESTBOURSE',
+  title: 'API Développeurs',
   description:
     "API REST des données de marché BRVM : actions, indices, obligations. JSON, accès gratuit sur autorisation (clé délivrée après examen de la demande).",
 };
@@ -58,9 +58,9 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com';
  * Lighthouse du média partenaire qui chute — et notre widget qu'on accuse.
  */
 const WIDGETS: { nom: string; path: string; h: number; titre: string }[] = [
-  { nom: 'Bandeau des cours', path: '/embed/ticker', h: 56, titre: 'Cours BRVM — WESTBOURSE' },
-  { nom: 'Heatmap du jour', path: '/embed/heatmap', h: 420, titre: 'Heatmap BRVM — WESTBOURSE' },
-  { nom: 'Fiche valeur', path: '/embed/valeur/SNTS', h: 180, titre: 'Cours SNTS — WESTBOURSE' },
+  { nom: 'Bandeau des cours', path: '/embed/ticker', h: 56, titre: 'Cours BRVM' },
+  { nom: 'Heatmap du jour', path: '/embed/heatmap', h: 420, titre: 'Heatmap BRVM' },
+  { nom: 'Fiche valeur', path: '/embed/valeur/SNTS', h: 180, titre: 'Cours SNTS' },
 ];
 
 export default function DevelopersPage() {
@@ -168,7 +168,7 @@ export default function DevelopersPage() {
               indispensable : sans ce contrôle, n&apos;importe quelle autre iframe de votre page
               pourrait redimensionner le widget.
             </p>
-            <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-3 text-[11px] text-faint">{`<iframe id="wb-widget" title="Cours BRVM — WESTBOURSE"
+            <pre className="overflow-x-auto rounded-lg bg-bg border border-border/60 p-3 text-[11px] text-faint">{`<iframe id="wb-widget" title="Cours BRVM"
   src="${SITE}/embed/ticker" width="100%" height="56"
   frameborder="0" loading="lazy"></iframe>
 <script>

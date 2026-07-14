@@ -7,7 +7,7 @@ import { SectionHeader, StatPill, EmptyStatePremium } from '@/components/ui/prem
 
 interface Props { params: { code: string } }
 
-export const metadata = { title: 'Valorisation DCF — WESTBOURSE' };
+export const metadata = { title: 'Valorisation DCF' };
 
 export default async function DcfPage({ params }: Props) {
   const code = params.code.toUpperCase();
