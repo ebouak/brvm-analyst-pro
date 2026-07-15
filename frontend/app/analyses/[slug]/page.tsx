@@ -145,41 +145,49 @@ function DividendTable({ data }: { data: NonNullable<LoadedCitable['dividend']> 
     return <p className="text-sm text-muted">Données de rendement indisponibles pour le moment.</p>;
   }
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-surface">
-      <table className="w-full text-sm">
-        <caption className="px-4 pt-3 text-left text-xs text-faint">
-          {data.rows.length} actions · cours de la séance du {fmtDate(data.asOf)}
-        </caption>
-        <thead>
-          <tr className="border-b border-border/60 text-left text-xs text-muted">
-            <th className="px-4 py-3 font-medium">#</th>
-            <th className="px-4 py-3 font-medium">Action</th>
-            <th className="px-4 py-3 text-right font-medium">Dividende</th>
-            <th className="px-4 py-3 text-right font-medium">Cours</th>
-            <th className="px-4 py-3 text-right font-medium">Rendement</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border/40">
-          {data.rows.map((r, i) => (
-            <tr key={r.code}>
-              <td className="px-4 py-2.5 text-faint">{i + 1}</td>
-              <td className="px-4 py-2.5">
-                <Link href={`/societes/${r.code}`} className="font-medium text-ivory hover:text-accent">
-                  {r.nom}
-                </Link>{' '}
-                <span className="text-[11px] text-faint">({r.code})</span>
-              </td>
-              <td className="tabular px-4 py-2.5 text-right text-muted">
-                {nf.format(r.dividende)} <span className="text-[10px] text-faint">exerc. {r.exercice}</span>
-              </td>
-              <td className="tabular px-4 py-2.5 text-right text-muted">{nf.format(r.cours)}</td>
-              <td className="tabular px-4 py-2.5 text-right font-semibold text-up">
-                {r.rendementPct.toFixed(2)} %
-              </td>
+    <div className="space-y-2">
+      <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+        <table className="w-full text-sm">
+          <caption className="px-4 pt-3 text-left text-xs text-faint">
+            {data.rows.length} actions ayant distribué au titre de l&apos;exercice{' '}
+            <strong className="text-muted">{data.exerciceRef}</strong> · dividendes NETS ·
+            cours de la séance du {fmtDate(data.asOf)}
+          </caption>
+          <thead>
+            <tr className="border-b border-border/60 text-left text-xs text-muted">
+              <th className="px-4 py-3 font-medium">#</th>
+              <th className="px-4 py-3 font-medium">Action</th>
+              <th className="px-4 py-3 text-right font-medium">Dividende net {data.exerciceRef}</th>
+              <th className="px-4 py-3 text-right font-medium">Cours</th>
+              <th className="px-4 py-3 text-right font-medium">Rendement net</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border/40">
+            {data.rows.map((r, i) => (
+              <tr key={r.code}>
+                <td className="px-4 py-2.5 text-faint">{i + 1}</td>
+                <td className="px-4 py-2.5">
+                  <Link href={`/societes/${r.code}`} className="font-medium text-ivory hover:text-accent">
+                    {r.nom}
+                  </Link>{' '}
+                  <span className="text-[11px] text-faint">({r.code})</span>
+                </td>
+                <td className="tabular px-4 py-2.5 text-right text-muted">{nf.format(r.dividende)}</td>
+                <td className="tabular px-4 py-2.5 text-right text-muted">{nf.format(r.cours)}</td>
+                <td className="tabular px-4 py-2.5 text-right font-semibold text-up">
+                  {r.rendementPct.toFixed(2)} %
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-[11px] text-faint">
+        Rendement NET = dividende net de l&apos;exercice {data.exerciceRef} (tel que publié par
+        l&apos;émetteur) ÷ cours de clôture. Les titres n&apos;ayant pas distribué au titre de{' '}
+        {data.exerciceRef} sont exclus — leur rendement courant est nul, non celui d&apos;un
+        exercice antérieur.
+      </p>
     </div>
   );
 }

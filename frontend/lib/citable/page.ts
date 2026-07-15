@@ -34,6 +34,8 @@ export interface DividendDataset {
   rows: YieldRow[];
   /** Date de la séance des cours utilisés (fraîcheur = signal de citation). */
   asOf: string | null;
+  /** Exercice de référence commun au classement (ex. 2025). */
+  exerciceRef: number;
 }
 
 /** La page + son jeu de données (null si la page n'est pas de type data). */
@@ -78,7 +80,7 @@ async function loadDividendDataset(): Promise<DividendDataset> {
     .maybeSingle();
 
   const asOf = (lastRow as { date_marche: string } | null)?.date_marche ?? null;
-  if (!asOf) return { rows: [], asOf: null };
+  if (!asOf) return { rows: [], asOf: null, exerciceRef: 0 };
 
   const [{ data: divs }, { data: cours }] = await Promise.all([
     db.from('dividends').select('code, exercice, montant'),
@@ -89,12 +91,12 @@ async function loadDividendDataset(): Promise<DividendDataset> {
       .not('cours_jour', 'is', null),
   ]);
 
-  const rows = buildDividendYield(
+  const { rows, exerciceRef } = buildDividendYield(
     (divs ?? []) as { code: string; exercice: number | null; montant: number }[],
     (cours ?? []) as { code: string; cours_jour: number; designation: string | null }[],
   );
 
-  return { rows, asOf };
+  return { rows, asOf, exerciceRef };
 }
 
 /** Slugs publiés — pour le sitemap. */
