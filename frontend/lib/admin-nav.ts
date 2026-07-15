@@ -16,6 +16,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/payments', label: 'Paiements', permission: 'billing.read' },
   { href: '/admin/scraping', label: 'Scraping', permission: 'scraping.read' },
   { href: '/admin/content', label: 'Contenu', permission: 'content.read' },
+  { href: '/admin/analyses', label: 'Analyses citables', permission: 'content.write' },
   { href: '/admin/formations', label: 'Formations', permission: 'content.read' },
   { href: '/admin/academy', label: 'Academy (IA)', permission: 'content.read' },
   { href: '/admin/weekly', label: 'Rapports hebdo', permission: 'content.read' },
