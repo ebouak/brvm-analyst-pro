@@ -31,9 +31,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createPublicClient();
-    const [{ data: instruments }, { data: briefs }] = await Promise.all([
+    const [{ data: instruments }, { data: briefs }, { data: analyses }] = await Promise.all([
       supabase.from('brvm_instruments').select('code').eq('type', 'action').eq('actif', true),
       supabase.from('brief_daily').select('date_marche').order('date_marche', { ascending: false }).limit(365),
+      supabase.from('citable_pages').select('slug, updated_at').eq('published', true),
     ]);
 
     const companyPages: MetadataRoute.Sitemap = (instruments ?? []).map((i) => ({
@@ -50,7 +51,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    return [...staticPages, ...companyPages, ...briefPages];
+    // Pages citables (GEO) : contenu unique, mis a jour -> priorite haute.
+    const analysePages: MetadataRoute.Sitemap = (analyses ?? []).map((a) => ({
+      url: `${SITE_URL}/analyses/${a.slug}`,
+      lastModified: a.updated_at ? new Date(a.updated_at) : undefined,
+      changeFrequency: 'daily' as const,
+      priority: 0.85,
+    }));
+
+    return [...staticPages, ...companyPages, ...briefPages, ...analysePages];
   } catch {
     // Base inaccessible au build : on publie au moins les pages statiques.
     return staticPages;
