@@ -147,6 +147,28 @@ const jsonLd = {
       },
     },
     {
+      // WESTBOURSE en tant qu'APPLICATION (outil), distinct de l'Organization
+      // (l'éditeur) et du FinancialService (l'offre). Aide moteurs et IA à
+      // comprendre que c'est une app financière web, pas un simple site vitrine.
+      '@type': 'WebApplication',
+      '@id': `${SITE_URL}/#webapp`,
+      name: 'WESTBOURSE',
+      url: SITE_URL,
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Web',
+      browserRequirements: 'Requires JavaScript. Requires HTML5.',
+      inLanguage: 'fr',
+      description:
+        "Cours BRVM toutes les 15 minutes, notation A–F, fondamentaux vérifiés, rendement réel après impôt et inflation, comparateur de SGI et brief quotidien.",
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'XOF',
+        description: 'Accès gratuit ; abonnement Premium optionnel.',
+      },
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+    {
       '@type': 'FinancialService',
       '@id': `${SITE_URL}/#service`,
       name: 'WESTBOURSE — Analyse BRVM',
