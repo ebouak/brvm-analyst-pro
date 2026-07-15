@@ -113,9 +113,11 @@ const jsonLd = {
        * chaque URL au fur et à mesure de la création des comptes.
        */
       sameAs: [
+        // Page ENTREPRISE (prioritaire pour l'entité) — vérifiée publique le 2026-07-15.
+        'https://www.linkedin.com/company/westbourse',
+        // Profil personnel du fondateur — renforce l'ancrage humain de la marque.
         'https://www.linkedin.com/in/westbourse-lt-745473422/',
-        // À AJOUTER dès leur création — chacun renforce l'entité :
-        // 'https://www.linkedin.com/company/westbourse',  ← LA PAGE ENTREPRISE (prioritaire)
+        // À AJOUTER dès leur création :
         // 'https://x.com/westbourse',
         // 'https://www.facebook.com/westbourse',
       ],
