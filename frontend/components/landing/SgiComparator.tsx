@@ -151,16 +151,27 @@ function SgiCard({ s, frais }: { s: Sgi; frais?: SgiFrais }) {
         </div>
       </dl>
 
-      {lien && (
-        <a
-          href={lien.href}
-          rel="nofollow noopener"
-          target="_blank"
-          className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11.5px] text-accent/80 transition-colors hover:text-accent"
-        >
-          {lien.label}
-          <span aria-hidden>↗</span>
-        </a>
+      {/* Contacter, c'est le geste qui précède l'ouverture d'un compte. Sur mobile,
+          le téléphone devient un bouton d'appel : on rapproche l'intention de l'action.
+          N'affiché que si RENSEIGNÉ — jamais de « n.c. » qui remplit sans informer. */}
+      {(lien || s.telephone || s.email) && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[11.5px]">
+          {lien && (
+            <a href={lien.href} rel="nofollow noopener" target="_blank" className="inline-flex items-center gap-1 text-accent/80 transition-colors hover:text-accent">
+              {lien.label} <span aria-hidden>↗</span>
+            </a>
+          )}
+          {s.telephone && (
+            <a href={`tel:${s.telephone.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-1 text-muted transition-colors hover:text-accent" title="Appeler la SGI">
+              <span aria-hidden>☎</span> {s.telephone.split('/')[0]!.trim()}
+            </a>
+          )}
+          {s.email && (
+            <a href={`mailto:${s.email}`} className="inline-flex items-center gap-1 text-muted transition-colors hover:text-accent" title="Écrire à la SGI">
+              <span aria-hidden>✉</span> email
+            </a>
+          )}
+        </div>
       )}
     </article>
   );

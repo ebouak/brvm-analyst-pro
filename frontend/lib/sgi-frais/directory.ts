@@ -44,7 +44,7 @@ export interface Sgi {
 }
 
 export const SGI_DIRECTORY: Sgi[] = [
-  { nom: 'Atlantique Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe Banque Atlantique', logo: '/sgi/atlantique-finance.svg', depotMin: '2 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.atlantiquefinance.net', ficheBRVM: 'https://www.brvm.org/fr/sgi-atlantique-finance' },
+  { nom: 'Atlantique Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe Banque Atlantique', logo: '/sgi/atlantique-finance.svg', depotMin: '2 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.atlantiquefinance.net', ficheBRVM: 'https://www.brvm.org/fr/sgi-atlantique-finance', telephone: '+225 27 20 31 21 21', email: 'atlantiquefinance@banqueatlantique.net' },
   { nom: 'BICI Bourse', pays: 'CI', type: 'Banque', groupe: 'BICICI · BNP Paribas', logo: '/sgi/bici-bourse.svg', depotMin: 'Pas de minimum', depotMinSource: 'relevé', siteWeb: 'https://www.bicibourse.ci', ficheBRVM: 'https://www.brvm.org/fr/sgi-bici-bourse' },
   { nom: 'BNI Finances', pays: 'CI', type: 'Banque', groupe: "Banque Nationale d'Investissement", logo: '/sgi/bni-finances.svg', depotMin: '1 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.bni.ci' },
   { nom: 'BOA Capital Securities', pays: 'CI', type: 'Banque', groupe: 'Groupe Bank of Africa', logo: '/sgi/boa-capital-securities.svg', depotMin: 'Pas de minimum', depotMinSource: 'relevé', siteWeb: 'https://www.bmcecapital.com' },
@@ -52,8 +52,8 @@ export const SGI_DIRECTORY: Sgi[] = [
   { nom: 'EDC Investment Corporation', pays: 'CI', type: 'Banque', groupe: 'Groupe Ecobank', logo: '/sgi/edc-investment-corporation.svg', depotMin: '1 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.ecobank.com', ficheBRVM: 'https://www.brvm.org/fr/sgi-edc-investment-corporation' },
   { nom: 'NSIA Finance', pays: 'CI', type: 'Banque', groupe: 'Groupe NSIA · devient NSIA Capital (2026)', logo: '/sgi/nsia-finance.svg', depotMin: '≈ 500 000 FCFA', depotMinSource: 'indicatif', siteWeb: 'https://nsiafinance.com', ficheBRVM: 'https://www.brvm.org/fr/sgi-nsia-finance' },
   { nom: 'SOGEBOURSE', pays: 'CI', type: 'Banque', groupe: "Société Générale Côte d'Ivoire", logo: '/sgi/sogebourse.svg', depotMin: '≈ 500 000 FCFA', depotMinSource: 'indicatif' },
-  { nom: 'Hudson & Cie', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/hudson-cie.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
-  { nom: 'Phoenix Capital Management', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/phoenix-capital-management.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
+  { nom: 'Hudson & Cie', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/hudson-cie.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', telephone: '+225 27 20 31 55 00', email: 'info@hudson-cie.com', siteWeb: 'https://hudson-cie.com' },
+  { nom: 'Phoenix Capital Management', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/phoenix-capital-management.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', telephone: '+225 27 22 59 85 80', email: 'cms@phoenixafrica.com', siteWeb: 'https://phoenixafrica.com' },
   { nom: 'Africaine de Bourse', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/africaine-de-bourse.svg', depotMin: '1 000 000 FCFA', depotMinSource: 'relevé', siteWeb: 'https://www.sib.ci' },
   { nom: 'Sirius Capital', pays: 'CI', type: 'Indépendante', groupe: 'Maison indépendante', logo: '/sgi/sirius-capital.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif' },
   { nom: 'CGF Bourse', pays: 'SN', type: 'Indépendante', groupe: 'Maison indépendante · pionnière', logo: '/sgi/cgf-bourse.svg', depotMin: '≈ 100 000 FCFA', depotMinSource: 'indicatif', siteWeb: 'https://www.cgfbourse.com', ficheBRVM: 'https://www.brvm.org/fr/sgi-cgf-bourse' },
@@ -76,7 +76,7 @@ export const SGI_DIRECTORY: Sgi[] = [
   { nom: 'ABCO Bourse', pays: 'SN', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
   { nom: 'GEK Capital', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
   { nom: 'Global Capital', pays: 'ML', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
-  { nom: 'Oragroup Securities', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
+  { nom: 'Oragroup Securities', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu', telephone: '+225 07 88 77 15 69', email: 'contactOGS@orabank.net', siteWeb: 'https://oragroupsecurities.net' },
   { nom: 'BIIC Financial Services (BFS)', pays: 'BJ', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
   { nom: 'MAC African SGI', pays: 'CI', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
   { nom: 'AfricaBourse', pays: 'BJ', type: 'Non déterminé', groupe: 'Non renseigné', depotMin: 'Non renseigné', depotMinSource: 'inconnu' },
