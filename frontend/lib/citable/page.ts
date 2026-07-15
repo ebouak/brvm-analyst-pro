@@ -83,7 +83,13 @@ async function loadDividendDataset(): Promise<DividendDataset> {
   if (!asOf) return { rows: [], asOf: null, exerciceRef: 0 };
 
   const [{ data: divs }, { data: cours }] = await Promise.all([
-    db.from('dividends').select('code, exercice, montant'),
+    // VÉRIFIÉ UNIQUEMENT : on ne retient que les dividendes à DÉTACHEMENT DATÉ
+    // (ex_date non nul). Ce sont les seuls dont le montant est confirmé par un
+    // détachement réel — source primaire. Les valeurs issues des fiches sociétés
+    // (sans ex_date) sont écartées : elles se sont révélées biaisées (~12 % de
+    // sous-estimation sur plusieurs titres). Une page citée ne doit afficher que
+    // des chiffres vérifiables.
+    db.from('dividends').select('code, exercice, montant').not('ex_date', 'is', null),
     db
       .from('brvm_actions_daily')
       .select('code, cours_jour, designation')

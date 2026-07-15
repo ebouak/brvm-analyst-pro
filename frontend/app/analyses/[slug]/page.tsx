@@ -184,9 +184,10 @@ function DividendTable({ data }: { data: NonNullable<LoadedCitable['dividend']> 
       </div>
       <p className="text-[11px] text-faint">
         Rendement NET = dividende net de l&apos;exercice {data.exerciceRef} (tel que publié par
-        l&apos;émetteur) ÷ cours de clôture. Les titres n&apos;ayant pas distribué au titre de{' '}
-        {data.exerciceRef} sont exclus — leur rendement courant est nul, non celui d&apos;un
-        exercice antérieur.
+        l&apos;émetteur) ÷ cours de clôture. Classement établi sur les seuls dividendes à{' '}
+        <strong className="text-muted">détachement daté et vérifié</strong> (source primaire) —
+        chaque montant affiché est confirmé. Les titres dont le détachement n&apos;est pas encore
+        enregistré apparaîtront au fil du cycle de distribution.
       </p>
     </div>
   );
