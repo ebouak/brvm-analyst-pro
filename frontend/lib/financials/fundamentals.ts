@@ -41,9 +41,14 @@ export function calculateFundamentals(p: FundamentalsParams): FundamentalRatios 
   const dette_totale = dette_court != null && dette_long != null ? dette_court + dette_long : null;
   const dette_sur_capitaux_propres = safe(dette_totale, bal?.total_capitaux_propres ?? null, (d, cp) => d / cp);
 
+  // Payout : montant distribué / résultat net. Si le nombre d'actions de
+  // l'exercice n'est pas publié, DPA/BPA donne exactement le même ratio
+  // (mêmes actions au numérateur et au dénominateur) — repli honnête.
   const payout = (inc?.dividende_par_action != null && inc?.actions_en_circulation != null && inc?.resultat_net != null && inc.resultat_net !== 0)
     ? ((inc.dividende_par_action * inc.actions_en_circulation) / inc.resultat_net) * 100
-    : null;
+    : (inc?.dividende_par_action != null && inc?.benefice_par_action != null && inc.benefice_par_action !== 0)
+      ? (inc.dividende_par_action / inc.benefice_par_action) * 100
+      : null;
 
   const croissance_ca = (inc?.revenu_total != null && incPrev?.revenu_total != null && incPrev.revenu_total !== 0)
     ? ((inc.revenu_total - incPrev.revenu_total) / Math.abs(incPrev.revenu_total)) * 100

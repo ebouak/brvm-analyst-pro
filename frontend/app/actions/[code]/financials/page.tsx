@@ -5,6 +5,8 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financials/valuation';
 import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
+import BankScorecard from '@/components/financials/BankScorecard';
+import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
 
@@ -43,6 +45,21 @@ export default async function FinancialsPage({ params }: Props) {
     latestCashflow?.flux_tresorerie_disponible ?? null,
     data.instrument.shares,
   );
+
+  // Analyse bancaire UEMOA : postes spécifiques (prêts, dépôts, marge
+  // d'intérêts…) + score /100 — uniquement pour la famille banque.
+  const bankAnalysis = (() => {
+    if (data.instrument.famille_comptable !== 'banque') return null;
+    const cur = extractBankYear(latestIncome, latestBalance);
+    if (!cur) return null;
+    const prev = extractBankYear(prevIncome, data.balanceSheets[1] ?? null);
+    const kpis = computeBankKpis(cur, prev, {
+      cours: data.latestDaily?.cours_jour ?? null,
+      shares: data.instrument.shares,
+      dividendeParAction: latestIncome?.dividende_par_action ?? null,
+    });
+    return { kpis, score: scoreBanqueUemoa(kpis), periode: latestIncome?.periode ?? null };
+  })();
 
   return (
     <div className="min-h-screen bg-bg">
@@ -128,10 +145,18 @@ export default async function FinancialsPage({ params }: Props) {
           />
         </div>
 
+        {/* Analyse bancaire UEMOA (banques uniquement) */}
+        {bankAnalysis && (
+          <div>
+            <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse bancaire UEMOA</p>
+            <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} />
+          </div>
+        )}
+
         {/* Fundamental analysis */}
         <div>
           <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Ratios fondamentaux</p>
-          <FundamentalAnalysis ratios={ratios} />
+          <FundamentalAnalysis ratios={ratios} famille={data.instrument.famille_comptable} />
         </div>
 
         {/* Financial statement tabs */}
