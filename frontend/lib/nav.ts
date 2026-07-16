@@ -55,6 +55,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/dividendes', label: 'Dividendes' },
       { href: '/calendrier', label: 'Calendrier' },
+      { href: '/rendement-vrai', label: 'Rendement vrai (net d’impôt & inflation)' },
+      { href: '/rendement-reel', label: 'Rendement réel (après inflation)' },
+      { href: '/fiscalite', label: 'Fiscalité des dividendes' },
       { href: '/saisonnalite', label: 'Saisonnalité' },
     ],
   },

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Rendement du dividende des actions BRVM">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1417"/>
+      <stop offset="1" stop-color="#030303"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#56D7FD" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#56D7FD"/>
+    </linearGradient>
+    <linearGradient id="barUp" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#3fe18b" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#3fe18b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- grille discrete -->
+  <g stroke="#56D7FD" stroke-opacity="0.06" stroke-width="1">
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="450" x2="1200" y2="450"/>
+  </g>
+
+  <!-- marque -->
+  <text x="80" y="96" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#FCFCFC" letter-spacing="2">WESTBOURSE</text>
+
+  <!-- titre -->
+  <text x="80" y="210" font-family="Georgia, serif" font-size="62" fill="#FCFCFC" font-weight="bold">Rendement du</text>
+  <text x="80" y="282" font-family="Georgia, serif" font-size="62" fill="#56D7FD" font-weight="bold">dividende BRVM</text>
+
+  <text x="80" y="340" font-family="system-ui, Arial, sans-serif" font-size="24" fill="#8b93a7">Dividende net · exercice de référence · cours de clôture</text>
+
+  <!-- histogramme decroissant, evoque un classement de rendements -->
+  <g transform="translate(700,470)">
+    <rect x="0"   y="-210" width="58" height="210" rx="6" fill="url(#barUp)"/>
+    <rect x="80"  y="-180" width="58" height="180" rx="6" fill="url(#bar)"/>
+    <rect x="160" y="-158" width="58" height="158" rx="6" fill="url(#bar)"/>
+    <rect x="240" y="-140" width="58" height="140" rx="6" fill="url(#bar)"/>
+    <rect x="320" y="-120" width="58" height="120" rx="6" fill="url(#bar)"/>
+    <rect x="400" y="-96"  width="58" height="96"  rx="6" fill="url(#bar)"/>
+    <!-- valeur en tete -->
+    <text x="29" y="-224" font-family="'JetBrains Mono', monospace" font-size="24" fill="#3fe18b" text-anchor="middle" font-weight="bold">7,4 %</text>
+    <!-- ligne de base -->
+    <line x1="-10" y1="0" x2="470" y2="0" stroke="#232733" stroke-width="2"/>
+  </g>
+
+  <!-- pastille % -->
+  <g transform="translate(150,470)">
+    <circle cx="0" cy="0" r="66" fill="none" stroke="#56D7FD" stroke-opacity="0.3" stroke-width="3"/>
+    <text x="0" y="20" font-family="Georgia, serif" font-size="64" fill="#56D7FD" text-anchor="middle" font-weight="bold">%</text>
+  </g>
+
+  <text x="80" y="600" font-family="system-ui, Arial, sans-serif" font-size="18" fill="#4a5268">Données vérifiées · mises à jour à chaque séance · westbourse.com</text>
+</svg>
