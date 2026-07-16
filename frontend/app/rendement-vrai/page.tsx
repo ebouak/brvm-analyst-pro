@@ -6,9 +6,9 @@ import { SectionHeader } from '@/components/ui/premium';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Rendement vrai BRVM : cours + dividendes − impôt − inflation',
+  title: 'Rendement vrai BRVM : cours + dividendes nets réinvestis − inflation',
   description:
-    "Ce qu'une action BRVM vous a réellement rapporté : cours, dividendes réinvestis, impôt IRVM de votre pays et inflation. Le seul calcul complet du marché.",
+    "Ce qu'une action BRVM vous a réellement rapporté : cours + dividendes nets réinvestis, corrigés de l'inflation de votre pays. Le dividende est net d'impôt à la source. Le seul calcul complet du marché.",
 };
 
 const DEFAUT = 'SNTS';
@@ -34,7 +34,7 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
         <SectionHeader
           kicker="Pouvoir d'achat"
           title="Le rendement vrai"
-          subtitle="Le cours ne dit qu'une partie de l'histoire. Voici ce que votre action vous a réellement rapporté : dividendes réinvestis, impôt de votre pays, inflation de votre pays."
+          subtitle="Le cours ne dit qu'une partie de l'histoire. Voici ce que votre action vous a réellement rapporté : dividendes nets réinvestis, corrigés de l'inflation de votre pays."
         />
 
         <form method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4">
@@ -95,7 +95,7 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
               <div className="rounded-xl border border-accent/40 bg-accent/5 p-5">
                 <p className="overline text-accent">Ce que vous avez vraiment gagné</p>
                 <p className="mt-1 text-xs text-muted">
-                  Dividendes réinvestis, net d&apos;impôt, après inflation ({r.pays[0]!.nom})
+                  Dividendes nets réinvestis, après inflation ({r.pays[0]!.nom})
                 </p>
                 <p
                   className={`tabular mt-2 text-3xl font-semibold ${
@@ -121,7 +121,7 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
                   <div key={d.exercice} className="rounded-lg border border-border/60 bg-bg px-3 py-2">
                     <p className="text-[11px] text-faint">Exercice {d.exercice}</p>
                     <p className="tabular text-sm font-semibold text-ivory">
-                      {nf.format(d.montantBrut)} FCFA
+                      {nf.format(d.montantNet)} FCFA
                     </p>
                     <p className="text-[10px] text-faint">
                       réinvesti à {nf.format(d.coursReinvest)}
@@ -129,9 +129,9 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
                   </div>
                 ))}
                 <div className="rounded-lg border border-up/30 bg-up/5 px-3 py-2">
-                  <p className="text-[11px] text-faint">Total brut</p>
+                  <p className="text-[11px] text-faint">Total net</p>
                   <p className="tabular text-sm font-semibold text-up">
-                    {nf.format(r.totalDividendesBruts)} FCFA
+                    {nf.format(r.totalDividendesNets)} FCFA
                   </p>
                   <p className="text-[10px] text-faint">par action détenue</p>
                 </div>
@@ -145,10 +145,9 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
                   Le même titre, huit résultats différents
                 </h2>
                 <p className="mt-1 text-sm text-muted">
-                  Même action, même cours, mêmes dividendes. Mais l&apos;
-                  <strong className="text-white">impôt</strong> et l&apos;
-                  <strong className="text-white">inflation de votre pays</strong> décident de ce
-                  qu&apos;il vous en reste.
+                  Même action, même cours, mêmes dividendes nets. Mais l&apos;
+                  <strong className="text-white">inflation de votre pays</strong> décide de ce
+                  qu&apos;il vous en reste vraiment.
                 </p>
               </div>
 
@@ -157,9 +156,8 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
                   <thead>
                     <tr className="border-b border-border/60 text-left text-xs text-muted">
                       <th className="px-4 py-3 font-medium">Pays</th>
-                      <th className="px-4 py-3 text-right font-medium">IRVM</th>
                       <th className="px-4 py-3 text-right font-medium">Cours seul</th>
-                      <th className="px-4 py-3 text-right font-medium">+ dividendes</th>
+                      <th className="px-4 py-3 text-right font-medium">+ dividendes nets</th>
                       <th className="px-4 py-3 text-right font-medium">Inflation</th>
                       <th className="px-4 py-3 text-right font-medium">RENDEMENT VRAI</th>
                     </tr>
@@ -167,17 +165,7 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
                   <tbody className="divide-y divide-border/40">
                     {r.pays.map((p) => (
                       <tr key={p.iso3} className={p.resultat.perteReelle ? 'bg-down/5' : undefined}>
-                        <td className="px-4 py-3 font-medium text-ivory">
-                          {p.nom}
-                          {p.resultat.impotNonConfirme && (
-                            <span className="ml-1.5 text-[10px] text-warn" title="Taux fiscal non confirmé : le chiffre est un majorant">
-                              ⚠
-                            </span>
-                          )}
-                        </td>
-                        <td className="tabular px-4 py-3 text-right text-muted">
-                          {p.tauxIrvm === null ? '—' : `${(p.tauxIrvm * 100).toFixed(1)} %`}
-                        </td>
+                        <td className="px-4 py-3 font-medium text-ivory">{p.nom}</td>
                         <td className="tabular px-4 py-3 text-right text-faint">
                           {pct(p.resultat.prixSeulPct)}
                         </td>
@@ -200,18 +188,10 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
                 </table>
               </div>
 
-              {r.pays.some((p) => p.resultat.impotNonConfirme) && (
-                <p className="rounded-lg border border-warn/30 bg-warn/5 px-4 py-2 text-xs text-warn">
-                  ⚠ Taux d&apos;IRVM non confirmé pour certains pays : le calcul est fait{' '}
-                  <strong>sans impôt</strong>, le rendement vrai y est donc un{' '}
-                  <strong>majorant</strong>. Nous n&apos;inventons pas un taux fiscal.
-                </p>
-              )}
-
               {r.pays.some((p) => p.resultat.perteReelle) && (
                 <p className="rounded-lg border border-down/30 bg-down/5 px-4 py-2 text-xs text-down">
                   Les lignes en rouge sont des <strong>pertes réelles</strong> : même dividendes
-                  compris, le gain n&apos;a pas compensé l&apos;impôt et la hausse des prix.
+                  nets compris, le gain n&apos;a pas compensé la hausse des prix.
                 </p>
               )}
             </section>
@@ -231,9 +211,12 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
                   n&apos;est pas une simple addition — c&apos;est la capitalisation.
                 </li>
                 <li>
-                  <strong className="text-ivory">Impôt</strong> : retenue à la source (IRVM) sur les
-                  dividendes d&apos;actions cotées, par pays —{' '}
-                  <Link href="/fiscalite" className="text-accent underline">barème détaillé</Link>.
+                  <strong className="text-ivory">Impôt (déjà déduit)</strong> : les dividendes
+                  publiés par les émetteurs BRVM sont <strong>nets d&apos;IRVM</strong>, prélevé à la
+                  source par l&apos;émetteur selon son pays de cotation — pas selon le vôtre. Le
+                  dividende net est donc le même pour tous ; nous le réinvestissons tel quel, sans le
+                  re-taxer. Détail des taux :{' '}
+                  <Link href="/fiscalite" className="text-accent underline">barème IRVM par pays</Link>.
                 </li>
                 <li>
                   <strong className="text-ivory">Inflation</strong> : Banque mondiale, indicateur{' '}

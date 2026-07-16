@@ -1,7 +1,7 @@
 import 'server-only';
 import { createPublicClient } from '@/lib/supabase/public';
 import { computeTrueReturn, type TrueReturnResult, type DividendeExercice } from './trueReturn';
-import { BAREME, PAYS_LABELS, type PaysUemoa } from '@/lib/tax/rates';
+import { PAYS_LABELS, type PaysUemoa } from '@/lib/tax/rates';
 
 /**
  * Assemble les données du RENDEMENT VRAI depuis la base.
@@ -45,8 +45,6 @@ const EXERCICES = [2022, 2023, 2024];
 export interface PaysRendement {
   iso3: string;
   nom: string;
-  /** Taux IRVM appliqué, ou null si non confirmé pour ce pays. */
-  tauxIrvm: number | null;
   resultat: TrueReturnResult;
 }
 
@@ -55,10 +53,10 @@ export interface TrueReturnReport {
   designation: string | null;
   coursDebut: number;
   coursFin: number;
-  /** Dividendes bruts encaissés, par exercice. */
+  /** Dividendes NETS encaissés, par exercice. */
   dividendes: DividendeExercice[];
-  /** Total des dividendes BRUTS versés sur la période, par action détenue au départ. */
-  totalDividendesBruts: number;
+  /** Total des dividendes NETS versés sur la période, par action détenue au départ. */
+  totalDividendesNets: number;
   pays: PaysRendement[];
 }
 
@@ -164,11 +162,12 @@ export async function buildTrueReturn(code: string): Promise<TrueReturnReport | 
   if (bruts.length !== EXERCICES.length) return null;
 
   // Cours de réinvestissement : ~30 juin de l'année de détachement (exercice + 1).
+  // Le montant est NET (prélevé à la source par l'émetteur) — voir trueReturn.ts.
   const dividendes: DividendeExercice[] = [];
   for (const d of bruts) {
     const coursReinvest = await coursProche(CODE, `${d.exercice + 1}-06-30`);
     if (!coursReinvest || coursReinvest <= 0) return null; // pas de prix → pas de calcul
-    dividendes.push({ exercice: d.exercice, montantBrut: Number(d.montant), coursReinvest });
+    dividendes.push({ exercice: d.exercice, montantNet: Number(d.montant), coursReinvest });
   }
 
   const { data: instr } = await db
@@ -195,15 +194,12 @@ export async function buildTrueReturn(code: string): Promise<TrueReturnReport | 
     if (taux.length < nbAnnees) continue; // série incomplète → pays écarté, pas complété
 
     const fiscal = ISO3_TO_FISCAL[iso3];
-    // Taux `null` dans le barème = non confirmé. On ne l'invente pas : le calcul se
-    // fait alors SANS impôt et le résultat est signalé comme un MAJORANT.
-    const tauxIrvm = fiscal ? BAREME[fiscal].dividende_cote.taux : null;
-
+    // Le dividende étant déjà NET à la source, l'impôt ne se réapplique pas : la
+    // différence entre pays vient uniquement de l'INFLATION propre à chacun.
     const resultat = computeTrueReturn({
       coursDebut: b.debut,
       coursFin: b.fin,
       dividendes,
-      tauxIrvm,
       inflations: taux,
     });
     if (!resultat) continue;
@@ -211,7 +207,6 @@ export async function buildTrueReturn(code: string): Promise<TrueReturnReport | 
     pays.push({
       iso3,
       nom: fiscal ? PAYS_LABELS[fiscal] : nom,
-      tauxIrvm,
       resultat,
     });
   }
@@ -225,7 +220,7 @@ export async function buildTrueReturn(code: string): Promise<TrueReturnReport | 
     coursDebut: b.debut,
     coursFin: b.fin,
     dividendes,
-    totalDividendesBruts: dividendes.reduce((s, d) => s + d.montantBrut, 0),
+    totalDividendesNets: dividendes.reduce((s, d) => s + d.montantNet, 0),
     pays,
   };
 }
