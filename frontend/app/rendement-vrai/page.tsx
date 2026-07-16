@@ -1,23 +1,43 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { buildTrueReturn, listCodesEligibles, ANNEE_DEBUT, ANNEE_FIN } from '@/lib/macro/trueReturnData';
+import {
+  buildUnifiedReturn, listCodesUnified, HORIZONS, type Mode, type Horizon,
+} from '@/lib/macro/unifiedReturn';
+import { RendementExplorer } from '@/components/rendement/RendementExplorer';
 import { SectionHeader } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Rendement vrai BRVM : cours + dividendes nets réinvestis − inflation',
+  title: 'Rendement réel & vrai BRVM : cours + dividendes − inflation',
   description:
-    "Ce qu'une action BRVM vous a réellement rapporté : cours + dividendes nets réinvestis, corrigés de l'inflation de votre pays. Le dividende est net d'impôt à la source. Le seul calcul complet du marché.",
+    "Ce que votre action BRVM vous a réellement rapporté : cours, puis cours + dividendes nets réinvestis, corrigés de l'inflation de votre pays UEMOA. Deux vues, un seul écran interactif.",
 };
 
-const DEFAUT = 'SNTS';
-const nf = new Intl.NumberFormat('fr-FR');
-const pct = (n: number) => `${n > 0 ? '+' : ''}${n.toFixed(2)} %`;
+const DEFAUT_CODE = 'SNTS';
+const DEFAUT_ANNEES: Horizon = 5;
 
-export default async function Page({ searchParams }: { searchParams: { code?: string } }) {
-  const code = (searchParams.code ?? DEFAUT).toUpperCase();
-  const [codes, r] = await Promise.all([listCodesEligibles(), buildTrueReturn(code)]);
+function parseMode(v: string | undefined): Mode {
+  return v === 'reel' ? 'reel' : 'vrai';
+}
+function parseAnnees(v: string | undefined): Horizon {
+  const n = Number.parseInt(v ?? '', 10);
+  return HORIZONS.includes(n as Horizon) ? (n as Horizon) : DEFAUT_ANNEES;
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { code?: string; mode?: string; annees?: string };
+}) {
+  const code = (searchParams.code ?? DEFAUT_CODE).toUpperCase();
+  const mode = parseMode(searchParams.mode);
+  const annees = parseAnnees(searchParams.annees);
+
+  const [codes, report] = await Promise.all([
+    listCodesUnified(),
+    buildUnifiedReturn(code, mode, annees),
+  ]);
 
   return (
     <div className="min-h-screen bg-bg">
@@ -34,214 +54,166 @@ export default async function Page({ searchParams }: { searchParams: { code?: st
         <SectionHeader
           kicker="Pouvoir d'achat"
           title="Le rendement vrai"
-          subtitle="Le cours ne dit qu'une partie de l'histoire. Voici ce que votre action vous a réellement rapporté : dividendes nets réinvestis, corrigés de l'inflation de votre pays."
+          subtitle="Le cours ne dit qu'une partie de l'histoire. Voici ce que votre action vous a réellement rapporté — d'abord le cours seul, puis dividendes nets réinvestis compris, toujours corrigé de l'inflation de votre pays."
         />
 
-        <form method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4">
-          <label className="block">
-            <span className="text-xs text-muted">Action</span>
-            <select
-              name="code"
-              defaultValue={code}
-              className="mt-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50"
+        <form method="get" className="space-y-4 rounded-xl border border-border bg-surface p-4">
+          {/* Bascule de mode : le geste central de l'écran unifié. */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs text-muted">Vue</span>
+            <div className="inline-flex rounded-full border border-border bg-bg p-1">
+              <button
+                type="submit"
+                name="mode"
+                value="reel"
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                  mode === 'reel' ? 'bg-accent text-[#03222b]' : 'text-muted hover:text-white'
+                }`}
+              >
+                Cours seul · réel
+              </button>
+              <button
+                type="submit"
+                name="mode"
+                value="vrai"
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                  mode === 'vrai' ? 'bg-accent text-[#03222b]' : 'text-muted hover:text-white'
+                }`}
+              >
+                + Dividendes · vrai
+              </button>
+            </div>
+            <span className="text-[11px] text-faint">
+              {mode === 'vrai'
+                ? 'Cours + dividendes nets réinvestis, corrigés de l’inflation.'
+                : 'Cours seul corrigé de l’inflation — horizon au choix.'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-end gap-3 border-t border-border/50 pt-4">
+            <label className="block">
+              <span className="text-xs text-muted">Action</span>
+              <select
+                name="code"
+                defaultValue={code}
+                className="mt-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50"
+              >
+                {codes.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code}{c.designation ? ` — ${c.designation}` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="text-xs text-muted">
+                Horizon {mode === 'vrai' && <span className="text-faint">(mode réel)</span>}
+              </span>
+              <select
+                name="annees"
+                defaultValue={String(annees)}
+                disabled={mode === 'vrai'}
+                className="mt-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-40"
+              >
+                {HORIZONS.map((h) => (
+                  <option key={h} value={h}>{h} ans</option>
+                ))}
+              </select>
+            </label>
+
+            {/* Applique code/horizon en conservant le mode courant. */}
+            <button
+              type="submit"
+              name="mode"
+              value={mode}
+              className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#03222b] transition active:scale-95"
             >
-              {codes.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.code}{c.designation ? ` — ${c.designation}` : ''}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="submit"
-            className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#03222b] transition active:scale-95"
-          >
-            Calculer
-          </button>
-          <span className="ml-auto text-xs text-faint">
-            {codes.length} titres · {ANNEE_DEBUT}–{ANNEE_FIN}
-          </span>
+              Calculer
+            </button>
+
+            <span className="ml-auto text-xs text-faint">{codes.length} titres</span>
+          </div>
         </form>
 
-        {!r ? (
+        {!report ? (
           <div className="rounded-xl border border-border bg-surface p-8 text-center">
             <p className="text-sm text-muted">
-              Données incomplètes pour <strong className="text-white">{code}</strong>.
+              Données incomplètes pour <strong className="text-white">{code}</strong>
+              {mode === 'vrai' ? ' en mode dividendes réinvestis' : ` sur ${annees} ans`}.
             </p>
             <p className="mt-1 text-xs text-faint">
-              Un exercice manquant n&apos;est pas un dividende nul : plutôt que de sous-estimer le
+              Un exercice ou un cours manquant n&apos;est pas un zéro : plutôt que de sous-estimer le
               rendement, nous préférons ne rien afficher.
             </p>
+            {mode === 'vrai' && (
+              <Link
+                href={`/rendement-vrai?mode=reel&code=${code}`}
+                className="mt-3 inline-block rounded-full border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/10"
+              >
+                Essayer la vue « cours seul · réel » →
+              </Link>
+            )}
           </div>
         ) : (
           <>
-            {/* ── Le contraste : ce que tout le monde affiche vs la réalité ── */}
-            <section className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-border bg-surface p-5">
-                <p className="overline text-faint">Ce que tout le monde affiche</p>
-                <p className="mt-1 text-xs text-muted">Performance du cours seul</p>
-                <p
-                  className={`tabular mt-2 text-3xl font-semibold ${
-                    r.pays[0]!.resultat.prixSeulPct >= 0 ? 'text-up' : 'text-down'
-                  }`}
-                >
-                  {pct(r.pays[0]!.resultat.prixSeulPct)}
-                </p>
-                <p className="mt-2 text-xs text-faint">
-                  {nf.format(r.coursDebut)} → {nf.format(r.coursFin)} FCFA
-                </p>
-              </div>
+            <p className="text-sm text-muted">
+              <strong className="text-ivory">{report.code}</strong>
+              {report.nom ? ` — ${report.nom}` : ''}
+              <span className="text-faint"> · {report.periodeLabel}</span>
+            </p>
 
-              <div className="rounded-xl border border-accent/40 bg-accent/5 p-5">
-                <p className="overline text-accent">Ce que vous avez vraiment gagné</p>
-                <p className="mt-1 text-xs text-muted">
-                  Dividendes nets réinvestis, après inflation ({r.pays[0]!.nom})
-                </p>
-                <p
-                  className={`tabular mt-2 text-3xl font-semibold ${
-                    r.pays[0]!.resultat.perteReelle ? 'text-down' : 'text-up'
-                  }`}
-                >
-                  {pct(r.pays[0]!.resultat.vraiPct)}
-                </p>
-                <p className="mt-2 text-xs text-faint">
-                  dont <strong className="text-ivory">{pct(r.pays[0]!.resultat.apportDividendesPts)}</strong>{' '}
-                  apportés par les dividendes
-                </p>
-              </div>
-            </section>
+            <RendementExplorer report={report} />
 
-            {/* ── Les dividendes encaissés ── */}
-            <section className="rounded-xl border border-border bg-surface p-5">
-              <h2 className="text-sm font-semibold text-ivory">
-                {r.code}{r.designation ? ` — ${r.designation}` : ''} · dividendes encaissés
-              </h2>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {r.dividendes.map((d) => (
-                  <div key={d.exercice} className="rounded-lg border border-border/60 bg-bg px-3 py-2">
-                    <p className="text-[11px] text-faint">Exercice {d.exercice}</p>
-                    <p className="tabular text-sm font-semibold text-ivory">
-                      {nf.format(d.montantNet)} FCFA
-                    </p>
-                    <p className="text-[10px] text-faint">
-                      réinvesti à {nf.format(d.coursReinvest)}
-                    </p>
-                  </div>
-                ))}
-                <div className="rounded-lg border border-up/30 bg-up/5 px-3 py-2">
-                  <p className="text-[11px] text-faint">Total net</p>
-                  <p className="tabular text-sm font-semibold text-up">
-                    {nf.format(r.totalDividendesNets)} FCFA
-                  </p>
-                  <p className="text-[10px] text-faint">par action détenue</p>
-                </div>
-              </div>
-            </section>
-
-            {/* ── LE cœur : le même titre n'enrichit pas également ── */}
-            <section className="space-y-3">
-              <div>
-                <h2 className="font-display text-xl text-white">
-                  Le même titre, huit résultats différents
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Même action, même cours, mêmes dividendes nets. Mais l&apos;
-                  <strong className="text-white">inflation de votre pays</strong> décide de ce
-                  qu&apos;il vous en reste vraiment.
-                </p>
-              </div>
-
-              <div className="overflow-x-auto rounded-xl border border-border bg-surface">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border/60 text-left text-xs text-muted">
-                      <th className="px-4 py-3 font-medium">Pays</th>
-                      <th className="px-4 py-3 text-right font-medium">Cours seul</th>
-                      <th className="px-4 py-3 text-right font-medium">+ dividendes nets</th>
-                      <th className="px-4 py-3 text-right font-medium">Inflation</th>
-                      <th className="px-4 py-3 text-right font-medium">RENDEMENT VRAI</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/40">
-                    {r.pays.map((p) => (
-                      <tr key={p.iso3} className={p.resultat.perteReelle ? 'bg-down/5' : undefined}>
-                        <td className="px-4 py-3 font-medium text-ivory">{p.nom}</td>
-                        <td className="tabular px-4 py-3 text-right text-faint">
-                          {pct(p.resultat.prixSeulPct)}
-                        </td>
-                        <td className="tabular px-4 py-3 text-right text-muted">
-                          {pct(p.resultat.totalNominalPct)}
-                        </td>
-                        <td className="tabular px-4 py-3 text-right text-muted">
-                          +{p.resultat.inflationCumulPct.toFixed(2)} %
-                        </td>
-                        <td
-                          className={`tabular px-4 py-3 text-right text-base font-semibold ${
-                            p.resultat.perteReelle ? 'text-down' : 'text-up'
-                          }`}
-                        >
-                          {pct(p.resultat.vraiPct)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {r.pays.some((p) => p.resultat.perteReelle) && (
-                <p className="rounded-lg border border-down/30 bg-down/5 px-4 py-2 text-xs text-down">
-                  Les lignes en rouge sont des <strong>pertes réelles</strong> : même dividendes
-                  nets compris, le gain n&apos;a pas compensé la hausse des prix.
-                </p>
-              )}
-            </section>
-
-            {/* ── Méthode : tout est sourcé, rien n'est inventé ── */}
+            {/* ── Méthode et sources ── */}
             <section className="rounded-xl border border-border bg-surface p-4">
               <h3 className="text-xs font-semibold text-ivory">Méthode et sources</h3>
               <ul className="mt-2 space-y-1 text-xs text-muted">
-                <li>
-                  <strong className="text-ivory">Détention</strong> : de début {ANNEE_DEBUT} à fin{' '}
-                  {ANNEE_FIN}. On encaisse sur cette période les dividendes des exercices 2021 à 2024
-                  (chacun est détaché l&apos;année suivante).
-                </li>
-                <li>
-                  <strong className="text-ivory">Réinvestissement</strong> : chaque dividende net
-                  rachète des actions au cours du jour, et ces actions rapportent à leur tour. Ce
-                  n&apos;est pas une simple addition — c&apos;est la capitalisation.
-                </li>
-                <li>
-                  <strong className="text-ivory">Impôt (déjà déduit)</strong> : les dividendes
-                  publiés par les émetteurs BRVM sont <strong>nets d&apos;IRVM</strong>, prélevé à la
-                  source par l&apos;émetteur selon son pays de cotation — pas selon le vôtre. Le
-                  dividende net est donc le même pour tous ; nous le réinvestissons tel quel, sans le
-                  re-taxer. Détail des taux :{' '}
-                  <Link href="/fiscalite" className="text-accent underline">barème IRVM par pays</Link>.
-                </li>
+                {report.mode === 'vrai' ? (
+                  <>
+                    <li>
+                      <strong className="text-ivory">Réinvestissement</strong> : chaque dividende net
+                      rachète des actions au cours du jour, et ces actions rapportent à leur tour. Ce
+                      n&apos;est pas une addition — c&apos;est la capitalisation.
+                    </li>
+                    <li>
+                      <strong className="text-ivory">Impôt (déjà déduit)</strong> : les dividendes
+                      publiés par les émetteurs BRVM sont <strong>nets d&apos;IRVM</strong>, prélevé à
+                      la source par l&apos;émetteur selon son pays de cotation — pas le vôtre. On les
+                      réinvestit tels quels, sans les re-taxer. Détail :{' '}
+                      <Link href="/fiscalite" className="text-accent underline">barème IRVM par pays</Link>.
+                    </li>
+                    <li className="text-faint">
+                      <strong>Convention assumée</strong> : les dates de détachement n&apos;étant pas
+                      publiées avant 2026, le réinvestissement est fait à la clôture la plus proche du
+                      30 juin de l&apos;année de détachement.
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <strong className="text-ivory">Cours seul</strong> : clôtures réelles BRVM sur
+                      l&apos;horizon choisi. Cette vue <strong>ignore les dividendes</strong> — pour
+                      les inclure, passez à la vue « + Dividendes · vrai ».
+                    </li>
+                    <li>
+                      <strong className="text-ivory">Formule</strong> : Fisher —
+                      (1 + réel) = (1 + nominal) / (1 + inflation). Pas la soustraction, qui surestime
+                      le gain dès que l&apos;inflation est élevée.
+                    </li>
+                  </>
+                )}
                 <li>
                   <strong className="text-ivory">Inflation</strong> : Banque mondiale, indicateur{' '}
                   <a
                     href="https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG"
                     target="_blank" rel="noopener noreferrer"
                     className="text-accent underline"
-                  >FP.CPI.TOTL.ZG</a>. Formule de Fisher, inflation chaînée année par année.
-                </li>
-                <li>
-                  <strong className="text-ivory">Dividendes</strong> : fiches sociétés Sikafinance
-                  (une valeur par exercice). Cours : clôtures réelles BRVM.
+                  >FP.CPI.TOTL.ZG</a>, chaînée année par année. Recoupée avec la BCEAO.
                 </li>
                 <li className="text-faint">
-                  <strong>Convention assumée</strong> : les dates de détachement n&apos;étant pas
-                  publiées avant 2026, le réinvestissement est fait à la clôture la plus proche du
-                  30 juin de l&apos;année de détachement — les détachements réellement datés tombent
-                  entre fin mai et fin juin.
-                </li>
-                <li className="text-faint">
-                  <strong>Pourquoi pas 10 ans ?</strong> Les dividendes 2017-2020 n&apos;existent
-                  chez aucune de nos sources. Le réinvestissement est une chaîne : un trou de quatre
-                  ans la brise. Étendre la fenêtre reviendrait à prétendre que ces sociétés
-                  n&apos;ont rien distribué — c&apos;est faux, et cela sous-estimerait lourdement le
-                  rendement.
+                  Un pays dont la série d&apos;inflation est incomplète est écarté du tableau plutôt
+                  que complété par estimation.
                 </li>
               </ul>
             </section>
