@@ -6,6 +6,7 @@ import { fmtNumber, fmtFcfa } from '@/lib/format';
 import RatioCard from './RatioCard';
 import RangeBar from './RangeBar';
 import EditFundamentalsModal from './EditFundamentalsModal';
+import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 
 export interface FundamentalsPanelProps {
   code: string;
@@ -54,6 +55,15 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
 
   const divSuffix = p.dividendeExercice != null && !p.dividendeVerifie
     ? ` (ex. ${p.dividendeExercice})` : '';
+
+  const revenuLabel = p.famille === 'banque' ? 'PNB' : p.famille === 'assurance' ? 'Primes' : 'CA';
+  const chartPoints: FundaChartPoint[] = sortedHist.map((h) => ({
+    periode: String(h.year),
+    revenu: h.revenue,
+    net: h.net_income,
+    bpa: null,
+    dividende: null,
+  }));
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="bg-surface border border-border rounded-xl p-4">
@@ -117,6 +127,10 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
           <RatioCard label="Croissance RN" value={pct(croissanceRN)} positive={croissanceRN != null ? croissanceRN >= 0 : null} quality={croissanceRN == null ? 'missing' : 'ok'} />
         </Section>
       </div>
+
+      {chartPoints.length >= 2 && (
+        <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={p.famille === 'banque'} />
+      )}
 
       {p.sourceUrl && (
         <a href={p.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-up hover:underline block">

@@ -5,6 +5,7 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financials/valuation';
 import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
+import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import BankScorecard from '@/components/financials/BankScorecard';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
@@ -60,6 +61,24 @@ export default async function FinancialsPage({ params }: Props) {
     });
     return { kpis, score: scoreBanqueUemoa(kpis), periode: latestIncome?.periode ?? null };
   })();
+
+  const isBank = data.instrument.famille_comptable === 'banque';
+  const revenuLabel = isBank ? 'PNB' : data.instrument.famille_comptable === 'assurance' ? 'Primes' : 'CA';
+
+  // Points du graphique : croisement compte de résultat + bilan par période.
+  const balanceByPeriode = new Map(data.balanceSheets.map((b) => [b.periode, b]));
+  const chartPoints: FundaChartPoint[] = data.incomeStatements.map((s) => {
+    const bal = balanceByPeriode.get(s.periode);
+    return {
+      periode: s.periode,
+      revenu: s.revenu_total,
+      net: s.resultat_net,
+      bpa: s.benefice_par_action,
+      dividende: s.dividende_par_action,
+      credits: bal?.lignes_specifiques?.credits_clientele ?? null,
+      depots: bal?.lignes_specifiques?.depots_clientele ?? null,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-bg">
@@ -159,6 +178,14 @@ export default async function FinancialsPage({ params }: Props) {
           <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Ratios fondamentaux</p>
           <FundamentalAnalysis ratios={ratios} famille={data.instrument.famille_comptable} />
         </div>
+
+        {/* Analyse graphique pluriannuelle */}
+        {chartPoints.length >= 2 && (
+          <div>
+            <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse graphique</p>
+            <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} />
+          </div>
+        )}
 
         {/* Financial statement tabs */}
         <div id="etats">
