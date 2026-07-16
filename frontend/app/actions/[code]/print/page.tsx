@@ -2,6 +2,7 @@
 import { notFound } from 'next/navigation';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
+import { extractBankYear, computeBankKpis, scoreBanqueUemoa, bankExportSections } from '@/lib/bank/kpis';
 import PrintTrigger from '@/components/financials/PrintTrigger';
 
 interface Props { params: { code: string } }
@@ -26,6 +27,20 @@ export default async function PrintPage({ params }: Props) {
     balance: bal_n,
     cashflow: cf_n,
   });
+
+  // Analyse bancaire (banques uniquement).
+  const bankSections = (() => {
+    if (data.instrument.famille_comptable !== 'banque') return null;
+    const cur = extractBankYear(inc_n, bal_n);
+    if (!cur) return null;
+    const prev = extractBankYear(inc_n1, data.balanceSheets[1] ?? null);
+    const kpis = computeBankKpis(cur, prev, {
+      cours: data.latestDaily?.cours_jour ?? null,
+      shares: data.instrument.shares,
+      dividendeParAction: inc_n?.dividende_par_action ?? null,
+    });
+    return { periode: inc_n?.periode ?? null, sections: bankExportSections(kpis, scoreBanqueUemoa(kpis)) };
+  })();
 
   const fmtFCFA = (n: number | null) => n != null ? `${n.toLocaleString('fr-FR')} FCFA` : '—';
   const fmtPct  = (n: number | null) => n != null ? `${n.toFixed(1)}%` : '—';
@@ -81,6 +96,34 @@ export default async function PrintPage({ params }: Props) {
           ))}
         </tbody>
       </table>
+      {bankSections && (
+        <>
+          <h2 className="text-lg font-semibold mb-3 border-b pb-1">
+            Analyse bancaire UEMOA{bankSections.periode ? ` (exercice ${bankSections.periode})` : ''}
+          </h2>
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {bankSections.sections.map((sec) => (
+              <div key={sec.titre} className="border rounded p-3">
+                <p className="text-xs font-semibold text-gray-700 mb-2">{sec.titre}</p>
+                <table className="w-full text-xs border-collapse">
+                  <tbody>
+                    {sec.lignes.map(([label, val]) => (
+                      <tr key={label}>
+                        <td className="py-1 text-gray-500">{label.trim()}</td>
+                        <td className="py-1 text-right font-medium">{val}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-gray-400 mb-6 italic">
+            Barème Commission Bancaire UMOA / FSI FMI. Un indicateur non publié dans les états
+            déposés est neutralisé (hors calcul) ; la confiance indique la part du barème mesurable.
+          </p>
+        </>
+      )}
       {data.incomeStatements.length > 0 && (
         <>
           <h2 className="text-lg font-semibold mb-3 border-b pb-1">Compte de résultat (FCFA)</h2>

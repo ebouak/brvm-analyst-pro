@@ -255,3 +255,56 @@ export function scoreBanqueUemoa(k: BankKpis): BankScore {
     axes,
   };
 }
+
+// ─────────────────────── Export (Excel / PDF) ───────────────────────
+
+/**
+ * Met en forme l'analyse bancaire pour les exports (mêmes libellés/valeurs que
+ * l'écran, source unique pour Excel et PDF). Retourne des sections de couples
+ * [libellé, valeur formatée].
+ */
+export function bankExportSections(
+  kpis: BankKpis,
+  score: BankScore,
+): { titre: string; lignes: [string, string][] }[] {
+  const nf = new Intl.NumberFormat('fr-FR');
+  const md = (v: number | null) => (v == null ? 'non publié' : `${nf.format(Math.round(v / 1e9 * 10) / 10)} Md FCFA`);
+  const pc = (v: number | null, d = 1) => (v == null ? 'non publié' : `${(v * 100).toFixed(d)} %`);
+
+  const sections: { titre: string; lignes: [string, string][] }[] = [
+    {
+      titre: 'Intermédiation',
+      lignes: [
+        ['Crédits à la clientèle (prêts)', md(kpis.creditsClientele)],
+        ['Dépôts de la clientèle', md(kpis.depotsClientele)],
+        ['Transformation (crédits / dépôts)', pc(kpis.transformation)],
+        ['Total actifs', md(kpis.totalActifs)],
+        ['Capitaux propres', md(kpis.capitauxPropres)],
+      ],
+    },
+    {
+      titre: 'Performance bancaire',
+      lignes: [
+        ["Marge nette d'intérêts (NIM)", pc(kpis.nim, 2)],
+        ["Coefficient d'exploitation", pc(kpis.costIncome)],
+        ['ROE', pc(kpis.roe)],
+        ['ROA', pc(kpis.roa, 2)],
+        ['Capitaux propres / actifs', pc(kpis.leverage)],
+        ['Créances douteuses / crédits', pc(kpis.nplRatio)],
+        ['Ratio de solvabilité (min 11,5 %)', pc(kpis.ratioSolvabilite)],
+      ],
+    },
+    {
+      titre: 'Score UEMOA /100',
+      lignes: [
+        ['Score global', score.total == null ? 'indicateurs insuffisants' : `${score.total} / 100`],
+        ['Confiance (part mesurable)', `${Math.round(score.confiance * 100)} %`],
+        ...score.axes.map((a): [string, string] => [
+          `  ${a.label}`,
+          a.disponibles === 0 ? 'non publié' : `${a.obtenus} / ${a.disponibles} pts`,
+        ]),
+      ],
+    },
+  ];
+  return sections;
+}

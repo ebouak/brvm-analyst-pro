@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { generateXlsxBlob } from '@/lib/export/xlsx';
 import type { IncomeStatement, BalanceSheet, CashFlowStatement, FundamentalRatios } from '@/lib/financials/types';
+import type { BankKpis, BankScore } from '@/lib/bank/kpis';
 
 interface Props {
   code: string;
@@ -11,15 +12,16 @@ interface Props {
   incomeStatements: IncomeStatement[];
   balanceSheets: BalanceSheet[];
   cashFlowStatements: CashFlowStatement[];
+  bank?: { kpis: BankKpis; score: BankScore; periode: string | null } | null;
 }
 
-export default function ExportBar({ code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements }: Props) {
+export default function ExportBar({ code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements, bank }: Props) {
   const [loadingXls, setLoadingXls] = useState(false);
 
   async function handleXls() {
     setLoadingXls(true);
     try {
-      const blob = await generateXlsxBlob({ code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements });
+      const blob = await generateXlsxBlob({ code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements, bank });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

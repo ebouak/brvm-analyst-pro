@@ -46,6 +46,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/conseiller', label: 'Conseiller' },
       { href: '/signaux', label: 'Signaux' },
       { href: '/screener', label: 'Screener' },
+      { href: '/scanner', label: 'Scanner technique' },
       { href: '/fondamentaux', label: 'Fondamentaux' },
       { href: '/backtest', label: 'Backtest' },
     ],
@@ -114,6 +115,11 @@ export const NAV_GROUPS: NavGroup[] = [
  * command palette ⌘K pour rester trouvables en 2 frappes.
  */
 export const PALETTE_EXTRA: NavItem[] = [
+  { href: '/screener/intraday', label: 'Screener intraday' },
+  { href: '/premium/calendrier', label: 'Agenda — dates clés', premium: true },
+  { href: '/portefeuille/import', label: 'Importer un relevé SGI (portefeuille)' },
+  { href: '/developers', label: 'API & widgets embarquables' },
+  { href: '/weekly/thesis', label: 'Référentiel matières premières' },
   { href: '/veille', label: 'Veille Intelligence' },
   { href: '/weekly', label: 'Analyses hebdo (matières premières)' },
   { href: '/conseiller/track-record', label: 'Track record du conseiller' },

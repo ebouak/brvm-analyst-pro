@@ -98,6 +98,7 @@ export default async function FinancialsPage({ params }: Props) {
             incomeStatements={data.incomeStatements}
             balanceSheets={data.balanceSheets}
             cashFlowStatements={data.cashFlowStatements}
+            bank={bankAnalysis}
           />
         </div>
 

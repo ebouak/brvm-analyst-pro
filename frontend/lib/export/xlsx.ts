@@ -1,6 +1,7 @@
 // frontend/lib/export/xlsx.ts
 import ExcelJS from 'exceljs';
 import type { IncomeStatement, BalanceSheet, CashFlowStatement, FundamentalRatios } from '@/lib/financials/types';
+import { bankExportSections, type BankKpis, type BankScore } from '@/lib/bank/kpis';
 
 const HDR = 'FF0F1117';
 const TXT = 'FFE6E9F0';
@@ -40,8 +41,10 @@ export async function generateXlsxBlob(params: {
   incomeStatements: IncomeStatement[];
   balanceSheets: BalanceSheet[];
   cashFlowStatements: CashFlowStatement[];
+  /** Analyse bancaire (famille banque uniquement). */
+  bank?: { kpis: BankKpis; score: BankScore; periode: string | null } | null;
 }): Promise<Blob> {
-  const { code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements } = params;
+  const { code, designation, secteur, ratios, incomeStatements, balanceSheets, cashFlowStatements, bank } = params;
   const wb = new ExcelJS.Workbook();
   wb.creator = 'WESTBOURSE';
   wb.created = new Date();
@@ -79,6 +82,28 @@ export async function generateXlsxBlob(params: {
   ratioRows.forEach(([label, val], i) => {
     dataRow(ws1, [label, val], 6 + i, i % 2 === 0);
   });
+
+  // Feuille bancaire (banques uniquement) : prêts, dépôts, NIM, score UEMOA.
+  if (bank) {
+    const wsb = wb.addWorksheet('Analyse bancaire');
+    wsb.getColumn(1).width = 36;
+    wsb.getColumn(2).width = 24;
+    wsb.getCell('A1').value = `Analyse bancaire UEMOA${bank.periode ? ` — exercice ${bank.periode}` : ''}`;
+    wsb.getCell('A1').font = { bold: true, size: 12, name: 'Calibri' };
+    let row = 3;
+    for (const sec of bankExportSections(bank.kpis, bank.score)) {
+      head(wsb, [sec.titre, ''], row);
+      row += 1;
+      sec.lignes.forEach(([label, val], i) => {
+        dataRow(wsb, [label, val], row, i % 2 === 0);
+        row += 1;
+      });
+      row += 1; // ligne vide entre sections
+    }
+    wsb.getCell(`A${row}`).value =
+      'Barème Commission Bancaire UMOA / FSI FMI. Indicateur non publié = neutralisé (hors calcul), confiance = part mesurable.';
+    wsb.getCell(`A${row}`).font = { color: { argb: MUT }, size: 8, italic: true, name: 'Calibri' };
+  }
 
   // Feuille 2 : Compte de résultat
   const ws2 = wb.addWorksheet('Compte de résultat');
