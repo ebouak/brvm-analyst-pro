@@ -7,6 +7,8 @@ import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import BankScorecard from '@/components/financials/BankScorecard';
+import ValueTrapBadge from '@/components/fundamentals/ValueTrapBadge';
+import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
@@ -61,6 +63,14 @@ export default async function FinancialsPage({ params }: Props) {
     });
     return { kpis, score: scoreBanqueUemoa(kpis), periode: latestIncome?.periode ?? null };
   })();
+
+  // Alerte value trap : PER (ratios) croisé avec la trajectoire du résultat net.
+  const trap = assessValueTrap({
+    per: ratios.per,
+    netIncomeSeries: [...data.incomeStatements]
+      .sort((a, b) => a.periode.localeCompare(b.periode))
+      .map((s) => s.resultat_net),
+  });
 
   const isBank = data.instrument.famille_comptable === 'banque';
   const revenuLabel = isBank ? 'PNB' : data.instrument.famille_comptable === 'assurance' ? 'Primes' : 'CA';
@@ -172,6 +182,9 @@ export default async function FinancialsPage({ params }: Props) {
             <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} />
           </div>
         )}
+
+        {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
+        <ValueTrapBadge result={trap} />
 
         {/* Fundamental analysis */}
         <div>

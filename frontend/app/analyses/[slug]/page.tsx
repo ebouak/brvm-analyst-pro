@@ -36,7 +36,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const loaded = await loadCitablePage(params.slug);
   if (!loaded) notFound();
 
-  const { page, dividend } = loaded;
+  const { page, dividend, perTrap } = loaded;
   const maj = fmtDate(page.updated_at);
 
   return (
@@ -78,6 +78,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
         {/* Le TABLEAU live — le cœur citable d'une page data. */}
         {dividend && <DividendTable data={dividend} />}
+        {perTrap && <PerTrapTable data={perTrap} />}
 
         {page.commentary_md && <Prose md={page.commentary_md} />}
 
@@ -193,9 +194,76 @@ function DividendTable({ data }: { data: NonNullable<LoadedCitable['dividend']> 
   );
 }
 
+/* ── Tableau des pièges du PER ────────────────────────────────────────────── */
+const TRAP_STYLE: Record<string, string> = {
+  danger: 'text-down',
+  warn: 'text-warn',
+  good: 'text-up',
+  neutral: 'text-muted',
+};
+function PerTrapTable({ data }: { data: NonNullable<LoadedCitable['perTrap']> }) {
+  if (data.rows.length === 0) {
+    return <p className="text-sm text-muted">Données de PER indisponibles pour le moment.</p>;
+  }
+  // On met en avant les pièges et pertes ; le détail complet suit.
+  const pieges = data.rows.filter((r) => r.severity === 'danger');
+  return (
+    <div className="space-y-2">
+      <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+        <table className="w-full text-sm">
+          <caption className="px-4 pt-3 text-left text-xs text-faint">
+            {data.rows.length} actions · PER = cours de la séance du {fmtDate(data.asOf)} ÷ BPA du
+            dernier exercice · <strong className="text-down">{pieges.length}</strong> signaux de
+            piège ou de perte
+          </caption>
+          <thead>
+            <tr className="border-b border-border/60 text-left text-xs text-muted">
+              <th className="px-4 py-3 font-medium">Action</th>
+              <th className="px-4 py-3 text-right font-medium">PER</th>
+              <th className="px-4 py-3 text-right font-medium">Résultat net (dern. ex.)</th>
+              <th className="px-4 py-3 text-right font-medium">Tendance</th>
+              <th className="px-4 py-3 font-medium">Verdict</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/40">
+            {data.rows.map((r) => (
+              <tr key={r.code} className={r.severity === 'danger' ? 'bg-down/5' : undefined}>
+                <td className="px-4 py-2.5">
+                  <Link href={`/societes/${r.code}`} className="font-medium text-ivory hover:text-accent">
+                    {r.nom}
+                  </Link>{' '}
+                  <span className="text-[11px] text-faint">({r.code})</span>
+                </td>
+                <td className="tabular px-4 py-2.5 text-right text-muted">
+                  {r.per == null ? '—' : r.per.toFixed(1)}
+                </td>
+                <td className="tabular px-4 py-2.5 text-right text-muted">
+                  {r.netDernier == null ? '—' : `${nf.format(Math.round(r.netDernier / 1e9 * 10) / 10)} Md`}
+                </td>
+                <td className="tabular px-4 py-2.5 text-right text-muted">
+                  {r.cagr == null ? '—' : `${r.cagr > 0 ? '+' : ''}${r.cagr.toFixed(0)} %/an`}
+                </td>
+                <td className={`px-4 py-2.5 text-xs font-medium ${TRAP_STYLE[r.severity] ?? 'text-muted'}`}>
+                  {r.label}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-[11px] text-faint">
+        PER = cours ÷ bénéfice par action du dernier exercice publié (aligné sur les fiches sociétés
+        Sika Finance). Le verdict croise le PER avec la <strong className="text-muted">trajectoire
+        du résultat net</strong> : un PER bas n&apos;est une décote que si le bénéfice tient. Analyse
+        automatique à but éducatif, recalculée à chaque séance.
+      </p>
+    </div>
+  );
+}
+
 /* ── JSON-LD : Article + Dataset (si data) + FAQPage ──────────────────────── */
 function JsonLd({ loaded }: { loaded: LoadedCitable }) {
-  const { page, dividend } = loaded;
+  const { page, dividend, perTrap } = loaded;
   const url = `${SITE}/analyses/${page.slug}`;
 
   const graph: Record<string, unknown>[] = [
@@ -222,6 +290,19 @@ function JsonLd({ loaded }: { loaded: LoadedCitable }) {
       dateModified: dividend.asOf ?? page.updated_at,
       temporalCoverage: dividend.asOf ?? undefined,
       variableMeasured: 'Rendement du dividende (dividende brut / cours de clôture)',
+    });
+  }
+
+  if (perTrap && perTrap.rows.length > 0) {
+    graph.push({
+      '@type': 'Dataset',
+      '@id': `${url}#dataset`,
+      name: page.title,
+      description: page.short_answer,
+      creator: { '@id': `${SITE}/#organization` },
+      dateModified: perTrap.asOf ?? page.updated_at,
+      temporalCoverage: perTrap.asOf ?? undefined,
+      variableMeasured: 'PER (cours / BPA) et verdict value trap (croisement PER × trajectoire du résultat net)',
     });
   }
 

@@ -1,6 +1,7 @@
 import 'server-only';
 import { createPublicClient } from '@/lib/supabase/public';
 import { buildDividendYield, type YieldRow } from './dividendYield';
+import { buildPerValueTrap, type PerTrapRow } from './perValueTrap';
 
 /**
  * Chargement d'une page citable : le calque éditable (table citable_pages) + le
@@ -38,10 +39,17 @@ export interface DividendDataset {
   exerciceRef: number;
 }
 
+export interface PerTrapDataset {
+  rows: PerTrapRow[];
+  /** Date de la séance des cours utilisés. */
+  asOf: string | null;
+}
+
 /** La page + son jeu de données (null si la page n'est pas de type data). */
 export interface LoadedCitable {
   page: CitablePage;
   dividend?: DividendDataset;
+  perTrap?: PerTrapDataset;
 }
 
 export async function loadCitablePage(slug: string): Promise<LoadedCitable | null> {
@@ -62,8 +70,45 @@ export async function loadCitablePage(slug: string): Promise<LoadedCitable | nul
   if (page.kind === 'data' && page.data_source === 'dividend_yield') {
     result.dividend = await loadDividendDataset();
   }
+  if (page.kind === 'data' && page.data_source === 'per_value_trap') {
+    result.perTrap = await loadPerTrapDataset();
+  }
 
   return result;
+}
+
+/** Jeu de données « pièges du PER » : PER × trajectoire du résultat net. */
+async function loadPerTrapDataset(): Promise<PerTrapDataset> {
+  const db = createPublicClient();
+
+  const { data: lastRow } = await db
+    .from('brvm_actions_daily')
+    .select('date_marche')
+    .not('cours_jour', 'is', null)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const asOf = (lastRow as { date_marche: string } | null)?.date_marche ?? null;
+  if (!asOf) return { rows: [], asOf: null };
+
+  const [{ data: income }, { data: cours }] = await Promise.all([
+    db
+      .from('income_statements')
+      .select('code, periode, resultat_net, benefice_par_action')
+      .eq('type_periode', 'annuel'),
+    db
+      .from('brvm_actions_daily')
+      .select('code, cours_jour, designation')
+      .eq('date_marche', asOf)
+      .not('cours_jour', 'is', null),
+  ]);
+
+  const rows = buildPerValueTrap(
+    (income ?? []) as { code: string; periode: string; resultat_net: number | null; benefice_par_action: number | null }[],
+    (cours ?? []) as { code: string; cours_jour: number; designation: string | null }[],
+  );
+  return { rows, asOf };
 }
 
 /** Jeu de données « rendement du dividende » : dernière séance + dividendes confirmés. */

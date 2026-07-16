@@ -7,6 +7,8 @@ import RatioCard from './RatioCard';
 import RangeBar from './RangeBar';
 import EditFundamentalsModal from './EditFundamentalsModal';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
+import ValueTrapBadge from './ValueTrapBadge';
+import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 
 export interface FundamentalsPanelProps {
   code: string;
@@ -56,6 +58,12 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
   const divSuffix = p.dividendeExercice != null && !p.dividendeVerifie
     ? ` (ex. ${p.dividendeExercice})` : '';
 
+  // Alerte value trap : croise le PER avec la trajectoire du résultat net.
+  const trap = assessValueTrap({
+    per: r.per,
+    netIncomeSeries: sortedHist.map((h) => h.net_income),
+  });
+
   const revenuLabel = p.famille === 'banque' ? 'PNB' : p.famille === 'assurance' ? 'Primes' : 'CA';
   const chartPoints: FundaChartPoint[] = sortedHist.map((h) => ({
     periode: String(h.year),
@@ -89,6 +97,8 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
       {p.range52.low != null && (
         <RangeBar title="52 semaines" low={p.range52.low} high={p.range52.high} current={p.range52.current} />
       )}
+
+      <ValueTrapBadge result={trap} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Section title="Générales">
