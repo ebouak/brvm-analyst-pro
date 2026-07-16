@@ -1,3 +1,4 @@
+import { getVerifiedDividends } from '@/lib/dividends/verified';
 import { createPublicClient } from '@/lib/supabase/public';
 import { getDcfRanking } from '@/lib/dcf/ranking';
 import { recommend, type AdvisorResult } from './recommend';
@@ -42,12 +43,11 @@ export async function getAdvisorRecommendations(): Promise<AdvisorRow[]> {
     }
   }
 
-  // Dernier dividende par code → rendement.
-  const { data: divs } = await sb.from('dividends').select('code, montant, exercice').order('exercice', { ascending: false });
+  // Dividende VÉRIFIÉ (détachement daté) par code → rendement. Source unique,
+  // jamais les valeurs société biaisées. Voir lib/dividends/verified.ts.
+  const verified = await getVerifiedDividends(sb);
   const divByCode = new Map<string, number>();
-  for (const d of (divs ?? []) as { code: string; montant: number }[]) {
-    if (!divByCode.has(d.code)) divByCode.set(d.code, d.montant); // le plus récent
-  }
+  for (const [code, v] of verified) divByCode.set(code, v.montant);
 
   // Historique ~30 séances par code (sparkline de tendance).
   const sparkByCode = new Map<string, number[]>();

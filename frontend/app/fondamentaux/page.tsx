@@ -1,5 +1,6 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
+import { getVerifiedDividends } from '@/lib/dividends/verified';
 import FundamentalsTable, { type ScreenerRow } from '@/components/fundamentals/FundamentalsTable';
 import {
   SectionHeader,
@@ -17,11 +18,13 @@ export const metadata = { title: 'Analyse fondamentale' };
 
 async function getData(): Promise<ScreenerRow[]> {
   const sb = createPublicClient();
-  const [{ data: instruments }, { data: funds }, { data: quotes }, { data: divs }] = await Promise.all([
+  const [{ data: instruments }, { data: funds }, { data: quotes }, verifiedDivs] = await Promise.all([
     sb.from('brvm_instruments').select('code, designation, secteur, shares').eq('type', 'action').eq('actif', true),
     sb.from('fundamentals').select('code, year, revenue, net_income, equity, debt, is_manual').order('year', { ascending: false }),
     sb.from('brvm_actions_daily').select('code, cours_jour, date_marche').order('date_marche', { ascending: false }),
-    sb.from('dividends').select('code, montant, ex_date').order('ex_date', { ascending: false }),
+    // Dividendes VÉRIFIÉS (détachement daté) — source unique, jamais les valeurs
+    // société biaisées. Voir lib/dividends/verified.ts.
+    getVerifiedDividends(sb),
   ]);
 
   const lastCours: Record<string, number | null> = {};
@@ -35,7 +38,7 @@ async function getData(): Promise<ScreenerRow[]> {
     if (best) lastFund[code] = { revenue: best.revenue, net_income: best.net_income, equity: best.equity, debt: best.debt ?? null };
   }
   const lastDiv: Record<string, number | null> = {};
-  for (const d of (divs ?? []) as { code: string; montant: number | null }[]) if (!(d.code in lastDiv)) lastDiv[d.code] = d.montant;
+  for (const [code, v] of verifiedDivs) lastDiv[code] = v.montant;
 
   return ((instruments ?? []) as { code: string; designation: string | null; secteur: string | null; shares: number | null }[]).map((ins) => {
     const f = lastFund[ins.code] ?? { revenue: null, net_income: null, equity: null, debt: null };

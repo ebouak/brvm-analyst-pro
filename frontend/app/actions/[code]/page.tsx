@@ -347,7 +347,11 @@ export default async function InstrumentPage({
     ? last.cours_jour - last.cours_precedent : null;
 
   // Rendement dividende
-  const lastDiv = (dividends as { montant: number; ex_date: string; payment_date?: string }[])[0];
+  // Dividende VÉRIFIÉ : le plus récent à détachement daté (ex_date). Les valeurs
+  // société sans date sont biaisées (~12 %) — on ne les utilise pas pour le
+  // rendement affiché. Cohérent avec /fondamentaux, /analyses et le comparateur.
+  const lastDiv = (dividends as { montant: number; ex_date: string | null; payment_date?: string }[])
+    .find((d) => d.ex_date && d.montant > 0) ?? null;
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
     ? (lastDiv.montant / last.cours_jour) * 100 : null;
 

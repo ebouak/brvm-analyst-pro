@@ -1,3 +1,4 @@
+import { getVerifiedDividends } from '@/lib/dividends/verified';
 import { createPublicClient } from '@/lib/supabase/public';
 import { yieldToMaturity, yearsTo, parseObligationDesignation } from '@/lib/bonds';
 import { toReturns, buildComparison, type AssetClassPoint } from './assetClasses';
@@ -41,9 +42,11 @@ export async function getAssetComparison(): Promise<AssetClassPoint[]> {
 
   // 3) Revenu dividende : rendement moyen (dernier montant / dernier cours).
   let dividendYield: number | null = null;
-  const { data: divData } = await sb.from('dividends').select('code, montant, exercice').order('exercice', { ascending: false });
+  // Dividendes VÉRIFIÉS (détachement daté) — source unique, jamais les valeurs
+  // société biaisées. Voir lib/dividends/verified.ts.
+  const verified = await getVerifiedDividends(sb);
   const latestDiv = new Map<string, number>();
-  for (const d of (divData ?? []) as { code: string; montant: number }[]) if (!latestDiv.has(d.code)) latestDiv.set(d.code, d.montant);
+  for (const [code, v] of verified) latestDiv.set(code, v.montant);
   const divCodes = [...latestDiv.keys()];
   if (divCodes.length) {
     const { data: lastActRow } = await sb.from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1);

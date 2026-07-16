@@ -122,7 +122,12 @@ export default async function CompanyPage({ params }: PageProps) {
   const positive = (variation ?? 0) >= 0;
 
   const bestFund = pickBestFundamental(fundamentals);
-  const lastDividend = dividends[0] ?? null;
+  // Dividende VÉRIFIÉ (détachement daté) pour le rendement : les valeurs société
+  // sans ex_date sont biaisées (~12 %). Cohérent avec le reste du site.
+  const lastDividend =
+    (dividends as { montant: number; ex_date: string | null }[]).find((d) => d.ex_date && d.montant > 0)
+    ?? dividends[0]
+    ?? null;
   const ratios = bestFund
     ? computeRatios({
         cours,

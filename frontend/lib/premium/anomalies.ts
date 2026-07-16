@@ -1,3 +1,4 @@
+import { getVerifiedDividends } from '@/lib/dividends/verified';
 import { createClient } from '@/lib/supabase/server';
 
 export interface PointDividende {
@@ -27,10 +28,9 @@ export async function getAnomaliesData() {
     .select('code, year, revenue, net_income, equity')
     .order('year', { ascending: false });
 
-  const { data: divs } = await supabase
-    .from('dividends')
-    .select('code, montant, exercice')
-    .order('exercice', { ascending: false });
+  // Dividendes VÉRIFIÉS (détachement daté) — source unique, jamais les valeurs
+  // société biaisées. Voir lib/dividends/verified.ts.
+  const verifiedDivs = await getVerifiedDividends(supabase);
 
   const { data: signals } = await supabase
     .from('signals_daily')
@@ -59,9 +59,7 @@ export async function getAnomaliesData() {
   }
 
   const divMap = new Map<string, number>();
-  for (const d of divs ?? []) {
-    if (!divMap.has(d.code)) divMap.set(d.code, Number(d.montant));
-  }
+  for (const [code, v] of verifiedDivs) divMap.set(code, v.montant);
 
   const signalMap = new Map<string, string>();
   for (const s of signals ?? []) {
