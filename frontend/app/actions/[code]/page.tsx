@@ -163,7 +163,9 @@ async function getData(code: string, fromDate?: string) {
         .from('dividends')
         .select('montant, ex_date, payment_date, exercice')
         .eq('code', code)
-        .order('ex_date', { ascending: false })
+        // Tri par exercice (toujours renseigné). Trier par ex_date mettait les
+        // NULL en tête (PostgREST) et pouvait évincer les lignes datées du limit.
+        .order('exercice', { ascending: false })
         .limit(6),
       supabase
         .from('market_events')
@@ -347,11 +349,13 @@ export default async function InstrumentPage({
     ? last.cours_jour - last.cours_precedent : null;
 
   // Rendement dividende
-  // Dividende VÉRIFIÉ : le plus récent à détachement daté (ex_date). Les valeurs
-  // société sans date sont biaisées (~12 %) — on ne les utilise pas pour le
-  // rendement affiché. Cohérent avec /fondamentaux, /analyses et le comparateur.
-  const lastDiv = (dividends as { montant: number; ex_date: string | null; payment_date?: string }[])
-    .find((d) => d.ex_date && d.montant > 0) ?? null;
+  // Priorité au dividende VÉRIFIÉ (détachement daté). À défaut, repli sur le
+  // dividende du dernier exercice (montants alignés Sika Finance depuis la
+  // reconstruction de la table) — c'est le rendement « trailing » standard.
+  // Le repli est signalé à l'utilisateur (exercice affiché, date non publiée).
+  const divRows = dividends as { montant: number; ex_date: string | null; exercice: number | null; payment_date?: string }[];
+  const lastDivVerifie = divRows.find((d) => d.ex_date && d.montant > 0) ?? null;
+  const lastDiv = lastDivVerifie ?? divRows.find((d) => d.montant > 0) ?? null;
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
     ? (lastDiv.montant / last.cours_jour) * 100 : null;
 
@@ -955,11 +959,21 @@ export default async function InstrumentPage({
               }}
               sharesSource={instrument?.shares_source ?? null}
               isManual={latest.is_manual ?? false}
-              history={fundamentals
-                .filter((f) => (f.is_manual ?? false) === (latest.is_manual ?? false))
-                .map((f) => ({ year: f.year ?? 0, revenue: f.revenue, net_income: f.net_income }))}
+              history={(() => {
+                // Un point par exercice (le corrigé manuellement l'emporte), sans
+                // filtrer par is_manual : sinon une seule ligne corrigée vidait
+                // l'historique et la croissance devenait « non disponible ».
+                const byYear = new Map<number, { year: number; revenue: number | null; net_income: number | null }>();
+                for (const f of [...fundamentals].sort((a, b) => (a.is_manual ? 1 : 0) - (b.is_manual ? 1 : 0))) {
+                  if (f.year != null) byYear.set(f.year, { year: f.year, revenue: f.revenue, net_income: f.net_income });
+                }
+                return [...byYear.values()];
+              })()}
               sourceUrl={null}
               range52={range52}
+              famille={(instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null}
+              dividendeExercice={lastDiv?.exercice ?? null}
+              dividendeVerifie={lastDivVerifie != null}
             />
           </div>
         );
