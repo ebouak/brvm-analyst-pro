@@ -21,6 +21,10 @@ const nextConfig = {
     return [
       // Squelette premium fusionné avec la vraie page backtest (audit 2026-06-12)
       { source: '/premium/backtesting', destination: '/backtest', permanent: true },
+      // /rendement-reel fusionné dans /rendement-vrai (vue « cours seul · réel »).
+      // 308 edge — les query params entrants (code, annees) sont conservés et
+      // fusionnés avec mode=reel. Consolide le SEO des deux anciennes URL.
+      { source: '/rendement-reel', destination: '/rendement-vrai?mode=reel', permanent: true },
     ];
   },
   // En-têtes de sécurité HTTP sur toutes les routes. (Étaient définis dans un
