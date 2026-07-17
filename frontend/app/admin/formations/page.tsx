@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard } from '@/components/ui/premium';
 import { loadAdminFormations } from '@/lib/admin/formations';
@@ -18,6 +19,18 @@ export default async function Page() {
         <MetricCard label="Total" value={String(kpis.total)} />
         <MetricCard label="Publiées" value={String(kpis.published)} />
       </div>
+
+      <Link
+        href="/admin/formations/modules"
+        className="flex items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/[0.05] px-4 py-3 transition hover:border-accent/50"
+      >
+        <div>
+          <p className="text-sm font-semibold text-ivory">🎬 Modules vidéo interactifs</p>
+          <p className="text-xs text-muted">Cours multi-leçons : collez un lien YouTube/Vimeo, chapitres, quiz, progression.</p>
+        </div>
+        <span className="text-sm font-semibold text-accent">Gérer →</span>
+      </Link>
+
       <FormationsAdmin rows={rows} />
     </div>
   );
