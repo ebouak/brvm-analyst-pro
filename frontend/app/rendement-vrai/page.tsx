@@ -5,6 +5,7 @@ import {
 } from '@/lib/macro/unifiedReturn';
 import { RendementExplorer } from '@/components/rendement/RendementExplorer';
 import { SectionHeader } from '@/components/ui/premium';
+import SignupCta from '@/components/public/SignupCta';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,12 @@ export default async function Page({
           <Link href="/" className="font-display tracking-tight text-white hover:text-accent">
             WESTBOURSE
           </Link>
-          <Link href="/" className="text-sm text-muted hover:text-white">← Accueil</Link>
+          <div className="flex items-center gap-3 text-sm">
+            <Link href="/login" className="text-muted hover:text-white">Connexion</Link>
+            <Link href="/signup" className="rounded-lg bg-accent px-3.5 py-1.5 font-semibold text-bg transition-colors hover:bg-gold-2 active:scale-95">
+              Créer un compte
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -219,6 +225,11 @@ export default async function Page({
             </section>
           </>
         )}
+
+        <SignupCta
+          titre="Suivez le rendement vrai de tout votre portefeuille"
+          sousTitre="Cette page est publique. Le compte gratuit débloque le suivi de portefeuille, les alertes et les signaux."
+        />
       </main>
     </div>
   );

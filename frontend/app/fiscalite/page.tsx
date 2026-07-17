@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { BAREME, PAYS_LABELS, type PaysUemoa, type TypeRevenu } from '@/lib/tax/rates';
 import TaxCalculator from '@/components/tax/TaxCalculator';
 import { SectionHeader } from '@/components/ui/premium';
+import SignupCta from '@/components/public/SignupCta';
 
 export const metadata: Metadata = {
   title: 'Fiscalité des dividendes et obligations BRVM (IRVM/IRC)',
@@ -48,6 +49,17 @@ const FAQ: { q: string; a: string }[] = [
 export default function FiscalitePage() {
   return (
     <div className="min-h-screen bg-bg">
+      <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
+          <Link href="/" className="font-display tracking-tight text-white hover:text-accent">WESTBOURSE</Link>
+          <div className="flex items-center gap-3 text-sm">
+            <Link href="/login" className="text-muted hover:text-white">Connexion</Link>
+            <Link href="/signup" className="rounded-lg bg-accent px-3.5 py-1.5 font-semibold text-bg transition-colors hover:bg-gold-2 active:scale-95">
+              Créer un compte
+            </Link>
+          </div>
+        </div>
+      </header>
       <div className="mx-auto max-w-4xl px-4 py-10 space-y-8">
         <SectionHeader
           accent="emerald"
@@ -117,6 +129,11 @@ export default function FiscalitePage() {
             l&apos;espace Dividendes
           </Link>.
         </p>
+
+        <SignupCta
+          titre="Calculez le net de vos dividendes, automatiquement"
+          sousTitre="Cette page est publique. Le compte gratuit applique la fiscalité à vos vraies positions et vous alerte aux détachements."
+        />
       </div>
     </div>
   );

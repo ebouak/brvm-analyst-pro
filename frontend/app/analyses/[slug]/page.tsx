@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { loadCitablePage, type LoadedCitable } from '@/lib/citable/page';
 import { SectionHeader } from '@/components/ui/premium';
+import SignupCta from '@/components/public/SignupCta';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +45,13 @@ export default async function Page({ params }: { params: { slug: string } }) {
       <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-6">
           <Link href="/" className="font-display tracking-tight text-white hover:text-accent">WESTBOURSE</Link>
-          <Link href="/analyses" className="text-sm text-muted hover:text-white">← Analyses</Link>
+          <div className="flex items-center gap-3 text-sm">
+            <Link href="/analyses" className="hidden text-muted hover:text-white sm:block">← Analyses</Link>
+            <Link href="/login" className="text-muted hover:text-white">Connexion</Link>
+            <Link href="/signup" className="rounded-lg bg-accent px-3.5 py-1.5 font-semibold text-bg transition-colors hover:bg-gold-2 active:scale-95">
+              Créer un compte
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -117,6 +124,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
             </dl>
           </section>
         )}
+
+        <SignupCta
+          titre="Analysez la BRVM avec les bons outils"
+          sousTitre="Cette analyse est publique. Le compte gratuit débloque les signaux, les fiches complètes et le simulateur."
+        />
 
         <p className="border-t border-border/60 pt-4 text-[11px] text-faint">
           Information à but éducatif — ne constitue pas un conseil en investissement. Les cours et
