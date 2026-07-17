@@ -71,6 +71,31 @@ export default async function FormationsPage() {
         </div>
       </Link>
 
+      {/* ── Modules vidéo interactifs ─────────────────────────────────────── */}
+      <Link href="/formations/modules"
+        className="group flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-surface p-6 transition-all hover:border-accent/50">
+        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-3xl">
+          🎬
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-accent">Vidéo</span>
+            <StatPill tone="sapphire">Chapitres</StatPill>
+            <StatPill tone="neutral">Quiz + progression</StatPill>
+          </div>
+          <h2 className="font-display text-xl text-white transition-colors group-hover:text-accent">
+            Modules vidéo interactifs
+          </h2>
+          <p className="mt-1 max-w-xl text-sm text-muted leading-relaxed">
+            Des cours en vidéo chapitrés, avec quiz de validation et suivi de progression. Reprenez
+            exactement là où vous vous êtes arrêté.
+          </p>
+          <span className="mt-3 inline-block text-[11px] font-semibold text-accent group-hover:underline">
+            Voir les modules →
+          </span>
+        </div>
+      </Link>
+
       {/* ── Cours générés (Academy IA) ────────────────────────────────────── */}
       {courses.length > 0 && (
         <div className="space-y-3">

@@ -49,6 +49,8 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
       "font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com",
       "img-src 'self' data: blob: https:",
+      // Vidéos des modules formation : MP4 hébergés sur Supabase Storage (ou blob local).
+      "media-src 'self' blob: data: https://*.supabase.co",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.de.sentry.io https://challenges.cloudflare.com https://api.fontshare.com https://eu.i.posthog.com https://eu-assets.i.posthog.com",
       "frame-src 'self' https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "worker-src 'self' blob:",
