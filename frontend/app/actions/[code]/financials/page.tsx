@@ -12,6 +12,11 @@ import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
+import { canAccess } from '@/lib/server/featureAccess';
+import { SectionLock } from '@/components/premium/SectionLock';
+
+const lockLevel = (required: string): 'premium' | 'pro' | 'disabled' =>
+  required === 'pro' ? 'pro' : required === 'disabled' ? 'disabled' : 'premium';
 
 interface Props {
   params: { code: string };
@@ -72,6 +77,12 @@ export default async function FinancialsPage({ params }: Props) {
       .map((s) => s.resultat_net),
   });
 
+  // Gating premium — aligné sur la fiche action : l'analyse fondamentale (ratios,
+  // graphiques, analyse bancaire, value trap) suit le flag `fondamentaux`, la
+  // valorisation (Graham/DCF/score) suit `dcf`. Les ÉTATS FINANCIERS BRUTS
+  // restent publics (SEO/GEO). Éditable dans /admin/features sans redéploiement.
+  const [gateFonda, gateValo] = await Promise.all([canAccess('fondamentaux'), canAccess('dcf')]);
+
   const isBank = data.instrument.famille_comptable === 'banque';
   const revenuLabel = isBank ? 'PNB' : data.instrument.famille_comptable === 'assurance' ? 'Primes' : 'CA';
 
@@ -119,19 +130,26 @@ export default async function FinancialsPage({ params }: Props) {
               </span>
             )}
           </div>
-          <ExportBar
-            code={code}
-            designation={data.instrument.designation}
-            secteur={data.instrument.secteur}
-            ratios={ratios}
-            incomeStatements={data.incomeStatements}
-            balanceSheets={data.balanceSheets}
-            cashFlowStatements={data.cashFlowStatements}
-            bank={bankAnalysis}
-          />
+          {/* Export (Excel/PDF) : embarque ratios + analyse bancaire → premium.
+              Non rendu pour un gratuit (sinon la donnée premium fuit par le fichier). */}
+          {gateFonda.allowed && (
+            <ExportBar
+              code={code}
+              designation={data.instrument.designation}
+              secteur={data.instrument.secteur}
+              ratios={ratios}
+              incomeStatements={data.incomeStatements}
+              balanceSheets={data.balanceSheets}
+              cashFlowStatements={data.cashFlowStatements}
+              bank={bankAnalysis}
+            />
+          )}
         </div>
 
-        {/* Panneau valorisation */}
+        {/* Panneau valorisation — premium (flag dcf) */}
+        {!gateValo.allowed ? (
+          <SectionLock required={lockLevel(gateValo.required)} titre="Valorisation (Graham, DCF, score)" pitch="Juste prix, marge de sécurité et score de valorisation." />
+        ) : (
         <div className="bg-surface border border-border rounded-xl p-4 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted uppercase tracking-wide">Valorisation</span>
@@ -165,6 +183,7 @@ export default async function FinancialsPage({ params }: Props) {
             <p className="text-xs text-faint">BPA, PB ou FCF manquants pour calculer la valorisation.</p>
           )}
         </div>
+        )}
 
         {/* 52-week range */}
         <div className="bg-surface border border-border rounded-xl p-5">
@@ -175,29 +194,42 @@ export default async function FinancialsPage({ params }: Props) {
           />
         </div>
 
-        {/* Analyse bancaire UEMOA (banques uniquement) */}
-        {bankAnalysis && (
-          <div>
-            <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse bancaire UEMOA</p>
-            <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} />
-          </div>
-        )}
+        {/* ── Analyse fondamentale (premium, flag `fondamentaux`) ──
+            Ratios, value trap, analyse bancaire et graphiques : réservés.
+            Un anonyme/gratuit voit un cadenas, pas les valeurs (vrai verrou). */}
+        {!gateFonda.allowed ? (
+          <SectionLock
+            required={lockLevel(gateFonda.required)}
+            titre="Analyse fondamentale"
+            pitch="Ratios (PER, ROE, marge…), détection de value trap, graphiques pluriannuels"
+          />
+        ) : (
+          <>
+            {/* Analyse bancaire UEMOA (banques uniquement) */}
+            {bankAnalysis && (
+              <div>
+                <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse bancaire UEMOA</p>
+                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} />
+              </div>
+            )}
 
-        {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
-        <ValueTrapBadge result={trap} />
+            {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
+            <ValueTrapBadge result={trap} />
 
-        {/* Fundamental analysis */}
-        <div>
-          <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Ratios fondamentaux</p>
-          <FundamentalAnalysis ratios={ratios} famille={data.instrument.famille_comptable} />
-        </div>
+            {/* Ratios fondamentaux */}
+            <div>
+              <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Ratios fondamentaux</p>
+              <FundamentalAnalysis ratios={ratios} famille={data.instrument.famille_comptable} />
+            </div>
 
-        {/* Analyse graphique pluriannuelle */}
-        {chartPoints.length >= 2 && (
-          <div>
-            <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse graphique</p>
-            <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} />
-          </div>
+            {/* Analyse graphique pluriannuelle */}
+            {chartPoints.length >= 2 && (
+              <div>
+                <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse graphique</p>
+                <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} />
+              </div>
+            )}
+          </>
         )}
 
         {/* Financial statement tabs */}
