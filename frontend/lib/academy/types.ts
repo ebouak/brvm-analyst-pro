@@ -33,7 +33,7 @@ export const qcmSchema = z.object({
  */
 export const chartSchema = z
   .object({
-    type: z.enum(['bar', 'line']),
+    type: z.enum(['bar', 'line', 'pie']),
     titre: z.string().min(1).max(160),
     labels: z.array(z.string().min(1).max(40)).min(2).max(10),
     valeurs: z.array(z.number()).min(2).max(10),
@@ -59,6 +59,8 @@ export const lessonSchema = z.object({
   resume: z.string().min(1).max(600),
   sections: z.array(sectionSchema).min(1).max(8),
   chart: chartSchema.nullable().optional(),
+  // Graphiques multiples (leçons enrichies) — rendus après `chart`.
+  charts: z.array(chartSchema).max(4).optional().default([]),
   qcm: qcmSchema.nullable().optional(),
   // Mots-clés EN fournis par le LLM pour rechercher une image (ex. "stock market chart").
   imageQuery: z.string().max(120).nullable().optional(),

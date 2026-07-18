@@ -84,6 +84,7 @@ export default function LessonContent({
       })}
 
       {lesson.chart && <LessonChart chart={lesson.chart} />}
+      {lesson.charts?.map((c, i) => <LessonChart key={`c${i}`} chart={c} />)}
 
       {exercise && (
         <ExerciseBlock
