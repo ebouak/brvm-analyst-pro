@@ -22,6 +22,7 @@ interface HubCourse {
   niveau: string | null;
   resume: string | null;
   lessonsCount: number;
+  cover: string | null;
 }
 
 export default async function AcademyHubPage() {
@@ -49,6 +50,7 @@ export default async function AcademyHubPage() {
   }[]).map((r) => ({
     id: r.id, slug: r.slug, titre: r.titre, niveau: r.niveau, resume: r.resume,
     lessonsCount: r.content?.lessons?.length ?? 0,
+    cover: r.content?.lessons?.find((l) => l.image?.url)?.image?.url ?? null,
   }));
 
   // Progression de l'utilisateur (RLS owner via session).
@@ -107,8 +109,13 @@ export default async function AcademyHubPage() {
                     <Link
                       key={c.slug}
                       href={`/formations/academy/${c.slug}${p.done > 0 ? `?lecon=${p.nextIdx + 1}` : ''}`}
-                      className="group flex flex-col rounded-xl border border-border bg-surface p-5 transition hover:border-accent/40"
+                      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition hover:border-accent/40"
                     >
+                      {c.cover && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.cover} alt="" className="h-28 w-full object-cover" loading="lazy" />
+                      )}
+                      <div className="flex flex-1 flex-col p-5">
                       <h3 className="font-display text-base text-white transition group-hover:text-accent">
                         {c.titre}
                       </h3>
@@ -121,6 +128,7 @@ export default async function AcademyHubPage() {
                           {c.lessonsCount} leçons ·{' '}
                           {p.pct === 0 ? 'non commencé' : p.pct === 100 ? 'terminé ✓' : `${p.pct} %`}
                         </p>
+                      </div>
                       </div>
                     </Link>
                   );
