@@ -1,6 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { loadExercise } from '@/lib/academy/exercisesServer';
+import { withinTolerance } from '@/lib/academy/exercises';
 
 /**
  * Actions du shell Academy. RLS OWNER : chaque upsert fixe user_id = auth.uid()
@@ -45,6 +47,40 @@ export async function saveQuizResult(
     quiz_score: correct ? 100 : 0,
     quiz_passed: correct,
   });
+}
+
+export interface ExerciseCheck {
+  ok: boolean;
+  correct?: boolean;
+  /** Corrigé lisible (ex. « 7,7 » ou l'option correcte). */
+  attendu?: string;
+  explication?: string;
+}
+
+/**
+ * Corrige un exercice live : recharge les MÊMES données côté serveur, compare
+ * avec tolérance, enregistre le résultat (exercice_passed).
+ */
+export async function checkExercise(
+  courseId: string,
+  lessonIdx: number,
+  exerciseId: string,
+  answer: number,
+): Promise<ExerciseCheck> {
+  const built = await loadExercise(exerciseId);
+  if (!built) return { ok: false };
+
+  const correct = built.pub.type === 'choice'
+    ? Math.round(answer) === built.expected
+    : withinTolerance(answer, built.expected, built.tolerancePct);
+
+  await upsertProgress(courseId, lessonIdx, { exercice_passed: correct });
+
+  const attendu = built.pub.type === 'choice'
+    ? built.pub.options?.[built.expected] ?? String(built.expected)
+    : `${built.expected.toFixed(2)}${built.pub.unite ? ` ${built.pub.unite}` : ''}`;
+
+  return { ok: true, correct, attendu, explication: built.explication };
 }
 
 /** Sauvegarde la note personnelle (vide → suppression de la ligne). */

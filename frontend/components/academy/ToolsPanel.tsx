@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { CourseContent, Lesson } from '@/lib/academy/types';
 
-type Tab = 'notes' | 'glossaire' | 'ressources';
+type Tab = 'notes' | 'glossaire' | 'ressources' | 'discussion';
 
 export default function ToolsPanel({
   lesson,
@@ -22,7 +22,7 @@ export default function ToolsPanel({
   return (
     <div className="rounded-xl border border-border bg-surface">
       <div className="flex border-b border-border/60" role="tablist" aria-label="Outils">
-        {([['notes', 'Notes'], ['glossaire', 'Glossaire'], ['ressources', 'Ressources']] as const).map(([id, label]) => (
+        {([['notes', 'Notes'], ['glossaire', 'Glossaire'], ['ressources', 'Ressources'], ['discussion', 'Discussion']] as const).map(([id, label]) => (
           <button
             key={id}
             type="button"
@@ -41,6 +41,33 @@ export default function ToolsPanel({
         {tab === 'notes' && <NotesTab key={note} initial={note} onSave={onSaveNote} />}
         {tab === 'glossaire' && <GlossaireTab items={content.glossaire ?? []} />}
         {tab === 'ressources' && <RessourcesTab lesson={lesson} content={content} />}
+        {tab === 'discussion' && <DiscussionTab courseTitre={content.titre} />}
+      </div>
+    </div>
+  );
+}
+
+/** Discussion : on réutilise le forum communautaire — pas de système parallèle. */
+function DiscussionTab({ courseTitre }: { courseTitre: string }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs leading-relaxed text-muted">
+        Une question sur ce cours ? Posez-la à la communauté sur le forum — mentionnez
+        « <span className="text-ivory">{courseTitre}</span> » dans le titre pour être retrouvé facilement.
+      </p>
+      <div className="flex flex-col gap-2">
+        <Link
+          href="/forum/nouveau"
+          className="rounded-lg bg-accent px-3 py-2 text-center text-xs font-semibold text-bg transition hover:bg-gold-2 active:scale-95"
+        >
+          Poser une question sur le forum
+        </Link>
+        <Link
+          href="/forum"
+          className="rounded-lg border border-border px-3 py-2 text-center text-xs text-muted transition hover:text-white"
+        >
+          Voir les discussions
+        </Link>
       </div>
     </div>
   );

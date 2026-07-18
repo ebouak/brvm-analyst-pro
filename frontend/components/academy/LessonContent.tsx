@@ -2,8 +2,10 @@
 
 import type { Lesson } from '@/lib/academy/types';
 import { SECTION_LABEL } from '@/lib/academy/types';
+import type { PublicExercise } from '@/lib/academy/exercises';
 import QcmBlock from './QcmBlock';
 import LessonChart from './LessonChart';
+import ExerciseBlock from './ExerciseBlock';
 
 /** Styles par type de section — hiérarchie visuelle du manuel. */
 const SECTION_STYLE: Record<string, { box: string; badge: string }> = {
@@ -19,10 +21,20 @@ export default function LessonContent({
   lesson,
   quizPassed,
   onQuizAnswer,
+  exercise,
+  exercicePassed,
+  courseId,
+  lessonIdx,
+  onExerciseResult,
 }: {
   lesson: Lesson;
   quizPassed: boolean | null;
   onQuizAnswer: (correct: boolean) => void;
+  exercise?: PublicExercise;
+  exercicePassed: boolean | null;
+  courseId: string;
+  lessonIdx: number;
+  onExerciseResult: (correct: boolean) => void;
 }) {
   return (
     <article className="space-y-5">
@@ -53,6 +65,16 @@ export default function LessonContent({
       })}
 
       {lesson.chart && <LessonChart chart={lesson.chart} />}
+
+      {exercise && (
+        <ExerciseBlock
+          exercise={exercise}
+          courseId={courseId}
+          lessonIdx={lessonIdx}
+          alreadyPassed={exercicePassed}
+          onResult={onExerciseResult}
+        />
+      )}
 
       {lesson.qcm && (
         <QcmBlock qcm={lesson.qcm} alreadyPassed={quizPassed} onAnswer={onQuizAnswer} />

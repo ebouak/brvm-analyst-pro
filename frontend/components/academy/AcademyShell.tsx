@@ -65,7 +65,11 @@ export default function AcademyShell({
   const complete = useCallback(async () => {
     setProgress((prev) => ({
       ...prev,
-      [idx]: { completed: true, quizPassed: prev[idx]?.quizPassed ?? null },
+      [idx]: {
+        completed: true,
+        quizPassed: prev[idx]?.quizPassed ?? null,
+        exercicePassed: prev[idx]?.exercicePassed ?? null,
+      },
     }));
     await markLessonDone(data.courseId, idx);
   }, [data.courseId, idx]);
@@ -74,11 +78,30 @@ export default function AcademyShell({
     async (correct: boolean) => {
       setProgress((prev) => ({
         ...prev,
-        [idx]: { completed: prev[idx]?.completed ?? false, quizPassed: correct },
+        [idx]: {
+          completed: prev[idx]?.completed ?? false,
+          quizPassed: correct,
+          exercicePassed: prev[idx]?.exercicePassed ?? null,
+        },
       }));
       await saveQuizResult(data.courseId, idx, correct);
     },
     [data.courseId, idx],
+  );
+
+  const onExerciseResult = useCallback(
+    (correct: boolean) => {
+      // La persistance est faite par checkExercise (serveur) ; on aligne l'état local.
+      setProgress((prev) => ({
+        ...prev,
+        [idx]: {
+          completed: prev[idx]?.completed ?? false,
+          quizPassed: prev[idx]?.quizPassed ?? null,
+          exercicePassed: correct,
+        },
+      }));
+    },
+    [idx],
   );
 
   const onSaveNote = useCallback(
@@ -137,6 +160,11 @@ export default function AcademyShell({
             lesson={lesson}
             quizPassed={progress[idx]?.quizPassed ?? null}
             onQuizAnswer={onQuizAnswer}
+            exercise={data.exercises[idx]}
+            exercicePassed={progress[idx]?.exercicePassed ?? null}
+            courseId={data.courseId}
+            lessonIdx={idx}
+            onExerciseResult={onExerciseResult}
           />
           <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border/50 pt-4">
             {!done ? (
