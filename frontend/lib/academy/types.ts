@@ -62,6 +62,17 @@ export const lessonSchema = z.object({
   imageQuery: z.string().max(120).nullable().optional(),
   // Rempli côté serveur après fetch Pexels (absent de la sortie LLM).
   image: lessonImageSchema.nullable().optional(),
+  // ── Academy v2 ──
+  // Durée de lecture estimée, affichée dans le sommaire.
+  duree_min: z.number().int().min(1).max(60).nullable().optional(),
+  // Liens « Pratiquer sur WESTBOURSE » (onglet Ressources du shell).
+  liens: z
+    .array(z.object({ label: z.string().min(1).max(120), href: z.string().min(1).max(300) }))
+    .max(6)
+    .optional()
+    .default([]),
+  // P3 : identifiant d'exercice live (registre lib/academy/exercises.ts).
+  exercice_id: z.string().max(60).nullable().optional(),
 });
 
 export const glossaireItemSchema = z.object({
