@@ -43,7 +43,12 @@ export default function LessonChart({ chart }: { chart: Chart }) {
         </ResponsiveContainer>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-faint">
-        {chart.note} <span className="italic">(valeurs illustratives)</span>
+        {chart.note}{' '}
+        <span className="italic">
+          {chart.reel
+            ? '(données réelles à la date de rédaction — sources officielles)'
+            : '(valeurs illustratives)'}
+        </span>
       </p>
     </figure>
   );

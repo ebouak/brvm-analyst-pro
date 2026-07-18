@@ -39,6 +39,8 @@ export const chartSchema = z
     valeurs: z.array(z.number()).min(2).max(10),
     unite: z.string().max(20).optional().default(''),
     note: z.string().min(1).max(700), // interprétation pédagogique
+    // true = données RÉELLES sourcées (études de cas) ; false = valeurs d'exemple.
+    reel: z.boolean().optional().default(false),
   })
   .refine((c) => c.labels.length === c.valeurs.length, {
     message: 'labels et valeurs doivent avoir la même longueur',
