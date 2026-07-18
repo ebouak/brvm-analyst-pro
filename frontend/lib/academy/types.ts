@@ -75,6 +75,8 @@ export const lessonSchema = z.object({
     .default([]),
   // P3 : identifiant d'exercice live (registre lib/academy/exercises.ts).
   exercice_id: z.string().max(60).nullable().optional(),
+  // Nom du module — regroupe les leçons dans le sommaire (organisation par niveau).
+  module: z.string().max(160).nullable().optional(),
 });
 
 export const glossaireItemSchema = z.object({

@@ -221,8 +221,15 @@ function Sommaire({
     <ol className="mt-2 space-y-1 lg:mt-0">
       {lessons.map((l, i) => {
         const st = progress[i];
+        // En-tête de module quand il change (organisation par niveau → modules).
+        const showModule = l.module && l.module !== lessons[i - 1]?.module;
         return (
           <li key={i}>
+            {showModule && (
+              <p className="mb-1 mt-3 px-1 text-[10px] font-semibold uppercase tracking-wide text-faint first:mt-0">
+                {l.module}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => goTo(i)}
