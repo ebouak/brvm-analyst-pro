@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getServiceClient } from '@/lib/billing/serviceClient';
+import { loadCourseForLearning } from '@/lib/academy/learn';
+import { canAccess } from '@/lib/server/featureAccess';
+import { AccessGate } from '@/components/premium/AccessGate';
+import AcademyShell from '@/components/academy/AcademyShell';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,23 +27,34 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 /**
- * Page plein écran d'un cours Academy généré.
- * Le HTML charté est servi par /api/academy/[slug] et affiché en iframe.
- * Plein écran via ConditionalShell (préfixe /formations/academy).
+ * Cours Academy en RENDU NATIF (shell type Coursera). L'iframe historique est
+ * abandonnée ; /api/academy/[slug] reste en legacy (rollback) mais n'est plus
+ * référencée. Le niveau d'accès vient de feature_flags (`formations`).
  */
-export default async function AcademyCoursePage({ params }: { params: { slug: string } }) {
-  const card = await getCard(params.slug);
-  if (!card) notFound();
-
-  return (
-    <div className="fixed inset-0 z-0">
-      <iframe
-        src={`/api/academy/${encodeURIComponent(params.slug)}`}
-        title={card.titre}
-        className="block w-full h-full border-0"
-        allow="fullscreen"
-        loading="eager"
+export default async function AcademyCoursePage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string };
+  searchParams: { lecon?: string };
+}) {
+  const gate = await canAccess('formations');
+  if (!gate.allowed) {
+    return (
+      <AccessGate
+        required={gate.required === 'free' ? 'premium' : gate.required}
+        feature="La WestBourse Academy"
+        hint="Cours interactifs, progression, quiz et certificats."
       />
-    </div>
-  );
+    );
+  }
+
+  const data = await loadCourseForLearning(params.slug);
+  if (!data) notFound();
+
+  // ?lecon=N est 1-indexé côté URL (humain) ; le shell clamp les bornes.
+  const n = Number.parseInt(searchParams.lecon ?? '1', 10);
+  const initialLesson = Number.isFinite(n) ? n - 1 : 0;
+
+  return <AcademyShell data={data} initialLesson={initialLesson} />;
 }
