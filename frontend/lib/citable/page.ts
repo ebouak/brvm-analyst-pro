@@ -78,7 +78,7 @@ export async function loadCitablePage(slug: string): Promise<LoadedCitable | nul
 }
 
 /** Jeu de données « pièges du PER » : PER × trajectoire du résultat net. */
-async function loadPerTrapDataset(): Promise<PerTrapDataset> {
+export async function loadPerTrapDataset(): Promise<PerTrapDataset> {
   const db = createPublicClient();
 
   const { data: lastRow } = await db
@@ -112,7 +112,7 @@ async function loadPerTrapDataset(): Promise<PerTrapDataset> {
 }
 
 /** Jeu de données « rendement du dividende » : dernière séance + dividendes confirmés. */
-async function loadDividendDataset(): Promise<DividendDataset> {
+export async function loadDividendDataset(): Promise<DividendDataset> {
   const db = createPublicClient();
 
   // Dernière séance de cours disponible.
