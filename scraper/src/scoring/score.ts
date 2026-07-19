@@ -62,6 +62,8 @@ export interface ScoreInput {
   volume: number | null;
   /** Volume moyen 30j (mv_volume_avg_30d). */
   avg_volume_30d: number | null;
+  /** Score de liquidité v2 (liquidity_daily) ; si absent, fallback sur avg_volume_30d. */
+  liquidity_score?: number | null;
 }
 
 /** Résultat détaillé et explicable d'un scoring. */
@@ -154,9 +156,14 @@ export function computeScore(input: ScoreInput): ScoreResult {
   // +BONUS en tendance haussière, −BONUS en baissière (plus de biais acheteur).
   const bonusTendance = trendNorm * P.BONUS_TENDANCE;
 
-  // --- Pénalité de faible liquidité ----------------------------------------
+  // --- Pénalité de faible liquidité (v2 : score liquidity_daily ; sinon volume 30j) ---
   let penaliteLiquidite = 0;
-  if (input.avg_volume_30d != null && input.avg_volume_30d < P.MIN_LIQUIDITY_AVG_VOLUME) {
+  if (input.liquidity_score != null) {
+    // Classe C/D uniquement (score < 50) : pénalité proportionnelle au déficit.
+    if (input.liquidity_score < 50) {
+      penaliteLiquidite = ((50 - input.liquidity_score) / 50) * P.PENALITE_LIQUIDITE_MAX;
+    }
+  } else if (input.avg_volume_30d != null && input.avg_volume_30d < P.MIN_LIQUIDITY_AVG_VOLUME) {
     const deficit = 1 - input.avg_volume_30d / P.MIN_LIQUIDITY_AVG_VOLUME;
     penaliteLiquidite = clamp(deficit, 0, 1) * P.PENALITE_LIQUIDITE_MAX;
   }

@@ -161,4 +161,22 @@ describe('computeScore', () => {
     });
     expect(r.penalite_liquidite).toBeGreaterThan(0);
   });
+
+  it('pénalité de liquidité v2 : classe D (score 10) pénalise, classe A (score 90) non', () => {
+    const closes: number[] = [];
+    for (let i = 0; i < 40; i++) closes.push(100 + i);
+    const base = { code: 'L', closes, variation_pct: 1, volume: 1000, avg_volume_30d: 1000 };
+    const d = computeScore({ ...base, liquidity_score: 10 });
+    const a = computeScore({ ...base, liquidity_score: 90 });
+    expect(d.penalite_liquidite).toBeGreaterThan(0);
+    expect(a.penalite_liquidite).toBe(0);
+  });
+
+  it('liquidity_score absent → fallback règle volume 30j (comportement historique)', () => {
+    const closes: number[] = [];
+    for (let i = 0; i < 40; i++) closes.push(100 + i);
+    // avg_volume_30d très bas → sous le seuil MIN_LIQUIDITY_AVG_VOLUME → pénalité legacy.
+    const r = computeScore({ code: 'L', closes, variation_pct: 1, volume: 10, avg_volume_30d: 10 });
+    expect(r.penalite_liquidite).toBeGreaterThan(0);
+  });
 });

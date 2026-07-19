@@ -159,6 +159,13 @@ export async function runScoring(
       .select('code, variation_pct, volume, avg_volume_30d');
     if (e2) throw new Error(`mv_signal_inputs: ${e2.message}`);
 
+    // Liquidité v2 du jour (liquidity_daily) — absente => fallback volume 30j dans computeScore.
+    const { data: liqRows } = await sb
+      .from('liquidity_daily')
+      .select('code, score')
+      .eq('date_marche', dateMarche);
+    const liqByCode = new Map<string, number | null>((liqRows ?? []).map((r) => [r.code as string, r.score as number | null]));
+
     const results: ScoreResult[] = [];
     const indicators: IndicatorRow[] = [];
     for (const row of inputsRows ?? []) {
@@ -170,6 +177,7 @@ export async function runScoring(
         variation_pct: row.variation_pct as number | null,
         volume: row.volume as number | null,
         avg_volume_30d: row.avg_volume_30d as number | null,
+        liquidity_score: liqByCode.get(code) ?? null,
       };
       results.push(computeScore(input));
       indicators.push(computeIndicators(code, dateMarche, closes));
