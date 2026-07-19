@@ -7,6 +7,7 @@ import { markLessonDone, saveQuizResult, saveNote } from '@/app/formations/acade
 import { courseProgress } from '@/lib/academy/progressCalc';
 import LessonContent from './LessonContent';
 import ToolsPanel from './ToolsPanel';
+import SlideDeck from './SlideDeck';
 
 /**
  * Shell d'apprentissage type Coursera :
@@ -28,6 +29,7 @@ export default function AcademyShell({
   const [idx, setIdx] = useState(clamp(initialLesson));
   const [progress, setProgress] = useState<Record<number, LessonState>>(data.progress);
   const [showTools, setShowTools] = useState(false); // mobile
+  const [showDeck, setShowDeck] = useState(false); // mode présentation (PDF)
 
   const lesson = lessons[idx]!;
   const p = useMemo(
@@ -130,6 +132,14 @@ export default function AcademyShell({
           </div>
           <button
             type="button"
+            onClick={() => setShowDeck(true)}
+            className="rounded-lg border border-gold/40 bg-gold/10 px-2.5 py-1 text-xs font-medium text-gold transition hover:bg-gold/20"
+            title="Voir le cours en diapositives, fidèle au support imprimable"
+          >
+            ▭ Mode présentation
+          </button>
+          <button
+            type="button"
             onClick={() => setShowTools((v) => !v)}
             className="rounded-lg border border-border px-2.5 py-1 text-xs text-muted hover:text-white lg:hidden"
             aria-expanded={showTools}
@@ -138,6 +148,8 @@ export default function AcademyShell({
           </button>
         </div>
       </header>
+
+      {showDeck && <SlideDeck content={data.content} onClose={() => setShowDeck(false)} />}
 
       <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 lg:grid-cols-[260px_minmax(0,1fr)_300px]">
         {/* ── Sommaire ── */}
