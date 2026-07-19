@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeLiquidityV2, classifyLiquidity, type LiquiditySessionRow30 } from '../src/liquidity/compute.js';
+import { computeSessionFlow, type FlowSnapshot } from '../src/liquidity/flow.js';
 
 /** n séances traitées identiques : cours 5000, variation 0.5 %, valeur `valeur` FCFA. */
 function rows(n: number, valeur: number, variation = 0.5): LiquiditySessionRow30[] {
@@ -63,5 +64,40 @@ describe('classifyLiquidity', () => {
     expect(classifyLiquidity(50)).toBe('B');
     expect(classifyLiquidity(25)).toBe('C');
     expect(classifyLiquidity(24)).toBe('D');
+  });
+});
+
+function snap(t: string, close: number, volume: number): FlowSnapshot {
+  return { captured_at: `2026-07-17T${t}:00Z`, close, volume };
+}
+
+describe('computeSessionFlow', () => {
+  it('null si moins de 2 snapshots', () => {
+    expect(computeSessionFlow([])).toBeNull();
+    expect(computeSessionFlow([snap('09:00', 5000, 100)])).toBeNull();
+  });
+
+  it('tick rule : hausse → achat, baisse → vente, plat → neutre', () => {
+    const f = computeSessionFlow([
+      snap('09:00', 5000, 0),
+      snap('09:15', 5050, 100),
+      snap('09:30', 5050, 150),
+      snap('09:45', 5000, 250),
+    ])!;
+    expect(f.volume_achat).toBe(100);
+    expect(f.volume_neutre).toBe(50);
+    expect(f.volume_vente).toBe(100);
+    expect(f.flux_net_pct).toBe(0);
+  });
+
+  it('volume cumulé non monotone (correction de séance) → delta clampé à 0', () => {
+    const f = computeSessionFlow([snap('09:00', 5000, 200), snap('09:15', 5100, 150)])!;
+    expect(f.volume_achat).toBe(0);
+    expect(f.flux_net_pct).toBeNull();
+  });
+
+  it('désordre chronologique toléré (tri interne)', () => {
+    const f = computeSessionFlow([snap('09:15', 5050, 100), snap('09:00', 5000, 0)])!;
+    expect(f.volume_achat).toBe(100);
   });
 });
