@@ -14,10 +14,41 @@ export type Categorie = (typeof CATEGORIES)[number];
 export const NIVEAUX = ['debutant', 'intermediaire', 'avance', 'expert'] as const;
 export type Niveau = (typeof NIVEAUX)[number];
 
+/** Bloc « chiffres clés » — rangée de cartes KPI sous le texte de la section. */
+export const statSchema = z.object({
+  label: z.string().min(1).max(60),
+  valeur: z.string().min(1).max(40),
+  /** Précision optionnelle sous la valeur (ex. « contre 836 Md en 1998 »). */
+  detail: z.string().max(120).optional().default(''),
+});
+
+/** Bloc tableau — colonnes + lignes de texte (rendu stylé, scroll horizontal). */
+export const tableauSchema = z
+  .object({
+    colonnes: z.array(z.string().min(1).max(60)).min(2).max(6),
+    lignes: z.array(z.array(z.string().max(160))).min(1).max(12),
+    note: z.string().max(300).optional().default(''),
+  })
+  .refine((t) => t.lignes.every((l) => l.length === t.colonnes.length), {
+    message: 'chaque ligne doit avoir autant de cellules que de colonnes',
+  });
+
+/** Bloc étapes — frise numérotée verticale (phases de séance, parcours, dates). */
+export const etapeSchema = z.object({
+  titre: z.string().min(1).max(120),
+  detail: z.string().max(400).optional().default(''),
+  /** Étape mise en avant (ex. la date de détachement). */
+  cle: z.boolean().optional().default(false),
+});
+
 export const sectionSchema = z.object({
   type: z.enum(SECTION_TYPES),
   titre: z.string().min(1).max(120),
   contenu: z.string().min(1).max(2000),
+  // ── Blocs structurés optionnels (mise en page riche type slide) ──
+  stats: z.array(statSchema).max(6).optional().default([]),
+  tableau: tableauSchema.nullable().optional(),
+  etapes: z.array(etapeSchema).max(8).optional().default([]),
 });
 
 export const qcmSchema = z.object({
@@ -105,6 +136,9 @@ export const courseContentSchema = z.object({
 export type CourseContent = z.infer<typeof courseContentSchema>;
 export type Lesson = z.infer<typeof lessonSchema>;
 export type Section = z.infer<typeof sectionSchema>;
+export type SectionStat = z.infer<typeof statSchema>;
+export type SectionTableau = z.infer<typeof tableauSchema>;
+export type SectionEtape = z.infer<typeof etapeSchema>;
 export type Qcm = z.infer<typeof qcmSchema>;
 export type Chart = z.infer<typeof chartSchema>;
 export type LessonImage = z.infer<typeof lessonImageSchema>;

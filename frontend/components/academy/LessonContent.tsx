@@ -79,6 +79,71 @@ export default function LessonContent({
             </p>
             <h2 className="text-sm font-semibold text-ivory">{s.titre}</h2>
             <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-muted">{s.contenu}</p>
+
+            {/* Chiffres clés — rangée de cartes KPI (style slide). */}
+            {s.stats && s.stats.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {s.stats.map((k, j) => (
+                  <div key={j} className="rounded-lg border border-border/60 bg-bg/50 px-3 py-2.5">
+                    <p className="text-[10px] uppercase tracking-wide text-faint">{k.label}</p>
+                    <p className="tabular mt-0.5 text-lg font-semibold text-accent">{k.valeur}</p>
+                    {k.detail && <p className="mt-0.5 text-[10px] leading-snug text-faint">{k.detail}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Tableau comparatif (SGI, profils…) — scroll horizontal sur mobile. */}
+            {s.tableau && (
+              <div className="mt-3 overflow-x-auto rounded-lg border border-border/60">
+                <table className="w-full min-w-[480px] text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-border/60 bg-bg/60">
+                      {s.tableau.colonnes.map((c, j) => (
+                        <th key={j} className="px-3 py-2 font-semibold uppercase tracking-wide text-faint">{c}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {s.tableau.lignes.map((ligne, j) => (
+                      <tr key={j} className="border-b border-border/40 last:border-0">
+                        {ligne.map((cell, k) => (
+                          <td key={k} className={`px-3 py-2 ${k === 0 ? 'font-semibold text-ivory' : 'tabular text-muted'}`}>
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {s.tableau.note && <p className="border-t border-border/40 px-3 py-2 text-[10px] text-faint">{s.tableau.note}</p>}
+              </div>
+            )}
+
+            {/* Étapes — frise numérotée verticale (phases, parcours, dates clés). */}
+            {s.etapes && s.etapes.length > 0 && (
+              <ol className="mt-3 space-y-0">
+                {s.etapes.map((e, j) => (
+                  <li key={j} className="relative flex gap-3 pb-3 last:pb-0">
+                    {j < s.etapes!.length - 1 && (
+                      <span aria-hidden className="absolute left-[13px] top-7 h-[calc(100%-1.25rem)] w-px bg-border/60" />
+                    )}
+                    <span
+                      aria-hidden
+                      className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
+                        e.cle ? 'bg-gold/20 text-gold ring-1 ring-gold/50' : 'bg-accent/10 text-accent'
+                      }`}
+                    >
+                      {e.cle ? '★' : j + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className={`text-sm font-semibold ${e.cle ? 'text-gold' : 'text-ivory'}`}>{e.titre}</p>
+                      {e.detail && <p className="mt-0.5 text-xs leading-relaxed text-muted">{e.detail}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
           </section>
         );
       })}
