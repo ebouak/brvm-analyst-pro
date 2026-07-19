@@ -167,6 +167,25 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'liquidity': {
+      const { runLiquidity } = await import('./liquidity/runLiquidity.js');
+      const res = await monitored(
+        { code: 'liquidity', label: 'Liquidité v2' },
+        async () => {
+          const r = await runLiquidity({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.nb_titres,
+              rows_upserted: r.nb_titres,
+              metadata: { date_marche: r.date_marche, nb_scores: r.nb_scores, nb_flux: r.nb_flux },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'events': {
       const res = await monitored(
         { code: 'events', label: 'Événements BRVM' },
