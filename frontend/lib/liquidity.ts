@@ -87,3 +87,49 @@ export function computeLiquidity(
     nbSeances: nbSeancesMarche,
   };
 }
+
+/** Ligne de la table liquidity_daily (moteur scraper liq-v2). */
+export interface LiquidityDailyRow {
+  code?: string;
+  date_marche?: string;
+  score: number | null;
+  classe: LiquidityClass | null;
+  presence_pct: number;
+  activite?: number | null;
+  amihud?: number | null;
+  spread_roll_pct?: number | null;
+  valeur_moyenne_30j: number;
+  seances_traitees: number;
+  seances_marche: number;
+  volume_achat?: number | null;
+  volume_vente?: number | null;
+  volume_neutre?: number | null;
+  flux_net_pct?: number | null;
+}
+
+/** LiquidityScore + détail v2 (sous-composantes, flux) pour l'affichage enrichi. */
+export interface LiquidityScoreV2 extends LiquidityScore {
+  v2: Pick<LiquidityDailyRow, 'amihud' | 'spread_roll_pct' | 'activite' | 'volume_achat' | 'volume_vente' | 'volume_neutre' | 'flux_net_pct'>;
+}
+
+/** Mappe une ligne liquidity_daily ; null si le moteur n'a pas pu scorer (honnêteté). */
+export function fromDailyRow(row: LiquidityDailyRow | null | undefined): LiquidityScoreV2 | null {
+  if (!row || row.score == null || row.classe == null) return null;
+  return {
+    score: row.score,
+    classe: row.classe,
+    label: LIQUIDITY_LABELS[row.classe],
+    valeurMoyenne: row.valeur_moyenne_30j,
+    presencePct: Math.round(row.presence_pct),
+    nbSeances: row.seances_marche,
+    v2: {
+      amihud: row.amihud ?? null,
+      spread_roll_pct: row.spread_roll_pct ?? null,
+      activite: row.activite ?? null,
+      volume_achat: row.volume_achat ?? null,
+      volume_vente: row.volume_vente ?? null,
+      volume_neutre: row.volume_neutre ?? null,
+      flux_net_pct: row.flux_net_pct ?? null,
+    },
+  };
+}
