@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CourseContent } from '@/lib/academy/types';
 import { courseToSlides, splitNumbered, type Slide } from '@/lib/academy/slides';
 import { SECTION_LABEL } from '@/lib/academy/types';
@@ -12,6 +12,10 @@ import LessonChart from './LessonChart';
  * Navigation clavier (← →, Échap), plein écran, et impression → PDF (chaque
  * diapo = une page paysage). Les données proviennent du cours existant.
  */
+
+/** Dimensions « natives » d'une diapo (16/9) — l'écran la met à l'échelle pour l'ajuster. */
+const DESIGN_W = 1120;
+const DESIGN_H = 630;
 
 const NAVY = '#123a5e';
 const NAVY_DEEP = '#0c2740';
@@ -39,6 +43,23 @@ export default function SlideDeck({ content, onClose }: { content: CourseContent
   const clamp = useCallback((i: number) => Math.min(Math.max(0, i), total - 1), [total]);
 
   const go = useCallback((i: number) => setIdx((prev) => clamp(typeof i === 'number' ? i : prev)), [clamp]);
+
+  // Met la diapo (1120×630) à l'échelle pour tenir entièrement dans la scène —
+  // évite tout rognage vertical quel que soit le format de l'écran.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const compute = () => {
+      const s = Math.min(el.clientWidth / DESIGN_W, el.clientHeight / DESIGN_H);
+      setScale(s > 0 ? s : 1);
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -68,15 +89,25 @@ export default function SlideDeck({ content, onClose }: { content: CourseContent
         </div>
       </div>
 
-      {/* Zone diapo (une seule visible à l'écran ; toutes à l'impression) */}
-      <div className="deck-stage flex flex-1 items-center justify-center overflow-hidden p-4 sm:p-8">
-        <div className="deck-viewport w-full" style={{ maxWidth: 1100 }}>
-          {slides.map((s, i) => (
-            <div key={i} className={`deck-slide ${i === idx ? 'is-active' : 'is-hidden'}`}>
-              <SlideView slide={s} page={i + 1} total={total} />
-            </div>
-          ))}
+      {/* Zone diapo — à l'écran : la diapo active, mise à l'échelle pour s'ajuster. */}
+      <div ref={stageRef} className="deck-stage flex flex-1 items-center justify-center overflow-hidden p-3 sm:p-6">
+        <div className="deck-screen" style={{ width: DESIGN_W * scale, height: DESIGN_H * scale }}>
+          <div
+            className="deck-canvas"
+            style={{ width: DESIGN_W, height: DESIGN_H, transform: `scale(${scale})`, transformOrigin: 'top left' }}
+          >
+            <SlideView slide={slides[idx]!} page={idx + 1} total={total} />
+          </div>
         </div>
+      </div>
+
+      {/* À l'impression uniquement : toutes les diapos, une par page paysage. */}
+      <div className="deck-print">
+        {slides.map((s, i) => (
+          <div key={i} className="deck-print-slide">
+            <SlideView slide={s} page={i + 1} total={total} />
+          </div>
+        ))}
       </div>
 
       {/* Navigation (masquée à l'impression) */}
@@ -99,23 +130,24 @@ export default function SlideDeck({ content, onClose }: { content: CourseContent
       </div>
 
       <style jsx global>{`
-        .deck-slide { display: none; }
-        .deck-slide.is-active { display: block; }
-        .deck-slide {
-          aspect-ratio: 16 / 9;
-          width: 100%;
+        .deck-canvas {
           border-radius: 14px;
           overflow: hidden;
           box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
+        .deck-print { display: none; }
         @media print {
           @page { size: landscape; margin: 0; }
-          .deck-toolbar, .deck-nav { display: none !important; }
+          .deck-toolbar, .deck-nav, .deck-stage { display: none !important; }
           .deck-root { position: static !important; background: #fff !important; }
-          .deck-stage { display: block !important; overflow: visible !important; padding: 0 !important; }
-          .deck-viewport { max-width: none !important; }
-          .deck-slide { display: block !important; aspect-ratio: 16 / 9; border-radius: 0; box-shadow: none; page-break-after: always; break-after: page; }
-          .deck-slide.is-hidden { display: block !important; }
+          .deck-print { display: block !important; }
+          .deck-print-slide {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            page-break-after: always;
+            break-after: page;
+          }
         }
       `}</style>
     </div>
