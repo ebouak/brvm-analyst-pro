@@ -1,4 +1,4 @@
-import type { LiquidityScore } from '@/lib/liquidity';
+import type { LiquidityScore, LiquidityScoreV2 } from '@/lib/liquidity';
 import { PremiumPanel } from '@/components/ui/premium';
 
 const CLASS_STYLE: Record<string, string> = {
@@ -23,12 +23,19 @@ export function LiquidityCard({
   courtageMin,
   courtageMax,
 }: {
-  liquidity: LiquidityScore | null;
+  liquidity: LiquidityScore | LiquidityScoreV2 | null;
   /** Fourchette de courtage réelle observée sur les barèmes SGI en base (%). */
   courtageMin: number | null;
   courtageMax: number | null;
 }) {
   if (!liquidity) return null;
+
+  // Détail v2 (moteur liquidity_daily) : absent tant que la table n'est pas peuplée.
+  const v2 = 'v2' in liquidity ? liquidity.v2 : null;
+  const achat = v2?.volume_achat ?? 0;
+  const vente = v2?.volume_vente ?? 0;
+  const fluxOk = v2?.flux_net_pct != null && achat + vente > 0;
+  const pctAchat = fluxOk ? Math.round((achat / (achat + vente)) * 100) : 0;
 
   // Aller-retour = (courtage + 0,3 % BRVM/DC-BR) × 2 ordres.
   const arMin = courtageMin != null ? (courtageMin + 0.3) * 2 : null;
@@ -85,6 +92,50 @@ export function LiquidityCard({
           votre position doit gagner au moins {arMax.toFixed(1)} % pour couvrir les frais au barème
           le plus élevé. <a href="/comparateur-sgi" className="text-accent hover:underline">Comparer les SGI →</a>
         </p>
+      )}
+
+      {/* ── Détail mesuré (moteur v2) : flux de la séance, spread et impact prix ── */}
+      {v2 && (
+        <div className="mt-4 space-y-3 border-t border-border pt-3">
+          <div>
+            <div className="mb-1 flex items-center justify-between text-[11px]">
+              <span className="text-muted">Flux de la séance (achat / vente)</span>
+              <span className="tabular text-faint">
+                {fluxOk ? `net ${v2.flux_net_pct! > 0 ? '+' : ''}${v2.flux_net_pct} %` : '—'}
+              </span>
+            </div>
+            {fluxOk ? (
+              <div className="flex h-2 overflow-hidden rounded-full bg-border" role="img"
+                aria-label={`Pression acheteuse ${pctAchat} %, vendeuse ${100 - pctAchat} %`}>
+                <div className="bg-up" style={{ width: `${pctAchat}%` }} />
+                <div className="bg-down" style={{ width: `${100 - pctAchat}%` }} />
+              </div>
+            ) : (
+              <p className="text-[11px] text-faint">Pas de données intraday pour cette séance.</p>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-muted">Écart de prix estimé (spread marché)</span>
+            <span className="tabular text-ivory">
+              {v2.spread_roll_pct != null
+                ? `≈ ${v2.spread_roll_pct.toFixed(2)} % (${fmtFcfa(500_000 * (v2.spread_roll_pct / 100))} sur 500 000 FCFA)`
+                : 'non estimable'}
+            </span>
+          </div>
+
+          {v2.amihud != null && (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-muted">Impact prix (Amihud, %/M FCFA)</span>
+              <span className="tabular text-ivory">{v2.amihud.toFixed(3)}</span>
+            </div>
+          )}
+
+          <p className="text-[10px] leading-relaxed text-faint">
+            La BRVM ne publie pas son carnet d&apos;ordres : le spread et l&apos;impact prix sont
+            estimés à partir des échanges des 30 dernières séances, jamais inventés.
+          </p>
+        </div>
       )}
     </PremiumPanel>
   );
