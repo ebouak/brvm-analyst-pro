@@ -9,6 +9,9 @@ import { logger } from '../logger.js';
 import { computeLiquidityV2, ENGINE_VERSION } from './compute.js';
 import { computeSessionFlow, type FlowSnapshot } from './flow.js';
 
+/** Fenêtre d'observation du score (séances de marché). */
+const NB_SEANCES = 30;
+
 export interface LiquidityRunResult {
   status: 'success' | 'mock' | 'failed';
   date_marche: string | null;
@@ -52,38 +55,79 @@ export async function runLiquidity(opts: { mock?: boolean } = {}): Promise<Liqui
 
   const sb = getSupabase();
 
-  const { data: dateRows, error: e1 } = await sb
-    .from('brvm_actions_daily')
-    .select('date_marche')
-    .order('date_marche', { ascending: false })
-    .limit(4000);
-  if (e1) throw e1;
-  const dates = [...new Set((dateRows ?? []).map((r) => r.date_marche as string))].slice(0, 30);
+  // PostgREST plafonne CHAQUE réponse à 1000 lignes, quel que soit le .limit()
+  // demandé. Avec 47 titres, une requête simple ne couvrait que 22 séances et
+  // tronquait silencieusement les données (~1410 lignes attendues sur 30 séances).
+  // On pagine donc explicitement par .range().
+  const PAGE = 1000;
+
+  // 1) Les 30 dernières séances de marché (pagination jusqu'à en avoir 30).
+  const dateSet = new Set<string>();
+  for (let offset = 0; dateSet.size < NB_SEANCES; offset += PAGE) {
+    const { data, error } = await sb
+      .from('brvm_actions_daily')
+      .select('date_marche')
+      .order('date_marche', { ascending: false })
+      .range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    const rows = (data ?? []) as { date_marche: string }[];
+    for (const r of rows) dateSet.add(r.date_marche);
+    if (rows.length < PAGE) break;
+  }
+  const dates = [...dateSet].sort((a, b) => b.localeCompare(a)).slice(0, NB_SEANCES);
   if (dates.length === 0) {
     logger.warn('liquidité : aucune séance en base');
     return { status: 'failed', date_marche: null, nb_titres: 0, nb_scores: 0, nb_flux: 0 };
   }
   const lastDate = dates[0]!;
 
-  const { data: daily, error: e2 } = await sb
-    .from('brvm_actions_daily')
-    .select('code, date_marche, cours_jour, variation_pct, volume, valeur_echangee')
-    .in('date_marche', dates);
-  if (e2) throw e2;
+  // 2) Les cours de ces séances (paginés : ~1410 lignes > plafond).
+  const daily: DailyRow[] = [];
+  for (let offset = 0; ; offset += PAGE) {
+    const { data, error } = await sb
+      .from('brvm_actions_daily')
+      .select('code, date_marche, cours_jour, variation_pct, volume, valeur_echangee')
+      .in('date_marche', dates)
+      .range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    const rows = (data ?? []) as DailyRow[];
+    daily.push(...rows);
+    if (rows.length < PAGE) break;
+  }
 
-  const { data: snaps, error: e3 } = await sb
-    .from('brvm_intraday_snapshots')
-    .select('code, captured_at, close, volume')
-    .eq('date_marche', lastDate);
-  if (e3) throw e3;
+  // 3) Snapshots intraday de la dernière séance (paginés aussi : ~30 captures × 47 titres).
+  const snaps: ({ code: string } & FlowSnapshot)[] = [];
+  for (let offset = 0; ; offset += PAGE) {
+    const { data, error } = await sb
+      .from('brvm_intraday_snapshots')
+      .select('code, captured_at, close, volume')
+      .eq('date_marche', lastDate)
+      .range(offset, offset + PAGE - 1);
+    if (error) throw error;
+    const rows = (data ?? []) as ({ code: string } & FlowSnapshot)[];
+    snaps.push(...rows);
+    if (rows.length < PAGE) break;
+  }
+
+  // 4) Référentiel des actions actives : un titre qui n'a JAMAIS traité sur la
+  // fenêtre n'a aucune ligne dans brvm_actions_daily. Sans ce seed il serait
+  // absent du classement, alors que c'est le cas le plus illiquide qui soit
+  // (spec §3 : « titre jamais traité → classe D naturelle »).
+  const { data: instruments, error: e4 } = await sb
+    .from('brvm_instruments')
+    .select('code')
+    .eq('type', 'action')
+    .eq('actif', true);
+  if (e4) throw e4;
 
   const byCode = new Map<string, DailyRow[]>();
-  for (const r of (daily ?? []) as DailyRow[]) {
+  for (const i of (instruments ?? []) as { code: string }[]) byCode.set(i.code, []);
+  for (const r of daily) {
     if (!byCode.has(r.code)) byCode.set(r.code, []);
     byCode.get(r.code)!.push(r);
   }
   const snapsByCode = new Map<string, FlowSnapshot[]>();
-  for (const s of (snaps ?? []) as ({ code: string } & FlowSnapshot)[]) {
+  for (const s of snaps) {
     if (!snapsByCode.has(s.code)) snapsByCode.set(s.code, []);
     snapsByCode.get(s.code)!.push(s);
   }

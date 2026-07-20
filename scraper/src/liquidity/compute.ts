@@ -32,10 +32,12 @@ export const ENGINE_VERSION = 'liq-v2.0.0';
 const MIN_SEANCES = 10;
 const LOG_FLOOR = 100_000;      // activité : 100 k FCFA/séance → 0
 const LOG_CEIL = 100_000_000;   // 100 M FCFA/séance → 1
-// Amihud (%/M FCFA), échelle log inversée. Bornes calibrées sur la
-// distribution BRVM (SNTS ~0,01 ; micro-caps illiquides > 20).
-const AMIHUD_GOOD = 0.05;
-const AMIHUD_BAD = 50;
+// Amihud (%/M FCFA), échelle log inversée. Bornes recalibrées le 2026-07-20 sur
+// la distribution RÉELLE des 47 titres (min 0,009 · médiane 0,097 · max 23,5) :
+// les bornes initiales (0,05 → 50) plaçaient le titre médian à 90 % de la
+// composante et ne discriminaient plus rien.
+const AMIHUD_GOOD = 0.01;
+const AMIHUD_BAD = 10;
 // Spread de Roll en % du cours, échelle inversée (0,2 % excellent, 5 % très cher).
 const SPREAD_GOOD = 0.2;
 const SPREAD_BAD = 5;
@@ -111,10 +113,6 @@ export function computeLiquidityV2(
     .map((r) => r.cours_jour)
     .filter((c): c is number => c != null && c > 0);
   const spreadPct = rollSpreadPct(closes);
-  const compRoll =
-    spreadPct == null
-      ? 0.5 // non estimable : neutre, documenté
-      : clamp01(Math.log10(SPREAD_BAD / Math.max(spreadPct, SPREAD_GOOD)) / Math.log10(SPREAD_BAD / SPREAD_GOOD));
 
   const base: Omit<LiquidityV2Result, 'score' | 'classe'> = {
     presence_pct: Math.round(presencePct * 100) / 100,
@@ -129,6 +127,14 @@ export function computeLiquidityV2(
   // Honnêteté : historique insuffisant → pas de score.
   if (seancesMarche < MIN_SEANCES) return { ...base, score: null, classe: null };
 
-  const score = Math.round(100 * (0.25 * (presencePct / 100) + 0.25 * activite + 0.25 * compAmihud + 0.25 * compRoll));
+  // Composantes à poids égal. Quand le spread n'est pas estimable (cov ≥ 0, cas
+  // de 18 titres sur 47 au premier calcul réel), son poids est REDISTRIBUÉ sur
+  // les autres plutôt que remplacé par une valeur neutre : un titre ne doit pas
+  // gagner des points grâce à une donnée manquante.
+  const parts: number[] = [presencePct / 100, activite, compAmihud];
+  if (spreadPct != null) {
+    parts.push(clamp01(Math.log10(SPREAD_BAD / Math.max(spreadPct, SPREAD_GOOD)) / Math.log10(SPREAD_BAD / SPREAD_GOOD)));
+  }
+  const score = Math.round((100 * parts.reduce((s, v) => s + v, 0)) / parts.length);
   return { ...base, score, classe: classifyLiquidity(score) };
 }
