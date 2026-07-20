@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getAdvisorRecommendations } from '@/lib/advisor/server';
 import { createPublicClient } from '@/lib/supabase/public';
-import { computeLiquidity } from '@/lib/liquidity';
+import { computeLiquidity, type LiquidityDailyRow } from '@/lib/liquidity';
 import { getRecentChanges } from '@/lib/advisor/changes';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
 import { AdvisorCard } from '@/components/advisor/AdvisorCard';
@@ -37,10 +37,21 @@ async function getLiquidityMap(): Promise<Map<string, { classe: string; score: n
     list.push(r);
     byCode.set(r.code, list);
   }
+  // Liquidité v2 (table liquidity_daily) — fallback calcul legacy si table vide.
+  const { data: liqRows2 } = await sb
+    .from('liquidity_daily')
+    .select('code, score, classe, presence_pct, valeur_moyenne_30j, seances_traitees, seances_marche')
+    .order('date_marche', { ascending: false })
+    .limit(100);
   const out = new Map<string, { classe: string; score: number }>();
-  for (const [code, list] of byCode) {
-    const liq = computeLiquidity(list, seances);
-    if (liq) out.set(code, { classe: liq.classe, score: liq.score });
+  for (const r of (liqRows2 ?? []) as LiquidityDailyRow[]) {
+    if (r.score != null && r.classe != null && r.code && !out.has(r.code)) out.set(r.code, { classe: r.classe, score: r.score });
+  }
+  if (out.size === 0) {
+    for (const [code, list] of byCode) {
+      const liq = computeLiquidity(list, seances);
+      if (liq) out.set(code, { classe: liq.classe, score: liq.score });
+    }
   }
   return out;
 }

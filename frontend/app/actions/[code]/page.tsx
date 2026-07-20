@@ -26,7 +26,7 @@ import PublicationsModal, { type Publication } from '@/components/PublicationsMo
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
-import { computeLiquidity } from '@/lib/liquidity';
+import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/liquidity';
 import { LiquidityCard } from '@/components/LiquidityCard';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
@@ -379,7 +379,16 @@ export default async function InstrumentPage({
     cours_jour: r.cours_jour ?? null,
     valeur_echangee: (r as { valeur_echangee?: number | null }).valeur_echangee ?? null,
   }));
-  const liquidity = computeLiquidity(liqRows, liqRows.length);
+  // Liquidité v2 (table liquidity_daily) — fallback calcul legacy si table vide.
+  const liqDailyClient = createPublicClient();
+  const { data: liqRow } = await liqDailyClient
+    .from('liquidity_daily')
+    .select('*')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const liquidity = fromDailyRow(liqRow as LiquidityDailyRow | null) ?? computeLiquidity(liqRows, liqRows.length);
   const sgiFrais = await getSgiFrais().catch(() => []);
   const courtages = sgiFrais
     .map((f) => f.courtagePctMax ?? f.courtagePctMin)

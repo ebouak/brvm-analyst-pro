@@ -61,10 +61,20 @@ export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
           list.push(r);
           histoByCode.set(r.code, list);
         }
+        const { data: liqDaily } = await supabase
+          .from('liquidity_daily')
+          .select('code, score, classe')
+          .order('date_marche', { ascending: false })
+          .limit(100);
         const liquidityByCode = new Map<string, { score: number; classe: string }>();
-        for (const [code, rows] of histoByCode) {
-          const liq = computeLiquidity(rows, seances);
-          if (liq) liquidityByCode.set(code, { score: liq.score, classe: liq.classe });
+        for (const r of (liqDaily ?? []) as { code: string; score: number | null; classe: string | null }[]) {
+          if (r.score != null && r.classe != null && !liquidityByCode.has(r.code)) liquidityByCode.set(r.code, { score: r.score, classe: r.classe });
+        }
+        if (liquidityByCode.size === 0) {
+          for (const [code, rows] of histoByCode) {
+            const liq = computeLiquidity(rows, seances);
+            if (liq) liquidityByCode.set(code, { score: liq.score, classe: liq.classe });
+          }
         }
 
         const { data: signals } = await supabase
