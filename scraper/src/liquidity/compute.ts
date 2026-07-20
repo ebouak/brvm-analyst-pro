@@ -28,19 +28,40 @@ export interface LiquidityV2Result {
   seances_marche: number;
 }
 
-export const ENGINE_VERSION = 'liq-v2.0.0';
+export const ENGINE_VERSION = 'liq-v3.0.0';
 const MIN_SEANCES = 10;
-const LOG_FLOOR = 100_000;      // activité : 100 k FCFA/séance → 0
-const LOG_CEIL = 100_000_000;   // 100 M FCFA/séance → 1
-// Amihud (%/M FCFA), échelle log inversée. Bornes recalibrées le 2026-07-20 sur
-// la distribution RÉELLE des 47 titres (min 0,009 · médiane 0,097 · max 23,5) :
-// les bornes initiales (0,05 → 50) plaçaient le titre médian à 90 % de la
-// composante et ne discriminaient plus rien.
-const AMIHUD_GOOD = 0.01;
-const AMIHUD_BAD = 10;
-// Spread de Roll en % du cours, échelle inversée (0,2 % excellent, 5 % très cher).
-const SPREAD_GOOD = 0.2;
-const SPREAD_BAD = 5;
+
+/**
+ * ÉCHELLES ABSOLUES (v3, 2026-07-20). Les bornes v2 étaient calées sur la
+ * distribution BRVM elle-même : elles étalaient mécaniquement les titres entre
+ * eux et classaient la moitié du marché « très liquide » malgré un spread
+ * médian de 1,6 %. Or la BRVM a un vrai problème de liquidité — ce n'est pas
+ * la fréquence (les titres traitent 95-100 % des séances) mais la PROFONDEUR
+ * et le COÛT. Les bornes ci-dessous mesurent donc la négociabilité réelle,
+ * pas le rang relatif : « classe A » doit vouloir dire « on peut y entrer et
+ * en sortir », pas « moins pire que les autres ».
+ */
+const LOG_FLOOR = 1_000_000;    // activité : 1 M FCFA/séance → 0
+const LOG_CEIL = 500_000_000;   // 500 M FCFA/séance → 1
+// Amihud (%/M FCFA) : combien le cours bouge par million échangé.
+// 0,001 = on absorbe un million sans faire bouger le cours ; 5 = illiquide.
+const AMIHUD_GOOD = 0.001;
+const AMIHUD_BAD = 5;
+// Spread de Roll en % du cours : 0,1 % = coût d'aller-retour négligeable,
+// 4 % = prohibitif. (Médiane BRVM constatée : 1,6 %.)
+const SPREAD_GOOD = 0.1;
+const SPREAD_BAD = 4;
+
+/**
+ * Poids des composantes. La présence pèse peu : sur la BRVM 2026 tous les
+ * titres traitent 95-100 % des séances, elle ne discrimine donc plus rien.
+ * Ce qui fait la liquidité ici, c'est la taille échangeable (activité),
+ * l'impact prix (Amihud) et le coût d'exécution (Roll).
+ */
+const POIDS_PRESENCE = 0.10;
+const POIDS_ACTIVITE = 0.30;
+const POIDS_AMIHUD = 0.30;
+const POIDS_ROLL = 0.30;
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
@@ -127,14 +148,22 @@ export function computeLiquidityV2(
   // Honnêteté : historique insuffisant → pas de score.
   if (seancesMarche < MIN_SEANCES) return { ...base, score: null, classe: null };
 
-  // Composantes à poids égal. Quand le spread n'est pas estimable (cov ≥ 0, cas
-  // de 18 titres sur 47 au premier calcul réel), son poids est REDISTRIBUÉ sur
-  // les autres plutôt que remplacé par une valeur neutre : un titre ne doit pas
-  // gagner des points grâce à une donnée manquante.
-  const parts: number[] = [presencePct / 100, activite, compAmihud];
+  // Quand le spread n'est pas estimable (cov ≥ 0, cas de 18 titres sur 47 au
+  // premier calcul réel), son poids est REDISTRIBUÉ sur les autres composantes
+  // plutôt que remplacé par une valeur neutre : un titre ne doit pas gagner des
+  // points grâce à une donnée manquante.
+  const parts: { valeur: number; poids: number }[] = [
+    { valeur: presencePct / 100, poids: POIDS_PRESENCE },
+    { valeur: activite, poids: POIDS_ACTIVITE },
+    { valeur: compAmihud, poids: POIDS_AMIHUD },
+  ];
   if (spreadPct != null) {
-    parts.push(clamp01(Math.log10(SPREAD_BAD / Math.max(spreadPct, SPREAD_GOOD)) / Math.log10(SPREAD_BAD / SPREAD_GOOD)));
+    const compRoll = clamp01(
+      Math.log10(SPREAD_BAD / Math.max(spreadPct, SPREAD_GOOD)) / Math.log10(SPREAD_BAD / SPREAD_GOOD),
+    );
+    parts.push({ valeur: compRoll, poids: POIDS_ROLL });
   }
-  const score = Math.round((100 * parts.reduce((s, v) => s + v, 0)) / parts.length);
+  const poidsTotal = parts.reduce((s, p) => s + p.poids, 0);
+  const score = Math.round((100 * parts.reduce((s, p) => s + p.valeur * p.poids, 0)) / poidsTotal);
   return { ...base, score, classe: classifyLiquidity(score) };
 }

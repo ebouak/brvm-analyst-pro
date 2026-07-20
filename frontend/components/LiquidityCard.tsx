@@ -41,14 +41,17 @@ export function LiquidityCard({
   const arMin = courtageMin != null ? (courtageMin + 0.3) * 2 : null;
   const arMax = courtageMax != null ? (courtageMax + 0.3) * 2 : null;
 
+  // Sur la BRVM, presque tous les titres traitent chaque séance : la difficulté
+  // n'est pas d'y passer un ordre, c'est d'y passer un ordre de TAILLE sans
+  // déplacer le cours. Les phrases décrivent donc la profondeur et le coût.
   const phrase =
     liquidity.classe === 'A'
-      ? 'Titre parmi les plus traités de la cote : entrée et sortie généralement possibles sans délai notable.'
+      ? 'Parmi les rares valeurs réellement négociables de la cote : vous pouvez entrer et sortir d’une position de taille normale sans peser sur le cours.'
       : liquidity.classe === 'B'
-        ? 'Liquidité correcte : les ordres de taille raisonnable passent, prévoyez un peu de patience sur les gros montants.'
+        ? 'Négociable, mais la profondeur est limitée : fractionnez les ordres importants et utilisez des ordres à cours limité pour ne pas subir le prix.'
         : liquidity.classe === 'C'
-          ? 'Liquidité faible : le titre ne traite pas chaque séance — fractionnez vos ordres et utilisez des ordres à cours limité.'
-          : 'Titre très illiquide : plusieurs séances peuvent passer sans aucune transaction. Le risque principal est de ne pas trouver de contrepartie à la revente.';
+          ? 'Le titre traite régulièrement, mais pour de petits montants : un ordre de taille déplacera le cours contre vous. Comptez plusieurs séances pour construire ou solder une position.'
+          : 'Très illiquide : les échanges sont trop rares ou trop minces pour garantir une contrepartie. Le risque principal est de rester bloqué avec vos titres.';
 
   return (
     <PremiumPanel className="p-5">

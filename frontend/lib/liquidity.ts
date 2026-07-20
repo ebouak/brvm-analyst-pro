@@ -28,10 +28,15 @@ export interface LiquidityScore {
   nbSeances: number;
 }
 
+/**
+ * Libellés calés sur l'échelle ABSOLUE du moteur v3 : ils décrivent la
+ * négociabilité réelle, pas un rang relatif entre titres BRVM. Sur ce marché,
+ * seule une poignée de valeurs atteint la classe A.
+ */
 export const LIQUIDITY_LABELS: Record<LiquidityClass, string> = {
-  A: 'Très liquide',
-  B: 'Liquidité correcte',
-  C: 'Liquidité faible',
+  A: 'Négociable sans friction',
+  B: 'Négociable avec précaution',
+  C: 'Peu négociable',
   D: 'Très illiquide',
 };
 
