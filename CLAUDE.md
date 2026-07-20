@@ -212,6 +212,30 @@ scraper verts.
 - **Prérequis prod** : le projet **frontend Vercel** doit avoir
   `SUPABASE_SERVICE_ROLE_KEY` (présente — admin + billing l'utilisent server-side).
 
+### Ajouts (passage 2026-07-20) — Liquidité v2
+
+Spec `docs/superpowers/specs/2026-07-19-liquidite-v2-design.md`, plan
+`docs/superpowers/plans/2026-07-19-liquidite-v2.md`. 397 tests scraper verts,
+tsc + build frontend verts.
+
+- **Moteur unique** `scraper/src/liquidity/` : `compute.ts` (score 0-100 en 4
+  parts égales — présence, activité en valeur, impact prix **Amihud**, spread
+  implicite **Roll**) et `flow.ts` (flux acheteur/vendeur par **tick rule** sur
+  `brvm_intraday_snapshots`). Fonctions pures testées. `runLiquidity.ts` upsert
+  `liquidity_daily` (migration `0111`, PK `code,date_marche`, RLS lecture
+  publique). CLI `liquidity[:mock]`, job cron dans `.github/workflows/score.yml`.
+- **Honnêteté** : score `null` sous 10 séances ; flux `null` sans snapshots ;
+  spread `null` si non estimable (cov ≥ 0) → composante neutre. Le carnet
+  d'ordres n'étant pas publié par la BRVM, profondeur et coût d'exécution sont
+  **estimés**, jamais inventés.
+- **Unification** : la pénalité de liquidité du scoring §9 dérive désormais du
+  score v2 (classe C/D uniquement) avec **fallback sur l'ancienne règle volume
+  30 j** si `liquidity_daily` est absente — le scoring n'échoue jamais.
+- **Frontend** : `lib/liquidity.ts` gagne `fromDailyRow` (+ types `LiquidityDailyRow`,
+  `LiquidityScoreV2`) ; fiche action, conseiller et screener lisent la table avec
+  fallback legacy ; `LiquidityCard` v2 (barre flux achat/vente, spread marché
+  estimé, Amihud) ; page **`/liquidite`** (classement + méthodologie).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
