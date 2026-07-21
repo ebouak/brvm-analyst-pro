@@ -41,27 +41,34 @@ const MIN_SEANCES = 10;
  * pas le rang relatif : « classe A » doit vouloir dire « on peut y entrer et
  * en sortir », pas « moins pire que les autres ».
  */
-const LOG_FLOOR = 1_000_000;    // activité : 1 M FCFA/séance → 0
-const LOG_CEIL = 500_000_000;   // 500 M FCFA/séance → 1
+const LOG_FLOOR = 2_000_000;    // activité : 2 M FCFA/séance → 0
+const LOG_CEIL = 400_000_000;   // 400 M FCFA/séance → 1 (SNTS, le plus gros, ~260 M)
 // Amihud (%/M FCFA) : combien le cours bouge par million échangé.
-// 0,001 = on absorbe un million sans faire bouger le cours ; 5 = illiquide.
-const AMIHUD_GOOD = 0.001;
+// 0,002 = on absorbe un million sans faire bouger le cours ; 5 = illiquide.
+const AMIHUD_GOOD = 0.002;
 const AMIHUD_BAD = 5;
 // Spread de Roll en % du cours : 0,1 % = coût d'aller-retour négligeable,
 // 4 % = prohibitif. (Médiane BRVM constatée : 1,6 %.)
 const SPREAD_GOOD = 0.1;
 const SPREAD_BAD = 4;
+// Spread NON estimable (cov ≥ 0 : prix figé ou en tendance pure) : signal
+// ambigu — chez un gros titre c'est de la stabilité, chez un petit c'est
+// l'absence de contrepartie. On applique une valeur légèrement défavorable
+// (0,35) plutôt que de retirer le critère (ce qui offrirait un laissez-passer),
+// mais Roll ne pèse que 10 % : son incertitude ne peut pas dominer le score.
+const NE_SPREAD = 0.35;
 
 /**
  * Poids des composantes. La présence pèse peu : sur la BRVM 2026 tous les
- * titres traitent 95-100 % des séances, elle ne discrimine donc plus rien.
- * Ce qui fait la liquidité ici, c'est la taille échangeable (activité),
- * l'impact prix (Amihud) et le coût d'exécution (Roll).
+ * titres traitent 95-100 % des séances, elle ne discrimine plus rien. Le cœur
+ * de la liquidité, c'est la taille échangeable (activité) et surtout l'impact
+ * prix (Amihud, toujours mesurable). Le spread de Roll, absent ~40 % du temps
+ * et bruité, n'est qu'un appoint.
  */
-const POIDS_PRESENCE = 0.10;
-const POIDS_ACTIVITE = 0.30;
-const POIDS_AMIHUD = 0.30;
-const POIDS_ROLL = 0.30;
+const POIDS_PRESENCE = 0.1;
+const POIDS_ACTIVITE = 0.35;
+const POIDS_AMIHUD = 0.45;
+const POIDS_ROLL = 0.1;
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
@@ -148,22 +155,19 @@ export function computeLiquidityV2(
   // Honnêteté : historique insuffisant → pas de score.
   if (seancesMarche < MIN_SEANCES) return { ...base, score: null, classe: null };
 
-  // Quand le spread n'est pas estimable (cov ≥ 0, cas de 18 titres sur 47 au
-  // premier calcul réel), son poids est REDISTRIBUÉ sur les autres composantes
-  // plutôt que remplacé par une valeur neutre : un titre ne doit pas gagner des
-  // points grâce à une donnée manquante.
-  const parts: { valeur: number; poids: number }[] = [
-    { valeur: presencePct / 100, poids: POIDS_PRESENCE },
-    { valeur: activite, poids: POIDS_ACTIVITE },
-    { valeur: compAmihud, poids: POIDS_AMIHUD },
-  ];
-  if (spreadPct != null) {
-    const compRoll = clamp01(
-      Math.log10(SPREAD_BAD / Math.max(spreadPct, SPREAD_GOOD)) / Math.log10(SPREAD_BAD / SPREAD_GOOD),
-    );
-    parts.push({ valeur: compRoll, poids: POIDS_ROLL });
-  }
-  const poidsTotal = parts.reduce((s, p) => s + p.poids, 0);
-  const score = Math.round((100 * parts.reduce((s, p) => s + p.valeur * p.poids, 0)) / poidsTotal);
+  // Spread non estimable → NE_SPREAD (défavorable mais pas éliminatoire), jamais
+  // retiré : Roll ne pèse que 10 %, il informe sans jamais dominer.
+  const compRoll =
+    spreadPct == null
+      ? NE_SPREAD
+      : clamp01(Math.log10(SPREAD_BAD / Math.max(spreadPct, SPREAD_GOOD)) / Math.log10(SPREAD_BAD / SPREAD_GOOD));
+
+  const score = Math.round(
+    100 *
+      (POIDS_PRESENCE * (presencePct / 100) +
+        POIDS_ACTIVITE * activite +
+        POIDS_AMIHUD * compAmihud +
+        POIDS_ROLL * compRoll),
+  );
   return { ...base, score, classe: classifyLiquidity(score) };
 }
