@@ -30,6 +30,10 @@ export async function GET() {
     theses,
     notifPrefs,
     authEvents,
+    academyProgress,
+    academyNotes,
+    academyExamAttempts,
+    academyCertificates,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -52,6 +56,10 @@ export async function GET() {
     supabase.from('investment_theses').select('*').eq('user_id', user.id),
     supabase.from('notification_prefs').select('*').eq('user_id', user.id),
     supabase.from('auth_events').select('*').eq('user_id', user.id),
+    supabase.from('academy_progress').select('*').eq('user_id', user.id),
+    supabase.from('academy_notes').select('*').eq('user_id', user.id),
+    supabase.from('academy_exam_attempts').select('*').eq('user_id', user.id),
+    supabase.from('academy_certificates').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -81,6 +89,10 @@ export async function GET() {
     // Journal de connexions (IP, appareil) — donnée personnelle : elle doit
     // figurer dans l'export au titre du droit d'accès.
     auth_events: authEvents.data ?? [],
+    academy_progress: academyProgress.data ?? [],
+    academy_notes: academyNotes.data ?? [],
+    academy_exam_attempts: academyExamAttempts.data ?? [],
+    academy_certificates: academyCertificates.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

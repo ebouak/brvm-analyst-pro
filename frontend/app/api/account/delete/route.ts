@@ -34,6 +34,10 @@ export async function DELETE() {
     'paper_trading_positions',
     'paper_trading_accounts',
     'investment_theses',
+    'academy_progress',
+    'academy_notes',
+    'academy_exam_attempts',
+    'academy_certificates',
   ] as const;
 
   for (const t of tables) {
