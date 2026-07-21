@@ -42,7 +42,7 @@ const MIN_SEANCES = 10;
  * en sortir », pas « moins pire que les autres ».
  */
 const LOG_FLOOR = 2_000_000;    // activité : 2 M FCFA/séance → 0
-const LOG_CEIL = 400_000_000;   // 400 M FCFA/séance → 1 (SNTS, le plus gros, ~260 M)
+const LOG_CEIL = 250_000_000;   // 250 M FCFA/séance → 1 (SNTS, le plus gros, ~260 M)
 // Amihud (%/M FCFA) : combien le cours bouge par million échangé.
 // 0,002 = on absorbe un million sans faire bouger le cours ; 5 = illiquide.
 const AMIHUD_GOOD = 0.002;
@@ -56,7 +56,7 @@ const SPREAD_BAD = 4;
 // l'absence de contrepartie. On applique une valeur légèrement défavorable
 // (0,35) plutôt que de retirer le critère (ce qui offrirait un laissez-passer),
 // mais Roll ne pèse que 10 % : son incertitude ne peut pas dominer le score.
-const NE_SPREAD = 0.35;
+const NE_SPREAD = 0.4;
 
 /**
  * Poids des composantes. La présence pèse peu : sur la BRVM 2026 tous les
