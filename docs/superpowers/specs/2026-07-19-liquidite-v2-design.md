@@ -84,6 +84,21 @@ RLS activée + policy lecture publique (donnée de marché, comme `brvm_actions_
 
 ## 6. Hors scope (phase 2)
 
-- **Spike carnet Richbourse** : vérifier accès/CGU/fraîcheur des meilleures limites achat-vente ; si concluant, spec séparée (colonnes `bid/ask` viendraient enrichir `liquidity_daily`).
+- **Spike carnet Richbourse — CONCLU le 2026-07-21 : NON-GO.** Aucune source
+  gratuite ne publie le carnet d'ordres (meilleures limites bid/ask, quantités
+  en attente, profondeur). Vérifié sur trois fronts :
+  - Richbourse public (`/common/mouvements/index/<code>`, déjà scrapé sans auth)
+    → OHLC, volume, valeur, capitalisation. Pas de bid/ask.
+  - brvm.org public (`/fr/cours-actions/0`, source de notre cron intraday)
+    → symbole, nom, volume, cours veille/ouverture/clôture, variation. Pas de carnet.
+  - Le **Carnet d'Ordres Central** de la BRVM est bien diffusé en temps réel,
+    mais aux **destinataires agréés** (SGI, terminaux de données payants), pas
+    sur une page web librement accessible. Le scraper viserait une donnée
+    licenciée → risque CGU/juridique, hors de question.
+  - **Conséquence** : l'estimation de la profondeur par Amihud + du coût par
+    Roll (approche v2/v3) reste la seule voie honnête. Décision confirmée, pas
+    un pis-aller. Rouvrir uniquement si WESTBOURSE devient destinataire agréé
+    d'un flux BRVM (partenariat SGI / abonnement data), ce qui relèverait alors
+    d'un tout autre projet (feed temps réel, pas scraping).
 - `nb_transactions` par titre : non publié par brvm.org ; à récupérer via BDFIN si la source est réactivée.
 - Intégration du flux achat/vente dans le Diagnostic IA et le Brief.
