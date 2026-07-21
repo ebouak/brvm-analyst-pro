@@ -46,9 +46,11 @@ lue que côté serveur via le service client, jamais exposée : c'est ce qui pro
 réponses. `revoke insert, update, delete … from public, anon, authenticated`.
 
 Seed : script d'import qui (a) parcourt les leçons de chaque cours-niveau et insère leurs
-`qcm` en `source='quiz'`, (b) insère les questions inédites de synthèse (rédigées + les
-QCM_DATA de certification de l'ancienne édition) en `source='inedite'`. Idempotent
-(dédoublonnage par hash question+niveau).
+`qcm` en `source='quiz'`, (b) insère les questions inédites de synthèse en
+`source='inedite'`. Ces inédites sont **rédigées** pour l'examen ; on peut en récupérer
+une partie des 12 QCM de l'ancienne édition, qui ne sont plus dans le source vivant mais
+dans l'historique git : `git show b7c3d9d:frontend/public/academy/index.html` (extraire le
+bloc `QCM_DATA`). Idempotent (dédoublonnage par hash question+niveau).
 
 ### 2.2 `academy_exam_attempts` — passages
 
