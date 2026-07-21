@@ -29,6 +29,7 @@ const PUBLIC_PREFIXES = [
   '/brief',      // briefs de séance datés (SEO)
   '/simulateur', // simulateur d'investissement public (/simulateur/[code])
   '/embed',      // widgets embarqués sur des sites tiers
+  '/certificat', // vérification publique d'un certificat Academy
   '/auth',       // callback Supabase
   '/api',        // routes API (gèrent leur propre auth)
 ];
