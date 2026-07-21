@@ -106,31 +106,51 @@ export default async function AcademyHubPage() {
                 {list.map((c) => {
                   const p = courseProgress(c.lessonsCount, byCourse.get(c.id) ?? []);
                   return (
-                    <Link
+                    <div
                       key={c.slug}
-                      href={`/formations/academy/${c.slug}${p.done > 0 ? `?lecon=${p.nextIdx + 1}` : ''}`}
                       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition hover:border-accent/40"
                     >
-                      {c.cover && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={c.cover} alt="" className="h-28 w-full object-cover" loading="lazy" />
-                      )}
-                      <div className="flex flex-1 flex-col p-5">
-                      <h3 className="font-display text-base text-white transition group-hover:text-accent">
-                        {c.titre}
-                      </h3>
-                      {c.resume && <p className="mt-1 line-clamp-2 text-sm text-muted">{c.resume}</p>}
-                      <div className="mt-4">
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
-                          <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${p.pct}%` }} />
+                      <Link
+                        href={`/formations/academy/${c.slug}${p.done > 0 ? `?lecon=${p.nextIdx + 1}` : ''}`}
+                        className="flex flex-1 flex-col"
+                      >
+                        {c.cover && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={c.cover} alt="" className="h-28 w-full object-cover" loading="lazy" />
+                        )}
+                        <div className="flex flex-1 flex-col p-5 pb-0">
+                        <h3 className="font-display text-base text-white transition group-hover:text-accent">
+                          {c.titre}
+                        </h3>
+                        {c.resume && <p className="mt-1 line-clamp-2 text-sm text-muted">{c.resume}</p>}
+                        <div className="mt-4">
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+                            <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${p.pct}%` }} />
+                          </div>
+                          <p className="mt-1.5 text-[11px] text-faint">
+                            {c.lessonsCount} leçons ·{' '}
+                            {p.pct === 0 ? 'non commencé' : p.pct === 100 ? 'terminé ✓' : `${p.pct} %`}
+                          </p>
                         </div>
-                        <p className="mt-1.5 text-[11px] text-faint">
-                          {c.lessonsCount} leçons ·{' '}
-                          {p.pct === 0 ? 'non commencé' : p.pct === 100 ? 'terminé ✓' : `${p.pct} %`}
-                        </p>
-                      </div>
-                      </div>
-                    </Link>
+                        </div>
+                      </Link>
+                      {c.niveau && (
+                        <div className="px-5 pb-5">
+                          {p.pct === 100 ? (
+                            <Link
+                              href={`/formations/academy/examen/${c.niveau}`}
+                              className="mt-3 inline-block rounded-lg border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold hover:bg-gold/20"
+                            >
+                              Passer l’examen →
+                            </Link>
+                          ) : (
+                            <span className="mt-3 inline-block text-[11px] text-faint">
+                              Terminez les leçons pour débloquer l’examen
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
