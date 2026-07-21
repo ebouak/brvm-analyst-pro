@@ -236,6 +236,35 @@ tsc + build frontend verts.
   fallback legacy ; `LiquidityCard` v2 (barre flux achat/vente, spread marché
   estimé, Amihud) ; page **`/liquidite`** (classement + méthodologie).
 
+### Ajouts (passage 2026-07-21) — Academy P2 : examens & certificats
+
+Spec `docs/superpowers/specs/2026-07-21-academy-examens-certificats-design.md`,
+plan `docs/superpowers/plans/2026-07-21-academy-examens-certificats.md`. Build
+frontend vert, exam.test.mjs vert.
+
+- **Examen par niveau** (migration `0112`) : banque `academy_exam_questions`
+  **jamais lisible** (RLS sans policy de lecture, assemblée serveur-only via
+  service_role) ; `academy_exam_attempts` RLS owner ; `academy_certificates`
+  exposé publiquement via la **vue `academy_certificates_public`** (colonnes
+  `user_id`/`consent_at` masquées par grants de colonnes + policy `revoked=false`).
+- **Moteur pur** `lib/academy/exam.ts` (`assembleExam`/`gradeExam`, PRNG seedé) :
+  les bonnes réponses ne quittent jamais la base ; correction par **valeur**
+  (le client renvoie l'ordre d'options vu). Seuil 70 %, tentatives illimitées,
+  tirage aléatoire. Banque seedée par `scraper/scripts/seed-exam-bank.mjs`
+  (qcm des leçons + inédits ; QCM historiques dans git `b7c3d9d`).
+- **Routes** : `/api/academy/exam/[niveau]/start|submit` (gate `canAccess('formations')`
+  + déblocage après leçons complétées), `/api/academy/certificate` (POST, exige
+  consentement + examen réussi, écriture **service_role**), `PATCH .../[id]`
+  (révocation service_role bornée à `user_id`).
+- **Frontend** : page examen `/formations/academy/examen/[niveau]`, écran de
+  génération (nom `profiles.display_name` + case de consentement), page publique
+  `/certificat/[id]` (+ `opengraph-image` dynamique) ouverte dans le middleware,
+  bouton « Ajouter à LinkedIn », entrée « Passer l'examen » sur le hub (100 %).
+- **RGPD** : consentement horodaté (`consent_at`) ; export + delete couvrent
+  désormais `academy_progress/notes/exam_attempts/certificates` (comble aussi un
+  écart préexistant sur progress/notes). Certificat révocable.
+- **P4 (hors scope)** : codes d'accès B2B.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
