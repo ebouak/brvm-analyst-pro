@@ -14,9 +14,13 @@ export interface Levels {
   dernier: number;
   cassureHaut: boolean;
   cassureBas: boolean;
-  /** Extensions au-delà de la résistance (amplitude du canal projetée). */
+  /** Extensions HAUSSIÈRES au-delà de la résistance (amplitude projetée). */
   objectif1: number;
   objectif2: number;
+  /** Extensions BAISSIÈRES sous le support. Ne jamais présenter d'objectif
+   *  haussier à une valeur qui vient de rompre son support (et inversement). */
+  objectifBas1: number;
+  objectifBas2: number;
   /** Sous le support : niveau qui invaliderait la lecture haussière. */
   invalidation: number;
 }
@@ -40,6 +44,8 @@ export function computeLevels(closes: number[]): Levels | null {
     cassureBas: dernier < support,
     objectif1: round(resistance + amplitude * 0.5),
     objectif2: round(resistance + amplitude),
+    objectifBas1: round(support - amplitude * 0.5),
+    objectifBas2: round(support - amplitude),
     invalidation: round(support - amplitude * 0.25),
   };
 }

@@ -78,7 +78,7 @@ const metrics = {
   code: 'ETIT', dates: ['2026-07-20', '2026-07-21'], closes: [63, 66],
   rsi: [68, 69.8], dernier: 66, variationHebdo: 4.76, volume: 7600000,
   ratioVolume: 2.8, rsiDernier: 69.8, macdPositif: true,
-  levels: { resistance: 63, support: 55, dernier: 66, cassureHaut: true, cassureBas: false, objectif1: 67, objectif2: 71, invalidation: 53 },
+  levels: { resistance: 63, support: 55, dernier: 66, cassureHaut: true, cassureBas: false, objectif1: 67, objectif2: 71, objectifBas1: 51, objectifBas2: 47, invalidation: 53 },
 };
 
 test('buildSkeleton produit des sections et une whitelist de chiffres', () => {
@@ -105,4 +105,35 @@ test('assertNoForeignNumber REJETTE un nombre inventé', () => {
 
 test('assertNoForeignNumber tolère un arrondi proche', () => {
   assert.equal(assertNoForeignNumber('RSI de 70 environ.', [69.8]), true);
+});
+
+test('computeLevels expose aussi des objectifs BAISSIERS', () => {
+  const l = computeLevels(croissante);
+  assert.ok(l.objectifBas1 < l.support);
+  assert.ok(l.objectifBas2 < l.objectifBas1);
+});
+
+test('le squelette est lui-meme accepte par son propre garde-fou', () => {
+  // Regression : le texte contient « RSI(14) » et « 20 seances ». Sans ces
+  // constantes dans la whitelist, toute reformulation fidele etait rejetee.
+  const s = buildSkeleton(metrics);
+  const texte = s.sections.map((x) => x.texte).join(' ');
+  assert.equal(assertNoForeignNumber(texte, s.chiffres), true);
+});
+
+test('une valeur en BAISSE ne recoit jamais d objectif haussier', () => {
+  // Regression : STAC avait rompu son support et se voyait annoncer un
+  // « premier objectif » 32 % plus haut.
+  const baisse = {
+    ...metrics,
+    variationHebdo: -6.57,
+    levels: { resistance: 3200, support: 3050, dernier: 2985, cassureHaut: false, cassureBas: true,
+              objectif1: 3275, objectif2: 3350, objectifBas1: 2975, objectifBas2: 2900, invalidation: 3012 },
+  };
+  const s = buildSkeleton(baisse);
+  const niveaux = s.sections.find((x) => x.titre === 'Niveaux à surveiller').texte;
+  assert.match(niveaux, /baisse/i);
+  assert.ok(!niveaux.includes('3275'), 'aucun objectif haussier ne doit apparaitre');
+  assert.ok(!niveaux.includes('3350'), 'aucun objectif haussier ne doit apparaitre');
+  assert.equal(assertNoForeignNumber(niveaux, s.chiffres), true);
 });

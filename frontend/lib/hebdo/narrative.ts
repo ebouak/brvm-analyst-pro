@@ -14,9 +14,17 @@ export interface Skeleton {
 
 const pct = (x: number) => `${x >= 0 ? '+' : ''}${x.toFixed(2)} %`;
 
+/**
+ * Constantes structurelles qui apparaissent LITTÉRALEMENT dans le texte du
+ * squelette : « RSI(14) » et « moyenne des 20 séances ». Sans elles dans la
+ * whitelist, le garde-fou rejetterait même une reformulation parfaitement
+ * fidèle (constaté au premier run réel : 100 % de rejets).
+ */
+const CONSTANTES_TEXTE = [14, 20];
+
 export function buildSkeleton(m: HebdoMetrics): Skeleton {
   const sections: { titre: string; texte: string }[] = [];
-  const chiffres: number[] = [m.dernier];
+  const chiffres: number[] = [m.dernier, ...CONSTANTES_TEXTE];
 
   // 1. Séance / semaine
   let s1 = `${m.code} termine la semaine à ${m.dernier} FCFA`;
@@ -43,19 +51,31 @@ export function buildSkeleton(m: HebdoMetrics): Skeleton {
     });
   }
 
-  // 3. Niveaux et cassure
+  // 3. Niveaux et cassure — DIRECTIONNEL : on ne présente jamais d'objectif
+  //    haussier à une valeur qui vient de rompre son support (et inversement).
   if (m.levels) {
     const l = m.levels;
-    chiffres.push(l.resistance, l.support, l.objectif1, l.objectif2, l.invalidation);
-    const etat = l.cassureHaut
-      ? `Le cours a franchi la résistance des ${l.resistance} FCFA`
-      : l.cassureBas
-        ? `Le cours a rompu le support des ${l.support} FCFA`
-        : `Le cours évolue entre ${l.support} et ${l.resistance} FCFA`;
-    sections.push({
-      titre: 'Niveaux à surveiller',
-      texte: `${etat}. Support : ${l.support} FCFA. Premier objectif : ${l.objectif1} FCFA, second : ${l.objectif2} FCFA. Invalidation sous ${l.invalidation} FCFA.`,
-    });
+    chiffres.push(l.resistance, l.support);
+    let texte: string;
+    if (l.cassureBas) {
+      chiffres.push(l.objectifBas1, l.objectifBas2);
+      texte =
+        `Le cours a rompu le support des ${l.support} FCFA. ` +
+        `Prochains seuils à la baisse : ${l.objectifBas1} FCFA, puis ${l.objectifBas2} FCFA. ` +
+        `Un retour durable au-dessus de ${l.support} FCFA annulerait cette rupture.`;
+    } else if (l.cassureHaut) {
+      chiffres.push(l.objectif1, l.objectif2, l.invalidation);
+      texte =
+        `Le cours a franchi la résistance des ${l.resistance} FCFA. ` +
+        `Premier objectif : ${l.objectif1} FCFA, second : ${l.objectif2} FCFA. ` +
+        `Invalidation sous ${l.invalidation} FCFA.`;
+    } else {
+      texte =
+        `Le cours évolue entre ${l.support} et ${l.resistance} FCFA. ` +
+        `Une sortie de ce canal donnera la direction : au-dessus de ${l.resistance} FCFA à la hausse, ` +
+        `sous ${l.support} FCFA à la baisse.`;
+    }
+    sections.push({ titre: 'Niveaux à surveiller', texte });
   }
 
   const verdict = m.variationHebdo != null && m.variationHebdo >= 0
