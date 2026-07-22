@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { computeLevels } from './levels.ts';
 import { selectHebdo } from './select.ts';
 import { buildSkeleton, assertNoForeignNumber } from './narrative.ts';
+import { fmtMontant } from './format.ts';
 
 /** Série croissante 40 → 79 (40 points). */
 const croissante = Array.from({ length: 40 }, (_, i) => 40 + i);
@@ -136,4 +137,15 @@ test('une valeur en BAISSE ne recoit jamais d objectif haussier', () => {
   assert.ok(!niveaux.includes('3275'), 'aucun objectif haussier ne doit apparaitre');
   assert.ok(!niveaux.includes('3350'), 'aucun objectif haussier ne doit apparaitre');
   assert.equal(assertNoForeignNumber(niveaux, s.chiffres), true);
+});
+
+test('fmtMontant : milliards, millions, milliers', () => {
+  assert.equal(fmtMontant(13075000000), '13,1 milliards FCFA');
+  assert.equal(fmtMontant(-96558000), '96,6 millions FCFA');
+  assert.equal(fmtMontant(1351000000), '1,4 milliard FCFA');
+  assert.equal(fmtMontant(450000).replace(/[\s  ]/g, ' '), '450 000 FCFA');
+});
+
+test('fmtMontant : valeur absolue (le signe est porté par la phrase)', () => {
+  assert.equal(fmtMontant(-13075000000), '13,1 milliards FCFA');
 });
