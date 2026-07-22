@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { computeLevels } from './levels.ts';
 import { selectHebdo } from './select.ts';
-import { buildSkeleton, assertNoForeignNumber } from './narrative.ts';
+import { buildSkeleton, assertNoForeignNumber, assertNoCausalClaim } from './narrative.ts';
 import { fmtMontant } from './format.ts';
 import { pickNotableFundamental } from './fundamentals.ts';
+import { pickRecentEvent } from './context.ts';
 
 /** Série croissante 40 → 79 (40 points). */
 const croissante = Array.from({ length: 40 }, (_, i) => 40 + i);
@@ -199,4 +200,40 @@ test('pickNotableFundamental : cas banal → null (pas de remplissage)', () => {
 
 test('pickNotableFundamental : aucune donnee → null', () => {
   assert.equal(pickNotableFundamental([], 3000), null);
+});
+
+const evts = [
+  { event_date: '2026-07-18', title: 'Résultats semestriels 2026', event_type: 'resultats' },
+  { event_date: '2026-05-12', title: 'Avis de convocation AGO', event_type: 'assemblee' },
+];
+
+test('pickRecentEvent : retient un evenement dans la fenetre de 14 jours', () => {
+  const e = pickRecentEvent(evts, '2026-07-22');
+  assert.ok(e);
+  assert.match(e.phrase, /Résultats semestriels 2026/);
+  assert.match(e.phrase, /18/);
+});
+
+test('pickRecentEvent : ecarte un evenement trop ancien', () => {
+  const vieux = [{ event_date: '2026-05-12', title: 'Avis de convocation AGO', event_type: 'assemblee' }];
+  assert.equal(pickRecentEvent(vieux, '2026-07-22'), null);
+});
+
+test('pickRecentEvent : aucun evenement → null', () => {
+  assert.equal(pickRecentEvent([], '2026-07-22'), null);
+});
+
+test('pickRecentEvent : la phrase ne contient aucun lien de causalite', () => {
+  const e = pickRecentEvent(evts, '2026-07-22');
+  assert.equal(assertNoCausalClaim(e.phrase), true);
+});
+
+test('assertNoCausalClaim : accepte une juxtaposition datee', () => {
+  assert.equal(assertNoCausalClaim('À noter : Résultats publiés le 18 juillet 2026.'), true);
+});
+
+test('assertNoCausalClaim : REJETTE une causalite affirmee', () => {
+  assert.equal(assertNoCausalClaim('Le cours a chuté à cause de la publication.'), false);
+  assert.equal(assertNoCausalClaim('La hausse s’explique par les résultats.'), false);
+  assert.equal(assertNoCausalClaim('Le titre monte suite à l’annonce.'), false);
 });

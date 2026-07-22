@@ -95,3 +95,28 @@ export function assertNoForeignNumber(texte: string, chiffres: number[]): boolea
     chiffres.some((c) => Math.abs(c - n) <= Math.max(0.5, Math.abs(c) * 0.01)),
   );
 }
+
+/**
+ * Connecteurs qui affirment une CAUSE. Un texte d'analyse peut juxtaposer un
+ * fait daté et un mouvement de cours ; il ne peut pas prétendre que l'un
+ * explique l'autre — nous n'avons aucune donnée qui l'établisse.
+ */
+const CONNECTEURS_CAUSAUX = [
+  'à cause de', 'a cause de',
+  'en raison de',
+  'suite à', 'suite a',
+  'provoqué par', 'provoque par',
+  'expliqué par', 'explique par',
+  's’explique par', "s'explique par",
+  'dû à', 'du à', 'due à',
+  'sous l’effet de', "sous l'effet de",
+  'grâce à', 'grace a',
+  'porté par', 'porte par',
+  'plombé par', 'plombe par',
+];
+
+/** false si le texte affirme un lien de causalité (→ on rejette la sortie LLM). */
+export function assertNoCausalClaim(texte: string): boolean {
+  const t = texte.toLowerCase();
+  return !CONNECTEURS_CAUSAUX.some((c) => t.includes(c));
+}
