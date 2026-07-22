@@ -5,6 +5,7 @@
  * d'une métrique) + garde-fou qui empêche toute reformulation LLM d'introduire
  * un chiffre absent des données. Règle §5 : rien d'inventé.
  */
+import { fmtNombre, fmtPct, fmtRatio } from './format.js';
 import type { HebdoMetrics, HebdoContexte } from './types.js';
 
 export interface Skeleton {
@@ -13,8 +14,6 @@ export interface Skeleton {
   chiffres: number[];
   verdict: string;
 }
-
-const pct = (x: number) => `${x >= 0 ? '+' : ''}${x.toFixed(2)} %`;
 
 /**
  * Constantes structurelles qui apparaissent LITTÉRALEMENT dans le texte du
@@ -30,14 +29,14 @@ export function buildSkeleton(m: HebdoMetrics, ctx?: HebdoContexte): Skeleton {
   const chiffres: number[] = [m.dernier, ...CONSTANTES_TEXTE];
 
   // 1. Ce qui s'est passé — langage courant, chiffre en appui.
-  let s1 = `${m.code} termine la semaine à ${m.dernier} FCFA`;
+  let s1 = `${m.code} termine la semaine à ${fmtNombre(m.dernier)} FCFA`;
   if (m.variationHebdo != null) {
     const sens = m.variationHebdo >= 0 ? 'en hausse' : 'en repli';
-    s1 += `, ${sens} de ${Math.abs(m.variationHebdo).toFixed(2)} % sur cinq séances`;
+    s1 += `, ${sens} de ${fmtPct(Math.abs(m.variationHebdo))} sur cinq séances`;
     chiffres.push(Math.abs(Math.round(m.variationHebdo * 100) / 100));
   }
   if (m.ratioVolume != null) {
-    s1 += `. Il s'est échangé ${m.ratioVolume.toFixed(1)} fois plus de titres que d'habitude, ` +
+    s1 += `. Il s’est échangé ${fmtRatio(m.ratioVolume)} fois plus de titres que d’habitude, ` +
           `signe que le mouvement a mobilisé du monde`;
     chiffres.push(Math.round(m.ratioVolume * 10) / 10);
   }
@@ -57,7 +56,7 @@ export function buildSkeleton(m: HebdoMetrics, ctx?: HebdoContexte): Skeleton {
       : ' La dynamique de fond reste orientée à la baisse.';
     sections.push({
       titre: 'Ce que ça veut dire',
-      texte: `${lecture} (indicateur de tension : ${m.rsiDernier.toFixed(0)} sur 100).${macd}`,
+      texte: `${lecture} (indicateur de tension : ${fmtNombre(m.rsiDernier)} sur 100).${macd}`,
     });
   }
 
@@ -75,21 +74,22 @@ export function buildSkeleton(m: HebdoMetrics, ctx?: HebdoContexte): Skeleton {
     if (l.cassureBas) {
       chiffres.push(l.objectifBas1, l.objectifBas2);
       texte =
-        `Le cours est passé sous son plancher des 20 dernières séances (${l.support} FCFA), ` +
-        `un seuil que les acheteurs défendaient jusqu'ici. Les prochains paliers à surveiller ` +
-        `sont ${l.objectifBas1} puis ${l.objectifBas2} FCFA. Repasser durablement au-dessus de ` +
-        `${l.support} FCFA annulerait ce signal.`;
+        `Le cours est passé sous son plancher des 20 dernières séances (${fmtNombre(l.support)} FCFA), ` +
+        `un seuil que les acheteurs défendaient jusqu’ici. Les prochains paliers à surveiller ` +
+        `sont ${fmtNombre(l.objectifBas1)} puis ${fmtNombre(l.objectifBas2)} FCFA. Repasser durablement ` +
+        `au-dessus de ${fmtNombre(l.support)} FCFA annulerait ce signal.`;
     } else if (l.cassureHaut) {
       chiffres.push(l.objectif1, l.objectif2, l.invalidation);
       texte =
-        `Le cours a dépassé son plafond des 20 dernières séances (${l.resistance} FCFA), ` +
-        `un seuil qui bloquait la hausse jusqu'ici. Les prochains paliers sont ${l.objectif1} ` +
-        `puis ${l.objectif2} FCFA. Un retour sous ${l.invalidation} FCFA remettrait ce signal en cause.`;
+        `Le cours a dépassé son plafond des 20 dernières séances (${fmtNombre(l.resistance)} FCFA), ` +
+        `un seuil qui bloquait la hausse jusqu’ici. Les prochains paliers sont ${fmtNombre(l.objectif1)} ` +
+        `puis ${fmtNombre(l.objectif2)} FCFA. Un retour sous ${fmtNombre(l.invalidation)} FCFA remettrait ` +
+        `ce signal en cause.`;
     } else {
       texte =
-        `Le cours reste coincé entre ${l.support} et ${l.resistance} FCFA. ` +
-        `C'est la sortie de ce couloir qui donnera la direction : au-dessus de ${l.resistance} FCFA ` +
-        `pour la hausse, sous ${l.support} FCFA pour la baisse.`;
+        `Le cours reste coincé entre ${fmtNombre(l.support)} et ${fmtNombre(l.resistance)} FCFA. ` +
+        `C’est la sortie de ce couloir qui donnera la direction : au-dessus de ${fmtNombre(l.resistance)} FCFA ` +
+        `pour la hausse, sous ${fmtNombre(l.support)} FCFA pour la baisse.`;
     }
     sections.push({ titre: 'Les niveaux à surveiller', texte });
   }
@@ -106,7 +106,11 @@ export function buildSkeleton(m: HebdoMetrics, ctx?: HebdoContexte): Skeleton {
  * (tolérance d'arrondi 1 %). Retourne false si le LLM a inventé une valeur.
  */
 export function assertNoForeignNumber(texte: string, chiffres: number[]): boolean {
-  const trouves = (texte.match(/\d+(?:[.,]\d+)?/g) ?? []).map((s) => parseFloat(s.replace(',', '.')));
+  // Les montants sont écrits à la française (« 3 050 FCFA ») : on recolle les
+  // milliers avant d'extraire, sinon « 3 050 » se lirait « 3 » puis « 050 » et
+  // le garde-fou rejetterait à tort un texte parfaitement fidèle.
+  const normalise = texte.replace(/(\d)[\s  ](?=\d{3}(?!\d))/g, '$1');
+  const trouves = (normalise.match(/\d+(?:[.,]\d+)?/g) ?? []).map((s) => parseFloat(s.replace(',', '.')));
   return trouves.every((n) =>
     chiffres.some((c) => Math.abs(c - n) <= Math.max(0.5, Math.abs(c) * 0.01)),
   );
