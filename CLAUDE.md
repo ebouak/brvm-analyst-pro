@@ -265,6 +265,34 @@ frontend vert, exam.test.mjs vert.
   écart préexistant sur progress/notes). Certificat révocable.
 - **P4 (hors scope)** : codes d'accès B2B.
 
+### Ajouts (passage 2026-07-22) — Analyse hebdo des valeurs en vogue
+
+Spec `docs/superpowers/specs/2026-07-22-analyse-hebdo-valeurs-design.md`, plan
+`docs/superpowers/plans/2026-07-22-analyse-hebdo-valeurs.md`. 14 tests purs verts,
+tsc + build frontend verts, 397 tests scraper sans régression.
+
+- **Honnêteté** : tout dérive du réel (clôtures `brvm_actions_daily`, RSI/MACD
+  calculés, niveaux via `computeLevels`). Aucun niveau ni chiffre saisi à la main.
+- **Modules purs** `frontend/lib/hebdo/` : `levels.ts` (support/résistance/objectifs
+  sur le canal 20 séances), `select.ts` (3-5 valeurs notables — variation, volume
+  ≥ 2×, cassure, RSI — avec **au moins une baisse garantie**), `narrative.ts`
+  (squelette déterministe + `assertNoForeignNumber`).
+- **Garde-fou LLM** : `scraper/src/hebdo/polish.ts` reformule les liaisons via
+  DeepSeek→Mistral mais **rejette toute sortie contenant un chiffre absent** de la
+  whitelist → fallback squelette. Aucun chemin ne publie un texte non vérifié.
+- **Worker** `scraper/src/hebdo/runHebdo.ts` (CLI `hebdo[:mock]`) : pagine
+  PostgREST (plafond 1000 lignes), fige un **snapshot** `metrics` par valeur,
+  **auto-publie** puis envoie une **alerte** (email/telegram) avec le lien.
+  Cron `.github/workflows/hebdo.yml` samedi 06:00 UTC. Migration `0113`.
+- **Duplication assumée** : `scraper/src/hebdo/pure/` copie les modules purs du
+  frontend (deux paquets TS distincts, pas de module partagé). Toute correction
+  est à reporter des deux côtés — commentaire en tête de chaque copie.
+- **Frontend** : `/analyses/hebdo` (index) et `/analyses/hebdo/[date]` (graphe
+  Recharts cours + RSI annoté des niveaux, narratif, lexique, disclaimer),
+  `opengraph-image` + PNG haute-rés `/api/hebdo/[date]/image?code=`,
+  admin `/admin/hebdo` (dépublier, `content.publish`). Nav : « Valeurs de la
+  semaine » (à ne pas confondre avec `/weekly`, matières premières).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
