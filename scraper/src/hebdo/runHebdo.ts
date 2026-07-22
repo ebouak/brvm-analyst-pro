@@ -10,6 +10,9 @@ import { polishNarrative } from './polish.js';
 import { resolveApiKeyForScraper } from './apiKey.js';
 import { selectHebdo } from './pure/select.js';
 import { buildSkeleton } from './pure/narrative.js';
+import { pickNotableFundamental } from './pure/fundamentals.js';
+import { pickRecentEvent } from './pure/context.js';
+import { buildPost } from './pure/post.js';
 import { computeLevels } from './pure/levels.js';
 import { rsiSeries, macdSeries } from './pure/indicators.js';
 
@@ -86,6 +89,34 @@ export async function runHebdo(opts: { mock?: boolean } = {}): Promise<HebdoRunR
     .single();
   if (eEd) throw eEd;
 
+  // Éclairages : fondamental (si notable) et actualité (si récente) — chargés
+  // uniquement pour les valeurs retenues.
+  const codes = picks.map((p) => p.code);
+  const { data: incomeRows } = await sb
+    .from('income_statements')
+    .select('code, periode, resultat_net, benefice_par_action, dividende_par_action')
+    .in('code', codes)
+    .eq('type_periode', 'annuel');
+  const { data: eventRows } = await sb
+    .from('market_events')
+    .select('instrument_code, event_date, title, event_type')
+    .in('instrument_code', codes)
+    .order('event_date', { ascending: false });
+
+  type IncomeR = { code: string; periode: string; resultat_net: number | null; benefice_par_action: number | null; dividende_par_action: number | null };
+  type EventR = { instrument_code: string; event_date: string; title: string; event_type?: string | null };
+
+  const incomeByCode = new Map<string, IncomeR[]>();
+  for (const r of (incomeRows ?? []) as IncomeR[]) {
+    if (!incomeByCode.has(r.code)) incomeByCode.set(r.code, []);
+    incomeByCode.get(r.code)!.push(r);
+  }
+  const eventsByCode = new Map<string, EventR[]>();
+  for (const r of (eventRows ?? []) as EventR[]) {
+    if (!eventsByCode.has(r.instrument_code)) eventsByCode.set(r.instrument_code, []);
+    eventsByCode.get(r.instrument_code)!.push(r);
+  }
+
   let ordre = 0;
   for (const p of picks) {
     const serie = (byCode.get(p.code) ?? []).slice(-HISTO);
@@ -107,12 +138,23 @@ export async function runHebdo(opts: { mock?: boolean } = {}): Promise<HebdoRunR
       macdPositif: hist == null ? null : hist > 0,
       levels: computeLevels(closes),
     };
-    const sk = buildSkeleton(metrics);
+    const ctx = {
+      fondamental: pickNotableFundamental(incomeByCode.get(p.code) ?? [], metrics.dernier),
+      evenement: pickRecentEvent(eventsByCode.get(p.code) ?? [], dateEdition),
+    };
+    const sk = buildSkeleton(metrics, ctx);
     const sections = await polishNarrative(sk.sections, sk.chiffres, resolveApiKeyForScraper);
     const narratif = sections.map((s) => `## ${s.titre}\n\n${s.texte}`).join('\n\n');
+    // Les posts sont composés depuis les sections VALIDÉES : mêmes garanties.
+    const skValide = { ...sk, sections };
+    const postLong = buildPost(skValide, metrics, 'long');
+    const postCourt = buildPost(skValide, metrics, 'court');
 
     const { error: eIt } = await sb.from('hebdo_items').upsert(
-      { edition_id: ed.id, code: p.code, sens: p.sens, raison: p.raison, metrics, narratif_md: narratif, ordre: ordre++ },
+      {
+        edition_id: ed.id, code: p.code, sens: p.sens, raison: p.raison, metrics,
+        narratif_md: narratif, post_long: postLong, post_court: postCourt, ordre: ordre++,
+      },
       { onConflict: 'edition_id,code' },
     );
     if (eIt) throw eIt;
