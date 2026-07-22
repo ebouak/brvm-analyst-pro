@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { computeLevels } from './levels.ts';
 import { selectHebdo } from './select.ts';
+import { buildSkeleton, assertNoForeignNumber } from './narrative.ts';
 
 /** Série croissante 40 → 79 (40 points). */
 const croissante = Array.from({ length: 40 }, (_, i) => 40 + i);
@@ -71,4 +72,37 @@ test('selectHebdo : volume anormal (≥2×) mentionné dans la raison', () => {
 
 test('selectHebdo : aucune valeur exploitable → tableau vide', () => {
   assert.deepEqual(selectHebdo([]), []);
+});
+
+const metrics = {
+  code: 'ETIT', dates: ['2026-07-20', '2026-07-21'], closes: [63, 66],
+  rsi: [68, 69.8], dernier: 66, variationHebdo: 4.76, volume: 7600000,
+  ratioVolume: 2.8, rsiDernier: 69.8, macdPositif: true,
+  levels: { resistance: 63, support: 55, dernier: 66, cassureHaut: true, cassureBas: false, objectif1: 67, objectif2: 71, invalidation: 53 },
+};
+
+test('buildSkeleton produit des sections et une whitelist de chiffres', () => {
+  const s = buildSkeleton(metrics);
+  assert.ok(s.sections.length >= 3);
+  assert.ok(s.chiffres.includes(69.8));
+  assert.ok(s.chiffres.includes(66));
+  assert.ok(s.verdict.length > 0);
+});
+
+test('buildSkeleton mentionne la cassure quand elle a lieu', () => {
+  const s = buildSkeleton(metrics);
+  const texte = s.sections.map((x) => x.texte).join(' ');
+  assert.match(texte, /cassure|franchi/i);
+});
+
+test('assertNoForeignNumber accepte un texte n’utilisant que la whitelist', () => {
+  assert.equal(assertNoForeignNumber('Le RSI atteint 69.8 et le cours 66 FCFA.', [69.8, 66]), true);
+});
+
+test('assertNoForeignNumber REJETTE un nombre inventé', () => {
+  assert.equal(assertNoForeignNumber('Objectif à 120 FCFA.', [69.8, 66]), false);
+});
+
+test('assertNoForeignNumber tolère un arrondi proche', () => {
+  assert.equal(assertNoForeignNumber('RSI de 70 environ.', [69.8]), true);
 });
