@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 import HebdoChart from '@/components/hebdo/HebdoChart';
+import CopyPostButton from '@/components/hebdo/CopyPostButton';
 import type { HebdoMetrics } from '@/lib/hebdo/types';
 
 export const dynamic = 'force-dynamic';
 
-interface Item { code: string; sens: string; raison: string; metrics: HebdoMetrics; narratif_md: string; ordre: number }
+interface Item { code: string; sens: string; raison: string; metrics: HebdoMetrics; narratif_md: string; post_long: string; post_court: string; ordre: number }
 
 async function load(date: string) {
   const db = createPublicClient();
@@ -16,7 +17,7 @@ async function load(date: string) {
   if (!ed) return null;
   const { data: items } = await db
     .from('hebdo_items')
-    .select('code, sens, raison, metrics, narratif_md, ordre')
+    .select('code, sens, raison, metrics, narratif_md, post_long, post_court, ordre')
     .eq('edition_id', (ed as { id: string }).id)
     .order('ordre');
   return { date: (ed as { date_edition: string }).date_edition, items: (items ?? []) as Item[] };
@@ -79,10 +80,14 @@ export default async function HebdoEditionPage({ params }: { params: { date: str
               })}
             </div>
 
-            <a href={`/api/hebdo/${e.date}/image?code=${it.code}`} download
-              className="inline-block rounded-lg border border-border px-3 py-1.5 text-xs text-muted hover:text-white">
-              ⤓ Télécharger l’image
-            </a>
+            <div className="flex flex-wrap gap-2">
+              <CopyPostButton texte={it.post_long} label="LinkedIn" />
+              <CopyPostButton texte={it.post_court} label="WhatsApp" />
+              <a href={`/api/hebdo/${e.date}/image?code=${it.code}`} download
+                className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted hover:text-white">
+                ⤓ Télécharger l’image
+              </a>
+            </div>
           </PremiumPanel>
         );
       })}
