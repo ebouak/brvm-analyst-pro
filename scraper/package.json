@@ -16,6 +16,8 @@
     "score": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts score",
     "backtest-signals": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts backtest-signals",
     "score:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts score --mock",
+    "hebdo": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts hebdo",
+    "hebdo:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts hebdo --mock",
     "liquidity": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts liquidity",
     "liquidity:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts liquidity --mock",
     "events": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts events",

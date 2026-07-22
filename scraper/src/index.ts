@@ -167,6 +167,25 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'hebdo': {
+      const { runHebdo } = await import('./hebdo/runHebdo.js');
+      const res = await monitored(
+        { code: 'hebdo', label: 'Analyse hebdo' },
+        async () => {
+          const r = await runHebdo({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.nb_items,
+              rows_upserted: r.nb_items,
+              metadata: { date_edition: r.date_edition, nb_items: r.nb_items },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'liquidity': {
       const { runLiquidity } = await import('./liquidity/runLiquidity.js');
       const res = await monitored(
