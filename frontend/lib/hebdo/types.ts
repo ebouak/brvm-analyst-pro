@@ -34,3 +34,9 @@ export interface HebdoMetrics {
   macdPositif: boolean | null;
   levels: Levels | null;
 }
+
+/** Éclairages optionnels injectés dans le narratif (spec §3 et §4). */
+export interface HebdoContexte {
+  fondamental: { phrase: string; chiffres: number[] } | null;
+  evenement: { phrase: string; chiffres: number[] } | null;
+}

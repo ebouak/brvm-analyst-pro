@@ -95,7 +95,7 @@ test('buildSkeleton produit des sections et une whitelist de chiffres', () => {
 test('buildSkeleton mentionne la cassure quand elle a lieu', () => {
   const s = buildSkeleton(metrics);
   const texte = s.sections.map((x) => x.texte).join(' ');
-  assert.match(texte, /cassure|franchi/i);
+  assert.match(texte, /plancher|plafond|couloir/i);
 });
 
 test('assertNoForeignNumber accepte un texte n’utilisant que la whitelist', () => {
@@ -134,8 +134,8 @@ test('une valeur en BAISSE ne recoit jamais d objectif haussier', () => {
               objectif1: 3275, objectif2: 3350, objectifBas1: 2975, objectifBas2: 2900, invalidation: 3012 },
   };
   const s = buildSkeleton(baisse);
-  const niveaux = s.sections.find((x) => x.titre === 'Niveaux à surveiller').texte;
-  assert.match(niveaux, /baisse/i);
+  const niveaux = s.sections.find((x) => x.titre === 'Les niveaux à surveiller').texte;
+  assert.match(niveaux, /plancher/i);
   assert.ok(!niveaux.includes('3275'), 'aucun objectif haussier ne doit apparaitre');
   assert.ok(!niveaux.includes('3350'), 'aucun objectif haussier ne doit apparaitre');
   assert.equal(assertNoForeignNumber(niveaux, s.chiffres), true);
@@ -236,4 +236,38 @@ test('assertNoCausalClaim : REJETTE une causalite affirmee', () => {
   assert.equal(assertNoCausalClaim('Le cours a chuté à cause de la publication.'), false);
   assert.equal(assertNoCausalClaim('La hausse s’explique par les résultats.'), false);
   assert.equal(assertNoCausalClaim('Le titre monte suite à l’annonce.'), false);
+});
+
+test('buildSkeleton : le texte est vulgarise (pas de jargon brut)', () => {
+  const s = buildSkeleton(metrics);
+  const texte = s.sections.map((x) => x.texte).join(' ');
+  assert.ok(!/RSI\(14\) s’établit/.test(texte), 'plus de formulation brute du RSI');
+  assert.match(texte, /surachet|survendu|tension/i);
+  assert.match(texte, /fois plus de titres|habitude/i);
+});
+
+test('buildSkeleton : section contexte presente si fondamental notable', () => {
+  const s = buildSkeleton(metrics, {
+    fondamental: { phrase: 'La société a publié une perte de 96,6 millions FCFA sur l’exercice 2025.', chiffres: [96.6, 2025] },
+    evenement: null,
+  });
+  const ctx = s.sections.find((x) => x.titre === 'Le contexte');
+  assert.ok(ctx);
+  assert.match(ctx.texte, /perte/);
+  assert.ok(s.chiffres.includes(96.6));
+});
+
+test('buildSkeleton : pas de section contexte si rien de notable', () => {
+  const s = buildSkeleton(metrics, { fondamental: null, evenement: null });
+  assert.equal(s.sections.find((x) => x.titre === 'Le contexte'), undefined);
+});
+
+test('buildSkeleton : le squelette passe ses deux gardes-fous', () => {
+  const s = buildSkeleton(metrics, {
+    fondamental: { phrase: 'La société a publié une perte de 96,6 millions FCFA sur l’exercice 2025.', chiffres: [96.6, 2025] },
+    evenement: { phrase: 'À noter : Résultats semestriels 2026, publié le 18 juillet 2026.', chiffres: [18, 2026] },
+  });
+  const texte = s.sections.map((x) => x.texte).join(' ');
+  assert.equal(assertNoForeignNumber(texte, s.chiffres), true);
+  assert.equal(assertNoCausalClaim(texte), true);
 });
