@@ -1,0 +1,38 @@
+name: Analyse hebdo
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    # Samedi 06:00 UTC : la séance de vendredi et le scoring sont passés.
+    - cron: '0 6 * * 6'
+  workflow_dispatch: {}
+
+concurrency:
+  group: hebdo
+  cancel-in-progress: false
+
+jobs:
+  hebdo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+      - name: Run hebdo
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          LOG_LEVEL: info
+        run: npm run hebdo
