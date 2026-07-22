@@ -21,6 +21,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/formations', label: 'Formations', permission: 'content.read' },
   { href: '/admin/academy', label: 'Academy (IA)', permission: 'content.read' },
   { href: '/admin/weekly', label: 'Rapports hebdo', permission: 'content.read' },
+  { href: '/admin/hebdo', label: 'Valeurs de la semaine', permission: 'content.publish' },
   { href: '/admin/newsletter', label: 'Newsletter', permission: 'content.read' },
   { href: '/admin/forum', label: 'Modération forum', permission: 'content.read' },
   { href: '/admin/leads', label: 'Leads débutants', permission: 'leads.read' },
