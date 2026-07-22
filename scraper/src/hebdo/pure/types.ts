@@ -1,4 +1,4 @@
-// COPIE de frontend/lib/... — frontend et scraper sont deux paquets TS distincts
+// COPIE de frontend/lib/hebdo — frontend et scraper sont deux paquets TS distincts
 // (pas de module partagé dans ce repo). Toute correction doit être reportée des deux côtés.
 import type { Levels } from './levels.js';
 
@@ -35,4 +35,10 @@ export interface HebdoMetrics {
   rsiDernier: number | null;
   macdPositif: boolean | null;
   levels: Levels | null;
+}
+
+/** Éclairages optionnels injectés dans le narratif (spec §3 et §4). */
+export interface HebdoContexte {
+  fondamental: { phrase: string; chiffres: number[] } | null;
+  evenement: { phrase: string; chiffres: number[] } | null;
 }

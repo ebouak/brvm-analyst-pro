@@ -24,6 +24,24 @@ function assertNoForeignNumber(texte: string, chiffres: number[]): boolean {
 }
 
 /**
+ * Connecteurs causaux — même liste que frontend/lib/hebdo/narrative.ts
+ * (dupliquée : paquets séparés). Un texte peut juxtaposer un fait daté et un
+ * mouvement de cours, jamais prétendre que l'un explique l'autre.
+ */
+const CONNECTEURS_CAUSAUX = [
+  'à cause de', 'a cause de', 'en raison de', 'suite à', 'suite a',
+  'provoqué par', 'provoque par', 'expliqué par', 'explique par',
+  's’explique par', "s'explique par", 'dû à', 'du à', 'due à',
+  'sous l’effet de', "sous l'effet de", 'grâce à', 'grace a',
+  'porté par', 'porte par', 'plombé par', 'plombe par',
+];
+
+function assertNoCausalClaim(texte: string): boolean {
+  const t = texte.toLowerCase();
+  return !CONNECTEURS_CAUSAUX.some((c) => t.includes(c));
+}
+
+/**
  * @param resolveKey fonction fournie par l'appelant pour obtenir une clé
  *   (permet de tester sans réseau et de réutiliser le stockage api_keys).
  */
@@ -36,6 +54,10 @@ export async function polishNarrative(
   const prompt =
     `Reformule ce commentaire boursier en français pour le rendre fluide et professionnel.\n` +
     `RÈGLES ABSOLUES : n'ajoute AUCUN chiffre, AUCUN fait, AUCUNE prévision. ` +
+    `N'affirme JAMAIS qu'un événement explique un mouvement de cours (pas de ` +
+    `« à cause de », « en raison de », « suite à », « grâce à », « porté par »). ` +
+    `Écris pour un lecteur qui débute en bourse : phrases courtes, mots simples, ` +
+    `aucun jargon non expliqué. ` +
     `N'utilise que ces valeurs numériques : ${chiffres.join(', ')}. ` +
     `Conserve exactement les mêmes titres de section (lignes commençant par ##).\n\n${brut}`;
 
@@ -55,6 +77,10 @@ export async function polishNarrative(
 
       if (!assertNoForeignNumber(out, chiffres)) {
         logger.warn({ provider: p.provider }, 'hebdo : reformulation rejetée (chiffre étranger) — squelette conservé');
+        continue;
+      }
+      if (!assertNoCausalClaim(out)) {
+        logger.warn({ provider: p.provider }, 'hebdo : reformulation rejetée (causalité affirmée) — squelette conservé');
         continue;
       }
       const blocs = out.split(/^##\s+/m).map((b) => b.trim()).filter(Boolean);
