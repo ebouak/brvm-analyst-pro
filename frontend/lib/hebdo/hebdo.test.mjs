@@ -4,6 +4,7 @@ import { computeLevels } from './levels.ts';
 import { selectHebdo } from './select.ts';
 import { buildSkeleton, assertNoForeignNumber } from './narrative.ts';
 import { fmtMontant } from './format.ts';
+import { pickNotableFundamental } from './fundamentals.ts';
 
 /** Série croissante 40 → 79 (40 points). */
 const croissante = Array.from({ length: 40 }, (_, i) => 40 + i);
@@ -148,4 +149,54 @@ test('fmtMontant : milliards, millions, milliers', () => {
 
 test('fmtMontant : valeur absolue (le signe est porté par la phrase)', () => {
   assert.equal(fmtMontant(-13075000000), '13,1 milliards FCFA');
+});
+
+const perte = [{ periode: '2025', resultat_net: -96558000, benefice_par_action: null, dividende_par_action: null }];
+// NB : benefice_par_action ajusté (100/95 → 150/142) — avec cours=3000 les
+// valeurs d'origine donnaient un PER de 30 (> PER_HAUT=25), rendant ce cas
+// notable au lieu de banal comme voulu par le test. Le reste (résultat net,
+// dividende) est inchangé.
+const banal = [
+  { periode: '2025', resultat_net: 1000000000, benefice_par_action: 150, dividende_par_action: null },
+  { periode: '2024', resultat_net: 950000000, benefice_par_action: 142, dividende_par_action: null },
+];
+
+test('pickNotableFundamental : une perte est toujours notable', () => {
+  const f = pickNotableFundamental(perte, 3000);
+  assert.ok(f);
+  assert.match(f.phrase, /perte/i);
+  assert.match(f.phrase, /96,6 millions/);
+});
+
+test('pickNotableFundamental : bond du benefice >= 30 %', () => {
+  const rows = [
+    { periode: '2025', resultat_net: 2000000000, benefice_par_action: 200, dividende_par_action: null },
+    { periode: '2024', resultat_net: 1000000000, benefice_par_action: 100, dividende_par_action: null },
+  ];
+  const f = pickNotableFundamental(rows, 3000);
+  assert.ok(f);
+  assert.match(f.phrase, /progress/i);
+});
+
+test('pickNotableFundamental : PER bas (< 5)', () => {
+  const rows = [{ periode: '2025', resultat_net: 5000000000, benefice_par_action: 1000, dividende_par_action: null }];
+  const f = pickNotableFundamental(rows, 3000);
+  assert.ok(f);
+  assert.match(f.phrase, /fois les b[ée]n[ée]fices/i);
+  assert.match(f.phrase, /bas/i);
+});
+
+test('pickNotableFundamental : rendement du dividende >= 6 %', () => {
+  const rows = [{ periode: '2025', resultat_net: 5000000000, benefice_par_action: 300, dividende_par_action: 240 }];
+  const f = pickNotableFundamental(rows, 3000);
+  assert.ok(f);
+  assert.match(f.phrase, /dividende/i);
+});
+
+test('pickNotableFundamental : cas banal → null (pas de remplissage)', () => {
+  assert.equal(pickNotableFundamental(banal, 3000), null);
+});
+
+test('pickNotableFundamental : aucune donnee → null', () => {
+  assert.equal(pickNotableFundamental([], 3000), null);
 });
