@@ -6,6 +6,7 @@ import { buildSkeleton, assertNoForeignNumber, assertNoCausalClaim } from './nar
 import { fmtMontant } from './format.ts';
 import { pickNotableFundamental } from './fundamentals.ts';
 import { pickRecentEvent } from './context.ts';
+import { buildPost } from './post.ts';
 
 /** Série croissante 40 → 79 (40 points). */
 const croissante = Array.from({ length: 40 }, (_, i) => 40 + i);
@@ -270,4 +271,36 @@ test('buildSkeleton : le squelette passe ses deux gardes-fous', () => {
   const texte = s.sections.map((x) => x.texte).join(' ');
   assert.equal(assertNoForeignNumber(texte, s.chiffres), true);
   assert.equal(assertNoCausalClaim(texte), true);
+});
+
+test('buildPost long : sections attendues + avertissement', () => {
+  const s = buildSkeleton(metrics);
+  const p = buildPost(s, metrics, 'long');
+  assert.match(p, /^📈 ETIT/);
+  assert.match(p, /Ce qui s’est passé/);
+  assert.match(p, /Les niveaux à surveiller/);
+  assert.match(p, /⚠️/);
+  assert.match(p, /pas un conseil/i);
+});
+
+test('buildPost court : compact, emojis, avertissement', () => {
+  const s = buildSkeleton(metrics);
+  const p = buildPost(s, metrics, 'court');
+  assert.ok(p.length <= 700, `trop long : ${p.length}`);
+  assert.match(p, /^📈 ETIT/);
+  assert.match(p, /⚠️/);
+});
+
+test('buildPost : emoji baissier pour une valeur en repli', () => {
+  const baisse = { ...metrics, variationHebdo: -6.42 };
+  const s = buildSkeleton(baisse);
+  assert.match(buildPost(s, baisse, 'court'), /^📉/);
+});
+
+test('buildPost long : le contexte apparait quand il existe', () => {
+  const s = buildSkeleton(metrics, {
+    fondamental: { phrase: 'La société a publié une perte de 96,6 millions FCFA sur l’exercice 2025.', chiffres: [96.6, 2025] },
+    evenement: null,
+  });
+  assert.match(buildPost(s, metrics, 'long'), /Le contexte/);
 });
