@@ -6,6 +6,8 @@ import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financia
 import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
+import ChartBuilder from '@/components/financials/ChartBuilder';
+import { buildChartRows } from '@/lib/financials/chartBuilder';
 import BankScorecard from '@/components/financials/BankScorecard';
 import ValueTrapBadge from '@/components/fundamentals/ValueTrapBadge';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
@@ -229,6 +231,9 @@ export default async function FinancialsPage({ params }: Props) {
                 <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} />
               </div>
             )}
+
+            {/* Constructeur de graphique — séries au choix, axes automatiques */}
+            <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
           </>
         )}
 
