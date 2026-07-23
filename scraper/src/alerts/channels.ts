@@ -43,7 +43,16 @@ async function sendEmail(n: Notification): Promise<SendResult | null> {
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ from, to, subject: n.subject, text: n.body }),
     });
-    if (!resp.ok) return { channel: 'email', status: 'failed', error: `HTTP ${resp.status}` };
+    if (!resp.ok) {
+      // Resend explique la cause dans le corps (domaine non vérifié, from
+      // refusé…). Sans lui on ne voit qu'un « HTTP 403 » indiagnosticable.
+      const detail = await resp.text().catch(() => '');
+      return {
+        channel: 'email',
+        status: 'failed',
+        error: `HTTP ${resp.status}${detail ? ` — ${detail.slice(0, 300)}` : ''}`,
+      };
+    }
     return { channel: 'email', status: 'sent' };
   } catch (err) {
     return { channel: 'email', status: 'failed', error: err instanceof Error ? err.message : String(err) };
