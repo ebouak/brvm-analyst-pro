@@ -127,6 +127,39 @@ export function buildChartRows(
   });
 }
 
+/**
+ * Ramène chaque série sélectionnée en base 100 à sa première valeur non nulle.
+ * Toutes les séries deviennent alors comparables sur UN seul axe (indice), quelle
+ * que soit leur unité — c'est ce qui lève la limite des deux familles d'unités.
+ *
+ * Honnêteté : on n'invente rien. Une série sans aucun point reste absente ; les
+ * trous internes restent des trous (`connectNulls={false}`). La transformation
+ * — un simple rebasage — est affichée à l'utilisateur, jamais masquée.
+ */
+export function normalizeRows(rows: ChartRow[], selectedIds: string[]): ChartRow[] {
+  const bases = new Map<string, number>();
+  for (const id of selectedIds) {
+    const premier = rows.find((r) => {
+      const v = r[id as SerieId];
+      return typeof v === 'number' && v !== 0;
+    });
+    const base = premier?.[id as SerieId];
+    if (typeof base === 'number' && base !== 0) bases.set(id, base);
+  }
+
+  return rows.map((r) => {
+    const out: ChartRow = { ...r };
+    for (const id of selectedIds) {
+      const base = bases.get(id);
+      const v = r[id as SerieId];
+      // Rebasage sur la valeur absolue de la base : une série qui part d'une
+      // perte (base négative) garde le bon sens de variation.
+      out[id as SerieId] = base != null && typeof v === 'number' ? (v / Math.abs(base)) * 100 : null;
+    }
+    return out;
+  });
+}
+
 export interface AxisPlan {
   /** Classe d'unité de l'axe gauche (null si rien de sélectionné). */
   gauche: UnitClass | null;

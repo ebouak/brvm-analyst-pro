@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/server';
 import { createPublicClient } from '@/lib/supabase/public';
 import { canAccess } from '@/lib/server/featureAccess';
 import { SectionLock } from '@/components/premium/SectionLock';
+import ChartBuilder from '@/components/financials/ChartBuilder';
+import { buildChartRows } from '@/lib/financials/chartBuilder';
+import { loadCompanyFinancials } from '@/lib/financials/queries';
 import brvmLogos from '@/lib/brvmLogos.json';
 
 const LOGOS = brvmLogos as Record<string, string>;
@@ -231,6 +234,15 @@ export default async function InstrumentPage({
     canAccess('fondamentaux'),           // analyse fondamentale
     canAccess('dcf'),                    // valorisation
   ]);
+
+  // États financiers complets pour le constructeur de graphique — chargés
+  // seulement si l'accès fondamental est ouvert (aucun coût pour les anonymes,
+  // qui ne verraient qu'un cadenas de toute façon).
+  const chartRows = gateFonda.allowed
+    ? await loadCompanyFinancials(code).then((f) =>
+        f ? buildChartRows(f.incomeStatements, f.balanceSheets, f.cashFlowStatements) : [],
+      )
+    : [];
   const fromDate = searchParams.from ?? '';
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
   const [valuation, scoring] = await Promise.all([
@@ -984,6 +996,14 @@ export default async function InstrumentPage({
               dividendeExercice={lastDiv?.exercice ?? null}
               dividendeVerifie={lastDivVerifie != null}
             />
+
+            {/* Constructeur de graphique — séries au choix, base 100 optionnelle */}
+            {chartRows.length >= 2 && (
+              <div className="mt-4">
+                <Eyebrow className="mb-3">Graphique personnalisé</Eyebrow>
+                <ChartBuilder rows={chartRows} />
+              </div>
+            )}
           </div>
         );
       })()}

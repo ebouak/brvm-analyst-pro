@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import {
-  buildChartRows, planAxes, peutAjouter, SERIES_CATALOG, DEFAULT_SELECTION,
+  buildChartRows, planAxes, peutAjouter, normalizeRows, SERIES_CATALOG, DEFAULT_SELECTION,
 } from './chartBuilder.ts';
 
 // --- buildChartRows : cas réel CIEC (valeurs vérifiées Madis/Sika/Zone Bourse) ---
@@ -78,3 +78,40 @@ for (const s of SERIES_CATALOG) {
 }
 
 console.log('✓ chartBuilder OK');
+
+// --- normalizeRows : base 100, leve la limite des unites ---
+
+const serie = [
+  { periode: '2022', revenu: 200_000_000_000, rn: 8_000_000_000, bpa: 100, margeNette: 4, rex: null, totalActif: null, capitauxPropres: null, dettesFin: null, fluxExploitation: null, fluxInvestissement: null, fluxFinancement: null, dividende: null, margeRex: null, roe: null, croissanceCa: null },
+  { periode: '2023', revenu: 220_000_000_000, rn: 12_000_000_000, bpa: 150, margeNette: null, rex: null, totalActif: null, capitauxPropres: null, dettesFin: null, fluxExploitation: null, fluxInvestissement: null, fluxFinancement: null, dividende: null, margeRex: null, roe: null, croissanceCa: null },
+];
+const norm = normalizeRows(serie, ['revenu', 'rn', 'bpa']);
+// 2022 = base 100 partout.
+assert.equal(norm[0].revenu, 100);
+assert.equal(norm[0].rn, 100);
+assert.equal(norm[0].bpa, 100);
+// 2023 = indice relatif : CA 220/200 = 110, RN 12/8 = 150, BPA 150/100 = 150.
+const proche = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `attendu ${b}, eu ${a}`);
+proche(norm[1].revenu, 110);
+proche(norm[1].rn, 150);
+proche(norm[1].bpa, 150);
+// Une serie non selectionnee garde sa valeur d'origine (seules les series
+// tracees sont rebasees ; les autres ne sont de toute facon pas rendues).
+assert.equal(norm[0].margeNette, 4, 'serie non selectionnee inchangee');
+assert.notEqual(norm[0].revenu, serie[0].revenu, 'serie selectionnee bien rebasee');
+
+// Base negative (perte de depart) : le sens de variation est conserve.
+const perte = [
+  { periode: '2022', rn: -4_000_000_000, revenu: null, bpa: null, margeNette: null, rex: null, totalActif: null, capitauxPropres: null, dettesFin: null, fluxExploitation: null, fluxInvestissement: null, fluxFinancement: null, dividende: null, margeRex: null, roe: null, croissanceCa: null },
+  { periode: '2023', rn: 2_000_000_000, revenu: null, bpa: null, margeNette: null, rex: null, totalActif: null, capitauxPropres: null, dettesFin: null, fluxExploitation: null, fluxInvestissement: null, fluxFinancement: null, dividende: null, margeRex: null, roe: null, croissanceCa: null },
+];
+const np = normalizeRows(perte, ['rn']);
+assert.equal(np[0].rn, -100, 'perte de depart -> -100');
+assert.equal(np[1].rn, 50, 'retour a +2 Md sur base |4 Md| = +50');
+
+// Serie entierement nulle : reste nulle, pas de division par zero.
+const vide = normalizeRows(serie, ['roe']);
+assert.equal(vide[0].roe, null);
+assert.equal(vide[1].roe, null);
+
+console.log('✓ chartBuilder normalisation OK');
