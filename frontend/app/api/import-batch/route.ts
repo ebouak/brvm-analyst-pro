@@ -95,7 +95,8 @@ export async function POST(req: Request) {
             if (!act.ok) { log(`${code} ex.${pub.exercice} : REJET [${act.reasons.join('; ')}]`); continue; }
 
             for (const ex of parsed.data.exercices) {
-              const guard = checkStatement(ex, parsed.data.est_banque);
+              // Famille issue de brvm_instruments : source de verite, prioritaire sur le LLM.
+              const guard = checkStatement(ex, famille === 'banque' || parsed.data.est_banque === true);
               if (!guard.ok) { log(`${code} ${ex.periode} : REJET [${guard.reasons.join('; ')}]`); continue; }
               if (famille === 'banque') {
                 const bk = checkBankSpecific({

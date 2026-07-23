@@ -42,8 +42,15 @@ export const yearStatementSchema = z.object({
 export type YearStatement = z.infer<typeof yearStatementSchema>;
 
 export const fullExtractionSchema = z.object({
-  est_banque: z.boolean(),           // SYSCOHADA banque vs industriel
-  unite_source: z.enum(['milliers', 'millions', 'fcfa']),
+  // `.optional()` sur les deux : les LLM omettent regulierement ces cles, ce qui
+  // faisait rejeter en bloc des extractions par ailleurs correctes (CIEC, SHEC).
+  // Aucune n'est indispensable :
+  //  - est_banque n'alimente que checkStatement, or la famille comptable est deja
+  //    connue de facon autoritative via brvm_instruments — l'appelant la fournit ;
+  //  - unite_source est purement declaratif : le prompt demande au modele de
+  //    convertir lui-meme les montants en FCFA bruts, aucun calcul ne s'en sert.
+  est_banque: z.boolean().optional(),
+  unite_source: z.enum(['milliers', 'millions', 'fcfa']).optional(),
   // Devise des tableaux réellement utilisés. Distincte de l'échelle : un document
   // ETI contient des séries en FCFA ET en USD, et confondre les deux a déjà produit
   // des flux de trésorerie 580× trop faibles (voir checkDeviseFcfa).

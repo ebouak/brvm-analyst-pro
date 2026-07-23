@@ -41,6 +41,7 @@ if (!code) { console.error('Usage: npx tsx scripts/reextract.ts <CODE> [--write]
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const llmKey = process.env.DEEPSEEK_API_KEY;
+const mistralKey = process.env.MISTRAL_API_KEY ?? null;
 if (!url || !serviceKey) { console.error('SUPABASE_URL / SERVICE_ROLE_KEY manquants'); process.exit(1); }
 if (!llmKey) { console.error('DEEPSEEK_API_KEY manquant'); process.exit(1); }
 
@@ -65,6 +66,22 @@ async function fetchPdfText(pdfUrl: string): Promise<string> {
     out += content.items.map((it: unknown) => (it && typeof it === 'object' && 'str' in it ? String((it as { str?: string }).str ?? '') : '')).join(' ') + '\n';
   }
   return out;
+}
+
+/**
+ * Copie de lib/import/ocr.ts (meme raison : import `server-only`). Repli pour les
+ * PDF scannes, dont pdfjs ne tire aucun texte — cas de CFAC exercice 2025.
+ */
+async function ocrPdf(pdfUrl: string, mistralKey: string): Promise<string> {
+  const r = await fetch('https://api.mistral.ai/v1/ocr', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${mistralKey}` },
+    body: JSON.stringify({ model: 'mistral-ocr-latest', document: { type: 'document_url', document_url: pdfUrl } }),
+    signal: AbortSignal.timeout(180000),
+  });
+  if (!r.ok) throw new Error(`OCR HTTP ${r.status} — ${(await r.text()).slice(0, 200)}`);
+  const j = (await r.json()) as { pages?: { markdown?: string }[] };
+  return (j.pages ?? []).map((pg) => pg.markdown ?? '').join('\n');
 }
 
 async function callLlm(text: string, symbol: string, famille: Famille): Promise<string | null> {
@@ -113,7 +130,17 @@ async function main(): Promise<void> {
       continue;
     }
     console.log(`  PDF : ${text.length} caractères`);
-    if (text.trim().length < 500) { console.error('  texte trop court (PDF scanné ?) — ignoré'); continue; }
+    if (text.trim().length < 500) {
+      if (!mistralKey) { console.error('  PDF scanné et MISTRAL_API_KEY absente — ignoré'); continue; }
+      try {
+        text = await ocrPdf(pub.source_url!, mistralKey);
+        console.log(`  PDF scanné -> OCR Mistral (${text.length} caractères)`);
+      } catch (e) {
+        console.error(`  OCR échoué : ${e instanceof Error ? e.message : e}`);
+        continue;
+      }
+      if (text.trim().length < 500) { console.error('  OCR insuffisant — ignoré'); continue; }
+    }
 
     const raw = await callLlm(text, code, famille);
     if (!raw) { console.error('  LLM indisponible'); continue; }
@@ -125,7 +152,7 @@ async function main(): Promise<void> {
       continue;
     }
 
-    console.log(`  unite_source=${parsed.data.unite_source} devise_source=${parsed.data.devise_source ?? '(non renseignée)'}`);
+    console.log(`  unite_source=${parsed.data.unite_source ?? '(non renseignée)'} devise_source=${parsed.data.devise_source ?? '(non renseignée)'}`);
     const dev = checkDeviseFcfa(parsed.data.devise_source);
     if (!dev.ok) { console.error(`  REJET DEVISE : ${dev.reasons.join('; ')}`); continue; }
 
@@ -133,7 +160,7 @@ async function main(): Promise<void> {
     if (!act.ok) { console.error(`  REJET N/N-1 : ${act.reasons.join('; ')}`); continue; }
 
     for (const ex of parsed.data.exercices) {
-      const guard = checkStatement(ex, parsed.data.est_banque);
+      const guard = checkStatement(ex, famille === 'banque' || parsed.data.est_banque === true);
       if (!guard.ok) { console.error(`  ${ex.periode} REJET : ${guard.reasons.join('; ')}`); continue; }
       if (famille === 'banque') {
         const bk = checkBankSpecific({
