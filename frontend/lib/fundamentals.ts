@@ -91,7 +91,16 @@ export function pickBestFundamental<T extends FundamentalRow>(rows: T[]): T | nu
   })[0]!;
 }
 
-export type Quality = 'ok' | 'suspect' | 'missing';
+/**
+ * `ns` = non significatif : le calcul est juste mais le ratio n'a pas de sens
+ * financier. Un PER negatif ne trahit AUCUNE erreur d'extraction — il dit que la
+ * societe perd de l'argent (SCRC : -10,3 Md FCFA en 2023, chiffre verifie). Le
+ * confondre avec `suspect` envoyait l'utilisateur verifier des etats financiers
+ * parfaitement corrects, et surtout laissait ces valeurs etre CLASSEES : au tri
+ * par PER croissant, les plus grosses pertes remontaient en tete, presentees
+ * comme les titres les moins chers.
+ */
+export type Quality = 'ok' | 'suspect' | 'ns' | 'missing';
 
 /**
  * Évalue la plausibilité d'une métrique. Best practice : ne jamais afficher un
@@ -107,10 +116,15 @@ export function assessQuality(metric: string, value: number | null): Quality {
       // Une société cotée BRVM a un CA/RN/equity/capi > 1M FCFA (sinon extraction ratée).
       return Math.abs(value) < 1_000_000 ? 'suspect' : 'ok';
     case 'per':
-      return value < 0 || value > 1000 ? 'suspect' : 'ok';
+      // Benefice negatif -> PER non significatif (convention financiere), pas
+      // une donnee douteuse. Au-dela de 1000 en revanche, l'extraction est en cause.
+      if (value < 0) return 'ns';
+      return value > 1000 ? 'suspect' : 'ok';
     case 'pb':
     case 'ps':
-      return value < 0 || value > 100 ? 'suspect' : 'ok';
+      // Capitaux propres negatifs -> multiple non significatif.
+      if (value < 0) return 'ns';
+      return value > 100 ? 'suspect' : 'ok';
     case 'margeNette':
       return Math.abs(value) > 1 ? 'suspect' : 'ok';   // |marge| > 100%
     case 'roe':

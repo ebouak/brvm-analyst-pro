@@ -29,10 +29,19 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
 
   const filtered = useMemo(() => {
     const base = secteur ? rows.filter((r) => r.secteur === secteur) : rows;
+    // Un ratio non significatif (PER/PB negatif) ne doit JAMAIS etre classe :
+    // sinon, au tri croissant par PER, les plus grosses pertes remontent en tete
+    // et passent pour les titres les moins chers. Ces valeurs sont renvoyees en
+    // fin de liste dans les deux sens de tri, comme les donnees manquantes.
+    const horsClassement = (v: number | null) => assessQuality(sort, v) !== 'ok'
+      && assessQuality(sort, v) !== 'suspect';
     return [...base].sort((a, b) => {
       const av = a[sort], bv = b[sort];
-      if (av == null) return 1; if (bv == null) return -1;
-      return asc ? av - bv : bv - av;
+      const ax = horsClassement(av), bx = horsClassement(bv);
+      if (ax && bx) return 0;
+      if (ax) return 1;
+      if (bx) return -1;
+      return asc ? (av as number) - (bv as number) : (bv as number) - (av as number);
     });
   }, [rows, sort, asc, secteur]);
 
@@ -46,6 +55,14 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
   const Cell = ({ metric, value, isPct }: { metric: SortKey; value: number | null; isPct?: boolean }) => {
     const q = assessQuality(metric, value);
     if (q === 'missing') return <td className="px-3 py-2 text-right text-muted/60">—</td>;
+    if (q === 'ns') {
+      return (
+        <td className="px-3 py-2 text-right text-muted/70"
+            title="Non significatif : résultat (ou capitaux propres) négatif. Le ratio n'a pas de sens financier — la donnée n'est pas en cause.">
+          n.s.
+        </td>
+      );
+    }
     const txt = isPct ? `${((value ?? 0) * 100).toFixed(1)} %` : fmtNumber(value, 2);
     return <td className={`px-3 py-2 text-right tabular ${q === 'suspect' ? 'text-warn' : ''}`}>{txt}{q === 'suspect' && ' ⚠️'}</td>;
   };
@@ -102,7 +119,11 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
           </tbody>
         </table>
       </div>
-      <p className="text-[10px] text-muted">⚠️ = donnée extraite douteuse (vérifier les états financiers). « — » = non disponible.</p>
+      <p className="text-[10px] text-muted">
+        ⚠️ = donnée extraite douteuse (vérifier les états financiers).
+        {' '}« n.s. » = non significatif : la société est en perte, le ratio n’a pas de sens — la donnée, elle, est correcte.
+        {' '}« — » = non disponible.
+      </p>
     </div>
   );
 }
