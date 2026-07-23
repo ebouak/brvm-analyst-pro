@@ -17,7 +17,11 @@ const ORDER: { provider: string; url: string; model: string }[] = [
  * frontend et scraper sont deux paquets séparés (pas de module partagé).
  */
 function assertNoForeignNumber(texte: string, chiffres: number[]): boolean {
-  const trouves = (texte.match(/\d+(?:[.,]\d+)?/g) ?? []).map((s) => parseFloat(s.replace(',', '.')));
+  // Les montants sont écrits à la française (« 3 050 FCFA ») : on recolle les
+  // milliers avant d'extraire, sinon « 3 050 » se lirait « 3 » puis « 050 » et
+  // le garde-fou rejetterait à tort un texte parfaitement fidèle.
+  const normalise = texte.replace(/(\d)[\s  ](?=\d{3}(?!\d))/g, '$1');
+  const trouves = (normalise.match(/\d+(?:[.,]\d+)?/g) ?? []).map((s) => parseFloat(s.replace(',', '.')));
   return trouves.every((n) =>
     chiffres.some((c) => Math.abs(c - n) <= Math.max(0.5, Math.abs(c) * 0.01)),
   );
