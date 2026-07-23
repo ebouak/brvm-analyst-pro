@@ -12,6 +12,13 @@ interface FundaRow {
 
 const COLORS = ['#3fe18b', '#56D7FD', '#ffb300', '#7e57c2', '#f44336', '#e6e9f0'];
 
+/**
+ * Multiples sans signification quand le denominateur est negatif : un PER
+ * negatif dit que la societe perd de l'argent, pas que le titre est bon marche.
+ * Meme regle que FundamentalsTable (lib/fundamentals.ts, qualite 'ns').
+ */
+const NS_SI_NEGATIF = new Set<keyof FundamentalRatios>(['per', 'pb']);
+
 const ROWS: { key: keyof FundamentalRatios; label: string; fmt: (v: number) => string }[] = [
   { key: 'per',                label: 'PER',                     fmt: (v) => v.toFixed(1) + 'x' },
   { key: 'pb',                 label: 'P/B',                     fmt: (v) => v.toFixed(2) + 'x' },
@@ -50,6 +57,14 @@ export default function CompareFundamentals({ rows }: { rows: FundaRow[] }) {
                 <td className="px-4 py-2 text-muted">{label}</td>
                 {rows.map((r) => {
                   const v = r.ratios[key];
+                  if (v != null && NS_SI_NEGATIF.has(key) && (v as number) < 0) {
+                    return (
+                      <td key={r.code} className="px-4 py-2 text-right text-muted/70"
+                          title="Non significatif : résultat (ou capitaux propres) négatif — le ratio n'a pas de sens financier, la donnée est correcte.">
+                        n.s.
+                      </td>
+                    );
+                  }
                   return (
                     <td key={r.code} className="px-4 py-2 text-right tabular text-ivory">
                       {v != null ? fmt(v as number) : <span className="text-faint">—</span>}
