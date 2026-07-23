@@ -23,16 +23,25 @@ export interface SendResult {
   error?: string;
 }
 
-/** Envoie via email (Resend HTTP API) si RESEND_API_KEY présent. */
+/**
+ * Envoie via email (Resend HTTP API) si RESEND_API_KEY présent.
+ *
+ * Destinataire : `n.to` pour les alertes personnelles (une par utilisateur) ;
+ * à défaut `ALERTS_EMAIL_TO`, l'adresse d'exploitation — c'est elle qui reçoit
+ * les notifications de worker sans utilisateur cible (publication hebdo,
+ * rapports mensuels). Sans l'un ni l'autre on ne devine pas : on rend `null`
+ * et `dispatch` retombe sur la console.
+ */
 async function sendEmail(n: Notification): Promise<SendResult | null> {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.ALERTS_EMAIL_FROM;
-  if (!key || !from || !n.to) return null;
+  const to = n.to || process.env.ALERTS_EMAIL_TO;
+  if (!key || !from || !to) return null;
   try {
     const resp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: n.to, subject: n.subject, text: n.body }),
+      body: JSON.stringify({ from, to, subject: n.subject, text: n.body }),
     });
     if (!resp.ok) return { channel: 'email', status: 'failed', error: `HTTP ${resp.status}` };
     return { channel: 'email', status: 'sent' };
