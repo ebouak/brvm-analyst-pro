@@ -38,7 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/actualites', label: 'Actualités & Veille' },
       { href: '/brief', label: 'Brief quotidien' },
-      { href: '/analyses/hebdo', label: 'Valeurs de la semaine' },
+      { href: '/analyses/hebdo', label: 'Analyse hebdo (actions)' },
     ],
   },
   {
