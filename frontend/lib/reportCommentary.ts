@@ -123,6 +123,74 @@ export function sectorCommentary(i: SectorCommentaryInput): string[] {
   return out;
 }
 
+export interface MarketDailyCommentaryInput {
+  /** Variations du jour, en %, des titres cotés ce jour-là. */
+  variations: number[];
+  /** Nombre de titres au tableau, cotés ou non. */
+  nbTitresCotes: number;
+  /** Valeurs échangées du jour, en FCFA, tous titres confondus. */
+  valeursEchangees: number[];
+  nbEvenements: number;
+}
+
+/**
+ * Constats sur une séance. Les deux apports propres à la BRVM sont la
+ * PARTICIPATION (combien de titres ont réellement traité) et la CONCENTRATION
+ * des échanges — sur un marché peu liquide, un indice peut bouger alors que la
+ * quasi-totalité de la cote n'a pas échangé une seule action.
+ */
+export function marketDailyCommentary(i: MarketDailyCommentaryInput): string[] {
+  const out: string[] = [];
+  const n = i.variations.length;
+  if (n === 0) {
+    return ['Aucun titre n’a coté ce jour-là : la séance ne peut pas être commentée.'];
+  }
+
+  const hausse = i.variations.filter((v) => v > 0).length;
+  const baisse = i.variations.filter((v) => v < 0).length;
+  const stables = n - hausse - baisse;
+  out.push(
+    `${hausse} hausse${hausse > 1 ? 's' : ''}, ${baisse} baisse${baisse > 1 ? 's' : ''} et ${stables} titre${stables > 1 ? 's' : ''} inchangé${stables > 1 ? 's' : ''} ` +
+    `parmi les ${n} valeurs cotées ce jour-là.`,
+  );
+
+  // Participation : ce que l'indice ne dit pas.
+  const traites = i.valeursEchangees.filter((v) => v > 0).length;
+  if (i.nbTitresCotes > 0) {
+    const part = (traites / i.nbTitresCotes) * 100;
+    out.push(
+      `${traites} titre${traites > 1 ? 's' : ''} sur ${i.nbTitresCotes} ${traites > 1 ? 'ont' : 'a'} réellement échangé, soit ${pctBrut(part)} de la cote. ` +
+      `Le reste est resté sans transaction : ces cours sont des reports, pas des prix de marché du jour.`,
+    );
+  }
+
+  // Concentration : la liquidité BRVM se joue sur une poignée de titres.
+  const total = i.valeursEchangees.reduce((a, b) => a + b, 0);
+  if (total > 0 && traites >= 3) {
+    const top3 = [...i.valeursEchangees].sort((a, b) => b - a).slice(0, 3).reduce((a, b) => a + b, 0);
+    out.push(
+      `Les 3 valeurs les plus traitées concentrent ${pctBrut((top3 / total) * 100)} des capitaux échangés de la séance.`,
+    );
+  }
+
+  // Moyenne vs médiane des variations.
+  const moy = i.variations.reduce((a, b) => a + b, 0) / n;
+  const med = mediane(i.variations);
+  if (med != null && Math.abs(moy - med) >= 0.5) {
+    out.push(
+      `La variation moyenne (${pct(moy, 2)}) s’écarte de la médiane (${pct(med, 2)}) : quelques mouvements extrêmes pèsent sur la moyenne.`,
+    );
+  }
+
+  if (i.nbEvenements > 0) {
+    out.push(
+      `${i.nbEvenements} événement${i.nbEvenements > 1 ? 's' : ''} publié${i.nbEvenements > 1 ? 's' : ''} à cette date — sans lien de causalité établi avec les cours ci-dessus.`,
+    );
+  }
+
+  return out;
+}
+
 export interface EventCommentaryInput {
   /**
    * Rendement ANORMAL post-événement de chaque titre lié, en % — c'est-à-dire

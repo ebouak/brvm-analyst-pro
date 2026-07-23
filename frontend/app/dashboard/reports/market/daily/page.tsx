@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import EventTimeline from '@/components/EventTimeline';
+import ReportSummaryCard from '@/components/ReportSummaryCard';
+import { marketDailyCommentary } from '@/lib/reportCommentary';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, MarketEvent } from '@/lib/types';
 
@@ -49,6 +51,12 @@ export default async function MarketDailyPage({ searchParams }: { searchParams: 
   const gainers = sorted.slice(0, 5);
   const losers = sorted.slice(-5).reverse();
   const active = [...actions].sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0)).slice(0, 5);
+  const analyse = marketDailyCommentary({
+    variations: vals,
+    nbTitresCotes: actions.length,
+    valeursEchangees: actions.map((a) => a.valeur_echangee ?? 0),
+    nbEvenements: events.length,
+  });
 
   const Movers = ({ title, rows }: { title: string; rows: ActionDaily[] }) => (
     <div className="bg-surface border border-border rounded-xl p-4">
@@ -74,6 +82,12 @@ export default async function MarketDailyPage({ searchParams }: { searchParams: 
           <p className="text-sm">État : <span className={trendCls}>{trend}</span></p>
         </div>
       </div>
+
+      <ReportSummaryCard
+        headline={`Séance du ${date} — tendance ${trend.toLowerCase()} (${adv} hausses / ${dec} baisses).`}
+        why={analyse}
+        whyTitle="Analyse"
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {indices.map((i) => (

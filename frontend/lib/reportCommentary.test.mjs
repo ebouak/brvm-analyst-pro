@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { sectorCommentary, eventCommentary, mediane } from './reportCommentary.ts';
+import { sectorCommentary, eventCommentary, marketDailyCommentary, mediane } from './reportCommentary.ts';
 
 // --- mediane ---
 assert.equal(mediane([]), null);
@@ -106,5 +106,30 @@ const evVide = eventCommentary({
 });
 assert.equal(evVide.length, 1);
 assert.ok(evVide[0].includes('Aucun rendement'));
+
+// --- marché journalier ---
+const seance = marketDailyCommentary({
+  variations: [3.2, 1.1, 0, -2.4, 7.5],
+  nbTitresCotes: 47,
+  valeursEchangees: [500_000_000, 300_000_000, 150_000_000, 50_000_000, 0],
+  nbEvenements: 1,
+});
+assert.ok(seance[0].includes('3 hausses, 1 baisse et 1 titre inchangé'), `eu: ${seance[0]}`);
+// 4 titres ont traité sur 47 cotés -> 8,5 % de la cote.
+assert.ok(
+  seance.some((c) => c.includes('4 titres sur 47') && c.includes('8,5 %')),
+  `participation attendue, eu: ${seance.join(' | ')}`,
+);
+assert.ok(
+  seance.some((c) => c.includes('sans transaction') && c.includes('reports')),
+  'l’absence de transaction doit être explicitée',
+);
+// Top 3 = 950 M sur 1 000 M = 95 %.
+assert.ok(seance.some((c) => c.includes('95,0 %') && c.includes('concentrent')), `eu: ${seance.join(' | ')}`);
+assert.ok(seance.some((c) => c.includes('sans lien de causalité')), 'non-causalité des événements');
+
+const seanceVide = marketDailyCommentary({ variations: [], nbTitresCotes: 47, valeursEchangees: [], nbEvenements: 0 });
+assert.equal(seanceVide.length, 1);
+assert.ok(seanceVide[0].includes('Aucun titre'));
 
 console.log('✓ reportCommentary OK');
