@@ -51,9 +51,9 @@ export default async function DiagnosticPage({ params }: Props) {
 
         <div className="bg-surface border border-border rounded-xl p-4">
           <p className="text-sm text-muted">
-            Analyse sell-side générée par IA (DeepSeek / Mistral / Grok) : rentabilité, bilan, flux,
-            valorisation DCF + multiples, dividende, risques et recommandation ACHAT/CONSERVER/VENDRE.
-            Basée sur les états financiers disponibles. Cache 7 jours.
+            Analyse générée automatiquement à partir des états financiers publiés, vérifiée par nos
+            garde-fous de plausibilité : rentabilité, bilan, flux, valorisation DCF et multiples,
+            dividende, risques, puis une orientation ACHAT/CONSERVER/VENDRE. Actualisée chaque semaine.
           </p>
         </div>
 

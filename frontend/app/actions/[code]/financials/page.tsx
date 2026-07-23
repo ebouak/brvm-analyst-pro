@@ -335,7 +335,10 @@ export default async function FinancialsPage({ params }: Props) {
         <div className="bg-surface border border-warn/20 rounded-xl p-4 flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-warn">✦ Diagnostic financier &amp; économique</p>
-            <p className="text-xs text-muted mt-0.5">Rapport sell-side complet généré par IA — réservé aux membres Premium.</p>
+            <p className="text-xs text-muted mt-0.5">
+              Analyse générée automatiquement à partir des états financiers publiés — vérifiée par
+              nos garde-fous de plausibilité. Réservée aux membres Premium.
+            </p>
           </div>
           <Link
             href={`/premium/diagnostic/${code}`}

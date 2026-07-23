@@ -23,9 +23,10 @@ export default async function DiagnosticIndexPage() {
     <div className="min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <div>
-          <h1 className="text-xl font-semibold">Diagnostic financier IA</h1>
+          <h1 className="text-xl font-semibold">Diagnostic financier</h1>
           <p className="text-sm text-muted mt-1">
-            Rapport sell-side complet généré par IA (DeepSeek / Mistral / Grok) pour chaque action BRVM.
+            Analyse générée automatiquement à partir des états financiers publiés — vérifiée par nos
+            garde-fous de plausibilité. Disponible pour chaque action de la cote BRVM.
           </p>
         </div>
 
