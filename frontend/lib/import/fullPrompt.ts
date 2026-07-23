@@ -9,6 +9,15 @@ export const FULL_SYSTEM_PROMPT =
   "3. Convertis TOUS les montants agrégés en FCFA BRUTS : si 'milliers' multiplie par 1000 ; si 'millions' par 1 000 000 ; si 'fcfa' garde tel quel.\n" +
   "   Exemple : tableau en milliers, CA = 197 629 996 -> revenu_total = 197629996000.\n" +
   "4. EXCEPTIONS jamais converties : benefice_par_action, benefice_par_action_dilue, dividende_par_action (FCFA par action), actions_en_circulation (nombre d'actions).\n\n" +
+  "RÈGLE DE DEVISE (tout aussi critique) :\n" +
+  "1. L'échelle et la devise sont deux choses distinctes. Lis la devise dans l'en-tête de CHAQUE tableau.\n" +
+  "2. Certains émetteurs panafricains (Ecobank/ETI, Oragroup…) publient un même document contenant " +
+  "à la fois des tableaux en FCFA et des tableaux en DOLLARS US — typiquement le compte de résultat " +
+  "consolidé en FCFA et les états du groupe en USD. Ne mélange JAMAIS les deux.\n" +
+  "3. Renseigne 'devise_source' = 'fcfa' | 'usd' | 'eur' | 'autre' d'après la devise des tableaux que tu as réellement utilisés.\n" +
+  "4. N'effectue AUCUNE conversion de devise (tu ne connais pas le taux de l'exercice) : rapporte la devise telle quelle.\n" +
+  "5. Si le document contient les deux devises, PRIVILÉGIE les tableaux en FCFA et extrais TOUTES les rubriques " +
+  "(résultat, bilan ET flux de trésorerie) depuis cette même série, pour qu'elles restent homogènes entre elles.\n\n" +
   "STRUCTURE : renvoie un exercice par année présente dans le document (souvent N et N-1 en comparatif).\n" +
   "Mets 'periode' = l'année sur 4 chiffres (ex '2025').\n\n" +
   "BANQUES (est_banque=true) : le 'revenu_total' = Produit Net Bancaire (PNB) ; cout_ventes et marge_brute peuvent être null ; " +

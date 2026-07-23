@@ -36,6 +36,11 @@ export type YearStatement = z.infer<typeof yearStatementSchema>;
 export const fullExtractionSchema = z.object({
   est_banque: z.boolean(),           // SYSCOHADA banque vs industriel
   unite_source: z.enum(['milliers', 'millions', 'fcfa']),
+  // Devise des tableaux réellement utilisés. Distincte de l'échelle : un document
+  // ETI contient des séries en FCFA ET en USD, et confondre les deux a déjà produit
+  // des flux de trésorerie 580× trop faibles (voir checkDeviseFcfa).
+  // `.optional()` : les extractions antérieures à ce champ restent valides.
+  devise_source: z.enum(['fcfa', 'usd', 'eur', 'autre']).optional(),
   exercices: z.array(yearStatementSchema).min(1),
 });
 

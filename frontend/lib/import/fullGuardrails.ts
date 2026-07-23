@@ -63,6 +63,46 @@ export function checkStatement(s: YearStatement, estBanque: boolean): GuardResul
   return { ok: reasons.length === 0, reasons };
 }
 
+/** Devises acceptées en base : tout est stocké en FCFA bruts. */
+export function checkDeviseFcfa(devise: string | null | undefined): GuardResult {
+  // `undefined` = extraction antérieure à l'ajout du champ : on ne bloque pas
+  // rétroactivement, le contrôle de magnitude reste le filet de sécurité.
+  if (devise == null) return { ok: true, reasons: [] };
+  if (devise === 'fcfa') return { ok: true, reasons: [] };
+  return { ok: false, reasons: [`devise ${devise} : la base ne stocke que des FCFA (aucune conversion n'est inventée)`] };
+}
+
+/**
+ * Cohérence entre les tables issues d'un MÊME document : `income_statements` et
+ * `cash_flow_statements` portent tous deux le résultat net de l'exercice, écrit
+ * depuis le même champ extrait — ils ne peuvent pas diverger.
+ *
+ * Une divergence trahit soit deux devises mélangées dans le document (ETIT 2022-2025 :
+ * compte de résultat en FCFA, flux en USD, rapport ≈ 580-620 = le taux USD/XOF de
+ * l'année), soit une table corrigée par une passe ultérieure sans que l'autre suive.
+ * Dans les deux cas les chiffres ne doivent pas être servis ensemble.
+ *
+ * Tolérance 2 % : le tableau de flux part parfois du résultat avant intérêts
+ * minoritaires, ce qui crée un écart légitime de quelques pour cent.
+ */
+export function checkResultatNetCoherence(
+  resultatNetIncome: number | null,
+  resultatNetCashflow: number | null,
+): GuardResult {
+  if (resultatNetIncome == null || resultatNetCashflow == null) return { ok: true, reasons: [] };
+  if (resultatNetCashflow === 0) return { ok: true, reasons: [] };
+  const ecart = rel(resultatNetCashflow, resultatNetIncome);
+  if (ecart <= 0.02) return { ok: true, reasons: [] };
+  const ratio = resultatNetIncome / resultatNetCashflow;
+  return {
+    ok: false,
+    reasons: [
+      `résultat net divergent entre compte de résultat et flux de trésorerie ` +
+      `(rapport ${ratio.toFixed(1)}) — devises mélangées ou table périmée`,
+    ],
+  };
+}
+
 /**
  * Contrôle léger spécifique banque : crédits clientèle + trésorerie ne doivent pas
  * dépasser le total actif de plus de 5% (sinon erreur d'extraction).
