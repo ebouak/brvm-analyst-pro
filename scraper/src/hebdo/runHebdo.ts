@@ -161,12 +161,18 @@ export async function runHebdo(opts: { mock?: boolean } = {}): Promise<HebdoRunR
   }
 
   const lien = `https://www.westbourse.com/analyses/hebdo/${dateEdition}`;
-  await dispatch({
+  // Journaliser l'issue de chaque canal : un échec d'envoi (Resend 4xx…) ne doit
+  // pas passer inaperçu sous prétexte que la publication, elle, a réussi.
+  const envois = await dispatch({
     subject: `Édition hebdo publiée — ${picks.length} valeurs`,
     body: `L'analyse hebdomadaire du ${dateEdition} est en ligne : ${lien}\nValeurs : ${picks.map((p) => p.code).join(', ')}\nRévisez ou dépubliez depuis /admin/hebdo si nécessaire.`,
     code: null,
     to: null,
   });
+  for (const e of envois) {
+    if (e.status === 'sent') logger.info({ canal: e.channel }, 'hebdo : notification envoyée');
+    else logger.error({ canal: e.channel, err: e.error }, 'hebdo : notification échouée');
+  }
 
   logger.info({ date: dateEdition, items: picks.length }, 'hebdo publiée');
   return { status: 'success', date_edition: dateEdition, nb_items: picks.length };
