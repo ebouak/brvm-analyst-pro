@@ -5,6 +5,7 @@ import { PERIOD_DAYS } from './types';
 import { smaSeries, rsiSeries, macdSeries, rsi, sma, detect } from './indicators';
 import { eventStudy, type DatedClose } from './eventStudy';
 import { instrumentHeadline, whyBullets, eventHeadline, type InstrumentMetrics } from './narrative';
+import { sectorCommentary, eventCommentary } from './reportCommentary';
 
 const PERIOD_LABEL: Record<string, string> = {
   '1S': '1 semaine', '1M': '1 mois', '3M': '3 mois', '6M': '6 mois', '1A': '1 an', max: 'la période',
@@ -149,7 +150,7 @@ export interface EventReport {
   event: MarketEvent;
   relatedCodes: string[];
   impact: Record<string, ReturnType<typeof eventStudy>>;
-  explanation: { headline: string };
+  explanation: { headline: string; why: string[] };
 }
 
 export async function buildEventReport(
@@ -191,7 +192,13 @@ export async function buildEventReport(
     ? eventHeadline({ eventDate: event.event_date, code: firstCode, abnormalReturnPost: ar, reaction, window })
     : `Événement du ${event.event_date} — aucun titre rattaché pour mesurer l'impact.`;
 
-  return { reportType: 'event', event, relatedCodes, impact, explanation: { headline } };
+  const why = eventCommentary({
+    impacts: relatedCodes.map((c) => ({ code: c, rendementAnormalPct: impact[c]?.abnormalReturnPost ?? null })),
+    nbTitresLies: relatedCodes.length,
+    fenetreSeances: window,
+  });
+
+  return { reportType: 'event', event, relatedCodes, impact, explanation: { headline, why } };
 }
 
 // --- Rapport secteur (§4.2 / §5) -------------------------------------------
@@ -212,7 +219,7 @@ export interface SectorReport {
   dispersion: number | null; // écart-type des perfs (%)
   averagePerf: number | null;
   events: MarketEvent[];
-  explanation: { headline: string };
+  explanation: { headline: string; why: string[] };
 }
 
 export async function buildSectorReport(
@@ -265,6 +272,15 @@ export async function buildSectorReport(
   return {
     reportType: 'sector', sector, period, titles, best, worst,
     dispersion, averagePerf, events: (evts ?? []) as MarketEvent[],
-    explanation: { headline },
+    explanation: {
+      headline,
+      why: sectorCommentary({
+        periodeLabel: PERIOD_LABEL[period] ?? 'la période',
+        perfs, nbTitresTotal: titles.length, averagePerf, dispersion,
+        best: best[0] && best[0].performancePct != null ? { code: best[0].code, perf: best[0].performancePct } : null,
+        worst: worst[0] && worst[0].performancePct != null ? { code: worst[0].code, perf: worst[0].performancePct } : null,
+        nbEvenements: (evts ?? []).length,
+      }),
+    },
   };
 }

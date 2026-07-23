@@ -39,7 +39,7 @@ export default async function EventReportPage({ params }: { params: { id: string
         <div className="bg-surface border border-border rounded-xl p-4 text-sm text-muted">{event.summary}</div>
       )}
 
-      <ReportSummaryCard headline={report.explanation.headline} />
+      <ReportSummaryCard headline={report.explanation.headline} why={report.explanation.why} whyTitle="Analyse" />
 
       <div>
         <h2 className="text-sm font-semibold mb-2">Impact avant / après (event-study, fenêtre 5 séances)</h2>

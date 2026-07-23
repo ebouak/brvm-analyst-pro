@@ -48,7 +48,7 @@ export default async function SectorReportPage({
         </div>
       </div>
 
-      <ReportSummaryCard headline={report.explanation.headline} />
+      <ReportSummaryCard headline={report.explanation.headline} why={report.explanation.why} whyTitle="Analyse" />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
         <Metric label="Perf moyenne" value={report.averagePerf != null ? (report.averagePerf >= 0 ? '+' : '') + report.averagePerf.toFixed(2) + '%' : '—'} />
