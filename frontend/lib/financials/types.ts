@@ -58,6 +58,10 @@ export interface BalanceSheet {
 export interface CashFlowStatement {
   periode: string;
   type_periode: string;
+  /** Devise du document source si ce n'est pas le FCFA (ex. 'USD' pour ETI). */
+  devise_origine?: string | null;
+  /** Taux moyen d'exercice appliqué pour convertir en FCFA (IAS 21). */
+  taux_conversion?: number | null;
   flux_exploitation: number | null;
   resultat_net: number | null;
   depreciation_amortissement: number | null;

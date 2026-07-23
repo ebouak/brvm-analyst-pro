@@ -63,6 +63,50 @@ export function checkStatement(s: YearStatement, estBanque: boolean): GuardResul
   return { ok: reasons.length === 0, reasons };
 }
 
+/**
+ * Cohérence du nombre d'actions implicite entre les exercices d'une MÊME
+ * extraction : `resultat_net / benefice_par_action` doit rester stable d'une
+ * année à l'autre (le capital d'une société cotée ne varie qu'à la marge).
+ *
+ * C'est le seul contrôle qui attrape l'**interversion des colonnes N / N-1**,
+ * l'erreur la plus fréquente du LLM sur les états comparatifs : les montants
+ * sont justes, seule leur affectation à l'année est fausse — donc magnitude,
+ * équilibre du bilan et cohérence RAI±impôts passent tous.
+ *
+ * Constaté sur NSBC : une ré-extraction a inversé les résultats nets 2024/2025
+ * en gardant les BPA dans le bon ordre, faisant sauter le nombre d'actions
+ * implicite de 24,7 M à 23,2 M puis 26,4 M.
+ *
+ * Tolérance 5 % : couvre les augmentations de capital ordinaires.
+ */
+export function checkActionsImplicites(
+  exercices: { periode: string; resultat_net?: number | null; benefice_par_action?: number | null }[],
+): GuardResult {
+  const implicites = exercices
+    .map((e) => ({
+      periode: e.periode,
+      actions: e.resultat_net != null && e.benefice_par_action ? e.resultat_net / e.benefice_par_action : null,
+    }))
+    .filter((x): x is { periode: string; actions: number } => x.actions != null && Number.isFinite(x.actions) && x.actions > 0);
+
+  if (implicites.length < 2) return { ok: true, reasons: [] };
+
+  const reference = implicites[0]!;
+  for (const x of implicites.slice(1)) {
+    if (rel(x.actions, reference.actions) > 0.05) {
+      return {
+        ok: false,
+        reasons: [
+          `nombre d'actions implicite instable entre ${reference.periode} et ${x.periode} ` +
+          `(${Math.round(reference.actions).toLocaleString('fr-FR')} vs ${Math.round(x.actions).toLocaleString('fr-FR')}) ` +
+          `— colonnes N/N-1 probablement interverties`,
+        ],
+      };
+    }
+  }
+  return { ok: true, reasons: [] };
+}
+
 /** Devises acceptées en base : tout est stocké en FCFA bruts. */
 export function checkDeviseFcfa(devise: string | null | undefined): GuardResult {
   // `undefined` = extraction antérieure à l'ajout du champ : on ne bloque pas

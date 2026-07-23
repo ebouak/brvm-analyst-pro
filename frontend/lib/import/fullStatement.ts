@@ -1,6 +1,14 @@
 import { z } from 'zod';
 
-const num = z.number().nullable();
+/**
+ * Montant extrait. `.optional()` autant que `.nullable()` : le prompt demande de
+ * mettre `null` quand une ligne est absente du document, mais les LLM omettent
+ * souvent la clé purement et simplement. Les deux expriment la même chose — une
+ * rubrique absente des états financiers — et `toRows` normalise déjà `undefined`
+ * en `null`. Sans cet `.optional()`, une extraction par ailleurs correcte était
+ * intégralement rejetée pour une clé manquante (constaté sur ETIT).
+ */
+const num = z.number().nullable().optional();
 
 export const yearStatementSchema = z.object({
   periode: z.string(),               // ex "2025"

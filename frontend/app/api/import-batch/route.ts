@@ -7,7 +7,7 @@ import { ocrPdf } from '@/lib/import/ocr';
 import { selectFinancialPublications, type PubRow } from '@/lib/import/selectPublications';
 import { fullUserPrompt, buildSystemPrompt } from '@/lib/import/fullPrompt';
 import { fullExtractionSchema } from '@/lib/import/fullStatement';
-import { checkStatement, checkBankSpecific } from '@/lib/import/fullGuardrails';
+import { checkStatement, checkBankSpecific, checkDeviseFcfa, checkActionsImplicites } from '@/lib/import/fullGuardrails';
 import { toRows, persistRows } from '@/lib/import/fullPersist';
 import type { Famille } from '@/lib/financials/sectors';
 
@@ -82,6 +82,17 @@ export async function POST(req: Request) {
             if (!raw) { log(`${code} ex.${pub.exercice} : LLM indisponible`); continue; }
             const parsed = fullExtractionSchema.safeParse(JSON.parse(raw));
             if (!parsed.success) { log(`${code} ex.${pub.exercice} : JSON invalide`); continue; }
+
+            // Devise : rejette tout l'exercice si le LLM a lu des tableaux en USD/EUR.
+            // Cas ETIT — un même document ETI contient des séries FCFA et USD, et
+            // les flux de trésorerie avaient été extraits de la série dollar.
+            const dev = checkDeviseFcfa(parsed.data.devise_source);
+            if (!dev.ok) { log(`${code} ex.${pub.exercice} : REJET [${dev.reasons.join('; ')}]`); continue; }
+
+            // Interversion N/N-1 : rejette l'exercice ENTIER, car les montants
+            // sont justes mais mal datés — aucun contrôle par année ne le voit.
+            const act = checkActionsImplicites(parsed.data.exercices);
+            if (!act.ok) { log(`${code} ex.${pub.exercice} : REJET [${act.reasons.join('; ')}]`); continue; }
 
             for (const ex of parsed.data.exercices) {
               const guard = checkStatement(ex, parsed.data.est_banque);

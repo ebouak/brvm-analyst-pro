@@ -53,7 +53,10 @@ export default function CashFlowStatement({ statements }: Props) {
     return <p className="text-muted text-sm">Aucune donnée disponible.</p>;
   }
 
+  // Signale une conversion de devise : l'utilisateur doit savoir qu'il ne lit pas
+  // les montants publiés mais leur conversion, et à quel taux.
   const sorted = [...statements].sort((a, b) => a.periode.localeCompare(b.periode));
+  const converti = sorted.find((s) => s.devise_origine && s.taux_conversion) ?? null;
 
   return (
     <div className="overflow-x-auto">
@@ -102,6 +105,16 @@ export default function CashFlowStatement({ statements }: Props) {
           })}
         </tbody>
       </table>
+
+      {converti && (
+        <p className="mt-3 text-xs text-muted">
+          Société publiant en {converti.devise_origine}. Montants convertis en FCFA au taux moyen
+          de chaque exercice (référence BCE, parité fixe EUR/XOF 655,957) — conformément à IAS 21.
+          Exercice {converti.periode} : 1 {converti.devise_origine} ={' '}
+          {converti.taux_conversion?.toLocaleString('fr-FR', { maximumFractionDigits: 3 })} FCFA.
+          Ces montants sont convertis, non publiés tels quels.
+        </p>
+      )}
     </div>
   );
 }

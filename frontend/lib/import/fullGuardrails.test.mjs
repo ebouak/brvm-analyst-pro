@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { checkStatement, checkDeviseFcfa, checkResultatNetCoherence } from './fullGuardrails.ts';
+import { checkStatement, checkDeviseFcfa, checkResultatNetCoherence, checkActionsImplicites } from './fullGuardrails.ts';
 
 const base = {
   revenu_total: 42_454_000_000, total_actifs: 49_140_000_000, total_passif: 49_140_000_000,
@@ -50,4 +50,43 @@ assert.equal(checkResultatNetCoherence(10_000_000_000, 9_000_000_000).ok, false)
 assert.equal(checkResultatNetCoherence(null, 594_122_000).ok, true);
 assert.equal(checkResultatNetCoherence(345_523_000_000, null).ok, true);
 
-console.log('✓ fullGuardrails devise + cohérence inter-tables OK');
+// --- Actions implicites : interversion N/N-1 (regression NSBC) ---
+
+// Base reelle NSBC : RN/BPA donne ~24,73 M d'actions les deux annees -> coherent.
+assert.equal(
+  checkActionsImplicites([
+    { periode: '2025', resultat_net: 40_712_000_000, benefice_par_action: 1646 },
+    { periode: '2024', resultat_net: 38_112_000_000, benefice_par_action: 1541 },
+  ]).ok,
+  true,
+  'la serie correcte de NSBC doit passer',
+);
+
+// Re-extraction fautive : resultats nets intervertis, BPA dans le bon ordre.
+const swap = checkActionsImplicites([
+  { periode: '2025', resultat_net: 38_112_000_000, benefice_par_action: 1646 },
+  { periode: '2024', resultat_net: 40_712_000_000, benefice_par_action: 1541 },
+]);
+assert.equal(swap.ok, false, 'attendu rejet sur interversion N/N-1');
+assert.ok(swap.reasons[0].includes('interverties'), `eu: ${swap.reasons[0]}`);
+
+// Un seul exercice exploitable : rien a comparer, on ne bloque pas.
+assert.equal(checkActionsImplicites([{ periode: '2025', resultat_net: 1, benefice_par_action: 1 }]).ok, true);
+// BPA nul ou absent : ignore, pas de division par zero.
+assert.equal(
+  checkActionsImplicites([
+    { periode: '2025', resultat_net: 40_712_000_000, benefice_par_action: 0 },
+    { periode: '2024', resultat_net: 38_112_000_000, benefice_par_action: null },
+  ]).ok,
+  true,
+);
+// Augmentation de capital de 3 % : sous la tolerance, accepte.
+assert.equal(
+  checkActionsImplicites([
+    { periode: '2025', resultat_net: 24_730_000_000, benefice_par_action: 1000 },
+    { periode: '2024', resultat_net: 24_000_000_000, benefice_par_action: 1000 },
+  ]).ok,
+  true,
+);
+
+console.log('✓ fullGuardrails devise + coherence inter-tables + actions implicites OK');
