@@ -232,8 +232,17 @@ export default async function FinancialsPage({ params }: Props) {
               </div>
             )}
 
-            {/* Constructeur de graphique — séries au choix, axes automatiques */}
-            <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
+            {/* Constructeur de graphique — séries au choix, axes automatiques.
+                En-tête de section comme les blocs voisins : sans lui, le bloc se
+                fondait dans la page et passait inaperçu. */}
+            {data.incomeStatements.length >= 2 && (
+              <div>
+                <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">
+                  Graphique personnalisé
+                </p>
+                <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
+              </div>
+            )}
           </>
         )}
 
