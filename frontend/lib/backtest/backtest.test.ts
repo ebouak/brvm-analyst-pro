@@ -89,3 +89,31 @@ describe('synthesizeBacktest', () => {
     expect(s.cautions.some((c) => /achat-conservation/i.test(c))).toBe(true);
   });
 });
+
+describe('runBacktest — absence de look-ahead', () => {
+  it('n’encaisse PAS le mouvement du jour qui a produit le signal', () => {
+    // Le signal BUY tombe en i=1, jour où le cours passe de 100 à 110.
+    // Ce mouvement est l'ENTRÉE de la décision : il ne peut pas être capté.
+    // Exécution au fixing suivant -> entrée à closes[2] = 110.
+    const closes = [100, 110, 110, 121];
+    const signals = ['HOLD', 'BUY', 'HOLD', 'HOLD'] as const;
+    const r = runBacktest({ closes, signals: [...signals], feesPct: 0, slippagePct: 0 });
+
+    // La stratégie ne détient le titre qu'à partir de i=2 : elle capte 110 -> 121,
+    // soit +10 %, et non 100 -> 121 (+21 %).
+    expect(r.totalReturn).toBeCloseTo(0.10, 3);
+    expect(r.trades[0]!.entryIndex).toBe(2);
+  });
+
+  it('n’esquive PAS la baisse du jour de vente', () => {
+    // SELL en i=2 : la position est encore détenue ce jour-là et subit la baisse.
+    // La sortie n'a lieu qu'au fixing suivant, en i=3.
+    const closes = [100, 100, 90, 90];
+    const signals = ['BUY', 'HOLD', 'SELL', 'HOLD'] as const;
+    const r = runBacktest({ closes, signals: [...signals], feesPct: 0, slippagePct: 0 });
+
+    expect(r.trades).toHaveLength(1);
+    expect(r.trades[0]!.exitIndex).toBe(3);
+    expect(r.totalReturn).toBeCloseTo(-0.10, 3);
+  });
+});
