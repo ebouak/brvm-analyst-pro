@@ -23,7 +23,31 @@ import {
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Backtest' };
 
-type BacktestResultEx = BacktestResult & { hasRealSignals?: boolean };
+/**
+ * PostgREST plafonne toute réponse à 1000 lignes. Sans pagination, un backtest
+ * pluriannuel portait silencieusement sur les 1000 premières séances seulement.
+ */
+async function chargerTout<T>(
+  construire: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
+): Promise<T[]> {
+  const LOT = 1000;
+  const tout: T[] = [];
+  for (let debut = 0; ; debut += LOT) {
+    const { data } = await construire(debut, debut + LOT - 1);
+    const lot = data ?? [];
+    tout.push(...lot);
+    if (lot.length < LOT) break;
+  }
+  return tout;
+}
+
+type BacktestResultEx = BacktestResult & {
+  hasRealSignals?: boolean;
+  nbSignauxReels?: number;
+  nbSeances?: number;
+  premiereSeance?: string | null;
+  derniereSeance?: string | null;
+};
 
 /** Taux sans risque annuel de référence (obligations d'État UEMOA ~6 %). */
 const RISK_FREE_RATE = 0.06;
@@ -122,8 +146,8 @@ export default async function BacktestPage({ searchParams }: PageProps) {
 
     // Fetch prix, signaux ET indice de marché (BRVM-C) en parallèle
     const fromDate = dateFrom || periodToDate(period) || null;
-    const [{ data: rows }, { data: sigRows }, { data: idxRows }] = await Promise.all([
-      (() => {
+    const [priceRowsAll, sigRowsAll, idxRowsAll] = await Promise.all([
+      chargerTout<{ cours_jour: number; date_marche: string }>((from, to) => {
         let q = supabase
           .from('brvm_actions_daily')
           .select('cours_jour, date_marche')
@@ -132,9 +156,9 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           .not('cours_jour', 'is', null);
         if (fromDate) q = q.gte('date_marche', fromDate);
         if (dateTo) q = q.lte('date_marche', dateTo);
-        return q;
-      })(),
-      (() => {
+        return q.range(from, to);
+      }),
+      chargerTout<{ signal: string; date_marche: string }>((from, to) => {
         let q = supabase
           .from('signals_daily')
           .select('signal, date_marche')
@@ -142,9 +166,9 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           .order('date_marche', { ascending: true });
         if (fromDate) q = q.gte('date_marche', fromDate);
         if (dateTo) q = q.lte('date_marche', dateTo);
-        return q;
-      })(),
-      (() => {
+        return q.range(from, to);
+      }),
+      chargerTout<{ valeur: number; date_marche: string }>((from, to) => {
         let q = supabase
           .from('brvm_indices_daily')
           .select('valeur, date_marche')
@@ -153,14 +177,14 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           .not('valeur', 'is', null);
         if (fromDate) q = q.gte('date_marche', fromDate);
         if (dateTo) q = q.lte('date_marche', dateTo);
-        return q;
-      })(),
+        return q.range(from, to);
+      }),
     ]);
 
-    const priceRows = (rows ?? []) as { cours_jour: number; date_marche: string }[];
+    const priceRows = priceRowsAll;
     const VALID_SIGNALS = new Set(['BUY', 'HOLD', 'SELL']);
     const signalMap = new Map(
-      (sigRows ?? [])
+      sigRowsAll
         .filter((s): s is { signal: SignalLabel; date_marche: string } => VALID_SIGNALS.has((s as { signal: string }).signal))
         .map((s) => [s.date_marche, s.signal])
     );
@@ -170,16 +194,26 @@ export default async function BacktestPage({ searchParams }: PageProps) {
     } else {
       closes = priceRows.map((r) => r.cours_jour);
       dates = priceRows.map((r) => r.date_marche);
-      const hasRealSignals = dates.some((d) => signalMap.has(d));
+      // Proportion RÉELLE de signaux : un booléen vrai dès une seule occurrence
+      // laissait annoncer « signaux réels » sur une série majoritairement synthétique.
+      const nbSignauxReels = dates.filter((d) => signalMap.has(d)).length;
+      const hasRealSignals = nbSignauxReels > 0;
       // Use real signal when available, fallback to simpleSignal otherwise
       const fallback = simpleSignal(closes);
       const signals: SignalLabel[] = dates.map((d, i) =>
         signalMap.get(d) ?? fallback[i]!
       );
-      result = { ...runBacktest({ closes, signals, dates, feesPct, slippagePct, riskFreeRate: RISK_FREE_RATE }), hasRealSignals };
+      result = {
+        ...runBacktest({ closes, signals, dates, feesPct, slippagePct, riskFreeRate: RISK_FREE_RATE }),
+        hasRealSignals,
+        nbSignauxReels,
+        nbSeances: dates.length,
+        premiereSeance: dates[0] ?? null,
+        derniereSeance: dates[dates.length - 1] ?? null,
+      };
 
       // Benchmarks : rendement BRVM-C sur la fenêtre + sans-risque dérivé.
-      const idxValues = ((idxRows ?? []) as { valeur: number }[]).map((r) => r.valeur).filter((v) => v != null && v > 0);
+      const idxValues = ((idxRowsAll ?? []) as { valeur: number }[]).map((r) => r.valeur).filter((v) => v != null && v > 0);
       const indexReturn = idxValues.length >= 2 ? (idxValues[idxValues.length - 1]! - idxValues[0]!) / idxValues[0]! : null;
       const riskFreeReturn = Math.pow(1 + RISK_FREE_RATE, closes.length / 252) - 1;
       benchmarks = { buyHoldReturn: result.buyAndHoldReturn, indexReturn, riskFreeReturn };
@@ -346,6 +380,35 @@ export default async function BacktestPage({ searchParams }: PageProps) {
                 ? 'Signaux WESTBOURSE'
                 : 'Signal momentum (fallback)'}
             </StatPill>
+          )}
+        </div>
+      )}
+
+      {/* Fraîcheur, couverture des signaux et limites — affichés AVANT les
+          résultats : l'utilisateur doit savoir sur quoi porte le calcul avant
+          de lire les chiffres. */}
+      {result && (
+        <div className="rounded-xl border border-border bg-surface p-3 text-xs text-muted space-y-1">
+          <p>
+            {result.nbSeances ?? 0} séances utilisées, du {result.premiereSeance ?? '—'} au{' '}
+            {result.derniereSeance ?? '—'}.
+          </p>
+          <p>
+            {result.nbSignauxReels ?? 0} séance{(result.nbSignauxReels ?? 0) > 1 ? 's' : ''} sur{' '}
+            {result.nbSeances ?? 0} port{(result.nbSignauxReels ?? 0) > 1 ? 'ent' : 'e'} un signal réel
+            {(result.nbSignauxReels ?? 0) < (result.nbSeances ?? 0)
+              && ' ; le reste utilise un signal technique de repli'}.
+          </p>
+          {(result.nbSeances ?? 0) > 0 && (result.nbSeances ?? 0) < 60 && (
+            <p className="text-warn">
+              ⓘ Moins de 60 séances sur la période : les ratios annualisés (Sharpe, Sortino,
+              Calmar, rendement annualisé) reposent sur trop peu d’observations pour être fiables.
+            </p>
+          )}
+          {!result.annualisationCalendaire && (
+            <p className="text-warn">
+              ⓘ Annualisation approchée sur 252 séances théoriques, faute de dates exploitables.
+            </p>
           )}
         </div>
       )}
