@@ -119,10 +119,13 @@ qu'elles ne le soient pas au hasard :
 - **Signal sur la dernière séance** : l'ordre ne peut jamais s'exécuter. Il est
   simplement abandonné — aucun trade n'est ouvert ni fermé. Un backtest ne doit
   pas inventer une exécution qui n'aurait pas eu lieu.
-- **Signal contraire avant exécution** : un `BUY` en attente annulé par un `SELL`
-  le lendemain (ou l'inverse) — l'ordre en attente est **remplacé**, pas empilé.
-  On ne conserve qu'une intention à la fois, la plus récente, ce qui reflète le
-  comportement d'un opérateur qui révise sa décision.
+- **Signal contraire avant exécution** : ce cas est **inatteignable par
+  construction**, ce que la rédaction initiale de cette spec affirmait à tort.
+  L'exécution (étape b) précède l'enregistrement du signal du jour (étape c),
+  donc tout ordre en attente s'exécute — ou est abandonné — dès la séance
+  suivante, avant qu'un signal contraire puisse le remplacer. Un ordre ne survit
+  jamais plus d'une séance. Constaté à l'implémentation par un test qui échouait
+  sur une attente fausse ; le test conserve cette propriété structurelle.
 
 ### Annualisation calendaire
 

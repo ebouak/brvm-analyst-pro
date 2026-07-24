@@ -94,52 +94,68 @@ export function runBacktest(input: BacktestInput): BacktestResult {
   let entryPrice = 0;
   let entryIndex = 0;
 
-  let numTrades = 0;
-  let winningTrades = 0;
-  let closedTrades = 0;
-
   let peakEquity = 100;
   let maxDrawdown = 0;
 
   const trades: Trade[] = [];
 
-  for (let i = 0; i < n; i++) {
-    const signal = signals[i];
-    const price = closes[i];
+  // Coût aller (ou retour) d'une transaction : frais + slippage.
+  const coutTransaction = feesPct + slippagePct;
 
-    if (!inPosition && signal === 'BUY') {
+  // Ordre décidé la veille, exécuté aujourd'hui à la clôture. Porte le délai
+  // d'une séance : on ne peut pas acheter à un cours qui est lui-même l'entrée
+  // de la décision.
+  let ordreEnAttente: 'BUY' | 'SELL' | null = null;
+
+  for (let i = 0; i < n; i++) {
+    // (a) Rendement du jour — dépend de la position détenue DEPUIS LA VEILLE.
+    //     C'est cet ordre qui élimine le biais de look-ahead.
+    const prec = closes[i - 1];
+    const cours = closes[i];
+    let dayReturn = 0;
+    if (inPosition && i > 0 && prec != null && prec !== 0 && cours != null) {
+      dayReturn = (cours - prec) / prec;
+    }
+    dailyReturns.push(dayReturn);
+    equity = equity * (1 + dayReturn);
+
+    // (b) Exécution de l'ordre décidé la veille, à la clôture d'aujourd'hui.
+    //     Les frais frappent l'equity : sans cela, totalReturn et maxDrawdown
+    //     resteraient bruts alors que les stats par trade sont nettes.
+    const prix = cours ?? 0;
+    if (ordreEnAttente === 'BUY' && !inPosition) {
       inPosition = true;
-      // Apply fees + slippage on entry
-      entryPrice = price * (1 + feesPct + slippagePct);
       entryIndex = i;
-      numTrades++;
-    } else if (inPosition && signal === 'SELL') {
-      // Apply fees + slippage on exit
-      const effectiveSellPrice = price * (1 - feesPct - slippagePct);
-      const win = effectiveSellPrice > entryPrice;
-      if (win) winningTrades++;
-      closedTrades++;
+      entryPrice = prix * (1 + coutTransaction);
+      equity = equity * (1 - coutTransaction);
+    } else if (ordreEnAttente === 'SELL' && inPosition) {
+      const prixSortie = prix * (1 - coutTransaction);
+      equity = equity * (1 - coutTransaction);
       inPosition = false;
       const tr: Trade = {
         entryIndex,
         exitIndex: i,
         entryPrice,
-        exitPrice: effectiveSellPrice,
-        returnPct: effectiveSellPrice / entryPrice - 1,
+        exitPrice: prixSortie,
+        returnPct: entryPrice !== 0 ? prixSortie / entryPrice - 1 : 0,
         bars: i - entryIndex,
-        win,
+        win: prixSortie > entryPrice,
       };
-      if (dates) { if (dates[entryIndex] !== undefined) tr.entryDate = dates[entryIndex]; if (dates[i] !== undefined) tr.exitDate = dates[i]; }
+      if (dates) {
+        if (dates[entryIndex] !== undefined) tr.entryDate = dates[entryIndex];
+        if (dates[i] !== undefined) tr.exitDate = dates[i];
+      }
       trades.push(tr);
     }
+    ordreEnAttente = null;
 
-    let dayReturn = 0;
-    if (inPosition && i > 0) {
-      dayReturn = (closes[i] - closes[i - 1]) / closes[i - 1];
-    }
-
-    dailyReturns.push(dayReturn);
-    equity = equity * (1 + dayReturn);
+    // (c) Le signal d'aujourd'hui devient l'ordre de demain. Un ordre contraire
+    //     REMPLACE le précédent — on ne conserve qu'une intention, la plus
+    //     récente. Un signal tombant sur la dernière séance ne s'exécute jamais :
+    //     un backtest n'invente pas une transaction qui n'aurait pas eu lieu.
+    const signal = signals[i];
+    if (signal === 'BUY' && !inPosition) ordreEnAttente = 'BUY';
+    else if (signal === 'SELL' && inPosition) ordreEnAttente = 'SELL';
 
     const pt: { date_index: number; date?: string; value: number } = {
       date_index: i,
@@ -178,19 +194,20 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     drawdownPeriods.push({ start: ddStart, end: equityCurve.length - 1 });
   }
 
-  // Position encore ouverte en fin de période : trade latent clôturé au dernier cours.
+  // Position encore ouverte en fin de période : trade latent valorisé au dernier
+  // cours, frais de sortie inclus pour rester cohérent avec les trades clôturés.
   if (inPosition) {
-    const lastPrice = closes[n - 1]! * (1 - feesPct - slippagePct);
+    const dernier = (closes[n - 1] ?? 0) * (1 - coutTransaction);
     const tr: Trade = {
       entryIndex,
       exitIndex: null,
       entryPrice,
-      exitPrice: lastPrice,
-      returnPct: lastPrice / entryPrice - 1,
+      exitPrice: dernier,
+      returnPct: entryPrice !== 0 ? dernier / entryPrice - 1 : 0,
       bars: n - 1 - entryIndex,
-      win: lastPrice > entryPrice,
+      win: dernier > entryPrice,
     };
-    if (dates) { if (dates[entryIndex] !== undefined) tr.entryDate = dates[entryIndex]; }
+    if (dates && dates[entryIndex] !== undefined) tr.entryDate = dates[entryIndex];
     trades.push(tr);
   }
 
@@ -200,7 +217,13 @@ export function runBacktest(input: BacktestInput): BacktestResult {
 
   const vol = stddev(dailyReturns) * Math.sqrt(252);
 
-  const winRate = closedTrades > 0 ? winningTrades / closedTrades : 0;
+  // winRate, avgWinPct et bestTradePct partagent désormais le MÊME tableau
+  // `trades`, position latente incluse. Auparavant la position encore ouverte
+  // comptait dans les uns et pas dans l'autre.
+  const winRate = trades.length > 0
+    ? trades.filter((t) => t.win === true).length / trades.length
+    : 0;
+  const numTrades = trades.length;
 
   const buyAndHoldReturn = (closes[n - 1]! - closes[0]!) / closes[0]!;
 

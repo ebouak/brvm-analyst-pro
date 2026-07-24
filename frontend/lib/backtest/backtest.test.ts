@@ -4,24 +4,31 @@ import { rateMetric, synthesizeBacktest, type BenchmarkSet } from './interpret';
 
 describe('runBacktest — métriques étendues', () => {
   it('enregistre les trades avec rendement net et clôt la position ouverte', () => {
-    // BUY à i=1 (prix 100), SELL à i=3 (prix 120)
+    // BUY signalé en i=1, exécuté au fixing suivant (i=2, prix 110).
+    // SELL signalé en i=3, exécuté au fixing suivant (i=4, prix 120).
+    // Le trade capte donc 110 -> 120 = +9,09 %, et NON 100 -> 120 = +20 % :
+    // la hausse 100 -> 110 s'est produite le jour même du signal.
     const closes = [100, 100, 110, 120, 120];
     const signals = ['HOLD', 'BUY', 'HOLD', 'SELL', 'HOLD'] as const;
     const r = runBacktest({ closes, signals: [...signals], feesPct: 0, slippagePct: 0 });
     expect(r.trades).toHaveLength(1);
-    expect(r.trades[0]!.exitIndex).toBe(3);
-    expect(r.trades[0]!.returnPct).toBeCloseTo(0.2, 3);
+    expect(r.trades[0]!.entryIndex).toBe(2);
+    expect(r.trades[0]!.exitIndex).toBe(4);
+    expect(r.trades[0]!.returnPct).toBeCloseTo(0.0909, 3);
     expect(r.trades[0]!.win).toBe(true);
-    expect(r.bestTradePct).toBeCloseTo(0.2, 3);
+    expect(r.bestTradePct).toBeCloseTo(0.0909, 3);
   });
 
   it('clôture une position encore ouverte au dernier cours (latent)', () => {
-    const closes = [100, 100, 130];
-    const signals = ['HOLD', 'BUY', 'HOLD'] as const;
+    // BUY signalé en i=1, exécuté en i=2 au prix 130. La série continue jusqu'à
+    // 140 : le trade latent vaut donc 130 -> 140 = +7,69 %.
+    const closes = [100, 100, 130, 140];
+    const signals = ['HOLD', 'BUY', 'HOLD', 'HOLD'] as const;
     const r = runBacktest({ closes, signals: [...signals] });
     expect(r.trades).toHaveLength(1);
+    expect(r.trades[0]!.entryIndex).toBe(2);
     expect(r.trades[0]!.exitIndex).toBeNull();
-    expect(r.trades[0]!.returnPct).toBeCloseTo(0.3, 3);
+    expect(r.trades[0]!.returnPct).toBeCloseTo(0.0769, 3);
   });
 
   it('Sortino/Calmar définis et Sharpe en excès du sans-risque', () => {
@@ -115,5 +122,52 @@ describe('runBacktest — absence de look-ahead', () => {
     expect(r.trades).toHaveLength(1);
     expect(r.trades[0]!.exitIndex).toBe(3);
     expect(r.totalReturn).toBeCloseTo(-0.10, 3);
+  });
+});
+
+describe('runBacktest — frais et cas limites', () => {
+  it('les frais réduisent le rendement TOTAL, pas seulement les stats par trade', () => {
+    const closes = [100, 100, 110, 110];
+    const signals = ['HOLD', 'BUY', 'HOLD', 'HOLD'] as const;
+    const sansFrais = runBacktest({ closes, signals: [...signals], feesPct: 0 });
+    const avecFrais = runBacktest({ closes, signals: [...signals], feesPct: 0.01 });
+    // Avant correction, les deux totalReturn étaient IDENTIQUES : les frais
+    // n'atteignaient jamais la courbe d'equity.
+    expect(avecFrais.totalReturn).toBeLessThan(sansFrais.totalReturn);
+  });
+
+  it('un signal sur la dernière séance n’est jamais exécuté', () => {
+    // L'ordre ne peut pas s'exécuter : il n'y a pas de séance suivante.
+    // Un backtest n'invente pas une transaction qui n'aurait pas eu lieu.
+    const closes = [100, 100, 100];
+    const signals = ['HOLD', 'HOLD', 'BUY'] as const;
+    const r = runBacktest({ closes, signals: [...signals] });
+    expect(r.trades).toHaveLength(0);
+    expect(r.totalReturn).toBeCloseTo(0, 6);
+  });
+
+  it('chaque ordre s’exécute à la séance suivante, sans jamais rester en attente', () => {
+    // BUY signalé en i=0 -> exécuté en i=1. SELL signalé en i=1 (après cette
+    // exécution, l'étape d'exécution précédant l'enregistrement du signal) ->
+    // exécuté en i=2. Un aller-retour complet, entrée 110 et sortie 120.
+    //
+    // Ce test fixe une propriété structurelle : un ordre en attente ne survit
+    // JAMAIS plus d'une séance. Le cas « ordre contraire remplaçant un ordre
+    // encore en attente » est donc inatteignable par construction — la spec le
+    // décrivait à tort comme une situation à gérer.
+    const closes = [100, 110, 120, 130];
+    const signals = ['BUY', 'SELL', 'HOLD', 'HOLD'] as const;
+    const r = runBacktest({ closes, signals: [...signals], feesPct: 0 });
+    expect(r.trades).toHaveLength(1);
+    expect(r.trades[0]!.entryIndex).toBe(1);
+    expect(r.trades[0]!.exitIndex).toBe(2);
+    expect(r.trades[0]!.returnPct).toBeCloseTo(120 / 110 - 1, 4);
+  });
+
+  it('série de moins de 2 points : résultat vide, aucune exception', () => {
+    const r = runBacktest({ closes: [100], signals: ['BUY'] });
+    expect(r.trades).toHaveLength(0);
+    expect(r.totalReturn).toBe(0);
+    expect(r.numTrades).toBe(0);
   });
 });
