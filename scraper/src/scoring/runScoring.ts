@@ -396,7 +396,7 @@ function synthSeriesProfile(last: number, n: number, profile: 'bullish' | 'beari
   return out;
 }
 
-/** Marche aléatoire bornée se terminant proche de `last` (utilisée par runBacktestCmd). */
+/** Marche aléatoire bornée se terminant proche de `last` (mode mock). */
 function synthSeries(last: number, n: number): number[] {
   const out: number[] = [];
   let v = last * 0.95;

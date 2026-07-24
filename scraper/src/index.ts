@@ -47,7 +47,6 @@ import { runDividends } from './dividends/runDividends.js';
 import { runShares } from './shares/runShares.js';
 import { runSecteurs } from './refdata/runSecteurs.js';
 import { runAlerts } from './alerts/runAlerts.js';
-import { runBacktestCmd } from './backtesting/runBacktest.js';
 import { runBacktestSignals } from './scoring/runBacktestSignals.js';
 import { runPublications } from './publications/runPublications.js';
 import { runBackfill } from './backfill/runBackfill.js';
@@ -429,17 +428,6 @@ async function main(): Promise<number> {
       const res = await runPublications({ mock });
       return res.status === 'failed' ? 1 : 0;
     }
-    case 'backtest': {
-      const code = positional[0];
-      if (!code) {
-        logger.error('Usage: backtest <CODE> [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--mock]');
-        return 1;
-      }
-      const from = rest.find((a) => a.startsWith('--from='))?.split('=')[1];
-      const to = rest.find((a) => a.startsWith('--to='))?.split('=')[1];
-      const res = await runBacktestCmd({ code, from, to, mock });
-      return res.status === 'failed' ? 1 : 0;
-    }
     case 'backtest-signals': {
       const res = await runBacktestSignals();
       if (res.status === 'failed') {
@@ -633,7 +621,7 @@ async function main(): Promise<number> {
     default:
       logger.error(
         { command },
-        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | forum-trending | publications | backtest | backfill | validate | notations | details | news | veille | monthly-reports',
+        'Commande inconnue. Commandes: daily | daily:full | date | score | events | dividends | shares | secteurs | alerts | forum-trending | publications | backfill | validate | notations | details | news | veille | monthly-reports',
       );
       return 1;
   }
