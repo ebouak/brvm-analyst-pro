@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import { runBacktest, type BacktestResult } from '@/lib/backtest';
@@ -22,24 +23,6 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Backtest' };
-
-/**
- * PostgREST plafonne toute réponse à 1000 lignes. Sans pagination, un backtest
- * pluriannuel portait silencieusement sur les 1000 premières séances seulement.
- */
-async function chargerTout<T>(
-  construire: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
-): Promise<T[]> {
-  const LOT = 1000;
-  const tout: T[] = [];
-  for (let debut = 0; ; debut += LOT) {
-    const { data } = await construire(debut, debut + LOT - 1);
-    const lot = data ?? [];
-    tout.push(...lot);
-    if (lot.length < LOT) break;
-  }
-  return tout;
-}
 
 type BacktestResultEx = BacktestResult & {
   hasRealSignals?: boolean;
@@ -147,7 +130,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
     // Fetch prix, signaux ET indice de marché (BRVM-C) en parallèle
     const fromDate = dateFrom || periodToDate(period) || null;
     const [priceRowsAll, sigRowsAll, idxRowsAll] = await Promise.all([
-      chargerTout<{ cours_jour: number; date_marche: string }>((from, to) => {
+      fetchAllRows<{ cours_jour: number; date_marche: string }>((from, to) => {
         let q = supabase
           .from('brvm_actions_daily')
           .select('cours_jour, date_marche')
@@ -158,7 +141,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
         if (dateTo) q = q.lte('date_marche', dateTo);
         return q.range(from, to);
       }),
-      chargerTout<{ signal: string; date_marche: string }>((from, to) => {
+      fetchAllRows<{ signal: string; date_marche: string }>((from, to) => {
         let q = supabase
           .from('signals_daily')
           .select('signal, date_marche')
@@ -168,7 +151,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
         if (dateTo) q = q.lte('date_marche', dateTo);
         return q.range(from, to);
       }),
-      chargerTout<{ valeur: number; date_marche: string }>((from, to) => {
+      fetchAllRows<{ valeur: number; date_marche: string }>((from, to) => {
         let q = supabase
           .from('brvm_indices_daily')
           .select('valeur, date_marche')

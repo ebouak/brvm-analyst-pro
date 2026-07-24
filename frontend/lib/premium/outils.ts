@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 
 export interface ActionProcheBas {
   code: string;
@@ -41,20 +42,26 @@ export async function getOutilsData(): Promise<OutilsData> {
   const supabase = createClient();
 
   // ── 1. Actions proches de leurs plus bas 52 semaines ──
-  const [actionsRes, dailyRes] = await Promise.all([
+  const depuis1An = new Date(Date.now() - 365 * 86400 * 1000).toISOString().split('T')[0];
+  const [actionsRes, rows] = await Promise.all([
     supabase
       .from('brvm_instruments')
       .select('code, designation, secteur')
       .eq('type', 'action'),
-    supabase
-      .from('brvm_actions_daily')
-      .select('code, cours_cloture, date_marche')
-      .gte('date_marche', new Date(Date.now() - 365 * 86400 * 1000).toISOString().split('T')[0])
-      .order('date_marche', { ascending: false }),
+    // Paginé : 365 j × ~48 titres ≈ 12 000 lignes. Le tri descendant ne ramenait
+    // que les ~20 séances récentes, si bien que le « plus haut / plus bas 52
+    // semaines » — la métrique de tête — se calculait sur trois semaines.
+    fetchAllRows<{ code: string; cours_cloture: number; date_marche: string }>(
+      (from, to) => supabase
+        .from('brvm_actions_daily')
+        .select('code, cours_cloture, date_marche')
+        .gte('date_marche', depuis1An)
+        .order('date_marche', { ascending: false })
+        .range(from, to),
+    ),
   ]);
 
   const instruments = actionsRes.data ?? [];
-  const rows = dailyRes.data ?? [];
 
   // Group by code, compute 52w high/low + last price
   const byCode = new Map<string, number[]>();
@@ -100,18 +107,25 @@ export async function getOutilsData(): Promise<OutilsData> {
   actionsProchesBas.sort((a, b) => a.distance_pct - b.distance_pct);
 
   // ── 2. Saisonnalité ──
-  const histRes = await supabase
-    .from('brvm_actions_daily')
-    .select('code, cours_cloture, date_marche')
-    .gte('date_marche', new Date(Date.now() - 5 * 365 * 86400 * 1000).toISOString().split('T')[0])
-    .order('date_marche', { ascending: true });
+  // Paginé : 5 ans × ~48 titres ≈ 60 000 lignes. Le tri ascendant ne ramenait
+  // que les ~20 séances de 2021, et la saisonnalité mensuelle se calculait sur
+  // ces trois semaines au lieu de cinq ans.
+  const depuis5Ans = new Date(Date.now() - 5 * 365 * 86400 * 1000).toISOString().split('T')[0]!;
+  const histAll = await fetchAllRows<{ code: string; cours_cloture: number; date_marche: string }>(
+    (from, to) => supabase
+      .from('brvm_actions_daily')
+      .select('code, cours_cloture, date_marche')
+      .gte('date_marche', depuis5Ans)
+      .order('date_marche', { ascending: true })
+      .range(from, to),
+  );
 
   // Compute monthly average variation per stock, then aggregate
   const moisStats: Record<number, { hausses: number; baisses: number; somme: number; count: number }> = {};
   for (let m = 1; m <= 12; m++) moisStats[m] = { hausses: 0, baisses: 0, somme: 0, count: 0 };
 
   const byCodeChron = new Map<string, { date: string; cours: number }[]>();
-  for (const r of histRes.data ?? []) {
+  for (const r of histAll) {
     if (!byCodeChron.has(r.code)) byCodeChron.set(r.code, []);
     byCodeChron.get(r.code)!.push({ date: r.date_marche, cours: r.cours_cloture as number });
   }

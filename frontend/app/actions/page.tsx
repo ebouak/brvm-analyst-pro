@@ -1,4 +1,5 @@
 import { createPublicClient } from '@/lib/supabase/public';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 import ActionsTable from '@/components/ActionsTable';
 import brvmSectors from '@/lib/brvmSectors.json';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
@@ -60,13 +61,19 @@ async function getData(withMetrics: boolean) {
     const since = new Date(lastDate);
     since.setDate(since.getDate() - 50);
     const sinceIso = since.toISOString().slice(0, 10);
-    const { data: hist } = await supabase
-      .from('brvm_actions_daily')
-      .select('code, date_marche, cours_jour')
-      .gte('date_marche', sinceIso)
-      .lte('date_marche', lastDate)
-      .order('date_marche', { ascending: true });
-    for (const r of (hist ?? []) as { code: string; cours_jour: number | null }[]) {
+    // Paginé : 50 j × ~48 titres ≈ 2 400 lignes. Le tri ascendant tronquait aux
+    // ~20 séances les plus vieilles, et la « tendance 30 j » montrait le début de
+    // la fenêtre en ratant les séances récentes — l'inverse de son intitulé.
+    const hist = await fetchAllRows<{ code: string; date_marche: string; cours_jour: number | null }>(
+      (from, to) => supabase
+        .from('brvm_actions_daily')
+        .select('code, date_marche, cours_jour')
+        .gte('date_marche', sinceIso)
+        .lte('date_marche', lastDate)
+        .order('date_marche', { ascending: true })
+        .range(from, to),
+    );
+    for (const r of hist as { code: string; cours_jour: number | null }[]) {
       if (r.cours_jour == null) continue;
       (sparklines[r.code] ??= []).push(r.cours_jour);
     }

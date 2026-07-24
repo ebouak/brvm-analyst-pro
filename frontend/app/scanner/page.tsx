@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 import { smaSeries, rsiSeries, macdSeries } from '@/lib/indicators';
 import {
   parseCriteriaFromSearchParams,
@@ -86,11 +87,17 @@ export default async function ScannerPage({ searchParams }: PageProps) {
   cutoffDate.setDate(cutoffDate.getDate() - 300);
   const cutoff = cutoffDate.toISOString().slice(0, 10);
 
-  const { data: histRows } = await supabase
-    .from('brvm_actions_daily')
-    .select('code, date_marche, cours_jour, volume')
-    .gte('date_marche', cutoff)
-    .order('date_marche', { ascending: true });
+  // Paginé : 300 j × ~48 titres ≈ 9 600 lignes, bien au-delà du plafond de 1000.
+  // Sans cela le tri ascendant ne ramenait que les ~20 séances LES PLUS VIEILLES
+  // et les indicateurs techniques portaient sur des cours d'il y a deux ans.
+  const histRows = await fetchAllRows<{ code: string; date_marche: string; cours_jour: number | null; volume: number | null }>(
+    (from, to) => supabase
+      .from('brvm_actions_daily')
+      .select('code, date_marche, cours_jour, volume')
+      .gte('date_marche', cutoff)
+      .order('date_marche', { ascending: true })
+      .range(from, to),
+  );
 
   const histByCode = new Map<string, { date_marche: string; cours_jour: number | null; volume: number | null }[]>();
   for (const row of histRows ?? []) {

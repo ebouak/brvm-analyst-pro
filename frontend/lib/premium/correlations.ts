@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 import { returns, pearson, beta, rollingCorr } from './correlationMath';
 import { readCommodityMacro, type CommodityMacro } from './agroMacro';
 
@@ -67,13 +68,18 @@ export async function getCorrelationsData(): Promise<CorrelationSerie[]> {
     for (const r of commoRows) commoByMonth.set(monthKey(r.date), r.price);
 
     // 2) Cours des actions agro → moyenne mensuelle.
-    const { data: acts } = await supabase
-      .from('brvm_actions_daily')
-      .select('code, cours_jour, date_marche')
-      .in('code', meta.codes)
-      .gte('date_marche', since)
-      .not('cours_jour', 'is', null)
-      .order('date_marche', { ascending: true });
+    // Paginé : 5 ans × plusieurs titres dépasse largement 1000 lignes ; la
+    // matrice de corrélation portait sinon sur la fraction la plus ancienne.
+    const acts = await fetchAllRows<{ code: string; cours_jour: number; date_marche: string }>(
+      (from, to) => supabase
+        .from('brvm_actions_daily')
+        .select('code, cours_jour, date_marche')
+        .in('code', meta.codes)
+        .gte('date_marche', since)
+        .not('cours_jour', 'is', null)
+        .order('date_marche', { ascending: true })
+        .range(from, to),
+    );
 
     const stockMonth = new Map<string, number[]>();
     for (const r of (acts ?? []) as { cours_jour: number; date_marche: string }[]) {
