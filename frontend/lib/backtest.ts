@@ -41,6 +41,10 @@ export interface BacktestResult {
   bestTradePct: number | null;
   worstTradePct: number | null;
   riskFreeRate: number;
+  /** true = annualisé sur le temps calendaire réel ; false = repli 252 séances
+   *  (aucune date fournie). L'interface ne doit jamais présenter le repli comme
+   *  une mesure. */
+  annualisationCalendaire: boolean;
 }
 
 const EMPTY_RESULT = (n: number, riskFreeRate: number): BacktestResult => ({
@@ -62,6 +66,7 @@ const EMPTY_RESULT = (n: number, riskFreeRate: number): BacktestResult => ({
   bestTradePct: null,
   worstTradePct: null,
   riskFreeRate,
+  annualisationCalendaire: false,
 });
 
 function stddev(values: number[]): number {
@@ -149,10 +154,14 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     }
     ordreEnAttente = null;
 
-    // (c) Le signal d'aujourd'hui devient l'ordre de demain. Un ordre contraire
-    //     REMPLACE le précédent — on ne conserve qu'une intention, la plus
-    //     récente. Un signal tombant sur la dernière séance ne s'exécute jamais :
-    //     un backtest n'invente pas une transaction qui n'aurait pas eu lieu.
+    // (c) Le signal d'aujourd'hui devient l'ordre de demain.
+    //
+    //     L'étape (b) précédant celle-ci, un ordre en attente ne survit jamais
+    //     plus d'une séance : il s'exécute ou il est abandonné. Aucun ordre
+    //     contraire ne peut donc en « remplacer » un autre encore en attente.
+    //
+    //     Un signal tombant sur la dernière séance ne s'exécute jamais : un
+    //     backtest n'invente pas une transaction qui n'aurait pas eu lieu.
     const signal = signals[i];
     if (signal === 'BUY' && !inPosition) ordreEnAttente = 'BUY';
     else if (signal === 'SELL' && inPosition) ordreEnAttente = 'SELL';
@@ -213,9 +222,26 @@ export function runBacktest(input: BacktestInput): BacktestResult {
 
   const finalEquity = equity;
   const totalReturn = finalEquity / 100 - 1;
-  const annualizedReturn = Math.pow(finalEquity / 100, 252 / n) - 1;
 
-  const vol = stddev(dailyReturns) * Math.sqrt(252);
+  // Annualisation sur le temps RÉELLEMENT écoulé. Sur la BRVM un titre peut
+  // coter 40 fois dans l'année : 252/n serait sans rapport avec la réalité.
+  // Sans dates, on retombe exactement sur l'ancienne convention (n/252 années
+  // donne pow(eq, 252/n)), signalée par annualisationCalendaire=false.
+  const premiereDate = dates?.[0];
+  const derniereDate = dates?.[n - 1];
+  const joursEcoules =
+    premiereDate && derniereDate
+      ? (Date.parse(derniereDate) - Date.parse(premiereDate)) / 86_400_000
+      : NaN;
+  const annualisationCalendaire = Number.isFinite(joursEcoules) && joursEcoules > 0;
+  const anneesBrutes = annualisationCalendaire ? joursEcoules / 365.25 : n / 252;
+  const annees = Math.max(anneesBrutes, 1 / 365.25);   // jamais zéro
+
+  const annualizedReturn = Math.pow(finalEquity / 100, 1 / annees) - 1;
+
+  // Volatilité mise à l'échelle du nombre RÉEL de séances par an.
+  const seancesParAn = n / annees;
+  const vol = stddev(dailyReturns) * Math.sqrt(seancesParAn);
 
   // winRate, avgWinPct et bestTradePct partagent désormais le MÊME tableau
   // `trades`, position latente incluse. Auparavant la position encore ouverte
@@ -225,15 +251,21 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     : 0;
   const numTrades = trades.length;
 
-  const buyAndHoldReturn = (closes[n - 1]! - closes[0]!) / closes[0]!;
+  const premierCours = closes[0];
+  const dernierCours = closes[n - 1];
+  const buyAndHoldReturn =
+    premierCours != null && premierCours !== 0 && dernierCours != null
+      ? (dernierCours - premierCours) / premierCours
+      : 0;
 
   // Sharpe / Sortino en EXCÈS sur le taux sans risque (best practice analyste).
-  const rfDaily = Math.pow(1 + riskFreeRate, 1 / 252) - 1;
+  // Taux sans risque ramené à la séance, sur le rythme réel de cotation.
+  const rfSeance = Math.pow(1 + riskFreeRate, 1 / Math.max(seancesParAn, 1)) - 1;
   const excessAnnual = annualizedReturn - riskFreeRate;
   const sharpeRatio = vol === 0 ? null : excessAnnual / vol;
 
   // Downside deviation : écart-type des rendements sous le seuil sans risque.
-  const downside = dailyReturns.map((r) => Math.min(0, r - rfDaily));
+  const downside = dailyReturns.map((r) => Math.min(0, r - rfSeance));
   const downsideVar = downside.reduce((s, v) => s + v * v, 0) / downside.length;
   const downsideDev = Math.sqrt(downsideVar) * Math.sqrt(252);
   const sortinoRatio = downsideDev === 0 ? null : excessAnnual / downsideDev;
@@ -265,5 +297,6 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     bestTradePct: rets.length ? Math.max(...rets) : null,
     worstTradePct: rets.length ? Math.min(...rets) : null,
     riskFreeRate,
+    annualisationCalendaire,
   };
 }

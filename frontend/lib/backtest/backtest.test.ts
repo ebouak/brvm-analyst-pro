@@ -171,3 +171,31 @@ describe('runBacktest — frais et cas limites', () => {
     expect(r.numTrades).toBe(0);
   });
 });
+
+describe('runBacktest — annualisation', () => {
+  it('annualise sur le temps calendaire quand les dates sont fournies', () => {
+    // 3 séances étalées sur 2 ans : un titre très peu liquide.
+    const closes = [100, 110, 121];
+    const signals = ['BUY', 'HOLD', 'HOLD'] as const;
+    const dates = ['2024-01-02', '2025-01-02', '2026-01-02'];
+    const r = runBacktest({ closes, signals: [...signals], dates, feesPct: 0 });
+    expect(r.annualisationCalendaire).toBe(true);
+    // Sans dates, 252/3 aurait donné un rendement annualisé absurde.
+    expect(r.annualizedReturn).toBeLessThan(1);
+  });
+
+  it('retombe sur la convention 252 sans dates, et le signale', () => {
+    const closes = [100, 110, 121];
+    const signals = ['BUY', 'HOLD', 'HOLD'] as const;
+    const r = runBacktest({ closes, signals: [...signals] });
+    expect(r.annualisationCalendaire).toBe(false);
+  });
+
+  it('cours nul en série : rendement 0, jamais Infinity', () => {
+    const closes = [0, 100, 110];
+    const signals = ['BUY', 'HOLD', 'HOLD'] as const;
+    const r = runBacktest({ closes, signals: [...signals] });
+    expect(Number.isFinite(r.totalReturn)).toBe(true);
+    expect(Number.isFinite(r.buyAndHoldReturn)).toBe(true);
+  });
+});
