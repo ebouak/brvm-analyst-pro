@@ -7,6 +7,9 @@ import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ChartBuilder from '@/components/financials/ChartBuilder';
+import PasseportPopover from '@/components/provenance/PasseportPopover';
+import { buildPassport } from '@/lib/provenance/passport';
+import { loadProvenance } from '@/lib/provenance/queries';
 import { buildChartRows } from '@/lib/financials/chartBuilder';
 import BankScorecard from '@/components/financials/BankScorecard';
 import ValueTrapBadge from '@/components/fundamentals/ValueTrapBadge';
@@ -28,6 +31,20 @@ export default async function FinancialsPage({ params }: Props) {
   const code = params.code.toUpperCase();
   const data = await loadCompanyFinancials(code);
   if (!data) notFound();
+
+  // Provenance du dernier exercice publié — celui qu'affichent les cartes de tête.
+  const provenance = await loadProvenance(code);
+  const periodeAffichee = data.incomeStatements[0]?.periode ?? null;
+  const pubsById = new Map(data.publications.map((p) => [p.id, p]));
+  const provIncome = periodeAffichee
+    ? provenance.get(`${periodeAffichee}|income_statements`) ?? null
+    : null;
+  const passeport = buildPassport(
+    provIncome,
+    provIncome?.publication_id ? pubsById.get(provIncome.publication_id) ?? null : null,
+    data.cashFlowStatements.find((c) => c.periode === periodeAffichee) ?? null,
+  );
+
 
   const latestIncome = data.incomeStatements[0] ?? null;
   const prevIncome = data.incomeStatements[1] ?? null;
@@ -220,7 +237,12 @@ export default async function FinancialsPage({ params }: Props) {
 
             {/* Ratios fondamentaux */}
             <div>
-              <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Ratios fondamentaux</p>
+              <div className="flex items-center gap-2 mb-3 px-0.5">
+                <p className="text-xs text-muted uppercase tracking-widest">Ratios fondamentaux</p>
+                {periodeAffichee && (
+                  <PasseportPopover passeport={passeport} titre={`Exercice ${periodeAffichee}`} />
+                )}
+              </div>
               <FundamentalAnalysis ratios={ratios} famille={data.instrument.famille_comptable} />
             </div>
 
