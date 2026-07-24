@@ -74,11 +74,31 @@ export function toRows(code: string, s: YearStatement, sourceFile: string): Mapp
   };
 }
 
+/** Origine d'une passe d'extraction, écrite dans provenance_exercice. */
+export interface OriginePasse {
+  /** Publication source. `null` si inconnue (l'exercice restera non tracé). */
+  publicationId: string | null;
+  /** 'deepseek-chat' | 'mistral-large-latest' | 'ocr-mistral' | 'manuel' */
+  extracteur: string;
+}
+
+const TABLES_TRACEES = ['income_statements', 'balance_sheets', 'cash_flow_statements'] as const;
+
 /**
  * Upsert les 4 lignes, en SAUTANT toute année déjà marquée 'pdf-verified' dans fundamentals
  * (protection des données vérifiées à la main comme PALC).
+ *
+ * Écrit également la provenance des trois tables d'états. C'est le POINT DE
+ * PASSAGE UNIQUE : toute donnée fondamentale entrant en base passe ici, donc la
+ * traçabilité ne peut pas être oubliée ailleurs. `origine` est obligatoire pour
+ * que l'oubli soit une erreur de compilation, pas un trou silencieux.
  */
-export async function persistRows(admin: SupabaseClient, code: string, rows: MappedRows): Promise<'written' | 'skipped-verified'> {
+export async function persistRows(
+  admin: SupabaseClient,
+  code: string,
+  rows: MappedRows,
+  origine: OriginePasse,
+): Promise<'written' | 'skipped-verified'> {
   const year = rows.fundamentals.year as number;
   const { data: existing } = await admin
     .from('fundamentals').select('source').eq('code', code).eq('year', year).maybeSingle();
@@ -88,5 +108,20 @@ export async function persistRows(admin: SupabaseClient, code: string, rows: Map
   await admin.from('balance_sheets').upsert(rows.balance, { onConflict: 'code,periode,type_periode' });
   await admin.from('cash_flow_statements').upsert(rows.cashflow, { onConflict: 'code,periode,type_periode' });
   await admin.from('fundamentals').upsert(rows.fundamentals, { onConflict: 'code,year' });
+
+  // Provenance : une ligne par table tracée. Confiance 'extrait' — seule une
+  // correction adossée à une source externe peut promouvoir à 'verifie'.
+  const periode = rows.income.periode as string;
+  await admin.from('provenance_exercice').upsert(
+    TABLES_TRACEES.map((table_cible) => ({
+      code, periode, table_cible,
+      publication_id: origine.publicationId,
+      extrait_le: new Date().toISOString(),
+      extracteur: origine.extracteur,
+      confiance: 'extrait',
+    })),
+    { onConflict: 'code,periode,table_cible' },
+  );
+
   return 'written';
 }

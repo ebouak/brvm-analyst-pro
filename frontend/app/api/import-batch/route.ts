@@ -106,7 +106,10 @@ export async function POST(req: Request) {
                 });
                 if (!bk.ok) { log(`${code} ${ex.periode} : REJET [${bk.reasons.join('; ')}]`); continue; }
               }
-              const res = await persistRows(admin, code, toRows(code, ex, pub.libelle ?? pub.source_url!));
+              const res = await persistRows(
+                admin, code, toRows(code, ex, pub.libelle ?? pub.source_url!),
+                { publicationId: pub.id, extracteur: 'deepseek-chat' },
+              );
               log(`${code} ${ex.periode} : ${res === 'written' ? 'écrit ✓' : 'protégé (pdf-verified)'}`);
             }
           } catch (e) {

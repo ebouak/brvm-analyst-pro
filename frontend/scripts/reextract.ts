@@ -122,6 +122,9 @@ async function main(): Promise<void> {
 
   for (const pub of selected) {
     console.log(`--- exercice ${pub.exercice} — ${pub.libelle}`);
+    // Trace l'extracteur réellement employé : le passeport doit dire si le
+    // chiffre vient d'un texte PDF ou d'une reconnaissance optique.
+    let utiliseOcr = false;
     let text: string;
     try {
       text = await fetchPdfText(pub.source_url!);
@@ -134,6 +137,7 @@ async function main(): Promise<void> {
       if (!mistralKey) { console.error('  PDF scanné et MISTRAL_API_KEY absente — ignoré'); continue; }
       try {
         text = await ocrPdf(pub.source_url!, mistralKey);
+        utiliseOcr = true;
         console.log(`  PDF scanné -> OCR Mistral (${text.length} caractères)`);
       } catch (e) {
         console.error(`  OCR échoué : ${e instanceof Error ? e.message : e}`);
@@ -177,7 +181,10 @@ async function main(): Promise<void> {
       );
 
       if (write) {
-        const res = await persistRows(admin, code, toRows(code, ex, pub.libelle ?? pub.source_url!));
+        const res = await persistRows(
+          admin, code, toRows(code, ex, pub.libelle ?? pub.source_url!),
+          { publicationId: pub.id, extracteur: utiliseOcr ? 'ocr-mistral' : 'deepseek-chat' },
+        );
         console.log(`    -> ${res === 'written' ? 'écrit ✓' : 'protégé (pdf-verified)'}`);
       }
     }
