@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import FreshnessBadge from '@/components/FreshnessBadge';
+import { computeFreshness } from '@/lib/freshness';
+import { loadFreshnessInputs } from '@/lib/freshness/queries';
 import NewsTicker from '@/components/NewsTicker';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
@@ -220,6 +223,10 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 export default async function Dashboard() {
   const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker } = await getData();
 
+  // Fraîcheur des cours — affichée au-dessus du ticker permanent.
+  const fIn = await loadFreshnessInputs();
+  const fraicheurCours = computeFreshness(fIn.derniereCollecte, fIn.derniereSeance, new Date());
+
   // Secteurs favoris de l'utilisateur (paramétrage intelligent).
   const supa = createClient();
   const { data: { user } } = await supa.auth.getUser();
@@ -424,6 +431,9 @@ export default async function Dashboard() {
         <NewsTicker className="-mx-4 sm:-mx-6 rounded-none" />
 
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
+        <div className="flex justify-end px-1">
+          <FreshnessBadge fraicheur={fraicheurCours} />
+        </div>
         <DashboardTicker items={ticker} dateMarche={lastDate} />
 
         {/* ── Bandeau alertes déclenchées ──────────────────────────────────── */}
