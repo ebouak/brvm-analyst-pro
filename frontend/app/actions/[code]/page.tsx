@@ -3,6 +3,9 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { createPublicClient } from '@/lib/supabase/public';
+import FreshnessBadge from '@/components/FreshnessBadge';
+import { computeFreshness } from '@/lib/freshness';
+import { loadFreshnessInputs } from '@/lib/freshness/queries';
 import { canAccess } from '@/lib/server/featureAccess';
 import { SectionLock } from '@/components/premium/SectionLock';
 import ChartBuilder from '@/components/financials/ChartBuilder';
@@ -337,6 +340,10 @@ export default async function InstrumentPage({
   const last    = rows[rows.length - 1]!;
   const prev    = rows[rows.length - 2] ?? null;
   const up      = (last.variation_pct ?? 0) >= 0;
+
+  // Fraîcheur des cours : dernière collecte intraday + dernière séance en base.
+  const fInputs = await loadFreshnessInputs();
+  const fraicheur = computeFreshness(fInputs.derniereCollecte, fInputs.derniereSeance, new Date());
   const lastRsi = rsiByRow[rsiByRow.length - 1];
   const lastMacd = macdByRow[macdByRow.length - 1];
   const lastMa20 = ma20[ma20.length - 1] ?? null;
@@ -578,9 +585,12 @@ export default async function InstrumentPage({
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-faint">
-              Séance du <span className="text-muted">{last.date_marche}</span>
-            </p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <p className="text-[11px] text-faint">
+                Séance du <span className="text-muted">{last.date_marche}</span>
+              </p>
+              <FreshnessBadge fraicheur={fraicheur} />
+            </div>
 
             {/* Séparateur or */}
             <div className="mt-5 h-px bg-gold-line opacity-40" />
