@@ -62,7 +62,20 @@ export async function POST(req: Request) {
     points: Array.isArray(body.points) ? body.points.slice(0, 8).map((p) => String(p).slice(0, 160)) : [],
     updated_at: new Date().toISOString(),
   };
-  const { error } = await sb.from('investment_theses').upsert(row, { onConflict: 'user_id,code' });
+  // L'upsert onConflict:'user_id,code' ne fonctionne plus : l'unicité est
+  // désormais un index PARTIEL (une seule these ACTIVE par titre), que
+  // supabase-js ne sait pas cibler. On met à jour la these active si elle
+  // existe, sinon on insère. Une nouvelle these sur un titre dont l'ancienne
+  // est clôturée passe alors sans conflit.
+  const { data: existante } = await sb
+    .from('investment_theses')
+    .select('id')
+    .eq('user_id', user.id).eq('code', row.code).eq('statut', 'active')
+    .maybeSingle();
+
+  const { error } = existante
+    ? await sb.from('investment_theses').update(row).eq('id', existante.id)
+    : await sb.from('investment_theses').insert(row);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
