@@ -4,7 +4,7 @@
  * l'alerte du cron samedi partait dans un console.log du runner GitHub.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { dispatch } from '../src/alerts/channels.js';
+import { dispatch, sendEmail } from '../src/alerts/channels.js';
 
 const ENV_KEYS = [
   'RESEND_API_KEY',
@@ -74,5 +74,24 @@ describe('dispatch — destinataire email', () => {
 
     expect(bodies).toHaveLength(0);
     expect(res).toEqual([{ channel: 'console', status: 'sent' }]);
+  });
+});
+
+describe('sendEmail — canal direct, sans diffusion globale', () => {
+  it('envoie uniquement l\'email, sans toucher Telegram ni WhatsApp', async () => {
+    process.env.TELEGRAM_BOT_TOKEN = 'tok';
+    process.env.TELEGRAM_CHAT_ID = 'chat';
+    process.env.WHATSAPP_TO = '+225000000';
+    const { bodies } = stubFetch();
+
+    const res = await sendEmail({ to: 'utilisateur@example.com', subject: 'Sujet', body: 'Corps', code: 'SNTS' });
+
+    expect(res).toEqual({ channel: 'email', status: 'sent' });
+    // Un seul appel fetch (Resend) : la preuve que sendEmail() appelée seule
+    // ne déclenche jamais dispatch() ni donc les canaux globaux de
+    // l'exploitant (Telegram/WhatsApp) — c'est la correction centrale du
+    // design #15 (voir spec §2).
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.to).toBe('utilisateur@example.com');
   });
 });

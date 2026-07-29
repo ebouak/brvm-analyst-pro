@@ -32,7 +32,7 @@ export interface SendResult {
  * rapports mensuels). Sans l'un ni l'autre on ne devine pas : on rend `null`
  * et `dispatch` retombe sur la console.
  */
-async function sendEmail(n: Notification): Promise<SendResult | null> {
+export async function sendEmail(n: Notification): Promise<SendResult | null> {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.ALERTS_EMAIL_FROM;
   const to = n.to || process.env.ALERTS_EMAIL_TO;
