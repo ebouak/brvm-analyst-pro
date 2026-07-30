@@ -134,6 +134,7 @@ SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 # Nettoyer la clé : supprimer espaces et caractères non-ASCII (problème copier-coller)
 DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "").strip()
 DEEPSEEK_KEY = DEEPSEEK_KEY.encode("ascii", "ignore").decode("ascii")
+PERPLEXITY_KEY = os.environ.get("PERPLEXITY_API_KEY", "").strip()
 
 
 # ── 1. Prix yfinance ──────────────────────────────────────────────────────────
@@ -545,6 +546,47 @@ def valider_item_perplexity(item: dict, maintenant: datetime, fenetre_jours: int
     return 0 <= delta_jours <= fenetre_jours
 
 
+def fetch_perplexity_context(commodites: list[str]) -> list[dict]:
+    """Contexte macro récent via Perplexity (recherche web + citations) —
+    injecté dans le prompt DeepSeek comme bloc distinct, jamais vérifié a
+    posteriori (design §5 : rôle volontairement limité au contexte d'entrée,
+    pas de garde-fou de rapprochement texte/citation). Dégradation silencieuse
+    si la clé est absente ou l'appel échoue : l'article se génère sans ce
+    bloc, exactement comme aujourd'hui."""
+    if not PERPLEXITY_KEY:
+        log.info("PERPLEXITY_API_KEY absente — contexte macro ignoré")
+        return []
+
+    import requests
+
+    liste = ", ".join(commodites)
+    prompt = (
+        f"Actualités récentes ayant affecté les prix de : {liste}, cette "
+        "semaine. Réponds UNIQUEMENT avec un tableau JSON strict, sans texte "
+        'autour, de la forme : [{"titre": "...", "resume": "...", '
+        '"date": "YYYY-MM-DD", "url": "https://..."}]. Un objet par fait '
+        "distinct, chacun avec sa propre source. N'invente aucune URL."
+    )
+    try:
+        resp = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={"Authorization": f"Bearer {PERPLEXITY_KEY}", "Content-Type": "application/json"},
+            json={"model": "sonar", "messages": [{"role": "user", "content": prompt}]},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        content = resp.json()["choices"][0]["message"]["content"]
+        items = json.loads(content)
+        if not isinstance(items, list):
+            raise ValueError("réponse JSON n'est pas une liste")
+    except Exception as e:
+        log.warning("Perplexity contexte macro erreur : %s", e)
+        return []
+
+    maintenant = datetime.now(timezone.utc)
+    return [it for it in items if valider_item_perplexity(it, maintenant)]
+
+
 # ── 5. Prompt DeepSeek + Builders visuels Python ─────────────────────────────
 
 def build_editorial_prompt(
@@ -553,6 +595,7 @@ def build_editorial_prompt(
     articles: list,
     brvm_scores: dict,
     correlations: list | None = None,
+    perplexity_items: list[dict] | None = None,
     week: int | None = None,
     year: int | None = None,
 ) -> str:
@@ -577,6 +620,12 @@ def build_editorial_prompt(
         for a in articles[:6]:
             art_ctx += f"\n  [{a.get('source_label','')}] {a.get('titre','')[:130]}"
 
+    perplex_ctx = ""
+    if perplexity_items:
+        perplex_ctx = "\nContexte macro récent (sources externes vérifiées) :"
+        for it in perplexity_items[:6]:
+            perplex_ctx += f"\n  [{it.get('date','')}] {it.get('titre','')[:130]}"
+
     top_brvm = ", ".join(f"{tk}({s}/10)" for tk, s in list(brvm_scores.items())[:5])
 
     corr_ctx = ""
@@ -598,6 +647,7 @@ DONNÉES :
 {price_lines}
 {wb_ctx}
 {art_ctx}
+{perplex_ctx}
 Top BRVM scorées : {top_brvm}
 {corr_ctx}
 
