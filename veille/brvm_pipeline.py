@@ -492,6 +492,7 @@ def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> li
         log.warning(f"[Perplex.] ✗ {ex}")
         return []
 
+    log.info(f"[Perplex.] {len(items)} item(s) reçus, avant validation fraîcheur/format")
     maintenant = datetime.utcnow()
     results = []
     for item in items:
@@ -514,8 +515,7 @@ def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> li
         except (AttributeError, KeyError, TypeError) as ex:
             log.debug(f"[Perplex.] item ignoré (format inattendu) : {ex}")
             continue
-    if results:
-        log.info(f"[Perplex.] {len(results):>3} art.")
+    log.info(f"[Perplex.] {len(results):>3} art. retenus après validation")
     return results
 
 # ─────────────────────────────────────────────────────────────
