@@ -1033,7 +1033,7 @@ def build_sources_perplexity(items: list[dict]) -> str:
         return ""
     rows = "".join(
         f'<li style="margin-bottom:6px;font-size:12px;color:#475569;">'
-        f'<a href="{it.get("url","")}" style="color:#1d4ed8;text-decoration:none;" '
+        f'<a href="{it.get("url","")}" style="color:#56D7FD;text-decoration:none;" '
         f'target="_blank" rel="noopener noreferrer">{it.get("titre","")}</a>'
         f' <span style="color:#94a3b8;">— {it.get("date","")}</span></li>'
         for it in items

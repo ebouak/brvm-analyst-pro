@@ -432,6 +432,7 @@ body::before {
 .weekly-content [style*="color:#475569"],
 .weekly-content [style*="color:#64748b"] { color: #94a3b8 !important; }
 .weekly-content [style*="border-bottom:1px solid #f1f5f9"] { border-bottom-color: #1e3a45 !important; }
+.weekly-content [style*="border-top:1px solid #e2e8f0"] { border-top-color: #1e3a45 !important; }
 .weekly-content [style*="border:1px solid #e2e8f0"],
 .weekly-content [style*="border-bottom:2px solid #e2e8f0"] {
   border-color: #1e3a45 !important; background: #0a1417 !important;
