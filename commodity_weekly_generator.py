@@ -1025,11 +1025,34 @@ def build_footer(year: int) -> str:
     )
 
 
+def build_sources_perplexity(items: list[dict]) -> str:
+    """Bloc « Sources consultées » : rendu Python déterministe, jamais fondu
+    dans le texte DeepSeek (design §5 — contexte d'entrée uniquement, les
+    citations restent affichées séparément et vérifiables individuellement)."""
+    if not items:
+        return ""
+    rows = "".join(
+        f'<li style="margin-bottom:6px;font-size:12px;color:#475569;">'
+        f'<a href="{it.get("url","")}" style="color:#1d4ed8;text-decoration:none;" '
+        f'target="_blank" rel="noopener noreferrer">{it.get("titre","")}</a>'
+        f' <span style="color:#94a3b8;">— {it.get("date","")}</span></li>'
+        for it in items
+    )
+    return (
+        '<div style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:20px;">'
+        '<p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;'
+        'letter-spacing:.08em;margin:0 0 10px 0;">Contexte macro — sources consultées</p>'
+        f'<ul style="margin:0;padding-left:18px;">{rows}</ul>'
+        '</div>'
+    )
+
+
 def assemble_content_html(
     editorial_html: str,
     prices: list,
     brvm_scores: dict,
     correlations: list | None = None,
+    perplexity_items: list[dict] | None = None,
     year: int | None = None,
     week: int | None = None,
 ) -> str:
@@ -1045,6 +1068,7 @@ def assemble_content_html(
         text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
                 f'color:#1e293b;line-height:1.8;">{text}</section>')
     corr_html = build_correlation_table(correlations or [])
+    sources_html = build_sources_perplexity(perplexity_items or [])
     return (
         '<article style="font-family:\'Segoe UI\',system-ui,sans-serif;'
         'max-width:900px;margin:0 auto;color:#1e293b;line-height:1.8;">\n'
@@ -1054,6 +1078,7 @@ def assemble_content_html(
         + text + "\n"
         + build_brvm_table(prices, brvm_scores) + "\n"
         + corr_html + "\n"
+        + sources_html + "\n"
         + build_footer(year) + "\n"
         + "</article>"
     )
@@ -1247,6 +1272,12 @@ def main():
     log.info("    → %d filières analysées (%d disponibles)",
              len(correlations), sum(1 for c in correlations if c["available"]))
 
+    # Étape 4c : Contexte macro Perplexity
+    log.info("4c/7 Contexte macro récent (Perplexity)...")
+    noms_commodites = [v["nom"] for v in YFINANCE_TICKERS.values()]
+    perplexity_items = fetch_perplexity_context(noms_commodites)
+    log.info("    → %d item(s) de contexte retenus", len(perplexity_items))
+
     # Étape 5 : Prompt + DeepSeek
     log.info("5/7 Génération article via DeepSeek...")
     prices = build_prices_list(yf_prices)
@@ -1255,7 +1286,7 @@ def main():
     brvm_scores_simple = {tk: round(v["score"] / 10, 1) for tk, v in brvm_scores.items()}
     prompt = build_editorial_prompt(
         prices, wb_summary, articles, brvm_scores_simple, correlations,
-        week=week, year=year,
+        perplexity_items=perplexity_items, week=week, year=year,
     )
 
     if args.dry_run:
@@ -1265,7 +1296,8 @@ def main():
         editorial_html = call_deepseek(prompt)
 
     article_html = assemble_content_html(
-        editorial_html, prices, brvm_scores_simple, correlations, year=year, week=week,
+        editorial_html, prices, brvm_scores_simple, correlations,
+        perplexity_items=perplexity_items, year=year, week=week,
     )
 
     # Étape 6 : HTML final
