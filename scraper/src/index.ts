@@ -47,6 +47,7 @@ import { runDividends } from './dividends/runDividends.js';
 import { runShares } from './shares/runShares.js';
 import { runSecteurs } from './refdata/runSecteurs.js';
 import { runAlerts } from './alerts/runAlerts.js';
+import { runThesisAlerts } from './theses/runThesisAlerts.js';
 import { runBacktestSignals } from './scoring/runBacktestSignals.js';
 import { runPublications } from './publications/runPublications.js';
 import { runBackfill } from './backfill/runBackfill.js';
@@ -258,6 +259,25 @@ async function main(): Promise<number> {
               rows_extracted: r.nb,
               rows_upserted: r.nb,
               metadata: { status: r.status, nb: r.nb },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'these-alertes': {
+      const res = await monitored(
+        { code: 'these-alertes', label: 'Alertes de thèses invalidées' },
+        async () => {
+          const r = await runThesisAlerts({ mock });
+          const outcomeStatus = r.status === 'failed' ? 'failed' : 'success';
+          return {
+            value: r,
+            outcome: {
+              status: outcomeStatus,
+              rows_extracted: r.evaluated,
+              rows_upserted: r.notified,
+              metadata: { status: r.status, evaluated: r.evaluated, notified: r.notified },
             },
           };
         },
