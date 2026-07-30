@@ -9,6 +9,7 @@ Sources connectées (150+) :
   • 8 flux matières premières (huile de palme, caoutchouc, cacao, pétrole…)
   • 7 sources institutionnelles (BCEAO, FMI, Banque Mondiale, agences de notation)
   • Scraping BRVM.org + CREPMF + UEMOA (officiel)
+  • Perplexity (recherche web sourcée, additive — voir PERPLEXITY_API_KEY)
 
 Usage:
     python brvm_pipeline.py              # collecte unique (toutes sources)
@@ -23,7 +24,7 @@ Dépendances:
     pip install feedparser requests beautifulsoup4 pyyaml schedule lxml
 """
 
-import re, json, time, sqlite3, hashlib, logging, argparse, schedule
+import os, re, json, time, sqlite3, hashlib, logging, argparse, schedule
 from datetime import datetime, timedelta
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -454,6 +455,65 @@ def valider_item_perplexity(item: dict, maintenant: datetime, fenetre_jours: int
     delta_jours = (maintenant.replace(tzinfo=None) - d).days
     return 0 <= delta_jours <= fenetre_jours
 
+def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> list:
+    """Source additive : interroge Perplexity (recherche web + citations) pour
+    de l'actualité BRVM/UEMOA récente. Sortie JSON stricte imposée — un fait =
+    une citation, jamais de synthèse libre non sourcée (design §3-4).
+    Dégradation silencieuse si la clé est absente ou l'appel échoue : la
+    pipeline continue avec les ~150 autres sources, comme n'importe quel
+    fetcher de ce fichier."""
+    api_key = os.environ.get("PERPLEXITY_API_KEY", "")
+    if not api_key:
+        log.info("[Perplex.] PERPLEXITY_API_KEY absente — source ignorée")
+        return []
+
+    prompt = (
+        "Actualités financières récentes concernant la BRVM (Bourse Régionale "
+        "des Valeurs Mobilières) et les marchés financiers de l'UEMOA. "
+        "Réponds UNIQUEMENT avec un tableau JSON strict, sans texte autour, "
+        'de la forme : [{"titre": "...", "resume": "...", "date": "YYYY-MM-DD", '
+        '"url": "https://..."}]. Un objet par fait distinct, chacun avec sa '
+        "propre source. N'invente aucune URL : n'inclus que des faits que tu "
+        "peux citer."
+    )
+    try:
+        resp = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={"model": "sonar", "messages": [{"role": "user", "content": prompt}]},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        content = resp.json()["choices"][0]["message"]["content"]
+        items = json.loads(content)
+        if not isinstance(items, list):
+            raise ValueError("réponse JSON n'est pas une liste")
+    except Exception as ex:
+        log.warning(f"[Perplex.] ✗ {ex}")
+        return []
+
+    maintenant = datetime.utcnow()
+    results = []
+    for item in items:
+        if not valider_item_perplexity(item, maintenant):
+            continue
+        titre = item["titre"].strip()
+        url_e = item["url"].strip()
+        resume = item["resume"].strip()
+        texte = f"{titre} {resume}"
+        results.append({
+            "hash": make_hash(titre, url_e), "titre": titre, "url": url_e,
+            "source": "Perplexity (recherche web)", "source_type": "perplexity",
+            "date_pub": item["date"], "resume": resume,
+            "langue": "fr", "pertinence": max(0.5, score(texte, global_kw)),
+            "sentiment": sentiment(texte),
+            "est_alerte": is_alerte(texte, alertes),
+            "_tickers": match_tickers(texte, idx),
+        })
+    if results:
+        log.info(f"[Perplex.] {len(results):>3} art.")
+    return results
+
 # ─────────────────────────────────────────────────────────────
 # EXPORT JSON (3 fichiers)
 # ─────────────────────────────────────────────────────────────
@@ -546,7 +606,7 @@ def run_pipeline(config: dict, conn: sqlite3.Connection):
     totals = {}
 
     # ── 1. RSS général ───────────────────────────────────────
-    log.info(f"\n[1/6] RSS général – {len(rss_general)} sources")
+    log.info(f"\n[1/7] RSS général – {len(rss_general)} sources")
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futs = {pool.submit(fetch_rss, s, idx, alertes_kw, global_kw, config): s for s in rss_general}
         for f in as_completed(futs):
@@ -554,7 +614,7 @@ def run_pipeline(config: dict, conn: sqlite3.Connection):
     totals["rss_general"] = sum(1 for a in all_articles if a.get("source_type")=="rss")
 
     # ── 2. Google News par société ───────────────────────────
-    log.info(f"\n[2/6] Google News – {len(sites_soc)} flux société")
+    log.info(f"\n[2/7] Google News – {len(sites_soc)} flux société")
     # Enrichir sites_soc avec nom d'affichage
     soc_gnews = []
     for soc in sites_soc:
@@ -567,7 +627,7 @@ def run_pipeline(config: dict, conn: sqlite3.Connection):
     totals["google_news"] = sum(1 for a in all_articles if a.get("source_type")=="google_news")
 
     # ── 3. Sites officiels des sociétés ─────────────────────
-    log.info(f"\n[3/6] Sites officiels – {len(sites_soc)} sociétés")
+    log.info(f"\n[3/7] Sites officiels – {len(sites_soc)} sociétés")
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futs = {pool.submit(fetch_site_societe, s, idx, alertes_kw, config): s for s in sites_soc}
         for f in as_completed(futs):
@@ -575,7 +635,7 @@ def run_pipeline(config: dict, conn: sqlite3.Connection):
     totals["site_officiel"] = sum(1 for a in all_articles if a.get("source_type")=="site_officiel")
 
     # ── 4. Matières premières ────────────────────────────────
-    log.info(f"\n[4/6] Matières premières – {len(rss_commodites)} flux")
+    log.info(f"\n[4/7] Matières premières – {len(rss_commodites)} flux")
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futs = {pool.submit(fetch_commodite, s, config): s for s in rss_commodites}
         for f in as_completed(futs):
@@ -583,7 +643,7 @@ def run_pipeline(config: dict, conn: sqlite3.Connection):
     totals["commodite"] = sum(1 for a in all_articles if a.get("source_type")=="commodite")
 
     # ── 5. Institutions (BCEAO, FMI, agences notation) ──────
-    log.info(f"\n[5/6] Institutions – {len(rss_insts)} sources")
+    log.info(f"\n[5/7] Institutions – {len(rss_insts)} sources")
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futs = {pool.submit(fetch_institution, s, idx, alertes_kw, global_kw, config): s for s in rss_insts}
         for f in as_completed(futs):
@@ -591,9 +651,14 @@ def run_pipeline(config: dict, conn: sqlite3.Connection):
     totals["institution"] = sum(1 for a in all_articles if a.get("source_type")=="institution")
 
     # ── 6. Scraping BRVM / CREPMF / UEMOA ───────────────────
-    log.info(f"\n[6/6] Scraping officiel – {len(scraping_off)} pages")
+    log.info(f"\n[6/7] Scraping officiel – {len(scraping_off)} pages")
     for s in scraping_off:
         all_articles.extend(fetch_scraping(s, idx, alertes_kw, config))
+
+    # ── 7. Perplexity (recherche web sourcée) ────────────────
+    log.info(f"\n[7/7] Perplexity – recherche web sourcée")
+    all_articles.extend(fetch_perplexity(idx, alertes_kw, global_kw, config))
+    totals["perplexity"] = sum(1 for a in all_articles if a.get("source_type")=="perplexity")
 
     # ── Déduplication & stockage ─────────────────────────────
     nouveaux = 0
