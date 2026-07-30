@@ -522,6 +522,29 @@ def build_wb_summary(wb_snapshot: dict) -> dict:
     return summary
 
 
+# ── 3c. Contexte macro récent (Perplexity) ──────────────────────────────────
+
+def valider_item_perplexity(item: dict, maintenant: datetime, fenetre_jours: int = 14) -> bool:
+    """Rejette tout item sans URL exploitable, sans titre/résumé, ou hors
+    fenêtre de fraîcheur. Aucune tentative de réparer un item incomplet — on
+    l'écarte silencieusement (design §3). Copie identique dans
+    veille/brvm_pipeline.py — toute correction doit être reportée des deux
+    côtés (pas de module Python partagé entre les deux pipelines)."""
+    if not isinstance(item, dict):
+        return False
+    url = item.get("url", "")
+    if not isinstance(url, str) or not url.startswith("http"):
+        return False
+    if not item.get("titre") or not item.get("resume"):
+        return False
+    try:
+        d = datetime.strptime(str(item.get("date", "")), "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return False
+    delta_jours = (maintenant.replace(tzinfo=None) - d).days
+    return 0 <= delta_jours <= fenetre_jours
+
+
 # ── 5. Prompt DeepSeek + Builders visuels Python ─────────────────────────────
 
 def build_editorial_prompt(
