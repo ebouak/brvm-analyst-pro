@@ -624,7 +624,7 @@ def build_editorial_prompt(
     if perplexity_items:
         perplex_ctx = "\nContexte macro récent (sources externes vérifiées) :"
         for it in perplexity_items[:6]:
-            perplex_ctx += f"\n  [{it.get('date','')}] {it.get('titre','')[:130]}"
+            perplex_ctx += f"\n  [{it.get('date','')}] {str(it.get('titre',''))[:130]}"
 
     top_brvm = ", ".join(f"{tk}({s}/10)" for tk, s in list(brvm_scores.items())[:5])
 
