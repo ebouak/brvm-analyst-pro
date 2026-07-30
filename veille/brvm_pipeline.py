@@ -497,19 +497,23 @@ def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> li
     for item in items:
         if not valider_item_perplexity(item, maintenant):
             continue
-        titre = item["titre"].strip()
-        url_e = item["url"].strip()
-        resume = item["resume"].strip()
-        texte = f"{titre} {resume}"
-        results.append({
-            "hash": make_hash(titre, url_e), "titre": titre, "url": url_e,
-            "source": "Perplexity (recherche web)", "source_type": "perplexity",
-            "date_pub": item["date"], "resume": resume,
-            "langue": "fr", "pertinence": max(0.5, score(texte, global_kw)),
-            "sentiment": sentiment(texte),
-            "est_alerte": is_alerte(texte, alertes),
-            "_tickers": match_tickers(texte, idx),
-        })
+        try:
+            titre = item["titre"].strip()
+            url_e = item["url"].strip()
+            resume = item["resume"].strip()
+            texte = f"{titre} {resume}"
+            results.append({
+                "hash": make_hash(titre, url_e), "titre": titre, "url": url_e,
+                "source": "Perplexity (recherche web)", "source_type": "perplexity",
+                "date_pub": item["date"], "resume": resume,
+                "langue": "fr", "pertinence": max(0.5, score(texte, global_kw)),
+                "sentiment": sentiment(texte),
+                "est_alerte": is_alerte(texte, alertes),
+                "_tickers": match_tickers(texte, idx),
+            })
+        except (AttributeError, KeyError, TypeError) as ex:
+            log.debug(f"[Perplex.] item ignoré (format inattendu) : {ex}")
+            continue
     if results:
         log.info(f"[Perplex.] {len(results):>3} art.")
     return results
