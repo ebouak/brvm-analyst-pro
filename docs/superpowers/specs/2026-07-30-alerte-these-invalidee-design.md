@@ -166,8 +166,16 @@ Voir : https://www.westbourse.com/journal
 instrumentée avec `withMonitoring` (même pattern que les 6 commandes déjà
 câblées — Lot 3 monitoring, voir `scraper/src/monitoring/`), `--mock` neutralise
 tout envoi réel. Planifiée en cron juste après `score` (a besoin de
-`signals_daily` et `brvm_actions_daily` à jour) — nouvel appel dans
-`.github/workflows/score.yml`, pas un nouveau workflow.
+`signals_daily` et `brvm_actions_daily` à jour).
+
+**Écart assumé au moment du plan** : plutôt qu'un nouvel appel dans
+`score.yml`, l'implémentation a créé un workflow GitHub dédié
+`.github/workflows/thesis-alerts.yml` (16:40 UTC, lun-ven), calqué sur
+`.github/workflows/alerts.yml` (retry ×3, notification Slack en cas d'échec) —
+ce gabarit existait déjà pour un besoin identique (alertes personnelles) et
+manquait à `score.yml`. Fonctionnellement équivalent, échoue plus proprement
+de façon isolée. Voir `docs/superpowers/plans/2026-07-30-alerte-these-invalidee-implementation.md`
+Task 7.
 
 ## 8. UI — `notification_prefs`
 
