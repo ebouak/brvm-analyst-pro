@@ -127,11 +127,18 @@ export async function runThesisAlerts(opts: { mock?: boolean } = {}): Promise<Th
         }
         if (prefs?.email) {
           try {
-            const { data: userData } = await sb.auth.admin.getUserById(t.user_id);
-            const email = userData?.user?.email;
-            if (email) {
-              const mail = await sendEmail({ to: email, subject, body, code: t.code });
-              if (mail) results.push(mail);
+            const { data: userData, error: userError } = await sb.auth.admin.getUserById(t.user_id);
+            if (userError) {
+              logger.warn(
+                { err: userError.message, userId: t.user_id },
+                'Récupération email utilisateur échouée — WhatsApp reste tenté indépendamment',
+              );
+            } else {
+              const email = userData?.user?.email;
+              if (email) {
+                const mail = await sendEmail({ to: email, subject, body, code: t.code });
+                if (mail) results.push(mail);
+              }
             }
           } catch (err) {
             logger.warn(
