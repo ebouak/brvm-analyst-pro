@@ -10,6 +10,7 @@ interface Prefs {
   whatsapp_optin: boolean;
   brief_whatsapp: boolean;
   alerts_whatsapp: boolean;
+  alerts_email: boolean;
 }
 
 const DEFAULTS: Prefs = {
@@ -17,6 +18,7 @@ const DEFAULTS: Prefs = {
   whatsapp_optin: false,
   brief_whatsapp: false,
   alerts_whatsapp: false,
+  alerts_email: false,
 };
 
 /**
@@ -39,7 +41,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
       const sb = createClient();
       const { data, error } = await sb
         .from('notification_prefs')
-        .select('whatsapp_phone, whatsapp_optin, brief_whatsapp, alerts_whatsapp')
+        .select('whatsapp_phone, whatsapp_optin, brief_whatsapp, alerts_whatsapp, alerts_email')
         .eq('user_id', userId)
         .maybeSingle();
       if (cancelled) return;
@@ -70,6 +72,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
         whatsapp_optin_at: next.whatsapp_optin ? new Date().toISOString() : null,
         brief_whatsapp: next.brief_whatsapp,
         alerts_whatsapp: next.alerts_whatsapp,
+        alerts_email: next.alerts_email,
       },
       { onConflict: 'user_id' },
     );
@@ -112,9 +115,9 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
     <section className="rounded-xl border border-border bg-surface p-5 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-ivory">Notifications WhatsApp</h2>
+          <h2 className="text-sm font-semibold text-ivory">Notifications d&apos;alertes</h2>
           <p className="mt-0.5 text-xs text-muted">
-            Brief quotidien et alertes de vos titres, directement sur WhatsApp.
+            Brief quotidien et alertes de vos titres, sur WhatsApp et par email.
           </p>
         </div>
         {prefs.whatsapp_optin && (
@@ -201,6 +204,16 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
           </button>
         </>
       )}
+
+      <label className="flex items-center gap-2 text-sm text-muted border-t border-border/60 pt-3">
+        <input
+          type="checkbox"
+          checked={prefs.alerts_email}
+          onChange={(e) => void save({ ...prefs, alerts_email: e.target.checked })}
+          className="accent-[#56D7FD]"
+        />
+        Recevoir un email si une de mes thèses d&apos;investissement est à revoir
+      </label>
 
       {state === 'saved' && <p className="text-xs text-up">✓ Préférences enregistrées.</p>}
       {state === 'error' && <p className="text-xs text-down">{errMsg ?? 'Erreur — réessayez.'}</p>}
