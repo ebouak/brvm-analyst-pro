@@ -10,6 +10,9 @@
  *   score             — bloquant : ≥ 1 signal calculé pour la séance du jour
  *   monthly <YYYY-MM> — informatif : nb de rapports générés pour le mois
  *   paper             — informatif : nb de positions ouvertes aujourd'hui
+ *   events            — informatif : nb d'événements ingérés dans les dernières 24h
+ *   dividends         — informatif : nb de dividendes ingérés dans les dernières 24h
+ *   alerts            — informatif : nb de notifications d'alertes envoyées dans les dernières 24h
  */
 import { createClient } from '@supabase/supabase-js';
 import { appendFileSync } from 'node:fs';
@@ -91,19 +94,23 @@ async function main(): Promise<void> {
     }
 
     case 'score': {
+      // runScoring calcule sur la dernière date disponible dans mv_signal_inputs,
+      // qui peut être en retard d'une séance (week-end, refresh de la vue) —
+      // on tolère donc une fenêtre de 4 jours plutôt que d'exiger date_marche = today.
+      const since = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       const { count, error } = await client
         .from('signals_daily')
         .select('*', { count: 'exact', head: true })
-        .eq('date_marche', today);
+        .gte('date_marche', since);
       if (error) {
         console.error('❌ Échec requête:', error.message);
         process.exit(1);
       }
       if ((count ?? 0) === 0) {
-        console.error(`❌ Aucun signal calculé pour ${today}`);
+        console.error(`❌ Aucun signal calculé depuis ${since}`);
         process.exit(1);
       }
-      console.log(`✅ ${count} signaux pour la séance du ${today}`);
+      console.log(`✅ ${count} signaux calculés depuis ${since}`);
       break;
     }
 
@@ -138,8 +145,50 @@ async function main(): Promise<void> {
       break;
     }
 
+    case 'events': {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count, error } = await client
+        .from('market_events')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', since);
+      if (error) {
+        console.error('❌ Échec requête:', error.message);
+        process.exit(1);
+      }
+      console.log(`ℹ️ ${count ?? 0} événement(s) ingéré(s) sur les dernières 24h (0 = aucune annonce, normal)`);
+      break;
+    }
+
+    case 'dividends': {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count, error } = await client
+        .from('dividends')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', since);
+      if (error) {
+        console.error('❌ Échec requête:', error.message);
+        process.exit(1);
+      }
+      console.log(`ℹ️ ${count ?? 0} dividende(s) ingéré(s) sur les dernières 24h (0 = hors saison, normal)`);
+      break;
+    }
+
+    case 'alerts': {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count, error } = await client
+        .from('notifications_log')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', since);
+      if (error) {
+        console.error('❌ Échec requête:', error.message);
+        process.exit(1);
+      }
+      console.log(`ℹ️ ${count ?? 0} notification(s) d'alerte envoyée(s) sur les dernières 24h (0 = aucun déclenchement, normal)`);
+      break;
+    }
+
     default:
-      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | score | monthly | paper`);
+      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | score | monthly | paper | events | dividends | alerts`);
       process.exit(1);
   }
 }

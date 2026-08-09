@@ -181,11 +181,18 @@ export async function runForumTrending(
       });
     }
 
-    // Batch update (Supabase doesn't support bulk update directly,
-    // so we upsert via the standard update method with id matching)
-    const { error: updateError } = await sb
-      .from('forum_posts')
-      .upsert(updates, { onConflict: 'id' });
+    // Update-only (jamais upsert) : ces posts existent déjà (on vient de les
+    // lire à l'étape 1). Un upsert avec un payload partiel {id, trending_score}
+    // emprunte le chemin INSERT ON CONFLICT de Postgres, qui déclenche le
+    // trigger de création de author_profiles avec un user_id absent du
+    // payload → violation de la contrainte NOT NULL. Un simple update ne
+    // touche jamais ce chemin.
+    const updateResults = await Promise.all(
+      updates.map((u) =>
+        sb.from('forum_posts').update({ trending_score: u.trending_score }).eq('id', u.id),
+      ),
+    );
+    const updateError = updateResults.find((r) => r.error)?.error;
 
     if (updateError) {
       throw new Error(`Failed to update trending scores: ${updateError.message}`);

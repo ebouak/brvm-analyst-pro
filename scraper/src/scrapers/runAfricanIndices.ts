@@ -14,7 +14,7 @@ async function getHtml(url: string, fixtureName: string, mock: boolean): Promise
   if (mock) return fixture(fixtureName);
   const resp = await fetch(url, {
     signal: AbortSignal.timeout(20000),
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WestbourseBot/1.0; +https://www.westbourse.com)' },
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36' },
   });
   if (!resp.ok) throw new Error(`AFX HTTP ${resp.status} (${url})`);
   return resp.text();
