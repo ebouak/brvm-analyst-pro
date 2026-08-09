@@ -102,21 +102,43 @@ async function upsert(divs: Dividend[]): Promise<number> {
     return divs.length;
   }
   const sb = getSupabase();
-  // Dédoublonnage intra-lot : la contrainte réelle posée par la migration 0099/0100
-  // est (code, exercice) — une seule valeur de dividende par société et par exercice
-  // (exercice NULL exempté, Postgres traite NULL comme distinct). Un même couple ne
-  // peut figurer qu'une seule fois dans un upsert ON CONFLICT (sinon Postgres :
+  const rows = divs.map((d) => ({ ...d, dedupe_hash: dedupe(d) }));
+
+  // Deux régimes de conflit coexistent sur `dividends`, un seul upsert ne peut
+  // en déclarer qu'un — on scinde donc le lot :
+  //
+  // 1) exercice connu : la contrainte réelle (migrations 0099/0100) est
+  //    (code, exercice) — une seule valeur par société et par exercice. On
+  //    cible cet index pour qu'un montant révisé ÉCRASE l'ancienne valeur au
+  //    lieu de percuter la contrainte.
+  // 2) exercice NULL (dividende annoncé, exercice pas encore identifié) :
+  //    Postgres traite NULL comme toujours distinct, donc ON CONFLICT
+  //    (code, exercice) ne matche JAMAIS ces lignes — chaque run réinsérerait
+  //    le même dividende en boucle et percuterait alors la contrainte
+  //    dedupe_hash. On cible dedupe_hash pour ces lignes : idempotent sur un
+  //    même triplet (code, exercice=null, montant), plusieurs montants
+  //    distincts restent tolérés (comportement documenté par 0099).
+  const withExercice = rows.filter((r) => r.exercice != null);
+  const withoutExercice = rows.filter((r) => r.exercice == null);
+
+  // Dédoublonnage intra-lot par (code, exercice) : un même couple ne peut
+  // figurer qu'une seule fois dans un upsert ON CONFLICT (sinon Postgres :
   // « ON CONFLICT DO UPDATE command cannot affect row a second time »).
-  const byKey = new Map<string, Dividend & { dedupe_hash: string }>();
-  for (const d of divs) {
-    const key = d.exercice != null ? `${d.code}|${d.exercice}` : `${d.code}|${dedupe(d)}`;
-    byKey.set(key, { ...d, dedupe_hash: dedupe(d) });
+  const byCodeExercice = new Map<string, (typeof rows)[number]>();
+  for (const r of withExercice) byCodeExercice.set(`${r.code}|${r.exercice}`, r);
+  const dedupedWithExercice = [...byCodeExercice.values()];
+
+  const byHash = new Map<string, (typeof rows)[number]>();
+  for (const r of withoutExercice) byHash.set(r.dedupe_hash, r);
+  const dedupedWithoutExercice = [...byHash.values()];
+
+  if (dedupedWithExercice.length > 0) {
+    const { error } = await sb.from('dividends').upsert(dedupedWithExercice, { onConflict: 'code,exercice' });
+    if (error) throw new Error(`upsert dividends (code,exercice): ${error.message}`);
   }
-  const rows = [...byKey.values()];
-  // onConflict cible (code, exercice) — l'invariant métier réel (0099/0100) — et non
-  // dedupe_hash : un montant révisé change le hash mais doit ÉCRASER l'ancienne
-  // valeur pour le même (code, exercice), pas entrer en collision avec elle.
-  const { error } = await sb.from('dividends').upsert(rows, { onConflict: 'code,exercice' });
-  if (error) throw new Error(`upsert dividends: ${error.message}`);
-  return rows.length;
+  if (dedupedWithoutExercice.length > 0) {
+    const { error } = await sb.from('dividends').upsert(dedupedWithoutExercice, { onConflict: 'dedupe_hash' });
+    if (error) throw new Error(`upsert dividends (dedupe_hash): ${error.message}`);
+  }
+  return dedupedWithExercice.length + dedupedWithoutExercice.length;
 }
