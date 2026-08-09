@@ -102,17 +102,21 @@ async function upsert(divs: Dividend[]): Promise<number> {
     return divs.length;
   }
   const sb = getSupabase();
-  // Dédoublonnage intra-lot : un même `dedupe_hash` ne peut figurer qu'une seule
-  // fois dans un upsert ON CONFLICT (sinon Postgres : « ON CONFLICT DO UPDATE
-  // command cannot affect row a second time »). Sikafinance renvoie parfois deux
-  // lignes équivalentes (même code/exercice/montant) → on garde la dernière.
-  const byHash = new Map<string, Dividend & { dedupe_hash: string }>();
+  // Dédoublonnage intra-lot : la contrainte réelle posée par la migration 0099/0100
+  // est (code, exercice) — une seule valeur de dividende par société et par exercice
+  // (exercice NULL exempté, Postgres traite NULL comme distinct). Un même couple ne
+  // peut figurer qu'une seule fois dans un upsert ON CONFLICT (sinon Postgres :
+  // « ON CONFLICT DO UPDATE command cannot affect row a second time »).
+  const byKey = new Map<string, Dividend & { dedupe_hash: string }>();
   for (const d of divs) {
-    const h = dedupe(d);
-    byHash.set(h, { ...d, dedupe_hash: h });
+    const key = d.exercice != null ? `${d.code}|${d.exercice}` : `${d.code}|${dedupe(d)}`;
+    byKey.set(key, { ...d, dedupe_hash: dedupe(d) });
   }
-  const rows = [...byHash.values()];
-  const { error } = await sb.from('dividends').upsert(rows, { onConflict: 'dedupe_hash' });
+  const rows = [...byKey.values()];
+  // onConflict cible (code, exercice) — l'invariant métier réel (0099/0100) — et non
+  // dedupe_hash : un montant révisé change le hash mais doit ÉCRASER l'ancienne
+  // valeur pour le même (code, exercice), pas entrer en collision avec elle.
+  const { error } = await sb.from('dividends').upsert(rows, { onConflict: 'code,exercice' });
   if (error) throw new Error(`upsert dividends: ${error.message}`);
   return rows.length;
 }
