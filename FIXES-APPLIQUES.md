@@ -72,10 +72,10 @@ Allez sur: https://github.com/ebouak/brvm-analyst-pro/settings/secrets/actions
    Value: https://vozwivhmjfmnnnjbbkpt.supabase.co
 
 5. SUPABASE_SERVICE_ROLE_KEY
-   Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvendpdmhtamZtbm5uamJia3B0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTY5MDMyNywiZXhwIjoyMDk1MjY2MzI3fQ.RvYGJMQC_9sgLJ_LVe0Gvyh1YRMOc_5JrtQ3Dhp9cRY
+   Value: <REDACTED-ROTATED-SERVICE-ROLE-KEY>
 
 6. RESEND_API_KEY
-   Value: re_jmaEWqbf_5ek7i7WouMcztJAT85LrgHz6
+   Value: <REDACTED-ROTATE-THIS-KEY>
 
 7. ALERTS_EMAIL_FROM
    Value: noreply@brvm.resend.dev
@@ -108,7 +108,7 @@ Allez sur: https://vercel.com/dashboard/brvm-analyst-pro/settings/environment-va
 1. VERCEL_TOKEN: (même que GitHub)
 2. SUPABASE_URL: https://vozwivhmjfmnnnjbbkpt.supabase.co
 3. SUPABASE_SERVICE_ROLE_KEY: (même que GitHub)
-4. RESEND_API_KEY: re_jmaEWqbf_5ek7i7WouMcztJAT85LrgHz6
+4. RESEND_API_KEY: <REDACTED-ROTATE-THIS-KEY>
 ```
 
 ---

@@ -3,6 +3,12 @@
 .env.local
 .env.*.local
 
+# Claude Code — settings locaux, contiennent l'historique des commandes
+# autorisées (peut embarquer des secrets collés en ligne de commande, ex.
+# incident 2026-08-15 : SUPABASE_SERVICE_ROLE_KEY exposée via des entrées
+# Bash(SUPABASE_SERVICE_ROLE_KEY=... ) restées dans permissions.allow).
+.claude/settings.local.json
+
 # Dépendances
 node_modules/
 
@@ -35,3 +41,11 @@ supabase/.temp/
 
 # Visual companion brainstorming artifacts
 .superpowers/
+
+# Ruflo / claude-flow (artefacts locaux — jamais committer, contient config + mémoire)
+claude-flow.config.json
+/data/memory/
+.claude-flow/
+.swarm/
+.claude/memory.db
+.claude/*.db
