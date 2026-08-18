@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import RatingBadge from '@/components/RatingBadge';
 import { fmtNumber } from '@/lib/format';
+import { createClient } from '@/lib/supabase/client';
 
 export interface CompanyCard {
   code: string;
@@ -19,6 +21,20 @@ export interface CompanyCard {
 /** Annuaire filtrable des sociétés (recherche instantanée nom/code/secteur/pays). */
 export default function CompaniesExplorer({ companies }: { companies: CompanyCard[] }) {
   const [query, setQuery] = useState('');
+  const router = useRouter();
+  const supabase = createClient();
+
+  // Le clic sur une carte n'ouvre plus la fiche publique /societes/CODE : il
+  // envoie vers /actions/CODE (connecté) ou vers l'inscription avec ce même
+  // /actions/CODE comme destination post-connexion (anonyme). Le `href` réel
+  // reste /societes/CODE — laissé intact pour le crawl SEO (Googlebot suit le
+  // href, jamais le onClick) ; seule la navigation humaine est interceptée.
+  const handleCardClick = (code: string) => async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const target = `/actions/${code}`;
+    const { data: { user } } = await supabase.auth.getUser();
+    router.push(user ? target : `/signup?next=${encodeURIComponent(target)}`);
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -78,6 +94,7 @@ export default function CompaniesExplorer({ companies }: { companies: CompanyCar
                   <Link
                     key={c.code}
                     href={`/societes/${c.code}`}
+                    onClick={handleCardClick(c.code)}
                     className="bg-surface border border-border rounded-xl p-4 hover:border-accent/40 transition-colors group"
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">

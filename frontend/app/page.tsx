@@ -5,7 +5,6 @@ import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
-import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
 import NewsletterForm from '@/components/NewsletterForm';
 import { LandingIndices } from '@/components/landing/LandingIndices';
 import LandingHeatmap from '@/components/landing/LandingHeatmap';
@@ -285,7 +284,6 @@ export default async function Landing() {
         </div>
 
         <NewsTicker className="-mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
-        <MarketSessionBanner className="mt-4" />
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
           <div>

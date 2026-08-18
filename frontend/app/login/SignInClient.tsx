@@ -21,10 +21,13 @@ const TURNSTILE_SITE_KEY =
 export default function SignInClient({
   subscribeNewsletter = false,
   subtitle = 'Connexion ou inscription',
+  next,
 }: {
   /** Abonne l'e-mail à la newsletter après une première vérification réussie (flux signup). */
   subscribeNewsletter?: boolean;
   subtitle?: string;
+  /** Destination post-connexion explicite (ex. depuis /societes → /actions/CODE). Prioritaire sur le comportement par défaut (bienvenue/dashboard). */
+  next?: string;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -80,7 +83,7 @@ export default function SignInClient({
         await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${oauthOrigin}/auth/callback?next=/dashboard`,
+            redirectTo: `${oauthOrigin}/auth/callback?next=${encodeURIComponent(next ?? '/dashboard')}`,
           },
         });
       }}
@@ -133,10 +136,11 @@ export default function SignInClient({
           // refléterait la navigation interne SPA, pas l'acquisition réelle).
           if (subscribeNewsletter) phCapture('signup_completed', { plan: 'free' });
         });
-        // Depuis la page d'inscription (subscribeNewsletter), on passe par le
-        // moment d'accueil « choisissez une action » ; depuis /login, direct au
-        // tableau de bord.
-        router.push(subscribeNewsletter ? '/bienvenue' : '/dashboard');
+        // `next` explicite (ex. clic depuis /societes) prime sur le comportement
+        // par défaut : depuis la page d'inscription (subscribeNewsletter), on
+        // passe par le moment d'accueil « choisissez une action » ; depuis
+        // /login, direct au tableau de bord.
+        router.push(next ?? (subscribeNewsletter ? '/bienvenue' : '/dashboard'));
         router.refresh();
       }}
     />

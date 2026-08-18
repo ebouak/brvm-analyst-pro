@@ -7,7 +7,7 @@ export const revalidate = 300;
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; next?: string };
 }) {
   const market = await getLoginMarket();
   return (
@@ -18,7 +18,7 @@ export default async function LoginPage({
           <p className="text-xs text-down">{searchParams.error}</p>
         </div>
       )}
-      <SignInClient />
+      <SignInClient next={searchParams.next} />
     </div>
   );
 }

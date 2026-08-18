@@ -7,7 +7,7 @@ export const revalidate = 300;
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; next?: string };
 }) {
   const market = await getLoginMarket();
   return (
@@ -18,7 +18,7 @@ export default async function SignupPage({
           <p className="text-xs text-down">{searchParams.error}</p>
         </div>
       )}
-      <SignInClient subscribeNewsletter subtitle="Créez votre compte gratuit" />
+      <SignInClient subscribeNewsletter subtitle="Créez votre compte gratuit" next={searchParams.next} />
     </div>
   );
 }

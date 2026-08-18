@@ -4,6 +4,7 @@ import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
 import NewsTicker from '@/components/NewsTicker';
+import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
@@ -429,6 +430,9 @@ export default async function Dashboard() {
 
         {/* ── Ticker actualités BRVM ─────────────────────────────────────── */}
         <NewsTicker className="-mx-4 sm:-mx-6 rounded-none" />
+
+        {/* ── État de la séance (déplacé depuis la page d'accueil) ─────────── */}
+        <MarketSessionBanner />
 
         {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
         <div className="flex justify-end px-1">
