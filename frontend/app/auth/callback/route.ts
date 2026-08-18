@@ -7,15 +7,27 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/dashboard';
 
-  if (code) {
-    const supabase = createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
+  if (!code) {
+    console.error('auth/callback: aucun code dans l\'URL de retour OAuth', {
+      url: request.url,
+    });
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent('Authentification échouée, réessayez.')}`,
+    );
   }
 
-  return NextResponse.redirect(
-    `${origin}/login?error=${encodeURIComponent('Authentification échouée, réessayez.')}`,
-  );
+  const supabase = createClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
+    console.error('auth/callback: exchangeCodeForSession a échoué', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+    });
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent('Authentification échouée, réessayez.')}`,
+    );
+  }
+
+  return NextResponse.redirect(`${origin}${next}`);
 }
