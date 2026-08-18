@@ -40,6 +40,18 @@ export default function SignInClient({
     return tokenRef.current;
   };
 
+  // Origine canonique de production — cohérente avec CANONICAL_ORIGIN dans
+  // middleware.ts. Le cookie PKCE (code_verifier) posé par signInWithOAuth est
+  // lié à l'origine utilisée ici : si un utilisateur arrive par un lien
+  // non-canonique (ancien domaine Vercel, apex sans www), window.location.origin
+  // diffère de l'origine où Google revient après le middleware, et
+  // exchangeCodeForSession échoue au premier essai. On fixe donc l'origine en
+  // production ; en local/preview on garde window.location.origin pour ne pas
+  // casser le développement (pas de domaine canonique fixe hors prod).
+  const CANONICAL_ORIGIN = 'https://www.westbourse.com';
+  const oauthOrigin =
+    process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' ? CANONICAL_ORIGIN : window.location.origin;
+
   return (
     <>
       <div className="fixed bottom-3 left-1/2 z-50 -translate-x-1/2">
@@ -68,7 +80,7 @@ export default function SignInClient({
         await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+            redirectTo: `${oauthOrigin}/auth/callback?next=/dashboard`,
           },
         });
       }}
