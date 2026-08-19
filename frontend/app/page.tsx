@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { unstable_cache } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
-import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import NewsletterForm from '@/components/NewsletterForm';
@@ -17,7 +16,7 @@ import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 import type { IndiceDaily } from '@/lib/types';
 import { getSgiDirectory } from '@/lib/sgi-frais/queries';
 import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
-import { HeroSpotlight } from '@/components/landing/HeroSpotlight';
+import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
 import { ProofBand } from '@/components/landing/ProofBand';
 import { SocialProof } from '@/components/landing/SocialProof';
 import { AppPreview } from '@/components/landing/AppPreview';
@@ -268,7 +267,18 @@ export default async function Landing() {
       {/* ── HERO : photo immersive + carte Afrique + logo BRVM clignotant ── */}
       {/* UX : proposition de valeur d'abord ; actualités externes et état de
           séance repoussés SOUS le hero (évite la fuite d'attention above the fold). */}
-      <HeroSpotlight dateLabel={dateLabel} ticks={ticks} />
+      <HeroDeviceMockup
+        dateLabel={dateLabel}
+        ticks={ticks}
+        brvmC={(indices.find((i) => i.code === 'BRVMC')?.valeur as number | undefined) ?? null}
+        topMover={
+          hausses[0]
+            ? { code: hausses[0].code, score: hausses[0].score, confiance: hausses[0].confiance }
+            : baisses[0]
+              ? { code: baisses[0].code, score: baisses[0].score, confiance: baisses[0].confiance }
+              : null
+        }
+      />
 
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand />
