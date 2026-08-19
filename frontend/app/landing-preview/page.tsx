@@ -203,7 +203,7 @@ async function getPreviewData() {
     indices,
     heatmapRows,
     spotlightSignal,
-    diagnosticExample: diagReport ?? null,
+    latestDiagnosticReport: diagReport ?? null,
     plans,
     simulation,
     briefContenu: (brief?.contenu as string | undefined) ?? null,
@@ -247,7 +247,7 @@ export default async function LandingPreview() {
     indices,
     heatmapRows,
     spotlightSignal,
-    diagnosticExample,
+    latestDiagnosticReport,
     plans,
     simulation,
     briefContenu,
@@ -351,7 +351,7 @@ export default async function LandingPreview() {
 
       <RatingSpotlight signal={spotlightSignal} />
 
-      <DiagnosticSpotlight report={diagnosticExample} />
+      <DiagnosticSpotlight report={latestDiagnosticReport} />
 
       {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
       <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-border p-6 md:p-10">
