@@ -16,6 +16,7 @@ import { SocialProof } from '@/components/landing/SocialProof';
 import { LandingFaq } from '@/components/landing/LandingFaq';
 import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
 import { DiagnosticSpotlight } from '@/components/landing/DiagnosticSpotlight';
+import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import Footer from '@/components/Footer';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
@@ -127,6 +128,29 @@ async function getPreviewData() {
     .limit(1)
     .maybeSingle();
 
+  const { data: planRows } = await supabase
+    .from('subscription_plans')
+    .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  const planIds = (planRows ?? []).map((p) => p.id as string);
+  const { data: featureRows } = planIds.length
+    ? await supabase
+        .from('plan_features')
+        .select('plan_id, feature_label, feature_value, sort_order')
+        .in('plan_id', planIds)
+        .order('sort_order', { ascending: true })
+    : { data: [] as { plan_id: string; feature_label: string; feature_value: string | null }[] };
+  const plans = (planRows ?? []).map((p) => ({
+    code: p.code as string,
+    name: p.name as string,
+    price_monthly: (p.price_monthly as number) ?? 0,
+    is_recommended: Boolean(p.is_recommended),
+    features: (featureRows ?? [])
+      .filter((f) => f.plan_id === p.id)
+      .map((f) => ({ feature_label: f.feature_label as string, feature_value: f.feature_value as string | null })),
+  }));
+
   return {
     asOf,
     ticks,
@@ -139,6 +163,7 @@ async function getPreviewData() {
     heatmapRows,
     spotlightSignal,
     diagnosticExample: diagReport ?? null,
+    plans,
   };
 }
 
@@ -180,6 +205,7 @@ export default async function LandingPreview() {
     heatmapRows,
     spotlightSignal,
     diagnosticExample,
+    plans,
   } = await getCachedPreviewData();
 
   const dateLabel = asOf
@@ -206,8 +232,6 @@ export default async function LandingPreview() {
               : null
         }
       />
-
-      {/* PremiumCompare : Task 6. DiagnosticSpotlight est câblé après RatingSpotlight ci-dessous. */}
 
       <section className="mt-10">
         <div className="mb-5 flex items-baseline justify-between gap-3">
@@ -268,6 +292,8 @@ export default async function LandingPreview() {
       <RatingSpotlight signal={spotlightSignal} />
 
       <DiagnosticSpotlight report={diagnosticExample} />
+
+      <PremiumCompare plans={plans} />
 
       <SocialProof />
       <LandingFaq />
