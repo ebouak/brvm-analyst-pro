@@ -13,7 +13,7 @@ import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
-import type { IndiceDaily } from '@/lib/types';
+import type { IndiceDaily, SignalDaily } from '@/lib/types';
 import { getSgiDirectory } from '@/lib/sgi-frais/queries';
 import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
 import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
@@ -21,6 +21,10 @@ import { ProofBand } from '@/components/landing/ProofBand';
 import { SocialProof } from '@/components/landing/SocialProof';
 import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
+import { ToolsGrid } from '@/components/landing/ToolsGrid';
+import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
+import { DiagnosticSpotlight } from '@/components/landing/DiagnosticSpotlight';
+import { PremiumCompare } from '@/components/landing/PremiumCompare';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
 // cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
@@ -68,6 +72,7 @@ async function getData() {
   let flatTop: MoverRow[] = [];
   let nbActions = 0;
   let volumeTotal = 0;
+  let spotlightSignal: (SignalDaily & { code: string }) | null = null;
 
   // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
   let indices: IndiceDaily[] = [];
@@ -128,6 +133,15 @@ async function getData() {
     }));
     // Lignes brutes des mêmes symboles, pour l'abonnement temps réel du ticker.
     tickerRows = tickSource.map((m) => ({ code: m.code, cours_jour: m.cours, variation_pct: m.pct }));
+
+    const { data: topSignal } = await supabase
+      .from('signals_daily')
+      .select('*')
+      .eq('date_marche', asOf)
+      .order('score_total', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
   }
 
   // Brief du jour (extrait)
@@ -183,7 +197,56 @@ async function getData() {
     /* pas de cartographie si données indisponibles */
   }
 
-  return { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows };
+  const { data: diagReport } = await supabase
+    .from('diagnostic_reports')
+    .select('code, generated_at, markdown_content')
+    .order('generated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { data: planRows } = await supabase
+    .from('subscription_plans')
+    .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  const planIds = (planRows ?? []).map((p) => p.id as string);
+  const { data: featureRows } = planIds.length
+    ? await supabase
+        .from('plan_features')
+        .select('id, plan_id, feature_label, feature_value, sort_order')
+        .in('plan_id', planIds)
+        .order('sort_order', { ascending: true })
+    : { data: [] as { id: string; plan_id: string; feature_label: string; feature_value: string | null }[] };
+  const plans = (planRows ?? []).map((p) => ({
+    code: p.code as string,
+    name: p.name as string,
+    // numeric(12,2) revient en chaîne via PostgREST — Number() explicite,
+    // même convention que app/pricing/page.tsx et app/account/plan/page.tsx.
+    price_monthly: Number(p.price_monthly ?? 0),
+    is_recommended: Boolean(p.is_recommended),
+    features: (featureRows ?? [])
+      .filter((f) => f.plan_id === p.id)
+      .map((f) => ({ id: f.id as string, feature_label: f.feature_label as string, feature_value: f.feature_value as string | null })),
+  }));
+
+  return {
+    asOf,
+    ticks,
+    tickerRows,
+    hausses,
+    baisses,
+    flatTop,
+    nbActions,
+    volumeTotal,
+    brief,
+    simulation,
+    indices,
+    news,
+    heatmapRows,
+    spotlightSignal,
+    latestDiagnosticReport: diagReport ?? null,
+    plans,
+  };
 }
 
 // Le layout racine lit la session (cookies) → la route est rendue dynamique et
@@ -246,7 +309,24 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getCachedData();
+  const {
+    asOf,
+    ticks,
+    tickerRows,
+    hausses,
+    baisses,
+    flatTop,
+    nbActions,
+    volumeTotal,
+    brief,
+    simulation,
+    indices,
+    news,
+    heatmapRows,
+    spotlightSignal,
+    latestDiagnosticReport,
+    plans,
+  } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
   const sgiDirectory = await getSgiDirectory();
@@ -382,6 +462,12 @@ export default async function Landing() {
         <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
       </section>
 
+      <ToolsGrid />
+
+      <RatingSpotlight signal={spotlightSignal} />
+
+      <DiagnosticSpotlight report={latestDiagnosticReport} />
+
       {/* ── APERÇU PLATEFORME : c'est le vrai moteur de conversion
           (features réelles + CTA inscription). ─────────────────────────── */}
       <AppPreview />
@@ -505,8 +591,8 @@ export default async function Landing() {
         </section>
       )}
 
-      {/* ── 3 CARTES : Analyse · Premium · Actualités ─────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* ── 2 CARTES : Analyse · Actualités ───────────────────────────── */}
+      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Carte 1 — Analyse exclusive → inscription */}
         <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-accent/40 hover:bg-white/[0.05]">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-up/30 bg-up/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-up">
@@ -525,23 +611,7 @@ export default async function Landing() {
           </Link>
         </article>
 
-        {/* Carte 2 — Premium → pricing */}
-        <article className="flex flex-col rounded-panel border border-accent/25 bg-accent/[0.05] p-6 transition-all hover:border-accent/50">
-          <p className="overline text-gold-2">Premium</p>
-          <h3 className="mt-3 font-display text-xl text-ivory">Passez à Premium</h3>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
-            Diagnostic IA façon sell-side sur chaque société — valorisation, forces, risques —
-            rapports mensuels PDF et paper trading automatique.
-          </p>
-          <Link
-            href="/pricing"
-            className="landing-hero-cta mt-5 inline-flex min-h-[44px] w-fit items-center gap-1.5 rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-          >
-            Découvrir <span aria-hidden>→</span>
-          </Link>
-        </article>
-
-        {/* Carte 3 — Actualités du marché (vraies données brvm_news) */}
+        {/* Carte 2 — Actualités du marché (vraies données brvm_news) */}
         <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-xl text-ivory">Actualités du Marché</h3>
@@ -586,6 +656,8 @@ export default async function Landing() {
           )}
         </article>
       </section>
+
+      <PremiumCompare plans={plans} />
 
       {/* ── FAQ — lève les objections avant le CTA final ─────────────── */}
       <LandingFaq />
