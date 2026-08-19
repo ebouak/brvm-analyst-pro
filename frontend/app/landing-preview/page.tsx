@@ -15,6 +15,7 @@ import type { HeatmapNode } from '@/lib/heatmap';
 import { SocialProof } from '@/components/landing/SocialProof';
 import { LandingFaq } from '@/components/landing/LandingFaq';
 import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
+import { DiagnosticSpotlight } from '@/components/landing/DiagnosticSpotlight';
 import Footer from '@/components/Footer';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
@@ -119,7 +120,26 @@ async function getPreviewData() {
     /* pas de cartographie si données indisponibles */
   }
 
-  return { asOf, ticks, tickerRows, hausses, baisses, nbActions, volumeTotal, indices, heatmapRows, spotlightSignal };
+  const { data: diagReport } = await supabase
+    .from('diagnostic_reports')
+    .select('code, generated_at, markdown_content')
+    .order('generated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return {
+    asOf,
+    ticks,
+    tickerRows,
+    hausses,
+    baisses,
+    nbActions,
+    volumeTotal,
+    indices,
+    heatmapRows,
+    spotlightSignal,
+    diagnosticExample: diagReport ?? null,
+  };
 }
 
 // Clé de cache distincte de 'landing-data' (production) — aucune interférence
@@ -148,8 +168,19 @@ function MoverLine({ m }: { m: MoverRow }) {
 }
 
 export default async function LandingPreview() {
-  const { asOf, ticks, tickerRows, hausses, baisses, nbActions, volumeTotal, indices, heatmapRows, spotlightSignal } =
-    await getCachedPreviewData();
+  const {
+    asOf,
+    ticks,
+    tickerRows,
+    hausses,
+    baisses,
+    nbActions,
+    volumeTotal,
+    indices,
+    heatmapRows,
+    spotlightSignal,
+    diagnosticExample,
+  } = await getCachedPreviewData();
 
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -176,7 +207,7 @@ export default async function LandingPreview() {
         }
       />
 
-      {/* DiagnosticSpotlight, PremiumCompare : Tasks 5-6 */}
+      {/* PremiumCompare : Task 6. DiagnosticSpotlight est câblé après RatingSpotlight ci-dessous. */}
 
       <section className="mt-10">
         <div className="mb-5 flex items-baseline justify-between gap-3">
@@ -235,6 +266,8 @@ export default async function LandingPreview() {
       <ToolsGrid />
 
       <RatingSpotlight signal={spotlightSignal} />
+
+      <DiagnosticSpotlight report={diagnosticExample} />
 
       <SocialProof />
       <LandingFaq />
