@@ -14,11 +14,12 @@ import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { SocialProof } from '@/components/landing/SocialProof';
 import { LandingFaq } from '@/components/landing/LandingFaq';
+import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
 import Footer from '@/components/Footer';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
-import type { IndiceDaily } from '@/lib/types';
+import type { IndiceDaily, SignalDaily } from '@/lib/types';
 
 // Preview isolée — jamais indexée, jamais liée depuis la nav publique.
 export const metadata = {
@@ -53,6 +54,7 @@ async function getPreviewData() {
   let baisses: MoverRow[] = [];
   let nbActions = 0;
   let volumeTotal = 0;
+  let spotlightSignal: (SignalDaily & { code: string }) | null = null;
 
   let indices: IndiceDaily[] = [];
   const { data: lastIdx } = await supabase
@@ -98,6 +100,15 @@ async function getPreviewData() {
       pct: `${m.pct >= 0 ? '+' : ''}${m.pct.toFixed(2)}%`,
     }));
     tickerRows = tickSource.map((m) => ({ code: m.code, cours_jour: m.cours, variation_pct: m.pct }));
+
+    const { data: topSignal } = await supabase
+      .from('signals_daily')
+      .select('*')
+      .eq('date_marche', asOf)
+      .order('score_total', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
   }
 
   let heatmapRows: HeatmapNode[] = [];
@@ -108,7 +119,7 @@ async function getPreviewData() {
     /* pas de cartographie si données indisponibles */
   }
 
-  return { asOf, ticks, tickerRows, hausses, baisses, nbActions, volumeTotal, indices, heatmapRows };
+  return { asOf, ticks, tickerRows, hausses, baisses, nbActions, volumeTotal, indices, heatmapRows, spotlightSignal };
 }
 
 // Clé de cache distincte de 'landing-data' (production) — aucune interférence
@@ -137,7 +148,7 @@ function MoverLine({ m }: { m: MoverRow }) {
 }
 
 export default async function LandingPreview() {
-  const { asOf, ticks, tickerRows, hausses, baisses, nbActions, volumeTotal, indices, heatmapRows } =
+  const { asOf, ticks, tickerRows, hausses, baisses, nbActions, volumeTotal, indices, heatmapRows, spotlightSignal } =
     await getCachedPreviewData();
 
   const dateLabel = asOf
@@ -165,7 +176,7 @@ export default async function LandingPreview() {
         }
       />
 
-      {/* ToolsGrid, RatingSpotlight, DiagnosticSpotlight, PremiumCompare : Tasks 3-6 */}
+      {/* DiagnosticSpotlight, PremiumCompare : Tasks 5-6 */}
 
       <section className="mt-10">
         <div className="mb-5 flex items-baseline justify-between gap-3">
@@ -222,6 +233,8 @@ export default async function LandingPreview() {
       </section>
 
       <ToolsGrid />
+
+      <RatingSpotlight signal={spotlightSignal} />
 
       <SocialProof />
       <LandingFaq />
