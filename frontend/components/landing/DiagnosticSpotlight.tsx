@@ -1,16 +1,9 @@
 // frontend/components/landing/DiagnosticSpotlight.tsx
 import Link from 'next/link';
+import { excerpt } from '@/lib/landing/excerpt';
 
 interface Props {
   report: { code: string; generated_at: string; markdown_content: string } | null;
-}
-
-function excerpt(markdown: string, maxLen = 280): string {
-  const plain = markdown.replace(/[#*_`>-]/g, '').replace(/\s+/g, ' ').trim();
-  if (plain.length <= maxLen) return plain;
-  const cut = plain.slice(0, maxLen);
-  const lastSpace = cut.lastIndexOf(' ');
-  return `${cut.slice(0, lastSpace)}…`;
 }
 
 export function DiagnosticSpotlight({ report }: Props) {
