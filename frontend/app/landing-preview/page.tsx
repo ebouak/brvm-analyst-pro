@@ -19,6 +19,9 @@ import { DiagnosticSpotlight } from '@/components/landing/DiagnosticSpotlight';
 import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import Footer from '@/components/Footer';
 import { fmtNumber } from '@/lib/format';
+import { simulateInvestment, type PricePoint } from '@/lib/simulate';
+import { getSgiDirectory } from '@/lib/sgi-frais/queries';
+import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 import type { IndiceDaily, SignalDaily } from '@/lib/types';
@@ -128,6 +131,42 @@ async function getPreviewData() {
     .limit(1)
     .maybeSingle();
 
+  // Brief du jour (extrait) — copie fidèle de app/page.tsx.
+  const { data: brief } = await supabase
+    .from('brief_daily')
+    .select('date_marche, contenu')
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Simulation réelle : 1 000 000 FCFA dans SNTS il y a 5 ans — copie fidèle
+  // de app/page.tsx.
+  let simulation: { finalValue: number; pct: number; years: number } | null = null;
+  try {
+    const from = new Date();
+    from.setFullYear(from.getFullYear() - 5);
+    const fromIso = from.toISOString().split('T')[0]!;
+    const [{ data: snts }, { data: divs }] = await Promise.all([
+      supabase
+        .from('brvm_actions_daily')
+        .select('date_marche, cours_jour')
+        .eq('code', 'SNTS')
+        .gte('date_marche', fromIso)
+        .order('date_marche', { ascending: true }),
+      supabase.from('dividends').select('montant, payment_date, ex_date').eq('code', 'SNTS'),
+    ]);
+    const prices: PricePoint[] = (snts ?? [])
+      .filter((r) => r.cours_jour != null && r.cours_jour > 0)
+      .map((r) => ({ date: r.date_marche as string, close: r.cours_jour as number }));
+    const dividends = (divs ?? [])
+      .map((d) => ({ date: (d.payment_date ?? d.ex_date ?? '') as string, montant: d.montant as number }))
+      .filter((d) => d.date);
+    const sim = simulateInvestment(1_000_000, fromIso, prices, dividends);
+    if (sim) simulation = { finalValue: sim.finalValue, pct: sim.totalReturnPct, years: sim.years };
+  } catch {
+    /* pas de simulation si données indisponibles */
+  }
+
   const { data: planRows } = await supabase
     .from('subscription_plans')
     .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
@@ -166,6 +205,8 @@ async function getPreviewData() {
     spotlightSignal,
     diagnosticExample: diagReport ?? null,
     plans,
+    simulation,
+    briefContenu: (brief?.contenu as string | undefined) ?? null,
   };
 }
 
@@ -208,11 +249,28 @@ export default async function LandingPreview() {
     spotlightSignal,
     diagnosticExample,
     plans,
+    simulation,
+    briefContenu,
   } = await getCachedPreviewData();
+
+  // Comptes SGI dynamiques (annuaire Supabase) — appelé hors cache, comme en
+  // production (app/page.tsx : getSgiDirectory() n'est pas dans getData()).
+  const sgiDirectory = await getSgiDirectory();
+  const sgiCount = sgiDirectory.length;
+  const sgiPaysCounts = new Map<string, number>();
+  for (const s of sgiDirectory) sgiPaysCounts.set(s.pays, (sgiPaysCounts.get(s.pays) ?? 0) + 1);
+  const sgiPaysTries = [...sgiPaysCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const sgiPaysLines = [
+    ...sgiPaysTries.slice(0, 3).map(([c, n]) => `${SGI_PAYS[c]?.nom ?? c} · ${n}`),
+    sgiPaysTries.slice(3).map(([c]) => SGI_PAYS[c]?.nom ?? c).join(' · '),
+  ].filter(Boolean);
 
   const dateLabel = asOf
     ? new Date(asOf).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
+  const briefLines = briefContenu
+    ? briefContenu.split('\n').filter((l) => l.trim() && !l.startsWith('Analyse complète')).slice(0, 7)
+    : [];
 
   return (
     <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
@@ -294,6 +352,106 @@ export default async function LandingPreview() {
       <RatingSpotlight signal={spotlightSignal} />
 
       <DiagnosticSpotlight report={diagnosticExample} />
+
+      {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
+      <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-border p-6 md:p-10">
+        <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
+          <div>
+            <p className="overline mb-3 text-gold-2">Simulateur</p>
+            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
+              Et si vous aviez investi&nbsp;?
+            </h2>
+            <p className="mb-6 max-w-[46ch] text-sm leading-relaxed text-muted">
+              Calculez ce qu&apos;un placement sur n&apos;importe quelle action BRVM aurait rapporté —
+              dividendes inclus, sur les cours réels.
+            </p>
+            <Link
+              href="/simulateur"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-up/40 px-5 text-sm font-semibold text-up transition-colors hover:bg-up/10"
+            >
+              Faire le calcul pour moi →
+            </Link>
+          </div>
+
+          {simulation ? (
+            <div className="landing-sim-result rounded-2xl p-6 border">
+              <p className="mb-1 text-xs text-muted">1 000 000 FCFA dans SONATEL il y a 5 ans, aujourd&apos;hui :</p>
+              <p className="tabular font-display text-4xl font-bold text-ivory md:text-5xl">
+                {fmtNumber(Math.round(simulation.finalValue))} <span className="text-lg text-muted">FCFA</span>
+              </p>
+              <p className={`tabular mt-1 text-lg font-bold ${simulation.pct >= 0 ? 'text-up' : 'text-down'}`}>
+                {simulation.pct >= 0 ? '+' : ''}{fmtNumber(simulation.pct, 1)} % · dividendes inclus
+              </p>
+              <p className="mt-3 text-[10px] text-faint">
+                Calcul réel sur les cours de clôture. Performances passées ne préjugent pas des performances futures.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/[0.08] bg-sunken/30 p-6 text-center">
+              <p className="text-sm text-faint">Le calcul s&apos;affichera dès que l&apos;historique sera disponible.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── COMPARATEUR SGI ─────────────────────────────────────────────── */}
+      <section className="mt-10 overflow-hidden rounded-panel border border-accent/20 bg-gradient-to-br from-accent/[0.06] to-transparent p-6 md:p-8">
+        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[1.4fr_auto]">
+          <div>
+            <p className="overline mb-3 text-gold-2">Comparateur · BRVM / UEMOA</p>
+            <h2 className="mb-3 max-w-[22ch] font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
+              Choisir sa SGI, sans <span className="text-accent">improviser</span>.
+            </h2>
+            <p className="mb-5 max-w-[58ch] text-sm leading-relaxed text-muted">
+              Annuaire complet des {sgiCount} SGI agréées de l&apos;UEMOA — pays, type, groupe, dépôt minimum indicatif —
+              et un calculateur de coût réel (courtage, garde, tenue de compte) pour comparer sur des chiffres,
+              pas des ordres de grandeur vagues.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/comparateur-sgi"
+                className="landing-hero-cta inline-flex min-h-[46px] items-center gap-1.5 rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
+              >
+                Comparer le coût réel <span aria-hidden>→</span>
+              </Link>
+              <span className="font-mono text-[12px] text-faint">{sgiCount} SGI · 7 pays UEMOA</span>
+            </div>
+          </div>
+          <div className="hidden md:flex md:flex-col md:gap-2 md:border-l md:border-white/10 md:pl-6">
+            {sgiPaysLines.map((l) => (
+              <span key={l} className="font-mono text-[12.5px] text-muted">
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── BRIEF DU JOUR (vrai contenu) ──────────────────────────────── */}
+      {briefLines.length > 0 && (
+        <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center">
+          <div>
+            <p className="overline mb-3 text-gold-2">Brief quotidien</p>
+            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
+              La séance résumée en 30 secondes, chaque soir.
+            </h2>
+            <p className="mb-6 max-w-[44ch] text-sm leading-relaxed text-muted">
+              Indices, hausses, baisses, volumes et annonces — généré automatiquement après chaque clôture.
+            </p>
+            <Link
+              href="/brief"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-elevated/40 px-5 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-elevated/70"
+            >
+              Lire les derniers briefs →
+            </Link>
+          </div>
+          <div className="landing-brief-card rounded-panel border p-5">
+            <pre className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-ivory/90">
+              {briefLines.join('\n')}
+            </pre>
+          </div>
+        </section>
+      )}
 
       <PremiumCompare plans={plans} />
 
