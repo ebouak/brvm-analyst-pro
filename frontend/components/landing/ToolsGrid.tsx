@@ -56,7 +56,7 @@ export function ToolsGrid() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {CATEGORIES.map((cat) => (
           <div key={cat.title}>
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-muted">{cat.title}</p>
+            <p className="overline mb-3 text-muted">{cat.title}</p>
             <div className="space-y-1.5">
               {cat.tools.map((t) => (
                 <Link
