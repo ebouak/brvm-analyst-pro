@@ -264,21 +264,28 @@ export default async function Landing() {
     <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
       <TasteTopbar ticks={ticks} liveRows={tickerRows} dateMarche={asOf} />
 
-      {/* ── HERO : photo immersive + carte Afrique + logo BRVM clignotant ── */}
+      {/* ── HERO : mockup de la vraie interface (BRVM-C, cotations, note) ── */}
       {/* UX : proposition de valeur d'abord ; actualités externes et état de
           séance repoussés SOUS le hero (évite la fuite d'attention above the fold). */}
-      <HeroDeviceMockup
-        dateLabel={dateLabel}
-        ticks={ticks}
-        brvmC={(indices.find((i) => i.code === 'BRVMC')?.valeur as number | undefined) ?? null}
-        topMover={
-          hausses[0]
-            ? { code: hausses[0].code, score: hausses[0].score, confiance: hausses[0].confiance }
-            : baisses[0]
-              ? { code: baisses[0].code, score: baisses[0].score, confiance: baisses[0].confiance }
-              : null
-        }
-      />
+      {(() => {
+        // Même repli que la carte "séance en direct" plus bas : sur une séance
+        // calme (fréquent sur la BRVM), hausses/baisses peuvent être vides
+        // alors que flatTop porte quand même des titres réels — ne pas priver
+        // le hero de son badge de notation dans ce cas.
+        const topMoverSource = hausses[0] ?? baisses[0] ?? flatTop[0] ?? null;
+        return (
+          <HeroDeviceMockup
+            dateLabel={dateLabel}
+            ticks={ticks}
+            brvmC={indices.find((i) => i.code === 'BRVMC')?.valeur ?? null}
+            topMover={
+              topMoverSource
+                ? { code: topMoverSource.code, score: topMoverSource.score, confiance: topMoverSource.confiance }
+                : null
+            }
+          />
+        );
+      })()}
 
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand />

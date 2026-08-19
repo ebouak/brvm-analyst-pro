@@ -1,5 +1,8 @@
 "use client";
 
+// Orphelin depuis c1be40b (Phase 13) — HeroDeviceMockup (production) n'utilise
+// plus ce composant. Conservé sur demande explicite, ne pas réutiliser sans
+// vérifier que ce choix tient toujours.
 import Link from "next/link";
 import { PulseBeams } from "@/components/ui/pulse-beams";
 
