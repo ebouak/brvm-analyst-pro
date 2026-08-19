@@ -196,7 +196,10 @@ const getCachedData = unstable_cache(getData, ['landing-data'], { revalidate: 30
 /* ── Petits composants de section (serveur) ──────────────────────────── */
 
 function MoverLine({ m }: { m: MoverRow }) {
-  const up = m.pct >= 0;
+  // pct === 0 est neutre, pas "hausse" : évite une puce verte sous un
+  // en-tête de carte "Top baisses" en mode repli flatTop (où tous les
+  // titres ont un pct exactement nul par construction).
+  const sign = m.pct > 0 ? 'up' : m.pct < 0 ? 'down' : 'neutral';
   return (
     <Link
       href={`/societes/${m.code}`}
@@ -208,8 +211,10 @@ function MoverLine({ m }: { m: MoverRow }) {
       </span>
       <span className="flex items-baseline gap-3 shrink-0">
         <span className="tabular text-sm text-ivory">{m.cours != null ? nf(m.cours) : '—'}</span>
-        <span className={`tabular text-xs font-bold ${up ? 'text-up' : 'text-down'}`}>
-          {up ? '+' : ''}{m.pct.toFixed(2)}%
+        <span
+          className={`tabular text-xs font-bold ${sign === 'up' ? 'text-up' : sign === 'down' ? 'text-down' : 'text-muted'}`}
+        >
+          {sign === 'up' ? '+' : ''}{m.pct.toFixed(2)}%
         </span>
       </span>
     </Link>
@@ -259,6 +264,7 @@ export default async function Landing() {
   const briefLines = brief
     ? (brief.contenu as string).split('\n').filter((l) => l.trim() && !l.startsWith('Analyse complète')).slice(0, 7)
     : [];
+  const brvmC = indices.find((i) => i.code === 'BRVMC')?.valeur ?? null;
   // Repli "séance peu animée" réparti sur les deux cartes (hausses/baisses)
   // sans dupliquer les mêmes titres — la garde d'affichage porte sur la
   // longueur de CHAQUE moitié, pas sur flatTop.length, pour ne jamais
@@ -284,7 +290,7 @@ export default async function Landing() {
           <HeroDeviceMockup
             dateLabel={dateLabel}
             ticks={ticks}
-            brvmC={indices.find((i) => i.code === 'BRVMC')?.valeur ?? null}
+            brvmC={brvmC}
             topMover={
               topMoverSource
                 ? { code: topMoverSource.code, score: topMoverSource.score, confiance: topMoverSource.confiance }
@@ -335,9 +341,7 @@ export default async function Landing() {
           <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
             <p className="overline mb-3 text-gold-2">BRVM-C</p>
             <p className="tabular font-display text-3xl text-ivory">
-              {indices.find((i) => i.code === 'BRVMC')?.valeur != null
-                ? nf(indices.find((i) => i.code === 'BRVMC')!.valeur as number, 2)
-                : '—'}
+              {brvmC != null ? nf(brvmC, 2) : '—'}
             </p>
             <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/[0.07] pt-3">
               <div>
