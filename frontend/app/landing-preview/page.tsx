@@ -4,6 +4,7 @@ import { unstable_cache } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
+import { ToolsGrid } from '@/components/landing/ToolsGrid';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import NewsletterForm from '@/components/NewsletterForm';
@@ -219,6 +220,8 @@ export default async function LandingPreview() {
 
         <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
       </section>
+
+      <ToolsGrid />
 
       <SocialProof />
       <LandingFaq />
