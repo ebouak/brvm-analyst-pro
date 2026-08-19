@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { unstable_cache } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
+import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import NewsletterForm from '@/components/NewsletterForm';
@@ -150,7 +151,13 @@ export default async function LandingPreview() {
 
       <TasteTopbar ticks={ticks} liveRows={tickerRows} dateMarche={asOf} />
 
-      {/* Hero, ToolsGrid, RatingSpotlight, DiagnosticSpotlight, PremiumCompare : Tasks 2-6 */}
+      <HeroDeviceMockup
+        dateLabel={dateLabel}
+        ticks={ticks}
+        brvmC={(indices.find((i) => i.code === 'BRVMC')?.valeur as number | undefined) ?? null}
+      />
+
+      {/* ToolsGrid, RatingSpotlight, DiagnosticSpotlight, PremiumCompare : Tasks 3-6 */}
 
       <section className="mt-10">
         <div className="mb-5 flex items-baseline justify-between gap-3">
