@@ -32,3 +32,11 @@ test('rejette un corps modifié après signature', () => {
   const tampered = '{"hello":"WORLD"}';
   assert.equal(verifyMetaSignature(tampered, header, SECRET), false);
 });
+
+test('rejette un hex invalide de même longueur sans lever d\'exception', () => {
+  const body = '{"hello":"world"}';
+  const header = `sha256=${'a'.repeat(63)}g`;
+  assert.doesNotThrow(() => {
+    assert.equal(verifyMetaSignature(body, header, SECRET), false);
+  });
+});
