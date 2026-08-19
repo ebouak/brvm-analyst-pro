@@ -155,6 +155,13 @@ export default async function LandingPreview() {
         dateLabel={dateLabel}
         ticks={ticks}
         brvmC={(indices.find((i) => i.code === 'BRVMC')?.valeur as number | undefined) ?? null}
+        topMover={
+          hausses[0]
+            ? { code: hausses[0].code, score: hausses[0].score, confiance: hausses[0].confiance }
+            : baisses[0]
+              ? { code: baisses[0].code, score: baisses[0].score, confiance: baisses[0].confiance }
+              : null
+        }
       />
 
       {/* ToolsGrid, RatingSpotlight, DiagnosticSpotlight, PremiumCompare : Tasks 3-6 */}

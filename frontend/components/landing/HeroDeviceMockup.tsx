@@ -3,10 +3,17 @@ import Link from 'next/link';
 import RatingBadge from '@/components/RatingBadge';
 import type { TickItem } from '@/components/landing/taste/types';
 
+interface TopMover {
+  code: string;
+  score: number | null;
+  confiance: number | null;
+}
+
 interface Props {
   dateLabel: string | null;
   ticks: TickItem[];
   brvmC: number | null;
+  topMover: TopMover | null;
 }
 
 /**
@@ -15,7 +22,7 @@ interface Props {
  * un cadre d'appareil affichant BRVM-C, les cotations réelles déjà calculées
  * par getPreviewData(), aucune nouvelle donnée.
  */
-export function HeroDeviceMockup({ dateLabel, ticks, brvmC }: Props) {
+export function HeroDeviceMockup({ dateLabel, ticks, brvmC, topMover }: Props) {
   const top = ticks.slice(0, 4);
   return (
     <section className="mt-6 grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_1.1fr]">
@@ -65,10 +72,12 @@ export function HeroDeviceMockup({ dateLabel, ticks, brvmC }: Props) {
           )}
         </div>
 
-        <div className="mt-4 flex items-center justify-between rounded-lg border border-accent/20 bg-accent/[0.05] px-3 py-2.5">
-          <span className="text-[11px] text-muted">Note quantitative — exemple</span>
-          <RatingBadge scoreTotal={78} confiance={82} />
-        </div>
+        {topMover && (
+          <div className="mt-4 flex items-center justify-between rounded-lg border border-accent/20 bg-accent/[0.05] px-3 py-2.5">
+            <span className="font-mono text-[11px] font-bold text-muted">{topMover.code}</span>
+            <RatingBadge scoreTotal={topMover.score} confiance={topMover.confiance} />
+          </div>
+        )}
       </div>
     </section>
   );
