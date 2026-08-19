@@ -20,3 +20,6 @@ end;
 $function$;
 
 revoke execute on function public.purge_rgpd_retention() from public, anon, authenticated;
+
+comment on function public.purge_rgpd_retention is
+  'Purge RGPD : supprime admin_audit_logs, notifications_log et auth_events de plus de 12 mois, whatsapp_conversations de plus de 90 jours.';
