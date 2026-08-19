@@ -259,6 +259,13 @@ export default async function Landing() {
   const briefLines = brief
     ? (brief.contenu as string).split('\n').filter((l) => l.trim() && !l.startsWith('Analyse complète')).slice(0, 7)
     : [];
+  // Repli "séance peu animée" réparti sur les deux cartes (hausses/baisses)
+  // sans dupliquer les mêmes titres — la garde d'affichage porte sur la
+  // longueur de CHAQUE moitié, pas sur flatTop.length, pour ne jamais
+  // afficher la légende "titres les plus échangés" sans item en dessous
+  // (flatTop peut avoir moins de 6 éléments un jour de séance dégradée).
+  const flatTopA = flatTop.slice(0, 3);
+  const flatTopB = flatTop.slice(3, 6);
 
   return (
     <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
@@ -313,10 +320,10 @@ export default async function Landing() {
             <div className="space-y-2">
               {hausses.length > 0 ? (
                 hausses.map((m) => <MoverLine key={m.code} m={m} />)
-              ) : flatTop.length > 0 ? (
+              ) : flatTopA.length > 0 ? (
                 <>
                   <p className="mb-1 text-[11px] text-muted">Séance peu animée — titres les plus échangés :</p>
-                  {flatTop.slice(0, 3).map((m) => (
+                  {flatTopA.map((m) => (
                     <MoverLine key={m.code} m={m} />
                   ))}
                 </>
@@ -350,10 +357,10 @@ export default async function Landing() {
             <div className="space-y-2">
               {baisses.length > 0 ? (
                 baisses.map((m) => <MoverLine key={m.code} m={m} />)
-              ) : flatTop.length > 0 ? (
+              ) : flatTopB.length > 0 ? (
                 <>
                   <p className="mb-1 text-[11px] text-muted">Séance peu animée — titres les plus échangés :</p>
-                  {flatTop.slice(3, 6).map((m) => (
+                  {flatTopB.map((m) => (
                     <MoverLine key={m.code} m={m} />
                   ))}
                 </>
