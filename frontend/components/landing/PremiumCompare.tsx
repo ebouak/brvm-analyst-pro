@@ -2,6 +2,7 @@
 import Link from 'next/link';
 
 interface PlanFeature {
+  id: string;
   feature_label: string;
   feature_value: string | null;
 }
@@ -36,7 +37,7 @@ export function PremiumCompare({ plans }: { plans: Plan[] }) {
             </p>
             <ul className="mt-4 space-y-2">
               {p.features.slice(0, 5).map((f) => (
-                <li key={f.feature_label} className="flex items-start gap-2 text-xs text-muted">
+                <li key={f.id} className="flex items-start gap-2 text-xs text-muted">
                   <span className="mt-0.5 text-up" aria-hidden>✓</span>
                   <span>{f.feature_label}{f.feature_value ? ` — ${f.feature_value}` : ''}</span>
                 </li>

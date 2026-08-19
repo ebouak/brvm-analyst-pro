@@ -137,18 +137,20 @@ async function getPreviewData() {
   const { data: featureRows } = planIds.length
     ? await supabase
         .from('plan_features')
-        .select('plan_id, feature_label, feature_value, sort_order')
+        .select('id, plan_id, feature_label, feature_value, sort_order')
         .in('plan_id', planIds)
         .order('sort_order', { ascending: true })
-    : { data: [] as { plan_id: string; feature_label: string; feature_value: string | null }[] };
+    : { data: [] as { id: string; plan_id: string; feature_label: string; feature_value: string | null }[] };
   const plans = (planRows ?? []).map((p) => ({
     code: p.code as string,
     name: p.name as string,
-    price_monthly: (p.price_monthly as number) ?? 0,
+    // numeric(12,2) revient en chaîne via PostgREST — Number() explicite,
+    // même convention que app/pricing/page.tsx et app/account/plan/page.tsx.
+    price_monthly: Number(p.price_monthly ?? 0),
     is_recommended: Boolean(p.is_recommended),
     features: (featureRows ?? [])
       .filter((f) => f.plan_id === p.id)
-      .map((f) => ({ feature_label: f.feature_label as string, feature_value: f.feature_value as string | null })),
+      .map((f) => ({ id: f.id as string, feature_label: f.feature_label as string, feature_value: f.feature_value as string | null })),
   }));
 
   return {
