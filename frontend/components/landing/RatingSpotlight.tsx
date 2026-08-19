@@ -7,13 +7,15 @@ interface Props {
   signal: (SignalDaily & { code: string }) | null;
 }
 
-function Bar({ label, value }: { label: string; value: number | null }) {
-  const pct = value == null ? 0 : Math.max(0, Math.min(100, ((value + 100) / 200) * 100));
+// Bornes réelles des sous-scores, cf. scraper/src/scoring/score.ts + docs/SCORING.md :
+// variation/volume/rsi ∈ [-1,1], bonus_tendance ∈ [-0.1,0.1], penalite_liquidite ∈ [0,0.25].
+function Bar({ label, value, min = -1, max = 1 }: { label: string; value: number | null; min?: number; max?: number }) {
+  const pct = value == null ? 0 : Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-[11px]">
         <span className="text-muted">{label}</span>
-        <span className="tabular text-faint">{value != null ? value.toFixed(0) : '—'}</span>
+        <span className="tabular text-faint">{value != null ? value.toFixed(2) : '—'}</span>
       </div>
       <div className="h-1.5 rounded-full bg-white/[0.06]">
         <div className="h-1.5 rounded-full bg-accent" style={{ width: `${pct}%` }} />
@@ -44,7 +46,7 @@ export function RatingSpotlight({ signal }: Props) {
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-surface p-5">
+        <div className="rounded-panel border border-white/10 bg-surface p-5 shadow-panel">
           <div className="mb-4 flex items-center justify-between">
             <span className="font-mono text-lg font-bold text-ivory">{signal.code}</span>
             <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
@@ -53,11 +55,11 @@ export function RatingSpotlight({ signal }: Props) {
             <Bar label="Variation" value={signal.score_variation ?? null} />
             <Bar label="Volume" value={signal.score_volume ?? null} />
             <Bar label="RSI" value={signal.score_rsi ?? null} />
-            <Bar label="Tendance (bonus)" value={signal.bonus_tendance ?? null} />
-            <Bar label="Liquidité (pénalité)" value={signal.penalite_liquidite ?? null} />
+            <Bar label="Tendance (bonus)" value={signal.bonus_tendance ?? null} min={-0.1} max={0.1} />
+            <Bar label="Liquidité (pénalité)" value={signal.penalite_liquidite ?? null} min={0} max={0.25} />
           </div>
           <p className="mt-4 text-[10px] text-faint">
-            {signal.signal} · confiance {signal.confiance ?? '—'}% · exemple réel de la séance en cours
+            {signal.signal} · confiance {signal.confiance != null ? `${(signal.confiance * 100).toFixed(0)}%` : '—'} · exemple réel de la séance en cours
           </p>
         </div>
       </div>
