@@ -9,7 +9,11 @@ import BeginnerBanner from '@/components/BeginnerBanner';
 import ContactNudge from '@/components/contact/ContactNudge';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
-const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
+// /landing-preview : aperçu de refonte (Phase 10), rend son propre <Footer/> —
+// volontairement absent de BARE_PREFIXES pour ne pas déclencher un second
+// footer via showsFooter() (qui ne teste que BARE_PREFIXES/LEGAL_PREFIXES,
+// jamais BARE_ROUTES).
+const BARE_ROUTES = new Set<string>(['/', '/login', '/signup', '/landing-preview']);
 
 /** Sections publiques SEO : plein écran avec leur propre header (PublicShell). */
 const BARE_PREFIXES = [
