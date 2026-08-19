@@ -31,10 +31,6 @@ create index if not exists idx_whatsapp_conversations_user
 
 alter table public.whatsapp_conversations enable row level security;
 
--- Lecture par le propriétaire uniquement (ex. futur historique visible dans
--- les paramètres du compte). Pas de policy insert/update/delete pour
--- anon/authenticated : seul service_role écrit (le webhook tourne côté
--- serveur avec la clé service_role).
 drop policy if exists "whatsapp_conversations_owner_select" on public.whatsapp_conversations;
 create policy "whatsapp_conversations_owner_select" on public.whatsapp_conversations
   for select using (auth.uid() = user_id);
