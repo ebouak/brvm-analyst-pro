@@ -57,13 +57,120 @@ interface NewsCardItem {
 async function getData() {
   const supabase = createPublicClient();
 
-  const { data: lastDay } = await supabase
+  // Étape 1 : toutes les requêtes qui ne dépendent d'aucune valeur calculée
+  // par une autre requête partent en un seul aller-retour réseau. (Avant :
+  // enchaînées en `await` séquentiels — chacune attendait la précédente sans
+  // raison, l'ancienne date brièvement postulée n'étant en réalité utile qu'à
+  // deux fetches précis, traités à l'étape 2 ci-dessous.)
+  const lastDayPromise = supabase
     .from('brvm_actions_daily')
     .select('date_marche')
     .order('date_marche', { ascending: false })
     .limit(1)
     .maybeSingle();
+  // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
+  const lastIdxPromise = supabase
+    .from('brvm_indices_daily')
+    .select('date_marche')
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // Brief du jour (extrait)
+  const briefPromise = supabase
+    .from('brief_daily')
+    .select('date_marche, contenu')
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // Simulation réelle : 1 000 000 FCFA dans SNTS il y a 5 ans — ne dépend que
+  // d'une date calculée localement, aucune valeur d'une autre requête.
+  const simulationPromise: Promise<{ finalValue: number; pct: number; years: number } | null> = (async () => {
+    try {
+      const from = new Date();
+      from.setFullYear(from.getFullYear() - 5);
+      const fromIso = from.toISOString().split('T')[0]!;
+      const [{ data: snts }, { data: divs }] = await Promise.all([
+        supabase
+          .from('brvm_actions_daily')
+          .select('date_marche, cours_jour')
+          .eq('code', 'SNTS')
+          .gte('date_marche', fromIso)
+          .order('date_marche', { ascending: true }),
+        supabase.from('dividends').select('montant, payment_date, ex_date').eq('code', 'SNTS'),
+      ]);
+      const prices: PricePoint[] = (snts ?? [])
+        .filter((r) => r.cours_jour != null && r.cours_jour > 0)
+        .map((r) => ({ date: r.date_marche as string, close: r.cours_jour as number }));
+      const dividends = (divs ?? [])
+        .map((d) => ({ date: (d.payment_date ?? d.ex_date ?? '') as string, montant: d.montant as number }))
+        .filter((d) => d.date);
+      const sim = simulateInvestment(1_000_000, fromIso, prices, dividends);
+      return sim ? { finalValue: sim.finalValue, pct: sim.totalReturnPct, years: sim.years } : null;
+    } catch {
+      return null; /* pas de simulation si données indisponibles */
+    }
+  })();
+  // Actualités du marché (4 dernières) pour la section cartes
+  const newsPromise = supabase
+    .from('brvm_news')
+    .select('id, titre, date_publication, source_url, instrument_code')
+    .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
+    .order('date_publication', { ascending: false })
+    .limit(4);
+  // Cartographie du marché (treemap landing) — même chargement que /heatmap.
+  // loadHeatmap() résout elle-même sa propre "dernière date" en interne,
+  // aucune dépendance sur `asOf`/`idxDate` calculés dans cette fonction.
+  const heatmapPromise: Promise<HeatmapNode[]> = (async () => {
+    try {
+      const { rows } = await loadHeatmap(supabase);
+      return rows;
+    } catch {
+      return []; /* pas de cartographie si données indisponibles */
+    }
+  })();
+  const diagReportPromise = supabase
+    .from('diagnostic_reports')
+    .select('code, generated_at, markdown_content')
+    .order('generated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const planRowsPromise = supabase
+    .from('subscription_plans')
+    .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  // Annuaire SGI (comparateur) : lecture publique pure, aucun cookie ni
+  // donnée de session (voir frontend/lib/sgi-frais/queries.ts) — rejoint le
+  // même cache 5 min que le reste de la landing au lieu d'un appel à part et
+  // non caché dans Landing().
+  const sgiDirectoryPromise = getSgiDirectory();
+
+  const [
+    { data: lastDay },
+    { data: lastIdx },
+    { data: brief },
+    simulation,
+    { data: newsRows },
+    heatmapRows,
+    { data: diagReport },
+    { data: planRows },
+    sgiDirectory,
+  ] = await Promise.all([
+    lastDayPromise,
+    lastIdxPromise,
+    briefPromise,
+    simulationPromise,
+    newsPromise,
+    heatmapPromise,
+    diagReportPromise,
+    planRowsPromise,
+    sgiDirectoryPromise,
+  ]);
+
   const asOf = (lastDay?.date_marche as string | undefined) ?? null;
+  const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
+  const news = (newsRows ?? []) as NewsCardItem[];
+  const planIds = (planRows ?? []).map((p) => p.id as string);
 
   let ticks: TickItem[] = [];
   let tickerRows: RealtimeActionRow[] = [];
@@ -73,42 +180,52 @@ async function getData() {
   let nbActions = 0;
   let volumeTotal = 0;
   let spotlightSignal: (SignalDaily & { code: string }) | null = null;
-
-  // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
   let indices: IndiceDaily[] = [];
-  const { data: lastIdx } = await supabase
-    .from('brvm_indices_daily')
-    .select('date_marche')
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
-  if (idxDate) {
-    const { data: idxRows } = await supabase
-      .from('brvm_indices_daily')
-      .select('*')
-      .eq('date_marche', idxDate);
-    indices = (idxRows ?? []) as IndiceDaily[];
-  }
 
-  if (asOf) {
-    const [{ data: rows }, { data: sigs }, { data: topSignal }] = await Promise.all([
-      supabase
-        .from('brvm_actions_daily')
-        .select('code, cours_jour, variation_pct, volume')
-        .eq('date_marche', asOf)
-        .order('variation_pct', { ascending: false }),
-      supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
-      // Signal spotlight : ne dépend que d'asOf, aucune donnée calculée
-      // ci-dessous — rejoint ce Promise.all plutôt qu'un aller-retour à part.
-      supabase
-        .from('signals_daily')
-        .select('*')
-        .eq('date_marche', asOf)
-        .order('score_total', { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+  // Étape 2 : les requêtes qui dépendent d'une valeur connue seulement après
+  // l'étape 1 (idxDate, asOf, planIds) — mais qui ne dépendent PAS les unes
+  // des autres — partent elles aussi en parallèle plutôt qu'en 3 allers-retours
+  // successifs.
+  const idxRowsPromise = idxDate
+    ? supabase.from('brvm_indices_daily').select('*').eq('date_marche', idxDate)
+    : Promise.resolve({ data: null as IndiceDaily[] | null });
+  const asOfBlockPromise = asOf
+    ? Promise.all([
+        supabase
+          .from('brvm_actions_daily')
+          .select('code, cours_jour, variation_pct, volume')
+          .eq('date_marche', asOf)
+          .order('variation_pct', { ascending: false }),
+        supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
+        // Signal spotlight : ne dépend que d'asOf, aucune donnée calculée
+        // ci-dessous — rejoint ce Promise.all plutôt qu'un aller-retour à part.
+        supabase
+          .from('signals_daily')
+          .select('*')
+          .eq('date_marche', asOf)
+          .order('score_total', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ])
+    : Promise.resolve(null);
+  const featureRowsPromise = planIds.length
+    ? supabase
+        .from('plan_features')
+        .select('id, plan_id, feature_label, feature_value, sort_order')
+        .in('plan_id', planIds)
+        .order('sort_order', { ascending: true })
+    : Promise.resolve({ data: [] as { id: string; plan_id: string; feature_label: string; feature_value: string | null }[] });
+
+  const [idxRowsRes, asOfBlockRes, featureRowsRes] = await Promise.all([
+    idxRowsPromise,
+    asOfBlockPromise,
+    featureRowsPromise,
+  ]);
+
+  indices = (idxRowsRes.data ?? []) as IndiceDaily[];
+
+  if (asOfBlockRes) {
+    const [{ data: rows }, { data: sigs }, { data: topSignal }] = asOfBlockRes;
     spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
     const all = (rows ?? []) as { code: string; cours_jour: number | null; variation_pct: number | null; volume: number | null }[];
     nbActions = all.length;
@@ -145,79 +262,7 @@ async function getData() {
     tickerRows = tickSource.map((m) => ({ code: m.code, cours_jour: m.cours, variation_pct: m.pct }));
   }
 
-  // Brief du jour (extrait)
-  const { data: brief } = await supabase
-    .from('brief_daily')
-    .select('date_marche, contenu')
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  // Simulation réelle : 1 000 000 FCFA dans SNTS il y a 5 ans
-  let simulation: { finalValue: number; pct: number; years: number } | null = null;
-  try {
-    const from = new Date();
-    from.setFullYear(from.getFullYear() - 5);
-    const fromIso = from.toISOString().split('T')[0]!;
-    const [{ data: snts }, { data: divs }] = await Promise.all([
-      supabase
-        .from('brvm_actions_daily')
-        .select('date_marche, cours_jour')
-        .eq('code', 'SNTS')
-        .gte('date_marche', fromIso)
-        .order('date_marche', { ascending: true }),
-      supabase.from('dividends').select('montant, payment_date, ex_date').eq('code', 'SNTS'),
-    ]);
-    const prices: PricePoint[] = (snts ?? [])
-      .filter((r) => r.cours_jour != null && r.cours_jour > 0)
-      .map((r) => ({ date: r.date_marche as string, close: r.cours_jour as number }));
-    const dividends = (divs ?? [])
-      .map((d) => ({ date: (d.payment_date ?? d.ex_date ?? '') as string, montant: d.montant as number }))
-      .filter((d) => d.date);
-    const sim = simulateInvestment(1_000_000, fromIso, prices, dividends);
-    if (sim) simulation = { finalValue: sim.finalValue, pct: sim.totalReturnPct, years: sim.years };
-  } catch {
-    /* pas de simulation si données indisponibles */
-  }
-
-  // Actualités du marché (4 dernières) pour la section cartes
-  const { data: newsRows } = await supabase
-    .from('brvm_news')
-    .select('id, titre, date_publication, source_url, instrument_code')
-    .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
-    .order('date_publication', { ascending: false })
-    .limit(4);
-  const news = (newsRows ?? []) as NewsCardItem[];
-
-  // Cartographie du marché (treemap landing) — même chargement que /heatmap.
-  let heatmapRows: HeatmapNode[] = [];
-  try {
-    const { rows } = await loadHeatmap(supabase);
-    heatmapRows = rows;
-  } catch {
-    /* pas de cartographie si données indisponibles */
-  }
-
-  const { data: diagReport } = await supabase
-    .from('diagnostic_reports')
-    .select('code, generated_at, markdown_content')
-    .order('generated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { data: planRows } = await supabase
-    .from('subscription_plans')
-    .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true });
-  const planIds = (planRows ?? []).map((p) => p.id as string);
-  const { data: featureRows } = planIds.length
-    ? await supabase
-        .from('plan_features')
-        .select('id, plan_id, feature_label, feature_value, sort_order')
-        .in('plan_id', planIds)
-        .order('sort_order', { ascending: true })
-    : { data: [] as { id: string; plan_id: string; feature_label: string; feature_value: string | null }[] };
+  const featureRows = featureRowsRes.data;
   const plans = (planRows ?? []).map((p) => ({
     code: p.code as string,
     name: p.name as string,
@@ -247,14 +292,16 @@ async function getData() {
     spotlightSignal,
     latestDiagnosticReport: diagReport ?? null,
     plans,
+    sgiDirectory,
   };
 }
 
 // Le layout racine lit la session (cookies) → la route est rendue dynamique et
 // l'ISR (`revalidate = 300`) est sans effet sur le HTML. On met donc les
-// DONNÉES en cache serveur 5 min : les ~10 requêtes Supabase ci-dessus ne
-// tournent plus à chaque visite. Sûr : getData n'utilise que le client public
-// (aucun cookie, aucune donnée personnalisée).
+// DONNÉES en cache serveur 5 min : les ~10 requêtes Supabase ci-dessus (dont
+// l'annuaire SGI, qui rejoint désormais ce même cache) ne tournent plus à
+// chaque visite. Sûr : getData n'utilise que le client public (aucun cookie,
+// aucune donnée personnalisée).
 const getCachedData = unstable_cache(getData, ['landing-data'], { revalidate: 300 });
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
@@ -327,10 +374,10 @@ export default async function Landing() {
     spotlightSignal,
     latestDiagnosticReport,
     plans,
+    sgiDirectory,
   } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
-  const sgiDirectory = await getSgiDirectory();
   const sgiCount = sgiDirectory.length;
   const sgiPaysCounts = new Map<string, number>();
   for (const s of sgiDirectory) sgiPaysCounts.set(s.pays, (sgiPaysCounts.get(s.pays) ?? 0) + 1);
