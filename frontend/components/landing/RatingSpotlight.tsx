@@ -5,6 +5,10 @@ import type { SignalDaily } from '@/lib/types';
 
 interface Props {
   signal: (SignalDaily & { code: string }) | null;
+  // Optionnel pour ne pas casser l'appelant preview (retiré en Task 6) qui
+  // ne la transmet pas encore — repli honnête sur le nombre de sociétés
+  // suivies par la plateforme si la vraie séance n'est pas disponible.
+  nbActions?: number;
 }
 
 // Bornes réelles des sous-scores, cf. scraper/src/scoring/score.ts + docs/SCORING.md :
@@ -24,7 +28,7 @@ function Bar({ label, value, min = -1, max = 1 }: { label: string; value: number
   );
 }
 
-export function RatingSpotlight({ signal }: Props) {
+export function RatingSpotlight({ signal, nbActions }: Props) {
   if (!signal) return null;
   return (
     <section className="mt-10 rounded-panel border border-white/10 bg-white/[0.02] p-6 md:p-8">
@@ -42,7 +46,7 @@ export function RatingSpotlight({ signal }: Props) {
             href="/notations"
             className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors hover:text-gold-2"
           >
-            Voir les 48 sociétés <span aria-hidden>→</span>
+            Voir les {nbActions != null && nbActions > 0 ? nbActions : 48} sociétés <span aria-hidden>→</span>
           </Link>
         </div>
 

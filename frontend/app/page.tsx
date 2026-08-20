@@ -92,14 +92,24 @@ async function getData() {
   }
 
   if (asOf) {
-    const [{ data: rows }, { data: sigs }] = await Promise.all([
+    const [{ data: rows }, { data: sigs }, { data: topSignal }] = await Promise.all([
       supabase
         .from('brvm_actions_daily')
         .select('code, cours_jour, variation_pct, volume')
         .eq('date_marche', asOf)
         .order('variation_pct', { ascending: false }),
       supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
+      // Signal spotlight : ne dépend que d'asOf, aucune donnée calculée
+      // ci-dessous — rejoint ce Promise.all plutôt qu'un aller-retour à part.
+      supabase
+        .from('signals_daily')
+        .select('*')
+        .eq('date_marche', asOf)
+        .order('score_total', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
+    spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
     const all = (rows ?? []) as { code: string; cours_jour: number | null; variation_pct: number | null; volume: number | null }[];
     nbActions = all.length;
     volumeTotal = all.reduce((s, r) => s + (r.volume ?? 0), 0);
@@ -133,15 +143,6 @@ async function getData() {
     }));
     // Lignes brutes des mêmes symboles, pour l'abonnement temps réel du ticker.
     tickerRows = tickSource.map((m) => ({ code: m.code, cours_jour: m.cours, variation_pct: m.pct }));
-
-    const { data: topSignal } = await supabase
-      .from('signals_daily')
-      .select('*')
-      .eq('date_marche', asOf)
-      .order('score_total', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
   }
 
   // Brief du jour (extrait)
@@ -464,7 +465,7 @@ export default async function Landing() {
 
       <ToolsGrid />
 
-      <RatingSpotlight signal={spotlightSignal} />
+      <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
 
       <DiagnosticSpotlight report={latestDiagnosticReport} />
 
