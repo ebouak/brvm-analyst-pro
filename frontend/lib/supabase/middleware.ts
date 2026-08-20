@@ -22,7 +22,6 @@ const PUBLIC_EXACT = new Set<string>([
   '/rendement-vrai', '/fiscalite', '/simulateur-budget',
   '/comparateur-sgi', '/actualites', '/formations',
   '/robots.txt', '/sitemap.xml', '/manifest.webmanifest',
-  '/landing-preview', // aperçu de refonte, non indexé (noindex) — Phase 10
 ]);
 const PUBLIC_PREFIXES = [
   '/societes',   // fiches sociétés (SEO)
