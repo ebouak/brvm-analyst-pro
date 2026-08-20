@@ -19,6 +19,9 @@ export interface Testimonial {
 
 export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number; testimonials?: Testimonial[] }) {
   const metrics = [
+    // Repli sur 48 (jamais inventé) si aucune séance n'a de données : c'est le
+    // total réel de sociétés cotées à la BRVM, déjà vérifié et affiché ailleurs
+    // sur le site (app/societes, tests fondamentaux) — pas un chiffre à part.
     { value: nbActions > 0 ? String(nbActions) : '48', label: 'sociétés cotées suivies' },
     { value: '15 min', label: 'fraîcheur des cours en séance' },
     { value: 'A–F', label: 'note quantitative par action' },
