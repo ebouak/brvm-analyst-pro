@@ -1,7 +1,13 @@
 /**
  * Bandeau de preuve PRODUIT (factuelle) — affiché sous le Hero.
- * Pas de faux témoignages ni de faux compteur d'utilisateurs : uniquement des
- * métriques vraies et vérifiables sur la plateforme. L'emplacement témoignages
+ * Pas de faux témoignages ni de faux compteur d'utilisateurs. Statut réel des
+ * 4 métriques : "sociétés cotées suivies" est une vraie donnée calculée
+ * (nbActions, dernière séance) ; "15 min"/"A–F" reflètent des faits réels
+ * d'infrastructure et de méthodologie (cadence du scraper, échelle de note)
+ * mais ne sont pas des requêtes — pas de nombre à recalculer ; "100%" est une
+ * affirmation éditoriale sans équivalent mesurable en base aujourd'hui — à ne
+ * pas présenter comme "vérifiée" au même titre que les autres tant qu'aucune
+ * métrique de couverture réelle ne l'alimente. L'emplacement témoignages
  * (prop `testimonials`) est prêt à recevoir de VRAIES citations quand elles existent.
  */
 
@@ -11,18 +17,17 @@ export interface Testimonial {
   role?: string;
 }
 
-const METRICS: { value: string; label: string }[] = [
-  { value: '48', label: 'sociétés cotées suivies' },
-  { value: '15 min', label: 'fraîcheur des cours en séance' },
-  { value: 'A–F', label: 'note quantitative par action' },
-  { value: '100%', label: 'données vérifiées à la source' },
-];
-
-export function ProofBand({ testimonials = [] }: { testimonials?: Testimonial[] }) {
+export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number; testimonials?: Testimonial[] }) {
+  const metrics = [
+    { value: nbActions > 0 ? String(nbActions) : '48', label: 'sociétés cotées suivies' },
+    { value: '15 min', label: 'fraîcheur des cours en séance' },
+    { value: 'A–F', label: 'note quantitative par action' },
+    { value: '100%', label: 'données vérifiées à la source' },
+  ];
   return (
     <section aria-label="Preuves" className="mt-4">
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.02] sm:grid-cols-4">
-        {METRICS.map((m) => (
+        {metrics.map((m) => (
           <div key={m.label} className="flex flex-col items-center gap-1 bg-surface px-4 py-5 text-center">
             <span className="font-display text-[clamp(22px,3.4vw,30px)] font-semibold leading-none text-accent tabular">
               {m.value}

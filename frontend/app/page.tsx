@@ -382,7 +382,7 @@ export default async function Landing() {
       })()}
 
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
-      <ProofBand />
+      <ProofBand nbActions={nbActions} />
 
       {/* ── MARCHÉ EN DIRECT : actus, séance, preuve chiffrée, indices,
           heatmap — remonté juste après ProofBand (preuve de fraîcheur des
