@@ -145,6 +145,15 @@ async function getData() {
   // non caché dans Landing().
   const sgiDirectoryPromise = getSgiDirectory();
 
+  // Sûr sans .throwOnError() nulle part dans ce fichier : le client Supabase
+  // résout toujours { data, error } sans jamais rejeter la Promise, même en
+  // cas d'erreur réseau/RLS — un Promise.all ici ne peut donc pas transformer
+  // une section en panne en page cassée. Ne PAS ajouter .throwOnError() à
+  // l'une de ces requêtes sans réévaluer cette garantie.
+  //
+  // ⚠️ Les deux listes ci-dessous doivent rester dans le MÊME ORDRE (client
+  // public non généré par `Database`, donc aucun filet de type ne détecterait
+  // un décalage positionnel) — tout ajout doit toucher les deux en même position.
   const [
     { data: lastDay },
     { data: lastIdx },
