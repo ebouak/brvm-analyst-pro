@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { unstable_cache } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public';
+import { getLastMarketDate } from '@/lib/marketDate';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
@@ -62,12 +63,9 @@ async function getData() {
   // enchaînées en `await` séquentiels — chacune attendait la précédente sans
   // raison, l'ancienne date brièvement postulée n'étant en réalité utile qu'à
   // deux fetches précis, traités à l'étape 2 ci-dessous.)
-  const lastDayPromise = supabase
-    .from('brvm_actions_daily')
-    .select('date_marche')
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Partagée avec frontend/lib/whatsappAgent/watchlistContext.ts — voir
+  // frontend/lib/marketDate.ts pour éviter que les deux divergent en silence.
+  const lastDayPromise = getLastMarketDate(supabase);
   // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
   const lastIdxPromise = supabase
     .from('brvm_indices_daily')
@@ -155,7 +153,7 @@ async function getData() {
   // public non généré par `Database`, donc aucun filet de type ne détecterait
   // un décalage positionnel) — tout ajout doit toucher les deux en même position.
   const [
-    { data: lastDay },
+    asOf,
     { data: lastIdx },
     { data: brief },
     simulation,
@@ -176,7 +174,6 @@ async function getData() {
     sgiDirectoryPromise,
   ]);
 
-  const asOf = (lastDay?.date_marche as string | undefined) ?? null;
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
   const news = (newsRows ?? []) as NewsCardItem[];
   const planIds = (planRows ?? []).map((p) => p.id as string);

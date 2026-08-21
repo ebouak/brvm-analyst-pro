@@ -2,6 +2,7 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { WatchlistContextItem } from './systemPrompt';
+import { getLastMarketDate } from '@/lib/marketDate';
 
 /**
  * Récupère les codes de la watchlist d'un utilisateur, puis les enrichit avec
@@ -9,26 +10,22 @@ import type { WatchlistContextItem } from './systemPrompt';
  * signals_daily) — jamais de chiffre inventé pour un code sans donnée du jour
  * (voir formatWatchlistItem dans systemPrompt.ts, qui gère ce cas
  * explicitement plutôt que de l'omettre silencieusement).
+ *
+ * Appelée à chaque message WhatsApp entrant (chemin critique de latence) :
+ * la requête watchlist et la résolution de la dernière date de séance sont
+ * mutuellement indépendantes et partent donc en parallèle.
  */
 export async function getWatchlistContext(
   db: SupabaseClient,
   userId: string,
 ): Promise<WatchlistContextItem[]> {
-  const { data: watchlistRows } = await db
-    .from('watchlist_items')
-    .select('code, watchlists!inner(user_id)')
-    .eq('watchlists.user_id', userId);
+  const [{ data: watchlistRows }, asOf] = await Promise.all([
+    db.from('watchlist_items').select('code, watchlists!inner(user_id)').eq('watchlists.user_id', userId),
+    getLastMarketDate(db),
+  ]);
 
   const codes = [...new Set((watchlistRows ?? []).map((r) => r.code as string))];
   if (codes.length === 0) return [];
-
-  const { data: lastDay } = await db
-    .from('brvm_actions_daily')
-    .select('date_marche')
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const asOf = (lastDay?.date_marche as string | undefined) ?? null;
 
   if (!asOf) {
     return codes.map((code) => ({ code, cours: null, variationPct: null, signal: null, confiance: null }));
