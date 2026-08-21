@@ -654,6 +654,173 @@ git commit -m "feat(whatsapp-agent): orchestration complète du traitement d'un 
 
 ---
 
+### Task 8bis : Appairage du numéro par code (preuve de possession)
+
+**Files:**
+- Create: `supabase/migrations/0128_whatsapp_pairing_codes.sql`
+- Create: `frontend/lib/whatsappAgent/pairing.ts`
+- Test: `frontend/lib/whatsappAgent/pairing.test.mjs`
+
+**Context (décision produit du 2026-08-21) :** l'activation actuelle
+(`components/settings/WhatsAppPrefs.tsx`) ne valide que le FORMAT E.164 du
+numéro — rien ne prouve que le déclarant possède ce numéro. La migration
+`0127` empêche désormais deux comptes de revendiquer le même numéro, mais
+« premier arrivé, premier servi » n'est pas une preuve de possession.
+
+**Flux retenu — code envoyé PAR l'utilisateur, pas reçu :** envoyer un code
+à un numéro qui n'a jamais écrit exigerait un template Meta pré-approuvé
+(délai d'approbation). On inverse : l'interface affiche un code, l'utilisateur
+l'envoie au numéro WhatsApp WESTBOURSE, le webhook le reconnaît et lie le
+numéro **tel que Meta le fournit** (donc sans faute de frappe possible) au
+compte. Aucun template requis — c'est l'utilisateur qui ouvre la fenêtre de
+24 h — et la possession est prouvée de façon plus forte qu'avec un code reçu.
+
+- [ ] **Step 1 : Écrire la migration**
+
+```sql
+-- ============================================================================
+-- 0128_whatsapp_pairing_codes.sql
+-- Codes d'appairage à usage unique pour lier un numéro WhatsApp à un compte.
+--
+-- RGPD : donnée perso = aucune (le code ne contient pas le numéro ; c'est le
+-- webhook qui écrit le numéro dans notification_prefs après validation).
+-- Conservation : 15 minutes d'usage + purge des codes expirés par
+-- purge_rgpd_retention(). Base légale : exécution du service demandé.
+-- ============================================================================
+
+create table if not exists public.whatsapp_pairing_codes (
+  code        text primary key,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  expires_at  timestamptz not null,
+  consumed_at timestamptz
+);
+
+comment on table public.whatsapp_pairing_codes is
+  'Codes à usage unique prouvant la possession d''un numéro WhatsApp : l''utilisateur envoie le code depuis son WhatsApp, le webhook lie alors le numéro fourni par Meta à son compte. Expire en 15 min.';
+
+create index if not exists idx_whatsapp_pairing_user
+  on public.whatsapp_pairing_codes (user_id);
+
+alter table public.whatsapp_pairing_codes enable row level security;
+
+-- Le propriétaire lit son propre code (l'interface l'affiche). Écriture et
+-- consommation : service_role uniquement (génération côté serveur, validation
+-- côté webhook).
+drop policy if exists "whatsapp_pairing_owner_select" on public.whatsapp_pairing_codes;
+create policy "whatsapp_pairing_owner_select" on public.whatsapp_pairing_codes
+  for select using (auth.uid() = user_id);
+
+-- Purge des codes expirés : rattachée à la fonction RGPD centralisée
+-- existante plutôt qu'à un second job planifié (même raisonnement que 0126).
+create or replace function public.purge_rgpd_retention()
+returns void
+language plpgsql
+security definer
+set search_path to 'public', 'pg_temp'
+as $function$
+begin
+  delete from public.admin_audit_logs where created_at < now() - interval '12 months';
+  delete from public.notifications_log  where created_at < now() - interval '12 months';
+  delete from public.auth_events        where created_at < now() - interval '12 months';
+  delete from public.whatsapp_conversations where created_at < now() - interval '90 days';
+  delete from public.whatsapp_pairing_codes where expires_at < now() - interval '1 day';
+end;
+$function$;
+
+revoke execute on function public.purge_rgpd_retention() from public, anon, authenticated;
+```
+
+- [ ] **Step 2 : Écrire le test qui échoue**
+
+```ts
+// frontend/lib/whatsappAgent/pairing.test.mjs
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { generatePairingCode, isPairingCode } from './pairing.ts';
+
+test('génère un code au format attendu', () => {
+  const code = generatePairingCode();
+  assert.match(code, /^WB-[A-Z0-9]{6}$/);
+});
+
+test('deux codes successifs diffèrent', () => {
+  assert.notEqual(generatePairingCode(), generatePairingCode());
+});
+
+test('reconnaît un code d\'appairage dans un message', () => {
+  assert.equal(isPairingCode('WB-7K3P9Q'), true);
+  assert.equal(isPairingCode('  wb-7k3p9q  '), true);
+});
+
+test('ne confond pas un message normal avec un code', () => {
+  assert.equal(isPairingCode('Quel est le cours de SONATEL ?'), false);
+  assert.equal(isPairingCode('WB-123'), false);
+});
+
+test('exclut les caractères ambigus (O/0, I/1)', () => {
+  for (let i = 0; i < 50; i++) {
+    assert.doesNotMatch(generatePairingCode().slice(3), /[O0I1]/);
+  }
+});
+```
+
+- [ ] **Step 3 : Lancer le test, vérifier qu'il échoue**
+
+Run: `cd frontend && npx tsx --test lib/whatsappAgent/pairing.test.mjs`
+Expected: échec — `pairing.ts` n'existe pas encore.
+
+- [ ] **Step 4 : Implémenter**
+
+```ts
+// frontend/lib/whatsappAgent/pairing.ts
+import { randomInt } from 'node:crypto';
+
+// Alphabet sans caractères ambigus (O/0, I/1) : le code est lu à l'écran
+// puis retapé à la main dans WhatsApp.
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const CODE_LENGTH = 6;
+const PAIRING_RE = /^WB-[A-Z0-9]{6}$/;
+
+/** Code d'appairage à usage unique, affiché par l'interface des paramètres. */
+export function generatePairingCode(): string {
+  let s = '';
+  for (let i = 0; i < CODE_LENGTH; i++) s += ALPHABET[randomInt(ALPHABET.length)];
+  return `WB-${s}`;
+}
+
+/**
+ * Un message WhatsApp entrant est-il un code d'appairage plutôt qu'une
+ * question à l'agent ? Testé AVANT le traitement conversationnel normal.
+ */
+export function isPairingCode(text: string): boolean {
+  return PAIRING_RE.test(text.trim().toUpperCase());
+}
+
+/** Normalise un message entrant en code comparable à celui stocké. */
+export function normalizePairingCode(text: string): string {
+  return text.trim().toUpperCase();
+}
+```
+
+- [ ] **Step 5 : Lancer le test, vérifier qu'il passe**
+
+Run: `cd frontend && npx tsx --test lib/whatsappAgent/pairing.test.mjs`
+Expected: 5 tests verts.
+
+- [ ] **Step 6 : Vérifier le typecheck**
+
+Run: `cd frontend && npx tsc --noEmit`
+
+- [ ] **Step 7 : Commit**
+
+```bash
+git add supabase/migrations/0128_whatsapp_pairing_codes.sql frontend/lib/whatsappAgent/pairing.ts frontend/lib/whatsappAgent/pairing.test.mjs
+git commit -m "feat(whatsapp-agent): codes d'appairage prouvant la possession du numéro"
+```
+
+---
+
 ### Task 9 : Webhook Meta (`app/api/whatsapp/webhook/route.ts`)
 
 **Files:**
@@ -739,10 +906,90 @@ async function processPayload(payload: unknown): Promise<void> {
     if (msg.type !== 'text' || !msg.from || !msg.text?.body) continue;
     // Meta envoie `from` sans le '+' initial (ex. "2250700000000").
     const fromE164 = `+${msg.from}`;
-    await handleIncomingMessage(fromE164, msg.text.body);
+    const body = msg.text.body;
+
+    // Appairage AVANT le traitement conversationnel : à ce stade le numéro
+    // n'est justement pas encore lié à un compte, donc handleIncomingMessage
+    // le rejetterait ("aucun compte"). Voir Task 8bis.
+    if (isPairingCode(body)) {
+      await redeemPairingCode(fromE164, body);
+      continue;
+    }
+
+    await handleIncomingMessage(fromE164, body);
   }
 }
 ```
+
+**Fichier compagnon à créer dans cette même tâche** — `frontend/lib/whatsappAgent/redeemPairing.ts` :
+
+```ts
+// frontend/lib/whatsappAgent/redeemPairing.ts
+import 'server-only';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import { normalizePairingCode } from './pairing';
+import { sendWhatsAppReply } from './sendWhatsapp';
+
+/**
+ * Consomme un code d'appairage envoyé par l'utilisateur depuis SON WhatsApp :
+ * c'est ce qui prouve la possession du numéro (le numéro vient de Meta, pas
+ * d'une saisie manuelle). Ne lève jamais — toute erreur devient un message
+ * de repli, pour ne pas faire échouer le webhook.
+ */
+export async function redeemPairingCode(fromE164: string, rawText: string): Promise<void> {
+  const db = getServiceClient();
+  const code = normalizePairingCode(rawText);
+
+  const { data: row } = await db
+    .from('whatsapp_pairing_codes')
+    .select('user_id, expires_at, consumed_at')
+    .eq('code', code)
+    .maybeSingle();
+
+  if (!row) {
+    await sendWhatsAppReply(fromE164, "Code inconnu. Générez-en un nouveau depuis les paramètres de votre compte WESTBOURSE.");
+    return;
+  }
+  if (row.consumed_at) {
+    await sendWhatsAppReply(fromE164, "Ce code a déjà été utilisé. Générez-en un nouveau depuis vos paramètres.");
+    return;
+  }
+  if (new Date(row.expires_at as string).getTime() < Date.now()) {
+    await sendWhatsAppReply(fromE164, "Ce code a expiré (15 minutes). Générez-en un nouveau depuis vos paramètres.");
+    return;
+  }
+
+  const userId = row.user_id as string;
+
+  // Le numéro vient de Meta : aucune faute de frappe possible, et la
+  // possession est prouvée par l'envoi lui-même.
+  const { error: linkError } = await db
+    .from('notification_prefs')
+    .upsert({ user_id: userId, whatsapp_phone: fromE164, whatsapp_optin: true }, { onConflict: 'user_id' });
+
+  if (linkError) {
+    // 23505 = l'index unique de 0127 : ce numéro appartient déjà à un autre compte.
+    const dejaPris = linkError.code === '23505';
+    console.error('whatsappAgent/redeemPairing: liaison impossible', { code: linkError.code, message: linkError.message });
+    await sendWhatsAppReply(
+      fromE164,
+      dejaPris
+        ? "Ce numéro est déjà lié à un autre compte WESTBOURSE. Contactez le support si vous pensez qu'il s'agit d'une erreur."
+        : "La liaison a échoué. Réessayez dans quelques instants.",
+    );
+    return;
+  }
+
+  await db.from('whatsapp_pairing_codes').update({ consumed_at: new Date().toISOString() }).eq('code', code);
+
+  await sendWhatsAppReply(
+    fromE164,
+    "✅ Numéro lié à votre compte WESTBOURSE. Activez maintenant l'agent conversationnel dans vos paramètres pour pouvoir me poser des questions.",
+  );
+}
+```
+
+Imports à ajouter en tête de `route.ts` : `import { isPairingCode } from '@/lib/whatsappAgent/pairing';` et `import { redeemPairingCode } from '@/lib/whatsappAgent/redeemPairing';`
 
 - [ ] **Step 2 : Vérifier le typecheck**
 
