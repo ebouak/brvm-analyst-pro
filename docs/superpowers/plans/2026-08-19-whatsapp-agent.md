@@ -524,7 +524,7 @@ git commit -m "feat(whatsapp-agent): appel LLM cascade DeepSeek→Mistral"
 **Files:**
 - Create: `frontend/lib/whatsappAgent/handleMessage.ts`
 
-**Context:** Assemble tout ce qui précède : identification par téléphone → consentement `agent_optin` → quota via `checkFeature` → contexte (historique + watchlist) → LLM → persistance → réponse.
+**Context:** Assemble tout ce qui précède : identification par téléphone → consentement `agent_optin` → quota via `checkFeature` → contexte (historique + watchlist ENRICHIE avec les vraies données de marché du jour, via `getWatchlistContext` — voir `frontend/lib/whatsappAgent/watchlistContext.ts`, ajouté après une revue de code de la Task 6 qui a signalé que le plan promettait "cours, fondamentaux, signaux" mais qu'aucune tâche n'allait chercher ces données) → LLM → persistance → réponse.
 
 - [ ] **Step 1 : Implémenter**
 
@@ -534,6 +534,7 @@ import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { checkFeature } from '@/lib/server/featureGate';
 import { buildSystemPrompt } from './systemPrompt';
+import { getWatchlistContext } from './watchlistContext';
 import { callAgentLlm, type ChatMessage } from './callAgentLlm';
 import { sendWhatsAppReply } from './sendWhatsapp';
 
@@ -593,7 +594,8 @@ export async function handleIncomingMessage(fromE164: string, text: string): Pro
     return;
   }
 
-  // 4. Contexte : historique récent + watchlist.
+  // 4. Contexte : historique récent + watchlist ENRICHIE (vraies données de
+  //    marché du jour pour chaque code suivi, pas seulement les codes bruts).
   const { data: history } = await db
     .from('whatsapp_conversations')
     .select('role, contenu')
@@ -601,19 +603,14 @@ export async function handleIncomingMessage(fromE164: string, text: string): Pro
     .order('created_at', { ascending: false })
     .limit(HISTORY_LIMIT);
 
-  const { data: watchlistRows } = await db
-    .from('watchlist_items')
-    .select('code, watchlists!inner(user_id)')
-    .eq('watchlists.user_id', userId);
-
-  const watchlistCodes = (watchlistRows ?? []).map((r) => r.code as string);
+  const watchlist = await getWatchlistContext(db, userId);
 
   const chatHistory: ChatMessage[] = (history ?? [])
     .reverse()
     .map((h) => ({ role: h.role as 'user' | 'assistant', content: h.contenu as string }));
 
   const messages: ChatMessage[] = [
-    { role: 'system', content: buildSystemPrompt({ watchlistCodes }) },
+    { role: 'system', content: buildSystemPrompt({ watchlist }) },
     ...chatHistory,
     { role: 'user', content: text },
   ];
@@ -633,7 +630,7 @@ export async function handleIncomingMessage(fromE164: string, text: string): Pro
 }
 ```
 
-**Note pour l'implémenteur :** la jointure `watchlist_items` → `watchlists` suppose que `watchlist_items` a une colonne `code` et une FK `watchlist_id` vers `watchlists`. Si le nom de colonne diffère dans le schéma réel, l'ajuster — vérifier avec `grep -n "watchlist_items" supabase/migrations/*.sql` avant d'implémenter cette étape si le nom de colonne n'est pas confirmé.
+**Note pour l'implémenteur :** `getWatchlistContext` (déjà implémenté, committé, review — `frontend/lib/whatsappAgent/watchlistContext.ts`) encapsule la jointure `watchlist_items` → `watchlists` et l'enrichissement avec `brvm_actions_daily`/`signals_daily` de la dernière séance. `handleMessage.ts` n'a qu'à l'appeler, pas à réimplémenter cette logique.
 
 - [ ] **Step 2 : Vérifier le typecheck**
 

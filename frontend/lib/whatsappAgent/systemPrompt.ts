@@ -1,7 +1,32 @@
 // frontend/lib/whatsappAgent/systemPrompt.ts
 
+export interface WatchlistContextItem {
+  code: string;
+  cours: number | null;
+  variationPct: number | null;
+  signal: string | null;
+  confiance: number | null;
+}
+
 export interface SystemPromptContext {
-  watchlistCodes: string[];
+  watchlist: WatchlistContextItem[];
+}
+
+function formatWatchlistItem(item: WatchlistContextItem): string {
+  if (item.cours == null && item.variationPct == null && item.signal == null) {
+    return `${item.code} : donnée du jour indisponible.`;
+  }
+  const parts: string[] = [];
+  if (item.cours != null) parts.push(`${item.cours.toLocaleString('fr-FR')} FCFA`);
+  if (item.variationPct != null) {
+    const sign = item.variationPct >= 0 ? '+' : '';
+    parts.push(`${sign}${item.variationPct.toFixed(2)} % aujourd'hui`);
+  }
+  if (item.signal != null) {
+    const confPart = item.confiance != null ? ` (confiance ${(item.confiance * 100).toFixed(0)} %)` : '';
+    parts.push(`signal ${item.signal}${confPart}`);
+  }
+  return `${item.code} : ${parts.join(', ')}.`;
 }
 
 /**
@@ -9,12 +34,19 @@ export interface SystemPromptContext {
  * d'honnêteté que lib/narrative.ts et les disclaimers déjà utilisés ailleurs
  * sur le projet : jamais de conseil en investissement, jamais de chiffre
  * inventé, toujours dérivé des données réelles fournies dans le contexte.
+ *
+ * `ctx.watchlist` porte les VRAIES données de la dernière séance disponible
+ * (cours, variation, signal) pour chaque code suivi par l'utilisateur — pas
+ * seulement les codes bruts, pour que l'agent puisse répondre à des
+ * questions factuelles ("où en est SNTS ?") sans jamais avoir à inventer un
+ * chiffre. Une entrée sans donnée du jour le dit explicitement plutôt que de
+ * l'omettre silencieusement.
  */
 export function buildSystemPrompt(ctx: SystemPromptContext): string {
-  const watchlistLine =
-    ctx.watchlistCodes.length > 0
-      ? `Watchlist de l'utilisateur : ${ctx.watchlistCodes.join(', ')}.`
-      : '';
+  const watchlistLines =
+    ctx.watchlist.length > 0
+      ? [`Watchlist de l'utilisateur (données réelles de la dernière séance disponible) :`, ...ctx.watchlist.map(formatWatchlistItem)]
+      : [];
 
   return [
     "Tu es l'agent WhatsApp de WESTBOURSE, plateforme d'analyse de la BRVM (Bourse Régionale des Valeurs Mobilières, UEMOA).",
@@ -25,7 +57,7 @@ export function buildSystemPrompt(ctx: SystemPromptContext): string {
     "3. Tu ne peux RIEN modifier (pas d'ajout à la watchlist, pas d'ordre, pas de changement de préférences) — tu es en lecture seule.",
     "4. Réponds en français, de façon concise (WhatsApp, pas un rapport) : vise moins de 600 caractères, ne dépasse jamais 1500 (les messages WhatsApp sont tronqués au-delà de 4096 caractères, sans avertissement — reste large en dessous). N'utilise JAMAIS de Markdown standard (pas de titres avec #, pas de tableaux avec |, pas de listes à puces avec -) : WhatsApp ne les affiche pas, ils apparaîtraient tels quels dans le message. Utilise uniquement le formatage WhatsApp réel : *gras*, _italique_, ~barré~, et des sauts de ligne simples.",
     '',
-    watchlistLine,
+    ...watchlistLines,
   ]
     .filter(Boolean)
     .join('\n');
