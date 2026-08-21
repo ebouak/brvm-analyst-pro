@@ -1,12 +1,45 @@
 // frontend/app/api/whatsapp/webhook/route.ts
 import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
+import { createHmac } from 'node:crypto';
 import { verifyMetaSignature } from '@/lib/whatsappAgent/verifySignature';
 import { handleIncomingMessage } from '@/lib/whatsappAgent/handleMessage';
 import { isPairingCode } from '@/lib/whatsappAgent/pairing';
 import { redeemPairingCode } from '@/lib/whatsappAgent/redeemPairing';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * Meta REJOUE un webhook qu'il n'a pas vu acquitté. On répond 200 en quelques
+ * millisecondes, mais un cold start Vercel peut dépasser son délai d'attente —
+ * le rejeu est donc plausible en pratique, pas théorique. Sans garde, un même
+ * message serait traité deux fois : deux appels LLM facturés, deux réponses
+ * identiques envoyées à l'utilisateur, deux lignes dans l'historique.
+ *
+ * `checkRateLimit` avec maxHits=1 EST une déduplication : le premier passage
+ * insère la ligne et autorise, tout rejeu dans la fenêtre est refusé. Ça évite
+ * une table dédiée (donc une migration de plus) et hérite de la purge
+ * automatique hors fenêtre. Fail-open si l'infra tombe — on retombe alors sur
+ * le comportement d'avant, pas pire.
+ *
+ * L'identifiant Meta (`wamid...`) désigne indirectement une personne : on le
+ * HMAC comme le numéro plutôt que de l'écrire en clair dans une table non
+ * déclarée comme portant des données personnelles.
+ */
+const DEDUPE_WINDOW_SECONDS = 15 * 60;
+
+async function dejaTraite(messageId: string): Promise<boolean> {
+  const secret = process.env.WHATSAPP_APP_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'westbourse-dedupe';
+  const key = createHmac('sha256', secret).update(messageId).digest('hex');
+  const { allowed } = await checkRateLimit({
+    route: 'whatsapp-msg-dedupe',
+    ip: key,
+    maxHits: 1,
+    windowSeconds: DEDUPE_WINDOW_SECONDS,
+  });
+  return !allowed;
+}
 
 // Handshake de configuration du webhook (une seule fois, dans le dashboard Meta).
 export async function GET(request: Request) {
@@ -61,6 +94,7 @@ interface MetaWebhookPayload {
     changes?: Array<{
       value?: {
         messages?: Array<{
+          id?: string;
           from?: string;
           text?: { body?: string };
           type?: string;
@@ -75,6 +109,13 @@ async function processPayload(payload: unknown): Promise<void> {
   const messages = p.entry?.[0]?.changes?.[0]?.value?.messages ?? [];
   for (const msg of messages) {
     if (msg.type !== 'text' || !msg.from || !msg.text?.body) continue;
+
+    // Rejeu Meta : ne rien traiter deux fois (voir dejaTraite ci-dessus).
+    if (msg.id && (await dejaTraite(msg.id))) {
+      console.warn('whatsapp/webhook: message déjà traité, rejeu Meta ignoré');
+      continue;
+    }
+
     // Meta envoie `from` sans le '+' initial (ex. "2250700000000").
     const fromE164 = `+${msg.from}`;
     const body = msg.text.body;

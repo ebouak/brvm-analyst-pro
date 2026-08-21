@@ -1,6 +1,6 @@
 // frontend/lib/whatsappAgent/redeemPairing.ts
 import 'server-only';
-import { createHash } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 import { normalizePairingCode, PAIRING_TTL_MINUTES } from './pairing';
@@ -26,11 +26,22 @@ const PAIRING_RATE_ROUTE = 'whatsapp-pairing';
 
 /**
  * Clé de rate-limit dérivée du numéro. `rate_limit_hits` n'est pas déclarée
- * comme contenant des données personnelles (voir migration 0065) : on y écrit
- * un SHA-256 du numéro, jamais le numéro en clair.
+ * comme contenant des données personnelles (migration 0065) : on n'y écrit
+ * jamais le numéro en clair.
+ *
+ * HMAC et non simple SHA-256 : l'espace des numéros E.164 fait ~10^10
+ * combinaisons, qu'un GPU parcourt en quelques secondes — un hash nu serait
+ * trivialement réversible, donc encore une donnée personnelle au sens du
+ * RGPD (pseudonymisation, pas anonymisation). Avec une clé secrète, le
+ * brute-force est impossible sans compromettre d'abord le secret.
+ *
+ * WHATSAPP_APP_SECRET est nécessairement défini ici : le webhook rejette en
+ * 401 avant d'appeler cette fonction s'il manque. Le repli n'existe que pour
+ * ne jamais réduire la clé à une chaîne vide si l'ordre d'appel changeait.
  */
 function pairingRateKey(fromE164: string): string {
-  return createHash('sha256').update(fromE164).digest('hex');
+  const secret = process.env.WHATSAPP_APP_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'westbourse-pairing';
+  return createHmac('sha256', secret).update(fromE164).digest('hex');
 }
 
 /**
