@@ -49,3 +49,9 @@ end;
 $function$;
 
 revoke execute on function public.purge_rgpd_retention() from public, anon, authenticated;
+
+-- create or replace conserve l'OID, donc le commentaire posé en 0126 survit
+-- et décrirait une fonction qui fait désormais une purge de plus. Réémis ici
+-- pour que \df+ ne mente pas.
+comment on function public.purge_rgpd_retention is
+  'Purge RGPD : supprime admin_audit_logs, notifications_log et auth_events de plus de 12 mois, whatsapp_conversations de plus de 90 jours, whatsapp_pairing_codes expirés depuis plus d''un jour.';

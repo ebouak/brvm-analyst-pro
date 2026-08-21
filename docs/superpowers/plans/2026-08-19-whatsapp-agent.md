@@ -927,7 +927,7 @@ async function processPayload(payload: unknown): Promise<void> {
 // frontend/lib/whatsappAgent/redeemPairing.ts
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { normalizePairingCode } from './pairing';
+import { normalizePairingCode, PAIRING_TTL_MINUTES } from './pairing';
 import { sendWhatsAppReply } from './sendWhatsapp';
 
 /**
@@ -940,26 +940,29 @@ export async function redeemPairingCode(fromE164: string, rawText: string): Prom
   const db = getServiceClient();
   const code = normalizePairingCode(rawText);
 
-  const { data: row } = await db
+  // Consommation ATOMIQUE (un seul énoncé) : un check-then-act en deux temps
+  // laisserait deux invocations serverless concurrentes — le webhook traite en
+  // waitUntil, la concurrence est réelle — passer toutes les deux le contrôle
+  // avant que l'une n'écrive consumed_at (TOCTOU). Le `where` porte les trois
+  // conditions ; 0 ligne renvoyée = code inconnu, expiré ou déjà consommé.
+  const { data: claimed } = await db
     .from('whatsapp_pairing_codes')
-    .select('user_id, expires_at, consumed_at')
+    .update({ consumed_at: new Date().toISOString() })
     .eq('code', code)
+    .is('consumed_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .select('user_id')
     .maybeSingle();
 
-  if (!row) {
-    await sendWhatsAppReply(fromE164, "Code inconnu. Générez-en un nouveau depuis les paramètres de votre compte WESTBOURSE.");
-    return;
-  }
-  if (row.consumed_at) {
-    await sendWhatsAppReply(fromE164, "Ce code a déjà été utilisé. Générez-en un nouveau depuis vos paramètres.");
-    return;
-  }
-  if (new Date(row.expires_at as string).getTime() < Date.now()) {
-    await sendWhatsAppReply(fromE164, "Ce code a expiré (15 minutes). Générez-en un nouveau depuis vos paramètres.");
+  if (!claimed) {
+    await sendWhatsAppReply(
+      fromE164,
+      `Code invalide, expiré (${PAIRING_TTL_MINUTES} minutes) ou déjà utilisé. Générez-en un nouveau depuis les paramètres de votre compte WESTBOURSE.`,
+    );
     return;
   }
 
-  const userId = row.user_id as string;
+  const userId = claimed.user_id as string;
 
   // Le numéro vient de Meta : aucune faute de frappe possible, et la
   // possession est prouvée par l'envoi lui-même.
@@ -980,14 +983,38 @@ export async function redeemPairingCode(fromE164: string, rawText: string): Prom
     return;
   }
 
-  await db.from('whatsapp_pairing_codes').update({ consumed_at: new Date().toISOString() }).eq('code', code);
-
+  // Pas de second `update consumed_at` ici : le code a déjà été consommé
+  // atomiquement plus haut, au moment de la réclamation.
   await sendWhatsAppReply(
     fromE164,
     "✅ Numéro lié à votre compte WESTBOURSE. Activez maintenant l'agent conversationnel dans vos paramètres pour pouvoir me poser des questions.",
   );
 }
 ```
+
+**Limitation des tentatives (à implémenter dans cette même tâche).** Chaque
+branche d'échec ci-dessus répond par un message WhatsApp — donc **facturé**, et
+comptabilisé par Meta dans le volume sortant vers des numéros non engagés, ce
+qui dégrade la *quality rating* du numéro professionnel et peut faire baisser
+son tier de messagerie (ce qui casserait briefs et alertes pour **tous** les
+utilisateurs). Ce n'est pas un risque de compromission — l'entropie du code
+(30 bits, ≈ 5,4 × 10⁸ tentatives en moyenne) rend le devinement irréaliste —
+mais une exposition économique et opérationnelle réelle.
+
+`frontend/lib/server/rateLimit.ts` existe déjà mais est clé par **IP** :
+inutilisable tel quel, l'IP appelante est toujours celle de Meta. La clé
+pertinente est le **numéro émetteur**. Deux contraintes :
+
+1. Ne jamais stocker le numéro en clair dans `rate_limit_hits` — cette table
+   n'est pas déclarée comme contenant des données personnelles ; utiliser un
+   hash (`createHash('sha256').update(fromE164).digest('hex')`).
+2. Au-delà du seuil, **cesser de répondre** plutôt que de répondre « code
+   inconnu » — sinon la limite ne coupe pas l'amplification, qui est
+   précisément le problème.
+
+Ordre de grandeur : 5 tentatives d'appairage par tranche de 10 minutes et par
+numéro. Aucun utilisateur légitime n'atteint ce seuil (il lit un code à
+l'écran et le recopie une fois).
 
 Imports à ajouter en tête de `route.ts` : `import { isPairingCode } from '@/lib/whatsappAgent/pairing';` et `import { redeemPairingCode } from '@/lib/whatsappAgent/redeemPairing';`
 
