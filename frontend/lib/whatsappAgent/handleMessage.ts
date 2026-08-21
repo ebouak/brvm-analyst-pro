@@ -18,18 +18,31 @@ const HISTORY_LIMIT = 10;
 export async function handleIncomingMessage(fromE164: string, text: string): Promise<void> {
   const db = getServiceClient();
 
-  // 1. Identification par téléphone vérifié.
-  const { data: prefs } = await db
+  // 1. Identification par le numéro DÉCLARÉ (pas « vérifié » : l'activation
+  //    dans les paramètres ne valide que le format E.164, aucun OTP ne prouve
+  //    la propriété du numéro — voir migration 0127 et la note produit du plan).
+  const { data: prefs, error: prefsError } = await db
     .from('notification_prefs')
     .select('user_id, agent_optin')
     .eq('whatsapp_phone', fromE164)
     .eq('whatsapp_optin', true)
     .maybeSingle();
 
+  if (prefsError) {
+    // PGRST116 = plusieurs lignes pour ce numéro (collision que la migration
+    // 0127 empêche désormais à la source, mais que d'anciennes données
+    // peuvent encore porter). Sans ce log, la victime reçoit « aucun compte »
+    // et l'incident est invisible en production.
+    console.error('whatsappAgent/handleMessage: lecture notification_prefs impossible', {
+      code: prefsError.code,
+      message: prefsError.message,
+    });
+  }
+
   if (!prefs) {
     await sendWhatsAppReply(
       fromE164,
-      "Ce numéro n'est associé à aucun compte WESTBOURSE vérifié. Activez WhatsApp dans les paramètres de votre compte pour utiliser l'agent.",
+      "Ce numéro n'est associé à aucun compte WESTBOURSE. Activez WhatsApp dans les paramètres de votre compte pour utiliser l'agent.",
     );
     return;
   }
