@@ -63,8 +63,7 @@ async function getData() {
   // enchaînées en `await` séquentiels — chacune attendait la précédente sans
   // raison, l'ancienne date brièvement postulée n'étant en réalité utile qu'à
   // deux fetches précis, traités à l'étape 2 ci-dessous.)
-  // Partagée avec frontend/lib/whatsappAgent/watchlistContext.ts — voir
-  // frontend/lib/marketDate.ts pour éviter que les deux divergent en silence.
+  // Extraite dans lib/marketDate.ts (voir ce fichier pour le détail du partage).
   const lastDayPromise = getLastMarketDate(supabase);
   // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
   const lastIdxPromise = supabase
