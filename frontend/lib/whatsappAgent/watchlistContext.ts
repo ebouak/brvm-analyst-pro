@@ -24,7 +24,13 @@ export async function getWatchlistContext(
     getLastMarketDate(db),
   ]);
 
-  const codes = [...new Set((watchlistRows ?? []).map((r) => r.code as string))];
+  // Plafond défensif : aucune limite serveur n'existe sur la taille d'une
+  // watchlist, et rien dans le pipeline (prompt système, historique) ne
+  // borne la taille du contexte envoyé au LLM à chaque message — un
+  // utilisateur suivant une grande partie des 48 valeurs de la BRVM ne doit
+  // pas faire gonfler chaque appel LLM indéfiniment.
+  const MAX_WATCHLIST_CODES = 20;
+  const codes = [...new Set((watchlistRows ?? []).map((r) => r.code as string))].slice(0, MAX_WATCHLIST_CODES);
   if (codes.length === 0) return [];
 
   if (!asOf) {

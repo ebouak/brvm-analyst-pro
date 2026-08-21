@@ -615,8 +615,16 @@ export async function handleIncomingMessage(fromE164: string, text: string): Pro
     { role: 'user', content: text },
   ];
 
-  // 5. Appel LLM.
+  // 5. Appel LLM. callAgentLlm ne logue rien en interne (les deux providers
+  //    échouent silencieusement vers null) — contrairement au pattern de
+  //    référence (callLlm dans import-batch/route.ts) dont l'appelant logue
+  //    toujours l'échec, une panne totale des deux providers doit être
+  //    tracée ICI pour rester diagnosticable en production (signalé par la
+  //    review qualité de la Task 7).
   const reply = await callAgentLlm(messages);
+  if (!reply) {
+    console.error('whatsappAgent/handleMessage: callAgentLlm a échoué (DeepSeek et Mistral indisponibles)', { userId });
+  }
   const finalReply = reply ?? "Je n'arrive pas à répondre pour le moment, réessayez dans quelques instants.";
 
   // 6. Persistance (les deux messages).
@@ -658,6 +666,7 @@ git commit -m "feat(whatsapp-agent): orchestration complète du traitement d'un 
 ```ts
 // frontend/app/api/whatsapp/webhook/route.ts
 import { NextResponse } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 import { verifyMetaSignature } from '@/lib/whatsappAgent/verifySignature';
 import { handleIncomingMessage } from '@/lib/whatsappAgent/handleMessage';
 
@@ -694,9 +703,17 @@ export async function POST(request: Request) {
 
   // Meta répond mal (voire redésabonne le webhook) si on met trop de temps à
   // répondre 200 — on traite en tâche de fond et on répond tout de suite.
-  void processPayload(payload).catch((err) => {
-    console.error('whatsapp/webhook: échec traitement en tâche de fond', err instanceof Error ? err.message : String(err));
-  });
+  // waitUntil() (pas un simple `void ...`) : sur Vercel/serverless, la
+  // fonction peut être arrêtée dès la réponse HTTP envoyée — la cascade LLM
+  // de callAgentLlm.ts pouvant atteindre ~60 s (DeepSeek puis Mistral,
+  // 30 s chacun), un `void` sans garantie d'exécution risquerait une
+  // troncature silencieuse du traitement (signalé par la review qualité de
+  // la Task 7).
+  waitUntil(
+    processPayload(payload).catch((err) => {
+      console.error('whatsapp/webhook: échec traitement en tâche de fond', err instanceof Error ? err.message : String(err));
+    }),
+  );
 
   return NextResponse.json({ status: 'received' }, { status: 200 });
 }
