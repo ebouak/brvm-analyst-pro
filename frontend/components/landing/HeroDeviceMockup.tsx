@@ -17,10 +17,11 @@ interface Props {
 }
 
 /**
- * Traitement Hero cible (Phase 10, remplace HeroSpotlight sur la preview
- * uniquement) : le produit réel comme visuel principal plutôt qu'une photo —
- * un cadre d'appareil affichant BRVM-C, les cotations réelles déjà calculées
- * par getPreviewData(), aucune nouvelle donnée.
+ * Traitement Hero cible (Phase 10-13), en production depuis Phase 13,
+ * remplace HeroSpotlight : le produit réel comme visuel principal plutôt
+ * qu'une photo — un cadre d'appareil affichant BRVM-C, les cotations
+ * réelles déjà calculées par getData()/getPreviewData(), aucune nouvelle
+ * donnée.
  */
 export function HeroDeviceMockup({ dateLabel, ticks, brvmC, topMover }: Props) {
   const top = ticks.slice(0, 4);

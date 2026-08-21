@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { unstable_cache } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
-import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import NewsletterForm from '@/components/NewsletterForm';
@@ -14,14 +13,18 @@ import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
-import type { IndiceDaily } from '@/lib/types';
+import type { IndiceDaily, SignalDaily } from '@/lib/types';
 import { getSgiDirectory } from '@/lib/sgi-frais/queries';
 import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
-import { HeroSpotlight } from '@/components/landing/HeroSpotlight';
+import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
 import { ProofBand } from '@/components/landing/ProofBand';
 import { SocialProof } from '@/components/landing/SocialProof';
 import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
+import { ToolsGrid } from '@/components/landing/ToolsGrid';
+import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
+import { DiagnosticSpotlight } from '@/components/landing/DiagnosticSpotlight';
+import { PremiumCompare } from '@/components/landing/PremiumCompare';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
 // cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
@@ -54,13 +57,129 @@ interface NewsCardItem {
 async function getData() {
   const supabase = createPublicClient();
 
-  const { data: lastDay } = await supabase
+  // Étape 1 : toutes les requêtes qui ne dépendent d'aucune valeur calculée
+  // par une autre requête partent en un seul aller-retour réseau. (Avant :
+  // enchaînées en `await` séquentiels — chacune attendait la précédente sans
+  // raison, l'ancienne date brièvement postulée n'étant en réalité utile qu'à
+  // deux fetches précis, traités à l'étape 2 ci-dessous.)
+  const lastDayPromise = supabase
     .from('brvm_actions_daily')
     .select('date_marche')
     .order('date_marche', { ascending: false })
     .limit(1)
     .maybeSingle();
+  // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
+  const lastIdxPromise = supabase
+    .from('brvm_indices_daily')
+    .select('date_marche')
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // Brief du jour (extrait)
+  const briefPromise = supabase
+    .from('brief_daily')
+    .select('date_marche, contenu')
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // Simulation réelle : 1 000 000 FCFA dans SNTS il y a 5 ans — ne dépend que
+  // d'une date calculée localement, aucune valeur d'une autre requête.
+  const simulationPromise: Promise<{ finalValue: number; pct: number; years: number } | null> = (async () => {
+    try {
+      const from = new Date();
+      from.setFullYear(from.getFullYear() - 5);
+      const fromIso = from.toISOString().split('T')[0]!;
+      const [{ data: snts }, { data: divs }] = await Promise.all([
+        supabase
+          .from('brvm_actions_daily')
+          .select('date_marche, cours_jour')
+          .eq('code', 'SNTS')
+          .gte('date_marche', fromIso)
+          .order('date_marche', { ascending: true }),
+        supabase.from('dividends').select('montant, payment_date, ex_date').eq('code', 'SNTS'),
+      ]);
+      const prices: PricePoint[] = (snts ?? [])
+        .filter((r) => r.cours_jour != null && r.cours_jour > 0)
+        .map((r) => ({ date: r.date_marche as string, close: r.cours_jour as number }));
+      const dividends = (divs ?? [])
+        .map((d) => ({ date: (d.payment_date ?? d.ex_date ?? '') as string, montant: d.montant as number }))
+        .filter((d) => d.date);
+      const sim = simulateInvestment(1_000_000, fromIso, prices, dividends);
+      return sim ? { finalValue: sim.finalValue, pct: sim.totalReturnPct, years: sim.years } : null;
+    } catch {
+      return null; /* pas de simulation si données indisponibles */
+    }
+  })();
+  // Actualités du marché (4 dernières) pour la section cartes
+  const newsPromise = supabase
+    .from('brvm_news')
+    .select('id, titre, date_publication, source_url, instrument_code')
+    .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
+    .order('date_publication', { ascending: false })
+    .limit(4);
+  // Cartographie du marché (treemap landing) — même chargement que /heatmap.
+  // loadHeatmap() résout elle-même sa propre "dernière date" en interne,
+  // aucune dépendance sur `asOf`/`idxDate` calculés dans cette fonction.
+  const heatmapPromise: Promise<HeatmapNode[]> = (async () => {
+    try {
+      const { rows } = await loadHeatmap(supabase);
+      return rows;
+    } catch {
+      return []; /* pas de cartographie si données indisponibles */
+    }
+  })();
+  const diagReportPromise = supabase
+    .from('diagnostic_reports')
+    .select('code, generated_at, markdown_content')
+    .order('generated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const planRowsPromise = supabase
+    .from('subscription_plans')
+    .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  // Annuaire SGI (comparateur) : lecture publique pure, aucun cookie ni
+  // donnée de session (voir frontend/lib/sgi-frais/queries.ts) — rejoint le
+  // même cache 5 min que le reste de la landing au lieu d'un appel à part et
+  // non caché dans Landing().
+  const sgiDirectoryPromise = getSgiDirectory();
+
+  // Sûr sans .throwOnError() nulle part dans ce fichier : le client Supabase
+  // résout toujours { data, error } sans jamais rejeter la Promise, même en
+  // cas d'erreur réseau/RLS — un Promise.all ici ne peut donc pas transformer
+  // une section en panne en page cassée. Ne PAS ajouter .throwOnError() à
+  // l'une de ces requêtes sans réévaluer cette garantie.
+  //
+  // ⚠️ Les deux listes ci-dessous doivent rester dans le MÊME ORDRE (client
+  // public non généré par `Database`, donc aucun filet de type ne détecterait
+  // un décalage positionnel) — tout ajout doit toucher les deux en même position.
+  const [
+    { data: lastDay },
+    { data: lastIdx },
+    { data: brief },
+    simulation,
+    { data: newsRows },
+    heatmapRows,
+    { data: diagReport },
+    { data: planRows },
+    sgiDirectory,
+  ] = await Promise.all([
+    lastDayPromise,
+    lastIdxPromise,
+    briefPromise,
+    simulationPromise,
+    newsPromise,
+    heatmapPromise,
+    diagReportPromise,
+    planRowsPromise,
+    sgiDirectoryPromise,
+  ]);
+
   const asOf = (lastDay?.date_marche as string | undefined) ?? null;
+  const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
+  const news = (newsRows ?? []) as NewsCardItem[];
+  const planIds = (planRows ?? []).map((p) => p.id as string);
 
   let ticks: TickItem[] = [];
   let tickerRows: RealtimeActionRow[] = [];
@@ -69,33 +188,54 @@ async function getData() {
   let flatTop: MoverRow[] = [];
   let nbActions = 0;
   let volumeTotal = 0;
-
-  // Indices BRVM (11) — date propre, pas toujours alignée sur les cours actions.
+  let spotlightSignal: (SignalDaily & { code: string }) | null = null;
   let indices: IndiceDaily[] = [];
-  const { data: lastIdx } = await supabase
-    .from('brvm_indices_daily')
-    .select('date_marche')
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
-  if (idxDate) {
-    const { data: idxRows } = await supabase
-      .from('brvm_indices_daily')
-      .select('*')
-      .eq('date_marche', idxDate);
-    indices = (idxRows ?? []) as IndiceDaily[];
-  }
 
-  if (asOf) {
-    const [{ data: rows }, { data: sigs }] = await Promise.all([
-      supabase
-        .from('brvm_actions_daily')
-        .select('code, cours_jour, variation_pct, volume')
-        .eq('date_marche', asOf)
-        .order('variation_pct', { ascending: false }),
-      supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
-    ]);
+  // Étape 2 : les requêtes qui dépendent d'une valeur connue seulement après
+  // l'étape 1 (idxDate, asOf, planIds) — mais qui ne dépendent PAS les unes
+  // des autres — partent elles aussi en parallèle plutôt qu'en 3 allers-retours
+  // successifs.
+  const idxRowsPromise = idxDate
+    ? supabase.from('brvm_indices_daily').select('*').eq('date_marche', idxDate)
+    : Promise.resolve({ data: null as IndiceDaily[] | null });
+  const asOfBlockPromise = asOf
+    ? Promise.all([
+        supabase
+          .from('brvm_actions_daily')
+          .select('code, cours_jour, variation_pct, volume')
+          .eq('date_marche', asOf)
+          .order('variation_pct', { ascending: false }),
+        supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
+        // Signal spotlight : ne dépend que d'asOf, aucune donnée calculée
+        // ci-dessous — rejoint ce Promise.all plutôt qu'un aller-retour à part.
+        supabase
+          .from('signals_daily')
+          .select('*')
+          .eq('date_marche', asOf)
+          .order('score_total', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ])
+    : Promise.resolve(null);
+  const featureRowsPromise = planIds.length
+    ? supabase
+        .from('plan_features')
+        .select('id, plan_id, feature_label, feature_value, sort_order')
+        .in('plan_id', planIds)
+        .order('sort_order', { ascending: true })
+    : Promise.resolve({ data: [] as { id: string; plan_id: string; feature_label: string; feature_value: string | null }[] });
+
+  const [idxRowsRes, asOfBlockRes, featureRowsRes] = await Promise.all([
+    idxRowsPromise,
+    asOfBlockPromise,
+    featureRowsPromise,
+  ]);
+
+  indices = (idxRowsRes.data ?? []) as IndiceDaily[];
+
+  if (asOfBlockRes) {
+    const [{ data: rows }, { data: sigs }, { data: topSignal }] = asOfBlockRes;
+    spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
     const all = (rows ?? []) as { code: string; cours_jour: number | null; variation_pct: number | null; volume: number | null }[];
     nbActions = all.length;
     volumeTotal = all.reduce((s, r) => s + (r.volume ?? 0), 0);
@@ -131,73 +271,55 @@ async function getData() {
     tickerRows = tickSource.map((m) => ({ code: m.code, cours_jour: m.cours, variation_pct: m.pct }));
   }
 
-  // Brief du jour (extrait)
-  const { data: brief } = await supabase
-    .from('brief_daily')
-    .select('date_marche, contenu')
-    .order('date_marche', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const featureRows = featureRowsRes.data;
+  const plans = (planRows ?? []).map((p) => ({
+    code: p.code as string,
+    name: p.name as string,
+    // numeric(12,2) revient en chaîne via PostgREST — Number() explicite,
+    // même convention que app/pricing/page.tsx et app/account/plan/page.tsx.
+    price_monthly: Number(p.price_monthly ?? 0),
+    is_recommended: Boolean(p.is_recommended),
+    features: (featureRows ?? [])
+      .filter((f) => f.plan_id === p.id)
+      .map((f) => ({ id: f.id as string, feature_label: f.feature_label as string, feature_value: f.feature_value as string | null })),
+  }));
 
-  // Simulation réelle : 1 000 000 FCFA dans SNTS il y a 5 ans
-  let simulation: { finalValue: number; pct: number; years: number } | null = null;
-  try {
-    const from = new Date();
-    from.setFullYear(from.getFullYear() - 5);
-    const fromIso = from.toISOString().split('T')[0]!;
-    const [{ data: snts }, { data: divs }] = await Promise.all([
-      supabase
-        .from('brvm_actions_daily')
-        .select('date_marche, cours_jour')
-        .eq('code', 'SNTS')
-        .gte('date_marche', fromIso)
-        .order('date_marche', { ascending: true }),
-      supabase.from('dividends').select('montant, payment_date, ex_date').eq('code', 'SNTS'),
-    ]);
-    const prices: PricePoint[] = (snts ?? [])
-      .filter((r) => r.cours_jour != null && r.cours_jour > 0)
-      .map((r) => ({ date: r.date_marche as string, close: r.cours_jour as number }));
-    const dividends = (divs ?? [])
-      .map((d) => ({ date: (d.payment_date ?? d.ex_date ?? '') as string, montant: d.montant as number }))
-      .filter((d) => d.date);
-    const sim = simulateInvestment(1_000_000, fromIso, prices, dividends);
-    if (sim) simulation = { finalValue: sim.finalValue, pct: sim.totalReturnPct, years: sim.years };
-  } catch {
-    /* pas de simulation si données indisponibles */
-  }
-
-  // Actualités du marché (4 dernières) pour la section cartes
-  const { data: newsRows } = await supabase
-    .from('brvm_news')
-    .select('id, titre, date_publication, source_url, instrument_code')
-    .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
-    .order('date_publication', { ascending: false })
-    .limit(4);
-  const news = (newsRows ?? []) as NewsCardItem[];
-
-  // Cartographie du marché (treemap landing) — même chargement que /heatmap.
-  let heatmapRows: HeatmapNode[] = [];
-  try {
-    const { rows } = await loadHeatmap(supabase);
-    heatmapRows = rows;
-  } catch {
-    /* pas de cartographie si données indisponibles */
-  }
-
-  return { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows };
+  return {
+    asOf,
+    ticks,
+    tickerRows,
+    hausses,
+    baisses,
+    flatTop,
+    nbActions,
+    volumeTotal,
+    brief,
+    simulation,
+    indices,
+    news,
+    heatmapRows,
+    spotlightSignal,
+    latestDiagnosticReport: diagReport ?? null,
+    plans,
+    sgiDirectory,
+  };
 }
 
 // Le layout racine lit la session (cookies) → la route est rendue dynamique et
 // l'ISR (`revalidate = 300`) est sans effet sur le HTML. On met donc les
-// DONNÉES en cache serveur 5 min : les ~10 requêtes Supabase ci-dessus ne
-// tournent plus à chaque visite. Sûr : getData n'utilise que le client public
-// (aucun cookie, aucune donnée personnalisée).
+// DONNÉES en cache serveur 5 min : les ~10 requêtes Supabase ci-dessus (dont
+// l'annuaire SGI, qui rejoint désormais ce même cache) ne tournent plus à
+// chaque visite. Sûr : getData n'utilise que le client public (aucun cookie,
+// aucune donnée personnalisée).
 const getCachedData = unstable_cache(getData, ['landing-data'], { revalidate: 300 });
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
 
 function MoverLine({ m }: { m: MoverRow }) {
-  const up = m.pct >= 0;
+  // pct === 0 est neutre, pas "hausse" : évite une puce verte sous un
+  // en-tête de carte "Top baisses" en mode repli flatTop (où tous les
+  // titres ont un pct exactement nul par construction).
+  const sign = m.pct > 0 ? 'up' : m.pct < 0 ? 'down' : 'neutral';
   return (
     <Link
       href={`/societes/${m.code}`}
@@ -209,8 +331,10 @@ function MoverLine({ m }: { m: MoverRow }) {
       </span>
       <span className="flex items-baseline gap-3 shrink-0">
         <span className="tabular text-sm text-ivory">{m.cours != null ? nf(m.cours) : '—'}</span>
-        <span className={`tabular text-xs font-bold ${up ? 'text-up' : 'text-down'}`}>
-          {up ? '+' : ''}{m.pct.toFixed(2)}%
+        <span
+          className={`tabular text-xs font-bold ${sign === 'up' ? 'text-up' : sign === 'down' ? 'text-down' : 'text-muted'}`}
+        >
+          {sign === 'up' ? '+' : ''}{m.pct.toFixed(2)}%
         </span>
       </span>
     </Link>
@@ -242,10 +366,27 @@ const STEPS = [
 ];
 
 export default async function Landing() {
-  const { asOf, ticks, tickerRows, hausses, baisses, flatTop, nbActions, volumeTotal, brief, simulation, indices, news, heatmapRows } = await getCachedData();
+  const {
+    asOf,
+    ticks,
+    tickerRows,
+    hausses,
+    baisses,
+    flatTop,
+    nbActions,
+    volumeTotal,
+    brief,
+    simulation,
+    indices,
+    news,
+    heatmapRows,
+    spotlightSignal,
+    latestDiagnosticReport,
+    plans,
+    sgiDirectory,
+  } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
-  const sgiDirectory = await getSgiDirectory();
   const sgiCount = sgiDirectory.length;
   const sgiPaysCounts = new Map<string, number>();
   for (const s of sgiDirectory) sgiPaysCounts.set(s.pays, (sgiPaysCounts.get(s.pays) ?? 0) + 1);
@@ -260,18 +401,44 @@ export default async function Landing() {
   const briefLines = brief
     ? (brief.contenu as string).split('\n').filter((l) => l.trim() && !l.startsWith('Analyse complète')).slice(0, 7)
     : [];
+  const brvmC = indices.find((i) => i.code === 'BRVMC')?.valeur ?? null;
+  // Repli "séance peu animée" réparti sur les deux cartes (hausses/baisses)
+  // sans dupliquer les mêmes titres — la garde d'affichage porte sur la
+  // longueur de CHAQUE moitié, pas sur flatTop.length, pour ne jamais
+  // afficher la légende "titres les plus échangés" sans item en dessous
+  // (flatTop peut avoir moins de 6 éléments un jour de séance dégradée).
+  const flatTopA = flatTop.slice(0, 3);
+  const flatTopB = flatTop.slice(3, 6);
 
   return (
     <div className="relative z-10 mx-auto max-w-content px-4 pb-12">
       <TasteTopbar ticks={ticks} liveRows={tickerRows} dateMarche={asOf} />
 
-      {/* ── HERO : photo immersive + carte Afrique + logo BRVM clignotant ── */}
+      {/* ── HERO : mockup de la vraie interface (BRVM-C, cotations, note) ── */}
       {/* UX : proposition de valeur d'abord ; actualités externes et état de
           séance repoussés SOUS le hero (évite la fuite d'attention above the fold). */}
-      <HeroSpotlight dateLabel={dateLabel} ticks={ticks} />
+      {(() => {
+        // Même repli que la carte "séance en direct" plus bas : sur une séance
+        // calme (fréquent sur la BRVM), hausses/baisses peuvent être vides
+        // alors que flatTop porte quand même des titres réels — ne pas priver
+        // le hero de son badge de notation dans ce cas.
+        const topMoverSource = hausses[0] ?? baisses[0] ?? flatTop[0] ?? null;
+        return (
+          <HeroDeviceMockup
+            dateLabel={dateLabel}
+            ticks={ticks}
+            brvmC={brvmC}
+            topMover={
+              topMoverSource
+                ? { code: topMoverSource.code, score: topMoverSource.score, confiance: topMoverSource.confiance }
+                : null
+            }
+          />
+        );
+      })()}
 
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
-      <ProofBand />
+      <ProofBand nbActions={nbActions} />
 
       {/* ── MARCHÉ EN DIRECT : actus, séance, preuve chiffrée, indices,
           heatmap — remonté juste après ProofBand (preuve de fraîcheur des
@@ -285,71 +452,78 @@ export default async function Landing() {
 
         <NewsTicker className="-mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-center">
-          <div>
-            <p className="mb-7 max-w-[56ch] text-base leading-[1.75] text-muted">
-              Cours actualisés toutes les 15 minutes, note A–F sur chaque action, fondamentaux extraits des
-              publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
-            </p>
+        <p className="mt-6 max-w-[56ch] text-base leading-[1.75] text-muted">
+          Cours actualisés toutes les 15 minutes, note A–F sur chaque action, fondamentaux extraits des
+          publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
+        </p>
 
-            {/* Preuves chiffrées réelles */}
-            <dl className="grid max-w-md grid-cols-3 gap-4 border-t border-white/[0.07] pt-5">
-              {[
-                { v: nbActions > 0 ? String(nbActions) : '48', l: 'sociétés suivies' },
-                { v: '15 min', l: 'fréquence des cours' },
-                { v: volumeTotal > 0 ? fmtNumber(volumeTotal) : '—', l: 'titres échangés (séance)' },
-              ].map((s) => (
-                <div key={s.l}>
-                  <dt className="sr-only">{s.l}</dt>
-                  <dd className="tabular font-display text-2xl text-ivory">{s.v}</dd>
-                  <dd className="mt-0.5 text-[11px] leading-tight text-faint">{s.l}</dd>
-                </div>
-              ))}
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+            <p className="overline mb-3 text-up">Top hausses</p>
+            <div className="space-y-2">
+              {hausses.length > 0 ? (
+                hausses.map((m) => <MoverLine key={m.code} m={m} />)
+              ) : flatTopA.length > 0 ? (
+                <>
+                  <p className="mb-1 text-[11px] text-muted">Séance peu animée — titres les plus échangés :</p>
+                  {flatTopA.map((m) => (
+                    <MoverLine key={m.code} m={m} />
+                  ))}
+                </>
+              ) : (
+                <p className="py-6 text-center text-xs text-faint">Aucune hausse signée cette séance.</p>
+              )}
+            </div>
+          </div>
+          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+            <p className="overline mb-3 text-gold-2">BRVM-C</p>
+            <p className="tabular font-display text-3xl text-ivory">
+              {brvmC != null ? nf(brvmC, 2) : '—'}
+            </p>
+            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/[0.07] pt-3">
+              <div>
+                <dt className="sr-only">sociétés suivies</dt>
+                <dd className="tabular font-display text-lg text-ivory">{nbActions > 0 ? nbActions : '—'}</dd>
+                <dd className="mt-0.5 text-[10px] text-faint">sociétés suivies</dd>
+              </div>
+              <div>
+                <dt className="sr-only">titres échangés</dt>
+                <dd className="tabular font-display text-lg text-ivory">{volumeTotal > 0 ? fmtNumber(volumeTotal) : '—'}</dd>
+                <dd className="mt-0.5 text-[10px] text-faint">titres échangés</dd>
+              </div>
             </dl>
           </div>
-
-          {/* Carte séance live — le produit en démonstration */}
-          <aside className="landing-live-card rounded-panel border border-white/10 p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="overline text-gold-2">La séance, en direct</p>
-              <Link href="/societes" className="text-[11px] text-muted transition-colors hover:text-ivory">
-                Tout voir →
-              </Link>
+          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+            <p className="overline mb-3 text-down">Top baisses</p>
+            <div className="space-y-2">
+              {baisses.length > 0 ? (
+                baisses.map((m) => <MoverLine key={m.code} m={m} />)
+              ) : flatTopB.length > 0 ? (
+                <>
+                  <p className="mb-1 text-[11px] text-muted">Séance peu animée — titres les plus échangés :</p>
+                  {flatTopB.map((m) => (
+                    <MoverLine key={m.code} m={m} />
+                  ))}
+                </>
+              ) : (
+                <p className="py-6 text-center text-xs text-faint">Aucune baisse signée cette séance.</p>
+              )}
             </div>
-
-            {hausses.length > 0 || baisses.length > 0 ? (
-              <div className="space-y-2">
-                {hausses.map((m) => (
-                  <MoverLine key={m.code} m={m} />
-                ))}
-                <div className="my-3 border-t border-white/[0.06]" aria-hidden />
-                {baisses.map((m) => (
-                  <MoverLine key={m.code} m={m} />
-                ))}
-              </div>
-            ) : flatTop.length > 0 ? (
-              <div className="space-y-2">
-                <p className="mb-1 text-[11px] text-muted">Séance peu animée — cours stables (titres les plus échangés) :</p>
-                {flatTop.map((m) => (
-                  <MoverLine key={m.code} m={m} />
-                ))}
-              </div>
-            ) : (
-              <p className="py-10 text-center text-sm text-faint">
-                {dateLabel ? `Séance du ${dateLabel} — données en cours de consolidation.` : 'Données de séance indisponibles pour le moment.'}
-              </p>
-            )}
-
-            <p className="mt-4 text-[10px] leading-relaxed text-faint">
-              Données réelles de la dernière séance · note A–F dérivée des signaux quantitatifs (NR = non noté).
-            </p>
-          </aside>
+          </div>
+          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+            <p className="overline mb-3 text-gold-2">Indices BRVM</p>
+            <LandingIndices indices={indices} />
+          </div>
         </div>
-
-        <LandingIndices indices={indices} />
 
         <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
       </section>
+
+      <ToolsGrid />
+
+      <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
+
+      <DiagnosticSpotlight report={latestDiagnosticReport} />
 
       {/* ── APERÇU PLATEFORME : c'est le vrai moteur de conversion
           (features réelles + CTA inscription). ─────────────────────────── */}
@@ -474,8 +648,8 @@ export default async function Landing() {
         </section>
       )}
 
-      {/* ── 3 CARTES : Analyse · Premium · Actualités ─────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* ── 2 CARTES : Analyse · Actualités ───────────────────────────── */}
+      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Carte 1 — Analyse exclusive → inscription */}
         <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-accent/40 hover:bg-white/[0.05]">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-up/30 bg-up/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-up">
@@ -494,23 +668,7 @@ export default async function Landing() {
           </Link>
         </article>
 
-        {/* Carte 2 — Premium → pricing */}
-        <article className="flex flex-col rounded-panel border border-accent/25 bg-accent/[0.05] p-6 transition-all hover:border-accent/50">
-          <p className="overline text-gold-2">Premium</p>
-          <h3 className="mt-3 font-display text-xl text-ivory">Passez à Premium</h3>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
-            Diagnostic IA façon sell-side sur chaque société — valorisation, forces, risques —
-            rapports mensuels PDF et paper trading automatique.
-          </p>
-          <Link
-            href="/pricing"
-            className="landing-hero-cta mt-5 inline-flex min-h-[44px] w-fit items-center gap-1.5 rounded-full px-5 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-          >
-            Découvrir <span aria-hidden>→</span>
-          </Link>
-        </article>
-
-        {/* Carte 3 — Actualités du marché (vraies données brvm_news) */}
+        {/* Carte 2 — Actualités du marché (vraies données brvm_news) */}
         <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-xl text-ivory">Actualités du Marché</h3>
@@ -555,6 +713,8 @@ export default async function Landing() {
           )}
         </article>
       </section>
+
+      <PremiumCompare plans={plans} />
 
       {/* ── FAQ — lève les objections avant le CTA final ─────────────── */}
       <LandingFaq />

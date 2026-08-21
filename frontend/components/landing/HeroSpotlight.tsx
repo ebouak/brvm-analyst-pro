@@ -1,3 +1,7 @@
+// Orphelin depuis c1be40b (Phase 13) — remplacé par HeroDeviceMockup en
+// production. Conservé sur demande explicite (pas de suppression sans
+// décision séparée) — ne pas réutiliser sans vérifier que ce choix tient
+// toujours.
 import Link from 'next/link';
 import Image from 'next/image';
 import { HeroPulseCTA } from '@/components/landing/HeroPulseCTA';
