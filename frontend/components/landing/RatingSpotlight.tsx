@@ -21,7 +21,7 @@ function Bar({ label, value, min = -1, max = 1 }: { label: string; value: number
         <span className="text-muted">{label}</span>
         <span className="tabular text-faint">{value != null ? value.toFixed(2) : '—'}</span>
       </div>
-      <div className="h-1.5 rounded-full bg-white/[0.06]">
+      <div className="h-1.5 rounded-full bg-border/50">
         <div className="h-1.5 rounded-full bg-accent" style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -31,7 +31,7 @@ function Bar({ label, value, min = -1, max = 1 }: { label: string; value: number
 export function RatingSpotlight({ signal, nbActions }: Props) {
   if (!signal) return null;
   return (
-    <section className="mt-10 rounded-panel border border-white/10 bg-white/[0.02] p-6 md:p-8">
+    <section className="mt-10 rounded-panel border border-border bg-surface/60 p-6 md:p-8">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-center">
         <div>
           <p className="overline mb-3 text-gold-2">Note quantitative</p>
@@ -50,7 +50,7 @@ export function RatingSpotlight({ signal, nbActions }: Props) {
           </Link>
         </div>
 
-        <div className="rounded-panel border border-white/10 bg-surface p-5 shadow-panel">
+        <div className="rounded-panel border border-border bg-surface p-5 shadow-panel">
           <div className="mb-4 flex items-center justify-between">
             <span className="font-mono text-lg font-bold text-ivory">{signal.code}</span>
             <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />

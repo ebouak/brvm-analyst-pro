@@ -134,7 +134,7 @@ const TOOLS: Tool[] = [
 
 export function ToolsGrid() {
   return (
-    <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5 md:p-6">
+    <div className="rounded-panel border border-border bg-surface/60 p-5 md:p-6">
       <h2 className="overline mb-4 text-gold-2">Tout ce dont vous avez besoin pour investir intelligemment</h2>
 
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
@@ -142,7 +142,7 @@ export function ToolsGrid() {
           <Link
             key={t.href}
             href={t.href}
-            className="group flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-3 transition-colors hover:border-accent/30 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            className="group flex items-start gap-3 rounded-xl border border-border/60 bg-surface/60 px-3.5 py-3 transition-colors hover:border-accent/30 hover:bg-elevated/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             <span className="mt-0.5 text-muted transition-colors group-hover:text-accent">
               <Icon>{t.icon}</Icon>

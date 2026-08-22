@@ -24,7 +24,7 @@ export function IndicesCompactCard({ indices }: { indices: IndiceDaily[] }) {
   const total = indices.filter((i) => i.valeur != null).length;
 
   return (
-    <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+    <div className="rounded-panel border border-border bg-surface/60 p-5">
       <p className="overline mb-3 text-gold-2">Indices BRVM</p>
 
       {main.length > 0 ? (
@@ -34,7 +34,7 @@ export function IndicesCompactCard({ indices }: { indices: IndiceDaily[] }) {
             const up = v > 0;
             const down = v < 0;
             return (
-              <li key={i.code} className="border-b border-white/[0.06] pb-2.5 last:border-0 last:pb-0">
+              <li key={i.code} className="border-b border-border/60 pb-2.5 last:border-0 last:pb-0">
                 <p className="text-[10px] uppercase tracking-wide text-faint">{LABELS[i.code] ?? i.code}</p>
                 <div className="mt-0.5 flex items-baseline justify-between gap-2">
                   <span className="tabular text-sm font-bold text-ivory">

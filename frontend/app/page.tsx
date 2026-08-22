@@ -318,7 +318,7 @@ function MoverLine({ m }: { m: MoverRow }) {
   return (
     <Link
       href={`/societes/${m.code}`}
-      className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 transition-colors hover:border-accent/30 hover:bg-white/[0.04]"
+      className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-surface/60 px-3.5 py-2.5 transition-colors hover:border-accent/30 hover:bg-elevated/70"
     >
       <span className="flex items-center gap-2.5 min-w-0">
         <span className="font-mono text-sm font-bold text-ivory">{m.code}</span>
@@ -361,7 +361,7 @@ const STEPS = [
 ];
 
 /** Carte compacte des deux rangées à 3 colonnes (densité verticale). */
-const ROW_CARD = 'flex flex-col rounded-panel border border-white/10 bg-white/[0.02] p-5';
+const ROW_CARD = 'flex flex-col rounded-panel border border-border bg-surface/60 p-5';
 const ROW_LINK = 'mt-auto pt-4 text-sm font-medium text-ivory/80 transition-colors hover:text-gold-2';
 
 // Sources de données réellement utilisées (reprises telles quelles de
@@ -467,7 +467,7 @@ export default async function Landing() {
         </p>
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+          <div className="rounded-panel border border-border bg-surface/60 p-5">
             <p className="overline mb-3 text-up">Top hausses</p>
             <div className="space-y-2">
               {hausses.length > 0 ? (
@@ -484,12 +484,12 @@ export default async function Landing() {
               )}
             </div>
           </div>
-          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+          <div className="rounded-panel border border-border bg-surface/60 p-5">
             <p className="overline mb-3 text-gold-2">BRVM-C</p>
             <p className="tabular font-display text-3xl text-ivory">
               {brvmC != null ? nf(brvmC, 2) : '—'}
             </p>
-            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/[0.07] pt-3">
+            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border/70 pt-3">
               <div>
                 <dt className="sr-only">sociétés suivies</dt>
                 <dd className="tabular font-display text-lg text-ivory">{nbActions > 0 ? nbActions : '—'}</dd>
@@ -502,7 +502,7 @@ export default async function Landing() {
               </div>
             </dl>
           </div>
-          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
+          <div className="rounded-panel border border-border bg-surface/60 p-5">
             <p className="overline mb-3 text-down">Top baisses</p>
             <div className="space-y-2">
               {baisses.length > 0 ? (
@@ -544,7 +544,7 @@ export default async function Landing() {
           <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
           {latestDiagnosticReport ? (
-            <div className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5">
+            <div className="rounded-xl border border-border/70 bg-sunken/30 p-3.5">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="font-mono text-xs font-bold text-ivory">{latestDiagnosticReport.code}</span>
                 <span className="text-[10px] text-faint">
@@ -560,7 +560,7 @@ export default async function Landing() {
               </p>
             </div>
           ) : (
-            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
               Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.
             </p>
           )}
@@ -594,7 +594,7 @@ export default async function Landing() {
               </p>
             </>
           ) : (
-            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
               Le calcul s&apos;affichera dès que l&apos;historique sera disponible.
             </p>
           )}
@@ -630,7 +630,7 @@ export default async function Landing() {
       <AppPreview />
 
       {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.06] md:grid-cols-3">
+      <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border/50 md:grid-cols-3">
         {STEPS.map((s) => (
           <Link key={s.n} href={s.href} className="group bg-surface p-6 transition-colors hover:bg-elevated">
             <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-gold-2">{s.n}</p>
@@ -709,7 +709,7 @@ export default async function Landing() {
               </ul>
             </>
           ) : (
-            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
               Le détail des formules s&apos;affichera dès que les plans seront disponibles.
             </p>
           )}
@@ -725,13 +725,13 @@ export default async function Landing() {
           {briefLines.length > 0 ? (
             <ul className="space-y-2">
               {briefLines.slice(0, 5).map((l, i) => (
-                <li key={i} className="border-b border-white/[0.06] pb-2 text-[13px] leading-snug text-ivory/85 last:border-0 last:pb-0">
+                <li key={i} className="border-b border-border/60 pb-2 text-[13px] leading-snug text-ivory/85 last:border-0 last:pb-0">
                   {l}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
               Le brief du jour sera disponible après la clôture.
             </p>
           )}
@@ -744,7 +744,7 @@ export default async function Landing() {
       {/* ── 2 CARTES : Analyse · Actualités ───────────────────────────── */}
       <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Carte 1 — Analyse exclusive → inscription */}
-        <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6 transition-all hover:border-accent/40 hover:bg-white/[0.05]">
+        <article className="flex flex-col rounded-panel border border-border bg-surface p-6 transition-all hover:border-accent/40 hover:bg-elevated/70">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-up/30 bg-up/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-up">
             <span className="h-1.5 w-1.5 rounded-full bg-up animate-pulse" /> Données temps réel
           </span>
@@ -762,7 +762,7 @@ export default async function Landing() {
         </article>
 
         {/* Carte 2 — Actualités du marché (vraies données brvm_news) */}
-        <article className="flex flex-col rounded-panel border border-white/10 bg-white/[0.03] p-6">
+        <article className="flex flex-col rounded-panel border border-border bg-surface p-6">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-xl text-ivory">Actualités du Marché</h3>
             <Link href="/actualites" className="text-[11px] text-muted transition-colors hover:text-ivory">
@@ -787,7 +787,7 @@ export default async function Landing() {
                   </>
                 );
                 return (
-                  <li key={n.id} className="border-b border-white/[0.06] pb-3 last:border-0 last:pb-0">
+                  <li key={n.id} className="border-b border-border/60 pb-3 last:border-0 last:pb-0">
                     {n.source_url ? (
                       <a href={n.source_url} target="_blank" rel="noopener noreferrer" className="group block">
                         {inner}

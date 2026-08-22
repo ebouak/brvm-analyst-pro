@@ -27,7 +27,7 @@ export function PremiumCompare({ plans }: { plans: Plan[] }) {
         {plans.map((p) => (
           <div
             key={p.code}
-            className={`rounded-panel border p-6 ${p.is_recommended ? 'border-accent/40 bg-accent/[0.05]' : 'border-white/10 bg-white/[0.02]'}`}
+            className={`rounded-panel border p-6 ${p.is_recommended ? 'border-accent/40 bg-accent/[0.05]' : 'border-border bg-surface/60'}`}
           >
             {p.is_recommended && <p className="overline mb-2 text-gold-2">Recommandé</p>}
             <h3 className="font-display text-xl text-ivory">{p.name}</h3>
