@@ -1212,30 +1212,33 @@ Ajouter la clé au `payload`, à la fin de l'objet (après `academy_certificates
 
 - [ ] **Step 2 : Ajouter à la suppression**
 
-Dans `frontend/app/api/account/delete/route.ts`, ajouter `'whatsapp_conversations'` à l'array `tables` :
+> ⚠️ **Correction (2026-08-22, constatée à l'implémentation).** La version
+> initiale de cette étape demandait d'ajouter `'whatsapp_conversations'` à
+> l'array `tables` de l'étape 1 de la route. **C'était un no-op silencieux** :
+> cette boucle utilise le client RLS (clé anon + session), or
+> `whatsapp_conversations` et `whatsapp_pairing_codes` n'ont qu'une policy
+> SELECT owner et AUCUNE policy DELETE pour `anon`/`authenticated` — par
+> design, seul le webhook en service_role y écrit. Un `delete()` RLS y
+> affecte 0 ligne sans lever d'erreur : la couverture aurait été apparente,
+> pas réelle.
+>
+> La bonne façon suit le bloc `2bis` déjà présent dans le fichier, qui purge
+> `notification_prefs` via le client `admin` (service_role) pour exactement
+> cette raison. Ajouter un bloc symétrique :
+>
+> ```ts
+> await admin.from('whatsapp_conversations').delete().eq('user_id', user.id);
+> await admin.from('whatsapp_pairing_codes').delete().eq('user_id', user.id);
+> ```
+>
+> Noter aussi que la table `whatsapp_pairing_codes` (migration `0128`)
+> n'existait pas quand cette tâche a été rédigée : les DEUX tables doivent
+> être couvertes, à l'export comme à la suppression.
 
-```ts
-  const tables = [
-    'watchlist_items', // via watchlists
-    'watchlists',
-    'portfolios_positions',
-    'alerts',
-    'notifications_log',
-    'report_snapshots',
-    'backtest_runs',
-    'push_subscriptions',
-    'paper_trading_positions',
-    'paper_trading_accounts',
-    'investment_theses',
-    'academy_progress',
-    'academy_notes',
-    'academy_exam_attempts',
-    'academy_certificates',
-    'whatsapp_conversations',
-  ] as const;
-```
-
-(La cascade FK de la migration Task 1 — `on delete cascade` sur `user_id` — couvre déjà la suppression via `auth.users`, mais cette purge explicite reste cohérente avec le commentaire du fichier : "belt & suspenders".)
+(La cascade FK — `on delete cascade` sur `user_id` dans les deux migrations —
+couvre déjà la suppression, puisque la route appelle réellement
+`admin.auth.admin.deleteUser(user.id)`. La purge explicite reste cohérente
+avec le commentaire du fichier : "belt & suspenders".)
 
 - [ ] **Step 3 : Vérifier le typecheck**
 
