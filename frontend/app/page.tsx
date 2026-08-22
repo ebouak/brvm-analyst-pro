@@ -437,6 +437,19 @@ const ROW_LINK = 'mt-auto pt-4 text-sm font-medium text-ivory/80 transition-colo
 // components/landing/SocialProof.tsx — aucun logo ni partenaire inventé).
 const PROOF_SOURCES = ['BDFIN', 'BCEAO', 'BloomField', 'GitHub brvm-data-public'];
 
+/**
+ * Audience TikTok. Ce chiffre N'EST PAS mesuré par l'application : il est
+ * déclaré et doit être relu à la main. Il est distinct du nombre de comptes
+ * créés (`memberCount`, lui compté en base) et les deux ne doivent jamais être
+ * présentés comme une seule et même « communauté » : le précédent « 2 000+ »
+ * codé en dur ici ne correspondait ni à l'un ni à l'autre.
+ * Renseigner TIKTOK_URL rend l'affirmation vérifiable d'un clic ; tant qu'elle
+ * est nulle, le chiffre s'affiche sans lien.
+ */
+const TIKTOK_FOLLOWERS = '5 000+';
+const TIKTOK_VERIFIE_LE = '2026-08-22';
+const TIKTOK_URL: string | null = null;
+
 export default async function Landing() {
   const {
     asOf,
@@ -744,15 +757,25 @@ export default async function Landing() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-up/70" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-up" />
             </span>
-            <span className="tabular font-display text-2xl font-semibold text-accent">
-              {memberCount != null ? nf(memberCount) : '—'}
-            </span>
+            <span className="tabular font-display text-2xl font-semibold text-accent">{TIKTOK_FOLLOWERS}</span>
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-muted">
-            {memberCount != null
-              ? 'comptes WESTBOURSE suivent la BRVM avec des données vérifiées.'
-              : 'La communauté WESTBOURSE suit la BRVM avec des données vérifiées.'}
+            abonnés suivent nos analyses de la BRVM sur{' '}
+            {TIKTOK_URL ? (
+              <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" className="text-ivory underline decoration-border underline-offset-2 hover:text-gold-2">
+                TikTok
+              </a>
+            ) : (
+              'TikTok'
+            )}
+            .
           </p>
+          {memberCount != null && (
+            <p className="mt-2 text-[11px] text-faint">
+              <span className="tabular text-muted">{nf(memberCount)}</span> comptes créés sur WESTBOURSE —
+              la fiche des sociétés se consulte sans inscription.
+            </p>
+          )}
           <p className="mt-4 text-[10px] uppercase tracking-[0.18em] text-faint">
             Données vérifiées · sources officielles
           </p>
