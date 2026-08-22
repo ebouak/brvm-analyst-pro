@@ -95,9 +95,21 @@ export async function redeemPairingCode(fromE164: string, rawText: string): Prom
 
   // Le numéro vient de Meta : aucune faute de frappe possible, et la
   // possession est prouvée par l'envoi lui-même.
+  // whatsapp_optin_at horodaté ICI : l'appairage EST l'acte de consentement
+  // (l'utilisateur envoie volontairement le code depuis son WhatsApp). Sans
+  // ça, la date restait nulle jusqu'à ce qu'il coche une autre case — le
+  // consentement RGPD aurait été actif sans date prouvable.
   const { error: linkError } = await db
     .from('notification_prefs')
-    .upsert({ user_id: userId, whatsapp_phone: fromE164, whatsapp_optin: true }, { onConflict: 'user_id' });
+    .upsert(
+      {
+        user_id: userId,
+        whatsapp_phone: fromE164,
+        whatsapp_optin: true,
+        whatsapp_optin_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    );
 
   if (linkError) {
     // 23505 = l'index unique de 0127 : ce numéro appartient déjà à un autre compte.
