@@ -814,7 +814,7 @@ export default async function Landing() {
 
       {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
       <section className="mt-10">
-        <NewsletterForm source="landing" />
+        <NewsletterForm source="landing" banner />
       </section>
 
       {/* ── CTA FINAL ─────────────────────────────────────────────────── */}
