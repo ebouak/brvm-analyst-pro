@@ -174,6 +174,15 @@ async function getData() {
   // Nombre réel de comptes : lecture service-role (profiles est sous RLS owner,
   // la clé anon y voit 0). Ne lève jamais — voir lib/landing/memberCount.ts.
   const memberCountPromise = getMemberCount();
+  // Série récente du BRVM-C : alimente le graphe du terminal du hero.
+  // Aucune donnée intraday n'existe (la BRVM n'en publie pas) — ce sont donc
+  // les clôtures des dernières séances, jamais une courbe simulée.
+  const brvmcSeriePromise = supabase
+    .from('brvm_indices_daily')
+    .select('valeur, date_marche')
+    .eq('code', 'BRVMC')
+    .order('date_marche', { ascending: false })
+    .limit(40);
   // Nombre de lignes obligataires réellement cotées à la dernière séance
   // obligataire (qui n'est pas forcément celle des actions). Deux allers-retours
   // enchaînés, mais l'ensemble part en parallèle du reste du lot 1.
@@ -218,6 +227,7 @@ async function getData() {
     { data: instrumentRows },
     memberCount,
     nbObligations,
+    { data: brvmcRows },
   ] = await Promise.all([
     lastDayPromise,
     lastIdxPromise,
@@ -231,6 +241,7 @@ async function getData() {
     instrumentsPromise,
     memberCountPromise,
     nbObligationsPromise,
+    brvmcSeriePromise,
   ]);
 
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
@@ -247,6 +258,16 @@ async function getData() {
   let spotlightSignal: (SignalDaily & { code: string }) | null = null;
   let indices: IndiceDaily[] = [];
   let sectors: SectorVariation[] = [];
+  const brvmcSerie = ((brvmcRows ?? []) as { valeur: number | null }[])
+    .map((r) => r.valeur)
+    .filter((v): v is number => v != null && v > 0)
+    .reverse();
+  /** Trois meilleures notes de la séance, pour les cartes du terminal. */
+  let topRated: { code: string; score: number | null; confiance: number | null }[] = [];
+  /** Compteurs de séance pour le terminal du hero : totaux du marché, pas des tops. */
+  let nbHausses = 0;
+  let nbBaisses = 0;
+  let nbTransactions = 0;
   let featured: StockDetail | null = null;
   let fundamentals: FundamentalsPreviewData | null = null;
 
@@ -300,7 +321,15 @@ async function getData() {
     const all = (rows ?? []) as SeanceRow[];
     nbActions = all.length;
     volumeTotal = all.reduce((s, r) => s + (r.volume ?? 0), 0);
+    nbTransactions = all.reduce((s, r) => s + (r.nb_transactions ?? 0), 0);
+    nbHausses = all.filter((r) => (r.variation_pct ?? 0) > 0).length;
+    nbBaisses = all.filter((r) => (r.variation_pct ?? 0) < 0).length;
     const sigByCode = new Map((sigs ?? []).map((s) => [s.code as string, s]));
+    topRated = [...((sigs ?? []) as { code: string; score_total: number | null; confiance: number | null }[])]
+      .filter((x) => x.score_total != null)
+      .sort((a, b) => (b.score_total ?? 0) - (a.score_total ?? 0))
+      .slice(0, 3)
+      .map((x) => ({ code: x.code, score: x.score_total, confiance: x.confiance }));
     const withVar = all.filter((r) => r.variation_pct != null);
     const referentiel = (instrumentRows ?? []) as { code: string; designation: string | null; shares: number | null }[];
     const nomByCode = new Map(referentiel.map((i) => [i.code, i.designation]));
@@ -497,6 +526,11 @@ async function getData() {
     sgiDirectory,
     memberCount,
     sectors,
+    brvmcSerie,
+    topRated,
+    nbHausses,
+    nbBaisses,
+    nbTransactions,
     featured,
     fundamentals,
     nbObligations,
@@ -627,6 +661,11 @@ export default async function Landing() {
     sgiDirectory,
     memberCount,
     sectors,
+    brvmcSerie,
+    topRated,
+    nbHausses,
+    nbBaisses,
+    nbTransactions,
     featured,
     fundamentals,
     nbObligations,
@@ -654,6 +693,7 @@ export default async function Landing() {
     [...plans].filter((p) => p.price_monthly > 0).sort((a, b) => a.price_monthly - b.price_monthly)[0] ??
     null;
   const brvmC = indices.find((i) => i.code === 'BRVMC')?.valeur ?? null;
+  const brvmCVar = indices.find((i) => i.code === 'BRVMC')?.variation_pct ?? null;
   // Repli "séance peu animée" réparti sur les deux cartes (hausses/baisses)
   // sans dupliquer les mêmes titres — la garde d'affichage porte sur la
   // longueur de CHAQUE moitié, pas sur flatTop.length, pour ne jamais
@@ -680,11 +720,14 @@ export default async function Landing() {
             dateLabel={dateLabel}
             ticks={ticks}
             brvmC={brvmC}
-            topMover={
-              topMoverSource
-                ? { code: topMoverSource.code, score: topMoverSource.score, confiance: topMoverSource.confiance }
-                : null
-            }
+            brvmCVar={brvmCVar}
+            brvmcSerie={brvmcSerie}
+            topRated={topRated}
+            diagnostic={spotlightSignal}
+            nbHausses={nbHausses}
+            nbBaisses={nbBaisses}
+            volumeTotal={volumeTotal}
+            nbTransactions={nbTransactions}
           />
         );
       })()}
