@@ -19,13 +19,12 @@ import { getSgiDirectory } from '@/lib/sgi-frais/queries';
 import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
 import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
 import { ProofBand } from '@/components/landing/ProofBand';
-import { SocialProof } from '@/components/landing/SocialProof';
 import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
 import { ToolsGrid } from '@/components/landing/ToolsGrid';
 import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
-import { DiagnosticSpotlight } from '@/components/landing/DiagnosticSpotlight';
 import { PremiumCompare } from '@/components/landing/PremiumCompare';
+import { excerpt } from '@/lib/landing/excerpt';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
 // cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
@@ -361,6 +360,14 @@ const STEPS = [
   },
 ];
 
+/** Carte compacte des deux rangées à 3 colonnes (densité verticale). */
+const ROW_CARD = 'flex flex-col rounded-panel border border-white/10 bg-white/[0.02] p-5';
+const ROW_LINK = 'mt-auto pt-4 text-sm font-medium text-ivory/80 transition-colors hover:text-gold-2';
+
+// Sources de données réellement utilisées (reprises telles quelles de
+// components/landing/SocialProof.tsx — aucun logo ni partenaire inventé).
+const PROOF_SOURCES = ['BDFIN', 'BCEAO', 'BloomField', 'GitHub brvm-data-public'];
+
 export default async function Landing() {
   const {
     asOf,
@@ -397,6 +404,12 @@ export default async function Landing() {
   const briefLines = brief
     ? (brief.contenu as string).split('\n').filter((l) => l.trim() && !l.startsWith('Analyse complète')).slice(0, 7)
     : [];
+  // Carte « Premium » de la rangée B : plan recommandé si la base en désigne un,
+  // sinon le plan payant le plus abordable — jamais un plan écrit en dur.
+  const premiumPlan =
+    plans.find((p) => p.is_recommended) ??
+    [...plans].filter((p) => p.price_monthly > 0).sort((a, b) => a.price_monthly - b.price_monthly)[0] ??
+    null;
   const brvmC = indices.find((i) => i.code === 'BRVMC')?.valeur ?? null;
   // Repli "séance peu animée" réparti sur les deux cartes (hausses/baisses)
   // sans dupliquer les mêmes titres — la garde d'affichage porte sur la
@@ -520,7 +533,97 @@ export default async function Landing() {
 
       <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
 
-      <DiagnosticSpotlight report={latestDiagnosticReport} />
+      {/* ── RANGÉE A : Diagnostic IA · Simulateur · Comparateur SGI ──────
+          Trois outils auparavant rendus en sections pleine largeur empilées
+          (DiagnosticSpotlight, section SGI, section Simulateur) — regroupés
+          ici en une grille compacte : même contenu, même destinations, mais
+          ~3 écrans de scroll économisés sur mobile. ────────────────────── */}
+      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {/* Carte 1 — Diagnostic IA (extrait d'un rapport réellement généré) */}
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
+          {latestDiagnosticReport ? (
+            <div className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold text-ivory">{latestDiagnosticReport.code}</span>
+                <span className="text-[10px] text-faint">
+                  {new Date(latestDiagnosticReport.generated_at).toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+              <p className="line-clamp-4 text-[13px] leading-relaxed text-ivory/85">
+                {excerpt(latestDiagnosticReport.markdown_content, 200)}
+              </p>
+            </div>
+          ) : (
+            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+              Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.
+            </p>
+          )}
+          <p className="mt-3 text-[10px] leading-relaxed text-faint">
+            Analyse façon sell-side générée à partir des données réelles de la plateforme — un outil
+            d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.
+          </p>
+          <Link href="/premium/diagnostic" className={ROW_LINK}>
+            Découvrir le Diagnostic IA <span aria-hidden>→</span>
+          </Link>
+        </article>
+
+        {/* Carte 2 — Simulateur (calcul réel, cours de clôture + dividendes) */}
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Simulateur</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">Et si vous aviez investi&nbsp;?</h2>
+          {simulation ? (
+            <>
+              <p className="text-xs leading-relaxed text-muted">
+                1 000 000 FCFA dans SONATEL il y a 5 ans, aujourd&apos;hui :
+              </p>
+              <p className="tabular mt-1.5 font-display text-3xl text-ivory">
+                {fmtNumber(Math.round(simulation.finalValue))} <span className="text-base text-muted">FCFA</span>
+              </p>
+              <p className={`tabular mt-1 text-sm font-bold ${simulation.pct >= 0 ? 'text-up' : 'text-down'}`}>
+                {simulation.pct >= 0 ? '+' : ''}
+                {fmtNumber(simulation.pct, 1)} % · dividendes inclus
+              </p>
+              <p className="mt-3 text-[10px] leading-relaxed text-faint">
+                Calcul réel sur les cours de clôture. Performances passées ne préjugent pas des performances futures.
+              </p>
+            </>
+          ) : (
+            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+              Le calcul s&apos;affichera dès que l&apos;historique sera disponible.
+            </p>
+          )}
+          <Link href="/simulateur" className={ROW_LINK}>
+            Tester une autre action <span aria-hidden>→</span>
+          </Link>
+        </article>
+
+        {/* Carte 3 — Comparateur SGI (annuaire réel + calculateur de coût) */}
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Comparateur · SGI</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">Choisissez votre SGI en toute clarté.</h2>
+          <p className="text-sm leading-relaxed text-muted">
+            Annuaire complet des {sgiCount} SGI agréées de l&apos;UEMOA — pays, type, groupe, dépôt minimum indicatif —
+            et un calculateur de coût réel (courtage, garde, tenue de compte).
+          </p>
+          <p className="mt-3 font-mono text-[12px] text-faint">{sgiCount} SGI · 7 pays UEMOA</p>
+          <ul className="mt-2 space-y-1">
+            {sgiPaysLines.map((l) => (
+              <li key={l} className="font-mono text-[12.5px] text-muted">
+                {l}
+              </li>
+            ))}
+          </ul>
+          <Link href="/comparateur-sgi" className={ROW_LINK}>
+            Comparer les {sgiCount} SGI <span aria-hidden>→</span>
+          </Link>
+        </article>
+      </section>
 
       {/* ── APERÇU PLATEFORME : c'est le vrai moteur de conversion
           (features réelles + CTA inscription). ─────────────────────────── */}
@@ -540,110 +643,103 @@ export default async function Landing() {
         ))}
       </section>
 
-      {/* ── COMPARATEUR SGI : le calculateur de coût réel est un
-          différenciateur concret, il mérite la même visibilité que
-          AppPreview/3 étapes. ───────────────────────────────────────────── */}
-      <section className="mt-10 overflow-hidden rounded-panel border border-accent/20 bg-gradient-to-br from-accent/[0.06] to-transparent p-6 md:p-8">
-        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[1.4fr_auto]">
-          <div>
-            <p className="overline mb-3 text-gold-2">Comparateur · BRVM / UEMOA</p>
-            <h2 className="mb-3 max-w-[22ch] font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
-              Choisir sa SGI, sans <span className="text-accent">improviser</span>.
-            </h2>
-            <p className="mb-5 max-w-[58ch] text-sm leading-relaxed text-muted">
-              Annuaire complet des {sgiCount} SGI agréées de l&apos;UEMOA — pays, type, groupe, dépôt minimum indicatif —
-              et un calculateur de coût réel (courtage, garde, tenue de compte) pour comparer sur des chiffres,
-              pas des ordres de grandeur vagues.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/comparateur-sgi"
-                className="landing-hero-cta inline-flex min-h-[46px] items-center gap-1.5 rounded-full px-6 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
-              >
-                Comparer le coût réel <span aria-hidden>→</span>
-              </Link>
-              <span className="font-mono text-[12px] text-faint">{sgiCount} SGI · 7 pays UEMOA</span>
-            </div>
+      {/* ── RANGÉE B : Communauté · Premium · Brief quotidien ────────────
+          Auparavant trois blocs pleine largeur empilés (SocialProof,
+          PremiumCompare, section Brief). PremiumCompare reste rendu en
+          pleine largeur plus bas (avant la FAQ) : ses 3 sous-colonnes sont
+          illisibles dans un tiers de largeur, donc ici c'est une carte
+          d'appel compacte bâtie sur le plan recommandé. ────────────────── */}
+      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {/* Carte 1 — Communauté + sources officielles (chiffres de SocialProof) */}
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Communauté</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">Vous n&apos;analysez pas seul.</h2>
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-up/70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-up" />
+            </span>
+            <span className="tabular font-display text-2xl font-semibold text-accent">2 000+</span>
           </div>
-          <div className="hidden md:flex md:flex-col md:gap-2 md:border-l md:border-white/10 md:pl-6">
-            {sgiPaysLines.map((l) => (
-              <span key={l} className="font-mono text-[12.5px] text-muted">
-                {l}
+          <p className="mt-1.5 text-sm leading-relaxed text-muted">
+            membres dans la communauté WESTBOURSE suivent la BRVM avec des données.
+          </p>
+          <p className="mt-4 text-[10px] uppercase tracking-[0.18em] text-faint">
+            Données vérifiées · sources officielles
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/brvm-logo.png" alt="BRVM" className="h-5 w-auto opacity-70 grayscale" />
+            {PROOF_SOURCES.map((s) => (
+              <span key={s} className="font-mono text-[11.5px] font-medium text-muted/70">
+                {s}
               </span>
             ))}
           </div>
-        </div>
-      </section>
+          <Link href="/signup" className={ROW_LINK}>
+            Rejoindre la communauté <span aria-hidden>→</span>
+          </Link>
+        </article>
 
-      {/* ── PREUVE SOCIALE : communauté réelle + sources officielles ───── */}
-      <SocialProof />
-
-      {/* ── SIMULATEUR (preuve par l'exemple, calcul réel) ────────────── */}
-      <section className="landing-sim-section mt-10 overflow-hidden rounded-panel border border-border p-6 md:p-10">
-        <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
-          <div>
-            <p className="overline mb-3 text-gold-2">Simulateur</p>
-            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
-              Et si vous aviez investi&nbsp;?
-            </h2>
-            <p className="mb-6 max-w-[46ch] text-sm leading-relaxed text-muted">
-              Calculez ce qu&apos;un placement sur n&apos;importe quelle action BRVM aurait rapporté —
-              dividendes inclus, sur les cours réels.
-            </p>
-            <Link
-              href="/simulateur"
-              className="inline-flex min-h-[44px] items-center rounded-full border border-up/40 px-5 text-sm font-semibold text-up transition-colors hover:bg-up/10"
-            >
-              Faire le calcul pour moi →
-            </Link>
-          </div>
-
-          {simulation ? (
-            <div className="landing-sim-result rounded-2xl p-6 border">
-              <p className="mb-1 text-xs text-muted">1 000 000 FCFA dans SONATEL il y a 5 ans, aujourd&apos;hui :</p>
-              <p className="tabular font-display text-4xl font-bold text-ivory md:text-5xl">
-                {fmtNumber(Math.round(simulation.finalValue))} <span className="text-lg text-muted">FCFA</span>
+        {/* Carte 2 — Premium (avantages tirés du plan recommandé, jamais en dur) */}
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Premium</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
+          {premiumPlan ? (
+            <>
+              <p className="tabular font-display text-2xl text-ivory">
+                {premiumPlan.price_monthly > 0
+                  ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
+                  : 'Gratuit'}
+                {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
               </p>
-              <p className={`tabular mt-1 text-lg font-bold ${simulation.pct >= 0 ? 'text-up' : 'text-down'}`}>
-                {simulation.pct >= 0 ? '+' : ''}{fmtNumber(simulation.pct, 1)} % · dividendes inclus
-              </p>
-              <p className="mt-3 text-[10px] text-faint">
-                Calcul réel sur les cours de clôture. Performances passées ne préjugent pas des performances futures.
-              </p>
-            </div>
+              <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
+              <ul className="mt-3 space-y-2">
+                {premiumPlan.features.slice(0, 4).map((f) => (
+                  <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+                    <span className="mt-0.5 text-up" aria-hidden>
+                      ✓
+                    </span>
+                    <span>
+                      {f.feature_label}
+                      {f.feature_value ? ` — ${f.feature_value}` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
-            <div className="rounded-2xl border border-white/[0.08] bg-sunken/30 p-6 text-center">
-              <p className="text-sm text-faint">Le calcul s&apos;affichera dès que l&apos;historique sera disponible.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── BRIEF DU JOUR (vrai contenu) ──────────────────────────────── */}
-      {briefLines.length > 0 && (
-        <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center">
-          <div>
-            <p className="overline mb-3 text-gold-2">Brief quotidien</p>
-            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
-              La séance résumée en 30 secondes, chaque soir.
-            </h2>
-            <p className="mb-6 max-w-[44ch] text-sm leading-relaxed text-muted">
-              Indices, hausses, baisses, volumes et annonces — généré automatiquement après chaque clôture.
+            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+              Le détail des formules s&apos;affichera dès que les plans seront disponibles.
             </p>
-            <Link
-              href="/brief"
-              className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-elevated/40 px-5 text-sm font-medium text-ivory transition-all hover:border-accent/40 hover:bg-elevated/70"
-            >
-              Lire les derniers briefs →
-            </Link>
-          </div>
-          <div className="landing-brief-card rounded-panel border p-5">
-            <pre className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-ivory/90">
-              {briefLines.join('\n')}
-            </pre>
-          </div>
-        </section>
-      )}
+          )}
+          <Link href="/pricing" className={ROW_LINK}>
+            Découvrir Premium <span aria-hidden>→</span>
+          </Link>
+        </article>
+
+        {/* Carte 3 — Brief quotidien (vrai contenu brief_daily) */}
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Brief quotidien</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">La séance résumée chaque soir.</h2>
+          {briefLines.length > 0 ? (
+            <ul className="space-y-2">
+              {briefLines.slice(0, 5).map((l, i) => (
+                <li key={i} className="border-b border-white/[0.06] pb-2 text-[13px] leading-snug text-ivory/85 last:border-0 last:pb-0">
+                  {l}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-xl border border-white/[0.07] bg-sunken/30 p-3.5 text-[13px] text-faint">
+              Le brief du jour sera disponible après la clôture.
+            </p>
+          )}
+          <Link href="/brief" className={ROW_LINK}>
+            Lire le brief <span aria-hidden>→</span>
+          </Link>
+        </article>
+      </section>
 
       {/* ── 2 CARTES : Analyse · Actualités ───────────────────────────── */}
       <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
