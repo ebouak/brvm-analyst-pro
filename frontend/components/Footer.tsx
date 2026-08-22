@@ -130,17 +130,6 @@ export default function Footer() {
           </ul>
         </nav>
 
-        <nav aria-label="Légal" className="group/col">
-          <ColHeader>Légal</ColHeader>
-          <ul className="mt-3 space-y-2">
-            {LEGAL.map((l) => (
-              <li key={l.href}>
-                <FooterLink href={l.href} label={l.label} />
-              </li>
-            ))}
-            <li><FooterCookieLink /></li>
-          </ul>
-        </nav>
 
         <nav aria-label="Outils" className="group/col">
           <ColHeader>Outils</ColHeader>
@@ -164,13 +153,24 @@ export default function Footer() {
           </ul>
         </nav>
 
+        <nav aria-label="Légal" className="group/col">
+          <ColHeader>Légal</ColHeader>
+          <ul className="mt-3 space-y-2">
+            {LEGAL.map((l) => (
+              <li key={l.href}>
+                <FooterLink href={l.href} label={l.label} />
+              </li>
+            ))}
+            <li><FooterCookieLink /></li>
+          </ul>
+        </nav>
         <div className="group/col">
           <ColHeader>Sources officielles</ColHeader>
           <ul className="mt-3 flex flex-wrap items-center gap-2">
             {SOURCES.map((s) => (
-              <li key={s.alt} className="flex h-7 items-center rounded-md bg-white px-1.5">
+              <li key={s.alt} className="flex h-9 items-center rounded-md bg-white px-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.src} alt={s.alt} className="h-3.5 w-auto" />
+                <img src={s.src} alt={s.alt} className="h-5 w-auto" />
               </li>
             ))}
           </ul>
