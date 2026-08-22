@@ -49,3 +49,4 @@ claude-flow.config.json
 .swarm/
 .claude/memory.db
 .claude/*.db
+frontend/v2.html
