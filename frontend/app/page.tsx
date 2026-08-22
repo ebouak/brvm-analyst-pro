@@ -174,6 +174,27 @@ async function getData() {
   // Nombre réel de comptes : lecture service-role (profiles est sous RLS owner,
   // la clé anon y voit 0). Ne lève jamais — voir lib/landing/memberCount.ts.
   const memberCountPromise = getMemberCount();
+  // Nombre de lignes obligataires réellement cotées à la dernière séance
+  // obligataire (qui n'est pas forcément celle des actions). Deux allers-retours
+  // enchaînés, mais l'ensemble part en parallèle du reste du lot 1.
+  const nbObligationsPromise: Promise<number | null> = (async () => {
+    try {
+      const { data: last } = await supabase
+        .from('brvm_obligations_daily')
+        .select('date_marche')
+        .order('date_marche', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!last?.date_marche) return null;
+      const { count } = await supabase
+        .from('brvm_obligations_daily')
+        .select('code', { count: 'exact', head: true })
+        .eq('date_marche', last.date_marche as string);
+      return typeof count === 'number' ? count : null;
+    } catch {
+      return null;
+    }
+  })();
 
   // Sûr sans .throwOnError() nulle part dans ce fichier : le client Supabase
   // résout toujours { data, error } sans jamais rejeter la Promise, même en
@@ -196,6 +217,7 @@ async function getData() {
     sgiDirectory,
     { data: instrumentRows },
     memberCount,
+    nbObligations,
   ] = await Promise.all([
     lastDayPromise,
     lastIdxPromise,
@@ -208,6 +230,7 @@ async function getData() {
     sgiDirectoryPromise,
     instrumentsPromise,
     memberCountPromise,
+    nbObligationsPromise,
   ]);
 
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
@@ -476,6 +499,7 @@ async function getData() {
     sectors,
     featured,
     fundamentals,
+    nbObligations,
   };
 }
 
@@ -605,6 +629,7 @@ export default async function Landing() {
     sectors,
     featured,
     fundamentals,
+    nbObligations,
   } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
@@ -1045,7 +1070,7 @@ export default async function Landing() {
       {/* AppPreview porte les badges GRATUIT / PREMIUM / UNIQUE : c'est de
           l'information de palier, sa place est ici et non en section 14 où
           elle répétait le message de PlatformUniverses juste au-dessus. */}
-      <AppPreview />
+      <AppPreview nbObligations={nbObligations} />
 
       <PremiumCompare plans={plans} />
 
