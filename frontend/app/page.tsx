@@ -32,6 +32,7 @@ import { computeRatios, latestUsable, type FundamentalsRow } from '@/lib/landing
 import { SectorStrip } from '@/components/landing/SectorStrip';
 import { DataToDecision } from '@/components/landing/DataToDecision';
 import { PlatformUniverses } from '@/components/landing/PlatformUniverses';
+import { DarkBand } from '@/components/landing/DarkBand';
 import { StockSpotlight, type StockDetail } from '@/components/landing/StockSpotlight';
 import { FundamentalsPreview, type FundamentalsPreviewData } from '@/components/landing/FundamentalsPreview';
 import brvmSectors from '@/lib/brvmSectors.json';
@@ -625,6 +626,16 @@ const ROW_LINK = 'mt-auto pt-4 text-sm font-medium text-ivory/80 transition-colo
 
 // Sources de données réellement utilisées (reprises telles quelles de
 // components/landing/SocialProof.tsx — aucun logo ni partenaire inventé).
+/**
+ * Rythme vertical en trois paliers. La page enchaînait des `mt-14` partout,
+ * ce qui mettait sur le même plan deux cartes voisines et deux chapitres
+ * sans rapport. Un espace doit dire quelque chose : plus il est grand, plus
+ * la rupture de sujet est forte.
+ */
+const GAP_COMPOSANT = 'mt-6'; // deux blocs d'une même idée
+const GAP_SECTION = 'mt-12'; // deux idées d'un même chapitre
+const GAP_CHAPITRE = 'mt-24'; // changement de sujet
+
 const PROOF_SOURCES = ['BDFIN', 'BCEAO', 'BloomField', 'GitHub brvm-data-public'];
 
 /**
@@ -830,11 +841,14 @@ export default async function Landing() {
       <SectorStrip sectors={sectors} dateLabel={dateLabel} />
 
       {/* ── 08 · CARTOGRAPHIE — pleine largeur, section immersive ───────── */}
-      {/* LandingHeatmap porte déjà son propre titre « Toute la cote BRVM » :
-          ne pas en ajouter un second au-dessus, il faisait doublon à l'écran. */}
-      <section className="mt-14">
-        <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
-      </section>
+      {/* Cartographie en bande sombre : première rupture de rythme de la page.
+          LandingHeatmap porte déjà son titre « Toute la cote BRVM », ne pas en
+          ajouter un second au-dessus — il faisait doublon à l'écran. */}
+      <div className={GAP_CHAPITRE}>
+        <DarkBand>
+          <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
+        </DarkBand>
+      </div>
 
       {/* ── 09 · COMPRENDRE UNE ACTION — fiche société réelle ───────────── */}
       <StockSpotlight stock={featured} dateLabel={dateLabel} />
@@ -845,78 +859,84 @@ export default async function Landing() {
       {/* ── 11 · SIGNATURE — la note A–F ────────────────────────────────── */}
       <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
 
-      {/* ── 12 · DIAGNOSTIC IA ──────────────────────────────────────────── */}
-      <section className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <article className={ROW_CARD}>
-          <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
-          <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
-          {latestDiagnosticReport ? (
-            <div className="rounded-xl border border-border/70 bg-sunken/30 p-3.5">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="font-mono text-xs font-bold text-ivory">{latestDiagnosticReport.code}</span>
-                {latestDiagnosticReport.generated_at && (
-                  <span className="text-[10px] text-faint">
-                    {new Date(latestDiagnosticReport.generated_at).toLocaleDateString('fr-FR', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </span>
-                )}
+      {/* Deuxième rupture de rythme : le Diagnostic IA est un moment de
+          DONNÉES, il passe donc en bande sombre comme la cartographie. */}
+      <div className={GAP_CHAPITRE}>
+        <DarkBand>
+        {/* ── 12 · DIAGNOSTIC IA ──────────────────────────────────────────── */}
+        <section className={`grid grid-cols-1 gap-4 lg:grid-cols-2`}>
+          <article className={ROW_CARD}>
+            <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
+            <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
+            {latestDiagnosticReport ? (
+              <div className="rounded-xl border border-border/70 bg-sunken/30 p-3.5">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-ivory">{latestDiagnosticReport.code}</span>
+                  {latestDiagnosticReport.generated_at && (
+                    <span className="text-[10px] text-faint">
+                      {new Date(latestDiagnosticReport.generated_at).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  )}
+                </div>
+                <p className="line-clamp-4 text-[13px] leading-relaxed text-ivory/85">
+                  {excerpt(latestDiagnosticReport.markdown_content ?? "", 200)}
+                </p>
               </div>
-              <p className="line-clamp-4 text-[13px] leading-relaxed text-ivory/85">
-                {excerpt(latestDiagnosticReport.markdown_content ?? "", 200)}
+            ) : (
+              <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
+                Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.
               </p>
-            </div>
-          ) : (
-            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-              Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.
+            )}
+            <p className="mt-3 text-[10px] leading-relaxed text-faint">
+              Analyse façon sell-side générée à partir des données réelles de la plateforme — un outil
+              d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.
             </p>
-          )}
-          <p className="mt-3 text-[10px] leading-relaxed text-faint">
-            Analyse façon sell-side générée à partir des données réelles de la plateforme — un outil
-            d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.
-          </p>
-          <Link href="/premium/diagnostic" className={ROW_LINK}>
-            Découvrir le Diagnostic IA <span aria-hidden>→</span>
-          </Link>
-        </article>
-        <article className={ROW_CARD}>
-          <p className="overline mb-2 text-gold-2">Premium</p>
-          <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
-          {premiumPlan ? (
-            <>
-              <p className="tabular font-display text-2xl text-ivory">
-                {premiumPlan.price_monthly > 0
-                  ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
-                  : 'Gratuit'}
-                {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
+            <Link href="/premium/diagnostic" className={ROW_LINK}>
+              Découvrir le Diagnostic IA <span aria-hidden>→</span>
+            </Link>
+          </article>
+          <article className={ROW_CARD}>
+            <p className="overline mb-2 text-gold-2">Premium</p>
+            <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
+            {premiumPlan ? (
+              <>
+                <p className="tabular font-display text-2xl text-ivory">
+                  {premiumPlan.price_monthly > 0
+                    ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
+                    : 'Gratuit'}
+                  {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
+                </p>
+                <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
+                <ul className="mt-3 space-y-2">
+                  {premiumPlan.features.slice(0, 4).map((f) => (
+                    <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+                      <span className="mt-0.5 text-up" aria-hidden>
+                        ✓
+                      </span>
+                      <span>
+                        {f.feature_label}
+                        {f.feature_value ? ` — ${f.feature_value}` : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
+                Le détail des formules s&apos;affichera dès que les plans seront disponibles.
               </p>
-              <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
-              <ul className="mt-3 space-y-2">
-                {premiumPlan.features.slice(0, 4).map((f) => (
-                  <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-                    <span className="mt-0.5 text-up" aria-hidden>
-                      ✓
-                    </span>
-                    <span>
-                      {f.feature_label}
-                      {f.feature_value ? ` — ${f.feature_value}` : ''}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : (
-            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-              Le détail des formules s&apos;affichera dès que les plans seront disponibles.
-            </p>
-          )}
-          <Link href="/pricing" className={ROW_LINK}>
-            Découvrir Premium <span aria-hidden>→</span>
-          </Link>
-        </article>
-      </section>
+            )}
+            <Link href="/pricing" className={ROW_LINK}>
+              Découvrir Premium <span aria-hidden>→</span>
+            </Link>
+          </article>
+        </section>
+        </DarkBand>
+      </div>
 
       {/* ── 13 · DE LA DONNÉE À LA DÉCISION — fil conducteur de la marque ─ */}
       <DataToDecision />
@@ -926,7 +946,7 @@ export default async function Landing() {
 
 
       {/* ── 15 + 16 · SIMULATEUR ET COMPARATEUR SGI ─────────────────────── */}
-      <section className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section className={`${GAP_SECTION} grid grid-cols-1 gap-4 lg:grid-cols-2`}>
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Simulateur</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Et si vous aviez investi&nbsp;?</h2>
@@ -977,7 +997,7 @@ export default async function Landing() {
       </section>
 
       {/* ── 17 · BRIEF QUOTIDIEN ET ACTUALITÉS ──────────────────────────── */}
-      <section className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section className={`${GAP_SECTION} grid grid-cols-1 gap-4 lg:grid-cols-2`}>
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Brief quotidien</p>
           <h2 className="mb-3 font-display text-lg text-ivory">La séance résumée chaque soir.</h2>

@@ -551,3 +551,37 @@ body::after {
   .wb-ticker-track { animation: none; }
   .wb-ticker { overflow-x: auto; }
 }
+
+/* ── Bande sombre pleine largeur (composants/landing/DarkBand.tsx) ───────
+   Redéclare le palier sombre des tokens sur un conteneur, pas sur :root.
+
+   Pourquoi : la bande reste sombre quel que soit le thème du site. Les
+   composants qu'elle contient (heatmap, cartes) sont pilotés par tokens ;
+   sans cette redéclaration, leur `text-ivory` prendrait la valeur du mode
+   clair (quasi noir) et deviendrait illisible sur le fond sombre.
+
+   Ne pas remplacer par `data-theme="dark"` : les blocs `:root[data-theme]`
+   de ce fichier sont attachés à la racine et ne cascaderaient pas ici. */
+.dark-band {
+  --color-bg: 3 3 3;
+  --color-surface: 10 20 23;
+  --color-elevated: 17 43 51;
+  --color-sunken: 2 3 3;
+  --color-border: 27 42 48;
+  --color-border-strong: 42 61 68;
+
+  --color-accent: 86 215 253;
+  --color-accent-dim: 47 169 207;
+  --color-gold-2: 143 230 255;
+  --color-gold-deep: 42 138 168;
+
+  --color-up: 63 225 139;
+  --color-emerald-soft: 122 240 179;
+  --color-down: 255 107 107;
+  --color-warn: 240 178 58;
+  --color-purple: 139 111 194;
+
+  --color-ivory: 252 252 252;
+  --color-muted: 181 181 181;
+  --color-faint: 92 107 112;
+}
