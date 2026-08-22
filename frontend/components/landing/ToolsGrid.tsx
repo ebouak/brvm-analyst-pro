@@ -1,3 +1,9 @@
+/**
+ * ⚠️ ORPHELIN depuis la landing V2 : remplacé par PlatformUniverses, qui
+ * reprend les 12 outils de ce fichier (vérifié un à un) et en ajoute 8.
+ * Conservé tel quel plutôt que supprimé : aucune fonctionnalité n'est perdue
+ * et il reste réutilisable ailleurs.
+ */
 import Link from 'next/link';
 
 /**

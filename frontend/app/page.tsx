@@ -21,12 +21,19 @@ import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
 import { ProofBand } from '@/components/landing/ProofBand';
 import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
-import { ToolsGrid } from '@/components/landing/ToolsGrid';
 import { MoverSparkline } from '@/components/landing/MoverSparkline';
 import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
 import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import { excerpt } from '@/lib/landing/excerpt';
 import { getMemberCount } from '@/lib/landing/memberCount';
+import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
+import { computeRatios, latestUsable, type FundamentalsRow } from '@/lib/landing/fundamentals';
+import { SectorStrip } from '@/components/landing/SectorStrip';
+import { DataToDecision } from '@/components/landing/DataToDecision';
+import { PlatformUniverses } from '@/components/landing/PlatformUniverses';
+import { StockSpotlight, type StockDetail } from '@/components/landing/StockSpotlight';
+import { FundamentalsPreview, type FundamentalsPreviewData } from '@/components/landing/FundamentalsPreview';
+import brvmSectors from '@/lib/brvmSectors.json';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
 // cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
@@ -39,6 +46,22 @@ export const metadata = {
 };
 
 const nf = (n: number, d = 0) => n.toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: d });
+
+/** Une ligne de `brvm_actions_daily` telle que la landing la charge. */
+interface SeanceRow {
+  code: string;
+  cours_jour: number | null;
+  variation_pct: number | null;
+  volume: number | null;
+  ouverture: number | null;
+  plus_haut: number | null;
+  plus_bas: number | null;
+  cours_precedent: number | null;
+  valeur_echangee: number | null;
+  nb_transactions: number | null;
+  beta_1an: number | null;
+  valorisation: number | null;
+}
 
 interface MoverRow {
   code: string;
@@ -148,7 +171,7 @@ async function getData() {
   const sgiDirectoryPromise = getSgiDirectory();
   // Référentiel des sociétés : 48 lignes, sert à afficher la raison sociale sous
   // le code dans les movers. Ne dépend d'aucune valeur calculée → lot 1.
-  const instrumentsPromise = supabase.from('brvm_instruments').select('code, designation');
+  const instrumentsPromise = supabase.from('brvm_instruments').select('code, designation, shares');
   // Nombre réel de comptes : lecture service-role (profiles est sous RLS owner,
   // la clé anon y voit 0). Ne lève jamais — voir lib/landing/memberCount.ts.
   const memberCountPromise = getMemberCount();
@@ -201,6 +224,9 @@ async function getData() {
   let volumeTotal = 0;
   let spotlightSignal: (SignalDaily & { code: string }) | null = null;
   let indices: IndiceDaily[] = [];
+  let sectors: SectorVariation[] = [];
+  let featured: StockDetail | null = null;
+  let fundamentals: FundamentalsPreviewData | null = null;
 
   // Étape 2 : les requêtes qui dépendent d'une valeur connue seulement après
   // l'étape 1 (idxDate, asOf, planIds) — mais qui ne dépendent PAS les unes
@@ -213,7 +239,9 @@ async function getData() {
     ? Promise.all([
         supabase
           .from('brvm_actions_daily')
-          .select('code, cours_jour, variation_pct, volume')
+          .select(
+            'code, cours_jour, variation_pct, volume, ouverture, plus_haut, plus_bas, cours_precedent, valeur_echangee, nb_transactions, beta_1an, valorisation',
+          )
           .eq('date_marche', asOf)
           .order('variation_pct', { ascending: false }),
         supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
@@ -247,14 +275,14 @@ async function getData() {
   if (asOfBlockRes) {
     const [{ data: rows }, { data: sigs }, { data: topSignal }] = asOfBlockRes;
     spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
-    const all = (rows ?? []) as { code: string; cours_jour: number | null; variation_pct: number | null; volume: number | null }[];
+    const all = (rows ?? []) as SeanceRow[];
     nbActions = all.length;
     volumeTotal = all.reduce((s, r) => s + (r.volume ?? 0), 0);
     const sigByCode = new Map((sigs ?? []).map((s) => [s.code as string, s]));
     const withVar = all.filter((r) => r.variation_pct != null);
-    const nomByCode = new Map(
-      ((instrumentRows ?? []) as { code: string; designation: string | null }[]).map((i) => [i.code, i.designation]),
-    );
+    const referentiel = (instrumentRows ?? []) as { code: string; designation: string | null; shares: number | null }[];
+    const nomByCode = new Map(referentiel.map((i) => [i.code, i.designation]));
+    const sharesByCode = new Map(referentiel.map((i) => [i.code, i.shares]));
     const toRow = (r: (typeof all)[number]): MoverRow => ({
       code: r.code,
       nom: nomByCode.get(r.code) ?? null,
@@ -301,6 +329,108 @@ async function getData() {
       for (const m of shown) m.spark = seriesByCode.get(m.code) ?? [];
     }
 
+    // Secteurs : agrégation des lignes DÉJÀ chargées ci-dessus, aucune requête
+    // supplémentaire. La classification vient de brvmSectors.json car
+    // brvm_instruments.secteur est vide en base.
+    sectors = computeSectorVariations(
+      all.map((r) => ({
+        code: r.code,
+        variation_pct: r.variation_pct,
+        cours_jour: r.cours_jour,
+        shares: sharesByCode.get(r.code) ?? null,
+      })),
+      brvmSectors as Record<string, string>,
+    );
+
+    // Valeur mise en avant (section « Comprendre une action ») : la plus
+    // échangée de la séance. C'est le choix qui garantit des données de séance
+    // réellement remplies — ouverture/plus haut/plus bas restent nuls sur un
+    // titre qui ne s'est pas traité.
+    const candidat = [...all]
+      .filter((r) => r.cours_jour != null && (r.valeur_echangee ?? 0) > 0)
+      .sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0))[0];
+
+    if (candidat) {
+      const sig = sigByCode.get(candidat.code) as
+        | { score_total?: number; confiance?: number; signal?: string }
+        | undefined;
+      const il_y_a_un_an = new Date(asOf as string);
+      il_y_a_un_an.setFullYear(il_y_a_un_an.getFullYear() - 1);
+
+      const [{ data: hist2 }, { data: divRows }, { data: fundaRows }] = await Promise.all([
+        supabase
+          .from('brvm_actions_daily')
+          .select('cours_jour')
+          .eq('code', candidat.code)
+          .lte('date_marche', asOf as string)
+          .order('date_marche', { ascending: false })
+          .limit(60),
+        supabase.from('dividends').select('montant, ex_date, payment_date').eq('code', candidat.code),
+        supabase
+          .from('fundamentals')
+          .select('code, year, revenue, net_income, equity, debt')
+          .eq('code', candidat.code)
+          .order('year', { ascending: false })
+          .limit(5),
+      ]);
+
+      const serie = ((hist2 ?? []) as { cours_jour: number | null }[])
+        .map((r) => r.cours_jour)
+        .filter((c): c is number => c != null && c > 0)
+        .reverse();
+
+      // Rendement du dividende : somme des montants détachés sur 12 mois
+      // glissants, rapportée au cours. null si aucun dividende sur la période
+      // — surtout pas 0 %, qui se lirait comme « ne verse rien » alors que la
+      // donnée peut simplement manquer.
+      const seuil = il_y_a_un_an.toISOString().slice(0, 10);
+      const totalDiv = ((divRows ?? []) as { montant: number | null; ex_date: string | null; payment_date: string | null }[])
+        .filter((d) => {
+          const dt = d.payment_date ?? d.ex_date;
+          return dt != null && dt >= seuil && dt <= (asOf as string);
+        })
+        .reduce((sum, d) => sum + (d.montant ?? 0), 0);
+
+      featured = {
+        code: candidat.code,
+        nom: nomByCode.get(candidat.code) ?? null,
+        cours: candidat.cours_jour,
+        variation_pct: candidat.variation_pct,
+        ouverture: candidat.ouverture,
+        plus_haut: candidat.plus_haut,
+        plus_bas: candidat.plus_bas,
+        cours_precedent: candidat.cours_precedent,
+        volume: candidat.volume,
+        valeur_echangee: candidat.valeur_echangee,
+        nb_transactions: candidat.nb_transactions,
+        beta_1an: candidat.beta_1an,
+        valorisation: candidat.valorisation,
+        titres: sharesByCode.get(candidat.code) ?? null,
+        rendementDividendePct:
+          totalDiv > 0 && candidat.cours_jour != null && candidat.cours_jour > 0
+            ? (totalDiv / candidat.cours_jour) * 100
+            : null,
+        score: sig?.score_total ?? null,
+        confiance: sig?.confiance ?? null,
+        signal: sig?.signal ?? null,
+        serie,
+      };
+
+      const exercice = latestUsable((fundaRows ?? []) as FundamentalsRow[]);
+      if (exercice) {
+        fundamentals = {
+          code: exercice.code,
+          nom: nomByCode.get(exercice.code) ?? null,
+          year: exercice.year,
+          revenue: exercice.revenue,
+          net_income: exercice.net_income,
+          equity: exercice.equity,
+          debt: exercice.debt,
+          ratios: computeRatios(exercice),
+        };
+      }
+    }
+
     const tickSource = hausses.length || baisses.length ? [...hausses, ...baisses] : flatTop;
     ticks = tickSource.map((m) => ({
       sym: m.code,
@@ -344,6 +474,9 @@ async function getData() {
     plans,
     sgiDirectory,
     memberCount,
+    sectors,
+    featured,
+    fundamentals,
   };
 }
 
@@ -470,6 +603,9 @@ export default async function Landing() {
     plans,
     sgiDirectory,
     memberCount,
+    sectors,
+    featured,
+    fundamentals,
   } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
@@ -623,21 +759,35 @@ export default async function Landing() {
         </div>
       </section>
 
-      {/* ── CARTOGRAPHIE + OUTILS côte à côte (1/3 – 2/3) ───────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      {/* ── 07 · SECTEURS — variation du jour, calculée (lib/landing/sectors.ts)  */}
+      <SectorStrip sectors={sectors} dateLabel={dateLabel} />
+
+      {/* ── 08 · CARTOGRAPHIE — pleine largeur, section immersive ───────── */}
+      <section aria-labelledby="carto-titre" className="mt-14">
+        <div className="mb-6 max-w-[52ch]">
+          <p className="overline mb-3 text-gold-2">Cartographie</p>
+          <h2 id="carto-titre" className="font-display text-2xl text-ivory md:text-4xl [letter-spacing:-0.035em]">
+            Toute la cote BRVM, d&apos;un coup d&apos;œil.
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            Chaque tuile est une société : sa taille suit la capitalisation, sa couleur la variation
+            du jour. Les secteurs se lisent d&apos;un regard.
+          </p>
+        </div>
         <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
-        <ToolsGrid />
       </section>
 
+      {/* ── 09 · COMPRENDRE UNE ACTION — fiche société réelle ───────────── */}
+      <StockSpotlight stock={featured} dateLabel={dateLabel} />
+
+      {/* ── 10 · FONDAMENTAUX ───────────────────────────────────────────── */}
+      <FundamentalsPreview data={fundamentals} />
+
+      {/* ── 11 · SIGNATURE — la note A–F ────────────────────────────────── */}
       <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
 
-      {/* ── RANGÉE A : Diagnostic IA · Simulateur · Comparateur SGI ──────
-          Trois outils auparavant rendus en sections pleine largeur empilées
-          (DiagnosticSpotlight, section SGI, section Simulateur) — regroupés
-          ici en une grille compacte : même contenu, même destinations, mais
-          ~3 écrans de scroll économisés sur mobile. ────────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* Carte 1 — Diagnostic IA (extrait d'un rapport réellement généré) */}
+      {/* ── 12 · DIAGNOSTIC IA ──────────────────────────────────────────── */}
+      <section className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
@@ -670,8 +820,54 @@ export default async function Landing() {
             Découvrir le Diagnostic IA <span aria-hidden>→</span>
           </Link>
         </article>
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Premium</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
+          {premiumPlan ? (
+            <>
+              <p className="tabular font-display text-2xl text-ivory">
+                {premiumPlan.price_monthly > 0
+                  ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
+                  : 'Gratuit'}
+                {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
+              </p>
+              <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
+              <ul className="mt-3 space-y-2">
+                {premiumPlan.features.slice(0, 4).map((f) => (
+                  <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+                    <span className="mt-0.5 text-up" aria-hidden>
+                      ✓
+                    </span>
+                    <span>
+                      {f.feature_label}
+                      {f.feature_value ? ` — ${f.feature_value}` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
+              Le détail des formules s&apos;affichera dès que les plans seront disponibles.
+            </p>
+          )}
+          <Link href="/pricing" className={ROW_LINK}>
+            Découvrir Premium <span aria-hidden>→</span>
+          </Link>
+        </article>
+      </section>
 
-        {/* Carte 2 — Simulateur (calcul réel, cours de clôture + dividendes) */}
+      {/* ── 13 · DE LA DONNÉE À LA DÉCISION — fil conducteur de la marque ─ */}
+      <DataToDecision />
+
+      {/* ── 14 · LA PLATEFORME — quatre univers (remplace la grille plate)  */}
+      <PlatformUniverses />
+
+      {/* ── 14b · APERÇU DE L’APPLICATION ───────────────────────────────── */}
+      <AppPreview />
+
+      {/* ── 15 + 16 · SIMULATEUR ET COMPARATEUR SGI ─────────────────────── */}
+      <section className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Simulateur</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Et si vous aviez investi&nbsp;?</h2>
@@ -700,8 +896,6 @@ export default async function Landing() {
             Tester une autre action <span aria-hidden>→</span>
           </Link>
         </article>
-
-        {/* Carte 3 — Comparateur SGI (annuaire réel + calculateur de coût) */}
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Comparateur · SGI</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Choisissez votre SGI en toute clarté.</h2>
@@ -723,32 +917,28 @@ export default async function Landing() {
         </article>
       </section>
 
-      {/* ── APERÇU PLATEFORME : c'est le vrai moteur de conversion
-          (features réelles + CTA inscription). ─────────────────────────── */}
-      <AppPreview />
-
-      {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border/50 md:grid-cols-3">
-        {STEPS.map((s) => (
-          <Link key={s.n} href={s.href} className="group bg-surface p-6 transition-colors hover:bg-elevated">
-            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-gold-2">{s.n}</p>
-            <h2 className="mt-3 font-display text-xl text-ivory">{s.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
-            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors group-hover:text-gold-2">
-              {s.cta} <span className="transition-transform group-hover:translate-x-0.5">→</span>
-            </span>
+      {/* ── 17 · BRIEF QUOTIDIEN ET ACTUALITÉS ──────────────────────────── */}
+      <section className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Brief quotidien</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">La séance résumée chaque soir.</h2>
+          {briefLines.length > 0 ? (
+            <ul className="space-y-2">
+              {briefLines.slice(0, 5).map((l, i) => (
+                <li key={i} className="border-b border-border/60 pb-2 text-[13px] leading-snug text-ivory/85 last:border-0 last:pb-0">
+                  {l}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
+              Le brief du jour sera disponible après la clôture.
+            </p>
+          )}
+          <Link href="/brief" className={ROW_LINK}>
+            Lire le brief <span aria-hidden>→</span>
           </Link>
-        ))}
-      </section>
-
-      {/* ── RANGÉE B : Communauté · Premium · Brief quotidien ────────────
-          Auparavant trois blocs pleine largeur empilés (SocialProof,
-          PremiumCompare, section Brief). PremiumCompare reste rendu en
-          pleine largeur plus bas (avant la FAQ) : ses 3 sous-colonnes sont
-          illisibles dans un tiers de largeur, donc ici c'est une carte
-          d'appel compacte bâtie sur le plan recommandé. ────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* Carte 1 — Communauté + sources officielles (chiffres de SocialProof) */}
+        </article>
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Communauté</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Vous n&apos;analysez pas seul.</h2>
@@ -790,65 +980,6 @@ export default async function Landing() {
           </div>
           <Link href="/signup" className={ROW_LINK}>
             Rejoindre la communauté <span aria-hidden>→</span>
-          </Link>
-        </article>
-
-        {/* Carte 2 — Premium (avantages tirés du plan recommandé, jamais en dur) */}
-        <article className={ROW_CARD}>
-          <p className="overline mb-2 text-gold-2">Premium</p>
-          <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
-          {premiumPlan ? (
-            <>
-              <p className="tabular font-display text-2xl text-ivory">
-                {premiumPlan.price_monthly > 0
-                  ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
-                  : 'Gratuit'}
-                {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
-              </p>
-              <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
-              <ul className="mt-3 space-y-2">
-                {premiumPlan.features.slice(0, 4).map((f) => (
-                  <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-                    <span className="mt-0.5 text-up" aria-hidden>
-                      ✓
-                    </span>
-                    <span>
-                      {f.feature_label}
-                      {f.feature_value ? ` — ${f.feature_value}` : ''}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : (
-            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-              Le détail des formules s&apos;affichera dès que les plans seront disponibles.
-            </p>
-          )}
-          <Link href="/pricing" className={ROW_LINK}>
-            Découvrir Premium <span aria-hidden>→</span>
-          </Link>
-        </article>
-
-        {/* Carte 3 — Brief quotidien (vrai contenu brief_daily) */}
-        <article className={ROW_CARD}>
-          <p className="overline mb-2 text-gold-2">Brief quotidien</p>
-          <h2 className="mb-3 font-display text-lg text-ivory">La séance résumée chaque soir.</h2>
-          {briefLines.length > 0 ? (
-            <ul className="space-y-2">
-              {briefLines.slice(0, 5).map((l, i) => (
-                <li key={i} className="border-b border-border/60 pb-2 text-[13px] leading-snug text-ivory/85 last:border-0 last:pb-0">
-                  {l}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-              Le brief du jour sera disponible après la clôture.
-            </p>
-          )}
-          <Link href="/brief" className={ROW_LINK}>
-            Lire le brief <span aria-hidden>→</span>
           </Link>
         </article>
       </section>
@@ -919,27 +1050,28 @@ export default async function Landing() {
         </article>
       </section>
 
+      {/* ── 18 · PREMIUM — comparatif complet des formules ──────────────── */}
       <PremiumCompare plans={plans} />
 
-      {/* ── FAQ — lève les objections avant le CTA final ─────────────── */}
-      <LandingFaq />
-
-      {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
-      <section className="mt-10">
+      {/* ── 20 · NEWSLETTER ─────────────────────────────────────────────── */}
+      <section className="mt-14">
         <NewsletterForm source="landing" banner />
       </section>
 
-      {/* ── CTA FINAL ─────────────────────────────────────────────────── */}
-      <section className="mt-12 text-center">
-        <h2 className="mx-auto mb-3 max-w-[24ch] font-display text-3xl text-ivory md:text-4xl [letter-spacing:-0.04em]">
+      {/* ── 21 · FAQ — lève les objections avant le CTA final ───────────── */}
+      <LandingFaq />
+
+      {/* ── 22 · CTA FINAL ──────────────────────────────────────────────── */}
+      <section className="mt-16 text-center">
+        <h2 className="mx-auto mb-3 max-w-[24ch] font-display text-3xl text-ivory md:text-5xl [letter-spacing:-0.04em]">
           Votre prochaine décision mérite mieux qu&apos;une intuition.
         </h2>
-        <p className="mb-6 text-sm text-muted">Compte gratuit · aucune carte bancaire · 1 minute.</p>
+        <p className="mb-7 text-sm text-muted">Sans carte bancaire · 1 minute · Accès immédiat.</p>
         <Link
           href="/signup"
-          className="landing-hero-cta inline-flex min-h-[50px] items-center rounded-full px-8 text-base font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
+          className="landing-hero-cta inline-flex min-h-[52px] items-center rounded-full px-9 text-base font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
         >
-          Créer mon compte gratuit
+          Créer mon compte gratuitement
         </Link>
       </section>
 
