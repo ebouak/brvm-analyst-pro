@@ -80,11 +80,6 @@ export function HeroDeviceMockup({ dateLabel, ticks, brvmC, topMover }: Props) {
             </Link>
           </div>
 
-          <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-[#7d8a90]">
-            <li className="flex items-center gap-1.5"><Check /> Aucune carte bancaire</li>
-            <li className="flex items-center gap-1.5"><Check /> Compte en 1 minute</li>
-            <li className="flex items-center gap-1.5"><Check /> Sans engagement</li>
-          </ul>
         </div>
 
         {/* Cadre « produit » — mêmes données que la page, présentées comme
@@ -136,10 +131,3 @@ export function HeroDeviceMockup({ dateLabel, ticks, brvmC, topMover }: Props) {
   );
 }
 
-function Check() {
-  return (
-    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="#3fe18b" strokeWidth="2" aria-hidden>
-      <path d="M3 8.5l3.2 3.2L13 5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}

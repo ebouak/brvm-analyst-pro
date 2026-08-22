@@ -79,7 +79,7 @@ export function AppPreview() {
           <Link
             key={f.title}
             href={f.href}
-            className="group flex flex-col rounded-panel border border-white/10 bg-white/[0.02] p-5 transition-all duration-200 hover:border-white/25 hover:bg-white/[0.04]"
+            className="group flex flex-col rounded-panel border border-border bg-surface/60 p-5 transition-all duration-200 hover:border-accent/30 hover:bg-elevated/70"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="text-2xl" aria-hidden>{f.icon}</span>

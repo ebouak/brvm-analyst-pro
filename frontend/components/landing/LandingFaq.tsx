@@ -52,7 +52,7 @@ export function LandingFaq() {
         {FAQ.map((item) => (
           <details
             key={item.q}
-            className="group rounded-panel border border-white/10 bg-white/[0.02] px-4 py-3"
+            className="group rounded-panel border border-border bg-surface/60 px-4 py-3"
           >
             <summary className="flex cursor-pointer items-center justify-between gap-3 text-[14px] font-semibold text-ivory [&::-webkit-details-marker]:hidden">
               <span>{item.q}</span>

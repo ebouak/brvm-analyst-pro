@@ -29,7 +29,7 @@ export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number;
   ];
   return (
     <section aria-label="Preuves" className="mt-4">
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-white/10 bg-white/[0.02] sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-border bg-border sm:grid-cols-4">
         {metrics.map((m) => (
           <div key={m.label} className="flex flex-col items-center gap-1 bg-surface px-4 py-5 text-center">
             <span className="font-display text-[clamp(22px,3.4vw,30px)] font-semibold leading-none text-accent tabular">
@@ -45,7 +45,7 @@ export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number;
           {testimonials.map((t) => (
             <figure
               key={t.author}
-              className="rounded-panel border border-white/10 bg-white/[0.02] p-4"
+              className="rounded-panel border border-border bg-surface/60 p-4"
             >
               <blockquote className="text-[13px] leading-relaxed text-ivory">“{t.quote}”</blockquote>
               <figcaption className="mt-2 text-[11px] text-muted">

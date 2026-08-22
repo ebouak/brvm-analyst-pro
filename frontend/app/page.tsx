@@ -446,6 +446,21 @@ export default async function Landing() {
         );
       })()}
 
+      {/* ── RÉASSURANCE : sortie du hero (§4.7 — le hero porte la promesse et
+          le CTA, pas un bandeau de confiance). Rendue ici, juste sous le
+          hero, en tokens de thème puisqu'on quitte le fond sombre fixe. ── */}
+      <ul className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] text-muted">
+        {['Aucune carte bancaire', 'Compte en 1 minute', 'Sans engagement'].map((t) => (
+          <li key={t} className="flex items-center gap-1.5">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor"
+                 strokeWidth="2" className="text-up" aria-hidden>
+              <path d="M3 8.5l3.2 3.2L13 5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {t}
+          </li>
+        ))}
+      </ul>
+
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand nbActions={nbActions} />
 
