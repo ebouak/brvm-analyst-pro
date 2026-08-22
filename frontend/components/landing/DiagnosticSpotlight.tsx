@@ -1,4 +1,9 @@
 // frontend/components/landing/DiagnosticSpotlight.tsx
+//
+// Orphelin depuis 697e2e4 : la landing rend désormais une carte compacte
+// équivalente dans sa rangée « Diagnostic / Simulateur / SGI » (3 colonnes),
+// cette version pleine largeur ne s'y prêtant pas. Conservé, non supprimé —
+// ne pas réutiliser sans vérifier que ce choix de densité tient toujours.
 import Link from 'next/link';
 import { excerpt } from '@/lib/landing/excerpt';
 

@@ -1,4 +1,9 @@
 /**
+ * Orphelin depuis 697e2e4 : la landing rend désormais une carte compacte
+ * équivalente dans sa rangée « Communauté / Premium / Brief » (3 colonnes),
+ * qui reprend les mêmes chiffres et les mêmes sources. Conservé, non
+ * supprimé — ne pas réutiliser sans vérifier que ce choix tient toujours.
+ *
  * Preuve sociale — HONNÊTE :
  * - Compteur = communauté réelle (~2 000 membres), framé comme « communauté »
  *   (pas comme « inscrits sur la plateforme »). Aucun chiffre inventé.
