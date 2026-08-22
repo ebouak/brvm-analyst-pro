@@ -137,7 +137,7 @@ export function ToolsGrid() {
     <div className="rounded-panel border border-border bg-surface/60 p-5 md:p-6">
       <h2 className="overline mb-4 text-gold-2">Tout ce dont vous avez besoin pour investir intelligemment</h2>
 
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
         {TOOLS.map((t) => (
           <Link
             key={t.href}

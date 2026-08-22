@@ -22,6 +22,7 @@ import { ProofBand } from '@/components/landing/ProofBand';
 import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
 import { ToolsGrid } from '@/components/landing/ToolsGrid';
+import { MoverSparkline } from '@/components/landing/MoverSparkline';
 import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
 import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import { excerpt } from '@/lib/landing/excerpt';
@@ -40,10 +41,14 @@ const nf = (n: number, d = 0) => n.toLocaleString('fr-FR', { maximumFractionDigi
 
 interface MoverRow {
   code: string;
+  /** Raison sociale (brvm_instruments.designation) — null si le référentiel ne la porte pas. */
+  nom: string | null;
   cours: number | null;
   pct: number;
   score: number | null;
   confiance: number | null;
+  /** Clôtures réelles des dernières séances, pour la mini-courbe. Vide = pas de courbe. */
+  spark: number[];
 }
 
 interface NewsCardItem {
@@ -140,6 +145,9 @@ async function getData() {
   // même cache 5 min que le reste de la landing au lieu d'un appel à part et
   // non caché dans Landing().
   const sgiDirectoryPromise = getSgiDirectory();
+  // Référentiel des sociétés : 48 lignes, sert à afficher la raison sociale sous
+  // le code dans les movers. Ne dépend d'aucune valeur calculée → lot 1.
+  const instrumentsPromise = supabase.from('brvm_instruments').select('code, designation');
 
   // Sûr sans .throwOnError() nulle part dans ce fichier : le client Supabase
   // résout toujours { data, error } sans jamais rejeter la Promise, même en
@@ -160,6 +168,7 @@ async function getData() {
     { data: diagReport },
     { data: planRows },
     sgiDirectory,
+    { data: instrumentRows },
   ] = await Promise.all([
     lastDayPromise,
     lastIdxPromise,
@@ -170,6 +179,7 @@ async function getData() {
     diagReportPromise,
     planRowsPromise,
     sgiDirectoryPromise,
+    instrumentsPromise,
   ]);
 
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
@@ -236,15 +246,20 @@ async function getData() {
     volumeTotal = all.reduce((s, r) => s + (r.volume ?? 0), 0);
     const sigByCode = new Map((sigs ?? []).map((s) => [s.code as string, s]));
     const withVar = all.filter((r) => r.variation_pct != null);
+    const nomByCode = new Map(
+      ((instrumentRows ?? []) as { code: string; designation: string | null }[]).map((i) => [i.code, i.designation]),
+    );
     const toRow = (r: (typeof all)[number]): MoverRow => ({
       code: r.code,
+      nom: nomByCode.get(r.code) ?? null,
       cours: r.cours_jour,
       pct: r.variation_pct ?? 0,
       score: (sigByCode.get(r.code)?.score_total as number | undefined) ?? null,
       confiance: (sigByCode.get(r.code)?.confiance as number | undefined) ?? null,
+      spark: [],
     });
-    hausses = withVar.filter((r) => (r.variation_pct ?? 0) > 0).slice(0, 3).map(toRow);
-    baisses = withVar.filter((r) => (r.variation_pct ?? 0) < 0).slice(-3).reverse().map(toRow);
+    hausses = withVar.filter((r) => (r.variation_pct ?? 0) > 0).slice(0, 5).map(toRow);
+    baisses = withVar.filter((r) => (r.variation_pct ?? 0) < 0).slice(-5).reverse().map(toRow);
     // Repli « séance peu animée » : la BRVM est peu liquide, beaucoup de titres
     // ne s'échangent pas → variation 0 % fréquente et légitime. Sans mover signé,
     // on montre quand même la séance via les plus gros volumes (jamais vide alors
@@ -255,6 +270,31 @@ async function getData() {
         .slice(0, 6)
         .map(toRow);
     }
+    // Mini-courbes : un aller-retour de plus, mais borné aux seuls codes
+    // réellement affichés (≤ 12) plutôt qu'à tout le marché — ~240 lignes, loin
+    // du plafond PostgREST de 1000. Il ne peut pas partir dans le lot 2 : les
+    // codes ne sont connus qu'après le calcul des movers ci-dessus.
+    const shown = [...hausses, ...baisses, ...flatTop];
+    if (shown.length > 0) {
+      const since = new Date(asOf as string);
+      since.setDate(since.getDate() - 40); // ~20 séances ouvrées
+      const { data: hist } = await supabase
+        .from('brvm_actions_daily')
+        .select('code, date_marche, cours_jour')
+        .in('code', shown.map((m) => m.code))
+        .gte('date_marche', since.toISOString().slice(0, 10))
+        .lte('date_marche', asOf as string)
+        .order('date_marche', { ascending: true });
+      const seriesByCode = new Map<string, number[]>();
+      for (const r of (hist ?? []) as { code: string; cours_jour: number | null }[]) {
+        if (r.cours_jour == null || r.cours_jour <= 0) continue;
+        const arr = seriesByCode.get(r.code);
+        if (arr) arr.push(r.cours_jour);
+        else seriesByCode.set(r.code, [r.cours_jour]);
+      }
+      for (const m of shown) m.spark = seriesByCode.get(m.code) ?? [];
+    }
+
     const tickSource = hausses.length || baisses.length ? [...hausses, ...baisses] : flatTop;
     ticks = tickSource.map((m) => ({
       sym: m.code,
@@ -310,26 +350,45 @@ const getCachedData = unstable_cache(getData, ['landing-data'], { revalidate: 30
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
 
-function MoverLine({ m }: { m: MoverRow }) {
+function MoverLine({ m, rank }: { m: MoverRow; rank: number }) {
   // pct === 0 est neutre, pas "hausse" : évite une puce verte sous un
   // en-tête de carte "Top baisses" en mode repli flatTop (où tous les
   // titres ont un pct exactement nul par construction).
   const sign = m.pct > 0 ? 'up' : m.pct < 0 ? 'down' : 'neutral';
+  const tone = sign === 'up' ? 'text-up' : sign === 'down' ? 'text-down' : 'text-muted';
   return (
     <Link
       href={`/societes/${m.code}`}
-      className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-surface/60 px-3.5 py-2.5 transition-colors hover:border-accent/30 hover:bg-elevated/70"
+      className="flex items-center gap-3 rounded-xl border border-border/60 bg-surface/60 px-3 py-2.5 transition-colors hover:border-accent/30 hover:bg-elevated/70"
     >
-      <span className="flex items-center gap-2.5 min-w-0">
-        <span className="font-mono text-sm font-bold text-ivory">{m.code}</span>
-        <RatingBadge scoreTotal={m.score} confiance={m.confiance} />
+      <span
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold tabular ${
+          sign === 'up' ? 'border-up/30 text-up' : sign === 'down' ? 'border-down/30 text-down' : 'border-border text-muted'
+        }`}
+        aria-hidden
+      >
+        {rank}
       </span>
-      <span className="flex items-baseline gap-3 shrink-0">
-        <span className="tabular text-sm text-ivory">{m.cours != null ? nf(m.cours) : '—'}</span>
-        <span
-          className={`tabular text-xs font-bold ${sign === 'up' ? 'text-up' : sign === 'down' ? 'text-down' : 'text-muted'}`}
-        >
-          {sign === 'up' ? '+' : ''}{m.pct.toFixed(2)}%
+
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2">
+          <span className="font-mono text-[13px] font-bold text-ivory">{m.code}</span>
+          <RatingBadge scoreTotal={m.score} confiance={m.confiance} />
+        </span>
+        {m.nom && (
+          <span className="mt-0.5 block truncate text-[10px] uppercase tracking-wide text-faint">{m.nom}</span>
+        )}
+      </span>
+
+      {/* Mini-courbe des vraies clôtures ; hérite de la couleur via currentColor. */}
+      <span className={`hidden sm:block ${tone}`}>
+        <MoverSparkline values={m.spark} />
+      </span>
+
+      <span className="shrink-0 text-right">
+        <span className="tabular block text-[13px] text-ivory">{m.cours != null ? nf(m.cours) : '—'}</span>
+        <span className={`tabular block text-[11px] font-bold ${tone}`}>
+          {sign === 'up' ? '+' : ''}{m.pct.toFixed(2)} %
         </span>
       </span>
     </Link>
@@ -486,12 +545,12 @@ export default async function Landing() {
             <p className="overline mb-3 text-up">Top hausses</p>
             <div className="space-y-2">
               {hausses.length > 0 ? (
-                hausses.map((m) => <MoverLine key={m.code} m={m} />)
+                hausses.map((m, i) => <MoverLine key={m.code} m={m} rank={i + 1} />)
               ) : flatTopA.length > 0 ? (
                 <>
                   <p className="mb-1 text-[11px] text-muted">Séance peu animée — titres les plus échangés :</p>
-                  {flatTopA.map((m) => (
-                    <MoverLine key={m.code} m={m} />
+                  {flatTopA.map((m, i) => (
+                    <MoverLine key={m.code} m={m} rank={i + 1} />
                   ))}
                 </>
               ) : (
@@ -521,12 +580,12 @@ export default async function Landing() {
             <p className="overline mb-3 text-down">Top baisses</p>
             <div className="space-y-2">
               {baisses.length > 0 ? (
-                baisses.map((m) => <MoverLine key={m.code} m={m} />)
+                baisses.map((m, i) => <MoverLine key={m.code} m={m} rank={i + 1} />)
               ) : flatTopB.length > 0 ? (
                 <>
                   <p className="mb-1 text-[11px] text-muted">Séance peu animée — titres les plus échangés :</p>
-                  {flatTopB.map((m) => (
-                    <MoverLine key={m.code} m={m} />
+                  {flatTopB.map((m, i) => (
+                    <MoverLine key={m.code} m={m} rank={i + 1} />
                   ))}
                 </>
               ) : (

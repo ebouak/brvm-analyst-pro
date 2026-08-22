@@ -9,6 +9,10 @@
  * pas présenter comme "vérifiée" au même titre que les autres tant qu'aucune
  * métrique de couverture réelle ne l'alimente. L'emplacement témoignages
  * (prop `testimonials`) est prêt à recevoir de VRAIES citations quand elles existent.
+ *
+ * Sources : seul le logo BRVM existe réellement dans `public/brand/`. BCEAO et
+ * Bloomfield sont rendus en toutes lettres plutôt qu'avec un faux logo — dépose
+ * les fichiers officiels dans `public/brand/` et remplace le rendu texte ici.
  */
 
 export interface Testimonial {
@@ -17,36 +21,70 @@ export interface Testimonial {
   role?: string;
 }
 
+function Ico({ d }: { d: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.4"
+         strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden>
+      <path d={d} />
+    </svg>
+  );
+}
+
+const ICONS = {
+  societes: 'M3 21h18M5 21V7l7-4 7 4v14M9 11h.01M9 15h.01M15 11h.01M15 15h.01',
+  horloge: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 7v5l3 2',
+  note: 'M4 12a8 8 0 0113.7-5.7M20 12a8 8 0 01-13.7 5.7M17 3v3.5h-3.5M7 21v-3.5h3.5',
+  sources: 'M12 3l8 3.5v5c0 4.2-3.2 7.8-8 8.5-4.8-.7-8-4.3-8-8.5v-5L12 3zM9 12l2 2 4-4',
+} as const;
+
 export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number; testimonials?: Testimonial[] }) {
   const metrics = [
     // Repli sur 48 (jamais inventé) si aucune séance n'a de données : c'est le
     // total réel de sociétés cotées à la BRVM, déjà vérifié et affiché ailleurs
     // sur le site (app/societes, tests fondamentaux) — pas un chiffre à part.
-    { value: nbActions > 0 ? String(nbActions) : '48', label: 'sociétés cotées suivies' },
-    { value: '15 min', label: 'fraîcheur des cours en séance' },
-    { value: 'A–F', label: 'note quantitative par action' },
-    { value: '100%', label: 'données vérifiées à la source' },
+    { value: nbActions > 0 ? String(nbActions) : '48', label: 'sociétés BRVM suivies', icon: ICONS.societes },
+    { value: '15 min', label: 'actualisation des cours', icon: ICONS.horloge },
+    { value: 'A–F', label: 'notation quantitative', icon: ICONS.note },
+    { value: 'Sources', label: 'données vérifiées et officielles', icon: ICONS.sources },
   ];
+
   return (
     <section aria-label="Preuves" className="mt-4">
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-border bg-border sm:grid-cols-4">
-        {metrics.map((m) => (
-          <div key={m.label} className="flex flex-col items-center gap-1 bg-surface px-4 py-5 text-center">
-            <span className="font-display text-[clamp(22px,3.4vw,30px)] font-semibold leading-none text-accent tabular">
-              {m.value}
-            </span>
-            <span className="text-[11px] leading-tight text-muted">{m.label}</span>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 gap-6 rounded-panel border border-border bg-surface px-5 py-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] lg:gap-8 lg:px-7">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4">
+          {metrics.map((m) => (
+            <div key={m.label} className="flex items-start gap-3">
+              <span className="mt-0.5 text-accent"><Ico d={m.icon} /></span>
+              <span className="min-w-0">
+                <span className="tabular block font-display text-[clamp(18px,2.2vw,24px)] font-semibold leading-none text-ivory">
+                  {m.value}
+                </span>
+                <span className="mt-1.5 block text-[11px] leading-tight text-muted">{m.label}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          <p className="overline mb-3 text-faint">Nos données proviennent des sources du marché</p>
+          <ul className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <li>
+              {/* Seul logo réellement disponible dans le dépôt. */}
+              <img src="/brand/brvm-logo.png" alt="BRVM" className="h-6 w-auto opacity-80" />
+            </li>
+            {['BCEAO', 'Publications des émetteurs', 'Bloomfield'].map((s) => (
+              <li key={s} className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {testimonials.length > 0 && (
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((t) => (
-            <figure
-              key={t.author}
-              className="rounded-panel border border-border bg-surface/60 p-4"
-            >
+            <figure key={t.author} className="rounded-panel border border-border bg-surface/60 p-4">
               <blockquote className="text-[13px] leading-relaxed text-ivory">“{t.quote}”</blockquote>
               <figcaption className="mt-2 text-[11px] text-muted">
                 <span className="text-accent">{t.author}</span>
