@@ -26,6 +26,7 @@ import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
 import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import { excerpt } from '@/lib/landing/excerpt';
 import { getMemberCount } from '@/lib/landing/memberCount';
+import { getLatestDiagnostic } from '@/lib/landing/latestDiagnostic';
 import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
 import { computeRatios, latestUsable, type FundamentalsRow } from '@/lib/landing/fundamentals';
 import { SectorStrip } from '@/components/landing/SectorStrip';
@@ -153,12 +154,10 @@ async function getData() {
       return []; /* pas de cartographie si données indisponibles */
     }
   })();
-  const diagReportPromise = supabase
-    .from('diagnostic_reports')
-    .select('code, generated_at, markdown_content')
-    .order('generated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // `diagnostic_reports` est sous RLS : la clé anon n'y voit aucune ligne, la
+  // section affichait donc son état vide pour tout visiteur public. Lecture
+  // service-role bordée à 3 colonnes non personnelles — voir le module.
+  const diagReportPromise = getLatestDiagnostic().then((data) => ({ data }));
   const planRowsPromise = supabase
     .from('subscription_plans')
     .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
@@ -244,7 +243,7 @@ async function getData() {
           )
           .eq('date_marche', asOf)
           .order('variation_pct', { ascending: false }),
-        supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
+        supabase.from('signals_daily').select('code, score_total, confiance, signal').eq('date_marche', asOf),
         // Signal spotlight : ne dépend que d'asOf, aucune donnée calculée
         // ci-dessous — rejoint ce Promise.all plutôt qu'un aller-retour à part.
         supabase
@@ -763,17 +762,9 @@ export default async function Landing() {
       <SectorStrip sectors={sectors} dateLabel={dateLabel} />
 
       {/* ── 08 · CARTOGRAPHIE — pleine largeur, section immersive ───────── */}
-      <section aria-labelledby="carto-titre" className="mt-14">
-        <div className="mb-6 max-w-[52ch]">
-          <p className="overline mb-3 text-gold-2">Cartographie</p>
-          <h2 id="carto-titre" className="font-display text-2xl text-ivory md:text-4xl [letter-spacing:-0.035em]">
-            Toute la cote BRVM, d&apos;un coup d&apos;œil.
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            Chaque tuile est une société : sa taille suit la capitalisation, sa couleur la variation
-            du jour. Les secteurs se lisent d&apos;un regard.
-          </p>
-        </div>
+      {/* LandingHeatmap porte déjà son propre titre « Toute la cote BRVM » :
+          ne pas en ajouter un second au-dessus, il faisait doublon à l'écran. */}
+      <section className="mt-14">
         <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
       </section>
 
@@ -795,16 +786,18 @@ export default async function Landing() {
             <div className="rounded-xl border border-border/70 bg-sunken/30 p-3.5">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="font-mono text-xs font-bold text-ivory">{latestDiagnosticReport.code}</span>
-                <span className="text-[10px] text-faint">
-                  {new Date(latestDiagnosticReport.generated_at).toLocaleDateString('fr-FR', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </span>
+                {latestDiagnosticReport.generated_at && (
+                  <span className="text-[10px] text-faint">
+                    {new Date(latestDiagnosticReport.generated_at).toLocaleDateString('fr-FR', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </span>
+                )}
               </div>
               <p className="line-clamp-4 text-[13px] leading-relaxed text-ivory/85">
-                {excerpt(latestDiagnosticReport.markdown_content, 200)}
+                {excerpt(latestDiagnosticReport.markdown_content ?? "", 200)}
               </p>
             </div>
           ) : (
@@ -863,8 +856,6 @@ export default async function Landing() {
       {/* ── 14 · LA PLATEFORME — quatre univers (remplace la grille plate)  */}
       <PlatformUniverses />
 
-      {/* ── 14b · APERÇU DE L’APPLICATION ───────────────────────────────── */}
-      <AppPreview />
 
       {/* ── 15 + 16 · SIMULATEUR ET COMPARATEUR SGI ─────────────────────── */}
       <section className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -1051,6 +1042,11 @@ export default async function Landing() {
       </section>
 
       {/* ── 18 · PREMIUM — comparatif complet des formules ──────────────── */}
+      {/* AppPreview porte les badges GRATUIT / PREMIUM / UNIQUE : c'est de
+          l'information de palier, sa place est ici et non en section 14 où
+          elle répétait le message de PlatformUniverses juste au-dessus. */}
+      <AppPreview />
+
       <PremiumCompare plans={plans} />
 
       {/* ── 20 · NEWSLETTER ─────────────────────────────────────────────── */}
