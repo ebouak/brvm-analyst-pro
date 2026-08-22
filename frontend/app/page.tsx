@@ -468,7 +468,8 @@ async function getData() {
         serie,
       };
 
-      const exercice = latestUsable((fundaRows ?? []) as FundamentalsRow[]);
+      const exercices = (fundaRows ?? []) as FundamentalsRow[];
+      const exercice = latestUsable(exercices);
       if (exercice) {
         fundamentals = {
           code: exercice.code,
@@ -479,6 +480,19 @@ async function getData() {
           equity: exercice.equity,
           debt: exercice.debt,
           ratios: computeRatios(exercice),
+          // Historique du plus ancien au plus récent, pour les mini-graphiques.
+          // On ne garde que les exercices réellement exploitables : une année
+          // vide ne doit pas produire une barre à zéro qui se lirait comme
+          // « chiffre d'affaires nul ».
+          historique: exercices
+            .filter((e) => e.revenue != null || e.net_income != null)
+            .sort((a, b) => a.year - b.year)
+            .map((e) => ({
+              year: e.year,
+              revenue: e.revenue,
+              net_income: e.net_income,
+              ratios: computeRatios(e),
+            })),
         };
       }
     }
