@@ -6,7 +6,7 @@ import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import RatingBadge from '@/components/RatingBadge';
 import NewsTicker from '@/components/NewsTicker';
 import NewsletterForm from '@/components/NewsletterForm';
-import { LandingIndices } from '@/components/landing/LandingIndices';
+import { IndicesCompactCard } from '@/components/landing/IndicesCompactCard';
 import LandingHeatmap from '@/components/landing/LandingHeatmap';
 import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
@@ -466,7 +466,7 @@ export default async function Landing() {
           publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
             <p className="overline mb-3 text-up">Top hausses</p>
             <div className="space-y-2">
@@ -519,17 +519,17 @@ export default async function Landing() {
               )}
             </div>
           </div>
+          {/* 4ᵉ colonne : indices en liste compacte (la variante pleine
+              largeur, LandingIndices, ne tient pas dans une colonne). */}
+          <IndicesCompactCard indices={indices} />
         </div>
-
-        {/* Indices en section propre (4 cartes principales + sectoriels) :
-            LandingIndices produit déjà sa propre mise en page, l'imbriquer
-            dans une colonne de la grille l'écrasait. */}
-        <LandingIndices indices={indices} />
-
-        <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
       </section>
 
-      <ToolsGrid />
+      {/* ── CARTOGRAPHIE + OUTILS côte à côte (1/3 – 2/3) ───────────────── */}
+      <section className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
+        <ToolsGrid />
+      </section>
 
       <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
 
