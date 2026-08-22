@@ -10,10 +10,24 @@
  * métrique de couverture réelle ne l'alimente. L'emplacement témoignages
  * (prop `testimonials`) est prêt à recevoir de VRAIES citations quand elles existent.
  *
- * Sources : seul le logo BRVM existe réellement dans `public/brand/`. BCEAO et
- * Bloomfield sont rendus en toutes lettres plutôt qu'avec un faux logo — dépose
- * les fichiers officiels dans `public/brand/` et remplace le rendu texte ici.
+ * Sources : les trois revendications sont vérifiées en base avant d'être
+ * affichées — cours BRVM, macro BCEAO (macro_indicators) et notations
+ * Bloomfield (brvm_instruments.notation_json, 38 sociétés). Ne pas ajouter une
+ * source ici sans que la donnée correspondante existe réellement.
  */
+
+/**
+ * Logos officiels des sources, téléchargés depuis les sites des institutions.
+ * Chacun est posé sur une pastille blanche : les trois sont sombres sur fond
+ * transparent et disparaîtraient en thème sombre. Même parti pris que
+ * HeroSpotlight. Marques déposées de leurs propriétaires respectifs, citées
+ * ici au titre de l'attribution factuelle des sources de données.
+ */
+const SOURCES = [
+  { src: '/brand/brvm-logo.png', alt: 'BRVM' },
+  { src: '/brand/bceao-logo.png', alt: 'BCEAO' },
+  { src: '/brand/bloomfield-logo.png', alt: 'Bloomfield Investment' },
+] as const;
 
 export interface Testimonial {
   quote: string;
@@ -67,16 +81,14 @@ export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number;
 
         <div className="border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
           <p className="overline mb-3 text-faint">Nos données proviennent des sources du marché</p>
-          <ul className="flex flex-wrap items-center gap-x-5 gap-y-3">
-            <li>
-              {/* Seul logo réellement disponible dans le dépôt. */}
-              <img src="/brand/brvm-logo.png" alt="BRVM" className="h-6 w-auto opacity-80" />
-            </li>
-            {['BCEAO', 'Publications des émetteurs', 'Bloomfield'].map((s) => (
-              <li key={s} className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-                {s}
+          <ul className="flex flex-wrap items-center gap-2.5">
+            {SOURCES.map((s) => (
+              <li key={s.alt} className="flex h-8 items-center rounded-md bg-white px-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={s.src} alt={s.alt} className="h-4 w-auto" />
               </li>
             ))}
+            <li className="text-[11px] font-medium text-muted">Publications des émetteurs</li>
           </ul>
         </div>
       </div>

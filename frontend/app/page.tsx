@@ -26,6 +26,7 @@ import { MoverSparkline } from '@/components/landing/MoverSparkline';
 import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
 import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import { excerpt } from '@/lib/landing/excerpt';
+import { getMemberCount } from '@/lib/landing/memberCount';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
 // cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
@@ -148,6 +149,9 @@ async function getData() {
   // Référentiel des sociétés : 48 lignes, sert à afficher la raison sociale sous
   // le code dans les movers. Ne dépend d'aucune valeur calculée → lot 1.
   const instrumentsPromise = supabase.from('brvm_instruments').select('code, designation');
+  // Nombre réel de comptes : lecture service-role (profiles est sous RLS owner,
+  // la clé anon y voit 0). Ne lève jamais — voir lib/landing/memberCount.ts.
+  const memberCountPromise = getMemberCount();
 
   // Sûr sans .throwOnError() nulle part dans ce fichier : le client Supabase
   // résout toujours { data, error } sans jamais rejeter la Promise, même en
@@ -169,6 +173,7 @@ async function getData() {
     { data: planRows },
     sgiDirectory,
     { data: instrumentRows },
+    memberCount,
   ] = await Promise.all([
     lastDayPromise,
     lastIdxPromise,
@@ -180,6 +185,7 @@ async function getData() {
     planRowsPromise,
     sgiDirectoryPromise,
     instrumentsPromise,
+    memberCountPromise,
   ]);
 
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
@@ -337,6 +343,7 @@ async function getData() {
     latestDiagnosticReport: diagReport ?? null,
     plans,
     sgiDirectory,
+    memberCount,
   };
 }
 
@@ -345,7 +352,10 @@ async function getData() {
 // DONNÉES en cache serveur 5 min : les ~10 requêtes Supabase ci-dessus (dont
 // l'annuaire SGI, qui rejoint désormais ce même cache) ne tournent plus à
 // chaque visite. Sûr : getData n'utilise que le client public (aucun cookie,
-// aucune donnée personnalisée).
+// aucune donnée personnalisée). Depuis l'ajout de getMemberCount(), un appel
+// service-role s'y ajoute, mais il ne rapatrie qu'un COMPTE (head: true) :
+// aucune ligne de `profiles`, donc rien de personnel ne peut se retrouver en
+// cache partagé. Toute lecture service-role ajoutée ici doit rester agrégée.
 const getCachedData = unstable_cache(getData, ['landing-data'], { revalidate: 300 });
 
 /* ── Petits composants de section (serveur) ──────────────────────────── */
@@ -446,6 +456,7 @@ export default async function Landing() {
     latestDiagnosticReport,
     plans,
     sgiDirectory,
+    memberCount,
   } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
@@ -733,10 +744,14 @@ export default async function Landing() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-up/70" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-up" />
             </span>
-            <span className="tabular font-display text-2xl font-semibold text-accent">2 000+</span>
+            <span className="tabular font-display text-2xl font-semibold text-accent">
+              {memberCount != null ? nf(memberCount) : '—'}
+            </span>
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-muted">
-            membres dans la communauté WESTBOURSE suivent la BRVM avec des données.
+            {memberCount != null
+              ? 'comptes WESTBOURSE suivent la BRVM avec des données vérifiées.'
+              : 'La communauté WESTBOURSE suit la BRVM avec des données vérifiées.'}
           </p>
           <p className="mt-4 text-[10px] uppercase tracking-[0.18em] text-faint">
             Données vérifiées · sources officielles
