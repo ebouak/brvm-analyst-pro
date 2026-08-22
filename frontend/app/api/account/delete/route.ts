@@ -67,6 +67,14 @@ export async function DELETE() {
   //       plus de la cascade FK de l'étape 3.
   await admin.from('notification_prefs').delete().eq('user_id', user.id);
 
+  // 2ter. Agent conversationnel WhatsApp : historique des messages (donnée
+  //       perso) et codes d'appairage. Mêmes contraintes que ci-dessus — RLS en
+  //       lecture seule pour le propriétaire, aucune policy DELETE → la purge
+  //       passe par service_role, en plus de la cascade FK de l'étape 3
+  //       (`user_id references auth.users(id) on delete cascade`).
+  await admin.from('whatsapp_conversations').delete().eq('user_id', user.id);
+  await admin.from('whatsapp_pairing_codes').delete().eq('user_id', user.id);
+
   // 3. Suppression définitive du compte auth (cascade FK : profil + données ;
   //    billing_transactions.user_id → NULL = anonymisé, conservé pour la compta).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);

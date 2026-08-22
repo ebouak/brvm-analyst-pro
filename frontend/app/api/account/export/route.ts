@@ -34,6 +34,8 @@ export async function GET() {
     academyNotes,
     academyExamAttempts,
     academyCertificates,
+    whatsappConversations,
+    whatsappPairingCodes,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -60,6 +62,8 @@ export async function GET() {
     supabase.from('academy_notes').select('*').eq('user_id', user.id),
     supabase.from('academy_exam_attempts').select('*').eq('user_id', user.id),
     supabase.from('academy_certificates').select('*').eq('user_id', user.id),
+    supabase.from('whatsapp_conversations').select('*').eq('user_id', user.id),
+    supabase.from('whatsapp_pairing_codes').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -93,6 +97,10 @@ export async function GET() {
     academy_notes: academyNotes.data ?? [],
     academy_exam_attempts: academyExamAttempts.data ?? [],
     academy_certificates: academyCertificates.data ?? [],
+    // Agent conversationnel WhatsApp : contenu des messages échangés (donnée
+    // perso, rétention 90 jours) et codes d'appairage du numéro.
+    whatsapp_conversations: whatsappConversations.data ?? [],
+    whatsapp_pairing_codes: whatsappPairingCodes.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
