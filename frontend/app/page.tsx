@@ -603,8 +603,8 @@ const PROOF_SOURCES = ['BDFIN', 'BCEAO', 'BloomField', 'GitHub brvm-data-public'
  * est nulle, le chiffre s'affiche sans lien.
  */
 const TIKTOK_FOLLOWERS = '5 000+';
-const TIKTOK_VERIFIE_LE = '2026-08-22';
-const TIKTOK_URL: string | null = null;
+const TIKTOK_VERIFIE_LE = '2026-08-23';
+const TIKTOK_URL: string | null = 'https://www.tiktok.com/@westbourse7';
 
 export default async function Landing() {
   const {
