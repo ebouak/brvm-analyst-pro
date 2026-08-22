@@ -453,7 +453,7 @@ export default async function Landing() {
           publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
             <p className="overline mb-3 text-up">Top hausses</p>
             <div className="space-y-2">
@@ -506,11 +506,12 @@ export default async function Landing() {
               )}
             </div>
           </div>
-          <div className="rounded-panel border border-white/10 bg-white/[0.02] p-5">
-            <p className="overline mb-3 text-gold-2">Indices BRVM</p>
-            <LandingIndices indices={indices} />
-          </div>
         </div>
+
+        {/* Indices en section propre (4 cartes principales + sectoriels) :
+            LandingIndices produit déjà sa propre mise en page, l'imbriquer
+            dans une colonne de la grille l'écrasait. */}
+        <LandingIndices indices={indices} />
 
         <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
       </section>
