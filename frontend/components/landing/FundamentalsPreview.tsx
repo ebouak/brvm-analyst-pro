@@ -78,15 +78,18 @@ function MiniBarres({
       <div className="mt-3 flex h-[52px] items-end gap-1.5" role="img"
            aria-label={`${titre} de ${dispo[0]!.year} à ${dernier.year}`}>
         {dispo.map((x) => {
-          const h = max === 0 ? 2 : Math.max(2, (Math.abs(x.v) / max) * 100);
+          const h = max === 0 ? 2 : Math.max(3, (Math.abs(x.v) / max) * 100);
           const negatif = x.v < 0;
+          // La barre est enfant DIRECT du conteneur à hauteur définie (h-[52px]).
+          // Avec un span intermédiaire sans hauteur, `height: X%` se résolvait
+          // contre un parent auto et les barres ne s'affichaient pas du tout.
           return (
-            <span key={x.year} className="flex flex-1 flex-col items-center gap-1">
-              <span
-                className={`w-full rounded-sm ${negatif ? 'bg-down/70' : 'bg-accent/70'}`}
-                style={{ height: `${h}%` }}
-              />
-            </span>
+            <span
+              key={x.year}
+              className={`flex-1 rounded-sm ${negatif ? 'bg-down/70' : 'bg-accent/70'}`}
+              style={{ height: `${h}%` }}
+              title={`${x.year} : ${format(x.v)}`}
+            />
           );
         })}
       </div>

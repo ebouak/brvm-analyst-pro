@@ -13,8 +13,18 @@ interface Props {
 
 // Bornes réelles des sous-scores, cf. scraper/src/scoring/score.ts + docs/SCORING.md :
 // variation/volume/rsi ∈ [-1,1], bonus_tendance ∈ [-0.1,0.1], penalite_liquidite ∈ [0,0.25].
-function Bar({ label, value, min = -1, max = 1 }: { label: string; value: number | null; min?: number; max?: number }) {
-  const pct = value == null ? 0 : Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+function Bar({
+  label,
+  value,
+  min = -1,
+  max = 1,
+  invert = false,
+}: { label: string; value: number | null; min?: number; max?: number; invert?: boolean }) {
+  // `invert` : pour la pénalité de liquidité, zéro est une BONNE nouvelle.
+  // Rendue telle quelle, sa barre restait vide et se lisait comme un mauvais
+  // score à côté de barres pleines. Même traitement que le terminal du hero.
+  const brut = value == null ? 0 : Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+  const pct = invert ? 100 - brut : brut;
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-[11px]">
@@ -60,7 +70,7 @@ export function RatingSpotlight({ signal, nbActions }: Props) {
             <Bar label="Volume" value={signal.score_volume ?? null} />
             <Bar label="RSI" value={signal.score_rsi ?? null} />
             <Bar label="Tendance (bonus)" value={signal.bonus_tendance ?? null} min={-0.1} max={0.1} />
-            <Bar label="Liquidité (pénalité)" value={signal.penalite_liquidite ?? null} min={0} max={0.25} />
+            <Bar label="Liquidité" value={signal.penalite_liquidite ?? null} min={0} max={0.25} invert />
           </div>
           <p className="mt-4 text-[10px] text-faint">
             {signal.signal} · confiance {signal.confiance != null ? `${(signal.confiance * 100).toFixed(0)}%` : '—'} · exemple réel de la séance en cours
