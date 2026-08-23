@@ -33,12 +33,11 @@ export default function LandingHeatmap({ rows, dateLabel }: { rows: HeatmapNode[
       </div>
 
       <div className="rounded-2xl border border-border bg-sunken/30 p-2">
-        <HeatmapTreemap data={rows} height={420} logos={brvmLogos as Record<string, string>} />
+        <HeatmapTreemap data={rows} height={320} logos={brvmLogos as Record<string, string>} />
       </div>
 
-      <p className="mt-3 text-[10px] leading-relaxed text-faint">
-        Données réelles de la dernière séance · taille = capitalisation boursière (à défaut, valeur échangée) ·
-        cliquez une société pour sa fiche.
+      <p className="mt-2.5 text-[10px] leading-relaxed text-faint">
+        Taille = capitalisation · couleur = variation du jour · cliquez une société pour sa fiche.
       </p>
     </section>
   );

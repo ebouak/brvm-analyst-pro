@@ -51,7 +51,7 @@ export function DarkBand({
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-content px-4 py-14 md:py-20">{children}</div>
+      <div className="relative mx-auto max-w-content px-4 py-10 md:py-14">{children}</div>
     </section>
   );
 }
