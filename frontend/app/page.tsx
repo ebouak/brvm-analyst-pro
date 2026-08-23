@@ -274,6 +274,9 @@ async function getData() {
   let marketStats: MarketStats | null = null;
   let breakdown: Breakdown | undefined;
   let sentimentScore = 50;
+  /** Écart de sentiment contre la veille, en points. null si la séance
+      précédente n'est pas exploitable — jamais 0, qui se lirait « stable ». */
+  let sentimentDelta: number | null = null;
   let featured: StockDetail | null = null;
   let fundamentals: FundamentalsPreviewData | null = null;
 
@@ -349,6 +352,36 @@ async function getData() {
     // Sentiment 0..100 dérivé du breadth, MÊME formule que le dashboard
     // (app/dashboard/page.tsx) — ne pas en inventer une seconde ici.
     sentimentScore = nbHausses + nbBaisses > 0 ? (nbHausses / (nbHausses + nbBaisses)) * 100 : 50;
+
+    // Écart contre la veille : même méthode que le dashboard
+    // (app/dashboard/page.tsx, prevBreadth). Un aller-retour de plus, borné à
+    // la seule colonne variation_pct de la séance précédente.
+    try {
+      const { data: prevDateRow } = await supabase
+        .from('brvm_actions_daily')
+        .select('date_marche')
+        .lt('date_marche', asOf as string)
+        .order('date_marche', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const prevDate = prevDateRow?.date_marche as string | undefined;
+      if (prevDate) {
+        const { data: prevRows } = await supabase
+          .from('brvm_actions_daily')
+          .select('variation_pct')
+          .eq('date_marche', prevDate);
+        let h = 0;
+        let b = 0;
+        for (const r of (prevRows ?? []) as { variation_pct: number | null }[]) {
+          const v = r.variation_pct ?? 0;
+          if (v > 0) h++;
+          else if (v < 0) b++;
+        }
+        if (h + b > 0) sentimentDelta = sentimentScore - (h / (h + b)) * 100;
+      }
+    } catch {
+      /* la jauge s'affiche sans écart plutôt que de faire tomber la page */
+    }
 
     const toMover = (r: SeanceRow) => ({ code: r.code, cours: r.cours_jour, variation: r.variation_pct ?? 0 });
     breakdown = {
@@ -580,6 +613,7 @@ async function getData() {
     marketStats,
     breakdown,
     sentimentScore,
+    sentimentDelta,
     featured,
     fundamentals,
     nbObligations,
@@ -728,6 +762,7 @@ export default async function Landing() {
     marketStats,
     breakdown,
     sentimentScore,
+    sentimentDelta,
     featured,
     fundamentals,
     nbObligations,
@@ -840,7 +875,7 @@ export default async function Landing() {
             <MarketStateCard
               stats={marketStats}
               sentimentScore={sentimentScore}
-              sentimentDelta={null}
+              sentimentDelta={sentimentDelta}
               breakdown={breakdown}
             />
           </div>
