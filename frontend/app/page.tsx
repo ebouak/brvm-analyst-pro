@@ -33,6 +33,7 @@ import { SectorStrip } from '@/components/landing/SectorStrip';
 import { DataToDecision } from '@/components/landing/DataToDecision';
 import { PlatformUniverses } from '@/components/landing/PlatformUniverses';
 import { DarkBand } from '@/components/landing/DarkBand';
+import MarketStateCard, { type MarketStats, type Breakdown } from '@/components/MarketStateCard';
 import { StockSpotlight, type StockDetail } from '@/components/landing/StockSpotlight';
 import { FundamentalsPreview, type FundamentalsPreviewData } from '@/components/landing/FundamentalsPreview';
 import brvmSectors from '@/lib/brvmSectors.json';
@@ -269,6 +270,10 @@ async function getData() {
   let nbHausses = 0;
   let nbBaisses = 0;
   let nbTransactions = 0;
+  /** État du marché — composant partagé avec le dashboard. */
+  let marketStats: MarketStats | null = null;
+  let breakdown: Breakdown | undefined;
+  let sentimentScore = 50;
   let featured: StockDetail | null = null;
   let fundamentals: FundamentalsPreviewData | null = null;
 
@@ -325,6 +330,32 @@ async function getData() {
     nbTransactions = all.reduce((s, r) => s + (r.nb_transactions ?? 0), 0);
     nbHausses = all.filter((r) => (r.variation_pct ?? 0) > 0).length;
     nbBaisses = all.filter((r) => (r.variation_pct ?? 0) < 0).length;
+    const nbStables = all.filter((r) => r.variation_pct === 0).length;
+
+    marketStats = {
+      hausses: nbHausses,
+      baisses: nbBaisses,
+      stables: nbStables,
+      total: all.length,
+      // `volumeTotal` agrège les volumes par instrument : somme réelle, pas
+      // une estimation — d'où volumeEstimated à false.
+      volumeTotal: volumeTotal > 0 ? volumeTotal : null,
+      volumeEstimated: false,
+      volumePrev: null,
+      titresEchanges: volumeTotal > 0 ? volumeTotal : null,
+      transactions: nbTransactions > 0 ? nbTransactions : null,
+    };
+
+    // Sentiment 0..100 dérivé du breadth, MÊME formule que le dashboard
+    // (app/dashboard/page.tsx) — ne pas en inventer une seconde ici.
+    sentimentScore = nbHausses + nbBaisses > 0 ? (nbHausses / (nbHausses + nbBaisses)) * 100 : 50;
+
+    const toMover = (r: SeanceRow) => ({ code: r.code, cours: r.cours_jour, variation: r.variation_pct ?? 0 });
+    breakdown = {
+      hausses: all.filter((r) => (r.variation_pct ?? 0) > 0).sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).map(toMover),
+      baisses: all.filter((r) => (r.variation_pct ?? 0) < 0).sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).map(toMover),
+      stables: all.filter((r) => r.variation_pct === 0).map(toMover),
+    };
     const sigByCode = new Map((sigs ?? []).map((s) => [s.code as string, s]));
     topRated = [...((sigs ?? []) as { code: string; score_total: number | null; confiance: number | null }[])]
       .filter((x) => x.score_total != null)
@@ -546,6 +577,9 @@ async function getData() {
     nbHausses,
     nbBaisses,
     nbTransactions,
+    marketStats,
+    breakdown,
+    sentimentScore,
     featured,
     fundamentals,
     nbObligations,
@@ -691,6 +725,9 @@ export default async function Landing() {
     nbHausses,
     nbBaisses,
     nbTransactions,
+    marketStats,
+    breakdown,
+    sentimentScore,
     featured,
     fundamentals,
     nbObligations,
@@ -792,7 +829,24 @@ export default async function Landing() {
           publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {/* État du marché : même composant que le dashboard. Il concentre
+            hausses / baisses / stables / titres, la répartition en barre, le
+            volume, les transactions et la jauge de sentiment. Il remplace une
+            carte BRVM-C qui n'affichait que deux chiffres pour beaucoup de vide
+            — la valeur de l'indice reste visible dans le hero et dans la carte
+            Indices juste à côté. */}
+        {marketStats && (
+          <div className="mt-4">
+            <MarketStateCard
+              stats={marketStats}
+              sentimentScore={sentimentScore}
+              sentimentDelta={null}
+              breakdown={breakdown}
+            />
+          </div>
+        )}
+
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <div className="rounded-panel border border-border bg-surface/60 p-5">
             <p className="overline mb-3 text-up">Top hausses</p>
             <div className="space-y-2">
@@ -809,24 +863,6 @@ export default async function Landing() {
                 <p className="py-6 text-center text-xs text-faint">Aucune hausse signée cette séance.</p>
               )}
             </div>
-          </div>
-          <div className="rounded-panel border border-border bg-surface/60 p-5">
-            <p className="overline mb-3 text-gold-2">BRVM-C</p>
-            <p className="tabular font-display text-3xl text-ivory">
-              {brvmC != null ? nf(brvmC, 2) : '—'}
-            </p>
-            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border/70 pt-3">
-              <div>
-                <dt className="sr-only">sociétés suivies</dt>
-                <dd className="tabular font-display text-lg text-ivory">{nbActions > 0 ? nbActions : '—'}</dd>
-                <dd className="mt-0.5 text-[10px] text-faint">sociétés suivies</dd>
-              </div>
-              <div>
-                <dt className="sr-only">titres échangés</dt>
-                <dd className="tabular font-display text-lg text-ivory">{volumeTotal > 0 ? fmtNumber(volumeTotal) : '—'}</dd>
-                <dd className="mt-0.5 text-[10px] text-faint">titres échangés</dd>
-              </div>
-            </dl>
           </div>
           <div className="rounded-panel border border-border bg-surface/60 p-5">
             <p className="overline mb-3 text-down">Top baisses</p>
