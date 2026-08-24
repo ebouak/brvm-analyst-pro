@@ -24,9 +24,25 @@ export interface LatestDiagnostic {
 
 export async function getLatestDiagnostic(): Promise<LatestDiagnostic | null> {
   try {
-    const { data, error } = await getServiceClient()
+    const db = getServiceClient();
+
+    // Le rapport le PLUS RÉCENT n'est pas forcément présentable : le premier
+    // affiché en vitrine portait sur BICB, l'une des quatre sociétés dont
+    // aucun état financier n'est en base (cf. CLAUDE.md §10). Montrer un
+    // « diagnostic » sur une société sans fondamentaux décrédibilise la
+    // fonctionnalité auprès de qui vérifie. On ne retient donc que les codes
+    // ayant un chiffre d'affaires réel.
+    const { data: avecFonda } = await db
+      .from('fundamentals')
+      .select('code')
+      .not('revenue', 'is', null);
+    const eligibles = [...new Set(((avecFonda ?? []) as { code: string }[]).map((r) => r.code))];
+    if (eligibles.length === 0) return null;
+
+    const { data, error } = await db
       .from('diagnostic_reports')
       .select('code, generated_at, markdown_content')
+      .in('code', eligibles)
       .order('generated_at', { ascending: false })
       .limit(1)
       .maybeSingle();

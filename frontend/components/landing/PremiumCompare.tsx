@@ -27,7 +27,7 @@ export function PremiumCompare({ plans }: { plans: Plan[] }) {
         {plans.map((p) => (
           <div
             key={p.code}
-            className={`rounded-panel border p-6 ${p.is_recommended ? 'border-accent/40 bg-accent/[0.05]' : 'border-border bg-surface/60'}`}
+            className={`flex flex-col rounded-panel border p-6 ${p.is_recommended ? 'border-accent/40 bg-accent/[0.05]' : 'border-border bg-surface/60'}`}
           >
             {p.is_recommended && <p className="overline mb-2 text-gold-2">Recommandé</p>}
             <h3 className="font-display text-xl text-ivory">{p.name}</h3>
@@ -52,6 +52,21 @@ export function PremiumCompare({ plans }: { plans: Plan[] }) {
                 Détail des fonctionnalités sur la page Tarifs.
               </p>
             )}
+
+            {/* Chaque carte porte son propre bouton. Auparavant les trois
+                formules n'offraient qu'un lien texte commun sous la grille :
+                au moment le plus à enjeu de la page, le visiteur n'avait rien
+                à cliquer dans la carte qu'il regardait. */}
+            <Link
+              href={p.price_monthly > 0 ? '/pricing' : '/signup'}
+              className={`mt-auto pt-5 flex min-h-[44px] items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                p.is_recommended
+                  ? 'landing-hero-cta text-[#03222b] shadow-gold'
+                  : 'border border-border text-ivory hover:border-accent/40'
+              }`}
+            >
+              {p.price_monthly > 0 ? 'Voir cette formule' : 'Créer mon compte gratuit'}
+            </Link>
           </div>
         ))}
       </div>

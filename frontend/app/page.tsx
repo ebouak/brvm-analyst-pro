@@ -698,7 +698,7 @@ const STEPS = [
     title: 'Entraînez-vous sans risque',
     body: 'Paper trading avec capital fictif, alertes personnalisées et suivi de portefeuille en réel.',
     href: '/signup',
-    cta: 'Créer un compte gratuit',
+    cta: 'Créer mon compte gratuit',
   },
 ];
 
@@ -1165,7 +1165,7 @@ export default async function Landing() {
             href="/signup"
             className="mt-5 inline-flex min-h-[44px] w-fit items-center gap-1.5 rounded-full border border-up/40 px-5 text-sm font-semibold text-up transition-colors hover:bg-up/10"
           >
-            Espace Analyse <span aria-hidden>→</span>
+            Créer mon compte gratuit <span aria-hidden>→</span>
           </Link>
         </article>
 
@@ -1241,7 +1241,7 @@ export default async function Landing() {
           href="/signup"
           className="landing-hero-cta inline-flex min-h-[52px] items-center rounded-full px-9 text-base font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
         >
-          Créer mon compte gratuitement
+          Créer mon compte gratuit
         </Link>
       </section>
 
