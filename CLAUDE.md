@@ -414,3 +414,22 @@ Cinq rôles canoniques (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-
 ### Domain docs
 
 Single-context (`CONTEXT.md` + `docs/adr/` à la racine). See `docs/agents/domain.md`.
+
+### Conseil avant décision irréversible (fable-advisor)
+
+Avant de t'engager sur une décision **coûteuse à défaire**, consulte d'abord le
+skill `fable-advisor` : architecture système ou workflow, schéma de base et
+modèle de données, contrat d'API ou de webhook, choix de technologie ou de
+prestataire, migration en production, suppression ou renommage de route.
+Consulte-le aussi **avant de lancer une boucle, un cron ou une routine non
+surveillée** — un défaut de conception s'y répète à chaque itération — et
+lorsque tu es bloqué après deux tentatives réellement différentes.
+
+Pourquoi c'est écrit ici : trancher seul une porte à sens unique est
+exactement le mode d'échec que ce protocole évite, et le déclenchement ne doit
+pas dépendre de mon appréciation du moment.
+
+**Fable facture 2× Opus** (10 $/50 $ par MTok). Le protocole impose ses propres
+plafonds : un consult par tâche, trois interactions Fable au maximum. Ne pas
+l'utiliser pour de la génération de code — c'est un conseiller en lecture
+seule, il rend un verdict, pas un livrable.
