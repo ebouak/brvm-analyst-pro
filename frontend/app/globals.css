@@ -41,7 +41,7 @@
 
   --color-ivory: 252 252 252;
   --color-muted: 181 181 181;
-  --color-faint: 92 107 112;
+  --color-faint: 122 138 144; /* 5,21:1 sur surface, 5,76:1 sur bg — mesuré */
 
   --shadow-card: 0 10px 24px rgba(0,0,0,0.35);
   --shadow-panel: 0 22px 60px rgba(0,0,0,0.45);
@@ -58,8 +58,13 @@
 }
 
 /* ── Mode clair « Warm Ivory » ──────────────────────────────────────────
-   Toutes les valeurs choisies pour tenir le contraste AA (4.5:1) sur fond
-   blanc/ivoire — jamais une simple inversion des valeurs sombres. */
+   Valeurs choisies pour tenir AA (4.5:1) sur fond blanc/ivoire — jamais une
+   simple inversion des valeurs sombres.
+
+   ⚠️ Cette affirmation a déjà été FAUSSE : `faint` était à 3,98:1 sur le
+   fond de page alors qu'il est utilisé 344 fois, dont ~99 en 10-11 px — donc
+   pas du « grand texte », le seuil 4,5:1 s'applique. Corrigé le 2026-08-24
+   après mesure. Toute valeur ajoutée ici doit être MESURÉE, pas estimée. */
 :root[data-theme="light"] {
   color-scheme: light;
 
@@ -83,7 +88,7 @@
 
   --color-ivory: 32 28 23;
   --color-muted: 87 78 64;
-  --color-faint: 133 122 103;
+  --color-faint: 110 101 86; /* 5,41:1 sur bg, 5,74:1 sur surface — mesuré */
 
   /* Ombres neutres discrètes — un halo cyan/vert lumineux lit comme un bug
      sur fond clair, pas comme un effet premium. */
@@ -583,5 +588,19 @@ body::after {
 
   --color-ivory: 252 252 252;
   --color-muted: 181 181 181;
-  --color-faint: 92 107 112;
+  --color-faint: 122 138 144; /* 5,21:1 sur surface, 5,76:1 sur bg — mesuré */
+}
+
+
+/* ── Marquees : pause au survol et au focus ─────────────────────────────
+   WCAG 2.2.2 (Pause, Stop, Hide) : un mouvement automatique de plus de 5 s
+   présenté avec d'autre contenu doit pouvoir être arrêté. La garde
+   `prefers-reduced-motion` globale (plus haut) ne couvre PAS ce besoin : elle
+   ne sert que les visiteurs ayant activé la préférence système.
+
+   Le modèle existait déjà pour le ticker embarquable (.wb-ticker) ; il
+   manquait aux deux marquees de la landing. */
+.animate-ticker:hover,
+.animate-ticker:focus-within {
+  animation-play-state: paused;
 }
