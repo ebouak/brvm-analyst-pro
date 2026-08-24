@@ -35,14 +35,23 @@ export function PremiumCompare({ plans }: { plans: Plan[] }) {
               {p.price_monthly > 0 ? `${p.price_monthly.toLocaleString('fr-FR')} FCFA` : 'Gratuit'}
               {p.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
             </p>
-            <ul className="mt-4 space-y-2">
-              {p.features.slice(0, 5).map((f) => (
-                <li key={f.id} className="flex items-start gap-2 text-xs text-muted">
-                  <span className="mt-0.5 text-up" aria-hidden>✓</span>
-                  <span>{f.feature_label}{f.feature_value ? ` — ${f.feature_value}` : ''}</span>
-                </li>
-              ))}
-            </ul>
+            {/* `plan_features` peut être vide en base : on n'affiche pas une
+                liste à puces sans puce, qui donne une carte visiblement
+                inachevée. Le détail vit de toute façon sur /pricing. */}
+            {p.features.length > 0 ? (
+              <ul className="mt-4 space-y-2">
+                {p.features.slice(0, 5).map((f) => (
+                  <li key={f.id} className="flex items-start gap-2 text-xs text-muted">
+                    <span className="mt-0.5 text-up" aria-hidden>✓</span>
+                    <span>{f.feature_label}{f.feature_value ? ` — ${f.feature_value}` : ''}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-xs leading-relaxed text-faint">
+                Détail des fonctionnalités sur la page Tarifs.
+              </p>
+            )}
           </div>
         ))}
       </div>

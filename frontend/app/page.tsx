@@ -21,12 +21,22 @@ import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
 import { ProofBand } from '@/components/landing/ProofBand';
 import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
-import { ToolsGrid } from '@/components/landing/ToolsGrid';
 import { MoverSparkline } from '@/components/landing/MoverSparkline';
 import { RatingSpotlight } from '@/components/landing/RatingSpotlight';
 import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import { excerpt } from '@/lib/landing/excerpt';
 import { getMemberCount } from '@/lib/landing/memberCount';
+import { getLatestDiagnostic } from '@/lib/landing/latestDiagnostic';
+import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
+import { computeRatios, latestUsable, type FundamentalsRow } from '@/lib/landing/fundamentals';
+import { SectorStrip } from '@/components/landing/SectorStrip';
+import { DataToDecision } from '@/components/landing/DataToDecision';
+import { PlatformUniverses } from '@/components/landing/PlatformUniverses';
+import { DarkBand } from '@/components/landing/DarkBand';
+import MarketStateCard, { type MarketStats, type Breakdown } from '@/components/MarketStateCard';
+import { StockSpotlight, type StockDetail } from '@/components/landing/StockSpotlight';
+import { FundamentalsPreview, type FundamentalsPreviewData } from '@/components/landing/FundamentalsPreview';
+import brvmSectors from '@/lib/brvmSectors.json';
 
 // ISR : la landing n'affiche que des données publiques (marché). On la met en
 // cache CDN et on la revalide toutes les 5 min (les cours bougent ~15 min) →
@@ -39,6 +49,22 @@ export const metadata = {
 };
 
 const nf = (n: number, d = 0) => n.toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: d });
+
+/** Une ligne de `brvm_actions_daily` telle que la landing la charge. */
+interface SeanceRow {
+  code: string;
+  cours_jour: number | null;
+  variation_pct: number | null;
+  volume: number | null;
+  ouverture: number | null;
+  plus_haut: number | null;
+  plus_bas: number | null;
+  cours_precedent: number | null;
+  valeur_echangee: number | null;
+  nb_transactions: number | null;
+  beta_1an: number | null;
+  valorisation: number | null;
+}
 
 interface MoverRow {
   code: string;
@@ -130,12 +156,10 @@ async function getData() {
       return []; /* pas de cartographie si données indisponibles */
     }
   })();
-  const diagReportPromise = supabase
-    .from('diagnostic_reports')
-    .select('code, generated_at, markdown_content')
-    .order('generated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // `diagnostic_reports` est sous RLS : la clé anon n'y voit aucune ligne, la
+  // section affichait donc son état vide pour tout visiteur public. Lecture
+  // service-role bordée à 3 colonnes non personnelles — voir le module.
+  const diagReportPromise = getLatestDiagnostic().then((data) => ({ data }));
   const planRowsPromise = supabase
     .from('subscription_plans')
     .select('id, code, name, price_monthly, is_recommended, is_active, sort_order')
@@ -148,10 +172,40 @@ async function getData() {
   const sgiDirectoryPromise = getSgiDirectory();
   // Référentiel des sociétés : 48 lignes, sert à afficher la raison sociale sous
   // le code dans les movers. Ne dépend d'aucune valeur calculée → lot 1.
-  const instrumentsPromise = supabase.from('brvm_instruments').select('code, designation');
+  const instrumentsPromise = supabase.from('brvm_instruments').select('code, designation, shares');
   // Nombre réel de comptes : lecture service-role (profiles est sous RLS owner,
   // la clé anon y voit 0). Ne lève jamais — voir lib/landing/memberCount.ts.
   const memberCountPromise = getMemberCount();
+  // Série récente du BRVM-C : alimente le graphe du terminal du hero.
+  // Aucune donnée intraday n'existe (la BRVM n'en publie pas) — ce sont donc
+  // les clôtures des dernières séances, jamais une courbe simulée.
+  const brvmcSeriePromise = supabase
+    .from('brvm_indices_daily')
+    .select('valeur, date_marche')
+    .eq('code', 'BRVMC')
+    .order('date_marche', { ascending: false })
+    .limit(40);
+  // Nombre de lignes obligataires réellement cotées à la dernière séance
+  // obligataire (qui n'est pas forcément celle des actions). Deux allers-retours
+  // enchaînés, mais l'ensemble part en parallèle du reste du lot 1.
+  const nbObligationsPromise: Promise<number | null> = (async () => {
+    try {
+      const { data: last } = await supabase
+        .from('brvm_obligations_daily')
+        .select('date_marche')
+        .order('date_marche', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!last?.date_marche) return null;
+      const { count } = await supabase
+        .from('brvm_obligations_daily')
+        .select('code', { count: 'exact', head: true })
+        .eq('date_marche', last.date_marche as string);
+      return typeof count === 'number' ? count : null;
+    } catch {
+      return null;
+    }
+  })();
 
   // Sûr sans .throwOnError() nulle part dans ce fichier : le client Supabase
   // résout toujours { data, error } sans jamais rejeter la Promise, même en
@@ -174,6 +228,8 @@ async function getData() {
     sgiDirectory,
     { data: instrumentRows },
     memberCount,
+    nbObligations,
+    { data: brvmcRows },
   ] = await Promise.all([
     lastDayPromise,
     lastIdxPromise,
@@ -186,6 +242,8 @@ async function getData() {
     sgiDirectoryPromise,
     instrumentsPromise,
     memberCountPromise,
+    nbObligationsPromise,
+    brvmcSeriePromise,
   ]);
 
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
@@ -201,6 +259,26 @@ async function getData() {
   let volumeTotal = 0;
   let spotlightSignal: (SignalDaily & { code: string }) | null = null;
   let indices: IndiceDaily[] = [];
+  let sectors: SectorVariation[] = [];
+  const brvmcSerie = ((brvmcRows ?? []) as { valeur: number | null }[])
+    .map((r) => r.valeur)
+    .filter((v): v is number => v != null && v > 0)
+    .reverse();
+  /** Trois meilleures notes de la séance, pour les cartes du terminal. */
+  let topRated: { code: string; score: number | null; confiance: number | null }[] = [];
+  /** Compteurs de séance pour le terminal du hero : totaux du marché, pas des tops. */
+  let nbHausses = 0;
+  let nbBaisses = 0;
+  let nbTransactions = 0;
+  /** État du marché — composant partagé avec le dashboard. */
+  let marketStats: MarketStats | null = null;
+  let breakdown: Breakdown | undefined;
+  let sentimentScore = 50;
+  /** Écart de sentiment contre la veille, en points. null si la séance
+      précédente n'est pas exploitable — jamais 0, qui se lirait « stable ». */
+  let sentimentDelta: number | null = null;
+  let featured: StockDetail | null = null;
+  let fundamentals: FundamentalsPreviewData | null = null;
 
   // Étape 2 : les requêtes qui dépendent d'une valeur connue seulement après
   // l'étape 1 (idxDate, asOf, planIds) — mais qui ne dépendent PAS les unes
@@ -213,10 +291,12 @@ async function getData() {
     ? Promise.all([
         supabase
           .from('brvm_actions_daily')
-          .select('code, cours_jour, variation_pct, volume')
+          .select(
+            'code, cours_jour, variation_pct, volume, ouverture, plus_haut, plus_bas, cours_precedent, valeur_echangee, nb_transactions, beta_1an, valorisation',
+          )
           .eq('date_marche', asOf)
           .order('variation_pct', { ascending: false }),
-        supabase.from('signals_daily').select('code, score_total, confiance').eq('date_marche', asOf),
+        supabase.from('signals_daily').select('code, score_total, confiance, signal').eq('date_marche', asOf),
         // Signal spotlight : ne dépend que d'asOf, aucune donnée calculée
         // ci-dessous — rejoint ce Promise.all plutôt qu'un aller-retour à part.
         supabase
@@ -247,14 +327,78 @@ async function getData() {
   if (asOfBlockRes) {
     const [{ data: rows }, { data: sigs }, { data: topSignal }] = asOfBlockRes;
     spotlightSignal = (topSignal as (SignalDaily & { code: string })) ?? null;
-    const all = (rows ?? []) as { code: string; cours_jour: number | null; variation_pct: number | null; volume: number | null }[];
+    const all = (rows ?? []) as SeanceRow[];
     nbActions = all.length;
     volumeTotal = all.reduce((s, r) => s + (r.volume ?? 0), 0);
+    nbTransactions = all.reduce((s, r) => s + (r.nb_transactions ?? 0), 0);
+    nbHausses = all.filter((r) => (r.variation_pct ?? 0) > 0).length;
+    nbBaisses = all.filter((r) => (r.variation_pct ?? 0) < 0).length;
+    const nbStables = all.filter((r) => r.variation_pct === 0).length;
+
+    marketStats = {
+      hausses: nbHausses,
+      baisses: nbBaisses,
+      stables: nbStables,
+      total: all.length,
+      // `volumeTotal` agrège les volumes par instrument : somme réelle, pas
+      // une estimation — d'où volumeEstimated à false.
+      volumeTotal: volumeTotal > 0 ? volumeTotal : null,
+      volumeEstimated: false,
+      volumePrev: null,
+      titresEchanges: volumeTotal > 0 ? volumeTotal : null,
+      transactions: nbTransactions > 0 ? nbTransactions : null,
+    };
+
+    // Sentiment 0..100 dérivé du breadth, MÊME formule que le dashboard
+    // (app/dashboard/page.tsx) — ne pas en inventer une seconde ici.
+    sentimentScore = nbHausses + nbBaisses > 0 ? (nbHausses / (nbHausses + nbBaisses)) * 100 : 50;
+
+    // Écart contre la veille : même méthode que le dashboard
+    // (app/dashboard/page.tsx, prevBreadth). Un aller-retour de plus, borné à
+    // la seule colonne variation_pct de la séance précédente.
+    try {
+      const { data: prevDateRow } = await supabase
+        .from('brvm_actions_daily')
+        .select('date_marche')
+        .lt('date_marche', asOf as string)
+        .order('date_marche', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const prevDate = prevDateRow?.date_marche as string | undefined;
+      if (prevDate) {
+        const { data: prevRows } = await supabase
+          .from('brvm_actions_daily')
+          .select('variation_pct')
+          .eq('date_marche', prevDate);
+        let h = 0;
+        let b = 0;
+        for (const r of (prevRows ?? []) as { variation_pct: number | null }[]) {
+          const v = r.variation_pct ?? 0;
+          if (v > 0) h++;
+          else if (v < 0) b++;
+        }
+        if (h + b > 0) sentimentDelta = sentimentScore - (h / (h + b)) * 100;
+      }
+    } catch {
+      /* la jauge s'affiche sans écart plutôt que de faire tomber la page */
+    }
+
+    const toMover = (r: SeanceRow) => ({ code: r.code, cours: r.cours_jour, variation: r.variation_pct ?? 0 });
+    breakdown = {
+      hausses: all.filter((r) => (r.variation_pct ?? 0) > 0).sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).map(toMover),
+      baisses: all.filter((r) => (r.variation_pct ?? 0) < 0).sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).map(toMover),
+      stables: all.filter((r) => r.variation_pct === 0).map(toMover),
+    };
     const sigByCode = new Map((sigs ?? []).map((s) => [s.code as string, s]));
+    topRated = [...((sigs ?? []) as { code: string; score_total: number | null; confiance: number | null }[])]
+      .filter((x) => x.score_total != null)
+      .sort((a, b) => (b.score_total ?? 0) - (a.score_total ?? 0))
+      .slice(0, 3)
+      .map((x) => ({ code: x.code, score: x.score_total, confiance: x.confiance }));
     const withVar = all.filter((r) => r.variation_pct != null);
-    const nomByCode = new Map(
-      ((instrumentRows ?? []) as { code: string; designation: string | null }[]).map((i) => [i.code, i.designation]),
-    );
+    const referentiel = (instrumentRows ?? []) as { code: string; designation: string | null; shares: number | null }[];
+    const nomByCode = new Map(referentiel.map((i) => [i.code, i.designation]));
+    const sharesByCode = new Map(referentiel.map((i) => [i.code, i.shares]));
     const toRow = (r: (typeof all)[number]): MoverRow => ({
       code: r.code,
       nom: nomByCode.get(r.code) ?? null,
@@ -301,6 +445,122 @@ async function getData() {
       for (const m of shown) m.spark = seriesByCode.get(m.code) ?? [];
     }
 
+    // Secteurs : agrégation des lignes DÉJÀ chargées ci-dessus, aucune requête
+    // supplémentaire. La classification vient de brvmSectors.json car
+    // brvm_instruments.secteur est vide en base.
+    sectors = computeSectorVariations(
+      all.map((r) => ({
+        code: r.code,
+        variation_pct: r.variation_pct,
+        cours_jour: r.cours_jour,
+        shares: sharesByCode.get(r.code) ?? null,
+      })),
+      brvmSectors as Record<string, string>,
+    );
+
+    // Valeur mise en avant (section « Comprendre une action ») : la plus
+    // échangée de la séance. C'est le choix qui garantit des données de séance
+    // réellement remplies — ouverture/plus haut/plus bas restent nuls sur un
+    // titre qui ne s'est pas traité.
+    const candidat = [...all]
+      .filter((r) => r.cours_jour != null && (r.valeur_echangee ?? 0) > 0)
+      .sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0))[0];
+
+    if (candidat) {
+      const sig = sigByCode.get(candidat.code) as
+        | { score_total?: number; confiance?: number; signal?: string }
+        | undefined;
+      const il_y_a_un_an = new Date(asOf as string);
+      il_y_a_un_an.setFullYear(il_y_a_un_an.getFullYear() - 1);
+
+      const [{ data: hist2 }, { data: divRows }, { data: fundaRows }] = await Promise.all([
+        supabase
+          .from('brvm_actions_daily')
+          .select('cours_jour')
+          .eq('code', candidat.code)
+          .lte('date_marche', asOf as string)
+          .order('date_marche', { ascending: false })
+          .limit(60),
+        supabase.from('dividends').select('montant, ex_date, payment_date').eq('code', candidat.code),
+        supabase
+          .from('fundamentals')
+          .select('code, year, revenue, net_income, equity, debt')
+          .eq('code', candidat.code)
+          .order('year', { ascending: false })
+          .limit(5),
+      ]);
+
+      const serie = ((hist2 ?? []) as { cours_jour: number | null }[])
+        .map((r) => r.cours_jour)
+        .filter((c): c is number => c != null && c > 0)
+        .reverse();
+
+      // Rendement du dividende : somme des montants détachés sur 12 mois
+      // glissants, rapportée au cours. null si aucun dividende sur la période
+      // — surtout pas 0 %, qui se lirait comme « ne verse rien » alors que la
+      // donnée peut simplement manquer.
+      const seuil = il_y_a_un_an.toISOString().slice(0, 10);
+      const totalDiv = ((divRows ?? []) as { montant: number | null; ex_date: string | null; payment_date: string | null }[])
+        .filter((d) => {
+          const dt = d.payment_date ?? d.ex_date;
+          return dt != null && dt >= seuil && dt <= (asOf as string);
+        })
+        .reduce((sum, d) => sum + (d.montant ?? 0), 0);
+
+      featured = {
+        code: candidat.code,
+        nom: nomByCode.get(candidat.code) ?? null,
+        cours: candidat.cours_jour,
+        variation_pct: candidat.variation_pct,
+        ouverture: candidat.ouverture,
+        plus_haut: candidat.plus_haut,
+        plus_bas: candidat.plus_bas,
+        cours_precedent: candidat.cours_precedent,
+        volume: candidat.volume,
+        valeur_echangee: candidat.valeur_echangee,
+        nb_transactions: candidat.nb_transactions,
+        beta_1an: candidat.beta_1an,
+        valorisation: candidat.valorisation,
+        titres: sharesByCode.get(candidat.code) ?? null,
+        rendementDividendePct:
+          totalDiv > 0 && candidat.cours_jour != null && candidat.cours_jour > 0
+            ? (totalDiv / candidat.cours_jour) * 100
+            : null,
+        score: sig?.score_total ?? null,
+        confiance: sig?.confiance ?? null,
+        signal: sig?.signal ?? null,
+        serie,
+      };
+
+      const exercices = (fundaRows ?? []) as FundamentalsRow[];
+      const exercice = latestUsable(exercices);
+      if (exercice) {
+        fundamentals = {
+          code: exercice.code,
+          nom: nomByCode.get(exercice.code) ?? null,
+          year: exercice.year,
+          revenue: exercice.revenue,
+          net_income: exercice.net_income,
+          equity: exercice.equity,
+          debt: exercice.debt,
+          ratios: computeRatios(exercice),
+          // Historique du plus ancien au plus récent, pour les mini-graphiques.
+          // On ne garde que les exercices réellement exploitables : une année
+          // vide ne doit pas produire une barre à zéro qui se lirait comme
+          // « chiffre d'affaires nul ».
+          historique: exercices
+            .filter((e) => e.revenue != null || e.net_income != null)
+            .sort((a, b) => a.year - b.year)
+            .map((e) => ({
+              year: e.year,
+              revenue: e.revenue,
+              net_income: e.net_income,
+              ratios: computeRatios(e),
+            })),
+        };
+      }
+    }
+
     const tickSource = hausses.length || baisses.length ? [...hausses, ...baisses] : flatTop;
     ticks = tickSource.map((m) => ({
       sym: m.code,
@@ -344,6 +604,19 @@ async function getData() {
     plans,
     sgiDirectory,
     memberCount,
+    sectors,
+    brvmcSerie,
+    topRated,
+    nbHausses,
+    nbBaisses,
+    nbTransactions,
+    marketStats,
+    breakdown,
+    sentimentScore,
+    sentimentDelta,
+    featured,
+    fundamentals,
+    nbObligations,
   };
 }
 
@@ -435,6 +708,16 @@ const ROW_LINK = 'mt-auto pt-4 text-sm font-medium text-ivory/80 transition-colo
 
 // Sources de données réellement utilisées (reprises telles quelles de
 // components/landing/SocialProof.tsx — aucun logo ni partenaire inventé).
+/**
+ * Rythme vertical en trois paliers. La page enchaînait des `mt-14` partout,
+ * ce qui mettait sur le même plan deux cartes voisines et deux chapitres
+ * sans rapport. Un espace doit dire quelque chose : plus il est grand, plus
+ * la rupture de sujet est forte.
+ */
+const GAP_COMPOSANT = 'mt-6'; // deux blocs d'une même idée
+const GAP_SECTION = 'mt-12'; // deux idées d'un même chapitre
+const GAP_CHAPITRE = 'mt-24'; // changement de sujet
+
 const PROOF_SOURCES = ['BDFIN', 'BCEAO', 'BloomField', 'GitHub brvm-data-public'];
 
 /**
@@ -447,8 +730,8 @@ const PROOF_SOURCES = ['BDFIN', 'BCEAO', 'BloomField', 'GitHub brvm-data-public'
  * est nulle, le chiffre s'affiche sans lien.
  */
 const TIKTOK_FOLLOWERS = '5 000+';
-const TIKTOK_VERIFIE_LE = '2026-08-22';
-const TIKTOK_URL: string | null = null;
+const TIKTOK_VERIFIE_LE = '2026-08-23';
+const TIKTOK_URL: string | null = 'https://www.tiktok.com/@westbourse7';
 
 export default async function Landing() {
   const {
@@ -470,6 +753,19 @@ export default async function Landing() {
     plans,
     sgiDirectory,
     memberCount,
+    sectors,
+    brvmcSerie,
+    topRated,
+    nbHausses,
+    nbBaisses,
+    nbTransactions,
+    marketStats,
+    breakdown,
+    sentimentScore,
+    sentimentDelta,
+    featured,
+    fundamentals,
+    nbObligations,
   } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
@@ -494,6 +790,7 @@ export default async function Landing() {
     [...plans].filter((p) => p.price_monthly > 0).sort((a, b) => a.price_monthly - b.price_monthly)[0] ??
     null;
   const brvmC = indices.find((i) => i.code === 'BRVMC')?.valeur ?? null;
+  const brvmCVar = indices.find((i) => i.code === 'BRVMC')?.variation_pct ?? null;
   // Repli "séance peu animée" réparti sur les deux cartes (hausses/baisses)
   // sans dupliquer les mêmes titres — la garde d'affichage porte sur la
   // longueur de CHAQUE moitié, pas sur flatTop.length, pour ne jamais
@@ -520,11 +817,14 @@ export default async function Landing() {
             dateLabel={dateLabel}
             ticks={ticks}
             brvmC={brvmC}
-            topMover={
-              topMoverSource
-                ? { code: topMoverSource.code, score: topMoverSource.score, confiance: topMoverSource.confiance }
-                : null
-            }
+            brvmCVar={brvmCVar}
+            brvmcSerie={brvmcSerie}
+            topRated={topRated}
+            diagnostic={spotlightSignal}
+            nbHausses={nbHausses}
+            nbBaisses={nbBaisses}
+            volumeTotal={volumeTotal}
+            nbTransactions={nbTransactions}
           />
         );
       })()}
@@ -564,7 +864,25 @@ export default async function Landing() {
           publications officielles, simulateur et brief quotidien. L&apos;essentiel est gratuit.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {/* État du marché : même composant que le dashboard. Il concentre
+            hausses / baisses / stables / titres, la répartition en barre, le
+            volume, les transactions et la jauge de sentiment. Il remplace une
+            carte BRVM-C qui n'affichait que deux chiffres pour beaucoup de vide
+            — la valeur de l'indice reste visible dans le hero et dans la carte
+            Indices juste à côté. */}
+        {marketStats && (
+          <div className="mt-4">
+            <MarketStateCard
+              stats={marketStats}
+              sentimentScore={sentimentScore}
+              sentimentDelta={sentimentDelta}
+              breakdown={breakdown}
+              headingLevel={2}
+            />
+          </div>
+        )}
+
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <div className="rounded-panel border border-border bg-surface/60 p-5">
             <p className="overline mb-3 text-up">Top hausses</p>
             <div className="space-y-2">
@@ -581,24 +899,6 @@ export default async function Landing() {
                 <p className="py-6 text-center text-xs text-faint">Aucune hausse signée cette séance.</p>
               )}
             </div>
-          </div>
-          <div className="rounded-panel border border-border bg-surface/60 p-5">
-            <p className="overline mb-3 text-gold-2">BRVM-C</p>
-            <p className="tabular font-display text-3xl text-ivory">
-              {brvmC != null ? nf(brvmC, 2) : '—'}
-            </p>
-            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border/70 pt-3">
-              <div>
-                <dt className="sr-only">sociétés suivies</dt>
-                <dd className="tabular font-display text-lg text-ivory">{nbActions > 0 ? nbActions : '—'}</dd>
-                <dd className="mt-0.5 text-[10px] text-faint">sociétés suivies</dd>
-              </div>
-              <div>
-                <dt className="sr-only">titres échangés</dt>
-                <dd className="tabular font-display text-lg text-ivory">{volumeTotal > 0 ? fmtNumber(volumeTotal) : '—'}</dd>
-                <dd className="mt-0.5 text-[10px] text-faint">titres échangés</dd>
-              </div>
-            </dl>
           </div>
           <div className="rounded-panel border border-border bg-surface/60 p-5">
             <p className="overline mb-3 text-down">Top baisses</p>
@@ -623,55 +923,116 @@ export default async function Landing() {
         </div>
       </section>
 
-      {/* ── CARTOGRAPHIE + OUTILS côte à côte (1/3 – 2/3) ───────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
-        <ToolsGrid />
-      </section>
+      {/* ── 07 · SECTEURS — variation du jour, calculée (lib/landing/sectors.ts)  */}
+      <SectorStrip sectors={sectors} dateLabel={dateLabel} />
 
+      {/* ── 08 · CARTOGRAPHIE — pleine largeur, section immersive ───────── */}
+      {/* Cartographie en bande sombre : première rupture de rythme de la page.
+          LandingHeatmap porte déjà son titre « Toute la cote BRVM », ne pas en
+          ajouter un second au-dessus — il faisait doublon à l'écran. */}
+      <div className={GAP_CHAPITRE}>
+        <DarkBand>
+          <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
+        </DarkBand>
+      </div>
+
+      {/* ── 09 · COMPRENDRE UNE ACTION — fiche société réelle ───────────── */}
+      <StockSpotlight stock={featured} dateLabel={dateLabel} />
+
+      {/* ── 10 · FONDAMENTAUX ───────────────────────────────────────────── */}
+      <FundamentalsPreview data={fundamentals} />
+
+      {/* ── 11 · SIGNATURE — la note A–F ────────────────────────────────── */}
       <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
 
-      {/* ── RANGÉE A : Diagnostic IA · Simulateur · Comparateur SGI ──────
-          Trois outils auparavant rendus en sections pleine largeur empilées
-          (DiagnosticSpotlight, section SGI, section Simulateur) — regroupés
-          ici en une grille compacte : même contenu, même destinations, mais
-          ~3 écrans de scroll économisés sur mobile. ────────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* Carte 1 — Diagnostic IA (extrait d'un rapport réellement généré) */}
-        <article className={ROW_CARD}>
-          <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
-          <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
-          {latestDiagnosticReport ? (
-            <div className="rounded-xl border border-border/70 bg-sunken/30 p-3.5">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="font-mono text-xs font-bold text-ivory">{latestDiagnosticReport.code}</span>
-                <span className="text-[10px] text-faint">
-                  {new Date(latestDiagnosticReport.generated_at).toLocaleDateString('fr-FR', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </span>
+      {/* Deuxième rupture de rythme : le Diagnostic IA est un moment de
+          DONNÉES, il passe donc en bande sombre comme la cartographie. */}
+      <div className={GAP_CHAPITRE}>
+        <DarkBand>
+        {/* ── 12 · DIAGNOSTIC IA ──────────────────────────────────────────── */}
+        <section className={`grid grid-cols-1 gap-4 lg:grid-cols-2`}>
+          <article className={ROW_CARD}>
+            <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
+            <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
+            {latestDiagnosticReport ? (
+              <div className="rounded-xl border border-border/70 bg-sunken/30 p-3.5">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-ivory">{latestDiagnosticReport.code}</span>
+                  {latestDiagnosticReport.generated_at && (
+                    <span className="text-[10px] text-faint">
+                      {new Date(latestDiagnosticReport.generated_at).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  )}
+                </div>
+                <p className="line-clamp-4 text-[13px] leading-relaxed text-ivory/85">
+                  {excerpt(latestDiagnosticReport.markdown_content ?? "", 200)}
+                </p>
               </div>
-              <p className="line-clamp-4 text-[13px] leading-relaxed text-ivory/85">
-                {excerpt(latestDiagnosticReport.markdown_content, 200)}
+            ) : (
+              <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
+                Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.
               </p>
-            </div>
-          ) : (
-            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-              Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.
+            )}
+            <p className="mt-3 text-[10px] leading-relaxed text-faint">
+              Analyse façon sell-side générée à partir des données réelles de la plateforme — un outil
+              d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.
             </p>
-          )}
-          <p className="mt-3 text-[10px] leading-relaxed text-faint">
-            Analyse façon sell-side générée à partir des données réelles de la plateforme — un outil
-            d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.
-          </p>
-          <Link href="/premium/diagnostic" className={ROW_LINK}>
-            Découvrir le Diagnostic IA <span aria-hidden>→</span>
-          </Link>
-        </article>
+            <Link href="/premium/diagnostic" className={ROW_LINK}>
+              Découvrir le Diagnostic IA <span aria-hidden>→</span>
+            </Link>
+          </article>
+          <article className={ROW_CARD}>
+            <p className="overline mb-2 text-gold-2">Premium</p>
+            <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
+            {premiumPlan ? (
+              <>
+                <p className="tabular font-display text-2xl text-ivory">
+                  {premiumPlan.price_monthly > 0
+                    ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
+                    : 'Gratuit'}
+                  {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
+                </p>
+                <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
+                <ul className="mt-3 space-y-2">
+                  {premiumPlan.features.slice(0, 4).map((f) => (
+                    <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
+                      <span className="mt-0.5 text-up" aria-hidden>
+                        ✓
+                      </span>
+                      <span>
+                        {f.feature_label}
+                        {f.feature_value ? ` — ${f.feature_value}` : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
+                Le détail des formules s&apos;affichera dès que les plans seront disponibles.
+              </p>
+            )}
+            <Link href="/pricing" className={ROW_LINK}>
+              Découvrir Premium <span aria-hidden>→</span>
+            </Link>
+          </article>
+        </section>
+        </DarkBand>
+      </div>
 
-        {/* Carte 2 — Simulateur (calcul réel, cours de clôture + dividendes) */}
+      {/* ── 13 · DE LA DONNÉE À LA DÉCISION — fil conducteur de la marque ─ */}
+      <DataToDecision />
+
+      {/* ── 14 · LA PLATEFORME — quatre univers (remplace la grille plate)  */}
+      <PlatformUniverses />
+
+
+      {/* ── 15 + 16 · SIMULATEUR ET COMPARATEUR SGI ─────────────────────── */}
+      <section className={`${GAP_SECTION} grid grid-cols-1 gap-4 lg:grid-cols-2`}>
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Simulateur</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Et si vous aviez investi&nbsp;?</h2>
@@ -700,8 +1061,6 @@ export default async function Landing() {
             Tester une autre action <span aria-hidden>→</span>
           </Link>
         </article>
-
-        {/* Carte 3 — Comparateur SGI (annuaire réel + calculateur de coût) */}
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Comparateur · SGI</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Choisissez votre SGI en toute clarté.</h2>
@@ -723,32 +1082,28 @@ export default async function Landing() {
         </article>
       </section>
 
-      {/* ── APERÇU PLATEFORME : c'est le vrai moteur de conversion
-          (features réelles + CTA inscription). ─────────────────────────── */}
-      <AppPreview />
-
-      {/* ── 3 ÉTAPES ──────────────────────────────────────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border/50 md:grid-cols-3">
-        {STEPS.map((s) => (
-          <Link key={s.n} href={s.href} className="group bg-surface p-6 transition-colors hover:bg-elevated">
-            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-gold-2">{s.n}</p>
-            <h2 className="mt-3 font-display text-xl text-ivory">{s.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
-            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors group-hover:text-gold-2">
-              {s.cta} <span className="transition-transform group-hover:translate-x-0.5">→</span>
-            </span>
+      {/* ── 17 · BRIEF QUOTIDIEN ET ACTUALITÉS ──────────────────────────── */}
+      <section className={`${GAP_SECTION} grid grid-cols-1 gap-4 lg:grid-cols-2`}>
+        <article className={ROW_CARD}>
+          <p className="overline mb-2 text-gold-2">Brief quotidien</p>
+          <h2 className="mb-3 font-display text-lg text-ivory">La séance résumée chaque soir.</h2>
+          {briefLines.length > 0 ? (
+            <ul className="space-y-2">
+              {briefLines.slice(0, 5).map((l, i) => (
+                <li key={i} className="border-b border-border/60 pb-2 text-[13px] leading-snug text-ivory/85 last:border-0 last:pb-0">
+                  {l}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
+              Le brief du jour sera disponible après la clôture.
+            </p>
+          )}
+          <Link href="/brief" className={ROW_LINK}>
+            Lire le brief <span aria-hidden>→</span>
           </Link>
-        ))}
-      </section>
-
-      {/* ── RANGÉE B : Communauté · Premium · Brief quotidien ────────────
-          Auparavant trois blocs pleine largeur empilés (SocialProof,
-          PremiumCompare, section Brief). PremiumCompare reste rendu en
-          pleine largeur plus bas (avant la FAQ) : ses 3 sous-colonnes sont
-          illisibles dans un tiers de largeur, donc ici c'est une carte
-          d'appel compacte bâtie sur le plan recommandé. ────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* Carte 1 — Communauté + sources officielles (chiffres de SocialProof) */}
+        </article>
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Communauté</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Vous n&apos;analysez pas seul.</h2>
@@ -790,65 +1145,6 @@ export default async function Landing() {
           </div>
           <Link href="/signup" className={ROW_LINK}>
             Rejoindre la communauté <span aria-hidden>→</span>
-          </Link>
-        </article>
-
-        {/* Carte 2 — Premium (avantages tirés du plan recommandé, jamais en dur) */}
-        <article className={ROW_CARD}>
-          <p className="overline mb-2 text-gold-2">Premium</p>
-          <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
-          {premiumPlan ? (
-            <>
-              <p className="tabular font-display text-2xl text-ivory">
-                {premiumPlan.price_monthly > 0
-                  ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
-                  : 'Gratuit'}
-                {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
-              </p>
-              <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
-              <ul className="mt-3 space-y-2">
-                {premiumPlan.features.slice(0, 4).map((f) => (
-                  <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-                    <span className="mt-0.5 text-up" aria-hidden>
-                      ✓
-                    </span>
-                    <span>
-                      {f.feature_label}
-                      {f.feature_value ? ` — ${f.feature_value}` : ''}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : (
-            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-              Le détail des formules s&apos;affichera dès que les plans seront disponibles.
-            </p>
-          )}
-          <Link href="/pricing" className={ROW_LINK}>
-            Découvrir Premium <span aria-hidden>→</span>
-          </Link>
-        </article>
-
-        {/* Carte 3 — Brief quotidien (vrai contenu brief_daily) */}
-        <article className={ROW_CARD}>
-          <p className="overline mb-2 text-gold-2">Brief quotidien</p>
-          <h2 className="mb-3 font-display text-lg text-ivory">La séance résumée chaque soir.</h2>
-          {briefLines.length > 0 ? (
-            <ul className="space-y-2">
-              {briefLines.slice(0, 5).map((l, i) => (
-                <li key={i} className="border-b border-border/60 pb-2 text-[13px] leading-snug text-ivory/85 last:border-0 last:pb-0">
-                  {l}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-              Le brief du jour sera disponible après la clôture.
-            </p>
-          )}
-          <Link href="/brief" className={ROW_LINK}>
-            Lire le brief <span aria-hidden>→</span>
           </Link>
         </article>
       </section>
@@ -919,27 +1215,33 @@ export default async function Landing() {
         </article>
       </section>
 
+      {/* ── 18 · PREMIUM — comparatif complet des formules ──────────────── */}
+      {/* AppPreview porte les badges GRATUIT / PREMIUM / UNIQUE : c'est de
+          l'information de palier, sa place est ici et non en section 14 où
+          elle répétait le message de PlatformUniverses juste au-dessus. */}
+      <AppPreview nbObligations={nbObligations} />
+
       <PremiumCompare plans={plans} />
 
-      {/* ── FAQ — lève les objections avant le CTA final ─────────────── */}
-      <LandingFaq />
-
-      {/* ── NEWSLETTER ───────────────────────────────────────────────── */}
-      <section className="mt-10">
+      {/* ── 20 · NEWSLETTER ─────────────────────────────────────────────── */}
+      <section className="mt-14">
         <NewsletterForm source="landing" banner />
       </section>
 
-      {/* ── CTA FINAL ─────────────────────────────────────────────────── */}
-      <section className="mt-12 text-center">
-        <h2 className="mx-auto mb-3 max-w-[24ch] font-display text-3xl text-ivory md:text-4xl [letter-spacing:-0.04em]">
+      {/* ── 21 · FAQ — lève les objections avant le CTA final ───────────── */}
+      <LandingFaq />
+
+      {/* ── 22 · CTA FINAL ──────────────────────────────────────────────── */}
+      <section className="mt-16 text-center">
+        <h2 className="mx-auto mb-3 max-w-[24ch] font-display text-3xl text-ivory md:text-5xl [letter-spacing:-0.04em]">
           Votre prochaine décision mérite mieux qu&apos;une intuition.
         </h2>
-        <p className="mb-6 text-sm text-muted">Compte gratuit · aucune carte bancaire · 1 minute.</p>
+        <p className="mb-7 text-sm text-muted">Sans carte bancaire · 1 minute · Accès immédiat.</p>
         <Link
           href="/signup"
-          className="landing-hero-cta inline-flex min-h-[50px] items-center rounded-full px-8 text-base font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
+          className="landing-hero-cta inline-flex min-h-[52px] items-center rounded-full px-9 text-base font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
         >
-          Créer mon compte gratuit
+          Créer mon compte gratuitement
         </Link>
       </section>
 

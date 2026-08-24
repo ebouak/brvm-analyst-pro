@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import RatingBadge from '@/components/RatingBadge';
 import type { SignalDaily } from '@/lib/types';
+import { SubscoreBars } from '@/components/landing/SubscoreBars';
 
 interface Props {
   signal: (SignalDaily & { code: string }) | null;
@@ -11,22 +12,6 @@ interface Props {
   nbActions?: number;
 }
 
-// Bornes réelles des sous-scores, cf. scraper/src/scoring/score.ts + docs/SCORING.md :
-// variation/volume/rsi ∈ [-1,1], bonus_tendance ∈ [-0.1,0.1], penalite_liquidite ∈ [0,0.25].
-function Bar({ label, value, min = -1, max = 1 }: { label: string; value: number | null; min?: number; max?: number }) {
-  const pct = value == null ? 0 : Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-[11px]">
-        <span className="text-muted">{label}</span>
-        <span className="tabular text-faint">{value != null ? value.toFixed(2) : '—'}</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-border/50">
-        <div className="h-1.5 rounded-full bg-accent" style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-}
 
 export function RatingSpotlight({ signal, nbActions }: Props) {
   if (!signal) return null;
@@ -55,13 +40,7 @@ export function RatingSpotlight({ signal, nbActions }: Props) {
             <span className="font-mono text-lg font-bold text-ivory">{signal.code}</span>
             <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           </div>
-          <div className="space-y-3">
-            <Bar label="Variation" value={signal.score_variation ?? null} />
-            <Bar label="Volume" value={signal.score_volume ?? null} />
-            <Bar label="RSI" value={signal.score_rsi ?? null} />
-            <Bar label="Tendance (bonus)" value={signal.bonus_tendance ?? null} min={-0.1} max={0.1} />
-            <Bar label="Liquidité (pénalité)" value={signal.penalite_liquidite ?? null} min={0} max={0.25} />
-          </div>
+          <SubscoreBars signal={signal} />
           <p className="mt-4 text-[10px] text-faint">
             {signal.signal} · confiance {signal.confiance != null ? `${(signal.confiance * 100).toFixed(0)}%` : '—'} · exemple réel de la séance en cours
           </p>

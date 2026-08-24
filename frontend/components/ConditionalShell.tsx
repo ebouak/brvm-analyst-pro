@@ -80,8 +80,17 @@ export default function ConditionalShell({
   if (bare) {
     return (
       <>
+        {/* Lien d'évitement : ces pages n'avaient AUCUN <main> ni raccourci
+            clavier vers le contenu. Un visiteur au clavier ou au lecteur
+            d'écran devait traverser l'en-tête à chaque chargement. */}
+        <a
+          href="#contenu"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-obsidian"
+        >
+          Aller au contenu
+        </a>
         {pathname === '/' && <BeginnerBanner />}
-        {children}
+        <main id="contenu">{children}</main>
         {showsFooter(pathname) && <Footer />}
         {showNudge && <ContactNudge />}
       </>
@@ -94,7 +103,7 @@ export default function ConditionalShell({
       <div className="flex-1 min-w-0">
         <MobileNav isPremium={isPremium} isAdmin={isAdmin} />
         {/* pb-16 : réserve la hauteur de la BottomNav mobile (56px + safe-area). */}
-        <main className="min-w-0 pb-16 md:pb-0">{children}</main>
+        <main id="contenu" className="min-w-0 pb-16 md:pb-0">{children}</main>
       </div>
       <BottomNav />
       {showNudge && <ContactNudge />}

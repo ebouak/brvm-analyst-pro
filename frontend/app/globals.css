@@ -41,7 +41,7 @@
 
   --color-ivory: 252 252 252;
   --color-muted: 181 181 181;
-  --color-faint: 92 107 112;
+  --color-faint: 122 138 144; /* 5,21:1 sur surface, 5,76:1 sur bg — mesuré */
 
   --shadow-card: 0 10px 24px rgba(0,0,0,0.35);
   --shadow-panel: 0 22px 60px rgba(0,0,0,0.45);
@@ -58,8 +58,13 @@
 }
 
 /* ── Mode clair « Warm Ivory » ──────────────────────────────────────────
-   Toutes les valeurs choisies pour tenir le contraste AA (4.5:1) sur fond
-   blanc/ivoire — jamais une simple inversion des valeurs sombres. */
+   Valeurs choisies pour tenir AA (4.5:1) sur fond blanc/ivoire — jamais une
+   simple inversion des valeurs sombres.
+
+   ⚠️ Cette affirmation a déjà été FAUSSE : `faint` était à 3,98:1 sur le
+   fond de page alors qu'il est utilisé 344 fois, dont ~99 en 10-11 px — donc
+   pas du « grand texte », le seuil 4,5:1 s'applique. Corrigé le 2026-08-24
+   après mesure. Toute valeur ajoutée ici doit être MESURÉE, pas estimée. */
 :root[data-theme="light"] {
   color-scheme: light;
 
@@ -83,7 +88,7 @@
 
   --color-ivory: 32 28 23;
   --color-muted: 87 78 64;
-  --color-faint: 133 122 103;
+  --color-faint: 110 101 86; /* 5,41:1 sur bg, 5,74:1 sur surface — mesuré */
 
   /* Ombres neutres discrètes — un halo cyan/vert lumineux lit comme un bug
      sur fond clair, pas comme un effet premium. */
@@ -550,4 +555,52 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .wb-ticker-track { animation: none; }
   .wb-ticker { overflow-x: auto; }
+}
+
+/* ── Bande sombre pleine largeur (composants/landing/DarkBand.tsx) ───────
+   Redéclare le palier sombre des tokens sur un conteneur, pas sur :root.
+
+   Pourquoi : la bande reste sombre quel que soit le thème du site. Les
+   composants qu'elle contient (heatmap, cartes) sont pilotés par tokens ;
+   sans cette redéclaration, leur `text-ivory` prendrait la valeur du mode
+   clair (quasi noir) et deviendrait illisible sur le fond sombre.
+
+   Ne pas remplacer par `data-theme="dark"` : les blocs `:root[data-theme]`
+   de ce fichier sont attachés à la racine et ne cascaderaient pas ici. */
+.dark-band {
+  --color-bg: 3 3 3;
+  --color-surface: 10 20 23;
+  --color-elevated: 17 43 51;
+  --color-sunken: 2 3 3;
+  --color-border: 27 42 48;
+  --color-border-strong: 42 61 68;
+
+  --color-accent: 86 215 253;
+  --color-accent-dim: 47 169 207;
+  --color-gold-2: 143 230 255;
+  --color-gold-deep: 42 138 168;
+
+  --color-up: 63 225 139;
+  --color-emerald-soft: 122 240 179;
+  --color-down: 255 107 107;
+  --color-warn: 240 178 58;
+  --color-purple: 139 111 194;
+
+  --color-ivory: 252 252 252;
+  --color-muted: 181 181 181;
+  --color-faint: 122 138 144; /* 5,21:1 sur surface, 5,76:1 sur bg — mesuré */
+}
+
+
+/* ── Marquees : pause au survol et au focus ─────────────────────────────
+   WCAG 2.2.2 (Pause, Stop, Hide) : un mouvement automatique de plus de 5 s
+   présenté avec d'autre contenu doit pouvoir être arrêté. La garde
+   `prefers-reduced-motion` globale (plus haut) ne couvre PAS ce besoin : elle
+   ne sert que les visiteurs ayant activé la préférence système.
+
+   Le modèle existait déjà pour le ticker embarquable (.wb-ticker) ; il
+   manquait aux deux marquees de la landing. */
+.animate-ticker:hover,
+.animate-ticker:focus-within {
+  animation-play-state: paused;
 }

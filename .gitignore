@@ -49,3 +49,11 @@ claude-flow.config.json
 .swarm/
 .claude/memory.db
 .claude/*.db
+frontend/v2.html
+
+# Captures de preview de la landing V2 (artefacts locaux, 5 Mo pièce)
+docs/landing-v2/apres/
+docs/landing-v2/tranches/
+
+# Build de production local, parallèle au serveur de dev (voir next.config.js)
+frontend/.next-prod/

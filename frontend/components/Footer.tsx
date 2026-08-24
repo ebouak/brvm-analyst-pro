@@ -5,14 +5,37 @@ import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import { SocialLinks } from '@/components/SocialLinks';
 import InstallPwaButton from '@/components/InstallPwaButton';
 
+/**
+ * Colonnes du footer. Chaque `href` pointe vers une route vérifiée existante
+ * sous `app/`. « Contact » n'y figure pas : la route /contact n'existe pas
+ * encore, et un lien mort en pied de page est le plus difficile à repérer.
+ */
 const PRODUIT = [
-  { href: '/societes', label: 'Sociétés' },
-  { href: '/simulateur', label: 'Simulateur' },
-  { href: '/classement', label: 'Classement papier' },
-  { href: '/brief', label: 'Brief du jour' },
-  { href: '/methodologie', label: 'Méthodologie' },
-  { href: '/fiscalite', label: 'Fiscalité UEMOA' },
+  { href: '/societes', label: 'Marché actions' },
+  { href: '/obligations', label: 'Marché obligataire' },
+  { href: '/comparateur-sgi', label: 'Comparateur SGI' },
+  { href: '/notations', label: 'Notes A–F' },
   { href: '/pricing', label: 'Tarifs' },
+];
+
+const OUTILS = [
+  { href: '/simulateur', label: 'Simulateur' },
+  { href: '/screener', label: 'Screener' },
+  { href: '/signaux', label: 'Signaux' },
+  { href: '/premium/diagnostic', label: 'Diagnostic IA' },
+  { href: '/premium/paper-trading', label: 'Paper trading' },
+  { href: '/parametres/alertes', label: 'Watchlist & alertes' },
+  { href: '/liquidite', label: 'Liquidité' },
+];
+
+const RESSOURCES = [
+  { href: '/actualites', label: 'Actualités' },
+  { href: '/brief', label: 'Brief du jour' },
+  { href: '/analyses', label: 'Analyses hebdo' },
+  { href: '/methodologie', label: 'Méthodologie' },
+  { href: '/formations/academy', label: 'Academy' },
+  { href: '/fiscalite', label: 'Fiscalité UEMOA' },
+  { href: '/classement', label: 'Classement papier' },
   { href: '/developers', label: 'API développeurs' },
   { href: '/api/rss', label: 'Flux RSS' },
 ];
@@ -21,6 +44,17 @@ const LEGAL = [
   { href: '/mentions-legales', label: 'Mentions légales' },
   { href: '/cgu', label: "Conditions d'utilisation" },
   { href: '/confidentialite', label: 'Confidentialité' },
+];
+
+/**
+ * Sources officielles. Les trois logos sont sombres sur fond transparent :
+ * posés sur pastille blanche pour rester lisibles sur le fond sombre fixe du
+ * footer. Marques de leurs propriétaires, citées en attribution de source.
+ */
+const SOURCES = [
+  { src: '/brand/brvm-logo.png', alt: 'BRVM' },
+  { src: '/brand/bceao-logo.png', alt: 'BCEAO' },
+  { src: '/brand/bloomfield-logo.png', alt: 'Bloomfield Investment' },
 ];
 
 /** Lien de footer premium : soulignement cyan qui se déploie + léger décalage au survol. */
@@ -58,7 +92,7 @@ export default function Footer() {
       {/* Halo cyan diffus en fond */}
       <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[40rem] -translate-x-1/2 rounded-full bg-[#56d7fd]/[0.04] blur-3xl" />
 
-      <div className="relative mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
+      <div className="relative mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6">
         <div className="col-span-2 md:col-span-1">
           <Link
             href="/"
@@ -96,6 +130,29 @@ export default function Footer() {
           </ul>
         </nav>
 
+
+        <nav aria-label="Outils" className="group/col">
+          <ColHeader>Outils</ColHeader>
+          <ul className="mt-3 space-y-2">
+            {OUTILS.map((l) => (
+              <li key={l.href}>
+                <FooterLink href={l.href} label={l.label} />
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav aria-label="Ressources" className="group/col">
+          <ColHeader>Ressources</ColHeader>
+          <ul className="mt-3 space-y-2">
+            {RESSOURCES.map((l) => (
+              <li key={l.href}>
+                <FooterLink href={l.href} label={l.label} />
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         <nav aria-label="Légal" className="group/col">
           <ColHeader>Légal</ColHeader>
           <ul className="mt-3 space-y-2">
@@ -107,14 +164,24 @@ export default function Footer() {
             <li><FooterCookieLink /></li>
           </ul>
         </nav>
-
-        <nav aria-label="Compte" className="group/col">
-          <ColHeader>Compte</ColHeader>
-          <ul className="mt-3 space-y-2">
+        <div className="group/col">
+          <ColHeader>Sources officielles</ColHeader>
+          <ul className="mt-3 flex flex-wrap items-center gap-2">
+            {SOURCES.map((s) => (
+              <li key={s.alt} className="flex h-9 items-center rounded-md bg-white px-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={s.src} alt={s.alt} className="h-5 w-auto" />
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] leading-snug text-[#fff]/45">
+            Publications des émetteurs et données de marché officielles.
+          </p>
+          <ul className="mt-4 space-y-2">
             <li><FooterLink href="/login" label="Connexion" /></li>
             <li><FooterLink href="/signup" label="Créer un compte" /></li>
           </ul>
-        </nav>
+        </div>
       </div>
 
       <div className="relative mx-auto mt-10 max-w-6xl border-t border-[rgba(255,255,255,0.05)] pt-6">

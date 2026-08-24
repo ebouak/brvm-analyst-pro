@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import { BeamButton } from '@/components/ui/beam-button';
 import { LiveTicker } from './LiveTicker';
+import { TasteMobileNav } from '@/components/landing/taste/TasteMobileNav';
 import ThemeToggle from '@/components/ThemeToggle';
 import type { TickItem } from './types';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
@@ -30,7 +31,7 @@ export function TasteTopbar({
       </Link>
 
       <div
-        className="min-w-0 flex-1 overflow-hidden border-x border-border px-4"
+        className="hidden min-w-0 flex-1 overflow-hidden border-x border-border px-4 sm:block"
         style={{ maskImage: 'linear-gradient(90deg,transparent,black 6%,black 94%,transparent)', WebkitMaskImage: 'linear-gradient(90deg,transparent,black 6%,black 94%,transparent)' }}
       >
         {liveRows ? (
@@ -57,13 +58,19 @@ export function TasteTopbar({
         <BeamButton href="/brief" className="hidden xl:inline-flex">Brief</BeamButton>
         <BeamButton href="/login" className="hidden sm:inline-flex">Connexion</BeamButton>
         <ThemeToggle className="hidden sm:inline-flex" />
+        {/* CTA permanent vers l'inscription GRATUITE. Auparavant, le seul
+            bouton toujours visible menait à /premium/diagnostic — une page
+            payante — alors que le hero promet « l'essentiel est gratuit ».
+            Sous 640 px c'était même le seul élément du header avec le logo. */}
         <Link
-          href="/premium/diagnostic"
-          className="inline-flex min-h-[42px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold transition-all hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(86,215,253,0.45),0_10px_32px_rgba(86,215,253,0.4)] hover:brightness-105 active:translate-y-0 active:scale-95 motion-reduce:hover:translate-y-0"
+          href="/signup"
+          className="inline-flex min-h-[44px] items-center rounded-full px-4 text-sm font-bold text-[#03222b] shadow-gold transition-all hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-95 motion-reduce:hover:translate-y-0"
           style={{ background: 'linear-gradient(180deg,#8fe6ff,#56d7fd)' }}
         >
-          Diagnostic IA
+          <span className="sm:hidden">S&apos;inscrire</span>
+          <span className="hidden sm:inline">Créer mon compte gratuit</span>
         </Link>
+        <TasteMobileNav />
       </div>
     </header>
   );

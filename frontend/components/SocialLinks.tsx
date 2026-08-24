@@ -2,7 +2,11 @@ import type { SVGProps } from 'react';
 
 /**
  * Liens réseaux sociaux du footer.
- * ⚠️ Remplacer les URLs « # » par les vrais profils WESTBOURSE.
+ * ⚠️ RÈGLE : seuls les profils dont l'URL est réelle sont rendus. Les entrées
+ * à `null` sont volontairement masquées — elles pointaient auparavant vers
+ * « # », soit cinq icônes cliquables ne menant nulle part. Un lien mort coûte
+ * plus cher que l'absence d'icône : il fait croire à un compte qui existe.
+ * Pour réactiver un réseau, remplacer `null` par l'URL du profil.
  * WhatsApp est dérivé de NEXT_PUBLIC_WHATSAPP_NUMBER (format international sans +).
  */
 // Contact WhatsApp officiel (+225 07 07 11 51 15). Surchargeable via env.
@@ -10,16 +14,17 @@ const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '225070711511
 
 type Social = { label: string; href: string; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element };
 
-const SOCIALS: Social[] = [
-  { label: 'LinkedIn', href: '#', Icon: LinkedInIcon },
-  { label: 'X (Twitter)', href: '#', Icon: XIcon },
-  { label: 'Instagram', href: '#', Icon: InstagramIcon },
-  { label: 'Facebook', href: '#', Icon: FacebookIcon },
-  { label: 'YouTube', href: '#', Icon: YouTubeIcon },
-  ...(whatsappNumber
-    ? [{ label: 'WhatsApp', href: `https://wa.me/${whatsappNumber}`, Icon: WhatsAppIcon }]
-    : []),
+const PROFILS: { label: string; href: string | null; Icon: Social['Icon'] }[] = [
+  { label: 'TikTok', href: 'https://www.tiktok.com/@westbourse7', Icon: TikTokIcon },
+  { label: 'LinkedIn', href: null, Icon: LinkedInIcon },
+  { label: 'X (Twitter)', href: null, Icon: XIcon },
+  { label: 'Instagram', href: null, Icon: InstagramIcon },
+  { label: 'Facebook', href: null, Icon: FacebookIcon },
+  { label: 'YouTube', href: null, Icon: YouTubeIcon },
+  { label: 'WhatsApp', href: whatsappNumber ? `https://wa.me/${whatsappNumber}` : null, Icon: WhatsAppIcon },
 ];
+
+const SOCIALS: Social[] = PROFILS.filter((p): p is Social => p.href !== null);
 
 export function SocialLinks() {
   return (
@@ -43,6 +48,14 @@ export function SocialLinks() {
 }
 
 /* ── Icônes de marque (paths officiels Simple Icons, currentColor) ─────────── */
+
+function TikTokIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+    </svg>
+  );
+}
 function LinkedInIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>

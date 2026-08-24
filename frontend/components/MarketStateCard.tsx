@@ -104,12 +104,20 @@ export default function MarketStateCard({
   sentimentScore,
   sentimentDelta,
   breakdown,
+  headingLevel = 3,
 }: {
   stats: MarketStats;
   sentimentScore?: number;
   sentimentDelta?: number | null;
   breakdown?: Breakdown;
+  /**
+   * Niveau du titre. Le dashboard rend cette carte sous un `h2` (donc `h3`
+   * convient) ; la landing la place juste après le `h1` du hero, où un `h3`
+   * crée un saut de niveau. À l'appelant de déclarer sa hiérarchie.
+   */
+  headingLevel?: 2 | 3;
 }) {
+  const Titre = (headingLevel === 2 ? 'h2' : 'h3') as 'h2' | 'h3';
   // Delta volume : seulement si valeur réelle (non estimée) et veille comparable
   const volPct = !stats.volumeEstimated && stats.volumeTotal != null && stats.volumePrev && stats.volumePrev > 0
     ? ((stats.volumeTotal - stats.volumePrev) / stats.volumePrev) * 100
@@ -143,7 +151,7 @@ export default function MarketStateCard({
             <span className="grid h-6 w-6 place-items-center rounded-full border border-border-strong bg-elevated text-muted">
               <Activity size={12} />
             </span>
-            <h3 className="text-sm font-semibold text-ivory">État du marché</h3>
+            <Titre className="text-sm font-semibold text-ivory">État du marché</Titre>
           </div>
           {stats.hausses + stats.baisses > 0 && <BreadthBadge ratio={breadth} />}
         </div>

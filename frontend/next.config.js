@@ -2,6 +2,11 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Dossier de build surchargeable, pour faire coexister un serveur de DEV et
+  // un serveur de PROD sur la même copie du dépôt. Sans ça les deux se
+  // disputent `.next` et le dev plante sur un `EINVAL readlink` en lisant les
+  // manifestes de production. Vercel n'a pas la variable et garde `.next`.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   // Retire l'en-tête de fingerprinting `X-Powered-By: Next.js`.
   poweredByHeader: false,
   experimental: {
