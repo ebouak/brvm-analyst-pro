@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { sparklinePath } from '@/lib/landing/sparkline';
 import { fmtNumber } from '@/lib/format';
+import { SubscoreBars, type SubscoreCouleurs } from '@/components/landing/SubscoreBars';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { SignalDaily } from '@/lib/types';
 
@@ -47,6 +48,15 @@ const VERT = '#3fe18b';
 const ROUGE = '#ff6b6b';
 const GRIS = '#7d8a90';
 
+/** Le terminal reste sombre quel que soit le thème : couleurs fixes, pas de tokens. */
+const COULEURS_TERMINAL: SubscoreCouleurs = {
+  label: GRIS,
+  piste: 'rgba(255,255,255,0.08)',
+  favorable: CYAN,
+  defavorable: ROUGE,
+  repere: 'rgba(255,255,255,0.22)',
+};
+
 /** Lettre A–F à partir du score total, même échelle que RatingBadge. */
 function lettre(score: number | null): string {
   if (score == null) return '—';
@@ -58,42 +68,6 @@ function lettre(score: number | null): string {
   return 'E';
 }
 
-/**
- * Barre de sous-score. Bornes réelles, cf. scraper/src/scoring/score.ts :
- * variation/volume/rsi ∈ [-1,1], bonus_tendance ∈ [-0.1,0.1],
- * penalite_liquidite ∈ [0,0.25].
- *
- * `invert` sert aux grandeurs où zéro est une BONNE nouvelle. La pénalité de
- * liquidité vaut 0 pour un titre liquide : rendue telle quelle, la barre
- * restait vide et se lisait comme une donnée manquante ou un mauvais score.
- * On l'inverse pour que, comme les autres, « plus rempli » signifie « mieux ».
- *
- * La valeur numérique est affichée à côté : une barre seule ne permet pas de
- * distinguer « zéro » de « pas de donnée ».
- */
-function Barre({
-  label,
-  value,
-  min = -1,
-  max = 1,
-  invert = false,
-}: { label: string; value: number | null; min?: number; max?: number; invert?: boolean }) {
-  const brut = value == null ? 0 : Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
-  const pct = invert ? 100 - brut : brut;
-  return (
-    <div className="flex items-center gap-2">
-      <span className="w-[68px] shrink-0 text-[9.5px] leading-tight" style={{ color: GRIS }}>
-        {label}
-      </span>
-      <span className="relative h-[5px] flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: CYAN }} />
-      </span>
-      <span className="tabular w-[30px] shrink-0 text-right text-[9px]" style={{ color: GRIS }}>
-        {value == null ? '—' : value.toFixed(2)}
-      </span>
-    </div>
-  );
-}
 
 function Panneau({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
@@ -257,12 +231,8 @@ export function HeroDeviceMockup({
                       {lettre(diagnostic.score_total ?? null)}
                     </span>
                   </div>
-                  <div className="mt-3 space-y-2">
-                    <Barre label="Variation" value={diagnostic.score_variation ?? null} />
-                    <Barre label="Volume" value={diagnostic.score_volume ?? null} />
-                    <Barre label="RSI" value={diagnostic.score_rsi ?? null} />
-                    <Barre label="Tendance" value={diagnostic.bonus_tendance ?? null} min={-0.1} max={0.1} />
-                    <Barre label="Liquidité" value={diagnostic.penalite_liquidite ?? null} min={0} max={0.25} invert />
+                  <div className="mt-3">
+                    <SubscoreBars signal={diagnostic} couleurs={COULEURS_TERMINAL} compact />
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t pt-3" style={{ borderColor: LIGNE }}>
                     <span className="text-[9px] uppercase tracking-wide" style={{ color: GRIS }}>Signal</span>

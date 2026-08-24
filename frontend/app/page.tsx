@@ -877,6 +877,7 @@ export default async function Landing() {
               sentimentScore={sentimentScore}
               sentimentDelta={sentimentDelta}
               breakdown={breakdown}
+              headingLevel={2}
             />
           </div>
         )}
