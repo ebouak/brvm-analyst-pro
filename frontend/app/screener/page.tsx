@@ -1,5 +1,6 @@
 import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
 import { canAccess } from '@/lib/server/featureAccess';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import ScreenerClient from '@/components/screener/ScreenerClient';
 
 export const dynamic = 'force-dynamic';
@@ -49,5 +50,12 @@ export default async function ScreenerPage() {
   }
 
   // `isPremium` alimente encore les FILTRES avancés à l'intérieur du screener.
-  return <ScreenerClient isPremium={gate.ent.isPremium} />;
+  // NuqsAdapter monté ICI et non dans le layout racine : les filtres d'URL ne
+  // concernent que le screener, et un provider global toucherait toutes les
+  // pages d'un site déjà en production pour un besoin local.
+  return (
+    <NuqsAdapter>
+      <ScreenerClient isPremium={gate.ent.isPremium} />
+    </NuqsAdapter>
+  );
 }

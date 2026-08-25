@@ -1,8 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useQueryStates, parseAsFloat, parseAsString } from 'nuqs';
 import { PRESETS } from '@/lib/screener/presets';
 import type { ScreenerPreset } from '@/lib/screener/presets';
+
+/**
+ * Les filtres vivent dans l'URL, plus dans un `useState` local.
+ *
+ * Avant, un utilisateur qui avait construit « les banques dont le RSI est sous
+ * 40 avec un dividende supérieur à 5 % » ne pouvait ni partager sa sélection,
+ * ni la mettre en favori, ni la retrouver après un rechargement. C'est
+ * exactement ce qu'on attend d'un screener.
+ *
+ * `clearOnDefault` garde l'URL propre : un filtre laissé à sa valeur par
+ * défaut ne s'écrit pas dans la barre d'adresse.
+ * `history: 'replace'` évite d'empiler une entrée d'historique par cran de
+ * curseur déplacé — sinon le bouton Retour devient inutilisable.
+ */
+const PARSEURS = {
+  rsiMin: parseAsFloat.withDefault(0),
+  rsiMax: parseAsFloat.withDefault(100),
+  scoreMin: parseAsFloat.withDefault(0),
+  secteur: parseAsString.withDefault(''),
+  dividendMin: parseAsFloat.withDefault(0),
+};
 
 interface FiltersState {
   rsiMin: number;
@@ -12,6 +34,17 @@ interface FiltersState {
   dividendMin: number;
 }
 
+/** Traduit l'état brut en filtres : une valeur par défaut vaut « pas de filtre ». */
+function versFiltres(f: FiltersState): ScreenerPreset['filters'] {
+  return {
+    rsiMin: f.rsiMin > 0 ? f.rsiMin : undefined,
+    rsiMax: f.rsiMax < 100 ? f.rsiMax : undefined,
+    scoreMin: f.scoreMin > 0 ? f.scoreMin : undefined,
+    dividendMin: f.dividendMin > 0 ? f.dividendMin : undefined,
+    secteur: f.secteur ? f.secteur : undefined,
+  };
+}
+
 export default function ScreenerFilters({
   isPremium,
   onFilterChange,
@@ -19,39 +52,34 @@ export default function ScreenerFilters({
   isPremium: boolean;
   onFilterChange: (filters: ScreenerPreset['filters']) => void;
 }) {
-  const [filters, setFilters] = useState<FiltersState>({
-    rsiMin: 0,
-    rsiMax: 100,
-    scoreMin: 0,
-    secteur: '',
-    dividendMin: 0,
+  const [filters, setFilters] = useQueryStates(PARSEURS, {
+    history: 'replace',
+    clearOnDefault: true,
   });
 
-  const handleChange = (key: keyof FiltersState, value: number | string) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
+  // Remontée à l'ouverture : une URL partagée arrive avec ses filtres déjà
+  // posés, et le parent doit les appliquer sans attendre une interaction.
+  useEffect(() => {
+    onFilterChange(versFiltres(filters));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.rsiMin, filters.rsiMax, filters.scoreMin, filters.secteur, filters.dividendMin]);
 
-    // Build filters object for parent
-    const filterObj: ScreenerPreset['filters'] = {
-      rsiMin: newFilters.rsiMin > 0 ? newFilters.rsiMin : undefined,
-      rsiMax: newFilters.rsiMax < 100 ? newFilters.rsiMax : undefined,
-      scoreMin: newFilters.scoreMin > 0 ? newFilters.scoreMin : undefined,
-      dividendMin: newFilters.dividendMin > 0 ? newFilters.dividendMin : undefined,
-      secteur: newFilters.secteur ? newFilters.secteur : undefined,
-    };
-    onFilterChange(filterObj);
+  const handleChange = (key: keyof FiltersState, value: number | string) => {
+    void setFilters({ [key]: value } as Partial<FiltersState>);
   };
 
   const applyPreset = (preset: ScreenerPreset) => {
-    const newFilters: FiltersState = {
+    // Un préréglage écrit l'URL comme n'importe quel filtre : la sélection
+    // obtenue reste partageable. `onFilterChange` n'est pas appelé ici —
+    // l'effet ci-dessus s'en charge dès que l'URL a changé, sinon le parent
+    // recevrait deux fois le même filtre.
+    void setFilters({
       rsiMin: preset.filters.rsiMin ?? 0,
       rsiMax: preset.filters.rsiMax ?? 100,
       scoreMin: preset.filters.scoreMin ?? 0,
       secteur: '',
       dividendMin: preset.filters.dividendMin ?? 0,
-    };
-    setFilters(newFilters);
-    onFilterChange(preset.filters);
+    });
   };
 
   return (
