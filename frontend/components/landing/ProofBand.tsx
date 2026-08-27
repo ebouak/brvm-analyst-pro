@@ -57,7 +57,7 @@ export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number;
     // total réel de sociétés cotées à la BRVM, déjà vérifié et affiché ailleurs
     // sur le site (app/societes, tests fondamentaux) — pas un chiffre à part.
     { value: nbActions > 0 ? String(nbActions) : '48', label: 'sociétés BRVM suivies', icon: ICONS.societes },
-    { value: '15 min', label: 'actualisation des cours', icon: ICONS.horloge },
+    { value: '15 min', label: 'actualisation en séance', icon: ICONS.horloge },
     { value: 'A–F', label: 'notation quantitative', icon: ICONS.note },
     { value: 'Sources', label: 'données vérifiées et officielles', icon: ICONS.sources },
   ];

@@ -46,7 +46,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/conseiller', label: 'Conseiller' },
       { href: '/signaux', label: 'Signaux' },
-      { href: '/screener', label: 'Screener' },
+      { href: '/screener', label: 'Screener multi-critères' },
       { href: '/liquidite', label: 'Liquidité' },
       { href: '/scanner', label: 'Scanner technique' },
       { href: '/fondamentaux', label: 'Fondamentaux' },

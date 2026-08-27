@@ -4,7 +4,6 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { getLastMarketDate } from '@/lib/marketDate';
 import { TasteTopbar } from '@/components/landing/taste/TasteTopbar';
 import RatingBadge from '@/components/RatingBadge';
-import NewsTicker from '@/components/NewsTicker';
 import NewsletterForm from '@/components/NewsletterForm';
 import { IndicesCompactCard } from '@/components/landing/IndicesCompactCard';
 import LandingHeatmap from '@/components/landing/LandingHeatmap';
@@ -847,6 +846,19 @@ export default async function Landing() {
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand nbActions={nbActions} />
 
+      {/* ── 04 · COMBIEN ÇA COÛTE ────────────────────────────────
+          Le tarif était en position 19 sur 21 écrans en mobile : le visiteur
+          qui se demande « combien ça coûte » devait parcourir toute la page,
+          puis la quitter, pour l'apprendre. Il remonte juste après la preuve,
+          là où la question se pose réellement. ────────────────────── */}
+      {/* AppPreview porte les badges GRATUIT / PREMIUM / UNIQUE : c'est de
+          l'information de palier, sa place est ici et non en section 14 où
+          elle répétait le message de PlatformUniverses juste au-dessus. */}
+      <AppPreview nbObligations={nbObligations} />
+
+      <PremiumCompare plans={plans} />
+
+
       {/* ── MARCHÉ EN DIRECT : actus, séance, preuve chiffrée, indices,
           heatmap — remonté juste après ProofBand (preuve de fraîcheur des
           données, elle doit être visible tôt) ; regroupés en un seul bloc
@@ -854,10 +866,9 @@ export default async function Landing() {
       <section className="mt-10">
         <div className="mb-5 flex items-baseline justify-between gap-3">
           <p className="overline text-gold-2">Marché en direct</p>
-          <span className="overline text-faint">Données réelles de la dernière séance</span>
+          <span className="overline text-faint">Actualisé toutes les 15 min en séance</span>
         </div>
 
-        <NewsTicker className="-mx-4 rounded-none sm:mx-0 sm:rounded-xl" />
 
         <p className="mt-6 max-w-[56ch] text-base leading-[1.75] text-muted">
           Cours actualisés toutes les 15 minutes, note A–F sur chaque action, fondamentaux extraits des
@@ -935,6 +946,20 @@ export default async function Landing() {
           <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
         </DarkBand>
       </div>
+
+      {/* ── CTA DE MI-PARCOURS ───────────────────────────────
+          Entre le hero et la fin de page, le visiteur mobile traversait 15
+          écrans sans une seule sortie vers l'inscription. Ce CTA arrive après
+          la cartographie, quand la démonstration a déjà convaincu. ─────── */}
+      <section className={`${GAP_SECTION} text-center`}>
+        <Link
+          href="/signup"
+          className="landing-hero-cta inline-flex min-h-[50px] items-center gap-1.5 rounded-full px-8 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"
+        >
+          Créer mon compte gratuit <span aria-hidden>→</span>
+        </Link>
+        <p className="mt-3 text-xs text-muted">Sans carte bancaire · 1 minute · Accès immédiat.</p>
+      </section>
 
       {/* ── 09 · COMPRENDRE UNE ACTION — fiche société réelle ───────────── */}
       <StockSpotlight stock={featured} dateLabel={dateLabel} />
@@ -1154,7 +1179,7 @@ export default async function Landing() {
         {/* Carte 1 — Analyse exclusive → inscription */}
         <article className="flex flex-col rounded-panel border border-border bg-surface p-6 transition-all hover:border-accent/40 hover:bg-elevated/70">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-up/30 bg-up/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-up">
-            <span className="h-1.5 w-1.5 rounded-full bg-up animate-pulse" /> Données temps réel
+            <span className="h-1.5 w-1.5 rounded-full bg-up" /> Données vérifiées
           </span>
           <h3 className="mt-4 font-display text-xl text-ivory">Accédez à des analyses exclusives</h3>
           <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
@@ -1214,14 +1239,6 @@ export default async function Landing() {
           )}
         </article>
       </section>
-
-      {/* ── 18 · PREMIUM — comparatif complet des formules ──────────────── */}
-      {/* AppPreview porte les badges GRATUIT / PREMIUM / UNIQUE : c'est de
-          l'information de palier, sa place est ici et non en section 14 où
-          elle répétait le message de PlatformUniverses juste au-dessus. */}
-      <AppPreview nbObligations={nbObligations} />
-
-      <PremiumCompare plans={plans} />
 
       {/* ── 20 · NEWSLETTER ─────────────────────────────────────────────── */}
       <section className="mt-14">

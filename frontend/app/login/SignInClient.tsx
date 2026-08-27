@@ -52,8 +52,20 @@ export default function SignInClient({
   // production ; en local/preview on garde window.location.origin pour ne pas
   // casser le développement (pas de domaine canonique fixe hors prod).
   const CANONICAL_ORIGIN = 'https://www.westbourse.com';
-  const oauthOrigin =
-    process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' ? CANONICAL_ORIGIN : window.location.origin;
+
+  // ⚠️ RÉSOLU À L'APPEL, jamais pendant le rendu. Ce composant est client, mais
+  // Next le pré-rend côté serveur où `window` n'existe pas : évaluer
+  // `window.location.origin` au corps du composant lève « window is not
+  // defined » à chaque rendu en dev et en preview. En production le ténaire
+  // court-circuitait vers l'origine canonique, donc le défaut y était
+  // invisible — raison pour laquelle il a survécu si longtemps.
+  //
+  // L'origine n'est nécessaire qu'au moment de signInWithOAuth, c'est-à-dire
+  // après un clic : la calculer là est à la fois plus juste et plus sûr.
+  const resoudreOauthOrigin = () => {
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV === 'production') return CANONICAL_ORIGIN;
+    return typeof window !== 'undefined' ? window.location.origin : CANONICAL_ORIGIN;
+  };
 
   return (
     <>
@@ -83,7 +95,7 @@ export default function SignInClient({
         await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${oauthOrigin}/auth/callback?next=${encodeURIComponent(next ?? '/dashboard')}`,
+            redirectTo: `${resoudreOauthOrigin()}/auth/callback?next=${encodeURIComponent(next ?? '/dashboard')}`,
           },
         });
       }}
