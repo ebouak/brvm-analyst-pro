@@ -713,9 +713,13 @@ const ROW_LINK = 'mt-auto pt-4 text-sm font-medium text-ivory/80 transition-colo
  * sans rapport. Un espace doit dire quelque chose : plus il est grand, plus
  * la rupture de sujet est forte.
  */
-const GAP_COMPOSANT = 'mt-6'; // deux blocs d'une même idée
-const GAP_SECTION = 'mt-12'; // deux idées d'un même chapitre
-const GAP_CHAPITRE = 'mt-24'; // changement de sujet
+// Ces respirations sont calibrées pour le desktop, où une page large a besoin
+// de vide pour que la hiérarchie se lise. Sur un écran de 390 px le même vide
+// devient du défilement pur : le lecteur ne voit qu'une seule chose à la fois,
+// et l'espace ne sépare plus rien qu'il puisse comparer. D'où deux valeurs.
+const GAP_COMPOSANT = 'mt-5 md:mt-6'; // deux blocs d'une même idée
+const GAP_SECTION = 'mt-8 md:mt-12'; // deux idées d'un même chapitre
+const GAP_CHAPITRE = 'mt-14 md:mt-24'; // changement de sujet
 
 const PROOF_SOURCES = ['BDFIN', 'BCEAO', 'BloomField', 'GitHub brvm-data-public'];
 

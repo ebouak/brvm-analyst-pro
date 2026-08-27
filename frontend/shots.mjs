@@ -41,12 +41,16 @@ for (const theme of THEMES) {
     });
     // Poser data-theme AVANT le premier rendu : appliqué après, on capture
     // un flash de l'autre thème sur les éléments déjà peints.
+    // Le site ne pose `data-theme` QUE pour le clair : le sombre est le defaut
+    // et n'a aucun attribut (cf. app/layout.tsx, script anti-flash). On ecrit
+    // donc la vraie cle de stockage, `westbourse-theme`, et on laisse le script
+    // du site decider. `colorScheme` seul suffirait, mais la cle rend le choix
+    // explicite plutot que dependant de la preference systeme du navigateur.
     await ctx.addInitScript((attr) => {
-      document.documentElement.setAttribute('data-theme', attr);
       try {
-        localStorage.setItem('theme', attr);
+        localStorage.setItem('westbourse-theme', attr);
       } catch {
-        /* stockage indisponible : l'attribut suffit */
+        /* stockage indisponible : colorScheme prend le relais */
       }
     }, theme.attr);
 
@@ -65,7 +69,8 @@ for (const theme of THEMES) {
     await page.screenshot({ path: `${OUT}/${theme.nom}-${v.nom}.png`, fullPage: true });
     console.log(
       `${theme.nom.padEnd(7)} ${v.nom.padEnd(9)} ${String(v.width).padStart(4)}px  ` +
-        `hauteur ${hauteur}px  debordement=${deborde}  data-theme=${themeRendu}`,
+        `hauteur ${hauteur}px  debordement=${deborde}  ` +
+        `rendu=${themeRendu === 'light' ? 'clair' : 'sombre'}`,
     );
     await ctx.close();
   }

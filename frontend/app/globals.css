@@ -604,3 +604,42 @@ body::after {
 .animate-ticker:focus-within {
   animation-play-state: paused;
 }
+
+/* ---------------------------------------------------------------------------
+   Univers de la plateforme : repliés sous 768 px, dépliés au-dessus.
+
+   Un attribut `open` est un booléen HTML : il ne peut pas dépendre d'un point
+   de rupture. Le repli vit donc ici, en CSS, et le composant reste un simple
+   `<details>` sans JavaScript.
+
+   Deux mécanismes cohabitent selon les navigateurs pour masquer le contenu
+   d'un `<details>` fermé : l'ancien (`display` sur les enfants) et le récent
+   `::details-content` avec `content-visibility: hidden`. On neutralise les
+   deux, sinon la section reste repliée sur desktop dans Chrome récent.
+--------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .univers-repli > .univers-corps {
+    display: block;
+  }
+
+  .univers-repli::details-content {
+    content-visibility: visible;
+    block-size: auto;
+  }
+
+  /* Déplié en permanence : le résumé ne doit plus se comporter en bouton. */
+  .univers-resume {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .univers-chevron {
+    display: none;
+  }
+}
+
+/* Le marqueur natif (triangle) est retiré partout : le compte d'outils sert
+   d'affordance, et le triangle par défaut jure avec le reste de la page. */
+.univers-resume::-webkit-details-marker {
+  display: none;
+}

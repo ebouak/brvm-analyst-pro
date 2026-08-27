@@ -7,6 +7,19 @@ import Link from 'next/link';
  * Chaque `href` pointe vers une route réellement existante sous `frontend/app`
  * (vérifiées une à une). Ne rien ajouter ici sans la route derrière : un lien
  * mort sur la page d'accueil coûte plus cher que l'entrée qu'il apporte.
+ *
+ * REPLIABLE SOUS 768 px. Mesuré : cette seule section occupait 1 730 px sur un
+ * écran de 390 px, soit deux écrans pleins de liens empilés, sur une page qui
+ * en faisait déjà vingt et un. `<details>` natif, donc aucun JavaScript et
+ * aucun composant client ajouté à une page qui est entièrement serveur.
+ *
+ * Les vingt outils restent tous présents dans le DOM et indexables : replier
+ * n'est pas retirer. Le nombre d'outils figure dans le `<summary>` pour que
+ * l'étendue de la plateforme reste lisible sans ouvrir quoi que ce soit.
+ *
+ * Au-dessus de 768 px la section redevient quatre cartes ouvertes — la règle
+ * vit dans `globals.css` (`.univers-repli`), parce qu'un attribut `open` ne
+ * peut pas dépendre d'un point de rupture.
  */
 
 interface Univers {
@@ -79,11 +92,18 @@ export function PlatformUniverses() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {UNIVERS.map((u) => (
-          <div key={u.cle} className="flex flex-col rounded-panel border border-border bg-surface/60 p-5">
-            <h3 className="font-display text-xl text-ivory">{u.titre}</h3>
-            <p className="mt-1 text-[11.5px] leading-snug text-faint">{u.accroche}</p>
+          <details key={u.cle} className="univers-repli flex flex-col rounded-panel border border-border bg-surface/60 p-5">
+            <summary className="univers-resume -m-5 flex cursor-pointer list-none items-start justify-between gap-3 p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">
+              <span className="block">
+                <h3 className="font-display text-xl text-ivory">{u.titre}</h3>
+                <p className="mt-1 text-[11.5px] leading-snug text-faint">{u.accroche}</p>
+              </span>
+              <span className="univers-chevron mt-1 shrink-0 text-[10.5px] text-faint">
+                {u.outils.length} outils
+              </span>
+            </summary>
 
-            <ul className="mt-4 flex-1 space-y-px">
+            <ul className="univers-corps mt-4 flex-1 space-y-px">
               {u.outils.map((o) => (
                 <li key={o.href}>
                   <Link
@@ -104,7 +124,7 @@ export function PlatformUniverses() {
                 </li>
               ))}
             </ul>
-          </div>
+          </details>
         ))}
       </div>
     </section>
