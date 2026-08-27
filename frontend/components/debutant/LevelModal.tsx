@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLevelModal } from './useLevelModal';
 import type { LeadLevel } from '@/lib/leads';
 
@@ -19,6 +19,7 @@ const OPTIONS: { key: LeadLevel; label: string; desc: string; emoji: string }[] 
 export default function LevelModal() {
   const { ready, seen, setLevel, dismiss } = useLevelModal();
   const [open, setOpen] = useState(false);
+  const reduire = useReducedMotion();
 
   useEffect(() => {
     if (!ready || seen) return;
@@ -36,7 +37,10 @@ export default function LevelModal() {
   }
 
   return (
-    <AnimatePresence>
+    // `mode="wait"` : sans lui AnimatePresence vaut "sync" et fait se
+    // chevaucher sortie et entrée. Sur une modale c'est là que le
+    // chevauchement se voit le plus — la sortie doit finir d'abord.
+    <AnimatePresence mode="wait">
       {open && (
         <motion.div
           className="fixed inset-0 z-[60] flex items-end justify-center bg-[#191714]/40 p-4 backdrop-blur-sm sm:items-center"
@@ -49,10 +53,14 @@ export default function LevelModal() {
         >
           <motion.div
             className="w-full max-w-md rounded-[1.6rem] border border-[#ddd7cd] bg-[#fbfaf7] p-6 shadow-[0_20px_60px_rgba(11,107,111,0.18)]"
-            initial={{ y: 28, opacity: 0, scale: 0.98 }}
+            // Sous préférence de mouvement réduit, la modale ne glisse plus :
+            // fondu seul. On ne supprime pas le retour visuel — il faut voir
+            // que quelque chose s'est ouvert — on retire le déplacement, qui
+            // est la partie réellement gênante.
+            initial={{ y: reduire ? 0 : 28, opacity: 0, scale: reduire ? 1 : 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 28, opacity: 0, scale: 0.98 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 240 }}
+            exit={{ y: reduire ? 0 : 28, opacity: 0, scale: reduire ? 1 : 0.98 }}
+            transition={reduire ? { duration: 0.15 } : { type: 'spring', damping: 22, stiffness: 240 }}
           >
             <div className="flex items-start justify-between gap-3">
               <div>

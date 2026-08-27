@@ -2,10 +2,28 @@
 
 // Bandeau haut de la page de connexion : cours du jour qui défilent +
 // strip de bougies animées (vraies variations du jour, jamais inventées).
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { LoginTick, LoginCandle } from '@/app/login/getLoginMarket';
 
+/**
+ * Une bougie du strip, animée en `scaleY` et non en `height`.
+ *
+ * Pourquoi ce détail compte : ces bougies bouclent à l'infini sur la page de
+ * connexion. Animer `height` sort du compositeur — chaque image déclenche un
+ * recalcul de mise en page, et comme la colonne est en `justify-center`, la
+ * hauteur du corps la recentrait : l'étiquette du code sautillait à chaque
+ * frame. `scaleY` s'exécute sur le compositeur, ne reflowe rien, et
+ * l'étiquette cesse de bouger.
+ *
+ * L'origine de transformation reste au centre : c'est ainsi que la bougie
+ * grandissait déjà (colonne centrée). On corrige le coût, pas l'apparence.
+ *
+ * `useReducedMotion` coupe la boucle. Une animation infinie qui ignore la
+ * préférence système est exactement ce qu'il ne faut pas faire, et celle-ci
+ * était sur la page que tout le monde traverse pour se connecter.
+ */
 function AnimatedCandle({ candle, index }: { candle: LoginCandle; index: number }) {
+  const reduire = useReducedMotion();
   const up = candle.pct >= 0;
   const color = up ? '#3fe18b' : '#ff6b6b';
   // Corps proportionnel à l'amplitude (borné pour rester lisible).
@@ -21,22 +39,35 @@ function AnimatedCandle({ candle, index }: { candle: LoginCandle; index: number 
       {/* Mèche */}
       <motion.span
         aria-hidden
-        className="absolute left-1/2 -translate-x-1/2 rounded-full"
-        style={{ width: 1.5, background: color, opacity: 0.5 }}
-        initial={{ height: wickH * 0.6 }}
-        animate={{ height: [wickH * 0.6, wickH, wickH * 0.6] }}
-        transition={{ duration: 2.4 + (index % 5) * 0.3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.12 }}
+        className="absolute left-1/2 rounded-full"
+        // La hauteur est désormais FIXE (elle vaut le maximum de l'ancienne
+        // animation) ; c'est `scaleY` qui varie. `translateX(-50%)` passe dans
+        // `style` : la classe Tailwind `-translate-x-1/2` serait écrasée par
+        // le transform que framer-motion écrit sur l'élément.
+        style={{ width: 1.5, height: wickH, background: color, opacity: 0.5, x: '-50%' }}
+        initial={{ scaleY: reduire ? 1 : 0.6 }}
+        animate={reduire ? { scaleY: 1 } : { scaleY: [0.6, 1, 0.6] }}
+        transition={
+          reduire
+            ? { duration: 0 }
+            : { duration: 2.4 + (index % 5) * 0.3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.12 }
+        }
       />
       {/* Corps */}
       <motion.span
         className="relative rounded-[2px]"
-        style={{ width: 8, background: color, boxShadow: `0 0 10px ${color}55` }}
-        initial={{ height: bodyH * 0.4, opacity: 0.7 }}
-        animate={{
-          height: [bodyH * 0.55, bodyH, bodyH * 0.7, bodyH],
-          opacity: [0.6, 1, 0.8, 1],
-        }}
-        transition={{ duration: 2.2 + (index % 4) * 0.4, repeat: Infinity, ease: 'easeInOut', delay: index * 0.1 }}
+        style={{ width: 8, height: bodyH, background: color, boxShadow: `0 0 10px ${color}55` }}
+        initial={{ scaleY: reduire ? 1 : 0.4, opacity: reduire ? 1 : 0.7 }}
+        animate={
+          reduire
+            ? { scaleY: 1, opacity: 1 }
+            : { scaleY: [0.55, 1, 0.7, 1], opacity: [0.6, 1, 0.8, 1] }
+        }
+        transition={
+          reduire
+            ? { duration: 0 }
+            : { duration: 2.2 + (index % 4) * 0.4, repeat: Infinity, ease: 'easeInOut', delay: index * 0.1 }
+        }
       />
       <span className="mt-1.5 text-[8px] font-medium tracking-tight text-white/35 group-hover:text-white/70 transition-colors">
         {candle.code}
