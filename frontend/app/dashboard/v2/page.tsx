@@ -1,6 +1,14 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Bascule, Peigne, type LigneCote, type Ponderation } from './Interactif';
+import {
+  Bandes,
+  Portefeuille,
+  Trajectoire,
+  type ItemBande,
+  type LignePortefeuille,
+  type PointSerie,
+} from './Sections';
 import './v2.css';
 
 /**
@@ -75,7 +83,18 @@ async function getData() {
     .limit(1);
   const lastIdxDate: string = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
-  const [{ data: actions }, { data: indices }, { count: nbObligations }] = await Promise.all([
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [
+    { data: actions },
+    { data: indices },
+    { count: nbObligations },
+    { data: histo },
+    { data: obligations },
+    { data: positions },
+  ] = await Promise.all([
     supabase
       .from('brvm_actions_daily')
       .select('code, designation, variation_pct, valeur_echangee, nb_transactions, volume')
@@ -88,6 +107,29 @@ async function getData() {
       .from('brvm_obligations_daily')
       .select('code', { count: 'exact', head: true })
       .eq('date_marche', lastDate),
+    // Historique des deux indices de marche, pour la trajectoire.
+    supabase
+      .from('brvm_indices_daily')
+      .select('code, valeur, date_marche')
+      .in('code', ['BRVMC', 'BRVM30'])
+      .not('valeur', 'is', null)
+      .lte('date_marche', lastIdxDate)
+      .order('date_marche', { ascending: true })
+      .limit(80),
+    supabase
+      .from('brvm_obligations_daily')
+      .select('code, cours_jour')
+      .eq('date_marche', lastDate)
+      .not('cours_jour', 'is', null)
+      .limit(14),
+    // Positions du compte connecte. Donnee PERSONNELLE : lue sous la RLS,
+    // jamais fabriquee. Sans session, la requete ne part meme pas.
+    user
+      ? supabase
+          .from('portfolios_positions')
+          .select('code, quantite, prix_entree')
+          .eq('user_id', user.id)
+      : Promise.resolve({ data: [] }),
   ]);
 
   return {
@@ -96,11 +138,15 @@ async function getData() {
     actions: (actions ?? []) as ActionRow[],
     indices: (indices ?? []) as IndiceRow[],
     nbObligations: nbObligations ?? null,
+    histo: (histo ?? []) as { code: string; valeur: number | null; date_marche: string }[],
+    obligations: (obligations ?? []) as { code: string; cours_jour: number | null }[],
+    positions: (positions ?? []) as { code: string; quantite: number; prix_entree: number }[],
   };
 }
 
 export default async function DashboardV2() {
-  const { lastDate, lastIdxDate, actions, indices, nbObligations } = await getData();
+  const { lastDate, lastIdxDate, actions, indices, nbObligations, histo, obligations, positions } =
+    await getData();
 
   if (!lastDate || actions.length === 0) {
     return (
@@ -203,6 +249,44 @@ export default async function DashboardV2() {
   const SPAN = 8;
   const largeurBarre = (v: number) => (Math.min(Math.abs(v), SPAN) / SPAN) * 50;
 
+  /* ---- series pour la trajectoire, dans l'ordre chronologique ----------- */
+  const serie = (code: string): PointSerie[] =>
+    histo
+      .filter((h) => h.code === code && h.valeur != null)
+      .map((h) => ({ date: h.date_marche, valeur: h.valeur as number }));
+  const serieA = serie('BRVMC');
+  const serieB = serie('BRVM30');
+
+  /* ---- bandes : les plus fortes variations, puis les obligations -------- */
+  const bandeActions: ItemBande[] = [...lignes]
+    .sort((a, b) => Math.abs(b.variation) - Math.abs(a.variation))
+    .slice(0, 16)
+    .map((l) => ({
+      code: l.code,
+      valeur: nf.format(Math.round(l.volume > 0 ? l.valeurEchangee / l.volume : 0)),
+      variation: l.variation,
+    }));
+  const bandeObligations: ItemBande[] = obligations
+    .filter((o) => o.cours_jour != null)
+    .map((o) => ({ code: o.code, valeur: nf.format(Math.round(o.cours_jour as number)) }));
+
+  /* ---- portefeuille : positions reelles, valorisees aux clotures -------- */
+  const parCode = new Map(actions.map((a) => [a.code, a]));
+  const lignesPf: LignePortefeuille[] = positions
+    .filter((p) => p.code !== 'LIQUIDITES' && p.quantite > 0)
+    .map((p) => {
+      const a = parCode.get(p.code);
+      const ve = a?.valeur_echangee ?? null;
+      const vol = a?.volume ?? null;
+      return {
+        code: p.code,
+        quantite: p.quantite,
+        prixEntree: p.prix_entree,
+        cours: ve != null && vol != null && vol > 0 ? ve / vol : null,
+        variation: a?.variation_pct ?? null,
+      };
+    });
+
   const dateFr = new Date(`${lastDate}T12:00:00Z`).toLocaleDateString('fr-FR', {
     weekday: 'long',
     day: 'numeric',
@@ -223,6 +307,8 @@ export default async function DashboardV2() {
           Version actuelle →
         </Link>
       </div>
+
+      <Bandes actions={bandeActions} obligations={bandeObligations} />
 
       {/* ---- strate d'état : six colonnes d'une même grammaire ------------ */}
       <div className="v2-cadre">
@@ -367,6 +453,32 @@ export default async function DashboardV2() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* ---- trajectoire --------------------------------------------------- */}
+      <section className="pt-9" aria-labelledby="v2-t-traj">
+        <h2 id="v2-t-traj" className="v2-tab text-[11px] uppercase tracking-[0.22em] text-muted">
+          Trajectoire des indices
+        </h2>
+        <p className="mt-1 max-w-[78ch] text-[12.5px] italic text-faint">
+          Clôtures ramenées en base 100 pour rendre les deux séries comparables.
+        </p>
+        <div className="mt-4">
+          <Trajectoire serieA={serieA} serieB={serieB} libelleA="BRVM Composite" libelleB="BRVM 30" />
+        </div>
+      </section>
+
+      {/* ---- portefeuille -------------------------------------------------- */}
+      <section className="pt-9" aria-labelledby="v2-t-pf">
+        <h2 id="v2-t-pf" className="v2-tab text-[11px] uppercase tracking-[0.22em] text-muted">
+          Mon portefeuille
+        </h2>
+        <p className="mt-1 max-w-[78ch] text-[12.5px] italic text-faint">
+          Vos positions, valorisées aux clôtures de cette séance.
+        </p>
+        <div className="mt-4">
+          <Portefeuille lignes={lignesPf} />
         </div>
       </section>
 

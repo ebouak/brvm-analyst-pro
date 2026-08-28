@@ -425,6 +425,17 @@ export default async function Dashboard() {
                 ⚙︎ Personnaliser
               </Link>
             )}
+            {/* Passage vers la seconde version du tableau de bord. Les deux
+                cohabitent : cette page-ci ne change pas, l'autre propose une
+                hiérarchie différente du même marché. Sans ce lien, /dashboard/v2
+                n'est atteignable qu'en connaissant l'URL par cœur. */}
+            <Link
+              href="/dashboard/v2"
+              className="rounded-full border border-accent/30 px-3 py-1.5 text-xs text-accent transition-colors hover:border-accent/60 hover:bg-accent/[0.06]"
+              title="Essayer la nouvelle version du tableau de bord"
+            >
+              Version v2 →
+            </Link>
           </nav>
         </header>
 

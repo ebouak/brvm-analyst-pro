@@ -295,3 +295,96 @@
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   Blocs ajoutes : bandes defilantes, trajectoire, portefeuille
+   ========================================================================== */
+.dash-v2 .v2-bandes { border-bottom: 1px solid var(--v2-rule); }
+.dash-v2 .v2-bande {
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--v2-rule-soft); min-height: 34px;
+}
+.dash-v2 .v2-bande:last-child { border-bottom: 0; }
+.dash-v2 .v2-bande-k {
+  flex: 0 0 auto; padding: 0 16px; font-family: var(--v2-mono); font-size: 9.5px;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--v2-ink-3);
+  border-right: 1px solid var(--v2-rule-soft); align-self: stretch;
+  display: flex; align-items: center;
+}
+.dash-v2 .v2-bande-piste {
+  flex: 1; min-width: 0; overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 3%, #000 96%, transparent);
+}
+.dash-v2 .v2-bande-flux { display: flex; width: max-content; }
+.dash-v2 .v2-bi {
+  display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 20px;
+  white-space: nowrap; border-right: 1px solid rgb(255 255 255 / 0.045);
+}
+.dash-v2 .v2-bi b { font-family: var(--v2-mono); font-size: 11px; color: var(--v2-ink-3); font-weight: 400; }
+.dash-v2 .v2-bi i { font-family: var(--v2-mono); font-size: 11.5px; color: var(--v2-ink); font-style: normal; }
+.dash-v2 .v2-bi em { font-family: var(--v2-mono); font-size: 10.5px; font-style: normal; }
+.dash-v2 .v2-bande:focus-visible { outline: 2px solid var(--v2-accent); outline-offset: -2px; }
+
+/* --- trajectoire --------------------------------------------------------- */
+.dash-v2 .v2-traj { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 0 34px; align-items: start; }
+.dash-v2 .v2-traj-side { border-left: 1px solid var(--v2-rule-soft); padding-left: 26px; }
+.dash-v2 .v2-plot svg { width: 100%; height: 220px; display: block; overflow: visible; }
+.dash-v2 .v2-plot .v2-pl-zero { stroke: rgb(255 255 255 / 0.2); stroke-width: 1; stroke-dasharray: 3 3; }
+.dash-v2 .v2-plot .v2-pl-a { stroke: var(--v2-ink); stroke-width: 1.6; fill: none; stroke-linejoin: round; }
+.dash-v2 .v2-plot .v2-pl-b { stroke: var(--v2-ink-3); stroke-width: 1.2; fill: none; stroke-dasharray: 5 3; }
+.dash-v2 .v2-plot .v2-pl-drop { stroke: var(--v2-down); stroke-width: 2.4; fill: none; }
+.dash-v2 .v2-plot .v2-pl-rise { stroke: var(--v2-up); stroke-width: 2.4; fill: none; }
+.dash-v2 .v2-plot .v2-pl-rep { fill: none; stroke: rgb(255 255 255 / 0.55); stroke-width: 1; }
+.dash-v2 .v2-plot text { font-family: var(--v2-mono); font-size: 9.5px; fill: var(--v2-ink-3); }
+.dash-v2 .v2-plot text.hi { fill: var(--v2-ink); }
+.dash-v2 .v2-plot text.cy { fill: var(--v2-accent); }
+.dash-v2 .v2-tfact { padding: 0 0 10px; margin-bottom: 10px; border-bottom: 1px solid var(--v2-rule-soft); }
+.dash-v2 .v2-tfact .v2-k { font-family: var(--v2-mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--v2-ink-3); }
+.dash-v2 .v2-tfact .v2-v { font-family: var(--v2-mono); font-size: 20px; color: var(--v2-ink); margin-top: 4px; }
+.dash-v2 .v2-tfact .v2-d { font-style: italic; font-size: 12.5px; color: var(--v2-ink-3); margin-top: 4px; line-height: 1.4; }
+
+/* --- portefeuille -------------------------------------------------------- */
+.dash-v2 .v2-pf-tot { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 18px; padding: 4px 0 16px; }
+.dash-v2 .v2-pf-tot .v2-k { font-family: var(--v2-mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--v2-ink-3); }
+.dash-v2 .v2-pf-tot .v2-v { font-family: var(--v2-mono); font-size: 17px; color: var(--v2-ink); margin-top: 4px; }
+.dash-v2 .v2-pf-scroll { overflow-x: auto; }
+.dash-v2 table.v2-pf { width: 100%; border-collapse: collapse; min-width: 560px; }
+.dash-v2 table.v2-pf th {
+  font-family: var(--v2-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--v2-ink-3); font-weight: 400; text-align: left; padding: 9px 10px 7px 0;
+  border-bottom: 1px solid var(--v2-rule-soft);
+}
+.dash-v2 table.v2-pf th.r, .dash-v2 table.v2-pf td.r { text-align: right; padding-right: 0; }
+.dash-v2 table.v2-pf td {
+  font-family: var(--v2-mono); font-size: 11.5px; color: var(--v2-ink-2);
+  padding: 8px 10px 8px 0; border-bottom: 1px solid rgb(255 255 255 / 0.045); white-space: nowrap;
+}
+.dash-v2 table.v2-pf td b { color: var(--v2-ink); font-weight: 600; letter-spacing: 0.06em; }
+.dash-v2 .v2-nd { color: var(--v2-ink-3); font-style: italic; }
+.dash-v2 .v2-pf-w { position: relative; display: inline-block; width: 44px; height: 5px; background: rgb(255 255 255 / 0.07); vertical-align: middle; }
+.dash-v2 .v2-pf-w i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--v2-accent); opacity: 0.55; }
+.dash-v2 .v2-pf-wp { margin-left: 8px; color: var(--v2-ink-3); font-size: 10.5px; }
+.dash-v2 .v2-vide { border: 1px dashed var(--v2-rule); padding: 22px; text-align: center; color: var(--v2-ink-2); }
+.dash-v2 .v2-lien { color: var(--v2-accent); text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 900px) {
+  .dash-v2 .v2-traj { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .dash-v2 .v2-traj-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--v2-rule-soft); padding-top: 18px; }
+  .dash-v2 .v2-pf-tot { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dash-v2 .v2-bande-k { padding: 0 10px; font-size: 9px; }
+}
+
+/* WCAG 2.2.2 : le defilement doit pouvoir etre arrete. */
+@media (prefers-reduced-motion: no-preference) {
+  .dash-v2 .v2-bande-flux { animation: v2-defile 46s linear infinite; }
+  .dash-v2 .v2-obl .v2-bande-flux { animation-duration: 58s; }
+  @keyframes v2-defile { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .dash-v2 .v2-bande:hover .v2-bande-flux,
+  .dash-v2 .v2-bande:focus-within .v2-bande-flux { animation-play-state: paused; }
+}
+/* Sous mouvement reduit rien ne defile : la bande devient une liste que l'on
+   parcourt a la main. Aucun element n'est perdu. */
+@media (prefers-reduced-motion: reduce) {
+  .dash-v2 .v2-bande-piste { overflow-x: auto; }
+}
