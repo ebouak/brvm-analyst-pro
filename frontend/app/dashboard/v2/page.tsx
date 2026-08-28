@@ -42,6 +42,7 @@ function montantCourt(x: number) {
 interface ActionRow {
   code: string;
   designation: string | null;
+  cours_jour: number | null;
   variation_pct: number | null;
   valeur_echangee: number | null;
   nb_transactions: number | null;
@@ -97,7 +98,7 @@ async function getData() {
   ] = await Promise.all([
     supabase
       .from('brvm_actions_daily')
-      .select('code, designation, variation_pct, valeur_echangee, nb_transactions, volume')
+      .select('code, designation, cours_jour, variation_pct, valeur_echangee, nb_transactions, volume')
       .eq('date_marche', lastDate),
     supabase
       .from('brvm_indices_daily')
@@ -169,10 +170,25 @@ export default async function DashboardV2() {
   const stables = actions.filter((a) => (a.variation_pct ?? 0) === 0);
   const total = actions.length;
 
+  /* La valeur echangee n'est pas publiee par la source intraday : elle est
+     nulle sur TOUTES les lignes certains jours. On l'estime alors par
+     cours x volume, comme le fait deja MarketStateCard ailleurs dans le
+     produit, et on l'annonce a l'ecran. Une estimation etiquetee vaut mieux
+     qu'un zero muet. */
+  const capitaux = (a: ActionRow) =>
+    a.valeur_echangee ?? (a.cours_jour != null && a.volume != null ? a.cours_jour * a.volume : 0);
+  const capitauxEstimes = actions.every((a) => a.valeur_echangee == null);
+
+  /* Les transactions ne sont pas non plus toujours publiees. Quand elles
+     manquent partout, la ponderation par transactions n'est PAS calculable :
+     on la retire de la bascule au lieu de l'afficher a zero. */
+  const transactionsConnues = actions.some((a) => a.nb_transactions != null);
+
+  const sommeCapitaux = (rows: ActionRow[]) => rows.reduce((s, a) => s + capitaux(a), 0);
   const somme = (rows: ActionRow[], k: 'valeur_echangee' | 'nb_transactions') =>
     rows.reduce((s, a) => s + (a[k] ?? 0), 0);
 
-  const veTotal = somme(actions, 'valeur_echangee');
+  const veTotal = sommeCapitaux(actions);
   const ntTotal = somme(actions, 'nb_transactions');
   const titres = actions.reduce((s, a) => s + (a.volume ?? 0), 0);
 
@@ -193,27 +209,33 @@ export default async function DashboardV2() {
       etiqBaisse: String(baisses.length),
       etiqHausse: String(hausses.length),
     },
-    {
-      cle: 'transactions',
-      libelle: 'Transactions',
-      unite: 'Une valeur pèse ses transactions',
-      qualificatif: 'pondéré par l’activité',
-      baisse: part(somme(baisses, 'nb_transactions'), ntTotal),
-      stable: part(somme(stables, 'nb_transactions'), ntTotal),
-      hausse: part(somme(hausses, 'nb_transactions'), ntTotal),
-      etiqBaisse: nf.format(somme(baisses, 'nb_transactions')),
-      etiqHausse: nf.format(somme(hausses, 'nb_transactions')),
-    },
+    ...(transactionsConnues
+      ? [
+          {
+            cle: 'transactions',
+            libelle: 'Transactions',
+            unite: 'Une valeur pèse ses transactions',
+            qualificatif: 'pondéré par l’activité',
+            baisse: part(somme(baisses, 'nb_transactions'), ntTotal),
+            stable: part(somme(stables, 'nb_transactions'), ntTotal),
+            hausse: part(somme(hausses, 'nb_transactions'), ntTotal),
+            etiqBaisse: nf.format(somme(baisses, 'nb_transactions')),
+            etiqHausse: nf.format(somme(hausses, 'nb_transactions')),
+          },
+        ]
+      : []),
     {
       cle: 'capitaux',
       libelle: 'Capitaux',
-      unite: 'Une valeur pèse ses capitaux',
-      qualificatif: 'pondéré par l’argent engagé',
-      baisse: part(somme(baisses, 'valeur_echangee'), veTotal),
-      stable: part(somme(stables, 'valeur_echangee'), veTotal),
-      hausse: part(somme(hausses, 'valeur_echangee'), veTotal),
-      etiqBaisse: `${pct(part(somme(baisses, 'valeur_echangee'), veTotal), 1)} %`,
-      etiqHausse: `${pct(part(somme(hausses, 'valeur_echangee'), veTotal), 1)} %`,
+      unite: capitauxEstimes
+        ? 'Une valeur pèse ses capitaux (estimés)'
+        : 'Une valeur pèse ses capitaux',
+      qualificatif: capitauxEstimes ? 'cours × titres échangés' : 'pondéré par l’argent engagé',
+      baisse: part(sommeCapitaux(baisses), veTotal),
+      stable: part(sommeCapitaux(stables), veTotal),
+      hausse: part(sommeCapitaux(hausses), veTotal),
+      etiqBaisse: `${pct(part(sommeCapitaux(baisses), veTotal), 1)} %`,
+      etiqHausse: `${pct(part(sommeCapitaux(hausses), veTotal), 1)} %`,
     },
   ];
 
@@ -241,7 +263,7 @@ export default async function DashboardV2() {
       code: a.code,
       nom: a.designation,
       variation: a.variation_pct as number,
-      valeurEchangee: a.valeur_echangee ?? 0,
+      valeurEchangee: capitaux(a),
       transactions: a.nb_transactions ?? 0,
       volume: a.volume ?? 0,
     }));
@@ -258,12 +280,15 @@ export default async function DashboardV2() {
   const serieB = serie('BRVM30');
 
   /* ---- bandes : les plus fortes variations, puis les obligations -------- */
+  const parCours = new Map(
+    actions.filter((a) => a.cours_jour != null).map((a) => [a.code, a.cours_jour as number]),
+  );
   const bandeActions: ItemBande[] = [...lignes]
     .sort((a, b) => Math.abs(b.variation) - Math.abs(a.variation))
     .slice(0, 16)
     .map((l) => ({
       code: l.code,
-      valeur: nf.format(Math.round(l.volume > 0 ? l.valeurEchangee / l.volume : 0)),
+      valeur: nf.format(Math.round(parCours.get(l.code) ?? 0)),
       variation: l.variation,
     }));
   const bandeObligations: ItemBande[] = obligations
@@ -276,13 +301,12 @@ export default async function DashboardV2() {
     .filter((p) => p.code !== 'LIQUIDITES' && p.quantite > 0)
     .map((p) => {
       const a = parCode.get(p.code);
-      const ve = a?.valeur_echangee ?? null;
-      const vol = a?.volume ?? null;
       return {
         code: p.code,
         quantite: p.quantite,
         prixEntree: p.prix_entree,
-        cours: ve != null && vol != null && vol > 0 ? ve / vol : null,
+        // Le VRAI cours de cloture, pas un prix moyen reconstitue.
+        cours: a?.cours_jour ?? null,
         variation: a?.variation_pct ?? null,
       };
     });
@@ -326,8 +350,15 @@ export default async function DashboardV2() {
         </div>
         <div className="v2-cstate">
           <div className="v2-k">Capitaux</div>
-          <div className="v2-val v2-tab">{montantCourt(veTotal)} FCFA</div>
-          <div className="v2-s">{nf.format(ntTotal)} transactions</div>
+          <div className="v2-val v2-tab">
+            {capitauxEstimes ? '≈ ' : ''}
+            {montantCourt(veTotal)} FCFA
+          </div>
+          <div className="v2-s">
+            {capitauxEstimes
+              ? 'estimé : cours × titres — valeur officielle non publiée'
+              : `${nf.format(ntTotal)} transactions`}
+          </div>
         </div>
         <div className="v2-cstate">
           <div className="v2-k">Titres échangés</div>
@@ -486,7 +517,10 @@ export default async function DashboardV2() {
         Source — séance BRVM du {lastDate}
         {lastIdxDate && lastIdxDate !== lastDate ? `, indices relevés le ${lastIdxDate}` : ''}. Tous
         les montants sont en FCFA. Les agrégats (largeur, parts, totaux) sont calculés sur les
-        lignes de cette séance ; aucune valeur n’est estimée. Cette page cohabite avec la version
+        lignes de cette séance.{' '}
+        {capitauxEstimes
+          ? 'La valeur échangée n’est pas publiée par la source intraday : les capitaux sont estimés par cours × titres échangés, et signalés comme tels partout où ils apparaissent.'
+          : 'Aucune valeur n’est estimée.'} Cette page cohabite avec la version
         actuelle du tableau de bord, qui reste inchangée.
       </p>
     </div>
