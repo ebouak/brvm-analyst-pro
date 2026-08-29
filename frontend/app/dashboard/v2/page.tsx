@@ -21,6 +21,7 @@ import {
   type LigneObligation,
   type LigneSignal,
 } from './Sections';
+import { Decor } from './Decor';
 import './v2.css';
 
 /**
@@ -351,6 +352,12 @@ export default async function DashboardV2() {
     });
   };
 
+  /* Les codes que l'utilisateur detient ou suit : marques sur l'axe pour qu'il
+     voie ou SES lignes se situent dans la seance. */
+  const miennes = [...new Set([...positions.map((x) => x.code), ...suivies])].filter(
+    (c) => c !== 'LIQUIDITES',
+  );
+
   const variations = new Map(
     actions.filter((a) => a.variation_pct != null).map((a) => [a.code, a.variation_pct as number]),
   );
@@ -434,6 +441,8 @@ export default async function DashboardV2() {
 
   return (
     <div className="dash-v2 mx-auto max-w-[1440px] px-4 pb-16 sm:px-6">
+      <Decor partBaissiere={partBaissiere} />
+
       <div className="flex flex-wrap items-baseline justify-between gap-3 py-5">
         <h1 className="font-display text-xl text-ivory md:text-2xl">
           Tableau de bord <span className="text-accent">v2</span>
@@ -583,7 +592,7 @@ export default async function DashboardV2() {
           grandeur choisie. L’axe couvre −8 % à +8 %.
         </p>
         <div className="mt-4">
-          <Peigne lignes={lignes} />
+          <Peigne lignes={lignes} miennes={miennes} />
         </div>
       </section>
 

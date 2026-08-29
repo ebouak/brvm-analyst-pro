@@ -174,7 +174,14 @@ export function Bascule({ mesures }: { mesures: Ponderation[] }) {
 type Unite = 'valeurEchangee' | 'transactions' | 'volume';
 type Filtre = 'all' | 'up' | 'down' | 'flat';
 
-export function Peigne({ lignes }: { lignes: LigneCote[] }) {
+export function Peigne({
+  lignes,
+  miennes = [],
+}: {
+  lignes: LigneCote[];
+  miennes?: string[];
+}) {
+  const aMoi = new Set(miennes);
   const [lu, setLu] = useState(0);
   const [unite, setUnite] = useState<Unite>('valeurEchangee');
   const [filtre, setFiltre] = useState<Filtre>('all');
@@ -284,13 +291,15 @@ export function Peigne({ lignes }: { lignes: LigneCote[] }) {
         {lignes.map((x, k) => {
           const dir = x.variation > 0 ? 'up' : x.variation < 0 ? 'down' : 'flat';
           const masque = filtre !== 'all' && filtre !== dir;
+          // Les lignes detenues ou suivies portent un repere sous l'axe.
+          const mien = aMoi.has(x.code);
           // Échelle en racine carrée : sinon SONATEL écrase tout le reste.
           // Plancher de visibilité pour que les très petites lignes existent.
           const f = Math.max(Math.sqrt((x[unite] ?? 0) / max), 0.024);
           return (
             <span
               key={`${x.code}-${k}`}
-              className={`v2-dent v2-${dir}${k === lu ? ' on' : ''}${masque ? ' mute' : ''}`}
+              className={`v2-dent v2-${dir}${k === lu ? ' on' : ''}${masque ? ' mute' : ''}${mien ? ' mien' : ''}`}
               style={{ left: `${xs[k]}%`, ['--f' as string]: f.toFixed(4) }}
               aria-hidden
             />
