@@ -57,3 +57,6 @@ docs/landing-v2/tranches/
 
 # Build de production local, parallèle au serveur de dev (voir next.config.js)
 frontend/.next-prod/
+
+# Captures de verification locales
+frontend/v2-*.png
