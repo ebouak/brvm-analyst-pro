@@ -12,7 +12,12 @@ import {
   Afrique,
   Motifs,
   LeReste,
+  DetailObligataire,
+  SignauxEtSuivi,
   type IndiceAfricain,
+  type IndicateurMacro,
+  type LigneObligation,
+  type LigneSignal,
 } from './Sections';
 import './v2.css';
 
@@ -101,6 +106,9 @@ async function getData() {
     { data: obligations },
     { data: positions },
     { data: afrique },
+    { data: macro },
+    { data: signaux },
+    { data: listes },
   ] = await Promise.all([
     supabase
       .from('brvm_actions_daily')
@@ -125,9 +133,10 @@ async function getData() {
       .limit(80),
     supabase
       .from('brvm_obligations_daily')
-      .select('code, cours_jour')
+      .select('code, designation, emetteur, taux_pct, maturite, cours_jour')
       .eq('date_marche', lastDate)
       .not('cours_jour', 'is', null)
+      .order('taux_pct', { ascending: false })
       .limit(14),
     // Positions du compte connecte. Donnee PERSONNELLE : lue sous la RLS,
     // jamais fabriquee. Sans session, la requete ne part meme pas.
@@ -144,7 +153,26 @@ async function getData() {
       .select('code, libelle, place, devise, valeur, variation_pct, ytd_pct, date_marche')
       .order('date_marche', { ascending: false })
       .limit(8),
+    supabase.from('macro_indicators').select('key, label, value, unit, as_of').limit(8),
+    supabase
+      .from('signals_daily')
+      .select('code, signal, score_total, confiance')
+      .eq('date_marche', lastDate),
+    // Listes de suivi : donnee PERSONNELLE, lue sous la RLS du compte.
+    user
+      ? supabase.from('watchlists').select('id').eq('user_id', user.id)
+      : Promise.resolve({ data: [] }),
   ]);
+
+  let suivies: string[] = [];
+  const ids = ((listes ?? []) as { id: string }[]).map((l) => l.id);
+  if (ids.length > 0) {
+    const { data: items } = await supabase
+      .from('watchlist_items')
+      .select('code')
+      .in('watchlist_id', ids);
+    suivies = [...new Set(((items ?? []) as { code: string }[]).map((i) => i.code))];
+  }
 
   return {
     lastDate,
@@ -153,9 +181,12 @@ async function getData() {
     indices: (indices ?? []) as IndiceRow[],
     nbObligations: nbObligations ?? null,
     histo: (histo ?? []) as { code: string; valeur: number | null; date_marche: string }[],
-    obligations: (obligations ?? []) as { code: string; cours_jour: number | null }[],
+    obligations: (obligations ?? []) as LigneObligation[],
     positions: (positions ?? []) as { code: string; quantite: number; prix_entree: number }[],
     afrique: (afrique ?? []) as IndiceAfricain[],
+    macro: (macro ?? []) as IndicateurMacro[],
+    signaux: (signaux ?? []) as LigneSignal[],
+    suivies,
   };
 }
 
@@ -170,6 +201,9 @@ export default async function DashboardV2() {
     obligations,
     positions,
     afrique,
+    macro,
+    signaux,
+    suivies,
   } = await getData();
 
   if (!lastDate || actions.length === 0) {
@@ -263,6 +297,15 @@ export default async function DashboardV2() {
   ];
 
   const partBaissiere = mesures[2].baisse;
+
+  /* La ligne la plus lourde de la seance : elle sert au commentaire derive. */
+  const plusLourde = actions.reduce<ActionRow | null>(
+    (m, a) => (m == null || capitaux(a) > capitaux(m) ? a : m),
+    null,
+  );
+  const variations = new Map(
+    actions.filter((a) => a.variation_pct != null).map((a) => [a.code, a.variation_pct as number]),
+  );
   const composite = indices.find((i) => i.code === 'BRVMC' || /composite/i.test(i.libelle ?? ''));
   const brvm30 = indices.find((i) => i.code === 'BRVM30' || /\b30\b/.test(i.libelle ?? ''));
 
@@ -438,6 +481,28 @@ export default async function DashboardV2() {
             </div>
           </div>
 
+          {/* Commentaire DERIVE des chiffres lus, jamais ecrit en dur : il se
+              recompose a chaque seance. */}
+          <p className="v2-note">
+            Le nombre ne dit rien&nbsp;: <b>{hausses.length}</b> hausses contre{' '}
+            <b>{baisses.length}</b> baisses, la cote est presque à l’équilibre.{' '}
+            {capitauxEstimes ? 'Les capitaux estimés, eux, tranchent' : 'La valeur échangée, elle, tranche'}
+            {' '}— <b>{pct(partBaissiere, 1)}&nbsp;%</b>{' '}
+            {partBaissiere >= 50
+              ? 'se sont traités sur des titres en repli'
+              : 'seulement se sont traités à la baisse'}
+            .
+            {plusLourde && (
+              <>
+                {' '}
+                <b>{plusLourde.designation ?? plusLourde.code}</b>, à elle seule, pèse{' '}
+                <b>{pct(part(capitaux(plusLourde), veTotal), 1)}&nbsp;%</b> du montant total et{' '}
+                {(plusLourde.variation_pct ?? 0) < 0 ? 'cède' : 'gagne'}{' '}
+                <b>{pct(Math.abs(plusLourde.variation_pct ?? 0))}&nbsp;%</b>.
+              </>
+            )}
+          </p>
+
           <p className="v2-vconseq">
             <span className="v2-lb">Règle appliquée — seuils fixés à l’avance</span>
             Composite &lt; −1,00 % → <b>{testCompo ? 'vrai' : 'faux'}</b>
@@ -450,6 +515,13 @@ export default async function DashboardV2() {
 
         <div>
           <Bascule mesures={mesures} />
+          <p className="v2-note">
+            C’est la même séance, mesurée {mesures.length} fois. La part baissière passe de{' '}
+            <b>{pct(mesures[0].baisse, 1)}&nbsp;%</b> des valeurs à{' '}
+            <b>{pct(mesures[mesures.length - 1].baisse, 1)}&nbsp;%</b> des capitaux
+            {capitauxEstimes ? ' estimés' : ''}&nbsp;: plus l’unité de mesure pèse lourd, plus la
+            séance penche.
+          </p>
         </div>
       </section>
 
@@ -551,6 +623,25 @@ export default async function DashboardV2() {
 
         <Repli titre="Motifs intraséance" digest={`0 détecté sur ${total} valeurs`}>
           <Motifs nbValeurs={total} />
+        </Repli>
+
+        <Repli
+          titre="Signaux et valeurs suivies"
+          digest={`${signaux.length} valeurs notées · ${suivies.length} suivies`}
+        >
+          <SignauxEtSuivi signaux={signaux} suivies={suivies} variations={variations} />
+        </Repli>
+
+        <Repli
+          titre="Le détail du cadre"
+          digest={`obligations, politique monétaire${nbObligations != null ? ` · ${nbObligations} lignes` : ''}`}
+        >
+          <DetailObligataire
+            obligations={obligations}
+            total={nbObligations}
+            macro={macro}
+            dateSeance={lastDate}
+          />
         </Repli>
 
         <Repli titre="Le reste du tableau de bord" digest="signaux, obligations, actualité, rapports">

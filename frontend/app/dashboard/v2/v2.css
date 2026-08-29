@@ -447,3 +447,35 @@
 @media (prefers-reduced-motion: reduce) {
   .dash-v2 .v2-fx { transition: none; }
 }
+
+/* ============ detail obligataire, macro, signaux, valeurs suivies ======== */
+.dash-v2 .v2-drawer { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 0 40px; }
+.dash-v2 .v2-nm { font-size: 12.5px; color: var(--v2-ink-3); max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.dash-v2 .v2-echue { color: var(--v2-ink-3); opacity: 0.62; }
+.dash-v2 .v2-mline {
+  padding: 11px 0; border-bottom: 1px solid rgb(255 255 255 / 0.045);
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+}
+.dash-v2 .v2-ml { font-size: 13px; color: var(--v2-ink-2); min-width: 0; }
+.dash-v2 .v2-ml em { display: block; font-size: 11px; color: var(--v2-ink-3); font-style: italic; margin-top: 2px; }
+.dash-v2 .v2-mv { font-family: var(--v2-mono); font-size: 15px; color: var(--v2-ink); white-space: nowrap; }
+
+.dash-v2 .v2-sgtot { display: flex; gap: 18px; flex-wrap: wrap; padding: 11px 0 13px; border-bottom: 1px solid var(--v2-rule-soft); }
+.dash-v2 .v2-sg { font-family: var(--v2-mono); font-size: 10.5px; letter-spacing: 0.1em; color: var(--v2-ink-3); }
+.dash-v2 .v2-sg b { font-size: 15px; margin-right: 5px; color: var(--v2-ink-2); }
+.dash-v2 .v2-sgrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgb(255 255 255 / 0.045); }
+.dash-v2 .v2-sgc { font-family: var(--v2-mono); font-size: 12.5px; letter-spacing: 0.08em; color: var(--v2-ink); min-width: 56px; }
+.dash-v2 .v2-sgb { font-family: var(--v2-mono); font-size: 9px; letter-spacing: 0.14em; padding: 2px 6px; border: 1px solid; }
+.dash-v2 .v2-b-up { color: var(--v2-up); border-color: rgb(63 225 139 / 0.35); }
+.dash-v2 .v2-b-down { color: var(--v2-down); border-color: rgb(255 107 107 / 0.35); }
+.dash-v2 .v2-b-flat { color: var(--v2-ink-3); border-color: var(--v2-rule); }
+.dash-v2 .v2-sgs { margin-left: auto; font-family: var(--v2-mono); font-size: 12px; color: var(--v2-ink-2); }
+.dash-v2 .v2-sgx { font-family: var(--v2-mono); font-size: 10px; color: var(--v2-ink-3); letter-spacing: 0.06em; }
+
+/* Les commentaires derives : ils expliquent le chiffre juste au-dessus. */
+.dash-v2 .v2-note { font-style: italic; font-size: 13px; line-height: 1.55; color: var(--v2-ink-2); margin-top: 12px; max-width: 68ch; }
+.dash-v2 .v2-note b { font-style: normal; font-weight: 600; color: var(--v2-ink); }
+
+@media (max-width: 900px) {
+  .dash-v2 .v2-drawer { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+}

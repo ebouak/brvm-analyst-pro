@@ -580,3 +580,255 @@ export function LeReste() {
     </div>
   );
 }
+
+
+/* ========================================================== obligations === */
+
+export interface LigneObligation {
+  code: string;
+  designation: string | null;
+  emetteur: string | null;
+  taux_pct: number | null;
+  maturite: string | null;
+  cours_jour: number | null;
+}
+
+export interface IndicateurMacro {
+  key: string;
+  label: string | null;
+  value: number | null;
+  unit: string | null;
+  as_of: string | null;
+}
+
+/**
+ * Detail obligataire et politique monetaire.
+ *
+ * LES ECHEANCES PASSEES SONT AFFICHEES TELLES QUELLES. Plusieurs lignes de la
+ * cote portent une maturite anterieure a la seance : elles figurent ainsi dans
+ * la source. Les corriger en silence serait pire que les montrer - on les
+ * attenue, et une note l'explique.
+ */
+export function DetailObligataire({
+  obligations,
+  total,
+  macro,
+  dateSeance,
+}: {
+  obligations: LigneObligation[];
+  total: number | null;
+  macro: IndicateurMacro[];
+  dateSeance: string;
+}) {
+  const echues = obligations.filter((o) => o.maturite != null && o.maturite < dateSeance).length;
+
+  return (
+    <div className="v2-drawer">
+      <div>
+        <div className="v2-drawer-h">
+          <h3>Marché obligataire</h3>
+          <span className="v2-tab">
+            {obligations.length} lignes{total != null ? ` sur ${total}` : ''} · séance du {dateSeance}
+          </span>
+        </div>
+
+        {obligations.length === 0 ? (
+          <p className="v2-hint">Aucune ligne obligataire cotée à cette séance.</p>
+        ) : (
+          <>
+            <div className="v2-pf-scroll">
+              <table className="v2-pf">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Désignation</th>
+                    <th className="r">Taux</th>
+                    <th className="r">Échéance</th>
+                    <th className="r">Cours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {obligations.map((o) => {
+                    const c = o.maturite != null && o.maturite < dateSeance ? 'v2-echue' : '';
+                    return (
+                      <tr key={o.code}>
+                        <td className={c}>
+                          <b>{o.code}</b>
+                        </td>
+                        <td className={`v2-nm ${c}`}>{o.designation ?? o.emetteur ?? '—'}</td>
+                        <td className={`r ${c}`}>{o.taux_pct != null ? `${pct(o.taux_pct)} %` : '—'}</td>
+                        <td className={`r ${c}`}>{o.maturite?.slice(0, 4) ?? '—'}</td>
+                        <td className={`r ${c}`}>
+                          {o.cours_jour != null ? nf.format(Math.round(o.cours_jour)) : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {echues > 0 && (
+              <p className="v2-hint">
+                {echues} ligne{echues > 1 ? 's portent' : ' porte'} une échéance déjà passée&nbsp;:
+                elle{echues > 1 ? 's figurent' : ' figure'} ainsi dans la source et{' '}
+                {echues > 1 ? 'sont affichées' : 'est affichée'} telle{echues > 1 ? 's' : ''} quelle
+                {echues > 1 ? 's' : ''}. Les corriger en silence serait pire que les montrer.
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      <div>
+        <div className="v2-drawer-h">
+          <h3>Politique monétaire</h3>
+          <span className="v2-tab">UEMOA</span>
+        </div>
+        {macro.length === 0 ? (
+          <p className="v2-hint">Aucun indicateur macro en base.</p>
+        ) : (
+          macro.map((m) => (
+            <div className="v2-mline" key={m.key}>
+              <span className="v2-ml">
+                {m.label ?? m.key}
+                {m.as_of && <em>depuis le {m.as_of}</em>}
+              </span>
+              <span className="v2-mv v2-tab">
+                {m.value != null ? nf.format(m.value) : '—'} {m.unit ?? ''}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ====================================================== signaux & suivi === */
+
+export interface LigneSignal {
+  code: string;
+  signal: string | null;
+  score_total: number | null;
+  confiance: number | null;
+}
+
+/**
+ * Signaux du jour et valeurs suivies.
+ *
+ * Les signaux sont calcules par le scoring du produit : ils sont REELS. La
+ * repartition BUY / HOLD / SELL est comptee sur l'ensemble de la seance.
+ *
+ * Un zero de SELL n'est PAS un avis d'achat : le modele neutralise en HOLD des
+ * que l'historique ou la liquidite ne permettent pas un calcul fiable. La note
+ * le dit, sinon le chiffre serait lu a l'envers.
+ *
+ * Les valeurs suivies sont une donnee PERSONNELLE, lue sous la RLS du compte.
+ * Sans liste, on affiche un etat vide - jamais un exemple deguise.
+ */
+export function SignauxEtSuivi({
+  signaux,
+  suivies,
+  variations,
+}: {
+  signaux: LigneSignal[];
+  suivies: string[];
+  variations: Map<string, number>;
+}) {
+  const compte = (s: string) => signaux.filter((x) => (x.signal ?? '').toUpperCase() === s).length;
+  const buy = compte('BUY');
+  const hold = compte('HOLD');
+  const sell = compte('SELL');
+  const tete = [...signaux]
+    .sort((a, b) => (b.score_total ?? 0) - (a.score_total ?? 0))
+    .slice(0, 5);
+
+  return (
+    <div className="v2-drawer">
+      <div>
+        <div className="v2-drawer-h">
+          <h3>Signaux du jour</h3>
+          <span className="v2-tab">{signaux.length} valeurs</span>
+        </div>
+
+        {signaux.length === 0 ? (
+          <p className="v2-hint">Aucun signal calculé pour cette séance.</p>
+        ) : (
+          <>
+            <div className="v2-sgtot">
+              <span className="v2-sg">
+                <b className="v2-up">{buy}</b> BUY
+              </span>
+              <span className="v2-sg">
+                <b>{hold}</b> HOLD
+              </span>
+              <span className="v2-sg">
+                <b className={sell > 0 ? 'v2-down' : undefined}>{sell}</b> SELL
+              </span>
+            </div>
+            {tete.map((s) => {
+              const sig = (s.signal ?? 'HOLD').toUpperCase();
+              return (
+                <div className="v2-sgrow" key={s.code}>
+                  <span className="v2-sgc">{s.code}</span>
+                  <span
+                    className={`v2-sgb ${sig === 'BUY' ? 'v2-b-up' : sig === 'SELL' ? 'v2-b-down' : 'v2-b-flat'}`}
+                  >
+                    {sig}
+                  </span>
+                  <span className="v2-sgs v2-tab">
+                    {s.score_total != null ? pct(s.score_total) : '—'}
+                  </span>
+                  <span className="v2-sgx v2-tab">
+                    conf. {s.confiance != null ? pct(s.confiance) : '—'}
+                  </span>
+                </div>
+              );
+            })}
+            {sell === 0 && (
+              <p className="v2-hint">
+                Aucun SELL ce jour&nbsp;: le modèle neutralise en HOLD dès que l’historique ou la
+                liquidité ne permettent pas un calcul fiable. Un zéro affiché ici est un refus de
+                trancher, pas un avis d’achat.
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      <div>
+        <div className="v2-drawer-h">
+          <h3>Valeurs suivies</h3>
+          <span className="v2-tab">{suivies.length}</span>
+        </div>
+        {suivies.length === 0 ? (
+          <div className="v2-vide">
+            <p>Aucune valeur en liste de suivi.</p>
+            <p className="v2-hint">
+              <Link href="/parametres/alertes" className="v2-lien">
+                Créer une liste et des seuils
+              </Link>
+            </p>
+          </div>
+        ) : (
+          suivies.map((code) => {
+            const v = variations.get(code);
+            return (
+              <div className="v2-sgrow" key={code}>
+                <span className="v2-sgc">{code}</span>
+                <span className="v2-sgx">
+                  {v == null ? 'non cotée à cette séance' : 'variation du jour'}
+                </span>
+                <span
+                  className={`v2-sgs v2-tab ${v == null ? '' : v >= 0 ? 'v2-up' : 'v2-down'}`}
+                >
+                  {v == null ? '—' : `${signe(v)} %`}
+                </span>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
