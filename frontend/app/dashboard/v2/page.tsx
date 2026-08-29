@@ -8,6 +8,11 @@ import {
   type ItemBande,
   type LignePortefeuille,
   type PointSerie,
+  Repli,
+  Afrique,
+  Motifs,
+  LeReste,
+  type IndiceAfricain,
 } from './Sections';
 import './v2.css';
 
@@ -95,6 +100,7 @@ async function getData() {
     { data: histo },
     { data: obligations },
     { data: positions },
+    { data: afrique },
   ] = await Promise.all([
     supabase
       .from('brvm_actions_daily')
@@ -131,6 +137,13 @@ async function getData() {
           .select('code, quantite, prix_entree')
           .eq('user_id', user.id)
       : Promise.resolve({ data: [] }),
+    // Indices regionaux. Leur date de releve est LUE et affichee : elle est
+    // souvent anterieure de plusieurs semaines a la seance BRVM.
+    supabase
+      .from('african_indices_daily')
+      .select('code, libelle, place, devise, valeur, variation_pct, ytd_pct, date_marche')
+      .order('date_marche', { ascending: false })
+      .limit(8),
   ]);
 
   return {
@@ -142,12 +155,22 @@ async function getData() {
     histo: (histo ?? []) as { code: string; valeur: number | null; date_marche: string }[],
     obligations: (obligations ?? []) as { code: string; cours_jour: number | null }[],
     positions: (positions ?? []) as { code: string; quantite: number; prix_entree: number }[],
+    afrique: (afrique ?? []) as IndiceAfricain[],
   };
 }
 
 export default async function DashboardV2() {
-  const { lastDate, lastIdxDate, actions, indices, nbObligations, histo, obligations, positions } =
-    await getData();
+  const {
+    lastDate,
+    lastIdxDate,
+    actions,
+    indices,
+    nbObligations,
+    histo,
+    obligations,
+    positions,
+    afrique,
+  } = await getData();
 
   if (!lastDate || actions.length === 0) {
     return (
@@ -512,6 +535,28 @@ export default async function DashboardV2() {
           <Portefeuille lignes={lignesPf} />
         </div>
       </section>
+
+      {/* ---- blocs secondaires, repliés ------------------------------------ */}
+      <div className="pt-9">
+        <Repli
+          titre="Afrique"
+          digest={
+            afrique.length > 0
+              ? `${afrique.length} places · relevé du ${afrique[0].date_marche}`
+              : 'aucun relevé'
+          }
+        >
+          <Afrique indices={afrique} dateSeance={lastDate} />
+        </Repli>
+
+        <Repli titre="Motifs intraséance" digest={`0 détecté sur ${total} valeurs`}>
+          <Motifs nbValeurs={total} />
+        </Repli>
+
+        <Repli titre="Le reste du tableau de bord" digest="signaux, obligations, actualité, rapports">
+          <LeReste />
+        </Repli>
+      </div>
 
       <p className="v2-tab mt-8 border-t border-border pt-4 text-[10.5px] leading-relaxed text-faint">
         Source — séance BRVM du {lastDate}
