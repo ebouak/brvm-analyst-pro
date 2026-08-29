@@ -479,3 +479,37 @@
 @media (max-width: 900px) {
   .dash-v2 .v2-drawer { grid-template-columns: minmax(0, 1fr); gap: 26px; }
 }
+
+/* ========================= mouvements nominatifs ======================== */
+.dash-v2 .v2-movers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 46px; }
+.dash-v2 .v2-mov-r { padding-left: 46px; border-left: 1px solid var(--v2-rule-soft); }
+.dash-v2 .v2-mov-h {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 4px 18px;
+  flex-wrap: wrap; padding-bottom: 9px; border-bottom: 1px solid var(--v2-rule);
+}
+.dash-v2 .v2-mov-h h3 { font-family: var(--v2-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; }
+.dash-v2 .v2-mov-h span { font-family: var(--v2-mono); font-size: 10.5px; color: var(--v2-ink-3); }
+.dash-v2 .v2-mrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 18px;
+  padding: 10px 0; border-bottom: 1px solid var(--v2-rule-soft);
+}
+.dash-v2 .v2-mid { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.dash-v2 .v2-mcode { font-family: var(--v2-mono); font-size: 17px; letter-spacing: 0.06em; color: var(--v2-ink); }
+.dash-v2 .v2-mnom { font-size: 12.5px; color: var(--v2-ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dash-v2 .v2-mnum { text-align: right; white-space: nowrap; }
+.dash-v2 .v2-mpx { font-family: var(--v2-mono); font-size: 15px; color: var(--v2-ink-2); }
+.dash-v2 .v2-mpx small { font-size: 10px; color: var(--v2-ink-3); letter-spacing: 0.08em; }
+.dash-v2 .v2-mvr { font-family: var(--v2-mono); font-size: 15px; font-weight: 600; margin-left: 14px; }
+.dash-v2 .v2-mmeta { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+.dash-v2 .v2-mtrack { position: relative; height: 3px; flex: 1; background: rgb(255 255 255 / 0.07); min-width: 40px; }
+.dash-v2 .v2-mtrack i { position: absolute; left: 0; top: 0; bottom: 0; }
+.dash-v2 .v2-mpc { font-family: var(--v2-mono); font-size: 10px; color: var(--v2-ink-3); white-space: nowrap; }
+.dash-v2 .v2-mnote {
+  grid-column: 1 / -1; font-style: italic; font-size: 12.5px; color: var(--v2-ink-2);
+  margin-top: 7px; padding-left: 13px; border-left: 1px solid var(--v2-rule); line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .dash-v2 .v2-movers { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  .dash-v2 .v2-mov-r { padding-left: 0; border-left: 0; border-top: 1px solid var(--v2-rule-soft); padding-top: 24px; }
+}

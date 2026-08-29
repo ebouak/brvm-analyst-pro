@@ -13,7 +13,9 @@ import {
   Motifs,
   LeReste,
   DetailObligataire,
+  Mouvements,
   SignauxEtSuivi,
+  type LigneMouvement,
   type IndiceAfricain,
   type IndicateurMacro,
   type LigneObligation,
@@ -303,6 +305,52 @@ export default async function DashboardV2() {
     (m, a) => (m == null || capitaux(a) > capitaux(m) ? a : m),
     null,
   );
+  /* ---- les douze lignes nominatives -------------------------------------
+     Le filet mesure la part de la valeur echangee. Les notes ne sont ecrites
+     que lorsque les chiffres les justifient, et citent ces chiffres. */
+  const versMouvement = (a: ActionRow): LigneMouvement => ({
+    code: a.code,
+    nom: a.designation,
+    cours: a.cours_jour,
+    variation: a.variation_pct ?? 0,
+    capitaux: capitaux(a),
+    partMontant: part(capitaux(a), veTotal),
+    transactions: a.nb_transactions,
+    volume: a.volume ?? 0,
+  });
+
+  const topHausses = [...hausses]
+    .sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0))
+    .slice(0, 6)
+    .map(versMouvement);
+  const topBaisses = [...baisses]
+    .sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0))
+    .slice(0, 6)
+    .map(versMouvement);
+
+  /* Notes derivees : la plus lourde de chaque camp, et celle dont le filet
+     contredit l'ampleur de la variation. */
+  const annoter = (lignes: LigneMouvement[]): LigneMouvement[] => {
+    if (lignes.length === 0) return lignes;
+    const lourde = lignes.reduce((m, l) => (l.capitaux > m.capitaux ? l : m), lignes[0]);
+    const legere = lignes.reduce((m, l) => (l.capitaux < m.capitaux ? l : m), lignes[0]);
+    return lignes.map((l) => {
+      if (l.code === lourde.code && l.partMontant >= 1) {
+        return {
+          ...l,
+          note: `Première ligne en capitaux de ce camp : ${nf.format(Math.round(l.capitaux))} FCFA sur ${nf.format(l.volume)} titres. Le mouvement est porté, pas subi.`,
+        };
+      }
+      if (l.code === legere.code && l.partMontant < 0.5 && lignes.length > 1) {
+        return {
+          ...l,
+          note: `Portée par ${nf.format(l.volume)} titres seulement — ${pct(l.partMontant)} % du montant. À traiter comme un prix, pas comme un flux.`,
+        };
+      }
+      return l;
+    });
+  };
+
   const variations = new Map(
     actions.filter((a) => a.variation_pct != null).map((a) => [a.code, a.variation_pct as number]),
   );
@@ -623,6 +671,21 @@ export default async function DashboardV2() {
 
         <Repli titre="Motifs intraséance" digest={`0 détecté sur ${total} valeurs`}>
           <Motifs nbValeurs={total} />
+        </Repli>
+
+        <Repli
+          titre="Mouvements"
+          digest={`${topHausses.length + topBaisses.length} lignes nominatives${topBaisses.length > 0 && topHausses.length > 0 ? ` · ${pct(topBaisses[0].variation)} / ${signe(topHausses[0].variation)} %` : ''}`}
+        >
+          <Mouvements
+            hausses={annoter(topHausses)}
+            baisses={annoter(topBaisses)}
+            partHausses={part(sommeCapitaux(hausses), veTotal)}
+            partBaisses={part(sommeCapitaux(baisses), veTotal)}
+            nbHausses={hausses.length}
+            nbBaisses={baisses.length}
+            capitauxEstimes={capitauxEstimes}
+          />
         </Repli>
 
         <Repli

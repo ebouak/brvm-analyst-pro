@@ -832,3 +832,112 @@ export function SignauxEtSuivi({
     </div>
   );
 }
+
+
+/* ========================================================== mouvements === */
+
+export interface LigneMouvement {
+  code: string;
+  nom: string | null;
+  cours: number | null;
+  variation: number;
+  capitaux: number;
+  partMontant: number;
+  transactions: number | null;
+  volume: number;
+  note?: string;
+}
+
+/**
+ * Les douze lignes nominatives : six hausses, six baisses.
+ *
+ * LE FILET SOUS CHAQUE LIGNE EST L'IDEE. Il mesure la part de la valeur
+ * echangee de la seance que cette ligne represente. Deux titres peuvent
+ * afficher la meme variation sans rien avoir de commun : l'un porte des
+ * capitaux, l'autre quelques titres. Une hausse sur un echange marginal reste
+ * une hausse marginale, et le filet le montre sans qu'on ait a l'expliquer.
+ *
+ * Les notes sont DERIVEES : ecrites seulement quand les chiffres les
+ * justifient, et citant ces chiffres.
+ */
+export function Mouvements({
+  hausses,
+  baisses,
+  partHausses,
+  partBaisses,
+  nbHausses,
+  nbBaisses,
+  capitauxEstimes,
+}: {
+  hausses: LigneMouvement[];
+  baisses: LigneMouvement[];
+  partHausses: number;
+  partBaisses: number;
+  nbHausses: number;
+  nbBaisses: number;
+  capitauxEstimes: boolean;
+}) {
+  if (hausses.length === 0 && baisses.length === 0) {
+    return <p className="v2-hint">Aucun mouvement signé à cette séance.</p>;
+  }
+
+  const colonne = (lignes: LigneMouvement[], sens: 'up' | 'down') => (
+    <div className={sens === 'up' ? 'v2-mov-col' : 'v2-mov-col v2-mov-r'}>
+      <div className="v2-mov-h">
+        <h3 className={sens === 'up' ? 'v2-up' : 'v2-down'}>
+          {sens === 'up' ? 'Hausses' : 'Baisses'}
+        </h3>
+        <span className="v2-tab">
+          {lignes.length} lignes · {pct(sens === 'up' ? partHausses : partBaisses, 1)} % du montant
+          sur {sens === 'up' ? nbHausses : nbBaisses} valeurs
+        </span>
+      </div>
+
+      {lignes.map((l) => (
+        <div className="v2-mrow" key={l.code}>
+          <div className="v2-mid">
+            <span className="v2-mcode">{l.code}</span>
+            <span className="v2-mnom">{l.nom ?? ''}</span>
+          </div>
+          <div className="v2-mnum">
+            <span className="v2-mpx v2-tab">
+              {l.cours != null ? nf.format(Math.round(l.cours)) : '—'} <small>FCFA</small>
+            </span>
+            <span className={`v2-mvr v2-tab ${sens === 'up' ? 'v2-up' : 'v2-down'}`}>
+              {signe(l.variation)} %
+            </span>
+          </div>
+          <div className="v2-mmeta">
+            <span className="v2-mtrack">
+              <i
+                style={{
+                  width: `${Math.min(100, l.partMontant).toFixed(2)}%`,
+                  background: sens === 'up' ? 'var(--v2-up)' : 'var(--v2-down)',
+                }}
+              />
+            </span>
+            <span className="v2-mpc v2-tab">
+              {pct(l.partMontant)} % du montant
+              {l.transactions != null ? ` · ${nf.format(l.transactions)} transactions` : ''}
+            </span>
+          </div>
+          {l.note && <p className="v2-mnote">{l.note}</p>}
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div>
+      <p className="v2-hint" style={{ marginBottom: 16 }}>
+        Le filet sous chaque ligne mesure sa part de la valeur échangée
+        {capitauxEstimes ? ' estimée' : ''} de la séance — une hausse sur un échange marginal reste
+        une hausse marginale.
+      </p>
+      <div className="v2-movers">
+        {colonne(hausses, 'up')}
+        {colonne(baisses, 'down')}
+      </div>
+    </div>
+  );
+}
