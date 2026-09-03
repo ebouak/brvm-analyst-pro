@@ -26,11 +26,13 @@ import { PremiumCompare } from '@/components/landing/PremiumCompare';
 import { excerpt } from '@/lib/landing/excerpt';
 import { getMemberCount } from '@/lib/landing/memberCount';
 import { getLatestDiagnostic } from '@/lib/landing/latestDiagnostic';
+import { getVideoSeance } from '@/lib/landing/videoSeance';
 import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
 import { computeRatios, latestUsable, type FundamentalsRow } from '@/lib/landing/fundamentals';
 import { SectorStrip } from '@/components/landing/SectorStrip';
 import { DataToDecision } from '@/components/landing/DataToDecision';
 import { PlatformUniverses } from '@/components/landing/PlatformUniverses';
+import { VideoSeance } from '@/components/landing/VideoSeance';
 import { DarkBand } from '@/components/landing/DarkBand';
 import MarketStateCard, { type MarketStats, type Breakdown } from '@/components/MarketStateCard';
 import { StockSpotlight, type StockDetail } from '@/components/landing/StockSpotlight';
@@ -175,6 +177,9 @@ async function getData() {
   // Nombre réel de comptes : lecture service-role (profiles est sous RLS owner,
   // la clé anon y voit 0). Ne lève jamais — voir lib/landing/memberCount.ts.
   const memberCountPromise = getMemberCount();
+  // Fiche de la derniere video de seance (objet de stockage public). Ne leve
+  // jamais : renvoie null tant que le worker video/ n'a pas publie.
+  const videoSeancePromise = getVideoSeance();
   // Série récente du BRVM-C : alimente le graphe du terminal du hero.
   // Aucune donnée intraday n'existe (la BRVM n'en publie pas) — ce sont donc
   // les clôtures des dernières séances, jamais une courbe simulée.
@@ -229,6 +234,7 @@ async function getData() {
     memberCount,
     nbObligations,
     { data: brvmcRows },
+    videoSeance,
   ] = await Promise.all([
     lastDayPromise,
     lastIdxPromise,
@@ -243,6 +249,7 @@ async function getData() {
     memberCountPromise,
     nbObligationsPromise,
     brvmcSeriePromise,
+    videoSeancePromise,
   ]);
 
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
@@ -616,6 +623,7 @@ async function getData() {
     featured,
     fundamentals,
     nbObligations,
+    videoSeance,
   };
 }
 
@@ -769,6 +777,7 @@ export default async function Landing() {
     featured,
     fundamentals,
     nbObligations,
+    videoSeance,
   } = await getCachedData();
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
@@ -950,6 +959,13 @@ export default async function Landing() {
           <LandingHeatmap rows={heatmapRows} dateLabel={dateLabel} />
         </DarkBand>
       </div>
+
+      {/* ── 08 bis · LA SÉANCE EN VIDÉO ──────────────────────────────────
+          Produite chaque soir par le worker video/ depuis les mêmes données
+          que la page. Placée après la cartographie : la démonstration
+          chiffrée est faite, la vidéo la résume avant le CTA. Disparaît
+          d'elle-même tant qu'aucune vidéo n'est publiée. ──────────────── */}
+      <VideoSeance data={videoSeance} dateMarche={asOf} />
 
       {/* ── CTA DE MI-PARCOURS ───────────────────────────────
           Entre le hero et la fin de page, le visiteur mobile traversait 15

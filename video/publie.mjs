@@ -73,7 +73,90 @@ console.log(`${TITRE} · ${(octets.length / 1e6).toFixed(2)} Mo · ${m.duree_s.t
 const echecs = [];
 let envois = 0;
 
-/* ---------------------------------------------------------- 2. Facebook */
+/* -------------------------------------------------- 2. landing page --- */
+
+/* La vidéo est hebergee dans le bucket public `seance-video` et lue par la
+   landing. Cette etape passe AVANT les reseaux sociaux : le site doit etre
+   servi meme quand aucune plateforme n'est configuree.
+
+   Le fichier porte la date de la seance, jamais un nom fixe : chaque journee a
+   son URL propre, donc aucun cache de CDN ne peut servir la video d'hier sous
+   les chiffres d'aujourd'hui. Seul `derniere.json`, minuscule, est reecrit — et
+   avec un cache court. */
+const dotenv = `${RACINE}/frontend/.env.local`;
+const envLocal = existsSync(dotenv) ? readFileSync(dotenv, 'utf8') : '';
+const lire = (...cles) => {
+  for (const k of cles) {
+    if (process.env[k]) return process.env[k].trim();
+    /* pas de variable nommee m ici : m est la fiche de seance, plus haut. */
+    const trouve = envLocal.match(new RegExp('^' + k + '=(.*)$', 'm'));
+    if (trouve) return trouve[1].trim().replace(/^"|"$/g, '');
+  }
+  return '';
+};
+const URL_SB = lire('SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL');
+const SERVICE = lire('SUPABASE_SERVICE_ROLE_KEY');
+const BUCKET = 'seance-video';
+
+if (URL_SB && SERVICE) {
+  try {
+    const envoyer = async (chemin, corps, type, cache) => {
+      const r = await fetch(`${URL_SB}/storage/v1/object/${BUCKET}/${chemin}`, {
+        method: 'POST',
+        headers: {
+          apikey: SERVICE,
+          Authorization: `Bearer ${SERVICE}`,
+          'Content-Type': type,
+          /* Constate le 2026-09-03 : ce service renvoie `no-cache` quoi qu'on
+             envoie — teste en en-tete ET en champ multipart. L'en-tete reste
+             la, correct, pour le jour ou il sera honore. Sans consequence sur
+             la justesse : le chemin porte la date, donc un cache perime ne
+             peut jamais afficher la video d'hier sous les chiffres du jour. */
+          'cache-control': `max-age=${cache}`,
+          /* upsert : relancer la meme seance remplace le fichier au lieu
+             d'echouer sur un doublon. */
+          'x-upsert': 'true',
+        },
+        body: corps,
+      });
+      if (!r.ok) throw new Error(`${chemin} → ${r.status} ${(await r.text()).slice(0, 200)}`);
+    };
+    const publique = (chemin) => `${URL_SB}/storage/v1/object/public/${BUCKET}/${chemin}`;
+
+    const cheminVideo = `seance/${m.seance}.mp4`;
+    await envoyer(cheminVideo, octets, 'video/mp4', 31536000);
+
+    /* L'affiche est facultative : une vidéo sans vignette reste lisible, mais
+       l'absence du fichier ne doit pas empecher la publication. */
+    let affiche = null;
+    const fAffiche = `${OUT}/affiche.jpg`;
+    if (existsSync(fAffiche)) {
+      const cheminAffiche = `seance/${m.seance}.jpg`;
+      await envoyer(cheminAffiche, readFileSync(fAffiche), 'image/jpeg', 31536000);
+      affiche = publique(cheminAffiche);
+    }
+
+    const url = publique(cheminVideo);
+    /* `fichier` est un chemin local sans interet pour le site, et qui trahirait
+       l'arborescence de la machine de build. On le remplace par l'URL. */
+    const { fichier, ...reste } = m;
+    await envoyer(
+      'derniere.json',
+      JSON.stringify({ ...reste, url, affiche }, null, 2),
+      'application/json',
+      60,
+    );
+    console.log(`Landing : hebergee (${url})`);
+    envois++;
+  } catch (e) {
+    console.error(`Landing : ECHEC — ${e.message}`);
+    echecs.push('landing');
+  }
+} else {
+  console.log('Landing : ignore (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY absents)');
+}
+
+/* ---------------------------------------------------------- 3. Facebook */
 
 /* Video de Page via l'API Graph. L'hote graph-video est celui prevu pour les
    televersements ; graph tout court fonctionne mais n'est pas garanti sur les
@@ -111,7 +194,7 @@ if (FB_PAGE && FB_TOKEN) {
   console.log('Facebook : ignore (FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN absents)');
 }
 
-/* ------------------------------------------------------------ 3. TikTok */
+/* ------------------------------------------------------------ 4. TikTok */
 
 /* Deux chemins selon l'etat de l'application developpeur :
    - inbox  : depose un brouillon dans l'appli, l'utilisateur finit la
@@ -247,7 +330,7 @@ if (TT_TOKEN) {
   console.log('TikTok : ignore (ni TIKTOK_REFRESH_TOKEN ni TIKTOK_ACCESS_TOKEN)');
 }
 
-/* ------------------------------------------------------------- 4. bilan */
+/* ------------------------------------------------------------- 5. bilan */
 
 if (echecs.length) {
   console.error(`Echec de publication : ${echecs.join(', ')}`);

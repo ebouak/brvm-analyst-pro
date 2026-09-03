@@ -311,6 +311,16 @@ execFileSync(
   { cwd: OUT, stdio: 'pipe' },
 );
 
+/* Affiche du lecteur : la carte-titre, qui porte deja le logo, la date et les
+   societes de la seance. Sans elle un lecteur HTML affiche un rectangle noir,
+   ce qui donne une section inachevee sur la landing. */
+const affiche = `${OUT}/affiche.jpg`;
+execFileSync(
+  'ffmpeg',
+  ['-y', '-i', `${OUT}/s00.png`, '-vf', 'scale=540:-2', '-q:v', '4', affiche],
+  { stdio: 'pipe' },
+);
+
 console.log('video montee :', sortie);
 
 /* ------------------------------------------------------- 5. fiche seance */
@@ -354,6 +364,10 @@ writeFileSync(
       plus_forte_hausse: { code: haut.code, variation_pct: haut.variation_pct },
       plus_forte_baisse: { code: bas.code, variation_pct: bas.variation_pct },
       duree_s: dureeVoix,
+      /* Le texte lu voyage avec la fiche : la video n'ayant pas de sous-titres,
+         c'est la seule transcription dont dispose un visiteur sourd, et le seul
+         contenu indexable de la section. */
+      texte: TEXTE,
       fichier: sortie,
       controles,
       publiable,

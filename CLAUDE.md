@@ -321,6 +321,17 @@ secrets tous exercés.
   Artefact conservé 14 j **même si la publication échoue**. Secrets à créer :
   `FB_PAGE_ID`, `FB_PAGE_ACCESS_TOKEN`, `TIKTOK_CLIENT_KEY`,
   `TIKTOK_CLIENT_SECRET`, `TIKTOK_REFRESH_TOKEN`.
+- **Landing** : `publie.mjs` héberge d'abord la vidéo dans le **bucket public
+  `seance-video`** (`seance/<date>.mp4` + `.jpg` d'affiche + `derniere.json`),
+  avant les réseaux — le site est servi même sans identifiants sociaux. L'URL
+  **porte la date** : aucun cache ne peut montrer la vidéo d'hier sous les
+  chiffres du jour. Côté site : `lib/landing/videoSeance.ts` (lecture anonyme,
+  revalidation 300 s) + `components/landing/VideoSeance.tsx`, section placée
+  après la cartographie. Elle **disparaît** sans vidéo publiée et affiche
+  **« séance précédente »** si la vidéo n'est pas la dernière séance connue.
+  Fichier servi depuis notre stockage : aucun lecteur tiers, la promesse
+  « aucun traceur » tient. Transcription dépliable (la vidéo n'ayant pas de
+  sous-titres, c'est le seul accès sans le son et le seul texte indexable).
 - **Sans sous-titres** (demande explicite). À rouvrir si l'audience TikTok le
   justifie : la plupart des vues y démarrent sans son.
 

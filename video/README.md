@@ -47,6 +47,30 @@ Si l'un échoue, `publie.mjs` **s'arrête sans rien envoyer** et sort en succès
 Un cron publie sans relecture humaine : mieux vaut un jour sans vidéo qu'un
 post public faux.
 
+## La landing page
+
+`publie.mjs` héberge d'abord la vidéo dans le bucket public **`seance-video`**,
+avant de toucher aux réseaux sociaux — le site doit être servi même quand
+aucune plateforme n'est configurée. Trois objets :
+
+| Objet | Rôle |
+|---|---|
+| `seance/<date>.mp4` | la vidéo, à une URL **datée** |
+| `seance/<date>.jpg` | l'affiche du lecteur (carte-titre, ~23 Ko) |
+| `derniere.json` | la fiche lue par la landing (chiffres, URL, transcription) |
+
+L'URL porte la date, jamais un nom fixe : aucun cache ne peut donc servir la
+vidéo d'hier sous les chiffres d'aujourd'hui.
+
+Côté site : `lib/landing/videoSeance.ts` lit `derniere.json` (anonyme, revalidé
+toutes les 5 min) et `components/landing/VideoSeance.tsx` l'affiche après la
+cartographie. La section **disparaît d'elle-même** tant qu'aucune vidéo n'est
+publiée, et **signale « séance précédente »** si la vidéo n'est pas celle de la
+dernière séance connue du site.
+
+Le fichier étant servi depuis notre propre stockage, aucun lecteur tiers n'est
+embarqué : la promesse « aucun traceur » de la landing tient.
+
 ## Configurer Facebook
 
 1. Créer une application sur `developers.facebook.com`, produit **Facebook Login**.

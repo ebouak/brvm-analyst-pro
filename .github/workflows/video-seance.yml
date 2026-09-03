@@ -70,9 +70,14 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node genere.mjs
 
-      - name: Publier sur Facebook et TikTok
+      - name: Publier sur la landing, Facebook et TikTok
         if: github.event_name == 'schedule' || inputs.publier
         env:
+          # Indispensables : c'est par elles que la vidéo est hébergée dans le
+          # bucket public `seance-video`, que lit la landing. Sans elles cette
+          # étape se limiterait aux réseaux sociaux et le site ne verrait rien.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           FB_BROUILLON: ${{ vars.FB_BROUILLON }}
