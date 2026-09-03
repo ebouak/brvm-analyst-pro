@@ -1,0 +1,15 @@
+{
+  "name": "westbourse-video-seance",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Video quotidienne de seance BRVM : generation depuis Supabase, publication Facebook et TikTok. A ne pas confondre avec remotion/, qui rend la video decorative de la landing.",
+  "scripts": {
+    "genere": "node genere.mjs",
+    "publie": "node publie.mjs",
+    "seance": "node genere.mjs && node publie.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}

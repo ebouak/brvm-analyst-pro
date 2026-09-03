@@ -293,6 +293,37 @@ tsc + build frontend verts, 397 tests scraper sans régression.
   admin `/admin/hebdo` (dépublier, `content.publish`). Nav : « Valeurs de la
   semaine » (à ne pas confondre avec `/weekly`, matières premières).
 
+### Ajouts (passage 2026-09-03) — Vidéo de séance quotidienne
+
+Voir `video/README.md`. Vérifié bout-en-bout en local sur la séance du 2026-09-02
+(47 valeurs, 18/22/7, 2,55 Md) : génération, refus de publication, et absence de
+secrets tous exercés.
+
+- **Troisième worker `video/`** (paquet ESM distinct, playwright seul) —
+  `genere.mjs` lit `brvm_actions_daily` + `brvm_indices_daily`, compose 7 scènes
+  1080×1920 dans Chromium, synthétise la voix (`edge-tts`, `fr-FR-DeniseNeural`)
+  et monte avec ffmpeg. **À ne pas confondre avec `remotion/`**, qui rend la
+  vidéo décorative de fond de la landing.
+- **Une seule lecture pour tout** : images, texte lu et légende publiée sont
+  composés des **mêmes variables**. Régression à l'origine de cette règle : une
+  version gardait l'audio figé pendant que les images suivaient la base, et la
+  voix a annoncé 31 hausses quand l'écran en montrait 18.
+- **Verrou de publiabilité** : `seance.json` porte 5 contrôles (`seance_recente`,
+  `assez_de_valeurs`, `composite_present`, `capitaux_non_nuls`,
+  `variations_non_plates`). `publie.mjs` **n'envoie rien** si l'un échoue — un
+  cron publie sans relecture, mieux vaut un jour sans vidéo qu'un post faux.
+- **Publication** `publie.mjs` : Facebook Graph `POST /{page}/videos` et TikTok
+  Content Posting API. Le **jeton TikTok expire en 24 h** → échange du
+  `refresh_token` à chaque exécution (et avertissement s'il est renouvelé).
+  Défaut TikTok = `inbox` (brouillon), seul mode qui marche sans audit de l'app.
+  Une plateforme non configurée est ignorée, jamais en échec.
+- **Cron** `.github/workflows/video-seance.yml` — 18:00 UTC, lundi-vendredi.
+  Artefact conservé 14 j **même si la publication échoue**. Secrets à créer :
+  `FB_PAGE_ID`, `FB_PAGE_ACCESS_TOKEN`, `TIKTOK_CLIENT_KEY`,
+  `TIKTOK_CLIENT_SECRET`, `TIKTOK_REFRESH_TOKEN`.
+- **Sans sous-titres** (demande explicite). À rouvrir si l'audience TikTok le
+  justifie : la plupart des vues y démarrent sans son.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

@@ -1,0 +1,97 @@
+name: Vidéo de séance
+
+# Génère la vidéo verticale de la séance BRVM depuis Supabase, puis la publie
+# sur Facebook et TikTok. Les deux étapes sont séparées : une génération réussie
+# reste récupérable en artefact même si une plateforme refuse l'envoi.
+#
+# Secrets requis pour la génération : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+# Secrets de publication (facultatifs, voir video/README.md) : FB_PAGE_ID,
+# FB_PAGE_ACCESS_TOKEN, TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET,
+# TIKTOK_REFRESH_TOKEN. Une plateforme non configurée est ignorée, pas en échec.
+
+on:
+  schedule:
+    # 18:00 UTC du lundi au vendredi. La BRVM clôture vers 15:00 UTC et le
+    # scraper intraday tourne toutes les 15 min : à 18:00 la séance est figée.
+    - cron: '0 18 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      publier:
+        description: 'Publier sur Facebook et TikTok (sinon génération seule)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: video-seance
+  cancel-in-progress: false
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: video
+    env:
+      # Sortie hors de gan-harness/, qui n'est pas versionné et n'existe pas ici.
+      VIDEO_OUT: ${{ github.workspace }}/video-out
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installer ffmpeg et les polices
+        # ffmpeg est présent sur l'image du runner, mais on ne le suppose pas.
+        # Les polices comptent : le rendu se fait dans un navigateur, et sans
+        # elles Chromium retomberait sur une fonte de secours étroite.
+        run: |
+          ffmpeg -version >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+          sudo apt-get install -y fonts-liberation fonts-dejavu-core
+
+      - name: Installer edge-tts
+        run: python -m pip install --quiet edge-tts
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Installer Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Générer la vidéo
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node genere.mjs
+
+      - name: Publier sur Facebook et TikTok
+        if: github.event_name == 'schedule' || inputs.publier
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          FB_BROUILLON: ${{ vars.FB_BROUILLON }}
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+          TIKTOK_MODE: ${{ vars.TIKTOK_MODE }}
+        run: node publie.mjs
+
+      - name: Conserver la vidéo
+        # always() : une vidéo correcte refusée par une plateforme reste
+        # téléchargeable et publiable à la main.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seance-${{ github.run_number }}
+          path: |
+            ${{ github.workspace }}/video-out/westbourse-seance.mp4
+            ${{ github.workspace }}/video-out/seance.json
+            ${{ github.workspace }}/video-out/texte.txt
+          retention-days: 14
+          if-no-files-found: warn

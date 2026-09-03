@@ -60,3 +60,7 @@ frontend/.next-prod/
 
 # Captures de verification locales
 frontend/v2-*.png
+
+# Prototype jetable du GAN harness + sorties video locales
+gan-harness/
+video-out/

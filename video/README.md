@@ -1,0 +1,100 @@
+# Vidéo de séance
+
+Vidéo verticale quotidienne de la séance BRVM : générée depuis Supabase,
+publiée sur Facebook et TikTok. Troisième worker du dépôt, à côté de
+`scraper/` et `frontend/`.
+
+> À ne pas confondre avec `remotion/`, qui rend la vidéo décorative de fond de
+> la landing page. Deux usages distincts, deux paquets distincts.
+
+```bash
+cd video
+npm install
+npx playwright install chromium
+python -m pip install edge-tts   # ffmpeg doit être dans le PATH
+
+npm run genere    # vidéo seule
+npm run publie    # envoi vers les plateformes configurées
+npm run seance    # les deux
+```
+
+## Le principe : une seule lecture
+
+Les images, le texte lu, et la légende publiée sont composés des **mêmes
+variables**, issues d'une seule interrogation de la base. Ce n'est pas un
+détail d'implémentation : une première version gardait un audio figé pendant
+que les images suivaient la base, et la voix a annoncé 31 hausses quand
+l'écran en montrait 18. Un chiffre change désormais partout à la fois, ou
+nulle part.
+
+Même règle pour les logos : une société sans fichier dans
+`frontend/public/logos/` s'affiche avec son code, **jamais** avec le logo
+d'une autre.
+
+## Le verrou de publiabilité
+
+`genere.mjs` écrit `seance.json`, qui porte cinq contrôles :
+
+| Contrôle | Ce qu'il empêche |
+|---|---|
+| `seance_recente` | publier une séance vieille de plus de 5 jours (`VIDEO_AGE_MAX_JOURS`) |
+| `assez_de_valeurs` | publier sur une collecte partielle (< 20 valeurs cotées) |
+| `composite_present` | une vidéo sans son indice de référence |
+| `capitaux_non_nuls` | le « 0 FCFA échangé » d'un jour où la source ne renvoie rien |
+| `variations_non_plates` | une séance où toutes les variations sont nulles |
+
+Si l'un échoue, `publie.mjs` **s'arrête sans rien envoyer** et sort en succès.
+Un cron publie sans relecture humaine : mieux vaut un jour sans vidéo qu'un
+post public faux.
+
+## Configurer Facebook
+
+1. Créer une application sur `developers.facebook.com`, produit **Facebook Login**.
+2. Demander les permissions `pages_manage_posts`, `pages_read_engagement`,
+   `pages_show_list`.
+3. Générer un **jeton de Page longue durée** (Graph API Explorer → choisir la
+   Page → échanger le jeton utilisateur court contre un long, puis contre un
+   jeton de Page). Un jeton de Page issu d'un jeton utilisateur longue durée
+   n'expire pas tant que le mot de passe ne change pas.
+4. Secrets du dépôt : `FB_PAGE_ID`, `FB_PAGE_ACCESS_TOKEN`.
+
+Variable facultative `FB_BROUILLON=true` : dépose sur la Page sans publier.
+
+## Configurer TikTok
+
+1. Application sur `developers.tiktok.com`, produit **Content Posting API**.
+2. Portée `video.upload` (dépôt en brouillon) ou `video.publish` (publication
+   directe — **exige un audit de l'application par TikTok**).
+3. Faire le parcours OAuth une fois pour obtenir un `refresh_token`.
+4. Secrets du dépôt : `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`,
+   `TIKTOK_REFRESH_TOKEN`.
+
+**Le jeton d'accès TikTok expire en 24 heures.** C'est pour cela que le script
+échange le jeton de rafraîchissement à chaque exécution au lieu de lire un
+`TIKTOK_ACCESS_TOKEN` figé — celui-ci ne sert qu'aux essais manuels à chaud.
+TikTok fait tourner le jeton de rafraîchissement : si la sortie affiche
+« le jeton de rafraîchissement a changé », mettre à jour le secret, faute de
+quoi l'exécution suivante échouera.
+
+Variable `TIKTOK_MODE=direct` pour publier réellement. Le défaut est `inbox`
+(brouillon à valider dans l'appli), seul mode qui fonctionne sans audit.
+
+## Planification
+
+`.github/workflows/video-seance.yml` — 18:00 UTC du lundi au vendredi. La BRVM
+clôture vers 15:00 UTC et le scraper intraday tourne toutes les 15 minutes :
+à 18:00 la séance est figée.
+
+La vidéo, `seance.json` et le texte lu sont conservés 14 jours en artefact,
+**même si la publication échoue** : une vidéo correcte refusée par une
+plateforme reste récupérable et publiable à la main.
+
+## Limites connues
+
+- **Pas de sous-titres incrustés** (retirés à la demande). Sur TikTok, la
+  plupart des vues démarrent sans son : à remettre si l'audience le justifie.
+- **Polices** : le rendu local utilise Segoe UI et Consolas ; le runner Linux
+  retombe sur Liberation et DejaVu. Le rendu CI est donc légèrement différent
+  de celui du poste — à vérifier sur le premier artefact.
+- **Facebook** : publié via `/videos`, pas via l'API Reels. C'est plus simple et
+  plus robuste, mais une vidéo 9:16 aurait davantage de portée en Reel.
