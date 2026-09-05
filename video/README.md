@@ -131,6 +131,24 @@ de l'audit est définitivement abandonnée ; les garder si elle doit être repri
 séance, largeur du marché, et une ligne par destination — dont
 « TikTok : brouillon déposé — À VALIDER dans l'appli ».
 
+### Mettre Telegram en service
+
+```bash
+cd video
+# 1. Sur Telegram : @BotFather → /newbot → nom, puis identifiant en "bot"
+# 2. Ouvrir la conversation avec le bot créé et lui écrire n'importe quoi.
+#    Telegram interdit à un bot d'écrire le premier : sans ce message, sa
+#    conversation n'existe pas et son identifiant est introuvable.
+# 3. Poser les secrets du dépôt :
+TELEGRAM_BOT_TOKEN=<jeton> node telegram-init.mjs --secrets
+```
+
+Le script valide le jeton, trouve l'identifiant de conversation, **envoie un
+message d'essai** — la seule preuve que le canal fonctionne vraiment — puis
+pose `TELEGRAM_BOT_TOKEN` et `TELEGRAM_CHAT_ID`. Sans `--secrets`, il se
+contente d'afficher les commandes. Le jeton ne transite jamais par la ligne de
+commande de `gh` (visible dans la liste des processus) ni par la sortie.
+
 Canaux : Telegram (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) et e-mail
 (`RESEND_API_KEY` + `ALERTS_EMAIL_FROM` + `ALERTS_EMAIL_TO`). Sans
 configuration, le script se tait sans échouer. **État au 2026-09-06** : les
