@@ -72,6 +72,9 @@ console.log(`${TITRE} · ${(octets.length / 1e6).toFixed(2)} Mo · ${m.duree_s.t
 
 const echecs = [];
 let envois = 0;
+/* Ce qui sera repris dans la notification du soir : une ligne par destination,
+   redigee pour un humain qui ne lira pas les journaux du runner. */
+const journal = [];
 
 /* -------------------------------------------------- 2. landing page --- */
 
@@ -147,9 +150,11 @@ if (URL_SB && SERVICE) {
       60,
     );
     console.log(`Landing : hebergee (${url})`);
+    journal.push(`Site : en ligne sur westbourse.com`);
     envois++;
   } catch (e) {
     console.error(`Landing : ECHEC — ${e.message}`);
+    journal.push(`Site : ECHEC — ${e.message}`);
     echecs.push('landing');
   }
 } else {
@@ -185,9 +190,11 @@ if (FB_PAGE && FB_TOKEN) {
       throw new Error(`${r.status} ${rep.error?.message ?? JSON.stringify(rep).slice(0, 300)}`);
     }
     console.log(`Facebook : ${brouillon ? 'depose' : 'publie'} (id ${rep.id})`);
+    journal.push(`Facebook : ${brouillon ? 'brouillon depose' : 'publie'}`);
     envois++;
   } catch (e) {
     console.error(`Facebook : ECHEC — ${e.message}`);
+    journal.push(`Facebook : ECHEC — ${e.message}`);
     echecs.push('facebook');
   }
 } else {
@@ -321,16 +328,74 @@ if (TT_TOKEN) {
     if (TT_MODE !== 'direct') {
       console.log("  → a valider depuis la boite de reception de l'appli TikTok.");
     }
+    journal.push(
+      TT_MODE === 'direct'
+        ? 'TikTok : publie'
+        : "TikTok : brouillon depose — A VALIDER dans l'appli (boite de reception)",
+    );
     envois++;
   } catch (e) {
     console.error(`TikTok : ECHEC — ${e.message}`);
+    journal.push(`TikTok : ECHEC — ${e.message}`);
     echecs.push('tiktok');
   }
 } else if (!echecs.includes('tiktok')) {
   console.log('TikTok : ignore (ni TIKTOK_REFRESH_TOKEN ni TIKTOK_ACCESS_TOKEN)');
 }
 
-/* ------------------------------------------------------------- 5. bilan */
+/* ------------------------------------------------- 5. notification du soir */
+
+/* Pourquoi cette etape existe. TikTok en mode `inbox` depose un BROUILLON : la
+   video n'est publiee que si quelqu'un ouvre l'appli et valide. Un cron muet
+   rendrait donc ce mode inutilisable — personne ne se souvient d'un geste
+   quotidien dont rien ne l'avertit. La notification est ce qui rend le choix
+   du brouillon tenable, plutot que theorique.
+   Meme canaux que le reste du projet ; sans configuration, on se tait. */
+const notifier = async (texte) => {
+  const jeton = process.env.TELEGRAM_BOT_TOKEN;
+  const salon = process.env.TELEGRAM_CHAT_ID;
+  if (jeton && salon) {
+    try {
+      await fetch(`https://api.telegram.org/bot${jeton}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: salon, text: texte, disable_web_page_preview: true }),
+      });
+    } catch (e) {
+      console.error(`Telegram : ${e.message}`);
+    }
+  }
+  const resend = process.env.RESEND_API_KEY;
+  const de = process.env.ALERTS_EMAIL_FROM;
+  const a = process.env.ALERTS_EMAIL_TO;
+  if (resend && de && a) {
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resend}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: de,
+          to: a.split(',').map((x) => x.trim()),
+          subject: `Vidéo BRVM — séance du ${m.date_fr}`,
+          text: texte,
+        }),
+      });
+    } catch (e) {
+      console.error(`Resend : ${e.message}`);
+    }
+  }
+};
+
+const resume = [
+  `Vidéo de la séance du ${m.date_fr}`,
+  `${m.hausses} hausses · ${m.baisses} baisses · ${m.stables} stables sur ${m.valeurs} valeurs`,
+  '',
+  ...(journal.length ? journal : ['Aucune destination configurée.']),
+].join('\n');
+
+await notifier(resume);
+
+/* ------------------------------------------------------------- 6. bilan */
 
 if (echecs.length) {
   console.error(`Echec de publication : ${echecs.join(', ')}`);

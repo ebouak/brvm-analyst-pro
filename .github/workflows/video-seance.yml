@@ -85,6 +85,14 @@ jobs:
           TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
           TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
           TIKTOK_MODE: ${{ vars.TIKTOK_MODE }}
+          # Notification du soir. Le mode TikTok « inbox » dépose un brouillon
+          # qu'il faut valider à la main : sans ce rappel, le geste serait
+          # oublié et le mode brouillon ne tiendrait pas.
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          ALERTS_EMAIL_TO: ${{ secrets.ALERTS_EMAIL_TO }}
         run: node publie.mjs
 
       - name: Conserver la vidéo

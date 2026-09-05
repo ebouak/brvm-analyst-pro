@@ -103,6 +103,40 @@ quoi l'exécution suivante échouera.
 Variable `TIKTOK_MODE=direct` pour publier réellement. Le défaut est `inbox`
 (brouillon à valider dans l'appli), seul mode qui fonctionne sans audit.
 
+### Décision du 2026-09-06 : on reste en mode brouillon
+
+L'audit TikTok (nécessaire pour `direct`) exige un parcours **Login Kit →
+Content Posting API** dans une interface utilisateur, à filmer pour la revue.
+Ce parcours n'existe pas dans ce dépôt et n'a pas été construit, délibérément :
+
+- **Ce que l'audit apporte** : supprimer une validation manuelle par jour.
+- **Ce qu'il coûte** : un flux OAuth, le stockage permanent de jetons tiers,
+  une vidéo de démonstration, et une revue de plusieurs jours pensée pour des
+  applications grand public — profil où un cron publiant sur son propre compte
+  passe mal.
+- **L'alternative gratuite** : Facebook ne demande aucun audit et porte mieux
+  ce contenu dans la zone UEMOA. C'est là que l'effort rapporte.
+
+Conséquence assumée : **la notification du soir n'est pas un agrément, c'est
+ce qui rend ce choix tenable.** Sans rappel, un geste quotidien s'oublie.
+
+Deux tables `tiktok_accounts` et `tiktok_posts` existent en base (créées hors
+dépôt, RLS vérifiée le 2026-09-06 : lecture anonyme vide, écriture refusée
+`42501`) mais **ne sont utilisées par aucun code**. Les supprimer si la piste
+de l'audit est définitivement abandonnée ; les garder si elle doit être reprise.
+
+## Notification du soir
+
+`publie.mjs` envoie un récapitulatif après chaque publication : date de la
+séance, largeur du marché, et une ligne par destination — dont
+« TikTok : brouillon déposé — À VALIDER dans l'appli ».
+
+Canaux : Telegram (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) et e-mail
+(`RESEND_API_KEY` + `ALERTS_EMAIL_FROM` + `ALERTS_EMAIL_TO`). Sans
+configuration, le script se tait sans échouer. **État au 2026-09-06** : les
+secrets Resend sont présents dans le dépôt, les secrets Telegram ne le sont
+pas — seul l'e-mail part.
+
 ## Planification
 
 `.github/workflows/video-seance.yml` — 18:00 UTC du lundi au vendredi. La BRVM
