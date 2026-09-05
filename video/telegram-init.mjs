@@ -17,8 +17,27 @@
  * Le jeton n'est jamais affiche ni ecrit sur le disque.
  */
 import { execFileSync } from 'node:child_process';
+import { readFileSync, existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const JETON = process.env.TELEGRAM_BOT_TOKEN;
+const ICI = dirname(fileURLToPath(import.meta.url));
+const RACINE = resolve(ICI, '..');
+
+/* Le jeton peut venir de l'environnement ou d'un .env.local, comme partout
+   ailleurs dans le projet. Le fichier evite d'avoir a manier la syntaxe
+   d'environnement de PowerShell, et surtout de faire transiter un secret par
+   un canal de discussion. Les deux chemins sont ignores par git. */
+const depuisFichier = (cle) => {
+  for (const f of [`${ICI}/.env.local`, `${RACINE}/frontend/.env.local`]) {
+    if (!existsSync(f)) continue;
+    const m = readFileSync(f, 'utf8').match(new RegExp('^' + cle + '=(.*)$', 'm'));
+    if (m) return m[1].trim().replace(/^"|"$/g, '');
+  }
+  return '';
+};
+
+const JETON = process.env.TELEGRAM_BOT_TOKEN || depuisFichier('TELEGRAM_BOT_TOKEN');
 const POSER = process.argv.includes('--secrets');
 
 if (!JETON) {
@@ -29,10 +48,15 @@ if (!JETON) {
   3. BotFather renvoie un jeton de la forme 1234567890:AAE...
   4. Ecrire n'importe quoi au bot cree (Telegram interdit a un bot
      d'ouvrir une conversation : sans ce message, elle n'existe pas)
-  5. Relancer, en PowerShell :
+  5. Le plus simple : creer le fichier video/.env.local (ignore par git)
+     contenant une seule ligne :
+       TELEGRAM_BOT_TOKEN=1234567890:AAE...
+     puis relancer :  node telegram-init.mjs --secrets
+
+     Sinon, par l'environnement — PowerShell :
        $env:TELEGRAM_BOT_TOKEN = "<jeton>"
        node telegram-init.mjs --secrets
-     ou en bash :
+     bash :
        TELEGRAM_BOT_TOKEN=<jeton> node telegram-init.mjs --secrets`);
   process.exit(1);
 }
