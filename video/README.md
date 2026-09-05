@@ -133,14 +133,27 @@ séance, largeur du marché, et une ligne par destination — dont
 
 ### Mettre Telegram en service
 
+1. Sur Telegram : **@BotFather** → `/newbot` → un nom, puis un identifiant
+   finissant par `bot`. Il renvoie un jeton `1234567890:AAE...`
+2. Ouvrir la conversation avec le bot créé et **lui écrire n'importe quoi**.
+   Telegram interdit à un bot d'écrire le premier : sans ce message, sa
+   conversation n'existe pas et son identifiant est introuvable.
+3. Poser les secrets du dépôt.
+
+PowerShell (terminal par défaut sous Windows) :
+
+```powershell
+cd video
+$env:TELEGRAM_BOT_TOKEN = "1234567890:AAE..."
+node telegram-init.mjs --secrets
+Remove-Item Env:TELEGRAM_BOT_TOKEN   # ne pas laisser traîner dans la session
+```
+
+bash / zsh :
+
 ```bash
 cd video
-# 1. Sur Telegram : @BotFather → /newbot → nom, puis identifiant en "bot"
-# 2. Ouvrir la conversation avec le bot créé et lui écrire n'importe quoi.
-#    Telegram interdit à un bot d'écrire le premier : sans ce message, sa
-#    conversation n'existe pas et son identifiant est introuvable.
-# 3. Poser les secrets du dépôt :
-TELEGRAM_BOT_TOKEN=<jeton> node telegram-init.mjs --secrets
+TELEGRAM_BOT_TOKEN=1234567890:AAE... node telegram-init.mjs --secrets
 ```
 
 Le script valide le jeton, trouve l'identifiant de conversation, **envoie un

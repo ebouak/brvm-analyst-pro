@@ -6,7 +6,12 @@
  * les trois, envoie un message d'essai pour prouver que le canal fonctionne
  * vraiment, puis pose les secrets du depot.
  *
- *   TELEGRAM_BOT_TOKEN=<jeton> node telegram-init.mjs
+ * PowerShell (le terminal par defaut de ce poste) :
+ *   $env:TELEGRAM_BOT_TOKEN = "<jeton>"
+ *   node telegram-init.mjs --secrets
+ *   Remove-Item Env:TELEGRAM_BOT_TOKEN
+ *
+ * bash / zsh :
  *   TELEGRAM_BOT_TOKEN=<jeton> node telegram-init.mjs --secrets
  *
  * Le jeton n'est jamais affiche ni ecrit sur le disque.
@@ -22,7 +27,13 @@ if (!JETON) {
   1. Sur Telegram, ouvrir une conversation avec @BotFather
   2. /newbot  ->  choisir un nom, puis un identifiant finissant par "bot"
   3. BotFather renvoie un jeton de la forme 1234567890:AAE...
-  4. Relancer :  TELEGRAM_BOT_TOKEN=<jeton> node telegram-init.mjs`);
+  4. Ecrire n'importe quoi au bot cree (Telegram interdit a un bot
+     d'ouvrir une conversation : sans ce message, elle n'existe pas)
+  5. Relancer, en PowerShell :
+       $env:TELEGRAM_BOT_TOKEN = "<jeton>"
+       node telegram-init.mjs --secrets
+     ou en bash :
+       TELEGRAM_BOT_TOKEN=<jeton> node telegram-init.mjs --secrets`);
   process.exit(1);
 }
 
