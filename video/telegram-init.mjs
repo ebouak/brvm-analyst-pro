@@ -109,46 +109,78 @@ console.log(`Bot reconnu : @${moi.username} (${moi.first_name})`);
 
 /* Branche webhook : elle remplace entierement le reste du script, la
    decouverte du chat_id devenant impossible une fois le webhook actif. */
-if (WEBHOOK) {
-  if (WEBHOOK === "off") {
-    await api("deleteWebhook", { drop_pending_updates: false });
-    console.log("Webhook retire — getUpdates redevient utilisable.");
-  } else {
-    /* Le secret voyage dans un en-tete a chaque appel entrant : c'est ce que
-       la route verifie a temps constant. Sans lui, n'importe qui connaissant
-       l'URL pourrait injecter de faux messages. */
-    const secret =
-      process.env.TELEGRAM_WEBHOOK_SECRET ||
-      depuisFichier("TELEGRAM_WEBHOOK_SECRET");
-    if (!secret) {
-      console.error(`TELEGRAM_WEBHOOK_SECRET absent.
+/* Fonction plutot qu'un bloc en ligne : chaque sortie d'erreur est un simple
+   `return`. Un `process.exit()` apres des requetes reseau declenche une
+   assertion libuv sous Windows, affichee APRES le message d'erreur — le
+   diagnostic devenait illisible au moment ou il servait le plus. */
+async function poserWebhook(url) {
+  /* Le secret voyage dans un en-tete a chaque appel entrant : c'est ce que la
+     route verifie a temps constant. Sans lui, n'importe qui connaissant l'URL
+     pourrait injecter de faux messages. */
+  const secret =
+    process.env.TELEGRAM_WEBHOOK_SECRET || depuisFichier("TELEGRAM_WEBHOOK_SECRET");
+  if (!secret) {
+    console.error(`TELEGRAM_WEBHOOK_SECRET absent.
 
   Generer une valeur aleatoire, la mettre dans video/.env.local ET dans les
   variables d'environnement Vercel du projet frontend (la route la compare) :
     node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`);
-      process.exit(1);
-    }
-    const r = await api("setWebhook", {
-      url: WEBHOOK,
-      secret_token: secret,
-      /* On ne demande QUE les messages : sans ce filtre, Telegram enverrait
-         aussi les publications du canal, que la route doit de toute facon
-         ignorer. Autant ne pas les recevoir. */
-      allowed_updates: ["message"],
-      drop_pending_updates: true,
-    });
-    console.log("Webhook pose :", r === true ? WEBHOOK : JSON.stringify(r));
-    const info = await api("getWebhookInfo");
-    console.log(`  url active        : ${info.url || "(aucune)"}`);
-    console.log(`  en attente        : ${info.pending_update_count ?? 0}`);
-    if (info.last_error_message)
-      console.log(`  derniere erreur   : ${info.last_error_message}`);
-    console.log(
-      "\n⚠️ getUpdates est desormais inactif : ce script ne peut plus",
-    );
-    console.log(
-      "   decouvrir de chat_id. Utiliser --webhook off pour revenir.",
-    );
+    return false;
+  }
+    /* TELEGRAM NE SUIT PAS LES REDIRECTIONS. Une URL qui repond 308 — le cas
+       de westbourse.com, qui redirige vers www — fait echouer chaque appel
+       avec « Wrong response from the webhook: 308 Permanent Redirect », sans
+       qu'aucun message n'arrive jamais.
+       Le piege est vicieux : un test en `curl -L` suit la redirection et
+       affiche un 401 rassurant. On verifie donc SANS suivre, comme Telegram. */
+  const sonde = await fetch(url, {
+    method: "POST",
+    redirect: "manual",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ update_id: 0 }),
+  });
+  if (sonde.status >= 300 && sonde.status < 400) {
+    const cible = sonde.headers.get("location");
+    console.error(`Cette URL redirige (HTTP ${sonde.status}) — Telegram ne suit pas les redirections.
+
+  Utiliser directement l'adresse finale :
+    node telegram-init.mjs --webhook ${cible ?? "<adresse canonique>"}`);
+    return false;
+  }
+    /* 401 est le bon signe : la route existe et refuse une requete sans le
+       jeton secret. C'est exactement ce qu'on veut voir ici. */
+  /* 401 est le bon signe : la route existe et refuse une requete sans le
+     jeton secret. C'est exactement ce qu'on veut voir ici. */
+  console.log(
+    `Controle de l'URL : HTTP ${sonde.status}${sonde.status === 401 ? " (route active, refus attendu sans secret)" : ""}`,
+  );
+
+  const r = await api("setWebhook", {
+    url,
+    secret_token: secret,
+    /* On ne demande QUE les messages : sans ce filtre, Telegram enverrait
+       aussi les publications du canal, que la route doit de toute facon
+       ignorer. Autant ne pas les recevoir. */
+    allowed_updates: ["message"],
+    drop_pending_updates: true,
+  });
+  console.log("Webhook pose :", r === true ? url : JSON.stringify(r));
+  const info = await api("getWebhookInfo");
+  console.log(`  url active        : ${info.url || "(aucune)"}`);
+  console.log(`  en attente        : ${info.pending_update_count ?? 0}`);
+  if (info.last_error_message)
+    console.log(`  derniere erreur   : ${info.last_error_message}`);
+  console.log("\n⚠️ getUpdates est desormais inactif : ce script ne peut plus");
+  console.log("   decouvrir de chat_id. Utiliser --webhook off pour revenir.");
+  return true;
+}
+
+if (WEBHOOK) {
+  if (WEBHOOK === "off") {
+    await api("deleteWebhook", { drop_pending_updates: false });
+    console.log("Webhook retire — getUpdates redevient utilisable.");
+  } else if (!(await poserWebhook(WEBHOOK))) {
+    process.exitCode = 1;
   }
 }
 

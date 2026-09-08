@@ -83,12 +83,22 @@ d'un webhook :
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 #    -> TELEGRAM_WEBHOOK_SECRET=<valeur>
 
-# 2. Déclarer le webhook
-node telegram-init.mjs --webhook https://westbourse.com/api/telegram/webhook
+# 2. Déclarer le webhook — noter le www, il est indispensable
+node telegram-init.mjs --webhook https://www.westbourse.com/api/telegram/webhook
 
 # Pour revenir en arrière :
 node telegram-init.mjs --webhook off
 ```
+
+> ⚠️ **Telegram ne suit AUCUNE redirection.** `westbourse.com` répond 308 vers
+> `www.westbourse.com` : déclaré sans le `www`, le webhook échoue à chaque
+> appel avec *« Wrong response from the webhook: 308 Permanent Redirect »* et
+> aucun message n'arrive jamais. Le piège est vicieux, car un test en `curl -L`
+> suit la redirection et affiche un 401 rassurant. Le script vérifie désormais
+> l'URL **sans suivre**, comme Telegram, et refuse en indiquant l'adresse
+> canonique.
+
+---
 
 > ⚠️ **Telegram autorise SOIT le long-polling, SOIT un webhook — jamais les
 > deux.** Une fois le webhook posé, la découverte automatique du `chat_id` par
