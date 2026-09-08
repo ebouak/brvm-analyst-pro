@@ -419,6 +419,31 @@ extraction du module partagé.
   (script + sauvegarde dans le scratchpad de session), écrire l'importateur
   Richbourse, et vérifier ABJC (base 120,97 vs Richbourse 201,52).
 
+### Ajouts (passage 2026-09-08) — Plage 52 semaines
+
+- **Colonnes tenues, enfin.** `cours_haut_52s` / `cours_bas_52s` de
+  `brvm_actions_daily` (migration `0018`) étaient lues par une douzaine de
+  fichiers frontend et **jamais alimentées** : 0 ligne sur 48 640. La donnée
+  n'est pas à collecter, elle se **calcule** depuis les clôtures déjà en base.
+- **Module** `scraper/src/scrapers/range52.ts` : `calculerBornes()` pur (testé,
+  7 cas) + `runRange52()`. Min/max des `cours_jour` sur 365 jours glissants,
+  **écriture sur la seule dernière séance** (c'est `latestDaily` que le
+  frontend lit). CLI `range52[:mock]`, job dans `.github/workflows/score.yml`
+  (après `score`, 16:00 UTC — la clôture du jour doit être incluse).
+- **Seuil `MIN_SEANCES = 20`** : sous 20 séances cotées, **aucune borne**. Sur
+  un marché étroit, annoncer un « plus-bas 52 semaines » tiré de trois points
+  serait une affirmation sans fondement. Zéros et nuls écartés — un zéro en
+  base est un trou de collecte, pas un cours.
+- **Pagination obligatoire** (~12 000 lignes) : PostgREST tronque à 1000 **en
+  silence**, ce qui aurait produit des bornes fausses et plausibles.
+- **Frontend** : `components/financials/WeekRange52.tsx` refondu en **tube
+  gradué** (rail, dégradé bas→haut ancré au rail, repère de niveau, `role="meter"`,
+  `motion-reduce`). Le dégradé encode la **position**, pas un verdict : un titre
+  au plus-haut peut être une dynamique comme une survalorisation. Jetons du
+  design system (les `bg-gray-700` / `bg-green-400` bruts ont disparu).
+- **Vérifié en production** : 47/47 valeurs, cours du jour toujours dans
+  `[bas ; haut]`, 0 incohérence.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

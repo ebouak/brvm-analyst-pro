@@ -15,6 +15,7 @@
  *   tsx src/index.ts events --mock         # événements mock
  *   tsx src/index.ts dividends             # ingère les dividendes
  *   tsx src/index.ts dividends --mock      # dividendes mock
+ *   tsx src/index.ts range52               # plus-haut/plus-bas 52 semaines
  *   tsx src/index.ts alerts                # évalue les alertes et notifie
  *   tsx src/index.ts alerts --mock         # notification de démonstration
  *   tsx src/index.ts forum-trending        # calcule les scores de tendance du forum
@@ -200,6 +201,27 @@ async function main(): Promise<number> {
               rows_extracted: r.nb_titres,
               rows_upserted: r.nb_titres,
               metadata: { date_marche: r.date_marche, nb_scores: r.nb_scores, nb_flux: r.nb_flux },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
+    case 'range52': {
+      // Plus-haut / plus-bas 52 semaines. À passer APRÈS `daily` : les bornes
+      // incluent la clôture du jour, sinon elles ignoreraient un nouveau record.
+      const { runRange52 } = await import('./scrapers/range52.js');
+      const res = await monitored(
+        { code: 'range52', label: 'Bornes 52 semaines' },
+        async () => {
+          const r = await runRange52({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.status === 'failed' ? 'failed' : 'success',
+              rows_extracted: r.nb_calcules,
+              rows_upserted: r.nb_ecrits,
+              metadata: { date_marche: r.date_marche, nb_calcules: r.nb_calcules },
             },
           };
         },
