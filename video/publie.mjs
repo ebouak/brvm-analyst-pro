@@ -87,7 +87,11 @@ const journal = [];
    les chiffres d'aujourd'hui. Seul `derniere.json`, minuscule, est reecrit — et
    avec un cache court. */
 const dotenv = `${RACINE}/frontend/.env.local`;
-const envLocal = existsSync(dotenv) ? readFileSync(dotenv, 'utf8') : '';
+/* La marque d'ordre d'octets est retiree : PowerShell 5.1 en ajoute une avec
+   `Set-Content -Encoding utf8`, et la premiere cle du fichier devient alors
+   introuvable — panne constatee le 2026-09-08 sur un .env.local pourtant
+   correctement ecrit. */
+const envLocal = existsSync(dotenv) ? readFileSync(dotenv, 'utf8').replace(/^﻿/, '') : '';
 const lire = (...cles) => {
   for (const k of cles) {
     if (process.env[k]) return process.env[k].trim();

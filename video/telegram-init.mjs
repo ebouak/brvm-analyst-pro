@@ -31,7 +31,12 @@ const RACINE = resolve(ICI, '..');
 const depuisFichier = (cle) => {
   for (const f of [`${ICI}/.env.local`, `${RACINE}/frontend/.env.local`]) {
     if (!existsSync(f)) continue;
-    const m = readFileSync(f, 'utf8').match(new RegExp('^' + cle + '=(.*)$', 'm'));
+    /* Retirer la marque d'ordre d'octets : `Set-Content -Encoding utf8` sous
+       Windows PowerShell 5.1 en ajoute une, et la premiere cle du fichier
+       s'appelait alors "﻿TELEGRAM_BOT_TOKEN" — introuvable. Constate le
+       2026-09-08 sur un fichier pourtant correctement ecrit. */
+    const contenu = readFileSync(f, 'utf8').replace(/^﻿/, '');
+    const m = contenu.match(new RegExp('^' + cle + '=(.*)$', 'm'));
     if (m) return m[1].trim().replace(/^"|"$/g, '');
   }
   return '';
@@ -99,44 +104,54 @@ for (const u of maj) {
 }
 
 if (salons.size === 0) {
+  /* Deux causes, et la seconde surprend : Telegram JETTE les messages en
+     attente au bout de 24 h. Avoir ecrit au bot avant-hier ne suffit donc
+     pas — il faut un message recent. Constate le 2026-09-08. */
   console.error(`
 Aucune conversation trouvee.
 
-  Telegram interdit a un bot d'ecrire le premier. Ouvre donc la conversation
-  avec @${moi.username}, envoie n'importe quel message (« bonjour » suffit),
-  puis relance ce script.`);
-  process.exit(1);
-}
+  Ouvre la conversation avec @${moi.username} et envoie-lui un message
+  MAINTENANT (« bonjour » suffit), puis relance ce script.
 
-console.log(`\n${salons.size} conversation(s) :`);
-for (const [id, nom] of salons) console.log(`  ${id.padEnd(16)} ${nom}`);
-
-/* On prend la plus recente : c'est celle que l'utilisateur vient d'ouvrir. */
-const [salon] = [...salons.keys()].slice(-1);
-await api('sendMessage', {
-  chat_id: salon,
-  text:
-    'WESTBOURSE - canal de notification actif.\n' +
-    'Tu recevras ici le recapitulatif de la video de seance chaque soir.',
-});
-console.log(`\nMessage d'essai envoye a ${salon}. Verifie-le dans Telegram.`);
-
-if (POSER) {
-  /* Le jeton passe par l'entree standard de gh, jamais par la ligne de
-     commande : celle-ci serait visible dans la liste des processus. */
-  for (const [nom, valeur] of [
-    ['TELEGRAM_BOT_TOKEN', JETON],
-    ['TELEGRAM_CHAT_ID', salon],
-  ]) {
-    execFileSync('gh', ['secret', 'set', nom], {
-      input: valeur,
-      stdio: ['pipe', 'inherit', 'inherit'],
-    });
-    console.log(`secret ${nom} pose`);
-  }
-  console.log('\nTermine. La prochaine execution du cron notifiera sur Telegram.');
+  Deux raisons possibles :
+   - tu ne lui as jamais ecrit (Telegram interdit a un bot d'ecrire le premier) ;
+   - tu lui as ecrit il y a plus de 24 h : Telegram efface les messages en
+     attente passe ce delai. Il en faut un recent.`);
+  /* exitCode plutot que process.exit() : une sortie abrupte pendant que des
+     requetes reseau se terminent declenche une assertion libuv sous Windows,
+     qui masque le message ci-dessus. */
+  process.exitCode = 1;
 } else {
-  console.log(`\nPour poser les secrets du depot, relancer avec --secrets, ou :
+  console.log(`\n${salons.size} conversation(s) :`);
+  for (const [id, nom] of salons) console.log(`  ${id.padEnd(16)} ${nom}`);
+
+  /* On prend la plus recente : c'est celle que l'utilisateur vient d'ouvrir. */
+  const [salon] = [...salons.keys()].slice(-1);
+  await api('sendMessage', {
+    chat_id: salon,
+    text:
+      'WESTBOURSE - canal de notification actif.\n' +
+      'Tu recevras ici le recapitulatif de la video de seance chaque soir.',
+  });
+  console.log(`\nMessage d'essai envoye a ${salon}. Verifie-le dans Telegram.`);
+
+  if (POSER) {
+    /* Le jeton passe par l'entree standard de gh, jamais par la ligne de
+       commande : celle-ci serait visible dans la liste des processus. */
+    for (const [nom, valeur] of [
+      ['TELEGRAM_BOT_TOKEN', JETON],
+      ['TELEGRAM_CHAT_ID', salon],
+    ]) {
+      execFileSync('gh', ['secret', 'set', nom], {
+        input: valeur,
+        stdio: ['pipe', 'inherit', 'inherit'],
+      });
+      console.log(`secret ${nom} pose`);
+    }
+    console.log('\nTermine. La prochaine execution du cron notifiera sur Telegram.');
+  } else {
+    console.log(`\nPour poser les secrets du depot, relancer avec --secrets, ou :
   gh secret set TELEGRAM_BOT_TOKEN
   gh secret set TELEGRAM_CHAT_ID     (valeur : ${salon})`);
+  }
 }

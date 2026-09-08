@@ -40,7 +40,10 @@ mkdirSync(OUT, { recursive: true });
    runner ce fichier n'existe pas, et le lire aveuglement ferait echouer le
    cron avant meme la premiere requete. */
 const dotenv = `${RACINE}/frontend/.env.local`;
-const env = existsSync(dotenv) ? readFileSync(dotenv, 'utf8') : '';
+/* La marque d'ordre d'octets est retiree : PowerShell 5.1 en ajoute une avec
+   `Set-Content -Encoding utf8`, et la premiere cle du fichier devient alors
+   introuvable. */
+const env = existsSync(dotenv) ? readFileSync(dotenv, 'utf8').replace(/^﻿/, '') : '';
 const lire = (...cles) => {
   for (const k of cles) {
     if (process.env[k]) return process.env[k].trim();
