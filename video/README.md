@@ -71,6 +71,39 @@ dernière séance connue du site.
 Le fichier étant servi depuis notre propre stockage, aucun lecteur tiers n'est
 embarqué : la promesse « aucun traceur » de la landing tient.
 
+## Canal Telegram public
+
+Diffusion automatique de la vidéo dans un canal public, en pièce jointe — le
+format vertical se lit nativement dans Telegram, sans quitter l'application.
+
+> **Deux destinations Telegram, à ne jamais confondre :**
+> `TELEGRAM_CHAT_ID` = ta conversation privée, où arrive le récapitulatif
+> d'exploitation. `TELEGRAM_CANAL` = le canal public, où va la vidéo. Les
+> mélanger ferait paraître des journaux techniques devant ton audience.
+
+### Créer le canal
+
+1. Telegram → menu → **Nouveau canal** → nom « WESTBOURSE », type **public**,
+   choisir un lien (ex. `t.me/westbourse`)
+2. Canal → **Administrateurs** → **Ajouter** → `@Westbourse_alerte_bot`
+3. Lui laisser au minimum **« Publier des messages »**
+
+Sans cette étape d'administrateur, Telegram refuse l'envoi : un bot ne peut
+pas écrire dans un canal dont il n'est pas admin.
+
+### Configurer
+
+```bash
+gh variable set TELEGRAM_CANAL --body "@westbourse"
+```
+
+Variable et non secret : un nom de canal public n'a rien à cacher, et le voir
+dans les journaux aide au diagnostic.
+
+Pour afficher le lien d'abonnement sur la landing, ajouter côté Vercel :
+`NEXT_PUBLIC_TELEGRAM_CANAL=westbourse` (sans le `@`). Absente, le lien
+n'apparaît pas — pas de lien mort tant que le canal n'existe pas.
+
 ## Configurer Facebook
 
 1. Créer une application sur `developers.facebook.com`, produit **Facebook Login**.

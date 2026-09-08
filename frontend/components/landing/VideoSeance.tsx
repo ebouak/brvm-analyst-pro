@@ -25,6 +25,9 @@ export function VideoSeance({
   if (!data) return null;
 
   const enRetard = !!dateMarche && data.seance < dateMarche;
+  /* Nom du canal public, sans le @ ni l'URL : la variable ne porte que
+     l'identifiant, le lien est construit ici. Absente = pas de lien. */
+  const canal = process.env.NEXT_PUBLIC_TELEGRAM_CANAL?.replace(/^@/, '').trim();
   const md = data.capitaux_fcfa / 1e9;
   const nb = (x: number, d = 2) => x.toFixed(d).replace('.', ',');
   const secondes = Math.round(data.duree_s);
@@ -106,12 +109,27 @@ export function VideoSeance({
             </details>
           </div>
 
-          <Link
-            href="/dashboard"
-            className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-gold-2 transition-colors hover:text-ivory"
-          >
-            Voir le détail de la séance <span aria-hidden>→</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Link
+              href="/dashboard"
+              className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-gold-2 transition-colors hover:text-ivory"
+            >
+              Voir le détail de la séance <span aria-hidden>→</span>
+            </Link>
+
+            {/* N'apparaît que si le canal existe : pas de lien mort sur la page
+                d'accueil tant qu'il n'est pas ouvert. */}
+            {canal && (
+              <a
+                href={`https://t.me/${canal}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-muted transition-colors hover:text-ivory"
+              >
+                Recevoir la vidéo chaque soir sur Telegram <span aria-hidden>↗</span>
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </section>

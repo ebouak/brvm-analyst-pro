@@ -90,6 +90,11 @@ jobs:
           # oublié et le mode brouillon ne tiendrait pas.
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Canal PUBLIC de diffusion — distinct de TELEGRAM_CHAT_ID, qui est la
+          # conversation privée d'exploitation. Variable et non secret : un nom
+          # de canal public n'a rien à cacher, et le voir dans les journaux aide
+          # au diagnostic.
+          TELEGRAM_CANAL: ${{ vars.TELEGRAM_CANAL }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
           ALERTS_EMAIL_TO: ${{ secrets.ALERTS_EMAIL_TO }}

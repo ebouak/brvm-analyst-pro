@@ -1,5 +1,5 @@
 /**
- * Publication de la video de seance sur Facebook et TikTok.
+ * Publication de la video de seance : site, canal Telegram, Facebook, TikTok.
  *
  * La legende est composee a partir de seance.json, c'est-a-dire des memes
  * nombres que la voix et les images. Rien ici ne reformule le marche : si un
@@ -165,7 +165,52 @@ if (URL_SB && SERVICE) {
   console.log('Landing : ignore (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY absents)');
 }
 
-/* ---------------------------------------------------------- 3. Facebook */
+/* ------------------------------------------------- 3. canal Telegram --- */
+
+/* Canal public de diffusion, a ne pas confondre avec TELEGRAM_CHAT_ID, qui
+   est la conversation privee ou part le recapitulatif d'exploitation. Deux
+   destinations volontairement distinctes : les melanger ferait paraitre des
+   journaux techniques devant le public.
+
+   La video est envoyee en piece jointe, pas en lien : le format vertical se
+   lit nativement dans Telegram, sans quitter l'application. */
+/* `lire` et non process.env : le canal doit pouvoir etre essaye en local
+   depuis .env.local avant d'etre confie au cron. */
+const CANAL = lire('TELEGRAM_CANAL');
+const JETON_TG = lire('TELEGRAM_BOT_TOKEN');
+
+if (CANAL && JETON_TG) {
+  try {
+    const form = new FormData();
+    form.set('chat_id', CANAL);
+    form.set('video', new Blob([octets], { type: 'video/mp4' }), 'westbourse-seance.mp4');
+    /* 1024 caracteres est le plafond d'une legende Telegram. La notre en fait
+       environ 500 : la coupe n'est qu'un filet de securite. */
+    form.set('caption', LEGENDE.slice(0, 1024));
+    form.set('supports_streaming', 'true');
+
+    const r = await fetch(`https://api.telegram.org/bot${JETON_TG}/sendVideo`, {
+      method: 'POST',
+      body: form,
+    });
+    const rep = await r.json().catch(() => ({}));
+    /* Le message d'erreur de Telegram peut contenir l'URL appelee, donc le
+       jeton : on ne relaie que la description. */
+    if (!rep.ok) throw new Error(rep.description ?? `HTTP ${r.status}`);
+
+    console.log(`Canal Telegram : publie (${CANAL})`);
+    journal.push('Canal Telegram : publie');
+    envois++;
+  } catch (e) {
+    console.error(`Canal Telegram : ECHEC — ${e.message}`);
+    journal.push(`Canal Telegram : ECHEC — ${e.message}`);
+    echecs.push('canal-telegram');
+  }
+} else {
+  console.log('Canal Telegram : ignore (TELEGRAM_CANAL / TELEGRAM_BOT_TOKEN absents)');
+}
+
+/* ---------------------------------------------------------- 4. Facebook */
 
 /* Video de Page via l'API Graph. L'hote graph-video est celui prevu pour les
    televersements ; graph tout court fonctionne mais n'est pas garanti sur les
@@ -205,7 +250,7 @@ if (FB_PAGE && FB_TOKEN) {
   console.log('Facebook : ignore (FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN absents)');
 }
 
-/* ------------------------------------------------------------ 4. TikTok */
+/* ------------------------------------------------------------ 5. TikTok */
 
 /* Deux chemins selon l'etat de l'application developpeur :
    - inbox  : depose un brouillon dans l'appli, l'utilisateur finit la
@@ -347,7 +392,7 @@ if (TT_TOKEN) {
   console.log('TikTok : ignore (ni TIKTOK_REFRESH_TOKEN ni TIKTOK_ACCESS_TOKEN)');
 }
 
-/* ------------------------------------------------- 5. notification du soir */
+/* ------------------------------------------------- 6. notification du soir */
 
 /* Pourquoi cette etape existe. TikTok en mode `inbox` depose un BROUILLON : la
    video n'est publiee que si quelqu'un ouvre l'appli et valide. Un cron muet
@@ -356,8 +401,8 @@ if (TT_TOKEN) {
    du brouillon tenable, plutot que theorique.
    Meme canaux que le reste du projet ; sans configuration, on se tait. */
 const notifier = async (texte) => {
-  const jeton = process.env.TELEGRAM_BOT_TOKEN;
-  const salon = process.env.TELEGRAM_CHAT_ID;
+  const jeton = lire("TELEGRAM_BOT_TOKEN");
+  const salon = lire("TELEGRAM_CHAT_ID");
   if (jeton && salon) {
     try {
       await fetch(`https://api.telegram.org/bot${jeton}/sendMessage`, {
@@ -369,9 +414,9 @@ const notifier = async (texte) => {
       console.error(`Telegram : ${e.message}`);
     }
   }
-  const resend = process.env.RESEND_API_KEY;
-  const de = process.env.ALERTS_EMAIL_FROM;
-  const a = process.env.ALERTS_EMAIL_TO;
+  const resend = lire("RESEND_API_KEY");
+  const de = lire("ALERTS_EMAIL_FROM");
+  const a = lire("ALERTS_EMAIL_TO");
   if (resend && de && a) {
     try {
       await fetch('https://api.resend.com/emails', {
@@ -399,7 +444,7 @@ const resume = [
 
 await notifier(resume);
 
-/* ------------------------------------------------------------- 6. bilan */
+/* ------------------------------------------------------------- 7. bilan */
 
 if (echecs.length) {
   console.error(`Echec de publication : ${echecs.join(', ')}`);
