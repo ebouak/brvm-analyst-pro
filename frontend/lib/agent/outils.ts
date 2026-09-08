@@ -462,10 +462,16 @@ async function actualitesValeur(db: SupabaseClient, saisie: string) {
   const code = await resoudreCode(db, saisie);
   if (!code) return { erreur: `Aucune valeur cotée ne correspond à « ${saisie} ».` };
 
+  /* `ticker_codes` et NON `instrument_code`.
+     Sonde du 2026-09-08 : sur les 400 actualités les plus récentes,
+     instrument_code est renseigné 0 fois, ticker_codes 144 fois. La première
+     version de cet outil filtrait sur instrument_code — elle ne pouvait donc
+     RIEN renvoyer, en silence et sans jamais échouer : l'agent répondait
+     « aucune actualité » sur des sociétés qui en avaient. */
   const { data } = await db
     .from('brvm_news')
     .select('titre, date_publication, source_url, source_label')
-    .eq('instrument_code', code)
+    .contains('ticker_codes', [code])
     /* hidden : des actualités sont masquées côté rédaction. Les servir ici
        contournerait cette décision éditoriale. */
     .not('hidden', 'is', true)
