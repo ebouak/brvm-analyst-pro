@@ -259,23 +259,48 @@ async function dividendesValeur(db: SupabaseClient, saisie: string) {
       : Promise.resolve({ data: null as { cours_jour: number | null } | null }),
   ]);
 
-  if (!divs || divs.length === 0) {
-    return { code, dividendes: [], message: `Aucun dividende connu en base pour ${code}.` };
+  /* FILTRE DE FIABILITE — audit du 2026-09-08 contre Sika Finance : sur 353
+     lignes de la table, 179 sont inexploitables.
+       · 90 portent un montant EGAL a l'annee (extraction bdfin ratee) ;
+       · 68 portent un montant a zero (pages societe sikafinance) ;
+       · 21 n'ont pas d'exercice.
+     Servir ces lignes telles quelles donnait « rendement 0 % » ou « dividende
+     de 2013 FCFA » avec l'aplomb d'un chiffre verifie. Mieux vaut dire qu'on
+     ne sait pas : la regle « aucun chiffre invente » couvre aussi les chiffres
+     que la base contient a tort. */
+  const fiables = (divs ?? []).filter(
+    (d) =>
+      d.exercice != null &&
+      d.montant != null &&
+      Number(d.montant) > 0 &&
+      Number(d.montant) !== Number(d.exercice),
+  );
+
+  if (fiables.length === 0) {
+    return {
+      code,
+      dividendes: [],
+      message: `Aucun dividende fiable en base pour ${code}. Ne rien affirmer sur son dividende.`,
+    };
   }
 
   const cours = (a?.cours_jour as number | null) ?? null;
-  const dernier = divs[0];
+  const dernier = fiables[0];
+  const divs2 = fiables;
   return {
     code,
     cours_actuel: cours,
     // Rendement calculé seulement si les deux termes existent : jamais estimé.
     rendement_pct:
       cours && cours > 0 && dernier.montant != null ? (Number(dernier.montant) / cours) * 100 : null,
-    dividendes: divs.map((d) => ({
+    dividendes: divs2.map((d) => ({
       exercice: d.exercice,
       montant: `${fr(Number(d.montant))} ${d.devise ?? 'FCFA'}`,
       detachement: d.ex_date ?? 'inconnu',
-      paiement: d.payment_date ?? 'inconnu',
+      /* payment_date est vide sur les 353 lignes de la table : l'annoncer
+         « inconnu » a chaque fois donnait l'illusion d'une donnee parfois
+         disponible. On ne mentionne le champ que s'il existe vraiment. */
+      ...(d.payment_date ? { paiement: d.payment_date } : {}),
     })),
     avertissement:
       'Un dividende passé ne préjuge pas des suivants. Ce rendement est historique, pas une promesse.',
