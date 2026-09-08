@@ -232,7 +232,9 @@ async function main(): Promise<number> {
       const res = await monitored(
         { code: 'cloture', label: 'Point de clôture Telegram' },
         async () => {
-          const r = await runCloture({ mock });
+          // `cloture 2026-09-07` rejoue une séance précise (essai, rattrapage).
+          const dateArg = rest.find((a: string) => /^\d{4}-\d{2}-\d{2}$/.test(a));
+          const r = await runCloture({ mock, date: dateArg });
           return {
             value: r,
             outcome: {

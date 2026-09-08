@@ -40,8 +40,23 @@ export interface LigneWatchlist {
   variationPct: number | null;
 }
 
+export interface Mouvement {
+  code: string;
+  variationPct: number;
+}
+
 export interface ContexteCloture {
   marche: MarcheJour;
+  /**
+   * Trois plus fortes hausses et trois plus fortes baisses.
+   *
+   * Calculées depuis la MÊME lecture que le reste du message, et non extraites
+   * du texte du brief : celui-ci répète déjà tendance, hausses/baisses et
+   * BRVM-C, si bien que le citer disait deux fois la même chose. Ce que le
+   * brief apporte réellement, ce sont les mouvements par nom — autant les
+   * dériver de la source plutôt que d'analyser de la prose.
+   */
+  mouvements: { hausses: Mouvement[]; baisses: Mouvement[] };
   /** Vrai = les blocs personnels sont composés. Source : profiles.is_premium. */
   premium: boolean;
   alertes: AlerteDeclenchee[];
@@ -145,11 +160,22 @@ export function composerCloture(ctx: ContexteCloture): string {
     }
   }
 
+  const { hausses: mh, baisses: mb } = ctx.mouvements;
+  if (mh.length > 0 || mb.length > 0) {
+    const liste = (l: Mouvement[]) =>
+      l.map((x) => `${x.code} ${signe(x.variationPct, 1)} %`).join(' · ');
+    lignes.push('');
+    lignes.push('▸ MOUVEMENTS DU JOUR');
+    if (mh.length > 0) lignes.push(`  Hausses : ${liste(mh)}`);
+    if (mb.length > 0) lignes.push(`  Baisses : ${liste(mb)}`);
+  }
+
+  /* Le brief n'est plus cité mais annoncé : son texte répète les chiffres
+     déjà donnés plus haut, et ce qu'il ajoute vraiment (actualités, volumes)
+     se lit mieux sur la page que dans un extrait tronqué. */
   if (ctx.brief) {
     lignes.push('');
-    lignes.push('▸ LE BRIEF');
-    lignes.push(`  « ${ctx.brief} »`);
-    lignes.push(`  ${ctx.briefUrl}`);
+    lignes.push(`▸ LA NOTE COMPLÈTE  ${ctx.briefUrl}`);
   }
 
   /* Le gratuit voit ce qu'il rate UNE fois, en pied — pas un bloc masqué par

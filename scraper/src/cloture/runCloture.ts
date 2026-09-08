@@ -75,7 +75,9 @@ async function envoyer(
   }
 }
 
-export async function runCloture(opts: { mock?: boolean } = {}): Promise<ClotureRunResult> {
+export async function runCloture(
+  opts: { mock?: boolean; date?: string } = {},
+): Promise<ClotureRunResult> {
   const cfg = getConfig();
   if (opts.mock || cfg.USE_MOCK) {
     logger.warn('Mode MOCK cloture — aucun envoi');
@@ -85,14 +87,23 @@ export async function runCloture(opts: { mock?: boolean } = {}): Promise<Cloture
   try {
     const sb = getSupabase();
 
-    // 1. Dernière séance et données de marché.
-    const { data: derniere } = await sb
-      .from('brvm_actions_daily')
-      .select('date_marche')
-      .order('date_marche', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const dateMarche = (derniere?.date_marche as string | undefined) ?? null;
+    /* 1. La séance visée.
+       Par défaut la dernière connue — mais une date explicite est nécessaire
+       pour rejouer une séance précise, et pour éviter un piège réel : la
+       séance du JOUR existe dès la première collecte intraday, bien avant la
+       consolidation de 16:00. La prendre trop tôt donnerait un point de
+       clôture aux capitaux estimés, et surtout désaccordé de la vidéo, qui
+       porte elle une date figée dans seance.json. */
+    let dateMarche: string | null = opts.date ?? null;
+    if (!dateMarche) {
+      const { data: derniere } = await sb
+        .from('brvm_actions_daily')
+        .select('date_marche')
+        .order('date_marche', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      dateMarche = (derniere?.date_marche as string | undefined) ?? null;
+    }
     if (!dateMarche) {
       return {
         status: 'non-publiable',
@@ -174,15 +185,30 @@ export async function runCloture(opts: { mock?: boolean } = {}): Promise<Cloture
       (actions ?? []).map((a) => [a.code as string, a.cours_jour as number | null]),
     );
 
-    // Première phrase du brief : le message renvoie vers la page pour la suite.
-    const premierePhrase = (t: string | null | undefined): string | null => {
-      if (!t) return null;
-      const clean = t.replace(/\s+/g, ' ').trim();
-      const stop = clean.indexOf('. ');
-      const p = stop > 40 ? clean.slice(0, stop + 1) : clean.slice(0, 180);
-      return p.length > 0 ? p : null;
+    /* Le brief est ANNONCÉ, pas cité. Son texte reprend tendance, hausses,
+       baisses et BRVM-C — soit exactement ce que le message affiche déjà en
+       en-tête. Le citer disait deux fois la même chose, et un extrait tronqué
+       coupait en plein mot. Ce qu'il apporte en propre (actualités, volumes en
+       titres) se lit mieux sur sa page. */
+    const briefTexte = (brief?.contenu as string | undefined)?.trim() ? 'oui' : null;
+
+    /* Plus forts mouvements, depuis la MEME lecture que le reste : aucune
+       requete de plus, et aucun risque de desaccord avec les chiffres du haut
+       du message. */
+    const parVariation = [...cotes].sort(
+      (a, b) => (b.variation_pct as number) - (a.variation_pct as number),
+    );
+    const mouvements = {
+      hausses: parVariation
+        .filter((a) => (a.variation_pct as number) > 0)
+        .slice(0, 3)
+        .map((a) => ({ code: a.code as string, variationPct: a.variation_pct as number })),
+      baisses: parVariation
+        .filter((a) => (a.variation_pct as number) < 0)
+        .slice(-3)
+        .reverse()
+        .map((a) => ({ code: a.code as string, variationPct: a.variation_pct as number })),
     };
-    const briefTexte = premierePhrase(brief?.contenu as string | undefined);
 
     // 2. Destinataires consentants.
     const { data: prefs } = await sb
@@ -292,6 +318,7 @@ export async function runCloture(opts: { mock?: boolean } = {}): Promise<Cloture
 
       const texte = composerCloture({
         marche,
+        mouvements,
         premium,
         alertes: mesAlertes,
         portefeuille: monPortefeuille,

@@ -21,6 +21,7 @@ const MARCHE = {
 
 const VIDE: ContexteCloture = {
   marche: MARCHE,
+  mouvements: { hausses: [], baisses: [] },
   premium: true,
   alertes: [],
   portefeuille: [],
@@ -63,7 +64,8 @@ describe('composerCloture — un bloc vide n’apparaît pas', () => {
     expect(t).not.toContain('VOS ALERTES');
     expect(t).not.toContain('VOTRE PORTEFEUILLE');
     expect(t).not.toContain('VOTRE WATCHLIST');
-    expect(t).not.toContain('LE BRIEF');
+    expect(t).not.toContain('LA NOTE COMPLÈTE');
+    expect(t).not.toContain('MOUVEMENTS DU JOUR');
   });
 
   it('ignore une watchlist dont aucune valeur n’a coté', () => {
@@ -164,5 +166,38 @@ describe('composerCloture — mise en forme', () => {
       brief: 'Séance portée par les banques',
     });
     expect(t).not.toMatch(/\*|_|^#/m);
+  });
+});
+
+describe('composerCloture — mouvements du jour', () => {
+  const AVEC_MVT: ContexteCloture = {
+    ...VIDE,
+    mouvements: {
+      hausses: [
+        { code: 'NSBC', variationPct: 7.49 },
+        { code: 'BOAM', variationPct: 7.34 },
+      ],
+      baisses: [{ code: 'SOGC', variationPct: -7.5 }],
+    },
+  };
+
+  it('donne les mouvements par nom — ce que l’en-tête ne dit pas', () => {
+    const t = composerCloture(AVEC_MVT);
+    expect(t).toContain('▸ MOUVEMENTS DU JOUR');
+    expect(t).toContain('NSBC +7,5 %');
+    expect(t).toContain('SOGC −7,5 %');
+  });
+
+  it('les donne aussi à un gratuit : c’est du marché, pas du personnel', () => {
+    expect(composerCloture({ ...AVEC_MVT, premium: false })).toContain('▸ MOUVEMENTS DU JOUR');
+  });
+
+  it('ANNONCE le brief sans le citer', () => {
+    // Le texte du brief répète tendance, hausses/baisses et BRVM-C : le citer
+    // disait deux fois la même chose dans un même message.
+    const t = composerCloture({ ...AVEC_MVT, brief: 'peu importe le contenu' });
+    expect(t).toContain('▸ LA NOTE COMPLÈTE');
+    expect(t).not.toContain('peu importe le contenu');
+    expect(t).toContain('westbourse.com/brief');
   });
 });
