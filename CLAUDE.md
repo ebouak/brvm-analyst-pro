@@ -380,6 +380,45 @@ extraction du module partagé.
   `frontend` + `video/.env.local`) et `NEXT_PUBLIC_TELEGRAM_BOT`, déclarer le
   webhook, puis **tester la RLS des deux tables à la clé anon**.
 
+### Ajouts (passage 2026-09-08) — Agent à outils, et audit des dividendes
+
+417 tests scraper verts, tsc frontend vert, 17 tests purs frontend verts.
+
+- **Agent outillé** (`lib/agent/outils.ts`) : 8 fonctions en **lecture seule** —
+  `mon_portefeuille`, `mes_alertes`, `cours_valeur`, `historique_valeur`,
+  `dividendes_valeur`, `actualites_valeur`, `liquidite_valeur`,
+  `palmares_seance`. Le contexte n'est plus empilé dans le prompt avant de
+  connaître la question. **Cela RENFORCE l'honnêteté** : chaque chiffre vient
+  d'un retour de fonction, une donnée absente devient un `null` explicite.
+  Élargir ce que l'agent voit n'élargit JAMAIS ce qu'il peut faire.
+- `callAgentLlm(messages, outils?)` et `buildSystemPrompt({canal, outils})` :
+  paramètres **facultatifs**, WhatsApp reste sur l'ancien comportement (non
+  éprouvable ici). Les trois garde-fous sont une source unique, paramétrée par
+  canal et non dupliquée. `MAX_TOURS = 3` borne la boucle d'outils.
+- **AUDIT DIVIDENDES (2026-09-08) contre Sika Finance** — 123 points comparés,
+  93 % concordants. Alignement établi : `exercice` = année Sika.
+  **Sur 353 lignes, 179 étaient inexploitables** :
+  + 90 avec `montant = exercice` (source `bdfin`, 28 codes, 1999-2015) ;
+  + 68 à zéro (`sikafinance-societe`) ; 21 sans exercice ;
+  + **8 mal attribuées** : TTLC portait les dividendes de TOTAL SENEGAL et
+    BOABF ceux de BOA SENEGAL, 4 années sur 4 exactes.
+- **Cause** : sikafinance **tronque ses libellés à 20 caractères**
+  (« BANK OF AFRICA SENEG »), les alias curés attendaient les noms complets, et
+  le repli flou tranchait au lieu de renoncer. Corrigé : motifs valides sur
+  20 caractères, `TTLS` ajouté avant `TTLC`, et le flou **refuse désormais
+  l'ambiguïté** (score ≥ 0,72 ET écart ≥ 0,12 avec le second) — un trou déclaré
+  dans `unmatched` vaut mieux qu'une ligne fausse. Test de régression
+  `tests/sikafinanceMatcher.test.ts`.
+- **L'agent écarte à la lecture** les lignes non fiables : sans elles il
+  annonçait « rendement 0 % » pour 13 actions sur 48.
+- **Richbourse** (`richbourse.com/common/dividende/index`) : source plus propre
+  — **codes BRVM natifs dans les liens** (pas de correspondance par nom, donc
+  pas le bug ci-dessus) et **date de paiement**, absente à 100 % de la base.
+  Année courante seulement. Importateur **non écrit** à ce jour.
+- **Reste à faire** : lancer la purge des 98 lignes fausses
+  (script + sauvegarde dans le scratchpad de session), écrire l'importateur
+  Richbourse, et vérifier ABJC (base 120,97 vs Richbourse 201,52).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

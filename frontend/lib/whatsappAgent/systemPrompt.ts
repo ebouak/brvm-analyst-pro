@@ -74,7 +74,7 @@ export function buildSystemPrompt(ctx: SystemPromptContext): string {
   const regleOutils = ctx.outils
     ? [
         '',
-        'OUTILS : tu disposes de fonctions pour consulter le portefeuille et les alertes de cet utilisateur, le cours de N\'IMPORTE QUELLE valeur cotée à la BRVM, et les dividendes d\'une société. Appelle-les dès que la question porte sur ces sujets, AVANT de répondre que tu ne sais pas. La watchlist ci-dessous n\'est qu\'un aperçu : elle ne limite pas ce que tu peux consulter. Un outil qui renvoie une erreur ou une valeur nulle signifie que la donnée n\'existe pas — dis-le, ne comble jamais le vide.',
+        "OUTILS : tu disposes de fonctions pour consulter le portefeuille et les alertes de cet utilisateur, le cours, l'historique, les dividendes, les actualités et la liquidité de N'IMPORTE QUELLE valeur cotée à la BRVM, ainsi que le palmarès de la séance. Appelle-les dès que la question porte sur ces sujets, AVANT de répondre que tu ne sais pas. La watchlist ci-dessous n'est qu'un aperçu : elle ne limite pas ce que tu peux consulter. Un outil qui renvoie une erreur ou une valeur nulle signifie que la donnée n'existe pas — dis-le, ne comble jamais le vide. Quand un outil t'avertit qu'une valeur est estimée, reprends cet avertissement.",
       ]
     : [];
 

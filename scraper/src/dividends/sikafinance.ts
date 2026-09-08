@@ -62,15 +62,28 @@ interface Instrument {
   designation: string | null;
 }
 
-/** Construit un matcher nom -> code à partir du référentiel + alias curés. */
-function buildMatcher(instruments: Instrument[]): (name: string) => string | null {
+/**
+ * Construit un matcher nom -> code à partir du référentiel + alias curés.
+ *
+ * Exporté UNIQUEMENT pour les tests : c'est la pièce qui a produit la
+ * mauvaise attribution de 2026-09-08, et elle doit être éprouvée directement
+ * plutôt qu'à travers une requête réseau.
+ */
+export function buildMatcher(instruments: Instrument[]): (name: string) => string | null {
   // Alias curés : fragment de nom sikafinance (normalisé, en minuscule) -> code BRVM.
   const CURATED: Array<[RegExp, string]> = [
-    [/bank of africa senegal/, 'BOAS'],
+    /* ⚠️ SIKAFINANCE TRONQUE SES LIBELLÉS À 20 CARACTÈRES. « BANK OF AFRICA
+       SENEGAL » y apparaît « BANK OF AFRICA SENEG », et l'ancien motif
+       /bank of africa senegal/ ne matchait donc PAS : le repli flou attribuait
+       ses dividendes à BOABF. Constaté le 2026-09-08 par recoupement — 4 ans
+       sur 4 de BOA Sénégal étaient stockés sous BOA Burkina, et 4 ans de
+       Total Sénégal sous Total CI.
+       Tout motif ajouté ici doit rester valide sur 20 caractères. */
+    [/bank of africa seneg/, 'BOAS'],
     [/bank of africa mali/, 'BOAM'],
     [/bank of africa niger/, 'BOAN'],
     [/bank of africa benin/, 'BOAB'],
-    [/bank of africa burkina/, 'BOABF'],
+    [/bank of africa burki/, 'BOABF'],
     [/bank of africa.*ivoire|bank of africa ci/, 'BOAC'],
     [/orange ci|orange cote/, 'ORAC'],
     [/sonatel/, 'SNTS'],
@@ -82,6 +95,11 @@ function buildMatcher(instruments: Instrument[]): (name: string) => string | nul
     [/saph|plantations d heveas/, 'SPHC'],
     [/sogb|caoutchoucs de grand/, 'SOGC'],
     [/palm\s?ci|palmci/, 'PALC'],
+    /* Total Sénégal AVANT Total CI : sans lui, « TOTAL SENEGAL » ne matchait
+       aucun alias et le repli flou le rattachait à TTLC — la désignation
+       « TOTAL CI » lui ressemblant assez. L'ordre compte, le premier motif
+       satisfait l'emporte. */
+    [/total seneg/, 'TTLS'],
     [/total ci|total cote/, 'TTLC'],
     [/unilever/, 'UNLC'],
     [/nestle/, 'NTLC'],
@@ -115,17 +133,29 @@ function buildMatcher(instruments: Instrument[]): (name: string) => string | nul
     for (const [re, code] of CURATED) {
       if (re.test(norm) && codes.has(code)) return code;
     }
-    // 2) fuzzy sur la désignation du référentiel
-    let best: string | null = null;
-    let bestScore = 0;
-    for (const ins of instruments) {
-      const s = similarity(name, ins.designation ?? ins.code);
-      if (s > bestScore) {
-        bestScore = s;
-        best = ins.code;
-      }
-    }
-    return bestScore >= 0.5 ? best : null;
+    /* 2) Repli flou — DÉLIBÉRÉMENT TIMIDE.
+
+       C'est ce repli, et non les alias, qui a produit les fausses
+       attributions : avec un simple seuil à 0,5 sur le meilleur candidat,
+       « TOTAL SENEGAL » ressemblait assez à « TOTAL CI » pour être adopté sans
+       le moindre signalement. Le résultat était des dividendes d'une société
+       stockés sous une autre — la pire erreur possible sur ce jeu de données,
+       parce qu'elle est invisible : les montants restent plausibles.
+
+       Deux conditions désormais, au lieu d'une :
+         · un score élevé dans l'absolu (0,72) ;
+         · un écart net avec le second (0,12), donc l'absence d'ambiguïté.
+       Un nom qui ressemble à deux sociétés n'est attribué à AUCUNE : il
+       remonte dans `unmatched`, où il est visible et corrigeable par un alias.
+       Un trou déclaré vaut mieux qu'une ligne fausse. */
+    const scores = instruments
+      .map((ins) => ({ code: ins.code, s: similarity(name, ins.designation ?? ins.code) }))
+      .sort((a, b) => b.s - a.s);
+    const premier = scores[0];
+    const second = scores[1];
+    if (!premier || premier.s < 0.72) return null;
+    if (second && premier.s - second.s < 0.12) return null;
+    return premier.code;
   };
 }
 

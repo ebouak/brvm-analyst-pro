@@ -72,6 +72,73 @@ export const OUTILS: DefinitionOutil[] = [
   {
     type: 'function',
     function: {
+      name: 'historique_valeur',
+      description:
+        "Évolution d'une valeur sur une période : cours de début et de fin, variation, plus haut, plus bas, nombre de séances. À utiliser dès qu'une question porte sur le passé — « depuis quand elle baisse », « sur trois mois », « cette semaine », « sa tendance ».",
+      parameters: {
+        type: 'object',
+        properties: {
+          code: { type: 'string', description: 'Code BRVM ou nom de la société' },
+          jours: {
+            type: 'string',
+            description: 'Profondeur en jours calendaires (7, 30, 90, 365). Défaut 30.',
+          },
+        },
+        required: ['code'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'palmares_seance',
+      description:
+        "Classement de la dernière séance : plus fortes hausses, plus fortes baisses, ou plus gros volumes échangés. À utiliser pour « qui monte », « quelles sont les meilleures performances », « où sont passés les échanges ».",
+      parameters: {
+        type: 'object',
+        properties: {
+          critere: {
+            type: 'string',
+            description: "L'un de : hausses, baisses, volumes",
+          },
+        },
+        required: ['critere'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'actualites_valeur',
+      description:
+        "Dernières actualités publiées concernant une société (titre, date, lien). À utiliser pour « quoi de neuf sur », « des nouvelles de », « pourquoi elle bouge ».",
+      parameters: {
+        type: 'object',
+        properties: {
+          code: { type: 'string', description: 'Code BRVM ou nom de la société' },
+        },
+        required: ['code'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'liquidite_valeur',
+      description:
+        "Facilité d'achat et de revente d'une valeur : score de liquidité, classe, spread estimé, impact prix. Question vitale sur la BRVM, marché étroit où l'on peut rester bloqué sur une position. À utiliser pour « est-ce liquide », « puis-je revendre facilement », « y a-t-il des acheteurs ».",
+      parameters: {
+        type: 'object',
+        properties: {
+          code: { type: 'string', description: 'Code BRVM ou nom de la société' },
+        },
+        required: ['code'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'dividendes_valeur',
       description:
         'Dividendes versés par une société : montant, exercice, date de détachement, date de paiement, et rendement calculé sur le cours actuel. À utiliser pour « quel dividende », « quel rendement », « quand est le détachement ».',
@@ -307,6 +374,149 @@ async function dividendesValeur(db: SupabaseClient, saisie: string) {
   };
 }
 
+async function historiqueValeur(db: SupabaseClient, saisie: string, joursTexte?: string) {
+  const code = await resoudreCode(db, saisie);
+  if (!code) return { erreur: `Aucune valeur cotée ne correspond à « ${saisie} ».` };
+
+  /* Bornes explicites : une profondeur libre laisserait le modèle demander
+     dix ans de séances, soit des milliers de lignes dans le contexte. */
+  const jours = Math.min(Math.max(Number(joursTexte) || 30, 5), 400);
+  const depuis = new Date(Date.now() - jours * 86400000).toISOString().slice(0, 10);
+
+  const { data } = await db
+    .from('brvm_actions_daily')
+    .select('date_marche, cours_jour, volume')
+    .eq('code', code)
+    .gte('date_marche', depuis)
+    .not('cours_jour', 'is', null)
+    .order('date_marche', { ascending: true });
+
+  const pts = (data ?? []).filter((p) => p.cours_jour != null);
+  if (pts.length < 2) {
+    return { code, erreur: `Moins de deux séances cotées pour ${code} sur ${jours} jours.` };
+  }
+
+  const debut = pts[0];
+  const fin = pts[pts.length - 1];
+  const cours = pts.map((p) => Number(p.cours_jour));
+  const haut = Math.max(...cours);
+  const bas = Math.min(...cours);
+  const c0 = Number(debut.cours_jour);
+  const c1 = Number(fin.cours_jour);
+
+  return {
+    code,
+    /* La période RÉELLE, pas celle demandée : sur un marché où toutes les
+       valeurs ne cotent pas chaque jour, annoncer « sur 90 jours » quand on
+       n'a que 4 séances serait trompeur. */
+    du: debut.date_marche,
+    au: fin.date_marche,
+    seances_cotees: pts.length,
+    cours_debut: c0,
+    cours_fin: c1,
+    variation_pct: c0 > 0 ? ((c1 - c0) / c0) * 100 : null,
+    plus_haut: haut,
+    plus_bas: bas,
+    volume_moyen: Math.round(
+      pts.reduce((s, p) => s + (Number(p.volume) || 0), 0) / pts.length,
+    ),
+  };
+}
+
+async function palmaresSeance(db: SupabaseClient, critere: string) {
+  const asOf = await getLastMarketDate(db);
+  if (!asOf) return { erreur: 'Aucune séance disponible en base.' };
+
+  const c = critere.toLowerCase();
+  const parVolume = /volume|echange|échange|capitau/.test(c);
+  const baisses = /baiss|recul|perd|pire/.test(c);
+
+  const { data } = await db
+    .from('brvm_actions_daily')
+    .select('code, cours_jour, variation_pct, volume, valeur_echangee')
+    .eq('date_marche', asOf)
+    .not(parVolume ? 'volume' : 'variation_pct', 'is', null);
+
+  const lignes = (data ?? []).sort((a, b) =>
+    parVolume
+      ? Number(b.volume) - Number(a.volume)
+      : baisses
+        ? Number(a.variation_pct) - Number(b.variation_pct)
+        : Number(b.variation_pct) - Number(a.variation_pct),
+  );
+
+  return {
+    seance: asOf,
+    critere: parVolume ? 'volumes échangés' : baisses ? 'plus fortes baisses' : 'plus fortes hausses',
+    valeurs_cotees: lignes.length,
+    classement: lignes.slice(0, 5).map((l) => ({
+      code: l.code,
+      cours: l.cours_jour,
+      variation_pct: l.variation_pct,
+      volume: l.volume,
+    })),
+  };
+}
+
+async function actualitesValeur(db: SupabaseClient, saisie: string) {
+  const code = await resoudreCode(db, saisie);
+  if (!code) return { erreur: `Aucune valeur cotée ne correspond à « ${saisie} ».` };
+
+  const { data } = await db
+    .from('brvm_news')
+    .select('titre, date_publication, source_url, source_label')
+    .eq('instrument_code', code)
+    /* hidden : des actualités sont masquées côté rédaction. Les servir ici
+       contournerait cette décision éditoriale. */
+    .not('hidden', 'is', true)
+    .order('date_publication', { ascending: false })
+    .limit(5);
+
+  if (!data || data.length === 0) {
+    return { code, actualites: [], message: `Aucune actualité en base pour ${code}.` };
+  }
+  return {
+    code,
+    actualites: data.map((n) => ({
+      titre: n.titre,
+      date: n.date_publication,
+      source: n.source_label ?? null,
+      lien: n.source_url ?? null,
+    })),
+  };
+}
+
+async function liquiditeValeur(db: SupabaseClient, saisie: string) {
+  const code = await resoudreCode(db, saisie);
+  if (!code) return { erreur: `Aucune valeur cotée ne correspond à « ${saisie} ».` };
+
+  const { data } = await db
+    .from('liquidity_daily')
+    .select(
+      'date_marche, score, classe, presence_pct, amihud, spread_roll_pct, valeur_moyenne_30j, seances_traitees, flux_net_pct',
+    )
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return { code, erreur: `Pas de mesure de liquidité pour ${code}.` };
+  return {
+    code,
+    seance: data.date_marche,
+    // score null sous 10 séances : le moteur refuse de noter sur trop peu.
+    score_sur_100: data.score,
+    classe: data.classe,
+    presence_pct: data.presence_pct,
+    valeur_moyenne_30j_fcfa: data.valeur_moyenne_30j,
+    spread_estime_pct: data.spread_roll_pct,
+    flux_net_pct: data.flux_net_pct,
+    seances_observees: data.seances_traitees,
+    avertissement:
+      "Le carnet d'ordres n'étant pas publié par la BRVM, la profondeur et le coût d'exécution sont ESTIMÉS à partir des échanges observés, jamais mesurés directement.",
+  };
+}
+
 /* ------------------------------------------------------------ répartition */
 
 /**
@@ -330,6 +540,18 @@ export async function executerOutil(
         return await coursValeur(db, String(args.code ?? ''));
       case 'dividendes_valeur':
         return await dividendesValeur(db, String(args.code ?? ''));
+      case 'historique_valeur':
+        return await historiqueValeur(
+          db,
+          String(args.code ?? ''),
+          args.jours == null ? undefined : String(args.jours),
+        );
+      case 'palmares_seance':
+        return await palmaresSeance(db, String(args.critere ?? 'hausses'));
+      case 'actualites_valeur':
+        return await actualitesValeur(db, String(args.code ?? ''));
+      case 'liquidite_valeur':
+        return await liquiditeValeur(db, String(args.code ?? ''));
       default:
         return { erreur: `Outil inconnu : ${nom}` };
     }
