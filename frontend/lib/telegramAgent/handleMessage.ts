@@ -5,6 +5,7 @@ import { checkFeature } from '@/lib/server/featureGate';
 import { buildSystemPrompt } from '@/lib/whatsappAgent/systemPrompt';
 import { getWatchlistContext } from '@/lib/whatsappAgent/watchlistContext';
 import { callAgentLlm, type ChatMessage } from '@/lib/whatsappAgent/callAgentLlm';
+import { OUTILS, executerOutil } from '@/lib/agent/outils';
 import { sendTelegramReply } from './sendTelegram';
 
 const HISTORY_LIMIT = 10;
@@ -104,14 +105,17 @@ export async function handleIncomingMessage(chatId: number, text: string): Promi
     .map((h) => ({ role: h.role as 'user' | 'assistant', content: h.contenu as string }));
 
   const messages: ChatMessage[] = [
-    { role: 'system', content: buildSystemPrompt({ watchlist }) },
+    { role: 'system', content: buildSystemPrompt({ watchlist, canal: 'telegram', outils: true }) },
     ...chatHistory,
     { role: 'user', content: text },
   ];
 
   // 5. Appel LLM. callAgentLlm échoue silencieusement vers null : une panne des
   //    deux fournisseurs doit être tracée ICI pour rester diagnosticable.
-  const reply = await callAgentLlm(messages);
+  const reply = await callAgentLlm(messages, {
+    definitions: OUTILS,
+    executer: (nom, args) => executerOutil(db, userId, nom, args),
+  });
   if (!reply) {
     console.error(
       'telegramAgent/handleMessage: callAgentLlm a échoué (DeepSeek et Mistral indisponibles)',
