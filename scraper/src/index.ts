@@ -44,6 +44,7 @@ import { runDailyFull } from './runners/runDailyFull.js';
 import { runScoring } from './scoring/runScoring.js';
 import { runEvents } from './events/runEvents.js';
 import { runDividends } from './dividends/runDividends.js';
+import { runCloture } from './cloture/runCloture.js';
 import { runShares } from './shares/runShares.js';
 import { runSecteurs } from './refdata/runSecteurs.js';
 import { runAlerts } from './alerts/runAlerts.js';
@@ -225,6 +226,29 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'cloture': {
+      // Point de clôture Telegram. Passe APRÈS alerts.yml : le message annonce
+      // combien d'alertes se sont déclenchées, il ne peut pas les précéder.
+      const res = await monitored(
+        { code: 'cloture', label: 'Point de clôture Telegram' },
+        async () => {
+          const r = await runCloture({ mock });
+          return {
+            value: r,
+            outcome: {
+              // 'non-publiable' n'est PAS un échec : c'est le garde-fou qui
+              // refuse d'envoyer un message faux, et il doit rester vert.
+              status: r.status === 'failed' ? ('failed' as const) : ('success' as const),
+              rows_extracted: r.recipients,
+              rows_upserted: r.sent,
+              metadata: { status: r.status, dateMarche: r.dateMarche, sent: r.sent },
+            },
+          };
+        },
+      );
+      return res.status === 'failed' ? 1 : 0;
+    }
+
     case 'dividends': {
       const res = await monitored(
         { code: 'dividends', label: 'Dividendes' },

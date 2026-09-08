@@ -11,9 +11,16 @@ name: Vidéo de séance
 
 on:
   schedule:
-    # 18:00 UTC du lundi au vendredi. La BRVM clôture vers 15:00 UTC et le
-    # scraper intraday tourne toutes les 15 min : à 18:00 la séance est figée.
-    - cron: '0 18 * * 1-5'
+    # 16:45 UTC du lundi au vendredi.
+    #
+    # Pourquoi cette heure, et pas 18:00 comme auparavant :
+    #   · la BRVM clôture vers 15:00 UTC ;
+    #   · daily.yml et score.yml consolident cours et signaux à 16:00 ;
+    #   · alerts.yml part à 16:30, et le point de clôture qui suit annonce
+    #     combien d'alertes se sont déclenchées — il doit donc passer après.
+    # À 18:00, la vidéo arrivait deux heures après la consolidation, et EN MÊME
+    # TEMPS que scrape-daily : deux workflows sur les mêmes tables.
+    - cron: '45 16 * * 1-5'
   workflow_dispatch:
     inputs:
       publier:
@@ -71,6 +78,7 @@ jobs:
         run: node genere.mjs
 
       - name: Publier sur la landing, Facebook et TikTok
+        id: publier
         if: github.event_name == 'schedule' || inputs.publier
         env:
           # Indispensables : c'est par elles que la vidéo est hébergée dans le
@@ -99,6 +107,24 @@ jobs:
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
           ALERTS_EMAIL_TO: ${{ secrets.ALERTS_EMAIL_TO }}
         run: node publie.mjs
+
+      # Point de clôture privé, APRÈS la publication de la vidéo : il réutilise
+      # son file_id pour l'adresser à chaque abonné sans la re-téléverser.
+      # Voir docs/superpowers/specs/2026-09-08-cloture-telegram-design.md.
+      - name: Point de clôture Telegram
+        if: github.event_name == 'schedule' || inputs.publier
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          # Vide si la publication dans le canal a échoué : le point de clôture
+          # part alors sans la vidéo, plutôt que pas du tout.
+          TELEGRAM_VIDEO_FILE_ID: ${{ steps.publier.outputs.video_file_id }}
+          LOG_LEVEL: info
+        run: |
+          npm install --no-audit --no-fund
+          npx tsx src/index.ts cloture
 
       - name: Conserver la vidéo
         # always() : une vidéo correcte refusée par une plateforme reste

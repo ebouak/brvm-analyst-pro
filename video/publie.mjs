@@ -12,7 +12,7 @@
  *
  *   node publie.mjs
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -184,6 +184,9 @@ if (URL_SB && SERVICE) {
    depuis .env.local avant d'etre confie au cron. */
 const CANAL = lire('TELEGRAM_CANAL');
 const JETON_TG = lire('TELEGRAM_BOT_TOKEN');
+/* Renseigne apres publication dans le canal, puis transmis au worker de
+   cloture pour qu'il renvoie la MEME video sans la televerser a nouveau. */
+let fileIdVideo = null;
 
 if (CANAL && JETON_TG) {
   try {
@@ -203,6 +206,14 @@ if (CANAL && JETON_TG) {
     /* Le message d'erreur de Telegram peut contenir l'URL appelee, donc le
        jeton : on ne relaie que la description. */
     if (!rep.ok) throw new Error(rep.description ?? `HTTP ${r.status}`);
+
+    /* LE file_id EST CE QUI REND LA VIDEO SOUTENABLE EN PRIVE. Telegram permet
+       de renvoyer un fichier deja televerse en ne citant que son identifiant :
+       un televersement, N envois. Sans lui, adresser 1 Mo a chaque abonne
+       serait autant de televersements, et l'envoi prive serait a deconseiller.
+       Le worker de cloture le lit ensuite (TELEGRAM_VIDEO_FILE_ID). */
+    fileIdVideo = rep.result?.video?.file_id ?? null;
+    if (fileIdVideo) console.log(`  file_id : ${fileIdVideo.slice(0, 24)}…`);
 
     console.log(`Canal Telegram : publie (${CANAL})`);
     journal.push('Canal Telegram : publie');
@@ -458,4 +469,12 @@ if (echecs.length) {
 }
 if (envois === 0) {
   console.log('Aucune plateforme configuree — video generee, rien envoye.');
+}
+
+/* Transmission du file_id a l'etape suivante du workflow.
+   GITHUB_OUTPUT plutot qu'un fichier a nous : c'est le canal prevu entre deux
+   etapes d'un meme job, et il disparait avec l'execution — un identifiant
+   Telegram n'a aucune raison de survivre a la seance qu'il designe. */
+if (fileIdVideo && process.env.GITHUB_OUTPUT) {
+  appendFileSync(process.env.GITHUB_OUTPUT, `video_file_id=${fileIdVideo}\n`, 'utf8');
 }
