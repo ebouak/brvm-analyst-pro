@@ -414,10 +414,24 @@ extraction du module partagé.
 - **Richbourse** (`richbourse.com/common/dividende/index`) : source plus propre
   — **codes BRVM natifs dans les liens** (pas de correspondance par nom, donc
   pas le bug ci-dessus) et **date de paiement**, absente à 100 % de la base.
-  Année courante seulement. Importateur **non écrit** à ce jour.
-- **Reste à faire** : lancer la purge des 98 lignes fausses
-  (script + sauvegarde dans le scratchpad de session), écrire l'importateur
-  Richbourse, et vérifier ABJC (base 120,97 vs Richbourse 201,52).
+  Année courante seulement. `src/dividends/richbourse.ts` (`parseRichbourse`
+  pur + `fetchRichbourseDividends`), branché en **dernier** dans
+  `runDividends` : le dédoublonnage intra-lot garde la dernière occurrence,
+  donc Richbourse l'emporte sur la campagne en cours. Une ligne sans code
+  exploitable est **ignorée, jamais devinée** (TRACTAFRIC, BOLLORE-AGL).
+- **FAIT (2026-09-08)** : purge des 98 lignes fausses (353 → 263, exploitables
+  49 % → 66 %, plus aucune ligne `montant = exercice`) ; import Richbourse
+  exécuté en production — **18 premières dates de paiement** de la table, et
+  15 montants arrondis par sikafinance remplacés par leur valeur exacte
+  (écart maximal 0,48 FCFA, tous dans le même sens). ABJC ex.2025 tranché :
+  **201,52 au 2026-09-30**, l'entier 202 était l'arrondi de sikafinance.
+  Conséquence visible : `/calendrier` et `/dividendes/calendrier` affichent
+  enfin des événements de paiement (5 dans les 90 jours), vérifiés à la clé
+  anon. Cron `dividends.yml` (samedi 09:00 UTC) rafraîchit sans intervention.
+- **Reste ouvert, délibérément** : 68 lignes à montant nul et 21 sans exercice
+  ne sont **pas** supprimées — leur fausseté n'est pas prouvée, et elles sont
+  déjà écartées à la lecture par `lib/agent/outils.ts`. Les supprimer sur une
+  présomption détruirait de la donnée peut-être bonne.
 
 ### Ajouts (passage 2026-09-08) — Plage 52 semaines
 

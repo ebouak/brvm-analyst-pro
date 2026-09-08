@@ -364,9 +364,11 @@ async function dividendesValeur(db: SupabaseClient, saisie: string) {
       exercice: d.exercice,
       montant: `${fr(Number(d.montant))} ${d.devise ?? 'FCFA'}`,
       detachement: d.ex_date ?? 'inconnu',
-      /* payment_date est vide sur les 353 lignes de la table : l'annoncer
-         « inconnu » a chaque fois donnait l'illusion d'une donnee parfois
-         disponible. On ne mentionne le champ que s'il existe vraiment. */
+      /* Le champ n'est mentionne QUE s'il existe. La date de paiement etait
+         absente de toute la table jusqu'a l'import richbourse (2026-09-08) ;
+         elle ne couvre aujourd'hui que la campagne en cours. L'annoncer
+         « inconnu » partout donnerait l'illusion d'une donnee generalement
+         disponible. */
       ...(d.payment_date ? { paiement: d.payment_date } : {}),
     })),
     avertissement:
