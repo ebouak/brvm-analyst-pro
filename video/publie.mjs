@@ -86,12 +86,18 @@ const journal = [];
    son URL propre, donc aucun cache de CDN ne peut servir la video d'hier sous
    les chiffres d'aujourd'hui. Seul `derniere.json`, minuscule, est reecrit — et
    avec un cache court. */
-const dotenv = `${RACINE}/frontend/.env.local`;
-/* La marque d'ordre d'octets est retiree : PowerShell 5.1 en ajoute une avec
+/* Deux fichiers, dans cet ordre : les reglages propres au worker video (jeton
+   et canal Telegram) vivent a cote de lui, ceux du site restent dans
+   frontend/. Ne lire que le second laissait le canal muet alors que sa
+   configuration etait bien presente — constate le 2026-09-08.
+
+   La marque d'ordre d'octets est retiree : PowerShell 5.1 en ajoute une avec
    `Set-Content -Encoding utf8`, et la premiere cle du fichier devient alors
-   introuvable — panne constatee le 2026-09-08 sur un .env.local pourtant
-   correctement ecrit. */
-const envLocal = existsSync(dotenv) ? readFileSync(dotenv, 'utf8').replace(/^﻿/, '') : '';
+   introuvable. */
+const envLocal = [`${RACINE}/video/.env.local`, `${RACINE}/frontend/.env.local`]
+  .filter((f) => existsSync(f))
+  .map((f) => readFileSync(f, 'utf8').replace(/^﻿/, ''))
+  .join('\n');
 const lire = (...cles) => {
   for (const k of cles) {
     if (process.env[k]) return process.env[k].trim();
