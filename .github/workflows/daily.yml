@@ -26,7 +26,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       NODE_TLS_REJECT_UNAUTHORIZED: '0' # brvm.org a une chaîne TLS incomplète
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
