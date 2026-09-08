@@ -11,6 +11,7 @@ import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { sha256 } from '../utils/hash.js';
 import { extractDividendAmount, extractExercice } from './extract.js';
+import { fetchRichbourseDividends } from './richbourse.js';
 import { fetchSikafinanceDividends } from './sikafinance.js';
 import type { Dividend } from './types.js';
 
@@ -42,16 +43,27 @@ export async function runDividends(opts: { mock?: boolean } = {}): Promise<Divid
       logger.warn('Mode MOCK dividendes');
       divs = buildMock();
     } else {
-      // Source principale : sikafinance (montants + dates à jour).
-      // Complétée par les communiqués BDFIN déjà ingérés (historique).
-      const [sika, fromEvents] = await Promise.all([
+      // Trois sources, et L'ORDRE COMPTE : le dédoublonnage intra-lot par
+      // (code, exercice) conserve la DERNIÈRE occurrence. Richbourse passe donc
+      // en dernier, car c'est la plus fiable des trois sur la campagne en
+      // cours — codes BRVM natifs (aucune correspondance par nom, donc pas la
+      // mauvaise attribution corrigée le 2026-09-08), montants non arrondis
+      // (2293,28 là où sikafinance donne 2293) et surtout DATE DE PAIEMENT,
+      // absente de toute la table jusqu'ici.
+      // Sikafinance reste la source de l'historique, que richbourse ne couvre
+      // pas ; BDFIN complète par les communiqués déjà ingérés.
+      const [sika, fromEvents, rich] = await Promise.all([
         fetchSikafinanceDividends().catch((e) => {
           logger.warn({ err: (e as Error).message }, 'sikafinance indisponible');
           return [] as Dividend[];
         }),
         deriveFromEvents().catch(() => [] as Dividend[]),
+        fetchRichbourseDividends().catch((e) => {
+          logger.warn({ err: (e as Error).message }, 'richbourse indisponible');
+          return [] as Dividend[];
+        }),
       ]);
-      divs = [...sika, ...fromEvents];
+      divs = [...sika, ...fromEvents, ...rich];
     }
     const nb = await upsert(divs);
     logger.info({ nb }, 'Dividendes ingérés');

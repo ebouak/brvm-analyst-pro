@@ -116,6 +116,13 @@ export function buildMatcher(instruments: Instrument[]): (name: string) => strin
     [/cfao/, 'CFAC'],
     [/bernabe/, 'BNBC'],
     [/bicici/, 'BICC'],
+    /* Remontés par `unmatched` au premier passage après le durcissement du
+       repli flou — la preuve que le refus d'ambiguïté rend les trous visibles
+       au lieu de les remplir en silence. Tronqués à 20 caractères :
+       « BANQUE INTERNATIONALE POUR L'INDUSTRIE ET LE COMMERCE DU BENIN » et
+       « SOCIETE IVOIRIENNE DE BANQUE ». */
+    [/banque international/, 'BICB'],
+    [/societe ivoirienne d(e|$)/, 'SIBC'],
     [/cie\b|compagnie ivoirienne d electricite/, 'CIEC'],
     [/tractafric/, 'PRSC'],
     [/safca/, 'SAFC'],
