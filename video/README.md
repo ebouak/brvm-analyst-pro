@@ -71,6 +71,31 @@ dernière séance connue du site.
 Le fichier étant servi depuis notre propre stockage, aucun lecteur tiers n'est
 embarqué : la promesse « aucun traceur » de la landing tient.
 
+### Déclarer le webhook (agent + alertes personnelles)
+
+Le même bot sert aussi les fonctionnalités utilisateur du site (alertes
+personnelles, agent conversationnel — voir migration `0129`). Elles ont besoin
+d'un webhook :
+
+```bash
+# 1. Générer un secret, à mettre dans video/.env.local ET dans les variables
+#    Vercel du projet `frontend` (la route le compare à temps constant) :
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+#    -> TELEGRAM_WEBHOOK_SECRET=<valeur>
+
+# 2. Déclarer le webhook
+node telegram-init.mjs --webhook https://westbourse.com/api/telegram/webhook
+
+# Pour revenir en arrière :
+node telegram-init.mjs --webhook off
+```
+
+> ⚠️ **Telegram autorise SOIT le long-polling, SOIT un webhook — jamais les
+> deux.** Une fois le webhook posé, la découverte automatique du `chat_id` par
+> ce script cesse de fonctionner. Elle a déjà rempli son office
+> (`TELEGRAM_CHAT_ID` est en secret), et **les envois sortants n'en dépendent
+> pas** : le récapitulatif du soir et le canal public continuent normalement.
+
 ## Canal Telegram public
 
 Diffusion automatique de la vidéo dans un canal public, en pièce jointe — le

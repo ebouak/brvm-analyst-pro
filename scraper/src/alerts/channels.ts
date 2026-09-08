@@ -13,6 +13,18 @@ export interface Notification {
   subject: string;
   body: string;
   code?: string | null;
+  /**
+   * Conversation Telegram destinataire (notification_prefs.telegram_chat_id).
+   * Absent = aucun envoi Telegram, SAUF si `operateur` est vrai.
+   */
+  telegramChatId?: number | string | null;
+  /**
+   * Message d'exploitation destiné à l'administrateur, et non à un
+   * utilisateur : seul cas où TELEGRAM_CHAT_ID (la conversation de
+   * l'exploitant) est un destinataire légitime. Doit être posé
+   * EXPLICITEMENT — voir le commentaire de sendTelegram.
+   */
+  operateur?: boolean;
 }
 
 export type ChannelName = 'email' | 'telegram' | 'whatsapp' | 'console';
@@ -59,10 +71,24 @@ export async function sendEmail(n: Notification): Promise<SendResult | null> {
   }
 }
 
-/** Envoie via Telegram si TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID présents. */
+/**
+ * Envoie via Telegram à la conversation DESTINATAIRE.
+ *
+ * DÉFAUT CORRIGÉ ICI (migration 0129) : cette fonction lisait un unique
+ * process.env.TELEGRAM_CHAT_ID — celui de l'exploitant. Toute alerte
+ * d'utilisateur partait donc dans la conversation de l'administrateur, jamais
+ * dans la sienne, alors que /parametres/alertes annonçait « notifications par
+ * email (et Telegram si configuré) ».
+ *
+ * Il n'y a VOLONTAIREMENT aucun repli vers TELEGRAM_CHAT_ID quand
+ * telegramChatId est absent : un repli silencieux reproduirait exactement le
+ * défaut. Un message sans destinataire n'est pas envoyé. Seuls les messages
+ * d'exploitation, qui posent `operateur: true` en toute connaissance de
+ * cause, visent la conversation de l'administrateur.
+ */
 async function sendTelegram(n: Notification): Promise<SendResult | null> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const chatId = n.telegramChatId ?? (n.operateur ? process.env.TELEGRAM_CHAT_ID : null);
   if (!token || !chatId) return null;
   try {
     const resp = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {

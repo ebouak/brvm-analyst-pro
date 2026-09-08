@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { SectionHeader } from '@/components/ui/premium';
 import { AlertsManager, type UserAlert } from './AlertsManager';
 import WhatsAppPrefs from '@/components/settings/WhatsAppPrefs';
+import TelegramPrefs from '@/components/settings/TelegramPrefs';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
@@ -48,6 +49,10 @@ export default async function AlertesPage() {
         subtitle="Soyez notifié dès qu'un titre franchit un seuil de prix, change de signal ou approche d'un détachement de dividende."
       />
       <WhatsAppPrefs userId={user.id} />
+
+      {/* Telegram : meme role, canal different. La section se masque
+          d elle-meme tant que la migration 0129 n est pas appliquee. */}
+      <TelegramPrefs userId={user.id} />
       <AlertsManager
         alerts={(alerts ?? []) as UserAlert[]}
         instruments={(instruments ?? []) as { code: string; designation: string | null }[]}

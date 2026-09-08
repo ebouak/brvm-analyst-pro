@@ -335,6 +335,51 @@ secrets tous exercés.
 - **Sans sous-titres** (demande explicite). À rouvrir si l'audience TikTok le
   justifie : la plupart des vues y démarrent sans son.
 
+### Ajouts (passage 2026-09-08) — Telegram : canal public, alertes perso, agent
+
+Migration `0129_telegram_alerts.sql` **à appliquer**. tsc frontend vert,
+typecheck + **412 tests scraper verts**, `pairing.test.mjs` (6) vert après
+extraction du module partagé.
+
+- **Canal public** `@westbourse7` : `video/publie.mjs` y poste la vidéo en
+  pièce jointe (`TELEGRAM_CANAL`). **Trois destinations Telegram distinctes, à
+  ne jamais confondre** : `TELEGRAM_CHAT_ID` = conversation privée
+  d'exploitation, `TELEGRAM_CANAL` = canal public,
+  `notification_prefs.telegram_chat_id` = conversation d'un utilisateur.
+- **DÉFAUT CORRIGÉ** : `scraper/src/alerts/channels.ts` envoyait TOUTE alerte
+  Telegram vers l'unique `TELEGRAM_CHAT_ID` — celui de l'exploitant — alors que
+  `/parametres/alertes` promettait « et Telegram si configuré ». `Notification`
+  porte désormais `telegramChatId` ; **aucun repli** vers la conversation de
+  l'exploitant (un repli silencieux reproduirait le défaut). Les messages
+  d'exploitation posent `operateur: true` explicitement.
+- **Preuve de possession, contrairement à WhatsApp** : `telegram_chat_id` n'est
+  jamais saisi ; il vient de Telegram et n'est écrit que par le webhook après un
+  code d'appairage valide. Là où `whatsapp_phone` reste déclaratif (0127),
+  celui-ci est prouvé. Le composant `TelegramPrefs` ne l'écrit jamais.
+- **Module partagé** `lib/pairingCodes.ts` : extrait de
+  `whatsappAgent/pairing.ts` (qui le réexporte, appelants inchangés) — il n'a
+  jamais rien eu de spécifique à un canal.
+- **Agent** `lib/telegramAgent/` : réutilise **tels quels** `systemPrompt`
+  (garde-fou « pas de conseil en investissement »), `watchlistContext` et
+  `callAgentLlm` de whatsappAgent. Les dupliquer aurait créé deux garde-fous
+  destinés à diverger. Consentement commun `agent_optin` — même agent, deux
+  canaux. Quota : code `whatsapp_agent` conservé (mal nommé, mais en semer un
+  autre refuserait tout le monde en silence).
+- **Webhook** `/api/telegram/webhook` : secret partagé par en-tête
+  (`TELEGRAM_WEBHOOK_SECRET`), comparé à **temps constant** — pas de HMAC comme
+  Meta. Déduplication par `update_id`. **Ne traite que `chat.type === 'private'`** :
+  sans ce filtre, le bot prendrait ses propres publications de canal pour des
+  questions et répondrait devant tout le monde.
+- ⚠️ **Telegram : long-polling OU webhook, jamais les deux.** Poser le webhook
+  (`node telegram-init.mjs --webhook <url>`) désactive `getUpdates`, donc la
+  découverte de `chat_id`. Les envois sortants n'en dépendent pas.
+- **RGPD** : export et suppression couvrent `telegram_conversations` et
+  `telegram_pairing_codes` ; purge 90 j / 1 j dans `purge_rgpd_retention()`. Le
+  déliement efface le `chat_id`, pas seulement l'opt-in.
+- **Reste à faire** : appliquer 0129, poser `TELEGRAM_WEBHOOK_SECRET` (Vercel
+  `frontend` + `video/.env.local`) et `NEXT_PUBLIC_TELEGRAM_BOT`, déclarer le
+  webhook, puis **tester la RLS des deux tables à la clé anon**.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

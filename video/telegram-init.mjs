@@ -45,6 +45,18 @@ const depuisFichier = (cle) => {
 const JETON = process.env.TELEGRAM_BOT_TOKEN || depuisFichier('TELEGRAM_BOT_TOKEN');
 const POSER = process.argv.includes('--secrets');
 
+/* --webhook <url> : declare le webhook du bot pour l'agent conversationnel et
+   les alertes personnelles (frontend/app/api/telegram/webhook).
+
+   ⚠️ IRREVERSIBLE POUR CE SCRIPT : Telegram autorise SOIT le long-polling
+   (getUpdates), SOIT un webhook — jamais les deux. Une fois le webhook pose,
+   la decouverte automatique du chat_id ci-dessous cesse de fonctionner. Elle a
+   deja rempli son office (TELEGRAM_CHAT_ID est en secret), et les envois
+   sortants — recapitulatif du soir, canal public — n'en dependent pas. Pour la
+   retrouver temporairement : --webhook off. */
+const iWebhook = process.argv.indexOf('--webhook');
+const WEBHOOK = iWebhook >= 0 ? process.argv[iWebhook + 1] : null;
+
 if (!JETON) {
   console.error(`Jeton absent.
 
@@ -93,6 +105,45 @@ try {
   process.exit(1);
 }
 console.log(`Bot reconnu : @${moi.username} (${moi.first_name})`);
+
+/* Branche webhook : elle remplace entierement le reste du script, la
+   decouverte du chat_id devenant impossible une fois le webhook actif. */
+if (WEBHOOK) {
+  if (WEBHOOK === 'off') {
+    await api('deleteWebhook', { drop_pending_updates: false });
+    console.log('Webhook retire — getUpdates redevient utilisable.');
+  } else {
+    /* Le secret voyage dans un en-tete a chaque appel entrant : c'est ce que
+       la route verifie a temps constant. Sans lui, n'importe qui connaissant
+       l'URL pourrait injecter de faux messages. */
+    const secret = process.env.TELEGRAM_WEBHOOK_SECRET || depuisFichier('TELEGRAM_WEBHOOK_SECRET');
+    if (!secret) {
+      console.error(`TELEGRAM_WEBHOOK_SECRET absent.
+
+  Generer une valeur aleatoire, la mettre dans video/.env.local ET dans les
+  variables d'environnement Vercel du projet frontend (la route la compare) :
+    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`);
+      process.exit(1);
+    }
+    const r = await api('setWebhook', {
+      url: WEBHOOK,
+      secret_token: secret,
+      /* On ne demande QUE les messages : sans ce filtre, Telegram enverrait
+         aussi les publications du canal, que la route doit de toute facon
+         ignorer. Autant ne pas les recevoir. */
+      allowed_updates: ['message'],
+      drop_pending_updates: true,
+    });
+    console.log('Webhook pose :', r === true ? WEBHOOK : JSON.stringify(r));
+    const info = await api('getWebhookInfo');
+    console.log(`  url active        : ${info.url || '(aucune)'}`);
+    console.log(`  en attente        : ${info.pending_update_count ?? 0}`);
+    if (info.last_error_message) console.log(`  derniere erreur   : ${info.last_error_message}`);
+    console.log('\n⚠️ getUpdates est desormais inactif : ce script ne peut plus');
+    console.log('   decouvrir de chat_id. Utiliser --webhook off pour revenir.');
+  }
+  process.exit(0);
+}
 
 const maj = await api('getUpdates', { timeout: 0 });
 /* Une conversation n'apparait dans getUpdates que si quelqu'un a ecrit au bot

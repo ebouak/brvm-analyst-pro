@@ -58,7 +58,12 @@ export function AlertsManager({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-muted">
-          {alerts.length} alerte{alerts.length !== 1 ? 's' : ''} · notifications par email (et Telegram si configuré)
+          {/* « et Telegram si configuré » disait vrai de l'exploitant, pas de
+              l'utilisateur : ses alertes Telegram partaient dans la
+              conversation de l'administrateur (corrigé par la migration 0129).
+              Le libellé renvoie désormais aux réglages, qui font foi. */}
+          {alerts.length} alerte{alerts.length !== 1 ? 's' : ''} · notifications par e-mail, et sur
+          WhatsApp ou Telegram si vous les avez liés ci-dessous
         </p>
         <button
           type="button"

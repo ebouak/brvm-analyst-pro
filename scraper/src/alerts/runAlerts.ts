@@ -35,7 +35,15 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
   const cfg = getConfig();
   if (opts.mock || cfg.USE_MOCK) {
     // Démonstration : une alerte fictive déclenchée.
-    await dispatch({ subject: 'Alerte BRVM (mock)', body: 'SNTS a franchi 15 000 FCFA.', code: 'SNTS', to: null });
+    // operateur: true — en mock aucun utilisateur n'est concerné, le message
+    // est une démonstration destinée à l'administrateur.
+    await dispatch({
+      subject: 'Alerte BRVM (mock)',
+      body: 'SNTS a franchi 15 000 FCFA.',
+      code: 'SNTS',
+      to: null,
+      operateur: true,
+    });
     logger.warn('Mode MOCK alertes : notification de démonstration envoyée');
     return { status: 'mock', evaluated: 1, triggered: 1, message: null };
   }
@@ -86,16 +94,37 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
     // Prefs WhatsApp par propriétaire d'alerte (opt-in RGPD) — une lecture par run.
     const userIds = [...new Set(rows.map((r) => r.user_id))];
     const waByUser = new Map<string, string>(); // user_id -> téléphone E.164
+    // Telegram : conversation PERSONNELLE du propriétaire de l'alerte. Sans
+    // cette table de correspondance, channels.ts n'a aucun destinataire et
+    // n'envoie rien — c'est délibéré, le repli vers la conversation de
+    // l'exploitant ayant été le défaut corrigé par la migration 0129.
+    const tgByUser = new Map<string, number>(); // user_id -> chat_id Telegram
     if (userIds.length > 0) {
       const { data: prefs } = await sb
         .from('notification_prefs')
-        .select('user_id, whatsapp_phone, whatsapp_optin, alerts_whatsapp')
-        .in('user_id', userIds)
-        .eq('whatsapp_optin', true)
-        .eq('alerts_whatsapp', true);
-      for (const p of (prefs ?? []) as { user_id: string; whatsapp_phone: string | null }[]) {
-        const phone = p.whatsapp_phone?.trim();
-        if (phone && /^\+\d{8,15}$/.test(phone)) waByUser.set(p.user_id, phone);
+        .select(
+          'user_id, whatsapp_phone, whatsapp_optin, alerts_whatsapp, telegram_chat_id, telegram_optin, alerts_telegram',
+        )
+        .in('user_id', userIds);
+      type PrefRow = {
+        user_id: string;
+        whatsapp_phone: string | null;
+        whatsapp_optin: boolean | null;
+        alerts_whatsapp: boolean | null;
+        telegram_chat_id: number | null;
+        telegram_optin: boolean | null;
+        alerts_telegram: boolean | null;
+      };
+      for (const p of (prefs ?? []) as PrefRow[]) {
+        // Les deux opt-in sont désormais filtrés ICI et non dans la requête :
+        // un `.eq()` par canal exclurait les lignes de l'autre canal.
+        if (p.whatsapp_optin && p.alerts_whatsapp) {
+          const phone = p.whatsapp_phone?.trim();
+          if (phone && /^\+\d{8,15}$/.test(phone)) waByUser.set(p.user_id, phone);
+        }
+        if (p.telegram_optin && p.alerts_telegram && p.telegram_chat_id != null) {
+          tgByUser.set(p.user_id, p.telegram_chat_id);
+        }
       }
     }
 
@@ -113,7 +142,15 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
       triggered++;
       const subject = `Alerte ${a.code}`;
       const body = describeAlert(a, px, smart);
-      const results = await dispatch({ subject, body, code: a.code, to: null });
+      const results = await dispatch({
+        subject,
+        body,
+        code: a.code,
+        to: null,
+        // Destinataire Telegram du PROPRIÉTAIRE de l'alerte. Absent = aucun
+        // envoi Telegram — voir sendTelegram dans channels.ts.
+        telegramChatId: tgByUser.get(a.user_id) ?? null,
+      });
 
       // Canal WhatsApp PERSONNEL du propriétaire (opt-in) — en plus des canaux
       // globaux. Template Meta d'abord (hors fenêtre 24 h), repli texte.

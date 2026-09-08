@@ -75,6 +75,13 @@ export async function DELETE() {
   await admin.from('whatsapp_conversations').delete().eq('user_id', user.id);
   await admin.from('whatsapp_pairing_codes').delete().eq('user_id', user.id);
 
+  // 2quater. Même agent, canal Telegram (migration 0129). Le chat_id lui-même
+  //          part avec notification_prefs à l'étape 2bis ; restent l'historique
+  //          des messages et les codes d'appairage, soumis aux mêmes
+  //          contraintes RLS — donc même purge explicite en service_role.
+  await admin.from('telegram_conversations').delete().eq('user_id', user.id);
+  await admin.from('telegram_pairing_codes').delete().eq('user_id', user.id);
+
   // 3. Suppression définitive du compte auth (cascade FK : profil + données ;
   //    billing_transactions.user_id → NULL = anonymisé, conservé pour la compta).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);

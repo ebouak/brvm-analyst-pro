@@ -36,6 +36,8 @@ export async function GET() {
     academyCertificates,
     whatsappConversations,
     whatsappPairingCodes,
+    telegramConversations,
+    telegramPairingCodes,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -64,6 +66,8 @@ export async function GET() {
     supabase.from('academy_certificates').select('*').eq('user_id', user.id),
     supabase.from('whatsapp_conversations').select('*').eq('user_id', user.id),
     supabase.from('whatsapp_pairing_codes').select('*').eq('user_id', user.id),
+    supabase.from('telegram_conversations').select('*').eq('user_id', user.id),
+    supabase.from('telegram_pairing_codes').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -101,6 +105,11 @@ export async function GET() {
     // perso, rétention 90 jours) et codes d'appairage du numéro.
     whatsapp_conversations: whatsappConversations.data ?? [],
     whatsapp_pairing_codes: whatsappPairingCodes.data ?? [],
+    // Même agent conversationnel, canal Telegram : contenu des messages
+    // (donnée perso, rétention 90 jours) et codes d'appairage. Le chat_id
+    // lui-même figure déjà dans notification_prefs ci-dessus.
+    telegram_conversations: telegramConversations.data ?? [],
+    telegram_pairing_codes: telegramPairingCodes.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
