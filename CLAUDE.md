@@ -458,6 +458,27 @@ extraction du module partagé.
 - **Vérifié en production** : 47/47 valeurs, cours du jour toujours dans
   `[bas ; haut]`, 0 incohérence.
 
+### Agent WhatsApp — PRÉCONDITION avant de lui donner les outils (2026-09-08)
+
+L'agent WhatsApp appelle encore `callAgentLlm(messages)` sans outils, là où
+Telegram passe `{definitions: OUTILS, executer}`. **Ce n'est pas un oubli à
+corriger d'un paramètre.**
+
+`lib/whatsappAgent/handleMessage.ts` identifie l'utilisateur par le numéro
+**déclaré** dans les paramètres : aucun OTP ne prouve la possession (le code le
+dit lui-même). Si un compte saisit — par faute de frappe ou volontairement — le
+numéro d'un tiers, c'est ce tiers qui, en écrivant au bot, reçoit les données de
+l'autre. Aujourd'hui cela expose une watchlist ; **avec les outils, ce serait le
+portefeuille, les positions et les alertes**. Telegram n'a pas ce problème : son
+`chat_id` vient de Telegram et n'est écrit qu'après un code d'appairage.
+
+Ordre imposé : **appairage d'abord, outils ensuite.** Le module de codes est
+déjà partagé (`lib/pairingCodes.ts`, extrait précisément parce qu'il n'a rien
+de spécifique à un canal).
+
+Rien ne presse : au 2026-09-08 le canal est **dormant** — `whatsapp_conversations`
+est vide et aucun identifiant Meta n'est configuré.
+
 ### Ajouts (passage 2026-09-08) — Flottant et volume moyen 30 j
 
 - **`flottant` et `vol_moyen_30j` (0/335 depuis la migration `0020`) sont
@@ -465,6 +486,14 @@ extraction du module partagé.
   que ses fondamentaux). Le module `runDetails` existait et écrivait déjà ces
   colonnes ; il prenait **403 sur chaque appel** (chaîne d'agent périmée) et
   n'était **planifié dans aucun workflow**.
+- **Ce que cela change, honnêtement.** `flottant` est affiché sur la fiche
+  action (« Titres flottant ») : gain réel. `vol_moyen_30j` **n'a aucun
+  consommateur** — la fiche action calcule déjà sa propre moyenne sur nos
+  20 dernières séances, et le repli de liquidité du scoring lit
+  `avg_volume_30d` de `mv_signal_inputs`, une autre colonne. La remplir l'a
+  rendue juste plutôt que vide ; **ne pas l'afficher à côté de la moyenne 20 j
+  calculée** — deux moyennes de volume voisines, dont une tierce et en retard
+  d'une séance, tromperaient plus qu'elles n'informeraient.
 - **`src/client/richbourseAgent.ts`** : la chaîne d'agent et sa justification
   déontologique (robots.txt de richbourse, `/common/mouvements/` et
   `/common/dividende/` hors Disallow) vivaient en double, et une seule copie
