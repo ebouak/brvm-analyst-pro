@@ -458,6 +458,36 @@ extraction du module partagé.
 - **Vérifié en production** : 47/47 valeurs, cours du jour toujours dans
   `[bas ; haut]`, 0 incohérence.
 
+### Ajouts (passage 2026-09-08) — Flottant et volume moyen 30 j
+
+- **`flottant` et `vol_moyen_30j` (0/335 depuis la migration `0020`) sont
+  remplis** : 47 actions sur 48 (SVOC n'a pas de page richbourse — même trou
+  que ses fondamentaux). Le module `runDetails` existait et écrivait déjà ces
+  colonnes ; il prenait **403 sur chaque appel** (chaîne d'agent périmée) et
+  n'était **planifié dans aucun workflow**.
+- **`src/client/richbourseAgent.ts`** : la chaîne d'agent et sa justification
+  déontologique (robots.txt de richbourse, `/common/mouvements/` et
+  `/common/dividende/` hors Disallow) vivaient en double, et une seule copie
+  était juste. Constante partagée désormais.
+- **PREUVE DE SÉANCE plutôt que date devinée.** La page ne porte aucune date de
+  séance exploitable ; l'ancien code se rabattait **silencieusement** sur
+  « aujourd'hui » — un dimanche, l'update ne visait aucune ligne et le journal
+  annonçait un succès. `runDetails` s'ancre maintenant sur la dernière séance
+  **de notre base**, et n'écrit `ouverture`/`plus_haut`/`plus_bas` que si la
+  clôture de richbourse **égale notre `cours_jour`**.
+- **Ce garde-fou a servi immédiatement** : au 2026-09-08, richbourse avait une
+  séance de retard sur **39 valeurs sur 47** (SNTS 38 700 contre 39 200, NTLC
+  18 000 contre 16 900). Sans lui, les extrêmes d'hier auraient été collés sous
+  la clôture d'aujourd'hui — et auraient **écrasé** les valeurs correctes que
+  `cotations` (daily.yml, sikafinance) écrit déjà. Ces colonnes n'étaient donc
+  pas vides, contrairement à `flottant`/`vol_moyen_30j`.
+- **Tests** (`tests/richbourseDetails.test.ts`, 7) sur le balisage réel, dont le
+  piège de la cellule de libellé « Volume moyen » qui contient une infobulle
+  entière : une égalité stricte la manquerait sans rien faire échouer.
+- **Cron** : job `details` ajouté à `dividends.yml` (samedi 09:00 UTC) — même
+  source, même jour, pour ne pas multiplier les visites chez un tiers.
+  Hebdomadaire car le flottant ne bouge qu'aux opérations sur titres.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

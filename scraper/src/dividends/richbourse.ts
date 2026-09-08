@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { logger } from '../logger.js';
+import { RICHBOURSE_AGENT } from '../client/richbourseAgent.js';
 import type { Dividend } from './types.js';
 
 /**
@@ -31,22 +32,6 @@ import type { Dividend } from './types.js';
 
 const RICHBOURSE_URL = 'https://www.richbourse.com/common/dividende/index';
 
-/**
- * Agent HTTP — un choix à expliciter plutôt qu'à subir.
- *
- * Richbourse renvoie 403 à « Mozilla/5.0 (compatible; BRVMAnalystPro/1.0) »
- * et 200 à un agent de navigateur : un filtre grossier sur la chaîne, qui
- * contredit leur propre robots.txt. Celui-ci est en effet explicite —
- * « une page servie en 200 à un visiteur anonyme ET déclarée dans le sitemap
- * est ouverte », pour TOUS les robots, IA génératives comprises — et
- * /common/dividende/index ne figure dans aucun Disallow.
- *
- * On garde donc NOTRE IDENTITÉ et notre URL dans la chaîne : le préfixe
- * navigateur sert à passer le filtre, pas à se faire passer pour un humain.
- * Une requête par exécution quotidienne, sur une seule page autorisée.
- */
-const AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) BRVMAnalystPro/1.0 (+https://westbourse.com)';
 
 /** Convertit « 2 293.28 » ou « 1 707,2 » en nombre. Null si illisible. */
 function parseMontant(s: string): number | null {
@@ -139,7 +124,7 @@ export function parseRichbourse(html: string): { dividends: Dividend[]; ignores:
 export async function fetchRichbourseDividends(): Promise<Dividend[]> {
   const res = await axios.get<string>(RICHBOURSE_URL, {
     timeout: 30000,
-    headers: { 'User-Agent': AGENT },
+    headers: { 'User-Agent': RICHBOURSE_AGENT },
     responseType: 'text',
   });
 
