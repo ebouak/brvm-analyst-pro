@@ -32,6 +32,7 @@ import { computeRatios, latestUsable, type FundamentalsRow } from '@/lib/landing
 import { SectorStrip } from '@/components/landing/SectorStrip';
 import { DataToDecision } from '@/components/landing/DataToDecision';
 import { PlatformUniverses } from '@/components/landing/PlatformUniverses';
+import ScreensShowcase from '@/components/landing/ScreensShowcase';
 import { VideoSeance } from '@/components/landing/VideoSeance';
 import { DarkBand } from '@/components/landing/DarkBand';
 import MarketStateCard, { type MarketStats, type Breakdown } from '@/components/MarketStateCard';
@@ -1071,6 +1072,16 @@ export default async function Landing() {
 
       {/* ── 13 · DE LA DONNÉE À LA DÉCISION — fil conducteur de la marque ─ */}
       <DataToDecision />
+
+      {/* ── 13 bis · LA PLATEFORME EN ACTION — vidéo Remotion ────────────
+          Rebranché le 2026-09-10. Le composant et la vidéo existaient déjà
+          (`remotion/landing-video.tsx`, 16 s, écrans de production) mais rien
+          ne les montait : l'audit de conservation les a trouvés parmi neuf
+          composants sans aucun appelant. Placé ICI, juste avant les quatre
+          univers : on montre la plateforme, puis on la découpe.
+          Coût de chargement nul tant que la section n'approche pas du
+          viewport — ScreensShowcase ne monte la vidéo qu'à 300 px du bord. */}
+      <ScreensShowcase />
 
       {/* ── 14 · LA PLATEFORME — quatre univers (remplace la grille plate)  */}
       <PlatformUniverses />
