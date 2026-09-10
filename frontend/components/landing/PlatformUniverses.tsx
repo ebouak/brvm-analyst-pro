@@ -38,7 +38,11 @@ const UNIVERS: Univers[] = [
       { label: 'Note A–F', href: '/notations', desc: 'Score quantitatif par action, recalculé chaque séance' },
       { label: 'Fondamentaux', href: '/societes', desc: 'États financiers extraits des publications officielles' },
       { label: 'Screener', href: '/screener', desc: 'RSI, MACD, dividendes, secteurs, filtres combinés' },
-      { label: 'Signaux', href: '/signaux', desc: 'BUY / HOLD / SELL avec niveau de confiance' },
+      // Formulation corrigée le 2026-09-10 : sur 3 533 signaux depuis le 1er juin,
+      // 98 % sont HOLD (seuils à ±0,6 pour un score dont le 99e centile vaut 0,604).
+      // Promettre « BUY / HOLD / SELL » sans dire que l'abstention est la règle
+      // laissait attendre des signaux francs quotidiens. Voir CLAUDE.md §9.
+      { label: 'Signaux', href: '/signaux', desc: 'BUY / HOLD / SELL — le moteur s’abstient tant que rien n’est net' },
       { label: 'Conseiller unifié', href: '/conseiller', desc: 'Synthèse DCF, technique et fondamentale' },
       { label: 'Liquidité', href: '/liquidite', desc: 'Score de liquidité, spread estimé, flux acheteur' },
     ],

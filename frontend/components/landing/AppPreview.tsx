@@ -108,7 +108,10 @@ const FEATURES: Feature[] = [
   {
     icon: I.eclair,
     title: 'Signaux BUY / HOLD / SELL',
-    desc: 'Chaque titre scoré à la séance, avec son score de confiance, filtrable par secteur.',
+    // « et conserver » n'est pas une coquetterie : 98 % des 3 533 signaux émis
+    // depuis le 1er juin sont des HOLD. Le dire ici évite de promettre une
+    // conviction quotidienne que le moteur ne produit pas. Voir CLAUDE.md §9.
+    desc: 'Chaque titre scoré à la séance, avec sa confiance — et « conserver » tant qu’aucun signal n’est net.',
     badge: 'PREMIUM',
     href: '/pricing',
     points: ['Signaux quotidiens', 'Historique', 'Export CSV'],

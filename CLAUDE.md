@@ -529,6 +529,21 @@ est vide et aucun identifiant Meta n'est configuré.
   Les bougies hebdo des indices (dashboard) sont construites avec open = clôture
   veille et close = valeur du jour (corps réel, sans mèches) — honnête, pas de
   high/low inventés. Les cours actions restent des courbes de clôture + volume.
+- **SIGNAUX QUASI MUETS — calibrage des seuils (constaté le 2026-09-10).**
+  Sur **3 533 signaux depuis le 1er juin**, 98 % sont `HOLD` : seulement 1,05 %
+  dépassent `+0,6` et 0,82 % passent sous `-0,6`. Or `score_total` a une médiane
+  de **0,011**, un 99e centile à **0,604** et un maximum à 0,821 — les seuils
+  `BUY_THRESHOLD = 0.6` / `SELL_THRESHOLD = -0.6` de `scoring/score.ts` sont donc
+  posés **au centile 99**. Mécanique en cause : le score est une moyenne pondérée
+  de sous-scores bornés à ±1, et la moyenne écrase vers zéro. Depuis le 1er août :
+  980 `HOLD`, 20 `BUY`, **aucun `SELL`**.
+  ⚠️ **Ne pas « corriger » en abaissant le seuil sans décision produit** :
+  descendre à ±0,45 rendrait ~13 % des signaux actionnables, c'est-à-dire
+  fabriquerait des recommandations d'achat. Deux options, et le choix engage
+  l'argent des utilisateurs : (a) recalibrer les seuils sur la distribution
+  réelle, (b) assumer l'abstention et le dire. **L'option (b) a été appliquée au
+  niveau du discours** — `PlatformUniverses` et `AppPreview` annoncent désormais
+  que le moteur s'abstient tant que rien n'est net. La calibration reste ouverte.
 - **mv_signal_inputs** ne matérialise que la dernière séance : le scoring d'une
   date passée précise est partiel (voir `docs/SCORING.md` §6).
 - **Comparatif dividendes** : dépend de l'ingestion des dividendes (mock fourni).
