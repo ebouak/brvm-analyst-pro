@@ -1205,27 +1205,18 @@ export default async function Landing() {
         </article>
       </section>
 
-      {/* ── 2 CARTES : Analyse · Actualités ───────────────────────────── */}
-      <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Carte 1 — Analyse exclusive → inscription */}
-        <article className="flex flex-col rounded-panel border border-border bg-surface p-6 transition-all hover:border-accent/40 hover:bg-elevated/70">
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-up/30 bg-up/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-up">
-            <span className="h-1.5 w-1.5 rounded-full bg-up" /> Données vérifiées
-          </span>
-          <h3 className="mt-4 font-display text-xl text-ivory">Accédez à des analyses exclusives</h3>
-          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
-            Note A–F sur chaque action, signaux quantitatifs, watchlist et alertes. L&apos;essentiel est
-            gratuit — créez votre compte en 1 minute.
-          </p>
-          <Link
-            href="/signup"
-            className="mt-5 inline-flex min-h-[44px] w-fit items-center gap-1.5 rounded-full border border-up/40 px-5 text-sm font-semibold text-up transition-colors hover:bg-up/10"
-          >
-            Créer mon compte gratuit <span aria-hidden>→</span>
-          </Link>
-        </article>
-
-        {/* Carte 2 — Actualités du marché (vraies données brvm_news) */}
+      {/* ── ACTUALITÉS DU MARCHÉ ─────────────────────────────────────────
+          « Carte 1 · Accédez à des analyses exclusives » retirée le
+          2026-09-10 : c'était le QUATRIÈME lien /signup de la page (avec le
+          CTA de mi-parcours, « Rejoindre la communauté » et le CTA final,
+          sans compter le hero et la barre), et elle n'annonçait que des
+          fonctions déjà présentées plus haut — note A–F, signaux, watchlist.
+          Aucune information perdue.
+          Les actualités RESTENT et passent pleine largeur : vérifié, `news`
+          n'est rendu qu'ICI sur toute la landing. Ne pas les retirer en
+          croyant à un doublon — il n'y en a pas. ────────────────────────── */}
+      <section className="mt-10">
+        {/* Actualités du marché (vraies données brvm_news) */}
         <article className="flex flex-col rounded-panel border border-border bg-surface p-6">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-xl text-ivory">Actualités du Marché</h3>
