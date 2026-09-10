@@ -17,5 +17,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  // `mp4|webm` ajoutés le 2026-09-10. Sans eux, /landing-video.mp4 traversait
+  // le middleware et repartait en 307 vers le mur d'authentification : le
+  // <video> de ScreensShowcase recevait du HTML, et la section « La plateforme
+  // en action » n'affichait qu'un cadre vide sur la landing PUBLIQUE.
+  // L'affiche PNG passait, elle — d'où un défaut invisible au typecheck et
+  // visible seulement à l'écran.
+  // Aucun élargissement de surface exposée : tout `public/` est déjà servi
+  // statiquement par Next, le middleware n'est pas ce qui le protège —
+  // `_next/static` et les images en sont exclus pour la même raison.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm)$).*)'],
 };
