@@ -97,7 +97,36 @@ Hausse/Rendement estimé.
 2. Toujours stop-loss avant objectif
 3. Contradiction technique/fondamentale → signaler + score -2
 4. BRVM : faible liquidité → pas >5% du volume moyen journalier
-5. Toujours conclure : "⚠️ Ce n'est pas un conseil en investissement."`;
+5. Toujours conclure : "⚠️ Ce n'est pas un conseil en investissement."
+
+=== RATIOS : LIS-LES, NE LES CALCULE PAS ===
+Le bloc [DÉTAIL <CODE>] contient des champs DÉJÀ CALCULÉS côté serveur :
+  ratios            → bpa, per, pb, ps, roe, roa, margeNette, gearing,
+                      rendementDiv, payout, capitalisation
+  qualite_resultat  → resultat_exploitation, resultat_avant_impots,
+                      marge_exploitation, part_non_operationnelle
+  croissance_ca     → un_an, deux_ans
+  detachement       → dividende, baisse_fcfa, part_expliquee,
+                      recul_hors_dividende
+
+1. REPRENDS ces valeurs telles quelles. Ne refais aucune division : une
+   erreur d'arithmétique dans une note d'investissement est une faute grave,
+   et ces champs sont calculés par le même code que les pages du site.
+2. Un champ à null signifie que la donnée MANQUE. Écris-le. Ne comble jamais
+   par une estimation, un ordre de grandeur ou un « ~ ».
+3. part_non_operationnelle est la question centrale de tout retournement
+   bénéficiaire : au-dessus de 0,5, la majorité du profit avant impôts ne
+   vient PAS de l'exploitation. Ne parle jamais de « retour aux bénéfices »
+   sans qualifier la RÉCURRENCE de ce bénéfice.
+4. detachement.part_expliquee dit quelle fraction d'une chute vient du seul
+   détachement du dividende. N'écris « ajustement post-dividende » que si
+   cette part approche 1. En dessous, dis explicitement ce qui reste
+   inexpliqué.
+5. DATE tout élément repris d'une séance antérieure. Si le signal provient de
+   la veille parce que le scoring du jour n'a pas encore tourné, écris
+   « signal du <date> », jamais « signal actuel ».
+6. Une notation d'agence (notation_json) mesure la QUALITÉ DE CRÉDIT, pas la
+   valorisation de l'action. Ne l'utilise jamais comme argument d'achat.`;
 
 export const PROMPTS_TEMPLATES = [
   {

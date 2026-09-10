@@ -1,5 +1,17 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
+/* Les ratios servis à l'IA viennent du MÊME module que les pages du site :
+   une seule définition de BPA, PER, P/B, ROE et payout dans tout le projet. */
+import {
+  computeRatios,
+  pickBestFundamental,
+  fusionnerExercices,
+  qualiteResultat,
+  croissanceCA,
+  expliqueDetachement,
+  type FundamentalRow,
+  type LigneResultat,
+} from '@/lib/fundamentals';
 
 // ── Tool definitions (OpenAI function-calling format) ────────────────────────
 
@@ -216,6 +228,7 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       const [
         { data: hist }, { data: instr }, { data: sig },
         { data: divs }, { data: fundsRows }, { data: pubs }, { data: evts },
+        { data: isRows },
       ] = await Promise.all([
         sb.from('brvm_actions_daily').select('date_marche, cours_jour, variation_pct, volume, valeur_echangee').eq('code', code).order('date_marche', { ascending: false }).limit(days),
         sb.from('brvm_instruments').select('designation, secteur, pays, shares, notation_json').eq('code', code).maybeSingle(),
@@ -231,8 +244,73 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
         sb.from('fundamentals').select('year, revenue, net_income, equity, debt, bfr').eq('code', code).order('year', { ascending: false }).limit(5),
         sb.from('publications').select('date_publication, libelle, type_publication').eq('code', code).order('date_publication', { ascending: false }).limit(10),
         sb.from('market_events').select('event_date, title, event_type, sentiment').eq('instrument_code', code).order('event_date', { ascending: false }).limit(10),
+        sb.from('income_statements').select('periode, revenu_total, resultat_exploitation, resultat_avant_impots, resultat_net').eq('code', code).order('periode', { ascending: false }).limit(12),
       ]);
-      return { code, instrument: instr, signal: sig?.[0] ?? null, history: hist ?? [], dividends: divs ?? [], fundamentals: fundsRows ?? [], publications: pubs ?? [], events: evts ?? [] };
+
+      /* ── RATIOS CALCULÉS, ET NON LAISSÉS AU MODÈLE ──────────────────────
+         Un LLM calcule mal et, surtout, n'y pense pas : ses notes citaient des
+         montants sans jamais les rapporter au cours. BPA, PER, P/B, ROE et
+         payout sont donc dérivés ICI, en TypeScript, par le MÊME module que
+         les pages du site (`lib/fundamentals`) — une seule source de vérité.
+
+         Le nombre d'actions vient de `brvm_instruments.shares`, jamais de
+         `income_statements.actions_en_circulation` : sur NEIC les dépôts
+         anciens portent 510 633 titres quand le référentiel en compte
+         12 765 825, soit un facteur 25 après fractionnement. Mélanger les deux
+         donnerait un PER faux d'autant. (2026-09-10) */
+      const fonda = pickBestFundamental((fundsRows ?? []) as FundamentalRow[]);
+      const coursRecent = hist?.[0]?.cours_jour ?? null;
+      const divRecent = (divs ?? []).find((d) => Number(d.montant) > 0)?.montant ?? null;
+
+      const ratios = fonda
+        ? computeRatios({
+            cours: coursRecent,
+            shares: instr?.shares ?? null,
+            revenue: fonda.revenue,
+            net_income: fonda.net_income,
+            equity: fonda.equity,
+            debt: (fonda as { debt?: number | null }).debt ?? null,
+            dividende: divRecent,
+          })
+        : null;
+
+      const exercices = fusionnerExercices((isRows ?? []) as LigneResultat[]);
+
+      /* Le détachement n'est décomposé que si l'ex-date correspond vraiment à
+         une séance connue ET que la veille est disponible : sans les deux
+         cours, la soustraction n'aurait aucun sens. */
+      let detachement = null;
+      const divDate = (divs ?? []).find((d) => d.ex_date != null && Number(d.montant) > 0);
+      if (divDate?.ex_date && hist) {
+        const i = hist.findIndex((h) => h.date_marche === divDate.ex_date);
+        if (i >= 0 && hist[i + 1]) {
+          detachement = expliqueDetachement(
+            String(divDate.ex_date),
+            Number(divDate.montant),
+            hist[i + 1].cours_jour,
+            hist[i].cours_jour,
+          );
+        }
+      }
+
+      return {
+        code,
+        instrument: instr,
+        signal: sig?.[0] ?? null,
+        history: hist ?? [],
+        dividends: divs ?? [],
+        fundamentals: fundsRows ?? [],
+        publications: pubs ?? [],
+        events: evts ?? [],
+        ratios,
+        qualite_resultat: qualiteResultat(exercices[0]),
+        croissance_ca: {
+          un_an: croissanceCA(exercices, 1),
+          deux_ans: croissanceCA(exercices, 2),
+        },
+        comptes_resultat: exercices,
+        detachement,
+      };
     }
 
     case 'get_signals': {

@@ -51,6 +51,144 @@ export function computeRatios(i: FundamentalInputs): Ratios {
   };
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPLÉMENTS D'ANALYSE — ajoutés le 2026-09-10.
+
+   `computeRatios` ci-dessus couvre la valorisation (BPA, PER, P/B, ROE,
+   payout…). Il lui manquait trois dérivations qu'une note d'analyste ne peut
+   pas omettre, et qu'un modèle de langage ne pense pas à faire seul :
+
+     1. la QUALITÉ du bénéfice — quelle part vient de l'exploitation ;
+     2. la TRAJECTOIRE du chiffre d'affaires sur plusieurs exercices ;
+     3. la DÉCOMPOSITION d'une chute un jour de détachement.
+
+   Elles vivent ici, et non dans un nouveau module, pour qu'il n'existe qu'une
+   seule source de vérité sur les ratios de ce projet.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Lignes de compte de résultat, telles que stockées (une par exercice). */
+export interface LigneResultat {
+  periode: string;
+  revenu_total: number | null;
+  resultat_exploitation: number | null;
+  resultat_avant_impots: number | null;
+  resultat_net: number | null;
+}
+
+export interface QualiteResultat {
+  periode: string;
+  resultat_exploitation: number | null;
+  resultat_avant_impots: number | null;
+  resultat_net: number | null;
+  marge_exploitation: number | null;
+  /**
+   * Part du résultat AVANT IMPÔTS qui ne provient PAS de l'exploitation,
+   * en fraction de 1. Proche de 0 : le profit est opérationnel, donc
+   * reproductible. Au-delà de 0,5 : il tient majoritairement à des éléments
+   * financiers ou exceptionnels, et rien ne garantit qu'il se répète.
+   *
+   * Motif de cet ajout : une note qualifiait 2025 de « retour aux bénéfices »
+   * pour NEIC. Or résultat d'exploitation 1,213 Md contre résultat avant
+   * impôts 2,467 Md — la moitié du profit ne venait pas de l'activité. La
+   * donnée était en base ; personne ne la calculait.
+   */
+  part_non_operationnelle: number | null;
+}
+
+/**
+ * Fusionne les lignes d'un même exercice.
+ *
+ * `income_statements` porte souvent DEUX lignes par période : l'extraction
+ * résumée (CA, résultat net) et le détail complet (exploitation, impôts).
+ * Aucune n'est complète seule. On retient, champ par champ, la première
+ * valeur non nulle.
+ */
+export function fusionnerExercices(lignes: LigneResultat[]): LigneResultat[] {
+  const parPeriode = new Map<string, LigneResultat>();
+  for (const l of lignes) {
+    const acc = parPeriode.get(l.periode);
+    if (!acc) {
+      parPeriode.set(l.periode, { ...l });
+      continue;
+    }
+    if (acc.revenu_total == null) acc.revenu_total = l.revenu_total;
+    if (acc.resultat_exploitation == null) acc.resultat_exploitation = l.resultat_exploitation;
+    if (acc.resultat_avant_impots == null) acc.resultat_avant_impots = l.resultat_avant_impots;
+    if (acc.resultat_net == null) acc.resultat_net = l.resultat_net;
+  }
+  return [...parPeriode.values()].sort((a, b) => b.periode.localeCompare(a.periode));
+}
+
+export function qualiteResultat(ligne: LigneResultat | null | undefined): QualiteResultat | null {
+  if (!ligne) return null;
+  const rexp = ligne.resultat_exploitation;
+  const rai = ligne.resultat_avant_impots;
+  return {
+    periode: ligne.periode,
+    resultat_exploitation: rexp,
+    resultat_avant_impots: rai,
+    resultat_net: ligne.resultat_net,
+    marge_exploitation: div(rexp, ligne.revenu_total),
+    // Exige les DEUX termes : sans le résultat d'exploitation la question n'a
+    // pas de réponse, et une approximation serait pire que le silence.
+    part_non_operationnelle:
+      rexp != null && rai != null && rai !== 0 ? (rai - rexp) / Math.abs(rai) : null,
+  };
+}
+
+/**
+ * Croissance du chiffre d'affaires sur `nAnnees` exercices, en fraction de 1.
+ * `lignes` doit être trié du plus récent au plus ancien.
+ */
+export function croissanceCA(lignes: LigneResultat[], nAnnees: number): number | null {
+  const recent = lignes[0]?.revenu_total ?? null;
+  const ancien = lignes[nAnnees]?.revenu_total ?? null;
+  if (recent == null || ancien == null || ancien === 0) return null;
+  return (recent - ancien) / ancien;
+}
+
+export interface Detachement {
+  ex_date: string;
+  dividende: number;
+  cours_veille: number;
+  cours_ex: number;
+  baisse_fcfa: number;
+  /** Part de la baisse expliquée par le seul détachement, en fraction de 1. */
+  part_expliquee: number | null;
+  /** Recul subsistant une fois la référence ajustée du dividende. */
+  recul_hors_dividende: number | null;
+}
+
+/**
+ * Décompose la chute d'un jour de détachement.
+ *
+ * Motif : une note écrivait « probable ajustement post-dividende » devant un
+ * −11,74 % alors que le dividende n'en expliquait que 4,7 points. Attribuer
+ * toute la baisse au détachement est une erreur d'analyse — et la
+ * décomposition n'est qu'une soustraction, elle n'a pas à être confiée au
+ * modèle.
+ */
+export function expliqueDetachement(
+  exDate: string,
+  dividende: number | null,
+  coursVeille: number | null,
+  coursEx: number | null,
+): Detachement | null {
+  if (dividende == null || coursVeille == null || coursEx == null) return null;
+  if (dividende <= 0 || coursVeille <= 0) return null;
+  const baisse = coursVeille - coursEx;
+  const reference = coursVeille - dividende;
+  return {
+    ex_date: exDate,
+    dividende,
+    cours_veille: coursVeille,
+    cours_ex: coursEx,
+    baisse_fcfa: baisse,
+    part_expliquee: baisse > 0 ? Math.min(dividende / baisse, 1) : null,
+    recul_hors_dividende: reference > 0 ? (coursEx - reference) / reference : null,
+  };
+}
+
 export interface FundamentalRow {
   year: number | null;
   revenue: number | null;
