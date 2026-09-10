@@ -299,7 +299,14 @@ export default async function DashboardV2() {
     },
   ];
 
-  const partBaissiere = mesures[2].baisse;
+  /* La pondération « capitaux » est TOUJOURS la dernière entrée, mais pas
+     toujours la troisième : l'entrée « transactions » n'est ajoutée que si
+     `transactionsConnues`. Un index fixe [2] valait `undefined` les séances
+     où aucune valeur ne publie `nb_transactions` — et faisait tomber toute
+     la page sur « Cette section n'a pas pu se charger ».
+     Les lignes du commentaire dérivé utilisaient déjà `mesures.length - 1` ;
+     celle-ci était la seule à indexer en dur. */
+  const partBaissiere = mesures[mesures.length - 1].baisse;
 
   /* La ligne la plus lourde de la seance : elle sert au commentaire derive. */
   const plusLourde = actions.reduce<ActionRow | null>(
