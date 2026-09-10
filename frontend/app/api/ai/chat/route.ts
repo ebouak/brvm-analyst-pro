@@ -127,7 +127,16 @@ async function buildRichContext(question: string): Promise<string> {
     for (const code of codes) {
       fetches.push(runTool('search_company', { query: code }).then(async (found) => {
         const res = found as { results?: Array<{ code: string }> };
-        const match = res.results?.[0];
+        /* `search_company` filtre par SOUS-CHAÎNE sur le code, la désignation
+           ET le secteur, puis trie par code alphabétique — jamais par
+           pertinence. Prendre results[0] à l'aveugle chargeait donc le détail
+           d'un INDICE là où l'utilisateur demandait une action : le PDF du
+           2026-09-10 en porte la trace, « [DÉTAIL BRVMCBASE] » sur une
+           question portant sur NEIC.
+           On exige désormais la correspondance EXACTE du code. À défaut, on
+           préfère ne rien joindre plutôt que joindre le détail d'autre chose :
+           un contexte muet se voit, un contexte faux ne se voit pas. */
+        const match = res.results?.find((r) => r.code?.toUpperCase() === code.toUpperCase());
         if (match) {
           const detail = await runTool('get_action_detail', { code: match.code, days: 30 });
           parts.push(`\n[DÉTAIL ${match.code}]\n${JSON.stringify(detail, null, 0)}`);

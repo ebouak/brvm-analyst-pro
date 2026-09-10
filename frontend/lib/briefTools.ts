@@ -220,7 +220,14 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
         sb.from('brvm_actions_daily').select('date_marche, cours_jour, variation_pct, volume, valeur_echangee').eq('code', code).order('date_marche', { ascending: false }).limit(days),
         sb.from('brvm_instruments').select('designation, secteur, pays, shares, notation_json').eq('code', code).maybeSingle(),
         sb.from('signals_daily').select('signal, score_total, confiance, explication, score_variation, score_volume, score_rsi, bonus_tendance, penalite_liquidite').eq('code', code).order('date_marche', { ascending: false }).limit(1),
-        sb.from('dividends').select('exercice, montant, devise, ex_date, payment_date').eq('code', code).order('ex_date', { ascending: false }).limit(5),
+        // `nullsFirst: false` est INDISPENSABLE ici. PostgreSQL place les NULL
+        // en TÊTE d'un tri décroissant, et 245 des 263 lignes de `dividends`
+        // n'ont pas d'ex_date. Sans cette option, NEIC rendait ses cinq lignes
+        // sans date et écartait la seule datée — celle de l'exercice 2025,
+        // 140,40 FCFA détachés le 2026-09-09, exactement la ligne recherchée.
+        // L'agent répondait alors « cette donnée n'est pas dans mon contexte »,
+        // ce qui était vrai, et masquait le défaut d'outil. (2026-09-10)
+        sb.from('dividends').select('exercice, montant, devise, ex_date, payment_date').eq('code', code).order('ex_date', { ascending: false, nullsFirst: false }).limit(5),
         sb.from('fundamentals').select('year, revenue, net_income, equity, debt, bfr').eq('code', code).order('year', { ascending: false }).limit(5),
         sb.from('publications').select('date_publication, libelle, type_publication').eq('code', code).order('date_publication', { ascending: false }).limit(10),
         sb.from('market_events').select('event_date, title, event_type, sentiment').eq('instrument_code', code).order('event_date', { ascending: false }).limit(10),
@@ -275,7 +282,11 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
     }
 
     case 'get_dividends': {
-      let q = sb.from('dividends').select('code, exercice, montant, devise, ex_date, payment_date').order('ex_date', { ascending: false }).limit(50);
+      // Même piège qu'en ligne 223, en pire : sans `nullsFirst: false`, les
+      // « 50 dividendes les plus récents » étaient 50 lignes SANS AUCUNE DATE,
+      // et tout dividende réellement daté se retrouvait hors fenêtre. Mesuré
+      // le 2026-09-10 : 50 NULL sur 50, aucun détachement récent visible.
+      let q = sb.from('dividends').select('code, exercice, montant, devise, ex_date, payment_date').order('ex_date', { ascending: false, nullsFirst: false }).limit(50);
       if (args.code) q = q.eq('code', String(args.code).toUpperCase());
       const { data } = await q;
       return { dividends: data ?? [] };
