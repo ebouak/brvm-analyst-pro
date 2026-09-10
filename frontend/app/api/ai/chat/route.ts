@@ -62,7 +62,17 @@ function extractCodes(text: string): string[] {
   const matches = text.toUpperCase().match(/\b[A-Z]{2,5}C?\b/g) ?? [];
   // Filtre les mots courants qui ne sont pas des codes
   const SKIP = new Set(['RSI','MACD','EMA','SMA','BUY','HOLD','SELL','BRVM','FCFA','ROE','PER']);
-  return [...new Set(matches.filter((m) => !SKIP.has(m)))].slice(0, 3);
+  /* PAS de `.slice(0, 3)` ICI. Le motif ci-dessus capture n'importe quel mot
+     français de 2 à 5 lettres : sur « Faut-il acheter, vendre ou conserver ?
+     (NEIC) » il rend FAUT, IL, OU, NEIC — et tronquer aux trois premiers
+     jetait le seul vrai ticker, arrivé en quatrième position. L'agent
+     répondait alors, à juste titre, qu'il n'avait aucune donnée sur la valeur.
+     La sélection se fait plus bas, sur la correspondance EXACTE avec un code
+     d'instrument ; les mots parasites n'y survivent pas. Le plafond est donc
+     appliqué APRÈS validation, jamais avant. (2026-09-10)
+     Borne haute large pour ne pas retomber dans le même piège, mais finie :
+     une question ne déclenchera pas plus de 12 recherches. */
+  return [...new Set(matches.filter((m) => !SKIP.has(m)))].slice(0, 12);
 }
 
 // ── Construit un contexte temps réel riche ────────────────────────────────────
@@ -122,8 +132,12 @@ async function buildRichContext(question: string): Promise<string> {
       }));
     }
 
-    // Détail par société si un code est détecté
+    /* Détail par société si un code est détecté.
+       `retenus` plafonne le nombre de blocs JOINTS (donc de codes réellement
+       reconnus), et non le nombre de mots examinés : c'est l'inversion qui
+       manquait. Un mot parasite ne consomme plus le quota. */
     const codes = extractCodes(question);
+    let retenus = 0;
     for (const code of codes) {
       fetches.push(runTool('search_company', { query: code }).then(async (found) => {
         const res = found as { results?: Array<{ code: string }> };
@@ -137,7 +151,11 @@ async function buildRichContext(question: string): Promise<string> {
            préfère ne rien joindre plutôt que joindre le détail d'autre chose :
            un contexte muet se voit, un contexte faux ne se voit pas. */
         const match = res.results?.find((r) => r.code?.toUpperCase() === code.toUpperCase());
-        if (match) {
+        /* Le plafond se teste ICI, dans la continuation : les recherches
+           partent toutes en parallèle, un `break` dans la boucle ne gaterait
+           rien. On compte les blocs RETENUS, pas les mots examinés. */
+        if (match && retenus < 3) {
+          retenus += 1;
           const detail = await runTool('get_action_detail', { code: match.code, days: 30 });
           parts.push(`\n[DÉTAIL ${match.code}]\n${JSON.stringify(detail, null, 0)}`);
         }
