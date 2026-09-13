@@ -14,7 +14,7 @@ export function CookieBanner() {
       {needsChoice && (
         // Bandeau à fond FIXE sombre (tous thèmes) → blancs littéraux, pas de
         // tokens (`text-white` = ivoire réactif au thème, illisible en clair).
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[rgba(255,255,255,0.1)] bg-[#0a1417]/95 px-4 py-4 backdrop-blur-md">
+        <div className="print:hidden fixed inset-x-0 bottom-0 z-50 border-t border-[rgba(255,255,255,0.1)] bg-[#0a1417]/95 px-4 py-4 backdrop-blur-md">
           <div className="mx-auto flex max-w-4xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-[#fff]/80">
               Nous utilisons des cookies strictement nécessaires au fonctionnement du site.

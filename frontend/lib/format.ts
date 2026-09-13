@@ -10,7 +10,7 @@ export function fmtFcfa(n: number | null | undefined): string {
   if (n == null) return '—';
   if (Math.abs(n) >= 1e12) return (n / 1e12).toFixed(2).replace('.', ',') + ' T';
   if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2).replace('.', ',') + ' Md';
-  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1) + ' M';
+  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1).replace('.', ',') + ' M';
   if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(0) + ' k';
   return fmtNumber(n);
 }

@@ -13,6 +13,7 @@ import {
   type QualiteResultat,
   type Detachement,
 } from '@/lib/fundamentals';
+import { computeLevels, type Levels } from '@/lib/hebdo/levels';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -159,6 +160,13 @@ export interface DossierValeur {
   ratios: Ratios | null;
   qualite_resultat: QualiteResultat | null;
   /**
+   * Support, résistance et extensions du canal 20 séances. Réutilise le module
+   * PUR ET TESTÉ de l'analyse hebdomadaire plutôt que d'en écrire un second :
+   * deux jeux de niveaux pour la même valeur se contrediraient tôt ou tard.
+   * `null` sous 22 séances — un canal tiré de moins ne décrit rien.
+   */
+  niveaux: Levels | null;
+  /**
    * Ce que le dossier NE PEUT PAS dire, et pourquoi. Rendu tel quel dans le
    * document : une case vide sans explication ressemble à un oubli, une case
    * vide expliquée est une information.
@@ -182,11 +190,17 @@ function litNotation(brut: unknown): Identite['notation'] {
   if (!brut || typeof brut !== 'object') return null;
   const n = brut as RowNotation;
   const hist = Array.isArray(n.history) ? n.history : [];
-  let stables = n.note ? 1 : 0;
+  /* `history` CONTIENT la notation courante en tête (vérifié sur NEIC : même
+     date 2025-12-01 au niveau racine et en history[0]). Compter « 1 + les
+     entrées » annonçait 4 exercices stables là où il y en a 3. La notation
+     courante n'est ajoutée que si elle est absente de l'historique. */
+  let stables = 0;
   for (const h of hist) {
     if (h?.note && n.note && h.note === n.note) stables += 1;
     else break;
   }
+  const couranteDansHistorique = hist[0]?.date_notation != null && hist[0].date_notation === n.date_notation;
+  if (n.note && !couranteDansHistorique) stables += 1;
   return {
     note: n.note ?? null,
     agence: n.agence ?? null,
@@ -194,7 +208,7 @@ function litNotation(brut: unknown): Identite['notation'] {
     court_terme: n.court_terme ?? null,
     perspective: n.perspective ?? null,
     date_notation: n.date_notation ?? null,
-    annees_stables: stables > 0 ? Math.min(stables, hist.length + 1) : null,
+    annees_stables: stables > 0 ? stables : null,
   };
 }
 
@@ -309,6 +323,16 @@ export async function buildDossier(
     }
   }
 
+  /* Les clôtures nulles sont ÉCARTÉES, pas remplacées : un zéro en base est un
+     trou de collecte. Les inclure écraserait le support du canal à 0. */
+  const closes = serie.map((r) => r.cours_jour).filter((c): c is number => c != null && c > 0);
+  const niveaux = computeLevels(closes);
+  if (!niveaux) {
+    lacunes.push(
+      `Moins de 22 séances cotées disponibles (${closes.length}) : support, résistance et objectifs ne sont pas établissables.`,
+    );
+  }
+
   const s = sig as { date_marche?: string; signal?: string; score_total?: number; confiance?: number; explication?: string; inputs?: Record<string, number | null> } | null;
   const inputs = s?.inputs ?? {};
   const cpPrecedent = fondaRows[1]?.equity ?? null;
@@ -377,6 +401,7 @@ export async function buildDossier(
     },
     ratios,
     qualite_resultat: qualite,
+    niveaux,
     lacunes,
   };
 }

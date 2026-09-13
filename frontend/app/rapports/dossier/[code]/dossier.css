@@ -1,0 +1,379 @@
+/**
+ * Dossier valeur — feuille A4, portée par `.dv`.
+ *
+ * POURQUOI DES STYLES PROPRES plutôt que le thème du site. Le bloc
+ * `@media print` de `globals.css` blanchit tout : fonds, encres, panneaux. Il
+ * sert à imprimer des pages conçues pour l'écran sombre. Ce document-ci est
+ * conçu pour le PAPIER d'abord — il est donc clair à l'écran comme à
+ * l'impression, et le bloc global n'a rien à défaire. Même parti pris que
+ * `.dash-v2` : tout est préfixé, rien ne fuit vers le reste de l'application.
+ *
+ * Les familles typographiques restent celles de la marque (variables CSS
+ * posées par le layout racine) : un rapport client ne doit pas ressembler à un
+ * document venu d'ailleurs.
+ */
+
+.dv {
+  --dv-encre: #12161c;
+  --dv-encre-douce: #5b6672;
+  --dv-faible: #8b949e;
+  --dv-papier: #ffffff;
+  --dv-fond: #f4f6f8;
+  --dv-trame: #dfe4ea;
+  --dv-accent: #0e6f86;
+  --dv-accent-clair: #e6f2f5;
+  --dv-hausse: #15803d;
+  --dv-baisse: #b91c1c;
+  --dv-alerte: #92580b;
+
+  background: var(--dv-fond);
+  color: var(--dv-encre);
+  font-family: var(--font-sans), 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 24px 12px 64px;
+}
+
+.dv * { box-sizing: border-box; }
+
+/* ── Page A4 ─────────────────────────────────────────────────────────────── */
+
+.dv-page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto 18px;
+  padding: 15mm 14mm 12mm;
+  background: var(--dv-papier);
+  box-shadow: 0 1px 3px rgba(18, 22, 28, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 9mm;
+}
+
+.dv-page--couverture { justify-content: space-between; gap: 0; }
+
+/* En-tête courant : rappelle la valeur sur chaque feuille détachée. */
+.dv-courant {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--dv-trame);
+  padding-bottom: 3mm;
+  font-size: 8.5pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dv-faible);
+}
+
+.dv-pied {
+  margin-top: auto;
+  padding-top: 4mm;
+  border-top: 1px solid var(--dv-trame);
+  font-size: 8pt;
+  color: var(--dv-faible);
+  display: flex;
+  justify-content: space-between;
+  gap: 8mm;
+}
+
+/* ── Panneaux ────────────────────────────────────────────────────────────── */
+
+.dv-panneau { break-inside: avoid; }
+
+.dv-titre {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 14pt;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1mm;
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+}
+
+/* Le numéro dit la place du panneau dans une séquence de douze, pas une
+   décoration : le lecteur qui reçoit ce dossier chaque trimestre retrouve le
+   même panneau au même rang. */
+.dv-numero {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8.5pt;
+  font-weight: 500;
+  color: var(--dv-accent);
+  background: var(--dv-accent-clair);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.dv-chapo {
+  margin: 0 0 3mm;
+  font-size: 9.5pt;
+  color: var(--dv-encre-douce);
+  max-width: 62ch;
+}
+
+/* ── Couverture ──────────────────────────────────────────────────────────── */
+
+.dv-marque {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9pt;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dv-accent);
+}
+
+.dv-couv-titre {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 34pt;
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 4mm 0 2mm;
+  text-wrap: balance;
+}
+
+.dv-couv-code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12pt;
+  color: var(--dv-encre-douce);
+  letter-spacing: 0.1em;
+}
+
+.dv-couv-cours {
+  display: flex;
+  align-items: baseline;
+  gap: 5mm;
+  margin-top: 8mm;
+  padding-top: 5mm;
+  border-top: 2px solid var(--dv-encre);
+}
+
+.dv-couv-prix {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 28pt;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ── Grilles de mesures ──────────────────────────────────────────────────── */
+
+.dv-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(38mm, 1fr));
+  gap: 3mm;
+}
+
+.dv-mesure {
+  border: 1px solid var(--dv-trame);
+  border-radius: 3px;
+  padding: 3mm 3.5mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  min-width: 0;
+}
+
+.dv-mesure dt {
+  font-size: 8pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dv-faible);
+}
+
+.dv-mesure dd {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13pt;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.dv-mesure small {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 8pt;
+  color: var(--dv-encre-douce);
+  line-height: 1.35;
+}
+
+.dv-hausse { color: var(--dv-hausse); }
+.dv-baisse { color: var(--dv-baisse); }
+.dv-absent { color: var(--dv-faible); font-weight: 400; }
+
+/* ── Tableaux ────────────────────────────────────────────────────────────── */
+
+.dv-tableau-cadre { overflow-x: auto; }
+
+.dv-tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+}
+
+.dv-tableau th,
+.dv-tableau td {
+  padding: 1.8mm 2mm;
+  text-align: right;
+  border-bottom: 1px solid var(--dv-trame);
+}
+
+.dv-tableau th:first-child,
+.dv-tableau td:first-child { text-align: left; }
+
+.dv-tableau thead th {
+  font-size: 8pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dv-faible);
+  font-weight: 500;
+  border-bottom: 1px solid var(--dv-encre-douce);
+}
+
+.dv-tableau td.dv-num {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Listes d'appréciation ───────────────────────────────────────────────── */
+
+.dv-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2mm; }
+
+.dv-liste li {
+  display: grid;
+  grid-template-columns: 3mm 1fr;
+  gap: 3mm;
+  align-items: start;
+  font-size: 10pt;
+  padding-bottom: 2mm;
+  border-bottom: 1px solid var(--dv-trame);
+}
+
+.dv-liste li:last-child { border-bottom: 0; padding-bottom: 0; }
+
+/* Le filet coloré porte la polarité ; le texte reste en encre, jamais en
+   couleur — un mot vert sur papier noir et blanc disparaît. */
+.dv-liste li::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 100%;
+  min-height: 4mm;
+  border-radius: 2px;
+  background: var(--dv-trame);
+}
+
+.dv-liste--forces li::before { background: var(--dv-hausse); }
+.dv-liste--risques li::before { background: var(--dv-baisse); }
+
+/* ── Encadrés ────────────────────────────────────────────────────────────── */
+
+.dv-encadre {
+  border: 1px solid var(--dv-trame);
+  border-left: 3px solid var(--dv-accent);
+  background: var(--dv-fond);
+  border-radius: 0 3px 3px 0;
+  padding: 3.5mm 4mm;
+  font-size: 9.5pt;
+}
+
+.dv-encadre--reserve { border-left-color: var(--dv-alerte); }
+
+.dv-encadre h3 {
+  margin: 0 0 1.5mm;
+  font-size: 9pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dv-encre-douce);
+  font-weight: 600;
+}
+
+.dv-encadre ul { margin: 0; padding-left: 4mm; display: flex; flex-direction: column; gap: 1.5mm; }
+
+.dv-vide {
+  font-size: 9.5pt;
+  color: var(--dv-encre-douce);
+  font-style: italic;
+  border: 1px dashed var(--dv-trame);
+  border-radius: 3px;
+  padding: 4mm;
+  margin: 0;
+}
+
+/* ── Figures ─────────────────────────────────────────────────────────────── */
+
+.dv-figure { margin: 0; }
+.dv-figure svg { width: 100%; height: auto; display: block; }
+
+.dv-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5mm;
+  margin-top: 2mm;
+  font-size: 8.5pt;
+  color: var(--dv-encre-douce);
+}
+
+.dv-legende i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+
+/* ── Barre d'action (écran seulement) ────────────────────────────────────── */
+
+.dv-actions {
+  width: 210mm;
+  margin: 0 auto 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 9.5pt;
+  color: var(--dv-encre-douce);
+}
+
+.dv-bouton {
+  border: 1px solid var(--dv-encre);
+  background: var(--dv-encre);
+  color: #fff;
+  border-radius: 3px;
+  padding: 6px 14px;
+  font: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.dv-bouton:hover { opacity: 0.85; }
+.dv-bouton:focus-visible { outline: 2px solid var(--dv-accent); outline-offset: 2px; }
+
+/* ── Impression ──────────────────────────────────────────────────────────── */
+
+@page { size: A4 portrait; margin: 0; }
+
+@media print {
+  .dv { background: #fff; padding: 0; }
+  .dv-actions { display: none; }
+  .dv-page {
+    box-shadow: none;
+    margin: 0;
+    /* `break-after` sur la dernière feuille ajouterait une page blanche. */
+    break-after: page;
+  }
+  .dv-page:last-child { break-after: auto; }
+
+  /* Les aplats de couleur portent de l'information (part expliquée, signe du
+     résultat) : sans cette règle, le navigateur les supprime à l'impression. */
+  .dv-page, .dv-figure, .dv-numero, .dv-liste li::before, .dv-encadre {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media screen and (max-width: 230mm) {
+  .dv-page, .dv-actions { width: 100%; }
+  .dv-page { min-height: 0; padding: 8mm 6mm; }
+}
