@@ -126,7 +126,15 @@ Le bloc [DÉTAIL <CODE>] contient des champs DÉJÀ CALCULÉS côté serveur :
    la veille parce que le scoring du jour n'a pas encore tourné, écris
    « signal du <date> », jamais « signal actuel ».
 6. Une notation d'agence (notation_json) mesure la QUALITÉ DE CRÉDIT, pas la
-   valorisation de l'action. Ne l'utilise jamais comme argument d'achat.`;
+   valorisation de l'action. Ne l'utilise jamais comme argument d'achat.
+7. Chaque dividende porte un champ base_fiscale : "net" (IRVM déjà retenu),
+   "brut", ou "inconnu". QUALIFIE TOUJOURS le montant et le rendement avec
+   cette base — « 5,34 % net » et « 5,34 % » ne disent pas la même chose à
+   12 % près. Si la base est "inconnu", écris-le : la source ne le précise
+   pas. Ne convertis JAMAIS un montant d'une base à l'autre.
+8. Quand base_fiscale vaut "net", le taux de distribution (payout) rapporte
+   un dividende net à un bénéfice par action brut : il est minoré d'environ
+   12 %. Signale-le au lieu de présenter le chiffre comme exact.`;
 
 export const PROMPTS_TEMPLATES = [
   {

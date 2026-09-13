@@ -109,6 +109,14 @@ export interface FocusDividende {
    * sur l'ancien comptage d'actions.
    */
   montant: number | null;
+  /**
+   * `net` (IRVM retenu à la source), `brut`, ou `inconnu` si la source ne le
+   * précise pas. Renseigné en base par la migration 0130 et son déclencheur.
+   * Le rapport DOIT afficher cette qualité à côté du montant : « 140,40 net »
+   * et « 140,40 » ne disent pas la même chose à 12 % près.
+   */
+  base_fiscale: 'brut' | 'net' | 'inconnu' | null;
+  source: string | null;
   exercice: number | null;
   ex_date: string | null;
   payment_date: string | null;
@@ -211,7 +219,7 @@ export async function buildDossier(
     sb.from('signals_daily').select('date_marche, signal, score_total, confiance, explication, inputs').eq('code', CODE).order('date_marche', { ascending: false }).limit(1).maybeSingle(),
     // `nullsFirst: false` : sans lui, les lignes datées passent DERRIÈRE les
     // NULL et sortent de la fenêtre. Même piège que dans briefTools.ts.
-    sb.from('dividends').select('exercice, montant, ex_date, payment_date').eq('code', CODE).order('ex_date', { ascending: false, nullsFirst: false }).limit(12),
+    sb.from('dividends').select('exercice, montant, ex_date, payment_date, base_fiscale, source').eq('code', CODE).order('ex_date', { ascending: false, nullsFirst: false }).limit(12),
     sb.from('fundamentals').select('year, revenue, net_income, equity, debt').eq('code', CODE).order('year', { ascending: false }).limit(6),
     sb.from('income_statements').select('periode, revenu_total, resultat_exploitation, resultat_avant_impots, resultat_net').eq('code', CODE).order('periode', { ascending: false }).limit(14),
   ]);
@@ -235,9 +243,26 @@ export async function buildDossier(
 
   /* Le dividende retenu est le plus récent STRICTEMENT POSITIF. Un zéro est
      une information pour l'historique, jamais une base de rendement. */
-  const dividendes = (divs ?? []) as { exercice: number | null; montant: number | null; ex_date: string | null; payment_date: string | null }[];
+  const dividendes = (divs ?? []) as {
+    exercice: number | null;
+    montant: number | null;
+    ex_date: string | null;
+    payment_date: string | null;
+    base_fiscale: 'brut' | 'net' | 'inconnu' | null;
+    source: string | null;
+  }[];
   const divRetenu = dividendes.find((d) => Number(d.montant) > 0) ?? null;
   if (!divRetenu) lacunes.push('Aucun dividende positif enregistré : rendement et taux de distribution non calculables.');
+
+  /* Une base fiscale inconnue vaut 12 % d'incertitude sur le rendement : c'est
+     l'écart de l'IRVM. Le taire reviendrait à publier un pourcentage dont on
+     ne sait pas s'il est net ou brut. */
+  if (divRetenu && (divRetenu.base_fiscale == null || divRetenu.base_fiscale === 'inconnu')) {
+    lacunes.push(
+      `La source « ${divRetenu.source ?? 'inconnue'} » ne précise pas si le dividende est brut ou net : ` +
+        `le rendement affiché est incertain à hauteur de l'IRVM (12 %).`,
+    );
+  }
 
   const ratios = fonda
     ? computeRatios({
@@ -250,6 +275,16 @@ export async function buildDossier(
         dividende: divRetenu?.montant ?? null,
       })
     : null;
+
+  /* Rapporter un dividende NET à un bénéfice par action BRUT minore le taux de
+     distribution. Sur NEIC : 88 % affichés, 100 % réels si le brut vaut bien
+     159,54. Ce contrôle vient après `ratios`, qui porte le payout. */
+  if (divRetenu?.base_fiscale === 'net' && ratios?.payout != null) {
+    lacunes.push(
+      'Le taux de distribution rapporte un dividende NET à un bénéfice par action brut : ' +
+        "il est donc minoré d'environ 12 %.",
+    );
+  }
 
   const qualite = qualiteResultat(exercices[0]);
   if (qualite && qualite.part_non_operationnelle == null) {
@@ -312,6 +347,8 @@ export async function buildDossier(
       .map((e) => ({ exercice: e.periode, chiffre_affaires: e.revenu_total, resultat_net: e.resultat_net })),
     dividende: {
       montant: divRetenu?.montant ?? null,
+      base_fiscale: divRetenu?.base_fiscale ?? null,
+      source: divRetenu?.source ?? null,
       exercice: divRetenu?.exercice ?? null,
       ex_date: divRetenu?.ex_date ?? null,
       payment_date: divRetenu?.payment_date ?? null,

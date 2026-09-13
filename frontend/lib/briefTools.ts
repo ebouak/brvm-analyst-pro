@@ -240,7 +240,10 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
         // 140,40 FCFA détachés le 2026-09-09, exactement la ligne recherchée.
         // L'agent répondait alors « cette donnée n'est pas dans mon contexte »,
         // ce qui était vrai, et masquait le défaut d'outil. (2026-09-10)
-        sb.from('dividends').select('exercice, montant, devise, ex_date, payment_date').eq('code', code).order('ex_date', { ascending: false, nullsFirst: false }).limit(5),
+        // `base_fiscale` (migration 0130) dit si le montant est brut, net ou
+        // de base inconnue. Sans elle, l'agent publiait un rendement ambigu de
+        // 12 % — l'écart de l'IRVM entre nos deux fournisseurs.
+        sb.from('dividends').select('exercice, montant, devise, ex_date, payment_date, base_fiscale, source').eq('code', code).order('ex_date', { ascending: false, nullsFirst: false }).limit(5),
         sb.from('fundamentals').select('year, revenue, net_income, equity, debt, bfr').eq('code', code).order('year', { ascending: false }).limit(5),
         sb.from('publications').select('date_publication, libelle, type_publication').eq('code', code).order('date_publication', { ascending: false }).limit(10),
         sb.from('market_events').select('event_date, title, event_type, sentiment').eq('instrument_code', code).order('event_date', { ascending: false }).limit(10),
