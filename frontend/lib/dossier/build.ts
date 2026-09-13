@@ -86,11 +86,27 @@ export interface FocusDividende {
    * affiché. Le rapport présente ce champ sans étiquette fiscale tant que la
    * source n'est pas établie.
    *
-   * Garde-fou associé : ne JAMAIS reprendre
-   * `income_statements.dividende_par_action`. Sur NEIC, ce champ vaut 3 989 —
-   * le parseur y a recopié le bénéfice par action. Une infographie tirée de ce
-   * champ annonçait « dividende brut 159,54 » (le BPA) et un rendement de
-   * 6,07 %, là où le dividende réel de 140,40 donne 5,34 %.
+   * ÉTAT DE LA VÉRIFICATION AU 2026-09-14 — à ne pas trancher sans preuve.
+   * Les deux sources ne sont PAS sur la même base, et le désaccord n'est pas
+   * systématique :
+   *   - richbourse.com/common/dividende/index affirme en toutes lettres
+   *     « Les montants affichés sont-ils bruts ou nets ? Ils sont nets :
+   *     l'IRVM est déjà retenu à la source » ;
+   *   - pour NEIC, sikafinance publie 159,54 quand richbourse publie 140,40,
+   *     soit exactement le rapport 0,88 de l'IRVM à 12 % ;
+   *   - mais pour TRACTAFRIC, les deux publient 183,92, à l'identique.
+   * Un écart de 12 % sur une valeur et zéro sur une autre interdit de conclure.
+   * Le champ reste donc SANS étiquette fiscale, et le rapport doit le
+   * présenter tel quel.
+   *
+   * Conséquence à ne pas oublier : `payout` mélange potentiellement un
+   * dividende net et un BPA brut. Sur NEIC il vaut 88 % ; si 159,54 est bien
+   * le brut, le vrai taux de distribution est de 100 %.
+   *
+   * Garde-fou distinct, celui-là certain : ne JAMAIS reprendre
+   * `income_statements.dividende_par_action`. Sur NEIC ce champ vaut 3 989 sur
+   * la ligne détaillée — le parseur y a recopié le bénéfice par action calculé
+   * sur l'ancien comptage d'actions.
    */
   montant: number | null;
   exercice: number | null;
