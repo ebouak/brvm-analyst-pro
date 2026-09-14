@@ -341,6 +341,11 @@ body::before {
 
   /* Pas d'ombres ni d'effets à l'impression */
   * { box-shadow: none !important; text-shadow: none !important; }
+
+  /* Le splash d'intro est `fixed` : imprimé pendant sa seconde d'affichage, il
+     recouvrirait CHAQUE page d'un voile sombre. Constaté sur le dossier valeur
+     rendu par Chromium (video/dossiers.mjs). */
+  [data-splash] { display: none !important; }
   a { text-decoration: none !important; }
 }
 

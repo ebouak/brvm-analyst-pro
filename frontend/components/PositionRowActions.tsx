@@ -31,6 +31,16 @@ export default function PositionRowActions({ position }: { position: RowPosition
       >
         📄
       </Link>
+      {/* Le PDF du samedi. Lien natif (pas <Link>) : c'est une redirection
+          vers une URL signée, pas une navigation dans l'app. */}
+      <a
+        href={`/api/dossier/${position.code}/pdf`}
+        className="text-xs text-muted hover:text-up transition"
+        title="Télécharger le dossier en PDF (produit chaque samedi)"
+        aria-label={`Télécharger le dossier PDF ${position.code}`}
+      >
+        ⬇
+      </a>
       <button
         type="button"
         onClick={() => setModal('history')}

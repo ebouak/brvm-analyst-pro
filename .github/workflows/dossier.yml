@@ -1,0 +1,107 @@
+name: Dossiers valeur
+
+# Chaque samedi, pour chaque action cotée à la dernière séance :
+#   1. polit la prose des panneaux 10-12 (route /api/cron/dossier-polish, un
+#      code par appel, sous liste blanche — une sortie non conforme laisse le
+#      squelette) ;
+#   2. imprime la page /rapports/dossier/<CODE> en PDF A4 (video/dossiers.mjs)
+#      et la range dans le bucket privé `dossiers`.
+#
+# Un dossier ne dépend que du code, pas de l'utilisateur : ≤ 48 documents par
+# passage, jamais utilisateurs × lignes. Le téléchargement par un abonné passe
+# par /api/dossier/<CODE>/pdf (session vérifiée, URL signée courte).
+#
+# Samedi 11:00 UTC : après dividends.yml (09:00, dividendes + flottant) et
+# hebdo.yml (06:00), pour que la prose et les PDF portent les données de la
+# semaine close.
+#
+# Secrets requis : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (rangement),
+# CRON_SECRET (même valeur que sur Vercel), DOSSIER_RENDER_SECRET (même valeur
+# que sur Vercel, ≥ 32 caractères). Variable facultative : DOSSIER_SITE_URL
+# (défaut https://www.westbourse.com).
+
+on:
+  schedule:
+    - cron: '0 11 * * 6'
+  workflow_dispatch:
+    inputs:
+      codes:
+        description: 'Codes à traiter, séparés par des espaces (vide = toutes les valeurs de la dernière séance)'
+        type: string
+        default: ''
+      polir:
+        description: 'Polir la prose avant d’imprimer'
+        type: boolean
+        default: true
+
+concurrency:
+  group: dossiers
+  cancel-in-progress: false
+
+jobs:
+  dossiers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: video
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Polices
+        # Le rendu est un navigateur : sans polices, Chromium retombe sur une
+        # fonte de secours et la mise en page A4 mesurée en test ne tient plus.
+        run: sudo apt-get install -y fonts-liberation fonts-dejavu-core
+
+      - name: Polir la prose (un code par appel)
+        if: inputs.polir != false
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE: ${{ vars.DOSSIER_SITE_URL || 'https://www.westbourse.com' }}
+          CODES: ${{ inputs.codes }}
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "CRON_SECRET absent : polissage sauté (les pages rendent le squelette)."; exit 0; fi
+          if [ -z "$CODES" ]; then
+            CODES=$(curl -sf -H "Authorization: Bearer $CRON_SECRET" "$SITE/api/cron/dossier-polish" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).codes.join(" ")))')
+          fi
+          echo "Codes : $CODES"
+          echecs=0
+          for c in $CODES; do
+            r=$(curl -s -w '\n%{http_code}' -H "Authorization: Bearer $CRON_SECRET" "$SITE/api/cron/dossier-polish?code=$c")
+            code_http=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
+            echo "  $c  HTTP $code_http  $corps"
+            [ "$code_http" = "200" ] || echecs=$((echecs+1))
+          done
+          # Un échec de polissage n'est pas bloquant : la page rend le squelette,
+          # qui est exact. On le dit, et on continue vers l'impression.
+          [ "$echecs" -eq 0 ] || echo "::warning::$echecs code(s) sans prose polie cette semaine (squelette servi)."
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Installer Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Imprimer et ranger les PDF
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          DOSSIER_RENDER_SECRET: ${{ secrets.DOSSIER_RENDER_SECRET }}
+          DOSSIER_SITE_URL: ${{ vars.DOSSIER_SITE_URL }}
+        run: node dossiers.mjs ${{ inputs.codes }}
+
+      - name: Conserver les PDF produits
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dossiers-${{ github.run_id }}
+          path: video/out/dossiers/*.pdf
+          retention-days: 14
+          if-no-files-found: ignore

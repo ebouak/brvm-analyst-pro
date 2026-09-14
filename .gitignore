@@ -64,3 +64,5 @@ frontend/v2-*.png
 # Prototype jetable du GAN harness + sorties video locales
 gan-harness/
 video-out/
+# PDF des dossiers valeur imprimés en local (video/dossiers.mjs)
+video/out/

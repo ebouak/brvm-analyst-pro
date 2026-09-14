@@ -39,6 +39,30 @@ function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
+/**
+ * Rendu serveur-à-serveur du dossier valeur : video/dossiers.mjs imprime la
+ * page en PDF avec Chromium, sans session. Il présente DOSSIER_RENDER_SECRET
+ * dans un en-tête — jamais dans l'URL, qui finirait dans les journaux d'accès.
+ *
+ * Ouvert pour CE SEUL préfixe. La page ne contient que des données de marché,
+ * aucune donnée utilisateur : si le secret fuyait, l'exposition serait un
+ * rapport lisible par tout abonné, pas un portefeuille. Comparaison à temps
+ * constant écrite à la main : node:crypto n'existe pas en Edge. Un secret de
+ * moins de 32 caractères est refusé — mieux vaut un cron en échec qu'un mur
+ * gardé par « test ».
+ */
+function isRenderAuthorized(request: NextRequest): boolean {
+  if (!request.nextUrl.pathname.startsWith('/rapports/dossier/')) return false;
+  const attendu = process.env.DOSSIER_RENDER_SECRET;
+  const fourni = request.headers.get('x-dossier-render');
+  if (!attendu || !fourni || attendu.length < 32) return false;
+  let diff = attendu.length ^ fourni.length;
+  for (let i = 0; i < attendu.length; i++) {
+    diff |= attendu.charCodeAt(i) ^ (fourni.charCodeAt(i % fourni.length) || 0);
+  }
+  return diff === 0;
+}
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -64,7 +88,7 @@ export async function updateSession(request: NextRequest) {
   // Mur d'authentification : hors vitrine SEO, un anonyme est renvoyé vers /login
   // (avec ?next pour revenir après connexion). Les pages publiques restent
   // indexables ; l'app interactive exige un compte.
-  if (!user && !isPublicPath(request.nextUrl.pathname)) {
+  if (!user && !isPublicPath(request.nextUrl.pathname) && !isRenderAuthorized(request)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('next', request.nextUrl.pathname);

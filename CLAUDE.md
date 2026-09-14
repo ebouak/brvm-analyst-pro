@@ -458,6 +458,63 @@ extraction du module partagé.
 - **Vérifié en production** : 47/47 valeurs, cours du jour toujours dans
   `[bas ; haut]`, 0 incohérence.
 
+### Ajouts (passage 2026-09-14) — Dossier valeur : rapport A4, prose polie, PDF par lot
+
+tsc frontend vert, 33 tests purs verts (`lib/dossier/*.test.mjs` +
+`lib/fundamentals.analyse.test.mjs`), 47/47 PDF imprimés en local à 7 pages
+chacun, mur vérifié dans les quatre cas (sans en-tête 307, bon secret 200,
+mauvais secret 307, autre route avec le bon secret 307).
+
+- **Page `/rapports/dossier/[code]`** : 12 panneaux sur 7 feuilles A4, rendu
+  serveur, SVG pur (Recharts est client-only et peut sortir vide à
+  l'impression). Feuille CSS propre `.dv`, claire d'origine : le bloc
+  `@media print` global blanchit des pages sombres, celle-ci n'a rien à
+  défaire. Entrées : ligne de portefeuille (📄 page, ⬇ PDF) et fiche action.
+- **PILOTÉ PAR LA DONNÉE, PAS PAR LA PROSE.** `lib/dossier/build.ts` lit ou
+  calcule chaque chiffre ; `narratif.ts` dérive forces et vigilances
+  (déterministe, chaque ligne porte son chiffre ET un `fait` sans chiffre) ;
+  `prose.ts` assemble un squelette **sans aucun nombre par construction**
+  (sauf l'année d'exercice et les renvois de panneaux). Les lacunes sont
+  déclarées au panneau 12, jamais laissées en blanc.
+- **Prose polie** (`/api/cron/dossier-polish?code=`, bearer `CRON_SECRET`,
+  jamais en query string) : DeepSeek→Mistral reformule le squelette ;
+  `validerProse` rejette tout chiffre hors liste blanche, toute causalité,
+  tout titre modifié. Rangée dans `dossier_narratifs` (migration `0131`,
+  lecture publique, écriture service_role) avec l'**empreinte** du squelette.
+  À la lecture, la page revalide ET compare l'empreinte : une prose issue d'un
+  squelette qui a changé (une force apparue, un risque disparu) est écartée.
+  **Pourquoi sans chiffre** : une prose chiffrée le samedi serait contredite
+  dès lundi par les panneaux vivants, et le garde-fou l'écarterait à raison —
+  visible un jour sur sept. Les chiffres vivent dans les panneaux.
+- **PDF par lot** (`video/dossiers.mjs`, cron `dossier.yml` samedi 11:00 UTC
+  après `dividends.yml`) : Chromium imprime la page VIVANTE — une seule source
+  de mise en page. Un dossier ne dépend que du code : **≤ 48 PDF par passage,
+  jamais utilisateurs × lignes**. Bucket privé `dossiers` (`<CODE>/<date>.pdf`
+  + `<CODE>/dernier.pdf`), servi par `/api/dossier/[code]/pdf` après contrôle
+  de session, en URL signée 10 min.
+- **Le worker n'a pas de session** : il présente `DOSSIER_RENDER_SECRET` dans
+  l'en-tête `x-dossier-render`, que `lib/supabase/middleware.ts` accepte pour
+  le SEUL préfixe `/rapports/dossier/` (comparaison à temps constant écrite à
+  la main — `node:crypto` n'existe pas en Edge ; secret < 32 caractères refusé).
+  Rayon d'exposition si le secret fuit : un rapport de données de marché,
+  aucune donnée utilisateur.
+- **Verrous du worker** : 7 feuilles exactement, PDF > 30 ko, et sous média
+  print `scrollHeight ≤ clientHeight` sur chaque feuille — les feuilles ont une
+  **hauteur fixe** de 297 mm à l'impression (297 mm = 1122,5 px ; une feuille
+  mesurée à 1123 débordait d'un demi-pixel et ouvrait une page fantôme : NEIC
+  sortait en 9 pages). Un débordement fait échouer le code, jamais un rognage
+  silencieux. Le splash d'intro (`fixed`, 1 s) recouvrait chaque page :
+  `[data-splash]` masqué en print + drapeau `ws_splash_seen` posé par le worker.
+- **Corrections vues en chemin** : `litNotation` comptait deux fois la
+  notation courante (`history[0]` la contient déjà) ; `fmtFcfa` laissait un
+  point décimal sur la branche « M » ; `CookieBanner` sans `print:hidden`
+  s'imprimait sur chaque page de tous les exports.
+- **Reste à faire (vous)** : appliquer `0131` ; créer `DOSSIER_RENDER_SECRET`
+  (≥ 32 car.) sur Vercel `frontend` ET en secret GitHub ; lancer `dossier.yml`
+  à la main une première fois ; puis `get_advisors` + test anon sur
+  `dossier_narratifs`. Ouvert : envoi hebdo par email/Telegram des PDF des
+  lignes détenues — exige un opt-in explicite (RGPD), chantier séparé.
+
 ### Agent WhatsApp — PRÉCONDITION avant de lui donner les outils (2026-09-08)
 
 L'agent WhatsApp appelle encore `callAgentLlm(messages)` sans outils, là où

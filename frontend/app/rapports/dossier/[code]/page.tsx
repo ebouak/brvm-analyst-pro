@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { buildDossier, type DossierValeur } from '@/lib/dossier/build';
 import { construireNarratif } from '@/lib/dossier/narratif';
+import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
 import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dossier/Graphiques';
 import { fmtFcfa, fmtNumber, fmtDateFR } from '@/lib/format';
 import ImprimerDossier from './ImprimerDossier';
@@ -119,6 +120,10 @@ export default async function DossierPage({ params }: { params: { code: string }
   if (!d) notFound();
 
   const n = construireNarratif(d);
+  /* Prose : squelette déterministe, remplacé par la version polie SEULEMENT si
+     elle correspond au squelette vivant et repasse le garde-fou. */
+  const prose = await chargerProse(sb, d.identite.code, construireSquelette(d, n));
+  const [lecture, scenarios] = prose.sections;
   const { identite: id, chiffres_cles: c, ratios: r, qualite_resultat: q, dividende: div, niveaux: lv } = d;
   const nomComplet = id.designation ?? id.code;
 
@@ -496,6 +501,16 @@ export default async function DossierPage({ params }: { params: { code: string }
 
       {/* ── Feuille 6 · Appréciation ───────────────────────────────────── */}
       <Feuille d={d} page={6}>
+        <section className="dv-panneau">
+          <h2 className="dv-titre">{lecture!.titre}</h2>
+          <p className="dv-prose">{lecture!.texte}</p>
+          <p className="dv-source">
+            {prose.source === 'polie'
+              ? `Rédaction relue le ${fmtDateFR(prose.genere_le)} — sans aucun chiffre, par construction ; les chiffres sont dans les panneaux.`
+              : 'Rédaction automatique — sans aucun chiffre, par construction ; les chiffres sont dans les panneaux.'}
+          </p>
+        </section>
+
         <Panneau
           n={10}
           titre="Points d'appui"
@@ -542,6 +557,8 @@ export default async function DossierPage({ params }: { params: { code: string }
           titre="Niveaux et réserves"
           chapo="Les objectifs ci-dessous sont des extensions géométriques du canal, pas des prévisions. Ils disent où le mouvement porterait s'il se prolongeait, rien de plus."
         >
+          <h3 className="dv-sous-titre">{scenarios!.titre}</h3>
+          <p className="dv-prose">{scenarios!.texte}</p>
           {lv ? (
             <div className="dv-tableau-cadre">
               <table className="dv-tableau">

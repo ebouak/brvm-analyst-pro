@@ -22,6 +22,11 @@ import type { DossierValeur } from './build';
 export interface Appreciation {
   /** Texte prêt à afficher, chiffre inclus. */
   texte: string;
+  /**
+   * Le même fait, SANS AUCUN CHIFFRE, pour la prose (lib/dossier/prose.ts).
+   * Les chiffres restent aux panneaux ; la prose ne fait que les nommer.
+   */
+  fait: string;
   /** Valeur qui fonde l'appréciation, pour vérification. */
   mesure: number | null;
 }
@@ -70,13 +75,13 @@ export function construireNarratif(d: DossierValeur): Narratif {
 
   // ── Rentabilité ─────────────────────────────────────────────────────────
   if (c.resultat_net != null && c.resultat_net > 0) {
-    forces.push({ texte: `Exercice bénéficiaire : ${mtt(c.resultat_net)}`, mesure: c.resultat_net });
+    forces.push({ texte: `Exercice bénéficiaire : ${mtt(c.resultat_net)}`, fait: 'un exercice bénéficiaire', mesure: c.resultat_net });
   } else if (c.resultat_net != null && c.resultat_net < 0) {
-    risques.push({ texte: `Exercice déficitaire : ${mtt(c.resultat_net)}`, mesure: c.resultat_net });
+    risques.push({ texte: `Exercice déficitaire : ${mtt(c.resultat_net)}`, fait: 'un exercice déficitaire', mesure: c.resultat_net });
   }
 
   if (r?.roe != null && r.roe > SEUILS.ROE_ELEVE) {
-    forces.push({ texte: `Rentabilité des capitaux propres élevée : ${pct(r.roe, 0)}`, mesure: r.roe });
+    forces.push({ texte: `Rentabilité des capitaux propres élevée : ${pct(r.roe, 0)}`, fait: 'une rentabilité des capitaux propres élevée', mesure: r.roe });
   }
 
   /* La qualité du bénéfice prime sur son montant. Un profit massivement non
@@ -86,6 +91,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
       texte:
         `${pct(q.part_non_operationnelle, 0).replace('+', '')} du résultat avant impôts ne vient pas de ` +
         `l'exploitation : la récurrence du bénéfice reste à confirmer`,
+      fait: "un bénéfice majoritairement non opérationnel, dont la récurrence reste à confirmer",
       mesure: q.part_non_operationnelle,
     });
   } else if (
@@ -97,6 +103,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
        sens comme dans l'autre, le bénéfice reste d'origine opérationnelle. */
     forces.push({
       texte: `Bénéfice d'origine opérationnelle (part non opérationnelle : ${pct(q.part_non_operationnelle, 0)})`,
+      fait: "un bénéfice d'origine opérationnelle",
       mesure: q.part_non_operationnelle,
     });
   }
@@ -107,11 +114,13 @@ export function construireNarratif(d: DossierValeur): Narratif {
       const deux = c.croissance_ca_2ans != null ? `, ${pct(c.croissance_ca_2ans, 1)} sur deux exercices` : '';
       risques.push({
         texte: `Chiffre d'affaires en recul : ${pct(c.croissance_ca_1an, 1)} sur un exercice${deux}`,
+        fait: "un chiffre d'affaires en recul",
         mesure: c.croissance_ca_1an,
       });
     } else if (c.croissance_ca_1an > 0.05) {
       forces.push({
         texte: `Chiffre d'affaires en progression : ${pct(c.croissance_ca_1an, 1)}`,
+        fait: "un chiffre d'affaires en progression",
         mesure: c.croissance_ca_1an,
       });
     }
@@ -119,14 +128,15 @@ export function construireNarratif(d: DossierValeur): Narratif {
 
   // ── Structure financière ────────────────────────────────────────────────
   if (r?.gearing != null && r.gearing < SEUILS.GEARING_SAIN) {
-    forces.push({ texte: `Endettement faible : ${nb(r.gearing * 100, 0)} % des capitaux propres`, mesure: r.gearing });
+    forces.push({ texte: `Endettement faible : ${nb(r.gearing * 100, 0)} % des capitaux propres`, fait: 'un endettement faible', mesure: r.gearing });
   } else if (r?.gearing != null && r.gearing > 1) {
-    risques.push({ texte: `Endettement supérieur aux capitaux propres : ${nb(r.gearing * 100, 0)} %`, mesure: r.gearing });
+    risques.push({ texte: `Endettement supérieur aux capitaux propres : ${nb(r.gearing * 100, 0)} %`, fait: 'un endettement supérieur aux capitaux propres', mesure: r.gearing });
   }
 
   if (c.variation_capitaux_propres_1an != null && c.variation_capitaux_propres_1an > 0.1) {
     forces.push({
       texte: `Capitaux propres en hausse de ${pct(c.variation_capitaux_propres_1an, 0)}`,
+      fait: 'des capitaux propres en hausse',
       mesure: c.variation_capitaux_propres_1an,
     });
   }
@@ -135,6 +145,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
   if (r?.pb != null && r.pb > SEUILS.PB_PRIME) {
     risques.push({
       texte: `Le marché paie ${nb(r.pb, 1)} fois les capitaux propres : la valeur n'est pas décotée`,
+      fait: 'une valorisation sans décote sur les capitaux propres',
       mesure: r.pb,
     });
   }
@@ -147,6 +158,10 @@ export function construireNarratif(d: DossierValeur): Narratif {
       : ' (base non précisée par la source)';
     forces.push({
       texte: `Dividende de ${nb(d.dividende.montant, 2)} FCFA${base}, soit ${nb(d.dividende.rendement * 100, 2)} % du cours`,
+      fait:
+        d.dividende.base_fiscale === 'net' ? 'un dividende net versé'
+        : d.dividende.base_fiscale === 'brut' ? 'un dividende brut versé'
+        : 'un dividende versé, de base fiscale non précisée',
       mesure: d.dividende.rendement,
     });
   }
@@ -156,6 +171,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
   if (d.dividende.exercices_sans_dividende > 0) {
     risques.push({
       texte: `Distribution irrégulière : ${d.dividende.exercices_sans_dividende} exercice${d.dividende.exercices_sans_dividende > 1 ? 's' : ''} sans dividende sur la période couverte`,
+      fait: 'une distribution irrégulière',
       mesure: d.dividende.exercices_sans_dividende,
     });
   }
@@ -166,6 +182,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
     const stab = n.annees_stables && n.annees_stables > 1 ? `, stable depuis ${n.annees_stables} exercices` : '';
     forces.push({
       texte: `Notation ${n.note} (${n.agence ?? 'agence non précisée'})${stab} — qualité de crédit, non valorisation`,
+      fait: 'une notation de crédit publiée',
       mesure: null,
     });
   }
@@ -175,6 +192,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
   if (dernierVolume != null && dernierVolume < SEUILS.VOLUME_FAIBLE) {
     risques.push({
       texte: `Liquidité faible : ${dernierVolume.toLocaleString('fr-FR')} titres échangés — l'exécution peut déplacer le cours`,
+      fait: 'une liquidité faible',
       mesure: dernierVolume,
     });
   }
@@ -187,6 +205,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
         `Le détachement du ${fmtDateFR(d.detachement.ex_date)} n'explique que ` +
         `${nb(d.detachement.part_expliquee * 100, 0)} % de la baisse observée ` +
         `(${nb(d.detachement.baisse_fcfa, 0)} FCFA pour un dividende de ${nb(d.detachement.dividende, 2)})`,
+      fait: 'une baisse au détachement que le dividende seul n’explique pas',
       mesure: d.detachement.part_expliquee,
     });
   }

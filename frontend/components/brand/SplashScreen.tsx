@@ -25,6 +25,7 @@ export default function SplashScreen() {
   return (
     <div
       aria-hidden="true"
+      data-splash
       style={{
         position: 'fixed', inset: 0, zIndex: 100,
         // CRITIQUE : le splash est purement décoratif. S'il traîne (thread

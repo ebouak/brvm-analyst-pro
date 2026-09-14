@@ -7,7 +7,8 @@
   "scripts": {
     "genere": "node genere.mjs",
     "publie": "node publie.mjs",
-    "seance": "node genere.mjs && node publie.mjs"
+    "seance": "node genere.mjs && node publie.mjs",
+    "dossiers": "node dossiers.mjs"
   },
   "dependencies": {
     "playwright": "^1.60.0"

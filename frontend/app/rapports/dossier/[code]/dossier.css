@@ -112,6 +112,31 @@
   max-width: 62ch;
 }
 
+/* ── Prose ───────────────────────────────────────────────────────────────── */
+
+.dv-prose {
+  margin: 0 0 2mm;
+  font-size: 10.5pt;
+  line-height: 1.55;
+  max-width: 68ch;
+  text-wrap: pretty;
+}
+
+.dv-source {
+  margin: 0;
+  font-size: 8pt;
+  color: var(--dv-faible);
+}
+
+.dv-sous-titre {
+  margin: 0 0 1mm;
+  font-size: 9pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dv-encre-douce);
+  font-weight: 600;
+}
+
 /* ── Couverture ──────────────────────────────────────────────────────────── */
 
 .dv-marque {
@@ -360,10 +385,24 @@
   .dv-page {
     box-shadow: none;
     margin: 0;
+    /* HAUTEUR FIXE, pas min-height : 297 mm font 1122,5 px, et une feuille
+       mesurée à 1123 déborde d'un demi-pixel — Chromium ouvre alors une page
+       presque vide. Le chrome est resserré (marges, interlignes) pour donner
+       de la marge au contenu ; le débordement, s'il survient, est DÉTECTÉ par
+       video/dossiers.mjs (scrollHeight > clientHeight) et fait échouer le
+       code plutôt que de ranger un PDF rogné. */
+    height: 297mm;
+    min-height: 0;
+    overflow: hidden;
+    padding: 12mm 13mm 10mm;
+    gap: 7mm;
     /* `break-after` sur la dernière feuille ajouterait une page blanche. */
     break-after: page;
   }
   .dv-page:last-child { break-after: auto; }
+  .dv-prose { font-size: 10pt; line-height: 1.5; }
+  .dv-liste li { font-size: 9.5pt; padding-bottom: 1.6mm; }
+  .dv-liste { gap: 1.6mm; }
 
   /* Les aplats de couleur portent de l'information (part expliquée, signe du
      résultat) : sans cette règle, le navigateur les supprime à l'impression. */
