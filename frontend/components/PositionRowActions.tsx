@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { deletePosition } from '@/app/portefeuille/actions';
 import EditPositionModal from './EditPositionModal';
 import PriceHistoryModal from './PriceHistoryModal';
@@ -14,12 +15,22 @@ export interface RowPosition {
   note: string | null;
 }
 
-/** Actions par ligne de position : modifier, voir l'historique des cours, supprimer. */
+/** Actions par ligne de position : dossier valeur, historique des cours, modifier, supprimer. */
 export default function PositionRowActions({ position }: { position: RowPosition }) {
   const [modal, setModal] = useState<'edit' | 'history' | null>(null);
 
   return (
     <div className="flex items-center justify-center gap-2">
+      {/* Le dossier A4 est la raison d'être de cette ligne pour un porteur :
+          c'est ici, sur SA position, qu'il le cherche — pas dans un menu. */}
+      <Link
+        href={`/rapports/dossier/${position.code}`}
+        className="text-xs text-muted hover:text-up transition"
+        title="Dossier valeur (12 panneaux, imprimable)"
+        aria-label={`Dossier valeur ${position.code}`}
+      >
+        📄
+      </Link>
       <button
         type="button"
         onClick={() => setModal('history')}

@@ -493,6 +493,12 @@ export default async function InstrumentPage({
           >
             États financiers →
           </Link>
+          <Link
+            href={`/rapports/dossier/${code}`}
+            className="inline-flex items-center gap-1 text-[11px] font-medium border border-up/40 bg-up/[0.12] rounded-full px-3 py-1 text-up hover:bg-up/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          >
+            Dossier A4 →
+          </Link>
           {/* Action contextuelle : publications */}
           <PublicationsModal
             code={code}
