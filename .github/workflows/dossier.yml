@@ -5,7 +5,12 @@ name: Dossiers valeur
 #      code par appel, sous liste blanche — une sortie non conforme laisse le
 #      squelette) ;
 #   2. imprime la page /rapports/dossier/<CODE> en PDF A4 (video/dossiers.mjs)
-#      et la range dans le bucket privé `dossiers`.
+#      et la range dans le bucket privé `dossiers` ;
+#   3. envoie à chaque porteur qui l'a demandé (notification_prefs.dossiers_*)
+#      le dossier de chaque valeur de son portefeuille, par email et/ou
+#      Telegram — jamais deux fois la même semaine (journal dossier_envois).
+#      Secrets requis en plus : RESEND_API_KEY, ALERTS_EMAIL_FROM,
+#      TELEGRAM_BOT_TOKEN.
 #
 # Un dossier ne dépend que du code, pas de l'utilisateur : ≤ 48 documents par
 # passage, jamais utilisateurs × lignes. Le téléchargement par un abonné passe
@@ -96,6 +101,27 @@ jobs:
           DOSSIER_RENDER_SECRET: ${{ secrets.DOSSIER_RENDER_SECRET }}
           DOSSIER_SITE_URL: ${{ vars.DOSSIER_SITE_URL }}
         run: node dossiers.mjs ${{ inputs.codes }}
+
+      - name: Envoyer les dossiers aux porteurs
+        # APRÈS l'impression, jamais avant : le job n'envoie que des PDF de
+        # moins de trois jours et nomme les autres dans le message.
+        #
+        # `inputs.codes == ''` : un lancement manuel ciblé sur quelques codes
+        # RÉIMPRIME sans envoyer. On n'écrit pas à un client parce qu'on a
+        # relancé un PDF.
+        #
+        # `continue-on-error` : un échec d'envoi ne doit pas effacer le succès
+        # de l'impression, déjà rangée. Il reste visible en rouge sur l'étape.
+        if: inputs.codes == ''
+        continue-on-error: true
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: npm install && npm run dossiers:envoi
 
       - name: Conserver les PDF produits
         if: always()

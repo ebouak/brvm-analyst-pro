@@ -38,6 +38,7 @@ export async function GET() {
     whatsappPairingCodes,
     telegramConversations,
     telegramPairingCodes,
+    dossierEnvois,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -68,6 +69,7 @@ export async function GET() {
     supabase.from('whatsapp_pairing_codes').select('*').eq('user_id', user.id),
     supabase.from('telegram_conversations').select('*').eq('user_id', user.id),
     supabase.from('telegram_pairing_codes').select('*').eq('user_id', user.id),
+    supabase.from('dossier_envois').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -110,6 +112,10 @@ export async function GET() {
     // lui-même figure déjà dans notification_prefs ci-dessus.
     telegram_conversations: telegramConversations.data ?? [],
     telegram_pairing_codes: telegramPairingCodes.data ?? [],
+    // Journal des envois hebdomadaires de dossiers (migration 0132) : quelles
+    // valeurs ont été adressées, quand et par quel canal. Donnée personnelle
+    // liée au compte, rétention 90 jours — elle relève du droit d'accès.
+    dossier_envois: dossierEnvois.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

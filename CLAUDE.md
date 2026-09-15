@@ -509,11 +509,52 @@ mauvais secret 307, autre route avec le bon secret 307).
   notation courante (`history[0]` la contient déjà) ; `fmtFcfa` laissait un
   point décimal sur la branche « M » ; `CookieBanner` sans `print:hidden`
   s'imprimait sur chaque page de tous les exports.
-- **Reste à faire (vous)** : appliquer `0131` ; créer `DOSSIER_RENDER_SECRET`
-  (≥ 32 car.) sur Vercel `frontend` ET en secret GitHub ; lancer `dossier.yml`
-  à la main une première fois ; puis `get_advisors` + test anon sur
-  `dossier_narratifs`. Ouvert : envoi hebdo par email/Telegram des PDF des
-  lignes détenues — exige un opt-in explicite (RGPD), chantier séparé.
+- **FAIT (2026-09-14)** : `0131` appliquée, `DOSSIER_RENDER_SECRET` posé sur
+  Vercel et GitHub, `CRON_SECRET` réaligné (il avait divergé), lot complet
+  exécuté — **47 proses polies et 47 PDF rangés**, avis de sécurité : aucun
+  nouveau. Le cron tourne seul depuis.
+
+### Ajouts (passage 2026-09-15) — Envoi hebdomadaire des dossiers aux porteurs
+
+Spec `docs/superpowers/specs/2026-09-15-envoi-dossiers-design.md`, plan
+`docs/superpowers/plans/2026-09-15-envoi-dossiers.md`. 3e étape de
+`dossier.yml`, après l'impression.
+
+- **Consentement distinct** (migration `0132`, **à appliquer**) :
+  `notification_prefs.dossiers_email` / `dossiers_telegram` /
+  `dossiers_optin_at`, cases décochées par défaut, UI `DossiersPrefs` dans
+  `/parametres/alertes`. La case Telegram reste inerte tant que la
+  conversation n'est pas appairée. Le composant n'écrit JAMAIS
+  `telegram_chat_id` — seul le webhook le pose. WhatsApp EXCLU (numéro
+  déclaratif, voir la précondition d'appairage plus bas).
+- **Journal idempotent** `dossier_envois` (PK `user_id, semaine, canal`, RLS
+  lecture owner, écriture service_role, rétention 90 j dans
+  `purge_rgpd_retention`). Un couple déjà `envoye` cette semaine est sauté :
+  **relancer le workflow à la main ne renvoie rien à personne.**
+- **Modules purs testés** `scraper/src/dossiers/` : `selection.ts` (7 tests —
+  fraîcheur 3 j, tri par valorisation, plafond 12 pièces jointes) et
+  `message.ts` (7 tests). **AUCUN CHIFFRE dans le corps du message**, hors
+  dates : les chiffres vivent dans les PDF où ils ont été vérifiés ; en
+  remettre créerait une seconde source à tenir juste. Un test échoue à la
+  moindre valeur numérique réintroduite.
+- **Verrou de fraîcheur** : un PDF de plus de 3 jours n'est pas envoyé, il est
+  **écarté ET NOMMÉ** dans le message. Un dossier périmé livré en silence est
+  pire qu'un dossier absent.
+- **Canaux** (`alerts/channels.ts`, 8 tests) : `Notification.attachments`
+  (base64 encodé côté canal) et `sendTelegramDocument` en multipart. Même
+  règle que `sendTelegram` : destinataire explicite, **aucun repli** vers la
+  conversation de l'exploitant. L'URL portant le jeton du bot, seule la
+  `description` de Telegram est relayée en cas d'échec.
+- **Portefeuille vide → AUCUN message**, seulement une trace `vide`. Un canal
+  demandé mais inutilisable (pas d'adresse, pas d'appairage) est ignoré : ce
+  n'est pas un échec d'envoi.
+- **Un lancement manuel ciblé (`inputs.codes`) réimprime sans envoyer** : on
+  n'écrit pas à un client parce qu'on a relancé un PDF.
+- **RGPD** : `dossier_envois` ajoutée à `/api/account/export` ; suppression
+  couverte par la cascade `auth.users`.
+- **Reste à faire (vous)** : appliquer `0132`, puis `get_advisors` + test à la
+  clé anon sur `dossier_envois` (0 ligne sans session), cocher la case sur
+  votre compte et lancer `dossier.yml` sans codes pour le premier envoi réel.
 
 ### Agent WhatsApp — PRÉCONDITION avant de lui donner les outils (2026-09-08)
 

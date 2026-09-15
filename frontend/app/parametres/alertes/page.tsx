@@ -4,6 +4,7 @@ import { SectionHeader } from '@/components/ui/premium';
 import { AlertsManager, type UserAlert } from './AlertsManager';
 import WhatsAppPrefs from '@/components/settings/WhatsAppPrefs';
 import TelegramPrefs from '@/components/settings/TelegramPrefs';
+import DossiersPrefs from '@/components/settings/DossiersPrefs';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
@@ -53,6 +54,13 @@ export default async function AlertesPage() {
       {/* Telegram : meme role, canal different. La section se masque
           d elle-meme tant que la migration 0129 n est pas appliquee. */}
       <TelegramPrefs userId={user.id} />
+
+      {/* Dossiers valeur du samedi. Placé APRÈS Telegram : la case Telegram de
+          cette section reste inerte tant que la conversation n'est pas
+          appairée, et l'appairage se fait juste au-dessus. Se masque d'elle-
+          même tant que la migration 0132 n'est pas appliquée. */}
+      <DossiersPrefs userId={user.id} />
+
       <AlertsManager
         alerts={(alerts ?? []) as UserAlert[]}
         instruments={(instruments ?? []) as { code: string; designation: string | null }[]}
