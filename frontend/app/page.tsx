@@ -860,6 +860,18 @@ export default async function Landing() {
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand nbActions={nbActions} />
 
+      {/* ── LE FIL CONDUCTEUR — « De la donnée à la décision » ────────────
+          REMONTÉ de la position 16 à la 5 (2026-09-15). C'est la THÈSE de la
+          marque : elle doit CADRER ce qui suit, pas le conclure. En fin de
+          page, le visiteur avait traversé quinze sections sans qu'on lui ait
+          jamais dit COMMENT on passe d'une donnée à une décision — la
+          démonstration arrivait après les preuves qu'elle devait expliquer.
+          Placée avant le tarif, et non à sa place : la décision documentée
+          plus bas de montrer le prix tôt (le visiteur mobile le cherchait à
+          l'écran 19) reste intacte. On explique le mécanisme, puis son prix,
+          puis on le démontre. ──────────────────────────────────────────── */}
+      <DataToDecision />
+
       {/* ── 04 · COMBIEN ÇA COÛTE ────────────────────────────────
           Le tarif était en position 19 sur 21 écrans en mobile : le visiteur
           qui se demande « combien ça coûte » devait parcourir toute la page,
@@ -1069,9 +1081,6 @@ export default async function Landing() {
         </section>
         </DarkBand>
       </div>
-
-      {/* ── 13 · DE LA DONNÉE À LA DÉCISION — fil conducteur de la marque ─ */}
-      <DataToDecision />
 
       {/* ── 13 bis · LA PLATEFORME EN ACTION — vidéo Remotion ────────────
           Rebranché le 2026-09-10. Le composant et la vidéo existaient déjà
