@@ -5,6 +5,7 @@ import { fmtNumber } from '@/lib/format';
 import { SubscoreBars, type SubscoreCouleurs } from '@/components/landing/SubscoreBars';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { SignalDaily } from '@/lib/types';
+import './heroTerminal.css';
 
 interface Rated {
   code: string;
@@ -35,6 +36,12 @@ interface Props {
  * sous-scores du signal. Quatre panneaux séparés par des filets de 1 px, à la
  * manière d'un terminal financier.
  *
+ * MOUVEMENT : le terminal s'initialise au chargement (heroTerminal.css), en
+ * CSS pur — aucun JavaScript, donc aucun effet sur le LCP et aucun
+ * clignotement. La colonne de discours (H1 compris) n'est PAS animée : elle
+ * est probablement l'élément LCP, et la promesse doit être immédiate — c'est
+ * la preuve qui se construit, pas l'annonce.
+ *
  * ⚠️ Couleurs de texte et de fond VOLONTAIREMENT FIXES dans toute la section :
  * le hero reste sombre quel que soit le thème du site. Un texte piloté par
  * token deviendrait illisible en mode clair (ivory clair → quasi noir sur un
@@ -47,6 +54,13 @@ const CYAN = '#56d7fd';
 const VERT = '#3fe18b';
 const ROUGE = '#ff6b6b';
 const GRIS = '#7d8a90';
+
+/**
+ * Retard d'entrée d'un élément dans la séquence d'initialisation (voir
+ * heroTerminal.css). Porté en variable CSS plutôt qu'en classe par palier :
+ * un seul jeu d'animations, et les retards restent des données lisibles ici.
+ */
+const delai = (ms: number) => ({ '--d': `${ms}ms` }) as React.CSSProperties;
 
 /** Le terminal reste sombre quel que soit le thème : couleurs fixes, pas de tokens. */
 const COULEURS_TERMINAL: SubscoreCouleurs = {
@@ -77,9 +91,12 @@ function Panneau({ children, className = '' }: { children: React.ReactNode; clas
   );
 }
 
-function Titre({ children }: { children: React.ReactNode }) {
+function Titre({ children, d }: { children: React.ReactNode; d: number }) {
   return (
-    <p className="mb-2 font-mono text-[8.5px] font-bold uppercase tracking-[0.18em]" style={{ color: '#8fe6ff' }}>
+    <p
+      className="ht-in mb-2 font-mono text-[8.5px] font-bold uppercase tracking-[0.18em]"
+      style={{ ...delai(d), color: '#8fe6ff' }}
+    >
       {children}
     </p>
   );
@@ -165,12 +182,12 @@ export function HeroDeviceMockup({
 
         {/* ── Terminal ───────────────────────────────────────────────── */}
         <div
-          className="overflow-hidden rounded-2xl shadow-[0_28px_70px_-28px_rgba(0,0,0,0.9)]"
+          className="ht-frame overflow-hidden rounded-2xl shadow-[0_28px_70px_-28px_rgba(0,0,0,0.9)]"
           style={{ border: `1px solid ${LIGNE}` }}
         >
           <div
-            className="flex items-center justify-between px-3.5 py-2"
-            style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${LIGNE}` }}
+            className="ht-in flex items-center justify-between px-3.5 py-2"
+            style={{ ...delai(140), background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${LIGNE}` }}
           >
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: '#8fe6ff' }}>
               Terminal WESTBOURSE
@@ -185,8 +202,8 @@ export function HeroDeviceMockup({
           <div className="grid grid-cols-1 gap-px sm:grid-cols-12" style={{ background: LIGNE }}>
             {/* Indice + courbe + statistiques de séance */}
             <Panneau className="sm:col-span-7">
-              <Titre>BRVM-C</Titre>
-              <div className="flex items-baseline gap-3">
+              <Titre d={220}>BRVM-C</Titre>
+              <div className="ht-in flex items-baseline gap-3" style={delai(280)}>
                 <span className="tabular font-display text-[clamp(26px,3.4vw,38px)] leading-none" style={{ color: '#fcfcfc' }}>
                   {brvmC != null ? brvmC.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) : '—'}
                 </span>
@@ -199,8 +216,21 @@ export function HeroDeviceMockup({
               </div>
               {geo ? (
                 <svg viewBox="0 0 300 60" className="mt-2 h-auto w-full" fill="none" aria-hidden>
-                  <path d={geo.area} fill={indiceUp ? VERT : ROUGE} opacity={0.12} />
-                  <path d={geo.line} stroke={indiceUp ? VERT : ROUGE} strokeWidth={1.8} strokeLinejoin="round" />
+                  {/* L'aplat n'entre qu'une fois la ligne tracée : l'ordre dit
+                      « le tracé d'abord, le volume ensuite ». Le <g> porte
+                      l'animation pour que l'opacité 0,12 du chemin survive. */}
+                  <g className="ht-in" style={delai(760)}>
+                    <path d={geo.area} fill={indiceUp ? VERT : ROUGE} opacity={0.12} />
+                  </g>
+                  <path
+                    d={geo.line}
+                    className="ht-draw"
+                    pathLength={1}
+                    style={delai(360)}
+                    stroke={indiceUp ? VERT : ROUGE}
+                    strokeWidth={1.8}
+                    strokeLinejoin="round"
+                  />
                 </svg>
               ) : (
                 <p className="mt-3 text-[10px]" style={{ color: GRIS }}>Historique indisponible.</p>
@@ -211,8 +241,8 @@ export function HeroDeviceMockup({
                   { l: 'Hausses', v: String(nbHausses) },
                   { l: 'Baisses', v: String(nbBaisses) },
                   { l: 'Transact.', v: nbTransactions > 0 ? fmtNumber(nbTransactions) : '—' },
-                ].map((x) => (
-                  <div key={x.l}>
+                ].map((x, i) => (
+                  <div key={x.l} className="ht-in" style={delai(620 + i * 60)}>
                     <dt className="text-[8.5px] uppercase tracking-wide" style={{ color: GRIS }}>{x.l}</dt>
                     <dd className="tabular mt-0.5 text-[12.5px] font-medium" style={{ color: '#fcfcfc' }}>{x.v}</dd>
                   </div>
@@ -222,19 +252,25 @@ export function HeroDeviceMockup({
 
             {/* Diagnostic : sous-scores réels du signal */}
             <Panneau className="sm:col-span-5">
-              <Titre>Diagnostic WESTBOURSE</Titre>
+              <Titre d={260}>Diagnostic WESTBOURSE</Titre>
               {diagnostic ? (
                 <>
-                  <div className="flex items-baseline justify-between gap-2">
+                  <div className="ht-in flex items-baseline justify-between gap-2" style={delai(460)}>
                     <span className="font-mono text-sm font-bold" style={{ color: '#fcfcfc' }}>{diagnostic.code}</span>
                     <span className="font-display text-3xl leading-none" style={{ color: CYAN }}>
                       {lettre(diagnostic.score_total ?? null)}
                     </span>
                   </div>
-                  <div className="mt-3">
+                  <div className="ht-in mt-3" style={delai(640)}>
                     <SubscoreBars signal={diagnostic} couleurs={COULEURS_TERMINAL} compact />
                   </div>
-                  <div className="mt-4 flex items-center justify-between border-t pt-3" style={{ borderColor: LIGNE }}>
+                  {/* LE VERDICT EN DERNIER (1060 ms), après les sous-scores qui
+                      le fondent. Un signal qui précède ses mesures se lit comme
+                      une opinion ; l'inverse se lit comme une démonstration. */}
+                  <div
+                    className="ht-pop mt-4 flex items-center justify-between border-t pt-3"
+                    style={{ ...delai(1060), borderColor: LIGNE }}
+                  >
                     <span className="text-[9px] uppercase tracking-wide" style={{ color: GRIS }}>Signal</span>
                     <span
                       className="rounded px-2 py-0.5 font-mono text-[10px] font-bold"
@@ -243,7 +279,7 @@ export function HeroDeviceMockup({
                       {diagnostic.signal ?? '—'}
                     </span>
                   </div>
-                  <div className="mt-1.5 flex items-center justify-between">
+                  <div className="ht-in mt-1.5 flex items-center justify-between" style={delai(1140)}>
                     <span className="text-[9px] uppercase tracking-wide" style={{ color: GRIS }}>Confiance</span>
                     <span className="tabular text-[11px] font-bold" style={{ color: '#fcfcfc' }}>
                       {diagnostic.confiance != null ? `${(diagnostic.confiance * 100).toFixed(0)} %` : '—'}
@@ -257,11 +293,15 @@ export function HeroDeviceMockup({
 
             {/* Top variations de la séance */}
             <Panneau className="sm:col-span-7">
-              <Titre>Top variations</Titre>
+              <Titre d={300}>Top variations</Titre>
               {top.length > 0 ? (
                 <ul className="space-y-1">
-                  {top.map((t) => (
-                    <li key={t.sym} className="flex items-center justify-between gap-2 py-0.5">
+                  {top.map((t, i) => (
+                    <li
+                      key={t.sym}
+                      className="ht-in flex items-center justify-between gap-2 py-0.5"
+                      style={delai(520 + i * 55)}
+                    >
                       <span className="font-mono text-[11.5px] font-bold" style={{ color: '#fcfcfc' }}>{t.sym}</span>
                       <span className="tabular text-[11.5px] font-bold" style={{ color: t.dir === 'up' ? VERT : ROUGE }}>
                         {t.pct}
@@ -277,13 +317,13 @@ export function HeroDeviceMockup({
             {/* Meilleures notes A–F de la séance */}
             {topRated.length > 0 && (
               <Panneau className="sm:col-span-5">
-                <Titre>Meilleures notes de la séance</Titre>
+                <Titre d={340}>Meilleures notes de la séance</Titre>
                 <div className="grid grid-cols-3 gap-2">
-                  {topRated.map((r) => (
+                  {topRated.map((r, i) => (
                     <div
                       key={r.code}
-                      className="rounded-lg px-2.5 py-2 text-center"
-                      style={{ background: 'rgba(255,255,255,0.035)' }}
+                      className="ht-in rounded-lg px-2.5 py-2 text-center"
+                      style={{ ...delai(800 + i * 70), background: 'rgba(255,255,255,0.035)' }}
                     >
                       <p className="font-mono text-[10.5px]" style={{ color: GRIS }}>{r.code}</p>
                       <p className="font-display text-2xl leading-none" style={{ color: CYAN }}>{lettre(r.score)}</p>

@@ -1,0 +1,96 @@
+/**
+ * Séquence d'initialisation du terminal du hero.
+ *
+ * POURQUOI DU CSS PUR, SANS UNE LIGNE DE JAVASCRIPT.
+ * Le hero est rendu côté serveur, déjà à son état final. Un composant client
+ * qui ajouterait une classe au montage produirait un CLIGNOTEMENT : le
+ * terminal s'affiche (SSR), disparaît (image 0 de l'animation), puis revient
+ * en fondu. Des `@keyframes` posées dans le HTML serveur jouent d'elles-mêmes,
+ * au premier rendu, sans JS et sans flash. Conséquences : zéro octet de
+ * JavaScript, aucun effet sur le LCP, et la séquence fonctionne même si le
+ * bundle ne se charge jamais.
+ *
+ * CE QUI N'EST PAS ANIMÉ, DÉLIBÉRÉMENT : la colonne de discours (titre,
+ * sous-titre, boutons). Le H1 est selon toute vraisemblance l'élément LCP —
+ * animer son opacité retarderait la mesure de Google. Narrativement c'est
+ * aussi le bon choix : la promesse est immédiate, la PREUVE se construit.
+ *
+ * ORDRE DE LECTURE IMPOSÉ : les métriques d'abord, le verdict en dernier. Le
+ * badge de signal (BUY/HOLD/SELL) n'apparaît qu'à 1060 ms, après les
+ * sous-scores qui le fondent. Un verdict qui précède ses mesures se lit comme
+ * une opinion ; l'inverse se lit comme une démonstration.
+ *
+ * Les délais sont portés par `--d` sur chaque élément, jamais par une classe
+ * par palier : un seul jeu d'animations, des retards en données.
+ */
+
+/* Cadre du terminal : entre en premier, tout le reste se pose dedans. */
+.ht-frame {
+  animation: ht-frame 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes ht-frame {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* Révélation générique : opacité + montée de 6 px. `both` maintient l'état
+   initial pendant le retard, sinon l'élément apparaîtrait puis disparaîtrait. */
+.ht-in {
+  animation: ht-in 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes ht-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Apparition du verdict : léger grossissement, sans rebond — un signal
+   financier ne doit pas « pop » comme une récompense de jeu. */
+.ht-pop {
+  animation: ht-pop 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes ht-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+/* Tracé de la courbe.
+   `pathLength="1"` sur le <path> normalise la longueur à 1 : plus besoin de
+   mesurer le chemin en JS (getTotalLength), le dasharray vaut 1 quelle que
+   soit la série. État de repos = `stroke-dashoffset: 0`, donc courbe ENTIÈRE :
+   sans animation (mouvement réduit, CSS non chargée), le tracé est complet. */
+.ht-draw {
+  stroke-dasharray: 1;
+  animation: ht-draw 560ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes ht-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/**
+ * Mouvement réduit : on ne dégrade pas, on supprime. Chaque élément retrouve
+ * son état naturel — qui EST l'état final, puisque aucune de ces classes ne
+ * modifie la mise en page au repos. Rien à recalculer, rien à rattraper.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .ht-frame,
+  .ht-in,
+  .ht-pop,
+  .ht-draw {
+    animation: none;
+  }
+}
