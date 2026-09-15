@@ -18,6 +18,8 @@
     "score:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts score --mock",
     "hebdo": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts hebdo",
     "hebdo:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts hebdo --mock",
+    "dossiers:envoi": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts dossiers:envoi",
+    "dossiers:envoi:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts dossiers:envoi --mock",
     "liquidity": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts liquidity",
     "range52": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts range52",
     "range52:mock": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx src/index.ts range52 --mock",

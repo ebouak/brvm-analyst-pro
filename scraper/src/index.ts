@@ -129,6 +129,35 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+
+    case 'dossiers:envoi': {
+      const { runEnvoi } = await import('./dossiers/runEnvoi.js');
+      const res = await monitored(
+        { code: 'dossiers-envoi', label: 'Envoi des dossiers valeur' },
+        async () => {
+          const r = await runEnvoi({ mock });
+          return {
+            value: r,
+            outcome: {
+              // `partial` et non `failed` : des envois ont pu aboutir. Le code
+              // de sortie 1 ci-dessous fait quand même échouer le workflow.
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.comptes,
+              rows_upserted: r.envoyes,
+              metadata: {
+                semaine: r.semaine,
+                envoyes: r.envoyes,
+                vides: r.vides,
+                echecs: r.echecs,
+                sautes: r.sautes,
+              },
+            },
+          };
+        },
+      );
+      // `monitored` déballe déjà MonitoredResult.value (voir sa signature).
+      return res.echecs > 0 ? 1 : 0;
+    }
     case 'daily:full': {
       logger.info('Executing daily full scrape');
       const result = await runDailyFull(positional[0]);

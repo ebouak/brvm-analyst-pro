@@ -168,6 +168,13 @@ export async function sendTelegramDocument(
   }
 }
 
+/**
+ * Export nominal du canal TEXTE Telegram, pour les appelants qui composent
+ * eux-mêmes leur envoi (dossiers/runEnvoi.ts : un message d'ouverture, puis
+ * un document par valeur). `dispatch` reste la porte d'entrée normale.
+ */
+export const sendTelegramText = sendTelegram;
+
 /** Config Cloud API commune (token + numéro d'envoi). null si non configurée. */
 function whatsAppConfig(): { token: string; phoneId: string } | null {
   const token = process.env.WHATSAPP_TOKEN;
