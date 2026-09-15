@@ -25,6 +25,13 @@ export interface Notification {
    * EXPLICITEMENT — voir le commentaire de sendTelegram.
    */
   operateur?: boolean;
+  /**
+   * Pièces jointes — EMAIL UNIQUEMENT (Telegram passe par
+   * `sendTelegramDocument`, un document par envoi). L'appelant fournit des
+   * octets ; l'encodage base64 qu'attend Resend se fait ici, pour qu'aucun
+   * appelant n'ait à manipuler du texte encodé.
+   */
+  attachments?: { filename: string; content: Buffer }[];
 }
 
 export type ChannelName = 'email' | 'telegram' | 'whatsapp' | 'console';
@@ -53,7 +60,22 @@ export async function sendEmail(n: Notification): Promise<SendResult | null> {
     const resp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to, subject: n.subject, text: n.body }),
+      body: JSON.stringify({
+        from,
+        to,
+        subject: n.subject,
+        text: n.body,
+        // Clé posée seulement s'il y a vraiment des pièces jointes : Resend
+        // refuse un `attachments: []` sur certains comptes.
+        ...(n.attachments && n.attachments.length > 0
+          ? {
+              attachments: n.attachments.map((a) => ({
+                filename: a.filename,
+                content: a.content.toString('base64'),
+              })),
+            }
+          : {}),
+      }),
     });
     if (!resp.ok) {
       // Resend explique la cause dans le corps (domaine non vérifié, from
@@ -97,6 +119,49 @@ async function sendTelegram(n: Notification): Promise<SendResult | null> {
       body: JSON.stringify({ chat_id: chatId, text: `${n.subject}\n${n.body}` }),
     });
     if (!resp.ok) return { channel: 'telegram', status: 'failed', error: `HTTP ${resp.status}` };
+    return { channel: 'telegram', status: 'sent' };
+  } catch (err) {
+    return { channel: 'telegram', status: 'failed', error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+/**
+ * Envoie un DOCUMENT (PDF) dans une conversation Telegram, en multipart.
+ *
+ * Même règle que `sendTelegram` : destinataire EXPLICITE, aucun repli vers la
+ * conversation de l'exploitant. Le modèle multipart est repris de
+ * `video/publie.mjs` (sendVideo), qui téléverse déjà la vidéo de séance.
+ *
+ * L'URL appelée contient le jeton du bot : en cas d'échec on ne relaie que la
+ * `description` renvoyée par Telegram, jamais l'URL — sinon le jeton finirait
+ * dans les journaux d'erreur.
+ */
+export async function sendTelegramDocument(
+  chatId: number | string,
+  octets: Buffer,
+  filename: string,
+  caption: string,
+): Promise<SendResult | null> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || !chatId) return null;
+  try {
+    const form = new FormData();
+    form.set('chat_id', String(chatId));
+    /* `new Uint8Array(octets)` plutôt que le Buffer tel quel : le type de
+       `Buffer.buffer` est `ArrayBufferLike`, qui autorise un SharedArrayBuffer
+       et n'est donc pas un `BlobPart` valide pour TypeScript. La copie est
+       négligeable (~150 ko) et lève l'ambiguïté. */
+    form.set('document', new Blob([new Uint8Array(octets)], { type: 'application/pdf' }), filename);
+    // 1024 caractères est le plafond d'une légende Telegram.
+    form.set('caption', caption.slice(0, 1024));
+    const resp = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
+      method: 'POST',
+      body: form,
+    });
+    const rep = (await resp.json().catch(() => ({}))) as { ok?: boolean; description?: string };
+    if (!resp.ok || !rep.ok) {
+      return { channel: 'telegram', status: 'failed', error: rep.description ?? `HTTP ${resp.status}` };
+    }
     return { channel: 'telegram', status: 'sent' };
   } catch (err) {
     return { channel: 'telegram', status: 'failed', error: err instanceof Error ? err.message : String(err) };
