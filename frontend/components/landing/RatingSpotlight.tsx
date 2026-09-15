@@ -10,19 +10,32 @@ interface Props {
   // ne la transmet pas encore — repli honnête sur le nombre de sociétés
   // suivies par la plateforme si la vraie séance n'est pas disponible.
   nbActions?: number;
+  /**
+   * Rendu en sous-bloc de la section « Comprendre une action » : titre
+   * rétrogradé en h3, marge resserrée. Voir FundamentalsPreview pour le motif.
+   */
+  sousSection?: boolean;
 }
 
 
-export function RatingSpotlight({ signal, nbActions }: Props) {
+export function RatingSpotlight({ signal, nbActions, sousSection = false }: Props) {
   if (!signal) return null;
   return (
-    <section className="mt-10 rounded-panel border border-border bg-surface/60 p-6 md:p-8">
+    <section
+      className={`rounded-panel border border-border bg-surface/60 p-6 md:p-8 ${sousSection ? 'mt-6' : 'mt-10'}`}
+    >
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-center">
         <div>
           <p className="overline mb-3 text-gold-2">Note quantitative</p>
-          <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
-            Chaque action. Une note.
-          </h2>
+          {sousSection ? (
+            <h3 className="mb-3 font-display text-xl text-ivory md:text-2xl [letter-spacing:-0.03em]">
+              Chaque action. Une note.
+            </h3>
+          ) : (
+            <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
+              Chaque action. Une note.
+            </h2>
+          )}
           <p className="max-w-[46ch] text-sm leading-relaxed text-muted">
             Chaque note A–F est calculée à partir de signaux quantitatifs explicables — variation,
             volume, RSI, tendance et liquidité — jamais d&apos;opinion inventée.

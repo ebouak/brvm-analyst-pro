@@ -105,7 +105,21 @@ function MiniBarres({
   );
 }
 
-export function FundamentalsPreview({ data }: { data: FundamentalsPreviewData | null }) {
+export function FundamentalsPreview({
+  data,
+  sousSection = false,
+}: {
+  data: FundamentalsPreviewData | null;
+  /**
+   * Rendu en SOUS-BLOC d'une section englobante. Trois sections consécutives
+   * — la fiche, les fondamentaux, la note — portaient sur la MÊME valeur
+   * (`featured` et `fundamentals` dérivent du même `candidat` dans page.tsx) :
+   * elles ne forment qu'un seul sujet. En sous-bloc : pas de nom accessible
+   * propre (donc plus de repère de navigation redondant), titre rétrogradé en
+   * h3 sous le h2 de la section, marge resserrée.
+   */
+  sousSection?: boolean;
+}) {
   if (!data) return null;
 
   const h = data.historique;
@@ -119,12 +133,21 @@ export function FundamentalsPreview({ data }: { data: FundamentalsPreviewData | 
   ];
 
   return (
-    <section aria-labelledby="fonda-titre" className="mt-24">
-      <div className="mb-8 max-w-[52ch]">
+    <section
+      {...(sousSection ? {} : { 'aria-labelledby': 'fonda-titre' })}
+      className={sousSection ? 'mt-10' : 'mt-24'}
+    >
+      <div className={`max-w-[52ch] ${sousSection ? 'mb-5' : 'mb-8'}`}>
         <p className="overline mb-3 text-gold-2">Fondamentaux</p>
-        <h2 id="fonda-titre" className="font-display text-2xl text-ivory md:text-4xl [letter-spacing:-0.035em]">
-          Nous ne nous contentons pas d&apos;afficher les cours.
-        </h2>
+        {sousSection ? (
+          <h3 className="font-display text-xl text-ivory md:text-2xl [letter-spacing:-0.03em]">
+            Nous ne nous contentons pas d&apos;afficher les cours.
+          </h3>
+        ) : (
+          <h2 id="fonda-titre" className="font-display text-2xl text-ivory md:text-4xl [letter-spacing:-0.035em]">
+            Nous ne nous contentons pas d&apos;afficher les cours.
+          </h2>
+        )}
         <p className="mt-3 text-sm leading-relaxed text-muted">
           Les états financiers sont extraits des publications officielles des émetteurs, puis
           recoupés : bilan équilibré, cohérence résultat/BPA, ordre de grandeur. Un chiffre qui

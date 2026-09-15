@@ -796,12 +796,6 @@ export default async function Landing() {
   const briefLines = brief
     ? (brief.contenu as string).split('\n').filter((l) => l.trim() && !l.startsWith('Analyse complète')).slice(0, 7)
     : [];
-  // Carte « Premium » de la rangée B : plan recommandé si la base en désigne un,
-  // sinon le plan payant le plus abordable — jamais un plan écrit en dur.
-  const premiumPlan =
-    plans.find((p) => p.is_recommended) ??
-    [...plans].filter((p) => p.price_monthly > 0).sort((a, b) => a.price_monthly - b.price_monthly)[0] ??
-    null;
   const brvmC = indices.find((i) => i.code === 'BRVMC')?.valeur ?? null;
   const brvmCVar = indices.find((i) => i.code === 'BRVMC')?.variation_pct ?? null;
   // Repli "séance peu animée" réparti sur les deux cartes (hausses/baisses)
@@ -994,21 +988,27 @@ export default async function Landing() {
         <p className="mt-3 text-xs text-muted">Sans carte bancaire · 1 minute · Accès immédiat.</p>
       </section>
 
-      {/* ── 09 · COMPRENDRE UNE ACTION — fiche société réelle ───────────── */}
+      {/* ── COMPRENDRE UNE ACTION — un sujet, trois éclairages ────────────
+          FUSION (2026-09-15). Ces trois blocs portent sur la MÊME valeur —
+          `featured` et `fundamentals` dérivent tous deux de `candidat`, la
+          plus échangée de la séance — mais s'annonçaient comme trois sections
+          distinctes, chacune avec son h2 et sa marge de chapitre. Le lecteur
+          croyait changer de sujet trois fois. La fiche ouvre désormais le
+          sujet ; les fondamentaux et la note en sont les sous-parties (h3,
+          marges resserrées). Aucune donnée retirée. ───────────────────── */}
       <StockSpotlight stock={featured} dateLabel={dateLabel} />
-
-      {/* ── 10 · FONDAMENTAUX ───────────────────────────────────────────── */}
-      <FundamentalsPreview data={fundamentals} />
-
-      {/* ── 11 · SIGNATURE — la note A–F ────────────────────────────────── */}
-      <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
+      <FundamentalsPreview data={fundamentals} sousSection />
+      <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} sousSection />
 
       {/* Deuxième rupture de rythme : le Diagnostic IA est un moment de
           DONNÉES, il passe donc en bande sombre comme la cartographie. */}
       <div className={GAP_CHAPITRE}>
         <DarkBand>
         {/* ── 12 · DIAGNOSTIC IA ──────────────────────────────────────────── */}
-        <section className={`grid grid-cols-1 gap-4 lg:grid-cols-2`}>
+        {/* Carte « Premium » retirée (2026-09-15) : elle répétait le prix et
+            les inclusions que PremiumCompare montre déjà, dix sections plus
+            haut. Le Diagnostic occupe désormais toute la bande. */}
+        <section>
           <article className={ROW_CARD}>
             <p className="overline mb-2 text-gold-2">Diagnostic IA</p>
             <h2 className="mb-3 font-display text-lg text-ivory">Votre analyste BRVM en quelques secondes.</h2>
@@ -1043,57 +1043,22 @@ export default async function Landing() {
               Découvrir le Diagnostic IA <span aria-hidden>→</span>
             </Link>
           </article>
-          <article className={ROW_CARD}>
-            <p className="overline mb-2 text-gold-2">Premium</p>
-            <h2 className="mb-3 font-display text-lg text-ivory">Passez à Premium</h2>
-            {premiumPlan ? (
-              <>
-                <p className="tabular font-display text-2xl text-ivory">
-                  {premiumPlan.price_monthly > 0
-                    ? `${premiumPlan.price_monthly.toLocaleString('fr-FR')} FCFA`
-                    : 'Gratuit'}
-                  {premiumPlan.price_monthly > 0 && <span className="text-xs font-normal text-faint"> /mois</span>}
-                </p>
-                <p className="mt-0.5 text-[11px] text-faint">Formule {premiumPlan.name}</p>
-                <ul className="mt-3 space-y-2">
-                  {premiumPlan.features.slice(0, 4).map((f) => (
-                    <li key={f.id} className="flex items-start gap-2 text-xs leading-relaxed text-muted">
-                      <span className="mt-0.5 text-up" aria-hidden>
-                        ✓
-                      </span>
-                      <span>
-                        {f.feature_label}
-                        {f.feature_value ? ` — ${f.feature_value}` : ''}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
-                Le détail des formules s&apos;affichera dès que les plans seront disponibles.
-              </p>
-            )}
-            <Link href="/pricing" className={ROW_LINK}>
-              Découvrir Premium <span aria-hidden>→</span>
-            </Link>
-          </article>
         </section>
         </DarkBand>
       </div>
 
-      {/* ── 13 bis · LA PLATEFORME EN ACTION — vidéo Remotion ────────────
-          Rebranché le 2026-09-10. Le composant et la vidéo existaient déjà
-          (`remotion/landing-video.tsx`, 16 s, écrans de production) mais rien
-          ne les montait : l'audit de conservation les a trouvés parmi neuf
-          composants sans aucun appelant. Placé ICI, juste avant les quatre
-          univers : on montre la plateforme, puis on la découpe.
-          Coût de chargement nul tant que la section n'approche pas du
-          viewport — ScreensShowcase ne monte la vidéo qu'à 300 px du bord. */}
-      <ScreensShowcase />
-
-      {/* ── 14 · LA PLATEFORME — quatre univers (remplace la grille plate)  */}
+      {/* ── LA PLATEFORME — les univers, puis la démonstration ────────────
+          ORDRE INVERSÉ (2026-09-15) : on présente les quatre univers, PUIS la
+          vidéo qui les montre à l'œuvre. La vidéo ouvrait auparavant un sujet
+          que la section suivante annonçait une seconde fois — deux ouvertures
+          pour un seul propos. Elle en est maintenant la conclusion visuelle.
+          (`remotion/landing-video.tsx`, 16 s, écrans de production ; rebranché
+          le 2026-09-10 après l'audit de conservation, qui l'avait trouvé parmi
+          neuf composants sans appelant. Coût de chargement nul tant que la
+          section n'approche pas du viewport : ScreensShowcase ne monte la
+          vidéo qu'à 300 px du bord.) ──────────────────────────────────── */}
       <PlatformUniverses />
+      <ScreensShowcase />
 
 
       {/* ── 15 + 16 · SIMULATEUR ET COMPARATEUR SGI ─────────────────────── */}
@@ -1269,11 +1234,13 @@ export default async function Landing() {
             </p>
           )}
         </article>
-      </section>
 
-      {/* ── 20 · NEWSLETTER ─────────────────────────────────────────────── */}
-      <section className="mt-14">
-        <NewsletterForm source="landing" banner />
+        {/* La newsletter occupait une section pleine à elle seule juste avant
+            la FAQ. Elle rejoint les actualités : même intention — rester
+            informé — donc un seul bloc au lieu de deux. */}
+        <div className="mt-4">
+          <NewsletterForm source="landing" banner />
+        </div>
       </section>
 
       {/* ── 21 · FAQ — lève les objections avant le CTA final ───────────── */}
