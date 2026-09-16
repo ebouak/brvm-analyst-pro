@@ -1,0 +1,42 @@
+/**
+ * Révélation au défilement — CSS PUR, sans IntersectionObserver.
+ *
+ * `animation-timeline: view()` lie l'animation à la POSITION de l'élément dans
+ * le viewport, sans une ligne de JavaScript : pas d'observateur à monter, pas
+ * de composant client, aucun effet sur le LCP. Même parti pris que la séquence
+ * du hero (heroTerminal.css).
+ *
+ * PROGRESSIF PAR CONSTRUCTION, et c'est le point important. Le support est
+ * partiel (Chromium oui, Safari et Firefox pas encore). L'`@supports` ci-dessous
+ * fait que, partout ailleurs, la règle n'existe tout simplement pas : l'élément
+ * reste à son état NATUREL, c'est-à-dire pleinement visible. Aucun contenu
+ * n'est donc jamais « garé » à `opacity: 0` en attendant un déclencheur qui
+ * pourrait ne jamais venir — le mode d'échec classique de ce genre d'effet.
+ *
+ * Portée volontairement étroite : le fil conducteur « De la donnée à la
+ * décision », dont les sept maillons gagnent à se poser l'un après l'autre.
+ * Ne pas l'étendre à toute la page : un effet partout n'est plus un effet.
+ */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rv-item {
+      animation: rv-in linear both;
+      animation-timeline: view();
+      /* L'animation se joue pendant que l'élément entre par le bas et se
+         termine bien avant le centre : il est lisible dès qu'on le regarde. */
+      animation-range: entry 0% cover 28%;
+    }
+  }
+}
+
+@keyframes rv-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

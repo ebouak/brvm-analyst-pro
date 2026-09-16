@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import './revelation.css';
 
 /**
  * Section 13 — « De la donnée à la décision ».
@@ -35,7 +36,11 @@ export function DataToDecision() {
 
       <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         {ETAPES.map((e, i) => (
-          <li key={e.n} className="relative bg-surface">
+          /* `rv-item` : chaque maillon se pose à son entrée dans le viewport
+             (revelation.css, CSS pur). Le décalage vient de la position dans
+             la page, pas d'un `animation-delay` : les maillons ne s'enchaînent
+             donc jamais plus vite que le lecteur ne descend. */
+          <li key={e.n} className="rv-item relative bg-surface">
             <Link
               href={e.href}
               className="flex h-full flex-col gap-2 p-4 transition-colors hover:bg-elevated/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/50"

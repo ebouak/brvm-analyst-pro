@@ -18,6 +18,9 @@ import { getSgiDirectory } from '@/lib/sgi-frais/queries';
 import { PAYS as SGI_PAYS } from '@/lib/sgi-frais/directory';
 import { HeroDeviceMockup } from '@/components/landing/HeroDeviceMockup';
 import { ProofBand } from '@/components/landing/ProofBand';
+import { PreuveDonnee } from '@/components/landing/PreuveDonnee';
+import { loadFreshnessInputs } from '@/lib/freshness/queries';
+import { computeFreshness } from '@/lib/freshness';
 import { AppPreview } from '@/components/landing/AppPreview';
 import { LandingFaq } from '@/components/landing/LandingFaq';
 import { MoverSparkline } from '@/components/landing/MoverSparkline';
@@ -181,6 +184,11 @@ async function getData() {
   // Fiche de la derniere video de seance (objet de stockage public). Ne leve
   // jamais : renvoie null tant que le worker video/ n'a pas publie.
   const videoSeancePromise = getVideoSeance();
+  // Fraîcheur : horodatage RÉEL de la dernière collecte (vue publique
+  // v_fraicheur_cours, migration 0122). Déjà utilisée par /dashboard et la
+  // fiche action — la landing ne la montrait pas, alors que c'est là que la
+  // preuve compte le plus.
+  const fraicheurPromise = loadFreshnessInputs();
   // Série récente du BRVM-C : alimente le graphe du terminal du hero.
   // Aucune donnée intraday n'existe (la BRVM n'en publie pas) — ce sont donc
   // les clôtures des dernières séances, jamais une courbe simulée.
@@ -236,6 +244,7 @@ async function getData() {
     nbObligations,
     { data: brvmcRows },
     videoSeance,
+    fraicheurInputs,
   ] = await Promise.all([
     lastDayPromise,
     lastIdxPromise,
@@ -251,6 +260,7 @@ async function getData() {
     nbObligationsPromise,
     brvmcSeriePromise,
     videoSeancePromise,
+    fraicheurPromise,
   ]);
 
   const idxDate = (lastIdx?.date_marche as string | undefined) ?? null;
@@ -625,6 +635,7 @@ async function getData() {
     fundamentals,
     nbObligations,
     videoSeance,
+    fraicheurInputs,
   };
 }
 
@@ -686,6 +697,13 @@ function MoverLine({ m, rank }: { m: MoverRow; rank: number }) {
   );
 }
 
+/**
+ * NOTE (2026-09-16) : `STEPS` n'est rendu NULLE PART dans ce fichier — vérifié
+ * par recherche. Conservé tel quel plutôt que supprimé : son contenu (les
+ * trois portes d'entrée « note → fondamentaux → entraînement ») est le
+ * matériau d'un futur parcours « Je débute sur la BRVM », listé au P1 de
+ * l'audit. Le supprimer ferait perdre une rédaction déjà calibrée.
+ */
 const STEPS = [
   {
     n: '01',
@@ -779,7 +797,17 @@ export default async function Landing() {
     fundamentals,
     nbObligations,
     videoSeance,
+    fraicheurInputs,
   } = await getCachedData();
+
+  /* Calculé au RENDU, pas dans getData : `computeFreshness` compare à l'heure
+     courante, et getData est mis en cache 5 minutes — un âge figé serait faux
+     dès la seconde visite. Seules les ENTRÉES sont cachées. */
+  const fraicheur = computeFreshness(
+    fraicheurInputs.derniereCollecte,
+    fraicheurInputs.derniereSeance,
+    new Date(),
+  );
 
   // Comptes SGI dynamiques (annuaire Supabase, repli TS) — plus de « 22 » en dur.
   const sgiCount = sgiDirectory.length;
@@ -853,6 +881,19 @@ export default async function Landing() {
 
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand nbActions={nbActions} />
+
+      {/* ── LA PREUVE DE LA DONNÉE — source → chiffre → horodatage ────────
+          Ajoutée le 2026-09-16. La page AFFIRMAIT « sources officielles »
+          sans jamais le MONTRER : l'honnêteté du produit — aucun chiffre
+          saisi à la main, un trou déclaré plutôt que comblé — restait
+          invisible pour le visiteur. C'est pourtant le vrai écart face aux
+          sites de rumeurs. Placée juste après le bandeau de confiance, dont
+          elle est la démonstration. ─────────────────────────────────────── */}
+      <PreuveDonnee
+        fraicheur={fraicheur}
+        exemple={featured ? { code: featured.code, nom: featured.nom, cours: featured.cours } : null}
+        nbActions={nbActions}
+      />
 
       {/* ── LE FIL CONDUCTEUR — « De la donnée à la décision » ────────────
           REMONTÉ de la position 16 à la 5 (2026-09-15). C'est la THÈSE de la
@@ -998,7 +1039,23 @@ export default async function Landing() {
           marges resserrées). Aucune donnée retirée. ───────────────────── */}
       <StockSpotlight stock={featured} dateLabel={dateLabel} />
       <FundamentalsPreview data={fundamentals} sousSection />
-      <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} sousSection />
+
+      {/* ── LA NOTE A–F — section À PART, et il le faut ───────────────────
+          Elle avait été fusionnée dans « Comprendre une action » le
+          2026-09-15 : c'était une ERREUR. Ces deux blocs ne parlent pas de la
+          même société. `featured` (et donc `fundamentals`) vient de
+          `candidat`, la valeur la plus ÉCHANGÉE ; `spotlightSignal` vient de
+          `order('score_total' desc)`, la MIEUX NOTÉE. En production : SNTS
+          d'un côté, SHEC de l'autre. Sous un titre annonçant une société, le
+          sous-bloc en montrait une autre.
+          Second motif : les trois composants rendent `null` sur des
+          conditions INDÉPENDANTES. Sans cotation échangée, StockSpotlight et
+          FundamentalsPreview disparaissent tous deux — mais RatingSpotlight
+          restait, h3 orphelin sans son h2.
+          Ne pas la refusionner sans lui passer le signal de `featured`, ce qui
+          suppose d'en charger les sous-scores (`inputs`), absents du select
+          actuel de `sigByCode`. ─────────────────────────────────────────── */}
+      <RatingSpotlight signal={spotlightSignal} nbActions={nbActions} />
 
       {/* Deuxième rupture de rythme : le Diagnostic IA est un moment de
           DONNÉES, il passe donc en bande sombre comme la cartographie. */}
@@ -1173,9 +1230,10 @@ export default async function Landing() {
               </span>
             ))}
           </div>
-          <Link href="/signup" className={ROW_LINK}>
-            Rejoindre la communauté <span aria-hidden>→</span>
-          </Link>
+          {/* Lien /signup retiré (2026-09-16) : c'était le 4e de la page, et
+              il doublait le CTA de mi-parcours situé quelques sections plus
+              haut. La carte informe (audience, comptes, sources) ; elle n'a
+              pas à convertir une seconde fois. */}
         </article>
       </section>
 
