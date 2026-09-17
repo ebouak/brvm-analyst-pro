@@ -7,6 +7,7 @@ import Sparkline from '@/components/public/Sparkline';
 import RatingBadge from '@/components/RatingBadge';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
+import { jsonLdScript } from '@/lib/jsonLd';
 
 // ISR : aligné sur la fréquence intraday (15 min)
 export const revalidate = 900;
@@ -160,7 +161,7 @@ export default async function CompanyPage({ params }: PageProps) {
 
   return (
     <PublicShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8">

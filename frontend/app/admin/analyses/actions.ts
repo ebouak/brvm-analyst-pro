@@ -109,12 +109,22 @@ export async function deletePage(slug: string): Promise<R> {
   return { ok: true };
 }
 
+const TYPES_IMAGE_AUTORISES = ['image/jpeg', 'image/png', 'image/webp'];
+
 /** Upload d'une image (hero ou inline) → renvoie l'URL publique à coller dans le champ. */
 export async function uploadImage(formData: FormData): Promise<{ ok: boolean; url?: string; message?: string }> {
   await requirePermission('content.write');
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return { ok: false, message: 'Aucun fichier.' };
   if (file.size > 3 * 1024 * 1024) return { ok: false, message: 'Image trop lourde (max 3 Mo).' };
+  // Liste blanche de types, comme /api/avatar. Le poids seul ne dit rien de ce
+  // qu'on range dans un bucket PUBLIC : un SVG y sert du script, un HTML une
+  // page sur notre domaine de stockage. La route n'est ouverte qu'aux porteurs
+  // de `content.write`, donc le risque etait faible — mais la regle ne coute
+  // qu'une ligne et ne depend pas de la confiance faite aux admins.
+  if (!TYPES_IMAGE_AUTORISES.includes(file.type)) {
+    return { ok: false, message: 'Format non supporté (JPG, PNG ou WebP).' };
+  }
   try {
     const url = await uploadInlineImage(file);
     return { ok: true, url };

@@ -11,6 +11,7 @@ import SplashScreen from '@/components/brand/SplashScreen';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import PostHogInit from '@/components/analytics/PostHogInit';
 import { createClient } from '@/lib/supabase/server';
+import { jsonLdScript } from '@/lib/jsonLd';
 
 // URL canonique du site. Défaut = domaine cible westbourse.com ; surchargeable
 // via NEXT_PUBLIC_SITE_URL (mettre l'URL RÉELLEMENT servie tant que le domaine
@@ -294,7 +295,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
         />
         {/* Chrome applicatif : entièrement masqué sur /embed/* (widgets tiers :
             aucun cookie, aucun traceur). ConditionalShell reste hors du garde,

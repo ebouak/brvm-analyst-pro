@@ -5,6 +5,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import PrintButton from '@/components/public/PrintButton';
 import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
+import { jsonLdScript } from '@/lib/jsonLd';
 
 export const revalidate = 900;
 
@@ -141,7 +142,7 @@ export default async function BriefDatePage({ params }: PageProps) {
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(articleLd) }}
         />
 
         {/* ── Fil d'Ariane ───────────────────────────────────────────── */}
