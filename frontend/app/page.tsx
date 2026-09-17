@@ -10,6 +10,7 @@ import LandingHeatmap from '@/components/landing/LandingHeatmap';
 import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
+import { SimulateurInteractif } from '@/components/landing/SimulateurInteractif';
 import { fmtNumber } from '@/lib/format';
 import type { TickItem } from '@/components/landing/taste/types';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
@@ -117,7 +118,21 @@ async function getData() {
     .maybeSingle();
   // Simulation réelle : 1 000 000 FCFA dans SNTS il y a 5 ans — ne dépend que
   // d'une date calculée localement, aucune valeur d'une autre requête.
-  const simulationPromise: Promise<{ finalValue: number; pct: number; years: number } | null> = (async () => {
+  /**
+   * Simulation SONATEL. Renvoie DÉSORMAIS la série et les dividendes, pas
+   * seulement le résultat : le composant client recalcule à chaque coup de
+   * curseur avec la même fonction pure, donc sur de vraies clôtures.
+   *
+   * Série ÉCHANTILLONNÉE AU MOIS (première clôture de chaque mois) + la
+   * dernière séance connue ajoutée telle quelle. Cinq ans de quotidien font
+   * ~1250 points ; le curseur n'a pas besoin de cette finesse, et la landing
+   * n'a pas à porter ce poids. Chaque point reste une VRAIE clôture — jamais
+   * une moyenne — et la valeur d'arrivée est bien le cours du jour.
+   */
+  const simulationPromise: Promise<{
+    finalValue: number; pct: number; years: number;
+    serie: PricePoint[]; dividendes: { date: string; montant: number }[];
+  } | null> = (async () => {
     try {
       const from = new Date();
       from.setFullYear(from.getFullYear() - 5);
@@ -138,7 +153,25 @@ async function getData() {
         .map((d) => ({ date: (d.payment_date ?? d.ex_date ?? '') as string, montant: d.montant as number }))
         .filter((d) => d.date);
       const sim = simulateInvestment(1_000_000, fromIso, prices, dividends);
-      return sim ? { finalValue: sim.finalValue, pct: sim.totalReturnPct, years: sim.years } : null;
+      if (!sim) return null;
+
+      // Première clôture de chaque mois, puis la dernière séance connue.
+      const parMois = new Map<string, PricePoint>();
+      for (const pt of prices) {
+        const mois = pt.date.slice(0, 7);
+        if (!parMois.has(mois)) parMois.set(mois, pt);
+      }
+      const serie = [...parMois.values()];
+      const derniere = prices[prices.length - 1];
+      if (derniere && serie[serie.length - 1]?.date !== derniere.date) serie.push(derniere);
+
+      return {
+        finalValue: sim.finalValue,
+        pct: sim.totalReturnPct,
+        years: sim.years,
+        serie,
+        dividendes: dividends,
+      };
     } catch {
       return null; /* pas de simulation si données indisponibles */
     }
@@ -1126,6 +1159,34 @@ export default async function Landing() {
                 Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.
               </p>
             )}
+            {/* CE QUE L'IA LIT, ET CE QU'ELLE NE FAIT PAS.
+                Les entrées listées ici sont VÉRIFIÉES dans le code du pipeline
+                (lib/diagnostic/prompt.ts et metrics.ts) : cotations et plage
+                52 semaines, deux exercices comptables, ratios calculés en
+                amont, signaux de presse avec leur source et leur date, grille
+                de points de vigilance. Ne rien ajouter ici qui ne soit
+                réellement injecté dans le prompt — ce bloc n'a de valeur que
+                s'il est exact. */}
+            <div className="mt-4 grid grid-cols-1 gap-3 border-t border-border/60 pt-3 sm:grid-cols-2">
+              <div>
+                <p className="overline mb-1.5 text-faint">Ce qu&apos;elle lit</p>
+                <ul className="space-y-1 text-[11.5px] leading-snug text-muted">
+                  <li>Cotations et plage 52 semaines</li>
+                  <li>Deux exercices : résultat, bilan, trésorerie</li>
+                  <li>Ratios calculés en amont (ROE DuPont, marges)</li>
+                  <li>Presse — avec sa source, sa date et son lien</li>
+                </ul>
+              </div>
+              <div>
+                <p className="overline mb-1.5 text-faint">Ce qu&apos;elle ne fait pas</p>
+                <ul className="space-y-1 text-[11.5px] leading-snug text-muted">
+                  <li>Calculer les chiffres — ils le sont avant, par du code testé</li>
+                  <li>Recommander d&apos;acheter ou de vendre</li>
+                  <li>Prédire un cours</li>
+                  <li>Inventer une source : sans presse trouvée, elle écrit « non évaluable »</li>
+                </ul>
+              </div>
+            </div>
             <p className="mt-3 text-[10px] leading-relaxed text-faint">
               Analyse façon sell-side générée à partir des données réelles de la plateforme — un outil
               d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.
@@ -1166,29 +1227,17 @@ export default async function Landing() {
           <p className="overline mb-2 text-gold-2">Simulateur</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Et si vous aviez investi&nbsp;?</h2>
           {simulation ? (
-            <>
-              <p className="text-xs leading-relaxed text-muted">
-                1 000 000 FCFA dans SONATEL il y a 5 ans, aujourd&apos;hui :
-              </p>
-              <p className="tabular mt-1.5 font-display text-4xl text-ivory">
-                {fmtNumber(Math.round(simulation.finalValue))} <span className="text-base text-muted">FCFA</span>
-              </p>
-              <p className={`tabular mt-1 text-sm font-bold ${simulation.pct >= 0 ? 'text-up' : 'text-down'}`}>
-                {simulation.pct >= 0 ? '+' : ''}
-                {fmtNumber(simulation.pct, 1)} % · dividendes inclus
-              </p>
-              <p className="mt-3 text-[10px] leading-relaxed text-faint">
-                Calcul réel sur les cours de clôture. Performances passées ne préjugent pas des performances futures.
-              </p>
-            </>
+            <SimulateurInteractif
+              code="SNTS"
+              nom="SONATEL"
+              serie={simulation.serie}
+              dividendes={simulation.dividendes}
+            />
           ) : (
             <p className="rounded-xl border border-border/70 bg-sunken/30 p-3.5 text-[13px] text-faint">
               Le calcul s&apos;affichera dès que l&apos;historique sera disponible.
             </p>
           )}
-          <Link href="/simulateur" className={ROW_LINK}>
-            Tester une autre action <span aria-hidden>→</span>
-          </Link>
         </article>
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Comparateur · SGI</p>
