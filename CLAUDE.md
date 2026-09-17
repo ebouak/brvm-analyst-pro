@@ -552,9 +552,50 @@ Spec `docs/superpowers/specs/2026-09-15-envoi-dossiers-design.md`, plan
   n'écrit pas à un client parce qu'on a relancé un PDF.
 - **RGPD** : `dossier_envois` ajoutée à `/api/account/export` ; suppression
   couverte par la cascade `auth.users`.
-- **Reste à faire (vous)** : appliquer `0132`, puis `get_advisors` + test à la
-  clé anon sur `dossier_envois` (0 ligne sans session), cocher la case sur
-  votre compte et lancer `dossier.yml` sans codes pour le premier envoi réel.
+- **FAIT (2026-09-17)** : `0132` appliquée ; RLS vérifiée (lecture anonyme `[]`,
+  écriture `42501`, `purge_rgpd_retention` en anonyme `permission denied`,
+  0 avis de sécurité) ; **premier envoi réel réussi** vers `ebouak@gmail.com`
+  — `comptes 1 · envoyés 1 · échecs 0`, 4 PDF en pièces jointes, **réception
+  confirmée**. L'idempotence est armée : relancer ne renvoie rien
+  (`sautés` passerait à 1).
+
+### Ajouts (passage 2026-09-16/17) — Landing : mouvement, récit, preuve
+
+Audit complet en 12 axes. Trois commits en production, chacun vérifié dans le
+HTML servi (et non déduit — voir la leçon en §9).
+
+- **Hero animé** (`heroTerminal.css`) : le terminal s'initialise au chargement,
+  **CSS pur, zéro JavaScript**. Un composant client posant une classe au
+  montage aurait fait clignoter (visible → masqué → fondu), le HTML étant déjà
+  rendu à l'état final. La colonne de discours n'est PAS animée : le `H1` est
+  l'élément LCP (mesuré). `pathLength="1"` évite de mesurer la courbe en JS, et
+  l'état de repos vaut `dashoffset: 0` — tracé entier si rien ne s'anime.
+  **Coût LCP mesuré : −84 ms** (7 exécutions, Pixel 7, 4G bridée, CPU ×4, en
+  n'éteignant QUE les classes `.ht-*`), c'est-à-dire rien. CLS 0,0001.
+- **Récit remonté** : « De la donnée à la décision » passe de la 16ᵉ à la 5ᵉ
+  place. Placé AVANT le tarif sans le déplacer — la décision documentée de
+  montrer le prix tôt reste intacte.
+- **Preuve de la donnée** (`PreuveDonnee.tsx`) : source → chiffre → horodatage
+  sur un chiffre RÉEL. Réutilise `v_fraicheur_cours` (migration 0122), déjà
+  employée par `/dashboard` et la fiche action mais absente de la landing.
+  `computeFreshness` est calculé AU RENDU, pas dans `getData` (caché 5 min) :
+  un âge figé serait faux dès la seconde visite.
+- **Légendes A–F et BUY/HOLD/SELL** au point de contact — ils étaient affichés
+  partout, définis nulle part.
+- **Révélation au défilement** (`revelation.css`) : `animation-timeline: view()`
+  sous `@supports`, donc aucun IntersectionObserver. Là où le support manque
+  (Safari, Firefox), la règle n'existe pas et l'élément reste PLEINEMENT
+  VISIBLE — jamais de contenu garé à `opacity: 0`.
+- **FUSION ANNULÉE, et pourquoi** : `RatingSpotlight` avait été fusionné dans
+  « Comprendre une action ». **C'était faux.** `featured`/`fundamentals`
+  viennent de `candidat` (la plus ÉCHANGÉE) ; `spotlightSignal` de
+  `order('score_total' desc)` (la mieux NOTÉE) — en production SNTS contre
+  SHEC. Sous un titre annonçant une société, le sous-bloc en montrait une
+  autre. Et les trois composants rendent `null` sur des conditions
+  INDÉPENDANTES : sans cotation échangée, RatingSpotlight restait seul, `h3`
+  orphelin. **Ne pas refusionner** sans lui passer le signal de `featured`, ce
+  qui suppose de charger ses sous-scores (`inputs`), absents du select de
+  `sigByCode`.
 
 ### Agent WhatsApp — PRÉCONDITION avant de lui donner les outils (2026-09-08)
 
@@ -650,6 +691,23 @@ est vide et aucun identifiant Meta n'est configuré.
   Lancer `npm run typecheck` dans chaque dossier après `npm install`.
 - **lint** : `scraper` référence eslint mais sans fichier `eslint.config.js`
   (à ajouter si on veut lint). Non bloquant.
+- **PANNE EMAIL SILENCIEUSE DE 7 SEMAINES (23/07 → 17/09/2026).** `RESEND_API_KEY`
+  était invalide côté GitHub et **totalement absente de Vercel**. Conséquence :
+  aucun email envoyé depuis le 23 juillet — `notifications_log` ne portait plus
+  que du `telegram` et de la `console`. **`alerts.yml` affichait « success »
+  pendant tout ce temps** : `dispatch` ne lève pas quand un canal refuse, il
+  retombe sur la console. Découverte par accident, parce que le job d'envoi des
+  dossiers, lui, **échoue bruyamment** (code 1 + `statut='echec'` + raison dans
+  `dossier_envois`).
+  ⚠️ **La leçon générale** : un workflow vert ne prouve pas qu'un message est
+  parti. Tout nouveau canal doit journaliser son échec, pas seulement son
+  succès. Vérifier la délivrabilité par la DONNÉE (`notifications_log`,
+  `dossier_envois`), jamais par la couleur du run.
+  ⚠️ **Piège de validation** : une clé Resend à portée « Sending access » ne
+  peut PAS appeler `GET /domains` — elle y répond 401 tout en étant valide. Pour
+  tester une clé sans rien envoyer : `POST /emails` avec un corps VIDE ; 401
+  « API key is invalid » = mauvaise clé, 422 `missing_required_field` = bonne.
+  Scripts de rotation : `~/.claude/resend-key.ps1` et `resend-vercel.ps1`.
 
 ## 10. Prochaines tâches prioritaires
 
