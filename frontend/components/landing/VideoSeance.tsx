@@ -62,6 +62,18 @@ export function VideoSeance({
         </span>
       </div>
 
+      {/* PREUVE DE FRAÎCHEUR (2026-09-17). La vidéo était présentée comme un
+          résumé ; elle est surtout la démonstration quotidienne que la chaîne
+          tourne. Elle est composée automatiquement chaque soir à partir des
+          MÊMES variables que cette page — images, voix et légende ; un jour
+          sans vidéo signifie un jour sans séance exploitable, jamais un
+          habillage recyclé. C'est le quatrième maillon de « La preuve de la
+          donnée » plus haut, et il se voit. */}
+      <p className="mb-4 max-w-[62ch] text-sm leading-relaxed text-muted">
+        Produite automatiquement chaque soir après la clôture, à partir des mêmes chiffres que
+        cette page. Aucune séance exploitable, aucune vidéo — jamais un habillage recyclé.
+      </p>
+
       {/* items-start : sans cela le panneau s'étire à la hauteur de la vidéo
           (461 px mesurés) et reste aux trois quarts vide — un cadre creux se
           lit comme une section cassée. Il épouse maintenant son contenu. */}

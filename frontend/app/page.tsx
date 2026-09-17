@@ -1118,8 +1118,16 @@ export default async function Landing() {
       <ScreensShowcase />
 
 
-      {/* ── 15 + 16 · SIMULATEUR ET COMPARATEUR SGI ─────────────────────── */}
-      <section className={`${GAP_SECTION} grid grid-cols-1 gap-4 lg:grid-cols-2`}>
+      {/* ── SIMULATEUR ET COMPARATEUR SGI ────────────────────────────────
+          GRILLE ASYMÉTRIQUE (2026-09-17). Quatre cartes strictement
+          identiques s'enchaînaient ici (simulateur, SGI, brief, communauté) :
+          le lecteur ne voyait plus de hiérarchie, tout pesait pareil. La
+          rupture ne vient PAS d'un ornement mais du POIDS : le simulateur
+          porte le seul chiffre vraiment persuasif de la page — ce qu'un
+          million de FCFA serait devenu — quand l'annuaire SGI est une
+          référence utile mais froide. La colonne large dit lequel des deux
+          mérite d'être lu en premier. ──────────────────────────────────── */}
+      <section className={`${GAP_SECTION} grid grid-cols-1 gap-4 lg:grid-cols-[1.35fr_1fr]`}>
         <article className={ROW_CARD}>
           <p className="overline mb-2 text-gold-2">Simulateur</p>
           <h2 className="mb-3 font-display text-lg text-ivory">Et si vous aviez investi&nbsp;?</h2>
@@ -1128,7 +1136,7 @@ export default async function Landing() {
               <p className="text-xs leading-relaxed text-muted">
                 1 000 000 FCFA dans SONATEL il y a 5 ans, aujourd&apos;hui :
               </p>
-              <p className="tabular mt-1.5 font-display text-3xl text-ivory">
+              <p className="tabular mt-1.5 font-display text-4xl text-ivory">
                 {fmtNumber(Math.round(simulation.finalValue))} <span className="text-base text-muted">FCFA</span>
               </p>
               <p className={`tabular mt-1 text-sm font-bold ${simulation.pct >= 0 ? 'text-up' : 'text-down'}`}>
