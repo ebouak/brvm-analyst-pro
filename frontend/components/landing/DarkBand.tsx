@@ -15,6 +15,7 @@
  * quel que soit le thème. Un texte piloté par token y deviendrait illisible
  * en mode clair.
  */
+import './revelation.css';
 
 export function DarkBand({
   children,
@@ -42,7 +43,7 @@ export function DarkBand({
       />
       {/* Grille financière ténue, même vocabulaire que le terminal du hero. */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-25"
+        className="db-trame pointer-events-none absolute inset-0 opacity-25"
         style={{
           backgroundImage:
             'linear-gradient(rgba(86,215,253,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(86,215,253,.05) 1px, transparent 1px)',

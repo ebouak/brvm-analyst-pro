@@ -36,6 +36,15 @@ interface Props {
  * sous-scores du signal. Quatre panneaux séparés par des filets de 1 px, à la
  * manière d'un terminal financier.
  *
+ * PLANCHER TYPOGRAPHIQUE 11 px (2026-09-17). Les libellés du terminal
+ * descendaient à 8,5 px. Ce n'était PAS un défaut d'accessibilité — les neuf
+ * couples de couleurs de cette section passent AA, le gris est à 5,68:1 sur
+ * le fond, mesuré — mais 8,5 px reste peu lisible pour un lecteur qui n'a pas
+ * vingt ans, et la diaspora consulte souvent au téléphone. La classe
+ * `overline` du design system (10 px) n'est PAS touchée : ses capitales et son
+ * interlettrage large la rendent lisible à cette taille, et la changer
+ * altérerait la langue typographique de tout le site.
+ *
  * MOUVEMENT : le terminal s'initialise au chargement (heroTerminal.css), en
  * CSS pur — aucun JavaScript, donc aucun effet sur le LCP et aucun
  * clignotement. La colonne de discours (H1 compris) n'est PAS animée : elle
@@ -94,7 +103,7 @@ function Panneau({ children, className = '' }: { children: React.ReactNode; clas
 function Titre({ children, d }: { children: React.ReactNode; d: number }) {
   return (
     <p
-      className="ht-in mb-2 font-mono text-[8.5px] font-bold uppercase tracking-[0.18em]"
+      className="ht-in mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em]"
       style={{ ...delai(d), color: '#8fe6ff' }}
     >
       {children}
@@ -144,7 +153,7 @@ export function HeroDeviceMockup({
         {/* ── Colonne discours ───────────────────────────────────────── */}
         <div>
           <span
-            className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em]"
+            className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em]"
             style={{ border: '1px solid rgba(86,215,253,0.3)', color: '#8fe6ff' }}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: VERT }} />
@@ -189,11 +198,11 @@ export function HeroDeviceMockup({
             className="ht-in flex items-center justify-between px-3.5 py-2"
             style={{ ...delai(140), background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${LIGNE}` }}
           >
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: '#8fe6ff' }}>
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: '#8fe6ff' }}>
               Terminal WESTBOURSE
             </span>
             {dateLabel && (
-              <span className="text-[9.5px]" style={{ color: GRIS }}>
+              <span className="text-[11px]" style={{ color: GRIS }}>
                 Séance du {dateLabel}
               </span>
             )}
@@ -233,7 +242,7 @@ export function HeroDeviceMockup({
                   />
                 </svg>
               ) : (
-                <p className="mt-3 text-[10px]" style={{ color: GRIS }}>Historique indisponible.</p>
+                <p className="mt-3 text-[11px]" style={{ color: GRIS }}>Historique indisponible.</p>
               )}
               <dl className="mt-3 grid grid-cols-4 gap-2 border-t pt-2.5" style={{ borderColor: LIGNE }}>
                 {[
@@ -243,7 +252,7 @@ export function HeroDeviceMockup({
                   { l: 'Transact.', v: nbTransactions > 0 ? fmtNumber(nbTransactions) : '—' },
                 ].map((x, i) => (
                   <div key={x.l} className="ht-in" style={delai(620 + i * 60)}>
-                    <dt className="text-[8.5px] uppercase tracking-wide" style={{ color: GRIS }}>{x.l}</dt>
+                    <dt className="text-[11px] uppercase tracking-wide" style={{ color: GRIS }}>{x.l}</dt>
                     <dd className="tabular mt-0.5 text-[12.5px] font-medium" style={{ color: '#fcfcfc' }}>{x.v}</dd>
                   </div>
                 ))}
@@ -271,23 +280,23 @@ export function HeroDeviceMockup({
                     className="ht-pop mt-4 flex items-center justify-between border-t pt-3"
                     style={{ ...delai(1060), borderColor: LIGNE }}
                   >
-                    <span className="text-[9px] uppercase tracking-wide" style={{ color: GRIS }}>Signal</span>
+                    <span className="text-[11px] uppercase tracking-wide" style={{ color: GRIS }}>Signal</span>
                     <span
-                      className="rounded px-2 py-0.5 font-mono text-[10px] font-bold"
+                      className="rounded px-2 py-0.5 font-mono text-[11px] font-bold"
                       style={{ background: 'rgba(63,225,139,0.14)', color: VERT }}
                     >
                       {diagnostic.signal ?? '—'}
                     </span>
                   </div>
                   <div className="ht-in mt-1.5 flex items-center justify-between" style={delai(1140)}>
-                    <span className="text-[9px] uppercase tracking-wide" style={{ color: GRIS }}>Confiance</span>
+                    <span className="text-[11px] uppercase tracking-wide" style={{ color: GRIS }}>Confiance</span>
                     <span className="tabular text-[11px] font-bold" style={{ color: '#fcfcfc' }}>
                       {diagnostic.confiance != null ? `${(diagnostic.confiance * 100).toFixed(0)} %` : '—'}
                     </span>
                   </div>
                 </>
               ) : (
-                <p className="py-6 text-center text-[10px]" style={{ color: GRIS }}>Signal indisponible.</p>
+                <p className="py-6 text-center text-[11px]" style={{ color: GRIS }}>Signal indisponible.</p>
               )}
             </Panneau>
 
@@ -310,7 +319,7 @@ export function HeroDeviceMockup({
                   ))}
                 </ul>
               ) : (
-                <p className="py-4 text-center text-[10px]" style={{ color: GRIS }}>Séance indisponible.</p>
+                <p className="py-4 text-center text-[11px]" style={{ color: GRIS }}>Séance indisponible.</p>
               )}
             </Panneau>
 
@@ -327,7 +336,7 @@ export function HeroDeviceMockup({
                     >
                       <p className="font-mono text-[10.5px]" style={{ color: GRIS }}>{r.code}</p>
                       <p className="font-display text-2xl leading-none" style={{ color: CYAN }}>{lettre(r.score)}</p>
-                      <p className="tabular mt-0.5 text-[9px]" style={{ color: GRIS }}>
+                      <p className="tabular mt-0.5 text-[11px]" style={{ color: GRIS }}>
                         {r.confiance != null ? `conf. ${(r.confiance * 100).toFixed(0)} %` : '—'}
                       </p>
                     </div>

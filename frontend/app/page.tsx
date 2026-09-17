@@ -698,11 +698,14 @@ function MoverLine({ m, rank }: { m: MoverRow; rank: number }) {
 }
 
 /**
- * NOTE (2026-09-16) : `STEPS` n'est rendu NULLE PART dans ce fichier — vérifié
- * par recherche. Conservé tel quel plutôt que supprimé : son contenu (les
- * trois portes d'entrée « note → fondamentaux → entraînement ») est le
- * matériau d'un futur parcours « Je débute sur la BRVM », listé au P1 de
- * l'audit. Le supprimer ferait perdre une rédaction déjà calibrée.
+ * Parcours « Je débute sur la BRVM » — monté le 2026-09-17.
+ *
+ * CE QUE C'EST, ET CE QUE CE N'EST PAS. Ces trois étapes ne REDISENT rien :
+ * la note A–F, les fondamentaux et l'entraînement sont démontrés plus bas,
+ * chacun avec ses vrais chiffres. Ici, ce sont trois PORTES — un itinéraire
+ * pour qui ne sait pas par où commencer, placé haut, avant la démonstration.
+ * D'où le gabarit volontairement maigre : un numéro, une phrase, un lien.
+ * S'il grossissait, il redeviendrait le doublon qui l'avait fait démonter.
  */
 const STEPS = [
   {
@@ -879,6 +882,31 @@ export default async function Landing() {
         ))}
       </ul>
 
+      {/* ── JE DÉBUTE SUR LA BRVM — trois portes d'entrée ───────────────
+          Placé haut, avant la démonstration : le débutant (la cible n°1 du
+          produit) sait enfin par où commencer. Gabarit maigre à dessein — voir
+          le commentaire de STEPS. ──────────────────────────────────────── */}
+      <section aria-labelledby="debut-titre" className="mt-10">
+        <h2 id="debut-titre" className="overline mb-4 text-gold-2">
+          Je débute sur la BRVM
+        </h2>
+        <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-panel border border-border bg-border sm:grid-cols-3">
+          {STEPS.map((e) => (
+            <li key={e.n} className="bg-surface">
+              <Link
+                href={e.href}
+                className="flex h-full flex-col gap-1.5 p-4 transition-colors hover:bg-elevated/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/50"
+              >
+                <span className="tabular font-mono text-[11px] font-bold text-accent">{e.n}</span>
+                <span className="font-display text-base leading-tight text-ivory">{e.title}</span>
+                <span className="text-[12px] leading-snug text-muted">{e.body}</span>
+                <span className="mt-auto pt-2 text-[12px] font-medium text-ivory/80">{e.cta} →</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {/* ── BADGES DE CONFIANCE (preuve produit factuelle) ────────────── */}
       <ProofBand nbActions={nbActions} />
 
@@ -993,10 +1021,14 @@ export default async function Landing() {
               largeur, LandingIndices, ne tient pas dans une colonne). */}
           <IndicesCompactCard indices={indices} />
         </div>
+
+        {/* Les secteurs font partie du MÊME sujet — l'état du marché du jour —
+            et n'étaient une « section » que par accident de balisage (ils
+            étaient déjà collés en mt-6). Rapatriés dedans. */}
+        <SectorStrip sectors={sectors} dateLabel={dateLabel} />
       </section>
 
-      {/* ── 07 · SECTEURS — variation du jour, calculée (lib/landing/sectors.ts)  */}
-      <SectorStrip sectors={sectors} dateLabel={dateLabel} />
+
 
       {/* ── 08 · CARTOGRAPHIE — pleine largeur, section immersive ───────── */}
       {/* Cartographie en bande sombre : première rupture de rythme de la page.
@@ -1018,8 +1050,10 @@ export default async function Landing() {
       {/* ── CTA DE MI-PARCOURS ───────────────────────────────
           Entre le hero et la fin de page, le visiteur mobile traversait 15
           écrans sans une seule sortie vers l'inscription. Ce CTA arrive après
-          la cartographie, quand la démonstration a déjà convaincu. ─────── */}
-      <section className={`${GAP_SECTION} text-center`}>
+          la cartographie et la vidéo, quand la démonstration a déjà convaincu.
+          Marge resserrée (2026-09-17) : il conclut la vidéo au lieu de former
+          une section à lui seul. ──────────────────────────────────────── */}
+      <section className="mt-6 text-center">
         <Link
           href="/signup"
           className="landing-hero-cta inline-flex min-h-[50px] items-center gap-1.5 rounded-full px-8 text-sm font-bold text-[#03222b] shadow-gold transition-transform active:scale-95"

@@ -30,6 +30,31 @@
   }
 }
 
+/**
+ * Parallaxe des bandes sombres — decoratif, et assume comme tel.
+ *
+ * SEULE la trame de fond derive, de 24 px sur toute la traversee du viewport.
+ * Le CONTENU ne bouge pas : un texte qui glisse sous l'oeil se lit moins bien,
+ * et l'effet ne doit rien couter a la lecture. Meme garde que la revelation :
+ * sous `@supports`, donc inexistant la ou le timeline n'est pas supporte, et
+ * neutralise par `prefers-reduced-motion`.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .db-trame {
+      animation: db-derive linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+      will-change: transform;
+    }
+  }
+}
+
+@keyframes db-derive {
+  from { transform: translate3d(0, -12px, 0); }
+  to   { transform: translate3d(0, 12px, 0); }
+}
+
 @keyframes rv-in {
   from {
     opacity: 0;
