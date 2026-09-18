@@ -28,6 +28,7 @@ import { chromium } from 'playwright';
 import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { entetesSupabase } from './supabaseEntetes.mjs';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const RACINE = resolve(ICI, '..');
@@ -70,7 +71,7 @@ if (SECRET.length < 32) {
 /* ── Codes à traiter : la dernière séance, comme la route de polissage ───── */
 async function codesDerniereSeance() {
   const cle = ANON || SERVICE;
-  const h = { apikey: cle, Authorization: `Bearer ${cle}` };
+  const h = entetesSupabase(cle);
   const r1 = await fetch(`${URL_SB}/rest/v1/brvm_actions_daily?select=date_marche&order=date_marche.desc&limit=1`, { headers: h });
   const [derniere] = await r1.json();
   if (!derniere?.date_marche) return { date: null, codes: [] };
@@ -84,8 +85,7 @@ async function ranger(chemin, octets) {
   const r = await fetch(`${URL_SB}/storage/v1/object/${BUCKET}/${chemin}`, {
     method: 'POST',
     headers: {
-      apikey: SERVICE,
-      Authorization: `Bearer ${SERVICE}`,
+      ...entetesSupabase(SERVICE),
       'Content-Type': 'application/pdf',
       'x-upsert': 'true',
     },
