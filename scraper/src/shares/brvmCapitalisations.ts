@@ -4,8 +4,8 @@
  * d'actions en circulation (source autoritaire — pas d'estimation capi/cours).
  *
  * Mapping par libellé d'en-tête ; le code société est en première colonne.
- * NB : brvm.org a une chaîne TLS incomplète → le workflow pose
- * NODE_TLS_REJECT_UNAUTHORIZED=0 (le polyfill scraper le fait aussi).
+ * NB : brvm.org a eu une chaîne TLS incomplète (2026-05) ; sonde du
+ * 2026-09-18 : chaîne complète. La vérification TLS est active.
  */
 import axios from 'axios';
 import * as cheerio from 'cheerio';

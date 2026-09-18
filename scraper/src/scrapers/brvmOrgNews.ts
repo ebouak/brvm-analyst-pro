@@ -6,8 +6,8 @@
  *      → ancres /fr/mediacentre/actualites/<slug> (titres affichés « Lire plus »)
  *  - Article : <h1> = titre, 1er <p> du corps = résumé, date littérale dans le texte.
  *
- * brvm.org a une chaîne TLS incomplète → le scraper tourne avec
- * NODE_TLS_REJECT_UNAUTHORIZED=0 (déjà le cas via les scripts npm / polyfills).
+ * brvm.org a eu une chaîne TLS incomplète (2026-05). Sonde du 2026-09-18 :
+ * chaîne complète (3 certificats). La vérification TLS est active.
  */
 import axios from 'axios';
 import * as cheerio from 'cheerio';
