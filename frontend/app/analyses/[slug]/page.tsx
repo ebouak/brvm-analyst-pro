@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { loadCitablePage, type LoadedCitable } from '@/lib/citable/page';
 import { SectionHeader } from '@/components/ui/premium';
 import SignupCta from '@/components/public/SignupCta';
+import { jsonLdScript } from '@/lib/jsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -333,7 +334,7 @@ function JsonLd({ loaded }: { loaded: LoadedCitable }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdScript({ '@context': 'https://schema.org', '@graph': graph }) }}
     />
   );
 }
