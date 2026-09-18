@@ -597,6 +597,60 @@ HTML servi (et non déduit — voir la leçon en §9).
   qui suppose de charger ses sous-scores (`inputs`), absents du select de
   `sigByCode`.
 
+### Ajouts (passage 2026-09-17/18) — Remédiation de l'audit : soft-404, sécurité, dépendances
+
+Audit complet en 5 phases (`AUDIT_REPORT.md`, plan `PLAN_REMEDIATION.md`).
+
+- **SOFT-404, cause prouvée dans les deux sens.** Toute route publique absente
+  (`/societes/ZZZZ`…) répondait **200**. Cause : `app/loading.tsx` à la RACINE.
+  Une frontière Suspense fait diffuser la réponse en flux, donc le statut 200
+  part avant que la page n'appelle `notFound()`. Retirer ce fichier rend le 404 ;
+  en ajouter un à une app Next 14.2.35 VIERGE casse le sien. Vingt autres pistes
+  ont été mesurées et écartées, dont **le middleware, innocent**.
+  ⚠️ **RÈGLE : aucun `loading.tsx` au-dessus d'une route pouvant appeler
+  `notFound()`.** Le squelette vit dans `components/ui/LoadingSkeleton.tsx` et
+  n'est posé que segment par segment (`e2e/not-found.spec.ts` protège la règle
+  en testant le STATUT, pas l'apparence). PR #16, `4fc8caa`, validée en
+  production 8/8.
+- **Mesurer le rendu, pas le HTML brut.** Le texte de `not-found.tsx` figure
+  dans la charge RSC de TOUTES les pages : un grep sur le HTML signale une 404
+  partout. Vérifier `innerText` dans un navigateur.
+- **Historique git public : décision assumée, pas oubli.** La clé
+  `service_role` (depuis le commit initial, retirée en `78c27ab`/`73455cc`) et
+  une ancienne clé Resend restent dans l'historique. **Les deux sont rotées**
+  (18/08 et 17/09) : aucun identifiant vivant. Pas de réécriture — elle
+  casserait clones et forks ; à reconsidérer seulement en cas d'audit externe.
+- **Détection de secrets et blocage au push ACTIVÉS le 2026-09-18.** Ils
+  étaient désactivés au niveau du dépôt, contrairement à ce que laissait
+  croire `73455cc` (l'alerte venait du réglage du compte utilisateur).
+- **NEXT 14 NE REÇOIT PLUS DE CORRECTIFS.** 14.2.35 est la dernière 14.x ; les
+  correctifs de sécurité sont reportés sur la **15.5** (≥ 15.5.24) et la 16.
+  Deux avis CRITIQUES d'exécution de code à distance la visent :
+  + CVE-2026-75604 — serveurs hébergés sous **Windows**. Vercel tourne sous
+    Linux : production non concernée. **Le serveur de dev local l'est** : `next
+    dev` écoute par défaut sur `0.0.0.0`, donc sur le réseau local.
+  + GHSA-2xp9-vwfh-vxw4 — `libheif` via `sharp`, quand l'optimiseur traite un
+    **AVIF**. Non exploitable aujourd'hui : aucun AVIF dans `public/`, aucun
+    `images.remotePatterns`. ⚠️ **Ne PAS ajouter d'image AVIF, de
+    `remotePatterns` ni de `formats: ['image/avif']` tant que Next n'est pas
+    ≥ 15.5.24** — chacun de ces gestes rouvre la faille.
+  Plusieurs avis HAUTS de déni de service (Server Components, Server Actions)
+  s'appliquent, eux, et n'ont aucun correctif en 14.x : la montée en 15.5 est
+  à planifier comme un chantier à part entière.
+- **`postcss` embarqué par Next (8.4.31) : override NON appliqué.** Il ne
+  traite que notre propre CSS au build ; les avis exigent un CSS fourni par un
+  attaquant. Risque de casser le build > gain.
+- **`npm audit fix` passé au lockfile seul** (`--package-lock-only`, pour ne
+  pas tenter d'installer `canvas` sur Windows). Gain réel : `sanitize-html`
+  2.17.5 → 2.17.7 — 17 charges XSS testées, aucune ne survit, sortie
+  identique à l'ancienne version. `tar` (via `canvas`, optionnel, tiré par
+  `pdfjs-dist`) reste vulnérable : n'intervient qu'à l'installation.
+- **`scraper/` : 9 avis hauts, lot séparé.** `xlsx` 0.18.5 n'a **aucun
+  correctif sur npm** (SheetJS publie désormais sur son CDN) ; il ne lit que la
+  Pink Sheet de la Banque mondiale, mais dans un job qui porte la clé
+  `service_role`. `axios`, `undici`, `ip-address`, `js-yaml` se corrigent sans
+  rupture ; la chaîne `puppeteer` exige une majeure.
+
 ### Agent WhatsApp — PRÉCONDITION avant de lui donner les outils (2026-09-08)
 
 L'agent WhatsApp appelle encore `callAgentLlm(messages)` sans outils, là où
@@ -734,7 +788,10 @@ est vide et aucun identifiant Meta n'est configuré.
 ## 11. Précautions avant modification
 
 - **Ne jamais commiter de secret.** Identifiants uniquement en `.env.local` /
-  secrets de plateforme. Le code lit l'environnement.
+  secrets de plateforme. Le code lit l'environnement. Filet côté GitHub : la
+  détection de secrets et le blocage au push sont actifs (2026-09-18) — un
+  push contenant une clé reconnue est REFUSÉ. Ne jamais le contourner par
+  « allow secret » sans avoir d'abord roté la clé.
 - **Garder le frontend découplé de BRVM** : il ne lit que Supabase. Ne pas
   appeler le site BRVM depuis le frontend.
 - **Préserver l'idempotence** des upsert (clés de conflit) — sinon doublons.
