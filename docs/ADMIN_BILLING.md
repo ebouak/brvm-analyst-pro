@@ -91,7 +91,15 @@ idempotence (pas de second abonnement si un `pending`/`active` existe) ;
    confirmé (logique d'activation déjà centralisée).
 
 Le webhook legacy `/api/webhooks/payment` (toggle premium par email +
-`WEBHOOK_SECRET`) reste en place, indépendant de ce flux.
+`WEBHOOK_SECRET`) a été **supprimé le 2026-09-18**. `WEBHOOK_SECRET` n'était
+défini dans aucun environnement Vercel : la route répondait 401 à toute
+requête et n'avait aucun appelant. Elle passait premium un compte désigné par
+son seul email, sans lien avec `subscriptions` ni `billing_transactions`.
+
+⚠️ Une valeur de `WEBHOOK_SECRET` figure dans l'historique git public
+(`docs/superpowers/plans/2026-06-08-premium-modules.md`). **Ne jamais la
+réutiliser**, pour aucun secret. Le webhook d'un futur provider doit recevoir
+un secret neuf et vérifier une signature du provider, pas un secret partagé.
 
 ## 5. Monitoring du scraping
 
