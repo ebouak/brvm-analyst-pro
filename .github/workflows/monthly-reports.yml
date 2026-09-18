@@ -18,7 +18,7 @@ jobs:
       ALERTS_EMAIL_TO: ${{ secrets.ALERTS_EMAIL_TO }}
       LOG_LEVEL: info
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
