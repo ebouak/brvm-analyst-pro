@@ -51,6 +51,15 @@ jobs:
             });
             console.log('✅ Catch-up workflow triggered');
 
+      # Rendre la panne VISIBLE. Jusqu'ici ce workflow restait vert même avec des
+      # cours périmés : l'alerte Slack ci-dessous n'a jamais eu de destination
+      # (secret SLACK_WEBHOOK absent). Un run rouge, lui, est notifié par GitHub.
+      - name: Échouer si les cours intraday sont périmés
+        if: steps.check.outputs.stale == 'true'
+        run: |
+          echo "::error::Cours intraday périmés en séance (voir l'étape de contrôle). Rattrapage déclenché ; si l'alerte se répète, vérifier le déclencheur pg_cron (secret Vault github_pat_brvm)."
+          exit 1
+
       - name: Notify Slack if stale
         if: steps.check.outputs.needsRetrigger == 'true'
         env:
