@@ -15,7 +15,6 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       LOG_LEVEL: info
-      NODE_TLS_REJECT_UNAUTHORIZED: 0
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5

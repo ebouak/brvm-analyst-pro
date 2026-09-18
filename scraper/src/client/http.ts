@@ -13,9 +13,10 @@ import { getConfig } from '../config.js';
 import { withRetry } from '../utils/retry.js';
 import { logger } from '../logger.js';
 
-// La validation TLS est désactivée globalement par polyfills.ts via
-// https.globalAgent.options.rejectUnauthorized = false. axios-cookiejar-support
-// ne supporte pas qu'on passe un httpsAgent custom — il gère son propre agent.
+// La validation TLS est active (l'ancienne désactivation globale a été retirée
+// le 2026-09-18). axios-cookiejar-support ne supporte pas qu'on passe un
+// httpsAgent custom — il gère son propre agent ; un CA manquant se règle par
+// NODE_EXTRA_CA_CERTS, pas par rejectUnauthorized.
 
 export interface HttpClient {
   jar: CookieJar;

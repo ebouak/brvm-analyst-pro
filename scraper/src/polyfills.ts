@@ -18,10 +18,14 @@ if (!(globalThis as { WebSocket?: unknown }).WebSocket) {
   log(`[polyfills] WebSocket installed on globalThis`);
 }
 
-// 2) TLS — BDFIN cert intermediaire non reconnu sur Ubuntu 22.04.
-// NODE_TLS_REJECT_UNAUTHORIZED desactive la validation TLS globalement.
-// Le module https natif de Node respecte cette variable d'environment.
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-log(`[polyfills] TLS verification disabled`);
+// 2) TLS — la verification est ACTIVE. Ce fichier posait
+// NODE_TLS_REJECT_UNAUTHORIZED=0 (cert intermediaire BDFIN non reconnu sur
+// Ubuntu 22.04, en 2026-05) : aucune verification de certificat, y compris
+// vers Supabase avec la cle secrete. Sonde du 2026-09-18 : les 12 hotes du
+// scraper servent une chaine complete. Si un hote casse de nouveau, corriger
+// cet hote-la (CA supplementaire via NODE_EXTRA_CA_CERTS), jamais le global.
+if (process.env['NODE_TLS_REJECT_UNAUTHORIZED'] === '0') {
+  log(`[polyfills] ATTENTION : NODE_TLS_REJECT_UNAUTHORIZED=0 pose par l'environnement — verification TLS desactivee`);
+}
 
 export { ws };
