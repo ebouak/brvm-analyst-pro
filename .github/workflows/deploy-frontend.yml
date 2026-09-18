@@ -6,6 +6,10 @@ name: Deploy Frontend to Vercel
 on:
   workflow_dispatch: {}
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

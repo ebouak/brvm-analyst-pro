@@ -18,6 +18,10 @@ concurrency:
   group: veille-intelligence
   cancel-in-progress: false
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   veille-intelligence:
     runs-on: ubuntu-latest

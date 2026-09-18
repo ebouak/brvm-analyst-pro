@@ -43,6 +43,10 @@ concurrency:
   group: dossiers
   cancel-in-progress: false
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   dossiers:
     runs-on: ubuntu-latest

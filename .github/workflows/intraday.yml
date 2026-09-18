@@ -20,6 +20,10 @@ concurrency:
   group: intraday
   cancel-in-progress: false
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   intraday:
     runs-on: ubuntu-latest

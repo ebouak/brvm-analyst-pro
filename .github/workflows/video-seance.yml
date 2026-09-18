@@ -32,6 +32,10 @@ concurrency:
   group: video-seance
   cancel-in-progress: false
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   video:
     runs-on: ubuntu-latest
