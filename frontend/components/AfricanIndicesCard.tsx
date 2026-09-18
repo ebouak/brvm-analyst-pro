@@ -1,4 +1,6 @@
 import { createPublicClient } from '@/lib/supabase/public';
+import { fmtDateFR } from '@/lib/format';
+import { estPerime, plusRecente } from '@/lib/african/fraicheur';
 
 interface AfricanIndexRow {
   code: string;
@@ -58,24 +60,43 @@ export async function AfricanIndicesCard({ brvmComposite }: {
     });
   }
 
+  /* DATE AFFICHÉE, TOUJOURS. La collecte AFX n'a jamais fonctionné en CI
+     (136/136 échecs depuis le 04/07) : la table s'est figée aux 02-03/07 et
+     cette carte présentait ces valeurs sans leur âge, comme celles du jour.
+     Chaque tuile porte désormais sa date, et au-delà de 4 jours un bandeau le
+     dit clairement. La tuile BRVM, elle, est à jour et n'est pas concernée. */
+  const derniere = plusRecente(rows.map((r) => r.date_marche));
+  const perime = estPerime(derniere, new Date());
+
   return (
     <div className="rounded-panel border border-border bg-surface/40 p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="overline text-gold-2">Afrique · vue régionale</p>
-        <span className="overline text-faint">source AFX · fin de séance</span>
+        <span className="overline text-faint">
+          {perime && derniere ? `source AFX · données du ${fmtDateFR(derniere)}` : 'source AFX · fin de séance'}
+        </span>
       </div>
+      {perime && (
+        <p role="status" className="mb-3 rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-[11px] leading-relaxed text-warn">
+          Source momentanément indisponible : les indices africains ci-dessous datent
+          {derniere ? ` du ${fmtDateFR(derniere)}` : ' d’une date inconnue'} et ne reflètent pas les marchés du jour.
+        </p>
+      )}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((it) => (
           <div
             key={it.key}
             className={`flex flex-col gap-1 rounded-xl border p-3 ${
               it.home ? 'border-accent/30 bg-accent/[0.06]' : 'border-border bg-sunken/30'
-            }`}
+            } ${!it.home && perime ? 'opacity-60' : ''}`}
           >
             <span className="truncate text-[11px] text-muted">
               <span aria-hidden className="mr-1">{it.flag}</span>
               {it.libelle}
             </span>
+            {it.date && (
+              <span className="tabular text-[11px] text-faint">au {fmtDateFR(it.date)}</span>
+            )}
             <span className="tabular text-lg font-bold leading-none text-ivory">
               {it.valeur != null ? nf(it.valeur) : '—'}
             </span>

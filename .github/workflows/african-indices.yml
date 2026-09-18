@@ -20,7 +20,7 @@ concurrency:
 jobs:
   african:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15 # Crawl-delay 60 s entre sources : ~3 min par tentative
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -36,8 +36,9 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          MAX_RETRIES=3
-          RETRY_DELAY=30
+          # Le délai entre tentatives ne descend pas sous le Crawl-delay (60 s) du site.
+          MAX_RETRIES=2
+          RETRY_DELAY=60
           for attempt in $(seq 1 $MAX_RETRIES); do
             echo "Attempt $attempt/$MAX_RETRIES..."
             if npx tsx src/index.ts african; then
