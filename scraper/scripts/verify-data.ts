@@ -5,7 +5,7 @@
  * Usage : npx tsx scripts/verify-data.ts <mode> [arg]
  * Modes :
  *   intraday          — bloquant : ≥ 10 cotations pour la séance du jour
- *   watchdog          — non bloquant : émet needsRetrigger=true/false (GITHUB_OUTPUT)
+ *   watchdog          — émet needsRetrigger et stale (GITHUB_OUTPUT) d'après la fraîcheur INTRADAY
  *   daily             — bloquant : ≥ 1 cotation pour la séance du jour
  *   score             — bloquant : ≥ 1 signal calculé pour la séance du jour
  *   monthly <YYYY-MM> — informatif : nb de rapports générés pour le mois
@@ -16,6 +16,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { appendFileSync } from 'node:fs';
+import { evaluerFraicheurIntraday } from '../src/monitoring/fraicheurIntraday.js';
 
 function setOutput(key: string, value: string): void {
   const file = process.env.GITHUB_OUTPUT;
@@ -53,26 +54,33 @@ async function main(): Promise<void> {
     }
 
     case 'watchdog': {
-      const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-      const { data, error } = await client
-        .from('brvm_actions_daily')
-        .select('updated_at')
-        .gte('updated_at', thirtyMinAgo)
-        .order('updated_at', { ascending: false })
-        .limit(1);
-      if (error) {
-        console.error('❌ Échec requête:', error.message);
+      // Fraîcheur de l'INTRADAY, et d'elle seule : voir src/monitoring/fraicheurIntraday.ts
+      // pour la raison — l'ancienne mesure (dernière écriture dans
+      // brvm_actions_daily) était rafraîchie par d'autres jobs et restait verte
+      // pendant que l'intraday tournait 4 fois par jour au lieu de 32.
+      const [fraicheur, calendrier] = await Promise.all([
+        client.from('v_fraicheur_cours').select('derniere_collecte_intraday').limit(1),
+        client.from('market_calendar').select('is_trading_day').eq('date', today).limit(1),
+      ]);
+      if (fraicheur.error) {
+        console.error('❌ Échec lecture v_fraicheur_cours:', fraicheur.error.message);
         process.exit(1);
       }
-      if (!data || data.length === 0) {
-        console.log('🔴 STALE : aucune mise à jour depuis 30 min');
-        setOutput('needsRetrigger', 'true');
-        return;
+      if (calendrier.error) {
+        console.error('❌ Échec lecture market_calendar:', calendrier.error.message);
+        process.exit(1);
       }
-      const minutes = Math.floor((Date.now() - new Date(data[0].updated_at).getTime()) / 60000);
-      const stale = minutes > 20;
-      console.log(stale ? `⚠️ STALE : données vieilles de ${minutes} min` : `✅ FRESH : mise à jour il y a ${minutes} min`);
-      setOutput('needsRetrigger', stale ? 'true' : 'false');
+      const r = evaluerFraicheurIntraday({
+        derniereCollecte: fraicheur.data?.[0]?.derniere_collecte_intraday ?? null,
+        maintenant: new Date(),
+        jourFerie: calendrier.data?.[0]?.is_trading_day === false,
+      });
+      console.log(`${r.verdict === 'perimee' ? '🔴 PÉRIMÉE' : r.verdict === 'fraiche' ? '✅ FRAÎCHE' : 'ℹ️ ' + r.verdict.toUpperCase()} : ${r.message}`);
+      const perimee = r.verdict === 'perimee';
+      setOutput('needsRetrigger', perimee ? 'true' : 'false');
+      // `stale` fait échouer le workflow après la tentative de rattrapage :
+      // un run ROUGE est notifié par GitHub, un run vert ne l'est jamais.
+      setOutput('stale', perimee ? 'true' : 'false');
       break;
     }
 
