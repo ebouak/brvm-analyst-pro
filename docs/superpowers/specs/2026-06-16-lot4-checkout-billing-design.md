@@ -23,7 +23,7 @@ Ce Lot alimente enfin les pages admin du Lot 2 (abonnements, paiements).
 
 - `/api/webhooks/payment/route.ts` : toggle `profiles.is_premium` par email +
   `WEBHOOK_SECRET`. Ne touche pas `subscriptions`/`billing_transactions`.
-  **Reste inchangé** (rétro-compatible).
+  **Supprimé le 2026-09-18** (aucun appelant, secret absent de Vercel — voir `docs/ADMIN_BILLING.md` §4).
 - Tables (migration 0041) : `subscription_plans(code,name,price_monthly,price_yearly,currency)`,
   `subscriptions(id,user_id,plan_id,status,billing_cycle,started_at,renews_at,canceled_at)`,
   `billing_transactions(id,subscription_id,user_id,provider,amount,currency,status,payment_method,paid_at)`.

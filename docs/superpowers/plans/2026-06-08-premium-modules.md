@@ -246,7 +246,7 @@ export async function POST(req: NextRequest) {
 
 Ouvrir `frontend/.env.local` et ajouter :
 ```
-WEBHOOK_SECRET=choisir_une_valeur_aleatoire_longue
+WEBHOOK_SECRET=<valeur retirée — voir docs/ADMIN_BILLING.md ; route supprimée le 2026-09-18>
 ```
 
 - [ ] **Step 3 : Typecheck**
