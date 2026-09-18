@@ -15,6 +15,7 @@
 import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { entetesSupabase } from './supabaseEntetes.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
@@ -117,8 +118,7 @@ if (URL_SB && SERVICE) {
       const r = await fetch(`${URL_SB}/storage/v1/object/${BUCKET}/${chemin}`, {
         method: 'POST',
         headers: {
-          apikey: SERVICE,
-          Authorization: `Bearer ${SERVICE}`,
+          ...entetesSupabase(SERVICE),
           'Content-Type': type,
           /* Constate le 2026-09-03 : ce service renvoie `no-cache` quoi qu'on
              envoie — teste en en-tete ET en champ multipart. L'en-tete reste
