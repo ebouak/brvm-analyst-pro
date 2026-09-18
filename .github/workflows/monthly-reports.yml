@@ -6,6 +6,10 @@ on:
     - cron: '0 8 1 * *'  # 1st of every month at 08:00 UTC
   workflow_dispatch:     # Manual trigger
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   generate:
     runs-on: ubuntu-latest

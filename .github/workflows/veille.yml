@@ -11,6 +11,10 @@ on:
         required: false
         default: 'false'
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   veille:
     runs-on: ubuntu-latest

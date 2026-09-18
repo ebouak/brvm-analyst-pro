@@ -7,6 +7,10 @@ on:
     - cron: '0 10 * * 1-5'
   workflow_dispatch: {}
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   auto_open:
     runs-on: ubuntu-latest

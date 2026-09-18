@@ -6,6 +6,10 @@ name: Tests e2e (Playwright)
 on:
   workflow_dispatch: {}
 
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
