@@ -615,11 +615,34 @@ Audit complet en 5 phases (`AUDIT_REPORT.md`, plan `PLAN_REMEDIATION.md`).
 - **Mesurer le rendu, pas le HTML brut.** Le texte de `not-found.tsx` figure
   dans la charge RSC de TOUTES les pages : un grep sur le HTML signale une 404
   partout. Vérifier `innerText` dans un navigateur.
-- **Historique git public : décision assumée, pas oubli.** La clé
-  `service_role` (depuis le commit initial, retirée en `78c27ab`/`73455cc`) et
-  une ancienne clé Resend restent dans l'historique. **Les deux sont rotées**
-  (18/08 et 17/09) : aucun identifiant vivant. Pas de réécriture — elle
-  casserait clones et forks ; à reconsidérer seulement en cas d'audit externe.
+- **INCIDENT DU 2026-09-18 — la clé `service_role` de l'historique était
+  VALIDE.** Présente dans l'historique PUBLIC depuis le commit initial (émise
+  le 25/05), retirée des fichiers en `78c27ab`/`73455cc`. Ce dernier commit
+  affirmait « déjà rotée côté Supabase » : **c'était faux**, et l'audit du
+  17/09 l'avait repris sans test. Mesuré le 18/09 : la clé exposée lisait
+  `profiles` sans RLS, et c'était **celle de production**. Accès complet à la
+  base ouvert au public pendant environ 4 mois ; aucune trace d'altération dans
+  les tables d'administration et de facturation, mais **une lecture ne laisse
+  aucune trace** — l'extraction ne peut pas être exclue (point RGPD à trancher
+  par le responsable de traitement).
+  **Résolu le jour même, sans interruption** : passage aux nouvelles clés
+  `sb_publishable_` / `sb_secret_` (GitHub, Vercel Production + Preview,
+  `.env.local`), vérification de chaque consommateur, puis **désactivation des
+  clés héritées** dans Supabase. La clé exposée renvoie désormais 401
+  « Legacy API keys are disabled » (10 essais sur 10). Alerte GitHub #1 close
+  en « revoked » avec la preuve. La clé Resend, elle, était bien morte (401).
+  ⚠️ **Leçon : une clé n'est révoquée que si un TEST le prouve** — jamais sur
+  la foi d'un message de commit, d'une doc ou d'un rapport.
+- **Deux pièges des nouvelles clés, mesurés pendant la bascule :**
+  + en-têtes INCOMPATIBLES entre familles : clé héritée = `apikey` +
+    `Authorization: Bearer` (apikey seul retombe au rôle anonyme) ; clé
+    `sb_` = `apikey` SEUL (en Bearer : « Invalid JWT »). Tout `fetch` brut
+    passe par `video/supabaseEntetes.mjs` ; supabase-js gère les deux ;
+  + une clé `sb_secret_` est REFUSÉE (401 « Forbidden use of secret API key
+    in browser ») si le User-Agent ressemble à un navigateur — dont celui de
+    PowerShell 5.1 (`Mozilla/5.0…`). Toujours fixer un User-Agent explicite.
+- **Historique git : pas de réécriture.** La clé qu'il contient est désormais
+  inerte ; réécrire casserait clones et forks pour un gain nul.
 - **Détection de secrets et blocage au push ACTIVÉS le 2026-09-18.** Ils
   étaient désactivés au niveau du dépôt, contrairement à ce que laissait
   croire `73455cc` (l'alerte venait du réglage du compte utilisateur).
@@ -649,7 +672,9 @@ Audit complet en 5 phases (`AUDIT_REPORT.md`, plan `PLAN_REMEDIATION.md`).
   correctif sur npm** (SheetJS publie désormais sur son CDN) ; il ne lit que la
   Pink Sheet de la Banque mondiale, mais dans un job qui porte la clé
   `service_role`. `axios`, `undici`, `ip-address`, `js-yaml` se corrigent sans
-  rupture ; la chaîne `puppeteer` exige une majeure.
+  rupture ; la chaîne `puppeteer` exige une majeure. ⚠️ Le scraper tourne
+  avec **`NODE_TLS_REJECT_UNAUTHORIZED=0`** (script npm) : AUCUNE vérification
+  de certificat, y compris vers Supabase avec la clé secrète. Priorité du lot.
 
 ### Agent WhatsApp — PRÉCONDITION avant de lui donner les outils (2026-09-08)
 
