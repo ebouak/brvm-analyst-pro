@@ -31,7 +31,7 @@ export interface Slide {
   imageUrl: string | null;
   sponsorName?: string | null;
   /** Vue permanente : identifiant du rendu dessiné (voir HeroCarousel). */
-  render?: 'photo' | 'note' | 'brief' | 'dossiers';
+  render?: 'photo' | 'sgi' | 'note' | 'brief' | 'dossiers';
 }
 
 /** Ligne de `landing_slides` telle que lue par la clé anon (policy : actives dans leur fenêtre). */
@@ -53,6 +53,7 @@ export interface LandingSlideRow {
 /** Vues permanentes. `imageUrl` de la photo : fichier /public, provisoire (image générée). */
 export const PERMANENT_SLIDES: readonly Slide[] = [
   { id: 'p-photo', kind: 'permanent', title: 'Mieux informé, plus serein.', imageUrl: '/landing/portrait-provisoire.jpg', render: 'photo' },
+  { id: 'p-sgi', kind: 'permanent', title: 'Trouvez la SGI faite pour votre profil', imageUrl: null, render: 'sgi' },
   { id: 'p-note', kind: 'permanent', title: 'Une note de A à F par action', imageUrl: null, render: 'note' },
   { id: 'p-brief', kind: 'permanent', title: 'Le brief du soir', imageUrl: null, render: 'brief' },
   { id: 'p-dossiers', kind: 'permanent', title: 'Dossiers PDF hebdomadaires', imageUrl: null, render: 'dossiers' },

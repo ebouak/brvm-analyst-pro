@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useEffect, useRef, useState } from 'react';
 import type { Slide } from '@/lib/landing/slides';
@@ -29,9 +30,11 @@ interface Props {
   topNote: TopNote | null;
   topHausse: { code: string; variation: number } | null;
   topBaisse: { code: string; variation: number } | null;
+  /** Compteurs réels du comparateur SGI — jamais de score affiché ici. */
+  sgi: { nb: number; nbGrilles: number; pays: string[] };
 }
 
-export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, topNote, topHausse, topBaisse }: Props) {
+export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, topNote, topHausse, topBaisse, sgi }: Props) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   const reduce = useRef(false);
@@ -76,7 +79,7 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
               <img src={s.imageUrl} alt="" width={900} height={672} loading={k === 0 ? 'eager' : 'lazy'} />
             )}
             {s.kind === 'permanent' ? (
-              <Permanente s={s} dateLabel={dateLabel} brvmCVar={brvmCVar} hausses={hausses} nbActions={nbActions} topNote={topNote} topHausse={topHausse} topBaisse={topBaisse} />
+              <Permanente s={s} dateLabel={dateLabel} brvmCVar={brvmCVar} hausses={hausses} nbActions={nbActions} topNote={topNote} topHausse={topHausse} topBaisse={topBaisse} sgi={sgi} active={active} />
             ) : (
               <div className="pv">
                 <div className="box">
@@ -116,7 +119,7 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
 }
 
 /** Vues permanentes : dessinées, alimentées par les VRAIS chiffres de la séance. */
-function Permanente({ s, dateLabel, brvmCVar, hausses, nbActions, topNote, topHausse, topBaisse }: { s: Slide } & Omit<Props, 'slides'>) {
+function Permanente({ s, dateLabel, brvmCVar, hausses, nbActions, topNote, topHausse, topBaisse, sgi, active }: { s: Slide; active: boolean } & Omit<Props, 'slides'>) {
   if (s.render === 'photo') {
     return (
       <>
@@ -127,6 +130,22 @@ function Permanente({ s, dateLabel, brvmCVar, hausses, nbActions, topNote, topHa
         <div className="poster" aria-hidden="true">Mieux<br />informé,<br />plus serein.<i><svg viewBox="0 0 52 6" width="52" height="6"><path d="M1 4 C 15 1, 35 6, 51 2" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="2.5" strokeLinecap="round" /></svg></i></div>
         <figure className="quote"><span className="hand">« Je ne subis plus le marché, je le comprends. »</span><figcaption><small>La promesse WESTBOURSE</small></figcaption></figure>
       </>
+    );
+  }
+  if (s.render === 'sgi') {
+    // Annonce maison du comparateur : uniquement des compteurs lus en base
+    // (annuaire, grilles tarifaires, pays). Aucun classement ni score n'est
+    // montré ici — ils dépendent du profil saisi dans le moteur.
+    const nb = sgi.nb > 0 ? sgi.nb : null;
+    return (
+      <div className="pv pv-sgi"><div className="box">
+        <span className="o">Comparateur SGI · BRVM</span>
+        <h3>Trouvez la SGI faite pour votre profil.</h3>
+        <p>Cinq questions, et le moteur classe {nb ? `les ${nb} SGI agréées` : 'les SGI agréées'} selon vos critères{sgi.nbGrilles > 0 ? ` — sur ${sgi.nbGrilles} grilles tarifaires homologuées` : ''}. Chaque point du score est justifié.</p>
+        {sgi.pays.length > 0 && <ul className="chips" aria-label="Pays couverts">{sgi.pays.map((n) => <li key={n}>{n}</li>)}</ul>}
+        <Link href="/comparateur-sgi" className="btn btn-gold btn-sm" style={{ marginTop: 14 }} tabIndex={active ? 0 : -1}>Commencer maintenant →</Link>
+      </div>
+      <span className="hand hand-sgi" aria-hidden="true">Comparer. Comprendre.<br />Investir en confiance.</span></div>
     );
   }
   if (s.render === 'note') {

@@ -84,6 +84,7 @@ export default async function Landing() {
                 hausses={d.hausses} nbActions={d.nbActions} topNote={d.topNote}
                 topHausse={topH ? { code: topH.code, variation: topH.variation } : null}
                 topBaisse={topB ? { code: topB.code, variation: topB.variation } : null}
+                sgi={d.sgi}
               />
             </div>
             <div className="fil"><span className="tag-fil">Le fil conducteur</span><span>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</span></div>

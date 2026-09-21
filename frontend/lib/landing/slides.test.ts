@@ -20,9 +20,9 @@ describe('estAffichable', () => {
 });
 
 describe('composeSlides', () => {
-  it('sans vue admin : les 4 permanentes, dans l’ordre', () => {
+  it('sans vue admin : les 5 permanentes, dans l’ordre', () => {
     const s = composeSlides(PERMANENT_SLIDES, [], U, NOW);
-    expect(s.map((x) => x.id)).toEqual(['p-photo', 'p-note', 'p-brief', 'p-dossiers']);
+    expect(s.map((x) => x.id)).toEqual(['p-photo', 'p-sgi', 'p-note', 'p-brief', 'p-dossiers']);
   });
   it('plafond 10 et au moins 3 permanentes même si un admin programme 12 pubs', () => {
     const rows = Array.from({ length: 12 }, (_, i) => row(i + 1));
@@ -31,9 +31,9 @@ describe('composeSlides', () => {
     expect(s.filter((x) => x.kind === 'permanent')).toHaveLength(MIN_PERMANENT);
     expect(s.filter((x) => x.kind === 'ad')).toHaveLength(7);
   });
-  it('avec 3 pubs : 4 permanentes + 3 pubs, triées par position', () => {
+  it('avec 3 pubs : 5 permanentes + 3 pubs, triées par position', () => {
     const s = composeSlides(PERMANENT_SLIDES, [row(3), row(1), row(2)], U, NOW);
-    expect(s.map((x) => x.id)).toEqual(['p-photo', 'p-note', 'p-brief', 'p-dossiers', 'a1', 'a2', 'a3']);
+    expect(s.map((x) => x.id)).toEqual(['p-photo', 'p-sgi', 'p-note', 'p-brief', 'p-dossiers', 'a1', 'a2', 'a3']);
   });
   it('une pub porte toujours son annonceur ; une annonce maison jamais', () => {
     const ad = rowToSlide(row(1, { sponsor_name: null }), U);

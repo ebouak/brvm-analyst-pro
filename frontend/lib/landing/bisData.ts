@@ -16,6 +16,8 @@ import brvmLogos from '@/lib/brvmLogos.json';
 import { getVideoSeance, type VideoSeance } from '@/lib/landing/videoSeance';
 import { getLatestDiagnostic, type LatestDiagnostic } from '@/lib/landing/latestDiagnostic';
 import type { SignalDaily } from '@/lib/types';
+import { getSgiDirectory, getSgiFrais } from '@/lib/sgi-frais/queries';
+import { PAYS } from '@/lib/sgi-frais/directory';
 
 export interface Mover {
   code: string;
@@ -44,7 +46,11 @@ export interface EtatMarche {
 }
 export interface TopNote { code: string; nom: string | null; score: number | null; signal: string | null; grade: string | null }
 
+export interface SgiCompteurs { nb: number; nbGrilles: number; pays: string[] }
+
 export interface LandingBisData {
+  /** Compteurs réels du comparateur SGI (annuaire + grilles tarifaires en base). */
+  sgi: SgiCompteurs;
   dateMarche: string | null;
   nbActions: number;
   hausses: number;
@@ -90,16 +96,20 @@ async function load(): Promise<LandingBisData> {
     videoSeance: null,
     spotlightSignal: null,
     latestDiagnostic: null,
+    sgi: { nb: 0, nbGrilles: 0, pays: [] },
   };
 
-  const [dateMarche, plansRes, slidesRes, collecteRes, videoSeance, latestDiagnostic] = await Promise.all([
+  const [dateMarche, plansRes, slidesRes, collecteRes, videoSeance, latestDiagnostic, sgiDir, sgiFrais] = await Promise.all([
     getLastMarketDate(db),
     db.from('subscription_plans').select('code, name, price_monthly, price_yearly, currency').order('price_monthly'),
     db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position').order('position'),
     db.from('v_fraicheur_cours').select('derniere_collecte_intraday').maybeSingle(),
     getVideoSeance().catch(() => null),
     getLatestDiagnostic().catch(() => null),
+    getSgiDirectory().catch(() => []),
+    getSgiFrais().catch(() => []),
   ]);
+  const sgi: SgiCompteurs = { nb: sgiDir.length, nbGrilles: sgiFrais.length, pays: [...new Set(sgiDir.map((x) => PAYS[x.pays]?.nom).filter((n): n is string => !!n))] };
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
   const slides = composeSlides(PERMANENT_SLIDES, (slidesRes.data ?? []) as LandingSlideRow[], supabaseUrl);
@@ -107,7 +117,7 @@ async function load(): Promise<LandingBisData> {
     code: String(p.code), name: String(p.name), monthly: Number(p.price_monthly ?? 0), yearly: Number(p.price_yearly ?? 0), currency: String(p.currency ?? 'XOF'),
   }));
   const derniereCollecte = (collecteRes.data?.derniere_collecte_intraday as string | null) ?? null;
-  if (!dateMarche) return { ...vide, plans, slides, derniereCollecte, videoSeance, latestDiagnostic };
+  if (!dateMarche) return { ...vide, plans, slides, derniereCollecte, videoSeance, latestDiagnostic, sgi };
 
 
   const [rowsRes, prevRes, idxRes, instRes, serieRes, sigRes] = await Promise.all([
@@ -193,7 +203,7 @@ async function load(): Promise<LandingBisData> {
 
   return {
     dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses, brvmC,
-    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic,
+    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic, sgi,
   };
 }
 
