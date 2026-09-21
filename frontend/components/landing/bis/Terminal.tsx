@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import RatingBadge from '@/components/RatingBadge';
-import { SubscoreBars } from '@/components/landing/SubscoreBars';
+import { SubscoreBars, COULEURS_TOKEN } from '@/components/landing/SubscoreBars';
 import { excerpt } from '@/lib/landing/excerpt';
 import { fmtNumber } from '@/lib/format';
 import type { LandingBisData } from '@/lib/landing/bisData';
@@ -91,7 +91,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
           {s ? (
             <>
               <div className="tc-card-head"><b className="num">{s.code}</b><RatingBadge scoreTotal={s.score_total} confiance={s.confiance} neutre /></div>
-              <SubscoreBars signal={s} compact />
+              <SubscoreBars signal={s} compact couleurs={{ ...COULEURS_TOKEN, label: '#a3afb4' }} />
               <p className="tc-foot">Signal {s.signal} · confiance {s.confiance != null ? `${(s.confiance * 100).toFixed(0)} %` : '—'} · exemple réel de la séance en cours</p>
               <p className="tc-disc">{RATING_DISCLAIMER}</p>
             </>

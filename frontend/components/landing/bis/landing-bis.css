@@ -6,7 +6,7 @@
 
 .lb {
   --paper: #f7f5f0; --paper-2: #efece5; --white: #ffffff;
-  --ink: #10203a; --ink-2: #2a3a55; --muted: #5b6675; --faint: #6b7580; --line: rgba(16, 32, 58, .10);
+  --ink: #10203a; --ink-2: #2a3a55; --muted: #5b6675; --faint: #5f6975; --line: rgba(16, 32, 58, .10);
   --blue: #1f6fb3; --teal: #1ba8c9; --gold: #c9a23a; --gold-ink: #5a4410; --green: #2f9e6b; --green-soft: #e3f4ea;
   --up: #177a4c; --down: #b0342f;
   --hand: 'Caveat', 'Segoe Script', cursive;
@@ -679,3 +679,9 @@
   .lb .mnav-panel a:hover, .lb .mnav-panel a:focus-visible { background: var(--paper); }
   .lb .mnav-panel .grp { padding: 8px 12px 2px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
 }
+
+/* audit, seconde passe : étiquettes des barres de sous-scores (composant partagé, 9 px gris sur sombre), focus du menu mobile */
+.lb .tc-card .text-faint, .lb .tc-card [class*="text-\["] { color: #a3afb4 !important; }
+.lb .tc-card [class*="text-\[9px\]"], .lb .tc-card [class*="text-\[10px\]"] { font-size: 11px !important; }
+.lb .watch > b span { color: var(--muted); font-size: 11px; }
+.lb .mnav-btn:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
