@@ -24,11 +24,19 @@ const fmtD = (iso: string) => { const [y, m, d] = iso.split('-'); return `${d}/$
 
 export function IndexChart({ serie }: { serie: Point[] }) {
   const [k, setK] = useState<(typeof FENETRES)[number]['k']>('1M');
-  const pts = useMemo(() => serie.slice(-(FENETRES.find((f) => f.k === k)?.n ?? 21)), [serie, k]);
+  const n = FENETRES.find((f) => f.k === k)?.n ?? 21;
+  const pts = useMemo(() => serie.slice(-n), [serie, n]);
+  // SMA 20 calculée sur la série COMPLÈTE (les 19 séances avant la fenêtre
+  // comptent), puis découpée : la moyenne est juste dès le premier point.
+  const sma = useMemo(() => {
+    const out: (number | null)[] = serie.map((_, i) => i < 19 ? null : serie.slice(i - 19, i + 1).reduce((a, p) => a + p.v, 0) / 20);
+    return out.slice(-n);
+  }, [serie, n]);
 
   if (pts.length < 2) return <p className="empty">Pas assez de séances pour tracer la courbe.</p>;
 
-  const vals = pts.map((p) => p.v);
+  const smaVals = sma.filter((v): v is number => v != null);
+  const vals = [...pts.map((p) => p.v), ...smaVals];
   const min = Math.min(...vals), max = Math.max(...vals);
   const pad = (max - min || 1) * 0.08;
   const lo = min - pad, hi = max + pad;
@@ -36,6 +44,7 @@ export function IndexChart({ serie }: { serie: Point[] }) {
   const y = (v: number) => PT + (1 - (v - lo) / (hi - lo)) * (H - PT - PB);
   const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.v).toFixed(1)}`).join(' ');
   const area = `${line} L${x(pts.length - 1).toFixed(1)} ${(H - PB).toFixed(1)} L${PL} ${(H - PB).toFixed(1)} Z`;
+  const smaLine = sma.map((v, i) => v == null ? null : `${x(i).toFixed(1)} ${y(v).toFixed(1)}`).filter(Boolean).map((seg, i) => `${i ? 'L' : 'M'}${seg}`).join(' ');
   const ticks = [lo + pad, (lo + hi) / 2, hi - pad];
   const xLabels = [0, Math.floor((pts.length - 1) / 2), pts.length - 1];
   const dernier = pts[pts.length - 1];
@@ -50,6 +59,7 @@ export function IndexChart({ serie }: { serie: Point[] }) {
             <button key={f.k} type="button" role="tab" aria-selected={f.k === k} onClick={() => setK(f.k)} disabled={serie.length < 2}>{f.k}</button>
           ))}
         </div>
+        <span className="legend"><i className="sw sma" aria-hidden="true" />SMA 20</span>
         <span className={`num chart-var ${varFen >= 0 ? 'up' : 'down'}`} aria-label={`Variation sur la fenêtre ${k}`}>
           {varFen >= 0 ? '+' : '−'}{Math.abs(varFen).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} % <small>sur {k === '1M' ? '1 mois' : k === '3M' ? '3 mois' : '1 an'}</small>
         </span>
@@ -64,6 +74,7 @@ export function IndexChart({ serie }: { serie: Point[] }) {
         ))}
         <path d={area} fill="url(#lb-idx)" />
         <path d={line} fill="none" stroke="#1ba8c9" strokeWidth="2" strokeLinejoin="round" />
+        {smaLine && <path d={smaLine} fill="none" stroke="#c9a23a" strokeWidth="1.6" strokeDasharray="4 3" strokeLinejoin="round" />}
         <circle cx={x(pts.length - 1)} cy={y(dernier.v)} r="3.5" fill="#1ba8c9" stroke="#fff" strokeWidth="1.5" />
         {xLabels.map((i) => (
           <text key={i} x={x(i)} y={H - 8} fontSize="11" fill="currentColor" fillOpacity=".7" textAnchor={i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle'}>{fmtD(pts[i].d)}</text>

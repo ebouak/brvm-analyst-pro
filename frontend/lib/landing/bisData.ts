@@ -20,6 +20,8 @@ export interface Mover {
   nom: string | null;
   cours: number;
   variation: number;
+  volume: number | null;
+  valeur: number | null;
   /** Tracé SVG (44×16) des 20 dernières clôtures, ou null si < 2 points. */
   spark: string | null;
 }
@@ -129,8 +131,8 @@ async function load(): Promise<LandingBisData> {
       sparks.set(c, sparklinePath(serie, 44, 16)?.line ?? null);
     }
   }
-  const toMover = (r: { code: string; cours: number; variation: number }): Mover => ({
-    code: r.code, nom: noms.get(r.code) ?? null, cours: r.cours, variation: r.variation, spark: sparks.get(r.code) ?? null,
+  const toMover = (r: { code: string; cours: number; variation: number; volume: number | null; valeur: number | null }): Mover => ({
+    code: r.code, nom: noms.get(r.code) ?? null, cours: r.cours, variation: r.variation, volume: r.volume, valeur: r.valeur, spark: sparks.get(r.code) ?? null,
   });
 
   const indices: Indice[] = (idxRes.data ?? [])

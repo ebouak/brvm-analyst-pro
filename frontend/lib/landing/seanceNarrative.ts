@@ -29,6 +29,8 @@ export interface SeanceNarrative {
   corps: string;
   /** Points factuels « à surveiller » (0 à 3). */
   surveiller: string[];
+  /** « Flash info » : 2 à 3 puces courtes, dérivées. */
+  flash: string[];
 }
 
 const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
@@ -44,7 +46,7 @@ export function orientation(m: SeanceMetrics): 'hausse' | 'baisse' | 'equilibre'
 export function seanceNarrative(m: SeanceMetrics): SeanceNarrative {
   const o = orientation(m);
   if (o === 'vide') {
-    return { sousTitre: 'Aucune séance en base.', accroche: 'Aucune donnée de séance disponible.', corps: 'La page le dit plutôt que d’afficher des cours périmés.', surveiller: [] };
+    return { sousTitre: 'Aucune séance en base.', accroche: 'Aucune donnée de séance disponible.', corps: 'La page le dit plutôt que d’afficher des cours périmés.', surveiller: [], flash: [] };
   }
   const sousTitre =
     o === 'baisse' ? `${m.baisses} ${pl(m.baisses, 'valeur recule', 'valeurs reculent')}, ${m.hausses} ${pl(m.hausses, 'progresse', 'progressent')}. La séance reste orientée à la baisse.`
@@ -72,5 +74,11 @@ export function seanceNarrative(m: SeanceMetrics): SeanceNarrative {
   if (m.topBaisse) surveiller.push(`${m.topBaisse.code} signe la plus forte baisse (${pct(m.topBaisse.variation)}).`);
   if (m.plusEchangee) surveiller.push(`${m.plusEchangee.code} concentre la plus forte valeur échangée de la séance.`);
 
-  return { sousTitre, accroche, corps, surveiller };
+  const flash: string[] = [];
+  flash.push(o === 'baisse' ? `Baisse dominante : ${m.baisses} valeurs reculent` : o === 'hausse' ? `Hausse dominante : ${m.hausses} valeurs progressent` : `Séance équilibrée : ${m.hausses} hausses, ${m.baisses} baisses`);
+  if (o !== 'hausse' && faibles.length) flash.push(`Secteurs les plus faibles : ${faibles.map((s) => `${s.secteur.toLowerCase()} (${pct(s.variation_pct)})`).join(', ')}`);
+  else if (forts.length) flash.push(`Secteurs porteurs : ${forts.map((s) => `${s.secteur.toLowerCase()} (${pct(s.variation_pct)})`).join(', ')}`);
+  if (m.plusEchangee) flash.push(`${m.plusEchangee.code} concentre la plus forte valeur échangée`);
+
+  return { sousTitre, accroche, corps, surveiller, flash };
 }

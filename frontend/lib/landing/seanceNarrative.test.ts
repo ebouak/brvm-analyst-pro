@@ -39,3 +39,12 @@ describe('seanceNarrative — dérivé des chiffres, jamais rédigé', () => {
     expect(n.corps).toContain('portée par télécoms (+3,95 %)');
   });
 });
+
+describe('flash info', () => {
+  it('trois puces dérivées, sans promesse', () => {
+    const n = seanceNarrative(S18);
+    expect(n.flash[0]).toBe('Baisse dominante : 30 valeurs reculent');
+    expect(n.flash[1]).toContain('industriels (−2,34 %)');
+    expect(n.flash[2]).toBe('SNTS concentre la plus forte valeur échangée');
+  });
+});
