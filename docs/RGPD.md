@@ -11,7 +11,7 @@ Audit initial : 2026-06-16.
 |---|---|---|---|---|---|---|
 | `auth.users` (Supabase) | email, hash mdp | Authentification | Contrat | Vie du compte | ✅ (account) | Support/worker service-role |
 | `profiles` | email, profil/horizon investisseur, mode_debutant | Compte + personnalisation (profiling léger) | Contrat | Vie du compte | ✅ | Liée au compte auth (support) |
-| `newsletter_subscribers` | email, confirm_token | Marketing (newsletter) | **Consentement** (double opt-in) | Jusqu'au désabonnement | ⬜ (à ajouter) | ✅ par email |
+| `newsletter_subscribers` | email, confirm_token | Marketing (newsletter) | **Consentement** (double opt-in) | Confirmés : jusqu'au désabonnement · **non confirmés : 30 j après le dernier email de confirmation** (0133, cron mensuel) | ⬜ (à ajouter) | ✅ par email |
 | `watchlists` / `watchlist_items` | user_id, libellés | Suivi de valeurs | Contrat | Vie du compte | ✅ | ✅ |
 | `portfolios_positions` | user_id, lignes | Portefeuille | Contrat | Vie du compte | ✅ | ✅ |
 | `alerts` | user_id, seuils | Alertes | Contrat | Vie du compte | ✅ | ✅ |
@@ -88,7 +88,7 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Données : email + token de confirmation.
 - Finalité : envoi de la newsletter.
 - Base légale : **consentement** (double opt-in via `confirm_token`).
-- Conservation : jusqu'au désabonnement.
+- Conservation : confirmés, jusqu'au désabonnement ; non confirmés, 30 jours après le dernier email de confirmation envoyé (`confirmation_sent_at`, migration 0133) — jamais sollicités : conservés.
 - Droits : désabonnement = suppression de la ligne ; couvert par l'effacement compte (par email).
 - Sécurité : pas d'autre donnée perso ; pas de partage tiers.
 

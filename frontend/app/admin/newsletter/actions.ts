@@ -124,6 +124,16 @@ export async function resendConfirmations(): Promise<R & { sent?: number; total?
       unsubscribeUrl: `${base}/api/newsletter/unsubscribe?token=${r.confirm_token}`,
     }),
   })));
+  if (res.sent > 0) {
+    // sendBatch ne dit pas QUELLES adresses ont abouti ; sur un envoi total, on
+    // horodate toutes les lignes sollicitées ; sur un partiel, aucune — mieux
+    // vaut garder une ligne un mois de trop que la purger sans l'avoir prévenue.
+    if (res.sent === pending.length) {
+      await db.from('newsletter_subscribers')
+        .update({ confirmation_sent_at: new Date().toISOString() })
+        .eq('confirmed', false);
+    }
+  }
   await recordAudit(ctx, {
     action: 'newsletter.resend_confirmations', resourceType: 'newsletter', severity: 'warning',
     metadata: { pending: pending.length, sent: res.sent, ok: res.ok, error: res.error ?? null },
