@@ -245,9 +245,6 @@
 .lb .tag-fil { display: inline-flex; align-items: center; min-height: 28px; padding: 0 12px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
 .lb .steps { border-top: 0; padding-top: 18px; }
 
-/* cartographie (écran du terminal) */
-.lb .carto { padding: 16px; }
-.lb .carto .overline { color: #56D7FD; }
 
 /* quatre façons de travailler le marché */
 .lb .facons { margin-top: 44px; }

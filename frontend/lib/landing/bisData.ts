@@ -10,8 +10,6 @@ import { getLastMarketDate } from '@/lib/marketDate';
 import { sparklinePath } from '@/lib/landing/sparkline';
 import { composeSlides, PERMANENT_SLIDES, type LandingSlideRow, type Slide } from '@/lib/landing/slides';
 import { scoreToRating } from '@/lib/rating';
-import { loadHeatmap } from '@/lib/heatmapData';
-import type { HeatmapNode } from '@/lib/heatmap';
 import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
 import brvmSectors from '@/lib/brvmSectors.json';
 
@@ -56,7 +54,6 @@ export interface LandingBisData {
   topNote: TopNote | null;
   derniereCollecte: string | null;
   etat: EtatMarche;
-  heatmap: HeatmapNode[];
   /** Clôtures BRVM Composite, ~250 dernières séances, chronologiques. */
   brvmCSerie: Point[];
   secteurs: SectorVariation[];
@@ -76,19 +73,16 @@ async function load(): Promise<LandingBisData> {
     dateMarche: null, nbActions: 0, hausses: 0, baisses: 0, inchangees: 0, brvmC: null,
     topHausses: [], topBaisses: [], indices: [], plans: [], slides: [...PERMANENT_SLIDES], topNote: null, derniereCollecte: null,
     etat: { valeurEchangee: null, titresEchanges: null, transactions: null, valeurVsVeille: null, titresVsVeille: null, transactionsVsVeille: null, sentimentScore: 50, sentimentDelta: null },
-    heatmap: [],
     brvmCSerie: [],
     secteurs: [],
     plusEchangee: null,
   };
 
-  const [dateMarche, plansRes, slidesRes, collecteRes, heatmap] = await Promise.all([
+  const [dateMarche, plansRes, slidesRes, collecteRes] = await Promise.all([
     getLastMarketDate(db),
     db.from('subscription_plans').select('code, name, price_monthly, price_yearly, currency').order('price_monthly'),
     db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position').order('position'),
     db.from('v_fraicheur_cours').select('derniere_collecte_intraday').maybeSingle(),
-    // Cartographie : même chargement que /heatmap ; vide plutôt que page en erreur.
-    loadHeatmap(db).then((r) => r.rows).catch(() => [] as HeatmapNode[]),
   ]);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
@@ -97,7 +91,7 @@ async function load(): Promise<LandingBisData> {
     code: String(p.code), name: String(p.name), monthly: Number(p.price_monthly ?? 0), yearly: Number(p.price_yearly ?? 0), currency: String(p.currency ?? 'XOF'),
   }));
   const derniereCollecte = (collecteRes.data?.derniere_collecte_intraday as string | null) ?? null;
-  if (!dateMarche) return { ...vide, plans, slides, derniereCollecte, heatmap };
+  if (!dateMarche) return { ...vide, plans, slides, derniereCollecte };
 
 
   const [rowsRes, prevRes, idxRes, instRes, serieRes, sigRes] = await Promise.all([
@@ -182,7 +176,7 @@ async function load(): Promise<LandingBisData> {
 
   return {
     dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses, brvmC,
-    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, heatmap, brvmCSerie, secteurs, plusEchangee,
+    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee,
   };
 }
 

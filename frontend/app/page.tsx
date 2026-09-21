@@ -3,7 +3,6 @@ import NewsletterForm from '@/components/NewsletterForm';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
-import LandingHeatmap from '@/components/landing/LandingHeatmap';
 import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
@@ -115,13 +114,6 @@ export default async function Landing() {
           <div id="marche">
             <BrvmAujourdhui d={d} fraicheur={fraicheur} dateLabel={dateLabel} />
           </div>
-
-          {/* 2 bis · CARTOGRAPHIE — écran du terminal (sombre), réutilisé tel quel */}
-          {d.heatmap.length > 0 && (
-            <section className="etat carto" aria-label="Cartographie du marché">
-              <LandingHeatmap rows={d.heatmap} dateLabel={dateLabel} />
-            </section>
-          )}
 
           {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
           <QuatreFacons />
