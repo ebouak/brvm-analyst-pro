@@ -12,6 +12,8 @@ import { composeSlides, PERMANENT_SLIDES, type LandingSlideRow, type Slide } fro
 import { scoreToRating } from '@/lib/rating';
 import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
+import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
+import brvmSectors from '@/lib/brvmSectors.json';
 
 export interface Mover {
   code: string;
@@ -21,12 +23,17 @@ export interface Mover {
   /** Tracé SVG (44×16) des 20 dernières clôtures, ou null si < 2 points. */
   spark: string | null;
 }
-export interface Indice { code: string; label: string; valeur: number; variation: number | null }
+export interface Indice { code: string; label: string; valeur: number; variation: number | null; veille: number | null }
+export interface Point { d: string; v: number }
 export interface Plan { code: string; name: string; monthly: number; yearly: number; currency: string }
 export interface EtatMarche {
   valeurEchangee: number | null;   // somme de valeur_echangee (FCFA)
   titresEchanges: number | null;   // somme de volume (titres)
   transactions: number | null;
+  /** Écarts contre la veille, en % (null si l'une des deux sommes manque). */
+  valeurVsVeille: number | null;
+  titresVsVeille: number | null;
+  transactionsVsVeille: number | null;
   sentimentScore: number;          // hausses / (hausses + baisses) × 100 — même méthode que le dashboard
   sentimentDelta: number | null;   // écart contre la veille, en points
 }
@@ -48,6 +55,11 @@ export interface LandingBisData {
   derniereCollecte: string | null;
   etat: EtatMarche;
   heatmap: HeatmapNode[];
+  /** Clôtures BRVM Composite, ~250 dernières séances, chronologiques. */
+  brvmCSerie: Point[];
+  secteurs: SectorVariation[];
+  /** Valeur la plus échangée (FCFA) de la séance, ou null si aucune valeur renseignée. */
+  plusEchangee: { code: string; valeur: number } | null;
 }
 
 const LABELS: Record<string, string> = {
@@ -61,8 +73,11 @@ async function load(): Promise<LandingBisData> {
   const vide: LandingBisData = {
     dateMarche: null, nbActions: 0, hausses: 0, baisses: 0, inchangees: 0, brvmC: null,
     topHausses: [], topBaisses: [], indices: [], plans: [], slides: [...PERMANENT_SLIDES], topNote: null, derniereCollecte: null,
-    etat: { valeurEchangee: null, titresEchanges: null, transactions: null, sentimentScore: 50, sentimentDelta: null },
+    etat: { valeurEchangee: null, titresEchanges: null, transactions: null, valeurVsVeille: null, titresVsVeille: null, transactionsVsVeille: null, sentimentScore: 50, sentimentDelta: null },
     heatmap: [],
+    brvmCSerie: [],
+    secteurs: [],
+    plusEchangee: null,
   };
 
   const [dateMarche, plansRes, slidesRes, collecteRes, heatmap] = await Promise.all([
@@ -82,11 +97,13 @@ async function load(): Promise<LandingBisData> {
   const derniereCollecte = (collecteRes.data?.derniere_collecte_intraday as string | null) ?? null;
   if (!dateMarche) return { ...vide, plans, slides, derniereCollecte, heatmap };
 
-  const [rowsRes, prevRes, idxRes, instRes, sigRes] = await Promise.all([
+
+  const [rowsRes, prevRes, idxRes, instRes, serieRes, sigRes] = await Promise.all([
     db.from('brvm_actions_daily').select('code, cours_jour, variation_pct, volume, valeur_echangee, nb_transactions').eq('date_marche', dateMarche),
     db.from('brvm_actions_daily').select('date_marche').lt('date_marche', dateMarche).order('date_marche', { ascending: false }).limit(1).maybeSingle(),
-    db.from('brvm_indices_daily').select('code, valeur, variation_pct').eq('date_marche', dateMarche),
-    db.from('brvm_instruments').select('code, designation'),
+    db.from('brvm_indices_daily').select('code, valeur, variation_pct, valeur_precedente').eq('date_marche', dateMarche),
+    db.from('brvm_instruments').select('code, designation, shares'),
+    db.from('brvm_indices_daily').select('date_marche, valeur').eq('code', 'BRVMC').lte('date_marche', dateMarche).order('date_marche', { ascending: false }).limit(250),
     db.from('signals_daily').select('code, score_total, signal, confiance').eq('date_marche', dateMarche).order('score_total', { ascending: false }).limit(1).maybeSingle(),
   ]);
 
@@ -97,10 +114,10 @@ async function load(): Promise<LandingBisData> {
   const hausses = rows.filter((r) => r.variation > 0).length;
   const baisses = rows.filter((r) => r.variation < 0).length;
   const parVar = [...rows].sort((a, b) => b.variation - a.variation);
-  const top = parVar.filter((r) => r.variation > 0).slice(0, 3);
-  const bottom = parVar.filter((r) => r.variation < 0).slice(-3).reverse();
+  const top = parVar.filter((r) => r.variation > 0).slice(0, 5);
+  const bottom = parVar.filter((r) => r.variation < 0).slice(-5).reverse();
 
-  // Sparklines réelles : 20 dernières clôtures des 6 codes du palmarès.
+  // Sparklines réelles : 20 dernières clôtures des codes du palmarès (≤ 10).
   const codes = [...top, ...bottom].map((r) => r.code);
   const sparks = new Map<string, string | null>();
   if (codes.length) {
@@ -118,7 +135,7 @@ async function load(): Promise<LandingBisData> {
 
   const indices: Indice[] = (idxRes.data ?? [])
     .filter((i) => i.valeur != null)
-    .map((i) => ({ code: String(i.code), label: LABELS[String(i.code)] ?? String(i.code), valeur: Number(i.valeur), variation: i.variation_pct == null ? null : Number(i.variation_pct) }));
+    .map((i) => ({ code: String(i.code), label: LABELS[String(i.code)] ?? String(i.code), valeur: Number(i.valeur), variation: i.variation_pct == null ? null : Number(i.variation_pct), veille: i.valeur_precedente == null ? null : Number(i.valeur_precedente) }));
   const brvmC = indices.find((i) => i.code === 'BRVMC') ?? null;
 
   // État du marché : sommes réelles (null si aucune ligne ne porte la donnée) et
@@ -127,13 +144,34 @@ async function load(): Promise<LandingBisData> {
   const sentimentScore = hausses + baisses > 0 ? (hausses / (hausses + baisses)) * 100 : 50;
   let sentimentDelta: number | null = null;
   const prevDate = (prevRes.data?.date_marche as string | undefined) ?? null;
+  let veilleValeur: number | null = null, veilleTitres: number | null = null, veilleTx: number | null = null;
   if (prevDate) {
-    const { data: prev } = await db.from('brvm_actions_daily').select('variation_pct').eq('date_marche', prevDate);
+    const { data: prev } = await db.from('brvm_actions_daily').select('variation_pct, volume, valeur_echangee, nb_transactions').eq('date_marche', prevDate);
     let h = 0, b = 0;
-    for (const r of prev ?? []) { const v = Number(r.variation_pct ?? 0); if (v > 0) h++; else if (v < 0) b++; }
+    const pr = (prev ?? []).map((r) => ({ v: Number(r.variation_pct ?? 0), volume: r.volume == null ? null : Number(r.volume), valeur: r.valeur_echangee == null ? null : Number(r.valeur_echangee), tx: r.nb_transactions == null ? null : Number(r.nb_transactions) }));
+    for (const r of pr) { if (r.v > 0) h++; else if (r.v < 0) b++; }
     if (h + b > 0) sentimentDelta = sentimentScore - (h / (h + b)) * 100;
+    const sp = (f: (r: typeof pr[number]) => number | null) => pr.some((r) => f(r) != null) ? pr.reduce((a, r) => a + (f(r) ?? 0), 0) : null;
+    veilleValeur = sp((r) => r.valeur); veilleTitres = sp((r) => r.volume); veilleTx = sp((r) => r.tx);
   }
-  const etat: EtatMarche = { valeurEchangee: somme((r) => r.valeur), titresEchanges: somme((r) => r.volume), transactions: somme((r) => r.tx), sentimentScore, sentimentDelta };
+  const vs = (a: number | null, b: number | null) => a != null && b != null && b > 0 ? ((a - b) / b) * 100 : null;
+  const valeurEchangee = somme((r) => r.valeur), titresEchanges = somme((r) => r.volume), transactions = somme((r) => r.tx);
+  const etat: EtatMarche = {
+    valeurEchangee, titresEchanges, transactions,
+    valeurVsVeille: vs(valeurEchangee, veilleValeur), titresVsVeille: vs(titresEchanges, veilleTitres), transactionsVsVeille: vs(transactions, veilleTx),
+    sentimentScore, sentimentDelta,
+  };
+
+  // Série BRVM Composite (chronologique) et variations sectorielles pondérées
+  // par la capitalisation (brvmSectors.json + brvm_instruments.shares).
+  const brvmCSerie: Point[] = (serieRes.data ?? []).filter((r) => r.valeur != null).map((r) => ({ d: String(r.date_marche), v: Number(r.valeur) })).reverse();
+  const sharesByCode = new Map<string, number | null>((instRes.data ?? []).map((i) => [String(i.code), i.shares == null ? null : Number(i.shares)]));
+  const maxVal = rows.filter((r) => r.valeur != null && r.valeur > 0).sort((a, b) => (b.valeur ?? 0) - (a.valeur ?? 0))[0];
+  const plusEchangee = maxVal ? { code: maxVal.code, valeur: maxVal.valeur as number } : null;
+  const secteurs = computeSectorVariations(
+    rows.map((r) => ({ code: r.code, variation_pct: r.variation, cours_jour: r.cours, shares: sharesByCode.get(r.code) ?? null })),
+    brvmSectors as Record<string, string>,
+  );
 
   const sig = sigRes.data;
   const topNote: TopNote | null = sig
@@ -142,7 +180,7 @@ async function load(): Promise<LandingBisData> {
 
   return {
     dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses, brvmC,
-    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, heatmap,
+    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, heatmap, brvmCSerie, secteurs, plusEchangee,
   };
 }
 

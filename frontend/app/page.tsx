@@ -2,10 +2,10 @@ import Link from 'next/link';
 import NewsletterForm from '@/components/NewsletterForm';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
-import MarketStateCard from '@/components/MarketStateCard';
+import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import LandingHeatmap from '@/components/landing/LandingHeatmap';
 import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
-import { getLandingBisData, type Mover, type Plan } from '@/lib/landing/bisData';
+import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
 import '@/components/landing/bis/landing-bis.css';
@@ -26,8 +26,6 @@ export const metadata = {
     'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit — créez votre compte en 1 minute.',
 };
 
-const pct = (v: number | null) => v == null ? '—' : `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
-const tone = (v: number | null) => (v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '');
 
 const STEPS = [
   { k: '01', t: 'Données', d: 'Cours, volumes et publications collectés à la source.', bg: '#e4eef9', c: '#1f6fb3', ic: <><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" /></> },
@@ -38,19 +36,6 @@ const STEPS = [
   { k: '06', t: 'Simulation', d: 'Ce que la décision aurait donné, dividendes inclus.', bg: '#e4eef9', c: '#1f6fb3', ic: <><path d="M4 7h16M4 12h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="#fff" /><circle cx="15" cy="12" r="2" fill="#fff" /><circle cx="8" cy="17" r="2" fill="#fff" /></> },
   { k: '07', t: 'Décision', d: 'À vous de trancher, avec les chiffres sous les yeux.', bg: '#e3f4ea', c: '#2f9e6b', ic: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></> },
 ];
-
-function MoverRow({ m }: { m: Mover }) {
-  return (
-    <Link className="row" href={`/societes/${m.code}`}>
-      <span className="code">{m.code}</span>
-      <span className="px">{fmtNumber(m.cours)}</span>
-      {m.spark
-        ? <svg viewBox="0 0 44 16" aria-hidden="true"><path d={m.spark} fill="none" stroke={m.variation >= 0 ? '#1f8f5a' : '#c4423f'} strokeWidth="1.5" /></svg>
-        : <span aria-hidden="true" />}
-      <span className={`v ${tone(m.variation)}`}>{pct(m.variation)}</span>
-    </Link>
-  );
-}
 
 function PlanPrice({ p }: { p: Plan }) {
   if (!p) return null;
@@ -64,8 +49,6 @@ export default async function Landing() {
   const d = await getLandingBisData();
   const fraicheur = computeFreshness(d.derniereCollecte, d.dateMarche, new Date());
   const dateLabel = d.dateMarche ? fmtDateFR(d.dateMarche) : null;
-  const total = Math.max(d.nbActions, 1);
-  const w = (n: number) => `${Math.round((n / total) * 100)}%`;
   const free = d.plans.find((p) => p.code === 'free');
   const premium = d.plans.find((p) => p.code === 'premium');
   const topH = d.topHausses[0] ?? null;
@@ -128,43 +111,10 @@ export default async function Landing() {
           <ProofBandBis nbActions={d.nbActions} />
           <PreuveDonneeBis fraicheur={fraicheur} exemple={topH ? { code: topH.code, nom: topH.nom, cours: topH.cours } : null} nbActions={d.nbActions} />
 
-          {/* 2 · MARCHÉ (réel) — l'état du marché est l'écran du terminal, réutilisé tel quel (sombre) */}
-          {d.nbActions > 0 && (
-            <section className="etat" aria-label="État du marché">
-              <MarketStateCard
-                stats={{ hausses: d.hausses, baisses: d.baisses, stables: d.inchangees, total: d.nbActions, volumeTotal: d.etat.valeurEchangee, volumeEstimated: false, volumePrev: null, titresEchanges: d.etat.titresEchanges, transactions: d.etat.transactions }}
-                sentimentScore={d.etat.sentimentScore}
-                sentimentDelta={d.etat.sentimentDelta}
-                headingLevel={2}
-              />
-            </section>
-          )}
-          <section id="marche" className="market" aria-label={dateLabel ? `Séance du ${dateLabel}` : 'Marché'}>
-            <div className="card">
-              <p className="head"><span className="over">BRVM Composite</span><span>{dateLabel ? `Clôture · ${dateLabel}` : 'Aucune séance en base'}</span></p>
-              {d.brvmC ? (
-                <>
-                  <div className="idx-big num">{d.brvmC.valeur.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className={`var ${tone(d.brvmC.variation)}`}>{pct(d.brvmC.variation)}</span></div>
-                  <div className="breadth" aria-hidden="true"><i style={{ width: w(d.hausses), background: '#1f8f5a' }} /><i style={{ width: w(d.inchangees), background: '#cfd5dc' }} /><i style={{ width: w(d.baisses), background: '#c4423f' }} /></div>
-                  <div className="breadth-l num"><span className="up">{d.hausses} hausse{d.hausses > 1 ? 's' : ''}</span><span>{d.inchangees} inchangée{d.inchangees > 1 ? 's' : ''}</span><span className="down">{d.baisses} baisse{d.baisses > 1 ? 's' : ''}</span></div>
-                </>
-              ) : <p className="empty">Les indices de cette séance ne sont pas encore disponibles.</p>}
-              <p className="stamp">Source brvm.org · actualisé toutes les 15 min en séance{fraicheur.ageMinutes != null && fraicheur.etat !== 'inconnu' ? ` · dernière collecte il y a ${fraicheur.ageMinutes} min` : ''}</p>
-              {fraicheur.etat === 'perime' && <p className="warn" role="status">Collecte interrompue : les cours ci-dessous peuvent ne pas refléter la séance en cours.</p>}
-            </div>
-            <div className="card">
-              <p className="head"><span className="over" style={{ color: '#1f8f5a' }}>Top hausses</span></p>
-              <div className="num" style={{ marginTop: 6 }}>
-                {d.topHausses.length ? d.topHausses.map((m) => <MoverRow key={m.code} m={m} />) : <p className="empty">Aucune hausse sur cette séance.</p>}
-              </div>
-            </div>
-            <div className="card">
-              <p className="head"><span className="over" style={{ color: '#c4423f' }}>Top baisses</span></p>
-              <div className="num" style={{ marginTop: 6 }}>
-                {d.topBaisses.length ? d.topBaisses.map((m) => <MoverRow key={m.code} m={m} />) : <p className="empty">Aucune baisse sur cette séance.</p>}
-              </div>
-            </div>
-          </section>
+          {/* 2 · LA BRVM AUJOURD'HUI — aperçu de séance (réel, dérivé) */}
+          <div id="marche">
+            <BrvmAujourdhui d={d} fraicheur={fraicheur} dateLabel={dateLabel} />
+          </div>
 
           {/* 2 bis · CARTOGRAPHIE — écran du terminal (sombre), réutilisé tel quel */}
           {d.heatmap.length > 0 && (
