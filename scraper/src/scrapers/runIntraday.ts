@@ -4,6 +4,8 @@ import { dirname, join } from 'node:path';
 import { logger } from '../logger.js';
 import { parseBrvmPublic, parseBrvmResumeIndices } from './brvmPublic.js';
 import { ensureIndexInstruments, upsertActions, upsertIndices, upsertMarketSummary, insertIntradaySnapshots } from '../persistence/repository.js';
+import { getSupabase } from '../persistence/supabase.js';
+import { memeSeanceQuePrecedente, type LigneComparable } from './preuveDeSeance.js';
 import type { IndiceRow } from '../types.js';
 
 const BRVM_PUBLIC_URL = 'https://www.brvm.org/fr/cours-actions/0';
@@ -41,6 +43,17 @@ function mergeIndices(activity: IndiceRow[], resume: IndiceRow[]): IndiceRow[] {
   return [...byCode.values()];
 }
 
+/** Dernière séance en base STRICTEMENT antérieure à `today` (lignes comparables). */
+async function derniereSeancePrecedente(today: string): Promise<{ date: string; lignes: LigneComparable[] } | null> {
+  const sb = getSupabase();
+  const { data: d } = await sb.from('brvm_actions_daily').select('date_marche').lt('date_marche', today)
+    .order('date_marche', { ascending: false }).limit(1).maybeSingle();
+  const date = (d?.date_marche as string | undefined) ?? null;
+  if (!date) return null;
+  const { data: rows } = await sb.from('brvm_actions_daily').select('code, cours_jour, variation_pct, volume').eq('date_marche', date);
+  return { date, lignes: (rows ?? []) as LigneComparable[] };
+}
+
 export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbActions: number; nbIndices: number }> {
   const mock = opts.mock ?? false;
   const today = new Date().toISOString().slice(0, 10);
@@ -66,6 +79,19 @@ export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbAc
 
   let nbSummary = 0;
   if (!mock) {
+    // PREUVE DE SÉANCE. brvm.org ne date pas sa page ; avant les premiers
+    // échanges (et tout un jour férié) elle montre encore la séance précédente.
+    // Si le snapshot est identique ligne à ligne à la dernière séance en base,
+    // on n'écrit RIEN sous la date du jour (voir preuveDeSeance.ts).
+    const prec = await derniereSeancePrecedente(today);
+    if (prec) {
+      const verdict = memeSeanceQuePrecedente(snapshot.actions, prec.lignes);
+      if (verdict.memeSeance) {
+        logger.warn({ today, precedente: prec.date, ...verdict }, 'intraday : la page montre encore la séance précédente — aucune écriture');
+        return { nbActions: 0, nbIndices: 0 };
+      }
+      logger.info({ today, precedente: prec.date, identiques: verdict.identiques, comparees: verdict.comparees }, 'intraday : séance nouvelle confirmée');
+    }
     // Crée seulement les instruments d'indices MANQUANTS (les nouveaux sectoriels),
     // sans toucher aux lignes existantes — sinon on écraserait secteur/pays des
     // actions (renseignés par le scrape quotidien) → « secteur Inconnu ». Les
