@@ -18,6 +18,7 @@ import { parseObligations } from '../parsers/obligations.js';
 import { parseIndices } from '../parsers/indices.js';
 import { sha256 } from '../utils/hash.js';
 import { todayMarketDate } from '../utils/dates.js';
+import * as cheerio from 'cheerio';
 import { logger } from '../logger.js';
 import type { MarketSnapshot, MarketDate } from '../types.js';
 
@@ -36,6 +37,33 @@ export const MARKET_DATE_FIELDS = {
   dateSelect: 'ctl00$Main$DropDownList1',
 } as const;
 
+/**
+ * Date de la séance AFFICHÉE, lue sur la page : option sélectionnée du
+ * déroulant de séance (valeur YYYYMMDD). Null si le déroulant ou sa sélection
+ * manque, ou si la valeur n'a pas la forme attendue.
+ *
+ * POURQUOI. `scrapeLatest` datait la séance avec « aujourd'hui ». Le
+ * 2026-09-21 à 06:02 UTC (relance manuelle, marché fermé), la page affichait
+ * encore la clôture du vendredi 18 : 44 lignes de clôture ont été écrites
+ * sous la date du lundi 21 — une séance fantôme, identique à la précédente.
+ * Même famille de défaut que celle corrigée pour runDetails (« preuve de
+ * séance plutôt que date devinée »).
+ */
+export function dateSeanceDepuisHtml(html: string): MarketDate | null {
+  const $ = cheerio.load(html);
+  const sel = $(`select[name="${MARKET_DATE_FIELDS.dateSelect}"]`).first();
+  if (sel.length === 0) return null;
+  let v = sel.find('option[selected]').first().attr('value');
+  // ASP.NET peut sérialiser la sélection en selected="selected" comme en
+  // attribut nu ; cheerio couvre les deux. Sans attribut, le navigateur
+  // prendrait la première option — ce n'est PAS une preuve, on renonce.
+  if (!v) return null;
+  v = v.trim();
+  const m = /^(\d{4})(\d{2})(\d{2})$/.exec(v);
+  if (!m) return null;
+  return `${m[1]}-${m[2]}-${m[3]}`;
+}
+
 function snapshotFromHtml(html: string, date: MarketDate): MarketSnapshot {
   return {
     date_marche: date,
@@ -51,7 +79,18 @@ function snapshotFromHtml(html: string, date: MarketDate): MarketSnapshot {
 export async function scrapeLatest(http: HttpClient): Promise<MarketSnapshot> {
   const cfg = getConfig();
   const html = await getAuthenticated(http, cfg.BDFIN_MARKET_PATH);
-  const snap = snapshotFromHtml(html, todayMarketDate());
+  const datePage = dateSeanceDepuisHtml(html);
+  if (!datePage) {
+    // Pas de date lisible : on n'écrit rien sous une date devinée. Le job
+    // échoue bruyamment, ce qui vaut mieux qu'une séance fantôme.
+    throw new Error(
+      `Activites_marche : date de séance introuvable sur la page (déroulant ${MARKET_DATE_FIELDS.dateSelect}) — aucune écriture. Aujourd'hui = ${todayMarketDate()}.`,
+    );
+  }
+  if (datePage !== todayMarketDate()) {
+    logger.info({ datePage, aujourdhui: todayMarketDate() }, 'Séance affichée différente du jour : on prend la date de la page');
+  }
+  const snap = snapshotFromHtml(html, datePage);
   logger.info(
     {
       actions: snap.actions.length,
