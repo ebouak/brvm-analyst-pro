@@ -4,6 +4,7 @@ import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import MarketStateCard from '@/components/MarketStateCard';
 import LandingHeatmap from '@/components/landing/LandingHeatmap';
+import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
 import { getLandingBisData, type Mover, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
@@ -171,6 +172,9 @@ export default async function Landing() {
               <LandingHeatmap rows={d.heatmap} dateLabel={dateLabel} />
             </section>
           )}
+
+          {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
+          <QuatreFacons />
 
           {/* 3 · GRATUIT / PREMIUM */}
           <section id="premium" className="prem" aria-labelledby="h-prem">

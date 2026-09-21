@@ -248,3 +248,31 @@
 /* cartographie (écran du terminal) */
 .lb .carto { padding: 16px; }
 .lb .carto .overline { color: #56D7FD; }
+
+/* quatre façons de travailler le marché */
+.lb .facons { margin-top: 44px; }
+.lb .facons-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+.lb .facons-head h2 { font-size: clamp(32px, 4vw, 48px); margin-top: 8px; }
+.lb .facons-head .lead { color: var(--ink-2); font-size: 15.5px; margin-top: 12px; max-width: 52ch; }
+.lb .annot-2 { transform: rotate(-6deg); max-width: 260px; text-align: center; margin-top: 12px; }
+.lb .annot-2 .stroke { display: block; width: 110px; height: 8px; margin: 2px auto 0; }
+@media (max-width: 720px) { .lb .annot-2 { transform: none; text-align: left; } .lb .annot-2 .stroke { margin-left: 0; } }
+.lb .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 1080px) { .lb .cols { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .lb .cols { grid-template-columns: 1fr; } }
+.lb .col { display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); padding: var(--pad-panel); }
+.lb .col header { padding: 12px 12px 6px; }
+.lb .col .k { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--col); }
+.lb .col h3 { font-size: 30px; margin-top: 2px; }
+.lb .col header p { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+.lb .col .visuel { border-radius: var(--r-card); overflow: hidden; border: 1px solid var(--line); aspect-ratio: 320 / 150; }
+.lb .col .visuel svg { width: 100%; height: 100%; display: block; }
+.lb .col ul { list-style: none; padding: 6px 4px 0; margin: 0; display: grid; gap: 2px; flex: 1; }
+.lb .col li a { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; min-height: 44px; padding: 6px 8px; border-radius: 10px; transition-property: background-color; transition-duration: 120ms; }
+.lb .col li a:hover { background: var(--paper); }
+.lb .col li .ic { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--col-bg); color: var(--col); }
+.lb .col li b { display: block; font-weight: 600; font-size: 14px; }
+.lb .col li small { display: block; font-size: 12px; color: var(--muted); line-height: 1.3; }
+.lb .col .voir { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; font-weight: 600; font-size: 14px; color: var(--col); }
+.lb .col .voir:hover { text-decoration: underline; }
+.lb .facons .banner { margin-top: 14px; }
