@@ -32,11 +32,11 @@ function Gauge({ score }: { score: number }) {
   const nx = cx + (r - 14) * Math.cos(Math.PI * (1 - a)), ny = cy - (r - 14) * Math.sin(Math.PI * (1 - a));
   return (
     <svg viewBox="0 0 200 104" className="gauge-svg" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(score)} aria-label="Sentiment de séance">
-      <path d={arc(0, 0.4)} fill="none" stroke="#c4423f" strokeWidth="14" strokeLinecap="butt" />
-      <path d={arc(0.4, 0.6)} fill="none" stroke="#e0b64a" strokeWidth="14" />
-      <path d={arc(0.6, 1)} fill="none" stroke="#1f8f5a" strokeWidth="14" />
-      <line x1={cx} y1={cy} x2={nx.toFixed(1)} y2={ny.toFixed(1)} stroke="#10203a" strokeWidth="3" strokeLinecap="round" />
-      <circle cx={cx} cy={cy} r="6" fill="#10203a" />
+      <path d={arc(0, 0.4)} fill="none" stroke="rgb(var(--color-down))" strokeWidth="14" strokeLinecap="butt" />
+      <path d={arc(0.4, 0.6)} fill="none" stroke="rgb(var(--color-warn))" strokeWidth="14" />
+      <path d={arc(0.6, 1)} fill="none" stroke="rgb(var(--color-up))" strokeWidth="14" />
+      <line x1={cx} y1={cy} x2={nx.toFixed(1)} y2={ny.toFixed(1)} stroke="rgb(var(--color-ivory))" strokeWidth="3" strokeLinecap="round" />
+      <circle cx={cx} cy={cy} r="6" fill="rgb(var(--color-ivory))" />
     </svg>
   );
 }
@@ -49,7 +49,7 @@ function Row({ m, i }: { m: Mover; i: number }) {
       <td className="num">{fmtNumber(m.cours)}</td>
       <td><span className={`chip num ${tone(m.variation)}`}>{pct(m.variation)}</span></td>
       <td className="num vol">{fmtM(m.valeur ?? null)}</td>
-      <td>{m.spark ? <svg viewBox="0 0 44 16" width="56" height="18" aria-hidden="true"><path d={m.spark} fill="none" stroke={m.variation >= 0 ? '#1f8f5a' : '#c4423f'} strokeWidth="1.6" /></svg> : <span className="empty-spark" aria-hidden="true">—</span>}</td>
+      <td>{m.spark ? <svg viewBox="0 0 44 16" width="56" height="18" aria-hidden="true"><path d={m.spark} fill="none" stroke={m.variation >= 0 ? 'rgb(var(--color-up))' : 'rgb(var(--color-down))'} strokeWidth="1.6" /></svg> : <span className="empty-spark" aria-hidden="true">—</span>}</td>
     </tr>
   );
 }

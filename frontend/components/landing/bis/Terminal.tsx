@@ -91,7 +91,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
           {s ? (
             <>
               <div className="tc-card-head"><b className="num">{s.code}</b><RatingBadge scoreTotal={s.score_total} confiance={s.confiance} neutre /></div>
-              <SubscoreBars signal={s} compact couleurs={{ ...COULEURS_TOKEN, label: '#a3afb4' }} />
+              <SubscoreBars signal={s} compact couleurs={COULEURS_TOKEN} />
               <p className="tc-foot">Signal {s.signal} · confiance {s.confiance != null ? `${(s.confiance * 100).toFixed(0)} %` : '—'} · exemple réel de la séance en cours</p>
               <p className="tc-disc">{RATING_DISCLAIMER}</p>
             </>

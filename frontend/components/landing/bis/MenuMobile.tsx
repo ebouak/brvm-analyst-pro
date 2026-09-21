@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useId, useRef, useState } from 'react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 /**
  * Menu des pages publiques sous 1 000 px : les cinq liens de la barre et les
@@ -53,6 +54,8 @@ export function MenuMobile() {
           {LIENS.map((l) => <Link key={l.href} href={l.href} onClick={() => setOpen(false)}>{l.t}</Link>)}
           <p className="grp">Outils</p>
           {OUTILS.map((l) => <Link key={l.href} href={l.href} onClick={() => setOpen(false)}>{l.t}</Link>)}
+          <p className="grp">Affichage</p>
+          <div className="mnav-theme"><ThemeToggle /></div>
         </nav>
       )}
     </div>

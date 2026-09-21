@@ -30,13 +30,13 @@ export const metadata = {
 
 
 const STEPS = [
-  { k: '01', t: 'Données', d: 'Cours, volumes et publications collectés à la source.', bg: '#e4eef9', c: '#1f6fb3', ic: <><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" /></> },
-  { k: '02', t: 'Analyse', d: 'Fondamentaux, RSI, MACD, dividendes.', bg: '#e4eef9', c: '#1f6fb3', ic: <><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></> },
-  { k: '03', t: 'Note A–F', d: 'Un score quantitatif explicable par action.', bg: '#e3f4ea', c: '#2f9e6b', ic: <><path d="M4 20v-8M10 20V7M16 20V3M22 20H2" /></> },
-  { k: '04', t: 'Signal', d: 'BUY, HOLD ou SELL, avec son niveau de confiance.', bg: '#fbeede', c: '#d97b1e', ic: <path d="M3 16l5-6 4 4 5-8 4 5" /> },
-  { k: '05', t: 'Diagnostic IA', d: 'Forces, risques et valorisation mis en mots.', bg: '#ece6f7', c: '#6b4fbb', ic: <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 3 3 3 0 0 0 2 3v1a3 3 0 0 0 3 3h1V4H9zM15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 3 3 3 0 0 1-2 3v1a3 3 0 0 1-3 3h-1V4h1z" /> },
-  { k: '06', t: 'Simulation', d: 'Ce que la décision aurait donné, dividendes inclus.', bg: '#e4eef9', c: '#1f6fb3', ic: <><path d="M4 7h16M4 12h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="#fff" /><circle cx="15" cy="12" r="2" fill="#fff" /><circle cx="8" cy="17" r="2" fill="#fff" /></> },
-  { k: '07', t: 'Décision', d: 'À vous de trancher, avec les chiffres sous les yeux.', bg: '#e3f4ea', c: '#2f9e6b', ic: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></> },
+  { k: '01', t: 'Données', d: 'Cours, volumes et publications collectés à la source.', bg: 'rgb(var(--color-accent) / .14)', c: 'rgb(var(--color-accent))', ic: <><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" /></> },
+  { k: '02', t: 'Analyse', d: 'Fondamentaux, RSI, MACD, dividendes.', bg: 'rgb(var(--color-accent) / .14)', c: 'rgb(var(--color-accent))', ic: <><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></> },
+  { k: '03', t: 'Note A–F', d: 'Un score quantitatif explicable par action.', bg: 'rgb(var(--color-up) / .14)', c: 'rgb(var(--color-up))', ic: <><path d="M4 20v-8M10 20V7M16 20V3M22 20H2" /></> },
+  { k: '04', t: 'Signal', d: 'BUY, HOLD ou SELL, avec son niveau de confiance.', bg: 'rgb(var(--color-warn) / .14)', c: 'rgb(var(--color-warn))', ic: <path d="M3 16l5-6 4 4 5-8 4 5" /> },
+  { k: '05', t: 'Diagnostic IA', d: 'Forces, risques et valorisation mis en mots.', bg: 'rgb(var(--color-purple) / .14)', c: 'rgb(var(--color-purple))', ic: <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 3 3 3 0 0 0 2 3v1a3 3 0 0 0 3 3h1V4H9zM15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 3 3 3 0 0 1-2 3v1a3 3 0 0 1-3 3h-1V4h1z" /> },
+  { k: '06', t: 'Simulation', d: 'Ce que la décision aurait donné, dividendes inclus.', bg: 'rgb(var(--color-accent) / .14)', c: 'rgb(var(--color-accent))', ic: <><path d="M4 7h16M4 12h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="rgb(var(--color-surface))" /><circle cx="15" cy="12" r="2" fill="rgb(var(--color-surface))" /><circle cx="8" cy="17" r="2" fill="rgb(var(--color-surface))" /></> },
+  { k: '07', t: 'Décision', d: 'À vous de trancher, avec les chiffres sous les yeux.', bg: 'rgb(var(--color-up) / .14)', c: 'rgb(var(--color-up))', ic: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></> },
 ];
 
 function PlanPrice({ p }: { p: Plan }) {
@@ -45,7 +45,7 @@ function PlanPrice({ p }: { p: Plan }) {
 }
 
 /* Vignettes produit dessinées (mini-écrans de l'app) — pas des photos, et pas de crédit image. */
-const Thumb = ({ children }: { children: React.ReactNode }) => <div className="thumb" aria-hidden="true"><svg viewBox="0 0 96 64"><rect width="96" height="64" fill="#0a1417" />{children}</svg></div>;
+const Thumb = ({ children }: { children: React.ReactNode }) => <div className="thumb" aria-hidden="true"><svg viewBox="0 0 96 64"><rect width="96" height="64" fill="rgb(var(--color-surface))" />{children}</svg></div>;
 
 export default async function Landing() {
   const [d, membres] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null)]);
@@ -66,12 +66,12 @@ export default async function Landing() {
           <section className="hero" aria-labelledby="h1">
             <div className="hero-grid">
               <div className="hero-copy">
-                <div className="annot" aria-hidden="true"><span className="hand">Des données<br />à vos décisions,<br />tout simplement.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="#1ba8c9" strokeWidth="3" strokeLinecap="round" /></svg></div>
+                <div className="annot" aria-hidden="true"><span className="hand">Des données<br />à vos décisions,<br />tout simplement.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
                 <h1 id="h1">De la donnée<br />à la <span className="accent">décision.</span></h1>
                 <p className="lead">Une méthode simple et transparente pour analyser la BRVM autrement, avec des données officielles et des outils concrets.</p>
                 <ul className="assur" aria-label="Sans engagement">
                   {['Aucune carte bancaire', 'Compte en 1 minute', 'Sans engagement'].map((t) => (
-                    <li key={t}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#2f9e6b" /><path d="M4.5 8.5l2.3 2.3L11.5 6" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>{t}</li>
+                    <li key={t}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="rgb(var(--color-up))" /><path d="M4.5 8.5l2.3 2.3L11.5 6" fill="none" stroke="rgb(var(--color-surface))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>{t}</li>
                   ))}
                 </ul>
                 <div className="cta">
@@ -156,35 +156,35 @@ export default async function Landing() {
                   <div className="offer-h"><span className="tag free">GRATUIT</span><span>Pour suivre l&apos;essentiel</span></div>
                   {free && <PlanPrice p={free} />}
                   <Link className="feat" href="/actualites">
-                    <Thumb><rect x="8" y="8" width="80" height="6" rx="2" fill="#56D7FD" /><rect x="8" y="20" width="60" height="4" rx="2" fill="#4a5a60" /><rect x="8" y="28" width="70" height="4" rx="2" fill="#4a5a60" /><rect x="8" y="36" width="50" height="4" rx="2" fill="#4a5a60" /><rect x="8" y="48" width="36" height="8" rx="2" fill="#3fe18b" /><rect x="50" y="48" width="36" height="8" rx="2" fill="#ff6b6b" /></Thumb>
+                    <Thumb><rect x="8" y="8" width="80" height="6" rx="2" fill="rgb(var(--color-accent))" /><rect x="8" y="20" width="60" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="28" width="70" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="36" width="50" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="48" width="36" height="8" rx="2" fill="rgb(var(--color-up))" /><rect x="50" y="48" width="36" height="8" rx="2" fill="rgb(var(--color-down))" /></Thumb>
                     <span><b>Veille de marché</b><p>Actualités agrégées, top hausses / baisses et brief quotidien.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                   <Link className="feat" href="/societes">
-                    <Thumb><path d="M6 46 L20 40 L32 44 L44 30 L56 34 L68 22 L80 26 L90 14" fill="none" stroke="#3fe18b" strokeWidth="2" /><path d="M6 46 L20 40 L32 44 L44 30 L56 34 L68 22 L80 26 L90 14 V58 H6z" fill="#3fe18b" opacity=".15" /></Thumb>
+                    <Thumb><path d="M6 46 L20 40 L32 44 L44 30 L56 34 L68 22 L80 26 L90 14" fill="none" stroke="rgb(var(--color-up))" strokeWidth="2" /><path d="M6 46 L20 40 L32 44 L44 30 L56 34 L68 22 L80 26 L90 14 V58 H6z" fill="rgb(var(--color-up))" opacity=".15" /></Thumb>
                     <span><b>Marché &amp; données</b><p>Cours, volumes, indices et états financiers officiels.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                   <Link className="feat" href="/signup">
-                    <Thumb><g fill="#0f1b1f" stroke="#2a3a40"><rect x="8" y="8" width="80" height="12" rx="3" /><rect x="8" y="24" width="80" height="12" rx="3" /><rect x="8" y="40" width="80" height="12" rx="3" /></g><g fill="#56D7FD"><rect x="12" y="11" width="20" height="6" rx="1" /><rect x="12" y="27" width="20" height="6" rx="1" /><rect x="12" y="43" width="20" height="6" rx="1" /></g><rect x="64" y="11" width="20" height="6" rx="1" fill="#3fe18b" /><rect x="64" y="27" width="20" height="6" rx="1" fill="#ff6b6b" /><rect x="64" y="43" width="20" height="6" rx="1" fill="#3fe18b" /></Thumb>
+                    <Thumb><g fill="rgb(var(--color-elevated))" stroke="rgb(var(--color-border))"><rect x="8" y="8" width="80" height="12" rx="3" /><rect x="8" y="24" width="80" height="12" rx="3" /><rect x="8" y="40" width="80" height="12" rx="3" /></g><g fill="rgb(var(--color-accent))"><rect x="12" y="11" width="20" height="6" rx="1" /><rect x="12" y="27" width="20" height="6" rx="1" /><rect x="12" y="43" width="20" height="6" rx="1" /></g><rect x="64" y="11" width="20" height="6" rx="1" fill="rgb(var(--color-up))" /><rect x="64" y="27" width="20" height="6" rx="1" fill="rgb(var(--color-down))" /><rect x="64" y="43" width="20" height="6" rx="1" fill="rgb(var(--color-up))" /></Thumb>
                     <span><b>Watchlist &amp; portefeuille</b><p>PRU, plus-value latente, alertes par email.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                 </div>
                 <div className="offer gold">
-                  <div className="offer-h gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="#c9a23a" aria-hidden="true"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z" /></svg><span className="tag prem">PREMIUM</span><span>Pour aller plus loin</span></div>
+                  <div className="offer-h gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="rgb(var(--color-accent))" aria-hidden="true"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z" /></svg><span className="tag prem">PREMIUM</span><span>Pour aller plus loin</span></div>
                   {premium && <PlanPrice p={premium} />}
                   <Link className="feat" href="/pricing">
-                    <Thumb><rect x="8" y="10" width="26" height="14" rx="3" fill="#3fe18b" /><rect x="35" y="10" width="26" height="14" rx="3" fill="#2a3a40" /><rect x="62" y="10" width="26" height="14" rx="3" fill="#ff6b6b" opacity=".5" /><text x="21" y="20" fontSize="8" fontFamily="monospace" fill="#052a35" textAnchor="middle">BUY</text><text x="48" y="20" fontSize="8" fontFamily="monospace" fill="#c0c8cc" textAnchor="middle">HOLD</text><text x="75" y="20" fontSize="8" fontFamily="monospace" fill="#fff" textAnchor="middle">SELL</text><rect x="8" y="32" width="80" height="4" rx="2" fill="#4a5a60" /><rect x="8" y="40" width="64" height="4" rx="2" fill="#4a5a60" /><rect x="8" y="48" width="72" height="4" rx="2" fill="#4a5a60" /></Thumb>
+                    <Thumb><rect x="8" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-up))" /><rect x="35" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-border))" /><rect x="62" y="10" width="26" height="14" rx="3" fill="rgb(var(--color-down))" opacity=".5" /><text x="21" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-accent) / .18)" textAnchor="middle">BUY</text><text x="48" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-muted))" textAnchor="middle">HOLD</text><text x="75" y="20" fontSize="8" fontFamily="monospace" fill="rgb(var(--color-surface))" textAnchor="middle">SELL</text><rect x="8" y="32" width="80" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="40" width="64" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="48" width="72" height="4" rx="2" fill="rgb(var(--color-border-strong))" /></Thumb>
                     <span><b>Signaux BUY / HOLD / SELL</b><p>Signaux quotidiens, historique, export CSV.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                   <Link className="feat" href="/pricing">
-                    <Thumb><rect x="8" y="8" width="28" height="28" rx="6" fill="#56D7FD" opacity=".2" stroke="#56D7FD" /><text x="22" y="30" fontSize="20" fontFamily="monospace" fill="#56D7FD" textAnchor="middle">A</text><rect x="44" y="10" width="44" height="5" rx="2" fill="#c0c8cc" /><rect x="44" y="20" width="36" height="4" rx="2" fill="#4a5a60" /><rect x="44" y="28" width="40" height="4" rx="2" fill="#4a5a60" /><rect x="8" y="44" width="80" height="4" rx="2" fill="#4a5a60" /><rect x="8" y="52" width="60" height="4" rx="2" fill="#4a5a60" /></Thumb>
+                    <Thumb><rect x="8" y="8" width="28" height="28" rx="6" fill="rgb(var(--color-accent))" opacity=".2" stroke="rgb(var(--color-accent))" /><text x="22" y="30" fontSize="20" fontFamily="monospace" fill="rgb(var(--color-accent))" textAnchor="middle">A</text><rect x="44" y="10" width="44" height="5" rx="2" fill="rgb(var(--color-muted))" /><rect x="44" y="20" width="36" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="44" y="28" width="40" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="44" width="80" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="52" width="60" height="4" rx="2" fill="rgb(var(--color-border-strong))" /></Thumb>
                     <span><b>Conseiller unifié</b><p>Notation A–F, diagnostic IA, recommandations.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                   <Link className="feat" href="/pricing">
-                    <Thumb><g fill="#0f1b1f" stroke="#2a3a40"><rect x="8" y="8" width="80" height="10" rx="2" /><rect x="8" y="22" width="80" height="10" rx="2" /><rect x="8" y="36" width="80" height="10" rx="2" /><rect x="8" y="50" width="80" height="8" rx="2" /></g><g fill="#56D7FD"><rect x="12" y="11" width="14" height="4" rx="1" /><rect x="12" y="25" width="14" height="4" rx="1" /><rect x="12" y="39" width="14" height="4" rx="1" /></g><rect x="60" y="11" width="24" height="4" rx="1" fill="#3fe18b" /><rect x="60" y="25" width="16" height="4" rx="1" fill="#3fe18b" /><rect x="60" y="39" width="20" height="4" rx="1" fill="#ff6b6b" /></Thumb>
+                    <Thumb><g fill="rgb(var(--color-elevated))" stroke="rgb(var(--color-border))"><rect x="8" y="8" width="80" height="10" rx="2" /><rect x="8" y="22" width="80" height="10" rx="2" /><rect x="8" y="36" width="80" height="10" rx="2" /><rect x="8" y="50" width="80" height="8" rx="2" /></g><g fill="rgb(var(--color-accent))"><rect x="12" y="11" width="14" height="4" rx="1" /><rect x="12" y="25" width="14" height="4" rx="1" /><rect x="12" y="39" width="14" height="4" rx="1" /></g><rect x="60" y="11" width="24" height="4" rx="1" fill="rgb(var(--color-up))" /><rect x="60" y="25" width="16" height="4" rx="1" fill="rgb(var(--color-up))" /><rect x="60" y="39" width="20" height="4" rx="1" fill="rgb(var(--color-down))" /></Thumb>
                     <span><b>Screener RSI, MACD, dividendes</b><p>Filtres avancés, ratios, rendement.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                   <Link className="feat" href="/pricing">
-                    <Thumb><rect x="30" y="6" width="36" height="56" rx="6" fill="#0f1b1f" stroke="#2a3a40" /><rect x="36" y="14" width="24" height="8" rx="2" fill="#56D7FD" /><rect x="36" y="26" width="24" height="4" rx="1" fill="#4a5a60" /><rect x="36" y="34" width="18" height="4" rx="1" fill="#4a5a60" /><circle cx="58" cy="15" r="4" fill="#ff6b6b" /><rect x="36" y="46" width="24" height="8" rx="2" fill="#3fe18b" /></Thumb>
+                    <Thumb><rect x="30" y="6" width="36" height="56" rx="6" fill="rgb(var(--color-elevated))" stroke="rgb(var(--color-border))" /><rect x="36" y="14" width="24" height="8" rx="2" fill="rgb(var(--color-accent))" /><rect x="36" y="26" width="24" height="4" rx="1" fill="rgb(var(--color-border-strong))" /><rect x="36" y="34" width="18" height="4" rx="1" fill="rgb(var(--color-border-strong))" /><circle cx="58" cy="15" r="4" fill="rgb(var(--color-down))" /><rect x="36" y="46" width="24" height="8" rx="2" fill="rgb(var(--color-up))" /></Thumb>
                     <span><b>Alertes &amp; détection proactive</b><p>Seuils personnalisés, Telegram, événements clés.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                 </div>

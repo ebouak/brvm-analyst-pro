@@ -32,15 +32,15 @@ const x1 = (v: number | null) => v == null ? '—' : `${v.toLocaleString('fr-FR'
 const fcfa = (v: number | null) => v == null ? '—' : `${fmtNumber(v)} FCFA`;
 
 const ETAPES = [
-  { k: '01', t: 'Comprendre', d: 'Découvrez la BRVM, les actions et les indices.', c: '#1f6fb3', bg: '#e4eef9', href: '/formations' },
-  { k: '02', t: 'Observer', d: 'Explorez les sociétés cotées et leurs évolutions.', c: '#2f9e6b', bg: '#e3f4ea', href: '/societes' },
-  { k: '03', t: 'Analyser', d: 'Apprenez à regarder les résultats, la valorisation et les dividendes.', c: '#b8860b', bg: '#fbf1d8', href: '/fondamentaux' },
-  { k: '04', t: 'Simuler', d: 'Testez vos idées avec un capital fictif.', c: '#c4423f', bg: '#fbe4e3', href: '/simulateur' },
-  { k: '05', t: 'Décider', d: 'Vous avez les informations. La décision vous appartient.', c: '#6b4fbb', bg: '#ece6f7', href: '/signup' },
+  { k: '01', t: 'Comprendre', d: 'Découvrez la BRVM, les actions et les indices.', c: 'rgb(var(--color-accent))', bg: 'rgb(var(--color-accent) / .14)', href: '/formations' },
+  { k: '02', t: 'Observer', d: 'Explorez les sociétés cotées et leurs évolutions.', c: 'rgb(var(--color-up))', bg: 'rgb(var(--color-up) / .14)', href: '/societes' },
+  { k: '03', t: 'Analyser', d: 'Apprenez à regarder les résultats, la valorisation et les dividendes.', c: 'rgb(var(--color-warn))', bg: 'rgb(var(--color-warn) / .14)', href: '/fondamentaux' },
+  { k: '04', t: 'Simuler', d: 'Testez vos idées avec un capital fictif.', c: 'rgb(var(--color-down))', bg: 'rgb(var(--color-down) / .14)', href: '/simulateur' },
+  { k: '05', t: 'Décider', d: 'Vous avez les informations. La décision vous appartient.', c: 'rgb(var(--color-purple))', bg: 'rgb(var(--color-purple) / .14)', href: '/signup' },
 ];
 
 /** Courbe SVG serveur (pas de Recharts : client-only, vide à l'impression). */
-function Courbe({ serie, w = 520, h = 170, couleur = '#1ba8c9', ariaLabel }: { serie: SerieMois[]; w?: number; h?: number; couleur?: string; ariaLabel: string }) {
+function Courbe({ serie, w = 520, h = 170, couleur = 'rgb(var(--color-accent))', ariaLabel }: { serie: SerieMois[]; w?: number; h?: number; couleur?: string; ariaLabel: string }) {
   if (serie.length < 2) return <p className="empty">Pas assez d&apos;historique pour tracer la courbe.</p>;
   const PL = 6, PR = 54, PT = 10, PB = 24;
   const vals = serie.map((p) => p.v);
@@ -60,17 +60,17 @@ function Courbe({ serie, w = 520, h = 170, couleur = '#1ba8c9', ariaLabel }: { s
       {ticks.map((t) => <g key={t}><line x1={PL} x2={w - PR} y1={y(t)} y2={y(t)} stroke="currentColor" strokeOpacity=".12" /><text x={w - PR + 8} y={y(t) + 4} fontSize="11" fill="currentColor" fillOpacity=".7" className="num">{fmtNumber(t)}</text></g>)}
       <path d={area} fill={`url(#${gid})`} />
       <path d={line} fill="none" stroke={couleur} strokeWidth="2" strokeLinejoin="round" />
-      <circle cx={x(serie.length - 1)} cy={y(serie[serie.length - 1].v)} r="3.5" fill={couleur} stroke="#fff" strokeWidth="1.5" />
+      <circle cx={x(serie.length - 1)} cy={y(serie[serie.length - 1].v)} r="3.5" fill={couleur} stroke="rgb(var(--color-surface))" strokeWidth="1.5" />
       {labels.map((i) => <text key={i} x={x(i)} y={h - 7} fontSize="11" fill="currentColor" fillOpacity=".7" textAnchor={i === 0 ? 'start' : i === serie.length - 1 ? 'end' : 'middle'}>{mois(serie[i].d)}</text>)}
     </svg>
   );
 }
 
 function Spark({ f }: { f: FicheDebutant }) {
-  return f.spark ? <svg viewBox="0 0 44 16" width="56" height="18" aria-hidden="true"><path d={f.spark} fill="none" stroke={(f.variation ?? 0) >= 0 ? '#1f8f5a' : '#c4423f'} strokeWidth="1.6" /></svg> : <span className="empty-spark">—</span>;
+  return f.spark ? <svg viewBox="0 0 44 16" width="56" height="18" aria-hidden="true"><path d={f.spark} fill="none" stroke={(f.variation ?? 0) >= 0 ? 'rgb(var(--color-up))' : 'rgb(var(--color-down))'} strokeWidth="1.6" /></svg> : <span className="empty-spark">—</span>;
 }
 
-const Check = () => <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#2f9e6b" /><path d="M4.5 8.5l2.3 2.3L11.5 6" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+const Check = () => <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="rgb(var(--color-up))" /><path d="M4.5 8.5l2.3 2.3L11.5 6" fill="none" stroke="rgb(var(--color-surface))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 
 export default async function DebutantPage() {
   const d = await getDebutantData();
@@ -110,7 +110,7 @@ export default async function DebutantPage() {
               <div className="hero-photo">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/landing/portrait-provisoire.jpg" alt="Un jeune investisseur réfléchit devant son ordinateur portable, une fiche WESTBOURSE à l’écran." width={900} height={672} loading="eager" />
-                <div className="annot-photo" aria-hidden="true"><span className="hand">« Les bonnes décisions commencent<br />par une bonne compréhension. »</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="#c9a23a" strokeWidth="3" strokeLinecap="round" /></svg></div>
+                <div className="annot-photo" aria-hidden="true"><span className="hand">« Les bonnes décisions commencent<br />par une bonne compréhension. »</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
                 {v && v.cours != null && (
                   <div className="mini-fiche num" aria-label={`Aperçu de la fiche ${v.code}`}>
                     <span className="o">{v.logo && /* eslint-disable-next-line @next/next/no-img-element */ <img src={v.logo} alt="" width={20} height={20} className="logo-soc" />}{v.code}{v.nom ? ` · ${v.nom}` : ''}</span>
@@ -141,7 +141,7 @@ export default async function DebutantPage() {
           <section className="parcours" id="parcours" aria-labelledby="h-parcours">
             <div className="sec-head">
               <div><p className="over">Le parcours</p><h2 id="h-parcours">Votre parcours commence ici.</h2><p className="lead">Pas besoin d&apos;être expert. Avancez étape par étape.</p></div>
-              <div className="annot-2" aria-hidden="true"><span className="hand">Avancez<br />à votre rythme.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="#1ba8c9" strokeWidth="3" strokeLinecap="round" /></svg></div>
+              <div className="annot-2" aria-hidden="true"><span className="hand">Avancez<br />à votre rythme.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
             </div>
             <ol className="etapes">
               {ETAPES.map((e) => (
@@ -232,7 +232,7 @@ export default async function DebutantPage() {
                 {sim ? (
                   <>
                     <p className="over">Exemple de simulation · {sim.code}{v?.nom ? ` · ${v.nom}` : ''}</p>
-                    <Courbe serie={sim.serie} ariaLabel={`Cours de ${sim.code} sur ${Math.round(sim.years)} ans`} couleur="#1f6fb3" />
+                    <Courbe serie={sim.serie} ariaLabel={`Cours de ${sim.code} sur ${Math.round(sim.years)} ans`} couleur="rgb(var(--color-accent))" />
                     <dl className="kpis num">
                       <div><dt>Valeur initiale</dt><dd>{fmtNumber(sim.montant)} FCFA</dd></div>
                       <div><dt>Valeur simulée</dt><dd>{fmtNumber(Math.round(sim.finalValue))} FCFA</dd></div>

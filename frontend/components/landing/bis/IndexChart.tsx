@@ -65,7 +65,7 @@ export function IndexChart({ serie }: { serie: Point[] }) {
         </span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`BRVM Composite, ${pts.length} séances, de ${fmtV(premier.v)} à ${fmtV(dernier.v)}`}>
-        <defs><linearGradient id="lb-idx" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1ba8c9" stopOpacity=".35" /><stop offset="1" stopColor="#1ba8c9" stopOpacity="0" /></linearGradient></defs>
+        <defs><linearGradient id="lb-idx" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="rgb(var(--color-accent))" stopOpacity=".35" /><stop offset="1" stopColor="rgb(var(--color-accent))" stopOpacity="0" /></linearGradient></defs>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={PL} x2={W - PR} y1={y(t)} y2={y(t)} stroke="currentColor" strokeOpacity=".12" />
@@ -73,9 +73,9 @@ export function IndexChart({ serie }: { serie: Point[] }) {
           </g>
         ))}
         <path d={area} fill="url(#lb-idx)" />
-        <path d={line} fill="none" stroke="#1ba8c9" strokeWidth="2" strokeLinejoin="round" />
-        {smaLine && <path d={smaLine} fill="none" stroke="#c9a23a" strokeWidth="1.6" strokeDasharray="4 3" strokeLinejoin="round" />}
-        <circle cx={x(pts.length - 1)} cy={y(dernier.v)} r="3.5" fill="#1ba8c9" stroke="#fff" strokeWidth="1.5" />
+        <path d={line} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="2" strokeLinejoin="round" />
+        {smaLine && <path d={smaLine} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="1.6" strokeDasharray="4 3" strokeLinejoin="round" />}
+        <circle cx={x(pts.length - 1)} cy={y(dernier.v)} r="3.5" fill="rgb(var(--color-accent))" stroke="rgb(var(--color-surface))" strokeWidth="1.5" />
         {xLabels.map((i) => (
           <text key={i} x={x(i)} y={H - 8} fontSize="11" fill="currentColor" fillOpacity=".7" textAnchor={i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle'}>{fmtD(pts[i].d)}</text>
         ))}

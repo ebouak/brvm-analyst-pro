@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { OutilsMenu } from './OutilsMenu';
 import { MenuMobile } from './MenuMobile';
+import ThemeToggle from '@/components/ThemeToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 /**
@@ -24,6 +25,7 @@ export function LandingNav({ marchesHref = '/#marche' }: { marchesHref?: string 
         <Link href="/formations" className="opt">Formations</Link>
         <OutilsMenu />
         <Link href="/methodologie" className="opt">À propos</Link>
+        <ThemeToggle className="opt theme" />
         <Link href="/login" className="opt login">Se connecter</Link>
         <MenuMobile />
         <Link href="/signup" className="btn btn-ink btn-sm cta-nav" style={{ marginLeft: 8 }}><span className="long">Créer mon compte gratuit</span><span className="court">Créer un compte</span></Link>

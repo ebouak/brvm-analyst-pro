@@ -124,7 +124,7 @@ function Permanente({ s, dateLabel, brvmCVar, hausses, nbActions, topNote, topHa
           // eslint-disable-next-line @next/next/no-img-element
           <img src={s.imageUrl} alt="Un investisseur consulte WESTBOURSE sur son ordinateur portable dans un bureau lumineux." width={900} height={672} loading="eager" />
         )}
-        <div className="poster" aria-hidden="true">Mieux<br />informé,<br />plus serein.<i><svg viewBox="0 0 52 6" width="52" height="6"><path d="M1 4 C 15 1, 35 6, 51 2" fill="none" stroke="#1ba8c9" strokeWidth="2.5" strokeLinecap="round" /></svg></i></div>
+        <div className="poster" aria-hidden="true">Mieux<br />informé,<br />plus serein.<i><svg viewBox="0 0 52 6" width="52" height="6"><path d="M1 4 C 15 1, 35 6, 51 2" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="2.5" strokeLinecap="round" /></svg></i></div>
         <figure className="quote"><span className="hand">« Je ne subis plus le marché, je le comprends. »</span><figcaption><small>La promesse WESTBOURSE</small></figcaption></figure>
       </>
     );
@@ -146,9 +146,9 @@ function Permanente({ s, dateLabel, brvmCVar, hausses, nbActions, topNote, topHa
         <span className="o">Brief du soir{dateLabel ? ` · ${dateLabel}` : ''}</span>
         <h3>{nbActions > 0 ? `${hausses} valeur${hausses > 1 ? 's' : ''} en hausse sur ${nbActions}.` : 'La séance résumée chaque soir.'}</h3>
         <div className="lines num">
-          {brvmCVar != null && <span>BRVM Composite<b className={brvmCVar >= 0 ? 'up' : 'down'} style={{ color: brvmCVar >= 0 ? '#3fe18b' : '#ff6b6b' }}>{fmtPct(brvmCVar)}</b></span>}
-          {topHausse && <span>Plus forte hausse · {topHausse.code}<b style={{ color: '#3fe18b' }}>{fmtPct(topHausse.variation)}</b></span>}
-          {topBaisse && <span>Plus forte baisse · {topBaisse.code}<b style={{ color: '#ff6b6b' }}>{fmtPct(topBaisse.variation)}</b></span>}
+          {brvmCVar != null && <span>BRVM Composite<b className={brvmCVar >= 0 ? 'up' : 'down'} style={{ color: brvmCVar >= 0 ? 'rgb(var(--color-up))' : 'rgb(var(--color-down))' }}>{fmtPct(brvmCVar)}</b></span>}
+          {topHausse && <span>Plus forte hausse · {topHausse.code}<b style={{ color: 'rgb(var(--color-up))' }}>{fmtPct(topHausse.variation)}</b></span>}
+          {topBaisse && <span>Plus forte baisse · {topBaisse.code}<b style={{ color: 'rgb(var(--color-down))' }}>{fmtPct(topBaisse.variation)}</b></span>}
         </div>
         <p>Cinq lignes chaque jour de cotation à 18 h, par email ou Telegram.</p>
       </div></div>
