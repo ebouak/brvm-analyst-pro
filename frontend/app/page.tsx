@@ -195,10 +195,7 @@ export default async function Landing() {
             <span className="disc">Ceci n&apos;est pas un conseil en investissement.</span>
           </div>
 
-          <footer>
-            <span>© {new Date().getFullYear()} WESTBOURSE · Abidjan</span>
-            <nav aria-label="Légal"><Link href="/mentions-legales">Mentions légales</Link><Link href="/confidentialite">Confidentialité</Link><Link href="/cgu">CGU</Link><Link href="/developers">Développeurs</Link></nav>
-          </footer>
+          {/* Pied de page : le footer global du site (ConditionalShell) suit — pas de doublon ici. */}
         </main>
       </div>
     </div>
