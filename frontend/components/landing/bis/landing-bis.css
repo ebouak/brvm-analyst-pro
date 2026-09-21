@@ -583,3 +583,10 @@
 @media (prefers-reduced-motion: reduce) { .lb .sticky-cta { transition-duration: 0ms; } }
 @media print { .lb .sticky-cta { display: none; } }
 .lb .comp-table .ex { display: block; font-size: 11px; color: var(--faint); font-weight: 400; }
+
+/* logos de sociétés (public/logos, lib/brvmLogos.json) : pastille blanche, bord neutre */
+.lb .logo-soc { width: 22px; height: 22px; border-radius: 6px; object-fit: contain; background: #fff; outline: 1px solid rgba(0, 0, 0, .1); outline-offset: -1px; margin-right: 8px; vertical-align: middle; }
+.lb .logo-soc.grand { width: 28px; height: 28px; border-radius: 8px; }
+.lb .logo-soc.th { display: block; width: 36px; height: 36px; border-radius: 10px; margin: 0 auto 6px; }
+.lb .final-l .logo-cell { display: flex; align-items: center; gap: 10px; grid-column: 1 / -1; }
+.lb .final-l .logo-cell span { font-weight: 600; letter-spacing: .08em; font-size: 14px; color: #fff; }

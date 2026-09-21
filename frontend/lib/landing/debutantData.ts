@@ -19,10 +19,13 @@ import { scoreToRating } from '@/lib/rating';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { sparklinePath } from '@/lib/landing/sparkline';
 import { getMemberCount } from '@/lib/landing/memberCount';
+import brvmLogos from '@/lib/brvmLogos.json';
 
 export interface FicheDebutant {
   code: string;
   nom: string | null;
+  /** Chemin /public du logo de la société (lib/brvmLogos.json), ou null. */
+  logo: string | null;
   cours: number | null;
   variation: number | null;
   per: number | null;
@@ -115,7 +118,7 @@ async function load(): Promise<DebutantData> {
     const s = sig.get(code);
     const note = s ? scoreToRating(s.score, s.conf).note : 'NR';
     return {
-      code, nom: i?.nom ?? null, cours: c?.cours ?? null, variation: c?.variation ?? null,
+      code, nom: i?.nom ?? null, logo: (brvmLogos as Record<string, string>)[code] ?? null, cours: c?.cours ?? null, variation: c?.variation ?? null,
       per: r?.per != null && r.per > 0 ? r.per : null,
       dividende: dv?.montant ?? null, exerciceDividende: dv?.exercice ?? null, dividendeVerifie: dv?.verifie ?? false,
       rendement: dv ? rendementDividende(dv.montant, c?.cours ?? null) : null,

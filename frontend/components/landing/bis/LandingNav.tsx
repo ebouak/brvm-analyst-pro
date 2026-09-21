@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { OutilsMenu } from './OutilsMenu';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 /**
  * En-tête des pages publiques claires (/ et /debutant). Toutes les cibles
@@ -12,7 +13,7 @@ export function LandingNav({ marchesHref = '/#marche' }: { marchesHref?: string 
   return (
     <header className="nav">
       <Link className="brand" href="/" aria-label="WESTBOURSE, accueil">
-        <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 8l8 24 8-16 8 16 8-24" fill="none" stroke="#1f6fb3" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" /><path d="M12 8l8 16" stroke="#1ba8c9" strokeWidth="5" strokeLinecap="round" /></svg>
+        <AnimatedLogo size={36} variant="mark" animate={false} />
         <span><b>WESTBOURSE</b><small>Comprendre aujourd&apos;hui, investir demain</small></span>
       </Link>
       <nav className="nav-links" aria-label="Principal">

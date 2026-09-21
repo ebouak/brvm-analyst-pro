@@ -45,7 +45,7 @@ function Row({ m, i }: { m: Mover; i: number }) {
   return (
     <tr>
       <td className="num rk">{i + 1}</td>
-      <td><Link href={`/societes/${m.code}`} className="code num">{m.code}</Link></td>
+      <td><Link href={`/societes/${m.code}`} className="code num">{m.logo && /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.logo} alt="" width={22} height={22} className="logo-soc" loading="lazy" />}{m.code}</Link></td>
       <td className="num">{fmtNumber(m.cours)}</td>
       <td><span className={`chip num ${tone(m.variation)}`}>{pct(m.variation)}</span></td>
       <td className="num vol">{fmtM(m.valeur ?? null)}</td>

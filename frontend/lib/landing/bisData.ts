@@ -12,10 +12,12 @@ import { composeSlides, PERMANENT_SLIDES, type LandingSlideRow, type Slide } fro
 import { scoreToRating } from '@/lib/rating';
 import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
 import brvmSectors from '@/lib/brvmSectors.json';
+import brvmLogos from '@/lib/brvmLogos.json';
 
 export interface Mover {
   code: string;
   nom: string | null;
+  logo: string | null;
   cours: number;
   variation: number;
   volume: number | null;
@@ -126,7 +128,7 @@ async function load(): Promise<LandingBisData> {
     }
   }
   const toMover = (r: { code: string; cours: number; variation: number; volume: number | null; valeur: number | null }): Mover => ({
-    code: r.code, nom: noms.get(r.code) ?? null, cours: r.cours, variation: r.variation, volume: r.volume, valeur: r.valeur, spark: sparks.get(r.code) ?? null,
+    code: r.code, nom: noms.get(r.code) ?? null, logo: (brvmLogos as Record<string, string>)[r.code] ?? null, cours: r.cours, variation: r.variation, volume: r.volume, valeur: r.valeur, spark: sparks.get(r.code) ?? null,
   });
 
   const indices: Indice[] = (idxRes.data ?? [])

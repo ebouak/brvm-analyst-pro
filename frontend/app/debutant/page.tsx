@@ -5,6 +5,7 @@ import { StickyCta } from '@/components/landing/bis/StickyCta';
 import { getDebutantData, type FicheDebutant, type SerieMois } from '@/lib/landing/debutantData';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
+import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 import '@/components/landing/bis/landing-bis.css';
 
 /**
@@ -112,7 +113,7 @@ export default async function DebutantPage() {
                 <div className="annot-photo" aria-hidden="true"><span className="hand">« Les bonnes décisions commencent<br />par une bonne compréhension. »</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="#c9a23a" strokeWidth="3" strokeLinecap="round" /></svg></div>
                 {v && v.cours != null && (
                   <div className="mini-fiche num" aria-label={`Aperçu de la fiche ${v.code}`}>
-                    <span className="o">{v.code}{v.nom ? ` · ${v.nom}` : ''}</span>
+                    <span className="o">{v.logo && /* eslint-disable-next-line @next/next/no-img-element */ <img src={v.logo} alt="" width={20} height={20} className="logo-soc" />}{v.code}{v.nom ? ` · ${v.nom}` : ''}</span>
                     <b>{fmtNumber(v.cours)} <small>FCFA</small></b>
                     <span className={`chip ${tone(v.variation)}`}>{pct(v.variation)}</span>
                     <dl><div><dt>Note</dt><dd>{v.note ?? '—'}</dd></div><div><dt>PER</dt><dd>{x1(v.per)}</dd></div><div><dt>Dividende</dt><dd>{v.dividende != null ? fmtNumber(v.dividende) : '—'}</dd></div></dl>
@@ -160,7 +161,7 @@ export default async function DebutantPage() {
                 {v && v.cours != null ? (
                   <>
                     <div className="fiche-head">
-                      <div><p className="over">Fiche société · séance du {dateLabel}</p><h3>{v.nom ?? v.code} <span className="num code">{v.code}</span></h3></div>
+                      <div><p className="over">Fiche société · séance du {dateLabel}</p><h3>{v.logo && /* eslint-disable-next-line @next/next/no-img-element */ <img src={v.logo} alt="" width={28} height={28} className="logo-soc grand" />}{v.nom ?? v.code} <span className="num code">{v.code}</span></h3></div>
                       <div className="prix num"><b>{fmtNumber(v.cours)} <small>FCFA</small></b><span className={`chip ${tone(v.variation)}`}>{pct(v.variation)}</span></div>
                     </div>
                     <Courbe serie={d.serie12m} ariaLabel={`Cours de ${v.code} sur 12 mois`} />
@@ -200,7 +201,7 @@ export default async function DebutantPage() {
             {d.comparees.length >= 2 ? (
               <div className="card table-wrap">
                 <table className="comp-table">
-                  <thead><tr><th scope="col">Séance du {dateLabel}</th>{d.comparees.map((c) => <th scope="col" key={c.code}><b>{c.nom ?? c.code}</b><small className="num">{c.code}</small></th>)}</tr></thead>
+                  <thead><tr><th scope="col">Séance du {dateLabel}</th>{d.comparees.map((c) => <th scope="col" key={c.code}>{c.logo && /* eslint-disable-next-line @next/next/no-img-element */ <img src={c.logo} alt="" width={36} height={36} className="logo-soc th" loading="lazy" />}<b>{c.nom ?? c.code}</b><small className="num">{c.code}</small></th>)}</tr></thead>
                   <tbody className="num">
                     <tr><th scope="row">Cours (FCFA)</th>{d.comparees.map((c) => <td key={c.code}>{c.cours != null ? fmtNumber(c.cours) : '—'}</td>)}</tr>
                     <tr><th scope="row">PER</th>{d.comparees.map((c) => <td key={c.code}>{x1(c.per)}</td>)}</tr>
@@ -312,6 +313,7 @@ export default async function DebutantPage() {
               <small>Gratuit · Sans carte bancaire · À votre rythme</small>
             </div>
             <ul className="final-l">
+              <li className="logo-cell"><AnimatedLogo size={44} variant="mark" animate={false} /><span>WESTBOURSE</span></li>
               {[['Données', 'fiables'], ['Analyse', 'indépendante'], ['Outils', 'simples'], ['Communauté', 'active']].map(([a, b]) => <li key={a}><b>{a}</b><span>{b}</span></li>)}
             </ul>
           </section>
