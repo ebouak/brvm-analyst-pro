@@ -13,6 +13,9 @@ import { scoreToRating } from '@/lib/rating';
 import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
 import brvmSectors from '@/lib/brvmSectors.json';
 import brvmLogos from '@/lib/brvmLogos.json';
+import { getVideoSeance, type VideoSeance } from '@/lib/landing/videoSeance';
+import { getLatestDiagnostic, type LatestDiagnostic } from '@/lib/landing/latestDiagnostic';
+import type { SignalDaily } from '@/lib/types';
 
 export interface Mover {
   code: string;
@@ -61,6 +64,12 @@ export interface LandingBisData {
   secteurs: SectorVariation[];
   /** Valeur la plus échangée (FCFA) de la séance, ou null si aucune valeur renseignée. */
   plusEchangee: { code: string; valeur: number } | null;
+  /** Vidéo de séance publiée (bucket seance-video), ou null — le composant disparaît alors. */
+  videoSeance: VideoSeance | null;
+  /** Signal le mieux noté de la séance, avec ses sous-scores (RatingSpotlight). */
+  spotlightSignal: (SignalDaily & { code: string }) | null;
+  /** Dernier diagnostic IA réellement généré, ou null. */
+  latestDiagnostic: LatestDiagnostic | null;
 }
 
 const LABELS: Record<string, string> = {
@@ -78,13 +87,18 @@ async function load(): Promise<LandingBisData> {
     brvmCSerie: [],
     secteurs: [],
     plusEchangee: null,
+    videoSeance: null,
+    spotlightSignal: null,
+    latestDiagnostic: null,
   };
 
-  const [dateMarche, plansRes, slidesRes, collecteRes] = await Promise.all([
+  const [dateMarche, plansRes, slidesRes, collecteRes, videoSeance, latestDiagnostic] = await Promise.all([
     getLastMarketDate(db),
     db.from('subscription_plans').select('code, name, price_monthly, price_yearly, currency').order('price_monthly'),
     db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position').order('position'),
     db.from('v_fraicheur_cours').select('derniere_collecte_intraday').maybeSingle(),
+    getVideoSeance().catch(() => null),
+    getLatestDiagnostic().catch(() => null),
   ]);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
@@ -93,7 +107,7 @@ async function load(): Promise<LandingBisData> {
     code: String(p.code), name: String(p.name), monthly: Number(p.price_monthly ?? 0), yearly: Number(p.price_yearly ?? 0), currency: String(p.currency ?? 'XOF'),
   }));
   const derniereCollecte = (collecteRes.data?.derniere_collecte_intraday as string | null) ?? null;
-  if (!dateMarche) return { ...vide, plans, slides, derniereCollecte };
+  if (!dateMarche) return { ...vide, plans, slides, derniereCollecte, videoSeance, latestDiagnostic };
 
 
   const [rowsRes, prevRes, idxRes, instRes, serieRes, sigRes] = await Promise.all([
@@ -102,7 +116,7 @@ async function load(): Promise<LandingBisData> {
     db.from('brvm_indices_daily').select('code, valeur, variation_pct, valeur_precedente').eq('date_marche', dateMarche),
     db.from('brvm_instruments').select('code, designation, shares'),
     db.from('brvm_indices_daily').select('date_marche, valeur').eq('code', 'BRVMC').lte('date_marche', dateMarche).order('date_marche', { ascending: false }).limit(250),
-    db.from('signals_daily').select('code, score_total, signal, confiance').eq('date_marche', dateMarche).order('score_total', { ascending: false }).limit(1).maybeSingle(),
+    db.from('signals_daily').select('*').eq('date_marche', dateMarche).order('score_total', { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const noms = new Map<string, string | null>((instRes.data ?? []).map((i) => [String(i.code), (i.designation as string | null) ?? null]));
@@ -171,14 +185,15 @@ async function load(): Promise<LandingBisData> {
     brvmSectors as Record<string, string>,
   );
 
-  const sig = sigRes.data;
+  const sig = sigRes.data as (SignalDaily & { code: string }) | null;
+  const spotlightSignal = sig ?? null;
   const topNote: TopNote | null = sig
     ? { code: String(sig.code), nom: noms.get(String(sig.code)) ?? null, score: sig.score_total == null ? null : Number(sig.score_total), signal: (sig.signal as string | null) ?? null, grade: scoreToRating(sig.score_total == null ? null : Number(sig.score_total), sig.confiance == null ? null : Number(sig.confiance)).note }
     : null;
 
   return {
     dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses, brvmC,
-    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee,
+    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic,
   };
 }
 

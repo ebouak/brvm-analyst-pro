@@ -591,3 +591,15 @@
 .lb .logo-soc.th { display: block; width: 36px; height: 36px; border-radius: 10px; margin: 0 auto 6px; }
 .lb .final-l .logo-cell { display: flex; align-items: center; gap: 10px; grid-column: 1 / -1; }
 .lb .final-l .logo-cell span { font-weight: 600; letter-spacing: .08em; font-size: 14px; color: #fff; }
+
+/* écrans du terminal (composants sombres existants, encadrés) */
+.lb .term { padding: 12px 18px 18px; }
+.lb .term > section { margin-top: 0 !important; }
+.lb .term .lit { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(252, 252, 252, .1); }
+@media (max-width: 640px) { .lb .term .lit { grid-template-columns: 1fr; } }
+.lb .term .lit .over { color: #8f98a3; }
+.lb .term .lit ul { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 4px; font-size: 12.5px; color: #a3afb4; }
+.lb .term .lit li { position: relative; padding-left: 12px; }
+.lb .term .lit li::before { content: ""; position: absolute; left: 0; top: .55em; width: 5px; height: 5px; border-radius: 50%; background: #56D7FD; }
+.lb .term .lit .note { grid-column: 1 / -1; font-size: 11px; color: #8f98a3; }
+.lb .term .lit .note a { color: #56D7FD; font-weight: 600; }
