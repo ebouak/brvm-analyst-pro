@@ -4,6 +4,7 @@ import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
+import { OutilsMenu } from '@/components/landing/bis/OutilsMenu';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
@@ -63,7 +64,7 @@ export default async function Landing() {
           </Link>
           <nav className="nav-links" aria-label="Principal">
             <a href="#marche" className="opt">Marché</a>
-            <a href="#methode" className="opt">Méthode</a>
+            <OutilsMenu />
             <Link href="/pricing" className="opt">Tarifs</Link>
             <Link href="/login" className="opt">Connexion</Link>
             <Link href="/signup" className="btn btn-ink btn-sm" style={{ marginLeft: 8 }}>Créer un compte</Link>
