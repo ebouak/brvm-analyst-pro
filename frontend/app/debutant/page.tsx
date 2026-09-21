@@ -19,7 +19,7 @@ import '@/components/landing/bis/landing-bis.css';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: 'Investir à la BRVM quand on débute | Westbourse',
+  title: { absolute: 'Investir à la BRVM quand on débute | Westbourse' },
   description: 'Découvrez la BRVM pas à pas : apprenez à lire une action, comparer les sociétés et tester vos idées avec Westbourse.',
   alternates: { canonical: '/debutant' },
   openGraph: { title: 'Investir à la BRVM quand on débute | Westbourse', description: 'Comprenez le marché, apprenez à lire une action et entraînez-vous avant de prendre vos premières décisions.', type: 'website' },
@@ -204,14 +204,15 @@ export default async function DebutantPage() {
                   <tbody className="num">
                     <tr><th scope="row">Cours (FCFA)</th>{d.comparees.map((c) => <td key={c.code}>{c.cours != null ? fmtNumber(c.cours) : '—'}</td>)}</tr>
                     <tr><th scope="row">PER</th>{d.comparees.map((c) => <td key={c.code}>{x1(c.per)}</td>)}</tr>
-                    <tr><th scope="row">Dividende</th>{d.comparees.map((c) => <td key={c.code}>{fcfa(c.dividende)}</td>)}</tr>
+                    <tr><th scope="row">Dividende{d.comparees.some((c) => c.dividende != null && !c.dividendeVerifie) ? ' *' : ''}</th>{d.comparees.map((c) => <td key={c.code}>{fcfa(c.dividende)}{c.dividende != null && !c.dividendeVerifie ? ' *' : ''}{c.exerciceDividende ? <small className="ex"> ex. {c.exerciceDividende}</small> : null}</td>)}</tr>
                     <tr><th scope="row">Rendement</th>{d.comparees.map((c) => <td key={c.code}>{c.rendement != null ? `${c.rendement.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %` : '—'}</td>)}</tr>
                     <tr><th scope="row">Note</th>{d.comparees.map((c) => <td key={c.code}><span className="note">{c.note ?? '—'}</span></td>)}</tr>
                     <tr><th scope="row">Tendance <small>20 séances</small></th>{d.comparees.map((c) => <td key={c.code}><Spark f={c} /></td>)}</tr>
                   </tbody>
                 </table>
               </div>
-            ) : <p className="empty">Le comparatif sera disponible dès que deux sociétés auront des fondamentaux et un dividende vérifiés.</p>}
+            ) : <p className="empty">Le comparatif sera disponible dès que deux sociétés auront des fondamentaux et un dividende publiés.</p>}
+            {d.comparees.some((c) => c.dividende != null && !c.dividendeVerifie) && <p className="disc">* Dividende du dernier exercice publié, déclaré par la société (sans date de détachement en base) ; sans astérisque : détachement daté et vérifié.</p>}
             <p className="transition">En quelques secondes, vous pouvez mettre plusieurs sociétés face à face. <Link href="/societes" className="btn btn-ink btn-sm">Comparer les sociétés <span aria-hidden="true">→</span></Link></p>
           </section>
 

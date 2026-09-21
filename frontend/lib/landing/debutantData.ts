@@ -14,7 +14,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { getLastMarketDate } from '@/lib/marketDate';
 import { computeRatios } from '@/lib/fundamentals';
 import { latestUsable, type FundamentalsRow } from '@/lib/landing/fundamentals';
-import { getVerifiedDividends, rendementDividende } from '@/lib/dividends/verified';
+import { selectVerified, rendementDividende } from '@/lib/dividends/verified';
 import { scoreToRating } from '@/lib/rating';
 import { simulateInvestment, type PricePoint } from '@/lib/simulate';
 import { sparklinePath } from '@/lib/landing/sparkline';
@@ -28,6 +28,8 @@ export interface FicheDebutant {
   per: number | null;
   dividende: number | null;
   exerciceDividende: number | null;
+  /** true = détachement daté (ex_date) ; false = dividende déclaré par exercice (source société / Sika Finance). */
+  dividendeVerifie: boolean;
   rendement: number | null;
   note: string | null;          // 'A+' … 'E', ou null si non noté
   /** Tracé (44×16) des 20 dernières clôtures, ou null. */
@@ -69,12 +71,12 @@ async function load(): Promise<DebutantData> {
   const depuis3a = new Date(); depuis3a.setFullYear(depuis3a.getFullYear() - 3);
   const from3 = depuis3a.toISOString().slice(0, 10);
 
-  const [rowsRes, instRes, fondRes, sigRes, divMap, histRes] = await Promise.all([
+  const [rowsRes, instRes, fondRes, sigRes, divsRes, histRes] = await Promise.all([
     db.from('brvm_actions_daily').select('code, cours_jour, variation_pct, valeur_echangee').eq('date_marche', dateMarche),
     db.from('brvm_instruments').select('code, designation, shares'),
     db.from('fundamentals').select('code, year, revenue, net_income, equity, debt'),
     db.from('signals_daily').select('code, score_total, confiance').eq('date_marche', dateMarche),
-    getVerifiedDividends(db).catch(() => new Map()),
+    db.from('dividends').select('code, montant, exercice, ex_date, payment_date').gt('montant', 0).order('exercice', { ascending: false }),
     db.from('brvm_actions_daily').select('code, date_marche, cours_jour').eq('code', VEDETTE).gte('date_marche', from3).order('date_marche', { ascending: true }),
   ]);
 
@@ -86,6 +88,18 @@ async function load(): Promise<DebutantData> {
     if (!fondParCode.has(c)) fondParCode.set(c, []);
     fondParCode.get(c)!.push({ code: c, year: Number(f.year), revenue: f.revenue == null ? null : Number(f.revenue), net_income: f.net_income == null ? null : Number(f.net_income), equity: f.equity == null ? null : Number(f.equity), debt: f.debt == null ? null : Number(f.debt) });
   }
+  // Dividende : VÉRIFIÉ (ex_date datée, lib/dividends/verified) quand il existe —
+  // aujourd'hui SNTS seul — sinon le dernier dividende déclaré par exercice
+  // (montant ≠ exercice : les lignes où le montant vaut l'année sont des
+  // erreurs connues d'extraction, voir CLAUDE.md). Le drapeau dit lequel.
+  const divRows = (divsRes.data ?? []).map((d) => ({ code: String(d.code), montant: d.montant == null ? null : Number(d.montant), exercice: d.exercice == null ? null : Number(d.exercice), ex_date: (d.ex_date as string | null) ?? null }));
+  const verifies = selectVerified(divRows);
+  const declares = new Map<string, { montant: number; exercice: number | null }>();
+  for (const r of divRows) {
+    if (r.montant == null || r.montant <= 0 || r.exercice == null || r.montant === r.exercice) continue;
+    const prev = declares.get(r.code);
+    if (!prev || (r.exercice ?? -1) > (prev.exercice ?? -1)) declares.set(r.code, { montant: r.montant, exercice: r.exercice });
+  }
   const sig = new Map((sigRes.data ?? []).map((s) => [String(s.code), { score: s.score_total == null ? null : Number(s.score_total), conf: s.confiance == null ? null : Number(s.confiance) }]));
 
   const fiche = (code: string, spark: string | null): FicheDebutant => {
@@ -93,13 +107,14 @@ async function load(): Promise<DebutantData> {
     const i = inst.get(code);
     const ex = latestUsable(fondParCode.get(code) ?? []);
     const r = ex ? computeRatios({ cours: c?.cours ?? null, shares: i?.shares ?? null, revenue: ex.revenue, net_income: ex.net_income, equity: ex.equity, debt: ex.debt, dividende: null }) : null;
-    const dv = divMap.get(code) as { montant: number; exercice: number | null } | undefined;
+    const vf = verifies.get(code);
+    const dv = vf ? { montant: vf.montant, exercice: vf.exercice, verifie: true } : (declares.get(code) ? { ...declares.get(code)!, verifie: false } : undefined);
     const s = sig.get(code);
     const note = s ? scoreToRating(s.score, s.conf).note : 'NR';
     return {
       code, nom: i?.nom ?? null, cours: c?.cours ?? null, variation: c?.variation ?? null,
       per: r?.per != null && r.per > 0 ? r.per : null,
-      dividende: dv?.montant ?? null, exerciceDividende: dv?.exercice ?? null,
+      dividende: dv?.montant ?? null, exerciceDividende: dv?.exercice ?? null, dividendeVerifie: dv?.verifie ?? false,
       rendement: dv ? rendementDividende(dv.montant, c?.cours ?? null) : null,
       note: note === 'NR' ? null : note, spark,
     };
@@ -135,9 +150,8 @@ async function load(): Promise<DebutantData> {
   const serie12m = serieAll.slice(-13).map((p) => ({ d: p.date, v: p.close }));
 
   let simulation: Simulation | null = null;
-  const { data: allDivs } = await db.from('dividends').select('montant, payment_date, ex_date, exercice').eq('code', VEDETTE);
-  const dividends = (allDivs ?? [])
-    .filter((d) => d.montant != null && Number(d.montant) > 0 && (d.exercice == null || Number(d.montant) !== Number(d.exercice)))
+  const dividends = (divsRes.data ?? [])
+    .filter((d) => String(d.code) === VEDETTE && d.montant != null && Number(d.montant) > 0 && (d.exercice == null || Number(d.montant) !== Number(d.exercice)))
     .map((d) => ({ date: String(d.payment_date ?? d.ex_date ?? ''), montant: Number(d.montant) }))
     .filter((d) => d.date);
   const sim = prices.length > 2 ? simulateInvestment(MONTANT, from3, prices, dividends) : null;

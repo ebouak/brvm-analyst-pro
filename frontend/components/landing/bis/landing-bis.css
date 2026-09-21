@@ -582,3 +582,4 @@
 @media (max-width: 560px) { .lb .sticky-cta > span { display: none; } }
 @media (prefers-reduced-motion: reduce) { .lb .sticky-cta { transition-duration: 0ms; } }
 @media print { .lb .sticky-cta { display: none; } }
+.lb .comp-table .ex { display: block; font-size: 11px; color: var(--faint); font-weight: 400; }
