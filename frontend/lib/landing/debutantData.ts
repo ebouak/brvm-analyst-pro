@@ -92,13 +92,16 @@ async function load(): Promise<DebutantData> {
   // aujourd'hui SNTS seul — sinon le dernier dividende déclaré par exercice
   // (montant ≠ exercice : les lignes où le montant vaut l'année sont des
   // erreurs connues d'extraction, voir CLAUDE.md). Le drapeau dit lequel.
-  const divRows = (divsRes.data ?? []).map((d) => ({ code: String(d.code), montant: d.montant == null ? null : Number(d.montant), exercice: d.exercice == null ? null : Number(d.exercice), ex_date: (d.ex_date as string | null) ?? null }));
+  const divRows = (divsRes.data ?? []).map((d) => ({ code: String(d.code), montant: d.montant == null ? null : Number(d.montant), exercice: d.exercice == null ? null : Number(d.exercice), ex_date: (d.ex_date as string | null) ?? null, payment_date: (d.payment_date as string | null) ?? null }));
   const verifies = selectVerified(divRows);
-  const declares = new Map<string, { montant: number; exercice: number | null }>();
+  const declares = new Map<string, { montant: number; exercice: number | null; datee: boolean }>();
   for (const r of divRows) {
     if (r.montant == null || r.montant <= 0 || r.exercice == null || r.montant === r.exercice) continue;
     const prev = declares.get(r.code);
-    if (!prev || (r.exercice ?? -1) > (prev.exercice ?? -1)) declares.set(r.code, { montant: r.montant, exercice: r.exercice });
+    // À exercice égal, la ligne datée (date de paiement, import Richbourse)
+    // l'emporte : c'est la valeur exacte, l'autre est un arrondi de fiche.
+    const mieux = !prev || (r.exercice ?? -1) > (prev.exercice ?? -1) || ((r.exercice ?? -1) === (prev.exercice ?? -1) && !!r.payment_date && !prev.datee);
+    if (mieux) declares.set(r.code, { montant: r.montant, exercice: r.exercice, datee: !!r.payment_date });
   }
   const sig = new Map((sigRes.data ?? []).map((s) => [String(s.code), { score: s.score_total == null ? null : Number(s.score_total), conf: s.confiance == null ? null : Number(s.confiance) }]));
 
@@ -108,7 +111,7 @@ async function load(): Promise<DebutantData> {
     const ex = latestUsable(fondParCode.get(code) ?? []);
     const r = ex ? computeRatios({ cours: c?.cours ?? null, shares: i?.shares ?? null, revenue: ex.revenue, net_income: ex.net_income, equity: ex.equity, debt: ex.debt, dividende: null }) : null;
     const vf = verifies.get(code);
-    const dv = vf ? { montant: vf.montant, exercice: vf.exercice, verifie: true } : (declares.get(code) ? { ...declares.get(code)!, verifie: false } : undefined);
+    const dv = vf ? { montant: vf.montant, exercice: vf.exercice, verifie: true } : (declares.get(code) ? { montant: declares.get(code)!.montant, exercice: declares.get(code)!.exercice, verifie: false } : undefined);
     const s = sig.get(code);
     const note = s ? scoreToRating(s.score, s.conf).note : 'NR';
     return {
