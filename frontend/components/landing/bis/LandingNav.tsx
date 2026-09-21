@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { OutilsMenu } from './OutilsMenu';
+import { MenuMobile } from './MenuMobile';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 /**
  * En-tête des pages publiques claires (/ et /debutant). Toutes les cibles
  * existent : /societes, /analyses, /formations, /methodologie (« À propos »),
  * /login, /signup. « Marchés » renvoie à la séance sur la landing.
- * Sur mobile, seuls le logo et « Créer un compte » restent visibles — le CTA
- * d'inscription ne quitte jamais l'écran.
+ * Sous 1 000 px : logo, CTA d'inscription (toujours visible) et un menu
+ * dépliant propre aux pages publiques (MenuMobile).
  */
 export function LandingNav({ marchesHref = '/#marche' }: { marchesHref?: string }) {
   return (
@@ -24,7 +25,8 @@ export function LandingNav({ marchesHref = '/#marche' }: { marchesHref?: string 
         <OutilsMenu />
         <Link href="/methodologie" className="opt">À propos</Link>
         <Link href="/login" className="opt login">Se connecter</Link>
-        <Link href="/signup" className="btn btn-ink btn-sm" style={{ marginLeft: 8 }}>Créer un compte</Link>
+        <Link href="/signup" className="btn btn-ink btn-sm" style={{ marginLeft: 8 }}>Créer mon compte gratuit</Link>
+        <MenuMobile />
       </nav>
     </header>
   );

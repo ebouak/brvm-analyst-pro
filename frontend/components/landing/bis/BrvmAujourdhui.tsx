@@ -59,7 +59,7 @@ function Table({ titre, rows, tone: t, href, vide }: { titre: string; rows: Move
     <div className="card top">
       <div className="top-head">
         <h3 className={t}><span className="badge" aria-hidden="true">{t === 'up' ? '↑' : '↓'}</span>{titre}</h3>
-        <Link href={href} className={`more ${t}`}>Voir toutes →</Link>
+        <Link href={href} className={`more ${t}`}>Voir les 47 sociétés →</Link>
       </div>
       {rows.length ? (
         <table>
@@ -149,8 +149,8 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
         </div>
 
         {/* Rangée 3 */}
-        <div className="r3a"><Table titre="Top 5 hausses" rows={d.topHausses} tone="up" href="/signaux" vide="Aucune hausse sur cette séance." /></div>
-        <div className="r3b"><Table titre="Top 5 baisses" rows={d.topBaisses} tone="down" href="/signaux" vide="Aucune baisse sur cette séance." /></div>
+        <div className="r3a"><Table titre="Top 5 hausses" rows={d.topHausses} tone="up" href="/societes" vide="Aucune hausse sur cette séance." /></div>
+        <div className="r3b"><Table titre="Top 5 baisses" rows={d.topBaisses} tone="down" href="/societes" vide="Aucune baisse sur cette séance." /></div>
         <div className="card dit r3c">
           <h3><span className="badge" aria-hidden="true">≡</span>Ce que dit la séance</h3>
           <ul className="dit-l">{n.flash.slice(0, 2).map((f) => <li key={f}><b>{f}</b></li>)}</ul>
@@ -182,7 +182,7 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
 
       <div className="today-foot">
         <p className="stamp">Source brvm.org · actualisé toutes les 15 min en séance · « vs veille » compare à la séance précédente en base.</p>
-        <Link href="/dashboard" className="btn btn-gold">Explorer le marché <span aria-hidden="true">→</span></Link>
+        <Link href="/societes" className="btn btn-gold">Explorer les sociétés <span aria-hidden="true">→</span></Link>
       </div>
     </section>
   );

@@ -4,6 +4,7 @@ import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/bis/Terminal';
+import { getMemberCount } from '@/lib/landing/memberCount';
 import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
 import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
@@ -47,7 +48,7 @@ function PlanPrice({ p }: { p: Plan }) {
 const Thumb = ({ children }: { children: React.ReactNode }) => <div className="thumb" aria-hidden="true"><svg viewBox="0 0 96 64"><rect width="96" height="64" fill="#0a1417" />{children}</svg></div>;
 
 export default async function Landing() {
-  const d = await getLandingBisData();
+  const [d, membres] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null)]);
   const fraicheur = computeFreshness(d.derniereCollecte, d.dateMarche, new Date());
   const dateLabel = d.dateMarche ? fmtDateFR(d.dateMarche) : null;
   const free = d.plans.find((p) => p.code === 'free');
@@ -75,7 +76,7 @@ export default async function Landing() {
                 </ul>
                 <div className="cta">
                   <Link href="/signup" className="btn btn-ink">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
-                  <a href="#marche" className="btn btn-ghost">Explorer la BRVM <span aria-hidden="true">→</span></a>
+                  <Link href="/societes" className="btn btn-ghost">Explorer les sociétés <span aria-hidden="true">→</span></Link>
                 </div>
               </div>
               <HeroCarousel
@@ -111,13 +112,31 @@ export default async function Landing() {
           {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
           <QuatreFacons />
 
-          {/* 3 · GRATUIT / PREMIUM */}
+          {/* 2 quater · AVEC UN COMPTE GRATUIT — la valeur du gratuit AVANT Premium */}
+          <section className="gratuit" aria-labelledby="h-gratuit">
+            <div className="card grand">
+              <div>
+                <p className="over">Avec un compte gratuit</p>
+                <h2 id="h-gratuit">Commencez par explorer. Gratuitement.</h2>
+                <ul className="coches deux">
+                  {['Explorer les 47 sociétés cotées et leurs fiches', 'Consulter les fondamentaux et les dividendes', 'Suivre la séance et les indices', 'Créer votre watchlist et votre portefeuille', 'Recevoir le brief du soir et vos alertes par email'].map((t) => <li key={t}><span className="check" aria-hidden="true" />{t}</li>)}
+                </ul>
+                <p className="muted">Sans carte bancaire, sans engagement. Les outils avancés viennent ensuite, quand vous en aurez besoin.</p>
+              </div>
+              <div className="cta-col">
+                <Link href="/signup" className="btn btn-ink btn-lg">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
+                <small>Sans carte bancaire · Sans engagement</small>
+              </div>
+            </div>
+          </section>
+
+          {/* 3 · POUR ALLER PLUS LOIN — Premium, une seule fois */}
           <section id="premium" className="prem" aria-labelledby="h-prem">
             <div className="prem-copy">
               <p className="over">Accédez à plus avec Premium</p>
-              <h2 id="h-prem">Gratuit ou <span className="accent">Premium</span>,<br />à chacun ses ambitions.</h2>
+              <h2 id="h-prem">Pour aller <span className="accent">plus loin</span>,<br />quand vous serez prêt.</h2>
               <p>Les essentiels pour suivre le marché sont gratuits. Premium vous donne plus d&apos;outils pour aller plus loin et saisir davantage d&apos;opportunités.</p>
-              <Link href="/pricing" className="btn btn-ink">Découvrir Premium <span aria-hidden="true">→</span></Link>
+              <Link href="/pricing" className="btn btn-ghost">Voir les offres <span aria-hidden="true">→</span></Link>
               <div className="skyline" aria-hidden="true">
                 <svg viewBox="0 0 600 210" preserveAspectRatio="xMidYMax slice">
                   <defs><linearGradient id="lb-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f7f5f0" /><stop offset=".55" stopColor="#cfe3ee" /><stop offset="1" stopColor="#7fb0c8" /></linearGradient><linearGradient id="lb-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#6a9fbb" /><stop offset="1" stopColor="#2f6f8f" /></linearGradient></defs>
@@ -172,7 +191,7 @@ export default async function Landing() {
                 <div className="banner">
                   <div className="leaf" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 20c0-8 6-14 16-16-1 10-7 16-16 16z" /><path d="M4 20c4-6 8-9 12-11" /></svg></div>
                   <div className="t"><b>Des marchés plus compréhensibles. Des opportunités plus accessibles.</b><span>Informations fiables · Analyses claires · Outils concrets</span></div>
-                  <Link href="/pricing" className="btn btn-gold">Voir les offres Premium <span aria-hidden="true">→</span></Link>
+                  <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
                 </div>
               </div>
             </div>
@@ -194,10 +213,26 @@ export default async function Landing() {
               <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M9 12l2 2 4-4" /></svg>Données fiables et officielles</li>
               <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 8h8M8 12h8M8 16h5" /></svg><Link href="/methodologie">Une méthode transparente</Link></li>
               <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 20h16M6 16v-5M11 16V7M16 16v-3M21 16V4" /></svg>Des analyses actionnables</li>
-              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M3 19c0-3 3-5 6-5s6 2 6 5M14 18c0-2 2-3.5 4-3.5s3 1.5 3 3.5" /></svg>Une communauté d&apos;investisseurs</li>
+              <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M3 19c0-3 3-5 6-5s6 2 6 5M14 18c0-2 2-3.5 4-3.5s3 1.5 3 3.5" /></svg>{membres != null && membres > 0 ? <><b className="num">{fmtNumber(membres)}</b>&nbsp;membres inscrits</> : 'Une communauté d’investisseurs'}</li>
             </ul>
             <span className="disc">Ceci n&apos;est pas un conseil en investissement.</span>
           </div>
+
+          {/* 6 · CTA FINAL */}
+          <section className="final" aria-labelledby="h-final">
+            <div>
+              <h2 id="h-final">Votre première analyse peut commencer maintenant.</h2>
+              <p>Explorez gratuitement la BRVM, découvrez les sociétés cotées et entraînez-vous avant d&apos;aller plus loin.</p>
+              <div className="cta">
+                <Link href="/signup" className="btn btn-gold btn-lg">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
+                <Link href="/societes" className="btn btn-ghost-inv">Explorer les sociétés</Link>
+              </div>
+              <small>Gratuit · Sans carte bancaire · À votre rythme · Ceci n&apos;est pas un conseil en investissement.</small>
+            </div>
+            <ul className="final-l">
+              {[['Données', 'fiables et datées'], ['Analyse', 'indépendante'], ['Outils', 'simples'], ['Décision', 'la vôtre']].map(([a, b]) => <li key={a}><b>{a}</b><span>{b}</span></li>)}
+            </ul>
+          </section>
 
           {/* Pied de page : le footer global du site (ConditionalShell) suit — pas de doublon ici. */}
         </main>

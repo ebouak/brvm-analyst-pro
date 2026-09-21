@@ -31,7 +31,7 @@ export function StickyCta({ seuil = 0.35 }: { seuil?: number }) {
   return (
     <div className={`sticky-cta${visible ? ' on' : ''}`} role="complementary" aria-label="Créer un compte" aria-hidden={!visible}>
       <span>Prêt à commencer ?</span>
-      <Link href="/signup" className="btn btn-ink btn-sm" tabIndex={visible ? 0 : -1}>Créer mon compte gratuitement <span aria-hidden="true">→</span></Link>
+      <Link href="/signup" className="btn btn-ink btn-sm" tabIndex={visible ? 0 : -1}>Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
       <button type="button" onClick={() => setFermee(true)} aria-label="Fermer" tabIndex={visible ? 0 : -1}>×</button>
     </div>
   );

@@ -11,6 +11,9 @@ import Link from 'next/link';
  */
 
 interface Outil { t: string; d: string; href: string; ic: React.ReactNode }
+
+/** Routes derrière le login (lib/supabase/middleware.ts) : on le dit avant le clic. */
+const PROTEGEES = new Set(['/signaux', '/fondamentaux', '/screener', '/parametres/alertes', '/portefeuille', '/premium/paper-trading', '/backtest', '/obligations', '/weekly']);
 interface Colonne { k: string; t: string; d: string; c: string; bg: string; href: string; visuel: React.ReactNode; outils: Outil[] }
 
 const I = {
@@ -106,7 +109,7 @@ export function QuatreFacons() {
                 <li key={o.t}>
                   <Link href={o.href}>
                     <span className="ic"><Ic c={o.ic} /></span>
-                    <span><b>{o.t}</b><small>{o.d}</small></span>
+                    <span><b>{o.t}{PROTEGEES.has(o.href) && <em className="cg" title="Accessible avec un compte gratuit">compte gratuit</em>}</b><small>{o.d}</small></span>
                   </Link>
                 </li>
               ))}
@@ -118,7 +121,7 @@ export function QuatreFacons() {
       <div className="banner">
         <div className="leaf" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 20c0-8 6-14 16-16-1 10-7 16-16 16z" /><path d="M4 20c4-6 8-9 12-11" /></svg></div>
         <div className="t"><b>Une plateforme. Plusieurs façons de travailler le marché.</b><span>Des données fiables · Des analyses claires · Des outils concrets</span></div>
-        <Link href="/signup" className="btn btn-gold">Découvrir la plateforme <span aria-hidden="true">→</span></Link>
+        <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
       </div>
     </section>
   );

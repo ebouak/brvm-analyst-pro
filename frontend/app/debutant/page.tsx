@@ -102,8 +102,8 @@ export default async function DebutantPage() {
                   {['Gratuit pour commencer', 'Sans carte bancaire', 'À votre rythme'].map((t) => <li key={t}><Check />{t}</li>)}
                 </ul>
                 <div className="cta">
-                  <Link href="/signup" className="btn btn-ink btn-lg">Créer mon compte gratuitement <span aria-hidden="true">→</span></Link>
-                  <Link href="/societes" className="btn btn-ghost">Explorer la BRVM</Link>
+                  <Link href="/signup" className="btn btn-ink btn-lg">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
+                  <Link href="/societes" className="btn btn-ghost">Explorer les sociétés</Link>
                 </div>
                 <p className="sous-cta">Créez votre compte en quelques secondes. Aucun engagement.</p>
               </div>
@@ -258,7 +258,7 @@ export default async function DebutantPage() {
                 <p className="muted">Commencez gratuitement. Vous pourrez découvrir progressivement les fonctionnalités disponibles.</p>
               </div>
               <div className="cta-col">
-                <Link href="/signup" className="btn btn-ink btn-lg">Créer mon compte gratuitement <span aria-hidden="true">→</span></Link>
+                <Link href="/signup" className="btn btn-ink btn-lg">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
                 <small>Sans carte bancaire · Sans engagement</small>
               </div>
             </div>
@@ -307,8 +307,8 @@ export default async function DebutantPage() {
               <h2 id="h-final">Votre première analyse peut commencer maintenant.</h2>
               <p>Explorez gratuitement la BRVM, découvrez les sociétés cotées et entraînez-vous avant d&apos;aller plus loin.</p>
               <div className="cta">
-                <Link href="/signup" className="btn btn-gold btn-lg">Créer mon compte gratuitement <span aria-hidden="true">→</span></Link>
-                <Link href="/societes" className="btn btn-ghost-inv">Explorer la BRVM</Link>
+                <Link href="/signup" className="btn btn-gold btn-lg">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
+                <Link href="/societes" className="btn btn-ghost-inv">Explorer les sociétés</Link>
               </div>
               <small>Gratuit · Sans carte bancaire · À votre rythme</small>
             </div>

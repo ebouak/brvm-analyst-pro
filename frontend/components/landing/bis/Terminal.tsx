@@ -4,6 +4,7 @@ import { SubscoreBars } from '@/components/landing/SubscoreBars';
 import { excerpt } from '@/lib/landing/excerpt';
 import { fmtNumber } from '@/lib/format';
 import type { LandingBisData } from '@/lib/landing/bisData';
+import { RATING_DISCLAIMER } from '@/lib/rating';
 
 /**
  * Un seul panneau sombre, trois rangées serrées : la séance en vidéo et ses
@@ -45,7 +46,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
           </div>
           <div className="tc-grid">
             <div className="tc-player">
-              <video controls preload="metadata" poster={v.affiche ?? undefined} playsInline aria-label={`Vidéo de la séance du ${v.date_fr}`}>
+              <video controls preload="none" poster={v.affiche ?? undefined} playsInline aria-label={`Vidéo de la séance du ${v.date_fr}`}>
                 <source src={v.url} type="video/mp4" />
               </video>
               <ul className="tc-logos" aria-label="Sources">
@@ -58,10 +59,10 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
             <div>
               <p className="tc-lead">Chaque soir, la séance est résumée en vidéo : indice, largeur du marché, capitaux échangés, et les sociétés qui ont porté les échanges. <b>Les images et la voix sont composées des mêmes chiffres</b>, lus une seule fois dans nos données de séance.</p>
               <dl className="tc-kpis num">
-                <div><dt>BRVM Composite</dt><dd>{v.composite ? v.composite.valeur.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}</dd>{v.composite && <small className={v.composite.variation_pct >= 0 ? 'up' : 'down'}>{pct(v.composite.variation_pct)}</small>}</div>
-                <div><dt>Hausses</dt><dd className="up">{v.hausses}</dd><small>sur {v.valeurs} titres</small></div>
-                <div><dt>Baisses</dt><dd className="down">{v.baisses}</dd><small>sur {v.valeurs} titres</small></div>
-                <div><dt>Capitaux échangés</dt><dd>{fmtMd(v.capitaux_fcfa)} <span className="unit">FCFA</span></dd><small>{v.capitaux_estimes ? 'estimés' : 'clôture'}</small></div>
+                <div><dt>BRVM Composite</dt><dd>{v.composite ? v.composite.valeur.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}{v.composite && <small className={v.composite.variation_pct >= 0 ? 'up' : 'down'}>{pct(v.composite.variation_pct)}</small>}</dd></div>
+                <div><dt>Hausses</dt><dd className="up">{v.hausses}<small>sur {v.valeurs} titres</small></dd></div>
+                <div><dt>Baisses</dt><dd className="down">{v.baisses}<small>sur {v.valeurs} titres</small></dd></div>
+                <div><dt>Capitaux échangés</dt><dd>{fmtMd(v.capitaux_fcfa)} <span className="unit">FCFA</span><small>{v.capitaux_estimes ? 'estimés' : 'clôture'}</small></dd></div>
               </dl>
               <div className="tc-links">
                 <details><summary>Lire la transcription</summary><p>{v.texte}</p></details>
@@ -84,14 +85,15 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
             <div><dt><span className="g">A</span> à <span className="g">F</span></dt><dd>Une note recalculée à chaque séance à partir de signaux vérifiables. A = bien orientés ; F = mal orientés. Ce n&apos;est pas un avis.</dd></div>
             <div><dt><span className="g up">BUY</span> · <span className="g">HOLD</span> · <span className="g down">SELL</span></dt><dd>Quand rien n&apos;est net, le moteur affiche HOLD et s&apos;abstient. C&apos;est un choix de rigueur, pas un manque d&apos;avis — et cela arrive souvent.</dd></div>
           </dl>
-          <Link href="/signaux" className="tc-link">Voir les {d.nbActions || 47} sociétés →</Link>
+          <Link href="/societes" className="tc-link">Voir les {d.nbActions || 47} sociétés →</Link>
         </div>
         <div className="tc-card">
           {s ? (
             <>
-              <div className="tc-card-head"><b className="num">{s.code}</b><RatingBadge scoreTotal={s.score_total} confiance={s.confiance} /></div>
+              <div className="tc-card-head"><b className="num">{s.code}</b><RatingBadge scoreTotal={s.score_total} confiance={s.confiance} neutre /></div>
               <SubscoreBars signal={s} compact />
-              <p className="tc-foot">{s.signal} · confiance {s.confiance != null ? `${(s.confiance * 100).toFixed(0)} %` : '—'} · exemple réel de la séance en cours</p>
+              <p className="tc-foot">Signal {s.signal} · confiance {s.confiance != null ? `${(s.confiance * 100).toFixed(0)} %` : '—'} · exemple réel de la séance en cours</p>
+              <p className="tc-disc">{RATING_DISCLAIMER}</p>
             </>
           ) : <p className="tc-foot">Aucun signal publié pour cette séance.</p>}
         </div>
