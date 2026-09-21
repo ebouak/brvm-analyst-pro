@@ -127,6 +127,40 @@ export async function upsertInstruments(snapshotOrInstruments: any): Promise<voi
   if (error) throw new Error(`upsert brvm_instruments: ${error.message}`);
 }
 
+/**
+ * Lignes d'upsert d'un snapshot — fonction PURE, testée.
+ *
+ * Une source qui ne collecte PAS une colonne ne doit pas l'envoyer : sur la
+ * clé (code, date_marche), un upsert PostgREST met à jour toutes les colonnes
+ * présentes dans la charge, y compris à null. L'intraday (brvm.org) ne porte
+ * ni valeur_echangee ni nb_transactions ; les envoyer à null ÉCRASAIT les
+ * valeurs de clôture posées par BDFIN dès qu'un passage intraday suivait le
+ * job de clôture (constaté le 2026-09-18 : 47 lignes vidées par un
+ * déclenchement manuel à 23:43). Les clés absentes de la charge sont
+ * laissées telles quelles par ON CONFLICT DO UPDATE.
+ */
+export function lignesActions(snapshot: MarketSnapshot): Array<Record<string, unknown>> {
+  const sansCloture = snapshot.actions.every((a) => a.valeur_echangee == null && a.nb_transactions == null);
+  return snapshot.actions.map((a) => {
+    const ligne: Record<string, unknown> = {
+      code: a.code,
+      date_marche: snapshot.date_marche,
+      designation: a.designation,
+      pays: a.pays,
+      secteur: a.secteur,
+      cours_precedent: a.cours_precedent,
+      cours_jour: a.cours_jour,
+      variation_pct: a.variation_pct,
+      volume: a.volume,
+    };
+    if (!sansCloture) {
+      ligne.nb_transactions = a.nb_transactions;
+      ligne.valeur_echangee = a.valeur_echangee;
+    }
+    return ligne;
+  });
+}
+
 export async function upsertActions(snapshot: MarketSnapshot): Promise<number>;
 export async function upsertActions(actions: Array<{
   code: string;
@@ -156,19 +190,7 @@ export async function upsertActions(snapshotOrActions: any): Promise<number> {
   // Original overload: MarketSnapshot
   const snapshot = snapshotOrActions as MarketSnapshot;
   if (snapshot.actions.length === 0) return 0;
-  const rows = snapshot.actions.map((a) => ({
-    code: a.code,
-    date_marche: snapshot.date_marche,
-    designation: a.designation,
-    pays: a.pays,
-    secteur: a.secteur,
-    cours_precedent: a.cours_precedent,
-    cours_jour: a.cours_jour,
-    variation_pct: a.variation_pct,
-    volume: a.volume,
-    nb_transactions: a.nb_transactions,
-    valeur_echangee: a.valeur_echangee,
-  }));
+  const rows = lignesActions(snapshot);
   const { error } = await sb
     .from('brvm_actions_daily')
     .upsert(rows, { onConflict: 'code,date_marche' });
