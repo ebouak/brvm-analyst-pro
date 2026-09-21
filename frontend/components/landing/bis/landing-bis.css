@@ -235,3 +235,16 @@
 /* État du marché : composant du terminal (sombre) encadré dans la vitrine claire */
 .lb .etat { margin-top: 18px; border-radius: var(--r-panel); overflow: hidden; border: 1px solid var(--line); background: #030303; color: #FCFCFC; padding: var(--pad-panel); box-shadow: 0 30px 60px -40px rgba(16, 32, 58, .45); }
 .lb .etat h2, .lb .etat h3 { font-weight: 600; letter-spacing: -.01em; }
+
+/* réassurance sous l'accroche */
+.lb .assur { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin: 0; list-style: none; }
+.lb .assur li { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); }
+
+/* fil conducteur (au-dessus des 7 étapes) */
+.lb .fil { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 24px 0; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.lb .tag-fil { display: inline-flex; align-items: center; min-height: 28px; padding: 0 12px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+.lb .steps { border-top: 0; padding-top: 18px; }
+
+/* cartographie (écran du terminal) */
+.lb .carto { padding: 16px; }
+.lb .carto .overline { color: #56D7FD; }

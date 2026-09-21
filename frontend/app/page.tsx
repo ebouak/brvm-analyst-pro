@@ -3,6 +3,7 @@ import NewsletterForm from '@/components/NewsletterForm';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import MarketStateCard from '@/components/MarketStateCard';
+import LandingHeatmap from '@/components/landing/LandingHeatmap';
 import { getLandingBisData, type Mover, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
@@ -94,9 +95,14 @@ export default async function Landing() {
                 <div className="annot" aria-hidden="true"><span className="hand">Des données<br />à vos décisions,<br />tout simplement.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="#1ba8c9" strokeWidth="3" strokeLinecap="round" /></svg></div>
                 <h1 id="h1">De la donnée<br />à la <span className="accent">décision.</span></h1>
                 <p className="lead">Une méthode simple et transparente pour analyser la BRVM autrement, avec des données officielles et des outils concrets.</p>
+                <ul className="assur" aria-label="Sans engagement">
+                  {['Aucune carte bancaire', 'Compte en 1 minute', 'Sans engagement'].map((t) => (
+                    <li key={t}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#2f9e6b" /><path d="M4.5 8.5l2.3 2.3L11.5 6" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>{t}</li>
+                  ))}
+                </ul>
                 <div className="cta">
-                  <Link href="/signup" className="btn btn-ink">Créer un compte gratuit</Link>
-                  <a href="#marche" className="btn btn-ghost">Voir la séance du jour</a>
+                  <Link href="/signup" className="btn btn-ink">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
+                  <a href="#marche" className="btn btn-ghost">Explorer la BRVM <span aria-hidden="true">→</span></a>
                 </div>
               </div>
               <HeroCarousel
@@ -106,6 +112,7 @@ export default async function Landing() {
                 topBaisse={topB ? { code: topB.code, variation: topB.variation } : null}
               />
             </div>
+            <div className="fil"><span className="tag-fil">Le fil conducteur</span><span>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</span></div>
             <ol className="steps" id="methode" aria-label="La méthode en sept étapes">
               {STEPS.map((s) => (
                 <li className="step" key={s.k}>
@@ -158,11 +165,18 @@ export default async function Landing() {
             </div>
           </section>
 
+          {/* 2 bis · CARTOGRAPHIE — écran du terminal (sombre), réutilisé tel quel */}
+          {d.heatmap.length > 0 && (
+            <section className="etat carto" aria-label="Cartographie du marché">
+              <LandingHeatmap rows={d.heatmap} dateLabel={dateLabel} />
+            </section>
+          )}
+
           {/* 3 · GRATUIT / PREMIUM */}
           <section id="premium" className="prem" aria-labelledby="h-prem">
             <div className="prem-copy">
               <p className="over">Accédez à plus avec Premium</p>
-              <h2 id="h-prem">Gratuit ou <span className="accent">Premium</span>,<br />à chacun ses besoins.</h2>
+              <h2 id="h-prem">Gratuit ou <span className="accent">Premium</span>,<br />à chacun ses ambitions.</h2>
               <p>Les essentiels pour suivre le marché sont gratuits. Premium vous donne plus d&apos;outils pour aller plus loin et saisir davantage d&apos;opportunités.</p>
               <Link href="/pricing" className="btn btn-ink">Découvrir Premium <span aria-hidden="true">→</span></Link>
               <div className="skyline" aria-hidden="true">
