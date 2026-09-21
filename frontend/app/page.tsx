@@ -4,7 +4,7 @@ import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
-import { OutilsMenu } from '@/components/landing/bis/OutilsMenu';
+import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
@@ -57,19 +57,7 @@ export default async function Landing() {
   return (
     <div className="lb">
       <div className="wrap">
-        <header className="nav">
-          <Link className="brand" href="/" aria-label="WESTBOURSE, accueil">
-            <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 8l8 24 8-16 8 16 8-24" fill="none" stroke="#1f6fb3" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" /><path d="M12 8l8 16" stroke="#1ba8c9" strokeWidth="5" strokeLinecap="round" /></svg>
-            <span><b>WESTBOURSE</b><small>Comprendre aujourd&apos;hui, investir demain</small></span>
-          </Link>
-          <nav className="nav-links" aria-label="Principal">
-            <a href="#marche" className="opt">Marché</a>
-            <OutilsMenu />
-            <Link href="/pricing" className="opt">Tarifs</Link>
-            <Link href="/login" className="opt">Connexion</Link>
-            <Link href="/signup" className="btn btn-ink btn-sm" style={{ marginLeft: 8 }}>Créer un compte</Link>
-          </nav>
-        </header>
+        <LandingNav />
 
         <main>
           {/* 1 · HERO + 7 ÉTAPES */}
