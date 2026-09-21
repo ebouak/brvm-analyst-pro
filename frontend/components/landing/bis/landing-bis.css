@@ -685,3 +685,12 @@
 .lb .tc-card [class*="text-\[9px\]"], .lb .tc-card [class*="text-\[10px\]"] { font-size: 11px !important; }
 .lb .watch > b span { color: var(--muted); font-size: 11px; }
 .lb .mnav-btn:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* barre sous 560 px : signature masquée, CTA court, menu avant le CTA */
+.lb .cta-nav .court { display: none; }
+@media (max-width: 560px) {
+  .lb .brand small { display: none; }
+  .lb .cta-nav .long { display: none; } .lb .cta-nav .court { display: inline; }
+  .lb .nav-links .btn { padding: 0 12px; font-size: 13px; margin-left: 4px !important; }
+  .lb .nav-links { gap: 0; }
+}

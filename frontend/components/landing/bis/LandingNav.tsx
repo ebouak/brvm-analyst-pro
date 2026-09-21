@@ -25,8 +25,8 @@ export function LandingNav({ marchesHref = '/#marche' }: { marchesHref?: string 
         <OutilsMenu />
         <Link href="/methodologie" className="opt">À propos</Link>
         <Link href="/login" className="opt login">Se connecter</Link>
-        <Link href="/signup" className="btn btn-ink btn-sm" style={{ marginLeft: 8 }}>Créer mon compte gratuit</Link>
         <MenuMobile />
+        <Link href="/signup" className="btn btn-ink btn-sm cta-nav" style={{ marginLeft: 8 }}><span className="long">Créer mon compte gratuit</span><span className="court">Créer un compte</span></Link>
       </nav>
     </header>
   );
