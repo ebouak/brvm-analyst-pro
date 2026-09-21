@@ -72,6 +72,13 @@ export async function POST(req: NextRequest) {
       }),
     }).catch((e: unknown) => ({ ok: false, sent: 0, error: (e as Error).message }));
     if (!envoi.ok) console.error('[newsletter] email de confirmation non envoyé :', envoi.error);
+    else {
+      // Départ de la fenêtre de rétention (30 j, migration 0133) : seul un
+      // envoi réussi la déclenche.
+      await supabase.from('newsletter_subscribers')
+        .update({ confirmation_sent_at: new Date().toISOString() })
+        .eq('confirm_token', ligne.confirm_token);
+    }
 
     return NextResponse.json({ ok: true });
   } catch {
