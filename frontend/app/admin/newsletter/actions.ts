@@ -8,6 +8,7 @@ import { sendBatch } from '@/lib/server/email';
 import { campaignHtml, textToHtml, siteUrl } from '@/lib/email/templates';
 import { validateUploads } from '@/lib/email/uploads';
 import { uploadInlineImage } from '@/lib/server/storage';
+import { buildConfirmEmailHtml, CONFIRM_SUBJECT } from '@/lib/newsletter/confirmEmail';
 
 type R = { ok: boolean; message?: string };
 
@@ -92,4 +93,45 @@ export async function sendCampaign(formData: FormData): Promise<R & { sent?: num
     return { ok: false, message: partial, sent: res.sent };
   }
   return { ok: true, sent: res.sent };
+}
+
+/**
+ * Renvoie l'email de confirmation à TOUS les inscrits non confirmés.
+ *
+ * Pourquoi cette action existe : jusqu'à ce jour aucune route ne confirmait
+ * une inscription, et l'expéditeur de test de Resend n'écrivait qu'à
+ * l'exploitant — les inscrits de la landing n'ont jamais reçu de lien valide.
+ * Envoi de masse vers des tiers : permission `content.publish`, journal
+ * d'audit avec compte par adresse (jamais les adresses elles-mêmes).
+ */
+export async function resendConfirmations(): Promise<R & { sent?: number; total?: number }> {
+  const ctx = await requirePermission('content.publish');
+  const db = getServiceClient();
+  const { data, error } = await db
+    .from('newsletter_subscribers')
+    .select('email, confirm_token')
+    .eq('confirmed', false);
+  if (error) return { ok: false, message: 'Lecture des abonnés impossible.' };
+  const pending = (data ?? []) as { email: string; confirm_token: string }[];
+  if (pending.length === 0) return { ok: true, sent: 0, total: 0, message: 'Aucun inscrit en attente.' };
+
+  const base = siteUrl();
+  const res = await sendBatch(pending.map((r) => ({
+    to: r.email,
+    subject: CONFIRM_SUBJECT,
+    html: buildConfirmEmailHtml({
+      confirmUrl: `${base}/api/newsletter/confirm?token=${r.confirm_token}`,
+      unsubscribeUrl: `${base}/api/newsletter/unsubscribe?token=${r.confirm_token}`,
+    }),
+  })));
+  await recordAudit(ctx, {
+    action: 'newsletter.resend_confirmations', resourceType: 'newsletter', severity: 'warning',
+    metadata: { pending: pending.length, sent: res.sent, ok: res.ok, error: res.error ?? null },
+  });
+  revalidatePath('/admin/newsletter');
+  if (!res.ok) {
+    return { ok: false, sent: res.sent, total: pending.length,
+      message: res.sent > 0 ? `Envoi partiel : ${res.sent}/${pending.length}. ${res.error ?? ''}`.trim() : (res.error ?? "Échec de l'envoi.") };
+  }
+  return { ok: true, sent: res.sent, total: pending.length };
 }

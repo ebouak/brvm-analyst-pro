@@ -1,7 +1,7 @@
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
 import { loadNewsletter } from '@/lib/admin/newsletter';
-import { CampaignForm, UnsubscribeButton } from './CampaignForm';
+import { CampaignForm, UnsubscribeButton, ResendConfirmationsButton } from './CampaignForm';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Newsletter — Administration' };
@@ -33,6 +33,7 @@ export default async function Page({ searchParams }: { searchParams: { q?: strin
         <MetricCard label="Taux de confirmation" value={kpis.rate == null ? DASH : `${Math.round(kpis.rate * 100)} %`} accent="neutral" />
       </div>
 
+      {canCampaign && <ResendConfirmationsButton pending={kpis.total - kpis.confirmed} />}
       {canCampaign && <CampaignForm />}
 
       <div className="flex items-center justify-between gap-3">

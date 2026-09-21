@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef } from 'react';
-import { sendCampaign, unsubscribeSubscriber } from './actions';
+import { sendCampaign, unsubscribeSubscriber, resendConfirmations } from './actions';
 
 export function CampaignForm() {
   const [pending, startTransition] = useTransition();
@@ -78,5 +78,30 @@ export function UnsubscribeButton({ id }: { id: string }) {
     >
       Désabonner
     </button>
+  );
+}
+
+/** Renvoi de l'email de confirmation aux inscrits en attente (double opt-in). */
+export function ResendConfirmationsButton({ pending }: { pending: number }) {
+  const [busy, start] = useTransition();
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        disabled={busy || pending === 0}
+        onClick={() => {
+          if (!window.confirm(`Renvoyer l'email de confirmation à ${pending} inscrit(s) en attente ?`)) return;
+          start(async () => {
+            const r = await resendConfirmations();
+            setMsg(r.ok ? `Confirmation renvoyée à ${r.sent}/${r.total} inscrit(s).` : (r.message ?? 'Erreur'));
+          });
+        }}
+        className="rounded-lg border border-border bg-bg px-3 py-2 text-sm text-ivory transition-colors hover:border-accent/50 disabled:opacity-50"
+      >
+        {busy ? 'Envoi…' : `Renvoyer la confirmation (${pending} en attente)`}
+      </button>
+      {msg && <span role="status" className="text-xs text-muted">{msg}</span>}
+    </div>
   );
 }
