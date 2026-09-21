@@ -196,3 +196,42 @@
 .lb .nl-form .text-down { color: var(--down) !important; }
 .lb .nl-form .text-up, .lb .nl-form .text-ivory { color: var(--ink) !important; }
 .lb .nl-form .bg-surface\/60 { background: var(--paper) !important; border-color: var(--line) !important; }
+
+/* bandeau de preuve (sous les 7 étapes) */
+.lb .proofband { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; padding: 16px 20px; background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); align-items: center; }
+@media (max-width: 900px) { .lb .proofband { grid-template-columns: 1fr; } }
+.lb .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 640px) { .lb .metrics { grid-template-columns: repeat(2, 1fr); } }
+.lb .metric { display: flex; gap: 10px; align-items: flex-start; }
+.lb .metric .ic { color: var(--blue); margin-top: 2px; }
+.lb .metric b { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 600; line-height: 1; }
+.lb .metric small { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+.lb .sources { border-left: 1px solid var(--line); padding-left: 18px; }
+@media (max-width: 900px) { .lb .sources { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 14px; } }
+.lb .sources .over { color: var(--faint); margin-bottom: 8px; }
+.lb .sources ul { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0; margin: 0; list-style: none; }
+.lb .sources li { display: flex; align-items: center; height: 32px; padding: 0 8px; border-radius: 6px; background: var(--paper); border: 1px solid var(--line); }
+.lb .sources img { height: 22px; width: auto; outline: 0; }
+.lb .sources .txt { font-size: 12.5px; color: var(--ink-2); }
+
+/* la preuve de la donnée */
+.lb .preuve { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 18px; margin-top: 18px; align-items: start; }
+@media (max-width: 960px) { .lb .preuve { grid-template-columns: 1fr; } }
+.lb .preuve-copy h2 { font-size: clamp(26px, 3vw, 34px); margin-top: 8px; }
+.lb .preuve-copy p:not(.over) { color: var(--ink-2); font-size: 14px; margin-top: 12px; max-width: 42ch; }
+.lb .preuve-copy .btn { margin-top: 16px; }
+.lb .chain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0; margin: 0; list-style: none; }
+@media (max-width: 720px) { .lb .chain { grid-template-columns: 1fr; } }
+.lb .chain li { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); padding: 16px; }
+.lb .chain .rang { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--blue); }
+.lb .chain .ic { position: absolute; right: 14px; top: 14px; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: #e4eef9; color: var(--blue); }
+.lb .chain .over { color: var(--faint); margin-top: 2px; }
+.lb .chain .val { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.2; margin-top: 8px; }
+.lb .chain .val.muted { color: var(--muted); font-weight: 500; }
+.lb .chain .val small { font-family: var(--font-sans); font-size: 11px; color: var(--faint); font-weight: 500; }
+.lb .chain .det { font-size: 12.5px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+.lb .preuve-note { grid-column: 1 / -1; font-size: 11.5px; color: var(--faint); }
+
+/* État du marché : composant du terminal (sombre) encadré dans la vitrine claire */
+.lb .etat { margin-top: 18px; border-radius: var(--r-panel); overflow: hidden; border: 1px solid var(--line); background: #030303; color: #FCFCFC; padding: var(--pad-panel); box-shadow: 0 30px 60px -40px rgba(16, 32, 58, .45); }
+.lb .etat h2, .lb .etat h3 { font-weight: 600; letter-spacing: -.01em; }

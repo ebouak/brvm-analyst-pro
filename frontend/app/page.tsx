@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import NewsletterForm from '@/components/NewsletterForm';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
+import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
+import MarketStateCard from '@/components/MarketStateCard';
 import { getLandingBisData, type Mover, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
@@ -114,7 +116,21 @@ export default async function Landing() {
             </ol>
           </section>
 
-          {/* 2 · MARCHÉ (réel) */}
+          {/* 1 bis · PREUVES (sous les 7 étapes) */}
+          <ProofBandBis nbActions={d.nbActions} />
+          <PreuveDonneeBis fraicheur={fraicheur} exemple={topH ? { code: topH.code, nom: topH.nom, cours: topH.cours } : null} nbActions={d.nbActions} />
+
+          {/* 2 · MARCHÉ (réel) — l'état du marché est l'écran du terminal, réutilisé tel quel (sombre) */}
+          {d.nbActions > 0 && (
+            <section className="etat" aria-label="État du marché">
+              <MarketStateCard
+                stats={{ hausses: d.hausses, baisses: d.baisses, stables: d.inchangees, total: d.nbActions, volumeTotal: d.etat.valeurEchangee, volumeEstimated: false, volumePrev: null, titresEchanges: d.etat.titresEchanges, transactions: d.etat.transactions }}
+                sentimentScore={d.etat.sentimentScore}
+                sentimentDelta={d.etat.sentimentDelta}
+                headingLevel={2}
+              />
+            </section>
+          )}
           <section id="marche" className="market" aria-label={dateLabel ? `Séance du ${dateLabel}` : 'Marché'}>
             <div className="card">
               <p className="head"><span className="over">BRVM Composite</span><span>{dateLabel ? `Clôture · ${dateLabel}` : 'Aucune séance en base'}</span></p>
