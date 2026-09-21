@@ -37,7 +37,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
         <div className="tc-row tc-video">
           <div className="tc-head">
             <div>
-              <p className="o">La séance en {v.duree_s} secondes</p>
+              <p className="o">La séance en {Math.round(v.duree_s)} secondes</p>
               <h2>La séance du {v.date_fr}{videoPrecedente && <span className="tag">séance précédente</span>}</h2>
               <p className="tc-sub">Produite automatiquement chaque soir après la clôture, à partir des mêmes chiffres que cette page. Aucune séance exploitable, aucune vidéo — jamais un habillage recyclé.</p>
             </div>
