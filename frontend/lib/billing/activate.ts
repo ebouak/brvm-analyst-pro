@@ -1,5 +1,5 @@
 import { getServiceClient } from './serviceClient';
-import { computeRenewsAt } from './dates';
+import { computeRenewsAt, prixDuCycle } from './dates';
 import type { BillingCycle } from './types';
 import { captureServerEvent } from '@/lib/analytics/posthogServer';
 
@@ -12,7 +12,7 @@ export async function activateSubscription(subscriptionId: string): Promise<{ ok
   const db = getServiceClient();
   const { data: sub, error } = await db
     .from('subscriptions')
-    .select('id, user_id, billing_cycle, plan:subscription_plans(code, name, price_monthly, price_yearly, currency)')
+    .select('id, user_id, billing_cycle, plan:subscription_plans(code, name, price_monthly, price_quarterly, price_yearly, currency)')
     .eq('id', subscriptionId)
     .maybeSingle();
   if (error || !sub) return { ok: false, message: 'Abonnement introuvable.' };
@@ -46,7 +46,7 @@ export async function activateSubscription(subscriptionId: string): Promise<{ ok
     plan: plan?.code ?? null,
     plan_name: plan?.name ?? null,
     billing_cycle: sub.billing_cycle,
-    amount: sub.billing_cycle === 'yearly' ? plan?.price_yearly ?? null : plan?.price_monthly ?? null,
+    amount: prixDuCycle(plan ?? {}, (sub.billing_cycle as BillingCycle) ?? 'monthly'),
     currency: plan?.currency ?? null,
     subscription_id: subscriptionId,
   });

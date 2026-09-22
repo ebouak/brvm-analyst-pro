@@ -14,7 +14,7 @@ export default async function PricingPage() {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from('subscription_plans')
-    .select('code, name, price_monthly, price_yearly, is_recommended')
+    .select('code, name, price_monthly, price_quarterly, price_yearly, is_recommended')
     .eq('is_active', true)
     .order('sort_order', { ascending: true });
 
@@ -22,6 +22,7 @@ export default async function PricingPage() {
     code: p.code as string,
     name: p.name as string,
     price_monthly: Number(p.price_monthly ?? 0),
+    price_quarterly: p.price_quarterly == null ? null : Number(p.price_quarterly),
     price_yearly: p.price_yearly == null ? null : Number(p.price_yearly),
     is_recommended: Boolean(p.is_recommended),
   }));
