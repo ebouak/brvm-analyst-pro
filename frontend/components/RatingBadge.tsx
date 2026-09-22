@@ -7,7 +7,7 @@ import { scoreToRating, RATING_DISCLAIMER, type Rating } from '@/lib/rating';
 
 const TONE_CLASSES: Record<Rating['tone'], string> = {
   up: 'text-up border-up/40 bg-up/10',
-  mid: 'text-accent border-accent/40 bg-accent/10',
+  mid: 'text-accent-ink border-accent/40 bg-accent/10',
   neutral: 'text-white border-border-strong bg-elevated',
   down: 'text-down border-down/40 bg-down/10',
   muted: 'text-muted border-border bg-surface',
