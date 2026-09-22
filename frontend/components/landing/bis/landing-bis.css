@@ -104,12 +104,12 @@
 .lb .slide.ad .pv p { color: var(--muted); }
 .lb .ad-tag { position: absolute; z-index: 3; top: 16px; right: 16px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--ink); background: rgb(var(--color-surface) / .9); border-radius: 999px; padding: 5px 10px; }
 .lb .car-ctl { position: absolute; z-index: 4; left: 0; right: 0; bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-.lb .car-ctl button { min-width: 44px; min-height: 44px; border-radius: 999px; border: 1px solid rgb(var(--color-surface) / .35); background: rgb(var(--color-surface) / .55); color: var(--ink); cursor: pointer; display: grid; place-items: center; backdrop-filter: blur(6px);
+.lb .car-ctl button { min-width: 44px; min-height: 44px; border-radius: 999px; border: 1px solid rgb(var(--color-ivory) / .35); background: rgb(var(--color-surface) / .55); color: var(--ink); cursor: pointer; display: grid; place-items: center; backdrop-filter: blur(6px);
   transition-property: background-color, transform; transition-duration: 150ms; }
 .lb .car-ctl button:hover { background: rgb(var(--color-surface) / .8); }
 .lb .car-ctl button:active { transform: scale(.96); }
 .lb .dots { display: flex; gap: 6px; padding: 8px 10px; border-radius: 999px; background: rgb(var(--color-surface) / .55); backdrop-filter: blur(6px); }
-.lb .dots button { min-width: 0; min-height: 0; width: 10px; height: 10px; padding: 0; border: 0; background: rgb(var(--color-surface) / .4); position: relative; transition-property: width, background-color; transition-duration: 200ms; }
+.lb .dots button { min-width: 0; min-height: 0; width: 10px; height: 10px; padding: 0; border: 0; background: rgb(var(--color-ivory) / .4); position: relative; transition-property: width, background-color; transition-duration: 200ms; }
 .lb .dots button::before { content: ""; position: absolute; inset: -8px; }
 .lb .dots button[aria-current="true"] { background: var(--ink); width: 22px; }
 .lb .dots button.is-ad { outline: 1px solid var(--gold); outline-offset: 1px; }
