@@ -8,7 +8,11 @@ import type { TopNote } from '@/lib/landing/bisData';
 /**
  * Carrousel du hero « À la une ».
  *
- * · défilement 6 s, en pause au survol, au focus et quand l'onglet est caché ;
+ * · défilement 7 s (temps de lecture d'un titre + sous-titre, Baymard), en pause au
+ *   survol, au focus et quand l'onglet est caché ;
+ * · bouton pause/lecture VISIBLE (WCAG 2.2.2 : la pause au survol ne suffit ni au
+ *   clavier ni au tactile) ; le défilement s'arrête DÉFINITIVEMENT dès que
+ *   l'utilisateur touche une commande (NN/g, Baymard) ;
  * · AUCUN défilement automatique sous prefers-reduced-motion ;
  * · flèches ←/→ au clavier, points cliquables (44 px de zone), annonces
  *   d'état par aria-live ;
@@ -18,7 +22,7 @@ import type { TopNote } from '@/lib/landing/bisData';
  *   `images.remotePatterns`, interdit tant que Next < 15.5.24 (voir CLAUDE.md).
  */
 
-const INTERVALLE_MS = 6000;
+const INTERVALLE_MS = 7000;
 const fmtPct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
 
 interface Props {
@@ -37,6 +41,8 @@ interface Props {
 export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, topNote, topHausse, topBaisse, sgi }: Props) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
+  // Arrêt volontaire : bouton pause, ou première commande touchée. Ne repart jamais seul.
+  const [stopped, setStopped] = useState(false);
   const reduce = useRef(false);
   const n = slides.length;
 
@@ -48,12 +54,14 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
   }, []);
 
   useEffect(() => {
-    if (n < 2 || paused || reduce.current) return;
+    if (n < 2 || paused || stopped || reduce.current) return;
     const t = setInterval(() => setI((k) => (k + 1) % n), INTERVALLE_MS);
     return () => clearInterval(t);
-  }, [n, paused]);
+  }, [n, paused, stopped]);
 
-  const go = (k: number) => setI(((k % n) + n) % n);
+  const go = (k: number) => { setStopped(true); setI(((k % n) + n) % n); };
+  const [autoOk, setAutoOk] = useState(false);
+  useEffect(() => { setAutoOk(n > 1 && !reduce.current); }, [n]);
 
   return (
     <div
@@ -111,6 +119,13 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
           <button type="button" onClick={() => go(i + 1)} aria-label="Diapositive suivante">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
           </button>
+          {autoOk && (
+            <button type="button" className="pause" onClick={() => setStopped((v) => !v)} aria-pressed={stopped ? 'true' : 'false'} aria-label={stopped ? 'Reprendre le défilement automatique' : 'Arrêter le défilement automatique'}>
+              {stopped
+                ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+                : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>}
+            </button>
+          )}
         </div>
       )}
       <p className="sr-only" aria-live="polite">Diapositive {i + 1} sur {n}</p>

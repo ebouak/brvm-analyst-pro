@@ -199,6 +199,7 @@
   .lb *, .lb *::before, .lb *::after { transition-duration: 0ms !important; }
   .lb .btn:active, .lb .feat:hover { transform: none; }
 }
+.lb .car-ctl button.pause { margin-left: 4px; }
 @media print { .lb .car-ctl { display: none; } }
 
 /* NewsletterForm (variante compact) repeint en clair : le composant partagé
