@@ -10,7 +10,9 @@ import { useId, useState, type ReactNode } from 'react';
  * · un clic sur une étape ouvre un panneau de contextualisation alimenté par
  *   un FAIT réel calculé côté serveur (`Fait`) — jamais un chiffre d'exemple.
  *   Sans donnée, le panneau le dit plutôt que d'inventer ;
- * · sémantique onglets (tablist / tab / tabpanel), flèches ←/→ au clavier.
+ * · sémantique onglets (tablist / tab / tabpanel) : les onglets sont enfants
+ *   DIRECTS du tablist — un <li> entre les deux casse la règle ARIA
+ *   (aria-required-children / -parent) et retire la sémantique de liste.
  */
 
 export interface Fait {
@@ -42,16 +44,14 @@ export function FilConducteur({ etapes }: { etapes: Etape[] }) {
 
   return (
     <div className="fil-wrap">
-      <ol className="steps" id="methode" role="tablist" aria-label="La méthode en sept étapes" onKeyDown={(ev) => { if (ev.key === 'ArrowLeft') { ev.preventDefault(); go(sel - 1); } if (ev.key === 'ArrowRight') { ev.preventDefault(); go(sel + 1); } }}>
+      <div className="steps" id="methode" role="tablist" aria-label="La méthode en sept étapes" onKeyDown={(ev) => { if (ev.key === 'ArrowLeft') { ev.preventDefault(); go(sel - 1); } if (ev.key === 'ArrowRight') { ev.preventDefault(); go(sel + 1); } }}>
         {etapes.map((s, k) => (
-          <li className="step" key={s.k} style={{ ['--i' as string]: k }}>
-            <button type="button" role="tab" id={`${id}-tab-${k}`} aria-selected={k === sel} aria-controls={`${id}-panel`} tabIndex={k === sel ? 0 : -1} onClick={() => setSel(k)} className={k === sel ? 'is-sel' : undefined}>
+          <button className={`step${k === sel ? ' is-sel' : ''}`} key={s.k} style={{ ['--i' as string]: k }} type="button" role="tab" id={`${id}-tab-${k}`} aria-selected={k === sel} aria-controls={`${id}-panel`} tabIndex={k === sel ? 0 : -1} onClick={() => setSel(k)}>
               <span className="ic" style={{ background: s.bg, color: s.c }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">{s.ic}</svg></span>
               <span className="k">{s.k}</span><span className="t">{s.t}</span><span className="d">{s.d}</span>
-            </button>
-          </li>
+          </button>
         ))}
-      </ol>
+      </div>
       <div className="fil-panel" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${sel}`}>
         <span className="ic" style={{ background: e.bg, color: e.c }} aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{e.ic}</svg></span>
         {e.fait ? (
