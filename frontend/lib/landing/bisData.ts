@@ -16,6 +16,7 @@ import brvmLogos from '@/lib/brvmLogos.json';
 import { getVideoSeance, type VideoSeance } from '@/lib/landing/videoSeance';
 import { getLatestDiagnostic, type LatestDiagnostic } from '@/lib/landing/latestDiagnostic';
 import type { SignalDaily } from '@/lib/types';
+import { serieSaine } from '@/lib/landing/serieSaine';
 import { getSgiDirectory, getSgiFrais } from '@/lib/sgi-frais/queries';
 import { PAYS } from '@/lib/sgi-frais/directory';
 
@@ -126,7 +127,8 @@ async function load(): Promise<LandingBisData> {
     db.from('brvm_indices_daily').select('code, valeur, variation_pct, valeur_precedente').eq('date_marche', dateMarche),
     db.from('brvm_instruments').select('code, designation, shares'),
     db.from('brvm_indices_daily').select('date_marche, valeur').eq('code', 'BRVMC').lte('date_marche', dateMarche).order('date_marche', { ascending: false }).limit(250),
-    db.from('signals_daily').select('*').eq('date_marche', dateMarche).order('score_total', { ascending: false }).limit(1).maybeSingle(),
+    // Dernière séance SCORÉE (≤ séance courante) : en séance, le scoring du jour n'existe pas encore.
+    db.from('signals_daily').select('*').lte('date_marche', dateMarche).order('date_marche', { ascending: false }).order('score_total', { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const noms = new Map<string, string | null>((instRes.data ?? []).map((i) => [String(i.code), (i.designation as string | null) ?? null]));
@@ -186,7 +188,7 @@ async function load(): Promise<LandingBisData> {
 
   // Série BRVM Composite (chronologique) et variations sectorielles pondérées
   // par la capitalisation (brvmSectors.json + brvm_instruments.shares).
-  const brvmCSerie: Point[] = (serieRes.data ?? []).filter((r) => r.valeur != null).map((r) => ({ d: String(r.date_marche), v: Number(r.valeur) })).reverse();
+  const brvmCSerie: Point[] = serieSaine((serieRes.data ?? []).filter((r) => r.valeur != null).map((r) => ({ d: String(r.date_marche), v: Number(r.valeur) })).reverse());
   const sharesByCode = new Map<string, number | null>((instRes.data ?? []).map((i) => [String(i.code), i.shares == null ? null : Number(i.shares)]));
   const maxVal = rows.filter((r) => r.valeur != null && r.valeur > 0).sort((a, b) => (b.valeur ?? 0) - (a.valeur ?? 0))[0];
   const plusEchangee = maxVal ? { code: maxVal.code, valeur: maxVal.valeur as number } : null;
