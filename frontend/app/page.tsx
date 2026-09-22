@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import NewsletterForm from '@/components/NewsletterForm';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
+import { FilConducteur, type Fait } from '@/components/landing/bis/FilConducteur';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/bis/Terminal';
@@ -9,7 +10,7 @@ import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
 import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
-import { fmtDateFR, fmtNumber } from '@/lib/format';
+import { fmtDateFR, fmtFcfa, fmtNumber } from '@/lib/format';
 import '@/components/landing/bis/landing-bis.css';
 
 /**
@@ -56,6 +57,24 @@ export default async function Landing() {
   const topH = d.topHausses[0] ?? null;
   const topB = d.topBaisses[0] ?? null;
 
+  // Un fait RÉEL par étape du fil conducteur (null = le panneau le dira, jamais un exemple).
+  const age = fraicheur.ageMinutes;
+  const depuis = age == null ? null : age < 60 ? `il y a ${age} min` : age < 48 * 60 ? `il y a ${Math.round(age / 60)} h` : `il y a ${Math.round(age / 1440)} j`;
+  const sig = d.spotlightSignal;
+  const serie = d.brvmCSerie;
+  const perf = serie.length >= 2 && serie[0].v > 0 ? ((serie[serie.length - 1].v / serie[0].v) - 1) * 100 : null;
+  const pct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
+  const conf = sig?.confiance == null ? null : Math.round(Number(sig.confiance) * (Number(sig.confiance) <= 1 ? 100 : 1));
+  const FAITS: (Fait | null)[] = [
+    d.nbActions > 0 ? { libelle: 'Collecte de la dernière séance', valeur: `${d.nbActions} sociétés · ${d.hausses} hausses · ${d.baisses} baisses`, detail: `Cours relevés sur brvm.org${dateLabel ? ` pour la séance du ${dateLabel}` : ''}${depuis ? `, dernière collecte ${depuis}` : ''}. Toutes les 15 minutes en séance.`, href: '/societes', hrefLabel: 'Voir les sociétés' } : null,
+    d.plusEchangee ? { libelle: 'Valeur la plus échangée', valeur: `${d.plusEchangee.code} · ${fmtFcfa(d.plusEchangee.valeur)}`, detail: 'Volumes, RSI, MACD et fondamentaux sont recalculés à chaque séance sur la fiche de chaque société.', href: `/societes/${d.plusEchangee.code}`, hrefLabel: 'Ouvrir la fiche' } : null,
+    d.topNote?.grade ? { libelle: 'Meilleure note du jour', valeur: `${d.topNote.grade} · ${d.topNote.code}${d.topNote.nom ? ` — ${d.topNote.nom}` : ''}`, detail: 'Une note de A à F recalculée chaque séance à partir de signaux vérifiables — tendance, volume, RSI, liquidité — avec le poids de chacun.', href: `/societes/${d.topNote.code}`, hrefLabel: 'Voir la note' } : null,
+    sig ? { libelle: `Signal du jour · ${sig.code}`, valeur: `${sig.signal}${conf != null ? ` · confiance ${conf} %` : ''}`, detail: sig.signal === 'HOLD' ? 'HOLD signifie que rien n’est net : le moteur s’abstient plutôt que de fabriquer une recommandation. Ce n’est pas un conseil en investissement.' : 'Un signal n’est émis que lorsque plusieurs sous-scores concordent. Ce n’est pas un conseil en investissement.', href: '/signaux', hrefLabel: 'Tous les signaux' } : null,
+    d.latestDiagnostic ? { libelle: 'Dernier diagnostic généré', valeur: `${d.latestDiagnostic.code}${d.latestDiagnostic.generated_at ? ` · ${fmtDateFR(d.latestDiagnostic.generated_at.slice(0, 10))}` : ''}`, detail: 'Forces, risques et valorisation rédigés à partir des chiffres de la plateforme — une analyse structurée, jamais une recommandation d’achat ou de vente.', href: `/premium/diagnostic/${d.latestDiagnostic.code}`, hrefLabel: 'Lire le diagnostic' } : null,
+    perf != null ? { libelle: `BRVM Composite sur ${serie.length} séances`, valeur: pct(perf), detail: 'Le simulateur rejoue une décision sur l’historique réel, dividendes inclus, pour mesurer ce qu’elle aurait donné — avant de la prendre.', href: '/simulateur', hrefLabel: 'Simuler' } : null,
+    { libelle: 'La décision vous appartient', valeur: membres != null && membres > 0 ? `${fmtNumber(membres)} membres inscrits` : 'Un compte gratuit, sans carte bancaire', detail: 'Explorez les sociétés, suivez la séance et testez vos idées avec un capital fictif. Les outils avancés viennent ensuite, quand vous en aurez besoin.', href: '/signup', hrefLabel: 'Créer mon compte gratuit' },
+  ];
+
   return (
     <div className="lb">
       <div className="wrap">
@@ -88,14 +107,7 @@ export default async function Landing() {
               />
             </div>
             <div className="fil"><span className="tag-fil">Le fil conducteur</span><span>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</span></div>
-            <ol className="steps" id="methode" aria-label="La méthode en sept étapes">
-              {STEPS.map((s) => (
-                <li className="step" key={s.k}>
-                  <div className="ic" style={{ background: s.bg, color: s.c }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">{s.ic}</svg></div>
-                  <span className="k">{s.k}</span><h3>{s.t}</h3><p>{s.d}</p>
-                </li>
-              ))}
-            </ol>
+            <FilConducteur etapes={STEPS.map((s, k) => ({ ...s, fait: FAITS[k] ?? null }))} />
           </section>
 
           {/* 1 bis · PREUVES (sous les 7 étapes) */}
