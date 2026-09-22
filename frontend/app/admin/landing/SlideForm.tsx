@@ -39,6 +39,12 @@ export function SlideForm() {
             <option value="house">Annonce maison</option>
           </select>
         </label>
+        <label className="text-xs text-muted">Emplacement
+          <select name="placement" className={INPUT} defaultValue="billboard">
+            <option value="billboard">Bandeau (recommandé — toutes les créations tournent)</option>
+            <option value="hero">Carrousel du hero (quelques vues seulement)</option>
+          </select>
+        </label>
         <label className="text-xs text-muted">Annonceur {kind === 'ad' && <span className="text-down">*</span>}
           <input name="sponsor_name" required={kind === 'ad'} maxLength={80} className={INPUT} placeholder="Raison sociale" />
         </label>

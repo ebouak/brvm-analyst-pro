@@ -38,6 +38,7 @@ export async function createSlide(formData: FormData): Promise<R> {
   const endsAt = String(formData.get('ends_at') ?? '').trim();
   const position = Number(formData.get('position') ?? 100);
   const image = formData.get('image');
+  const placement = String(formData.get('placement') ?? 'billboard') === 'hero' ? 'hero' : 'billboard';
 
   if (title.length < 3 || title.length > 80) return { ok: false, message: 'Titre : 3 à 80 caractères.' };
   if (kind === 'ad' && !sponsor) return { ok: false, message: 'Une publicité doit nommer son annonceur.' };
@@ -49,11 +50,15 @@ export async function createSlide(formData: FormData): Promise<R> {
 
   const db = getServiceClient();
 
-  // Plafond utile : au-delà de MAX_SLIDES − MIN_PERMANENT vues admin actives,
-  // la landing n'en montrera pas plus — on le dit plutôt que d'accepter en silence.
-  const { count } = await db.from('landing_slides').select('id', { count: 'exact', head: true }).eq('is_active', true);
-  if ((count ?? 0) >= MAX_SLIDES - MIN_PERMANENT) {
-    return { ok: false, message: `Déjà ${count} vues actives : la landing n'en affiche que ${MAX_SLIDES - MIN_PERMANENT} au plus. Désactivez-en une d'abord.` };
+  // Plafond utile du CARROUSEL seulement : au-delà de MAX_SLIDES − MIN_PERMANENT
+  // vues admin actives, la landing n'en montrera pas plus — on le dit plutôt que
+  // d'accepter en silence. Les bandeaux n'ont pas de plafond : ils ne se
+  // disputent pas un rang, chaque création est tirée au sort à poids égal.
+  if (placement === 'hero') {
+    const { count } = await db.from('landing_slides').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('placement', 'hero');
+    if ((count ?? 0) >= MAX_SLIDES - MIN_PERMANENT) {
+      return { ok: false, message: `Déjà ${count} vues actives dans le carrousel : il n'en affiche que ${MAX_SLIDES - MIN_PERMANENT} au plus. Choisissez « Bandeau », ou désactivez-en une.` };
+    }
   }
 
   const ext = image.type === 'image/png' ? 'png' : image.type === 'image/webp' ? 'webp' : 'jpg';
@@ -63,7 +68,7 @@ export async function createSlide(formData: FormData): Promise<R> {
   if (up.error) return { ok: false, message: `Image refusée : ${up.error.message}` };
 
   const { data, error } = await db.from('landing_slides').insert({
-    kind, title, subtitle, cta_label: ctaLabel, link_url: linkUrl, image_path: path, sponsor_name: kind === 'ad' ? sponsor : null,
+    kind, placement, title, subtitle, cta_label: ctaLabel, link_url: linkUrl, image_path: path, sponsor_name: kind === 'ad' ? sponsor : null,
     starts_at: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
     ends_at: endsAt ? new Date(endsAt).toISOString() : null,
     position: Number.isFinite(position) ? position : 100,

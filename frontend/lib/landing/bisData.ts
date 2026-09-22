@@ -8,7 +8,7 @@ import { unstable_cache } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public';
 import { getLastMarketDate } from '@/lib/marketDate';
 import { sparklinePath } from '@/lib/landing/sparkline';
-import { composeSlides, PERMANENT_SLIDES, type LandingSlideRow, type Slide } from '@/lib/landing/slides';
+import { bandeaux, composeSlides, PERMANENT_SLIDES, type LandingSlideRow, type Slide } from '@/lib/landing/slides';
 import { scoreToRating } from '@/lib/rating';
 import { computeSectorVariations, type SectorVariation } from '@/lib/landing/sectors';
 import brvmSectors from '@/lib/brvmSectors.json';
@@ -63,6 +63,8 @@ export interface LandingBisData {
   indices: Indice[];
   plans: Plan[];
   slides: Slide[];
+  /** Créations des bandeaux (hors carrousel) — le tirage se fait au client. */
+  bandeaux: Slide[];
   topNote: TopNote | null;
   derniereCollecte: string | null;
   etat: EtatMarche;
@@ -89,7 +91,7 @@ async function load(): Promise<LandingBisData> {
   const db = createPublicClient();
   const vide: LandingBisData = {
     dateMarche: null, nbActions: 0, hausses: 0, baisses: 0, inchangees: 0, brvmC: null,
-    topHausses: [], topBaisses: [], indices: [], plans: [], slides: [...PERMANENT_SLIDES], topNote: null, derniereCollecte: null,
+    topHausses: [], topBaisses: [], indices: [], plans: [], slides: [...PERMANENT_SLIDES], bandeaux: [], topNote: null, derniereCollecte: null,
     etat: { valeurEchangee: null, titresEchanges: null, transactions: null, valeurVsVeille: null, titresVsVeille: null, transactionsVsVeille: null, sentimentScore: 50, sentimentDelta: null },
     brvmCSerie: [],
     secteurs: [],
@@ -103,7 +105,7 @@ async function load(): Promise<LandingBisData> {
   const [dateMarche, plansRes, slidesRes, collecteRes, videoSeance, latestDiagnostic, sgiDir, sgiFrais] = await Promise.all([
     getLastMarketDate(db),
     db.from('subscription_plans').select('code, name, price_monthly, price_yearly, currency').order('price_monthly'),
-    db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position').order('position'),
+    db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position, placement').order('position'),
     db.from('v_fraicheur_cours').select('derniere_collecte_intraday').maybeSingle(),
     getVideoSeance().catch(() => null),
     getLatestDiagnostic().catch(() => null),
@@ -113,12 +115,14 @@ async function load(): Promise<LandingBisData> {
   const sgi: SgiCompteurs = { nb: sgiDir.length, nbGrilles: sgiFrais.length, pays: [...new Set(sgiDir.map((x) => PAYS[x.pays]?.nom).filter((n): n is string => !!n))] };
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-  const slides = composeSlides(PERMANENT_SLIDES, (slidesRes.data ?? []) as LandingSlideRow[], supabaseUrl);
+  const lignesSlides = (slidesRes.data ?? []) as LandingSlideRow[];
+  const slides = composeSlides(PERMANENT_SLIDES, lignesSlides, supabaseUrl);
+  const pubs = bandeaux(lignesSlides, supabaseUrl);
   const plans: Plan[] = (plansRes.data ?? []).map((p) => ({
     code: String(p.code), name: String(p.name), monthly: Number(p.price_monthly ?? 0), yearly: Number(p.price_yearly ?? 0), currency: String(p.currency ?? 'XOF'),
   }));
   const derniereCollecte = (collecteRes.data?.derniere_collecte_intraday as string | null) ?? null;
-  if (!dateMarche) return { ...vide, plans, slides, derniereCollecte, videoSeance, latestDiagnostic, sgi };
+  if (!dateMarche) return { ...vide, plans, slides, bandeaux: pubs, derniereCollecte, videoSeance, latestDiagnostic, sgi };
 
 
   const [rowsRes, prevRes, idxRes, instRes, serieRes, sigRes] = await Promise.all([
@@ -205,7 +209,7 @@ async function load(): Promise<LandingBisData> {
 
   return {
     dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses, brvmC,
-    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic, sgi,
+    topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, bandeaux: pubs, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic, sgi,
   };
 }
 

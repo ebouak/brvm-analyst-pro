@@ -14,21 +14,23 @@ export default async function Page() {
   const canEdit = ctx.isSuperAdmin || ctx.permissions.has('content.publish');
   const db = getServiceClient();
   const { data } = await db.from('landing_slides')
-    .select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position, created_at')
+    .select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position, placement, created_at')
     .order('position').order('starts_at');
   const rows = (data ?? []) as (LandingSlideRow & { created_at: string })[];
   const now = new Date();
-  const visibles = rows.filter((r) => estAffichable(r, now)).length;
+  const affichables = rows.filter((r) => estAffichable(r, now));
+  const visibles = affichables.filter((r) => (r.placement ?? 'hero') === 'hero').length;
+  const enBandeau = affichables.filter((r) => r.placement === 'billboard').length;
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader kicker="Administration" title="Landing — À la une" subtitle="Diapositives du hero : publicités et annonces, en plus des vues permanentes du produit." />
+      <SectionHeader kicker="Administration" title="Landing — À la une" subtitle="Publicités et annonces : en bandeau (toutes tournent, une par chargement) ou dans le carrousel du hero, en plus des vues permanentes du produit." />
       <div className="gold-rule" />
       <div className="grid grid-cols-3 gap-3">
         <MetricCard label="Vues permanentes" value={String(PERMANENT_SLIDES.length)} accent="sapphire" />
-        <MetricCard label="Vues admin visibles maintenant" value={String(Math.min(visibles, MAX_SLIDES - MIN_PERMANENT))} accent="emerald" />
-        <MetricCard label="Plafond affiché" value={`${MAX_SLIDES} (dont ≥ ${MIN_PERMANENT} permanentes)`} accent="neutral" />
+        <MetricCard label="Créations en bandeau" value={String(enBandeau)} accent="emerald" />
+        <MetricCard label="Carrousel" value={`${Math.min(visibles, MAX_SLIDES - MIN_PERMANENT)} / ${MAX_SLIDES - MIN_PERMANENT} places`} accent="neutral" />
       </div>
 
       {canEdit && <SlideForm />}
@@ -43,6 +45,7 @@ export default async function Page() {
                 <th className="px-4 py-3 font-medium">Aperçu</th>
                 <th className="px-4 py-3 font-medium">Titre</th>
                 <th className="px-4 py-3 font-medium">Type</th>
+                <th className="px-4 py-3 font-medium">Emplacement</th>
                 <th className="px-4 py-3 font-medium">Fenêtre</th>
                 <th className="px-4 py-3 font-medium">Pos.</th>
                 <th className="px-4 py-3 font-medium">État</th>
@@ -59,6 +62,7 @@ export default async function Page() {
                       <img src={publicImageUrl(base, r.image_path)} alt="" width={96} height={64} className="h-16 w-24 rounded-md object-cover" loading="lazy" />
                     </td>
                     <td className="px-4 py-2.5 text-ivory">{r.title}{r.sponsor_name && <span className="block text-xs text-muted">{r.sponsor_name}</span>}</td>
+                    <td className="px-4 py-2.5">{(r.placement ?? 'hero') === 'billboard' ? <StatPill tone="emerald">Bandeau</StatPill> : <StatPill tone="neutral">Carrousel</StatPill>}</td>
                     <td className="px-4 py-2.5">{r.kind === 'ad' ? <StatPill tone="neutral">Publicité</StatPill> : <StatPill tone="emerald">Maison</StatPill>}</td>
                     <td className="px-4 py-2.5 text-xs text-muted tabular">{fmt(r.starts_at)} → {r.ends_at ? fmt(r.ends_at) : 'sans fin'}</td>
                     <td className="px-4 py-2.5 tabular">{r.position}</td>

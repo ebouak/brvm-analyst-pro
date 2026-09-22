@@ -734,3 +734,15 @@
 }
 @keyframes fil-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .lb .step .ic, .lb .step button { transition: none; } }
+
+/* bandeau (placement 'billboard') — une création par chargement, hauteur fixe */
+.lb .bb { max-width: 1180px; margin: 18px auto 0; }
+.lb .bb-in { position: relative; overflow: hidden; border-radius: var(--r-panel); border: 1px solid var(--line); background: rgb(var(--color-elevated)); min-height: 132px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px; padding: 18px 22px; }
+.lb .bb-in > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; outline: 0; }
+.lb .bb-in::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgb(var(--color-elevated) / .92) 0%, rgb(var(--color-elevated) / .55) 46%, rgb(var(--color-elevated) / .15) 100%); }
+.lb .bb-tag { position: absolute; z-index: 2; top: 10px; right: 14px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--ink); background: rgb(var(--color-surface) / .9); border-radius: 999px; padding: 3px 10px; }
+.lb .bb-copy { position: relative; z-index: 2; display: grid; gap: 4px; max-width: 62ch; }
+.lb .bb-copy b { font-family: var(--font-display); font-size: clamp(19px, 2.2vw, 26px); font-weight: 700; letter-spacing: -.015em; color: var(--ink); line-height: 1.1; }
+.lb .bb-copy span { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.lb .bb .btn { position: relative; z-index: 2; white-space: nowrap; }
+@media (max-width: 720px) { .lb .bb-in { grid-template-columns: 1fr; min-height: 148px; padding: 16px; } .lb .bb .btn { justify-self: start; } }

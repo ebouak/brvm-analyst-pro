@@ -15,10 +15,19 @@
  *    pas d'un drapeau désactivable).
  */
 
-export const MAX_SLIDES = 10;
+/**
+ * Plafond du carrousel. Volontairement BAS : Nielsen Norman Group recommande
+ * cinq vues au plus, et la mesure de référence (Erik Runyon, Notre Dame) donne
+ * 1,07 % de clics sur un carrousel, dont 84 % sur la PREMIÈRE vue. Au-delà,
+ * une diapositive n'est vue par presque personne — la vendre à un annonceur
+ * serait vendre du vide. Les annonces vivent dans les bandeaux (placement
+ * 'billboard'), où toutes les créations actives tournent à poids égal.
+ */
+export const MAX_SLIDES = 5;
 export const MIN_PERMANENT = 3;
 
 export type SlideKind = 'permanent' | 'house' | 'ad';
+export type Placement = 'hero' | 'billboard';
 
 export interface Slide {
   id: string;
@@ -48,6 +57,8 @@ export interface LandingSlideRow {
   ends_at: string | null;
   is_active: boolean;
   position: number;
+  /** 'hero' = diapositive du carrousel ; 'billboard' = bandeau (migration 0135). */
+  placement?: Placement | null;
 }
 
 /** Vues permanentes. `imageUrl` de la photo : fichier /public, provisoire (image générée). */
@@ -97,11 +108,28 @@ export function composeSlides(
   const perm = permanent.slice(0, MAX_SLIDES);
   const gardees = Math.max(Math.min(MIN_PERMANENT, perm.length), 0);
   const admin = adminRows
-    .filter((r) => estAffichable(r, now))
+    .filter((r) => estAffichable(r, now) && (r.placement ?? 'hero') === 'hero')
     .sort((a, b) => a.position - b.position || a.starts_at.localeCompare(b.starts_at))
     .map((r) => rowToSlide(r, supabaseUrl));
   const placesAdmin = Math.max(MAX_SLIDES - gardees, 0);
   const adminRetenues = admin.slice(0, placesAdmin);
   const placesPerm = MAX_SLIDES - adminRetenues.length;
   return [...perm.slice(0, placesPerm), ...adminRetenues];
+}
+
+/**
+ * Créations affichables dans les bandeaux, dans l'ordre de `position`.
+ * Le choix de CELLE qui s'affiche est fait côté client, à poids égal et par
+ * chargement de page (voir Billboard.tsx) : sous ISR, un tirage au rendu
+ * serveur serait figé pendant toute la durée du cache, donc toujours la même.
+ */
+export function bandeaux(
+  adminRows: readonly LandingSlideRow[],
+  supabaseUrl: string,
+  now: Date = new Date(),
+): Slide[] {
+  return adminRows
+    .filter((r) => estAffichable(r, now) && r.placement === 'billboard')
+    .sort((a, b) => a.position - b.position || a.starts_at.localeCompare(b.starts_at))
+    .map((r) => rowToSlide(r, supabaseUrl));
 }

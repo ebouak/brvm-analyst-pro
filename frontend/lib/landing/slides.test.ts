@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { composeSlides, estAffichable, PERMANENT_SLIDES, MAX_SLIDES, MIN_PERMANENT, type LandingSlideRow, rowToSlide } from './slides';
+import { bandeaux, composeSlides, estAffichable, PERMANENT_SLIDES, MAX_SLIDES, MIN_PERMANENT, type LandingSlideRow, rowToSlide } from './slides';
 
 const NOW = new Date('2026-09-21T10:00:00Z');
 const U = 'https://x.supabase.co';
@@ -7,6 +7,17 @@ const row = (i: number, over: Partial<LandingSlideRow> = {}): LandingSlideRow =>
   id: `a${i}`, kind: 'ad', title: `Pub ${i}`, subtitle: null, cta_label: null, link_url: 'https://annonceur.example',
   image_path: `2026-09/${i}.jpg`, sponsor_name: `Annonceur ${i}`, starts_at: '2026-09-01T00:00:00Z', ends_at: null,
   is_active: true, position: i, ...over,
+});
+
+describe('bandeaux', () => {
+  it('ne retient que les créations de bandeau affichables, triées par position', () => {
+    const rows = [row(3, { placement: 'billboard' }), row(1, { placement: 'billboard' }), row(2, { placement: 'hero' }), row(4, { placement: 'billboard', is_active: false })];
+    expect(bandeaux(rows, U, NOW).map((x) => x.id)).toEqual(['a1', 'a3']);
+  });
+  it('sans emplacement renseigné, une ligne reste au carrousel (défaut de la migration)', () => {
+    expect(bandeaux([row(1)], U, NOW)).toHaveLength(0);
+    expect(composeSlides([], [row(1)], U, NOW)).toHaveLength(1);
+  });
 });
 
 describe('estAffichable', () => {
@@ -24,16 +35,20 @@ describe('composeSlides', () => {
     const s = composeSlides(PERMANENT_SLIDES, [], U, NOW);
     expect(s.map((x) => x.id)).toEqual(['p-photo', 'p-sgi', 'p-note', 'p-brief', 'p-dossiers']);
   });
-  it('plafond 10 et au moins 3 permanentes même si un admin programme 12 pubs', () => {
+  it('plafond MAX_SLIDES et au moins MIN_PERMANENT permanentes même si un admin programme 12 pubs', () => {
     const rows = Array.from({ length: 12 }, (_, i) => row(i + 1));
     const s = composeSlides(PERMANENT_SLIDES, rows, U, NOW);
     expect(s).toHaveLength(MAX_SLIDES);
     expect(s.filter((x) => x.kind === 'permanent')).toHaveLength(MIN_PERMANENT);
-    expect(s.filter((x) => x.kind === 'ad')).toHaveLength(7);
+    expect(s.filter((x) => x.kind === 'ad')).toHaveLength(MAX_SLIDES - MIN_PERMANENT);
   });
-  it('avec 3 pubs : 5 permanentes + 3 pubs, triées par position', () => {
-    const s = composeSlides(PERMANENT_SLIDES, [row(3), row(1), row(2)], U, NOW);
-    expect(s.map((x) => x.id)).toEqual(['p-photo', 'p-sgi', 'p-note', 'p-brief', 'p-dossiers', 'a1', 'a2', 'a3']);
+  it('avec 2 pubs : les 3 premières permanentes puis les pubs, triées par position', () => {
+    const s = composeSlides(PERMANENT_SLIDES, [row(2), row(1)], U, NOW);
+    expect(s.map((x) => x.id)).toEqual(['p-photo', 'p-sgi', 'p-note', 'a1', 'a2']);
+  });
+  it('une création de bandeau ne monte JAMAIS dans le carrousel', () => {
+    const s = composeSlides(PERMANENT_SLIDES, [row(1, { placement: 'billboard' })], U, NOW);
+    expect(s.every((x) => x.kind === 'permanent')).toBe(true);
   });
   it('une pub porte toujours son annonceur ; une annonce maison jamais', () => {
     const ad = rowToSlide(row(1, { sponsor_name: null }), U);

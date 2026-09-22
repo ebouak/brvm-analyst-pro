@@ -2,6 +2,7 @@ import Link from 'next/link';
 import NewsletterForm from '@/components/NewsletterForm';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { FilConducteur, type Fait } from '@/components/landing/bis/FilConducteur';
+import { Billboard } from '@/components/landing/bis/Billboard';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/bis/Terminal';
@@ -106,6 +107,7 @@ export default async function Landing() {
                 sgi={d.sgi}
               />
             </div>
+            <Billboard creations={d.bandeaux} slot="Emplacement annonceur, haut de page" />
             <div className="fil"><span className="tag-fil">Le fil conducteur</span><span>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</span></div>
             <FilConducteur etapes={STEPS.map((s, k) => ({ ...s, fait: FAITS[k] ?? null }))} />
           </section>
@@ -118,6 +120,8 @@ export default async function Landing() {
           <div id="marche">
             <BrvmAujourdhui d={d} fraicheur={fraicheur} dateLabel={dateLabel} />
           </div>
+
+          <Billboard creations={d.bandeaux} slot="Emplacement annonceur, milieu de page" />
 
           {/* 2 bis · ÉCRANS DU TERMINAL — vidéo de séance, note quantitative, diagnostic IA */}
           <Terminal d={d} dateMarche={d.dateMarche} />
