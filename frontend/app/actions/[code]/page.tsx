@@ -35,6 +35,7 @@ import { pickBestFundamental } from '@/lib/fundamentals';
 import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/liquidity';
 import { LiquidityCard } from '@/components/LiquidityCard';
 import CarnetOrdres, { type CarnetRow } from '@/components/CarnetOrdres';
+import CarnetCommentaire from '@/components/CarnetCommentaire';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
@@ -420,6 +421,18 @@ export default async function InstrumentPage({
     .limit(1)
     .maybeSingle();
   const carnet = (carnetRow ?? null) as CarnetRow | null;
+
+  // Actualités de la valeur — rapprochées de la séance par leur SEULE date.
+  // Jamais datées dans le futur : une publication à venir ne commente pas une
+  // séance passée.
+  const { data: actusRows } = await liqDailyClient
+    .from('brvm_news')
+    .select('titre, date_publication')
+    .eq('instrument_code', code)
+    .lte('date_publication', new Date().toISOString().slice(0, 10))
+    .order('date_publication', { ascending: false })
+    .limit(3);
+  const actualites = (actusRows ?? []) as { titre: string; date_publication: string }[];
   const sgiFrais = await getSgiFrais().catch(() => []);
   const courtages = sgiFrais
     .map((f) => f.courtagePctMax ?? f.courtagePctMin)
@@ -714,6 +727,11 @@ export default async function InstrumentPage({
         <Eyebrow className="mb-3">Liquidité & coût de friction</Eyebrow>
         <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
         <CarnetOrdres carnet={carnet} />
+        <CarnetCommentaire
+          carnet={carnet}
+          signal={signal ? { date_marche: signal.date_marche, signal: signal.signal, confiance: signal.confiance ?? null } : null}
+          actualites={actualites}
+        />
       </div>
 
       {/* ══════════════════════════════════════════════════

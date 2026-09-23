@@ -26,6 +26,8 @@ import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
+import CarnetCommentaire from '@/components/CarnetCommentaire';
+import type { CarnetSeance as CarnetVedette } from '@/lib/carnet/commentaire';
 import {
   SectionHeader,
   EmptyStatePremium,
@@ -120,6 +122,44 @@ async function getData() {
     topSectorPerfs,
   });
 
+  // Valeur commentée du jour : celle qui porte le signal le plus assuré, à
+  // défaut la plus échangée de la séance. Aucune des deux n'est un conseil —
+  // c'est simplement la valeur dont il y a le plus à dire.
+  const vedetteCode =
+    typedSignals[0]?.code ??
+    [...typedActions].sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0))[0]?.code ??
+    null;
+
+  const [{ data: carnetVedette }, { data: actusVedette }] = vedetteCode
+    ? await Promise.all([
+        supabase
+          .from('brvm_carnet_daily')
+          .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
+          .eq('code', vedetteCode)
+          .order('date_marche', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('brvm_news')
+          .select('titre, date_publication')
+          .eq('instrument_code', vedetteCode)
+          .lte('date_publication', new Date().toISOString().slice(0, 10))
+          .order('date_publication', { ascending: false })
+          .limit(2),
+      ])
+    : [{ data: null }, { data: null }];
+
+  const vedette = vedetteCode
+    ? {
+        code: vedetteCode,
+        carnet: (carnetVedette ?? null) as CarnetVedette | null,
+        signal: typedSignals[0]
+          ? { date_marche: typedSignals[0].date_marche, signal: typedSignals[0].signal, confiance: typedSignals[0].confiance ?? null }
+          : null,
+        actualites: (actusVedette ?? []) as { titre: string; date_publication: string }[],
+      }
+    : null;
+
   // Historique cours (10 dernières séances) pour tous les codes — sparklines TopMovers
   const { data: histRows } = await supabase
     .from('brvm_actions_daily')
@@ -170,6 +210,7 @@ async function getData() {
   ];
 
   return {
+    vedette,
     lastDate,
     actions: typedActions,
     indices: typedIndices,
@@ -222,7 +263,7 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker } = await getData();
+  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker, vedette } = await getData();
 
   // Fraîcheur des cours — affichée au-dessus du ticker permanent.
   const fIn = await loadFreshnessInputs();
@@ -333,6 +374,15 @@ export default async function Dashboard() {
     ),
     seance: (
       <section aria-label="Séance du jour">
+        {vedette && (
+          <div className="mb-4 rounded-panel border border-border bg-surface p-4">
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <h3 className="text-sm font-semibold text-ivory">Ce que dit la séance · {vedette.code}</h3>
+              <Link href={`/actions/${vedette.code}`} className="text-xs font-semibold text-accent-ink hover:underline">Voir la fiche →</Link>
+            </div>
+            <CarnetCommentaire carnet={vedette.carnet} signal={vedette.signal} actualites={vedette.actualites} compact />
+          </div>
+        )}
         <p className="overline text-muted mb-4 tracking-[0.16em]">Séance du jour</p>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" sparklines={sparklines} />
