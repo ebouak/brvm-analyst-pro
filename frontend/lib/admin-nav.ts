@@ -19,6 +19,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/analyses', label: 'Analyses citables', permission: 'content.write' },
   { href: '/admin/veille-brvm', label: 'Veille BRVM', permission: 'content.read' },
   { href: '/admin/formations', label: 'Formations', permission: 'content.read' },
+  { href: '/admin/formations/sessions', label: 'Formations · Sessions live', permission: 'content.read' },
   { href: '/admin/academy', label: 'Academy (IA)', permission: 'content.read' },
   { href: '/admin/weekly', label: 'Rapports hebdo', permission: 'content.read' },
   { href: '/admin/hebdo', label: 'Valeurs de la semaine', permission: 'content.publish' },
