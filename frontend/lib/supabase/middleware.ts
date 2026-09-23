@@ -24,6 +24,7 @@ const PUBLIC_EXACT = new Set<string>([
   '/robots.txt', '/sitemap.xml', '/manifest.webmanifest',
 ]);
 const PUBLIC_PREFIXES = [
+  '/formations', // hub, Academy publique et sessions en direct (SEO)
   '/societes',   // fiches sociétés (SEO)
   '/analyses',   // pages citables (GEO)
   '/brief',      // briefs de séance datés (SEO)
