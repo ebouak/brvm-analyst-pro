@@ -39,6 +39,7 @@ export async function GET() {
     telegramConversations,
     telegramPairingCodes,
     dossierEnvois,
+    formationInscriptions,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -70,6 +71,7 @@ export async function GET() {
     supabase.from('telegram_conversations').select('*').eq('user_id', user.id),
     supabase.from('telegram_pairing_codes').select('*').eq('user_id', user.id),
     supabase.from('dossier_envois').select('*').eq('user_id', user.id),
+    supabase.from('formation_inscriptions').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -116,6 +118,7 @@ export async function GET() {
     // valeurs ont été adressées, quand et par quel canal. Donnée personnelle
     // liée au compte, rétention 90 jours — elle relève du droit d'accès.
     dossier_envois: dossierEnvois.data ?? [],
+    formation_inscriptions: formationInscriptions.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
