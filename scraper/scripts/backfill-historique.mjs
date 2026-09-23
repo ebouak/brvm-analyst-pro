@@ -52,6 +52,24 @@ const noter = () => { mkdirSync(dirname(ETAT), { recursive: true }); writeFileSy
 /** Refus explicite de la source : on s'arrête, on ne contourne pas. */
 class Refus extends Error {}
 
+/**
+ * Un incident RÉSEAU (coupure, DNS, socket avortée) n'est pas un refus de la
+ * source : on réessaie trois fois en espaçant, puis on renonce. Un refus
+ * explicite (401/403/429/5xx) n'est JAMAIS réessayé — voir Refus.
+ */
+async function avecReprise(fn, quoi) {
+  let derniere;
+  for (let essai = 1; essai <= 3; essai++) {
+    try { return await fn(); } catch (e) {
+      if (e instanceof Refus) throw e;
+      derniere = e;
+      console.warn(`  incident réseau (${essai}/3) sur ${quoi} : ${e.cause?.code ?? e.message}`);
+      await dors(DELAI_MS * 5 * essai);
+    }
+  }
+  throw derniere;
+}
+
 async function histos(ticker, du, au) {
   const r = await fetch(API, {
     method: 'POST',
@@ -136,9 +154,9 @@ const TRIMESTRES = [['01-01', '03-31'], ['04-01', '06-30'], ['07-01', '09-30'], 
           const cle = `${code}:${an}${d}`;
           n++;
           if (faits.has(cle)) continue;
-          const lst = await histos(map.get(code), `${an}-${d}`, `${an}-${f}`);
+          const lst = await avecReprise(() => histos(map.get(code), `${an}-${d}`, `${an}-${f}`), `${code} ${an}-${d}`);
           const rows = lignes(code, lst);
-          ecrits += await ecrire(rows);
+          ecrits += await avecReprise(() => ecrire(rows), `écriture ${code} ${an}-${d}`);
           parCode += rows.length;
           faits.add(cle); etat.ecrits = ecrits; noter();
           await dors(DELAI_MS);
