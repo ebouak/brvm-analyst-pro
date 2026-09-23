@@ -34,6 +34,7 @@ import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
 import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/liquidity';
 import { LiquidityCard } from '@/components/LiquidityCard';
+import CarnetOrdres, { type CarnetRow } from '@/components/CarnetOrdres';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
@@ -408,6 +409,17 @@ export default async function InstrumentPage({
     .limit(1)
     .maybeSingle();
   const liquidity = fromDailyRow(liqRow as LiquidityDailyRow | null) ?? computeLiquidity(liqRows, liqRows.length);
+
+  // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
+  // de celle des cours, le bulletin paraissant après la clôture.
+  const { data: carnetRow } = await liqDailyClient
+    .from('brvm_carnet_daily')
+    .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const carnet = (carnetRow ?? null) as CarnetRow | null;
   const sgiFrais = await getSgiFrais().catch(() => []);
   const courtages = sgiFrais
     .map((f) => f.courtagePctMax ?? f.courtagePctMin)
@@ -701,6 +713,7 @@ export default async function InstrumentPage({
       <div id="liquidite" className="scroll-mt-24">
         <Eyebrow className="mb-3">Liquidité & coût de friction</Eyebrow>
         <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
+        <CarnetOrdres carnet={carnet} />
       </div>
 
       {/* ══════════════════════════════════════════════════
