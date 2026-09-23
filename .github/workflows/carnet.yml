@@ -1,0 +1,69 @@
+name: Carnet d'ordres (Bulletin Officiel de la Cote)
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+# Le bulletin d'une séance paraît APRÈS la clôture, et parfois seulement le
+# lendemain. On passe donc tard (19:00 UTC) puis une seconde fois le matin
+# suivant : la collecte est idempotente et saute la séance déjà en base, si
+# bien que le second passage ne coûte qu'une lecture de la page de liste.
+on:
+  schedule:
+    - cron: '0 19 * * 1-5'
+    - cron: '30 7 * * 2-6'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Séance à rattraper (AAAA-MM-JJ). Vide = dernier bulletin publié.'
+        required: false
+
+concurrency:
+  group: carnet
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  carnet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Collecte du carnet
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts carnet ${{ inputs.date }}
+
+      - name: Vérifier ce qui a été écrit
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        # Un workflow vert ne prouve pas qu'une donnée est arrivée : on relit la
+        # base et on échoue bruyamment si la dernière séance collectée est vide.
+        run: |
+          node -e "
+          const u = process.env.SUPABASE_URL, k = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          fetch(u + '/rest/v1/brvm_carnet_daily?select=date_marche&order=date_marche.desc&limit=1', { headers: { apikey: k, Authorization: 'Bearer ' + k } })
+            .then(r => r.json())
+            .then(async (rows) => {
+              const d = rows[0] && rows[0].date_marche;
+              if (!d) { console.error('aucune ligne de carnet en base'); process.exit(1); }
+              const r = await fetch(u + '/rest/v1/brvm_carnet_daily?select=code&date_marche=eq.' + d, { headers: { apikey: k, Authorization: 'Bearer ' + k, Prefer: 'count=exact' } });
+              const n = Number((r.headers.get('content-range') || '').split('/')[1] || 0);
+              console.log('dernière séance ' + d + ' : ' + n + ' valeurs');
+              if (n < 30) { console.error('carnet anormalement court'); process.exit(1); }
+            })
+            .catch((e) => { console.error(e); process.exit(1); });
+          "

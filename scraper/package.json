@@ -70,7 +70,9 @@
     "daily:full:mock": "tsx src/index.ts daily:full --mock",
     "paper-trading:auto": "tsx src/index.ts paper-trading:auto",
     "paper-trading:auto:mock": "tsx src/index.ts paper-trading:auto --mock",
-    "obscura:start": "obscura serve --port 9222 --stealth"
+    "obscura:start": "obscura serve --port 9222 --stealth",
+    "carnet": "tsx src/index.ts carnet",
+    "carnet:date": "tsx src/index.ts carnet"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -87,7 +89,8 @@
     "tough-cookie": "^5.0.0",
     "ws": "^8.21.0",
     "xlsx": "^0.18.5",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "pdfjs-dist": "^4.4.168"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",

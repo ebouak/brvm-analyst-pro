@@ -43,6 +43,31 @@ export default async function FormationsPage() {
         subtitle="Montez en compétence sur l'investissement à la BRVM : cours, replays et conférences. Accès réservé aux membres Premium."
       />
 
+      {/* ── Sessions en direct — places limitées ────────────────────────────── */}
+      <Link href="/formations/sessions"
+        className="group flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-surface p-6 transition-all hover:border-accent/50">
+        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-3xl">
+          🎤
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-accent">En direct</span>
+            <StatPill tone="sapphire">Places limitées</StatPill>
+            <StatPill tone="neutral">Avec un formateur</StatPill>
+          </div>
+          <h2 className="font-display text-xl text-white transition-colors group-hover:text-accent">
+            Sessions animées par un formateur
+          </h2>
+          <p className="mt-1 max-w-xl text-sm text-muted leading-relaxed">
+            Quatre heures en petit groupe, en ligne ou en présentiel, sur des cas réels de la BRVM.
+            L&apos;Academy reste gratuite et sert de préparation.
+          </p>
+          <span className="mt-3 inline-block text-[11px] font-semibold text-accent group-hover:underline">
+            Voir les sessions →
+          </span>
+        </div>
+      </Link>
+
       {/* ── WestBourse Academy — mise en avant permanente ─────────────────── */}
       <Link href="/formations/academy"
         className="group relative flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-[#56D7FD]/25 bg-gradient-to-br from-[#0a1f25] to-[#050e11] p-6 overflow-hidden hover:border-[#56D7FD]/50 transition-all">

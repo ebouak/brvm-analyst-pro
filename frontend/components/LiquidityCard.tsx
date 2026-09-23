@@ -118,12 +118,17 @@ export function LiquidityCard({
             )}
           </div>
 
+{/* Une fourchette MESURÉE sur le carnet publié ne se présente pas comme
+              une estimation : le mot change avec la source, sinon le lecteur ne
+              peut plus distinguer un fait d'un calcul. */}
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-muted">Écart de prix estimé (spread marché)</span>
+            <span className="text-muted">
+              {v2.spread_source === 'carnet' ? 'Écart de prix mesuré (fourchette)' : 'Écart de prix estimé (spread marché)'}
+            </span>
             <span className="tabular text-ivory">
-              {v2.spread_roll_pct != null
-                ? `≈ ${v2.spread_roll_pct.toFixed(2)} % (${fmtFcfa(500_000 * (v2.spread_roll_pct / 100))} sur 500 000 FCFA)`
-                : 'non estimable'}
+              {v2.spread_pct != null
+                ? `${v2.spread_source === 'carnet' ? '' : '≈ '}${v2.spread_pct.toFixed(2)} % (${fmtFcfa(500_000 * (v2.spread_pct / 100))} sur 500 000 FCFA)`
+                : 'non disponible'}
             </span>
           </div>
 
@@ -135,8 +140,9 @@ export function LiquidityCard({
           )}
 
           <p className="text-[10px] leading-relaxed text-faint">
-            La BRVM ne publie pas son carnet d&apos;ordres : le spread et l&apos;impact prix sont
-            estimés à partir des échanges des 30 dernières séances, jamais inventés.
+            {v2.spread_source === 'carnet'
+              ? "La fourchette vient des meilleures limites publiées par la BRVM au Bulletin Officiel de la Cote, à la clôture de la dernière séance parue. L'impact prix, lui, reste estimé sur les échanges des 30 dernières séances."
+              : "Faute de limites publiées pour cette valeur, la fourchette et l'impact prix sont estimés à partir des échanges des 30 dernières séances, jamais inventés."}
           </p>
         </div>
       )}

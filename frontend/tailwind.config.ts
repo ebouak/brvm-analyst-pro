@@ -43,6 +43,7 @@ const themeColors = {
   // ── Cyan — accent / CTA / consécration (porté par 'accent'+'gold') ────────
   accent:        withAlpha('--color-accent'),
   'accent-dim':  withAlpha('--color-accent-dim'),
+  'accent-ink':  withAlpha('--color-accent-ink'),
   'accent-glow': '#56d7fd24',
   gold:          withAlpha('--color-accent'),
   'gold-2':      withAlpha('--color-gold-2'),

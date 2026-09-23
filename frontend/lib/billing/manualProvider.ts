@@ -1,4 +1,5 @@
 import { getServiceClient } from './serviceClient';
+import { prixDuCycle } from './dates';
 import type { CheckoutRequest, CheckoutResult, PaymentProvider } from './types';
 
 function instructions(ref: string, amount: number, currency: string): string {
@@ -18,12 +19,12 @@ export const manualProvider: PaymentProvider = {
 
     const { data: plan, error: planErr } = await db
       .from('subscription_plans')
-      .select('id, price_monthly, price_yearly, currency')
+      .select('id, price_monthly, price_quarterly, price_yearly, currency')
       .eq('code', req.planCode)
       .maybeSingle();
     if (planErr || !plan) return { ok: false, status: 'error', message: 'Plan introuvable.' };
 
-    const amount = req.cycle === 'yearly' ? plan.price_yearly : plan.price_monthly;
+    const amount = prixDuCycle(plan, req.cycle);
     if (amount == null) {
       return { ok: false, status: 'error', message: 'Tarif indisponible pour ce cycle.' };
     }

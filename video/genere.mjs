@@ -309,7 +309,10 @@ execFileSync(
     /* Pas de sous-titres incrustes : le montage ne porte que l'image et la voix. */
     '-vf', 'fps=30,format=yuv420p',
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '20',
-    '-c:a', 'aac', '-b:a', '160k', '-shortest', sortie,
+    '-c:a', 'aac', '-b:a', '160k',
+    /* moov en tete : sans lui, un lecteur en preload="metadata" telecharge ~1 Mo
+       pour trouver les metadonnees (mesure le 2026-09-21 sur la landing). */
+    '-movflags', '+faststart', '-shortest', sortie,
   ],
   { cwd: OUT, stdio: 'pipe' },
 );

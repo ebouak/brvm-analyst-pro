@@ -121,6 +121,8 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <div className="flex gap-2">
           <input
+            id="newsletter-compact-email"
+            aria-label="Adresse email"
             type="email"
             required
             value={email}

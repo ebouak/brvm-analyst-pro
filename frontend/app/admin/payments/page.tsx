@@ -72,7 +72,7 @@ export default async function Page() {
                     <td className="px-4 py-2.5 text-muted tabular">{fmtDate(p.paid_at ?? p.created_at)}</td>
                     <td className="px-4 py-2.5">
                       {p.status === 'pending'
-                        ? <PaymentRowActions subscriptionId={p.subscription_id} />
+                        ? <PaymentRowActions transactionId={p.id} />
                         : <span className="text-faint">—</span>}
                     </td>
                   </tr>

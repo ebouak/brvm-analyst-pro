@@ -29,7 +29,7 @@ export default async function Page() {
     db.from('profiles').select('is_premium, premium_since').eq('id', user.id).maybeSingle(),
     db
       .from('subscription_plans')
-      .select('code, name, price_monthly, price_yearly, currency')
+      .select('code, name, price_monthly, price_quarterly, price_yearly, currency')
       .eq('is_active', true)
       .neq('code', 'free')
       .order('sort_order', { ascending: true }),
@@ -51,6 +51,7 @@ export default async function Page() {
     code: p.code as string,
     name: p.name as string,
     price_monthly: Number(p.price_monthly ?? 0),
+    price_quarterly: p.price_quarterly == null ? null : Number(p.price_quarterly),
     price_yearly: p.price_yearly == null ? null : Number(p.price_yearly),
     currency: (p.currency as string) ?? 'XOF',
   }));

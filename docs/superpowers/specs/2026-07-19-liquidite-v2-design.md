@@ -84,7 +84,20 @@ RLS activée + policy lecture publique (donnée de marché, comme `brvm_actions_
 
 ## 6. Hors scope (phase 2)
 
-- **Spike carnet Richbourse — CONCLU le 2026-07-21 : NON-GO.** Aucune source
+- **Spike carnet Richbourse — CONCLU le 2026-07-21 : NON-GO.**
+
+  ⚠️ **CONCLUSION RENVERSÉE LE 2026-09-23 : la source existait.** La BRVM publie
+  chaque séance son **Bulletin Officiel de la Cote** (PDF), dont une page donne
+  par valeur les quantités résiduelles et les meilleures limites des deux côtés.
+  Collecté depuis lors par `scraper/src/carnet/` vers `brvm_carnet_daily`.
+
+  **Pourquoi ce spike est passé à côté** : il a interrogé des pages HTML de
+  cotation (Richbourse, brvm.org/cours-actions, sikafinance) — jamais les
+  PUBLICATIONS de l'institution elle-même. Leçon pour les prochaines recherches
+  de source : regarder ce que le producteur de la donnée publie en propre avant
+  de conclure qu'une donnée n'existe pas.
+
+  Le raisonnement d'origine, conservé tel quel : Aucune source
   gratuite ne publie le carnet d'ordres (meilleures limites bid/ask, quantités
   en attente, profondeur). Vérifié sur trois fronts :
   - Richbourse public (`/common/mouvements/index/<code>`, déjà scrapé sans auth)

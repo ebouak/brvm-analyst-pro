@@ -5,6 +5,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import Sparkline from '@/components/public/Sparkline';
 import RatingBadge from '@/components/RatingBadge';
+import CarnetOrdres, { type CarnetRow } from '@/components/CarnetOrdres';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
@@ -21,7 +22,7 @@ interface PageProps {
 async function getCompany(code: string) {
   const supabase = createPublicClient();
 
-  const [{ data: instrument }, { data: hist }, { data: sig }, { data: funds }, { data: divs }, { data: news }, { data: diag }] =
+  const [{ data: instrument }, { data: hist }, { data: sig }, { data: funds }, { data: divs }, { data: news }, { data: diag }, { data: carnet }] =
     await Promise.all([
       supabase.from('brvm_instruments').select('*').eq('code', code).eq('type', 'action').maybeSingle(),
       supabase
@@ -60,9 +61,20 @@ async function getCompany(code: string) {
         .select('markdown_content, generated_at')
         .eq('code', code)
         .maybeSingle(),
+      // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : celui-ci
+      // paraît après la clôture, parfois le lendemain, donc sa date diffère de
+      // celle des cours. On prend la plus récente disponible pour cette valeur.
+      supabase
+        .from('brvm_carnet_daily')
+        .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
+        .eq('code', code)
+        .order('date_marche', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
 
   return {
+    carnet: (carnet ?? null) as CarnetRow | null,
     instrument: instrument as {
       code: string; designation: string; secteur: string | null; pays: string | null;
       shares?: number | null;
@@ -111,7 +123,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompanyPage({ params }: PageProps) {
   const code = decodeURIComponent(params.code).toUpperCase();
-  const { instrument, hist, signal, fundamentals, dividends, news, diagnostic } = await getCompany(code);
+  const { instrument, hist, signal, fundamentals, dividends, news, diagnostic, carnet } = await getCompany(code);
 
   if (!instrument) notFound();
 
@@ -197,6 +209,8 @@ export default async function CompanyPage({ params }: PageProps) {
           <p className="text-faint text-sm py-8 text-center">Historique de cours en cours de constitution.</p>
         )}
       </section>
+
+      <CarnetOrdres carnet={carnet} />
 
       {/* ── Chiffres clés ────────────────────────────────────────────────── */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">

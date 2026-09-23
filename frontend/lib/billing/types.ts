@@ -1,4 +1,4 @@
-export type BillingCycle = 'monthly' | 'yearly';
+export type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
 
 export interface CheckoutRequest {
   userId: string;

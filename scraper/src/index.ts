@@ -236,6 +236,28 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'carnet': {
+      // Carnet d'ordres depuis le Bulletin Officiel de la Cote. Le bulletin
+      // paraît après la clôture : ce job n'a donc rien à voir avec l'intraday,
+      // et la séance qu'il enregistre est celle que le bulletin déclare.
+      const { runCarnet } = await import('./carnet/runCarnet.js');
+      const res = await monitored(
+        { code: 'carnet', label: 'Carnet d’ordres (BOC)' },
+        async () => {
+          const r = await runCarnet({ date: positional[0] });
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lignes,
+              rows_upserted: r.ecrites,
+              metadata: { date_marche: r.date, avec_fourchette: r.avecFourchette, au_marche: r.auMarche, saute: r.saute },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'range52': {
       // Plus-haut / plus-bas 52 semaines. À passer APRÈS `daily` : les bornes
       // incluent la clôture du jour, sinon elles ignoreraient un nouveau record.

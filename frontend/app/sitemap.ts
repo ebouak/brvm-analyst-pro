@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/brief`, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/simulateur`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/comparateur-sgi`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/secteurs`, changeFrequency: 'daily', priority: 0.8 },
     // Outils publics à contenu UNIQUE : personne d'autre sur la place ne les propose.
     // Ce sont eux qui peuvent capter des requêtes que les concurrents ne couvrent pas.
     { url: `${SITE_URL}/rendement-vrai`, changeFrequency: 'weekly', priority: 0.8 },

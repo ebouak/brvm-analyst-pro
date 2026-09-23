@@ -8,6 +8,7 @@ export interface PlanOption {
   code: string;
   name: string;
   price_monthly: number;
+  price_quarterly: number | null;
   price_yearly: number | null;
   currency: string;
 }
@@ -76,12 +77,22 @@ export function PlanClient({ plans, canSubscribe }: { plans: PlanOption[]; canSu
               >
                 Mensuel
               </button>
+              {p.price_quarterly != null && (
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => subscribe(p.code, 'quarterly')}
+                  className="rounded-lg border border-accent/40 px-4 py-2 text-sm font-semibold text-accent-ink transition active:scale-95 disabled:opacity-50"
+                >
+                  Trimestriel · {nf.format(p.price_quarterly)} {p.currency}
+                </button>
+              )}
               {p.price_yearly != null && (
                 <button
                   type="button"
                   disabled={pending}
                   onClick={() => subscribe(p.code, 'yearly')}
-                  className="rounded-lg border border-accent/40 px-4 py-2 text-sm font-semibold text-accent transition active:scale-95 disabled:opacity-50"
+                  className="rounded-lg border border-accent/40 px-4 py-2 text-sm font-semibold text-accent-ink transition active:scale-95 disabled:opacity-50"
                 >
                   Annuel · {nf.format(p.price_yearly)} {p.currency}
                 </button>

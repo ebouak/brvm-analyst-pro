@@ -30,6 +30,9 @@
 
   --color-accent: 86 215 253;
   --color-accent-dim: 47 169 207;
+  /* Accent utilisable en TEXTE : identique en sombre, assombri en clair où
+     #0c8fae ne donne que 3,4 : 1 sur fond papier (mesuré). */
+  --color-accent-ink: 86 215 253;
   --color-gold-2: 143 230 255;
   --color-gold-deep: 42 138 168;
 
@@ -77,6 +80,7 @@
 
   --color-accent: 12 143 174;
   --color-accent-dim: 10 125 153;
+  --color-accent-ink: 10 111 136;   /* 5,4 : 1 sur surface, 5,1 : 1 sur bg — mesuré */
   --color-gold-2: 10 125 153;
   --color-gold-deep: 10 125 153;
 

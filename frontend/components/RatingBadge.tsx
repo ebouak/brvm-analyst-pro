@@ -7,7 +7,7 @@ import { scoreToRating, RATING_DISCLAIMER, type Rating } from '@/lib/rating';
 
 const TONE_CLASSES: Record<Rating['tone'], string> = {
   up: 'text-up border-up/40 bg-up/10',
-  mid: 'text-accent border-accent/40 bg-accent/10',
+  mid: 'text-accent-ink border-accent/40 bg-accent/10',
   neutral: 'text-white border-border-strong bg-elevated',
   down: 'text-down border-down/40 bg-down/10',
   muted: 'text-muted border-border bg-surface',
@@ -18,11 +18,14 @@ export default function RatingBadge({
   confiance,
   size = 'sm',
   showLabel = false,
+  neutre = false,
 }: {
   scoreTotal: number | null | undefined;
   confiance: number | null | undefined;
   size?: 'sm' | 'lg';
   showLabel?: boolean;
+  /** Pages publiques : ni « Achat » ni aucun libellé d'action dans title / aria-label — la lettre et le disclaimer seuls. */
+  neutre?: boolean;
 }) {
   const rating = scoreToRating(scoreTotal, confiance);
   const sizeClasses =
@@ -33,11 +36,11 @@ export default function RatingBadge({
   return (
     <span
       className={`inline-flex items-center gap-1.5 border tabular transition-colors ${TONE_CLASSES[rating.tone]} ${sizeClasses}`}
-      title={`Note BRVM : ${rating.note} — ${rating.label}. ${RATING_DISCLAIMER}`}
-      aria-label={`Note BRVM ${rating.note} : ${rating.label}`}
+      title={neutre ? `Note BRVM ${rating.note}. ${RATING_DISCLAIMER}` : `Note BRVM : ${rating.note} — ${rating.label}. ${RATING_DISCLAIMER}`}
+      aria-label={neutre ? `Note BRVM ${rating.note}` : `Note BRVM ${rating.note} : ${rating.label}`}
     >
       {rating.note}
-      {showLabel && rating.note !== 'NR' && (
+      {showLabel && !neutre && rating.note !== 'NR' && (
         <span className="font-normal text-[0.85em] opacity-80">{rating.label}</span>
       )}
     </span>

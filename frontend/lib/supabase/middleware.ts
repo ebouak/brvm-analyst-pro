@@ -20,10 +20,11 @@ const PUBLIC_EXACT = new Set<string>([
   '/mentions-legales', '/cgu', '/confidentialite',
   '/methodologie', '/debutant', '/developers',
   '/rendement-vrai', '/fiscalite', '/simulateur-budget',
-  '/comparateur-sgi', '/actualites', '/formations',
+  '/comparateur-sgi', '/actualites', '/formations', '/secteurs',
   '/robots.txt', '/sitemap.xml', '/manifest.webmanifest',
 ]);
 const PUBLIC_PREFIXES = [
+  '/formations', // hub, Academy publique et sessions en direct (SEO)
   '/societes',   // fiches sociétés (SEO)
   '/analyses',   // pages citables (GEO)
   '/brief',      // briefs de séance datés (SEO)
