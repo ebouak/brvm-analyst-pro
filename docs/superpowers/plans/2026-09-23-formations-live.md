@@ -496,7 +496,7 @@ export async function reserverPlace(sessionId: string): Promise<ResultatReservat
   }
 
   revalidatePath('/formations/sessions');
-  revalidatePath('/compte/formations');
+  revalidatePath('/account/formations');
   return { ok: true, message: 'Place réservée. Elle sera confirmée dès réception du paiement.' };
 }
 ```
@@ -775,12 +775,12 @@ git commit -m "feat(formations): page de séance et réservation"
 ### Tâche 7 : mes inscriptions, avec le lien de visio
 
 **Fichiers :**
-- Créer : `frontend/app/compte/formations/page.tsx`
+- Créer : `frontend/app/account/formations/page.tsx`
 
 - [ ] **Étape 1 : écrire la page**
 
 ```tsx
-// frontend/app/compte/formations/page.tsx
+// frontend/app/account/formations/page.tsx
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
@@ -864,7 +864,7 @@ Attendu : aucune ligne.
 - [ ] **Étape 3 : commit**
 
 ```bash
-git add frontend/app/compte/formations/page.tsx
+git add frontend/app/account/formations/page.tsx
 git commit -m "feat(formations): mes inscriptions, lien de visio réservé aux places payées"
 ```
 
@@ -1331,7 +1331,7 @@ cd .. && MSYS_NO_PATHCONV=1 npx --yes supabase@latest db query --linked \
   "select 'premium=' || is_premium::text as l from profiles where id = '<UUID_DU_COMPTE_DE_TEST>';"
 ```
 Attendu : `premium=false`.
-5. Ouvrir `/compte/formations` : la séance est « Confirmée » et le lien « Rejoindre la session » apparaît.
+5. Ouvrir `/account/formations` : la séance est « Confirmée » et le lien « Rejoindre la session » apparaît.
 
 - [ ] **Étape 5 : vérifier que la surréservation est impossible**
 

@@ -63,6 +63,6 @@ export async function reserverPlace(sessionId: string): Promise<ResultatReservat
   }
 
   revalidatePath('/formations/sessions');
-  revalidatePath('/compte/formations');
+  revalidatePath('/account/formations');
   return { ok: true, message: 'Place réservée. Elle sera confirmée dès réception du paiement.' };
 }
