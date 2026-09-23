@@ -4,6 +4,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import { getVerifiedDividends } from '@/lib/dividends/verified';
 import { agregerParSecteur, medianeMarche, type AgregatSecteur, type LigneSociete } from './agregat';
+import brvmSectors from '@/lib/brvmSectors.json';
 
 /**
  * Chargement des données du tableau de bord sectoriel.
@@ -13,6 +14,11 @@ import { agregerParSecteur, medianeMarche, type AgregatSecteur, type LigneSociet
  * fondamentaux. Aucun chiffre n'est recalculé différemment ici : deux écrans
  * qui affichent un PER différent pour la même société, c'est une plateforme
  * qu'on ne croit plus.
+ *
+ * Le secteur vient de brvmSectors.json, référentiel déjà utilisé par la landing :
+ * la colonne  de brvm_instruments n'est renseignée que pour 3 sociétés
+ * — s'y fier rangeait 44 valeurs nulle part, et créait un 8e secteur parasite
+ * pour une seule société.
  *
  * La séance est lue en deux temps (dernière date, puis cours de cette date) :
  * une requête « toutes les cotations triées » serait tronquée en silence à
@@ -65,7 +71,8 @@ async function charger(): Promise<DonneesSecteurs> {
         dividende: dividendes.get(ins.code)?.montant ?? null,
       });
       return {
-        code: ins.code, nom: ins.designation, secteur: ins.secteur,
+        code: ins.code, nom: ins.designation,
+        secteur: (brvmSectors as Record<string, string>)[ins.code] ?? ins.secteur ?? null,
         cours: q?.cours ?? null, per: r.per, pbr: r.pb,
         // computeRatios rend un RATIO (dividende/cours) ; l'agrégat et l'affichage
         // travaillent en pourcentage. La conversion se fait ici, une seule fois.
