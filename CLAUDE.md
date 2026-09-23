@@ -225,9 +225,13 @@ tsc + build frontend verts.
   `liquidity_daily` (migration `0111`, PK `code,date_marche`, RLS lecture
   publique). CLI `liquidity[:mock]`, job cron dans `.github/workflows/score.yml`.
 - **Honnêteté** : score `null` sous 10 séances ; flux `null` sans snapshots ;
-  spread `null` si non estimable (cov ≥ 0) → composante neutre. Le carnet
-  d'ordres n'étant pas publié par la BRVM, profondeur et coût d'exécution sont
-  **estimés**, jamais inventés.
+  fourchette `null` quand aucune source ne la donne → composante neutre.
+  ⚠️ **CORRIGÉ le 2026-09-23** : cette ligne affirmait que « le carnet d'ordres
+  n'étant pas publié par la BRVM, profondeur et coût d'exécution sont estimés ».
+  **C'était faux.** La BRVM publie chaque séance un **Bulletin Officiel de la
+  Cote** (PDF) dont une page donne, par valeur, les quantités résiduelles et les
+  cours des DEUX côtés — voir la section « Carnet d'ordres » plus bas. L'impact
+  prix (Amihud) reste, lui, calculé sur les échanges.
 - **Unification** : la pénalité de liquidité du scoring §9 dérive désormais du
   score v2 (classe C/D uniquement) avec **fallback sur l'ancienne règle volume
   30 j** si `liquidity_daily` est absente — le scoring n'échoue jamais.
@@ -734,6 +738,59 @@ est vide et aucun identifiant Meta n'est configuré.
 - **Cron** : job `details` ajouté à `dividends.yml` (samedi 09:00 UTC) — même
   source, même jour, pour ne pas multiplier les visites chez un tiers.
   Hebdomadaire car le flottant ne bouge qu'aux opérations sur titres.
+
+### Ajouts (passage 2026-09-23) — Carnet d'ordres : la BRVM le publie
+
+Migrations `0138` (carnet) et `0139` (source de la fourchette), appliquées.
+14 tests de parsing + 17 tests de liquidité, 505 tests scraper sans régression.
+
+- **LA BRVM PUBLIE SON CARNET D'ORDRES.** Le **Bulletin Officiel de la Cote**
+  (`brvm.org/fr/bulletins-officiels-de-la-cote/0`, un PDF par séance) porte une
+  page « MARCHE DES ACTIONS » donnant, par valeur : quantité résiduelle à
+  l'achat, cours achat / vente, quantité résiduelle à la vente, cours de
+  référence. Le spike de juillet 2026 avait conclu l'inverse **en n'interrogeant
+  que des pages HTML de cotation** (Richbourse, brvm.org/cours-actions,
+  sikafinance) — jamais les publications de l'institution. ⚠️ **Leçon
+  générale** : avant de conclure qu'une donnée n'existe pas, regarder ce que le
+  PRODUCTEUR de la donnée publie en propre.
+- **Collecte** : `scraper/src/carnet/` — `parse.ts` (pur, testé sur une fixture
+  du bulletin réel), `fetch.ts`, `runCarnet.ts`. CLI `carnet [AAAA-MM-JJ]`,
+  cron `.github/workflows/carnet.yml` (19:00 UTC et 07:30 UTC le lendemain :
+  le bulletin paraît parfois seulement le jour suivant). Idempotent : une séance
+  déjà en base est sautée. Le workflow **relit la base** et échoue si le carnet
+  est vide — un run vert ne prouve rien.
+- **Deux pièges du PDF, tous deux capables de passer inaperçus.** (1) Les
+  colonnes ne se lisent PAS par index : le séparateur « / » tombe tantôt dans la
+  ligne, tantôt sur une ligne à lui seul, et une valeur sans acheteur décale
+  tout le reste — d'où un découpage par POSITION horizontale. (2) Deux
+  conventions de nombres cohabitent dans le même tableau : « 12 790 » (espaces)
+  et « 3,955 » qui vaut **3 955 francs**. Lire cette virgule comme un décimal
+  diviserait le cours par mille, sans que rien ne le signale à l'écran.
+- **Un ordre « au marché » n'a pas de cours.** Le spread vaut alors `null`, et
+  une fourchette croisée est refusée aussi : elle trahirait une lecture fautive.
+- **La fourchette réelle remplace l'estimateur de Roll** dans
+  `liquidity/compute.ts` (paramètre optionnel ; Roll reste en repli et reste
+  stocké à côté, pour pouvoir comparer l'estimation au fait). `liquidity_daily`
+  gagne `spread_pct` et `spread_source` (`carnet` | `roll`) : l'interface
+  n'affiche le « ≈ » que sur une estimation.
+- **Effet mesuré, avant/après sur 48 valeurs** : fourchette renseignée **26 → 47**,
+  médiane des scores 58,0 → 58,5 (donc pas d'inflation générale), un seul
+  changement de classe (ONTBF B→C). Roll **surestimait** le coût (SNTS 1,41 %
+  estimé contre 0,01 % réel ; STBC 3,37 contre 0,23) mais le **sous-estimait**
+  ailleurs (FTSC 42→37, fourchette réelle 6,08 % ; BOAS 83→78). Seule SVOC
+  reste sans fourchette. Bornes SPREAD_GOOD/BAD inchangées : les déplacer en
+  même temps qu'on change de source aurait rendu l'avant/après illisible.
+- **Profondeur : 11 séances seulement.** Le site n'expose qu'une dizaine de
+  bulletins ; les URL anciennes existent mais leur suffixe varie (`_2` marche en
+  juin, échoue en mars), donc une reprise profonde exigerait des milliers de
+  requêtes dont beaucoup en 404 sur le serveur d'une institution publique —
+  disproportionné. Le cron accumule à partir de maintenant.
+- **Affichage** : `components/CarnetOrdres.tsx` sur la fiche société. La date de
+  séance est écrite en toutes lettres (le bulletin paraît APRÈS la clôture : ces
+  quantités ne sont pas l'état du marché à cet instant), le texte précise que
+  seule la meilleure limite de chaque côté est publiée — ce n'est donc **pas la
+  profondeur complète** — et la barre encode le rapport entre les deux côtés
+  sans porter de verdict : un déséquilibre n'est pas un signal d'achat.
 
 ## 9. Bugs connus / limites
 

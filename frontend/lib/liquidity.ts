@@ -103,6 +103,10 @@ export interface LiquidityDailyRow {
   activite?: number | null;
   amihud?: number | null;
   spread_roll_pct?: number | null;
+  /** Fourchette retenue par le moteur, en % du cours. */
+  spread_pct?: number | null;
+  /** 'carnet' = mesurée sur les limites publiées par la BRVM ; 'roll' = estimée. */
+  spread_source?: 'carnet' | 'roll' | null;
   valeur_moyenne_30j: number;
   seances_traitees: number;
   seances_marche: number;
@@ -114,7 +118,7 @@ export interface LiquidityDailyRow {
 
 /** LiquidityScore + détail v2 (sous-composantes, flux) pour l'affichage enrichi. */
 export interface LiquidityScoreV2 extends LiquidityScore {
-  v2: Pick<LiquidityDailyRow, 'amihud' | 'spread_roll_pct' | 'activite' | 'volume_achat' | 'volume_vente' | 'volume_neutre' | 'flux_net_pct'>;
+  v2: Pick<LiquidityDailyRow, 'amihud' | 'spread_roll_pct' | 'spread_pct' | 'spread_source' | 'activite' | 'volume_achat' | 'volume_vente' | 'volume_neutre' | 'flux_net_pct'>;
 }
 
 /** Mappe une ligne liquidity_daily ; null si le moteur n'a pas pu scorer (honnêteté). */
@@ -130,6 +134,8 @@ export function fromDailyRow(row: LiquidityDailyRow | null | undefined): Liquidi
     v2: {
       amihud: row.amihud ?? null,
       spread_roll_pct: row.spread_roll_pct ?? null,
+      spread_pct: row.spread_pct ?? null,
+      spread_source: row.spread_source ?? null,
       activite: row.activite ?? null,
       volume_achat: row.volume_achat ?? null,
       volume_vente: row.volume_vente ?? null,

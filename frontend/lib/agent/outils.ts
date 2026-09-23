@@ -501,7 +501,7 @@ async function liquiditeValeur(db: SupabaseClient, saisie: string) {
   const { data } = await db
     .from('liquidity_daily')
     .select(
-      'date_marche, score, classe, presence_pct, amihud, spread_roll_pct, valeur_moyenne_30j, seances_traitees, flux_net_pct',
+      'date_marche, score, classe, presence_pct, amihud, spread_roll_pct, spread_pct, spread_source, valeur_moyenne_30j, seances_traitees, flux_net_pct',
     )
     .eq('code', code)
     .order('date_marche', { ascending: false })
@@ -517,7 +517,9 @@ async function liquiditeValeur(db: SupabaseClient, saisie: string) {
     classe: data.classe,
     presence_pct: data.presence_pct,
     valeur_moyenne_30j_fcfa: data.valeur_moyenne_30j,
-    spread_estime_pct: data.spread_roll_pct,
+    // L'agent doit pouvoir dire si la fourchette est mesurée ou estimée.
+    spread_pct: data.spread_pct ?? data.spread_roll_pct,
+    spread_source: data.spread_source ?? (data.spread_roll_pct != null ? 'roll' : null),
     flux_net_pct: data.flux_net_pct,
     seances_observees: data.seances_traitees,
     avertissement:

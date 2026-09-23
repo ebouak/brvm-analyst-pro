@@ -99,7 +99,11 @@ export default async function LiquiditePage() {
                       <td className="tabular px-3 py-2 text-muted">{Math.round(r.presence_pct)} %</td>
                       <td className="tabular px-3 py-2 text-muted">{fmtFcfa(r.valeur_moyenne_30j)}</td>
                       <td className="tabular px-3 py-2 text-muted">
-                        {r.spread_roll_pct != null ? `≈ ${Number(r.spread_roll_pct).toFixed(2)} %` : '—'}
+                        {/* Le « ≈ » n'apparaît que sur une estimation : une fourchette
+                            mesurée au carnet publié ne doit pas se lire comme un calcul. */}
+                        {(r.spread_pct ?? r.spread_roll_pct) != null
+                          ? `${r.spread_source === 'carnet' ? '' : '≈ '}${Number(r.spread_pct ?? r.spread_roll_pct).toFixed(2)} %`
+                          : '—'}
                       </td>
                       <td
                         className={`tabular px-3 py-2 ${
