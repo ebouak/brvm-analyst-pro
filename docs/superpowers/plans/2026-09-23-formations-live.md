@@ -131,7 +131,7 @@ export function transitionAutorisee(de: StatutInscription, vers: StatutInscripti
 - [ ] **Étape 4 : lancer le test et vérifier qu'il passe**
 
 Commande : `cd frontend && npx vitest run lib/formations/regles.test.ts`
-Attendu : `Tests  13 passed (13)`.
+Attendu : `Tests  11 passed (11)`.
 
 - [ ] **Étape 5 : commit**
 
@@ -351,13 +351,16 @@ git commit -m "feat(formations): tables, vue publique sans lien de visio, réten
 
 ### Tâche 3 : lecture serveur des séances
 
+> ⚠️ Le fichier  EXISTE DÉJÀ pour le catalogue des
+> replays : ne pas l'écraser. Les séances vivent dans .
+
 **Fichiers :**
-- Créer : `frontend/lib/formations/server.ts`
+- Créer : `frontend/lib/formations/sessions.ts`
 
 - [ ] **Étape 1 : écrire le module**
 
 ```ts
-// frontend/lib/formations/server.ts
+// frontend/lib/formations/sessions.ts
 import 'server-only';
 import { createPublicClient } from '@/lib/supabase/public';
 import type { StatutSession } from './regles';
@@ -414,7 +417,7 @@ Attendu : aucune ligne.
 - [ ] **Étape 3 : commit**
 
 ```bash
-git add frontend/lib/formations/server.ts
+git add frontend/lib/formations/sessions.ts
 git commit -m "feat(formations): lecture des séances par la vue publique"
 ```
 
@@ -526,7 +529,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import PublicShell from '@/components/public/PublicShell';
 import { SectionHeader, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
-import { listerSessionsAVenir } from '@/lib/formations/server';
+import { listerSessionsAVenir } from '@/lib/formations/sessions';
 
 export const revalidate = 300;
 
@@ -684,7 +687,7 @@ import { notFound } from 'next/navigation';
 import PublicShell from '@/components/public/PublicShell';
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
 import { createClient } from '@/lib/supabase/server';
-import { lireSessionPublique } from '@/lib/formations/server';
+import { lireSessionPublique } from '@/lib/formations/sessions';
 import { placeDisponible, type SessionTarif } from '@/lib/formations/regles';
 import BoutonReserver from './BoutonReserver';
 

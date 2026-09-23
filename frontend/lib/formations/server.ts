@@ -1,7 +1,5 @@
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { createPublicClient } from '@/lib/supabase/public';
-import type { StatutSession } from './regles';
 
 export interface FormationCard {
   id: string;
@@ -42,52 +40,4 @@ export async function getFormationFull(id: string): Promise<FormationFull | null
   const sb = getServiceClient();
   const { data } = await sb.from('formations').select('*').eq('id', id).eq('published', true).maybeSingle();
   return (data as FormationFull | null) ?? null;
-}
-
-// --- Formations live (sessions animées en direct) ---
-// Ajouté par le plan `docs/superpowers/plans/2026-09-23-formations-live.md`
-// (tâche 3). Cohabite avec les formations « replay » ci-dessus : deux
-// catalogues distincts partageant le même chemin de module.
-
-/**
- * Lecture des séances. La liste publique passe par la VUE, qui ne porte pas
- * `lien_visio` : impossible de le divulguer par inadvertance depuis une page.
- */
-
-export interface SessionPublique {
-  id: string;
-  niveau: 'debutant' | 'intermediaire' | 'avance';
-  titre: string;
-  description: string | null;
-  debut_at: string;
-  duree_min: number;
-  modalite: 'presentiel' | 'visio';
-  lieu: string | null;
-  places: number;
-  places_prises: number;
-  prix: number;
-  prix_abonne: number | null;
-  statut: StatutSession;
-}
-
-const SESSION_COLONNES = 'id, niveau, titre, description, debut_at, duree_min, modalite, lieu, places, places_prises, prix, prix_abonne, statut';
-
-export async function listerSessionsAVenir(): Promise<SessionPublique[]> {
-  const sb = createPublicClient();
-  const { data } = await sb
-    .from('formation_sessions_publiques')
-    .select(SESSION_COLONNES)
-    .gte('debut_at', new Date().toISOString())
-    .order('debut_at', { ascending: true });
-  return (data ?? []) as SessionPublique[];
-}
-
-export async function lireSessionPublique(id: string): Promise<SessionPublique | null> {
-  const sb = createPublicClient();
-  const { data } = await sb
-    .from('formation_sessions_publiques')
-    .select(SESSION_COLONNES)
-    .eq('id', id)
-    .maybeSingle();
-  return (data as SessionPublique | null) ?? null;
 }
