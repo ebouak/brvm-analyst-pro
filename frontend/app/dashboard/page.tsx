@@ -154,8 +154,22 @@ async function getData() {
         code: vedetteCode,
         carnet: (carnetVedette ?? null) as CarnetVedette | null,
         signal: typedSignals[0]
-          ? { date_marche: typedSignals[0].date_marche, signal: typedSignals[0].signal, confiance: typedSignals[0].confiance ?? null }
+          ? {
+              date_marche: typedSignals[0].date_marche,
+              signal: typedSignals[0].signal,
+              confiance: typedSignals[0].confiance ?? null,
+              score_total: (typedSignals[0] as { score_total?: number | null }).score_total ?? null,
+              explication: (typedSignals[0] as { explication?: string | null }).explication ?? null,
+              sousScores: (() => {
+                const s = typedSignals[0] as unknown as Record<string, unknown>;
+                const n = (k: string) => (typeof s[k] === 'number' ? (s[k] as number) : null);
+                return { variation: n('score_variation'), volume: n('score_volume'), rsi: n('score_rsi'), macd: n('score_macd'), tendance: n('bonus_tendance') };
+              })(),
+            }
           : null,
+        // Les capitaux de la séance : l'étalon qui empêche de lire un reliquat
+        // de carnet comme un rapport de force.
+        valeurEchangee: typedActions.find((a) => a.code === vedetteCode)?.valeur_echangee ?? null,
         actualites: (actusVedette ?? []) as { titre: string; date_publication: string }[],
       }
     : null;
@@ -380,7 +394,13 @@ export default async function Dashboard() {
               <h3 className="text-sm font-semibold text-ivory">Ce que dit la séance · {vedette.code}</h3>
               <Link href={`/actions/${vedette.code}`} className="text-xs font-semibold text-accent-ink hover:underline">Voir la fiche →</Link>
             </div>
-            <CarnetCommentaire carnet={vedette.carnet} signal={vedette.signal} actualites={vedette.actualites} compact />
+            <CarnetCommentaire
+              carnet={vedette.carnet}
+              signal={vedette.signal}
+              actualites={vedette.actualites}
+              contexte={{ valeurEchangee: vedette.valeurEchangee }}
+              compact
+            />
           </div>
         )}
         <p className="overline text-muted mb-4 tracking-[0.16em]">Séance du jour</p>

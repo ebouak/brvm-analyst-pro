@@ -36,6 +36,7 @@ import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/li
 import { LiquidityCard } from '@/components/LiquidityCard';
 import CarnetOrdres, { type CarnetRow } from '@/components/CarnetOrdres';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
+import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
@@ -433,6 +434,54 @@ export default async function InstrumentPage({
     .order('date_publication', { ascending: false })
     .limit(3);
   const actualites = (actusRows ?? []) as { titre: string; date_publication: string }[];
+
+  // Fourchettes du marché à la même séance : sans elles, « 1,75 % » ne se
+  // compare à rien. Seules les valeurs dont la fourchette est RÉELLEMENT
+  // mesurée entrent dans le classement — jamais celles qui n'en ont pas.
+  const seanceLiq = (liqRow as { date_marche?: string } | null)?.date_marche ?? null;
+  const { data: spreadRows } = seanceLiq
+    ? await liqDailyClient.from('liquidity_daily').select('spread_pct').eq('date_marche', seanceLiq).not('spread_pct', 'is', null)
+    : { data: null };
+  const spreads = ((spreadRows ?? []) as { spread_pct: number }[]).map((r) => r.spread_pct).sort((a, b) => a - b);
+  const propreSpread = (liqRow as { spread_pct?: number | null } | null)?.spread_pct ?? null;
+  const contexteCarnet = spreads.length > 0
+    ? {
+        valeurEchangee: (last as { valeur_echangee?: number | null }).valeur_echangee ?? null,
+        spreadMedianMarche: spreads[Math.floor(spreads.length / 2)]!,
+        valeursPlusSerrees: propreSpread != null ? spreads.filter((x) => x < propreSpread).length : null,
+        valeursComparees: spreads.length,
+      }
+    : { valeurEchangee: (last as { valeur_echangee?: number | null }).valeur_echangee ?? null };
+
+  // Agitation ordinaire du titre, mesurée sur son propre historique. Sous
+  // 20 séances, `ecartTypeVariations` rend `null` et le mouvement du jour est
+  // cité sans être qualifié.
+  const { ecartTypePct, seances } = ecartTypeVariations(rows.slice(-31).map((r) => r.variation_pct));
+  const bruitSeance = {
+    variationPct: last.variation_pct ?? null,
+    ecartTypePct,
+    seancesObservees: seances,
+    volumeRatio: ((signal as { inputs?: { volume_ratio?: number | null } | null } | null)?.inputs)?.volume_ratio ?? null,
+  };
+
+  // Comptes du dernier exercice publié, et celui d'avant pour l'évolution.
+  const exBrut = fundamentals.length > 0 ? pickBestFundamental(fundamentals) : null;
+  // Un exercice sans année n'est pas exploitable : on n'en tire rien plutôt que de deviner.
+  const exCourant = exBrut?.year != null ? (exBrut as typeof exBrut & { year: number }) : null;
+  const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
+  const economieSociete = exCourant
+    ? {
+        exercice: exCourant.year,
+        resultatNet: exCourant.net_income ?? null,
+        resultatNetPrecedent: exPrecedent?.net_income ?? null,
+        chiffreAffaires: exCourant.revenue ?? null,
+        chiffreAffairesPrecedent: exPrecedent?.revenue ?? null,
+        capitauxPropres: exCourant.equity ?? null,
+        actions: instrument?.shares ?? null,
+        coursJour: last.cours_jour ?? null,
+        source: exCourant.is_manual ? 'pdf-verified' : null,
+      }
+    : null;
   const sgiFrais = await getSgiFrais().catch(() => []);
   const courtages = sgiFrais
     .map((f) => f.courtagePctMax ?? f.courtagePctMin)
@@ -729,8 +778,24 @@ export default async function InstrumentPage({
         <CarnetOrdres carnet={carnet} />
         <CarnetCommentaire
           carnet={carnet}
-          signal={signal ? { date_marche: signal.date_marche, signal: signal.signal, confiance: signal.confiance ?? null } : null}
+          signal={signal ? {
+            date_marche: signal.date_marche,
+            signal: signal.signal,
+            confiance: signal.confiance ?? null,
+            score_total: signal.score_total ?? null,
+            explication: signal.explication ?? null,
+            // Les sous-scores : seule base permettant de dire que les facteurs
+            // se contredisent. Sans eux, le texte ne l'affirme pas.
+            sousScores: (() => {
+              const s = signal as unknown as Record<string, unknown>;
+              const n = (k: string) => (typeof s[k] === 'number' ? (s[k] as number) : null);
+              return { variation: n('score_variation'), volume: n('score_volume'), rsi: n('score_rsi'), macd: n('score_macd'), tendance: n('bonus_tendance') };
+            })(),
+          } : null}
           actualites={actualites}
+          contexte={contexteCarnet}
+          bruit={bruitSeance}
+          economie={economieSociete}
         />
       </div>
 
