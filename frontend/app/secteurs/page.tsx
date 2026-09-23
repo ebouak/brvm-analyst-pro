@@ -4,6 +4,7 @@ import SectorsExport from '@/components/SectorsExport';
 import SectorCard from '@/components/SectorCard';
 import SectorRankingTable from '@/components/SectorRankingTable';
 import SectorRotation from '@/components/SectorRotation';
+import ValorisationSecteurs from '@/components/secteurs/ValorisationSecteurs';
 import NewsletterForm from '@/components/NewsletterForm';
 import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
@@ -211,6 +212,11 @@ export default async function SecteursPage() {
                 </div>
               </PremiumPanel>
             </section>
+
+            {/* ── Section 4 : Valorisation (PER, PBR, rendement) ───────────── */}
+            <div className="animate-rise-in [animation-delay:0.40s]">
+              <ValorisationSecteurs />
+            </div>
           </>
         )}
 
