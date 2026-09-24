@@ -156,7 +156,7 @@ aux `limites` du commentaire :
 Les `a_surveiller` ne vont qu'à l'admin. Une page qui affiche une donnée
 périmée sans le dire est pire qu'une page qui l'avoue.
 
-### Table `coherence_anomalies` (migration 0140)
+### Table `coherence_anomalies` (migration 0141)
 
 `code`, `regle`, `gravite`, `message`, `preuve jsonb`, `detectee_le`,
 `resolue_le`. Clé naturelle `(code, regle, detectee_le)` pour l'idempotence du

@@ -28,6 +28,7 @@ import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import type { CarnetSeance as CarnetVedette } from '@/lib/carnet/commentaire';
+import { canAccess } from '@/lib/server/featureAccess';
 import {
   SectionHeader,
   EmptyStatePremium,
@@ -280,7 +281,12 @@ export default async function Dashboard() {
   const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker, vedette } = await getData();
 
   // Fraîcheur des cours — affichée au-dessus du ticker permanent.
-  const fIn = await loadFreshnessInputs();
+  // `lecture_seance` verrouille l'encart « Ce que dit la séance · CODE » plus bas :
+  // vérifié ici, en parallèle, pour ne pas ajouter d'aller-retour dédié.
+  const [fIn, gateLectureSeance] = await Promise.all([
+    loadFreshnessInputs(),
+    canAccess('lecture_seance'),
+  ]);
   const fraicheurCours = computeFreshness(fIn.derniereCollecte, fIn.derniereSeance, new Date());
 
   // Secteurs favoris de l'utilisateur (paramétrage intelligent).
@@ -388,7 +394,15 @@ export default async function Dashboard() {
     ),
     seance: (
       <section aria-label="Séance du jour">
-        {vedette && (
+        {/* Verrou premium `lecture_seance` : sur ce tableau de bord déjà dense en
+            CTA (signaux, patterns intraday plus bas), un cadenas de plus pour un
+            encart qui met en avant une valeur choisie automatiquement — pas
+            recherchée par l'utilisateur — ajouterait de la fatigue sans le
+            justifier. On omet donc le bloc entier plutôt que d'y mettre un
+            SectionLock ; la fiche action, elle, explique l'offre avec un vrai
+            pitch. Rien ne fuit : le bloc (titre + lien + composant) ne rend
+            rien du tout, sans cadre ni marge orpheline. */}
+        {vedette && gateLectureSeance.allowed && (
           <div className="mb-4 rounded-panel border border-border bg-surface p-4">
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <h3 className="text-sm font-semibold text-ivory">Ce que dit la séance · {vedette.code}</h3>

@@ -81,9 +81,9 @@ floue des dividendes) :
 
 ---
 
-## Tâche 2 — Migration 0140 : drapeau et table
+## Tâche 2 — Migration 0141 : drapeau et table
 
-**Fichier** : `supabase/migrations/0140_coherence_et_flag_lecture_seance.sql` (CREATE).
+**Fichier** : `supabase/migrations/0141_coherence_et_flag_lecture_seance.sql` (CREATE).
 
 1. `INSERT INTO feature_flags (code, label, acces, description)` →
    `('lecture_seance', 'Lecture commentée de la séance', 'premium', '…')`,

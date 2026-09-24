@@ -3,6 +3,7 @@ import {
   type ActualiteRecente, type BruitSeance, type CarnetSeance,
   type ContexteSeance, type EconomieSociete, type SignalSeance,
 } from '@/lib/carnet/commentaire';
+import type { MesureEvenement } from '@/lib/carnet/evenements';
 
 /**
  * « Ce que dit la séance » — bruit, carnet, technique, comptes, actualité,
@@ -26,6 +27,10 @@ const PASTILLE: Record<string, { classe: string; libelle: string }> = {
   carnet: { classe: 'bg-accent/12 text-accent-ink', libelle: 'Carnet' },
   signal: { classe: 'bg-purple/12 text-purple', libelle: 'Technique' },
   economie: { classe: 'bg-gold/12 text-gold', libelle: 'Comptes' },
+  // Ni « up » ni « down » : ce ne sont que des dates de publication rapprochées
+  // d'une mesure, jamais un verdict — un jeton teinté hausse/baisse laisserait
+  // croire à un jugement que ce module s'interdit précisément de porter.
+  evenement: { classe: 'bg-faint/12 text-faint', libelle: 'Événement' },
   actualite: { classe: 'bg-warn/12 text-warn', libelle: 'Actualité' },
 };
 
@@ -36,6 +41,7 @@ export default function CarnetCommentaire({
   contexte,
   bruit,
   economie,
+  evenements,
   compact = false,
 }: {
   carnet: CarnetSeance | null;
@@ -44,13 +50,14 @@ export default function CarnetCommentaire({
   contexte?: ContexteSeance;
   bruit?: BruitSeance;
   economie?: EconomieSociete | null;
+  evenements?: MesureEvenement[];
   /** Variante resserrée pour le tableau de bord : la synthèse d'abord, deux constats. */
   compact?: boolean;
 }) {
   // Rien à dire : on n'affiche pas un cadre vide.
-  if (!carnet && !signal && !economie && !bruit?.variationPct && !(actualites && actualites.length > 0)) return null;
+  if (!carnet && !signal && !economie && !bruit?.variationPct && !(actualites && actualites.length > 0) && !(evenements && evenements.length > 0)) return null;
 
-  const { constats, synthese, limites } = commenterSeance({ carnet, signal, actualites, contexte, bruit, economie });
+  const { constats, synthese, limites } = commenterSeance({ carnet, signal, actualites, contexte, bruit, economie, evenements });
   const nonConseil = limites[limites.length - 1]!;
   const autres = limites.slice(0, -1);
 

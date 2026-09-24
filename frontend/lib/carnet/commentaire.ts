@@ -44,6 +44,8 @@
  * Décrire, comparer, mettre à l'échelle : oui. Prédire ou conseiller : non.
  */
 
+import { phraseEvenement, type MesureEvenement } from './evenements';
+
 export interface CarnetSeance {
   date_marche: string;
   qte_achat: number | null;
@@ -135,7 +137,7 @@ export interface ContexteSeance {
 
 /** Un constat : le fait, sa portée, et l'origine de la donnée. */
 export interface Constat {
-  origine: 'bruit' | 'carnet' | 'signal' | 'economie' | 'actualite';
+  origine: 'bruit' | 'carnet' | 'signal' | 'economie' | 'evenement' | 'actualite';
   /** Le fait brut — retrouvable dans l'écran juste au-dessus. */
   fait: string;
   /** À quoi il se compare, ce qu'il coûte, ce qu'il pèse. Absent si rien ne permet de l'établir. */
@@ -175,9 +177,11 @@ const CROISSANCE_PLATE_PCT = 2;
 /* ───────────────────────── Mise en forme ───────────────────────── */
 
 const nb = (v: number) => v.toLocaleString('fr-FR');
-const pc = (v: number, d = 2) =>
+/** Exportée pour `lib/carnet/evenements.ts`, qui reprend cette mise en forme plutôt que de la dupliquer. */
+export const pc = (v: number, d = 2) =>
   `${v.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d })} %`;
-const dec = (v: number, d = 2) => v.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+/** Exportée pour `lib/carnet/evenements.ts` — voir `pc` ci-dessus. */
+export const dec = (v: number, d = 2) => v.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 /** Montant lisible : 22,5 millions plutôt que 22 533 095. */
 export function fcfa(v: number): string {
@@ -188,7 +192,8 @@ export function fcfa(v: number): string {
   return `${nb(Math.round(v))} FCFA`;
 }
 
-const jour = (iso: string) => {
+/** Exportée pour `lib/carnet/evenements.ts` — voir `pc` ci-dessus. */
+export const jour = (iso: string) => {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 };
@@ -279,11 +284,13 @@ export function commenterSeance(entree: {
   contexte?: ContexteSeance;
   bruit?: BruitSeance;
   economie?: EconomieSociete | null;
+  evenements?: MesureEvenement[];
 }): Commentaire {
   const { carnet, signal } = entree;
   const actualites = entree.actualites ?? [];
   const ctx = entree.contexte ?? {};
   const economie = entree.economie ?? null;
+  const evenements = entree.evenements ?? [];
   const constats: Constat[] = [];
   const limites: string[] = [];
 
@@ -456,7 +463,19 @@ export function commenterSeance(entree: {
     }
   }
 
-  /* ── 5. L'actualité, rapprochée par la date et par elle seule ────────── */
+  /* ── 5. Les événements de marché, et ce que le cours a fait après ─────
+     Le point le plus tentant pour glisser une cause : une publication suivie
+     d'une hausse ne prouve pas qu'elle l'a provoquée. `phraseEvenement` ne
+     décrit qu'une succession dans le temps — jamais une explication. ──── */
+  if (evenements.length > 0) {
+    for (const mesure of evenements) {
+      const { fait, portee } = phraseEvenement(mesure);
+      constats.push({ origine: 'evenement', fait, portee });
+    }
+    limites.push("Ces mesures décrivent ce qui a suivi la date, pas ce que l'événement a produit.");
+  }
+
+  /* ── 6. L'actualité, rapprochée par la date et par elle seule ────────── */
   if (actualites.length > 0) {
     const ref = carnet?.date_marche ?? signal?.date_marche ?? null;
     const a0 = actualites[0]!;
