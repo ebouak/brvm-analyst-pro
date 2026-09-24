@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { logger } from '../logger.js';
 import { parseBrvmPublic, parseBrvmResumeIndices } from './brvmPublic.js';
-import { ensureIndexInstruments, upsertActions, upsertIndices, upsertMarketSummary, insertIntradaySnapshots } from '../persistence/repository.js';
+import { ensureIndexInstruments, ensureActionInstruments, upsertActions, upsertIndices, upsertMarketSummary, insertIntradaySnapshots } from '../persistence/repository.js';
 import type { IndiceRow } from '../types.js';
 
 const BRVM_PUBLIC_URL = 'https://www.brvm.org/fr/cours-actions/0';
@@ -66,11 +66,23 @@ export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbAc
 
   let nbSummary = 0;
   if (!mock) {
-    // Crée seulement les instruments d'indices MANQUANTS (les nouveaux sectoriels),
-    // sans toucher aux lignes existantes — sinon on écraserait secteur/pays des
-    // actions (renseignés par le scrape quotidien) → « secteur Inconnu ». Les
-    // instruments d'actions existent déjà ; pas besoin de les réécrire ici.
+    // Crée seulement les instruments MANQUANTS — indices sectoriels et valeurs
+    // nouvellement admises à la cote — sans jamais toucher aux lignes
+    // existantes, sinon on écraserait secteur/pays (renseignés par le scrape
+    // quotidien) → « secteur Inconnu ».
+    //
+    // Les actions étaient supposées déjà présentes. C'était faux : le
+    // 24/09/2026, l'admission de BBGC (Bridge Bank Group CI, 48e valeur) a fait
+    // violer la clé étrangère `brvm_actions_daily_code_fkey`, et comme le lot
+    // part en une seule requête, les 47 autres lignes sont tombées avec elle —
+    // 25 séances de collecte perdues avant correction manuelle.
     await ensureIndexInstruments(snapshot.indices);
+    const nouvellesActions = await ensureActionInstruments(snapshot.actions);
+    if (nouvellesActions.length > 0) {
+      // En `warn` délibérément : une entrée en cote est un événement rare, qui
+      // demande ensuite une curation (secteur, pays, famille comptable, logo).
+      logger.warn({ codes: nouvellesActions }, 'intraday : nouvelle(s) valeur(s) admise(s) à la cote — curation à faire');
+    }
     await upsertActions(snapshot);
     // Historise cette capture (append) pour la détection de patterns intraday.
     // Non bloquant : un échec ne doit pas casser le scrape des cours.

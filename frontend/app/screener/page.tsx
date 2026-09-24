@@ -1,4 +1,5 @@
 import { SectionHeader, EmptyStatePremium } from '@/components/ui/premium';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { canAccess } from '@/lib/server/featureAccess';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import ScreenerClient from '@/components/screener/ScreenerClient';
@@ -37,7 +38,7 @@ export default async function ScreenerPage() {
             <EmptyStatePremium
               icon="🔒"
               title={`Screener réservé au plan ${gate.required === 'pro' ? 'Platinium' : 'Premium'}`}
-              hint="Filtrez les 47 valeurs par RSI, volume, score, secteur et rendement du dividende."
+              hint={`Filtrez les ${NB_SOCIETES_COTEES} valeurs par RSI, volume, score, secteur et rendement du dividende.`}
               action={{
                 href: '/account/plan',
                 label: `Passer à ${gate.required === 'pro' ? 'Platinium' : 'Premium'}`,

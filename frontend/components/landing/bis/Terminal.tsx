@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import RatingBadge from '@/components/RatingBadge';
 import { SubscoreBars, COULEURS_TOKEN } from '@/components/landing/SubscoreBars';
 import { excerpt } from '@/lib/landing/excerpt';
@@ -85,7 +86,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
             <div><dt><span className="g">A</span> à <span className="g">F</span></dt><dd>Une note recalculée à chaque séance à partir de signaux vérifiables. A = bien orientés ; F = mal orientés. Ce n&apos;est pas un avis.</dd></div>
             <div><dt><span className="g up">BUY</span> · <span className="g">HOLD</span> · <span className="g down">SELL</span></dt><dd>Quand rien n&apos;est net, le moteur affiche HOLD et s&apos;abstient. C&apos;est un choix de rigueur, pas un manque d&apos;avis — et cela arrive souvent.</dd></div>
           </dl>
-          <Link href="/societes" className="tc-link">Voir les {d.nbActions || 47} sociétés →</Link>
+          <Link href="/societes" className="tc-link">Voir les {d.nbActions || NB_SOCIETES_COTEES} sociétés →</Link>
         </div>
         <div className="tc-card">
           {s ? (

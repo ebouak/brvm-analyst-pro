@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import type { LandingBisData, Mover } from '@/lib/landing/bisData';
 import type { Fraicheur } from '@/lib/freshness';
 import { seanceNarrative } from '@/lib/landing/seanceNarrative';
@@ -59,7 +60,7 @@ function Table({ titre, rows, tone: t, href, vide }: { titre: string; rows: Move
     <div className="card top">
       <div className="top-head">
         <h3 className={t}><span className="badge" aria-hidden="true">{t === 'up' ? '↑' : '↓'}</span>{titre}</h3>
-        <Link href={href} className={`more ${t}`}>Voir les 47 sociétés →</Link>
+        <Link href={href} className={`more ${t}`}>Voir les {NB_SOCIETES_COTEES} sociétés →</Link>
       </div>
       {rows.length ? (
         <table>

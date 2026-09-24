@@ -21,7 +21,7 @@ export const BALANCE_KEYS = new Set<string>([
 
 /** Mapping de référence des 48 actions BRVM -> famille comptable. */
 export const FAMILLE_PAR_CODE: Record<string, Famille> = {
-  BICB: 'banque', BICC: 'banque', BOAB: 'banque', BOABF: 'banque', BOAC: 'banque',
+  BBGC: 'banque', BICB: 'banque', BICC: 'banque', BOAB: 'banque', BOABF: 'banque', BOAC: 'banque',
   BOAM: 'banque', BOAN: 'banque', BOAS: 'banque', CBIBF: 'banque', ECOC: 'banque',
   ETIT: 'banque', NSBC: 'banque', ORGT: 'banque', SGBC: 'banque', SIBC: 'banque',
   ABJC: 'general', BNBC: 'general', CABC: 'general', CFAC: 'general', CIEC: 'general',
