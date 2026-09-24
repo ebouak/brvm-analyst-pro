@@ -369,6 +369,22 @@ writeFileSync(
       ligne_lourde: { code: lourde.code, part_pct: partLourde, variation_pct: lourde.variation_pct },
       plus_forte_hausse: { code: haut.code, variation_pct: haut.variation_pct },
       plus_forte_baisse: { code: bas.code, variation_pct: bas.variation_pct },
+      /* Les trois de chaque côté, pour le brief écrit. Une seule valeur par
+         camp suffit à une voix off de trente secondes ; un brief de clôture
+         en cite plusieurs, sans quoi le lecteur ne voit pas si la séance
+         s'est jouée sur un titre isolé ou sur un mouvement d'ensemble.
+         On n'annonce QUE des valeurs réellement en hausse (ou en baisse) :
+         un marché où deux titres seulement montent ne doit pas produire un
+         « top 3 » dont le troisième recule. */
+      meilleures: trie
+        .filter((a) => a.variation_pct > 0)
+        .slice(0, 3)
+        .map((a) => ({ code: a.code, variation_pct: a.variation_pct })),
+      pires: [...trie]
+        .reverse()
+        .filter((a) => a.variation_pct < 0)
+        .slice(0, 3)
+        .map((a) => ({ code: a.code, variation_pct: a.variation_pct })),
       duree_s: dureeVoix,
       /* Le texte lu voyage avec la fiche : la video n'ayant pas de sous-titres,
          c'est la seule transcription dont dispose un visiteur sourd, et le seul
