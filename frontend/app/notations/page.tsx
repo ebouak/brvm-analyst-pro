@@ -47,6 +47,7 @@ const COMPANIES: { ticker: string; name: string; sector: string }[] = [
   { ticker: 'STAC', name: "SETAO CÔTE D'IVOIRE",           sector: 'Industriels' },
   { ticker: 'CABC', name: "SICABLE CÔTE D'IVOIRE",         sector: 'Industriels' },
   // Services financiers
+  { ticker: 'BBGC',  name: "BRIDGE BANK GROUP CÔTE D'IVOIRE",       sector: 'Services financiers' },
   { ticker: 'BOAB',  name: 'BANK OF AFRICA BÉNIN',                  sector: 'Services financiers' },
   { ticker: 'BOABF', name: 'BANK OF AFRICA BURKINA FASO',           sector: 'Services financiers' },
   { ticker: 'BOAC',  name: "BANK OF AFRICA CÔTE D'IVOIRE",          sector: 'Services financiers' },

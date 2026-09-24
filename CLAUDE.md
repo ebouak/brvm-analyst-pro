@@ -792,6 +792,61 @@ Migrations `0138` (carnet) et `0139` (source de la fourchette), appliquées.
   profondeur complète** — et la barre encode le rapport entre les deux côtés
   sans porter de verdict : un déséquilibre n'est pas un signal d'achat.
 
+### Ajouts (passage 2026-09-24) — BBGC : une admission à la cote fait tomber la séance
+
+Migration `0140_bbgc_bridge_bank.sql` **à appliquer**. tsc scraper + frontend verts,
+**528 tests scraper verts** (14 nouveaux), build frontend inchangé.
+
+- **LA PANNE.** `brvm_actions_daily.code` référence `brvm_instruments(code)`. Le
+  24/09/2026 à 09:15 UTC, l'admission de **BBGC — Bridge Bank Group Côte d'Ivoire**
+  (48e valeur, OPV de 10 M d'actions à 6 750 FCFA souscrite à 142 %) a fait violer
+  cette clé étrangère. Comme `upsertActions` envoie le lot **en une seule requête**,
+  UN code inconnu a rejeté **les 47 autres lignes** : 25 runs perdus, toute la
+  séance sans cours intraday. `runIntraday` n'appelait que `ensureIndexInstruments`
+  et portait le commentaire « Les instruments d'actions existent déjà ; pas besoin
+  de les réécrire ici » — vrai pendant des mois, faux en une matinée.
+- **Correctif structurel** : `ensureActionInstruments` (persistence/repository.ts)
+  crée les actions manquantes **et elles seules**, en `ignoreDuplicates` sur un lot
+  pré-filtré — une ligne existante n'est JAMAIS réécrite, sinon on écraserait
+  secteur/pays du scrape quotidien (« secteur Inconnu »). Deux garde-fous, parce
+  qu'une création automatique dans un cron non surveillé peut polluer le
+  référentiel : un code doit être **3 à 5 majuscules** avec une désignation non
+  vide, et **au plus 3 codes inédits par passage** — au-delà c'est le balisage de
+  brvm.org qui a bougé, pas le marché qui a ouvert dix sociétés, et on refuse
+  d'écrire. 14 tests.
+- **La machine prouve, l'humain cure.** Le scraper ne reprend que la désignation
+  publiée par brvm.org. Secteur, pays et famille comptable **restent nuls** : ils
+  ne figurent pas sur la page des cours, les deviner produirait un fait faux.
+  `runSecteurs` journalise déjà les actions sans secteur mappé — trou déclaré,
+  comblé par la migration de curation.
+- **OÙ ENREGISTRER UNE NOUVELLE VALEUR** (les huit registres, tous à 47 avant BBGC) :
+  migration de curation dans `supabase/migrations/` · `scraper/src/refdata/runSecteurs.ts`
+  (`SECTEURS`) · `scraper/src/notations/runNotations.ts` (`BRVM_CODES`) ·
+  `scraper/src/dividends/sikafinance.ts` (alias curé) · `frontend/lib/brvmSectors.json` ·
+  `frontend/lib/financials/sectors.ts` (`FAMILLE_PAR_CODE`) ·
+  `frontend/app/notations/page.tsx` (`COMPANIES`) · `frontend/public/logos/` +
+  `frontend/lib/brvmLogos.json`.
+- **« Les 47 sociétés » était écrit en dur à sept endroits** et tous sont devenus
+  faux le même matin. Désormais `NB_SOCIETES_COTEES` (`frontend/lib/universe.ts`),
+  **dérivé** de `brvmSectors.json`. L'un des sept n'était pas qu'un libellé :
+  `/dashboard` plafonnait ses sparklines à `10 * 47` lignes et aurait tronqué la
+  48e valeur **en silence** — il lit maintenant le nombre réel de valeurs de la
+  séance. ⚠️ **Un compte d'univers ne se saisit pas, il se dérive.**
+- **Alias dividendes posé d'avance** : `/bridge bank group/` → BBGC. Sikafinance
+  tronque à 20 caractères (« BRIDGE BANK GROUP CO ») ; le motif y survit. Le repli
+  flou aurait peut-être suffi, mais c'est lui qui a mal attribué quatre exercices
+  en 2026.
+- **Lacunes assumées, à combler à la main** : pas de **logo** BBGC (dégradation
+  propre — `ActionsTable` affiche les deux premières lettres), pas d'**identifiant
+  portail** dans `runPublicationsBrowser.ts` (il ne s'invente pas), et **aucun
+  fondamental** tant qu'aucune publication n'est en base — même situation que BICB,
+  BOAB, CABC et SVOC.
+- ⚠️ **La leçon générale** : un lot idempotent qui part en une seule requête
+  transforme le rejet d'UNE ligne en perte de TOUT le lot. Partout où une clé
+  étrangère pointe vers un référentiel curé, la donnée nouvelle doit pouvoir
+  s'enregistrer seule — ou le référentiel devient un point de panne à chaque
+  nouveauté du marché.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

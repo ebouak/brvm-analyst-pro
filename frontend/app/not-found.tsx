@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import type { Metadata } from 'next';
 
 /**
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 const PORTES = [
   { href: '/', titre: 'Accueil', detail: 'La séance en cours, la cote, les notes A–F.' },
-  { href: '/societes', titre: 'Les sociétés', detail: 'Les 47 valeurs suivies et leurs fiches.' },
+  { href: '/societes', titre: 'Les sociétés', detail: `Les ${NB_SOCIETES_COTEES} valeurs suivies et leurs fiches.` },
   { href: '/brief', titre: 'Le brief du jour', detail: 'La séance résumée chaque soir.' },
   { href: '/actualites', titre: 'Actualités', detail: "L'actualité BRVM et UEMOA." },
 ];

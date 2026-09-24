@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { createClient } from '@/lib/supabase/server';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
@@ -181,7 +182,7 @@ async function getData() {
     .select('code, cours_jour, date_marche')
     .not('cours_jour', 'is', null)
     .order('date_marche', { ascending: false })
-    .limit(10 * 47); // max 47 actions × 10 séances
+    .limit(10 * (typedActions.length || NB_SOCIETES_COTEES)); // 10 séances × le nombre réel de valeurs cotées
 
   const sparklines: Record<string, number[]> = {};
   for (const row of (histRows ?? []) as { code: string; cours_jour: number; date_marche: string }[]) {

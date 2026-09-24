@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import NewsletterForm from '@/components/NewsletterForm';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { FilConducteur, type Fait } from '@/components/landing/bis/FilConducteur';
@@ -136,7 +137,7 @@ export default async function Landing() {
                 <p className="over">Avec un compte gratuit</p>
                 <h2 id="h-gratuit">Commencez par explorer. Gratuitement.</h2>
                 <ul className="coches deux">
-                  {['Explorer les 47 sociétés cotées et leurs fiches', 'Consulter les fondamentaux et les dividendes', 'Suivre la séance et les indices', 'Créer votre watchlist et votre portefeuille', 'Recevoir le brief du soir et vos alertes par email'].map((t) => <li key={t}><span className="check" aria-hidden="true" />{t}</li>)}
+                  {[`Explorer les ${NB_SOCIETES_COTEES} sociétés cotées et leurs fiches`, 'Consulter les fondamentaux et les dividendes', 'Suivre la séance et les indices', 'Créer votre watchlist et votre portefeuille', 'Recevoir le brief du soir et vos alertes par email'].map((t) => <li key={t}><span className="check" aria-hidden="true" />{t}</li>)}
                 </ul>
                 <p className="muted">Sans carte bancaire, sans engagement. Les outils avancés viennent ensuite, quand vous en aurez besoin.</p>
               </div>
