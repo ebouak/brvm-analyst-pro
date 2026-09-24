@@ -40,10 +40,21 @@ export interface AnomalieOuverte {
  *                      d'anomalie, à ne surtout pas confondre avec `balaye` ;
  *  - `jamais_balaye`  la table existe mais ne contient AUCUNE ligne, ouverte
  *                      ou résolue : rien ne prouve qu'un balayage ait déjà
- *                      tourné ;
+ *                      tourné. ATTENTION, limite structurelle confirmée en
+ *                      lisant `scraper/src/coherence/runCoherence.ts` : un
+ *                      passage qui ne trouve AUCUNE anomalie n'écrit RIEN
+ *                      (« zéro anomalie trouvée n'est pas un échec »). Cet
+ *                      état est donc réellement ambigu entre « jamais
+ *                      exécuté » et « exécuté N fois, toujours propre » —
+ *                      les deux produisent une table vide, et rien dans ce
+ *                      schéma ne permet de les départager. La page ne
+ *                      tranche pas entre les deux, elle nomme l'ambiguïté ;
  *  - `balaye`         au moins une ligne a déjà été vue (ouverte ou
- *                      résolue) — la preuve qu'un balayage a tourné existe,
- *                      qu'il reste ou non des anomalies ouvertes aujourd'hui.
+ *                      résolue) — la preuve qu'un balayage a tourné CE
+ *                      jour-là existe, qu'il reste ou non des anomalies
+ *                      ouvertes aujourd'hui. Ça ne prouve rien sur les
+ *                      passages plus récents qui seraient restés propres
+ *                      (eux aussi silencieux, pour la même raison).
  *
  * C'est cette distinction `jamais_balaye` / `balaye` (avec zéro anomalie
  * ouverte) qui évite de faire passer une absence de mesure pour un
@@ -57,8 +68,11 @@ export interface TableauCoherence {
   anomalies: AnomalieOuverte[];
   /**
    * `detectee_le` la plus récente toutes lignes confondues (ouvertes +
-   * résolues) — preuve du dernier passage connu, indépendante de ce qu'il
-   * reste ouvert aujourd'hui.
+   * résolues) — date de la DERNIÈRE ANOMALIE DÉTECTÉE, pas nécessairement du
+   * dernier passage du balayage : un passage qui ne trouve rien n'écrit rien
+   * (voir `EtatBalayage`), donc un passage récent et propre est invisible
+   * ici. Cette date prouve qu'un balayage a eu lieu CE jour-là ; elle ne dit
+   * rien sur d'éventuels passages plus récents restés silencieux.
    */
   dernierBalayage: string | null;
   kpis: { trompeuses: number; aSurveiller: number; valeursConcernees: number };

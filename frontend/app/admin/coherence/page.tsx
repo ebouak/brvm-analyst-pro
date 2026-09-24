@@ -126,8 +126,8 @@ export default async function Page() {
       {etat === 'jamais_balaye' && (
         <EmptyStatePremium
           icon="◇"
-          title="Aucun balayage n'a encore tourné"
-          hint="La table existe mais ne contient aucune ligne, ouverte ou résolue : rien ne prouve qu'un balayage ait déjà eu lieu. Ce n'est pas un satisfecit — revenir après le premier passage hebdomadaire."
+          title="Aucune trace de balayage"
+          hint="La table ne contient aucune ligne, ouverte ou résolue. Un passage qui ne trouve aucune anomalie n'écrit rien (« zéro anomalie n'est pas un échec ») : impossible de distinguer, depuis cette seule table, « le balayage n'a jamais tourné » de « il a tourné et n'a jamais rien trouvé ». Dans les deux cas, ce silence n'est pas un satisfecit."
         />
       )}
 
@@ -145,14 +145,14 @@ export default async function Page() {
               accent={kpis.aSurveiller > 0 ? 'sapphire' : 'neutral'}
             />
             <MetricCard label="Valeurs concernées" value={String(kpis.valeursConcernees)} accent="neutral" />
-            <MetricCard label="Dernier balayage" value={fmtDate(dernierBalayage)} accent="neutral" />
+            <MetricCard label="Dernière anomalie détectée" value={fmtDate(dernierBalayage)} accent="neutral" />
           </div>
 
           {anomalies.length === 0 ? (
             <EmptyStatePremium
               icon="✦"
               title="Aucune anomalie ouverte"
-              hint={`Dernier balayage le ${fmtDate(dernierBalayage)} — aucune contradiction détectée à ce jour.`}
+              hint={`Dernière anomalie détectée le ${fmtDate(dernierBalayage)}, désormais résolue. Un passage propre n'écrivant rien, ceci ne certifie pas qu'un balayage ait eu lieu depuis cette date — seulement qu'aucune anomalie n'est restée ouverte.`}
             />
           ) : (
             <div className="space-y-6">
