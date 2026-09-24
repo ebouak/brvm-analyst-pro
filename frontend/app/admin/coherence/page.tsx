@@ -96,7 +96,7 @@ export default async function Page() {
   // un sujet différent. `data_admin` et `support_admin` ont déjà les deux.
   await requirePermission('scraping.read');
 
-  const { etat, anomalies, dernierBalayage, kpis, erreurMessage } = await loadCoherenceDashboard();
+  const { etat, anomalies, dernierBalayage, dernierPassage, kpis, erreurMessage } = await loadCoherenceDashboard();
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
@@ -127,7 +127,7 @@ export default async function Page() {
         <EmptyStatePremium
           icon="◇"
           title="Aucune trace de balayage"
-          hint="La table ne contient aucune ligne, ouverte ou résolue. Un passage qui ne trouve aucune anomalie n'écrit rien (« zéro anomalie n'est pas un échec ») : impossible de distinguer, depuis cette seule table, « le balayage n'a jamais tourné » de « il a tourné et n'a jamais rien trouvé ». Dans les deux cas, ce silence n'est pas un satisfecit."
+          hint="Ni passage journalisé dans scraper_runs, ni aucune anomalie en base : rien ne prouve que le balayage ait déjà tourné. Ce silence n'est pas un satisfecit — lancer « npm run coherence » dans scraper/, ou attendre le cron du dimanche 08:00 UTC."
         />
       )}
 
@@ -145,14 +145,26 @@ export default async function Page() {
               accent={kpis.aSurveiller > 0 ? 'sapphire' : 'neutral'}
             />
             <MetricCard label="Valeurs concernées" value={String(kpis.valeursConcernees)} accent="neutral" />
-            <MetricCard label="Dernière anomalie détectée" value={fmtDate(dernierBalayage)} accent="neutral" />
+            {/* La date du PASSAGE quand elle existe — elle vaut aussi pour un
+                balayage propre, que la table des anomalies ne montre pas. On
+                retombe sur la dernière anomalie seulement à défaut, et le
+                libellé dit alors ce qu'il montre vraiment. */}
+            <MetricCard
+              label={dernierPassage ? 'Dernier balayage' : 'Dernière anomalie détectée'}
+              value={fmtDate(dernierPassage ? dernierPassage.quand.slice(0, 10) : dernierBalayage)}
+              accent={dernierPassage && dernierPassage.status !== 'success' ? 'gold' : 'neutral'}
+            />
           </div>
 
           {anomalies.length === 0 ? (
             <EmptyStatePremium
               icon="✦"
               title="Aucune anomalie ouverte"
-              hint={`Dernière anomalie détectée le ${fmtDate(dernierBalayage)}, désormais résolue. Un passage propre n'écrivant rien, ceci ne certifie pas qu'un balayage ait eu lieu depuis cette date — seulement qu'aucune anomalie n'est restée ouverte.`}
+              hint={
+                dernierPassage
+                  ? `Balayage du ${fmtDate(dernierPassage.quand.slice(0, 10))} : ${dernierPassage.valeursExaminees ?? '?'} valeurs examinées, aucune anomalie ouverte à l'issue. Le passage est attesté par scraper_runs, pas déduit d'un silence.`
+                  : `Dernière anomalie détectée le ${fmtDate(dernierBalayage)}, désormais résolue. Aucun passage n'est journalisé : ceci ne certifie pas qu'un balayage ait eu lieu depuis cette date.`
+              }
             />
           ) : (
             <div className="space-y-6">

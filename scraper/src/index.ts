@@ -16,6 +16,8 @@
  *   tsx src/index.ts dividends             # ingère les dividendes
  *   tsx src/index.ts dividends --mock      # dividendes mock
  *   tsx src/index.ts range52               # plus-haut/plus-bas 52 semaines
+ *   tsx src/index.ts coherence             # balayage hebdomadaire de cohérence
+ *   tsx src/index.ts coherence --mock      # démonstration (sans Supabase)
  *   tsx src/index.ts alerts                # évalue les alertes et notifie
  *   tsx src/index.ts alerts --mock         # notification de démonstration
  *   tsx src/index.ts forum-trending        # calcule les scores de tendance du forum
@@ -278,6 +280,41 @@ async function main(): Promise<number> {
         },
       );
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'coherence': {
+      // Balayage hebdomadaire des 4 règles de cohérence (notation périmée,
+      // étiquette technique contredite, publication mal attribuée, comptes
+      // périmés) sur les 48 actions. N'échoue jamais en silence : voir
+      // src/coherence/runCoherence.ts — zéro instrument lu ou une écriture
+      // refusée lèvent une erreur explicite, propagée jusqu'ici.
+      const { runCoherence } = await import('./coherence/runCoherence.js');
+      const res = await monitored(
+        { code: 'coherence', label: 'Cohérence des fiches sociétés' },
+        async () => {
+          const r = await runCoherence({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.nb_instruments,
+              rows_upserted: r.nb_anomalies,
+              // `nb_instruments` répété ici (déjà dans rows_extracted) : la
+              // console /admin/coherence doit pouvoir prouver, depuis cette
+              // seule ligne de scraper_runs, qu'un passage sans anomalie
+              // ("nb_anomalies": 0) est un passage qui a bien examiné les 48
+              // valeurs — et non l'absence de passage.
+              metadata: {
+                date_detection: r.date_detection,
+                nb_instruments: r.nb_instruments,
+                nb_anomalies: r.nb_anomalies,
+                par_regle: r.par_regle,
+                par_gravite: r.par_gravite,
+              },
+            },
+          };
+        },
+      );
+      return 0;
     }
     case 'events': {
       const res = await monitored(

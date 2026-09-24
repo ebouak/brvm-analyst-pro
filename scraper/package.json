@@ -23,6 +23,8 @@
     "liquidity": "tsx src/index.ts liquidity",
     "range52": "tsx src/index.ts range52",
     "range52:mock": "tsx src/index.ts range52 --mock",
+    "coherence": "tsx src/index.ts coherence",
+    "coherence:mock": "tsx src/index.ts coherence --mock",
     "liquidity:mock": "tsx src/index.ts liquidity --mock",
     "events": "tsx src/index.ts events",
     "events:mock": "tsx src/index.ts events --mock",
