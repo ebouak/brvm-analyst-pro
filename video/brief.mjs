@@ -303,7 +303,14 @@ function courbeIndice(m) {
 
 /* ───────────────────────── Le corps HTML ───────────────────────── */
 
-export function html(m) {
+/**
+ * @param m        la fiche de séance (`seance.json`)
+ * @param options  `avertissement` : bandeau placé AVANT le brief, pour un envoi
+ *                 qui n'a pas été demandé. Il n'existe que pour l'envoi de
+ *                 découverte : un abonné qui a coché la case ne doit jamais
+ *                 lire « vous recevez ceci une seule fois » — ce serait faux.
+ */
+export function html(m, { avertissement = null } = {}) {
   const hausses = m.meilleures5 ?? m.meilleures ?? [];
   const baisses = m.pires5 ?? m.pires ?? [];
   const maxH = Math.max(...hausses.map((v) => Math.abs(v.variation_pct)), 0);
@@ -415,6 +422,18 @@ export function html(m) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.creme};padding:20px 10px">
 <tr><td align="center">
 <table role="presentation" width="620" cellpadding="0" cellspacing="0" border="0" style="max-width:620px;width:100%;background:${C.creme}">
+
+  ${
+    avertissement
+      ? `<tr><td style="padding:0 0 12px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFF8E8;border:1px solid ${C.or}">
+      <tr><td style="padding:14px 18px">
+        <p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.65;color:#6B5424">${avertissement}</p>
+      </td></tr>
+    </table>
+  </td></tr>`
+      : ''
+  }
 
   <!-- ══ En-tête ══ -->
   <tr><td style="padding:18px 20px;background:${C.blanc};border:1px solid ${C.trait};border-bottom:none">

@@ -130,6 +130,24 @@ jobs:
           npm install --no-audit --no-fund
           npx tsx src/index.ts cloture
 
+      - name: Envoyer le brief aux abonnés
+        # APRÈS la publication, jamais avant : un échec d'envoi ne doit pas
+        # empêcher la vidéo de sortir. Et `continue-on-error` est VOLONTAIREMENT
+        # absent — ce dépôt a vécu sept semaines de panne d'emails invisible
+        # parce qu'un workflow restait vert. Si l'envoi casse, on le voit.
+        #
+        # Destinataires : les seuls comptes ayant coché « Brief de clôture »
+        # dans /parametres/alertes. Aucun abonné = succès, pas échec.
+        # L'envoi de DÉCOUVERTE (à tous) n'est pas ici : il se déclenche à la
+        # main, parce qu'il contredit une promesse faite aux lecteurs.
+        if: github.event_name == 'schedule' || inputs.publier
+        working-directory: video
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+        run: node brief-envoi.mjs --envoyer
       - name: Conserver la vidéo
         # always() : une vidéo correcte refusée par une plateforme reste
         # téléchargeable et publiable à la main.
