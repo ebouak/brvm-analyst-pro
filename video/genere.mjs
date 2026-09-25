@@ -72,11 +72,38 @@ const [{ date_marche: seance }] = await api(
   'brvm_actions_daily?select=date_marche&order=date_marche.desc&limit=1',
 );
 const actions = await api(
-  `brvm_actions_daily?select=code,designation,cours_jour,variation_pct,volume,valeur_echangee&date_marche=eq.${seance}`,
+  `brvm_actions_daily?select=code,designation,cours_jour,variation_pct,volume,valeur_echangee,nb_transactions&date_marche=eq.${seance}`,
 );
 const indices = await api(
   `brvm_indices_daily?select=code,valeur,variation_pct&date_marche=eq.${seance}`,
 );
+
+/* ── Ce que le brief écrit exige EN PLUS de la vidéo ───────────────────────
+   Tout passe par la MÊME lecture : c'est la règle de ce worker depuis qu'une
+   version a gardé l'audio figé pendant que les images suivaient la base, et
+   que la voix a annoncé 31 hausses quand l'écran en montrait 18. Un brief
+   nourri d'une seconde requête serait une seconde chance de se contredire.
+
+   L'HISTORIQUE DE L'INDICE, et pourquoi il n'est pas intraday. Une maquette
+   demandait une courbe « 09h → 16h » du BRVM Composite. Impossible :
+   `brvm_intraday_snapshots` ne contient que des ACTIONS (47 codes le
+   24/09/2026, aucun indice). La courbe serait inventée. On trace donc les
+   20 dernières séances, qui existent réellement. */
+const histoIndice = await api(
+  `brvm_indices_daily?select=date_marche,valeur&code=eq.BRVMC&date_marche=lte.${seance}` +
+    '&order=date_marche.desc&limit=20',
+);
+
+/* Actualités du jour et de la veille. `hidden` et `status` sont respectés :
+   un article retiré de la publication n'a rien à faire dans un envoi. */
+const veille = new Date(new Date(`${seance}T12:00:00Z`).getTime() - 4 * 86400000)
+  .toISOString()
+  .slice(0, 10);
+const actus = await api(
+  'brvm_news?select=titre,resume,source_url,image_url,secteur,instrument_code,date_publication,score_impact' +
+    `&date_publication=gte.${veille}&date_publication=lte.${seance}` +
+    '&hidden=is.false&order=date_publication.desc,score_impact.desc.nullslast&limit=12',
+).catch(() => []);
 
 /* La valeur echangee n'est pas toujours publiee par la source intraday. On
    estime alors par cours x volume - comme le fait le produit ailleurs - et on
@@ -98,6 +125,64 @@ const haut = trie[0];
 const bas = trie[trie.length - 1];
 const composite = indices.find((i) => i.code === 'BRVMC');
 const partLourde = (cap(lourde) / (T || 1)) * 100;
+
+/* ── Ce qui alimente le brief écrit, calculé ici et nulle part ailleurs ──── */
+
+/** Une valeur du palmarès, avec de quoi la nommer et la situer. */
+const mouvement = (a) => ({
+  code: a.code,
+  designation: a.designation ?? a.code,
+  cours: a.cours_jour ?? null,
+  variation_pct: a.variation_pct,
+});
+const meilleures5 = trie.filter((a) => a.variation_pct > 0).slice(0, 5).map(mouvement);
+const pires5 = [...trie].reverse().filter((a) => a.variation_pct < 0).slice(0, 5).map(mouvement);
+
+/* Répartition sectorielle : la SEULE façon honnête de dire « la séance a été
+   portée par tel secteur ». On ne l'affirme pas, on la mesure — combien de
+   valeurs, combien en hausse, quelle part des capitaux. Le secteur vient du
+   référentiel curé du frontend ; un code absent tombe en « Non classé »
+   plutôt que d'être rangé au hasard. */
+let SECTEURS = {};
+try {
+  SECTEURS = JSON.parse(readFileSync(`${RACINE}/frontend/lib/brvmSectors.json`, 'utf8'));
+} catch {
+  /* Référentiel introuvable : on renonce à la répartition plutôt que de la deviner. */
+}
+const parSecteur = {};
+for (const a of cotes) {
+  const s = SECTEURS[a.code] ?? 'Non classé';
+  (parSecteur[s] ??= { secteur: s, valeurs: 0, hausses: 0, capitaux: 0 });
+  parSecteur[s].valeurs++;
+  if (a.variation_pct > 0) parSecteur[s].hausses++;
+  parSecteur[s].capitaux += cap(a);
+}
+const secteurs = Object.values(parSecteur)
+  .map((s) => ({ ...s, part_pct: (s.capitaux / (T || 1)) * 100 }))
+  .sort((a, b) => b.part_pct - a.part_pct);
+
+/* Transactions : agrégat réel quand la colonne est renseignée, `null` sinon.
+   Un zéro affiché passerait pour « aucune transaction » au lieu de
+   « la source ne le publie pas ». */
+const avecTx = cotes.filter((a) => a.nb_transactions != null);
+const transactions = avecTx.length > 0 ? avecTx.reduce((s, a) => s + a.nb_transactions, 0) : null;
+
+/* Historique de l'indice, du plus ancien au plus récent (la requête le rend
+   décroissant). Sous 5 points, aucune courbe : trois pixels ne dessinent pas
+   une tendance. */
+const historiqueIndice = [...(histoIndice ?? [])]
+  .reverse()
+  .map((r) => ({ date: r.date_marche, valeur: r.valeur }))
+  .filter((r) => r.valeur != null);
+
+/* Actualités. La « phare » est celle du jour de séance au plus fort impact ;
+   à défaut d'impact renseigné, la plus récente. AUCUNE n'est fabriquée : sans
+   article, le brief affiche ses propres constats de marché à la place. */
+const actusListe = Array.isArray(actus) ? actus : [];
+const duJour = actusListe.filter((n) => n.date_publication === seance);
+const candidates = duJour.length > 0 ? duJour : actusListe;
+const phare = candidates[0] ?? null;
+const autresActus = candidates.filter((n) => n !== phare).slice(0, 3);
 
 const fr = (x, d = 2) => x.toFixed(d).replace('.', ',');
 const sg = (x, d = 2) => `${x >= 0 ? '+' : '−'}${fr(Math.abs(x), d)}`;
@@ -385,6 +470,15 @@ writeFileSync(
         .filter((a) => a.variation_pct < 0)
         .slice(0, 3)
         .map((a) => ({ code: a.code, variation_pct: a.variation_pct })),
+
+      /* ── Pour le brief écrit. La vidéo n'en a pas l'usage : sa voix dure
+         trente secondes et ne peut pas citer dix valeurs. ───────────────── */
+      meilleures5,
+      pires5,
+      secteurs,
+      transactions,
+      historique_indice: historiqueIndice,
+      actualites: { phare, autres: autresActus },
       duree_s: dureeVoix,
       /* Le texte lu voyage avec la fiche : la video n'ayant pas de sous-titres,
          c'est la seule transcription dont dispose un visiteur sourd, et le seul

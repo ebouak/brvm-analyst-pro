@@ -16,6 +16,7 @@ import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
+import { sujet, texte, html } from './brief.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
@@ -435,92 +436,13 @@ if (TT_TOKEN) {
    MÊME lecture que les images et la voix de la vidéo. Une seconde source
    serait une seconde chance de se contredire. */
 
-const pctSigne = (x) => sg(x);
-const listeMouvements = (liste, repli) => {
-  const l = Array.isArray(liste) && liste.length > 0 ? liste : repli ? [repli] : [];
-  return l.map((v) => `${v.code} ${pctSigne(v.variation_pct)} %`).join(' · ');
-};
-
-const SUJET = m.composite
-  ? `BRVM Composite ${sg(m.composite.variation_pct)} % — séance du ${m.date_fr}`
-  : `BRVM — séance du ${m.date_fr}`;
-
-/* L'URL porte la date : aucun cache ne peut servir la vidéo d'hier sous les
-   chiffres du jour. Même règle que pour la landing. */
-const LIEN_VIDEO = `https://www.westbourse.com/#seance-${m.seance}`;
-
-const briefLignes = () => {
-  const l = [];
-  if (m.composite) {
-    l.push(`Le BRVM Composite termine à ${fr(m.composite.valeur)} points, ${sg(m.composite.variation_pct)} % sur la séance.`);
-  }
-  l.push(`${m.hausses} valeurs en hausse, ${m.baisses} en baisse, ${m.stables} inchangées sur ${m.valeurs} cotées.`);
-  l.push(`${m.capitaux_estimes ? 'Environ ' : ''}${fr(m.capitaux_fcfa / 1e9)} milliards de FCFA échangés.`);
-
-  const hausses = listeMouvements(m.meilleures, m.plus_forte_hausse);
-  const baisses = listeMouvements(m.pires, m.plus_forte_baisse);
-  if (hausses) l.push(`En tête : ${hausses}.`);
-  if (baisses) l.push(`En queue : ${baisses}.`);
-
-  /* La concentration : sur un marché étroit, c'est souvent le chiffre le plus
-     informatif de la séance — il dit si le volume vient du marché ou d'une
-     seule ligne. Omis si la donnée manque, jamais estimé. */
-  if (m.ligne_lourde && typeof m.ligne_lourde.part_pct === 'number') {
-    l.push(
-      `Premier échange de la séance : ${m.ligne_lourde.code}, ${fr(m.ligne_lourde.part_pct, 1)} % des capitaux traités.`,
-    );
-  }
-  return l;
-};
-
-const RESERVES = [
-  'Chiffres issus de la séance officielle de la BRVM.',
-  m.capitaux_estimes
-    ? "Capitaux estimés par cours × titres : la BRVM ne publie pas la valeur officielle."
-    : '',
-  "Information de marché. Ce brief ne constitue pas un conseil en investissement.",
-].filter(Boolean);
-
-const echappe = (s) =>
-  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-const briefTexte = [
-  SUJET,
-  '',
-  ...briefLignes(),
-  '',
-  `Vidéo de la séance : ${LIEN_VIDEO}`,
-  'Analyse complète : https://www.westbourse.com',
-  '',
-  ...RESERVES,
-].join('\n');
-
-const briefHtml = () => {
-  const couleur = !m.composite ? '#8b8b8b' : m.composite.variation_pct >= 0 ? '#1a7f4b' : '#b3261e';
-  return [
-    '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;color:#16181d;line-height:1.55">',
-    `<p style="margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b7280">WESTBOURSE · Clôture BRVM</p>`,
-    `<h1 style="margin:0 0 16px;font-size:20px;font-weight:600">Séance du ${echappe(m.date_fr)}</h1>`,
-    m.composite
-      ? `<p style="margin:0 0 20px;font-size:28px;font-weight:600;color:${couleur}">${echappe(sg(m.composite.variation_pct))} %<span style="font-size:15px;font-weight:400;color:#6b7280"> &nbsp;BRVM Composite à ${echappe(fr(m.composite.valeur))} pts</span></p>`
-      : '',
-    '<table role="presentation" style="border-collapse:collapse;width:100%;margin:0 0 20px">',
-    briefLignes()
-      .map(
-        (ligne) =>
-          `<tr><td style="padding:7px 0;border-bottom:1px solid #eceef1;font-size:15px">${echappe(ligne)}</td></tr>`,
-      )
-      .join(''),
-    '</table>',
-    `<p style="margin:0 0 24px"><a href="${LIEN_VIDEO}" style="display:inline-block;padding:11px 20px;background:#16181d;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600">Voir la vidéo de la séance</a></p>`,
-    `<p style="margin:0 0 16px;font-size:14px"><a href="https://www.westbourse.com" style="color:#16181d">Analyse complète sur westbourse.com</a></p>`,
-    `<hr style="border:0;border-top:1px solid #eceef1;margin:20px 0">`,
-    RESERVES.map((r) => `<p style="margin:0 0 6px;font-size:12px;color:#6b7280">${echappe(r)}</p>`).join(''),
-    '</div>',
-  ]
-    .filter(Boolean)
-    .join('');
-};
+/* Le brief vit dans son propre module : il a grossi d'une poignée de lignes
+   à une vraie publication, et sa mise en page n'a rien à faire au milieu de
+   la logique de publication.  ne fait que composer — il ne
+   lit rien, n'envoie rien, et se teste seul. */
+const SUJET = sujet(m);
+const briefTexte = texte(m);
+const briefHtml = () => html(m);
 
 const notifier = async (texte, html, sujet) => {
   const jeton = lire("TELEGRAM_BOT_TOKEN");
