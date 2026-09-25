@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import {
   ComposedChart, Bar, Line, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts';
+import { useJetons, avecAlpha } from '@/lib/theme/jetons';
 
 export interface Candle {
   label: string;       // Lun, Mar, ...
@@ -24,12 +25,14 @@ interface Props {
   lastVar: number | null;
 }
 
-const UP = '#3fe18b';
-const DOWN = '#ff6b6b';
-const CYAN = '#56d7fd';
+/* Recharts prend ses couleurs en props, hors de toute feuille de style : des
+   hex figés ici resteraient ceux du mode sombre sur fond papier. Constante de
+   module — un littéral passé à `useJetons` ferait reboucler son effet. */
+const JETONS = ['up', 'down', 'accent', 'surface', 'border', 'ivory', 'muted', 'faint'] as const;
 
 export default function WeeklyIndexChart({ title, code, candles, rsi, macd, lastValue, lastVar }: Props) {
   const [weeks, setWeeks] = useState<1 | 3>(1);
+  const c = useJetons(JETONS);
 
   const data = useMemo(() => {
     const span = weeks === 1 ? 5 : 15;
@@ -55,7 +58,10 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
     >
       <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-border/60 px-4 py-2.5">
         <div className="flex items-baseline gap-2">
-          <span className="inline-block h-2 w-2 rounded-full bg-cyan shadow-[0_0_8px_#56d7fd]" aria-hidden />
+          <span
+            className="inline-block h-2 w-2 rounded-full bg-cyan shadow-[0_0_8px_rgb(var(--color-accent))]"
+            aria-hidden
+          />
           <h3 className="font-display text-sm text-ivory">{title}</h3>
           <span className="tabular text-base font-semibold text-ivory">{lastValue}</span>
           {lastVar != null && (
@@ -79,7 +85,7 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
                 onClick={() => setWeeks(w)}
                 aria-pressed={weeks === w}
                 className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all ${
-                  weeks === w ? 'bg-cyan text-[#03222b]' : 'text-muted hover:text-ivory'
+                  weeks === w ? 'bg-cyan text-bg' : 'text-muted hover:text-ivory'
                 }`}
               >
                 {w}W
@@ -97,28 +103,33 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
             <ComposedChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
               <defs>
                 <linearGradient id={`trend-${code}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={CYAN} stopOpacity={0.35} />
-                  <stop offset="100%" stopColor={CYAN} stopOpacity={0} />
+                  <stop offset="0%" stopColor={c.accent} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={c.accent} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis
                 dataKey="label"
-                tick={{ fill: '#b5b5b5', fontSize: 11 }}
-                axisLine={{ stroke: '#1b2a30' }}
+                tick={{ fill: c.muted, fontSize: 11 }}
+                axisLine={{ stroke: c.border }}
                 tickLine={false}
               />
               <YAxis
                 domain={domain}
-                tick={{ fill: '#5c6b70', fontSize: 10 }}
+                tick={{ fill: c.faint, fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 width={48}
                 tickFormatter={(v: number) => v.toFixed(0)}
               />
               <Tooltip
-                cursor={{ fill: 'rgba(86,215,253,0.06)' }}
-                contentStyle={{ background: '#0a1417', border: '1px solid #1b2a30', borderRadius: 12, fontSize: 12 }}
-                labelStyle={{ color: '#fcfcfc' }}
+                cursor={{ fill: avecAlpha(c.accent, 0.06) }}
+                contentStyle={{
+                  background: c.surface,
+                  border: `1px solid ${c.border}`,
+                  borderRadius: 12,
+                  fontSize: 12,
+                }}
+                labelStyle={{ color: c.ivory }}
                 formatter={(_v, _n, p) => {
                   const c = p?.payload as Candle | undefined;
                   if (!c) return ['', ''];
@@ -130,9 +141,9 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
                 {data.map((d, i) => (
                   <Cell
                     key={i}
-                    fill={i === lastIdx ? CYAN : d.up ? UP : DOWN}
+                    fill={i === lastIdx ? c.accent : d.up ? c.up : c.down}
                     fillOpacity={i === lastIdx ? 1 : 0.55}
-                    stroke={i === lastIdx ? CYAN : 'none'}
+                    stroke={i === lastIdx ? c.accent : 'none'}
                     strokeWidth={i === lastIdx ? 1 : 0}
                   />
                 ))}
@@ -141,10 +152,10 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
               <Line
                 type="monotone"
                 dataKey="close"
-                stroke={CYAN}
+                stroke={c.accent}
                 strokeWidth={2}
-                dot={{ r: 2.5, fill: CYAN, strokeWidth: 0 }}
-                activeDot={{ r: 4, fill: CYAN }}
+                dot={{ r: 2.5, fill: c.accent, strokeWidth: 0 }}
+                activeDot={{ r: 4, fill: c.accent }}
                 isAnimationActive={false}
               />
             </ComposedChart>
