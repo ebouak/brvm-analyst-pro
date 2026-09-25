@@ -16,7 +16,7 @@ export default function LiquiditesModal({ current, onClose }: Props) {
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center" onClick={onClose}>
       <div className="bg-surface border border-border rounded-xl shadow-lg max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-          <h2 className="text-lg font-semibold">💵 Liquidités</h2>
+          <h2 className="text-lg font-semibold">Liquidités</h2>
           <button type="button" onClick={onClose} className="text-muted hover:text-fg text-lg" aria-label="Fermer">✕</button>
         </div>
 

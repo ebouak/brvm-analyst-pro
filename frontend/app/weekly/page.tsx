@@ -35,12 +35,12 @@ async function fetchWeeklyArticles(): Promise<WeeklyArticle[]> {
 }
 
 const COMMO_LABELS: Record<string, { label: string; icon: string }> = {
-  cocoa: { label: 'Cacao', icon: '🍫' },
-  palm_oil: { label: 'Huile de palme', icon: '🌴' },
-  rubber: { label: 'Caoutchouc', icon: '🛞' },
-  sugar: { label: 'Sucre', icon: '🧊' },
-  crude_brent: { label: 'Brent', icon: '🛢️' },
-  gold: { label: 'Or', icon: '🥇' },
+  cocoa: { label: 'Cacao', icon: '◇' },
+  palm_oil: { label: 'Huile de palme', icon: '◇' },
+  rubber: { label: 'Caoutchouc', icon: '◇' },
+  sugar: { label: 'Sucre', icon: '◇' },
+  crude_brent: { label: 'Brent', icon: '◇' },
+  gold: { label: 'Or', icon: '◇' },
 };
 
 interface CommoTick {

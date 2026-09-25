@@ -15,7 +15,7 @@ const OUTILS = [
   { t: 'Simulateur budget', d: 'Construire un plan d’épargne', href: '/simulateur-budget' },
   { t: 'Paper trading', d: 'Capital virtuel, conditions réelles', href: '/premium/paper-trading' },
   { t: 'Backtesting', d: 'Rejouer une stratégie sur l’historique', href: '/backtest' },
-  { t: 'Diagnostic IA', d: 'Un rapport par société, à partir des chiffres', href: '/premium/diagnostic' },
+  { t: 'Dossier d’analyse', d: 'Un rapport par société, à partir des chiffres', href: '/premium/diagnostic' },
 ] as const;
 
 export function OutilsMenu() {

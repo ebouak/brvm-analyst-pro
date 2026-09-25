@@ -9,7 +9,7 @@ import { RATING_DISCLAIMER } from '@/lib/rating';
 
 /**
  * Un seul panneau sombre, trois rangées serrées : la séance en vidéo et ses
- * chiffres · la note quantitative et ses barres · le diagnostic IA en une
+ * chiffres · la note quantitative et ses barres · le dossier d’analyse en une
  * ligne. Fusion des trois écrans du terminal pour tenir dans un écran.
  *
  * Mêmes garde-fous que les composants d'origine : pas de vidéo publiée →
@@ -100,10 +100,10 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
         </div>
       </div>
 
-      {/* Rangée 3 — le diagnostic IA, sur une ligne */}
+      {/* Rangée 3 — le dossier d’analyse, sur une ligne */}
       <div className="tc-row tc-diag">
         <div className="tc-head compact">
-          <div><p className="o">Diagnostic IA</p><h2>Votre analyste BRVM en quelques secondes.</h2></div>
+          <div><p className="o">Dossier d’analyse</p><h2>Votre analyste BRVM en quelques secondes.</h2></div>
           {r?.generated_at && <span className="tc-date num">{new Date(r.generated_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>}
         </div>
         <div className="tc-report">
@@ -116,7 +116,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
           ) : (
             <>
               <p className="tc-vide">Un exemple de diagnostic s&apos;affichera ici dès qu&apos;un rapport aura été généré.</p>
-              <Link href="/premium/diagnostic" className="tc-btn ghost">Découvrir le Diagnostic IA →</Link>
+              <Link href="/premium/diagnostic" className="tc-btn ghost">Découvrir le Dossier d’analyse →</Link>
             </>
           )}
         </div>

@@ -61,8 +61,8 @@ export default function PortfolioDashboard() {
 
       {/* Sous-onglets consolidés (plus de doublon ni de saisie manuelle) */}
       <div className="flex gap-2 border-b border-border">
-        <TabBtn active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>📊 Vue d&apos;ensemble</TabBtn>
-        <TabBtn active={activeTab === 'optimisation'} onClick={() => setActiveTab('optimisation')}>🎯 Optimisation</TabBtn>
+        <TabBtn active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Vue d&apos;ensemble</TabBtn>
+        <TabBtn active={activeTab === 'optimisation'} onClick={() => setActiveTab('optimisation')}>Optimisation</TabBtn>
         <TabBtn active={activeTab === 'mouvements'} onClick={() => setActiveTab('mouvements')}>💸 Mouvements</TabBtn>
       </div>
 

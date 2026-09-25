@@ -41,7 +41,7 @@ export default function DeleteConfirmModal({
             Êtes-vous sûr de vouloir supprimer <span className="font-medium text-fg">{itemName}</span> ?
           </p>
           <p className="text-xs text-down font-medium">
-            ⚠ Cette action est irréversible.
+            Cette action est irréversible.
           </p>
         </div>
 

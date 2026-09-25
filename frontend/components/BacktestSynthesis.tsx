@@ -45,7 +45,7 @@ export default function BacktestSynthesis({ synthesis, strategyReturn, benchmark
           <ul className="mt-3 space-y-1.5">
             {synthesis.cautions.map((c, i) => (
               <li key={i} className="flex items-start gap-2 text-xs text-warn/90">
-                <span className="mt-0.5 shrink-0">⚠</span>
+                <span className="mt-0.5 shrink-0">!</span>
                 <span className="leading-relaxed">{c}</span>
               </li>
             ))}

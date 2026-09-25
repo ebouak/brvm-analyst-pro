@@ -26,7 +26,7 @@ const FREQUENCES = [
   { label: 'Actif (1+ ordre/semaine)', value: 48 },
 ];
 
-const MEDALS = ['🥇', '🥈', '🥉'];
+const MEDALS = ['1ᵉʳ', '2ᵉ', '3ᵉ'];
 
 const fmtFcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
 
@@ -136,10 +136,10 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
       contenu: (
         <div className="flex flex-wrap gap-2">
           {([
-            ['cout', '💰 Les frais les plus bas'],
+            ['cout', 'Les frais les plus bas'],
             ['solidite', '🏛 Un adossement bancaire solide'],
             ['proximite', '📍 La proximité géographique'],
-            ['equilibre', '⚖️ Un bon équilibre de tout'],
+            ['equilibre', 'Un bon équilibre de tout'],
           ] as const).map(([val, label]) => (
             <button
               key={val} type="button"
@@ -220,7 +220,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                   </span>
                 )}
                 {m.alerteDepotMin && (
-                  <p className="mt-2 text-[11px] text-warn">⚠ Capital sous le dépôt minimum exigé</p>
+                  <p className="mt-2 text-[11px] text-warn">Capital sous le dépôt minimum exigé</p>
                 )}
 
                 {/* Justification par critère */}

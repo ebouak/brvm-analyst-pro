@@ -85,7 +85,7 @@ export default function LeadForm() {
                 rel="noopener noreferrer"
                 className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#0b6b6f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#084d50]"
               >
-                💬 Discuter sur WhatsApp maintenant
+                Discuter sur WhatsApp maintenant
               </a>
             )}
           </motion.div>
@@ -159,7 +159,7 @@ export default function LeadForm() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-[#0b6b6f]/30 bg-white px-7 py-3.5 text-sm font-semibold text-[#0b6b6f] transition hover:bg-[#d4ebe8]/40"
                 >
-                  💬 WhatsApp
+                  WhatsApp
                 </a>
               )}
             </div>

@@ -12,8 +12,8 @@ interface Check { status: ThesisStatus; perfPct: number | null; raisons: string[
 const STANCE_LABEL: Record<Stance, string> = { achat: 'Achat', conserver: 'Conserver', vente: 'Vente' };
 const STATUS_UI: Record<ThesisStatus, { label: string; cls: string }> = {
   intacte: { label: '✓ Thèse intacte', cls: 'text-up border-up/30 bg-up/5' },
-  'a-revoir': { label: '⚠ À revoir', cls: 'text-warn border-warn/30 bg-warn/5' },
-  'objectif-atteint': { label: '🎯 Objectif atteint', cls: 'text-info border-info/30 bg-info/5' },
+  'a-revoir': { label: 'À revoir', cls: 'text-warn border-warn/30 bg-warn/5' },
+  'objectif-atteint': { label: 'Objectif atteint', cls: 'text-info border-info/30 bg-info/5' },
 };
 
 export default function ThesisPanel({ code, coursActuel }: { code: string; coursActuel: number | null }) {

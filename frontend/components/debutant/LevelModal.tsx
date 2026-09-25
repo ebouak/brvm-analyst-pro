@@ -6,9 +6,9 @@ import { useLevelModal } from './useLevelModal';
 import type { LeadLevel } from '@/lib/leads';
 
 const OPTIONS: { key: LeadLevel; label: string; desc: string; emoji: string }[] = [
-  { key: 'debutant', label: 'Je débute', desc: "Je découvre la BRVM, je pars de zéro.", emoji: '🌱' },
-  { key: 'intermediaire', label: 'Je connais les bases', desc: 'Je sais ce qu’est une action, je veux ouvrir un compte.', emoji: '📘' },
-  { key: 'confirme', label: 'Je suis à l’aise', desc: 'Je veux juste être mis en relation avec un partenaire.', emoji: '🚀' },
+  { key: 'debutant', label: 'Je débute', desc: "Je découvre la BRVM, je pars de zéro.", emoji: '○' },
+  { key: 'intermediaire', label: 'Je connais les bases', desc: 'Je sais ce qu’est une action, je veux ouvrir un compte.', emoji: '◐' },
+  { key: 'confirme', label: 'Je suis à l’aise', desc: 'Je veux juste être mis en relation avec un partenaire.', emoji: '●' },
 ];
 
 /**

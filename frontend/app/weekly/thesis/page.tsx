@@ -367,7 +367,7 @@ export default function ThesisPage() {
         {/* ── Note cacao ── */}
         <section className="bg-[#0a0f12] border border-amber-900/30 rounded-xl p-5">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">⚠️</span>
+            <span className="text-2xl">!</span>
             <div>
               <p className="font-semibold text-amber-400 mb-1">Cacao — pas de pur joueur coté BRVM</p>
               <p className="text-sm text-muted">
@@ -378,7 +378,7 @@ export default function ThesisPage() {
                 que <strong className="text-gray-200">micro</strong> par titre coté.
               </p>
               <p className="text-xs text-faint mt-2 font-mono">
-                ⚠️ SICC = Société Ivoirienne de Coco Râpé (coprah), pas cacao.
+                SICC = Société Ivoirienne de Coco Râpé (coprah), pas cacao.
               </p>
             </div>
           </div>

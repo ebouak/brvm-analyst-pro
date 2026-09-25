@@ -77,7 +77,7 @@ export interface LandingBisData {
   videoSeance: VideoSeance | null;
   /** Signal le mieux noté de la séance, avec ses sous-scores (RatingSpotlight). */
   spotlightSignal: (SignalDaily & { code: string }) | null;
-  /** Dernier diagnostic IA réellement généré, ou null. */
+  /** Dernier dossier d’analyse réellement généré, ou null. */
   latestDiagnostic: LatestDiagnostic | null;
 }
 

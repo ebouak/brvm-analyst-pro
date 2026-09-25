@@ -69,7 +69,7 @@ export default function PortfolioOverview({ state, isLoading = false }: Props) {
       {/* Courbe d'équité (base 100) — auto-dérivée */}
       <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">📈 Évolution du portefeuille (base 100)</h3>
+          <h3 className="text-sm font-semibold text-white">Évolution du portefeuille (base 100)</h3>
           {state.annualizedReturn != null && (
             <span className={`text-sm font-semibold ${pnlClass(state.annualizedReturn)}`}>{pct(state.annualizedReturn)}/an</span>
           )}

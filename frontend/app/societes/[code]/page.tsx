@@ -405,10 +405,10 @@ export default async function CompanyPage({ params }: PageProps) {
         </section>
       </div>
 
-      {/* ── Teaser diagnostic IA (convertisseur) ─────────────────────────── */}
+      {/* ── Teaser dossier d’analyse (convertisseur) ─────────────────────────── */}
       {teaserLines.length > 0 && (
         <section className="bg-surface border border-accent/30 rounded-xl p-5 mb-6 relative overflow-hidden">
-          <p className="text-[11px] text-accent/80 uppercase tracking-[0.18em] mb-2">Diagnostic IA · extrait</p>
+          <p className="text-[11px] text-accent/80 uppercase tracking-[0.18em] mb-2">Dossier d’analyse · extrait</p>
           <div className="space-y-2 text-sm text-muted leading-relaxed">
             {teaserLines.map((l, i) => (
               <p key={i}>{l}</p>

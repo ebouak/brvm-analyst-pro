@@ -16,7 +16,7 @@ export default function RecentSignalsCard({ signals }: { signals: SignalRow[] })
   if (actionnable.length === 0) {
     return (
       <div className="bg-surface border border-border rounded-xl p-4">
-        <h3 className="text-sm font-semibold mb-2">🔔 Signaux récents</h3>
+        <h3 className="text-sm font-semibold mb-2">Signaux récents</h3>
         <p className="text-xs text-muted py-4 text-center">Aucun signal BUY/SELL aujourd'hui.</p>
         <Link href="/signaux" className="text-xs text-up hover:underline">Voir tous les signaux →</Link>
       </div>
@@ -25,7 +25,7 @@ export default function RecentSignalsCard({ signals }: { signals: SignalRow[] })
 
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
-      <h3 className="text-sm font-semibold mb-3">🔔 Signaux récents</h3>
+      <h3 className="text-sm font-semibold mb-3">Signaux récents</h3>
       <div className="space-y-2">
         {actionnable.map((s) => (
           <div key={s.code} className="border border-border/60 rounded-lg p-3 hover:border-up/20 transition-colors">

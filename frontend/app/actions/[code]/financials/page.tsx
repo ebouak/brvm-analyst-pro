@@ -286,7 +286,7 @@ export default async function FinancialsPage({ params }: Props) {
           <div className="bg-surface border border-warn/30 rounded-xl p-5 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-warn">📄 Données financières non importées</p>
+                <p className="text-sm font-semibold text-warn">Données financières non importées</p>
                 <p className="text-xs text-muted mt-1">
                   {data.publications.length} publication{data.publications.length > 1 ? 's' : ''} disponible{data.publications.length > 1 ? 's' : ''} pour {code}.
                   Importez-les via l&apos;IA pour remplir automatiquement les états financiers.

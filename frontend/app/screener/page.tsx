@@ -36,7 +36,7 @@ export default async function ScreenerPage() {
             />
           ) : (
             <EmptyStatePremium
-              icon="🔒"
+              icon="✦"
               title={`Screener réservé au plan ${gate.required === 'pro' ? 'Platinium' : 'Premium'}`}
               hint={`Filtrez les ${NB_SOCIETES_COTEES} valeurs par RSI, volume, score, secteur et rendement du dividende.`}
               action={{

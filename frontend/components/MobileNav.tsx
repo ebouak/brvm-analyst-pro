@@ -111,7 +111,7 @@ export default function MobileNav({
                       >
                         {item.label}
                         {locked ? (
-                          <span className="ml-auto text-xs opacity-60">🔒</span>
+                          <span className="ml-auto text-xs opacity-60">✦</span>
                         ) : item.premium ? (
                           <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[8px] font-semibold text-gold">
                             PRO

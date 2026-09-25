@@ -37,7 +37,7 @@ const STEPS = [
   { k: '02', t: 'Analyse', d: 'Fondamentaux, RSI, MACD, dividendes.', bg: 'rgb(var(--color-accent) / .14)', c: 'rgb(var(--color-accent))', ic: <><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></> },
   { k: '03', t: 'Note A–F', d: 'Un score quantitatif explicable par action.', bg: 'rgb(var(--color-up) / .14)', c: 'rgb(var(--color-up))', ic: <><path d="M4 20v-8M10 20V7M16 20V3M22 20H2" /></> },
   { k: '04', t: 'Signal', d: 'BUY, HOLD ou SELL, avec son niveau de confiance.', bg: 'rgb(var(--color-warn) / .14)', c: 'rgb(var(--color-warn))', ic: <path d="M3 16l5-6 4 4 5-8 4 5" /> },
-  { k: '05', t: 'Diagnostic IA', d: 'Forces, risques et valorisation mis en mots.', bg: 'rgb(var(--color-purple) / .14)', c: 'rgb(var(--color-purple))', ic: <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 3 3 3 0 0 0 2 3v1a3 3 0 0 0 3 3h1V4H9zM15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 3 3 3 0 0 1-2 3v1a3 3 0 0 1-3 3h-1V4h1z" /> },
+  { k: '05', t: 'Dossier d’analyse', d: 'Forces, risques et valorisation mis en mots.', bg: 'rgb(var(--color-purple) / .14)', c: 'rgb(var(--color-purple))', ic: <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 3 3 3 0 0 0 2 3v1a3 3 0 0 0 3 3h1V4H9zM15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 3 3 3 0 0 1-2 3v1a3 3 0 0 1-3 3h-1V4h1z" /> },
   { k: '06', t: 'Simulation', d: 'Ce que la décision aurait donné, dividendes inclus.', bg: 'rgb(var(--color-accent) / .14)', c: 'rgb(var(--color-accent))', ic: <><path d="M4 7h16M4 12h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="rgb(var(--color-surface))" /><circle cx="15" cy="12" r="2" fill="rgb(var(--color-surface))" /><circle cx="8" cy="17" r="2" fill="rgb(var(--color-surface))" /></> },
   { k: '07', t: 'Décision', d: 'À vous de trancher, avec les chiffres sous les yeux.', bg: 'rgb(var(--color-up) / .14)', c: 'rgb(var(--color-up))', ic: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></> },
 ];
@@ -124,7 +124,7 @@ export default async function Landing() {
 
           <Billboard creations={d.bandeaux} slot="Emplacement annonceur, milieu de page" />
 
-          {/* 2 bis · ÉCRANS DU TERMINAL — vidéo de séance, note quantitative, diagnostic IA */}
+          {/* 2 bis · ÉCRANS DU TERMINAL — vidéo de séance, note quantitative, dossier d’analyse */}
           <Terminal d={d} dateMarche={d.dateMarche} />
 
           {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
@@ -195,7 +195,7 @@ export default async function Landing() {
                   </Link>
                   <Link className="feat" href="/pricing">
                     <Thumb><rect x="8" y="8" width="28" height="28" rx="6" fill="rgb(var(--color-accent))" opacity=".2" stroke="rgb(var(--color-accent))" /><text x="22" y="30" fontSize="20" fontFamily="monospace" fill="rgb(var(--color-accent))" textAnchor="middle">A</text><rect x="44" y="10" width="44" height="5" rx="2" fill="rgb(var(--color-muted))" /><rect x="44" y="20" width="36" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="44" y="28" width="40" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="44" width="80" height="4" rx="2" fill="rgb(var(--color-border-strong))" /><rect x="8" y="52" width="60" height="4" rx="2" fill="rgb(var(--color-border-strong))" /></Thumb>
-                    <span><b>Conseiller unifié</b><p>Notation A–F, diagnostic IA, recommandations.</p></span><span className="chev" aria-hidden="true">›</span>
+                    <span><b>Conseiller unifié</b><p>Notation A–F, dossier d’analyse, recommandations.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                   <Link className="feat" href="/pricing">
                     <Thumb><g fill="rgb(var(--color-elevated))" stroke="rgb(var(--color-border))"><rect x="8" y="8" width="80" height="10" rx="2" /><rect x="8" y="22" width="80" height="10" rx="2" /><rect x="8" y="36" width="80" height="10" rx="2" /><rect x="8" y="50" width="80" height="8" rx="2" /></g><g fill="rgb(var(--color-accent))"><rect x="12" y="11" width="14" height="4" rx="1" /><rect x="12" y="25" width="14" height="4" rx="1" /><rect x="12" y="39" width="14" height="4" rx="1" /></g><rect x="60" y="11" width="24" height="4" rx="1" fill="rgb(var(--color-up))" /><rect x="60" y="25" width="16" height="4" rx="1" fill="rgb(var(--color-up))" /><rect x="60" y="39" width="20" height="4" rx="1" fill="rgb(var(--color-down))" /></Thumb>

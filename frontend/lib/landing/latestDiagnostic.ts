@@ -2,7 +2,7 @@ import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 
 /**
- * Dernier rapport de Diagnostic IA réellement généré, pour l'exemple de la
+ * Dernier dossier d’analyse réellement généré, pour l'exemple de la
  * landing.
  *
  * Pourquoi service-role : `diagnostic_reports` est protégé par RLS et la clé

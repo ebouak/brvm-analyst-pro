@@ -122,7 +122,7 @@ const FEATURES: Feature[] = [
     desc: 'Recommandation Acheter / Conserver / Vendre combinant DCF, RSI, dividende et signal.',
     badge: 'PREMIUM',
     href: '/pricing',
-    points: ['Notation A–F', 'Diagnostic IA', 'Recommandations'],
+    points: ['Notation A–F', 'Dossier d’analyse', 'Recommandations'],
   },
   {
     icon: I.barres,

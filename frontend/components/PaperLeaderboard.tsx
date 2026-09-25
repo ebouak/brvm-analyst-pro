@@ -14,7 +14,7 @@ type Row = {
 
 type Me = { optin: boolean; alias: string | null; rank: number | null } | null;
 
-const MEDALS = ['🥇', '🥈', '🥉'];
+const MEDALS = ['1ᵉʳ', '2ᵉ', '3ᵉ'];
 
 /**
  * Classement paper trading anonymisé (opt-in). Deux modes :

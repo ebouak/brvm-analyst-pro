@@ -125,7 +125,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
       {!loading && !markdown && !error && (
         <div className="bg-surface border border-border rounded-xl p-10 text-center space-y-2">
           <p className="text-muted text-sm">Aucun diagnostic disponible pour {code}.</p>
-          <p className="text-faint text-xs">Cliquez sur &quot;Générer le diagnostic&quot; pour lancer l&apos;analyse IA.</p>
+          <p className="text-faint text-xs">Cliquez sur &quot;Générer le diagnostic&quot; pour lancer l&apos;analyse.</p>
         </div>
       )}
     </div>

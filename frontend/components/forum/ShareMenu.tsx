@@ -16,13 +16,13 @@ const SHARE_TARGETS = [
   },
   {
     name: 'LinkedIn',
-    icon: '💼',
+    icon: 'in',
     href: (title: string, url: string) =>
       `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
   },
   {
     name: 'WhatsApp',
-    icon: '💬',
+    icon: '✆',
     href: (title: string, url: string) =>
       `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`,
   },

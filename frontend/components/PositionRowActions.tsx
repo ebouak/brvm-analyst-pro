@@ -29,7 +29,7 @@ export default function PositionRowActions({ position }: { position: RowPosition
         title="Dossier valeur (12 panneaux, imprimable)"
         aria-label={`Dossier valeur ${position.code}`}
       >
-        📄
+        Dossier
       </Link>
       {/* Le PDF du samedi. Lien natif (pas <Link>) : c'est une redirection
           vers une URL signée, pas une navigation dans l'app. */}
@@ -39,7 +39,7 @@ export default function PositionRowActions({ position }: { position: RowPosition
         title="Télécharger le dossier en PDF (produit chaque samedi)"
         aria-label={`Télécharger le dossier PDF ${position.code}`}
       >
-        ⬇
+        PDF
       </a>
       <button
         type="button"
@@ -47,7 +47,7 @@ export default function PositionRowActions({ position }: { position: RowPosition
         className="text-xs text-muted hover:text-up transition"
         title="Voir l'historique des cours"
       >
-        📈
+        Cours
       </button>
       <button
         type="button"

@@ -542,7 +542,7 @@ export default async function Dashboard() {
             href="/parametres/alertes"
             className="flex w-full items-center gap-2 rounded-lg border border-down/30 bg-down/10 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
           >
-            <span className="animate-pulse" aria-hidden>🔔</span>
+            <span className="animate-pulse" aria-hidden>●</span>
             <span>
               {triggeredAlerts} alerte{triggeredAlerts > 1 ? 's' : ''} déclenchée{triggeredAlerts > 1 ? 's' : ''}
             </span>
@@ -594,7 +594,7 @@ export default async function Dashboard() {
               <p className="font-semibold text-ivory">À propos des patterns</p>
               <p>Adaptés au marché de <strong>fixing</strong> de la BRVM (une fixation par séance) :</p>
               <ul className="space-y-1.5 ml-2">
-                <li>📈 <strong>Momentum</strong> — Tendance intraséance marquée</li>
+                <li><strong>Momentum</strong> — Tendance intraséance marquée</li>
                 <li>🔊 <strong>Volume anormal</strong> — Pic d&apos;échanges vs moyenne 20&nbsp;j</li>
                 <li>➡️ <strong>Mouvement</strong> — Variation de prix significative</li>
               </ul>

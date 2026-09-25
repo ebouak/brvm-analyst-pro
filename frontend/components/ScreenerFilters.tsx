@@ -161,7 +161,7 @@ export default function ScreenerFilters({
                 }`}
                 onClick={() => applyPreset(p)}
               >
-                {p.label} {p.isPremium && '🔒'}
+                {p.label} {p.isPremium && '✦'}
               </button>
             ) : null
           )}

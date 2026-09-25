@@ -36,7 +36,7 @@ const TOPICS: Topic[] = [
     key: 'signals_digest',
     title: 'Digest Signaux Opportunité',
     description:
-      'Synthèse hebdomadaire des signaux BUY/WATCH générés par le scoring IA. Publié le lundi matin.',
+      'Synthèse hebdomadaire des signaux BUY/WATCH générés par le scoring quantitatif. Publié le lundi matin.',
     badge: 'Hebdo',
   },
   {

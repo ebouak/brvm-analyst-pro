@@ -6,7 +6,7 @@ import { ADMIN_EMAILS } from './admin-emails';
  * Garde unique des fonctionnalités : accès (free / premium / désactivée) ET
  * quota journalier par utilisateur.
  *
- * Pourquoi : le diagnostic IA vérifiait « l'utilisateur est premium » mais
+ * Pourquoi : le dossier d’analyse vérifiait « l'utilisateur est premium » mais
  * jamais « combien de fois aujourd'hui » — un seul compte pouvait lancer des
  * centaines d'analyses et vider le budget LLM. Le compteur est en base (un
  * compteur en mémoire ne survit pas au serverless).

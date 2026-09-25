@@ -78,7 +78,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/premium/valorisation', label: 'Valorisation', premium: true },
       { href: '/premium/diagnostic', label: 'Diagnostic financier', premium: true },
-      { href: '/assistant', label: 'Assistant IA', premium: true },
+      { href: '/assistant', label: 'Poser une question', premium: true },
       { href: '/premium/outils', label: 'Outils Pro', premium: true },
     ],
   },

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 const STATS = [
-  { label: 'Diagnostic', value: 'Sell-side IA' },
+  { label: 'Diagnostic', value: 'Sell-side' },
   { label: 'Classements', value: 'Propriétaires' },
   { label: 'Anomalies', value: 'Corrélations & détection' },
 ];
@@ -31,7 +31,7 @@ export function PremiumCircle() {
           L’intelligence d’une maison d’investissement, à votre table.
         </h3>
         <p className="mb-4 max-w-[54ch] text-sm leading-[1.75] text-muted">
-          Diagnostic IA, classements propriétaires, anomalies et corrélations — traités comme une aile privée du terminal.
+          Dossier d’analyse, classements propriétaires, anomalies et corrélations — traités comme une aile privée du terminal.
         </p>
         <div className="mb-4 flex flex-wrap gap-3">
           <Link
@@ -44,7 +44,7 @@ export function PremiumCircle() {
             href="/premium/diagnostic"
             className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-elevated/40 px-5 text-sm text-muted transition-all hover:bg-elevated/70"
           >
-            Voir le diagnostic IA
+            Voir le dossier d’analyse
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

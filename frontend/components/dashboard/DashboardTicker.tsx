@@ -144,13 +144,13 @@ export default function DashboardTicker({
               {it.kind === 'action' && patternsByCode[it.code] && patternsByCode[it.code].length > 0 && (
                 <span className="inline-flex gap-0.5">
                   {patternsByCode[it.code].some((p) => p.pattern_type === 'atr_extreme') && (
-                    <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">⚡</span>
+                    <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">ATR</span>
                   )}
                   {patternsByCode[it.code].some((p) => p.pattern_type === 'bullish_consolidation') && (
-                    <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">📊</span>
+                    <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">CONS</span>
                   )}
                   {patternsByCode[it.code].some((p) => p.pattern_type === 'breakout_impulse') && (
-                    <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">🚀</span>
+                    <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">BRK</span>
                   )}
                 </span>
               )}

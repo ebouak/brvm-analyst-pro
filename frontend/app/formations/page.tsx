@@ -75,7 +75,7 @@ export default async function FormationsPage() {
         <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-[#56D7FD]/8 blur-3xl" />
         {/* Icône */}
         <div className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-[#56D7FD]/10 border border-[#56D7FD]/20 text-3xl">
-          🎓
+          ◈
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
@@ -135,7 +135,7 @@ export default async function FormationsPage() {
               <Link key={c.id} href={`/formations/academy/${c.slug}`}
                 className="group flex flex-col rounded-xl border border-border bg-surface p-4 hover:border-[#56D7FD]/40 transition">
                 <div className="flex items-center gap-2 text-[11px] text-faint">
-                  <span className="text-[#56D7FD]">📘 Cours</span>
+                  <span className="text-[#56D7FD]">Cours</span>
                   {c.niveau && <span>· {NIVEAU_COURSE[c.niveau] ?? c.niveau}</span>}
                 </div>
                 <h3 className="mt-1 font-display text-white group-hover:text-[#56D7FD] transition line-clamp-2">{c.titre}</h3>
@@ -161,7 +161,7 @@ export default async function FormationsPage() {
                 {f.cover_url
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={f.cover_url} alt="" className="h-full w-full object-cover" />
-                  : <div className="h-full w-full flex items-center justify-center text-3xl opacity-40">🎓</div>}
+                  : <div className="h-full w-full flex items-center justify-center text-3xl opacity-40">◈</div>}
                 <span className="absolute top-2 right-2 rounded-full bg-gold/90 px-2 py-0.5 text-[10px] font-semibold text-bg">Premium</span>
               </div>
               <div className="flex flex-1 flex-col p-4">

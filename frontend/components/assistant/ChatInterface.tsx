@@ -35,7 +35,7 @@ function printAnalyse(index: number, symbole?: string) {
       .foot{margin-top:24px;border-top:1px solid #eee;padding-top:8px;font-size:11px;color:#888;font-style:italic}
       @media print{body{margin:0}}
     </style></head><body>
-    <header><div class="kick">WESTBOURSE · Assistant IA${symbole ? ' · ' + symbole : ''}</div>
+    <header><div class="kick">WESTBOURSE · Questions${symbole ? ' · ' + symbole : ''}</div>
     <h1>Analyse${symbole ? ' — ' + symbole : ''}</h1><div class="kick">${date}</div></header>
     ${node.innerHTML}
     <div class="foot">Document généré par l'assistant WESTBOURSE — dérivé de données réelles. Ne constitue pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures.</div>
@@ -142,7 +142,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
             const updated = [...prev];
             updated[updated.length - 1] = {
               role: 'assistant',
-              content: `❌ ${msg}`,
+              content: `${msg}`,
               loading: false,
             };
             return updated;
@@ -179,11 +179,11 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         {/* Avatar double-bezel */}
         <div className="rounded-xl border border-gold/20 bg-gold/[0.06] p-0.5 shrink-0">
           <div className="w-8 h-8 rounded-[calc(0.75rem-2px)] bg-elevated flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
-            <span className="text-gold text-xs font-bold font-display">IA</span>
+            <span className="text-gold text-xs font-bold font-display">✦</span>
           </div>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-ivory">Analyste BRVM IA</h2>
+          <h2 className="text-sm font-semibold text-ivory">Questions sur la BRVM</h2>
           <p className="text-[11px] text-faint">Analyse technique · Fondamentale · Macro UEMOA</p>
         </div>
         <div className="ml-auto flex items-center gap-2">

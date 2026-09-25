@@ -268,7 +268,7 @@ export default async function DebutantPage() {
           <section className="plusloin" aria-labelledby="h-plus">
             <p className="over">Lorsque vous serez prêt à aller plus loin</p>
             <h2 id="h-plus">Pour aller plus loin, Westbourse propose également des outils avancés.</h2>
-            <ul className="chips">{['Signaux', 'Alertes', 'Screener', 'Conseiller unifié', 'Diagnostic IA', 'Dossiers PDF'].map((t) => <li key={t}>{t}</li>)}</ul>
+            <ul className="chips">{['Signaux', 'Alertes', 'Screener', 'Conseiller unifié', 'Dossier d’analyse', 'Dossiers PDF'].map((t) => <li key={t}>{t}</li>)}</ul>
             <Link href="/premium/outils" className="lien">Découvrir les outils →</Link>
           </section>
 

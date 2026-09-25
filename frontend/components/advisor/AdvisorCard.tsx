@@ -49,7 +49,7 @@ export function AdvisorCard({ row, liquidite }: {
               className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-warn/30 bg-warn/10 px-1.5 py-0.5 text-[10px] font-medium text-warn"
               title={`Score de liquidité ${liquidite.score}/100 : le titre traite peu — fractionnez vos ordres et prévoyez un délai de revente.`}
             >
-              ⚠ Liquidité {liquidite.classe === 'D' ? 'très faible' : 'faible'} — position à dimensionner
+              Liquidité {liquidite.classe === 'D' ? 'très faible' : 'faible'} — position à dimensionner
             </p>
           )}
 

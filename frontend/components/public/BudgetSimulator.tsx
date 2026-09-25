@@ -345,7 +345,7 @@ export default function BudgetSimulator({
       </p>
 
       <div className="mt-4 flex items-start gap-3 rounded-xl border border-gold-2/30 bg-gold-2/[0.06] px-4 py-3.5 text-[13px] leading-relaxed text-gold-2/90">
-        <span aria-hidden>⚠</span>
+        <span aria-hidden>!</span>
         <p>
           <b className="text-gold-2">Outil éducatif.</b> Ce simulateur ne constitue pas un conseil en
           investissement. Les dividendes projetés sont des estimations (le net suppose une IRVM de 10&nbsp;% sur

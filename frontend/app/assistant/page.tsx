@@ -2,8 +2,8 @@ import { ChatInterface } from '@/components/assistant/ChatInterface';
 import { SectionHeader, StatPill, PremiumPanel } from '@/components/ui/premium';
 
 export const metadata = {
-  title: 'Assistant IA Analyste',
-  description: 'Analyse technique et fondamentale des actions BRVM par IA',
+  title: 'Poser une question',
+  description: 'Analyse technique et fondamentale des actions BRVM',
 };
 
 interface Props {
@@ -20,7 +20,7 @@ export default async function AssistantPage({ searchParams }: Props) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <SectionHeader
           kicker="Intelligence artificielle · Exclusif"
-          title={sym ? `Assistant IA — ${sym}` : 'Assistant IA Analyste'}
+          title={sym ? `Questions — ${sym}` : 'Poser une question'}
           subtitle="Analyse multi-dimensionnelle en temps réel — technique, fondamentale, macro UEMOA."
           actions={
             <div className="flex items-center gap-2">

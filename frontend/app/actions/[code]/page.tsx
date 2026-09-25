@@ -813,7 +813,7 @@ export default async function InstrumentPage({
       {rows.length < 20 && (
         <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
           <div className="flex items-center gap-2.5">
-            <span className="text-warn text-base leading-none">⚠</span>
+            <span className="text-warn text-base leading-none">!</span>
             <p className="text-xs text-warn font-medium">
               Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
             </p>
@@ -1296,9 +1296,9 @@ export default async function InstrumentPage({
           </PremiumPanel>
         ) : (
           <EmptyStatePremium
-            icon="🔒"
+            icon="✦"
             title={`Indicateurs techniques — réservés au plan ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`}
-            hint="RSI, MACD, moyennes mobiles, lecture technique et explication par l'IA."
+            hint="RSI, MACD, moyennes mobiles, lecture technique et lecture commentée."
             action={{
               href: '/account/plan',
               label: `Passer à ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`,
@@ -1321,7 +1321,7 @@ export default async function InstrumentPage({
                 { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: '↓', external: true },
                 { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: '⌛' },
                 { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: '▤', external: true },
-                { href: `/assistant?symbole=${code}`, label: "Analyser avec l'IA", icon: '◈' },
+                { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: '◈' },
               ].map(({ href, label, icon, external }) => {
                 const cls =
                   'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';

@@ -6,8 +6,8 @@ import type { ValueTrapResult } from '@/lib/fundamentals/valueTrap';
  * la valorisation est saine ou indéterminée — pas de bruit.
  */
 const STYLE: Record<ValueTrapResult['severity'], { box: string; icon: string }> = {
-  danger: { box: 'border-down/40 bg-down/10 text-down', icon: '⚠️' },
-  warn: { box: 'border-warn/40 bg-warn/10 text-warn', icon: '⚡' },
+  danger: { box: 'border-down/40 bg-down/10 text-down', icon: '!' },
+  warn: { box: 'border-warn/40 bg-warn/10 text-warn', icon: '?' },
   good: { box: 'border-up/40 bg-up/10 text-up', icon: '✓' },
   neutral: { box: 'border-border bg-surface text-muted', icon: 'ℹ️' },
 };

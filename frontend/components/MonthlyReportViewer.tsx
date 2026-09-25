@@ -64,7 +64,7 @@ export function MonthlyReportViewer({ report, pdfUrl }: MonthlyReportViewerProps
             download
             className="inline-flex items-center gap-2 rounded-full bg-gold py-2 px-5 text-sm font-semibold text-obsidian hover:bg-gold/90 transition-all duration-200"
           >
-            <span>⬇</span> Télécharger PDF
+            <span>↓</span> Télécharger PDF
           </a>
         )}
       </div>

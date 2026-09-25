@@ -21,11 +21,11 @@ export default function PortefeuilleModals({ watchlistId, instruments, liquidite
         </button>
         <button type="button" onClick={() => setModal('liquidites')}
           className="text-xs border border-border text-muted rounded px-3 py-1.5 hover:text-white hover:border-up/40 transition">
-          💵 Liquidités
+          Liquidités
         </button>
         <button type="button" onClick={() => setModal('alert')}
           className="text-xs border border-border text-muted rounded px-3 py-1.5 hover:text-white hover:border-up/40 transition">
-          🔔 Créer une alerte
+          Créer une alerte
         </button>
       </div>
       {modal === 'position' && (

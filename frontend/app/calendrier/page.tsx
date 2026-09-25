@@ -200,7 +200,7 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
                 title="Abonnez-vous dans Google Calendar / Apple / Outlook : les nouvelles ex-dates et paiements apparaîtront automatiquement"
                 className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
               >
-                🗓 S'abonner au calendrier (.ics)
+                S'abonner au calendrier (.ics)
               </a>
             </>
           }

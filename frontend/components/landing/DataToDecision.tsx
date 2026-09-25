@@ -15,7 +15,7 @@ const ETAPES = [
   { n: '02', titre: 'Analyse', desc: 'Fondamentaux, RSI, MACD, dividendes.', href: '/screener' },
   { n: '03', titre: 'Note A–F', desc: 'Un score quantitatif explicable par action.', href: '/notations' },
   { n: '04', titre: 'Signal', desc: 'BUY, HOLD ou SELL, avec son niveau de confiance.', href: '/signaux' },
-  { n: '05', titre: 'Diagnostic IA', desc: 'Forces, risques et valorisation mis en mots.', href: '/premium/diagnostic' },
+  { n: '05', titre: 'Dossier d’analyse', desc: 'Forces, risques et valorisation mis en mots.', href: '/premium/diagnostic' },
   { n: '06', titre: 'Simulation', desc: 'Ce que la décision aurait donné, dividendes inclus.', href: '/simulateur' },
   { n: '07', titre: 'Décision', desc: 'À vous de trancher, avec les chiffres sous les yeux.', href: '/signup' },
 ];

@@ -62,12 +62,12 @@ export function EngagementRow({
         } ${!onLike ? 'cursor-default opacity-50' : ''}`}
         aria-label={liked ? 'Retirer mon like' : 'Aimer'}
       >
-        <span>👍</span>
+        <span>▲</span>
         <span className="tabular">{likes}</span>
       </button>
 
       <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full">
-        <span>💬</span>
+        <span>↩</span>
         <span className="tabular">{replyCount}</span>
       </div>
 

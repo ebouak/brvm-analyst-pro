@@ -26,7 +26,7 @@ const OUTILS = [
   { t: 'Simulateur budget', href: '/simulateur-budget' },
   { t: 'Paper trading', href: '/premium/paper-trading' },
   { t: 'Backtesting', href: '/backtest' },
-  { t: 'Diagnostic IA', href: '/premium/diagnostic' },
+  { t: 'Dossier d’analyse', href: '/premium/diagnostic' },
 ];
 
 export function MenuMobile() {

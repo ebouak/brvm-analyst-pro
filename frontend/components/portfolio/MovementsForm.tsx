@@ -353,7 +353,7 @@ export default function MovementsForm({ onSuccess }: Props) {
                 discrepancyStatus.matches ? 'text-up' : 'text-down'
               }`}
             >
-              {discrepancyStatus.matches ? '✅' : '❌'} {discrepancyStatus.message}
+              {discrepancyStatus.matches ? '✓' : '✕'} {discrepancyStatus.message}
             </span>
           </div>
         </div>

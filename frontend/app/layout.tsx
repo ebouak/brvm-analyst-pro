@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     'actions UEMOA', 'bourse UEMOA', 'investissement Afrique de l’Ouest',
     'cours bourse Côte d’Ivoire', 'SONATEL', 'ECOBANK BRVM',
     'SGI BRVM', 'SGI BRVM comparatif', 'analyse action BRVM', 'note A-F action BRVM',
-    'simulateur bourse UEMOA', 'fondamentaux BRVM', 'diagnostic IA BRVM', 'brief BRVM quotidien',
+    'simulateur bourse UEMOA', 'fondamentaux BRVM', 'dossier d’analyse BRVM', 'brief BRVM quotidien',
     'comment investir BRVM débutant', 'WESTBOURSE',
   ],
   authors: [{ name: 'WESTBOURSE', url: SITE_URL }],
@@ -196,7 +196,7 @@ const jsonLd = {
           name: 'Est-ce vraiment gratuit ?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Oui. Les cours, la note A–F et les fondamentaux sont accessibles gratuitement après création d'un compte — sans carte bancaire. L'abonnement Premium (Diagnostic IA) est optionnel.",
+            text: "Oui. Les cours, la note A–F et les fondamentaux sont accessibles gratuitement après création d'un compte — sans carte bancaire. L'abonnement Premium (Dossier d’analyse) est optionnel.",
           },
         },
         {
@@ -220,7 +220,7 @@ const jsonLd = {
           name: 'Comment passer à Premium ?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Depuis votre compte, via la page Tarifs. Le Premium débloque le Diagnostic IA (analyse détaillée par société), sans engagement.',
+            text: 'Depuis votre compte, via la page Tarifs. Le Premium débloque le Dossier d’analyse (analyse détaillée par société), sans engagement.',
           },
         },
       ],

@@ -19,9 +19,9 @@ export default function ActionMenu({ code }: { code: string }) {
 
   const items: { href: string; label: string }[] = [
     { href: '/portefeuille', label: '★ Watchlist' },
-    { href: '/portefeuille', label: '🔔 Alertes' },
+    { href: '/portefeuille', label: 'Alertes' },
     { href: `/backtest?code=${code}`, label: '◈ Backtester' },
-    { href: `/forum?code=${code}`, label: '💬 Discuter de cette valeur' },
+    { href: `/forum?code=${code}`, label: 'Discuter de cette valeur' },
   ];
 
   return (

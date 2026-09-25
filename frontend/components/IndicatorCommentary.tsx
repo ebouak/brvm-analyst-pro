@@ -17,7 +17,7 @@ const QUESTIONS = [
 ];
 
 /**
- * Encart de lecture automatique des indicateurs + boutons « Expliquer avec l'IA »
+ * Encart de lecture automatique des indicateurs + boutons « Expliquer »
  * (questions prêtes à l'emploi, deep-link vers l'assistant pré-rempli).
  */
 export default function IndicatorCommentary({ reading, code }: { reading: IndicatorReading; code: string }) {
@@ -38,7 +38,7 @@ export default function IndicatorCommentary({ reading, code }: { reading: Indica
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[11px] text-faint">✦ Expliquer avec l'IA :</span>
+        <span className="text-[11px] text-faint">✦ Expliquer :</span>
         {QUESTIONS.map((q) => (
           <Link
             key={q}
