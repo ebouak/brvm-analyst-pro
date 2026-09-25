@@ -126,7 +126,7 @@ export async function redeemPairingCode(chatId: number, rawText: string): Promis
   // atomiquement plus haut, au moment de la réclamation.
   await sendTelegramReply(
     chatId,
-    '✅ Telegram lié à votre compte WESTBOURSE.\n\n' +
+    '✓ Telegram lié à votre compte WESTBOURSE.\n\n' +
       'Vous recevrez ici les alertes que vous avez définies. Pour me poser des ' +
       "questions sur le marché, activez l'agent conversationnel dans vos paramètres.",
   );

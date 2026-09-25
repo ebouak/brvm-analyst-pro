@@ -21,7 +21,7 @@ export function formatFlipText(flips: AdvisorFlip[], date: string): string {
     .slice(0, 20)
     .map((f) => `• ${f.code} : ${label(f.from)} → ${label(f.to)} (conviction ${f.conviction}%)`);
   const extra = flips.length > 20 ? `\n… et ${flips.length - 20} autre(s).` : '';
-  return `🔔 WESTBOURSE — ${flips.length} changement(s) de recommandation (${date})\n\n${lines.join('\n')}${extra}`;
+  return `WESTBOURSE — ${flips.length} changement(s) de recommandation (${date})\n\n${lines.join('\n')}${extra}`;
 }
 
 /** Corps HTML (Email) — pur, testable. */
@@ -35,7 +35,7 @@ export function formatFlipHtml(flips: AdvisorFlip[], date: string): string {
     )
     .join('');
   return `<div style="font-family:system-ui,sans-serif">
-    <h2>🔔 ${flips.length} changement(s) de recommandation</h2>
+    <h2>${flips.length} changement(s) de recommandation</h2>
     <p style="color:#666">Séance du ${date}</p>
     <table style="border-collapse:collapse">${rows}</table>
     <p style="color:#999;font-size:12px;margin-top:16px">Aide à la décision — exécutez via votre SGI. Performances passées ne préjugent pas des performances futures.</p>
@@ -90,7 +90,7 @@ async function notifyEmailOps(flips: AdvisorFlip[], date: string): Promise<Chann
   const { sendEmail } = await import('@/lib/server/email');
   const r = await sendEmail({
     to,
-    subject: `🔔 ${flips.length} changement(s) de recommandation — ${date}`,
+    subject: `${flips.length} changement(s) de recommandation — ${date}`,
     html: formatFlipHtml(flips, date),
   });
   return { channel: 'email', ok: r.ok, error: r.error };

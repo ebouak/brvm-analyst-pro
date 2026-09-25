@@ -22,7 +22,7 @@ const STATIC_PAGES: SearchItem[] = [
       sublabel: g.label,
       href: it.href,
       searchKey: `${it.label} ${g.label}`.toLowerCase(),
-      emoji: '📄',
+      emoji: '◇',
     })),
   ),
   ...PALETTE_EXTRA.map((it) => ({
@@ -31,7 +31,7 @@ const STATIC_PAGES: SearchItem[] = [
     sublabel: 'Autres pages',
     href: it.href,
     searchKey: it.label.toLowerCase(),
-    emoji: '📄',
+    emoji: '◇',
   })),
 ];
 
@@ -44,7 +44,7 @@ export function buildSearchItems(args: {
     sublabel: inst.designation ?? undefined,
     href: `/actions/${inst.code}`,
     searchKey: `${inst.code} ${inst.designation ?? ''} ${inst.secteur ?? ''}`.toLowerCase(),
-    emoji: '📈',
+    emoji: '◆',
   }));
 
   const secteurSet = new Set<string>();
@@ -58,7 +58,7 @@ export function buildSearchItems(args: {
         sublabel: 'Secteur',
         href: `/secteurs?focus=${encodeURIComponent(inst.secteur)}`,
         searchKey: `secteur ${inst.secteur}`.toLowerCase(),
-        emoji: '🏭',
+        emoji: '◈',
       });
     }
   }

@@ -146,13 +146,13 @@ export function filterByKind(
 
 export function iconForKind(kind: CalendarItem['kind']): string {
   switch (kind) {
-    case 'ex-date': return '💰';
-    case 'payment': return '💵';
-    case 'AG': return '🏛️';
-    case 'RESULTAT': return '📊';
-    case 'COMMUNIQUE': return '📰';
-    case 'INTRODUCTION': return '🆕';
-    default: return '📌';
+    case 'ex-date': return '◆';
+    case 'payment': return '◉';
+    case 'AG': return '◈';
+    case 'RESULTAT': return '▸';
+    case 'COMMUNIQUE': return '·';
+    case 'INTRODUCTION': return '✦';
+    default: return '◇';
   }
 }
 
