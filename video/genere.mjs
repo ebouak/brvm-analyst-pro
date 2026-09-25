@@ -181,8 +181,21 @@ const historiqueIndice = [...(histoIndice ?? [])]
 const actusListe = Array.isArray(actus) ? actus : [];
 const duJour = actusListe.filter((n) => n.date_publication === seance);
 const candidates = duJour.length > 0 ? duJour : actusListe;
-const phare = candidates[0] ?? null;
-const autresActus = candidates.filter((n) => n !== phare).slice(0, 3);
+
+/* Un brief de marché mène avec le MARCHÉ. Sans ce tri, la une du 24/09/2026
+   était « Les prix du caoutchouc ont flambé » alors que la base contenait
+   « BRVM : Bridge Bank Group fait son entrée sur la cote » — l'événement de la
+   séance. On remonte donc les articles rattachés à une valeur cotée ou citant
+   la BRVM ; à défaut, l'ordre de la requête (impact puis fraîcheur) tranche.
+   Aucun article n'est écarté : seul leur ORDRE change. */
+const concerneLeMarche = (n) =>
+  Boolean(n.instrument_code) || /\bBRVM\b|\bUEMOA\b/i.test(n.titre ?? '');
+const classees = [...candidates].sort(
+  (a, b) => Number(concerneLeMarche(b)) - Number(concerneLeMarche(a)),
+);
+
+const phare = classees[0] ?? null;
+const autresActus = classees.filter((n) => n !== phare).slice(0, 3);
 
 const fr = (x, d = 2) => x.toFixed(d).replace('.', ',');
 const sg = (x, d = 2) => `${x >= 0 ? '+' : '−'}${fr(Math.abs(x), d)}`;

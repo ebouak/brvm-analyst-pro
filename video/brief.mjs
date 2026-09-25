@@ -4,7 +4,7 @@
  * ── CE QUE CE FICHIER EST, ET CE QU'IL N'EST PAS ──
  * C'est un EMAIL, pas une page React. Pas de composants, pas de flexbox
  * fiable, pas de police web garantie : des tableaux, du style en ligne, et
- * une largeur de 600 px. Les blocs d'une maquette web sont atteignables ; sa
+ * une largeur de 620 px. Les blocs d'une maquette web sont atteignables ; sa
  * mécanique ne l'est pas. Le contraste éditorial vient donc de Georgia (serif,
  * présente partout) contre la pile sans-serif du système — pas d'une fonte
  * chargée, qu'un client de messagerie sur deux ignorerait.
@@ -177,58 +177,128 @@ export function texte(m) {
   return l.join('\n');
 }
 
-/* ───────────────────────── Briques HTML ───────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════
+   L'OSSATURE, et ce qu'elle impose
+   ═══════════════════════════════════════════════════════════════════════
 
-const section = (titre, corps, { fond = C.blanc, or = false } = {}) => `
-<tr><td style="padding:0 0 1px">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${fond}">
-    <tr><td style="padding:26px 28px 0">
-      <p style="margin:0 0 16px;font-family:${SANS};font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${or ? C.or : C.turquoise}">${esc(titre)}</p>
-    </td></tr>
-    <tr><td style="padding:0 28px 26px">${corps}</td></tr>
-  </table>
+   Structure retenue, d'après la maquette validée :
+
+     en-tête clair  →  hero éditorial  →  BANDEAU KPI SOMBRE (la signature)
+     →  phare | autres actus  →  hausses | baisses  →  indice | chiffres clés
+     →  secteurs  →  lecture  →  barre de pied sombre avec le bouton vidéo
+
+   DEUX COLONNES EN EMAIL. Ni flex ni grid : des `div` en `inline-block` à
+   largeur maximale, dans une cellule à `font-size:0` pour tuer l'espace
+   inter-blocs. Sous 620 px les colonnes s'empilent d'elles-mêmes, sans
+   requête média — donc aussi dans les clients qui les ignorent. Outlook de
+   bureau ignore `inline-block` et empile toujours : c'est la dégradation
+   choisie, pas un oubli.
+
+   TROIS ÉLÉMENTS DE LA MAQUETTE ABSENTS, ET POURQUOI :
+
+     · La PHOTO du hero (skyline). Aucune image de bandeau dans le dépôt, et
+       un hero qui dépend d'une image est un hero souvent vide : les clients
+       de messagerie bloquent les images par défaut. Le hero tient sur sa
+       typographie.
+     · Les VIGNETTES des actualités. `brvm_news.image_url` est vide sur la
+       totalité des articles récents (0 sur 6 au 25/09/2026). Mettre une image
+       générique à la place reviendrait à illustrer un article avec une photo
+       qui ne le concerne pas.
+     · La COURBE INTRADAY « 09h → 16h ». `brvm_intraday_snapshots` ne contient
+       que des actions, aucun indice : cette courbe serait inventée de bout en
+       bout. Elle est remplacée par les 20 dernières séances, réelles.
+
+   Les pastilles rondes dorées du bandeau KPI sont conservées comme ANNEAUX,
+   sans glyphe : une icône de messagerie ne se dessine ni en SVG (retiré par
+   plusieurs clients) ni en émoji (le projet s'en interdit l'usage décoratif).
+   L'anneau porte le rythme visuel sans prétendre illustrer quoi que ce soit.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/** Colonne d'une rangée à deux blocs. `part` vaut 'large' (≈2/3) ou 'egal'. */
+const colonne = (contenu, part = 'egal') => {
+  const max = part === 'large' ? 356 : part === 'etroit' ? 212 : 284;
+  return `<div style="display:inline-block;vertical-align:top;width:100%;max-width:${max}px;font-size:14px">${contenu}</div>`;
+};
+
+/** Une rangée : une cellule à font-size 0, des colonnes qui s'empilent seules. */
+const rangee = (colonnes, { fond = C.creme, gap = 12 } = {}) => `
+<tr><td style="padding:${gap}px ${gap}px 0;background:${fond};font-size:0;line-height:0">
+  ${colonnes.join(`<div style="display:inline-block;width:${gap}px;font-size:0">&nbsp;</div>`)}
 </td></tr>`;
 
-/** Une ligne de palmarès : code, nom, cours, variation, et une barre d'amplitude. */
+/** Carte blanche à titre — la brique de toutes les rangées. */
+const carte = (titre, corps, { pad = '18px 20px' } = {}) => `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.blanc};border:1px solid ${C.trait}">
+  ${titre ? `<tr><td style="padding:16px 20px 0"><p style="margin:0;font-family:${SERIF};font-size:17px;font-weight:700;color:${C.nuit}">${esc(titre)}</p></td></tr>` : ''}
+  <tr><td style="padding:${pad}">${corps}</td></tr>
+</table>`;
+
+/** L'anneau doré du bandeau KPI. Aucun glyphe : voir l'en-tête. */
+const anneau = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:9px"><tr><td style="width:30px;height:30px;border:1px solid ${C.or};border-radius:15px;background:rgba(201,164,92,.16);font-size:0;line-height:30px">&nbsp;</td></tr></table>`;
+
+/** Une colonne du bandeau KPI sombre. */
+const kpiSombre = (label, valeur, { premier = false } = {}) => `
+<td valign="top" style="padding:0 14px;${premier ? '' : `border-left:1px solid #1D3A5C;`}">
+  ${anneau}
+  <p style="margin:0;font-family:${SANS};font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8AA3BF;line-height:1.45">${esc(label)}</p>
+  <p style="margin:5px 0 0;font-family:${SERIF};font-size:17px;font-weight:700;color:${C.blanc};line-height:1.25">${esc(valeur)}</p>
+</td>`;
+
+/** Une ligne de palmarès : valeur, cours, variation, barre d'amplitude. */
 function ligneMouvement(v, max, hausse) {
-  const largeur = max > 0 ? Math.max(8, Math.round((Math.abs(v.variation_pct) / max) * 100)) : 0;
+  const largeur = max > 0 ? Math.max(10, Math.round((Math.abs(v.variation_pct) / max) * 100)) : 0;
   const teinte = hausse ? C.hausse : C.baisse;
   const fond = hausse ? C.hausseFond : C.baisseFond;
   return `
   <tr>
-    <td style="padding:9px 0;border-bottom:1px solid ${C.trait};font-family:${SANS};font-size:13px;color:${C.texte};font-weight:600">${esc(v.code)}<span style="display:block;font-weight:400;font-size:11px;color:${C.faible};padding-top:2px">${esc((v.designation ?? '').slice(0, 26))}</span></td>
-    <td style="padding:9px 0;border-bottom:1px solid ${C.trait};font-family:${SANS};font-size:12.5px;color:${C.second};text-align:right;white-space:nowrap">${v.cours != null ? ent(v.cours) : '—'}</td>
-    <td style="padding:9px 0 9px 12px;border-bottom:1px solid ${C.trait};font-family:${SANS};font-size:13px;font-weight:600;color:${teinte};text-align:right;white-space:nowrap">${esc(sg(v.variation_pct))} %</td>
-    <td style="padding:9px 0 9px 10px;border-bottom:1px solid ${C.trait};width:62px">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:62px"><tr>
-        <td style="height:5px;width:${largeur}%;background:${teinte};font-size:0;line-height:0">&nbsp;</td>
-        <td style="height:5px;background:${fond};font-size:0;line-height:0">&nbsp;</td>
+    <td style="padding:8px 0;border-top:1px solid ${C.trait};font-family:${SANS};font-size:12.5px;font-weight:600;color:${C.texte}">${esc(v.code)}</td>
+    <td style="padding:8px 0;border-top:1px solid ${C.trait};font-family:${SANS};font-size:12px;color:${C.second};text-align:right;white-space:nowrap">${v.cours != null ? ent(v.cours) : '—'}</td>
+    <td style="padding:8px 0 8px 10px;border-top:1px solid ${C.trait};font-family:${SANS};font-size:12.5px;font-weight:600;color:${teinte};text-align:right;white-space:nowrap">${esc(sg(v.variation_pct))} %</td>
+    <td style="padding:8px 0 8px 8px;border-top:1px solid ${C.trait};width:48px">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:48px"><tr>
+        <td style="height:6px;width:${largeur}%;background:${teinte};font-size:0;line-height:0">&nbsp;</td>
+        <td style="height:6px;background:${fond};font-size:0;line-height:0">&nbsp;</td>
       </tr></table>
     </td>
   </tr>`;
 }
 
-/** Courbe de l'indice en cellules de tableau — le SVG est retiré par plusieurs clients. */
+/** Tableau d'un palmarès, en-têtes compris. */
+const tableauMouvements = (liste, max, hausse) =>
+  liste.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td style="padding-bottom:6px;font-family:${SANS};font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:${C.faible}">Valeur</td>
+        <td style="padding-bottom:6px;font-family:${SANS};font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:${C.faible};text-align:right">Cours</td>
+        <td colspan="2" style="padding-bottom:6px;font-family:${SANS};font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:${C.faible};text-align:right">Variation</td>
+      </tr>
+      ${liste.map((v) => ligneMouvement(v, max, hausse)).join('')}
+    </table>`
+    : `<p style="margin:0;font-family:${SANS};font-size:12.5px;color:${C.faible}">Aucune valeur dans ce sens sur la séance.</p>`;
+
+/** Courbe de l'indice en cellules — le SVG est retiré par plusieurs clients. */
 function courbeIndice(m) {
   const h = m.historique_indice ?? [];
-  if (h.length < 5) return '';
+  if (h.length < 5) {
+    return `<p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.6;color:${C.faible}">Historique insuffisant pour tracer une évolution.</p>`;
+  }
   const vals = h.map((p) => p.valeur);
   const min = Math.min(...vals);
   const max = Math.max(...vals);
   const amp = max - min || 1;
   const barres = h
-    .map((p) => {
-      const haut = 6 + Math.round(((p.valeur - min) / amp) * 40);
-      return `<td valign="bottom" style="padding:0 1px"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%"><tr><td style="height:${haut}px;background:${C.turquoise};font-size:0;line-height:0">&nbsp;</td></tr></table></td>`;
-    })
+    .map(
+      (p, i) =>
+        `<td valign="bottom" style="padding:0 1px"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%"><tr><td style="height:${8 + Math.round(((p.valeur - min) / amp) * 52)}px;background:${i === h.length - 1 ? C.nuit : C.turquoise};font-size:0;line-height:0">&nbsp;</td></tr></table></td>`,
+    )
     .join('');
   return `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-    <tr style="height:48px">${barres}</tr>
-    <tr><td colspan="${h.length}" style="padding-top:7px;font-family:${SANS};font-size:10.5px;color:${C.faible}">
-      ${h.length} dernières séances · de ${esc(fr(min))} à ${esc(fr(max))} points
-    </td></tr>
-  </table>`;
+    <tr style="height:60px">${barres}</tr>
+  </table>
+  <p style="margin:9px 0 0;font-family:${SANS};font-size:10.5px;line-height:1.55;color:${C.faible}">
+    ${h.length} dernières séances, de ${esc(fr(min))} à ${esc(fr(max))} points. La BRVM ne publiant pas d’historique intraday de l’indice, aucune courbe de la journée n’est possible.
+  </p>`;
 }
 
 /* ───────────────────────── Le corps HTML ───────────────────────── */
@@ -241,219 +311,177 @@ export function html(m) {
   const phare = m.actualites?.phare ?? null;
   const autres = m.actualites?.autres ?? [];
   const vert = !m.composite || m.composite.variation_pct >= 0;
-  const teinteHero = vert ? C.turquoise : '#FF8A7A';
 
-  /* ── KPI ── */
-  const kpis = [
-    m.composite ? ['Clôture', `${fr(m.composite.valeur)} pts`] : null,
-    ['Hausses', String(m.hausses)],
-    ['Baisses', String(m.baisses)],
-    ['Stables', String(m.stables)],
-    ['Capitaux', fcfa(m.capitaux_fcfa)],
-    ['Valeurs traitées', String(m.valeurs)],
-  ].filter(Boolean);
+  /* ── Bandeau KPI sombre : la signature de l'ossature ── */
+  const bandeau = `
+  <tr><td style="padding:14px 12px 0;background:${C.creme}">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.nuit}">
+      <tr><td style="padding:22px 20px">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td valign="top" width="188" style="padding-right:16px;border-right:1px solid #1D3A5C">
+            <p style="margin:0 0 6px;font-family:${SERIF};font-size:16px;font-weight:700;color:${C.blanc}">BRVM Composite</p>
+            ${
+              m.composite
+                ? `<p style="margin:0;font-family:${SANS};font-size:36px;line-height:1.05;font-weight:700;color:${vert ? C.turquoise : '#FF8A7A'}">${esc(sg(m.composite.variation_pct))} %</p>
+                   <p style="margin:5px 0 0;font-family:${SANS};font-size:13px;color:#9FB3C8">à ${esc(fr(m.composite.valeur))} pts</p>`
+                : `<p style="margin:0;font-family:${SANS};font-size:13px;line-height:1.6;color:#9FB3C8">Indice non disponible pour cette séance.</p>`
+            }
+          </td>
+          <td valign="top">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              ${m.composite ? kpiSombre('Clôture', `${fr(m.composite.valeur)} pts`, { premier: true }) : ''}
+              ${kpiSombre('Hausse / baisse / stable', `${m.hausses} / ${m.baisses} / ${m.stables}`, { premier: !m.composite })}
+              ${kpiSombre('Capitaux échangés', fcfa(m.capitaux_fcfa))}
+              ${m.ligne_lourde ? kpiSombre('Premier échangé', `${m.ligne_lourde.code} · ${fr(m.ligne_lourde.part_pct, 1)} %`) : ''}
+            </tr></table>
+          </td>
+        </tr></table>
+      </td></tr>
+    </table>
+  </td></tr>`;
 
-  const celluleKpi = ([k, v]) => `
-    <td width="33%" style="padding:13px 10px;border-right:1px solid ${C.trait};border-bottom:1px solid ${C.trait}">
-      <p style="margin:0;font-family:${SANS};font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:${C.faible}">${esc(k)}</p>
-      <p style="margin:4px 0 0;font-family:${SANS};font-size:16px;font-weight:600;color:${C.texte}">${esc(v)}</p>
-    </td>`;
-  const lignesKpi = [];
-  for (let i = 0; i < kpis.length; i += 3) {
-    lignesKpi.push(`<tr>${kpis.slice(i, i + 3).map(celluleKpi).join('')}</tr>`);
-  }
-
-  /* ── Information phare : article réel, ou repli factuel ── */
-  const blocPhare = phare
-    ? section(
-        'Information du jour',
-        `
-      ${phare.secteur ? `<p style="margin:0 0 9px"><span style="display:inline-block;padding:3px 9px;background:${C.creme};border:1px solid ${C.trait};font-family:${SANS};font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:${C.second}">${esc(phare.secteur)}</span></p>` : ''}
-      <p style="margin:0 0 9px;font-family:${SERIF};font-size:19px;line-height:1.35;font-weight:700;color:${C.nuit}">${esc(phare.titre)}</p>
-      ${phare.resume ? `<p style="margin:0 0 14px;font-family:${SANS};font-size:13.5px;line-height:1.65;color:${C.second}">${esc(String(phare.resume).slice(0, 300))}</p>` : ''}
-      ${phare.source_url ? `<p style="margin:0"><a href="${esc(phare.source_url)}" style="font-family:${SANS};font-size:13px;font-weight:600;color:${C.nuit};text-decoration:none;border-bottom:2px solid ${C.turquoise};padding-bottom:1px">Lire l'article →</a></p>` : ''}`,
-      )
-    : /* AUCUN ARTICLE FABRIQUÉ. Sans actualité en base, on ne raconte pas
-         d'histoire : on donne les faits de la séance, et on le dit. */
-      section(
-        'À retenir aujourd’hui',
-        `<p style="margin:0 0 12px;font-family:${SANS};font-size:12.5px;line-height:1.6;color:${C.faible}">Aucune actualité éditoriale n’est disponible pour cette séance. Voici ce que disent les chiffres.</p>
+  /* ── Information phare : article RÉEL, ou repli factuel ── */
+  const corpsPhare = phare
+    ? `${phare.secteur ? `<p style="margin:0 0 8px"><span style="display:inline-block;padding:3px 9px;background:${C.creme};border:1px solid ${C.trait};font-family:${SANS};font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:${C.second}">${esc(phare.secteur)}</span></p>` : ''}
+       <p style="margin:0 0 9px;font-family:${SERIF};font-size:18px;line-height:1.35;font-weight:700;color:${C.nuit}">${esc(phare.titre)}</p>
+       ${phare.resume ? `<p style="margin:0 0 13px;font-family:${SANS};font-size:13px;line-height:1.65;color:${C.second}">${esc(String(phare.resume).slice(0, 260))}</p>` : ''}
+       ${phare.source_url ? `<p style="margin:0"><a href="${esc(phare.source_url)}" style="font-family:${SANS};font-size:12.5px;font-weight:600;color:${C.nuit};text-decoration:none;border-bottom:2px solid ${C.turquoise};padding-bottom:1px">Lire l’analyse complète →</a></p>` : ''}`
+    : /* AUCUN ARTICLE FABRIQUÉ : sans actualité, on donne les faits et on le dit. */
+      `<p style="margin:0 0 11px;font-family:${SANS};font-size:12px;line-height:1.6;color:${C.faible}">Aucune actualité éditoriale n’est disponible pour cette séance. Voici ce que disent les chiffres.</p>
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
          ${faits(m)
            .map(
-             (f, i) => `<tr>
-             <td width="34" valign="top" style="padding:7px 0;font-family:${SERIF};font-size:15px;font-weight:700;color:${C.or}">${String(i + 1).padStart(2, '0')}</td>
-             <td style="padding:7px 0;font-family:${SANS};font-size:13.5px;line-height:1.6;color:${C.texte}">${esc(f)}</td></tr>`,
+             (f, i) =>
+               `<tr><td width="30" valign="top" style="padding:6px 0;font-family:${SERIF};font-size:14px;font-weight:700;color:${C.or}">${String(i + 1).padStart(2, '0')}</td>
+                <td style="padding:6px 0;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.texte}">${esc(f)}</td></tr>`,
            )
            .join('')}
-       </table>`,
-      );
+       </table>`;
 
-  /* ── À retenir (quand la phare est un article, les faits gardent leur place) ── */
-  const blocRetenir = phare
-    ? section(
-        'À retenir',
-        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-        ${faits(m)
-          .map(
-            (f, i) => `<tr>
-            <td width="34" valign="top" style="padding:7px 0;font-family:${SERIF};font-size:15px;font-weight:700;color:${C.or}">${String(i + 1).padStart(2, '0')}</td>
-            <td style="padding:7px 0;font-family:${SANS};font-size:13.5px;line-height:1.6;color:${C.texte}">${esc(f)}</td></tr>`,
-          )
-          .join('')}
-      </table>`,
-        { fond: C.creme },
-      )
-    : '';
+  const corpsAutres = autres.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      ${autres
+        .map(
+          (n, i) => `<tr><td style="padding:${i === 0 ? '0' : '10px'} 0 10px;${i === 0 ? '' : `border-top:1px solid ${C.trait};`}">
+          ${n.secteur ? `<p style="margin:0 0 4px;font-family:${SANS};font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:${C.or}">${esc(n.secteur)}</p>` : ''}
+          <p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.5;color:${C.texte}">${n.source_url ? `<a href="${esc(n.source_url)}" style="color:${C.texte};text-decoration:none">${esc(n.titre)}</a>` : esc(n.titre)}</p>
+        </td></tr>`,
+        )
+        .join('')}
+    </table>`
+    : `<p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.6;color:${C.faible}">Aucune autre actualité publiée sur la période.</p>`;
 
-  /* ── Palmarès ── */
-  const tableauMouvements = (liste, max, hausse) =>
-    liste.length
-      ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${liste
-          .map((v) => ligneMouvement(v, max, hausse))
-          .join('')}</table>`
-      : `<p style="margin:0;font-family:${SANS};font-size:12.5px;color:${C.faible}">Aucune valeur dans ce sens sur la séance.</p>`;
-
-  /* ── Activité : uniquement ce qui existe ── */
-  const activite = [
-    ['Capitaux échangés', fcfa(m.capitaux_fcfa)],
-    ['Valeurs traitées', String(m.valeurs)],
-    m.transactions != null ? ['Transactions', ent(m.transactions)] : null,
-    m.ligne_lourde ? ['Valeur la plus échangée', `${m.ligne_lourde.code} · ${fr(m.ligne_lourde.part_pct, 1)} %`] : null,
+  /* ── Chiffres clés : uniquement ce qui existe ── */
+  const clés = [
+    [fcfa(m.capitaux_fcfa), 'Capitaux échangés'],
+    [String(m.valeurs), 'Valeurs traitées'],
+    m.transactions != null ? [ent(m.transactions), 'Transactions'] : null,
+    m.ligne_lourde ? [`${fr(m.ligne_lourde.part_pct, 1)} %`, `Poids du premier échange (${m.ligne_lourde.code})`] : null,
   ].filter(Boolean);
+
+  const corpsClés = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    ${clés
+      .map(
+        ([v, k], i) => `<tr><td style="padding:${i === 0 ? '0' : '11px'} 0 11px;${i === 0 ? '' : `border-top:1px solid ${C.trait};`}">
+        <p style="margin:0;font-family:${SERIF};font-size:20px;font-weight:700;color:${C.nuit};line-height:1.2">${esc(v)}</p>
+        <p style="margin:3px 0 0;font-family:${SANS};font-size:11px;color:${C.faible}">${esc(k)}</p>
+      </td></tr>`,
+      )
+      .join('')}
+  </table>`;
 
   /* ── Secteurs : une MESURE, jamais une explication ── */
   const secteurs = (m.secteurs ?? []).filter((s) => s.part_pct >= 1).slice(0, 4);
   const blocSecteurs = secteurs.length
-    ? section(
+    ? `<tr><td style="padding:12px 12px 0;background:${C.creme}">${carte(
         'Où se sont traités les capitaux',
         `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
         ${secteurs
           .map(
-            (s) => `<tr>
-          <td style="padding:8px 0;border-bottom:1px solid ${C.trait};font-family:${SANS};font-size:13px;color:${C.texte}">${esc(s.secteur)}<span style="display:block;font-size:11px;color:${C.faible};padding-top:2px">${s.hausses} de ${s.valeurs} valeurs en hausse</span></td>
-          <td style="padding:8px 0;border-bottom:1px solid ${C.trait};font-family:${SANS};font-size:14px;font-weight:600;color:${C.nuit};text-align:right;white-space:nowrap">${esc(fr(s.part_pct, 1))} %</td>
+            (s, i) => `<tr>
+          <td style="padding:7px 0;${i ? `border-top:1px solid ${C.trait};` : ''}font-family:${SANS};font-size:12.5px;color:${C.texte}">${esc(s.secteur)}<span style="color:${C.faible}"> — ${s.hausses} de ${s.valeurs} valeurs en hausse</span></td>
+          <td style="padding:7px 0;${i ? `border-top:1px solid ${C.trait};` : ''}font-family:${SANS};font-size:13px;font-weight:600;color:${C.nuit};text-align:right;white-space:nowrap">${esc(fr(s.part_pct, 1))} %</td>
         </tr>`,
           )
           .join('')}
       </table>
-      <p style="margin:12px 0 0;font-family:${SANS};font-size:11.5px;line-height:1.6;color:${C.faible}">Part de chaque secteur dans les capitaux échangés. Cette répartition décrit où l’argent s’est traité ; elle n’explique pas le mouvement de l’indice.</p>`,
-      )
-    : '';
-
-  /* ── Autres actualités : masquées si la base n'en a pas ── */
-  const blocAutres = autres.length
-    ? section(
-        'Autres actualités',
-        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-        ${autres
-          .map(
-            (n) => `<tr><td style="padding:11px 0;border-bottom:1px solid ${C.trait}">
-            ${n.secteur ? `<p style="margin:0 0 4px;font-family:${SANS};font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:${C.faible}">${esc(n.secteur)}</p>` : ''}
-            <p style="margin:0;font-family:${SANS};font-size:13.5px;line-height:1.5;color:${C.texte}">${n.source_url ? `<a href="${esc(n.source_url)}" style="color:${C.texte};text-decoration:none">${esc(n.titre)}</a>` : esc(n.titre)}</p>
-          </td></tr>`,
-          )
-          .join('')}
-      </table>`,
-        { fond: C.creme },
-      )
+      <p style="margin:11px 0 0;font-family:${SANS};font-size:11px;line-height:1.6;color:${C.faible}">Part de chaque secteur dans les capitaux échangés. Cette répartition décrit <em>où</em> l’argent s’est traité ; elle n’explique pas le mouvement de l’indice.</p>`,
+      )}</td></tr>`
     : '';
 
   return `
 <div style="margin:0;padding:0;background:${C.creme}">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(faits(m)[0] ?? '')}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.creme};padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.creme};padding:20px 10px">
 <tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:${C.blanc};border:1px solid ${C.trait}">
+<table role="presentation" width="620" cellpadding="0" cellspacing="0" border="0" style="max-width:620px;width:100%;background:${C.creme}">
 
   <!-- ══ En-tête ══ -->
-  <tr><td style="padding:22px 28px 18px;border-bottom:3px solid ${C.nuit}">
+  <tr><td style="padding:18px 20px;background:${C.blanc};border:1px solid ${C.trait};border-bottom:none">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td style="font-family:${SERIF};font-size:21px;font-weight:700;letter-spacing:.04em;color:${C.nuit}">WESTBOURSE</td>
-      <td style="text-align:right;font-family:${SANS};font-size:9.5px;line-height:1.5;letter-spacing:.12em;text-transform:uppercase;color:${C.faible}">La référence<br>sur les marchés africains</td>
+      <td style="font-family:${SERIF};font-size:22px;font-weight:700;letter-spacing:.04em;color:${C.nuit}">WESTBOURSE<span style="display:block;font-family:${SANS};font-size:8.5px;font-weight:600;letter-spacing:.22em;color:${C.or};padding-top:3px">INFORMER · ANALYSER · ÉCLAIRER</span></td>
+      <td style="text-align:right;font-family:${SANS};font-size:9px;line-height:1.6;letter-spacing:.12em;text-transform:uppercase;color:${C.faible};border-left:1px solid ${C.trait};padding-left:16px;width:150px">La référence<br>sur les marchés africains</td>
     </tr></table>
   </td></tr>
 
-  <!-- ══ Hero ══ -->
-  <tr><td style="padding:26px 28px 24px;background:${C.nuit}">
-    <p style="margin:0 0 4px;font-family:${SANS};font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${C.or}">Brief de clôture</p>
-    <p style="margin:0 0 18px;font-family:${SERIF};font-size:26px;line-height:1.25;font-weight:700;color:${C.blanc}">Séance du ${esc(m.date_fr)}</p>
-    ${
-      m.composite
-        ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-        <td valign="bottom" style="padding-right:16px;font-family:${SANS};font-size:40px;line-height:1;font-weight:700;color:${teinteHero}">${esc(sg(m.composite.variation_pct))} %</td>
-        <td valign="bottom" style="padding-bottom:4px;font-family:${SANS};font-size:13px;line-height:1.5;color:#9FB3C8">BRVM Composite<br><span style="color:${C.blanc};font-weight:600">${esc(fr(m.composite.valeur))} points</span></td>
-      </tr></table>
-      <p style="margin:16px 0 0;font-family:${SANS};font-size:13.5px;line-height:1.6;color:#B9C7D6">Le BRVM Composite termine la séance ${m.composite.variation_pct >= 0 ? 'en hausse' : 'en baisse'} de ${esc(fr(Math.abs(m.composite.variation_pct)))} %, à ${esc(fr(m.composite.valeur))} points.</p>`
-        : `<p style="margin:0;font-family:${SANS};font-size:13.5px;line-height:1.6;color:#B9C7D6">L’indice BRVM Composite n’est pas disponible pour cette séance. Les chiffres ci-dessous portent sur les valeurs cotées.</p>`
-    }
+  <!-- ══ Hero éditorial ══ -->
+  <tr><td style="padding:26px 20px 24px;background:${C.blanc};border:1px solid ${C.trait};border-top:none">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px"><tr>
+      <td style="width:26px;height:2px;background:${C.or};font-size:0;line-height:0">&nbsp;</td>
+      <td style="padding-left:10px;font-family:${SANS};font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:${C.second}">Newsletter quotidienne</td>
+    </tr></table>
+    <p style="margin:0 0 10px;font-family:${SERIF};font-size:34px;line-height:1.12;font-weight:700;color:${C.nuit}">Séance du<br>${esc(m.date_fr)}</p>
+    <p style="margin:0;font-family:${SANS};font-size:13.5px;line-height:1.65;color:${C.second}">Toute l’actualité et les chiffres clés de la BRVM en un coup d’œil.</p>
   </td></tr>
 
-  <!-- ══ KPI ══ -->
-  <tr><td style="padding:0 28px">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${C.trait}">${lignesKpi.join('')}</table>
-  </td></tr>
+  ${bandeau}
 
-  ${blocPhare}
-  ${blocRetenir}
+  ${rangee([
+    colonne(carte('Information phare du jour', corpsPhare), 'large'),
+    colonne(carte('Autres actualités du jour', corpsAutres), 'etroit'),
+  ])}
 
-  <!-- ══ Palmarès ══ -->
-  ${section(
-    'Les plus fortes hausses',
-    tableauMouvements(hausses, maxH, true),
-  )}
-  ${section('Les plus fortes baisses', tableauMouvements(baisses, maxB, false), { fond: C.creme })}
+  ${rangee([
+    colonne(carte('Les plus fortes hausses', tableauMouvements(hausses, maxH, true))),
+    colonne(carte('Les plus fortes baisses', tableauMouvements(baisses, maxB, false))),
+  ])}
 
-  <!-- ══ Activité ══ -->
-  ${section(
-    'Activité du marché',
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-      ${activite
-        .map(
-          ([k, v]) => `<tr>
-        <td style="padding:8px 0;border-bottom:1px solid ${C.trait};font-family:${SANS};font-size:13px;color:${C.second}">${esc(k)}</td>
-        <td style="padding:8px 0;border-bottom:1px solid ${C.trait};font-family:${SANS};font-size:14px;font-weight:600;color:${C.texte};text-align:right;white-space:nowrap">${esc(v)}</td>
-      </tr>`,
-        )
-        .join('')}
-    </table>
-    ${courbeIndice(m)}`,
-  )}
+  ${rangee([
+    colonne(carte('Évolution de l’indice BRVM Composite', courbeIndice(m))),
+    colonne(carte('Chiffres clés de la séance', corpsClés)),
+  ])}
 
   ${blocSecteurs}
 
-  <!-- ══ Lecture ══ -->
-  ${section(
+  <!-- ══ Lecture de la séance ══ -->
+  <tr><td style="padding:12px 12px 14px;background:${C.creme}">${carte(
     'Lecture de la séance',
     lecture(m)
       .map(
-        (p, i) =>
-          `<p style="margin:0 0 ${i === lecture(m).length - 1 ? '0' : '9px'};font-family:${SANS};font-size:13.5px;line-height:1.7;color:${i === lecture(m).length - 1 ? C.faible : C.texte}">${esc(p)}</p>`,
+        (p, i, t) =>
+          `<p style="margin:0 0 ${i === t.length - 1 ? '0' : '8px'};font-family:${SANS};font-size:13px;line-height:1.7;color:${i === t.length - 1 ? C.faible : C.texte}">${esc(p)}</p>`,
       )
       .join(''),
-    { fond: C.creme, or: true },
-  )}
+  )}</td></tr>
 
-  ${blocAutres}
-
-  <!-- ══ Vidéo ══ -->
-  <tr><td style="padding:26px 28px;text-align:center;border-top:1px solid ${C.trait}">
-    <a href="${SITE}/#seance-${esc(m.seance)}" style="display:inline-block;padding:13px 28px;background:${C.nuit};color:${C.blanc};font-family:${SANS};font-size:14px;font-weight:600;text-decoration:none">Voir la vidéo de la séance →</a>
-    <p style="margin:11px 0 0;font-family:${SANS};font-size:12px;color:${C.faible}">Une trentaine de secondes, les mêmes chiffres, commentés.</p>
-  </td></tr>
-
-  <!-- ══ Pied ══ -->
-  <tr><td style="padding:22px 28px;background:${C.nuit}">
-    <p style="margin:0 0 3px;font-family:${SERIF};font-size:15px;font-weight:700;letter-spacing:.04em;color:${C.blanc}">WESTBOURSE</p>
-    <p style="margin:0 0 14px;font-family:${SANS};font-size:12px;color:#8FA3B8">L’actualité et l’analyse des marchés africains</p>
-    <p style="margin:0 0 14px;font-family:${SANS};font-size:12px">
-      <a href="${SITE}/societes" style="color:${C.turquoise};text-decoration:none">Sociétés</a>
-      <span style="color:#3E5875"> · </span><a href="${SITE}/actualites" style="color:${C.turquoise};text-decoration:none">Actualités</a>
-      <span style="color:#3E5875"> · </span><a href="${SITE}/analyses/hebdo" style="color:${C.turquoise};text-decoration:none">Analyses</a>
-      <span style="color:#3E5875"> · </span><a href="${SITE}/parametres/alertes" style="color:${C.turquoise};text-decoration:none">Mes préférences</a>
-    </p>
-    <p style="margin:0 0 4px;font-family:${SANS};font-size:11px;line-height:1.6;color:#6F869E">Chiffres issus de la séance officielle de la BRVM.${m.capitaux_estimes ? ' Capitaux estimés par cours × titres : la valeur officielle n’est pas publiée.' : ''}</p>
-    <p style="margin:0;font-family:${SANS};font-size:11px;line-height:1.6;color:#6F869E">Information de marché. <strong style="color:#8FA3B8">Ceci n’est pas un conseil en investissement.</strong></p>
+  <!-- ══ Barre de pied ══ -->
+  <tr><td style="padding:0 12px 20px;background:${C.creme}">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.nuit}">
+      <tr><td style="padding:20px">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td valign="middle" style="font-family:${SERIF};font-size:15px;font-weight:700;letter-spacing:.04em;color:${C.blanc}">WESTBOURSE<span style="display:block;font-family:${SANS};font-size:8px;font-weight:600;letter-spacing:.16em;color:#6F869E;padding-top:3px">L’ACTUALITÉ DES MARCHÉS AFRICAINS</span></td>
+          <td valign="middle" align="right">
+            <a href="${SITE}/#seance-${esc(m.seance)}" style="display:inline-block;padding:11px 22px;border:1px solid ${C.turquoise};border-radius:22px;font-family:${SANS};font-size:13px;font-weight:600;color:${C.turquoise};text-decoration:none">Voir la vidéo de la séance →</a>
+          </td>
+        </tr></table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;border-top:1px solid #1D3A5C"><tr><td style="padding-top:13px">
+          <p style="margin:0 0 7px;font-family:${SANS};font-size:11px">
+            <a href="${SITE}/societes" style="color:${C.turquoise};text-decoration:none">Sociétés</a><span style="color:#3E5875"> · </span><a href="${SITE}/actualites" style="color:${C.turquoise};text-decoration:none">Actualités</a><span style="color:#3E5875"> · </span><a href="${SITE}/analyses/hebdo" style="color:${C.turquoise};text-decoration:none">Analyses</a><span style="color:#3E5875"> · </span><a href="${SITE}/parametres/alertes" style="color:${C.turquoise};text-decoration:none">Mes préférences</a>
+          </p>
+          <p style="margin:0;font-family:${SANS};font-size:10.5px;line-height:1.6;color:#6F869E">Chiffres issus de la séance officielle de la BRVM.${m.capitaux_estimes ? ' Capitaux estimés par cours × titres.' : ''} Information de marché — <strong style="color:#8FA3B8">ceci n’est pas un conseil en investissement</strong>.</p>
+        </td></tr></table>
+      </td></tr>
+    </table>
   </td></tr>
 
 </table>
