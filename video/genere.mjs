@@ -89,10 +89,16 @@ const indices = await api(
    `brvm_intraday_snapshots` ne contient que des ACTIONS (47 codes le
    24/09/2026, aucun indice). La courbe serait inventée. On trace donc les
    20 dernières séances, qui existent réellement. */
+/* `.catch` OBLIGATOIRE, et la distinction compte. Les trois requêtes
+   ci-dessus sont PORTEUSES : sans elles il n'y a pas de vidéo, et échouer fort
+   est la bonne réponse. Les deux suivantes ENRICHISSENT le brief écrit : une
+   panne de l'une d'elles ne doit jamais emporter la séance entière. Sans cette
+   garde, un graphique décoratif de vingt barres pouvait supprimer la vidéo ET
+   le brief du jour. */
 const histoIndice = await api(
   `brvm_indices_daily?select=date_marche,valeur&code=eq.BRVMC&date_marche=lte.${seance}` +
     '&order=date_marche.desc&limit=20',
-);
+).catch(() => []);
 
 /* Actualités du jour et de la veille. `hidden` et `status` sont respectés :
    un article retiré de la publication n'a rien à faire dans un envoi. */
