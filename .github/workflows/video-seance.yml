@@ -27,6 +27,10 @@ on:
         description: 'Publier sur Facebook et TikTok (sinon génération seule)'
         type: boolean
         default: true
+      decouverte:
+        description: "ENVOI DE DÉCOUVERTE du brief à TOUS les comptes — une seule fois, jamais automatique"
+        type: boolean
+        default: false
 
 concurrency:
   group: video-seance
@@ -148,6 +152,23 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
         run: node brief-envoi.mjs --envoyer
+      - name: Envoi de découverte du brief (tous les comptes)
+        # JAMAIS sur  : uniquement quand un humain coche la case.
+        # Ce mode rompt une phrase écrite aux lecteurs le 2026-09-24
+        # (« vous ne recevrez plus rien sans l'avoir demandé ») : c'est une
+        # décision du responsable de traitement, pas un réglage. Le bandeau de
+        # l'email le reconnaît auprès du lecteur au lieu de l'escamoter.
+        #
+        #  le rend structurellement unique par adresse : une
+        # seconde exécution n’enverrait rien à personne.
+        if: inputs.decouverte
+        working-directory: video
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+        run: node brief-envoi.mjs --decouverte --envoyer
       - name: Conserver la vidéo
         # always() : une vidéo correcte refusée par une plateforme reste
         # téléchargeable et publiable à la main.
