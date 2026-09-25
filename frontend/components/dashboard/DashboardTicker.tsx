@@ -30,10 +30,19 @@ function TickerSpark({ data, up }: { data: number[]; up: boolean }) {
     const y = h - ((v - min) / range) * (h - 2) - 1;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
-  const stroke = up ? '#3fe18b' : '#ff6b6b';
+  /* Classe de jeton, PAS un hex : `up` et `down` sont pilotés par variables CSS
+     et changent en mode clair (63 225 139 → 13 138 79). Un `#3fe18b` figé
+     laissait ce tracé en néon de mode sombre sur fond clair. */
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden className="shrink-0 opacity-70">
-      <polyline points={pts} fill="none" stroke={stroke} strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
+      <polyline
+        points={pts}
+        fill="none"
+        className={up ? 'stroke-up' : 'stroke-down'}
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
