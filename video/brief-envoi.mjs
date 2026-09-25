@@ -201,11 +201,24 @@ if (seulement) {
   destinataires = profils.map((p) => ({ email: p.email, user_id: p.id }));
 }
 
-/* Déjà servis pour cette campagne : la garantie du « une seule fois ». */
+/* Déjà servis : la garantie du « une seule fois ».
+ *
+ * ON NE RETIENT QUE LES ENVOIS RÉUSSIS, et la nuance a coûté 58 personnes le
+ * 2026-09-25. Ce soir-là, le quota quotidien Resend s'est épuisé à mi-parcours
+ * (429 `daily_quota_exceeded`) : 58 destinataires ont été journalisés en
+ * `echec`. Comme le jeu ci-dessous ne filtrait pas sur le statut, ils étaient
+ * comptés comme servis — et n'auraient JAMAIS reçu le brief, en silence.
+ *
+ * Un échec signifie que RIEN n'a été remis. Il doit rester retentable : le
+ * quota se réarme le lendemain. Le risque symétrique — un envoi réussi dont la
+ * journalisation échoue, donc réexpédié — est borné par l'arrêt immédiat en cas
+ * d'écriture impossible, juste en dessous. */
 const deja = new Set(
-  (await paginer(`campagne_envois?select=email&campagne=eq.${encodeURIComponent(CAMPAGNE)}&order=email.asc`)).map(
-    (r) => r.email,
-  ),
+  (
+    await paginer(
+      `campagne_envois?select=email&campagne=eq.${encodeURIComponent(CAMPAGNE)}&statut=eq.envoye&order=email.asc`,
+    )
+  ).map((r) => r.email),
 );
 
 const vus = new Set();
@@ -277,9 +290,13 @@ for (const d of aTraiter) {
   /* Journalisation IMMÉDIATE, avant le destinataire suivant : une
      interruption laisse la base cohérente avec ce qui a réellement été tenté. */
   try {
-    await api('campagne_envois', {
+    /* `merge-duplicates`, et non `ignore-duplicates` : une tentative qui suit
+       un échec doit ÉCRASER la ligne précédente. Avec « ignore », le retour du
+       réessai serait perdu et la ligne resterait à `echec` alors que l'email
+       est parti — la base mentirait sur ce qui a été remis. */
+    await api('campagne_envois?on_conflict=campagne,email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Prefer: 'resolution=ignore-duplicates' },
+      headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
       body: JSON.stringify({ campagne: CAMPAGNE, email: d.email, user_id: d.user_id, statut, raison }),
     });
     ecritures++;
@@ -314,8 +331,21 @@ if (envoyes > 0 && ecritures === 0) {
   console.error("Des envois ont eu lieu mais AUCUN n'a pu être journalisé.");
   process.exit(1);
 }
-if (echecs > 0 && envoyes === 0) {
-  console.error('Aucun envoi réussi.');
+/* UN TAUX D'ÉCHEC IMPORTANT DOIT FAIRE ROUGIR LE JOB.
+ *
+ * Le 2026-09-25, 58 envois sur 129 ont échoué (quota Resend épuisé) et le
+ * workflow est resté VERT : l'ancienne règle ne déclenchait que sur « aucun
+ * envoi réussi ». Un demi-échec silencieux est exactement le défaut que ce
+ * dépôt paie depuis les sept semaines d'emails muets derrière un run vert.
+ * Au-delà d'un dixième d'échecs, on sort en erreur — le journal reste juste,
+ * mais quelqu'un est prévenu. */
+const SEUIL_ECHEC = 0.1;
+if (echecs > 0 && (envoyes === 0 || echecs / (envoyes + echecs) > SEUIL_ECHEC)) {
+  console.error(
+    `${echecs} échec(s) sur ${envoyes + echecs} tentatives. ` +
+      'Les adresses en échec restent retentables : relancer une fois la cause levée.',
+  );
   process.exit(1);
 }
+if (echecs > 0) console.log(`${echecs} échec(s), sous le seuil — retentables à la prochaine exécution.`);
 console.log('=== FIN ===');
