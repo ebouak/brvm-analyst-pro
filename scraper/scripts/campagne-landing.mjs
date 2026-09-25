@@ -1,6 +1,15 @@
 /**
  * Campagne d'annonce de la refonte — envoi UNIQUE aux comptes existants.
  *
+ * ⚠️ INCIDENT DU 2026-09-24, ET LA RÈGLE QUI EN DÉCOULE. La première version
+ * imprimait les adresses EN CLAIR en mode d'essai. Ce dépôt est PUBLIC, donc
+ * ses journaux d'exécution GitHub le sont aussi : un simple essai a exposé une
+ * centaine d'adresses d'utilisateurs à quiconque ouvrait la page des Actions.
+ * Le journal a été supprimé dans la minute, mais la faute était dans le code.
+ * RÈGLE : un script qui manipule des données personnelles ne doit jamais
+ * pouvoir les écrire dans un journal — et surtout pas en mode d'essai, qui est
+ * précisément celui qu'on lance sans y penser. Voir `masquer`.
+ *
  * CE SCRIPT SUIT UNE RÈGLE ABSOLUE : ne jamais envoyer le même message deux
  * fois au même destinataire, jamais par accident. Trois garde-fous, dans cet
  * ordre d'importance :
@@ -69,6 +78,20 @@ import {
 } from './campagne-landing.email.mjs';
 
 const dors = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Adresse MASQUÉE, pour tout ce qui sort sur la sortie standard.
+ *
+ * Garde les deux premiers caractères et le domaine : assez pour diagnostiquer
+ * (faute de frappe, domaine en masse, adresse manifestement invalide), trop peu
+ * pour identifier quelqu'un. Voir l'incident en tête de fichier.
+ */
+const masquer = (email) => {
+  const s = typeof email === 'string' ? email : '';
+  const at = s.lastIndexOf('@');
+  if (at < 1) return '(adresse illisible)';
+  return `${s.slice(0, Math.min(2, at))}…@${s.slice(at + 1)}`;
+};
 
 async function principal() {
   /* ────────────────────────────────────────── 1. arguments de commande ── */
@@ -259,7 +282,8 @@ async function principal() {
 
   for (const dest of aTraiter) {
     if (!ARME) {
-      console.log(`  [ESSAI] serait envoyé à ${dest.email}${dest.prenom ? ` (${dest.prenom})` : ''}`);
+      // Adresse MASQUÉE : ce journal est public (voir `masquer`).
+      console.log(`  [ESSAI] serait envoyé à ${masquer(dest.email)}`);
       continue;
     }
 
@@ -293,7 +317,7 @@ async function principal() {
 
     if (statut === 'envoye') {
       envoyes++;
-      console.log(`  ${dest.email} — envoyé`);
+      console.log(`  ${masquer(dest.email)} — envoyé`);
     } else {
       echecsEnvoi++;
       console.error(`  ${dest.email} — ÉCHEC ENVOI : ${raison}`);
