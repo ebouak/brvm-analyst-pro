@@ -29,7 +29,7 @@ export default function PositionRowActions({ position }: { position: RowPosition
         title="Dossier valeur (12 panneaux, imprimable)"
         aria-label={`Dossier valeur ${position.code}`}
       >
-        Dossier
+        Rapport
       </Link>
       {/* Le PDF du samedi. Lien natif (pas <Link>) : c'est une redirection
           vers une URL signée, pas une navigation dans l'app. */}
