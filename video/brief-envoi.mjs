@@ -158,7 +158,15 @@ const H = entetesSupabase(SERVICE);
 const api = async (chemin, init) => {
   const r = await fetch(`${URL_SB}/rest/v1/${chemin}`, { ...init, headers: { ...H, ...(init?.headers ?? {}) } });
   if (!r.ok) throw new Error(`${chemin} → ${r.status} ${(await r.text()).slice(0, 180)}`);
-  return r.status === 204 ? null : r.json();
+  /* Le corps peut être VIDE sur une écriture : PostgREST répond 201 sans
+     contenu quand on ne demande pas `return=representation`. Appeler `json()`
+     dessus lève « Unexpected end of JSON input ».
+     Ce défaut a coûté un envoi le 2026-09-25 : l'INSERT avait abouti, seule sa
+     lecture échouait, et le script s'est arrêté après le premier destinataire
+     en croyant ne plus pouvoir journaliser. L'arrêt était le bon réflexe ; la
+     cause, une réponse mal lue. On teste donc le corps, pas le code. */
+  const corps = await r.text();
+  return corps ? JSON.parse(corps) : null;
 };
 
 /** PostgREST tronque à 1000 lignes EN SILENCE : on pagine toujours. */
