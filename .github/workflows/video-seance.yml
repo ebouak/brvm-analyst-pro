@@ -153,14 +153,14 @@ jobs:
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
         run: node brief-envoi.mjs --envoyer
       - name: Envoi de découverte du brief (tous les comptes)
-        # JAMAIS sur  : uniquement quand un humain coche la case.
+        # JAMAIS sur "schedule" : uniquement quand un humain coche la case.
         # Ce mode rompt une phrase écrite aux lecteurs le 2026-09-24
         # (« vous ne recevrez plus rien sans l'avoir demandé ») : c'est une
         # décision du responsable de traitement, pas un réglage. Le bandeau de
         # l'email le reconnaît auprès du lecteur au lieu de l'escamoter.
         #
-        #  le rend structurellement unique par adresse : une
-        # seconde exécution n’enverrait rien à personne.
+        # La table campagne_envois le rend structurellement unique par
+        # adresse : une seconde exécution n’enverrait rien à personne.
         if: inputs.decouverte
         working-directory: video
         env:
