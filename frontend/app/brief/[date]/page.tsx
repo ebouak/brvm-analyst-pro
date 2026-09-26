@@ -345,7 +345,7 @@ export default async function BriefDatePage({ params }: PageProps) {
           </a>
         </footer>
         <p className="mt-6 text-[10px] text-faint leading-relaxed">
-          Note générée automatiquement depuis les données de séance (brvm.org). La tendance est dérivée du
+          Note composée depuis les données de séance (brvm.org). La tendance est dérivée du
           rapport hausses/baisses — aucun commentaire inventé. Pas un conseil en investissement.
         </p>
       </article>

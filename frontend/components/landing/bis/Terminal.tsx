@@ -41,7 +41,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
             <div>
               <p className="o">La séance en {Math.round(v.duree_s)} secondes</p>
               <h2>La séance du {v.date_fr}{videoPrecedente && <span className="tag">séance précédente</span>}</h2>
-              <p className="tc-sub">Produite automatiquement chaque soir après la clôture, à partir des mêmes chiffres que cette page. Aucune séance exploitable, aucune vidéo — jamais un habillage recyclé.</p>
+              <p className="tc-sub">Montée chaque soir après la clôture, à partir des chiffres de cette page — les mêmes. Un jour sans séance exploitable est un jour sans vidéo : rien n’est repris d’un ancien épisode.</p>
             </div>
             <span className="hand-dark" aria-hidden="true">Des données<br />pour de meilleures<br />décisions.</span>
           </div>

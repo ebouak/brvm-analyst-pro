@@ -1454,7 +1454,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
         <BeginnerHint text="Score > 60 = signal favorable. Score < 40 = signal défavorable. Entre les deux = neutre." />
 
         <p className="text-sm text-muted mb-5 leading-relaxed">
-          {signal.explication ?? 'Signal calculé automatiquement.'}
+          {signal.explication ?? 'Signal calculé à partir des indicateurs de la séance.'}
         </p>
 
         {/* Sous-scores */}

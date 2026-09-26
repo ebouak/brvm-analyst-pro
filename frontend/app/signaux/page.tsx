@@ -125,7 +125,7 @@ export default async function SignauxPage() {
         <div className="mt-10">
           <EmptyStatePremium
             title="Aucun signal généré"
-            hint="Les signaux sont calculés automatiquement après chaque clôture de séance."
+            hint="Les signaux sont recalculés après chaque clôture de séance."
             icon="◈"
           />
         </div>
@@ -277,7 +277,7 @@ export default async function SignauxPage() {
         </div>
 
         <div className="border-t border-border/40 pt-3 text-xs text-faint italic leading-relaxed">
-          Les signaux sont calculés automatiquement à partir d'indicateurs techniques et ne constituent
+          Les signaux sont calculés à partir d'indicateurs techniques et ne constituent
           pas un conseil en investissement. Consultez un conseiller agréé COSUMAF avant toute décision.
         </div>
       </div>
