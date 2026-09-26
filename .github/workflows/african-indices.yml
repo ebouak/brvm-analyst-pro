@@ -47,7 +47,7 @@ jobs:
     timeout-minutes: 15 # Crawl-delay 60 s entre sources : ~3 min par tentative
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: Install scraper deps
