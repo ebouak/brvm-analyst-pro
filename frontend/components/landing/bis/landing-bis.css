@@ -66,7 +66,15 @@
 .lb .btn-sm { min-height: 42px; padding: 0 16px; font-size: 14px; }
 
 /* hero */
-.lb .hero { position: relative; border-radius: var(--r-panel); overflow: hidden; background: var(--white); border: 1px solid var(--line); box-shadow: 0 30px 60px -40px rgba(0, 0, 0, .35); }
+/* `overflow` ne sert ici qu'à découper les coins arrondis. Mais `hidden` fait
+   de cette section un CONTENEUR DE DÉFILEMENT, et `animation-timeline: view()`
+   s'accroche au conteneur le plus proche : toute animation au défilement à
+   l'intérieur se rattachait donc à une boîte de 1166 px qui ne défile jamais,
+   et naissait « terminée ». Mesuré en production — le fil était dessiné à
+   100 % quelle que soit la position de la page.
+   `clip` découpe exactement pareil SANS créer de conteneur de défilement ; la
+   déclaration `hidden` qui précède reste le repli des navigateurs anciens. */
+.lb .hero { position: relative; border-radius: var(--r-panel); overflow: hidden; overflow: clip; background: var(--white); border: 1px solid var(--line); box-shadow: 0 30px 60px -40px rgba(0, 0, 0, .35); }
 .lb .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; min-height: 520px; }
 .lb .hero-copy { padding: 44px 40px 36px; display: flex; flex-direction: column; justify-content: center; gap: 18px; position: relative; }
 .lb .hero h1 { font-size: clamp(42px, 5.6vw, 72px); }
@@ -786,12 +794,21 @@
      jamais un élément garé à scaleX(0) en attente d'un observateur. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
+      /* Timeline NOMMÉE, portée par la rangée. `view()` anonyme prend pour
+         sujet l'élément animé lui-même — ici un trait de 3 px de haut, dont la
+         phase d'entrée dure 3 px de défilement : le tracé se faisait en moins
+         d'un pixel, donc jamais vu. Rattachée à `.steps` (220 px), elle se
+         déroule sur une distance qu'on perçoit. Un nom déclaré sur un ancêtre
+         est trouvé par ses descendants, `timeline-scope` est inutile. */
+      .lb .fil-wrap .steps { view-timeline-name: --fil; }
+
       .lb .fil-wrap .step:not(:last-child)::after {
         animation: fil-trait linear both;
-        animation-timeline: view();
-        /* Décalé de 20 % après l'entrée de l'étape : la pastille arrive, puis
-           le trait part vers la suivante. Même cadence `--i` que `fil-in`. */
-        animation-range: entry calc(20% + var(--i, 0) * 5%) entry calc(48% + var(--i, 0) * 5%);
+        animation-timeline: --fil;
+        /* Décalage `--i` : les six traits se tracent de gauche à droite, la
+           rangée se parcourt comme on la lit. Le dernier finit à 93 %, avant
+           la fin de la plage — aucun ne reste inachevé. */
+        animation-range: entry calc(20% + var(--i, 0) * 8%) entry calc(45% + var(--i, 0) * 8%);
       }
     }
   }
