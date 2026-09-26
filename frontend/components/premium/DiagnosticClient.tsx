@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo, useDeferredValue } from 'react';
+import { MARQUE_ECHEC, MESSAGE_ECHEC } from '@/lib/diagnostic/echec';
 
 interface Props {
   code: string;
@@ -15,7 +16,11 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
   async function generate(force = false) {
     setLoading(true);
     setError(null);
-    setMarkdown('');
+    // On NE VIDE PAS le rapport en cours. Une régénération qui échoue laissait
+    // l'écran vide alors qu'un rapport valide existait toujours en base : la
+    // personne perdait ce qu'elle lisait pour rien. Le contenu n'est remplacé
+    // qu'à l'arrivée du premier morceau du nouveau.
+    const precedent = markdown;
     try {
       const res = await fetch(`/api/diagnostic/${code}`, {
         method: 'POST',
@@ -43,7 +48,16 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
         const { done, value } = await reader.read();
         if (done) break;
         buf += dec.decode(value, { stream: true });
-        setMarkdown(buf);
+        if (buf.includes(MARQUE_ECHEC)) {
+          // Panne déclarée par le serveur : un message pour la personne, et le
+          // rapport précédent reste à l'écran plutôt que d'être effacé.
+          setError(MESSAGE_ECHEC);
+          setMarkdown(precedent);
+          return;
+        }
+        // Tronque à un éventuel marqueur partiel (il commence par un octet
+        // nul) : sans cela un fragment du marqueur s'afficherait une frame.
+        setMarkdown(buf.split('\u0000')[0] ?? '');
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur réseau');
@@ -89,7 +103,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
               aria-label="Imprimer le diagnostic en PDF"
               className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted hover:text-white hover:border-up/40 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-up/50"
             >
-              <span aria-hidden="true">🖨</span> PDF
+              <span aria-hidden="true">↓</span> PDF
             </button>
           )}
           <button
@@ -99,7 +113,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
             aria-label={cachedMarkdown ? 'Regénérer le diagnostic' : 'Générer le diagnostic'}
             className="px-3 py-1.5 text-xs rounded-lg bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-up/50"
           >
-            {loading ? '⏳ Génération…' : cachedMarkdown ? '↺ Regénérer' : '✦ Générer le diagnostic'}
+            {loading ? 'Génération…' : cachedMarkdown ? '↺ Regénérer' : '✦ Générer le diagnostic'}
           </button>
         </div>
       </div>

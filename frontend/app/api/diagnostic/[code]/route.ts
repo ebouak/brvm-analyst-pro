@@ -10,6 +10,7 @@ import { buildDiagnosticPrompt } from '@/lib/diagnostic/prompt';
 import { computeRedFlags } from '@/lib/diagnostic/redFlags';
 import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals';
 import { findWebSignals } from '@/lib/diagnostic/webSearch';
+import { MARQUE_ECHEC } from '@/lib/diagnostic/echec';
 
 export const maxDuration = 120;
 
@@ -197,7 +198,12 @@ export async function POST(req: Request, { params }: { params: { code: string } 
           { onConflict: 'code' },
         );
       } else {
-        controller.enqueue(encoder.encode('\n\n[Erreur : tous les fournisseurs LLM ont échoué]'));
+        // Marqueur, pas de prose : écrire la panne dans le flux de CONTENU la
+        // rendait indistinguable d'un rapport, et le client l'affichait comme
+        // une analyse. Le statut HTTP ne peut pas servir — il est arrêté à 200
+        // avant même qu'un fournisseur soit interrogé.
+        console.error('[diagnostic] aucun fournisseur n’a répondu pour', code);
+        controller.enqueue(encoder.encode(MARQUE_ECHEC));
       }
 
       controller.close();
