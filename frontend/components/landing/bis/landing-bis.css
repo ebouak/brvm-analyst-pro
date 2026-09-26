@@ -740,6 +740,69 @@
 @keyframes fil-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .lb .step .ic, .lb .fil-wrap .step { transition: none; } }
 
+/* ── LE FIL, rendu visible ────────────────────────────────────────────────
+   La section s'appelle « le fil conducteur » et n'en montrait aucun : sept
+   pastilles séparées par un chevron « › ». Le trait relie désormais les
+   CENTRES des pastilles et se trace à mesure qu'on descend.
+
+   Géométrie, pas valeurs devinées : la pastille fait 64 px, centrée dans son
+   étape (`margin: 0 auto`, padding horizontal symétrique), sous 8 px de
+   padding — son centre est donc à 8 + 32 = 40 px du haut, et à 50 % de la
+   largeur. Entre deux centres il y a une colonne + la gouttière de 8 px, donc
+   l'espace libre entre deux bords vaut 100 % + 8 − 64, soit 100 % − 56 px ;
+   7 px d'air de chaque côté laissent 100 % − 78 px.
+
+   Ce trait REMPLACE le chevron plutôt que de s'y ajouter : deux marques pour
+   dire la même chose se disputent l'œil. Portée à la seule `.fil-wrap` — le
+   « › » de `.lb .steps` sert ailleurs.
+
+   Sous 1000 px la grille repasse à 4 colonnes puis 2 : les étapes ne sont
+   plus alignées, un trait horizontal relierait des pastilles qui ne se
+   suivent pas. La règle existante masque déjà `::after` là ; celle-ci ne
+   s'applique qu'au-dessus. */
+@media (min-width: 1001px) {
+  .lb .fil-wrap .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 39px;
+    left: calc(50% + 39px);
+    right: auto;
+    width: calc(100% - 78px);
+    height: 2px;
+    border-radius: 1px;
+    /* Le dégradé va du neutre vers l'accent : il donne le sens de lecture
+       sans ajouter de flèche. */
+    background: linear-gradient(90deg, rgb(var(--color-faint) / .45), rgb(var(--color-accent) / .7));
+    transform-origin: left center;
+  }
+
+  /* État de repos = trait ENTIER. Là où `animation-timeline` manque (Safari,
+     Firefox) la règle ci-dessous n'existe pas, et le fil reste dessiné —
+     jamais un élément garé à scaleX(0) en attente d'un observateur. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .lb .fil-wrap .step:not(:last-child)::after {
+        animation: fil-trait linear both;
+        animation-timeline: view();
+        /* Décalé de 20 % après l'entrée de l'étape : la pastille arrive, puis
+           le trait part vers la suivante. Même cadence `--i` que `fil-in`. */
+        animation-range: entry calc(20% + var(--i, 0) * 5%) entry calc(48% + var(--i, 0) * 5%);
+      }
+    }
+  }
+}
+@keyframes fil-trait { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Confirmation du clic : un anneau qui s'ouvre une fois et s'arrête. Une
+   pulsation infinie sur un tableau de bord financier devient un parasite. */
+@media (prefers-reduced-motion: no-preference) {
+  .lb .fil-wrap .step.is-sel .ic { animation: fil-anneau 1s cubic-bezier(.22, 1, .36, 1) 2; }
+}
+@keyframes fil-anneau {
+  from { box-shadow: 0 14px 24px -14px rgba(0, 0, 0, .55), 0 0 0 0 rgb(var(--color-accent) / .5); }
+  to   { box-shadow: 0 14px 24px -14px rgba(0, 0, 0, .55), 0 0 0 12px rgb(var(--color-accent) / 0); }
+}
+
 /* bandeau (placement 'billboard') — une création par chargement, hauteur fixe */
 .lb .bb { max-width: 1180px; margin: 18px auto 0; }
 .lb .bb-in { position: relative; overflow: hidden; border-radius: var(--r-panel); border: 1px solid var(--line); background: rgb(var(--color-elevated)); min-height: 132px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px; padding: 18px 22px; }
