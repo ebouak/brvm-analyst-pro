@@ -805,10 +805,16 @@
       .lb .fil-wrap .step:not(:last-child)::after {
         animation: fil-trait linear both;
         animation-timeline: --fil;
-        /* Décalage `--i` : les six traits se tracent de gauche à droite, la
-           rangée se parcourt comme on la lit. Le dernier finit à 93 %, avant
-           la fin de la plage — aucun ne reste inachevé. */
-        animation-range: entry calc(20% + var(--i, 0) * 8%) entry calc(45% + var(--i, 0) * 8%);
+        /* `cover`, PAS `entry`. La phase `entry` s'achève dès que l'élément a
+           fini d'entrer par le bas : mesuré en production, le fil se dessinait
+           entièrement alors que la rangée était encore à 320 px sous le bord
+           bas de l'écran. L'animation s'exécutait — personne ne la voyait.
+           `cover` couvre toute la traversée (hauteur de la rangée + hauteur du
+           viewport), donc 28 % à 46 % place le tracé au MILIEU de l'écran.
+           Décalage `--i` : les six traits se tracent de gauche à droite, la
+           rangée se parcourt comme on la lit. Le dernier finit à 66 %, bien
+           avant la sortie — aucun ne reste inachevé. */
+        animation-range: cover calc(28% + var(--i, 0) * 4%) cover calc(46% + var(--i, 0) * 4%);
       }
     }
   }
