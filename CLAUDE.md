@@ -847,6 +847,50 @@ Migration `0140_bbgc_bridge_bank.sql` **à appliquer**. tsc scraper + frontend v
   s'enregistrer seule — ou le référentiel devient un point de panne à chaque
   nouveauté du marché.
 
+### Ajouts (passage 2026-09-26) — Les deux replis LLM étaient morts en silence
+
+558 tests scraper verts, tsc vert (scraper + frontend), commande exécutée en réel.
+
+- **L'INCIDENT.** Un rapport de production affichait « tous les fournisseurs ont
+  échoué ». Trois causes distinctes, mesurées par appel HTTP réel et non déduites
+  d'une documentation : DeepSeek à court de crédit (**402**),
+  `mistral-large-latest` **403 « not available in your subscription tier »**,
+  `grok-2-latest` **404**. En creusant : `pixtral-large-latest` **400 « Invalid
+  model »** et `grok-2-vision-latest` **404** également. **27 remplacements dans
+  14 fichiers** (frontend + scraper) : `mistral-small-latest` et `grok-4.6`
+  couvrent désormais texte ET image, les variantes « vision » ont disparu côté
+  fournisseurs.
+- ⚠️ **LA LEÇON, plus importante que le correctif.** Le produit tournait depuis
+  un moment sur **DeepSeek seul, sans filet**. Un repli qui échoue NE SE VOIT
+  PAS : il n'est sollicité que le jour où le premier fournisseur tombe. Il a
+  fallu une panne de crédit simultanée pour découvrir que les deux secours
+  étaient morts depuis longtemps. Quatrième incident de ce type ici, après les
+  sept semaines d'emails muets et le demi-envoi resté vert.
+- **Contrôle quotidien** `scraper/src/sante/` : `evaluerSante.ts` pur (8 tests)
+  + `runSanteLlm.ts` qui SONDE réellement les trois fournisseurs (un jeton
+  chacun, timeout 10 s). CLI `sante:llm`, cron `.github/workflows/sante-llm.yml`
+  à 06:30 UTC. Écrit dans `scraper_runs`/`scraper_errors` via `monitored` —
+  **aucune migration**, les tables de 0041 suffisent.
+- ⚠️ **UN 429 N'EST PAS UNE PANNE.** Le compte Mistral est sur un palier gratuit
+  qui renvoie 429 même à deux secondes d'intervalle : le modèle est bon, le
+  débit ne l'est pas. Le classer en panne fabriquerait une alerte quotidienne
+  permanente, donc ignorée — le défaut même que ce contrôle doit éviter. Trois
+  états : `ok` / `limite` / `panne`. Alerte Telegram (`operateur: true`)
+  seulement sur `panne` ; sortie en code 1 seulement quand plus AUCUN
+  fournisseur n'est utilisable.
+- **Comme repli réel, xAI est le seul des deux sur lequel compter** tant que
+  l'abonnement Mistral n'est pas monté.
+- **Modèles dupliqués** : `frontend/lib/server/llmModels.ts` et
+  `FOURNISSEURS_LLM` dans `scraper/src/sante/runSanteLlm.ts`. Deux paquets TS
+  distincts, comme `scraper/src/hebdo/pure/` — à corriger des deux côtés.
+- **Diagnostic : la panne était livrée sur le canal du CONTENU.** La route
+  écrivait « [Erreur : tous les fournisseurs LLM ont échoué] » dans le flux du
+  rapport ; le client l'affichait en paragraphe sous l'en-tête « Rapport du … »,
+  avec un bouton PDF. Le statut HTTP ne peut pas servir (arrêté à 200 avant
+  d'interroger un fournisseur) → marqueur `lib/diagnostic/echec.ts` contenant un
+  octet nul. Et `generate()` vidait le rapport AVANT de tenter la régénération :
+  un échec effaçait un rapport valide de l'écran.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

@@ -35,6 +35,7 @@
  *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
  *   tsx src/index.ts veille                # monitoring BRVM Veille Intelligente
  *   tsx src/index.ts veille [<YYYY-MM-DD>] [--mock] # date spécifique ou démo
+ *   tsx src/index.ts sante:llm             # sonde DeepSeek/Mistral/xAI, alerte Telegram si panne
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
@@ -259,6 +260,41 @@ async function main(): Promise<number> {
         },
       );
       return 0;
+    }
+    case 'sante:llm': {
+      // Sonde réelle des trois fournisseurs LLM (DeepSeek/Mistral/xAI) : une
+      // clé valide ne suffit pas, un modèle de repli retiré casse tout sans
+      // qu'aucun autre job ne le voie tant que le fournisseur prioritaire
+      // répond. Voir src/sante/evaluerSante.ts pour l'incident du 2026-09-26.
+      const { runSanteLlm } = await import('./sante/runSanteLlm.js');
+      const res = await monitored(
+        { code: 'sante-llm', label: 'Santé des fournisseurs LLM' },
+        async () => {
+          const r = await runSanteLlm();
+          return {
+            value: r,
+            outcome: {
+              // 'total' = plus aucun fournisseur utilisable : c'est le seul
+              // cas qui doit faire échouer le run de monitoring lui-même — un
+              // run vert ne doit jamais couvrir une panne totale.
+              status:
+                r.verdict.niveau === 'total'
+                  ? ('failed' as const)
+                  : r.verdict.niveau === 'partiel'
+                    ? ('partial' as const)
+                    : ('success' as const),
+              rows_extracted: r.sondages.length,
+              rows_upserted: r.verdict.utilisables,
+              metadata: {
+                niveau: r.verdict.niveau,
+                etats: r.verdict.etats,
+                alerteEnvoyee: r.alerteEnvoyee,
+              },
+            },
+          };
+        },
+      );
+      return res.verdict.niveau === 'total' ? 1 : 0;
     }
     case 'range52': {
       // Plus-haut / plus-bas 52 semaines. À passer APRÈS `daily` : les bornes

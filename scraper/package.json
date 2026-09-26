@@ -74,7 +74,8 @@
     "paper-trading:auto:mock": "tsx src/index.ts paper-trading:auto --mock",
     "obscura:start": "obscura serve --port 9222 --stealth",
     "carnet": "tsx src/index.ts carnet",
-    "carnet:date": "tsx src/index.ts carnet"
+    "carnet:date": "tsx src/index.ts carnet",
+    "sante:llm": "tsx src/index.ts sante:llm"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
