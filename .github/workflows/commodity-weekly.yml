@@ -37,7 +37,11 @@ jobs:
 
       - name: Générer l'article
         env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          # Clé DeepSeek NON passée : le script la lit dans la table
+          # `api_keys` (repli ajouté le 2026-09-26). Le secret du dépôt
+          # datait du 28 juin et différait de la clé en base — deux copies
+          # à tenir synchronisées à la main, donc deux copies qui divergent.
+          # Une seule source désormais, éditable depuis /admin/cles-api.
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

@@ -131,8 +131,46 @@ class CommodityPrice:
 
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL") or os.environ.get("SUPABASE_URL", "")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+def _resoudre_cle_llm(fournisseur: str) -> str:
+    """Clé LLM : variable d'environnement d'abord, table `api_keys` ensuite.
+
+    Même ordre que `resolveApiKey` (frontend) et `resolveApiKeyForScraper`
+    (scraper). Ce script était le SEUL consommateur à n'avoir aucun repli : il
+    dépendait donc d'un secret GitHub qu'il fallait tenir synchronisé à la main
+    avec la table. Mesuré le 2026-09-26 : les deux portaient des clés
+    DIFFÉRENTES, toutes deux valides ce jour-là — rien ne garantissait qu'elles
+    le restent. Avec ce repli, mettre à jour `/admin/cles-api` suffit.
+    """
+    depuis_env = os.environ.get(f"{fournisseur.upper()}_API_KEY", "").strip()
+    if depuis_env:
+        return depuis_env
+    if not SUPABASE_URL or not SERVICE_KEY:
+        return ""
+    try:
+        import requests
+
+        # Les clés `sb_secret_` veulent `apikey` SEUL : en Bearer, PostgREST
+        # répond « Invalid JWT ». Les clés héritées veulent les deux.
+        entetes = {"apikey": SERVICE_KEY, "User-Agent": "westbourse-weekly/1.0"}
+        if not SERVICE_KEY.startswith("sb_"):
+            entetes["Authorization"] = f"Bearer {SERVICE_KEY}"
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/api_keys",
+            params={"select": "api_key", "provider": f"eq.{fournisseur}"},
+            headers=entetes,
+            timeout=15,
+        )
+        r.raise_for_status()
+        lignes = r.json()
+        return (lignes[0].get("api_key") or "").strip() if lignes else ""
+    except Exception:
+        # Une clé illisible ne doit pas faire tomber le script ici : l'appelant
+        # lève déjà « DEEPSEEK_API_KEY non définie » avec un message clair.
+        return ""
+
+
 # Nettoyer la clé : supprimer espaces et caractères non-ASCII (problème copier-coller)
-DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+DEEPSEEK_KEY = _resoudre_cle_llm("deepseek")
 DEEPSEEK_KEY = DEEPSEEK_KEY.encode("ascii", "ignore").decode("ascii")
 PERPLEXITY_KEY = os.environ.get("PERPLEXITY_API_KEY", "").strip()
 
