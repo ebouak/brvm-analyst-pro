@@ -157,7 +157,7 @@ export default async function ComparePage({
         </Link>
         <h1 className="text-2xl font-semibold mt-1">Comparateur multi-titres</h1>
         <p className="text-sm text-[#8b93a7]">
-          Performance relative base 100 — jusqu'à 6 actions BRVM
+          Performance relative base 100 · jusqu'à 6 actions BRVM
         </p>
       </div>
 

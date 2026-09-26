@@ -197,7 +197,7 @@ export default function IntraDayPatternsTable({
       <div className="bg-elevated/30 border border-border/50 rounded-lg p-4 space-y-2 text-xs text-muted">
         <p>
           <strong>Momentum :</strong> le cours a bougé de plus de 3 % depuis l&apos;ouverture. Sur la
-          BRVM, la plupart des titres ne bougent pas de la journée — un tel mouvement est en soi une
+          BRVM, la plupart des titres ne bougent pas de la journée : un tel mouvement est en soi une
           information.
         </p>
         <p>

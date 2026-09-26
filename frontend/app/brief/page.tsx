@@ -35,7 +35,7 @@ export default async function BriefPage() {
             Le résumé de séance BRVM, chaque jour
           </h1>
           <p className="text-muted text-sm leading-relaxed">
-            Indices, hausses, baisses, volumes et actualités — composé après chaque clôture depuis
+            Indices, hausses, baisses, volumes et actualités : composé après chaque clôture depuis
             les données officielles.
           </p>
           {TELEGRAM_CHANNEL_URL && (
@@ -67,7 +67,7 @@ export default async function BriefPage() {
                       href={`/brief/${b.date_marche}`}
                       className="text-sm text-accent font-medium hover:text-gold-2 transition-colors"
                     >
-                      Note de conjoncture — séance du {fmtDateFR(b.date_marche)} →
+                      Note de conjoncture · séance du {fmtDateFR(b.date_marche)} →
                     </Link>
                     <a
                       href={`https://wa.me/?text=${waText}`}

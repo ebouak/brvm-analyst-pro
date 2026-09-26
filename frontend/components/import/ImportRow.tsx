@@ -40,7 +40,7 @@ export default function ImportRow({ file, validCodes }: Props) {
 
   async function run() {
     setError(null);
-    if (!validCodes.has(symbol)) { setStatus('error'); setError(`Code ${symbol} inconnu — corrigez-le.`); return; }
+    if (!validCodes.has(symbol)) { setStatus('error'); setError(`Code ${symbol} inconnu : corrigez-le.`); return; }
     try {
       setStatus('reading');
       const pdf = await readPdf(file);

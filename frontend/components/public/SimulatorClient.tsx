@@ -71,7 +71,7 @@ export default function SimulatorClient({
       if (!sim) {
         setError(
           prices.length < 2
-            ? "Historique insuffisant pour cette période — essayez une période plus courte."
+            ? "Historique insuffisant pour cette période : essayez une période plus courte."
             : 'Montant insuffisant pour acheter au moins une action à cette date.',
         );
         return;

@@ -44,7 +44,7 @@ function LockedCell() {
   return (
     <Link
       href="/account/plan"
-      title="Réservé aux abonnés — cliquez pour débloquer"
+      title="Réservé aux abonnés, cliquez pour débloquer"
       className="inline-flex items-center gap-1 rounded-md border border-gold/25 bg-gold/5 px-2 py-0.5 text-[10px] text-gold/80 transition hover:bg-gold/10"
     >
       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>

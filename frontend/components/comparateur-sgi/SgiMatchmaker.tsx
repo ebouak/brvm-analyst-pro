@@ -156,12 +156,12 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
   return (
     <section id="moteur-sgi" className="scroll-mt-24 rounded-panel border border-accent/25 bg-accent/[0.04] p-6 md:p-8">
-      <p className="overline mb-2 text-gold-2">Étape 1 · Moteur de choix — exclusif</p>
+      <p className="overline mb-2 text-gold-2">Étape 1 · Moteur de choix (exclusif)</p>
       <h3 className="mb-1 font-display text-2xl text-ivory [letter-spacing:-0.03em]">
         Quelle SGI est faite pour vous ?
       </h3>
       <p className="mb-6 max-w-[62ch] text-sm leading-relaxed text-muted">
-        5 questions, et le moteur classe les {directory.length} SGI selon VOTRE profil — sur la base
+        5 questions, et le moteur classe les {directory.length} SGI selon VOTRE profil : sur la base
         des barèmes réels ({frais.filter((f) => f.confiance === 'homologue_crepmf').length} grilles
         homologuées AMF-UMOA en base). Chaque point du score est justifié, rien n&apos;est inventé.
       </p>
@@ -317,7 +317,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
           <p className="mt-4 text-[10px] leading-relaxed text-faint">
             Classement indicatif dérivé des barèmes publiés (bornes maximales, prudence) et de votre
-            profil déclaré — pas une recommandation d&apos;investissement. Confirmez toujours les
+            profil déclaré, pas une recommandation d&apos;investissement. Confirmez toujours les
             conditions auprès de la SGI avant d&apos;ouvrir un compte.
           </p>
         </div>

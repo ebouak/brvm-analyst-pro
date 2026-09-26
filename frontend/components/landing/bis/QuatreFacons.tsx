@@ -91,7 +91,7 @@ export function QuatreFacons() {
         <div>
           <p className="over">La plateforme</p>
           <h2 id="h-facons">Quatre façons de travailler<br />le <span className="accent">marché</span>.</h2>
-          <p className="lead">Comprendre, surveiller, tester et explorer — WESTBOURSE réunit les outils dont vous avez besoin, au même endroit.</p>
+          <p className="lead">Comprendre, surveiller, tester et explorer : WESTBOURSE réunit les outils dont vous avez besoin, au même endroit.</p>
         </div>
         <div className="annot-2" aria-hidden="true"><span className="hand">Des outils concrets<br />pour aller plus loin.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
       </div>

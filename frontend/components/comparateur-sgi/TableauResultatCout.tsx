@@ -190,7 +190,7 @@ export function TableauResultatCout({
 
       {rows.some((r) => r.champCourtageManquant || r.champGardeManquant) && (
         <p className="text-[11px] text-warn">
-          Certains taux non renseignés comptent pour 0 FCFA dans le Total — le coût réel de ces SGI est
+          Certains taux non renseignés comptent pour 0 FCFA dans le Total : le coût réel de ces SGI est
           possiblement plus élevé.
         </p>
       )}

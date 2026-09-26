@@ -25,7 +25,7 @@ export default async function DiagnosticIndexPage() {
         <div>
           <h1 className="text-xl font-semibold">Dossier d’analyse</h1>
           <p className="text-sm text-muted mt-1">
-            Analyse générée automatiquement à partir des états financiers publiés — vérifiée par nos
+            Analyse générée automatiquement à partir des états financiers publiés, vérifiée par nos
             garde-fous de plausibilité. Disponible pour chaque action de la cote BRVM.
           </p>
         </div>

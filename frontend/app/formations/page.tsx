@@ -84,7 +84,7 @@ export default async function FormationsPage() {
             <StatPill tone="neutral">QCM interactifs</StatPill>
           </div>
           <h2 className="font-display text-xl text-white group-hover:text-[#56D7FD] transition-colors">
-            WestBourse Academy — Édition Intégrale
+            WestBourse Academy · Édition Intégrale
           </h2>
           <p className="mt-1 text-sm text-[#7a9ea8] leading-relaxed max-w-xl">
             Formation complète en 8 sections par leçon : définition, cas réels BRVM, pièges fréquents, lexique ciblé et points à retenir. Du débutant au niveau Expert CREPMF.

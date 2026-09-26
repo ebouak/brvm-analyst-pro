@@ -146,7 +146,7 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
       {prefs.dossiers_optin_at && (
         <p className="mt-4 text-[11px] text-faint">
           Activé le {new Date(prefs.dossiers_optin_at).toLocaleDateString('fr-FR')}. Décochez pour ne
-          plus rien recevoir — le retrait prend effet immédiatement.
+          plus rien recevoir, le retrait prend effet immédiatement.
         </p>
       )}
       {etat === 'erreur' && message && <p className="mt-3 text-xs text-down">{message}</p>}

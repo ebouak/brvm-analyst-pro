@@ -21,7 +21,7 @@ async function getCard(slug: string) {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const card = await getCard(params.slug);
   return {
-    title: card ? `${card.titre} — WestBourse Academy` : 'Cours — WestBourse Academy',
+    title: card ? `${card.titre} · WestBourse Academy` : 'Cours — WestBourse Academy',
     description: card?.resume ?? undefined,
   };
 }

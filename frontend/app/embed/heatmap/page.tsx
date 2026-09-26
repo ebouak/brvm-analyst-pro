@@ -8,7 +8,7 @@ import AutoHeight from '@/components/embed/AutoHeight';
 export const revalidate = 300;
 export const metadata: Metadata = {
   // `absolute` : évite le suffixe « | WESTBOURSE » du template racine.
-  title: { absolute: 'Heatmap BRVM du jour — WESTBOURSE' },
+  title: { absolute: 'Heatmap BRVM du jour · WESTBOURSE' },
   robots: { index: false },
 };
 

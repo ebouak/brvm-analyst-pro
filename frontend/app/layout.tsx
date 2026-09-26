@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     siteName: 'WESTBOURSE',
     title: 'WESTBOURSE — Décidez sur la BRVM avec des données, pas des rumeurs',
     description:
-      'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit — créez votre compte en 1 minute.',
+      'Cours BRVM toutes les 15 min, note A–F par action, fondamentaux vérifiés, simulateur et brief quotidien. Gratuit, créez votre compte en 1 minute.',
     // og:image généré automatiquement par app/opengraph-image.tsx (1200×630).
   },
   twitter: {
@@ -196,7 +196,7 @@ const jsonLd = {
           name: 'Est-ce vraiment gratuit ?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Oui. Les cours, la note A–F et les fondamentaux sont accessibles gratuitement après création d'un compte — sans carte bancaire. L'abonnement Premium (Dossier d’analyse) est optionnel.",
+            text: "Oui. Les cours, la note A–F et les fondamentaux sont accessibles gratuitement après création d'un compte, sans carte bancaire. L'abonnement Premium (Dossier d’analyse) est optionnel.",
           },
         },
         {

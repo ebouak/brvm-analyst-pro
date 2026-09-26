@@ -96,7 +96,7 @@ export default function CorrelationsCharts({ series }: { series: CorrelationSeri
                 <p className="text-xs text-muted leading-relaxed">{selected.macro.reading}</p>
               </div>
               <p className="text-[11px] text-faint">
-                Corrélation de Pearson sur les variations mensuelles (méthode analyste — évite les fausses corrélations de tendance).
+                Corrélation de Pearson sur les variations mensuelles (méthode analyste, évite les fausses corrélations de tendance).
                 Prix matières premières : World Bank « Pink Sheet » (mensuel).
               </p>
             </>
@@ -136,9 +136,9 @@ export default function CorrelationsCharts({ series }: { series: CorrelationSeri
                 </td>
                 <td className="py-2 px-4 text-muted text-xs">
                   {!s.dataAvailable ? 'Historique commun insuffisant'
-                    : Math.abs(s.coefficient) > 0.7 ? 'Mouvement synchrone — surveiller le cours mondial'
-                    : Math.abs(s.coefficient) > 0.4 ? 'Corrélation partielle — facteurs locaux prédominent'
-                    : 'Peu corrélé — diversification efficace'}
+                    : Math.abs(s.coefficient) > 0.7 ? 'Mouvement synchrone : surveiller le cours mondial'
+                    : Math.abs(s.coefficient) > 0.4 ? 'Corrélation partielle : facteurs locaux prédominent'
+                    : 'Peu corrélé : diversification efficace'}
                 </td>
               </tr>
             ))}

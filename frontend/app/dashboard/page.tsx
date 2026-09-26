@@ -323,7 +323,7 @@ export default async function Dashboard() {
           <SectionHeader
             kicker="Tableau de bord"
             title="Marché BRVM"
-            subtitle="Bourse Régionale des Valeurs Mobilières — UEMOA"
+            subtitle="Bourse Régionale des Valeurs Mobilières · UEMOA"
           />
           <EmptyStatePremium
             icon="◈"

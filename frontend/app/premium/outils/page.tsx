@@ -31,7 +31,7 @@ export default async function OutilsPage() {
         accent="gold"
         kicker="Boîte à outils"
         title="Outils Premium"
-        subtitle="Saisonnalité, actions proches de leurs plus bas, réaction aux états financiers — signaux structurels de la BRVM."
+        subtitle="Saisonnalité, actions proches de leurs plus bas, réaction aux états financiers · signaux structurels de la BRVM."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
 

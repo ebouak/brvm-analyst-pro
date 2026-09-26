@@ -53,7 +53,7 @@ export default function CarnetOrdres({ carnet }: { carnet: CarnetRow | null }) {
   return (
     <section className="mb-6 rounded-xl border border-border bg-surface p-5">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm text-muted">Carnet d&apos;ordres — quantités résiduelles</h2>
+        <h2 className="text-sm text-muted">Carnet d&apos;ordres · quantités résiduelles</h2>
         <span className="text-xs text-faint">clôture du {fmtDateFR(carnet.date_marche)}</span>
       </div>
 

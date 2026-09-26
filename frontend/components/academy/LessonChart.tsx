@@ -76,7 +76,7 @@ export default function LessonChart({ chart, variant = 'app' }: { chart: Chart; 
         {chart.note}{' '}
         <span className="italic">
           {chart.reel
-            ? '(données réelles à la date de rédaction — sources officielles)'
+            ? '(données réelles à la date de rédaction, sources officielles)'
             : '(valeurs illustratives)'}
         </span>
       </p>

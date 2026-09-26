@@ -106,7 +106,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!instr) return { title: 'Société introuvable' };
 
-  const title = `Action ${instr.designation} (${code}) — Cours, dividendes, analyse`;
+  const title = `Action ${instr.designation} (${code}) · Cours, dividendes, analyse`;
   const description = `Cours en quasi temps réel, note BRVM, fondamentaux, dividendes et actualités de ${instr.designation} (${code}) cotée à la BRVM. Analyse gratuite et données vérifiées.`;
 
   return {
@@ -265,7 +265,7 @@ export default async function CompanyPage({ params }: PageProps) {
 
       {/* ── Graphique 1 an ───────────────────────────────────────────────── */}
       <section className="bg-surface border border-border rounded-xl p-5 mb-6">
-        <h2 className="text-sm text-muted mb-3">Cours de clôture — 12 derniers mois</h2>
+        <h2 className="text-sm text-muted mb-3">Cours de clôture · 12 derniers mois</h2>
         {closes.length >= 2 ? (
           <Sparkline values={closes} positive={closes[closes.length - 1]! >= closes[0]!} />
         ) : (
@@ -330,7 +330,7 @@ export default async function CompanyPage({ params }: PageProps) {
       {bestFund && (
         <section className="bg-surface border border-border rounded-xl p-5 mb-6">
           <h2 className="text-sm text-muted mb-4">
-            Fondamentaux — exercice {bestFund.year ?? '—'}
+            Fondamentaux · exercice {bestFund.year ?? '—'}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3">
             {[
@@ -422,7 +422,7 @@ export default async function CompanyPage({ params }: PageProps) {
             <div className="absolute inset-0 flex items-center justify-center">
               <Link href="/signup"
                 className="px-5 py-2.5 rounded-lg bg-accent text-bg font-semibold hover:bg-gold-2 transition-colors active:scale-95">
-                Lire l&apos;analyse complète — gratuit
+                Lire l&apos;analyse complète · gratuit
               </Link>
             </div>
           </div>

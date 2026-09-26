@@ -51,7 +51,7 @@ export default async function VeillePage() {
       <SectionHeader
         kicker={`Intelligence · ${NB_SOCIETES_COTEES} sociétés · 150+ sources · 1 an d'historique`}
         title="Veille BRVM"
-        subtitle="Surveillance automatisée des actualités marché — mis à jour quotidiennement."
+        subtitle="Surveillance automatisée des actualités marché, mis à jour quotidiennement."
       />
       <ViewTabs tabs={INTEL_TABS} current="/veille" />
       <VeilleDashboard news={news} />

@@ -131,7 +131,7 @@ export function AnomalieCharts({
 
   return (
     <>
-      <ChartCard title="Dividendes — Rendement vs Payout" desc="Zone idéale : rendement élevé + payout raisonnable (<80%). Payout élevé = risque de coupe.">
+      <ChartCard title="Dividendes · Rendement vs Payout" desc="Zone idéale : rendement élevé + payout raisonnable (<80%). Payout élevé = risque de coupe.">
         {pointsDividendes.length === 0 ? <EmptyState /> : <EChart option={optDiv} height={340} />}
       </ChartCard>
 
@@ -139,7 +139,7 @@ export function AnomalieCharts({
         {pointsLiqVol.length === 0 ? <EmptyState /> : <EChart option={optLiq} height={340} />}
       </ChartCard>
 
-      <ChartCard title="Heatmap — 20 dernières séances" desc="Variations journalières. Rouge = baisse, vert = hausse. Lignes homogènes = mouvement de marché.">
+      <ChartCard title="Heatmap · 20 dernières séances" desc="Variations journalières. Rouge = baisse, vert = hausse. Lignes homogènes = mouvement de marché.">
         {heatData.length === 0 ? <EmptyState /> : <EChart option={optHeat} height={Math.max(280, codes.length * 18 + 60)} />}
       </ChartCard>
 

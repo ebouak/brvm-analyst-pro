@@ -159,9 +159,9 @@ export default function ProfileClient({ initial, email, isPremium, initialPrefer
           <div>
             <p className="text-xs text-muted mb-1">Notifications email</p>
             {([
-              ['signaux', "Signaux d'achat détectés", 'activé — livraison bientôt'],
+              ['signaux', "Signaux d'achat détectés", 'activé · livraison bientôt'],
               ['briefHebdo', 'Brief hebdomadaire du marché', '(dé)abonne la newsletter'],
-              ['alertesPrix', 'Alertes de prix sur mes titres', 'activé — livraison bientôt'],
+              ['alertesPrix', 'Alertes de prix sur mes titres', 'activé · livraison bientôt'],
               ['actus', 'Actualités importantes', ''],
             ] as [keyof typeof notify, string, string][]).map(([k, label, sub]) => (
               <label key={k} className="flex items-center justify-between border-b border-border/40 py-2 cursor-pointer">

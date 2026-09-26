@@ -20,7 +20,7 @@ export default function LevelGreeting() {
         className="flex flex-col items-start gap-3 rounded-2xl border border-[#0b6b6f]/20 bg-[#d4ebe8]/50 p-5 sm:flex-row sm:items-center sm:justify-between"
       >
         <p className="text-sm font-medium text-[#191714]">
-          Vous êtes à l’aise avec la BRVM ? Allez droit au but — un partenaire habilité vous met en relation.
+          Vous êtes à l’aise avec la BRVM ? Allez droit au but : un partenaire habilité vous met en relation.
         </p>
         <a
           href="#cta"
@@ -34,7 +34,7 @@ export default function LevelGreeting() {
 
   const msg =
     level === 'intermediaire'
-      ? 'Vous connaissez les bases — concentrons-nous sur l’ouverture de votre compte titres.'
+      ? 'Vous connaissez les bases : concentrons-nous sur l’ouverture de votre compte titres.'
       : 'Nouveau à la BRVM ? On vous explique chaque étape, simplement, sans jargon.';
 
   return (

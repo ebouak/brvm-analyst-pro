@@ -134,7 +134,7 @@ export default async function SecteursPage() {
             title="Performance sectorielle"
             subtitle={
               lastDate
-                ? `Classement et rotation des secteurs cotés — Dernière séance : ${fmtDateFR(lastDate)}`
+                ? `Classement et rotation des secteurs cotés · Dernière séance : ${fmtDateFR(lastDate)}`
                 : 'Classement et rotation des secteurs cotés sur la BRVM'
             }
           />
@@ -219,7 +219,7 @@ export default async function SecteursPage() {
               <div>
                 <Eyebrow>Analyse dynamique</Eyebrow>
                 <h2 className="font-display text-heading-sm text-ivory mt-1">
-                  Rotation sectorielle — 30 jours
+                  Rotation sectorielle · 30 jours
                 </h2>
               </div>
 
@@ -241,7 +241,7 @@ export default async function SecteursPage() {
         <div className="animate-rise-in [animation-delay:0.42s] flex items-center justify-between rounded-xl border border-border/50 bg-elevated/30 px-5 py-3.5">
           <div>
             <p className="text-sm font-medium text-ivory">Voir la cartographie visuelle</p>
-            <p className="text-xs text-muted">Heatmap — taille proportionnelle à la capitalisation, couleur = variation</p>
+            <p className="text-xs text-muted">Heatmap : taille proportionnelle à la capitalisation, couleur = variation</p>
           </div>
           <Link
             href="/heatmap"

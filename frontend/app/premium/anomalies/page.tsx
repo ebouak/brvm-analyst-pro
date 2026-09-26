@@ -35,7 +35,7 @@ export default async function AnomaliesPage() {
       <SectionHeader
         kicker="Détection d'anomalies · Visuels exclusifs"
         title="Anomalies &amp; Opportunités de Marché"
-        subtitle="4 analyses visuelles pour identifier les actions hors-norme — dividendes, liquidité, heatmap et valorisation."
+        subtitle="4 analyses visuelles pour identifier les actions hors-norme · dividendes, liquidité, heatmap et valorisation."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
 

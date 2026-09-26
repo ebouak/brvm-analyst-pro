@@ -10,7 +10,7 @@ export const revalidate = 300;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 export const metadata: Metadata = {
-  title: 'Formations en direct — Bourse et BRVM',
+  title: 'Formations en direct · Bourse et BRVM',
   description:
     'Sessions de formation animées en direct sur la Bourse et la BRVM : dates, places limitées, tarifs. Places réservées depuis votre compte WESTBOURSE.',
   alternates: { canonical: SITE_URL + '/formations/sessions' },

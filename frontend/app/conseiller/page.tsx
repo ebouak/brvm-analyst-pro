@@ -86,7 +86,7 @@ export default async function ConseillerPage() {
       <SectionHeader
         kicker="Bot conseiller"
         title="Conseiller BRVM"
-        subtitle="Une recommandation unifiée par action — Acheter / Conserver / Vendre — qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
+        subtitle="Une recommandation unifiée par action (Acheter / Conserver / Vendre) qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
         actions={
           <>
             <StatPill tone="neutral"><span className="tabular">{rows.length}</span>&nbsp;valeurs analysées</StatPill>
@@ -169,7 +169,7 @@ export default async function ConseillerPage() {
       })}
 
       <p className="text-[11px] text-faint">
-        Synthèse algorithmique dérivée des données réelles (signaux, DCF, RSI, dividendes) — aucune
+        Synthèse algorithmique dérivée des données réelles (signaux, DCF, RSI, dividendes), aucune
         valeur inventée. Ne constitue pas un conseil en investissement personnalisé. Performances passées
         ne préjugent pas des performances futures.
       </p>

@@ -85,7 +85,7 @@ export function VerifyForm() {
 
       <p className="text-[11px] text-faint">
         Le code change toutes les 30 secondes. Si l’échec persiste, vérifiez que l’heure de votre
-        téléphone est réglée automatiquement — un décalage d’horloge invalide les codes.
+        téléphone est réglée automatiquement : un décalage d’horloge invalide les codes.
       </p>
     </form>
   );

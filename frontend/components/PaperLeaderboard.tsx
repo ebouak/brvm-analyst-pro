@@ -76,7 +76,7 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
           <h2 className="font-display text-xl text-ivory">Meilleures performances papier</h2>
           <p className="mt-1 max-w-[52ch] text-xs leading-relaxed text-muted">
             Perfs de trading fictif (capital papier), anonymisées et sur la base du volontariat.
-            Aucune performance réelle — à but pédagogique.
+            Aucune performance réelle : à but pédagogique.
           </p>
         </div>
         {me?.optin && me.rank != null && (
@@ -95,7 +95,7 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
       ) : rows.length === 0 ? (
         <div className="rounded-xl border border-border bg-sunken/30 p-8 text-center">
           <p className="text-sm text-muted">
-            Personne au classement pour l&apos;instant — soyez le premier à y entrer.
+            Personne au classement pour l&apos;instant : soyez le premier à y entrer.
           </p>
         </div>
       ) : (
@@ -151,7 +151,7 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
             <div className="flex flex-wrap items-end gap-3">
               <div className="min-w-[200px] flex-1">
                 <label htmlFor="lb-alias" className="mb-1 block text-xs text-muted">
-                  Alias public (optionnel — sinon un alias neutre est généré)
+                  Alias public (optionnel, sinon un alias neutre est généré)
                 </label>
                 <input
                   id="lb-alias"
@@ -173,7 +173,7 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
               </button>
               <p className="w-full text-[10px] leading-relaxed text-faint">
                 Participation volontaire et réversible. Seuls votre alias et vos métriques de jeu
-                (perf %, nombre de trades) sont publics — jamais votre identité ni votre capital.
+                (perf %, nombre de trades) sont publics, jamais votre identité ni votre capital.
               </p>
             </div>
           )}

@@ -133,7 +133,7 @@ export default async function WeeklyPage() {
             ))}
           </div>
           <p className="mt-1.5 text-[10px] text-faint">
-            Prix mensuels — source Banque mondiale (Pink Sheet), dernier point : {commos[0]?.date}.
+            Prix mensuels · source Banque mondiale (Pink Sheet), dernier point : {commos[0]?.date}.
           </p>
         </div>
       )}

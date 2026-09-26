@@ -189,7 +189,7 @@ export default function OnboardingModal() {
             <div className="space-y-2">
               {[
                 { val: 'gratuit' as const, label: 'Gratuit', desc: 'Accès aux fonctionnalités de base, sans carte bancaire' },
-                { val: 'premium' as const, label: 'Premium', desc: 'Dossier d’analyse, outils avancés et rapports — voir les offres' },
+                { val: 'premium' as const, label: 'Premium', desc: 'Dossier d’analyse, outils avancés et rapports · voir les offres' },
               ].map(({ val, label, desc }) => (
                 <button key={val} type="button" onClick={() => setFormule(val)}
                   className={`w-full text-left px-4 py-3 rounded-xl border transition ${

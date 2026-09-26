@@ -69,7 +69,7 @@ export default function PortfolioOptimizer({ userId }: { userId: string }) {
           <span className="text-warn">Contribution au risque</span> : part de la volatilité totale apportée par chaque ligne.
           <span className="text-ivory"> Min-variance</span> : allocation qui minimise le risque.
           <span className="text-up"> Max-Sharpe</span> : allocation qui maximise le rendement par unité de risque.
-          Les poids peuvent être négatifs (vente à découvert théorique) — à interpréter comme une direction de rééquilibrage.
+          Les poids peuvent être négatifs (vente à découvert théorique), à interpréter comme une direction de rééquilibrage.
           Hypothèses : rendements quotidiens 2 ans, sans-risque 6%.
         </p>
       </div>

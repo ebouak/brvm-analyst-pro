@@ -205,7 +205,7 @@ export function CalculateurCout({
 
             <GraphiqueCoutSGI
               resultats={top10}
-              title={resultats.length > 10 ? 'Coût total par SGI (FCFA) — top 10' : 'Coût total par SGI (FCFA)'}
+              title={resultats.length > 10 ? 'Coût total par SGI (FCFA) · top 10' : 'Coût total par SGI (FCFA)'}
             />
 
             <div>

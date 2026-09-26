@@ -106,7 +106,7 @@ export default function SignalPerformance({
             </table>
           </div>
           <p className="text-[11px] text-faint italic">
-            Signaux réellement émis en production (pas de backtest) — performance mesurée depuis la date d&apos;émission,
+            Signaux réellement émis en production (pas de backtest), performance mesurée depuis la date d&apos;émission,
             sur un horizon encore court pour les plus récents.
           </p>
         </div>

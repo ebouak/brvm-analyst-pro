@@ -55,7 +55,7 @@ export default function OpengraphImage() {
             <span style={{ color: '#56D7FD' }}>données</span>, pas des rumeurs.
           </div>
           <div style={{ color: '#7a9ea8', fontSize: 30, fontWeight: 500 }}>
-            Cours · Notes A–F · Fondamentaux · Simulateur — Gratuit
+            Cours · Notes A–F · Fondamentaux · Simulateur · Gratuit
           </div>
         </div>
 

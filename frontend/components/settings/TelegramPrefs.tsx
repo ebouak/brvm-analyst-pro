@@ -190,7 +190,7 @@ export default function TelegramPrefs({ userId }: { userId: string }) {
             <>
               <p className="text-sm text-muted">
                 Générez un code, puis envoyez-le au bot depuis votre Telegram. C’est ce message qui
-                prouve que le compte est bien le vôtre — rien à recopier de notre côté.
+                prouve que le compte est bien le vôtre, rien à recopier de notre côté.
               </p>
               <button
                 type="button"
@@ -235,7 +235,7 @@ export default function TelegramPrefs({ userId }: { userId: string }) {
                 onClick={() => void charger()}
                 className="mt-3 text-xs font-semibold text-muted transition-colors hover:text-white"
               >
-                J’ai envoyé le code — vérifier
+                J’ai envoyé le code · vérifier
               </button>
             </>
           )}

@@ -20,7 +20,7 @@ interface Topic {
 const TOPICS: Topic[] = [
   {
     key: 'weekly_commodity',
-    title: 'Analyses Hebdo — Matières Premières',
+    title: 'Analyses Hebdo · Matières Premières',
     description:
       'Impact du cacao, pétrole, caoutchouc et huile de palme sur les valeurs BRVM. Publié chaque vendredi.',
     badge: 'Hebdo',

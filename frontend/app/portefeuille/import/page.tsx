@@ -127,7 +127,7 @@ export default function ImportRelevePage() {
           <PdfDropzone onFiles={(accepted) => { if (accepted[0]) void analyse(accepted[0]); }} />
           {error && <p className="mt-3 text-sm text-down">✕ {error}</p>}
           <p className="mt-3 text-[11px] leading-relaxed text-faint">
-            Le document est analysé automatiquement puis oublié — il n&apos;est ni stocké ni transmis à des tiers
+            Le document est analysé automatiquement puis oublié : il n&apos;est ni stocké ni transmis à des tiers
             autres que le fournisseur d&apos;analyse. Limite : 10 analyses par heure.
           </p>
         </PremiumPanel>

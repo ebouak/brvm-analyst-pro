@@ -96,8 +96,8 @@ export default async function ValorisationSecteurs() {
 
       <PremiumPanel className="space-y-2 p-4 text-xs text-muted">
         <p>
-          Chaque ratio est calculé société par société — dernier exercice publié, cours
-          {d.dateMarche ? ` de la séance du ${fmtDateFR(d.dateMarche)}` : ''} — puis résumé par la{' '}
+          Chaque ratio est calculé société par société (dernier exercice publié, cours
+          {d.dateMarche ? ` de la séance du ${fmtDateFR(d.dateMarche)}` : ''}) puis résumé par la{' '}
           <strong className="text-ivory">médiane</strong> du secteur, et non par la moyenne qu&apos;une seule valeur
           extrême suffirait à déformer. Un PER négatif (société en perte) ou invraisemblable est{' '}
           <strong className="text-ivory">écarté et compté</strong>, jamais corrigé : c&apos;est ce que dit la colonne

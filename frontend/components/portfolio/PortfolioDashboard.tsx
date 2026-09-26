@@ -77,7 +77,7 @@ export default function PortfolioDashboard() {
           <div className="space-y-3">
             <div className="text-xs text-muted bg-bg/40 border border-border rounded-lg px-4 py-2">
               ℹ️ Les apports et retraits ajustent le capital investi. La valorisation et la performance
-              sont dérivées automatiquement de vos positions — aucune saisie de solde n’est nécessaire.
+              sont dérivées automatiquement de vos positions : aucune saisie de solde n’est nécessaire.
             </div>
             <MovementsForm />
           </div>

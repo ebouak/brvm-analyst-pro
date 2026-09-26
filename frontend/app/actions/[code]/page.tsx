@@ -105,7 +105,7 @@ export async function generateMetadata({ params }: { params: { code: string } })
   const coursTxt = cours ? `${new Intl.NumberFormat('fr-FR').format(cours)} FCFA` : null;
 
   return {
-    title: `${nom} (${code}) — cours, dividendes et analyse BRVM`,
+    title: `${nom} (${code}) · cours, dividendes et analyse BRVM`,
     /**
      * NOINDEX — et c'est délibéré.
      *
@@ -124,7 +124,7 @@ export async function generateMetadata({ params }: { params: { code: string } })
       : `${nom} (${code}) à la BRVM : cours, historique, dividendes versés, saisonnalité et analyse. Données vérifiées.`,
     alternates: { canonical: `${SITE_URL}/societes/${code}` },
     openGraph: {
-      title: `${nom} (${code}) — cours BRVM`,
+      title: `${nom} (${code}) · cours BRVM`,
       description: coursTxt ? `${coursTxt} — cours, dividendes et analyse.` : 'Cours, dividendes et analyse.',
       url: `${SITE_URL}/actions/${code}`,
       type: 'website',
@@ -1155,7 +1155,7 @@ export default async function InstrumentPage({
               <SectionLock
                 required={gateFonda.required === 'free' ? 'premium' : gateFonda.required}
                 titre="Analyse fondamentale"
-                pitch="PER, P/B, ROE, marge, endettement — et leur lecture."
+                pitch="PER, P/B, ROE, marge, endettement, et leur lecture."
               />
             </div>
           );
@@ -1297,7 +1297,7 @@ export default async function InstrumentPage({
         ) : (
           <EmptyStatePremium
             icon="✦"
-            title={`Indicateurs techniques — réservés au plan ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`}
+            title={`Indicateurs techniques · réservés au plan ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`}
             hint="RSI, MACD, moyennes mobiles, lecture technique et lecture commentée."
             action={{
               href: '/account/plan',

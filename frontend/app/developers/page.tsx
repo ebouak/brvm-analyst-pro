@@ -80,7 +80,7 @@ export default function DevelopersPage() {
           <p className="mt-3 max-w-2xl text-muted leading-relaxed">
             API REST JSON sur les données de marché de la BRVM (Bourse Régionale des Valeurs
             Mobilières, UEMOA). <strong className="text-white">Accès sur autorisation</strong> :
-            demandez une clé ci-dessous — c&apos;est gratuit pour un usage éditorial ou de recherche,
+            demandez une clé ci-dessous : c&apos;est gratuit pour un usage éditorial ou de recherche,
             et cela nous permet de protéger le service et de vous prévenir en cas de changement.
           </p>
         </div>
@@ -163,7 +163,7 @@ export default function DevelopersPage() {
           <div className="space-y-2 rounded-xl border border-border bg-surface p-4">
             <p className="text-sm text-white">Hauteur automatique (facultatif)</p>
             <p className="text-xs text-muted">
-              Le widget publie sa hauteur réelle. Ce script l&apos;applique — il{' '}
+              Le widget publie sa hauteur réelle. Ce script l&apos;applique : il{' '}
               <strong className="text-white">vérifie l&apos;origine</strong>, ce qui est
               indispensable : sans ce contrôle, n&apos;importe quelle autre iframe de votre page
               pourrait redimensionner le widget.

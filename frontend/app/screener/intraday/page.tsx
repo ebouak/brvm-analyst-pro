@@ -32,7 +32,7 @@ export default async function IntraDayScreenerPage() {
         <SectionHeader
           kicker="Outils"
           title="Screener Intraday"
-          subtitle="Les titres qui bougent, et ceux dont le volume s'emballe — sur la séance du jour."
+          subtitle="Les titres qui bougent, et ceux dont le volume s'emballe, sur la séance du jour."
         />
       </div>
 

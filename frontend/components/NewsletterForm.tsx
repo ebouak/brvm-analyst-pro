@@ -82,7 +82,7 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
               Le brief BRVM chaque semaine dans votre boîte mail
             </p>
             <p className="mt-1 text-xs text-muted">
-              Cours, signaux, événements — un résumé hebdomadaire clair et actionnable. Gratuit.
+              Cours, signaux, événements · un résumé hebdomadaire clair et actionnable. Gratuit.
             </p>
           </div>
 
@@ -154,7 +154,7 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
           Le brief BRVM chaque semaine dans votre boîte mail
         </h2>
         <p className="text-sm text-muted max-w-md mx-auto">
-          Cours, signaux, événements — un résumé hebdomadaire clair et actionnable. Gratuit.
+          Cours, signaux, événements · un résumé hebdomadaire clair et actionnable. Gratuit.
         </p>
       </div>
 

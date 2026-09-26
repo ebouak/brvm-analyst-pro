@@ -2,7 +2,7 @@ import { BacktestInfographic } from '@/components/backtest/backtest-infographic'
 import { mockBacktestReportBICC } from '@/data/mock-backtest-report';
 import { AnimatedValue } from '@/components/AnimatedValue';
 
-export const metadata = { title: 'Infographie de backtest — démo' };
+export const metadata = { title: 'Infographie de backtest · démo' };
 
 /**
  * Page de démonstration du système d'infographie de backtest.
@@ -15,7 +15,7 @@ export default function BacktestDemoPage() {
       <div className="mx-auto max-w-2xl space-y-10">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Infographie de backtest</h1>
-          <p className="mt-1 text-sm text-gray-500">Système de composants clairs et pédagogiques — deux variantes.</p>
+          <p className="mt-1 text-sm text-gray-500">Système de composants clairs et pédagogiques, deux variantes.</p>
         </div>
 
         <section className="space-y-3">

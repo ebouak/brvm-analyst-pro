@@ -6,7 +6,7 @@ import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
 
 export const metadata: Metadata = {
   title: 'Tarifs',
-  description: 'Plans Gratuit, Premium et Platinium — analyse BRVM/UEMOA premium.',
+  description: 'Plans Gratuit, Premium et Platinium · analyse BRVM/UEMOA premium.',
 };
 export const revalidate = 300;
 

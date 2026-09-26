@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { listCourses } from '@/lib/video/server';
 import { SectionHeader } from '@/components/ui/premium';
 
-export const metadata: Metadata = { title: 'Modules vidéo — Formations' };
+export const metadata: Metadata = { title: 'Modules vidéo · Formations' };
 export const dynamic = 'force-dynamic';
 
 const NIVEAU: Record<string, string> = {

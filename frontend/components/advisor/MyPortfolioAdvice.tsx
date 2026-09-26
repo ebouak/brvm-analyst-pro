@@ -49,7 +49,7 @@ export function MyPortfolioAdvice() {
 
   return (
     <section className="space-y-3">
-      <h2 className="font-display text-lg text-white">Mon portefeuille — conseils</h2>
+      <h2 className="font-display text-lg text-white">Mon portefeuille · conseils</h2>
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
@@ -90,7 +90,7 @@ export function MyPortfolioAdvice() {
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-faint">Conseil dérivé des signaux réels — exécutez via votre SGI. Survolez un conseil pour les raisons.</p>
+      <p className="text-[11px] text-faint">Conseil dérivé des signaux réels : exécutez via votre SGI. Survolez un conseil pour les raisons.</p>
     </section>
   );
 }

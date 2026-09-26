@@ -109,8 +109,8 @@ export default function BankScorecard({ kpis, score, periode }: {
           Barème inspiré des indicateurs de la Commission Bancaire UMOA et des FSI du FMI
           (ROE 15 %, ROA 1,5 %, coefficient d&apos;exploitation 50-80 %, NPL 5-15 %, solvabilité
           réglementaire ≥ 11,5 %, transformation 50-100 %, NIM 4 %). Un indicateur non publié
-          dans les états déposés est neutralisé — il sort du calcul au lieu d&apos;être compté
-          comme un zéro — et la confiance indique la part du barème réellement mesurable.
+          dans les états déposés est neutralisé (il sort du calcul au lieu d&apos;être compté
+          comme un zéro) et la confiance indique la part du barème réellement mesurable.
         </p>
       </div>
     </div>

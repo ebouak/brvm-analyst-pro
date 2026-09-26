@@ -136,13 +136,13 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
       const res = await fetch('/api/whatsapp/pairing', { method: 'POST' });
       const body = (await res.json()) as { code?: string; expiresAt?: string; error?: string };
       if (!res.ok || !body.code || !body.expiresAt) {
-        setPairingMsg(body.error ?? 'Génération du code impossible — réessayez.');
+        setPairingMsg(body.error ?? 'Génération du code impossible : réessayez.');
         return;
       }
       setPairing({ code: body.code, expiresAt: body.expiresAt });
       setNow(Date.now());
     } catch {
-      setPairingMsg('Génération du code impossible — vérifiez votre connexion.');
+      setPairingMsg('Génération du code impossible : vérifiez votre connexion.');
     } finally {
       setPairingBusy(false);
     }
@@ -155,7 +155,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
     const fresh = await loadPrefs();
     setPairingBusy(false);
     if (!fresh) {
-      setPairingMsg('Vérification impossible — réessayez dans un instant.');
+      setPairingMsg('Vérification impossible : réessayez dans un instant.');
       return;
     }
     if (fresh.whatsapp_optin) {
@@ -165,7 +165,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
       return;
     }
     setPairingMsg(
-      'Aucune liaison détectée pour l’instant. L’envoi met quelques secondes à nous parvenir — patientez, puis réessayez.',
+      'Aucune liaison détectée pour l’instant. L’envoi met quelques secondes à nous parvenir, patientez, puis réessayez.',
     );
   }
 
@@ -268,7 +268,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
 
               <p className="text-xs text-muted">
                 {codeExpired
-                  ? 'Code expiré — générez-en un nouveau.'
+                  ? 'Code expiré : générez-en un nouveau.'
                   : `Valide encore ${remainingMin} minute${remainingMin > 1 ? 's' : ''}.`}
               </p>
 
@@ -369,7 +369,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
       </label>
 
       {state === 'saved' && <p className="text-xs text-up">✓ Préférences enregistrées.</p>}
-      {state === 'error' && <p className="text-xs text-down">{errMsg ?? 'Erreur — réessayez.'}</p>}
+      {state === 'error' && <p className="text-xs text-down">{errMsg ?? 'Erreur : réessayez.'}</p>}
     </section>
   );
 }

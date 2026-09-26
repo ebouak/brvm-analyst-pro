@@ -27,7 +27,7 @@ export default async function ValorisationPage() {
         accent="gold"
         kicker="Intelligence fondamentale"
         title="Valorisation BRVM"
-        subtitle="Juste-valeur estimée vs cours — multiples sectoriels (P/E, P/B) et DDM. Classement value du marché."
+        subtitle="Juste-valeur estimée vs cours · multiples sectoriels (P/E, P/B) et DDM. Classement value du marché."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
       <ViewTabs tabs={VALO_TABS} current="/premium/valorisation" />

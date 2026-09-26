@@ -13,7 +13,7 @@ export default function UpgradePage() {
 
       <div className="grid gap-4 mb-10">
         {[
-          { icon: '◇', title: 'Classements multi-critères', desc: 'PBR, PER, marge nette, liquidité, performance, volatilité, rotation — 9 classements actualisés.' },
+          { icon: '◇', title: 'Classements multi-critères', desc: 'PBR, PER, marge nette, liquidité, performance, volatilité, rotation · 9 classements actualisés.' },
           { icon: '◇', title: 'Calendrier des dates clés', desc: 'Dates de publication des états financiers, annonces et versements de dividendes, Assemblées Générales.' },
           { icon: '◇', title: 'Détection d\'anomalies', desc: '4 analyses visuelles : scatter dividendes, liquidité/volatilité, heatmap 20 séances, marge vs croissance.' },
         ].map((f) => (

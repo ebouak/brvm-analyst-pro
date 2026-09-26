@@ -120,7 +120,7 @@ export default async function DebutantPage() {
                   </div>
                 )}
                 {d.membres != null && d.membres > 0 && (
-                  <div className="membres"><b className="num">{fmtNumber(d.membres)}</b><span>membres inscrits — une communauté qui fait grandir les investisseurs africains.</span></div>
+                  <div className="membres"><b className="num">{fmtNumber(d.membres)}</b><span>membres inscrits, une communauté qui fait grandir les investisseurs africains.</span></div>
                 )}
               </div>
             </div>

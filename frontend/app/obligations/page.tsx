@@ -102,7 +102,7 @@ export default async function ObligationsPage() {
         <SectionHeader
           kicker="Instruments de taux"
           title="Marché obligataire"
-          subtitle="YTM, duration modifiée et courbe des taux — BRVM"
+          subtitle="YTM, duration modifiée et courbe des taux · BRVM"
         />
         <EmptyStatePremium
           icon="◎"
@@ -123,7 +123,7 @@ export default async function ObligationsPage() {
       <SectionHeader
         kicker="Instruments de taux"
         title="Marché obligataire"
-        subtitle="YTM, duration modifiée — BRVM"
+        subtitle="YTM, duration modifiée · BRVM"
         actions={
           <div className="flex items-center gap-2 flex-wrap">
             <StatPill tone="sapphire">
@@ -167,7 +167,7 @@ export default async function ObligationsPage() {
 
       {/* Note sur les obligations amorties */}
       <p className="text-[11px] text-faint leading-relaxed border-l-2 border-[#1a2a30] pl-3">
-        <strong className="text-orange-400">YTM N/A</strong> = obligation à amortissement partiel (prix {`<`} 8 000 FCFA) — le capital remboursé périodiquement rend le calcul YTM non fiable avec nominal 10 000 FCFA.
+        <strong className="text-orange-400">YTM N/A</strong> = obligation à amortissement partiel (prix {`<`} 8 000 FCFA) : le capital remboursé périodiquement rend le calcul YTM non fiable avec nominal 10 000 FCFA.
         Les obligations cotées &quot;Au pair&quot; (cours ≈ 10 000 FCFA) ont un YTM ≈ coupon nominal.
       </p>
 
@@ -197,7 +197,7 @@ export default async function ObligationsPage() {
         <details className="group">
           <summary className="cursor-pointer text-xs text-faint hover:text-muted flex items-center gap-2 py-2 list-none">
             <span className="border border-[#1a2a30] rounded px-2 py-0.5 group-open:border-[#56D7FD]/30">
-              {expired.length} obligations échues — cliquer pour afficher
+              {expired.length} obligations échues : cliquer pour afficher
             </span>
           </summary>
           <div className="mt-3">

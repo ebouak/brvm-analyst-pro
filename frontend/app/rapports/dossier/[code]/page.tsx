@@ -99,7 +99,7 @@ function Feuille({ d, page, children }: { d: DossierValeur; page: number; childr
       </div>
       {children}
       <div className="dv-pied">
-        <span>Document d&apos;information — ne constitue pas un conseil en investissement.</span>
+        <span>Document d&apos;information : ne constitue pas un conseil en investissement.</span>
         <span>{page} / {TOTAL_FEUILLES}</span>
       </div>
     </article>
@@ -131,7 +131,7 @@ export default async function DossierPage({ params }: { params: { code: string }
     <div className="dv">
       <div className="dv-actions">
         <span>
-          {TOTAL_PANNEAUX} panneaux sur {TOTAL_FEUILLES} feuilles A4 — chaque chiffre est lu en base ou calculé, aucun n&apos;est rédigé.
+          {TOTAL_PANNEAUX} panneaux sur {TOTAL_FEUILLES} feuilles A4 : chaque chiffre est lu en base ou calculé, aucun n&apos;est rédigé.
         </span>
         <ImprimerDossier />
       </div>
@@ -401,7 +401,7 @@ export default async function DossierPage({ params }: { params: { code: string }
                 <div className="dv-tableau-cadre" style={{ marginTop: '4mm' }}>
                   <table className="dv-tableau">
                     <caption className="dv-chapo" style={{ captionSide: 'top', textAlign: 'left' }}>
-                      Historique par exercice, zéros compris — l&apos;irrégularité est une information, pas un trou.
+                      Historique par exercice, zéros compris : l&apos;irrégularité est une information, pas un trou.
                     </caption>
                     <thead>
                       <tr>
@@ -437,7 +437,7 @@ export default async function DossierPage({ params }: { params: { code: string }
         <Panneau
           n={8}
           titre="La journée de détachement"
-          chapo="Le jour où le dividende se détache, le cours baisse mécaniquement du montant versé. Tout ce qui dépasse est un mouvement de marché — et se dit comme tel."
+          chapo="Le jour où le dividende se détache, le cours baisse mécaniquement du montant versé. Tout ce qui dépasse est un mouvement de marché, et se dit comme tel."
         >
           {d.detachement ? (
             <>
@@ -483,7 +483,7 @@ export default async function DossierPage({ params }: { params: { code: string }
         <Panneau
           n={9}
           titre="Cours et niveaux"
-          chapo={`Clôtures réelles sur ${d.technique.serie.length} séances. Support et résistance sont les bornes du canal des 20 séances précédentes — aucun niveau n'est saisi à la main.`}
+          chapo={`Clôtures réelles sur ${d.technique.serie.length} séances. Support et résistance sont les bornes du canal des 20 séances précédentes : aucun niveau n'est saisi à la main.`}
         >
           <CourbeCours serie={d.technique.serie} niveaux={lv} />
           <dl className="dv-grille" style={{ marginTop: '3mm' }}>
@@ -507,7 +507,7 @@ export default async function DossierPage({ params }: { params: { code: string }
           <p className="dv-source">
             {prose.source === 'polie'
               ? `Rédaction relue le ${fmtDateFR(prose.genere_le)} — sans aucun chiffre, par construction ; les chiffres sont dans les panneaux.`
-              : 'Rédaction automatique — sans aucun chiffre, par construction ; les chiffres sont dans les panneaux.'}
+              : 'Rédaction automatique : sans aucun chiffre, par construction ; les chiffres sont dans les panneaux.'}
           </p>
         </section>
 

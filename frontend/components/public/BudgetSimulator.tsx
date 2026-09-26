@@ -98,8 +98,8 @@ export default function BudgetSimulator({
         Que faire de <span className="text-accent">votre budget</span> ?
       </h1>
       <p className="mb-8 max-w-[62ch] text-[15px] leading-relaxed text-muted">
-        Indiquez votre montant et vos frais de courtage. Le moteur compose trois portefeuilles — revenu,
-        croissance, équilibre — avec le détail action par action, frais déduits et dividendes projetés à partir
+        Indiquez votre montant et vos frais de courtage. Le moteur compose trois portefeuilles (revenu,
+        croissance, équilibre) avec le détail action par action, frais déduits et dividendes projetés à partir
         des cours réels de la BRVM.
       </p>
 
@@ -149,7 +149,7 @@ export default function BudgetSimulator({
             <label htmlFor="bs-fee" className="block text-[13px] font-semibold text-ivory">
               Frais de courtage SGI
             </label>
-            <p className="mb-2.5 text-[11.5px] text-faint">Courtage moyen par ordre — varie selon la SGI</p>
+            <p className="mb-2.5 text-[11.5px] text-faint">Courtage moyen par ordre : varie selon la SGI</p>
             <div className="flex items-center rounded-xl border border-white/10 bg-bg px-3.5 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
               <input
                 id="bs-fee"
@@ -340,7 +340,7 @@ export default function BudgetSimulator({
         Univers : {univers.length} action{univers.length > 1 ? 's' : ''} cotée
         {univers.length > 1 ? 's' : ''}
         {asOf ? ` · cours au ${asOf}` : ''}. Rendement dividende connu pour {yieldKnown}, performance 12 mois pour{' '}
-        {perfKnown}. Les actions sans la métrique requise sont écartées de la stratégie concernée — aucun chiffre
+        {perfKnown}. Les actions sans la métrique requise sont écartées de la stratégie concernée, aucun chiffre
         n&apos;est inventé.
       </p>
 
@@ -349,7 +349,7 @@ export default function BudgetSimulator({
         <p>
           <b className="text-gold-2">Outil éducatif.</b> Ce simulateur ne constitue pas un conseil en
           investissement. Les dividendes projetés sont des estimations (le net suppose une IRVM de 10&nbsp;% sur
-          actions cotées, à vérifier) et la « perf 12 mois » est historique — les performances passées ne préjugent
+          actions cotées, à vérifier) et la « perf 12 mois » est historique : les performances passées ne préjugent
           pas des performances futures. Avant tout ordre, contactez une SGI agréée ; les frais réels varient selon la
           SGI et le montant.
         </p>

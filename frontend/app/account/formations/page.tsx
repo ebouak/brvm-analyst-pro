@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Mes formations' };
 
 const LIBELLE: Record<string, string> = {
-  reservee: 'Réservée — en attente de paiement',
+  reservee: 'Réservée · en attente de paiement',
   payee: 'Confirmée',
   annulee: 'Annulée',
   presente: 'Suivie',

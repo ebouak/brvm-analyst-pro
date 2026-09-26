@@ -33,7 +33,7 @@ export default function ClassementPage() {
           <h2 className="mb-1 font-display text-xl text-ivory">Entrez dans la course</h2>
           <p className="text-[13px] leading-relaxed text-muted">
             Créez votre compte, initialisez un capital fictif et testez vos convictions
-            sur les cours réels — avant d&apos;engager un seul franc.
+            sur les cours réels, avant d&apos;engager un seul franc.
           </p>
         </div>
         <Link

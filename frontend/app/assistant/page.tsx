@@ -21,7 +21,7 @@ export default async function AssistantPage({ searchParams }: Props) {
         <SectionHeader
           kicker="Intelligence artificielle · Exclusif"
           title={sym ? `Questions — ${sym}` : 'Poser une question'}
-          subtitle="Analyse multi-dimensionnelle en temps réel — technique, fondamentale, macro UEMOA."
+          subtitle="Analyse multi-dimensionnelle en temps réel · technique, fondamentale, macro UEMOA."
           actions={
             <div className="flex items-center gap-2">
               <StatPill tone="gold">✦ Premium</StatPill>

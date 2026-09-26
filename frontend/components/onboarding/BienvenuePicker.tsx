@@ -109,8 +109,8 @@ export default function BienvenuePicker({ actions }: { actions: WelcomeAction[] 
 
           <p className="mt-3 text-[11px] leading-relaxed text-faint">
             {scoreToRating(selected.scoreTotal, selected.confiance).note === 'NR'
-              ? 'Titre non noté pour cette séance (données insuffisantes) — la fiche détaille pourquoi.'
-              : 'Note dérivée de signaux quantitatifs explicables — jamais d’opinion inventée.'}
+              ? 'Titre non noté pour cette séance (données insuffisantes), la fiche détaille pourquoi.'
+              : 'Note dérivée de signaux quantitatifs explicables, jamais d’opinion inventée.'}
           </p>
 
           <div className="mt-5 flex flex-wrap gap-3">

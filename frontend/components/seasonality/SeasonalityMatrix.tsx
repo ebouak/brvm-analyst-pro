@@ -110,7 +110,7 @@ export default function SeasonalityMatrix({
           href="/account/plan"
           className="block rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-center text-sm font-semibold text-gold transition hover:bg-gold/10"
         >
-          Débloquer les 12 mois, les extrêmes et la table détaillée — Passer à Premium →
+          Débloquer les 12 mois, les extrêmes et la table détaillée · Passer à Premium →
         </a>
       )}
 
