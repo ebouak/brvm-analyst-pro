@@ -29,8 +29,8 @@ async function getProviders(): Promise<ProviderCfg[]> {
   ]);
   return [
     { name: 'deepseek', key: deepseekKey ?? undefined, url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-    { name: 'mistral',  key: mistralKey ?? undefined, url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest' },
-    { name: 'grok',     key: xaiKey ?? undefined, url: 'https://api.x.ai/v1/chat/completions', model: 'grok-2-latest' },
+    { name: 'mistral',  key: mistralKey ?? undefined, url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
+    { name: 'grok',     key: xaiKey ?? undefined, url: 'https://api.x.ai/v1/chat/completions', model: 'grok-4.6' },
   ].filter((p) => p.key);
 }
 

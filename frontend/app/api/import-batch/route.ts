@@ -16,7 +16,7 @@ export const maxDuration = 300;
 async function callLlm(text: string, symbol: string, famille: Famille): Promise<string | null> {
   const providers = [
     { key: await resolveApiKey('deepseek'), url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-    { key: await resolveApiKey('mistral'), url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest' },
+    { key: await resolveApiKey('mistral'), url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
   ].filter((p) => p.key);
   for (const p of providers) {
     try {

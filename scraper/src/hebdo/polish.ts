@@ -9,7 +9,7 @@ export interface SkeletonSection { titre: string; texte: string }
 
 const ORDER: { provider: string; url: string; model: string }[] = [
   { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest' },
+  { provider: 'mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
 ];
 
 /**

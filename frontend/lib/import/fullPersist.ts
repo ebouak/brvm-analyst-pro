@@ -78,7 +78,9 @@ export function toRows(code: string, s: YearStatement, sourceFile: string): Mapp
 export interface OriginePasse {
   /** Publication source. `null` si inconnue (l'exercice restera non tracé). */
   publicationId: string | null;
-  /** 'deepseek-chat' | 'mistral-large-latest' | 'ocr-mistral' | 'manuel' */
+  /** 'deepseek-chat' | 'mistral-small-latest' | 'ocr-mistral' | 'manuel'.
+   *  Des lignes antérieures au 2026-09-26 portent 'mistral-large-latest' :
+   *  ce modèle a été retiré du palier d'abonnement, pas de l'historique. */
   extracteur: string;
 }
 

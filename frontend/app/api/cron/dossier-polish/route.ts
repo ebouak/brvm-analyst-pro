@@ -32,7 +32,7 @@ function autorise(req: Request): boolean {
 
 const ORDRE = [
   { provider: 'deepseek' as const, url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral' as const, url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest' },
+  { provider: 'mistral' as const, url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
 ];
 
 /**

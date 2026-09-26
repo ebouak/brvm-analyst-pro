@@ -28,7 +28,7 @@ const SYSTEM =
 async function callLlm(text: string): Promise<{ synthese?: string; highlights?: unknown; cyclique?: boolean } | null> {
   const cfgs: Array<{ key: string | null; url: string; model: string }> = [
     { key: await resolveApiKey('deepseek'), url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-    { key: await resolveApiKey('mistral'), url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest' },
+    { key: await resolveApiKey('mistral'), url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
   ];
   for (const c of cfgs) {
     if (!c.key) continue;
