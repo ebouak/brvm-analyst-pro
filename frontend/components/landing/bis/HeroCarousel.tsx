@@ -84,7 +84,7 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
             {s.kind === 'ad' && <span className="ad-tag">Publicité · {s.sponsorName}</span>}
             {s.imageUrl && s.kind !== 'permanent' && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={s.imageUrl} alt="" width={900} height={672} loading={k === 0 ? 'eager' : 'lazy'} />
+              <img style={{ objectFit: s.imageFit ?? 'cover' }} src={s.imageUrl} alt="" width={900} height={672} loading={k === 0 ? 'eager' : 'lazy'} />
             )}
             {s.kind === 'permanent' ? (
               <Permanente s={s} dateLabel={dateLabel} brvmCVar={brvmCVar} hausses={hausses} nbActions={nbActions} topNote={topNote} topHausse={topHausse} topBaisse={topBaisse} sgi={sgi} active={active} />

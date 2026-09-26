@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from 'react';
 import { createSlide, deleteSlide, toggleSlide } from './actions';
+import { SlidePreview } from './SlidePreview';
 
 const INPUT = 'w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-ivory';
 
@@ -28,7 +29,7 @@ export function SlideForm() {
     >
       <h2 className="font-display text-base text-ivory">Nouvelle diapositive</h2>
       <p className="text-xs text-muted">
-        Image 1 600 × 1 200 (JPEG, PNG ou WebP, 5 Mo max). Une publicité est toujours affichée avec la mention « Publicité » et le nom de l&apos;annonceur.
+        Image JPEG, PNG ou WebP, 5 Mo max. Le bandeau est en 1 600 × 300, le carrousel en 900 × 672 : l’aperçu ci-dessous montre le rendu dans les deux. Une publicité est toujours affichée avec la mention « Publicité » et le nom de l&apos;annonceur.
         La landing montre au plus 7 vues admin, après ses vues permanentes.
       </p>
       {msg && <div role="status" className="rounded-card border border-border bg-bg p-3 text-sm text-ivory">{msg}</div>}
@@ -69,10 +70,10 @@ export function SlideForm() {
         <label className="text-xs text-muted">Position (croissant)
           <input name="position" type="number" defaultValue={100} min={0} max={999} className={INPUT} />
         </label>
-        <label className="text-xs text-muted">Image *
-          <input name="image" type="file" required accept="image/jpeg,image/png,image/webp" className={INPUT} />
-        </label>
       </div>
+      {/* Le champ image vit dans SlidePreview : il pilote l'aperçu, qui montre
+          le rendu dans les DEUX cadres réels avant enregistrement. */}
+      <SlidePreview />
       <button type="submit" disabled={pending} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-[#03222b] disabled:opacity-50">
         {pending ? 'Envoi…' : 'Ajouter la diapositive'}
       </button>

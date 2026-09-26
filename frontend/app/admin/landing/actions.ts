@@ -69,6 +69,9 @@ export async function createSlide(formData: FormData): Promise<R> {
 
   const { data, error } = await db.from('landing_slides').insert({
     kind, placement, title, subtitle, cta_label: ctaLabel, link_url: linkUrl, image_path: path, sponsor_name: kind === 'ad' ? sponsor : null,
+    // Toute valeur inattendue retombe sur 'cover', le comportement
+    // historique : un champ trafiqué ne doit pas changer le rendu.
+    image_fit: formData.get('image_fit') === 'contain' ? 'contain' : 'cover',
     starts_at: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
     ends_at: endsAt ? new Date(endsAt).toISOString() : null,
     position: Number.isFinite(position) ? position : 100,

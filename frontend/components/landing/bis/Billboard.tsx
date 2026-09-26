@@ -35,7 +35,7 @@ export function Billboard({ creations, slot }: { creations: Slide[]; slot: strin
         {s && (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {s.imageUrl && <img src={s.imageUrl} alt="" width={1600} height={300} loading="lazy" />}
+            {s.imageUrl && <img style={{ objectFit: s.imageFit ?? 'cover' }} src={s.imageUrl} alt="" width={1600} height={300} loading="lazy" />}
             <span className="bb-tag">{s.kind === 'ad' ? `Publicité · ${s.sponsorName}` : 'WESTBOURSE'}</span>
             <div className="bb-copy">
               <b>{s.title}</b>

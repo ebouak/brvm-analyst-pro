@@ -38,6 +38,8 @@ export interface Slide {
   linkUrl?: string | null;
   /** URL absolue ou chemin /public de l'image de fond ; null = vue produit dessinée (permanente). */
   imageUrl: string | null;
+  /** Cadrage choisi à l'admin. Absent = 'cover', comme avant la migration 0143. */
+  imageFit?: 'cover' | 'contain';
   sponsorName?: string | null;
   /** Vue permanente : identifiant du rendu dessiné (voir HeroCarousel). */
   render?: 'photo' | 'sgi' | 'note' | 'brief' | 'dossiers';
@@ -52,6 +54,8 @@ export interface LandingSlideRow {
   cta_label: string | null;
   link_url: string | null;
   image_path: string;
+  /** 'cover' (défaut) rogne pour remplir ; 'contain' montre l'image entière. */
+  image_fit?: 'cover' | 'contain' | null;
   sponsor_name: string | null;
   starts_at: string;
   ends_at: string | null;
@@ -91,6 +95,7 @@ export function rowToSlide(r: LandingSlideRow, supabaseUrl: string): Slide {
     ctaLabel: r.cta_label,
     linkUrl: r.link_url,
     imageUrl: publicImageUrl(supabaseUrl, r.image_path),
+    imageFit: r.image_fit === 'contain' ? 'contain' : 'cover',
     sponsorName: r.kind === 'ad' ? (r.sponsor_name ?? 'Annonceur') : null,
   };
 }

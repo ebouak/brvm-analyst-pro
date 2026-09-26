@@ -87,6 +87,25 @@ const LABELS: Record<string, string> = {
   BRVMINDU: 'Industriels', BRVMFINS: 'Services financiers', BRVMSPUB: 'Services publics', BRVMTELE: 'Télécoms',
 };
 
+/**
+ * Diapositives de la landing, avec REPLI si `image_fit` n'existe pas encore.
+ *
+ * Les migrations de ce dépôt s'appliquent à la main dans l'éditeur SQL
+ * Supabase : entre le déploiement de ce code et ce passage, la colonne
+ * `image_fit` (migration 0143) peut manquer. PostgREST refuse alors la requête
+ * ENTIÈRE — `data` reviendrait null et la landing perdrait TOUTES ses annonces
+ * jusqu'à l'intervention, sans rien signaler. On retente donc sans la colonne,
+ * et le cadrage retombe sur 'cover', son défaut historique.
+ *
+ * Ce repli devient inutile une fois 0143 appliquée. Le retirer alors ne coûte
+ * rien ; le laisser non plus.
+ */
+async function lireSlides(db: ReturnType<typeof createPublicClient>) {
+  const avec = await db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, image_fit, sponsor_name, starts_at, ends_at, is_active, position, placement').order('position');
+  if (!avec.error) return avec;
+  return db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position, placement').order('position');
+}
+
 async function load(): Promise<LandingBisData> {
   const db = createPublicClient();
   const vide: LandingBisData = {
@@ -105,7 +124,7 @@ async function load(): Promise<LandingBisData> {
   const [dateMarche, plansRes, slidesRes, collecteRes, videoSeance, latestDiagnostic, sgiDir, sgiFrais] = await Promise.all([
     getLastMarketDate(db),
     db.from('subscription_plans').select('code, name, price_monthly, price_yearly, currency').order('price_monthly'),
-    db.from('landing_slides').select('id, kind, title, subtitle, cta_label, link_url, image_path, sponsor_name, starts_at, ends_at, is_active, position, placement').order('position'),
+    lireSlides(db),
     db.from('v_fraicheur_cours').select('derniere_collecte_intraday').maybeSingle(),
     getVideoSeance().catch(() => null),
     getLatestDiagnostic().catch(() => null),
