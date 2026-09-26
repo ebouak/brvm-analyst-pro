@@ -764,15 +764,20 @@
   .lb .fil-wrap .step:not(:last-child)::after {
     content: "";
     position: absolute;
-    top: 39px;
-    left: calc(50% + 39px);
+    /* Le trait TOUCHE les deux pastilles : mesuré en production, une première
+       version laissait 11 px d'air de chaque côté — 50 px de long sur 2 px de
+       haut à 45 % d'opacité, entre deux disques de 64 px. Le style calculé
+       était correct et l'œil ne voyait rien. Un connecteur qui ne touche pas
+       ce qu'il connecte ne relie rien. */
+    top: 38.5px;
+    left: calc(50% + 32px);
     right: auto;
-    width: calc(100% - 78px);
-    height: 2px;
-    border-radius: 1px;
+    width: calc(100% - 64px);
+    height: 3px;
+    border-radius: 2px;
     /* Le dégradé va du neutre vers l'accent : il donne le sens de lecture
        sans ajouter de flèche. */
-    background: linear-gradient(90deg, rgb(var(--color-faint) / .45), rgb(var(--color-accent) / .7));
+    background: linear-gradient(90deg, rgb(var(--color-faint) / .5), rgb(var(--color-accent) / .9));
     transform-origin: left center;
   }
 
