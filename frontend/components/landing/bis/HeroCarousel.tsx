@@ -192,7 +192,7 @@ function Permanente({ s, dateLabel, brvmCVar, hausses, nbActions, topNote, topHa
     <div className="pv"><div className="box">
       <span className="o">Premium · chaque samedi</span>
       <h3>Votre portefeuille, en dossiers.</h3>
-      <p>Douze panneaux par société sur sept feuilles A4, chiffres vérifiés, prose sans un seul nombre inventé — envoyés par email ou Telegram.</p>
+      <p>Douze panneaux par société sur sept feuilles A4, chiffres vérifiés, prose sans un seul nombre inventé, envoyés par email ou Telegram.</p>
     </div></div>
   );
 }

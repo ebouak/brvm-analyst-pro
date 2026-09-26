@@ -87,7 +87,7 @@ export function PreuveDonneeBis({ fraicheur, exemple, nbActions }: PreuveProps) 
       <div className="preuve-copy">
         <p className="over">La preuve de la donnée</p>
         <h2 id="h-preuve">Chaque chiffre a une source, une date et une heure.</h2>
-        <p>Voici la chaîne complète d&apos;un chiffre affiché sur cette page — vous pouvez la remonter jusqu&apos;à sa source. Aucun cours n&apos;est saisi à la main, et une donnée manquante est déclarée plutôt que comblée.</p>
+        <p>Voici la chaîne complète d&apos;un chiffre affiché sur cette page : vous pouvez la remonter jusqu&apos;à sa source. Aucun cours n&apos;est saisi à la main, et une donnée manquante est déclarée plutôt que comblée.</p>
         <a href="/methodologie" className="btn btn-ink btn-sm">Voir un exemple de source <span aria-hidden="true">→</span></a>
       </div>
       <ol className="chain">

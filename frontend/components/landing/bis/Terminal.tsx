@@ -41,7 +41,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
             <div>
               <p className="o">La séance en {Math.round(v.duree_s)} secondes</p>
               <h2>La séance du {v.date_fr}{videoPrecedente && <span className="tag">séance précédente</span>}</h2>
-              <p className="tc-sub">Montée chaque soir après la clôture, à partir des chiffres de cette page — les mêmes. Un jour sans séance exploitable est un jour sans vidéo : rien n’est repris d’un ancien épisode.</p>
+              <p className="tc-sub">Montée chaque soir après la clôture, à partir des mêmes chiffres que cette page. Un jour sans séance exploitable est un jour sans vidéo : rien n’est repris d’un ancien épisode.</p>
             </div>
             <span className="hand-dark" aria-hidden="true">Des données<br />pour de meilleures<br />décisions.</span>
           </div>
@@ -81,10 +81,10 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
         <div>
           <p className="o">Note quantitative</p>
           <h2>Chaque action. Une note.</h2>
-          <p className="tc-sub">Chaque note A–F est calculée à partir de signaux quantitatifs explicables — variation, volume, RSI, tendance et liquidité — jamais d&apos;opinion inventée.</p>
+          <p className="tc-sub">Chaque note A–F est calculée à partir de signaux quantitatifs explicables (variation, volume, RSI, tendance et liquidité), jamais d&apos;opinion inventée.</p>
           <dl className="tc-legende">
             <div><dt><span className="g">A</span> à <span className="g">F</span></dt><dd>Une note recalculée à chaque séance à partir de signaux vérifiables. A = bien orientés ; F = mal orientés. Ce n&apos;est pas un avis.</dd></div>
-            <div><dt><span className="g up">BUY</span> · <span className="g">HOLD</span> · <span className="g down">SELL</span></dt><dd>Quand rien n&apos;est net, le moteur affiche HOLD et s&apos;abstient. C&apos;est un choix de rigueur, pas un manque d&apos;avis — et cela arrive souvent.</dd></div>
+            <div><dt><span className="g up">BUY</span> · <span className="g">HOLD</span> · <span className="g down">SELL</span></dt><dd>Quand rien n&apos;est net, le moteur affiche HOLD et s&apos;abstient. C&apos;est un choix de rigueur, pas un manque d&apos;avis, et cela arrive souvent.</dd></div>
           </dl>
           <Link href="/societes" className="tc-link">Voir les {d.nbActions || NB_SOCIETES_COTEES} sociétés →</Link>
         </div>
@@ -121,9 +121,9 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
           )}
         </div>
         <div className="tc-lit">
-          <div><p className="o">Ce qu&apos;elle lit</p><ul><li>Cotations et plage 52 semaines</li><li>Deux exercices : résultat, bilan, trésorerie</li><li>Ratios calculés en amont (ROE DuPont, marges)</li><li>Presse — avec sa source, sa date et son lien</li></ul></div>
-          <p className="tc-mid">Analyse façon sell-side générée à partir des données réelles de la plateforme — un outil d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.</p>
-          <div><p className="o">Ce qu&apos;elle ne fait pas</p><ul><li>Calculer les chiffres — ils le sont avant, par du code testé</li><li>Recommander d&apos;acheter ou de vendre</li><li>Prédire un cours</li><li>Inventer une source : sans presse trouvée, elle écrit « non évaluable »</li></ul></div>
+          <div><p className="o">Ce qu&apos;elle lit</p><ul><li>Cotations et plage 52 semaines</li><li>Deux exercices : résultat, bilan, trésorerie</li><li>Ratios calculés en amont (ROE DuPont, marges)</li><li>Presse : sa source, sa date et son lien</li></ul></div>
+          <p className="tc-mid">Analyse façon sell-side générée à partir des données réelles de la plateforme : un outil d&apos;analyse, jamais une recommandation d&apos;achat ou de vente.</p>
+          <div><p className="o">Ce qu&apos;elle ne fait pas</p><ul><li>Calculer les chiffres : ils le sont avant, par du code testé</li><li>Recommander d&apos;acheter ou de vendre</li><li>Prédire un cours</li><li>Inventer une source : sans presse trouvée, elle écrit « non évaluable »</li></ul></div>
           <blockquote>Une analyse structurée pour aller plus loin, avec méthode.</blockquote>
         </div>
       </div>

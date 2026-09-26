@@ -31,7 +31,7 @@ export function PremiumCircle() {
           L’intelligence d’une maison d’investissement, à votre table.
         </h3>
         <p className="mb-4 max-w-[54ch] text-sm leading-[1.75] text-muted">
-          Dossier d’analyse, classements propriétaires, anomalies et corrélations — traités comme une aile privée du terminal.
+          Dossier d’analyse, classements propriétaires, anomalies et corrélations, traités comme une aile privée du terminal.
         </p>
         <div className="mb-4 flex flex-wrap gap-3">
           <Link

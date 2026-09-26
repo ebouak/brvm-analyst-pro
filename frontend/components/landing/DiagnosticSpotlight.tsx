@@ -21,7 +21,7 @@ export function DiagnosticSpotlight({ report }: Props) {
             Votre analyste BRVM en quelques secondes.
           </h2>
           <p className="max-w-[46ch] text-sm leading-relaxed text-muted">
-            Une analyse façon sell-side sur chaque société — valorisation, forces, risques — générée à
+            Une analyse façon sell-side sur chaque société (valorisation, forces, risques), générée à
             partir des données réelles de la plateforme. Un outil d&apos;analyse complémentaire, jamais
             une recommandation d&apos;achat ou de vente.
           </p>

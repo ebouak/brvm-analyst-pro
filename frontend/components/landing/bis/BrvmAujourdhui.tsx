@@ -134,7 +134,7 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
         <div className="card flash r1d">
           <p className="over">BRVM Flash info</p>
           <ul>{n.flash.map((f) => <li key={f}>{f}</li>)}</ul>
-          <p className="flash-foot">Dérivé des chiffres de la séance — aucune phrase rédigée.</p>
+          <p className="flash-foot">Dérivé des chiffres de la séance, aucune phrase rédigée.</p>
         </div>
 
         {/* Rangée 2 */}

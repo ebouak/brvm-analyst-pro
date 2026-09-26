@@ -11,7 +11,7 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
     a: (
       <>
         Oui. Les cours, la note A–F et les fondamentaux sont accessibles gratuitement après création
-        d&apos;un compte — sans carte bancaire. L&apos;abonnement Premium (Dossier d’analyse) est optionnel.
+        d&apos;un compte, sans carte bancaire. L&apos;abonnement Premium (Dossier d’analyse) est optionnel.
       </>
     ),
   },

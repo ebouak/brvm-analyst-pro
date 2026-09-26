@@ -70,7 +70,7 @@ export function VideoSeance({
           habillage recyclé. C'est le quatrième maillon de « La preuve de la
           donnée » plus haut, et il se voit. */}
       <p className="mb-4 max-w-[62ch] text-sm leading-relaxed text-muted">
-        Montée chaque soir après la clôture, à partir des chiffres de cette page — les mêmes.
+        Montée chaque soir après la clôture, à partir des mêmes chiffres que cette page.
         Un jour sans séance exploitable est un jour sans vidéo : rien n’est repris d’un ancien épisode.
       </p>
 

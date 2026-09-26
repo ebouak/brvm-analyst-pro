@@ -72,7 +72,7 @@ export function StockSpotlight({ stock, dateLabel }: { stock: StockDetail | null
           Tout ce qu&apos;il faut savoir, sur un seul écran.
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Voici ce que vous trouvez sur chacune des fiches société — celle-ci est réelle et date
+          Voici ce que vous trouvez sur chacune des fiches société : celle-ci est réelle et date
           {dateLabel ? ` de la séance du ${dateLabel}` : ' de la dernière séance'}.
         </p>
       </div>

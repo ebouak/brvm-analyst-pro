@@ -117,7 +117,7 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
           La seule plateforme qui <span className="text-[#56d7fd]">note chaque action BRVM</span> chaque jour.
         </p>
         <p className="mb-5 max-w-[42ch] text-[13px] leading-[1.6] text-[#b5b5b5]">
-          Données officielles. Zéro opinion inventée — tout est dérivé des chiffres.
+          Données officielles. Zéro opinion inventée : tout est dérivé des chiffres.
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
