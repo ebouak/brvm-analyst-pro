@@ -40,11 +40,18 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          # Priorité env dans resolveApiKeyForScraper() : si absentes ici, la
-          # clé est lue dans la table api_keys (mêmes clés que le frontend).
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          # ⚠️ LES CLÉS LLM NE SONT PAS PASSÉES ICI, DÉLIBÉRÉMENT.
+          # `resolveApiKeyForScraper()` lit l'environnement AVANT la table
+          # `api_keys`. Mesuré le 2026-09-26 : le secret GitHub
+          # DEEPSEEK_API_KEY datait du 28 juin et différait de la clé en base
+          # — deux clés distinctes, toutes deux valides ce jour-là, mais rien
+          # ne garantit qu'elles le restent ensemble. Un contrôle qui teste
+          # une source pendant que la production en utilise une autre ne
+          # prouve rien ; pire, il rassure à tort.
+          # La table est la source que l'exploitant peut corriger seul, depuis
+          # /admin/cles-api, sans redéploiement — c'est donc elle qu'on sonde.
+          # Ne réintroduire ces trois variables que le jour où les clés
+          # n'existeront plus qu'à un seul endroit.
           LOG_LEVEL: info
         # Code de sortie non nul quand plus aucun fournisseur n'est
         # utilisable : un run vert ne doit jamais couvrir une panne totale.
