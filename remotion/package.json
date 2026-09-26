@@ -3,7 +3,9 @@
   "private": true,
   "description": "Rendu local de la vidéo de la landing (gratuit, sans service externe).",
   "scripts": {
-    "render": "remotion render index.ts landing ../frontend/public/landing-video.mp4 --codec h264"
+    "render": "remotion render index.ts landing ../frontend/public/landing-video.mp4 --codec h264",
+    "render:fil": "remotion render index.ts fil-conducteur out/fil-conducteur.mp4 --codec h264",
+    "studio": "remotion studio index.ts"
   },
   "dependencies": {
     "@remotion/cli": "4.0.236",
