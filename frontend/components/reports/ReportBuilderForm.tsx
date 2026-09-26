@@ -61,7 +61,7 @@ export default function ReportBuilderForm({
           disabled={selected.length === 0}
           onClick={() => router.push(href)}
           className="rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-bg disabled:opacity-40">
-          📄 Générer le rapport
+          Générer le rapport
         </button>
         <span className="text-xs text-faint">{selected.length} bloc{selected.length > 1 ? 's' : ''}</span>
       </div>

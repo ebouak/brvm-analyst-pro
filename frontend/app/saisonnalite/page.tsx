@@ -31,7 +31,7 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
       <SectionHeader
         kicker="Outil · Analyse statistique"
         title="Saisonnalité"
-        subtitle="Performance mensuelle moyenne d'une action sur plusieurs années — lecture statistique, à croiser avec tendance, liquidité et dividende."
+        subtitle="Performance mensuelle moyenne d'une action sur plusieurs années · lecture statistique, à croiser avec tendance, liquidité et dividende."
       />
 
       {/* Sélecteur de titre (form GET). En essai, il est désactivé : l'aperçu

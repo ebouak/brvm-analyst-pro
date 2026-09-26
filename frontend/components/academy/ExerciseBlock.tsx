@@ -43,7 +43,7 @@ export default function ExerciseBlock({
   return (
     <div className="rounded-xl border border-accent/30 bg-accent/[0.04] p-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="overline text-accent">Exercice — données réelles</p>
+        <p className="overline text-accent">Exercice · données réelles</p>
         {alreadyPassed && !answered && (
           <span className="rounded-full bg-up/15 px-2 py-0.5 text-[11px] font-medium text-up">Déjà réussi ✓</span>
         )}
@@ -103,7 +103,7 @@ export default function ExerciseBlock({
           }`}
         >
           <p className="font-semibold">
-            {result!.correct ? 'Correct !' : `Pas tout à fait — réponse attendue : ${result!.attendu}`}
+            {result!.correct ? 'Correct !' : `Pas tout à fait, réponse attendue : ${result!.attendu}`}
           </p>
           {result!.explication && (
             <p className="mt-1 text-xs leading-relaxed opacity-90">{result!.explication}</p>

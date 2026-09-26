@@ -22,7 +22,7 @@ const OUTILS = [
   { href: '/simulateur', label: 'Simulateur' },
   { href: '/screener', label: 'Screener' },
   { href: '/signaux', label: 'Signaux' },
-  { href: '/premium/diagnostic', label: 'Diagnostic IA' },
+  { href: '/premium/diagnostic', label: 'Dossier d’analyse' },
   { href: '/premium/paper-trading', label: 'Paper trading' },
   { href: '/parametres/alertes', label: 'Watchlist & alertes' },
   { href: '/liquidite', label: 'Liquidité' },

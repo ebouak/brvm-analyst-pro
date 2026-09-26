@@ -193,7 +193,7 @@ const FAQ: { q: string; r: string; open?: boolean }[] = [
   { q: "Combien coûte l'ouverture et la tenue d'un compte ?", r: "L'ouverture d'un compte-titres est le plus souvent gratuite. Le dépôt de départ se situe généralement entre 100 000 et 1 000 000 FCFA. À chaque transaction s'applique un courtage de l'ordre de 1 à 1,5 %. Des droits de garde annuels peuvent s'ajouter : demandez toujours le barème complet par écrit." },
   { q: 'Puis-je choisir une SGI dans un autre pays que le mien ?', r: "Oui. La BRVM est un marché régional unifié couvrant les huit pays de l'UEMOA. Vous pouvez ouvrir un compte chez n'importe quelle SGI agréée, y compris hors de votre pays de résidence, dès lors qu'elle accepte votre dossier." },
   { q: 'Quel délai et quels documents pour ouvrir le compte ?', r: "Comptez en général une à deux semaines entre le dépôt du dossier et l'activation. Prévoyez une pièce d'identité valide, un justificatif de domicile, un justificatif de revenus ou d'origine des fonds, et un RIB." },
-  { q: 'Pourrai-je passer mes ordres en ligne ?', r: "Cela dépend de la SGI. Certaines proposent une plateforme web ou une application mobile ; d'autres fonctionnent encore par téléphone ou e-mail. Si l'autonomie compte pour vous, vérifiez ce point — et demandez une démonstration — avant de vous engager." },
+  { q: 'Pourrai-je passer mes ordres en ligne ?', r: "Cela dépend de la SGI. Certaines proposent une plateforme web ou une application mobile ; d'autres fonctionnent encore par téléphone ou e-mail. Si l'autonomie compte pour vous, vérifiez ce point (et demandez une démonstration) avant de vous engager." },
   { q: 'Existe-t-il une « meilleure » SGI ?', r: "Non, il n'y a pas de classement universel. La SGI idéale dépend de votre profil : petits ordres → frais bas et pédagogie ; investisseur actif → plateforme rapide ; non-résident → gestion à distance. Servez-vous des six critères pour trancher selon vos besoins." },
 ];
 
@@ -241,7 +241,7 @@ export default function SgiComparator({
       </h2>
       <p className="mb-6 max-w-[64ch] text-sm leading-relaxed text-muted">
         Pour acheter ou vendre une action à la BRVM, une seule porte d&apos;entrée : une SGI agréée. Voici l&apos;annuaire
-        complet, classé par pays, avec les critères pour décider sur des faits — pas sur une réputation.
+        complet, classé par pays, avec les critères pour décider sur des faits, pas sur une réputation.
       </p>
 
       {/* Repères chiffrés */}
@@ -264,7 +264,7 @@ export default function SgiComparator({
           <p className="overline mb-2 text-gold-2">Le rôle de la SGI</p>
           <h3 className="mb-3 font-display text-xl text-ivory">Votre intermédiaire obligatoire</h3>
           <p className="mb-3 text-sm leading-relaxed text-muted">
-            Une SGI — Société de Gestion et d&apos;Intermédiation — est un courtier agréé par le régulateur régional
+            Une SGI (Société de Gestion et d&apos;Intermédiation) est un courtier agréé par le régulateur régional
             (le CREPMF). Aucun particulier ne passe d&apos;ordre directement sur la cote : tout achat et toute vente
             transitent par une SGI, qui ouvre votre compte-titres, exécute vos ordres et conserve vos valeurs.
           </p>

@@ -21,7 +21,7 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
   return (
     // Couleurs de texte FIXES (pas de tokens thème) dans toute cette section :
     // le fond (photo + voile navy) reste volontairement sombre quel que soit
-    // le thème du site (comme le CTA « Diagnostic IA ») — un texte piloté par
+    // le thème du site (comme le CTA « Dossier d’analyse ») — un texte piloté par
     // token deviendrait illisible en mode clair (ivory clair → quasi noir sur
     // un fond qui, lui, ne change jamais).
     <section className="relative mt-6 h-[clamp(420px,56vw,480px)] overflow-hidden rounded-panel border border-[rgba(255,255,255,0.1)]">
@@ -117,7 +117,7 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
           La seule plateforme qui <span className="text-[#56d7fd]">note chaque action BRVM</span> chaque jour.
         </p>
         <p className="mb-5 max-w-[42ch] text-[13px] leading-[1.6] text-[#b5b5b5]">
-          Données officielles. Zéro opinion inventée — tout est dérivé des chiffres.
+          Données officielles. Zéro opinion inventée : tout est dérivé des chiffres.
         </p>
 
         <div className="flex flex-wrap items-center gap-3">

@@ -1,0 +1,89 @@
+name: Campagne email — annonce de la refonte
+
+# AUCUN `schedule`, SOUS AUCUN PRÉTEXTE. C'est délibéré : une campagne de
+# masse qui se déclencherait seule serait exactement l'accident que ce
+# workflow existe pour rendre impossible. `workflow_dispatch` uniquement —
+# un humain clique, à chaque fois.
+#
+# Le script (scraper/scripts/campagne-landing.mjs) est lui-même en mode
+# d'essai par défaut : même déclenché ici, rien ne part tant que `envoyer`
+# n'est pas coché. L'unicité réelle vient de la table `campagne_envois`
+# (migration 0142_brief_email_et_campagne.sql, clé naturelle
+# `(campagne, email)`) : relancer ce workflow après un premier envoi ne
+# retouche pas ceux déjà journalisés.
+on:
+  workflow_dispatch:
+    inputs:
+      envoyer:
+        description: "Envoi RÉEL (décoché = mode d'essai, rien n'est envoyé)"
+        type: boolean
+        default: false
+      limite:
+        description: 'Plafonne le nombre de destinataires traités (vide = tous les éligibles)'
+        type: string
+        default: ''
+      seulement:
+        description: "N'envoyer qu'à cette adresse (auto-test avant l'envoi de masse)"
+        type: string
+        default: ''
+      campagne:
+        description: 'Identifiant de campagne (clé de dédoublonnage dans campagne_envois)'
+        type: string
+        default: 'landing-2026-09'
+
+# Un seul envoi de campagne à la fois — deux exécutions en parallèle
+# pourraient toutes deux lire "pas encore journalisé" pour le même compte
+# avant que l'une des deux ait eu le temps d'écrire sa ligne, et donc
+# envoyer deux fois. `cancel-in-progress: false` : une exécution en cours ne
+# doit jamais être coupée à mi-parcours, elle doit finir (ou échouer
+# bruyamment) avant qu'une autre puisse démarrer.
+concurrency:
+  group: campagne-landing
+  cancel-in-progress: false
+
+# Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
+permissions:
+  contents: read
+
+jobs:
+  campagne:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Annoncer le mode avant tout envoi
+        run: |
+          if [ "${{ inputs.envoyer }}" = "true" ]; then
+            echo "::warning::ENVOI RÉEL ARMÉ — campagne « ${{ inputs.campagne }} »."
+          else
+            echo "Mode d'essai — rien ne sera envoyé (campagne « ${{ inputs.campagne }} »)."
+          fi
+
+      - name: Exécuter la campagne
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          ENVOYER: ${{ inputs.envoyer }}
+          LIMITE: ${{ inputs.limite }}
+          SEULEMENT: ${{ inputs.seulement }}
+          CAMPAGNE: ${{ inputs.campagne }}
+        run: |
+          set -u
+          ARGS=()
+          if [ "$ENVOYER" = "true" ]; then ARGS+=(--envoyer); fi
+          if [ -n "$LIMITE" ]; then ARGS+=("--limite=$LIMITE"); fi
+          if [ -n "$SEULEMENT" ]; then ARGS+=("--seulement=$SEULEMENT"); fi
+          if [ -n "$CAMPAGNE" ]; then ARGS+=("--campagne=$CAMPAGNE"); fi
+          node scripts/campagne-landing.mjs "${ARGS[@]}"

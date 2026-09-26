@@ -49,7 +49,7 @@ export default function BacktestChart({ equityCurve, closes, dates, drawdownPeri
 
   return (
     <div className="bg-surface border border-border rounded-xl p-4 min-h-[420px]">
-      <h3 className="text-sm font-semibold mb-2">📈 Courbe d&apos;équité</h3>
+      <h3 className="text-sm font-semibold mb-2">Courbe d&apos;équité</h3>
       <EChart
         height={380}
         option={{

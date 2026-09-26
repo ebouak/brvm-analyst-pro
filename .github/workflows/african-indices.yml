@@ -5,13 +5,33 @@ env:
   SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
 
 on:
-  schedule:
-    # Places couvertes : GSE 10:00-15:00 GMT, NGX 09:30-13:30 GMT (UTC+1),
-    # NSE Kenya 06:30-12:00 GMT (UTC+3). AFX met à jour en continu.
-    # 3 passages par jour ouvré suffisent (mi-séance, clôtures, fin de journée) :
-    # minute décalée hors top-of-hour (congestion GitHub).
-    - cron: '7 12,15,17 * * 1-5'
-  workflow_dispatch: {} # déclenchement manuel possible
+  # ── PLANIFICATION COUPÉE LE 2026-09-24, ET POURQUOI ─────────────────────
+  # 136 exécutions, 136 échecs depuis le 04/07/2026. Toutes identiques :
+  # UND_ERR_CONNECT_TIMEOUT sur les SIX adresses d'afx.kwayisi.org (4 en v4,
+  # 2 en v6), pour les trois places à la fois.
+  #
+  # Diagnostic établi le 24/09 : l'hôte est PARFAITEMENT JOIGNABLE depuis une
+  # connexion résidentielle (HTTP 301 en 0,7 s, mêmes adresses IP que celles
+  # que le runner tente). Il expire uniquement depuis GitHub Actions. Une
+  # expiration — et non un 403 — sur toutes les adresses, pendant trois mois,
+  # alors que le service est debout : la source filtre les plages
+  # d'hébergeurs. Réessayer n'y changera rien.
+  #
+  # Ce qui a décidé la coupure, ce n'est pas l'échec lui-même mais son BRUIT :
+  # trois runs rouges par jour ouvré, soit ~780 par an, au milieu desquels la
+  # panne intraday du 24/09 (31 échecs, une vraie régression) était bien plus
+  # dure à voir. Une alerte permanente n'alerte plus personne.
+  #
+  # L'affichage, lui, ne ment pas : `AfricanIndicesCard` détecte la péremption
+  # au-delà de 4 jours (`lib/african/fraicheur.ts`), date les valeurs et les
+  # atténue. Le site dit donc « données du 3 juillet 2026 », pas « fin de
+  # séance ».
+  #
+  # Pour relancer la collecte, il faudra une route qui ne parte pas d'un
+  # centre de données (proxy, exécution planifiée ailleurs) ou une autre
+  # source. Remettre le `schedule` sans l'un des deux ne fera que rallumer le
+  # bruit.
+  workflow_dispatch: {} # déclenchement manuel conservé, pour tester une correction
 
 concurrency:
   group: african-indices

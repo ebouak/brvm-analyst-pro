@@ -73,7 +73,7 @@ export default async function TrackRecordPage() {
       <SectionHeader
         kicker="Conseiller · transparence"
         title="Track record du Conseiller"
-        subtitle="Chaque changement de recommandation est daté au moment où il a été émis, et la performance du cours depuis est affichée — les bonnes bascules comme les mauvaises. Rien n'est antidaté, rien n'est effacé."
+        subtitle="Chaque changement de recommandation est daté au moment où il a été émis, et la performance du cours depuis est affichée, les bonnes bascules comme les mauvaises. Rien n'est antidaté, rien n'est effacé."
       />
 
       <div className="flex items-center justify-between gap-3">
@@ -180,7 +180,7 @@ export default async function TrackRecordPage() {
         Méthode : la bascule est datée du snapshot quotidien qui l&apos;a produite ; la performance va de
         la clôture de ce jour au dernier cours connu, brute (hors frais de courtage et hors dividendes).
         Les bascules vers « Conserver » ne sont pas notées. Un historique court n&apos;a pas de valeur
-        statistique — jugez sur la durée. Ne constitue pas un conseil en investissement.
+        statistique : jugez sur la durée. Ne constitue pas un conseil en investissement.
       </p>
     </div>
   );

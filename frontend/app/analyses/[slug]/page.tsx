@@ -132,7 +132,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         />
 
         <p className="border-t border-border/60 pt-4 text-[11px] text-faint">
-          Information à but éducatif — ne constitue pas un conseil en investissement. Les cours et
+          Information à but éducatif : ne constitue pas un conseil en investissement. Les cours et
           rendements passés ne préjugent pas des performances futures.
         </p>
       </main>

@@ -11,7 +11,7 @@ import { courseProgress, resumeTarget, type ProgressRowFull } from '@/lib/academ
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'WestBourse Academy — Formation complète BRVM',
+  title: 'WestBourse Academy · Formation complète BRVM',
   description: 'Cours interactifs par niveau, progression, quiz. Maîtrisez l’investissement à la BRVM.',
 };
 
@@ -164,7 +164,7 @@ export default async function AcademyHubPage() {
           className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-5 py-4 transition hover:border-accent/30"
         >
           <div>
-            <p className="text-sm font-semibold text-ivory">📚 Édition Intégrale (44 leçons) — version classique</p>
+            <p className="text-sm font-semibold text-ivory">📚 Édition Intégrale (44 leçons) · version classique</p>
             <p className="text-xs text-muted">L’ancien format, en attendant sa migration vers les cours interactifs.</p>
           </div>
           <span aria-hidden className="text-muted">→</span>

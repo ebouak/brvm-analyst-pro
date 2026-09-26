@@ -31,7 +31,7 @@ export default function PatternEnrichmentBadge({
       className={`border rounded-lg p-3 ${getPatternBadgeStyle(pattern_confidence)}`}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="font-semibold">⚡ Motifs Intraday</span>
+        <span className="font-semibold">Motifs Intraday</span>
         <span
           className={`text-sm font-bold ${getPatternScoreColor(pattern_delta)}`}
         >

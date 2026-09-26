@@ -141,14 +141,14 @@ export function ContactNudge() {
 
       {status === 'sent' ? (
         <div className="py-4 text-center">
-          <div className="text-2xl">✅</div>
+          <div className="text-2xl">✓</div>
           <p className="mt-2 font-display text-base text-ivory">Message envoyé&nbsp;!</p>
           <p className="mt-1 text-xs text-muted">On vous répond très vite par email.</p>
         </div>
       ) : (
         <>
           <div className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-accent/15 text-lg">💬</span>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-accent/15 text-lg">✉</span>
             <div>
               <p className="font-display text-[1.02rem] font-semibold leading-tight text-ivory">
                 Salut, on se parle&nbsp;?

@@ -33,7 +33,7 @@ export function PostHeader({ post, author, isPinned }: PostHeaderProps) {
           <span>{relativeTimeFR(post.created_at)}</span>
           {isPinned && (
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent/15 text-accent text-xs font-medium">
-              📌 Épinglé
+              Épinglé
             </span>
           )}
         </div>

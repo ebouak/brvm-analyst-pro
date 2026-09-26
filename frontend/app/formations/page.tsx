@@ -43,6 +43,31 @@ export default async function FormationsPage() {
         subtitle="Montez en compétence sur l'investissement à la BRVM : cours, replays et conférences. Accès réservé aux membres Premium."
       />
 
+      {/* ── Sessions en direct — places limitées ────────────────────────────── */}
+      <Link href="/formations/sessions"
+        className="group flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-surface p-6 transition-all hover:border-accent/50">
+        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-3xl">
+          🎤
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-accent">En direct</span>
+            <StatPill tone="sapphire">Places limitées</StatPill>
+            <StatPill tone="neutral">Avec un formateur</StatPill>
+          </div>
+          <h2 className="font-display text-xl text-white transition-colors group-hover:text-accent">
+            Sessions animées par un formateur
+          </h2>
+          <p className="mt-1 max-w-xl text-sm text-muted leading-relaxed">
+            Quatre heures en petit groupe, en ligne ou en présentiel, sur des cas réels de la BRVM.
+            L&apos;Academy reste gratuite et sert de préparation.
+          </p>
+          <span className="mt-3 inline-block text-[11px] font-semibold text-accent group-hover:underline">
+            Voir les sessions →
+          </span>
+        </div>
+      </Link>
+
       {/* ── WestBourse Academy — mise en avant permanente ─────────────────── */}
       <Link href="/formations/academy"
         className="group relative flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-[#56D7FD]/25 bg-gradient-to-br from-[#0a1f25] to-[#050e11] p-6 overflow-hidden hover:border-[#56D7FD]/50 transition-all">
@@ -50,7 +75,7 @@ export default async function FormationsPage() {
         <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-[#56D7FD]/8 blur-3xl" />
         {/* Icône */}
         <div className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-[#56D7FD]/10 border border-[#56D7FD]/20 text-3xl">
-          🎓
+          ◈
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
@@ -59,7 +84,7 @@ export default async function FormationsPage() {
             <StatPill tone="neutral">QCM interactifs</StatPill>
           </div>
           <h2 className="font-display text-xl text-white group-hover:text-[#56D7FD] transition-colors">
-            WestBourse Academy — Édition Intégrale
+            WestBourse Academy · Édition Intégrale
           </h2>
           <p className="mt-1 text-sm text-[#7a9ea8] leading-relaxed max-w-xl">
             Formation complète en 8 sections par leçon : définition, cas réels BRVM, pièges fréquents, lexique ciblé et points à retenir. Du débutant au niveau Expert CREPMF.
@@ -110,7 +135,7 @@ export default async function FormationsPage() {
               <Link key={c.id} href={`/formations/academy/${c.slug}`}
                 className="group flex flex-col rounded-xl border border-border bg-surface p-4 hover:border-[#56D7FD]/40 transition">
                 <div className="flex items-center gap-2 text-[11px] text-faint">
-                  <span className="text-[#56D7FD]">📘 Cours</span>
+                  <span className="text-[#56D7FD]">Cours</span>
                   {c.niveau && <span>· {NIVEAU_COURSE[c.niveau] ?? c.niveau}</span>}
                 </div>
                 <h3 className="mt-1 font-display text-white group-hover:text-[#56D7FD] transition line-clamp-2">{c.titre}</h3>
@@ -136,7 +161,7 @@ export default async function FormationsPage() {
                 {f.cover_url
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={f.cover_url} alt="" className="h-full w-full object-cover" />
-                  : <div className="h-full w-full flex items-center justify-center text-3xl opacity-40">🎓</div>}
+                  : <div className="h-full w-full flex items-center justify-center text-3xl opacity-40">◈</div>}
                 <span className="absolute top-2 right-2 rounded-full bg-gold/90 px-2 py-0.5 text-[10px] font-semibold text-bg">Premium</span>
               </div>
               <div className="flex flex-1 flex-col p-4">

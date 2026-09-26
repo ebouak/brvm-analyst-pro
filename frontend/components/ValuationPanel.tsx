@@ -110,7 +110,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
             ))}
           </ul>
           {verdict.cautions.map((c, i) => (
-            <p key={i} className="flex items-start gap-2 text-xs text-warn/90"><span>⚠</span><span>{c}</span></p>
+            <p key={i} className="flex items-start gap-2 text-xs text-warn/90"><span>!</span><span>{c}</span></p>
           ))}
         </div>
 

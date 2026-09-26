@@ -86,7 +86,7 @@ export default async function ConseillerPage() {
       <SectionHeader
         kicker="Bot conseiller"
         title="Conseiller BRVM"
-        subtitle="Une recommandation unifiée par action — Acheter / Conserver / Vendre — qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
+        subtitle="Une recommandation unifiée par action (Acheter / Conserver / Vendre) qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
         actions={
           <>
             <StatPill tone="neutral"><span className="tabular">{rows.length}</span>&nbsp;valeurs analysées</StatPill>
@@ -94,7 +94,7 @@ export default async function ConseillerPage() {
               href="/conseiller/track-record"
               className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
             >
-              📊 Track record public →
+              Track record public →
             </Link>
           </>
         }
@@ -119,7 +119,7 @@ export default async function ConseillerPage() {
       {changes.length > 0 && (
         <section className="rounded-xl border border-info/30 bg-info/5 p-4">
           <h2 className="mb-2 flex items-center gap-2 font-display text-base text-white">
-            🔔 Changements de recommandation
+            Changements de recommandation
             <span className="text-[11px] font-normal text-faint">(depuis la dernière séance)</span>
           </h2>
           <ul className="flex flex-wrap gap-2">
@@ -169,7 +169,7 @@ export default async function ConseillerPage() {
       })}
 
       <p className="text-[11px] text-faint">
-        Synthèse algorithmique dérivée des données réelles (signaux, DCF, RSI, dividendes) — aucune
+        Synthèse algorithmique dérivée des données réelles (signaux, DCF, RSI, dividendes), aucune
         valeur inventée. Ne constitue pas un conseil en investissement personnalisé. Performances passées
         ne préjugent pas des performances futures.
       </p>

@@ -225,9 +225,13 @@ tsc + build frontend verts.
   `liquidity_daily` (migration `0111`, PK `code,date_marche`, RLS lecture
   publique). CLI `liquidity[:mock]`, job cron dans `.github/workflows/score.yml`.
 - **Honnêteté** : score `null` sous 10 séances ; flux `null` sans snapshots ;
-  spread `null` si non estimable (cov ≥ 0) → composante neutre. Le carnet
-  d'ordres n'étant pas publié par la BRVM, profondeur et coût d'exécution sont
-  **estimés**, jamais inventés.
+  fourchette `null` quand aucune source ne la donne → composante neutre.
+  ⚠️ **CORRIGÉ le 2026-09-23** : cette ligne affirmait que « le carnet d'ordres
+  n'étant pas publié par la BRVM, profondeur et coût d'exécution sont estimés ».
+  **C'était faux.** La BRVM publie chaque séance un **Bulletin Officiel de la
+  Cote** (PDF) dont une page donne, par valeur, les quantités résiduelles et les
+  cours des DEUX côtés — voir la section « Carnet d'ordres » plus bas. L'impact
+  prix (Amihud) reste, lui, calculé sur les échanges.
 - **Unification** : la pénalité de liquidité du scoring §9 dérive désormais du
   score v2 (classe C/D uniquement) avec **fallback sur l'ancienne règle volume
   30 j** si `liquidity_daily` est absente — le scoring n'échoue jamais.
@@ -734,6 +738,158 @@ est vide et aucun identifiant Meta n'est configuré.
 - **Cron** : job `details` ajouté à `dividends.yml` (samedi 09:00 UTC) — même
   source, même jour, pour ne pas multiplier les visites chez un tiers.
   Hebdomadaire car le flottant ne bouge qu'aux opérations sur titres.
+
+### Ajouts (passage 2026-09-23) — Carnet d'ordres : la BRVM le publie
+
+Migrations `0138` (carnet) et `0139` (source de la fourchette), appliquées.
+14 tests de parsing + 17 tests de liquidité, 505 tests scraper sans régression.
+
+- **LA BRVM PUBLIE SON CARNET D'ORDRES.** Le **Bulletin Officiel de la Cote**
+  (`brvm.org/fr/bulletins-officiels-de-la-cote/0`, un PDF par séance) porte une
+  page « MARCHE DES ACTIONS » donnant, par valeur : quantité résiduelle à
+  l'achat, cours achat / vente, quantité résiduelle à la vente, cours de
+  référence. Le spike de juillet 2026 avait conclu l'inverse **en n'interrogeant
+  que des pages HTML de cotation** (Richbourse, brvm.org/cours-actions,
+  sikafinance) — jamais les publications de l'institution. ⚠️ **Leçon
+  générale** : avant de conclure qu'une donnée n'existe pas, regarder ce que le
+  PRODUCTEUR de la donnée publie en propre.
+- **Collecte** : `scraper/src/carnet/` — `parse.ts` (pur, testé sur une fixture
+  du bulletin réel), `fetch.ts`, `runCarnet.ts`. CLI `carnet [AAAA-MM-JJ]`,
+  cron `.github/workflows/carnet.yml` (19:00 UTC et 07:30 UTC le lendemain :
+  le bulletin paraît parfois seulement le jour suivant). Idempotent : une séance
+  déjà en base est sautée. Le workflow **relit la base** et échoue si le carnet
+  est vide — un run vert ne prouve rien.
+- **Deux pièges du PDF, tous deux capables de passer inaperçus.** (1) Les
+  colonnes ne se lisent PAS par index : le séparateur « / » tombe tantôt dans la
+  ligne, tantôt sur une ligne à lui seul, et une valeur sans acheteur décale
+  tout le reste — d'où un découpage par POSITION horizontale. (2) Deux
+  conventions de nombres cohabitent dans le même tableau : « 12 790 » (espaces)
+  et « 3,955 » qui vaut **3 955 francs**. Lire cette virgule comme un décimal
+  diviserait le cours par mille, sans que rien ne le signale à l'écran.
+- **Un ordre « au marché » n'a pas de cours.** Le spread vaut alors `null`, et
+  une fourchette croisée est refusée aussi : elle trahirait une lecture fautive.
+- **La fourchette réelle remplace l'estimateur de Roll** dans
+  `liquidity/compute.ts` (paramètre optionnel ; Roll reste en repli et reste
+  stocké à côté, pour pouvoir comparer l'estimation au fait). `liquidity_daily`
+  gagne `spread_pct` et `spread_source` (`carnet` | `roll`) : l'interface
+  n'affiche le « ≈ » que sur une estimation.
+- **Effet mesuré, avant/après sur 48 valeurs** : fourchette renseignée **26 → 47**,
+  médiane des scores 58,0 → 58,5 (donc pas d'inflation générale), un seul
+  changement de classe (ONTBF B→C). Roll **surestimait** le coût (SNTS 1,41 %
+  estimé contre 0,01 % réel ; STBC 3,37 contre 0,23) mais le **sous-estimait**
+  ailleurs (FTSC 42→37, fourchette réelle 6,08 % ; BOAS 83→78). Seule SVOC
+  reste sans fourchette. Bornes SPREAD_GOOD/BAD inchangées : les déplacer en
+  même temps qu'on change de source aurait rendu l'avant/après illisible.
+- **Profondeur : 11 séances seulement.** Le site n'expose qu'une dizaine de
+  bulletins ; les URL anciennes existent mais leur suffixe varie (`_2` marche en
+  juin, échoue en mars), donc une reprise profonde exigerait des milliers de
+  requêtes dont beaucoup en 404 sur le serveur d'une institution publique —
+  disproportionné. Le cron accumule à partir de maintenant.
+- **Affichage** : `components/CarnetOrdres.tsx` sur la fiche société. La date de
+  séance est écrite en toutes lettres (le bulletin paraît APRÈS la clôture : ces
+  quantités ne sont pas l'état du marché à cet instant), le texte précise que
+  seule la meilleure limite de chaque côté est publiée — ce n'est donc **pas la
+  profondeur complète** — et la barre encode le rapport entre les deux côtés
+  sans porter de verdict : un déséquilibre n'est pas un signal d'achat.
+
+### Ajouts (passage 2026-09-24) — BBGC : une admission à la cote fait tomber la séance
+
+Migration `0140_bbgc_bridge_bank.sql` **à appliquer**. tsc scraper + frontend verts,
+**528 tests scraper verts** (14 nouveaux), build frontend inchangé.
+
+- **LA PANNE.** `brvm_actions_daily.code` référence `brvm_instruments(code)`. Le
+  24/09/2026 à 09:15 UTC, l'admission de **BBGC — Bridge Bank Group Côte d'Ivoire**
+  (48e valeur, OPV de 10 M d'actions à 6 750 FCFA souscrite à 142 %) a fait violer
+  cette clé étrangère. Comme `upsertActions` envoie le lot **en une seule requête**,
+  UN code inconnu a rejeté **les 47 autres lignes** : 25 runs perdus, toute la
+  séance sans cours intraday. `runIntraday` n'appelait que `ensureIndexInstruments`
+  et portait le commentaire « Les instruments d'actions existent déjà ; pas besoin
+  de les réécrire ici » — vrai pendant des mois, faux en une matinée.
+- **Correctif structurel** : `ensureActionInstruments` (persistence/repository.ts)
+  crée les actions manquantes **et elles seules**, en `ignoreDuplicates` sur un lot
+  pré-filtré — une ligne existante n'est JAMAIS réécrite, sinon on écraserait
+  secteur/pays du scrape quotidien (« secteur Inconnu »). Deux garde-fous, parce
+  qu'une création automatique dans un cron non surveillé peut polluer le
+  référentiel : un code doit être **3 à 5 majuscules** avec une désignation non
+  vide, et **au plus 3 codes inédits par passage** — au-delà c'est le balisage de
+  brvm.org qui a bougé, pas le marché qui a ouvert dix sociétés, et on refuse
+  d'écrire. 14 tests.
+- **La machine prouve, l'humain cure.** Le scraper ne reprend que la désignation
+  publiée par brvm.org. Secteur, pays et famille comptable **restent nuls** : ils
+  ne figurent pas sur la page des cours, les deviner produirait un fait faux.
+  `runSecteurs` journalise déjà les actions sans secteur mappé — trou déclaré,
+  comblé par la migration de curation.
+- **OÙ ENREGISTRER UNE NOUVELLE VALEUR** (les huit registres, tous à 47 avant BBGC) :
+  migration de curation dans `supabase/migrations/` · `scraper/src/refdata/runSecteurs.ts`
+  (`SECTEURS`) · `scraper/src/notations/runNotations.ts` (`BRVM_CODES`) ·
+  `scraper/src/dividends/sikafinance.ts` (alias curé) · `frontend/lib/brvmSectors.json` ·
+  `frontend/lib/financials/sectors.ts` (`FAMILLE_PAR_CODE`) ·
+  `frontend/app/notations/page.tsx` (`COMPANIES`) · `frontend/public/logos/` +
+  `frontend/lib/brvmLogos.json`.
+- **« Les 47 sociétés » était écrit en dur à sept endroits** et tous sont devenus
+  faux le même matin. Désormais `NB_SOCIETES_COTEES` (`frontend/lib/universe.ts`),
+  **dérivé** de `brvmSectors.json`. L'un des sept n'était pas qu'un libellé :
+  `/dashboard` plafonnait ses sparklines à `10 * 47` lignes et aurait tronqué la
+  48e valeur **en silence** — il lit maintenant le nombre réel de valeurs de la
+  séance. ⚠️ **Un compte d'univers ne se saisit pas, il se dérive.**
+- **Alias dividendes posé d'avance** : `/bridge bank group/` → BBGC. Sikafinance
+  tronque à 20 caractères (« BRIDGE BANK GROUP CO ») ; le motif y survit. Le repli
+  flou aurait peut-être suffi, mais c'est lui qui a mal attribué quatre exercices
+  en 2026.
+- **Lacunes assumées, à combler à la main** : pas de **logo** BBGC (dégradation
+  propre — `ActionsTable` affiche les deux premières lettres), pas d'**identifiant
+  portail** dans `runPublicationsBrowser.ts` (il ne s'invente pas), et **aucun
+  fondamental** tant qu'aucune publication n'est en base — même situation que BICB,
+  BOAB, CABC et SVOC.
+- ⚠️ **La leçon générale** : un lot idempotent qui part en une seule requête
+  transforme le rejet d'UNE ligne en perte de TOUT le lot. Partout où une clé
+  étrangère pointe vers un référentiel curé, la donnée nouvelle doit pouvoir
+  s'enregistrer seule — ou le référentiel devient un point de panne à chaque
+  nouveauté du marché.
+
+### Ajouts (passage 2026-09-26) — Les deux replis LLM étaient morts en silence
+
+558 tests scraper verts, tsc vert (scraper + frontend), commande exécutée en réel.
+
+- **L'INCIDENT.** Un rapport de production affichait « tous les fournisseurs ont
+  échoué ». Trois causes distinctes, mesurées par appel HTTP réel et non déduites
+  d'une documentation : DeepSeek à court de crédit (**402**),
+  `mistral-large-latest` **403 « not available in your subscription tier »**,
+  `grok-2-latest` **404**. En creusant : `pixtral-large-latest` **400 « Invalid
+  model »** et `grok-2-vision-latest` **404** également. **27 remplacements dans
+  14 fichiers** (frontend + scraper) : `mistral-small-latest` et `grok-4.6`
+  couvrent désormais texte ET image, les variantes « vision » ont disparu côté
+  fournisseurs.
+- ⚠️ **LA LEÇON, plus importante que le correctif.** Le produit tournait depuis
+  un moment sur **DeepSeek seul, sans filet**. Un repli qui échoue NE SE VOIT
+  PAS : il n'est sollicité que le jour où le premier fournisseur tombe. Il a
+  fallu une panne de crédit simultanée pour découvrir que les deux secours
+  étaient morts depuis longtemps. Quatrième incident de ce type ici, après les
+  sept semaines d'emails muets et le demi-envoi resté vert.
+- **Contrôle quotidien** `scraper/src/sante/` : `evaluerSante.ts` pur (8 tests)
+  + `runSanteLlm.ts` qui SONDE réellement les trois fournisseurs (un jeton
+  chacun, timeout 10 s). CLI `sante:llm`, cron `.github/workflows/sante-llm.yml`
+  à 06:30 UTC. Écrit dans `scraper_runs`/`scraper_errors` via `monitored` —
+  **aucune migration**, les tables de 0041 suffisent.
+- ⚠️ **UN 429 N'EST PAS UNE PANNE.** Le compte Mistral est sur un palier gratuit
+  qui renvoie 429 même à deux secondes d'intervalle : le modèle est bon, le
+  débit ne l'est pas. Le classer en panne fabriquerait une alerte quotidienne
+  permanente, donc ignorée — le défaut même que ce contrôle doit éviter. Trois
+  états : `ok` / `limite` / `panne`. Alerte Telegram (`operateur: true`)
+  seulement sur `panne` ; sortie en code 1 seulement quand plus AUCUN
+  fournisseur n'est utilisable.
+- **Comme repli réel, xAI est le seul des deux sur lequel compter** tant que
+  l'abonnement Mistral n'est pas monté.
+- **Modèles dupliqués** : `frontend/lib/server/llmModels.ts` et
+  `FOURNISSEURS_LLM` dans `scraper/src/sante/runSanteLlm.ts`. Deux paquets TS
+  distincts, comme `scraper/src/hebdo/pure/` — à corriger des deux côtés.
+- **Diagnostic : la panne était livrée sur le canal du CONTENU.** La route
+  écrivait « [Erreur : tous les fournisseurs LLM ont échoué] » dans le flux du
+  rapport ; le client l'affichait en paragraphe sous l'en-tête « Rapport du … »,
+  avec un bouton PDF. Le statut HTTP ne peut pas servir (arrêté à 200 avant
+  d'interroger un fournisseur) → marqueur `lib/diagnostic/echec.ts` contenant un
+  octet nul. Et `generate()` vidait le rapport AVANT de tenter la régénération :
+  un échec effaçait un rapport valide de l'écran.
 
 ## 9. Bugs connus / limites
 

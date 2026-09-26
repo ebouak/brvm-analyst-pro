@@ -70,7 +70,7 @@ export default async function ReportsArchivePage() {
             <EmptyStatePremium
               title="Aucun rapport disponible"
               hint="Vos rapports mensuels apparaîtront ici après la première génération"
-              icon="📊"
+              icon="◇"
             />
           </div>
         ) : (

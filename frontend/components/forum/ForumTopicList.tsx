@@ -6,7 +6,7 @@ import { Avatar } from './Avatar';
 
 export function ForumTopicList({ topics, authors }: { topics: ForumTopic[]; authors: Map<string, AuthorProfile> }) {
   if (topics.length === 0) {
-    return <EmptyStatePremium icon="💬" title="Aucune discussion" hint="Lancez la première discussion de la communauté." />;
+    return <EmptyStatePremium icon="◇" title="Aucune discussion" hint="Lancez la première discussion de la communauté." />;
   }
   return (
     <ul className="grid gap-3 sm:grid-cols-2">

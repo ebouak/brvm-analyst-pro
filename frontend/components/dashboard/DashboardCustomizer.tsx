@@ -54,8 +54,8 @@ export default function DashboardCustomizer({ initial }: { initial: DashboardLay
             <button
               type="button" role="switch" aria-checked={on} aria-label={`Afficher ${meta.label}`}
               onClick={() => toggle(k)}
-              className={`relative h-[22px] w-[40px] rounded-full transition-colors ${on ? 'bg-accent' : 'bg-neutral-700'}`}>
-              <span className={`absolute top-[2px] h-[18px] w-[18px] rounded-full transition-all ${on ? 'right-[2px] bg-bg' : 'left-[2px] bg-neutral-400'}`} />
+              className={`relative h-[22px] w-[40px] rounded-full transition-colors ${on ? 'bg-accent' : 'bg-border-strong'}`}>
+              <span className={`absolute top-[2px] h-[18px] w-[18px] rounded-full transition-all ${on ? 'right-[2px] bg-bg' : 'left-[2px] bg-muted'}`} />
             </button>
           </div>
         );

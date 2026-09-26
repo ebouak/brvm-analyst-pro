@@ -85,6 +85,12 @@ export function buildMatcher(instruments: Instrument[]): (name: string) => strin
     [/bank of africa benin/, 'BOAB'],
     [/bank of africa burki/, 'BOABF'],
     [/bank of africa.*ivoire|bank of africa ci/, 'BOAC'],
+    /* BBGC, cotée le 24/09/2026. « BRIDGE BANK GROUP COTE D'IVOIRE » est
+       tronqué en « BRIDGE BANK GROUP CO » : le motif tient dans les 20
+       caractères. Posé avant tout dividende connu — le repli flou aurait
+       peut-être suffi, mais c'est précisément lui qui a mal attribué quatre
+       exercices en 2026. */
+    [/bridge bank group/, 'BBGC'],
     [/orange ci|orange cote/, 'ORAC'],
     [/sonatel/, 'SNTS'],
     [/sicable/, 'CABC'],

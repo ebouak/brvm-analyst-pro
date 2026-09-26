@@ -5,9 +5,13 @@ import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import Sparkline from '@/components/public/Sparkline';
 import RatingBadge from '@/components/RatingBadge';
+import CarnetOrdres, { type CarnetRow } from '@/components/CarnetOrdres';
+import CarnetCommentaire from '@/components/CarnetCommentaire';
+import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
+import { requiredAccess } from '@/lib/server/featureAccess';
 
 // ISR : aligné sur la fréquence intraday (15 min)
 export const revalidate = 900;
@@ -21,7 +25,7 @@ interface PageProps {
 async function getCompany(code: string) {
   const supabase = createPublicClient();
 
-  const [{ data: instrument }, { data: hist }, { data: sig }, { data: funds }, { data: divs }, { data: news }, { data: diag }] =
+  const [{ data: instrument }, { data: hist }, { data: sig }, { data: funds }, { data: divs }, { data: news }, { data: diag }, { data: carnet }] =
     await Promise.all([
       supabase.from('brvm_instruments').select('*').eq('code', code).eq('type', 'action').maybeSingle(),
       supabase
@@ -60,9 +64,20 @@ async function getCompany(code: string) {
         .select('markdown_content, generated_at')
         .eq('code', code)
         .maybeSingle(),
+      // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : celui-ci
+      // paraît après la clôture, parfois le lendemain, donc sa date diffère de
+      // celle des cours. On prend la plus récente disponible pour cette valeur.
+      supabase
+        .from('brvm_carnet_daily')
+        .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
+        .eq('code', code)
+        .order('date_marche', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
 
   return {
+    carnet: (carnet ?? null) as CarnetRow | null,
     instrument: instrument as {
       code: string; designation: string; secteur: string | null; pays: string | null;
       shares?: number | null;
@@ -91,7 +106,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!instr) return { title: 'Société introuvable' };
 
-  const title = `Action ${instr.designation} (${code}) — Cours, dividendes, analyse`;
+  const title = `Action ${instr.designation} (${code}) · Cours, dividendes, analyse`;
   const description = `Cours en quasi temps réel, note BRVM, fondamentaux, dividendes et actualités de ${instr.designation} (${code}) cotée à la BRVM. Analyse gratuite et données vérifiées.`;
 
   return {
@@ -111,7 +126,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompanyPage({ params }: PageProps) {
   const code = decodeURIComponent(params.code).toUpperCase();
-  const { instrument, hist, signal, fundamentals, dividends, news, diagnostic } = await getCompany(code);
+  // `requiredAccess`, PAS `canAccess` : cette page est la seule à porter
+  // `revalidate = 900` (ISR) plutôt que `force-dynamic`. `canAccess` résout les
+  // droits de L'UTILISATEUR via `getEntitlements()` → `createClient()` (lecture
+  // de session/cookies), ce qui bascule silencieusement la route en rendu
+  // dynamique — huit requêtes Supabase par visite au lieu d'un cache de 15 min.
+  // `requiredAccess` ne lit que le niveau déclaré en base (`feature_flags`, via
+  // service_role, sans session) : on sait QUOI est requis, jamais QUI regarde.
+  // Conséquence assumée : cette page publique et indexée ne montre JAMAIS
+  // l'analyse, même à un abonné connecté — la lecture complète reste sur
+  // /actions/[code], qui peut se permettre d'être dynamique.
+  const [{ instrument, hist, signal, fundamentals, dividends, news, diagnostic, carnet }, { required: accesLectureSeance }] =
+    await Promise.all([getCompany(code), requiredAccess('lecture_seance')]);
 
   if (!instrument) notFound();
 
@@ -139,6 +165,55 @@ export default async function CompanyPage({ params }: PageProps) {
         debt: bestFund.debt ?? null,
         dividende: lastDividend?.montant ?? null,
       })
+    : null;
+
+  // ── « Ce que dit la séance » (verrou premium `lecture_seance`) ──────────
+  // Repris de /actions/[code], réduit à ce que CETTE page charge déjà — pas
+  // de requête liquidity_daily supplémentaire pour situer la fourchette parmi
+  // les autres valeurs du marché : sur une page publique en ISR, ce n'est
+  // qu'une nuance de phrase (`situerFourchette` dégrade proprement sans elle)
+  // pour un aller-retour de plus à chaque régénération. `valeurEchangee` seul
+  // suffit à donner une échelle au carnet.
+  const contexteCarnet = { valeurEchangee: last?.valeur_echangee ?? null };
+
+  // Agitation ordinaire du titre. Sous 20 séances, `ecartTypeVariations` rend
+  // `null` et le mouvement du jour est cité sans être qualifié.
+  const { ecartTypePct, seances } = ecartTypeVariations(hist.slice(0, 31).map((r) => r.variation_pct));
+  const bruitSeance = {
+    variationPct: last?.variation_pct ?? null,
+    ecartTypePct,
+    seancesObservees: seances,
+    // Pas de `volume_ratio` ici : cette page ne charge pas `signals_daily.inputs`.
+  };
+
+  // Comptes du dernier exercice publié, et celui d'avant pour l'évolution —
+  // même logique que /actions/[code], à partir de `bestFund` déjà calculé.
+  const exCourant = bestFund && bestFund.year != null ? bestFund : null;
+  const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
+  const economieSociete = exCourant
+    ? {
+        exercice: exCourant.year,
+        resultatNet: exCourant.net_income ?? null,
+        resultatNetPrecedent: exPrecedent?.net_income ?? null,
+        chiffreAffaires: exCourant.revenue ?? null,
+        chiffreAffairesPrecedent: exPrecedent?.revenue ?? null,
+        capitauxPropres: exCourant.equity ?? null,
+        actions: instrument.shares ?? null,
+        coursJour: cours ?? null,
+        source: exCourant.is_manual ? 'pdf-verified' : null,
+      }
+    : null;
+
+  // Signal réduit aux colonnes chargées par cette page (pas d'`explication` ni
+  // de sous-scores ici) : `sousScores` omis plutôt que deviné — le module ne
+  // parlera pas de facteurs qui se contredisent sans eux.
+  const signalSeance = signal
+    ? {
+        date_marche: signal.date_marche,
+        signal: signal.signal,
+        confiance: signal.confiance ?? null,
+        score_total: signal.score_total ?? null,
+      }
     : null;
 
   // Teaser diagnostic : 3 premières lignes non vides du markdown
@@ -190,13 +265,51 @@ export default async function CompanyPage({ params }: PageProps) {
 
       {/* ── Graphique 1 an ───────────────────────────────────────────────── */}
       <section className="bg-surface border border-border rounded-xl p-5 mb-6">
-        <h2 className="text-sm text-muted mb-3">Cours de clôture — 12 derniers mois</h2>
+        <h2 className="text-sm text-muted mb-3">Cours de clôture · 12 derniers mois</h2>
         {closes.length >= 2 ? (
           <Sparkline values={closes} positive={closes[closes.length - 1]! >= closes[0]!} />
         ) : (
           <p className="text-faint text-sm py-8 text-center">Historique de cours en cours de constitution.</p>
         )}
       </section>
+
+      <CarnetOrdres carnet={carnet} />
+
+      {/* ── Ce que dit la séance ─────────────────────────────────────────────
+          `accesLectureSeance === 'free'` est le SEUL cas où ce bloc s'adresse à
+          tout le monde — puisqu'on ne sait pas QUI regarde (voir plus haut, pas
+          de lecture de session ici). Dans tous les autres cas, y compris pour
+          un abonné qui lirait cette page publique, on NE REND PAS le composant :
+          page indexée par Google, servie depuis le cache ISR, aucune phrase ni
+          chiffre du commentaire ne doit atteindre ce HTML. Pas de `SectionLock`
+          ici : il pointe en dur vers /account/plan et proposerait à un abonné
+          de se réabonner — un bloc neutre renvoie simplement vers la fiche où
+          l'analyse existe déjà, pour les deux publics. */}
+      {accesLectureSeance === 'free' ? (
+        <CarnetCommentaire
+          carnet={carnet}
+          signal={signalSeance}
+          actualites={news}
+          contexte={contexteCarnet}
+          bruit={bruitSeance}
+          economie={economieSociete}
+        />
+      ) : (
+        <div className="mb-6 rounded-xl border border-border bg-surface p-5 text-center">
+          <h2 className="text-sm text-muted mb-1.5">Ce que dit la séance</h2>
+          <p className="text-faint text-sm">
+            Le carnet d&apos;ordres mis à l&apos;échelle, le score technique face à ses
+            seuils et les comptes rapportés au cours : cette lecture de la séance
+            est sur la fiche détaillée.
+          </p>
+          <Link
+            href={`/actions/${code}`}
+            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
+          >
+            Voir l&apos;analyse de la séance →
+          </Link>
+        </div>
+      )}
 
       {/* ── Chiffres clés ────────────────────────────────────────────────── */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -217,7 +330,7 @@ export default async function CompanyPage({ params }: PageProps) {
       {bestFund && (
         <section className="bg-surface border border-border rounded-xl p-5 mb-6">
           <h2 className="text-sm text-muted mb-4">
-            Fondamentaux — exercice {bestFund.year ?? '—'}
+            Fondamentaux · exercice {bestFund.year ?? '—'}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3">
             {[
@@ -292,10 +405,10 @@ export default async function CompanyPage({ params }: PageProps) {
         </section>
       </div>
 
-      {/* ── Teaser diagnostic IA (convertisseur) ─────────────────────────── */}
+      {/* ── Teaser dossier d’analyse (convertisseur) ─────────────────────────── */}
       {teaserLines.length > 0 && (
         <section className="bg-surface border border-accent/30 rounded-xl p-5 mb-6 relative overflow-hidden">
-          <p className="text-[11px] text-accent/80 uppercase tracking-[0.18em] mb-2">Diagnostic IA · extrait</p>
+          <p className="text-[11px] text-accent/80 uppercase tracking-[0.18em] mb-2">Dossier d’analyse · extrait</p>
           <div className="space-y-2 text-sm text-muted leading-relaxed">
             {teaserLines.map((l, i) => (
               <p key={i}>{l}</p>
@@ -309,7 +422,7 @@ export default async function CompanyPage({ params }: PageProps) {
             <div className="absolute inset-0 flex items-center justify-center">
               <Link href="/signup"
                 className="px-5 py-2.5 rounded-lg bg-accent text-bg font-semibold hover:bg-gold-2 transition-colors active:scale-95">
-                Lire l&apos;analyse complète — gratuit
+                Lire l&apos;analyse complète · gratuit
               </Link>
             </div>
           </div>

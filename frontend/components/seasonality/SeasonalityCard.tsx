@@ -25,7 +25,7 @@ export default function SeasonalityCard({ code, returns }: { code: string; retur
         <div><p className="text-faint">Pire</p>
           <p className="font-semibold text-down">{r.worstMonth ? MONTHS[r.worstMonth - 1] : '—'}</p></div>
       </div>
-      {r.dataQuality === 'insufficient' && <p className="text-[10px] text-down">Historique court — peu fiable.</p>}
+      {r.dataQuality === 'insufficient' && <p className="text-[10px] text-down">Historique court : peu fiable.</p>}
     </div>
   );
 }

@@ -15,12 +15,12 @@ const COLS: { key: Col; label: string; tooltip: string }[] = [
   { key: 'secteur', label: 'Secteur', tooltip: 'Secteur économique ICB' },
   { key: 'count', label: '# Act.', tooltip: "Nombre d'actions cotées dans ce secteur" },
   { key: 'coursMean', label: 'Cours moy.', tooltip: 'Cours de clôture moyen pondéré des actions du secteur (FCFA)' },
-  { key: 'varDay', label: 'Jour %', tooltip: 'Variation moyenne des cours ce jour — moyenne arithmétique des variations individuelles' },
-  { key: 'var5d', label: '5j %', tooltip: 'Performance sectorielle sur 5 jours de bourse — variation du cours moyen vs il y a 5 séances' },
-  { key: 'var30d', label: '30j %', tooltip: 'Performance sur 30 jours calendaires — bon indicateur de tendance à moyen terme' },
-  { key: 'var90d', label: '90j %', tooltip: 'Performance trimestrielle (90 jours calendaires) — tendance structurelle' },
-  { key: 'var1y', label: '1A %', tooltip: 'Performance sur 1 an calendaire — reflète le cycle annuel complet' },
-  { key: 'volumeDay', label: 'Vol. jour', tooltip: 'Valeur échangée cumulée du secteur ce jour (en FCFA) — mesure la liquidité sectorielle' },
+  { key: 'varDay', label: 'Jour %', tooltip: 'Variation moyenne des cours ce jour : moyenne arithmétique des variations individuelles' },
+  { key: 'var5d', label: '5j %', tooltip: 'Performance sectorielle sur 5 jours de bourse : variation du cours moyen vs il y a 5 séances' },
+  { key: 'var30d', label: '30j %', tooltip: 'Performance sur 30 jours calendaires : bon indicateur de tendance à moyen terme' },
+  { key: 'var90d', label: '90j %', tooltip: 'Performance trimestrielle (90 jours calendaires) : tendance structurelle' },
+  { key: 'var1y', label: '1A %', tooltip: 'Performance sur 1 an calendaire : reflète le cycle annuel complet' },
+  { key: 'volumeDay', label: 'Vol. jour', tooltip: 'Valeur échangée cumulée du secteur ce jour (en FCFA) : mesure la liquidité sectorielle' },
 ];
 
 function VarCell({ v }: { v: number | null }) {

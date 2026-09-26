@@ -60,7 +60,7 @@ export default function CompareFundamentals({ rows }: { rows: FundaRow[] }) {
                   if (v != null && NS_SI_NEGATIF.has(key) && (v as number) < 0) {
                     return (
                       <td key={r.code} className="px-4 py-2 text-right text-muted/70"
-                          title="Non significatif : résultat (ou capitaux propres) négatif — le ratio n'a pas de sens financier, la donnée est correcte.">
+                          title="Non significatif : résultat (ou capitaux propres) négatif, le ratio n'a pas de sens financier, la donnée est correcte.">
                         n.s.
                       </td>
                     );

@@ -20,7 +20,7 @@ interface Topic {
 const TOPICS: Topic[] = [
   {
     key: 'weekly_commodity',
-    title: 'Analyses Hebdo — Matières Premières',
+    title: 'Analyses Hebdo · Matières Premières',
     description:
       'Impact du cacao, pétrole, caoutchouc et huile de palme sur les valeurs BRVM. Publié chaque vendredi.',
     badge: 'Hebdo',
@@ -36,7 +36,7 @@ const TOPICS: Topic[] = [
     key: 'signals_digest',
     title: 'Digest Signaux Opportunité',
     description:
-      'Synthèse hebdomadaire des signaux BUY/WATCH générés par le scoring IA. Publié le lundi matin.',
+      'Synthèse hebdomadaire des signaux BUY/WATCH générés par le scoring quantitatif. Publié le lundi matin.',
     badge: 'Hebdo',
   },
   {

@@ -116,7 +116,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
     <>
       {/* ── Filtres ── */}
       <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
-        <h3 className="text-sm font-semibold">🔍 Filtres</h3>
+        <h3 className="text-sm font-semibold">Filtres</h3>
 
         {/* Pills de filtre rapide par signal (avec compteurs réels) */}
         <div className="flex flex-wrap gap-2">
@@ -402,7 +402,7 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>
-            <h2 className="font-semibold">🔍 Détail du signal — {s.code}</h2>
+            <h2 className="font-semibold">Détail du signal — {s.code}</h2>
             <p className="text-xs text-muted mt-0.5">
               {s.date_marche} • Score : <span className={`tabular font-mono font-medium ${(s.score_total ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
                 {s.score_total != null ? ((s.score_total >= 0 ? '+' : '') + s.score_total.toFixed(2)) : '—'}
@@ -418,7 +418,7 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
         <div className="p-5 space-y-5">
           {/* Composantes du score */}
           <div>
-            <h3 className="text-sm font-semibold mb-3">📊 Composantes du score</h3>
+            <h3 className="text-sm font-semibold mb-3">Composantes du score</h3>
             <div className="space-y-2">
               {subScores.map(({ label, key, neg }) => {
                 const raw = (s[key] as number | null | undefined) ?? null;

@@ -3,10 +3,36 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+type Cycle = 'monthly' | 'quarterly' | 'yearly';
+
+const CYCLES: { cle: Cycle; label: string }[] = [
+  { cle: 'monthly', label: 'Mensuel' },
+  { cle: 'quarterly', label: 'Trimestriel' },
+  { cle: 'yearly', label: 'Annuel' },
+];
+const MOIS: Record<Cycle, number> = { monthly: 1, quarterly: 3, yearly: 12 };
+const UNITE: Record<Cycle, string> = { monthly: 'mois', quarterly: '3 mois', yearly: 'an' };
+
+function prixCycle(p: PricingPlan, c: Cycle): number | null {
+  const v = c === 'yearly' ? p.price_yearly : c === 'quarterly' ? p.price_quarterly : p.price_monthly;
+  return v == null ? null : Number(v);
+}
+
+/** Économie en % face au mensuel, arrondie. 0 si non calculable — une mention
+ *  « 2 mois offerts » écrite en dur deviendrait fausse au premier changement. */
+function economie(p: PricingPlan | undefined, c: Cycle): number {
+  if (!p || c === 'monthly') return 0;
+  const prix = prixCycle(p, c);
+  const plein = p.price_monthly * MOIS[c];
+  if (prix == null || plein <= 0 || prix >= plein) return 0;
+  return Math.round((1 - prix / plein) * 100);
+}
+
 export interface PricingPlan {
   code: string;
   name: string;
   price_monthly: number;
+  price_quarterly: number | null;
   price_yearly: number | null;
   is_recommended: boolean;
 }
@@ -31,7 +57,7 @@ const FEATURES: Record<string, { tagline: string; cta: string; items: string[] }
       'Tout le plan Gratuit',
       'Signaux avancés',
       'Historique étendu',
-      'Rapports IA enrichis',
+      'Rapports enrichis',
       'Export PDF / Word',
       'Comparatifs sectoriels',
       'Plus d’alertes et de watchlists',
@@ -68,10 +94,12 @@ function fmtPrice(n: number): string {
 }
 
 export function PricingClient({ plans }: { plans: PricingPlan[] }) {
-  const [yearly, setYearly] = useState(false);
+  const [cycle, setCycle] = useState<Cycle>('yearly');
   const ordered = ['free', 'premium', 'platinium']
     .map((code) => plans.find((p) => p.code === code))
     .filter((p): p is PricingPlan => Boolean(p));
+  // Plan de référence pour l'économie affichée : celui mis en avant, sinon Premium.
+  const reference = ordered.find((p) => p.is_recommended) ?? ordered.find((p) => p.code === 'premium');
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16">
@@ -86,25 +114,27 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
         </p>
       </div>
 
-      {/* Toggle mensuel / annuel */}
-      <div className="mt-8 flex items-center justify-center gap-3">
-        <span className={!yearly ? 'text-ivory' : 'text-faint'}>Mensuel</span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={yearly}
-          onClick={() => setYearly((v) => !v)}
-          className="relative h-6 w-11 rounded-full bg-elevated transition-colors"
-        >
-          <span
-            className={`absolute top-0.5 h-5 w-5 rounded-full bg-accent transition-transform ${
-              yearly ? 'translate-x-5' : 'translate-x-0.5'
-            }`}
-          />
-        </button>
-        <span className={yearly ? 'text-ivory' : 'text-faint'}>
-          Annuel <span className="text-up">(2 mois offerts)</span>
-        </span>
+      {/* Choix du cycle. L'économie est calculée sur le plan mis en avant. */}
+      <div role="radiogroup" aria-label="Cycle de facturation" className="mt-8 flex items-center justify-center">
+        <div className="inline-flex rounded-full border border-border bg-elevated p-1">
+          {CYCLES.map((c) => {
+            const actif = c.cle === cycle;
+            const eco = economie(reference, c.cle);
+            return (
+              <button
+                key={c.cle}
+                type="button"
+                role="radio"
+                aria-checked={actif}
+                onClick={() => setCycle(c.cle)}
+                className={`min-h-[40px] rounded-full px-4 text-sm font-semibold transition-colors ${actif ? 'bg-accent text-[#03222b]' : 'text-muted hover:text-ivory'}`}
+              >
+                {c.label}
+                {eco > 0 && <span className={actif ? 'ml-1.5 opacity-80' : 'ml-1.5 text-up'}>−{eco}&nbsp;%</span>}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Cartes */}
@@ -112,8 +142,11 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
         {ordered.map((plan) => {
           const f = FEATURES[plan.code];
           const monthly = plan.price_monthly;
-          const yearlyPrice = plan.price_yearly ?? monthly * 12;
-          const shown = yearly ? yearlyPrice : monthly;
+          // Un plan sans prix pour ce cycle retombe sur son mensuel, ET l'unité
+          // affichée suit : jamais un montant sous une mauvaise unité.
+          const prix = prixCycle(plan, cycle);
+          const shown = prix ?? monthly;
+          const unite = prix == null ? 'mois' : UNITE[cycle];
           const isFree = monthly === 0;
           const highlighted = plan.is_recommended;
           const href = isFree ? '/signup' : `/signup?plan=${plan.code}`;
@@ -136,7 +169,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="tabular text-3xl font-bold text-ivory">{fmtPrice(shown)}</span>
                 <span className="text-sm text-muted">
-                  {isFree ? '' : `XOF / ${yearly ? 'an' : 'mois'}`}
+                  {isFree ? '' : `XOF / ${unite}`}
                 </span>
               </div>
               <Link
@@ -180,7 +213,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
                 ['Vue marché & actualités', ['✓', '✓', '✓']],
                 ['Signaux avancés', ['—', '✓', '✓']],
                 ['Historique étendu', ['—', '✓', '✓']],
-                ['Rapports IA', ['Restreint', 'Enrichi', 'Approfondi']],
+                ['Rapports', ['Restreint', 'Enrichi', 'Approfondi']],
                 ['Exports', ['—', 'PDF / Word', 'Enrichis']],
                 ['Comparatifs sectoriels', ['—', '✓', '✓']],
                 ['Analyse fondamentale complète', ['—', '—', '✓']],

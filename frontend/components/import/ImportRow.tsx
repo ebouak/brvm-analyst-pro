@@ -40,7 +40,7 @@ export default function ImportRow({ file, validCodes }: Props) {
 
   async function run() {
     setError(null);
-    if (!validCodes.has(symbol)) { setStatus('error'); setError(`Code ${symbol} inconnu — corrigez-le.`); return; }
+    if (!validCodes.has(symbol)) { setStatus('error'); setError(`Code ${symbol} inconnu : corrigez-le.`); return; }
     try {
       setStatus('reading');
       const pdf = await readPdf(file);
@@ -102,11 +102,11 @@ export default function ImportRow({ file, validCodes }: Props) {
         <span className="text-muted text-xs truncate flex-1">{file.name}</span>
         <span className="text-xs">
           {status === 'pending' && <span className="text-faint">en attente</span>}
-          {status === 'reading' && '📄 lecture…'}
-          {status === 'analyzing' && '🤖 analyse…'}
+          {status === 'reading' && 'lecture…'}
+          {status === 'analyzing' && 'analyse…'}
           {status === 'auto-saving' && '💾 écriture…'}
           {status === 'done' && <span className="text-up">✓ enregistré ({provider})</span>}
-          {status === 'review' && <span className="text-warn">⚠️ à valider ({provider})</span>}
+          {status === 'review' && <span className="text-warn">à valider ({provider})</span>}
           {status === 'error' && <span className="text-down">✕ {error}</span>}
         </span>
         {status === 'pending' && (

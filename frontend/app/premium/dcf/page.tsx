@@ -27,7 +27,7 @@ export default async function DcfIndexPage() {
         accent="gold"
         kicker="Intelligence fondamentale"
         title="Valorisation DCF — classement du marché"
-        subtitle="Juste-valeur par flux actualisés (WACC dérivé du MEDAF) pour toute la cote. Outil de screening — cliquez une société pour la fiche détaillée (bêta réel, hypothèses ajustables)."
+        subtitle="Juste-valeur par flux actualisés (WACC dérivé du MEDAF) pour toute la cote. Outil de screening : cliquez une société pour la fiche détaillée (bêta réel, hypothèses ajustables)."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
       <ViewTabs tabs={VALO_TABS} current="/premium/dcf" />

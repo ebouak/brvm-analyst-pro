@@ -25,7 +25,7 @@ const COMPANIES = [
     ],
     risks: ['Sécheresse cocoteraies locales', 'Concurrence palme / soja meilleur marché'],
     conviction: 'medium',
-    note: 'Valeur de niche — marché et liquidité limités',
+    note: 'Valeur de niche · marché et liquidité limités',
   },
   {
     ticker: 'SIFCA',
@@ -39,12 +39,12 @@ const COMPANIES = [
     sensitivity: 3,
     benchmark: 'CPO Bursa + SICOM + ICE SB=F',
     thesis: [
-      'Diversification naturelle — bénéfice sur plusieurs cycles simultanément',
+      'Diversification naturelle · bénéfice sur plusieurs cycles simultanément',
       'Cœur de valeur : huile de palme, hévéa et sucre (via Sucrivoire)',
     ],
     risks: ['Cacao = exposition mineure/indirecte uniquement', 'Dépendance politiques agricoles CI'],
     conviction: 'medium',
-    note: 'Cacao ● faible — ne pas surpondérer',
+    note: 'Cacao ● faible · ne pas surpondérer',
   },
   {
     ticker: 'SAPH',
@@ -63,7 +63,7 @@ const COMPANIES = [
     ],
     risks: ['Reflux ventes auto mondiales', 'Baisse SICOM avec coûts incompressibles'],
     conviction: 'high',
-    note: 'Pur joueur caoutchouc — corrélation directe et claire',
+    note: 'Pur joueur caoutchouc · corrélation directe et claire',
   },
   {
     ticker: 'SOGB',
@@ -101,7 +101,7 @@ const COMPANIES = [
     ],
     risks: ['Réglementation UE biocarburants / palme', 'Hausse taxes import Inde → CPO chute'],
     conviction: 'medium',
-    note: 'Peu liquide — données CPO techniques à suivre sur Bursa Malaysia',
+    note: 'Peu liquide · données CPO techniques à suivre sur Bursa Malaysia',
   },
   {
     ticker: 'SCRC',
@@ -120,7 +120,7 @@ const COMPANIES = [
     ],
     risks: ['Prix administrés CI bloquent la transmission mondiale', 'Surproduction Brésil / Inde'],
     conviction: 'medium',
-    note: 'Exposition asymétrique — prix administrés amortissent les hausses mondiales',
+    note: 'Exposition asymétrique · prix administrés amortissent les hausses mondiales',
   },
   {
     ticker: 'TTLS',
@@ -367,9 +367,9 @@ export default function ThesisPage() {
         {/* ── Note cacao ── */}
         <section className="bg-[#0a0f12] border border-amber-900/30 rounded-xl p-5">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">⚠️</span>
+            <span className="text-2xl">!</span>
             <div>
-              <p className="font-semibold text-amber-400 mb-1">Cacao — pas de pur joueur coté BRVM</p>
+              <p className="font-semibold text-amber-400 mb-1">Cacao · pas de pur joueur coté BRVM</p>
               <p className="text-sm text-muted">
                 Il n'existe pas à ce jour de société cotée à la BRVM dont le modèle d'affaires
                 repose exclusivement sur le cacao. Le cacao affecte l'économie ivoirienne
@@ -378,7 +378,7 @@ export default function ThesisPage() {
                 que <strong className="text-gray-200">micro</strong> par titre coté.
               </p>
               <p className="text-xs text-faint mt-2 font-mono">
-                ⚠️ SICC = Société Ivoirienne de Coco Râpé (coprah), pas cacao.
+                SICC = Société Ivoirienne de Coco Râpé (coprah), pas cacao.
               </p>
             </div>
           </div>

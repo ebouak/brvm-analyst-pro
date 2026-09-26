@@ -57,7 +57,7 @@ export default function BeginnerBanner() {
         >
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 text-sm">
             <p className="text-white/90">
-              <span aria-hidden>🌱</span> Débutant à la BRVM ?{' '}
+              Débutant à la BRVM ?{' '}
               <Link href="/debutant" className="font-semibold text-accent underline-offset-2 hover:underline">
                 On vous accompagne pas à pas pour ouvrir votre compte →
               </Link>

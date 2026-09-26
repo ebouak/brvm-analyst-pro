@@ -36,7 +36,7 @@ export function AccessGate({
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
       <EmptyStatePremium
-        icon="🔒"
+        icon="✦"
         title={`${feature} — réservé au plan ${label}`}
         hint={
           hint ??

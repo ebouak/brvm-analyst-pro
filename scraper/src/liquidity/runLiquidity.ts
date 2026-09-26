@@ -132,12 +132,38 @@ export async function runLiquidity(opts: { mock?: boolean } = {}): Promise<Liqui
     snapsByCode.get(s.code)!.push(s);
   }
 
+  // Fourchette MESURÉE : dernier carnet publié par valeur. Le bulletin paraît
+  // après la clôture, parfois le lendemain, donc sa date diffère de `lastDate`
+  // — on prend la plus récente disponible plutôt que d'exiger une correspondance
+  // exacte, qui priverait le score de la mesure un jour sur deux.
+  const spreadCarnet = new Map<string, number>();
+  {
+    const { data: carnet } = await sb
+      .from('brvm_carnet_daily')
+      .select('code, date_marche, cours_achat, cours_vente, achat_au_marche, vente_au_marche')
+      .order('date_marche', { ascending: false })
+      .limit(2000);
+    for (const c of (carnet ?? []) as {
+      code: string; cours_achat: number | null; cours_vente: number | null;
+      achat_au_marche: boolean; vente_au_marche: boolean;
+    }[]) {
+      if (spreadCarnet.has(c.code)) continue;            // déjà la séance la plus récente
+      if (c.achat_au_marche || c.vente_au_marche) continue; // pas de limite : pas de fourchette
+      const a = c.cours_achat;
+      const v = c.cours_vente;
+      if (a == null || v == null || a <= 0 || v <= 0 || v < a) continue;
+      spreadCarnet.set(c.code, ((v - a) / ((v + a) / 2)) * 100);
+    }
+  }
+
   const records = [];
   let nbScores = 0;
+  let nbCarnet = 0;
   let nbFlux = 0;
   for (const [code, list] of byCode) {
-    const liq = computeLiquidityV2(list, dates.length);
+    const liq = computeLiquidityV2(list, dates.length, spreadCarnet.get(code) ?? null);
     const flow = computeSessionFlow(snapsByCode.get(code) ?? []);
+    if (liq.spread_source === 'carnet') nbCarnet++;
     if (liq.score != null) nbScores++;
     if (flow?.flux_net_pct != null) nbFlux++;
     records.push({
@@ -149,6 +175,8 @@ export async function runLiquidity(opts: { mock?: boolean } = {}): Promise<Liqui
       activite: liq.activite,
       amihud: liq.amihud,
       spread_roll_pct: liq.spread_roll_pct,
+      spread_pct: liq.spread_pct,
+      spread_source: liq.spread_source,
       valeur_moyenne_30j: liq.valeur_moyenne_30j,
       seances_traitees: liq.seances_traitees,
       seances_marche: liq.seances_marche,

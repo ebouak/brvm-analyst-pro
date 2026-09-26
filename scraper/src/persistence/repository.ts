@@ -36,6 +36,86 @@ export async function ensureIndexInstruments(
 }
 
 /**
+ * Nombre maximal d'actions inconnues créées en une passe.
+ *
+ * Une admission à la cote arrive une à la fois (BBGC, 48e valeur, le
+ * 24/09/2026). Si le parseur remonte soudain une dizaine de codes inédits,
+ * c'est le balisage de brvm.org qui a bougé, pas le marché qui a ouvert dix
+ * sociétés : on refuse alors d'écrire plutôt que de polluer le référentiel
+ * de codes fantômes, qui deviendraient ensuite des cibles de clé étrangère.
+ */
+const MAX_NOUVELLES_ACTIONS = 3;
+
+/** Un code BRVM est fait de 3 à 5 majuscules (SNTS, BOABF, BBGC). */
+const CODE_VALIDE = /^[A-Z]{3,5}$/;
+
+/**
+ * Crée les instruments d'actions MANQUANTS, et eux seuls.
+ *
+ * `brvm_actions_daily.code` référence `brvm_instruments(code)` : une valeur
+ * nouvellement cotée fait donc échouer l'upsert — et comme le lot part en une
+ * seule requête, UN code inconnu rejette LA SÉANCE ENTIÈRE. C'est ce qui a
+ * coûté la journée du 24/09/2026 : 25 runs perdus jusqu'à ce que BBGC soit
+ * enregistrée à la main.
+ *
+ * Seule la désignation publiée par brvm.org est reprise. Secteur, pays et
+ * famille comptable restent NULS : ils ne figurent pas sur la page des cours,
+ * et les inventer produirait un « secteur Inconnu » affiché comme un fait.
+ * `runSecteurs` journalise déjà les actions sans secteur mappé — un trou
+ * déclaré, que la migration de curation vient combler.
+ *
+ * Les lignes existantes ne sont JAMAIS réécrites (`ignoreDuplicates`, et le
+ * lot est de toute façon filtré aux seuls codes absents) : sans cela on
+ * écraserait le secteur et le pays renseignés par le scrape quotidien.
+ *
+ * @returns les codes effectivement créés (vide si le référentiel est à jour).
+ */
+export async function ensureActionInstruments(
+  actions: Array<{ code: string; designation: string }>,
+): Promise<string[]> {
+  if (actions.length === 0) return [];
+  const sb = getSupabase();
+
+  const parCode = new Map<string, string>();
+  for (const a of actions) if (!parCode.has(a.code)) parCode.set(a.code, a.designation);
+
+  const { data, error: erreurLecture } = await sb
+    .from('brvm_instruments')
+    .select('code')
+    .in('code', [...parCode.keys()]);
+  if (erreurLecture) throw new Error(`ensure action instruments (lecture): ${erreurLecture.message}`);
+
+  const connus = new Set((data ?? []).map((r) => r.code as string));
+  const nouveaux = [...parCode.entries()].filter(([code]) => !connus.has(code));
+  if (nouveaux.length === 0) return [];
+
+  const douteux = nouveaux.filter(([code, designation]) => !CODE_VALIDE.test(code) || !designation?.trim());
+  if (douteux.length > 0) {
+    throw new Error(
+      `ensure action instruments: code ou désignation inexploitable (${douteux.map(([c]) => c).join(', ')})`,
+    );
+  }
+  if (nouveaux.length > MAX_NOUVELLES_ACTIONS) {
+    throw new Error(
+      `ensure action instruments: ${nouveaux.length} actions inconnues d'un coup ` +
+        `(${nouveaux.map(([c]) => c).join(', ')}) — parsing suspect, rien n'est écrit`,
+    );
+  }
+
+  const rows = nouveaux.map(([code, designation]) => ({
+    code,
+    designation,
+    type: 'action' as const,
+    actif: true,
+  }));
+  const { error } = await sb
+    .from('brvm_instruments')
+    .upsert(rows, { onConflict: 'code', ignoreDuplicates: true });
+  if (error) throw new Error(`ensure action instruments: ${error.message}`);
+  return rows.map((r) => r.code);
+}
+
+/**
  * Crée les instruments d'obligations MANQUANTS (INSERT only) pour satisfaire la
  * FK brvm_obligations_daily.code → brvm_instruments.code. Ne touche pas aux lignes
  * existantes (même posture que ensureIndexInstruments).

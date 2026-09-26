@@ -27,7 +27,7 @@ export function normalize(s: string): string {
 /** Pages d'une société, par mot-clé (ordre = priorité de détection). */
 const SOCIETE_PAGES: { re: RegExp; href: (code: string) => string; label: string }[] = [
   { re: /fondament|bilan|compte de result|etats? financ|chiffre d'affaires|resultat net/, href: (c) => `/financials/${c}`, label: 'Fondamentaux' },
-  { re: /diagnostic/, href: (c) => `/premium/diagnostic/${c}`, label: 'Diagnostic IA' },
+  { re: /diagnostic/, href: (c) => `/premium/diagnostic/${c}`, label: 'Dossier d’analyse' },
   { re: /dividende/, href: (c) => `/actions/${c}#dividendes`, label: 'Dividendes' },
   { re: /signa(l|ux)|rsi|macd|technique/, href: (c) => `/actions/${c}`, label: 'Analyse technique' },
 ];

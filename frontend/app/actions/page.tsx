@@ -121,7 +121,7 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
       <SectionHeader
         kicker="BRVM · Cote officielle"
         title="Marché Actions"
-        subtitle="Toutes les valeurs cotées — cours, volumes, performances et signaux assistés."
+        subtitle="Toutes les valeurs cotées · cours, volumes, performances et signaux assistés."
         actions={
           <>
             <div className="flex items-center gap-2">

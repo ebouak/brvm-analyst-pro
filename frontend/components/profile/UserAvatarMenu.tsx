@@ -76,8 +76,8 @@ export default function UserAvatarMenu() {
           <div className="py-1 text-sm">
             {[
               { href: '/profil', label: '🙍 Mon profil' },
-              { href: '/portefeuille', label: '📊 Mon portefeuille' },
-              { href: '/parametres/compte', label: '⚙️ Paramètres' },
+              { href: '/portefeuille', label: 'Mon portefeuille' },
+              { href: '/parametres/compte', label: 'Paramètres' },
             ].map((it) => (
               <Link key={it.href} href={it.href} onClick={() => setOpen(false)}
                 className="block px-4 py-2 text-muted hover:bg-white/[0.04] hover:text-white transition">

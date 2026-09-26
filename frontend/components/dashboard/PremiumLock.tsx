@@ -58,7 +58,7 @@ export function PremiumLock({
         </div>
         <Link
           href="/account/plan"
-          className="rounded-full bg-gold px-4 py-1.5 text-xs font-semibold text-[#1a1205] transition active:scale-95"
+          className="rounded-full bg-gold px-4 py-1.5 text-xs font-semibold text-bg transition active:scale-95"
         >
           Passer à Premium
         </Link>

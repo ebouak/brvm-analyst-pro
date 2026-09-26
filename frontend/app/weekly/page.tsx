@@ -35,12 +35,12 @@ async function fetchWeeklyArticles(): Promise<WeeklyArticle[]> {
 }
 
 const COMMO_LABELS: Record<string, { label: string; icon: string }> = {
-  cocoa: { label: 'Cacao', icon: '🍫' },
-  palm_oil: { label: 'Huile de palme', icon: '🌴' },
-  rubber: { label: 'Caoutchouc', icon: '🛞' },
-  sugar: { label: 'Sucre', icon: '🧊' },
-  crude_brent: { label: 'Brent', icon: '🛢️' },
-  gold: { label: 'Or', icon: '🥇' },
+  cocoa: { label: 'Cacao', icon: '◇' },
+  palm_oil: { label: 'Huile de palme', icon: '◇' },
+  rubber: { label: 'Caoutchouc', icon: '◇' },
+  sugar: { label: 'Sucre', icon: '◇' },
+  crude_brent: { label: 'Brent', icon: '◇' },
+  gold: { label: 'Or', icon: '◇' },
 };
 
 interface CommoTick {
@@ -133,7 +133,7 @@ export default async function WeeklyPage() {
             ))}
           </div>
           <p className="mt-1.5 text-[10px] text-faint">
-            Prix mensuels — source Banque mondiale (Pink Sheet), dernier point : {commos[0]?.date}.
+            Prix mensuels · source Banque mondiale (Pink Sheet), dernier point : {commos[0]?.date}.
           </p>
         </div>
       )}

@@ -63,7 +63,7 @@ export default function PatternSummaryWidget() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-sm text-ivory flex items-center gap-2">
-          <span className="text-lg">📊</span> État des Motifs
+          État des motifs
         </h3>
       </div>
 
@@ -82,7 +82,7 @@ export default function PatternSummaryWidget() {
             {momentumCount > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-up text-xs">📈</span>
+                  <span className="text-up text-xs">▲</span>
                   <span className="text-muted">Momentum</span>
                 </div>
                 <span className="font-mono font-bold text-up">{momentumCount}</span>

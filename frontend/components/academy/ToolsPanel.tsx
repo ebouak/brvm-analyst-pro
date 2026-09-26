@@ -52,7 +52,7 @@ function DiscussionTab({ courseTitre }: { courseTitre: string }) {
   return (
     <div className="space-y-3">
       <p className="text-xs leading-relaxed text-muted">
-        Une question sur ce cours ? Posez-la à la communauté sur le forum — mentionnez
+        Une question sur ce cours ? Posez-la à la communauté sur le forum : mentionnez
         « <span className="text-ivory">{courseTitre}</span> » dans le titre pour être retrouvé facilement.
       </p>
       <div className="flex flex-col gap-2">

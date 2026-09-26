@@ -10,11 +10,11 @@ import ExerciseBlock from './ExerciseBlock';
 /** Styles + icône par type de section — hiérarchie visuelle et repères. */
 const SECTION_STYLE: Record<string, { box: string; badge: string; icon: string }> = {
   definition: { box: 'border-accent/30 bg-accent/[0.05]', badge: 'text-accent', icon: '📖' },
-  importance: { box: 'border-border bg-surface', badge: 'text-ivory', icon: '💡' },
-  cas:        { box: 'border-up/30 bg-up/[0.05]', badge: 'text-up', icon: '🔍' },
-  piege:      { box: 'border-down/30 bg-down/[0.05]', badge: 'text-down', icon: '⚠️' },
+  importance: { box: 'border-border bg-surface', badge: 'text-ivory', icon: '◆' },
+  cas:        { box: 'border-up/30 bg-up/[0.05]', badge: 'text-up', icon: '→' },
+  piege:      { box: 'border-down/30 bg-down/[0.05]', badge: 'text-down', icon: '!' },
   lexique:    { box: 'border-border bg-surface', badge: 'text-muted', icon: '📚' },
-  retenir:    { box: 'border-gold/30 bg-gold/[0.06]', badge: 'text-gold', icon: '✅' },
+  retenir:    { box: 'border-gold/30 bg-gold/[0.06]', badge: 'text-gold', icon: '✓' },
 };
 
 export default function LessonContent({

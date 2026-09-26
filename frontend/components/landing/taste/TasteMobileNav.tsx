@@ -27,7 +27,7 @@ const LIENS = [
   { href: '/simulateur', label: 'Simulateur' },
   { href: '/brief', label: 'Brief quotidien' },
   { href: '/actualites', label: 'Actualités' },
-  { href: '/premium/diagnostic', label: 'Diagnostic IA' },
+  { href: '/premium/diagnostic', label: 'Dossier d’analyse' },
   { href: '/pricing', label: 'Tarifs' },
 ];
 

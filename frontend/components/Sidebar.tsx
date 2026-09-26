@@ -90,7 +90,7 @@ export default function Sidebar({
                       className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-faint hover:text-gold hover:bg-gold/[0.06] ${EASE}`}
                     >
                       {item.label}
-                      <span className="ml-auto text-[9px] opacity-60 group-hover:opacity-100">🔒</span>
+                      <span className="ml-auto text-[9px] opacity-60 group-hover:opacity-100">✦</span>
                     </Link>
                   );
                 }

@@ -35,13 +35,13 @@ export default function SentimentGauge({ score, delta }: Props) {
   return (
     <div className="flex flex-col items-center">
       <svg viewBox="0 0 200 116" width="100%" height="100%" className="max-w-[220px]" aria-hidden>
-        <path d={seg(0, 33, '')} stroke="#ff6b6b" strokeWidth="11" fill="none" strokeLinecap="round" opacity="0.85" />
-        <path d={seg(34, 66, '')} stroke="#f0b23a" strokeWidth="11" fill="none" opacity="0.85" />
-        <path d={seg(67, 100, '')} stroke="#3fe18b" strokeWidth="11" fill="none" strokeLinecap="round" opacity="0.85" />
+        <path d={seg(0, 33, '')} className="stroke-down" strokeWidth="11" fill="none" strokeLinecap="round" opacity="0.85" />
+        <path d={seg(34, 66, '')} className="stroke-warn" strokeWidth="11" fill="none" opacity="0.85" />
+        <path d={seg(67, 100, '')} className="stroke-up" strokeWidth="11" fill="none" strokeLinecap="round" opacity="0.85" />
         {/* aiguille */}
-        <line x1={cx} y1={cy} x2={nx.toFixed(1)} y2={ny.toFixed(1)} stroke="#56d7fd" strokeWidth="3" strokeLinecap="round" />
-        <circle cx={cx} cy={cy} r="5" fill="#56d7fd" />
-        <circle cx={cx} cy={cy} r="9" fill="none" stroke="#56d7fd" strokeOpacity="0.3" strokeWidth="2" />
+        <line x1={cx} y1={cy} x2={nx.toFixed(1)} y2={ny.toFixed(1)} className="stroke-accent" strokeWidth="3" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="5" className="fill-accent" />
+        <circle cx={cx} cy={cy} r="9" fill="none" className="stroke-accent" strokeOpacity="0.3" strokeWidth="2" />
       </svg>
       <div className="-mt-2 text-center">
         <div className="overline text-faint">Sentiment du marché</div>

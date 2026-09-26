@@ -30,10 +30,19 @@ function TickerSpark({ data, up }: { data: number[]; up: boolean }) {
     const y = h - ((v - min) / range) * (h - 2) - 1;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
-  const stroke = up ? '#3fe18b' : '#ff6b6b';
+  /* Classe de jeton, PAS un hex : `up` et `down` sont pilotés par variables CSS
+     et changent en mode clair (63 225 139 → 13 138 79). Un `#3fe18b` figé
+     laissait ce tracé en néon de mode sombre sur fond clair. */
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden className="shrink-0 opacity-70">
-      <polyline points={pts} fill="none" stroke={stroke} strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
+      <polyline
+        points={pts}
+        fill="none"
+        className={up ? 'stroke-up' : 'stroke-down'}
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -135,13 +144,13 @@ export default function DashboardTicker({
               {it.kind === 'action' && patternsByCode[it.code] && patternsByCode[it.code].length > 0 && (
                 <span className="inline-flex gap-0.5">
                   {patternsByCode[it.code].some((p) => p.pattern_type === 'atr_extreme') && (
-                    <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">⚡</span>
+                    <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">ATR</span>
                   )}
                   {patternsByCode[it.code].some((p) => p.pattern_type === 'bullish_consolidation') && (
-                    <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">📊</span>
+                    <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">CONS</span>
                   )}
                   {patternsByCode[it.code].some((p) => p.pattern_type === 'breakout_impulse') && (
-                    <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">🚀</span>
+                    <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">BRK</span>
                   )}
                 </span>
               )}

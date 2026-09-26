@@ -57,7 +57,7 @@ export default async function FormationDetailPage({ params }: { params: { id: st
       {f.support_url && (
         <a href={f.support_url} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm text-white hover:border-info/40">
-          📄 Télécharger le support
+          Télécharger le support
         </a>
       )}
 

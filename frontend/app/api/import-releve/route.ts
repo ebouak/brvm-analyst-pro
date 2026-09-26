@@ -39,8 +39,8 @@ async function providers(): Promise<Record<Provider, ProviderCfg>> {
   ]);
   return {
     deepseek: { key: deepseekKey ?? undefined, url: 'https://api.deepseek.com/chat/completions', model: () => 'deepseek-chat' },
-    mistral: { key: mistralKey ?? undefined, url: 'https://api.mistral.ai/v1/chat/completions', model: (m) => (m === 'vision' ? 'pixtral-large-latest' : 'mistral-large-latest') },
-    grok: { key: xaiKey ?? undefined, url: 'https://api.x.ai/v1/chat/completions', model: (m) => (m === 'vision' ? 'grok-2-vision-latest' : 'grok-2-latest') },
+    mistral: { key: mistralKey ?? undefined, url: 'https://api.mistral.ai/v1/chat/completions', model: (m) => (m === 'vision' ? 'mistral-small-latest' : 'mistral-small-latest') },
+    grok: { key: xaiKey ?? undefined, url: 'https://api.x.ai/v1/chat/completions', model: (m) => (m === 'vision' ? 'grok-4.6' : 'grok-4.6') },
   };
 }
 

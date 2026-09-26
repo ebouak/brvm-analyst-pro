@@ -56,7 +56,7 @@ export default async function SecurityPage() {
                   {e.event === 'sign_in'
                     ? 'Connexion'
                     : e.event === 'sign_in_failed'
-                      ? '⚠ Échec de connexion'
+                      ? 'Échec de connexion'
                       : e.event === 'sign_out'
                         ? 'Déconnexion'
                         : 'Réinit. mot de passe'}

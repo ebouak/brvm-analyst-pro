@@ -56,7 +56,7 @@ export default function PriceHistoryModal({ code, onClose }: { code: string; onC
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-          <h2 className="text-lg font-semibold">📈 Historique des cours — {code}</h2>
+          <h2 className="text-lg font-semibold">Historique des cours — {code}</h2>
           <button type="button" onClick={onClose} className="text-muted hover:text-fg text-lg" aria-label="Fermer">✕</button>
         </div>
 

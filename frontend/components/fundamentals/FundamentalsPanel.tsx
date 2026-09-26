@@ -84,7 +84,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">
-          🏦 Fondamentaux{p.year ? ` (exercice ${p.year})` : ''}
+          Fondamentaux{p.year ? ` (exercice ${p.year})` : ''}
           {p.famille === 'banque' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[10px] font-medium text-info">Banque</span>}
           {p.famille === 'assurance' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[10px] font-medium text-info">Assurance</span>}
         </h2>
@@ -144,7 +144,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
 
       {p.sourceUrl && (
         <a href={p.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-up hover:underline block">
-          📄 États financiers officiels (PDF)
+          États financiers officiels (PDF)
         </a>
       )}
       <p className="text-[10px] text-muted">

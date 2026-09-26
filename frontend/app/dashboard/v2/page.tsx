@@ -486,7 +486,7 @@ export default async function DashboardV2() {
           </div>
           <div className="v2-s">
             {capitauxEstimes
-              ? 'estimé : cours × titres — valeur officielle non publiée'
+              ? 'estimé : cours × titres, valeur officielle non publiée'
               : `${nf.format(ntTotal)} transactions`}
           </div>
         </div>
@@ -568,7 +568,7 @@ export default async function DashboardV2() {
           </p>
 
           <p className="v2-vconseq">
-            <span className="v2-lb">Règle appliquée — seuils fixés à l’avance</span>
+            <span className="v2-lb">Règle appliquée : seuils fixés à l’avance</span>
             Composite &lt; −1,00 % → <b>{testCompo ? 'vrai' : 'faux'}</b>
             {compoVar != null ? ` (${signe(compoVar)} %)` : ''}
             <br />
@@ -609,7 +609,7 @@ export default async function DashboardV2() {
           Les indices, sur le même axe
         </h2>
         <p className="mt-1 max-w-[78ch] text-[12.5px] italic text-faint">
-          Même graduation que la dispersion. Les indices bougent moins que les valeurs — les barres
+          Même graduation que la dispersion. Les indices bougent moins que les valeurs : les barres
           sont courtes, c’est exact.
         </p>
         <div className="mt-4">
@@ -729,7 +729,7 @@ export default async function DashboardV2() {
       </div>
 
       <p className="v2-tab mt-8 border-t border-border pt-4 text-[10.5px] leading-relaxed text-faint">
-        Source — séance BRVM du {lastDate}
+        Source · séance BRVM du {lastDate}
         {lastIdxDate && lastIdxDate !== lastDate ? `, indices relevés le ${lastIdxDate}` : ''}. Tous
         les montants sont en FCFA. Les agrégats (largeur, parts, totaux) sont calculés sur les
         lignes de cette séance.{' '}

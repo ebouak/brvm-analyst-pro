@@ -214,7 +214,7 @@ export default function CommandPalette({ items }: Props) {
       >
         {/* Input */}
         <div className="flex items-center gap-3 border-b border-[#232733] px-4 py-3">
-          <span className="text-[#8b93a7]" aria-hidden>🔍</span>
+          <span className="text-muted" aria-hidden>›</span>
           <input
             ref={inputRef}
             type="text"
@@ -262,7 +262,7 @@ export default function CommandPalette({ items }: Props) {
                       isSelected ? 'bg-[#00c853]/10 text-[#00c853]' : 'text-[#e6e9f0] hover:bg-[#0f1117]',
                     ].join(' ')}
                   >
-                    <span aria-hidden>📈</span>
+                    <span aria-hidden>◇</span>
                     <span className="flex-1 truncate">
                       <span className="font-medium">{r.code}</span>
                       <span className={`ml-2 text-sm ${isSelected ? 'text-[#00c853]/70' : 'text-[#8b93a7]'}`}>

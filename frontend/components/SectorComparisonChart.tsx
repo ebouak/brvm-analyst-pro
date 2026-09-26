@@ -8,7 +8,7 @@ export default function SectorComparisonChart({ data }: { data: SectorBar[] }) {
 
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
-      <h3 className="text-sm font-semibold mb-2">📊 Performance par titre (%)</h3>
+      <h3 className="text-sm font-semibold mb-2">Performance par titre (%)</h3>
       <EChart
         height={Math.max(180, rows.length * 28 + 60)}
         option={{

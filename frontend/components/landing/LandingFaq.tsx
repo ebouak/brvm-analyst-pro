@@ -11,7 +11,7 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
     a: (
       <>
         Oui. Les cours, la note A–F et les fondamentaux sont accessibles gratuitement après création
-        d&apos;un compte — sans carte bancaire. L&apos;abonnement Premium (Diagnostic IA) est optionnel.
+        d&apos;un compte, sans carte bancaire. L&apos;abonnement Premium (Dossier d’analyse) est optionnel.
       </>
     ),
   },
@@ -38,7 +38,7 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
     a: (
       <>
         Depuis votre compte, via la page <Link href="/pricing" className="text-accent hover:underline">Tarifs</Link>.
-        Le Premium débloque le Diagnostic IA (analyse détaillée par société), sans engagement.
+        Le Premium débloque le Dossier d’analyse (analyse détaillée par société), sans engagement.
       </>
     ),
   },

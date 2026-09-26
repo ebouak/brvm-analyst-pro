@@ -15,7 +15,7 @@ export default function BeginnerToggle() {
           : 'border-border text-faint hover:border-cyan/30 hover:text-muted'
       }`}
     >
-      {beginner ? '🎓 Débutant' : '◈ Expert'}
+      {beginner ? 'Débutant' : '◈ Expert'}
     </button>
   );
 }

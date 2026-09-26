@@ -60,7 +60,7 @@ export default function ScreensShowcase() {
         )}
       </div>
       <p className="mt-2 text-center text-[11px] text-faint">
-        Écrans réels de l&apos;application — tableau de bord, fiche instrument, signaux, heatmap, screener.
+        Écrans réels de l&apos;application : tableau de bord, fiche instrument, signaux, heatmap, screener.
       </p>
     </section>
   );

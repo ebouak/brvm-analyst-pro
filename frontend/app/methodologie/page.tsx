@@ -28,7 +28,7 @@ export default function MethodologiePage() {
               'Couverture : séance courante uniquement',
               'Cours de clôture, volume, valeur échangée, nb transactions',
             ]}
-            note="Source officielle — priorité maximale en cas de conflit."
+            note="Source officielle : priorité maximale en cas de conflit."
           />
           <SourceCard
             title="GitHub brvm-data-public"
@@ -40,7 +40,7 @@ export default function MethodologiePage() {
               'Couverture : ~50 tickers, historique depuis 2000',
               'Utilisé pour backfill initial et backtesting',
             ]}
-            note="Données non officielles — uniquement pour l'analyse technique historique."
+            note="Données non officielles : uniquement pour l'analyse technique historique."
           />
         </div>
       </Section>
@@ -176,7 +176,7 @@ export default function MethodologiePage() {
       <div className="rounded-panel border border-warn/20 bg-warn/[0.03] px-5 py-4 shadow-card space-y-2">
         <div className="flex items-center gap-2">
           <span className="text-warn text-xs">▲</span>
-          <h3 className="overline text-warn/80">Avertissement légal — COSUMAF</h3>
+          <h3 className="overline text-warn/80">Avertissement légal · COSUMAF</h3>
         </div>
         <p className="text-xs text-faint leading-relaxed">
           Les données, analyses, signaux et résultats de backtesting fournis par WESTBOURSE sont à titre{' '}

@@ -70,8 +70,8 @@ export function VideoSeance({
           habillage recyclé. C'est le quatrième maillon de « La preuve de la
           donnée » plus haut, et il se voit. */}
       <p className="mb-4 max-w-[62ch] text-sm leading-relaxed text-muted">
-        Produite automatiquement chaque soir après la clôture, à partir des mêmes chiffres que
-        cette page. Aucune séance exploitable, aucune vidéo — jamais un habillage recyclé.
+        Montée chaque soir après la clôture, à partir des mêmes chiffres que cette page.
+        Un jour sans séance exploitable est un jour sans vidéo : rien n’est repris d’un ancien épisode.
       </p>
 
       {/* items-start : sans cela le panneau s'étire à la hauteur de la vidéo

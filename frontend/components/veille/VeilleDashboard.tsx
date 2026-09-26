@@ -302,7 +302,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     const top = [...news].sort((a, b) => (b.score_impact ?? 0) - (a.score_impact ?? 0))[0];
     if (top && (top.score_impact ?? 0) > 0) {
       out.push({
-        icon: '⚡',
+        icon: '◇',
         text: `Impact le plus fort (${top.score_impact}/100) : ${top.titre}`,
         detail: `${top.source_label ?? top.source} · ${top.date_publication}`,
       });
@@ -328,7 +328,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     if (pos + neg >= 5) {
       const ratio = Math.round((pos / (pos + neg)) * 100);
       out.push({
-        icon: ratio >= 60 ? '📈' : ratio <= 40 ? '📉' : '⚖️',
+        icon: ratio >= 60 ? '▲' : ratio <= 40 ? '▼' : '=',
         text: `Tonalité ${ratio >= 60 ? 'positive' : ratio <= 40 ? 'négative' : 'partagée'} : ${ratio} % d'articles positifs`,
         detail: `${pos} positifs · ${neg} négatifs sur les articles classés`,
       });
@@ -349,7 +349,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
   const VIEWS: { id: View; label: string; icon: string; count: number }[] = [
     { id: 'flux', label: 'Flux', icon: '≡', count: news.length },
     { id: 'heatmap', label: 'Heatmap', icon: '⬛', count: stats.covered },
-    { id: 'alertes', label: 'Alertes', icon: '🔔', count: stats.alertes },
+    { id: 'alertes', label: 'Alertes', icon: '◇', count: stats.alertes },
     { id: 'matieres', label: 'Matières', icon: '◈', count: stats.matieres },
     { id: 'sources', label: 'Sources', icon: '⌬', count: topSources.length },
   ];
@@ -502,7 +502,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
             showAlertes ? 'bg-[#ff6b6b] border-[#ff6b6b] text-white' : 'bg-surface border-border text-muted hover:text-foreground'
           }`}
         >
-          🔔 Alertes
+          Alertes
         </button>
         <button type="button" onClick={reset} className="px-3 py-1.5 rounded-lg text-sm border border-border text-muted hover:text-foreground transition-colors cursor-pointer">
           ✕ Reset
@@ -613,7 +613,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
           {view === 'flux' && alertesCritiques.length > 0 && !showAlertes && (
             <div className="bg-[#ff6b6b]/5 border border-[#ff6b6b]/30 rounded-xl p-3 space-y-2">
               <p className="text-xs font-bold text-[#ff6b6b] uppercase tracking-widest">
-                🔔 Alertes critiques ({stats.alertes})
+                Alertes critiques ({stats.alertes})
               </p>
               {alertesCritiques.map((n) => (
                 <a key={n.id} href={n.source_url ?? '#'} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">

@@ -79,7 +79,7 @@ function renderChart(ch: Chart): string {
   }
 
   return `<div class="chart-wrap">
-    <h4>📈 ${esc(ch.titre)}${ch.unite ? ` <span class="chart-unit">(${esc(ch.unite)})</span>` : ''}</h4>
+    <h4>${esc(ch.titre)}${ch.unite ? ` <span class="chart-unit">(${esc(ch.unite)})</span>` : ''}</h4>
     <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(ch.titre)}" class="chart-svg">
       ${grid}${series}${xLabels}
     </svg>

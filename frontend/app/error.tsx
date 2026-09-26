@@ -34,7 +34,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       <div className="space-y-1">
         <h1 className="font-display text-xl text-white">Une erreur est survenue</h1>
         <p className="max-w-sm text-sm text-muted">
-          La page n&apos;a pas pu se charger correctement. Réessayez — si le problème persiste,
+          La page n&apos;a pas pu se charger correctement. Réessayez. Si le problème persiste,
           revenez au tableau de bord.
         </p>
       </div>

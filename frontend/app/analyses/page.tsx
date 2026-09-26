@@ -47,7 +47,7 @@ export default async function AnalysesIndex() {
           className="block rounded-xl border border-accent/30 bg-accent/5 p-5 transition-colors hover:border-accent/60"
         >
           <p className="text-[11px] uppercase tracking-wider text-accent">Chaque semaine</p>
-          <h2 className="mt-1 font-display text-lg text-white">Analyse hebdo — les valeurs qui bougent</h2>
+          <h2 className="mt-1 font-display text-lg text-white">Analyse hebdo · les valeurs qui bougent</h2>
           <p className="mt-1 text-sm text-muted">
             Les cinq titres les plus actifs de la semaine, expliqués simplement : ce qui s’est passé,
             ce que ça veut dire, les niveaux à surveiller.

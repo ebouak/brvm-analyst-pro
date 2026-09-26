@@ -163,17 +163,17 @@ export default function ReportsPage() {
   };
   const PRESETS: { label: string; hint: string; params: ReportParams }[] = [
     {
-      label: '⚡ Marché — 7 derniers jours',
+      label: 'Marché · 7 derniers jours',
       hint: 'Vue express de la semaine',
       params: { type: 'hebdomadaire', codes: [], dateFrom: iso(daysAgo(7)), dateTo: iso(new Date()) },
     },
     {
-      label: '📅 Marché — 30 derniers jours',
+      label: 'Marché · 30 derniers jours',
       hint: 'Le standard mensuel',
       params: { type: 'mensuel', codes: [], dateFrom: iso(daysAgo(30)), dateTo: iso(new Date()) },
     },
     {
-      label: '📊 Trimestre écoulé',
+      label: 'Trimestre écoulé',
       hint: 'Tendances de fond + événements',
       params: { type: 'personnalise', codes: [], dateFrom: iso(daysAgo(91)), dateTo: iso(new Date()) },
     },
@@ -187,7 +187,7 @@ export default function ReportsPage() {
           <h1 className="font-display text-2xl text-ivory [letter-spacing:-0.02em]">Rapports interactifs</h1>
           <p className="mt-1 max-w-[58ch] text-sm text-muted">
             Composez un rapport sur mesure (titres, période) : performances, séries de cours,
-            événements, signaux — exportable en PDF.
+            événements, signaux, exportable en PDF.
           </p>
         </div>
         {report && !loading && (
@@ -196,7 +196,7 @@ export default function ReportsPage() {
             onClick={handleExportPDF}
             className="rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-obsidian shadow-gold-sm transition hover:bg-gold-2 active:scale-95"
           >
-            ⬇ Exporter en PDF
+            Exporter en PDF
           </button>
         )}
       </div>

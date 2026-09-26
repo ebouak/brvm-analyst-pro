@@ -70,7 +70,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
           <p className="text-[10px] text-faint">
             {indice
               ? 'Mode indice : toutes les séries ramenées à 100 la première année. Comparez n’importe quelles trajectoires.'
-              : 'Cochez jusqu’à deux familles d’unités (montants, %, FCFA/action) — les axes se placent seuls. Pour tout combiner, activez « base 100 ».'}
+              : 'Cochez jusqu’à deux familles d’unités (montants, %, FCFA/action), les axes se placent seuls. Pour tout combiner, activez « base 100 ».'}
           </p>
         </div>
         <button
@@ -100,7 +100,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
                     <button
                       key={s.id} type="button" onClick={() => basculer(s.id)} disabled={bloque}
                       aria-pressed={coche}
-                      title={bloque ? 'Ajouterait une 3e famille d’unités — décochez d’abord une série.' : undefined}
+                      title={bloque ? 'Ajouterait une 3e famille d’unités : décochez d’abord une série.' : undefined}
                       className={`px-2 py-1 rounded border text-[11px] transition ${
                         coche
                           ? 'border-accent/60 bg-accent/10 text-accent'
@@ -162,7 +162,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
       )}
 
       <p className="text-[10px] text-faint">
-        Séries dérivées des états financiers publiés (une valeur manquante laisse un trou — rien n’est estimé).
+        Séries dérivées des états financiers publiés (une valeur manquante laisse un trou, rien n’est estimé).
         Marges = résultat / CA ; ROE = résultat net / capitaux propres.
       </p>
     </div>

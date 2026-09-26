@@ -16,6 +16,8 @@
  *   tsx src/index.ts dividends             # ingère les dividendes
  *   tsx src/index.ts dividends --mock      # dividendes mock
  *   tsx src/index.ts range52               # plus-haut/plus-bas 52 semaines
+ *   tsx src/index.ts coherence             # balayage hebdomadaire de cohérence
+ *   tsx src/index.ts coherence --mock      # démonstration (sans Supabase)
  *   tsx src/index.ts alerts                # évalue les alertes et notifie
  *   tsx src/index.ts alerts --mock         # notification de démonstration
  *   tsx src/index.ts forum-trending        # calcule les scores de tendance du forum
@@ -33,6 +35,7 @@
  *   tsx src/index.ts paper-trading:auto --mock # démo (sans Supabase)
  *   tsx src/index.ts veille                # monitoring BRVM Veille Intelligente
  *   tsx src/index.ts veille [<YYYY-MM-DD>] [--mock] # date spécifique ou démo
+ *   tsx src/index.ts sante:llm             # sonde DeepSeek/Mistral/xAI, alerte Telegram si panne
  *
  * Codes de sortie : 0 = success/mock/partial, 1 = failed (utile pour le cron).
  */
@@ -236,6 +239,63 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'carnet': {
+      // Carnet d'ordres depuis le Bulletin Officiel de la Cote. Le bulletin
+      // paraît après la clôture : ce job n'a donc rien à voir avec l'intraday,
+      // et la séance qu'il enregistre est celle que le bulletin déclare.
+      const { runCarnet } = await import('./carnet/runCarnet.js');
+      const res = await monitored(
+        { code: 'carnet', label: 'Carnet d’ordres (BOC)' },
+        async () => {
+          const r = await runCarnet({ date: positional[0] });
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lignes,
+              rows_upserted: r.ecrites,
+              metadata: { date_marche: r.date, avec_fourchette: r.avecFourchette, au_marche: r.auMarche, saute: r.saute },
+            },
+          };
+        },
+      );
+      return 0;
+    }
+    case 'sante:llm': {
+      // Sonde réelle des trois fournisseurs LLM (DeepSeek/Mistral/xAI) : une
+      // clé valide ne suffit pas, un modèle de repli retiré casse tout sans
+      // qu'aucun autre job ne le voie tant que le fournisseur prioritaire
+      // répond. Voir src/sante/evaluerSante.ts pour l'incident du 2026-09-26.
+      const { runSanteLlm } = await import('./sante/runSanteLlm.js');
+      const res = await monitored(
+        { code: 'sante-llm', label: 'Santé des fournisseurs LLM' },
+        async () => {
+          const r = await runSanteLlm();
+          return {
+            value: r,
+            outcome: {
+              // 'total' = plus aucun fournisseur utilisable : c'est le seul
+              // cas qui doit faire échouer le run de monitoring lui-même — un
+              // run vert ne doit jamais couvrir une panne totale.
+              status:
+                r.verdict.niveau === 'total'
+                  ? ('failed' as const)
+                  : r.verdict.niveau === 'partiel'
+                    ? ('partial' as const)
+                    : ('success' as const),
+              rows_extracted: r.sondages.length,
+              rows_upserted: r.verdict.utilisables,
+              metadata: {
+                niveau: r.verdict.niveau,
+                etats: r.verdict.etats,
+                alerteEnvoyee: r.alerteEnvoyee,
+              },
+            },
+          };
+        },
+      );
+      return res.verdict.niveau === 'total' ? 1 : 0;
+    }
     case 'range52': {
       // Plus-haut / plus-bas 52 semaines. À passer APRÈS `daily` : les bornes
       // incluent la clôture du jour, sinon elles ignoreraient un nouveau record.
@@ -256,6 +316,41 @@ async function main(): Promise<number> {
         },
       );
       return res.status === 'failed' ? 1 : 0;
+    }
+    case 'coherence': {
+      // Balayage hebdomadaire des 4 règles de cohérence (notation périmée,
+      // étiquette technique contredite, publication mal attribuée, comptes
+      // périmés) sur les 48 actions. N'échoue jamais en silence : voir
+      // src/coherence/runCoherence.ts — zéro instrument lu ou une écriture
+      // refusée lèvent une erreur explicite, propagée jusqu'ici.
+      const { runCoherence } = await import('./coherence/runCoherence.js');
+      const res = await monitored(
+        { code: 'coherence', label: 'Cohérence des fiches sociétés' },
+        async () => {
+          const r = await runCoherence({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.nb_instruments,
+              rows_upserted: r.nb_anomalies,
+              // `nb_instruments` répété ici (déjà dans rows_extracted) : la
+              // console /admin/coherence doit pouvoir prouver, depuis cette
+              // seule ligne de scraper_runs, qu'un passage sans anomalie
+              // ("nb_anomalies": 0) est un passage qui a bien examiné les 48
+              // valeurs — et non l'absence de passage.
+              metadata: {
+                date_detection: r.date_detection,
+                nb_instruments: r.nb_instruments,
+                nb_anomalies: r.nb_anomalies,
+                par_regle: r.par_regle,
+                par_gravite: r.par_gravite,
+              },
+            },
+          };
+        },
+      );
+      return 0;
     }
     case 'events': {
       const res = await monitored(

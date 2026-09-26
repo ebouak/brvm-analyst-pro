@@ -16,12 +16,12 @@ export function DiagnosticSpotlight({ report }: Props) {
     <section className="mt-10 rounded-panel border border-accent/20 bg-gradient-to-br from-accent/[0.06] to-transparent p-6 md:p-8">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_1.1fr] md:items-center">
         <div>
-          <p className="overline mb-3 text-gold-2">Diagnostic IA · Premium</p>
+          <p className="overline mb-3 text-gold-2">Dossier d’analyse · Premium</p>
           <h2 className="mb-3 font-display text-2xl text-ivory md:text-3xl [letter-spacing:-0.03em]">
             Votre analyste BRVM en quelques secondes.
           </h2>
           <p className="max-w-[46ch] text-sm leading-relaxed text-muted">
-            Une analyse façon sell-side sur chaque société — valorisation, forces, risques — générée à
+            Une analyse façon sell-side sur chaque société (valorisation, forces, risques), générée à
             partir des données réelles de la plateforme. Un outil d&apos;analyse complémentaire, jamais
             une recommandation d&apos;achat ou de vente.
           </p>

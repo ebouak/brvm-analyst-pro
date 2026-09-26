@@ -227,7 +227,7 @@ export function PaperTradingDashboard() {
           </summary>
           <ol className="mt-3 max-w-2xl space-y-1.5 text-xs text-muted">
             <li>
-              <span className="text-white">1.</span> Vous ouvrez une position fictive — par défaut
+              <span className="text-white">1.</span> Vous ouvrez une position fictive : par défaut
               10 % de votre capital simulé, converti en titres au cours du jour.
             </li>
             <li>

@@ -1,4 +1,5 @@
 import { createPublicClient } from '@/lib/supabase/public';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import VeilleDashboard from '@/components/veille/VeilleDashboard';
 import { SectionHeader } from '@/components/ui/premium';
 import ViewTabs from '@/components/ViewTabs';
@@ -48,9 +49,9 @@ export default async function VeillePage() {
   return (
     <div className="min-h-screen bg-bg px-4 py-6 space-y-6 max-w-7xl mx-auto">
       <SectionHeader
-        kicker="Intelligence · 47 sociétés · 150+ sources · 1 an d'historique"
+        kicker={`Intelligence · ${NB_SOCIETES_COTEES} sociétés · 150+ sources · 1 an d'historique`}
         title="Veille BRVM"
-        subtitle="Surveillance automatisée des actualités marché — mis à jour quotidiennement."
+        subtitle="Surveillance automatisée des actualités marché, mis à jour quotidiennement."
       />
       <ViewTabs tabs={INTEL_TABS} current="/veille" />
       <VeilleDashboard news={news} />

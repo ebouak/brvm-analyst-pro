@@ -60,7 +60,7 @@ export default async function Page({
         <SectionHeader
           kicker="Pouvoir d'achat"
           title="Le rendement vrai"
-          subtitle="Le cours ne dit qu'une partie de l'histoire. Voici ce que votre action vous a réellement rapporté — d'abord le cours seul, puis dividendes nets réinvestis compris, toujours corrigé de l'inflation de votre pays."
+          subtitle="Le cours ne dit qu'une partie de l'histoire. Voici ce que votre action vous a réellement rapporté : d'abord le cours seul, puis dividendes nets réinvestis compris, toujours corrigé de l'inflation de votre pays."
         />
 
         <form method="get" className="space-y-4 rounded-xl border border-border bg-surface p-4">
@@ -92,7 +92,7 @@ export default async function Page({
             <span className="text-[11px] text-faint">
               {mode === 'vrai'
                 ? 'Cours + dividendes nets réinvestis, corrigés de l’inflation.'
-                : 'Cours seul corrigé de l’inflation — horizon au choix.'}
+                : 'Cours seul corrigé de l’inflation · horizon au choix.'}
             </span>
           </div>
 
@@ -180,12 +180,12 @@ export default async function Page({
                     <li>
                       <strong className="text-ivory">Réinvestissement</strong> : chaque dividende net
                       rachète des actions au cours du jour, et ces actions rapportent à leur tour. Ce
-                      n&apos;est pas une addition — c&apos;est la capitalisation.
+                      n&apos;est pas une addition : c&apos;est la capitalisation.
                     </li>
                     <li>
                       <strong className="text-ivory">Impôt (déjà déduit)</strong> : les dividendes
                       publiés par les émetteurs BRVM sont <strong>nets d&apos;IRVM</strong>, prélevé à
-                      la source par l&apos;émetteur selon son pays de cotation — pas le vôtre. On les
+                      la source par l&apos;émetteur selon son pays de cotation, pas le vôtre. On les
                       réinvestit tels quels, sans les re-taxer. Détail :{' '}
                       <Link href="/fiscalite" className="text-accent underline">barème IRVM par pays</Link>.
                     </li>

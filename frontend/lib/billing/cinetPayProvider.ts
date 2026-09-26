@@ -1,5 +1,6 @@
 import 'server-only';
 import { getServiceClient } from './serviceClient';
+import { prixDuCycle } from './dates';
 import type { CheckoutRequest, CheckoutResult, PaymentProvider } from './types';
 
 /**
@@ -63,12 +64,12 @@ export const cinetPayProvider: PaymentProvider = {
 
     const { data: plan, error: planErr } = await db
       .from('subscription_plans')
-      .select('id, name, price_monthly, price_yearly, currency')
+      .select('id, name, price_monthly, price_quarterly, price_yearly, currency')
       .eq('code', req.planCode)
       .maybeSingle();
     if (planErr || !plan) return { ok: false, status: 'error', message: 'Plan introuvable.' };
 
-    const amount = Number(req.cycle === 'yearly' ? plan.price_yearly : plan.price_monthly);
+    const amount = Number(prixDuCycle(plan, req.cycle) ?? Number.NaN);
     if (!Number.isFinite(amount) || amount <= 0) {
       return { ok: false, status: 'error', message: 'Tarif indisponible pour ce cycle.' };
     }

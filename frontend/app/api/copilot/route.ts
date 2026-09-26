@@ -87,7 +87,7 @@ async function executeIntent(intent: CopilotIntent): Promise<CopilotResponse> {
 
 const LLM_ORDER: { provider: LlmProvider; url: string; model: string }[] = [
   { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest' },
+  { provider: 'mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
 ];
 
 const TOOL_PROMPT = `Tu es le routeur de commandes de WESTBOURSE (analyse BRVM). Choisis UN outil pour la requête utilisateur et réponds UNIQUEMENT en JSON compact, sans markdown.

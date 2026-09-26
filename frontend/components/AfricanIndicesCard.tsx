@@ -116,7 +116,7 @@ export async function AfricanIndicesCard({ brvmComposite }: {
         ))}
       </div>
       <p className="mt-2 text-[10px] leading-relaxed text-faint">
-        Indices en devise locale — non comparables en niveau, seulement en variation.
+        Indices en devise locale : non comparables en niveau, seulement en variation.
       </p>
     </div>
   );

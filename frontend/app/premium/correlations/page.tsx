@@ -32,7 +32,7 @@ export default async function CorrelationsPage() {
       <SectionHeader
         kicker="Intelligence de marché"
         title="Corrélation Matières Premières"
-        subtitle="Relation entre le cours des actions BRVM et les matières premières sous-jacentes — huile de palme, caoutchouc, sucre, cacao."
+        subtitle="Relation entre le cours des actions BRVM et les matières premières sous-jacentes · huile de palme, caoutchouc, sucre, cacao."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />
 

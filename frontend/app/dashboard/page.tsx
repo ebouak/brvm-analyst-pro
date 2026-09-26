@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { createClient } from '@/lib/supabase/server';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
@@ -26,6 +27,9 @@ import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
 import { fmtFcfa } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
+import CarnetCommentaire from '@/components/CarnetCommentaire';
+import type { CarnetSeance as CarnetVedette } from '@/lib/carnet/commentaire';
+import { canAccess } from '@/lib/server/featureAccess';
 import {
   SectionHeader,
   EmptyStatePremium,
@@ -120,13 +124,65 @@ async function getData() {
     topSectorPerfs,
   });
 
+  // Valeur commentée du jour : celle qui porte le signal le plus assuré, à
+  // défaut la plus échangée de la séance. Aucune des deux n'est un conseil —
+  // c'est simplement la valeur dont il y a le plus à dire.
+  const vedetteCode =
+    typedSignals[0]?.code ??
+    [...typedActions].sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0))[0]?.code ??
+    null;
+
+  const [{ data: carnetVedette }, { data: actusVedette }] = vedetteCode
+    ? await Promise.all([
+        supabase
+          .from('brvm_carnet_daily')
+          .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
+          .eq('code', vedetteCode)
+          .order('date_marche', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('brvm_news')
+          .select('titre, date_publication')
+          .eq('instrument_code', vedetteCode)
+          .lte('date_publication', new Date().toISOString().slice(0, 10))
+          .order('date_publication', { ascending: false })
+          .limit(2),
+      ])
+    : [{ data: null }, { data: null }];
+
+  const vedette = vedetteCode
+    ? {
+        code: vedetteCode,
+        carnet: (carnetVedette ?? null) as CarnetVedette | null,
+        signal: typedSignals[0]
+          ? {
+              date_marche: typedSignals[0].date_marche,
+              signal: typedSignals[0].signal,
+              confiance: typedSignals[0].confiance ?? null,
+              score_total: (typedSignals[0] as { score_total?: number | null }).score_total ?? null,
+              explication: (typedSignals[0] as { explication?: string | null }).explication ?? null,
+              sousScores: (() => {
+                const s = typedSignals[0] as unknown as Record<string, unknown>;
+                const n = (k: string) => (typeof s[k] === 'number' ? (s[k] as number) : null);
+                return { variation: n('score_variation'), volume: n('score_volume'), rsi: n('score_rsi'), macd: n('score_macd'), tendance: n('bonus_tendance') };
+              })(),
+            }
+          : null,
+        // Les capitaux de la séance : l'étalon qui empêche de lire un reliquat
+        // de carnet comme un rapport de force.
+        valeurEchangee: typedActions.find((a) => a.code === vedetteCode)?.valeur_echangee ?? null,
+        actualites: (actusVedette ?? []) as { titre: string; date_publication: string }[],
+      }
+    : null;
+
   // Historique cours (10 dernières séances) pour tous les codes — sparklines TopMovers
   const { data: histRows } = await supabase
     .from('brvm_actions_daily')
     .select('code, cours_jour, date_marche')
     .not('cours_jour', 'is', null)
     .order('date_marche', { ascending: false })
-    .limit(10 * 47); // max 47 actions × 10 séances
+    .limit(10 * (typedActions.length || NB_SOCIETES_COTEES)); // 10 séances × le nombre réel de valeurs cotées
 
   const sparklines: Record<string, number[]> = {};
   for (const row of (histRows ?? []) as { code: string; cours_jour: number; date_marche: string }[]) {
@@ -170,6 +226,7 @@ async function getData() {
   ];
 
   return {
+    vedette,
     lastDate,
     actions: typedActions,
     indices: typedIndices,
@@ -222,10 +279,15 @@ function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketS
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker } = await getData();
+  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker, vedette } = await getData();
 
   // Fraîcheur des cours — affichée au-dessus du ticker permanent.
-  const fIn = await loadFreshnessInputs();
+  // `lecture_seance` verrouille l'encart « Ce que dit la séance · CODE » plus bas :
+  // vérifié ici, en parallèle, pour ne pas ajouter d'aller-retour dédié.
+  const [fIn, gateLectureSeance] = await Promise.all([
+    loadFreshnessInputs(),
+    canAccess('lecture_seance'),
+  ]);
   const fraicheurCours = computeFreshness(fIn.derniereCollecte, fIn.derniereSeance, new Date());
 
   // Secteurs favoris de l'utilisateur (paramétrage intelligent).
@@ -261,7 +323,7 @@ export default async function Dashboard() {
           <SectionHeader
             kicker="Tableau de bord"
             title="Marché BRVM"
-            subtitle="Bourse Régionale des Valeurs Mobilières — UEMOA"
+            subtitle="Bourse Régionale des Valeurs Mobilières · UEMOA"
           />
           <EmptyStatePremium
             icon="◈"
@@ -333,6 +395,29 @@ export default async function Dashboard() {
     ),
     seance: (
       <section aria-label="Séance du jour">
+        {/* Verrou premium `lecture_seance` : sur ce tableau de bord déjà dense en
+            CTA (signaux, patterns intraday plus bas), un cadenas de plus pour un
+            encart qui met en avant une valeur choisie automatiquement — pas
+            recherchée par l'utilisateur — ajouterait de la fatigue sans le
+            justifier. On omet donc le bloc entier plutôt que d'y mettre un
+            SectionLock ; la fiche action, elle, explique l'offre avec un vrai
+            pitch. Rien ne fuit : le bloc (titre + lien + composant) ne rend
+            rien du tout, sans cadre ni marge orpheline. */}
+        {vedette && gateLectureSeance.allowed && (
+          <div className="mb-4 rounded-panel border border-border bg-surface p-4">
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <h3 className="text-sm font-semibold text-ivory">Ce que dit la séance · {vedette.code}</h3>
+              <Link href={`/actions/${vedette.code}`} className="text-xs font-semibold text-accent-ink hover:underline">Voir la fiche →</Link>
+            </div>
+            <CarnetCommentaire
+              carnet={vedette.carnet}
+              signal={vedette.signal}
+              actualites={vedette.actualites}
+              contexte={{ valeurEchangee: vedette.valeurEchangee }}
+              compact
+            />
+          </div>
+        )}
         <p className="overline text-muted mb-4 tracking-[0.16em]">Séance du jour</p>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" sparklines={sparklines} />
@@ -457,7 +542,7 @@ export default async function Dashboard() {
             href="/parametres/alertes"
             className="flex w-full items-center gap-2 rounded-lg border border-down/30 bg-down/10 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
           >
-            <span className="animate-pulse" aria-hidden>🔔</span>
+            <span className="animate-pulse" aria-hidden>●</span>
             <span>
               {triggeredAlerts} alerte{triggeredAlerts > 1 ? 's' : ''} déclenchée{triggeredAlerts > 1 ? 's' : ''}
             </span>
@@ -509,7 +594,7 @@ export default async function Dashboard() {
               <p className="font-semibold text-ivory">À propos des patterns</p>
               <p>Adaptés au marché de <strong>fixing</strong> de la BRVM (une fixation par séance) :</p>
               <ul className="space-y-1.5 ml-2">
-                <li>📈 <strong>Momentum</strong> — Tendance intraséance marquée</li>
+                <li><strong>Momentum</strong> — Tendance intraséance marquée</li>
                 <li>🔊 <strong>Volume anormal</strong> — Pic d&apos;échanges vs moyenne 20&nbsp;j</li>
                 <li>➡️ <strong>Mouvement</strong> — Variation de prix significative</li>
               </ul>

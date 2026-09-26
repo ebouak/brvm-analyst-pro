@@ -23,6 +23,14 @@ export interface LiquidityV2Result {
   activite: number;              // 0-1 (échelle log valeur moyenne)
   amihud: number | null;         // %/M FCFA — null si aucune séance traitée
   spread_roll_pct: number | null;// % du cours — null si cov >= 0 (non estimable)
+  /** Fourchette RETENUE pour le score, en % du cours. */
+  spread_pct: number | null;
+  /**
+   * D'où vient cette fourchette. `carnet` = mesurée sur les meilleures limites
+   * publiées par la BRVM ; `roll` = estimée statistiquement ; `null` = aucune.
+   * Le lecteur doit pouvoir distinguer un fait d'une estimation.
+   */
+  spread_source: 'carnet' | 'roll' | null;
   valeur_moyenne_30j: number;    // FCFA / séance de marché
   seances_traitees: number;
   seances_marche: number;
@@ -47,8 +55,14 @@ const LOG_CEIL = 250_000_000;   // 250 M FCFA/séance → 1 (SNTS, le plus gros,
 // 0,002 = on absorbe un million sans faire bouger le cours ; 5 = illiquide.
 const AMIHUD_GOOD = 0.002;
 const AMIHUD_BAD = 5;
-// Spread de Roll en % du cours : 0,1 % = coût d'aller-retour négligeable,
-// 4 % = prohibitif. (Médiane BRVM constatée : 1,6 %.)
+// Fourchette en % du cours : 0,1 % = coût d'aller-retour négligeable,
+// 4 % = prohibitif.
+//
+// Deux médianes coexistent, et l'écart est instructif : Roll ESTIMAIT 1,6 %
+// quand le carnet d'ordres, une fois disponible, en MESURE 0,5 à 1,1 % selon la
+// séance. Roll surestimait donc le coût — ce qui pénalisait des titres plus
+// négociables qu'il ne le croyait. Les bornes restent inchangées : les déplacer
+// en même temps qu'on change de source rendrait l'avant/après illisible.
 const SPREAD_GOOD = 0.1;
 const SPREAD_BAD = 4;
 // Spread NON estimable (cov ≥ 0 : prix figé ou en tendance pure) : signal
@@ -101,6 +115,13 @@ export function rollSpreadPct(closes: number[]): number | null {
 export function computeLiquidityV2(
   rows: LiquiditySessionRow30[],
   seancesMarche: number,
+  /**
+   * Fourchette MESURÉE sur le carnet d'ordres de la dernière séance publiée,
+   * en % du milieu. Quand elle est fournie, elle prime sur Roll : un fait
+   * observé vaut mieux qu'un estimateur qui se tait quatre fois sur dix.
+   * `null`/absent → on retombe sur Roll, comme avant.
+   */
+  spreadCarnetPct?: number | null,
 ): LiquidityV2Result {
   const traitees = rows.filter((r) => (r.volume ?? 0) > 0);
   const seancesTraitees = traitees.length;
@@ -140,13 +161,20 @@ export function computeLiquidityV2(
     .sort((a, b) => a.date_marche.localeCompare(b.date_marche))
     .map((r) => r.cours_jour)
     .filter((c): c is number => c != null && c > 0);
-  const spreadPct = rollSpreadPct(closes);
+  const spreadRoll = rollSpreadPct(closes);
+
+  // Le carnet prime ; Roll ne sert plus que de repli.
+  const spreadMesure = spreadCarnetPct != null && spreadCarnetPct >= 0 ? spreadCarnetPct : null;
+  const spreadPct = spreadMesure ?? spreadRoll;
+  const spreadSource: 'carnet' | 'roll' | null = spreadMesure != null ? 'carnet' : spreadRoll != null ? 'roll' : null;
 
   const base: Omit<LiquidityV2Result, 'score' | 'classe'> = {
     presence_pct: Math.round(presencePct * 100) / 100,
     activite: Math.round(activite * 10_000) / 10_000,
     amihud: amihud != null ? Math.round(amihud * 1_000_000) / 1_000_000 : null,
-    spread_roll_pct: spreadPct != null ? Math.round(spreadPct * 10_000) / 10_000 : null,
+    spread_roll_pct: spreadRoll != null ? Math.round(spreadRoll * 10_000) / 10_000 : null,
+    spread_pct: spreadPct != null ? Math.round(spreadPct * 10_000) / 10_000 : null,
+    spread_source: spreadSource,
     valeur_moyenne_30j: Math.round(valeurMoyenne * 100) / 100,
     seances_traitees: seancesTraitees,
     seances_marche: seancesMarche,
@@ -155,8 +183,9 @@ export function computeLiquidityV2(
   // Honnêteté : historique insuffisant → pas de score.
   if (seancesMarche < MIN_SEANCES) return { ...base, score: null, classe: null };
 
-  // Spread non estimable → NE_SPREAD (défavorable mais pas éliminatoire), jamais
-  // retiré : Roll ne pèse que 10 %, il informe sans jamais dominer.
+  // Aucune fourchette, ni mesurée ni estimée → NE_SPREAD (défavorable mais pas
+  // éliminatoire), jamais retiré : la composante ne pèse que 10 %, elle informe
+  // sans jamais dominer.
   const compRoll =
     spreadPct == null
       ? NE_SPREAD

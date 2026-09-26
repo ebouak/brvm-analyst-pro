@@ -51,7 +51,7 @@ export default async function RevuePage({ params }: Props) {
         </div>
         <div className="text-right text-[10px] text-gray-400">
           <p>Générée le {today}</p>
-          <p className="mt-1 max-w-[180px]">Document informatif — ne constitue pas un conseil en investissement</p>
+          <p className="mt-1 max-w-[180px]">Document informatif : ne constitue pas un conseil en investissement</p>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export default async function RevuePage({ params }: Props) {
         <div className="mb-5">
           <FinancialsBars data={d.years.map((y) => ({ periode: y.periode, revenu: y.revenu, resultatNet: y.resultatNet }))} />
           <p className="text-[10px] text-gray-400 text-center mt-1">
-            CA (orange) et résultat net (gris){profil.cyclique ? ' sur plusieurs exercices — lecture du cycle' : ''}.
+            CA (orange) et résultat net (gris){profil.cyclique ? ' sur plusieurs exercices · lecture du cycle' : ''}.
           </p>
         </div>
       )}
@@ -127,7 +127,7 @@ export default async function RevuePage({ params }: Props) {
       {d.highlights && (d.highlights.synthese || d.highlights.items.length > 0) && (
         <>
           <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">
-            Activité — ce qui se passe dans l&apos;entreprise
+            Activité · ce qui se passe dans l&apos;entreprise
           </h2>
           {d.highlights.synthese && <p className="text-sm text-gray-700 leading-relaxed mb-2">{d.highlights.synthese}</p>}
           <ul className="text-sm text-gray-700 list-disc pl-5 mb-2 space-y-1">
@@ -168,7 +168,7 @@ export default async function RevuePage({ params }: Props) {
       {d.years.length >= 2 && latest && prev && (
         <>
           <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1 mt-5">
-            Avant la prochaine publication — à surveiller
+            Avant la prochaine publication · à surveiller
           </h2>
           <ul className="text-sm text-gray-700 list-disc pl-5 mb-2 space-y-1">
             <li>
@@ -191,7 +191,7 @@ export default async function RevuePage({ params }: Props) {
             ))}
           </ul>
           <p className="text-[10px] text-gray-400 mb-4 italic">
-            Repères qualitatifs dérivés de l&apos;historique réel — il ne s&apos;agit PAS d&apos;un consensus
+            Repères qualitatifs dérivés de l&apos;historique réel : il ne s&apos;agit PAS d&apos;un consensus
             d&apos;analystes ni d&apos;une prévision chiffrée.
           </p>
         </>
@@ -199,7 +199,7 @@ export default async function RevuePage({ params }: Props) {
 
       <p className="text-[10px] text-gray-400 mt-6 border-t pt-2 italic">
         Source : WESTBOURSE · {today}. Données dérivées de publications réelles (états financiers, rapports
-        d&apos;activité, cours BRVM) — aucune valeur inventée. Les ordres s&apos;exécutent via une SGI agréée.
+        d&apos;activité, cours BRVM), aucune valeur inventée. Les ordres s&apos;exécutent via une SGI agréée.
         Les performances passées ne préjugent pas des performances futures.
       </p>
     </div>

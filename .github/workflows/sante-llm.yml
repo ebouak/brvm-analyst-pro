@@ -1,0 +1,58 @@
+name: Santé des fournisseurs LLM
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+# Contrôle quotidien matinal : sonde réellement DeepSeek, Mistral et xAI
+# (un vrai appel HTTP, pas une vérification de config — voir l'incident du
+# 2026-09-26 dans CLAUDE.md : les clés étaient valides, c'étaient les modèles
+# de repli qui n'existaient plus). Alerte Telegram si au moins un fournisseur
+# est en panne ; échoue bruyamment si plus AUCUN n'est utilisable.
+on:
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: sante-llm
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sante-llm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Sonder les fournisseurs LLM
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # ⚠️ LES CLÉS LLM NE SONT PAS PASSÉES ICI, DÉLIBÉRÉMENT.
+          # `resolveApiKeyForScraper()` lit l'environnement AVANT la table
+          # `api_keys`. Mesuré le 2026-09-26 : le secret GitHub
+          # DEEPSEEK_API_KEY datait du 28 juin et différait de la clé en base
+          # — deux clés distinctes, toutes deux valides ce jour-là, mais rien
+          # ne garantit qu'elles le restent ensemble. Un contrôle qui teste
+          # une source pendant que la production en utilise une autre ne
+          # prouve rien ; pire, il rassure à tort.
+          # La table est la source que l'exploitant peut corriger seul, depuis
+          # /admin/cles-api, sans redéploiement — c'est donc elle qu'on sonde.
+          # Ne réintroduire ces trois variables que le jour où les clés
+          # n'existeront plus qu'à un seul endroit.
+          LOG_LEVEL: info
+        # Code de sortie non nul quand plus aucun fournisseur n'est
+        # utilisable : un run vert ne doit jamais couvrir une panne totale.
+        run: npx tsx src/index.ts sante:llm

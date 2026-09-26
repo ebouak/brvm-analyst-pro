@@ -52,7 +52,7 @@ export async function callAgentLlm(
     {
       key: await resolveApiKey('mistral'),
       url: 'https://api.mistral.ai/v1/chat/completions',
-      model: 'mistral-large-latest',
+      model: 'mistral-small-latest',
     },
   ].filter((p) => p.key);
 

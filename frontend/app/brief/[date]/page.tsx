@@ -291,7 +291,7 @@ export default async function BriefDatePage({ params }: PageProps) {
                 <p className="overline mb-2 text-gold-2">🎧 Écouter le brief (1 min)</p>
                 {/* eslint-disable-next-line jsx-a11y/media-has-caption -- transcription complète juste en dessous */}
                 <audio controls preload="none" src={brief.audio_url} className="w-full">
-                  Votre navigateur ne lit pas l&apos;audio — le texte complet est ci-dessous.
+                  Votre navigateur ne lit pas l&apos;audio : le texte complet est ci-dessous.
                 </audio>
               </div>
             )}
@@ -345,8 +345,8 @@ export default async function BriefDatePage({ params }: PageProps) {
           </a>
         </footer>
         <p className="mt-6 text-[10px] text-faint leading-relaxed">
-          Note générée automatiquement depuis les données de séance (brvm.org). La tendance est dérivée du
-          rapport hausses/baisses — aucun commentaire inventé. Pas un conseil en investissement.
+          Note composée depuis les données de séance (brvm.org). La tendance est dérivée du
+          rapport hausses/baisses, aucun commentaire inventé. Pas un conseil en investissement.
         </p>
       </article>
     </PublicShell>

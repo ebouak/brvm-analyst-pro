@@ -66,7 +66,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-white">⚡ Analyse Techniques Intraday</h3>
+      <h3 className="text-lg font-semibold text-white">Analyse Techniques Intraday</h3>
 
       {/* ATR Section */}
       {pattern.atr_score !== null && (
@@ -140,7 +140,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
             </div>
           )}
           <div>
-            <span className="text-muted">Δ Conseiller IA</span>
+            <span className="text-muted">Δ Conseiller</span>
             <div className={`font-semibold mt-1 ${pattern.advisor_sub_score_delta && pattern.advisor_sub_score_delta > 0 ? 'text-up' : 'text-down'}`}>
               {pattern.advisor_sub_score_delta ? (pattern.advisor_sub_score_delta > 0 ? '+' : '') + pattern.advisor_sub_score_delta.toFixed(2) : '—'}
             </div>

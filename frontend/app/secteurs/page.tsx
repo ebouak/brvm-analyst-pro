@@ -4,6 +4,7 @@ import SectorsExport from '@/components/SectorsExport';
 import SectorCard from '@/components/SectorCard';
 import SectorRankingTable from '@/components/SectorRankingTable';
 import SectorRotation from '@/components/SectorRotation';
+import ValorisationSecteurs from '@/components/secteurs/ValorisationSecteurs';
 import NewsletterForm from '@/components/NewsletterForm';
 import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
@@ -17,7 +18,24 @@ import {
 // Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
 // par l'intraday : ISR 5 min (audit 2026-06-12).
 export const revalidate = 300;
-export const metadata = { title: 'Secteurs' };
+// Page PUBLIQUE (whitelist du middleware) : « PER BRVM », « rendement dividende
+// BRVM » sont des requêtes réelles, et la valorisation sectorielle est de la
+// donnée de marché, sans rien de personnel.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
+
+export const metadata: import('next').Metadata = {
+  title: 'Secteurs BRVM — performance, PER, PBR et rendement du dividende',
+  description:
+    "Performance et valorisation des secteurs cotés à la BRVM : variation, classement, rotation, puis PER, PBR et rendement du dividende médians, calculés sur les états financiers publiés.",
+  keywords: ['secteurs BRVM', 'PER BRVM', 'PBR BRVM', 'rendement dividende BRVM', 'valorisation sectorielle UEMOA'],
+  alternates: { canonical: SITE_URL + '/secteurs' },
+  openGraph: {
+    type: 'website',
+    title: 'Secteurs BRVM — performance et valorisation',
+    description: 'Variation, classement et rotation des secteurs cotés, puis PER, PBR et rendement du dividende médians.',
+    url: SITE_URL + '/secteurs',
+  },
+};
 
 interface ActionRow {
   code: string; secteur: string | null; date_marche: string;
@@ -116,7 +134,7 @@ export default async function SecteursPage() {
             title="Performance sectorielle"
             subtitle={
               lastDate
-                ? `Classement et rotation des secteurs cotés — Dernière séance : ${fmtDateFR(lastDate)}`
+                ? `Classement et rotation des secteurs cotés · Dernière séance : ${fmtDateFR(lastDate)}`
                 : 'Classement et rotation des secteurs cotés sur la BRVM'
             }
           />
@@ -201,7 +219,7 @@ export default async function SecteursPage() {
               <div>
                 <Eyebrow>Analyse dynamique</Eyebrow>
                 <h2 className="font-display text-heading-sm text-ivory mt-1">
-                  Rotation sectorielle — 30 jours
+                  Rotation sectorielle · 30 jours
                 </h2>
               </div>
 
@@ -211,6 +229,11 @@ export default async function SecteursPage() {
                 </div>
               </PremiumPanel>
             </section>
+
+            {/* ── Section 4 : Valorisation (PER, PBR, rendement) ───────────── */}
+            <div className="animate-rise-in [animation-delay:0.40s]">
+              <ValorisationSecteurs />
+            </div>
           </>
         )}
 
@@ -218,7 +241,7 @@ export default async function SecteursPage() {
         <div className="animate-rise-in [animation-delay:0.42s] flex items-center justify-between rounded-xl border border-border/50 bg-elevated/30 px-5 py-3.5">
           <div>
             <p className="text-sm font-medium text-ivory">Voir la cartographie visuelle</p>
-            <p className="text-xs text-muted">Heatmap — taille proportionnelle à la capitalisation, couleur = variation</p>
+            <p className="text-xs text-muted">Heatmap : taille proportionnelle à la capitalisation, couleur = variation</p>
           </div>
           <Link
             href="/heatmap"

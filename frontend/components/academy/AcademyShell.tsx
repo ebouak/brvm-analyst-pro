@@ -156,7 +156,7 @@ export default function AcademyShell({
         <aside className="lg:sticky lg:top-20 lg:self-start">
           <details className="lg:hidden">
             <summary className="cursor-pointer rounded-lg border border-border bg-surface px-3 py-2 text-sm text-muted">
-              Sommaire — leçon {idx + 1}/{lessons.length}
+              Sommaire · leçon {idx + 1}/{lessons.length}
             </summary>
             <Sommaire lessons={lessons} progress={progress} idx={idx} goTo={goTo} />
           </details>

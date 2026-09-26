@@ -7,8 +7,8 @@ export const maxDuration = 60;
 
 const ORDER: { provider: LlmProvider; url: string; model: string }[] = [
   { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral',  url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest' },
-  { provider: 'xai',     url: 'https://api.x.ai/v1/chat/completions', model: 'grok-2-latest' },
+  { provider: 'mistral',  url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
+  { provider: 'xai',     url: 'https://api.x.ai/v1/chat/completions', model: 'grok-4.6' },
 ];
 
 const SYSTEM = `Tu es WESTBOURSE, un assistant financier expert de la Bourse Régionale des Valeurs Mobilières (UEMOA).

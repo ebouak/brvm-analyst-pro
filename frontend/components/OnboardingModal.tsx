@@ -163,7 +163,7 @@ export default function OnboardingModal() {
             {debutant && (
               <a href="/debutant" target="_blank" rel="noopener noreferrer"
                 className="block rounded-xl border border-cyan/20 bg-cyan/5 px-4 py-2.5 text-xs text-cyan hover:bg-cyan/10 transition">
-                🌱 Débuter en bourse à la BRVM — guide pas à pas &amp; accompagnement →
+                Débuter en bourse à la BRVM — guide pas à pas &amp; accompagnement →
               </a>
             )}
             <div className="flex gap-2">
@@ -189,7 +189,7 @@ export default function OnboardingModal() {
             <div className="space-y-2">
               {[
                 { val: 'gratuit' as const, label: 'Gratuit', desc: 'Accès aux fonctionnalités de base, sans carte bancaire' },
-                { val: 'premium' as const, label: 'Premium', desc: 'Diagnostic IA, outils avancés et rapports — voir les offres' },
+                { val: 'premium' as const, label: 'Premium', desc: 'Dossier d’analyse, outils avancés et rapports · voir les offres' },
               ].map(({ val, label, desc }) => (
                 <button key={val} type="button" onClick={() => setFormule(val)}
                   className={`w-full text-left px-4 py-3 rounded-xl border transition ${

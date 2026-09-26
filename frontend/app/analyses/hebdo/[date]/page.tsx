@@ -42,7 +42,7 @@ export default async function HebdoEditionPage({ params }: { params: { date: str
       <Link href="/analyses/hebdo" className="text-sm text-muted hover:text-white">← Toutes les éditions</Link>
       <SectionHeader
         kicker="Analyse hebdomadaire"
-        title={`Les valeurs en vue — semaine du ${e.date}`}
+        title={`Les valeurs en vue · semaine du ${e.date}`}
         subtitle="Analyse technique sur données réelles de la BRVM : cours de clôture, RSI(14), niveaux de support et de résistance."
       />
 

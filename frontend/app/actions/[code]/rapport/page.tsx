@@ -51,7 +51,7 @@ export default async function RapportPage({ params }: Props) {
         </div>
         <div className="text-right text-[10px] text-gray-400">
           <p>Générée le {today}</p>
-          <p className="mt-1 max-w-[180px]">Document informatif — ne constitue pas un conseil en investissement</p>
+          <p className="mt-1 max-w-[180px]">Document informatif : ne constitue pas un conseil en investissement</p>
         </div>
       </div>
 

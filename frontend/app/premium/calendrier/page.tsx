@@ -126,7 +126,7 @@ export default async function CalendrierPremiumPage() {
         <SectionHeader
           kicker="Agenda Premium"
           title="Dates Clés"
-          subtitle="Communiqués, états financiers, dividendes et Assemblées Générales — regroupés par société."
+          subtitle="Communiqués, états financiers, dividendes et Assemblées Générales, regroupés par société."
           actions={<StatPill tone="gold">✦ Premium</StatPill>}
         />
         <ViewTabs tabs={CALENDAR_TABS} current="/premium/calendrier" />

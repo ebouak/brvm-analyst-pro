@@ -18,7 +18,7 @@ export interface ConfirmEmailParams {
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
-export const CONFIRM_SUBJECT = '📊 Bienvenue sur WESTBOURSE — Confirmez votre inscription';
+export const CONFIRM_SUBJECT = 'Bienvenue sur WESTBOURSE — Confirmez votre inscription';
 
 export function buildConfirmEmailHtml({ confirmUrl, unsubscribeUrl }: ConfirmEmailParams): string {
   return `

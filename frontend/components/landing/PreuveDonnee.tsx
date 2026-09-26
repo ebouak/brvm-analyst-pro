@@ -77,7 +77,7 @@ export function PreuveDonnee({ fraicheur, exemple, nbActions }: Props) {
           Chaque chiffre a une source, une date et une heure.
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Voici la chaîne complète d&apos;un chiffre affiché sur cette page — vous pouvez la remonter
+          Voici la chaîne complète d&apos;un chiffre affiché sur cette page : vous pouvez la remonter
           jusqu&apos;à sa source. Aucun cours n&apos;est saisi à la main, et une donnée manquante est
           déclarée plutôt que comblée.
         </p>

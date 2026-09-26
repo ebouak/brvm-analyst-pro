@@ -46,7 +46,7 @@ export default function ExportBar({ code, designation, secteur, ratios, incomeSt
         aria-label="Télécharger les données financières au format Excel"
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs text-muted hover:text-white hover:border-up/40 transition-all active:scale-95 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-up/50"
       >
-        <span aria-hidden="true">⬇</span>
+        <span aria-hidden="true">↓</span>
         {loadingXls ? 'Génération…' : 'Excel (.xlsx)'}
       </button>
       <button

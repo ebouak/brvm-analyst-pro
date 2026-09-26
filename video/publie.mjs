@@ -16,6 +16,7 @@ import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
+import { sujet, texte, html } from './brief.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
@@ -417,7 +418,33 @@ if (TT_TOKEN) {
    quotidien dont rien ne l'avertit. La notification est ce qui rend le choix
    du brouillon tenable, plutot que theorique.
    Meme canaux que le reste du projet ; sans configuration, on se tait. */
-const notifier = async (texte) => {
+/* ---- Le brief de clôture ----------------------------------------------
+   Ce message partait jusqu'ici avec, pour tout contenu, la date, le décompte
+   hausses/baisses et les lignes du JOURNAL D'EXPLOITATION — « Canal Telegram :
+   publie » se lisait donc comme une phrase du brief. Deux choses étaient en
+   cause : le journal n'avait rien à faire dans le corps, et le corps n'avait
+   rien d'un brief.
+
+   Ce qu'un brief de clôture doit porter, et que la légende Telegram portait
+   déjà : le niveau de l'indice ET sa variation, la respiration du marché
+   (hausses / baisses / stables), les capitaux traités, les valeurs qui ont
+   mené la séance des deux côtés, et la concentration — la part du premier
+   échange dans le total, seul chiffre qui dise si la séance s'est jouée sur
+   un titre ou sur le marché.
+
+   Rien n'est calculé ici : tout vient de `seance.json`, c'est-à-dire de la
+   MÊME lecture que les images et la voix de la vidéo. Une seconde source
+   serait une seconde chance de se contredire. */
+
+/* Le brief vit dans son propre module : il a grossi d'une poignée de lignes
+   à une vraie publication, et sa mise en page n'a rien à faire au milieu de
+   la logique de publication.  ne fait que composer — il ne
+   lit rien, n'envoie rien, et se teste seul. */
+const SUJET = sujet(m);
+const briefTexte = texte(m);
+const briefHtml = () => html(m);
+
+const notifier = async (texte, html, sujet) => {
   const jeton = lire("TELEGRAM_BOT_TOKEN");
   const salon = lire("TELEGRAM_CHAT_ID");
   if (jeton && salon) {
@@ -442,8 +469,11 @@ const notifier = async (texte) => {
         body: JSON.stringify({
           from: de,
           to: a.split(',').map((x) => x.trim()),
-          subject: `Vidéo BRVM — séance du ${m.date_fr}`,
+          // Le sujet porte le chiffre : un objet qui dit seulement « séance
+          // du … » oblige à ouvrir pour apprendre quoi que ce soit.
+          subject: sujet,
           text: texte,
+          ...(html ? { html } : {}),
         }),
       });
     } catch (e) {
@@ -452,14 +482,29 @@ const notifier = async (texte) => {
   }
 };
 
-const resume = [
-  `Vidéo de la séance du ${m.date_fr}`,
-  `${m.hausses} hausses · ${m.baisses} baisses · ${m.stables} stables sur ${m.valeurs} valeurs`,
+/* Le brief d'abord, le journal d'exploitation ENSUITE et clairement séparé.
+   Les mêler, c'était faire lire « Canal Telegram : publie » comme une phrase
+   du brief. L'exploitant a toujours besoin de savoir où la vidéo est partie ;
+   le lecteur n'a pas à le subir au milieu des chiffres. */
+const journalLignes = journal.length ? journal : ['Aucune destination configurée.'];
+
+const corpsTexte = [
+  briefTexte,
   '',
-  ...(journal.length ? journal : ['Aucune destination configurée.']),
+  '— — —',
+  'Diffusion :',
+  ...journalLignes.map((l) => `  ${l}`),
 ].join('\n');
 
-await notifier(resume);
+const corpsHtml = [
+  briefHtml(),
+  '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:600px;margin:16px auto 0;color:#9aa0a6;font-size:11px">',
+  '<p style="margin:0 0 4px;letter-spacing:.06em;text-transform:uppercase">Diffusion</p>',
+  journalLignes.map((l) => `<p style="margin:0 0 2px">${echappe(l)}</p>`).join(''),
+  '</div>',
+].join('');
+
+await notifier(corpsTexte, corpsHtml, SUJET);
 
 /* ------------------------------------------------------------- 7. bilan */
 

@@ -19,10 +19,10 @@ export default function PortfolioTabs({ children }: { children: ReactNode }) {
     <div>
       <div className="flex gap-1 border-b border-border mb-6 px-6 pt-6">
         <TabButton active={tab === 'mon-portefeuille'} onClick={() => setTab('mon-portefeuille')}>
-          💼 Mon portefeuille
+          Mon portefeuille
         </TabButton>
         <TabButton active={tab === 'analyse'} onClick={() => setTab('analyse')}>
-          📊 Analyse &amp; suivi
+          Analyse &amp; suivi
         </TabButton>
       </div>
 

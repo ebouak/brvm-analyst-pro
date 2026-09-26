@@ -347,7 +347,7 @@ export function Peigne({
 
       <p className="v2-hint">
         Survolez, touchez ou tabulez le graphique pour lire une valeur. Échelle de hauteur en racine
-        carrée — les grosses lignes n’écrasent pas les petites. Maximum affiché&nbsp;: {montant(max)}.
+        carrée : les grosses lignes n’écrasent pas les petites. Maximum affiché&nbsp;: {montant(max)}.
       </p>
     </div>
   );

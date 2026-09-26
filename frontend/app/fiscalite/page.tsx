@@ -30,11 +30,11 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Le taux dépend-il de mon pays de résidence ou de celui de la société ?',
-    a: "Du pays de l'émetteur, où la retenue est opérée. Votre résidence fiscale peut ensuite jouer (conventions de non double imposition) — consultez un fiscaliste pour votre situation.",
+    a: "Du pays de l'émetteur, où la retenue est opérée. Votre résidence fiscale peut ensuite jouer (conventions de non double imposition), consultez un fiscaliste pour votre situation.",
   },
   {
     q: "Pourquoi les obligations d'État affichent-elles 0 % ?",
-    a: "Les emprunts émis par les États de l'UEMOA et les institutions régionales (BOAD, BIDC) sont exonérés de retenue sur les coupons — c'est l'un des attraits du marché obligataire régional.",
+    a: "Les emprunts émis par les États de l'UEMOA et les institutions régionales (BOAD, BIDC) sont exonérés de retenue sur les coupons : c'est l'un des attraits du marché obligataire régional.",
   },
   {
     q: 'Les plus-values de cession sont-elles imposées ?',
@@ -107,7 +107,7 @@ export default function FiscalitePage() {
           </div>
           <p className="text-[11px] text-faint">
             Survolez un taux pour voir sa source. « Non confirmé » signale l&apos;absence de source
-            vérifiée — jamais un taux estimé.
+            vérifiée, jamais un taux estimé.
           </p>
         </section>
 

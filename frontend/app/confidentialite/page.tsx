@@ -28,9 +28,9 @@ export default function ConfidentialitePage() {
       <section>
         <h2>Finalités et base légale</h2>
         <ul>
-          <li>Fourniture du service et gestion du compte — exécution du contrat.</li>
-          <li>Envoi de la newsletter — consentement.</li>
-          <li>Sécurité et prévention de la fraude — intérêt légitime.</li>
+          <li>Fourniture du service et gestion du compte : exécution du contrat.</li>
+          <li>Envoi de la newsletter : consentement.</li>
+          <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
         </ul>
       </section>
 

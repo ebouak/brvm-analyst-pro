@@ -23,7 +23,7 @@ export default function RatioCard({ label, value, quality = 'ok', positive }: Pr
       <span className="text-muted">{label}</span>
       <span className={`tabular ${quality === 'suspect' ? 'text-warn' : colorCls}`}>
         {value}
-        {quality === 'suspect' && <span title="Donnée douteuse" className="ml-1">⚠️</span>}
+        {quality === 'suspect' && <span title="Donnée douteuse" className="ml-1">!</span>}
       </span>
     </div>
   );

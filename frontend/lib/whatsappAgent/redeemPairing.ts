@@ -128,6 +128,6 @@ export async function redeemPairingCode(fromE164: string, rawText: string): Prom
   // atomiquement plus haut, au moment de la réclamation.
   await sendWhatsAppReply(
     fromE164,
-    "✅ Numéro lié à votre compte WESTBOURSE. Activez maintenant l'agent conversationnel dans vos paramètres pour pouvoir me poser des questions.",
+    "✓ Numéro lié à votre compte WESTBOURSE. Activez maintenant l'agent conversationnel dans vos paramètres pour pouvoir me poser des questions.",
   );
 }

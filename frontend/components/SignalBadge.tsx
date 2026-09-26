@@ -10,7 +10,7 @@ const STYLES: Record<string, string> = {
 };
 
 const SIGNAL_HINTS: Record<string, string> = {
-  BUY: "Le système pense que l'action est en bonne position pour monter — signal d'achat.",
+  BUY: "Le système pense que l'action est en bonne position pour monter : signal d'achat.",
   HOLD: "Pas de signal fort : attendre avant d'agir.",
   SELL: "Le signal suggère de sortir ou d'éviter cette action.",
 };

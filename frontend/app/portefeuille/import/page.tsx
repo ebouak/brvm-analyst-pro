@@ -127,7 +127,7 @@ export default function ImportRelevePage() {
           <PdfDropzone onFiles={(accepted) => { if (accepted[0]) void analyse(accepted[0]); }} />
           {error && <p className="mt-3 text-sm text-down">✕ {error}</p>}
           <p className="mt-3 text-[11px] leading-relaxed text-faint">
-            Le document est analysé par IA puis oublié — il n&apos;est ni stocké ni transmis à des tiers
+            Le document est analysé automatiquement puis oublié : il n&apos;est ni stocké ni transmis à des tiers
             autres que le fournisseur d&apos;analyse. Limite : 10 analyses par heure.
           </p>
         </PremiumPanel>
@@ -136,7 +136,7 @@ export default function ImportRelevePage() {
       {(status === 'reading' || status === 'analyzing') && (
         <PremiumPanel className="p-8 text-center">
           <p className="text-sm text-muted">
-            {status === 'reading' ? '📄 Lecture du PDF…' : '🤖 Détection des positions…'}
+            {status === 'reading' ? 'Lecture du PDF…' : 'Détection des positions…'}
           </p>
           <p className="mt-1 truncate text-xs text-faint">{fileName}</p>
         </PremiumPanel>
@@ -154,7 +154,7 @@ export default function ImportRelevePage() {
 
           {warnings.length > 0 && (
             <div className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-[11px] text-warn">
-              ⚠ {warnings.join(' · ')}
+              {warnings.join(' · ')}
             </div>
           )}
 

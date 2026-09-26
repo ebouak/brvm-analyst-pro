@@ -109,7 +109,7 @@ export default function CashFlowStatement({ statements }: Props) {
       {converti && (
         <p className="mt-3 text-xs text-muted">
           Société publiant en {converti.devise_origine}. Montants convertis en FCFA au taux moyen
-          de chaque exercice (référence BCE, parité fixe EUR/XOF 655,957) — conformément à IAS 21.
+          de chaque exercice (référence BCE, parité fixe EUR/XOF 655,957), conformément à IAS 21.
           Exercice {converti.periode} : 1 {converti.devise_origine} ={' '}
           {converti.taux_conversion?.toLocaleString('fr-FR', { maximumFractionDigits: 3 })} FCFA.
           Ces montants sont convertis, non publiés tels quels.

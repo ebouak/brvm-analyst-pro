@@ -55,7 +55,7 @@ function formatDate(dateStr: string): string {
  */
 function buildRepliesSection(replies: ForumReply[], appUrl: string): string {
   if (replies.length === 0) {
-    return '<div class="empty-state">Aucune réponse pour le moment. Continuez à partager vos idées! 💡</div>';
+    return '<div class="empty-state">Aucune réponse pour le moment. Continuez à partager vos idées!</div>';
   }
 
   const replyItems = replies.slice(0, 3).map((reply) => {
@@ -67,7 +67,7 @@ function buildRepliesSection(replies: ForumReply[], appUrl: string): string {
         <div class="item-author">${escapeHtml(authorName)}</div>
         <div class="item-body">${escapeHtml(truncateText(reply.body, 180))}</div>
         <div class="item-meta">
-          <span>📅 ${formatDate(reply.created_at)}</span>
+          <span>${formatDate(reply.created_at)}</span>
           ${likeCountHTML}
         </div>
         <div class="item-action">
@@ -95,7 +95,7 @@ function buildRepliesSection(replies: ForumReply[], appUrl: string): string {
  */
 function buildLikesSection(likes: Array<{ post: ForumPost; count: number }>, appUrl: string): string {
   if (likes.length === 0) {
-    return '<div class="empty-state">Pas encore de reactions. Partagez plus! 🚀</div>';
+    return '<div class="empty-state">Pas encore de reactions. Partagez plus!</div>';
   }
 
   const likeItems = likes.slice(0, 3).map((item) => {
@@ -155,7 +155,7 @@ function buildTrendingSection(trending: ForumPost[], appUrl: string): string {
           ${escapeHtml(authorName)} · ${formatDate(post.created_at)}
         </div>
         <div>
-          <span class="trending-score">📈 ${trendingScore}</span>
+          <span class="trending-score">${trendingScore}</span>
           ${likeCountHTML}
         </div>
         <div class="item-action">
@@ -485,7 +485,7 @@ export function generateDigestHTML(data: DigestData): string {
       <!-- Replies Section -->
       <div class="section">
         <h2 class="section-title">
-          💬 Réponses
+          Réponses
           <span class="count">${data.replies.length}</span>
         </h2>
         ${repliesSection}
@@ -494,7 +494,7 @@ export function generateDigestHTML(data: DigestData): string {
       <!-- Likes & Awards Section -->
       <div class="section">
         <h2 class="section-title">
-          ⭐ J'aime & Récompenses
+          J'aime & Récompenses
           <span class="count">${totalLikes}</span>
         </h2>
         ${likesSection}
@@ -503,7 +503,7 @@ export function generateDigestHTML(data: DigestData): string {
       <!-- Trending Section -->
       <div class="section">
         <h2 class="section-title">
-          🔥 Tendances
+          Tendances
           <span class="count">${data.trending.length}</span>
         </h2>
         ${trendingSection}

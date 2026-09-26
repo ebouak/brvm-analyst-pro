@@ -17,7 +17,7 @@ export default function YieldCurveChart({ data }: { data: CurvePoint[] }) {
 
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
-      <h3 className="text-sm font-semibold mb-2">📉 Courbe des taux (YTM vs maturité)</h3>
+      <h3 className="text-sm font-semibold mb-2">Courbe des taux (YTM vs maturité)</h3>
       <EChart
         height={300}
         option={{

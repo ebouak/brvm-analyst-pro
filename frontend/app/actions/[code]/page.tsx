@@ -34,6 +34,11 @@ import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
 import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/liquidity';
 import { LiquidityCard } from '@/components/LiquidityCard';
+import CarnetOrdres, { type CarnetRow } from '@/components/CarnetOrdres';
+import CarnetCommentaire from '@/components/CarnetCommentaire';
+import { ecartTypeVariations } from '@/lib/carnet/commentaire';
+import { selectionnerEvenements, type EvenementMarche, type MesureEvenement } from '@/lib/carnet/evenements';
+import { eventStudy, type DatedClose } from '@/lib/eventStudy';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
@@ -100,7 +105,7 @@ export async function generateMetadata({ params }: { params: { code: string } })
   const coursTxt = cours ? `${new Intl.NumberFormat('fr-FR').format(cours)} FCFA` : null;
 
   return {
-    title: `${nom} (${code}) — cours, dividendes et analyse BRVM`,
+    title: `${nom} (${code}) · cours, dividendes et analyse BRVM`,
     /**
      * NOINDEX — et c'est délibéré.
      *
@@ -119,7 +124,7 @@ export async function generateMetadata({ params }: { params: { code: string } })
       : `${nom} (${code}) à la BRVM : cours, historique, dividendes versés, saisonnalité et analyse. Données vérifiées.`,
     alternates: { canonical: `${SITE_URL}/societes/${code}` },
     openGraph: {
-      title: `${nom} (${code}) — cours BRVM`,
+      title: `${nom} (${code}) · cours BRVM`,
       description: coursTxt ? `${coursTxt} — cours, dividendes et analyse.` : 'Cours, dividendes et analyse.',
       url: `${SITE_URL}/actions/${code}`,
       type: 'website',
@@ -231,11 +236,12 @@ export default async function InstrumentPage({
   // Indicateurs techniques (RSI, MACD, moyennes mobiles, lecture, explication IA).
   // Niveau requis LU EN BASE (feature_flags → `indicateurs_techniques`), éditable
   // dans /admin/features. Le cours et le volume, eux, restent publics.
-  const [gateIndicateurs, gateSignaux, gateFonda, gateValo] = await Promise.all([
+  const [gateIndicateurs, gateSignaux, gateFonda, gateValo, gateLectureSeance] = await Promise.all([
     canAccess('indicateurs_techniques'), // verdict, config technique, RSI/MACD
     canAccess('signaux'),                // signal quantitatif
     canAccess('fondamentaux'),           // analyse fondamentale
     canAccess('dcf'),                    // valorisation
+    canAccess('lecture_seance'),         // « Ce que dit la séance » (carnet commenté)
   ]);
 
   // États financiers complets pour le constructeur de graphique — chargés
@@ -408,6 +414,149 @@ export default async function InstrumentPage({
     .limit(1)
     .maybeSingle();
   const liquidity = fromDailyRow(liqRow as LiquidityDailyRow | null) ?? computeLiquidity(liqRows, liqRows.length);
+
+  // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
+  // de celle des cours, le bulletin paraissant après la clôture.
+  const { data: carnetRow } = await liqDailyClient
+    .from('brvm_carnet_daily')
+    .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
+    .eq('code', code)
+    .order('date_marche', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const carnet = (carnetRow ?? null) as CarnetRow | null;
+
+  // Actualités de la valeur — rapprochées de la séance par leur SEULE date.
+  // Jamais datées dans le futur : une publication à venir ne commente pas une
+  // séance passée.
+  const { data: actusRows } = await liqDailyClient
+    .from('brvm_news')
+    .select('titre, date_publication')
+    .eq('instrument_code', code)
+    .lte('date_publication', new Date().toISOString().slice(0, 10))
+    .order('date_publication', { ascending: false })
+    .limit(3);
+  const actualites = (actusRows ?? []) as { titre: string; date_publication: string }[];
+
+  // Fourchettes du marché à la même séance : sans elles, « 1,75 % » ne se
+  // compare à rien. Seules les valeurs dont la fourchette est RÉELLEMENT
+  // mesurée entrent dans le classement — jamais celles qui n'en ont pas.
+  const seanceLiq = (liqRow as { date_marche?: string } | null)?.date_marche ?? null;
+  const { data: spreadRows } = seanceLiq
+    ? await liqDailyClient.from('liquidity_daily').select('spread_pct').eq('date_marche', seanceLiq).not('spread_pct', 'is', null)
+    : { data: null };
+  const spreads = ((spreadRows ?? []) as { spread_pct: number }[]).map((r) => r.spread_pct).sort((a, b) => a - b);
+  const propreSpread = (liqRow as { spread_pct?: number | null } | null)?.spread_pct ?? null;
+  const contexteCarnet = spreads.length > 0
+    ? {
+        valeurEchangee: (last as { valeur_echangee?: number | null }).valeur_echangee ?? null,
+        spreadMedianMarche: spreads[Math.floor(spreads.length / 2)]!,
+        valeursPlusSerrees: propreSpread != null ? spreads.filter((x) => x < propreSpread).length : null,
+        valeursComparees: spreads.length,
+      }
+    : { valeurEchangee: (last as { valeur_echangee?: number | null }).valeur_echangee ?? null };
+
+  // Agitation ordinaire du titre, mesurée sur son propre historique. Sous
+  // 20 séances, `ecartTypeVariations` rend `null` et le mouvement du jour est
+  // cité sans être qualifié.
+  const { ecartTypePct, seances } = ecartTypeVariations(rows.slice(-31).map((r) => r.variation_pct));
+  const bruitSeance = {
+    variationPct: last.variation_pct ?? null,
+    ecartTypePct,
+    seancesObservees: seances,
+    volumeRatio: ((signal as { inputs?: { volume_ratio?: number | null } | null } | null)?.inputs)?.volume_ratio ?? null,
+  };
+
+  // Comptes du dernier exercice publié, et celui d'avant pour l'évolution.
+  const exBrut = fundamentals.length > 0 ? pickBestFundamental(fundamentals) : null;
+  // Un exercice sans année n'est pas exploitable : on n'en tire rien plutôt que de deviner.
+  const exCourant = exBrut?.year != null ? (exBrut as typeof exBrut & { year: number }) : null;
+  const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
+  const economieSociete = exCourant
+    ? {
+        exercice: exCourant.year,
+        resultatNet: exCourant.net_income ?? null,
+        resultatNetPrecedent: exPrecedent?.net_income ?? null,
+        chiffreAffaires: exCourant.revenue ?? null,
+        chiffreAffairesPrecedent: exPrecedent?.revenue ?? null,
+        capitauxPropres: exCourant.equity ?? null,
+        actions: instrument?.shares ?? null,
+        coursJour: last.cours_jour ?? null,
+        source: exCourant.is_manual ? 'pdf-verified' : null,
+      }
+    : null;
+
+  // Événements de marché de la société, et ce que le cours a fait après.
+  // Chargés SEULEMENT si la lecture de séance est accessible (gateLectureSeance,
+  // calculé plus haut) : inutile de payer ces requêtes pour un bloc que
+  // <SectionLock> affichera à la place de <CarnetCommentaire>.
+  let mesuresEvenements: MesureEvenement[] = [];
+  if (gateLectureSeance.allowed) {
+    const aujourdhui = new Date().toISOString().slice(0, 10);
+    let idxQuery = liqDailyClient
+      .from('brvm_indices_daily')
+      .select('date_marche, valeur')
+      .eq('code', 'BRVMC') // BRVM Composite — même code que lib/reports.ts et app/dashboard/page.tsx.
+      .order('date_marche', { ascending: false })
+      .limit(HISTORY);
+    if (fromDate) idxQuery = idxQuery.gte('date_marche', fromDate);
+
+    const [{ data: evtsRows }, { data: idxRows }] = await Promise.all([
+      liqDailyClient
+        .from('market_events')
+        .select('event_date, event_type, title')
+        .eq('instrument_code', code)
+        // Jamais un événement daté dans le futur — même principe que les
+        // actualités ci-dessus : une publication à venir ne commente pas une
+        // séance passée. `selectionnerEvenements` l'exclurait de toute façon,
+        // mais filtrer ici évite qu'un événement futur ne prenne, à tort, une
+        // des 8 places retenues au détriment d'un événement passé pertinent.
+        .lte('event_date', aujourdhui)
+        .order('event_date', { ascending: false })
+        .limit(8),
+      idxQuery,
+    ]);
+
+    const retenus = selectionnerEvenements((evtsRows ?? []) as EvenementMarche[], aujourdhui, 3);
+
+    if (retenus.length > 0) {
+      const serieTitre: DatedClose[] = rows.map((r) => ({ date: r.date_marche, close: r.cours_jour ?? null }));
+      const volumesTitre = rows.map((r) => r.volume ?? null);
+      const serieIndice: DatedClose[] = ((idxRows ?? []) as { date_marche: string; valeur: number | null }[])
+        .map((r) => ({ date: r.date_marche, close: r.valeur }))
+        .reverse(); // desc -> asc, comme `serieTitre`.
+
+      mesuresEvenements = retenus.map((evenement) => {
+        const resultat = eventStudy(serieTitre, volumesTitre, serieIndice, evenement.event_date, 5);
+        // Ne se fie pas au calendrier : il faut au moins 5 séances COTÉES
+        // après J0 dans NOTRE série, pas cinq jours civils (un week-end n'est
+        // pas une séance). `eventStudy` referme sa fenêtre sur la dernière
+        // séance disponible sans le signaler : c'est cette ligne qui détecte
+        // une fenêtre encore ouverte.
+        const fenetreComplete = resultat.found && serieTitre.length - 1 - resultat.j0Index >= 5;
+        const volumeRatio = fenetreComplete && resultat.avgVolPre != null && resultat.avgVolPre > 0 && resultat.avgVolPost != null
+          ? resultat.avgVolPost / resultat.avgVolPre
+          : null;
+        return {
+          evenement,
+          // `indexRetPost` NON NUL est exigé, et ce n'est pas une précaution de
+          // style. `eventStudy` retombe silencieusement sur le rendement BRUT du
+          // titre quand l'indice manque (`: retPost`, eventStudy.ts) tout en
+          // continuant de nommer le résultat « excédentaire ». Or l'historique
+          // de BRVMC ne remonte qu'au 2026-05-26 : sans cette garde, un
+          // événement d'octobre 2025 affichait « 24,51 % de moins bien que le
+          // BRVM Composite » alors qu'aucune comparaison à l'indice n'avait eu
+          // lieu. Mieux vaut aucune mesure qu'une mesure dont l'étalon est
+          // absent.
+          surperformancePct:
+            fenetreComplete && resultat.indexRetPost != null ? resultat.abnormalReturnPost : null,
+          volumeRatio,
+          fenetreComplete,
+        };
+      });
+    }
+  }
+
   const sgiFrais = await getSgiFrais().catch(() => []);
   const courtages = sgiFrais
     .map((f) => f.courtagePctMax ?? f.courtagePctMin)
@@ -664,7 +813,7 @@ export default async function InstrumentPage({
       {rows.length < 20 && (
         <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
           <div className="flex items-center gap-2.5">
-            <span className="text-warn text-base leading-none">⚠</span>
+            <span className="text-warn text-base leading-none">!</span>
             <p className="text-xs text-warn font-medium">
               Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
             </p>
@@ -701,6 +850,39 @@ export default async function InstrumentPage({
       <div id="liquidite" className="scroll-mt-24">
         <Eyebrow className="mb-3">Liquidité & coût de friction</Eyebrow>
         <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
+        <CarnetOrdres carnet={carnet} />
+        {gateLectureSeance.allowed ? (
+          <CarnetCommentaire
+            carnet={carnet}
+            signal={signal ? {
+              date_marche: signal.date_marche,
+              signal: signal.signal,
+              confiance: signal.confiance ?? null,
+              score_total: signal.score_total ?? null,
+              explication: signal.explication ?? null,
+              // Les sous-scores : seule base permettant de dire que les facteurs
+              // se contredisent. Sans eux, le texte ne l'affirme pas.
+              sousScores: (() => {
+                const s = signal as unknown as Record<string, unknown>;
+                const n = (k: string) => (typeof s[k] === 'number' ? (s[k] as number) : null);
+                return { variation: n('score_variation'), volume: n('score_volume'), rsi: n('score_rsi'), macd: n('score_macd'), tendance: n('bonus_tendance') };
+              })(),
+            } : null}
+            actualites={actualites}
+            contexte={contexteCarnet}
+            bruit={bruitSeance}
+            economie={economieSociete}
+            evenements={mesuresEvenements}
+          />
+        ) : (
+          // Verrou premium : le composant n'est pas rendu, aucun chiffre du
+          // commentaire n'atteint le HTML pour un visiteur non autorisé.
+          <SectionLock
+            required={gateLectureSeance.required === 'free' ? 'premium' : gateLectureSeance.required}
+            titre="Ce que dit la séance"
+            pitch="Le carnet d'ordres rapporté aux capitaux échangés, la fourchette chiffrée en francs et comparée au reste du marché, le score technique face à ses seuils, et les comptes rapportés au cours."
+          />
+        )}
       </div>
 
       {/* ══════════════════════════════════════════════════
@@ -973,7 +1155,7 @@ export default async function InstrumentPage({
               <SectionLock
                 required={gateFonda.required === 'free' ? 'premium' : gateFonda.required}
                 titre="Analyse fondamentale"
-                pitch="PER, P/B, ROE, marge, endettement — et leur lecture."
+                pitch="PER, P/B, ROE, marge, endettement, et leur lecture."
               />
             </div>
           );
@@ -1114,9 +1296,9 @@ export default async function InstrumentPage({
           </PremiumPanel>
         ) : (
           <EmptyStatePremium
-            icon="🔒"
-            title={`Indicateurs techniques — réservés au plan ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`}
-            hint="RSI, MACD, moyennes mobiles, lecture technique et explication par l'IA."
+            icon="✦"
+            title={`Indicateurs techniques · réservés au plan ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`}
+            hint="RSI, MACD, moyennes mobiles, lecture technique et lecture commentée."
             action={{
               href: '/account/plan',
               label: `Passer à ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`,
@@ -1139,7 +1321,7 @@ export default async function InstrumentPage({
                 { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: '↓', external: true },
                 { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: '⌛' },
                 { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: '▤', external: true },
-                { href: `/assistant?symbole=${code}`, label: "Analyser avec l'IA", icon: '◈' },
+                { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: '◈' },
               ].map(({ href, label, icon, external }) => {
                 const cls =
                   'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
@@ -1272,7 +1454,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
         <BeginnerHint text="Score > 60 = signal favorable. Score < 40 = signal défavorable. Entre les deux = neutre." />
 
         <p className="text-sm text-muted mb-5 leading-relaxed">
-          {signal.explication ?? 'Signal calculé automatiquement.'}
+          {signal.explication ?? 'Signal calculé à partir des indicateurs de la séance.'}
         </p>
 
         {/* Sous-scores */}

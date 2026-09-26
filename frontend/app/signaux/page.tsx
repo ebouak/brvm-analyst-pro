@@ -125,7 +125,7 @@ export default async function SignauxPage() {
         <div className="mt-10">
           <EmptyStatePremium
             title="Aucun signal généré"
-            hint="Les signaux sont calculés automatiquement après chaque clôture de séance."
+            hint="Les signaux sont recalculés après chaque clôture de séance."
             icon="◈"
           />
         </div>
@@ -150,7 +150,7 @@ export default async function SignauxPage() {
       <SectionHeader
         kicker="BRVM · Moteur de signaux"
         title="Signaux d'opportunité"
-        subtitle="Détection assistée d'opportunités d'entrée et de sortie — scoring multi-facteurs explicable."
+        subtitle="Détection assistée d'opportunités d'entrée et de sortie · scoring multi-facteurs explicable."
         actions={
           <>
             <StatPill tone="gold">
@@ -249,7 +249,7 @@ export default async function SignauxPage() {
             </div>
             <p className="tabular text-sm font-semibold text-ivory">Score &gt; +0.60</p>
             <p className="text-xs text-muted leading-relaxed">
-              Opportunité d'achat détectée — momentum positif et valorisation favorable.
+              Opportunité d'achat détectée : momentum positif et valorisation favorable.
             </p>
           </div>
 
@@ -260,7 +260,7 @@ export default async function SignauxPage() {
             </div>
             <p className="tabular text-sm font-semibold text-ivory">−0.60 ≤ Score ≤ +0.60</p>
             <p className="text-xs text-muted leading-relaxed">
-              Attente & surveillance — signal insuffisant pour déclencher une action.
+              Attente & surveillance : signal insuffisant pour déclencher une action.
             </p>
           </div>
 
@@ -271,13 +271,13 @@ export default async function SignauxPage() {
             </div>
             <p className="tabular text-sm font-semibold text-ivory">Score &lt; −0.60</p>
             <p className="text-xs text-muted leading-relaxed">
-              Opportunité de sortie détectée — dégradation des indicateurs de tendance.
+              Opportunité de sortie détectée : dégradation des indicateurs de tendance.
             </p>
           </div>
         </div>
 
         <div className="border-t border-border/40 pt-3 text-xs text-faint italic leading-relaxed">
-          Les signaux sont calculés automatiquement à partir d'indicateurs techniques et ne constituent
+          Les signaux sont calculés à partir d'indicateurs techniques et ne constituent
           pas un conseil en investissement. Consultez un conseiller agréé COSUMAF avant toute décision.
         </div>
       </div>

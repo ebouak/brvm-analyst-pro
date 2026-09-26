@@ -7,6 +7,7 @@ import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 import BeginnerBanner from '@/components/BeginnerBanner';
 import ContactNudge from '@/components/contact/ContactNudge';
+import NewsletterNudge from '@/components/newsletter/NewsletterNudge';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -70,6 +71,16 @@ export default function ConditionalShell({
     !pathname.startsWith('/admin') &&
     !pathname.startsWith('/embed') && // widget tiers : aucun chrome
     !pathname.startsWith('/formations/academy');
+  // Invitation newsletter : uniquement sur les pages publiques (branche `bare`
+  // ci-dessous), jamais sur l'authentification ni sur les pages légales —
+  // demander une adresse au milieu d'une politique de confidentialité est le
+  // pire endroit possible. Le composant se tait de lui-même pour les personnes
+  // déjà connectées et tant que le bandeau cookies attend une réponse.
+  const showNewsletter =
+    pathname !== '/login' &&
+    pathname !== '/signup' &&
+    !pathname.startsWith('/embed') &&
+    !LEGAL_PREFIXES.some((p) => pathname.startsWith(p));
   // /admin a sa propre console (layout dédié) → pas de shell applicatif ni footer.
   const bare =
     BARE_ROUTES.has(pathname) ||
@@ -93,6 +104,7 @@ export default function ConditionalShell({
         <main id="contenu">{children}</main>
         {showsFooter(pathname) && <Footer />}
         {showNudge && <ContactNudge />}
+        {showNewsletter && <NewsletterNudge />}
       </>
     );
   }

@@ -195,7 +195,7 @@ export default async function ScannerPage({ searchParams }: PageProps) {
           </div>
           <p className="font-display text-base text-ivory">Configurez des filtres puis lancez le scan</p>
           <p className="text-sm text-muted max-w-md mx-auto leading-relaxed">
-            Combinez des critères techniques — RSI, MACD, moyennes mobiles, volume et signal.
+            Combinez des critères techniques : RSI, MACD, moyennes mobiles, volume et signal.
             Les indicateurs sont calculés sur les 200 dernières séances disponibles.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
@@ -255,7 +255,7 @@ function ScannerPageHeader({ universeSize }: { universeSize?: number }) {
     <SectionHeader
       kicker="BRVM · Analyse technique"
       title="Scanner technique"
-      subtitle="Filtrez les valeurs selon des critères techniques combinables — RSI, MACD, moyennes mobiles, volume et signal."
+      subtitle="Filtrez les valeurs selon des critères techniques combinables : RSI, MACD, moyennes mobiles, volume et signal."
       actions={
         universeSize != null ? (
           <StatPill tone="neutral">

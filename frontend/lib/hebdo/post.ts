@@ -9,10 +9,10 @@ import type { HebdoMetrics } from './types';
 
 export type PostFormat = 'long' | 'court';
 
-const AVERTISSEMENT = '⚠️ Information à but pédagogique — ce n’est pas un conseil en investissement.';
+const AVERTISSEMENT = 'Information à but pédagogique — ce n’est pas un conseil en investissement.';
 
 function emoji(m: HebdoMetrics): string {
-  return (m.variationHebdo ?? 0) >= 0 ? '📈' : '📉';
+  return (m.variationHebdo ?? 0) >= 0 ? '▲' : '▼';
 }
 
 /**
@@ -50,14 +50,14 @@ export function buildPost(sk: Skeleton, m: HebdoMetrics, format: PostFormat): st
     const v = m.variationHebdo;
     lignes.push(`${tete} — ${v == null ? 'stable' : `${v >= 0 ? '+' : '−'}${fmtPct(Math.abs(v))}`} cette semaine`);
     if (m.ratioVolume != null) {
-      lignes.push(`📊 ${fmtRatio(m.ratioVolume)}× plus de titres échangés que d’habitude`);
+      lignes.push(`· ${fmtRatio(m.ratioVolume)}× plus de titres échangés que d’habitude`);
     }
     const sens = sk.sections.find((s) => s.titre === 'Ce que ça veut dire');
-    if (sens) lignes.push(`🔍 ${premierePhrase(sens.texte)}`);
+    if (sens) lignes.push(`· ${premierePhrase(sens.texte)}`);
     const ctx = sk.sections.find((s) => s.titre === 'Le contexte');
-    if (ctx) lignes.push(`📌 ${premierePhrase(ctx.texte)}`);
+    if (ctx) lignes.push(`· ${premierePhrase(ctx.texte)}`);
     const niv = sk.sections.find((s) => s.titre === 'Les niveaux à surveiller');
-    if (niv) lignes.push(`🎯 ${premierePhrase(niv.texte)}`);
+    if (niv) lignes.push(`· ${premierePhrase(niv.texte)}`);
     lignes.push(AVERTISSEMENT);
     return lignes.join('\n');
   }

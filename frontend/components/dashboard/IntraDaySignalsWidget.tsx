@@ -59,7 +59,7 @@ export default function IntraDaySignalsWidget() {
   const getPatternBadge = (patternType: string) => {
     switch (patternType) {
       case 'intraday_momentum':
-        return { icon: '📈', label: 'Momentum', bgClass: 'bg-up/20', textClass: 'text-up' };
+        return { icon: '▲', label: 'Momentum', bgClass: 'bg-up/20', textClass: 'text-up' };
       case 'volume_spike':
         return { icon: '🔊', label: 'Volume', bgClass: 'bg-info/20', textClass: 'text-info' };
       case 'price_move':
@@ -74,7 +74,7 @@ export default function IntraDaySignalsWidget() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-sm text-ivory flex items-center gap-2">
-          <span className="text-lg">⚡</span> Signaux Intraday
+          Signaux intraséance
         </h3>
         <span className="text-xs bg-elevated/80 text-muted px-2 py-1 rounded-full font-medium">
           {patterns.length} détecté{patterns.length > 1 ? 's' : ''}
@@ -95,7 +95,7 @@ export default function IntraDaySignalsWidget() {
           <div className="flex gap-3 text-xs border-t border-border/40 pt-3">
             {momentumCount > 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-up/10">
-                <span className="text-up">📈</span>
+                <span className="text-up">▲</span>
                 <span className="text-up font-medium">{momentumCount} Momentum</span>
               </div>
             )}

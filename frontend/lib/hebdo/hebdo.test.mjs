@@ -276,25 +276,25 @@ test('buildSkeleton : le squelette passe ses deux gardes-fous', () => {
 test('buildPost long : sections attendues + avertissement', () => {
   const s = buildSkeleton(metrics);
   const p = buildPost(s, metrics, 'long');
-  assert.match(p, /^📈 ETIT/);
+  assert.match(p, /^▲ ETIT/);
   assert.match(p, /Ce qui s’est passé/);
   assert.match(p, /Les niveaux à surveiller/);
-  assert.match(p, /⚠️/);
+  assert.match(p, /pas un conseil en investissement/);
   assert.match(p, /pas un conseil/i);
 });
 
-test('buildPost court : compact, emojis, avertissement', () => {
+test('buildPost court : compact, marques, avertissement', () => {
   const s = buildSkeleton(metrics);
   const p = buildPost(s, metrics, 'court');
   assert.ok(p.length <= 700, `trop long : ${p.length}`);
-  assert.match(p, /^📈 ETIT/);
-  assert.match(p, /⚠️/);
+  assert.match(p, /^▲ ETIT/);
+  assert.match(p, /pas un conseil en investissement/);
 });
 
-test('buildPost : emoji baissier pour une valeur en repli', () => {
+test('buildPost : marque baissiere pour une valeur en repli', () => {
   const baisse = { ...metrics, variationHebdo: -6.42 };
   const s = buildSkeleton(baisse);
-  assert.match(buildPost(s, baisse, 'court'), /^📉/);
+  assert.match(buildPost(s, baisse, 'court'), /^▼/);
 });
 
 test('buildPost long : le contexte apparait quand il existe', () => {

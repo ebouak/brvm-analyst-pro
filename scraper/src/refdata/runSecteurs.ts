@@ -19,6 +19,7 @@ const log = logger.child({ module: 'runSecteurs' });
 /** Code BRVM → secteur ICB BRVM (libellé FR). */
 export const SECTEURS: Record<string, string> = {
   // Services financiers (confirmé en direct sur Sika Finance)
+  BBGC: 'Services financiers', // Bridge Bank Group CI, cotée le 24/09/2026
   BICB: 'Services financiers', BICC: 'Services financiers',
   BOAB: 'Services financiers', BOABF: 'Services financiers',
   BOAC: 'Services financiers', BOAM: 'Services financiers',

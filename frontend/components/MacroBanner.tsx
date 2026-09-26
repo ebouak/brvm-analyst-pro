@@ -50,7 +50,7 @@ export async function MacroBanner() {
     items.push({
       label: 'Taux directeur BCEAO',
       value: `${fmt(taux.value)} %`,
-      hint: `Taux minimum de soumission — en vigueur depuis le ${taux.as_of} (source bceao.int)`,
+      hint: `Taux minimum de soumission · en vigueur depuis le ${taux.as_of} (source bceao.int)`,
     });
   }
   if (guichet) {
@@ -69,7 +69,7 @@ export async function MacroBanner() {
     items.push({
       label: 'USD / XOF',
       value: `≈ ${fmt(usdXof.value, 1)}`,
-      hint: `Dérivé du cours BCE USD/EUR du ${usdXof.date} × parité fixe — indicatif`,
+      hint: `Dérivé du cours BCE USD/EUR du ${usdXof.date} × parité fixe · indicatif`,
     });
   }
 

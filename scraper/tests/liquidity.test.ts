@@ -101,3 +101,48 @@ describe('computeSessionFlow', () => {
     expect(f.volume_achat).toBe(100);
   });
 });
+
+describe('fourchette du carnet d’ordres', () => {
+  /** Séries à cours strictement constant : Roll ne peut rien estimer (cov = 0). */
+  const plates = rows(30, 50_000_000);
+
+  it('sans carnet, la source reste Roll — comportement d’avant inchangé', () => {
+    const r = computeLiquidityV2(plates, 30);
+    expect(r.spread_source).toBe(r.spread_roll_pct == null ? null : 'roll');
+    expect(r.spread_pct).toBe(r.spread_roll_pct);
+  });
+
+  it('avec carnet, la fourchette MESURÉE prime sur l’estimation', () => {
+    const r = computeLiquidityV2(plates, 30, 0.8);
+    expect(r.spread_source).toBe('carnet');
+    expect(r.spread_pct).toBe(0.8);
+  });
+
+  it('une fourchette mesurée serrée vaut mieux au score qu’aucune fourchette', () => {
+    const sans = computeLiquidityV2(plates, 30);
+    const avec = computeLiquidityV2(plates, 30, 0.2);
+    expect(avec.score!).toBeGreaterThan(sans.score!);
+  });
+
+  it('une fourchette mesurée large pénalise davantage qu’aucune fourchette', () => {
+    // Le carnet ne sert pas qu'à faire monter les notes : une valeur dont la
+    // fourchette est réellement prohibitive doit tomber plus bas que l'ignorance.
+    const sans = computeLiquidityV2(plates, 30);
+    const avec = computeLiquidityV2(plates, 30, 6);
+    expect(avec.score!).toBeLessThan(sans.score!);
+  });
+
+  it('un carnet absent (null) ne prétend pas être une mesure', () => {
+    const r = computeLiquidityV2(plates, 30, null);
+    expect(r.spread_source).not.toBe('carnet');
+  });
+
+  it('conserve l’estimation de Roll à côté de la mesure, pour pouvoir les comparer', () => {
+    const variees = rows(30, 50_000_000).map((r, i) => ({ ...r, cours_jour: i % 2 ? 5000 : 5100 }));
+    const r = computeLiquidityV2(variees, 30, 0.5);
+    expect(r.spread_source).toBe('carnet');
+    expect(r.spread_pct).toBe(0.5);
+    expect(r.spread_roll_pct).not.toBeNull();
+    expect(r.spread_roll_pct).not.toBe(0.5);
+  });
+});

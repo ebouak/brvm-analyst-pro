@@ -12,7 +12,7 @@ const TELEGRAM_CHANNEL_URL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? '';
 export const metadata: Metadata = {
   title: 'Brief quotidien BRVM — Résumé de séance',
   description:
-    'Le résumé quotidien de la séance BRVM : indices, plus fortes hausses et baisses, volumes et actualités. Gratuit, généré automatiquement depuis les données officielles.',
+    'Le résumé quotidien de la séance BRVM : indices, plus fortes hausses et baisses, volumes et actualités. Gratuit, composé après chaque clôture depuis les données officielles.',
   alternates: { canonical: `${SITE_URL}/brief` },
 };
 
@@ -35,8 +35,8 @@ export default async function BriefPage() {
             Le résumé de séance BRVM, chaque jour
           </h1>
           <p className="text-muted text-sm leading-relaxed">
-            Indices, hausses, baisses, volumes et actualités — généré automatiquement après chaque
-            clôture depuis les données officielles.
+            Indices, hausses, baisses, volumes et actualités : composé après chaque clôture depuis
+            les données officielles.
           </p>
           {TELEGRAM_CHANNEL_URL && (
             <a
@@ -67,7 +67,7 @@ export default async function BriefPage() {
                       href={`/brief/${b.date_marche}`}
                       className="text-sm text-accent font-medium hover:text-gold-2 transition-colors"
                     >
-                      Note de conjoncture — séance du {fmtDateFR(b.date_marche)} →
+                      Note de conjoncture · séance du {fmtDateFR(b.date_marche)} →
                     </Link>
                     <a
                       href={`https://wa.me/?text=${waText}`}

@@ -115,7 +115,7 @@ export function Trajectoire({
   if (serieA.length < 3) {
     return (
       <p className="v2-hint">
-        Historique insuffisant pour tracer une trajectoire — il faut au moins trois séances.
+        Historique insuffisant pour tracer une trajectoire : il faut au moins trois séances.
       </p>
     );
   }
@@ -194,7 +194,7 @@ export function Trajectoire({
           <div className="v2-k">{libelleA}</div>
           <div className={`v2-v ${totalA >= 0 ? 'v2-up' : 'v2-down'}`}>{signe(totalA)} %</div>
           <div className="v2-d">
-            sur {n} séances — de {pct(serieA[0].valeur)} à {pct(dernier.valeur)}
+            sur {n} séances, de {pct(serieA[0].valeur)} à {pct(dernier.valeur)}
           </div>
         </div>
         {totalB != null && (
@@ -349,7 +349,7 @@ export function Portefeuille({ lignes }: { lignes: LignePortefeuille[] }) {
       {sansCours > 0 && (
         <p className="v2-hint">
           {sansCours} ligne{sansCours > 1 ? 's' : ''} sans cours pour cette séance
-          {sansCours > 1 ? ' sont valorisées' : ' est valorisée'} à son prix de revient — aucune
+          {sansCours > 1 ? ' sont valorisées' : ' est valorisée'} à son prix de revient : aucune
           estimation n’est faite à sa place.
         </p>
       )}
@@ -468,7 +468,7 @@ export function Afrique({ indices, dateSeance }: { indices: IndiceAfricain[]; da
       {indices.some((i) => i.ytd_pct != null) && (
         <>
           <div className="v2-grp">
-            <span>Depuis le 1ᵉʳ janvier — relevé régional</span>
+            <span>Depuis le 1ᵉʳ janvier · relevé régional</span>
             <hr />
           </div>
           {indices
@@ -530,7 +530,7 @@ export function Motifs({ nbValeurs }: { nbValeurs: number }) {
         <p className="v2-scan-p">
           Ce n’est ni une panne ni une surprise. La BRVM cote en <b>fixing</b>&nbsp;: une seule
           fixation de prix par séance. Les motifs qui reposent sur le chemin parcouru{' '}
-          <b>pendant</b> la séance — accélération, retournement, volatilité intrajournalière — n’ont
+          <b>pendant</b> la séance (accélération, retournement, volatilité intrajournalière) n’ont
           structurellement rien à observer ici. Seuls les motifs calculables sur des clôtures
           successives peuvent se déclencher.
         </p>
@@ -931,7 +931,7 @@ export function Mouvements({
     <div>
       <p className="v2-hint" style={{ marginBottom: 16 }}>
         Le filet sous chaque ligne mesure sa part de la valeur échangée
-        {capitauxEstimes ? ' estimée' : ''} de la séance — une hausse sur un échange marginal reste
+        {capitauxEstimes ? ' estimée' : ''} de la séance : une hausse sur un échange marginal reste
         une hausse marginale.
       </p>
       <div className="v2-movers">

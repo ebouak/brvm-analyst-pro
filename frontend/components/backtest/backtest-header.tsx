@@ -17,7 +17,7 @@ export function BacktestHeader({ meta, highlightShortHistory = true }: { meta: B
       <div className="flex flex-wrap items-center gap-2">
         {highlightShortHistory && meta.isShortHistory && (
           <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
-            ⚠ Historique court
+            Historique court
           </span>
         )}
         <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600">

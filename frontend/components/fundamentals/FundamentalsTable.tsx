@@ -58,13 +58,13 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
     if (q === 'ns') {
       return (
         <td className="px-3 py-2 text-right text-muted/70"
-            title="Non significatif : résultat (ou capitaux propres) négatif. Le ratio n'a pas de sens financier — la donnée n'est pas en cause.">
+            title="Non significatif : résultat (ou capitaux propres) négatif. Le ratio n'a pas de sens financier, la donnée n'est pas en cause.">
           n.s.
         </td>
       );
     }
     const txt = isPct ? `${((value ?? 0) * 100).toFixed(1)} %` : fmtNumber(value, 2);
-    return <td className={`px-3 py-2 text-right tabular ${q === 'suspect' ? 'text-warn' : ''}`}>{txt}{q === 'suspect' && ' ⚠️'}</td>;
+    return <td className={`px-3 py-2 text-right tabular ${q === 'suspect' ? 'text-warn' : ''}`}>{txt}{q === 'suspect' && ' '}</td>;
   };
 
   const csvColumns: CsvColumn<ScreenerRow>[] = [
@@ -120,8 +120,8 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
         </table>
       </div>
       <p className="text-[10px] text-muted">
-        ⚠️ = donnée extraite douteuse (vérifier les états financiers).
-        {' '}« n.s. » = non significatif : la société est en perte, le ratio n’a pas de sens — la donnée, elle, est correcte.
+        = donnée extraite douteuse (vérifier les états financiers).
+        {' '}« n.s. » = non significatif : la société est en perte, le ratio n’a pas de sens, la donnée, elle, est correcte.
         {' '}« — » = non disponible.
       </p>
     </div>

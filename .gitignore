@@ -66,3 +66,6 @@ gan-harness/
 video-out/
 # PDF des dossiers valeur imprimés en local (video/dossiers.mjs)
 video/out/
+
+# Rendus vidéo locaux (MP4 + images extraites) — artefacts, pas des sources.
+remotion/out/

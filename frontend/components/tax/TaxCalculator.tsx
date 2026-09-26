@@ -6,8 +6,8 @@ import { dividendeNet, couponNet } from '@/lib/tax/compute';
 
 const TYPES: { key: TypeRevenu; label: string }[] = [
   { key: 'dividende_cote', label: 'Dividende (société cotée)' },
-  { key: 'obligation_etat', label: "Coupon — obligation d'État" },
-  { key: 'obligation_privee', label: 'Coupon — obligation privée' },
+  { key: 'obligation_etat', label: "Coupon · obligation d'État" },
+  { key: 'obligation_privee', label: 'Coupon · obligation privée' },
 ];
 
 const fcfa = (v: number) => v.toLocaleString('fr-FR') + ' FCFA';
@@ -67,7 +67,7 @@ export default function TaxCalculator() {
 
       {res.indisponible ? (
         <p className="rounded-lg border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-          Taux non confirmé pour ce pays et ce type de revenu — consultez votre SGI.
+          Taux non confirmé pour ce pays et ce type de revenu : consultez votre SGI.
         </p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-3 text-center">

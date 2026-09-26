@@ -32,7 +32,7 @@ export default async function IntraDayScreenerPage() {
         <SectionHeader
           kicker="Outils"
           title="Screener Intraday"
-          subtitle="Les titres qui bougent, et ceux dont le volume s'emballe — sur la séance du jour."
+          subtitle="Les titres qui bougent, et ceux dont le volume s'emballe, sur la séance du jour."
         />
       </div>
 
@@ -44,7 +44,7 @@ export default async function IntraDayScreenerPage() {
         </Suspense>
       ) : (
         <EmptyStatePremium
-          icon="⚡"
+          icon="◇"
           title="Screener intraday réservé au premium"
           hint="Les titres qui bougent et les volumes qui s'emballent en séance sont inclus dans l'abonnement Premium."
           action={{ href: '/account/plan', label: 'Passer à Premium' }}
@@ -56,7 +56,7 @@ export default async function IntraDayScreenerPage() {
           <h3 className="font-medium text-ivory mb-3">Ce que ce screener mesure</h3>
           <div className="space-y-3 text-sm text-muted">
             <div>
-              <p className="font-medium text-ivory mb-1">📈 Momentum de séance</p>
+              <p className="font-medium text-ivory mb-1">Momentum de séance</p>
               <p>
                 Variation du cours depuis l&apos;ouverture, au-delà de <strong>3 %</strong>. Sur la
                 BRVM, la plupart des titres ne bougent pas de la journée : un mouvement de cette

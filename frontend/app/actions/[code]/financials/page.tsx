@@ -286,7 +286,7 @@ export default async function FinancialsPage({ params }: Props) {
           <div className="bg-surface border border-warn/30 rounded-xl p-5 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-warn">📄 Données financières non importées</p>
+                <p className="text-sm font-semibold text-warn">Données financières non importées</p>
                 <p className="text-xs text-muted mt-1">
                   {data.publications.length} publication{data.publications.length > 1 ? 's' : ''} disponible{data.publications.length > 1 ? 's' : ''} pour {code}.
                   Importez-les via l&apos;IA pour remplir automatiquement les états financiers.
@@ -338,7 +338,7 @@ export default async function FinancialsPage({ params }: Props) {
         {/* Publications d'états financiers + résumé chiffres clés */}
         {data.publications.filter((p) => p.type_publication === 'etats_financiers').length > 0 && (
           <div className="bg-surface border border-border rounded-xl p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-white">Publications — états financiers</h2>
+            <h2 className="text-sm font-semibold text-white">Publications · états financiers</h2>
             <ul className="space-y-2">
               {data.publications.filter((p) => p.type_publication === 'etats_financiers').map((p) => {
                 const an = (p.libelle ?? '').match(/[Ee]xercice\s+(20\d{2})/)?.[1] ?? null;
@@ -372,7 +372,7 @@ export default async function FinancialsPage({ params }: Props) {
           <div>
             <p className="text-sm font-semibold text-warn">✦ Diagnostic financier &amp; économique</p>
             <p className="text-xs text-muted mt-0.5">
-              Analyse générée automatiquement à partir des états financiers publiés — vérifiée par
+              Analyse générée automatiquement à partir des états financiers publiés, vérifiée par
               nos garde-fous de plausibilité. Réservée aux membres Premium.
             </p>
           </div>

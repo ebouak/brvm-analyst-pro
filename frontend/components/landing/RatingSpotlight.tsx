@@ -24,8 +24,8 @@ export function RatingSpotlight({ signal, nbActions }: Props) {
             Chaque action. Une note.
           </h2>
           <p className="max-w-[46ch] text-sm leading-relaxed text-muted">
-            Chaque note A–F est calculée à partir de signaux quantitatifs explicables — variation,
-            volume, RSI, tendance et liquidité — jamais d&apos;opinion inventée.
+            Chaque note A–F est calculée à partir de signaux quantitatifs explicables (variation,
+            volume, RSI, tendance et liquidité), jamais d&apos;opinion inventée.
           </p>
 
           {/* MICRO-LÉGENDE (2026-09-16). La note et le signal étaient affichés
@@ -46,7 +46,7 @@ export function RatingSpotlight({ signal, nbActions }: Props) {
               <dt className="text-[12px] font-semibold text-ivory">BUY · HOLD · SELL</dt>
               <dd className="text-[12px] leading-snug text-muted">
                 Quand rien n&apos;est net, le moteur affiche HOLD et s&apos;abstient. C&apos;est un
-                choix de rigueur, pas un manque d&apos;avis — et cela arrive souvent.
+                choix de rigueur, pas un manque d&apos;avis, et cela arrive souvent.
               </dd>
             </div>
           </dl>
