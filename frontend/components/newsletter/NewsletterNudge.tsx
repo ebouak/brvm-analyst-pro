@@ -111,7 +111,7 @@ export default function NewsletterNudge() {
   return (
     <aside
       role="complementary"
-      aria-label="Recevoir le brief BRVM par email"
+      aria-label="Recevoir le résumé BRVM hebdomadaire par email"
       className="fixed bottom-3 left-3 right-3 z-[115] w-auto rounded-2xl border border-border bg-surface/95 p-4 shadow-[0_18px_50px_-12px_rgba(0,0,0,.55)] backdrop-blur motion-safe:animate-[nudgeIn_.45s_ease-out] sm:right-auto sm:bottom-4 sm:left-4 sm:w-[22rem]"
     >
       <div className="flex items-start gap-3">
@@ -127,9 +127,14 @@ export default function NewsletterNudge() {
 
         <div className="min-w-0 flex-1">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">WESTBOURSE</p>
+          {/* HEBDOMADAIRE, et pas un mot de plus. La liste
+              `newsletter_subscribers` reçoit un résumé par semaine : le
+              formulaire du pied de page et l'email de confirmation le disent
+              tous deux. Une première version annonçait « après chaque
+              clôture » — la personne aurait été démentie par l'email de
+              confirmation reçu trois minutes plus tard. */}
           <p className="mt-1 text-sm leading-relaxed text-ivory">
-            Recevez le brief de la séance BRVM : indices, hausses, baisses et volumes, après
-            chaque clôture.
+            Le résumé BRVM de la semaine dans votre boîte mail. Gratuit.
           </p>
 
           {etape === 'invite' ? (

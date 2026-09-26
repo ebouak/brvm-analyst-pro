@@ -802,6 +802,22 @@
          est trouvé par ses descendants, `timeline-scope` est inutile. */
       .lb .fil-wrap .steps { view-timeline-name: --fil; }
 
+      /* La cascade des étapes était MORTE dans cette section, et depuis
+         toujours : `.lb .fil-wrap .step { all: unset }` (0,3,0) l'emporte sur
+         `.lb .step { animation: fil-in }` (0,2,0) et remet `animation` à sa
+         valeur initiale. On la rétablit à spécificité égale, plus bas dans le
+         fichier.
+         ⚠️ PART DE 35 % D'OPACITÉ, PAS DE ZÉRO. `fil-in` parque son sujet à
+         `opacity: 0` ; ici le sujet n'est pas un ornement mais sept blocs de
+         texte. Un incident de timeline les rendrait invisibles — exactement ce
+         que l'audit de cette landing a proscrit. Le mouvement se voit, le
+         contenu reste lisible en toute circonstance. */
+      .lb .fil-wrap .step {
+        animation: fil-etape linear both;
+        animation-timeline: --fil;
+        animation-range: cover calc(24% + var(--i, 0) * 4%) cover calc(42% + var(--i, 0) * 4%);
+      }
+
       .lb .fil-wrap .step:not(:last-child)::after {
         animation: fil-trait linear both;
         animation-timeline: --fil;
@@ -842,3 +858,5 @@
 .lb .bb-copy span { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
 .lb .bb .btn { position: relative; z-index: 2; white-space: nowrap; }
 @media (max-width: 720px) { .lb .bb-in { grid-template-columns: 1fr; min-height: 148px; padding: 16px; } .lb .bb .btn { justify-self: start; } }
+
+@keyframes fil-etape { from { opacity: .35; transform: translateY(10px); } to { opacity: 1; transform: none; } }
