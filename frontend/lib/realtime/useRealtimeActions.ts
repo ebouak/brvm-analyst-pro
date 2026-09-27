@@ -71,10 +71,14 @@ export function useRealtimeActions<T extends RealtimeActionRow>(
 
     // Les navigateurs coupent les websockets en veille d'onglet : au retour au
     // premier plan, on force une resynchro de la séance courante.
+    // ⚠️ CE SELECT DOIT LISTER TOUTE COLONNE AFFICHÉE EN DIRECT. Les événements
+    // Realtime portent la ligne entière, mais cette requête-ci ne rend que ce
+    // qu'elle demande : une colonne oubliée resterait figée à sa valeur de
+    // départ après un simple changement d'onglet, sans rien signaler.
     const onFocus = async () => {
       const { data } = await supabase
         .from('brvm_actions_daily')
-        .select('code, cours_jour, variation_pct, volume')
+        .select('code, cours_jour, variation_pct, volume, valeur_echangee, nb_transactions')
         .eq('date_marche', dateMarche);
       if (data) setRows((prev) => data.map((d) => ({ ...(prev.find((p) => p.code === d.code) ?? {}), ...d }) as T));
     };

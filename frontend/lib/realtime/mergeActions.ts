@@ -11,6 +11,12 @@ export interface RealtimeActionRow {
   cours_jour: number | null;
   variation_pct: number | null;
   volume?: number | null;
+  /** Capitaux de la séance. Facultatifs : seuls les consommateurs qui les
+   *  affichent les fournissent. Ajoutés le 2026-09-27 pour la landing — voir
+   *  la resynchronisation de `useRealtimeActions`, qui DOIT les resélectionner
+   *  sous peine de les figer au retour d'onglet. */
+  valeur_echangee?: number | null;
+  nb_transactions?: number | null;
 }
 
 export type FlashDirection = 'up' | 'down' | 'none';

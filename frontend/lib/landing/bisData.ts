@@ -40,6 +40,12 @@ export interface EtatMarche {
   transactions: number | null;
   /** Écarts contre la veille, en % (null si l'une des deux sommes manque). */
   valeurVsVeille: number | null;
+  /** Totaux de la séance PRÉCÉDENTE. Exposés pour que le direct recalcule les
+   *  écarts « vs veille » exactement, au lieu de faire vivre le numérateur
+   *  au-dessus d'une base figée — un pourcentage qui dérive sans le dire. */
+  veilleValeur: number | null;
+  veilleTitres: number | null;
+  veilleTransactions: number | null;
   titresVsVeille: number | null;
   transactionsVsVeille: number | null;
   sentimentScore: number;          // hausses / (hausses + baisses) × 100 — même méthode que le dashboard
@@ -61,7 +67,7 @@ export interface LandingBisData {
    *  deux colonnes que `useRealtimeActions` met à jour de façon fiable.
    *  ~48 lignes, quelques kilo-octets — le coût est négligeable et il évite au
    *  client de refaire la requête que le serveur vient de faire. */
-  coursSeed: { code: string; cours_jour: number | null; variation_pct: number | null }[];
+  coursSeed: { code: string; cours_jour: number | null; variation_pct: number | null; volume: number | null; valeur_echangee: number | null; nb_transactions: number | null }[];
   brvmC: Indice | null;
   topHausses: Mover[];
   topBaisses: Mover[];
@@ -116,7 +122,7 @@ async function load(): Promise<LandingBisData> {
   const vide: LandingBisData = {
     dateMarche: null, nbActions: 0, hausses: 0, baisses: 0, inchangees: 0, coursSeed: [], brvmC: null,
     topHausses: [], topBaisses: [], indices: [], plans: [], slides: [...PERMANENT_SLIDES], bandeaux: [], topNote: null, derniereCollecte: null,
-    etat: { valeurEchangee: null, titresEchanges: null, transactions: null, valeurVsVeille: null, titresVsVeille: null, transactionsVsVeille: null, sentimentScore: 50, sentimentDelta: null },
+    etat: { valeurEchangee: null, titresEchanges: null, transactions: null, veilleValeur: null, veilleTitres: null, veilleTransactions: null, valeurVsVeille: null, titresVsVeille: null, transactionsVsVeille: null, sentimentScore: 50, sentimentDelta: null },
     brvmCSerie: [],
     secteurs: [],
     plusEchangee: null,
@@ -210,6 +216,7 @@ async function load(): Promise<LandingBisData> {
   const valeurEchangee = somme((r) => r.valeur), titresEchanges = somme((r) => r.volume), transactions = somme((r) => r.tx);
   const etat: EtatMarche = {
     valeurEchangee, titresEchanges, transactions,
+    veilleValeur, veilleTitres, veilleTransactions: veilleTx,
     valeurVsVeille: vs(valeurEchangee, veilleValeur), titresVsVeille: vs(titresEchanges, veilleTitres), transactionsVsVeille: vs(transactions, veilleTx),
     sentimentScore, sentimentDelta,
   };
@@ -233,7 +240,7 @@ async function load(): Promise<LandingBisData> {
 
   return {
     dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses,
-    coursSeed: rows.map((r) => ({ code: r.code, cours_jour: r.cours, variation_pct: r.variation })),
+    coursSeed: rows.map((r) => ({ code: r.code, cours_jour: r.cours, variation_pct: r.variation, volume: r.volume, valeur_echangee: r.valeur, nb_transactions: r.tx })),
     brvmC,
     topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, bandeaux: pubs, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic, sgi,
   };

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CompteursLive } from './CompteursLive';
+import { EtatSeanceLive, pct, tone } from './EtatSeanceLive';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import type { LandingBisData, Mover } from '@/lib/landing/bisData';
 import type { Fraicheur } from '@/lib/freshness';
@@ -16,9 +16,6 @@ import { IndexChart } from './IndexChart';
  * la BRVM ne les publie pas (CLAUDE.md §9) ; on montre veille et clôture.
  */
 
-const pct = (v: number | null, d = 2) => v == null ? '—' : `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d })} %`;
-const tone = (v: number | null) => (v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '');
-const fmtMd = (v: number) => v >= 1e9 ? `${(v / 1e9).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Md` : v >= 1e6 ? `${(v / 1e6).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} M` : fmtNumber(v);
 const fmtM = (v: number | null) => v == null ? '—' : v >= 1e6 ? `${(v / 1e6).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} M` : v >= 1e3 ? `${(v / 1e3).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} k` : fmtNumber(v);
 const fmt2 = (v: number) => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -139,17 +136,17 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
         </div>
 
         {/* Rangée 2 */}
-        {/* Les trois compteurs passent en DIRECT après hydratation. Le serveur
-            rend déjà les chiffres — ils sont dans le HTML, le LCP est intact —
-            et le client ne fait que les corriger quand une cotation bouge. */}
-        <CompteursLive seed={d.coursSeed} dateMarche={d.dateMarche} hausses={d.hausses} inchangees={d.inchangees} baisses={d.baisses} nbActions={d.nbActions} />
-        <div className="card keys r2d">
-          <ul className="keys-l num">
-            <li><b>{d.etat.valeurEchangee != null ? `${fmtMd(d.etat.valeurEchangee)} FCFA` : '—'}</b><span>Valeur échangée</span>{d.etat.valeurVsVeille != null && <small><i className={`chip ${tone(d.etat.valeurVsVeille)}`}>{pct(d.etat.valeurVsVeille, 1)}</i> vs veille</small>}</li>
-            <li><b>{d.etat.titresEchanges != null ? fmtNumber(d.etat.titresEchanges) : '—'}</b><span>Titres échangés</span>{d.etat.titresVsVeille != null && <small><i className={`chip ${tone(d.etat.titresVsVeille)}`}>{pct(d.etat.titresVsVeille, 1)}</i> vs veille</small>}</li>
-            <li><b>{d.etat.transactions != null ? fmtNumber(d.etat.transactions) : '—'}</b><span>Transactions</span>{d.etat.transactionsVsVeille != null && <small><i className={`chip ${tone(d.etat.transactionsVsVeille)}`}>{pct(d.etat.transactionsVsVeille, 1)}</i> vs veille</small>}</li>
-          </ul>
-        </div>
+        {/* Compteurs ET capitaux passent en DIRECT après hydratation, rendus
+            par un SEUL composant — donc un seul abonnement Supabase, là où
+            deux composants auraient ouvert deux canaux sur le même sujet.
+            Le serveur rend déjà les chiffres : ils sont dans le HTML servi, le
+            LCP est intact, et le client ne fait que les corriger. */}
+        <EtatSeanceLive
+          seed={d.coursSeed} dateMarche={d.dateMarche}
+          hausses={d.hausses} inchangees={d.inchangees} baisses={d.baisses} nbActions={d.nbActions}
+          valeurEchangee={d.etat.valeurEchangee} titresEchanges={d.etat.titresEchanges} transactions={d.etat.transactions}
+          veilleValeur={d.etat.veilleValeur} veilleTitres={d.etat.veilleTitres} veilleTransactions={d.etat.veilleTransactions}
+        />
 
         {/* Rangée 3 */}
         <div className="r3a"><Table titre="Top 5 hausses" rows={d.topHausses} tone="up" href="/societes" vide="Aucune hausse sur cette séance." /></div>
