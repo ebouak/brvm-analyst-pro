@@ -8,6 +8,7 @@ import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/bis/Terminal';
 import { getMemberCount } from '@/lib/landing/memberCount';
+import { EcransDefilants } from '@/components/landing/bis/EcransDefilants';
 import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
 import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
@@ -129,6 +130,11 @@ export default async function Landing() {
 
           {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
           <QuatreFacons />
+
+          {/* Les écrans réels, juste avant l'offre : le visiteur vient
+              d'apprendre CE QUI est couvert, il voit maintenant à quoi ça
+              ressemble, puis on lui propose le compte gratuit. */}
+          <EcransDefilants />
 
           {/* 2 quater · AVEC UN COMPTE GRATUIT — la valeur du gratuit AVANT Premium */}
           <section className="gratuit" aria-labelledby="h-gratuit">
