@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import RatingBadge from '@/components/RatingBadge';
@@ -19,8 +19,28 @@ export interface CompanyCard {
 }
 
 /** Annuaire filtrable des sociétés (recherche instantanée nom/code/secteur/pays). */
+/** Sens de variation, pour les liens venus des compteurs de la landing. */
+type Sens = 'tous' | 'hausse' | 'baisse' | 'stable';
+const LIBELLE_SENS: Record<Exclude<Sens, 'tous'>, string> = {
+  hausse: 'En hausse',
+  baisse: 'En baisse',
+  stable: 'Stables',
+};
+
 export default function CompaniesExplorer({ companies }: { companies: CompanyCard[] }) {
   const [query, setQuery] = useState('');
+  const [sens, setSens] = useState<Sens>('tous');
+
+  // Le filtre arrive par l'URL (`?sens=hausse`), depuis les compteurs de la
+  // landing. Lu APRÈS montage, avec `window.location`, et non par
+  // `searchParams` côté serveur : cette page est en ISR 900 s, et lire
+  // `searchParams` la ferait basculer en rendu dynamique à chaque visite.
+  // `useSearchParams` imposerait en plus une frontière Suspense, dont ce dépôt
+  // sait le prix (une réponse diffusée en flux part en 200 avant tout 404).
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get('sens');
+    if (v === 'hausse' || v === 'baisse' || v === 'stable') setSens(v);
+  }, []);
   const router = useRouter();
   const supabase = createClient();
 
@@ -38,15 +58,26 @@ export default function CompaniesExplorer({ companies }: { companies: CompanyCar
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return companies;
-    return companies.filter(
+    // Une variation absente n'est ni une hausse ni une baisse : on ne la range
+    // pas d'office dans « stables », ce serait affirmer un chiffre qu'on n'a pas.
+    const parSens = sens === 'tous'
+      ? companies
+      : companies.filter((c) => {
+          const v = c.variation_pct;
+          if (v == null) return false;
+          if (sens === 'hausse') return v > 0;
+          if (sens === 'baisse') return v < 0;
+          return v === 0;
+        });
+    if (!q) return parSens;
+    return parSens.filter(
       (c) =>
         c.code.toLowerCase().includes(q) ||
         c.designation.toLowerCase().includes(q) ||
         (c.secteur ?? '').toLowerCase().includes(q) ||
         (c.pays ?? '').toLowerCase().includes(q),
     );
-  }, [companies, query]);
+  }, [companies, query, sens]);
 
   const bySector = useMemo(() => {
     const map = new Map<string, CompanyCard[]>();
@@ -72,6 +103,24 @@ export default function CompaniesExplorer({ companies }: { companies: CompanyCar
           placeholder="Rechercher : SONATEL, banque, Sénégal…"
           className="w-full md:max-w-md bg-surface border border-border rounded-xl px-4 py-3 text-sm text-white placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/40 transition-colors"
         />
+        {sens !== 'tous' && (
+          // Sans cette puce, une personne arrivant depuis la landing verrait
+          // une liste tronquée sans savoir pourquoi, ni comment la rouvrir.
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-accent-ink">
+              {LIBELLE_SENS[sens]}
+              <button
+                type="button"
+                onClick={() => setSens('tous')}
+                aria-label="Retirer le filtre et afficher toutes les sociétés"
+                className="font-semibold hover:opacity-70"
+              >
+                ×
+              </button>
+            </span>
+            <span>sur cette séance</span>
+          </p>
+        )}
         {query && (
           <p className="mt-2 text-xs text-muted" role="status">
             {filtered.length} résultat{filtered.length > 1 ? 's' : ''} pour « {query} »

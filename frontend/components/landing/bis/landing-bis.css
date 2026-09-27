@@ -365,6 +365,16 @@
 .lb .flash-foot { font-size: 11px; color: var(--faint); margin-top: 12px; font-style: italic; }
 
 .lb .tile { position: relative; display: flex; align-items: center; gap: 12px; overflow: hidden; }
+
+/* Les trois compteurs sont devenus des LIENS vers la liste filtrée
+   (/societes?sens=…). Un élément cliquable doit le montrer : sans cette règle,
+   rien ne distinguait une tuile inerte d'une tuile qui mène quelque part.
+   `color: inherit` et `text-decoration: none` empêchent l'ancre d'imposer sa
+   couleur de lien aux chiffres, qui portent déjà leur sémantique hausse/baisse. */
+.lb a.tile { color: inherit; text-decoration: none; transition: border-color 160ms, transform 160ms; }
+.lb a.tile:hover { border-color: rgb(var(--color-accent) / .45); transform: translateY(-1px); }
+.lb a.tile:focus-visible { outline: 2px solid rgb(var(--color-accent)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .lb a.tile { transition: none; } .lb a.tile:hover { transform: none; } }
 .lb .tile .ico { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--paper-2); color: var(--muted); font-weight: 700; flex: none; }
 .lb .tile .ico.up { background: rgb(var(--color-up) / .14); color: var(--up-tx); } .lb .tile .ico.down { background: rgb(var(--color-down) / .14); color: var(--down-tx); }
 .lb .tile b { display: block; font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1; }

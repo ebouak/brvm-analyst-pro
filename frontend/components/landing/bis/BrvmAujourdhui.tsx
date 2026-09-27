@@ -138,9 +138,9 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
         </div>
 
         {/* Rangée 2 */}
-        <div className="card tile r2a"><span className="ico up">↑</span><div><b className="num up">{d.hausses}</b><span>hausses<small className="num">{p(d.hausses)} %</small></span></div><i className="bar up" style={{ width: `${p(d.hausses)}%` }} aria-hidden="true" /></div>
-        <div className="card tile r2b"><span className="ico">−</span><div><b className="num">{d.inchangees}</b><span>stables<small className="num">{p(d.inchangees)} %</small></span></div><i className="bar" style={{ width: `${p(d.inchangees)}%` }} aria-hidden="true" /></div>
-        <div className="card tile r2c"><span className="ico down">↓</span><div><b className="num down">{d.baisses}</b><span>baisses<small className="num">{p(d.baisses)} %</small></span></div><i className="bar down" style={{ width: `${p(d.baisses)}%` }} aria-hidden="true" /></div>
+        <Link href="/societes?sens=hausse" className="card tile r2a" aria-label="Voir les valeurs en hausse de la séance"><span className="ico up">↑</span><div><b className="num up">{d.hausses}</b><span>hausses<small className="num">{p(d.hausses)} %</small></span></div><i className="bar up" style={{ width: `${p(d.hausses)}%` }} aria-hidden="true" /></Link>
+        <Link href="/societes?sens=stable" className="card tile r2b" aria-label="Voir les valeurs stables de la séance"><span className="ico">−</span><div><b className="num">{d.inchangees}</b><span>stables<small className="num">{p(d.inchangees)} %</small></span></div><i className="bar" style={{ width: `${p(d.inchangees)}%` }} aria-hidden="true" /></Link>
+        <Link href="/societes?sens=baisse" className="card tile r2c" aria-label="Voir les valeurs en baisse de la séance"><span className="ico down">↓</span><div><b className="num down">{d.baisses}</b><span>baisses<small className="num">{p(d.baisses)} %</small></span></div><i className="bar down" style={{ width: `${p(d.baisses)}%` }} aria-hidden="true" /></Link>
         <div className="card keys r2d">
           <ul className="keys-l num">
             <li><b>{d.etat.valeurEchangee != null ? `${fmtMd(d.etat.valeurEchangee)} FCFA` : '—'}</b><span>Valeur échangée</span>{d.etat.valeurVsVeille != null && <small><i className={`chip ${tone(d.etat.valeurVsVeille)}`}>{pct(d.etat.valeurVsVeille, 1)}</i> vs veille</small>}</li>
