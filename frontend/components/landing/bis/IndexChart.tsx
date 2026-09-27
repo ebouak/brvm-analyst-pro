@@ -140,7 +140,7 @@ export function IndexChart({ serie }: { serie: Point[] }) {
         <motion.g initial={false} animate={fondu}>
           <motion.path d={area} fill="url(#lb-idx)" initial={false} animate={controls} variants={aire} />
           <motion.path d={line} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="2" strokeLinejoin="round" initial={false} animate={controls} variants={ligne} />
-          {smaLine && <motion.path d={smaLine} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="1.6" strokeDasharray="4 3" strokeLinejoin="round" initial={false} animate={controls} variants={moyenne} />}
+          {smaLine && <motion.path d={smaLine} fill="none" stroke="rgb(var(--color-sma, var(--color-accent)))" strokeWidth="1.6" strokeDasharray="4 3" strokeLinejoin="round" initial={false} animate={controls} variants={moyenne} />}
           <motion.circle cx={x(pts.length - 1)} cy={y(dernier.v)} r="3.5" fill="rgb(var(--color-accent))" stroke="rgb(var(--color-surface))" strokeWidth="1.5" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} initial={false} animate={controls} variants={pointFinal} />
         </motion.g>
         {xLabels.map((i) => (
