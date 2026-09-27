@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRealtimeActions } from '@/lib/realtime/useRealtimeActions';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 import { fmtNumber } from '@/lib/format';
+import { pct, tone, fmtMd } from '@/lib/landing/formats';
 
 /**
  * L'état de la séance en direct : les trois compteurs ET les capitaux.
@@ -22,13 +23,6 @@ import { fmtNumber } from '@/lib/format';
  * (`cours-live-<date>`) — du gaspillage, et deux états pouvant diverger d'une
  * fraction de seconde sur la même séance.
  */
-
-/** Recopiés de `BrvmAujourdhui` : ces trois formateurs doivent vivre côté client
- *  puisque les valeurs changent après hydratation. La page serveur les importe
- *  désormais d'ici, plutôt que d'en garder une seconde copie. */
-export const pct = (v: number | null, d = 2) => v == null ? '—' : `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d })} %`;
-export const tone = (v: number | null) => (v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '');
-export const fmtMd = (v: number) => v >= 1e9 ? `${(v / 1e9).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Md` : v >= 1e6 ? `${(v / 1e6).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} M` : fmtNumber(v);
 
 export interface EtatSeanceLiveProps {
   /** Une ligne par valeur cotée du jour. */

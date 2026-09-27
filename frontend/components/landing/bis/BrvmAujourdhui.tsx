@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { EtatSeanceLive, pct, tone } from './EtatSeanceLive';
+import { EtatSeanceLive } from './EtatSeanceLive';
+import { pct, tone } from '@/lib/landing/formats';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import type { LandingBisData, Mover } from '@/lib/landing/bisData';
 import type { Fraicheur } from '@/lib/freshness';
