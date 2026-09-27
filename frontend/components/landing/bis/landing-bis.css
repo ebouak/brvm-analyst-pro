@@ -305,16 +305,40 @@
 .lb .today { margin-top: 28px; }
 
 /* ── « La BRVM aujourd'hui » : charte marine institutionnelle ────────────
-   Panneau CLAIR constant, dans les deux thèmes du site (demande explicite :
-   ces associations « doivent rester constantes »). On redéfinit ici, et ici
-   seulement, les jetons du thème (--color-*, triplets RGB) ET leurs alias de
-   la landing : un alias comme --up est résolu au niveau de `.lb`, il faut
-   donc le reposer, sinon les enfants hériteraient de l'ancienne valeur.
-   Toutes les règles et tous les SVG existants suivent sans être réécrits.
-   Contrastes mesurés sur blanc : #003B71 11,3 · #102A43 14,6 · #006FBA 5,3 ·
-   #1B7F4B 5,0 · #C53030 5,5 · #52667A 5,9. #B7791F (3,6) et #829AB1 (2,9) ne
-   servent qu'à des tracés, jamais à du texte. */
+   Deux variantes de la MÊME charte, qui suivent la bascule Clair/Sombre du
+   site : sombre par défaut (comme le site), claire sous data-theme="light".
+   On redéfinit ici, et ici seulement, les jetons du thème (--color-*,
+   triplets RGB) ET leurs alias de la landing : un alias comme --up est résolu
+   au niveau de `.lb`, il faut donc le reposer, sinon les enfants hériteraient
+   de l'ancienne valeur. Toutes les règles et tous les SVG suivent.
+
+   Contrastes mesurés (texte) —
+   clair, sur blanc : #003B71 11,3 · #102A43 14,6 · #006FBA 5,3 · #1B7F4B 5,0 ·
+     #C53030 5,5 · #52667A 5,9 ; #B7791F et #829AB1 : tracés seulement ;
+   sombre, sur carte #0F2135 : #8EC5F0 8,8 · #E3ECF5 13,6 · #9DB2C7 7,5 ·
+     #4FA8E8 6,3 · #3DBE7E 6,9 · #F27474 5,8 · #E1A445 7,4 · SMA #6D89A6 4,5. */
 .lb .today {
+  /* Sombre (défaut) */
+  --color-bg: 8 21 35;            /* #081523 */
+  --color-sunken: 13 30 48;       /* #0D1E30 */
+  --color-surface: 15 33 53;      /* #0F2135 */
+  --color-border: 35 64 94;       /* #23405E */
+  --color-ivory: 227 236 245;     /* #E3ECF5 */
+  --color-muted: 157 178 199;     /* #9DB2C7 */
+  --color-faint: 141 163 186;     /* #8DA3BA */
+  --color-accent: 79 168 232;     /* #4FA8E8 */
+  --color-sma: 109 137 166;       /* #6D89A6 */
+  --color-up: 61 190 126;         /* #3DBE7E */
+  --color-down: 242 116 116;      /* #F27474 */
+  --color-warn: 225 164 69;       /* #E1A445 */
+  --navy: #8EC5F0;                /* titres et chiffres majeurs */
+  --navy-pill: #1F5F99;           /* onglet actif */
+  --on-btn: #081523;
+  --ombre: rgba(0, 0, 0, .45);
+  --bord-survol: rgba(79, 168, 232, .35);
+  color-scheme: dark;
+}
+[data-theme="light"] .lb .today {
   --color-bg: 245 248 251;        /* #F5F8FB  fond global */
   --color-sunken: 234 240 246;    /* #EAF0F6  rail des onglets */
   --color-surface: 255 255 255;   /* #FFFFFF  carte */
@@ -327,24 +351,29 @@
   --color-up: 27 127 75;          /* #1B7F4B  hausse */
   --color-down: 197 48 48;        /* #C53030  baisse */
   --color-warn: 183 121 31;       /* #B7791F  stable / attention */
-  --navy: #003B71;                /* titres, chiffres majeurs, onglet actif */
-
+  --navy: #003B71;
+  --navy-pill: #003B71;
+  --on-btn: #FFFFFF;
+  --ombre: rgba(0, 59, 113, .10);
+  --bord-survol: rgba(0, 59, 113, .28);
+  color-scheme: light;
+}
+/* Alias .lb reposés sur les jetons ci-dessus (identiques pour les deux thèmes). */
+.lb .today {
   --paper: rgb(var(--color-bg)); --paper-2: rgb(var(--color-sunken)); --white: rgb(var(--color-surface));
   --ink: rgb(var(--color-ivory)); --ink-2: rgb(var(--color-ivory) / .82); --muted: rgb(var(--color-muted)); --faint: rgb(var(--color-faint)); --line: rgb(var(--color-border));
   --blue: rgb(var(--color-accent)); --gold: rgb(var(--color-accent)); --green: rgb(var(--color-up)); --green-soft: rgb(var(--color-up) / .08);
   --up: rgb(var(--color-up)); --down: rgb(var(--color-down));
   --blue-tx: var(--blue); --up-tx: var(--up); --down-tx: var(--down);
   --on-ink: #FFFFFF;
-
-  color-scheme: light;
   background: var(--paper); color: var(--ink);
   border-radius: var(--r-panel); padding: clamp(16px, 3vw, 28px);
 }
 .lb .today h2, .lb .today .big { color: var(--navy); }
-.lb .today .tabs .tab-pill { background: var(--navy); }
-/* Texte blanc sur #006FBA : 5,3:1 (le texte sombre d'origine y tombait à ~3,9). */
-.lb .today .btn-gold { color: #FFFFFF; box-shadow: 0 10px 24px -14px rgba(0, 59, 113, .6); }
-.lb .today .btn-gold:hover { background: var(--navy); }
+.lb .today .tabs .tab-pill { background: var(--navy-pill); }
+/* Clair : blanc sur #006FBA (5,3:1). Sombre : #081523 sur #4FA8E8 (7,1:1). */
+.lb .today .btn-gold { color: var(--on-btn); box-shadow: 0 10px 24px -14px var(--ombre); }
+.lb .today .btn-gold:hover { background: var(--navy-pill); color: #FFFFFF; }
 .lb .today .legend .sw.sma { border-top-color: rgb(var(--color-sma)); }
 /* Fond de pastille à 8 % : à 14 %, le vert de hausse tombait à 4,37:1. */
 .lb .today .chip.up, .lb .today .tile .ico.up, .lb .today .top h3.up .badge { background: rgb(var(--color-up) / .08); }
@@ -930,7 +959,7 @@
    bordure — aucune propriété de mise en page. Pointeur fin seulement. */
 @media (hover: hover) and (pointer: fine) {
   .lb .today .card { transition: box-shadow .2s ease-out, border-color .2s ease-out; }
-  .lb .today .card:hover { box-shadow: 0 16px 34px rgba(0, 59, 113, .10); border-color: rgba(0, 59, 113, .28); }
+  .lb .today .card:hover { box-shadow: 0 16px 34px var(--ombre); border-color: var(--bord-survol); }
 }
 @media (prefers-reduced-motion: reduce) {
   .lb .today .card { transition: none; }

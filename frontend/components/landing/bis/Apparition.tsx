@@ -14,7 +14,7 @@ import { apparitionCarte, apparitionEntete, useRevelation } from '@/lib/landing/
  * navigateur.
  *
  * La règle d'armement vit dans `useRevelation` : rien n'est masqué au rendu
- * serveur, rien de déjà visible n'est rejoué.
+ * serveur ; la carte se rejoue à chaque retour à l'écran, réarmée hors champ.
  */
 
 export function Apparition({
@@ -33,7 +33,7 @@ export function Apparition({
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const controls = useRevelation(ref);
+  const { controls } = useRevelation(ref);
 
   return (
     <motion.div

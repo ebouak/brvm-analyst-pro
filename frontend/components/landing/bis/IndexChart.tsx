@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { motion, useAnimationControls, type Variants } from 'framer-motion';
 import type { Point } from '@/lib/landing/bisData';
 import { EASE, useRevelation } from '@/lib/landing/mouvement';
@@ -13,8 +13,8 @@ import { EASE, useRevelation } from '@/lib/landing/mouvement';
  * atteintes ; texte en jetons du thème.
  *
  * Mouvement (voir lib/landing/mouvement.ts) : le serveur rend la courbe
- * entière. Hors champ au montage, elle est armée puis TRACÉE à l'entrée à
- * l'écran — ligne, puis aire, puis SMA, puis le point final. Changer de
+ * entière. Hors champ, elle est armée puis TRACÉE à chaque entrée à
+ * l'écran (et retracée au survol à la souris) — ligne, puis aire, puis SMA, puis le point final. Changer de
  * fenêtre ne rejoue pas le tracé : un bref fondu suffit à signaler que la
  * courbe a changé, sans faire attendre une seconde celui qui compare.
  */
@@ -53,7 +53,10 @@ export function IndexChart({ serie }: { serie: Point[] }) {
   const [k, setK] = useState<(typeof FENETRES)[number]['k']>('1M');
   const ref = useRef<HTMLDivElement>(null);
   const onglets = useRef<(HTMLButtonElement | null)[]>([]);
-  const controls = useRevelation(ref);
+  const { controls, rejouer } = useRevelation(ref);
+  // Survol à la souris : la courbe se retrace sur place. Pas au toucher —
+  // sur mobile, c'est le retour à l'écran qui la rejoue.
+  const survol = (e: PointerEvent<HTMLDivElement>) => { if (e.pointerType === 'mouse') rejouer(); };
   const fondu = useAnimationControls();
   const montage = useRef(true);
   useEffect(() => {
@@ -103,7 +106,7 @@ export function IndexChart({ serie }: { serie: Point[] }) {
   const varFen = ((dernier.v - premier.v) / premier.v) * 100;
 
   return (
-    <div className="chart" ref={ref}>
+    <div className="chart" ref={ref} onPointerEnter={survol}>
       <div className="chart-head">
         <div className="tabs" role="tablist" aria-label="Fenêtre" onKeyDown={surTouche}>
           {FENETRES.map((f, i) => (

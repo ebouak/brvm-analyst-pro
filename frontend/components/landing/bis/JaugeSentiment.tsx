@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { animate, motion, useMotionValue, useTransform, type Variants } from 'framer-motion';
+import { useRef, type PointerEvent } from 'react';
+import { animate, motion, useMotionValue, useReducedMotion, useTransform, type Variants } from 'framer-motion';
 import { EASE, useRevelation } from '@/lib/landing/mouvement';
 
 /**
@@ -10,7 +10,8 @@ import { EASE, useRevelation } from '@/lib/landing/mouvement';
  * Rendu serveur = aiguille sur le VRAI score (initial={false}). Seule une jauge
  * hors champ au montage est armée : l'aiguille est posée au centre (50, neutre)
  * et les arcs effacés, puis, à l'entrée à l'écran, les arcs se tracent et
- * l'aiguille rejoint le score par un ressort amorti. Elle ne part jamais de 0 :
+ * l'aiguille rejoint le score par un ressort amorti — à chaque retour à
+ * l'écran, et en plus bref au survol. Elle ne part jamais de 0 :
  * « 0/100 » serait une lecture fausse, même une demi-seconde.
  */
 
@@ -40,20 +41,30 @@ export function JaugeSentiment({ score }: { score: number }) {
   const s = Math.max(0, Math.min(100, score));
   const ref = useRef<HTMLDivElement>(null);
   const mv = useMotionValue(s);
+  const sobre = useReducedMotion();
   const x2 = useTransform(mv, (v) => point(v / 100, r - 14)[0]);
   const y2 = useTransform(mv, (v) => point(v / 100, r - 14)[1]);
 
-  const controls = useRevelation(ref, {
+  const { controls, rejouer } = useRevelation(ref, {
     onArme: () => mv.set(50),
     onRevele: () => {
       void animate(mv, s, { type: 'spring', stiffness: 70, damping: 14, mass: 0.8, delay: 0.55 });
     },
   });
 
+  // Survol (souris seulement) : les arcs se retracent et l'aiguille reçoit une
+  // impulsion qui la fait osciller AUTOUR du vrai score, où elle se pose — elle
+  // ne repart pas du neutre sous les yeux de la personne.
+  const survol = (e: PointerEvent<HTMLDivElement>) => {
+    if (sobre || e.pointerType !== 'mouse') return;
+    rejouer();
+    void animate(mv, s, { type: 'spring', stiffness: 120, damping: 7, velocity: s >= 50 ? -160 : 160 });
+  };
+
   const libelle = s >= 60 ? 'Positif' : s <= 40 ? 'Négatif' : 'Neutre';
 
   return (
-    <div ref={ref}>
+    <div ref={ref} onPointerEnter={survol}>
       <svg viewBox="0 0 200 104" className="gauge-svg" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(s)} aria-label="Sentiment de séance">
         <motion.path d={arc(0, 0.4)} fill="none" stroke="rgb(var(--color-down))" strokeWidth="14" initial={false} animate={controls} variants={trace} custom={0} />
         <motion.path d={arc(0.4, 0.6)} fill="none" stroke="rgb(var(--color-warn))" strokeWidth="14" initial={false} animate={controls} variants={trace} custom={1} />
