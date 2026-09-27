@@ -57,6 +57,11 @@ export interface LandingBisData {
   hausses: number;
   baisses: number;
   inchangees: number;
+  /** Graine du temps réel : une ligne par valeur cotée du jour, réduite aux
+   *  deux colonnes que `useRealtimeActions` met à jour de façon fiable.
+   *  ~48 lignes, quelques kilo-octets — le coût est négligeable et il évite au
+   *  client de refaire la requête que le serveur vient de faire. */
+  coursSeed: { code: string; cours_jour: number | null; variation_pct: number | null }[];
   brvmC: Indice | null;
   topHausses: Mover[];
   topBaisses: Mover[];
@@ -109,7 +114,7 @@ async function lireSlides(db: ReturnType<typeof createPublicClient>) {
 async function load(): Promise<LandingBisData> {
   const db = createPublicClient();
   const vide: LandingBisData = {
-    dateMarche: null, nbActions: 0, hausses: 0, baisses: 0, inchangees: 0, brvmC: null,
+    dateMarche: null, nbActions: 0, hausses: 0, baisses: 0, inchangees: 0, coursSeed: [], brvmC: null,
     topHausses: [], topBaisses: [], indices: [], plans: [], slides: [...PERMANENT_SLIDES], bandeaux: [], topNote: null, derniereCollecte: null,
     etat: { valeurEchangee: null, titresEchanges: null, transactions: null, valeurVsVeille: null, titresVsVeille: null, transactionsVsVeille: null, sentimentScore: 50, sentimentDelta: null },
     brvmCSerie: [],
@@ -227,7 +232,9 @@ async function load(): Promise<LandingBisData> {
     : null;
 
   return {
-    dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses, brvmC,
+    dateMarche, nbActions: rows.length, hausses, baisses, inchangees: rows.length - hausses - baisses,
+    coursSeed: rows.map((r) => ({ code: r.code, cours_jour: r.cours, variation_pct: r.variation })),
+    brvmC,
     topHausses: top.map(toMover), topBaisses: bottom.map(toMover), indices, plans, slides, bandeaux: pubs, topNote, derniereCollecte, etat, brvmCSerie, secteurs, plusEchangee, videoSeance, spotlightSignal, latestDiagnostic, sgi,
   };
 }
