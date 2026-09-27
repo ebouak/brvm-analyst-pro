@@ -6,6 +6,7 @@ import { useRealtimeActions } from '@/lib/realtime/useRealtimeActions';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 import { fmtNumber } from '@/lib/format';
 import { pct, tone, fmtMd } from '@/lib/landing/formats';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 
 /**
  * L'état de la séance en direct : les trois compteurs ET les capitaux.
@@ -70,6 +71,8 @@ function somme(rows: readonly RealtimeActionRow[], lire: (r: RealtimeActionRow) 
   return vu ? total : null;
 }
 
+const fmtFcfa = (v: number) => `${fmtMd(v)} FCFA`;
+
 /** Écart relatif à la veille. Même formule que le serveur (`bisData`). */
 const vs = (a: number | null, b: number | null) => (a != null && b != null && b > 0 ? ((a - b) / b) * 100 : null);
 
@@ -103,10 +106,12 @@ export function EtatSeanceLive(p: EtatSeanceLiveProps) {
     { cle: 'r2c', sens: 'baisse', ton: 'down', ico: '↓', valeur: b, mot: 'baisses', aria: 'en baisse' },
   ] as const;
 
+  // Formateurs à référence STABLE (portée module) : AnimatedNumber les met en
+  // dépendance, une fonction recréée à chaque rendu relancerait son calcul.
   const cles = [
-    { libelle: 'Valeur échangée', texte: valeur != null ? `${fmtMd(valeur)} FCFA` : '—', ecart: vs(valeur, p.veilleValeur) },
-    { libelle: 'Titres échangés', texte: titres != null ? fmtNumber(titres) : '—', ecart: vs(titres, p.veilleTitres) },
-    { libelle: 'Transactions', texte: tx != null ? fmtNumber(tx) : '—', ecart: vs(tx, p.veilleTransactions) },
+    { libelle: 'Valeur échangée', valeur, format: fmtFcfa, ecart: vs(valeur, p.veilleValeur) },
+    { libelle: 'Titres échangés', valeur: titres, format: fmtNumber, ecart: vs(titres, p.veilleTitres) },
+    { libelle: 'Transactions', valeur: tx, format: fmtNumber, ecart: vs(tx, p.veilleTransactions) },
   ];
 
   return (
@@ -121,8 +126,10 @@ export function EtatSeanceLive(p: EtatSeanceLiveProps) {
           <span className={`ico ${t.ton}`}>{t.ico}</span>
           <div>
             {/* `aria-live` poli : une cotation qui change ne doit pas
-                interrompre un lecteur d'écran en pleine lecture. */}
-            <b className={`num ${t.ton}`} aria-live="polite">{t.valeur}</b>
+                interrompre un lecteur d'écran en pleine lecture. Le nombre
+                ne glisse qu'entre deux vraies valeurs, jamais depuis zéro ;
+                seule la valeur finale est exposée au lecteur d'écran. */}
+            <b className={`num ${t.ton}`} aria-live="polite"><AnimatedNumber value={t.valeur} /></b>
             <span>
               {t.mot}
               <small className="num">{pourcent(t.valeur)} %</small>
@@ -136,7 +143,7 @@ export function EtatSeanceLive(p: EtatSeanceLiveProps) {
         <ul className="keys-l num">
           {cles.map((c) => (
             <li key={c.libelle}>
-              <b aria-live="polite">{c.texte}</b>
+              <b aria-live="polite">{c.valeur != null ? <AnimatedNumber value={c.valeur} format={c.format} /> : '—'}</b>
               <span>{c.libelle}</span>
               {c.ecart != null && (
                 <small>
