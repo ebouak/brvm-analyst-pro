@@ -7,6 +7,8 @@ import type { Fraicheur } from '@/lib/freshness';
 import { seanceNarrative } from '@/lib/landing/seanceNarrative';
 import { fmtNumber } from '@/lib/format';
 import { IndexChart } from './IndexChart';
+import { JaugeSentiment } from './JaugeSentiment';
+import { Apparition, MouvementSobre } from './Apparition';
 
 /**
  * « La BRVM aujourd'hui » — aperçu de séance, charte claire, structure en
@@ -19,27 +21,6 @@ import { IndexChart } from './IndexChart';
 
 const fmtM = (v: number | null) => v == null ? '—' : v >= 1e6 ? `${(v / 1e6).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} M` : v >= 1e3 ? `${(v / 1e3).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} k` : fmtNumber(v);
 const fmt2 = (v: number) => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-/** Jauge en demi-cercle : arc rouge → ambre → vert, aiguille sur le score. */
-function Gauge({ score }: { score: number }) {
-  const cx = 100, cy = 96, r = 78;
-  const arc = (a0: number, a1: number) => {
-    const p = (a: number) => [cx + r * Math.cos(Math.PI * (1 - a)), cy - r * Math.sin(Math.PI * (1 - a))];
-    const [x0, y0] = p(a0), [x1, y1] = p(a1);
-    return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
-  };
-  const a = Math.max(0, Math.min(100, score)) / 100;
-  const nx = cx + (r - 14) * Math.cos(Math.PI * (1 - a)), ny = cy - (r - 14) * Math.sin(Math.PI * (1 - a));
-  return (
-    <svg viewBox="0 0 200 104" className="gauge-svg" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(score)} aria-label="Sentiment de séance">
-      <path d={arc(0, 0.4)} fill="none" stroke="rgb(var(--color-down))" strokeWidth="14" strokeLinecap="butt" />
-      <path d={arc(0.4, 0.6)} fill="none" stroke="rgb(var(--color-warn))" strokeWidth="14" />
-      <path d={arc(0.6, 1)} fill="none" stroke="rgb(var(--color-up))" strokeWidth="14" />
-      <line x1={cx} y1={cy} x2={nx.toFixed(1)} y2={ny.toFixed(1)} stroke="rgb(var(--color-ivory))" strokeWidth="3" strokeLinecap="round" />
-      <circle cx={cx} cy={cy} r="6" fill="rgb(var(--color-ivory))" />
-    </svg>
-  );
-}
 
 function Row({ m, i }: { m: Mover; i: number }) {
   return (
@@ -80,15 +61,16 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
   const p = (x: number) => Math.round((x / total) * 100);
   const points = d.brvmC && d.brvmC.veille != null ? d.brvmC.valeur - d.brvmC.veille : null;
   const score = Math.round(d.etat.sentimentScore);
-  const libelle = score >= 60 ? 'Positif' : score <= 40 ? 'Négatif' : 'Neutre';
   const enSeance = fraicheur.etat === 'frais';
   const age = fraicheur.ageMinutes;
   const secteurs = [...d.secteurs].sort((a, b) => b.variation_pct - a.variation_pct);
 
   return (
     <section className="today" aria-labelledby="h-today">
-      {/* Rangée 0 — en-tête */}
-      <div className="today-head">
+      <MouvementSobre>
+      {/* Rangée 0 — en-tête. Les enveloppes Apparition sont de minces
+          composants clients : le contenu reste rendu ici, côté serveur. */}
+      <Apparition className="today-head" variante="entete" survol={false}>
         <div>
           <p className="over">Aperçu du marché</p>
           <h2 id="h-today">La BRVM aujourd&apos;hui</h2>
@@ -106,11 +88,11 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
             {dateLabel && <span className="pill date">{dateLabel}</span>}
           </div>
         </div>
-      </div>
+      </Apparition>
 
       <div className="today-grid">
         {/* Rangée 1 */}
-        <div className="card idx r1a">
+        <Apparition className="card idx r1a" rang={0}>
           <p className="over">BRVM Composite</p>
           {d.brvmC ? (
             <>
@@ -122,19 +104,18 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
               </dl>
             </>
           ) : <p className="empty">Indice non disponible pour cette séance.</p>}
-        </div>
-        <div className="card r1b"><IndexChart serie={d.brvmCSerie} /></div>
-        <div className="card senti r1c">
+        </Apparition>
+        <Apparition className="card r1b" rang={1}><IndexChart serie={d.brvmCSerie} /></Apparition>
+        <Apparition className="card senti r1c" rang={2}>
           <p className="over">Sentiment de séance <span className="info" title="Part des valeurs en hausse parmi celles qui ont varié, sur 100.">ⓘ</span></p>
-          <Gauge score={score} />
-          <p className={`word ${score >= 60 ? 'up' : score <= 40 ? 'down' : ''}`}>{libelle} <span className="num">({score}/100)</span></p>
+          <JaugeSentiment score={score} />
           <p className="senti-foot"><b className="down">{d.baisses}</b> baisse{d.baisses > 1 ? 's' : ''} sur {d.nbActions} titres suivis{d.etat.sentimentDelta != null && <small className={`num ${tone(d.etat.sentimentDelta)}`}> · {d.etat.sentimentDelta >= 0 ? '+' : '−'}{Math.abs(Math.round(d.etat.sentimentDelta))} pts vs veille</small>}</p>
-        </div>
-        <div className="card flash r1d">
+        </Apparition>
+        <Apparition className="card flash r1d" rang={3}>
           <p className="over">BRVM Flash info</p>
           <ul>{n.flash.map((f) => <li key={f}>{f}</li>)}</ul>
           <p className="flash-foot">Dérivé des chiffres de la séance, aucune phrase rédigée.</p>
-        </div>
+        </Apparition>
 
         {/* Rangée 2 */}
         {/* Compteurs ET capitaux passent en DIRECT après hydratation, rendus
@@ -185,6 +166,7 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
         <p className="stamp">Source brvm.org · actualisé toutes les 15 min en séance · « vs veille » compare à la séance précédente en base.</p>
         <Link href="/societes" className="btn btn-gold">Explorer les sociétés <span aria-hidden="true">→</span></Link>
       </div>
+      </MouvementSobre>
     </section>
   );
 }

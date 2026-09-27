@@ -1,7 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { motion, useAnimationControls, type Variants } from 'framer-motion';
 import type { Point } from '@/lib/landing/bisData';
+import { EASE, useRevelation } from '@/lib/landing/mouvement';
 
 /**
  * Courbe des clôtures du BRVM Composite. Trois fenêtres : 1 mois (≈ 21
@@ -9,7 +11,32 @@ import type { Point } from '@/lib/landing/bisData';
  * ne publie pas l'indice en intraday et nous n'en avons pas de série — on ne
  * dessine pas ce qu'on n'a pas. Axe Y gradué sur les valeurs réellement
  * atteintes ; texte en jetons du thème.
+ *
+ * Mouvement (voir lib/landing/mouvement.ts) : le serveur rend la courbe
+ * entière. Hors champ au montage, elle est armée puis TRACÉE à l'entrée à
+ * l'écran — ligne, puis aire, puis SMA, puis le point final. Changer de
+ * fenêtre ne rejoue pas le tracé : un bref fondu suffit à signaler que la
+ * courbe a changé, sans faire attendre une seconde celui qui compare.
  */
+
+// La SMA est pointillée : animer son pathLength réécrirait son dasharray.
+// Elle n'apparaît donc qu'en opacité.
+const ligne: Variants = {
+  cache: { pathLength: 0 },
+  visible: { pathLength: 1, transition: { duration: 1.15, ease: 'easeInOut', delay: 0.2 } },
+};
+const aire: Variants = {
+  cache: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.6, ease: EASE, delay: 0.7 } },
+};
+const moyenne: Variants = {
+  cache: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.5, ease: EASE, delay: 1.0 } },
+};
+const pointFinal: Variants = {
+  cache: { opacity: 0, scale: 0 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.3, ease: EASE, delay: 1.3 } },
+};
 
 const FENETRES = [
   { k: '1M', n: 21 },
@@ -24,6 +51,30 @@ const fmtD = (iso: string) => { const [y, m, d] = iso.split('-'); return `${d}/$
 
 export function IndexChart({ serie }: { serie: Point[] }) {
   const [k, setK] = useState<(typeof FENETRES)[number]['k']>('1M');
+  const ref = useRef<HTMLDivElement>(null);
+  const onglets = useRef<(HTMLButtonElement | null)[]>([]);
+  const controls = useRevelation(ref);
+  const fondu = useAnimationControls();
+  const montage = useRef(true);
+  useEffect(() => {
+    if (montage.current) { montage.current = false; return; }
+    void fondu.start({ opacity: [0.3, 1], transition: { duration: 0.25, ease: 'easeOut' } });
+  }, [k, fondu]);
+
+  // Onglets ARIA : flèches, Début, Fin ; un seul onglet dans l'ordre de tabulation.
+  const surTouche = (e: KeyboardEvent<HTMLDivElement>) => {
+    const i = FENETRES.findIndex((f) => f.k === k);
+    const cible =
+      e.key === 'ArrowRight' ? (i + 1) % FENETRES.length
+      : e.key === 'ArrowLeft' ? (i - 1 + FENETRES.length) % FENETRES.length
+      : e.key === 'Home' ? 0
+      : e.key === 'End' ? FENETRES.length - 1
+      : null;
+    if (cible == null) return;
+    e.preventDefault();
+    setK(FENETRES[cible].k);
+    onglets.current[cible]?.focus();
+  };
   const n = FENETRES.find((f) => f.k === k)?.n ?? 21;
   const pts = useMemo(() => serie.slice(-n), [serie, n]);
   // SMA 20 calculée sur la série COMPLÈTE (les 19 séances avant la fenêtre
@@ -52,11 +103,25 @@ export function IndexChart({ serie }: { serie: Point[] }) {
   const varFen = ((dernier.v - premier.v) / premier.v) * 100;
 
   return (
-    <div className="chart">
+    <div className="chart" ref={ref}>
       <div className="chart-head">
-        <div className="tabs" role="tablist" aria-label="Fenêtre">
-          {FENETRES.map((f) => (
-            <button key={f.k} type="button" role="tab" aria-selected={f.k === k} onClick={() => setK(f.k)} disabled={serie.length < 2}>{f.k}</button>
+        <div className="tabs" role="tablist" aria-label="Fenêtre" onKeyDown={surTouche}>
+          {FENETRES.map((f, i) => (
+            <button
+              key={f.k}
+              ref={(el) => { onglets.current[i] = el; }}
+              type="button"
+              role="tab"
+              aria-selected={f.k === k}
+              tabIndex={f.k === k ? 0 : -1}
+              onClick={() => setK(f.k)}
+              disabled={serie.length < 2}
+            >
+              {/* La pastille est rendue par le serveur sous l'onglet actif ;
+                  framer la fait glisser d'un onglet à l'autre (layoutId). */}
+              {f.k === k && <motion.span layoutId="lb-periode-active" className="tab-pill" aria-hidden="true" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
+              <span className="tab-lbl">{f.k}</span>
+            </button>
           ))}
         </div>
         <span className="legend"><i className="sw sma" aria-hidden="true" />SMA 20</span>
@@ -72,10 +137,12 @@ export function IndexChart({ serie }: { serie: Point[] }) {
             <text x={W - PR + 8} y={y(t) + 4} fontSize="11" fill="currentColor" fillOpacity=".7" className="num">{fmtV(t)}</text>
           </g>
         ))}
-        <path d={area} fill="url(#lb-idx)" />
-        <path d={line} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="2" strokeLinejoin="round" />
-        {smaLine && <path d={smaLine} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="1.6" strokeDasharray="4 3" strokeLinejoin="round" />}
-        <circle cx={x(pts.length - 1)} cy={y(dernier.v)} r="3.5" fill="rgb(var(--color-accent))" stroke="rgb(var(--color-surface))" strokeWidth="1.5" />
+        <motion.g initial={false} animate={fondu}>
+          <motion.path d={area} fill="url(#lb-idx)" initial={false} animate={controls} variants={aire} />
+          <motion.path d={line} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="2" strokeLinejoin="round" initial={false} animate={controls} variants={ligne} />
+          {smaLine && <motion.path d={smaLine} fill="none" stroke="rgb(var(--color-accent))" strokeWidth="1.6" strokeDasharray="4 3" strokeLinejoin="round" initial={false} animate={controls} variants={moyenne} />}
+          <motion.circle cx={x(pts.length - 1)} cy={y(dernier.v)} r="3.5" fill="rgb(var(--color-accent))" stroke="rgb(var(--color-surface))" strokeWidth="1.5" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} initial={false} animate={controls} variants={pointFinal} />
+        </motion.g>
         {xLabels.map((i) => (
           <text key={i} x={x(i)} y={H - 8} fontSize="11" fill="currentColor" fillOpacity=".7" textAnchor={i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle'}>{fmtD(pts[i].d)}</text>
         ))}
