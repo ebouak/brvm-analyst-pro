@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#0f1117"/>
-  <text x="16" y="22" font-family="system-ui,sans-serif" font-size="14" font-weight="700"
-        text-anchor="middle" fill="#00c853">BA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#0c1d2e"/>
+  <g transform="translate(76 146) scale(2.77)">
+    <path d="M16 24 L40 82 L58 48 L76 82" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M76 82 L100 33" fill="none" stroke="#16b6a4" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="110,12 117,40 86,28" fill="#16b6a4"/>
+  </g>
 </svg>

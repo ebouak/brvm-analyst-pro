@@ -8,7 +8,10 @@ const BUCKET = 'newsletter-assets';
  */
 export async function uploadInlineImage(file: File): Promise<string> {
   const db = getServiceClient();
-  const ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '');
+  // Extension dérivée du MIME validé (file.type), pas du nom — le nom peut
+  // porter "evil.svg" alors que le type est "image/png" ; le bucket est PUBLIC.
+  const ext =
+    file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : file.type === 'image/jpeg' ? 'jpg' : 'png';
   const month = new Date().toISOString().slice(0, 7);
   const path = `campaigns/${month}/${crypto.randomUUID()}.${ext}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
