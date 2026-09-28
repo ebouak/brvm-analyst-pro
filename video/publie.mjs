@@ -78,6 +78,15 @@ let envois = 0;
    redigee pour un humain qui ne lira pas les journaux du runner. */
 const journal = [];
 
+/* Quelle version part ? Écrit par rendu-anime.mjs. Un repli vers la vidéo
+   fixe n'est pas une panne de publication — les chiffres sont les mêmes —
+   mais il ne doit JAMAIS passer inaperçu : ce dépôt a déjà vécu une panne
+   invisible de sept semaines derrière un workflow vert. */
+if (m.rendu === 'remotion') journal.push('Rendu : version animée (Remotion)');
+else if (m.rendu === 'repli-ffmpeg') {
+  journal.push(`Rendu animé EN ÉCHEC — version fixe publiée (${m.rendu_raison ?? 'raison inconnue'})`);
+}
+
 /* -------------------------------------------------- 2. landing page --- */
 
 /* La vidéo est hebergee dans le bucket public `seance-video` et lue par la

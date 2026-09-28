@@ -8,7 +8,8 @@
     "studio": "remotion studio index.ts",
     "audio:showreel": "node showreel-audio.mjs",
     "render:showreel": "node showreel-voix.mjs && node showreel-audio.mjs && remotion render index.ts showreel out/westbourse-showreel.mp4 --codec h264 --crf 18",
-    "voix:showreel": "node showreel-voix.mjs"
+    "voix:showreel": "node showreel-voix.mjs",
+    "seance": "node seance-prep.mjs && remotion render index.ts seance out/westbourse-seance-anime.mp4 --codec h264 --crf 20"
   },
   "dependencies": {
     "@remotion/cli": "4.0.236",

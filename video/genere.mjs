@@ -499,6 +499,15 @@ writeFileSync(
       historique_indice: historiqueIndice,
       actualites: { phare, autres: autresActus },
       duree_s: dureeVoix,
+      /* Ce dont a besoin le rendu animé (remotion/seance.tsx). Même lecture,
+         mêmes variables que la voix : la version animée ne relit JAMAIS la
+         base, elle ne fait que mettre en mouvement ces nombres-là. */
+      video: {
+        parts: PARTS,
+        part_baissiere_pct: partB,
+        frise: [...cotes].sort((a, b) => cap(b) - cap(a)).slice(0, 8).map((a) => a.code),
+        noms: Object.fromEntries(cotes.map((a) => [a.code, a.designation ?? a.code])),
+      },
       /* Le texte lu voyage avec la fiche : la video n'ayant pas de sous-titres,
          c'est la seule transcription dont dispose un visiteur sourd, et le seul
          contenu indexable de la section. */

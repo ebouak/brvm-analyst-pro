@@ -2,6 +2,7 @@ import { Composition } from 'remotion';
 import Main from './landing-video';
 import FilConducteurVideo, { TOTAL as FIL_TOTAL } from './fil-conducteur';
 import Showreel, { TOTAL as SHOWREEL_TOTAL } from './showreel';
+import Seance, { calculerSeance } from './seance';
 
 // 16 s × 30 fps = 480 frames (intro 75 + 4 écrans × 83 + outro 72 = 479 ≤ 480)
 export function RemotionRoot() {
@@ -36,6 +37,18 @@ export function RemotionRoot() {
         fps={30}
         width={1920}
         height={1080}
+      />
+      {/* Vidéo de séance animée, verticale. Durée = voix du jour + 1,5 s,
+          lue dans public/seance/seance.json (écrit par video/genere.mjs). */}
+      <Composition
+        id="seance"
+        component={Seance}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ fiche: null }}
+        calculateMetadata={calculerSeance}
       />
     </>
   );
