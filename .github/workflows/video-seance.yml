@@ -43,7 +43,8 @@ permissions:
 jobs:
   video:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # 35 et non plus 25 : le rendu Remotion (borné à 12 min) s'ajoute.
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: video
@@ -84,6 +85,29 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node genere.mjs
+
+      - name: Animer la vidéo (Remotion)
+        # Même seance.json, même voix : seance-prep.mjs ne relit PAS la base.
+        # continue-on-error : un rendu en échec ne doit pas supprimer la
+        # journée — la vidéo fixe de genere.mjs (mêmes chiffres) part à la
+        # place. Le repli n'est pas silencieux : rendu-anime.mjs l'écrit dans
+        # seance.json, publie.mjs le met dans le brief de l'exploitant, et une
+        # annotation apparaît sur le run.
+        id: animer
+        continue-on-error: true
+        timeout-minutes: 12
+        working-directory: remotion
+        run: |
+          npm ci --no-audit --no-fund
+          node seance-prep.mjs "$VIDEO_OUT"
+          npx remotion render index.ts seance "$VIDEO_OUT/westbourse-seance-anime.mp4" --codec h264 --crf 20 --log=error
+
+      - name: Choisir la version publiée
+        # Toujours exécuté, même si le rendu a échoué : c'est lui qui écrit le
+        # repli. Ne retient l'animée que si elle vient de la MÊME lecture que
+        # la voix et qu'elle est complète (voir video/rendu-anime.mjs).
+        if: always()
+        run: node rendu-anime.mjs
 
       - name: Publier sur la landing, Facebook et TikTok
         id: publier
@@ -178,6 +202,7 @@ jobs:
           name: seance-${{ github.run_number }}
           path: |
             ${{ github.workspace }}/video-out/westbourse-seance.mp4
+            ${{ github.workspace }}/video-out/westbourse-seance-anime.mp4
             ${{ github.workspace }}/video-out/seance.json
             ${{ github.workspace }}/video-out/texte.txt
           retention-days: 14
