@@ -584,6 +584,36 @@ def valider_item_perplexity(item: dict, maintenant: datetime, fenetre_jours: int
     return 0 <= delta_jours <= fenetre_jours
 
 
+def url_joignable(url: str, requete=None, timeout: int = 10) -> bool:
+    """Le lien cité par Perplexity mène-t-il réellement quelque part ?
+
+    `valider_item_perplexity` ne contrôle que la FORME de l'URL. Or c'est un
+    modèle qui la fournit : une URL plausible mais inexistante passerait, et
+    s'afficherait dans « Sources consultées » (décision du 2026-09-28). On
+    interroge donc le site : HEAD d'abord, GET si le serveur refuse HEAD
+    (403/405/501, fréquent), redirections suivies. Statut final < 400 →
+    joignable. Toute erreur réseau → non joignable : un doute écarte l'item.
+
+    `requete(methode, url)` → code HTTP, injectable pour les tests. Copie
+    identique dans veille/brvm_pipeline.py — toute correction doit être
+    reportée des deux côtés."""
+    if requete is None:
+        import requests
+
+        def requete(methode: str, u: str) -> int:
+            r = requests.request(methode, u, allow_redirects=True, timeout=timeout, stream=True,
+                                 headers={"User-Agent": "Mozilla/5.0 (compatible; WestBourseVeille/1.0)"})
+            r.close()
+            return r.status_code
+    try:
+        code = requete("HEAD", url)
+        if code in (403, 405, 501):
+            code = requete("GET", url)
+        return code < 400
+    except Exception:
+        return False
+
+
 def fetch_perplexity_context(commodites: list[str]) -> list[dict]:
     """Contexte macro récent via Perplexity (recherche web + citations) —
     injecté dans le prompt DeepSeek comme bloc distinct, jamais vérifié a
@@ -622,7 +652,11 @@ def fetch_perplexity_context(commodites: list[str]) -> list[dict]:
         return []
 
     maintenant = datetime.now(timezone.utc)
-    return [it for it in items if valider_item_perplexity(it, maintenant)]
+    valides = [it for it in items if valider_item_perplexity(it, maintenant)]
+    joignables = [it for it in valides if url_joignable(str(it["url"]).strip())]
+    if len(joignables) < len(valides):
+        log.info("Perplexity : %d lien(s) injoignable(s) écarté(s)", len(valides) - len(joignables))
+    return joignables
 
 
 # ── 5. Prompt DeepSeek + Builders visuels Python ─────────────────────────────

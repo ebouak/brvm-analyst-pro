@@ -55,3 +55,47 @@ def test_date_dans_le_futur_est_rejetee():
     date_future = (MAINTENANT + timedelta(days=5)).strftime("%Y-%m-%d")
     item = item_valide(date=date_future)
     assert valider_item_perplexity(item, MAINTENANT) is False
+
+
+# ── url_joignable : le lien cité doit exister (décision du 2026-09-28) ──
+from commodity_weekly_generator import url_joignable
+
+
+def faux_serveur(codes: dict):
+    """Renvoie un requete(methode, url) qui répond selon la méthode."""
+    appels = []
+
+    def requete(methode, url):
+        appels.append(methode)
+        rep = codes[methode]
+        if isinstance(rep, Exception):
+            raise rep
+        return rep
+    requete.appels = appels
+    return requete
+
+
+def test_lien_qui_repond_200_est_joignable():
+    assert url_joignable("https://x.test/a", faux_serveur({"HEAD": 200})) is True
+
+
+def test_lien_404_est_ecarte():
+    assert url_joignable("https://x.test/a", faux_serveur({"HEAD": 404})) is False
+
+
+def test_head_refuse_bascule_sur_get():
+    req = faux_serveur({"HEAD": 405, "GET": 200})
+    assert url_joignable("https://x.test/a", req) is True
+    assert req.appels == ["HEAD", "GET"]
+
+
+def test_head_refuse_puis_get_404_est_ecarte():
+    assert url_joignable("https://x.test/a", faux_serveur({"HEAD": 403, "GET": 404})) is False
+
+
+def test_erreur_reseau_est_ecartee():
+    assert url_joignable("https://x.test/a", faux_serveur({"HEAD": TimeoutError("délai")})) is False
+
+
+def test_serveur_en_erreur_500_est_ecarte():
+    assert url_joignable("https://x.test/a", faux_serveur({"HEAD": 500})) is False

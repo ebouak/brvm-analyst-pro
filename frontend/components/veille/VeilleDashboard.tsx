@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { VeilleNews } from '@/app/veille/page.tsx';
+import { libelleSource } from '@/lib/news/origine';
 
 type View = 'flux' | 'heatmap' | 'alertes' | 'matieres' | 'sources';
 type Period = 7 | 30 | 90 | 365;
@@ -64,9 +65,7 @@ function ArticleCard({ item }: { item: VeilleNews }) {
     ? 'border-l-[3px] border-l-[#ff6b6b]'
     : 'border-l-[3px] border-l-transparent';
   const sentEmoji = sent === 'positif' ? '🟢' : sent === 'négatif' ? '🔴' : '⚪';
-  const srcLabel = (item.source_label && item.source_label !== 'brvm' && item.source_label !== 'Inconnu')
-    ? item.source_label
-    : item.source ?? 'Source';
+  const srcLabel = libelleSource(item);
 
   return (
     <a
@@ -179,7 +178,7 @@ function exportCSV(news: VeilleNews[], period: Period) {
     [
       n.date_publication,
       `"${(n.titre ?? '').replace(/"/g, '""')}"`,
-      `"${(n.source_label ?? n.source ?? '').replace(/"/g, '""')}"`,
+      `"${libelleSource(n).replace(/"/g, '""')}"`,
       n.sentiment ?? '',
       n.score_impact ?? 0,
       (n.ticker_codes ?? []).join(';'),
@@ -223,7 +222,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
   const filtered = useMemo(() => {
     let items = showAlertes ? alertes : news;
     if (secteurFilter) items = items.filter((n) => n.secteur === secteurFilter);
-    if (sourceFilter) items = items.filter((n) => (n.source_label ?? n.source) === sourceFilter);
+    if (sourceFilter) items = items.filter((n) => libelleSource(n) === sourceFilter);
     if (sentimentFilter) items = items.filter((n) => n.sentiment === sentimentFilter);
     if (search) {
       const q = search.toLowerCase();
@@ -231,7 +230,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
         n.titre.toLowerCase().includes(q) ||
         (n.resume ?? '').toLowerCase().includes(q) ||
         (n.ticker_codes ?? []).some((t) => t.toLowerCase().includes(q)) ||
-        (n.source_label ?? '').toLowerCase().includes(q),
+        libelleSource(n).toLowerCase().includes(q),
       );
     }
     if (activeStatFilter === 'alertes') items = items.filter((n) => (n.score_impact ?? 0) >= 70);
@@ -274,8 +273,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
   const topSources = useMemo(() => {
     const map = new Map<string, number>();
     for (const n of filtered) {
-      const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
-        ? n.source_label : n.source ?? 'Autre';
+      const lbl = libelleSource(n);
       map.set(lbl, (map.get(lbl) ?? 0) + 1);
     }
     return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([label, count]) => ({ label, count }));
@@ -285,8 +283,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
   const sidebarSources = useMemo(() => {
     const map = new Map<string, number>();
     for (const n of news) {
-      const lbl = (n.source_label && n.source_label !== 'brvm' && n.source_label !== 'Inconnu')
-        ? n.source_label : n.source ?? 'Autre';
+      const lbl = libelleSource(n);
       map.set(lbl, (map.get(lbl) ?? 0) + 1);
     }
     return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
@@ -304,7 +301,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
       out.push({
         icon: '◇',
         text: `Impact le plus fort (${top.score_impact}/100) : ${top.titre}`,
-        detail: `${top.source_label ?? top.source} · ${top.date_publication}`,
+        detail: `${libelleSource(top)} · ${top.date_publication}`,
       });
     }
 
@@ -343,8 +340,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
 
   const lastItem = news[0];
   const lastTime = lastItem ? relativeTime(lastItem.created_at ?? lastItem.date_publication) : '—';
-  const lastSrc = (lastItem?.source_label && lastItem.source_label !== 'brvm')
-    ? lastItem.source_label : lastItem?.source ?? '—';
+  const lastSrc = lastItem ? libelleSource(lastItem) : '—';
 
   const VIEWS: { id: View; label: string; icon: string; count: number }[] = [
     { id: 'flux', label: 'Flux', icon: '≡', count: news.length },

@@ -455,6 +455,34 @@ def valider_item_perplexity(item: dict, maintenant: datetime, fenetre_jours: int
     delta_jours = (maintenant.replace(tzinfo=None) - d).days
     return 0 <= delta_jours <= fenetre_jours
 
+def url_joignable(url: str, requete=None, timeout: int = 10) -> bool:
+    """Le lien cité par Perplexity mène-t-il réellement quelque part ?
+
+    `valider_item_perplexity` ne contrôle que la FORME de l'URL. Or c'est un
+    modèle qui la fournit : une URL plausible mais inexistante passerait, et
+    s'afficherait sur /actualites comme un article de presse (décision du
+    2026-09-28). On interroge donc le site : HEAD d'abord, GET si le serveur
+    refuse HEAD (403/405/501, fréquent), redirections suivies. Statut final
+    < 400 → joignable. Toute erreur réseau → non joignable : un doute écarte
+    l'item.
+
+    `requete(methode, url)` → code HTTP, injectable pour les tests. Copie
+    identique dans commodity_weekly_generator.py — toute correction doit être
+    reportée des deux côtés."""
+    if requete is None:
+        def requete(methode: str, u: str) -> int:
+            r = requests.request(methode, u, allow_redirects=True, timeout=timeout, stream=True,
+                                 headers={"User-Agent": "Mozilla/5.0 (compatible; WestBourseVeille/1.0)"})
+            r.close()
+            return r.status_code
+    try:
+        code = requete("HEAD", url)
+        if code in (403, 405, 501):
+            code = requete("GET", url)
+        return code < 400
+    except Exception:
+        return False
+
 def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> list:
     """Source additive : interroge Perplexity (recherche web + citations) pour
     de l'actualité BRVM/UEMOA récente. Sortie JSON stricte imposée — un fait =
@@ -497,6 +525,9 @@ def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> li
     results = []
     for item in items:
         if not valider_item_perplexity(item, maintenant):
+            continue
+        if not url_joignable(str(item["url"]).strip()):
+            log.info(f"[Perplex.] ✗ lien injoignable, item écarté : {item['url']}")
             continue
         try:
             titre = item["titre"].strip()
