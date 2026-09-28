@@ -561,6 +561,23 @@ def titre_pertinent(titre: str) -> bool:
     t = unicodedata.normalize("NFKD", titre or "").encode("ascii", "ignore").decode().lower()
     return any(re.search(rf"\b{re.escape(m)}", t) for m in MOTS_MARCHE)
 
+def decoder_page(contenu: bytes, content_type: str) -> str:
+    """Décode une page selon son encodage RÉEL.
+
+    `requests` suppose ISO-8859-1 quand l'en-tête HTTP n'annonce pas de
+    charset : une page UTF-8 donnait « TrÃ©sor » au lieu de « Trésor »
+    (constaté le 2026-09-28 sur allAfrica). Ordre : charset de l'en-tête,
+    puis <meta charset> de la page, puis UTF-8."""
+    m = re.search(r"charset=\"?([\w-]+)", content_type or "", re.I)
+    enc = m.group(1) if m else None
+    if not enc:
+        mm = re.search(rb"<meta[^>]+charset=[\"']?([\w-]+)", contenu[:4096], re.I)
+        enc = mm.group(1).decode("ascii", "ignore") if mm else "utf-8"
+    try:
+        return contenu.decode(enc, errors="replace")
+    except LookupError:
+        return contenu.decode("utf-8", errors="replace")
+
 def telecharger_page(url: str, timeout: int = 15) -> str:
     """HTML de la page (500 ko au plus), chaîne vide en cas d'échec."""
     try:
@@ -568,7 +585,7 @@ def telecharger_page(url: str, timeout: int = 15) -> str:
                          headers={"User-Agent": "Mozilla/5.0 (compatible; WestBourseVeille/1.0)"})
         if r.status_code >= 400:
             return ""
-        return r.text[:500_000]
+        return decoder_page(r.content[:500_000], r.headers.get("Content-Type", ""))
     except Exception:
         return ""
 
