@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * « Le fil conducteur » — les sept étapes de la méthode, cliquables.
@@ -36,6 +37,7 @@ export interface Etape {
   fait: Fait | null;
 }
 
+const EASE=[0.22,1,0.36,1] as const;
 export function FilConducteur({ etapes }: { etapes: Etape[] }) {
   const [sel, setSel] = useState(0);
   const id = useId();
@@ -46,14 +48,15 @@ export function FilConducteur({ etapes }: { etapes: Etape[] }) {
     <div className="fil-wrap">
       <div className="steps" id="methode" role="tablist" aria-label="La méthode en sept étapes" onKeyDown={(ev) => { if (ev.key === 'ArrowLeft') { ev.preventDefault(); go(sel - 1); } if (ev.key === 'ArrowRight') { ev.preventDefault(); go(sel + 1); } }}>
         {etapes.map((s, k) => (
-          <button className={`step${k === sel ? ' is-sel' : ''}`} key={s.k} style={{ ['--i' as string]: k }} type="button" role="tab" id={`${id}-tab-${k}`} aria-selected={k === sel} aria-controls={`${id}-panel`} tabIndex={k === sel ? 0 : -1} onClick={() => setSel(k)}>
+          <motion.button className={`step${k === sel ? ' is-sel' : ''}`} key={s.k} style={{ ['--i' as string]: k, position:'relative' } as any} type="button" role="tab" id={`${id}-tab-${k}`} aria-selected={k === sel} aria-controls={`${id}-panel`} tabIndex={k === sel ? 0 : -1} onClick={() => setSel(k)} whileHover={{y:-2}} whileTap={{scale:0.98}} transition={{duration:0.2,ease:EASE}}>
               <span className="ic" style={{ background: s.bg, color: s.c }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">{s.ic}</svg></span>
               <span className="k">{s.k}</span><span className="t">{s.t}</span><span className="d">{s.d}</span>
-          </button>
+              {k===sel && <motion.span layoutId="fdot-apercu" style={{position:'absolute',left:'50%',bottom:-4,width:6,height:6,borderRadius:999,background:'rgb(var(--color-accent))',transform:'translateX(-50%)'}} aria-hidden />}
+          </motion.button>
         ))}
       </div>
-      <div className="fil-panel" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${sel}`}>
-        <span className="ic" style={{ background: e.bg, color: e.c }} aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{e.ic}</svg></span>
+      <div className="fil-panel" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${sel}`} style={{overflow:'hidden'} as any}>
+        <AnimatePresence mode="wait"><motion.div key={sel} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}} transition={{duration:0.35,ease:EASE}} style={{display:'flex',gap:14,alignItems:'flex-start',width:'100%'}}><span className="ic" style={{ background: e.bg, color: e.c, flex:'none'} as any} aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{e.ic}</svg></span>
         {e.fait ? (
           <>
             <div>
@@ -69,7 +72,7 @@ export function FilConducteur({ etapes }: { etapes: Etape[] }) {
             <b className="val">Donnée indisponible pour le moment</b>
             <p>Cette étape s&apos;illustre avec un chiffre réel de la dernière séance ; il n&apos;est pas encore en base.</p>
           </div>
-        )}
+        )}</motion.div></AnimatePresence>
       </div>
     </div>
   );

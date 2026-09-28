@@ -30,6 +30,8 @@ const BARE_PREFIXES = [
   '/debutant',
   '/developers',
   '/formations/academy', // plein écran — l'Academy a sa propre UI (sidebar, nav)
+  '/maquette', // maquette motion AVANT/APRES — pleine page, noindex, hors auth (validation prod)
+  '/apercu', // apercu non indexe de la landing bis (meme code que /), hors auth
 ];
 
 /** Pages légales : publiques, plein écran, AVEC footer. */

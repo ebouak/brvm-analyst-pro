@@ -21,6 +21,7 @@ const PUBLIC_EXACT = new Set<string>([
   '/methodologie', '/debutant', '/developers',
   '/rendement-vrai', '/fiscalite', '/simulateur-budget',
   '/comparateur-sgi', '/actualites', '/formations', '/secteurs',
+  '/maquette', '/apercu',
   // /manifest.json est le manifeste déclaré par app/layout.tsx : sans lui ici,
   // il répondait 307 vers /login et aucun navigateur ne pouvait le lire
   // (constaté le 2026-09-28). /manifest.webmanifest reste pour compatibilité.

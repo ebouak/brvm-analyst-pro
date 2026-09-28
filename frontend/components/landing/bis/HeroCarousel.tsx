@@ -2,6 +2,7 @@
 import Link from 'next/link';
 
 import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Slide } from '@/lib/landing/slides';
 import type { TopNote } from '@/lib/landing/bisData';
 
@@ -22,7 +23,8 @@ import type { TopNote } from '@/lib/landing/bisData';
  *   `images.remotePatterns`, interdit tant que Next < 15.5.24 (voir CLAUDE.md).
  */
 
-const INTERVALLE_MS = 7000;
+const INTERVALLE_MS = 4200;
+const EASE: [number,number,number,number] = [0.22,1,0.36,1];
 const fmtPct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
 
 interface Props {
@@ -60,11 +62,12 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
   }, [n, paused, stopped]);
 
   const go = (k: number) => { setStopped(true); setI(((k % n) + n) % n); };
+  const onDragEnd = (_: unknown, info: { offset: { x: number } }) => { if (info.offset.x < -60) go(i + 1); else if (info.offset.x > 60) go(i - 1); };
   const [autoOk, setAutoOk] = useState(false);
   useEffect(() => { setAutoOk(n > 1 && !reduce.current); }, [n]);
 
   return (
-    <div
+    <motion.div
       className="car"
       role="region"
       aria-roledescription="carrousel"
@@ -74,19 +77,21 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
       onKeyDown={(e) => { if (e.key === 'ArrowLeft') go(i - 1); if (e.key === 'ArrowRight') go(i + 1); }}
+      drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.18} onDragEnd={onDragEnd} style={{ touchAction: 'pan-y' } as any}
     >
+      <AnimatePresence mode="wait"><motion.div key={'kb-'+i} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 0.45, scale: 1.06 }} exit={{ opacity: 0 }} transition={{ duration: 0.55, ease: EASE }} style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' } as any} aria-hidden>{slides[i]?.imageUrl && <img src={slides[i].imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: (slides[i] as any).imageFit ?? 'cover' } as any} />}</motion.div></AnimatePresence>
       {slides.map((s, k) => {
         const active = k === i;
         const label = `${k + 1} sur ${n} : ${s.kind === 'ad' ? `Publicité, ${s.sponsorName}` : s.title}`;
         const cls = `slide${s.kind === 'ad' ? ' ad' : s.imageUrl ? '' : ' dark'}`;
         return (
-          <div key={s.id} className={cls} aria-hidden={active ? 'false' : 'true'} role="group" aria-roledescription="diapositive" aria-label={label}>
+          <motion.div key={s.id} className={cls} aria-hidden={active ? 'false' : 'true'} role="group" aria-roledescription="diapositive" aria-label={label} initial={false} animate={{ opacity: active ? 1 : 0 }} transition={{ duration: 0.45, ease: EASE }} style={{ pointerEvents: active ? 'auto' : 'none' } as any}>
             {s.kind === 'ad' && <span className="ad-tag">Publicité · {s.sponsorName}</span>}
             {s.imageUrl && s.kind !== 'permanent' && (
               // eslint-disable-next-line @next/next/no-img-element
               <img style={{ objectFit: s.imageFit ?? 'cover' }} src={s.imageUrl} alt="" width={900} height={672} loading={k === 0 ? 'eager' : 'lazy'} />
             )}
-            {s.kind === 'permanent' ? (
+            <motion.div initial={false} animate={active ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }} transition={{ duration: 0.45, ease: EASE, delay: active ? 0.1 : 0 }}>{s.kind === 'permanent' ? (
               <Permanente s={s} dateLabel={dateLabel} brvmCVar={brvmCVar} hausses={hausses} nbActions={nbActions} topNote={topNote} topHausse={topHausse} topBaisse={topBaisse} sgi={sgi} active={active} />
             ) : (
               <div className="pv">
@@ -101,13 +106,15 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
                   )}
                 </div>
               </div>
-            )}
-          </div>
+            )}</motion.div>
+          </motion.div>
         );
       })}
 
       {n > 1 && (
-        <div className="car-ctl">
+        <>
+        <div className="car-progress" aria-hidden style={{ position: 'absolute', left: 12, right: 12, bottom: 56, height: 3, background: 'rgba(255,255,255,.18)', borderRadius: 999, overflow: 'hidden', zIndex: 3 } as any}><motion.span key={i+'-'+String(paused)+String(stopped)} initial={{ width: '0%' }} animate={{ width: paused || stopped || n < 2 ? '0%' : '100%' }} transition={{ duration: paused || stopped ? 0 : INTERVALLE_MS/1000, ease: 'linear' }} style={{ display: 'block', height: '100%', background: 'rgb(var(--color-accent))' } as any} /></div>
+      <div className="car-ctl">
           <button type="button" onClick={() => go(i - 1)} aria-label="Diapositive précédente">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
           </button>
@@ -127,9 +134,10 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
             </button>
           )}
         </div>
+        </>
       )}
       <p className="sr-only" aria-live="polite">Diapositive {i + 1} sur {n}</p>
-    </div>
+    </motion.div>
   );
 }
 

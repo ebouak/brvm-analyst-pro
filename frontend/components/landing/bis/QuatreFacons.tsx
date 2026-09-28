@@ -1,4 +1,6 @@
+'use client';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 /**
  * « Quatre façons de travailler le marché » — Analyser, Surveiller, Simuler,
@@ -84,6 +86,7 @@ const COLONNES: Colonne[] = [
   ] },
 ];
 
+const EASE=[0.22,1,0.36,1] as const;
 export function QuatreFacons() {
   return (
     <section className="facons" aria-labelledby="h-facons">
@@ -96,8 +99,8 @@ export function QuatreFacons() {
         <div className="annot-2" aria-hidden="true"><span className="hand">Des outils concrets<br />pour aller plus loin.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
       </div>
       <div className="cols">
-        {COLONNES.map((col) => (
-          <article key={col.k} className="col" style={{ ['--col' as string]: col.c, ['--col-bg' as string]: col.bg }}>
+        {COLONNES.map((col, idx) => (
+          <motion.article key={col.k} className="col" style={{ ['--col' as string]: col.c, ['--col-bg' as string]: col.bg }} initial={{opacity:0,y:14}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:0.25}} transition={{duration:0.55,ease:EASE,delay:idx*0.08}} whileHover={{y:-4,scale:1.01}}>
             <header>
               <span className="k">{col.k}</span>
               <h3>{col.t}</h3>
@@ -108,14 +111,14 @@ export function QuatreFacons() {
               {col.outils.map((o) => (
                 <li key={o.t}>
                   <Link href={o.href}>
-                    <span className="ic"><Ic c={o.ic} /></span>
+                    <motion.span className="ic" whileHover={{rotate:6,scale:1.08}} transition={{type:'spring',stiffness:420,damping:18}}><Ic c={o.ic} /></motion.span>
                     <span><b>{o.t}{PROTEGEES.has(o.href) && <em className="cg" title="Accessible avec un compte gratuit">compte gratuit</em>}</b><small>{o.d}</small></span>
                   </Link>
                 </li>
               ))}
             </ul>
             <Link href={col.href} className="voir">Voir les outils <span aria-hidden="true">→</span></Link>
-          </article>
+          </motion.article>
         ))}
       </div>
       <div className="banner">
