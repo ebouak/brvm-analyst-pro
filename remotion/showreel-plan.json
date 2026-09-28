@@ -1,0 +1,88 @@
+{
+  "_": "Plan unique du showreel : durées des scènes (images à 30 i/s, multiples de 60 = une mesure à 120 BPM) et voix off. Lu par showreel.tsx, showreel-voix.mjs et showreel-audio.mjs — ne rien dupliquer ailleurs.",
+  "voixTts": "fr-FR-DeniseNeural",
+  "scenes": [
+    {
+      "id": "ouverture",
+      "duree": 240
+    },
+    {
+      "id": "probleme",
+      "duree": 240
+    },
+    {
+      "id": "solution",
+      "duree": 300
+    },
+    {
+      "id": "fonctions",
+      "duree": 720
+    },
+    {
+      "id": "ambition",
+      "duree": 300
+    },
+    {
+      "id": "fin",
+      "duree": 300
+    }
+  ],
+  "voix": [
+    {
+      "id": "v1",
+      "scene": "ouverture",
+      "decalage": 30,
+      "texte": "La finance africaine mérite des outils à sa hauteur. Bienvenue sur WestBourse."
+    },
+    {
+      "id": "v2",
+      "scene": "probleme",
+      "decalage": 14,
+      "texte": "Comprendre la BRVM ne devrait pas être compliqué. Les bonnes décisions commencent par les bonnes informations."
+    },
+    {
+      "id": "v3",
+      "scene": "solution",
+      "decalage": 10,
+      "texte": "WestBourse rassemble le marché en un seul endroit : l'indice, le sentiment de la séance, les plus fortes hausses et les plus fortes baisses."
+    },
+    {
+      "id": "v4",
+      "scene": "fonctions",
+      "decalage": 8,
+      "texte": "Suivez toutes les sociétés cotées, leurs cours et leurs performances."
+    },
+    {
+      "id": "v5",
+      "scene": "fonctions",
+      "decalage": 184,
+      "texte": "Chaque fiche société : cours, carnet d'ordres, fondamentaux et dividendes."
+    },
+    {
+      "id": "v6",
+      "scene": "fonctions",
+      "decalage": 368,
+      "texte": "Suivez les communiqués officiels et l'actualité des sociétés, jour après jour."
+    },
+    {
+      "id": "v7",
+      "scene": "fonctions",
+      "decalage": 548,
+      "texte": "Formez-vous avec l'Academy, et choisissez l'intermédiaire qui vous correspond."
+    },
+    {
+      "id": "v8",
+      "scene": "ambition",
+      "decalage": 6,
+      "texte": "L'information financière, plus claire. L'investissement, plus accessible. La BRVM, à portée de décision."
+    },
+    {
+      "id": "v9",
+      "scene": "fin",
+      "decalage": 10,
+      "texte": "WestBourse. Comprendre la BRVM, investir avec confiance. Découvrez la plateforme sur westbourse point com."
+    }
+  ],
+  "capturesDu": "28 septembre 2026",
+  "seanceAffichee": "25 septembre 2026"
+}

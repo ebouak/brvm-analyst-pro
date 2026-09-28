@@ -544,6 +544,9 @@ MOTS_MARCHE = (
     "brvm", "uemoa", "umoa", "bceao", "bourse", "boursier", "composite",
     "cotation", "obligat", "emprunt", "dividende", "capitalisation",
     "sgi", "crepmf", "amf-umoa", "marche financier", "stock market",
+    # Émissions de titres publics sur le marché de l'UEMOA (« le Trésor
+    # lève 60,5 milliards FCFA ») — ajouté le 2026-09-28.
+    "tresor", "titres publics",
 )
 
 def titre_pertinent(titre: str) -> bool:

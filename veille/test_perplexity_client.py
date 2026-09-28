@@ -202,3 +202,8 @@ def test_titres_d_articles_ne_sont_pas_generiques():
     assert titre_generique("La BRVM franchit le cap des 20 000 milliards de FCFA | Financial Afrik") is False
     assert titre_generique("BRVM : 29 valeurs en baisse et le Composite retombe sous les 550 points") is False
     assert titre_generique("Dabafinance - BRVM Hits 555 Points as Rally Extends Into September") is False
+
+
+def test_emissions_du_tresor_sont_du_marche():
+    assert titre_pertinent("Mali : le Trésor lève 60,5 milliards FCFA - FINECO") is True
+    assert titre_pertinent("Sénégal : succès de l’émission de titres publics") is True
