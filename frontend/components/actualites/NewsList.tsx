@@ -9,6 +9,8 @@ export interface NewsItem {
   titre: string;
   date_publication: string;
   source: string;
+  /** Origine réelle (« Sika Finance », « Financial Afrik »…), posée par le scraper. */
+  source_label?: string | null;
   source_url: string | null;
   resume: string | null;
   instrument_code: string | null;
@@ -17,6 +19,19 @@ export interface NewsItem {
 
 const SOURCE_LABELS: Record<string, string> = { brvm: 'BRVM', cosumaf: 'COSUMAF', autre: 'Autre' };
 type Period = 'all' | '7' | '30' | '90';
+
+/**
+ * Ce que le badge et le filtre affichent : l'ORIGINE de l'article.
+ *
+ * `source` n'est pas une origine : les scrapers y écrivent 'brvm' pour tout
+ * article qui concerne le marché, quel que soit le site qui l'a publié. Le
+ * badge affichait donc « BRVM » sur des articles d'Abidjan.net, de Seneplus ou
+ * d'Ecobank (constaté le 2026-09-28 : 15 articles sur 300 viennent vraiment de
+ * brvm.org) — comme s'il s'agissait de communiqués officiels.
+ */
+function origine(i: Pick<NewsItem, 'source' | 'source_label'>): string {
+  return i.source_label?.trim() || SOURCE_LABELS[i.source] || i.source;
+}
 
 /** Temps de lecture estimé (≈200 mots/min) à partir du titre + résumé. */
 function readingTime(item: NewsItem): number {
@@ -29,7 +44,7 @@ export default function NewsList({ items }: { items: NewsItem[] }) {
   const [period, setPeriod] = useState<Period>('all');
 
   const sources = useMemo(
-    () => [...new Set(items.map((i) => i.source))].sort(),
+    () => [...new Set(items.map(origine))].sort((a, b) => a.localeCompare(b, 'fr')),
     [items],
   );
 
@@ -37,7 +52,7 @@ export default function NewsList({ items }: { items: NewsItem[] }) {
     const now = Date.now();
     const maxAge = period === 'all' ? Infinity : Number(period) * 86_400_000;
     return items.filter((i) => {
-      if (source && i.source !== source) return false;
+      if (source && origine(i) !== source) return false;
       if (maxAge !== Infinity) {
         const age = now - new Date(i.date_publication).getTime();
         if (age > maxAge) return false;
@@ -54,7 +69,7 @@ export default function NewsList({ items }: { items: NewsItem[] }) {
       <div className="flex flex-wrap items-center gap-2">
         <select value={source} onChange={(e) => setSource(e.target.value)} className={selCls} aria-label="Filtrer par source">
           <option value="">Toutes sources</option>
-          {sources.map((s) => <option key={s} value={s}>{SOURCE_LABELS[s] ?? s}</option>)}
+          {sources.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={period} onChange={(e) => setPeriod(e.target.value as Period)} className={selCls} aria-label="Filtrer par période">
           <option value="all">Toute période</option>
@@ -82,7 +97,7 @@ export default function NewsList({ items }: { items: NewsItem[] }) {
               <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] px-1.5 py-0.5 rounded border border-accent/30 text-accent bg-accent/10 font-semibold">
-                    {SOURCE_LABELS[item.source] ?? item.source}
+                    {origine(item)}
                   </span>
                   <span className="text-xs text-faint tabular">{fmtDateFR(item.date_publication)}</span>
                   <span className="text-[10px] text-faint">· {readingTime(item)} min de lecture</span>

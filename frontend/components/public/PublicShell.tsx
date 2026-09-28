@@ -19,7 +19,11 @@ export default function PublicShell({ children }: { children: React.ReactNode })
             className="group flex items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
           >
             <AnimatedLogo size={30} variant="mark" animate={false} />
-            <span className="font-display text-white text-lg tracking-tight transition-colors group-hover:text-accent">
+            {/* Sous 400 px, logo seul : le nom plus « Connexion » plus le bouton ne
+                tiennent pas sur une ligne, et « Créer un compte » passait sur deux
+                lignes (constaté le 2026-09-28 à 390 px). Le lien garde son nom
+                accessible par aria-label. */}
+            <span className="hidden min-[400px]:inline font-display text-white text-lg tracking-tight transition-colors group-hover:text-accent">
               WESTBOURSE
             </span>
           </Link>
@@ -40,12 +44,12 @@ export default function PublicShell({ children }: { children: React.ReactNode })
               Brief
             </Link>
             <ThemeToggle className="hidden sm:inline-flex" />
-            <Link href="/login" className="text-muted hover:text-white transition-colors">
+            <Link href="/login" className="whitespace-nowrap text-muted hover:text-white transition-colors">
               Connexion
             </Link>
             <Link
               href="/signup"
-              className="px-3.5 py-1.5 rounded-lg bg-accent text-bg font-semibold hover:bg-gold-2 transition-colors active:scale-95"
+              className="whitespace-nowrap px-3.5 py-1.5 rounded-lg bg-accent text-bg font-semibold hover:bg-gold-2 transition-colors active:scale-95"
             >
               Créer un compte
             </Link>

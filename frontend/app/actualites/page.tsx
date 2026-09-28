@@ -27,7 +27,7 @@ export default async function ActualitesPage() {
       <SectionHeader
         kicker="Marché · BRVM · COSUMAF"
         title="Actualités"
-        subtitle="Communiqués officiels BRVM et COSUMAF mis à jour quotidiennement."
+        subtitle="Communiqués officiels et presse économique sur la BRVM et l’UEMOA, mis à jour chaque jour. La source de chaque article est indiquée."
       />
       <ViewTabs tabs={INTEL_TABS} current="/actualites" />
 

@@ -138,6 +138,49 @@ export async function ensureObligationInstruments(
   if (error) throw new Error(`ensure obligation instruments: ${error.message}`);
 }
 
+/** Colonnes du référentiel qu'une source peut ignorer — et ne doit alors pas écraser. */
+const COLONNES_CUREES = ['designation', 'pays', 'secteur'] as const;
+
+/**
+ * Lignes d'upsert du référentiel, regroupées par jeu de colonnes — fonction
+ * PURE, testée.
+ *
+ * RÉGRESSION CORRIGÉE (constatée le 2026-09-28) : 46 actions sur 48 avaient
+ * `secteur = null` dans brvm_instruments, et /secteurs affichait un secteur
+ * « Inconnu » de 46 valeurs. `runSecteurs` (daily.yml) posait bien les
+ * secteurs ICB, mais chaque collecte suivante les effaçait : BDFIN renvoie une
+ * chaîne vide quand sa page n'a pas la colonne, brvm.org n'en a jamais, et
+ * l'upsert recopiait ce vide sur la valeur curée.
+ *
+ * Une colonne curée vide ou nulle est donc RETIRÉE de la ligne : absente de la
+ * charge, elle est laissée telle quelle par ON CONFLICT DO UPDATE. Les lignes
+ * sont ensuite regroupées par jeu de colonnes, car un upsert PostgREST en lot
+ * complète à null les clés manquantes d'une ligne à l'autre — mélanger les
+ * formes réintroduirait le défaut.
+ */
+export function lignesInstruments(rows: Array<Record<string, unknown>>): Array<Array<Record<string, unknown>>> {
+  const groupes = new Map<string, Array<Record<string, unknown>>>();
+  for (const brute of rows) {
+    const ligne: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(brute)) {
+      const curee = (COLONNES_CUREES as readonly string[]).includes(k);
+      if (curee && (v == null || (typeof v === 'string' && v.trim() === ''))) continue;
+      ligne[k] = v;
+    }
+    const cle = Object.keys(ligne).sort().join(',');
+    if (!groupes.has(cle)) groupes.set(cle, []);
+    groupes.get(cle)!.push(ligne);
+  }
+  return [...groupes.values()];
+}
+
+async function envoyerInstruments(sb: ReturnType<typeof getSupabase>, rows: Array<Record<string, unknown>>): Promise<void> {
+  for (const groupe of lignesInstruments(rows)) {
+    const { error } = await sb.from('brvm_instruments').upsert(groupe, { onConflict: 'code' });
+    if (error) throw new Error(`upsert brvm_instruments: ${error.message}`);
+  }
+}
+
 /** Upsert du référentiel instruments (table brvm_instruments). */
 export async function upsertInstruments(snapshot: MarketSnapshot): Promise<void>;
 export async function upsertInstruments(instruments: Array<{
@@ -165,10 +208,7 @@ export async function upsertInstruments(snapshotOrInstruments: any): Promise<voi
       type: i.type,
       actif: true,
     }));
-    const { error } = await sb
-      .from('brvm_instruments')
-      .upsert(rows, { onConflict: 'code' });
-    if (error) throw new Error(`upsert brvm_instruments: ${error.message}`);
+    await envoyerInstruments(sb, rows);
     return rows.length;
   }
 
@@ -201,10 +241,7 @@ export async function upsertInstruments(snapshotOrInstruments: any): Promise<voi
     })),
   ];
   if (rows.length === 0) return;
-  const { error } = await sb
-    .from('brvm_instruments')
-    .upsert(rows, { onConflict: 'code' });
-  if (error) throw new Error(`upsert brvm_instruments: ${error.message}`);
+  await envoyerInstruments(sb, rows);
 }
 
 /**
