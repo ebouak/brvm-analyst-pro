@@ -59,6 +59,7 @@ _load_env(
     os.path.join(_here, ".env"),
 )
 from pathlib import Path
+from urllib.parse import urlparse
 
 log = logging.getLogger("wb-commodity-weekly")
 
@@ -605,6 +606,15 @@ def url_joignable(url: str, requete=None, timeout: int = 10) -> bool:
                                  headers={"User-Agent": "Mozilla/5.0 (compatible; WestBourseVeille/1.0)"})
             r.close()
             return r.status_code
+    # Notre propre site n'est pas une source externe : Perplexity résumait
+    # nos pages, republiées ensuite comme actualité (5 articles sur 40 au
+    # 2026-09-28). Écarté avant tout appel réseau.
+    try:
+        hote = (urlparse(url).hostname or "").lower()
+    except ValueError:
+        return False
+    if hote == "westbourse.com" or hote.endswith(".westbourse.com"):
+        return False
     try:
         code = requete("HEAD", url)
         if code in (403, 405, 501):

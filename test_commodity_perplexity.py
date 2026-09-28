@@ -99,3 +99,14 @@ def test_erreur_reseau_est_ecartee():
 
 def test_serveur_en_erreur_500_est_ecarte():
     assert url_joignable("https://x.test/a", faux_serveur({"HEAD": 500})) is False
+
+
+def test_notre_propre_site_est_ecarte_sans_appel_reseau():
+    req = faux_serveur({"HEAD": 200})
+    assert url_joignable("https://www.westbourse.com/societes/SNTS", req) is False
+    assert url_joignable("https://westbourse.com/brief", req) is False
+    assert req.appels == []
+
+
+def test_domaine_voisin_n_est_pas_confondu():
+    assert url_joignable("https://notwestbourse.com/a", faux_serveur({"HEAD": 200})) is True
