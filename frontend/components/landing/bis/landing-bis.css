@@ -488,6 +488,17 @@
 .lb .top .code { font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
 .lb .top .code:hover { color: var(--blue-tx); }
 .lb .top .vol { color: var(--muted); font-size: 12.5px; }
+/* Le Top 5 tient en 4 colonnes de grille (~330 px utiles à 1440 px) : trop
+   étroit pour six colonnes. Mesuré le 2026-09-28 : le lien « logo + code »
+   ne recevait que 48 px pour ~62 de contenu, et « SAFC » débordait sur le
+   cours (« SAFQ 300 »). Cause : le max-width: 100% de Tailwind annule la
+   largeur minimale d'une image dans le calcul d'une colonne de tableau. */
+.lb .top .logo-soc { flex: none; max-width: none; }
+.lb .top .code, .lb .top td.num, .lb .top .chip { white-space: nowrap; }
+/* La courbe est la colonne qu'on peut perdre : elle illustre, les chiffres
+   informent. Sans container queries, tout reste affiché comme avant. */
+.lb .top { container-type: inline-size; }
+@container (max-width: 420px) { .lb .top .col-graph { display: none; } }
 .lb .empty-spark { color: var(--faint); }
 
 .lb .dit-l { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }

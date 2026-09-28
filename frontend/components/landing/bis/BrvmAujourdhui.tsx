@@ -30,7 +30,7 @@ function Row({ m, i }: { m: Mover; i: number }) {
       <td className="num">{fmtNumber(m.cours)}</td>
       <td><span className={`chip num ${tone(m.variation)}`}>{pct(m.variation)}</span></td>
       <td className="num vol">{fmtM(m.valeur ?? null)}</td>
-      <td>{m.spark ? <svg viewBox="0 0 44 16" width="56" height="18" aria-hidden="true"><path d={m.spark} fill="none" stroke={m.variation >= 0 ? 'rgb(var(--color-up))' : 'rgb(var(--color-down))'} strokeWidth="1.6" /></svg> : <span className="empty-spark" aria-hidden="true">—</span>}</td>
+      <td className="col-graph">{m.spark ? <svg viewBox="0 0 44 16" width="56" height="18" aria-hidden="true"><path d={m.spark} fill="none" stroke={m.variation >= 0 ? 'rgb(var(--color-up))' : 'rgb(var(--color-down))'} strokeWidth="1.6" /></svg> : <span className="empty-spark" aria-hidden="true">—</span>}</td>
     </tr>
   );
 }
@@ -44,7 +44,7 @@ function Table({ titre, rows, tone: t, href, vide }: { titre: string; rows: Move
       </div>
       {rows.length ? (
         <table>
-          <thead><tr><th scope="col">#</th><th scope="col">Valeur</th><th scope="col">Cours (FCFA)</th><th scope="col">Variation</th><th scope="col" title="Valeur échangée, en FCFA">Échangé</th><th scope="col">Graphique</th></tr></thead>
+          <thead><tr><th scope="col">#</th><th scope="col">Valeur</th><th scope="col">Cours (FCFA)</th><th scope="col">Variation</th><th scope="col" title="Valeur échangée, en FCFA">Échangé</th><th scope="col" className="col-graph">Graphique</th></tr></thead>
           <tbody>{rows.map((m, i) => <Row key={m.code} m={m} i={i} />)}</tbody>
         </table>
       ) : <p className="empty">{vide}</p>}
