@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { fmtDateFR } from '@/lib/format';
+import { libelleSource } from '@/lib/news/origine';
 
 export interface NewsItem {
   id: string;
@@ -11,27 +12,17 @@ export interface NewsItem {
   source: string;
   /** Origine réelle (« Sika Finance », « Financial Afrik »…), posée par le scraper. */
   source_label?: string | null;
+  source_type?: string | null;
   source_url: string | null;
   resume: string | null;
   instrument_code: string | null;
   image_url?: string | null;
 }
 
-const SOURCE_LABELS: Record<string, string> = { brvm: 'BRVM', cosumaf: 'COSUMAF', autre: 'Autre' };
 type Period = 'all' | '7' | '30' | '90';
 
-/**
- * Ce que le badge et le filtre affichent : l'ORIGINE de l'article.
- *
- * `source` n'est pas une origine : les scrapers y écrivent 'brvm' pour tout
- * article qui concerne le marché, quel que soit le site qui l'a publié. Le
- * badge affichait donc « BRVM » sur des articles d'Abidjan.net, de Seneplus ou
- * d'Ecobank (constaté le 2026-09-28 : 15 articles sur 300 viennent vraiment de
- * brvm.org) — comme s'il s'agissait de communiqués officiels.
- */
-function origine(i: Pick<NewsItem, 'source' | 'source_label'>): string {
-  return i.source_label?.trim() || SOURCE_LABELS[i.source] || i.source;
-}
+/** Badge et filtre montrent l'éditeur de l'article — voir lib/news/origine.ts. */
+const origine = libelleSource;
 
 /** Temps de lecture estimé (≈200 mots/min) à partir du titre + résumé. */
 function readingTime(item: NewsItem): number {
