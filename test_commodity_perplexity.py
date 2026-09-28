@@ -110,3 +110,14 @@ def test_notre_propre_site_est_ecarte_sans_appel_reseau():
 
 def test_domaine_voisin_n_est_pas_confondu():
     assert url_joignable("https://notwestbourse.com/a", faux_serveur({"HEAD": 200})) is True
+
+
+from commodity_weekly_generator import ressemble_a_un_article
+
+
+def test_page_de_liste_ecartee():
+    assert ressemble_a_un_article("https://www.brvm.org/fr/marche/avis-et-publications/avis") is False
+
+
+def test_article_accepte():
+    assert ressemble_a_un_article("https://www.sikafinance.com/marches/brvm-29-valeurs-en-baisse_64333") is True

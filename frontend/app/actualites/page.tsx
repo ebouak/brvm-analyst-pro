@@ -16,6 +16,7 @@ export default async function ActualitesPage() {
   const { data } = await supabase
     .from('brvm_news')
     .select('*')
+    .not('hidden', 'is', true) // modération rédactionnelle
     .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
     .order('date_publication', { ascending: false })
     .limit(100);

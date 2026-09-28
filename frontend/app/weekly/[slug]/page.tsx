@@ -26,6 +26,7 @@ async function fetchArticle(slug: string): Promise<WeeklyArticle | null> {
   const { data, error } = await sb
     .from('brvm_news')
     .select('id, titre, date_publication, resume, content_html, slug, metadata, ticker_codes, source_label')
+    .not('hidden', 'is', true) // modération rédactionnelle
     .eq('slug', slug)
     .single();
 

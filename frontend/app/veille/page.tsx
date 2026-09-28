@@ -36,6 +36,7 @@ async function fetchVeilleData() {
   const { data: news } = await sb
     .from('brvm_news')
     .select('*')
+    .not('hidden', 'is', true) // modération rédactionnelle
     .gte('date_publication', since1y)
     .order('date_publication', { ascending: false })
     .limit(5000);

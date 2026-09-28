@@ -144,6 +144,7 @@ async function getData() {
         supabase
           .from('brvm_news')
           .select('titre, date_publication')
+          .not('hidden', 'is', true) // modération rédactionnelle
           .eq('instrument_code', vedetteCode)
           .lte('date_publication', new Date().toISOString().slice(0, 10))
           .order('date_publication', { ascending: false })

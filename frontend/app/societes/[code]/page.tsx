@@ -55,6 +55,7 @@ async function getCompany(code: string) {
       supabase
         .from('brvm_news')
         .select('titre, date_publication, source, source_url')
+        .not('hidden', 'is', true) // modération rédactionnelle
         .eq('instrument_code', code)
         .lte('date_publication', new Date().toISOString().slice(0, 10)) // jamais d'actu datée dans le futur
         .order('date_publication', { ascending: false })

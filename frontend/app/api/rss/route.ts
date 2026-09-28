@@ -34,6 +34,7 @@ export async function GET() {
     sb
       .from('brvm_news')
       .select('id, titre, resume, slug, date_publication, source_url, source_label, source_type')
+      .not('hidden', 'is', true) // modération rédactionnelle
       .order('date_publication', { ascending: false })
       .limit(30),
     sb
