@@ -493,6 +493,82 @@ def url_joignable(url: str, requete=None, timeout: int = 10) -> bool:
     except Exception:
         return False
 
+def ressemble_a_un_article(url: str) -> bool:
+    """Le lien désigne-t-il UN article, et pas une page de liste ?
+
+    Constaté le 2026-09-28 : sur 40 items Perplexity, 16 pointaient vers des
+    index (`/avis`, `/actualites`, `/common/news/index`…). Le lien répond, mais
+    ne prouve rien du fait cité — le modèle accroche un fait qu'il a rédigé à
+    une page générique. Règle : le dernier segment du chemin est un « slug »
+    d'article, au moins 20 caractères avec un tiret."""
+    try:
+        chemin = urlparse(url).path.rstrip("/")
+    except ValueError:
+        return False
+    dernier = chemin.rsplit("/", 1)[-1] if chemin else ""
+    # Tiret exigé : un slug d'article est un titre (« brvm-29-valeurs-… »),
+    # une rubrique est souvent un identifiant (« actualites_bourse_brvm »).
+    return len(dernier) >= 20 and "-" in dernier
+
+def titre_generique(titre: str) -> bool:
+    """Titre de RUBRIQUE plutôt que d'article : avant le « | Nom du site »,
+    au plus 5 mots (« Toutes | BRVM », « Bulletin Officiel de la Cote |
+    BRVM »). L'adresse de ces pages ressemble à un article ; leur titre, non."""
+    tete = (titre or "").split(" | ", 1)[0].strip()
+    return len(tete.split()) <= 5
+
+def metadonnees_editeur(html: str) -> dict:
+    """Titre et description que l'ÉDITEUR a publiés pour sa page.
+
+    Remplace le titre et le résumé rédigés par Perplexity : ce texte-là porte
+    des chiffres écrits par un modèle (« Composite en recul de 3,66 % à
+    516,29 points »), contraires à la règle du projet — aucun chiffre qui ne
+    vienne d'une source. Ordre : og:title, puis <title> ; og:description,
+    puis meta description. Chaîne vide si absent : on n'invente rien."""
+    soup = BeautifulSoup(html or "", "html.parser")
+
+    def meta(*noms: str) -> str:
+        for nom in noms:
+            tag = soup.find("meta", attrs={"property": nom}) or soup.find("meta", attrs={"name": nom})
+            if tag and tag.get("content"):
+                return " ".join(tag["content"].split())
+        return ""
+
+    titre = meta("og:title", "twitter:title")
+    if not titre and soup.title and soup.title.string:
+        titre = " ".join(soup.title.string.split())
+    return {"titre": titre, "resume": meta("og:description", "description", "twitter:description")}
+
+MOTS_MARCHE = (
+    # Pas « cote » : sans accents, il attraperait « Côte d'Ivoire ».
+    "brvm", "uemoa", "umoa", "bceao", "bourse", "boursier", "composite",
+    "cotation", "obligat", "emprunt", "dividende", "capitalisation",
+    "sgi", "crepmf", "amf-umoa", "marche financier", "stock market",
+)
+
+def titre_pertinent(titre: str) -> bool:
+    """Le titre PUBLIÉ PAR L'ÉDITEUR parle-t-il du marché ?
+
+    Un lien joignable vers un vrai article ne suffit pas : Perplexity
+    rattachait des faits BRVM à des pages sans rapport (« Conseil des
+    ministres », une page de rubrique de Financial Afrik — constaté le
+    2026-09-28 sur les lignes existantes). On exige un mot du marché dans le
+    titre de l'éditeur, accents et casse ignorés."""
+    import unicodedata
+    t = unicodedata.normalize("NFKD", titre or "").encode("ascii", "ignore").decode().lower()
+    return any(re.search(rf"\b{re.escape(m)}", t) for m in MOTS_MARCHE)
+
+def telecharger_page(url: str, timeout: int = 15) -> str:
+    """HTML de la page (500 ko au plus), chaîne vide en cas d'échec."""
+    try:
+        r = requests.get(url, timeout=timeout, allow_redirects=True,
+                         headers={"User-Agent": "Mozilla/5.0 (compatible; WestBourseVeille/1.0)"})
+        if r.status_code >= 400:
+            return ""
+        return r.text[:500_000]
+    except Exception:
+        return ""
+
 def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> list:
     """Source additive : interroge Perplexity (recherche web + citations) pour
     de l'actualité BRVM/UEMOA récente. Sortie JSON stricte imposée — un fait =
@@ -533,19 +609,43 @@ def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> li
     log.info(f"[Perplex.] {len(items)} item(s) reçus, avant validation fraîcheur/format")
     maintenant = datetime.utcnow()
     results = []
+    vues = set()
     for item in items:
         if not valider_item_perplexity(item, maintenant):
             continue
-        if not url_joignable(str(item["url"]).strip()):
-            log.info(f"[Perplex.] ✗ lien injoignable, item écarté : {item['url']}")
+        url_e = str(item["url"]).strip()
+        # Un article = une URL : le modèle reformule le même fait sous
+        # plusieurs titres (jusqu'à 4 fois constaté), le hash titre+url
+        # laissait tout passer.
+        if url_e in vues:
+            continue
+        vues.add(url_e)
+        if not ressemble_a_un_article(url_e):
+            log.info(f"[Perplex.] ✗ page de liste, pas un article : {url_e}")
+            continue
+        if not url_joignable(url_e):
+            log.info(f"[Perplex.] ✗ lien injoignable, item écarté : {url_e}")
+            continue
+        editeur = metadonnees_editeur(telecharger_page(url_e))
+        if not editeur["titre"]:
+            log.info(f"[Perplex.] ✗ page sans titre d'éditeur, item écarté : {url_e}")
+            continue
+        if titre_generique(editeur["titre"]):
+            log.info(f"[Perplex.] ✗ page de rubrique (« {editeur['titre'][:60]} »), item écarté")
+            continue
+        if not titre_pertinent(editeur["titre"]):
+            log.info(f"[Perplex.] ✗ titre hors marché (« {editeur['titre'][:60]} »), item écarté")
             continue
         try:
-            titre = item["titre"].strip()
-            url_e = item["url"].strip()
-            resume = item["resume"].strip()
+            # Texte de l'ÉDITEUR, jamais celui du modèle : Perplexity ne sert
+            # plus qu'à trouver le lien.
+            titre = editeur["titre"]
+            resume = editeur["resume"]
             texte = f"{titre} {resume}"
             results.append({
-                "hash": make_hash(titre, url_e), "titre": titre, "url": url_e,
+                # Hash sur l'URL seule : un fait reformulé à la passe
+                # suivante ne crée plus de doublon.
+                "hash": make_hash("perplexity", url_e), "titre": titre, "url": url_e,
                 "source": "Perplexity (recherche web)", "source_type": "perplexity",
                 "date_pub": item["date"], "resume": resume,
                 "langue": "fr", "pertinence": max(0.5, score(texte, global_kw)),

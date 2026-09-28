@@ -432,6 +432,7 @@ export default async function InstrumentPage({
   const { data: actusRows } = await liqDailyClient
     .from('brvm_news')
     .select('titre, date_publication')
+    .not('hidden', 'is', true) // modération rédactionnelle
     .eq('instrument_code', code)
     .lte('date_publication', new Date().toISOString().slice(0, 10))
     .order('date_publication', { ascending: false })

@@ -624,6 +624,19 @@ def url_joignable(url: str, requete=None, timeout: int = 10) -> bool:
         return False
 
 
+def ressemble_a_un_article(url: str) -> bool:
+    """Le lien désigne-t-il UN article, et pas une page de liste ? Dernier
+    segment du chemin : au moins 20 caractères avec un tiret.
+    Copie identique dans veille/brvm_pipeline.py (voir la raison là-bas) —
+    toute correction doit être reportée des deux côtés."""
+    try:
+        chemin = urlparse(url).path.rstrip("/")
+    except ValueError:
+        return False
+    dernier = chemin.rsplit("/", 1)[-1] if chemin else ""
+    return len(dernier) >= 20 and "-" in dernier
+
+
 def fetch_perplexity_context(commodites: list[str]) -> list[dict]:
     """Contexte macro récent via Perplexity (recherche web + citations) —
     injecté dans le prompt DeepSeek comme bloc distinct, jamais vérifié a
@@ -663,9 +676,12 @@ def fetch_perplexity_context(commodites: list[str]) -> list[dict]:
 
     maintenant = datetime.now(timezone.utc)
     valides = [it for it in items if valider_item_perplexity(it, maintenant)]
-    joignables = [it for it in valides if url_joignable(str(it["url"]).strip())]
+    uniques: dict[str, dict] = {}
+    for it in valides:
+        uniques.setdefault(str(it["url"]).strip(), it)  # un article = une URL
+    joignables = [it for u, it in uniques.items() if ressemble_a_un_article(u) and url_joignable(u)]
     if len(joignables) < len(valides):
-        log.info("Perplexity : %d lien(s) injoignable(s) écarté(s)", len(valides) - len(joignables))
+        log.info("Perplexity : %d item(s) écarté(s) (doublon, page de liste ou lien injoignable)", len(valides) - len(joignables))
     return joignables
 
 

@@ -22,6 +22,7 @@ async function fetchWeeklyArticles(): Promise<WeeklyArticle[]> {
   const { data, error } = await sb
     .from('brvm_news')
     .select('id, titre, date_publication, resume, slug, metadata, ticker_codes')
+    .not('hidden', 'is', true) // modération rédactionnelle
     .eq('source_type', 'analyse')
     .like('slug', 'westbourse-commodities-weekly-%')
     .order('date_publication', { ascending: false })
