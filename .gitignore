@@ -69,3 +69,6 @@ video/out/
 
 # Rendus vidéo locaux (MP4 + images extraites) — artefacts, pas des sources.
 remotion/out/
+# Fichiers générés du showreel (captures, voix, bande-son : ~44 Mo) —
+# régénérés par video/captures-showreel.mjs et `npm run render:showreel`.
+remotion/public/

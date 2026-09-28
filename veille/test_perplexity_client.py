@@ -202,3 +202,31 @@ def test_titres_d_articles_ne_sont_pas_generiques():
     assert titre_generique("La BRVM franchit le cap des 20 000 milliards de FCFA | Financial Afrik") is False
     assert titre_generique("BRVM : 29 valeurs en baisse et le Composite retombe sous les 550 points") is False
     assert titre_generique("Dabafinance - BRVM Hits 555 Points as Rally Extends Into September") is False
+
+
+def test_emissions_du_tresor_sont_du_marche():
+    assert titre_pertinent("Mali : le Trésor lève 60,5 milliards FCFA - FINECO") is True
+    assert titre_pertinent("Sénégal : succès de l’émission de titres publics") is True
+
+
+# ── decoder_page : l'encodage réel, pas ISO-8859-1 par défaut ──
+from brvm_pipeline import decoder_page
+
+
+def test_utf8_sans_charset_dans_l_en_tete_n_est_pas_massacre():
+    html = "<title>Mali : le Trésor lève 55 milliards</title>".encode("utf-8")
+    assert "Trésor lève" in decoder_page(html, "text/html")
+
+
+def test_meta_charset_de_la_page_est_respecte():
+    html = '<meta charset="iso-8859-1"><title>Trésor</title>'.encode("iso-8859-1")
+    assert "Trésor" in decoder_page(html, "text/html")
+
+
+def test_charset_de_l_en_tete_prioritaire():
+    html = "<title>Trésor</title>".encode("iso-8859-1")
+    assert "Trésor" in decoder_page(html, "text/html; charset=ISO-8859-1")
+
+
+def test_charset_inconnu_retombe_sur_utf8():
+    assert "Trésor" in decoder_page("Trésor".encode("utf-8"), "text/html; charset=nimportequoi")
