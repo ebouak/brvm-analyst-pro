@@ -254,14 +254,56 @@ const TEXTE = [
   .join(' ');
 
 writeFileSync(`${OUT}/texte.txt`, TEXTE, 'utf8');
-/* Appele par son module Python : l'executable edge-tts n'est pas forcement
-   dans le PATH selon l'installation de pip. */
-execFileSync(
-  'python',
-  ['-m', 'edge_tts', '--voice', 'fr-FR-DeniseNeural', '--text', TEXTE,
-   '--write-media', `${OUT}/voix.mp3`],
-  { stdio: 'pipe' },
-);
+
+/* LA VOIX DE L'AUTEUR, avec repli. Depuis le 2026-09-29, la voix off est la
+   voix clonée de l'auteur (ElevenLabs, voix « jye »), dès que les deux
+   variables sont présentes — secret ELEVENLABS_API_KEY et variable
+   ELEVENLABS_VOICE_ID sur le runner, remotion/.env.local en local.
+
+   REPLI ASSUMÉ vers Denise si ElevenLabs échoue (quota, panne) : pour une
+   publication quotidienne, sortir la séance compte plus que le timbre, et le
+   TEXTE lu est le même dans les deux cas — la règle « une seule lecture »
+   tient. Le repli n'est jamais muet : `voix_moteur` / `voix_raison` partent
+   dans seance.json et publie.mjs le signale dans le brief de l'exploitant. */
+const dotenvVideo = `${RACINE}/remotion/.env.local`;
+const envVideo = existsSync(dotenvVideo) ? readFileSync(dotenvVideo, 'utf8').replace(/^﻿/, '') : '';
+const lireVoix = (k) =>
+  process.env[k]?.trim() || envVideo.match(new RegExp('^' + k + '=(.*)$', 'm'))?.[1].trim() || '';
+const CLE_EL = lireVoix('ELEVENLABS_API_KEY');
+const VOIX_EL = lireVoix('ELEVENLABS_VOICE_ID');
+
+let voixMoteur = 'denise';
+let voixRaison = CLE_EL && VOIX_EL ? null : 'ElevenLabs non configuré';
+if (CLE_EL && VOIX_EL) {
+  try {
+    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOIX_EL}?output_format=mp3_44100_128`, {
+      method: 'POST',
+      headers: { 'xi-api-key': CLE_EL, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+      body: JSON.stringify({
+        text: TEXTE,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: { stability: 0.5, similarity_boost: 0.85, style: 0.15, use_speaker_boost: true },
+      }),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    writeFileSync(`${OUT}/voix.mp3`, Buffer.from(await r.arrayBuffer()));
+    voixMoteur = 'elevenlabs';
+  } catch (e) {
+    voixRaison = `ElevenLabs en échec (${e.message})`;
+    console.log(`::warning title=Voix de l'auteur indisponible::${voixRaison} — voix Denise utilisée.`);
+  }
+}
+if (voixMoteur === 'denise') {
+  /* Appele par son module Python : l'executable edge-tts n'est pas forcement
+     dans le PATH selon l'installation de pip. */
+  execFileSync(
+    'python',
+    ['-m', 'edge_tts', '--voice', 'fr-FR-DeniseNeural', '--text', TEXTE,
+     '--write-media', `${OUT}/voix.mp3`],
+    { stdio: 'pipe' },
+  );
+}
+console.log(`voix : ${voixMoteur === 'elevenlabs' ? 'auteur (ElevenLabs)' : `Denise${voixRaison ? ` — ${voixRaison}` : ''}`}`);
 const dureeVoix = parseFloat(
   execFileSync('ffprobe', [
     '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1',
@@ -499,6 +541,9 @@ writeFileSync(
       historique_indice: historiqueIndice,
       actualites: { phare, autres: autresActus },
       duree_s: dureeVoix,
+      /* Quelle voix a parlé, et pourquoi pas celle de l'auteur le cas échéant. */
+      voix_moteur: voixMoteur,
+      voix_raison: voixRaison,
       /* Ce dont a besoin le rendu animé (remotion/seance.tsx). Même lecture,
          mêmes variables que la voix : la version animée ne relit JAMAIS la
          base, elle ne fait que mettre en mouvement ces nombres-là. */
