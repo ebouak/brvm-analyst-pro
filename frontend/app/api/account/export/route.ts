@@ -41,6 +41,7 @@ export async function GET() {
     dossierEnvois,
     formationInscriptions,
     emailsBienvenue,
+    userEntitlements,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -75,6 +76,8 @@ export async function GET() {
     supabase.from('formation_inscriptions').select('*').eq('user_id', user.id),
     // Emails de bienvenue envoyés (migration 0145) — un par motif.
     supabase.from('emails_bienvenue').select('*').eq('user_id', user.id),
+    // Accès achetés à l'unité via Chariow (migration 0146).
+    supabase.from('user_entitlements').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -123,6 +126,7 @@ export async function GET() {
     dossier_envois: dossierEnvois.data ?? [],
     formation_inscriptions: formationInscriptions.data ?? [],
     emails_bienvenue: emailsBienvenue.data ?? [],
+    user_entitlements: userEntitlements.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

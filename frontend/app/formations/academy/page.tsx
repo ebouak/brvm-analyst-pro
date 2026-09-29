@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { createClient } from '@/lib/supabase/server';
-import { canAccess } from '@/lib/server/featureAccess';
+import { accesAcademy } from '@/lib/server/academyAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
+import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import { SectionHeader } from '@/components/ui/premium';
 import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
-import { NIVEAUX, NIVEAU_LABEL, type CourseContent } from '@/lib/academy/types';
+import { NIVEAUX, NIVEAU_LABEL, type CourseContent, type Niveau } from '@/lib/academy/types';
 import { courseProgress, resumeTarget, type ProgressRowFull } from '@/lib/academy/progressCalc';
 
 export const dynamic = 'force-dynamic';
@@ -27,16 +28,19 @@ interface HubCourse {
 }
 
 export default async function AcademyHubPage() {
-  const gate = await canAccess('formations');
-  if (!gate.allowed) {
+  // Abonnement premium = tout ; sinon, seuls les niveaux achetés à l'unité.
+  const acces = await accesAcademy();
+  const complet = acces.abonnement.allowed;
+  if (!complet && acces.niveaux.size === 0) {
     // La leçon 0 reste offerte à tous, au-dessus du bloc d'accès premium.
     return (
       <>
-        <div className="mx-auto w-full max-w-3xl px-4 pt-6 sm:px-6">
+        <div className="mx-auto w-full max-w-3xl space-y-4 px-4 pt-6 sm:px-6">
           <Lecon0Carte />
+          <OffresNiveaux userId={acces.userId} possedes={acces.niveaux} retour="/formations/academy" />
         </div>
         <AccessGate
-          required={gate.required === 'free' ? 'premium' : gate.required}
+          required={acces.abonnement.required === 'free' ? 'premium' : acces.abonnement.required}
           feature="La WestBourse Academy"
           hint="Cours interactifs, progression, quiz et certificats."
         />
@@ -54,7 +58,9 @@ export default async function AcademyHubPage() {
   const courses: HubCourse[] = ((rows ?? []) as {
     id: string; slug: string; titre: string; niveau: string | null; resume: string | null;
     content: CourseContent | null;
-  }[]).map((r) => ({
+  }[])
+    .filter((r) => complet || (r.niveau !== null && acces.niveaux.has(r.niveau as Niveau)))
+    .map((r) => ({
     id: r.id, slug: r.slug, titre: r.titre, niveau: r.niveau, resume: r.resume,
     lessonsCount: r.content?.lessons?.length ?? 0,
     cover: r.content?.lessons?.find((l) => l.image?.url)?.image?.url ?? null,
@@ -167,17 +173,25 @@ export default async function AcademyHubPage() {
           );
         })}
 
-        {/* Édition Intégrale statique — legacy jusqu'à sa migration en cours DB (P3). */}
-        <Link
-          href="/formations/academy/integrale"
-          className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-5 py-4 transition hover:border-accent/30"
-        >
-          <div>
-            <p className="text-sm font-semibold text-ivory">📚 Édition Intégrale (44 leçons) · version classique</p>
-            <p className="text-xs text-muted">L’ancien format, en attendant sa migration vers les cours interactifs.</p>
-          </div>
-          <span aria-hidden className="text-muted">→</span>
-        </Link>
+        {/* Acheteur à l'unité : les autres niveaux restent à sa portée. */}
+        {!complet && (
+          <OffresNiveaux userId={acces.userId} possedes={acces.niveaux} retour="/formations/academy" />
+        )}
+
+        {/* Édition Intégrale statique — legacy jusqu'à sa migration en cours DB (P3).
+            Elle couvre tous les niveaux : réservée à l'abonnement. */}
+        {complet && (
+          <Link
+            href="/formations/academy/integrale"
+            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-5 py-4 transition hover:border-accent/30"
+          >
+            <div>
+              <p className="text-sm font-semibold text-ivory">📚 Édition Intégrale (44 leçons) · version classique</p>
+              <p className="text-xs text-muted">L’ancien format, en attendant sa migration vers les cours interactifs.</p>
+            </div>
+            <span aria-hidden className="text-muted">→</span>
+          </Link>
+        )}
       </div>
     </div>
   );

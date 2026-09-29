@@ -1,7 +1,32 @@
 'use client';
 
 import { useTransition } from 'react';
-import { confirmPayment, rejectPayment } from './actions';
+import { confirmPayment, rejectPayment, revoquerAchat } from './actions';
+
+/**
+ * Révocation d'un achat Chariow remboursé (niveau de l'Academy ou pass).
+ * Chariow n'émet aucun événement de remboursement : ce bouton est le seul
+ * chemin qui retire l'accès.
+ */
+export function RevocationAchat({ transactionId }: { transactionId: string }) {
+  const [pending, startTransition] = useTransition();
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() => {
+        if (!window.confirm('Révoquer cet achat (remboursé) ? L’accès correspondant sera retiré.')) return;
+        startTransition(async () => {
+          const r = await revoquerAchat(transactionId);
+          if (!r.ok) window.alert(r.message ?? 'Révocation impossible.');
+        });
+      }}
+      className="rounded-md border border-down/40 px-2 py-1 text-xs font-medium text-down transition active:scale-95 disabled:opacity-50"
+    >
+      Révoquer (remboursé)
+    </button>
+  );
+}
 
 /**
  * Boutons d'une ligne de paiement.

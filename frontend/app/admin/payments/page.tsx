@@ -1,7 +1,7 @@
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
 import { loadPayments } from '@/lib/admin/payments';
-import { PaymentRowActions } from './PaymentRowActions';
+import { PaymentRowActions, RevocationAchat } from './PaymentRowActions';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Paiements — Administration' };
@@ -71,9 +71,13 @@ export default async function Page() {
                     <td className="px-4 py-2.5 text-muted">{p.payment_method ?? DASH}</td>
                     <td className="px-4 py-2.5 text-muted tabular">{fmtDate(p.paid_at ?? p.created_at)}</td>
                     <td className="px-4 py-2.5">
-                      {p.status === 'pending'
-                        ? <PaymentRowActions transactionId={p.id} />
-                        : <span className="text-faint">—</span>}
+                      {p.status === 'pending' ? (
+                        <PaymentRowActions transactionId={p.id} />
+                      ) : p.status === 'paid' && (p.objet === 'module' || p.objet === 'pass') ? (
+                        <RevocationAchat transactionId={p.id} />
+                      ) : (
+                        <span className="text-faint">—</span>
+                      )}
                     </td>
                   </tr>
                 );

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { loadCourseForLearning } from '@/lib/academy/learn';
-import { canAccess } from '@/lib/server/featureAccess';
+import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import AcademyShell from '@/components/academy/AcademyShell';
 
@@ -11,11 +11,11 @@ export const dynamic = 'force-dynamic';
 async function getCard(slug: string) {
   const { data } = await getServiceClient()
     .from('academy_courses')
-    .select('titre, resume, published')
+    .select('titre, resume, published, niveau')
     .eq('slug', slug)
     .eq('published', true)
     .maybeSingle();
-  return data as { titre: string; resume: string | null; published: boolean } | null;
+  return data as { titre: string; resume: string | null; published: boolean; niveau: string | null } | null;
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -38,11 +38,16 @@ export default async function AcademyCoursePage({
   params: { slug: string };
   searchParams: { lecon?: string };
 }) {
-  const gate = await canAccess('formations');
+  const card = await getCard(params.slug);
+  if (!card) notFound();
+
+  // Abonnement premium OU niveau du cours acheté à l'unité (Chariow).
+  const gate = await peutSuivreNiveau(card.niveau);
   if (!gate.allowed) {
+    const required = gate.acces.abonnement.required;
     return (
       <AccessGate
-        required={gate.required === 'free' ? 'premium' : gate.required}
+        required={required === 'free' ? 'premium' : required}
         feature="La WestBourse Academy"
         hint="Cours interactifs, progression, quiz et certificats."
       />

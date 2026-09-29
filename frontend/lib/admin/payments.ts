@@ -11,6 +11,8 @@ export interface PaymentRow {
   subscription_id: string | null;
   user_email: string | null;
   provider: string;
+  /** abonnement | formation | module | pass — décide des actions possibles. */
+  objet: string;
   amount: number;
   currency: string;
   status: string;
@@ -29,7 +31,7 @@ export async function loadPayments(limit = 100): Promise<PaymentsDashboard> {
   const db = getAdminClient();
   const { data } = await db
     .from('billing_transactions')
-    .select('id, subscription_id, user_id, provider, amount, currency, status, payment_method, paid_at, created_at')
+    .select('id, subscription_id, user_id, provider, objet, amount, currency, status, payment_method, paid_at, created_at')
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -48,6 +50,7 @@ export async function loadPayments(limit = 100): Promise<PaymentsDashboard> {
     subscription_id: (r.subscription_id as string) ?? null,
     user_email: emailById.get(r.user_id as string) ?? null,
     provider: r.provider as string,
+    objet: (r.objet as string) ?? 'abonnement',
     amount: Number(r.amount ?? 0),
     currency: (r.currency as string) ?? 'XOF',
     status: r.status as string,

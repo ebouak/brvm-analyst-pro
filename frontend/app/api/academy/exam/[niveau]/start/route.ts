@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { canAccess } from '@/lib/server/featureAccess';
+import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { assembleExam } from '@/lib/academy/exam';
 import { loadBank, niveauLessonsDone, isNiveau } from '@/lib/academy/examServer';
 
@@ -14,8 +14,11 @@ export async function POST(_req: NextRequest, { params }: { params: { niveau: st
   const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Connexion requise' }, { status: 401 });
 
-  const gate = await canAccess('formations');
-  if (!gate.allowed) return NextResponse.json({ error: 'premium', required: gate.required }, { status: 403 });
+  // Abonnement premium OU niveau acheté à l'unité (Chariow).
+  const gate = await peutSuivreNiveau(niveau);
+  if (!gate.allowed) {
+    return NextResponse.json({ error: 'premium', required: gate.acces.abonnement.required }, { status: 403 });
+  }
 
   const done = await niveauLessonsDone(niveau);
   if (!done.ok) return NextResponse.json({ error: 'Terminez les leçons de ce niveau avant l’examen.' }, { status: 409 });

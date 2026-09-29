@@ -1,0 +1,53 @@
+name: Pass Chariow (expiration et rappels)
+
+# Chaque jour à 05:15 UTC :
+#   1. expire les pass premium Chariow échus (fonction SQL expirer_pass_chariow,
+#      migration 0146) — et eux seuls : les abonnements manuels/CinetPay ne
+#      sont pas touchés ;
+#   2. prévient UNE fois, par email, les porteurs dont le pass finit dans
+#      7 jours ou moins. Relancer ce workflow ne réécrit à personne
+#      (subscriptions.rappel_expiration_at).
+#
+# Échec visible : un rappel refusé fait sortir le job en code 1 ; une
+# configuration Resend absente l'arrête sans rien marquer.
+#
+# Secrets : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY,
+# ALERTS_EMAIL_FROM.
+
+on:
+  schedule:
+    - cron: '15 5 * * *'
+  workflow_dispatch:
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+concurrency:
+  group: pass-chariow
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  pass:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: scraper
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Installer
+        run: npm ci --no-audit --no-fund
+      - name: Expirer les pass et envoyer les rappels
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts pass

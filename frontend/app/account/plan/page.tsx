@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
 import { PlanClient, type PlanOption } from './PlanClient';
+import { produitsActifs } from '@/lib/billing/chariow/catalogue';
+import AchatChariow from '@/components/billing/AchatChariow';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Mon abonnement' };
@@ -25,7 +27,7 @@ export default async function Page() {
   if (!user) redirect('/login');
 
   const db = getServiceClient();
-  const [{ data: profile }, { data: plansRaw }, { data: sub }] = await Promise.all([
+  const [{ data: profile }, { data: plansRaw }, { data: sub }, pass, { data: passActifs }] = await Promise.all([
     db.from('profiles').select('is_premium, premium_since').eq('id', user.id).maybeSingle(),
     db
       .from('subscription_plans')
@@ -44,7 +46,22 @@ export default async function Page() {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    // Pass premium Chariow (achat unique, renouvelé à la main). Vide tant
+    // qu'aucun produit n'est activé au catalogue : la section disparaît.
+    produitsActifs('pass'),
+    db
+      .from('subscriptions')
+      .select('renews_at, subscription_plans!inner(code)')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .eq('source', 'chariow'),
   ]);
+
+  const echeancePass = new Map<string, string | null>();
+  for (const s of (passActifs ?? []) as { renews_at: string | null; subscription_plans: { code: string } | { code: string }[] }[]) {
+    const plan = Array.isArray(s.subscription_plans) ? s.subscription_plans[0] : s.subscription_plans;
+    if (plan?.code) echeancePass.set(plan.code, s.renews_at);
+  }
 
   const isPremium = Boolean(profile?.is_premium);
   const plans: PlanOption[] = (plansRaw ?? []).map((p) => ({
@@ -92,6 +109,46 @@ export default async function Page() {
       </div>
 
       <PlanClient plans={plans} canSubscribe={canSubscribe} />
+
+      {pass.length > 0 && (
+        <section aria-labelledby="h-pass" className="space-y-3 rounded-panel border border-border bg-surface p-5">
+          <div>
+            <h2 id="h-pass" className="font-display text-lg text-white">Pass sans engagement</h2>
+            <p className="mt-1 max-w-[65ch] text-sm text-muted">
+              Payez une période, en Mobile Money ou par carte, via Chariow. Aucun prélèvement automatique : un email
+              vous prévient 7 jours avant l’échéance. Racheter avant l’échéance prolonge votre pass sans perdre de jours.
+            </p>
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {pass.map((p) => {
+              const echeance = p.planCode ? echeancePass.get(p.planCode) : undefined;
+              return (
+                <li key={p.productCode} className="flex flex-col gap-3 rounded-lg border border-border/70 bg-bg/40 p-4">
+                  <div>
+                    <p className="text-sm text-ivory">{p.libelle}</p>
+                    {echeance !== undefined && (
+                      <p className="mt-1 text-xs text-muted">Pass en cours jusqu’au {fmtDate(echeance)}</p>
+                    )}
+                  </div>
+                  <AchatChariow
+                    productCode={p.productCode}
+                    libelle={p.libelle}
+                    montant={p.montant}
+                    devise={p.devise}
+                    connecte
+                    retour="/account/plan"
+                    cta={echeance !== undefined ? 'Prolonger' : 'Acheter'}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <Link href="/account/achats" className="inline-block text-sm text-muted transition-colors hover:text-accent">
+        Mes achats et reçus →
+      </Link>
 
       <div className="pt-2 border-t border-border">
         <Link

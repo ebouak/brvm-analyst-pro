@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { canAccess } from '@/lib/server/featureAccess';
+import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { gradeExam } from '@/lib/academy/exam';
 import { loadBank, isNiveau } from '@/lib/academy/examServer';
 
@@ -18,7 +18,8 @@ export async function POST(req: NextRequest, { params }: { params: { niveau: str
   const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Connexion requise' }, { status: 401 });
 
-  const gate = await canAccess('formations');
+  // Abonnement premium OU niveau acheté à l'unité (Chariow).
+  const gate = await peutSuivreNiveau(niveau);
   if (!gate.allowed) return NextResponse.json({ error: 'premium' }, { status: 403 });
 
   const body = (await req.json()) as SubmitBody;

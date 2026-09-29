@@ -154,6 +154,27 @@ async function main(): Promise<number> {
       return res.echecs > 0 ? 1 : 0;
     }
 
+    case 'pass': {
+      const { runPass } = await import('./pass/runPass.js');
+      const res = await monitored(
+        { code: 'pass-chariow', label: 'Pass Chariow (expiration, rappels J-7)' },
+        async () => {
+          const r = await runPass({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.candidats,
+              rows_upserted: r.envoyes,
+              metadata: { expires: r.expires, candidats: r.candidats, envoyes: r.envoyes, echecs: r.echecs },
+            },
+          };
+        },
+      );
+      // Un rappel non parti fait échouer le workflow : il se voit, il ne dort pas.
+      return res.echecs > 0 ? 1 : 0;
+    }
+
     case 'dossiers:envoi': {
       const { runEnvoi } = await import('./dossiers/runEnvoi.js');
       const res = await monitored(
