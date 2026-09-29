@@ -93,7 +93,7 @@ jobs:
     if: always() # indépendant du succès de l'ingestion des dividendes
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
