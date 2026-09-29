@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
 import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/server';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
+import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
@@ -67,6 +68,9 @@ export default async function FormationsPage() {
           </span>
         </div>
       </Link>
+
+      {/* ── Leçon 0 — gratuite, ouverte à tous ─────────────────────────────── */}
+      <Lecon0Carte className="mb-4" />
 
       {/* ── WestBourse Academy — mise en avant permanente ─────────────────── */}
       <Link href="/formations/academy"

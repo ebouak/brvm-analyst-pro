@@ -1,0 +1,54 @@
+name: Emails de bienvenue
+
+# Toutes les heures : un email d'accueil (lien vers la leçon 0) à chaque
+# NOUVEAU compte, et un autre à chaque abonnement PAYANT activé. Une seule
+# fois par compte et par motif — table emails_bienvenue (migration 0145) ;
+# relancer ce workflow ne réécrit à personne.
+#
+# Jamais rétroactif : seuls les comptes créés et les abonnements démarrés
+# après le 2026-09-29 (MISE_EN_SERVICE, scraper/src/bienvenue/selection.ts).
+#
+# Échec visible : un envoi refusé fait sortir le job en code 1 ; une
+# configuration Resend absente l'arrête sans rien journaliser.
+#
+# Secrets : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY,
+# ALERTS_EMAIL_FROM (domaine vérifié chez Resend, sinon seul le titulaire du
+# compte Resend reçoit).
+
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+concurrency:
+  group: bienvenue
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  bienvenue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: scraper
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Installer
+        run: npm ci --no-audit --no-fund
+      - name: Envoyer les emails de bienvenue
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts bienvenue

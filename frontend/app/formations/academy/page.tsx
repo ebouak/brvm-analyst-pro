@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import { SectionHeader } from '@/components/ui/premium';
+import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
 import { NIVEAUX, NIVEAU_LABEL, type CourseContent } from '@/lib/academy/types';
 import { courseProgress, resumeTarget, type ProgressRowFull } from '@/lib/academy/progressCalc';
 
@@ -28,12 +29,18 @@ interface HubCourse {
 export default async function AcademyHubPage() {
   const gate = await canAccess('formations');
   if (!gate.allowed) {
+    // La leçon 0 reste offerte à tous, au-dessus du bloc d'accès premium.
     return (
-      <AccessGate
-        required={gate.required === 'free' ? 'premium' : gate.required}
-        feature="La WestBourse Academy"
-        hint="Cours interactifs, progression, quiz et certificats."
-      />
+      <>
+        <div className="mx-auto w-full max-w-3xl px-4 pt-6 sm:px-6">
+          <Lecon0Carte />
+        </div>
+        <AccessGate
+          required={gate.required === 'free' ? 'premium' : gate.required}
+          feature="La WestBourse Academy"
+          hint="Cours interactifs, progression, quiz et certificats."
+        />
+      </>
     );
   }
 
@@ -82,6 +89,8 @@ export default async function AcademyHubPage() {
           title="WestBourse Academy"
           subtitle="Des cours interactifs par niveau : progression sauvegardée, quiz, et bientôt examens et certificats."
         />
+
+        <Lecon0Carte className="mt-4" />
 
         {resume && (
           <Link
