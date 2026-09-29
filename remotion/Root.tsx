@@ -3,6 +3,7 @@ import Main from './landing-video';
 import FilConducteurVideo, { TOTAL as FIL_TOTAL } from './fil-conducteur';
 import Showreel, { TOTAL as SHOWREEL_TOTAL } from './showreel';
 import Seance, { calculerSeance } from './seance';
+import Ecosysteme, { calculerEcosysteme } from './ecosysteme';
 
 // 16 s × 30 fps = 480 frames (intro 75 + 4 écrans × 83 + outro 72 = 479 ≤ 480)
 export function RemotionRoot() {
@@ -49,6 +50,18 @@ export function RemotionRoot() {
         height={1920}
         defaultProps={{ fiche: null }}
         calculateMetadata={calculerSeance}
+      />
+      {/* « Qui fait quoi sur le marché financier de l'UMOA » — pédagogique,
+          vertical, voix off. Durée dérivée des pistes de voix. */}
+      <Composition
+        id="ecosysteme"
+        component={Ecosysteme}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ durees: null }}
+        calculateMetadata={calculerEcosysteme}
       />
     </>
   );

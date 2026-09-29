@@ -91,7 +91,7 @@ Brief pour démarrer directement :
 ## Ce qui manque pour une reprise 100% propre
 
 Voir la section dédiée en fin de réponse / `CLAUDE.md` §9. En résumé :
-- pas de `package-lock.json` commité (lancer `npm install` régénère) ;
+- `frontend/package-lock.json` commité ; `scraper/package-lock.json` non commité (lancer `npm install` le régénère) ;
 - typecheck/build réels non exécutés ici (deps non installées dans l'environnement) ;
 - sélecteurs BDFIN/brvm.org à calibrer sur le markup réel ;
 - pas encore de CI, ni de fichier `eslint.config.js`, ni de tests frontend.

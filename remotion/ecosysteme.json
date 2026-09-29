@@ -1,0 +1,88 @@
+{
+  "_": "Vidéo pédagogique « Qui fait quoi sur le marché financier régional de l'UMOA ». Source unique : textes affichés ET voix off. Lu par ecosysteme.tsx et ecosysteme-voix.mjs. D'après la carte mentale fournie le 2026-09-29, corrigée sur deux points : le DC/BR ne centralise pas les ordres (c'est la BRVM, dans son système de cotation) mais est la Banque de Règlement ; il s'agit du MARCHÉ financier régional, pas de tout le système financier (qui inclut la BCEAO et les banques).",
+  "voixTts": "fr-FR-DeniseNeural",
+  "scenes": [
+    {
+      "id": "intro",
+      "voix": "Qui fait quoi sur le marché financier régional de l'UMOA ? Quatre familles d'acteurs, un seul marché pour les huit pays de l'Union."
+    },
+    {
+      "id": "regulation",
+      "famille": "Régulation et contrôle",
+      "numero": "01",
+      "acteurs": [
+        {
+          "sigle": "AMF-UMOA",
+          "nom": "Autorité des Marchés Financiers",
+          "surnom": "Le gendarme du marché",
+          "roles": ["Surveillance du marché", "Octroi des agréments", "Protection des investisseurs", "Sanction des manquements"]
+        }
+      ],
+      "voix": "D'abord, le régulateur : l'AMF-UMOA, le gendarme du marché. Elle surveille le marché, délivre les agréments, protège les investisseurs, et sanctionne les manquements."
+    },
+    {
+      "id": "infrastructures",
+      "famille": "Infrastructures de marché",
+      "numero": "02",
+      "acteurs": [
+        {
+          "sigle": "BRVM",
+          "nom": "Bourse Régionale des Valeurs Mobilières",
+          "roles": ["Organisation de la cotation", "Promotion du marché", "Gestion des indices boursiers"]
+        },
+        {
+          "sigle": "DC/BR",
+          "nom": "Dépositaire Central / Banque de Règlement",
+          "roles": ["Conservation des titres", "Règlement-livraison", "Banque de règlement"]
+        }
+      ],
+      "voix": "Ensuite, les infrastructures. La BRVM, la Bourse régionale, organise la cotation, fait la promotion du marché et gère les indices boursiers. Le DC/BR, dépositaire central et banque de règlement, conserve les titres et assure le règlement-livraison des transactions."
+    },
+    {
+      "id": "intermediaires",
+      "famille": "Intermédiaires agréés",
+      "numero": "03",
+      "acteurs": [
+        {
+          "sigle": "SGI",
+          "nom": "Société de Gestion et d'Intermédiation",
+          "surnom": "Investissement direct",
+          "roles": ["Ouverture du compte-titres", "Plateforme de passage d'ordres", "Exécution des ordres", "Conseil"]
+        },
+        {
+          "sigle": "SGO",
+          "nom": "Société de Gestion d'OPCVM",
+          "surnom": "Investissement indirect",
+          "roles": ["Création et gestion de FCP", "Mutualisation des risques", "Gestion professionnelle dédiée"]
+        }
+      ],
+      "voix": "Pour accéder au marché, on passe par des intermédiaires agréés. La SGI, société de gestion et d'intermédiation, ouvre votre compte-titres et exécute vos ordres : c'est l'investissement direct. La SGO gère des fonds communs de placement : c'est l'investissement indirect, avec des risques mutualisés et une gestion professionnelle."
+    },
+    {
+      "id": "participants",
+      "famille": "Participants au marché",
+      "numero": "04",
+      "acteurs": [
+        {
+          "sigle": "Émetteurs",
+          "nom": "Ils ont besoin de fonds",
+          "roles": ["États — marché obligataire", "Entreprises — actions et obligations"]
+        },
+        {
+          "sigle": "Investisseurs",
+          "nom": "Ils apportent les capitaux",
+          "roles": ["Particuliers", "Institutionnels — banques, assurances"]
+        }
+      ],
+      "voix": "Enfin, les participants. Les émetteurs cherchent des fonds : les États, sur le marché obligataire, et les entreprises, en actions et en obligations. Les investisseurs apportent les capitaux : particuliers comme institutionnels, banques et assurances."
+    },
+    {
+      "id": "recap",
+      "voix": "Régulation, infrastructures, intermédiaires, participants : chacun a son rôle, et ensemble ils font vivre le marché."
+    },
+    {
+      "id": "fin",
+      "voix": "Pour investir en direct, tout commence par une SGI agréée. Comparez-les sur westbourse point com."
+    }
+  ]
+}

@@ -72,3 +72,13 @@ remotion/out/
 # Fichiers générés du showreel (captures, voix, bande-son : ~44 Mo) —
 # régénérés par video/captures-showreel.mjs et `npm run render:showreel`.
 remotion/public/
+
+# Artefacts locaux — ne jamais committer (générés, caches, previews)
+.vite/
+.vscode/
+__pycache__/
+veille/__pycache__/
+design-output/
+run-build*.ps1
+AUDIT_REPORT.md
+PLAN_REMEDIATION.md
