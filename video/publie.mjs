@@ -82,6 +82,11 @@ const journal = [];
    fixe n'est pas une panne de publication — les chiffres sont les mêmes —
    mais il ne doit JAMAIS passer inaperçu : ce dépôt a déjà vécu une panne
    invisible de sept semaines derrière un workflow vert. */
+/* Même règle pour la voix : un repli vers la voix de synthèse se dit. */
+if (m.voix_moteur === 'elevenlabs') journal.push('Voix : voix de l’auteur (ElevenLabs)');
+else if (m.voix_moteur === 'denise' && m.voix_raison && m.voix_raison !== 'ElevenLabs non configuré') {
+  journal.push(`Voix de l’auteur EN ÉCHEC — voix de synthèse utilisée (${m.voix_raison})`);
+}
 if (m.rendu === 'remotion') journal.push('Rendu : version animée (Remotion)');
 else if (m.rendu === 'repli-ffmpeg') {
   journal.push(`Rendu animé EN ÉCHEC — version fixe publiée (${m.rendu_raison ?? 'raison inconnue'})`);

@@ -84,6 +84,10 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Voix de l'auteur (clone ElevenLabs « jye »). Absentes ou en échec :
+          # voix de synthèse Denise, signalée dans le brief de l'exploitant.
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
         run: node genere.mjs
 
       - name: Animer la vidéo (Remotion)
