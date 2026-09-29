@@ -40,6 +40,7 @@ export async function GET() {
     telegramPairingCodes,
     dossierEnvois,
     formationInscriptions,
+    emailsBienvenue,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id),
     supabase.from('watchlists').select('*').eq('user_id', user.id),
@@ -72,6 +73,8 @@ export async function GET() {
     supabase.from('telegram_pairing_codes').select('*').eq('user_id', user.id),
     supabase.from('dossier_envois').select('*').eq('user_id', user.id),
     supabase.from('formation_inscriptions').select('*').eq('user_id', user.id),
+    // Emails de bienvenue envoyés (migration 0145) — un par motif.
+    supabase.from('emails_bienvenue').select('*').eq('user_id', user.id),
   ]);
 
   const payload = {
@@ -119,6 +122,7 @@ export async function GET() {
     // liée au compte, rétention 90 jours — elle relève du droit d'accès.
     dossier_envois: dossierEnvois.data ?? [],
     formation_inscriptions: formationInscriptions.data ?? [],
+    emails_bienvenue: emailsBienvenue.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

@@ -133,6 +133,27 @@ async function main(): Promise<number> {
       return res.status === 'failed' ? 1 : 0;
     }
 
+    case 'bienvenue': {
+      const { runBienvenue } = await import('./bienvenue/runBienvenue.js');
+      const res = await monitored(
+        { code: 'bienvenue', label: 'Emails de bienvenue (inscription, abonnement)' },
+        async () => {
+          const r = await runBienvenue({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.candidats,
+              rows_upserted: r.envoyes,
+              metadata: { candidats: r.candidats, envoyes: r.envoyes, echecs: r.echecs },
+            },
+          };
+        },
+      );
+      // Un échec d'envoi fait échouer le workflow : il se voit, il ne dort pas.
+      return res.echecs > 0 ? 1 : 0;
+    }
+
     case 'dossiers:envoi': {
       const { runEnvoi } = await import('./dossiers/runEnvoi.js');
       const res = await monitored(

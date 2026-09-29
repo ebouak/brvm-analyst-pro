@@ -32,6 +32,11 @@ export interface Notification {
    * appelant n'ait à manipuler du texte encodé.
    */
   attachments?: { filename: string; content: Buffer }[];
+  /**
+   * Version HTML — EMAIL UNIQUEMENT, facultative. Le texte brut (`body`) part
+   * toujours avec : messageries sans images, lecteurs d'écran.
+   */
+  html?: string;
 }
 
 export type ChannelName = 'email' | 'telegram' | 'whatsapp' | 'console';
@@ -65,6 +70,7 @@ export async function sendEmail(n: Notification): Promise<SendResult | null> {
         to,
         subject: n.subject,
         text: n.body,
+        ...(n.html ? { html: n.html } : {}),
         // Clé posée seulement s'il y a vraiment des pièces jointes : Resend
         // refuse un `attachments: []` sur certains comptes.
         ...(n.attachments && n.attachments.length > 0
