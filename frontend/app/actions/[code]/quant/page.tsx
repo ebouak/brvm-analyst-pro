@@ -14,7 +14,9 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
   const supabase = createPublicClient();
   const { data: inst } = await supabase.from('brvm_instruments').select('code,designation,secteur,famille_comptable').eq('code', symbol).maybeSingle();
   if (!inst) notFound();
-  const { data: scores } = await supabase.from('quant_model_scores').select('*').eq('security_id', symbol).order('score_date',{ascending:false}).limit(3);
+  // Toujours afficher la fiche WB_COMBINED_ALPHA (pas WB_PRICE_MOMENTUM) : sinon SNTS affichait "Strong Positive Momentum" au lieu de "Achat quant".
+  const { data: runCA } = await supabase.from('quant_model_runs').select('id').eq('model_code','WB_COMBINED_ALPHA').order('calculation_date',{ascending:false}).limit(1).maybeSingle();
+  const { data: scores } = runCA ? await supabase.from('quant_model_scores').select('*').eq('security_id', symbol).eq('run_id', (runCA as {id:string}).id).order('score_date',{ascending:false}).limit(3) : { data: null } as { data: null };
   const latest = scores?.[0] as unknown as { combined_alpha_score:number|null; price_momentum_score:number|null; value_score:number|null; earnings_quality_score:number|null; financial_strength_score:number|null; dividend_quality_score:number|null; liquidity_score:number|null; classification:string; confidence_level:string; eligibility_status:string; penalties_json:unknown; calculation_notes:unknown; score_date:string; rank_global:number|null } | undefined;
   const penalties = Array.isArray(latest?.penalties_json) ? (latest!.penalties_json as {code:string;label:string;points:number;reason:string}[]) : [];
   const notes = Array.isArray(latest?.calculation_notes) ? (latest!.calculation_notes as string[]) : [];
