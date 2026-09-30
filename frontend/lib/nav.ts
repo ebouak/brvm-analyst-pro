@@ -51,6 +51,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/scanner', label: 'Scanner technique' },
       { href: '/fondamentaux', label: 'Fondamentaux' },
       { href: '/backtest', label: 'Backtest' },
+      { href: '/analyse/combined-alpha', label: 'Combined Alpha' },
     ],
   },
   {

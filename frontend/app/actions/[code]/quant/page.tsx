@@ -1,30 +1,47 @@
-import { createPublicClient } from '@/lib/supabase/public';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { createPublicClient } from '@/lib/supabase/public';
+import { SectionHeader, PremiumPanel, StatPill, Eyebrow, EmptyStatePremium } from '@/components/ui/premium';
 export const revalidate = 300;
+function fr(c:string){const m:Record<string,string>={'Strong Buy Quant':'Achat quant fort','Buy Quant':'Achat quant','Watchlist / Neutral':'A surveiller','Reduce / Avoid':'Alleger / eviter','High Risk / Avoid':'Risque eleve — eviter','Insufficient Data':'Donnees insuffisantes'};return m[c]??c;}
+function cf(c:string){return c==='high'?'Elevee':c==='medium'?'Moyenne':c==='low'?'Faible':'Insuffisante';}
+function ef(s:string){return s==='eligible'?'Eligible':s==='eligible_with_warning'?'Eligible (reserve)':'Non eligible';}
+function tone(v:number|null){if(v==null)return 'text-faint';if(v>=70)return 'text-up';if(v>=50)return 'text-warn';return 'text-down';}
+function barC(v:number|null){if(v==null)return 'bg-border';if(v>=70)return 'bg-up';if(v>=50)return 'bg-warn';return 'bg-down';}
+function sigC(c:string){if(c==='Strong Buy Quant')return 'border-up/30 bg-up/10 text-up';if(c==='Buy Quant')return 'border-up/20 bg-up/[0.07] text-up';if(c==='Watchlist / Neutral')return 'border-warn/30 bg-warn/10 text-warn';if(c==='Reduce / Avoid')return 'border-down/20 bg-down/10 text-down';if(c==='High Risk / Avoid')return 'border-down/30 bg-down/15 text-down';return 'border-border bg-elevated text-faint';}
 export default async function QuantSecurityPage({ params }: { params: { code: string } }) {
   const symbol = params.code.toUpperCase();
   const supabase = createPublicClient();
   const { data: inst } = await supabase.from('brvm_instruments').select('code,designation,secteur,famille_comptable').eq('code', symbol).maybeSingle();
   if (!inst) notFound();
   const { data: scores } = await supabase.from('quant_model_scores').select('*').eq('security_id', symbol).order('score_date',{ascending:false}).limit(3);
-  const latest = scores?.[0] as unknown as { combined_alpha_score:number|null; price_momentum_score:number|null; value_score:number|null; earnings_quality_score:number|null; financial_strength_score:number|null; dividend_quality_score:number|null; classification:string; confidence_level:string; eligibility_status:string; penalties_json:unknown; calculation_notes:unknown } | undefined;
-  const bar = (v:number|null)=> (<div className="h-2 bg-zinc-200 rounded"><div className="h-2 bg-emerald-600 rounded" style={{width: `${v ?? 0}%`}} /></div>);
+  const latest = scores?.[0] as unknown as { combined_alpha_score:number|null; price_momentum_score:number|null; value_score:number|null; earnings_quality_score:number|null; financial_strength_score:number|null; dividend_quality_score:number|null; liquidity_score:number|null; classification:string; confidence_level:string; eligibility_status:string; penalties_json:unknown; calculation_notes:unknown; score_date:string; rank_global:number|null } | undefined;
+  const penalties = Array.isArray(latest?.penalties_json) ? (latest!.penalties_json as {code:string;label:string;points:number;reason:string}[]) : [];
+  const notes = Array.isArray(latest?.calculation_notes) ? (latest!.calculation_notes as string[]) : [];
+  const pillars = latest ? [
+    { label:'Valorisation', w:'30%', h:'Prix bon marche ? (PER, P/B, rendement)', v: latest.value_score },
+    { label:'Momentum', w:'25%', h:'Tendance du cours 3/6/12 mois', v: latest.price_momentum_score },
+    { label:'Qualite beneficiaire', w:'20%', h:'ROE, croissance et regularite', v: latest.earnings_quality_score },
+    { label:'Solidite financiere', w:'15%', h:'Dette, tresorerie et couverture', v: latest.financial_strength_score },
+    { label:'Dividende', w:'10%', h:'Rendement et regularite', v: latest.dividend_quality_score },
+  ] : [];
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-xl font-bold">{inst.code} — {inst.designation}</h1>
-      <p className="text-sm text-zinc-500">{inst.secteur} · {inst.famille_comptable}</p>
-      {!latest ? <p className="mt-6 text-amber-700 bg-amber-50 p-4 rounded-xl">Données insuffisantes — score non calculable. Vérifiez l’historique de cours et les états financiers.</p> : (
-        <div className="mt-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="border rounded-xl p-4"><p className="text-xs text-zinc-500">Combined Alpha</p><p className="text-3xl font-bold">{latest.combined_alpha_score ?? '—'}</p><p className="text-sm">{latest.classification} · fiabilité {latest.confidence_level}</p><p className="text-xs text-zinc-500 mt-1">Score quantitatif propriétaire de Westbourse, indicatif et non constitutif d’un conseil en investissement.</p></div>
-            <div className="border rounded-xl p-4"><p className="text-xs text-zinc-500">Price Momentum</p><p className="text-3xl font-bold">{latest.price_momentum_score ?? '—'}</p></div>
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="flex flex-wrap gap-2 text-xs"><Link href="/analyse/combined-alpha" className="text-sapphire hover:text-gold hover:underline">← Classement Combined Alpha</Link><span className="text-faint">·</span><Link href={`/actions/${symbol}`} className="text-faint hover:text-muted">Fiche {symbol}</Link></div>
+      <SectionHeader kicker="BRVM · Quant — fiche valeur" title={`${(inst as {code:string;designation:string|null}).code} — ${(inst as {designation:string|null}).designation ?? (inst as {code:string}).code}`} subtitle={`${(inst as {secteur:string|null}).secteur ?? 'Secteur non renseigne'} · ${(inst as {famille_comptable:string|null}).famille_comptable ?? 'general'}${latest?.score_date ? ` · Mise a jour ${String(latest.score_date)}` : ''}`} accent="gold" actions={latest ? (<div className="flex flex-wrap gap-2"><StatPill tone={latest.eligibility_status==='eligible' ? 'emerald' : latest.eligibility_status==='eligible_with_warning' ? 'gold' : 'neutral'}>{ef(latest.eligibility_status)}</StatPill><StatPill tone={latest.confidence_level==='high' ? 'emerald' : latest.confidence_level==='medium' ? 'gold' : 'neutral'}>Fiabilite {cf(latest.confidence_level)}</StatPill>{latest.rank_global ? <StatPill tone="neutral">Rang #{latest.rank_global}</StatPill> : null}</div>) : undefined} />
+      <div className="gold-rule" />
+      {!latest ? (<EmptyStatePremium icon="◈" title="Donnees insuffisantes" hint="Score non calculable : au moins 20 seances, un momentum disponible et 3 piliers sur 4 requis. L historique s etoffe seance apres seance." />) : latest.combined_alpha_score==null ? (
+        <PremiumPanel><div className="p-6 space-y-3"><p className="text-sm text-warn font-medium">Score Combined Alpha non calculable pour {symbol}</p><p className="text-sm text-muted leading-relaxed">Raison : {notes.join(' · ') || 'donnees insuffisantes.'} Verifiez l historique de cours et les etats financiers.</p><div className="flex flex-wrap gap-2 pt-2"><Link href="/analyse/combined-alpha" className="text-xs text-sapphire hover:underline">Voir le classement →</Link><Link href={`/actions/${symbol}`} className="text-xs text-faint hover:text-muted">Retour fiche →</Link></div></div></PremiumPanel>
+      ) : (
+        <>
+          <div className="grid md:grid-cols-2 gap-3">
+            <PremiumPanel className="p-5"><Eyebrow>Combined Alpha</Eyebrow><div className="mt-2 flex items-baseline gap-3"><span className={`font-display text-5xl font-bold tabular-nums ${tone(latest.combined_alpha_score)}`}>{latest.combined_alpha_score}</span><span className="text-sm text-faint">/ 100</span><span className={`ml-auto inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide ${sigC(latest.classification)}`}>{fr(latest.classification)}</span></div><p className="mt-2 text-xs leading-relaxed text-muted">Combine les 5 piliers puis retire une penalite risque ≤ 25 pts. <span className="text-ivory font-medium">≥65 = Achat quant</span>, 50–64 Surveiller, &lt;50 Eviter.</p><p className="mt-2 text-xs text-faint">Fiabilite {cf(latest.confidence_level)} · {ef(latest.eligibility_status)}{latest.liquidity_score!=null ? ` · Liquidite ${latest.liquidity_score}/100` : ''}</p></PremiumPanel>
+            <PremiumPanel className="p-5"><Eyebrow>Price Momentum</Eyebrow><div className="mt-2 flex items-baseline gap-3"><span className={`font-display text-5xl font-bold tabular-nums ${tone(latest.price_momentum_score)}`}>{latest.price_momentum_score ?? '—'}</span>{latest.price_momentum_score!=null && <span className="text-sm text-faint">/ 100</span>}</div><p className="mt-2 text-xs leading-relaxed text-muted">Tendance prix seule : 40% 12 mois ex-1 mois + 25% 6 mois + 15% 3 mois + 10% proximite 52 semaines + 10% pente. Penalites liquidite/volatilite appliquees.</p></PremiumPanel>
           </div>
-          <div className="border rounded-xl p-4 space-y-2"><p className="font-semibold text-sm">Sous-scores</p>
-            <div className="grid grid-cols-2 gap-3 text-sm"><span>Value</span>{bar(latest.value_score)}<span>Momentum</span>{bar(latest.price_momentum_score)}<span>Quality</span>{bar(latest.earnings_quality_score)}<span>Strength</span>{bar(latest.financial_strength_score)}<span>Dividende</span>{bar(latest.dividend_quality_score)}</div>
-          </div>
-          <div className="border rounded-xl p-4"><p className="font-semibold text-sm">Pénalités & notes</p><pre className="text-xs whitespace-pre-wrap mt-2 bg-zinc-50 p-3 rounded">{JSON.stringify({ penalties: latest.penalties_json, notes: latest.calculation_notes }, null, 2)}</pre></div>
-          <p className="text-xs text-zinc-500">Ne constitue pas un conseil en investissement. À compléter par une analyse fondamentale et une vérification de liquidité.</p>
-        </div>
+          <PremiumPanel className="p-5 space-y-4"><div className="flex items-center justify-between"><Eyebrow>Les 5 piliers du score</Eyebrow><span className="text-xs text-faint">Poids entre parentheses — redistribues si pilier manquant</span></div><div className="space-y-3">{pillars.map(p=> (<div key={p.label} className="grid grid-cols-[1fr_auto] md:grid-cols-[14rem_1fr_3.5rem] items-center gap-3"><div><p className="text-sm font-medium text-ivory">{p.label} <span className="text-xs text-faint font-normal">({p.w})</span></p><p className="text-xs text-faint leading-relaxed">{p.h}</p></div><div className="h-2.5 rounded-full bg-elevated border border-border overflow-hidden"><div className={`h-full rounded-full transition-all ${barC(p.v)}`} style={{ width: `${p.v!=null ? Math.max(4, p.v) : 0}%` }} /></div><span className={`text-right font-mono text-sm font-semibold tabular-nums ${tone(p.v)}`}>{p.v ?? '—'}</span></div>))}</div><p className="text-xs text-faint leading-relaxed">Lecture : 80–100 excellent, 65–79 bon, 50–64 moyen, &lt;50 faible. Trait court = faible mais calcule ; — = non calculable.</p></PremiumPanel>
+          <PremiumPanel className="p-5 space-y-3"><Eyebrow>Garde-fous &amp; notes</Eyebrow>{penalties.length===0 ? (<p className="text-sm text-muted">Aucune penalite — aucun garde-fou declenche.</p>) : (<ul className="space-y-2">{penalties.map((pe,i)=> (<li key={i} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-elevated/40 px-3 py-2"><div><p className="text-sm font-medium text-ivory">{pe.label} <span className="text-xs text-faint font-normal">({pe.code})</span></p><p className="text-xs text-muted leading-relaxed">{pe.reason}</p></div><span className="shrink-0 rounded-full border border-down/30 bg-down/10 px-2 py-0.5 text-xs font-semibold text-down">−{pe.points} pts</span></li>))}</ul>)}{notes.length>0 && (<div className="rounded-lg bg-elevated/30 border border-border px-3 py-3"><p className="text-xs font-medium text-ivory mb-1">Notes</p><ul className="list-disc list-inside space-y-1 text-xs text-muted leading-relaxed">{notes.map((n,i)=> <li key={i}>{n}</li>)}</ul></div>)}</PremiumPanel>
+          <div className="rounded-card border border-border bg-elevated/30 px-5 py-4 flex flex-wrap items-center justify-between gap-3"><p className="text-xs leading-relaxed text-faint max-w-2xl">Score quantitatif proprietaire Westbourse, indicatif et non constitutif d un conseil en investissement. A completer par une analyse fondamentale et votre horizon personnel.</p><div className="flex gap-2"><Link href="/analyse/combined-alpha" className="inline-flex items-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-ivory hover:border-gold/40 hover:text-gold transition-colors">Classement complet</Link><Link href="/fondamentaux" className="inline-flex items-center rounded-lg bg-gold px-3 py-1.5 text-xs font-semibold text-obsidian hover:bg-gold-soft transition-colors">Fondamentaux →</Link></div></div>
+        </>
       )}
     </div>
   );
