@@ -154,6 +154,30 @@ async function main(): Promise<number> {
       return res.echecs > 0 ? 1 : 0;
     }
 
+    case 'interim': {
+      // Comptes intermédiaires (T1, S1, T3) extraits des rapports d'activités.
+      // `interim SGBC SNTS` limite à ces sociétés.
+      const { runInterim } = await import('./interim/runInterim.js');
+      const res = await monitored(
+        { code: 'interim', label: 'Comptes intermédiaires (trimestres, semestres)' },
+        async () => {
+          const r = await runInterim({ mock, codes: positional.map((c) => c.toUpperCase()) });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.candidats,
+              rows_upserted: r.ecrits,
+              metadata: { candidats: r.candidats, ecrits: r.ecrits, rejetes: r.rejetes, echecs: r.echecs },
+            },
+          };
+        },
+      );
+      // Un échec (LLM ou PDF injoignable) fait échouer le job ; un REJET par
+      // garde-fou est une décision, pas une panne.
+      return res.echecs > 0 ? 1 : 0;
+    }
+
     case 'pass': {
       const { runPass } = await import('./pass/runPass.js');
       const res = await monitored(

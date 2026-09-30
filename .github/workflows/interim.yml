@@ -1,0 +1,61 @@
+name: Comptes intermédiaires (trimestres, semestres)
+
+# Chaque lundi à 06:30 UTC : extrait les chiffres clés des rapports d'activités
+# trimestriels et semestriels publiés (table publications, alimentée chaque
+# jour par scrape-daily.yml) vers income_statements / balance_sheets, avec
+# type_periode 'trimestre' | 'semestriel'. Voir scraper/src/interim/.
+#
+# IDEMPOTENT : une publication déjà tracée dans provenance_exercice est sautée.
+# Une extraction REJETÉE par les garde-fous n'est pas tracée : elle est
+# retentée la semaine suivante (l'OCR Mistral, en palier gratuit, répond
+# souvent 429).
+#
+# N'écrit JAMAIS un exercice annuel ni la table fundamentals : un
+# intermédiaire ne sert que tant que l'exercice n'est pas publié
+# (frontend/lib/financials/interim.ts).
+#
+# Échec visible : un PDF ou un LLM injoignable fait sortir le job en code 1.
+# Secrets : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (les clés LLM sont lues
+# dans la table api_keys).
+
+on:
+  schedule:
+    - cron: '30 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      codes:
+        description: 'Limiter à ces sociétés (ex. « SGBC SNTS »), vide = toutes'
+        required: false
+        default: ''
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+concurrency:
+  group: interim
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  interim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: scraper
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Installer
+        run: npm ci --no-audit --no-fund
+      - name: Extraire les comptes intermédiaires
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+          CODES: ${{ github.event.inputs.codes }}
+        run: npx tsx src/index.ts interim $CODES

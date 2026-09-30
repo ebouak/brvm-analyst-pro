@@ -276,6 +276,8 @@ export default async function FinancialsPage({ params }: Props) {
               incomeStatements={data.incomeStatements}
               balanceSheets={data.balanceSheets}
               cashFlowStatements={data.cashFlowStatements}
+              incomeInterim={data.incomeInterim}
+              balanceInterim={data.balanceInterim}
               famille={data.instrument.famille_comptable}
             />
           </div>

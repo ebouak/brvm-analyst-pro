@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type { FinancialsData } from './types';
+import { TYPES_INTERIM } from './interim';
 
 export async function loadCompanyFinancials(code: string): Promise<FinancialsData | null> {
   const supabase = createClient();
@@ -12,7 +13,7 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
 
   if (instrError || !instrument) return null;
 
-  const [hist52Res, incomeRes, balanceRes, cashflowRes, pubsRes] = await Promise.all([
+  const [hist52Res, incomeRes, balanceRes, cashflowRes, pubsRes, incomeIntRes, balanceIntRes] = await Promise.all([
     // Fetch 260 séances pour calculer plage 52 semaines dynamiquement
     supabase
       .from('brvm_actions_daily')
@@ -47,6 +48,22 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
       .eq('code', code)
       .order('date_publication', { ascending: false })
       .limit(10),
+    // Comptes intermédiaires : requêtes séparées, pour qu'aucun semestre ne
+    // chasse un exercice de la limite ci-dessus.
+    supabase
+      .from('income_statements')
+      .select('*')
+      .eq('code', code)
+      .in('type_periode', [...TYPES_INTERIM])
+      .order('periode', { ascending: false })
+      .limit(8),
+    supabase
+      .from('balance_sheets')
+      .select('*')
+      .eq('code', code)
+      .in('type_periode', [...TYPES_INTERIM])
+      .order('periode', { ascending: false })
+      .limit(8),
   ]);
 
   // Calcul dynamique de la plage 52 semaines à partir de l'historique
@@ -68,6 +85,8 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
     incomeStatements: (incomeRes.data ?? []) as any,
     balanceSheets: (balanceRes.data ?? []) as any,
     cashFlowStatements: (cashflowRes.data ?? []) as any,
+    incomeInterim: (incomeIntRes.data ?? []) as any,
+    balanceInterim: (balanceIntRes.data ?? []) as any,
     publications: (pubsRes.data ?? []) as { id: string; libelle: string | null; date_publication: string; type_publication: string | null; source_url: string | null }[],
   };
 }

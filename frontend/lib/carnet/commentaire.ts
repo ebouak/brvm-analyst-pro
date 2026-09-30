@@ -45,6 +45,7 @@
  */
 
 import { phraseEvenement, type MesureEvenement } from './evenements';
+import type { LectureIntermediaire } from '../financials/interim';
 
 export interface CarnetSeance {
   date_marche: string;
@@ -121,6 +122,12 @@ export interface EconomieSociete {
   coursJour?: number | null;
   /** `fundamentals.source` — « pdf-verified » vaut mieux qu'une extraction. */
   source?: string | null;
+  /**
+   * Comptes intermédiaires de l'année en cours (T1, S1, T3), tant que
+   * l'exercice annuel correspondant n'est pas publié — voir
+   * lib/financials/interim.ts (règle de remplacement, 12 mois glissants).
+   */
+  intermediaire?: LectureIntermediaire | null;
 }
 
 /** De quoi donner une échelle aux chiffres du carnet. */
@@ -173,6 +180,8 @@ const PER_MAX = 100;
 const PBR_MAX = 30;
 /** En deçà, une variation d'un exercice à l'autre est une stabilité, pas une évolution. */
 const CROISSANCE_PLATE_PCT = 2;
+/** Sujet des phrases de synthèse quand seuls les comptes annuels orientent la lecture. */
+const ECO_SUJET_ANNUEL = 'Les comptes du dernier exercice';
 
 /* ───────────────────────── Mise en forme ───────────────────────── */
 
@@ -300,6 +309,8 @@ export function commenterSeance(entree: {
   let carnetPenche: 'achat' | 'vente' | null = null;
   let signalPenche: 'hausse' | 'baisse' | 'aucun' | null = null;
   let ecoOrientation: 'favorable' | 'degradee' | 'contrastee' | null = null;
+  // Sujet des phrases de synthèse sur les comptes : les plus récents qui orientent.
+  let ecoSujet = ECO_SUJET_ANNUEL;
   let coteSousFondsPropres = false;
 
   /* ── 1. La séance sort-elle de l'ordinaire ? ─────────────────────────── */
@@ -461,6 +472,50 @@ export function commenterSeance(entree: {
         `Les comptes portent sur l'exercice ${economie.exercice}, clos depuis : ils ne décrivent pas la situation courante de la société${economie.source === 'pdf-verified' ? ' (chiffres relevés sur les états financiers publiés)' : ''}.`,
       );
     }
+
+    /* ── 4 bis. Les comptes intermédiaires de l'année en cours ───────────
+       Plus récents que l'exercice : ce sont EUX qui orientent la lecture tant
+       que l'exercice suivant n'est pas publié. La valorisation s'y rapporte
+       sur douze mois glissants — jamais par une annualisation (semestre × 2),
+       fausse pour toute activité saisonnière. ──────────────────────────── */
+    const im = economie.intermediaire ?? null;
+    if (im && (im.revenu != null || im.resultatNet != null)) {
+      const neuf = im.mois === 9; // « les 9 premiers mois » appelle le pluriel
+      const iCA = croissancePct(im.revenu, im.revenuPrecedent);
+      const iRN = croissancePct(im.resultatNet, im.resultatNetPrecedent);
+      const orientation = orienterEconomie(iCA, iRN);
+      if (orientation) {
+        ecoOrientation = orientation;
+        ecoSujet = `Les comptes ${neuf ? 'des' : 'du'} ${im.libelle}`;
+      }
+
+      const blocI = [
+        im.resultatNet != null ? `${fcfa(im.resultatNet)} de résultat net` : null,
+        im.revenu != null ? `${fcfa(im.revenu)} de chiffre d'affaires` : null,
+      ].filter(Boolean);
+      const evolI = [
+        iCA != null ? `le chiffre d'affaires ${sensCroissance(iCA)}` : null,
+        iRN != null ? `le résultat net ${sensCroissance(iRN)}` : null,
+      ].filter(Boolean).join(' et ');
+      const rnG = im.glissant?.resultatNet ?? null;
+      const perG = capitalisation != null && rnG != null && rnG > 0 ? capitalisation / rnG : null;
+
+      const porteeI = [
+        evolI ? `Par rapport ${neuf ? 'aux' : 'au'} ${im.libellePrecedent}, ${evolI}.` : null,
+        im.glissant && rnG != null
+          ? `Sur les ${im.glissant.libelle}, le résultat net atteint ${fcfa(rnG)}${perG != null && perG < PER_MAX ? ` : au cours du jour, la société vaut ${dec(perG, 1)} fois ce résultat` : ''}.`
+          : null,
+      ].filter(Boolean).join(' ');
+
+      constats.push({
+        origine: 'economie',
+        fait: `Sur ${neuf ? 'les' : 'le'} ${im.libelle}, la société affiche ${blocI.join(' pour ')} (comptes intermédiaires).`,
+        portee: porteeI || undefined,
+      });
+      limites.push(
+        `Les comptes ${neuf ? 'des' : 'du'} ${im.libelle} sont intermédiaires : ils ne sont pas audités (tout au plus revus de façon limitée par les commissaires aux comptes) et seront remplacés par les comptes de l'exercice dès leur publication.`,
+      );
+    }
   }
 
   /* ── 5. Les événements de marché, et ce que le cours a fait après ─────
@@ -502,7 +557,7 @@ export function commenterSeance(entree: {
   limites.push('Ces constats décrivent une séance passée. Ils ne constituent pas un conseil en investissement.');
   return {
     constats,
-    synthese: synthetiser({ seanceOrdinaire, carnetNegligeable, carnetPenche, signalPenche, ecoOrientation, coteSousFondsPropres }),
+    synthese: synthetiser({ seanceOrdinaire, carnetNegligeable, carnetPenche, signalPenche, ecoOrientation, ecoSujet, coteSousFondsPropres }),
     limites,
   };
 }
@@ -625,6 +680,8 @@ function synthetiser(e: {
   carnetPenche: 'achat' | 'vente' | null;
   signalPenche: 'hausse' | 'baisse' | 'aucun' | null;
   ecoOrientation: 'favorable' | 'degradee' | 'contrastee' | null;
+  /** « Les comptes du dernier exercice » ou « Les comptes du 1er semestre 2026 ». */
+  ecoSujet: string;
   coteSousFondsPropres: boolean;
 }): string | null {
   const parties: string[] = [];
@@ -668,17 +725,17 @@ function synthetiser(e: {
     const techSens = e.signalPenche === 'hausse' ? 1 : -1;
     parties.push(
       ecoSens === 0
-        ? `Les comptes du dernier exercice donnent une image contrastée, que la lecture technique ne recoupe ni ne contredit.`
+        ? `${e.ecoSujet} donnent une image contrastée, que la lecture technique ne recoupe ni ne contredit.`
         : ecoSens === techSens
-          ? `Les comptes du dernier exercice vont dans le même sens que la lecture technique. Cela ne fait pas une prévision : les deux décrivent le passé, l'un sur douze mois, l'autre sur quelques séances.`
-          : `Les comptes du dernier exercice et la lecture technique ne décrivent pas la même chose : ${e.ecoOrientation === 'favorable' ? 'une activité en progression' : 'une activité en repli'} d'un côté, ${e.signalPenche === 'hausse' ? 'un cours orienté à la hausse' : 'un cours orienté à la baisse'} de l'autre. Un tel écart peut durer des années et ne se résout pas de lui-même.`,
+          ? `${e.ecoSujet} vont dans le même sens que la lecture technique. Cela ne fait pas une prévision : les deux décrivent le passé, l'un sur ${e.ecoSujet === ECO_SUJET_ANNUEL ? 'douze mois' : 'quelques mois'}, l'autre sur quelques séances.`
+          : `${e.ecoSujet} et la lecture technique ne décrivent pas la même chose : ${e.ecoOrientation === 'favorable' ? 'une activité en progression' : 'une activité en repli'} d'un côté, ${e.signalPenche === 'hausse' ? 'un cours orienté à la hausse' : 'un cours orienté à la baisse'} de l'autre. Un tel écart peut durer des années et ne se résout pas de lui-même.`,
     );
   } else if (e.ecoOrientation && !e.signalPenche) {
     parties.push(e.ecoOrientation === 'favorable'
-      ? "Les comptes du dernier exercice publié sont orientés favorablement."
+      ? `${e.ecoSujet} sont orientés favorablement.`
       : e.ecoOrientation === 'degradee'
-        ? "Les comptes du dernier exercice publié sont orientés à la baisse."
-        : "Les comptes du dernier exercice publié donnent une image contrastée.");
+        ? `${e.ecoSujet} sont orientés à la baisse.`
+        : `${e.ecoSujet} donnent une image contrastée.`);
   }
 
   if (parties.length === 0) return null;
