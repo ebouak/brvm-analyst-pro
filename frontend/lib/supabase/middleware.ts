@@ -31,6 +31,8 @@ const PUBLIC_PREFIXES = [
   '/formations', // hub, Academy publique et sessions en direct (SEO)
   '/societes',   // fiches sociétés (SEO)
   '/analyses',   // pages citables (GEO)
+  '/analyse',    // Westbourse Combined Alpha & co (quant vitrine, publique)
+  '/actions',    // fiches action + onglet /quant (publiques)
   '/brief',      // briefs de séance datés (SEO)
   '/simulateur', // simulateur d'investissement public (/simulateur/[code])
   '/embed',      // widgets embarqués sur des sites tiers
