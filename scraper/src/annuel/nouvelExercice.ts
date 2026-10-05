@@ -89,7 +89,7 @@ const ECART_MAX = 0.02;
 
 export function verifierNouvelExercice(e: NouvelExercice, exercice: number, base: AncresN1): Verdict {
   const motifs: string[] = [];
-  const devise = (e.devise_source ?? '').toLowerCase();
+  const devise = (e.devise_source ?? '').toLowerCase().replace(/[^a-z]/g, ''); // « F CFA », « F.CFA » → « fcfa »
   if (devise && devise !== 'fcfa' && devise !== 'xof') motifs.push(`devise ${devise}`);
 
   const n0 = e.colonnes.find((c) => c.annee === exercice);

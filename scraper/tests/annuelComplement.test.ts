@@ -76,3 +76,13 @@ describe('construirePatches — jamais d’écrasement', () => {
     ]);
   });
 });
+
+describe('devise — graphies de « FCFA »', () => {
+  it('accepte « F CFA », « F.CFA », « XOF » ; refuse « USD »', () => {
+    const base = { revenu_total: 500 * M, resultat_net: 40 * M, total_actifs: 900 * M };
+    for (const d of ['F CFA', 'F.CFA', 'FCFA', 'XOF']) {
+      expect(verifierComplement(lecture({ devise_source: d, revenu_total: 500 * M }), 2025, base).ok).toBe(true);
+    }
+    expect(verifierComplement(lecture({ devise_source: 'USD', revenu_total: 500 * M }), 2025, base).ok).toBe(false);
+  });
+});

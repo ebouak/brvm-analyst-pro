@@ -60,7 +60,7 @@ export async function runSecondHalf(args: {
   const withC=pillared.filter(p=> p.combined!=null).sort((a,b)=> (b.combined! - a.combined!)); withC.forEach((p,i)=> p.rankGlobal=i+1);
   for(const s of new Set(pillared.map(p=> p.sector))){ const arr=pillared.filter(p=> p.sector===s && p.combined!=null).sort((a,b)=> (b.combined! - a.combined!)); arr.forEach((p,i)=> p.rankSector=i+1); }
   const total=pillared.length; const eligible=pillared.filter(p=> p.eligibility!=='ineligible' && p.combined!=null).length;
-  if(dryRun) return { calculationDate:calc, dryRun, total, eligible, runs:[{modelCode:'WB_PRICE_MOMENTUM',runId:null},{modelCode:'WB_COMBINED_ALPHA',runId:null}], results: pillared.map(p=> ({symbol:p.symbol,sector:p.sector,priceMomentum:p.mom,combinedAlpha:p.combined,classification:p.combinedCls,confidence:p.confidence,eligibility:p.eligibility,rankGlobal:p.rankGlobal,rankSector:p.rankSector})) };
+  if(dryRun) return { calculationDate:calc, dryRun, total, eligible, runs:[{modelCode:'WB_PRICE_MOMENTUM',runId:null},{modelCode:'WB_COMBINED_ALPHA',runId:null}], results: pillared.map(p=> ({symbol:p.symbol,sector:p.sector,priceMomentum:p.mom,combinedAlpha:p.combined,financialStrength:p.fsScore,classification:p.combinedCls,confidence:p.confidence,eligibility:p.eligibility,rankGlobal:p.rankGlobal,rankSector:p.rankSector})) };
   const { finishPersist } = await import('./run-second-extra');
   return finishPersist({ calc, pillared });
 }

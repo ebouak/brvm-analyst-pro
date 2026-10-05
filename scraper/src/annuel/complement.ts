@@ -131,7 +131,7 @@ const ECART_MAX = 0.02;
 
 export function verifierComplement(c: Complement, exercice: number, existant: Existant): Verdict {
   const motifs: string[] = [];
-  const devise = (c.devise_source ?? '').toLowerCase();
+  const devise = (c.devise_source ?? '').toLowerCase().replace(/[^a-z]/g, ''); // « F CFA », « F.CFA » → « fcfa »
   if (devise && devise !== 'fcfa' && devise !== 'xof') motifs.push(`devise ${devise}`);
   if (c.exercice !== exercice) motifs.push(`exercice lu ${c.exercice} ≠ ${exercice}`);
 
