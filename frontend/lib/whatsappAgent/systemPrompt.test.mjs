@@ -15,7 +15,7 @@ test('interdit explicitement le conseil en investissement', () => {
 
 test('fournit un script de refus pour une demande directe d\'achat/vente', () => {
   const prompt = buildSystemPrompt({ watchlist: [] });
-  assert.match(prompt, /je ne peux pas te dire d'acheter ou de vendre/i);
+  assert.match(prompt, /je ne peux pas vous dire d'acheter ou de vendre/i);
 });
 
 test('interdit le Markdown standard et donne la syntaxe WhatsApp réelle', () => {

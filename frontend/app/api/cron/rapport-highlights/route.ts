@@ -9,6 +9,7 @@ import { resolveApiKey } from '@/lib/server/apiKeys';
 import { ocrPdf } from '@/lib/import/ocr';
 import { rediger } from '@/lib/server/redacteur';
 import { jsonDepuisPdf } from '@/lib/server/geminiPdf';
+import { CHARTE_REDACTION } from '@/lib/llm/redaction';
 import { parseLlmJson } from '@/lib/import/llmProviders';
 import { classifyCompany } from '@/lib/reports/profile';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
@@ -59,7 +60,10 @@ async function callLlm(text: string): Promise<Sortie | null> {
  */
 async function lireRapport(url: string, mistralKey: string | null): Promise<{ out: Sortie | null; voie: string; erreur?: string }> {
   try {
-    const g = await jsonDepuisPdf(url, SYSTEM, 'Analyse ce rapport et réponds avec le JSON demandé.');
+    // La lecture PDF ne passe pas par le rédacteur : la charte s'ajoute ici.
+    const g = await jsonDepuisPdf(url, `${SYSTEM}
+
+${CHARTE_REDACTION}`, 'Analyse ce rapport et réponds avec le JSON demandé.');
     if (g && estSortie(g.brut)) return { out: g.brut, voie: g.modele };
   } catch (e) {
     console.warn('[rapport-highlights] Gemini :', (e as Error).message);
