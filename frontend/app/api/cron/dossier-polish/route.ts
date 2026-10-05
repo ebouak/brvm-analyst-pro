@@ -13,7 +13,7 @@
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { resolveApiKey } from '@/lib/server/apiKeys';
+import { rediger } from '@/lib/server/redacteur';
 import { buildDossier } from '@/lib/dossier/build';
 import { construireNarratif } from '@/lib/dossier/narratif';
 import { construireSquelette, validerProse, type SectionProse, type Squelette } from '@/lib/dossier/prose';
@@ -29,11 +29,6 @@ function autorise(req: Request): boolean {
   const b = Buffer.from(bearer, 'utf8');
   return a.length === b.length && timingSafeEqual(a, b);
 }
-
-const ORDRE = [
-  { provider: 'deepseek' as const, url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral' as const, url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
-];
 
 /**
  * Même contrat que scraper/src/hebdo/polish.ts : reformuler, sans rien
@@ -52,33 +47,24 @@ async function polir(sq: Squelette): Promise<{ sections: SectionProse[]; provide
     `- Conserve exactement les titres de section (lignes commençant par ##), dans le même ordre.\n` +
     `- Phrases courtes. Aucun jargon non expliqué.\n\n${brut}`;
 
-  for (const p of ORDRE) {
-    const key = await resolveApiKey(p.provider);
-    if (!key) continue;
-    try {
-      const res = await fetch(p.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-        body: JSON.stringify({ model: p.model, messages: [{ role: 'user', content: prompt }], temperature: 0.3 }),
-      });
-      if (!res.ok) continue;
-      const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-      const out = json.choices?.[0]?.message?.content ?? '';
-      if (!out) continue;
+  const decouper = (out: string) =>
+    out.split(/^##\s+/m).map((b) => b.trim()).filter(Boolean).map((b) => {
+      const nl = b.indexOf('\n');
+      return { titre: nl >= 0 ? b.slice(0, nl).trim() : b.trim(), texte: nl >= 0 ? b.slice(nl + 1).trim() : '' };
+    });
 
-      const blocs = out.split(/^##\s+/m).map((b) => b.trim()).filter(Boolean);
-      const candidate = blocs.map((b) => {
-        const nl = b.indexOf('\n');
-        return { titre: nl >= 0 ? b.slice(0, nl).trim() : b.trim(), texte: nl >= 0 ? b.slice(nl + 1).trim() : '' };
-      });
-      const valides = validerProse(candidate, sq);
-      if (!valides) continue; // rejeté : chiffre étranger, causalité, ou structure — on tente le suivant
-      return { sections: valides, provider: p.provider };
-    } catch {
-      continue;
-    }
-  }
-  return null;
+  // Cascade commune (lib/server/redacteur). Une sortie rejetée par validerProse
+  // — chiffre étranger, causalité, structure — fait passer au fournisseur
+  // suivant. Pas de consigne de format des nombres : ce texte n'en porte pas.
+  const r = await rediger([{ role: 'user', content: prompt }], {
+    temperature: 0.3,
+    maxTokens: 2500,
+    formatFr: false,
+    accepter: (out) => validerProse(decouper(out), sq) != null,
+  });
+  if (!r) return null;
+  const valides = validerProse(decouper(r.texte), sq);
+  return valides ? { sections: valides, provider: r.modele } : null;
 }
 
 export async function GET(req: Request) {

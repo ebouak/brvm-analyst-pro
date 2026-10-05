@@ -35,10 +35,18 @@ export const MODELE_LLM = {
   mistral: 'mistral-small-latest',
   /** grok-4.x est nativement multimodal. */
   xai: 'grok-4.6',
+  /**
+   * Flash stable le plus récent au 2026-10-05 (`gemini-3.1-pro-preview` testé :
+   * 62 s et réponse tronquée). Appelé avec `reasoning_effort: 'low'` — sans lui,
+   * le modèle dépense son budget de jetons en réflexion et rend 12 mots.
+   */
+  gemini: 'gemini-3.8-flash',
 } as const;
 
 export const URL_LLM = {
   deepseek: 'https://api.deepseek.com/chat/completions',
   mistral: 'https://api.mistral.ai/v1/chat/completions',
   xai: 'https://api.x.ai/v1/chat/completions',
+  /** Endpoint compatible OpenAI de l'API Gemini officielle (Bearer). */
+  gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
 } as const;

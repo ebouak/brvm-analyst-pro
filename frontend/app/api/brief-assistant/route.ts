@@ -1,15 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
-import { resolveApiKey, type LlmProvider } from '@/lib/server/apiKeys';
+import { parametresFournisseur, redacteursDisponibles, type Redacteur } from '@/lib/server/redacteur';
 import { TOOL_DEFS, runTool } from '@/lib/briefTools';
 
 export const maxDuration = 60;
-
-const ORDER: { provider: LlmProvider; url: string; model: string }[] = [
-  { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral',  url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
-  { provider: 'xai',     url: 'https://api.x.ai/v1/chat/completions', model: 'grok-4.6' },
-];
 
 const SYSTEM = `Tu es WESTBOURSE, un assistant financier expert de la Bourse Régionale des Valeurs Mobilières (UEMOA).
 
@@ -86,7 +80,7 @@ interface ChatMsg {
 }
 
 async function callLLM(
-  cfg: { url: string; model: string },
+  cfg: Redacteur,
   key: string,
   messages: ChatMsg[],
   withTools: boolean,
@@ -95,9 +89,10 @@ async function callLLM(
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: cfg.model,
+      model: cfg.modele,
       messages,
       temperature: 0.15,
+      ...parametresFournisseur(cfg.fournisseur),
       ...(withTools ? { tools: TOOL_DEFS, tool_choice: 'auto' } : {}),
     }),
     signal: AbortSignal.timeout(50000),
@@ -114,13 +109,8 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { question?: string; history?: ChatMsg[] } | null;
   if (!body?.question?.trim()) return NextResponse.json({ error: 'Question vide' }, { status: 400 });
 
-  // Choisir le 1er provider disponible
-  let chosen: { url: string; model: string; key: string } | null = null;
-  for (const c of ORDER) {
-    const k = await resolveApiKey(c.provider);
-    if (k) { chosen = { ...c, key: k }; break; }
-  }
-  if (!chosen) return NextResponse.json({ error: 'Aucune clé IA configurée (page Clés API).' }, { status: 503 });
+  const redacteurs = await redacteursDisponibles();
+  if (redacteurs.length === 0) return NextResponse.json({ error: 'Aucune clé IA configurée (page Clés API).' }, { status: 503 });
 
   const ctx = await buildContext();
   const messages: ChatMsg[] = [
@@ -129,37 +119,47 @@ export async function POST(request: Request) {
     { role: 'user', content: body.question },
   ];
 
-  try {
-    // Boucle d'outils — max 5 tours pour questions complexes
-    for (let turn = 0; turn < 5; turn++) {
-      const json = await callLLM(chosen, chosen.key, messages, true);
-      const msg = json?.choices?.[0]?.message;
-      if (!msg) break;
+  // Cascade commune : un fournisseur qui échoue (crédit épuisé, modèle retiré)
+  // cède la place au suivant, la conversation repartant de zéro — un fil
+  // d'outils à moitié construit par un autre modèle serait incohérent.
+  let derniereErreur = 'Erreur IA';
+  for (const chosen of redacteurs) {
+    const fil: ChatMsg[] = [...messages];
+    try {
+      // Boucle d'outils — max 5 tours pour questions complexes
+      for (let turn = 0; turn < 5; turn++) {
+        const json = await callLLM(chosen, chosen.cle, fil, true);
+        const msg = json?.choices?.[0]?.message;
+        if (!msg) break;
 
-      const toolCalls = msg.tool_calls as Array<{ id: string; function: { name: string; arguments: string } }> | undefined;
-      if (toolCalls?.length) {
-        messages.push({ role: 'assistant', content: msg.content ?? '', tool_calls: msg.tool_calls });
-        await Promise.all(
-          toolCalls.map(async (tc) => {
-            let parsed: Record<string, unknown> = {};
-            try { parsed = JSON.parse(tc.function.arguments || '{}'); } catch { /* ignore */ }
-            const result = await runTool(tc.function.name, parsed);
-            messages.push({ role: 'tool', tool_call_id: tc.id, name: tc.function.name, content: JSON.stringify(result) });
-          }),
-        );
-        continue;
+        const toolCalls = msg.tool_calls as Array<{ id: string; function: { name: string; arguments: string } }> | undefined;
+        if (toolCalls?.length) {
+          // tool_calls recopié TEL QUEL : Gemini y range une signature de
+          // pensée sans laquelle il refuse le tour suivant (mesuré).
+          fil.push({ role: 'assistant', content: msg.content ?? '', tool_calls: msg.tool_calls });
+          await Promise.all(
+            toolCalls.map(async (tc) => {
+              let parsed: Record<string, unknown> = {};
+              try { parsed = JSON.parse(tc.function.arguments || '{}'); } catch { /* ignore */ }
+              const result = await runTool(tc.function.name, parsed);
+              fil.push({ role: 'tool', tool_call_id: tc.id, name: tc.function.name, content: JSON.stringify(result) });
+            }),
+          );
+          continue;
+        }
+
+        return NextResponse.json({ answer: msg.content ?? '', provider: chosen.modele });
       }
 
-      return NextResponse.json({ answer: msg.content ?? '', provider: chosen.model });
+      // Dernier recours sans outils
+      const finalJson = await callLLM(chosen, chosen.cle, fil, false);
+      return NextResponse.json({
+        answer: finalJson?.choices?.[0]?.message?.content ?? 'Réponse indisponible.',
+        provider: chosen.modele,
+      });
+    } catch (e) {
+      derniereErreur = e instanceof Error ? e.message : 'Erreur IA';
     }
-
-    // Dernier recours sans outils
-    const finalJson = await callLLM(chosen, chosen.key, messages, false);
-    return NextResponse.json({
-      answer: finalJson?.choices?.[0]?.message?.content ?? 'Réponse indisponible.',
-      provider: chosen.model,
-    });
-  } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'Erreur IA' }, { status: 502 });
   }
+  return NextResponse.json({ error: derniereErreur }, { status: 502 });
 }

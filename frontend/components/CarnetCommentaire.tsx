@@ -4,13 +4,16 @@ import {
   type ContexteSeance, type EconomieSociete, type SignalSeance,
 } from '@/lib/carnet/commentaire';
 import type { MesureEvenement } from '@/lib/carnet/evenements';
+import { Suspense } from 'react';
+import SyntheseSeance, { SyntheseDeterministe } from '@/components/SyntheseSeance';
 
 /**
  * « Ce que dit la séance » — bruit, carnet, technique, comptes, actualité,
  * puis ce que ces lectures disent ensemble.
  *
- * Le texte vient d'un module pur et testé : aucun modèle de langage n'écrit
- * ici. Deux partis pris d'affichage, tirés d'une capture où le commentaire
+ * Les constats viennent d'un module pur et testé. Seule la SYNTHÈSE peut être
+ * reformulée par un modèle (components/SyntheseSeance), à partir de ces seuls
+ * constats et sous garde-fou ; à défaut, la synthèse déterministe s'affiche. Deux partis pris d'affichage, tirés d'une capture où le commentaire
  * était juste mais illisible :
  *
  *  1. chaque constat est sur DEUX niveaux — le fait, puis sa portée en gris.
@@ -57,7 +60,8 @@ export default function CarnetCommentaire({
   // Rien à dire : on n'affiche pas un cadre vide.
   if (!carnet && !signal && !economie && !bruit?.variationPct && !(actualites && actualites.length > 0) && !(evenements && evenements.length > 0)) return null;
 
-  const { constats, synthese, limites } = commenterSeance({ carnet, signal, actualites, contexte, bruit, economie, evenements });
+  const commentaire = commenterSeance({ carnet, signal, actualites, contexte, bruit, economie, evenements });
+  const { constats, synthese, limites } = commentaire;
   const nonConseil = limites[limites.length - 1]!;
   const autres = limites.slice(0, -1);
 
@@ -72,11 +76,13 @@ export default function CarnetCommentaire({
       )}
 
       {/* La synthèse en tête : le lecteur qui ne lit qu'une ligne lit celle-ci. */}
-      {synthese && (
-        <p className={`${compact ? '' : 'mb-4'} rounded-lg border-l-2 border-accent bg-accent/[0.06] px-3.5 py-2.5 text-sm leading-relaxed text-ivory`}>
-          {synthese}
-        </p>
-      )}
+      {/* Frontière Suspense INTERNE au composant : elle n'est rendue qu'après
+          que la page a fini ses propres lectures (et un éventuel notFound()),
+          donc elle ne retarde pas le statut HTTP — contrairement à un
+          loading.tsx (cf. CLAUDE.md, soft-404). */}
+      <Suspense fallback={<SyntheseDeterministe texte={synthese} classe={compact ? '' : 'mb-4'} />}>
+        <SyntheseSeance commentaire={commentaire} classe={compact ? '' : 'mb-4'} />
+      </Suspense>
 
       <ul className="space-y-3.5">
         {visibles.map((c) => {

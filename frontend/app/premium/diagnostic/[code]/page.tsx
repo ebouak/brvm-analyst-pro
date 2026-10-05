@@ -52,8 +52,10 @@ export default async function DiagnosticPage({ params }: Props) {
         <div className="bg-surface border border-border rounded-xl p-4">
           <p className="text-sm text-muted">
             Analyse générée automatiquement à partir des états financiers publiés, vérifiée par nos
-            garde-fous de plausibilité : rentabilité, bilan, flux, valorisation DCF et multiples,
-            dividende, risques, puis une orientation ACHAT/CONSERVER/VENDRE. Actualisée chaque semaine.
+            garde-fous de plausibilité : forces et faiblesses, rentabilité, bilan, flux, comparaison aux
+            médianes des sociétés comparables, valorisation DCF et multiples, dividende, risques, points de
+            vigilance, ce que les chiffres ne disent pas, puis une orientation ACHAT/CONSERVER/VENDRE.
+            Actualisée chaque semaine.
           </p>
         </div>
 
