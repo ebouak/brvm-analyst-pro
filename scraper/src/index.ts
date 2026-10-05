@@ -154,6 +154,28 @@ async function main(): Promise<number> {
       return res.echecs > 0 ? 1 : 0;
     }
 
+    case 'annuel:nouveau': {
+      // Importe les exercices annuels PUBLIÉS mais absents de la base, prouvés
+      // par la colonne N−1 du même PDF. `annuel:nouveau SDSC SICC` limite.
+      const { runNouvelExercice } = await import('./annuel/runNouvelExercice.js');
+      const res = await monitored(
+        { code: 'annuel-nouveau', label: 'Import des nouveaux exercices annuels' },
+        async () => {
+          const r = await runNouvelExercice({ mock, codes: positional.map((c) => c.toUpperCase()) });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.candidats,
+              rows_upserted: r.importes,
+              metadata: { candidats: r.candidats, importes: r.importes, rejetes: r.rejetes, echecs: r.echecs },
+            },
+          };
+        },
+      );
+      return res.echecs > 0 ? 1 : 0;
+    }
+
     case 'annuel:complement': {
       // Remplit les champs VIDES du dernier exercice annuel (dettes, charges
       // financières, flux, ratios prudentiels bancaires) en relisant le PDF
