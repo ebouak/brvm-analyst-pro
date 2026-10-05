@@ -131,5 +131,13 @@ export interface FinancialsData {
   incomeStatements: IncomeStatement[];
   balanceSheets: BalanceSheet[];
   cashFlowStatements: CashFlowStatement[];
+  /**
+   * Trimestres et semestres (type_periode 'trimestre' | 'semestriel'), en
+   * cumul depuis le début de l'exercice — voir lib/financials/interim.ts.
+   * Tenus À PART des exercices : graphiques et ratios supposent des années
+   * complètes, un semestre mêlé aux exercices les fausserait.
+   */
+  incomeInterim: IncomeStatement[];
+  balanceInterim: BalanceSheet[];
   publications: Publication[];
 }

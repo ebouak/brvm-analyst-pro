@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { createPublicClient } from '@/lib/supabase/public';
+import { chargerIntermediaire } from '@/lib/financials/interimServer';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
@@ -473,8 +474,11 @@ export default async function InstrumentPage({
   // Un exercice sans année n'est pas exploitable : on n'en tire rien plutôt que de deviner.
   const exCourant = exBrut?.year != null ? (exBrut as typeof exBrut & { year: number }) : null;
   const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
+  // Trimestre / semestre de l'année en cours, tant que l'exercice n'est pas publié.
+  const intermediaire = exCourant ? await chargerIntermediaire(createPublicClient(), code, fundamentals) : null;
   const economieSociete = exCourant
     ? {
+        intermediaire,
         exercice: exCourant.year,
         resultatNet: exCourant.net_income ?? null,
         resultatNetPrecedent: exPrecedent?.net_income ?? null,

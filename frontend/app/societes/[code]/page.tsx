@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
+import { chargerIntermediaire } from '@/lib/financials/interimServer';
 import PublicShell from '@/components/public/PublicShell';
 import Sparkline from '@/components/public/Sparkline';
 import RatingBadge from '@/components/RatingBadge';
@@ -191,8 +192,11 @@ export default async function CompanyPage({ params }: PageProps) {
   // même logique que /actions/[code], à partir de `bestFund` déjà calculé.
   const exCourant = bestFund && bestFund.year != null ? bestFund : null;
   const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
+  // Trimestre / semestre de l'année en cours, tant que l'exercice n'est pas publié.
+  const intermediaire = exCourant ? await chargerIntermediaire(createPublicClient(), code, fundamentals) : null;
   const economieSociete = exCourant
     ? {
+        intermediaire,
         exercice: exCourant.year,
         resultatNet: exCourant.net_income ?? null,
         resultatNetPrecedent: exPrecedent?.net_income ?? null,
