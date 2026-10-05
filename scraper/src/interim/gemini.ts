@@ -103,12 +103,18 @@ async function resoudreModele(cle: string): Promise<string | null> {
  * modèle effectivement servi. null si le PDF est trop lourd ou la réponse
  * vide ; lève sur une erreur HTTP (l'appelant retombe sur la chaîne texte).
  */
-export async function lireAvecGemini(
+/**
+ * Envoie un PDF à Gemini et renvoie l'objet JSON de la réponse (non validé)
+ * avec le nom du modèle servi. null si le PDF est trop lourd ou la réponse
+ * vide ; lève sur une erreur HTTP. Partagé par les intermédiaires et le
+ * complément des annuels (scraper/src/annuel/).
+ */
+export async function jsonDepuisPdf(
   urlPdf: string,
   systeme: string,
   consigne: string,
   cle: string,
-): Promise<{ extraction: Extraction; modele: string } | null> {
+): Promise<{ brut: unknown; modele: string } | null> {
   const modele = await resoudreModele(cle);
   if (!modele) throw new Error('aucun modèle Gemini flash disponible');
 
@@ -127,20 +133,32 @@ export async function lireAvecGemini(
   const j = (await r.json()) as ReponseGemini;
   const texte = texteReponse(j);
   if (!texte) return null;
+  return { brut: jsonTolerant(texte), modele: j.modelVersion ?? modele };
+}
 
-  let brut: unknown;
+function jsonTolerant(texte: string): unknown {
   try {
-    brut = JSON.parse(texte);
+    return JSON.parse(texte);
   } catch {
     const a = texte.indexOf('{');
     const b = texte.lastIndexOf('}');
     try {
-      brut = a >= 0 && b > a ? JSON.parse(texte.slice(a, b + 1)) : null;
+      return a >= 0 && b > a ? JSON.parse(texte.slice(a, b + 1)) : null;
     } catch {
-      brut = null;
+      return null;
     }
   }
-  const parse = schemaExtraction.safeParse(brut);
+}
+
+export async function lireAvecGemini(
+  urlPdf: string,
+  systeme: string,
+  consigne: string,
+  cle: string,
+): Promise<{ extraction: Extraction; modele: string } | null> {
+  const r = await jsonDepuisPdf(urlPdf, systeme, consigne, cle);
+  if (!r) return null;
+  const parse = schemaExtraction.safeParse(r.brut);
   if (!parse.success) return null;
-  return { extraction: parse.data, modele: j.modelVersion ?? modele };
+  return { extraction: parse.data, modele: r.modele };
 }

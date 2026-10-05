@@ -7,12 +7,14 @@ export function buildRaw(a: {
   incPrev: Record<string,unknown>|null;
   incHistory: Record<string,unknown>[];
   bal: Record<string,unknown>|null;
+  /** Bilan de l'exercice précédent (croissance des dépôts bancaires). Facultatif. */
+  balPrev?: Record<string,unknown>|null;
   cf: Record<string,unknown>|null;
   price:number|null; shares:number|null; divRows: Record<string,unknown>[];
 }): Record<string,number|null> {
   const inc=a.inc as unknown as { revenu_total:number|null; resultat_net:number|null; benefice_par_action:number|null; dividende_par_action:number|null; resultat_exploitation:number|null; charges_financieres_nettes:number|null }|null;
   const bal=a.bal as unknown as { total_capitaux_propres:number|null; total_actifs:number|null; dette_court_terme:number|null; dette_long_terme:number|null; total_actif_circulant:number|null; passif_courant:number|null; tresorerie_equivalents:number|null; lignes_specifiques:Record<string,number|null>|null }|null;
-  const cf=a.cf as unknown as { flux_exploitation:number|null; flux_tresorerie_disponible:number|null; depreciation_amortissement:number|null }|null;
+  const cf=a.cf as unknown as { flux_exploitation:number|null; flux_tresorerie_disponible:number|null; depreciation_amortissement:number|null; depenses_capital:number|null; investissements_ppe:number|null }|null;
   const bpa=nNum(inc?.benefice_par_action); const dpa=nNum(inc?.dividende_par_action);
   const rn=nNum(inc?.resultat_net); const cap=nNum(bal?.total_capitaux_propres);
   const ebit=nNum(inc?.resultat_exploitation); const dep=nNum(cf?.depreciation_amortissement);
@@ -49,10 +51,25 @@ export function buildRaw(a: {
   const ndE=dTot!=null&&cash!=null&&ebitda!=null&&ebitda!==0?(dTot-cash)/ebitda:null;
   const de=dTot!=null&&cap!=null&&cap!==0?dTot/cap:null;
   const cr=nNum(bal?.total_actif_circulant)!=null&&nNum(bal?.passif_courant)!=null&&nNum(bal?.passif_courant)!==0?nNum(bal?.total_actif_circulant)!/nNum(bal?.passif_courant)!:null;
-  const fcf=nNum(cf?.flux_tresorerie_disponible); const fcfD=fcf!=null&&dTot!=null&&dTot!==0?fcf/dTot:null;
+  // FCF publié, sinon flux d'exploitation − investissements (deux lignes publiées) :
+  // le flux disponible n'est publié tel quel que par 1 société sur 34.
+  const capex=nNum(cf?.depenses_capital)??nNum(cf?.investissements_ppe);
+  const fcf=nNum(cf?.flux_tresorerie_disponible)??(fex!=null&&capex!=null?fex-Math.abs(capex):null);
+  const fcfD=fcf!=null&&dTot!=null&&dTot!==0?fcf/dTot:null;
   const ls=(bal?.lignes_specifiques??{}) as Record<string,number|null>; const car=nNum(ls.ratio_solvabilite)??null;
+  // Banques — lignes publiées (rapport annuel, tableau prudentiel) :
+  //   créances douteuses / crédits bruts à la clientèle ; taux de couverture publié ;
+  //   ratio de liquidité publié (JAMAIS le ratio courant d'une société industrielle) ;
+  //   croissance des dépôts N / N−1.
+  const credits=nNum(ls.credits_clientele); const douteuses=nNum(ls.creances_douteuses);
+  const npl=credits!=null&&credits>0&&douteuses!=null?douteuses/credits:null;
+  const nplCov=nNum(ls.taux_couverture_creances);
+  const liqBank=nNum(ls.ratio_liquidite);
+  const lsPrev=((a.balPrev?.lignes_specifiques as Record<string,number|null>|null)??{});
+  const depots=nNum(ls.depots_clientele); const depotsPrev=nNum(lsPrev.depots_clientele);
+  const depG=depots!=null&&depotsPrev!=null&&depotsPrev>0?(depots-depotsPrev)/depotsPrev:null;
   let dc:number|null=null; let dg:number|null=null;
   if(a.divRows.length>0){const paid=a.divRows.filter(r=>nNum((r as Record<string,unknown>).montant)!=null&&nNum((r as Record<string,unknown>).montant)!>0).length;dc=Math.round((paid/Math.min(5,a.divRows.length))*100);const vals=[...a.divRows].sort((x,y)=>String(x.exercice).localeCompare(String(y.exercice))).map(r=>nNum((r as Record<string,unknown>).montant)).filter((v):v is number=>v!=null&&v>0);if(vals.length>=2)dg=dividendCAGR(vals);}
   const pay=(()=>{if(dpa==null||rn==null||rn===0) return null; if(a.shares!=null&&a.shares>0) return (dpa*a.shares)/rn*100; if(bpa!=null&&bpa!==0) return (dpa/bpa)*100; return null;})();
-  return { per,pb,dividendYield:dy,evEbitda,earningsYield:ey,roe,roa,epsGrowth3y:eps3,netIncomeGrowth:nig,marginStability:ms,cashConversion:cc,accruals:acc,earningsStability:es2,interestCoverage:ic,netDebtToEbitda:ndE,debtToEquity:de,currentRatio:cr,fcfToDebt:fcfD,capitalAdequacy:car,liquidityRatio:cr,solvencyRatio:car,combinedRatio:nNum(ls.ratio_combine),dividendConsistency:dc,dividendGrowth:dg,payoutRatio:pay,_metaRn:rn,_metaCapitaux:cap } as unknown as Record<string,number|null>;
+  return { per,pb,dividendYield:dy,evEbitda,earningsYield:ey,roe,roa,epsGrowth3y:eps3,netIncomeGrowth:nig,marginStability:ms,cashConversion:cc,accruals:acc,earningsStability:es2,interestCoverage:ic,netDebtToEbitda:ndE,debtToEquity:de,currentRatio:cr,fcfToDebt:fcfD,capitalAdequacy:car,nplRatio:npl,nplCoverage:nplCov,depositGrowth:depG,liquidityRatio:liqBank,solvencyRatio:car,combinedRatio:nNum(ls.ratio_combine),dividendConsistency:dc,dividendGrowth:dg,payoutRatio:pay,_metaRn:rn,_metaCapitaux:cap } as unknown as Record<string,number|null>;
 }

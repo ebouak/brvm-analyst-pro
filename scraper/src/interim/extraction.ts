@@ -104,7 +104,7 @@ export function verifierExtraction(
   reference: ReferenceAnnuelle | null,
 ): Verdict {
   const motifs: string[] = [];
-  const devise = (e.devise_source ?? '').toLowerCase();
+  const devise = (e.devise_source ?? '').toLowerCase().replace(/[^a-z]/g, ''); // « F CFA », « F.CFA » → « fcfa »
   if (devise && devise !== 'fcfa' && devise !== 'xof') motifs.push(`devise ${devise}`);
   if (e.cumul_depuis_debut_exercice === false && cible.code !== 'T1') {
     motifs.push('trimestre isolé, pas un cumul depuis le début de l’exercice');
