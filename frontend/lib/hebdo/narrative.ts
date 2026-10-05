@@ -34,8 +34,7 @@ export function buildSkeleton(m: HebdoMetrics, ctx?: HebdoContexte): Skeleton {
     chiffres.push(Math.abs(Math.round(m.variationHebdo * 100) / 100));
   }
   if (m.ratioVolume != null) {
-    s1 += `. Il s’est échangé ${fmtRatio(m.ratioVolume)} fois plus de titres que d’habitude, ` +
-          `signe que le mouvement a mobilisé du monde`;
+    s1 += `. Les volumes échangés représentent ${fmtRatio(m.ratioVolume)} fois leur niveau habituel`;
     chiffres.push(Math.round(m.ratioVolume * 10) / 10);
   }
   sections.push({ titre: 'Ce qui s’est passé', texte: `${s1}.` });
@@ -45,16 +44,16 @@ export function buildSkeleton(m: HebdoMetrics, ctx?: HebdoContexte): Skeleton {
     chiffres.push(Math.round(m.rsiDernier * 10) / 10);
     const lecture =
       m.rsiDernier > 70
-        ? 'Le titre a beaucoup monté en peu de temps : il est en zone de surachat, ce qui appelle souvent une pause'
+        ? 'Le titre a fortement progressé en peu de séances : il se trouve en zone dite de surachat'
         : m.rsiDernier < 30
-          ? 'Le titre a beaucoup baissé en peu de temps : il est en zone de survente, où des acheteurs reviennent parfois'
+          ? 'Le titre a fortement reculé en peu de séances : il se trouve en zone dite de survente'
           : 'Le titre n’est ni suracheté ni survendu : la tension reste modérée';
     const macd = m.macdPositif == null ? '' : m.macdPositif
-      ? ' La dynamique de fond reste orientée à la hausse.'
-      : ' La dynamique de fond reste orientée à la baisse.';
+      ? ' La tendance de fond, mesurée par le MACD, reste orientée à la hausse.'
+      : ' La tendance de fond, mesurée par le MACD, reste orientée à la baisse.';
     sections.push({
       titre: 'Ce que ça veut dire',
-      texte: `${lecture} (indicateur de tension : ${fmtNombre(m.rsiDernier)} sur 100).${macd}`,
+      texte: `${lecture} (indicateur de tension RSI : ${fmtNombre(m.rsiDernier)} sur 100).${macd}`,
     });
   }
 
@@ -72,29 +71,29 @@ export function buildSkeleton(m: HebdoMetrics, ctx?: HebdoContexte): Skeleton {
     if (l.cassureBas) {
       chiffres.push(l.objectifBas1, l.objectifBas2);
       texte =
-        `Le cours est passé sous son plancher des 20 dernières séances (${fmtNombre(l.support)} FCFA), ` +
-        `un seuil que les acheteurs défendaient jusqu’ici. Les prochains paliers à surveiller ` +
-        `sont ${fmtNombre(l.objectifBas1)} puis ${fmtNombre(l.objectifBas2)} FCFA. Repasser durablement ` +
-        `au-dessus de ${fmtNombre(l.support)} FCFA annulerait ce signal.`;
+        `Le cours est passé sous son plancher des 20 dernières séances (${fmtNombre(l.support)} FCFA). ` +
+        `Les paliers suivants, calculés sur l’amplitude de ce canal, se situent à ${fmtNombre(l.objectifBas1)} ` +
+        `puis ${fmtNombre(l.objectifBas2)} FCFA. Un retour durable au-dessus de ${fmtNombre(l.support)} FCFA ` +
+        `invaliderait ce scénario.`;
     } else if (l.cassureHaut) {
       chiffres.push(l.objectif1, l.objectif2, l.invalidation);
       texte =
-        `Le cours a dépassé son plafond des 20 dernières séances (${fmtNombre(l.resistance)} FCFA), ` +
-        `un seuil qui bloquait la hausse jusqu’ici. Les prochains paliers sont ${fmtNombre(l.objectif1)} ` +
-        `puis ${fmtNombre(l.objectif2)} FCFA. Un retour sous ${fmtNombre(l.invalidation)} FCFA remettrait ` +
-        `ce signal en cause.`;
+        `Le cours a franchi son plafond des 20 dernières séances (${fmtNombre(l.resistance)} FCFA). ` +
+        `Les paliers suivants, calculés sur l’amplitude de ce canal, se situent à ${fmtNombre(l.objectif1)} ` +
+        `puis ${fmtNombre(l.objectif2)} FCFA. Un retour sous ${fmtNombre(l.invalidation)} FCFA ` +
+        `invaliderait ce scénario.`;
     } else {
       texte =
-        `Le cours reste coincé entre ${fmtNombre(l.support)} et ${fmtNombre(l.resistance)} FCFA. ` +
-        `C’est la sortie de ce couloir qui donnera la direction : au-dessus de ${fmtNombre(l.resistance)} FCFA ` +
-        `pour la hausse, sous ${fmtNombre(l.support)} FCFA pour la baisse.`;
+        `Le cours évolue entre son plancher (${fmtNombre(l.support)} FCFA) et son plafond ` +
+        `(${fmtNombre(l.resistance)} FCFA) des 20 dernières séances. Une clôture au-dessus de ` +
+        `${fmtNombre(l.resistance)} FCFA ou sous ${fmtNombre(l.support)} FCFA marquerait la sortie de ce canal.`;
     }
     sections.push({ titre: 'Les niveaux à surveiller', texte });
   }
 
   const verdict = m.variationHebdo != null && m.variationHebdo >= 0
-    ? 'Dynamique haussière sur la semaine'
-    : 'Repli sur la semaine';
+    ? 'Semaine en hausse'
+    : 'Semaine en baisse';
 
   return { sections, chiffres: [...new Set(chiffres.map((x) => Math.round(x * 100) / 100))], verdict };
 }

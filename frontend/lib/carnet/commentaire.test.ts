@@ -85,14 +85,14 @@ describe('commenterSeance — mise à l’échelle', () => {
   it('DIT que la confiance mesure la donnée, pas la justesse d’une prévision', () => {
     const t = tout(palc());
     expect(t).toContain('92 %');
-    expect(t).toContain("non sur la justesse d'une prévision");
+    expect(t).toContain("pas la justesse d'une prévision");
   });
 
   it('reprend les facteurs du moteur plutôt que de les taire', () => {
     const t = tout(palc());
     expect(t).toContain('RSI 30');
     expect(t).toContain('MACD négatif');
-    expect(t).toContain("aucun facteur ne l'emporte assez nettement");
+    expect(t).toContain("aucun facteur ne l'emporte nettement");
   });
 
   it('n’invente AUCUNE échelle quand les capitaux de la séance sont inconnus', () => {
@@ -119,8 +119,8 @@ describe('commenterSeance — synthèse', () => {
       signal: { date_marche: '2026-09-22', signal: 'HOLD', confiance: 0.8, score_total: -0.4 },
       contexte: { valeurEchangee: 1_000_000 },
     });
-    expect(c.synthese).toContain('ne disent pas la même chose');
-    expect(c.synthese).toContain('rien ici ne permet de les départager');
+    expect(c.synthese).toContain('les deux divergent');
+    expect(c.synthese).toContain('rien ne permet ici de les départager');
   });
 
   it('refuse de bâtir une convergence sur un carnet négligeable', () => {
@@ -129,7 +129,7 @@ describe('commenterSeance — synthèse', () => {
       signal: { date_marche: '2026-09-22', signal: 'HOLD', confiance: 0.9, score_total: -0.255 },
       contexte: { valeurEchangee: 22_533_095 },
     });
-    expect(c.synthese).toContain('trop petit');
+    expect(c.synthese).toContain('trop faibles pour être significatifs');
     expect(c.synthese).not.toContain('concordent');
   });
 
@@ -139,7 +139,7 @@ describe('commenterSeance — synthèse', () => {
       signal: { date_marche: '2026-09-22', signal: 'HOLD', confiance: 0.9, score_total: 0.01 },
       contexte: { valeurEchangee: 22_533_095 },
     });
-    expect(c.synthese).toContain('aucun fait marquant');
+    expect(c.synthese).toContain('Séance sans fait notable');
   });
 });
 
@@ -189,7 +189,7 @@ describe('commenterSeance — les trois interdits tiennent', () => {
     expect(t).toContain('Résultats semestriels');
     expect(t).toContain('2 jours avant cette séance');
     expect(t).toContain('chronologique, pas explicatif');
-    expect(c.limites.join(' ')).toContain("Rien ici n'établit");
+    expect(c.limites.join(' ')).toContain("Rien n'établit");
   });
 
   it('le dit franchement quand il n’y a rien à commenter', () => {
@@ -209,7 +209,7 @@ describe('commenterSeance — bruit de marché', () => {
       bruit: { variationPct: -1.22, ecartTypePct: 1.72, seancesObservees: 30 },
     }));
     expect(t).toContain('reculé de 1,22 %');
-    expect(t).toContain("agitation ordinaire");
+    expect(t).toContain("variation habituelle");
     expect(t).toContain('bruit de marché');
   });
 
@@ -218,7 +218,7 @@ describe('commenterSeance — bruit de marché', () => {
       carnet: null, signal: null,
       bruit: { variationPct: 6.5, ecartTypePct: 1.72, seancesObservees: 30 },
     }));
-    expect(t).toContain('séance inhabituelle');
+    expect(t).toContain('la séance est inhabituelle');
     expect(t).not.toContain('bruit de marché');
   });
 
@@ -226,7 +226,7 @@ describe('commenterSeance — bruit de marché', () => {
     const c = commenterSeance({ carnet: null, signal: null, bruit: { variationPct: -4, ecartTypePct: 1.2, seancesObservees: 6 } });
     const t = tout(c);
     expect(t).toContain('reculé de 4,00 %');       // le fait est cité
-    expect(t).not.toContain('agitation ordinaire'); // il n'est pas qualifié
+    expect(t).not.toContain('variation habituelle'); // il n'est pas qualifié
     expect(c.limites.join(' ')).toContain('trop court');
   });
 });
@@ -248,9 +248,9 @@ describe('commenterSeance — cohérence économique', () => {
 
   it('DIT qu’une décote sur fonds propres peut durer et ne prédit rien', () => {
     const t = tout(commenterSeance({ carnet: null, signal: null, economie: palmci }));
-    expect(t).toContain('en dessous de la valeur comptable');
+    expect(t).toContain('sous la valeur comptable');
     expect(t).toContain('peut durer des années');
-    expect(t).toContain('ne dit rien du sens du prochain mouvement');
+    expect(t).toContain('il ne dit rien du prochain mouvement du cours');
   });
 
   it('DIT « contrastée » quand le CA monte et le résultat baisse — le cas PALC réel', () => {
@@ -269,7 +269,7 @@ describe('commenterSeance — cohérence économique', () => {
       economie: { ...palmci, resultatNetPrecedent: 11_000_000_000 }, // RN +41 %, CA +14,8 %
       signal: { date_marche: '2026-09-23', signal: 'SELL', confiance: 0.9, score_total: -0.7 },
     });
-    expect(c.synthese).toContain('ne décrivent pas la même chose');
+    expect(c.synthese).toContain('et la lecture technique divergent');
     expect(c.synthese).toContain('une activité en progression');
     expect(c.synthese).toContain('un cours orienté à la baisse');
     expect(c.synthese).toContain('peut durer des années');
@@ -293,7 +293,7 @@ describe('commenterSeance — cohérence économique', () => {
 
   it('rappelle que les comptes sont clos et ne décrivent pas le présent', () => {
     const c = commenterSeance({ carnet: null, signal: null, economie: palmci });
-    expect(c.limites.join(' ')).toContain('clos depuis');
+    expect(c.limites.join(' ')).toContain('désormais clos');
     expect(c.limites.join(' ')).toContain('états financiers publiés');
   });
 });
@@ -351,6 +351,6 @@ describe('facteursDivergents — on n’affirme une contradiction que si on la c
         explication: 'Pas de signal franc (HOLD). Facteurs : RSI 70 ; MACD positif.', sousScores: { rsi: 0.4, macd: 0.55 } },
     });
     expect(tout(sans)).not.toContain("s'opposent");
-    expect(tout(sans)).toContain("aucun facteur ne l'emporte assez nettement");
+    expect(tout(sans)).toContain("aucun facteur ne l'emporte nettement");
   });
 });
