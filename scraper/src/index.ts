@@ -154,6 +154,29 @@ async function main(): Promise<number> {
       return res.echecs > 0 ? 1 : 0;
     }
 
+    case 'annuel:complement': {
+      // Remplit les champs VIDES du dernier exercice annuel (dettes, charges
+      // financières, flux, ratios prudentiels bancaires) en relisant le PDF
+      // avec Gemini. Lancé à la main ; `annuel:complement SGBC SNTS` limite.
+      const { runComplement } = await import('./annuel/runComplement.js');
+      const res = await monitored(
+        { code: 'annuel-complement', label: 'Complément des comptes annuels' },
+        async () => {
+          const r = await runComplement({ mock, codes: positional.map((c) => c.toUpperCase()) });
+          return {
+            value: r,
+            outcome: {
+              status: r.echecs > 0 ? ('partial' as const) : ('success' as const),
+              rows_extracted: r.societes,
+              rows_upserted: r.champsEcrits,
+              metadata: { societes: r.societes, champsEcrits: r.champsEcrits, rejetes: r.rejetes, echecs: r.echecs },
+            },
+          };
+        },
+      );
+      return res.echecs > 0 ? 1 : 0;
+    }
+
     case 'interim': {
       // Comptes intermédiaires (T1, S1, T3) extraits des rapports d'activités.
       // `interim SGBC SNTS` limite à ces sociétés.

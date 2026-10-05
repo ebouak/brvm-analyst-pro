@@ -51,8 +51,8 @@ export function buildPillared(args: {
       sector:m.sector, interestCoverage:raw.interestCoverage as number|null,
       netDebtToEbitda:raw.netDebtToEbitda as number|null, debtToEquity:raw.debtToEquity as number|null,
       currentRatio:raw.currentRatio as number|null, fcfToDebt:raw.fcfToDebt as number|null,
-      capitalAdequacy:raw.capitalAdequacy as number|null, nplRatio:null, nplCoverage:null,
-      liquidityRatio:raw.liquidityRatio as number|null, depositGrowth:null,
+      capitalAdequacy:raw.capitalAdequacy as number|null, nplRatio:raw.nplRatio as number|null, nplCoverage:raw.nplCoverage as number|null,
+      liquidityRatio:raw.liquidityRatio as number|null, depositGrowth:raw.depositGrowth as number|null,
       solvencyRatio:raw.solvencyRatio as number|null, combinedRatio:raw.combinedRatio as number|null,
       provisionCoverage:null,
       peers:gp as unknown as Record<string,(number|null)[]>, sectorPeers:sp as unknown as Record<string,(number|null)[]>

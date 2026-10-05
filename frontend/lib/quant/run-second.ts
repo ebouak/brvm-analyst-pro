@@ -32,10 +32,12 @@ export async function runSecondHalf(args: {
     const prevInc=sortedInc.length>=2?sortedInc[sortedInc.length-2]:null;
     const balRows=balBy.get(m.symbol)??[]; const balAnn=balRows.filter(r=> String((r as {type_periode:string}).type_periode)==='annuel');
     const latestBal=pickLatest(balAnn as unknown as {periode:string}[]) as unknown as Record<string,unknown>|null;
+    const sortedBal=[...balAnn].sort((a,b)=> String(a.periode).localeCompare(String(b.periode)));
+    const prevBal=sortedBal.length>=2?sortedBal[sortedBal.length-2] as Record<string,unknown>:null;
     const cfRows=cfBy.get(m.symbol)??[]; const cfAnn=cfRows.filter(r=> String((r as {type_periode:string}).type_periode)==='annuel');
     const latestCf=pickLatest(cfAnn as unknown as {periode:string}[]) as unknown as Record<string,unknown>|null;
     const divRows=divBy.get(m.symbol)??[];
-    const raw=buildRaw({ inc:latestInc, incPrev:prevInc as Record<string,unknown>|null, incHistory:incAnn, bal:latestBal, cf:latestCf, price:m.price, shares:m.shares, divRows });
+    const raw=buildRaw({ inc:latestInc, incPrev:prevInc as Record<string,unknown>|null, incHistory:incAnn, bal:latestBal, balPrev:prevBal, cf:latestCf, price:m.price, shares:m.shares, divRows });
     raws.set(m.symbol,raw);
     const years=new Set(incAnn.map(r=> String((r as {periode:string}).periode).slice(0,4))).size;
     const recentYear=incAnn.length? Number(String((incAnn[0] as {periode:string}).periode).slice(0,4)):0;
@@ -43,7 +45,11 @@ export async function runSecondHalf(args: {
     const avail=Object.values(raw).filter(v=> v!=null).length; const coverageRate=Math.min(1,avail/12);
     metas.set(m.symbol,{hasRecent,years,coverageRate});
   }
-  const peerKeys=['per','pb','dividendYield','evEbitda','earningsYield','roe','roa','epsGrowth3y','netIncomeGrowth','cashConversion','accruals','interestCoverage','netDebtToEbitda','debtToEquity','currentRatio','fcfToDebt'] as const;
+  // Les indicateurs bancaires et d'assurance DOIVENT figurer ici : le score de
+  // solidité est un percentile face aux pairs ; sans pairs, chaque facteur
+  // bancaire valait null et la solidité des 15 banques n'était jamais calculée.
+  const peerKeys=['per','pb','dividendYield','evEbitda','earningsYield','roe','roa','epsGrowth3y','netIncomeGrowth','cashConversion','accruals','interestCoverage','netDebtToEbitda','debtToEquity','currentRatio','fcfToDebt',
+    'capitalAdequacy','nplRatio','nplCoverage','liquidityRatio','depositGrowth','solvencyRatio','combinedRatio'] as const;
   const globalPeers:Record<string,(number|null)[]>={}; for(const k of peerKeys) globalPeers[k]=[...raws.values()].map(r=> (r as Record<string,number|null>)[k] ?? null);
   for(const k of peerKeys) globalPeers[k]=winsor(globalPeers[k]);
   const sectorPeers=new Map<Sector,Record<string,(number|null)[]>>();
