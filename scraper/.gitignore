@@ -8,3 +8,5 @@ dist/
 coverage/
 debug-snapshots/
 output/
+# jeton local non versionné (scraper/_tok.mts)
+_tok.mts

@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel, MetricCard, StatPill, Eyebrow, EmptyStatePremium } from '@/components/ui/premium';
 

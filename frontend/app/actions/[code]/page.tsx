@@ -752,6 +752,21 @@ export default async function InstrumentPage({
               <FreshnessBadge fraicheur={fraicheur} />
             </div>
 
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                href={`/actions/${code}/quant`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/[0.10] px-3.5 py-1.5 text-xs font-semibold text-gold transition hover:bg-gold/15 hover:border-gold/40"
+              >
+                ◈ Fiche Quant — Combined Alpha
+              </Link>
+              <Link
+                href="/analyse/combined-alpha"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs text-muted transition hover:border-gold/30 hover:text-gold"
+              >
+                Classement complet →
+              </Link>
+            </div>
+
             {/* Séparateur or */}
             <div className="mt-5 h-px bg-gold-line opacity-40" />
 
