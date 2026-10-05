@@ -596,7 +596,7 @@ export default async function Dashboard() {
               <p>Adaptés au marché de <strong>fixing</strong> de la BRVM (une fixation par séance) :</p>
               <ul className="space-y-1.5 ml-2">
                 <li><strong>Momentum</strong> — Tendance intraséance marquée</li>
-                <li>🔊 <strong>Volume anormal</strong> — Pic d&apos;échanges vs moyenne 20&nbsp;j</li>
+                <li><strong>Volume anormal</strong> — Pic d&apos;échanges vs moyenne 20&nbsp;j</li>
                 <li>➡️ <strong>Mouvement</strong> — Variation de prix significative</li>
               </ul>
               <p className="pt-2 italic text-faint">

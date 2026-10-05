@@ -92,7 +92,7 @@ export default function PublicationsModal({ code, designation, publications, cou
         }`}
         title={disabled ? 'Aucune publication disponible' : `Voir les publications (${count})`}
       >
-        📰 Publications ({count})
+        Publications ({count})
       </button>
 
       {/* Modal overlay */}

@@ -148,7 +148,7 @@ export default function NotificationButton() {
             disabled={busy}
             className="px-4 py-2 rounded-lg bg-down/20 text-down border border-down/40 hover:bg-down/30 disabled:opacity-50 text-sm"
           >
-            {busy ? 'En cours…' : '🔕 Désactiver les notifications'}
+            {busy ? 'En cours…' : 'Désactiver les notifications'}
           </button>
           <button
             type="button"

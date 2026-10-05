@@ -55,7 +55,7 @@ export default function PortfolioDashboard() {
           onClick={handleRefetch}
           className="px-4 py-2 rounded-lg bg-up/10 text-up hover:bg-up/20 transition text-sm font-medium"
         >
-          🔄 Mettre à jour
+          Mettre à jour
         </button>
       </div>
 
@@ -63,7 +63,7 @@ export default function PortfolioDashboard() {
       <div className="flex gap-2 border-b border-border">
         <TabBtn active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Vue d&apos;ensemble</TabBtn>
         <TabBtn active={activeTab === 'optimisation'} onClick={() => setActiveTab('optimisation')}>Optimisation</TabBtn>
-        <TabBtn active={activeTab === 'mouvements'} onClick={() => setActiveTab('mouvements')}>💸 Mouvements</TabBtn>
+        <TabBtn active={activeTab === 'mouvements'} onClick={() => setActiveTab('mouvements')}>Mouvements</TabBtn>
       </div>
 
       <div className="space-y-6">

@@ -73,7 +73,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
             onClick={() => { setPays('DIASPORA'); setStep(1); }}
             className="rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-medium text-accent transition-all hover:bg-accent/20 active:scale-95"
           >
-            🌍 Diaspora (hors UEMOA)
+            Diaspora (hors UEMOA)
           </button>
         </div>
       ),
@@ -119,14 +119,14 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
             onClick={() => { setAutonomie('en_ligne'); setStep(4); }}
             className="rounded-full border border-border bg-surface/40 px-4 py-2.5 text-sm text-ivory transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95"
           >
-            💻 En ligne, en autonomie
+            En ligne, en autonomie
           </button>
           <button
             type="button"
             onClick={() => { setAutonomie('accompagne'); setStep(4); }}
             className="rounded-full border border-border bg-surface/40 px-4 py-2.5 text-sm text-ivory transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95"
           >
-            🤝 Accompagné par un conseiller
+            Accompagné par un conseiller
           </button>
         </div>
       ),
@@ -137,8 +137,8 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
         <div className="flex flex-wrap gap-2">
           {([
             ['cout', 'Les frais les plus bas'],
-            ['solidite', '🏛 Un adossement bancaire solide'],
-            ['proximite', '📍 La proximité géographique'],
+            ['solidite', 'Un adossement bancaire solide'],
+            ['proximite', 'La proximité géographique'],
             ['equilibre', 'Un bon équilibre de tout'],
           ] as const).map(([val, label]) => (
             <button
@@ -244,7 +244,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
                 <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3 text-[11px]">
                   {m.sgi.telephone && (
-                    <a href={`tel:${m.sgi.telephone.replace(/\s/g, '')}`} className="text-accent hover:underline">📞 {m.sgi.telephone}</a>
+                    <a href={`tel:${m.sgi.telephone.replace(/\s/g, '')}`} className="text-accent hover:underline">Tél. {m.sgi.telephone}</a>
                   )}
                   {m.sgi.siteWeb && (
                     <a href={m.sgi.siteWeb} target="_blank" rel="nofollow noopener" className="text-accent hover:underline">Site ↗</a>

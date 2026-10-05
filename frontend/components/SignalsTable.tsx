@@ -41,9 +41,9 @@ const SIG_PILLS: {
   idleCls: string;
 }[] = [
   { value: 'ALL', key: 'all', label: 'Tous', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'BUY', key: 'buy', label: '🟢 Acheter', activeCls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', idleCls: 'border-emerald-500/20 text-emerald-400/70 hover:text-emerald-400' },
-  { value: 'HOLD', key: 'hold', label: '⚪ Conserver', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'SELL', key: 'sell', label: '🔴 Vendre', activeCls: 'bg-red-500/20 text-red-400 border-red-500/40', idleCls: 'border-red-500/20 text-red-400/70 hover:text-red-400' },
+  { value: 'BUY', key: 'buy', label: 'Achat', activeCls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', idleCls: 'border-emerald-500/20 text-emerald-400/70 hover:text-emerald-400' },
+  { value: 'HOLD', key: 'hold', label: 'Conserver', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
+  { value: 'SELL', key: 'sell', label: 'Vente', activeCls: 'bg-red-500/20 text-red-400 border-red-500/40', idleCls: 'border-red-500/20 text-red-400/70 hover:text-red-400' },
 ];
 
 // ─── Composante principale ─────────────────────────────────────────────────
@@ -446,7 +446,7 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
 
           {/* Explication */}
           <div>
-            <h3 className="text-sm font-semibold mb-2">📝 Explication générée</h3>
+            <h3 className="text-sm font-semibold mb-2">Explication générée</h3>
             <div className="bg-bg border border-border/60 rounded-lg p-3">
               <p className="text-sm text-muted leading-relaxed">
                 {s.explication ?? 'Aucune explication enregistrée pour ce signal.'}
@@ -458,13 +458,13 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
           {jsonStr && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold">📥 Inputs bruts (audit)</h3>
+                <h3 className="text-sm font-semibold">Données d’entrée (audit)</h3>
                 <button
                   type="button"
                   onClick={copyJson}
                   className="text-xs text-muted hover:text-up border border-border rounded px-2 py-0.5 transition"
                 >
-                  {copied ? '✓ Copié !' : '📋 Copier'}
+                  {copied ? 'Copié' : 'Copier'}
                 </button>
               </div>
               <pre className="bg-bg border border-border/60 rounded-lg p-3 text-xs font-mono text-muted overflow-x-auto max-h-48">
@@ -487,7 +487,7 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
                 }}
                 className="text-xs border border-border rounded px-3 py-1.5 text-muted hover:text-up hover:border-up/40 transition"
               >
-                📥 Exporter JSON
+                Exporter en JSON
               </button>
             )}
             <Link

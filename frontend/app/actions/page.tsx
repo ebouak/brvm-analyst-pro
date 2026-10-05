@@ -10,7 +10,7 @@ import { canAccess } from '@/lib/server/featureAccess';
 // sont soumises au flag `actions_metrics`. Rendu dynamique : le contenu dépend
 // désormais de l'utilisateur, un cache partagé servirait la version premium à tous.
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Marché Actions' };
+export const metadata = { title: 'Marché actions' };
 
 /**
  * `withMetrics` : charge-t-on les colonnes CALCULÉES (signaux, tendance 30 j) ?
@@ -101,7 +101,7 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
       <div className="max-w-7xl mx-auto px-6 py-12">
         <SectionHeader
           kicker="BRVM · Cote officielle"
-          title="Marché Actions"
+          title="Marché actions"
           subtitle="Tableau de bord des valeurs cotées sur la Bourse Régionale des Valeurs Mobilières."
         />
         <div className="mt-10">
@@ -120,7 +120,7 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
       {/* ── En-tête de page ─────────────────────────────────────────────── */}
       <SectionHeader
         kicker="BRVM · Cote officielle"
-        title="Marché Actions"
+        title="Marché actions"
         subtitle="Toutes les valeurs cotées · cours, volumes, performances et signaux assistés."
         actions={
           <>

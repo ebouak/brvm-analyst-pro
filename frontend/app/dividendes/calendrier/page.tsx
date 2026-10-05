@@ -9,7 +9,7 @@ import type { DividendCalendarEvent } from '@/lib/dividend/calendar';
 
 export const metadata: Metadata = {
   title: 'Calendrier des Dividendes',
-  description: 'Calendrier annuel interactif des dividendes avec dates de détachement, taux et rendements estimés',
+  description: 'Calendrier annuel des dividendes : dates de détachement, montants et rendements estimés.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -113,7 +113,7 @@ export default async function DividendCalendarPage() {
         <SectionHeader
           kicker="Calendrier boursier"
           title="Dividendes"
-          subtitle="Calendrier annuel interactif · dates de détachement, taux et rendements estimés"
+          subtitle="Calendrier annuel : dates de détachement, montants et rendements estimés."
         />
         <ViewTabs tabs={CALENDAR_TABS} current="/dividendes/calendrier" />
 

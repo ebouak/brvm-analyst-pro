@@ -5,7 +5,7 @@ import ViewTabs from '@/components/ViewTabs';
 import { INTEL_TABS } from '@/lib/viewTabsPresets';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Analyses Hebdo Matières Premières' };
+export const metadata = { title: 'Matières premières : analyse hebdomadaire' };
 
 interface WeeklyArticle {
   id: string;
@@ -105,8 +105,8 @@ export default async function WeeklyPage() {
   return (
     <div className="min-h-screen bg-bg text-ivory px-4 py-8 max-w-5xl mx-auto">
       <SectionHeader
-        title="Analyses Hebdo – Matières Premières"
-        subtitle="Impact du cacao, pétrole, caoutchouc et huile de palme sur les valeurs BRVM"
+        title="Matières premières : analyse hebdomadaire"
+        subtitle="Le cacao, le pétrole, le caoutchouc et l’huile de palme, et leur lien avec les valeurs cotées à la BRVM."
       />
       <div className="mt-4">
         <ViewTabs tabs={INTEL_TABS} current="/weekly" />

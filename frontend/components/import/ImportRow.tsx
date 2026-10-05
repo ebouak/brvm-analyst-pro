@@ -104,7 +104,7 @@ export default function ImportRow({ file, validCodes }: Props) {
           {status === 'pending' && <span className="text-faint">en attente</span>}
           {status === 'reading' && 'lecture…'}
           {status === 'analyzing' && 'analyse…'}
-          {status === 'auto-saving' && '💾 écriture…'}
+          {status === 'auto-saving' && 'Enregistrement…'}
           {status === 'done' && <span className="text-up">✓ enregistré ({provider})</span>}
           {status === 'review' && <span className="text-warn">à valider ({provider})</span>}
           {status === 'error' && <span className="text-down">✕ {error}</span>}

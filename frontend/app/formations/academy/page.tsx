@@ -93,7 +93,7 @@ export default async function AcademyHubPage() {
         <SectionHeader
           kicker="Académie"
           title="WestBourse Academy"
-          subtitle="Des cours interactifs par niveau : progression sauvegardée, quiz, et bientôt examens et certificats."
+          subtitle="Des cours interactifs par niveau, avec progression sauvegardée, quiz, examens et certificats."
         />
 
         <Lecon0Carte className="mt-4" />
@@ -186,7 +186,7 @@ export default async function AcademyHubPage() {
             className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-5 py-4 transition hover:border-accent/30"
           >
             <div>
-              <p className="text-sm font-semibold text-ivory">📚 Édition Intégrale (44 leçons) · version classique</p>
+              <p className="text-sm font-semibold text-ivory">Édition intégrale (44 leçons) · version classique</p>
               <p className="text-xs text-muted">L’ancien format, en attendant sa migration vers les cours interactifs.</p>
             </div>
             <span aria-hidden className="text-muted">→</span>

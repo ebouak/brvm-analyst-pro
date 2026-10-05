@@ -145,7 +145,7 @@ export default function IntraDayPatternsTable({
           }`}
           onClick={() => setAutoRefresh(!autoRefresh)}
         >
-          {autoRefresh ? '🔄 Auto (30s)' : '⏸ Manuel'}
+          {autoRefresh ? 'Actualisation auto (30 s)' : 'Actualisation manuelle'}
         </button>
       </div>
 
@@ -201,7 +201,7 @@ export default function IntraDayPatternsTable({
           information.
         </p>
         <p>
-          <strong>🔊 Volume anormal :</strong> volume de la séance supérieur à 2× sa moyenne des 20
+          <strong>Volume anormal :</strong> volume de la séance supérieur à 2× sa moyenne des 20
           dernières séances.
         </p>
         <p>

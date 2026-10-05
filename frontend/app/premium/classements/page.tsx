@@ -31,7 +31,7 @@ export default async function ClassementsPage({
       {/* Header */}
       <SectionHeader
         kicker="Classements · 9 critères analytiques"
-        title="Classements des Actions BRVM"
+        title="Classements des actions BRVM"
         subtitle="Palmarès de toutes les sociétés cotées selon la performance, la liquidité, la valorisation et les fondamentaux."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
       />

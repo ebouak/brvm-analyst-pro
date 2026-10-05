@@ -286,7 +286,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
                         onClick={() => printAnalyse(i, symbole || symbolePreselect)}
                         className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-[11px] text-muted hover:text-white hover:border-gold/40"
                       >
-                        🖨️ Imprimer
+                        Imprimer
                       </button>
                     </div>
                   )}

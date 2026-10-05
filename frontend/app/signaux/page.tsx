@@ -120,7 +120,7 @@ export default async function SignauxPage() {
         <SectionHeader
           kicker="BRVM · Moteur de signaux"
           title="Signaux d'opportunité"
-          subtitle="Détection assistée d'opportunités d'entrée et de sortie sur le marché actions."
+          subtitle="Signaux techniques calculés à chaque séance, avec le détail des facteurs qui les composent."
         />
         <div className="mt-10">
           <EmptyStatePremium
@@ -150,7 +150,7 @@ export default async function SignauxPage() {
       <SectionHeader
         kicker="BRVM · Moteur de signaux"
         title="Signaux d'opportunité"
-        subtitle="Détection assistée d'opportunités d'entrée et de sortie · scoring multi-facteurs explicable."
+        subtitle="Signaux techniques calculés à chaque séance, avec le détail des facteurs qui les composent."
         actions={
           <>
             <StatPill tone="gold">

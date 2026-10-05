@@ -25,7 +25,7 @@ export default async function ScreenerPage() {
         <SectionHeader
           kicker="Outils"
           title="Screener multi-critères"
-          subtitle="Filtrez les actions par RSI, volume, score, secteur, dividende"
+          subtitle="Filtrez les actions par RSI, volume, score, secteur et rendement du dividende."
         />
         <div className="mt-10">
           {gate.required === 'disabled' ? (

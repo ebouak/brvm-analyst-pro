@@ -125,7 +125,7 @@ export default async function CalendrierPremiumPage() {
       <div className="space-y-4">
         <SectionHeader
           kicker="Agenda Premium"
-          title="Dates Clés"
+          title="Dates clés"
           subtitle="Communiqués, états financiers, dividendes et Assemblées Générales, regroupés par société."
           actions={<StatPill tone="gold">✦ Premium</StatPill>}
         />

@@ -77,7 +77,7 @@ export default async function ReportsHome() {
       {/* ── En-tête ── */}
       <SectionHeader
         kicker="Centre de rapports"
-        title="Rapports & Événements"
+        title="Rapports et événements"
         subtitle="Synthèses de marché, analyses sectorielles et communiqués d'émetteurs BRVM/UEMOA."
         actions={
           lastDate && (
