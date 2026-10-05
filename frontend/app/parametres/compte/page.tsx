@@ -14,7 +14,7 @@ export default function ComptePage() {
     setMsg(null);
     try {
       const res = await fetch('/api/account/export');
-      if (!res.ok) throw new Error((await res.json()).error ?? 'Échec export');
+      if (!res.ok) throw new Error((await res.json()).error ?? 'L’export a échoué. Réessayez.');
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -37,7 +37,7 @@ export default function ComptePage() {
     try {
       const res = await fetch('/api/account/delete', { method: 'DELETE' });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Échec suppression');
+      if (!res.ok) throw new Error(json.error ?? 'La suppression a échoué. Réessayez.');
       setMsg(json.message ?? 'Données supprimées.');
       setTimeout(() => (window.location.href = '/'), 2000);
     } catch (e) {

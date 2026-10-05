@@ -17,7 +17,7 @@ export default function RecentSignalsCard({ signals }: { signals: SignalRow[] })
     return (
       <div className="bg-surface border border-border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-2">Signaux récents</h3>
-        <p className="text-xs text-muted py-4 text-center">Aucun signal BUY/SELL aujourd'hui.</p>
+        <p className="text-xs text-muted py-4 text-center">Aucun signal d’achat ni de vente aujourd’hui.</p>
         <Link href="/signaux" className="text-xs text-up hover:underline">Voir tous les signaux →</Link>
       </div>
     );

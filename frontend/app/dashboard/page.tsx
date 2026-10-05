@@ -452,7 +452,7 @@ export default async function Dashboard() {
           <RecentSignalsCard signals={signals as SignalDaily[]} />
         ) : (
           <PremiumLock
-            title="Signaux BUY / SELL réservés au premium"
+            title="Signaux d’achat et de vente réservés au Premium"
             pitch="Les signaux d'achat et de vente notés A–F, avec leur explication, sont inclus dans l'abonnement Premium."
             rows={3}
           />

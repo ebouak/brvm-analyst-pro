@@ -274,7 +274,7 @@ export default function MovementsForm({ onSuccess }: Props) {
         </div>
 
         {isLoading ? (
-          <div className="p-6 text-center text-muted">Chargement...</div>
+          <div className="p-6 text-center text-muted">Chargement…</div>
         ) : monthMovements.length === 0 ? (
           <div className="p-6 text-center text-muted">
             {moisFin ? 'Aucun mouvement pour ce mois' : 'Sélectionnez un mois pour afficher les mouvements'}

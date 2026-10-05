@@ -63,7 +63,7 @@ export default function ProfileClient({ initial, email, isPremium, initialPrefer
       fd.append('file', new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
       const r = await fetch('/api/avatar', { method: 'POST', body: fd });
       const j = await r.json();
-      if (r.ok) setAvatar(j.avatar_url); else setMsg(j.error ?? 'Échec upload');
+      if (r.ok) setAvatar(j.avatar_url); else setMsg(j.error ?? 'L’envoi de la photo a échoué.');
     } catch { setMsg('Image illisible'); } finally { setUploading(false); }
   }
 

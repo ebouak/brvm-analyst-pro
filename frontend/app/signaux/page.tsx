@@ -103,7 +103,7 @@ export default async function SignauxPage() {
       <AccessGate
         required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Les Signaux"
-        hint="Signaux BUY / SELL notés, avec leur performance historique."
+        hint="Signaux d’achat et de vente notés, avec leur performance historique."
       />
     );
   }
@@ -225,10 +225,10 @@ export default async function SignauxPage() {
       {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
       {total > 0 && buyCount === 0 && (
         <div className="rounded-xl border border-info/25 bg-info/[0.06] px-4 py-3 text-sm text-muted">
-          <span className="font-medium text-white">Aucune opportunité d&apos;achat détectée sur cette séance.</span>{' '}
-          Le moteur n&apos;a trouvé aucun titre réunissant les conditions d&apos;un signal d&apos;achat —
-          c&apos;est un état de marché normal (phase neutre ou prudente), pas une anomalie. Les titres
-          en <span className="text-white">Conserver</span> restent à surveiller pour un futur point d&apos;entrée.
+          <span className="font-medium text-white">Aucun signal d&apos;achat sur cette séance.</span>{' '}
+          Aucun titre ne réunit les conditions d&apos;un signal d&apos;achat. C&apos;est une situation
+          courante en phase de marché neutre, pas une anomalie. Les titres classés
+          <span className="text-white">Conserver</span> n&apos;ont simplement franchi aucun des deux seuils.
         </div>
       )}
 
@@ -247,9 +247,9 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="BUY" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">Score &gt; +0.60</p>
+            <p className="tabular text-sm font-semibold text-ivory">Score &gt; +0,60</p>
             <p className="text-xs text-muted leading-relaxed">
-              Opportunité d'achat détectée : momentum positif et valorisation favorable.
+              Les facteurs techniques (variation, volume, RSI, MACD, tendance) penchent nettement à la hausse.
             </p>
           </div>
 
@@ -258,9 +258,9 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="HOLD" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">−0.60 ≤ Score ≤ +0.60</p>
+            <p className="tabular text-sm font-semibold text-ivory">−0,60 ≤ Score ≤ +0,60</p>
             <p className="text-xs text-muted leading-relaxed">
-              Attente & surveillance : signal insuffisant pour déclencher une action.
+              Aucun seuil franchi : les facteurs techniques ne penchent pas assez nettement.
             </p>
           </div>
 
@@ -269,9 +269,9 @@ export default async function SignauxPage() {
             <div className="flex items-center gap-2">
               <SignalBadge signal="SELL" />
             </div>
-            <p className="tabular text-sm font-semibold text-ivory">Score &lt; −0.60</p>
+            <p className="tabular text-sm font-semibold text-ivory">Score &lt; −0,60</p>
             <p className="text-xs text-muted leading-relaxed">
-              Opportunité de sortie détectée : dégradation des indicateurs de tendance.
+              Les facteurs techniques penchent nettement à la baisse.
             </p>
           </div>
         </div>

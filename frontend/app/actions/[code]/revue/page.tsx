@@ -161,7 +161,7 @@ export default async function RevuePage({ params }: Props) {
       <p className="text-sm text-gray-700 leading-relaxed mb-2">
         {lastDiv
           ? `Le dernier dividende connu (exercice ${lastDiv.exercice}) est de ${fcfa(lastDiv.montant)} par action, soit un rendement de ${d.ratios.yieldPct != null ? d.ratios.yieldPct.toFixed(2) + ' %' : '—'} au cours actuel${d.ratios.payout != null ? `, pour un taux de distribution d'environ ${d.ratios.payout.toFixed(0)} % du bénéfice` : ''}. Le détachement du dividende (à l'AGO) provoque mécaniquement une baisse technique du cours égale au coupon : l'actionnaire reçoit en cash ce que le cours perd, sans destruction de valeur. Sur la durée, la trajectoire du cours suit surtout la progression des résultats.`
-          : "Aucun dividende récent connu en base pour cette valeur."}
+          : "Aucun dividende récent enregistré pour cette valeur."}
       </p>
 
       {/* Avant la prochaine publication (earnings preview qualitatif) */}

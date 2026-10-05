@@ -97,7 +97,7 @@ export default function IntraDayPatternsTable({
 
   if (loading) {
     return (
-      <div className="text-center text-muted py-8">Chargement des patterns...</div>
+      <div className="text-center text-muted py-8">Chargement des configurations…</div>
     );
   }
 
@@ -105,7 +105,7 @@ export default function IntraDayPatternsTable({
     return (
       <div className="bg-surface border border-border rounded-xl p-10 text-center">
         <p className="text-muted mb-2">◈ Aucun pattern détecté</p>
-        <p className="text-xs text-faint">Aucun pattern valide pour {dateMarche}</p>
+        <p className="text-xs text-faint">Aucune configuration détectée pour la séance du {dateMarche}</p>
       </div>
     );
   }

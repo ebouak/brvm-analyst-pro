@@ -975,7 +975,7 @@ export default async function InstrumentPage({
                     <span>Équilibre</span>
                     <span>Surachat &gt;70</span>
                   </div>
-                  <BeginnerHint text="RSI < 30 = l'action est potentiellement survendue (bon point d'entrée possible). RSI > 70 = suracheté (prudence)." />
+                  <BeginnerHint text="RSI sous 30 : le titre a fortement reculé en peu de séances (zone dite de survente). RSI au-dessus de 70 : il a fortement progressé (zone dite de surachat). Ni l'un ni l'autre ne prédit le mouvement suivant." />
                 </div>
 
                 {/* Moyennes mobiles */}

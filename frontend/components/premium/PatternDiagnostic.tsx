@@ -40,7 +40,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
   if (error) {
     return (
       <div className="bg-surface border border-down/30 rounded-xl p-4">
-        <p className="text-sm text-down">Erreur: {error}</p>
+        <p className="text-sm text-down">Erreur : {error}</p>
       </div>
     );
   }
