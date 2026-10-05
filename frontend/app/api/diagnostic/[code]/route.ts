@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkFeature } from '@/lib/server/featureGate';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createSbAdmin } from '@supabase/supabase-js';
-import { resolveApiKey } from '@/lib/server/apiKeys';
+import { redacteursDisponibles, redigerEnFlux } from '@/lib/server/redacteur';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeDiagnosticMetrics } from '@/lib/diagnostic/metrics';
@@ -11,28 +11,12 @@ import { computeRedFlags } from '@/lib/diagnostic/redFlags';
 import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals';
 import { findWebSignals } from '@/lib/diagnostic/webSearch';
 import { MARQUE_ECHEC } from '@/lib/diagnostic/echec';
+import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
+import { lectureIntermediaire } from '@/lib/financials/interim';
 
 export const maxDuration = 120;
 
 const MAX_AGE_MS = 7 * 24 * 3600 * 1000;
-
-interface ProviderCfg {
-  name: string;
-  key: string | undefined;
-  url: string;
-  model: string;
-}
-
-async function getProviders(): Promise<ProviderCfg[]> {
-  const [deepseekKey, mistralKey, xaiKey] = await Promise.all([
-    resolveApiKey('deepseek'), resolveApiKey('mistral'), resolveApiKey('xai'),
-  ]);
-  return [
-    { name: 'deepseek', key: deepseekKey ?? undefined, url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-    { name: 'mistral',  key: mistralKey ?? undefined, url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
-    { name: 'grok',     key: xaiKey ?? undefined, url: 'https://api.x.ai/v1/chat/completions', model: 'grok-4.6' },
-  ].filter((p) => p.key);
-}
 
 export async function POST(req: Request, { params }: { params: { code: string } }) {
   const supa = createServerClient();
@@ -87,14 +71,16 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     return NextResponse.json({ error: consumed.reason }, { status: consumed.status });
   }
 
-  // async-parallel : données financières et clés LLM sont indépendantes → en parallèle
-  const [data, providerList] = await Promise.all([
+  // async-parallel : données financières, contexte de pairs et clés LLM sont
+  // indépendants → en parallèle
+  const [data, contexteQuant, redacteurs] = await Promise.all([
     loadCompanyFinancials(code),
-    getProviders(),
+    chargerContexteQuant(admin, code),
+    redacteursDisponibles(),
   ]);
   if (!data) return NextResponse.json({ error: 'Instrument inconnu' }, { status: 404 });
-  if (providerList.length === 0) {
-    return NextResponse.json({ error: 'Aucune clé LLM configurée (DeepSeek, Mistral ou Grok requis)' }, { status: 503 });
+  if (redacteurs.length === 0) {
+    return NextResponse.json({ error: 'Aucune clé LLM configurée (DeepSeek, Gemini ou Grok requis)' }, { status: 503 });
   }
 
   const inc_n  = data.incomeStatements[0] ?? null;
@@ -121,6 +107,18 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     .filter((cat) => newsSignals[cat].length === 0);
   const webSignals = await findWebSignals(admin, code, data.instrument.designation ?? code, categoriesSansResultat);
 
+  // Comptes intermédiaires postérieurs au dernier annuel : confrontés aux MÊMES
+  // annuels que les tableaux du prompt (income_statements), pour que les douze
+  // mois glissants se calculent sur les chiffres que le modèle voit.
+  const interim = lectureIntermediaire([
+    ...data.incomeStatements,
+    ...data.incomeInterim,
+  ].map((l) => ({
+    periode: String(l.periode),
+    revenu_total: l.revenu_total == null ? null : Number(l.revenu_total),
+    resultat_net: l.resultat_net == null ? null : Number(l.resultat_net),
+  })));
+
   const prompt = buildDiagnosticPrompt({
     code,
     designation: data.instrument.designation,
@@ -132,6 +130,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     periode_n: inc_n?.periode ?? 'N',
     periode_n1: inc_n1?.periode ?? 'N-1',
     redFlags, newsSignals, webSignals,
+    interim, contexteQuant,
   });
 
   const encoder = new TextEncoder();
@@ -141,63 +140,33 @@ export async function POST(req: Request, { params }: { params: { code: string } 
       let full = '';
       let usedModel = 'unknown';
 
-      for (const p of providerList) {
-        try {
-          const resp = await fetch(p.url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
-            body: JSON.stringify({
-              model: p.model,
-              stream: true,
-              messages: [{ role: 'user', content: prompt }],
-              max_tokens: 4096,
-              temperature: 0.3,
-            }),
-            signal: AbortSignal.timeout(110000),
-          });
-
-          if (!resp.ok || !resp.body) continue;
-
-          usedModel = p.name;
-          const reader = resp.body.getReader();
-          const dec = new TextDecoder();
-
-          let streamDone = false;
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done || streamDone) break;
-            const chunk = dec.decode(value, { stream: true });
-            for (const line of chunk.split('\n')) {
-              if (!line.startsWith('data: ')) continue;
-              const raw = line.slice(6).trim();
-              if (raw === '[DONE]') {
-                streamDone = true;
-                break;
-              }
-              try {
-                const j = JSON.parse(raw) as { choices?: Array<{ delta?: { content?: string } }> };
-                const text = j.choices?.[0]?.delta?.content ?? '';
-                if (text) {
-                  full += text;
-                  controller.enqueue(encoder.encode(text));
-                }
-              } catch {
-                // ligne malformée, ignorer
-              }
-            }
+      // Cascade DeepSeek → Gemini → Grok (lib/server/redacteur). Elle ne joue
+      // qu'avant le premier octet : un fournisseur qui tombe en cours de flux
+      // laisse un rapport partiel, qui n'est PAS mis en cache (voir plus bas).
+      let complet = false;
+      try {
+        const redaction = await redigerEnFlux(
+          [{ role: 'user', content: prompt }],
+          { maxTokens: 7000, temperature: 0.3, timeoutMs: 110_000 },
+        );
+        if (redaction) {
+          usedModel = redaction.modele;
+          for await (const fragment of redaction.fragments) {
+            full += fragment;
+            controller.enqueue(encoder.encode(fragment));
           }
-          break; // succès, on arrête la cascade
-        } catch {
-          continue; // prochain provider
+          complet = true;
         }
+      } catch (e) {
+        console.error('[diagnostic] flux interrompu pour', code, (e as Error).name);
       }
 
-      if (full) {
+      if (full && complet) {
         await admin.from('diagnostic_reports').upsert(
           { code, markdown_content: full, model_used: usedModel, metrics_snapshot: m as unknown as Record<string, unknown>, red_flag_score: redFlags.overallScore },
           { onConflict: 'code' },
         );
-      } else {
+      } else if (!full) {
         // Marqueur, pas de prose : écrire la panne dans le flux de CONTENU la
         // rendait indistinguable d'un rapport, et le client l'affichait comme
         // une analyse. Le statut HTTP ne peut pas servir — il est arrêté à 200

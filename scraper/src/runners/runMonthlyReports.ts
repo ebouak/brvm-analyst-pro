@@ -58,17 +58,18 @@ type Supa = ReturnType<typeof getSupabase>;
  * frontend) puis variables d'environnement. Sans clé → repli déterministe.
  */
 async function resolveNarrator(supabase: Supa): Promise<ReportNarrator> {
-  const keys: { deepseek?: string; mistral?: string; grok?: string } = {
+  const keys: { deepseek?: string; gemini?: string; xai?: string } = {
     deepseek: process.env.DEEPSEEK_API_KEY,
-    mistral: process.env.MISTRAL_API_KEY,
-    grok: process.env.GROK_API_KEY,
+    gemini: process.env.GEMINI_API_KEY,
+    xai: process.env.XAI_API_KEY ?? process.env.GROK_API_KEY,
   };
   try {
     const { data } = await supabase.from('api_keys').select('provider, api_key');
     for (const r of (data ?? []) as { provider: string; api_key: string }[]) {
       if (r.provider === 'deepseek' && !keys.deepseek) keys.deepseek = r.api_key;
-      if (r.provider === 'mistral' && !keys.mistral) keys.mistral = r.api_key;
-      if (r.provider === 'grok' && !keys.grok) keys.grok = r.api_key;
+      if (r.provider === 'gemini' && !keys.gemini) keys.gemini = r.api_key;
+      // La table range Grok sous `xai` ; `grok` reste lu pour l'historique.
+      if ((r.provider === 'xai' || r.provider === 'grok') && !keys.xai) keys.xai = r.api_key;
     }
   } catch (err) {
     logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'api_keys illisible — repli déterministe possible');

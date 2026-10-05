@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { resolveApiKey, type LlmProvider } from '@/lib/server/apiKeys';
+import { redacteursDisponibles, redigerEnFlux } from '@/lib/server/redacteur';
 import { runTool } from '@/lib/briefTools';
 import { SYSTEM_PROMPT_ANALYSTE } from '@/lib/ai/prompts';
 import { createClient } from '@/lib/supabase/server';
@@ -49,12 +49,6 @@ function mentionsPortfolio(text: string): boolean {
 }
 
 export const maxDuration = 60;
-
-const ORDER: { provider: LlmProvider; url: string; model: string }[] = [
-  { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral',  url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
-  { provider: 'xai',      url: 'https://api.x.ai/v1/chat/completions',      model: 'grok-4.6' },
-];
 
 // ── Détecte les codes BRVM mentionnés dans le texte ──────────────────────────
 
@@ -171,59 +165,13 @@ async function buildRichContext(question: string): Promise<string> {
   return parts.join('\n');
 }
 
-// ── Streaming LLM ─────────────────────────────────────────────────────────────
-
-async function* streamLLM(
-  cfg: { url: string; model: string },
-  key: string,
-  messages: unknown[],
-): AsyncGenerator<string> {
-  const resp = await fetch(cfg.url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: cfg.model, temperature: 0.15, stream: true, messages }),
-    signal: AbortSignal.timeout(50000),
-  });
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error(`${resp.status}: ${err.slice(0, 200)}`);
-  }
-
-  const reader = resp.body!.getReader();
-  const dec = new TextDecoder();
-  let buf = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split('\n');
-    buf = lines.pop() ?? '';
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const raw = line.slice(6).trim();
-      if (raw === '[DONE]') return;
-      try {
-        const evt = JSON.parse(raw);
-        const text: string | undefined = evt?.choices?.[0]?.delta?.content;
-        if (text) yield text;
-      } catch { /* skip */ }
-    }
-  }
-}
-
 // ── Route principale ──────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // 1. Résoudre le provider
-  let chosen: { url: string; model: string; key: string } | null = null;
-  for (const c of ORDER) {
-    const key = await resolveApiKey(c.provider);
-    if (key) { chosen = { url: c.url, model: c.model, key }; break; }
-  }
-  if (!chosen) {
+  // 1. Au moins un fournisseur configuré (cascade commune : lib/server/redacteur)
+  if ((await redacteursDisponibles()).length === 0) {
     return Response.json(
-      { error: 'Aucune clé IA configurée. Ajoutez DeepSeek, Mistral ou Grok dans /admin/cles-api.' },
+      { error: 'Aucune clé IA configurée. Ajoutez DeepSeek, Gemini ou Grok dans /admin/cles-api.' },
       { status: 503 },
     );
   }
@@ -253,7 +201,14 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (const text of streamLLM({ url: chosen!.url, model: chosen!.model }, chosen!.key, messages)) {
+        // La cascade joue avant le premier octet : un fournisseur en panne
+        // (crédit épuisé, modèle retiré) cède la place au suivant.
+        const redaction = await redigerEnFlux(
+          messages as { role: 'system' | 'user' | 'assistant'; content: string }[],
+          { temperature: 0.15, maxTokens: 2500, timeoutMs: 50_000 },
+        );
+        if (!redaction) throw new Error('Aucun fournisseur IA n’a répondu.');
+        for await (const text of redaction.fragments) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
         }
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));

@@ -1,12 +1,13 @@
 import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 
-export type LlmProvider = 'deepseek' | 'mistral' | 'xai';
+export type LlmProvider = 'deepseek' | 'mistral' | 'xai' | 'gemini';
 
 const ENV_VAR: Record<LlmProvider, string> = {
   deepseek: 'DEEPSEEK_API_KEY',
   mistral: 'MISTRAL_API_KEY',
   xai: 'XAI_API_KEY',
+  gemini: 'GEMINI_API_KEY',
 };
 
 /**

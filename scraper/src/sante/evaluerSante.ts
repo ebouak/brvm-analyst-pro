@@ -12,7 +12,7 @@
  * d'alerte. Aucun I/O ici, tout est testable en isolation.
  */
 
-export type Fournisseur = 'deepseek' | 'mistral' | 'xai';
+export type Fournisseur = 'deepseek' | 'mistral' | 'xai' | 'gemini';
 export type EtatFournisseur = 'ok' | 'limite' | 'panne';
 
 export interface SondageFournisseur {

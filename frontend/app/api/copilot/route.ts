@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
-import { resolveApiKey, type LlmProvider } from '@/lib/server/apiKeys';
+import { rediger } from '@/lib/server/redacteur';
 import { parseCopilotQuery, findSociete, normalize, type CopilotIntent, type InstrumentRef } from '@/lib/copilot/parse';
 import { loadPerTrapDataset, loadDividendDataset } from '@/lib/citable/page';
 import { NAV_GROUPS, PALETTE_EXTRA } from '@/lib/nav';
@@ -85,11 +85,6 @@ async function executeIntent(intent: CopilotIntent): Promise<CopilotResponse> {
 
 // ── Fallback LLM : un appel, sortie JSON, validée zod ────────────────────────
 
-const LLM_ORDER: { provider: LlmProvider; url: string; model: string }[] = [
-  { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
-];
-
 const TOOL_PROMPT = `Tu es le routeur de commandes de WESTBOURSE (analyse BRVM). Choisis UN outil pour la requête utilisateur et réponds UNIQUEMENT en JSON compact, sans markdown.
 Outils :
 - {"tool":"chercher_societe","query":"<nom ou code de la société>"} — la requête vise une société cotée BRVM précise.
@@ -98,37 +93,35 @@ Outils :
 - {"tool":"filtrer_rendement","op":"lt|gt","seuil":<n>} — filtre par rendement du dividende (%).
 Si aucun outil ne convient, réponds {"tool":"ouvrir_page","href":"/assistant"}.`;
 
+function lireOutil(raw: string): ToolCall | null {
+  try {
+    const jsonText = raw.replace(/^```(?:json)?|```$/g, '').trim();
+    const parsed = toolSchema.safeParse(JSON.parse(jsonText));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+
 async function llmChooseTool(q: string): Promise<ToolCall | null> {
   const prompt = TOOL_PROMPT.replace('__ROUTES__', [...PAGE_WHITELIST].join(' '));
-  for (const { provider, url, model } of LLM_ORDER) {
-    const key = await resolveApiKey(provider);
-    if (!key) continue;
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: prompt },
-            { role: 'user', content: q },
-          ],
-          temperature: 0,
-          max_tokens: 100,
-        }),
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (!res.ok) continue;
-      const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-      const raw = data.choices?.[0]?.message?.content?.trim() ?? '';
-      const jsonText = raw.replace(/^```(?:json)?|```$/g, '').trim();
-      const parsed = toolSchema.safeParse(JSON.parse(jsonText));
-      if (parsed.success) return parsed.data;
-    } catch {
-      // provider suivant
-    }
-  }
-  return null;
+  // Cascade commune, sans Grok (trop lent pour une barre de commande). Une
+  // sortie qui ne passe pas le schéma zod fait passer au fournisseur suivant.
+  const r = await rediger(
+    [
+      { role: 'system', content: prompt },
+      { role: 'user', content: q },
+    ],
+    {
+      temperature: 0,
+      maxTokens: 100,
+      timeoutMs: 10_000,
+      formatFr: false,
+      fournisseurs: ['deepseek', 'gemini'],
+      accepter: (t) => lireOutil(t) != null,
+    },
+  );
+  return r ? lireOutil(r.texte) : null;
 }
 
 async function executeTool(call: ToolCall, instruments: InstrumentRef[], q: string): Promise<CopilotResponse> {

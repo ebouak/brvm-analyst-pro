@@ -1,5 +1,6 @@
 /**
- * Sonde réellement les trois fournisseurs LLM (DeepSeek, Mistral, xAI) et
+ * Sonde réellement les fournisseurs LLM (DeepSeek, Gemini, xAI, et Mistral
+ * qui ne sert plus qu'à l'OCR de repli) et
  * alerte par Telegram dès qu'au moins l'un est en panne.
  *
  * POURQUOI UNE SONDE RÉELLE ET NON UNE SIMPLE VÉRIFICATION DE CONFIG : le
@@ -34,6 +35,12 @@ export const FOURNISSEURS_LLM: { fournisseur: Fournisseur; url: string; modele: 
   { fournisseur: 'deepseek', url: 'https://api.deepseek.com/chat/completions', modele: 'deepseek-chat' },
   { fournisseur: 'mistral', url: 'https://api.mistral.ai/v1/chat/completions', modele: 'mistral-small-latest' },
   { fournisseur: 'xai', url: 'https://api.x.ai/v1/chat/completions', modele: 'grok-4.6' },
+  // Second de la cascade de rédaction depuis le 2026-10-05 (src/llm/redacteur.ts).
+  {
+    fournisseur: 'gemini',
+    url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+    modele: 'gemini-3.8-flash',
+  },
 ];
 
 const TIMEOUT_MS = 10_000;

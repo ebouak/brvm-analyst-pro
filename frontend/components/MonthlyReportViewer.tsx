@@ -214,9 +214,9 @@ export function MonthlyReportViewer({ report, pdfUrl }: MonthlyReportViewerProps
             </div>
 
             <div className="rounded-card border border-border bg-surface p-6">
-              <h4 className="text-sm font-semibold text-ivory mb-3">Recommandations</h4>
+              <h4 className="text-sm font-semibold text-ivory mb-3">Secteurs du mois écoulé</h4>
               <p className="text-sm leading-relaxed text-muted text-justify whitespace-pre-wrap">
-                {report.recommendations || 'Aucune recommandation disponible.'}
+                {report.recommendations || 'Aucune lecture sectorielle disponible.'}
               </p>
             </div>
           </>

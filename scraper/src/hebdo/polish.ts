@@ -4,19 +4,15 @@
  * whitelist est REJETÉE → on retombe sur le squelette brut (jamais d'invention).
  */
 import { logger } from '../logger.js';
+import { rediger } from '../llm/redacteur.js';
 
 export interface SkeletonSection { titre: string; texte: string }
-
-const ORDER: { provider: string; url: string; model: string }[] = [
-  { provider: 'deepseek', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-  { provider: 'mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
-];
 
 /**
  * Même règle que frontend/lib/hebdo/narrative.ts. Dupliquée volontairement :
  * frontend et scraper sont deux paquets séparés (pas de module partagé).
  */
-function assertNoForeignNumber(texte: string, chiffres: number[]): boolean {
+export function assertNoForeignNumber(texte: string, chiffres: number[]): boolean {
   // Les montants sont écrits à la française (« 3 050 FCFA ») : on recolle les
   // milliers avant d'extraire, sinon « 3 050 » se lirait « 3 » puis « 050 » et
   // le garde-fou rejetterait à tort un texte parfaitement fidèle.
@@ -40,7 +36,7 @@ const CONNECTEURS_CAUSAUX = [
   'porté par', 'porte par', 'plombé par', 'plombe par',
 ];
 
-function assertNoCausalClaim(texte: string): boolean {
+export function assertNoCausalClaim(texte: string): boolean {
   const t = texte.toLowerCase();
   return !CONNECTEURS_CAUSAUX.some((c) => t.includes(c));
 }
@@ -65,37 +61,25 @@ export async function polishNarrative(
     `N'utilise que ces valeurs numériques : ${chiffres.join(', ')}. ` +
     `Conserve exactement les mêmes titres de section (lignes commençant par ##).\n\n${brut}`;
 
-  for (const p of ORDER) {
-    const key = await resolveKey(p.provider);
-    if (!key) continue;
-    try {
-      const res = await fetch(p.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-        body: JSON.stringify({ model: p.model, messages: [{ role: 'user', content: prompt }], temperature: 0.3 }),
-      });
-      if (!res.ok) continue;
-      const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-      const out = json.choices?.[0]?.message?.content ?? '';
-      if (!out) continue;
+  const blocsDe = (out: string) => out.split(/^##\s+/m).map((b) => b.trim()).filter(Boolean);
 
-      if (!assertNoForeignNumber(out, chiffres)) {
-        logger.warn({ provider: p.provider }, 'hebdo : reformulation rejetée (chiffre étranger) — squelette conservé');
-        continue;
-      }
-      if (!assertNoCausalClaim(out)) {
-        logger.warn({ provider: p.provider }, 'hebdo : reformulation rejetée (causalité affirmée) — squelette conservé');
-        continue;
-      }
-      const blocs = out.split(/^##\s+/m).map((b) => b.trim()).filter(Boolean);
-      if (blocs.length !== sections.length) continue;
-      return blocs.map((b, i) => {
-        const nl = b.indexOf('\n');
-        return { titre: sections[i]!.titre, texte: (nl >= 0 ? b.slice(nl + 1) : b).trim() };
-      });
-    } catch (e) {
-      logger.warn({ provider: p.provider, err: String(e) }, 'hebdo : provider LLM indisponible');
-    }
+  // Cascade commune (src/llm/redacteur.ts). Une sortie qui enfreint une règle
+  // fait passer au fournisseur suivant ; si tous échouent, squelette brut.
+  const r = await rediger([{ role: 'user', content: prompt }], resolveKey, {
+    temperature: 0.3,
+    maxTokens: 2500,
+    accepter: (out) =>
+      assertNoForeignNumber(out, chiffres) &&
+      assertNoCausalClaim(out) &&
+      blocsDe(out).length === sections.length,
+    journal: ({ fournisseur, raison }) =>
+      logger.warn({ provider: fournisseur, raison }, 'hebdo : reformulation écartée — fournisseur suivant'),
+  });
+  if (r) {
+    return blocsDe(r.texte).map((b, i) => {
+      const nl = b.indexOf('\n');
+      return { titre: sections[i]!.titre, texte: (nl >= 0 ? b.slice(nl + 1) : b).trim() };
+    });
   }
   return sections; // fallback honnête
 }

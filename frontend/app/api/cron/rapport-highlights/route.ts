@@ -7,6 +7,8 @@ import { NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { resolveApiKey } from '@/lib/server/apiKeys';
 import { ocrPdf } from '@/lib/import/ocr';
+import { rediger } from '@/lib/server/redacteur';
+import { jsonDepuisPdf } from '@/lib/server/geminiPdf';
 import { parseLlmJson } from '@/lib/import/llmProviders';
 import { classifyCompany } from '@/lib/reports/profile';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
@@ -25,40 +27,55 @@ const SYSTEM =
   "marchés, perspectives). 'cyclique'=true si l'activité dépend de campagnes ou de cours " +
   "de matières premières (agro). Aucun texte hors JSON.";
 
-async function callLlm(text: string): Promise<{ synthese?: string; highlights?: unknown; cyclique?: boolean } | null> {
-  const cfgs: Array<{ key: string | null; url: string; model: string }> = [
-    { key: await resolveApiKey('deepseek'), url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },
-    { key: await resolveApiKey('mistral'), url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest' },
-  ];
-  for (const c of cfgs) {
-    if (!c.key) continue;
-    try {
-      const r = await fetch(c.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${c.key}` },
-        body: JSON.stringify({
-          model: c.model,
-          messages: [
-            { role: 'system', content: SYSTEM },
-            { role: 'user', content: `Texte du rapport :\n${text.slice(0, 28000)}` },
-          ],
-          temperature: 0,
-          response_format: { type: 'json_object' },
-        }),
-        signal: AbortSignal.timeout(60000),
-      });
-      if (!r.ok) continue;
-      const j = await r.json();
-      const parsed = parseLlmJson(j?.choices?.[0]?.message?.content ?? '');
-      if (parsed) return parsed as { synthese?: string; highlights?: unknown; cyclique?: boolean };
-    } catch {
-      /* provider suivant */
-    }
-  }
-  return null;
+type Sortie = { synthese?: string; highlights?: unknown; cyclique?: boolean };
+
+const estSortie = (x: unknown): x is Sortie =>
+  !!x && typeof x === 'object' &&
+  (typeof (x as Sortie).synthese === 'string' || Array.isArray((x as Sortie).highlights));
+
+/** Repli texte : cascade commune sur le texte OCR. */
+async function callLlm(text: string): Promise<Sortie | null> {
+  const r = await rediger(
+    [
+      { role: 'system', content: SYSTEM },
+      { role: 'user', content: `Texte du rapport :\n${text.slice(0, 28000)}` },
+    ],
+    {
+      temperature: 0,
+      json: true,
+      maxTokens: 2000,
+      timeoutMs: 60_000,
+      accepter: (t) => estSortie(parseLlmJson(t)),
+    },
+  );
+  const parsed = r ? parseLlmJson(r.texte) : null;
+  return estSortie(parsed) ? parsed : null;
 }
 
-async function processCode(admin: ReturnType<typeof getServiceClient>, code: string, mistralKey: string) {
+/**
+ * Voie principale : Gemini lit le PDF ENTIER (texte et pages en image) en un
+ * appel. L'OCR Mistral ne sert plus que de repli — son palier gratuit répond
+ * 429 la plupart du temps, et il ne lisait pas les tableaux en image.
+ */
+async function lireRapport(url: string, mistralKey: string | null): Promise<{ out: Sortie | null; voie: string; erreur?: string }> {
+  try {
+    const g = await jsonDepuisPdf(url, SYSTEM, 'Analyse ce rapport et réponds avec le JSON demandé.');
+    if (g && estSortie(g.brut)) return { out: g.brut, voie: g.modele };
+  } catch (e) {
+    console.warn('[rapport-highlights] Gemini :', (e as Error).message);
+  }
+  if (!mistralKey) return { out: null, voie: 'aucune', erreur: 'Gemini sans réponse et pas de clé Mistral pour l’OCR' };
+  let text = '';
+  try {
+    text = await ocrPdf(url, mistralKey);
+  } catch (e) {
+    return { out: null, voie: 'ocr', erreur: (e as Error).message };
+  }
+  if (text.trim().length < 200) return { out: null, voie: 'ocr', erreur: 'texte-vide' };
+  return { out: await callLlm(text), voie: 'ocr+texte' };
+}
+
+async function processCode(admin: ReturnType<typeof getServiceClient>, code: string, mistralKey: string | null) {
   // Le RAPPORT ANNUEL (intégré) fait foi et est complet → on le privilégie.
   // (Amorcer une société à la fois, ?code= ou limit=1, pour que l'OCR du gros
   // PDF dispose de toute la fenêtre de durée.) On ignore les attestations CAC.
@@ -78,16 +95,8 @@ async function processCode(admin: ReturnType<typeof getServiceClient>, code: str
     list[0];
   if (!chosen?.source_url) return { code, status: 'pas-de-rapport' };
 
-  let text = '';
-  try {
-    text = await ocrPdf(chosen.source_url, mistralKey);
-  } catch (e) {
-    return { code, status: 'ocr-echec', error: (e as Error).message };
-  }
-  if (text.trim().length < 200) return { code, status: 'texte-vide' };
-
-  const out = await callLlm(text);
-  if (!out) return { code, status: 'llm-echec' };
+  const { out, voie, erreur } = await lireRapport(chosen.source_url, mistralKey);
+  if (!out) return { code, status: 'lecture-echec', voie, error: erreur };
 
   const { data: instr } = await admin.from('brvm_instruments').select('secteur').eq('code', code).maybeSingle();
   const profil = classifyCompany(code, (instr as { secteur?: string } | null)?.secteur ?? null, FAMILLE_PAR_CODE[code]);
@@ -108,7 +117,7 @@ async function processCode(admin: ReturnType<typeof getServiceClient>, code: str
     updated_at: new Date().toISOString(),
   }, { onConflict: 'code' });
   if (error) return { code, status: 'db-echec', error: error.message };
-  return { code, status: 'ok', items: items.length };
+  return { code, status: 'ok', voie, items: items.length };
 }
 
 export async function GET(req: Request) {
@@ -117,8 +126,10 @@ export async function GET(req: Request) {
   const provided = bearer ?? req.headers.get('x-cron-secret') ?? new URL(req.url).searchParams.get('secret');
   if (!secret || provided !== secret) return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
 
-  const mistralKey = await resolveApiKey('mistral');
-  if (!mistralKey) return NextResponse.json({ error: 'Clé Mistral requise (OCR).' }, { status: 503 });
+  const [geminiKey, mistralKey] = await Promise.all([resolveApiKey('gemini'), resolveApiKey('mistral')]);
+  if (!geminiKey && !mistralKey) {
+    return NextResponse.json({ error: 'Clé Gemini (lecture PDF) ou Mistral (OCR) requise.' }, { status: 503 });
+  }
 
   const admin = getServiceClient();
   const url = new URL(req.url);

@@ -1,13 +1,13 @@
 // frontend/lib/whatsappAgent/callAgentLlm.ts
 import 'server-only';
-import { resolveApiKey } from '@/lib/server/apiKeys';
+import { parametresFournisseur, redacteursDisponibles } from '@/lib/server/redacteur';
 import type { DefinitionOutil } from '@/lib/agent/outils';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string | null;
-  /* Champs du protocole d'outils (compatible OpenAI, supporté par DeepSeek et
-     Mistral). Absents des messages ordinaires. */
+  /* Champs du protocole d'outils (compatible OpenAI : DeepSeek, Gemini, Grok).
+     Absents des messages ordinaires. */
   tool_calls?: Array<{
     id: string;
     type: 'function';
@@ -31,8 +31,12 @@ export interface BoiteAOutils {
 const MAX_TOURS = 3;
 
 /**
- * Cascade DeepSeek → Mistral, même motif que callLlm dans
- * app/api/import-batch/route.ts — adapté à une conversation multi-tour.
+ * Cascade commune DeepSeek → Gemini → Grok (lib/server/redacteur), adaptée à
+ * une conversation multi-tour.
+ *
+ * Le message de l'assistant portant des appels d'outils est réinjecté TEL QUEL
+ * (plus bas) : Gemini y range une signature de pensée et refuse le tour
+ * suivant si on la retire — mesuré le 2026-10-05.
  *
  * Le second paramètre est FACULTATIF : sans lui, le comportement est
  * exactement celui d'avant (un aller-retour, aucun outil). C'est ce qui permet
@@ -43,18 +47,12 @@ export async function callAgentLlm(
   messages: ChatMessage[],
   outils?: BoiteAOutils,
 ): Promise<string | null> {
-  const providers = [
-    {
-      key: await resolveApiKey('deepseek'),
-      url: 'https://api.deepseek.com/chat/completions',
-      model: 'deepseek-chat',
-    },
-    {
-      key: await resolveApiKey('mistral'),
-      url: 'https://api.mistral.ai/v1/chat/completions',
-      model: 'mistral-small-latest',
-    },
-  ].filter((p) => p.key);
+  const providers = (await redacteursDisponibles()).map((r) => ({
+    key: r.cle,
+    url: r.url,
+    model: r.modele,
+    extra: parametresFournisseur(r.fournisseur),
+  }));
 
   for (const p of providers) {
     try {
@@ -71,6 +69,7 @@ export async function callAgentLlm(
             model: p.model,
             temperature: 0.3,
             messages: fil,
+            ...p.extra,
             ...(outils ? { tools: outils.definitions, tool_choice: 'auto' } : {}),
           }),
           signal: AbortSignal.timeout(30000),
