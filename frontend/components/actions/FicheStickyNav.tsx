@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { fmtNumber } from '@/lib/format';
 
 /**
@@ -54,6 +55,13 @@ export function FicheStickyNav({
             {s.label}
           </a>
         ))}
+        <span className="mx-1 h-4 w-px shrink-0 bg-border/60" aria-hidden />
+        <Link
+          href={`/actions/${code}/quant`}
+          className="whitespace-nowrap rounded-full border border-gold/30 bg-gold/[0.10] px-2.5 py-1 font-medium text-gold transition-colors hover:bg-gold/15 hover:border-gold/40"
+        >
+          ◈ Quant
+        </Link>
       </div>
     </nav>
   );

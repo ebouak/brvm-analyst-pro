@@ -18,6 +18,7 @@ export default function ActionMenu({ code }: { code: string }) {
   }, [open]);
 
   const items: { href: string; label: string }[] = [
+    { href: `/actions/${code}/quant`, label: '◈ Quant — Combined Alpha' },
     { href: '/portefeuille', label: '★ Watchlist' },
     { href: '/portefeuille', label: 'Alertes' },
     { href: `/backtest?code=${code}`, label: '◈ Backtester' },
