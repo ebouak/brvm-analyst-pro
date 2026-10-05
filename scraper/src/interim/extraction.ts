@@ -59,6 +59,7 @@ export function promptSysteme(famille: Famille): string {
     "4. cumul_depuis_debut_exercice = true si les montants couvrent la période depuis le début de l'exercice (ex. « au 30 juin », « 1er semestre », « 9 mois »). false s'ils couvrent un trimestre ISOLÉ (ex. « 2e trimestre seul », « T3 seul »).",
     "5. " + revenu,
     "6. resultat_net = résultat net de la période (part du groupe si consolidé). SIGNE : un montant précédé d'un « - », entre parenthèses, ou qualifié de perte est NÉGATIF. Contrôle-le avec la colonne variation et le commentaire : si le résultat « recule » d'un montant supérieur au résultat de l'année précédente, le résultat courant est une PERTE (vu chez BNBC : « recule de 81 MCFA », variation −506 %).",
+    "6 bis. resultat_exploitation et resultat_avant_impots : uniquement s'ils figurent TELS QUELS dans le tableau. Ne les calcule JAMAIS à partir d'autres lignes (ex. résultat brut d'exploitation moins coût du risque) : absent = null.",
     "7. total_actifs = total du bilan ; depots_clientele et credits_clientele = encours en FIN de période (pas les encours moyens).",
     "8. Si le document contient des tableaux en FCFA et en devises, utilise UNIQUEMENT les tableaux en FCFA.",
   ].join('\n');
