@@ -297,6 +297,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
         />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap"
+        />
       </head>
       <body className="text-white antialiased font-sans">
         {/* JSON-LD Schema.org (rich snippets) */}

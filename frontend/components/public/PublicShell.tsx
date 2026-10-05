@@ -1,98 +1,20 @@
 import Link from 'next/link';
 import { RATING_DISCLAIMER } from '@/lib/rating';
-import ThemeToggle from '@/components/ThemeToggle';
-import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import { SiteHeader } from '@/components/layout/SiteHeader';
 
-/**
- * Shell des pages publiques SEO (/societes, /simulateur, /brief) :
- * header léger avec CTA inscription, footer avec disclaimer.
- * Composant serveur — aucun état client.
- */
+/** Pages publiques SEO — header unifie SiteHeader, footer disclaimer conserve. */
 export default function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
-      <header className="border-b border-border/60 bg-surface sticky top-0 z-40 print:hidden">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between gap-4">
-          <Link
-            href="/"
-            aria-label="WESTBOURSE — accueil"
-            className="group flex items-center gap-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
-          >
-            <AnimatedLogo size={30} variant="mark" animate={false} />
-            {/* Sous 400 px, logo seul : le nom plus « Connexion » plus le bouton ne
-                tiennent pas sur une ligne, et « Créer un compte » passait sur deux
-                lignes (constaté le 2026-09-28 à 390 px). Le lien garde son nom
-                accessible par aria-label. */}
-            <span className="hidden min-[400px]:inline font-display text-white text-lg tracking-tight transition-colors group-hover:text-accent">
-              WESTBOURSE
-            </span>
-          </Link>
-          <nav className="flex items-center gap-2 md:gap-4 text-sm" aria-label="Navigation principale">
-            <Link href="/societes" className="text-muted hover:text-white transition-colors hidden sm:block">
-              Sociétés
-            </Link>
-            <Link href="/comparateur-sgi" className="text-muted hover:text-white transition-colors hidden sm:block">
-              SGI
-            </Link>
-            <Link href="/simulateur" className="text-muted hover:text-white transition-colors hidden sm:block">
-              Simulateur
-            </Link>
-            <Link href="/simulateur-budget" className="text-muted hover:text-white transition-colors hidden md:block">
-              Budget
-            </Link>
-            <Link href="/brief" className="text-muted hover:text-white transition-colors hidden md:block">
-              Brief
-            </Link>
-            <ThemeToggle className="hidden sm:inline-flex" />
-            <Link href="/login" className="whitespace-nowrap text-muted hover:text-white transition-colors">
-              Connexion
-            </Link>
-            <Link
-              href="/signup"
-              className="whitespace-nowrap px-3.5 py-1.5 rounded-lg bg-accent text-bg font-semibold hover:bg-gold-2 transition-colors active:scale-95"
-            >
-              Créer un compte
-            </Link>
-          </nav>
-        </div>
-        {/* Rangée mobile : les sections publiques restent accessibles au pouce */}
-        <nav
-          className="sm:hidden border-t border-border/40 px-4 h-10 flex items-center gap-5 text-[13px] overflow-x-auto"
-          aria-label="Sections publiques"
-        >
-          <Link href="/societes" className="text-muted hover:text-white transition-colors shrink-0">
-            Sociétés
-          </Link>
-          <Link href="/comparateur-sgi" className="text-muted hover:text-white transition-colors shrink-0">
-            SGI
-          </Link>
-          <Link href="/simulateur" className="text-muted hover:text-white transition-colors shrink-0">
-            Simulateur
-          </Link>
-          <Link href="/simulateur-budget" className="text-muted hover:text-white transition-colors shrink-0">
-            Budget
-          </Link>
-          <Link href="/brief" className="text-muted hover:text-white transition-colors shrink-0">
-            Brief
-          </Link>
-        </nav>
-      </header>
-
+      <SiteHeader />
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-6 py-8">{children}</main>
-
       <footer className="border-t border-border/60 mt-12 print:hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-2">
           <p className="text-[11px] text-faint leading-relaxed">{RATING_DISCLAIMER}</p>
           <p className="text-[11px] text-faint">
-            Données : BRVM, publications officielles des émetteurs. Performances passées ne préjugent pas des
-            performances futures. ·{' '}
-            <Link href="/mentions-legales" className="underline hover:text-muted">
-              Mentions légales
-            </Link>{' '}
-            ·{' '}
-            <Link href="/methodologie" className="underline hover:text-muted">
-              Méthodologie
-            </Link>
+            Données : BRVM, publications officielles. Performances passées ne préjugent pas des performances futures. ·{' '}
+            <Link href="/mentions-legales" className="underline hover:text-muted">Mentions légales</Link> ·{' '}
+            <Link href="/methodologie" className="underline hover:text-muted">Méthodologie</Link>
           </p>
         </div>
       </footer>

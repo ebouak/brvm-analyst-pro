@@ -36,17 +36,16 @@ const BARE_PREFIXES = [
 /** Pages légales : publiques, plein écran, AVEC footer. */
 const LEGAL_PREFIXES = ['/mentions-legales', '/cgu', '/confidentialite'];
 
-/** Routes publiques qui doivent afficher le footer global. */
+/** Routes publiques qui doivent afficher le footer global. PublicShell a son propre mini-footer — on evite le doublon. */
 function showsFooter(pathname: string): boolean {
   if (pathname === '/login' || pathname === '/signup') return false;
-  // /debutant a son propre thème clair (cream/teal) → pas du footer global sombre.
   if (pathname.startsWith('/debutant')) return false;
-  // /formations/academy est plein écran (iframe) → aucun chrome global.
   if (pathname.startsWith('/formations/academy')) return false;
-  // /embed : widget dans une iframe tierce — un footer y serait absurde.
   if (pathname.startsWith('/embed')) return false;
   if (pathname === '/') return true;
-  return [...BARE_PREFIXES, ...LEGAL_PREFIXES].some((p) => pathname.startsWith(p));
+  // BARE_PREFIXES deja rendus dans PublicShell (qui a son footer) — pas de footer global ici.
+  if (BARE_PREFIXES.some((p) => pathname.startsWith(p))) return false;
+  return LEGAL_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
 /**

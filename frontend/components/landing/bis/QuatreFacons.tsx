@@ -4,11 +4,9 @@ import { motion } from 'framer-motion';
 
 /**
  * « Quatre façons de travailler le marché » — Analyser, Surveiller, Simuler,
- * Explorer. Chaque outil pointe vers une route qui EXISTE (vérifié au
- * moment d'écrire : /societes, /signaux, /screener, /fondamentaux,
- * /portefeuille, /parametres/alertes, /brief, /actualites, /simulateur,
- * /simulateur-budget, /premium/paper-trading, /backtest, /obligations,
- * /weekly, /comparateur-sgi, /analyses/hebdo, /formations, /developers).
+ * Explorer — miroir éditorial de NAV_GROUPS (lib/nav.ts). Chaque outil
+ * pointe vers une route qui EXISTE (vérifié : mêmes href que la nav
+ * applicative ; les labels restent éditoriaux mais les routes sont 1:1).
  * Les visuels de tête sont des mini-écrans dessinés (SVG), pas des photos.
  */
 
@@ -16,6 +14,7 @@ interface Outil { t: string; d: string; href: string; ic: React.ReactNode }
 
 /** Routes derrière le login (lib/supabase/middleware.ts) : on le dit avant le clic. */
 const PROTEGEES = new Set(['/signaux', '/fondamentaux', '/screener', '/parametres/alertes', '/portefeuille', '/premium/paper-trading', '/backtest', '/obligations', '/weekly']);
+const PREMIUM = new Set(['/premium/paper-trading', '/premium/diagnostic']);
 interface Colonne { k: string; t: string; d: string; c: string; bg: string; href: string; visuel: React.ReactNode; outils: Outil[] }
 
 const I = {
@@ -94,13 +93,13 @@ export function QuatreFacons() {
         <div>
           <p className="over">La plateforme</p>
           <h2 id="h-facons">Quatre façons de travailler<br />le <span className="accent">marché</span>.</h2>
-          <p className="lead">Comprendre, surveiller, tester et explorer : WESTBOURSE réunit les outils dont vous avez besoin, au même endroit.</p>
+          <p className="lead">Comprendre, surveiller, tester et explorer — les mêmes outils que dans l’app, présentés en vitrine.</p>
         </div>
         <div className="annot-2" aria-hidden="true"><span className="hand">Des outils concrets<br />pour aller plus loin.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
       </div>
       <div className="cols">
         {COLONNES.map((col, idx) => (
-          <motion.article key={col.k} className="col" style={{ ['--col' as string]: col.c, ['--col-bg' as string]: col.bg }} initial={{opacity:0,y:14}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:0.25}} transition={{duration:0.55,ease:EASE,delay:idx*0.08}} whileHover={{y:-4,scale:1.01}}>
+          <motion.article key={col.k} className="col" style={{ ['--col' as string]: col.c, ['--col-bg' as string]: col.bg }} initial={{opacity:0,y:8}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:0.25}} transition={{duration:0.45,ease:EASE,delay:idx*0.06}} whileHover={{y:-2}}>
             <header>
               <span className="k">{col.k}</span>
               <h3>{col.t}</h3>
@@ -112,7 +111,7 @@ export function QuatreFacons() {
                 <li key={o.t}>
                   <Link href={o.href}>
                     <motion.span className="ic" whileHover={{rotate:6,scale:1.08}} transition={{type:'spring',stiffness:420,damping:18}}><Ic c={o.ic} /></motion.span>
-                    <span><b>{o.t}{PROTEGEES.has(o.href) && <em className="cg" title="Accessible avec un compte gratuit">compte gratuit</em>}</b><small>{o.d}</small></span>
+                    <span><b>{o.t}{PROTEGEES.has(o.href) && !PREMIUM.has(o.href) && <em className="cg" title="Accessible avec un compte gratuit">compte gratuit</em>}{PREMIUM.has(o.href) && <em className="cg cg--premium" title="Réservé aux abonnés Premium">Premium ✦</em>}</b><small>{o.d}</small></span>
                   </Link>
                 </li>
               ))}
