@@ -127,3 +127,38 @@ describe('lignesInterim', () => {
     expect(balance).toBeNull();
   });
 });
+
+describe('Gemini — choix du modèle et format', async () => {
+  const { choisirModeleFlash, corpsRequete, texteReponse } = await import('../src/interim/gemini.js');
+  const gen = ['generateContent'];
+
+  it('retient le flash stable le plus récent, écarte lite/preview/image/tts', () => {
+    const m = choisirModeleFlash([
+      { name: 'models/gemini-3.1-pro', supportedGenerationMethods: gen },
+      { name: 'models/gemini-3.6-flash', supportedGenerationMethods: gen },
+      { name: 'models/gemini-3.7-flash', supportedGenerationMethods: gen },
+      { name: 'models/gemini-3.8-flash-preview-09', supportedGenerationMethods: gen },
+      { name: 'models/gemini-3.7-flash-lite', supportedGenerationMethods: gen },
+      { name: 'models/gemini-3.7-flash-image', supportedGenerationMethods: gen },
+      { name: 'models/gemini-3.9-flash', supportedGenerationMethods: ['embedContent'] },
+    ]);
+    expect(m).toBe('gemini-3.7-flash');
+  });
+
+  it('aucun candidat → null (le scraper retombe sur la chaîne texte)', () => {
+    expect(choisirModeleFlash([{ name: 'models/gemini-3.1-pro', supportedGenerationMethods: gen }])).toBeNull();
+  });
+
+  it('envoie le PDF en inlineData et demande du JSON', () => {
+    const c = corpsRequete('SYS', 'CONSIGNE', 'QkFTRTY0');
+    expect(c.contents[0].parts[0]).toEqual({ inlineData: { mimeType: 'application/pdf', data: 'QkFTRTY0' } });
+    expect(c.generationConfig.responseMimeType).toBe('application/json');
+    expect(c.systemInstruction.parts[0].text).toBe('SYS');
+  });
+
+  it('lit le texte de la réponse, hors parties « pensée », et null si vide', () => {
+    expect(texteReponse({ candidates: [{ content: { parts: [{ text: 'brouillon', thought: true }, { text: '{"a":1}' }] } }] })).toBe('{"a":1}');
+    expect(texteReponse({ candidates: [] })).toBeNull();
+    expect(texteReponse({ promptFeedback: { blockReason: 'SAFETY' } })).toBeNull();
+  });
+});

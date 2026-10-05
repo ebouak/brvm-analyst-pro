@@ -26,6 +26,11 @@ import { resolveApiKeyForScraper } from '../hebdo/apiKey.js';
 import { FOURNISSEURS_LLM } from '../sante/runSanteLlm.js';
 import { codePeriode, typePeriode, type PeriodeInterim } from './periode.js';
 import { choisirPublications, lignesInterim, type PubInterim } from './selection.js';
+import { lireAvecGemini } from './gemini.js';
+
+async function resoudreCleGemini(): Promise<string | null> {
+  return resolveApiKeyForScraper('gemini');
+}
 import {
   promptSysteme,
   promptUtilisateur,
@@ -160,6 +165,9 @@ export async function runInterim({ mock = false, codes = [] as string[] } = {}):
 
   const { data: instr } = await sb.from('brvm_instruments').select('code, famille_comptable').eq('type', 'action');
   const famille = new Map((instr ?? []).map((i) => [i.code as string, ((i.famille_comptable as string) ?? 'general') as Famille]));
+  // Clé Gemini : GEMINI_API_KEY, sinon table api_keys (provider 'gemini').
+  // Absente → la chaîne texte (DeepSeek…) prend tout, comme avant.
+  const cleGemini = mock ? null : await resoudreCleGemini();
 
   let ecrits = 0, rejetes = 0, echecs = 0;
   for (const pub of aTraiter) {
@@ -179,12 +187,27 @@ export async function runInterim({ mock = false, codes = [] as string[] } = {}):
         .maybeSingle();
       const reference = (ref as { revenu_total: number | null; resultat_net: number | null } | null) ?? null;
 
-      // 1er essai sur le texte pdfjs ; 2e sur l'OCR si le PDF est scanné ou si
-      // le tableau chiffré n'a pas été trouvé dans le texte (tableau en image).
+      // 1) Gemini lit le PDF TEL QUEL (texte + images des pages) : scans et
+      //    tableaux en image compris. 2) Repli : texte pdfjs → DeepSeek…
+      //    3) Dernier recours : OCR Mistral (palier gratuit, souvent 429).
       let ocr = false;
-      let texte = await texteDuPdf(pub.source_url);
+      let texte = '';
       let r: Awaited<ReturnType<typeof appelerLlm>> = null;
-      if (texte.trim().length >= 400) {
+      if (cleGemini) {
+        try {
+          const g = await lireAvecGemini(
+            pub.source_url,
+            promptSysteme(fam),
+            `Société BRVM : ${pub.code}. Publication : ${pub.libelle}. Le PDF est joint (il peut être scanné). Réponds uniquement par le JSON demandé.`,
+            cleGemini,
+          );
+          if (g && g.extraction.periodes.length > 0) r = { extraction: g.extraction, modele: `gemini:${g.modele}` };
+        } catch (e) {
+          log.warn({ etiquette, err: (e as Error).message.slice(0, 120) }, 'Gemini indisponible — repli sur la chaîne texte');
+        }
+      }
+      if (!r) texte = await texteDuPdf(pub.source_url);
+      if (!r && texte.trim().length >= 400) {
         r = await appelerLlm(promptSysteme(fam), promptUtilisateur(pub.code, pub.libelle, texte));
       }
       if (!r || r.extraction.periodes.length === 0) {
