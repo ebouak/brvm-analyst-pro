@@ -79,7 +79,7 @@ export function ShareMenu({ postTitle, shareUrl }: ShareMenuProps) {
             role="menuitem"
           >
             <span>📋</span>
-            {copied ? 'Copié!' : 'Copier le lien'}
+            {copied ? 'Lien copié' : 'Copier le lien'}
           </button>
         </div>
       )}

@@ -26,7 +26,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Marché',
     items: [
-      { href: '/dashboard', label: 'Dashboard' },
+      { href: '/dashboard', label: 'Tableau de bord' },
       { href: '/actions', label: 'Actions' },
       { href: '/obligations', label: 'Obligations' },
       { href: '/secteurs', label: 'Secteurs' },
@@ -36,7 +36,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Intelligence',
     items: [
-      { href: '/actualites', label: 'Actualités & Veille' },
+      { href: '/actualites', label: 'Actualités et veille' },
       { href: '/brief', label: 'Brief quotidien' },
       { href: '/analyses/hebdo', label: 'Analyse hebdo (actions)' },
     ],
@@ -59,7 +59,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/dividendes', label: 'Dividendes' },
       { href: '/calendrier', label: 'Calendrier' },
-      { href: '/rendement-vrai', label: 'Rendement réel & vrai (après inflation)' },
+      { href: '/rendement-vrai', label: 'Rendement réel (après inflation)' },
       { href: '/fiscalite', label: 'Fiscalité des dividendes' },
       { href: '/saisonnalite', label: 'Saisonnalité' },
     ],
@@ -70,7 +70,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/portefeuille', label: 'Portefeuille' },
       { href: '/journal', label: 'Journal de décision' },
       { href: '/parametres/alertes', label: 'Mes alertes' },
-      { href: '/premium/paper-trading', label: 'Paper Trading', premium: true },
+      { href: '/premium/paper-trading', label: 'Portefeuille virtuel', premium: true },
       { href: '/reports', label: 'Rapports' },
     ],
   },
@@ -86,7 +86,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Découverte',
     items: [
-      { href: '/societes', label: 'Sociétés (public)' },
+      { href: '/societes', label: 'Sociétés cotées' },
       { href: '/comparateur-sgi', label: 'Choisir sa SGI' },
       { href: '/simulateur', label: 'Simulateur' },
       { href: '/forum', label: 'Forum' },
@@ -135,15 +135,15 @@ export const PALETTE_EXTRA: NavItem[] = [
   { href: '/premium/anomalies', label: 'Anomalies', premium: true },
   { href: '/premium/correlations', label: 'Corrélations', premium: true },
   { href: '/premium/comparateur', label: 'Comparateur de titres', premium: true },
-  { href: '/classement', label: 'Classement papier (leaderboard)' },
+  { href: '/classement', label: 'Classement des portefeuilles virtuels' },
   { href: '/actions/compare', label: 'Comparer des actions' },
-  { href: '/dashboard/reports', label: 'Rapports & événements' },
+  { href: '/dashboard/reports', label: 'Rapports et événements' },
   { href: '/dashboard/reports/events', label: 'Événements de marché' },
   { href: '/dividendes/calendrier', label: 'Calendrier des dividendes' },
   { href: '/simulateur-budget', label: 'Simulateur budget' },
   { href: '/fiscalite', label: 'Fiscalité des dividendes (IRVM)' },
   { href: '/analyses', label: 'Analyses BRVM (dividende, comparatifs)' },
-  { href: '/rendement-vrai', label: 'Rendement réel & vrai (dividendes + inflation)' },
+  { href: '/rendement-vrai', label: 'Rendement réel (dividendes et inflation)' },
   { href: '/methodologie', label: 'Méthodologie' },
   { href: '/debutant', label: 'Guide débutant' },
   { href: '/pricing', label: 'Tarifs' },

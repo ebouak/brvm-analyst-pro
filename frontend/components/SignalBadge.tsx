@@ -10,9 +10,9 @@ const STYLES: Record<string, string> = {
 };
 
 const SIGNAL_HINTS: Record<string, string> = {
-  BUY: "Le système pense que l'action est en bonne position pour monter : signal d'achat.",
-  HOLD: "Pas de signal fort : attendre avant d'agir.",
-  SELL: "Le signal suggère de sortir ou d'éviter cette action.",
+  BUY: "Signal d'achat : le score technique dépasse le seuil d'achat. Lecture des cours passés, ni prévision ni conseil.",
+  HOLD: "Aucun signal : le score technique reste entre les seuils d'achat et de vente.",
+  SELL: "Signal de vente : le score technique passe sous le seuil de vente. Lecture des cours passés, ni prévision ni conseil.",
 };
 
 export default function SignalBadge({

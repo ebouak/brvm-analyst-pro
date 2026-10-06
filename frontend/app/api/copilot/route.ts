@@ -117,6 +117,7 @@ async function llmChooseTool(q: string): Promise<ToolCall | null> {
       maxTokens: 100,
       timeoutMs: 10_000,
       formatFr: false,
+      charte: false,
       fournisseurs: ['deepseek', 'gemini'],
       accepter: (t) => lireOutil(t) != null,
     },

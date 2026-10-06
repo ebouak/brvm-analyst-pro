@@ -75,7 +75,7 @@ export default function UserAvatarMenu() {
           </div>
           <div className="py-1 text-sm">
             {[
-              { href: '/profil', label: '🙍 Mon profil' },
+              { href: '/profil', label: 'Mon profil' },
               { href: '/portefeuille', label: 'Mon portefeuille' },
               { href: '/parametres/compte', label: 'Paramètres' },
             ].map((it) => (
@@ -86,7 +86,7 @@ export default function UserAvatarMenu() {
             ))}
             <button type="button" onClick={logout}
               className="block w-full border-t border-border px-4 py-2 text-left text-down hover:bg-down/5 transition">
-              🚪 Déconnexion
+              Déconnexion
             </button>
           </div>
         </div>

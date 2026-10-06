@@ -326,24 +326,24 @@ export function commenterSeance(entree: {
       let portee: string | undefined;
       if (sigma != null && b.ecartTypePct != null) {
         seanceOrdinaire = sigma < SIGMA_NOTABLE;
-        const cadre = `d'un jour à l'autre, cette valeur bouge en moyenne de ${pc(b.ecartTypePct)}`;
+        const cadre = `d'une séance à l'autre, le titre varie en moyenne de ${pc(b.ecartTypePct)}`;
         portee = sigma < SIGMA_NOTABLE
-          ? `Ce mouvement tient dans l'agitation ordinaire du titre : ${cadre}. Rien ne le distingue du bruit de marché.`
+          ? `Ce mouvement reste dans la variation habituelle du titre : ${cadre}. Rien ne le distingue du bruit de marché.`
           : sigma < SIGMA_INHABITUEL
-            ? `Le mouvement dépasse l'agitation ordinaire du titre — ${cadre} — sans être exceptionnel.`
-            : `Le mouvement vaut ${dec(sigma, 1)} fois l'agitation ordinaire du titre (${cadre}) : c'est une séance inhabituelle.`;
+            ? `Ce mouvement dépasse la variation habituelle du titre (${cadre}), sans être inhabituel.`
+            : `Ce mouvement représente ${dec(sigma, 1)} fois la variation habituelle du titre (${cadre}) : la séance est inhabituelle.`;
       }
       if (b.volumeRatio != null && b.volumeRatio > 0) {
         const vr = b.volumeRatio < 0.6
-          ? `Les échanges sont maigres : ${dec(b.volumeRatio, 1)} fois le volume habituel.`
+          ? `Les échanges sont faibles : ${dec(b.volumeRatio, 1)} fois le volume habituel.`
           : b.volumeRatio > 2
-            ? `Les échanges sont nourris : ${dec(b.volumeRatio, 1)} fois le volume habituel.`
+            ? `Les échanges sont soutenus : ${dec(b.volumeRatio, 1)} fois le volume habituel.`
             : null;
         if (vr) portee = portee ? `${portee} ${vr}` : vr;
       }
       constats.push({ origine: 'bruit', fait, portee });
       if (sigma == null) {
-        limites.push("L'historique est trop court pour dire si ce mouvement sort de l'ordinaire : il est cité, pas qualifié.");
+        limites.push("L'historique est trop court pour qualifier ce mouvement : il est seulement cité.");
       }
     }
   }
@@ -357,8 +357,8 @@ export function commenterSeance(entree: {
     if (a === 0 && v === 0) {
       constats.push({
         origine: 'carnet',
-        fait: `Le carnet était vide à la clôture du ${q} : aucun ordre n'est resté sans preneur.`,
-        portee: "Tout ce qui était présenté des deux côtés a été servi.",
+        fait: `Le carnet était vide à la clôture du ${q} : aucun ordre n'est resté sans contrepartie.`,
+        portee: 'Tous les ordres présentés à l’achat comme à la vente ont été exécutés.',
       });
     } else {
       const detail = [
@@ -370,7 +370,7 @@ export function commenterSeance(entree: {
 
       constats.push({
         origine: 'carnet',
-        fait: `À la clôture du ${q}, il restait ${detail} — c'est ce qui n'a pas trouvé preneur.`,
+        fait: `À la clôture du ${q}, ordres restés sans contrepartie : ${detail}.`,
         portee: porteeDuCarnet(carnet, ctx, (n) => { carnetNegligeable = n; }),
       });
     }
@@ -385,17 +385,17 @@ export function commenterSeance(entree: {
         fait: ecartFcfa != null
           ? `${nb(ecartFcfa)} FCFA ${ecartFcfa > 1 ? 'séparaient' : 'séparait'} le meilleur acheteur du meilleur vendeur, soit ${pc(f)} du cours.`
           : `${pc(f)} séparaient le meilleur acheteur du meilleur vendeur.`,
-        portee: `Acheter puis revendre dans la foulée coûterait de l'ordre de ${nb(cout)} FCFA par million investi — le prix de l'aller-retour, avant tout frais de courtage.${situation ? ` ${situation}` : ''}`,
+        portee: `Un aller-retour immédiat (achat puis revente) coûterait environ ${nb(cout)} FCFA par million de FCFA investi, hors frais de courtage.${situation ? ` ${situation}` : ''}`,
       });
     } else if (carnet.achat_au_marche || carnet.vente_au_marche) {
       constats.push({
         origine: 'carnet',
         fait: `Un ordre « au marché » était en attente du côté ${carnet.vente_au_marche ? 'vente' : 'achat'}.`,
-        portee: "Un ordre « au marché » accepte le prix qu'on lui donne, sans limite. Aucune fourchette ne peut donc être mesurée sur cette séance.",
+        portee: "Un ordre « au marché » s'exécute au prix disponible, sans limite de prix : aucune fourchette ne peut donc être mesurée sur cette séance.",
       });
     }
 
-    limites.push("Le carnet ne dit ni qui a passé ces ordres, ni pourquoi. Seule la meilleure limite de chaque côté est publiée par le bulletin de la cote : la profondeur complète du marché reste invisible.");
+    limites.push("Le carnet n'indique ni l'auteur des ordres ni leur motif. Le bulletin de la cote ne publie que la meilleure limite de chaque côté : la profondeur complète du marché n'est pas visible.");
   }
 
   /* ── 3. La lecture technique ─────────────────────────────────────────── */
@@ -405,13 +405,13 @@ export function commenterSeance(entree: {
     if (s != null) signalPenche = s > 0.05 ? 'hausse' : s < -0.05 ? 'baisse' : 'aucun';
 
     const positionScore = s == null ? '' :
-      ` Son score s'établit à ${dec(s)} sur une échelle qui va de −1 à +1 : il faut dépasser +${dec(SEUIL_ACHAT, 1)} pour un signal d'achat, descendre sous −${dec(Math.abs(SEUIL_VENTE), 1)} pour un signal de vente.`;
+      ` Score : ${dec(s)} sur une échelle de −1 à +1 ; un signal d'achat exige plus de +${dec(SEUIL_ACHAT, 1)}, un signal de vente moins de −${dec(Math.abs(SEUIL_VENTE), 1)}.`;
 
     constats.push({
       origine: 'signal',
       fait: estHold
-        ? `La lecture technique ne tranche pas sur la séance du ${jour(signal.date_marche)}.${positionScore}`
-        : `La lecture technique donne ${signal.signal} sur la séance du ${jour(signal.date_marche)}.${positionScore}`,
+        ? `Sur la séance du ${jour(signal.date_marche)}, la lecture technique reste neutre.${positionScore}`
+        : `Sur la séance du ${jour(signal.date_marche)}, la lecture technique donne un signal ${signal.signal === 'BUY' ? "d'achat" : signal.signal === 'SELL' ? 'de vente' : signal.signal}.${positionScore}`,
       portee: facteursEtConfiance(signal, estHold),
     });
 
@@ -423,7 +423,7 @@ export function commenterSeance(entree: {
           : `Le signal porte sur une séance ${j > 0 ? 'postérieure' : 'antérieure'} de ${Math.abs(j)} jour${Math.abs(j) > 1 ? 's' : ''} à celle du carnet : le bulletin de la cote paraît après la clôture, il a donc toujours une séance de retard.`,
       );
     }
-    limites.push("La lecture technique ne porte que sur l'historique des cours et des volumes. Elle ignore les comptes de la société.");
+    limites.push("La lecture technique ne repose que sur l'historique des cours et des volumes ; elle ne tient pas compte des comptes de la société.");
   }
 
   /* ── 4. La lecture des comptes ───────────────────────────────────────── */
@@ -455,7 +455,7 @@ export function commenterSeance(entree: {
           ? `Au cours du jour, la société vaut ${fcfa(capitalisation)} en Bourse, soit ${ratios.join(' et ')}.`
           : null,
         coteSousFondsPropres
-          ? "Le marché la valorise donc en dessous de la valeur comptable de ses capitaux propres — un écart qui peut durer des années et ne dit rien du sens du prochain mouvement."
+          ? "Le marché la valorise donc sous la valeur comptable de ses capitaux propres. Un tel écart peut durer des années ; il ne dit rien du prochain mouvement du cours."
           : null,
         evolution ? `D'un exercice à l'autre, ${evolution}.` : null,
       ].filter(Boolean).join(' ');
@@ -469,7 +469,7 @@ export function commenterSeance(entree: {
       });
 
       limites.push(
-        `Les comptes portent sur l'exercice ${economie.exercice}, clos depuis : ils ne décrivent pas la situation courante de la société${economie.source === 'pdf-verified' ? ' (chiffres relevés sur les états financiers publiés)' : ''}.`,
+        `Les comptes portent sur l'exercice ${economie.exercice}, désormais clos : ils ne décrivent pas la situation actuelle de la société${economie.source === 'pdf-verified' ? ' (chiffres relevés sur les états financiers publiés)' : ''}.`,
       );
     }
 
@@ -513,7 +513,7 @@ export function commenterSeance(entree: {
         portee: porteeI || undefined,
       });
       limites.push(
-        `Les comptes ${neuf ? 'des' : 'du'} ${im.libelle} sont intermédiaires : ils ne sont pas audités (tout au plus revus de façon limitée par les commissaires aux comptes) et seront remplacés par les comptes de l'exercice dès leur publication.`,
+        `Les comptes ${neuf ? 'des' : 'du'} ${im.libelle} sont intermédiaires : non audités (au mieux soumis à un examen limité des commissaires aux comptes), ils seront remplacés par les comptes annuels dès leur publication.`,
       );
     }
   }
@@ -527,7 +527,7 @@ export function commenterSeance(entree: {
       const { fait, portee } = phraseEvenement(mesure);
       constats.push({ origine: 'evenement', fait, portee });
     }
-    limites.push("Ces mesures décrivent ce qui a suivi la date, pas ce que l'événement a produit.");
+    limites.push("Ces mesures décrivent ce qui a suivi l'événement, pas ce qu'il a provoqué.");
   }
 
   /* ── 6. L'actualité, rapprochée par la date et par elle seule ────────── */
@@ -541,20 +541,20 @@ export function commenterSeance(entree: {
     constats.push({
       origine: 'actualite',
       fait: `${actualites.length === 1 ? 'Une publication concerne' : `${actualites.length} publications concernent`} cette société, la plus récente parue ${quand} : « ${a0.titre} ».`,
-      portee: "Elle figure ici parce que sa date est proche, et pour cette seule raison. Le rapprochement est chronologique, pas explicatif.",
+      portee: 'Elle est citée pour sa date uniquement : le rapprochement est chronologique, pas explicatif.',
     });
-    limites.push("Rien ici n'établit que cette publication explique les ordres en carnet ou la position du moteur.");
+    limites.push("Rien n'établit que cette publication explique les ordres en carnet ou la position de la lecture technique.");
   }
 
   if (constats.length === 0) {
     return {
-      constats: [{ origine: 'carnet', fait: 'Aucune donnée de séance exploitable pour commenter cette valeur.' }],
+      constats: [{ origine: 'carnet', fait: 'Aucune donnée de séance exploitable pour cette valeur.' }],
       synthese: null,
       limites: ["Ni carnet d'ordres, ni signal, ni comptes, ni publication récente ne sont disponibles pour cette valeur."],
     };
   }
 
-  limites.push('Ces constats décrivent une séance passée. Ils ne constituent pas un conseil en investissement.');
+  limites.push('Ces constats décrivent une séance passée et ne constituent pas un conseil en investissement.');
   return {
     constats,
     synthese: synthetiser({ seanceOrdinaire, carnetNegligeable, carnetPenche, signalPenche, ecoOrientation, ecoSujet, coteSousFondsPropres }),
@@ -581,8 +581,8 @@ function porteeDuCarnet(c: CarnetSeance, ctx: ContexteSeance, marquerNegligeable
   marquerNegligeable(negligeable);
   const partTxt = part < 1 ? 'moins de 1 %' : pc(part, part < 10 ? 1 : 0);
   return negligeable
-    ? `Rapportés à la séance, ces ordres pèsent peu : ${fcfa(val)} au total, soit ${partTxt} des ${fcfa(seance)} échangés. L'écart entre les deux côtés porte donc sur un reliquat, et ne mesure pas un rapport de force entre acheteurs et vendeurs.`
-    : `Ces ordres pèsent ${fcfa(val)}, soit ${partTxt} des ${fcfa(seance)} échangés dans la séance — une part notable de l'activité du jour.`;
+    ? `Rapportés à la séance, ces ordres pèsent peu : ${fcfa(val)} au total, soit ${partTxt} des ${fcfa(seance)} échangés. L'écart entre acheteurs et vendeurs porte sur un reliquat ; il ne mesure pas un rapport de force.`
+    : `Ces ordres représentent ${fcfa(val)}, soit ${partTxt} des ${fcfa(seance)} échangés dans la séance : une part notable de l'activité du jour.`;
 }
 
 /** Situe la fourchette parmi celles du marché ce jour-là. */
@@ -595,7 +595,7 @@ function situerFourchette(f: number, ctx: ContexteSeance): string | null {
       : `${mieux} valeur${mieux > 1 ? 's' : ''} sur ${total} ${mieux > 1 ? 'affichent' : 'affiche'} une fourchette plus serrée`
     : null;
   const medTxt = med != null ? `la médiane du marché étant à ${pc(med)}` : null;
-  const qualif = med == null ? '' : f > med * 1.5 ? "C'est large pour la BRVM : " : f < med * 0.66 ? "C'est serré pour la BRVM : " : 'C\'est dans la moyenne du marché : ';
+  const qualif = med == null ? '' : f > med * 1.5 ? 'Fourchette large pour la BRVM : ' : f < med * 0.66 ? 'Fourchette serrée pour la BRVM : ' : 'Fourchette dans la moyenne du marché : ';
   const corps = [rang, medTxt].filter(Boolean).join(', ');
   return corps ? `${qualif}${corps}.` : null;
 }
@@ -615,22 +615,22 @@ function facteursEtConfiance(signal: SignalSeance, estHold: boolean): string | u
   // l'air unanime — et n'a aucun moyen de trancher.
   const divergents = div?.divergent === true;
   if (estHold && divergents && div) {
-    morceaux.push(`Elle reste au milieu parce que ses facteurs s'opposent : ${et(div.hausse)} ${div.hausse.length > 1 ? 'tirent' : 'tire'} à la hausse, ${et(div.baisse)} à la baisse.`);
-    if (facteurs) morceaux.push(`Le détail retenu par le moteur : ${facteurs}.`);
+    morceaux.push(`Elle reste neutre car ses facteurs s'opposent : ${et(div.hausse)} ${div.hausse.length > 1 ? 'tirent' : 'tire'} à la hausse, ${et(div.baisse)} à la baisse.`);
+    if (facteurs) morceaux.push(`Facteurs retenus : ${facteurs}.`);
   } else if (facteurs) {
     // Sans sous-scores, ou sans opposition constatée, aucune contradiction
     // n'est affirmée : on énonce les facteurs, c'est tout.
     morceaux.push(estHold
-      ? `Elle reste au milieu : aucun facteur ne l'emporte assez nettement. Les facteurs retenus : ${facteurs}.`
-      : `Les facteurs retenus : ${facteurs}.`);
+      ? `Elle reste neutre : aucun facteur ne l'emporte nettement. Facteurs retenus : ${facteurs}.`
+      : `Facteurs retenus : ${facteurs}.`);
   } else if (estHold) {
-    morceaux.push("Elle reste au milieu : aucun facteur ne l'emporte assez nettement.");
+    morceaux.push("Elle reste neutre : aucun facteur ne l'emporte nettement.");
   }
 
   const c = signal.confiance;
   if (c != null) {
     const pct = Math.round(c * (c <= 1 ? 100 : 1));
-    morceaux.push(`Les ${pct} % de confiance affichés portent sur la qualité de la donnée — historique disponible, complétude des séances — et non sur la justesse d'une prévision.`);
+    morceaux.push(`Le taux de confiance de ${pct} % mesure la qualité des données (historique disponible, séances complètes), pas la justesse d'une prévision.`);
   }
 
   return morceaux.length > 0 ? morceaux.join(' ') : undefined;
@@ -695,14 +695,14 @@ function synthetiser(e: {
   //    aucune volatilité n'est fournie : sans cette branche, l'information
   //    « carnet trop petit » se perdait en silence.
   if (e.seanceOrdinaire === true && rienAuCarnet) {
-    parties.push("La séance n'a rien porté de notable : un mouvement de cours dans l'agitation habituelle du titre, et un carnet résiduel trop petit pour signifier quoi que ce soit.");
+    parties.push("Séance sans fait notable : le cours évolue dans sa variation habituelle et les ordres restés en carnet sont trop faibles pour être significatifs.");
   } else if (e.seanceOrdinaire === false) {
     parties.push("La séance sort de l'ordinaire par son ampleur.");
   } else if (rienAuCarnet && rienEnTechnique) {
-    parties.push("Cette séance ne porte aucun fait marquant : un carnet résiduel trop petit pour signifier quoi que ce soit, et une lecture technique qui reste au milieu.");
+    parties.push("Séance sans fait notable : les ordres restés en carnet sont trop faibles pour être significatifs et la lecture technique reste neutre.");
     techniqueDeja = true;
   } else if (rienAuCarnet) {
-    parties.push("Le carnet résiduel est trop petit pour signifier quoi que ce soit : l'écart entre les deux côtés porte sur des miettes.");
+    parties.push("Les ordres restés en carnet sont trop faibles pour être significatifs : l'écart entre acheteurs et vendeurs porte sur des montants marginaux.");
   }
 
   // b) Technique contre carnet — seulement si le carnet pèse quelque chose.
@@ -711,12 +711,12 @@ function synthetiser(e: {
   } else if (!e.carnetNegligeable && e.carnetPenche && e.signalPenche && e.signalPenche !== 'aucun') {
     const accord = (e.carnetPenche === 'achat' && e.signalPenche === 'hausse') || (e.carnetPenche === 'vente' && e.signalPenche === 'baisse');
     parties.push(accord
-      ? `Les ordres restés en carnet penchent du côté ${e.carnetPenche}, et la lecture technique du même côté : les deux concordent, sans que l'une confirme l'autre — elles ne mesurent pas la même chose.`
-      : `Les ordres restés en carnet penchent du côté ${e.carnetPenche}, quand la lecture technique penche du côté de la ${e.signalPenche} : les deux ne disent pas la même chose, et rien ici ne permet de les départager.`);
+      ? `Les ordres restés en carnet penchent côté ${e.carnetPenche}, et la lecture technique va dans le même sens. Les deux concordent sans se confirmer : elles ne mesurent pas la même chose.`
+      : `Les ordres restés en carnet penchent côté ${e.carnetPenche}, la lecture technique vers la ${e.signalPenche} : les deux divergent, et rien ne permet ici de les départager.`);
   } else if (e.signalPenche === 'aucun') {
-    parties.push('La lecture technique reste au milieu.');
+    parties.push('La lecture technique reste neutre.');
   } else if (e.signalPenche) {
-    parties.push(`Sans trancher, la lecture technique penche du côté de la ${e.signalPenche}.`);
+    parties.push(`La lecture technique penche vers la ${e.signalPenche}, sans donner de signal.`);
   }
 
   // c) Technique contre comptes — la cohérence que réclame toute lecture sérieuse.
@@ -728,7 +728,7 @@ function synthetiser(e: {
         ? `${e.ecoSujet} donnent une image contrastée, que la lecture technique ne recoupe ni ne contredit.`
         : ecoSens === techSens
           ? `${e.ecoSujet} vont dans le même sens que la lecture technique. Cela ne fait pas une prévision : les deux décrivent le passé, l'un sur ${e.ecoSujet === ECO_SUJET_ANNUEL ? 'douze mois' : 'quelques mois'}, l'autre sur quelques séances.`
-          : `${e.ecoSujet} et la lecture technique ne décrivent pas la même chose : ${e.ecoOrientation === 'favorable' ? 'une activité en progression' : 'une activité en repli'} d'un côté, ${e.signalPenche === 'hausse' ? 'un cours orienté à la hausse' : 'un cours orienté à la baisse'} de l'autre. Un tel écart peut durer des années et ne se résout pas de lui-même.`,
+          : `${e.ecoSujet} et la lecture technique divergent : ${e.ecoOrientation === 'favorable' ? 'une activité en progression' : 'une activité en repli'} d'un côté, ${e.signalPenche === 'hausse' ? 'un cours orienté à la hausse' : 'un cours orienté à la baisse'} de l'autre. Un tel écart peut durer des années.`,
     );
   } else if (e.ecoOrientation && !e.signalPenche) {
     parties.push(e.ecoOrientation === 'favorable'

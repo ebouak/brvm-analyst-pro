@@ -59,7 +59,7 @@ export default async function ReportsArchivePage() {
         <SectionHeader
           kicker="Gestion de portefeuille"
           title="Archive des rapports"
-          subtitle="Consultez tous vos rapports mensuels WESTBOURSE"
+          subtitle="L’ensemble de vos rapports mensuels."
         />
         <div className="mt-4">
           <ViewTabs tabs={REPORT_TABS} current="/premium/reports" />

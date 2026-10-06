@@ -77,7 +77,7 @@ export default async function ReportsHome() {
       {/* ── En-tête ── */}
       <SectionHeader
         kicker="Centre de rapports"
-        title="Rapports & Événements"
+        title="Rapports et événements"
         subtitle="Synthèses de marché, analyses sectorielles et communiqués d'émetteurs BRVM/UEMOA."
         actions={
           lastDate && (
@@ -185,8 +185,8 @@ export default async function ReportsHome() {
         {events.length === 0 ? (
           <EmptyStatePremium
             icon="◈"
-            title="Aucun événement ingéré"
-            hint="Les événements de marché sont ingérés automatiquement chaque jour ouvré."
+            title="Aucun événement enregistré"
+            hint="Les événements de marché sont collectés automatiquement chaque jour ouvré."
             action={{ href: '/dashboard/reports/events', label: 'Explorer' }}
           />
         ) : (

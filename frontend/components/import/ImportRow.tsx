@@ -50,7 +50,7 @@ export default function ImportRow({ file, validCodes }: Props) {
         body: JSON.stringify({ mode: pdf.mode, symbol, year, text: pdf.text, images: pdf.images }),
       });
       const j = await readJsonResponse(res);
-      if (!j.ok) { setStatus('error'); setError((j.data.error as string) ?? 'Échec analyse'); return; }
+      if (!j.ok) { setStatus('error'); setError((j.data.error as string) ?? 'L’analyse du document a échoué.'); return; }
       setProvider(j.data.provider as string);
       const data = j.data.data as FundamentalExtraction;
       setExtraction(data);
@@ -72,7 +72,7 @@ export default function ImportRow({ file, validCodes }: Props) {
           }),
         });
         const wj = await readJsonResponse(w);
-        if (!wj.ok) { setStatus('error'); setError((wj.data.error as string) ?? 'Échec écriture'); return; }
+        if (!wj.ok) { setStatus('error'); setError((wj.data.error as string) ?? 'L’enregistrement a échoué.'); return; }
         setStatus('done');
       } else {
         setStatus('review');
@@ -104,7 +104,7 @@ export default function ImportRow({ file, validCodes }: Props) {
           {status === 'pending' && <span className="text-faint">en attente</span>}
           {status === 'reading' && 'lecture…'}
           {status === 'analyzing' && 'analyse…'}
-          {status === 'auto-saving' && '💾 écriture…'}
+          {status === 'auto-saving' && 'Enregistrement…'}
           {status === 'done' && <span className="text-up">✓ enregistré ({provider})</span>}
           {status === 'review' && <span className="text-warn">à valider ({provider})</span>}
           {status === 'error' && <span className="text-down">✕ {error}</span>}

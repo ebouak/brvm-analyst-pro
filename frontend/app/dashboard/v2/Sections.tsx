@@ -410,7 +410,7 @@ export interface IndiceAfricain {
  */
 export function Afrique({ indices, dateSeance }: { indices: IndiceAfricain[]; dateSeance: string }) {
   if (indices.length === 0) {
-    return <p className="v2-hint">Aucun relevé régional dans la base pour l’instant.</p>;
+    return <p className="v2-hint">Aucun relevé régional disponible pour l’instant.</p>;
   }
 
   const SPAN = 8;
@@ -685,7 +685,7 @@ export function DetailObligataire({
           <span className="v2-tab">UEMOA</span>
         </div>
         {macro.length === 0 ? (
-          <p className="v2-hint">Aucun indicateur macro en base.</p>
+          <p className="v2-hint">Aucun indicateur macroéconomique disponible.</p>
         ) : (
           macro.map((m) => (
             <div className="v2-mline" key={m.key}>

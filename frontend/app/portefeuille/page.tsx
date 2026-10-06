@@ -223,7 +223,7 @@ export default async function PortefeuillePage({
           <SectionHeader
             kicker="Gestion patrimoniale"
             title="Mon portefeuille"
-            subtitle="Valorisation temps réel, P&L latent et surveillance des positions BRVM."
+            subtitle="Valorisation au dernier cours, plus-values latentes et suivi de vos positions."
           />
           <div className="flex items-center gap-3">
             <Link

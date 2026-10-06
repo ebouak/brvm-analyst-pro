@@ -102,7 +102,7 @@ export default async function ObligationsPage() {
         <SectionHeader
           kicker="Instruments de taux"
           title="Marché obligataire"
-          subtitle="YTM, duration modifiée et courbe des taux · BRVM"
+          subtitle="Rendement à l’échéance (YTM), duration modifiée et courbe des taux des obligations cotées à la BRVM."
         />
         <EmptyStatePremium
           icon="◎"
@@ -123,7 +123,7 @@ export default async function ObligationsPage() {
       <SectionHeader
         kicker="Instruments de taux"
         title="Marché obligataire"
-        subtitle="YTM, duration modifiée · BRVM"
+        subtitle="Rendement à l’échéance (YTM) et duration modifiée des obligations cotées à la BRVM."
         actions={
           <div className="flex items-center gap-2 flex-wrap">
             <StatPill tone="sapphire">

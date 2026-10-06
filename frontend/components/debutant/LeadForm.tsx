@@ -74,7 +74,7 @@ export default function LeadForm() {
             className="flex flex-col items-center gap-3 py-6 text-center"
           >
             <span className="grid h-14 w-14 place-items-center rounded-full bg-[#d4ebe8] text-2xl" aria-hidden>✓</span>
-            <h3 className="text-xl font-bold text-[#191714]">Demande reçue, merci !</h3>
+            <h3 className="text-xl font-bold text-[#191714]">Demande reçue. Merci.</h3>
             <p className="max-w-sm text-sm text-[#6e6a63]">
               Un partenaire habilité vous recontacte rapidement pour ouvrir votre compte BRVM.
             </p>

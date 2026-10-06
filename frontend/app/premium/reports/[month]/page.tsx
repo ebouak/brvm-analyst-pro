@@ -97,7 +97,7 @@ export default async function ReportDetailPage({ params }: { params: { month: st
         <SectionHeader
           kicker="Rapport mensuel"
           title={monthName}
-          subtitle="Analyse complète de vos performances et opportunités"
+          subtitle="Vos performances du mois, les signaux marquants et les événements de marché."
         />
 
         {/* Report viewer component */}

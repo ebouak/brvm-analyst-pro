@@ -244,7 +244,7 @@ test('buildSkeleton : le texte est vulgarise (pas de jargon brut)', () => {
   const texte = s.sections.map((x) => x.texte).join(' ');
   assert.ok(!/RSI\(14\) s’établit/.test(texte), 'plus de formulation brute du RSI');
   assert.match(texte, /surachet|survendu|tension/i);
-  assert.match(texte, /fois plus de titres|habitude/i);
+  assert.match(texte, /fois leur niveau habituel/i);
 });
 
 test('buildSkeleton : section contexte presente si fondamental notable', () => {

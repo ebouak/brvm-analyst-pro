@@ -186,15 +186,25 @@ function describeAlert(
   px: { cours: number | null; variation: number | null },
   smart: SmartContext,
 ): string {
+  // Chiffres au format français ; une valeur absente est dite absente, pas « ? ».
+  // Aucune lecture du RSI au-delà de sa zone : « rebond possible » ou
+  // « prudence » étaient des pronostics, que la donnée ne fonde pas.
+  const fr = (n: number | string | null | undefined, d = 0): string => {
+    const v = n == null ? null : Number(n);
+    return v == null || !Number.isFinite(v) ? 'non disponible' : v.toLocaleString('fr-FR', { maximumFractionDigits: d });
+  };
+  const jours = smart.daysToExDividend;
   switch (a.type) {
-    case 'prix_au_dessus': return `${a.code} a atteint ou dépassé ${a.seuil} (cours ${px.cours ?? '?'}).`;
-    case 'prix_en_dessous': return `${a.code} est repassé sous ${a.seuil} (cours ${px.cours ?? '?'}).`;
-    case 'variation': return `${a.code} a varié de ${px.variation ?? '?'}% (seuil ${a.seuil}%).`;
-    case 'signal_achat': return `${a.code} : signal quantitatif passé à ACHAT.`;
-    case 'signal_vente': return `${a.code} : signal quantitatif passé à VENTE.`;
-    case 'rsi_survente': return `${a.code} : RSI en survente (${smart.rsi?.toFixed(0) ?? '?'}) — rebond possible.`;
-    case 'rsi_surachat': return `${a.code} : RSI en surachat (${smart.rsi?.toFixed(0) ?? '?'}) — prudence.`;
-    case 'dividende_proche': return `${a.code} : détachement de dividende dans ${smart.daysToExDividend ?? '?'} jour(s).`;
+    case 'prix_au_dessus': return `${a.code} a atteint ou dépassé ${fr(a.seuil)} FCFA (cours : ${fr(px.cours)} FCFA).`;
+    case 'prix_en_dessous': return `${a.code} est repassé sous ${fr(a.seuil)} FCFA (cours : ${fr(px.cours)} FCFA).`;
+    case 'variation': return `${a.code} a varié de ${fr(px.variation, 2)} % sur la séance (seuil : ${fr(a.seuil, 2)} %).`;
+    case 'signal_achat': return `${a.code} : le signal technique passe à « achat ».`;
+    case 'signal_vente': return `${a.code} : le signal technique passe à « vente ».`;
+    case 'rsi_survente': return `${a.code} : RSI à ${fr(smart.rsi)}, en zone dite de survente.`;
+    case 'rsi_surachat': return `${a.code} : RSI à ${fr(smart.rsi)}, en zone dite de surachat.`;
+    case 'dividende_proche': return jours == null
+      ? `${a.code} : détachement de dividende prochain (date non disponible).`
+      : `${a.code} : détachement de dividende dans ${jours} jour${jours > 1 ? 's' : ''}.`;
     default: return `${a.code} : alerte déclenchée.`;
   }
 }

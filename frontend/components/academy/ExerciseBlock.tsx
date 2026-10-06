@@ -103,7 +103,7 @@ export default function ExerciseBlock({
           }`}
         >
           <p className="font-semibold">
-            {result!.correct ? 'Correct !' : `Pas tout à fait, réponse attendue : ${result!.attendu}`}
+            {result!.correct ? 'Bonne réponse.' : `Réponse incorrecte. Réponse attendue : ${result!.attendu}`}
           </p>
           {result!.explication && (
             <p className="mt-1 text-xs leading-relaxed opacity-90">{result!.explication}</p>

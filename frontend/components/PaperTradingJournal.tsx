@@ -215,7 +215,7 @@ function ClosedTradesTable({ trades }: { trades: Position[] }) {
   if (trades.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-surface p-10 text-center">
-        <p className="font-medium text-white">Aucun trade fermé</p>
+        <p className="font-medium text-white">Aucune opération clôturée</p>
         <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
           Vos positions clôturées apparaîtront ici avec leur performance définitive
           (P&amp;L réalisé et rendement).

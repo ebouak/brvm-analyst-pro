@@ -158,7 +158,7 @@ export function ReportPDF({ data, generatedAt }: Props) {
             Signaux BUY/SELL ({actionable.length})
           </Text>
           {actionable.length === 0 ? (
-            <Text style={styles.muted}>Aucun signal BUY / SELL sur la période.</Text>
+            <Text style={styles.muted}>Aucun signal d’achat ni de vente sur la période.</Text>
           ) : (
             <View>
               <View style={styles.tableHeader}>

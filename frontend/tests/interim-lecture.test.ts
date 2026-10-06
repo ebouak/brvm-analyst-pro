@@ -85,7 +85,7 @@ describe('commentaire de séance avec comptes intermédiaires', () => {
   });
 
   it('déclare la limite : non audités, remplacés par l’exercice', () => {
-    expect(c.limites.join(' ')).toMatch(/ne sont pas audités .* remplacés par les comptes de l'exercice/);
+    expect(c.limites.join(' ')).toMatch(/non audités .* remplacés par les comptes annuels/);
   });
 
   it('sans intermédiaire, le commentaire est inchangé', () => {

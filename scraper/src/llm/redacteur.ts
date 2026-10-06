@@ -37,10 +37,29 @@ export const CONSIGNE_FORMAT_FR =
   'Écris tous les nombres au format français : virgule décimale (12,5 %), ' +
   'espace entre les milliers (12 500 FCFA). Jamais de point décimal.';
 
-export function avecFormatFr(messages: MessageLlm[]): MessageLlm[] {
+/** Charte de rédaction — COPIE de frontend/lib/llm/redaction.ts (à tenir identique). */
+export const CHARTE_REDACTION = [
+  "STYLE — ton d'analyste financier sobre, en vouvoiement :",
+  '- Phrases courtes (25 mots au plus), une idée par phrase, voix active.',
+  '- Vocabulaire financier exact ; tout terme technique est expliqué en quelques mots à sa première occurrence.',
+  "- Chaque affirmation s'appuie sur un chiffre ou un fait fourni : écrivez ce qui est constaté, jamais ce qui est supposé.",
+  "- Aucun adjectif d'emphase ni superlatif non chiffré (exceptionnel, impressionnant, remarquable, spectaculaire, excellent) ; aucun point d'exclamation, aucun emoji.",
+  '- Aucune formule creuse (« il convient de noter », « force est de constater », « dans un contexte de », « en effet », « globalement »).',
+  '- Une réserve se dit une fois, clairement, au bon endroit ; elle ne se répète pas à chaque phrase.',
+].join('\n');
+
+function ajouterAuSysteme(messages: MessageLlm[], bloc: string): MessageLlm[] {
   const i = messages.findIndex((m) => m.role === 'system');
-  if (i === -1) return [{ role: 'system', content: CONSIGNE_FORMAT_FR }, ...messages];
-  return messages.map((m, j) => (j === i ? { ...m, content: `${m.content}\n\n${CONSIGNE_FORMAT_FR}` } : m));
+  if (i === -1) return [{ role: 'system', content: bloc }, ...messages];
+  return messages.map((m, j) => (j === i ? { ...m, content: `${m.content}\n\n${bloc}` } : m));
+}
+
+export function avecFormatFr(messages: MessageLlm[]): MessageLlm[] {
+  return ajouterAuSysteme(messages, CONSIGNE_FORMAT_FR);
+}
+
+export function avecCharte(messages: MessageLlm[]): MessageLlm[] {
+  return ajouterAuSysteme(messages, CHARTE_REDACTION);
 }
 
 export function parametresFournisseur(f: FournisseurRedaction): Record<string, unknown> {
@@ -53,6 +72,8 @@ export interface OptionsRedaction {
   timeoutMs?: number;
   /** Consigne de nombres à la française (défaut : oui). */
   formatFr?: boolean;
+  /** Charte de rédaction (défaut : oui) ; à couper pour une sortie non lue par un humain. */
+  charte?: boolean;
   json?: boolean;
   /** Garde-fou : une sortie refusée fait passer au fournisseur suivant. */
   accepter?: (texte: string) => boolean;
@@ -88,7 +109,10 @@ export async function rediger(
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cle}` },
         body: JSON.stringify({
           model: MODELE_REDACTION[f],
-          messages: options.formatFr === false ? messages : avecFormatFr(messages),
+          messages: (() => {
+            const avecStyle = options.charte === false ? messages : avecCharte(messages);
+            return options.formatFr === false ? avecStyle : avecFormatFr(avecStyle);
+          })(),
           max_tokens: options.maxTokens ?? 1500,
           temperature: options.temperature ?? 0.3,
           ...(options.json ? { response_format: { type: 'json_object' } } : {}),

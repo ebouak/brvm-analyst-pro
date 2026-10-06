@@ -1,7 +1,7 @@
 import 'server-only';
 import { resolveApiKey } from '@/lib/server/apiKeys';
 import { MODELE_LLM, URL_LLM } from '@/lib/server/llmModels';
-import { avecFormatFr, LecteurSse, type MessageLlm } from '@/lib/llm/redaction';
+import { avecCharte, avecFormatFr, LecteurSse, type MessageLlm } from '@/lib/llm/redaction';
 
 /**
  * Cascade UNIQUE de rédaction : DeepSeek → Gemini Flash → Grok.
@@ -34,6 +34,11 @@ export interface OptionsRedaction {
   timeoutMs?: number;
   /** Ajoute la consigne de nombres à la française (défaut : oui). */
   formatFr?: boolean;
+  /**
+   * Ajoute la charte de rédaction (lib/llm/redaction, défaut : oui). À couper
+   * seulement pour une sortie qui n'est pas lue par un humain (routage JSON).
+   */
+  charte?: boolean;
   /** Demande une sortie JSON (`response_format: json_object`). */
   json?: boolean;
   /**
@@ -75,10 +80,15 @@ export function parametresFournisseur(f: FournisseurRedaction): Record<string, u
   return f === 'gemini' ? { reasoning_effort: 'low' } : {};
 }
 
+function consignes(messages: MessageLlm[], o: OptionsRedaction): MessageLlm[] {
+  const avecStyle = o.charte === false ? messages : avecCharte(messages);
+  return o.formatFr === false ? avecStyle : avecFormatFr(avecStyle);
+}
+
 function corps(r: Redacteur, messages: MessageLlm[], o: OptionsRedaction, stream: boolean) {
   return JSON.stringify({
     model: r.modele,
-    messages: o.formatFr === false ? messages : avecFormatFr(messages),
+    messages: consignes(messages, o),
     max_tokens: o.maxTokens ?? 1500,
     temperature: o.temperature ?? 0.3,
     ...(o.json ? { response_format: { type: 'json_object' } } : {}),

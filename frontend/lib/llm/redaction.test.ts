@@ -50,3 +50,12 @@ describe('LecteurSse', () => {
     expect(l.lire(': keep-alive\n\ndata: {pas du json\n' + ligne('ok'))).toEqual(['ok']);
   });
 });
+
+describe('avecCharte', () => {
+  it('ajoute la charte au système existant, sans écraser la consigne', async () => {
+    const { avecCharte, CHARTE_REDACTION } = await import('./redaction');
+    const m = avecCharte([{ role: 'system', content: 'Tu es analyste.' }, { role: 'user', content: 'Q' }]);
+    expect(m[0].content).toBe(`Tu es analyste.\n\n${CHARTE_REDACTION}`);
+    expect(CHARTE_REDACTION).toContain('vouvoiement');
+  });
+});

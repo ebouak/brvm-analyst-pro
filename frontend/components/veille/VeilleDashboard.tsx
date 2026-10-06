@@ -487,9 +487,9 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
           className="bg-surface border border-border rounded-lg px-2 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent"
         >
           <option value="">Tout sentiment</option>
-          <option value="positif">🟢 Positif</option>
+          <option value="positif">Positif</option>
           <option value="neutre">⚪ Neutre</option>
-          <option value="négatif">🔴 Négatif</option>
+          <option value="négatif">Négatif</option>
         </select>
         <button
           type="button"

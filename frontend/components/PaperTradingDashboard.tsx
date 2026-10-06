@@ -566,7 +566,7 @@ export function PaperTradingDashboard() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-muted text-center py-8">Aucune position ni trade pour l’instant.</p>
+          <p className="text-muted text-center py-8">Aucune position ni opération pour l’instant.</p>
         )}
         {equityCurve.length === 0 && openPositions.length > 0 && (
           <p className="mt-2 text-center text-xs text-faint">

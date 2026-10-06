@@ -6,7 +6,7 @@ import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
-export const metadata = { title: 'Formations & conférences' };
+export const metadata = { title: 'Formations et conférences' };
 // Garde par utilisateur (plan Platinium) : rendu dynamique.
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +40,7 @@ export default async function FormationsPage() {
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
         kicker="Académie"
-        title="Formations & conférences"
+        title="Formations et conférences"
         subtitle="Montez en compétence sur l'investissement à la BRVM : cours, replays et conférences. Accès réservé aux membres Premium."
       />
 

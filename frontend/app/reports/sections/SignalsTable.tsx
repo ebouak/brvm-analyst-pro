@@ -22,7 +22,7 @@ export default function SignalsTable({ signals }: { signals: Signal[] }) {
     <section className="bg-surface border border-border rounded-xl p-5 space-y-3">
       <h2 className="font-semibold">Signaux générés</h2>
       {actionable.length === 0 ? (
-        <p className="text-sm text-muted">Aucun signal BUY / SELL sur cette période.</p>
+        <p className="text-sm text-muted">Aucun signal d’achat ni de vente sur cette période.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

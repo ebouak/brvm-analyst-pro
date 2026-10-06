@@ -19,7 +19,7 @@ export default function BacktestTrades({ trades, bestTradePct, worstTradePct }: 
   if (trades.length === 0) {
     return (
       <div className="bg-surface border border-border rounded-xl p-6 text-center">
-        <p className="text-sm text-muted">Aucun trade sur la période.</p>
+        <p className="text-sm text-muted">Aucune opération sur la période.</p>
         <p className="mt-1 text-xs text-faint">La stratégie n’a déclenché aucun aller-retour (BUY → SELL).</p>
       </div>
     );

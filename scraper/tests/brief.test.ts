@@ -80,19 +80,19 @@ describe('composeBriefText / composeBrief', () => {
     // Le fix du bug : BRVMC en base s'affiche bien BRVM-C
     expect(text!).toContain('BRVM-C : 310,45 (+0,52 %)');
     expect(text!).toContain('BRVM-30 : 155,2 (-0,13 %)');
-    expect(text!).toContain('🟢 Hausses : PALC +5,10 % · SNTS +2,50 %');
-    expect(text!).toContain('🔴 Baisses : BICC -3,40 % · SGBC -1,20 %');
-    expect(text!).toContain('💰 Transactions : 1,96 milliards FCFA');
-    expect(text!).toContain('📰 La BRVM publie');
+    expect(text!).toContain('Hausses : PALC +5,10 % · SNTS +2,50 %');
+    expect(text!).toContain('Baisses : BICC -3,40 % · SGBC -1,20 %');
+    expect(text!).toContain('Transactions : 1,96 milliards FCFA');
+    expect(text!).toContain('\n· La BRVM publie');
     expect(text!).toContain('https://example.test/brief/2026-06-12?utm_source=telegram');
   });
 
   it('séance sans actualités ni indices ni market summary : sections absentes, pas de crash', () => {
     const text = composeBrief({ ...base, indices: [], news: [], marketSummary: null });
     expect(text).not.toBeNull();
-    expect(text!).not.toContain('📰');
+    expect(text!).not.toContain('\n· ');
     expect(text!).not.toContain('BRVM-C');
-    expect(text!).not.toContain('💰');
+    expect(text!).not.toContain('Transactions :');
   });
 
   it('séance entièrement en baisse : pas de section hausses', () => {
@@ -104,7 +104,7 @@ describe('composeBriefText / composeBrief', () => {
       ],
     });
     const text = composeBriefText(data!, 'https://example.test');
-    expect(text).not.toContain('🟢 Hausses');
-    expect(text).toContain('🔴 Baisses : BBB -2,00 % · AAA -1,00 %');
+    expect(text).not.toContain('Hausses :');
+    expect(text).toContain('Baisses : BBB -2,00 % · AAA -1,00 %');
   });
 });

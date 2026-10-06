@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Screener Intraday',
   description:
-    "Titres qui bougent et titres dont le volume s'emballe, sur la séance BRVM du jour.",
+    "Les plus fortes variations et les volumes inhabituels de la séance BRVM en cours.",
 };
 
 
@@ -32,7 +32,7 @@ export default async function IntraDayScreenerPage() {
         <SectionHeader
           kicker="Outils"
           title="Screener Intraday"
-          subtitle="Les titres qui bougent, et ceux dont le volume s'emballe, sur la séance du jour."
+          subtitle="Les plus fortes variations et les volumes inhabituels de la séance en cours."
         />
       </div>
 
@@ -46,7 +46,7 @@ export default async function IntraDayScreenerPage() {
         <EmptyStatePremium
           icon="◇"
           title="Screener intraday réservé au premium"
-          hint="Les titres qui bougent et les volumes qui s'emballent en séance sont inclus dans l'abonnement Premium."
+          hint="Le suivi des variations et des volumes inhabituels en séance est inclus dans l’abonnement Premium."
           action={{ href: '/account/plan', label: 'Passer à Premium' }}
         />
       )}
@@ -65,7 +65,7 @@ export default async function IntraDayScreenerPage() {
             </div>
 
             <div>
-              <p className="font-medium text-ivory mb-1">🔊 Volume anormal</p>
+              <p className="font-medium text-ivory mb-1">Volume anormal</p>
               <p>
                 Volume échangé sur la séance supérieur à <strong>2×</strong> sa moyenne des
                 20 dernières séances. Signale un intérêt inhabituel pour le titre.
