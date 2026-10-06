@@ -291,14 +291,19 @@ function buildExplanation(a: {
     );
   }
   const parts: string[] = [];
+  // Décimales à la française : ce texte est affiché tel quel (tableau des
+  // signaux, commentaire de séance). Les formulations « RSI N (neutre) » et
+  // « volume proche de la moyenne » sont lues par frontend/lib/coherence/regles.ts :
+  // ne pas les modifier sans lui.
+  const x = (v: number) => v.toFixed(1).replace('.', ',');
   if (a.rsiVal != null) {
-    if (a.rsiVal < 30) parts.push(`RSI ${a.rsiVal.toFixed(0)} (survente, signal acheteur)`);
-    else if (a.rsiVal > 70) parts.push(`RSI ${a.rsiVal.toFixed(0)} (surachat, signal vendeur)`);
+    if (a.rsiVal < 30) parts.push(`RSI ${a.rsiVal.toFixed(0)} (zone de survente)`);
+    else if (a.rsiVal > 70) parts.push(`RSI ${a.rsiVal.toFixed(0)} (zone de surachat)`);
     else parts.push(`RSI ${a.rsiVal.toFixed(0)} (neutre)`);
   }
   if (a.volumeRatio != null) {
-    if (a.volumeRatio > 1.5) parts.push(`volume ${a.volumeRatio.toFixed(1)}x la moyenne (activité anormale)`);
-    else if (a.volumeRatio < 0.5) parts.push(`volume faible (${a.volumeRatio.toFixed(1)}x la moyenne)`);
+    if (a.volumeRatio > 1.5) parts.push(`volume ${x(a.volumeRatio)} fois la moyenne (activité inhabituelle)`);
+    else if (a.volumeRatio < 0.5) parts.push(`volume faible (${x(a.volumeRatio)} fois la moyenne)`);
     else parts.push(`volume proche de la moyenne`);
   }
   if (a.macdHistogram != null) {
@@ -311,17 +316,17 @@ function buildExplanation(a: {
 
   const intro =
     a.signal === 'BUY'
-      ? 'Opportunité acheteuse'
+      ? 'Signal d’achat'
       : a.signal === 'SELL'
-        ? 'Signal vendeur'
-        : 'Pas de signal franc (HOLD)';
+        ? 'Signal de vente'
+        : 'Aucun signal (score entre les seuils)';
 
   // Clause de tension : court terme vs tendance de fond divergents.
   let tension = '';
   if (a.signal === 'SELL' && a.trendUp) {
-    tension = ' À nuancer : la tendance de fond reste haussière (MA20 > MA50) — plutôt une correction technique qu\'un retournement.';
+    tension = ' À nuancer : la tendance de fond reste haussière (MA20 > MA50).';
   } else if (a.signal === 'BUY' && a.trendDown) {
-    tension = ' À nuancer : la tendance de fond reste baissière (MA20 < MA50) — un rebond est possible sans garantie de retournement.';
+    tension = ' À nuancer : la tendance de fond reste baissière (MA20 < MA50).';
   }
 
   return `${intro}. Facteurs : ${parts.join(' ; ')}.${tension}`;

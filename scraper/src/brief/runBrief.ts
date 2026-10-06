@@ -18,7 +18,10 @@ export interface BriefRunResult {
   dateMarche?: string;
 }
 
-const SITE_URL = process.env.SITE_URL ?? 'https://frontend-zeta-ten-22.vercel.app';
+// Domaine public. L'ancienne valeur de repli (l'adresse technique Vercel)
+// partait telle quelle dans chaque brief Telegram, faute de SITE_URL dans le
+// workflow — constaté sur le brief du 2026-10-06.
+const SITE_URL = process.env.SITE_URL ?? 'https://www.westbourse.com';
 
 /** Envoie la note en photo Telegram (image OG) ; retourne false si non configuré/échec. */
 async function sendTelegramPhoto(caption: string, imageUrl: string): Promise<boolean> {

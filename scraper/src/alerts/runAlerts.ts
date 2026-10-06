@@ -14,7 +14,7 @@ import { logger } from '../logger.js';
 import { isTriggered, isSmartTriggered, isSmartType, type AlertType, type SmartContext } from './evaluate.js';
 import { dispatch, sendWhatsAppTemplate, sendWhatsAppRaw } from './channels.js';
 
-interface AlertRow {
+export interface AlertRow {
   id: string;
   user_id: string;
   code: string;
@@ -36,7 +36,12 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
   if (opts.mock || cfg.USE_MOCK) {
     // Démonstration : une alerte fictive déclenchée.
     // operateur: true — en mock aucun utilisateur n'est concerné, le message
-    // est une démonstration destinée à l'administrateur.
+    // est une démonstration destinée à l'administrateur. DRY_RUN l'empêche
+    // aussi de partir : à blanc, rien ne s'envoie, démonstration comprise.
+    if (cfg.DRY_RUN) {
+      logger.info('DRY_RUN — notification de démonstration composée, non envoyée');
+      return { status: 'mock', evaluated: 1, triggered: 1, message: null };
+    }
     await dispatch({
       subject: 'Alerte BRVM (mock)',
       body: 'SNTS a franchi 15 000 FCFA.',
@@ -142,6 +147,13 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
       triggered++;
       const subject = `Alerte ${a.code}`;
       const body = describeAlert(a, px, smart);
+      /* DRY_RUN doit couvrir l'ENVOI, pas seulement les écritures en base
+         (même règle que runCloture). Avant ce garde, un passage à blanc
+         envoyait réellement emails, Telegram et WhatsApp aux propriétaires. */
+      if (cfg.DRY_RUN) {
+        logger.info({ code: a.code, type: a.type, body }, 'DRY_RUN — alerte composée, non envoyée');
+        continue;
+      }
       const results = await dispatch({
         subject,
         body,
@@ -181,7 +193,7 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
   }
 }
 
-function describeAlert(
+export function describeAlert(
   a: AlertRow,
   px: { cours: number | null; variation: number | null },
   smart: SmartContext,
