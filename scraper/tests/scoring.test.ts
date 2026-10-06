@@ -87,7 +87,7 @@ describe('computeScore', () => {
     expect(r.bonus_tendance).toBeGreaterThan(0); // facteur tendance positif
     expect(r.score_total).toBeGreaterThan(0.6);
     expect(r.signal).toBe('BUY');
-    expect(r.explication).toContain('Opportunité');
+    expect(r.explication).toContain('Signal d’achat');
   });
 
   it('tendance baissière qui accélère + baisse + volume => SELL', () => {

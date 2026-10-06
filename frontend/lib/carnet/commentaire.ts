@@ -196,8 +196,10 @@ export const dec = (v: number, d = 2) => v.toLocaleString('fr-FR', { minimumFrac
 export function fcfa(v: number): string {
   if (!Number.isFinite(v)) return '—';
   const a = Math.abs(v);
-  if (a >= 1_000_000_000) return `${dec(v / 1_000_000_000, a >= 1_000_000_000_000 ? 0 : a >= 10_000_000_000 ? 1 : 2)} milliards de FCFA`;
-  if (a >= 1_000_000) return `${dec(v / 1_000_000, 1)} millions de FCFA`;
+  // « milliard » et « million » ne prennent le pluriel qu'à partir de 2 :
+  // « 1,49 milliard », « 2,1 milliards ».
+  if (a >= 1_000_000_000) return `${dec(v / 1_000_000_000, a >= 1_000_000_000_000 ? 0 : a >= 10_000_000_000 ? 1 : 2)} milliard${a >= 2_000_000_000 ? 's' : ''} de FCFA`;
+  if (a >= 1_000_000) return `${dec(v / 1_000_000, 1)} million${a >= 2_000_000 ? 's' : ''} de FCFA`;
   return `${nb(Math.round(v))} FCFA`;
 }
 
