@@ -153,10 +153,10 @@ const TENDANCE_LABEL: Record<BriefData['tendance'], string> = {
 /** Compose le texte Telegram à partir des données structurées. */
 export function composeBriefText(data: BriefData, siteUrl?: string): string {
   const lines: string[] = [];
-  lines.push(`📊 BRVM — Note de conjoncture du ${fmtDateFr(data.date_marche)}`);
+  lines.push(`BRVM — Note de conjoncture du ${fmtDateFr(data.date_marche)}`);
   lines.push('');
   lines.push(
-    `${data.tendance === 'haussiere' ? '🟢' : data.tendance === 'baissiere' ? '🔴' : '⚖️'} ${TENDANCE_LABEL[data.tendance]} : ${data.breadth.hausses} hausses · ${data.breadth.baisses} baisses · ${data.breadth.stables} stables`,
+    `${TENDANCE_LABEL[data.tendance]} : ${data.breadth.hausses} hausses · ${data.breadth.baisses} baisses · ${data.breadth.stables} stables`,
   );
 
   for (const idx of data.indices) {
@@ -168,17 +168,17 @@ export function composeBriefText(data: BriefData, siteUrl?: string): string {
   if (data.top_hausses.length > 0) {
     lines.push('');
     lines.push(
-      `🟢 Hausses : ${data.top_hausses.map((a) => `${a.code} ${fmtPct(a.variation_pct)}`).join(' · ')}`,
+      `Hausses : ${data.top_hausses.map((a) => `${a.code} ${fmtPct(a.variation_pct)}`).join(' · ')}`,
     );
   }
   if (data.top_baisses.length > 0) {
     lines.push(
-      `🔴 Baisses : ${data.top_baisses.map((a) => `${a.code} ${fmtPct(a.variation_pct)}`).join(' · ')}`,
+      `Baisses : ${data.top_baisses.map((a) => `${a.code} ${fmtPct(a.variation_pct)}`).join(' · ')}`,
     );
   }
 
   if (data.valeur_transactions != null) {
-    lines.push(`💰 Transactions : ${fmtFcfaCourt(data.valeur_transactions)} FCFA`);
+    lines.push(`Transactions : ${fmtFcfaCourt(data.valeur_transactions)} FCFA`);
   }
   if (data.volume_total > 0) {
     lines.push(`Volume : ${data.volume_total.toLocaleString('fr-FR')} titres`);
@@ -189,11 +189,11 @@ export function composeBriefText(data: BriefData, siteUrl?: string): string {
     lines.push('');
     for (const n of news) {
       const t = n.titre.length > 90 ? n.titre.slice(0, 87) + '…' : n.titre;
-      lines.push(`📰 ${t}`);
+      lines.push(`· ${t}`);
     }
   }
 
-  const site = siteUrl ?? 'https://frontend-zeta-ten-22.vercel.app';
+  const site = siteUrl ?? 'https://www.westbourse.com';
   lines.push('');
   lines.push(`Note complète → ${site}/brief/${data.date_marche}?utm_source=telegram&utm_medium=brief`);
 
