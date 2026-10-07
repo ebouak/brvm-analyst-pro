@@ -152,7 +152,7 @@ Pour une banque, marge brute, stocks, BFR, investissements industriels (capex), 
 |---|---|---|---|
 | Produit net bancaire (PNB) | ${fmt(pnb)} | ${fmt(pnb1)} | ${pct(croissancePnb)} |
 | Produits d'intérêts | ${fmt(li.produit_interets)} | ${fmt(li1.produit_interets)} | |
-| Marge d'intérêts | ${fmt(li.marge_interets)} | ${fmt(li1.marge_interets)} | |
+| Marge d'intérêts${li.marge_interets == null && cur?.margeInterets != null ? ' (produits − charges d’intérêts)' : ''} | ${fmt(cur?.margeInterets)} | ${fmt(prev?.margeInterets)} | |
 | Frais généraux | ${fmt(inc_n?.frais_generaux_admin)} | ${fmt(inc_n1?.frais_generaux_admin)} | |
 | Coût du risque | ${fmt(li.cout_du_risque)} | ${fmt(li1.cout_du_risque)} | |
 | Résultat d'exploitation | ${fmt(inc_n?.resultat_exploitation)} | ${fmt(inc_n1?.resultat_exploitation)} | |

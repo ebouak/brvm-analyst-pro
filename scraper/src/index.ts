@@ -184,7 +184,7 @@ async function main(): Promise<number> {
       const res = await monitored(
         { code: 'annuel-complement', label: 'Complément des comptes annuels' },
         async () => {
-          const r = await runComplement({ mock, codes: positional.map((c) => c.toUpperCase()) });
+          const r = await runComplement({ mock, dryRun: /^(1|true|yes)$/i.test(process.env.DRY_RUN ?? ''), codes: positional.map((c) => c.toUpperCase()) });
           return {
             value: r,
             outcome: {
