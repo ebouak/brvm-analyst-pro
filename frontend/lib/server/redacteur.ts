@@ -119,7 +119,10 @@ export async function rediger(
         signal: AbortSignal.timeout(options.timeoutMs ?? 60_000),
       });
       if (!resp.ok) {
-        console.warn(`[redacteur] ${r.fournisseur} HTTP ${resp.status}`);
+        // Le début de la réponse dit QUI refuse : un 403 de CodeCraft depuis
+        // Vercel (2026-10-07) pouvait venir de Cloudflare ou du revendeur.
+        const motif = (await resp.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160);
+        console.warn(`[redacteur] ${r.fournisseur} HTTP ${resp.status} ${motif}`);
         continue;
       }
       const j = (await resp.json()) as {
@@ -165,7 +168,10 @@ export async function redigerEnFlux(
         signal: AbortSignal.timeout(options.timeoutMs ?? 110_000),
       });
       if (!resp.ok || !resp.body) {
-        console.warn(`[redacteur] ${r.fournisseur} HTTP ${resp.status}`);
+        // Le début de la réponse dit QUI refuse : un 403 de CodeCraft depuis
+        // Vercel (2026-10-07) pouvait venir de Cloudflare ou du revendeur.
+        const motif = (await resp.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160);
+        console.warn(`[redacteur] ${r.fournisseur} HTTP ${resp.status} ${motif}`);
         continue;
       }
       const corpsFlux = resp.body;

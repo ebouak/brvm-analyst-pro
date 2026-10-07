@@ -43,6 +43,33 @@ function fmt(n: number | null | undefined, decimals = 1): string {
   return n == null ? 'N/D' : n.toFixed(decimals);
 }
 
+/** Frais généraux / PNB, en %. null si l'un manque. */
+function coefficient(inc: IncomeStatement | null): number | null {
+  const ls = (inc?.lignes_specifiques ?? {}) as Record<string, number | null>;
+  const pnb = ls.pnb ?? inc?.revenu_total ?? null;
+  const fg = inc?.depenses_exploitation ?? inc?.frais_generaux_admin ?? null;
+  return pnb != null && pnb > 0 && fg != null ? (Math.abs(fg) / pnb) * 100 : null;
+}
+
+/** Variante bancaire de « compression des marges » : le coefficient d'exploitation se dégrade. */
+function coefficientBanque(inc_n: IncomeStatement | null, inc_n1: IncomeStatement | null): RedFlagCheck {
+  const n = coefficient(inc_n);
+  const n1 = coefficient(inc_n1);
+  const dataAvailable = n != null && n1 != null;
+  const hausse = dataAvailable ? n! - n1! : 0;
+  const triggered = dataAvailable && hausse > 0;
+  return {
+    id: 'compression_marges',
+    label: "Dégradation du coefficient d'exploitation",
+    triggered,
+    severity: triggered ? clamp(Math.round(hausse), 1, 10) : 0,
+    evidence: dataAvailable
+      ? `Coefficient d'exploitation ${fmt(n)} % (vs ${fmt(n1)} %) — frais généraux / PNB`
+      : "Coefficient d'exploitation non calculable sur les 2 exercices",
+    dataAvailable,
+  };
+}
+
 export function computeRedFlags(params: {
   inc_n: IncomeStatement | null;
   inc_n1: IncomeStatement | null;
@@ -205,6 +232,14 @@ export function computeRedFlags(params: {
         : "Nombre d'actions en circulation non disponible sur les 2 périodes",
       dataAvailable,
     });
+  }
+
+  // Banque : la compression des marges se lit sur le coefficient
+  // d'exploitation (frais généraux / PNB). Une « marge EBITDA » de banque n'a
+  // pas de sens — le rapport SGBC du 2026-10-07 en parlait cinq fois.
+  if (params.famille === 'banque') {
+    const i = checks.findIndex((c) => c.id === 'compression_marges');
+    if (i !== -1) checks[i] = coefficientBanque(inc_n, inc_n1);
   }
 
   // Banque : ces contrôles supposent une entreprise industrielle. Ils sortent
