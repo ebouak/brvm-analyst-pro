@@ -18,21 +18,31 @@
 --   * créances en souffrance : montant brut, taux et couverture sont distincts ;
 --     la définition lue est conservée (PCB « créances en souffrance » et IFRS
 --     « créances douteuses » ne se fusionnent pas).
---   * le périmètre non écrit dans le document reste « non_precise ».
+--   * le périmètre non écrit dans le document reste « non_precise » ; une
+--     valeur propre à une branche d'activité ou à une autre filiale n'entre
+--     pas (ex. créances de la branche islamique de Coris).
+--   * une borne publiée se garde comme borne : comparateur '>' et valeur 14,
+--     jamais la valeur exacte d'un autre exercice reportée.
 
 create table if not exists public.indicateur_source (
   id                    uuid primary key default gen_random_uuid(),
   code                  text not null,
   indicateur            text not null check (indicateur in (
-                          'solvabilite_total', 'ratio_cet1', 'ratio_tier1',
+                          'solvabilite_total', 'ratio_cet1', 'ratio_tier1', 'ratio_levier',
+                          'ratio_liquidite',
                           'creances_souffrance_brutes', 'taux_creances_souffrance',
-                          'couverture_creances_souffrance', 'ratio_liquidite')),
+                          'couverture_creances_souffrance',
+                          -- Distincts des créances en souffrance : ne jamais les fusionner
+                          -- (SIB 2021 : sinistralité 9,39 % = CDL 4,55 % + restructurées 4,84 %).
+                          'taux_creances_restructurees', 'taux_sinistralite')),
   date_arrete           date,
   perimetre             text not null default 'non_precise'
                           check (perimetre in ('individuel', 'consolide', 'non_precise')),
   statut                text not null check (statut in (
                           'publie', 'non_applicable', 'non_trouve', 'publie_non_exploitable')),
   valeur                numeric,
+  -- Une borne publiée (« supérieur à 14 % ») n'est pas une valeur exacte.
+  comparateur           text not null default '=' check (comparateur in ('=', '>', '>=', '<', '<=')),
   unite                 text check (unite in ('pct', 'fcfa', 'millions_fcfa', 'milliers_fcfa', 'usd', 'millions_usd')),
   -- Le document
   emetteur_lu           text,
