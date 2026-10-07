@@ -35,7 +35,7 @@
     "lightweight-charts": "^5.2.0",
     "next": "^14.2.35",
     "nuqs": "^2.10.1",
-    "pdfjs-dist": "^4.4.168",
+    "pdfjs-dist": "^6.3.289",
     "posthog-js": "^1.396.6",
     "posthog-node": "^5.39.4",
     "react": "^18.3.1",
