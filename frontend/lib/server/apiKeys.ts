@@ -1,7 +1,7 @@
 import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 
-export type LlmProvider = 'deepseek' | 'mistral' | 'xai' | 'gemini' | 'anthropic';
+export type LlmProvider = 'deepseek' | 'mistral' | 'xai' | 'gemini' | 'anthropic' | 'codecraft';
 
 const ENV_VAR: Record<LlmProvider, string> = {
   deepseek: 'DEEPSEEK_API_KEY',
@@ -9,6 +9,7 @@ const ENV_VAR: Record<LlmProvider, string> = {
   xai: 'XAI_API_KEY',
   gemini: 'GEMINI_API_KEY',
   anthropic: 'ANTHROPIC_API_KEY',
+  codecraft: 'CODECRAFT_API_KEY',
 };
 
 /**

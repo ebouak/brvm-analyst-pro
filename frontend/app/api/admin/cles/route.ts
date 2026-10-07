@@ -4,10 +4,10 @@ import { createClient as createSb } from '@supabase/supabase-js';
 import { requireAdmin } from '@/lib/server/admin';
 import { getMfaStatus } from '@/lib/server/mfa';
 
-const PROVIDERS = ['anthropic', 'deepseek', 'mistral', 'xai', 'resend'] as const;
+const PROVIDERS = ['anthropic', 'codecraft', 'deepseek', 'mistral', 'xai', 'resend'] as const;
 type Provider = (typeof PROVIDERS)[number];
 const ENV_VAR: Record<Provider, string> = {
-  anthropic: 'ANTHROPIC_API_KEY', deepseek: 'DEEPSEEK_API_KEY', mistral: 'MISTRAL_API_KEY', xai: 'XAI_API_KEY', resend: 'RESEND_API_KEY',
+  anthropic: 'ANTHROPIC_API_KEY', codecraft: 'CODECRAFT_API_KEY', deepseek: 'DEEPSEEK_API_KEY', mistral: 'MISTRAL_API_KEY', xai: 'XAI_API_KEY', resend: 'RESEND_API_KEY',
 };
 
 function admin() {

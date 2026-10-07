@@ -171,16 +171,20 @@ export async function POST(req: Request, { params }: { params: { code: string } 
       // laisse un rapport partiel, qui n'est PAS mis en cache (voir plus bas).
       let complet = false;
       try {
-        // Claude d'abord (API officielle) ; sans clé ou en échec avant le
-        // premier octet, la cascade habituelle DeepSeek → Gemini → Grok.
+        // Claude officiel s'il a une clé, puis CodeCraft, puis DeepSeek →
+        // Gemini → Grok. Un refus (crédit épuisé, clé, modèle) se voit au
+        // statut HTTP, avant le premier octet : le suivant prend la main.
+        // 280 s : un rapport complet prend ~2 min 40 chez CodeCraft (mesuré).
         const redaction =
           (await redigerClaudeEnFlux([{ role: 'user', content: prompt }], { maxTokens: 16_000, timeoutMs: 280_000 }))
           ?? (await redigerEnFlux(
             [{ role: 'user', content: prompt }],
-            { maxTokens: 7000, temperature: 0.3, timeoutMs: 110_000 },
+            { maxTokens: 7000, temperature: 0.3, timeoutMs: 280_000, fournisseurs: ['codecraft', 'deepseek', 'gemini', 'xai'] },
           ));
         if (redaction) {
-          usedModel = redaction.modele;
+          // Un revendeur n'est pas le modèle qu'il annonce : on dit par où le
+          // texte est passé.
+          usedModel = redaction.fournisseur === 'codecraft' ? `codecraft/${redaction.modele}` : redaction.modele;
           for await (const fragment of redaction.fragments) {
             full += fragment;
             controller.enqueue(encoder.encode(fragment));

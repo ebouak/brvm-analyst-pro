@@ -17,9 +17,13 @@ import { avecCharte, avecFormatFr, LecteurSse, type MessageLlm } from '@/lib/llm
  * consignes strictes, les trois écrivent un texte équivalent. Il dit « le plus
  * rapide et le moins cher d'abord, deux secours réels derrière ».
  */
-export type FournisseurRedaction = 'deepseek' | 'gemini' | 'xai';
+export type FournisseurRedaction = 'codecraft' | 'deepseek' | 'gemini' | 'xai';
 
+/** Cascade par défaut : CodeCraft n'y figure pas (diagnostic seulement). */
 export const CASCADE_REDACTION: readonly FournisseurRedaction[] = ['deepseek', 'gemini', 'xai'];
+
+/** Ordre de tous les fournisseurs connus ; `fournisseurs` en choisit un sous-ensemble. */
+const ORDRE_COMPLET: readonly FournisseurRedaction[] = ['codecraft', 'deepseek', 'gemini', 'xai'];
 
 export interface Redacteur {
   fournisseur: FournisseurRedaction;
@@ -65,7 +69,7 @@ export interface Redaction {
 export async function redacteursDisponibles(
   fournisseurs: readonly FournisseurRedaction[] = CASCADE_REDACTION,
 ): Promise<Redacteur[]> {
-  const ordre = CASCADE_REDACTION.filter((f) => fournisseurs.includes(f));
+  const ordre = ORDRE_COMPLET.filter((f) => fournisseurs.includes(f));
   const cles = await Promise.all(ordre.map((f) => resolveApiKey(f)));
   return ordre.flatMap((f, i) => {
     const cle = cles[i];
