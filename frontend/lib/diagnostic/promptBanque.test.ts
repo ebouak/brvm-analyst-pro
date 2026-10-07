@@ -84,6 +84,14 @@ describe('diagnostic — banque', () => {
     expect(p).not.toContain('Couverture des créances douteuses');
   });
 
+  it('la valorisation est calculée par le code et le modèle doit la reprendre telle quelle', () => {
+    const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque' });
+    expect(p).toContain('## VALORISATION CALCULÉE');
+    expect(p).toMatch(/Actualisation des dividendes : 28\s39\d FCFA/);   // 2 606 × 1,035 / 0,095
+    expect(p).toContain('Reprends TELLES QUELLES les valeurs du bloc VALORISATION CALCULÉE');
+  });
+
   it('une société non financière garde le gabarit général, avec le bloc marché en plus', () => {
     const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m });
     const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'general' });

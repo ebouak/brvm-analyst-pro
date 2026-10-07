@@ -7,6 +7,7 @@ import type { LectureIntermediaire } from '@/lib/financials/interim';
 import type { ContexteQuant } from './contexteQuant';
 import type { LigneComparaison } from './medianes';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
+import { valoriser, blocValorisation } from './valorisation';
 
 function fmt(n: number | null | undefined, decimals = 0): string {
   if (n == null) return 'N/D';
@@ -315,6 +316,10 @@ Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du 
 ${banque
   ? blocBanque({ inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions: marche?.actions ?? null, m, interim, cours_bas_52s, cours_haut_52s, absenceSolvabilite }) + '\n\n'
   : donneesGenerales}---
+## VALORISATION CALCULÉE (mêmes nombres que le graphique du rapport)
+${blocValorisation(valoriser({ famille, cours, actions: marche?.actions ?? null, inc: inc_n, bal: bal_n, medianes: contexteQuant?.medianes?.lignes }))}
+
+---
 ## DONNÉES DE MARCHÉ DU TITRE
 ${blocMarche(cours, marche)}
 
@@ -355,8 +360,8 @@ ${banque
 **5. ANALYSE DES FLUX** — qualité du cash, Capex maintenance vs croissance, FCF, trésorerie nette`}
 **6. COMPARAISON AUX MÉDIANES DU SECTEUR** — reprends le tableau de comparaison fourni (valeurs et médianes telles quelles, sans en recalculer aucune), puis commente les écarts les plus marqués. Une médiane « non significative » se dit comme telle. Une position face à la médiane décrit un écart, elle ne prouve pas une sous- ou survalorisation.
 ${banque
-  ? `**7. VALORISATION** — pour une banque, le DCF sur free cash-flow ne s'applique pas : utilise la valeur justifiée par le rapport cours / valeur comptable, P/B = (ROE − g) / (k − g), et l'actualisation des dividendes, avec les mêmes hypothèses (k 12–14%, g 3–4%) ; puis les multiples relatifs (PER, P/B) face aux médianes de la section 6`
-  : `**7. VALORISATION** — DCF simplifié (WACC 12–14%, g 3–4%) + multiples relatifs + pairs BRVM (appuie-toi sur les médianes de la section 6)`}
+  ? `**7. VALORISATION** — pour une banque, le DCF sur free cash-flow ne s'applique pas. Reprends TELLES QUELLES les valeurs du bloc VALORISATION CALCULÉE (valeur justifiée par le P/B, actualisation des dividendes, multiples médians des pairs) : ne les recalcule pas, un graphique du rapport les affiche avec les mêmes nombres. Explique ce que chaque méthode suppose et pourquoi elles divergent`
+  : `**7. VALORISATION** — reprends TELLES QUELLES les valeurs du bloc VALORISATION CALCULÉE (actualisation des dividendes, multiples médians des pairs) : ne les recalcule pas, un graphique du rapport les affiche avec les mêmes nombres. Tu peux y ajouter un DCF simplifié (WACC 12–14%, g 3–4%) en montrant ton calcul`}
 **8. POLITIQUE DE DIVIDENDE** — durabilité, signal marché
 **9. RISQUES & CATALYSEURS** — sectoriels, opérationnels, macro UEMOA
 **10. POINTS DE VIGILANCE** — 3 à 6 éléments concrets à surveiller aux prochaines publications (un ratio qui se dégrade, une donnée manquante, un red flag déclenché, une médiane défavorable, un écart entre comptes intermédiaires et annuels). Pour chacun : ce qui est observé aujourd'hui et ce qui changerait la lecture.

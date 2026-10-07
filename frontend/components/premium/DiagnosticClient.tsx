@@ -18,9 +18,21 @@ interface Props {
   code: string;
   cachedMarkdown: string | null;
   cachedAt: string | null;
+  /**
+   * Graphiques rendus au serveur, rangés par numéro de section du rapport
+   * (« 3 » = rentabilité…). Chacun s'insère sous le titre de sa section ; ceux
+   * dont le titre n'apparaît pas sont regroupés à la fin — aucun ne se perd.
+   */
+  graphiques?: Record<string, ReactNode>;
 }
 
-export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Props) {
+/** « ## 3. ANALYSE… », « ### **7. VALORISATION** » → « 3 », « 7 ». */
+function numeroSection(ligne: string): string | null {
+  const m = /^#{1,6}\s*\**\s*(\d{1,2})[.)]/.exec(ligne);
+  return m ? String(Number(m[1])) : null;
+}
+
+export default function DiagnosticClient({ code, cachedMarkdown, cachedAt, graphiques = {} }: Props) {
   const [markdown, setMarkdown] = useState(cachedMarkdown ?? '');
   const [dateRapport, setDateRapport] = useState<string | null>(cachedAt);
   const [loading, setLoading] = useState(false);
@@ -95,9 +107,22 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
   // rerender-use-deferred-value : pendant le streaming, on diffère le rendu lourd
   // du markdown pour garder l'UI réactive ; useMemo évite de re-parser à chaque render.
   const deferredMarkdown = useDeferredValue(markdown);
-  const renderedMarkdown = useMemo(
-    () =>
-      deferredMarkdown.split('\n').map((line, i) => {
+  const { rendu: renderedMarkdown, restants } = useMemo(() => {
+    const places = new Set<string>();
+    const rendu = deferredMarkdown.split('\n').flatMap((line, i) => {
+      const n = numeroSection(line.trimEnd());
+      const el = rendreLigne(line, i);
+      if (n && graphiques[n] && !places.has(n)) {
+        places.add(n);
+        return [el, <div key={`g${n}`}>{graphiques[n]}</div>];
+      }
+      return [el];
+    });
+    const restants = Object.keys(graphiques).filter((n) => !places.has(n)).sort((a, b) => Number(a) - Number(b));
+    return { rendu, restants };
+  }, [deferredMarkdown, graphiques]);
+
+  function rendreLigne(line: string, i: number): ReactNode {
         const l = line.trimEnd();
         if (/^#\s/.test(l)) return <h2 key={i} className="text-lg font-semibold text-white mt-2 mb-3">{enLigne(l.replace(/^#\s+/, ''))}</h2>;
         if (l.startsWith('## ')) return <h2 key={i} className="text-base font-semibold text-white mt-6 mb-2 border-b border-border pb-1">{enLigne(l.slice(3))}</h2>;
@@ -111,9 +136,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
         }
         if (l.trim() === '') return <div key={i} className="h-2" />;
         return <p key={i} className="text-sm text-muted leading-relaxed">{enLigne(l)}</p>;
-      }),
-    [deferredMarkdown],
-  );
+  }
 
   return (
     <div className="space-y-4">
@@ -162,6 +185,19 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
       {markdown && (
         <div className="bg-surface border border-border rounded-xl p-6 space-y-1 print:bg-white print:text-black print:border-0">
           {renderedMarkdown}
+          {restants.length > 0 && (
+            <>
+              <h2 className="text-base font-semibold text-white mt-6 mb-2 border-b border-border pb-1">Graphiques complémentaires</h2>
+              {restants.map((n) => <div key={`r${n}`}>{graphiques[n]}</div>)}
+            </>
+          )}
+        </div>
+      )}
+
+      {!markdown && Object.keys(graphiques).length > 0 && (
+        <div className="bg-surface border border-border rounded-xl p-6">
+          <h2 className="text-base font-semibold text-white mb-2">Les chiffres en graphiques</h2>
+          {Object.keys(graphiques).sort((a, b) => Number(a) - Number(b)).map((n) => <div key={`v${n}`}>{graphiques[n]}</div>)}
         </div>
       )}
 
