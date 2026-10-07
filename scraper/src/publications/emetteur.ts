@@ -77,6 +77,13 @@ export const ALIAS_EMETTEURS: Readonly<Record<string, string>> = {
   'LNB BN': 'LNBB',
   'NSIA BANQUE CI': 'NSBC',
   'ONATEL BF': 'ONTBF',
+  'ONATEL': 'ONTBF',
+  // Ancien nom de Tractafric Motors CI, lu dans les PDF « SDACI: États financiers
+  // 2004 / 2006 » (« PEYRISSAC CÔTE D'IVOIRE S.A. »).
+  'PEYRISSAC': 'PRSC',
+  'PEYRISSAC CI': 'PRSC',
+  'SDACI': 'PRSC',
+  'ETI': 'ETIT',
   'ORAGROUP TG': 'ORGT',
   'ORANGE CI': 'ORAC',
   'PALM CI': 'PALC',
@@ -144,10 +151,16 @@ export function emetteurDuFichier(url: string | null, alias: Map<string, string>
   try { fichier = decodeURIComponent(url.split('/').pop() ?? ''); } catch { fichier = url.split('/').pop() ?? ''; }
   const f = ` ${normaliser(fichier).replace(/[^A-Z0-9&' ]+/g, ' ').replace(/\s+/g, ' ')} `;
   const trouves = new Set<string>();
+  const vus: { n: string; code: string }[] = [];
   for (const [nom, code] of alias) {
-    if (!candidats.has(code) || nom.length < 4) continue;
+    if (!candidats.has(code) || nom.length < 3) continue; // mots entiers : « CIE », « ETI »
     const n = normaliser(nom).replace(/[^A-Z0-9&' ]+/g, ' ').replace(/\s+/g, ' ').trim();
-    if (n && f.includes(` ${n} `)) trouves.add(code);
+    if (n && f.includes(` ${n} `)) vus.push({ n, code });
+  }
+  // La correspondance la plus longue l'emporte : « ECOBANK CI » (ECOC) contient
+  // « ECOBANK » (ETIT) ; sans cette règle le fichier passait pour ambigu.
+  for (const v of vus) {
+    if (!vus.some((o) => o.n.length > v.n.length && ` ${o.n} `.includes(` ${v.n} `))) trouves.add(v.code);
   }
   return trouves.size === 1 ? [...trouves][0]! : null;
 }
@@ -171,6 +184,9 @@ export function emetteurDuDocument(
   partage: Set<string> | null = null,
 ): { code: string | null; conflit: boolean; titre: string | null; fichier: string | null } {
   const titre = emetteurDuTitre(libelle, alias);
+  // Une preuve par le contenu du PDF prime sur le titre et le nom du fichier.
+  const prouve = url ? PREUVES_CONTENU[url]?.code ?? null : null;
+  if (prouve) return { code: prouve, conflit: false, titre, fichier: prouve };
   const fichier = emetteurDuFichier(url, alias, codes);
   if (titre && fichier && titre !== fichier) return { code: null, conflit: true, titre, fichier };
   if (titre) return { code: titre, conflit: false, titre, fichier };
@@ -196,11 +212,27 @@ export function codeDeCollecte(page: string, libelle: string, url: string | null
  * rattachement : lire un PDF étranger fabrique des comptes faux.
  */
 export function documentEtranger(code: string, libelle: string, url: string | null, alias: Map<string, string>, codes: Set<string>): string | null {
-  const titre = emetteurDuTitre(libelle, alias);
-  if (titre && titre !== code) return titre;
+  const prouve = url ? PREUVES_CONTENU[url]?.code ?? null : null;
+  if (prouve) return prouve !== code ? prouve : null;
+  // Le document fait foi : un fichier qui nomme la ligne lui appartient, même
+  // sous un titre faux (« États financiers 2017 : ETIT » = Ecobank CI).
   const fichier = emetteurDuFichier(url, alias, codes);
-  return fichier && fichier !== code ? fichier : null;
+  if (fichier) return fichier !== code ? fichier : null;
+  const titre = emetteurDuTitre(libelle, alias);
+  return titre && titre !== code ? titre : null;
 }
+
+/**
+ * Rattachements prouvés par le CONTENU du PDF, quand ni le titre ni le nom du
+ * fichier ne suffisent. Chaque entrée cite ce qu'on a lu. À n'alimenter que
+ * par lecture du document — jamais par déduction.
+ */
+export const PREUVES_CONTENU: Readonly<Record<string, { code: string; preuve: string }>> = {
+  'https://bfin.brvm.org/0/Communiques_emetteurs/20171031%20-%20Pr%C3%A9sentation%20R%C3%A9sultats%20Fin%20Sept%202017.pdf': {
+    code: 'ETIT',
+    preuve: '2026-10-07 : « Groupe Ecobank – Communiqué presse Résultats Financiers Sept 2017 … Lomé, Togo » (groupe ETI, pas Ecobank CI)',
+  },
+};
 
 /**
  * Code que désigne le titre quand il CONTREDIT le code rattaché ; null si le
