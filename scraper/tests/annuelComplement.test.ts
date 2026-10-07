@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { champsManquants, construirePatches, schemaComplement, verifierComplement } from '../src/annuel/complement.js';
+import { champsManquants, construirePatches, schemaComplement, verifierComplement, nomEmetteur, memeEmetteur, PRUDENTIELS, promptComplement } from '../src/annuel/complement.js';
 
 const M = 1e6;
 const lecture = (x: object) => schemaComplement.parse({ devise_source: 'fcfa', exercice: 2025, ...x });
@@ -26,8 +26,31 @@ describe('champsManquants', () => {
     });
     expect(m.map((x) => x.champ)).toEqual([
       'resultat_avant_impots', 'impots', 'benefice_par_action', 'coefficient_exploitation',
+      'produit_interets', 'charges_interets', 'cout_du_risque',
       'ratio_solvabilite', 'creances_douteuses', 'taux_couverture_creances', 'ratio_liquidite',
+      'flux_exploitation', 'flux_investissement', 'flux_financement',
     ]);
+  });
+});
+
+describe('verifierComplement — banques (intérêts, coût du risque)', () => {
+  const base = { revenu_total: 276 * M, resultat_net: 101 * M, total_actifs: 3769 * M };
+
+  it('accepte intérêts et coût du risque cohérents (SGBC 2025)', () => {
+    const v = verifierComplement(lecture({ revenu_total: 276 * M, resultat_net: 101 * M, produit_interets: 230 * M, charges_interets: 48 * M, cout_du_risque: 47 * M }), 2025, base);
+    expect(v.ok).toBe(true);
+  });
+
+  it('REJETTE des charges d’intérêts négatives (signe non converti)', () => {
+    const v = verifierComplement(lecture({ revenu_total: 276 * M, charges_interets: -48 * M }), 2025, base);
+    expect(v.ok).toBe(false);
+    expect(v.motifs.join(' ')).toMatch(/charges d'intérêts négatives/);
+  });
+
+  it('REJETTE un coût du risque supérieur au PNB (unité ou ligne fausse)', () => {
+    const v = verifierComplement(lecture({ revenu_total: 276 * M, cout_du_risque: 470 * M }), 2025, base);
+    expect(v.ok).toBe(false);
+    expect(v.motifs.join(' ')).toMatch(/coût du risque supérieur au PNB/);
   });
 });
 
@@ -84,5 +107,32 @@ describe('devise — graphies de « FCFA »', () => {
       expect(verifierComplement(lecture({ devise_source: d, revenu_total: 500 * M }), 2025, base).ok).toBe(true);
     }
     expect(verifierComplement(lecture({ devise_source: 'USD', revenu_total: 500 * M }), 2025, base).ok).toBe(false);
+  });
+});
+
+describe('notation comme seconde source — même émetteur exigé', () => {
+  it('lit le nom d’émetteur en fin de libellé, sans parenthèse ni « Exercice »', () => {
+    expect(nomEmetteur("Rapport d'activités annuel et Etats Financiers - Exercice 2025 - SOCIETE GENERALE CI (Annule et remplace le précédent)")).toBe('SOCIETE GENERALE CI');
+    expect(nomEmetteur('Notation Financière - SIB CI')).toBe('SIB CI');
+    expect(nomEmetteur('Communiqué - Fractionnement de capital - Exercice 2017')).toBeNull();
+    expect(nomEmetteur('Sans tiret')).toBeNull();
+  });
+
+  it('écarte la notation de SIB CI classée chez SGBC (cas réel du 2026-01-08)', () => {
+    expect(memeEmetteur(nomEmetteur('Notation Financière - SIB CI'), 'SOCIETE GENERALE CI')).toBe(false);
+    expect(memeEmetteur(nomEmetteur('Notation financière - SOCIETE GENERALE CI'), 'SOCIETE GENERALE CI')).toBe(true);
+    expect(memeEmetteur(nomEmetteur('Notation financière - CORIS BANK INTERNATIONAL BF'), 'CORIS BANK INTERNATIONAL BF')).toBe(true);
+  });
+
+  it('seuls les champs prudentiels peuvent venir d’une notation', () => {
+    expect(PRUDENTIELS.has('ratio_solvabilite')).toBe(true);
+    expect(PRUDENTIELS.has('creances_douteuses')).toBe(true);
+    expect(PRUDENTIELS.has('cout_du_risque')).toBe(false);
+    expect(PRUDENTIELS.has('total_capitaux_propres')).toBe(false);
+  });
+
+  it('le prompt de notation vise la seule colonne de l’exercice', () => {
+    expect(promptComplement('banque', 2025, 'notation')).toMatch(/RAPPORT DE NOTATION.*UNIQUEMENT la colonne 2025/s);
+    expect(promptComplement('banque', 2025)).toMatch(/ÉTATS FINANCIERS ANNUELS/);
   });
 });

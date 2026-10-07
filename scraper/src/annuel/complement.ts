@@ -48,6 +48,13 @@ export const CIBLES: Record<'general' | 'banque', { table: Table; champ: string;
     { table: 'income_statements', champ: 'impots' },
     { table: 'income_statements', champ: 'benefice_par_action' },
     { table: 'income_statements', champ: 'coefficient_exploitation', ls: true },
+    // Ajoutés le 2026-10-07 : le diagnostic SGBC ne pouvait citer ni la marge
+    // d'intérêts ni le coût du risque, pourtant publiés au compte de résultat.
+    // La marge d'intérêts n'est PAS lue : elle se calcule (produits − charges)
+    // dans lib/bank/kpis.ts, le modèle ne calculant rien.
+    { table: 'income_statements', champ: 'produit_interets', ls: true },
+    { table: 'income_statements', champ: 'charges_interets', ls: true },
+    { table: 'income_statements', champ: 'cout_du_risque', ls: true },
     { table: 'balance_sheets', champ: 'total_capitaux_propres' },
     { table: 'balance_sheets', champ: 'ratio_solvabilite', ls: true },
     { table: 'balance_sheets', champ: 'creances_douteuses', ls: true },
@@ -55,6 +62,11 @@ export const CIBLES: Record<'general' | 'banque', { table: Table; champ: string;
     { table: 'balance_sheets', champ: 'ratio_liquidite', ls: true },
     { table: 'balance_sheets', champ: 'credits_clientele', ls: true },
     { table: 'balance_sheets', champ: 'depots_clientele', ls: true },
+    // Rarement publiés par les banques BRVM (absents du document SGBC 2025) :
+    // ciblés quand même, null s'ils n'y sont pas.
+    { table: 'cash_flow_statements', champ: 'flux_exploitation' },
+    { table: 'cash_flow_statements', champ: 'flux_investissement' },
+    { table: 'cash_flow_statements', champ: 'flux_financement' },
   ],
 };
 
@@ -91,28 +103,68 @@ export const schemaComplement = z.object({
   ratio_liquidite: n,
   credits_clientele: n,
   depots_clientele: n,
+  produit_interets: n,
+  charges_interets: n,
+  cout_du_risque: n,
+  flux_investissement: n,
+  flux_financement: n,
 });
 export type Complement = z.infer<typeof schemaComplement>;
 
-export function promptComplement(famille: Famille, exercice: number): string {
+export function promptComplement(famille: Famille, exercice: number, document: 'etats' | 'notation' = 'etats'): string {
   const banque = famille === 'banque';
   return [
-    `Tu relis les ÉTATS FINANCIERS ANNUELS d'une société cotée à la BRVM et tu relèves des chiffres de l'exercice ${exercice} (colonne ${exercice}, PAS l'exercice précédent).`,
+    document === 'notation'
+      ? `Tu relis le RAPPORT DE NOTATION FINANCIÈRE d'une banque cotée à la BRVM et tu relèves des chiffres de l'exercice ${exercice}. Ces rapports présentent souvent plusieurs exercices côte à côte : prends UNIQUEMENT la colonne ${exercice}.`
+      : `Tu relis les ÉTATS FINANCIERS ANNUELS d'une société cotée à la BRVM et tu relèves des chiffres de l'exercice ${exercice} (colonne ${exercice}, PAS l'exercice précédent).`,
     'Réponds UNIQUEMENT par un objet JSON avec ces clés (nombre ou null) :',
     `devise_source, exercice (= ${exercice}), revenu_total, resultat_net, total_actifs,`,
     banque
-      ? 'resultat_avant_impots, impots, benefice_par_action, coefficient_exploitation, total_capitaux_propres, ratio_solvabilite, creances_douteuses, taux_couverture_creances, ratio_liquidite, credits_clientele, depots_clientele.'
+      ? 'resultat_avant_impots, impots, benefice_par_action, coefficient_exploitation, total_capitaux_propres, ratio_solvabilite, creances_douteuses, taux_couverture_creances, ratio_liquidite, credits_clientele, depots_clientele, produit_interets, charges_interets, cout_du_risque, flux_exploitation, flux_investissement, flux_financement.'
       : 'resultat_exploitation, charges_financieres_nettes, resultat_avant_impots, impots, benefice_par_action, dette_court_terme, dette_long_terme, tresorerie_equivalents, total_actif_circulant, passif_courant, total_capitaux_propres, flux_exploitation, depreciation_amortissement, depenses_capital, investissements_ppe.',
     '',
     'RÈGLES IMPÉRATIVES :',
     "1. N'INVENTE RIEN et ne CALCULE RIEN : un montant qui ne figure pas tel quel dans le document → null.",
     "2. Montants convertis en FCFA BRUTS d'après l'en-tête du tableau (milliers ×1 000 ; millions ×1 000 000).",
     banque
-      ? "3. revenu_total = Produit Net Bancaire. benefice_par_action en FCFA PAR ACTION (jamais converti). coefficient_exploitation en %. ratio_solvabilite, taux_couverture_creances et ratio_liquidite en POURCENTAGE (ex. 12,5 → 12.5), tels que publiés dans le tableau des normes prudentielles ou le rapport de gestion. creances_douteuses = encours BRUT des créances douteuses / en souffrance ; credits_clientele et depots_clientele = encours de fin d'exercice."
+      ? "3. revenu_total = Produit Net Bancaire. benefice_par_action en FCFA PAR ACTION (jamais converti). coefficient_exploitation en %. ratio_solvabilite, taux_couverture_creances et ratio_liquidite en POURCENTAGE (ex. 12,5 → 12.5), tels que publiés dans le tableau des normes prudentielles ou le rapport de gestion. creances_douteuses = encours BRUT des créances douteuses / en souffrance ; credits_clientele et depots_clientele = encours de fin d'exercice. produit_interets = « intérêts et produits assimilés » ; charges_interets = « intérêts et charges assimilées » en valeur POSITIVE ; cout_du_risque = « coût (net) du risque » en valeur POSITIVE s'il s'agit d'une charge, négative pour une reprise nette. flux_exploitation, flux_investissement, flux_financement = totaux du tableau des flux de trésorerie, s'il existe (sinon null)."
       : "3. revenu_total = chiffre d'affaires. benefice_par_action en FCFA PAR ACTION (jamais converti). impots = impôt sur le résultat (positif). investissements_ppe = acquisitions d'immobilisations corporelles du tableau des flux (valeur positive). charges_financieres_nettes = frais financiers (positif s'il s'agit d'une charge). dette_court_terme / dette_long_terme = dettes FINANCIÈRES (emprunts, découverts), pas les fournisseurs. depenses_capital = acquisitions d'immobilisations du tableau des flux (valeur positive).",
     "4. Si le document contient des tableaux consolidés ET sociaux, prends ceux qui correspondent au chiffre d'affaires publié en tête du rapport ; ne mélange pas les deux.",
     '5. Tableaux en devises étrangères : ne les utilise pas ; devise_source = la devise réellement lue.',
   ].join('\n');
+}
+
+/**
+ * Champs bancaires prudentiels : absents des états financiers publiés (vérifié
+ * sur SGBC 2025), présents dans les rapports de notation. Seuls ces champs
+ * peuvent venir d'une notation : les lignes comptables restent tirées des
+ * états financiers, source primaire.
+ */
+export const PRUDENTIELS = new Set(['ratio_solvabilite', 'creances_douteuses', 'taux_couverture_creances', 'ratio_liquidite']);
+
+const normEmetteur = (s: string) =>
+  s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\(.*?\)/g, ' ').replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+/**
+ * Nom d'émetteur porté par un libellé BDFIN : son dernier segment « - XXX »,
+ * sans parenthèse (« (Annule et remplace…) »). null si le libellé n'en a pas.
+ */
+export function nomEmetteur(libelle: string): string | null {
+  const segs = libelle.split(' - ');
+  if (segs.length < 2) return null;
+  const n = normEmetteur(segs[segs.length - 1]!);
+  return n.length >= 2 && !/^EXERCICE\b/.test(n) ? n : null;
+}
+
+/**
+ * Deux libellés désignent-ils le même émetteur ? Égalité ou inclusion des noms
+ * normalisés. Volontairement strict : un faux négatif fait seulement sauter une
+ * seconde source ; un faux positif attribuerait à une banque les ratios d'une
+ * autre — le cas réel du rapport « SIB CI » classé chez SGBC (2026-01-08).
+ */
+export function memeEmetteur(a: string | null, b: string | null): boolean {
+  if (!a || !b) return false;
+  return a === b || a.includes(b) || b.includes(a);
 }
 
 export interface Existant {
@@ -161,6 +213,11 @@ export function verifierComplement(c: Complement, exercice: number, existant: Ex
   if (c.taux_couverture_creances != null && (c.taux_couverture_creances < 0 || c.taux_couverture_creances > 200)) motifs.push('taux de couverture hors [0 ; 200] %');
   if (c.ratio_liquidite != null && (c.ratio_liquidite <= 0 || c.ratio_liquidite > 1000)) motifs.push('ratio de liquidité hors bornes');
   if (c.creances_douteuses != null && c.credits_clientele != null && c.creances_douteuses > c.credits_clientele) motifs.push('créances douteuses > crédits');
+  if (c.produit_interets != null && c.produit_interets < 0) motifs.push("produits d'intérêts négatifs");
+  if (c.charges_interets != null && c.charges_interets < 0) motifs.push("charges d'intérêts négatives (attendues en valeur positive)");
+  // Un coût du risque supérieur au PNB signalerait une erreur d'unité ou de ligne.
+  const pnb = c.revenu_total ?? existant.revenu_total;
+  if (c.cout_du_risque != null && pnb != null && pnb > 0 && Math.abs(c.cout_du_risque) > pnb) motifs.push('coût du risque supérieur au PNB');
 
   return { ok: motifs.length === 0, motifs, ancres };
 }

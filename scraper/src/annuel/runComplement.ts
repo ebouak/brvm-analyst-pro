@@ -16,6 +16,9 @@ import {
   construirePatches,
   promptComplement,
   schemaComplement,
+  PRUDENTIELS,
+  nomEmetteur,
+  memeEmetteur,
   verifierComplement,
   type Famille,
   type Table,
@@ -32,7 +35,7 @@ export interface ComplementResult {
 
 const TABLES: Table[] = ['income_statements', 'balance_sheets', 'cash_flow_statements'];
 
-export async function runComplement({ mock = false, codes = [] as string[] } = {}): Promise<ComplementResult> {
+export async function runComplement({ mock = false, dryRun = false, codes = [] as string[] } = {}): Promise<ComplementResult> {
   const sb = getSupabase();
   const cle = mock ? null : await resolveApiKeyForScraper('gemini');
   if (!mock && !cle) throw new Error('Clé Gemini absente (GEMINI_API_KEY ou api_keys provider gemini).');
@@ -84,7 +87,27 @@ export async function runComplement({ mock = false, codes = [] as string[] } = {
         const rang = (p: typeof a) => (p.type_publication === 'etats_financiers' ? 0 : /rapport annuel|activit|gestion/i.test(p.libelle) ? 1 : 2);
         return rang(a) - rang(b) || b.date_publication.localeCompare(a.date_publication);
       })
-      .slice(0, 2);
+      .slice(0, 2)
+      .map((d) => ({ ...d, nature: 'etats' as 'etats' | 'notation' }));
+
+    // Seconde source pour les seuls champs prudentiels d'une banque : le
+    // rapport de notation publié APRÈS la clôture de l'exercice, à condition
+    // qu'il nomme le même émetteur que les états financiers de la société.
+    if (famille === 'banque' && manquants.some((m) => PRUDENTIELS.has(m.champ))) {
+      const emetteur = nomEmetteur(docs.find((d) => d.nature === 'etats')?.libelle ?? '');
+      const { data: nots } = await sb
+        .from('publications')
+        .select('id, libelle, type_publication, date_publication, source_url')
+        .eq('code', code)
+        .eq('type_publication', 'notation')
+        .gt('date_publication', `${exercice}-12-31`)
+        .not('source_url', 'is', null)
+        .order('date_publication', { ascending: false });
+      const notation = ((nots ?? []) as typeof docs).find((n) => memeEmetteur(nomEmetteur(n.libelle), emetteur));
+      const ecartees = ((nots ?? []) as typeof docs).filter((n) => !memeEmetteur(nomEmetteur(n.libelle), emetteur));
+      if (ecartees.length) log.warn({ code, emetteur, ecartees: ecartees.map((n) => n.libelle) }, 'notation écartée : autre émetteur');
+      if (notation) docs.push({ ...notation, nature: 'notation' });
+    }
 
     if (mock) {
       log.info({ code, exercice, manquants: manquants.map((m) => m.champ), docs: docs.map((d) => d.libelle) }, '[mock] à compléter');
@@ -103,8 +126,11 @@ export async function runComplement({ mock = false, codes = [] as string[] } = {
 
     for (const doc of docs) {
       if (manquants.length === 0) break;
+      // Une notation ne fournit QUE des champs prudentiels.
+      const visees = doc.nature === 'notation' ? manquants.filter((m) => PRUDENTIELS.has(m.champ)) : manquants;
+      if (visees.length === 0) continue;
       try {
-        const r = await jsonDepuisPdf(doc.source_url, promptComplement(famille, exercice), `Société BRVM : ${code}. Document : ${doc.libelle}.`, cle!);
+        const r = await jsonDepuisPdf(doc.source_url, promptComplement(famille, exercice, doc.nature), `Société BRVM : ${code}. Document : ${doc.libelle}.`, cle!);
         const parse = schemaComplement.safeParse(r?.brut);
         if (!r || !parse.success) {
           rejetes++;
@@ -117,7 +143,19 @@ export async function runComplement({ mock = false, codes = [] as string[] } = {
           log.warn({ code, exercice, doc: doc.libelle, motifs: verdict.motifs }, 'complément REJETÉ');
           continue;
         }
-        for (const p of construirePatches(manquants, parse.data)) {
+        const patches = construirePatches(visees, parse.data);
+        // À blanc : lecture et contrôles complets, AUCUNE écriture — pour voir
+        // ce qui serait complété avant de toucher à la base.
+        if (dryRun) {
+          log.info({ code, exercice, doc: doc.libelle, ancres: verdict.ancres, patches }, '[dryRun] serait complété');
+          champsEcrits += patches.reduce((n, p) => n + Object.keys(p.colonnes).length + Object.keys(p.ls).length, 0);
+          // Comme en écriture réelle : les champs trouvés sortent de la liste,
+          // le document suivant (une notation, par exemple) vise le reste.
+          const trouves = new Set(patches.flatMap((p) => [...Object.keys(p.colonnes), ...Object.keys(p.ls)]));
+          manquants = manquants.filter((m) => !trouves.has(m.champ));
+          continue;
+        }
+        for (const p of patches) {
           const avant = existant[p.table];
           const maj: Record<string, unknown> = { ...p.colonnes };
           if (Object.keys(p.ls).length) {
@@ -163,6 +201,6 @@ export async function runComplement({ mock = false, codes = [] as string[] } = {
     }
   }
 
-  log.info({ societes, champsEcrits, rejetes, echecs, mock }, 'complément des annuels');
+  log.info({ societes, champsEcrits, rejetes, echecs, mock, dryRun }, 'complément des annuels');
   return { societes, champsEcrits, rejetes, echecs };
 }

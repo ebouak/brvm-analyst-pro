@@ -98,7 +98,12 @@ export function extractBankYear(
   return {
     periode: income?.periode ?? '',
     pnb: li.pnb ?? null,
-    margeInterets: li.marge_interets ?? null,
+    // Publiée telle quelle si possible ; sinon produits − charges d'intérêts,
+    // tous deux relus dans le compte de résultat (complément annuel, 2026-10-07).
+    margeInterets: li.marge_interets
+      ?? (li.produit_interets != null && li.charges_interets != null
+        ? li.produit_interets - Math.abs(li.charges_interets)
+        : null),
     fraisGeneraux: income?.depenses_exploitation ?? income?.frais_generaux_admin ?? null,
     resultatNet: income?.resultat_net ?? null,
     totalActifs: balance?.total_actifs ?? null,
