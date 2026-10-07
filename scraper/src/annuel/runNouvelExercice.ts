@@ -14,6 +14,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { resolveApiKeyForScraper } from '../hebdo/apiKey.js';
 import { jsonDepuisPdf } from '../interim/gemini.js';
+import { construireAlias, documentEtranger } from '../publications/emetteur.js';
 import { lignesExercice, promptNouvelExercice, schemaNouvelExercice, verifierNouvelExercice } from './nouvelExercice.js';
 
 const log = logger.child({ module: 'annuel-nouveau' });
@@ -40,9 +41,17 @@ export async function runNouvelExercice({ mock = false, codes = [] as string[] }
   const { data: pubs, error } = await q;
   if (error) throw new Error(`publications : ${error.message}`);
 
+  // Un document dont le titre nomme une AUTRE société n'est jamais lu pour
+  // celle-ci : les bilans 2022-2023 de CFAC venaient de Tractafric (2026-10-07).
+  const { data: insAlias } = await sb.from('brvm_instruments').select('code, designation').eq('type', 'action');
+  const alias = construireAlias((insAlias ?? []) as { code: string; designation: string | null }[]);
+  const codesConnus = new Set((insAlias ?? []).map((i) => i.code as string));
+
   // Dernière publication d'états financiers par société, avec son exercice.
   const parCode = new Map<string, { id: string; libelle: string; source_url: string; exercice: number; date: string }>();
   for (const p of (pubs ?? []) as { id: string; code: string; libelle: string; date_publication: string; source_url: string }[]) {
+    const autre = documentEtranger(p.code, p.libelle, p.source_url, alias, codesConnus);
+    if (autre) { log.warn({ code: p.code, emetteur: autre, libelle: p.libelle }, "publication d'une autre société — écartée"); continue; }
     const ex = exerciceDuLibelle(p.libelle);
     if (!ex) continue;
     const prev = parCode.get(p.code);

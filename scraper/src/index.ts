@@ -212,6 +212,19 @@ async function main(): Promise<number> {
       return 0;
     }
 
+    case 'publications:rattachement': {
+      // Rattache au bon émetteur les publications que leur titre contredit
+      // (publications/emetteur.ts). À BLANC par défaut : DRY_RUN=false écrit.
+      const { runRattachement } = await import('./publications/runRattachement.js');
+      const dryRun = !/^(0|false|no)$/i.test(process.env.DRY_RUN ?? '');
+      const r = await runRattachement({ dryRun });
+      for (const c of r.corrections) console.log(`${c.action.padEnd(19)} ${c.code} → ${c.vers}  ${c.date}  ${c.libelle}`);
+      const n = (a: string) => r.corrections.filter((c) => c.action === a).length;
+      for (const c of r.conflits) console.log(`conflit titre≠fichier ${c.code}  titre ${c.titre} / fichier ${c.fichier}  ${c.libelle}`);
+      console.log(`${dryRun ? 'À blanc' : 'Écrit'} : ${n('supprimer')} suppression(s), ${n('rattacher')} rattachement(s), ${n('sauter (passeport)')} sautée(s), ${n('à vérifier')} à vérifier (fichier muet), ${r.evenements} événement(s) réaligné(s), ${r.conflits.length} conflit(s) titre/fichier laissé(s) en place.`);
+      return 0;
+    }
+
     case 'interim': {
       // Comptes intermédiaires (T1, S1, T3) extraits des rapports d'activités.
       // `interim SGBC SNTS` limite à ces sociétés.
