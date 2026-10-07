@@ -57,6 +57,41 @@ describe('diagnostic — banque', () => {
     expect(p).toContain('ne cite PAS comme lacunes la marge brute');
   });
 
+  it('compression des marges : coefficient d’exploitation pour une banque, jamais de marge EBITDA', () => {
+    const n = { ...(inc_n as object), frais_generaux_admin: 107e9 } as never;
+    const n1 = { ...(inc_n1 as object), frais_generaux_admin: 99.7e9 } as never;
+    const r = computeRedFlags({ inc_n: n, inc_n1: n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    const c = r.checks.find((x) => x.id === 'compression_marges')!;
+    expect(c.label).toBe("Dégradation du coefficient d'exploitation");
+    expect(c.triggered).toBe(true);            // 38,8 % contre 37,9 %
+    expect(c.evidence).toMatch(/^Coefficient d'exploitation 38\.8 % \(vs 37\.9 %\)/);
+    const p = buildDiagnosticPrompt({ ...base, inc_n: n, inc_n1: n1, redFlags: r, famille: 'banque' });
+    expect(p).not.toMatch(/marge EBITDA [0-9N]/i);
+    expect(p).toContain("N'emploie pas non plus « marge EBITDA »");
+  });
+
+  it('un seul ROE : fin d’exercice, la définition du tableau des pairs', () => {
+    const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque' });
+    expect(p).toMatch(/ROE 20\.4% \(résultat net \/ capitaux propres de fin d'exercice/);   // 101 / 495
+    expect(p).not.toMatch(/ROE 21\.\d%/);                                                  // ancienne moyenne
+  });
+
+  it('la couverture est dite « non performantes », pas « douteuses »', () => {
+    const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque' });
+    expect(p).toContain('Couverture des créances non performantes (taux publié) 82.0%');
+    expect(p).not.toContain('Couverture des créances douteuses');
+  });
+
+  it('la valorisation est calculée par le code et le modèle doit la reprendre telle quelle', () => {
+    const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque' });
+    expect(p).toContain('## VALORISATION CALCULÉE');
+    expect(p).toMatch(/Actualisation des dividendes : 28\s39\d FCFA/);   // 2 606 × 1,035 / 0,095
+    expect(p).toContain('Reprends TELLES QUELLES les valeurs du bloc VALORISATION CALCULÉE');
+  });
+
   it('une société non financière garde le gabarit général, avec le bloc marché en plus', () => {
     const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m });
     const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'general' });

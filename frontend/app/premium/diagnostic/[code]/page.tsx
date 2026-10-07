@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import DiagnosticClient from '@/components/premium/DiagnosticClient';
 import PatternDiagnostic from '@/components/premium/PatternDiagnostic';
 import { ViewTracker } from '@/components/analytics/ViewTracker';
+import { graphiquesParSection } from '@/components/diagnostic/GraphiquesDiagnostic';
 
 interface Props { params: { code: string } }
 
@@ -19,11 +20,14 @@ export default async function DiagnosticPage({ params }: Props) {
 
   if (!instrument) notFound();
 
-  const { data: cached } = await supa
-    .from('diagnostic_reports')
-    .select('markdown_content, generated_at')
-    .eq('code', code)
-    .single();
+  const [{ data: cached }, graphiques] = await Promise.all([
+    supa.from('diagnostic_reports').select('markdown_content, generated_at').eq('code', code).single(),
+    // Un échec des graphiques ne doit jamais priver la page du rapport.
+    graphiquesParSection(code).catch((e) => {
+      console.error('[diagnostic] graphiques indisponibles pour', code, (e as Error).message);
+      return {};
+    }),
+  ]);
 
   return (
     <div className="min-h-screen bg-bg">
@@ -63,6 +67,7 @@ export default async function DiagnosticPage({ params }: Props) {
           code={code}
           cachedMarkdown={cached?.markdown_content ?? null}
           cachedAt={cached?.generated_at ?? null}
+          graphiques={graphiques}
         />
 
         <section className="bg-surface border border-border rounded-xl p-6 space-y-4">

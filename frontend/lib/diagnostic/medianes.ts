@@ -59,7 +59,7 @@ const RATIOS: Record<FamilleComparaison, DefinitionRatio[]> = {
     { cle: 'roa', libelle: 'ROA', facteur: 100, unite: '%', sens: 'haut' },
     { cle: 'dividendYield', libelle: 'Rendement du dividende', facteur: 100, unite: '%', sens: 'haut' },
     { cle: 'payoutRatio', libelle: 'Taux de distribution', facteur: 1, unite: '%', sens: 'neutre' },
-    { cle: 'nplCoverage', libelle: 'Couverture des créances douteuses', facteur: 1, unite: '%', sens: 'haut' },
+    { cle: 'nplCoverage', libelle: 'Couverture des créances non performantes (taux publié)', facteur: 1, unite: '%', sens: 'haut' },
     { cle: 'depositGrowth', libelle: 'Croissance des dépôts', facteur: 100, unite: '%', sens: 'haut' },
     { cle: 'epsGrowth3y', libelle: 'Croissance du BPA (3 ans)', facteur: 100, unite: '%', sens: 'haut' },
   ],

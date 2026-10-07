@@ -7,6 +7,7 @@ import type { LectureIntermediaire } from '@/lib/financials/interim';
 import type { ContexteQuant } from './contexteQuant';
 import type { LigneComparaison } from './medianes';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
+import { valoriser, blocValorisation } from './valorisation';
 
 function fmt(n: number | null | undefined, decimals = 0): string {
   if (n == null) return 'N/D';
@@ -138,6 +139,13 @@ function blocBanque(q: {
   const curPnb = cur ? { ...cur, pnb: cur.pnb ?? pnb } : null;
   const k = curPnb ? computeBankKpis(curPnb, prev, { cours, shares: actions, dividendeParAction: inc_n?.dividende_par_action ?? null }) : null;
   const score = k ? scoreBanqueUemoa(k) : null;
+  // ROE et ROA sur les montants de FIN d'exercice : la définition du modèle
+  // quant (quant/run-buildraw.ts), donc celle du tableau des pairs. Le ROE sur
+  // capitaux propres moyens de computeBankKpis donnait 21,4 % ici et 20,5 % dans
+  // le tableau : deux chiffres pour un même ratio dans un même rapport.
+  const rn = inc_n?.resultat_net ?? null;
+  const roeFin = rn != null && bal_n?.total_capitaux_propres ? rn / bal_n.total_capitaux_propres : null;
+  const roaFin = rn != null && bal_n?.total_actifs ? rn / bal_n.total_actifs : null;
   const coefPublie = enPct(li.coefficient_exploitation);
   const coef = coefPublie ?? (k?.costIncome != null ? k.costIncome * 100 : null);
   const pc100 = (v: number | null | undefined) => pct(v == null ? null : v * 100);
@@ -177,8 +185,8 @@ ${blocIntermediaire(q.interim)}
 
 ---
 ## RATIOS BANCAIRES
-Rentabilité : ROE ${pc100(k?.roe)} | ROA ${pc100(k?.roa)} | Coefficient d'exploitation ${pct(coef)} (${coefPublie != null ? 'publié' : 'calculé : frais généraux / PNB'}) | Marge d'intérêts / actifs moyens ${pc100(k?.nim)}
-Qualité du portefeuille : Créances douteuses / crédits ${pc100(k?.nplRatio)} | Couverture des créances douteuses ${pct(enPct(lb.taux_couverture_creances))}
+Rentabilité : ROE ${pc100(roeFin)} (résultat net / capitaux propres de fin d'exercice — même définition que la comparaison aux pairs) | ROA ${pc100(roaFin)} (résultat net / total du bilan de fin d'exercice) | Coefficient d'exploitation ${pct(coef)} (${coefPublie != null ? 'publié' : 'calculé : frais généraux / PNB'}) | Marge d'intérêts / actifs moyens ${pc100(k?.nim)}
+Qualité du portefeuille : Créances douteuses / crédits ${pc100(k?.nplRatio)} | Couverture des créances non performantes (taux publié) ${pct(enPct(lb.taux_couverture_creances))}
 Structure : Crédits / dépôts ${pc100(k?.transformation)} | Fonds propres / total du bilan ${pc100(k?.leverage)} | Ratio de solvabilité ${lb.ratio_solvabilite != null ? pct(lb.ratio_solvabilite) : q.absenceSolvabilite ?? 'N/D'} (minimum réglementaire UEMOA : 11.5%)
 Valorisation (cours ${cours ?? 'N/D'} FCFA) : PER ${x(per)} | Cours / valeur comptable ${x(k?.pb)} | Rendement du dividende ${pc100(k?.rendementDiv)}
 Dividende : DPA ${inc_n?.dividende_par_action ?? 'N/D'} FCFA | Taux de distribution ${pct(m.payout_ratio)}
@@ -308,6 +316,10 @@ Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du 
 ${banque
   ? blocBanque({ inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions: marche?.actions ?? null, m, interim, cours_bas_52s, cours_haut_52s, absenceSolvabilite }) + '\n\n'
   : donneesGenerales}---
+## VALORISATION CALCULÉE (mêmes nombres que le graphique du rapport)
+${blocValorisation(valoriser({ famille, cours, actions: marche?.actions ?? null, inc: inc_n, bal: bal_n, medianes: contexteQuant?.medianes?.lignes }))}
+
+---
 ## DONNÉES DE MARCHÉ DU TITRE
 ${blocMarche(cours, marche)}
 
@@ -348,12 +360,12 @@ ${banque
 **5. ANALYSE DES FLUX** — qualité du cash, Capex maintenance vs croissance, FCF, trésorerie nette`}
 **6. COMPARAISON AUX MÉDIANES DU SECTEUR** — reprends le tableau de comparaison fourni (valeurs et médianes telles quelles, sans en recalculer aucune), puis commente les écarts les plus marqués. Une médiane « non significative » se dit comme telle. Une position face à la médiane décrit un écart, elle ne prouve pas une sous- ou survalorisation.
 ${banque
-  ? `**7. VALORISATION** — pour une banque, le DCF sur free cash-flow ne s'applique pas : utilise la valeur justifiée par le rapport cours / valeur comptable, P/B = (ROE − g) / (k − g), et l'actualisation des dividendes, avec les mêmes hypothèses (k 12–14%, g 3–4%) ; puis les multiples relatifs (PER, P/B) face aux médianes de la section 6`
-  : `**7. VALORISATION** — DCF simplifié (WACC 12–14%, g 3–4%) + multiples relatifs + pairs BRVM (appuie-toi sur les médianes de la section 6)`}
+  ? `**7. VALORISATION** — pour une banque, le DCF sur free cash-flow ne s'applique pas. Reprends TELLES QUELLES les valeurs du bloc VALORISATION CALCULÉE (valeur justifiée par le P/B, actualisation des dividendes, multiples médians des pairs) : ne les recalcule pas, un graphique du rapport les affiche avec les mêmes nombres. Explique ce que chaque méthode suppose et pourquoi elles divergent`
+  : `**7. VALORISATION** — reprends TELLES QUELLES les valeurs du bloc VALORISATION CALCULÉE (actualisation des dividendes, multiples médians des pairs) : ne les recalcule pas, un graphique du rapport les affiche avec les mêmes nombres. Tu peux y ajouter un DCF simplifié (WACC 12–14%, g 3–4%) en montrant ton calcul`}
 **8. POLITIQUE DE DIVIDENDE** — durabilité, signal marché
 **9. RISQUES & CATALYSEURS** — sectoriels, opérationnels, macro UEMOA
 **10. POINTS DE VIGILANCE** — 3 à 6 éléments concrets à surveiller aux prochaines publications (un ratio qui se dégrade, une donnée manquante, un red flag déclenché, une médiane défavorable, un écart entre comptes intermédiaires et annuels). Pour chacun : ce qui est observé aujourd'hui et ce qui changerait la lecture.
-**11. CE QUE LES CHIFFRES NE DISENT PAS** — les limites de cette analyse : données N/D ou absentes, ancienneté du dernier exercice, ce que les états financiers publiés ne montrent pas (qualité du management, gouvernance, carnet de commandes, concurrence, exposition réglementaire, liquidité réelle du titre), et la portée limitée d'une comparaison sur un marché d'une cinquantaine de sociétés. N'invente aucun fait pour combler ces trous : nomme-les.${banque ? " Pour une banque, ne cite PAS comme lacunes la marge brute, les stocks, le BFR, le capex, le free cash-flow, la dette nette ni l'Altman Z' : ces notions ne s'appliquent pas à une banque." : ''}
+**11. CE QUE LES CHIFFRES NE DISENT PAS** — les limites de cette analyse : données N/D ou absentes, ancienneté du dernier exercice, ce que les états financiers publiés ne montrent pas (qualité du management, gouvernance, carnet de commandes, concurrence, exposition réglementaire, liquidité réelle du titre), et la portée limitée d'une comparaison sur un marché d'une cinquantaine de sociétés. N'invente aucun fait pour combler ces trous : nomme-les.${banque ? " Pour une banque, ne cite PAS comme lacunes la marge brute, les stocks, le BFR, le capex, le free cash-flow, la dette nette ni l'Altman Z' : ces notions ne s'appliquent pas à une banque. N'emploie pas non plus « marge EBITDA » : les charges d'une banque se lisent sur le coefficient d'exploitation. Le taux de couverture est publié par la banque sur ses créances non performantes (« en souffrance » en norme UMOA) : ne l'appelle pas « couverture des créances douteuses »." : ''}
 **12. CONCLUSION & RECOMMANDATION** — ACHAT/CONSERVER/VENDRE + objectif + horizon + stop suggéré
 **13. RED FLAGS** — pour chaque check déclenché ci-dessus, rédige 2–3 phrases de contexte expliquant pourquoi c'est préoccupant. N'invente AUCUN chiffre — utilise uniquement les valeurs fournies dans le tableau. Pour les catégories de veille/recherche : si des signaux sont fournis, cite-les avec leur source et leur date ; sinon écris explicitement « non évaluable — aucune source publique trouvée ». Le score global de gravité (déjà calculé : ${redFlags.overallScore ?? 'non évaluable'}/10) doit être repris tel quel, jamais recalculé ou réinterprété.`;
 }
