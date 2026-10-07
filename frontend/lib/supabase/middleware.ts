@@ -39,6 +39,7 @@ const PUBLIC_PREFIXES = [
   '/certificat', // vérification publique d'un certificat Academy
   '/auth',       // callback Supabase
   '/api',        // routes API (gèrent leur propre auth)
+  '/apercu',     // previews isolées hybrides A+B (noindex, bare) — tout /apercu/* public sans auth
 ];
 
 function isPublicPath(pathname: string): boolean {

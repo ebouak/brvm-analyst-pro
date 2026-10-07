@@ -1,23 +1,24 @@
 import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import NewsletterForm from '@/components/NewsletterForm';
-import { HeroCarousel } from '@/components/landing/apercu/HeroCarousel';
-import { FilConducteur, type Fait } from '@/components/landing/apercu/FilConducteur';
+import { HeroHybride } from '@/components/landing/apercu/HeroHybride';
+import type { Fait } from '@/components/landing/apercu/FilConducteur';
+import { TimelineHybride } from '@/components/landing/apercu/TimelineHybride';
 import { Billboard } from '@/components/landing/apercu/Billboard';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/apercu/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/apercu/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/apercu/Terminal';
 import { getMemberCount } from '@/lib/landing/memberCount';
-import { QuatreFacons } from '@/components/landing/apercu/QuatreFacons';
+import { BentoFacons } from '@/components/landing/apercu/BentoFacons';
 import { LandingNav } from '@/components/landing/apercu/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtFcfa, fmtNumber } from '@/lib/format';
-import '@/components/landing/apercu/landing-bis.css';
+import '@/components/landing/apercu/landing-hybride.css';
 
 /**
- * Landing « bis » — vitrine CLAIRE et éditoriale (l'app, elle, reste sombre :
- * toute la CSS vit sous `.lb`, voir landing-bis.css).
+ * Landing hybride A×B — apercu sombre sunken — vitrine CLAIRE et éditoriale (l'app, elle, reste sombre :
+ * toute la CSS vit sous `.ah`, voir landing-hybride.css).
  *
  * Six sections au lieu de vingt-deux : hero à la une (carrousel : vues
  * permanentes + emplacements admin), méthode en sept étapes, séance réelle,
@@ -80,43 +81,19 @@ export default async function Apercu() {
   ];
 
   return (
-    <div className="lb">
+    <div className="ah">
       <div style={{position:"sticky",top:0,zIndex:50,background:"linear-gradient(90deg,#56D7FD,#3FE18B)",color:"#06141a",textAlign:"center",padding:"6px 12px",fontSize:12,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase"}}>APERCU · bac à sable motion (noindex) — prod sur <a href="/" style={{textDecoration:"underline"}}>/</a></div>
-      <div className="wrap">
+      <div className="wrap" data-hybride="ah">
         <LandingNav />
 
         <main>
-          {/* 1 · HERO + 7 ÉTAPES */}
-          <section className="hero" aria-labelledby="h1">
-            <div className="hero-grid">
-              <div className="hero-copy">
-                <div className="annot" aria-hidden="true"><span className="hand">Des données<br />à vos décisions,<br />tout simplement.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
-                <h1 id="h1">De la donnée<br />à la <span className="accent">décision.</span></h1>
-                <p className="lead">Une méthode simple et transparente pour analyser la BRVM autrement, avec des données officielles et des outils concrets.</p>
-                <ul className="assur" aria-label="Sans engagement">
-                  {['Aucune carte bancaire', 'Compte en 1 minute', 'Sans engagement'].map((t) => (
-                    <li key={t}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="rgb(var(--color-up))" /><path d="M4.5 8.5l2.3 2.3L11.5 6" fill="none" stroke="rgb(var(--color-surface))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>{t}</li>
-                  ))}
-                </ul>
-                <div className="cta">
-                  <Link href="/signup" className="btn btn-ink">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
-                  <Link href="/societes" className="btn btn-ghost">Explorer les sociétés <span aria-hidden="true">→</span></Link>
-                </div>
-              </div>
-              <HeroCarousel
-                slides={d.slides} dateLabel={dateLabel} brvmCVar={d.brvmC?.variation ?? null}
-                hausses={d.hausses} nbActions={d.nbActions} topNote={d.topNote}
-                topHausse={topH ? { code: topH.code, variation: topH.variation } : null}
-                topBaisse={topB ? { code: topB.code, variation: topB.variation } : null}
-                sgi={d.sgi}
-              />
-            </div>
-            <Billboard creations={d.bandeaux} slot="Emplacement annonceur, haut de page" />
-            <div className="fil"><span className="tag-fil">Le fil conducteur</span><span>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</span></div>
-            <FilConducteur etapes={STEPS.map((s, k) => ({ ...s, fait: FAITS[k] ?? null }))} />
-          </section>
+          {/* 1 · HERO HYBRIDE A+B (claim + marché live) */}
+          <HeroHybride d={d} dateLabel={dateLabel} />
+          <Billboard creations={d.bandeaux} slot="Emplacement annonceur, haut de page" />
+          {/* 1 bis · TIMELINE 7 ÉTAPES — remplace FilConducteur + preuves éparses */}
+          <TimelineHybride etapes={STEPS.map((s,k)=>({ ...s, fait: FAITS[k]??null }))} />
 
-          {/* 1 bis · PREUVES (sous les 7 étapes) */}
+          {/* preuves condensées sous timeline */}
           <ProofBandBis nbActions={d.nbActions} />
           <PreuveDonneeBis fraicheur={fraicheur} exemple={topH ? { code: topH.code, nom: topH.nom, cours: topH.cours } : null} nbActions={d.nbActions} />
 
@@ -131,7 +108,7 @@ export default async function Apercu() {
           <Terminal d={d} dateMarche={d.dateMarche} />
 
           {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
-          <QuatreFacons />
+          <BentoFacons />
 
           {/* 2 quater · AVEC UN COMPTE GRATUIT — la valeur du gratuit AVANT Premium */}
           <section className="gratuit" aria-labelledby="h-gratuit">
