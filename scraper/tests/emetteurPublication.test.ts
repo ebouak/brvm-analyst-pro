@@ -104,6 +104,30 @@ describe('collecteur : on ne quitte la page que si titre ET fichier désignent l
   });
 });
 
+describe('lecture du nom de fichier et preuves de contenu (PDF lus le 2026-10-07)', () => {
+  const codes = new Set(['ECOC', 'ETIT', 'ONTBF', 'BOAC', 'CIEC', 'TTLS', 'PRSC', 'CFAC']);
+  const a4 = construireAlias([...codes].map((code) => ({ code, designation: null as string | null })));
+  const B = 'https://bfin.brvm.org/0/Communiques_emetteurs/';
+  it('la correspondance la plus longue l’emporte : « ECOBANK CI » n’est pas « ECOBANK »', () => {
+    expect(emetteurDuFichier(`${B}ETATS%20FINANCIERS%202017%20ECOBANK%20CI.PDF`, a4, codes)).toBe('ECOC');
+  });
+  it('mots entiers de 3 lettres et anciens noms', () => {
+    expect(emetteurDuFichier(`${B}20220429%20-%20Etats%20financiers%20%20SYSCOHADA%20exercice%202021%20-%20CIE.pdf`, a4, codes)).toBe('CIEC');
+    expect(emetteurDuFichier(`${B}20180709-ONATEL%20Communique%20de%20presse%20-%20juillet%202018.pdf`, a4, codes)).toBe('ONTBF');
+    expect(emetteurDuFichier(`${B}Etats%20Financiers%20PEYRISSAC%20Exo%202004%20%20%2007-06-2005.pdf`, a4, codes)).toBe('PRSC');
+  });
+  it('extraction : un fichier qui nomme la ligne lui appartient, même sous un titre faux', () => {
+    expect(documentEtranger('ECOC', 'Etats financiers - Exercice 2017: ETIT', `${B}ETATS%20FINANCIERS%202017%20ECOBANK%20CI.PDF`, a4, codes)).toBeNull();
+    expect(documentEtranger('ONTBF', 'Notation Finanière - BOA CI', `${B}20180709-ONATEL%20Communique%20de%20presse%20-%20juillet%202018.pdf`, a4, codes)).toBeNull();
+    expect(documentEtranger('ETIT', 'Etats financiers - Exercice 2017: ETIT', `${B}ETATS%20FINANCIERS%202017%20ECOBANK%20CI.PDF`, a4, codes)).toBe('ECOC');
+  });
+  it('preuve de contenu : le document sans nom est rendu à ETI', () => {
+    const url = `${B}20171031%20-%20Pr%C3%A9sentation%20R%C3%A9sultats%20Fin%20Sept%202017.pdf`;
+    expect(documentEtranger('ECOC', "Rapport d'Activité du 3e trimestre 2017 - ETI TG", url, a4, codes)).toBe('ETIT');
+    expect(codeDeCollecte('ECOC', "Rapport d'Activité du 3e trimestre 2017 - ETI TG", url, a4, codes)).toBe('ETIT');
+  });
+});
+
 describe('contradiction entre le titre et le code rattaché', () => {
   it('signale le bon code quand le titre en nomme un autre', () => {
     expect(emetteurContredit('SGBC', 'Notation Financière - SIB CI', alias)).toBe('SIBC');
