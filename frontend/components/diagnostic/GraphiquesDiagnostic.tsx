@@ -9,7 +9,7 @@ import { computeRedFlags } from '@/lib/diagnostic/redFlags';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { valoriser } from '@/lib/diagnostic/valorisation';
 import { seriesAnnuelles, assez, type PointAnnuel } from '@/lib/diagnostic/series';
-import { libelleAbsence, type ObsStatut } from '@/lib/bank/prudentiel';
+import { libelleAbsence, serieRetenue, type ObsIndicateur } from '@/lib/bank/prudentiel';
 import {
   Figure, Barres, Courbes, BarresH, Pairs, Fourchette, Jauge, CourbeCours,
   type Serie, type LignePair, type Ton,
@@ -31,8 +31,8 @@ export async function graphiquesParSection(code: string): Promise<Record<string,
     chargerContexteQuant(admin, code),
     admin.from('brvm_actions_daily').select('date_marche, cours_jour').eq('code', code)
       .order('date_marche', { ascending: false }).limit(260),
-    admin.from('indicateur_source').select('date_arrete,statut,motif,comparateur,valeur')
-      .eq('code', code).eq('indicateur', 'solvabilite_total'),
+    admin.from('indicateur_source').select('indicateur,date_arrete,statut,motif,comparateur,valeur')
+      .eq('code', code).in('indicateur', ['solvabilite_total', 'taux_creances_souffrance', 'couverture_creances_souffrance']),
   ]);
   if (!data) return {};
 
@@ -134,13 +134,38 @@ export async function graphiquesParSection(code: string): Promise<Record<string,
     }
     const lb = (bal_n?.lignes_specifiques ?? {}) as Record<string, number | null>;
     const solva = lb.ratio_solvabilite ?? null;
-    const absence = solva == null ? libelleAbsence((obsRes.data ?? []) as ObsStatut[], bal_n?.periode) : null;
+    const obs = (obsRes.data ?? []) as ObsIndicateur[];
+    const absence = solva == null ? libelleAbsence(obs.filter((o) => o.indicateur === 'solvabilite_total'), bal_n?.periode) : null;
     ajouter('4', (
       <Figure key="solva" titre={`Ratio de solvabilité réglementaire${bal_n?.periode ? ` (exercice ${String(bal_n.periode).slice(0, 4)})` : ''}`}
         lecture="Fonds propres réglementaires rapportés aux actifs pondérés par leur risque." source="publications de la banque, observations sourcées WESTBOURSE">
         <Jauge valeur={solva} minimum={11.5} absence={absence} resume="Ratio de solvabilité face au minimum UEMOA" />
       </Figure>
     ));
+    // Qualité du portefeuille : taux PUBLIÉS par la banque (norme UMOA :
+    // créances « en souffrance »), distincts des créances douteuses IFRS.
+    const taux = serieRetenue(obs, 'taux_creances_souffrance');
+    const couv = serieRetenue(obs, 'couverture_creances_souffrance');
+    if (taux.length) {
+      ajouter('4', (
+        <Figure key="souffrance" titre="Créances en souffrance / crédits (taux publié par la banque)"
+          lecture="Part des crédits que la banque classe en souffrance. Une hausse signale une dégradation du portefeuille."
+          source="publications de la banque, observations sourcées WESTBOURSE">
+          <Courbes annees={taux.map((p) => p.annee)} format="pct" resume="Taux de créances en souffrance par exercice"
+            series={[{ nom: 'Créances en souffrance / crédits', ton: 'down', valeurs: taux.map((p) => p.valeur) }]} />
+        </Figure>
+      ));
+    }
+    if (couv.length) {
+      ajouter('4', (
+        <Figure key="couverture" titre="Couverture des créances en souffrance par les provisions (publiée)"
+          lecture="Part des créances en souffrance déjà provisionnée. Une baisse laisse davantage de risque à absorber."
+          source="publications de la banque, observations sourcées WESTBOURSE">
+          <Courbes annees={couv.map((p) => p.annee)} format="pct" resume="Taux de couverture par exercice"
+            series={[{ nom: 'Couverture', ton: 'up', valeurs: couv.map((p) => p.valeur) }]} />
+        </Figure>
+      ));
+    }
   } else if (assez(pts, 'totalActifs') || assez(pts, 'capitauxPropres')) {
     ajouter('4', (
       <Figure key="bilan" titre="Total du bilan, capitaux propres et dettes financières" source={SRC_ETATS}>

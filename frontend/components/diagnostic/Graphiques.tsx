@@ -25,9 +25,6 @@ const REMPLI: Record<Ton, string> = {
 const TRAIT: Record<Ton, string> = {
   accent: 'stroke-accent', up: 'stroke-up', down: 'stroke-down', warn: 'stroke-warn', muted: 'stroke-muted',
 };
-const PASTILLE: Record<Ton, string> = {
-  accent: 'bg-accent', up: 'bg-up', down: 'bg-down', warn: 'bg-warn', muted: 'bg-muted',
-};
 
 const nf = (v: number, d = 0) => v.toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: d });
 
@@ -74,7 +71,11 @@ function Legende({ series }: { series: { nom: string; ton: Ton }[] }) {
     <ul className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
       {series.map((s) => (
         <li key={s.nom} className="flex items-center gap-1.5">
-          <span aria-hidden className={`inline-block h-2.5 w-2.5 rounded-sm ${PASTILLE[s.ton]}`} />
+          {/* SVG et non fond CSS : les navigateurs n'impriment pas les couleurs
+              de fond par défaut, la pastille disparaissait du PDF. */}
+          <svg aria-hidden width="10" height="10" viewBox="0 0 10 10" className="shrink-0">
+            <rect width="10" height="10" rx="2" className={REMPLI[s.ton]} />
+          </svg>
           {s.nom}
         </li>
       ))}
