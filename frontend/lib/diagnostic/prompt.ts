@@ -119,11 +119,13 @@ export function buildDiagnosticPrompt(params: {
   interim?: LectureIntermediaire | null;
   /** Médianes des pairs et notes des piliers (facultatif). */
   contexteQuant?: ContexteQuant | null;
+  /** Date de rédaction, en toutes lettres (« 7 octobre 2026 »). */
+  dateRapport?: string;
 }): string {
   const { code, designation, secteur, cours, cours_bas_52s, cours_haut_52s,
           inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m,
           periode_n, periode_n1, redFlags, newsSignals, webSignals,
-          interim, contexteQuant } = params;
+          interim, contexteQuant, dateRapport } = params;
 
   const redFlagsTable = redFlags.checks.map((c) => {
     if (!c.dataAvailable) return `| ${c.label} | non évaluable | — | ${c.evidence} |`;
@@ -141,7 +143,7 @@ Tu vas produire un **diagnostic financier et économique complet** de ${designat
 Ton analyse suit les standards sell-side CFA Level III et s'appuie exclusivement sur les données ci-dessous.
 Rédige en français professionnel, pour un investisseur particulier comme pour un lecteur averti : rigoureux, factuel, nuancé. Longueur cible : 2 000–3 000 mots.
 Tout chiffre que tu cites doit figurer dans les données ci-dessous ou en être dérivé par un calcul que tu montres. Une donnée marquée N/D reste N/D : tu ne l'estimes pas.
-Commence directement par le rapport, sans préambule.
+Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du rapport : ${dateRapport}. Si tu dates le rapport, utilise cette date et aucune autre.` : ''}
 
 ---
 ## DONNÉES FINANCIÈRES (FCFA)
