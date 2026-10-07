@@ -11,20 +11,28 @@ const nf = new Intl.NumberFormat('fr-FR');
 const md = (v: number | null) => (v == null ? '—' : `${nf.format(Math.round(v / 1e9 * 10) / 10)} Md FCFA`);
 const pct = (v: number | null, d = 1) => (v == null ? '—' : `${(v * 100).toFixed(d)} %`);
 
-function KpiRow({ label, value, tone }: { label: string; value: string; tone?: 'up' | 'down' | null }) {
-  const cls = value === '—' ? 'text-faint italic' : tone === 'up' ? 'text-up' : tone === 'down' ? 'text-down' : 'text-white';
+/**
+ * Une valeur absente n'est pas dite « non publiée » : on ne le sait pas. Par
+ * défaut « non disponible » ; pour un indicateur prudentiel, `absence` porte ce
+ * que disent les documents consultés (sources contradictoires, borne…).
+ */
+function KpiRow({ label, value, tone, absence }: { label: string; value: string; tone?: 'up' | 'down' | null; absence?: string | null }) {
+  const vide = value === '—';
+  const cls = vide ? 'text-faint italic text-xs font-normal text-right' : tone === 'up' ? 'text-up' : tone === 'down' ? 'text-down' : 'text-white';
   return (
-    <div className="flex items-baseline justify-between py-1.5 border-b border-border/40 last:border-0">
+    <div className="flex items-baseline justify-between gap-3 py-1.5 border-b border-border/40 last:border-0">
       <span className="text-xs text-muted">{label}</span>
-      <span className={`tabular text-sm font-medium ${cls}`}>{value === '—' ? 'non publié' : value}</span>
+      <span className={`tabular text-sm font-medium ${cls}`}>{vide ? absence ?? 'non disponible' : value}</span>
     </div>
   );
 }
 
-export default function BankScorecard({ kpis, score, periode }: {
+export default function BankScorecard({ kpis, score, periode, absences }: {
   kpis: BankKpis;
   score: BankScore;
   periode: string | null;
+  /** Pourquoi un indicateur prudentiel manque, selon indicateur_source (lib/bank/prudentiel). */
+  absences?: { solvabilite?: string | null };
 }) {
   return (
     <div className="space-y-4">
@@ -50,7 +58,7 @@ export default function BankScorecard({ kpis, score, periode }: {
           <KpiRow label="ROA" value={pct(kpis.roa, 2)} tone={kpis.roa == null ? null : kpis.roa >= 0 ? 'up' : 'down'} />
           <KpiRow label="Capitaux propres / actifs" value={pct(kpis.leverage)} />
           <KpiRow label="Créances douteuses / crédits" value={pct(kpis.nplRatio)} tone={kpis.nplRatio != null && kpis.nplRatio > 0.1 ? 'down' : null} />
-          <KpiRow label="Ratio de solvabilité (min 11,5 %)" value={pct(kpis.ratioSolvabilite)} />
+          <KpiRow label="Ratio de solvabilité (min 11,5 %)" value={pct(kpis.ratioSolvabilite)} absence={absences?.solvabilite} />
         </div>
       </div>
 
@@ -79,7 +87,7 @@ export default function BankScorecard({ kpis, score, periode }: {
                 <div className="flex items-baseline justify-between">
                   <p className="text-xs font-medium text-ivory">{axe.label}</p>
                   <p className="tabular text-xs text-muted">
-                    {neutralise ? 'non publié' : `${axe.obtenus} / ${axe.disponibles} pts`}
+                    {neutralise ? 'non mesurable' : `${axe.obtenus} / ${axe.disponibles} pts`}
                   </p>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border/40">
@@ -94,7 +102,7 @@ export default function BankScorecard({ kpis, score, periode }: {
                       <span className={s.points == null ? 'text-faint italic' : 'text-muted'}>{s.label}</span>
                       <span className={`tabular ${s.points == null ? 'text-faint italic' : 'text-ivory'}`}>
                         {s.points == null
-                          ? 'non publié'
+                          ? 'neutralisé'
                           : `${s.valeur != null && s.format === 'pct' ? `${(s.valeur * 100).toFixed(1)} % · ` : ''}${s.points}/${s.max}`}
                       </span>
                     </li>
@@ -108,8 +116,8 @@ export default function BankScorecard({ kpis, score, periode }: {
         <p className="text-[10px] text-faint leading-relaxed">
           Barème inspiré des indicateurs de la Commission Bancaire UMOA et des FSI du FMI
           (ROE 15 %, ROA 1,5 %, coefficient d&apos;exploitation 50-80 %, NPL 5-15 %, solvabilité
-          réglementaire ≥ 11,5 %, transformation 50-100 %, NIM 4 %). Un indicateur non publié
-          dans les états déposés est neutralisé (il sort du calcul au lieu d&apos;être compté
+          réglementaire ≥ 11,5 %, transformation 50-100 %, NIM 4 %). Un indicateur absent
+          des documents consultés est neutralisé (il sort du calcul au lieu d&apos;être compté
           comme un zéro) et la confiance indique la part du barème réellement mesurable.
         </p>
       </div>

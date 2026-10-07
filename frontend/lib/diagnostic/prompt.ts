@@ -124,6 +124,7 @@ function blocBanque(q: {
   m: DiagnosticMetrics;
   interim: LectureIntermediaire | null | undefined;
   cours_bas_52s: number | null; cours_haut_52s: number | null;
+  absenceSolvabilite?: string | null;
 }): string {
   const { inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions, m } = q;
   const li = inc_n?.lignes_specifiques ?? {};
@@ -178,7 +179,7 @@ ${blocIntermediaire(q.interim)}
 ## RATIOS BANCAIRES
 Rentabilité : ROE ${pc100(k?.roe)} | ROA ${pc100(k?.roa)} | Coefficient d'exploitation ${pct(coef)} (${coefPublie != null ? 'publié' : 'calculé : frais généraux / PNB'}) | Marge d'intérêts / actifs moyens ${pc100(k?.nim)}
 Qualité du portefeuille : Créances douteuses / crédits ${pc100(k?.nplRatio)} | Couverture des créances douteuses ${pct(enPct(lb.taux_couverture_creances))}
-Structure : Crédits / dépôts ${pc100(k?.transformation)} | Fonds propres / total du bilan ${pc100(k?.leverage)} | Ratio de solvabilité ${pct(enPct(lb.ratio_solvabilite))} (minimum réglementaire UEMOA : 11.5%)
+Structure : Crédits / dépôts ${pc100(k?.transformation)} | Fonds propres / total du bilan ${pc100(k?.leverage)} | Ratio de solvabilité ${lb.ratio_solvabilite != null ? pct(lb.ratio_solvabilite) : q.absenceSolvabilite ?? 'N/D'} (minimum réglementaire UEMOA : 11.5%)
 Valorisation (cours ${cours ?? 'N/D'} FCFA) : PER ${x(per)} | Cours / valeur comptable ${x(k?.pb)} | Rendement du dividende ${pc100(k?.rendementDiv)}
 Dividende : DPA ${inc_n?.dividende_par_action ?? 'N/D'} FCFA | Taux de distribution ${pct(m.payout_ratio)}
 Score bancaire UEMOA : ${score?.total != null ? `${score.total}/100` : 'non évaluable'} (confiance ${score ? Math.round(score.confiance * 100) : 0} % : part des indicateurs effectivement publiés)
@@ -226,11 +227,13 @@ export function buildDiagnosticPrompt(params: {
   famille?: 'banque' | 'assurance' | 'general' | null;
   /** Actions, flottant, volume moyen. */
   marche?: MarcheTitre | null;
+  /** Banque : pourquoi la solvabilité manque (lib/bank/prudentiel), si elle manque. */
+  absenceSolvabilite?: string | null;
 }): string {
   const { code, designation, secteur, cours, cours_bas_52s, cours_haut_52s,
           inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m,
           periode_n, periode_n1, redFlags, newsSignals, webSignals,
-          interim, contexteQuant, dateRapport, famille, marche } = params;
+          interim, contexteQuant, dateRapport, famille, marche, absenceSolvabilite } = params;
   const banque = famille === 'banque';
 
   const redFlagsTable = redFlags.checks.map((c) => {
@@ -299,11 +302,11 @@ Plage 52s : ${cours_bas_52s ?? 'N/D'} – ${cours_haut_52s ?? 'N/D'} FCFA
 Tu vas produire un **diagnostic financier et économique complet** de ${designation ?? code} (${code}).
 Ton analyse suit les standards sell-side CFA Level III et s'appuie exclusivement sur les données ci-dessous.
 Rédige en français professionnel, pour un investisseur particulier comme pour un lecteur averti : rigoureux, factuel, nuancé. Longueur cible : 2 000–3 000 mots.
-Tout chiffre que tu cites doit figurer dans les données ci-dessous ou en être dérivé par un calcul que tu montres. Une donnée marquée N/D reste N/D : tu ne l'estimes pas.
+Tout chiffre que tu cites doit figurer dans les données ci-dessous ou en être dérivé par un calcul que tu montres. Une donnée marquée N/D reste N/D : tu ne l'estimes pas. Une donnée décrite par un statut (« sources contradictoires », « borne », « non trouvé dans les documents consultés ») se rapporte tel quel : tu ne choisis pas entre les sources et tu ne la remplaces pas par la valeur d'un autre exercice.
 Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du rapport : ${dateRapport}. Si tu dates le rapport, utilise cette date et aucune autre.` : ''}
 
 ${banque
-  ? blocBanque({ inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions: marche?.actions ?? null, m, interim, cours_bas_52s, cours_haut_52s }) + '\n\n'
+  ? blocBanque({ inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions: marche?.actions ?? null, m, interim, cours_bas_52s, cours_haut_52s, absenceSolvabilite }) + '\n\n'
   : donneesGenerales}---
 ## DONNÉES DE MARCHÉ DU TITRE
 ${blocMarche(cours, marche)}

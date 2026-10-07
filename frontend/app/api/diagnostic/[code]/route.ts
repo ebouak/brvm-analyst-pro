@@ -8,6 +8,7 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeDiagnosticMetrics } from '@/lib/diagnostic/metrics';
 import { buildDiagnosticPrompt } from '@/lib/diagnostic/prompt';
 import { computeRedFlags } from '@/lib/diagnostic/redFlags';
+import { libelleAbsence, type ObsStatut } from '@/lib/bank/prudentiel';
 import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals';
 import { findWebSignals } from '@/lib/diagnostic/webSearch';
 import { MARQUE_ECHEC } from '@/lib/diagnostic/echec';
@@ -107,6 +108,16 @@ export async function POST(req: Request, { params }: { params: { code: string } 
   const famille = data.instrument.famille_comptable ?? FAMILLE_PAR_CODE[code] ?? 'general';
   const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m, famille });
 
+  // Banque sans ratio de solvabilité retenu : ce que disent les documents
+  // consultés (sources contradictoires, borne…), plutôt qu'un « N/D » muet.
+  const absenceSolvabilite = famille === 'banque' && bal_n?.lignes_specifiques?.ratio_solvabilite == null
+    ? libelleAbsence(
+        ((await admin.from('indicateur_source').select('date_arrete,statut,motif,comparateur,valeur')
+          .eq('code', code).eq('indicateur', 'solvabilite_total')).data ?? []) as ObsStatut[],
+        bal_n?.periode,
+      )
+    : null;
+
   const newsSignals = await findNewsSignals(admin, code);
   const categoriesSansResultat = (Object.keys(newsSignals) as NewsCategory[])
     .filter((cat) => newsSignals[cat].length === 0);
@@ -135,7 +146,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     periode_n: inc_n?.periode ?? 'N',
     periode_n1: inc_n1?.periode ?? 'N-1',
     redFlags, newsSignals, webSignals,
-    interim, contexteQuant, famille,
+    interim, contexteQuant, famille, absenceSolvabilite,
     marche: {
       actions: data.instrument.shares ?? inc_n?.actions_en_circulation ?? null,
       flottant: (titre as { flottant?: number | null } | null)?.flottant ?? null,

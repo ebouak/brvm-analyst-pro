@@ -199,6 +199,19 @@ async function main(): Promise<number> {
       return res.echecs > 0 ? 1 : 0;
     }
 
+    case 'prudentiel:selection': {
+      // Verse la valeur retenue d'indicateur_source dans lignes_specifiques
+      // (solvabilité). À BLANC par défaut : écrire exige DRY_RUN=false.
+      const { runSelectionPrudentielle } = await import('./prudentiel/runSelection.js');
+      const dryRun = !/^(0|false|no)$/i.test(process.env.DRY_RUN ?? '');
+      const r = await runSelectionPrudentielle({ dryRun, codes: positional.map((c) => c.toUpperCase()) });
+      for (const l of r.lignes.filter((x) => x.avant !== x.apres || x.decision !== 'aucune_observation')) {
+        console.log(`${l.code} ${l.periode} ${l.champ} : ${l.avant ?? '—'} → ${l.apres ?? '—'} (${l.decision})${l.avant !== l.apres ? (dryRun ? ' [à blanc]' : ' [écrit]') : ''}`);
+      }
+      console.log(`${dryRun ? 'À blanc' : 'Écrit'} : ${r.lignes.filter((l) => l.avant !== l.apres).length} changement(s), ${r.ecrites} écrit(s).`);
+      return 0;
+    }
+
     case 'interim': {
       // Comptes intermédiaires (T1, S1, T3) extraits des rapports d'activités.
       // `interim SGBC SNTS` limite à ces sociétés.

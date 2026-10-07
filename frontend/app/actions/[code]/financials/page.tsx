@@ -15,6 +15,8 @@ import BankScorecard from '@/components/financials/BankScorecard';
 import ValueTrapBadge from '@/components/fundamentals/ValueTrapBadge';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
+import { libelleAbsence, type ObsStatut } from '@/lib/bank/prudentiel';
+import { createClient } from '@/lib/supabase/server';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
 import { canAccess } from '@/lib/server/featureAccess';
@@ -73,6 +75,14 @@ export default async function FinancialsPage({ params }: Props) {
     data.instrument.shares,
   );
 
+  // Pourquoi la solvabilité manque, s'il manque : ce que disent les documents
+  // consultés pour l'exercice du bilan affiché (indicateur_source, lecture publique).
+  const obsSolvabilite: ObsStatut[] = data.instrument.famille_comptable === 'banque'
+    ? ((await createClient().from('indicateur_source')
+        .select('date_arrete,statut,motif,comparateur,valeur')
+        .eq('code', code).eq('indicateur', 'solvabilite_total')).data ?? [])
+    : [];
+
   // Analyse bancaire UEMOA : postes spécifiques (prêts, dépôts, marge
   // d'intérêts…) + score /100 — uniquement pour la famille banque.
   const bankAnalysis = (() => {
@@ -85,7 +95,12 @@ export default async function FinancialsPage({ params }: Props) {
       shares: data.instrument.shares,
       dividendeParAction: latestIncome?.dividende_par_action ?? null,
     });
-    return { kpis, score: scoreBanqueUemoa(kpis), periode: latestIncome?.periode ?? null };
+    return {
+      kpis,
+      score: scoreBanqueUemoa(kpis),
+      periode: latestIncome?.periode ?? null,
+      absences: { solvabilite: kpis.ratioSolvabilite == null ? libelleAbsence(obsSolvabilite, latestBalance?.periode) : null },
+    };
   })();
 
   // Alerte value trap : PER (ratios) croisé avec la trajectoire du résultat net.
@@ -228,7 +243,7 @@ export default async function FinancialsPage({ params }: Props) {
             {bankAnalysis && (
               <div>
                 <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse bancaire UEMOA</p>
-                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} />
+                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} />
               </div>
             )}
 

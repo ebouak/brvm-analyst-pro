@@ -23,6 +23,14 @@ import { schemaExtraction, type Extraction } from './extraction.js';
 const API = 'https://generativelanguage.googleapis.com/v1beta';
 /** Limite des données en ligne de l'API (20 Mo par requête), marge comprise. */
 const PDF_MAX_OCTETS = 18 * 1024 * 1024;
+/**
+ * Au-delà, le PDF passe par l'API de fichiers (plafond 2 Go). Avant le
+ * 2026-10-07, un PDF trop lourd renvoyait simplement null, que l'appelant
+ * prenait pour une lecture vide : les rapports annuels BOA de 49 Mo passaient
+ * pour « lus sans valeur » alors qu'ils n'avaient jamais été envoyés.
+ */
+const FICHIER_MAX_OCTETS = 2 * 1024 * 1024 * 1024;
+const UPLOAD = 'https://generativelanguage.googleapis.com/upload/v1beta/files';
 
 export interface ModeleListe {
   name: string;
@@ -54,13 +62,17 @@ export function choisirModeleFlash(modeles: ModeleListe[]): string | null {
   return candidats[0] ?? null;
 }
 
-export function corpsRequete(systeme: string, consigne: string, pdfBase64: string) {
+/** `pdf` : contenu base64 (envoi direct) ou URI d'un fichier déposé (gros PDF). */
+export function corpsRequete(systeme: string, consigne: string, pdf: string | { fileUri: string }) {
+  const piece = typeof pdf === 'string'
+    ? { inlineData: { mimeType: 'application/pdf', data: pdf } }
+    : { fileData: { mimeType: 'application/pdf', fileUri: pdf.fileUri } };
   return {
     systemInstruction: { parts: [{ text: systeme }] },
     contents: [
       {
         role: 'user',
-        parts: [{ inlineData: { mimeType: 'application/pdf', data: pdfBase64 } }, { text: consigne }],
+        parts: [piece, { text: consigne }],
       },
     ],
     generationConfig: { responseMimeType: 'application/json', temperature: 0 },
@@ -81,6 +93,43 @@ export function texteReponse(j: ReponseGemini): string | null {
     .map((p) => p.text)
     .join('');
   return t.trim() ? t : null;
+}
+
+interface FichierGemini { name: string; uri: string; state?: string }
+
+/** Dépose un PDF dans l'API de fichiers (envoi en deux temps) et attend qu'il soit prêt. */
+async function deposer(octets: Buffer, nom: string, cle: string): Promise<FichierGemini> {
+  const debut = await fetch(UPLOAD, {
+    method: 'POST',
+    headers: {
+      'x-goog-api-key': cle,
+      'X-Goog-Upload-Protocol': 'resumable',
+      'X-Goog-Upload-Command': 'start',
+      'X-Goog-Upload-Header-Content-Length': String(octets.length),
+      'X-Goog-Upload-Header-Content-Type': 'application/pdf',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ file: { display_name: nom.slice(0, 120) } }),
+    signal: AbortSignal.timeout(30_000),
+  });
+  const urlEnvoi = debut.headers.get('x-goog-upload-url');
+  if (!debut.ok || !urlEnvoi) throw new Error(`Gemini dépôt HTTP ${debut.status}`);
+  const envoi = await fetch(urlEnvoi, {
+    method: 'POST',
+    headers: { 'X-Goog-Upload-Offset': '0', 'X-Goog-Upload-Command': 'upload, finalize' },
+    body: octets.buffer.slice(octets.byteOffset, octets.byteOffset + octets.byteLength) as ArrayBuffer,
+    signal: AbortSignal.timeout(300_000),
+  });
+  if (!envoi.ok) throw new Error(`Gemini envoi HTTP ${envoi.status}`);
+  let f = ((await envoi.json()) as { file?: FichierGemini }).file;
+  if (!f) throw new Error('Gemini envoi : réponse sans fichier');
+  for (let i = 0; i < 60 && f.state === 'PROCESSING'; i++) {
+    await new Promise((r) => setTimeout(r, 2_000));
+    const g = await fetch(`${API}/${f.name}`, { headers: { 'x-goog-api-key': cle }, signal: AbortSignal.timeout(20_000) });
+    f = (await g.json()) as FichierGemini;
+  }
+  if (f.state && f.state !== 'ACTIVE') throw new Error(`fichier Gemini non exploitable : ${f.state}`);
+  return f;
 }
 
 let modeleResolu: string | null | undefined;
@@ -121,16 +170,24 @@ export async function jsonDepuisPdf(
   const pdf = await fetch(urlPdf, { signal: AbortSignal.timeout(60_000) });
   if (!pdf.ok) throw new Error(`PDF HTTP ${pdf.status}`);
   const octets = Buffer.from(await pdf.arrayBuffer());
-  if (octets.length > PDF_MAX_OCTETS) return null;
+  if (octets.length > FICHIER_MAX_OCTETS) return null;
+  const gros = octets.length > PDF_MAX_OCTETS;
+  const fichier = gros ? await deposer(octets, decodeURIComponent(urlPdf.split('/').pop() ?? 'document.pdf'), cle) : null;
 
-  const r = await fetch(`${API}/models/${encodeURIComponent(modele)}:generateContent`, {
-    method: 'POST',
-    headers: { 'x-goog-api-key': cle, 'content-type': 'application/json', 'user-agent': 'westbourse-scraper/1.0' },
-    body: JSON.stringify(corpsRequete(systeme, consigne, octets.toString('base64'))),
-    signal: AbortSignal.timeout(180_000),
-  });
-  if (!r.ok) throw new Error(`Gemini HTTP ${r.status}`);
-  const j = (await r.json()) as ReponseGemini;
+  let j: ReponseGemini;
+  try {
+    const r = await fetch(`${API}/models/${encodeURIComponent(modele)}:generateContent`, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': cle, 'content-type': 'application/json', 'user-agent': 'westbourse-scraper/1.0' },
+      body: JSON.stringify(corpsRequete(systeme, consigne, fichier ? { fileUri: fichier.uri } : octets.toString('base64'))),
+      signal: AbortSignal.timeout(gros ? 300_000 : 180_000),
+    });
+    if (!r.ok) throw new Error(`Gemini HTTP ${r.status}`);
+    j = (await r.json()) as ReponseGemini;
+  } finally {
+    // Gemini efface seul les fichiers sous 48 h ; on n'attend pas.
+    if (fichier) void fetch(`${API}/${fichier.name}`, { method: 'DELETE', headers: { 'x-goog-api-key': cle } }).catch(() => undefined);
+  }
   const texte = texteReponse(j);
   if (!texte) return null;
   return { brut: jsonTolerant(texte), modele: j.modelVersion ?? modele };
