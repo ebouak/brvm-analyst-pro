@@ -24,7 +24,8 @@ Statut de chaque ligne : **lu** = extrait par Gemini avec page et libellé ; **r
 | NSBC | nsiabanque.ci — rapports annuels | « ratio de solvabilité total » (13,36 % en 2024 selon une note de recherche) | repéré |
 | ETIT | Ecobank Group annual report 2025 (anglais, USD, consolidé) | Total CAR 16,7 % (estimation) ; CET1 13,2 % ; NPL ratio 9,4 % | repéré |
 | ECOC | rapport d'activités 2025 (BRVM) | coût du risque, ROE ; ratios prudentiels « au-dessus des exigences » sans chiffre | repéré, chiffre absent |
-| BOAC, BOAS, BOAM, BOAN, BOAB, BOABF | bank-of-africa.net (rapports financiers jusqu'à 2024) ; BOA Niger : rapport du CA 2025 « annule et remplace » | à lire ; le groupe publie un « Rapport Pilier III » pour BOA-RDC (hors UMOA), pas trouvé pour les filiales UMOA | repéré |
+| BOAS, BOAC | présentation des résultats (3 mars 2025, p. 52 et 62) + rapports annuels 2024 (49 Mo, p. 52, lus par l'API de fichiers) | solvabilité 2023 concordante (13,9 % ; 13,6 %) ; **2024 en conflit** : 14,9 % contre 14,4 % (BOAS), 16,9 % contre 14,2 % (BOAC) | **lu** — `source_conflict` |
+| BOAM, BOAN, BOAB, BOABF | présentation des résultats (mars 2025) ; BOA Niger : rapport du CA 2025 « annule et remplace » | solvabilité 2023-2024 de la présentation ; rapports annuels non lus | lu (présentation seule) |
 | CBIBF | burkina.coris.bank — rapports d'activités 2025 | à lire | repéré |
 | BICC | rapport d'activités annuel 2025 (BRVM) | à lire | repéré |
 
@@ -34,3 +35,19 @@ Statut de chaque ligne : **lu** = extrait par Gemini avec page et libellé ; **r
 2. Les définitions diffèrent (PCB « créances en souffrance » individuel, IFRS « créances douteuses » consolidé) : pas de fusion.
 3. Les documents de référence portent souvent sur l'exercice **précédent** : la période doit être signalée.
 4. Aucune publication intitulée « Pilier 3 » n'a été trouvée pour une banque cotée de l'UMOA ; les ratios figurent dans les rapports annuels, documents de référence et comptes IFRS.
+
+## Décisions
+
+**2026-10-07 — conflit entre deux documents de l'émetteur : pas d'arbitrage par la date.**
+BOAS et BOAC 2024 : la présentation des résultats (mars 2025) et le rapport annuel
+(septembre 2025) donnent des ratios incompatibles à une décimale. Le rapport annuel
+est plus récent et son ratio se recalcule depuis Tier 1, Tier 2 et RWA ; il n'en est
+pas pour autant retenu. Une règle « le document définitif le plus récent l'emporte »
+reviendrait à trancher à la place de l'émetteur, et ne s'appliquerait qu'aux banques
+qui publient les composantes — deux régimes coexisteraient. Les deux observations
+restent en `publie_non_exploitable` / `source_conflict`, le recalcul est consigné en
+commentaire. À rouvrir si l'émetteur publie un erratum ou si un contrôle manuel tranche.
+
+**Piège : les rapports annuels des filiales BOA reprennent, p. 23, les chiffres de
+BOA Group consolidé** (« Ratio de solvabilité estimé 12,6 % / 14,5 % »). Ils sont
+identiques d'un rapport de filiale à l'autre et ne concernent aucune filiale.
