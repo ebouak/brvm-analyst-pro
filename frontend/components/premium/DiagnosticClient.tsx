@@ -1,6 +1,18 @@
 'use client';
-import { useState, useEffect, useMemo, useDeferredValue } from 'react';
+import { useState, useEffect, useMemo, useDeferredValue, type ReactNode } from 'react';
 import { MARQUE_ECHEC, MESSAGE_ECHEC } from '@/lib/diagnostic/echec';
+
+/** Même durée que MAX_AGE_MS de la route : au-delà, le rapport est régénéré. */
+const AGE_MAX_MS = 7 * 24 * 3600 * 1000;
+
+/** Gras en ligne : « **texte** » → <strong>. Le reste est rendu tel quel. */
+function enLigne(texte: string): ReactNode[] {
+  return texte.split(/(\*\*[^*]+\*\*)/g).map((morceau, i) =>
+    /^\*\*[^*]+\*\*$/.test(morceau)
+      ? <strong key={i} className="font-semibold text-white">{morceau.slice(2, -2)}</strong>
+      : morceau,
+  );
+}
 
 interface Props {
   code: string;
@@ -10,7 +22,11 @@ interface Props {
 
 export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Props) {
   const [markdown, setMarkdown] = useState(cachedMarkdown ?? '');
+  const [dateRapport, setDateRapport] = useState<string | null>(cachedAt);
   const [loading, setLoading] = useState(false);
+  // Un rapport de plus de 7 jours n'est plus « actualisé chaque semaine » : il
+  // reste affiché (mieux qu'un écran vide) le temps que le nouveau arrive.
+  const perime = !!cachedAt && Date.now() - new Date(cachedAt).getTime() > AGE_MAX_MS;
   const [error, setError] = useState<string | null>(null);
 
   async function generate(force = false) {
@@ -36,8 +52,9 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
 
       const ct = res.headers.get('content-type') ?? '';
       if (ct.includes('application/json')) {
-        const j = await res.json() as { markdown?: string };
+        const j = await res.json() as { markdown?: string; generated_at?: string };
         setMarkdown(j.markdown ?? '');
+        if (j.generated_at) setDateRapport(j.generated_at);
         return;
       }
 
@@ -59,6 +76,8 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
         // nul) : sans cela un fragment du marqueur s'afficherait une frame.
         setMarkdown(buf.split('\u0000')[0] ?? '');
       }
+      // Rapport neuf, complet : sa date est celle du jour.
+      if (buf && !buf.includes(MARQUE_ECHEC)) setDateRapport(new Date().toISOString());
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur réseau');
     } finally {
@@ -67,7 +86,9 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
   }
 
   useEffect(() => {
-    if (!cachedMarkdown) void generate(false);
+    // Sans rapport, ou avec un rapport périmé : le serveur ne régénère que
+    // si son propre cache a plus de 7 jours (force = false).
+    if (!cachedMarkdown || perime) void generate(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -77,12 +98,19 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
   const renderedMarkdown = useMemo(
     () =>
       deferredMarkdown.split('\n').map((line, i) => {
-        if (line.startsWith('## ')) return <h2 key={i} className="text-base font-semibold text-white mt-6 mb-2 border-b border-border pb-1">{line.slice(3)}</h2>;
-        if (line.startsWith('### ')) return <h3 key={i} className="text-sm font-semibold text-white mt-4 mb-1">{line.slice(4)}</h3>;
-        if (line.startsWith('- ')) return <li key={i} className="text-sm text-muted ml-4 list-disc">{line.slice(2)}</li>;
-        if (line.startsWith('| ')) return <p key={i} className="text-xs text-muted font-mono whitespace-pre">{line}</p>;
-        if (line.trim() === '') return <div key={i} className="h-2" />;
-        return <p key={i} className="text-sm text-muted leading-relaxed">{line}</p>;
+        const l = line.trimEnd();
+        if (/^#\s/.test(l)) return <h2 key={i} className="text-lg font-semibold text-white mt-2 mb-3">{enLigne(l.replace(/^#\s+/, ''))}</h2>;
+        if (l.startsWith('## ')) return <h2 key={i} className="text-base font-semibold text-white mt-6 mb-2 border-b border-border pb-1">{enLigne(l.slice(3))}</h2>;
+        if (/^#{3,6}\s/.test(l)) return <h3 key={i} className="text-sm font-semibold text-white mt-4 mb-1">{enLigne(l.replace(/^#{3,6}\s+/, ''))}</h3>;
+        if (/^(-{3,}|\*{3,}|_{3,})$/.test(l.trim())) return <hr key={i} className="my-4 border-border" />;
+        if (/^\s*[-*]\s/.test(l)) return <li key={i} className="text-sm text-muted ml-4 list-disc leading-relaxed">{enLigne(l.replace(/^\s*[-*]\s+/, ''))}</li>;
+        if (l.trimStart().startsWith('|')) {
+          // Ligne de séparation d'un tableau (|---|---|) : rien à afficher.
+          if (/^\|?[\s:|-]+\|?$/.test(l.trim())) return null;
+          return <p key={i} className="text-xs text-muted font-mono whitespace-pre overflow-x-auto">{l.replace(/\*\*/g, '')}</p>;
+        }
+        if (l.trim() === '') return <div key={i} className="h-2" />;
+        return <p key={i} className="text-sm text-muted leading-relaxed">{enLigne(l)}</p>;
       }),
     [deferredMarkdown],
   );
@@ -90,9 +118,10 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt }: Pro
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        {cachedAt && (
+        {dateRapport && (
           <p className="text-xs text-faint">
-            Rapport du {new Date(cachedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+            Rapport du {new Date(dateRapport).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+            {loading && perime && ' · mise à jour en cours…'}
           </p>
         )}
         <div className="flex gap-2 ml-auto">

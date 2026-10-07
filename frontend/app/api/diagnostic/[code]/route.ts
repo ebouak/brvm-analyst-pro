@@ -131,6 +131,9 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     periode_n1: inc_n1?.periode ?? 'N-1',
     redFlags, newsSignals, webSignals,
     interim, contexteQuant,
+    // Sans elle, le modèle inventait une date (« 26 mai 2025 » sur un rapport
+    // de juin 2026).
+    dateRapport: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }),
   });
 
   const encoder = new TextEncoder();
