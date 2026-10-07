@@ -6,6 +6,7 @@ import { parsePublicationsTable } from './parser.js';
 import { classifyPublication } from './classify.js';
 import { upsertPublications, dedupeHash } from './repository.js';
 import type { Publication } from './types.js';
+import { construireAlias, emetteurDuDocument } from './emetteur.js';
 
 export interface PubsRunResult {
   status: 'success' | 'failed';
@@ -178,6 +179,10 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
       .eq('actif', true);
     if (error) throw new Error(`load instruments: ${error.message}`);
     const brvm = (instruments ?? []) as Array<{ code: string; designation: string | null }>;
+    // La page BDFIN d'un émetteur liste parfois les documents d'un autre (1004,
+    // CFAO Motors CI, porte ceux de Tractafric Motors CI) : le titre fait foi.
+    const alias = construireAlias(brvm);
+    const codesConnus = new Set(brvm.map((b) => b.code));
 
     const mappings: Array<{ code: string; value: string; text: string }> = [];
     const unmatched: string[] = [];
@@ -237,14 +242,22 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
         const rows = parsePublicationsTable(html, pubUrl);
 
         for (const r of rows) {
+          // Titre et fichier d'accord sur une autre société cotée : on rattache
+          // à elle. En désaccord : on garde l'émetteur de la page (le titre BDFIN
+          // est parfois faux, le fichier aussi — recoupement RichBourse).
+          const doc = emetteurDuDocument(r.libelle, r.source_url, alias, codesConnus);
+          const autre = !doc.conflit && doc.code && doc.code !== m.code ? doc.code : null;
+          if (doc.conflit) logger.warn({ page: m.code, titre: doc.titre, fichier: doc.fichier, libelle: r.libelle }, 'Titre et fichier BDFIN en désaccord');
+          const code = autre ?? m.code;
+          if (autre) logger.warn({ page: m.code, emetteur: autre, libelle: r.libelle }, "Publication rattachée à l'émetteur nommé par son titre");
           allPubs.push({
-            code: m.code,
+            code,
             date_publication: r.date_publication,
             libelle: r.libelle,
             type_publication: classifyPublication(r.libelle),
             source_url: r.source_url,
             source: 'bdfin',
-            dedupe_hash: dedupeHash(m.code, r.date_publication, r.libelle),
+            dedupe_hash: dedupeHash(code, r.date_publication, r.libelle),
           });
         }
         logger.info(

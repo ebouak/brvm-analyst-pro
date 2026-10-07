@@ -27,6 +27,7 @@ import { FOURNISSEURS_LLM } from '../sante/runSanteLlm.js';
 import { codePeriode, typePeriode, type PeriodeInterim } from './periode.js';
 import { choisirPublications, lignesInterim, type PubInterim } from './selection.js';
 import { lireAvecGemini } from './gemini.js';
+import { construireAlias, documentEtranger } from '../publications/emetteur.js';
 
 async function resoudreCleGemini(): Promise<string | null> {
   return resolveApiKeyForScraper('gemini');
@@ -152,7 +153,19 @@ export async function runInterim({ mock = false, codes = [] as string[] } = {}):
   if (codes.length) q = q.in('code', codes);
   const { data: pubs, error } = await q;
   if (error) throw new Error(`lecture publications : ${error.message}`);
-  const cibles = choisirPublications((pubs ?? []) as PubInterim[], anneeMin);
+
+  // Un document dont le titre nomme une AUTRE société n'est jamais lu pour
+  // celle-ci : CFAC portait les trimestres 2024-2025 de Tractafric (2026-10-07).
+  const { data: insAlias } = await sb.from('brvm_instruments').select('code, designation').eq('type', 'action');
+  const alias = construireAlias((insAlias ?? []) as { code: string; designation: string | null }[]);
+  const codesConnus = new Set((insAlias ?? []).map((i) => i.code as string));
+  const lisibles = ((pubs ?? []) as PubInterim[]).filter((p) => {
+    // Titre OU fichier : un PDF lié par erreur à la mauvaise annonce reste étranger.
+    const autre = documentEtranger(p.code, p.libelle, p.source_url, alias, codesConnus);
+    if (autre) log.warn({ code: p.code, emetteur: autre, libelle: p.libelle }, "publication d'une autre société — écartée");
+    return !autre;
+  });
+  const cibles = choisirPublications(lisibles, anneeMin);
 
   // Déjà traitées : une provenance porte l'identifiant de la publication.
   const deja = new Set<string>();
