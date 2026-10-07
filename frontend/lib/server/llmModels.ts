@@ -41,6 +41,15 @@ export const MODELE_LLM = {
    * le modèle dépense son budget de jetons en réflexion et rend 12 mots.
    */
   gemini: 'gemini-3.8-flash',
+  /**
+   * Revendeur compatible OpenAI, en tête du SEUL diagnostic (choix produit du
+   * 2026-10-07, contre l'avis technique). Testé ce jour-là : « gpt-5.5 » et
+   * « gemma-2-2b » au tokenizer identique, prompt système caché d'environ
+   * 300 jetons, max_tokens ignoré — rien ne prouve que ce soit Claude. Le
+   * rapport l'enregistre donc sous « codecraft/… », jamais sous le nom seul.
+   * Flux mesuré : premier mot à 18 s, ~22 mots/s.
+   */
+  codecraft: 'claude-opus-5.5',
 } as const;
 
 export const URL_LLM = {
@@ -49,4 +58,5 @@ export const URL_LLM = {
   xai: 'https://api.x.ai/v1/chat/completions',
   /** Endpoint compatible OpenAI de l'API Gemini officielle (Bearer). */
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+  codecraft: 'https://codecraftapi.com/v1/chat/completions',
 } as const;
