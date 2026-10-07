@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { construireAlias, emetteurDuTitre, emetteurContredit, emetteurDuFichier, emetteurDuDocument, documentEtranger } from '../src/publications/emetteur.js';
+import { construireAlias, emetteurDuTitre, emetteurContredit, emetteurDuFichier, emetteurDuDocument, documentEtranger, codeDeCollecte } from '../src/publications/emetteur.js';
 
 const alias = construireAlias([
   { code: 'SIBC', designation: "SOCIETE IVOIRIENNE DE BANQUE COTE D'IVOIRE" },
@@ -86,6 +86,21 @@ describe('le document fait foi face au titre (recoupement RichBourse)', () => {
       'https://bfin.brvm.org/0/x/20230630%20-%20Rapport%20d%27activit%C3%A9s%20-%201er%20Trimestre%202023%20-%20ORANGE%20CI.pdf', a2, codes)).toBe('ORAC');
     expect(documentEtranger('SEMC', 'Rapport annuel 2023 - EVIOSYS PACKAGING SIEM CI',
       'https://bfin.brvm.org/0/x/Rapport%20annuel%202023%20-%20EVIOSYS%20PACKAGING%20SIEM%20CI.pdf', a2, codes)).toBeNull();
+  });
+});
+
+describe('collecteur : on ne quitte la page que si titre ET fichier désignent la même société', () => {
+  const codes = new Set(['ECOC', 'ETIT', 'CFAC', 'PRSC', 'SIBC', 'SGBC']);
+  const a3 = construireAlias([...codes].map((code) => ({ code, designation: null as string | null })));
+  it('titre seul (fichier muet) : on reste sur la page — le PDF « … : ETIT » était celui d’Ecobank CI', () => {
+    expect(codeDeCollecte('ECOC', 'Etats financiers - Exercice 2017: ETIT', 'https://bfin.brvm.org/0/x/Etats%20financiers%202017.pdf', a3, codes)).toBe('ECOC');
+  });
+  it('titre et fichier d’accord : on rattache à la société nommée', () => {
+    expect(codeDeCollecte('CFAC', 'Etats financiers - Exercice 2025 - TRACTAFRIC MOTORS CI',
+      'https://bfin.brvm.org/0/x/Etats%20financiers%202025%20-%20TRACTAFRIC%20MOTORS%20CI.pdf', a3, codes)).toBe('PRSC');
+  });
+  it('titre et fichier en désaccord : on reste sur la page', () => {
+    expect(codeDeCollecte('SGBC', 'Notation Financière - SIB CI', 'https://bfin.brvm.org/0/x/Notation%20-%20SGBCI.pdf', a3, codes)).toBe('SGBC');
   });
 });
 

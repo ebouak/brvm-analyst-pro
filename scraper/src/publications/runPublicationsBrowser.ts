@@ -6,7 +6,7 @@ import { parsePublicationsTable } from './parser.js';
 import { classifyPublication } from './classify.js';
 import { upsertPublications, dedupeHash } from './repository.js';
 import type { Publication } from './types.js';
-import { construireAlias, emetteurDuDocument } from './emetteur.js';
+import { construireAlias, emetteurDuDocument, codeDeCollecte } from './emetteur.js';
 
 export interface PubsRunResult {
   status: 'success' | 'failed';
@@ -246,7 +246,8 @@ export async function runPublicationsBrowser(): Promise<PubsRunResult> {
           // à elle. En désaccord : on garde l'émetteur de la page (le titre BDFIN
           // est parfois faux, le fichier aussi — recoupement RichBourse).
           const doc = emetteurDuDocument(r.libelle, r.source_url, alias, codesConnus);
-          const autre = !doc.conflit && doc.code && doc.code !== m.code ? doc.code : null;
+          const rattache = codeDeCollecte(m.code, r.libelle, r.source_url, alias, codesConnus);
+          const autre = rattache !== m.code ? rattache : null;
           if (doc.conflit) logger.warn({ page: m.code, titre: doc.titre, fichier: doc.fichier, libelle: r.libelle }, 'Titre et fichier BDFIN en désaccord');
           const code = autre ?? m.code;
           if (autre) logger.warn({ page: m.code, emetteur: autre, libelle: r.libelle }, "Publication rattachée à l'émetteur nommé par son titre");

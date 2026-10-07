@@ -179,6 +179,18 @@ export function emetteurDuDocument(
 }
 
 /**
+ * Code sous lequel le collecteur range une publication trouvée sur la page
+ * BDFIN de `page`. Même règle que la commande de rattachement : on ne quitte
+ * le code de la page que si le titre ET le nom du fichier désignent la même
+ * autre société cotée. Lus le 2026-10-07, trois PDF titrés pour une autre
+ * société (fichier muet) étaient ceux de la page : le titre seul ne suffit pas.
+ */
+export function codeDeCollecte(page: string, libelle: string, url: string | null, alias: Map<string, string>, codes: Set<string>): string {
+  const d = emetteurDuDocument(libelle, url, alias, codes);
+  return !d.conflit && d.code && d.code !== page && d.fichier === d.code && codes.has(d.code) ? d.code : page;
+}
+
+/**
  * Garde-fou des extractions de chiffres : renvoie le code d'une AUTRE société
  * si le titre OU le fichier en nomme une ; null sinon. Plus strict que le
  * rattachement : lire un PDF étranger fabrique des comptes faux.
