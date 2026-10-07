@@ -162,3 +162,12 @@ describe('Gemini — choix du modèle et format', async () => {
     expect(texteReponse({ promptFeedback: { blockReason: 'SAFETY' } })).toBeNull();
   });
 });
+
+describe('corpsRequete — gros PDF', () => {
+  it('référence un fichier déposé au lieu d’envoyer le contenu', async () => {
+    const { corpsRequete } = await import('../src/interim/gemini.js');
+    const c = corpsRequete('S', 'Q', { fileUri: 'https://generativelanguage.googleapis.com/v1beta/files/abc' }) as any;
+    expect(c.contents[0].parts[0]).toEqual({ fileData: { mimeType: 'application/pdf', fileUri: 'https://generativelanguage.googleapis.com/v1beta/files/abc' } });
+    expect(JSON.stringify(c)).not.toContain('inlineData');
+  });
+});
