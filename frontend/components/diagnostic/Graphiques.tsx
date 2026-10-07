@@ -73,7 +73,7 @@ function Legende({ series }: { series: { nom: string; ton: Ton }[] }) {
         <li key={s.nom} className="flex items-center gap-1.5">
           {/* SVG et non fond CSS : les navigateurs n'impriment pas les couleurs
               de fond par défaut, la pastille disparaissait du PDF. */}
-          <svg aria-hidden width="10" height="10" viewBox="0 0 10 10" className="shrink-0">
+          <svg aria-hidden width="10" height="10" viewBox="0 0 10 10" className="h-2.5 w-2.5 shrink-0">
             <rect width="10" height="10" rx="2" className={REMPLI[s.ton]} />
           </svg>
           {s.nom}
