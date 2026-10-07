@@ -27,12 +27,14 @@ function KpiRow({ label, value, tone, absence }: { label: string; value: string;
   );
 }
 
-export default function BankScorecard({ kpis, score, periode, absences }: {
+export default function BankScorecard({ kpis, score, periode, absences, qualite }: {
   kpis: BankKpis;
   score: BankScore;
   periode: string | null;
   /** Pourquoi un indicateur prudentiel manque, selon indicateur_source (lib/bank/prudentiel). */
   absences?: { solvabilite?: string | null };
+  /** Taux publiés par la banque pour l'exercice affiché, EN POURCENTAGE (8 = 8 %). */
+  qualite?: { taux: number | null; tauxAbsence: string | null; couverture: number | null; couvertureAbsence: string | null };
 }) {
   return (
     <div className="space-y-4">
@@ -58,6 +60,14 @@ export default function BankScorecard({ kpis, score, periode, absences }: {
           <KpiRow label="ROA" value={pct(kpis.roa, 2)} tone={kpis.roa == null ? null : kpis.roa >= 0 ? 'up' : 'down'} />
           <KpiRow label="Capitaux propres / actifs" value={pct(kpis.leverage)} />
           <KpiRow label="Créances douteuses / crédits" value={pct(kpis.nplRatio)} tone={kpis.nplRatio != null && kpis.nplRatio > 0.1 ? 'down' : null} />
+          {qualite && (
+            <>
+              <KpiRow label="Créances en souffrance / crédits (publié)" value={pct(qualite.taux == null ? null : qualite.taux / 100)}
+                absence={qualite.tauxAbsence} tone={qualite.taux != null && qualite.taux > 10 ? 'down' : null} />
+              <KpiRow label="Couverture des créances en souffrance (publiée)" value={pct(qualite.couverture == null ? null : qualite.couverture / 100, 0)}
+                absence={qualite.couvertureAbsence} />
+            </>
+          )}
           <KpiRow label="Ratio de solvabilité (min 11,5 %)" value={pct(kpis.ratioSolvabilite)} absence={absences?.solvabilite} />
         </div>
       </div>

@@ -16,7 +16,8 @@ describe('graphiques du diagnostic — rendu serveur', () => {
       series: [{ nom: 'PNB', ton: 'accent', valeurs: [263e9, null, 276e9] }, { nom: 'RN', ton: 'up', valeurs: [-5e9, 101e9, 101e9], negatifEnRouge: true }],
     })));
     expect(html).toContain('fill-down');                 // le résultat négatif
-    expect((html.match(/<rect /g) ?? []).length).toBe(5); // 6 points, 1 trou
+    expect((html.match(/<rect x=/g) ?? []).length).toBe(5); // 6 points, 1 trou (les pastilles de légende n'ont pas de x)
+    expect((html.match(/<svg aria-hidden/g) ?? []).length).toBe(2); // pastilles en SVG : elles s'impriment
     expect(html).toContain('PNB');                        // légende dès deux séries
   });
 

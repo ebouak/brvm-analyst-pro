@@ -9,7 +9,7 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeDiagnosticMetrics } from '@/lib/diagnostic/metrics';
 import { buildDiagnosticPrompt } from '@/lib/diagnostic/prompt';
 import { computeRedFlags } from '@/lib/diagnostic/redFlags';
-import { libelleAbsence, type ObsStatut } from '@/lib/bank/prudentiel';
+import { libelleAbsence, ligneQualiteActif, type ObsIndicateur } from '@/lib/bank/prudentiel';
 import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals';
 import { findWebSignals } from '@/lib/diagnostic/webSearch';
 import { MARQUE_ECHEC } from '@/lib/diagnostic/echec';
@@ -112,13 +112,16 @@ export async function POST(req: Request, { params }: { params: { code: string } 
 
   // Banque sans ratio de solvabilité retenu : ce que disent les documents
   // consultés (sources contradictoires, borne…), plutôt qu'un « N/D » muet.
+  const obsPrudentielles = famille === 'banque'
+    ? ((await admin.from('indicateur_source').select('indicateur,date_arrete,statut,motif,comparateur,valeur')
+        .eq('code', code).in('indicateur', ['solvabilite_total', 'taux_creances_souffrance', 'couverture_creances_souffrance'])).data ?? []) as ObsIndicateur[]
+    : [];
   const absenceSolvabilite = famille === 'banque' && bal_n?.lignes_specifiques?.ratio_solvabilite == null
-    ? libelleAbsence(
-        ((await admin.from('indicateur_source').select('date_arrete,statut,motif,comparateur,valeur')
-          .eq('code', code).eq('indicateur', 'solvabilite_total')).data ?? []) as ObsStatut[],
-        bal_n?.periode,
-      )
+    ? libelleAbsence(obsPrudentielles.filter((o) => o.indicateur === 'solvabilite_total'), bal_n?.periode)
     : null;
+  // Taux de créances en souffrance publiés par la banque, exercice par exercice :
+  // sans eux, le rapport disait « créances douteuses N/D » alors qu'ils sont en base.
+  const qualiteActif = ligneQualiteActif(obsPrudentielles);
 
   const newsSignals = await findNewsSignals(admin, code);
   const categoriesSansResultat = (Object.keys(newsSignals) as NewsCategory[])
@@ -148,7 +151,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     periode_n: inc_n?.periode ?? 'N',
     periode_n1: inc_n1?.periode ?? 'N-1',
     redFlags, newsSignals, webSignals,
-    interim, contexteQuant, famille, absenceSolvabilite,
+    interim, contexteQuant, famille, absenceSolvabilite, qualiteActif,
     marche: {
       actions: data.instrument.shares ?? inc_n?.actions_en_circulation ?? null,
       flottant: (titre as { flottant?: number | null } | null)?.flottant ?? null,

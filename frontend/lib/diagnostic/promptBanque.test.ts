@@ -92,6 +92,14 @@ describe('diagnostic — banque', () => {
     expect(p).toContain('Reprends TELLES QUELLES les valeurs du bloc VALORISATION CALCULÉE');
   });
 
+  it('les taux de créances en souffrance publiés arrivent au modèle', () => {
+    const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m, famille: 'banque' });
+    const ligne = 'Créances en souffrance / crédits (taux publié par la banque) : 2023 6,8 % · 2024 7,5 % · 2025 8 %';
+    const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque', qualiteActif: ligne });
+    expect(p).toContain(`Taux publiés par la banque : ${ligne}`);
+    expect(buildDiagnosticPrompt({ ...base, redFlags, famille: 'banque' })).not.toContain('Taux publiés par la banque');
+  });
+
   it('une société non financière garde le gabarit général, avec le bloc marché en plus', () => {
     const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n: null, cf_n1: null, m });
     const p = buildDiagnosticPrompt({ ...base, redFlags, famille: 'general' });

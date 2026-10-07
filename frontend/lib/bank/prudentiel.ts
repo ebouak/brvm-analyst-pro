@@ -47,3 +47,51 @@ export function libelleAbsence(obs: ObsStatut[], periode: string | null | undefi
   if (c.length && c.every((o) => o.statut === 'non_applicable')) return 'non applicable';
   return NON_TROUVE;
 }
+
+
+/** Une observation d'`indicateur_source` avec son indicateur, pour les séries. */
+export interface ObsIndicateur extends ObsStatut {
+  indicateur: string;
+}
+
+const NON_RETENABLE = new Set(['source_conflict', 'estime', 'approximation', 'illisible', 'definition_incompatible']);
+
+/**
+ * Série annuelle d'un indicateur, au 31 décembre seulement. Une année n'a une
+ * valeur que si ses observations publiées, exactes et non contestées donnent
+ * TOUTES le même nombre ; sinon elle est absente — jamais tranchée ici. La
+ * règle complète (arrondi publié, périmètre) vit côté scraper
+ * (prudentiel/selection.ts) ; ce module ne fait qu'afficher.
+ */
+export function serieRetenue(obs: ObsIndicateur[], indicateur: string): { annee: string; valeur: number }[] {
+  const parAnnee = new Map<string, Set<number>>();
+  const exclues = new Set<string>();
+  for (const o of obs) {
+    if (o.indicateur !== indicateur || !o.date_arrete?.endsWith('-12-31')) continue;
+    const annee = o.date_arrete.slice(0, 4);
+    if (o.motif && NON_RETENABLE.has(o.motif)) { exclues.add(annee); continue; }
+    if (o.statut !== 'publie' || o.comparateur !== '=' || o.valeur == null) continue;
+    (parAnnee.get(annee) ?? parAnnee.set(annee, new Set()).get(annee)!).add(Number(o.valeur));
+  }
+  return [...parAnnee]
+    .filter(([annee, vals]) => vals.size === 1 && !exclues.has(annee))
+    .map(([annee, vals]) => ({ annee, valeur: [...vals][0]! }))
+    .sort((a, b) => a.annee.localeCompare(b.annee));
+}
+
+const pcFr = (v: number) => `${v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`;
+
+/**
+ * Ligne « qualité du portefeuille » pour le prompt du diagnostic : les taux
+ * publiés par la banque, exercice par exercice. null si rien n'est publié.
+ */
+export function ligneQualiteActif(obs: ObsIndicateur[]): string | null {
+  const taux = serieRetenue(obs, 'taux_creances_souffrance');
+  const couv = serieRetenue(obs, 'couverture_creances_souffrance');
+  if (!taux.length && !couv.length) return null;
+  const fmt = (s: { annee: string; valeur: number }[]) => s.map((p) => `${p.annee} ${pcFr(p.valeur)}`).join(' · ');
+  return [
+    taux.length ? `Créances en souffrance / crédits (taux publié par la banque) : ${fmt(taux)}` : null,
+    couv.length ? `Couverture des créances en souffrance (publiée) : ${fmt(couv)}` : null,
+  ].filter(Boolean).join(' | ');
+}

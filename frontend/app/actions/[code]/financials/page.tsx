@@ -15,7 +15,7 @@ import BankScorecard from '@/components/financials/BankScorecard';
 import ValueTrapBadge from '@/components/fundamentals/ValueTrapBadge';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
-import { libelleAbsence, type ObsStatut } from '@/lib/bank/prudentiel';
+import { libelleAbsence, serieRetenue, dateArrete, type ObsIndicateur } from '@/lib/bank/prudentiel';
 import { createClient } from '@/lib/supabase/server';
 import FinancialTabs from '@/components/financials/FinancialTabs';
 import ExportBar from '@/components/financials/ExportBar';
@@ -77,11 +77,16 @@ export default async function FinancialsPage({ params }: Props) {
 
   // Pourquoi la solvabilité manque, s'il manque : ce que disent les documents
   // consultés pour l'exercice du bilan affiché (indicateur_source, lecture publique).
-  const obsSolvabilite: ObsStatut[] = data.instrument.famille_comptable === 'banque'
+  const obsPrudentielles: ObsIndicateur[] = data.instrument.famille_comptable === 'banque'
     ? ((await createClient().from('indicateur_source')
-        .select('date_arrete,statut,motif,comparateur,valeur')
-        .eq('code', code).eq('indicateur', 'solvabilite_total')).data ?? [])
+        .select('indicateur,date_arrete,statut,motif,comparateur,valeur')
+        .eq('code', code).in('indicateur', ['solvabilite_total', 'taux_creances_souffrance', 'couverture_creances_souffrance'])).data ?? []) as ObsIndicateur[]
     : [];
+  const obsDe = (indicateur: string) => obsPrudentielles.filter((o) => o.indicateur === indicateur);
+  // Taux publiés pour l'exercice du bilan affiché — jamais celui d'un exercice voisin.
+  const anneeBilan = dateArrete(latestBalance?.periode)?.slice(0, 4) ?? null;
+  const tauxPublie = (indicateur: string) =>
+    serieRetenue(obsPrudentielles, indicateur).find((p) => p.annee === anneeBilan)?.valeur ?? null;
 
   // Analyse bancaire UEMOA : postes spécifiques (prêts, dépôts, marge
   // d'intérêts…) + score /100 — uniquement pour la famille banque.
@@ -99,7 +104,17 @@ export default async function FinancialsPage({ params }: Props) {
       kpis,
       score: scoreBanqueUemoa(kpis),
       periode: latestIncome?.periode ?? null,
-      absences: { solvabilite: kpis.ratioSolvabilite == null ? libelleAbsence(obsSolvabilite, latestBalance?.periode) : null },
+      absences: { solvabilite: kpis.ratioSolvabilite == null ? libelleAbsence(obsDe('solvabilite_total'), latestBalance?.periode) : null },
+      qualite: (() => {
+        const taux = tauxPublie('taux_creances_souffrance');
+        const couverture = tauxPublie('couverture_creances_souffrance');
+        return {
+          taux,
+          tauxAbsence: taux == null ? libelleAbsence(obsDe('taux_creances_souffrance'), latestBalance?.periode) : null,
+          couverture,
+          couvertureAbsence: couverture == null ? libelleAbsence(obsDe('couverture_creances_souffrance'), latestBalance?.periode) : null,
+        };
+      })(),
     };
   })();
 
@@ -243,7 +258,7 @@ export default async function FinancialsPage({ params }: Props) {
             {bankAnalysis && (
               <div>
                 <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse bancaire UEMOA</p>
-                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} />
+                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} />
               </div>
             )}
 
