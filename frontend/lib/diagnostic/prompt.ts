@@ -6,6 +6,7 @@ import type { NewsCategory, NewsSignal } from './newsSignals';
 import type { LectureIntermediaire } from '@/lib/financials/interim';
 import type { ContexteQuant } from './contexteQuant';
 import type { LigneComparaison } from './medianes';
+import { extractBankYear, computeBankKpis, scoreBanqueUemoa } from '@/lib/bank/kpis';
 
 function fmt(n: number | null | undefined, decimals = 0): string {
   if (n == null) return 'N/D';
@@ -91,9 +92,109 @@ function blocPiliers(q: ContexteQuant | null | undefined): string {
   ].join('\n');
 }
 
+/** Fraction (0,13) ou pourcentage (13) → pourcentage. Les extractions varient. */
+const enPct = (v: number | null | undefined): number | null =>
+  v == null ? null : Math.abs(v) <= 1 ? v * 100 : v;
+
+/** Données de marché du titre : utiles à toute famille comptable. */
+function blocMarche(cours: number | null, m: MarcheTitre | null | undefined): string {
+  if (!m) return 'Données de marché non disponibles.';
+  const cap = cours != null && m.actions != null ? cours * m.actions : null;
+  const partFlottant = m.flottant != null && m.actions ? (m.flottant / m.actions) * 100 : null;
+  return [
+    `Actions en circulation : ${fmt(m.actions)} | Capitalisation au cours du jour : ${fmt(cap)} FCFA`,
+    `Flottant : ${fmt(m.flottant)} titres${partFlottant != null ? ` (${partFlottant.toFixed(1)}% du capital)` : ''} | Volume moyen sur 30 séances : ${fmt(m.volMoyen30j)} titres par séance`,
+  ].join('\n');
+}
+
+/**
+ * Données et ratios d'une BANQUE. Le gabarit industriel (marge brute, BFR,
+ * Altman, free cash-flow) n'a pas de sens ici : le rapport SGBC du
+ * 2026-10-07 présentait ces postes comme des lacunes, et ignorait le PNB,
+ * le coefficient d'exploitation, les dépôts et les crédits pourtant en base.
+ * Les ratios viennent de lib/bank/kpis.ts — la même définition que l'onglet
+ * financier de la fiche action.
+ */
+function blocBanque(q: {
+  inc_n: IncomeStatement | null; inc_n1: IncomeStatement | null;
+  bal_n: BalanceSheet | null; bal_n1: BalanceSheet | null;
+  cf_n: CashFlowStatement | null;
+  periode_n: string; periode_n1: string;
+  cours: number | null; actions: number | null;
+  m: DiagnosticMetrics;
+  interim: LectureIntermediaire | null | undefined;
+  cours_bas_52s: number | null; cours_haut_52s: number | null;
+}): string {
+  const { inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions, m } = q;
+  const li = inc_n?.lignes_specifiques ?? {};
+  const li1 = inc_n1?.lignes_specifiques ?? {};
+  const lb = bal_n?.lignes_specifiques ?? {};
+  const lb1 = bal_n1?.lignes_specifiques ?? {};
+  const pnb = li.pnb ?? inc_n?.revenu_total ?? null;
+  const pnb1 = li1.pnb ?? inc_n1?.revenu_total ?? null;
+  const cur = extractBankYear(inc_n, bal_n);
+  const prev = extractBankYear(inc_n1, bal_n1);
+  const curPnb = cur ? { ...cur, pnb: cur.pnb ?? pnb } : null;
+  const k = curPnb ? computeBankKpis(curPnb, prev, { cours, shares: actions, dividendeParAction: inc_n?.dividende_par_action ?? null }) : null;
+  const score = k ? scoreBanqueUemoa(k) : null;
+  const coefPublie = enPct(li.coefficient_exploitation);
+  const coef = coefPublie ?? (k?.costIncome != null ? k.costIncome * 100 : null);
+  const pc100 = (v: number | null | undefined) => pct(v == null ? null : v * 100);
+  const croissancePnb = pnb != null && pnb1 ? ((pnb - pnb1) / Math.abs(pnb1)) * 100 : null;
+  const per = inc_n?.benefice_par_action && cours ? cours / inc_n.benefice_par_action : null;
+
+  return `---
+## DONNÉES FINANCIÈRES — BANQUE (FCFA)
+Pour une banque, marge brute, stocks, BFR, investissements industriels (capex), free cash-flow, dette nette et score d'Altman ne s'appliquent pas : ils ne figurent pas ci-dessous et ne sont PAS des données manquantes.
+
+### Compte de résultat
+| Indicateur | ${periode_n} | ${periode_n1} | Δ |
+|---|---|---|---|
+| Produit net bancaire (PNB) | ${fmt(pnb)} | ${fmt(pnb1)} | ${pct(croissancePnb)} |
+| Produits d'intérêts | ${fmt(li.produit_interets)} | ${fmt(li1.produit_interets)} | |
+| Marge d'intérêts | ${fmt(li.marge_interets)} | ${fmt(li1.marge_interets)} | |
+| Frais généraux | ${fmt(inc_n?.frais_generaux_admin)} | ${fmt(inc_n1?.frais_generaux_admin)} | |
+| Coût du risque | ${fmt(li.cout_du_risque)} | ${fmt(li1.cout_du_risque)} | |
+| Résultat d'exploitation | ${fmt(inc_n?.resultat_exploitation)} | ${fmt(inc_n1?.resultat_exploitation)} | |
+| Résultat net | ${fmt(inc_n?.resultat_net)} | ${fmt(inc_n1?.resultat_net)} | ${pct(m.cagr_rn)} |
+
+### Bilan
+| Indicateur | ${periode_n} | ${periode_n1} |
+|---|---|---|
+| Total du bilan | ${fmt(bal_n?.total_actifs)} | ${fmt(bal_n1?.total_actifs)} |
+| Crédits à la clientèle | ${fmt(lb.credits_clientele)} | ${fmt(lb1.credits_clientele)} |
+| Dépôts de la clientèle | ${fmt(lb.depots_clientele)} | ${fmt(lb1.depots_clientele)} |
+| Créances douteuses (brutes) | ${fmt(lb.creances_douteuses)} | ${fmt(lb1.creances_douteuses)} |
+| Capitaux propres | ${fmt(bal_n?.total_capitaux_propres)} | ${fmt(bal_n1?.total_capitaux_propres)} |
+| Trésorerie et équivalents | ${fmt(bal_n?.tresorerie_equivalents)} | ${fmt(bal_n1?.tresorerie_equivalents)} |
+
+### Flux de trésorerie publiés (${periode_n})
+Flux d'exploitation ${fmt(cf_n?.flux_exploitation)} | Flux d'investissement ${fmt(cf_n?.flux_investissement)} | Flux de financement ${fmt(cf_n?.flux_financement)} | Dividendes versés ${fmt(cf_n?.dividendes_verses)}
+
+### Comptes intermédiaires (postérieurs à ${periode_n})
+${blocIntermediaire(q.interim)}
+
+---
+## RATIOS BANCAIRES
+Rentabilité : ROE ${pc100(k?.roe)} | ROA ${pc100(k?.roa)} | Coefficient d'exploitation ${pct(coef)} (${coefPublie != null ? 'publié' : 'calculé : frais généraux / PNB'}) | Marge d'intérêts / actifs moyens ${pc100(k?.nim)}
+Qualité du portefeuille : Créances douteuses / crédits ${pc100(k?.nplRatio)} | Couverture des créances douteuses ${pct(enPct(lb.taux_couverture_creances))}
+Structure : Crédits / dépôts ${pc100(k?.transformation)} | Fonds propres / total du bilan ${pc100(k?.leverage)} | Ratio de solvabilité ${pct(enPct(lb.ratio_solvabilite))} (minimum réglementaire UEMOA : 11.5%)
+Valorisation (cours ${cours ?? 'N/D'} FCFA) : PER ${x(per)} | Cours / valeur comptable ${x(k?.pb)} | Rendement du dividende ${pc100(k?.rendementDiv)}
+Dividende : DPA ${inc_n?.dividende_par_action ?? 'N/D'} FCFA | Taux de distribution ${pct(m.payout_ratio)}
+Score bancaire UEMOA : ${score?.total != null ? `${score.total}/100` : 'non évaluable'} (confiance ${score ? Math.round(score.confiance * 100) : 0} % : part des indicateurs effectivement publiés)
+Plage 52 semaines : ${q.cours_bas_52s ?? 'N/D'} – ${q.cours_haut_52s ?? 'N/D'} FCFA`;
+}
+
 function formatSignals(signals: NewsSignal[] | undefined): string {
   if (!signals || signals.length === 0) return 'non évaluable — aucune source publique trouvée';
   return signals.map((s) => `- ${s.titre} (${s.source}, ${s.date}${s.url ? `, ${s.url}` : ''})`).join('\n');
+}
+
+/** Données de marché du titre. */
+export interface MarcheTitre {
+  actions: number | null;
+  flottant: number | null;
+  volMoyen30j: number | null;
 }
 
 export function buildDiagnosticPrompt(params: {
@@ -121,31 +222,23 @@ export function buildDiagnosticPrompt(params: {
   contexteQuant?: ContexteQuant | null;
   /** Date de rédaction, en toutes lettres (« 7 octobre 2026 »). */
   dateRapport?: string;
+  /** Famille comptable : une banque reçoit des données et des consignes propres. */
+  famille?: 'banque' | 'assurance' | 'general' | null;
+  /** Actions, flottant, volume moyen. */
+  marche?: MarcheTitre | null;
 }): string {
   const { code, designation, secteur, cours, cours_bas_52s, cours_haut_52s,
           inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m,
           periode_n, periode_n1, redFlags, newsSignals, webSignals,
-          interim, contexteQuant, dateRapport } = params;
+          interim, contexteQuant, dateRapport, famille, marche } = params;
+  const banque = famille === 'banque';
 
   const redFlagsTable = redFlags.checks.map((c) => {
-    if (!c.dataAvailable) return `| ${c.label} | non évaluable | — | ${c.evidence} |`;
+    if (!c.dataAvailable) return `| ${c.label} | ${c.evidence.startsWith('Non applicable') ? 'non applicable' : 'non évaluable'} | — | ${c.evidence} |`;
     return `| ${c.label} | ${c.triggered ? 'Déclenché' : 'OK'} | ${c.triggered ? c.severity : 0}/10 | ${c.evidence} |`;
   }).join('\n');
 
-  const enrichmentBlocks = (Object.keys(CATEGORY_LABELS) as NewsCategory[]).map((cat) => {
-    const internal = newsSignals[cat] ?? [];
-    const source = internal.length > 0 ? internal : webSignals[cat];
-    return `**${CATEGORY_LABELS[cat]}**\n${formatSignals(source)}`;
-  }).join('\n\n');
-
-  return `Tu es un analyste financier senior spécialisé sur les marchés actions africains (BRVM).
-Tu vas produire un **diagnostic financier et économique complet** de ${designation ?? code} (${code}).
-Ton analyse suit les standards sell-side CFA Level III et s'appuie exclusivement sur les données ci-dessous.
-Rédige en français professionnel, pour un investisseur particulier comme pour un lecteur averti : rigoureux, factuel, nuancé. Longueur cible : 2 000–3 000 mots.
-Tout chiffre que tu cites doit figurer dans les données ci-dessous ou en être dérivé par un calcul que tu montres. Une donnée marquée N/D reste N/D : tu ne l'estimes pas.
-Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du rapport : ${dateRapport}. Si tu dates le rapport, utilise cette date et aucune autre.` : ''}
-
----
+  const donneesGenerales = `---
 ## DONNÉES FINANCIÈRES (FCFA)
 
 ### Compte de résultat
@@ -194,6 +287,27 @@ Dividende : DPA ${inc_n?.dividende_par_action ?? 'N/D'} FCFA | Payout ${pct(m.pa
 Altman Z' : ${m.altman_z?.toFixed(2) ?? 'N/D'} [>2.6 sain | 1.1–2.6 gris | <1.1 détresse]
 Plage 52s : ${cours_bas_52s ?? 'N/D'} – ${cours_haut_52s ?? 'N/D'} FCFA
 
+`;
+
+  const enrichmentBlocks = (Object.keys(CATEGORY_LABELS) as NewsCategory[]).map((cat) => {
+    const internal = newsSignals[cat] ?? [];
+    const source = internal.length > 0 ? internal : webSignals[cat];
+    return `**${CATEGORY_LABELS[cat]}**\n${formatSignals(source)}`;
+  }).join('\n\n');
+
+  return `Tu es un analyste financier senior spécialisé sur les marchés actions africains (BRVM).
+Tu vas produire un **diagnostic financier et économique complet** de ${designation ?? code} (${code}).
+Ton analyse suit les standards sell-side CFA Level III et s'appuie exclusivement sur les données ci-dessous.
+Rédige en français professionnel, pour un investisseur particulier comme pour un lecteur averti : rigoureux, factuel, nuancé. Longueur cible : 2 000–3 000 mots.
+Tout chiffre que tu cites doit figurer dans les données ci-dessous ou en être dérivé par un calcul que tu montres. Une donnée marquée N/D reste N/D : tu ne l'estimes pas.
+Commence directement par le rapport, sans préambule.${dateRapport ? `\nDate du rapport : ${dateRapport}. Si tu dates le rapport, utilise cette date et aucune autre.` : ''}
+
+${banque
+  ? blocBanque({ inc_n, inc_n1, bal_n, bal_n1, cf_n, periode_n, periode_n1, cours, actions: marche?.actions ?? null, m, interim, cours_bas_52s, cours_haut_52s }) + '\n\n'
+  : donneesGenerales}---
+## DONNÉES DE MARCHÉ DU TITRE
+${blocMarche(cours, marche)}
+
 ---
 ## COMPARAISON AUX MÉDIANES DES PAIRS (calculée, à reprendre telle quelle)
 ${blocMedianes(contexteQuant)}
@@ -222,15 +336,21 @@ Secteur : ${secteur ?? 'N/D'} | Marché : BRVM/UEMOA | Référentiel : SYSCOA/OH
 
 **1. SYNTHÈSE EXÉCUTIVE** — verdict (ACHAT/CONSERVER/VENDRE) + 4–5 points-clés + objectif de cours 12 mois
 **2. FORCES ET FAIBLESSES** — deux listes de 3 à 5 points chacune. Chaque point s'appuie sur un chiffre fourni ci-dessus (ratio, tendance, position face à la médiane, note de pilier) et le cite.
-**3. ANALYSE DE LA RENTABILITÉ** — drivers des marges, qualité du résultat net, effet ciseaux si CA↑ RN↓. Si des comptes intermédiaires sont fournis, dis ce qu'ils indiquent pour l'exercice en cours, sans les extrapoler à l'année entière.
+${banque
+  ? `**3. ANALYSE DE LA RENTABILITÉ** — PNB et sa croissance, marge d'intérêts, coefficient d'exploitation, coût du risque, ROE et ROA. Si des comptes intermédiaires sont fournis, dis ce qu'ils indiquent pour l'exercice en cours, sans les extrapoler à l'année entière.
+**4. ANALYSE DU BILAN** — crédits et dépôts (rapport crédits / dépôts), qualité du portefeuille (créances douteuses, couverture), fonds propres et solvabilité réglementaire
+**5. LIQUIDITÉ ET FINANCEMENT** — collecte de dépôts face aux crédits, trésorerie ; les flux de trésorerie s'ils sont publiés`
+  : `**3. ANALYSE DE LA RENTABILITÉ** — drivers des marges, qualité du résultat net, effet ciseaux si CA↑ RN↓. Si des comptes intermédiaires sont fournis, dis ce qu'ils indiquent pour l'exercice en cours, sans les extrapoler à l'année entière.
 **4. ANALYSE DU BILAN** — structure financement, BFR, solvabilité, DuPont
-**5. ANALYSE DES FLUX** — qualité du cash, Capex maintenance vs croissance, FCF, trésorerie nette
+**5. ANALYSE DES FLUX** — qualité du cash, Capex maintenance vs croissance, FCF, trésorerie nette`}
 **6. COMPARAISON AUX MÉDIANES DU SECTEUR** — reprends le tableau de comparaison fourni (valeurs et médianes telles quelles, sans en recalculer aucune), puis commente les écarts les plus marqués. Une médiane « non significative » se dit comme telle. Une position face à la médiane décrit un écart, elle ne prouve pas une sous- ou survalorisation.
-**7. VALORISATION** — DCF simplifié (WACC 12–14%, g 3–4%) + multiples relatifs + pairs BRVM (appuie-toi sur les médianes de la section 6)
+${banque
+  ? `**7. VALORISATION** — pour une banque, le DCF sur free cash-flow ne s'applique pas : utilise la valeur justifiée par le rapport cours / valeur comptable, P/B = (ROE − g) / (k − g), et l'actualisation des dividendes, avec les mêmes hypothèses (k 12–14%, g 3–4%) ; puis les multiples relatifs (PER, P/B) face aux médianes de la section 6`
+  : `**7. VALORISATION** — DCF simplifié (WACC 12–14%, g 3–4%) + multiples relatifs + pairs BRVM (appuie-toi sur les médianes de la section 6)`}
 **8. POLITIQUE DE DIVIDENDE** — durabilité, signal marché
 **9. RISQUES & CATALYSEURS** — sectoriels, opérationnels, macro UEMOA
 **10. POINTS DE VIGILANCE** — 3 à 6 éléments concrets à surveiller aux prochaines publications (un ratio qui se dégrade, une donnée manquante, un red flag déclenché, une médiane défavorable, un écart entre comptes intermédiaires et annuels). Pour chacun : ce qui est observé aujourd'hui et ce qui changerait la lecture.
-**11. CE QUE LES CHIFFRES NE DISENT PAS** — les limites de cette analyse : données N/D ou absentes, ancienneté du dernier exercice, ce que les états financiers publiés ne montrent pas (qualité du management, gouvernance, carnet de commandes, concurrence, exposition réglementaire, liquidité réelle du titre), et la portée limitée d'une comparaison sur un marché d'une cinquantaine de sociétés. N'invente aucun fait pour combler ces trous : nomme-les.
+**11. CE QUE LES CHIFFRES NE DISENT PAS** — les limites de cette analyse : données N/D ou absentes, ancienneté du dernier exercice, ce que les états financiers publiés ne montrent pas (qualité du management, gouvernance, carnet de commandes, concurrence, exposition réglementaire, liquidité réelle du titre), et la portée limitée d'une comparaison sur un marché d'une cinquantaine de sociétés. N'invente aucun fait pour combler ces trous : nomme-les.${banque ? " Pour une banque, ne cite PAS comme lacunes la marge brute, les stocks, le BFR, le capex, le free cash-flow, la dette nette ni l'Altman Z' : ces notions ne s'appliquent pas à une banque." : ''}
 **12. CONCLUSION & RECOMMANDATION** — ACHAT/CONSERVER/VENDRE + objectif + horizon + stop suggéré
 **13. RED FLAGS** — pour chaque check déclenché ci-dessus, rédige 2–3 phrases de contexte expliquant pourquoi c'est préoccupant. N'invente AUCUN chiffre — utilise uniquement les valeurs fournies dans le tableau. Pour les catégories de veille/recherche : si des signaux sont fournis, cite-les avec leur source et leur date ; sinon écris explicitement « non évaluable — aucune source publique trouvée ». Le score global de gravité (déjà calculé : ${redFlags.overallScore ?? 'non évaluable'}/10) doit être repris tel quel, jamais recalculé ou réinterprété.`;
 }

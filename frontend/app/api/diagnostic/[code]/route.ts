@@ -12,6 +12,7 @@ import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals
 import { findWebSignals } from '@/lib/diagnostic/webSearch';
 import { MARQUE_ECHEC } from '@/lib/diagnostic/echec';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
+import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { lectureIntermediaire } from '@/lib/financials/interim';
 
 export const maxDuration = 120;
@@ -73,10 +74,12 @@ export async function POST(req: Request, { params }: { params: { code: string } 
 
   // async-parallel : données financières, contexte de pairs et clés LLM sont
   // indépendants → en parallèle
-  const [data, contexteQuant, redacteurs] = await Promise.all([
+  const [data, contexteQuant, redacteurs, { data: titre }] = await Promise.all([
     loadCompanyFinancials(code),
     chargerContexteQuant(admin, code),
     redacteursDisponibles(),
+    // Flottant et volume moyen : en base (runDetails), jusqu'ici jamais transmis.
+    admin.from('brvm_instruments').select('flottant, vol_moyen_30j').eq('code', code).maybeSingle(),
   ]);
   if (!data) return NextResponse.json({ error: 'Instrument inconnu' }, { status: 404 });
   if (redacteurs.length === 0) {
@@ -100,7 +103,9 @@ export async function POST(req: Request, { params }: { params: { code: string } 
   });
 
   const m = computeDiagnosticMetrics({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, cours, capitalisation: ratios.capitalisation });
-  const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m });
+  // Famille comptable : la colonne de l'instrument, sinon le référentiel curé.
+  const famille = data.instrument.famille_comptable ?? FAMILLE_PAR_CODE[code] ?? 'general';
+  const redFlags = computeRedFlags({ inc_n, inc_n1, bal_n, bal_n1, cf_n, cf_n1, m, famille });
 
   const newsSignals = await findNewsSignals(admin, code);
   const categoriesSansResultat = (Object.keys(newsSignals) as NewsCategory[])
@@ -130,7 +135,12 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     periode_n: inc_n?.periode ?? 'N',
     periode_n1: inc_n1?.periode ?? 'N-1',
     redFlags, newsSignals, webSignals,
-    interim, contexteQuant,
+    interim, contexteQuant, famille,
+    marche: {
+      actions: data.instrument.shares ?? inc_n?.actions_en_circulation ?? null,
+      flottant: (titre as { flottant?: number | null } | null)?.flottant ?? null,
+      volMoyen30j: (titre as { vol_moyen_30j?: number | null } | null)?.vol_moyen_30j ?? null,
+    },
     // Sans elle, le modèle inventait une date (« 26 mai 2025 » sur un rapport
     // de juin 2026).
     dateRapport: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }),

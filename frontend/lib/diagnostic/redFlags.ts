@@ -26,6 +26,15 @@ const WEIGHTS: Record<string, number> = {
   dilution: 0.5,
 };
 
+/** Contrôles conçus pour une entreprise industrielle, et pourquoi ils ne valent pas pour une banque. */
+export const NON_APPLICABLES_BANQUE: Record<string, string> = {
+  divergence_cash: "les flux d'une banque reflètent ses dépôts et ses prêts, pas la conversion du résultat en trésorerie",
+  dette_cachee: "une banque n'a pas de BFR ; son passif, ce sont les dépôts de ses clients",
+  dividende_non_couvert: 'la couverture du dividende se lit sur le résultat et la solvabilité, pas sur un free cash-flow',
+  tension_liquidite: "la liquidité d'une banque se lit sur ses dépôts et ses crédits, pas sur le ratio de liquidité générale",
+  detresse_altman: "le score d'Altman est calibré sur des entreprises industrielles",
+};
+
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
 }
@@ -42,6 +51,8 @@ export function computeRedFlags(params: {
   cf_n: CashFlowStatement | null;
   cf_n1: CashFlowStatement | null;
   m: DiagnosticMetrics;
+  /** Famille comptable : pour une banque, certains contrôles n'ont pas de sens. */
+  famille?: 'banque' | 'assurance' | 'general' | null;
 }): RedFlagsResult {
   const { inc_n, inc_n1, bal_n, cf_n, m } = params;
   const checks: RedFlagCheck[] = [];
@@ -194,6 +205,16 @@ export function computeRedFlags(params: {
         : "Nombre d'actions en circulation non disponible sur les 2 périodes",
       dataAvailable,
     });
+  }
+
+  // Banque : ces contrôles supposent une entreprise industrielle. Ils sortent
+  // du score (comme une donnée absente) et sont dits « non applicables » —
+  // le rapport SGBC du 2026-10-07 les présentait comme des lacunes.
+  if (params.famille === 'banque') {
+    for (const c of checks) {
+      const raison = NON_APPLICABLES_BANQUE[c.id];
+      if (raison) Object.assign(c, { triggered: false, severity: 0, dataAvailable: false, evidence: `Non applicable à une banque : ${raison}` });
+    }
   }
 
   const available = checks.filter((c) => c.dataAvailable);
