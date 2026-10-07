@@ -111,7 +111,10 @@ export function extractBankYear(
     depotsClientele: lb.depots_clientele ?? null,
     creditsClientele: lb.credits_clientele ?? null,
     creancesDouteuses: lb.creances_douteuses ?? null,
-    ratioSolvabilite: lb.ratio_solvabilite ?? null,
+    // lignes_specifiques stocke le ratio EN POURCENTAGE (14,39), comme le
+    // tableau des états financiers l'affiche ; les KPIs raisonnent en fraction.
+    // Sans cette conversion, 14 devenait « 1 400 % » et la note maximale.
+    ratioSolvabilite: lb.ratio_solvabilite == null ? null : lb.ratio_solvabilite / 100,
   };
 }
 

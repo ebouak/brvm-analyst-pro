@@ -46,6 +46,18 @@ test('extractBankYear lit colonnes standard + lignes_specifiques', () => {
   assert.equal(y.creancesDouteuses, null); // absent = null, jamais 0
 });
 
+test('extractBankYear : ratio de solvabilité stocké en %, lu en fraction', () => {
+  // SIBC 2024 : 14,39 % en base. Lu tel quel, il devenait 1 439 % et la note maximale.
+  const y = extractBankYear(
+    { periode: '2024', lignes_specifiques: { pnb: 1 } },
+    { lignes_specifiques: { ratio_solvabilite: 14.39 } },
+  );
+  assert.ok(Math.abs(y.ratioSolvabilite - 0.1439) < 1e-12);
+  const k = computeBankKpis(y, null, { cours: null, shares: null, dividendeParAction: null });
+  const solva = scoreBanqueUemoa(k).axes.find((a) => a.id === 'solidite').sousScores.find((s) => s.id === 'solva');
+  assert.ok(solva.points > 0 && solva.points < 20, `points=${solva.points}`);
+});
+
 test('extractBankYear: frais généraux replie sur frais_generaux_admin', () => {
   const y = extractBankYear(
     { periode: '2025', resultat_net: 1, depenses_exploitation: null, frais_generaux_admin: 42 },
