@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 interface KeyStatus { provider: string; configured: boolean; source: string | null; }
-const LABELS: Record<string, string> = { deepseek: 'DeepSeek (prioritaire)', mistral: 'Mistral (vision/scannés)', xai: 'Grok / xAI (fallback)', resend: 'Resend (envoi d’emails)' };
+const LABELS: Record<string, string> = { anthropic: 'Claude / Anthropic (diagnostic, prioritaire — clé officielle console.anthropic.com)', deepseek: 'DeepSeek (rédaction courte, prioritaire)', mistral: 'Mistral (vision/scannés)', xai: 'Grok / xAI (dernier secours)', resend: 'Resend (envoi d’emails)' };
 
 export default function ApiKeysForm() {
   const [status, setStatus] = useState<KeyStatus[]>([]);

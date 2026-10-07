@@ -3,6 +3,7 @@ import { checkFeature } from '@/lib/server/featureGate';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { redacteursDisponibles, redigerEnFlux } from '@/lib/server/redacteur';
+import { redigerClaudeEnFlux } from '@/lib/server/redacteurClaude';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeDiagnosticMetrics } from '@/lib/diagnostic/metrics';
@@ -16,7 +17,8 @@ import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { lectureIntermediaire } from '@/lib/financials/interim';
 
-export const maxDuration = 120;
+// 300 s : Claude Opus 5.5 réfléchit avant d'écrire un rapport de 2 000 mots.
+export const maxDuration = 300;
 
 const MAX_AGE_MS = 7 * 24 * 3600 * 1000;
 
@@ -169,10 +171,14 @@ export async function POST(req: Request, { params }: { params: { code: string } 
       // laisse un rapport partiel, qui n'est PAS mis en cache (voir plus bas).
       let complet = false;
       try {
-        const redaction = await redigerEnFlux(
-          [{ role: 'user', content: prompt }],
-          { maxTokens: 7000, temperature: 0.3, timeoutMs: 110_000 },
-        );
+        // Claude d'abord (API officielle) ; sans clé ou en échec avant le
+        // premier octet, la cascade habituelle DeepSeek → Gemini → Grok.
+        const redaction =
+          (await redigerClaudeEnFlux([{ role: 'user', content: prompt }], { maxTokens: 16_000, timeoutMs: 280_000 }))
+          ?? (await redigerEnFlux(
+            [{ role: 'user', content: prompt }],
+            { maxTokens: 7000, temperature: 0.3, timeoutMs: 110_000 },
+          ));
         if (redaction) {
           usedModel = redaction.modele;
           for await (const fragment of redaction.fragments) {
