@@ -187,7 +187,11 @@ export async function POST(req: Request, { params }: { params: { code: string } 
 
       if (full && complet) {
         await admin.from('diagnostic_reports').upsert(
-          { code, markdown_content: full, model_used: usedModel, metrics_snapshot: m as unknown as Record<string, unknown>, red_flag_score: redFlags.overallScore },
+          // generated_at explicite : son `default now()` ne joue qu'à la création.
+          // Sans lui, la date restait celle du premier rapport (SGBC : 8 juin),
+          // le cache de 7 jours n'était jamais valide et chaque visite relançait
+          // une rédaction complète.
+          { code, markdown_content: full, model_used: usedModel, generated_at: new Date().toISOString(), metrics_snapshot: m as unknown as Record<string, unknown>, red_flag_score: redFlags.overallScore },
           { onConflict: 'code' },
         );
       } else if (!full) {
