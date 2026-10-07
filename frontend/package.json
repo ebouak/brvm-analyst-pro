@@ -47,7 +47,7 @@
     "remark-gfm": "^4.0.1",
     "sanitize-html": "^2.17.5",
     "server-only": "^0.0.1",
-    "tailwind-merge": "^3.6.0",
+    "tailwind-merge": "^3.7.0",
     "three": "^0.160.1",
     "web-push": "^3.6.7",
     "zod": "^3.22.4"
