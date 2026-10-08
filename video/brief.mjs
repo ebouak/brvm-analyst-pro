@@ -72,7 +72,7 @@ const fr = (x, d = 2) =>
   Number(x).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
 const sg = (x, d = 2) => `${x >= 0 ? '+' : '−'}${fr(Math.abs(x), d)}`;
 const ent = (x) => Number(x).toLocaleString('fr-FR');
-const esc = (s) =>
+export const esc = (s) =>
   String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** Montant lisible : « 3,30 Md FCFA » plutôt que 3 296 412 885. */
