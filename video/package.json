@@ -8,7 +8,8 @@
     "genere": "node genere.mjs",
     "publie": "node publie.mjs",
     "seance": "node genere.mjs && node publie.mjs",
-    "dossiers": "node dossiers.mjs"
+    "dossiers": "node dossiers.mjs",
+    "test": "node --test"
   },
   "dependencies": {
     "playwright": "^1.60.0"

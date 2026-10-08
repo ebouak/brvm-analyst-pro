@@ -34,6 +34,10 @@ const codes = new Set([
   fiche.ligne_lourde.code,
   fiche.plus_forte_hausse.code,
   fiche.plus_forte_baisse.code,
+  // les modèles affichent aussi le palmarès complet et les plus échangées
+  ...(fiche.video.meilleures ?? []).map((m) => m.code),
+  ...(fiche.video.pires ?? []).map((m) => m.code),
+  ...[...(fiche.video.cotes ?? [])].sort((a, b) => b.part_pct - a.part_pct).slice(0, 8).map((c) => c.code),
 ]);
 const logos = {};
 for (const code of codes) {
