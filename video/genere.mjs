@@ -253,7 +253,14 @@ const donneesRecit = {
   capitaux: T,
   estime,
   partB,
-  lourde: { ...mvt(lourde), part_pct: partLourde },
+  lourde: { ...mvt(lourde), part_pct: partLourde, cours: lourde.cours_jour ?? null },
+  seconde: (() => {
+    const s = [...cotes].sort((a, b) => cap(b) - cap(a))[1];
+    return s ? { code: s.code, designation: nomDe(s), part_pct: (cap(s) / (T || 1)) * 100 } : null;
+  })(),
+  volume: cotes.reduce((s, a) => s + (a.volume ?? 0), 0),
+  // tous les indices publiés pour la séance (BRVM 30, Prestige, sectoriels…) — même requête
+  indices: indices.filter((i) => i.valeur != null).map(({ code, valeur, variation_pct }) => ({ code, valeur, variation_pct })),
   meilleures: trie.filter((a) => a.variation_pct > 0).slice(0, 3).map(mvt),
   pires: [...trie].reverse().filter((a) => a.variation_pct < 0).slice(0, 3).map(mvt),
   secteurs,
@@ -632,6 +639,10 @@ writeFileSync(
         cotes: [...cotes]
           .sort((a, b) => b.variation_pct - a.variation_pct)
           .map((a) => ({ code: a.code, variation_pct: a.variation_pct, part_pct: (cap(a) / (T || 1)) * 100 })),
+        indices: donneesRecit.indices,
+        seconde: donneesRecit.seconde,
+        volume: donneesRecit.volume,
+        cours_lourde: donneesRecit.lourde.cours,
         meilleures: donneesRecit.meilleures.map(({ code, variation_pct }) => ({ code, variation_pct })),
         pires: donneesRecit.pires.map(({ code, variation_pct }) => ({ code, variation_pct })),
         part_baissiere_pct: partB,

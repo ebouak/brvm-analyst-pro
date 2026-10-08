@@ -165,3 +165,75 @@ test('garde-fou : aucun chiffre étranger dans les trois modèles, et un intrus 
   const d = seance();
   assert.deepEqual(chiffresEtrangers('Le BRVM Composite gagne 3 virgule 14 pour cent.', chiffresAutorises(d, null)), ['3 virgule 14']);
 });
+
+/* ── Script détaillé (2026-10-08) ─────────────────────────────────────── */
+
+function seanceDetaillee(sur = {}) {
+  return seance({
+    indices: [
+      { code: 'BRVMC', valeur: 547.91, variation_pct: 0.56 },
+      { code: 'BRVM30', valeur: 265.31, variation_pct: 0.52 },
+      { code: 'BRVMPRES', valeur: 203.22, variation_pct: 0.14 },
+      { code: 'BRVMSPUB', valeur: 276.3, variation_pct: 3.76 },
+      { code: 'BRVMCBASE', valeur: 267.37, variation_pct: 0.06 },
+      { code: 'BRVMFINS', valeur: 245.92, variation_pct: 0.19 },
+    ],
+    volume: 412345,
+    lourde: { code: 'SNTS', designation: 'SONATEL SENEGAL', part_pct: 35.2, variation_pct: -0.02, cours: 25500 },
+    seconde: { code: 'SGBC', designation: 'SOCIETE GENERALE COTE D\'IVOIRE', part_pct: 11.4 },
+    meilleures: [
+      { code: 'PRSC', designation: 'TRACTAFRIC MOTORS COTE D\'IVOIRE', variation_pct: 4.96 },
+      { code: 'CIEC', designation: 'CIE COTE D\'IVOIRE', variation_pct: 3.2 },
+      { code: 'SNTS', designation: 'SONATEL SENEGAL', variation_pct: 2.9 },
+    ],
+    pires: [
+      { code: 'ONTBF', designation: 'ONATEL BURKINA FASO', variation_pct: -5.94 },
+      { code: 'BOAN', designation: 'BANK OF AFRICA NIGER', variation_pct: -3.1 },
+    ],
+    ...sur,
+  });
+}
+const texteDe = (r, type) => r.temps.find((t) => t.type === type)?.texte ?? '';
+
+test('détail : l’indice cite le BRVM 30, le BRVM Prestige et l’écart au plus haut de la fenêtre', () => {
+  const r = composerRecit(seanceDetaillee(), { modele: 'nuit' });
+  const t = texteDe(r, 'indice');
+  assert.match(t, /BRVM 30 gagne 0 virgule 52 pour cent/);
+  assert.match(t, /BRVM Prestige gagne 0 virgule 14 pour cent/);
+  assert.match(t, /sous son plus haut de la période|à son plus haut de la période/);
+});
+
+test('détail : le palmarès nomme les trois hausses et les deux baisses, chacune avec sa variation', () => {
+  const t = texteDe(composerRecit(seanceDetaillee(), { modele: 'nuit' }), 'palmares');
+  for (const x of ['Tractafric Motors, plus 4 virgule 96', 'CIE, plus 3 virgule 2', 'Sonatel, plus 2 virgule 9',
+    'Onatel, moins 5 virgule 94', 'Bank of Africa Niger, moins 3 virgule 1']) {
+    assert.ok(t.includes(x), `${x} manquant dans : ${t}`);
+  }
+});
+
+test('détail : les indices sectoriels donnent le plus fort et le plus faible', () => {
+  const t = texteDe(composerRecit(seanceDetaillee(), { modele: 'papier' }), 'secteurs');
+  assert.match(t, /celui des services publics mène, plus 3 virgule 76 pour cent/);
+  assert.match(t, /celui de la consommation de base ferme la marche, plus 0 virgule 06 pour cent/);
+});
+
+test('détail : cours de clôture, valeur suivante et volume', () => {
+  const r = composerRecit(seanceDetaillee(), { modele: 'nuit' });
+  assert.match(texteDe(r, 'lourde'), /Son cours termine à 25500 francs CFA/);
+  assert.match(texteDe(r, 'lourde'), /Vient ensuite Société Générale/);
+  assert.match(texteDe(r, 'capitaux'), /412345 titres/);
+});
+
+test('détail : les trois modèles contiennent la scène des secteurs', () => {
+  for (const m of MODELES) {
+    assert.ok(composerRecit(seanceDetaillee(), { modele: m }).temps.some((t) => t.type === 'secteurs'), m);
+  }
+});
+
+test('détail : aucun chiffre étranger avec toutes les nouvelles données', () => {
+  for (const m of MODELES) {
+    const d = seanceDetaillee();
+    const r = composerRecit(d, { modele: m });
+    assert.deepEqual(chiffresEtrangers(r.texte, chiffresAutorises(d, r.faits)), [], m);
+  }
+});

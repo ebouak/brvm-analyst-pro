@@ -185,6 +185,10 @@ export function faitsIndice(historique, seance, variation) {
     record,
     fenetre: h.length,
     evolution_pct: h.length >= 10 ? (h[h.length - 1].valeur / h[0].valeur - 1) * 100 : null,
+    // ≤ 0 : à quelle distance du plus haut de la fenêtre l'indice termine
+    ecart_plus_haut_pct: h.length >= 10
+      ? (h[h.length - 1].valeur / Math.max(...h.map((p) => p.valeur)) - 1) * 100
+      : null,
   };
 }
 
@@ -255,15 +259,36 @@ function phraseIndice(d, faits, k) {
       `L’indice phare, le BRVM Composite, ${h ? 'progresse' : 'recule'} de ${pct(v)} et clôture à ${dit(c.valeur)} points.`,
     ], k);
   }
+  // Les deux autres indices de référence publiés par la BRVM
+  const autres = [['BRVM30', 'le BRVM 30'], ['BRVMPRES', 'le BRVM Prestige']]
+    .map(([code, nom]) => {
+      const x = (d.indices ?? []).find((i) => i.code === code);
+      if (!x || x.variation_pct == null) return null;
+      return Math.abs(x.variation_pct) < 0.005
+        ? `${nom} est stable`
+        : `${nom} ${x.variation_pct > 0 ? 'gagne' : 'perd'} ${pct(x.variation_pct)}`;
+    })
+    .filter(Boolean);
+  if (autres.length) p += ` ${majuscule(autres.join(', et '))}.`;
+
   const e = faits?.evolution_pct;
   if (e != null && Math.abs(e) >= 0.005) {
-    p += ` Sur ses ${faits.fenetre} dernières séances, il ${e > 0 ? 'gagne' : 'perd'} ${pct(e)}.`;
+    p += ` Sur ses ${faits.fenetre} dernières séances, le Composite ${e > 0 ? 'gagne' : 'perd'} ${pct(e)}`;
+    const ecart = faits.ecart_plus_haut_pct;
+    // Plus haut atteint au premier jour : l'écart répéterait l'évolution, on ne le dit pas deux fois.
+    if (ecart == null || Math.abs(ecart - e) < 0.01) p += '.';
+    else if (Math.abs(ecart) < 0.005) p += ', et termine à son plus haut de la période.';
+    else p += `, et se situe ${pct(ecart)} sous son plus haut de la période.`;
   }
   return p;
 }
 
+/** « A, B et C » */
+const enumere = (l) => (l.length < 2 ? l.join('') : `${l.slice(0, -1).join(', ')} et ${l[l.length - 1]}`);
+
 function phraseLargeur(d, k) {
   const { hausses: h, baisses: b, stables: s, valeurs: n } = d;
+  const part = n > 0 && h > 0 ? ` Les valeurs en hausse représentent ${proportionDite((h / n) * 100)} de la cote.` : '';
   return majuscule(pioche([
     `${accord(h, 'valeur progresse', 'valeurs progressent')}, ${accord(b, 'recule', 'reculent')}` +
       `${s > 0 ? `, ${accord(s, 'reste stable', 'restent stables')}` : ''}.`,
@@ -271,16 +296,17 @@ function phraseLargeur(d, k) {
       `${s > 0 ? ` ; ${accord(s, 'ne bouge pas', 'ne bougent pas')}` : ''}.`,
     `${accord(h, 'hausse', 'hausses')}, ${accord(b, 'baisse', 'baisses')}` +
       `${s > 0 ? ` et ${accord(s, 'valeur inchangée', 'valeurs inchangées')}` : ''}.`,
-  ], k));
+  ], k)) + part;
 }
 
 function phraseCapitaux(d, k) {
   const m = `${d.estime ? 'environ ' : ''}${montantDit(d.capitaux)} de francs CFA`;
   const prop = proportionDite(d.partB);
+  const titres = d.volume > 0 ? ` Cela représente ${dit(d.volume, 0)} titres.` : '';
   return majuscule(pioche([
     `${m} ont été échangés, dont ${prop} sur des titres en baisse.`,
     `${m} ont changé de mains ; ${prop} de ce montant porte sur des titres en repli.`,
-  ], k));
+  ], k)) + titres;
 }
 
 function phraseLourde(d, k) {
@@ -291,51 +317,78 @@ function phraseLourde(d, k) {
     ? 'à cours quasi inchangé'
     : `et ${l.variation_pct > 0 ? 'gagne' : 'cède'} ${pct(l.variation_pct)}`;
   const part = proportionDite(l.part_pct);
-  return pioche([
+  let p = pioche([
     `${nom} concentre à elle seule ${part} des capitaux échangés, ${mvt}.`,
     `La valeur la plus échangée est ${nom} : ${part} du montant total, ${mvt}.`,
   ], k);
+  if (l.cours > 0) p += ` Son cours termine à ${dit(l.cours, 0)} francs CFA.`;
+  const s = d.seconde;
+  if (s) p += ` Vient ensuite ${nomDit(s.designation, d.designations)}, avec ${proportionDite(s.part_pct)} des échanges.`;
+  return p;
 }
 
 function phrasePalmares(d, k) {
   const hauts = d.meilleures ?? [], bas = d.pires ?? [];
   if (!hauts.length && !bas.length) return null;
   const n = (a) => nomDit(a.designation, d.designations);
+  const suite = (l, signe) => (l.length > 1 ? `, devant ${enumere(l.slice(1).map((a) => `${n(a)}, ${signe} ${pct(a.variation_pct)}`))}` : '');
   const morceaux = [];
   if (hauts.length) {
-    const suite = hauts.length > 1 ? `, devant ${n(hauts[1])}` : ''; // deux noms suffisent à la voix ; l'écran montre les trois
     morceaux.push(pioche([
-      `En tête, ${n(hauts[0])}, plus ${pct(hauts[0].variation_pct)}${suite}.`,
-      `Plus forte hausse : ${n(hauts[0])}, plus ${pct(hauts[0].variation_pct)}${suite}.`,
+      `En tête, ${n(hauts[0])}, plus ${pct(hauts[0].variation_pct)}${suite(hauts, 'plus')}.`,
+      `Plus forte hausse : ${n(hauts[0])}, plus ${pct(hauts[0].variation_pct)}${suite(hauts, 'plus')}.`,
     ], `${k}h`));
   }
   if (bas.length) {
     morceaux.push(pioche([
-      `En queue de classement, ${n(bas[0])}, moins ${pct(bas[0].variation_pct)}.`,
-      `Plus forte baisse : ${n(bas[0])}, moins ${pct(bas[0].variation_pct)}.`,
+      `En queue de classement, ${n(bas[0])}, moins ${pct(bas[0].variation_pct)}${suite(bas, 'moins')}.`,
+      `Plus forte baisse : ${n(bas[0])}, moins ${pct(bas[0].variation_pct)}${suite(bas, 'moins')}.`,
     ], `${k}b`));
   }
   return morceaux.join(' ');
 }
 
+/** Indices sectoriels officiels de la BRVM → « l'indice <de quoi> ». */
+export const INDICES_SECTEURS = {
+  BRVMCBASE: 'de la consommation de base',
+  BRVMCDISC: 'de la consommation discrétionnaire',
+  BRVMENER: 'de l’énergie',
+  BRVMINDU: 'des industriels',
+  BRVMFINS: 'des services financiers',
+  BRVMSPUB: 'des services publics',
+  BRVMTELE: 'des télécommunications',
+};
+
 function phraseSecteurs(d) {
+  const morceaux = [];
+  const sect = (d.indices ?? [])
+    .filter((i) => INDICES_SECTEURS[i.code] && i.variation_pct != null)
+    .sort((a, b) => b.variation_pct - a.variation_pct);
+  if (sect.length >= 2) {
+    const sv = (i) => (Math.abs(i.variation_pct) < 0.005 ? 'à l’équilibre' : `${i.variation_pct > 0 ? 'plus' : 'moins'} ${pct(i.variation_pct)}`);
+    const haut = sect[0], bas = sect[sect.length - 1];
+    morceaux.push(`Parmi les indices sectoriels, celui ${INDICES_SECTEURS[haut.code]} mène, ${sv(haut)} ; ` +
+      `celui ${INDICES_SECTEURS[bas.code]} ferme la marche, ${sv(bas)}.`);
+  }
   const s = (d.secteurs ?? []).find((x) => SECTEURS[x.secteur]);
-  if (!s || s.valeurs < 2 || s.part_pct < 25) return null;
-  const { nom, pl } = SECTEURS[s.secteur];
-  const leurs = pl ? 'leurs' : 'ses';
-  const suite = s.hausses === 0
-    ? `aucune de ${leurs} ${s.valeurs} valeurs ne monte`
-    : `${s.hausses} de ${leurs} ${s.valeurs} valeurs ${s.hausses > 1 ? 'montent' : 'monte'}`;
-  return `Côté secteurs, ${nom} ${pl ? 'pèsent' : 'pèse'} ${proportionDite(s.part_pct)} des capitaux ; ${suite}.`;
+  if (s && s.valeurs >= 2 && s.part_pct >= 25) {
+    const { nom, pl } = SECTEURS[s.secteur];
+    const leurs = pl ? 'leurs' : 'ses';
+    const suite = s.hausses === 0
+      ? `aucune de ${leurs} ${s.valeurs} valeurs ne monte`
+      : `${s.hausses} de ${leurs} ${s.valeurs} valeurs ${s.hausses > 1 ? 'montent' : 'monte'}`;
+    morceaux.push(`${majuscule(nom)} ${pl ? 'pèsent' : 'pèse'} ${proportionDite(s.part_pct)} des capitaux ; ${suite}.`);
+  }
+  return morceaux.length ? morceaux.join(' ') : null;
 }
 
 /* ── Composition ──────────────────────────────────────────────────────── */
 
 /** Ordre de base de chaque modèle. L'angle du jour passe devant. */
 const ORDRE = {
-  nuit: ['indice', 'largeur', 'capitaux', 'lourde', 'palmares'],
-  papier: ['indice', 'palmares', 'secteurs', 'lourde'],
-  mosaique: ['largeur', 'indice', 'palmares', 'capitaux'],
+  nuit: ['indice', 'largeur', 'capitaux', 'lourde', 'palmares', 'secteurs'],
+  papier: ['indice', 'palmares', 'secteurs', 'lourde', 'largeur'],
+  mosaique: ['largeur', 'indice', 'palmares', 'secteurs', 'capitaux'],
 };
 
 /**
@@ -364,7 +417,7 @@ export function composerRecit(d, options = {}) {
   const ouverture = [
     pioche([`Séance du ${date} à la BRVM.`, `BRVM, séance du ${date}.`,
       `Voici la séance du ${date} à la BRVM.`], k('ouverture')),
-    angle ? angle.accroche : 'L’essentiel en moins d’une minute.',
+    angle ? angle.accroche : 'Les chiffres clés de la séance.',
   ].join(' ');
 
   const PHRASES = {
@@ -417,12 +470,20 @@ export function chiffresAutorises(d, faits) {
   if (d.lourde) { ajoute(d.lourde.part_pct); ajoute(d.lourde.variation_pct); }
   for (const a of [...(d.meilleures ?? []), ...(d.pires ?? [])]) ajoute(a.variation_pct);
   for (const s of d.secteurs ?? []) { ajoute(s.part_pct); ajoute(s.valeurs); ajoute(s.hausses); }
-  if (faits) { ajoute(faits.fenetre); ajoute(faits.evolution_pct); }
+  if (faits) { ajoute(faits.fenetre); ajoute(faits.evolution_pct); ajoute(faits.ecart_plus_haut_pct); }
+  for (const i of d.indices ?? []) { ajoute(i.valeur); ajoute(i.variation_pct); }
+  ajoute(d.volume);
+  if (d.lourde) ajoute(d.lourde.cours);
+  if (d.seconde) ajoute(d.seconde.part_pct);
+  if (d.valeurs > 0) ajoute((d.hausses / d.valeurs) * 100);
   ajoute(new Date(`${d.seance}T12:00:00Z`).getUTCDate());
   return ok;
 }
 
 /** Les nombres prononcés qui ne viennent pas de la donnée (vide = sain). */
 export function chiffresEtrangers(texte, autorises) {
-  return (texte.match(/\d+(?: virgule \d+)?/g) ?? []).filter((n) => !autorises.has(n));
+  // « BRVM 30 » est un NOM d'indice : on le retire par son nom exact plutôt
+  // que d'autoriser « 30 » partout, ce qui laisserait passer un 30 inventé.
+  const sansNoms = texte.replace(/\bBRVM 30\b/g, 'BRVM');
+  return (sansNoms.match(/\d+(?: virgule \d+)?/g) ?? []).filter((n) => !autorises.has(n));
 }

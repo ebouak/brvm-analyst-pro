@@ -174,6 +174,26 @@ function BarresJour({ th, fiche, debut }: { th: Theme; fiche: Fiche; debut: numb
   );
 }
 
+/** BRVM 30 et BRVM Prestige, sous le Composite. */
+function AutresIndices({ th, fiche, debut }: { th: Theme; fiche: Fiche; debut: number }) {
+  const liste = [['BRVM30', 'BRVM 30'], ['BRVMPRES', 'BRVM Prestige']]
+    .map(([code, nom]) => ({ nom, x: (fiche.video.indices ?? []).find((i) => i.code === code) }))
+    .filter((r) => r.x && r.x.variation_pct != null);
+  if (!liste.length) return null;
+  return (
+    <Entre th={th} debut={debut}>
+      <div style={{ display: 'flex', gap: 34, marginTop: 22, flexWrap: 'wrap' }}>
+        {liste.map(({ nom, x }) => (
+          <div key={nom} style={{ fontSize: 30, color: th.doux }}>
+            {nom} <b style={{ fontFamily: th.chiffre, color: ton(th, x!.variation_pct ?? 0) }}>{sg(x!.variation_pct ?? 0)} %</b>
+            <span style={{ fontFamily: th.chiffre, color: th.sourd }}> · {fr(x!.valeur)}</span>
+          </div>
+        ))}
+      </div>
+    </Entre>
+  );
+}
+
 function Indice({ th, fiche, duree }: PropsScene) {
   const c = fiche.composite;
   const badges = badgesIndice(fiche);
@@ -192,6 +212,7 @@ function Indice({ th, fiche, duree }: PropsScene) {
           <span style={{ fontSize: 36, color: th.doux }}>points</span>
         </div>
       </Entre>
+      <AutresIndices th={th} fiche={fiche} debut={16} />
       {th.modele === 'mosaique'
         ? <BarresJour th={th} fiche={fiche} debut={18} />
         : <Courbe th={th} fiche={fiche} debut={18} encre={th.modele === 'papier'} />}
@@ -299,6 +320,9 @@ function Capitaux({ th, fiche, duree }: PropsScene) {
         </div>
       </Entre>
       <Entre th={th} debut={10}><div style={{ fontSize: 38, color: th.doux, marginTop: 22 }}>de francs CFA ont changé de mains</div></Entre>
+      {fiche.video.volume ? (
+        <Entre th={th} debut={16}><div style={{ fontSize: 32, color: th.doux, marginTop: 10 }}><b style={{ fontFamily: th.chiffre, color: th.encre }}>{fr(fiche.video.volume, 0)}</b> titres échangés</div></Entre>
+      ) : null}
     </>
   );
   const contributeurs = [...fiche.video.cotes].sort((a, b) => b.part_pct - a.part_pct).slice(0, th.modele === 'mosaique' ? 7 : 5);
@@ -365,13 +389,25 @@ function Lourde({ th, fiche, duree }: PropsScene) {
       </div>
     </Entre>
   );
+  const cours = fiche.video.cours_lourde;
+  const seconde = fiche.video.seconde;
   const variation = (
-    <Entre th={th} debut={52}>
-      <div style={{ fontSize: 44, marginTop: 50 }}>
-        {mvt ?? (l.variation_pct > 0 ? 'gagne ' : 'cède ')}
-        <b style={{ color: ton(th, l.variation_pct), fontFamily: th.chiffre }}>{sg(l.variation_pct)} %</b>
-      </div>
-    </Entre>
+    <>
+      <Entre th={th} debut={52}>
+        <div style={{ fontSize: 44, marginTop: 50 }}>
+          {mvt ?? (l.variation_pct > 0 ? 'gagne ' : 'cède ')}
+          <b style={{ color: ton(th, l.variation_pct), fontFamily: th.chiffre }}>{sg(l.variation_pct)} %</b>
+          {cours ? <span style={{ color: th.doux }}> · clôture <b style={{ fontFamily: th.chiffre, color: th.encre }}>{fr(cours, 0)}</b> FCFA</span> : null}
+        </div>
+      </Entre>
+      {seconde && (
+        <Entre th={th} debut={64}>
+          <div style={{ fontSize: 32, color: th.doux, marginTop: 26 }}>
+            Ensuite : <b style={{ color: th.encre, fontFamily: th.chiffre }}>{seconde.code}</b>, {fr(seconde.part_pct, 1)} % des échanges
+          </div>
+        </Entre>
+      )}
+    </>
   );
 
   if (th.modele === 'papier') {
@@ -473,8 +509,48 @@ function Palmares({ th, fiche, duree }: PropsScene) {
 }
 
 /* ── Secteurs ─────────────────────────────────────────────────────────── */
+/** Indices sectoriels officiels, du plus fort au plus faible. */
+const NOMS_SECTEURS: Record<string, string> = {
+  BRVMSPUB: 'Services publics', BRVMTELE: 'Télécommunications', BRVMFINS: 'Services financiers',
+  BRVMINDU: 'Industriels', BRVMENER: 'Énergie', BRVMCBASE: 'Consommation de base', BRVMCDISC: 'Consommation discrétionnaire',
+};
+
 function Secteurs({ th, fiche, duree }: PropsScene) {
   const f = useCurrentFrame();
+  const sect = (fiche.video.indices ?? [])
+    .filter((i) => NOMS_SECTEURS[i.code] && i.variation_pct != null)
+    .sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0));
+  if (sect.length >= 2) {
+    const m = Math.max(...sect.map((s) => Math.abs(s.variation_pct ?? 0)), 0.01);
+    const dominant = fiche.secteurs.find((s) => s.secteur !== 'Non classé');
+    return (
+      <Scene th={th} duree={duree}>
+        <Entre th={th} debut={0}><Etiquette th={th} texte="Indices sectoriels" /></Entre>
+        {sect.map((s, i) => {
+          const v = s.variation_pct ?? 0;
+          const p = t(f, 6 + i * 5, 6 + i * 5 + 18);
+          return (
+            <div key={s.code} style={{ display: 'grid', gridTemplateColumns: '1fr 300px 150px', alignItems: 'center', gap: 16, padding: '13px 0', borderBottom: `1px solid ${th.bord}`, opacity: Math.min(1, p * 2) }}>
+              <span style={{ fontFamily: th.modele === 'papier' ? th.titre : th.texte, fontSize: 32, fontWeight: 600 }}>{NOMS_SECTEURS[s.code]}</span>
+              <div style={{ height: 26, background: th.surface, position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 0, bottom: 0, left: v >= 0 ? '50%' : `${50 - (Math.abs(v) / m) * 50 * p}%`, width: `${(Math.abs(v) / m) * 50 * p}%`, background: v >= 0 ? th.haut : th.bas }} />
+                <div style={{ position: 'absolute', top: -4, bottom: -4, left: '50%', width: 2, background: th.sourd }} />
+              </div>
+              <span style={{ fontFamily: th.chiffre, fontSize: 32, fontWeight: 700, textAlign: 'right', color: ton(th, v) }}>{sg(v)} %</span>
+            </div>
+          );
+        })}
+        {dominant && (
+          <Entre th={th} debut={50}>
+            <div style={{ fontSize: 30, color: th.doux, marginTop: 30 }}>
+              Capitaux : <b style={{ color: th.encre }}>{dominant.secteur}</b> pèse {fr(dominant.part_pct, 1)} % · {dominant.hausses} hausse{dominant.hausses > 1 ? 's' : ''} sur {dominant.valeurs}
+            </div>
+          </Entre>
+        )}
+      </Scene>
+    );
+  }
+  // Sans indices sectoriels publiés : la répartition des capitaux par secteur.
   const liste = fiche.secteurs.filter((s) => s.secteur !== 'Non classé').slice(0, 5);
   const m = Math.max(...liste.map((s) => s.part_pct), 1);
   return (

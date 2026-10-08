@@ -27,6 +27,10 @@ export interface Fiche {
     faits: { sens: number; serie: number; serie_plafonnee: boolean; record: boolean; fenetre: number; evolution_pct: number | null } | null;
     plan: Temps[];
     cotes: { code: string; variation_pct: number; part_pct: number }[];
+    indices?: { code: string; valeur: number; variation_pct: number | null }[];
+    seconde?: { code: string; designation: string; part_pct: number } | null;
+    volume?: number;
+    cours_lourde?: number | null;
     meilleures: Mouvement[];
     pires: Mouvement[];
     part_baissiere_pct: number;
