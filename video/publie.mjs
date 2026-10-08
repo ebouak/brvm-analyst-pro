@@ -16,7 +16,7 @@ import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
-import { sujet, texte, html } from './brief.mjs';
+import { sujet, texte, html, esc as echappe } from './brief.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
