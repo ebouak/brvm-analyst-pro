@@ -31,9 +31,41 @@ Même règle pour les logos : une société sans fichier dans
 `frontend/public/logos/` s'affiche avec son code, **jamais** avec le logo
 d'une autre.
 
+## Trois modèles, un récit tiré de la donnée
+
+`recit.mjs` (pur, testé : `npm test`) décide **quoi dire, dans quel ordre, sous
+quel habillage**. Il rend une suite de « temps » — une phrase lue + la scène
+qui l'illustre — dont sont tirés la voix, les images animées et le repli fixe.
+
+| Modèle | Habillage | Déroulé de base |
+|---|---|---|
+| `nuit` | terminal sombre, chiffres en chasse fixe | indice · largeur · capitaux · valeur la plus échangée · palmarès |
+| `papier` | une de journal claire, empattements, filets | indice · palmarès · secteurs · valeur la plus échangée |
+| `mosaique` | carte de chaleur : une tuile par valeur | largeur · indice · palmarès · capitaux |
+
+- **Rotation sur le rang ouvré** : jamais le même modèle deux séances de suite,
+  vendredi → lundi compris (un modulo sur les jours calendaires les aurait
+  fait coïncider une semaine sur une). `VIDEO_MODELE` en force un ; le
+  workflow l'expose en entrée `modele` pour un lancement manuel.
+- **L'angle vient de la séance** : plus forte variation de l'indice sur la
+  fenêtre, série d'affilée, indice et majorité des titres en désaccord, une
+  valeur à plus de 30 % des échanges, un écart de plus de 7 %, une hausse ou
+  baisse très largement partagée. Le fait le mieux noté devient l'accroche
+  (écrite en grand à l'ouverture, pour qui regarde sans le son) et sa scène
+  passe en tête. Rien n'est jugé : on dit ce qui s'est passé.
+- **Phrases variées mais déterministes** : plusieurs formulations par scène,
+  choisies par hachage de la date — même séance, même texte.
+- **Noms prononçables** : « Sonatel » plutôt que « SONATEL SENEGAL », le pays
+  restant quand il départage (Bank of Africa Sénégal / Niger, Ecobank Côte
+  d'Ivoire face au groupe ETI). Proportions dites comme on les dit
+  (« près de la moitié ») ; l'écran garde le chiffre exact.
+- **Une piste par phrase** : chaque temps est synthétisé seul et mesuré, puis
+  les pistes sont assemblées. Une scène dure exactement le temps de sa phrase,
+  avec ElevenLabs comme avec Denise (tout ou rien : jamais deux voix mêlées).
+
 ## Le verrou de publiabilité
 
-`genere.mjs` écrit `seance.json`, qui porte cinq contrôles :
+`genere.mjs` écrit `seance.json`, qui porte six contrôles :
 
 | Contrôle | Ce qu'il empêche |
 |---|---|
@@ -42,6 +74,7 @@ d'une autre.
 | `composite_present` | une vidéo sans son indice de référence |
 | `capitaux_non_nuls` | le « 0 FCFA échangé » d'un jour où la source ne renvoie rien |
 | `variations_non_plates` | une séance où toutes les variations sont nulles |
+| `texte_verifie` | une voix qui prononcerait un nombre absent de la donnée (`recit.mjs`, `chiffresEtrangers`) |
 
 Si l'un échoue, `publie.mjs` **s'arrête sans rien envoyer** et sort en succès.
 Un cron publie sans relecture humaine : mieux vaut un jour sans vidéo qu'un

@@ -25,6 +25,7 @@ import { execFileSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { composerRecit, chiffresAutorises, chiffresEtrangers } from './recit.mjs';
 
 /* Chemins deduits du fichier lui-meme : le script doit tourner aussi bien sur
    le poste de l'auteur que sur un runner GitHub, ou aucun chemin Windows
@@ -235,23 +236,42 @@ console.log(
 
 /* --------------------------------------------------------------- 2. voix */
 
-/* Le texte lu est compose des MEMES variables que les images. */
-const dit = (x, d = 2) => fr(Math.abs(x), d).replace(',', ' virgule ');
-const TEXTE = [
-  `Séance du ${dateFr} à la BRVM.`,
-  composite
-    ? `Le BRVM Composite ${composite.variation_pct >= 0 ? 'gagne' : 'perd'} ${dit(composite.variation_pct)} pour cent, à ${dit(composite.valeur)} points.`
-    : '',
-  `${hausses.length} valeurs montent, ${baisses.length} reculent, ${stables} restent stables.`,
-  `${estime ? 'Environ ' : ''}${dit(T / 1e9)} milliards de francs CFA ont changé de mains.`,
-  `${dit(partB, 1)} pour cent de ces capitaux se sont traités sur des titres en repli.`,
-  `${lourde.designation ?? lourde.code} pèse à elle seule ${dit(partLourde, 1)} pour cent du montant échangé, et ${lourde.variation_pct >= 0 ? 'gagne' : 'cède'} ${dit(lourde.variation_pct)} pour cent.`,
-  `La plus forte hausse : ${haut.designation ?? haut.code}, plus ${dit(haut.variation_pct)} pour cent.`,
-  `La plus forte baisse : ${bas.designation ?? bas.code}, moins ${dit(bas.variation_pct)} pour cent.`,
-  'Tous ces chiffres viennent de la séance officielle. L’analyse complète est sur WESTBOURSE.',
-]
-  .filter(Boolean)
-  .join(' ');
+/* Le récit — quoi dire, dans quel ordre, sous quel modèle — est composé par
+   recit.mjs (pur, testé : `npm test`) à partir des MÊMES variables que les
+   images. Il rend une suite de « temps » : une phrase lue + la scène qui
+   l'illustre. Trois modèles tournent d'une séance à l'autre ; VIDEO_MODELE
+   (nuit | papier | mosaique) en force un pour un essai. */
+const nomDe = (a) => a.designation ?? a.code;
+const mvt = (a) => ({ code: a.code, designation: nomDe(a), variation_pct: a.variation_pct });
+const donneesRecit = {
+  seance,
+  composite: composite ? { valeur: composite.valeur, variation_pct: composite.variation_pct } : null,
+  hausses: hausses.length,
+  baisses: baisses.length,
+  stables,
+  valeurs: cotes.length,
+  capitaux: T,
+  estime,
+  partB,
+  lourde: { ...mvt(lourde), part_pct: partLourde },
+  meilleures: trie.filter((a) => a.variation_pct > 0).slice(0, 3).map(mvt),
+  pires: [...trie].reverse().filter((a) => a.variation_pct < 0).slice(0, 3).map(mvt),
+  secteurs,
+  historique: historiqueIndice,
+  designations: cotes.map(nomDe),
+};
+const RECIT = composerRecit(donneesRecit, { modele: process.env.VIDEO_MODELE });
+const TEXTE = RECIT.texte;
+
+/* AUCUN CHIFFRE ÉTRANGER. Un nombre lu qui ne vient pas de la donnée rend la
+   séance NON PUBLIABLE (contrôle `texte_verifie`) : publie.mjs n'enverra rien.
+   Un cron publie sans relecture ; une voix qui annonce un chiffre faux sur
+   trois réseaux est pire qu'un jour sans vidéo. */
+const etrangers = chiffresEtrangers(TEXTE, chiffresAutorises(donneesRecit, RECIT.faits));
+if (etrangers.length) {
+  console.log(`::error title=Chiffre étranger dans le texte lu::${etrangers.join(', ')} — séance non publiable.`);
+}
+console.log(`modèle ${RECIT.modele} · angle ${RECIT.angle ?? 'aucun'} · ${RECIT.temps.length} temps`);
 
 writeFileSync(`${OUT}/texte.txt`, TEXTE, 'utf8');
 
@@ -272,23 +292,40 @@ const lireVoix = (k) =>
 const CLE_EL = lireVoix('ELEVENLABS_API_KEY');
 const VOIX_EL = lireVoix('ELEVENLABS_VOICE_ID');
 
+/* UNE PISTE PAR TEMPS, puis assemblage. Chaque phrase est synthétisée seule
+   et mesurée : la durée de chaque scène est donc celle de SA phrase, au
+   centième près, quel que soit le moteur. L'ancien découpage par parts fixes
+   (6 %, 11 %…) faisait apparaître une image avant ou après qu'on en parle. */
+const PAUSE_S = 0.35;
+const piste = (i) => `${OUT}/voix-${String(i).padStart(2, '0')}.mp3`;
+const duree = (f) =>
+  parseFloat(
+    execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', f])
+      .toString()
+      .trim(),
+  );
+
 let voixMoteur = 'denise';
 let voixRaison = CLE_EL && VOIX_EL ? null : 'ElevenLabs non configuré';
 if (CLE_EL && VOIX_EL) {
   try {
-    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOIX_EL}?output_format=mp3_44100_128`, {
-      method: 'POST',
-      headers: { 'xi-api-key': CLE_EL, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
-      body: JSON.stringify({
-        text: TEXTE,
-        model_id: 'eleven_multilingual_v2',
-        voice_settings: { stability: 0.5, similarity_boost: 0.85, style: 0.15, use_speaker_boost: true },
-      }),
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    writeFileSync(`${OUT}/voix.mp3`, Buffer.from(await r.arrayBuffer()));
+    for (const [i, t] of RECIT.temps.entries()) {
+      const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOIX_EL}?output_format=mp3_44100_128`, {
+        method: 'POST',
+        headers: { 'xi-api-key': CLE_EL, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+        body: JSON.stringify({
+          text: t.texte,
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: { stability: 0.5, similarity_boost: 0.85, style: 0.15, use_speaker_boost: true },
+        }),
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      writeFileSync(piste(i), Buffer.from(await r.arrayBuffer()));
+    }
     voixMoteur = 'elevenlabs';
   } catch (e) {
+    /* Tout ou rien : un échec en cours de route repasse TOUTES les phrases
+       sur Denise. Deux timbres dans la même vidéo s'entendraient. */
     voixRaison = `ElevenLabs en échec (${e.message})`;
     console.log(`::warning title=Voix de l'auteur indisponible::${voixRaison} — voix Denise utilisée.`);
   }
@@ -296,21 +333,42 @@ if (CLE_EL && VOIX_EL) {
 if (voixMoteur === 'denise') {
   /* Appele par son module Python : l'executable edge-tts n'est pas forcement
      dans le PATH selon l'installation de pip. */
-  execFileSync(
-    'python',
-    ['-m', 'edge_tts', '--voice', 'fr-FR-DeniseNeural', '--text', TEXTE,
-     '--write-media', `${OUT}/voix.mp3`],
-    { stdio: 'pipe' },
-  );
+  for (const [i, t] of RECIT.temps.entries()) {
+    execFileSync(
+      'python',
+      ['-m', 'edge_tts', '--voice', 'fr-FR-DeniseNeural', '--text', t.texte, '--write-media', piste(i)],
+      { stdio: 'pipe' },
+    );
+  }
 }
 console.log(`voix : ${voixMoteur === 'elevenlabs' ? 'auteur (ElevenLabs)' : `Denise${voixRaison ? ` — ${voixRaison}` : ''}`}`);
-const dureeVoix = parseFloat(
-  execFileSync('ffprobe', [
-    '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1',
-    `${OUT}/voix.mp3`,
-  ]).toString().trim(),
+
+/* Le plan : où commence et combien dure chaque scène, mesuré sur les pistes. */
+let curseur = 0;
+const PLAN = RECIT.temps.map((t, i) => {
+  const d = duree(piste(i)) + PAUSE_S;
+  const p = { type: t.type, texte: t.texte, debut_s: curseur, duree_s: d };
+  curseur += d;
+  return p;
+});
+
+/* Assemblage : chaque piste ramenée au même format puis suivie de sa pause. */
+const n = RECIT.temps.length;
+execFileSync(
+  'ffmpeg',
+  [
+    '-y',
+    ...RECIT.temps.flatMap((_, i) => ['-i', piste(i)]),
+    '-filter_complex',
+    RECIT.temps
+      .map((_, i) => `[${i}:a]aresample=44100,aformat=sample_fmts=fltp:channel_layouts=mono,apad=pad_dur=${PAUSE_S}[a${i}]`)
+      .join(';') + `;${RECIT.temps.map((_, i) => `[a${i}]`).join('')}concat=n=${n}:v=0:a=1[voix]`,
+    '-map', '[voix]', '-c:a', 'libmp3lame', '-b:a', '160k', `${OUT}/voix.mp3`,
+  ],
+  { stdio: 'pipe' },
 );
-console.log(`voix generee : ${dureeVoix.toFixed(1)} s`);
+const dureeVoix = duree(`${OUT}/voix.mp3`);
+console.log(`voix generee : ${dureeVoix.toFixed(1)} s (${n} temps)`);
 
 /* ------------------------------------------------------------- 3. scenes */
 
@@ -362,14 +420,16 @@ const frise = [...cotes]
   .map((a) => vignette(a.code, 92))
   .join('');
 
-/* Parts du temps de parole, normalisees sur la duree reelle de la voix : les
-   scenes suivent le propos au lieu de le devancer. */
-const PARTS = [0.062, 0.112, 0.138, 0.198, 0.17, 0.188, 0.132];
+/* REPLI FIXE. Ces images ne servent que si le rendu animé (Remotion) échoue.
+   Elles suivent le MÊME plan que la voix : chaque temps du récit affiche la
+   carte de son sujet, pendant la durée exacte de sa phrase. */
+const echappe = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const SCENES = [
   `<div class="s" style="justify-content:center;align-items:center;text-align:center">
     <div style="margin-bottom:50px">${LOGO_W(190)}</div>
     <div style="font-family:ui-monospace,Consolas,monospace;font-size:52px;letter-spacing:.36em">WESTBOURSE</div>
     <div class="lbl" style="font-size:46px;margin-top:40px">Séance BRVM du ${dateFr}</div>
+    ${RECIT.accroche ? `<div style="font-size:54px;font-weight:600;line-height:1.25;margin-top:48px;max-width:900px">${echappe(RECIT.accroche)}</div>` : ''}
     <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:840px;margin-top:64px">${frise}</div></div>`,
 
   `${MARQUE}<div class="s"><div class="k">BRVM Composite</div>
@@ -423,7 +483,18 @@ const SCENES = [
     <div class="lbl" style="font-size:25px;color:#8CA3AA;margin-top:64px;max-width:780px">
     Tous les chiffres proviennent de la séance officielle de la BRVM.<br>
     ${estime ? 'Les capitaux sont estimés par cours × titres, la valeur officielle n’étant pas publiée.' : 'Aucune valeur n’est estimée.'}</div></div>`,
+
+  `${MARQUE}<div class="s"><div class="k">Capitaux par secteur</div>
+    ${secteurs.filter((s) => s.secteur !== 'Non classé').slice(0, 5).map((s) => `
+    <div style="margin:22px 0">
+      <div style="display:flex;justify-content:space-between;font-size:36px"><span>${echappe(s.secteur)}</span>
+        <b style="font-family:ui-monospace,Consolas,monospace">${fr(s.part_pct, 1)} %</b></div>
+      <div style="height:22px;background:#0e191d;margin-top:12px"><div style="height:100%;width:${s.part_pct.toFixed(1)}%;background:#56D7FD"></div></div>
+      <div style="font-size:26px;color:#8CA3AA;margin-top:8px">${s.hausses} en hausse sur ${s.valeurs}</div>
+    </div>`).join('')}</div>${pied('Part des capitaux échangés')}`,
 ];
+/* Temps du récit → carte du repli fixe. */
+const CARTE = { ouverture: 0, indice: 1, largeur: 2, capitaux: 3, lourde: 4, palmares: 5, fin: 6, secteurs: 7 };
 
 const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
@@ -437,12 +508,11 @@ console.log(`${SCENES.length} scenes capturees`);
 
 /* ------------------------------------------------------------ 4. montage */
 
-const dernier = String(SCENES.length - 1).padStart(2, '0');
+const carte = (type) => `s${String(CARTE[type]).padStart(2, '0')}.png`;
 writeFileSync(
   `${OUT}/liste.txt`,
-  SCENES.map(
-    (_, i) => `file 's${String(i).padStart(2, '0')}.png'\nduration ${(PARTS[i] * dureeVoix).toFixed(3)}`,
-  ).join('\n') + `\nfile 's${dernier}.png'\n`,
+  PLAN.map((p) => `file '${carte(p.type)}'\nduration ${p.duree_s.toFixed(3)}`).join('\n') +
+    `\nfile '${carte(PLAN[PLAN.length - 1].type)}'\n`,
   'utf8',
 );
 
@@ -493,6 +563,8 @@ const controles = {
   composite_present: !!composite,
   capitaux_non_nuls: T > 0,
   variations_non_plates: hausses.length + baisses.length > 0,
+  /* Chaque nombre lu vient de la donnée (recit.mjs, `chiffresEtrangers`). */
+  texte_verifie: etrangers.length === 0,
 };
 const publiable = Object.values(controles).every(Boolean);
 
@@ -548,7 +620,20 @@ writeFileSync(
          mêmes variables que la voix : la version animée ne relit JAMAIS la
          base, elle ne fait que mettre en mouvement ces nombres-là. */
       video: {
-        parts: PARTS,
+        /* Le modèle du jour et l'angle retenu (recit.mjs), puis le PLAN :
+           chaque scène, sa phrase, son début et sa durée mesurés sur la voix. */
+        modele: RECIT.modele,
+        angle: RECIT.angle,
+        accroche: RECIT.accroche,
+        faits: RECIT.faits,
+        plan: PLAN,
+        /* Toutes les valeurs cotées, pour la carte du marché (modèle mosaïque)
+           et le classement des capitaux. */
+        cotes: [...cotes]
+          .sort((a, b) => b.variation_pct - a.variation_pct)
+          .map((a) => ({ code: a.code, variation_pct: a.variation_pct, part_pct: (cap(a) / (T || 1)) * 100 })),
+        meilleures: donneesRecit.meilleures.map(({ code, variation_pct }) => ({ code, variation_pct })),
+        pires: donneesRecit.pires.map(({ code, variation_pct }) => ({ code, variation_pct })),
         part_baissiere_pct: partB,
         frise: [...cotes].sort((a, b) => cap(b) - cap(a)).slice(0, 8).map((a) => a.code),
         noms: Object.fromEntries(cotes.map((a) => [a.code, a.designation ?? a.code])),

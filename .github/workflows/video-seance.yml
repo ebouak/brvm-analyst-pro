@@ -31,6 +31,11 @@ on:
         description: "ENVOI DE DÉCOUVERTE du brief à TOUS les comptes — une seule fois, jamais automatique"
         type: boolean
         default: false
+      modele:
+        description: 'Modèle de vidéo (auto = rotation : jamais le même deux séances de suite)'
+        type: choice
+        options: [auto, nuit, papier, mosaique]
+        default: auto
 
 concurrency:
   group: video-seance
@@ -77,6 +82,11 @@ jobs:
       - name: Installer les dépendances
         run: npm install
 
+      # Le récit (modèle, angle, phrases, garde-fou des chiffres) est testé
+      # avant chaque génération : un gabarit cassé ne doit jamais parler.
+      - name: Tester le récit
+        run: npm test
+
       - name: Installer Chromium
         run: npx playwright install chromium --with-deps
 
@@ -88,6 +98,8 @@ jobs:
           # voix de synthèse Denise, signalée dans le brief de l'exploitant.
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+          # Vide au cron : la rotation de video/recit.mjs choisit le modèle.
+          VIDEO_MODELE: ${{ inputs.modele != 'auto' && inputs.modele || '' }}
         run: node genere.mjs
 
       - name: Animer la vidéo (Remotion)
