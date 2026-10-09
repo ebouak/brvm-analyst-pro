@@ -18,6 +18,13 @@
  *     (`rapprocher`) ; un conflit n'est jamais tranché ;
  *   * une borne publiée doit être respectée par la valeur exacte retenue, sinon
  *     les deux sources se contredisent.
+ *
+ * Règle (2026-10-09, migration 0149) : une source SECONDAIRE (article, analyse
+ * de plateforme) n'entre jamais dans la décision — ni comme valeur retenue, ni
+ * pour créer un conflit avec un chiffre de l'émetteur. Elle reste en base comme
+ * corroboration. Un document de l'émetteur relayé par une plateforme
+ * (`reprise_emetteur`) compte comme l'émetteur. Une valeur déclarée provisoire
+ * par l'émetteur peut être retenue, mais avec la réserve « provisoire ».
  */
 
 import { rapprocher } from './rapprochement.js';
@@ -38,11 +45,14 @@ export interface ObsPrudentielle {
   texte_original: string | null;
   motif: Motif | null;
   document_url: string;
+  /** Absent = 'emetteur' (observations antérieures à 0149). */
+  nature_source?: 'emetteur' | 'reprise_emetteur' | 'secondaire';
+  provisoire?: boolean;
 }
 
 export type Decision =
   | { etat: 'retenue'; valeur: number; observation: string; perimetre: Perimetre;
-      classe: 'unique' | 'rounding_compatible'; reserve: 'controle_en_cours' | null }
+      classe: 'unique' | 'rounding_compatible'; reserve: 'controle_en_cours' | 'provisoire' | null }
   | { etat: 'conflit'; observations: string[] }
   | { etat: 'borne'; comparateur: Exclude<Comparateur, '='>; valeur: number; observation: string }
   | { etat: 'non_exploitable'; motif: Motif | null; observations: string[] }
@@ -70,7 +80,9 @@ function respecte(v: number, c: Exclude<Comparateur, '='>, borne: number): boole
 }
 
 export function selectionnerExercice(obs: ObsPrudentielle[], dateArrete: string): Decision {
-  const exercice = obs.filter((o) => o.date_arrete === dateArrete);
+  // Les sources secondaires sont écartées AVANT tout : elles ne doivent ni
+  // décider, ni contredire un chiffre de l'émetteur.
+  const exercice = obs.filter((o) => o.date_arrete === dateArrete && o.nature_source !== 'secondaire');
   if (exercice.length === 0) return { etat: 'aucune_observation' };
 
   const publiees = (p: Perimetre) =>
@@ -106,7 +118,9 @@ export function selectionnerExercice(obs: ObsPrudentielle[], dateArrete: string)
       observation: retenue.id,
       perimetre,
       classe: r.classe === 'unique' ? 'unique' : 'rounding_compatible',
-      reserve: exactes.some((o) => o.motif === 'controle_en_cours') ? 'controle_en_cours' : null,
+      reserve: exactes.some((o) => o.motif === 'controle_en_cours')
+        ? 'controle_en_cours'
+        : retenue.provisoire ? 'provisoire' : null,
     };
   }
 

@@ -102,3 +102,32 @@ describe('date d’arrêté d’une période annuelle', () => {
     expect(dateArrete('2025-S1')).toBeNull();
   });
 });
+
+describe('nature de la source (migration 0149)', () => {
+  it('une source secondaire seule n’est JAMAIS retenue (NSIA 13,15 %, Sika)', () => {
+    const presse = o({ date_arrete: D25, valeur: 13.15, texte_original: '13,15 %', nature_source: 'secondaire' });
+    expect(selectionnerExercice([presse], D25)).toEqual({ etat: 'aucune_observation' });
+  });
+
+  it('une source secondaire ne crée pas de conflit avec le chiffre de l’émetteur', () => {
+    const officiel = o({ date_arrete: D25, valeur: 13.0, texte_original: '13,0 %' });
+    const presse = o({ date_arrete: D25, valeur: 13.15, texte_original: '13,15 %', nature_source: 'secondaire' });
+    expect(selectionnerExercice([officiel, presse], D25)).toMatchObject({ etat: 'retenue', valeur: 13.0, observation: officiel.id, classe: 'unique' });
+  });
+
+  it('un « non trouvé » de l’émetteur reste non trouvé malgré un chiffre de presse', () => {
+    const absent = o({ date_arrete: D25, statut: 'non_trouve', document_url: 'communique-2025' });
+    const presse = o({ date_arrete: D25, valeur: 13.15, texte_original: '13,15 %', nature_source: 'secondaire' });
+    expect(selectionnerExercice([absent, presse], D25)).toEqual({ etat: 'non_trouve', documents: 1 });
+  });
+
+  it('un document de l’émetteur relayé par une plateforme compte comme l’émetteur', () => {
+    const relaye = o({ valeur: 17.7, texte_original: '17,7 %', nature_source: 'reprise_emetteur' });
+    expect(selectionnerExercice([relaye], D24)).toMatchObject({ etat: 'retenue', valeur: 17.7, reserve: null });
+  });
+
+  it('une valeur provisoire est retenue avec la réserve « provisoire » (SAFCA S1 2025)', () => {
+    const p = o({ valeur: 11.886, texte_original: '11,886 %', nature_source: 'reprise_emetteur', provisoire: true });
+    expect(selectionnerExercice([p], D24)).toMatchObject({ etat: 'retenue', valeur: 11.886, reserve: 'provisoire' });
+  });
+});
