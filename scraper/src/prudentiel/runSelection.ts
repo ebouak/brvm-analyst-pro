@@ -65,7 +65,7 @@ function motifTrace(d: Decision, obs: ObsLue[]): { motif: string; source: string
   switch (d.etat) {
     case 'retenue':
       return {
-        motif: `Valeur retenue depuis indicateur_source (${d.classe === 'unique' ? 'source unique' : 'compatibles à l’arrondi, la plus précise'}, périmètre ${d.perimetre})${d.reserve ? ' — contrôle documentaire en cours' : ''}.`,
+        motif: `Valeur retenue depuis indicateur_source (${d.classe === 'unique' ? 'source unique' : 'compatibles à l’arrondi, la plus précise'}, périmètre ${d.perimetre})${d.reserve === 'controle_en_cours' ? ' — contrôle documentaire en cours' : d.reserve === 'provisoire' ? ' — chiffre déclaré provisoire par l’émetteur' : ''}.`,
         source: src(d.observation),
       };
     case 'conflit':
@@ -86,7 +86,7 @@ export async function runSelectionPrudentielle(opts: { dryRun: boolean; codes?: 
   const indicateurs = Object.keys(CORRESPONDANCE);
 
   let q = sb.from('indicateur_source')
-    .select('id,code,indicateur,date_arrete,perimetre,statut,valeur,comparateur,texte_original,motif,document_url,document_libelle,page')
+    .select('id,code,indicateur,date_arrete,perimetre,statut,valeur,comparateur,texte_original,motif,document_url,document_libelle,page,nature_source,provisoire')
     .in('indicateur', indicateurs);
   if (opts.codes?.length) q = q.in('code', opts.codes);
   const { data: obs, error } = await q;
