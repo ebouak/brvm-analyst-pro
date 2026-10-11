@@ -106,11 +106,21 @@ function Feuille({ d, page, children }: { d: DossierValeur; page: number; childr
   );
 }
 
+/* Le libellé dit le SIGNAL, pas l'état de tous les indicateurs : un signal
+   d'attente avec un RSI à 81,5 (SNTS, 09/10/2026) n'a rien de « neutre ».
+   La zone du RSI est donc dite à côté, comme un fait. */
 const VERDICT: Record<string, string> = {
-  BUY: 'Indicateurs bien orientés',
-  SELL: 'Indicateurs mal orientés',
-  HOLD: 'Indicateurs neutres',
+  BUY: 'Signal haussier',
+  SELL: 'Signal baissier',
+  HOLD: 'Signal d’attente',
 };
+
+function zoneRsi(rsi: number | null): string | null {
+  if (rsi == null) return null;
+  if (rsi >= 70) return `RSI ${fmtNumber(rsi, 1)} : zone de surachat (au-dessus de 70).`;
+  if (rsi <= 30) return `RSI ${fmtNumber(rsi, 1)} : zone de survente (au-dessous de 30).`;
+  return null;
+}
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
@@ -154,10 +164,15 @@ export default async function DossierPage({ params }: { params: { code: string }
               {c.variation_veille_pct != null && (
                 <>
                   {' · '}
-                  <strong className={c.variation_veille_pct >= 0 ? 'dv-hausse' : 'dv-baisse'}>
-                    {c.variation_veille_pct >= 0 ? '+' : '−'}
-                    {fmtNumber(Math.abs(c.variation_veille_pct), 2)} %
-                  </strong>
+                  {/* Une variation nulle n'est ni une hausse ni une baisse : ni signe, ni couleur. */}
+                  {Math.abs(c.variation_veille_pct) < 0.005 ? (
+                    <strong>{fmtNumber(0, 2)} %</strong>
+                  ) : (
+                    <strong className={c.variation_veille_pct > 0 ? 'dv-hausse' : 'dv-baisse'}>
+                      {c.variation_veille_pct > 0 ? '+' : '−'}
+                      {fmtNumber(Math.abs(c.variation_veille_pct), 2)} %
+                    </strong>
+                  )}
                 </>
               )}
               <br />
@@ -187,7 +202,7 @@ export default async function DossierPage({ params }: { params: { code: string }
               valeur={d.technique.signal ? (VERDICT[d.technique.signal] ?? d.technique.signal) : null}
               note={
                 d.technique.date_signal
-                  ? `Signal du ${fmtDateFR(d.technique.date_signal)}. Mesure de tendance, pas une recommandation.`
+                  ? `Signal du ${fmtDateFR(d.technique.date_signal)}. ${zoneRsi(d.technique.rsi) ?? ''} Mesure de tendance, pas une recommandation.`.replace('  ', ' ')
                   : "Aucun signal calculé pour cette valeur."
               }
             />
@@ -442,22 +457,55 @@ export default async function DossierPage({ params }: { params: { code: string }
           {d.detachement ? (
             <>
               <dl className="dv-grille">
-                <Mesure libelle="Séance" valeur={fmtDateFR(d.detachement.ex_date)} />
+                <Mesure
+                  libelle="Séance de détachement"
+                  valeur={fmtDateFR(d.detachement.ex_date)}
+                  note={
+                    d.detachement.ex_date_officielle !== d.detachement.ex_date
+                      ? `Ex-date publiée : ${fmtDateFR(d.detachement.ex_date_officielle)}, jour sans séance ; première séance cotée ensuite.`
+                      : undefined
+                  }
+                />
                 <Mesure libelle="Veille" valeur={`${fmtNumber(d.detachement.cours_veille)} FCFA`} />
                 <Mesure libelle="Clôture du jour" valeur={`${fmtNumber(d.detachement.cours_ex)} FCFA`} />
-                <Mesure
-                  libelle="Part expliquée"
-                  valeur={part(d.detachement.part_expliquee)}
-                  ton={
-                    d.detachement.part_expliquee == null
-                      ? undefined
-                      : d.detachement.part_expliquee >= 0.9
-                        ? 'hausse'
-                        : 'baisse'
-                  }
-                  note="Fraction de la baisse imputable au seul détachement."
-                />
+                {/* Baisse INFÉRIEURE au dividende : « part expliquée » plafonnerait à
+                    100 % et s'afficherait en vert, alors que la baisse mécanique
+                    attendue n'a pas eu lieu (SNTS : −50 FCFA pour 1 750). On montre
+                    alors le rapport baisse / dividende, sans couleur de verdict. */}
+                {d.detachement.baisse_fcfa < d.detachement.dividende ? (
+                  <Mesure
+                    libelle="Baisse / dividende"
+                    valeur={part(d.detachement.baisse_fcfa / d.detachement.dividende)}
+                    note="Part du dividende effectivement retranchée du cours à la clôture."
+                  />
+                ) : (
+                  <Mesure
+                    libelle="Part expliquée"
+                    valeur={part(d.detachement.part_expliquee)}
+                    ton={
+                      d.detachement.part_expliquee == null
+                        ? undefined
+                        : d.detachement.part_expliquee >= 0.9
+                          ? 'hausse'
+                          : 'baisse'
+                    }
+                    note="Fraction de la baisse imputable au seul détachement."
+                  />
+                )}
               </dl>
+              {d.detachement.baisse_fcfa < d.detachement.dividende && d.detachement.recul_hors_dividende != null && (
+                <div className="dv-encadre" style={{ marginTop: '3mm' }}>
+                  <h3>Une baisse inférieure au dividende</h3>
+                  <p style={{ margin: 0 }}>
+                    {d.detachement.baisse_fcfa > 0
+                      ? <>Le cours n&apos;a perdu que <strong>{fmtNumber(d.detachement.baisse_fcfa)} FCFA</strong></>
+                      : <>Le cours n&apos;a pas baissé</>}{' '}
+                    pour un dividende de <strong>{fmtNumber(d.detachement.dividende, 2)} FCFA</strong> : la clôture termine{' '}
+                    <strong>{part(d.detachement.recul_hors_dividende, 2)}</strong> au-dessus de la référence ajustée du
+                    dividende. Le constat est mécanique ; il ne dit pas pourquoi le marché a compensé le détachement.
+                  </p>
+                </div>
+              )}
               <div style={{ marginTop: '4mm' }}>
                 <BarreDetachement baisse={d.detachement.baisse_fcfa} dividende={d.detachement.dividende} />
               </div>

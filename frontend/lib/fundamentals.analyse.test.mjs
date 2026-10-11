@@ -5,6 +5,7 @@ import {
   qualiteResultat,
   croissanceCA,
   expliqueDetachement,
+  exercicesAnnuels,
 } from './fundamentals.ts';
 
 /**
@@ -80,6 +81,47 @@ test('croissance du CA sur un et deux exercices', () => {
   ];
   assert.ok(Math.abs(croissanceCA(ex, 1) + 0.238) < 0.005, '-23,8 % sur un an');
   assert.ok(Math.abs(croissanceCA(ex, 2) + 0.397) < 0.005, '-39,7 % sur deux ans');
+});
+
+// Cas réel SNTS (dossier du 10/10/2026). Trié comme du TEXTE, « 2026-T1 » passe
+// devant « 2026-S1 » et « 2025 » : le dossier comparait un trimestre à un
+// semestre puis à neuf mois et annonçait « chiffre d'affaires en recul de 52 % »
+// pour une société dont le CA a progressé de 8,3 %.
+const SNTS = fusionnerExercices([
+  L('2026-T1', 504_200_000_000, null, null, 113_800_000_000),
+  L('2026-S1', 1_049_800_000_000, null, null, 230_000_000_000),
+  L('2025-T3', 1_432_500_000_000, null, null, 311_000_000_000),
+  L('2025-T1', 471_600_000_000, null, null, 108_400_000_000),
+  L('2025-S1', 960_200_000_000, null, null, 208_100_000_000),
+  L('2025', 1_923_122_000_000, 669_792_000_000, null, 413_588_000_000),
+  L('2024-S1', 877_700_000_000, null, null, 192_600_000_000),
+  L('2024', 1_776_443_000_000, 619_524_000_000, null, 393_662_000_000),
+  L('2023', 1_620_701_000_000, 515_709_000_000, null, 331_748_000_000),
+]);
+
+test('SNTS : la croissance compare TOUJOURS une période à la même période (jamais T1 contre S1)', () => {
+  // Sur la ligne la plus récente (2026-T1), la comparaison à un an est 2025-T1.
+  assert.ok(Math.abs(croissanceCA(SNTS, 1) - (504.2 / 471.6 - 1)) < 1e-9, 'T1 2026 contre T1 2025 : +6,9 %');
+  // Pas de 2024-T1 en base : on ne compare pas à autre chose, on rend null.
+  assert.equal(croissanceCA(SNTS, 2), null);
+});
+
+test('SNTS : sur les exercices annuels, 2025 contre 2024 = +8,3 %, contre 2023 = +18,7 %', () => {
+  const annuels = exercicesAnnuels(SNTS);
+  assert.deepEqual(annuels.map((e) => e.periode), ['2025', '2024', '2023']);
+  assert.ok(Math.abs(croissanceCA(annuels, 1) - 0.0826) < 0.0005);
+  assert.ok(Math.abs(croissanceCA(annuels, 2) - 0.1866) < 0.0005);
+});
+
+test('SNTS : le dernier exercice annuel porte le résultat d’exploitation (marge 34,8 %)', () => {
+  const q = qualiteResultat(exercicesAnnuels(SNTS)[0]);
+  assert.equal(q.periode, '2025');
+  assert.ok(Math.abs(q.marge_exploitation - 0.3483) < 0.0005);
+});
+
+test('exercicesAnnuels : trié par année, intermédiaires exclus, quel que soit l’ordre reçu', () => {
+  const e = exercicesAnnuels([L('2023', 1, null, null, 1), L('2025-S1', 2, null, null, 2), L('2025', 3, null, null, 3), L('2024', 4, null, null, 4)]);
+  assert.deepEqual(e.map((x) => x.periode), ['2025', '2024', '2023']);
 });
 
 test('pas d’exercice de comparaison -> null', () => {

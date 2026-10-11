@@ -4,6 +4,7 @@ import {
   computeRatios,
   pickBestFundamental,
   fusionnerExercices,
+  exercicesAnnuels,
   qualiteResultat,
   croissanceCA,
   expliqueDetachement,
@@ -155,7 +156,9 @@ export interface DossierValeur {
   chiffres_cles: ChiffresCles;
   trajectoire: PointAnnuel[];
   dividende: FocusDividende;
-  detachement: Detachement | null;
+  /** `ex_date` = séance réellement comparée ; `ex_date_officielle` = date publiée
+   *  (elle peut tomber un jour sans séance : Ascension, 14/05/2026 pour SNTS). */
+  detachement: (Detachement & { ex_date_officielle: string }) | null;
   technique: Technique;
   ratios: Ratios | null;
   qualite_resultat: QualiteResultat | null;
@@ -255,6 +258,15 @@ export async function buildDossier(
   const fonda = pickBestFundamental(fondaRows);
   if (!fonda) lacunes.push('Aucun état financier exploitable en base pour cette société.');
 
+  /* UNE SEULE PÉRIODE DE RÉFÉRENCE : l'exercice ANNUEL des montants affichés.
+     Libellé, croissance, qualité du résultat et trajectoire la lisent toutes.
+     Avant le 2026-10-11, le libellé venait de la période la plus récente
+     triée comme du texte (« 2026-T1 ») pendant que les montants venaient de
+     l'annuel 2025 — et la croissance comparait un trimestre à un semestre. */
+  const exerciceRef = fonda?.year != null ? String(fonda.year) : exercicesAnnuels(exercices)[0]?.periode ?? null;
+  const annuels = exercicesAnnuels(exercices).filter((e) => exerciceRef == null || Number(e.periode) <= Number(exerciceRef));
+  const annuelRef = annuels[0]?.periode === exerciceRef ? annuels : [];
+
   /* Le dividende retenu est le plus récent STRICTEMENT POSITIF. Un zéro est
      une information pour l'historique, jamais une base de rendement. */
   const dividendes = (divs ?? []) as {
@@ -300,27 +312,36 @@ export async function buildDossier(
     );
   }
 
-  const qualite = qualiteResultat(exercices[0]);
+  const qualite = qualiteResultat(annuelRef[0]);
   if (qualite && qualite.part_non_operationnelle == null) {
     lacunes.push(
       "Le résultat d'exploitation n'est pas renseigné pour le dernier exercice : impossible de dire quelle part du bénéfice vient de l'activité.",
     );
   }
 
-  /* Détachement : uniquement si l'ex-date tombe sur une séance connue ET que
-     la veille existe. Sans les deux cours, la décomposition n'a aucun sens. */
-  let detachement: Detachement | null = null;
+  /* Détachement : la séance de détachement est la PREMIÈRE séance à partir de
+     l'ex-date, la veille la dernière séance avant. Lues par une requête dédiée :
+     la fenêtre des 90 dernières séances ne contient souvent pas l'ex-date
+     (SNTS, détachement du 14/05/2026, fenêtre ouverte le 11/06), et l'ex-date
+     publiée peut tomber un jour sans séance (le 14/05/2026, jour de
+     l'Ascension). Sans les deux cours, pas de décomposition. */
+  let detachement: (Detachement & { ex_date_officielle: string }) | null = null;
   const divDate = dividendes.find((d) => d.ex_date != null && Number(d.montant) > 0);
   if (divDate?.ex_date) {
-    const i = lignes.findIndex((h) => h.date_marche === divDate.ex_date);
-    if (i >= 0 && lignes[i + 1]) {
-      detachement = expliqueDetachement(
-        String(divDate.ex_date),
-        Number(divDate.montant),
-        lignes[i + 1].cours_jour,
-        lignes[i].cours_jour,
-      );
-    }
+    const decale = (iso: string, j: number) => new Date(Date.parse(`${iso}T12:00:00Z`) + j * 86400000).toISOString().slice(0, 10);
+    const { data: autour } = await sb
+      .from('brvm_actions_daily')
+      .select('date_marche, cours_jour')
+      .eq('code', CODE)
+      .gte('date_marche', decale(divDate.ex_date, -10))
+      .lte('date_marche', decale(divDate.ex_date, 10))
+      .gt('cours_jour', 0)
+      .order('date_marche', { ascending: true });
+    const seances = (autour ?? []) as { date_marche: string; cours_jour: number }[];
+    const ex = seances.find((h) => h.date_marche >= divDate.ex_date!);
+    const veille = [...seances].reverse().find((h) => h.date_marche < divDate.ex_date!);
+    const base = ex && veille ? expliqueDetachement(ex.date_marche, Number(divDate.montant), veille.cours_jour, ex.cours_jour) : null;
+    if (base) detachement = { ...base, ex_date_officielle: divDate.ex_date };
   }
 
   /* Les clôtures nulles sont ÉCARTÉES, pas remplacées : un zéro en base est un
@@ -349,7 +370,7 @@ export async function buildDossier(
       notation: litNotation((instr as { notation_json?: unknown }).notation_json),
     },
     chiffres_cles: {
-      exercice: exercices[0]?.periode ?? (fonda?.year != null ? String(fonda.year) : null),
+      exercice: exerciceRef,
       cours,
       date_cours: derniere?.date_marche ?? null,
       variation_veille_pct: derniere?.variation_pct ?? null,
@@ -358,15 +379,17 @@ export async function buildDossier(
       resultat_net: fonda?.net_income ?? null,
       capitaux_propres: fonda?.equity ?? null,
       dette: (fonda as { debt?: number | null } | null)?.debt ?? null,
-      croissance_ca_1an: croissanceCA(exercices, 1),
-      croissance_ca_2ans: croissanceCA(exercices, 2),
+      croissance_ca_1an: croissanceCA(annuelRef, 1),
+      croissance_ca_2ans: croissanceCA(annuelRef, 2),
       variation_capitaux_propres_1an:
         fonda?.equity != null && cpPrecedent != null && cpPrecedent !== 0
           ? (fonda.equity - cpPrecedent) / Math.abs(cpPrecedent)
           : null,
     },
-    trajectoire: exercices
-      .slice()
+    // Exercices ANNUELS seulement : un trimestre à côté d'une année sur le même
+    // axe se lit comme un effondrement.
+    trajectoire: annuels
+      .slice(0, 6)
       .reverse()
       .map((e) => ({ exercice: e.periode, chiffre_affaires: e.revenu_total, resultat_net: e.resultat_net })),
     dividende: {
