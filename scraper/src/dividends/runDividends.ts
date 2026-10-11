@@ -106,14 +106,36 @@ async function deriveFromEvents(): Promise<Dividend[]> {
   return out;
 }
 
-async function upsert(divs: Dividend[]): Promise<number> {
+/**
+ * Une ligne issue du Bulletin Officiel de la Cote (source 'brvm-boc', voir
+ * runDividendesBoc.ts) est la RÉFÉRENCE : aucune autre source ne l'écrase.
+ * Sans ce filtre, RichBourse — importé en dernier, et qui l'emporte donc —
+ * remettait chaque samedi SGBC 2025 à 2 293,28 au lieu des 2 298,75 publiés
+ * par la BRVM.
+ */
+export function sansEcraserReference<T extends { code: string; exercice?: number | null }>(
+  rows: T[],
+  references: Set<string>,
+): T[] {
+  return rows.filter((r) => r.exercice == null || !references.has(`${r.code}|${r.exercice}`));
+}
+
+async function upsert(divsBruts: Dividend[]): Promise<number> {
   const cfg = getConfig();
-  if (divs.length === 0) return 0;
+  if (divsBruts.length === 0) return 0;
   if (cfg.DRY_RUN) {
-    logger.warn({ count: divs.length }, 'DRY_RUN — dividendes non écrits');
-    return divs.length;
+    logger.warn({ count: divsBruts.length }, 'DRY_RUN — dividendes non écrits');
+    return divsBruts.length;
   }
   const sb = getSupabase();
+  const { data: refs, error: errRefs } = await sb.from('dividends').select('code, exercice').eq('source', 'brvm-boc');
+  if (errRefs) throw new Error(`dividends (références brvm-boc) : ${errRefs.message}`);
+  const references = new Set(((refs ?? []) as { code: string; exercice: number | null }[]).map((r) => `${r.code}|${r.exercice}`));
+  const divs = sansEcraserReference(divsBruts, references);
+  if (divs.length < divsBruts.length) {
+    logger.info({ preservees: divsBruts.length - divs.length }, 'dividendes : lignes du Bulletin officiel préservées');
+  }
+  if (divs.length === 0) return 0;
   const rows = divs.map((d) => ({ ...d, dedupe_hash: dedupe(d) }));
 
   // Deux régimes de conflit coexistent sur `dividends`, un seul upsert ne peut

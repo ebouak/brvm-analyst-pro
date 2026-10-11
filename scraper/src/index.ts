@@ -534,6 +534,24 @@ async function main(): Promise<number> {
       return res.status === 'failed' ? 1 : 0;
     }
 
+    case 'dividends:boc': {
+      // Dividendes de référence (Bulletin officiel). À BLANC sauf --ecrire.
+      const { runDividendesBoc } = await import('./dividends/runDividendesBoc.js');
+      const r = await runDividendesBoc({ ecrire: process.argv.includes('--ecrire') });
+      const parEcart: Record<string, number> = {};
+      for (const l of r.lignes) {
+        parEcart[l.ecart] = (parEcart[l.ecart] ?? 0) + 1;
+        if (l.ecart !== 'concordant') {
+          console.log(
+            `${l.code.padEnd(6)} exercice ${l.exercice}  ${l.ecart.padEnd(18)} bulletin ${l.boc.montant} payé ${l.boc.date_paiement}` +
+              `  |  base ${l.base ? `${l.base.montant} (${l.base.source}, ${l.base.base_fiscale}) paiement ${l.base.payment_date ?? '—'}` : '—'}`,
+          );
+        }
+      }
+      console.log(`${r.bulletin}\n${JSON.stringify(parEcart)} — ${r.ecrites ? `${r.ecrites} ligne(s) écrite(s)` : 'à blanc, rien écrit'}`);
+      return 0;
+    }
+
     case 'dividends': {
       const res = await monitored(
         { code: 'dividends', label: 'Dividendes' },
