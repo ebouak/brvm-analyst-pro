@@ -116,7 +116,11 @@ export function CourbeCours({ serie, niveaux }: { serie: Technique['serie']; niv
   }
 
   const L = 620;
-  const H = 250;
+  /* 200 et non 250 : la feuille 5 porte aussi le panneau de détachement, qui
+     peut afficher un encadré (baisse inférieure au dividende) et une note
+     d'ex-date. À 250, huit dossiers débordaient (SNTS de 43 px) et le verrou
+     d'impression les refusait — à raison. */
+  const H = 200;
   const MG = { haut: 14, bas: 30, gauche: 60, droite: 56 };
   const largeurUtile = L - MG.gauche - MG.droite;
   const hauteurUtile = H - MG.haut - MG.bas;
