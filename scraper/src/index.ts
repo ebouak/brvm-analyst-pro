@@ -275,7 +275,7 @@ async function main(): Promise<number> {
       const res = await monitored(
         { code: 'dossiers-envoi', label: 'Envoi des dossiers valeur' },
         async () => {
-          const r = await runEnvoi({ mock });
+          const r = await runEnvoi({ mock, rectificatif: process.argv.includes('--rectificatif') });
           return {
             value: r,
             outcome: {

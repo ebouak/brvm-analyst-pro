@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { composerMessage } from '../src/dossiers/message.js';
+import { composerMessage, composerRectificatif } from '../src/dossiers/message.js';
 import type { Selection } from '../src/dossiers/selection.js';
 
 const sel: Selection = {
@@ -57,5 +57,27 @@ describe('composerMessage', () => {
   it('sans reste, aucun renvoi au portefeuille', () => {
     const court: Selection = { ...sel, reste_email: [] };
     expect(composerMessage(court, '2026-09-14', 'email').corps).not.toContain('/portefeuille');
+  });
+});
+
+describe('composerRectificatif', () => {
+  const r = composerRectificatif(sel, '2026-10-05', 'email');
+
+  it('annonce un rectificatif daté de la semaine de l’envoi fautif', () => {
+    expect(r.sujet).toBe('Rectificatif — vos dossiers valeur de la semaine du 05/10/2026');
+  });
+
+  it('dit que les pièces jointes REMPLACENT les précédentes et ce qui était faux, sans chiffre', () => {
+    expect(r.corps).toContain('remplacent');
+    expect(r.corps).toContain('trimestre');
+    expect(r.corps).toContain('NEIC — NEI CEDA CI');
+    expect(r.corps).toContain('ne constitue pas un conseil en investissement');
+  });
+
+  it('AUCUN chiffre dans le corps, hors dates JJ/MM/AAAA', () => {
+    for (const canal of ['email', 'telegram'] as const) {
+      const sansDates = composerRectificatif(sel, '2026-10-05', canal).corps.replace(/\b\d{2}\/\d{2}\/\d{4}\b/g, '');
+      expect(sansDates).not.toMatch(/\d/);
+    }
   });
 });

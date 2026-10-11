@@ -26,7 +26,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { sendEmail, sendTelegramDocument, sendTelegramText } from '../alerts/channels.js';
 import { cleSemaine, selectionnerLignes, type LigneCandidate, type Selection } from './selection.js';
-import { composerMessage } from './message.js';
+import { composerMessage, composerRectificatif } from './message.js';
 
 const BUCKET = 'dossiers';
 
@@ -49,8 +49,16 @@ interface Pref {
 type Canal = 'email' | 'telegram';
 type Statut = 'en_cours' | 'envoye' | 'echec' | 'vide';
 
-export async function runEnvoi(opts: { mock?: boolean } = {}): Promise<EnvoiResult> {
+/**
+ * `rectificatif` : renvoie la version CORRIGÉE des dossiers aux seuls comptes
+ * dont l'envoi de la semaine est `envoye` et pas encore rectifié
+ * (`rectifie_le` nul, migration 0150), avec un message qui dit ce qui était
+ * faux. Il ne touche JAMAIS au statut de l'envoi d'origine ; il pose
+ * `rectifie_le` après succès — un rectificatif ne part donc qu'une fois.
+ */
+export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } = {}): Promise<EnvoiResult> {
   const mock = Boolean(opts.mock);
+  const rectificatif = Boolean(opts.rectificatif);
   const sb = getSupabase();
   const maintenant = new Date();
   const semaine = cleSemaine(maintenant);
@@ -122,6 +130,20 @@ export async function runEnvoi(opts: { mock?: boolean } = {}): Promise<EnvoiResu
     ((dejaRows ?? []) as { user_id: string; canal: string }[]).map((r) => `${r.user_id}:${r.canal}`),
   );
 
+  /* Rectificatif : seules cibles = envois de la semaine, réussis, non rectifiés. */
+  let aRectifier = new Set<string>();
+  if (rectificatif) {
+    const { data: rows, error } = await sb
+      .from('dossier_envois')
+      .select('user_id, canal')
+      .eq('semaine', semaine)
+      .eq('statut', 'envoye')
+      .is('rectifie_le', null);
+    if (error) throw new Error(`dossier_envois (rectificatif) : ${error.message}`);
+    aRectifier = new Set(((rows ?? []) as { user_id: string; canal: string }[]).map((r) => `${r.user_id}:${r.canal}`));
+    logger.info({ semaine, cibles: aRectifier.size }, 'rectificatif : envois à corriger');
+  }
+
   // Un PDF n'est téléchargé qu'une fois, même s'il est détenu par dix comptes.
   const cache = new Map<string, Buffer>();
   const telecharger = async (code: string): Promise<Buffer> => {
@@ -163,7 +185,13 @@ export async function runEnvoi(opts: { mock?: boolean } = {}): Promise<EnvoiResu
     if (p.dossiers_telegram && p.telegram_chat_id) canaux.push('telegram');
 
     for (const canal of canaux) {
-      if (deja.has(`${p.user_id}:${canal}`)) {
+      if (rectificatif) {
+        // Rectificatif : uniquement les envois fautifs de la semaine.
+        if (!aRectifier.has(`${p.user_id}:${canal}`)) {
+          res.sautes += 1;
+          continue;
+        }
+      } else if (deja.has(`${p.user_id}:${canal}`)) {
         res.sautes += 1;
         continue;
       }
@@ -171,15 +199,16 @@ export async function runEnvoi(opts: { mock?: boolean } = {}): Promise<EnvoiResu
       // Portefeuille vide, ou aucun dossier frais : aucun message. Un envoi
       // vide est du bruit ; la trace reste en base pour l'expliquer.
       if (sel.retenues.length === 0) {
-        await journal(p.user_id, canal, 'vide', []);
+        if (!rectificatif) await journal(p.user_id, canal, 'vide', []);
         res.vides += 1;
         continue;
       }
 
-      const msg = composerMessage(sel, semaine, canal);
+      const msg = rectificatif ? composerRectificatif(sel, semaine, canal) : composerMessage(sel, semaine, canal);
       const envoyees = canal === 'email' ? sel.pieces_jointes_email : sel.retenues;
       const codes = envoyees.map((l) => l.code);
-      await journal(p.user_id, canal, 'en_cours', codes);
+      // Le rectificatif ne réécrit jamais le statut de l'envoi d'origine.
+      if (!rectificatif) await journal(p.user_id, canal, 'en_cours', codes);
 
       if (mock) {
         logger.info({ user_id: p.user_id, canal, codes, sujet: msg.sujet }, 'mock : envoi simulé');
@@ -219,11 +248,22 @@ export async function runEnvoi(opts: { mock?: boolean } = {}): Promise<EnvoiResu
             if (!r || r.status !== 'sent') throw new Error(`${l.code} : ${r?.error ?? 'envoi refusé'}`);
           }
         }
-        await journal(p.user_id, canal, 'envoye', codes);
+        if (rectificatif) {
+          const { error } = await sb
+            .from('dossier_envois')
+            .update({ rectifie_le: new Date().toISOString() })
+            .eq('user_id', p.user_id)
+            .eq('semaine', semaine)
+            .eq('canal', canal);
+          if (error) logger.warn({ user_id: p.user_id, canal, err: error.message }, 'rectificatif envoyé mais non journalisé');
+        } else {
+          await journal(p.user_id, canal, 'envoye', codes);
+        }
         res.envoyes += 1;
       } catch (err) {
         const e = err instanceof Error ? err.message : String(err);
-        await journal(p.user_id, canal, 'echec', codes, e);
+        // Rectificatif en échec : la ligne reste « non rectifiée », relançable.
+        if (!rectificatif) await journal(p.user_id, canal, 'echec', codes, e);
         res.echecs += 1;
         logger.error({ user_id: p.user_id, canal, err: e }, 'envoi de dossiers échoué');
       }

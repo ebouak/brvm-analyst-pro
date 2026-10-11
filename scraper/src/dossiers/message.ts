@@ -24,6 +24,42 @@ function dateFR(iso: string): string {
   return `${j}/${m}/${a}`;
 }
 
+/**
+ * Rectificatif — envoyé aux comptes qui ont reçu un dossier fautif.
+ *
+ * Il dit CE qui était faux, en mots et sans chiffre (même règle que le message
+ * hebdomadaire : les chiffres justes sont dans les pièces jointes), et que les
+ * pièces jointes REMPLACENT les précédentes. Un porteur qui a lu « chiffre
+ * d'affaires en recul » doit savoir que c'était faux, pas seulement recevoir
+ * un nouveau fichier sans explication.
+ */
+export function composerRectificatif(sel: Selection, semaine: string, canal: 'email' | 'telegram'): Message {
+  const sujet = `Rectificatif — vos dossiers valeur de la semaine du ${dateFR(semaine)}`;
+  const jointes = canal === 'email' ? sel.pieces_jointes_email : sel.retenues;
+  const lignes: string[] = [
+    sujet,
+    '',
+    `Les dossiers valeur envoyés la semaine du ${dateFR(semaine)} comportaient une erreur de période :`,
+    'certains panneaux comparaient un trimestre à un semestre ou à un exercice annuel.',
+    'Cela a pu afficher à tort une baisse du chiffre d’affaires, ou un résultat d’exploitation « non disponible ».',
+    '',
+    'Les dossiers corrigés ci-joints remplacent les précédents. Merci de ne plus tenir compte des anciennes versions :',
+  ];
+  for (const l of jointes) lignes.push(`  • ${l.code} — ${l.designation}`);
+  if (canal === 'email' && sel.reste_email.length > 0) {
+    lignes.push('', 'Également corrigés, sur votre portefeuille :');
+    for (const l of sel.reste_email) lignes.push(`  • ${l.code} — ${l.designation}`);
+    lignes.push('  https://www.westbourse.com/portefeuille');
+  }
+  lignes.push(
+    '',
+    'Nous vous prions de nous excuser pour cette erreur.',
+    '',
+    'Document d’information établi à partir des données Westbourse ; ne constitue pas un conseil en investissement.',
+  );
+  return { sujet, corps: lignes.join('\n') };
+}
+
 export function composerMessage(sel: Selection, semaine: string, canal: 'email' | 'telegram'): Message {
   const sujet = `Vos dossiers valeur — semaine du ${dateFR(semaine)}`;
 
