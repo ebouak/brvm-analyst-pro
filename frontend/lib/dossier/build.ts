@@ -18,7 +18,7 @@ import { computeLevels, type Levels } from '@/lib/hebdo/levels';
 import { lectureIntermediaire, type LectureIntermediaire } from '@/lib/financials/interim';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import type { ComparaisonMedianes } from '@/lib/diagnostic/medianes';
-import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, type PerformanceTitre, type Pilier } from './suivi';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, type PerformanceTitre, type Pilier } from './suivi';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -61,6 +61,8 @@ export interface Identite {
     date_notation: string | null;
     /** Années consécutives à note identique, la plus récente comprise. */
     annees_stables: number | null;
+    /** Date d'un communiqué de notation PLUS RÉCENT que la note : elle est alors à confirmer. */
+    communique_plus_recent: string | null;
   } | null;
 }
 
@@ -245,6 +247,7 @@ function litNotation(brut: unknown): Identite['notation'] {
     perspective: n.perspective ?? null,
     date_notation: n.date_notation ?? null,
     annees_stables: stables > 0 ? stables : null,
+    communique_plus_recent: null,
   };
 }
 
@@ -311,6 +314,20 @@ export async function buildDossier(
     ? await sb.from('balance_sheets').select('total_actifs').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
     : { data: null };
   const fisc = fiscaliteDividende((instr as { pays?: string | null }).pays ?? null);
+  const notation = litNotation((instr as { notation_json?: unknown }).notation_json);
+  if (notation) {
+    const { data: communiques } = await sb.from('publications').select('date_publication')
+      .eq('code', CODE).ilike('libelle', '%notation%').order('date_publication', { ascending: false }).limit(5);
+    notation.communique_plus_recent = notationDepassee(
+      notation.date_notation,
+      ((communiques ?? []) as { date_publication: string | null }[]).map((c) => c.date_publication).filter((x): x is string => !!x),
+    );
+    if (notation.communique_plus_recent) {
+      lacunes.push(
+        `Un communiqué de notation publié le ${notation.communique_plus_recent.split('-').reverse().join('/')} est plus récent que la note enregistrée : celle-ci est à confirmer.`,
+      );
+    }
+  }
   const tauxIrvm = fisc.taux != null ? `${Math.round(fisc.taux * 1000) / 10} %`.replace('.', ',') : null;
 
   /* Le dividende retenu est le plus récent STRICTEMENT POSITIF. Un zéro est
@@ -405,10 +422,14 @@ export async function buildDossier(
   /* ── Suivi : performance, liquidité, publication intermédiaire, piliers ── */
   const famille = (FAMILLE_PAR_CODE[CODE] ?? 'general') as Suivi['famille'];
   const debutAnnee = derniere?.date_marche ? `${derniere.date_marche.slice(0, 4)}-01-01` : null;
+  /* Base « depuis le 1er janvier » = DERNIÈRE CLÔTURE DE L'ANNÉE PRÉCÉDENTE,
+     convention du Bulletin officiel. La première séance de l'année (ancienne
+     base) faisait dire +73,0 % au dossier SNTS là où la BRVM publie +72,21 %
+     (44 980 / 26 120, clôture du 31/12/2025). */
   const [{ data: premierAn }, { data: liq }] = await Promise.all([
     debutAnnee
-      ? sb.from('brvm_actions_daily').select('cours_jour').eq('code', CODE).gte('date_marche', debutAnnee)
-          .gt('cours_jour', 0).order('date_marche', { ascending: true }).limit(1).maybeSingle()
+      ? sb.from('brvm_actions_daily').select('cours_jour').eq('code', CODE).lt('date_marche', debutAnnee)
+          .gt('cours_jour', 0).order('date_marche', { ascending: false }).limit(1).maybeSingle()
       : Promise.resolve({ data: null }),
     sb.from('liquidity_daily').select('date_marche, score, classe, spread_pct, spread_source, valeur_moyenne_30j')
       .eq('code', CODE).order('date_marche', { ascending: false }).limit(1).maybeSingle(),
@@ -468,7 +489,7 @@ export async function buildDossier(
       taux_irvm: fisc.taux,
       actions,
       flottant: (instr as { flottant?: number | null }).flottant ?? null,
-      notation: litNotation((instr as { notation_json?: unknown }).notation_json),
+      notation,
     },
     chiffres_cles: {
       exercice: exerciceRef,

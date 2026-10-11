@@ -177,7 +177,8 @@ export function construireNarratif(d: DossierValeur): Narratif {
   }
 
   // ── Notation ────────────────────────────────────────────────────────────
-  if (d.identite.notation?.note) {
+  // Une note dépassée par un communiqué plus récent n'est pas un point d'appui.
+  if (d.identite.notation?.note && !d.identite.notation.communique_plus_recent) {
     const n = d.identite.notation;
     const stab = n.annees_stables && n.annees_stables > 1 ? `, stable depuis ${n.annees_stables} exercices` : '';
     forces.push({
