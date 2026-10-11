@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { performanceTitre, piliersThese, controleExDate } from './suivi.ts';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende } from './suivi.ts';
 
 test('performance : 1 mois (21 séances), depuis le 1er janvier, position dans la plage 52 semaines', () => {
   const closes = Array.from({ length: 30 }, (_, i) => 100 + i); // 100 … 129
@@ -49,4 +49,26 @@ test('ex-date : une baisse très inférieure au dividende signale une date à v�
   assert.equal(controleExDate({ dividende: 140.4, baisse: 350 }), 'coherente');
   assert.equal(controleExDate({ dividende: 55.44, baisse: 0 }), 'a_verifier');
   assert.equal(controleExDate({ dividende: 100, baisse: 60 }), 'coherente', 'au-delà de 50 % du dividende');
+});
+
+test("rentabilité de l'actif : l'actif total du bilan quand il existe (SNTS 2025 : 413,6 / 3 270,2 = 12,6 %)", () => {
+  const r = rentabiliteActif({ resultatNet: 413_588e6, totalActif: 3_270_175e6, capitauxPropres: 1_399_263e6, dette: 248_038e6 });
+  assert.equal(r?.mesure, 'actif_total');
+  assert.equal(Math.round(r.valeur * 1000) / 10, 12.6);
+});
+
+test("rentabilité de l'actif : sans bilan, l'approximation change de NOM (capitaux investis), jamais présentée comme l'actif", () => {
+  const r = rentabiliteActif({ resultatNet: 413_588e6, totalActif: null, capitauxPropres: 1_399_263e6, dette: 248_038e6 });
+  assert.equal(r?.mesure, 'capitaux_investis');
+  assert.equal(Math.round(r.valeur * 1000) / 10, 25.1);
+  assert.equal(rentabiliteActif({ resultatNet: null, totalActif: 1, capitauxPropres: 1, dette: 1 }), null);
+  assert.equal(rentabiliteActif({ resultatNet: 1, totalActif: null, capitauxPropres: 1, dette: null }), null);
+});
+
+test("fiscalité du dividende : le taux vient du barème du pays de l'émetteur, jamais d'un 12 % en dur", () => {
+  assert.deepEqual(fiscaliteDividende('SN'), { pays: 'Sénégal', taux: 0.1 });
+  assert.deepEqual(fiscaliteDividende('ML'), { pays: 'Mali', taux: 0.07 });
+  // Pays connu au taux non vérifié, ou pays absent : AUCUN chiffre.
+  assert.deepEqual(fiscaliteDividende('NE'), { pays: 'Niger', taux: null });
+  assert.deepEqual(fiscaliteDividende(null), { pays: null, taux: null });
 });

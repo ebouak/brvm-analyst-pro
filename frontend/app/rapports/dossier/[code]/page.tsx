@@ -67,6 +67,8 @@ const pourcent = (v: number | null | undefined, d = 1) =>
   v == null ? null : `${v >= 0 ? '+' : '−'}${fmtNumber(Math.abs(v) * 100, d)} %`;
 /** Sans signe : pour les grandeurs qui n'ont pas de sens négatif (payout, part). */
 const part = (v: number | null | undefined, d = 1) => (v == null ? null : `${fmtNumber(v * 100, d)} %`);
+/** Taux réglementaire : « 10 % », « 12,5 % » — jamais « 10,0 % ». */
+const taux = (v: number) => `${fmtNumber(v * 100, Math.round(v * 1000) % 10 === 0 ? 0 : 1)} %`;
 const fois = (v: number | null | undefined) => (v == null ? null : `${fmtNumber(v, 2)} ×`);
 
 function Mesure({
@@ -223,7 +225,7 @@ export default async function DossierPage({ params }: { params: { code: string }
         <Panneau
           n={1}
           titre="Ce que dit ce dossier"
-          chapo="Les douze panneaux qui suivent sont construits à partir de la base : cotations, états financiers, dividendes et signaux. Rien n'y est estimé."
+          chapo="Les panneaux qui suivent sont construits à partir de la base : cotations, états financiers, dividendes et signaux. Toute approximation y est nommée comme telle ; ce qui manque est déclaré au panneau 12."
         >
           <dl className="dv-grille">
             <Mesure
@@ -248,7 +250,7 @@ export default async function DossierPage({ params }: { params: { code: string }
             <Mesure
               libelle="Points non établis"
               valeur={`${d.lacunes.length}`}
-              note="Détaillés au panneau 12 plutôt que laissés en blanc."
+              note="Réserves détaillées au panneau 12. Une mesure sans donnée est en outre marquée « non disponible » dans son panneau."
             />
           </dl>
         </Panneau>
@@ -361,7 +363,19 @@ export default async function DossierPage({ params }: { params: { code: string }
             />
             <Mesure libelle="Marge nette" valeur={part(r?.margeNette)} />
             <Mesure libelle="Endettement / capitaux propres" valeur={part(r?.gearing)} />
-            <Mesure libelle="Rentabilité de l'actif" valeur={part(r?.roa)} note="Approchée : capitaux propres + dette." />
+            {d.rentabilite_actif?.mesure === 'capitaux_investis' ? (
+              <Mesure
+                libelle="Rentabilité des capitaux investis"
+                valeur={part(d.rentabilite_actif.valeur)}
+                note="Résultat net / (capitaux propres + dette) : l'actif total de l'exercice n'est pas en base."
+              />
+            ) : (
+              <Mesure
+                libelle="Rentabilité de l'actif"
+                valeur={part(d.rentabilite_actif?.valeur)}
+                note={c.exercice ? `Résultat net / actif total ${c.exercice}.` : undefined}
+              />
+            )}
           </dl>
         </Panneau>
       </Feuille>
@@ -420,9 +434,9 @@ export default async function DossierPage({ params }: { params: { code: string }
                   valeur={`${fmtNumber(div.montant, 2)} FCFA`}
                   note={
                     div.base_fiscale === 'net'
-                      ? "Montant NET : l'IRVM de 12 % est déjà retenu à la source."
+                      ? `Montant NET : l'impôt sur le revenu des valeurs mobilières${id.taux_irvm != null ? ` (${taux(id.taux_irvm)})` : ''} est déjà retenu à la source.`
                       : div.base_fiscale === 'brut'
-                        ? 'Montant BRUT, avant retenue de 12 % au titre de l’IRVM.'
+                        ? `Montant BRUT, avant la retenue de l'impôt sur le revenu des valeurs mobilières${id.taux_irvm != null ? ` (${taux(id.taux_irvm)})` : ''}.`
                         : `La source « ${div.source ?? 'inconnue'} » ne précise pas si ce montant est brut ou net.`
                   }
                 />
@@ -437,7 +451,7 @@ export default async function DossierPage({ params }: { params: { code: string }
                       ? 'Rendement net du cours actuel.'
                       : div.base_fiscale === 'brut'
                         ? 'Rendement brut du cours actuel.'
-                        : 'Base fiscale inconnue : ce taux est incertain à hauteur de 12 %.'
+                        : `Base fiscale inconnue : ce taux est incertain à hauteur de l'impôt retenu à la source${id.taux_irvm != null ? ` (${taux(id.taux_irvm)})` : ''}.`
                   }
                 />
                 <Mesure
@@ -445,7 +459,7 @@ export default async function DossierPage({ params }: { params: { code: string }
                   valeur={part(div.payout)}
                   note={
                     div.base_fiscale === 'net'
-                      ? "Rapporte un dividende net à un bénéfice brut : minoré d'environ 12 %."
+                      ? `Rapporte un dividende net à un bénéfice brut : minoré${id.taux_irvm != null ? ` d'environ ${taux(id.taux_irvm)}` : " du taux de l'impôt retenu à la source"}.`
                       : 'Part du résultat net distribuée.'
                   }
                 />
@@ -598,8 +612,8 @@ export default async function DossierPage({ params }: { params: { code: string }
           <p className="dv-prose">{lecture!.texte}</p>
           <p className="dv-source">
             {prose.source === 'polie'
-              ? `Rédaction relue le ${fmtDateFR(prose.genere_le)} — sans aucun chiffre, par construction ; les chiffres sont dans les panneaux.`
-              : 'Rédaction automatique : sans aucun chiffre, par construction ; les chiffres sont dans les panneaux.'}
+              ? `Texte relu le ${fmtDateFR(prose.genere_le)}, établi à partir des panneaux de ce dossier. Il ne cite aucun chiffre : tous figurent dans les panneaux.`
+              : 'Texte établi à partir des panneaux de ce dossier. Il ne cite aucun chiffre : tous figurent dans les panneaux.'}
           </p>
         </section>
 
