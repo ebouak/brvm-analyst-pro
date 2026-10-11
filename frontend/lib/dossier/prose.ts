@@ -91,7 +91,7 @@ export function construireSquelette(d: DossierValeur, n: Narratif): Squelette {
           : lv.cassureBas
             ? 'La dernière clôture se situe sous le support : le canal est rompu par le bas.'
             : 'La dernière clôture se situe à l’intérieur du canal.',
-        'Au-dessus de la résistance, les extensions haussières prolongent l’amplitude du canal ; sous le support, l’invalidation puis les extensions baissières font de même.',
+        'Au-dessus de la résistance, les extensions haussières prolongent l’amplitude du canal ; sous le support, le seuil d’invalidation marque la rupture du canal par le bas.',
         'Ces niveaux décrivent la géométrie du canal, pas une prévision : ils disent où le mouvement porterait s’il se prolongeait, rien de plus.',
         'Les valeurs correspondantes sont dans le tableau ci-dessous.',
       ].join(' ')

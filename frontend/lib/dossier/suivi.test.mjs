@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende } from './suivi.ts';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee } from './suivi.ts';
 
 test('performance : 1 mois (21 séances), depuis le 1er janvier, position dans la plage 52 semaines', () => {
   const closes = Array.from({ length: 30 }, (_, i) => 100 + i); // 100 … 129
@@ -71,4 +71,12 @@ test("fiscalité du dividende : le taux vient du barème du pays de l'émetteur,
   // Pays connu au taux non vérifié, ou pays absent : AUCUN chiffre.
   assert.deepEqual(fiscaliteDividende('NE'), { pays: 'Niger', taux: null });
   assert.deepEqual(fiscaliteDividende(null), { pays: null, taux: null });
+});
+
+test('notation : un communiqué de notation postérieur à la note enregistrée la rend « à confirmer » (SNTS : AA+ du 01/06/2025, communiqué du 30/06/2026)', () => {
+  assert.equal(notationDepassee('2025-06-01', ['2026-06-30', '2024-06-28']), '2026-06-30');
+  assert.equal(notationDepassee('2025-06-01', ['2024-06-28']), null);
+  // Note sans date : on ne peut pas la dater, le communiqué le plus récent la signale.
+  assert.equal(notationDepassee(null, ['2024-06-28']), '2024-06-28');
+  assert.equal(notationDepassee('2025-06-01', []), null);
 });

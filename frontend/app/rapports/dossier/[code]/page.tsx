@@ -279,12 +279,19 @@ export default async function DossierPage({ params }: { params: { code: string }
             />
             <Mesure
               libelle="Notation"
-              valeur={id.notation?.note ?? null}
+              valeur={id.notation?.note ? (id.notation.communique_plus_recent ? 'À confirmer' : id.notation.note) : null}
+              texte={!!id.notation?.communique_plus_recent}
               note={
                 id.notation?.note
-                  ? `${id.notation.agence ?? 'Agence non précisée'}${
-                      id.notation.perspective ? `, perspective ${id.notation.perspective}` : ''
-                    }. Mesure la qualité de crédit, pas la valorisation de l'action.`
+                  ? id.notation.communique_plus_recent
+                    ? `Note enregistrée : ${id.notation.note} (${id.notation.agence ?? 'agence non précisée'}${
+                        id.notation.date_notation ? `, ${fmtDateFR(id.notation.date_notation)}` : ''
+                      }). Un communiqué de notation du ${fmtDateFR(id.notation.communique_plus_recent)} n'est pas encore intégré.`
+                    : `${id.notation.agence ?? 'Agence non précisée'}${
+                        id.notation.date_notation ? `, ${fmtDateFR(id.notation.date_notation)}` : ''
+                      }${
+                        id.notation.perspective ? `, perspective ${id.notation.perspective}` : ''
+                      }. Mesure la qualité de crédit, pas la valorisation de l'action.`
                   : undefined
               }
             />
@@ -441,7 +448,19 @@ export default async function DossierPage({ params }: { params: { code: string }
                   }
                 />
                 <Mesure libelle="Exercice" valeur={div.exercice != null ? String(div.exercice) : null} />
-                <Mesure libelle="Détachement" valeur={div.ex_date ? fmtDateFR(div.ex_date) : null} />
+                {/* Une date que la baisse du cours ne confirme pas n'est pas un fait :
+                    le dossier SNTS l'affichait ici sans réserve, la désavouait au
+                    panneau 12, et l'Ascension (14/05/2026) n'avait aucune séance. */}
+                {d.suivi.ex_date_controle === 'a_verifier' && div.ex_date ? (
+                  <Mesure
+                    libelle="Détachement"
+                    valeur="Non établi"
+                    texte
+                    note={`Date enregistrée : ${fmtDateFR(div.ex_date)}. Le cours ne la confirme pas (panneau 8).`}
+                  />
+                ) : (
+                  <Mesure libelle="Détachement" valeur={div.ex_date ? fmtDateFR(div.ex_date) : null} />
+                )}
                 <Mesure libelle="Mise en paiement" valeur={div.payment_date ? fmtDateFR(div.payment_date) : null} />
                 <Mesure
                   libelle="Rendement"
@@ -511,7 +530,7 @@ export default async function DossierPage({ params }: { params: { code: string }
             <>
               <dl className="dv-grille">
                 <Mesure
-                  libelle="Séance de détachement"
+                  libelle={d.suivi.ex_date_controle === 'a_verifier' ? 'Séance de détachement enregistrée' : 'Séance de détachement'}
                   valeur={fmtDateFR(d.detachement.ex_date)}
                   note={
                     d.detachement.ex_date_officielle !== d.detachement.ex_date
@@ -555,7 +574,8 @@ export default async function DossierPage({ params }: { params: { code: string }
                       : <>Le cours n&apos;a pas baissé</>}{' '}
                     pour un dividende de <strong>{fmtNumber(d.detachement.dividende, 2)} FCFA</strong> : la clôture termine{' '}
                     <strong>{part(d.detachement.recul_hors_dividende, 2)}</strong> au-dessus de la référence ajustée du
-                    dividende. Le constat est mécanique ; il ne dit pas pourquoi le marché a compensé le détachement.
+                    dividende. Soit la date enregistrée n&apos;est pas la bonne, soit le marché a absorbé le détachement : les
+                    données disponibles ne permettent pas de trancher.
                   </p>
                 </div>
               )}
@@ -736,7 +756,7 @@ export default async function DossierPage({ params }: { params: { code: string }
         <Panneau n={13} titre="Le titre en bourse" chapo="Évolution du cours et facilité à traiter le titre, mesurées sur les séances réelles.">
           <dl className="dv-grille">
             <Mesure libelle="Sur un mois" valeur={pourcent(d.suivi.performance.var_1m)} ton={tonDe(d.suivi.performance.var_1m)} note="Vingt et une séances." />
-            <Mesure libelle="Depuis le 1er janvier" valeur={pourcent(d.suivi.performance.var_ytd)} ton={tonDe(d.suivi.performance.var_ytd)} />
+            <Mesure libelle="Depuis le 1er janvier" valeur={pourcent(d.suivi.performance.var_ytd)} ton={tonDe(d.suivi.performance.var_ytd)} note="Base : dernière clôture de l'année précédente." />
             <Mesure
               libelle="Plage 52 semaines"
               valeur={d.suivi.performance.bas52 != null && d.suivi.performance.haut52 != null ? `${nb(d.suivi.performance.bas52)} – ${nb(d.suivi.performance.haut52)}` : null}
@@ -822,7 +842,10 @@ export default async function DossierPage({ params }: { params: { code: string }
                     .map((l) => (
                       <tr key={l.libelle}>
                         <td>{l.libelle}</td>
-                        <td className="dv-num">{fmtRatio(l.valeur, l.unite) ?? '—'}</td>
+                        {/* La colonne « société » reprend les ratios DU DOSSIER (panneau 3) :
+                            ceux du diagnostic, arrondis autrement, faisaient lire 3,21 au
+                            panneau 3 et 3,22 ici pour la même valeur (SNTS). */}
+                        <td className="dv-num">{fmtRatio(ratioPropre(r, l.libelle) ?? l.valeur, l.unite) ?? '—'}</td>
                         <td className="dv-num">{fmtRatio(l.mediane, l.unite) ?? '—'}</td>
                         <td className="dv-num">{l.nbPairs}</td>
                       </tr>
@@ -892,6 +915,19 @@ export default async function DossierPage({ params }: { params: { code: string }
 
 function tonDe(v: number | null | undefined): 'hausse' | 'baisse' | undefined {
   return v == null || Math.abs(v) < 0.00005 ? undefined : v > 0 ? 'hausse' : 'baisse';
+}
+
+/** Ratio de la société tel que calculé par le dossier, à l'échelle des lignes de comparables (`%` × 100). */
+function ratioPropre(r: DossierValeur['ratios'], libelle: string): number | null {
+  if (!r) return null;
+  const cent = (v: number | null) => (v == null ? null : v * 100);
+  switch (libelle) {
+    case 'PER': return r.per;
+    case 'Cours / valeur comptable': return r.pb;
+    case 'ROE': return cent(r.roe);
+    case 'Rendement du dividende': return cent(r.rendementDiv);
+    default: return null;
+  }
 }
 
 /** Valeur d'une ligne de comparables : `%` déjà multiplié par 100 par medianes.ts. */

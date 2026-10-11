@@ -181,3 +181,17 @@ export function fiscaliteDividende(paysBrut: string | null): { pays: string | nu
   if (!code) return { pays: paysBrut?.trim() || null, taux: null };
   return { pays: PAYS_LABELS[code], taux: BAREME[code].dividende_cote.taux };
 }
+
+// ── Notation ────────────────────────────────────────────────────────────────
+
+/**
+ * Date du communiqué de notation le plus récent s'il est POSTÉRIEUR à la note
+ * enregistrée, sinon null. Le dossier SNTS d'octobre 2026 affichait « AA+ »
+ * (note du 01/06/2025, source richbourse) alors qu'un communiqué GCR du
+ * 30/06/2026 était en base : une note dépassée ne s'affiche pas comme actuelle.
+ */
+export function notationDepassee(dateNotation: string | null, communiques: string[]): string | null {
+  const dernier = [...communiques].sort().at(-1) ?? null;
+  if (!dernier) return null;
+  return dateNotation == null || dernier > dateNotation ? dernier : null;
+}
