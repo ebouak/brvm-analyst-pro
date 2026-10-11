@@ -128,7 +128,7 @@ export function ContactNudge() {
       ref={cardRef}
       role="dialog"
       aria-label="Une question ? On vous répond"
-      className="fixed bottom-4 right-4 z-[120] w-[min(92vw,22rem)] motion-safe:animate-[nudgeIn_.45s_ease-out] rounded-2xl border border-accent/30 bg-surface/95 p-4 shadow-[0_18px_50px_-12px_rgba(0,0,0,.7)] backdrop-blur"
+      className="print:hidden fixed bottom-4 right-4 z-[120] w-[min(92vw,22rem)] motion-safe:animate-[nudgeIn_.45s_ease-out] rounded-2xl border border-accent/30 bg-surface/95 p-4 shadow-[0_18px_50px_-12px_rgba(0,0,0,.7)] backdrop-blur"
     >
       <button
         type="button"

@@ -212,7 +212,10 @@
   font-size: 13pt;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+  /* break-word + césure : « Télécommunications » se coupait en
+     « Télécommunica / tions » avec `anywhere`. */
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .dv-mesure small {

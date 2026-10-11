@@ -136,15 +136,41 @@ export function qualiteResultat(ligne: LigneResultat | null | undefined): Qualit
   };
 }
 
+/** « 2025 » est un exercice annuel ; « 2025-S1 », « 2025-T3 » sont intermédiaires. */
+export const estAnnuel = (periode: string): boolean => /^\d{4}$/.test(periode);
+
 /**
- * Croissance du chiffre d'affaires sur `nAnnees` exercices, en fraction de 1.
- * `lignes` doit être trié du plus récent au plus ancien.
+ * Les seuls exercices ANNUELS, du plus récent au plus ancien.
+ *
+ * `fusionnerExercices` trie les périodes comme du texte : « 2026-T1 » passe
+ * devant « 2026-S1 » puis devant « 2025 ». Prendre `[0]` pour « le dernier
+ * exercice » a fait titrer le dossier SNTS « exercice 2026-T1 » au-dessus des
+ * montants annuels 2025. Un panneau qui parle d'« exercice » lit CETTE liste.
+ */
+export function exercicesAnnuels(lignes: LigneResultat[]): LigneResultat[] {
+  return lignes.filter((l) => estAnnuel(l.periode)).sort((a, b) => Number(b.periode) - Number(a.periode));
+}
+
+/**
+ * Croissance du chiffre d'affaires sur `nAnnees`, en fraction de 1, de la
+ * période la plus récente (`lignes[0]`) contre LA MÊME période `nAnnees` plus
+ * tôt : 2025 contre 2024, S1 2026 contre S1 2025, T1 contre T1.
+ *
+ * Avant le 2026-10-11, elle comparait `lignes[0]` à `lignes[nAnnees]`,
+ * quelle qu'en soit la nature. Sur SNTS : T1 2026 (504 Md) contre S1 2026
+ * (1 050 Md), soit « −52 % » publié dans un dossier envoyé aux porteurs,
+ * pour une société dont le CA progressait de 8,3 %. Sans période équivalente
+ * en base, la réponse est `null` : jamais un rapprochement de durées
+ * différentes.
  */
 export function croissanceCA(lignes: LigneResultat[], nAnnees: number): number | null {
-  const recent = lignes[0]?.revenu_total ?? null;
-  const ancien = lignes[nAnnees]?.revenu_total ?? null;
-  if (recent == null || ancien == null || ancien === 0) return null;
-  return (recent - ancien) / ancien;
+  const recente = lignes[0];
+  const m = recente?.periode.match(/^(\d{4})(.*)$/);
+  if (!recente || !m || recente.revenu_total == null) return null;
+  const cible = `${Number(m[1]) - nAnnees}${m[2]}`;
+  const ancien = lignes.find((l) => l.periode === cible)?.revenu_total ?? null;
+  if (ancien == null || ancien === 0) return null;
+  return (recente.revenu_total - ancien) / ancien;
 }
 
 export interface Detachement {

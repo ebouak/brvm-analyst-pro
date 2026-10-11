@@ -6,6 +6,7 @@ import {
   computeRatios,
   pickBestFundamental,
   fusionnerExercices,
+  exercicesAnnuels,
   qualiteResultat,
   croissanceCA,
   expliqueDetachement,
@@ -306,10 +307,12 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
         publications: pubs ?? [],
         events: evts ?? [],
         ratios,
-        qualite_resultat: qualiteResultat(exercices[0]),
+        // Exercices ANNUELS : `exercices[0]` peut être un trimestre (tri texte),
+        // ce qui faisait comparer T1 à S1 (SNTS « −52 % », 2026-10-11).
+        qualite_resultat: qualiteResultat(exercicesAnnuels(exercices)[0]),
         croissance_ca: {
-          un_an: croissanceCA(exercices, 1),
-          deux_ans: croissanceCA(exercices, 2),
+          un_an: croissanceCA(exercicesAnnuels(exercices), 1),
+          deux_ans: croissanceCA(exercicesAnnuels(exercices), 2),
         },
         comptes_resultat: exercices,
         detachement,
