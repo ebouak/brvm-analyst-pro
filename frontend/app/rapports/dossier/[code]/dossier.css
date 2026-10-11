@@ -218,6 +218,15 @@
   hyphens: auto;
 }
 
+/* Valeur en MOTS (secteur, pays) : la chasse fixe à 13 pt ne loge pas
+   « Télécommunications » dans un quart de page, et la césure le coupait. */
+.dv-mesure dd.dv-dd-texte {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 10.5pt;
+  hyphens: manual;
+  overflow-wrap: normal;
+}
+
 .dv-mesure small {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 8pt;

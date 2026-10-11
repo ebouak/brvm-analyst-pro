@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
+import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
+import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { buildDossier, type DossierValeur } from '@/lib/dossier/build';
 import { construireNarratif } from '@/lib/dossier/narratif';
+import { controlerDossier } from '@/lib/dossier/controles';
 import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
 import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dossier/Graphiques';
 import { fmtFcfa, fmtNumber, fmtDateFR } from '@/lib/format';
@@ -26,11 +29,22 @@ import './dossier.css';
 
 export const dynamic = 'force-dynamic';
 
-const TOTAL_PANNEAUX = 12;
-/* Sept feuilles : la sixième (appréciations) et la septième (niveaux et
+const TOTAL_PANNEAUX = 16;
+/* Neuf feuilles. Les sixième (appréciations) et septième (niveaux et
    réserves) ne tiennent pas ensemble sur un A4 — vérifié sur NEIC, 12 lignes
-   d'appréciation plus le tableau des niveaux débordaient de 11 %. */
-const TOTAL_FEUILLES = 7;
+   d’appréciation plus le tableau des niveaux débordaient de 11 %. Les huitième et neuvième
+   (2026-10-11) portent le suivi : titre en bourse, dernière publication
+   intermédiaire, comparables, piliers. ⚠️ Le worker (video/dossiers.mjs,
+   FEUILLES_ATTENDUES) vérifie ce nombre : les deux changent ensemble. */
+const TOTAL_FEUILLES = 9;
+
+const STATUT_PILIER: Record<string, string> = {
+  tenu: 'Seuil atteint',
+  non_tenu: 'Seuil non atteint',
+  non_mesurable: 'Non mesurable',
+  non_applicable: 'Sans objet',
+};
+const FLECHE: Record<string, string> = { hausse: '↗', baisse: '↘', stable: '→' };
 
 export async function generateMetadata({ params }: { params: { code: string } }) {
   return { title: `Dossier ${params.code.toUpperCase()}` };
@@ -60,16 +74,23 @@ function Mesure({
   valeur,
   note,
   ton,
+  texte,
 }: {
   libelle: string;
   valeur: string | null;
   note?: string;
   ton?: 'hausse' | 'baisse';
+  /** Valeur en mots (secteur…) : police du texte, plus petite, sans césure forcée. */
+  texte?: boolean;
 }) {
+  const classes = [
+    valeur == null ? null : ton === 'hausse' ? 'dv-hausse' : ton === 'baisse' ? 'dv-baisse' : null,
+    texte ? 'dv-dd-texte' : null,
+  ].filter(Boolean).join(' ');
   return (
     <div className="dv-mesure">
       <dt>{libelle}</dt>
-      <dd className={valeur == null ? undefined : ton === 'hausse' ? 'dv-hausse' : ton === 'baisse' ? 'dv-baisse' : undefined}>
+      <dd className={classes || undefined}>
         {valeur ?? <Absent />}
       </dd>
       {note ? <small>{note}</small> : null}
@@ -126,7 +147,16 @@ function zoneRsi(rsi: number | null): string | null {
 
 export default async function DossierPage({ params }: { params: { code: string } }) {
   const sb = createClient();
-  const d = await buildDossier(sb, params.code);
+  /* Médianes des comparables : même source que le diagnostic (dernier calcul
+     Combined Alpha), lue avec le client serveur. Absentes = panneau 15 vide et
+     pilier « valorisation » non mesurable, jamais une médiane inventée. */
+  const svc = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const medianes =
+    svc && url
+      ? (await chargerContexteQuant(createSbAdmin(url, svc, { auth: { persistSession: false } }), params.code.toUpperCase())).medianes
+      : null;
+  const d = await buildDossier(sb, params.code, { medianes });
   if (!d) notFound();
 
   const n = construireNarratif(d);
@@ -137,8 +167,17 @@ export default async function DossierPage({ params }: { params: { code: string }
   const { identite: id, chiffres_cles: c, ratios: r, qualite_resultat: q, dividende: div, niveaux: lv } = d;
   const nomComplet = id.designation ?? id.code;
 
+  /* Contrôles de cohérence : le worker d'impression lit cet attribut et REFUSE
+     de ranger le PDF s'il n'est pas vide (comme pour un débordement). */
+  const anomalies = controlerDossier(d);
+
   return (
-    <div className="dv">
+    <div className="dv" data-controles={JSON.stringify(anomalies)}>
+      {anomalies.length > 0 && (
+        <div className="dv-actions print:hidden" role="alert">
+          <span>Dossier incohérent, non imprimable : {anomalies.join(' ')}</span>
+        </div>
+      )}
       <div className="dv-actions">
         <span>
           {TOTAL_PANNEAUX} panneaux sur {TOTAL_FEUILLES} feuilles A4 : chaque chiffre est lu en base ou calculé, aucun n&apos;est rédigé.
@@ -224,7 +263,7 @@ export default async function DossierPage({ params }: { params: { code: string }
       <Feuille d={d} page={2}>
         <Panneau n={2} titre="L'entreprise en bref">
           <dl className="dv-grille">
-            <Mesure libelle="Secteur" valeur={id.secteur} />
+            <Mesure libelle="Secteur" valeur={id.secteur} texte />
             <Mesure libelle="Pays" valeur={id.pays} />
             <Mesure libelle="Actions en circulation" valeur={nb(id.actions)} />
             <Mesure
@@ -506,9 +545,14 @@ export default async function DossierPage({ params }: { params: { code: string }
                   </p>
                 </div>
               )}
-              <div style={{ marginTop: '4mm' }}>
-                <BarreDetachement baisse={d.detachement.baisse_fcfa} dividende={d.detachement.dividende} />
-              </div>
+              {/* La barre suppose une baisse AU MOINS égale au dividende : dans le cas
+                  inverse elle affichait « dividende détaché : 50 FCFA, baisse
+                  intégralement expliquée » (SNTS), contredisant l'encadré. */}
+              {d.detachement.baisse_fcfa >= d.detachement.dividende && (
+                <div style={{ marginTop: '4mm' }}>
+                  <BarreDetachement baisse={d.detachement.baisse_fcfa} dividende={d.detachement.dividende} />
+                </div>
+              )}
               {d.detachement.recul_hors_dividende != null && d.detachement.recul_hors_dividende < 0 && (
                 <div className="dv-encadre dv-encadre--reserve" style={{ marginTop: '3mm' }}>
                   <h3>Au-delà du détachement</h3>
@@ -658,8 +702,9 @@ export default async function DossierPage({ params }: { params: { code: string }
             ) : (
               <p style={{ margin: 0 }}>
                 Toutes les données attendues sont présentes pour cette valeur. Les limites générales de la méthode
-                restent valables : le carnet d&apos;ordres n&apos;est pas publié par la BRVM, et les états financiers
-                sont annuels.
+                restent valables : la BRVM ne publie que la meilleure limite de chaque côté du carnet d&apos;ordres,
+                pas sa profondeur complète, et les comptes intermédiaires ne sont pas audités comme les comptes
+                annuels.
               </p>
             )}
           </div>
@@ -671,6 +716,179 @@ export default async function DossierPage({ params }: { params: { code: string }
           </p>
         </Panneau>
       </Feuille>
+
+      {/* ── Feuille 8 : suivi ─────────────────────────────────────────────── */}
+      <Feuille d={d} page={8}>
+        <Panneau n={13} titre="Le titre en bourse" chapo="Évolution du cours et facilité à traiter le titre, mesurées sur les séances réelles.">
+          <dl className="dv-grille">
+            <Mesure libelle="Sur un mois" valeur={pourcent(d.suivi.performance.var_1m)} ton={tonDe(d.suivi.performance.var_1m)} note="Vingt et une séances." />
+            <Mesure libelle="Depuis le 1er janvier" valeur={pourcent(d.suivi.performance.var_ytd)} ton={tonDe(d.suivi.performance.var_ytd)} />
+            <Mesure
+              libelle="Plage 52 semaines"
+              valeur={d.suivi.performance.bas52 != null && d.suivi.performance.haut52 != null ? `${nb(d.suivi.performance.bas52)} – ${nb(d.suivi.performance.haut52)}` : null}
+              note={d.suivi.performance.position_52s != null ? `Le cours se situe à ${part(d.suivi.performance.position_52s, 0)} de la plage, du plus-bas au plus-haut.` : undefined}
+            />
+            <Mesure
+              libelle="Liquidité"
+              valeur={d.suivi.liquidite?.score != null ? `${d.suivi.liquidite.score} / 100${d.suivi.liquidite.classe ? ` · ${d.suivi.liquidite.classe}` : ''}` : null}
+              note={
+                d.suivi.liquidite?.spread_pct != null
+                  ? `Écart achat-vente ${d.suivi.liquidite.spread_source === 'carnet' ? 'mesuré sur le carnet' : 'estimé (≈)'} : ${fmtNumber(d.suivi.liquidite.spread_pct, 2)} %.`
+                  : undefined
+              }
+            />
+            <Mesure
+              libelle="Échangé par séance"
+              valeur={cfa(d.suivi.liquidite?.valeur_moyenne_30j ?? null)}
+              note="Moyenne sur trente jours."
+            />
+          </dl>
+        </Panneau>
+
+        <Panneau n={14} titre="Dernière publication intermédiaire" chapo="Comparée à la même période de l’année précédente, jamais à une période d’une autre durée.">
+          {d.suivi.intermediaire ? (
+            <div className="dv-tableau-cadre">
+              <table className="dv-tableau">
+                <thead>
+                  <tr>
+                    <th>Poste</th>
+                    <th>{d.suivi.intermediaire.libelle}</th>
+                    <th>{d.suivi.intermediaire.libellePrecedent}</th>
+                    <th>Variation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {([
+                    ['Chiffre d’affaires', d.suivi.intermediaire.revenu, d.suivi.intermediaire.revenuPrecedent],
+                    ['Résultat net', d.suivi.intermediaire.resultatNet, d.suivi.intermediaire.resultatNetPrecedent],
+                  ] as const).map(([poste, n0, n1]) => {
+                    const v = n0 != null && n1 != null && n1 !== 0 ? (n0 - n1) / Math.abs(n1) : null;
+                    return (
+                      <tr key={poste}>
+                        <td>{poste}</td>
+                        <td className="dv-num">{cfa(n0) ?? '—'}</td>
+                        <td className="dv-num">{cfa(n1) ?? '—'}</td>
+                        <td className={`dv-num ${v == null ? '' : v > 0 ? 'dv-hausse' : v < 0 ? 'dv-baisse' : ''}`}>{pourcent(v) ?? '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {d.suivi.intermediaire.glissant && (
+                <p className="dv-chapo" style={{ marginTop: '2mm', marginBottom: 0 }}>
+                  Sur les {d.suivi.intermediaire.glissant.libelle} : chiffre d’affaires {cfa(d.suivi.intermediaire.glissant.revenu) ?? 'non calculable'},
+                  résultat net {cfa(d.suivi.intermediaire.glissant.resultatNet) ?? 'non calculable'}. Comptes intermédiaires non audités comme les comptes annuels.
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="dv-vide">Aucune publication intermédiaire postérieure au dernier exercice annuel n’est en base.</p>
+          )}
+        </Panneau>
+
+        <Panneau
+          n={15}
+          titre="Face aux sociétés comparables"
+          chapo={d.suivi.medianes ? `Médianes du groupe : ${d.suivi.medianes.groupe}, la société elle-même exclue.` : undefined}
+        >
+          {d.suivi.medianes ? (
+            <div className="dv-tableau-cadre">
+              <table className="dv-tableau">
+                <thead>
+                  <tr>
+                    <th>Ratio</th>
+                    <th>Société</th>
+                    <th>Médiane</th>
+                    <th>Pairs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.suivi.medianes.lignes
+                    .filter((l) => ['PER', 'Cours / valeur comptable', 'ROE', 'Rendement du dividende'].includes(l.libelle))
+                    .map((l) => (
+                      <tr key={l.libelle}>
+                        <td>{l.libelle}</td>
+                        <td className="dv-num">{fmtRatio(l.valeur, l.unite) ?? '—'}</td>
+                        <td className="dv-num">{fmtRatio(l.mediane, l.unite) ?? '—'}</td>
+                        <td className="dv-num">{l.nbPairs}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="dv-vide">Aucun calcul de comparaison disponible pour cette valeur : la comparaison n’est pas faite.</p>
+          )}
+        </Panneau>
+      </Feuille>
+
+      {/* ── Feuille 9 : piliers et rendez-vous ────────────────────────────────
+          Séparée de la 8 : les quatre panneaux de suivi débordaient d'une A4
+          de 300 à 480 px selon la valeur (mesuré en local, 8 valeurs). */}
+      <Feuille d={d} page={9}>
+        <Panneau
+          n={16}
+          titre="Piliers de suivi"
+          chapo="Six mesures et le seuil auquel on les lit. Un seuil atteint n’est pas une recommandation : c’est un repère pour suivre la valeur dans le temps."
+        >
+          <div className="dv-tableau-cadre">
+            <table className="dv-tableau">
+              <thead>
+                <tr>
+                  <th>Pilier</th>
+                  <th>Mesure</th>
+                  <th>Seuil de lecture</th>
+                  <th>Constat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {d.suivi.piliers.map((p) => (
+                  <tr key={p.cle}>
+                    <td>{p.libelle}</td>
+                    <td className="dv-num">
+                      {fmtPilier(p.mesure, p.unite, p.cle) ?? '—'}
+                      {p.tendance ? ` ${FLECHE[p.tendance]}` : ''}
+                    </td>
+                    <td style={{ textAlign: 'left' }}>{p.seuil}</td>
+                    <td className={p.statut === 'tenu' ? 'dv-hausse' : p.statut === 'non_tenu' ? 'dv-baisse' : 'dv-absent'}>
+                      {STATUT_PILIER[p.statut]}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <h3 className="dv-sous-titre" style={{ marginTop: '4mm' }}>Rendez-vous connus</h3>
+          {d.suivi.rendez_vous.length > 0 ? (
+            <ul className="dv-liste">
+              {d.suivi.rendez_vous.map((r) => (
+                <li key={`${r.date}${r.libelle}`}>
+                  {fmtDateFR(r.date)} — {r.libelle}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="dv-vide">Aucune date à venir annoncée en base. Aucune n’est estimée.</p>
+          )}
+        </Panneau>
+      </Feuille>
     </div>
   );
+}
+
+function tonDe(v: number | null | undefined): 'hausse' | 'baisse' | undefined {
+  return v == null || Math.abs(v) < 0.00005 ? undefined : v > 0 ? 'hausse' : 'baisse';
+}
+
+/** Valeur d'une ligne de comparables : `%` déjà multiplié par 100 par medianes.ts. */
+function fmtRatio(v: number | null, unite: '%' | 'x'): string | null {
+  if (v == null) return null;
+  return unite === '%' ? `${fmtNumber(v, 1)} %` : `${fmtNumber(v, 2)} ×`;
+}
+
+function fmtPilier(v: number | null, unite: '%' | 'x' | 'FCFA', cle: string): string | null {
+  if (v == null) return null;
+  if (unite === 'FCFA') return `${fmtNumber(v, 2)} FCFA`;
+  if (unite === 'x') return `${fmtNumber(v, 2)} ×`;
+  return cle === 'croissance' ? pourcent(v) : part(v);
 }

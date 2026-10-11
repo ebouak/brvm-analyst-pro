@@ -75,7 +75,7 @@ export function composerMessage(sel: Selection, semaine: string, canal: 'email' 
       ? 'Vous trouverez en pièces jointes le dossier de chaque valeur de votre portefeuille :'
       : 'Voici le dossier de chaque valeur de votre portefeuille :',
   );
-  for (const l of jointes) lignes.push(`  • ${l.code} — ${l.designation} — dossier de sept pages`);
+  for (const l of jointes) lignes.push(`  • ${l.code} — ${l.designation} — dossier complet`);
 
   if (reste.length > 0) {
     lignes.push('', 'Également disponibles sur votre portefeuille (limite de pièces jointes atteinte) :');
