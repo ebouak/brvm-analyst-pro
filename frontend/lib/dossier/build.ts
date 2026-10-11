@@ -18,7 +18,7 @@ import { computeLevels, type Levels } from '@/lib/hebdo/levels';
 import { lectureIntermediaire, type LectureIntermediaire } from '@/lib/financials/interim';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import type { ComparaisonMedianes } from '@/lib/diagnostic/medianes';
-import { performanceTitre, piliersThese, controleExDate, type PerformanceTitre, type Pilier } from './suivi';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, type PerformanceTitre, type Pilier } from './suivi';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -46,7 +46,10 @@ export interface Identite {
   code: string;
   designation: string | null;
   secteur: string | null;
+  /** Nom du pays (« Sénégal »), jamais le code du référentiel. */
   pays: string | null;
+  /** Taux de l'impôt sur le revenu des valeurs mobilières du pays, ou null s'il n'est pas vérifié. */
+  taux_irvm: number | null;
   actions: number | null;
   flottant: number | null;
   notation: {
@@ -166,6 +169,8 @@ export interface DossierValeur {
   technique: Technique;
   ratios: Ratios | null;
   qualite_resultat: QualiteResultat | null;
+  /** Sur l'actif total du bilan quand il existe ; sinon sur les capitaux investis, sous ce nom. */
+  rentabilite_actif: { valeur: number; mesure: 'actif_total' | 'capitaux_investis' } | null;
   /**
    * Support, résistance et extensions du canal 20 séances. Réutilise le module
    * PUR ET TESTÉ de l'analyse hebdomadaire plutôt que d'en écrire un second :
@@ -302,6 +307,11 @@ export async function buildDossier(
   const exerciceRef = fonda?.year != null ? String(fonda.year) : exercicesAnnuels(exercices)[0]?.periode ?? null;
   const annuels = exercicesAnnuels(exercices).filter((e) => exerciceRef == null || Number(e.periode) <= Number(exerciceRef));
   const annuelRef = annuels[0]?.periode === exerciceRef ? annuels : [];
+  const { data: bilanRef } = exerciceRef
+    ? await sb.from('balance_sheets').select('total_actifs').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
+    : { data: null };
+  const fisc = fiscaliteDividende((instr as { pays?: string | null }).pays ?? null);
+  const tauxIrvm = fisc.taux != null ? `${Math.round(fisc.taux * 1000) / 10} %`.replace('.', ',') : null;
 
   /* Le dividende retenu est le plus récent STRICTEMENT POSITIF. Un zéro est
      une information pour l'historique, jamais une base de rendement. */
@@ -316,13 +326,15 @@ export async function buildDossier(
   const divRetenu = dividendes.find((d) => Number(d.montant) > 0) ?? null;
   if (!divRetenu) lacunes.push('Aucun dividende positif enregistré : rendement et taux de distribution non calculables.');
 
-  /* Une base fiscale inconnue vaut 12 % d'incertitude sur le rendement : c'est
-     l'écart de l'IRVM. Le taire reviendrait à publier un pourcentage dont on
+  /* Une base fiscale inconnue rend le rendement incertain du taux de l'impôt sur
+     le revenu des valeurs mobilières, qui dépend du pays. Le taire reviendrait à publier un pourcentage dont on
      ne sait pas s'il est net ou brut. */
   if (divRetenu && (divRetenu.base_fiscale == null || divRetenu.base_fiscale === 'inconnu')) {
     lacunes.push(
       `La source « ${divRetenu.source ?? 'inconnue'} » ne précise pas si le dividende est brut ou net : ` +
-        `le rendement affiché est incertain à hauteur de l'IRVM (12 %).`,
+        (tauxIrvm
+          ? `le rendement affiché est incertain à hauteur de l'impôt sur le revenu des valeurs mobilières (${tauxIrvm} au ${fisc.pays}).`
+          : "le rendement affiché est incertain à hauteur de l'impôt sur le revenu des valeurs mobilières, dont le taux dépend du pays de l'émetteur."),
     );
   }
 
@@ -344,7 +356,7 @@ export async function buildDossier(
   if (divRetenu?.base_fiscale === 'net' && ratios?.payout != null) {
     lacunes.push(
       'Le taux de distribution rapporte un dividende NET à un bénéfice par action brut : ' +
-        "il est donc minoré d'environ 12 %.",
+        (tauxIrvm ? `il est donc minoré d'environ ${tauxIrvm}.` : "il est donc minoré du taux de l'impôt retenu à la source."),
     );
   }
 
@@ -452,7 +464,8 @@ export async function buildDossier(
       code: CODE,
       designation: (instr as { designation?: string | null }).designation ?? null,
       secteur: (instr as { secteur?: string | null }).secteur ?? null,
-      pays: (instr as { pays?: string | null }).pays ?? null,
+      pays: fisc.pays,
+      taux_irvm: fisc.taux,
       actions,
       flottant: (instr as { flottant?: number | null }).flottant ?? null,
       notation: litNotation((instr as { notation_json?: unknown }).notation_json),
@@ -512,6 +525,12 @@ export async function buildDossier(
     },
     ratios,
     qualite_resultat: qualite,
+    rentabilite_actif: rentabiliteActif({
+      resultatNet: fonda?.net_income ?? null,
+      totalActif: (bilanRef as { total_actifs?: number | null } | null)?.total_actifs ?? null,
+      capitauxPropres: fonda?.equity ?? null,
+      dette: (fonda as { debt?: number | null } | null)?.debt ?? null,
+    }),
     niveaux,
     lacunes,
     suivi: {

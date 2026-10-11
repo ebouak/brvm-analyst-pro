@@ -15,6 +15,8 @@
  * RÈGLE : une donnée absente donne `null` / « non mesurable », jamais 0 ni un
  * statut favorable par défaut.
  */
+import { BAREME, PAYS_LABELS, toPaysUemoa } from '@/lib/tax/rates';
+
 // ── Performance du titre ────────────────────────────────────────────────────
 
 const variation = (a: number | null, b: number | null) => (a == null || b == null || b === 0 ? null : (a - b) / Math.abs(b));
@@ -142,4 +144,40 @@ export function piliersThese(e: EntreePiliers): Pilier[] {
  */
 export function controleExDate(e: { dividende: number; baisse: number }): 'coherente' | 'a_verifier' {
   return e.dividende > 0 && e.baisse / e.dividende < 0.5 ? 'a_verifier' : 'coherente';
+}
+
+// ── Rentabilité de l'actif ──────────────────────────────────────────────────
+
+/**
+ * Résultat net / actif total quand le bilan de l'exercice est en base. Sinon,
+ * l'approximation par (capitaux propres + dette) est rendue SOUS SON NOM :
+ * « capitaux investis ». Le dossier SNTS du 10/10/2026 affichait 25,1 % sous
+ * le titre « rentabilité de l'actif », quand l'actif total, en base, la donnait
+ * à 12,6 % : une approximation présentée comme la mesure double le chiffre.
+ */
+export function rentabiliteActif(e: {
+  resultatNet: number | null;
+  totalActif: number | null;
+  capitauxPropres: number | null;
+  dette: number | null;
+}): { valeur: number; mesure: 'actif_total' | 'capitaux_investis' } | null {
+  if (e.resultatNet == null) return null;
+  if (e.totalActif != null && e.totalActif > 0) return { valeur: e.resultatNet / e.totalActif, mesure: 'actif_total' };
+  const investis = e.capitauxPropres != null && e.dette != null ? e.capitauxPropres + e.dette : null;
+  return investis != null && investis > 0 ? { valeur: e.resultatNet / investis, mesure: 'capitaux_investis' } : null;
+}
+
+// ── Fiscalité du dividende ──────────────────────────────────────────────────
+
+/**
+ * Taux de l'impôt sur le revenu des valeurs mobilières, lu dans le barème
+ * SOURCÉ du pays de l'émetteur (`lib/tax/rates.ts`). Le dossier écrivait 12 %
+ * pour toutes les valeurs : faux au Sénégal et en Côte d'Ivoire (10 %), au
+ * Mali (7 %), au Bénin (5 %). Pays inconnu ou taux non vérifié : `null`, et le
+ * dossier n'affiche alors aucun chiffre.
+ */
+export function fiscaliteDividende(paysBrut: string | null): { pays: string | null; taux: number | null } {
+  const code = toPaysUemoa(paysBrut);
+  if (!code) return { pays: paysBrut?.trim() || null, taux: null };
+  return { pays: PAYS_LABELS[code], taux: BAREME[code].dividende_cote.taux };
 }
