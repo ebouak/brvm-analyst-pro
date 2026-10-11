@@ -15,6 +15,10 @@ import {
   type Detachement,
 } from '@/lib/fundamentals';
 import { computeLevels, type Levels } from '@/lib/hebdo/levels';
+import { lectureIntermediaire, type LectureIntermediaire } from '@/lib/financials/interim';
+import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
+import type { ComparaisonMedianes } from '@/lib/diagnostic/medianes';
+import { performanceTitre, piliersThese, controleExDate, type PerformanceTitre, type Pilier } from './suivi';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -175,6 +179,30 @@ export interface DossierValeur {
    * vide expliquée est une information.
    */
   lacunes: string[];
+  /** Feuille « Suivi » : tout est mesuré, rien n'est recommandé. */
+  suivi: Suivi;
+}
+
+export interface Suivi {
+  famille: 'banque' | 'assurance' | 'general';
+  /** Dernière publication intermédiaire contre la même période un an plus tôt (lib/financials/interim). */
+  intermediaire: LectureIntermediaire | null;
+  performance: PerformanceTitre;
+  liquidite: {
+    date_marche: string;
+    score: number | null;
+    classe: string | null;
+    spread_pct: number | null;
+    spread_source: 'carnet' | 'roll' | null;
+    valeur_moyenne_30j: number | null;
+  } | null;
+  /** Médianes des sociétés comparables (dernier calcul Combined Alpha), si fournies. */
+  medianes: ComparaisonMedianes | null;
+  piliers: Pilier[];
+  /** Rendez-vous DATÉS et à venir connus en base — jamais une date estimée. */
+  rendez_vous: { date: string; libelle: string }[];
+  /** Le jour du détachement a-t-il vu une baisse cohérente avec le dividende ? */
+  ex_date_controle: 'coherente' | 'a_verifier' | null;
 }
 
 // ── Construction ────────────────────────────────────────────────────────────
@@ -218,7 +246,8 @@ function litNotation(brut: unknown): Identite['notation'] {
 export async function buildDossier(
   sb: SupabaseClient,
   code: string,
-  options: { seances?: number } = {},
+  /** `medianes` : chargées par l'appelant avec le client serveur (chargerContexteQuant). */
+  options: { seances?: number; medianes?: ComparaisonMedianes | null } = {},
 ): Promise<DossierValeur | null> {
   const seances = Math.min(options.seances ?? 90, 400);
   const CODE = code.toUpperCase();
@@ -232,7 +261,7 @@ export async function buildDossier(
     { data: isRows },
   ] = await Promise.all([
     sb.from('brvm_instruments').select('code, designation, secteur, pays, shares, flottant, notation_json').eq('code', CODE).maybeSingle(),
-    sb.from('brvm_actions_daily').select('date_marche, cours_jour, variation_pct, volume').eq('code', CODE).order('date_marche', { ascending: false }).limit(seances),
+    sb.from('brvm_actions_daily').select('date_marche, cours_jour, variation_pct, volume, cours_haut_52s, cours_bas_52s').eq('code', CODE).order('date_marche', { ascending: false }).limit(seances),
     sb.from('signals_daily').select('date_marche, signal, score_total, confiance, explication, inputs').eq('code', CODE).order('date_marche', { ascending: false }).limit(1).maybeSingle(),
     // `nullsFirst: false` : sans lui, les lignes datées passent DERRIÈRE les
     // NULL et sortent de la fenêtre. Même piège que dans briefTools.ts.
@@ -244,7 +273,14 @@ export async function buildDossier(
   if (!instr) return null;
 
   const lacunes: string[] = [];
-  const lignes = (hist ?? []) as { date_marche: string; cours_jour: number | null; variation_pct: number | null; volume: number | null }[];
+  const lignes = (hist ?? []) as {
+    date_marche: string;
+    cours_jour: number | null;
+    variation_pct: number | null;
+    volume: number | null;
+    cours_haut_52s: number | null;
+    cours_bas_52s: number | null;
+  }[];
   const serie = lignes.slice().reverse();
   const derniere = lignes[0] ?? null;
   const cours = derniere?.cours_jour ?? null;
@@ -354,6 +390,58 @@ export async function buildDossier(
     );
   }
 
+  /* ── Suivi : performance, liquidité, publication intermédiaire, piliers ── */
+  const famille = (FAMILLE_PAR_CODE[CODE] ?? 'general') as Suivi['famille'];
+  const debutAnnee = derniere?.date_marche ? `${derniere.date_marche.slice(0, 4)}-01-01` : null;
+  const [{ data: premierAn }, { data: liq }] = await Promise.all([
+    debutAnnee
+      ? sb.from('brvm_actions_daily').select('cours_jour').eq('code', CODE).gte('date_marche', debutAnnee)
+          .gt('cours_jour', 0).order('date_marche', { ascending: true }).limit(1).maybeSingle()
+      : Promise.resolve({ data: null }),
+    sb.from('liquidity_daily').select('date_marche, score, classe, spread_pct, spread_source, valeur_moyenne_30j')
+      .eq('code', CODE).order('date_marche', { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  const performance = performanceTitre({
+    closes,
+    coursDebutAnnee: (premierAn as { cours_jour?: number | null } | null)?.cours_jour ?? null,
+    haut52: derniere?.cours_haut_52s ?? null,
+    bas52: derniere?.cours_bas_52s ?? null,
+  });
+  // Un dividende par exercice (le premier connu), du plus ancien au plus récent.
+  const divParExercice = new Map<number, number>();
+  for (const dv of [...dividendes].sort((a, b) => (a.exercice ?? 0) - (b.exercice ?? 0))) {
+    if (dv.exercice != null && dv.montant != null && !divParExercice.has(dv.exercice)) divParExercice.set(dv.exercice, Number(dv.montant));
+  }
+  const medianes = options.medianes ?? null;
+  const piliers = piliersThese({
+    famille,
+    croissanceCA: croissanceCA(annuelRef, 1),
+    margeExp: qualite?.marge_exploitation ?? null,
+    margeExpPrecedente: qualiteResultat(annuelRef[1])?.marge_exploitation ?? null,
+    roe: ratios?.roe ?? null,
+    endettement: ratios?.gearing ?? null,
+    dividendes: [...divParExercice.values()],
+    per: ratios?.per ?? null,
+    perMediane: medianes?.lignes.find((l) => l.libelle === 'PER')?.mediane ?? null,
+  });
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+  const rendez_vous = dividendes
+    .flatMap((dv) => [
+      dv.ex_date && dv.ex_date >= aujourdhui ? { date: dv.ex_date, libelle: `Détachement du dividende de l’exercice ${dv.exercice ?? ''}`.trim() } : null,
+      dv.payment_date && dv.payment_date >= aujourdhui ? { date: dv.payment_date, libelle: `Mise en paiement du dividende de l’exercice ${dv.exercice ?? ''}`.trim() } : null,
+    ])
+    .filter((x): x is { date: string; libelle: string } => x != null)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const ex_date_controle = detachement
+    ? controleExDate({ dividende: detachement.dividende, baisse: detachement.baisse_fcfa })
+    : null;
+  if (ex_date_controle === 'a_verifier') {
+    lacunes.push(
+      'Le jour du détachement, la baisse du cours est très inférieure au dividende : la date de détachement enregistrée est à vérifier.',
+    );
+  }
+  const liqRow = liq as Suivi['liquidite'];
+
   const s = sig as { date_marche?: string; signal?: string; score_total?: number; confiance?: number; explication?: string; inputs?: Record<string, number | null> } | null;
   const inputs = s?.inputs ?? {};
   const cpPrecedent = fondaRows[1]?.equity ?? null;
@@ -426,5 +514,15 @@ export async function buildDossier(
     qualite_resultat: qualite,
     niveaux,
     lacunes,
+    suivi: {
+      famille,
+      intermediaire: lectureIntermediaire(exercices),
+      performance,
+      liquidite: liqRow ?? null,
+      medianes,
+      piliers,
+      rendez_vous,
+      ex_date_controle,
+    },
   };
 }

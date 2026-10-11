@@ -103,7 +103,7 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
     <section className="rounded-panel border border-border bg-surface p-5">
       <h2 className="font-display text-lg text-ivory">Dossiers valeur du samedi</h2>
       <p className="mt-1.5 text-sm leading-relaxed text-muted">
-        Chaque samedi, le dossier PDF de sept pages de chaque valeur de votre portefeuille. Rien
+        Chaque samedi, le dossier PDF de chaque valeur de votre portefeuille. Rien
         n&apos;est envoyé si votre portefeuille est vide.
       </p>
 

@@ -14,7 +14,7 @@
  * CE QUI EST PRODUIT, PAR CODE :  <CODE>/<date>.pdf  (historique)
  *                                  <CODE>/dernier.pdf (ce que sert /api/dossier/[code]/pdf)
  *
- * VERROU. Un PDF n'est rangé que si la page a rendu ses sept feuilles (`.dv-page`)
+ * VERROU. Un PDF n'est rangé que si la page a rendu toutes ses feuilles (`.dv-page`)
  * et si le fichier fait plus de 30 ko. Une page d'erreur imprimée fait une
  * feuille et quelques ko ; la ranger sous « dernier.pdf » livrerait une erreur
  * à un client. Un code en échec n'arrête pas le lot ; il est listé à la fin et
@@ -54,7 +54,7 @@ const SECRET = lire('DOSSIER_RENDER_SECRET');
 const SITE = (lire('DOSSIER_SITE_URL') || 'https://www.westbourse.com').replace(/\/$/, '');
 const BUCKET = 'dossiers';
 const DRY = lire('DOSSIER_DRY') === '1';
-const FEUILLES_ATTENDUES = 7;
+const FEUILLES_ATTENDUES = 9; // ⚠️ = TOTAL_FEUILLES de app/rapports/dossier/[code]/page.tsx
 const OCTETS_MIN = 30_000;
 
 const manquants = [['SUPABASE_URL', URL_SB], ['SUPABASE_SERVICE_ROLE_KEY', SERVICE], ['DOSSIER_RENDER_SECRET', SECRET]]
@@ -107,6 +107,16 @@ async function imprimer(page, code) {
   if (feuilles !== FEUILLES_ATTENDUES) {
     throw new Error(`${feuilles} feuille(s) rendue(s) au lieu de ${FEUILLES_ATTENDUES}`);
   }
+  /* Contrôles de cohérence (frontend/lib/dossier/controles.ts) : un dossier
+     qui se contredit n'est PAS rangé. Le dossier SNTS du 10/10/2026 (exercice
+     « 2026-T1 » au-dessus de montants annuels, CA « −52 % » faux) l'aurait été.
+     Attribut absent = page d'une ancienne version : refus aussi, on ne range
+     pas un dossier dont on ne sait pas s'il a été contrôlé. */
+  const brut = await page.locator('[data-controles]').first().getAttribute('data-controles').catch(() => null);
+  const anomalies = brut == null ? ['contrôles de cohérence absents de la page'] : JSON.parse(brut);
+  if (anomalies.length) {
+    throw new Error(`dossier incohérent — ${anomalies.join(' | ')} — non rangé`);
+  }
   /* À l'impression, chaque feuille a une hauteur fixe et `overflow: hidden`.
      Un contenu qui déborde serait ROGNÉ en silence — un rapport client avec une
      ligne coupée. On le mesure ici, sous média print, et on refuse. */
@@ -124,7 +134,7 @@ async function imprimer(page, code) {
     margin: { top: '0', right: '0', bottom: '0', left: '0' },
   });
   if (octets.length < OCTETS_MIN) {
-    throw new Error(`PDF de ${octets.length} octets — trop petit pour sept feuilles, non rangé`);
+    throw new Error(`PDF de ${octets.length} octets — trop petit pour un dossier complet, non rangé`);
   }
   return octets;
 }
