@@ -548,7 +548,7 @@ export default async function DossierPage({ params }: { params: { code: string }
                   valeur={fmtDateFR(d.detachement.ex_date)}
                   note={
                     d.detachement.ex_date_officielle !== d.detachement.ex_date
-                      ? `Ex-date publiée : ${fmtDateFR(d.detachement.ex_date_officielle)}, jour sans séance ; première séance cotée ensuite.`
+                      ? `Ex-date enregistrée : ${fmtDateFR(d.detachement.ex_date_officielle)}, jour sans séance ; première séance cotée ensuite.`
                       : undefined
                   }
                 />

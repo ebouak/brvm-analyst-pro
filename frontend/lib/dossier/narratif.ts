@@ -44,6 +44,10 @@ const pct = (x: number, d = 1) =>
 /* `fmtFcfa` adapte l'ordre de grandeur (k / M / Md / T) : un résultat de
    80 millions ne doit pas s'afficher « 0,08 Md ». */
 const mtt = (x: number) => `${fmtFcfa(x)} FCFA`;
+/* Un NIVEAU (rentabilité) ou une variation déjà qualifiée par « hausse » ne
+   prend pas de signe, et garde la décimale des panneaux : « +30 % » ici contre
+   29,6 % partout ailleurs faisait lire deux chiffres pour une même mesure. */
+const niveau = (x: number) => `${Math.abs(x * 100).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
 
 const nb = (x: number, d = 1) =>
   x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -81,7 +85,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
   }
 
   if (r?.roe != null && r.roe > SEUILS.ROE_ELEVE) {
-    forces.push({ texte: `Rentabilité des capitaux propres élevée : ${pct(r.roe, 0)}`, fait: 'une rentabilité des capitaux propres élevée', mesure: r.roe });
+    forces.push({ texte: `Rentabilité des capitaux propres élevée : ${niveau(r.roe)}`, fait: 'une rentabilité des capitaux propres élevée', mesure: r.roe });
   }
 
   /* La qualité du bénéfice prime sur son montant. Un profit massivement non
@@ -137,7 +141,7 @@ export function construireNarratif(d: DossierValeur): Narratif {
 
   if (c.variation_capitaux_propres_1an != null && c.variation_capitaux_propres_1an > 0.1) {
     forces.push({
-      texte: `Capitaux propres en hausse de ${pct(c.variation_capitaux_propres_1an, 0)}`,
+      texte: `Capitaux propres en hausse de ${niveau(c.variation_capitaux_propres_1an)}`,
       fait: 'des capitaux propres en hausse',
       mesure: c.variation_capitaux_propres_1an,
     });
