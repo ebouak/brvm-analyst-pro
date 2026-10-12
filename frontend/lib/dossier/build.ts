@@ -18,7 +18,7 @@ import { computeLevels, type Levels } from '@/lib/hebdo/levels';
 import { lectureIntermediaire, type LectureIntermediaire } from '@/lib/financials/interim';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import type { ComparaisonMedianes } from '@/lib/diagnostic/medianes';
-import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere, type PerformanceTitre, type Pilier } from './suivi';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere, memesComptes, type PerformanceTitre, type Pilier } from './suivi';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -313,9 +313,17 @@ export async function buildDossier(
   const annuels = exercicesAnnuels(exercices).filter((e) => exerciceRef == null || Number(e.periode) <= Number(exerciceRef));
   const annuelRef = annuels[0]?.periode === exerciceRef ? annuels : [];
   const { data: bilanRef } = exerciceRef
-    ? await sb.from('balance_sheets').select('total_actifs, dette_court_terme, dette_long_terme').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
+    ? await sb.from('balance_sheets').select('total_actifs, total_capitaux_propres, dette_court_terme, dette_long_terme').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
     : { data: null };
-  const bilan = bilanRef as { total_actifs?: number | null; dette_court_terme?: number | null; dette_long_terme?: number | null } | null;
+  const bilanBrut = bilanRef as { total_actifs?: number | null; total_capitaux_propres?: number | null; dette_court_terme?: number | null; dette_long_terme?: number | null } | null;
+  // Bilan et fondamentaux d'une même norme seulement : sinon on ne les croise pas.
+  const bilan = memesComptes(bilanBrut?.total_capitaux_propres ?? null, fonda?.equity ?? null) ? bilanBrut : null;
+  if (bilanBrut && !bilan) {
+    lacunes.push(
+      `Le bilan ${exerciceRef} en base et les fondamentaux ne relèvent pas des mêmes comptes (capitaux propres différents) : ` +
+        'la dette et l’actif total du bilan ne sont pas croisés avec eux.',
+    );
+  }
   const dette = detteFinanciere({
     famille: (FAMILLE_PAR_CODE[CODE] ?? 'general') as 'banque' | 'assurance' | 'general',
     lt: bilan?.dette_long_terme ?? null,

@@ -219,3 +219,16 @@ export function detteFinanciere(e: {
   }
   return e.declaree != null ? { valeur: e.declaree, perimetre: 'declaree' } : null;
 }
+
+/**
+ * Le bilan (`balance_sheets`) et les fondamentaux relèvent-ils des MÊMES
+ * comptes ? Un émetteur qui publie en IFRS et en SYSCOHADA peut avoir l'un
+ * dans une table et l'autre dans la seconde (SCRC 2025 : capitaux propres
+ * 13,8 Md SYSCOHADA au bilan, 17,2 Md IFRS en fondamentaux). Croiser une dette
+ * de l'un avec des capitaux propres de l'autre fabrique un ratio qui
+ * n'existe dans aucun des deux jeux de comptes. Tolérance 2 %.
+ */
+export function memesComptes(capitauxBilan: number | null, capitauxFondamentaux: number | null): boolean {
+  if (capitauxBilan == null || capitauxFondamentaux == null || capitauxFondamentaux === 0) return true;
+  return Math.abs(capitauxBilan - capitauxFondamentaux) / Math.abs(capitauxFondamentaux) <= 0.02;
+}
