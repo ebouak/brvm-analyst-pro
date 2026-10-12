@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { YearStatement } from './fullStatement';
-import { BALANCE_KEYS } from '@/lib/financials/sectors';
+import { BALANCE_KEYS, FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 
 const n = (v: number | null | undefined) => (v == null ? null : v);
 
@@ -9,6 +9,22 @@ export interface MappedRows {
   balance: Record<string, unknown>;
   cashflow: Record<string, unknown>;
   fundamentals: Record<string, unknown>;
+}
+
+/**
+ * Dette financière portée par `fundamentals.debt`. Hors banques : long terme +
+ * court terme (la consigne d'extraction y range la trésorerie-passif : crédits
+ * bancaires, découverts). Ce champ ne recevait que le long terme : 248 Md pour
+ * SNTS 2025 contre 402,7 Md dans les comptes certifiés, et un endettement lu à
+ * 17,7 % au lieu de 28,8 %. Banques et assurances : le court terme du bilan,
+ * ce sont les dépôts — seul le long terme est une dette de financement.
+ * Une rubrique absente vaut zéro (la consigne met null quand la ligne
+ * n'existe pas) ; les deux absentes : null.
+ */
+export function detteImportee(code: string, s: Pick<YearStatement, 'dette_long_terme' | 'dette_court_terme'>): number | null {
+  if ((FAMILLE_PAR_CODE[code] ?? 'general') !== 'general') return n(s.dette_long_terme);
+  if (s.dette_long_terme == null && s.dette_court_terme == null) return null;
+  return (s.dette_long_terme ?? 0) + (s.dette_court_terme ?? 0);
 }
 
 /** Transforme un exercice extrait en lignes prêtes à upsert dans les 4 tables. */
@@ -68,7 +84,7 @@ export function toRows(code: string, s: YearStatement, sourceFile: string): Mapp
     },
     fundamentals: {
       code, year, revenue: n(s.revenu_total), net_income: n(s.resultat_net),
-      equity: n(s.total_capitaux_propres), cash: n(s.tresorerie_equivalents), debt: n(s.dette_long_terme),
+      equity: n(s.total_capitaux_propres), cash: n(s.tresorerie_equivalents), debt: detteImportee(code, s),
       bfr, source: 'llm-extracted', source_file: sourceFile,
     },
   };

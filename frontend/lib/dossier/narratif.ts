@@ -127,7 +127,9 @@ export function construireNarratif(d: DossierValeur): Narratif {
   }
 
   // ── Structure financière ────────────────────────────────────────────────
-  if (r?.gearing != null && r.gearing < SEUILS.GEARING_SAIN) {
+  // « Faible » seulement sur une dette au périmètre établi (bilan, court + long
+  // terme) : SNTS affichait 17,7 % sur sa seule dette à long terme, 28,8 % réels.
+  if (r?.gearing != null && r.gearing < SEUILS.GEARING_SAIN && d.chiffres_cles.dette_perimetre === 'totale') {
     forces.push({ texte: `Endettement faible : ${nb(r.gearing * 100, 0)} % des capitaux propres`, fait: 'un endettement faible', mesure: r.gearing });
   } else if (r?.gearing != null && r.gearing > 1) {
     risques.push({ texte: `Endettement supérieur aux capitaux propres : ${nb(r.gearing * 100, 0)} %`, fait: 'un endettement supérieur aux capitaux propres', mesure: r.gearing });

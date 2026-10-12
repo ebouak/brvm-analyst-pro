@@ -18,7 +18,7 @@ import { computeLevels, type Levels } from '@/lib/hebdo/levels';
 import { lectureIntermediaire, type LectureIntermediaire } from '@/lib/financials/interim';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import type { ComparaisonMedianes } from '@/lib/diagnostic/medianes';
-import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, type PerformanceTitre, type Pilier } from './suivi';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere, type PerformanceTitre, type Pilier } from './suivi';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -77,6 +77,8 @@ export interface ChiffresCles {
   resultat_net: number | null;
   capitaux_propres: number | null;
   dette: number | null;
+  /** 'totale' : bilan, court + long terme ; 'long_terme' : banque ; 'declaree' : périmètre non vérifié. */
+  dette_perimetre: 'totale' | 'long_terme' | 'declaree' | null;
   croissance_ca_1an: number | null;
   croissance_ca_2ans: number | null;
   variation_capitaux_propres_1an: number | null;
@@ -311,8 +313,15 @@ export async function buildDossier(
   const annuels = exercicesAnnuels(exercices).filter((e) => exerciceRef == null || Number(e.periode) <= Number(exerciceRef));
   const annuelRef = annuels[0]?.periode === exerciceRef ? annuels : [];
   const { data: bilanRef } = exerciceRef
-    ? await sb.from('balance_sheets').select('total_actifs').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
+    ? await sb.from('balance_sheets').select('total_actifs, dette_court_terme, dette_long_terme').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
     : { data: null };
+  const bilan = bilanRef as { total_actifs?: number | null; dette_court_terme?: number | null; dette_long_terme?: number | null } | null;
+  const dette = detteFinanciere({
+    famille: (FAMILLE_PAR_CODE[CODE] ?? 'general') as 'banque' | 'assurance' | 'general',
+    lt: bilan?.dette_long_terme ?? null,
+    ct: bilan?.dette_court_terme ?? null,
+    declaree: (fonda as { debt?: number | null } | null)?.debt ?? null,
+  });
   const fisc = fiscaliteDividende((instr as { pays?: string | null }).pays ?? null);
   const notation = litNotation((instr as { notation_json?: unknown }).notation_json);
   if (notation) {
@@ -362,7 +371,7 @@ export async function buildDossier(
         revenue: fonda.revenue,
         net_income: fonda.net_income,
         equity: fonda.equity,
-        debt: (fonda as { debt?: number | null }).debt ?? null,
+        debt: dette?.valeur ?? null,
         dividende: divRetenu?.montant ?? null,
       })
     : null;
@@ -452,7 +461,9 @@ export async function buildDossier(
     margeExp: qualite?.marge_exploitation ?? null,
     margeExpPrecedente: qualiteResultat(annuelRef[1])?.marge_exploitation ?? null,
     roe: ratios?.roe ?? null,
-    endettement: ratios?.gearing ?? null,
+    // Un taux d'endettement au périmètre non vérifié peut sous-estimer la dette :
+    // il ne tient pas un pilier.
+    endettement: dette?.perimetre === 'totale' ? (ratios?.gearing ?? null) : null,
     dividendes: [...divParExercice.values()],
     per: ratios?.per ?? null,
     perMediane: medianes?.lignes.find((l) => l.libelle === 'PER')?.mediane ?? null,
@@ -500,7 +511,8 @@ export async function buildDossier(
       chiffre_affaires: fonda?.revenue ?? null,
       resultat_net: fonda?.net_income ?? null,
       capitaux_propres: fonda?.equity ?? null,
-      dette: (fonda as { debt?: number | null } | null)?.debt ?? null,
+      dette: dette?.valeur ?? null,
+      dette_perimetre: dette?.perimetre ?? null,
       croissance_ca_1an: croissanceCA(annuelRef, 1),
       croissance_ca_2ans: croissanceCA(annuelRef, 2),
       variation_capitaux_propres_1an:
@@ -548,9 +560,9 @@ export async function buildDossier(
     qualite_resultat: qualite,
     rentabilite_actif: rentabiliteActif({
       resultatNet: fonda?.net_income ?? null,
-      totalActif: (bilanRef as { total_actifs?: number | null } | null)?.total_actifs ?? null,
+      totalActif: bilan?.total_actifs ?? null,
       capitauxPropres: fonda?.equity ?? null,
-      dette: (fonda as { debt?: number | null } | null)?.debt ?? null,
+      dette: dette?.valeur ?? null,
     }),
     niveaux,
     lacunes,

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee } from './suivi.ts';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere } from './suivi.ts';
 
 test('performance : 1 mois (21 séances), depuis le 1er janvier, position dans la plage 52 semaines', () => {
   const closes = Array.from({ length: 30 }, (_, i) => 100 + i); // 100 … 129
@@ -79,4 +79,19 @@ test('notation : un communiqué de notation postérieur à la note enregistrée 
   // Note sans date : on ne peut pas la dater, le communiqué le plus récent la signale.
   assert.equal(notationDepassee(null, ['2024-06-28']), '2024-06-28');
   assert.equal(notationDepassee('2025-06-01', []), null);
+});
+
+test('dette financière : bilan court + long terme hors banques (SNTS 2025 : 232,66 + 170,03 = 402,69 Md, comptes certifiés)', () => {
+  assert.deepEqual(
+    detteFinanciere({ famille: 'general', lt: 232_660e6, ct: 170_026e6, declaree: 248_038e6 }),
+    { valeur: 402_686e6, perimetre: 'totale' },
+  );
+  // Une rubrique absente du bilan vaut zéro : la consigne d'extraction met null quand la ligne n'existe pas.
+  assert.deepEqual(detteFinanciere({ famille: 'general', lt: null, ct: 30e9, declaree: 2e9 }), { valeur: 30e9, perimetre: 'totale' });
+});
+
+test('dette financière : banque = long terme seul (le court terme du bilan bancaire, ce sont les dépôts) ; sans bilan = périmètre non vérifié', () => {
+  assert.deepEqual(detteFinanciere({ famille: 'banque', lt: 7e9, ct: 500e9, declaree: 7e9 }), { valeur: 7e9, perimetre: 'long_terme' });
+  assert.deepEqual(detteFinanciere({ famille: 'general', lt: null, ct: null, declaree: 5e9 }), { valeur: 5e9, perimetre: 'declaree' });
+  assert.equal(detteFinanciere({ famille: 'general', lt: null, ct: null, declaree: null }), null);
 });

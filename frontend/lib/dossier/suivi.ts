@@ -195,3 +195,27 @@ export function notationDepassee(dateNotation: string | null, communiques: strin
   if (!dernier) return null;
   return dateNotation == null || dernier > dateNotation ? dernier : null;
 }
+
+// ── Dette financière ────────────────────────────────────────────────────────
+
+/**
+ * La dette d'un émetteur non bancaire = dette financière à plus d'un an +
+ * trésorerie-passif (crédits bancaires, découverts), lues dans le BILAN de
+ * l'exercice. `fundamentals.debt` ne portait que le long terme (mapping de
+ * l'import) : 248 Md pour SNTS 2025, 402,7 Md dans les comptes certifiés.
+ * Banque : le court terme du bilan, ce sont les dépôts — seul le long terme
+ * a un sens. Sans bilan : le montant déclaré, périmètre NON VÉRIFIÉ.
+ */
+export function detteFinanciere(e: {
+  famille: 'banque' | 'assurance' | 'general';
+  lt: number | null;
+  ct: number | null;
+  declaree: number | null;
+}): { valeur: number; perimetre: 'totale' | 'long_terme' | 'declaree' } | null {
+  if (e.famille === 'general' && (e.lt != null || e.ct != null)) return { valeur: (e.lt ?? 0) + (e.ct ?? 0), perimetre: 'totale' };
+  if (e.famille !== 'general') {
+    const lt = e.lt ?? e.declaree;
+    return lt != null ? { valeur: lt, perimetre: 'long_terme' } : null;
+  }
+  return e.declaree != null ? { valeur: e.declaree, perimetre: 'declaree' } : null;
+}

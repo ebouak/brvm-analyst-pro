@@ -316,7 +316,17 @@ export default async function DossierPage({ params }: { params: { code: string }
               ton={c.resultat_net == null ? undefined : c.resultat_net >= 0 ? 'hausse' : 'baisse'}
             />
             <Mesure libelle="Capitaux propres" valeur={cfa(c.capitaux_propres)} />
-            <Mesure libelle="Dette" valeur={cfa(c.dette)} />
+            <Mesure
+              libelle={c.dette_perimetre === 'long_terme' ? 'Dette à plus d’un an' : 'Dette financière'}
+              valeur={cfa(c.dette)}
+              note={
+                c.dette_perimetre === 'totale'
+                  ? `À plus et à moins d’un an${c.exercice ? `, bilan ${c.exercice}` : ''}.`
+                  : c.dette_perimetre === 'declaree'
+                    ? 'Montant déclaré : son périmètre (court terme compris ou non) n’est pas vérifié.'
+                    : undefined
+              }
+            />
             <Mesure
               libelle="Croissance du CA"
               valeur={pourcent(c.croissance_ca_1an)}
@@ -369,7 +379,11 @@ export default async function DossierPage({ params }: { params: { code: string }
               ton={r?.roe == null ? undefined : r.roe >= 0 ? 'hausse' : 'baisse'}
             />
             <Mesure libelle="Marge nette" valeur={part(r?.margeNette)} />
-            <Mesure libelle="Endettement / capitaux propres" valeur={part(r?.gearing)} />
+            <Mesure
+              libelle={c.dette_perimetre === 'long_terme' ? 'Dette à plus d’un an / capitaux propres' : 'Dette financière / capitaux propres'}
+              valeur={part(r?.gearing)}
+              note={c.dette_perimetre === 'declaree' ? 'Périmètre de la dette non vérifié : le taux peut être sous-estimé.' : undefined}
+            />
             {d.rentabilite_actif?.mesure === 'capitaux_investis' ? (
               <Mesure
                 libelle="Rentabilité des capitaux investis"
