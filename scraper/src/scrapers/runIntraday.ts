@@ -7,6 +7,7 @@ import { ensureIndexInstruments, ensureActionInstruments, upsertActions, upsertI
 import { getSupabase } from '../persistence/supabase.js';
 import { memeSeanceQuePrecedente, type LigneComparable } from './preuveDeSeance.js';
 import type { IndiceRow } from '../types.js';
+import { jourNonOuvre } from '../utils/jourOuvre.js';
 
 const BRVM_PUBLIC_URL = 'https://www.brvm.org/fr/cours-actions/0';
 const BRVM_RESUME_URL = 'https://www.brvm.org/fr/resume';
@@ -57,6 +58,14 @@ async function derniereSeancePrecedente(today: string): Promise<{ date: string; 
 export async function runIntraday(opts: { mock?: boolean } = {}): Promise<{ nbActions: number; nbIndices: number }> {
   const mock = opts.mock ?? false;
   const today = new Date().toISOString().slice(0, 10);
+  // Pas de séance un week-end ou un jour férié : la page montre la précédente.
+  if (!mock) {
+    const raison = await jourNonOuvre(today);
+    if (raison) {
+      logger.warn({ today, raison }, 'intraday : jour non ouvré — aucune écriture');
+      return { nbActions: 0, nbIndices: 0 };
+    }
+  }
   const html = await getHtml(mock);
   const snapshot = parseBrvmPublic(html, today);
   snapshot.is_mock = mock;

@@ -15,6 +15,7 @@ import { logger } from '../logger.js';
 import { ensureObligationInstruments, upsertObligations } from '../persistence/repository.js';
 import { fetchBrvmObligations } from './brvmObligations.js';
 import type { MarketSnapshot, ObligationRow } from '../types.js';
+import { jourNonOuvre } from '../utils/jourOuvre.js';
 
 const log = logger.child({ module: 'runObligations' });
 
@@ -40,6 +41,14 @@ export async function runObligations(opts: { mock?: boolean } = {}): Promise<Obl
       const rows = MOCK_ROWS.map((r) => ({ ...r, date_marche: today }));
       log.info({ nb: rows.length }, 'Obligations mock');
       return { status: 'mock', nb: rows.length, message: null };
+    }
+
+    // Pas de séance un week-end ou un jour férié : brvm.org ne date pas sa page,
+    // l'écrire sous « aujourd'hui » fabriquait une séance (07/08, 25/08/2026…).
+    const raison = await jourNonOuvre(today);
+    if (raison) {
+      log.warn({ today, raison }, 'Obligations : jour non ouvré — aucune écriture');
+      return { status: 'success', nb: 0, message: `jour non ouvré : ${raison}` };
     }
 
     const fetched: ObligationRow[] = await fetchBrvmObligations();
