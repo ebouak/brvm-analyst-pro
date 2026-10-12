@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere } from './suivi.ts';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere, memesComptes } from './suivi.ts';
 
 test('performance : 1 mois (21 séances), depuis le 1er janvier, position dans la plage 52 semaines', () => {
   const closes = Array.from({ length: 30 }, (_, i) => 100 + i); // 100 … 129
@@ -94,4 +94,11 @@ test('dette financière : banque = long terme seul (le court terme du bilan banc
   assert.deepEqual(detteFinanciere({ famille: 'banque', lt: 7e9, ct: 500e9, declaree: 7e9 }), { valeur: 7e9, perimetre: 'long_terme' });
   assert.deepEqual(detteFinanciere({ famille: 'general', lt: null, ct: null, declaree: 5e9 }), { valeur: 5e9, perimetre: 'declaree' });
   assert.equal(detteFinanciere({ famille: 'general', lt: null, ct: null, declaree: null }), null);
+});
+
+test('mêmes comptes : le bilan ne se croise avec les fondamentaux que s’ils portent les mêmes capitaux propres (SCRC 2025 : SYSCOHADA 13,8 Md, IFRS 17,2 Md)', () => {
+  assert.equal(memesComptes(13_822_035_189, 17_243_172_000), false);
+  assert.equal(memesComptes(1_399_263e6, 1_399_263e6), true);
+  assert.equal(memesComptes(100, 101.5), true, 'écart de 1,5 % toléré');
+  assert.equal(memesComptes(null, 5), true, 'sans point de comparaison, rien ne prouve un écart');
 });
