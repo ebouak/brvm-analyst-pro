@@ -36,4 +36,10 @@ update fundamentals set debt = 56430276000, updated_at = now() where code = 'SCR
 update balance_sheets set dette_long_terme = 12675296717 where code = 'SHEC' and periode = '2022' and type_periode = 'annuel' and dette_long_terme = 0;
 update fundamentals set debt = 17019057856, updated_at = now() where code = 'SHEC' and year = 2022 and debt = 0;
 
+-- ── PALC : référence « pdf-verified », corrigée sur décision explicite (2026-10-12). ──
+-- EF 2025 (milliers) : dettes financières et ressources assimilées 796 559 / 4 047 029
+-- + trésorerie-passif 14 047 180 / 22 021 633 (colonnes 2025 / 2024).
+update fundamentals set debt = 14843739000, updated_at = now() where code = 'PALC' and year = 2025 and debt = 796559000;
+update fundamentals set debt = 26068662000, updated_at = now() where code = 'PALC' and year = 2024 and debt = 4047029000;
+
 commit;
