@@ -255,10 +255,43 @@ le code.
 - **Ajusté** : le statut « estimation » de l'agenda n'est pas créé, car nous
   n'estimons aucune date ; regroupement par notation écarté (couverture
   partielle) au profit des secteurs.
-- **Non retenu sans décision** : « bleu nuit » comme couleur d'identité. Il
-  n'existe dans aucun jeton du site (`globals.css` : sombre noir + cyan,
-  clair ivoire + sarcelle). L'introduire est un changement de charte, à
-  trancher séparément.
+- **Non retenu (décision du 2026-10-14, option A)** : « bleu nuit » comme
+  couleur d'identité. Il n'existe dans aucun jeton du site (`globals.css` :
+  sombre noir + cyan, clair ivoire + sarcelle). La refonte garde les jetons
+  actuels.
+
+### Visuel cible du 2026-10-14 (deux colonnes « actif » / « débutant »)
+
+Retenu comme **référence de structure**, pas comme maquette finale :
+
+- **Repris** : bandeau d'alertes détaillé (valeur, motif) ; bloc portefeuille
+  avec valeur totale, performance du jour face au BRVM Composite, plus-value
+  latente, répartition en anneau et tableau des positions ; agenda filtrable
+  (Mes valeurs · Dividendes · Assemblées · Jours fermés) avec pastilles de
+  statut ; publications filtrables ; tableau de liquidité (valeur de la
+  position, classe, fourchette, valeur moyenne 30 j, séances) ; « Comprendre
+  la séance » en cinq constats numérotés avec lien vers l'Academy ; invitation
+  « Créer mon portefeuille / Suivre des valeurs » pour le débutant ; bande
+  macro UEMOA.
+- **Écarté** :
+  - boutons **« Vendre »** sur chaque position : la plateforme ne passe pas
+    d'ordres, et un bouton de vente par ligne se lit comme une incitation ;
+    remplacés par un lien vers la fiche de la valeur ;
+  - **jauge « Sentiment du marché 52/100 »** : aucune mesure derrière ;
+  - **quatre cartes d'état de séance** (Ouvert, Négociation en continu,
+    Prochaine ouverture, Fuseau) : condensées en une pastille ;
+  - bloc **« Publications »** de l'actif, qui affiche en réalité un tableau de
+    cours : il doit lister des documents ;
+  - **couleurs bleu nuit** de l'en-tête et de la barre latérale (option A).
+- **À vérifier avant de reprendre** : graphe en bougies intraday (seulement si
+  les relevés toutes les 15 minutes, `brvm_intraday_candles_15m`, sont
+  fiables) ; vignettes photo des actualités (seulement si la source fournit
+  une image) ; indices africains présentés comme frais alors que la source est
+  figée au 03/07/2026.
+- **Chiffres du visuel** : illustratifs et souvent incohérents entre eux
+  (liquidité de SNTS à 14 séances pour une position de 4,5 M face à 325 M
+  échangés par jour ; fourchette à 0,8 % contre 0,01 % mesuré). Les écrans
+  finaux utilisent les données réelles.
 
 ## 10. RGPD
 
