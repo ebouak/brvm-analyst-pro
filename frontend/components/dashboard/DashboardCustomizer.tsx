@@ -14,6 +14,10 @@ export default function DashboardCustomizer({ initial, profil }: { initial: Dash
   const [hidden, setHidden] = useState<Set<WidgetKey>>(new Set(initialHidden));
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // Une disposition enregistrée FIGE l'ordre : le profil ne s'applique plus tant
+  // qu'elle existe. On le dit, et on offre un vrai retour à l'ordre automatique.
+  const [personnalise, setPersonnalise] = useState(initial != null);
+  const router = useRouter();
 
   const move = (i: number, dir: -1 | 1) => {
     const j = i + dir;
@@ -30,14 +34,31 @@ export default function DashboardCustomizer({ initial, profil }: { initial: Dash
       body: JSON.stringify({ preferences: { dashboard } }),
     });
     setSaving(false);
-    setMsg(r.ok ? '✓ Disposition enregistrée' : 'Échec de l’enregistrement');
+    if (r.ok) setPersonnalise(true);
+    setMsg(r.ok ? '✓ Disposition enregistrée : elle remplace l’ordre automatique.' : 'Échec de l’enregistrement');
   }
-  function reset() {
-    setOrder([...ordreParDefaut(profil)]); setHidden(new Set(MASQUES_PAR_DEFAUT[profil])); setMsg(null);
+  // Efface la disposition enregistrée : le tableau de bord suit de nouveau le profil.
+  async function revenirAuto() {
+    setSaving(true); setMsg(null);
+    const r = await fetch('/api/profile', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ preferences: { dashboard: null } }),
+    });
+    setSaving(false);
+    if (!r.ok) { setMsg('Échec : l’ordre automatique n’a pas pu être rétabli'); return; }
+    setOrder([...ordreParDefaut(profil)]); setHidden(new Set(MASQUES_PAR_DEFAUT[profil]));
+    setPersonnalise(false);
+    setMsg('✓ Ordre automatique rétabli : il suit désormais votre profil.');
+    router.refresh();
   }
 
   return (
     <div className="space-y-2">
+      <div className={`rounded-xl border px-4 py-3 text-sm ${personnalise ? 'border-warn/40 bg-warn/[0.06] text-warn' : 'border-accent/30 bg-accent/[0.05] text-ivory'}`} role="status">
+        {personnalise
+          ? 'Disposition personnalisée enregistrée : l’ordre ne suit plus votre profil.'
+          : `Ordre automatique selon votre profil : ${profil === 'actif' ? 'investisseur actif, votre portefeuille, l’agenda et les publications de vos valeurs d’abord' : 'débutant, la séance et son explication d’abord'}.`}
+      </div>
       {order.map((k, i) => {
         const meta = META.get(k); if (!meta) return null;
         const on = !hidden.has(k);
@@ -64,7 +85,7 @@ export default function DashboardCustomizer({ initial, profil }: { initial: Dash
         <button type="button" onClick={save} disabled={saving} className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-bg disabled:opacity-50">
           {saving ? 'Enregistrement…' : 'Enregistrer la disposition'}
         </button>
-        <button type="button" onClick={reset} className="text-xs text-faint hover:text-muted">Réinitialiser</button>
+        <button type="button" onClick={revenirAuto} disabled={saving || !personnalise} className="text-xs text-faint hover:text-muted disabled:opacity-40" title="Efface la disposition enregistrée : l’ordre suit de nouveau votre profil">Revenir à l’ordre automatique</button>
         {msg && <span className={`text-xs ${msg.startsWith('✓') ? 'text-up' : 'text-down'}`}>{msg}</span>}
       </div>
     </div>
