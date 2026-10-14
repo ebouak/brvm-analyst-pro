@@ -1,12 +1,17 @@
+import { createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { ACCUSE_FENETRE_SECONDES, accuseReception, normaliserEmail } from '@/lib/contact/accuse';
 import { sendEmail } from '@/lib/server/email';
 import { checkRateLimit, getClientIp } from '@/lib/server/rateLimit';
 
 /**
- * Encart « Salut, on se parle ? » — relais email vers la boîte support.
- * RGPD : minimisation. Aucune donnée persistée en base ; le message est
+ * Encart « Salut, on se parle ? » — relais email vers la boîte support, puis
+ * accusé de réception au visiteur (texte fixe, voir lib/contact/accuse.ts).
+ * RGPD : minimisation. Le message n'est pas persisté en base ; il est
  * uniquement transmis par email (finalité = contact, base légale = consentement
- * par envoi volontaire). Voir docs/RGPD.md.
+ * par envoi volontaire). Seule une empreinte SHA-256 de l'adresse est écrite
+ * dans rate_limit_hits, pour limiter les accusés ; elle est purgée au premier
+ * passage suivant la fin de sa fenêtre de 24 h. Voir docs/RGPD.md.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -52,6 +57,8 @@ export async function POST(req: NextRequest) {
 
     const result = await sendEmail({
       to,
+      // « Répondre » dans la boîte support écrit directement au visiteur.
+      replyTo: e,
       subject: `💬 Contact WESTBOURSE — ${p || 'visiteur'}`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
@@ -67,6 +74,21 @@ export async function POST(req: NextRequest) {
 
     if (!result.ok) {
       return NextResponse.json({ error: 'Envoi indisponible pour le moment.' }, { status: 502 });
+    }
+
+    // Accusé de réception — seulement si le message est bien parti au support
+    // (sinon on promettrait une réponse à un message perdu), et au plus un par
+    // adresse et par 24 h. La clé de limite est une empreinte de l'adresse :
+    // l'adresse elle-même n'est jamais écrite en base. Son échec ne fait pas
+    // échouer la requête (le message, lui, est arrivé) et n'est journalisé
+    // qu'avec la raison, jamais avec l'adresse.
+    const cle = createHash('sha256').update(`contact-accuse:${normaliserEmail(e)}`).digest('hex');
+    const { allowed: accuseAutorise } = await checkRateLimit({
+      route: 'contact-accuse', ip: cle, maxHits: 1, windowSeconds: ACCUSE_FENETRE_SECONDES,
+    });
+    if (accuseAutorise) {
+      const accuse = await sendEmail({ to: e, ...accuseReception() });
+      if (!accuse.ok) console.warn('[contact] accusé de réception non envoyé :', accuse.error);
     }
     return NextResponse.json({ ok: true });
   } catch {
