@@ -41,7 +41,7 @@ export const calculerEcosysteme: CalculateMetadataFunction<{ durees: Durees | nu
 };
 
 // ── Charte ──────────────────────────────────────────────────────────────────
-const C = {
+export const C = {
   fond: '#030303', surface: '#0a1417', bord: 'rgba(255,255,255,.12)',
   blanc: '#FCFCFC', gris: '#A9BFC5', sourd: '#7A8A90', teal: '#16B6A4', cyan: '#56D7FD',
 };
@@ -50,18 +50,18 @@ const TEINTE: Record<string, string> = {
   regulation: '#F0B23A', infrastructures: '#56D7FD', intermediaires: '#3fe18b', participants: '#B69BF0',
 };
 
-const EASE = Easing.bezier(0.16, 1, 0.3, 1);
-const t = (f: number, a: number, b: number, de = 0, a2 = 1) =>
+export const EASE = Easing.bezier(0.16, 1, 0.3, 1);
+export const t = (f: number, a: number, b: number, de = 0, a2 = 1) =>
   interpolate(f, [a, b], [de, a2], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EASE });
 
 /** Instant (en images) où la voix prononce `mot`, par sa position dans le texte. */
-function instant(voix: string, mot: string, duree: number): number {
+export function instant(voix: string, mot: string, duree: number): number {
   const i = voix.toLowerCase().indexOf(mot.toLowerCase());
   return i < 0 ? 0 : Math.round((i / voix.length) * duree * FPS);
 }
 
 // ── Éléments ────────────────────────────────────────────────────────────────
-function Logo({ taille, prog = 1 }: { taille: number; prog?: number }) {
+export function Logo({ taille, prog = 1 }: { taille: number; prog?: number }) {
   const p1 = Math.min(1, prog * 1.6), p2 = Math.max(0, Math.min(1, (prog - 0.5) * 3)), p3 = Math.max(0, Math.min(1, (prog - 0.75) * 4));
   return (
     <svg width={taille} height={taille * 0.78} viewBox="6 4 122 90" style={{ overflow: 'visible' }}>
@@ -72,7 +72,7 @@ function Logo({ taille, prog = 1 }: { taille: number; prog?: number }) {
   );
 }
 
-function Fond({ teinte = C.cyan }: { teinte?: string }) {
+export function Fond({ teinte = C.cyan }: { teinte?: string }) {
   const f = useCurrentFrame();
   return (
     <AbsoluteFill style={{ background: C.fond }}>
@@ -91,7 +91,7 @@ function Marque() {
   );
 }
 
-function Entre({ debut, children, dy = 36, style }: { debut: number; children: React.ReactNode; dy?: number; style?: React.CSSProperties }) {
+export function Entre({ debut, children, dy = 36, style }: { debut: number; children: React.ReactNode; dy?: number; style?: React.CSSProperties }) {
   const f = useCurrentFrame();
   const p = t(f, debut, debut + 16);
   return <div style={{ opacity: p, transform: `translateY(${(1 - p) * dy}px)`, filter: `blur(${(1 - p) * 8}px)`, ...style }}>{children}</div>;

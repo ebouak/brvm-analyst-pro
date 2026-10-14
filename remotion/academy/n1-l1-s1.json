@@ -1,0 +1,63 @@
+{
+  "_": "Academy · Niveau 1 · Leçon 1 · Section 1. Source unique : textes affichés ET voix off, lus par academy-section.tsx et academy-voix.mjs. Chaque chiffre est repris tel quel de la section publiée sur /formations/academy/academy-niveau-1-initiation?lecon=1 (contenu du 2026-10-14) ; aucun n'est calculé ni ajouté ici. Les nombres de la voix sont écrits en toutes lettres pour que la synthèse ne les lise pas de travers.",
+  "voixTts": "fr-FR-DeniseNeural",
+  "cours": "Niveau 1 · Initiation à la BRVM",
+  "lecon": "Leçon 1 · Qu’est-ce que la BRVM et comment ça marche ?",
+  "type": "definition",
+  "scenes": [
+    {
+      "id": "titre",
+      "gabarit": "titre",
+      "titre": "Une infrastructure financière, pas un casino",
+      "voix": "Qu'est-ce que la BRVM ? Commençons par une définition. La BRVM est une infrastructure financière. Pas un casino."
+    },
+    {
+      "id": "definition",
+      "gabarit": "definition",
+      "sigle": [["B", "Bourse"], ["R", "Régionale des"], ["V", "Valeurs"], ["M", "Mobilières"]],
+      "phrase": "Un système organisé et strictement réglementé",
+      "publics": ["Salarié", "Commerçant", "Étudiant", "Fonctionnaire"],
+      "chute": "investir de façon sécurisée dans de vraies entreprises de l’UEMOA",
+      "voix": "La Bourse régionale des valeurs mobilières est un système organisé, et strictement réglementé. Elle permet à n'importe qui, salarié, commerçant, étudiant ou fonctionnaire, d'investir de façon sécurisée dans de vraies entreprises de l'UEMOA."
+    },
+    {
+      "id": "marche",
+      "gabarit": "pays",
+      "titre": "Un marché unique pour 8 pays",
+      "pays": ["Bénin", "Burkina Faso", "Côte d’Ivoire", "Guinée-Bissau", "Mali", "Niger", "Sénégal", "Togo"],
+      "superviseur": "AMF-UMOA",
+      "superviseurNom": "Autorité des Marchés Financiers de l’UMOA",
+      "voix": "C'est un marché unique pour huit pays, supervisé par l'AMF-UMOA, l'autorité des marchés financiers de l'Union."
+    },
+    {
+      "id": "croissance",
+      "gabarit": "croissance",
+      "label": "Capitalisation boursière",
+      "unite": "Md FCFA",
+      "depart": { "annee": "1998", "valeur": 836 },
+      "arrivee": { "annee": "2026", "valeur": 18488 },
+      "multiple": "×22 en 28 ans",
+      "variation": "+2 100 %",
+      "acceleration": "+94 % en 6 ans depuis 2020",
+      "voix": "En vingt-huit ans, la capitalisation est passée de huit cent trente-six milliards de francs CFA en 1998, à dix-huit mille quatre cent quatre-vingt-huit milliards en 2026. Multipliée par plus de vingt-deux. Et la hausse s'est nettement accélérée depuis 2020 : plus quatre-vingt-quatorze pour cent en six ans."
+    },
+    {
+      "id": "chiffres",
+      "gabarit": "stats",
+      "titre": "La BRVM en quatre chiffres",
+      "stats": [
+        { "label": "Capitalisation 2026", "valeur": "18 488", "unite": "Md FCFA", "detail": "contre 836 Md FCFA en 1998", "mot": "capitalisation" },
+        { "label": "Sociétés cotées", "valeur": "49", "unite": "", "detail": "nomenclature 2026", "mot": "sociétés" },
+        { "label": "Secteurs", "valeur": "7", "unite": "", "detail": "des banques aux télécoms", "mot": "secteurs" },
+        { "label": "Pays UEMOA", "valeur": "8", "unite": "", "detail": "un seul marché commun", "mot": "pays" }
+      ],
+      "voix": "En quatre chiffres : dix-huit mille quatre cent quatre-vingt-huit milliards de capitalisation. Quarante-neuf sociétés cotées. Sept secteurs, des banques aux télécoms. Et huit pays, réunis dans un seul marché commun."
+    },
+    {
+      "id": "fin",
+      "gabarit": "fin",
+      "retenir": "La BRVM est une infrastructure régulée, ouverte à tous, pour investir dans de vraies entreprises.",
+      "voix": "À retenir : la BRVM n'est pas un casino. C'est une infrastructure régulée, ouverte à tous, pour investir dans de vraies entreprises."
+    }
+  ]
+}
