@@ -41,3 +41,10 @@ describe('valeurs non finies', () => {
     expect(fmtFcfaSigne(0.7)).toBe('+' + fmtFcfa(0.7));
   });
 });
+
+describe('fmtFcfa non fini', () => {
+  it('NaN et infini donnent un tiret', () => {
+    expect(fmtFcfa(NaN)).toBe('—');
+    expect(fmtFcfa(Infinity)).toBe('—');
+  });
+});

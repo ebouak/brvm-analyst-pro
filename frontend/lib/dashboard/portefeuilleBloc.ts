@@ -70,3 +70,62 @@ export function contributions(positions: EnrichedPosition[]): Contribution[] {
 export function positionsSansCours(positions: EnrichedPosition[]): string[] {
   return positions.filter((p) => !p.isLiquidites && !(fini(p.cours) && p.cours > 0)).map((p) => p.code);
 }
+
+export interface SyntheseValorisee {
+  valeur: number;
+  investi: number;
+  pnl: number;
+  pnlPct: number | null;
+  exclus: string[];
+}
+
+/** Liquidités + positions avec un cours > 0. Une position sans cours n'est jamais comptée à 0 : elle est exclue et nommée. */
+export function syntheseValorisee(positions: EnrichedPosition[]): SyntheseValorisee {
+  let valeur = 0;
+  let investi = 0;
+  let pnl = 0;
+  const exclus: string[] = [];
+  for (const p of positions) {
+    if (p.isLiquidites) {
+      if (fini(p.valeur)) valeur += p.valeur;
+      continue;
+    }
+    if (!avecCours(p)) {
+      exclus.push(p.code);
+      continue;
+    }
+    valeur += fini(p.valeur) ? p.valeur : 0;
+    investi += fini(p.investi) ? p.investi : 0;
+    pnl += fini(p.pnl) ? p.pnl : 0;
+  }
+  return { valeur, investi, pnl, pnlPct: investi > 0 ? pnl / investi : null, exclus };
+}
+
+/** Répartition par secteur sur le même sous-ensemble valorisé ; poids recalculés sur ce sous-ensemble. */
+export function secteursValorises(positions: EnrichedPosition[]): { secteur: string; valeur: number; poids: number }[] {
+  const par = new Map<string, number>();
+  for (const p of positions) {
+    if (!p.isLiquidites && !avecCours(p)) continue;
+    if (!fini(p.valeur)) continue;
+    const s = p.isLiquidites ? 'Liquidités' : p.secteur || 'Autre';
+    par.set(s, (par.get(s) ?? 0) + p.valeur);
+  }
+  const total = [...par.values()].reduce((a, b) => a + b, 0);
+  return [...par]
+    .map(([secteur, valeur]) => ({ secteur, valeur, poids: total > 0 ? valeur / total : 0 }))
+    .sort((a, b) => b.valeur - a.valeur);
+}
+
+/** Sous-échantillonnage régulier, premier et dernier points toujours conservés. */
+export function echantillonner<T>(points: T[], max = 365): T[] {
+  if (points.length <= max || max < 2) return points;
+  const out: T[] = [];
+  const pas = (points.length - 1) / (max - 1);
+  let dernier = -1;
+  for (let i = 0; i < max; i++) {
+    const idx = i === max - 1 ? points.length - 1 : Math.round(i * pas);
+    if (idx !== dernier) out.push(points[idx]);
+    dernier = idx;
+  }
+  return out;
+}

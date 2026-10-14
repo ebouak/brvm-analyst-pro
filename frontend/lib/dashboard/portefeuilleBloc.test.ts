@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lignesPerfDepuis, contributions, positionsSansCours, variationsDuJour } from './portefeuilleBloc';
+import { lignesPerfDepuis, contributions, positionsSansCours, variationsDuJour, syntheseValorisee, secteursValorises, echantillonner } from './portefeuilleBloc';
 import type { EnrichedPosition } from '@/lib/portfolio/derive';
 
 const pos = (code: string, o: Partial<EnrichedPosition> = {}): EnrichedPosition => ({
@@ -67,5 +67,50 @@ describe('une seule séance, sans écrasement par null', () => {
     ];
     expect(variationsDuJour(dbl).get('SNTS')).toBe(1.2);
     expect(lignesPerfDepuis([pos('SNTS')], dbl)[0].variationPct).toBe(1.2);
+  });
+});
+
+describe('syntheseValorisee', () => {
+  const liq = pos('LIQUIDITES', { isLiquidites: true, valeur: 5000, investi: 0, pnl: 0, cours: 0 });
+  it('exclut une position sans cours de valeur, investi et pnl, et la nomme', () => {
+    const r = syntheseValorisee([pos('SNTS'), pos('BOAN', { cours: 0, valeur: 0, pnl: -10000 })]);
+    expect(r).toEqual({ valeur: 11000, investi: 10000, pnl: 1000, pnlPct: 0.1, exclus: ['BOAN'] });
+  });
+  it('inclut les liquidités dans la valeur', () => {
+    const r = syntheseValorisee([pos('SNTS'), liq]);
+    expect(r.valeur).toBe(16000);
+    expect(r.exclus).toEqual([]);
+  });
+  it('aucune position valorisée : valeur 0, pnlPct null', () => {
+    const r = syntheseValorisee([pos('BOAN', { cours: 0, valeur: 0, pnl: -10000 })]);
+    expect(r.valeur).toBe(0);
+    expect(r.pnlPct).toBeNull();
+    expect(r.exclus).toEqual(['BOAN']);
+  });
+});
+
+describe('secteursValorises', () => {
+  it('poids recalculés sur le sous-ensemble valorisé, somme = 1, tri décroissant', () => {
+    const r = secteursValorises([
+      pos('A', { secteur: 'Banque', valeur: 3000 }),
+      pos('B', { secteur: 'Telecom', valeur: 1000 }),
+      pos('C', { secteur: 'Autre', cours: 0, valeur: 0 }),
+    ]);
+    expect(r.map((x) => x.secteur)).toEqual(['Banque', 'Telecom']);
+    expect(r.reduce((a, x) => a + x.poids, 0)).toBeCloseTo(1, 10);
+  });
+});
+
+describe('echantillonner', () => {
+  it('1000 points, max 365 : borné, premier et dernier conservés', () => {
+    const pts = Array.from({ length: 1000 }, (_, i) => i);
+    const r = echantillonner(pts, 365);
+    expect(r.length).toBeLessThanOrEqual(365);
+    expect(r[0]).toBe(0);
+    expect(r[r.length - 1]).toBe(999);
+  });
+  it('10 points : inchangé', () => {
+    const pts = Array.from({ length: 10 }, (_, i) => i);
+    expect(echantillonner(pts)).toBe(pts);
   });
 });
