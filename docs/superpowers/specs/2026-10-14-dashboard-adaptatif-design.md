@@ -92,8 +92,16 @@ charte dans ce chantier (voir §9).
 
 - **Sources** : `dividends` (`ex_date`, `payment_date` ≥ aujourd'hui, ≤ +30 j ;
   `montant`, `base_fiscale`, `source`), `market_events` (`event_type =
-  'assemblee'`, `event_date` à venir), `market_calendar`
-  (`is_trading_day = false`, jours de fermeture).
+  'assemblee'`, clé `instrument_code`), `market_calendar`
+  (`is_trading_day = false`, jours de fermeture — le module filtre lui-même).
+- **Assemblées : bloc VIDE tant qu'aucune date de réunion n'existe** (décision
+  du 2026-10-14, revue finale du plan 1). `market_events.event_date` est la
+  date de PUBLICATION de l'avis (`scraper/src/events/parser.ts` lit la date de
+  la liste), pas celle de la réunion : l'afficher comme date d'assemblée
+  serait faux. Le module attend un champ `date_reunion` et l'appelant passe une
+  liste vide jusqu'à ce qu'une source de date de réunion soit collectée (titre
+  ou résumé de l'avis à analyser, ou colonne dédiée). Statut `officiel` pour
+  `source = 'BRVM'` (avis publiés par la Bourse) ou `'bdfin'`.
 - **Profil actif** : ses valeurs en tête. Deux montants distincts, jamais
   confondus : le **dividende par action**, et le **total indicatif** =
   quantité détenue AUJOURD'HUI × dividende, libellé « pour vos N titres, s'ils
@@ -300,3 +308,26 @@ Retenu comme **référence de structure**, pas comme maquette finale :
 Aucune nouvelle donnée personnelle : le profil est déduit des positions
 existantes à chaque rendu, rien n'est stocké. Les blocs lisent sous RLS avec la
 session de l'utilisateur.
+
+## 11. Notes d'intégration pour le plan 2 (revue finale du plan 1)
+
+- **§8, premier critère NON atteint par le plan 1** : `ORDRE_ACTIF` ne
+  réordonne que les widgets configurables ; les sections fixes (macro, indices
+  africains, motifs intraday) restent au-dessus. La mise en page à trois
+  niveaux (§4.0) est l'objet du plan 2.
+- **`comprendre`** : hausses / baisses / stables à compter sur les
+  `variation_pct` NON nulles — le code actuel de la page et du brief compte un
+  nul comme « stable » (`?? 0`), ce qui transformerait une inconnue en
+  stabilité. `secteurMeneur` : le lire dans les indices sectoriels de
+  `brvm_indices_daily`, ou reformuler l'explication (« Les indices
+  sectoriels… ») si l'on garde la moyenne équipondérée de `computeTopSectorPerfs`.
+- **`performanceJour`** : `EnrichedPosition` (`lib/portfolio/derive.ts`) ne
+  porte ni variation ni date ; lire `brvm_actions_daily(code, cours_jour,
+  variation_pct, date_marche)` pour la séance affichée.
+- **`liquidite`** : `liquidity_daily.valeur_moyenne_30j` vaut `0` par défaut
+  (migration 0111) ; `dureeTheorique` traite ≤ 0 comme « non mesurée », à
+  conserver.
+- **Formatage** : `pctSigne` existe en deux copies (`lib/brief.ts`,
+  `lib/dashboard/comprendre.ts`) ; `fmtFcfa` émet un « - » ASCII alors que les
+  pourcentages utilisent « − » (U+2212). Avant d'afficher `variationFcfa`,
+  regrouper ces aides dans `lib/format.ts` avec un montant FCFA signé.
