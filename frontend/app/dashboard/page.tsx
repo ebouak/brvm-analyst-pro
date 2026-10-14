@@ -71,7 +71,7 @@ async function getData() {
     .limit(1);
   const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
-  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }] =
+  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }, { data: summaryRows }] =
     await Promise.all([
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
       supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastIdxDate),
@@ -88,7 +88,16 @@ async function getData() {
             .select('valeur_echangee, variation_pct')
             .eq('date_marche', prevDate)
         : Promise.resolve({ data: [] }),
+      // Résumés de CES deux séances (et non « les deux derniers ») : un résumé
+      // d'une autre séance comparé aux cours du jour serait incohérent.
+      supabase
+        .from('brvm_market_summary')
+        .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
+        .in('date_marche', prevDate ? [lastDate, prevDate] : [lastDate]),
     ]);
+  const resumes = (summaryRows ?? []) as MarketSummaryRow[];
+  const summary = resumes.find((r) => r.date_marche === lastDate) ?? null;
+  const summaryPrev = prevDate ? resumes.find((r) => r.date_marche === prevDate) ?? null : null;
 
   const prevRows = (prevActions ?? []) as { valeur_echangee: number | null; variation_pct: number | null }[];
   const prevValeur = prevDate
@@ -120,7 +129,8 @@ async function getData() {
     },
     actions: typedActions,
     signals: typedSignals,
-    volumePrev: prevValeur,
+    valeurTransactions: summary?.valeur_transactions ?? null,
+    valeurTransactionsPrev: summaryPrev?.valeur_transactions ?? null,
     topSectorPerfs,
   });
 
@@ -191,15 +201,6 @@ async function getData() {
   }
   // reverse: on a trié desc → on remet chronologique
   for (const k of Object.keys(sparklines)) sparklines[k]!.reverse();
-
-  // Totaux de séance réels (valeur des transactions, capitalisations) — 2 dernières pour le delta
-  const { data: summaryRows } = await supabase
-    .from('brvm_market_summary')
-    .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
-    .order('date_marche', { ascending: false })
-    .limit(2);
-  const summary = (summaryRows?.[0] ?? null) as MarketSummaryRow | null;
-  const summaryPrev = (summaryRows?.[1] ?? null) as MarketSummaryRow | null;
 
   // Ticker permanent : actions + obligations de la dernière séance disponible
   const { data: oblRows } = await supabase
