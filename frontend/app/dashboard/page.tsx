@@ -46,8 +46,6 @@ import {
   SectionHeader,
   EmptyStatePremium,
   PremiumCTA,
-  StatPill,
-  PremiumPanel,
 } from '@/components/ui/premium';
 import { BeamButton } from '@/components/ui/beam-button';
 
@@ -392,7 +390,7 @@ export default async function Dashboard() {
   const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
   const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
   const depuisPublications = plusJours(aujourdhui, -7);
-  const [etatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite] = await Promise.all([
+  const [etatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, weekly30, weeklyC] = await Promise.all([
     user && besoinPortefeuille
       ? chargerPortefeuille(supa, user.id, aujourdhui)
       : Promise.resolve<PortfolioState | null | undefined>(undefined),
@@ -400,6 +398,8 @@ export default async function Dashboard() {
     veut('agenda') ? chargerFermetures(supa, aujourdhui, finAgenda) : Promise.resolve([]),
     veut('publications') ? chargerPublications(supa, depuisPublications) : Promise.resolve([]),
     veut('liquidite') ? chargerLiquidite(supa) : Promise.resolve(null),
+    getWeeklyIndex('BRVM30', 'BRVM 30'),
+    getWeeklyIndex('BRVMC', 'BRVM Composite'),
   ]);
   const titresDetenus = (etatPortefeuille?.positions ?? []).filter((p) => !p.isLiquidites);
   const quantites = new Map(titresDetenus.map((p) => [p.code.trim().toUpperCase(), p.quantite]));
@@ -429,11 +429,6 @@ export default async function Dashboard() {
     valeurTransactionsVeille: summaryPrev?.valeur_transactions ?? null,
   });
   const seanceClose = estSeanceClose(lastDate, new Date());
-
-  const [weekly30, weeklyC] = await Promise.all([
-    getWeeklyIndex('BRVM30', 'BRVM 30'),
-    getWeeklyIndex('BRVMC', 'BRVM Composite'),
-  ]);
 
   // Widgets configurables (ordre + visibilité pilotés par le layout utilisateur).
   const sections: Record<WidgetKey, React.ReactNode> = {
@@ -637,12 +632,11 @@ export default async function Dashboard() {
             un layout utilisateur sauvegardé avant son ajout la masquerait) ── */}
         <section aria-label="Indices pan-africains">
           <AfricanIndicesCard
-            brvmComposite={(() => {
-              const brvmc = indices.find((i) => i.code === 'BRVMC');
-              return brvmc
+            brvmComposite={
+              brvmc
                 ? { valeur: (brvmc.valeur as number | null) ?? null, variation_pct: brvmc.variation_pct ?? null }
-                : null;
-            })()}
+                : null
+            }
           />
         </section>
 
