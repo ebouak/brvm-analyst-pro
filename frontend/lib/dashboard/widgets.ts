@@ -8,17 +8,17 @@ export interface WidgetMeta { key: WidgetKey; label: string; desc: string }
 
 /** Registre, dans l'ordre du profil débutant (spec §3). */
 export const WIDGETS: WidgetMeta[] = [
-  { key: 'etat', label: 'État du marché', desc: 'Hausses, baisses, valeur échangée' },
+  { key: 'etat', label: 'Récit de séance', desc: 'La séance racontée : titre, chapô, six mesures' },
   { key: 'comprendre', label: 'Comprendre la séance', desc: 'La séance en constats simples' },
-  { key: 'seance', label: 'Séance du jour', desc: 'Plus fortes hausses et baisses, indices, brief' },
+  { key: 'seance', label: 'Séance du jour', desc: 'Trajectoire des indices, largeur du marché, moteur de signaux' },
   { key: 'agenda', label: 'Agenda', desc: 'Dividendes et jours fermés des 30 prochains jours' },
   { key: 'publications', label: 'Publications', desc: 'Documents des émetteurs, 7 derniers jours' },
   { key: 'portefeuille', label: 'Mon portefeuille', desc: 'Valeur, plus-value latente, positions' },
-  { key: 'signaux', label: "Signaux d'opportunité", desc: 'Signaux actionnables récents' },
+  { key: 'signaux', label: 'Lecture et signaux', desc: "Ce que dit la séance, signaux d'opportunité" },
   { key: 'secteurs', label: 'Vos secteurs', desc: 'Perf du jour de vos secteurs favoris' },
-  { key: 'indices', label: 'Indices BRVM', desc: 'Composite, BRVM-30, sectoriels' },
+  { key: 'indices', label: 'Mouvements et secteurs', desc: 'Plus fortes hausses et baisses, indices sectoriels' },
   { key: 'liquidite', label: 'Liquidité', desc: 'Facilité à échanger les valeurs' },
-  { key: 'actus', label: 'Actualités', desc: 'Fil d’actualités BRVM' },
+  { key: 'actus', label: 'Actualités et régions', desc: 'Actualités, motifs en séance, Afrique' },
 ];
 
 /** Profil déduit des positions (spec §2) : rien n'est stocké. */
