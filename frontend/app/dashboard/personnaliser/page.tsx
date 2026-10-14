@@ -14,9 +14,11 @@ export default async function CustomizeDashboardPage() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: prof } = await sb.from('profiles').select('preferences').eq('id', user.id).maybeSingle();
+  const [{ data: prof }, profil] = await Promise.all([
+    sb.from('profiles').select('preferences').eq('id', user.id).maybeSingle(),
+    chargerProfil(sb, user.id),
+  ]);
   const layout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
-  const profil = await chargerProfil(sb, user.id);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">

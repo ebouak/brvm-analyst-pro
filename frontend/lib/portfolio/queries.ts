@@ -12,9 +12,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { LIQUIDITES_CODE } from './constantes';
 import { derivePortfolio, type PortfolioState, type RawPosition, type PricePoint } from './derive';
 
-export const LIQUIDITES_CODE = 'LIQUIDITES';
+export { LIQUIDITES_CODE };
 
 interface HookState<T> {
   data: T | null;

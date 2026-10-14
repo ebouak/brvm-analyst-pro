@@ -304,19 +304,22 @@ export default async function Dashboard() {
   // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
   let isPremium = false;
   if (user) {
-    const { data: prof } = await supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle();
+    const [{ data: prof }, { count }, profilCharge] = await Promise.all([
+      supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle(),
+      supa
+        .from('alerts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('actif', true)
+        .not('declenchee_le', 'is', null),
+      chargerProfil(supa, user.id),
+    ]);
     favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
     dashboardLayout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
     isPremium = Boolean(prof?.is_premium);
 
-    const { count } = await supa
-      .from('alerts')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('actif', true)
-      .not('declenchee_le', 'is', null);
     triggeredAlerts = count ?? 0;
-    profil = await chargerProfil(supa, user.id);
+    profil = profilCharge;
   }
   const layout = resolveLayout(dashboardLayout, profil);
 
