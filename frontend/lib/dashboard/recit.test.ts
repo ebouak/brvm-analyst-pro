@@ -40,4 +40,7 @@ describe('chapoSeance', () => {
   it('secteur inconnu : phrase omise, aucune invention', () => {
     expect(chapoSeance({ composite: null, meneur: { code: 'XXX', variationPct: 1 }, valeurEchangee: null, valeurEchangeeVeille: null })).toBe('');
   });
+  it('secteur stable à deux décimales : phrase omise', () => {
+    expect(chapoSeance({ composite: null, meneur: { code: 'BRVMENER', variationPct: 0.004 }, valeurEchangee: null, valeurEchangeeVeille: null })).toBe('');
+  });
 });

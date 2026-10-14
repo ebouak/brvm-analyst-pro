@@ -26,6 +26,10 @@ describe('cheminSparkline', () => {
     expect(p.dernier[0]).toBeCloseTo(81, 6);
     expect(p.hausse).toBe(true);
   });
+  it('série constante : ligne centrée verticalement', () => {
+    const p = cheminSparkline([5, 5, 5], 84, 24)!;
+    expect(p.points.split(' ').every((q) => q.endsWith(',12.0'))).toBe(true);
+  });
   it('moins de deux points finis : null', () => {
     expect(cheminSparkline([5], 84, 24)).toBeNull();
     expect(cheminSparkline([5, Number.NaN], 84, 24)).toBeNull();

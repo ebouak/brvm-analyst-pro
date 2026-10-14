@@ -42,7 +42,7 @@ export function chapoSeance(e: {
     );
   }
   const sujet = e.meneur ? SUJETS[e.meneur.code] : undefined;
-  if (e.meneur && sujet && fini(e.meneur.variationPct)) {
+  if (e.meneur && sujet && fini(e.meneur.variationPct) && Number(e.meneur.variationPct.toFixed(2)) !== 0) {
     const [s, pluriel] = sujet;
     phrases.push(
       e.meneur.variationPct > 0

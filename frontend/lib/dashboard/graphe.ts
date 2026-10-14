@@ -15,7 +15,7 @@ export function cheminSparkline(serie: number[], l: number, h: number, m = 3):
   { points: string; dernier: [number, number]; hausse: boolean } | null {
   if (serie.length < 2 || !serie.every(fini)) return null;
   const lo = Math.min(...serie), hi = Math.max(...serie), e = hi - lo || 1;
-  const pts = serie.map((v, i): [number, number] => [(i / (serie.length - 1)) * (l - 2 * m) + m, (1 - (v - lo) / e) * (h - 2 * m) + m]);
+  const pts = serie.map((v, i): [number, number] => [(i / (serie.length - 1)) * (l - 2 * m) + m, hi === lo ? h / 2 : (1 - (v - lo) / e) * (h - 2 * m) + m]);
   return {
     points: pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' '),
     dernier: pts[pts.length - 1]!,
