@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lignesPerfDepuis, contributions, positionsSansCours, variationsDuJour, syntheseValorisee, secteursValorises, echantillonner } from './portefeuilleBloc';
+import { lignesPerfDepuis, contributions, variationsDuJour, syntheseValorisee, secteursValorises, echantillonner } from './portefeuilleBloc';
 import type { EnrichedPosition } from '@/lib/portfolio/derive';
 
 const pos = (code: string, o: Partial<EnrichedPosition> = {}): EnrichedPosition => ({
@@ -39,12 +39,6 @@ describe('contributions', () => {
   it('position sans cours exclue (sa plus-value serait fausse)', () => {
     const r = contributions([pos('A', { pnl: 3000 }), pos('Z', { cours: 0, valeur: 0, pnl: -10000 })]);
     expect(r.map((x) => x.code)).toEqual(['A']);
-  });
-});
-
-describe('positionsSansCours', () => {
-  it('cours nul ou non fini, hors liquidités', () => {
-    expect(positionsSansCours([pos('A'), pos('Z', { cours: 0 }), pos('L', { isLiquidites: true, cours: 0 })])).toEqual(['Z']);
   });
 });
 

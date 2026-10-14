@@ -66,11 +66,6 @@ export function contributions(positions: EnrichedPosition[]): Contribution[] {
     .sort((x, y) => y.pnl - x.pnl);
 }
 
-/** Positions valorisées à 0 faute de cours : à signaler, jamais à taire. */
-export function positionsSansCours(positions: EnrichedPosition[]): string[] {
-  return positions.filter((p) => !p.isLiquidites && !(fini(p.cours) && p.cours > 0)).map((p) => p.code);
-}
-
 export interface SyntheseValorisee {
   valeur: number;
   investi: number;
@@ -107,7 +102,7 @@ export function secteursValorises(positions: EnrichedPosition[]): { secteur: str
   for (const p of positions) {
     if (!p.isLiquidites && !avecCours(p)) continue;
     if (!fini(p.valeur)) continue;
-    const s = p.isLiquidites ? 'Liquidités' : p.secteur || 'Autre';
+    const s = p.isLiquidites ? 'Liquidités' : p.secteur || 'Autres';
     par.set(s, (par.get(s) ?? 0) + p.valeur);
   }
   const total = [...par.values()].reduce((a, b) => a + b, 0);

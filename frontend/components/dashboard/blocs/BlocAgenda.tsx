@@ -11,8 +11,9 @@ const jourCourt = (iso: string) =>
  * « net » seulement si la source le dit. `items === null` : lecture en erreur.
  */
 export default function BlocAgenda({
-  items, aujourdhui, quantites,
+  items, aujourdhui, quantites, portefeuilleIndisponible = false,
 }: {
+  portefeuilleIndisponible?: boolean;
   items: ItemAgenda[] | null;
   aujourdhui: string;
   quantites: ReadonlyMap<string, number>;
@@ -20,6 +21,9 @@ export default function BlocAgenda({
   const liste = (items ?? []).slice(0, 8);
   return (
     <CadreBloc id="bloc-agenda" titre="Agenda · 30 jours" dateReference={aujourdhui} legendeDate="À partir du" lien={{ href: '/calendrier', label: 'Calendrier complet' }}>
+      {portefeuilleIndisponible && (
+        <p className="mb-3 text-xs text-muted">Vos positions n&apos;ont pas pu être lues : les valeurs détenues ne sont pas signalées.</p>
+      )}
       {items === null ? (
         <Indisponible />
       ) : liste.length === 0 ? (

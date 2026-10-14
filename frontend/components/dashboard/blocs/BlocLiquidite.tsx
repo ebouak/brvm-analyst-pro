@@ -9,8 +9,9 @@ import { CadreBloc, EtatVide, Indisponible } from './Cadre';
  * les valeurs les plus faciles et les plus difficiles à échanger.
  */
 export default function BlocLiquidite({
-  donnees, positions, dateSeance,
+  donnees, positions, dateSeance, portefeuilleIndisponible = false,
 }: {
+  portefeuilleIndisponible?: boolean;
   donnees: { dateMarche: string; lignes: LiquiditeSource[] } | null;
   positions: { code: string; valeur: number | null }[];
   dateSeance: string;
@@ -24,7 +25,7 @@ export default function BlocLiquidite({
       ancienne={ancienne}
       lien={{ href: '/liquidite', label: 'Méthode et classement' }}
     >
-      {donnees === null ? (
+      {donnees === null || portefeuilleIndisponible ? (
         <Indisponible />
       ) : donnees.lignes.length === 0 ? (
         <EtatVide message="Liquidité non mesurée pour le moment." />

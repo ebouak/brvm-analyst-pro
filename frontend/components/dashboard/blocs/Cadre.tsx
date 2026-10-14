@@ -5,7 +5,7 @@ import type { StatutAgenda } from '@/lib/dashboard/agenda';
 
 /** Cadre commun d'un bloc : titre, date de référence TOUJOURS visible, lien. */
 export function CadreBloc({
-  id, titre, dateReference, legendeDate = 'Données du', ancienne = false, lien, children,
+  id, titre, dateReference, legendeDate = 'Données du', ancienne = false, sansDate = false, lien, children,
 }: {
   id: string;
   titre: string;
@@ -13,6 +13,8 @@ export function CadreBloc({
   legendeDate?: string;
   /** Donnée plus ancienne que la séance affichée : signalée dans la forme (spec §4). */
   ancienne?: boolean;
+  /** États d'invitation (aucune donnée à dater) : pas de pastille de date. */
+  sansDate?: boolean;
   lien?: { href: string; label: string };
   children: ReactNode;
 }) {
@@ -21,11 +23,13 @@ export function CadreBloc({
       <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h2 id={id} className="font-display text-lg text-ivory">{titre}</h2>
         <div className="flex flex-wrap items-center gap-3">
-          <span
-            className={`tabular rounded-full border px-2 py-0.5 text-[11px] ${ancienne ? 'border-warn/50 text-warn' : 'border-border text-muted'}`}
-          >
-            {dateReference ? `${legendeDate} ${fmtDateFR(dateReference)}` : 'Date non disponible'}
-          </span>
+          {!sansDate && (
+            <span
+              className={`tabular rounded-full border px-2 py-0.5 text-[11px] ${ancienne ? 'border-warn/50 text-warn' : 'border-border text-muted'}`}
+            >
+              {dateReference ? `${legendeDate} ${fmtDateFR(dateReference)}` : 'Date non disponible'}
+            </span>
+          )}
           {lien && (
             <Link href={lien.href} className="text-xs font-semibold text-accent-ink hover:underline">
               {lien.label} →

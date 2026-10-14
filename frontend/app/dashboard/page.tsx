@@ -403,6 +403,7 @@ export default async function Dashboard() {
   ]);
   // `undefined` = visiteur, `null` = lecture en erreur.
   const etatPortefeuille: PortfolioState | null | undefined = resultatPortefeuille ? resultatPortefeuille.etat : resultatPortefeuille;
+  const portefeuilleIndisponible = !!user && besoinPortefeuille && resultatPortefeuille === null;
   const debutCourbe = resultatPortefeuille?.depuis ?? null;
   const titresDetenus = (etatPortefeuille?.positions ?? []).filter((p) => !p.isLiquidites);
   // Plusieurs lots d'un même titre : quantités ADDITIONNÉES par code.
@@ -534,13 +535,14 @@ export default async function Dashboard() {
       <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsDuJour(coursSeance, lastDate)} />
     ),
     comprendre: <BlocComprendre metriques={metriques} close={seanceClose} />,
-    agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={quantites} />,
-    publications: <BlocPublications items={publications} depuis={depuisPublications} />,
+    agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={quantites} portefeuilleIndisponible={portefeuilleIndisponible} />,
+    publications: <BlocPublications items={publications} depuis={depuisPublications} portefeuilleIndisponible={portefeuilleIndisponible} />,
     liquidite: (
       <BlocLiquidite
         donnees={liquidite}
         positions={titresDetenus.map((p) => ({ code: p.code, valeur: p.cours > 0 ? p.valeur : null }))}
         dateSeance={lastDate}
+        portefeuilleIndisponible={portefeuilleIndisponible}
       />
     ),
   };

@@ -33,7 +33,7 @@ export default function BlocPortefeuille({
   }
   if (etat === undefined || titres.length === 0) {
     return (
-      <CadreBloc id="bloc-portefeuille" titre="Mon portefeuille" dateReference={null}>
+      <CadreBloc id="bloc-portefeuille" titre="Mon portefeuille" dateReference={null} sansDate>
         <EtatVide message="Vous ne suivez encore aucune position." actions={INVITATION} />
       </CadreBloc>
     );
@@ -43,6 +43,7 @@ export default function BlocPortefeuille({
   const secteurs = secteursValorises(etat.positions);
   const contrib = contributions(etat.positions);
   const pnlPct = synth.pnlPct != null ? synth.pnlPct * 100 : null;
+  const rienDeValorise = synth.valeur === 0 && synth.investi === 0;
   const listeExclus = synth.exclus.join(', ');
 
   return (
@@ -62,11 +63,11 @@ export default function BlocPortefeuille({
       <div className="grid gap-3 sm:grid-cols-3">
         <Chiffre
           libelle={synth.exclus.length > 0 ? `Valeur (hors ${listeExclus})` : 'Valeur'}
-          valeur={`${fmtFcfa(synth.valeur)} FCFA`}
+          valeur={rienDeValorise ? '—' : `${fmtFcfa(synth.valeur)} FCFA`}
         />
         <Chiffre
           libelle="Plus-value latente"
-          valeur={`${fmtFcfaSigne(synth.pnl)} FCFA`}
+          valeur={rienDeValorise ? '—' : `${fmtFcfaSigne(synth.pnl)} FCFA`}
           detail={pnlPct != null ? fmtPctSigne(pnlPct, 1) : null}
           classe={sens(synth.pnl)}
         />
