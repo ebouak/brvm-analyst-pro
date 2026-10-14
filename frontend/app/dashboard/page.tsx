@@ -542,7 +542,7 @@ export default async function Dashboard() {
       <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsJour} />
     ),
     comprendre: <BlocComprendre metriques={metriques} close={seanceClose} />,
-    agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={quantites} portefeuilleIndisponible={portefeuilleIndisponible} />,
+    agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={Object.fromEntries(quantites)} portefeuilleIndisponible={portefeuilleIndisponible} />,
     publications: <BlocPublications items={publications} depuis={depuisPublications} portefeuilleIndisponible={portefeuilleIndisponible} />,
     liquidite: (
       <BlocLiquidite
