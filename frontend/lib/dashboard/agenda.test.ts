@@ -13,8 +13,8 @@ const base = {
     div({ code: 'SNTS', montant: 1740, payment_date: '2026-05-26', source: 'brvm-boc' }), // passé : exclu
     div({ code: 'XXXX', montant: 50, payment_date: '2026-12-31' }), // hors 30 jours : exclu
   ],
-  assemblees: [{ code: 'ETIT', event_date: '2026-10-30', title: 'Assemblée générale ordinaire - ETI TG', source: 'bdfin' }],
-  fermetures: [{ date: '2026-11-03', holiday_name: 'Jour férié' }],
+  assemblees: [{ code: 'ETIT', date_reunion: '2026-10-30', title: 'Assemblée générale ordinaire - ETI TG', source: 'bdfin' }],
+  fermetures: [{ date: '2026-11-03', holiday_name: 'Jour férié', is_trading_day: false }],
   positions: [{ code: 'SDSC', quantite: 100 }],
 };
 
@@ -188,8 +188,8 @@ describe('construireAgenda', () => {
     const a = construireAgenda({
       ...base,
       assemblees: [
-        { code: null, event_date: '2026-10-30', title: 'AG A', source: 'bdfin' },
-        { code: null, event_date: '2026-10-30', title: 'AG B', source: 'bdfin' },
+        { code: null, date_reunion: '2026-10-30', title: 'AG A', source: 'bdfin' },
+        { code: null, date_reunion: '2026-10-30', title: 'AG B', source: 'bdfin' },
       ],
     });
     expect(a.filter((i) => i.type === 'assemblee')).toHaveLength(2);
@@ -204,9 +204,9 @@ describe('construireAgenda', () => {
         div({ code: 'H3', ex_date: '2026-11-14' }),
       ],
       assemblees: [
-        { code: 'A1', event_date: '2026-10-14', title: 't1', source: 'bdfin' },
-        { code: 'A2', event_date: '2026-11-13', title: 't2', source: 'bdfin' },
-        { code: 'A3', event_date: '2026-11-14', title: 't3', source: 'bdfin' },
+        { code: 'A1', date_reunion: '2026-10-14', title: 't1', source: 'bdfin' },
+        { code: 'A2', date_reunion: '2026-11-13', title: 't2', source: 'bdfin' },
+        { code: 'A3', date_reunion: '2026-11-14', title: 't3', source: 'bdfin' },
       ],
     });
     const codes = a.map((i) => i.code);
@@ -216,7 +216,24 @@ describe('construireAgenda', () => {
   });
 
   it('fermeture sans libellé', () => {
-    const a = construireAgenda({ ...base, fermetures: [{ date: '2026-11-03', holiday_name: null }] });
+    const a = construireAgenda({ ...base, fermetures: [{ date: '2026-11-03', holiday_name: null, is_trading_day: false }] });
     expect(a.find((i) => i.type === 'fermeture')!.titre).toBe('Bourse fermée');
+  });
+
+  it('jour ouvré dans le calendrier : jamais une fermeture', () => {
+    const a = construireAgenda({ ...base, fermetures: [{ date: '2026-11-03', holiday_name: null, is_trading_day: true }] });
+    expect(a.filter((i) => i.type === 'fermeture')).toHaveLength(0);
+  });
+
+  it('assemblée : source BRVM officielle, source tierce annoncée', () => {
+    const a = construireAgenda({
+      ...base,
+      assemblees: [
+        { code: 'AAA', date_reunion: '2026-10-30', title: 'AG A', source: 'BRVM' },
+        { code: 'BBB', date_reunion: '2026-10-30', title: 'AG B', source: 'richbourse' },
+      ],
+    });
+    expect(a.find((i) => i.code === 'AAA')!.statut).toBe('officiel');
+    expect(a.find((i) => i.code === 'BBB')!.statut).toBe('annonce');
   });
 });

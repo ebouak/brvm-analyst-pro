@@ -30,15 +30,25 @@ describe('generateBrief — variations', () => {
     expect(s).not.toMatch(/-0\.26|−0,26/);
   });
 
-  it('variation faible : « est stable (+0,15 %) », jamais « stagne à +0.15% à »', () => {
+  it('variation faible : « est quasi stable (+0,15 %) », jamais « stagne à +0.15% à »', () => {
     const s = generateBrief(entree({ indices: { brvm30: brvm30(0.15), brvmc: null } })).summary;
-    expect(s).toContain(`est stable (+${fmtNumber(0.15, 2)} %)`);
+    expect(s).toContain(`est quasi stable (+${fmtNumber(0.15, 2)} %)`);
   });
 
-  it('variation quasi nulle : « 0,00 % » sans signe', () => {
+  it('variation nulle : « est stable à … points », sans parenthèse ni signe', () => {
     const s = generateBrief(entree({ indices: { brvm30: brvm30(0.001), brvmc: null } })).summary;
-    expect(s).toContain(`est stable (${fmtNumber(0, 2)} %)`);
+    expect(s).toContain('est stable à');
+    expect(s).not.toContain('stable (');
     expect(s).not.toContain(`+${fmtNumber(0, 2)}`);
+  });
+
+  it('sans BRVM 30 : « Valeur échangée : X FCFA (+Y %) », sans « Séance conclue »', () => {
+    const e = entree({ indices: { brvm30: null, brvmc: null } });
+    const s = generateBrief(e).summary;
+    const delta = ((e.valeurTransactions! - e.valeurTransactionsPrev!) / e.valeurTransactionsPrev!) * 100;
+    const signe = delta > 0 ? '+' : '−';
+    expect(s).toContain(`Valeur échangée : ${fmtFcfa(e.valeurTransactions!)} FCFA (${signe}${fmtNumber(Math.abs(delta), 1)} % sur la séance précédente).`);
+    expect(s).not.toContain('Séance conclue');
   });
 
   it('secteur en recul : « recule de 0,85 % », sans signe moins', () => {

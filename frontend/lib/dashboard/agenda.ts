@@ -2,7 +2,7 @@
  * Agenda des 30 prochains jours — module PUR et testé (spec §4.1).
  *
  * Statuts, dans la forme : `officiel` (paiement lu au Bulletin officiel
- * `brvm-boc`, ou AG publiée sur BDFIN), `annonce` (source tierce ; toutes les
+ * `brvm-boc`, ou AG dont l'avis vient de la BRVM ou de BDFIN), `annonce` (source tierce ; toutes les
  * dates de détachement, qu'aucune source officielle ne publie), `fermeture`
  * (jour non ouvré du calendrier de marché). Aucune date estimée par nous.
  * Dividende PAR ACTION et TOTAL INDICATIF (quantité détenue aujourd'hui) sont
@@ -26,8 +26,18 @@ export interface DividendeSource {
   base_fiscale: string | null;
   source: string | null;
 }
-export interface AssembleeSource { code: string | null; event_date: string; title: string; source: string | null }
-export interface FermetureSource { date: string; holiday_name: string | null }
+export interface AssembleeSource {
+  code: string | null;
+  /**
+   * Date de la RÉUNION. Ne jamais y mettre market_events.event_date, qui est la date de
+   * publication de l'avis : tant qu'aucune date de réunion n'est disponible, l'appelant
+   * passe une liste vide.
+   */
+  date_reunion: string;
+  title: string;
+  source: string | null;
+}
+export interface FermetureSource { date: string; holiday_name: string | null; is_trading_day: boolean }
 export interface PositionAgenda { code: string; quantite: number }
 
 export interface ItemAgenda {
@@ -120,16 +130,17 @@ export function construireAgenda(e: {
   }
 
   for (const a of e.assemblees) {
-    if (!dansFenetre(a.event_date)) continue;
+    if (!dansFenetre(a.date_reunion)) continue;
     const code = a.code != null && a.code.trim() !== '' ? normCode(a.code) : null;
-    ajouter(`assemblee|${code ?? a.title}|${a.event_date}`, {
-      date: a.event_date, type: 'assemblee', statut: a.source === 'bdfin' ? 'officiel' : 'annonce',
+    ajouter(`assemblee|${code ?? a.title}|${a.date_reunion}`, {
+      date: a.date_reunion, type: 'assemblee', statut: a.source === 'bdfin' || a.source === 'BRVM' ? 'officiel' : 'annonce',
       code, titre: a.title, parAction: null, totalIndicatif: null, baseFiscale: 'inconnue',
       mienne: code != null && qte.get(code) != null, source: a.source,
     });
   }
 
   for (const f of e.fermetures) {
+    if (f.is_trading_day) continue; // seuls les jours non ouvrés sont des fermetures
     if (!dansFenetre(f.date)) continue;
     // Une fermeture par date : un second libellé de jour férié le même jour est écarté volontairement.
     ajouter(`fermeture||${f.date}`, {

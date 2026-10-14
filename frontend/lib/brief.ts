@@ -49,7 +49,8 @@ function pctAbs(v: number, d = 2): string {
 
 /** « L'indice BRVM 30 recule de 0,26 % à 263,47 points » — jamais « recule de -0.26% ». */
 function phraseIndice(sujet: string, v: number, valeur: number): string {
-  if (Math.abs(v) < 0.2) return `${sujet} est stable (${pctSigne(v)}) à ${fmtNumber(valeur, 2)} points`;
+  if (Number(v.toFixed(2)) === 0) return `${sujet} est stable à ${fmtNumber(valeur, 2)} points`;
+  if (Math.abs(v) < 0.2) return `${sujet} est quasi stable (${pctSigne(v)}) à ${fmtNumber(valeur, 2)} points`;
   const verbe = v > 1 ? 'progresse nettement de' : v > 0 ? 'progresse de' : v < -1 ? 'recule nettement de' : 'recule de';
   return `${sujet} ${verbe} ${pctAbs(v)} à ${fmtNumber(valeur, 2)} points`;
 }
@@ -87,20 +88,21 @@ function buildSummary(input: BriefInput): string {
   // échangée (la collecte brvm.org ne la porte pas) : les additionner
   // affichait « 0 FCFA (-100 %) ». Sans résumé de séance, on se tait.
   const { valeurTransactions, valeurTransactionsPrev } = input;
-  let volumePart: string | null = null;
+  let volumeMontant: string | null = null;
+  let volumeEvolution = '';
   if (valeurTransactions != null && valeurTransactions > 0) {
-    volumePart = `dans un volume total de ${fmtFcfa(valeurTransactions)} FCFA`;
+    volumeMontant = `${fmtFcfa(valeurTransactions)} FCFA`;
     if (valeurTransactionsPrev != null && valeurTransactionsPrev > 0) {
       const delta = ((valeurTransactions - valeurTransactionsPrev) / valeurTransactionsPrev) * 100;
-      volumePart += ` (${pctSigne(delta, 1)} sur la séance précédente)`;
+      volumeEvolution = ` (${pctSigne(delta, 1)} sur la séance précédente)`;
     }
   }
 
   if (brvm30?.valeur != null && brvm30.variation_pct != null) {
     const p = phraseIndice("L'indice BRVM 30", brvm30.variation_pct, brvm30.valeur);
-    parts.push(volumePart ? `${p}, ${volumePart}.` : `${p}.`);
-  } else if (volumePart) {
-    parts.push(`Séance conclue ${volumePart}.`);
+    parts.push(volumeMontant ? `${p}, dans un volume total de ${volumeMontant}${volumeEvolution}.` : `${p}.`);
+  } else if (volumeMontant) {
+    parts.push(`Valeur échangée : ${volumeMontant}${volumeEvolution}.`);
   }
 
   // Breadth
@@ -186,7 +188,7 @@ function buildSignals(signals: SignalDaily[], actions: ActionDaily[]): string {
   if (withConf.length > 0) {
     const avgConf =
       withConf.reduce((acc, s) => acc + (s.confiance ?? 0), 0) / withConf.length;
-    parts.push(`Confiance moyenne : ${avgConf.toFixed(0)}%.`);
+    parts.push(`Confiance moyenne : ${fmtNumber(avgConf, 0)} %.`);
   }
 
   // Notable action: BUY signal + strong gain

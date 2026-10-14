@@ -35,6 +35,7 @@ export const ORDRE_DEBUTANT: WidgetKey[] = WIDGETS.map((w) => w.key);
 export const ORDRE_ACTIF: WidgetKey[] = ['portefeuille', ...ORDRE_DEBUTANT.filter((k) => k !== 'portefeuille')];
 
 /** Compatibilité : l'ordre par défaut historique est celui du débutant. */
+/** @deprecated Utiliser ORDRE_DEBUTANT ou ordreParDefaut(profil). Conservé pour compatibilité. */
 export const DEFAULT_ORDER: WidgetKey[] = ORDRE_DEBUTANT;
 
 export function ordreParDefaut(profil: Profil): WidgetKey[] {
