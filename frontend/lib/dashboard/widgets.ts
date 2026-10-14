@@ -81,7 +81,7 @@ export type Largeur = 'pleine' | 'demi' | 'tiers';
 export const LARGEUR: Record<WidgetKey, Largeur> = {
   portefeuille: 'pleine', etat: 'pleine', comprendre: 'pleine', seance: 'pleine', indices: 'pleine',
   agenda: 'demi', publications: 'demi', liquidite: 'demi',
-  signaux: 'tiers', secteurs: 'tiers', actus: 'tiers',
+  signaux: 'pleine', secteurs: 'tiers', actus: 'pleine',
 };
 
 export interface Rangee { largeur: Largeur; cles: WidgetKey[] }
@@ -100,8 +100,14 @@ export function grouperEnRangees(cles: WidgetKey[]): Rangee[] {
   return out;
 }
 
-/** Classes de grille d'une rangée. Un bloc seul dans sa rangée prend toute la largeur. */
-export function classeRangee(r: Rangee): string {
-  if (r.cles.length === 1) return '';
-  return r.largeur === 'tiers' ? 'grid gap-6 md:grid-cols-2 xl:grid-cols-3' : 'grid gap-6 md:grid-cols-2';
+/** Rangée de la surface unique : grille 12 colonnes, filet sous la rangée (spec §12). */
+export function classeRangee(_r: Rangee): string {
+  return 'grid grid-cols-1 border-b border-border lg:grid-cols-12';
+}
+
+const SPAN: Record<Largeur, string> = { pleine: 'lg:col-span-12', demi: 'lg:col-span-6', tiers: 'lg:col-span-4' };
+
+/** Cellule d'une rangée : filet vertical entre cellules (horizontal quand empilées). */
+export function classeCellule(largeur: Largeur, seule: boolean): string {
+  return `min-w-0 ${seule ? 'lg:col-span-12' : SPAN[largeur]} border-t border-border first:border-t-0 lg:border-t-0 lg:border-l lg:first:border-l-0`;
 }

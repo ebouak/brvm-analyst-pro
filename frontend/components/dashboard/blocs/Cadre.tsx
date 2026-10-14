@@ -19,9 +19,9 @@ export function CadreBloc({
   children: ReactNode;
 }) {
   return (
-    <section aria-labelledby={id} className="h-full min-w-0 rounded-panel border border-border bg-surface p-4 sm:p-5">
+    <section aria-labelledby={id} className="h-full min-w-0 py-5 lg:px-5">
       <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id={id} className="font-display text-lg text-ivory">{titre}</h2>
+        <h2 id={id} className="font-display text-[19px] leading-tight text-ivory">{titre}</h2>
         <div className="flex flex-wrap items-center gap-3">
           {!sansDate && (
             <span

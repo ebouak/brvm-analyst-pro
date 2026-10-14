@@ -10,7 +10,7 @@ import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard'
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
 import { chargerProfil } from '@/lib/dashboard/profil';
-import { resolveLayout, grouperEnRangees, classeRangee, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
+import { resolveLayout, grouperEnRangees, classeRangee, classeCellule, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
 import type { PortfolioState } from '@/lib/portfolio/derive';
 import { construireAgenda, plusJours, HORIZON_JOURS } from '@/lib/dashboard/agenda';
 import { performanceJour } from '@/lib/dashboard/performanceJour';
@@ -649,7 +649,7 @@ export default async function Dashboard() {
         {grouperEnRangees(layout.filter((k) => sections[k] != null)).map((r) => (
           <div key={r.cles.join('-')} className={classeRangee(r)}>
             {r.cles.map((k) => (
-              <div key={k} className="min-w-0">{sections[k]}</div>
+              <div key={k} className={classeCellule(r.largeur, r.cles.length === 1)}>{sections[k]}</div>
             ))}
           </div>
         ))}
