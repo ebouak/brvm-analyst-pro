@@ -126,3 +126,11 @@ describe('rangées', () => {
     expect(classeRangee({ largeur: 'pleine', cles: ['etat'] })).toBe('');
   });
 });
+
+describe('resolveLayout — doublons', () => {
+  it('un ordre sauvegardé avec doublon ne répète jamais un widget', () => {
+    const r = resolveLayout({ order: ['actus', 'actus', 'etat'] }, 'debutant');
+    expect(r.filter((k) => k === 'actus')).toHaveLength(1);
+    expect(r.slice(0, 2)).toEqual(['actus', 'etat']);
+  });
+});

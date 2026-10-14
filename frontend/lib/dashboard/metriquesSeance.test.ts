@@ -68,3 +68,15 @@ describe('estSeanceClose', () => {
     expect(estSeanceClose('2026-10-13', new Date('2026-10-13T15:30:00Z'))).toBe(true);
   });
 });
+
+describe('une seule séance pour les actions', () => {
+  it('une action d une autre date n entre pas dans la largeur du marché', () => {
+    const vieille = { ...a('OLD', 3, 999), date_marche: '2026-10-12' };
+    const m = metriquesDepuisSeance({
+      dateMarche: '2026-10-13', actions: [a('SNTS', 1), vieille], indices: [],
+      valeurTransactions: null, valeurTransactionsVeille: null,
+    });
+    expect(m.hausses).toBe(1);
+    expect(m.plusEchangee).toBeNull();
+  });
+});

@@ -54,3 +54,15 @@ describe('preparerPublications', () => {
     expect(preparerPublications(Array.from({ length: 12 }, (_, k) => p({ code: `X${k}`, date_publication: '2026-10-13' })), new Set(), 8)).toHaveLength(8);
   });
 });
+
+describe('doublon d URL', () => {
+  it('garde la ligne la plus récente même listée en second', () => {
+    const url = 'https://www.brvm.org/doc/X.pdf';
+    const r = preparerPublications([
+      p({ code: 'SNTS', date_publication: '2026-09-01', source_url: url }),
+      p({ code: 'SNTS', date_publication: '2026-10-01', source_url: url }),
+    ], new Set());
+    expect(r).toHaveLength(1);
+    expect(r[0].date).toBe('2026-10-01');
+  });
+});

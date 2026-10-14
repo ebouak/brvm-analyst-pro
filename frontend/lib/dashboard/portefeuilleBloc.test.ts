@@ -47,3 +47,25 @@ describe('positionsSansCours', () => {
     expect(positionsSansCours([pos('A'), pos('Z', { cours: 0 }), pos('L', { isLiquidites: true, cours: 0 })])).toEqual(['Z']);
   });
 });
+
+describe('une seule séance, sans écrasement par null', () => {
+  const deuxJours = [
+    { code: 'SNTS', cours_jour: 1000, variation_pct: 5, date_marche: '2026-10-12' },
+    { code: 'SNTS', cours_jour: 1100, variation_pct: 1.2, date_marche: '2026-10-13' },
+  ];
+  it('dateMarche : seules les lignes de cette séance comptent', () => {
+    const l = lignesPerfDepuis([pos('SNTS')], deuxJours, '2026-10-13');
+    expect(l[0].cours).toBe(1100);
+    expect(l[0].variationPct).toBe(1.2);
+    expect(l[0].dateMarche).toBe('2026-10-13');
+    expect(variationsDuJour(deuxJours, '2026-10-13').get('SNTS')).toBe(1.2);
+  });
+  it('un doublon à variation null garde la valeur connue', () => {
+    const dbl = [
+      { code: 'SNTS', cours_jour: 1100, variation_pct: 1.2, date_marche: '2026-10-13' },
+      { code: 'SNTS', cours_jour: 1100, variation_pct: null, date_marche: '2026-10-13' },
+    ];
+    expect(variationsDuJour(dbl).get('SNTS')).toBe(1.2);
+    expect(lignesPerfDepuis([pos('SNTS')], dbl)[0].variationPct).toBe(1.2);
+  });
+});

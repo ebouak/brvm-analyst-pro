@@ -16,9 +16,27 @@ export interface CoursSeance {
 const fini = (x: number | null | undefined): x is number => typeof x === 'number' && Number.isFinite(x);
 const avecCours = (p: EnrichedPosition) => !p.isLiquidites && fini(p.cours) && p.cours > 0;
 
+/** Index par code ; une seule séance si `dateMarche` est donné ; une valeur nulle n'écrase jamais une valeur connue. */
+function indexerSeance(seance: CoursSeance[], dateMarche?: string): Map<string, CoursSeance> {
+  const m = new Map<string, CoursSeance>();
+  for (const s of seance) {
+    if (dateMarche !== undefined && s.date_marche !== dateMarche) continue;
+    const k = s.code.trim().toUpperCase();
+    const ancien = m.get(k);
+    if (ancien) {
+      m.set(k, {
+        ...s,
+        cours_jour: fini(s.cours_jour) ? s.cours_jour : ancien.cours_jour,
+        variation_pct: fini(s.variation_pct) ? s.variation_pct : ancien.variation_pct,
+      });
+    } else m.set(k, s);
+  }
+  return m;
+}
+
 /** Lignes d'entrée de `performanceJour`, à partir des cours de LA séance affichée. */
-export function lignesPerfDepuis(positions: EnrichedPosition[], seance: CoursSeance[]): LignePerf[] {
-  const parCode = new Map(seance.map((s) => [s.code.trim().toUpperCase(), s]));
+export function lignesPerfDepuis(positions: EnrichedPosition[], seance: CoursSeance[], dateMarche?: string): LignePerf[] {
+  const parCode = indexerSeance(seance, dateMarche);
   return positions
     .filter((p) => !p.isLiquidites)
     .map((p) => {
@@ -33,8 +51,8 @@ export function lignesPerfDepuis(positions: EnrichedPosition[], seance: CoursSea
     });
 }
 
-export function variationsDuJour(seance: CoursSeance[]): Map<string, number | null> {
-  return new Map(seance.map((s) => [s.code.trim().toUpperCase(), fini(s.variation_pct) ? s.variation_pct : null]));
+export function variationsDuJour(seance: CoursSeance[], dateMarche?: string): Map<string, number | null> {
+  return new Map([...indexerSeance(seance, dateMarche)].map(([k, s]) => [k, fini(s.variation_pct) ? s.variation_pct : null]));
 }
 
 export interface Contribution { code: string; pnl: number; largeur: number }

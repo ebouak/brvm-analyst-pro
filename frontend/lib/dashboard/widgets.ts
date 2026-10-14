@@ -67,7 +67,7 @@ export interface DashboardLayout { order?: string[]; hidden?: string[] }
 export function resolveLayout(saved: DashboardLayout | null | undefined, profil: Profil = 'debutant'): WidgetKey[] {
   const defaut = ordreParDefaut(profil);
   const masquesProfil = new Set<WidgetKey>(MASQUES_PAR_DEFAUT[profil]);
-  const savedOrder = (saved?.order ?? []).filter((k) => VALID.has(k)) as WidgetKey[];
+  const savedOrder = [...new Set((saved?.order ?? []).filter((k) => VALID.has(k)))] as WidgetKey[];
   const seen = new Set<string>(savedOrder);
   const hidden = new Set<string>((saved?.hidden ?? []).filter((k) => VALID.has(k)));
   for (const k of defaut) if (!seen.has(k) && masquesProfil.has(k)) hidden.add(k);

@@ -57,3 +57,14 @@ describe('extremesLiquidite', () => {
     expect(tous).not.toContain('D');
   });
 });
+
+describe('normalisations', () => {
+  it('liquidités détectées malgré casse/espaces ; classe normalisée', () => {
+    const r = lignesLiquiditePositions(
+      [{ code: ' liquidites ', valeur: 1000 }, { code: 'SNTS', valeur: 1000 }],
+      [l('SNTS', 60, { classe: ' b ' })],
+    );
+    expect(r).toHaveLength(1);
+    expect(r[0].classe).toBe('B');
+  });
+});

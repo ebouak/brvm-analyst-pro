@@ -31,3 +31,13 @@ describe('fmtFcfaSigne', () => {
     expect(fmtFcfaSigne(-0.3)).toBe(fmtFcfa(0.3));
   });
 });
+
+describe('valeurs non finies', () => {
+  it('jamais « NaN » à l écran', () => {
+    expect(fmtFcfaSigne(NaN)).toBe('—');
+    expect(fmtPctSigne(Infinity)).toBe('—');
+  });
+  it('un montant sous le franc garde son signe', () => {
+    expect(fmtFcfaSigne(0.7)).toBe('+' + fmtFcfa(0.7));
+  });
+});

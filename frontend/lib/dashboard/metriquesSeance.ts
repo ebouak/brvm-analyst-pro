@@ -33,7 +33,8 @@ export function metriquesDepuisSeance(e: {
   valeurTransactions: number | null;
   valeurTransactionsVeille: number | null;
 }): MetriquesSeance {
-  const variations = e.actions.map((x) => x.variation_pct).filter(fini);
+  const actions = e.actions.filter((x) => x.date_marche === e.dateMarche);
+  const variations = actions.map((x) => x.variation_pct).filter(fini);
   const connue = variations.length > 0;
   const memeSeance = e.indices.filter((x) => x.date_marche === e.dateMarche);
 
@@ -47,7 +48,7 @@ export function metriquesDepuisSeance(e: {
     .sort((x, y) => (y.variation_pct as number) - (x.variation_pct as number))[0];
   const secteurMeneur = meneur ? { nom: nomSecteur(meneur), variationPct: meneur.variation_pct as number } : null;
 
-  const vedette = e.actions
+  const vedette = actions
     .filter((x) => fini(x.valeur_echangee) && (x.valeur_echangee as number) > 0)
     .sort((x, y) => (y.valeur_echangee as number) - (x.valeur_echangee as number))[0];
   const plusEchangee = vedette

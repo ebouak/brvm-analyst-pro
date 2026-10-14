@@ -44,10 +44,12 @@ export function fmtPctAbs(v: number, d = 2): string {
 
 /** « +1,95 % », « −0,26 % », « 0,00 % ». */
 export function fmtPctSigne(v: number, d = 2): string {
+  if (!Number.isFinite(v)) return '—';
   return `${signeArrondi(v, d)}${fmtPctAbs(v, d)}`;
 }
 
 /** Montant FCFA signé : « +1,3 M », « −450 k ». Sans signe sous le franc. */
 export function fmtFcfaSigne(n: number): string {
+  if (!Number.isFinite(n)) return '—';
   return `${signeArrondi(n, 0)}${fmtFcfa(Math.abs(n))}`;
 }

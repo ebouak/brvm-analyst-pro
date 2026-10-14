@@ -46,7 +46,8 @@ export function preparerPublications(
 ): PublicationBloc[] {
   const vus = new Set<string>();
   const out: PublicationBloc[] = [];
-  for (const r of rows) {
+  const recentsD = [...rows].sort((x, y) => String(y.date_publication).localeCompare(String(x.date_publication)));
+  for (const r of recentsD) {
     const libelle = r.libelle?.trim() ?? '';
     if (!ISO.test(r.date_publication) || !libelle) continue;
     const code = r.code.trim().toUpperCase();

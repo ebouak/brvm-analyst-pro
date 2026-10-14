@@ -43,7 +43,7 @@ export function lignesLiquiditePositions(
 ): LigneLiquidite[] {
   const parCode = new Map(liq.map((r) => [r.code.trim().toUpperCase(), r]));
   return positions
-    .filter((p) => p.code !== LIQUIDITES_CODE)
+    .filter((p) => p.code.trim().toUpperCase() !== LIQUIDITES_CODE)
     .map((p) => {
       const code = p.code.trim().toUpperCase();
       const r = parCode.get(code);
@@ -52,7 +52,7 @@ export function lignesLiquiditePositions(
       return {
         code,
         valeurPosition: valeur,
-        classe: r && estClasse(r.classe) ? r.classe : null,
+        classe: r && estClasse(r.classe?.trim().toUpperCase() ?? null) ? (r.classe!.trim().toUpperCase() as Classe) : null,
         fourchette: r ? fourchetteTexte(r.spread_pct, r.spread_source) : null,
         valeurMoyenne30j: moyenne,
         duree: dureeTheorique(valeur, moyenne),
