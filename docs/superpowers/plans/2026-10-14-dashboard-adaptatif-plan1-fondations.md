@@ -413,7 +413,7 @@ export async function chargerProfil(sb: SupabaseClient, userId: string | null): 
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
     .gt('quantite', 0)
-    .or('is_liquidites.is.null,is_liquidites.eq.false');
+    .neq('code', LIQUIDITES_CODE); // CORRIGÉ en exécution (ec1d23a) : is_liquidites n'existe pas dans cette table
   if (error) return 'debutant';
   return deduireProfil(count ?? 0);
 }

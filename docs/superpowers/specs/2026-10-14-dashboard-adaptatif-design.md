@@ -20,7 +20,9 @@ QUATRE nouveaux blocs plus l'enrichissement du bloc portefeuille.
 ## 2. Règle de profil
 
 - `profil = 'actif'` si l'utilisateur a **au moins une position** dans
-  `portfolios_positions` avec `quantite > 0` (hors ligne `is_liquidites`) ;
+  `portfolios_positions` avec `quantite > 0`, hors ligne de liquidités
+  (`code = 'LIQUIDITES'` : le cash y est une ligne sentinelle ; la colonne
+  `is_liquidites` appartient à une autre table, `portfolio_positions`) ;
   sinon `'debutant'`. Une ligne soldée à zéro ne compte pas.
 - Un layout **sauvegardé** par l'utilisateur (`/dashboard/personnaliser`) passe
   TOUJOURS devant l'ordre par défaut du profil.
