@@ -9,8 +9,11 @@ export interface AlerteDeclenchee {
 
 export interface DetailAlerte {
   code: string;
-  variationPct: number | null;
   motif: string;
+  /** Jour du déclenchement (AAAA-MM-JJ). La variation DU JOUR n'est pas montrée :
+   *  l'alerte a pu se déclencher un autre jour, et la juxtaposer au motif
+   *  (« Variation au-delà de 5 % ») ferait croire à un mouvement d'aujourd'hui. */
+  le: string | null;
 }
 
 function motifDe(type: string, seuil: number | null): string {
@@ -27,22 +30,17 @@ function motifDe(type: string, seuil: number | null): string {
   }
 }
 
-/** Détail des alertes déclenchées : les plus récentes d'abord, au plus `max`. Aucune valeur absente n'est affichée comme 0. */
-export function detaillerAlertes(
-  alertes: AlerteDeclenchee[],
-  variations: ReadonlyMap<string, number | null>,
-  max = 3,
-): DetailAlerte[] {
+/** Détail des alertes déclenchées : les plus récentes d'abord, au plus `max`. */
+export function detaillerAlertes(alertes: AlerteDeclenchee[], max = 3): DetailAlerte[] {
   return [...alertes]
     .sort((a, b) => (b.declenchee_le ?? '').localeCompare(a.declenchee_le ?? ''))
     .slice(0, Math.max(0, max))
     .map((a) => {
-      const code = a.code.trim().toUpperCase();
-      const v = variations.get(code);
+      const jour = a.declenchee_le?.slice(0, 10) ?? null;
       return {
-        code,
-        variationPct: v != null && Number.isFinite(v) ? v : null,
+        code: a.code.trim().toUpperCase(),
         motif: motifDe(a.type, a.seuil),
+        le: jour && /^\d{4}-\d{2}-\d{2}$/.test(jour) ? jour : null,
       };
     });
 }

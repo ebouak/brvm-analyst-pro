@@ -37,7 +37,7 @@ import { PremiumLock } from '@/components/dashboard/PremiumLock';
 import { AfricanIndicesCard } from '@/components/AfricanIndicesCard';
 import { MacroBanner } from '@/components/MacroBanner';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
-import { fmtFcfa, fmtPctSigne } from '@/lib/format';
+import { fmtFcfa, fmtDateFR } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
@@ -429,7 +429,7 @@ export default async function Dashboard() {
   const publications = publicationsBrutes === null ? null : preparerPublications(publicationsBrutes, new Set(quantites.keys()));
   const coursSeance = actions.map((a) => ({ code: a.code, cours_jour: a.cours_jour, variation_pct: a.variation_pct, date_marche: a.date_marche }));
   const variationsJour = variationsDuJour(coursSeance, lastDate);
-  const detailAlertes = detaillerAlertes(alertesBrutes, variationsJour);
+  const detailAlertes = detaillerAlertes(alertesBrutes);
   const brvmc = indices.find((i) => i.code === 'BRVMC');
   const perf = etatPortefeuille
     ? performanceJour(
@@ -632,10 +632,8 @@ export default async function Dashboard() {
               <span key={`${d.code}-${i}`} className="flex min-w-0 flex-wrap items-center gap-x-1.5">
                 <span aria-hidden className="text-muted">·</span>
                 <span className="font-bold">{d.code}</span>
-                {d.variationPct != null && (
-                  <span className={`tabular ${d.variationPct > 0 ? 'text-up' : d.variationPct < 0 ? 'text-down' : 'text-muted'}`}>{fmtPctSigne(d.variationPct)}</span>
-                )}
                 <span className="min-w-0 break-words text-muted">{d.motif}</span>
+                {d.le && <span className="tabular whitespace-nowrap text-muted">· le {fmtDateFR(d.le).slice(0, 5)}</span>}
               </span>
             ))}
             {triggeredAlerts > detailAlertes.length && (
