@@ -16,6 +16,7 @@ import { construireAgenda, plusJours, HORIZON_JOURS } from '@/lib/dashboard/agen
 import { performanceJour } from '@/lib/dashboard/performanceJour';
 import { metriquesDepuisSeance, estSeanceClose } from '@/lib/dashboard/metriquesSeance';
 import { preparerPublications } from '@/lib/dashboard/publications';
+import { detaillerAlertes, type AlerteDeclenchee } from '@/lib/dashboard/alertes';
 import { lignesPerfDepuis, variationsDuJour } from '@/lib/dashboard/portefeuilleBloc';
 import { chargerPortefeuille, chargerDividendes, chargerFermetures, chargerPublications, chargerLiquidite } from '@/lib/dashboard/chargement';
 import BlocComprendre from '@/components/dashboard/blocs/BlocComprendre';
@@ -36,7 +37,7 @@ import { PremiumLock } from '@/components/dashboard/PremiumLock';
 import { AfricanIndicesCard } from '@/components/AfricanIndicesCard';
 import { MacroBanner } from '@/components/MacroBanner';
 import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
-import { fmtFcfa } from '@/lib/format';
+import { fmtFcfa, fmtPctSigne } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
@@ -308,19 +309,22 @@ export default async function Dashboard() {
   let favoriteSectors: string[] = [];
   let dashboardLayout: DashboardLayout | null = null;
   let triggeredAlerts = 0;
+  let alertesBrutes: AlerteDeclenchee[] = [];
   let profil: Profil = 'debutant';
   // Un visiteur non connecté est traité comme non-premium. Les sections premium
   // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
   let isPremium = false;
   if (user) {
-    const [{ data: prof }, { count }, profilCharge] = await Promise.all([
+    const [{ data: prof }, { data: alertesDeclenchees, count }, profilCharge] = await Promise.all([
       supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle(),
       supa
         .from('alerts')
-        .select('id', { count: 'exact', head: true })
+        .select('code, type, seuil, declenchee_le', { count: 'exact' })
         .eq('user_id', user.id)
         .eq('actif', true)
-        .not('declenchee_le', 'is', null),
+        .not('declenchee_le', 'is', null)
+        .order('declenchee_le', { ascending: false })
+        .limit(10),
       chargerProfil(supa, user.id),
     ]);
     favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
@@ -328,6 +332,7 @@ export default async function Dashboard() {
     isPremium = Boolean(prof?.is_premium);
 
     triggeredAlerts = count ?? 0;
+    alertesBrutes = (alertesDeclenchees as AlerteDeclenchee[] | null) ?? [];
     profil = profilCharge;
   }
   const layout = resolveLayout(dashboardLayout, profil);
@@ -423,6 +428,8 @@ export default async function Dashboard() {
       });
   const publications = publicationsBrutes === null ? null : preparerPublications(publicationsBrutes, new Set(quantites.keys()));
   const coursSeance = actions.map((a) => ({ code: a.code, cours_jour: a.cours_jour, variation_pct: a.variation_pct, date_marche: a.date_marche }));
+  const variationsJour = variationsDuJour(coursSeance, lastDate);
+  const detailAlertes = detaillerAlertes(alertesBrutes, variationsJour);
   const brvmc = indices.find((i) => i.code === 'BRVMC');
   const perf = etatPortefeuille
     ? performanceJour(
@@ -532,7 +539,7 @@ export default async function Dashboard() {
       </section>
     ),
     portefeuille: (
-      <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsDuJour(coursSeance, lastDate)} />
+      <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsJour} />
     ),
     comprendre: <BlocComprendre metriques={metriques} close={seanceClose} />,
     agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={quantites} portefeuilleIndisponible={portefeuilleIndisponible} />,
@@ -615,13 +622,23 @@ export default async function Dashboard() {
         {triggeredAlerts > 0 && (
           <Link
             href="/parametres/alertes"
-            className="flex w-full items-center gap-2 rounded-lg border border-down/30 bg-down/10 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
+            className="flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-down/30 bg-down/10 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
           >
             <span className="animate-pulse" aria-hidden>●</span>
-            <span>
+            <span className="font-semibold">
               {triggeredAlerts} alerte{triggeredAlerts > 1 ? 's' : ''} déclenchée{triggeredAlerts > 1 ? 's' : ''}
             </span>
-            <span className="ml-auto">→</span>
+            {detailAlertes.map((d, i) => (
+              <span key={`${d.code}-${i}`} className="flex min-w-0 flex-wrap items-center gap-x-1.5">
+                <span aria-hidden className="text-muted">·</span>
+                <span className="font-bold">{d.code}</span>
+                {d.variationPct != null && (
+                  <span className={`tabular ${d.variationPct > 0 ? 'text-up' : d.variationPct < 0 ? 'text-down' : 'text-muted'}`}>{fmtPctSigne(d.variationPct)}</span>
+                )}
+                <span className="min-w-0 break-words text-muted">{d.motif}</span>
+              </span>
+            ))}
+            <span className="ml-auto whitespace-nowrap">Voir les alertes →</span>
           </Link>
         )}
 
