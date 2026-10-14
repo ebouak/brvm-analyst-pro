@@ -12,7 +12,7 @@ export function sentimentLabel(score: number): string {
   return 'Négatif';
 }
 
-/** Jauge demi-cercle (SVG) — sentiment de marché 0..100. */
+/** Jauge demi-cercle (SVG) — part des hausses parmi hausses + baisses, 0..100. */
 export default function SentimentGauge({ score, delta }: Props) {
   const s = Math.max(0, Math.min(100, score));
   // demi-cercle de 180° : angle de l'aiguille (-90° à gauche, +90° à droite)
@@ -44,7 +44,7 @@ export default function SentimentGauge({ score, delta }: Props) {
         <circle cx={cx} cy={cy} r="9" fill="none" className="stroke-accent" strokeOpacity="0.3" strokeWidth="2" />
       </svg>
       <div className="-mt-2 text-center">
-        <div className="overline text-faint">Sentiment du marché</div>
+        <div className="overline text-faint">Part des hausses</div>
         <div className="mt-1 font-display text-lg text-cyan">{sentimentLabel(s)}</div>
         <div className="tabular mt-0.5 text-2xl font-bold text-ivory">
           {s.toFixed(0)}<span className="text-sm text-faint">/100</span>
@@ -54,6 +54,9 @@ export default function SentimentGauge({ score, delta }: Props) {
             vs veille {up ? '+' : ''}{delta.toFixed(0)} pts
           </div>
         )}
+        <p className="mt-2 max-w-[220px] text-[11px] leading-snug text-faint">
+          Part des hausses parmi les valeurs qui ont bougé ; ce n&apos;est pas une mesure du sentiment.
+        </p>
       </div>
     </div>
   );
