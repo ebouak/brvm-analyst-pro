@@ -382,6 +382,7 @@ export default async function Dashboard() {
 
   // Widgets configurables (ordre + visibilité pilotés par le layout utilisateur).
   const sections: Record<WidgetKey, React.ReactNode> = {
+    agenda: null, publications: null, liquidite: null, comprendre: null,
     secteurs: user ? (
       <section aria-label="Vos secteurs">
         <div className="mb-3 flex items-center gap-2">

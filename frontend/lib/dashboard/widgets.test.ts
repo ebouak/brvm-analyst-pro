@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { resolveLayout, DEFAULT_ORDER, ORDRE_ACTIF, ORDRE_DEBUTANT, deduireProfil, ordreParDefaut } from './widgets';
+import {
+  resolveLayout, DEFAULT_ORDER, ORDRE_ACTIF, ORDRE_DEBUTANT, deduireProfil, ordreParDefaut,
+  MASQUES_PAR_DEFAUT, LARGEUR, grouperEnRangees, classeRangee, WIDGETS,
+} from './widgets';
 
 describe('resolveLayout', () => {
   it('layout vide → ordre par défaut, tout visible', () => {
@@ -35,8 +38,8 @@ describe('profil', () => {
     expect(deduireProfil(0)).toBe('debutant');
   });
 
-  it('sans layout sauvegardé, l ordre dépend du profil', () => {
-    expect(resolveLayout(null, 'actif')).toEqual(ORDRE_ACTIF);
+  it('sans layout sauvegardé, l ordre dépend du profil (comprendre masqué pour l actif)', () => {
+    expect(resolveLayout(null, 'actif')).toEqual(ORDRE_ACTIF.filter((k) => k !== 'comprendre'));
     expect(resolveLayout(null, 'debutant')).toEqual(ORDRE_DEBUTANT);
     expect(resolveLayout(null, 'actif')[0]).toBe('portefeuille');
     expect(resolveLayout(null, 'debutant')[0]).toBe('etat');
@@ -63,5 +66,63 @@ describe('profil', () => {
     expect(r[0]).toBe('actus');
     expect(r[1]).toBe('portefeuille');
     expect(r).not.toContain('indices');
+  });
+});
+
+describe('ordres de la spec §3', () => {
+  it('actif : portefeuille, agenda, publications, état, séance…', () => {
+    expect(ORDRE_ACTIF).toEqual([
+      'portefeuille', 'agenda', 'publications', 'etat', 'comprendre', 'seance',
+      'liquidite', 'signaux', 'secteurs', 'indices', 'actus',
+    ]);
+  });
+  it('débutant : état, comprendre, séance, agenda, publications, portefeuille…', () => {
+    expect(ORDRE_DEBUTANT).toEqual([
+      'etat', 'comprendre', 'seance', 'agenda', 'publications', 'portefeuille',
+      'signaux', 'secteurs', 'indices', 'liquidite', 'actus',
+    ]);
+  });
+  it('chaque clé a un libellé et une largeur', () => {
+    for (const k of ORDRE_DEBUTANT) {
+      expect(WIDGETS.find((w) => w.key === k)).toBeDefined();
+      expect(LARGEUR[k]).toBeDefined();
+    }
+  });
+});
+
+describe('masqués par défaut', () => {
+  it('comprendre masqué pour l actif seulement', () => {
+    expect(MASQUES_PAR_DEFAUT.actif).toEqual(['comprendre']);
+    expect(MASQUES_PAR_DEFAUT.debutant).toEqual([]);
+    expect(resolveLayout(null, 'debutant')).toContain('comprendre');
+  });
+  it('layout sauvegardé AVANT l apparition de comprendre : reste masqué pour l actif', () => {
+    const r = resolveLayout({ order: ['portefeuille', 'etat'], hidden: [] }, 'actif');
+    expect(r).not.toContain('comprendre');
+    expect(r).toContain('agenda');
+  });
+  it('comprendre réactivé explicitement (présent dans order) : visible', () => {
+    const r = resolveLayout({ order: ['comprendre', 'portefeuille'], hidden: [] }, 'actif');
+    expect(r[0]).toBe('comprendre');
+  });
+});
+
+describe('rangées', () => {
+  it('pleine seule ; demi par deux ; tiers par trois', () => {
+    expect(grouperEnRangees(['portefeuille', 'agenda', 'publications', 'etat'])).toEqual([
+      { largeur: 'pleine', cles: ['portefeuille'] },
+      { largeur: 'demi', cles: ['agenda', 'publications'] },
+      { largeur: 'pleine', cles: ['etat'] },
+    ]);
+    expect(grouperEnRangees(['signaux', 'secteurs', 'actus', 'signaux'])).toEqual([
+      { largeur: 'tiers', cles: ['signaux', 'secteurs', 'actus'] },
+      { largeur: 'tiers', cles: ['signaux'] },
+    ]);
+  });
+  it('un bloc seul dans sa rangée prend toute la largeur', () => {
+    expect(classeRangee({ largeur: 'demi', cles: ['agenda'] })).toBe('');
+    expect(classeRangee({ largeur: 'demi', cles: ['agenda', 'publications'] })).toBe('grid gap-6 md:grid-cols-2');
+    expect(classeRangee({ largeur: 'tiers', cles: ['signaux', 'actus'] })).toBe('grid gap-6 md:grid-cols-2 xl:grid-cols-3');
+    expect(classeRangee({ largeur: 'pleine', cles: ['etat'] })).toBe('');
   });
 });
