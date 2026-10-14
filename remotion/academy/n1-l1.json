@@ -1,0 +1,605 @@
+{
+  "_": "Academy · Niveau 1 · Leçon 1, en entier. Source unique : textes affichés ET voix off, lus par academy-lecon.tsx et academy-voix.mjs. Chiffres repris de la leçon publiée (contenu relu le 2026-10-14 sur /formations/academy/academy-niveau-1-initiation?lecon=1), recoupés avec la base le même jour : indices du 17.07.2026 confirmés (BRVMC 478,53 ; BRVM30 227,70). UNE EXCEPTION : la leçon écrit « En 2025, Sonatel a versé 1 700 FCFA net » ; la base porte 1 655 FCFA pour l'exercice 2024 (payé en 2025) et 1 740 FCFA pour l'exercice 2025 (Bulletin officiel de la cote, payé le 26.05.2026). La vidéo montre ce dernier, sourcé et daté. La courbe du Composite vient de brvm_indices_daily (code BRVMC), seule période en base : 26.05 → 17.07.2026. Les nombres de la voix sont écrits en toutes lettres pour que la synthèse ne les lise pas de travers.",
+  "voixTts": "fr-FR-DeniseNeural",
+  "cours": "Niveau 1 · Initiation à la BRVM",
+  "lecon": "Leçon 1",
+  "titreLecon": "Qu’est-ce que la BRVM et comment ça marche ?",
+  "sections": [
+    {
+      "n": 0,
+      "type": "intro",
+      "titre": "Introduction",
+      "scenes": [
+        {
+          "id": "intro",
+          "gabarit": "ouverture",
+          "sommaire": [
+            "Une infrastructure, pas un casino",
+            "Devenir copropriétaire",
+            "La formation du prix",
+            "Les indices",
+            "Passer par une SGI",
+            "Investir à distance",
+            "Trois pièges",
+            "À retenir"
+          ],
+          "voix": "Leçon un. Qu'est-ce que la BRVM, et comment ça marche ? En huit étapes, de la définition du marché jusqu'aux pièges à éviter."
+        }
+      ]
+    },
+    {
+      "n": 1,
+      "type": "definition",
+      "titre": "Une infrastructure financière, pas un casino",
+      "scenes": [
+        {
+          "id": "s1-chapitre",
+          "gabarit": "chapitre",
+          "barre": "casino",
+          "voix": "Commençons par une définition. La BRVM est une infrastructure financière. Pas un casino."
+        },
+        {
+          "id": "s1-definition",
+          "gabarit": "definition",
+          "sigle": [
+            [
+              "B",
+              "Bourse"
+            ],
+            [
+              "R",
+              "Régionale des"
+            ],
+            [
+              "V",
+              "Valeurs"
+            ],
+            [
+              "M",
+              "Mobilières"
+            ]
+          ],
+          "phrase": "Un système organisé et strictement réglementé",
+          "publics": [
+            "Salarié",
+            "Commerçant",
+            "Étudiant",
+            "Fonctionnaire"
+          ],
+          "chute": "investir de façon sécurisée dans de vraies entreprises de l’UEMOA",
+          "voix": "La Bourse régionale des valeurs mobilières est un système organisé, et strictement réglementé. Elle permet à n'importe qui, salarié, commerçant, étudiant ou fonctionnaire, d'investir de façon sécurisée dans de vraies entreprises de l'UEMOA."
+        },
+        {
+          "id": "s1-pays",
+          "gabarit": "pays",
+          "titre": "Un marché unique pour 8 pays",
+          "pays": [
+            "Bénin",
+            "Burkina Faso",
+            "Côte d’Ivoire",
+            "Guinée-Bissau",
+            "Mali",
+            "Niger",
+            "Sénégal",
+            "Togo"
+          ],
+          "superviseur": "AMF-UMOA",
+          "superviseurNom": "Autorité des Marchés Financiers de l’UMOA",
+          "voix": "C'est un marché unique pour huit pays, supervisé par l'AMF-UMOA, l'autorité des marchés financiers de l'Union."
+        },
+        {
+          "id": "s1-croissance",
+          "gabarit": "croissance",
+          "label": "Capitalisation boursière",
+          "unite": "Md FCFA",
+          "points": [
+            {
+              "annee": "1998",
+              "valeur": 836
+            },
+            {
+              "annee": "2015",
+              "valeur": 6800
+            },
+            {
+              "annee": "2020",
+              "valeur": 9500
+            },
+            {
+              "annee": "2024",
+              "valeur": 14200
+            },
+            {
+              "annee": "2026",
+              "valeur": 18488
+            }
+          ],
+          "multiple": "×22 en 28 ans",
+          "variation": "+2 100 %",
+          "acceleration": "+94 % entre 2020 et 2026",
+          "source": "Source : BRVM · AMF-UMOA, d’après la leçon · données au 17.07.2026",
+          "voix": "En vingt-huit ans, la capitalisation est passée de huit cent trente-six milliards de francs CFA en 1998, à dix-huit mille quatre cent quatre-vingt-huit milliards en 2026. Multipliée par plus de vingt-deux. Et la hausse s'est nettement accélérée depuis 2020 : plus quatre-vingt-quatorze pour cent en six ans."
+        },
+        {
+          "id": "s1-chiffres",
+          "gabarit": "stats",
+          "titre": "La BRVM en quatre chiffres",
+          "stats": [
+            {
+              "label": "Capitalisation 2026",
+              "valeur": "18 488",
+              "unite": "Md FCFA",
+              "detail": "contre 836 Md FCFA en 1998",
+              "mot": "capitalisation"
+            },
+            {
+              "label": "Sociétés cotées",
+              "valeur": "49",
+              "unite": "",
+              "detail": "nomenclature 2026",
+              "mot": "sociétés"
+            },
+            {
+              "label": "Secteurs",
+              "valeur": "7",
+              "unite": "",
+              "detail": "des banques aux télécoms",
+              "mot": "secteurs"
+            },
+            {
+              "label": "Pays UEMOA",
+              "valeur": "8",
+              "unite": "",
+              "detail": "un seul marché commun",
+              "mot": "pays"
+            }
+          ],
+          "voix": "En quatre chiffres : dix-huit mille quatre cent quatre-vingt-huit milliards de capitalisation. Quarante-neuf sociétés cotées. Sept secteurs, des banques aux télécoms. Et huit pays, réunis dans un seul marché commun."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "type": "importance",
+      "titre": "Acheter une action, c’est devenir copropriétaire",
+      "scenes": [
+        {
+          "id": "s2-chapitre",
+          "gabarit": "chapitre",
+          "voix": "Pourquoi c'est important. Acheter une action, c'est devenir copropriétaire."
+        },
+        {
+          "id": "s2-fraction",
+          "gabarit": "fraction",
+          "titre": "Une action = une fraction d’une entreprise réelle",
+          "voix": "Une action est une fraction d'une entreprise réelle. Quand vous l'achetez, vous en détenez une part. Et la loi vous garantit trois droits."
+        },
+        {
+          "id": "s2-droits",
+          "gabarit": "droits",
+          "droits": [
+            {
+              "titre": "Percevoir des dividendes",
+              "detail": "Votre part des bénéfices, versée en espèces sur votre compte-titres.",
+              "exemple": {
+                "logo": "logos/SNTS.jpg",
+                "nom": "Sonatel",
+                "valeur": "1 740 FCFA",
+                "legende": "par action · exercice 2025, payé le 26.05.2026",
+                "source": "Bulletin officiel de la cote"
+              },
+              "mot": "un :"
+            },
+            {
+              "titre": "Voter en assemblée générale",
+              "detail": "Nomination des dirigeants, distribution des bénéfices, fusions.",
+              "accroche": "1 action = 1 voix",
+              "mot": "deux :"
+            },
+            {
+              "titre": "Revendre vos titres",
+              "detail": "Quand vous voulez, sur le marché secondaire, via votre SGI.",
+              "accroche": "Jamais bloqué",
+              "mot": "trois :"
+            }
+          ],
+          "voix": "Un : percevoir des dividendes, votre part des bénéfices, versée en espèces sur votre compte-titres. Pour l'exercice 2025, Sonatel a versé mille sept cent quarante francs CFA par action. Deux : voter en assemblée générale, sur la nomination des dirigeants, la distribution des bénéfices ou les fusions. Une action donne une voix. Trois : revendre vos titres quand vous voulez, sur le marché secondaire, via votre SGI. La revente fait partie du contrat."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "type": "importance",
+      "titre": "Comment se forme le prix d’une action ?",
+      "scenes": [
+        {
+          "id": "s3-chapitre",
+          "gabarit": "chapitre",
+          "voix": "Comment se forme le prix d'une action ?"
+        },
+        {
+          "id": "s3-offre",
+          "gabarit": "offre",
+          "voix": "Par la confrontation de l'offre et de la demande. Quand la demande dépasse l'offre, le cours monte. Quand l'offre l'emporte, il baisse. Et l'AMF-UMOA veille à l'équité de chaque séance."
+        },
+        {
+          "id": "s3-seance",
+          "gabarit": "seance",
+          "titre": "Une séance, du lundi au vendredi · heure GMT",
+          "phases": [
+            {
+              "debut": "9h00",
+              "fin": "9h45",
+              "titre": "Pré-ouverture",
+              "detail": "Les ordres s’accumulent dans le carnet. Aucun échange n’est encore exécuté.",
+              "mot": "pré-ouverture"
+            },
+            {
+              "debut": "9h45",
+              "fin": null,
+              "titre": "Fixing d’ouverture",
+              "detail": "Premier cours d’équilibre calculé.",
+              "mot": "fixing d'ouverture"
+            },
+            {
+              "debut": "9h45",
+              "fin": "14h55",
+              "titre": "Négociation continue",
+              "detail": "Le cœur de la séance : les cours évoluent en temps réel.",
+              "cle": true,
+              "mot": "négociation continue"
+            },
+            {
+              "debut": "15h00",
+              "fin": null,
+              "titre": "Fixing de clôture",
+              "detail": "Cours de référence du jour fixé et publié.",
+              "mot": "fixing de clôture"
+            }
+          ],
+          "voix": "La BRVM cote du lundi au vendredi, de neuf heures à quinze heures, heure GMT, en quatre phases. D'abord, la pré-ouverture : les ordres s'accumulent dans le carnet, aucun échange n'est encore exécuté. À neuf heures quarante-cinq, le fixing d'ouverture calcule le premier cours d'équilibre. Vient ensuite le cœur de la séance : la négociation continue, jusqu'à quatorze heures cinquante-cinq. Les cours évoluent en temps réel. Enfin, à quinze heures, le fixing de clôture fixe et publie le cours de référence du jour."
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "type": "importance",
+      "titre": "Les indices, thermomètre du marché",
+      "scenes": [
+        {
+          "id": "s4-chapitre",
+          "gabarit": "chapitre",
+          "voix": "Les indices, thermomètre du marché."
+        },
+        {
+          "id": "s4-indices",
+          "gabarit": "indices",
+          "indices": [
+            {
+              "nom": "BRVM Composite",
+              "valeur": "478,53",
+              "detail": "Toutes les actions cotées, dividendes inclus · le baromètre officiel",
+              "mot": "composite"
+            },
+            {
+              "nom": "BRVM 30",
+              "valeur": "227,70",
+              "detail": "Les 30 valeurs les plus liquides · remplace le BRVM 10 depuis 2023",
+              "mot": "brvm 30"
+            }
+          ],
+          "date": "clôture du 17.07.2026",
+          "courbe": {
+            "nom": "BRVM Composite",
+            "periode": "26.05 → 17.07.2026",
+            "source": "Clôtures BRVM · 37 séances en base",
+            "valeurs": [
+              421.02,
+              422.81,
+              425.54,
+              426,
+              426,
+              435.38,
+              435.38,
+              436.68,
+              436.06,
+              435.61,
+              437.01,
+              436.6,
+              436.58,
+              435.52,
+              436.51,
+              438.68,
+              442.87,
+              445.31,
+              443.85,
+              442.11,
+              446.57,
+              449.82,
+              450.04,
+              453.21,
+              457.48,
+              460.55,
+              459.7,
+              460.21,
+              463.89,
+              470.48,
+              470.47,
+              474.92,
+              475.78,
+              479.46,
+              481.23,
+              479.92,
+              478.53
+            ]
+          },
+          "voix": "Deux indices mesurent la santé d'ensemble du marché. Quand un indice monte, les valeurs qui le composent ont progressé en moyenne. Le BRVM Composite regroupe toutes les actions cotées, dividendes inclus : c'est le baromètre officiel. Il clôturait à quatre cent soixante-dix-huit points cinquante-trois le dix-sept juillet 2026. Le BRVM 30 suit les trente valeurs les plus liquides ; il remplace le BRVM 10 depuis 2023. Il clôturait le même jour à deux cent vingt-sept points soixante-dix."
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "type": "cas",
+      "titre": "Impossible d’acheter en direct : passer par une SGI est obligatoire",
+      "scenes": [
+        {
+          "id": "s5-chapitre",
+          "gabarit": "chapitre",
+          "voix": "Cas réel. Impossible d'acheter en direct : passer par une SGI est obligatoire."
+        },
+        {
+          "id": "s5-flux",
+          "gabarit": "flux",
+          "etapes": [
+            {
+              "titre": "Vous",
+              "detail": "Votre ordre d’achat ou de vente",
+              "mot": "ordre"
+            },
+            {
+              "titre": "SGI",
+              "detail": "Société de Gestion et d’Intermédiation · capital minimum 1 milliard FCFA",
+              "mot": "société de gestion"
+            },
+            {
+              "titre": "BRVM",
+              "detail": "Le marché, où l’ordre est exécuté",
+              "logo": "brand/brvm-logo.png",
+              "mot": "milliard"
+            }
+          ],
+          "voix": "Vous ne pouvez pas passer un ordre directement à la BRVM. Il faut passer par une société de gestion et d'intermédiation, une SGI, qui doit disposer d'un capital minimum d'un milliard de francs CFA."
+        },
+        {
+          "id": "s5-tableau",
+          "gabarit": "tableau",
+          "titre": "Comparez les frais avant de choisir",
+          "colonnes": [
+            "SGI",
+            "Dépôt min.",
+            "Courtage",
+            "Spécificités"
+          ],
+          "lignes": [
+            {
+              "logo": "sgi/cgf-bourse.svg",
+              "cellules": [
+                "CGF Bourse",
+                "100 000 FCFA",
+                "0,8 %",
+                "Historique + app mobile · large panel d’analystes"
+              ]
+            },
+            {
+              "logo": "sgi/hudson-cie.svg",
+              "cellules": [
+                "Hudson & Cie",
+                "50 000 FCFA",
+                "1,0 %",
+                "Accessibilité petits porteurs · onboarding rapide"
+              ]
+            },
+            {
+              "logo": "sgi/nsia-finance.svg",
+              "cellules": [
+                "NSIA Finance",
+                "200 000 FCFA",
+                "0,7 %",
+                "Adossée à un assureur régional · SAV réputé"
+              ]
+            },
+            {
+              "logo": "sgi/boa-capital-securities.svg",
+              "cellules": [
+                "BOA Capital",
+                "150 000 FCFA",
+                "0,9 %",
+                "Réseau bancaire dense · virements internationaux fluides"
+              ]
+            },
+            {
+              "logo": "sgi/sogebourse.svg",
+              "cellules": [
+                "Sogebourse",
+                "500 000 FCFA",
+                "0,6 %",
+                "Investisseurs confirmés · gestion sous mandat"
+              ]
+            }
+          ],
+          "frais": [
+            "Commission BRVM 0,2 %",
+            "Dépositaire DC/BR 0,1 %",
+            "TVA 18 %"
+          ],
+          "note": "Grilles indicatives 2026, d’après la leçon · à confirmer auprès de chaque SGI",
+          "voix": "Comparez les frais avant de choisir : sur de petits montants, ils pèsent lourd. En plus du courtage, toutes les SGI appliquent les mêmes frais communs : une commission BRVM de zéro virgule deux pour cent, le dépositaire à zéro virgule un pour cent, et la TVA à dix-huit pour cent. Ces grilles sont indicatives : confirmez-les auprès de chaque SGI."
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "type": "cas",
+      "titre": "« La distance ne m’a pas empêché d’investir »",
+      "scenes": [
+        {
+          "id": "s6-chapitre",
+          "gabarit": "chapitre",
+          "voix": "Cas réel. La distance ne m'a pas empêché d'investir."
+        },
+        {
+          "id": "s6-profil",
+          "gabarit": "profil",
+          "nom": "M. Diallo",
+          "metier": "Développeur web d’origine ivoirienne",
+          "depart": "Lyon",
+          "arrivee": "Abidjan",
+          "date": "Mars 2026",
+          "depot": "100 000 FCFA",
+          "mention": "Témoignage anonymisé",
+          "voix": "En mars 2026, monsieur Diallo, développeur web d'origine ivoirienne installé à Lyon, a ouvert un compte-titres depuis l'application mobile de sa SGI, avec un premier dépôt de cent mille francs CFA."
+        },
+        {
+          "id": "s6-etapes",
+          "gabarit": "etapes",
+          "etapes": [
+            {
+              "titre": "Ouverture 100 % à distance",
+              "detail": "CNI + justificatif de domicile envoyés depuis l’app mobile de la SGI.",
+              "mot": "un :"
+            },
+            {
+              "titre": "Achat de 2 valeurs sectorielles",
+              "detail": "10 actions CIE CI (services publics) + 5 actions TOTAL CI (énergie).",
+              "logos": [
+                "logos/CIEC.jpg",
+                "logos/TTLC.jpg"
+              ],
+              "mot": "deux :"
+            },
+            {
+              "titre": "Suivi mobile 24h/24",
+              "detail": "Relevés par email, positions consultables à tout moment. Opérationnel 3 semaines après l’ouverture.",
+              "mot": "trois :"
+            }
+          ],
+          "conclusion": "La diaspora peut investir sur son marché d’origine sans se déplacer.",
+          "voix": "Un : une ouverture cent pour cent à distance, avec sa pièce d'identité et un justificatif de domicile. Deux : l'achat de deux valeurs sectorielles : dix actions CIE Côte d'Ivoire, et cinq actions TOTAL Côte d'Ivoire. Trois : un suivi mobile, vingt-quatre heures sur vingt-quatre. Tout était opérationnel trois semaines après l'ouverture. La diaspora peut investir sur son marché d'origine sans se déplacer."
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "type": "piege",
+      "titre": "3 erreurs qui font perdre plus vite qu’elles ne rapportent",
+      "scenes": [
+        {
+          "id": "s7-chapitre",
+          "gabarit": "chapitre",
+          "voix": "Pièges fréquents. Trois erreurs qui font perdre plus vite qu'elles ne rapportent."
+        },
+        {
+          "id": "s7-pieges",
+          "gabarit": "pieges",
+          "pieges": [
+            {
+              "erreur": "L’illusion du jackpot",
+              "detail": "Confondre investissement et spéculation : la BRVM n’est pas faite pour « faire ×10 en 3 jours ».",
+              "reflexe": "Viser un horizon d’au moins 3 à 5 ans et laisser les intérêts composés travailler.",
+              "mot": "un :"
+            },
+            {
+              "erreur": "L’argent qu’on ne peut pas perdre",
+              "detail": "Loyer, scolarité, urgence médicale : jamais en actions. La bourse comporte un vrai risque de perte en capital.",
+              "reflexe": "Constituer d’abord 3 à 6 mois d’épargne de précaution.",
+              "mot": "deux :"
+            },
+            {
+              "erreur": "L’oubli du calendrier",
+              "detail": "Résultats de février à avril, AG de mars à juin, puis versement. Vendre avant la date de détachement fait perdre le dividende.",
+              "reflexe": "Noter les dates clés de vos titres, publiées à l’avance par la BRVM.",
+              "mot": "trois :"
+            }
+          ],
+          "voix": "Un : l'illusion du jackpot. La BRVM n'est pas faite pour faire fois dix en trois jours. Le bon réflexe : viser un horizon d'au moins trois à cinq ans. Deux : investir l'argent qu'on ne peut pas perdre. La bourse comporte un vrai risque de perte en capital. Le bon réflexe : constituer d'abord trois à six mois d'épargne de précaution. Trois : oublier le calendrier. Vendre avant la date de détachement fait perdre le dividende. Le bon réflexe : noter les dates clés de vos titres."
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "type": "retenir",
+      "titre": "5 idées à emporter de cette leçon",
+      "scenes": [
+        {
+          "id": "s8-chapitre",
+          "gabarit": "chapitre",
+          "voix": "À retenir. Cinq idées à emporter de cette leçon."
+        },
+        {
+          "id": "s8-idees",
+          "gabarit": "idees",
+          "idees": [
+            {
+              "texte": "Un marché unique et réglementé : 8 pays de l’UEMOA, sous la supervision de l’AMF-UMOA.",
+              "mot": "un,"
+            },
+            {
+              "texte": "Une capitalisation multipliée par 22 en 28 ans, de 836 à 18 488 Md FCFA.",
+              "mot": "deux,"
+            },
+            {
+              "texte": "Être actionnaire, c’est être copropriétaire : dividendes, vote, revente.",
+              "mot": "trois,"
+            },
+            {
+              "texte": "Toute transaction passe par une SGI agréée, votre interlocuteur unique.",
+              "mot": "quatre,"
+            },
+            {
+              "texte": "Le BRVM Composite (478,53 pts) et le BRVM 30 (227,70 pts) donnent la température du marché.",
+              "mot": "cinq,"
+            }
+          ],
+          "voix": "Un, un marché unique et réglementé, pour huit pays, sous la supervision de l'AMF-UMOA. Deux, une capitalisation multipliée par vingt-deux en vingt-huit ans. Trois, être actionnaire, c'est être copropriétaire, avec trois droits : dividendes, vote, revente. Quatre, toute transaction passe par une SGI agréée. Cinq, le BRVM Composite et le BRVM 30 donnent la température du marché."
+        },
+        {
+          "id": "s8-secteurs",
+          "gabarit": "secteurs",
+          "titre": "Répartition sectorielle des 49 sociétés cotées",
+          "sousTitre": "nomenclature 2026 · part des sociétés cotées",
+          "labels": [
+            "Services financiers",
+            "Industriels",
+            "Conso. de base",
+            "Services publics",
+            "Énergie",
+            "Télécoms",
+            "Conso. discrétionnaire"
+          ],
+          "valeurs": [
+            37,
+            18,
+            14,
+            10,
+            8,
+            8,
+            5
+          ],
+          "logos": [
+            "logos/ECOC.png",
+            "logos/SGBC.jpg",
+            "logos/BOAC.png"
+          ],
+          "source": "Source : BRVM · AMF-UMOA · données au 17.07.2026",
+          "voix": "Pour finir, la répartition sectorielle des quarante-neuf sociétés cotées. Les services financiers dominent, avec trente-sept pour cent des sociétés : banques et assurances, comme Ecobank, la SGBCI ou BOA. Viennent ensuite les industriels, avec dix-huit pour cent."
+        },
+        {
+          "id": "fin",
+          "gabarit": "fin",
+          "retenir": "La BRVM est une infrastructure régulée, ouverte à tous, pour investir dans de vraies entreprises.",
+          "voix": "La BRVM n'est pas un casino. C'est une infrastructure régulée, ouverte à tous, pour investir dans de vraies entreprises. Rendez-vous dans la leçon suivante."
+        }
+      ]
+    }
+  ]
+}

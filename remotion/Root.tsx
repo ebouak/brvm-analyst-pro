@@ -4,7 +4,7 @@ import FilConducteurVideo, { TOTAL as FIL_TOTAL } from './fil-conducteur';
 import Showreel, { TOTAL as SHOWREEL_TOTAL } from './showreel';
 import Seance, { calculerSeance } from './seance';
 import Ecosysteme, { calculerEcosysteme } from './ecosysteme';
-import AcademySection, { calculerAcademy } from './academy-section';
+import AcademyLecon, { calculerLecon } from './academy-lecon';
 
 // 16 s × 30 fps = 480 frames (intro 75 + 4 écrans × 83 + outro 72 = 479 ≤ 480)
 export function RemotionRoot() {
@@ -64,18 +64,19 @@ export function RemotionRoot() {
         defaultProps={{ durees: null }}
         calculateMetadata={calculerEcosysteme}
       />
-      {/* Une section de l'Academy en motion design, 16:9, voix off. Section
-          choisie par --props='{"section":"n1-l1-s1"}' ; durée dérivée des
-          pistes de voix (public/academy/<section>/plan.json). */}
+      {/* Une leçon Academy en motion design, 16:9, voix off. Leçon choisie
+          par --props='{"lecon":"n1-l1"}' ; ajouter "section":3 pour ne rendre
+          qu'une section. Durée dérivée des pistes de voix
+          (public/academy/<lecon>/plan.json). */}
       <Composition
-        id="academy-section"
-        component={AcademySection}
+        id="academy-lecon"
+        component={AcademyLecon}
         durationInFrames={300}
         fps={30}
         width={1920}
         height={1080}
-        defaultProps={{ section: 'n1-l1-s1', plan: null }}
-        calculateMetadata={calculerAcademy}
+        defaultProps={{ lecon: 'n1-l1', section: null, plan: null }}
+        calculateMetadata={calculerLecon}
       />
     </>
   );
