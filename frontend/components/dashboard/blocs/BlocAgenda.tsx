@@ -29,18 +29,18 @@ export default function BlocAgenda({
         />
       ) : (
         <ul className="divide-y divide-border/50">
-          {liste.map((it) => {
+          {liste.map((it, i) => {
             const n = it.code ? quantites.get(it.code) : undefined;
             return (
-              <li key={`${it.type}-${it.code ?? ''}-${it.date}-${it.parAction ?? ''}`} className="flex flex-col gap-1 py-2.5 first:pt-0 last:pb-0">
+              <li key={`${it.type}-${it.code ?? ''}-${it.date}-${it.parAction ?? ''}-${i}`} className="flex flex-col gap-1 py-2.5 first:pt-0 last:pb-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="tabular w-24 shrink-0 text-xs text-muted">{jourCourt(it.date)}</span>
                   <PastilleStatut statut={it.statut} />
                   {it.mienne && <Pastille accent>Détenue</Pastille>}
                   {it.code ? (
-                    <Link href={`/actions/${it.code}`} className="min-w-0 truncate text-sm text-ivory hover:text-accent-ink">{it.titre}</Link>
+                    <Link href={`/actions/${it.code}`} title={it.titre} className="min-w-0 truncate text-sm text-ivory hover:text-accent-ink">{it.titre}</Link>
                   ) : (
-                    <span className="min-w-0 truncate text-sm text-ivory">{it.titre}</span>
+                    <span title={it.titre} className="min-w-0 truncate text-sm text-ivory">{it.titre}</span>
                   )}
                 </div>
                 {it.parAction != null && (
@@ -50,7 +50,7 @@ export default function BlocAgenda({
                     {it.totalIndicatif != null && n != null && (
                       <>
                         {' · '}total indicatif <span className="tabular text-ivory">{fmtNumber(it.totalIndicatif, 0)} FCFA</span> pour vos{' '}
-                        {fmtNumber(n, 0)} titres, s&apos;ils sont détenus à la date de détachement
+                        {fmtNumber(n, 0)} titres, {it.type === 'paiement' ? 's&apos;ils étaient détenus' : 's&apos;ils sont détenus'} à la date de détachement
                       </>
                     )}
                   </p>

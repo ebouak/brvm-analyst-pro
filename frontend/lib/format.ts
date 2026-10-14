@@ -20,7 +20,8 @@ export function fmtDateFR(iso: string | null | undefined): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const soloDate = /^\d{4}-\d{2}-\d{2}$/.test(iso);
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', ...(soloDate ? { timeZone: 'UTC' } : {}) });
 }
 
 /** "2026-05-26" + "16:30" → "26/05/2026 16:30" */

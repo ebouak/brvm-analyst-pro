@@ -21,13 +21,11 @@ export function CadreBloc({
       <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h2 id={id} className="font-display text-lg text-ivory">{titre}</h2>
         <div className="flex flex-wrap items-center gap-3">
-          {dateReference && (
-            <span
-              className={`tabular rounded-full border px-2 py-0.5 text-[11px] ${ancienne ? 'border-warn/50 text-warn' : 'border-border text-muted'}`}
-            >
-              {legendeDate} {fmtDateFR(dateReference)}
-            </span>
-          )}
+          <span
+            className={`tabular rounded-full border px-2 py-0.5 text-[11px] ${ancienne ? 'border-warn/50 text-warn' : 'border-border text-muted'}`}
+          >
+            {dateReference ? `${legendeDate} ${fmtDateFR(dateReference)}` : 'Date non disponible'}
+          </span>
           {lien && (
             <Link href={lien.href} className="text-xs font-semibold text-accent-ink hover:underline">
               {lien.label} →
@@ -71,13 +69,13 @@ const STATUTS: Record<StatutAgenda, { libelle: string; classe: string }> = {
 
 export function PastilleStatut({ statut }: { statut: StatutAgenda }) {
   const s = STATUTS[statut];
-  return <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.classe}`}>{s.libelle}</span>;
+  return <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${s.classe}`}>{s.libelle}</span>;
 }
 
 /** Pastille neutre (type de publication, « Détenue »…). */
 export function Pastille({ children, accent = false }: { children: ReactNode; accent?: boolean }) {
   return (
-    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${accent ? 'border-accent/50 text-accent-ink' : 'border-border-strong text-muted'}`}>
+    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${accent ? 'border-accent/50 text-accent-ink' : 'border-border-strong text-muted'}`}>
       {children}
     </span>
   );

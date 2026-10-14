@@ -42,21 +42,21 @@ function Positions({ donnees, positions }: { donnees: { dateMarche: string; lign
   return (
     <>
       <div className="-mx-1 overflow-x-auto">
-        <table className="w-full min-w-[30rem] text-sm">
+        <table aria-labelledby="bloc-liquidite" className="w-full min-w-[30rem] text-sm">
           <thead className="text-[11px] uppercase tracking-wide text-faint">
             <tr className="border-b border-border">
-              <th className="px-1 py-2 text-left font-medium">Valeur</th>
-              <th className="px-1 py-2 text-right font-medium">Position</th>
-              <th className="px-1 py-2 text-center font-medium">Classe</th>
-              <th className="px-1 py-2 text-right font-medium">Fourchette</th>
-              <th className="px-1 py-2 text-right font-medium">Échanges moy. 30 j</th>
-              <th className="px-1 py-2 text-right font-medium">Durée théorique</th>
+              <th scope="col" className="px-1 py-2 text-left font-medium">Valeur</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">Position</th>
+              <th scope="col" className="px-1 py-2 text-center font-medium">Classe</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">Fourchette</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">Échanges moy. 30 j</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">Durée théorique</th>
             </tr>
           </thead>
           <tbody>
             {lignes.map((l) => (
               <tr key={l.code} className="border-b border-border/40 last:border-0">
-                <td className="px-1 py-2"><Link href={`/actions/${l.code}`} className="font-semibold text-ivory hover:text-accent-ink">{l.code}</Link></td>
+                <th scope="row" className="px-1 py-2 text-left font-normal"><Link href={`/actions/${l.code}`} className="font-semibold text-ivory hover:text-accent-ink">{l.code}</Link></th>
                 <td className="tabular px-1 py-2 text-right text-muted">{l.valeurPosition != null ? fmtFcfa(l.valeurPosition) : '—'}</td>
                 {l.mesuree ? (
                   <>
@@ -84,7 +84,7 @@ function Positions({ donnees, positions }: { donnees: { dateMarche: string; lign
       <p className="mt-3 text-[11px] leading-snug text-faint">
         Durée théorique indicative, en supposant que vos ventes représentent {fmtNumber(PARTICIPATION_VOLUME * 100, 0)} % des échanges
         quotidiens moyens (30 séances au {fmtDateFR(donnees.dateMarche)}). Au-delà de {SEUIL_ALERTE_SEANCES} séances, la ligne est signalée.
-        Ce n&apos;est pas une garantie d&apos;exécution. « ≈ » : fourchette estimée faute de carnet publié.
+        Ce n&apos;est pas une garantie d&apos;exécution.{lignes.some((l) => l.fourchette?.startsWith('≈')) && ' « ≈ » : fourchette estimée faute de carnet publié.'}
       </p>
     </>
   );
@@ -109,17 +109,21 @@ function Marche({ lignes }: { lignes: LiquiditeSource[] }) {
 function ListeExtremes({ titre, items }: { titre: string; items: LiquiditeSource[] }) {
   return (
     <div className="min-w-0">
-      <p className="mb-2 text-xs font-semibold text-muted">{titre}</p>
+      <h3 className="mb-2 text-xs font-semibold text-muted">{titre}</h3>
+      {items.length === 0 ? (
+        <p className="text-xs text-muted">Aucune valeur notée.</p>
+      ) : (
       <ul className="space-y-1.5">
         {items.map((r) => (
           <li key={r.code} className="flex items-baseline justify-between gap-2 text-sm">
             <Link href={`/actions/${r.code}`} className="font-semibold text-ivory hover:text-accent-ink">{r.code}</Link>
-            <span className="tabular text-xs text-muted">
+            <span className="tabular min-w-0 text-xs text-muted">
               classe {r.classe ?? '—'} · fourchette {fourchetteTexte(r.spread_pct, r.spread_source) ?? 'non mesurée'}
             </span>
           </li>
         ))}
       </ul>
+      )}
     </div>
   );
 }
