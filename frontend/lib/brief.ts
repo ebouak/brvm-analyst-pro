@@ -16,7 +16,10 @@ export interface BriefInput {
   indices: { brvm30: IndiceDaily | null; brvmc: IndiceDaily | null };
   actions: ActionDaily[];
   signals: SignalDaily[];
-  volumePrev: number | null; // valeur échangée séance précédente (FCFA)
+  /** Valeur des transactions de la séance (brvm_market_summary), null si inconnue. */
+  valeurTransactions: number | null;
+  /** Même mesure pour la séance précédente, null si inconnue. */
+  valeurTransactionsPrev: number | null;
   topSectorPerfs: SectorPerf[];
 }
 
@@ -31,17 +34,22 @@ export interface Brief {
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
-function motVariation(v: number): string {
-  if (Math.abs(v) < 0.2) return 'stagne à';
-  if (v > 1) return 'progresse nettement de';
-  if (v > 0) return 'progresse de';
-  if (v < -1) return 'recule nettement de';
-  return 'recule de';
+/** Variation signée au format français : « +1,95 % », « −0,26 % ». */
+function pctSigne(v: number, d = 2): string {
+  const s = v > 0 ? '+' : v < 0 ? '−' : '';
+  return `${s}${fmtNumber(Math.abs(v), d)} %`;
 }
 
-function fmtVar(v: number): string {
-  const sign = v >= 0 ? '+' : '';
-  return `${sign}${v.toFixed(2)}%`;
+/** Valeur absolue, pour les phrases dont le verbe porte déjà le sens. */
+function pctAbs(v: number, d = 2): string {
+  return `${fmtNumber(Math.abs(v), d)} %`;
+}
+
+/** « L'indice BRVM 30 recule de 0,26 % à 263,47 points » — jamais « recule de -0.26% ». */
+function phraseIndice(sujet: string, v: number, valeur: number): string {
+  if (Math.abs(v) < 0.2) return `${sujet} est stable (${pctSigne(v)}) à ${fmtNumber(valeur, 2)} points`;
+  const verbe = v > 1 ? 'progresse nettement de' : v > 0 ? 'progresse de' : v < -1 ? 'recule nettement de' : 'recule de';
+  return `${sujet} ${verbe} ${pctAbs(v)} à ${fmtNumber(valeur, 2)} points`;
 }
 
 function breadthTone(hausses: number, baisses: number): string {
@@ -54,17 +62,15 @@ function breadthTone(hausses: number, baisses: number): string {
 // ─── Paragraph builders ───────────────────────────────────────────────────────
 
 function buildSummary(input: BriefInput): string {
-  const { indices, actions, volumePrev } = input;
+  const { indices, actions } = input;
   const brvm30 = indices.brvm30;
 
   // Breadth
   let hausses = 0, baisses = 0;
-  let volumeTotal = 0;
   for (const a of actions) {
     const v = a.variation_pct ?? 0;
     if (v > 0) hausses++;
     else if (v < 0) baisses++;
-    volumeTotal += a.valeur_echangee ?? 0;
   }
 
   // No data at all
@@ -74,26 +80,25 @@ function buildSummary(input: BriefInput): string {
 
   let parts: string[] = [];
 
-  // Indice BRVM30
+  // Valeur échangée : MÊME source que les repères clés (brvm_market_summary).
+  // Pendant la séance, les lignes d'actions n'ont pas encore de valeur
+  // échangée (la collecte brvm.org ne la porte pas) : les additionner
+  // affichait « 0 FCFA (-100 %) ». Sans résumé de séance, on se tait.
+  const { valeurTransactions, valeurTransactionsPrev } = input;
+  let volumePart: string | null = null;
+  if (valeurTransactions != null && valeurTransactions > 0) {
+    volumePart = `dans un volume total de ${fmtFcfa(valeurTransactions)} FCFA`;
+    if (valeurTransactionsPrev != null && valeurTransactionsPrev > 0) {
+      const delta = ((valeurTransactions - valeurTransactionsPrev) / valeurTransactionsPrev) * 100;
+      volumePart += ` (${pctSigne(delta, 1)} sur la séance précédente)`;
+    }
+  }
+
   if (brvm30?.valeur != null && brvm30.variation_pct != null) {
-    const mot = motVariation(brvm30.variation_pct);
-    parts.push(
-      `L'indice BRVM 30 ${mot} ${fmtVar(brvm30.variation_pct)} à ${fmtNumber(brvm30.valeur, 2)} points`
-    );
-  }
-
-  // Volume
-  let volumePart = `dans un volume total de ${fmtFcfa(volumeTotal)} FCFA`;
-  if (volumePrev != null && volumePrev > 0) {
-    const deltaVol = ((volumeTotal - volumePrev) / volumePrev) * 100;
-    const sign = deltaVol >= 0 ? '+' : '';
-    volumePart += ` (${sign}${deltaVol.toFixed(0)}% vs séance précédente)`;
-  }
-
-  if (parts.length > 0) {
-    parts[0] = parts[0] + ', ' + volumePart + '.';
-  } else {
-    parts.push(`Volume total de la séance : ${fmtFcfa(volumeTotal)} FCFA.`);
+    const p = phraseIndice("L'indice BRVM 30", brvm30.variation_pct, brvm30.valeur);
+    parts.push(volumePart ? `${p}, ${volumePart}.` : `${p}.`);
+  } else if (volumePart) {
+    parts.push(`Séance conclue ${volumePart}.`);
   }
 
   // Breadth
@@ -127,9 +132,9 @@ function buildSectors(topSectorPerfs: SectorPerf[]): string {
 
   if (bestSectors.length > 0) {
     const best = bestSectors[0]!;
-    let sentence = `Le secteur ${best.secteur} tire la cotation avec une performance de ${fmtVar(best.varPct)}`;
+    let sentence = `Le secteur ${best.secteur} tire la cotation avec une performance de ${pctSigne(best.varPct)}`;
     if (best.leader && best.leaderVar != null) {
-      sentence += `, mené par ${best.leader} (${fmtVar(best.leaderVar)})`;
+      sentence += `, mené par ${best.leader} (${pctSigne(best.leaderVar)})`;
     }
     sentence += '.';
     parts.push(sentence);
@@ -137,9 +142,9 @@ function buildSectors(topSectorPerfs: SectorPerf[]): string {
 
   if (worstSectors.length > 0) {
     const worst = worstSectors[worstSectors.length - 1]!;
-    let sentence = `À l'inverse, le secteur ${worst.secteur} recule de ${fmtVar(worst.varPct)}`;
+    let sentence = `À l'inverse, le secteur ${worst.secteur} recule de ${pctAbs(worst.varPct)}`;
     if (worst.leader && worst.leaderVar != null) {
-      sentence += ` sous l'effet de ${worst.leader} (${fmtVar(worst.leaderVar)})`;
+      sentence += ` sous l'effet de ${worst.leader} (${pctSigne(worst.leaderVar)})`;
     }
     sentence += '.';
     parts.push(sentence);
@@ -195,7 +200,7 @@ function buildSignals(signals: SignalDaily[], actions: ActionDaily[]): string {
     if (notable) {
       const a = notable.action!;
       parts.push(
-        `À surveiller : ${a.code} combine un signal BUY avec une hausse de ${fmtVar(a.variation_pct ?? 0)} ce jour.`
+        `À surveiller : ${a.code} combine un signal BUY avec une hausse de ${pctAbs(a.variation_pct ?? 0)} ce jour.`
       );
     }
   }
