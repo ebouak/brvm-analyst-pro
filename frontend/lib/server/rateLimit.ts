@@ -32,12 +32,13 @@ export async function checkRateLimit(opts: RateLimitOptions): Promise<{ allowed:
   const admin = createSupabaseClient(url, key, { auth: { persistSession: false } });
   const windowStart = new Date(Date.now() - opts.windowSeconds * 1000).toISOString();
 
-  // Minimisation : purge les lignes hors fenêtre pour cette route+IP avant de compter.
+  // Minimisation : purge TOUTES les lignes hors fenêtre de la route, pas
+  // seulement celles de cet appelant. Purger par IP laissait en base, sans
+  // limite de durée, l'IP de quiconque ne revenait jamais.
   await admin
     .from('rate_limit_hits')
     .delete()
     .eq('route', opts.route)
-    .eq('ip', opts.ip)
     .lt('created_at', windowStart);
 
   const { count, error: countError } = await admin
