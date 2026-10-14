@@ -36,8 +36,11 @@ export interface Brief {
 
 /** Variation signée au format français : « +1,95 % », « −0,26 % ». */
 function pctSigne(v: number, d = 2): string {
-  const s = v > 0 ? '+' : v < 0 ? '−' : '';
-  return `${s}${fmtNumber(Math.abs(v), d)} %`;
+  const abs = fmtNumber(Math.abs(v), d);
+  const nul = Number(Math.abs(v).toFixed(d)) === 0;
+  const s = nul ? '' : v > 0 ? '+' : '−';
+  return `${s}${abs} %`;
+}${fmtNumber(Math.abs(v), d)} %`;
 }
 
 /** Valeur absolue, pour les phrases dont le verbe porte déjà le sens. */

@@ -35,6 +35,12 @@ describe('generateBrief — variations', () => {
     expect(s).toContain(`est stable (+${fmtNumber(0.15, 2)} %)`);
   });
 
+  it('variation quasi nulle : « 0,00 % » sans signe', () => {
+    const s = generateBrief(entree({ indices: { brvm30: brvm30(0.001), brvmc: null } })).summary;
+    expect(s).toContain(`est stable (${fmtNumber(0, 2)} %)`);
+    expect(s).not.toContain(`+${fmtNumber(0, 2)}`);
+  });
+
   it('secteur en recul : « recule de 0,85 % », sans signe moins', () => {
     const r = generateBrief(entree({ topSectorPerfs: [{ secteur: 'Services publics', varPct: -0.85, count: 3 }] }));
     expect(r.sectors).toContain(`recule de ${fmtNumber(0.85, 2)} %`);
@@ -53,7 +59,7 @@ describe('generateBrief — valeur échangée', () => {
   it('sans résumé de séance (séance en cours) : aucun « 0 FCFA », aucun « -100% »', () => {
     const s = generateBrief(entree({ valeurTransactions: null, valeurTransactionsPrev: null })).summary;
     expect(s).not.toContain('FCFA');
-    expect(s).not.toContain('100');
+    expect(s).not.toMatch(/100\s?%/);
   });
 
   it('sans valeur de la veille : la valeur du jour sans comparaison', () => {
