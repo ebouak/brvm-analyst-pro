@@ -45,4 +45,16 @@ describe('dureeTheorique', () => {
     expect(dureeTheorique(1_000_000, 8_000_000, 1.5)).toEqual({ seances: null, alerte: false });
     expect(dureeTheorique(1_000_000, 8_000_000, Number.NaN)).toEqual({ seances: null, alerte: false });
   });
+
+  it('overflow : ratio non fini devient non mesuré', () => {
+    expect(dureeTheorique(1e300, 1e-300)).toEqual({ seances: null, alerte: false });
+  });
+
+  it('participation personnalisée valide : 0.5 → 50M / 4M = 12,5 → 13', () => {
+    expect(dureeTheorique(50_000_000, 8_000_000, 0.5)).toEqual({ seances: 13, alerte: false });
+  });
+
+  it("multiple exact avec participation non défaut : 48M / (8M × 0,3) = 20", () => {
+    expect(dureeTheorique(48_000_000, 8_000_000, 0.3)).toEqual({ seances: 20, alerte: false });
+  });
 });

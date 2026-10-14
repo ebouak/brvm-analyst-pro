@@ -30,6 +30,11 @@ export function dureeTheorique(
   ) {
     return { ...NON_MESUREE };
   }
-  const seances = Math.max(1, Math.ceil(valeurPosition / (valeurMoyenne30j * participation)));
+  const ratio = valeurPosition / (valeurMoyenne30j * participation);
+  if (!Number.isFinite(ratio)) {
+    return { ...NON_MESUREE };
+  }
+  // Marge contre l'arrondi flottant : 20,000000000000004 ne doit pas devenir 21
+  const seances = Math.max(1, Math.ceil(ratio - 1e-9));
   return { seances, alerte: seances > SEUIL_ALERTE_SEANCES };
 }
