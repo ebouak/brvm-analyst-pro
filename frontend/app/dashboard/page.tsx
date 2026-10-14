@@ -9,7 +9,8 @@ import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
-import { resolveLayout, type WidgetKey, type DashboardLayout } from '@/lib/dashboard/widgets';
+import { chargerProfil } from '@/lib/dashboard/profil';
+import { resolveLayout, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
@@ -71,7 +72,7 @@ async function getData() {
     .limit(1);
   const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
-  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }] =
+  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }, { data: summaryRows }] =
     await Promise.all([
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
       supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastIdxDate),
@@ -88,7 +89,16 @@ async function getData() {
             .select('valeur_echangee, variation_pct')
             .eq('date_marche', prevDate)
         : Promise.resolve({ data: [] }),
+      // Résumés de CES deux séances (et non « les deux derniers ») : un résumé
+      // d'une autre séance comparé aux cours du jour serait incohérent.
+      supabase
+        .from('brvm_market_summary')
+        .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
+        .in('date_marche', prevDate ? [lastDate, prevDate] : [lastDate]),
     ]);
+  const resumes = (summaryRows ?? []) as MarketSummaryRow[];
+  const summary = resumes.find((r) => r.date_marche === lastDate) ?? null;
+  const summaryPrev = prevDate ? resumes.find((r) => r.date_marche === prevDate) ?? null : null;
 
   const prevRows = (prevActions ?? []) as { valeur_echangee: number | null; variation_pct: number | null }[];
   const prevValeur = prevDate
@@ -120,7 +130,8 @@ async function getData() {
     },
     actions: typedActions,
     signals: typedSignals,
-    volumePrev: prevValeur,
+    valeurTransactions: summary?.valeur_transactions ?? null,
+    valeurTransactionsPrev: summaryPrev?.valeur_transactions ?? null,
     topSectorPerfs,
   });
 
@@ -191,15 +202,6 @@ async function getData() {
   }
   // reverse: on a trié desc → on remet chronologique
   for (const k of Object.keys(sparklines)) sparklines[k]!.reverse();
-
-  // Totaux de séance réels (valeur des transactions, capitalisations) — 2 dernières pour le delta
-  const { data: summaryRows } = await supabase
-    .from('brvm_market_summary')
-    .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
-    .order('date_marche', { ascending: false })
-    .limit(2);
-  const summary = (summaryRows?.[0] ?? null) as MarketSummaryRow | null;
-  const summaryPrev = (summaryRows?.[1] ?? null) as MarketSummaryRow | null;
 
   // Ticker permanent : actions + obligations de la dernière séance disponible
   const { data: oblRows } = await supabase
@@ -297,24 +299,29 @@ export default async function Dashboard() {
   let favoriteSectors: string[] = [];
   let dashboardLayout: DashboardLayout | null = null;
   let triggeredAlerts = 0;
+  let profil: Profil = 'debutant';
   // Un visiteur non connecté est traité comme non-premium. Les sections premium
   // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
   let isPremium = false;
   if (user) {
-    const { data: prof } = await supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle();
+    const [{ data: prof }, { count }, profilCharge] = await Promise.all([
+      supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle(),
+      supa
+        .from('alerts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('actif', true)
+        .not('declenchee_le', 'is', null),
+      chargerProfil(supa, user.id),
+    ]);
     favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
     dashboardLayout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
     isPremium = Boolean(prof?.is_premium);
 
-    const { count } = await supa
-      .from('alerts')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('actif', true)
-      .not('declenchee_le', 'is', null);
     triggeredAlerts = count ?? 0;
+    profil = profilCharge;
   }
-  const layout = resolveLayout(dashboardLayout);
+  const layout = resolveLayout(dashboardLayout, profil);
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {

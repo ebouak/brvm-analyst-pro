@@ -20,22 +20,45 @@ export const WIDGETS: WidgetMeta[] = [
   { key: 'actus', label: 'Actualités', desc: 'Fil d’actualités BRVM' },
 ];
 
-export const DEFAULT_ORDER: WidgetKey[] = WIDGETS.map((w) => w.key);
+/** Profil déduit des positions (spec §2) : rien n'est stocké. */
+export type Profil = 'actif' | 'debutant';
+
+/** Au moins une position détenue → investisseur actif. */
+export function deduireProfil(nbPositions: number): Profil {
+  return nbPositions > 0 ? 'actif' : 'debutant';
+}
+
+/** Débutant : l'ordre historique, la séance d'abord. */
+export const ORDRE_DEBUTANT: WidgetKey[] = WIDGETS.map((w) => w.key);
+
+/** Actif : son portefeuille d'abord, puis la séance dans l'ordre historique. */
+export const ORDRE_ACTIF: WidgetKey[] = ['portefeuille', ...ORDRE_DEBUTANT.filter((k) => k !== 'portefeuille')];
+
+/** Compatibilité : l'ordre par défaut historique est celui du débutant. */
+/** @deprecated Utiliser ORDRE_DEBUTANT ou ordreParDefaut(profil). Conservé pour compatibilité. */
+export const DEFAULT_ORDER: WidgetKey[] = ORDRE_DEBUTANT;
+
+export function ordreParDefaut(profil: Profil): WidgetKey[] {
+  return profil === 'actif' ? ORDRE_ACTIF : ORDRE_DEBUTANT;
+}
 const VALID = new Set<string>(DEFAULT_ORDER);
 
 export interface DashboardLayout { order?: string[]; hidden?: string[] }
 
 /**
- * Résout l'ordre + la visibilité des widgets à partir du layout sauvegardé.
+ * Résout l'ordre + la visibilité des widgets.
+ * - Layout sauvegardé : il l'emporte TOUJOURS sur le profil (spec §2).
+ * - Sinon : l'ordre par défaut du profil.
  * Tolérant : ignore les clés inconnues, ajoute en fin les widgets nouveaux
  * (apparus après la sauvegarde) tant qu'ils ne sont pas masqués.
  * Retourne la liste ORDONNÉE des widgets VISIBLES.
  */
-export function resolveLayout(saved: DashboardLayout | null | undefined): WidgetKey[] {
+export function resolveLayout(saved: DashboardLayout | null | undefined, profil: Profil = 'debutant'): WidgetKey[] {
+  const defaut = ordreParDefaut(profil);
   const hidden = new Set((saved?.hidden ?? []).filter((k) => VALID.has(k)));
   const savedOrder = (saved?.order ?? []).filter((k) => VALID.has(k));
   const seen = new Set(savedOrder);
   // Widgets connus absents du layout sauvegardé → ajoutés à la fin (ordre par défaut).
-  const merged = [...savedOrder, ...DEFAULT_ORDER.filter((k) => !seen.has(k))];
+  const merged = [...savedOrder, ...defaut.filter((k) => !seen.has(k))];
   return merged.filter((k) => !hidden.has(k)) as WidgetKey[];
 }
