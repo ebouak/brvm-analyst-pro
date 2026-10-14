@@ -8,6 +8,7 @@ import { courseProgress } from '@/lib/academy/progressCalc';
 import LessonContent from './LessonContent';
 import ToolsPanel from './ToolsPanel';
 import SlideDeck from './SlideDeck';
+import LessonVideo from './LessonVideo';
 
 /**
  * Shell d'apprentissage type Coursera :
@@ -17,9 +18,12 @@ import SlideDeck from './SlideDeck';
 export default function AcademyShell({
   data,
   initialLesson,
+  videos = [],
 }: {
   data: LearnData;
   initialLesson: number;
+  /** Numéros (1-indexés) des leçons qui ont une version vidéo. */
+  videos?: number[];
 }) {
   const lessons = data.content.lessons;
   const clamp = useCallback(
@@ -167,6 +171,7 @@ export default function AcademyShell({
 
         {/* ── Leçon ── */}
         <main className="min-w-0">
+          {videos.includes(idx + 1) && <LessonVideo key={`video-${idx}`} slug={data.slug} numero={idx + 1} />}
           <LessonContent
             key={idx}
             lesson={lesson}

@@ -10,7 +10,9 @@
     "render:showreel": "node showreel-voix.mjs && node showreel-audio.mjs && remotion render index.ts showreel out/westbourse-showreel.mp4 --codec h264 --crf 18",
     "voix:showreel": "node showreel-voix.mjs",
     "seance": "node seance-prep.mjs && remotion render index.ts seance out/westbourse-seance-anime.mp4 --codec h264 --crf 20",
-    "render:ecosysteme": "node ecosysteme-voix.mjs && remotion render index.ts ecosysteme out/westbourse-ecosysteme-umoa.mp4 --codec h264 --crf 20"
+    "render:ecosysteme": "node ecosysteme-voix.mjs && remotion render index.ts ecosysteme out/westbourse-ecosysteme-umoa.mp4 --codec h264 --crf 20",
+    "academy:publie": "node academy-publie.mjs n1-l1",
+    "academy": "node academy-voix.mjs n1-l1 && remotion render index.ts academy-lecon out/academy-n1-l1.mp4 --codec h264 --crf 20 --props={\"lecon\":\"n1-l1\",\"section\":null}"
   },
   "dependencies": {
     "@remotion/cli": "4.0.236",
