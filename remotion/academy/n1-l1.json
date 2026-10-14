@@ -1,6 +1,8 @@
 {
   "_": "Academy · Niveau 1 · Leçon 1, en entier. Source unique : textes affichés ET voix off, lus par academy-lecon.tsx et academy-voix.mjs. Chiffres repris de la leçon publiée (contenu relu le 2026-10-14 sur /formations/academy/academy-niveau-1-initiation?lecon=1), recoupés avec la base le même jour : indices du 17.07.2026 confirmés (BRVMC 478,53 ; BRVM30 227,70). UNE EXCEPTION : la leçon écrit « En 2025, Sonatel a versé 1 700 FCFA net » ; la base porte 1 655 FCFA pour l'exercice 2024 (payé en 2025) et 1 740 FCFA pour l'exercice 2025 (Bulletin officiel de la cote, payé le 26.05.2026). La vidéo montre ce dernier, sourcé et daté. La courbe du Composite vient de brvm_indices_daily (code BRVMC), seule période en base : 26.05 → 17.07.2026. Les nombres de la voix sont écrits en toutes lettres pour que la synthèse ne les lise pas de travers.",
   "voixTts": "fr-FR-DeniseNeural",
+  "slug": "academy-niveau-1-initiation",
+  "numero": 1,
   "cours": "Niveau 1 · Initiation à la BRVM",
   "lecon": "Leçon 1",
   "titreLecon": "Qu’est-ce que la BRVM et comment ça marche ?",

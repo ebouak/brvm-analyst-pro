@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { loadCourseForLearning } from '@/lib/academy/learn';
+import { videosDisponibles } from '@/lib/academy/videos';
 import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import AcademyShell from '@/components/academy/AcademyShell';
@@ -54,12 +55,12 @@ export default async function AcademyCoursePage({
     );
   }
 
-  const data = await loadCourseForLearning(params.slug);
+  const [data, videos] = await Promise.all([loadCourseForLearning(params.slug), videosDisponibles(params.slug)]);
   if (!data) notFound();
 
   // ?lecon=N est 1-indexé côté URL (humain) ; le shell clamp les bornes.
   const n = Number.parseInt(searchParams.lecon ?? '1', 10);
   const initialLesson = Number.isFinite(n) ? n - 1 : 0;
 
-  return <AcademyShell data={data} initialLesson={initialLesson} />;
+  return <AcademyShell data={data} initialLesson={initialLesson} videos={videos} />;
 }
