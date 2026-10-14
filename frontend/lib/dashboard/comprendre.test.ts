@@ -75,8 +75,13 @@ describe('comprendreSeance', () => {
   it('composite : variationPct 0.1 → quasi stable with +', () => {
     const t = comprendreSeance({ ...seance, composite: { valeur: 545.46, variationPct: 0.1 } })
       .find((x) => x.id === 'composite')!.texte;
-    expect(t).toContain('quasi stable');
-    expect(t).toContain('+');
+    expect(t).toBe(`Le BRVM Composite est resté quasi stable (+${fmtNumber(0.1, 2)} %) à ${fmtNumber(545.46, 2)} points.`);
+  });
+
+  it('composite : variationPct -0.1 → quasi stable with −', () => {
+    const t = comprendreSeance({ ...seance, composite: { valeur: 545.46, variationPct: -0.1 } })
+      .find((x) => x.id === 'composite')!.texte;
+    expect(t).toBe(`Le BRVM Composite est resté quasi stable (−${fmtNumber(0.1, 2)} %) à ${fmtNumber(545.46, 2)} points.`);
   });
 
   it('composite : variationPct 0.5 → progressé', () => {

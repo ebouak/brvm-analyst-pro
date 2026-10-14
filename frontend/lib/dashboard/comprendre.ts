@@ -26,7 +26,6 @@ export interface Constat {
   sens: string;
 }
 
-const fini = (...xs: number[]) => xs.every((x) => Number.isFinite(x));
 const pctAbs = (v: number, d = 2) => `${fmtNumber(Math.abs(v), d)} %`;
 const pctSigne = (v: number, d = 2) => {
   const r = Number(v.toFixed(d));
@@ -56,7 +55,7 @@ export function comprendreSeance(m: MetriquesSeance): Constat[] {
     });
   }
 
-  if (m.composite && fini(m.composite.valeur, m.composite.variationPct)) {
+  if (m.composite && Number.isFinite(m.composite.valeur) && Number.isFinite(m.composite.variationPct)) {
     const { valeur, variationPct: v } = m.composite;
     const r = Number(v.toFixed(2));
     let texte: string;
@@ -74,7 +73,7 @@ export function comprendreSeance(m: MetriquesSeance): Constat[] {
     });
   }
 
-  if (m.secteurMeneur && fini(m.secteurMeneur.variationPct) && m.secteurMeneur.nom) {
+  if (m.secteurMeneur && Number.isFinite(m.secteurMeneur.variationPct) && m.secteurMeneur.nom) {
     const { nom, variationPct: v } = m.secteurMeneur;
     const r = Number(v.toFixed(2));
     let texte: string;
@@ -92,10 +91,12 @@ export function comprendreSeance(m: MetriquesSeance): Constat[] {
     });
   }
 
-  if (fini(m.valeurEchangee) && m.valeurEchangee > 0) {
-    let texte = `${fmtFcfa(m.valeurEchangee)} FCFA ont été échangés`;
-    if (fini(m.valeurEchangeeVeille) && m.valeurEchangeeVeille > 0) {
-      const d = (m.valeurEchangee / m.valeurEchangeeVeille - 1) * 100;
+  const ve = m.valeurEchangee;
+  const vv = m.valeurEchangeeVeille;
+  if (ve != null && Number.isFinite(ve) && ve > 0) {
+    let texte = `${fmtFcfa(ve)} FCFA ont été échangés`;
+    if (vv != null && Number.isFinite(vv) && vv > 0) {
+      const d = (ve / vv - 1) * 100;
       texte += Math.abs(d) < 0.05
         ? ', autant que la séance précédente'
         : `, en ${d > 0 ? 'hausse' : 'baisse'} de ${pctAbs(d, 1)} sur la séance précédente`;
@@ -107,7 +108,7 @@ export function comprendreSeance(m: MetriquesSeance): Constat[] {
     });
   }
 
-  if (m.plusEchangee && fini(m.plusEchangee.valeur) && m.plusEchangee.valeur > 0 && m.plusEchangee.nom && m.plusEchangee.code) {
+  if (m.plusEchangee && Number.isFinite(m.plusEchangee.valeur) && m.plusEchangee.valeur > 0 && m.plusEchangee.nom && m.plusEchangee.code) {
     out.push({
       id: 'vedette',
       texte: `La valeur la plus échangée a été ${m.plusEchangee.nom} (${m.plusEchangee.code}), avec ${fmtFcfa(m.plusEchangee.valeur)} FCFA.`,
