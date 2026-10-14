@@ -638,6 +638,11 @@ export default async function Dashboard() {
                 <span className="min-w-0 break-words text-muted">{d.motif}</span>
               </span>
             ))}
+            {triggeredAlerts > detailAlertes.length && (
+              <span className="text-muted">
+                · + {triggeredAlerts - detailAlertes.length} autre{triggeredAlerts - detailAlertes.length > 1 ? 's' : ''}
+              </span>
+            )}
             <span className="ml-auto whitespace-nowrap">Voir les alertes →</span>
           </Link>
         )}

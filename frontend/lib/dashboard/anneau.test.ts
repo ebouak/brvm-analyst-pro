@@ -28,4 +28,9 @@ describe('partsAnneau', () => {
       expect(r[r.length - 1].fin).toBe(1);
     }
   });
+  it('plusieurs lots de la même valeur : une seule part', () => {
+    const r = partsAnneau([{ code: 'SNTS', valeur: 100 }, { code: 'SNTS', valeur: 50 }, { code: 'ORAC', valeur: 50 }]);
+    expect(r.map((x) => x.code)).toEqual(['SNTS', 'ORAC']);
+    expect(r[0]!.part).toBeCloseTo(0.75, 9);
+  });
 });

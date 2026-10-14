@@ -11,8 +11,14 @@ export interface PartAnneau {
  * Les parts somment à 1 ; `debut`/`fin` sont des fractions cumulées.
  */
 export function partsAnneau(lignes: { code: string; valeur: number }[], maxParts = 5): PartAnneau[] {
-  const valides = lignes
-    .filter((l) => Number.isFinite(l.valeur) && l.valeur > 0)
+  // Une valeur détenue en plusieurs lots (plusieurs lignes) ne forme qu'une part.
+  const parCode = new Map<string, number>();
+  for (const l of lignes) {
+    if (!Number.isFinite(l.valeur) || l.valeur <= 0) continue;
+    parCode.set(l.code, (parCode.get(l.code) ?? 0) + l.valeur);
+  }
+  const valides = [...parCode.entries()]
+    .map(([code, valeur]) => ({ code, valeur }))
     .sort((a, b) => b.valeur - a.valeur);
   const total = valides.reduce((s, l) => s + l.valeur, 0);
   if (total <= 0) return [];
