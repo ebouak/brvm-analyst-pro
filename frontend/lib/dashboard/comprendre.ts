@@ -26,13 +26,22 @@ export interface Constat {
   sens: string;
 }
 
+const fini = (...xs: number[]) => xs.every((x) => Number.isFinite(x));
 const pctAbs = (v: number, d = 2) => `${fmtNumber(Math.abs(v), d)} %`;
-const pctSigne = (v: number, d = 2) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${pctAbs(v, d)}`;
+const pctSigne = (v: number, d = 2) => {
+  const r = Number(v.toFixed(d));
+  return `${r > 0 ? '+' : r < 0 ? '−' : ''}${pctAbs(v, d)}`;
+};
 
 export function comprendreSeance(m: MetriquesSeance): Constat[] {
   const out: Constat[] = [];
 
-  if (m.hausses != null && m.baisses != null && m.stables != null) {
+  if (
+    m.hausses != null && Number.isInteger(m.hausses) && m.hausses >= 0 &&
+    m.baisses != null && Number.isInteger(m.baisses) && m.baisses >= 0 &&
+    m.stables != null && Number.isInteger(m.stables) && m.stables >= 0 &&
+    (m.hausses + m.baisses + m.stables) > 0
+  ) {
     const qui =
       m.baisses > m.hausses ? 'ici, la baisse a été plus répandue que la hausse'
       : m.hausses > m.baisses ? 'ici, la hausse a été plus répandue que la baisse'
@@ -47,30 +56,45 @@ export function comprendreSeance(m: MetriquesSeance): Constat[] {
     });
   }
 
-  if (m.composite) {
+  if (m.composite && fini(m.composite.valeur, m.composite.variationPct)) {
     const { valeur, variationPct: v } = m.composite;
+    const r = Number(v.toFixed(2));
+    let texte: string;
+    if (r === 0) {
+      texte = `Le BRVM Composite est resté stable à ${fmtNumber(valeur, 2)} points.`;
+    } else if (Math.abs(v) < 0.2) {
+      texte = `Le BRVM Composite est resté quasi stable (${pctSigne(v)}) à ${fmtNumber(valeur, 2)} points.`;
+    } else {
+      texte = `Le BRVM Composite a ${v > 0 ? 'progressé' : 'reculé'} de ${pctAbs(v)} à ${fmtNumber(valeur, 2)} points.`;
+    }
     out.push({
       id: 'composite',
-      texte:
-        Math.abs(v) < 0.2
-          ? `Le BRVM Composite est resté quasi stable (${pctSigne(v)}) à ${fmtNumber(valeur, 2)} points.`
-          : `Le BRVM Composite a ${v > 0 ? 'progressé' : 'reculé'} de ${pctAbs(v)} à ${fmtNumber(valeur, 2)} points.`,
+      texte,
       sens: "L'indice résume l'ensemble des actions cotées, pondérées par leur taille : une faible variation peut cacher de forts écarts entre valeurs.",
     });
   }
 
-  if (m.secteurMeneur) {
+  if (m.secteurMeneur && fini(m.secteurMeneur.variationPct) && m.secteurMeneur.nom) {
     const { nom, variationPct: v } = m.secteurMeneur;
+    const r = Number(v.toFixed(2));
+    let texte: string;
+    if (r > 0) {
+      texte = `Le secteur ${nom} a le plus progressé (${pctSigne(v)}).`;
+    } else if (r < 0) {
+      texte = `Le secteur ${nom} a le mieux résisté (${pctSigne(v)}).`;
+    } else {
+      texte = `Le secteur ${nom} est resté stable (${pctAbs(v)}).`;
+    }
     out.push({
       id: 'secteur',
-      texte: v > 0 ? `Le secteur ${nom} a le plus progressé (${pctSigne(v)}).` : `Le secteur ${nom} a le mieux résisté (${pctSigne(v)}).`,
+      texte,
       sens: 'Les indices sectoriels montrent dans quelle partie de la cote se concentrent les mouvements.',
     });
   }
 
-  if (m.valeurEchangee != null && m.valeurEchangee > 0) {
+  if (fini(m.valeurEchangee) && m.valeurEchangee > 0) {
     let texte = `${fmtFcfa(m.valeurEchangee)} FCFA ont été échangés`;
-    if (m.valeurEchangeeVeille != null && m.valeurEchangeeVeille > 0) {
+    if (fini(m.valeurEchangeeVeille) && m.valeurEchangeeVeille > 0) {
       const d = (m.valeurEchangee / m.valeurEchangeeVeille - 1) * 100;
       texte += Math.abs(d) < 0.05
         ? ', autant que la séance précédente'
@@ -83,7 +107,7 @@ export function comprendreSeance(m: MetriquesSeance): Constat[] {
     });
   }
 
-  if (m.plusEchangee) {
+  if (m.plusEchangee && fini(m.plusEchangee.valeur) && m.plusEchangee.valeur > 0 && m.plusEchangee.nom && m.plusEchangee.code) {
     out.push({
       id: 'vedette',
       texte: `La valeur la plus échangée a été ${m.plusEchangee.nom} (${m.plusEchangee.code}), avec ${fmtFcfa(m.plusEchangee.valeur)} FCFA.`,
