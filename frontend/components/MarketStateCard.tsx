@@ -259,7 +259,7 @@ export default function MarketStateCard({
         {/* Jauge « Part des hausses » (dérivée du breadth) */}
         {sentimentScore != null && (
           <div className="border-t border-border/40 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-4">
-            <SentimentGauge score={sentimentScore} delta={sentimentDelta} />
+            <SentimentGauge score={sentimentScore} delta={sentimentDelta} hausses={stats.hausses} baisses={stats.baisses} />
           </div>
         )}
         </div>
