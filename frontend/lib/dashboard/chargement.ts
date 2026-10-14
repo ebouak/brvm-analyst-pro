@@ -112,3 +112,69 @@ export async function chargerLiquidite(sb: SupabaseClient): Promise<{ dateMarche
   if (error) return journal('liquidité', error.message);
   return { dateMarche, lignes: (data ?? []) as LiquiditeSource[] };
 }
+
+export type SerieIndice = { date: string; valeur: number }[];
+
+/** 30 dernières séances de BRVMC et BRVM30 jusqu'à `jusquA` inclus, en ordre chronologique. */
+export async function chargerTrajectoires(sb: SupabaseClient, jusquA: string, n = 30): Promise<Record<'BRVMC' | 'BRVM30', SerieIndice> | null> {
+  const { data, error } = await sb
+    .from('brvm_indices_daily')
+    .select('code, date_marche, valeur')
+    .in('code', ['BRVMC', 'BRVM30'])
+    .lte('date_marche', jusquA)
+    .not('valeur', 'is', null)
+    .order('date_marche', { ascending: false })
+    .limit(n * 2 + 10);
+  if (error) return journal('trajectoires', error.message);
+  const out: Record<'BRVMC' | 'BRVM30', SerieIndice> = { BRVMC: [], BRVM30: [] };
+  for (const r of (data ?? []) as { code: 'BRVMC' | 'BRVM30'; date_marche: string; valeur: number }[]) {
+    const s = out[r.code];
+    if (s && s.length < n && Number.isFinite(Number(r.valeur))) s.push({ date: r.date_marche, valeur: Number(r.valeur) });
+  }
+  out.BRVMC.reverse(); out.BRVM30.reverse();
+  return out;
+}
+
+/** Nombre de signaux par type pour une séance (moteur de signaux). */
+export async function chargerCompteSignaux(sb: SupabaseClient, date: string): Promise<Record<string, number> | null> {
+  const { data, error } = await sb.from('signals_daily').select('signal').eq('date_marche', date).limit(500);
+  if (error) return journal('signaux (compte)', error.message);
+  const c: Record<string, number> = {};
+  for (const r of (data ?? []) as { signal: string }[]) c[r.signal] = (c[r.signal] ?? 0) + 1;
+  return c;
+}
+
+export interface Actualite { titre: string; date_publication: string; source: string | null; source_url: string | null }
+
+export async function chargerActualites(sb: SupabaseClient, aujourdhui: string, n = 5): Promise<Actualite[] | null> {
+  const { data, error } = await sb
+    .from('brvm_news')
+    .select('titre, date_publication, source, source_url')
+    .not('hidden', 'is', true)
+    .lte('date_publication', aujourdhui)
+    .order('date_publication', { ascending: false })
+    .limit(n);
+  if (error) return journal('actualités', error.message);
+  return (data ?? []) as Actualite[];
+}
+
+export interface IndiceAfricain { code: string; libelle: string | null; place: string | null; date_marche: string; valeur: number | null; variation_pct: number | null }
+
+export async function chargerAfrique(sb: SupabaseClient): Promise<IndiceAfricain[] | null> {
+  const { data, error } = await sb
+    .from('african_indices_daily')
+    .select('code, libelle, place, date_marche, valeur, variation_pct')
+    .order('date_marche', { ascending: false })
+    .limit(30);
+  if (error) return journal('indices africains', error.message);
+  const derniers = new Map<string, IndiceAfricain>();
+  for (const r of (data ?? []) as IndiceAfricain[]) if (!derniers.has(r.code)) derniers.set(r.code, r);
+  return [...derniers.values()];
+}
+
+/** Nombre de motifs détectés pour une séance (le détail reste premium). */
+export async function chargerCompteMotifs(sb: SupabaseClient, date: string): Promise<number | null> {
+  const { count, error } = await sb.from('brvm_pattern_scores').select('*', { count: 'exact', head: true }).eq('date_marche', date);
+  if (error) return journal('motifs (compte)', error.message);
+  return count ?? 0;
+}
