@@ -57,4 +57,11 @@ describe('profil', () => {
     expect(resolveLayout(null)).toEqual(DEFAULT_ORDER);
     expect(DEFAULT_ORDER).toEqual(ORDRE_DEBUTANT);
   });
+
+  it('layout partiel + profil actif : ordre sauvegardé, puis le défaut du profil', () => {
+    const r = resolveLayout({ order: ['actus'], hidden: ['indices'] }, 'actif');
+    expect(r[0]).toBe('actus');
+    expect(r[1]).toBe('portefeuille');
+    expect(r).not.toContain('indices');
+  });
 });

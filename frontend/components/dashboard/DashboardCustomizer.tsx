@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { WIDGETS, DEFAULT_ORDER, resolveLayout, type WidgetKey, type DashboardLayout } from '@/lib/dashboard/widgets';
+import { WIDGETS, ordreParDefaut, resolveLayout, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
 
 const META = new Map(WIDGETS.map((w) => [w.key, w]));
 
-export default function DashboardCustomizer({ initial }: { initial: DashboardLayout | null }) {
+export default function DashboardCustomizer({ initial, profil }: { initial: DashboardLayout | null; profil: Profil }) {
   // État de travail : ordre complet (visibles + masqués) + ensemble masqué.
-  const initialVisible = resolveLayout(initial);
-  const initialHidden = DEFAULT_ORDER.filter((k) => !initialVisible.includes(k));
+  const initialVisible = resolveLayout(initial, profil);
+  const initialHidden = ordreParDefaut(profil).filter((k) => !initialVisible.includes(k));
   const [order, setOrder] = useState<WidgetKey[]>([...initialVisible, ...initialHidden]);
   const [hidden, setHidden] = useState<Set<WidgetKey>>(new Set(initialHidden));
   const [saving, setSaving] = useState(false);
@@ -33,7 +33,7 @@ export default function DashboardCustomizer({ initial }: { initial: DashboardLay
     setMsg(r.ok ? '✓ Disposition enregistrée' : 'Échec de l’enregistrement');
   }
   function reset() {
-    setOrder([...DEFAULT_ORDER]); setHidden(new Set()); setMsg(null);
+    setOrder([...ordreParDefaut(profil)]); setHidden(new Set()); setMsg(null);
   }
 
   return (

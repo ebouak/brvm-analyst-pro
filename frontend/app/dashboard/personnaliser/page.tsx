@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { SectionHeader } from '@/components/ui/premium';
 import DashboardCustomizer from '@/components/dashboard/DashboardCustomizer';
+import { chargerProfil } from '@/lib/dashboard/profil';
 import type { DashboardLayout } from '@/lib/dashboard/widgets';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,7 @@ export default async function CustomizeDashboardPage() {
 
   const { data: prof } = await sb.from('profiles').select('preferences').eq('id', user.id).maybeSingle();
   const layout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
+  const profil = await chargerProfil(sb, user.id);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -23,7 +25,7 @@ export default async function CustomizeDashboardPage() {
         title="Personnaliser"
         subtitle="Activez, désactivez et réordonnez vos widgets. Le ticker reste toujours visible."
       />
-      <DashboardCustomizer initial={layout} />
+      <DashboardCustomizer initial={layout} profil={profil} />
       <Link href="/dashboard" className="inline-block text-xs text-accent hover:underline">← Retour au tableau de bord</Link>
     </div>
   );

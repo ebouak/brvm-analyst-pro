@@ -9,7 +9,8 @@ import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
 import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
-import { resolveLayout, type WidgetKey, type DashboardLayout } from '@/lib/dashboard/widgets';
+import { chargerProfil } from '@/lib/dashboard/profil';
+import { resolveLayout, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
@@ -298,6 +299,7 @@ export default async function Dashboard() {
   let favoriteSectors: string[] = [];
   let dashboardLayout: DashboardLayout | null = null;
   let triggeredAlerts = 0;
+  let profil: Profil = 'debutant';
   // Un visiteur non connecté est traité comme non-premium. Les sections premium
   // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
   let isPremium = false;
@@ -314,8 +316,9 @@ export default async function Dashboard() {
       .eq('actif', true)
       .not('declenchee_le', 'is', null);
     triggeredAlerts = count ?? 0;
+    profil = await chargerProfil(supa, user.id);
   }
-  const layout = resolveLayout(dashboardLayout);
+  const layout = resolveLayout(dashboardLayout, profil);
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
   if (!lastDate) {
