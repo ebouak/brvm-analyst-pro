@@ -56,7 +56,7 @@ export function performanceJour(
 
   // C: une donnée de marché manquante ou inexploitable annule le calcul, on nomme le code.
   const manquante = actives.find((l) => !estComplete(l));
-  if (manquante) return vide(`cours du jour absent pour ${manquante.code}`);
+  if (manquante) return vide(`donnée de marché indisponible pour ${manquante.code}`);
   const completes = actives.filter(estComplete);
 
   const dates = new Set(completes.map((l) => l.dateMarche));

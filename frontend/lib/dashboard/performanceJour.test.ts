@@ -37,6 +37,7 @@ describe('performanceJour', () => {
     const r = performanceJour([lignes[0]!, { ...lignes[1]!, dateMarche: '2026-10-09' }], { variationPct: 0, dateMarche: '2026-10-12' });
     expect(r.portefeuillePct).toBeNull();
     expect(r.comparable).toBe(false);
+    expect(r.raison).toBe('positions cotées à des séances différentes');
   });
 
   it('aucune position : rien à calculer', () => {
@@ -100,5 +101,32 @@ describe('performanceJour', () => {
     expect(r.comparable).toBe(false);
     expect(r.indicePct).toBeNull();
     expect(r.raison).toBe('indice indisponible');
+  });
+
+  it('donnée manquante ET séances différentes : la raison est la donnée manquante', () => {
+    const r = performanceJour(
+      [
+        { ...lignes[0]!, dateMarche: '2026-10-09' },
+        lignes[1]!,
+        { code: 'BOAN', quantite: 10, cours: null, variationPct: null, dateMarche: null },
+      ],
+      indiceOk,
+    );
+    expect(r.portefeuillePct).toBeNull();
+    expect(r.raison).toContain('BOAN');
+  });
+
+  it('indice sans date : non comparable, indice indisponible', () => {
+    const r = performanceJour(lignes, { variationPct: -0.26, dateMarche: null });
+    expect(r.comparable).toBe(false);
+    expect(r.raison).toBe('indice indisponible');
+  });
+
+  it('cours nul ou négatif : rien n est calculé, la raison nomme le code', () => {
+    for (const cours of [0, -10]) {
+      const r = performanceJour([...lignes, { code: 'ZZZZ', quantite: 5, cours, variationPct: 1, dateMarche: '2026-10-12' }], indiceOk);
+      expect(r.portefeuillePct).toBeNull();
+      expect(r.raison).toContain('ZZZZ');
+    }
   });
 });
