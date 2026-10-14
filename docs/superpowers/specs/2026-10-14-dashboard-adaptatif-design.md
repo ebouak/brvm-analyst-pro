@@ -353,3 +353,37 @@ session de l'utilisateur.
   `lib/dashboard/comprendre.ts`) ; `fmtFcfa` émet un « - » ASCII alors que les
   pourcentages utilisent « − » (U+2212). Avant d'afficher `variationFcfa`,
   regrouper ces aides dans `lib/format.ts` avec un montant FCFA signé.
+
+## 12. Refonte visuelle selon la maquette (décision du 2026-10-14)
+
+Question de l'utilisateur après mise en production : « pourquoi la version
+finale ne correspond ni à l'artefact ni à l'image cible ». Réponse : le §1
+excluait la refonte visuelle ; seuls l'ordre et les blocs avaient été livrés,
+dans l'habillage existant. **Décision : la production suit la maquette**
+(https://claude.ai/artifact/4ctBnG2srfNZhBnYBjeRwC), avec les jetons du site.
+
+- **Surface unique à filets** : plus de cartes arrondies empilées. Chaque
+  rangée est une grille de 12 colonnes séparée par un filet ; les blocs d'une
+  rangée sont séparés par un filet vertical (empilés sous `lg`).
+- **Barre d'état** : titre, date de séance, pastille d'état de séance
+  (`computeMarketPhase`, remplace les quatre cartes — conforme au §9),
+  fraîcheur des cours, liens. Le fil d'actualités défilant disparaît (les
+  actualités ont leur bloc).
+- **`etat` → récit d'ouverture** : titre tiré des chiffres (« Séance en repli :
+  22 baisses pour 15 hausses »), chapô (Composite, secteur meneur, valeur
+  échangée face à la veille), « Poser une question sur la séance », et six
+  chiffres (BRVM Composite, BRVM 30, BRVM Prestige, valeur échangée,
+  capitalisation actions, titres échangés). Chaque phrase n'existe que si sa
+  donnée existe.
+- **`seance`** : trajectoire des indices sur 30 séances (bascule Composite /
+  BRVM 30, point bas annoté) + largeur du marché et moteur de signaux
+  (« le moteur s'abstient » quand aucun signal ne franchit le seuil).
+- **`indices`** : plus fortes hausses et baisses avec tendance sur 20 séances,
+  indices sectoriels en barres divergentes autour de zéro.
+- **`signaux`** : « Ce que dit la séance » (verrou `lecture_seance` inchangé) +
+  signaux récents (verrou premium inchangé).
+- **`actus`** : actualités, motifs en séance (premium), Afrique · vue régionale
+  (données anciennes signalées dans la forme). Ces deux dernières n'étaient
+  plus des sections fixes : elles rejoignent la rangée.
+- Les blocs du plan 2 gardent leur contenu ; leur cadre devient plat.
+

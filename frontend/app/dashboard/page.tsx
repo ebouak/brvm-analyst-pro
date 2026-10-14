@@ -4,51 +4,46 @@ import { createClient } from '@/lib/supabase/server';
 import FreshnessBadge from '@/components/FreshnessBadge';
 import { computeFreshness } from '@/lib/freshness';
 import { loadFreshnessInputs } from '@/lib/freshness/queries';
-import NewsTicker from '@/components/NewsTicker';
-import MarketSessionBanner from '@/components/landing/MarketSessionBanner';
-import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard';
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
 import { chargerProfil } from '@/lib/dashboard/profil';
-import { resolveLayout, grouperEnRangees, classeRangee, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
+import { resolveLayout, grouperEnRangees, classeRangee, classeCellule, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
 import type { PortfolioState } from '@/lib/portfolio/derive';
 import { construireAgenda, plusJours, HORIZON_JOURS } from '@/lib/dashboard/agenda';
 import { performanceJour } from '@/lib/dashboard/performanceJour';
-import { metriquesDepuisSeance, estSeanceClose } from '@/lib/dashboard/metriquesSeance';
+import { metriquesDepuisSeance, estSeanceClose, INDICES_SECTORIELS } from '@/lib/dashboard/metriquesSeance';
 import { preparerPublications } from '@/lib/dashboard/publications';
 import { detaillerAlertes, depuisAlertesRecentes, ALERTES_RECENTES_JOURS, type AlerteDeclenchee } from '@/lib/dashboard/alertes';
 import { lignesPerfDepuis, variationsDuJour } from '@/lib/dashboard/portefeuilleBloc';
-import { chargerPortefeuille, chargerDividendes, chargerFermetures, chargerPublications, chargerLiquidite } from '@/lib/dashboard/chargement';
+import { chargerPortefeuille, chargerDividendes, chargerFermetures, chargerPublications, chargerLiquidite, chargerTrajectoires, chargerCompteSignaux, chargerActualites, chargerAfrique, chargerCompteMotifs } from '@/lib/dashboard/chargement';
+import { titreSeance, chapoSeance } from '@/lib/dashboard/recit';
+import Ouverture, { fmtIndice, fmtMd, type Chiffre } from '@/components/dashboard/surface/Ouverture';
+import { GrilleInterne, Cellule, Bloc, TeteBloc } from '@/components/dashboard/surface/Grille';
+import Trajectoire from '@/components/dashboard/surface/Trajectoire';
+import LargeurMoteur from '@/components/dashboard/surface/LargeurMoteur';
+import Mouvements from '@/components/dashboard/surface/Mouvements';
+import Secteurs from '@/components/dashboard/surface/Secteurs';
+import SignauxRecents from '@/components/dashboard/surface/SignauxRecents';
+import Actualites from '@/components/dashboard/surface/Actualites';
+import Motifs from '@/components/dashboard/surface/Motifs';
+import Afrique from '@/components/dashboard/surface/Afrique';
+import PastilleSeance from '@/components/dashboard/surface/PastilleSeance';
 import BlocComprendre from '@/components/dashboard/blocs/BlocComprendre';
 import BlocAgenda from '@/components/dashboard/blocs/BlocAgenda';
 import BlocPublications from '@/components/dashboard/blocs/BlocPublications';
 import BlocLiquidite from '@/components/dashboard/blocs/BlocLiquidite';
 import BlocPortefeuille from '@/components/dashboard/blocs/BlocPortefeuille';
-import TopMovers from '@/components/TopMovers';
-import RecentSignalsCard from '@/components/RecentSignalsCard';
-import BriefAssistant from '@/components/dashboard/BriefAssistant';
-import KeyMetrics from '@/components/dashboard/KeyMetrics';
-import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
-import NewsFeed from '@/components/dashboard/NewsFeed';
-import MarketIndices from '@/components/dashboard/MarketIndices';
-import IntraDaySignalsWidget from '@/components/dashboard/IntraDaySignalsWidget';
-import PatternSummaryWidget from '@/components/dashboard/PatternSummaryWidget';
 import { PremiumLock } from '@/components/dashboard/PremiumLock';
-import { AfricanIndicesCard } from '@/components/AfricanIndicesCard';
 import { MacroBanner } from '@/components/MacroBanner';
-import { getWeeklyIndex } from '@/lib/dashboard/weeklyIndex';
-import { fmtFcfa, fmtDateFR } from '@/lib/format';
+import { fmtDateFR, fmtNumber } from '@/lib/format';
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
-import { generateBrief, computeTopSectorPerfs, type Brief } from '@/lib/brief';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import type { CarnetSeance as CarnetVedette } from '@/lib/carnet/commentaire';
 import { canAccess } from '@/lib/server/featureAccess';
 import {
   SectionHeader,
   EmptyStatePremium,
-  PremiumCTA,
 } from '@/components/ui/premium';
-import { BeamButton } from '@/components/ui/beam-button';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard' };
@@ -62,7 +57,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], prevValeur: null, prevBreadth: null as number | null, sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, brief: null, ticker: [] as TickerLine[] };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, ticker: [] as TickerLine[] };
 
   // Date précédente pour le delta volume
   const { data: prevDateRow } = await supabase
@@ -82,7 +77,7 @@ async function getData() {
     .limit(1);
   const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
-  const [{ data: actions }, { data: indices }, { data: signals }, { data: prevActions }, { data: summaryRows }] =
+  const [{ data: actions }, { data: indices }, { data: signals }, { data: summaryRows }] =
     await Promise.all([
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
       supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastIdxDate),
@@ -93,12 +88,6 @@ async function getData() {
         .neq('signal', 'HOLD')
         .order('confiance', { ascending: false })
         .limit(6),
-      prevDate
-        ? supabase
-            .from('brvm_actions_daily')
-            .select('valeur_echangee, variation_pct')
-            .eq('date_marche', prevDate)
-        : Promise.resolve({ data: [] }),
       // Résumés de CES deux séances (et non « les deux derniers ») : un résumé
       // d'une autre séance comparé aux cours du jour serait incohérent.
       supabase
@@ -110,40 +99,9 @@ async function getData() {
   const summary = resumes.find((r) => r.date_marche === lastDate) ?? null;
   const summaryPrev = prevDate ? resumes.find((r) => r.date_marche === prevDate) ?? null : null;
 
-  const prevRows = (prevActions ?? []) as { valeur_echangee: number | null; variation_pct: number | null }[];
-  const prevValeur = prevDate
-    ? prevRows.reduce((s, a) => s + (a.valeur_echangee ?? 0), 0)
-    : null;
-
-  // Sentiment de la veille (breadth) pour dériver le delta « vs veille »
-  let prevBreadth: number | null = null;
-  if (prevDate && prevRows.length > 0) {
-    let h = 0, b = 0;
-    for (const a of prevRows) {
-      const v = a.variation_pct ?? 0;
-      if (v > 0) h++;
-      else if (v < 0) b++;
-    }
-    prevBreadth = h + b > 0 ? (h / (h + b)) * 100 : null;
-  }
-
   const typedActions = (actions ?? []) as ActionDaily[];
   const typedIndices = (indices ?? []) as IndiceDaily[];
   const typedSignals = (signals ?? []) as SignalDaily[];
-
-  const topSectorPerfs = computeTopSectorPerfs(typedActions);
-  const brief = generateBrief({
-    date: lastDate,
-    indices: {
-      brvm30: typedIndices.find((i) => i.code === 'BRVM30') ?? null,
-      brvmc:  typedIndices.find((i) => i.code === 'BRVMC')  ?? null,
-    },
-    actions: typedActions,
-    signals: typedSignals,
-    valeurTransactions: summary?.valeur_transactions ?? null,
-    valeurTransactionsPrev: summaryPrev?.valeur_transactions ?? null,
-    topSectorPerfs,
-  });
 
   // Valeur commentée du jour : celle qui porte le signal le plus assuré, à
   // défaut la plus échangée de la séance. Aucune des deux n'est un conseil —
@@ -198,13 +156,14 @@ async function getData() {
       }
     : null;
 
-  // Historique cours (10 dernières séances) pour tous les codes — sparklines TopMovers
+  // Historique cours (20 dernières séances) pour tous les codes — sparklines des mouvements
   const { data: histRows } = await supabase
     .from('brvm_actions_daily')
     .select('code, cours_jour, date_marche')
     .not('cours_jour', 'is', null)
     .order('date_marche', { ascending: false })
-    .limit(10 * (typedActions.length || NB_SOCIETES_COTEES)); // 10 séances × le nombre réel de valeurs cotées
+    // PostgREST tronque en silence à 1000 lignes : on plafonne explicitement.
+    .limit(Math.min(1000, 20 * (typedActions.length || NB_SOCIETES_COTEES))); // 20 séances × le nombre réel de valeurs cotées
 
   const sparklines: Record<string, number[]> = {};
   for (const row of (histRows ?? []) as { code: string; cours_jour: number; date_marche: string }[]) {
@@ -244,12 +203,9 @@ async function getData() {
     actions: typedActions,
     indices: typedIndices,
     signals: typedSignals,
-    prevValeur,
-    prevBreadth,
     sparklines,
     summary,
     summaryPrev,
-    brief,
     ticker,
   };
 }
@@ -261,38 +217,8 @@ interface MarketSummaryRow {
   capitalisation_obligations: number | null;
 }
 
-function marketStats(actions: ActionDaily[], prevValeur: number | null): MarketStats {
-  let hausses = 0, baisses = 0, stables = 0;
-  let valeurReelle = 0, valeurEstimee = 0, titresEchanges = 0, transactions = 0;
-  let hasValeur = false, hasTransactions = false, hasTitres = false;
-  for (const a of actions) {
-    const v = a.variation_pct ?? 0;
-    if (v > 0) hausses++;
-    else if (v < 0) baisses++;
-    else stables++;
-
-    if (a.valeur_echangee != null) { valeurReelle += a.valeur_echangee; hasValeur = true; }
-    if (a.volume != null) {
-      titresEchanges += a.volume; hasTitres = true;
-      if (a.cours_jour != null) valeurEstimee += a.cours_jour * a.volume;
-    }
-    if (a.nb_transactions != null) { transactions += a.nb_transactions; hasTransactions = true; }
-  }
-
-  // Valeur échangée : réelle si disponible, sinon estimée (cours × titres)
-  const volumeTotal = hasValeur ? valeurReelle : (hasTitres ? valeurEstimee : null);
-  return {
-    hausses, baisses, stables, total: actions.length,
-    volumeTotal,
-    volumeEstimated: !hasValeur && hasTitres,
-    volumePrev: prevValeur,
-    titresEchanges: hasTitres ? titresEchanges : null,
-    transactions: hasTransactions ? transactions : null,
-  };
-}
-
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, prevValeur, prevBreadth, sparklines, summary, summaryPrev, brief, ticker, vedette } = await getData();
+  const { lastDate, actions, indices, signals, sparklines, summary, summaryPrev, ticker, vedette } = await getData();
 
   // Fraîcheur des cours — affichée au-dessus du ticker permanent.
   // `lecture_seance` verrouille l'encart « Ce que dit la séance · CODE » plus bas :
@@ -358,32 +284,9 @@ export default async function Dashboard() {
     );
   }
 
-  const stats = marketStats(actions, prevValeur);
-  // Valeur échangée réelle (brvm.org) prioritaire sur l'estimation per-instrument
-  if (summary?.valeur_transactions != null) {
-    stats.volumeTotal = summary.valeur_transactions;
-    stats.volumeEstimated = false;
-    stats.volumePrev = summaryPrev?.valeur_transactions ?? null;
-  }
   const withVar = actions.filter((a) => a.variation_pct != null);
   const gainers = [...withVar].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).slice(0, 5);
   const losers  = [...withVar].sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).slice(0, 5);
-
-  // Sentiment 0..100 dérivé du breadth (hausses / (hausses+baisses)) ; delta vs veille en points
-  const sentimentScore = stats.hausses + stats.baisses > 0
-    ? (stats.hausses / (stats.hausses + stats.baisses)) * 100
-    : 50;
-  const sentimentDelta = prevBreadth != null ? sentimentScore - prevBreadth : null;
-
-  // Détail des valeurs par mouvement (pour les info-bulles au survol)
-  const toMover = (a: ActionDaily) => ({ code: a.code, cours: a.cours_jour ?? null, variation: a.variation_pct ?? 0 });
-  const breakdown = {
-    hausses: withVar.filter((a) => (a.variation_pct ?? 0) > 0)
-      .sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)).map(toMover),
-    baisses: withVar.filter((a) => (a.variation_pct ?? 0) < 0)
-      .sort((a, b) => (a.variation_pct ?? 0) - (b.variation_pct ?? 0)).map(toMover),
-    stables: withVar.filter((a) => (a.variation_pct ?? 0) === 0).map(toMover),
-  };
 
   const dateLabel = new Date(lastDate).toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
@@ -395,7 +298,7 @@ export default async function Dashboard() {
   const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
   const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
   const depuisPublications = plusJours(aujourdhui, -7);
-  const [resultatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, weekly30, weeklyC] = await Promise.all([
+  const [resultatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs] = await Promise.all([
     user && besoinPortefeuille
       ? chargerPortefeuille(supa, user.id, aujourdhui)
       : Promise.resolve<{ etat: PortfolioState; depuis: string } | null | undefined>(undefined),
@@ -403,8 +306,11 @@ export default async function Dashboard() {
     veut('agenda') ? chargerFermetures(supa, aujourdhui, finAgenda) : Promise.resolve([]),
     veut('publications') ? chargerPublications(supa, depuisPublications) : Promise.resolve([]),
     veut('liquidite') ? chargerLiquidite(supa) : Promise.resolve(null),
-    getWeeklyIndex('BRVM30', 'BRVM 30'),
-    getWeeklyIndex('BRVMC', 'BRVM Composite'),
+    veut('seance') ? chargerTrajectoires(supa, indices[0]?.date_marche ?? lastDate) : Promise.resolve(null),
+    veut('seance') ? chargerCompteSignaux(supa, lastDate) : Promise.resolve(null),
+    veut('actus') ? chargerActualites(supa, aujourdhui) : Promise.resolve(null),
+    veut('actus') ? chargerAfrique(supa) : Promise.resolve(null),
+    veut('actus') ? chargerCompteMotifs(supa, lastDate) : Promise.resolve(null),
   ]);
   // `undefined` = visiteur, `null` = lecture en erreur.
   const etatPortefeuille: PortfolioState | null | undefined = resultatPortefeuille ? resultatPortefeuille.etat : resultatPortefeuille;
@@ -446,97 +352,95 @@ export default async function Dashboard() {
   });
   const seanceClose = estSeanceClose(lastDate, new Date());
 
+  const secteursJour = indices
+    .filter((i) => i.date_marche === lastDate && INDICES_SECTORIELS.includes(i.code) && i.variation_pct != null)
+    .map((i) => ({ code: i.code, nom: (i.libelle ?? i.code).replace(/^BRVM\s*-\s*/i, ''), variation: Number(i.variation_pct) }));
+  const meneurSecteur = [...secteursJour].sort((a, b) => b.variation - a.variation)[0] ?? null;
+  const versLigne = (a: ActionDaily) => ({ code: a.code, nom: a.designation?.trim() || a.code, cours: a.cours_jour, variation: a.variation_pct, serie: sparklines[a.code] ?? [] });
+  // Indices publiés à une autre séance que les cours : ignorés (affichés « — »).
+  const memeSeance = (c: string) => indices.find((i) => i.code === c && i.date_marche === lastDate);
+  const brvmcJour = memeSeance('BRVMC');
+  const prestige = memeSeance('BRVMPRES');
+  const b30 = memeSeance('BRVM30');
+  const varCap = summary?.capitalisation_actions != null && summaryPrev?.capitalisation_actions ? (summary.capitalisation_actions / summaryPrev.capitalisation_actions - 1) * 100 : null;
+  const varValeur = summary?.valeur_transactions != null && summaryPrev?.valeur_transactions ? (summary.valeur_transactions / summaryPrev.valeur_transactions - 1) * 100 : null;
+  const titresEchanges = actions.reduce((t, a) => t + (a.volume ?? 0), 0);
+  const chiffres: Chiffre[] = [
+    { libelle: 'BRVM Composite', valeur: fmtIndice(brvmcJour?.valeur ?? null), variation: brvmcJour?.variation_pct ?? null },
+    { libelle: 'BRVM 30', valeur: fmtIndice(b30?.valeur ?? null), variation: b30?.variation_pct ?? null },
+    { libelle: 'BRVM Prestige', valeur: fmtIndice(prestige?.valeur ?? null), variation: prestige?.variation_pct ?? null },
+    { libelle: 'Valeur échangée', valeur: fmtMd(summary?.valeur_transactions ?? null), variation: varValeur, note: 'vs veille' },
+    { libelle: 'Capitalisation actions', valeur: fmtMd(summary?.capitalisation_actions ?? null), variation: varCap, note: 'vs veille' },
+    { libelle: 'Titres échangés', valeur: actions.some((a) => a.volume != null) ? fmtNumber(titresEchanges, 0) : '—', variation: null, note: `${actions.length} valeurs cotées` },
+  ];
+
   // Widgets configurables (ordre + visibilité pilotés par le layout utilisateur).
   const sections: Record<WidgetKey, React.ReactNode> = {
     secteurs: user ? (
-      <section aria-label="Vos secteurs">
-        <div className="mb-3 flex items-center gap-2">
-          <h2 className="font-display text-lg text-white">Vos secteurs</h2>
-          <span className="rounded-full bg-gradient-to-r from-accent to-up px-2 py-0.5 text-[9px] font-bold text-bg">PERSO</span>
-        </div>
+      <Bloc id="t-favoris">
+        <TeteBloc id="t-favoris" titre="Vos secteurs" droite={<Link href="/profil" className="text-xs text-accent-ink hover:underline">Choisir</Link>} />
         <FavoriteSectors favorites={favoriteSectors} />
-      </section>
+      </Bloc>
     ) : null,
-    indices: (
-      <section aria-label="Indices BRVM">
-        <MarketIndices indices={indices} />
-      </section>
-    ),
     etat: (
-      <section aria-label="État du marché">
-        <MarketStateCard stats={stats} sentimentScore={sentimentScore} sentimentDelta={sentimentDelta} breakdown={breakdown} />
-      </section>
+      <Ouverture
+        dateMarche={lastDate}
+        titre={titreSeance(metriques.hausses, metriques.baisses)}
+        chapo={chapoSeance({
+          composite: metriques.composite,
+          meneur: meneurSecteur ? { code: meneurSecteur.code, variationPct: meneurSecteur.variation } : null,
+          valeurEchangee: summary?.valeur_transactions ?? null,
+          valeurEchangeeVeille: summaryPrev?.valeur_transactions ?? null,
+        })}
+        chiffres={chiffres}
+      />
     ),
     seance: (
-      <section aria-label="Séance du jour">
-        {/* Verrou premium `lecture_seance` : sur ce tableau de bord déjà dense en
-            CTA (signaux, patterns intraday plus bas), un cadenas de plus pour un
-            encart qui met en avant une valeur choisie automatiquement — pas
-            recherchée par l'utilisateur — ajouterait de la fatigue sans le
-            justifier. On omet donc le bloc entier plutôt que d'y mettre un
-            SectionLock ; la fiche action, elle, explique l'offre avec un vrai
-            pitch. Rien ne fuit : le bloc (titre + lien + composant) ne rend
-            rien du tout, sans cadre ni marge orpheline. */}
-        {vedette && gateLectureSeance.allowed && (
-          <div className="mb-4 rounded-panel border border-border bg-surface p-4">
-            <div className="mb-2 flex items-baseline justify-between gap-2">
-              <h3 className="text-sm font-semibold text-ivory">Ce que dit la séance · {vedette.code}</h3>
-              <Link href={`/actions/${vedette.code}`} className="text-xs font-semibold text-accent-ink hover:underline">Voir la fiche →</Link>
-            </div>
-            <CarnetCommentaire
-              carnet={vedette.carnet}
-              signal={vedette.signal}
-              actualites={vedette.actualites}
-              contexte={{ valeurEchangee: vedette.valeurEchangee }}
-              compact
-            />
-          </div>
-        )}
-        <p className="overline text-muted mb-4 tracking-[0.16em]">Séance du jour</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          <TopMovers title="Top 5 hausses" rows={gainers} signals={signals as SignalDaily[]} direction="up" sparklines={sparklines} />
-          <TopMovers title="Top 5 baisses" rows={losers} signals={signals as SignalDaily[]} direction="down" sparklines={sparklines} />
-          <div className="space-y-4">
-            <WeeklyIndexChart {...weekly30} />
-            <WeeklyIndexChart {...weeklyC} />
-          </div>
-          <div className="rounded-panel border border-border bg-border/30 p-1.5">
-            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-4 py-4 h-full flex flex-col gap-3">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-ivory">Brief analytique</h3>
-                <BriefAssistant />
-              </div>
-              <KeyMetrics summary={summary} summaryPrev={summaryPrev} />
-              {brief?.summary && (
-                <div className="border-t border-border/40 pt-3">
-                  <p className="overline text-faint mb-1.5">Analyse du jour</p>
-                  <p className="text-[13px] leading-relaxed text-ivory/80">{brief.summary}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      <GrilleInterne>
+        <Cellule span={8}>{trajectoires
+          ? <Trajectoire series={trajectoires} jour={{ BRVMC: brvmcJour?.variation_pct ?? null, BRVM30: b30?.variation_pct ?? null }} />
+          : <Bloc id="t-traj"><TeteBloc id="t-traj" titre="Trajectoire des indices" /><p className="text-sm text-muted">Trajectoire momentanément indisponible.</p></Bloc>}</Cellule>
+        <Cellule span={4}><LargeurMoteur hausses={metriques.hausses} baisses={metriques.baisses} stables={metriques.stables} signaux={compteSignaux} /></Cellule>
+      </GrilleInterne>
     ),
-    signaux: (
-      <section aria-label="Signaux récents">
-        <p className="overline text-muted mb-4 tracking-[0.16em]">Signaux actionnables</p>
-        {isPremium ? (
-          <RecentSignalsCard signals={signals as SignalDaily[]} />
-        ) : (
-          <PremiumLock
-            title="Signaux d’achat et de vente réservés au Premium"
-            pitch="Les signaux d'achat et de vente notés A–F, avec leur explication, sont inclus dans l'abonnement Premium."
-            rows={3}
-          />
-        )}
-      </section>
+    indices: (
+      <GrilleInterne>
+        <Cellule span={4}><Mouvements id="t-hausses" titre="Plus fortes hausses" lignes={gainers.map(versLigne)} /></Cellule>
+        <Cellule span={4}><Mouvements id="t-baisses" titre="Plus fortes baisses" lignes={losers.map(versLigne)} /></Cellule>
+        <Cellule span={4}><Secteurs secteurs={secteursJour} /></Cellule>
+      </GrilleInterne>
     ),
+    signaux: (() => {
+      // Verrou `lecture_seance` fermé : le bloc « Ce que dit la séance » est
+      // absent (aucun cadenas de plus) et les signaux prennent toute la largeur,
+      // pour ne jamais laisser de cellule vide.
+      const carnet = vedette && gateLectureSeance.allowed ? vedette : null;
+      const signauxBloc = isPremium ? <SignauxRecents signaux={signals as SignalDaily[]} /> : (
+        <Bloc id="t-signaux-lock">
+          <TeteBloc id="t-signaux-lock" titre="Signaux d'opportunité" />
+          <PremiumLock title="Signaux d'achat et de vente réservés au Premium" pitch="Les signaux notés A–F, avec leur explication, sont inclus dans l'abonnement Premium." rows={3} />
+        </Bloc>
+      );
+      return (
+        <GrilleInterne>
+          {carnet && (
+            <Cellule span={6}>
+              <Bloc id="t-carnet">
+                <TeteBloc id="t-carnet" titre={`Ce que dit la séance · ${carnet.code}`} droite={<Link href={`/actions/${carnet.code}`} className="text-xs text-accent-ink hover:underline">Voir la fiche</Link>} />
+                <CarnetCommentaire carnet={carnet.carnet} signal={carnet.signal} actualites={carnet.actualites} contexte={{ valeurEchangee: carnet.valeurEchangee }} compact />
+              </Bloc>
+            </Cellule>
+          )}
+          <Cellule span={carnet ? 6 : 12}>{signauxBloc}</Cellule>
+        </GrilleInterne>
+      );
+    })(),
     actus: (
-      <section aria-label="Actualités">
-        <p className="overline text-muted mb-4 tracking-[0.16em]">Actualités</p>
-        <NewsFeed />
-      </section>
+      <GrilleInterne>
+        <Cellule span={4}><Actualites items={actualites} /></Cellule>
+        <Cellule span={4}><Motifs premium={isPremium} compte={compteMotifs} date={lastDate} /></Cellule>
+        <Cellule span={4}><Afrique indices={afrique} composite={{ valeur: brvmcJour?.valeur ?? null, variation: brvmcJour?.variation_pct ?? null }} dateSeance={lastDate} /></Cellule>
+      </GrilleInterne>
     ),
     portefeuille: (
       <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsJour} />
@@ -562,40 +466,25 @@ export default async function Dashboard() {
         aria-hidden
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6 sm:space-y-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-4">
 
-        {/* ── En-tête : titre éditorial + nav pills ───────────────────────── */}
-        <header className="flex flex-wrap items-end justify-between gap-5 pb-2">
-          <div>
-            {/* Eyebrow dorée */}
-            <p className="overline text-gold/60 mb-2 tracking-[0.22em]">
-              Bourse Régionale des Valeurs Mobilières
-            </p>
-            <h1 className="font-display text-3xl md:text-4xl text-ivory tracking-tight leading-none">
-              Tableau de bord
-            </h1>
-            {/* Date pill */}
-            <div className="mt-3 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-gold/[0.06] px-3 py-1 text-[11px] font-medium text-gold/80">
-                <span className="h-1.5 w-1.5 rounded-full bg-up animate-pulse" />
-                Séance du {dateLabel}
-              </span>
-            </div>
+        {/* ── Barre de tête : titre, séance, fraîcheur, liens ───────────────── */}
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <h1 className="font-display text-2xl text-ivory">Tableau de bord</h1>
+            <p className="text-xs text-muted">Séance du {dateLabel}</p>
           </div>
-
-          {/* Actions nav */}
           <nav className="flex flex-wrap items-center gap-2" aria-label="Navigation rapide">
-            <BeamButton href="/signaux">Signaux</BeamButton>
-            <BeamButton href="/portefeuille">Portefeuille</BeamButton>
+            <PastilleSeance />
+            <FreshnessBadge fraicheur={fraicheurCours} />
             {user && (
               <Link href="/dashboard/personnaliser" className="rounded-full border border-border px-3 py-1.5 text-xs text-muted hover:text-accent hover:border-accent/40 transition-colors" title={dashboardLayout ? 'Ordre personnalisé enregistré : il remplace l’ordre automatique de votre profil' : 'Personnaliser le tableau de bord'}>
                 {dashboardLayout ? '⚙︎ Ordre personnalisé' : '⚙︎ Personnaliser'}
               </Link>
             )}
             {/* Passage vers la seconde version du tableau de bord. Les deux
-                cohabitent : cette page-ci ne change pas, l'autre propose une
-                hiérarchie différente du même marché. Sans ce lien, /dashboard/v2
-                n'est atteignable qu'en connaissant l'URL par cœur. */}
+                cohabitent : sans ce lien, /dashboard/v2 n'est atteignable qu'en
+                connaissant l'URL par cœur. */}
             <Link
               href="/dashboard/v2"
               className="rounded-full border border-accent/30 px-3 py-1.5 text-xs text-accent transition-colors hover:border-accent/60 hover:bg-accent/[0.06]"
@@ -605,18 +494,6 @@ export default async function Dashboard() {
             </Link>
           </nav>
         </header>
-
-        {/* ── Ticker actualités BRVM ─────────────────────────────────────── */}
-        <NewsTicker className="-mx-4 sm:-mx-6 rounded-none" />
-
-        {/* ── État de la séance (déplacé depuis la page d'accueil) ─────────── */}
-        <MarketSessionBanner />
-
-        {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
-        <div className="flex justify-end px-1">
-          <FreshnessBadge fraicheur={fraicheurCours} />
-        </div>
-        <DashboardTicker items={ticker} dateMarche={lastDate} />
 
         {/* ── Bandeau alertes déclenchées ──────────────────────────────────── */}
         {triggeredAlerts > 0 && (
@@ -645,70 +522,21 @@ export default async function Dashboard() {
           </Link>
         )}
 
-        {/* ── Widgets configurables, par rangées (spec §4.0) ── */}
-        {grouperEnRangees(layout.filter((k) => sections[k] != null)).map((r) => (
-          <div key={r.cles.join('-')} className={classeRangee(r)}>
-            {r.cles.map((k) => (
-              <div key={k} className="min-w-0">{sections[k]}</div>
-            ))}
-          </div>
-        ))}
+        {/* ── Ticker permanent : cours actions + obligations ──────────────── */}
+        <DashboardTicker items={ticker} dateMarche={lastDate} />
 
-        {/* Sections fixes, sous les widgets : le premier bloc lu est celui du profil (spec §8). */}
-        {/* ── Macro UEMOA : taux BCEAO + change (section fixe) ── */}
         <MacroBanner />
 
-        {/* ── Afrique · vue régionale — section FIXE (hors widgets configurables :
-            un layout utilisateur sauvegardé avant son ajout la masquerait) ── */}
-        <section aria-label="Indices pan-africains">
-          <AfricanIndicesCard
-            brvmComposite={
-              brvmc
-                ? { valeur: (brvmc.valeur as number | null) ?? null, variation_pct: brvmc.variation_pct ?? null }
-                : null
-            }
-          />
-        </section>
-
-        {/* ── Signaux intraday — section FIXE ── */}
-        <section aria-label="Signaux intraday patterns">
-          <p className="overline text-muted mb-4 tracking-[0.16em]">Patterns intraday</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="md:col-span-1 lg:col-span-2">
-              {isPremium ? (
-                <IntraDaySignalsWidget />
-              ) : (
-                <PremiumLock
-                  title="Signaux intraday réservés au premium"
-                  pitch="Momentum et volumes anormaux détectés en séance, mis à jour toutes les 15 min."
-                  rows={4}
-                />
-              )}
+        {/* ── Widgets configurables, par rangées (spec §4.0) ── */}
+        <div className="border-t border-border">
+          {grouperEnRangees(layout.filter((k) => sections[k] != null)).map((r) => (
+            <div key={r.cles.join('-')} className={classeRangee(r)}>
+              {r.cles.map((k) => (
+                <div key={k} className={classeCellule(r.largeur, r.cles.length === 1)}>{sections[k]}</div>
+              ))}
             </div>
-            <div className="md:col-span-1 lg:col-span-1">
-              {isPremium ? (
-                <PatternSummaryWidget />
-              ) : (
-                <PremiumLock title="Synthèse des motifs" pitch="Réservée au premium." rows={3} />
-              )}
-            </div>
-            {/* Le panneau explicatif reste TOUJOURS visible : il dit à l'utilisateur
-                gratuit ce dont il se prive, ce qui est le but du verrou. */}
-            <div className="md:col-span-2 lg:col-span-1 flex flex-col gap-3 text-xs text-muted p-4 bg-elevated/20 rounded-xl border border-border/40">
-              <p className="font-semibold text-ivory">À propos des patterns</p>
-              <p>Adaptés au marché de <strong>fixing</strong> de la BRVM (une fixation par séance) :</p>
-              <ul className="space-y-1.5 ml-2">
-                <li><strong>Momentum</strong> — Tendance intraséance marquée</li>
-                <li><strong>Volume anormal</strong> — Pic d&apos;échanges vs moyenne 20&nbsp;j</li>
-                <li>➡️ <strong>Mouvement</strong> — Variation de prix significative</li>
-              </ul>
-              <p className="pt-2 italic text-faint">
-                Volatilité intraday (ATR, consolidation) non pertinente sur un marché de fixing.
-                Mis à jour toutes les 15&nbsp;min en séance.
-              </p>
-            </div>
-          </div>
-        </section>
+          ))}
+        </div>
 
         {/* ── Pied de page premium ───────────────────────────────────────── */}
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-6">

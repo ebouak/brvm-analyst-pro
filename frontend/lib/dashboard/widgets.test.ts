@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   resolveLayout, DEFAULT_ORDER, ORDRE_ACTIF, ORDRE_DEBUTANT, deduireProfil, ordreParDefaut,
-  MASQUES_PAR_DEFAUT, LARGEUR, grouperEnRangees, classeRangee, WIDGETS,
+  MASQUES_PAR_DEFAUT, LARGEUR, grouperEnRangees, classeRangee, classeCellule, WIDGETS,
 } from './widgets';
 
 describe('resolveLayout', () => {
@@ -115,15 +115,18 @@ describe('rangées', () => {
       { largeur: 'pleine', cles: ['etat'] },
     ]);
     expect(grouperEnRangees(['signaux', 'secteurs', 'actus', 'signaux'])).toEqual([
-      { largeur: 'tiers', cles: ['signaux', 'secteurs', 'actus'] },
-      { largeur: 'tiers', cles: ['signaux'] },
+      { largeur: 'pleine', cles: ['signaux'] },
+      { largeur: 'tiers', cles: ['secteurs'] },
+      { largeur: 'pleine', cles: ['actus'] },
+      { largeur: 'pleine', cles: ['signaux'] },
     ]);
   });
-  it('un bloc seul dans sa rangée prend toute la largeur', () => {
-    expect(classeRangee({ largeur: 'demi', cles: ['agenda'] })).toBe('');
-    expect(classeRangee({ largeur: 'demi', cles: ['agenda', 'publications'] })).toBe('grid gap-6 md:grid-cols-2');
-    expect(classeRangee({ largeur: 'tiers', cles: ['signaux', 'actus'] })).toBe('grid gap-6 md:grid-cols-2 xl:grid-cols-3');
-    expect(classeRangee({ largeur: 'pleine', cles: ['etat'] })).toBe('');
+  it('rangée = grille 12 colonnes à filet ; cellule seule = pleine largeur', () => {
+    expect(classeRangee({ largeur: 'demi', cles: ['agenda'] })).toBe('grid grid-cols-1 border-b border-border lg:grid-cols-12');
+    expect(classeCellule('demi', true)).toContain('lg:col-span-12');
+    expect(classeCellule('demi', false)).toContain('lg:col-span-6');
+    expect(classeCellule('tiers', false)).toContain('lg:col-span-4');
+    expect(classeCellule('tiers', false)).toContain('lg:border-l');
   });
 });
 

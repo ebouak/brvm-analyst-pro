@@ -8,17 +8,17 @@ export interface WidgetMeta { key: WidgetKey; label: string; desc: string }
 
 /** Registre, dans l'ordre du profil débutant (spec §3). */
 export const WIDGETS: WidgetMeta[] = [
-  { key: 'etat', label: 'État du marché', desc: 'Hausses, baisses, valeur échangée' },
+  { key: 'etat', label: 'Récit de séance', desc: 'La séance racontée : titre, chapô, six mesures' },
   { key: 'comprendre', label: 'Comprendre la séance', desc: 'La séance en constats simples' },
-  { key: 'seance', label: 'Séance du jour', desc: 'Plus fortes hausses et baisses, indices, brief' },
+  { key: 'seance', label: 'Séance du jour', desc: 'Trajectoire des indices, largeur du marché, moteur de signaux' },
   { key: 'agenda', label: 'Agenda', desc: 'Dividendes et jours fermés des 30 prochains jours' },
   { key: 'publications', label: 'Publications', desc: 'Documents des émetteurs, 7 derniers jours' },
   { key: 'portefeuille', label: 'Mon portefeuille', desc: 'Valeur, plus-value latente, positions' },
-  { key: 'signaux', label: "Signaux d'opportunité", desc: 'Signaux actionnables récents' },
+  { key: 'signaux', label: 'Lecture et signaux', desc: "Ce que dit la séance, signaux d'opportunité" },
   { key: 'secteurs', label: 'Vos secteurs', desc: 'Perf du jour de vos secteurs favoris' },
-  { key: 'indices', label: 'Indices BRVM', desc: 'Composite, BRVM-30, sectoriels' },
+  { key: 'indices', label: 'Mouvements et secteurs', desc: 'Plus fortes hausses et baisses, indices sectoriels' },
   { key: 'liquidite', label: 'Liquidité', desc: 'Facilité à échanger les valeurs' },
-  { key: 'actus', label: 'Actualités', desc: 'Fil d’actualités BRVM' },
+  { key: 'actus', label: 'Actualités et régions', desc: 'Actualités, motifs en séance, Afrique' },
 ];
 
 /** Profil déduit des positions (spec §2) : rien n'est stocké. */
@@ -81,7 +81,7 @@ export type Largeur = 'pleine' | 'demi' | 'tiers';
 export const LARGEUR: Record<WidgetKey, Largeur> = {
   portefeuille: 'pleine', etat: 'pleine', comprendre: 'pleine', seance: 'pleine', indices: 'pleine',
   agenda: 'demi', publications: 'demi', liquidite: 'demi',
-  signaux: 'tiers', secteurs: 'tiers', actus: 'tiers',
+  signaux: 'pleine', secteurs: 'tiers', actus: 'pleine',
 };
 
 export interface Rangee { largeur: Largeur; cles: WidgetKey[] }
@@ -100,8 +100,14 @@ export function grouperEnRangees(cles: WidgetKey[]): Rangee[] {
   return out;
 }
 
-/** Classes de grille d'une rangée. Un bloc seul dans sa rangée prend toute la largeur. */
-export function classeRangee(r: Rangee): string {
-  if (r.cles.length === 1) return '';
-  return r.largeur === 'tiers' ? 'grid gap-6 md:grid-cols-2 xl:grid-cols-3' : 'grid gap-6 md:grid-cols-2';
+/** Rangée de la surface unique : grille 12 colonnes, filet sous la rangée (spec §12). */
+export function classeRangee(_r: Rangee): string {
+  return 'grid grid-cols-1 border-b border-border lg:grid-cols-12';
+}
+
+const SPAN: Record<Largeur, string> = { pleine: 'lg:col-span-12', demi: 'lg:col-span-6', tiers: 'lg:col-span-4' };
+
+/** Cellule d'une rangée : filet vertical entre cellules (horizontal quand empilées). */
+export function classeCellule(largeur: Largeur, seule: boolean): string {
+  return `min-w-0 ${seule ? 'lg:col-span-12' : SPAN[largeur]} border-t border-border first:border-t-0 lg:border-t-0 lg:border-l lg:first:border-l-0`;
 }
