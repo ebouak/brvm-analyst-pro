@@ -20,9 +20,9 @@ export default function Ouverture({ dateMarche, titre, chapo, chiffres }: {
         {chapo && <p className="mt-2.5 max-w-[60ch] text-[15px] text-muted">{chapo}</p>}
         <div className="mt-3.5"><BriefAssistant /></div>
       </div>
-      <dl className="grid grid-cols-2 overflow-hidden rounded-lg border border-border sm:grid-cols-3">
+      <dl className="grid grid-cols-2 overflow-hidden gap-px rounded-lg border border-border bg-border sm:grid-cols-3">
         {chiffres.map((c) => (
-          <div key={c.libelle} className="min-w-0 border-b border-r border-border px-3.5 py-3">
+          <div key={c.libelle} className="min-w-0 bg-bg px-3.5 py-3">
             <dt className="overline text-faint">{c.libelle}</dt>
             <dd className="tabular mt-1.5 text-[19px] text-ivory">{c.valeur}</dd>
             <dd className={`tabular mt-0.5 text-xs ${ton(c.variation)}`}>

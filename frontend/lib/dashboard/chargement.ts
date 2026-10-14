@@ -117,21 +117,23 @@ export type SerieIndice = { date: string; valeur: number }[];
 
 /** 30 dernières séances de BRVMC et BRVM30 jusqu'à `jusquA` inclus, en ordre chronologique. */
 export async function chargerTrajectoires(sb: SupabaseClient, jusquA: string, n = 30): Promise<Record<'BRVMC' | 'BRVM30', SerieIndice> | null> {
-  const { data, error } = await sb
+  const lire = (c: 'BRVMC' | 'BRVM30') => sb
     .from('brvm_indices_daily')
-    .select('code, date_marche, valeur')
-    .in('code', ['BRVMC', 'BRVM30'])
+    .select('date_marche, valeur')
+    .eq('code', c)
     .lte('date_marche', jusquA)
     .not('valeur', 'is', null)
     .order('date_marche', { ascending: false })
-    .limit(n * 2 + 10);
-  if (error) return journal('trajectoires', error.message);
-  const out: Record<'BRVMC' | 'BRVM30', SerieIndice> = { BRVMC: [], BRVM30: [] };
-  for (const r of (data ?? []) as { code: 'BRVMC' | 'BRVM30'; date_marche: string; valeur: number }[]) {
-    const s = out[r.code];
-    if (s && s.length < n && Number.isFinite(Number(r.valeur))) s.push({ date: r.date_marche, valeur: Number(r.valeur) });
-  }
-  out.BRVMC.reverse(); out.BRVM30.reverse();
+    .limit(n);
+  const [a, b] = await Promise.all([lire('BRVMC'), lire('BRVM30')]);
+  const erreur = a.error ?? b.error;
+  if (erreur) return journal('trajectoires', erreur.message);
+  const serie = (d: unknown): SerieIndice =>
+    ((d ?? []) as { date_marche: string; valeur: number }[])
+      .filter((r) => Number.isFinite(Number(r.valeur)))
+      .map((r) => ({ date: r.date_marche, valeur: Number(r.valeur) }))
+      .reverse();
+  const out: Record<'BRVMC' | 'BRVM30', SerieIndice> = { BRVMC: serie(a.data), BRVM30: serie(b.data) };
   return out;
 }
 
