@@ -56,7 +56,7 @@ export default function BlocPortefeuille({
     >
       {synth.exclus.length > 0 && (
         <p className="mb-3 rounded-lg border border-warn/40 bg-warn/[0.06] px-3 py-2 text-xs text-warn">
-          Cours indisponible pour {listeExclus} : position exclue des totaux.
+          Aucun cours sur les 12 derniers mois pour {listeExclus} : position exclue des totaux.
         </p>
       )}
 
@@ -67,8 +67,8 @@ export default function BlocPortefeuille({
         />
         <Chiffre
           libelle="Plus-value latente"
-          valeur={rienDeValorise ? '—' : `${fmtFcfaSigne(synth.pnl)} FCFA`}
-          detail={pnlPct != null ? fmtPctSigne(pnlPct, 1) : null}
+          valeur={synth.investi === 0 ? '—' : `${fmtFcfaSigne(synth.pnl)} FCFA`}
+          detail={synth.investi !== 0 && pnlPct != null ? fmtPctSigne(pnlPct, 1) : null}
           classe={sens(synth.pnl)}
         />
         <Chiffre
