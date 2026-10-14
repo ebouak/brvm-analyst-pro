@@ -16,7 +16,27 @@ export interface DetailAlerte {
   le: string | null;
 }
 
+/** Le bandeau ne montre que les alertes déclenchées récemment : une alerte de
+ *  juillet restée « déclenchée » n'a plus rien d'une actualité. Elle reste
+ *  visible dans « Mes alertes ». */
+export const ALERTES_RECENTES_JOURS = 7;
+
+/** Borne basse (ISO) des déclenchements montrés dans le bandeau. */
+export function depuisAlertesRecentes(maintenant: Date, jours = ALERTES_RECENTES_JOURS): string {
+  return new Date(maintenant.getTime() - jours * 86_400_000).toISOString();
+}
+
+// Types « intelligents » (migration 0039) : seuil facultatif, le motif s'en passe.
+const SANS_SEUIL: Record<string, string> = {
+  signal_achat: 'Signal d’achat du moteur',
+  signal_vente: 'Signal de vente du moteur',
+  rsi_survente: 'RSI en zone de survente',
+  rsi_surachat: 'RSI en zone de surachat',
+  dividende_proche: 'Dividende proche',
+};
+
 function motifDe(type: string, seuil: number | null): string {
+  if (SANS_SEUIL[type]) return SANS_SEUIL[type];
   if (seuil == null || !Number.isFinite(seuil)) return 'Seuil franchi';
   switch (type) {
     case 'prix_au_dessus':

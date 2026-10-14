@@ -16,7 +16,7 @@ import { construireAgenda, plusJours, HORIZON_JOURS } from '@/lib/dashboard/agen
 import { performanceJour } from '@/lib/dashboard/performanceJour';
 import { metriquesDepuisSeance, estSeanceClose } from '@/lib/dashboard/metriquesSeance';
 import { preparerPublications } from '@/lib/dashboard/publications';
-import { detaillerAlertes, type AlerteDeclenchee } from '@/lib/dashboard/alertes';
+import { detaillerAlertes, depuisAlertesRecentes, ALERTES_RECENTES_JOURS, type AlerteDeclenchee } from '@/lib/dashboard/alertes';
 import { lignesPerfDepuis, variationsDuJour } from '@/lib/dashboard/portefeuilleBloc';
 import { chargerPortefeuille, chargerDividendes, chargerFermetures, chargerPublications, chargerLiquidite } from '@/lib/dashboard/chargement';
 import BlocComprendre from '@/components/dashboard/blocs/BlocComprendre';
@@ -322,7 +322,7 @@ export default async function Dashboard() {
         .select('code, type, seuil, declenchee_le', { count: 'exact' })
         .eq('user_id', user.id)
         .eq('actif', true)
-        .not('declenchee_le', 'is', null)
+        .gte('declenchee_le', depuisAlertesRecentes(new Date()))
         .order('declenchee_le', { ascending: false })
         .limit(10),
       chargerProfil(supa, user.id),
@@ -626,7 +626,7 @@ export default async function Dashboard() {
           >
             <span className="animate-pulse" aria-hidden>●</span>
             <span className="font-semibold">
-              {triggeredAlerts} alerte{triggeredAlerts > 1 ? 's' : ''} déclenchée{triggeredAlerts > 1 ? 's' : ''}
+              {triggeredAlerts} alerte{triggeredAlerts > 1 ? 's' : ''} déclenchée{triggeredAlerts > 1 ? 's' : ''} ces {ALERTES_RECENTES_JOURS} derniers jours
             </span>
             {detailAlertes.map((d, i) => (
               <span key={`${d.code}-${i}`} className="flex min-w-0 flex-wrap items-center gap-x-1.5">

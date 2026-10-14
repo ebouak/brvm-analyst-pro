@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detaillerAlertes } from './alertes';
+import { detaillerAlertes, depuisAlertesRecentes, ALERTES_RECENTES_JOURS } from './alertes';
 
 const a = (o: Partial<{ code: string; type: string; seuil: number | null; declenchee_le: string | null }>) => ({
   code: 'SNTS', type: 'prix_au_dessus', seuil: 25000, declenchee_le: '2026-10-01T10:00:00Z', ...o,
@@ -43,5 +43,14 @@ describe('detaillerAlertes', () => {
     expect(detaillerAlertes([a({ declenchee_le: '2026-10-08T23:30:00Z' })])[0].le).toBe('2026-10-08');
     expect(detaillerAlertes([a({ declenchee_le: null })])[0].le).toBeNull();
     expect(detaillerAlertes([a({ declenchee_le: 'n/a' })])[0].le).toBeNull();
+  });
+  it('types intelligents : motif sans seuil', () => {
+    expect(detaillerAlertes([a({ type: 'rsi_survente', seuil: null })])[0].motif).toBe('RSI en zone de survente');
+    expect(detaillerAlertes([a({ type: 'dividende_proche', seuil: null })])[0].motif).toBe('Dividende proche');
+    expect(detaillerAlertes([a({ type: 'signal_vente', seuil: 3 })])[0].motif).toBe('Signal de vente du moteur');
+  });
+  it('fenêtre des alertes récentes : 7 jours', () => {
+    expect(ALERTES_RECENTES_JOURS).toBe(7);
+    expect(depuisAlertesRecentes(new Date('2026-10-14T12:00:00Z'))).toBe('2026-10-07T12:00:00.000Z');
   });
 });
