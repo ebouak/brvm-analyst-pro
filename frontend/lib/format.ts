@@ -27,3 +27,27 @@ export function fmtDateFR(iso: string | null | undefined): string {
 export function fmtDateTimeFR(iso: string | null | undefined, time = '16:30'): string {
   return fmtDateFR(iso) === '—' ? '—' : `${fmtDateFR(iso)} ${time}`;
 }
+
+/**
+ * Signe choisi APRÈS l'arrondi : jamais « +0,00 % » ni « −0,00 % ».
+ * Le moins est typographique (U+2212), comme dans tout le site.
+ */
+function signeArrondi(v: number, d: number): '' | '+' | '−' {
+  const r = Number(v.toFixed(d));
+  return r > 0 ? '+' : r < 0 ? '−' : '';
+}
+
+/** « 0,26 % » — pour les phrases dont le verbe porte déjà le sens. */
+export function fmtPctAbs(v: number, d = 2): string {
+  return `${fmtNumber(Math.abs(v), d)} %`;
+}
+
+/** « +1,95 % », « −0,26 % », « 0,00 % ». */
+export function fmtPctSigne(v: number, d = 2): string {
+  return `${signeArrondi(v, d)}${fmtPctAbs(v, d)}`;
+}
+
+/** Montant FCFA signé : « +1,3 M », « −450 k ». Sans signe sous le franc. */
+export function fmtFcfaSigne(n: number): string {
+  return `${signeArrondi(n, 0)}${fmtFcfa(Math.abs(n))}`;
+}
