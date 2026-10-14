@@ -577,7 +577,7 @@ export default async function Dashboard() {
           </div>
 
           {/* Actions nav */}
-          <nav className="flex items-center gap-2" aria-label="Navigation rapide">
+          <nav className="flex flex-wrap items-center gap-2" aria-label="Navigation rapide">
             <BeamButton href="/signaux">Signaux</BeamButton>
             <BeamButton href="/portefeuille">Portefeuille</BeamButton>
             {user && (
