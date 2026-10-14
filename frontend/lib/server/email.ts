@@ -10,6 +10,11 @@ export interface EmailMessage {
   subject: string;
   html: string;
   attachments?: EmailAttachment[];
+  /**
+   * Adresse à laquelle répond le bouton « Répondre » du destinataire. Sans elle,
+   * la réponse part vers l'expéditeur technique (noreply@…) et se perd.
+   */
+  replyTo?: string;
 }
 export interface EmailResult { ok: boolean; sent: number; error?: string }
 
@@ -59,6 +64,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
         subject: msg.subject,
         html: msg.html,
         ...(msg.attachments && msg.attachments.length ? { attachments: msg.attachments } : {}),
+        ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
       }),
     });
     if (!res.ok) return { ok: false, sent: 0, error: `Resend HTTP ${res.status}` };

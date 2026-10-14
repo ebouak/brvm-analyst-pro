@@ -92,6 +92,21 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Droits : désabonnement = suppression de la ligne ; couvert par l'effacement compte (par email).
 - Sécurité : pas d'autre donnée perso ; pas de partage tiers.
 
+**Formulaire de contact (`/api/contact`) — accusé de réception (2026-10-15)**
+- Données : prénom, email, message, page — **non persistés** : relayés par email à la
+  boîte support (`CONTACT_EMAIL_TO`), qui peut répondre directement (en-tête
+  `reply_to` = adresse du visiteur).
+- Accusé de réception : texte **fixe** envoyé à l'adresse saisie, sans aucune reprise
+  de la saisie (empêche d'utiliser le formulaire comme relais vers un tiers).
+- Finalité : répondre à la demande. Base légale : **consentement** (envoi volontaire).
+- Conservation : l'email vit dans la boîte support (hors base). En base, seule une
+  **empreinte SHA-256** de l'adresse (`rate_limit_hits`, route `contact-accuse`) limite
+  les accusés à un par adresse et par 24 h ; purgée au premier passage suivant la fin
+  de la fenêtre. `checkRateLimit` purge désormais toute la route, et non plus la seule
+  IP appelante (les IP qui ne revenaient jamais restaient en base sans limite).
+- Droits : rien à exporter ni supprimer en base ; la boîte support se traite à la main.
+- Sécurité : limite 5 messages / 10 min par IP ; journal d'échec sans adresse.
+
 **Monitoring scraping (Lot 3)**
 - Données : **aucune donnée personnelle** (sources de marché, métriques techniques).
 - N/A RGPD. `scraper_errors` ne doit pas contenir de donnée perso (messages techniques).
