@@ -1,19 +1,14 @@
+import { fmtNumber } from '@/lib/format';
+
 interface Props {
-  score: number;        // 0..100 (dérivé du breadth)
-  delta?: number | null; // points vs veille
+  score: number;        // 0..100 : part des hausses parmi hausses + baisses
+  delta?: number | null; // points de pourcentage vs veille
+  hausses?: number | null;
+  baisses?: number | null;
 }
 
-/** Étiquette de sentiment selon le score (0-100). */
-export function sentimentLabel(score: number): string {
-  if (score >= 70) return 'Positif';
-  if (score >= 55) return 'Neutre positif';
-  if (score >= 45) return 'Neutre';
-  if (score >= 30) return 'Neutre négatif';
-  return 'Négatif';
-}
-
-/** Jauge demi-cercle (SVG) — sentiment de marché 0..100. */
-export default function SentimentGauge({ score, delta }: Props) {
+/** Jauge demi-cercle (SVG) — part des hausses parmi hausses + baisses, 0..100. */
+export default function SentimentGauge({ score, delta, hausses, baisses }: Props) {
   const s = Math.max(0, Math.min(100, score));
   // demi-cercle de 180° : angle de l'aiguille (-90° à gauche, +90° à droite)
   const angle = -90 + (s / 100) * 180;
@@ -31,6 +26,10 @@ export default function SentimentGauge({ score, delta }: Props) {
     return `M ${p0[0].toFixed(1)} ${p0[1].toFixed(1)} A ${r} ${r} 0 0 1 ${p1[0].toFixed(1)} ${p1[1].toFixed(1)}`;
   };
   const up = (delta ?? 0) >= 0;
+  // Un fait, pas un verdict : « Positif / Neutre » était une lecture par seuils
+  // de la même proportion, c'est-à-dire un « sentiment » réintroduit.
+  const enMouvement = hausses != null && baisses != null ? hausses + baisses : null;
+  const deltaR = delta != null ? Math.round(delta) : null;
 
   return (
     <div className="flex flex-col items-center">
@@ -44,16 +43,23 @@ export default function SentimentGauge({ score, delta }: Props) {
         <circle cx={cx} cy={cy} r="9" fill="none" className="stroke-accent" strokeOpacity="0.3" strokeWidth="2" />
       </svg>
       <div className="-mt-2 text-center">
-        <div className="overline text-faint">Sentiment du marché</div>
-        <div className="mt-1 font-display text-lg text-cyan">{sentimentLabel(s)}</div>
-        <div className="tabular mt-0.5 text-2xl font-bold text-ivory">
-          {s.toFixed(0)}<span className="text-sm text-faint">/100</span>
+        <div className="overline text-faint">Part des hausses</div>
+        <div className="tabular mt-1 text-2xl font-bold text-ivory">
+          {fmtNumber(s, 0)}<span className="text-sm text-faint"> %</span>
         </div>
-        {delta != null && (
-          <div className={`tabular mt-1 text-xs font-medium ${up ? 'text-up' : 'text-down'}`}>
-            vs veille {up ? '+' : ''}{delta.toFixed(0)} pts
+        {enMouvement != null && enMouvement > 0 && (
+          <div className="tabular mt-0.5 text-xs text-muted">
+            {hausses} hausse{hausses! > 1 ? 's' : ''} sur {enMouvement} valeur{enMouvement > 1 ? 's' : ''} en mouvement
           </div>
         )}
+        {deltaR != null && (
+          <div className={`tabular mt-1 text-xs font-medium ${deltaR === 0 ? 'text-muted' : up ? 'text-up' : 'text-down'}`}>
+            vs veille {deltaR > 0 ? '+' : deltaR < 0 ? '−' : ''}{fmtNumber(Math.abs(deltaR), 0)} point{Math.abs(deltaR) > 1 ? 's' : ''}
+          </div>
+        )}
+        <p className="mt-2 max-w-[220px] text-[11px] leading-snug text-faint">
+          Part des hausses parmi les valeurs qui ont bougé ; ce n&apos;est pas une mesure du sentiment.
+        </p>
       </div>
     </div>
   );

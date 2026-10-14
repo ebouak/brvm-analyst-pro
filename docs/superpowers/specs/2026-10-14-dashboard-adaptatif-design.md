@@ -303,6 +303,28 @@ Retenu comme **référence de structure**, pas comme maquette finale :
   échangés par jour ; fourchette à 0,8 % contre 0,01 % mesuré). Les écrans
   finaux utilisent les données réelles.
 
+### Mise en conformité avec le visuel cible (2026-10-14, après mise en production)
+
+Contrôle de la production face au visuel cible. Comblés sur la branche
+`feat/dashboard-cible` :
+
+- **Bandeau d'alertes détaillé** : code, variation du jour, motif reconstruit
+  du type et du seuil de l'alerte ; « + N autres » au-delà de trois.
+- **Anneau de répartition par valeur** (lots d'une même valeur additionnés) et
+  tableau des positions Valeur · Qté · PRU · Cours · Var. jour · Perf. latente ·
+  Montant ; la colonne « Poids » passe dans l'anneau.
+- **Agenda filtrable** (Tous · Mes valeurs · Dividendes · Jours fermés ;
+  « Assemblées » dès qu'une date de réunion existe) et **publications
+  filtrables** (Tous · Mes valeurs · États financiers · Rapports · Communiqués).
+  Ce sont des boutons de filtre (`aria-pressed`), pas des onglets.
+- **Jauge** : renommée « Part des hausses », sans verdict (« Positif »…), avec
+  le fait brut « N hausses sur M valeurs en mouvement » ; la jauge de
+  « sentiment » de la cible n'avait aucune mesure derrière.
+
+Maintenus volontairement : pas de boutons « Vendre », pas de bleu nuit (option
+A), « Comprendre la séance » après la clôture seulement, quatre cartes d'état
+de séance conservées (présentes dans la cible).
+
 ## 10. RGPD
 
 Aucune nouvelle donnée personnelle : le profil est déduit des positions

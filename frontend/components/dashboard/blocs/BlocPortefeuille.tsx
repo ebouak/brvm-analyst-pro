@@ -6,6 +6,7 @@ import type { ResultatPerfJour } from '@/lib/dashboard/performanceJour';
 import { contributions, syntheseValorisee, secteursValorises, echantillonner } from '@/lib/dashboard/portefeuilleBloc';
 import { CadreBloc, EtatVide, Indisponible } from './Cadre';
 import CourbeValeur from './CourbeValeur';
+import AnneauRepartition from './AnneauRepartition';
 
 const sens = (v: number | null | undefined) => (v == null ? 'text-ivory' : v > 0 ? 'text-up' : v < 0 ? 'text-down' : 'text-ivory');
 
@@ -45,6 +46,10 @@ export default function BlocPortefeuille({
   const pnlPct = synth.pnlPct != null ? synth.pnlPct * 100 : null;
   const rienDeValorise = synth.valeur === 0 && synth.investi === 0;
   const listeExclus = synth.exclus.join(', ');
+  // Même sous-ensemble que syntheseValorisee : titres cotés + liquidités.
+  const lignesAnneau = etat.positions
+    .filter((p) => p.isLiquidites || (Number.isFinite(p.cours) && p.cours > 0))
+    .map((p) => ({ code: p.isLiquidites ? 'Liquidités' : p.code, valeur: p.valeur }));
 
   return (
     <CadreBloc
@@ -60,6 +65,7 @@ export default function BlocPortefeuille({
         </p>
       )}
 
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
       <div className="grid gap-3 sm:grid-cols-3">
         <Chiffre
           libelle={synth.exclus.length > 0 ? `Valeur (hors ${listeExclus})` : 'Valeur'}
@@ -92,6 +98,8 @@ export default function BlocPortefeuille({
           classe={sens(perf?.portefeuillePct)}
         />
       </div>
+        {!rienDeValorise && <AnneauRepartition lignes={lignesAnneau} total={synth.valeur} />}
+      </div>
 
       <div className="mt-5">
         <CourbeValeur points={echantillonner(etat.equityCurve)} />
@@ -107,12 +115,12 @@ export default function BlocPortefeuille({
           <thead className="text-[11px] uppercase tracking-wide text-faint">
             <tr className="border-b border-border">
               <th scope="col" className="px-1 py-2 text-left font-medium">Valeur</th>
-              <th scope="col" className="px-1 py-2 text-right font-medium">Montant</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">Qté</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">PRU</th>
               <th scope="col" className="px-1 py-2 text-right font-medium">Cours</th>
               <th scope="col" className="px-1 py-2 text-right font-medium">Var. jour</th>
-              <th scope="col" className="px-1 py-2 text-right font-medium">Poids</th>
-              <th scope="col" className="px-1 py-2 text-right font-medium">PRU</th>
-              <th scope="col" className="px-1 py-2 text-right font-medium">Plus-value latente</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">Perf. latente</th>
+              <th scope="col" className="px-1 py-2 text-right font-medium">Montant</th>
             </tr>
           </thead>
           <tbody>
@@ -126,14 +134,19 @@ export default function BlocPortefeuille({
                       <Link href={`/actions/${p.code}`} className="font-semibold text-ivory hover:text-accent-ink">{p.code}</Link>
                     )}
                   </th>
-                  <td className="tabular px-1 py-2 text-right text-ivory">{sansCours ? '—' : fmtFcfa(p.valeur)}</td>
+                  <td className="tabular px-1 py-2 text-right text-muted">{p.isLiquidites || !(p.quantite > 0) ? '—' : fmtNumber(p.quantite, 0)}</td>
+                  <td className="tabular px-1 py-2 text-right text-muted">{p.isLiquidites ? '—' : fmtNumber(p.pru, 0)}</td>
                   <td className="tabular px-1 py-2 text-right text-muted">{p.isLiquidites || sansCours ? '—' : fmtNumber(p.cours, 0)}</td>
                   <td className={`tabular px-1 py-2 text-right ${sens(v)}`}>{v != null ? fmtPctSigne(v) : '—'}</td>
-                  <td className="tabular px-1 py-2 text-right text-muted">{sansCours ? '—' : `${fmtNumber(p.poids * 100, 1)} %`}</td>
-                  <td className="tabular px-1 py-2 text-right text-muted">{p.isLiquidites ? '—' : fmtNumber(p.pru, 0)}</td>
                   <td className={`tabular px-1 py-2 text-right ${sens(p.pnl)}`}>
-                    {p.isLiquidites || sansCours ? '—' : `${fmtFcfaSigne(p.pnl)}${p.pnlPct != null ? ` (${fmtPctSigne(p.pnlPct * 100, 1)})` : ''}`}
+                    {p.isLiquidites || sansCours ? '—' : (
+                      <>
+                        {p.pnlPct != null ? fmtPctSigne(p.pnlPct * 100, 1) : '—'}
+                        <span className="block text-[11px] text-muted">{fmtFcfaSigne(p.pnl)} FCFA</span>
+                      </>
+                    )}
                   </td>
+                  <td className="tabular px-1 py-2 text-right text-ivory">{sansCours ? '—' : fmtFcfa(p.valeur)}</td>
                 </tr>
               );
             })}
