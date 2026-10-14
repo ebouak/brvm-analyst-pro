@@ -40,7 +40,6 @@ function pctSigne(v: number, d = 2): string {
   const nul = Number(Math.abs(v).toFixed(d)) === 0;
   const s = nul ? '' : v > 0 ? '+' : '−';
   return `${s}${abs} %`;
-}${fmtNumber(Math.abs(v), d)} %`;
 }
 
 /** Valeur absolue, pour les phrases dont le verbe porte déjà le sens. */
