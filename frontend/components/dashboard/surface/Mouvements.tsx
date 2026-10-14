@@ -39,8 +39,8 @@ export default function Mouvements({ id, titre, lignes }: { id: string; titre: s
                     <Link href={`/actions/${l.code}`} className="tabular block text-[13px] text-ivory hover:text-accent-ink">{l.code}</Link>
                     <span className="block max-w-[16ch] truncate text-[11.5px] text-faint" title={l.nom}>{l.nom}</span>
                   </th>
-                  <td className="tabular px-1 py-1.5 text-right text-ivory">{l.cours != null ? fmtNumber(l.cours, 0) : '—'}</td>
-                  <td className={`tabular px-1 py-1.5 text-right ${l.variation == null ? 'text-faint' : l.variation > 0 ? 'text-up' : l.variation < 0 ? 'text-down' : 'text-muted'}`}>{l.variation != null ? fmtPctSigne(l.variation) : '—'}</td>
+                  <td className="tabular whitespace-nowrap px-1 py-1.5 text-right text-ivory">{l.cours != null ? fmtNumber(l.cours, 0) : '—'}</td>
+                  <td className={`tabular whitespace-nowrap px-1 py-1.5 text-right ${l.variation == null ? 'text-faint' : l.variation > 0 ? 'text-up' : l.variation < 0 ? 'text-down' : 'text-muted'}`}>{l.variation != null ? fmtPctSigne(l.variation) : '—'}</td>
                   <td className="px-1 py-1.5 text-right"><Sparkline serie={l.serie} /></td>
                 </tr>
               ))}

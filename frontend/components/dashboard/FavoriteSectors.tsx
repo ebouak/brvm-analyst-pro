@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { fmtPctSigne } from '@/lib/format';
 import { createPublicClient } from '@/lib/supabase/public';
 
 /**
@@ -43,27 +44,29 @@ export default async function FavoriteSectors({ favorites }: { favorites: string
     .map((fav) => ({ name: fav, s: bySector.get(fav) }))
     .filter((c) => c.s && c.s.n > 0);
 
+  const ton = (v: number) => (v > 0 ? 'text-up' : v < 0 ? 'text-down' : 'text-muted');
+  if (cards.length === 0) return <p className="text-sm text-muted">Aucune donnée pour vos secteurs sur la dernière séance.</p>;
+  // Lignes plates de la surface à filets (spec §12) ; moyenne SIMPLE des valeurs du secteur.
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {cards.map(({ name, s }) => {
-        const avg = s!.sum / s!.n;
-        return (
-          <Link key={name} href={`/actions?secteur=${encodeURIComponent(name)}`}
-            className={`rounded-xl border bg-surface p-4 transition hover:bg-elevated ${avg >= 0 ? 'border-up/30' : 'border-down/30'}`}>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-white">{name}</span>
-              <span className={`tabular text-sm font-bold ${avg >= 0 ? 'text-up' : 'text-down'}`}>{avg >= 0 ? '+' : ''}{avg.toFixed(2)}%</span>
-            </div>
-            <div className="mt-2 space-y-1 text-[11px]">
-              {s!.best && <div className="flex justify-between text-up"><span>↑ {s!.best.code}</span><span className="tabular">+{s!.best.v.toFixed(2)}%</span></div>}
-              {s!.worst && <div className="flex justify-between text-down"><span>↓ {s!.worst.code}</span><span className="tabular">{s!.worst.v.toFixed(2)}%</span></div>}
-            </div>
-          </Link>
-        );
-      })}
-      {cards.length === 0 && (
-        <p className="col-span-full text-xs text-faint">Aucune donnée pour vos secteurs sur la dernière séance.</p>
-      )}
-    </div>
+    <>
+      <ul>
+        {cards.map(({ name, s }) => {
+          const avg = s!.sum / s!.n;
+          return (
+            <li key={name} className="border-t border-border py-2 first:border-t-0 first:pt-0">
+              <Link href={`/actions?secteur=${encodeURIComponent(name)}`} className="flex items-baseline justify-between gap-3 text-[13.5px] text-ivory hover:text-accent-ink">
+                <span className="min-w-0 break-words">{name}</span>
+                <span className={`tabular whitespace-nowrap ${ton(avg)}`}>{fmtPctSigne(avg)}</span>
+              </Link>
+              <p className="tabular mt-0.5 flex flex-wrap gap-x-3 text-[11.5px] text-faint">
+                {s!.best && <span>meilleure {s!.best.code} <span className={ton(s!.best.v)}>{fmtPctSigne(s!.best.v)}</span></span>}
+                {s!.worst && <span>moins bonne {s!.worst.code} <span className={ton(s!.worst.v)}>{fmtPctSigne(s!.worst.v)}</span></span>}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-xs text-faint">Moyenne simple des variations des valeurs de chaque secteur, dernière séance.</p>
+    </>
   );
 }

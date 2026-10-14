@@ -377,13 +377,10 @@ export default async function Dashboard() {
   // Widgets configurables (ordre + visibilité pilotés par le layout utilisateur).
   const sections: Record<WidgetKey, React.ReactNode> = {
     secteurs: user ? (
-      <section aria-label="Vos secteurs">
-        <div className="mb-3 flex items-center gap-2">
-          <h2 className="font-display text-lg text-white">Vos secteurs</h2>
-          <span className="rounded-full bg-gradient-to-r from-accent to-up px-2 py-0.5 text-[9px] font-bold text-bg">PERSO</span>
-        </div>
+      <Bloc id="t-favoris">
+        <TeteBloc id="t-favoris" titre="Vos secteurs" droite={<Link href="/profil" className="text-xs text-accent-ink hover:underline">Choisir</Link>} />
         <FavoriteSectors favorites={favoriteSectors} />
-      </section>
+      </Bloc>
     ) : null,
     etat: (
       <Ouverture
