@@ -43,7 +43,6 @@ import { canAccess } from '@/lib/server/featureAccess';
 import {
   SectionHeader,
   EmptyStatePremium,
-  PremiumCTA,
 } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
@@ -163,7 +162,8 @@ async function getData() {
     .select('code, cours_jour, date_marche')
     .not('cours_jour', 'is', null)
     .order('date_marche', { ascending: false })
-    .limit(20 * (typedActions.length || NB_SOCIETES_COTEES)); // 20 séances × le nombre réel de valeurs cotées
+    // PostgREST tronque en silence à 1000 lignes : on plafonne explicitement.
+    .limit(Math.min(1000, 20 * (typedActions.length || NB_SOCIETES_COTEES))); // 20 séances × le nombre réel de valeurs cotées
 
   const sparklines: Record<string, number[]> = {};
   for (const row of (histRows ?? []) as { code: string; cours_jour: number; date_marche: string }[]) {
@@ -357,13 +357,16 @@ export default async function Dashboard() {
     .map((i) => ({ code: i.code, nom: (i.libelle ?? i.code).replace(/^BRVM\s*-\s*/i, ''), variation: Number(i.variation_pct) }));
   const meneurSecteur = [...secteursJour].sort((a, b) => b.variation - a.variation)[0] ?? null;
   const versLigne = (a: ActionDaily) => ({ code: a.code, nom: a.designation?.trim() || a.code, cours: a.cours_jour, variation: a.variation_pct, serie: sparklines[a.code] ?? [] });
-  const prestige = indices.find((i) => i.code === 'BRVMPRES');
-  const b30 = indices.find((i) => i.code === 'BRVM30');
+  // Indices publiés à une autre séance que les cours : ignorés (affichés « — »).
+  const memeSeance = (c: string) => indices.find((i) => i.code === c && i.date_marche === lastDate);
+  const brvmcJour = memeSeance('BRVMC');
+  const prestige = memeSeance('BRVMPRES');
+  const b30 = memeSeance('BRVM30');
   const varCap = summary?.capitalisation_actions != null && summaryPrev?.capitalisation_actions ? (summary.capitalisation_actions / summaryPrev.capitalisation_actions - 1) * 100 : null;
   const varValeur = summary?.valeur_transactions != null && summaryPrev?.valeur_transactions ? (summary.valeur_transactions / summaryPrev.valeur_transactions - 1) * 100 : null;
   const titresEchanges = actions.reduce((t, a) => t + (a.volume ?? 0), 0);
   const chiffres: Chiffre[] = [
-    { libelle: 'BRVM Composite', valeur: fmtIndice(brvmc?.valeur ?? null), variation: brvmc?.variation_pct ?? null },
+    { libelle: 'BRVM Composite', valeur: fmtIndice(brvmcJour?.valeur ?? null), variation: brvmcJour?.variation_pct ?? null },
     { libelle: 'BRVM 30', valeur: fmtIndice(b30?.valeur ?? null), variation: b30?.variation_pct ?? null },
     { libelle: 'BRVM Prestige', valeur: fmtIndice(prestige?.valeur ?? null), variation: prestige?.variation_pct ?? null },
     { libelle: 'Valeur échangée', valeur: fmtMd(summary?.valeur_transactions ?? null), variation: varValeur, note: 'vs veille' },
@@ -398,7 +401,7 @@ export default async function Dashboard() {
     seance: (
       <GrilleInterne>
         <Cellule span={8}>{trajectoires
-          ? <Trajectoire series={trajectoires} jour={{ BRVMC: brvmc?.variation_pct ?? null, BRVM30: b30?.variation_pct ?? null }} />
+          ? <Trajectoire series={trajectoires} jour={{ BRVMC: brvmcJour?.variation_pct ?? null, BRVM30: b30?.variation_pct ?? null }} />
           : <Bloc id="t-traj"><TeteBloc id="t-traj" titre="Trajectoire des indices" /><p className="text-sm text-muted">Trajectoire momentanément indisponible.</p></Bloc>}</Cellule>
         <Cellule span={4}><LargeurMoteur hausses={metriques.hausses} baisses={metriques.baisses} stables={metriques.stables} signaux={compteSignaux} /></Cellule>
       </GrilleInterne>
@@ -439,7 +442,7 @@ export default async function Dashboard() {
       <GrilleInterne>
         <Cellule span={4}><Actualites items={actualites} /></Cellule>
         <Cellule span={4}><Motifs premium={isPremium} compte={compteMotifs} date={lastDate} /></Cellule>
-        <Cellule span={4}><Afrique indices={afrique} composite={{ valeur: brvmc?.valeur ?? null, variation: brvmc?.variation_pct ?? null }} dateSeance={lastDate} /></Cellule>
+        <Cellule span={4}><Afrique indices={afrique} composite={{ valeur: brvmcJour?.valeur ?? null, variation: brvmcJour?.variation_pct ?? null }} dateSeance={lastDate} /></Cellule>
       </GrilleInterne>
     ),
     portefeuille: (
