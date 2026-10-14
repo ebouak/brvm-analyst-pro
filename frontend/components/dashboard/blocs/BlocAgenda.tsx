@@ -50,7 +50,7 @@ export default function BlocAgenda({
                     {it.totalIndicatif != null && n != null && (
                       <>
                         {' · '}total indicatif <span className="tabular text-ivory">{fmtNumber(it.totalIndicatif, 0)} FCFA</span> pour vos{' '}
-                        {fmtNumber(n, 0)} titres, {it.type === 'paiement' ? 's&apos;ils étaient détenus' : 's&apos;ils sont détenus'} à la date de détachement
+                        {fmtNumber(n, 0)} titres, {it.type === 'paiement' ? "s'ils étaient détenus" : "s'ils sont détenus"} à la date de détachement
                       </>
                     )}
                   </p>
