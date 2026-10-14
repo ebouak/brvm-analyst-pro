@@ -10,13 +10,24 @@ import MarketStateCard, { type MarketStats } from '@/components/MarketStateCard'
 import DashboardTicker, { type TickerLine } from '@/components/dashboard/DashboardTicker';
 import FavoriteSectors from '@/components/dashboard/FavoriteSectors';
 import { chargerProfil } from '@/lib/dashboard/profil';
-import { resolveLayout, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
+import { resolveLayout, grouperEnRangees, classeRangee, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
+import type { PortfolioState } from '@/lib/portfolio/derive';
+import { construireAgenda, plusJours, HORIZON_JOURS } from '@/lib/dashboard/agenda';
+import { performanceJour } from '@/lib/dashboard/performanceJour';
+import { metriquesDepuisSeance, estSeanceClose } from '@/lib/dashboard/metriquesSeance';
+import { preparerPublications } from '@/lib/dashboard/publications';
+import { lignesPerfDepuis, variationsDuJour } from '@/lib/dashboard/portefeuilleBloc';
+import { chargerPortefeuille, chargerDividendes, chargerFermetures, chargerPublications, chargerLiquidite } from '@/lib/dashboard/chargement';
+import BlocComprendre from '@/components/dashboard/blocs/BlocComprendre';
+import BlocAgenda from '@/components/dashboard/blocs/BlocAgenda';
+import BlocPublications from '@/components/dashboard/blocs/BlocPublications';
+import BlocLiquidite from '@/components/dashboard/blocs/BlocLiquidite';
+import BlocPortefeuille from '@/components/dashboard/blocs/BlocPortefeuille';
 import TopMovers from '@/components/TopMovers';
 import RecentSignalsCard from '@/components/RecentSignalsCard';
 import BriefAssistant from '@/components/dashboard/BriefAssistant';
 import KeyMetrics from '@/components/dashboard/KeyMetrics';
 import WeeklyIndexChart from '@/components/dashboard/WeeklyIndexChart';
-import PortfolioComposition from '@/components/dashboard/PortfolioComposition';
 import NewsFeed from '@/components/dashboard/NewsFeed';
 import MarketIndices from '@/components/dashboard/MarketIndices';
 import IntraDaySignalsWidget from '@/components/dashboard/IntraDaySignalsWidget';
@@ -35,8 +46,6 @@ import {
   SectionHeader,
   EmptyStatePremium,
   PremiumCTA,
-  StatPill,
-  PremiumPanel,
 } from '@/components/ui/premium';
 import { BeamButton } from '@/components/ui/beam-button';
 
@@ -375,10 +384,60 @@ export default async function Dashboard() {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
   });
 
-  const [weekly30, weeklyC] = await Promise.all([
+  // ── Blocs adaptatifs : on ne lit que ce que le layout affiche ──────────────
+  const aujourdhui = new Date().toISOString().slice(0, 10); // Abidjan = UTC+0
+  const veut = (k: WidgetKey) => layout.includes(k);
+  const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
+  const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
+  const depuisPublications = plusJours(aujourdhui, -7);
+  const [resultatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, weekly30, weeklyC] = await Promise.all([
+    user && besoinPortefeuille
+      ? chargerPortefeuille(supa, user.id, aujourdhui)
+      : Promise.resolve<{ etat: PortfolioState; depuis: string } | null | undefined>(undefined),
+    veut('agenda') ? chargerDividendes(supa, aujourdhui, finAgenda) : Promise.resolve([]),
+    veut('agenda') ? chargerFermetures(supa, aujourdhui, finAgenda) : Promise.resolve([]),
+    veut('publications') ? chargerPublications(supa, depuisPublications) : Promise.resolve([]),
+    veut('liquidite') ? chargerLiquidite(supa) : Promise.resolve(null),
     getWeeklyIndex('BRVM30', 'BRVM 30'),
     getWeeklyIndex('BRVMC', 'BRVM Composite'),
   ]);
+  // `undefined` = visiteur, `null` = lecture en erreur.
+  const etatPortefeuille: PortfolioState | null | undefined = resultatPortefeuille ? resultatPortefeuille.etat : resultatPortefeuille;
+  const portefeuilleIndisponible = !!user && besoinPortefeuille && resultatPortefeuille === null;
+  const debutCourbe = resultatPortefeuille?.depuis ?? null;
+  const titresDetenus = (etatPortefeuille?.positions ?? []).filter((p) => !p.isLiquidites);
+  // Plusieurs lots d'un même titre : quantités ADDITIONNÉES par code.
+  const quantites = new Map<string, number>();
+  for (const p of titresDetenus) {
+    const c = p.code.trim().toUpperCase();
+    quantites.set(c, (quantites.get(c) ?? 0) + p.quantite);
+  }
+  const agenda = dividendes === null || fermetures === null
+    ? null
+    : construireAgenda({
+        aujourdhui,
+        dividendes,
+        assemblees: [], // spec §4.1 : vide tant qu'aucune date de RÉUNION n'est collectée
+        fermetures,
+        positions: titresDetenus.map((p) => ({ code: p.code, quantite: p.quantite })),
+      });
+  const publications = publicationsBrutes === null ? null : preparerPublications(publicationsBrutes, new Set(quantites.keys()));
+  const coursSeance = actions.map((a) => ({ code: a.code, cours_jour: a.cours_jour, variation_pct: a.variation_pct, date_marche: a.date_marche }));
+  const brvmc = indices.find((i) => i.code === 'BRVMC');
+  const perf = etatPortefeuille
+    ? performanceJour(
+        lignesPerfDepuis(etatPortefeuille.positions, coursSeance, lastDate),
+        brvmc ? { variationPct: brvmc.variation_pct, dateMarche: brvmc.date_marche } : null,
+      )
+    : null;
+  const metriques = metriquesDepuisSeance({
+    dateMarche: lastDate,
+    actions,
+    indices,
+    valeurTransactions: summary?.valeur_transactions ?? null,
+    valeurTransactionsVeille: summaryPrev?.valeur_transactions ?? null,
+  });
+  const seanceClose = estSeanceClose(lastDate, new Date());
 
   // Widgets configurables (ordre + visibilité pilotés par le layout utilisateur).
   const sections: Record<WidgetKey, React.ReactNode> = {
@@ -473,10 +532,18 @@ export default async function Dashboard() {
       </section>
     ),
     portefeuille: (
-      <section aria-label="Composition du portefeuille">
-        <p className="overline text-muted mb-4 tracking-[0.16em]">Mon portefeuille</p>
-        <PortfolioComposition />
-      </section>
+      <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsDuJour(coursSeance, lastDate)} />
+    ),
+    comprendre: <BlocComprendre metriques={metriques} close={seanceClose} />,
+    agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={quantites} portefeuilleIndisponible={portefeuilleIndisponible} />,
+    publications: <BlocPublications items={publications} depuis={depuisPublications} portefeuilleIndisponible={portefeuilleIndisponible} />,
+    liquidite: (
+      <BlocLiquidite
+        donnees={liquidite}
+        positions={titresDetenus.map((p) => ({ code: p.code, valeur: p.cours > 0 ? p.valeur : null }))}
+        dateSeance={lastDate}
+        portefeuilleIndisponible={portefeuilleIndisponible}
+      />
     ),
   };
 
@@ -510,7 +577,7 @@ export default async function Dashboard() {
           </div>
 
           {/* Actions nav */}
-          <nav className="flex items-center gap-2" aria-label="Navigation rapide">
+          <nav className="flex flex-wrap items-center gap-2" aria-label="Navigation rapide">
             <BeamButton href="/signaux">Signaux</BeamButton>
             <BeamButton href="/portefeuille">Portefeuille</BeamButton>
             {user && (
@@ -558,6 +625,16 @@ export default async function Dashboard() {
           </Link>
         )}
 
+        {/* ── Widgets configurables, par rangées (spec §4.0) ── */}
+        {grouperEnRangees(layout.filter((k) => sections[k] != null)).map((r) => (
+          <div key={r.cles.join('-')} className={classeRangee(r)}>
+            {r.cles.map((k) => (
+              <div key={k} className="min-w-0">{sections[k]}</div>
+            ))}
+          </div>
+        ))}
+
+        {/* Sections fixes, sous les widgets : le premier bloc lu est celui du profil (spec §8). */}
         {/* ── Macro UEMOA : taux BCEAO + change (section fixe) ── */}
         <MacroBanner />
 
@@ -565,12 +642,11 @@ export default async function Dashboard() {
             un layout utilisateur sauvegardé avant son ajout la masquerait) ── */}
         <section aria-label="Indices pan-africains">
           <AfricanIndicesCard
-            brvmComposite={(() => {
-              const brvmc = indices.find((i) => i.code === 'BRVMC');
-              return brvmc
+            brvmComposite={
+              brvmc
                 ? { valeur: (brvmc.valeur as number | null) ?? null, variation_pct: brvmc.variation_pct ?? null }
-                : null;
-            })()}
+                : null
+            }
           />
         </section>
 
@@ -613,11 +689,6 @@ export default async function Dashboard() {
             </div>
           </div>
         </section>
-
-        {/* ── Widgets configurables (ordre + visibilité via /dashboard/personnaliser) ── */}
-        {layout.map((key) => (
-          <div key={key}>{sections[key]}</div>
-        ))}
 
         {/* ── Pied de page premium ───────────────────────────────────────── */}
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-6">

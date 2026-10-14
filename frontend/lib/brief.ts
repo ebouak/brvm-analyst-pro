@@ -1,5 +1,5 @@
 import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
-import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtDateFR, fmtPctSigne as pctSigne, fmtPctAbs as pctAbs } from '@/lib/format';
 
 // ─── Public interfaces ────────────────────────────────────────────────────────
 
@@ -33,19 +33,6 @@ export interface Brief {
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
-
-/** Variation signée au format français : « +1,95 % », « −0,26 % ». */
-function pctSigne(v: number, d = 2): string {
-  const abs = fmtNumber(Math.abs(v), d);
-  const nul = Number(Math.abs(v).toFixed(d)) === 0;
-  const s = nul ? '' : v > 0 ? '+' : '−';
-  return `${s}${abs} %`;
-}
-
-/** Valeur absolue, pour les phrases dont le verbe porte déjà le sens. */
-function pctAbs(v: number, d = 2): string {
-  return `${fmtNumber(Math.abs(v), d)} %`;
-}
 
 /** « L'indice BRVM 30 recule de 0,26 % à 263,47 points » — jamais « recule de -0.26% ». */
 function phraseIndice(sujet: string, v: number, valeur: number): string {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { WIDGETS, ordreParDefaut, resolveLayout, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
+import { WIDGETS, MASQUES_PAR_DEFAUT, ordreParDefaut, resolveLayout, type WidgetKey, type DashboardLayout, type Profil } from '@/lib/dashboard/widgets';
 
 const META = new Map(WIDGETS.map((w) => [w.key, w]));
 
@@ -33,7 +33,7 @@ export default function DashboardCustomizer({ initial, profil }: { initial: Dash
     setMsg(r.ok ? '✓ Disposition enregistrée' : 'Échec de l’enregistrement');
   }
   function reset() {
-    setOrder([...ordreParDefaut(profil)]); setHidden(new Set()); setMsg(null);
+    setOrder([...ordreParDefaut(profil)]); setHidden(new Set(MASQUES_PAR_DEFAUT[profil])); setMsg(null);
   }
 
   return (

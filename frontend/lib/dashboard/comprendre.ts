@@ -6,7 +6,7 @@
  * Une donnée manquante supprime la phrase ; elle ne devient jamais 0.
  * Formulations neutres, au passé, sans cause affirmée, sans conseil.
  */
-import { fmtNumber, fmtFcfa } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtPctSigne as pctSigne, fmtPctAbs as pctAbs } from '@/lib/format';
 
 export interface MetriquesSeance {
   dateMarche: string;
@@ -25,12 +25,6 @@ export interface Constat {
   texte: string;
   sens: string;
 }
-
-const pctAbs = (v: number, d = 2) => `${fmtNumber(Math.abs(v), d)} %`;
-const pctSigne = (v: number, d = 2) => {
-  const r = Number(v.toFixed(d));
-  return `${r > 0 ? '+' : r < 0 ? '−' : ''}${pctAbs(v, d)}`;
-};
 
 export function comprendreSeance(m: MetriquesSeance): Constat[] {
   const out: Constat[] = [];
