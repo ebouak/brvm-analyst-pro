@@ -390,10 +390,10 @@ export default async function Dashboard() {
   const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
   const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
   const depuisPublications = plusJours(aujourdhui, -7);
-  const [etatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, weekly30, weeklyC] = await Promise.all([
+  const [resultatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, weekly30, weeklyC] = await Promise.all([
     user && besoinPortefeuille
       ? chargerPortefeuille(supa, user.id, aujourdhui)
-      : Promise.resolve<PortfolioState | null | undefined>(undefined),
+      : Promise.resolve<{ etat: PortfolioState; depuis: string } | null | undefined>(undefined),
     veut('agenda') ? chargerDividendes(supa, aujourdhui, finAgenda) : Promise.resolve([]),
     veut('agenda') ? chargerFermetures(supa, aujourdhui, finAgenda) : Promise.resolve([]),
     veut('publications') ? chargerPublications(supa, depuisPublications) : Promise.resolve([]),
@@ -401,8 +401,16 @@ export default async function Dashboard() {
     getWeeklyIndex('BRVM30', 'BRVM 30'),
     getWeeklyIndex('BRVMC', 'BRVM Composite'),
   ]);
+  // `undefined` = visiteur, `null` = lecture en erreur.
+  const etatPortefeuille: PortfolioState | null | undefined = resultatPortefeuille ? resultatPortefeuille.etat : resultatPortefeuille;
+  const debutCourbe = resultatPortefeuille?.depuis ?? null;
   const titresDetenus = (etatPortefeuille?.positions ?? []).filter((p) => !p.isLiquidites);
-  const quantites = new Map(titresDetenus.map((p) => [p.code.trim().toUpperCase(), p.quantite]));
+  // Plusieurs lots d'un même titre : quantités ADDITIONNÉES par code.
+  const quantites = new Map<string, number>();
+  for (const p of titresDetenus) {
+    const c = p.code.trim().toUpperCase();
+    quantites.set(c, (quantites.get(c) ?? 0) + p.quantite);
+  }
   const agenda = dividendes === null || fermetures === null
     ? null
     : construireAgenda({
@@ -523,7 +531,7 @@ export default async function Dashboard() {
       </section>
     ),
     portefeuille: (
-      <BlocPortefeuille etat={etatPortefeuille} perf={perf} variations={variationsDuJour(coursSeance, lastDate)} />
+      <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsDuJour(coursSeance, lastDate)} />
     ),
     comprendre: <BlocComprendre metriques={metriques} close={seanceClose} />,
     agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={quantites} />,

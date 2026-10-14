@@ -42,13 +42,19 @@ export function lignesLiquiditePositions(
   liq: LiquiditeSource[],
 ): LigneLiquidite[] {
   const parCode = new Map(liq.map((r) => [r.code.trim().toUpperCase(), r]));
-  return positions
-    .filter((p) => p.code.trim().toUpperCase() !== LIQUIDITES_CODE)
-    .map((p) => {
-      const code = p.code.trim().toUpperCase();
+  // Plusieurs lots d'un même titre : une ligne par valeur. Un lot sans valeur rend le total inconnu (jamais sous-compté).
+  const agreges = new Map<string, number | null>();
+  for (const p of positions) {
+    const code = p.code.trim().toUpperCase();
+    if (code === LIQUIDITES_CODE) continue;
+    const v = fini(p.valeur) ? p.valeur : null;
+    const ancien = agreges.get(code);
+    agreges.set(code, ancien === undefined ? v : ancien == null || v == null ? null : ancien + v);
+  }
+  return [...agreges]
+    .map(([code, valeur]) => {
       const r = parCode.get(code);
       const moyenne = r && fini(r.valeur_moyenne_30j) && r.valeur_moyenne_30j > 0 ? r.valeur_moyenne_30j : null;
-      const valeur = fini(p.valeur) ? p.valeur : null;
       return {
         code,
         valeurPosition: valeur,

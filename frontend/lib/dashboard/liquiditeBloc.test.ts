@@ -33,6 +33,20 @@ describe('lignesLiquiditePositions', () => {
     expect(r[1]!.classe).toBe('A');
   });
 
+  it('plusieurs lots du même titre : une ligne, valeur additionnée', () => {
+    const r = lignesLiquiditePositions([{ code: 'SNTS', valeur: 2_000_000 }, { code: 'snts ', valeur: 3_000_000 }], liq);
+    expect(r).toHaveLength(1);
+    expect(r[0]!.valeurPosition).toBe(5_000_000);
+    expect(r[0]!.duree).toEqual({ seances: 1, alerte: false });
+  });
+
+  it('un lot sans valeur rend le total inconnu, jamais sous-compté', () => {
+    const r = lignesLiquiditePositions([{ code: 'SNTS', valeur: 2_000_000 }, { code: 'SNTS', valeur: null }], liq);
+    expect(r).toHaveLength(1);
+    expect(r[0]!.valeurPosition).toBeNull();
+    expect(r[0]!.duree.seances).toBeNull();
+  });
+
   it('valeur sans ligne ou sans moyenne : non mesurée, jamais 0', () => {
     const r = lignesLiquiditePositions([{ code: 'SVOC', valeur: 1_000_000 }, { code: 'ZZZZ', valeur: 1_000_000 }], liq);
     for (const x of r) {

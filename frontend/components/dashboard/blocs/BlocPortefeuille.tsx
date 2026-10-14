@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { fmtFcfa, fmtFcfaSigne, fmtNumber, fmtPctSigne } from '@/lib/format';
+import { fmtDateFR, fmtFcfa, fmtFcfaSigne, fmtNumber, fmtPctSigne } from '@/lib/format';
 import type { PortfolioState } from '@/lib/portfolio/derive';
 import type { ResultatPerfJour } from '@/lib/dashboard/performanceJour';
 import { contributions, syntheseValorisee, secteursValorises, echantillonner } from '@/lib/dashboard/portefeuilleBloc';
@@ -20,9 +20,10 @@ const INVITATION = [
  * Aucun bouton « Vendre » : la plateforme ne passe pas d'ordres (spec §9).
  */
 export default function BlocPortefeuille({
-  etat, perf, variations,
+  etat, perf, variations, debutCourbe,
 }: {
   etat: PortfolioState | null | undefined;
+  debutCourbe: string | null;
   perf: ResultatPerfJour | null;
   variations: ReadonlyMap<string, number | null>;
 }) {
@@ -94,8 +95,9 @@ export default function BlocPortefeuille({
       <div className="mt-5">
         <CourbeValeur points={echantillonner(etat.equityCurve)} />
         <p className="mt-1 text-[11px] text-faint">
-          Trait plein : valeur au cours du marché · pointillés : capital investi. Suppose une détention continue depuis la date
-          d&apos;entrée de chaque position.
+          Courbe sur la période depuis le {debutCourbe ? fmtDateFR(debutCourbe) : 'début de l’historique'} (au plus 12 mois). Trait plein : valeur au cours du
+          marché · pointillés : capital investi. Suppose une détention continue depuis la date d&apos;entrée de chaque position.
+          Historique complet sur la page Portefeuille.
         </p>
       </div>
 
