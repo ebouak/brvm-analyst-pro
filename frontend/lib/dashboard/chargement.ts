@@ -13,6 +13,8 @@ import type { DividendeSource, FermetureSource } from './agenda';
 import type { PublicationSource } from './publications';
 import type { LiquiditeSource } from './liquiditeBloc';
 
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
 function journal(bloc: string, message: string): null {
   console.error(`[dashboard] ${bloc} : lecture impossible :`, message);
   return null;
@@ -64,6 +66,7 @@ export async function chargerPortefeuille(sb: SupabaseClient, userId: string, au
 }
 
 export async function chargerDividendes(sb: SupabaseClient, debut: string, fin: string): Promise<DividendeSource[] | null> {
+  if (!ISO.test(debut) || !ISO.test(fin)) return journal('agenda', 'dates invalides');
   const { data, error } = await sb
     .from('dividends')
     .select('code, montant, ex_date, payment_date, base_fiscale, source')
@@ -74,6 +77,7 @@ export async function chargerDividendes(sb: SupabaseClient, debut: string, fin: 
 }
 
 export async function chargerFermetures(sb: SupabaseClient, debut: string, fin: string): Promise<FermetureSource[] | null> {
+  if (!ISO.test(debut) || !ISO.test(fin)) return journal('agenda', 'dates invalides');
   const { data, error } = await sb
     .from('market_calendar')
     .select('date, holiday_name, is_trading_day')

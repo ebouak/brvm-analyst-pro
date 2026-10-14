@@ -18,7 +18,6 @@ export default function CourbeValeur({ points }: { points: EquityPoint[] }) {
   const resume = `Valeur du portefeuille : ${fmtFcfa(premier.value)} FCFA au ${fmtDateFR(premier.date)}, ${fmtFcfa(dernier.value)} FCFA au ${fmtDateFR(dernier.date)} ; capital investi : ${fmtFcfa(dernier.invested)} FCFA.`;
   return (
     <div className="h-56 w-full" role="img" aria-label={resume}>
-      <p className="sr-only">{resume}</p>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 6, right: 12, left: 0, bottom: 4 }}>
           <CartesianGrid stroke={c.border} strokeDasharray="3 3" vertical={false} />
