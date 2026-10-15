@@ -1,4 +1,5 @@
 'use client';
+import { SECTEURS_2026, secteursCourants } from '@/lib/secteurs/nomenclature';
 
 import { useRef, useState } from 'react';
 import UserAvatar from './UserAvatar';
@@ -15,7 +16,8 @@ const LEVELS = [
   { v: 'beginner', l: 'Débutant' }, { v: 'intermediate', l: 'Intermédiaire' },
   { v: 'advanced', l: 'Avancé' }, { v: 'professional', l: 'Professionnel' },
 ];
-const SECTORS = ['Finance', 'Télécommunications', 'Énergie', 'Agro-industrie', 'Distribution', 'Industrie', 'Transport', 'Services publics'];
+// Nomenclature BRVM 2026 : les libellés doivent être ceux de la base, sinon « Vos secteurs » reste vide.
+const SECTORS = SECTEURS_2026;
 
 /** Redimensionne une image (canvas) à 400×400 max, qualité 0.85 → Blob JPEG. */
 async function resize(file: File, max = 400): Promise<Blob> {
@@ -40,7 +42,7 @@ export default function ProfileClient({ initial, email, isPremium, initialPrefer
   const [bio, setBio] = useState(initial.bio ?? '');
   const [location, setLocation] = useState(initial.location ?? '');
   const [level, setLevel] = useState(initial.experience_level ?? '');
-  const [sectors, setSectors] = useState<string[]>(initial.favorite_sectors ?? []);
+  const [sectors, setSectors] = useState<string[]>(secteursCourants(initial.favorite_sectors));
   const [briefFreq, setBriefFreq] = useState<string>(initialPreferences.briefFrequency ?? 'weekly');
   const [notify, setNotify] = useState({
     signaux: initialPreferences.notify?.signaux ?? false,

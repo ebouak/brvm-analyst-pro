@@ -280,7 +280,7 @@
             {
               "nom": "BRVM Composite",
               "valeur": "478,53",
-              "detail": "Toutes les actions cotées, dividendes inclus · le baromètre officiel",
+              "detail": "Toutes les actions cotées · le baromètre officiel, mesuré sur les seuls cours",
               "mot": "composite"
             },
             {
@@ -335,7 +335,7 @@
               478.53
             ]
           },
-          "voix": "Deux indices mesurent la santé d'ensemble du marché. Quand un indice monte, les valeurs qui le composent ont progressé en moyenne. Le BRVM Composite regroupe toutes les actions cotées, dividendes inclus : c'est le baromètre officiel. Il clôturait à quatre cent soixante-dix-huit points cinquante-trois le dix-sept juillet 2026. Le BRVM 30 suit les trente valeurs les plus liquides ; il remplace le BRVM 10 depuis 2023. Il clôturait le même jour à deux cent vingt-sept points soixante-dix."
+          "voix": "Deux indices mesurent la santé d'ensemble du marché. Quand un indice monte, les valeurs qui le composent ont progressé en moyenne. Le BRVM Composite regroupe toutes les actions cotées : c'est le baromètre officiel. Il ne suit que les cours ; pour les dividendes réinvestis, la BRVM publie depuis janvier 2026 un indice Total Return. Il clôturait à quatre cent soixante-dix-huit points cinquante-trois le dix-sept juillet 2026. Le BRVM 30 suit les trente valeurs les plus liquides ; il remplace le BRVM 10 depuis 2023. Il clôturait le même jour à deux cent vingt-sept points soixante-dix."
         }
       ]
     },

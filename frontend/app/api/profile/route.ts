@@ -1,6 +1,7 @@
 // API du profil utilisateur. GET = profil de l'utilisateur connecté.
 // PATCH = met à jour UNIQUEMENT des champs whitelistés (jamais email/is_premium/id)
 // via service_role après authentification → pas d'escalade de privilège.
+import { secteursCourants } from '@/lib/secteurs/nomenclature';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
@@ -32,7 +33,8 @@ export async function PATCH(req: Request) {
     let v = body[k];
     if (k === 'experience_level' && v != null && !LEVELS.includes(String(v))) continue;
     if (k === 'bio' && typeof v === 'string') v = v.slice(0, 160);
-    if (k === 'favorite_sectors' && Array.isArray(v)) v = v.slice(0, 12).map((s) => String(s).slice(0, 40));
+    // Nomenclature 2026 seulement : un libellé hors liste ne correspondrait à aucun secteur en base.
+    if (k === 'favorite_sectors' && Array.isArray(v)) v = secteursCourants(v.slice(0, 12).map((s) => String(s).slice(0, 40)));
     patch[k] = v;
   }
 
