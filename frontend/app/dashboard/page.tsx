@@ -1,3 +1,4 @@
+import { secteursCourants } from '@/lib/secteurs/nomenclature';
 import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import { createClient } from '@/lib/supabase/server';
@@ -253,7 +254,7 @@ export default async function Dashboard() {
         .limit(10),
       chargerProfil(supa, user.id),
     ]);
-    favoriteSectors = (prof?.favorite_sectors as string[] | null) ?? [];
+    favoriteSectors = secteursCourants(prof?.favorite_sectors as string[] | null);
     dashboardLayout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
     isPremium = Boolean(prof?.is_premium);
 
