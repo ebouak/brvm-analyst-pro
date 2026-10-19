@@ -1,5 +1,5 @@
 import 'server-only';
-import type { VenteChariow } from './regles';
+import { ID_VENTE, type VenteChariow } from './regles';
 
 /**
  * Client HTTP Chariow — SERVEUR UNIQUEMENT (`server-only` fait échouer le build
@@ -94,7 +94,7 @@ export function initierCheckout(corps: InitCheckout): Promise<ReponseCheckout> {
 
 /** GET /v1/sales/{id} — la seule source de vérité sur une vente. */
 export function lireVente(saleId: string): Promise<VenteChariow> {
-  if (!/^sal_[A-Za-z0-9]{3,100}$/.test(saleId)) {
+  if (!ID_VENTE.test(saleId)) {
     return Promise.reject(new ErreurChariow('identifiant de vente invalide', 400, false));
   }
   return appeler<VenteChariow>(`/sales/${encodeURIComponent(saleId)}`, { method: 'GET' });
