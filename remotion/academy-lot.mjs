@@ -34,9 +34,18 @@ const lancer = (cmd, args) => spawnSync(cmd, args, { cwd: ici, stdio: ['ignore',
 log(`lot : ${taches.map((t) => t.id).join(' ')}`);
 for (const t of taches) {
   const debut = Date.now();
-  let r = lancer('node', ['academy-depuis-cours.mjs', t.slug, String(t.n)]);
-  if (r.status !== 0) { log(`${t.id} ÉCHEC script : ${(r.stderr || r.stdout).trim().slice(-300)}`); process.exit(1); }
-  log(r.stdout.trim());
+  // Un script écrit à la main (leçon 1 : courbe réelle, chiffres recoupés) n'est
+  // jamais écrasé par le script généré : seuls les scripts générés sont refaits.
+  const json = `${ici}academy/${t.id}.json`;
+  const faitMain = existsSync(json) && !String(JSON.parse(readFileSync(json, 'utf8'))._ ?? '').startsWith('Généré par academy-depuis-cours');
+  let r;
+  if (faitMain) {
+    log(`${t.id} script écrit à la main : conservé`);
+  } else {
+    r = lancer('node', ['academy-depuis-cours.mjs', t.slug, String(t.n)]);
+    if (r.status !== 0) { log(`${t.id} ÉCHEC script : ${(r.stderr || r.stdout).trim().slice(-300)}`); process.exit(1); }
+    log(r.stdout.trim());
+  }
 
   r = lancer('node', ['academy-voix.mjs', t.id]);
   if (r.status === 3) { log(`${t.id} ARRÊT : ${r.stderr.trim().split('\n').pop()}`); process.exit(3); }
@@ -45,8 +54,10 @@ for (const t of taches) {
 
   // Props par fichier : sous Windows, le shell mutile les guillemets d'un JSON en ligne.
   writeFileSync(`${ici}out/props-${t.id}.json`, JSON.stringify({ lecon: t.id, section: null }));
+  // Délai par image porté à 2 min : sur un portable sur batterie (processeur
+  // bridé), le défaut de 30 s a fait échouer un rendu entier après 1 h 30.
   r = lancer('npx', ['remotion', 'render', 'index.ts', 'academy-lecon', `out/academy-${t.id}.mp4`, '--codec', 'h264', '--crf', '20',
-    `--props=out/props-${t.id}.json`, '--log=error']);
+    `--props=out/props-${t.id}.json`, '--timeout=120000', '--log=error']);
   if (r.status !== 0 || !existsSync(`${ici}out/academy-${t.id}.mp4`)) { log(`${t.id} ÉCHEC rendu : ${(r.stderr || r.stdout).trim().slice(-300)}`); process.exit(1); }
 
   r = lancer('node', ['academy-publie.mjs', t.id]);

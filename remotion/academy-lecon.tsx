@@ -12,6 +12,7 @@ import {
 } from 'remotion';
 import { MONO, SANS, SERIF } from './polices';
 import { C, FPS, Logo, t } from './ecosysteme';
+import { Mascotte, Pictogramme, PhotoFond, choisirPicto } from './academy-visuels';
 
 /**
  * Une leçon Academy entière en motion design, 16:9, voix off.
@@ -115,13 +116,22 @@ function Balayage({ teinte }: { teinte: string }) {
   return <div style={{ position: 'absolute', top: -200, bottom: -200, left: x, width: 420, transform: 'skewX(-18deg)', background: `linear-gradient(90deg, transparent, ${teinte}55, ${C.blanc}33, ${teinte}55, transparent)`, filter: 'blur(6px)', mixBlendMode: 'screen' }} />;
 }
 
-/** Entrée de scène : léger zoom arrière, flou dissipé ; sortie en fondu. */
-function Cadre({ duree, children }: { duree: number; children: React.ReactNode }) {
+/**
+ * Entrée de scène, en alternance pour rythmer : zoom arrière, glissé latéral,
+ * ou bascule 3D ; flou dissipé et sortie en fondu dans tous les cas.
+ */
+function Cadre({ duree, variante = 0, children }: { duree: number; variante?: number; children: React.ReactNode }) {
   const f = useCurrentFrame();
   const o = Math.min(t(f, 0, 12), t(f, duree - 10, duree, 1, 0));
-  const z = 1.05 - 0.05 * t(f, 0, 24) + 0.012 * (f / Math.max(1, duree));
+  const e = t(f, 0, 22);
+  const derive = 0.012 * (f / Math.max(1, duree));
+  const transforms = [
+    `scale(${1.05 - 0.05 * e + derive})`,
+    `translateX(${(1 - e) * 160}px) scale(${1 + derive})`,
+    `perspective(1800px) rotateY(${(1 - e) * -14}deg) scale(${1 + derive})`,
+  ];
   return (
-    <AbsoluteFill style={{ opacity: o, color: C.blanc, fontFamily: SANS, transform: `scale(${z})`, filter: `blur(${(1 - t(f, 0, 14)) * 10}px)` }}>
+    <AbsoluteFill style={{ opacity: o, color: C.blanc, fontFamily: SANS, transform: transforms[variante % 3], transformOrigin: 'left center', filter: `blur(${(1 - t(f, 0, 14)) * 10}px)` }}>
       {children}
     </AbsoluteFill>
   );
@@ -220,8 +230,12 @@ function Ouverture({ s, plan, teinte }: G) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const items: string[] = s.sommaire ?? [];
+  const photo = (plan as PlanLecon & { photo?: { url: string; credit?: string } | null }).photo;
+  const { durationInFrames } = useVideoConfig();
   return (
     <>
+      {/* Photo de la leçon, en mouvement lent, sous un voile sombre. */}
+      {photo?.url && <PhotoFond url={photo.url} credit={photo.credit} teinte={teinte} duree={durationInFrames} />}
       <div style={{ position: 'absolute', left: 90, top: 200, width: 860 }}>
         <div style={{ filter: `drop-shadow(0 0 ${30 * t(f, 10, 40)}px ${teinte})` }}><Logo taille={130} prog={t(f, 0, 36)} /></div>
         <Entre debut={16}><Badge teinte={teinte} style={{ marginTop: 40 }}>{plan.cours.toUpperCase()}</Badge></Entre>
@@ -244,7 +258,7 @@ function Ouverture({ s, plan, teinte }: G) {
   );
 }
 
-function Chapitre({ s, dv, sec, teinte }: G) {
+function Chapitre({ s, dv, sec, teinte, plan }: G) {
   const f = useCurrentFrame();
   const type = TYPES[sec.type] ?? TYPES.definition;
   const num = String(sec.n).padStart(2, '0');
@@ -254,8 +268,13 @@ function Chapitre({ s, dv, sec, teinte }: G) {
       <div style={{ position: 'absolute', right: 40, top: 80, fontFamily: SERIF, fontWeight: 700, fontSize: 640, lineHeight: 1, color: 'transparent', WebkitTextStroke: `3px ${teinte}55`, transform: `scale(${1.25 - 0.25 * t(f, 0, 40)}) translateX(${(1 - t(f, 0, 40)) * 120}px)`, opacity: 0.9 * t(f, 0, 20) }}>
         {num}
       </div>
-      <div style={{ position: 'absolute', left: 90, top: 300, width: 1300 }}>
-        <Entre debut={4}><Badge teinte={teinte}>{type.label.toUpperCase()} · SECTION {sec.n}</Badge></Entre>
+      {/* Le narrateur entre en scène et salue l'ouverture de la section. */}
+      <div style={{ position: 'absolute', right: 150, bottom: 90 }}>
+        <Mascotte src={staticFile(`academy/${plan.id}/${s.id}.mp3`)} teinte={teinte} taille={330} gestes={[14]} entree={2} />
+      </div>
+      <div style={{ position: 'absolute', left: 90, top: 210, width: 1300 }}>
+        <Pictogramme nom={choisirPicto(sec.titre, sec.type)} debut={4} taille={120} couleur={teinte} />
+        <Entre debut={4} style={{ marginTop: 34 }}><Badge teinte={teinte}>{type.label.toUpperCase()} · SECTION {sec.n}</Badge></Entre>
         <Mots texte={sec.titre} debut={10} pas={3} barre={barre} style={{ fontFamily: SERIF, fontSize: sec.titre.length > 50 ? 82 : 100, fontWeight: 600, lineHeight: 1.06, marginTop: 40 }} />
         <div style={{ marginTop: 40, height: 6, width: 300, borderRadius: 3, background: teinte, boxShadow: `0 0 20px ${teinte}`, transformOrigin: 'left', transform: `scaleX(${t(f, 18, 40)})` }} />
       </div>
@@ -404,7 +423,7 @@ function Croissance({ s, dv, teinte }: G) {
   );
 }
 
-function Stats({ s, dv, teinte }: G) {
+function Stats({ s, dv, teinte, sec }: G) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const stats: { label: string; valeur: string; unite: string; detail: string; mot?: string; part?: number }[] = s.stats;
@@ -420,7 +439,10 @@ function Stats({ s, dv, teinte }: G) {
           const cible = Number(st.valeur.replace(/\D/g, ''));
           return (
             <div key={st.label} style={{ padding: '40px 34px', ...panneau(teinte), minHeight: 460, display: 'flex', flexDirection: 'column', opacity: k, transform: `rotateX(${(1 - k) * 60}deg) translateY(${(1 - k) * 60}px)`, transformOrigin: 'bottom' }}>
-              <div style={{ fontFamily: MONO, fontSize: 21, letterSpacing: '.2em', color: teinte }}>{st.label.toUpperCase()}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div style={{ fontFamily: MONO, fontSize: 21, letterSpacing: '.2em', color: teinte }}>{st.label.toUpperCase()}</div>
+                <Pictogramme nom={choisirPicto(`${st.label} ${st.detail}`, sec.type)} debut={d + 4} taille={56} couleur={teinte} />
+              </div>
               <div style={{ fontFamily: MONO, fontSize: st.valeur.length > 12 ? 54 : st.valeur.length > 7 ? 70 : st.valeur.length > 3 ? 94 : 140, fontWeight: 700, marginTop: 34, lineHeight: 1, fontVariantNumeric: 'tabular-nums', textShadow: `0 0 30px ${teinte}55` }}>{entierPur ? entier(cible * t(f, d, d + 24)) : st.valeur}</div>
               {st.unite && <div style={{ fontSize: 32, color: C.gris, marginTop: 10 }}>{st.unite}</div>}
               <div style={{ fontSize: 27, color: C.gris, marginTop: 'auto', lineHeight: 1.35 }}>{st.detail}</div>
@@ -809,7 +831,7 @@ function Profil({ s, dv, teinte }: G) {
   );
 }
 
-function Etapes({ s, dv, teinte }: G) {
+function Etapes({ s, dv, teinte, sec }: G) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const etapes: { titre: string; detail: string; mot?: string; part?: number; cle?: boolean; logos?: string[] }[] = s.etapes;
@@ -831,6 +853,7 @@ function Etapes({ s, dv, teinte }: G) {
           <div key={e.titre} style={{ position: 'absolute', left: X - 50, top: Y0 + i * PAS, right: 90, display: 'flex', gap: 40, alignItems: 'center', opacity: k, transform: `translateX(${(1 - k) * 80}px)` }}>
             <div style={{ width: R, height: R, borderRadius: '50%', background: C.fond, border: `4px solid ${teinte}`, boxShadow: `0 0 30px ${teinte}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: MONO, fontSize: serre ? 34 : 44, fontWeight: 700, color: teinte, flexShrink: 0 }}>{e.cle ? '★' : i + 1}</div>
             <div style={{ ...panneau(teinte, !!e.cle), padding: serre ? '14px 26px' : '22px 30px', flex: 1, display: 'flex', alignItems: 'center', gap: 24 }}>
+              <Pictogramme nom={choisirPicto(`${e.titre} ${e.detail}`, sec.type)} debut={debuts[i] + 6} taille={serre ? 58 : 72} couleur={teinte} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: SERIF, fontSize: serre ? 34 : 44, fontWeight: 600 }}>{e.titre}</div>
                 <div style={{ fontSize: serre ? 23 : 27, color: C.gris, marginTop: 6 }}>{e.detail}</div>
@@ -976,7 +999,12 @@ function Secteurs({ s, dv }: G) {
 function Fin({ s, teinte, plan }: G) {
   const f = useCurrentFrame();
   return (
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 220px' }}>
+    <>
+    {/* Le narrateur salue en fin de leçon. */}
+    <div style={{ position: 'absolute', left: 90, bottom: 80 }}>
+      <Mascotte src={staticFile(`academy/${plan.id}/${s.id}.mp3`)} teinte={teinte} taille={280} entree={2} salut />
+    </div>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 420px' }}>
       <Entre debut={2}><div style={{ fontFamily: MONO, fontSize: 26, letterSpacing: '.3em', color: teinte }}>{String(s.surtitre ?? 'En une phrase').toUpperCase()}</div></Entre>
       <Mots texte={s.retenir} debut={8} pas={2} style={{ fontFamily: SERIF, fontSize: 70, fontWeight: 600, lineHeight: 1.15, marginTop: 30, justifyContent: 'center' }} />
       <div style={{ marginTop: 80, display: 'flex', alignItems: 'center', gap: 22, opacity: t(f, 50, 70), filter: `drop-shadow(0 0 ${24 * t(f, 60, 90)}px ${teinte})` }}>
@@ -986,6 +1014,7 @@ function Fin({ s, teinte, plan }: G) {
       <Entre debut={70}><div style={{ fontSize: 22, color: C.sourd, marginTop: 34 }}>Contenu pédagogique · pas un conseil en investissement</div></Entre>
       <Entre debut={76}><div style={{ fontSize: 19, color: C.sourd, marginTop: 10 }}>{(plan as PlanLecon & { mention?: string }).mention ?? 'Chiffres de la leçon, recoupés avec la base WestBourse le 14.10.2026'}</div></Entre>
     </div>
+    </>
   );
 }
 
@@ -994,44 +1023,48 @@ function Fin({ s, teinte, plan }: G) {
 type Bloc = { genre: 'para' | 'puce' | 'ok' | 'ko' | 'num'; n?: number; texte: string; part: number; suite?: boolean };
 
 /** Texte intégral d'une section, bloc par bloc, au rythme de la voix ; le bloc lu est mis en avant. */
-function Texte({ s, dv, teinte, sec }: G) {
+function Texte({ s, dv, teinte, sec, plan }: G) {
   const f = useCurrentFrame();
   const blocs: Bloc[] = s.blocs;
   const debuts = blocs.map((b) => aPart(b.part, dv, 6));
   const actif = Math.max(0, debuts.filter((d) => f >= d).length - 1);
   const total = blocs.reduce((a, b) => a + b.texte.length, 0);
-  const taille = total > 420 ? 30 : total > 300 ? 34 : total > 180 ? 39 : 46;
-  const marque = (b: Bloc) => {
-    if (b.genre === 'ok') return <span style={{ color: VERT, fontWeight: 700 }}>✓</span>;
-    if (b.genre === 'ko') return <span style={{ color: ROUGE, fontWeight: 700 }}>✕</span>;
-    if (b.genre === 'num') return <span style={{ fontFamily: MONO, color: teinte, fontWeight: 700 }}>{String(b.n).padStart(2, '0')}</span>;
-    if (b.genre === 'puce') return <span style={{ width: 12, height: 12, borderRadius: 3, background: teinte, display: 'inline-block', marginTop: taille * 0.45 }} />;
-    return null;
+  const taille = total > 420 ? 28 : total > 300 ? 32 : total > 180 ? 36 : 43;
+  // Paragraphes et puces : un pictogramme choisi d'après le SENS du bloc, qui se dessine quand la voix y arrive.
+  const marque = (b: Bloc, i: number) => {
+    if (b.genre === 'ok') return <span style={{ color: VERT, fontWeight: 700, fontSize: taille }}>✓</span>;
+    if (b.genre === 'ko') return <span style={{ color: ROUGE, fontWeight: 700, fontSize: taille }}>✕</span>;
+    if (b.genre === 'num') return <span style={{ fontFamily: MONO, color: teinte, fontWeight: 700, fontSize: taille }}>{String(b.n).padStart(2, '0')}</span>;
+    return <Pictogramme nom={choisirPicto(b.texte, sec.type)} debut={debuts[i]} taille={Math.round(taille * 1.75)} couleur={teinte} />;
   };
+  // Les chiffres du bloc lu passent en relief.
+  const relief = (texte: string, lu: boolean) =>
+    lu ? texte.split(/(\d[\d\s.,]*\d\s?%?|\d\s?%?)/).map((x, k) => (k % 2 ? <span key={k} style={{ color: teinte, fontWeight: 700 }}>{x}</span> : x)) : texte;
   return (
     <>
       {/* Numéro de section en filigrane, comme sur l'écran de chapitre. */}
-      <div style={{ position: 'absolute', right: 30, bottom: 90, fontFamily: SERIF, fontWeight: 700, fontSize: 420, lineHeight: 1, color: 'transparent', WebkitTextStroke: `2px ${teinte}26`, opacity: t(f, 0, 20) }}>
+      <div style={{ position: 'absolute', right: 380, bottom: 90, fontFamily: SERIF, fontWeight: 700, fontSize: 360, lineHeight: 1, color: 'transparent', WebkitTextStroke: `2px ${teinte}1f`, opacity: t(f, 0, 20) }}>
         {String(sec.n).padStart(2, '0')}
       </div>
       <Entre debut={2} style={{ position: 'absolute', top: 150, left: 90, right: 90 }}>
         <div style={{ fontFamily: MONO, fontSize: 21, letterSpacing: '.18em', color: teinte }}>{sec.titre.toUpperCase()}</div>
       </Entre>
-      <div style={{ position: 'absolute', left: 90, right: 200, top: 200, bottom: 110, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 22 }}>
+      <div style={{ position: 'absolute', left: 90, right: 460, top: 200, bottom: 110, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20 }}>
         {blocs.map((b, i) => {
           const p = t(f, debuts[i], debuts[i] + 14);
           const lu = i === actif;
-          const m = marque(b);
           return (
-            <div key={i} style={{ display: 'flex', gap: 22, alignItems: 'flex-start', opacity: p * (lu ? 1 : 0.62), transform: `translateY(${(1 - p) * 24}px)`, filter: `blur(${(1 - p) * 6}px)`,
-              ...(b.genre === 'ok' || b.genre === 'ko' ? { ...panneau(b.genre === 'ok' ? VERT : ROUGE, lu), padding: '18px 24px', borderRadius: 18 } : {}) }}>
-              {m && <div style={{ width: 44, flexShrink: 0, fontSize: taille, lineHeight: 1.35, display: 'flex', justifyContent: 'center' }}>{m}</div>}
-              <div style={{ fontSize: taille, lineHeight: 1.42, color: lu ? C.blanc : C.gris, borderLeft: b.genre === 'para' && lu ? `4px solid ${teinte}` : '4px solid transparent', paddingLeft: b.genre === 'para' ? 22 : 0 }}>
-                {b.texte}
-              </div>
+            <div key={i} style={{ display: 'flex', gap: 22, alignItems: 'center', opacity: p * (lu ? 1 : 0.6), transform: `translateX(${(1 - p) * -40}px) scale(${lu ? 1 : 0.985})`, transformOrigin: 'left center', filter: `blur(${(1 - p) * 6}px)`,
+              ...(b.genre === 'ok' || b.genre === 'ko' ? { ...panneau(b.genre === 'ok' ? VERT : ROUGE, lu), padding: '16px 22px', borderRadius: 18 } : {}) }}>
+              <div style={{ minWidth: 44, flexShrink: 0, display: 'flex', justifyContent: 'center' }}>{marque(b, i)}</div>
+              <div style={{ fontSize: taille, lineHeight: 1.4, color: lu ? C.blanc : C.gris }}>{relief(b.texte, lu)}</div>
             </div>
           );
         })}
+      </div>
+      {/* Le narrateur : parle avec la voix, désigne chaque nouveau bloc. */}
+      <div style={{ position: 'absolute', right: 90, bottom: 70 }}>
+        <Mascotte src={staticFile(`academy/${plan.id}/${s.id}.mp3`)} teinte={teinte} taille={290} gestes={debuts} entree={4} />
       </div>
     </>
   );
@@ -1177,7 +1210,7 @@ export default function AcademyLecon({ plan, section }: Props) {
   let debut = 0;
   return (
     <AbsoluteFill style={{ background: C.fond }}>
-      {scenesRendues(plan, section).map(({ s, sec }) => {
+      {scenesRendues(plan, section).map(({ s, sec }, rangScene) => {
         const teinte = (TYPES[sec.type] ?? TYPES.definition).teinte;
         const duree = dureeScene(plan, s);
         const from = debut;
@@ -1188,7 +1221,7 @@ export default function AcademyLecon({ plan, section }: Props) {
           <Sequence key={s.id} from={from} durationInFrames={duree} name={s.id}>
             <Audio src={staticFile(`academy/${plan.id}/${s.id}.mp3`)} />
             <Ambiance teinte={teinte} />
-            <Cadre duree={duree}>
+            <Cadre duree={duree} variante={rangScene}>
               <Habillage plan={plan} sec={sec} rang={sec.scenes.indexOf(s)} nb={sec.scenes.length} teinte={teinte} duree={duree} />
               <Gabarit s={s} dv={plan.durees[s.id]} teinte={teinte} plan={plan} sec={sec} />
             </Cadre>

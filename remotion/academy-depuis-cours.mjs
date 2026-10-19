@@ -174,6 +174,8 @@ const plan = {
   lecon: `Leçon ${numero}`,
   titreLecon,
   mention: 'Contenu de la leçon WestBourse Academy, reproduit tel que publié',
+  // Photo de la leçon (déjà affichée sur le site, crédit inclus), en fond de l'ouverture.
+  photo: lecon.image?.url ? { url: lecon.image.url, credit: lecon.image.credit ?? '' } : null,
   sections,
 };
 const sortie = fileURLToPath(new URL(`./academy/${id}.json`, import.meta.url));

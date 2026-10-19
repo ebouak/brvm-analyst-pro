@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@remotion/cli": "4.0.236",
+    "@remotion/media-utils": "4.0.236",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "remotion": "4.0.236"
