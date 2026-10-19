@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { corpsCheckout, normaliserTelephone } from '@/lib/billing/chariow/regles';
+import { corpsCheckout, telephoneChariow } from '@/lib/billing/chariow/regles';
 import { demarrerAchat } from '@/lib/billing/chariow/checkout';
 
 export const runtime = 'nodejs';
@@ -25,8 +25,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 });
   }
   if (brut && typeof brut === 'object' && 'phone' in brut) {
-    const p = (brut as { phone?: { number?: unknown } }).phone;
-    if (p && typeof p.number === 'string') p.number = normaliserTelephone(p.number);
+    const p = (brut as { phone?: { number?: unknown; countryCode?: unknown } }).phone;
+    if (p && typeof p.number === 'string') {
+      // Indicatif saisi → il fait foi sur le menu « Pays » (sinon Chariow refuse le numéro).
+      const t = telephoneChariow(p.number, typeof p.countryCode === 'string' ? p.countryCode : '');
+      p.number = t.number;
+      p.countryCode = t.countryCode;
+    }
   }
   const parse = corpsCheckout.safeParse(brut);
   if (!parse.success) {

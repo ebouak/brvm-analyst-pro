@@ -183,3 +183,29 @@ export type CorpsCheckout = z.infer<typeof corpsCheckout>;
 export function normaliserTelephone(brut: string): string {
   return brut.replace(/[\s.\-()]/g, '').replace(/^\+/, '').replace(/^00/, '');
 }
+
+/** Indicatifs des pays proposés au formulaire (AchatChariow). */
+const INDICATIFS: Record<string, string> = {
+  '225': 'CI', '221': 'SN', '226': 'BF', '223': 'ML', '229': 'BJ', '228': 'TG',
+  '227': 'NE', '245': 'GW', '237': 'CM', '224': 'GN', '33': 'FR',
+};
+
+/**
+ * Numéro et pays tels que Chariow les attend (numéro national + code ISO).
+ * Un numéro saisi au format international (« +225 07… », « 00225… ») FAIT FOI
+ * sur le menu « Pays » : on en déduit le pays et on retire l'indicatif.
+ * Constat du 2026-10-19 : « France » + « +2250707… » envoyait un numéro
+ * ivoirien sous l'indicatif français, et Chariow refusait le paiement
+ * (« Invalid phone number »). Sans indicatif, le pays choisi est conservé.
+ */
+export function telephoneChariow(brut: string, pays: string): { number: string; countryCode: string } {
+  const propre = brut.replace(/[\s.\-()]/g, '');
+  const international = /^(\+|00)/.test(propre);
+  const chiffres = normaliserTelephone(propre);
+  if (international) {
+    for (const [indicatif, code] of Object.entries(INDICATIFS)) {
+      if (chiffres.startsWith(indicatif)) return { number: chiffres.slice(indicatif.length), countryCode: code };
+    }
+  }
+  return { number: chiffres, countryCode: pays };
+}
