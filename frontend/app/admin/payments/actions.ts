@@ -6,9 +6,7 @@ import { recordAudit } from '@/lib/server/audit';
 import { activateSubscription, cancelSubscription } from '@/lib/billing/activate';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { confirmerPlaceFormation, rejeterPlaceFormation } from '@/lib/formations/confirmer';
-import { lireVente } from '@/lib/billing/chariow/client';
-import { produitParCode } from '@/lib/billing/chariow/catalogue';
-import { verifierVente } from '@/lib/billing/chariow/regles';
+import { rapprocherVente } from '@/lib/billing/chariow/rapprochement';
 
 /**
  * Achat Chariow (niveau de l'Academy ou pass) confirmé À LA MAIN — typiquement
@@ -17,36 +15,19 @@ import { verifierVente } from '@/lib/billing/chariow/regles';
  * d'administrateur ne vaut pas preuve de paiement.
  */
 async function confirmerAchatChariow(transactionId: string): Promise<{ ok: boolean; message: string }> {
-  const db = getServiceClient();
-  const { data: t } = await db
-    .from('billing_transactions')
-    .select('id, provider, provider_sale_id, product_code, amount, currency')
-    .eq('id', transactionId)
-    .maybeSingle();
-  if (!t) return { ok: false, message: 'Transaction introuvable.' };
-  if (t.provider !== 'chariow' || !t.provider_sale_id || !t.product_code) {
-    return { ok: false, message: 'Aucune vente Chariow rattachée : rien à vérifier, rien accordé.' };
-  }
-  const produit = await produitParCode(String(t.product_code), false);
-  if (!produit) return { ok: false, message: 'Produit absent du catalogue.' };
-  try {
-    const vente = await lireVente(String(t.provider_sale_id));
-    const v = verifierVente(vente, {
-      saleId: String(t.provider_sale_id),
-      chariowProductId: produit.chariowProductId,
-      montant: Number(t.amount),
-      devise: String(t.currency),
-    });
-    if (!v.ok) return { ok: false, message: `Vente non conforme chez Chariow : ${v.motif}.` };
-  } catch {
-    return { ok: false, message: 'Chariow injoignable : réessayez plus tard.' };
-  }
-  const { data, error } = await db.rpc('accorder_achat', {
-    p_transaction: transactionId,
-    p_sale: String(t.provider_sale_id),
-  });
-  if (error) return { ok: false, message: 'Accord impossible (base).' };
-  return { ok: ['module_accorde', 'pass_accorde', 'deja'].includes(String(data)), message: String(data) };
+  // Même rapprochement que la page de retour de paiement : une seule règle.
+  const r = await rapprocherVente(transactionId);
+  const MESSAGES: Record<string, string> = {
+    introuvable: 'Transaction introuvable.',
+    sans_vente: 'Aucune vente Chariow rattachée : rien à vérifier, rien accordé.',
+    produit_inconnu: 'Produit absent du catalogue.',
+    chariow_injoignable: 'Chariow injoignable : réessayez plus tard.',
+    erreur_base: 'Accord impossible (base).',
+  };
+  const message = r.resultat.startsWith('non_conforme')
+    ? `Vente non conforme chez Chariow : ${r.resultat.slice('non_conforme: '.length)}.`
+    : MESSAGES[r.resultat] ?? r.resultat;
+  return { ok: r.ok, message };
 }
 
 /**
