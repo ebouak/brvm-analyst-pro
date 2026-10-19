@@ -41,6 +41,14 @@ export interface PulseLu {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Identifiant de vente Chariow. La documentation annonce `sal_…` ; la PRODUCTION
+ * renvoie `SALERPBUEKQBLIBCHU9` (constaté le 2026-10-19 sur un achat réel).
+ * Le motif strict `^sal_` rejetait toute vraie vente comme « sans identifiant ».
+ * Les deux formes sont acceptées ; `test_sale_…` (Pulse de test) reste refusé.
+ */
+export const ID_VENTE = /^sal_?[A-Za-z0-9]{3,100}$/i;
+
 /** Extrait le strict nécessaire d'un Pulse. Ne renvoie jamais email, nom ni téléphone. */
 export function lirePulse(payload: unknown, enteteEvenement: string | null): PulseLu {
   const p = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
@@ -49,7 +57,7 @@ export function lirePulse(payload: unknown, enteteEvenement: string | null): Pul
     ? sale.custom_metadata
     : {}) as Record<string, unknown>;
   const evenement = String(p.event ?? enteteEvenement ?? '').slice(0, 60);
-  const saleId = typeof sale.id === 'string' && /^sal_[A-Za-z0-9]{3,100}$/.test(sale.id) ? sale.id : null;
+  const saleId = typeof sale.id === 'string' && ID_VENTE.test(sale.id) ? sale.id : null;
   const txn = typeof meta.txn === 'string' && UUID.test(meta.txn) ? meta.txn : null;
   return { evenement, saleId, txnMeta: txn };
 }

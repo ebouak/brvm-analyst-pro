@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createHmac } from 'node:crypto';
 import {
   CODE_FORMATION,
+  ID_VENTE,
   corpsCheckout,
   droitNiveauValide,
   niveauxDesDroits,
@@ -211,5 +212,18 @@ describe('telephoneChariow — l’indicatif saisi fait foi sur le pays', () => 
   });
   it('indicatif inconnu : pays choisi conservé, chiffres seuls', () => {
     expect(telephoneChariow('+1 202 555 0123', 'FR')).toEqual({ number: '12025550123', countryCode: 'FR' });
+  });
+});
+
+describe('ID_VENTE — format réel des ventes Chariow', () => {
+  it('accepte le format de production (constaté le 2026-10-19) et celui de la documentation', () => {
+    expect(ID_VENTE.test('SALERPBUEKQBLIBCHU9')).toBe(true);
+    expect(ID_VENTE.test('sal_xyz789abc')).toBe(true);
+  });
+  it('refuse un Pulse de test et tout identifiant hors gabarit', () => {
+    for (const x of ['test_sale_123', '../sales', 'SAL', 'abc', 'sal_a/b', '']) expect(ID_VENTE.test(x)).toBe(false);
+  });
+  it('lirePulse lit une vraie vente au format de production', () => {
+    expect(lirePulse({ event: 'successful.sale', sale: { id: 'SALERPBUEKQBLIBCHU9' } }, null).saleId).toBe('SALERPBUEKQBLIBCHU9');
   });
 });
