@@ -161,6 +161,13 @@ export async function demarrerAchat(args: {
     await echouer();
     if (e instanceof ErreurChariow) {
       console.error('chariow/checkout: refus Chariow', { statut: e.statut, message: e.message });
+      if (e.statut === 400 && /phone/i.test(e.message)) {
+        return {
+          ok: false,
+          statut: 400,
+          message: 'Numéro de téléphone refusé : vérifiez qu’il correspond au pays choisi, ou saisissez-le avec son indicatif (ex. +225 07 00 00 00 00).',
+        };
+      }
       if (e.statut === 422) {
         return { ok: false, statut: 422, message: 'Vérifiez vos informations (nom, téléphone, pays).' };
       }

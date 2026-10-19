@@ -145,8 +145,9 @@ export default function AchatChariow({
         </label>
       </div>
       <p id={`${id}-info`} className="text-[11px] leading-relaxed text-faint">
-        Paiement sécurisé par Chariow (Mobile Money ou carte). Vos nom et téléphone sont transmis à Chariow pour ce
-        paiement uniquement. L’accès s’ouvre dès la confirmation du paiement.
+        Paiement sécurisé par Chariow : Mobile Money (dont Wave) ou carte bancaire, au choix sur la page de paiement
+        selon votre pays. Saisissez votre numéro avec son indicatif (+225, +221…). Vos nom et téléphone sont transmis
+        à Chariow pour ce paiement uniquement. L’accès s’ouvre dès la confirmation du paiement.
       </p>
       {erreur && (
         <p role="alert" className="text-sm text-down">

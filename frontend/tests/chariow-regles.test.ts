@@ -7,6 +7,7 @@ import {
   niveauxDesDroits,
   lirePulse,
   normaliserTelephone,
+  telephoneChariow,
   signatureValide,
   verifierVente,
 } from '@/lib/billing/chariow/regles';
@@ -192,5 +193,23 @@ describe('niveauxDesDroits — formation complète (0155) et niveaux à l’unit
       now,
     );
     expect(n.size).toBe(0);
+  });
+});
+
+describe('telephoneChariow — l’indicatif saisi fait foi sur le pays', () => {
+  it('« France » + numéro ivoirien en +225 → CI, indicatif retiré (cas réel du 2026-10-19)', () => {
+    expect(telephoneChariow('+2250707115115', 'FR')).toEqual({ number: '0707115115', countryCode: 'CI' });
+  });
+  it('format 00 et espaces', () => {
+    expect(telephoneChariow('00 221 77 123 45 67', 'CI')).toEqual({ number: '771234567', countryCode: 'SN' });
+  });
+  it('numéro français en +33', () => {
+    expect(telephoneChariow('+33 6 12 34 56 78', 'CI')).toEqual({ number: '612345678', countryCode: 'FR' });
+  });
+  it('sans indicatif : le pays choisi est conservé', () => {
+    expect(telephoneChariow('07 07 11 51 15', 'CI')).toEqual({ number: '0707115115', countryCode: 'CI' });
+  });
+  it('indicatif inconnu : pays choisi conservé, chiffres seuls', () => {
+    expect(telephoneChariow('+1 202 555 0123', 'FR')).toEqual({ number: '12025550123', countryCode: 'FR' });
   });
 });
