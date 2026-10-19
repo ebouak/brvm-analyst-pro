@@ -85,6 +85,9 @@ function quand(s: SceneA, dv: number, mot: string, n = 0, avance = 4): number {
   return Math.max(6, Math.round((i / v.length) * dv * FPS) - avance);
 }
 
+/** Instant (en images) d'un élément placé à la fraction `part` (0..1) de la voix. */
+const aPart = (part: number | undefined, dv: number, avance = 4) => Math.max(6, Math.round((part ?? 0) * dv * FPS) - avance);
+
 // ── Ambiance : aurore, grille en perspective, particules, balayage ─────────
 function Ambiance({ teinte }: { teinte: string }) {
   const f = useCurrentFrame();
@@ -404,19 +407,21 @@ function Croissance({ s, dv, teinte }: G) {
 function Stats({ s, dv, teinte }: G) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const stats: { label: string; valeur: string; unite: string; detail: string; mot: string }[] = s.stats;
+  const stats: { label: string; valeur: string; unite: string; detail: string; mot?: string; part?: number }[] = s.stats;
   return (
     <>
-      <Titre>{s.titre}</Titre>
-      <div style={{ position: 'absolute', left: 90, right: 90, top: 340, display: 'grid', gridTemplateColumns: `repeat(${stats.length}, 1fr)`, gap: 28, perspective: 1400 }}>
+      <Titre>{s.titre ?? 'En chiffres'}</Titre>
+      <div style={{ position: 'absolute', left: 90, right: 90, top: 340, display: 'grid', gridTemplateColumns: `repeat(${Math.min(stats.length, 4)}, 1fr)`, gap: 28, perspective: 1400 }}>
         {stats.map((st) => {
-          const d = quand(s, dv, st.mot, 0, 8);
+          const d = st.part != null ? aPart(st.part, dv, 8) : quand(s, dv, st.mot, 0, 8);
           const k = spring({ frame: f - d, fps, config: { damping: 15, stiffness: 120 } });
-          const cible = Number(st.valeur.replace(/\s/g, ''));
+          // Compteur animé seulement pour un entier pur ; sinon la valeur publiée, telle quelle.
+          const entierPur = /^\d{1,3}(\s\d{3})*$|^\d+$/.test(st.valeur.trim());
+          const cible = Number(st.valeur.replace(/\D/g, ''));
           return (
             <div key={st.label} style={{ padding: '40px 34px', ...panneau(teinte), minHeight: 460, display: 'flex', flexDirection: 'column', opacity: k, transform: `rotateX(${(1 - k) * 60}deg) translateY(${(1 - k) * 60}px)`, transformOrigin: 'bottom' }}>
               <div style={{ fontFamily: MONO, fontSize: 21, letterSpacing: '.2em', color: teinte }}>{st.label.toUpperCase()}</div>
-              <div style={{ fontFamily: MONO, fontSize: st.valeur.length > 3 ? 94 : 140, fontWeight: 700, marginTop: 34, lineHeight: 1, fontVariantNumeric: 'tabular-nums', textShadow: `0 0 30px ${teinte}55` }}>{entier(cible * t(f, d, d + 24))}</div>
+              <div style={{ fontFamily: MONO, fontSize: st.valeur.length > 12 ? 54 : st.valeur.length > 7 ? 70 : st.valeur.length > 3 ? 94 : 140, fontWeight: 700, marginTop: 34, lineHeight: 1, fontVariantNumeric: 'tabular-nums', textShadow: `0 0 30px ${teinte}55` }}>{entierPur ? entier(cible * t(f, d, d + 24)) : st.valeur}</div>
               {st.unite && <div style={{ fontSize: 32, color: C.gris, marginTop: 10 }}>{st.unite}</div>}
               <div style={{ fontSize: 27, color: C.gris, marginTop: 'auto', lineHeight: 1.35 }}>{st.detail}</div>
             </div>
@@ -807,32 +812,39 @@ function Profil({ s, dv, teinte }: G) {
 function Etapes({ s, dv, teinte }: G) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const etapes: { titre: string; detail: string; mot: string; logos?: string[] }[] = s.etapes;
-  const debuts = etapes.map((e) => quand(s, dv, e.mot));
-  const X = 170, Y0 = 180, PAS = 215;
+  const etapes: { titre: string; detail: string; mot?: string; part?: number; cle?: boolean; logos?: string[] }[] = s.etapes;
+  const debuts = etapes.map((e) => (e.part != null ? aPart(e.part, dv) : quand(s, dv, e.mot ?? '')));
+  // Au-delà de trois étapes, on resserre : tout doit tenir à l'écran.
+  const serre = etapes.length > 3;
+  const PAS = serre ? Math.floor(700 / etapes.length) : 215;
+  const R = serre ? 76 : 100;
+  // Bloc d'étapes centré verticalement (au-dessus de la conclusion s'il y en a une).
+  const X = 170, Y0 = s.conclusion ? 180 : Math.round((1080 - (etapes.length - 1) * PAS - R) / 2);
   return (
     <>
       <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
-        <line x1={X} y1={Y0 + 50} x2={X} y2={Y0 + 50 + PAS * (etapes.length - 1)} stroke={teinte} strokeWidth={4} pathLength={1} strokeDasharray={1} strokeDashoffset={1 - t(f, debuts[0], debuts[etapes.length - 1] + 10)} style={{ filter: `drop-shadow(0 0 8px ${teinte})` }} />
+        <line x1={X} y1={Y0 + R / 2} x2={X} y2={Y0 + R / 2 + PAS * (etapes.length - 1)} stroke={teinte} strokeWidth={4} pathLength={1} strokeDasharray={1} strokeDashoffset={1 - t(f, debuts[0], debuts[etapes.length - 1] + 10)} style={{ filter: `drop-shadow(0 0 8px ${teinte})` }} />
       </svg>
       {etapes.map((e, i) => {
         const k = spring({ frame: f - debuts[i], fps, config: { damping: 14, stiffness: 130 } });
         return (
           <div key={e.titre} style={{ position: 'absolute', left: X - 50, top: Y0 + i * PAS, right: 90, display: 'flex', gap: 40, alignItems: 'center', opacity: k, transform: `translateX(${(1 - k) * 80}px)` }}>
-            <div style={{ width: 100, height: 100, borderRadius: '50%', background: C.fond, border: `4px solid ${teinte}`, boxShadow: `0 0 30px ${teinte}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: MONO, fontSize: 44, fontWeight: 700, color: teinte, flexShrink: 0 }}>{i + 1}</div>
-            <div style={{ ...panneau(teinte, false), padding: '22px 30px', flex: 1, display: 'flex', alignItems: 'center', gap: 24 }}>
+            <div style={{ width: R, height: R, borderRadius: '50%', background: C.fond, border: `4px solid ${teinte}`, boxShadow: `0 0 30px ${teinte}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: MONO, fontSize: serre ? 34 : 44, fontWeight: 700, color: teinte, flexShrink: 0 }}>{e.cle ? '★' : i + 1}</div>
+            <div style={{ ...panneau(teinte, !!e.cle), padding: serre ? '14px 26px' : '22px 30px', flex: 1, display: 'flex', alignItems: 'center', gap: 24 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: SERIF, fontSize: 44, fontWeight: 600 }}>{e.titre}</div>
-                <div style={{ fontSize: 27, color: C.gris, marginTop: 8 }}>{e.detail}</div>
+                <div style={{ fontFamily: SERIF, fontSize: serre ? 34 : 44, fontWeight: 600 }}>{e.titre}</div>
+                <div style={{ fontSize: serre ? 23 : 27, color: C.gris, marginTop: 6 }}>{e.detail}</div>
               </div>
               {e.logos?.map((l, j) => <div key={l} style={{ opacity: t(f, debuts[i] + 14 + j * 8, debuts[i] + 24 + j * 8) }}><LogoTuile chemin={l} taille={110} /></div>)}
             </div>
           </div>
         );
       })}
-      <Entre debut={quand(s, dv, 'diaspora')} style={{ position: 'absolute', left: 120, right: 90, top: 860 }}>
-        <div style={{ fontFamily: SERIF, fontSize: 44, fontWeight: 600, color: teinte }}>→ {s.conclusion}</div>
-      </Entre>
+      {s.conclusion && (
+        <Entre debut={quand(s, dv, 'diaspora')} style={{ position: 'absolute', left: 120, right: 90, top: 860 }}>
+          <div style={{ fontFamily: SERIF, fontSize: 44, fontWeight: 600, color: teinte }}>→ {s.conclusion}</div>
+        </Entre>
+      )}
     </>
   );
 }
@@ -961,23 +973,200 @@ function Secteurs({ s, dv }: G) {
   );
 }
 
-function Fin({ s, teinte }: G) {
+function Fin({ s, teinte, plan }: G) {
   const f = useCurrentFrame();
   return (
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 220px' }}>
-      <Entre debut={2}><div style={{ fontFamily: MONO, fontSize: 26, letterSpacing: '.3em', color: teinte }}>EN UNE PHRASE</div></Entre>
+      <Entre debut={2}><div style={{ fontFamily: MONO, fontSize: 26, letterSpacing: '.3em', color: teinte }}>{String(s.surtitre ?? 'En une phrase').toUpperCase()}</div></Entre>
       <Mots texte={s.retenir} debut={8} pas={2} style={{ fontFamily: SERIF, fontSize: 70, fontWeight: 600, lineHeight: 1.15, marginTop: 30, justifyContent: 'center' }} />
       <div style={{ marginTop: 80, display: 'flex', alignItems: 'center', gap: 22, opacity: t(f, 50, 70), filter: `drop-shadow(0 0 ${24 * t(f, 60, 90)}px ${teinte})` }}>
         <Logo taille={80} prog={t(f, 50, 84)} />
         <span style={{ fontFamily: MONO, fontSize: 34, letterSpacing: '.32em' }}>WESTBOURSE</span>
       </div>
       <Entre debut={70}><div style={{ fontSize: 22, color: C.sourd, marginTop: 34 }}>Contenu pédagogique · pas un conseil en investissement</div></Entre>
-      <Entre debut={76}><div style={{ fontSize: 19, color: C.sourd, marginTop: 10 }}>Chiffres de la leçon, recoupés avec la base WestBourse le 14.10.2026</div></Entre>
+      <Entre debut={76}><div style={{ fontSize: 19, color: C.sourd, marginTop: 10 }}>{(plan as PlanLecon & { mention?: string }).mention ?? 'Chiffres de la leçon, recoupés avec la base WestBourse le 14.10.2026'}</div></Entre>
     </div>
   );
 }
 
+// ── Gabarits génériques (leçons générées par academy-depuis-cours.mjs) ──────
+
+type Bloc = { genre: 'para' | 'puce' | 'ok' | 'ko' | 'num'; n?: number; texte: string; part: number; suite?: boolean };
+
+/** Texte intégral d'une section, bloc par bloc, au rythme de la voix ; le bloc lu est mis en avant. */
+function Texte({ s, dv, teinte, sec }: G) {
+  const f = useCurrentFrame();
+  const blocs: Bloc[] = s.blocs;
+  const debuts = blocs.map((b) => aPart(b.part, dv, 6));
+  const actif = Math.max(0, debuts.filter((d) => f >= d).length - 1);
+  const total = blocs.reduce((a, b) => a + b.texte.length, 0);
+  const taille = total > 420 ? 30 : total > 300 ? 34 : total > 180 ? 39 : 46;
+  const marque = (b: Bloc) => {
+    if (b.genre === 'ok') return <span style={{ color: VERT, fontWeight: 700 }}>✓</span>;
+    if (b.genre === 'ko') return <span style={{ color: ROUGE, fontWeight: 700 }}>✕</span>;
+    if (b.genre === 'num') return <span style={{ fontFamily: MONO, color: teinte, fontWeight: 700 }}>{String(b.n).padStart(2, '0')}</span>;
+    if (b.genre === 'puce') return <span style={{ width: 12, height: 12, borderRadius: 3, background: teinte, display: 'inline-block', marginTop: taille * 0.45 }} />;
+    return null;
+  };
+  return (
+    <>
+      {/* Numéro de section en filigrane, comme sur l'écran de chapitre. */}
+      <div style={{ position: 'absolute', right: 30, bottom: 90, fontFamily: SERIF, fontWeight: 700, fontSize: 420, lineHeight: 1, color: 'transparent', WebkitTextStroke: `2px ${teinte}26`, opacity: t(f, 0, 20) }}>
+        {String(sec.n).padStart(2, '0')}
+      </div>
+      <Entre debut={2} style={{ position: 'absolute', top: 150, left: 90, right: 90 }}>
+        <div style={{ fontFamily: MONO, fontSize: 21, letterSpacing: '.18em', color: teinte }}>{sec.titre.toUpperCase()}</div>
+      </Entre>
+      <div style={{ position: 'absolute', left: 90, right: 200, top: 200, bottom: 110, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 22 }}>
+        {blocs.map((b, i) => {
+          const p = t(f, debuts[i], debuts[i] + 14);
+          const lu = i === actif;
+          const m = marque(b);
+          return (
+            <div key={i} style={{ display: 'flex', gap: 22, alignItems: 'flex-start', opacity: p * (lu ? 1 : 0.62), transform: `translateY(${(1 - p) * 24}px)`, filter: `blur(${(1 - p) * 6}px)`,
+              ...(b.genre === 'ok' || b.genre === 'ko' ? { ...panneau(b.genre === 'ok' ? VERT : ROUGE, lu), padding: '18px 24px', borderRadius: 18 } : {}) }}>
+              {m && <div style={{ width: 44, flexShrink: 0, fontSize: taille, lineHeight: 1.35, display: 'flex', justifyContent: 'center' }}>{m}</div>}
+              <div style={{ fontSize: taille, lineHeight: 1.42, color: lu ? C.blanc : C.gris, borderLeft: b.genre === 'para' && lu ? `4px solid ${teinte}` : '4px solid transparent', paddingLeft: b.genre === 'para' ? 22 : 0 }}>
+                {b.texte}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+/** Tableau publié de la section, ligne par ligne au rythme de la voix. */
+function Grille({ s, dv, teinte, sec }: G) {
+  const f = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const colonnes: string[] = s.colonnes;
+  const lignes: string[][] = s.lignes;
+  const parts: number[] = s.parts;
+  const debuts = lignes.map((_, i) => aPart(parts[i], dv, 6));
+  const actif = Math.max(0, debuts.filter((d) => f >= d).length - 1);
+  const gabarit = colonnes.length <= 2 ? '1fr 2fr' : colonnes.length === 3 ? '0.8fr 0.8fr 2.2fr' : '0.9fr 0.8fr 0.8fr 2fr';
+  const longueur = lignes.flat().reduce((a, c) => a + c.length, 0);
+  const taille = longueur > 700 ? 21 : longueur > 450 ? 24 : 27;
+  return (
+    <>
+      <Entre debut={2} style={{ position: 'absolute', top: 150, left: 90, right: 90 }}>
+        <div style={{ fontFamily: MONO, fontSize: 21, letterSpacing: '.18em', color: teinte }}>{sec.titre.toUpperCase()}</div>
+      </Entre>
+      <div style={{ position: 'absolute', left: 90, right: 90, top: 210 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: gabarit, gap: 20, padding: '0 26px 12px', fontFamily: MONO, fontSize: 19, letterSpacing: '.16em', color: teinte, opacity: t(f, 4, 14) }}>
+          {colonnes.map((c) => <div key={c}>{c.toUpperCase()}</div>)}
+        </div>
+        {lignes.map((l, i) => {
+          const k = spring({ frame: f - debuts[i], fps, config: { damping: 16, stiffness: 140 } });
+          return (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: gabarit, gap: 20, alignItems: 'start', padding: '16px 26px', marginTop: 10, ...panneau(teinte, i === actif), borderRadius: 16, opacity: k, transform: `translateX(${(1 - k) * 140}px)` }}>
+              {l.map((c, j) => (
+                <div key={j} style={{ fontSize: j === 0 ? taille + 2 : taille, fontWeight: j === 0 ? 600 : 400, color: j === 0 ? C.blanc : C.gris, lineHeight: 1.35 }}>{c}</div>
+              ))}
+            </div>
+          );
+        })}
+        {s.note && (
+          <Entre debut={aPart(parts[lignes.length], dv, 6)}>
+            <div style={{ marginTop: 18, fontSize: 20, color: C.sourd, lineHeight: 1.4 }}>{s.note}</div>
+          </Entre>
+        )}
+      </div>
+    </>
+  );
+}
+
+/** Graphique de la leçon (barres, courbe ou anneau), sur une seule échelle ; « illustration » quand les valeurs sont des exemples. */
+function Graphique({ s, dv, teinte }: G) {
+  const f = useCurrentFrame();
+  const labels: string[] = s.labels;
+  const valeurs: number[] = s.valeurs;
+  const unite: string = s.unite ?? '';
+  const fmt = (v: number) => `${Number.isInteger(v) ? entier(v) : v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })}${unite ? ` ${unite}` : ''}`;
+  const prog = t(f, 14, Math.max(40, Math.round(dv * FPS * 0.35)));
+  const X0 = 140, X1 = 1780, Y0 = 760, H = 420;
+  const max = Math.max(...valeurs.map((v) => Math.abs(v)), 1e-9);
+  const min = Math.min(0, ...valeurs);
+  const y = (v: number) => Y0 - ((v - min) / (max - min)) * H;
+  const pas = (X1 - X0) / labels.length;
+  return (
+    <>
+      <Entre debut={2} style={{ position: 'absolute', top: 150, left: 90, right: 90, display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+        <div style={{ fontFamily: SERIF, fontSize: 46, fontWeight: 600 }}>{s.titre}</div>
+        <Badge teinte={s.reel ? VERT : '#F0B23A'} style={{ fontSize: 17 }}>{s.reel ? 'DONNÉES RÉELLES' : 'ILLUSTRATION · VALEURS D’EXEMPLE'}</Badge>
+      </Entre>
+      {s.type === 'pie' ? (
+        <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
+          {(() => {
+            const total = valeurs.reduce((a, v) => a + Math.max(0, v), 0) || 1;
+            let cum = 0;
+            return valeurs.map((v, i) => {
+              const a0 = (cum / total) * Math.PI * 2 - Math.PI / 2;
+              cum += Math.max(0, v);
+              const a1 = Math.min((cum / total) * Math.PI * 2 - Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2);
+              if (a1 <= a0 + 0.02) return null;
+              const R = 230, cx = 520, cy = 580;
+              const g = a1 - a0 > Math.PI ? 1 : 0;
+              return <path key={i} d={`M${cx + Math.cos(a0 + 0.01) * R} ${cy + Math.sin(a0 + 0.01) * R} A${R} ${R} 0 ${g} 1 ${cx + Math.cos(a1 - 0.01) * R} ${cy + Math.sin(a1 - 0.01) * R}`} fill="none" stroke={PALETTE[i % PALETTE.length]} strokeWidth={66} />;
+            });
+          })()}
+        </svg>
+      ) : (
+        <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
+          <line x1={X0} y1={y(0)} x2={X1} y2={y(0)} stroke={C.bord} strokeWidth={2} />
+          {s.type === 'line' ? (
+            <>
+              <path d={valeurs.map((v, i) => `${i ? 'L' : 'M'}${X0 + pas * (i + 0.5)} ${y(v)}`).join(' ')} fill="none" stroke={teinte} strokeWidth={6} strokeLinejoin="round"
+                pathLength={1} strokeDasharray={1} strokeDashoffset={1 - prog} style={{ filter: `drop-shadow(0 0 10px ${teinte})` }} />
+              {valeurs.map((v, i) => (
+                <g key={i} opacity={t(prog, i / valeurs.length, i / valeurs.length + 0.05)}>
+                  <circle cx={X0 + pas * (i + 0.5)} cy={y(v)} r={9} fill={C.fond} stroke={teinte} strokeWidth={4} />
+                  <text x={X0 + pas * (i + 0.5)} y={y(v) - 22} textAnchor="middle" fill={C.blanc} fontFamily={MONO} fontSize={22} fontWeight={700}>{fmt(v)}</text>
+                </g>
+              ))}
+            </>
+          ) : (
+            valeurs.map((v, i) => {
+              const h = Math.abs(y(v) - y(0)) * t(prog, i / valeurs.length * 0.6, i / valeurs.length * 0.6 + 0.4);
+              const w = Math.min(150, pas * 0.6);
+              const x = X0 + pas * (i + 0.5) - w / 2;
+              return (
+                <g key={i}>
+                  <rect x={x} y={v >= 0 ? y(0) - h : y(0)} width={w} height={h} rx={8} fill={v >= 0 ? teinte : ROUGE} opacity={0.9} />
+                  {h > 2 && <text x={x + w / 2} y={(v >= 0 ? y(0) - h : y(0) + h) + (v >= 0 ? -14 : 30)} textAnchor="middle" fill={C.blanc} fontFamily={MONO} fontSize={22} fontWeight={700}>{fmt(v)}</text>}
+                </g>
+              );
+            })
+          )}
+          {labels.map((l, i) => (
+            <text key={l + i} x={X0 + pas * (i + 0.5)} y={Y0 + 44} textAnchor="middle" fill={C.gris} fontFamily={SANS} fontSize={labels.length > 6 ? 18 : 22}>{l}</text>
+          ))}
+        </svg>
+      )}
+      {s.type === 'pie' && (
+        <div style={{ position: 'absolute', left: 900, right: 90, top: 330, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {labels.map((l, i) => (
+            <div key={l + i} style={{ display: 'flex', alignItems: 'center', gap: 16, opacity: t(f, 10 + i * 4, 22 + i * 4) }}>
+              <div style={{ width: 20, height: 20, borderRadius: 5, background: PALETTE[i % PALETTE.length] }} />
+              <div style={{ fontSize: 28, flex: 1 }}>{l}</div>
+              <div style={{ fontFamily: MONO, fontSize: 28, fontWeight: 700 }}>{fmt(valeurs[i])}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {s.note && (
+        <Entre debut={Math.round(dv * FPS * 0.3)} style={{ position: 'absolute', left: 90, right: 90, top: 860 }}>
+          <div style={{ fontSize: 22, color: C.gris, lineHeight: 1.45 }}>{s.note}</div>
+        </Entre>
+      )}
+    </>
+  );
+}
+
 const GABARITS: Record<string, (g: G) => React.ReactElement> = {
+  texte: Texte, grille: Grille, graphique: Graphique,
   ouverture: Ouverture, chapitre: Chapitre, definition: Definition, pays: Pays, croissance: Croissance, stats: Stats,
   fraction: Fraction, droits: Droits, offre: Offre, seance: Seance, indices: Indices, flux: Flux, tableau: Tableau,
   profil: Profil, etapes: Etapes, pieges: Pieges, idees: Idees, secteurs: Secteurs, fin: Fin,

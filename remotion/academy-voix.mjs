@@ -54,11 +54,31 @@ for (const c of chemins) {
 console.log(`${chemins.size} logos copiés`);
 
 const empreintes = existsSync(`${dossier}voix.json`) ? JSON.parse(readFileSync(`${dossier}voix.json`, 'utf8')) : {};
+const empreinteDe = (s) => createHash('sha256').update(`${moteur}\n${s.voix}`).digest('hex').slice(0, 16);
+
+// Garde-fou de crédit : AVANT toute synthèse, on vérifie que le crédit
+// ElevenLabs restant couvre toutes les pistes à (re)générer. Une leçon n'est
+// jamais à moitié doublée : sinon elle mélangerait des scènes muettes ou une
+// autre voix. Code de sortie 3 = crédit insuffisant (le lot s'arrête là).
+if (moteur === 'elevenlabs') {
+  const aFaire = plan.sections.flatMap((x) => x.scenes)
+    .filter((s) => !(existsSync(`${dossier}${s.id}.mp3`) && empreintes[s.id] === empreinteDe(s)));
+  const besoin = aFaire.reduce((a, s) => a + s.voix.length, 0);
+  const r = await fetch('https://api.elevenlabs.io/v1/user/subscription', { headers: { 'xi-api-key': CLE } });
+  if (!r.ok) { console.error(`ElevenLabs /user/subscription : HTTP ${r.status}`); process.exit(1); }
+  const sub = await r.json();
+  const reste = sub.character_limit - sub.character_count;
+  console.log(`crédit ElevenLabs : ${reste} caractères restants · besoin ${besoin}`);
+  if (besoin > reste) {
+    console.error(`Crédit insuffisant pour ${lecon} (${besoin} > ${reste}) : rien n'est généré. Renouvellement le ${new Date(sub.next_character_count_reset_unix * 1000).toISOString().slice(0, 10)}.`);
+    process.exit(3);
+  }
+}
 console.log(`leçon ${lecon} · moteur : ${moteur === 'elevenlabs' ? 'ElevenLabs (votre voix)' : 'edge-tts Denise'}`);
 const durees = {};
 for (const s of plan.sections.flatMap((x) => x.scenes)) {
   const mp3 = `${dossier}${s.id}.mp3`;
-  const empreinte = createHash('sha256').update(`${moteur}\n${s.voix}`).digest('hex').slice(0, 16);
+  const empreinte = empreinteDe(s);
   const neuf = !(existsSync(mp3) && empreintes[s.id] === empreinte);
   if (neuf) {
     if (moteur === 'elevenlabs') await synthetiser(s.voix, mp3);
