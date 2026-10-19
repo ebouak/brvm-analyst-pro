@@ -45,8 +45,9 @@ export default async function OffresNiveaux({
           {seuleFormation ? 'Acheter la formation' : 'Acheter sans abonnement'}
         </h2>
         <p className="mt-1 max-w-[65ch] text-sm text-muted">
-          Sans abonnement : les leçons, les examens et les certificats, accessibles à vie. Une refonte majeure
-          publiée plus de 12 mois après votre achat ne serait pas incluse ; vos certificats restent acquis.
+          Sans abonnement : les leçons, les examens et les certificats de l’Academy, accessibles à vie
+          {seuleFormation ? ', et un mois d’accès Premium à toute la plateforme' : ''}. Une refonte majeure publiée plus de
+          12 mois après votre achat ne serait pas incluse ; vos certificats restent acquis.
         </p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
@@ -54,7 +55,7 @@ export default async function OffresNiveaux({
           <li key={p.productCode} className="flex flex-col gap-3 rounded-lg border border-border/70 bg-bg/40 p-4">
             <div>
               <p className="text-xs uppercase tracking-widest text-accent">
-                {p.kind === 'formation' ? 'Formation complète · 4 niveaux' : p.niveau ? NIVEAU_LABEL[p.niveau] : ''}
+                {p.kind === 'formation' ? 'Formation complète · 4 niveaux + 1 mois Premium' : p.niveau ? NIVEAU_LABEL[p.niveau] : ''}
                 {p.kind === 'upgrade' ? ' · nouvelle version' : ''}
               </p>
               <p className="mt-1 text-sm text-ivory">{p.libelle}</p>

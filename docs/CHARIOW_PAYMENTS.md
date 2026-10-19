@@ -5,7 +5,7 @@ abonnement récurrent — Chariow ne fait que des achats uniques :
 
 | Produit | Code catalogue | Effet |
 |---|---|---|
-| **Formation complète** (0155) | `academy:integrale` | les **quatre niveaux** : leçons, examens, certificats, **à vie** — produit retenu le 2026-10-19 (`prd_48iuli9l`) |
+| **Formation complète** (0155, 0156) | `academy:integrale` | les **quatre niveaux** : leçons, examens, certificats, **à vie**, **+ 1 mois Premium** (0156 : abonnement Chariow mensuel ouvert ou prolongé ; retiré au remboursement) — `prd_48iuli9l`, 9 000 XOF |
 | Niveau de l'Academy | `academy:<niveau>` | leçons + examen + certificat du niveau, **à vie** |
 | Rachat après refonte | `academy:<niveau>:upgrade` | même accès, tarif réduit, réservé aux acheteurs rattrapés par une refonte |
 | Pass premium | `pass:<plan>:<cycle>` | Premium/Platinium pour 1, 3 ou 12 mois, **sans prélèvement automatique** |
