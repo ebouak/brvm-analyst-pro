@@ -3,7 +3,7 @@ import { cache } from 'react';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { createClient } from '@/lib/supabase/server';
 import { canAccess, type AccessDecision } from '@/lib/server/featureAccess';
-import { droitNiveauValide, type DroitNiveau } from '@/lib/billing/chariow/regles';
+import { CODE_FORMATION, droitNiveauValide, niveauxDesDroits, type DroitNiveau } from '@/lib/billing/chariow/regles';
 import { NIVEAUX, type Niveau } from '@/lib/academy/types';
 
 /**
@@ -58,12 +58,8 @@ async function droitsDe(userId: string): Promise<LigneDroit[]> {
 /** Niveaux achetés et encore valides (révocation, expiration, refonte > 12 mois). */
 export async function niveauxAchetes(userId: string): Promise<Set<Niveau>> {
   const [droits, refontes] = await Promise.all([droitsDe(userId), refontesParNiveau()]);
-  const ok = new Set<Niveau>();
-  for (const d of droits) {
-    if (!d.niveau || !d.product_code.startsWith('academy:')) continue;
-    if (droitNiveauValide(d, refontes.get(d.niveau) ?? null)) ok.add(d.niveau);
-  }
-  return ok;
+  // Niveau acheté seul, ou les quatre par la formation complète (0155).
+  return niveauxDesDroits(droits, refontes);
 }
 
 /**
@@ -93,6 +89,8 @@ export async function niveauxARemettreAJour(userId: string): Promise<Set<Niveau>
  *   - autre code : droit non révoqué et non expiré.
  */
 export async function hasActiveEntitlement(userId: string, productCode: string): Promise<boolean> {
+  // Avant le motif academy:<niveau>, qui lirait « integrale » comme un niveau.
+  if (productCode === CODE_FORMATION) return (await niveauxAchetes(userId)).size === NIVEAUX.length;
   const m = /^academy:([a-z]+)(?::upgrade)?$/.exec(productCode);
   if (m) {
     const niveau = m[1] as Niveau;

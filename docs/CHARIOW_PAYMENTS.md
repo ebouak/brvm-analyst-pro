@@ -5,11 +5,14 @@ abonnement récurrent — Chariow ne fait que des achats uniques :
 
 | Produit | Code catalogue | Effet |
 |---|---|---|
+| **Formation complète** (0155) | `academy:integrale` | les **quatre niveaux** : leçons, examens, certificats, **à vie** — produit retenu le 2026-10-19 (`prd_48iuli9l`) |
 | Niveau de l'Academy | `academy:<niveau>` | leçons + examen + certificat du niveau, **à vie** |
 | Rachat après refonte | `academy:<niveau>:upgrade` | même accès, tarif réduit, réservé aux acheteurs rattrapés par une refonte |
 | Pass premium | `pass:<plan>:<cycle>` | Premium/Platinium pour 1, 3 ou 12 mois, **sans prélèvement automatique** |
 
 Chariow **coexiste** avec `PAYMENT_PROVIDER` (manual / CinetPay) : il ne le remplace pas.
+
+Décision du 2026-10-19 : l'Academy entière s'ouvre à tout abonné Premium **ou** à l'acheteur de la formation complète ; aucun produit par niveau n'est créé. Le droit `academy:integrale` (niveau NULL) est traduit en quatre niveaux par `niveauxDesDroits` (`lib/billing/chariow/regles.ts`), chacun soumis à la règle de refonte ci-dessous.
 
 Règle produit des niveaux (décision du 2026-09-29) : accès à vie, **sauf** une refonte
 majeure publiée plus de 12 mois après l'achat ; le certificat reste acquis, le contenu

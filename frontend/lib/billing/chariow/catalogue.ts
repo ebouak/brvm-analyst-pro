@@ -9,7 +9,7 @@ import type { BillingCycle } from '@/lib/billing/types';
  * Chariow : le navigateur ne transmet qu'un `product_code`.
  */
 
-export type TypeProduit = 'module' | 'upgrade' | 'pass';
+export type TypeProduit = 'module' | 'upgrade' | 'pass' | 'formation';
 
 export interface ProduitChariow {
   productCode: string;

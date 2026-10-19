@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
+import { NIVEAUX, type Niveau } from '@/lib/academy/types';
 
 /**
  * Règles Chariow PURES : aucune I/O, aucune variable d'environnement.
@@ -127,6 +128,32 @@ export function droitNiveauValide(d: DroitNiveau, refonteLe: string | null, main
     if (refonte > achat + DOUZE_MOIS_MS) return false;
   }
   return true;
+}
+
+/**
+ * Code du produit « formation complète » (migration 0155) : UN achat ouvre les
+ * quatre niveaux. Son droit porte `niveau = null`.
+ */
+export const CODE_FORMATION = 'academy:integrale';
+
+/**
+ * Niveaux ouverts par un ensemble de droits achetés. Un droit à un niveau ouvre
+ * ce niveau ; le droit « formation complète » ouvre les quatre. Chaque niveau
+ * reste soumis à la règle de refonte (> 12 mois après l'achat), évaluée contre
+ * la date de CE droit : une refonte du niveau 3 ne retire que le niveau 3.
+ */
+export function niveauxDesDroits(
+  droits: readonly (DroitNiveau & { product_code: string; niveau: Niveau | null })[],
+  refontes: ReadonlyMap<Niveau, string>,
+  maintenant: Date = new Date(),
+): Set<Niveau> {
+  const ok = new Set<Niveau>();
+  for (const d of droits) {
+    const couverts: readonly Niveau[] =
+      d.product_code === CODE_FORMATION ? NIVEAUX : d.niveau && d.product_code.startsWith('academy:') ? [d.niveau] : [];
+    for (const n of couverts) if (droitNiveauValide(d, refontes.get(n) ?? null, maintenant)) ok.add(n);
+  }
+  return ok;
 }
 
 // ── Formulaire de paiement ───────────────────────────────────────────────────

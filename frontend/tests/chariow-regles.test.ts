@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { createHmac } from 'node:crypto';
 import {
+  CODE_FORMATION,
   corpsCheckout,
   droitNiveauValide,
+  niveauxDesDroits,
   lirePulse,
   normaliserTelephone,
   signatureValide,
@@ -153,5 +155,42 @@ describe('corpsCheckout — le navigateur ne fixe ni prix ni produit Chariow', (
   it('normalise un numéro saisi à la main', () => {
     expect(normaliserTelephone('+225 07 00-00.00.00')).toBe('2250700000000');
     expect(normaliserTelephone('00225 0700000000')).toBe('2250700000000');
+  });
+});
+
+describe('niveauxDesDroits — formation complète (0155) et niveaux à l’unité', () => {
+  const base = { granted_at: '2026-10-19T00:00:00Z', expires_at: null, revoked_at: null };
+  const now = new Date('2027-06-01T00:00:00Z');
+  const aucune = new Map();
+
+  it('la formation complète ouvre les quatre niveaux', () => {
+    const n = niveauxDesDroits([{ ...base, product_code: CODE_FORMATION, niveau: null }], aucune, now);
+    expect([...n].sort()).toEqual(['avance', 'debutant', 'expert', 'intermediaire']);
+  });
+
+  it('un niveau acheté seul n’ouvre que lui', () => {
+    const n = niveauxDesDroits([{ ...base, product_code: 'academy:avance', niveau: 'avance' }], aucune, now);
+    expect([...n]).toEqual(['avance']);
+  });
+
+  it('une refonte tardive d’UN niveau ne retire que ce niveau à l’acheteur de la formation', () => {
+    const refontes = new Map<'avance', string>([['avance', '2028-03-01T00:00:00Z']]);
+    const n = niveauxDesDroits([{ ...base, product_code: CODE_FORMATION, niveau: null }], refontes, new Date('2028-06-01T00:00:00Z'));
+    expect(n.has('avance')).toBe(false);
+    expect(n.size).toBe(3);
+  });
+
+  it('formation remboursée (révoquée) : plus rien', () => {
+    const n = niveauxDesDroits([{ ...base, revoked_at: '2026-11-01T00:00:00Z', product_code: CODE_FORMATION, niveau: null }], aucune, now);
+    expect(n.size).toBe(0);
+  });
+
+  it('un droit étranger à l’Academy ou sans niveau n’ouvre rien', () => {
+    const n = niveauxDesDroits(
+      [{ ...base, product_code: 'pass:premium:monthly', niveau: null }, { ...base, product_code: 'academy:debutant', niveau: null }],
+      aucune,
+      now,
+    );
+    expect(n.size).toBe(0);
   });
 });
