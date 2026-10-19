@@ -1,3 +1,4 @@
+import { NIVEAUX } from '@/lib/academy/types';
 import 'server-only';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { prixDuCycle } from '@/lib/billing/dates';
@@ -64,6 +65,10 @@ export async function demarrerAchat(args: {
     if (prixPlan == null || prixPlan !== produit.montant || (plan?.currency ?? 'XOF') !== produit.devise) {
       console.error('chariow/checkout: prix du pass ≠ subscription_plans', { code: produit.productCode });
       return { ok: false, statut: 409, message: 'Configuration tarifaire invalide. Contactez-nous.' };
+    }
+  } else if (produit.kind === 'formation') {
+    if ((await niveauxAchetes(userId)).size === NIVEAUX.length) {
+      return { ok: false, statut: 409, message: 'Vous avez déjà accès à toute la formation.' };
     }
   } else if (produit.niveau) {
     const possedes = await niveauxAchetes(userId);
