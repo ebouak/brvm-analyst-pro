@@ -1,3 +1,5 @@
+import OffresNiveaux from '@/components/billing/OffresNiveaux';
+import { accesAcademy } from '@/lib/server/academyAccess';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -109,6 +111,9 @@ export default async function Page() {
       </div>
 
       <PlanClient plans={plans} canSubscribe={canSubscribe} />
+
+      {/* Alternative sans abonnement : la formation complète, avec un mois Premium (Chariow). */}
+      <OffresNiveaux userId={user.id} possedes={(await accesAcademy()).niveaux} retour="/account/plan" />
 
       {pass.length > 0 && (
         <section aria-labelledby="h-pass" className="space-y-3 rounded-panel border border-border bg-surface p-5">

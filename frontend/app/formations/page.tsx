@@ -1,3 +1,5 @@
+import OffresNiveaux from '@/components/billing/OffresNiveaux';
+import { accesAcademy } from '@/lib/server/academyAccess';
 import Link from 'next/link';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
 import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/server';
@@ -22,12 +24,19 @@ export default async function FormationsPage() {
   // La page ne decide rien : elle demande.
   const gate = await canAccess('formations');
   if (!gate.allowed) {
+    const acces = await accesAcademy();
     return (
-      <AccessGate
-        required={gate.required === 'free' ? 'premium' : gate.required}
-        feature="Les formations & conférences"
-        hint="Cours, webinaires et conférences de l'Académie WESTBOURSE."
-      />
+      <>
+        <div className="mx-auto w-full max-w-3xl space-y-4 px-4 pt-6 sm:px-6">
+          <Lecon0Carte />
+          <OffresNiveaux userId={acces.userId} possedes={acces.niveaux} retour="/formations" />
+        </div>
+        <AccessGate
+          required={gate.required === 'free' ? 'premium' : gate.required}
+          feature="Les formations & conférences"
+          hint="Cours, webinaires et conférences de l'Académie WESTBOURSE."
+        />
+      </>
     );
   }
 

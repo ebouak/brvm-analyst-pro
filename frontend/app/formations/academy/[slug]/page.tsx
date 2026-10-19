@@ -1,3 +1,4 @@
+import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getServiceClient } from '@/lib/billing/serviceClient';
@@ -47,11 +48,17 @@ export default async function AcademyCoursePage({
   if (!gate.allowed) {
     const required = gate.acces.abonnement.required;
     return (
-      <AccessGate
-        required={required === 'free' ? 'premium' : required}
-        feature="La WestBourse Academy"
-        hint="Cours interactifs, progression, quiz et certificats."
-      />
+      <>
+        {/* Sans abonnement, la formation s'achète ici même (Chariow). */}
+        <div className="mx-auto w-full max-w-3xl px-4 pt-6 sm:px-6">
+          <OffresNiveaux userId={gate.acces.userId} possedes={gate.acces.niveaux} retour={`/formations/academy/${params.slug}`} />
+        </div>
+        <AccessGate
+          required={required === 'free' ? 'premium' : required}
+          feature="La WestBourse Academy"
+          hint="Cours interactifs, progression, quiz et certificats."
+        />
+      </>
     );
   }
 
