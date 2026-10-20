@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import type { ItemPdf } from '../src/dividends/boc.js';
 import { lireCalendrier, dateFr, type Calendrier } from '../src/dividends/calendrier.js';
 import { cleNom, codeDuNom } from '../src/dividends/calendrierCodes.js';
+import { lireTableEsv, urlsCandidatesCalendrier, exerciceDepuisUrlCalendrier } from '../src/dividends/esv.js';
 
 const fixture = (nom: string) =>
   JSON.parse(readFileSync(new URL(`./fixtures/${nom}`, import.meta.url), 'utf8')) as ItemPdf[][];
@@ -89,5 +90,39 @@ describe('correspondance nom → code (table curée, aucun repli flou)', () => {
   it('un nom inconnu ou partiel ne devine rien', () => {
     expect(codeDuNom('BANQUE INCONNUE CI')).toBeNull();
     expect(codeDuNom('ORANGE')).toBeNull();
+  });
+});
+
+const html = (nom: string) => readFileSync(new URL(`./fixtures/${nom}`, import.meta.url), 'utf8');
+const p0 = lireTableEsv(html('brvm-esv-dividendes-p0.html'));
+const p1 = lireTableEsv(html('brvm-esv-dividendes-p1.html'));
+
+describe('table HTML des paiements de dividendes (brvm.org/fr/esv)', () => {
+  it('dates lues dans les attributs ISO, avis et date de publication tirés du lien', () => {
+    expect(p0).toHaveLength(10);
+    expect(p0[0]).toEqual({
+      emetteur: 'BOLLORE TRANSPORT & LOGISTICS',
+      exercice: 2025,
+      paiement: '2026-10-27',
+      ex_date: '2026-10-26',
+      avis: '297-2026 BRVMDG',
+      avisUrl: expect.stringContaining('avis_ndeg297_brvmdg'),
+      datePublication: '2026-10-09',
+    });
+  });
+
+  it('les erreurs de la table sont lues telles quelles (le recoupement les tranchera)', () => {
+    expect(p1.find((r) => r.avis === '213-2026 BRVMDG')).toMatchObject({ emetteur: 'SOGB', ex_date: '2026-07-05' });
+    expect(p1.some((r) => r.avis === '211-2025 BRVMDG')).toBe(true);
+  });
+
+  it('candidats : un calendrier par date d’avis, du plus récent, au plus 5, sans doublon', () => {
+    const urls = urlsCandidatesCalendrier([...p0, ...p1]);
+    expect(urls[0]).toBe(
+      'https://www.brvm.org/sites/default/files/20261009_-_calendrier_de_paiement_des_dividendes_-_exercice_2025.pdf',
+    );
+    expect(urls.length).toBeLessThanOrEqual(5);
+    expect(new Set(urls).size).toBe(urls.length);
+    expect(exerciceDepuisUrlCalendrier(urls[0]!)).toBe(2025);
   });
 });
