@@ -1,0 +1,150 @@
+{
+  "titre": "Leçon 11 — BRVM ou autres placements : une comparaison objective",
+  "categorie": "general",
+  "duree_min": 7,
+  "sous_titre": "Rendement, risque, liquidité et effort : situer la bourse dans un patrimoine.",
+  "resume": "Il n’existe pas de placement idéal pour tout : chaque support a ses forces et ses contraintes.\nCette leçon compare la BRVM à l’épargne bancaire, à l’immobilier et au commerce, puis montre les rendements de dividende réels du marché.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Quatre placements, quatre profils",
+      "contenu": "Comparer des placements, c’est regarder quatre critères à la fois : ce qu’ils rapportent, la vitesse à laquelle on récupère son argent, le risque, et le temps qu’ils demandent.",
+      "tableau": {
+        "colonnes": ["Placement", "Rendement", "Liquidité", "Risque", "Effort"],
+        "lignes": [
+          ["Épargne bancaire", "Faible, connu d’avance", "Immédiate", "Très faible", "Aucun"],
+          ["Actions BRVM", "Dividendes et variation du cours, non garantis", "Rapide si la valeur s’échange", "Moyen à élevé à court terme", "Faible"],
+          ["Immobilier", "Loyers et valeur du bien", "Faible : des mois pour vendre", "Moyen", "Élevé : gestion, entretien"],
+          ["Commerce propre", "Très variable", "Très faible", "Élevé", "Très élevé"]
+        ],
+        "note": "Repères qualitatifs : les rendements réels varient selon les périodes, les produits et les situations."
+      }
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Les rendements de dividende réels du marché",
+      "contenu": "Le tableau donne le rendement de dividende de six valeurs de la BRVM, calculé sur le dernier dividende enregistré et le cours de la dernière séance.\nCe rendement n’est qu’une partie du rendement total : le cours peut monter ou baisser.",
+      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SGBC", "STBC", "BOAB", "CIEC"] }
+    },
+    {
+      "type": "importance",
+      "titre": "Comparer sur la bonne durée",
+      "contenu": "Une seule année peut être exceptionnellement bonne ou mauvaise. Comparez sur cinq à dix ans, et toujours dividendes compris.\nLe rendement total additionne les dividendes et la variation du cours.",
+      "formules": [
+        {
+          "nom": "Rendement total sur un an",
+          "expression": "(Dividendes + Cours final − Cours initial) ÷ Cours initial × 100",
+          "exemple": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 %"
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Bâtir un patrimoine par étapes",
+      "contenu": "Les placements ne s’opposent pas : ils se complètent, dans un ordre logique.",
+      "etapes_style": "frise",
+      "etapes": [
+        { "titre": "Épargne de précaution", "detail": "Trois à six mois de charges, disponibles immédiatement.", "cle": true },
+        { "titre": "Placements de long terme", "detail": "Actions BRVM diversifiées, pour l’argent dont on n’a pas besoin avant plusieurs années." },
+        { "titre": "Actifs réels", "detail": "Immobilier ou activité propre, selon ses moyens et son temps." }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Ce que la bourse apporte, et ce qu’elle demande",
+      "contenu": "Face à l’immobilier ou au commerce, la bourse se distingue sur deux points : la liquidité et le peu de temps qu’elle exige.",
+      "points": [
+        { "titre": "Liquidité", "detail": "Une action qui s’échange se vend en séance, quand un bien immobilier peut demander des mois." },
+        { "titre": "Peu de gestion", "detail": "Ni locataire, ni stock, ni salarié : le suivi se limite aux publications et au portefeuille." },
+        { "titre": "Fractionnement", "detail": "On peut investir des montants modestes, et répartir sur plusieurs sociétés." },
+        {
+          "titre": "En contrepartie, la volatilité",
+          "detail": "Le cours varie chaque jour : la bourse convient à l’argent dont on n’a pas besoin à court terme.",
+          "verifier": "votre horizon de placement avant d’investir."
+        }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Les erreurs de comparaison",
+      "contenu": "Une comparaison mal posée conduit à de mauvaises décisions.",
+      "points": [
+        { "titre": "Juger sur une seule année", "detail": "« La bourse a baissé cette année » ne dit rien du rendement sur dix ans." },
+        { "titre": "Oublier les dividendes", "detail": "Ne regarder que le cours sous-estime le rendement des actions." },
+        { "titre": "Comparer un brut à un net", "detail": "Rendements de dividendes, loyers et intérêts se comparent après impôts et frais." },
+        { "titre": "Tout mettre sur un seul support", "detail": "Un patrimoine solide combine plusieurs placements." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Cinq idées à garder en tête.",
+      "points": [
+        { "titre": "Aucun placement n’est idéal pour tout", "detail": "Chacun a son rendement, sa liquidité, son risque et son effort." },
+        { "titre": "La bourse offre liquidité et peu de gestion", "detail": "En échange d’une volatilité à court terme." },
+        { "titre": "Rendement total = dividendes + variation du cours", "detail": "Le rendement de dividende n’en est qu’une partie." },
+        { "titre": "On compare sur cinq à dix ans", "detail": "Et toujours dans les mêmes conditions : brut avec brut, net avec net." },
+        { "titre": "L’épargne de précaution vient en premier", "detail": "Avant la bourse, avant l’immobilier." }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Quel placement offre la liquidité la plus immédiate ?",
+      "options": ["L’épargne bancaire", "L’immobilier", "Un commerce", "Aucun des trois"],
+      "correct": 0,
+      "explication": "L’épargne bancaire est disponible immédiatement, ce qui en fait le support naturel de l’épargne de précaution."
+    },
+    {
+      "question": "Vous achetez une action 10 000 FCFA. Un an plus tard, elle cote 10 600 FCFA et vous avez reçu 400 FCFA de dividende. Quel est votre rendement total ?",
+      "options": ["4 %", "6 %", "10 %", "16 %"],
+      "correct": 2,
+      "explication": "(400 + 10 600 − 10 000) ÷ 10 000 × 100 = 10 % : 4 % de dividende et 6 % de hausse du cours."
+    },
+    {
+      "question": "Pourquoi comparer les placements sur cinq à dix ans ?",
+      "options": [
+        "Parce que les dividendes ne sont versés qu’au bout de cinq ans",
+        "Parce qu’une seule année peut être exceptionnellement bonne ou mauvaise",
+        "Parce que la BRVM ne publie ses cours qu’une fois par an",
+        "Parce que l’immobilier ne se vend qu’après dix ans"
+      ],
+      "correct": 1,
+      "explication": "Sur une seule année, le hasard pèse lourd. Une longue période donne une image plus fidèle du rendement."
+    },
+    {
+      "question": "Qu’est-ce que le rendement de dividende d’une action ?",
+      "options": [
+        "Le dividende divisé par le cours, hors variation du cours",
+        "La hausse du cours sur un an",
+        "Le bénéfice de la société divisé par son chiffre d’affaires",
+        "Le rendement total garanti par la société"
+      ],
+      "correct": 0,
+      "explication": "Rendement de dividende = dividende ÷ cours × 100. Il ne tient pas compte de la variation du cours, qui s’ajoute au rendement total."
+    },
+    {
+      "question": "Par quoi commencer pour bâtir un patrimoine ?",
+      "options": [
+        "Un portefeuille d’actions",
+        "Un bien immobilier",
+        "Une épargne de précaution disponible",
+        "Un commerce"
+      ],
+      "correct": 2,
+      "explication": "L’épargne de précaution couvre les imprévus : elle évite de devoir vendre ses actions ou son bien au mauvais moment."
+    }
+  ],
+  "qcm": {
+    "question": "Quel placement offre la liquidité la plus immédiate ?",
+    "options": ["L’épargne bancaire", "L’immobilier", "Un commerce", "Aucun des trois"],
+    "correct": 0,
+    "explication": "L’épargne bancaire est disponible immédiatement, ce qui en fait le support naturel de l’épargne de précaution."
+  },
+  "liens": [
+    { "label": "Rendement réel et vrai", "href": "/rendement-vrai" },
+    { "label": "Espace dividendes", "href": "/dividendes" }
+  ]
+}

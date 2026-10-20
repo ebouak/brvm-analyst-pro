@@ -1,0 +1,171 @@
+{
+  "titre": "Leçon 6 — Les risques : apprendre avant d'investir",
+  "categorie": "general",
+  "duree_min": 7,
+  "sous_titre": "Identifier les risques d’un placement en actions, et les trois protections qui les réduisent.",
+  "resume": "Investir en bourse, c’est accepter un risque de perte. Bien compris, ce risque se mesure et se réduit.\nCette leçon présente les trois risques principaux et les trois protections de l’investisseur : diversifier, voir loin, se former.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Trois risques à connaître",
+      "contenu": "Un bon investisseur ne fuit pas le risque : il le connaît et le limite.\nTrois risques reviennent sur tout marché d’actions, et la BRVM ne fait pas exception.",
+      "points": [
+        {
+          "titre": "Le risque de marché",
+          "detail": "Une baisse générale, due à une crise économique ou à un choc extérieur. Elle touche presque toutes les actions en même temps.",
+          "verifier": "comment votre portefeuille réagirait si tout le marché baissait de 20 %."
+        },
+        {
+          "titre": "Le risque spécifique",
+          "detail": "Un problème propre à une société : résultats en recul, mauvaise gestion, perte d’un marché. Il ne touche qu’une valeur.",
+          "verifier": "la part de votre capital placée sur une seule société."
+        },
+        {
+          "titre": "Le risque de liquidité",
+          "detail": "La difficulté à vendre vite sans faire baisser le prix. Sur la BRVM, certaines valeurs s’échangent peu.",
+          "verifier": "les volumes échangés de la valeur avant d’acheter."
+        }
+      ]
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Quand le dividende baisse : des cas réels",
+      "contenu": "Un dividende n’est jamais acquis. Il dépend chaque année des résultats et de la décision des actionnaires.\nLe tableau suit quatre valeurs de la BRVM sur cinq exercices : l’une progresse régulièrement, d’autres ont fortement réduit leur distribution.",
+      "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "PALC", "NTLC", "SPHC"] }
+    },
+    {
+      "type": "importance",
+      "titre": "Trois protections",
+      "contenu": "On ne supprime pas le risque, on le répartit et on lui laisse du temps.",
+      "points": [
+        {
+          "titre": "Diversifier",
+          "detail": "Répartir son capital sur plusieurs sociétés et plusieurs secteurs : banques, télécoms, agro-industrie, distribution. Une mauvaise année sur une valeur pèse alors peu.",
+          "verifier": "qu’aucune valeur ne dépasse une part importante de votre portefeuille."
+        },
+        {
+          "titre": "Voir loin",
+          "detail": "N’investir que l’argent dont vous n’aurez pas besoin avant plusieurs années. À court terme, les cours sont imprévisibles.",
+          "verifier": "la date à laquelle vous pourriez avoir besoin de ces fonds."
+        },
+        {
+          "titre": "Se former",
+          "detail": "Un investisseur informé lit les résultats, repère plus tôt les signaux d’alerte et panique moins lors des baisses.",
+          "verifier": "les dernières publications de chaque société détenue."
+        }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Diversifier : l’effet d’une mauvaise nouvelle",
+      "contenu": "Prenons 1 000 000 FCFA placés à 8 % de rendement, soit 80 000 FCFA de dividendes par an. Une des sociétés divise son dividende par deux.\nSur une seule valeur, le revenu chute de moitié. Réparti sur cinq valeurs égales, il ne baisse que d’un dixième.",
+      "tableau": {
+        "colonnes": ["Portefeuille", "Revenu avant", "Revenu après", "Variation"],
+        "lignes": [
+          ["Une seule valeur", "80 000 FCFA", "40 000 FCFA", "−50 %"],
+          ["Cinq valeurs égales", "80 000 FCFA", "72 000 FCFA", "−10 %"]
+        ],
+        "note": "Exemple pédagogique : 1 000 000 FCFA à 8 % de rendement ; une société sur cinq divise son dividende par deux."
+      }
+    },
+    {
+      "type": "importance",
+      "titre": "D’abord, une épargne de précaution",
+      "contenu": "Avant d’acheter une action, mettez de côté de quoi faire face à un imprévu : santé, loyer, scolarité.\nCette épargne reste sur un compte disponible. Elle vous évite de vendre vos actions au mauvais moment.",
+      "formules": [
+        {
+          "nom": "Épargne de précaution",
+          "expression": "Charges mensuelles × 3 à 6 mois",
+          "exemple": "250 000 FCFA × 6 = 1 500 000 FCFA"
+        }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Les erreurs qui coûtent cher",
+      "contenu": "La plupart des pertes réelles viennent de quelques erreurs, toujours les mêmes.",
+      "points": [
+        { "titre": "Investir son épargne d’urgence", "detail": "Si un imprévu oblige à vendre pendant une baisse, la perte devient définitive." },
+        { "titre": "Vendre dans la panique", "detail": "Une baisse temporaire ne devient une perte que si l’on vend. Revenez aux fondamentaux de la société avant de décider." },
+        { "titre": "Tout concentrer sur une valeur", "detail": "Une seule mauvaise nouvelle suffit alors à faire chuter tout le portefeuille." },
+        { "titre": "Ignorer la liquidité", "detail": "Sur une valeur peu échangée, un ordre passé sans limite de prix peut s’exécuter loin du dernier cours." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Cinq idées à garder en tête.",
+      "points": [
+        { "titre": "Trois risques : marché, spécifique, liquidité", "detail": "Chacun appelle une réponse différente." },
+        { "titre": "La diversification réduit le risque spécifique", "detail": "Elle ne protège pas d’une baisse générale du marché." },
+        { "titre": "Un dividende peut baisser", "detail": "Les cas réels de la BRVM le montrent : rien n’est acquis." },
+        { "titre": "L’épargne de précaution passe avant la bourse", "detail": "Trois à six mois de charges, disponibles à tout moment." },
+        { "titre": "La panique transforme une baisse en perte", "detail": "Investir à long terme, c’est accepter les creux." }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Pourquoi ne pas investir son épargne d’urgence en bourse ?",
+      "options": [
+        "Car les dividendes sont imposés",
+        "Car la bourse n’est accessible qu’aux résidents ivoiriens",
+        "Car on peut avoir besoin de cet argent rapidement et devoir vendre pendant une baisse",
+        "Car les SGI refusent les petits montants"
+      ],
+      "correct": 2,
+      "explication": "L’épargne d’urgence doit rester disponible. Vendre en urgence pendant une baisse transforme une baisse temporaire en perte définitive."
+    },
+    {
+      "question": "Votre revenu de dividendes vient à parts égales de cinq sociétés. L’une divise son dividende par deux. De combien baisse votre revenu ?",
+      "options": ["−50 %", "−20 %", "−10 %", "−5 %"],
+      "correct": 2,
+      "explication": "Chaque société apporte un cinquième du revenu, soit 20 %. Elle en perd la moitié : le revenu total baisse de 10 %."
+    },
+    {
+      "question": "Quel risque la diversification réduit-elle le mieux ?",
+      "options": [
+        "Le risque de marché",
+        "Le risque spécifique à une entreprise",
+        "Le risque de change",
+        "Tous les risques à la fois"
+      ],
+      "correct": 1,
+      "explication": "Répartir son capital limite l’effet d’un problème propre à une société. Une baisse générale du marché, elle, touche toutes les valeurs."
+    },
+    {
+      "question": "Qu’appelle-t-on le risque de liquidité ?",
+      "options": [
+        "La perte de valeur due à l’inflation",
+        "La difficulté à vendre rapidement sans faire baisser le prix",
+        "La faillite d’une société cotée",
+        "La variation du franc CFA"
+      ],
+      "correct": 1,
+      "explication": "Sur une valeur peu échangée, il peut manquer d’acheteurs : vendre vite oblige alors à accepter un prix plus bas."
+    },
+    {
+      "question": "Vos charges mensuelles sont de 200 000 FCFA. Quelle épargne de précaution sur six mois ?",
+      "options": ["600 000 FCFA", "1 200 000 FCFA", "2 000 000 FCFA", "200 000 FCFA"],
+      "correct": 1,
+      "explication": "200 000 FCFA × 6 mois = 1 200 000 FCFA, à garder disponibles avant d’investir en bourse."
+    }
+  ],
+  "qcm": {
+    "question": "Pourquoi ne pas investir son épargne d’urgence en bourse ?",
+    "options": [
+      "Car les dividendes sont imposés",
+      "Car la bourse n’est accessible qu’aux résidents ivoiriens",
+      "Car on peut avoir besoin de cet argent rapidement et devoir vendre pendant une baisse",
+      "Car les SGI refusent les petits montants"
+    ],
+    "correct": 2,
+    "explication": "L’épargne d’urgence doit rester disponible. Vendre en urgence pendant une baisse transforme une baisse temporaire en perte définitive."
+  },
+  "liens": [
+    { "label": "Classement de liquidité", "href": "/liquidite" },
+    { "label": "Espace dividendes", "href": "/dividendes" }
+  ]
+}
