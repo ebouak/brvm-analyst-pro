@@ -86,7 +86,7 @@ function Reinvestissement({ sim }: { sim: Extract<Simulation, { type: 'reinvesti
           <tbody>
             {lignes.map((l) => (
               <tr key={l.annee}>
-                <th scope="row" className="lp-ligne-tete">Année {l.annee}</th>
+                <th scope="row" className="lp-ligne-tete">{`Année ${l.annee}`}</th>
                 <td className="lp-num">{nombre(l.actionsReinvest)}</td>
                 <td className="lp-num">{nombre(l.dpa)}</td>
                 <td className="lp-num">{nombre(l.revenuReinvest)}</td>

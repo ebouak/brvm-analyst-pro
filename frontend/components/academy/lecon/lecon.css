@@ -128,7 +128,7 @@
 .lp-chiffre:first-child { border-left: 0; padding-left: 0; }
 .lp-chiffre dd {
   margin: 0; font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.5rem, 2.6vw, 2rem); line-height: 1.1; color: var(--lp-encre);
+  font-size: clamp(1.3rem, 2vw, 1.6rem); line-height: 1.15; color: var(--lp-encre);
   font-variant-numeric: tabular-nums;
 }
 .lp-chiffre dt { font-size: 0.78rem; color: var(--lp-doux); margin-top: 0.3rem; }
@@ -191,7 +191,10 @@
   text-transform: none; letter-spacing: 0; font-size: 0.93rem; font-weight: 600; color: var(--lp-encre);
   border-bottom: 1px solid var(--lp-trame); white-space: normal; padding-left: 0;
 }
-.lp-table .lp-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--lp-encre); }
+.lp-table .lp-num { text-align: right; font-variant-numeric: tabular-nums; color: var(--lp-encre); }
+/* Seuls les CHIFFRES sont insécables ; un en-tête peut passer à la ligne,
+   sinon il impose sa largeur et force le défilement du tableau. */
+.lp-table td.lp-num { white-space: nowrap; }
 .lp-table th.lp-num { color: var(--lp-doux); }
 .lp-note { margin-top: 0.6rem; font-size: 0.82rem; color: var(--lp-doux); }
 

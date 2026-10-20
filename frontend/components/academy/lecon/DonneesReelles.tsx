@@ -10,6 +10,8 @@ const nombre = (n: number) => new Intl.NumberFormat('fr-FR', { maximumFractionDi
 const pct = (n: number) => `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(n)} %`;
 const dateFr = (iso: string) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+/** Date courte pour les cellules étroites : 26/05/2026. */
+const dateCourte = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
 
 const SOURCES: Record<string, string> = {
   'brvm-calendrier': 'calendrier de paiement BRVM',
@@ -77,8 +79,8 @@ export default function DonneesReelles({ donnees }: { donnees: DonneesSection | 
                     {nombre(l.dividende)}
                     {!l.baseNette && '*'}
                     <span className="lp-cellule-detail">
-                      exercice {l.exercice}
-                      {l.paiement ? ` · payé le ${dateFr(l.paiement)}` : ''}
+                      ex. {l.exercice}
+                      {l.paiement ? ` · payé le ${dateCourte(l.paiement)}` : ''}
                     </span>
                   </td>
                   <td className="lp-num">{nombre(l.cours)}</td>
@@ -90,7 +92,9 @@ export default function DonneesReelles({ donnees }: { donnees: DonneesSection | 
           </table>
         </div>
         <ul className="lp-hypotheses">
-          {dateCours && <li>Cours de clôture de la séance du {dateFr(dateCours)} ; le rendement change avec le cours.</li>}
+          {dateCours && (
+            <li>Dernier cours enregistré, séance du {dateFr(dateCours)} ; le rendement change avec le cours.</li>
+          )}
           <li>Dividendes : {sources.join(', ')}, via la base WestBourse. Les dividendes passés ne préjugent pas des dividendes futurs.</li>
           {nonVerifiee && <li>* Montant publié dont la base (brut ou net) n’est pas vérifiée.</li>}
         </ul>
