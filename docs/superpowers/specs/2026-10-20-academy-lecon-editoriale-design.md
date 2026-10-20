@@ -129,6 +129,27 @@ sauvegarde complète avant, validation par `lessonSchema` avant écriture.
   derrière le mur Premium — le critère « prévisualisation Vercel » se vérifie en
   local connecté, puis en production après fusion.
 
+## 9 bis. Ajouts après la première relecture du propriétaire (2026-10-20)
+
+« La leçon est top, par contre il manque des exemples pertinents connectés
+directement à la base de données et le quiz de 5 questions au moins. »
+
+- **Exemples réels** : bloc de section `donnees_reelles { vue, codes, actions? }`.
+  Le contenu ne porte que des CODES ; dividendes (`dividends`), dernier cours
+  (`brvm_actions_daily`) et désignation (`brvm_instruments`) sont lus au
+  chargement (`lib/academy/donneesServer.ts`, lecture seule, tolérant aux
+  pannes ; calcul pur et testé dans `donneesReelles.ts`). Vue `rendement`
+  (dernier dividende net, cours, rendement, revenu pour N actions) et vue
+  `historique` (cinq exercices, nombre de baisses). Étiquette « Données
+  réelles », date de séance et sources affichées ; valeur sans donnée nommée.
+  Leçon 5 : SONATEL, ORANGE CI, SGCI, SODECI (rendement, 300 actions) ;
+  SONATEL, ORANGE CI, SGCI, SAPH (historique — la régularité contre la baisse).
+- **Quiz en série** : `quiz` (1 à 10 questions) prime sur `qcm` ; validé à
+  70 % comme les examens ; explication après chaque réponse ; « Recommencer ».
+  Leçon 5 : 6 questions (calculs, réinvestissement, détachement, piège du
+  rendement élevé, objectif de revenus). `qcm` reste pour l'éditeur admin et
+  la banque d'examens — la série n'est éditable qu'en JSON pour l'instant.
+
 ## 10. Hors périmètre
 
 Mode présentation (`SlideDeck`) et vidéos Remotion : ils ignorent les nouveaux
