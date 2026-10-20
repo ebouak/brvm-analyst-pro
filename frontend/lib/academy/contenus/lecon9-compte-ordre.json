@@ -1,0 +1,160 @@
+{
+  "titre": "Leçon 9 — Ouvrir un compte et passer son premier ordre",
+  "categorie": "general",
+  "duree_min": 7,
+  "sous_titre": "Quatre étapes, les bons documents, et le type d’ordre qui protège votre prix.",
+  "resume": "Pour acheter des actions à la BRVM, il faut passer par une Société de Gestion et d’Intermédiation (SGI) agréée.\nCette leçon détaille l’ouverture du compte, le dépôt et le premier ordre, avec les réflexes qui évitent les mauvaises surprises.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Le parcours en quatre étapes",
+      "contenu": "Un particulier n’achète pas directement en bourse : il passe par une SGI, qui transmet ses ordres au marché et conserve ses titres.\nDe nombreuses SGI permettent aujourd’hui d’ouvrir un compte en ligne.",
+      "flux": [
+        { "titre": "Choisir une SGI", "detail": "Agréée par l’autorité de régulation, l’AMF-UMOA.", "icone": "entreprise" },
+        { "titre": "Constituer le dossier", "detail": "Pièce d’identité, justificatif de domicile, formulaire.", "icone": "decision" },
+        { "titre": "Déposer des fonds", "detail": "Virement ou dépôt sur le compte espèces.", "icone": "paiement" },
+        { "titre": "Passer un ordre", "detail": "Choisir la valeur, la quantité et le prix.", "icone": "graphique" }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Choisir sa SGI",
+      "contenu": "Les SGI se distinguent par leurs frais, leur plateforme et leur service. Parmi elles : CGF Bourse, Hudson & Cie, NSIA Finance, BOA Capital Securities, SOGEBOURSE.",
+      "points": [
+        {
+          "titre": "L’agrément",
+          "detail": "Seules les SGI agréées peuvent exécuter vos ordres à la BRVM.",
+          "verifier": "la liste des SGI agréées publiée par l’AMF-UMOA (ex-CREPMF)."
+        },
+        {
+          "titre": "Les frais",
+          "detail": "Frais de courtage à chaque ordre, frais de tenue de compte, commissions : ils pèsent lourd sur les petits montants.",
+          "verifier": "la grille tarifaire complète, avant d’ouvrir le compte."
+        },
+        {
+          "titre": "La plateforme et le service",
+          "detail": "Ordres en ligne, suivi du portefeuille, réactivité en cas de question.",
+          "verifier": "les moyens de passer un ordre : en ligne, par téléphone, en agence."
+        },
+        {
+          "titre": "Le dépôt minimum",
+          "detail": "Il varie d’une SGI à l’autre.",
+          "verifier": "le montant exigé à l’ouverture."
+        }
+      ]
+    },
+    {
+      "type": "definition",
+      "titre": "Deux types d’ordres",
+      "contenu": "Le type d’ordre décide du prix que vous acceptez de payer. C’est le réflexe le plus important du premier achat.",
+      "points": [
+        {
+          "titre": "L’ordre à cours limité",
+          "detail": "Vous fixez un prix maximum. Pour un achat, l’ordre ne s’exécute qu’à ce prix ou en dessous ; sinon il attend.",
+          "verifier": "le dernier cours et les prix proposés avant de fixer votre limite."
+        },
+        {
+          "titre": "L’ordre au marché",
+          "detail": "Vous acceptez le meilleur prix disponible au moment de l’exécution. Plus rapide, mais sans contrôle du prix.",
+          "verifier": "les volumes échangés : sur une valeur peu liquide, le prix obtenu peut s’éloigner du dernier cours."
+        }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Le coût réel d’un premier achat",
+      "contenu": "Le coût d’un ordre ne se limite pas au cours de l’action : il faut y ajouter les frais.\nExemple pédagogique avec 1 % de frais : 20 actions à 10 000 FCFA coûtent 202 000 FCFA. Sur un très petit ordre, des frais minimums peuvent peser bien plus.",
+      "formules": [
+        { "nom": "Coût total d’un achat", "expression": "Quantité × Cours + Frais", "exemple": "20 × 10 000 + 1 % = 202 000 FCFA" }
+      ]
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Sur la BRVM : le prix de 20 actions",
+      "contenu": "Le tableau donne le cours de la dernière séance de quatre valeurs. Pour estimer un premier achat, multipliez ce cours par la quantité visée, puis ajoutez les frais de votre SGI.",
+      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SIBC", "BOAB"], "actions": 20 }
+    },
+    {
+      "type": "piege",
+      "titre": "Les erreurs à éviter",
+      "contenu": "Quelques réflexes évitent l’essentiel des mauvaises surprises.",
+      "points": [
+        { "titre": "Passer un ordre au marché sur une valeur peu échangée", "detail": "Le prix payé peut être nettement supérieur au dernier cours affiché." },
+        { "titre": "Confier ses fonds à un intermédiaire non agréé", "detail": "Plateformes et « courtiers » non agréés sont une source fréquente d’arnaques." },
+        { "titre": "Oublier les frais sur les petits ordres", "detail": "Mieux vaut regrouper ses achats que multiplier les très petits ordres." },
+        { "titre": "Signer sans lire les conditions", "detail": "Frais, délais et modalités de retrait figurent dans la convention de compte." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Cinq idées à garder en tête.",
+      "points": [
+        { "titre": "On investit à la BRVM par une SGI agréée", "detail": "L’agrément se vérifie auprès de l’AMF-UMOA." },
+        { "titre": "Quatre étapes", "detail": "Choisir la SGI, constituer le dossier, déposer, passer l’ordre." },
+        { "titre": "L’ordre à cours limité protège votre prix", "detail": "C’est le réflexe recommandé pour débuter." },
+        { "titre": "Coût total = quantité × cours + frais", "detail": "Les frais comptent, surtout sur les petits montants." },
+        { "titre": "Méfiance envers les plateformes non agréées", "detail": "Aucun agrément, aucun dépôt." }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Quel est le meilleur type d’ordre pour un investisseur débutant ?",
+      "options": [
+        "Ordre au marché, pour une exécution immédiate",
+        "Ordre à cours limité, pour contrôler son prix d’achat",
+        "Ordre stop, pour vendre automatiquement",
+        "Il n’y a pas de différence entre les deux"
+      ],
+      "correct": 1,
+      "explication": "L’ordre à cours limité fixe un prix maximum d’achat : vous maîtrisez votre coût d’entrée, en particulier sur les valeurs peu liquides."
+    },
+    {
+      "question": "Par qui faut-il passer pour acheter des actions à la BRVM ?",
+      "options": ["Sa banque, directement au guichet", "Une SGI agréée", "N’importe quelle plateforme en ligne", "La BCEAO"],
+      "correct": 1,
+      "explication": "Seules les Sociétés de Gestion et d’Intermédiation agréées peuvent transmettre des ordres au marché de la BRVM."
+    },
+    {
+      "question": "Quelle autorité agrée les SGI de l’UMOA ?",
+      "options": ["La BCEAO", "L’AMF-UMOA (ex-CREPMF)", "La BRVM elle-même", "Le ministère des Finances de chaque pays"],
+      "correct": 1,
+      "explication": "L’Autorité des Marchés Financiers de l’UMOA, qui a succédé au CREPMF, agrée et contrôle les SGI."
+    },
+    {
+      "question": "Vous achetez 20 actions à 10 000 FCFA avec 1 % de frais. Quel est le coût total ?",
+      "options": ["200 000 FCFA", "202 000 FCFA", "220 000 FCFA", "200 100 FCFA"],
+      "correct": 1,
+      "explication": "20 × 10 000 = 200 000 FCFA, plus 1 % de frais (2 000 FCFA) : 202 000 FCFA."
+    },
+    {
+      "question": "Un ordre d’achat à cours limité à 10 000 FCFA s’exécute :",
+      "options": [
+        "À 10 000 FCFA ou moins",
+        "Seulement au-dessus de 10 000 FCFA",
+        "Toujours immédiatement, quel que soit le prix",
+        "Jamais avant la séance suivante"
+      ],
+      "correct": 0,
+      "explication": "Pour un achat, la limite est un prix maximum : l’ordre s’exécute à 10 000 FCFA ou en dessous, sinon il attend."
+    }
+  ],
+  "qcm": {
+    "question": "Quel est le meilleur type d’ordre pour un investisseur débutant ?",
+    "options": [
+      "Ordre au marché, pour une exécution immédiate",
+      "Ordre à cours limité, pour contrôler son prix d’achat",
+      "Ordre stop, pour vendre automatiquement",
+      "Il n’y a pas de différence entre les deux"
+    ],
+    "correct": 1,
+    "explication": "L’ordre à cours limité fixe un prix maximum d’achat : vous maîtrisez votre coût d’entrée, en particulier sur les valeurs peu liquides."
+  },
+  "liens": [
+    { "label": "Comparateur de SGI", "href": "/comparateur-sgi" },
+    { "label": "Classement de liquidité", "href": "/liquidite" }
+  ]
+}

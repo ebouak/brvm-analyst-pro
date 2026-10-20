@@ -1,0 +1,136 @@
+{
+  "titre": "Leçon 8 — Trois stratégies d’investissement à la BRVM",
+  "categorie": "general",
+  "duree_min": 7,
+  "sous_titre": "Valeur, revenu ou croissance : choisir une approche, et l’horizon qui va avec.",
+  "resume": "Trois grandes approches structurent l’investissement en actions : acheter sous la valeur, viser un revenu régulier, ou miser sur la croissance.\nAucune n’est gagnante en soi : la bonne dépend de votre objectif, de votre horizon et de votre tolérance au risque.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Trois approches",
+      "contenu": "Une stratégie dit quoi acheter, quand, et comment réagir à une baisse. Sans elle, chaque décision est improvisée.",
+      "points": [
+        {
+          "titre": "Valeur (« value »)",
+          "detail": "Acheter une société dont le cours paraît inférieur à ce qu’elle vaut, en attendant que le marché le reconnaisse.",
+          "verifier": "le PER, la rentabilité des capitaux propres et l’endettement."
+        },
+        {
+          "titre": "Revenu (« income »)",
+          "detail": "Constituer un portefeuille de sociétés qui versent un dividende régulier, et réinvestir ce revenu.",
+          "verifier": "la régularité du dividende sur au moins cinq exercices."
+        },
+        {
+          "titre": "Croissance (« growth »)",
+          "detail": "Miser sur des sociétés dont l’activité progresse vite, quitte à recevoir peu de dividendes et à subir plus de volatilité.",
+          "verifier": "la progression du chiffre d’affaires et des bénéfices sur plusieurs années."
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Pourquoi choisir avant d’acheter",
+      "contenu": "Beaucoup d’investisseurs achètent ce dont on parle, vendent dès que ça baisse et rachètent quand ça monte. Ils manquent les dividendes et cristallisent leurs pertes.\nUne stratégie fixée à l’avance protège de la peur et de l’euphorie : elle donne un critère clair à chaque décision."
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Revenu : des dividendes qui progressent",
+      "contenu": "Une stratégie de revenu recherche des distributions régulières, idéalement croissantes.\nLe tableau montre quatre valeurs de la BRVM dont le dividende a progressé ces dernières années. Le passé ne garantit pas la suite : la régularité se vérifie chaque année.",
+      "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "BOAB", "SGBC", "SIBC"] }
+    },
+    {
+      "type": "cas",
+      "titre": "Valeur : lire le PER",
+      "contenu": "Le PER compare le prix d’une action au bénéfice qu’elle génère. Un PER de 8 signifie que l’on paie l’action 8 fois son bénéfice annuel.\nUn PER bas peut signaler une décote à saisir, ou une société en difficulté. Il se compare toujours à celui du secteur et à son propre historique.",
+      "formules": [
+        { "nom": "PER", "expression": "Cours de l’action ÷ Bénéfice par action", "exemple": "10 000 ÷ 1 250 = 8" }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Associer stratégie et horizon",
+      "contenu": "Chaque approche a son rythme. Juger une action de rendement sur trois mois, c’est la juger sur le mauvais critère.",
+      "tableau": {
+        "colonnes": ["Stratégie", "Objectif", "Horizon", "Profil"],
+        "lignes": [
+          ["Valeur", "Acheter sous la valeur", "3 à 5 ans", "Patient et analytique"],
+          ["Revenu", "Encaisser un revenu régulier", "5 ans et plus", "Débutant, retraité"],
+          ["Croissance", "Viser une plus-value", "5 ans et plus", "Tolérant à la volatilité"]
+        ],
+        "note": "Repères pédagogiques, pas des règles : votre situation personnelle prime."
+      }
+    },
+    {
+      "type": "piege",
+      "titre": "Les erreurs à éviter",
+      "contenu": "Les mêmes erreurs reviennent quand la stratégie n’est pas tenue.",
+      "points": [
+        { "titre": "Mélanger les approches sans cohérence", "detail": "Acheter une action pour son dividende, puis la vendre trois mois après parce que le cours n’a pas bougé." },
+        { "titre": "Choisir sur le seul rendement", "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou refléter un cours en chute." },
+        { "titre": "Confondre PER bas et bonne affaire", "detail": "Un PER bas peut traduire des bénéfices qui vont reculer." },
+        { "titre": "Suivre la rumeur", "detail": "Ce dont tout le monde parle est souvent déjà dans le prix." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Cinq idées à garder en tête.",
+      "points": [
+        { "titre": "Trois approches : valeur, revenu, croissance", "detail": "Chacune a ses critères et son horizon." },
+        { "titre": "Le revenu est la plus accessible pour débuter", "detail": "Elle demande peu de suivi quotidien." },
+        { "titre": "PER = cours ÷ bénéfice par action", "detail": "À comparer au secteur, jamais seul." },
+        { "titre": "Une stratégie se juge sur son horizon", "detail": "Cinq ans pour une action de rendement, pas trois mois." },
+        { "titre": "Le passé ne garantit pas la suite", "detail": "Un dividende en hausse se revérifie chaque année." }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Un débutant qui veut un revenu régulier choisit plutôt :",
+      "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Le trading quotidien"],
+      "correct": 1,
+      "explication": "La stratégie revenu vise des dividendes réguliers, réinvestis ou encaissés. Elle demande peu de suivi quotidien."
+    },
+    {
+      "question": "Une action cote 12 000 FCFA et son bénéfice par action est de 1 500 FCFA. Quel est son PER ?",
+      "options": ["5", "8", "18", "0,125"],
+      "correct": 1,
+      "explication": "PER = cours ÷ bénéfice par action = 12 000 ÷ 1 500 = 8."
+    },
+    {
+      "question": "Un PER très bas signifie-t-il toujours une bonne affaire ?",
+      "options": [
+        "Oui, toujours",
+        "Non : il peut aussi refléter des bénéfices qui vont reculer",
+        "Oui, s’il est inférieur à 20",
+        "Non, un PER bas est toujours mauvais signe"
+      ],
+      "correct": 1,
+      "explication": "Un PER bas peut signaler une décote… ou une société en difficulté. Il se compare au secteur et à l’historique de la société."
+    },
+    {
+      "question": "Sur quel horizon juger une action achetée pour son dividende ?",
+      "options": ["Une semaine", "Trois mois", "Cinq ans environ", "Un jour"],
+      "correct": 2,
+      "explication": "Une stratégie de revenu se juge sur la régularité des dividendes, donc sur plusieurs années."
+    },
+    {
+      "question": "Quelle stratégie accepte de recevoir peu de dividendes en échange d’un potentiel de plus-value ?",
+      "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Aucune"],
+      "correct": 2,
+      "explication": "La stratégie croissance mise sur la progression de l’activité et du cours, au prix d’une volatilité plus forte."
+    }
+  ],
+  "qcm": {
+    "question": "Un débutant qui veut un revenu régulier choisit plutôt :",
+    "options": ["La stratégie valeur", "La stratégie revenu", "La stratégie croissance", "Le trading quotidien"],
+    "correct": 1,
+    "explication": "La stratégie revenu vise des dividendes réguliers, réinvestis ou encaissés. Elle demande peu de suivi quotidien."
+  },
+  "liens": [
+    { "label": "Screener des actions", "href": "/screener" },
+    { "label": "Espace dividendes", "href": "/dividendes" }
+  ]
+}
