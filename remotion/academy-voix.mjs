@@ -27,6 +27,14 @@ if (!lecon || !/^[a-z0-9-]+$/.test(lecon)) {
   process.exit(1);
 }
 
+// Verrou commun avec academy-lot.mjs : aucune voix n'est générée (ni payée)
+// tant que academy/BLOQUE.txt existe.
+const verrou = fileURLToPath(new URL('./academy/BLOQUE.txt', import.meta.url));
+if (existsSync(verrou)) {
+  console.error(`Génération de voix bloquée : ${readFileSync(verrou, 'utf8').trim()}`);
+  process.exit(4);
+}
+
 const moteur = process.argv.includes('--denise') ? 'denise' : CLE ? 'elevenlabs' : 'denise';
 if (moteur === 'elevenlabs' && !VOIX) {
   console.error('ELEVENLABS_VOICE_ID absent de remotion/.env.local — lancer `node ecosysteme-voix.mjs --lister`.');

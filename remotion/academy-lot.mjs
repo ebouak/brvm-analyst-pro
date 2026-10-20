@@ -12,6 +12,14 @@ import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs
 import { fileURLToPath } from 'node:url';
 
 const ici = fileURLToPath(new URL('.', import.meta.url));
+
+// Verrou : tant que academy/BLOQUE.txt existe, aucune vidéo n'est produite
+// (décision du 2026-10-20 : les cours vont être améliorés, on ne génère pas
+// de vidéos sur un contenu appelé à changer). Supprimer le fichier pour relancer.
+if (existsSync(`${ici}academy/BLOQUE.txt`)) {
+  console.error(`Production bloquée : ${readFileSync(`${ici}academy/BLOQUE.txt`, 'utf8').trim()}`);
+  process.exit(4);
+}
 const journal = `${ici}out/academy-lot.log`;
 const log = (m) => { const l = `${new Date().toISOString().slice(0, 19)} ${m}`; console.log(l); appendFileSync(journal, l + '\n'); };
 
