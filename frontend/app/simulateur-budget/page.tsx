@@ -78,7 +78,7 @@ async function getUnivers(): Promise<{ univers: SimAction[]; asOf: string | null
         .order('date_marche', { ascending: true }),
       supabase
         .from('dividends')
-        .select('code, exercice, montant')
+        .select('code, exercice, montant, base_fiscale')
         .order('exercice', { ascending: false })
         .limit(500),
     ]);
@@ -100,14 +100,20 @@ async function getUnivers(): Promise<{ univers: SimAction[]; asOf: string | null
   }
 
   // Dividende du dernier exercice par code (somme des montants de l'exercice le plus récent).
-  const divByCode = new Map<string, { exercice: number; total: number }>();
+  // `toutNet` : chaque montant de l'exercice est déjà net d'IRVM (calendrier
+  // officiel) — le simulateur ne doit alors pas retirer l'impôt une seconde fois.
+  const divByCode = new Map<string, { exercice: number; total: number; toutNet: boolean }>();
   for (const d of divData ?? []) {
     if (d.exercice == null || d.montant == null) continue;
     const code = d.code as string;
     const ex = d.exercice as number;
+    const net = d.base_fiscale === 'net';
     const cur = divByCode.get(code);
-    if (!cur || ex > cur.exercice) divByCode.set(code, { exercice: ex, total: d.montant as number });
-    else if (ex === cur.exercice) cur.total += d.montant as number;
+    if (!cur || ex > cur.exercice) divByCode.set(code, { exercice: ex, total: d.montant as number, toutNet: net });
+    else if (ex === cur.exercice) {
+      cur.total += d.montant as number;
+      cur.toutNet = cur.toutNet && net;
+    }
   }
 
   const univers: SimAction[] = [];
@@ -128,6 +134,7 @@ async function getUnivers(): Promise<{ univers: SimAction[]; asOf: string | null
       secteur: (i.secteur as string | null) ?? null,
       prix,
       rendement,
+      rendementDejaNet: div?.toutNet ?? false,
       perf12,
     });
   }

@@ -38,7 +38,7 @@ describe('Bulletin officiel — dernier dividende payé, par position de colonne
 });
 
 import { classer } from '../src/dividends/runDividendesBoc.js';
-import { sansEcraserReference } from '../src/dividends/runDividends.js';
+import { sansEcraserReference, SOURCES_REFERENCE } from '../src/dividends/runDividends.js';
 
 describe('rapprochement avec la base', () => {
   const boc = { code: 'SNTS', montant: 1740, date_paiement: '2026-05-26', rendement_net_pct: 3.87 };
@@ -54,6 +54,9 @@ describe('rapprochement avec la base', () => {
     expect(classer(boc, null, jour)).toBe('absent');
     expect(classer({ ...boc, date_paiement: '2012-07-09' }, null, jour)).toBe('ancien');
   });
+  it('une ligne du calendrier officiel n’est jamais réécrite par le Bulletin', () => {
+    expect(classer(boc, { montant: 1750, payment_date: null, source: 'brvm-calendrier', base_fiscale: 'net' }, jour)).toBe('calendrier');
+  });
 });
 
 describe('priorité des sources', () => {
@@ -65,5 +68,8 @@ describe('priorité des sources', () => {
     ];
     const gardes = sansEcraserReference(lot, new Set(['SGBC|2025']));
     expect(gardes.map((r) => r.code)).toEqual(['SHEC', 'NEIC']);
+  });
+  it('le calendrier et le Bulletin sont les deux sources de référence, le calendrier d’abord', () => {
+    expect(SOURCES_REFERENCE).toEqual(['brvm-calendrier', 'brvm-boc']);
   });
 });

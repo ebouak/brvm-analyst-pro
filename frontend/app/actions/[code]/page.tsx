@@ -55,7 +55,7 @@ import { listTopics } from '@/lib/forum/server';
 import { ForumTopicList } from '@/components/forum/ForumTopicList';
 import { readTechnical } from '@/lib/signal/technical';
 import { analyzeDividendTiming } from '@/lib/signal/dividendTiming';
-import { rendementNet } from '@/lib/tax/compute';
+import { rendementNetSelonBase, type BaseFiscale } from '@/lib/tax/compute';
 import { toPaysUemoa } from '@/lib/tax/rates';
 import { readPosition } from '@/lib/signal/position';
 import { synthesize } from '@/lib/signal/synthesis';
@@ -173,7 +173,7 @@ async function getData(code: string, fromDate?: string) {
         .limit(1),
       supabase
         .from('dividends')
-        .select('montant, ex_date, payment_date, exercice')
+        .select('montant, ex_date, payment_date, exercice, base_fiscale')
         .eq('code', code)
         // Tri par exercice (toujours renseigné). Trier par ex_date mettait les
         // NULL en tête (PostgREST) et pouvait évincer les lignes datées du limit.
@@ -379,7 +379,7 @@ export default async function InstrumentPage({
   // dividende du dernier exercice (montants alignés Sika Finance depuis la
   // reconstruction de la table) — c'est le rendement « trailing » standard.
   // Le repli est signalé à l'utilisateur (exercice affiché, date non publiée).
-  const divRows = dividends as { montant: number; ex_date: string | null; exercice: number | null; payment_date?: string }[];
+  const divRows = dividends as { montant: number; ex_date: string | null; exercice: number | null; payment_date?: string; base_fiscale?: BaseFiscale }[];
   const lastDivVerifie = divRows.find((d) => d.ex_date && d.montant > 0) ?? null;
   const lastDiv = lastDivVerifie ?? divRows.find((d) => d.montant > 0) ?? null;
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
@@ -572,10 +572,13 @@ export default async function InstrumentPage({
   const pays = instrument?.pays ?? last.pays ?? null;
   const secteur = instrument?.secteur ?? last.secteur ?? null;
 
-  // Rendement dividende net d'IRVM (barème sourcé lib/tax — null si taux non confirmé).
+  // Rendement dividende net d'IRVM, selon la BASE du montant : un montant déjà
+  // net (calendrier officiel) n'est jamais retaxé — double IRVM corrigée le
+  // 2026-10-20. Base inconnue ou taux non confirmé → pas de net affiché.
+  const divDejaNet = lastDiv?.base_fiscale === 'net';
   const paysFiscal = toPaysUemoa(pays);
-  const divNetRes = divYield != null && paysFiscal
-    ? rendementNet(divYield, paysFiscal, 'dividende_cote')
+  const divNetRes = divYield != null && paysFiscal && !divDejaNet
+    ? rendementNetSelonBase(divYield, lastDiv?.base_fiscale, paysFiscal)
     : ({ indisponible: true } as const);
   const divYieldNet = divNetRes.indisponible ? null : divNetRes.valeur;
 
@@ -784,7 +787,7 @@ export default async function InstrumentPage({
               {capitalisation != null && <SessionMetric label="Capitalisation" value={fmtNumber(Math.round(capitalisation))} unit="MFCFA" accent />}
               {shares != null && <SessionMetric label="Titres totaux" value={fmtNumber(shares)} />}
               {instrument?.flottant != null && <SessionMetric label="Titres flottant" value={fmtNumber(instrument.flottant)} />}
-              {divYield != null && <SessionMetric label="Rdt dividende" value={divYield.toFixed(2)} unit="%" accent />}
+              {divYield != null && <SessionMetric label={divDejaNet ? 'Rdt dividende net' : 'Rdt dividende'} value={divYield.toFixed(2)} unit="%" accent />}
               {divYieldNet != null && <SessionMetric label="Rdt net d'IRVM" value={divYieldNet.toFixed(2)} unit="%" />}
             </div>
           </div>
@@ -1245,7 +1248,7 @@ export default async function InstrumentPage({
                       <span className="tabular font-mono text-3xl font-bold text-up leading-none">
                         {divYield.toFixed(2)}%
                       </span>
-                      <span className="text-xs text-muted">rendement estimé</span>
+                      <span className="text-xs text-muted">{divDejaNet ? "rendement estimé, net d'IRVM" : 'rendement estimé'}</span>
                     </div>
                   )}
                   <div className="space-y-0 border-t border-border/30 pt-3">

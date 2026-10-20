@@ -891,6 +891,43 @@ Migration `0140_bbgc_bridge_bank.sql` **à appliquer**. tsc scraper + frontend v
   octet nul. Et `generate()` vidait le rapport AVANT de tenter la régénération :
   un échec effaçait un rapport valide de l'écran.
 
+### Ajouts (passage 2026-10-20) — Calendrier officiel des dividendes, IRVM 12 %, double retenue corrigée
+
+Spec `docs/superpowers/specs/2026-10-20-dividendes-calendrier-design.md`, plan
+`docs/superpowers/plans/2026-10-20-dividendes-calendrier.md`. Migration `0157`
+**à appliquer AVANT le premier `--ecrire`**.
+
+- **Source de référence** : le « calendrier de paiement des dividendes » publié
+  par la BRVM (PDF) donne, par valeur, montant net, avis BRVM, dates de
+  publication, de détachement et de paiement. `scraper/src/dividends/` :
+  `calendrier.ts` (lecture PDF **par position**, ancrée sur le fragment
+  `BRVMDG`), `calendrierCodes.ts` (nom → code, 35 entrées curées), `esv.ts`
+  (table HTML de brvm.org : découverte du dernier calendrier par ses dates
+  d'avis, ≤ 5 sondes HEAD à 10 s — Crawl-delay), `rapprochementCalendrier.ts`
+  (pur), `runCalendrier.ts`. CLI `dividends:calendrier [--ecrire]`, sans
+  `--ecrire` = lecture à blanc. Étape de `dividends.yml` + `verify-data.ts
+  dividends-calendrier` (≥ 20 lignes datées, sinon rouge).
+- **Brut / net** : un montant marqué `(*)` est BRUT → `montant` = brut × (1 −
+  taux lu dans la note de bas de page), le brut conservé dans `montant_brut`,
+  le taux dans `taux_retenue`. Sans `(*)`, `montant_brut` reste NULL — aucune
+  retenue supposée. Contrainte `montant_brut >= montant`.
+- **Dates incohérentes** : PDF et table HTML recoupés par numéro d'avis ; un
+  désaccord REJETTE la ligne et la nomme dans le rapport (SOGB le 2026-10-20).
+  La table HTML a ses propres erreurs : elle ne fait jamais foi seule.
+- **Préséance** : calendrier > BOC > richbourse > sikafinance
+  (`SOURCES_REFERENCE` dans `runDividends.ts`). Ni l'historique ni le BOC
+  n'écrasent plus une ligne `brvm-calendrier`.
+- **IRVM Côte d'Ivoire : 12 % personnes physiques, 10 % personnes morales**
+  depuis l'annexe fiscale à la LF 2025 (vérifié sur les montants : ORANGE CI
+  800 → 704). `BAREME.CI.dividende_cote.taux = 0.12`, `tauxPersonneMorale`.
+- **DÉFAUT CORRIGÉ — DOUBLE IRVM.** `dividends.montant` est NET (0130 :
+  `base_fiscale`), mais `/dividendes` (bascule « net »), la fiche action
+  (« Rdt net d'IRVM ») et `/simulateur-budget` lui retiraient encore l'impôt.
+  `rendementNetSelonBase` (`lib/tax/compute.ts`) : `net` → tel quel, `brut` →
+  barème, base inconnue → **indisponible**, jamais supposée. Le simulateur
+  retient ligne à ligne (`SimAction.rendementDejaNet`). ⚠️ **Ne plus appeler
+  `rendementNet` sur un rendement de dividende sans connaître la base.**
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

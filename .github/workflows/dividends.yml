@@ -21,7 +21,9 @@ permissions:
 jobs:
   dividends:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 15 min : l'étape du calendrier officiel respecte 10 s entre deux requêtes
+    # vers brvm.org (robots.txt, Crawl-delay 10).
+    timeout-minutes: 15
     strategy:
       max-parallel: 1
     steps:
@@ -64,6 +66,24 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         if: success()
         run: npx tsx scripts/verify-data.ts dividends
+
+      # Calendrier officiel BRVM (dates de détachement, brut/net). APRÈS
+      # « dividends » : le calendrier est le dernier à écrire, et plus aucune
+      # autre source ne l'écrase (runDividends.SOURCES_REFERENCE).
+      - name: Calendrier officiel des dividendes
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts dividends:calendrier --ecrire
+
+      - name: Vérifier le calendrier en base
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/verify-data.ts dividends-calendrier
 
       - name: Notify failure on Slack
         if: failure()

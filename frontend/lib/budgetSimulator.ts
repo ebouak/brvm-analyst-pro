@@ -28,6 +28,11 @@ export interface SimAction {
   prix: number;
   /** Rendement du dividende en % (dividende annuel / cours), ou null si inconnu. */
   rendement: number | null;
+  /**
+   * Vrai quand `rendement` est tiré d'un montant DÉJÀ net d'IRVM (calendrier
+   * officiel, Bulletin) : la retenue n'est alors pas appliquée une seconde fois.
+   */
+  rendementDejaNet?: boolean;
   /** Performance sur 12 mois en %, ou null si l'historique est insuffisant. */
   perf12: number | null;
 }
@@ -190,18 +195,23 @@ export function computeStrategy(
   let investiTitres = 0;
   let frais = 0;
   let divBrut = 0;
+  let divNet = 0;
   let perfPond = 0;
   for (const l of lines) {
     const m = l.montant;
     investiTitres += m;
     frais += m * fee;
-    if (l.action.rendement != null) divBrut += (m * l.action.rendement) / 100;
+    if (l.action.rendement != null) {
+      const d = (m * l.action.rendement) / 100;
+      divBrut += d;
+      // Retenue ligne à ligne : un montant déjà net n'est jamais retaxé.
+      divNet += netTax && !l.action.rendementDejaNet ? d * (1 - IRVM) : d;
+    }
     if (l.action.perf12 != null) perfPond += (m * l.action.perf12) / 100;
   }
 
   const investiTotal = investiTitres + frais;
   const reste = budget - investiTotal;
-  const divNet = netTax ? divBrut * (1 - IRVM) : divBrut;
   const rendNet = investiTitres > 0 ? (divNet / investiTitres) * 100 : 0;
   const perfMoy = investiTitres > 0 ? (perfPond / investiTitres) * 100 : 0;
   const retourTotal = divNet + perfPond;

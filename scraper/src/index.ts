@@ -552,6 +552,35 @@ async function main(): Promise<number> {
       return 0;
     }
 
+    case 'dividends:calendrier': {
+      // Calendrier officiel de paiement (BRVM). À BLANC sauf --ecrire.
+      const { runCalendrier } = await import('./dividends/runCalendrier.js');
+      const r = await runCalendrier({ ecrire: process.argv.includes('--ecrire') });
+      console.log(`Calendrier ${r.url} (trouvé par ${r.via}) — exercice ${r.exercice}`);
+      const parEcart: Record<string, number> = {};
+      for (const l of r.lignes) {
+        parEcart[l.ecart] = (parEcart[l.ecart] ?? 0) + 1;
+        if (l.ecart === 'concordant') continue;
+        const brut = l.cible.montant_brut != null ? ` (brut ${l.cible.montant_brut})` : '';
+        const base = l.base
+          ? `${l.base.montant} (${l.base.source ?? '—'}) ex ${l.base.ex_date ?? '—'} paiement ${l.base.payment_date ?? '—'}`
+          : '—';
+        console.log(
+          `${l.code.padEnd(6)} ${l.ecart.padEnd(18)} net ${l.cible.montant}${brut} ex ${l.cible.ex_date} ` +
+            `paiement ${l.cible.payment_date}${l.recoupee ? '' : ' [non recoupé]'}  |  base ${base}`,
+        );
+      }
+      for (const j of r.rejets) console.log(`REJET  ${j.nom} (${j.avis ?? 'avis illisible'}) : ${j.motif}`);
+      for (const n of r.nonRapproches) console.log(`NON RAPPROCHÉ  « ${n} » — à ajouter à src/dividends/calendrierCodes.ts`);
+      console.log(
+        `${JSON.stringify({ ...parEcart, rejets: r.rejets.length, non_rapproches: r.nonRapproches.length })} — ` +
+          (r.ecrites ? `${r.ecrites} ligne(s) écrite(s)` : 'à blanc, rien écrit'),
+      );
+      // Une valeur nouvelle au calendrier doit faire du bruit (leçon BBGC) ;
+      // un rejet motivé, lui, est imprimé sans faire échouer la semaine.
+      return r.nonRapproches.length > 0 ? 1 : 0;
+    }
+
     case 'dividends': {
       const res = await monitored(
         { code: 'dividends', label: 'Dividendes' },
