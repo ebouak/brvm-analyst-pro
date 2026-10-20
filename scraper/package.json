@@ -34,6 +34,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "dividends": "tsx src/index.ts dividends",
     "dividends:mock": "tsx src/index.ts dividends --mock",
+    "dividends:calendrier": "tsx src/index.ts dividends:calendrier",
     "intraday": "tsx src/index.ts intraday",
     "intraday:mock": "tsx src/index.ts intraday --mock",
     "intraday:patterns": "tsx src/index.ts intraday:patterns",
