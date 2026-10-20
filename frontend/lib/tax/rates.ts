@@ -19,6 +19,8 @@ export interface TauxFiscal {
   verifieLe: string;
   /** Particularités (exonération selon maturité, etc.). */
   note?: string;
+  /** Taux des personnes morales quand il diffère de `taux` (qui vise les personnes physiques). */
+  tauxPersonneMorale?: number;
 }
 
 export const PAYS_LABELS: Record<PaysUemoa, string> = {
@@ -70,11 +72,15 @@ export const BAREME: Record<PaysUemoa, Record<TypeRevenu, TauxFiscal>> = {
   BF: { dividende_cote: DIV(0.125), obligation_etat: ETAT_EXONERE, obligation_privee: PRIVEE_USUEL },
   CI: {
     dividende_cote: {
-      taux: 0.10,
-      source: `${SIKA} ; PwC Tax Summaries CI (2026) — 10 % pour les sociétés cotées (droit commun 15 %)`,
-      sourceUrl: SIKA_URL,
-      verifieLe: '2026-07-10',
-      note: 'Quelques émetteurs (FILTISAC, SITAB…) appliquent un taux consolidé plus bas variable.',
+      // 12 % personnes physiques depuis l'annexe fiscale à la LF 2025 (vérifié
+      // le 2026-10-20 : SIB 425 → 374, ORANGE CI 800 → 704, SODECI 525 → 462).
+      taux: 0.12,
+      tauxPersonneMorale: 0.10,
+      source:
+        "Annexe fiscale à la loi de finances 2025 (DGBF) ; BRVM, calendrier de paiement des dividendes du 09/10/2026 — 12 % personnes physiques, 10 % personnes morales",
+      sourceUrl: 'https://www.dgbf.ci/wp-content/uploads/2025/01/Annexe1-Annexe-Fiscale.pdf',
+      verifieLe: '2026-10-20',
+      note: 'Personnes morales : 10 %. Avant 2025 : 10 % pour tous. Quelques émetteurs (FILTISAC…) appliquent un taux consolidé plus bas variable.',
     },
     obligation_etat: ETAT_EXONERE,
     obligation_privee: {
