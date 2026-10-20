@@ -93,6 +93,20 @@ export const simulationSchema = z.discriminatedUnion('type', [
 ]);
 export type Simulation = z.infer<typeof simulationSchema>;
 
+/**
+ * Exemples RÉELS tirés de la base au chargement de la leçon
+ * (lib/academy/donneesServer.ts) : le contenu ne porte que des codes, jamais
+ * de chiffres — ils seraient périmés dès la séance suivante.
+ *  - `rendement` : dernier dividende, dernier cours, rendement, revenu pour `actions` ;
+ *  - `historique` : dividendes des cinq derniers exercices (régularité).
+ */
+export const donneesReellesSchema = z.object({
+  vue: z.enum(['rendement', 'historique']),
+  codes: z.array(z.string().regex(/^[A-Z0-9]{3,6}$/)).min(1).max(6),
+  actions: z.number().int().positive().max(1_000_000).optional(),
+});
+export type DonneesReellesSpec = z.infer<typeof donneesReellesSchema>;
+
 export const sectionSchema = z.object({
   type: z.enum(SECTION_TYPES),
   titre: z.string().min(1).max(120),
@@ -115,6 +129,7 @@ export const sectionSchema = z.object({
   /** `frise` : étapes en frise horizontale sur ordinateur (verticale sur mobile). */
   etapes_style: z.enum(['liste', 'frise']).optional().default('liste'),
   simulation: simulationSchema.nullable().optional(),
+  donnees_reelles: donneesReellesSchema.nullable().optional(),
 });
 
 export const qcmSchema = z.object({
@@ -163,6 +178,16 @@ export const lessonSchema = z.object({
   // Graphiques multiples (leçons enrichies) — rendus après `chart`.
   charts: z.array(chartSchema).max(4).optional().default([]),
   qcm: qcmSchema.nullable().optional(),
+  /**
+   * Quiz en série (2026-10-20). Prime sur `qcm` à l'affichage quand il est
+   * présent ; `qcm` reste lu par l'éditeur admin et la banque d'examens.
+   */
+  quiz: z
+    .array(qcmSchema.refine((q) => q.correct < q.options.length, { message: 'bonne réponse hors des options' }))
+    .min(1)
+    .max(10)
+    .nullable()
+    .optional(),
   // Mots-clés EN fournis par le LLM pour rechercher une image (ex. "stock market chart").
   imageQuery: z.string().max(120).nullable().optional(),
   // Rempli côté serveur après fetch Pexels (absent de la sortie LLM).

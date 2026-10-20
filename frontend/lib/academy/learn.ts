@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { courseContentSchema, type CourseContent } from './types';
 import { loadExercise } from './exercisesServer';
 import type { PublicExercise } from './exercises';
+import { chargerDonneesReelles, type DonneesLecons } from './donneesServer';
 
 /**
  * Données du shell d'apprentissage : contenu du cours (service client, publié
@@ -26,6 +27,8 @@ export interface LearnData {
   notes: Record<number, string>;
   /** Exercices live chargés (leçons ayant un exercice_id, données du jour). */
   exercises: Record<number, PublicExercise>;
+  /** Exemples réels des sections `donnees_reelles` (lecture de la base au chargement). */
+  donnees: DonneesLecons;
 }
 
 /**
@@ -100,5 +103,7 @@ export async function loadCourseForLearning(slug: string): Promise<LearnData | n
     }),
   );
 
-  return { courseId: course.id, slug: course.slug, content: parsed.data, progress, notes: notesMap, exercises };
+  const donnees = await chargerDonneesReelles(parsed.data.lessons);
+
+  return { courseId: course.id, slug: course.slug, content: parsed.data, progress, notes: notesMap, exercises, donnees };
 }

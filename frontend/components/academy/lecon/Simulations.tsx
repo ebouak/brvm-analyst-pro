@@ -45,7 +45,13 @@ function Reinvestissement({ sim }: { sim: Extract<Simulation, { type: 'reinvesti
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={donnees} margin={{ top: 10, right: 12, left: 4, bottom: 4 }}>
             <CartesianGrid stroke={COULEUR.trame} vertical={false} />
-            <XAxis dataKey="annee" tick={{ fill: COULEUR.axe, fontSize: 12 }} axisLine={{ stroke: COULEUR.trame }} tickLine={false} />
+            <XAxis
+              dataKey="annee"
+              tick={{ fill: COULEUR.axe, fontSize: 12 }}
+              axisLine={{ stroke: COULEUR.trame }}
+              tickLine={false}
+              padding={{ left: 8, right: 20 }}
+            />
             <YAxis
               tick={{ fill: COULEUR.axe, fontSize: 12 }}
               axisLine={false}
@@ -72,9 +78,9 @@ function Reinvestissement({ sim }: { sim: Extract<Simulation, { type: 'reinvesti
             <tr>
               <th scope="col">Année</th>
               <th scope="col" className="lp-num">Actions détenues</th>
-              <th scope="col" className="lp-num">Dividende / action</th>
-              <th scope="col" className="lp-num">Revenu réinvesti</th>
-              <th scope="col" className="lp-num">Revenu en espèces</th>
+              <th scope="col" className="lp-num">Dividende / action (FCFA)</th>
+              <th scope="col" className="lp-num">Revenu réinvesti (FCFA)</th>
+              <th scope="col" className="lp-num">Revenu en espèces (FCFA)</th>
             </tr>
           </thead>
           <tbody>
@@ -82,9 +88,9 @@ function Reinvestissement({ sim }: { sim: Extract<Simulation, { type: 'reinvesti
               <tr key={l.annee}>
                 <th scope="row" className="lp-ligne-tete">Année {l.annee}</th>
                 <td className="lp-num">{nombre(l.actionsReinvest)}</td>
-                <td className="lp-num">{fcfa(l.dpa)}</td>
-                <td className="lp-num">{fcfa(l.revenuReinvest)}</td>
-                <td className="lp-num">{fcfa(l.revenuEspeces)}</td>
+                <td className="lp-num">{nombre(l.dpa)}</td>
+                <td className="lp-num">{nombre(l.revenuReinvest)}</td>
+                <td className="lp-num">{nombre(l.revenuEspeces)}</td>
               </tr>
             ))}
           </tbody>

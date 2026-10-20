@@ -78,6 +78,21 @@ describe('schéma de leçon — blocs éditoriaux optionnels', () => {
     ).toBe(false);
   });
 
+  it('exemples réels : codes BRVM valides, vue connue ; un code fantaisiste est refusé', () => {
+    const base = { type: 'cas', titre: 't', contenu: 'c' };
+    expect(sectionSchema.safeParse({ ...base, donnees_reelles: { vue: 'rendement', codes: ['SNTS', 'ORAC'], actions: 300 } }).success).toBe(true);
+    expect(sectionSchema.safeParse({ ...base, donnees_reelles: { vue: 'historique', codes: ['SNTS'] } }).success).toBe(true);
+    expect(sectionSchema.safeParse({ ...base, donnees_reelles: { vue: 'rendement', codes: ['snts; drop'] } }).success).toBe(false);
+    expect(sectionSchema.safeParse({ ...base, donnees_reelles: { vue: 'prevision', codes: ['SNTS'] } }).success).toBe(false);
+  });
+
+  it('quiz en série : de 1 à 10 questions, chacune avec une bonne réponse dans ses options', () => {
+    const q = { question: 'Q ?', options: ['a', 'b'], correct: 1, explication: 'Parce que.' };
+    expect(lessonSchema.safeParse({ ...ancienne, quiz: [q, q, q, q, q] }).success).toBe(true);
+    expect(lessonSchema.safeParse({ ...ancienne, quiz: [{ ...q, correct: 2 }] }).success).toBe(false);
+    expect(lessonSchema.safeParse({ ...ancienne, quiz: Array(11).fill(q) }).success).toBe(false);
+  });
+
   it('« Cas réel BRVM » seulement quand le cas est réel ; sinon « Exemple »', () => {
     const cas = sectionSchema.parse({ type: 'cas', titre: 't', contenu: 'c' });
     expect(libelleSection(cas)).toBe('Exemple');

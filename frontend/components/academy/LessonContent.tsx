@@ -8,6 +8,8 @@ import LessonChart from './LessonChart';
 import ExerciseBlock from './ExerciseBlock';
 import { ChiffresCles, Flux, Formules, Frise, Points, Tableau, Texte } from './lecon/Blocs';
 import SimulationLecon from './lecon/Simulations';
+import DonneesReelles from './lecon/DonneesReelles';
+import type { DonneesSection } from '@/lib/academy/donneesServer';
 import './lecon/lecon.css';
 
 /**
@@ -27,7 +29,7 @@ function kicker(s: Section, i: number): string {
   return s.type === 'importance' ? num : `${num} · ${libelleSection(s)}`;
 }
 
-function SectionLecon({ s, i }: { s: Section; i: number }) {
+function SectionLecon({ s, i, donnees }: { s: Section; i: number; donnees?: DonneesSection | null }) {
   const largeFrise = s.etapes.length > 0 && s.etapes_style === 'frise';
   return (
     <section className={`lp-section lp-large lp-section--${s.type}`} aria-labelledby={`lp-s${i}`}>
@@ -59,6 +61,11 @@ function SectionLecon({ s, i }: { s: Section; i: number }) {
           <SimulationLecon sim={s.simulation} />
         </div>
       )}
+      {s.donnees_reelles && (
+        <div className="lp-bloc">
+          <DonneesReelles donnees={donnees} />
+        </div>
+      )}
       {s.tableau && (
         <div className="lp-bloc lp-col">
           <Tableau tableau={s.tableau} />
@@ -87,6 +94,7 @@ export default function LessonContent({
   courseId,
   lessonIdx,
   onExerciseResult,
+  donnees,
 }: {
   lesson: Lesson;
   quizPassed: boolean | null;
@@ -96,8 +104,12 @@ export default function LessonContent({
   courseId: string;
   lessonIdx: number;
   onExerciseResult: (correct: boolean) => void;
+  /** Exemples réels de cette leçon, par index de section (lus en base au chargement). */
+  donnees?: Record<number, DonneesSection | null>;
 }) {
   const charts = [lesson.chart, ...(lesson.charts ?? [])].filter((c): c is NonNullable<typeof c> => Boolean(c));
+  // Quiz en série s'il existe ; sinon la question unique historique.
+  const questions = lesson.quiz?.length ? lesson.quiz : lesson.qcm ? [lesson.qcm] : [];
 
   return (
     <article className="lp">
@@ -123,7 +135,7 @@ export default function LessonContent({
       )}
 
       {lesson.sections.map((s, i) => (
-        <SectionLecon key={i} s={s} i={i} />
+        <SectionLecon key={i} s={s} i={i} donnees={donnees?.[i]} />
       ))}
 
       {charts.length > 0 && (
@@ -148,7 +160,7 @@ export default function LessonContent({
         </div>
       )}
 
-      {lesson.qcm && <QcmBlock qcm={lesson.qcm} alreadyPassed={quizPassed} onAnswer={onQuizAnswer} />}
+      {questions.length > 0 && <QcmBlock questions={questions} alreadyPassed={quizPassed} onAnswer={onQuizAnswer} />}
 
       {lesson.avertissement && <p className="lp-avertissement lp-col">{lesson.avertissement}</p>}
     </article>

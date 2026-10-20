@@ -29,6 +29,17 @@ describe('leçon 5 — dividendes (contenu éditorial)', () => {
     expect(lecon.avertissement).toContain('Les dividendes ne sont pas garantis');
   });
 
+  it('quiz d’au moins 5 questions, chacune expliquée', () => {
+    expect(lecon.quiz?.length ?? 0).toBeGreaterThanOrEqual(5);
+    for (const q of lecon.quiz ?? []) expect(q.explication.length).toBeGreaterThan(20);
+  });
+
+  it('exemples réels déclarés par codes seulement : rendement (300 actions) et historique', () => {
+    const vues = lecon.sections.flatMap((s) => (s.donnees_reelles ? [s.donnees_reelles] : []));
+    expect(vues.map((v) => v.vue)).toEqual(['rendement', 'historique']);
+    expect(vues[0]).toMatchObject({ actions: 300 });
+  });
+
   it('chaque paragraphe reste court (≤ 320 caractères)', () => {
     for (const s of lecon.sections) {
       for (const p of s.contenu.split(/\n+/)) expect(p.length, s.titre).toBeLessThanOrEqual(320);

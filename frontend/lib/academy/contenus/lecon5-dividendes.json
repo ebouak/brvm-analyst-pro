@@ -5,6 +5,59 @@
   "sous_titre": "Comprendre le mécanisme, calculer son rendement et mesurer l’effet du réinvestissement.",
   "resume": "Un dividende est la part du bénéfice qu’une société cotée verse à ses actionnaires.\nBien compris, il peut devenir une source de revenus régulière — à condition de savoir le calculer, le lire et en mesurer les limites.",
   "avertissement": "Ceci n’est pas un conseil en investissement. Les dividendes ne sont pas garantis. Investir en actions comporte un risque de perte en capital.",
+  "quiz": [
+    {
+      "question": "Vous détenez 200 actions et la société verse 1 500 FCFA par action. Quel est votre revenu brut ?",
+      "options": ["30 000 FCFA", "150 000 FCFA", "300 000 FCFA", "3 000 000 FCFA"],
+      "correct": 2,
+      "explication": "Revenu brut = nombre d’actions × dividende par action : 200 × 1 500 = 300 000 FCFA."
+    },
+    {
+      "question": "Une action cote 20 000 FCFA et verse un dividende annuel de 1 200 FCFA. Quel est son rendement ?",
+      "options": ["1,2 %", "6 %", "12 %", "16,7 %"],
+      "correct": 1,
+      "explication": "Rendement = dividende ÷ cours × 100 : 1 200 ÷ 20 000 × 100 = 6 %."
+    },
+    {
+      "question": "Quelle stratégie amplifie vos dividendes par effet boule de neige ?",
+      "options": [
+        "Vendre ses actions dès réception du dividende",
+        "Placer les dividendes sur un compte bancaire",
+        "Réinvestir les dividendes en achetant de nouvelles actions",
+        "Attendre 5 ans avant de toucher à son portefeuille"
+      ],
+      "correct": 2,
+      "explication": "Les actions achetées avec le dividende rapportent à leur tour un dividende l’année suivante, qui permet d’en acheter davantage."
+    },
+    {
+      "question": "Pour percevoir le prochain dividende, jusqu’à quand faut-il détenir l’action ?",
+      "options": [
+        "Le jour du paiement",
+        "La veille de la date de détachement",
+        "Le jour de l’assemblée générale",
+        "Un an avant le paiement"
+      ],
+      "correct": 1,
+      "explication": "Il faut détenir l’action la veille du détachement. Acheter le jour du détachement ou après ne donne pas droit au dividende en cours."
+    },
+    {
+      "question": "Une action affiche un rendement de 15 %, bien au-dessus des autres. Que peut-on en conclure ?",
+      "options": [
+        "C’est forcément un excellent placement",
+        "Le dividende va augmenter l’an prochain",
+        "Il faut vérifier : un cours en chute ou un dividende menacé peuvent expliquer ce chiffre",
+        "La société est sûrement la plus rentable du marché"
+      ],
+      "correct": 2,
+      "explication": "Un rendement très élevé est un signal à vérifier, pas une garantie : il peut venir d’un cours qui a chuté, ou d’un dividende que le marché juge intenable."
+    },
+    {
+      "question": "Quel capital faut-il pour viser 600 000 FCFA de dividendes bruts par an, à 8 % de rendement hypothétique ?",
+      "options": ["48 000 FCFA", "4 800 000 FCFA", "7 500 000 FCFA", "10 000 000 FCFA"],
+      "correct": 2,
+      "explication": "Capital = revenu visé ÷ rendement : 600 000 ÷ 8 % = 7 500 000 FCFA. À 6 %, il en faudrait 10 000 000."
+    }
+  ],
   "sections": [
     {
       "type": "definition",
@@ -32,7 +85,8 @@
     {
       "type": "cas",
       "titre": "Un exemple chiffré",
-      "contenu": "Un investisseur détient 300 actions. La société verse 1 000 FCFA par action, et l’action cote 10 000 FCFA.\nIl perçoit 300 000 FCFA bruts dans l’année, soit un rendement de 10 % au cours de 10 000 FCFA. Ces chiffres sont pédagogiques : ils ne décrivent aucune société cotée.",
+      "contenu": "Un investisseur détient 300 actions. La société verse 1 000 FCFA par action, et l’action cote 10 000 FCFA.\nIl perçoit 300 000 FCFA bruts dans l’année, soit un rendement de 10 % au cours de 10 000 FCFA. Ces chiffres sont pédagogiques : ils ne décrivent aucune société cotée.\nLe tableau qui suit applique le même calcul à quatre valeurs de la BRVM : dernier dividende enregistré, cours de la dernière séance, rendement, et revenu pour 300 actions.",
+      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SGBC", "SDCC"], "actions": 300 },
       "stats": [
         { "label": "Actions détenues", "valeur": "300" },
         { "label": "Dividende par action", "valeur": "1 000 FCFA" },
@@ -49,7 +103,8 @@
     {
       "type": "importance",
       "titre": "Analyser une action à dividendes",
-      "contenu": "Un dividende élevé n’est pas forcément un bon dividende. Cinq questions permettent d’en juger.",
+      "contenu": "Un dividende élevé n’est pas forcément un bon dividende. Cinq questions permettent d’en juger.\nCommencez par la régularité : le tableau montre les dividendes de quatre valeurs de la BRVM sur cinq exercices. Repérez celles qui progressent et celles qui ont connu une baisse.",
+      "donnees_reelles": { "vue": "historique", "codes": ["SNTS", "ORAC", "SGBC", "SPHC"] },
       "points": [
         {
           "titre": "Régularité des distributions",

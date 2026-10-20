@@ -176,12 +176,16 @@
 
 /* ── Tableaux ────────────────────────────────────────────────────────── */
 .lp-table-wrap { overflow-x: auto; }
-.lp-table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+/* `overflow-wrap: anywhere` de l'article couperait « Année » en « Anné / e » dans
+   une colonne étroite : dans les tableaux, on ne coupe qu'entre les mots. */
+.lp-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; overflow-wrap: normal; }
 .lp-table th {
-  text-align: left; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--lp-doux); padding: 0.55rem 0.75rem; border-bottom: 1.5px solid var(--lp-encre); white-space: nowrap;
+  text-align: left; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--lp-doux); padding: 0.5rem 0.6rem; border-bottom: 1.5px solid var(--lp-encre); vertical-align: bottom;
 }
-.lp-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--lp-trame); vertical-align: top; }
+.lp-table td { padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--lp-trame); vertical-align: top; }
+.lp-cellule-detail { display: block; margin-top: 0.1rem; font-size: 0.74rem; font-weight: 400; color: var(--lp-doux); white-space: normal; }
+.lp-table .lp-alerte { color: var(--lp-alerte); font-weight: 600; }
 .lp-table td:first-child, .lp-table th:first-child { padding-left: 0; }
 .lp-table .lp-ligne-tete {
   text-transform: none; letter-spacing: 0; font-size: 0.93rem; font-weight: 600; color: var(--lp-encre);
@@ -199,6 +203,7 @@
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--lp-retenir); border: 1px solid currentColor; border-radius: 999px; padding: 0.1rem 0.55rem;
 }
+.lp-badge--reel { color: var(--lp-accent); }
 .lp-graphe { height: 260px; }
 .lp-legende { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font-size: 0.82rem; color: var(--lp-texte); margin: 0.35rem 0 0.25rem; }
 .lp-legende span { display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -238,6 +243,19 @@
 .lp-quiz-explication { margin-top: 0.9rem; font-size: 0.95rem; }
 .lp-quiz-explication b { color: var(--lp-encre); }
 .lp-quiz-deja { font-size: 0.78rem; color: var(--lp-hausse); }
+.lp-quiz-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 2rem; }
+.lp-quiz-num { color: var(--lp-accent); margin-right: 0.15rem; }
+.lp-quiz-score {
+  margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  padding: 1rem 1.15rem; border-radius: 12px; background: var(--lp-alerte-clair); color: var(--lp-texte);
+}
+.lp-quiz-score--reussi { background: #eaf6ef; }
+.lp-quiz-score b { font-family: var(--font-display), Georgia, serif; font-size: 1.3rem; color: var(--lp-encre); font-variant-numeric: tabular-nums; }
+.lp-quiz-recommencer {
+  font: inherit; font-size: 0.9rem; font-weight: 600; color: var(--lp-accent); background: transparent;
+  border: 1px solid var(--lp-accent); border-radius: 999px; padding: 0.4rem 1rem; cursor: pointer;
+}
+.lp-quiz-recommencer:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 2px; }
 
 /* ── Pied ────────────────────────────────────────────────────────────── */
 .lp-avertissement { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--lp-trame); font-size: 0.82rem; color: var(--lp-doux); }
