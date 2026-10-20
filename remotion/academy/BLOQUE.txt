@@ -1,1 +1,3 @@
 Bloqué le 2026-10-20 à la demande du propriétaire : les modules de cours vont être améliorés. Les leçons 1 à 4 du niveau 1 sont publiées ; ne rien générer d'autre avant la nouvelle version des cours. Supprimer ce fichier pour relancer (academy-lot.mjs, academy-voix.mjs).
+
+Autorisé : n1-l5   (2026-10-20, demande du propriétaire « generer la video apres » : leçon 5 refondue, publiée)

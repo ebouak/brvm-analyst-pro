@@ -63,6 +63,10 @@ export function verbaliser(texte) {
     .replace(/\b(\d{1,2})h(\d{2})\b/g, (_, h, m) => `${enLettres(Number(h))} heure${Number(h) > 1 ? 's' : ''}${m === '00' ? '' : ' ' + enLettres(Number(m))}`)
     .replace(/\b(\d{4})\s*[-–]\s*(\d{4})\b/g, '$1 à $2')
     .replace(/×\s*(\d)/g, 'fois $1')
+    // Formules des leçons (2026-10-20) : « Nombre d’actions × Dividende », « ÷ », « = ».
+    .replace(/\s*×\s*/g, ' fois ')
+    .replace(/\s*÷\s*/g, ' divisé par ')
+    .replace(/\s*=\s*/g, ' égale ')
     .replace(/(^|[\s(])[+]\s*(?=\d)/g, '$1plus ')
     .replace(/(^|[\s(])[−-]\s*(?=\d)/g, '$1moins ');
   t = t.replace(new RegExp(String.raw`(${NOMBRE}),(\d+)`, 'g'), (_, e, f) => decimal(e.replace(/\D/g, ''), f));
@@ -87,6 +91,8 @@ if (process.argv[1]?.endsWith('verbaliser.mjs') && process.argv.includes('--test
     ['80 et 200 et 71 et 1 000 000', 'quatre-vingts et deux cents et soixante et onze et un million'],
     ['J+3', 'J plus trois'],
     ['Mme Ouédraogo', 'Madame Ouédraogo'],
+    ['1 000 ÷ 10 000 × 100 = 10 %', 'mille divisé par dix mille fois cent égale dix pour cent'],
+    ['Nombre d’actions × Dividende par action', 'Nombre d’actions fois Dividende par action'],
   ];
   let ko = 0;
   for (const [a, b] of cas) { const r = verbaliser(a); if (r !== b) { ko++; console.log(`✗ ${a}\n   obtenu  : ${r}\n   attendu : ${b}`); } }

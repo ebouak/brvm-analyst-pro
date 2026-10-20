@@ -30,7 +30,12 @@ if (!lecon || !/^[a-z0-9-]+$/.test(lecon)) {
 // Verrou commun avec academy-lot.mjs : aucune voix n'est générée (ni payée)
 // tant que academy/BLOQUE.txt existe.
 const verrou = fileURLToPath(new URL('./academy/BLOQUE.txt', import.meta.url));
-if (existsSync(verrou)) {
+// Exception nominative : une ligne « Autorisé : n1-l5, … » dans BLOQUE.txt
+// laisse passer les leçons citées, et elles seules (le lot reste bloqué).
+const autorisees = existsSync(verrou)
+  ? (readFileSync(verrou, 'utf8').match(/^Autoris[ée]+\s*:\s*(.+)$/im)?.[1] ?? '').split(/[\s,;]+/)
+  : [];
+if (existsSync(verrou) && !autorisees.includes(lecon)) {
   console.error(`Génération de voix bloquée : ${readFileSync(verrou, 'utf8').trim()}`);
   process.exit(4);
 }
