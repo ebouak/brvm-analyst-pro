@@ -28,6 +28,28 @@ export interface LearnData {
   exercises: Record<number, PublicExercise>;
 }
 
+/**
+ * DÉVELOPPEMENT SEULEMENT — voir une leçon réécrite AVANT de l'écrire en base.
+ * `ACADEMY_LECON_LOCALE=<slug>:<index>:<chemin du JSON>` remplace, champ par
+ * champ, la leçon `<index>` (0 = leçon 1) du cours `<slug>` ; le reste du cours
+ * vient de la base. Inerte hors `next dev` : la garde NODE_ENV ne laisse rien
+ * passer en production, et la variable n'existe pas sur Vercel.
+ */
+async function avecLeconLocale(slug: string, content: unknown): Promise<unknown> {
+  const spec = process.env.ACADEMY_LECON_LOCALE;
+  if (process.env.NODE_ENV !== 'development' || !spec) return content;
+  const [cible, index, ...chemin] = spec.split(':');
+  const i = Number(index);
+  if (cible !== slug || !Number.isInteger(i) || !content || typeof content !== 'object') return content;
+  const { readFile } = await import('node:fs/promises');
+  const locale = JSON.parse(await readFile(chemin.join(':'), 'utf8')) as Record<string, unknown>;
+  const c = content as { lessons?: Record<string, unknown>[] };
+  if (!c.lessons?.[i]) return content;
+  const lessons = [...c.lessons];
+  lessons[i] = { ...lessons[i], ...locale };
+  return { ...c, lessons };
+}
+
 export async function loadCourseForLearning(slug: string): Promise<LearnData | null> {
   const svc = getServiceClient();
   const { data: course } = await svc
@@ -38,7 +60,7 @@ export async function loadCourseForLearning(slug: string): Promise<LearnData | n
     .maybeSingle();
   if (!course) return null;
 
-  const parsed = courseContentSchema.safeParse(course.content);
+  const parsed = courseContentSchema.safeParse(await avecLeconLocale(slug, course.content));
   if (!parsed.success) return null; // contenu corrompu → 404 plutôt qu'un crash
 
   // Lignes utilisateur via la session (RLS owner) — vide si non connecté.

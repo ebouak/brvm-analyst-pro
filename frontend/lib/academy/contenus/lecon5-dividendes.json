@@ -1,0 +1,126 @@
+{
+  "titre": "Leçon 5 — Les dividendes : construire un revenu passif grâce à la BRVM",
+  "categorie": "income",
+  "duree_min": 9,
+  "sous_titre": "Comprendre le mécanisme, calculer son rendement et mesurer l’effet du réinvestissement.",
+  "resume": "Un dividende est la part du bénéfice qu’une société cotée verse à ses actionnaires.\nBien compris, il peut devenir une source de revenus régulière — à condition de savoir le calculer, le lire et en mesurer les limites.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les dividendes ne sont pas garantis. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Comprendre le dividende",
+      "contenu": "Quand une société réalise un bénéfice, son assemblée générale décide d’en verser une partie aux actionnaires : c’est le dividende.\nLe reste est conservé pour financer l’activité. Une société bénéficiaire peut aussi choisir de ne rien distribuer.",
+      "flux": [
+        { "titre": "Entreprise", "detail": "Réalise un bénéfice sur l’exercice.", "icone": "entreprise" },
+        { "titre": "Bénéfice distribuable", "detail": "La part qui peut être versée.", "icone": "benefices" },
+        { "titre": "Décision de distribution", "detail": "Votée en assemblée générale.", "icone": "decision" },
+        { "titre": "Actionnaires", "detail": "Reçoivent le dividende, par action détenue.", "icone": "actionnaires" }
+      ],
+      "formules": [
+        {
+          "nom": "Revenu brut",
+          "expression": "Nombre d’actions × Dividende par action",
+          "exemple": "300 × 1 000 FCFA = 300 000 FCFA"
+        },
+        {
+          "nom": "Rendement du dividende",
+          "expression": "Dividende annuel par action ÷ Cours de l’action × 100",
+          "exemple": "1 000 ÷ 10 000 × 100 = 10 %"
+        }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Un exemple chiffré",
+      "contenu": "Un investisseur détient 300 actions. La société verse 1 000 FCFA par action, et l’action cote 10 000 FCFA.\nIl perçoit 300 000 FCFA bruts dans l’année, soit un rendement de 10 % au cours de 10 000 FCFA. Ces chiffres sont pédagogiques : ils ne décrivent aucune société cotée.",
+      "stats": [
+        { "label": "Actions détenues", "valeur": "300" },
+        { "label": "Dividende par action", "valeur": "1 000 FCFA" },
+        { "label": "Revenu brut annuel", "valeur": "300 000 FCFA" },
+        { "label": "Rendement brut", "valeur": "10 %", "detail": "au cours de 10 000 FCFA" }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Réinvestir ses dividendes",
+      "contenu": "Plutôt que de dépenser le dividende, on peut s’en servir pour acheter de nouvelles actions. L’année suivante, ces actions rapportent à leur tour un dividende.\nAnnée 1 : 300 actions × 1 000 FCFA = 300 000 FCFA, réinvestis à 10 000 FCFA l’action, soit 30 actions de plus. Année 2 : 330 actions × 1 050 FCFA = 346 500 FCFA.\nLe graphique compare ce choix avec des dividendes conservés en espèces, sous les hypothèses écrites dessous.",
+      "simulation": { "type": "reinvestissement", "actions": 300, "dpa": 1000, "cours": 10000, "croissance_pct": 5, "annees": 6 }
+    },
+    {
+      "type": "importance",
+      "titre": "Analyser une action à dividendes",
+      "contenu": "Un dividende élevé n’est pas forcément un bon dividende. Cinq questions permettent d’en juger.",
+      "points": [
+        {
+          "titre": "Régularité des distributions",
+          "detail": "Une société qui verse chaque année, sans interruption, inspire plus de confiance qu’une distribution exceptionnelle.",
+          "verifier": "les dividendes versés sur au moins cinq exercices."
+        },
+        {
+          "titre": "Capacité bénéficiaire",
+          "detail": "Le dividende est payé par le bénéfice. Un bénéfice qui recule finit par peser sur la distribution.",
+          "verifier": "l’évolution du résultat net sur plusieurs années."
+        },
+        {
+          "titre": "Taux de distribution",
+          "detail": "C’est la part du bénéfice versée aux actionnaires. Proche ou au-delà de 100 %, la société distribue plus qu’elle ne gagne.",
+          "verifier": "dividendes totaux ÷ résultat net."
+        },
+        {
+          "titre": "Rendement au cours de référence",
+          "detail": "Le rendement dépend du prix payé : le même dividende rapporte moins si l’action a été achetée plus cher.",
+          "verifier": "le rendement au cours du jour, et non au cours d’il y a un an."
+        },
+        {
+          "titre": "Valorisation et risques",
+          "detail": "Un rendement très élevé peut traduire une action dont le cours a chuté, parce que le marché doute de la suite.",
+          "verifier": "le PER, l’endettement et l’actualité de la société."
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Les dates qui comptent",
+      "contenu": "Trois dates encadrent chaque dividende. Pour l’investisseur, la plus importante est la date de détachement.\nIl faut détenir l’action la veille du détachement pour percevoir le dividende. Acheter le jour du détachement ou après ne donne pas droit au dividende en cours : il revient au vendeur.",
+      "etapes_style": "frise",
+      "etapes": [
+        { "titre": "Décision de distribution", "detail": "L’assemblée générale approuve le montant du dividende." },
+        { "titre": "Date de détachement", "detail": "Seuls les détenteurs de la veille y ont droit ; le cours est ajusté du dividende.", "cle": true },
+        { "titre": "Date de paiement", "detail": "Le dividende est versé sur le compte titres, par l’intermédiaire de la SGI." }
+      ]
+    },
+    {
+      "type": "piege",
+      "titre": "Les erreurs à éviter",
+      "contenu": "Cinq erreurs reviennent souvent chez les investisseurs qui découvrent les dividendes.",
+      "points": [
+        { "titre": "Choisir sur le seul rendement", "detail": "Un rendement très élevé peut annoncer une baisse du dividende ou du cours." },
+        { "titre": "Acheter juste avant le détachement pour « toucher » le dividende", "detail": "Au détachement, le cours est ajusté du dividende : le gain n’est pas gratuit." },
+        { "titre": "Oublier les impôts et les frais", "detail": "Le dividende est versé après retenue à la source, et chaque ordre coûte des frais de courtage." },
+        { "titre": "Supposer que le dividende se répétera", "detail": "Il est voté chaque année : il peut baisser, ou disparaître." },
+        { "titre": "Tout miser sur une seule valeur", "detail": "Une société, un secteur ou un pays peut traverser une mauvaise année. Répartir réduit ce risque." }
+      ]
+    },
+    {
+      "type": "cas",
+      "titre": "Calculer un objectif de revenus",
+      "contenu": "Pour viser un revenu annuel, on divise ce revenu par le rendement espéré : on obtient le capital à investir.\nPour 600 000 FCFA de dividendes bruts par an, il faut 10 000 000 FCFA à 6 % de rendement, et 7 500 000 FCFA à 8 %. Ces rendements sont des hypothèses, pas des promesses.",
+      "formules": [
+        { "nom": "Capital nécessaire", "expression": "Revenu annuel visé ÷ Rendement", "exemple": "600 000 ÷ 6 % = 10 000 000 FCFA" }
+      ],
+      "simulation": { "type": "objectif", "revenu_cible": 600000, "rendements_pct": [6, 8] }
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Cinq idées à garder en tête.",
+      "points": [
+        { "titre": "Le dividende est une part du bénéfice", "detail": "Voté chaque année, il n’est jamais garanti." },
+        { "titre": "Revenu = actions × dividende par action", "detail": "300 actions × 1 000 FCFA = 300 000 FCFA bruts." },
+        { "titre": "Rendement = dividende ÷ cours × 100", "detail": "Il dépend du prix payé pour l’action." },
+        { "titre": "Réinvestir accroît les revenus futurs", "detail": "Les actions achetées produisent à leur tour un dividende." },
+        { "titre": "Le détachement décide du droit au dividende", "detail": "Il faut détenir l’action la veille de la date de détachement." }
+      ]
+    }
+  ]
+}
