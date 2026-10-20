@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { ItemPdf } from '../src/dividends/boc.js';
 import { lireCalendrier, dateFr, type Calendrier } from '../src/dividends/calendrier.js';
+import { cleNom, codeDuNom } from '../src/dividends/calendrierCodes.js';
 
 const fixture = (nom: string) =>
   JSON.parse(readFileSync(new URL(`./fixtures/${nom}`, import.meta.url), 'utf8')) as ItemPdf[][];
@@ -68,5 +69,25 @@ describe('calendrier officiel BRVM — lecture par position', () => {
 
   it('document sans ligne « ANNEE » : erreur, rien d’inventé', () => {
     expect(() => lireCalendrier([[]])).toThrow(/ANNEE/);
+  });
+});
+
+describe('correspondance nom → code (table curée, aucun repli flou)', () => {
+  it('les 35 lignes du 09/10 sont rapprochées, chacune vers un code distinct', () => {
+    const codes = c1009.lignes.map((l) => codeDuNom(l.nom));
+    expect(codes.filter((c) => c == null)).toEqual([]);
+    expect(new Set(codes).size).toBe(35);
+  });
+
+  it('accents, apostrophes et espaces parasites sont neutralisés', () => {
+    expect(cleNom('BOA CÔTE D’IVOIRE')).toBe('BOACOTEDIVOIRE');
+    expect(codeDuNom('BOA CÔTE D’IVOIRE')).toBe('BOAC');
+    expect(codeDuNom('SOCIETE GENERALE C I')).toBe('SGBC');
+    expect(codeDuNom('NEI - CEDA CI')).toBe('NEIC');
+  });
+
+  it('un nom inconnu ou partiel ne devine rien', () => {
+    expect(codeDuNom('BANQUE INCONNUE CI')).toBeNull();
+    expect(codeDuNom('ORANGE')).toBeNull();
   });
 });
