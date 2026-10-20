@@ -1,0 +1,137 @@
+{
+  "titre": "Leçon 10 — Investir depuis l’étranger (diaspora)",
+  "categorie": "general",
+  "duree_min": 6,
+  "sous_titre": "Ouvrir un compte à distance, transférer ses fonds, recevoir ses dividendes.",
+  "resume": "Il n’est pas nécessaire de vivre dans l’UEMOA pour investir à la BRVM : de nombreuses SGI ouvrent des comptes à distance.\nCette leçon décrit le parcours, le change et les précautions propres aux investisseurs de la diaspora.",
+  "avertissement": "Ceci n’est pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures. Investir en actions comporte un risque de perte en capital.",
+  "sections": [
+    {
+      "type": "definition",
+      "titre": "Le parcours à distance",
+      "contenu": "Le parcours ressemble à une ouverture locale. Seuls changent les documents de résidence et le transfert des fonds, par virement international.",
+      "flux": [
+        { "titre": "Banque à l’étranger", "detail": "Votre compte dans le pays de résidence.", "icone": "entreprise" },
+        { "titre": "Virement international", "detail": "Vers le compte de votre SGI.", "icone": "paiement" },
+        { "titre": "Compte chez une SGI", "detail": "Agréée par l’AMF-UMOA.", "icone": "decision" },
+        { "titre": "Achat d’actions", "detail": "En ligne, depuis n’importe où.", "icone": "graphique" },
+        { "titre": "Dividendes", "detail": "Conservés en FCFA ou virés à l’étranger.", "icone": "piece" }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Le change euro – franc CFA",
+      "contenu": "Le franc CFA est lié à l’euro par une parité fixe : 1 euro vaut 655,957 FCFA. Pour un résident de la zone euro, ce change ne fluctue pas.\nPour les autres devises, comme le dollar, le cours varie : le rendement final dépend aussi du change.",
+      "formules": [
+        { "nom": "Conversion", "expression": "Montant en FCFA = Montant en euros × 655,957", "exemple": "500 € × 655,957 ≈ 327 979 FCFA" }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Documents et délais",
+      "contenu": "Chaque SGI fixe sa liste de pièces. Les plus courantes sont les suivantes.",
+      "points": [
+        { "titre": "Une pièce d’identité valide", "detail": "Carte d’identité ou passeport, parfois avec une copie certifiée." },
+        { "titre": "Un justificatif de résidence", "detail": "Récent, dans votre pays d’accueil." },
+        { "titre": "Le formulaire d’ouverture signé", "detail": "Souvent transmis sous forme numérisée." },
+        {
+          "titre": "Un premier virement",
+          "detail": "Comptez de quelques jours à quelques semaines selon la banque et la SGI.",
+          "verifier": "les frais de virement facturés par votre banque et par la SGI."
+        }
+      ]
+    },
+    {
+      "type": "importance",
+      "titre": "Recevoir ses dividendes",
+      "contenu": "Deux options : les garder sur votre compte en FCFA pour les réinvestir, ou les faire virer sur votre compte à l’étranger, avec des frais et un délai.\nLe dividende est versé après la retenue à la source du pays de la société. Votre pays de résidence peut aussi l’imposer : renseignez-vous sur sa fiscalité et sur les conventions fiscales applicables."
+    },
+    {
+      "type": "cas",
+      "reel": true,
+      "titre": "Sur la BRVM : ce que rapportent 50 actions",
+      "contenu": "Le tableau montre, pour quatre valeurs, le dernier dividende enregistré et le revenu de 50 actions. Pour l’exprimer en euros, divisez le montant en FCFA par 655,957.",
+      "donnees_reelles": { "vue": "rendement", "codes": ["SNTS", "ORAC", "SGBC", "BOAB"], "actions": 50 }
+    },
+    {
+      "type": "piege",
+      "titre": "Les erreurs à éviter",
+      "contenu": "La distance rend certaines arnaques plus faciles. Quelques réflexes suffisent à s’en protéger.",
+      "points": [
+        { "titre": "Passer par une plateforme non agréée", "detail": "Des sites hors UEMOA proposent des « actions africaines » sans agrément : ce sont souvent des arnaques." },
+        { "titre": "Confier ses fonds à un intermédiaire informel", "detail": "Un proche ou un « agent » qui investit à votre place n’offre aucune garantie." },
+        { "titre": "Multiplier les petits virements", "detail": "Les frais bancaires internationaux peuvent absorber le rendement des petits montants." },
+        { "titre": "Ignorer la fiscalité du pays de résidence", "detail": "Les dividendes peuvent y être déclarés et imposés." }
+      ]
+    },
+    {
+      "type": "retenir",
+      "titre": "L’essentiel",
+      "contenu": "Cinq idées à garder en tête.",
+      "points": [
+        { "titre": "On peut investir à la BRVM depuis l’étranger", "detail": "Par une SGI agréée qui ouvre des comptes à distance." },
+        { "titre": "1 € = 655,957 FCFA", "detail": "Une parité fixe : pas de risque de change depuis la zone euro." },
+        { "titre": "Les dividendes peuvent rester en FCFA ou être rapatriés", "detail": "Avec des frais et un délai de virement." },
+        { "titre": "La fiscalité du pays de résidence compte", "detail": "Renseignez-vous avant le premier dividende." },
+        { "titre": "Aucun agrément, aucun dépôt", "detail": "Vérifiez l’agrément de l’intermédiaire auprès de l’AMF-UMOA." }
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "question": "1 000 € correspondent à combien de francs CFA ?",
+      "options": ["655 957 FCFA", "65 596 FCFA", "1 000 000 FCFA", "6 559 570 FCFA"],
+      "correct": 0,
+      "explication": "1 000 × 655,957 = 655 957 FCFA, selon la parité fixe entre l’euro et le franc CFA."
+    },
+    {
+      "question": "Pour un investisseur résidant dans la zone euro, la parité euro – franc CFA est :",
+      "options": ["Flottante, révisée chaque jour", "Fixe", "Indexée sur le dollar", "Révisée chaque mois par la BRVM"],
+      "correct": 1,
+      "explication": "La parité est fixe : 1 euro = 655,957 FCFA. Le change ne fait donc pas varier le rendement d’un investisseur de la zone euro."
+    },
+    {
+      "question": "Qui doit être agréé pour vous permettre d’investir à la BRVM depuis l’étranger ?",
+      "options": [
+        "Votre banque étrangère",
+        "La SGI, par l’AMF-UMOA",
+        "N’importe quel courtier en ligne international",
+        "Personne, aucun agrément n’est nécessaire"
+      ],
+      "correct": 1,
+      "explication": "Seule une SGI agréée par l’AMF-UMOA peut transmettre vos ordres à la BRVM, où que vous résidiez."
+    },
+    {
+      "question": "Une plateforme hors UEMOA vous propose des « actions africaines » sans agrément. Que faire ?",
+      "options": [
+        "Investir un petit montant pour tester",
+        "Ne pas y déposer de fonds et vérifier les intermédiaires agréés",
+        "Y investir si le rendement promis est élevé",
+        "Demander à un proche d’investir à votre place"
+      ],
+      "correct": 1,
+      "explication": "Sans agrément, aucun recours : ces plateformes sont une source fréquente d’arnaques visant la diaspora."
+    },
+    {
+      "question": "Les dividendes perçus par un investisseur résidant à l’étranger :",
+      "options": [
+        "Sont toujours exonérés d’impôt",
+        "Peuvent aussi être imposés dans le pays de résidence, selon sa fiscalité",
+        "Ne peuvent jamais quitter l’UEMOA",
+        "Sont versés uniquement en euros"
+      ],
+      "correct": 1,
+      "explication": "Après la retenue à la source du pays de la société, le pays de résidence peut aussi imposer le dividende, selon ses règles et les conventions fiscales."
+    }
+  ],
+  "qcm": {
+    "question": "1 000 € correspondent à combien de francs CFA ?",
+    "options": ["655 957 FCFA", "65 596 FCFA", "1 000 000 FCFA", "6 559 570 FCFA"],
+    "correct": 0,
+    "explication": "1 000 × 655,957 = 655 957 FCFA, selon la parité fixe entre l’euro et le franc CFA."
+  },
+  "liens": [
+    { "label": "Comparateur de SGI", "href": "/comparateur-sgi" },
+    { "label": "Fiscalité des placements", "href": "/fiscalite" }
+  ]
+}
