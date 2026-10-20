@@ -153,11 +153,12 @@ lecon.sections.forEach((s, i) => {
   }
 
   if (s.formules?.length) {
-    const lignes = s.formules.map((f) => [f.nom, f.exemple ? `${f.expression}\nExemple : ${f.exemple}` : f.expression]);
+    // Trois colonnes : la grille ne rend pas les retours à la ligne d'une cellule.
+    const lignes = s.formules.map((f) => [f.nom, f.expression, f.exemple ?? '']);
     const { voix, parts } = voixEtParts(
       s.formules.map((f) => `${f.nom} égale ${f.expression}.${f.exemple ? ` Exemple : ${f.exemple}.` : ''}`),
     );
-    scenes.push({ id: `s${k}-formules`, gabarit: 'grille', colonnes: ['Formule', 'Calcul'], lignes, note: '', parts, voix });
+    scenes.push({ id: `s${k}-formules`, gabarit: 'grille', colonnes: ['Formule', 'Calcul', 'Exemple'], lignes, note: '', parts, voix });
   }
 
   if (s.stats?.length) {
