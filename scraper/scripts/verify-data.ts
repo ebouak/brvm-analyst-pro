@@ -12,6 +12,7 @@
  *   paper             — informatif : nb de positions ouvertes aujourd'hui
  *   events            — informatif : nb d'événements ingérés dans les dernières 24h
  *   dividends         — informatif : nb de dividendes ingérés dans les dernières 24h
+ *   dividends-calendrier — bloquant : ≥ 20 dividendes du calendrier officiel datés (2 derniers exercices)
  *   alerts            — informatif : nb de notifications d'alertes envoyées dans les dernières 24h
  */
 import { createClient } from '@supabase/supabase-js';
@@ -181,6 +182,27 @@ async function main(): Promise<void> {
       break;
     }
 
+    case 'dividends-calendrier': {
+      // Un run vert ne prouve rien : on relit la base.
+      const depuis = new Date().getUTCFullYear() - 2;
+      const { count, error } = await client
+        .from('dividends')
+        .select('*', { count: 'exact', head: true })
+        .eq('source', 'brvm-calendrier')
+        .not('ex_date', 'is', null)
+        .gte('exercice', depuis);
+      if (error) {
+        console.error('❌ Échec requête:', error.message);
+        process.exit(1);
+      }
+      if ((count ?? 0) < 20) {
+        console.error(`❌ ${count ?? 0} dividende(s) du calendrier officiel avec date de détachement depuis l'exercice ${depuis} (attendu ≥ 20)`);
+        process.exit(1);
+      }
+      console.log(`✅ ${count} dividendes du calendrier officiel avec date de détachement (exercices ≥ ${depuis})`);
+      break;
+    }
+
     case 'alerts': {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { count, error } = await client
@@ -196,7 +218,7 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | score | monthly | paper | events | dividends | alerts`);
+      console.error(`Mode inconnu: ${mode}. Modes: intraday | watchdog | daily | score | monthly | paper | events | dividends | dividends-calendrier | alerts`);
       process.exit(1);
   }
 }
