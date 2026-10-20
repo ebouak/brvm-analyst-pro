@@ -1,0 +1,250 @@
+/**
+ * Leçon Academy — surface de lecture éditoriale, portée par `.lp`.
+ * Spec : docs/superpowers/specs/2026-10-20-academy-lecon-editoriale-design.md
+ *
+ * POURQUOI UNE FEUILLE PROPRE. Le reste de l'application est sombre ; l'article
+ * se lit sur un papier blanc chaud, comme une publication financière. Même parti
+ * pris que `.dv` (dossier valeur) : tout est préfixé, rien ne fuit vers le shell,
+ * le sommaire ou la colonne d'outils, qui gardent le thème du site.
+ *
+ * Le turquoise de la marque (#56D7FD) n'a pas le contraste sur fond clair : on
+ * prend sa version profonde (#0b7d93, 4,9:1 sur le papier).
+ */
+
+.lp {
+  --lp-papier: #fbf8f3;
+  --lp-encre: #0f1f33;
+  --lp-texte: #2b3a4d;
+  --lp-doux: #5d6b7d;
+  --lp-trame: #e6dfd3;
+  --lp-accent: #0b7d93;
+  --lp-accent-clair: #e3f3f6;
+  --lp-alerte: #a3401f;
+  --lp-alerte-clair: #fbece6;
+  --lp-retenir: #8a6a12;
+  --lp-hausse: #1d7a46;
+
+  background: var(--lp-papier);
+  color: var(--lp-texte);
+  border-radius: 20px;
+  padding: clamp(20px, 4.5vw, 56px) clamp(18px, 5vw, 64px);
+  font-family: var(--font-sans), 'Helvetica Neue', system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.lp * { box-sizing: border-box; }
+
+/* Colonne de lecture (~68 caractères) ; les blocs visuels peuvent s'élargir. */
+.lp-col { max-width: 42rem; margin-inline: auto; }
+.lp-large { max-width: 52rem; margin-inline: auto; }
+
+/* ── En-tête ─────────────────────────────────────────────────────────── */
+.lp-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin-bottom: 1rem; }
+.lp-categorie {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--lp-accent);
+}
+.lp-duree { font-size: 0.8rem; color: var(--lp-doux); }
+.lp-titre {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.75rem, 3.4vw, 2.6rem); line-height: 1.12; letter-spacing: -0.015em;
+  color: var(--lp-encre); text-wrap: balance; margin: 0;
+}
+.lp-sous-titre { margin-top: 0.75rem; font-size: 1.15rem; line-height: 1.5; color: var(--lp-texte); text-wrap: pretty; }
+.lp-intro { margin-top: 1rem; color: var(--lp-doux); }
+.lp-intro p { margin: 0; }
+.lp-intro p + p { margin-top: 0.6em; }
+
+.lp-image { margin: 2rem auto 0; }
+.lp-image img { display: block; width: 100%; aspect-ratio: 21 / 8; object-fit: cover; border-radius: 14px; }
+.lp-image figcaption { margin-top: 0.35rem; font-size: 0.72rem; color: var(--lp-doux); text-align: right; }
+
+/* ── Sections ────────────────────────────────────────────────────────── */
+.lp-section { margin-top: 3rem; padding-top: 2.25rem; border-top: 1px solid var(--lp-trame); }
+.lp-kicker {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--lp-accent); margin: 0 0 0.4rem;
+}
+.lp-h2 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.35rem, 2.2vw, 1.65rem); line-height: 1.2; color: var(--lp-encre);
+  text-wrap: balance; margin: 0 0 0.9rem;
+}
+.lp-texte p { margin: 0; }
+.lp-texte p + p { margin-top: 0.85em; }
+
+/* Pièges et « à retenir » : un filet, pas une boîte. */
+.lp-section--piege .lp-corps { border-left: 3px solid var(--lp-alerte); padding-left: 1.1rem; }
+.lp-section--piege .lp-kicker { color: var(--lp-alerte); }
+.lp-section--retenir .lp-corps { border-left: 3px solid var(--lp-retenir); padding-left: 1.1rem; }
+.lp-section--retenir .lp-kicker { color: var(--lp-retenir); }
+
+.lp-bloc { margin-top: 1.6rem; }
+
+/* ── Formules ────────────────────────────────────────────────────────── */
+.lp-formules { display: grid; gap: 0.75rem; }
+@media (min-width: 640px) { .lp-formules { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); } }
+.lp-formule { background: var(--lp-accent-clair); border-radius: 12px; padding: 1rem 1.15rem; }
+.lp-formule-nom { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lp-accent); }
+.lp-formule-expr {
+  margin-top: 0.35rem; font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem; line-height: 1.35; color: var(--lp-encre);
+}
+.lp-formule-ex { margin-top: 0.5rem; font-size: 0.9rem; color: var(--lp-texte); font-variant-numeric: tabular-nums; }
+
+/* ── Flux (mécanisme) : horizontal sur ordinateur, vertical sur mobile ─ */
+.lp-flux { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+.lp-flux-etape { position: relative; display: grid; grid-template-columns: 3.25rem 1fr; gap: 0.85rem; align-items: start; }
+.lp-flux-picto {
+  width: 3.25rem; height: 3.25rem; border-radius: 999px; display: grid; place-items: center;
+  border: 1.5px solid var(--lp-accent); color: var(--lp-accent); background: var(--lp-papier);
+  position: relative; z-index: 1;
+}
+.lp-flux-picto svg { width: 1.6rem; height: 1.6rem; }
+.lp-flux-titre { font-weight: 600; color: var(--lp-encre); line-height: 1.3; }
+.lp-flux-detail { font-size: 0.88rem; line-height: 1.45; color: var(--lp-doux); margin-top: 0.15rem; }
+/* Connecteur vertical entre étapes (mobile). */
+.lp-flux-etape:not(:last-child)::after {
+  content: ''; position: absolute; left: 1.625rem; top: 3.5rem; bottom: -1rem;
+  border-left: 1.5px dashed var(--lp-trame);
+}
+@media (min-width: 640px) {
+  .lp-flux { grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.5rem; }
+  .lp-flux-etape { grid-template-columns: 1fr; justify-items: center; text-align: center; padding-inline: 0.25rem; }
+  .lp-flux-etape:not(:last-child)::after {
+    left: calc(50% + 2rem); right: calc(-50% + 2rem); top: 1.625rem; bottom: auto;
+    border-left: 0; border-top: 1.5px solid var(--lp-trame);
+  }
+  .lp-flux-etape:not(:last-child)::before {
+    content: ''; position: absolute; top: calc(1.625rem - 4px); right: calc(-50% + 2rem);
+    border: 4.5px solid transparent; border-left: 7px solid var(--lp-accent); border-right: 0;
+  }
+}
+
+/* ── Chiffres clés : une rangée, pas des cartes ──────────────────────── */
+.lp-chiffres { display: flex; flex-wrap: wrap; gap: 1rem 0; margin: 0; }
+.lp-chiffre { flex: 1 1 9rem; padding: 0 1.25rem; border-left: 1px solid var(--lp-trame); display: flex; flex-direction: column-reverse; justify-content: flex-end; }
+.lp-chiffre:first-child { border-left: 0; padding-left: 0; }
+.lp-chiffre dd {
+  margin: 0; font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.5rem, 2.6vw, 2rem); line-height: 1.1; color: var(--lp-encre);
+  font-variant-numeric: tabular-nums;
+}
+.lp-chiffre dt { font-size: 0.78rem; color: var(--lp-doux); margin-top: 0.3rem; }
+.lp-chiffre-detail { display: block; font-size: 0.75rem; color: var(--lp-doux); }
+
+/* ── Points numérotés (critères, pièges, idées) ──────────────────────── */
+.lp-points { list-style: none; margin: 0; padding: 0; counter-reset: lp-point; }
+.lp-point { counter-increment: lp-point; display: grid; grid-template-columns: 2.25rem 1fr; gap: 0.75rem; padding: 0.95rem 0; border-top: 1px solid var(--lp-trame); }
+.lp-point:first-child { border-top: 0; padding-top: 0.25rem; }
+.lp-point::before {
+  content: counter(lp-point, decimal-leading-zero);
+  font-family: var(--font-display), Georgia, serif; font-size: 1.2rem; line-height: 1.35;
+  color: var(--lp-accent); font-variant-numeric: tabular-nums;
+}
+.lp-section--piege .lp-point::before { color: var(--lp-alerte); }
+.lp-section--retenir .lp-point::before { color: var(--lp-retenir); }
+.lp-point-titre { font-weight: 600; color: var(--lp-encre); line-height: 1.35; }
+.lp-point-detail { margin-top: 0.2rem; font-size: 0.97rem; }
+.lp-point-verifier { margin-top: 0.35rem; font-size: 0.86rem; color: var(--lp-doux); }
+.lp-point-verifier b { color: var(--lp-accent); font-weight: 600; }
+
+/* ── Frise des dates ─────────────────────────────────────────────────── */
+.lp-frise { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; }
+.lp-frise-etape { position: relative; display: grid; grid-template-columns: 1.5rem 1fr; gap: 0.75rem; }
+.lp-frise-point {
+  width: 1rem; height: 1rem; margin: 0.3rem 0.25rem 0; border-radius: 999px;
+  background: var(--lp-papier); border: 2px solid var(--lp-accent); position: relative; z-index: 1;
+}
+.lp-frise-etape--cle .lp-frise-point { background: var(--lp-accent); box-shadow: 0 0 0 4px var(--lp-accent-clair); }
+.lp-frise-etape:not(:last-child)::after {
+  content: ''; position: absolute; left: 0.74rem; top: 1.45rem; bottom: -1.25rem; border-left: 2px solid var(--lp-trame);
+}
+.lp-frise-num { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lp-doux); }
+.lp-frise-etape--cle .lp-frise-num { color: var(--lp-accent); }
+.lp-frise-titre { font-weight: 600; color: var(--lp-encre); }
+.lp-frise-detail { font-size: 0.92rem; margin-top: 0.15rem; }
+@media (min-width: 640px) {
+  .lp-frise:not(.lp-frise--verticale) { grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1.5rem; }
+  .lp-frise:not(.lp-frise--verticale) .lp-frise-etape { grid-template-columns: 1fr; gap: 0.6rem; }
+  .lp-frise:not(.lp-frise--verticale) .lp-frise-point { margin: 0; }
+  .lp-frise:not(.lp-frise--verticale) .lp-frise-etape:not(:last-child)::after {
+    left: 1rem; right: -1.5rem; top: 0.5rem; bottom: auto; border-left: 0; border-top: 2px solid var(--lp-trame);
+  }
+}
+
+/* ── Tableaux ────────────────────────────────────────────────────────── */
+.lp-table-wrap { overflow-x: auto; }
+.lp-table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+.lp-table th {
+  text-align: left; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--lp-doux); padding: 0.55rem 0.75rem; border-bottom: 1.5px solid var(--lp-encre); white-space: nowrap;
+}
+.lp-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--lp-trame); vertical-align: top; }
+.lp-table td:first-child, .lp-table th:first-child { padding-left: 0; }
+.lp-table .lp-ligne-tete {
+  text-transform: none; letter-spacing: 0; font-size: 0.93rem; font-weight: 600; color: var(--lp-encre);
+  border-bottom: 1px solid var(--lp-trame); white-space: normal; padding-left: 0;
+}
+.lp-table .lp-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--lp-encre); }
+.lp-table th.lp-num { color: var(--lp-doux); }
+.lp-note { margin-top: 0.6rem; font-size: 0.82rem; color: var(--lp-doux); }
+
+/* ── Figures (simulations, graphiques) ───────────────────────────────── */
+.lp-figure { margin: 0; }
+.lp-figure-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.35rem 1rem; margin-bottom: 0.75rem; }
+.lp-figure-titre { font-weight: 600; color: var(--lp-encre); }
+.lp-badge {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--lp-retenir); border: 1px solid currentColor; border-radius: 999px; padding: 0.1rem 0.55rem;
+}
+.lp-graphe { height: 260px; }
+.lp-legende { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; font-size: 0.82rem; color: var(--lp-texte); margin: 0.35rem 0 0.25rem; }
+.lp-legende span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.lp-legende i { display: inline-block; width: 1.1rem; height: 3px; border-radius: 2px; }
+.lp-hypotheses { margin: 0.75rem 0 0; padding-left: 1.1rem; font-size: 0.82rem; color: var(--lp-doux); }
+.lp-hypotheses li + li { margin-top: 0.15rem; }
+
+/* Barres d'objectif (CSS : deux à cinq barres n'exigent pas de bibliothèque). */
+.lp-barres { display: grid; gap: 0.85rem; }
+.lp-barre-ligne { display: grid; grid-template-columns: 4.5rem 1fr; gap: 0.75rem; align-items: center; }
+.lp-barre-etiquette { font-size: 0.9rem; color: var(--lp-doux); font-variant-numeric: tabular-nums; }
+.lp-barre-piste { position: relative; height: 2.25rem; background: var(--lp-accent-clair); border-radius: 6px; overflow: hidden; }
+.lp-barre { height: 100%; background: var(--lp-accent); border-radius: 6px; }
+.lp-barre-valeur {
+  position: absolute; inset: 0 auto 0 0.65rem; display: flex; align-items: center;
+  font-family: var(--font-display), Georgia, serif; font-size: 1.05rem; color: #fff; font-variant-numeric: tabular-nums;
+}
+
+.lp-barre-valeur--dehors { color: var(--lp-encre); }
+
+/* ── Quiz ────────────────────────────────────────────────────────────── */
+.lp-quiz { margin-top: 3rem; padding-top: 2.25rem; border-top: 1px solid var(--lp-trame); }
+.lp-quiz-question { font-family: var(--font-display), Georgia, serif; font-size: 1.25rem; line-height: 1.3; color: var(--lp-encre); margin: 0 0 1rem; }
+.lp-quiz-options { display: grid; gap: 0.5rem; }
+.lp-quiz-option {
+  display: flex; align-items: center; gap: 0.75rem; width: 100%; text-align: left;
+  padding: 0.75rem 0.95rem; border: 1px solid var(--lp-trame); border-radius: 10px;
+  background: #fff; color: var(--lp-texte); font: inherit; font-size: 0.97rem; cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+.lp-quiz-option:hover:not(:disabled) { border-color: var(--lp-accent); }
+.lp-quiz-option:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 2px; }
+.lp-quiz-option:disabled { cursor: default; }
+.lp-quiz-option b { font-size: 0.8rem; color: var(--lp-doux); }
+.lp-quiz-option--juste { border-color: var(--lp-hausse); background: #eaf6ef; color: var(--lp-hausse); }
+.lp-quiz-option--faux { border-color: var(--lp-alerte); background: var(--lp-alerte-clair); color: var(--lp-alerte); }
+.lp-quiz-explication { margin-top: 0.9rem; font-size: 0.95rem; }
+.lp-quiz-explication b { color: var(--lp-encre); }
+.lp-quiz-deja { font-size: 0.78rem; color: var(--lp-hausse); }
+
+/* ── Pied ────────────────────────────────────────────────────────────── */
+.lp-avertissement { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--lp-trame); font-size: 0.82rem; color: var(--lp-doux); }
+
+/* L'exercice garde son composant (thème du site), posé hors de la feuille claire. */
+.lp-exercice { margin-top: 3rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-quiz-option { transition: none; }
+}

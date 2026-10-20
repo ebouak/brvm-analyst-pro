@@ -1,21 +1,82 @@
 'use client';
 
-import type { Lesson } from '@/lib/academy/types';
-import { SECTION_LABEL, CATEGORIE_LABEL, type Categorie } from '@/lib/academy/types';
+import type { Lesson, Section } from '@/lib/academy/types';
+import { CATEGORIE_LABEL, libelleSection, type Categorie } from '@/lib/academy/types';
 import type { PublicExercise } from '@/lib/academy/exercises';
 import QcmBlock from './QcmBlock';
 import LessonChart from './LessonChart';
 import ExerciseBlock from './ExerciseBlock';
+import { ChiffresCles, Flux, Formules, Frise, Points, Tableau, Texte } from './lecon/Blocs';
+import SimulationLecon from './lecon/Simulations';
+import './lecon/lecon.css';
 
-/** Styles + icône par type de section — hiérarchie visuelle et repères. */
-const SECTION_STYLE: Record<string, { box: string; badge: string; icon: string }> = {
-  definition: { box: 'border-accent/30 bg-accent/[0.05]', badge: 'text-accent', icon: '📖' },
-  importance: { box: 'border-border bg-surface', badge: 'text-ivory', icon: '◆' },
-  cas:        { box: 'border-up/30 bg-up/[0.05]', badge: 'text-up', icon: '→' },
-  piege:      { box: 'border-down/30 bg-down/[0.05]', badge: 'text-down', icon: '!' },
-  lexique:    { box: 'border-border bg-surface', badge: 'text-muted', icon: '📚' },
-  retenir:    { box: 'border-gold/30 bg-gold/[0.06]', badge: 'text-gold', icon: '✓' },
-};
+/**
+ * Leçon Academy rendue comme un article éditorial sur papier clair (`.lp`,
+ * lecon/lecon.css) — spec docs/superpowers/specs/2026-10-20-academy-lecon-editoriale-design.md.
+ *
+ * Aucune section n'est enfermée dans une boîte : la hiérarchie vient de la
+ * typographie, de l'espace et des filets. Les blocs facultatifs (formules,
+ * schéma, simulation, frise, points) n'apparaissent que si le contenu les porte :
+ * une leçon ancienne s'affiche avec son texte, ses chiffres, son tableau et ses
+ * étapes, simplement mieux mis en page.
+ */
+
+/** Kicker de section : numéro, puis le rôle de la section quand il éclaire la lecture. */
+function kicker(s: Section, i: number): string {
+  const num = String(i + 1).padStart(2, '0');
+  return s.type === 'importance' ? num : `${num} · ${libelleSection(s)}`;
+}
+
+function SectionLecon({ s, i }: { s: Section; i: number }) {
+  const largeFrise = s.etapes.length > 0 && s.etapes_style === 'frise';
+  return (
+    <section className={`lp-section lp-large lp-section--${s.type}`} aria-labelledby={`lp-s${i}`}>
+      <div className="lp-col">
+        <p className="lp-kicker">{kicker(s, i)}</p>
+        <h2 id={`lp-s${i}`} className="lp-h2">{s.titre}</h2>
+      </div>
+      <div className="lp-col lp-corps">
+        <Texte contenu={s.contenu} />
+      </div>
+
+      {s.flux.length > 0 && (
+        <div className="lp-bloc">
+          <Flux etapes={s.flux} titre={s.titre} />
+        </div>
+      )}
+      {s.formules.length > 0 && (
+        <div className="lp-bloc lp-col">
+          <Formules formules={s.formules} />
+        </div>
+      )}
+      {s.stats.length > 0 && (
+        <div className="lp-bloc lp-col">
+          <ChiffresCles stats={s.stats} />
+        </div>
+      )}
+      {s.simulation && (
+        <div className="lp-bloc">
+          <SimulationLecon sim={s.simulation} />
+        </div>
+      )}
+      {s.tableau && (
+        <div className="lp-bloc lp-col">
+          <Tableau tableau={s.tableau} />
+        </div>
+      )}
+      {s.etapes.length > 0 && (
+        <div className={`lp-bloc ${largeFrise ? 'lp-large' : 'lp-col'}`}>
+          <Frise etapes={s.etapes} style={s.etapes_style} />
+        </div>
+      )}
+      {s.points.length > 0 && (
+        <div className="lp-bloc lp-col lp-corps">
+          <Points points={s.points} />
+        </div>
+      )}
+    </section>
+  );
+}
 
 export default function LessonContent({
   lesson,
@@ -36,134 +97,60 @@ export default function LessonContent({
   lessonIdx: number;
   onExerciseResult: (correct: boolean) => void;
 }) {
+  const charts = [lesson.chart, ...(lesson.charts ?? [])].filter((c): c is NonNullable<typeof c> => Boolean(c));
+
   return (
-    <article className="space-y-5">
-      {/* Bandeau image (illustration thématique) */}
+    <article className="lp">
+      <header className="lp-col">
+        <div className="lp-meta">
+          <span className="lp-categorie">{CATEGORIE_LABEL[lesson.categorie as Categorie] ?? 'Général'}</span>
+          {lesson.duree_min && <span className="lp-duree">{lesson.duree_min} min de lecture</span>}
+        </div>
+        <h1 className="lp-titre">{lesson.titre}</h1>
+        {lesson.sous_titre && <p className="lp-sous-titre">{lesson.sous_titre}</p>}
+        <div className="lp-intro">
+          <Texte contenu={lesson.resume} />
+        </div>
+      </header>
+
+      {/* L'illustration vient APRÈS le titre : le titre doit être lu en premier. */}
       {lesson.image?.url && (
-        <figure className="overflow-hidden rounded-2xl border border-border">
+        <figure className="lp-image lp-large">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={lesson.image.url}
-            alt={lesson.image.alt || lesson.titre}
-            className="h-48 w-full object-cover sm:h-60"
-            loading="lazy"
-          />
-          {lesson.image.credit && (
-            <figcaption className="bg-surface px-3 py-1 text-right text-[10px] text-faint">
-              {lesson.image.credit} · illustration
-            </figcaption>
-          )}
+          <img src={lesson.image.url} alt={lesson.image.alt || ''} loading="lazy" />
+          {lesson.image.credit && <figcaption>{lesson.image.credit} · illustration</figcaption>}
         </figure>
       )}
 
-      <header>
-        <div className="mb-1.5 flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-            {CATEGORIE_LABEL[lesson.categorie as Categorie] ?? 'Général'}
-          </span>
-          {lesson.duree_min && (
-            <span className="text-[11px] text-faint">⏱ {lesson.duree_min} min de lecture</span>
-          )}
+      {lesson.sections.map((s, i) => (
+        <SectionLecon key={i} s={s} i={i} />
+      ))}
+
+      {charts.length > 0 && (
+        <div className="lp-section lp-large">
+          {charts.map((c, i) => (
+            <div key={i} className={i > 0 ? 'lp-bloc' : undefined}>
+              <LessonChart chart={c} variant="slide" />
+            </div>
+          ))}
         </div>
-        <h1 className="font-display text-2xl text-white">{lesson.titre}</h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted">{lesson.resume}</p>
-      </header>
-
-      {lesson.sections.map((s, i) => {
-        const st = SECTION_STYLE[s.type] ?? SECTION_STYLE.importance!;
-        return (
-          <section key={i} className={`rounded-xl border p-4 ${st.box}`}>
-            <p className={`overline mb-1.5 flex items-center gap-1.5 ${st.badge}`}>
-              <span aria-hidden>{st.icon}</span>
-              {SECTION_LABEL[s.type] ?? s.titre}
-            </p>
-            <h2 className="text-sm font-semibold text-ivory">{s.titre}</h2>
-            <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-muted">{s.contenu}</p>
-
-            {/* Chiffres clés — rangée de cartes KPI (style slide). */}
-            {s.stats && s.stats.length > 0 && (
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {s.stats.map((k, j) => (
-                  <div key={j} className="rounded-lg border border-border/60 bg-bg/50 px-3 py-2.5">
-                    <p className="text-[10px] uppercase tracking-wide text-faint">{k.label}</p>
-                    <p className="tabular mt-0.5 text-lg font-semibold text-accent">{k.valeur}</p>
-                    {k.detail && <p className="mt-0.5 text-[10px] leading-snug text-faint">{k.detail}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Tableau comparatif (SGI, profils…) — scroll horizontal sur mobile. */}
-            {s.tableau && (
-              <div className="mt-3 overflow-x-auto rounded-lg border border-border/60">
-                <table className="w-full min-w-[480px] text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-border/60 bg-bg/60">
-                      {s.tableau.colonnes.map((c, j) => (
-                        <th key={j} className="px-3 py-2 font-semibold uppercase tracking-wide text-faint">{c}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {s.tableau.lignes.map((ligne, j) => (
-                      <tr key={j} className="border-b border-border/40 last:border-0">
-                        {ligne.map((cell, k) => (
-                          <td key={k} className={`px-3 py-2 ${k === 0 ? 'font-semibold text-ivory' : 'tabular text-muted'}`}>
-                            {cell}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {s.tableau.note && <p className="border-t border-border/40 px-3 py-2 text-[10px] text-faint">{s.tableau.note}</p>}
-              </div>
-            )}
-
-            {/* Étapes — frise numérotée verticale (phases, parcours, dates clés). */}
-            {s.etapes && s.etapes.length > 0 && (
-              <ol className="mt-3 space-y-0">
-                {s.etapes.map((e, j) => (
-                  <li key={j} className="relative flex gap-3 pb-3 last:pb-0">
-                    {j < s.etapes!.length - 1 && (
-                      <span aria-hidden className="absolute left-[13px] top-7 h-[calc(100%-1.25rem)] w-px bg-border/60" />
-                    )}
-                    <span
-                      aria-hidden
-                      className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                        e.cle ? 'bg-gold/20 text-gold ring-1 ring-gold/50' : 'bg-accent/10 text-accent'
-                      }`}
-                    >
-                      {e.cle ? '★' : j + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className={`text-sm font-semibold ${e.cle ? 'text-gold' : 'text-ivory'}`}>{e.titre}</p>
-                      {e.detail && <p className="mt-0.5 text-xs leading-relaxed text-muted">{e.detail}</p>}
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </section>
-        );
-      })}
-
-      {lesson.chart && <LessonChart chart={lesson.chart} />}
-      {lesson.charts?.map((c, i) => <LessonChart key={`c${i}`} chart={c} />)}
+      )}
 
       {exercise && (
-        <ExerciseBlock
-          exercise={exercise}
-          courseId={courseId}
-          lessonIdx={lessonIdx}
-          alreadyPassed={exercicePassed}
-          onResult={onExerciseResult}
-        />
+        <div className="lp-exercice lp-col">
+          <ExerciseBlock
+            exercise={exercise}
+            courseId={courseId}
+            lessonIdx={lessonIdx}
+            alreadyPassed={exercicePassed}
+            onResult={onExerciseResult}
+          />
+        </div>
       )}
 
-      {lesson.qcm && (
-        <QcmBlock qcm={lesson.qcm} alreadyPassed={quizPassed} onAnswer={onQuizAnswer} />
-      )}
+      {lesson.qcm && <QcmBlock qcm={lesson.qcm} alreadyPassed={quizPassed} onAnswer={onQuizAnswer} />}
+
+      {lesson.avertissement && <p className="lp-avertissement lp-col">{lesson.avertissement}</p>}
     </article>
   );
 }
