@@ -41,6 +41,72 @@ export const etapeSchema = z.object({
   cle: z.boolean().optional().default(false),
 });
 
+// ── Blocs éditoriaux (2026-10-20, spec 2026-10-20-academy-lecon-editoriale) ──
+// Tous OPTIONNELS : les leçons existantes restent valides telles quelles.
+
+/** Formule clé, avec son exemple chiffré. */
+export const formuleSchema = z.object({
+  nom: z.string().min(1).max(80),
+  expression: z.string().min(1).max(160),
+  exemple: z.string().max(200).optional().default(''),
+});
+
+/** Pictogrammes disponibles pour le schéma de mécanisme (components/academy/lecon/Pictogramme). */
+export const ICONES_FLUX = [
+  'entreprise', 'benefices', 'decision', 'actionnaires', 'paiement', 'calendrier', 'graphique', 'piece',
+] as const;
+export type IconeFlux = (typeof ICONES_FLUX)[number];
+
+/** Étape d'un schéma de mécanisme (A → B → C), dessiné en chaîne. */
+export const fluxEtapeSchema = z.object({
+  titre: z.string().min(1).max(40),
+  detail: z.string().max(120).optional().default(''),
+  icone: z.enum(ICONES_FLUX),
+});
+
+/** Point d'une liste éditoriale numérotée (critère, piège, idée essentielle). */
+export const pointSchema = z.object({
+  titre: z.string().min(1).max(80),
+  detail: z.string().max(300).optional().default(''),
+  /** « À vérifier » — ce que le lecteur doit contrôler (facultatif). */
+  verifier: z.string().max(160).optional().default(''),
+});
+
+/**
+ * Simulation CALCULÉE au rendu (lib/academy/simulations.ts) à partir de ces
+ * hypothèses — jamais des données de marché.
+ */
+export const simulationSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('reinvestissement'),
+    actions: z.number().int().positive().max(1_000_000),
+    dpa: z.number().positive(),
+    cours: z.number().positive(),
+    croissance_pct: z.number().min(-50).max(50),
+    annees: z.number().int().min(2).max(10),
+  }),
+  z.object({
+    type: z.literal('objectif'),
+    revenu_cible: z.number().positive(),
+    rendements_pct: z.array(z.number().positive().max(50)).min(2).max(5),
+  }),
+]);
+export type Simulation = z.infer<typeof simulationSchema>;
+
+/**
+ * Exemples RÉELS tirés de la base au chargement de la leçon
+ * (lib/academy/donneesServer.ts) : le contenu ne porte que des codes, jamais
+ * de chiffres — ils seraient périmés dès la séance suivante.
+ *  - `rendement` : dernier dividende, dernier cours, rendement, revenu pour `actions` ;
+ *  - `historique` : dividendes des cinq derniers exercices (régularité).
+ */
+export const donneesReellesSchema = z.object({
+  vue: z.enum(['rendement', 'historique']),
+  codes: z.array(z.string().regex(/^[A-Z0-9]{3,6}$/)).min(1).max(6),
+  actions: z.number().int().positive().max(1_000_000).optional(),
+});
+export type DonneesReellesSpec = z.infer<typeof donneesReellesSchema>;
+
 export const sectionSchema = z.object({
   type: z.enum(SECTION_TYPES),
   titre: z.string().min(1).max(120),
@@ -49,6 +115,21 @@ export const sectionSchema = z.object({
   stats: z.array(statSchema).max(6).optional().default([]),
   tableau: tableauSchema.nullable().optional(),
   etapes: z.array(etapeSchema).max(8).optional().default([]),
+  // ── Blocs éditoriaux ──
+  /** Une section `cas` ne s'intitule « Cas réel BRVM » que si elle l'est. */
+  reel: z.boolean().optional().default(false),
+  formules: z.array(formuleSchema).max(3).optional().default([]),
+  flux: z
+    .array(fluxEtapeSchema)
+    .max(5)
+    .optional()
+    .default([])
+    .refine((f) => f.length === 0 || f.length >= 2, { message: 'un schéma de mécanisme compte au moins deux étapes' }),
+  points: z.array(pointSchema).max(8).optional().default([]),
+  /** `frise` : étapes en frise horizontale sur ordinateur (verticale sur mobile). */
+  etapes_style: z.enum(['liste', 'frise']).optional().default('liste'),
+  simulation: simulationSchema.nullable().optional(),
+  donnees_reelles: donneesReellesSchema.nullable().optional(),
 });
 
 export const qcmSchema = z.object({
@@ -87,12 +168,26 @@ export const lessonImageSchema = z.object({
 export const lessonSchema = z.object({
   titre: z.string().min(1).max(160),
   categorie: z.enum(CATEGORIES).default('general'),
+  /** Sous-titre pédagogique de l'en-tête éditorial (facultatif). */
+  sous_titre: z.string().max(160).nullable().optional(),
   resume: z.string().min(1).max(600),
+  /** Mention réglementaire affichée en pied d'article (facultatif). */
+  avertissement: z.string().max(300).nullable().optional(),
   sections: z.array(sectionSchema).min(1).max(8),
   chart: chartSchema.nullable().optional(),
   // Graphiques multiples (leçons enrichies) — rendus après `chart`.
   charts: z.array(chartSchema).max(4).optional().default([]),
   qcm: qcmSchema.nullable().optional(),
+  /**
+   * Quiz en série (2026-10-20). Prime sur `qcm` à l'affichage quand il est
+   * présent ; `qcm` reste lu par l'éditeur admin et la banque d'examens.
+   */
+  quiz: z
+    .array(qcmSchema.refine((q) => q.correct < q.options.length, { message: 'bonne réponse hors des options' }))
+    .min(1)
+    .max(10)
+    .nullable()
+    .optional(),
   // Mots-clés EN fournis par le LLM pour rechercher une image (ex. "stock market chart").
   imageQuery: z.string().max(120).nullable().optional(),
   // Rempli côté serveur après fetch Pexels (absent de la sortie LLM).
@@ -162,11 +257,19 @@ export const CATEGORIE_LABEL: Record<Categorie, string> = {
 export const SECTION_LABEL: Record<SectionType, string> = {
   definition: 'Définition',
   importance: 'Pourquoi c’est important',
-  cas: 'Cas réel BRVM',
+  // « Cas réel BRVM » s'affichait aussi sur des simulations : le libellé par
+  // défaut est neutre, le réel se déclare (`reel: true`, voir libelleSection).
+  cas: 'Exemple',
   piege: 'Pièges fréquents',
   lexique: 'Lexique',
   retenir: 'À retenir',
 };
+
+/** Libellé d'une section ; « Cas réel BRVM » seulement pour un cas déclaré réel. */
+export function libelleSection(s: Pick<Section, 'type' | 'reel'>): string {
+  if (s.type === 'cas' && s.reel) return 'Cas réel BRVM';
+  return SECTION_LABEL[s.type];
+}
 
 /** Slug URL-safe depuis un titre. */
 export function slugify(input: string): string {

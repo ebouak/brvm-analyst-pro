@@ -21,23 +21,34 @@ export default function ToolsPanel({
 
   return (
     <div className="rounded-xl border border-border bg-surface">
-      <div className="flex border-b border-border/60" role="tablist" aria-label="Outils">
+      <div className="flex border-b border-border/60" role="tablist" aria-label="Outils de la leçon">
         {([['notes', 'Notes'], ['glossaire', 'Glossaire'], ['ressources', 'Ressources'], ['discussion', 'Discussion']] as const).map(([id, label]) => (
           <button
             key={id}
+            id={`outil-${id}`}
             type="button"
             role="tab"
             aria-selected={tab === id}
+            aria-controls="outil-panneau"
             onClick={() => setTab(id)}
-            className={`flex-1 px-3 py-2.5 text-xs font-medium transition ${
-              tab === id ? 'border-b-2 border-accent text-accent' : 'text-muted hover:text-white'
+            className={`-mb-px flex-1 border-b-2 px-2 py-2.5 text-[12px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+              tab === id
+                ? 'border-accent font-semibold text-ivory'
+                : 'border-transparent font-medium text-muted hover:text-ivory'
             }`}
           >
             {label}
           </button>
         ))}
       </div>
-      <div className="p-3">
+      {/* Sur grand écran, le panneau est collant : son contenu défile dans la
+          hauteur de la fenêtre, pour rester lisible sur un écran bas. */}
+      <div
+        id="outil-panneau"
+        role="tabpanel"
+        aria-labelledby={`outil-${tab}`}
+        className="p-3 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto"
+      >
         {tab === 'notes' && <NotesTab key={note} initial={note} onSave={onSaveNote} />}
         {tab === 'glossaire' && <GlossaireTab items={content.glossaire ?? []} />}
         {tab === 'ressources' && <RessourcesTab lesson={lesson} content={content} />}
@@ -95,7 +106,7 @@ function NotesTab({ initial, onSave }: { initial: string; onSave: (t: string) =>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        rows={10}
+        rows={8}
         placeholder="Vos notes sur cette leçon (privées, sauvegardées automatiquement)…"
         className="w-full resize-y rounded-lg border border-border bg-bg px-3 py-2 text-sm leading-relaxed text-ivory placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-accent/40"
       />
@@ -122,7 +133,8 @@ function GlossaireTab({ items }: { items: { terme: string; definition: string }[
         placeholder="Filtrer un terme…"
         className="w-full rounded-lg border border-border bg-bg px-3 py-1.5 text-sm text-ivory placeholder:text-faint"
       />
-      <dl className="max-h-80 space-y-3 overflow-y-auto pr-1">
+      {/* Le panneau défile déjà : pas de seconde zone de défilement imbriquée. */}
+      <dl className="space-y-2.5">
         {list.map((g) => (
           <div key={g.terme}>
             <dt className="text-xs font-semibold text-accent">{g.terme}</dt>

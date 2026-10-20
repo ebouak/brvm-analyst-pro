@@ -182,6 +182,7 @@ export default function AcademyShell({
             courseId={data.courseId}
             lessonIdx={idx}
             onExerciseResult={onExerciseResult}
+            donnees={data.donnees[idx]}
           />
           <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border/50 pt-4">
             {!done ? (
@@ -269,7 +270,7 @@ function Sommaire({
                 <span className="block truncate">{l.titre}</span>
                 <span className="text-[10px] text-faint">
                   {l.duree_min ? `${l.duree_min} min` : 'leçon'}
-                  {l.qcm ? ' · quiz' : ''}
+                  {l.quiz?.length || l.qcm ? ' · quiz' : ''}
                 </span>
               </span>
             </button>
