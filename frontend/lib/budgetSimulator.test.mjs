@@ -42,7 +42,23 @@ assert.ok(r.reste >= -1e-6, 'reste non négatif');
 assert.equal(r.divNet, r.divBrut, 'sans IRVM : net = brut');
 
 const rNet = computeStrategy(meta('div'), UNIV, 3, 1_000_000, 0.012, false, true);
-assert.ok(Math.abs(rNet.divNet - rNet.divBrut * (1 - IRVM)) < 1e-6, 'IRVM appliqué (-10 %)');
+assert.ok(Math.abs(rNet.divNet - rNet.divBrut * (1 - IRVM)) < 1e-6, `IRVM appliqué (-${IRVM * 100} %)`);
+
+// --- montant déjà net (calendrier officiel) : jamais retaxé -------------------
+// Double IRVM corrigée le 2026-10-20 : `dividends.montant` est net, lui
+// retirer l'impôt une seconde fois minorait le revenu affiché.
+const UNIV_NET = UNIV.map((a) => ({ ...a, rendementDejaNet: true }));
+const rDejaNet = computeStrategy(meta('div'), UNIV_NET, 3, 1_000_000, 0.012, false, true);
+assert.ok(Math.abs(rDejaNet.divNet - rDejaNet.divBrut) < 1e-6, 'déjà net : aucune retenue en plus');
+
+const UNIV_MIXTE = UNIV.map((a) => ({ ...a, rendementDejaNet: a.code === 'AAA' }));
+const rMixte = computeStrategy(meta('div'), UNIV_MIXTE, 3, 1_000_000, 0.012, false, true);
+const parLigne = rMixte.lines.reduce((s, l) => {
+  if (l.action.rendement == null) return s;
+  const d = (l.montant * l.action.rendement) / 100;
+  return s + (l.action.rendementDejaNet ? d : d * (1 - IRVM));
+}, 0);
+assert.ok(Math.abs(rMixte.divNet - parLigne) < 1e-6, 'mixte : retenue ligne à ligne');
 
 // --- univers vide / budget nul : pas de plantage ------------------------------
 assert.deepEqual(allocate([], 1_000_000, 0.01), [], 'sélection vide → aucune ligne');

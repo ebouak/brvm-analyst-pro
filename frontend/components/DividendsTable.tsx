@@ -5,7 +5,7 @@ import type { DividendRow } from '@/lib/dividends';
 import { fmtFcfa, fmtDateFR } from '@/lib/format';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
-import { rendementNet } from '@/lib/tax/compute';
+import { rendementNetSelonBase } from '@/lib/tax/compute';
 import { toPaysUemoa } from '@/lib/tax/rates';
 
 type SortKey = 'code' | 'designation' | 'secteur' | 'pays' | 'montant' | 'rendement_pct' | 'ex_date' | 'payment_date' | 'exercice';
@@ -198,9 +198,11 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                     {(() => {
                       if (row.rendement_pct == null) return '—';
                       if (!net) return `${row.rendement_pct.toFixed(2)}%`;
+                      // Un montant déjà net n'est jamais retaxé (double IRVM
+                      // corrigée le 2026-10-20) ; une base inconnue n'est pas supposée.
                       const p = toPaysUemoa(row.pays);
                       const r = p
-                        ? rendementNet(row.rendement_pct, p, 'dividende_cote')
+                        ? rendementNetSelonBase(row.rendement_pct, row.base_fiscale, p)
                         : ({ indisponible: true } as const);
                       return r.indisponible
                         ? `${row.rendement_pct.toFixed(2)}%*`
@@ -217,8 +219,9 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
         </table>
         {net && (
           <p className="px-3 pb-2 pt-1 text-[11px] text-faint">
-            * taux non confirmé pour ce pays → rendement brut affiché. Net = brut × (1 − IRVM du
-            pays de l&apos;émetteur).{' '}
+            Un montant publié net d&apos;IRVM (calendrier officiel BRVM) est affiché tel quel ; un
+            montant brut est réduit de l&apos;IRVM du pays de l&apos;émetteur. * base du montant inconnue
+            ou taux non confirmé → montant publié affiché, sans retenue supposée.{' '}
             <Link href="/fiscalite" className="underline underline-offset-2">Détails &amp; sources</Link>.
           </p>
         )}

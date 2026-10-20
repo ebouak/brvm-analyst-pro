@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import {
+  IRVM,
   STRATEGIES,
   computeStrategy,
   type SimAction,
@@ -168,7 +169,7 @@ export default function BudgetSimulator({
                 onChange={(e) => setNetTax(e.target.checked)}
                 className="h-4 w-4 accent-[#56D7FD]"
               />
-              Dividendes nets d&apos;IRVM (10&nbsp;%)
+              Dividendes nets d&apos;IRVM ({Math.round(IRVM * 100)}&nbsp;%)
             </label>
           </div>
 
@@ -348,8 +349,9 @@ export default function BudgetSimulator({
         <span aria-hidden>!</span>
         <p>
           <b className="text-gold-2">Outil éducatif.</b> Ce simulateur ne constitue pas un conseil en
-          investissement. Les dividendes projetés sont des estimations (le net suppose une IRVM de 10&nbsp;% sur
-          actions cotées, à vérifier) et la « perf 12 mois » est historique : les performances passées ne préjugent
+          investissement. Les dividendes projetés sont des estimations (le net suppose une IRVM de {Math.round(IRVM * 100)}&nbsp;% sur
+          actions cotées — taux ivoirien des personnes physiques — et ne la retire jamais d&apos;un montant
+          publié déjà net) et la « perf 12 mois » est historique : les performances passées ne préjugent
           pas des performances futures. Avant tout ordre, contactez une SGI agréée ; les frais réels varient selon la
           SGI et le montant.
         </p>

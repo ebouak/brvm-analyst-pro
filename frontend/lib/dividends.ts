@@ -10,6 +10,8 @@ export interface DividendRow {
   montant: number;
   cours_jour: number | null;
   rendement_pct: number | null;
+  /** Base du montant (migration 0130) : 'net' = déjà net d'IRVM, jamais retaxé. */
+  base_fiscale?: 'brut' | 'net' | 'inconnu' | null;
 }
 
 export function computeYield(montant: number, cours: number | null): number | null {

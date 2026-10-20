@@ -27,6 +27,7 @@ interface RawDividend {
   payment_date: string | null;
   montant: number;
   devise: string;
+  base_fiscale: 'brut' | 'net' | 'inconnu' | null;
 }
 
 interface RawInstrument {
@@ -54,7 +55,7 @@ async function getData(year?: string, sector?: string): Promise<{
   const [{ data: divData }, { data: instrData }] = await Promise.all([
     supabase
       .from('dividends')
-      .select('id, code, exercice, ex_date, payment_date, montant, devise')
+      .select('id, code, exercice, ex_date, payment_date, montant, devise, base_fiscale')
       .order('ex_date', { ascending: false })
       .limit(500),
     supabase
@@ -105,6 +106,7 @@ async function getData(year?: string, sector?: string): Promise<{
       montant: d.montant,
       cours_jour: cours,
       rendement_pct: computeYield(d.montant, cours),
+      base_fiscale: d.base_fiscale,
     };
   });
 
