@@ -107,17 +107,29 @@ async function deriveFromEvents(): Promise<Dividend[]> {
 }
 
 /**
- * Une ligne issue du Bulletin Officiel de la Cote (source 'brvm-boc', voir
- * runDividendesBoc.ts) est la RÉFÉRENCE : aucune autre source ne l'écrase.
+ * Sources OFFICIELLES BRVM : aucune autre source ne les écrase. Le calendrier
+ * de paiement (runCalendrier.ts) prime sur le Bulletin officiel
+ * (runDividendesBoc.ts), qui prime sur RichBourse et Sikafinance.
  * Sans ce filtre, RichBourse — importé en dernier, et qui l'emporte donc —
- * remettait chaque samedi SGBC 2025 à 2 293,28 au lieu des 2 298,75 publiés
- * par la BRVM.
+ * remettait chaque samedi ses propres valeurs par-dessus celles de la BRVM.
  */
+export const SOURCES_REFERENCE = ['brvm-calendrier', 'brvm-boc'] as const;
+
 export function sansEcraserReference<T extends { code: string; exercice?: number | null }>(
   rows: T[],
   references: Set<string>,
 ): T[] {
   return rows.filter((r) => r.exercice == null || !references.has(`${r.code}|${r.exercice}`));
+}
+
+/** Couples « code|exercice » déjà tenus par une source officielle. */
+export async function chargerReferences(): Promise<Set<string>> {
+  const { data, error } = await getSupabase()
+    .from('dividends')
+    .select('code, exercice')
+    .in('source', [...SOURCES_REFERENCE]);
+  if (error) throw new Error(`dividends (références officielles) : ${error.message}`);
+  return new Set(((data ?? []) as { code: string; exercice: number | null }[]).map((r) => `${r.code}|${r.exercice}`));
 }
 
 async function upsert(divsBruts: Dividend[]): Promise<number> {
@@ -128,12 +140,10 @@ async function upsert(divsBruts: Dividend[]): Promise<number> {
     return divsBruts.length;
   }
   const sb = getSupabase();
-  const { data: refs, error: errRefs } = await sb.from('dividends').select('code, exercice').eq('source', 'brvm-boc');
-  if (errRefs) throw new Error(`dividends (références brvm-boc) : ${errRefs.message}`);
-  const references = new Set(((refs ?? []) as { code: string; exercice: number | null }[]).map((r) => `${r.code}|${r.exercice}`));
+  const references = await chargerReferences();
   const divs = sansEcraserReference(divsBruts, references);
   if (divs.length < divsBruts.length) {
-    logger.info({ preservees: divsBruts.length - divs.length }, 'dividendes : lignes du Bulletin officiel préservées');
+    logger.info({ preservees: divsBruts.length - divs.length }, 'dividendes : lignes officielles BRVM préservées');
   }
   if (divs.length === 0) return 0;
   const rows = divs.map((d) => ({ ...d, dedupe_hash: dedupe(d) }));

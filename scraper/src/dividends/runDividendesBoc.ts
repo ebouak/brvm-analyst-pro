@@ -18,7 +18,7 @@ import { sha256 } from '../utils/hash.js';
 import { listerBulletins, telechargerPdf } from '../carnet/fetch.js';
 import { lireDerniersDividendes, type DividendeBoc, type ItemPdf } from './boc.js';
 
-export type Ecart = 'concordant' | 'date_manquante' | 'montant_different' | 'absent' | 'ancien';
+export type Ecart = 'concordant' | 'date_manquante' | 'montant_different' | 'absent' | 'ancien' | 'calendrier';
 
 /** Au-delà, un « dernier dividende » ne sert plus de base de rendement : il
  *  n'est PAS inscrit (UNLC : payé en 2012 ; un rendement calculé dessus
@@ -39,6 +39,8 @@ export function classer(boc: DividendeBoc, base: LigneRapport['base'], aujourdhu
     limite.setUTCFullYear(limite.getUTCFullYear() - ANCIENNETE_MAX_ANS);
     return boc.date_paiement < limite.toISOString().slice(0, 10) ? 'ancien' : 'absent';
   }
+  // Le calendrier officiel prime : le Bulletin ne le réécrit jamais.
+  if (base.source === 'brvm-calendrier') return 'calendrier';
   if (Math.abs(base.montant - boc.montant) >= 0.01) return 'montant_different';
   return base.payment_date === boc.date_paiement ? 'concordant' : 'date_manquante';
 }
@@ -87,7 +89,7 @@ export async function runDividendesBoc(opts: { ecrire?: boolean } = {}): Promise
   });
 
   let ecrites = 0;
-  const aEcrire = lignes.filter((l) => l.ecart !== 'concordant' && l.ecart !== 'ancien');
+  const aEcrire = lignes.filter((l) => l.ecart !== 'concordant' && l.ecart !== 'ancien' && l.ecart !== 'calendrier');
   if (opts.ecrire && aEcrire.length) {
     const rows = aEcrire.map((l) => ({
       code: l.code,

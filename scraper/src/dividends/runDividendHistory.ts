@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { logger } from '../logger.js';
 import { getSupabase } from '../persistence/supabase.js';
 import { parseSikaSociete } from './sikaSociete.js';
+import { chargerReferences, sansEcraserReference } from './runDividends.js';
 
 /**
  * Historique des dividendes (5 exercices) depuis les fiches sociétés Sikafinance.
@@ -111,9 +112,19 @@ export async function runDividendHistory(
     return { titres: titresOk.size, lignes: rows.length, echecs };
   }
 
+  // Une ligne du calendrier officiel ou du Bulletin n'est jamais réécrite par
+  // Sikafinance (cette commande n'en tenait aucun compte avant le 2026-10-20).
+  const aEcrire = sansEcraserReference(
+    rows as (Record<string, unknown> & { code: string; exercice: number | null })[],
+    await chargerReferences(),
+  );
+  if (aEcrire.length < rows.length) {
+    logger.info({ preservees: rows.length - aEcrire.length }, 'dividend-history: lignes officielles BRVM préservées');
+  }
+  if (aEcrire.length === 0) return { titres: titresOk.size, lignes: 0, echecs };
   const { error } = await getSupabase()
     .from('dividends')
-    .upsert(rows, { onConflict: 'code,exercice' });
+    .upsert(aEcrire, { onConflict: 'code,exercice' });
   if (error) throw new Error(`dividend-history: upsert échoué — ${error.message}`);
 
   logger.info(
