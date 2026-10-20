@@ -4,6 +4,7 @@ import type { ItemPdf } from '../src/dividends/boc.js';
 import { lireCalendrier, dateFr, type Calendrier } from '../src/dividends/calendrier.js';
 import { cleNom, codeDuNom } from '../src/dividends/calendrierCodes.js';
 import { lireTableEsv, urlsCandidatesCalendrier, exerciceDepuisUrlCalendrier } from '../src/dividends/esv.js';
+import { montantsPourBase, recouperDates, classer, type Cible } from '../src/dividends/rapprochementCalendrier.js';
 
 const fixture = (nom: string) =>
   JSON.parse(readFileSync(new URL(`./fixtures/${nom}`, import.meta.url), 'utf8')) as ItemPdf[][];
@@ -124,5 +125,55 @@ describe('table HTML des paiements de dividendes (brvm.org/fr/esv)', () => {
     expect(urls.length).toBeLessThanOrEqual(5);
     expect(new Set(urls).size).toBe(urls.length);
     expect(exerciceDepuisUrlCalendrier(urls[0]!)).toBe(2025);
+  });
+});
+
+describe('rapprochement : montants, recoupement, classement', () => {
+  const ligne = (avis: string) => parAvis(c1009, avis)!;
+
+  it('brut « (*) » → net = brut × (1 − taux lu), brut et taux conservés', () => {
+    expect(montantsPourBase(ligne('138-2026 BRVMDG'), 0.12)).toEqual({ montant: 704, montant_brut: 800, taux_retenue: 0.12 });
+    expect(montantsPourBase(ligne('231-2026 BRVMDG'), 0.12)?.montant).toBe(2293.28);
+  });
+
+  it('ligne nette : montant tel quel, brut NON reconstitué', () => {
+    expect(montantsPourBase(ligne('111-2026 BRVMDG'), 0.12)).toEqual({ montant: 1740, montant_brut: null, taux_retenue: null });
+  });
+
+  it('brut sans taux lisible : refusé, jamais calculé avec un taux supposé', () => {
+    expect(montantsPourBase(ligne('138-2026 BRVMDG'), null)).toBeNull();
+  });
+
+  it('recoupement : SOGB divergente rejetée, TRACTAFRIC concordante, BOA CI absente de la table', () => {
+    const { retenues, divergences } = recouperDates(c1009.lignes, [...p0, ...p1]);
+    expect(divergences.map((d) => d.ligne.avis)).toEqual(['213-2026 BRVMDG']);
+    expect(retenues).toHaveLength(34);
+    expect(retenues.filter((r) => r.recoupee)).toHaveLength(16);
+    expect(retenues.find((r) => r.ligne.avis === '294-2026 BRVMDG')?.recoupee).toBe(true);
+    expect(retenues.find((r) => r.ligne.avis === '102-2026 BRVMDG')?.recoupee).toBe(false);
+  });
+
+  const cible: Cible = {
+    montant: 704,
+    montant_brut: 800,
+    taux_retenue: 0.12,
+    ex_date: '2026-06-05',
+    payment_date: '2026-06-08',
+    avis_brvm: '138-2026 BRVMDG',
+  };
+  const base = {
+    montant: 704,
+    montant_brut: 800,
+    ex_date: '2026-06-05',
+    payment_date: '2026-06-08',
+    avis_brvm: '138-2026 BRVMDG',
+    source: 'brvm-calendrier',
+  };
+
+  it('classement', () => {
+    expect(classer(cible, null)).toBe('absent');
+    expect(classer(cible, { ...base, montant: 800 })).toBe('montant_different');
+    expect(classer(cible, { ...base, ex_date: null, source: 'brvm-boc' })).toBe('date_ajoutee');
+    expect(classer(cible, base)).toBe('concordant');
   });
 });
