@@ -56,6 +56,10 @@ test('canal email : memes garde-fous, texte brut, aucun outil de compte', () => 
   assert.match(p, /présentée sous ce message/);
   assert.match(p, /aucune donnée personnelle/);
   assert.match(p, /promesse de gain/);
+  // 21/10 : le brouillon a invente le contenu de /debutant (« reprend les etapes
+  // dans l'ordre… ») et redonne le lien d'inscription deja present dans le bloc.
+  assert.match(p, /Ne décris jamais le contenu d'une page/);
+  assert.match(p, /lien d'inscription/);
 });
 
 test('les regles email ne fuient pas sur WhatsApp ni Telegram', () => {

@@ -94,6 +94,17 @@ describe('rendu de la réponse', () => {
     }
   });
 
+  it('porte la marque : logo hébergé sur westbourse.com, nom lisible même images bloquées', () => {
+    expect(r.html).toContain('src="https://www.westbourse.com/icon-192.png"');
+    expect(r.html).toMatch(/>\s*WESTBOURSE\s*</);
+    // Mise en page en tableaux : seule forme fiable dans Gmail et Outlook.
+    expect(r.html).toContain('<table');
+    // Aucune image chargée depuis un autre domaine (traceur, ressource tierce).
+    for (const m of r.html.matchAll(/<img[^>]+src="([^"]+)"/g)) {
+      expect(m[1].startsWith('https://www.westbourse.com/')).toBe(true);
+    }
+  });
+
   it('porte la signature fixe, l’avertissement et la citation datée', () => {
     for (const s of [r.html, r.text]) {
       expect(s).toContain("L'équipe WESTBOURSE");
