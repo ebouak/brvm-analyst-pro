@@ -7,12 +7,12 @@ export const metadata: Metadata = { title: 'Politique de confidentialité' };
 
 export default function ConfidentialitePage() {
   return (
-    <LegalPage title="Politique de confidentialité" updatedAt="2026-06-15">
+    <LegalPage title="Politique de confidentialité" updatedAt="2026-10-21">
       <section>
         <h2>Responsable de traitement</h2>
         <p>
           Le responsable du traitement des données est <Placeholder>raison sociale</Placeholder>,
-          joignable à l&apos;adresse <Placeholder>email de contact</Placeholder>.
+          joignable à l&apos;adresse support@westbourse.com.
         </p>
       </section>
 
@@ -22,6 +22,10 @@ export default function ConfidentialitePage() {
           <li><strong>Compte</strong> : adresse e-mail, identifiant de session.</li>
           <li><strong>Usage</strong> : watchlist, portefeuille, simulations de paper-trading, préférences.</li>
           <li><strong>Newsletter</strong> : adresse e-mail, si vous y consentez.</li>
+          <li>
+            <strong>Formulaire de contact</strong> : prénom, adresse e-mail, page d&apos;où le message
+            est envoyé et contenu du message, ainsi que la réponse qui vous est adressée.
+          </li>
         </ul>
       </section>
 
@@ -30,6 +34,10 @@ export default function ConfidentialitePage() {
         <ul>
           <li>Fourniture du service et gestion du compte : exécution du contrat.</li>
           <li>Envoi de la newsletter : consentement.</li>
+          <li>
+            Réponse aux messages du formulaire de contact : mesures précontractuelles et intérêt
+            légitime à répondre à une demande que vous nous adressez.
+          </li>
           <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
         </ul>
       </section>
@@ -39,7 +47,9 @@ export default function ConfidentialitePage() {
         <p>
           Les données de compte sont conservées tant que le compte est actif, puis supprimées
           ou anonymisées dans un délai raisonnable après sa fermeture. Les données de
-          newsletter sont conservées jusqu&apos;au désabonnement.
+          newsletter sont conservées jusqu&apos;au désabonnement. Les messages du formulaire de
+          contact et nos réponses sont conservés 12 mois après le dernier échange, puis supprimés
+          automatiquement.
         </p>
       </section>
 
@@ -49,6 +59,15 @@ export default function ConfidentialitePage() {
           <li><strong>Supabase</strong> — hébergement base de données et authentification.</li>
           <li><strong>Vercel</strong> — hébergement de l&apos;application.</li>
           <li><strong>Resend</strong> — envoi des e-mails transactionnels et newsletter.</li>
+          <li>
+            <strong>Cloudflare</strong> — acheminement des e-mails adressés à support@westbourse.com.
+          </li>
+          <li>
+            <strong>Fournisseurs d&apos;IA (DeepSeek, Google Gemini, xAI)</strong> — rédaction d&apos;un
+            brouillon de réponse à votre message, relu et corrigé par un membre de l&apos;équipe avant
+            tout envoi. Seuls votre prénom et votre message leur sont transmis, jamais votre adresse
+            e-mail.
+          </li>
         </ul>
         <p>Certains prestataires peuvent traiter des données hors UEMOA, avec les garanties appropriées.</p>
       </section>
@@ -58,7 +77,7 @@ export default function ConfidentialitePage() {
         <p>
           Conformément à la réglementation applicable, vous disposez d&apos;un droit d&apos;accès, de
           rectification, d&apos;effacement, d&apos;opposition, de limitation et de portabilité. Pour les
-          exercer, écrivez à <Placeholder>email de contact</Placeholder>.
+          exercer, écrivez à support@westbourse.com.
         </p>
       </section>
 
