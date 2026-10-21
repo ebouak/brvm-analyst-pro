@@ -3,15 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ACCUSE_FENETRE_SECONDES, accuseReception, normaliserEmail } from '@/lib/contact/accuse';
 import { sendEmail } from '@/lib/server/email';
 import { checkRateLimit, getClientIp } from '@/lib/server/rateLimit';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 
 /**
  * Encart « Salut, on se parle ? » — relais email vers la boîte support, puis
  * accusé de réception au visiteur (texte fixe, voir lib/contact/accuse.ts).
- * RGPD : minimisation. Le message n'est pas persisté en base ; il est
- * uniquement transmis par email (finalité = contact, base légale = consentement
- * par envoi volontaire). Seule une empreinte SHA-256 de l'adresse est écrite
- * dans rate_limit_hits, pour limiter les accusés ; elle est purgée au premier
- * passage suivant la fin de sa fenêtre de 24 h. Voir docs/RGPD.md.
+ * RGPD : le message est conservé dans `contact_messages` (migration 0158,
+ * service_role seul) pour qu'il reçoive une réponse — finalité : répondre à la
+ * demande ; conservation 12 mois après la dernière activité. Une empreinte
+ * SHA-256 de l'adresse est aussi écrite dans rate_limit_hits pour limiter les
+ * accusés (purgée après 24 h). Aucun contenu de message n'est journalisé.
+ * Voir docs/RGPD.md.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -55,6 +57,26 @@ export async function POST(req: NextRequest) {
     const esc = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+    // Conservé AVANT l'envoi : sans trace en base, 4 visiteurs sur 7 n'ont
+    // jamais eu la réponse promise (relevé du 2026-10-21). Un échec
+    // d'enregistrement ne bloque pas l'email — le message ne se perd jamais à
+    // cause de la base — mais l'email le signale.
+    let messageId: string | null = null;
+    try {
+      const { data, error } = await getServiceClient()
+        .from('contact_messages')
+        .insert({ prenom: p || null, email: e, page: pageLabel || null, message: m })
+        .select('id')
+        .single();
+      if (error) console.warn('[contact] message non enregistré :', error.code ?? error.message);
+      else messageId = (data as { id: string }).id;
+    } catch (err) {
+      console.warn('[contact] message non enregistré :', (err as Error).message);
+    }
+    const lienConsole = messageId
+      ? `<p><a href="https://www.westbourse.com/admin/contact/${messageId}" style="color:#2a8aa8;font-weight:bold">Répondre depuis la console →</a></p>`
+      : `<p style="color:#b42318"><strong>Non enregistré en base</strong> — répondez depuis cet email.</p>`;
+
     const result = await sendEmail({
       to,
       // « Répondre » dans la boîte support écrit directement au visiteur.
@@ -63,6 +85,7 @@ export async function POST(req: NextRequest) {
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
           <h2 style="color:#2a8aa8">Nouveau message depuis l'encart de contact</h2>
+          ${lienConsole}
           <p><strong>Prénom :</strong> ${esc(p) || '—'}</p>
           <p><strong>Email :</strong> ${esc(e)}</p>
           <p><strong>Page :</strong> ${esc(pageLabel) || '—'}</p>

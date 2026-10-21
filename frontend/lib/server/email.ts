@@ -15,8 +15,17 @@ export interface EmailMessage {
    * la réponse part vers l'expéditeur technique (noreply@…) et se perd.
    */
   replyTo?: string;
+  /**
+   * Expéditeur propre à ce message (ex. `WESTBOURSE <support@westbourse.com>`
+   * pour les réponses aux visiteurs). Absent = ALERTS_EMAIL_FROM. Le domaine
+   * doit être vérifié chez Resend.
+   */
+  from?: string;
+  /** Version texte brut, jointe à la version HTML. */
+  text?: string;
 }
-export interface EmailResult { ok: boolean; sent: number; error?: string }
+/** `id` : identifiant Resend du message envoyé, preuve d'envoi conservée par l'appelant. */
+export interface EmailResult { ok: boolean; sent: number; error?: string; id?: string }
 
 /**
  * Adresse d'expédition.
@@ -59,16 +68,18 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: fromAddress(),
+        from: msg.from ?? fromAddress(),
         to: msg.to,
         subject: msg.subject,
         html: msg.html,
+        ...(msg.text ? { text: msg.text } : {}),
         ...(msg.attachments && msg.attachments.length ? { attachments: msg.attachments } : {}),
         ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
       }),
     });
     if (!res.ok) return { ok: false, sent: 0, error: `Resend HTTP ${res.status}` };
-    return { ok: true, sent: 1 };
+    const corps = (await res.json().catch(() => null)) as { id?: unknown } | null;
+    return { ok: true, sent: 1, ...(typeof corps?.id === 'string' ? { id: corps.id } : {}) };
   } catch (e) {
     return { ok: false, sent: 0, error: (e as Error).message };
   }
