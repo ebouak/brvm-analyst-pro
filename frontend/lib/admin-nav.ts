@@ -26,6 +26,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/landing', label: 'Landing · À la une', permission: 'content.read' },
   { href: '/admin/newsletter', label: 'Newsletter', permission: 'content.read' },
   { href: '/admin/forum', label: 'Modération forum', permission: 'content.read' },
+  { href: '/admin/contact', label: 'Messages de contact', permission: 'support.read' },
   { href: '/admin/leads', label: 'Leads débutants', permission: 'leads.read' },
   { href: '/admin/reports', label: 'Rapports IA', permission: 'content.read' },
   { href: '/admin/import-fondamentaux', label: 'Import fondamentaux (IA)', permission: 'content.write' },

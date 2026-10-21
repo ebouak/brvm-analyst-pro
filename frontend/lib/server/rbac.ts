@@ -21,6 +21,7 @@ export type PermissionCode =
   | 'scraping.read' | 'scraping.retry' | 'scraping.configure'
   | 'content.read' | 'content.write' | 'content.publish'
   | 'leads.read' | 'leads.write'
+  | 'support.read' | 'support.reply'
   | 'audit.read'
   | 'settings.read' | 'settings.write'
   | 'forum.manage';
