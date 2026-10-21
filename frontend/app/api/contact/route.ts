@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     try {
       const { data, error } = await getServiceClient()
         .from('contact_messages')
-        .insert({ prenom: p || null, email: e, page: pageLabel || null, message: m })
+        .insert({ prenom: p || null, email: normaliserEmail(e), page: pageLabel || null, message: m })
         .select('id')
         .single();
       if (error) console.warn('[contact] message non enregistré :', error.code ?? error.message);

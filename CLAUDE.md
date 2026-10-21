@@ -928,6 +928,38 @@ Spec `docs/superpowers/specs/2026-10-20-dividendes-calendrier-design.md`, plan
   retient ligne à ligne (`SimAction.rendementDejaNet`). ⚠️ **Ne plus appeler
   `rendementNet` sur un rendement de dividende sans connaître la base.**
 
+### Ajouts (passage 2026-10-21) — Répondre aux messages du formulaire de contact
+
+Spec `docs/superpowers/specs/2026-10-21-contact-reponses-design.md`, plan
+`docs/superpowers/plans/2026-10-21-contact-reponses.md`. Migration `0158`.
+
+- **Le constat** : sur 7 messages réels (17/09 → 14/10), **4 sans réponse** malgré
+  l'accusé promettant « sous 2 jours ouvrés » ; une réponse partie vers
+  `noreply@westbourse.com` (domaine **sans MX** → rejetée) ; des réponses portant un
+  préambule d'assistant collé, du Markdown brut et une signature personnelle
+  (téléphones, adresses). Rien ne gardait trace d'un message.
+- **`support@westbourse.com` existe** : routage email Cloudflare → Gmail de
+  l'exploitant (MX `route*.mx.cloudflare.net`, posé le 2026-10-21, aller-retour
+  vérifié). Resend envoie par `send.westbourse.com` : pas de conflit.
+- **Conservation** : `contact_messages`, RLS **sans policy** (service_role seul),
+  purge 12 mois après la dernière activité. `/api/contact` enregistre AVANT l'email ;
+  un échec d'enregistrement n'empêche pas l'email (qui le signale).
+- **Console `/admin/contact`** (`support.read` / `support.reply`) : brouillon IA rédigé
+  à l'ouverture (`lib/contact/brouillon.ts`, canal `email` de `buildSystemPrompt`,
+  fiche produit FIXE `ficheProduit.ts`, outils de **marché seulement**). L'humain
+  corrige et confirme ; envoi depuis `WESTBOURSE <support@westbourse.com>`, signature
+  et avertissement **fixes** ajoutés par `rendu.ts`.
+- **`validerBrouillon`** (pur, testé, appliqué au navigateur ET au serveur) refuse
+  Markdown, préambule d'assistant, téléphone, toute adresse autre que support@, tout
+  lien hors westbourse.com / amf-umoa.org / brvm.org. Chaque règle = un défaut réel.
+- **Pas de double envoi** : `nouveau → envoi` conditionnel ; échec Resend → retour à
+  `nouveau`, jamais « répondu » à tort.
+- **Relance** : `contact:rappel` (`contact-rappel.yml`, 07:00 UTC lun-ven) → Telegram
+  exploitant au-delà d'un jour ouvré, sans donnée personnelle ; échoue si la table est
+  illisible ou si le message ne part pas. `joursOuvresEcoules` dupliqué
+  frontend/scraper (à corriger des deux côtés).
+- **Hors V1** : les relances d'un visiteur arrivent dans Gmail, pas dans la console.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

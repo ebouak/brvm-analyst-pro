@@ -92,6 +92,24 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Droits : désabonnement = suppression de la ligne ; couvert par l'effacement compte (par email).
 - Sécurité : pas d'autre donnée perso ; pas de partage tiers.
 
+**Formulaire de contact — messages conservés et réponses (2026-10-21, migration 0158)**
+- ⚠️ **Remplace le « non persisté » ci-dessous** : 4 visiteurs sur 7 n'avaient jamais
+  reçu la réponse promise, faute de trace. Les messages sont désormais conservés dans
+  `contact_messages` (adresse enregistrée en minuscules).
+- Données : prénom, email, page, message, brouillon, réponse envoyée, identifiant Resend.
+- Finalité : répondre à la demande. Base légale : mesures précontractuelles / intérêt
+  légitime à répondre à une sollicitation volontaire.
+- Conservation : **12 mois après `derniere_activite_at`** (`purge_rgpd_retention`).
+- Sous-traitants : brouillon rédigé par DeepSeek → Gemini → xAI à partir du **prénom et
+  du message seulement** (jamais l'adresse) ; aucun envoi sans relecture humaine.
+  Cloudflare achemine `support@westbourse.com` vers la boîte de l'exploitant.
+- Droits : export (`/api/account/export`, si l'adresse du compte est **confirmée** — sinon
+  un compte créé avec l'adresse d'un tiers exporterait ses messages) ; suppression sur
+  demande à support@ (service_role) et par la purge.
+- Sécurité : RLS sans aucune policy (service_role seul) ; console `/admin/contact` derrière
+  `support.read` / `support.reply` ; l'audit ne trace que l'action et l'identifiant ;
+  relance Telegram exploitant sans aucune donnée personnelle.
+
 **Formulaire de contact (`/api/contact`) — accusé de réception (2026-10-15)**
 - Données : prénom, email, message, page — **non persistés** : relayés par email à la
   boîte support (`CONTACT_EMAIL_TO`), qui peut répondre directement (en-tête

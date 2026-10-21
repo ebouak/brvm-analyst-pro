@@ -3,6 +3,7 @@
 // (droit d'accès et de portabilité — cf. spec §11.2).
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export async function GET() {
   const supabase = createClient();
@@ -80,6 +81,19 @@ export async function GET() {
     supabase.from('user_entitlements').select('*').eq('user_id', user.id),
   ]);
 
+  // Messages du formulaire de contact (migration 0158) : la table n'a aucune
+  // policy, lecture service_role FILTRÉE sur l'adresse du compte. Seulement si
+  // l'adresse est confirmée — sinon un compte créé avec l'adresse d'un tiers
+  // exporterait ses messages.
+  let contactMessages: unknown[] = [];
+  if (user.email && user.email_confirmed_at) {
+    const { data } = await getServiceClient()
+      .from('contact_messages')
+      .select('created_at, prenom, email, page, message, statut, reponse, repondu_at')
+      .eq('email', user.email.trim().toLowerCase());
+    contactMessages = data ?? [];
+  }
+
   const payload = {
     exported_at: new Date().toISOString(),
     account: {
@@ -127,6 +141,8 @@ export async function GET() {
     formation_inscriptions: formationInscriptions.data ?? [],
     emails_bienvenue: emailsBienvenue.data ?? [],
     user_entitlements: userEntitlements.data ?? [],
+    // Messages envoyés via le formulaire de contact avec l'adresse du compte.
+    contact_messages: contactMessages,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
