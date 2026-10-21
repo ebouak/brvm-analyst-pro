@@ -37,6 +37,19 @@ test('le canal ne change QUE la mise en forme', () => {
   assert.match(wa, /agent WhatsApp/);
 });
 
+test('canal email : memes garde-fous, texte brut, aucun outil de compte', () => {
+  const p = buildSystemPrompt({ watchlist: [], canal: 'email', outils: true });
+  assert.match(p, /JAMAIS de conseil en investissement/);
+  assert.match(p, /n'inventes AUCUN chiffre/);
+  assert.match(p, /lecture seule/);
+  assert.match(p, /BROUILLON/);
+  assert.match(p, /AUCUN symbole de mise en forme/);
+  assert.match(p, /Pas de signature/);
+  assert.match(p, /AUCUNE donnée de compte/);
+  assert.ok(!/portefeuille et les alertes de cet utilisateur/.test(p), 'pas d outils de compte annonces');
+  assert.ok(!/agent WhatsApp|agent Telegram/.test(p));
+});
+
 test('sans le drapeau outils, aucune mention d outils', () => {
   const p = buildSystemPrompt({ watchlist: WATCHLIST });
   assert.ok(!/OUTILS/.test(p), 'un agent sans outils ne doit pas croire en avoir');
