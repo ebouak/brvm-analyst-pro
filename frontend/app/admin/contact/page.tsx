@@ -2,11 +2,20 @@ import Link from 'next/link';
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
 import { loadMessagesContact, STATUT_CONTACT_LABEL, type StatutContact } from '@/lib/admin/contact';
+import { LIVRAISON_LABEL, type Livraison } from '@/lib/contact/livraison';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Messages de contact — Administration' };
 
 const nf = new Intl.NumberFormat('fr-FR');
+
+const TON_LIVRAISON: Record<Livraison, string> = {
+  envoye: 'text-faint',
+  retarde: 'text-gold',
+  remis: 'text-up',
+  rejete: 'text-down font-medium',
+  spam: 'text-down font-medium',
+};
 
 const TONE: Record<StatutContact, 'sapphire' | 'gold' | 'emerald' | 'neutral'> = {
   nouveau: 'gold',
@@ -31,6 +40,7 @@ export default async function Page() {
   const { rows, erreur } = await loadMessagesContact();
   const attente = rows.filter((r) => r.statut === 'nouveau' || r.statut === 'envoi');
   const retard = attente.filter((r) => r.enRetard);
+  const nonRemis = rows.filter((r) => r.livraison === 'rejete' || r.livraison === 'spam');
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
@@ -41,9 +51,10 @@ export default async function Page() {
       />
       <div className="gold-rule" />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MetricCard label="À répondre" value={nf.format(attente.length)} accent="gold" />
         <MetricCard label="En retard (> 1 j ouvré)" value={nf.format(retard.length)} accent={retard.length ? 'gold' : 'neutral'} />
+        <MetricCard label="Réponses non remises" value={nf.format(nonRemis.length)} accent={nonRemis.length ? 'gold' : 'neutral'} />
         <MetricCard label="Total conservé" value={nf.format(rows.length)} accent="sapphire" />
       </div>
 
@@ -87,6 +98,11 @@ export default async function Page() {
                   </td>
                   <td className="px-4 py-2.5">
                     <StatPill tone={TONE[m.statut]}>{STATUT_CONTACT_LABEL[m.statut]}</StatPill>
+                    {m.statut === 'repondu' && (
+                      <div className={`mt-1 text-[11px] ${m.livraison ? TON_LIVRAISON[m.livraison] : 'text-faint'}`}>
+                        {m.livraison ? LIVRAISON_LABEL[m.livraison] : 'Livraison non suivie'}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

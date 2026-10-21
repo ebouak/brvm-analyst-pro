@@ -968,6 +968,16 @@ Spec `docs/superpowers/specs/2026-10-21-contact-reponses-design.md`, plan
   paiement Chariow brut dans un email. L'IA renvoie au bloc, ne l'écrit pas
   (règles 6-10 du canal `email` : réponse exacte, aucun chiffre hors sujet,
   aucun prix, aucune donnée personnelle demandée, aucune urgence ni promesse).
+- **Livraison vérifiée (migration 0159)** : « envoyé » ne prouve pas « reçu ».
+  Webhook `/api/webhooks/resend` (protocole Svix : corps BRUT, HMAC-SHA256 à temps
+  constant, horodatage ±5 min, secret `RESEND_WEBHOOK_SECRET` sur Vercel) →
+  `contact_messages.livraison` : envoye < retarde < remis < rejete < spam, **ne
+  recule jamais** (mise à jour conditionnelle : rejeu et désordre sans effet).
+  `contact:rappel` (07:00 et 14:00 UTC) signale aussi les réponses non remises (une
+  alerte par réponse, `livraison_alerte_at`), les remises non confirmées après 24 h
+  — signe d'un webhook muet — et les envois bloqués. ⚠️ La clé Resend de la table
+  `api_keys` était **invalide** au 2026-10-21 (le site utilise celle de Vercel) :
+  le repli de `resolveResendKey` ne sauverait rien si la variable disparaissait.
 
 ## 9. Bugs connus / limites
 

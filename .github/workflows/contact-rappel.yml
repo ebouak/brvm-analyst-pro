@@ -3,14 +3,18 @@ name: Relance des messages de contact
 env:
   SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
 
-# Chaque jour ouvré à 07:00 UTC : Telegram exploitant si un message du
-# formulaire attend une réponse depuis plus d'un jour ouvré. L'accusé de
-# réception promet « sous 2 jours ouvrés » ; au 2026-10-21, 4 visiteurs sur 7
-# n'avaient jamais été répondus et rien ne le signalait.
+# Chaque jour ouvré à 07:00 et 14:00 UTC : Telegram exploitant si une demande
+# attend une réponse depuis plus d'un jour ouvré, si une réponse n'est PAS
+# ARRIVÉE (rejetée / spam, statut reçu par webhook Resend), si une remise reste
+# non confirmée après 24 h (webhook muet) ou si un envoi est resté bloqué.
+# Au 2026-10-21, 4 visiteurs sur 7 n'avaient jamais été répondus et rien ne le
+# signalait.
 # Le run ÉCHOUE si la table est illisible ou si la relance ne part pas.
 on:
   schedule:
     - cron: '0 7 * * 1-5'
+    # Second passage : une réponse rejetée le matin est signalée le jour même.
+    - cron: '0 14 * * 1-5'
   workflow_dispatch: {}
 
 concurrency:

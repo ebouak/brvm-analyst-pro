@@ -1,5 +1,6 @@
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { enRetard, joursOuvresEcoules } from '@/lib/contact/delai';
+import type { Livraison } from '@/lib/contact/livraison';
 
 /** Messages du formulaire de contact (migration 0158, service_role seul). */
 export type StatutContact = 'nouveau' | 'envoi' | 'repondu' | 'clos' | 'spam';
@@ -24,13 +25,17 @@ export interface MessageContactRow {
   brouillon_at: string | null;
   reponse: string | null;
   repondu_at: string | null;
+  /** Statut Resend de la réponse (migration 0159) ; null tant que rien n'est parti. */
+  livraison: Livraison | null;
+  livraison_at: string | null;
+  livraison_detail: string | null;
   /** Calculés : ancienneté en jours ouvrés, et dépassement du seuil d'alerte. */
   joursOuvres: number;
   enRetard: boolean;
 }
 
 const COLS =
-  'id, created_at, prenom, email, page, message, statut, brouillon, brouillon_at, reponse, repondu_at';
+  'id, created_at, prenom, email, page, message, statut, brouillon, brouillon_at, reponse, repondu_at, livraison, livraison_at, livraison_detail';
 
 function enrichir(r: Omit<MessageContactRow, 'joursOuvres' | 'enRetard'>, maintenant: Date): MessageContactRow {
   const attend = r.statut === 'nouveau' || r.statut === 'envoi';

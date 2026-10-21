@@ -446,9 +446,15 @@ async function main(): Promise<number> {
             value: r,
             outcome: {
               status: 'success' as const,
-              rows_extracted: r.enAttente,
+              rows_extracted: r.examines,
               rows_upserted: r.envoye ? 1 : 0,
-              metadata: { en_attente: r.enAttente, en_retard: r.enRetard, relance_envoyee: r.envoye },
+              metadata: {
+                en_retard: r.enRetard,
+                non_remis: r.nonRemis,
+                remise_non_confirmee: r.nonConfirmes,
+                bloques: r.bloques,
+                alerte_envoyee: r.envoye,
+              },
             },
           };
         },
