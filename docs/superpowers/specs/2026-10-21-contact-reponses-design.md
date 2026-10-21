@@ -128,7 +128,8 @@ devient `support@westbourse.com`).
 
 ### 3.5 Relance — CLI `contact:rappel` (scraper)
 
-Chaque jour ouvré à 07:00 UTC (job ajouté à `alerts.yml`) : messages `nouveau`
+Chaque jour ouvré à 07:00 UTC (workflow dédié `contact-rappel.yml` :
+`alerts.yml` ne tourne qu'à 16:30) : messages `nouveau`
 plus vieux qu'un jour ouvré → un message Telegram **exploitant**
 (`operateur: true`) avec le nombre, l'ancienneté maximale et le lien de la
 console — sans prénom, adresse ni contenu. Aucun message en attente → rien.
