@@ -76,7 +76,8 @@
     "obscura:start": "obscura serve --port 9222 --stealth",
     "carnet": "tsx src/index.ts carnet",
     "carnet:date": "tsx src/index.ts carnet",
-    "sante:llm": "tsx src/index.ts sante:llm"
+    "sante:llm": "tsx src/index.ts sante:llm",
+    "contact:rappel": "tsx src/index.ts contact:rappel"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

@@ -433,6 +433,28 @@ async function main(): Promise<number> {
       );
       return res.verdict.niveau === 'total' ? 1 : 0;
     }
+    case 'contact:rappel': {
+      // Relance des messages du formulaire sans réponse depuis plus d'un jour
+      // ouvré (voir src/contact/rappel.ts). Échoue si la table est illisible
+      // ou si la relance ne part pas : un rappel muet ne doit pas passer vert.
+      const { runRappelContact } = await import('./contact/rappel.js');
+      await monitored(
+        { code: 'contact-rappel', label: 'Relance des messages de contact' },
+        async () => {
+          const r = await runRappelContact({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: 'success' as const,
+              rows_extracted: r.enAttente,
+              rows_upserted: r.envoye ? 1 : 0,
+              metadata: { en_attente: r.enAttente, en_retard: r.enRetard, relance_envoyee: r.envoye },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'range52': {
       // Plus-haut / plus-bas 52 semaines. À passer APRÈS `daily` : les bornes
       // incluent la clôture du jour, sinon elles ignoreraient un nouveau record.
