@@ -81,8 +81,10 @@ export default function ReponseForm({
           </label>
 
           <div className="rounded-lg border border-border/60 bg-elevated/40 px-4 py-3 text-xs text-muted">
-            Ajouté automatiquement sous votre texte : « {AVERTISSEMENT} », la signature « {SIGNATURE} », puis le message
-            du visiteur cité. Envoi depuis support@westbourse.com.
+            Ajouté automatiquement sous votre texte : le bloc « Pour aller plus loin » (formation complète, 4 niveaux à vie
+            + 1 mois Premium, prix lu au catalogue Chariow à l&apos;envoi, lien d&apos;inscription vers l&apos;offre), « {AVERTISSEMENT} »,
+            la signature « {SIGNATURE} », puis le message du visiteur cité. Envoi depuis support@westbourse.com. N&apos;écrivez
+            ni prix ni offre dans votre texte.
           </div>
 
           {texte.trim() && !verdict.ok && (

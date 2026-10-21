@@ -31,27 +31,10 @@ export interface MessageContact {
 
 export type ResultatBrouillon = { brouillon: string } | { brouillon: ''; raison: string };
 
-async function offres(db: SupabaseClient): Promise<string> {
-  const { data } = await db
-    .from('subscription_plans')
-    .select('name, price_monthly, price_yearly, currency')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true });
-  const lignes = (data ?? []).map((o) => {
-    const prix = [
-      o.price_monthly != null ? `${o.price_monthly} ${o.currency ?? 'XOF'}/mois` : null,
-      o.price_yearly != null ? `${o.price_yearly} ${o.currency ?? 'XOF'}/an` : null,
-    ].filter(Boolean);
-    return `- ${o.name}${prix.length ? ` : ${prix.join(', ')}` : ''}`;
-  });
-  return lignes.length ? `OFFRES EN VIGUEUR (lues en base) :\n${lignes.join('\n')}` : '';
-}
-
 export async function genererBrouillon(db: SupabaseClient, m: MessageContact): Promise<ResultatBrouillon> {
   const systeme = [
     buildSystemPrompt({ watchlist: [], canal: 'email', outils: true }),
     FICHE_PRODUIT,
-    await offres(db),
   ]
     .filter(Boolean)
     .join('\n\n');

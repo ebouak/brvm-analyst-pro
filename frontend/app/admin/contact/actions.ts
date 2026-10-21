@@ -8,6 +8,8 @@ import { sendEmail } from '@/lib/server/email';
 import { genererBrouillon } from '@/lib/contact/brouillon';
 import { validerBrouillon, ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { renduReponse } from '@/lib/contact/rendu';
+import { produitParCode } from '@/lib/billing/chariow/catalogue';
+import { CODE_FORMATION } from '@/lib/billing/chariow/regles';
 
 /**
  * Actions de la console /admin/contact. Toutes passent par requirePermission
@@ -58,7 +60,15 @@ export async function envoyerReponse(id: string, texte: string): Promise<Retour>
     .maybeSingle();
   if (!m) return { ok: false, message: 'Ce message a déjà été traité ou est en cours d’envoi.' };
 
-  const rendu = renduReponse({ reponse: verdict.texte, messageOrigine: m.message, recuLe: m.created_at });
+  // Offre lue au catalogue Chariow À L'ENVOI : prix et disponibilité ne
+  // viennent jamais du texte (ni de l'IA, ni du navigateur). Inactive → pas de bloc.
+  const produit = await produitParCode(CODE_FORMATION);
+  const rendu = renduReponse({
+    reponse: verdict.texte,
+    messageOrigine: m.message,
+    recuLe: m.created_at,
+    offre: produit ? { montant: produit.montant, devise: produit.devise } : null,
+  });
   const res = await sendEmail({
     to: m.email,
     from: EXPEDITEUR,

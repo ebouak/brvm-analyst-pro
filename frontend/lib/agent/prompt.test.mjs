@@ -48,6 +48,21 @@ test('canal email : memes garde-fous, texte brut, aucun outil de compte', () => 
   assert.match(p, /AUCUNE donnée de compte/);
   assert.ok(!/portefeuille et les alertes de cet utilisateur/.test(p), 'pas d outils de compte annonces');
   assert.ok(!/agent WhatsApp|agent Telegram/.test(p));
+  // Regles de vente et de justesse (2026-10-21) : repondre a la question, pas de
+  // chiffre hors sujet, pas de prix ni d'offre recrite (bloc fixe), aucune
+  // donnee personnelle demandee, aucune urgence ni promesse de gain.
+  assert.match(p, /exactement à la question/);
+  assert.match(p, /aucun chiffre de marché/);
+  assert.match(p, /présentée sous ce message/);
+  assert.match(p, /aucune donnée personnelle/);
+  assert.match(p, /promesse de gain/);
+});
+
+test('les regles email ne fuient pas sur WhatsApp ni Telegram', () => {
+  for (const canal of ['whatsapp', 'telegram']) {
+    const p = buildSystemPrompt({ watchlist: WATCHLIST, canal, outils: true });
+    assert.ok(!/présentée sous ce message/.test(p), canal);
+  }
 });
 
 test('sans le drapeau outils, aucune mention d outils', () => {
