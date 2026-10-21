@@ -959,6 +959,15 @@ Spec `docs/superpowers/specs/2026-10-21-contact-reponses-design.md`, plan
   illisible ou si le message ne part pas. `joursOuvresEcoules` dupliqué
   frontend/scraper (à corriger des deux côtés).
 - **Hors V1** : les relances d'un visiteur arrivent dans Gmail, pas dans la console.
+- **Vente (2026-10-21)** : sous chaque réponse, un bloc FIXE « Pour aller plus loin »
+  présente la formation complète (`academy:integrale` : 4 niveaux à vie + 1 mois
+  Premium, qui comprend les alertes email). Prix et disponibilité lus au catalogue
+  Chariow **à l'envoi** ; offre inactive → pas de bloc. Lien
+  `/signup?next=/formations/academy` : l'achat EXIGE un compte, seul moyen de
+  rattacher la vente Chariow à un acheteur — ⚠️ ne jamais mettre un lien de
+  paiement Chariow brut dans un email. L'IA renvoie au bloc, ne l'écrit pas
+  (règles 6-10 du canal `email` : réponse exacte, aucun chiffre hors sujet,
+  aucun prix, aucune donnée personnelle demandée, aucune urgence ni promesse).
 
 ## 9. Bugs connus / limites
 

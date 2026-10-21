@@ -72,6 +72,28 @@ describe('rendu de la réponse', () => {
   it('rend les liens autorisés cliquables', () => {
     expect(r.html).toContain('<a href="https://www.westbourse.com/debutant"');
   });
+  it('sans offre active, aucun bloc commercial', () => {
+    expect(r.html).not.toContain('Pour aller plus loin');
+    expect(r.text).not.toContain('Pour aller plus loin');
+  });
+
+  it('avec l’offre du catalogue : prix lu, compte requis, lien d’inscription vers l’offre', () => {
+    const o = renduReponse({
+      reponse: 'Bonjour,\n\nRéponse.',
+      messageOrigine: 'Question',
+      recuLe: '2026-10-21T08:00:00Z',
+      offre: { montant: 9000, devise: 'XOF' },
+    });
+    for (const s of [o.html, o.text]) {
+      expect(s).toContain('Pour aller plus loin');
+      expect(s).toContain('9 000');
+      expect(s).toContain('accès à vie');
+      expect(s).toContain('1 mois Premium offert');
+      expect(s).toContain('alertes');
+      expect(s).toContain('https://www.westbourse.com/signup?next=%2Fformations%2Facademy');
+    }
+  });
+
   it('porte la signature fixe, l’avertissement et la citation datée', () => {
     for (const s of [r.html, r.text]) {
       expect(s).toContain("L'équipe WESTBOURSE");
