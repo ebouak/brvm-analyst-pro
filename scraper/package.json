@@ -77,7 +77,8 @@
     "carnet": "tsx src/index.ts carnet",
     "carnet:date": "tsx src/index.ts carnet",
     "sante:llm": "tsx src/index.ts sante:llm",
-    "contact:rappel": "tsx src/index.ts contact:rappel"
+    "contact:rappel": "tsx src/index.ts contact:rappel",
+    "whatsapp:sante": "tsx src/index.ts whatsapp:sante"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

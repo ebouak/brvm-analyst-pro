@@ -979,6 +979,32 @@ Spec `docs/superpowers/specs/2026-10-21-contact-reponses-design.md`, plan
   `api_keys` était **invalide** au 2026-10-21 (le site utilise celle de Vercel) :
   le repli de `resolveResendKey` ne sauverait rien si la variable disparaissait.
 
+### Ajouts (passage 2026-10-23) — WhatsApp sans Meta : passerelle WAHA (P0)
+
+Spec `docs/superpowers/specs/2026-10-23-whatsapp-passerelle-design.md`.
+Décision de l'exploitant : **non officiel pour tester, puis officiel**.
+
+- ⚠️ **Non officiel = contraire aux conditions de WhatsApp** : le numéro dédié
+  (+33 7 43 65 72 71) peut être banni sans préavis. Risque confiné à ce numéro.
+- **Infra** : Hetzner projet `WESTBOURSE`, serveur `westbourse-wa` (CX23,
+  2.31.31.43), `/opt/waha` (WAHA `gows-2026.9.2` non publié derrière Caddy
+  `2.11.7`, HTTPS `wa.westbourse.com`). Clé SSH dédiée `~/.ssh/westbourse_wa`.
+  Scripts serveur : `session.sh` (statut / relancer / qr / code), `diag.sh`,
+  `journaux.sh` — aucun n'affiche de secret.
+- **Interface d'envoi unique** `lib/whatsapp/passerelle.ts` (`waha` | `meta`,
+  `WHATSAPP_PASSERELLE`) : n'y entre que ce que les deux savent faire.
+- **Webhook** `/api/whatsapp/waha` : HMAC-SHA512 du corps BRUT
+  (`X-Webhook-Hmac`, `WAHA_WEBHOOK_HMAC_KEY`), l'horodatage WAHA n'étant PAS
+  signé, l'anti-rejeu passe par la déduplication sur l'identifiant de message.
+  Groupes, statuts et Chaînes ignorés ; `@lid` traité comme conversation privée.
+  `session.status` hors WORKING/STARTING → Telegram immédiat (`alerteExploitant`,
+  extrait de `billing/chariow/alerte.ts`).
+- **Surveillance** `whatsapp:sante` (`whatsapp-sante.yml`, horaire 06-22 h UTC) :
+  couvre WAHA ou le serveur arrêté, que le webhook ne peut pas signaler. Run rouge
+  + Telegram en panne. Secrets GitHub `WAHA_URL`, `WAHA_API_KEY`.
+- **P0 ne traite aucun message** : il prouve la chaîne. P1 (contact), P2
+  (appairage puis agent), P3 (alertes, modèle + variables), P4 (Chaîne).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

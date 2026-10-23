@@ -433,6 +433,28 @@ async function main(): Promise<number> {
       );
       return res.verdict.niveau === 'total' ? 1 : 0;
     }
+    case 'whatsapp:sante': {
+      // Surveillance de la passerelle WhatsApp non officielle (voir src/whatsapp/sante.ts).
+      // Une panne fait ÉCHOUER le run : un run rouge est notifié, un vert jamais.
+      const { runSanteWhatsapp } = await import('./whatsapp/sante.js');
+      const r = await monitored(
+        { code: 'whatsapp-sante', label: 'Santé de la passerelle WhatsApp' },
+        async () => {
+          const v = await runSanteWhatsapp({ mock });
+          return {
+            value: v,
+            outcome: {
+              status: v.niveau === 'ok' ? ('success' as const) : ('failed' as const),
+              rows_extracted: 1,
+              rows_upserted: 0,
+              metadata: { niveau: v.niveau, alerte_envoyee: v.alerteEnvoyee },
+            },
+          };
+        },
+      );
+      console.log(`[whatsapp:sante] ${r.niveau} — ${r.message}`);
+      return r.niveau === 'ok' ? 0 : 1;
+    }
     case 'contact:rappel': {
       // Relance des messages du formulaire sans réponse depuis plus d'un jour
       // ouvré (voir src/contact/rappel.ts). Échoue si la table est illisible
