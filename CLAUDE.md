@@ -1004,6 +1004,11 @@ Décision de l'exploitant : **non officiel pour tester, puis officiel**.
   + Telegram en panne. Secrets GitHub `WAHA_URL`, `WAHA_API_KEY`.
 - **P0 ne traite aucun message** : il prouve la chaîne. P1 (contact), P2
   (appairage puis agent), P3 (alertes, modèle + variables), P4 (Chaîne).
+- **P1 (2026-10-23, migration 0160)** : un message WhatsApp privé entre dans
+  `/admin/contact` (`canal = 'whatsapp'`), en FIL tant qu'il attend une réponse ;
+  accusé FIXE (une fois / 24 h, en réponse seulement), email à l'exploitant ; la
+  réponse repart par le canal d'arrivée et sa remise est suivie par `message.ack`.
+  Hetzner déclaré sous-traitant dans `/confidentialite`.
 
 ## 9. Bugs connus / limites
 

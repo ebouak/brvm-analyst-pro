@@ -61,7 +61,24 @@ describe('lecture défensive des événements', () => {
       deMoi: false,
       media: false,
       horodatage: 1792760000,
+      prenom: null,
     });
+  });
+  it('prénom affiché (pushName), selon le moteur, borné et nettoyé', () => {
+    const gows = lireEvenementWaha({ event: 'message', payload: { id: 'i', from: 'a@c.us', body: 'x', _data: { Info: { PushName: '  Awa\n ' } } } });
+    expect(gows && gows.type === 'message' ? gows.prenom : 'x').toBe('Awa');
+    const webjs = lireEvenementWaha({ event: 'message', payload: { id: 'i', from: 'a@c.us', body: 'x', _data: { notifyName: 'Konan' } } });
+    expect(webjs && webjs.type === 'message' ? webjs.prenom : 'x').toBe('Konan');
+    const long = lireEvenementWaha({ event: 'message', payload: { id: 'i', from: 'a@c.us', body: 'x', _data: { notifyName: 'N'.repeat(200) } } });
+    expect(long && long.type === 'message' ? long.prenom?.length : 0).toBe(80);
+  });
+  it('accusés de remise : envoyé, remis, lu, erreur ; « en attente » ignoré', () => {
+    const ack = (ack: number, ackName: string) => lireEvenementWaha({ event: 'message.ack', payload: { id: 'true_x@c.us_M1', ack, ackName } });
+    expect(ack(1, 'SERVER')).toEqual({ type: 'message.ack', id: 'true_x@c.us_M1', livraison: 'envoye' });
+    expect(ack(2, 'DEVICE')).toEqual({ type: 'message.ack', id: 'true_x@c.us_M1', livraison: 'remis' });
+    expect(ack(3, 'READ')).toEqual({ type: 'message.ack', id: 'true_x@c.us_M1', livraison: 'remis' });
+    expect(ack(-1, 'ERROR')).toEqual({ type: 'message.ack', id: 'true_x@c.us_M1', livraison: 'rejete' });
+    expect(ack(0, 'PENDING')).toBeNull();
   });
   it('changement d’état de session', () => {
     expect(lireEvenementWaha({ event: 'session.status', session: 'default', payload: { status: 'FAILED' } })).toEqual({

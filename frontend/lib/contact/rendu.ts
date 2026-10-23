@@ -205,3 +205,23 @@ export function renduReponse(e: EntreeRendu): { subject: string; html: string; t
 
   return { subject: SUJET_REPONSE, html, text };
 }
+
+/**
+ * Réponse sur WhatsApp : texte simple (WhatsApp n'affiche pas le HTML), offre
+ * courte, avertissement et signature FIXES. Pas de citation du message : la
+ * conversation l'affiche déjà au-dessus. Borné à 4096 caractères (limite WhatsApp).
+ */
+export function renduReponseWhatsapp(e: { reponse: string; offre?: OffreFormation | null }): string {
+  const parties = [e.reponse.trim()];
+  if (e.offre && e.offre.montant > 0) {
+    parties.push(
+      [
+        '— Pour aller plus loin —',
+        `La formation WESTBOURSE Academy complète : 4 niveaux, accès à vie, et 1 mois Premium offert (alertes email comprises) — ${prix(e.offre)}.`,
+        `Créez votre compte gratuit, vous arrivez directement sur l'offre : ${LIEN_OFFRE}`,
+      ].join('\n'),
+    );
+  }
+  parties.push(AVERTISSEMENT, `${SIGNATURE}\nwww.westbourse.com`);
+  return parties.join('\n\n').slice(0, 4096);
+}

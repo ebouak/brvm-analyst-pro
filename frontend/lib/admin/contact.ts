@@ -1,6 +1,7 @@
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { enRetard, joursOuvresEcoules } from '@/lib/contact/delai';
 import type { Livraison } from '@/lib/contact/livraison';
+import { libelleWhatsapp } from '@/lib/contact/whatsappEntrant';
 
 /** Messages du formulaire de contact (migration 0158, service_role seul). */
 export type StatutContact = 'nouveau' | 'envoi' | 'repondu' | 'clos' | 'spam';
@@ -17,7 +18,10 @@ export interface MessageContactRow {
   id: string;
   created_at: string;
   prenom: string | null;
-  email: string;
+  email: string | null;
+  /** email (formulaire) ou whatsapp (passerelle WAHA, migration 0160). */
+  canal: 'email' | 'whatsapp';
+  whatsapp_chat_id: string | null;
   page: string | null;
   message: string;
   statut: StatutContact;
@@ -29,19 +33,22 @@ export interface MessageContactRow {
   livraison: Livraison | null;
   livraison_at: string | null;
   livraison_detail: string | null;
-  /** Calculés : ancienneté en jours ouvrés, et dépassement du seuil d'alerte. */
+  /** Calculés : destinataire lisible, ancienneté en jours ouvrés, dépassement du seuil d'alerte. */
+  destinataire: string;
   joursOuvres: number;
   enRetard: boolean;
 }
 
 const COLS =
-  'id, created_at, prenom, email, page, message, statut, brouillon, brouillon_at, reponse, repondu_at, livraison, livraison_at, livraison_detail';
+  'id, created_at, prenom, email, canal, whatsapp_chat_id, page, message, statut, brouillon, brouillon_at, reponse, repondu_at, livraison, livraison_at, livraison_detail';
 
-function enrichir(r: Omit<MessageContactRow, 'joursOuvres' | 'enRetard'>, maintenant: Date): MessageContactRow {
+function enrichir(r: Omit<MessageContactRow, 'joursOuvres' | 'enRetard' | 'destinataire'>, maintenant: Date): MessageContactRow {
   const attend = r.statut === 'nouveau' || r.statut === 'envoi';
   const depuis = new Date(r.created_at);
   return {
     ...r,
+    destinataire:
+      r.canal === 'whatsapp' && r.whatsapp_chat_id ? libelleWhatsapp(r.whatsapp_chat_id) : (r.email ?? '—'),
     joursOuvres: attend ? joursOuvresEcoules(depuis, maintenant) : 0,
     enRetard: attend && enRetard(depuis, maintenant),
   };

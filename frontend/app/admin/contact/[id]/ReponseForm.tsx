@@ -15,12 +15,14 @@ import type { StatutContact } from '@/lib/admin/contact';
 export default function ReponseForm({
   id,
   email,
+  canal,
   statut,
   brouillonInitial,
   peutRepondre,
 }: {
   id: string;
   email: string;
+  canal: 'email' | 'whatsapp';
   statut: StatutContact;
   brouillonInitial: string;
   peutRepondre: boolean;
@@ -81,10 +83,20 @@ export default function ReponseForm({
           </label>
 
           <div className="rounded-lg border border-border/60 bg-elevated/40 px-4 py-3 text-xs text-muted">
-            Ajouté automatiquement sous votre texte : le bloc « Pour aller plus loin » (formation complète, 4 niveaux à vie
-            + 1 mois Premium, prix lu au catalogue Chariow à l&apos;envoi, lien d&apos;inscription vers l&apos;offre), « {AVERTISSEMENT} »,
-            la signature « {SIGNATURE} », puis le message du visiteur cité. Envoi depuis support@westbourse.com. N&apos;écrivez
-            ni prix ni offre dans votre texte.
+            {canal === 'whatsapp' ? (
+              <>
+                Envoyé <b>sur WhatsApp</b>, depuis le numéro WESTBOURSE, en texte simple. Ajouté automatiquement : l&apos;offre
+                formation en version courte (prix lu au catalogue Chariow), « {AVERTISSEMENT} » et la signature « {SIGNATURE} ».
+                N&apos;écrivez ni prix ni offre dans votre texte.
+              </>
+            ) : (
+              <>
+                Ajouté automatiquement sous votre texte : le bloc « Pour aller plus loin » (formation complète, 4 niveaux à vie
+                + 1 mois Premium, prix lu au catalogue Chariow à l&apos;envoi, lien d&apos;inscription vers l&apos;offre), « {AVERTISSEMENT} »,
+                la signature « {SIGNATURE} », puis le message du visiteur cité. Envoi depuis support@westbourse.com. N&apos;écrivez
+                ni prix ni offre dans votre texte.
+              </>
+            )}
           </div>
 
           {texte.trim() && !verdict.ok && (

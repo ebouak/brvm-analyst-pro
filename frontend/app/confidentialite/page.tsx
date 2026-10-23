@@ -26,6 +26,10 @@ export default function ConfidentialitePage() {
             <strong>Formulaire de contact</strong> : prénom, adresse e-mail, page d&apos;où le message
             est envoyé et contenu du message, ainsi que la réponse qui vous est adressée.
           </li>
+          <li>
+            <strong>Messages WhatsApp</strong> envoyés au numéro WESTBOURSE : numéro (ou identifiant WhatsApp),
+            nom affiché, contenu du message et réponse adressée.
+          </li>
         </ul>
       </section>
 
@@ -48,8 +52,8 @@ export default function ConfidentialitePage() {
           Les données de compte sont conservées tant que le compte est actif, puis supprimées
           ou anonymisées dans un délai raisonnable après sa fermeture. Les données de
           newsletter sont conservées jusqu&apos;au désabonnement. Les messages du formulaire de
-          contact et nos réponses sont conservés 12 mois après le dernier échange, puis supprimés
-          automatiquement.
+          contact et nos réponses — y compris les messages WhatsApp — sont conservés 12 mois après le
+          dernier échange, puis supprimés automatiquement.
         </p>
       </section>
 
@@ -61,6 +65,10 @@ export default function ConfidentialitePage() {
           <li><strong>Resend</strong> — envoi des e-mails transactionnels et newsletter.</li>
           <li>
             <strong>Cloudflare</strong> — acheminement des e-mails adressés à support@westbourse.com.
+          </li>
+          <li>
+            <strong>Hetzner</strong> (Allemagne) — hébergement du serveur qui relie le numéro WhatsApp
+            WESTBOURSE au site.
           </li>
           <li>
             <strong>Fournisseurs d&apos;IA (DeepSeek, Google Gemini, xAI)</strong> — rédaction d&apos;un
