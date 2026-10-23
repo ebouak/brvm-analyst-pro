@@ -28,6 +28,7 @@ export function VideoSeance({
   /* Nom du canal public, sans le @ ni l'URL : la variable ne porte que
      l'identifiant, le lien est construit ici. Absente = pas de lien. */
   const canal = process.env.NEXT_PUBLIC_TELEGRAM_CANAL?.replace(/^@/, '').trim();
+  const chaineWhatsapp = process.env.NEXT_PUBLIC_WHATSAPP_CHAINE_URL?.trim();
   const md = data.capitaux_fcfa / 1e9;
   const nb = (x: number, d = 2) => x.toFixed(d).replace('.', ',');
   const secondes = Math.round(data.duree_s);
@@ -139,6 +140,18 @@ export function VideoSeance({
                 className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-muted transition-colors hover:text-ivory"
               >
                 Recevoir la vidéo chaque soir sur Telegram <span aria-hidden>↗</span>
+              </a>
+            )}
+
+            {/* Même règle : invisible tant que la Chaîne n'est pas configurée. */}
+            {chaineWhatsapp && (
+              <a
+                href={chaineWhatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-muted transition-colors hover:text-ivory"
+              >
+                Recevoir la vidéo chaque soir sur WhatsApp <span aria-hidden>↗</span>
               </a>
             )}
           </div>

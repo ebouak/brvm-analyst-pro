@@ -17,6 +17,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
 import { sujet, texte, html, esc as echappe } from './brief.mjs';
+import { marqueurBucket, publierChaine } from './chaineWhatsapp.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
@@ -126,6 +127,9 @@ const lire = (...cles) => {
 const URL_SB = lire('SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL');
 const SERVICE = lire('SUPABASE_SERVICE_ROLE_KEY');
 const BUCKET = 'seance-video';
+/* URL publique de la vidéo du jour, renseignée par l'étape 2 : la Chaîne
+   WhatsApp (étape 3b) la fait télécharger par la passerelle. */
+let urlVideoPublique = null;
 
 if (URL_SB && SERVICE) {
   try {
@@ -165,6 +169,7 @@ if (URL_SB && SERVICE) {
     }
 
     const url = publique(cheminVideo);
+    urlVideoPublique = url;
     /* `fichier` est un chemin local sans interet pour le site, et qui trahirait
        l'arborescence de la machine de build. On le remplace par l'URL. */
     const { fichier, ...reste } = m;
@@ -240,6 +245,41 @@ if (CANAL && JETON_TG) {
   }
 } else {
   console.log('Canal Telegram : ignore (TELEGRAM_CANAL / TELEGRAM_BOT_TOKEN absents)');
+}
+
+/* --------------------------------------------- 3b. Chaîne WhatsApp --- */
+
+/* Chaîne publique WESTBOURSE, publiée par la passerelle WAHA (non officielle).
+   La vidéo n'est pas renvoyée : la passerelle la télécharge depuis le bucket,
+   d'où la dépendance à l'étape 2. Un marqueur par séance empêche une relance
+   manuelle du workflow de publier deux fois (voir chaineWhatsapp.mjs). */
+const WAHA_URL = lire('WAHA_URL');
+const WAHA_CLE = lire('WAHA_API_KEY');
+const CHAINE_ID = lire('WHATSAPP_CHAINE_ID');
+
+if (WAHA_URL && WAHA_CLE && CHAINE_ID && urlVideoPublique) {
+  try {
+    const etat = await publierChaine({
+      m,
+      urlVideo: urlVideoPublique,
+      waha: { url: WAHA_URL, cle: WAHA_CLE },
+      chaineId: CHAINE_ID,
+      marqueur: marqueurBucket({ urlSupabase: URL_SB, entetes: entetesSupabase(SERVICE), seance: m.seance }),
+    });
+    console.log(`Chaîne WhatsApp : ${etat === 'publie' ? 'publiee' : 'deja publiee pour cette seance — rien envoye'}`);
+    journal.push(`Chaîne WhatsApp : ${etat === 'publie' ? 'publiée' : 'déjà publiée (relance ignorée)'}`);
+    if (etat === 'publie') envois++;
+  } catch (e) {
+    console.error(`Chaîne WhatsApp : ECHEC — ${e.message}`);
+    journal.push(`Chaîne WhatsApp : ECHEC — ${e.message}`);
+    echecs.push('chaine-whatsapp');
+  }
+} else if (WAHA_URL && WAHA_CLE && CHAINE_ID) {
+  // Configurée mais sans vidéo hébergée : l'échec du site est déjà compté.
+  console.log("Chaîne WhatsApp : ignoree (video non hebergee, voir l'etape site)");
+  journal.push('Chaîne WhatsApp : non publiée (vidéo non hébergée)');
+} else {
+  console.log('Chaîne WhatsApp : ignoree (WAHA_URL / WAHA_API_KEY / WHATSAPP_CHAINE_ID absents)');
 }
 
 /* ---------------------------------------------------------- 4. Facebook */

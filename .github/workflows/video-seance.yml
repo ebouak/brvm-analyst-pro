@@ -151,6 +151,11 @@ jobs:
           # de canal public n'a rien à cacher, et le voir dans les journaux aide
           # au diagnostic.
           TELEGRAM_CANAL: ${{ vars.TELEGRAM_CANAL }}
+          # Chaîne WhatsApp publique (passerelle WAHA, lot B). Identifiant en
+          # variable, comme TELEGRAM_CANAL : une Chaîne publique n'a rien à cacher.
+          WAHA_URL: ${{ secrets.WAHA_URL }}
+          WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
+          WHATSAPP_CHAINE_ID: ${{ vars.WHATSAPP_CHAINE_ID }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
           ALERTS_EMAIL_TO: ${{ secrets.ALERTS_EMAIL_TO }}
