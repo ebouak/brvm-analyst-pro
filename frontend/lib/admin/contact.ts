@@ -2,6 +2,7 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { enRetard, joursOuvresEcoules } from '@/lib/contact/delai';
 import type { Livraison } from '@/lib/contact/livraison';
 import { libelleWhatsapp } from '@/lib/contact/whatsappEntrant';
+import { statsWhatsapp, type StatsWhatsapp } from '@/lib/whatsapp/commandes';
 
 /** Messages du formulaire de contact (migration 0158, service_role seul). */
 export type StatutContact = 'nouveau' | 'envoi' | 'repondu' | 'clos' | 'spam';
@@ -72,4 +73,27 @@ export async function loadMessagesContact(): Promise<{ rows: MessageContactRow[]
 export async function loadMessageContact(id: string): Promise<MessageContactRow | null> {
   const { data } = await getServiceClient().from('contact_messages').select(COLS).eq('id', id).maybeSingle();
   return data ? enrichir(data as MessageContactRow, new Date()) : null;
+}
+
+/**
+ * Suivi WhatsApp (lot A §5) : messages reçus et délai de réponse sur 30 jours,
+ * commandes rapides servies. Les commandes sont COMPTÉES côté base (en-tête
+ * count) : lire les lignes buterait sur le plafond silencieux de 1 000 lignes
+ * de PostgREST et donnerait un total faux et plausible.
+ */
+export async function loadSuiviWhatsapp(): Promise<{ stats: StatsWhatsapp; commandes7: number | null; commandes30: number | null }> {
+  const db = getServiceClient();
+  const maintenant = new Date();
+  const depuis = (j: number) => new Date(maintenant.getTime() - j * 86400000).toISOString();
+  const [{ data: msgs }, c7, c30] = await Promise.all([
+    db.from('contact_messages').select('canal, created_at, repondu_at').eq('canal', 'whatsapp').gte('created_at', depuis(30)).limit(1000),
+    db.from('whatsapp_commandes').select('id', { count: 'exact', head: true }).eq('resultat', 'ok').gte('created_at', depuis(7)),
+    db.from('whatsapp_commandes').select('id', { count: 'exact', head: true }).eq('resultat', 'ok').gte('created_at', depuis(30)),
+  ]);
+  return {
+    stats: statsWhatsapp((msgs ?? []) as { canal: string; created_at: string; repondu_at: string | null }[], maintenant),
+    // null = table absente (migration 0161 non appliquée) : affiché « — », jamais 0.
+    commandes7: c7.error ? null : (c7.count ?? 0),
+    commandes30: c30.error ? null : (c30.count ?? 0),
+  };
 }

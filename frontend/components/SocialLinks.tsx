@@ -9,8 +9,11 @@ import type { SVGProps } from 'react';
  * Pour réactiver un réseau, remplacer `null` par l'URL du profil.
  * WhatsApp est dérivé de NEXT_PUBLIC_WHATSAPP_NUMBER (format international sans +).
  */
-// Contact WhatsApp officiel (+225 07 07 11 51 15). Surchargeable via env.
-const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '2250707115115').replace(/\D/g, '');
+// Numéro de la passerelle WhatsApp (+33 7 43 65 72 71) : les messages arrivent
+// dans la console de contact et les commandes rapides y répondent (lot A).
+// Surchargeable via env.
+const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '33743657271').replace(/\D/g, '');
+const WHATSAPP_PREREMPLI = encodeURIComponent('Bonjour WESTBOURSE, ');
 
 type Social = { label: string; href: string; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element };
 
@@ -21,7 +24,7 @@ const PROFILS: { label: string; href: string | null; Icon: Social['Icon'] }[] = 
   { label: 'Instagram', href: null, Icon: InstagramIcon },
   { label: 'Facebook', href: null, Icon: FacebookIcon },
   { label: 'YouTube', href: null, Icon: YouTubeIcon },
-  { label: 'WhatsApp', href: whatsappNumber ? `https://wa.me/${whatsappNumber}` : null, Icon: WhatsAppIcon },
+  { label: 'WhatsApp', href: whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${WHATSAPP_PREREMPLI}` : null, Icon: WhatsAppIcon },
 ];
 
 const SOCIALS: Social[] = PROFILS.filter((p): p is Social => p.href !== null);

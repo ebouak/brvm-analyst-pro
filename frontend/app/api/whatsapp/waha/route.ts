@@ -6,6 +6,8 @@ import { estConversationPrivee, lireEvenementWaha, verifierSignatureWaha } from 
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { statutsRemplacables } from '@/lib/contact/livraison';
 import { recevoirMessageWhatsapp } from '@/lib/contact/whatsappEntrant';
+import { lireCommande } from '@/lib/whatsapp/commandes';
+import { repondreCommande } from '@/lib/whatsapp/repondreCommande';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -82,6 +84,14 @@ export async function POST(req: Request) {
   // Message : ni nos propres envois, ni groupes, statuts ou Chaînes.
   if (ev.deMoi || !estConversationPrivee(ev.de)) return NextResponse.json({ ok: true, ignore: true });
   if (await dejaTraite(ev.id)) return NextResponse.json({ ok: true, doublon: true });
+
+  // Commande rapide (COURS, DIV, PALMARES, AIDE) : réponse automatique sans IA ;
+  // toute autre phrase va à la console, chez un humain (lot A §1).
+  const commande = lireCommande(ev.texte);
+  if (commande) {
+    await repondreCommande(ev.de, commande);
+    return NextResponse.json({ ok: true, commande: commande.type });
+  }
 
   try {
     const r = await recevoirMessageWhatsapp({ de: ev.de, texte: ev.texte, media: ev.media, prenom: ev.prenom });
