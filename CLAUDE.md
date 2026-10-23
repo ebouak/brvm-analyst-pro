@@ -1025,6 +1025,14 @@ Décision de l'exploitant : **non officiel pour tester, puis officiel**.
   (`NEXT_PUBLIC_WHATSAPP_NUMBER`, absente de Vercel avant ce lot : l'encart de
   contact n'avait AUCUN bouton WhatsApp). `/dividendes` exige une connexion :
   les liens publics pointent vers `/societes/<CODE>` et `/actions`.
+- **Lot B — Chaîne WhatsApp (2026-10-24)** : « WESTBOURSE Bourse BRVM »
+  (`120363411964806044@newsletter`, https://whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d).
+  Étape 3b de `video/publie.mjs` : `sendVideo` par l'URL du bucket (dépend de
+  l'étape site), légende pure `video/chaineWhatsapp.mjs` tirée de `seance.json`,
+  marqueur `chaine/<séance>.json` en création seule → une relance ne republie
+  pas. Variable GitHub `WHATSAPP_CHAINE_ID`. Le bucket `seance-video` refuse
+  `text/plain` (415). Création de Chaîne : WhatsApp refuse description/photo
+  à la création (graphql 400) — nom seul, le reste depuis l'application.
 
 ## 9. Bugs connus / limites
 
