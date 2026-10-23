@@ -80,3 +80,18 @@ HMAC-SHA512. Session `default` WORKING sur 33743657271.
    horaire) et un run rouge.
 4. `envoyerTexte` envoie un message réel au numéro de l'exploitant (essai unique).
 5. Aucun contenu de message ni secret dans les journaux.
+
+## 7. P1 — contact par WhatsApp
+
+- Message privé entrant → `contact_messages` (`canal = 'whatsapp'`, `whatsapp_chat_id`,
+  migration 0160). Conversation **en attente** du même correspondant : le message s'ajoute au fil
+  (horodaté UTC) au lieu d'une nouvelle fiche.
+- Nouvelle fiche → email à l'exploitant (lien console) + **accusé FIXE** sur WhatsApp, en réponse
+  seulement, au plus une fois par conversation et par 24 h.
+- Réponse depuis la console → repart par le canal d'arrivée (`renduReponseWhatsapp` : texte simple,
+  offre courte, avertissement, signature ; pas de citation). L'identifiant WhatsApp du message est
+  gardé dans `resend_id` ; les accusés `message.ack` (SERVER/DEVICE/READ/ERROR) alimentent la même
+  colonne `livraison` (monotone) que l'email.
+- Échec d'enregistrement : l'identifiant est déjà dédupliqué → alerte Telegram ; le message reste
+  lisible dans WhatsApp sur le téléphone.
+- Serveur : `WHATSAPP_HOOK_EVENTS=message,message.ack,session.status`.

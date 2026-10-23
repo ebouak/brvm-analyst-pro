@@ -113,6 +113,11 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
   donnée nouvelle, la raison d'un rejet (`livraison_detail`, 300 caractères au plus, peut
   citer l'adresse du destinataire) — même table, même RLS, même purge 12 mois. Ouvertures
   et clics ne sont PAS suivis.
+- **WhatsApp (migration 0160, 2026-10-23)** : messages reçus sur le numéro WESTBOURSE via la
+  passerelle WAHA (serveur Hetzner, Allemagne) → même table, `canal = 'whatsapp'`. Donnée nouvelle :
+  `whatsapp_chat_id` (numéro ou identifiant `@lid`) et le nom affiché choisi par la personne. Même
+  finalité, même base légale, même conservation (12 mois), même accès (service_role seul). Accusé
+  automatique FIXE, en réponse seulement, une fois par 24 h. Hetzner ajouté aux sous-traitants.
 
 **Formulaire de contact (`/api/contact`) — accusé de réception (2026-10-15)**
 - Données : prénom, email, message, page — **non persistés** : relayés par email à la

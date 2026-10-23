@@ -28,7 +28,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       <SectionHeader
         kicker="Message de contact"
         title={m.prenom || 'Visiteur sans prénom'}
-        subtitle={`${m.email} · reçu le ${fmtDate(m.created_at)}${m.page ? ` · depuis ${m.page}` : ''}`}
+        subtitle={`${m.canal === 'whatsapp' ? 'WhatsApp ' : ''}${m.destinataire} · reçu le ${fmtDate(m.created_at)}${m.page ? ` · depuis ${m.page}` : ''}`}
         actions={<StatPill tone={m.enRetard ? 'gold' : 'neutral'}>{STATUT_CONTACT_LABEL[m.statut]}</StatPill>}
       />
 
@@ -43,7 +43,8 @@ export default async function Page({ params }: { params: { id: string } }) {
         <PremiumPanel>
           <div className="rounded-[calc(var(--radius-panel,16px)-6px)] bg-surface p-5">
             <div className="text-[11px] uppercase tracking-wider text-faint">
-              Réponse envoyée{m.repondu_at ? ` le ${fmtDate(m.repondu_at)}` : ''} depuis support@westbourse.com
+              Réponse envoyée{m.repondu_at ? ` le ${fmtDate(m.repondu_at)}` : ''}{' '}
+              {m.canal === 'whatsapp' ? 'sur WhatsApp, depuis le numéro WESTBOURSE' : 'depuis support@westbourse.com'}
             </div>
             <p className={`mt-2 text-sm ${m.livraison === 'rejete' || m.livraison === 'spam' ? 'text-down font-medium' : m.livraison === 'remis' ? 'text-up' : 'text-muted'}`}>
               Livraison : {m.livraison ? LIVRAISON_LABEL[m.livraison] : 'non suivie'}
@@ -57,14 +58,17 @@ export default async function Page({ params }: { params: { id: string } }) {
             )}
             <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">{m.reponse}</p>
             <p className="mt-4 text-xs text-faint">
-              Une relance du visiteur arrive dans la boîte de support (routage Cloudflare vers Gmail).
+              {m.canal === 'whatsapp'
+                ? 'Une relance du visiteur rouvre une fiche ici même.'
+                : 'Une relance du visiteur arrive dans la boîte de support (routage Cloudflare vers Gmail).'}
             </p>
           </div>
         </PremiumPanel>
       ) : (
         <ReponseForm
           id={m.id}
-          email={m.email}
+          email={m.destinataire}
+          canal={m.canal}
           statut={m.statut}
           brouillonInitial={m.brouillon ?? ''}
           peutRepondre={peutRepondre}

@@ -3,6 +3,9 @@ import { createHmac } from 'node:crypto';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
 import { estConversationPrivee, lireEvenementWaha, verifierSignatureWaha } from '@/lib/whatsapp/waha';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import { statutsRemplacables } from '@/lib/contact/livraison';
+import { recevoirMessageWhatsapp } from '@/lib/contact/whatsappEntrant';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,8 +19,9 @@ export const dynamic = 'force-dynamic';
  *   2. session.status hors WORKING → alerte Telegram immédiate : une passerelle
  *      non officielle peut se déconnecter ou être bannie sans autre signal ;
  *   3. message → seules les conversations privées d'un tiers ; déduplication par
- *      identifiant (WAHA réessaie sans accusé). En P0, simple accusé : le
- *      traitement (contact, agent) arrive en P1/P2 — rien n'est stocké ici.
+ *      identifiant (WAHA réessaie sans accusé), puis enregistrement dans la
+ *      console de contact (P1, lib/contact/whatsappEntrant.ts) ;
+ *   4. message.ack → livraison des réponses envoyées depuis la console.
  *
  * Journaux : jamais le corps, ni le texte, ni l'expéditeur.
  */
@@ -61,10 +65,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  if (ev.type === 'message.ack') {
+    // Accusé de remise d'une RÉPONSE envoyée depuis la console (resend_id = id
+    // WhatsApp du message). Statut monotone : un accusé en retard ne recule rien.
+    const remplacables = statutsRemplacables(ev.livraison);
+    const filtre = remplacables.length ? `livraison.is.null,livraison.in.(${remplacables.join(',')})` : 'livraison.is.null';
+    await getServiceClient()
+      .from('contact_messages')
+      .update({ livraison: ev.livraison, livraison_at: new Date().toISOString() })
+      .eq('canal', 'whatsapp')
+      .eq('resend_id', ev.id)
+      .or(filtre);
+    return NextResponse.json({ ok: true });
+  }
+
   // Message : ni nos propres envois, ni groupes, statuts ou Chaînes.
   if (ev.deMoi || !estConversationPrivee(ev.de)) return NextResponse.json({ ok: true, ignore: true });
   if (await dejaTraite(ev.id)) return NextResponse.json({ ok: true, doublon: true });
 
-  // P0 : réception prouvée, aucun traitement ni stockage. P1 branchera ici le contact.
-  return NextResponse.json({ ok: true, recu: true });
+  try {
+    const r = await recevoirMessageWhatsapp({ de: ev.de, texte: ev.texte, media: ev.media, prenom: ev.prenom });
+    return NextResponse.json({ ok: true, recu: true, ...(r ? { nouveau: r.nouveau } : { vide: true }) });
+  } catch (e) {
+    // L'identifiant est déjà marqué traité : un rejeu serait écarté. On alerte donc
+    // l'exploitant — le message reste lisible dans WhatsApp, sur le téléphone.
+    console.error('[waha] message non enregistré :', (e as Error).message);
+    await alerterExploitant(
+      'un message WhatsApp n’a pas pu être enregistré dans la console. Le lire directement dans WhatsApp sur le téléphone WESTBOURSE.',
+      '📵 WhatsApp',
+    );
+    return NextResponse.json({ ok: false, erreur: 'enregistrement impossible' });
+  }
 }

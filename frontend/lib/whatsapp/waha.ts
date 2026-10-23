@@ -35,9 +35,38 @@ export function chatIdDepuisTelephone(telephone: string): string | null {
   return chiffres.length >= 8 && chiffres.length <= 15 ? `${chiffres}@c.us` : null;
 }
 
+export type LivraisonWaha = 'envoye' | 'remis' | 'rejete';
+
 export type EvenementWaha =
-  | { type: 'message'; id: string; de: string; texte: string; deMoi: boolean; media: boolean; horodatage: number | null }
-  | { type: 'session.status'; session: string | null; statut: string };
+  | { type: 'message'; id: string; de: string; texte: string; deMoi: boolean; media: boolean; horodatage: number | null; prenom: string | null }
+  | { type: 'session.status'; session: string | null; statut: string }
+  | { type: 'message.ack'; id: string; livraison: LivraisonWaha };
+
+/**
+ * Prénom affiché par l'expéditeur (« pushName »), selon le moteur : GOWS
+ * (`_data.Info.PushName`) ou WEBJS (`_data.notifyName`). Facultatif, choisi
+ * par la personne elle-même : borné, nettoyé, jamais exigé.
+ */
+function prenomAffiche(p: Record<string, unknown>): string | null {
+  const d = (p._data && typeof p._data === 'object' ? p._data : {}) as Record<string, unknown>;
+  const info = (d.Info && typeof d.Info === 'object' ? d.Info : {}) as Record<string, unknown>;
+  const brut = [info.PushName, d.notifyName, d.pushName, p.notifyName].find((x) => typeof x === 'string' && x.trim());
+  // eslint-disable-next-line no-control-regex
+  return typeof brut === 'string' ? brut.replace(/[\x00-\x1f\x7f]/g, ' ').trim().slice(0, 80) || null : null;
+}
+
+/**
+ * Accusés WhatsApp (ack) : -1 ERROR, 0 PENDING, 1 SERVER, 2 DEVICE, 3 READ,
+ * 4 PLAYED. « Remis » dès l'arrivée sur le téléphone ; « en attente » n'apporte rien.
+ */
+function livraisonDepuisAck(ack: unknown, nom: unknown): LivraisonWaha | null {
+  const n = typeof ack === 'number' ? ack : null;
+  const s = typeof nom === 'string' ? nom.toUpperCase() : '';
+  if (n === -1 || s === 'ERROR') return 'rejete';
+  if (n === 1 || s === 'SERVER') return 'envoye';
+  if ((n !== null && n >= 2) || s === 'DEVICE' || s === 'READ' || s === 'PLAYED') return 'remis';
+  return null;
+}
 
 export function lireEvenementWaha(corps: unknown): EvenementWaha | null {
   if (!corps || typeof corps !== 'object') return null;
@@ -54,7 +83,13 @@ export function lireEvenementWaha(corps: unknown): EvenementWaha | null {
       deMoi: p.fromMe === true,
       media: p.hasMedia === true,
       horodatage: typeof p.timestamp === 'number' ? p.timestamp : null,
+      prenom: prenomAffiche(p),
     };
+  }
+  if (c.event === 'message.ack') {
+    if (typeof p.id !== 'string' || !p.id) return null;
+    const livraison = livraisonDepuisAck(p.ack, p.ackName);
+    return livraison ? { type: 'message.ack', id: p.id, livraison } : null;
   }
   if (c.event === 'session.status') {
     if (typeof p.status !== 'string' || !p.status) return null;

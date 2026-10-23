@@ -1,7 +1,30 @@
 import { describe, it, expect } from 'vitest';
 import { validerBrouillon } from './validerBrouillon';
 import { joursOuvresEcoules, enRetard } from './delai';
-import { renduReponse } from './rendu';
+import { renduReponse, renduReponseWhatsapp } from './rendu';
+import { accuseReceptionWhatsapp } from './accuse';
+
+describe('réponse et accusé sur WhatsApp', () => {
+  it('texte simple : réponse, offre courte, avertissement, signature — sans HTML ni citation', () => {
+    const t = renduReponseWhatsapp({ reponse: 'Bonjour Awa,\n\nVoici la réponse.', offre: { montant: 9000, devise: 'XOF' } });
+    expect(t).toContain('Bonjour Awa,');
+    expect(t).toContain('9 000 FCFA');
+    expect(t).toContain('https://www.westbourse.com/signup?next=%2Fformations%2Facademy');
+    expect(t).toContain("conseil d'investissement");
+    expect(t).toContain("L'équipe WESTBOURSE");
+    expect(t).not.toMatch(/<[a-z]/i);
+    expect(t).not.toContain('Votre message du');
+    expect(t.length).toBeLessThanOrEqual(4096);
+  });
+  it('sans offre active : aucun bloc commercial', () => {
+    expect(renduReponseWhatsapp({ reponse: 'Bonjour,', offre: null })).not.toContain('FCFA');
+  });
+  it('accusé : texte fixe, délai annoncé, aucune reprise de la saisie', () => {
+    const a = accuseReceptionWhatsapp();
+    expect(a).toContain('2 jours ouvrés');
+    expect(a).not.toMatch(/\$\{|undefined/);
+  });
+});
 
 const SOBRE = `Bonjour Ephraim,
 

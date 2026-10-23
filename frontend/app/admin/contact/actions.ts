@@ -7,7 +7,8 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { sendEmail } from '@/lib/server/email';
 import { genererBrouillon } from '@/lib/contact/brouillon';
 import { validerBrouillon, ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
-import { renduReponse } from '@/lib/contact/rendu';
+import { renduReponse, renduReponseWhatsapp } from '@/lib/contact/rendu';
+import { passerelleWhatsapp } from '@/lib/whatsapp/passerelle';
 import { produitParCode } from '@/lib/billing/chariow/catalogue';
 import { CODE_FORMATION } from '@/lib/billing/chariow/regles';
 
@@ -56,27 +57,33 @@ export async function envoyerReponse(id: string, texte: string): Promise<Retour>
     .update({ statut: 'envoi' })
     .eq('id', id)
     .eq('statut', 'nouveau')
-    .select('email, message, created_at')
+    .select('email, message, created_at, canal, whatsapp_chat_id')
     .maybeSingle();
   if (!m) return { ok: false, message: 'Ce message a déjà été traité ou est en cours d’envoi.' };
 
   // Offre lue au catalogue Chariow À L'ENVOI : prix et disponibilité ne
   // viennent jamais du texte (ni de l'IA, ni du navigateur). Inactive → pas de bloc.
   const produit = await produitParCode(CODE_FORMATION);
-  const rendu = renduReponse({
-    reponse: verdict.texte,
-    messageOrigine: m.message,
-    recuLe: m.created_at,
-    offre: produit ? { montant: produit.montant, devise: produit.devise } : null,
-  });
-  const res = await sendEmail({
-    to: m.email,
-    from: EXPEDITEUR,
-    replyTo: ADRESSE_SUPPORT,
-    subject: rendu.subject,
-    html: rendu.html,
-    text: rendu.text,
-  });
+  const offre = produit ? { montant: produit.montant, devise: produit.devise } : null;
+
+  // La réponse repart par le canal d'arrivée.
+  let res: { ok: boolean; id?: string; error?: string };
+  if (m.canal === 'whatsapp' && m.whatsapp_chat_id) {
+    const r = await passerelleWhatsapp().envoyerTexte(m.whatsapp_chat_id, renduReponseWhatsapp({ reponse: verdict.texte, offre }));
+    res = { ok: r.ok, id: r.id, error: r.erreur };
+  } else if (m.email) {
+    const rendu = renduReponse({ reponse: verdict.texte, messageOrigine: m.message, recuLe: m.created_at, offre });
+    res = await sendEmail({
+      to: m.email,
+      from: EXPEDITEUR,
+      replyTo: ADRESSE_SUPPORT,
+      subject: rendu.subject,
+      html: rendu.html,
+      text: rendu.text,
+    });
+  } else {
+    res = { ok: false, error: 'aucun destinataire enregistré' };
+  }
 
   const maintenant = new Date().toISOString();
   if (res.ok) {

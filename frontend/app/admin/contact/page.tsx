@@ -80,7 +80,10 @@ export default async function Page() {
                     <Link href={`/admin/contact/${m.id}`} className="font-medium text-ivory hover:text-accent">
                       {m.prenom || 'Sans prénom'}
                     </Link>
-                    <div className="text-xs text-muted">{m.email}</div>
+                    <div className="text-xs text-muted">
+                      {m.canal === 'whatsapp' && <span className="mr-1 rounded bg-up/15 px-1.5 py-0.5 text-[10px] font-semibold text-up">WhatsApp</span>}
+                      {m.destinataire}
+                    </div>
                   </td>
                   <td className="px-4 py-2.5">
                     <Link href={`/admin/contact/${m.id}`} className="block max-w-md text-xs text-muted line-clamp-2 hover:text-ivory">

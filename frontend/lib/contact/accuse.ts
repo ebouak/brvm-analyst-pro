@@ -38,3 +38,16 @@ export function accuseReception(): { subject: string; html: string } {
 export function normaliserEmail(email: string): string {
   return email.trim().toLowerCase();
 }
+
+/**
+ * Accusé de réception sur WhatsApp — texte FIXE, comme l'accusé email : rien de
+ * la saisie n'y est repris. Envoyé en RÉPONSE à la personne qui vient d'écrire
+ * (jamais à froid), au plus une fois par conversation et par 24 h.
+ */
+export function accuseReceptionWhatsapp(): string {
+  return [
+    'Bonjour, merci pour votre message à WESTBOURSE.',
+    `Un membre de l'équipe vous répondra ${DELAI_REPONSE}, ici même sur WhatsApp.`,
+    'Inutile de renvoyer votre message entre-temps.',
+  ].join('\n');
+}
