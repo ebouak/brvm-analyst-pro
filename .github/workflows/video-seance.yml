@@ -164,7 +164,7 @@ jobs:
       # Point de clôture privé, APRÈS la publication de la vidéo : il réutilise
       # son file_id pour l'adresser à chaque abonné sans la re-téléverser.
       # Voir docs/superpowers/specs/2026-09-08-cloture-telegram-design.md.
-      - name: Point de clôture Telegram
+      - name: Point de clôture Telegram et WhatsApp
         if: github.event_name == 'schedule' || inputs.publier
         working-directory: scraper
         env:
@@ -174,6 +174,11 @@ jobs:
           # Vide si la publication dans le canal a échoué : le point de clôture
           # part alors sans la vidéo, plutôt que pas du tout.
           TELEGRAM_VIDEO_FILE_ID: ${{ steps.publier.outputs.video_file_id }}
+          # WhatsApp personnel par la passerelle (lot E) : ignoré si absent.
+          WAHA_URL: ${{ secrets.WAHA_URL }}
+          WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
+          # Lien de la Chaîne : la vidéo n'est pas renvoyée à chaque abonné WhatsApp.
+          WHATSAPP_CHAINE_URL: ${{ vars.WHATSAPP_CHAINE_URL }}
           LOG_LEVEL: info
         run: |
           npm install --no-audit --no-fund

@@ -23,18 +23,23 @@ import { createClient } from '@/lib/supabase/client';
 interface Prefs {
   dossiers_email: boolean;
   dossiers_telegram: boolean;
+  dossiers_whatsapp: boolean;
   dossiers_optin_at: string | null;
   telegram_chat_id: number | null;
+  /** Lu seulement, jamais écrit : seul le webhook le pose (migration 0162). */
+  whatsapp_chat_id: string | null;
 }
 
 const DEFAUTS: Prefs = {
   dossiers_email: false,
   dossiers_telegram: false,
+  dossiers_whatsapp: false,
   dossiers_optin_at: null,
   telegram_chat_id: null,
+  whatsapp_chat_id: null,
 };
 
-const COLONNES = 'dossiers_email, dossiers_telegram, dossiers_optin_at, telegram_chat_id';
+const COLONNES = 'dossiers_email, dossiers_telegram, dossiers_whatsapp, dossiers_optin_at, telegram_chat_id, whatsapp_chat_id';
 
 export default function DossiersPrefs({ userId }: { userId: string }) {
   const [prefs, setPrefs] = useState<Prefs>(DEFAUTS);
@@ -66,11 +71,11 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
     void charger();
   }, [charger]);
 
-  const enregistrer = async (patch: Partial<Pick<Prefs, 'dossiers_email' | 'dossiers_telegram'>>) => {
+  const enregistrer = async (patch: Partial<Pick<Prefs, 'dossiers_email' | 'dossiers_telegram' | 'dossiers_whatsapp'>>) => {
     setEtat('envoi');
     setMessage(null);
     const suivant = { ...prefs, ...patch };
-    const actif = suivant.dossiers_email || suivant.dossiers_telegram;
+    const actif = suivant.dossiers_email || suivant.dossiers_telegram || suivant.dossiers_whatsapp;
     // Posé à la PREMIÈRE activation, conservé tant qu'un canal reste actif,
     // effacé au retrait complet.
     const optinAt = actif ? (prefs.dossiers_optin_at ?? new Date().toISOString()) : null;
@@ -81,6 +86,7 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
         user_id: userId,
         dossiers_email: suivant.dossiers_email,
         dossiers_telegram: suivant.dossiers_telegram,
+        dossiers_whatsapp: suivant.dossiers_whatsapp,
         dossiers_optin_at: optinAt,
       },
       { onConflict: 'user_id' },
@@ -97,6 +103,7 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
   if (etat === 'indisponible') return null;
 
   const appaire = prefs.telegram_chat_id != null;
+  const appaireWa = prefs.whatsapp_chat_id != null;
   const fige = etat !== 'pret';
 
   return (
@@ -138,6 +145,24 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
               {appaire
                 ? 'Un document par valeur, dans votre conversation appairée.'
                 : 'Appairez d’abord Telegram ci-dessus pour activer ce canal.'}
+            </span>
+          </span>
+        </label>
+
+        <label className={`flex items-start gap-3 text-sm ${appaireWa ? '' : 'opacity-60'}`}>
+          <input
+            type="checkbox"
+            checked={prefs.dossiers_whatsapp}
+            disabled={fige || !appaireWa}
+            onChange={(e) => void enregistrer({ dossiers_whatsapp: e.target.checked })}
+            className="mt-1 h-4 w-4 accent-accent"
+          />
+          <span>
+            <span className="text-ivory">Sur WhatsApp</span>
+            <span className="mt-0.5 block text-xs text-faint">
+              {appaireWa
+                ? 'Un document par valeur, dans votre conversation WhatsApp liée. Réservé aux abonnés Premium.'
+                : 'Liez d’abord votre WhatsApp ci-dessus (code d’appairage). Réservé aux abonnés Premium.'}
             </span>
           </span>
         </label>

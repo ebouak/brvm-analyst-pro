@@ -13,6 +13,7 @@ import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { isTriggered, isSmartTriggered, isSmartType, type AlertType, type SmartContext } from './evaluate.js';
 import { dispatch, sendWhatsAppTemplate, sendWhatsAppRaw } from './channels.js';
+import { envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 
 export interface AlertRow {
   id: string;
@@ -104,16 +105,27 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
     // n'envoie rien — c'est délibéré, le repli vers la conversation de
     // l'exploitant ayant été le défaut corrigé par la migration 0129.
     const tgByUser = new Map<string, number>(); // user_id -> chat_id Telegram
+    // WhatsApp par la passerelle (lot E) : identifiant PROUVÉ par appairage, et
+    // réservé aux comptes Premium (grille validée le 2026-10-23).
+    const waChatByUser = new Map<string, string>();
+    const passerelle = wahaConfiguree();
     if (userIds.length > 0) {
-      const { data: prefs } = await sb
-        .from('notification_prefs')
-        .select(
-          'user_id, whatsapp_phone, whatsapp_optin, alerts_whatsapp, telegram_chat_id, telegram_optin, alerts_telegram',
-        )
-        .in('user_id', userIds);
+      const [{ data: prefs }, { data: profils }] = await Promise.all([
+        sb
+          .from('notification_prefs')
+          .select(
+            'user_id, whatsapp_phone, whatsapp_chat_id, whatsapp_optin, alerts_whatsapp, telegram_chat_id, telegram_optin, alerts_telegram',
+          )
+          .in('user_id', userIds),
+        sb.from('profiles').select('id, is_premium').in('id', userIds),
+      ]);
+      const premium = new Set(
+        ((profils ?? []) as { id: string; is_premium: boolean | null }[]).filter((p) => p.is_premium).map((p) => p.id),
+      );
       type PrefRow = {
         user_id: string;
         whatsapp_phone: string | null;
+        whatsapp_chat_id: string | null;
         whatsapp_optin: boolean | null;
         alerts_whatsapp: boolean | null;
         telegram_chat_id: number | null;
@@ -124,8 +136,14 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
         // Les deux opt-in sont désormais filtrés ICI et non dans la requête :
         // un `.eq()` par canal exclurait les lignes de l'autre canal.
         if (p.whatsapp_optin && p.alerts_whatsapp) {
-          const phone = p.whatsapp_phone?.trim();
-          if (phone && /^\+\d{8,15}$/.test(phone)) waByUser.set(p.user_id, phone);
+          if (passerelle) {
+            if (p.whatsapp_chat_id && premium.has(p.user_id)) waChatByUser.set(p.user_id, p.whatsapp_chat_id);
+          } else {
+            // Ancien chemin Meta (numéro déclaré), seulement sans passerelle :
+            // les deux à la fois enverraient l'alerte en double.
+            const phone = p.whatsapp_phone?.trim();
+            if (phone && /^\+\d{8,15}$/.test(phone)) waByUser.set(p.user_id, phone);
+          }
         }
         if (p.telegram_optin && p.alerts_telegram && p.telegram_chat_id != null) {
           tgByUser.set(p.user_id, p.telegram_chat_id);
@@ -166,6 +184,15 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
 
       // Canal WhatsApp PERSONNEL du propriétaire (opt-in) — en plus des canaux
       // globaux. Template Meta d'abord (hors fenêtre 24 h), repli texte.
+      const chatWa = waChatByUser.get(a.user_id);
+      if (chatWa) {
+        await pauseEntreEnvois();
+        const r = await envoyerTexteWaha(
+          chatWa,
+          [`🔔 *${subject}*`, '', body, '', '_Information de marché, pas un conseil en investissement._'].join('\n'),
+        );
+        results.push({ channel: 'whatsapp', status: r.ok ? 'sent' : 'failed', ...(r.erreur ? { error: r.erreur } : {}) });
+      }
       const phone = waByUser.get(a.user_id);
       if (phone) {
         let wa = await sendWhatsAppTemplate(phone, 'alerte_titre', [a.code, body]);

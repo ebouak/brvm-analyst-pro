@@ -107,6 +107,12 @@ export async function runBriefWhatsapp(
     let sent = 0;
     for (const r of recipients) {
       if (dejaEnvoye.has(r.user_id)) continue;
+      /* DRY_RUN doit couvrir l'ENVOI (même règle que runCloture et runAlerts) :
+         avant ce garde, un passage à blanc envoyait réellement le brief. */
+      if (cfg.DRY_RUN) {
+        logger.info({ userId: r.user_id }, 'DRY_RUN — brief WhatsApp composé, non envoyé');
+        continue;
+      }
       let res = await sendWhatsAppTemplate(r.phone, 'daily_brief', [dateMarche, body]);
       if (res?.status !== 'sent') {
         res = (await sendWhatsAppRaw(r.phone, `Brief BRVM du ${dateMarche}\n\n${body}`)) ?? res;

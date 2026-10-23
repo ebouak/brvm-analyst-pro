@@ -11,6 +11,7 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
+import { envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import {
   composerCloture,
   type AlerteDeclenchee,
@@ -33,6 +34,15 @@ export interface ClotureRunResult {
 export function clotureMarker(dateMarche: string): string {
   return `Cloture ${dateMarche} (Telegram)`;
 }
+
+/** Même rendez-vous sur WhatsApp (lot E) : marqueur distinct, idempotence par canal. */
+export function clotureMarkerWhatsapp(dateMarche: string): string {
+  return `Cloture ${dateMarche} (WhatsApp)`;
+}
+
+type Destinataire =
+  | { user_id: string; canal: 'telegram'; telegram_chat_id: number }
+  | { user_id: string; canal: 'whatsapp'; whatsapp_chat_id: string };
 
 interface EnvoiResultat {
   ok: boolean;
@@ -218,16 +228,33 @@ export async function runCloture(
       .eq('brief_telegram', true)
       .not('telegram_chat_id', 'is', null);
 
-    const destinataires = ((prefs ?? []) as { user_id: string; telegram_chat_id: number }[]).filter(
-      (p) => p.telegram_chat_id != null,
-    );
+    /* WhatsApp (lot E) : même message que Telegram, à l'identifiant PROUVÉ par
+       appairage (migration 0162), seulement si la passerelle est configurée. */
+    const { data: prefsWa } = wahaConfiguree()
+      ? await sb
+          .from('notification_prefs')
+          .select('user_id, whatsapp_chat_id')
+          .eq('whatsapp_optin', true)
+          .eq('brief_whatsapp', true)
+          .not('whatsapp_chat_id', 'is', null)
+      : { data: [] };
+
+    const destinataires: Destinataire[] = [
+      ...((prefs ?? []) as { user_id: string; telegram_chat_id: number | null }[])
+        .filter((p) => p.telegram_chat_id != null)
+        .map((p) => ({ user_id: p.user_id, canal: 'telegram' as const, telegram_chat_id: p.telegram_chat_id as number })),
+      ...((prefsWa ?? []) as { user_id: string; whatsapp_chat_id: string | null }[])
+        .filter((p) => p.whatsapp_chat_id)
+        .map((p) => ({ user_id: p.user_id, canal: 'whatsapp' as const, whatsapp_chat_id: p.whatsapp_chat_id as string })),
+    ];
     if (destinataires.length === 0) {
       return { status: 'success', dateMarche, recipients: 0, sent: 0, message: null };
     }
-    const userIds = destinataires.map((d) => d.user_id);
+    const userIds = [...new Set(destinataires.map((d) => d.user_id))];
 
     // 3. Idempotence, niveau de plan et données personnelles, en parallèle.
     const marker = clotureMarker(dateMarche);
+    const markerWa = clotureMarkerWhatsapp(dateMarche);
     const [
       { data: logs },
       { data: profils },
@@ -237,9 +264,9 @@ export async function runCloture(
     ] = await Promise.all([
       sb
         .from('notifications_log')
-        .select('user_id')
-        .eq('channel', 'telegram')
-        .eq('message', marker)
+        .select('user_id, channel')
+        .in('channel', ['telegram', 'whatsapp'])
+        .in('message', [marker, markerWa])
         .in('user_id', userIds),
       sb.from('profiles').select('id, is_premium').in('id', userIds),
       sb
@@ -257,7 +284,8 @@ export async function runCloture(
         .in('watchlists.user_id', userIds),
     ]);
 
-    const dejaEnvoye = new Set(((logs ?? []) as { user_id: string }[]).map((l) => l.user_id));
+    // Clé utilisateur + canal : avoir reçu le message sur Telegram ne dispense pas de WhatsApp.
+    const dejaEnvoye = new Set(((logs ?? []) as { user_id: string; channel: string }[]).map((l) => `${l.user_id}:${l.channel}`));
     const premiumParUser = new Map(
       ((profils ?? []) as { id: string; is_premium: boolean | null }[]).map((p) => [
         p.id,
@@ -297,7 +325,7 @@ export async function runCloture(
     // 4. Composition et envoi, un utilisateur à la fois.
     let sent = 0;
     for (const d of destinataires) {
-      if (dejaEnvoye.has(d.user_id)) continue;
+      if (dejaEnvoye.has(`${d.user_id}:${d.canal}`)) continue;
 
       const premium = premiumParUser.get(d.user_id) ?? false;
       const mesAlertes: AlerteDeclenchee[] = (alertesParUser.get(d.user_id) ?? []).map((a) => ({
@@ -316,7 +344,7 @@ export async function runCloture(
         (code) => ({ code, variationPct: variationParCode.get(code) ?? null }),
       );
 
-      const texte = composerCloture({
+      const texteBase = composerCloture({
         marche,
         mouvements,
         premium,
@@ -326,6 +354,11 @@ export async function runCloture(
         brief: briefTexte,
         briefUrl: BRIEF_URL,
       });
+      /* La vidéo n'est PAS renvoyée à chaque abonné WhatsApp (≈ 19 Mo par envoi
+         sur une passerelle non officielle) : la Chaîne publique la porte déjà. */
+      const chaine = process.env.WHATSAPP_CHAINE_URL;
+      const texte =
+        d.canal === 'whatsapp' && chaine ? [texteBase, '', `📺 La vidéo de la séance : ${chaine}`].join('\n') : texteBase;
 
       /* DRY_RUN doit couvrir l'ENVOI, pas seulement les écritures en base.
          Un essai à sec qui expédie de vrais messages à de vrais utilisateurs
@@ -336,6 +369,27 @@ export async function runCloture(
           `DRY_RUN — message composé, non envoyé :\n${texte}`,
         );
         sent++;
+        continue;
+      }
+
+      if (d.canal === 'whatsapp') {
+        await pauseEntreEnvois();
+        const r = await envoyerTexteWaha(d.whatsapp_chat_id, texte);
+        if (!r.ok) {
+          logger.warn({ userId: d.user_id, err: r.erreur }, 'Envoi clôture WhatsApp échoué');
+          continue;
+        }
+        sent++;
+        if (!cfg.DRY_RUN) {
+          await sb.from('notifications_log').insert({
+            user_id: d.user_id,
+            alert_id: null,
+            code: null,
+            channel: 'whatsapp',
+            message: markerWa,
+            status: 'sent',
+          });
+        }
         continue;
       }
 

@@ -46,6 +46,9 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ALERTS_OPS_EMAIL: ${{ secrets.ALERTS_OPS_EMAIL }}
+          # WhatsApp personnel par la passerelle (lot E) : ignoré si absent.
+          WAHA_URL: ${{ secrets.WAHA_URL }}
+          WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
         run: |
           MAX_RETRIES=3
           RETRY_DELAY=30

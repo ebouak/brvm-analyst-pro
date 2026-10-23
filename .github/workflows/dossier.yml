@@ -129,6 +129,9 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          # WhatsApp personnel par la passerelle (lot E) : ignoré si absent.
+          WAHA_URL: ${{ secrets.WAHA_URL }}
+          WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
         run: npm install && npm run dossiers:envoi
 
       # Après une correction du générateur : la version corrigée, avec un message
@@ -144,6 +147,9 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          # WhatsApp personnel par la passerelle (lot E) : ignoré si absent.
+          WAHA_URL: ${{ secrets.WAHA_URL }}
+          WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
         run: npm install && npm run dossiers:envoi -- --rectificatif
 
       - name: Conserver les PDF produits
