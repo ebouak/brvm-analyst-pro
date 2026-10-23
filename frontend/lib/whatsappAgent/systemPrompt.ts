@@ -23,6 +23,12 @@ export interface SystemPromptContext {
    * la lui donnerait — exactement la frustration qu'on cherche à supprimer.
    */
   outils?: boolean;
+  /**
+   * false = compte gratuit : l'agent n'a PAS les outils portefeuille / alertes
+   * (réservés Premium, lot D). Il doit le dire au lieu de prétendre que la
+   * donnée n'existe pas. Absent = comportement historique (tous les outils).
+   */
+  premium?: boolean;
 }
 
 function formatWatchlistItem(item: WatchlistContextItem): string {
@@ -78,6 +84,12 @@ export function buildSystemPrompt(ctx: SystemPromptContext): string {
     ? [
         '',
         "OUTILS : tu peux consulter le cours, l'historique, les dividendes, les actualités et la liquidité de N'IMPORTE QUELLE valeur cotée à la BRVM, ainsi que le palmarès de la séance. Tu n'as accès à AUCUNE donnée de compte : l'auteur du message n'est pas identifié. Un outil qui renvoie une erreur ou une valeur nulle signifie que la donnée n'existe pas — dis-le, ne comble jamais le vide.",
+      ]
+    : ctx.outils && ctx.premium === false
+    ? [
+        '',
+        "OUTILS : tu disposes de fonctions pour consulter le cours, l'historique, les dividendes, les actualités et la liquidité de N'IMPORTE QUELLE valeur cotée à la BRVM, ainsi que le palmarès de la séance. Appelle-les dès que la question porte sur ces sujets, AVANT de répondre que tu ne sais pas. Un outil qui renvoie une erreur ou une valeur nulle signifie que la donnée n'existe pas — dis-le, ne comble jamais le vide.",
+        "Cet utilisateur a un compte GRATUIT : tu n'as PAS accès à son portefeuille ni à ses alertes, réservés à l'abonnement Premium. S'il te les demande, dis-le en une phrase, sans insister, et donne ce lien : https://www.westbourse.com/pricing",
       ]
     : ctx.outils
     ? [

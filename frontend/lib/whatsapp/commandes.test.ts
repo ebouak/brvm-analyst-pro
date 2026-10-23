@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lireCommande, rendreCommande, statsWhatsapp } from './commandes';
+import { estDemandeHumain, lireCommande, rendreCommande, statsWhatsapp } from './commandes';
 
 describe('lireCommande — reconnaissance', () => {
   it.each([
@@ -155,5 +155,14 @@ describe('statsWhatsapp', () => {
   it('sans réponse : délai null', () => {
     const s = statsWhatsapp([{ canal: 'whatsapp', created_at: j(1), repondu_at: null }], maintenant);
     expect(s.delaiMedianHeures).toBeNull();
+  });
+});
+
+describe('estDemandeHumain', () => {
+  it.each(['HUMAIN', 'humain', ' Conseiller ', '/equipe', 'Équipe', 'support'])('« %s » → équipe', (t) => {
+    expect(estDemandeHumain(t)).toBe(true);
+  });
+  it.each(['humain svp', 'je veux un conseiller', 'AIDE', ''])('« %s » → non', (t) => {
+    expect(estDemandeHumain(t)).toBe(false);
   });
 });

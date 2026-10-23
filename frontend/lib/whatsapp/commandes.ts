@@ -55,6 +55,14 @@ export function lireCommande(texte: string): Commande | null {
   return null;
 }
 
+/**
+ * `HUMAIN` / `CONSEILLER` / `EQUIPE` : l'abonné appairé veut parler à l'équipe,
+ * pas à l'assistant — le message va à la console de contact (lot D).
+ */
+export function estDemandeHumain(texte: string): boolean {
+  return /^(humain|conseiller|equipe|support)$/.test(sansAccent(texte.trim().replace(/^[/!]\s*/, '')));
+}
+
 /* ------------------------------------------------------------ mise en forme */
 
 type Res = Record<string, unknown> | null;
@@ -105,6 +113,8 @@ function aide(): string {
     EXEMPLES,
     '',
     'Ou écrivez simplement votre question : un membre de l’équipe vous répond.',
+    '',
+    '🤖 *Abonnés* : liez votre WhatsApp à votre compte (Paramètres → Alertes) pour poser vos questions à l’assistant. Tapez *HUMAIN* pour écrire à l’équipe.',
   ].join('\n');
 }
 
