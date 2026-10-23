@@ -4,6 +4,7 @@ import FilConducteurVideo, { TOTAL as FIL_TOTAL } from './fil-conducteur';
 import Showreel, { TOTAL as SHOWREEL_TOTAL } from './showreel';
 import Seance, { calculerSeance } from './seance';
 import Ecosysteme, { calculerEcosysteme } from './ecosysteme';
+import Canaux, { calculerCanaux } from './canaux';
 import AcademyLecon, { calculerLecon } from './academy-lecon';
 
 // 16 s × 30 fps = 480 frames (intro 75 + 4 écrans × 83 + outro 72 = 479 ≤ 480)
@@ -63,6 +64,18 @@ export function RemotionRoot() {
         height={1920}
         defaultProps={{ durees: null }}
         calculateMetadata={calculerEcosysteme}
+      />
+      {/* « WESTBOURSE sur WhatsApp et Telegram » — vertical, voix off. Durée
+          dérivée des pistes de voix ; chiffres lus en base par canaux-prep.mjs. */}
+      <Composition
+        id="canaux"
+        component={Canaux}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ durees: null, donnees: null }}
+        calculateMetadata={calculerCanaux}
       />
       {/* Une leçon Academy en motion design, 16:9, voix off. Leçon choisie
           par --props='{"lecon":"n1-l1"}' ; ajouter "section":3 pour ne rendre
