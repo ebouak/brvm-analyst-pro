@@ -220,9 +220,10 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
     <section className="rounded-xl border border-border bg-surface p-5 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-ivory">Notifications d&apos;alertes</h2>
+          <h2 className="text-sm font-semibold text-ivory">WhatsApp — alertes, point du soir et assistant</h2>
           <p className="mt-0.5 text-xs text-muted">
-            Brief quotidien et alertes de vos titres, sur WhatsApp et par email.
+            Liez votre WhatsApp pour recevoir le point de clôture chaque soir, vos alertes (Premium)
+            et poser vos questions à l&apos;assistant (3 par jour gratuites, 100 en Premium).
           </p>
         </div>
         {prefs.whatsapp_optin && (
@@ -343,7 +344,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
                 onChange={(e) => void save({ ...prefs, brief_whatsapp: e.target.checked })}
                 className="accent-[#56D7FD]"
               />
-              Brief quotidien
+              Point de clôture chaque soir
             </label>
             <label className="flex items-center gap-2 text-muted">
               <input
@@ -352,7 +353,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
                 onChange={(e) => void save({ ...prefs, alerts_whatsapp: e.target.checked })}
                 className="accent-[#56D7FD]"
               />
-              Alertes de mes titres
+              Alertes de mes titres <span className="text-faint">(Premium)</span>
             </label>
           </div>
 

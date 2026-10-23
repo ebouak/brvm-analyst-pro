@@ -1043,6 +1043,13 @@ Décision de l'exploitant : **non officiel pour tester, puis officiel**.
   publique (il pouvait avant), seulement les vider. ⚠️ Tout composant qui
   upsert `notification_prefs` ne doit JAMAIS inclure ces colonnes : la branche
   INSERT du déclencheur les viderait à chaque enregistrement.
+- **Lot E — envois personnels WhatsApp (2026-10-24, migration 0163 à appliquer)** :
+  point de clôture (même texte que Telegram + lien Chaîne), alertes (Premium),
+  dossiers PDF (Premium) vers `whatsapp_chat_id` UNIQUEMENT, par
+  `scraper/src/whatsapp/passerelle.ts`, 2-4 s entre envois. Ancien chemin Meta
+  seulement sans passerelle. `/parametres/alertes` : canaux visibles pour tout
+  compte connecté, alertes/dossiers derrière `canAccess('alertes')`.
+  ⚠️ `scrape-daily.yml` lance `alerts` sans aucun canal — à vérifier.
 
 ## 9. Bugs connus / limites
 

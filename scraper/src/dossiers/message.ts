@@ -33,7 +33,7 @@ function dateFR(iso: string): string {
  * d'affaires en recul » doit savoir que c'était faux, pas seulement recevoir
  * un nouveau fichier sans explication.
  */
-export function composerRectificatif(sel: Selection, semaine: string, canal: 'email' | 'telegram'): Message {
+export function composerRectificatif(sel: Selection, semaine: string, canal: 'email' | 'telegram' | 'whatsapp'): Message {
   const sujet = `Rectificatif — vos dossiers valeur de la semaine du ${dateFR(semaine)}`;
   const jointes = canal === 'email' ? sel.pieces_jointes_email : sel.retenues;
   const lignes: string[] = [
@@ -60,7 +60,7 @@ export function composerRectificatif(sel: Selection, semaine: string, canal: 'em
   return { sujet, corps: lignes.join('\n') };
 }
 
-export function composerMessage(sel: Selection, semaine: string, canal: 'email' | 'telegram'): Message {
+export function composerMessage(sel: Selection, semaine: string, canal: 'email' | 'telegram' | 'whatsapp'): Message {
   const sujet = `Vos dossiers valeur — semaine du ${dateFR(semaine)}`;
 
   /* Telegram envoie un document par valeur, sans plafond : il annonce donc

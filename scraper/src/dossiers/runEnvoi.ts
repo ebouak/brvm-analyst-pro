@@ -25,6 +25,7 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { sendEmail, sendTelegramDocument, sendTelegramText } from '../alerts/channels.js';
+import { envoyerDocumentWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { cleSemaine, selectionnerLignes, type LigneCandidate, type Selection } from './selection.js';
 import { composerMessage, composerRectificatif } from './message.js';
 
@@ -44,9 +45,11 @@ interface Pref {
   dossiers_email: boolean;
   dossiers_telegram: boolean;
   telegram_chat_id: number | null;
+  dossiers_whatsapp: boolean;
+  whatsapp_chat_id: string | null;
 }
 
-type Canal = 'email' | 'telegram';
+type Canal = 'email' | 'telegram' | 'whatsapp';
 type Statut = 'en_cours' | 'envoye' | 'echec' | 'vide';
 
 /**
@@ -67,8 +70,8 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
   // ── 1. Comptes ayant explicitement demandé l'envoi ──────────────────────
   const { data: prefsRows, error: errPrefs } = await sb
     .from('notification_prefs')
-    .select('user_id, dossiers_email, dossiers_telegram, telegram_chat_id')
-    .or('dossiers_email.eq.true,dossiers_telegram.eq.true');
+    .select('user_id, dossiers_email, dossiers_telegram, telegram_chat_id, dossiers_whatsapp, whatsapp_chat_id')
+    .or('dossiers_email.eq.true,dossiers_telegram.eq.true,dossiers_whatsapp.eq.true');
   if (errPrefs) throw new Error(`notification_prefs : ${errPrefs.message}`);
   const prefs = (prefsRows ?? []) as Pref[];
   res.comptes = prefs.length;
@@ -80,7 +83,7 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
   // ── 2. Tout ce qui ne dépend que de la liste des comptes, en parallèle ──
   const userIds = prefs.map((p) => p.user_id);
   const [{ data: profils }, { data: positions }, { data: instruments }, { data: derniere }] = await Promise.all([
-    sb.from('profiles').select('id, email').in('id', userIds),
+    sb.from('profiles').select('id, email, is_premium').in('id', userIds),
     sb.from('portfolios_positions').select('user_id, code, quantite').in('user_id', userIds),
     sb.from('brvm_instruments').select('code, designation'),
     sb.from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1).maybeSingle(),
@@ -89,6 +92,11 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
   const emailPar = new Map(
     ((profils ?? []) as { id: string; email: string | null }[]).map((p) => [p.id, p.email]),
   );
+  // WhatsApp : canal réservé aux comptes Premium (grille du 2026-10-23).
+  const premiumPar = new Set(
+    ((profils ?? []) as { id: string; is_premium: boolean | null }[]).filter((p) => p.is_premium).map((p) => p.id),
+  );
+  const passerelle = wahaConfiguree();
   const nomPar = new Map(
     ((instruments ?? []) as { code: string; designation: string | null }[]).map((i) => [i.code, i.designation ?? i.code]),
   );
@@ -183,6 +191,7 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
     const canaux: Canal[] = [];
     if (p.dossiers_email && emailPar.get(p.user_id)) canaux.push('email');
     if (p.dossiers_telegram && p.telegram_chat_id) canaux.push('telegram');
+    if (p.dossiers_whatsapp && p.whatsapp_chat_id && premiumPar.has(p.user_id) && passerelle) canaux.push('whatsapp');
 
     for (const canal of canaux) {
       if (rectificatif) {
@@ -229,6 +238,20 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
             attachments,
           });
           if (!r || r.status !== 'sent') throw new Error(r?.error ?? 'canal email non configuré');
+        } else if (canal === 'whatsapp') {
+          // Rythme lent et constant : une rafale de documents ressemble à du spam.
+          // Le corps commence déjà par le sujet (message.ts) : pas de titre en double.
+          const ouverture = await envoyerTexteWaha(p.whatsapp_chat_id!, msg.corps);
+          if (!ouverture.ok) throw new Error(ouverture.erreur ?? 'passerelle WhatsApp en échec');
+          for (const l of envoyees) {
+            await pauseEntreEnvois();
+            const r = await envoyerDocumentWaha(
+              p.whatsapp_chat_id!,
+              { octets: await telecharger(l.code), nom: `westbourse-dossier-${l.code}.pdf` },
+              `${l.code} — ${l.designation}`,
+            );
+            if (!r.ok) throw new Error(`${l.code} : ${r.erreur ?? 'envoi refusé'}`);
+          }
         } else {
           const ouverture = await sendTelegramText({
             subject: msg.sujet,

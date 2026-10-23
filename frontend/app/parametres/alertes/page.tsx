@@ -19,18 +19,12 @@ export default async function AlertesPage() {
 
   // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
   // La page ne decide rien : elle demande.
+  // Les CANAUX (WhatsApp, Telegram, brief) restent visibles pour tout compte
+  // connecté : lier WhatsApp ouvre l'essai gratuit de l'assistant (lot D). Seuls
+  // les alertes personnalisées et les dossiers dépendent de ce niveau d'accès.
   const gate = await canAccess('alertes');
-  if (!gate.allowed) {
-    return (
-      <AccessGate
-        required={gate.required === 'free' ? 'premium' : gate.required}
-        feature="Les alertes personnalisées"
-        hint="Soyez prévenu par email et WhatsApp quand un cours franchit votre seuil."
-      />
-    );
-  }
 
-  const [{ data: alerts }, { data: instruments }] = await Promise.all([
+  const [{ data: alerts }, { data: instruments }] = gate.allowed ? await Promise.all([
     supabase
       .from('alerts')
       .select('id, code, type, seuil, actif, declenchee_le, created_at')
@@ -41,7 +35,7 @@ export default async function AlertesPage() {
       .select('code, designation')
       .eq('type', 'action')
       .order('code'),
-  ]);
+  ]) : [{ data: [] }, { data: [] }];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -62,12 +56,22 @@ export default async function AlertesPage() {
           même tant que la migration 0132 n'est pas appliquée. */}
       <BriefPrefs userId={user.id} />
 
-      <DossiersPrefs userId={user.id} />
+      {gate.allowed ? (
+        <>
+          <DossiersPrefs userId={user.id} />
 
-      <AlertsManager
-        alerts={(alerts ?? []) as UserAlert[]}
-        instruments={(instruments ?? []) as { code: string; designation: string | null }[]}
-      />
+          <AlertsManager
+            alerts={(alerts ?? []) as UserAlert[]}
+            instruments={(instruments ?? []) as { code: string; designation: string | null }[]}
+          />
+        </>
+      ) : (
+        <AccessGate
+          required={gate.required === 'free' ? 'premium' : gate.required}
+          feature="Les alertes personnalisées"
+          hint="Soyez prévenu par email et WhatsApp quand un cours franchit votre seuil."
+        />
+      )}
     </div>
   );
 }
