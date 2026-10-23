@@ -1,4 +1,4 @@
-name: Campagne email — annonce de la refonte
+name: Campagne email (envoi unique, déclenchement manuel)
 
 # AUCUN `schedule`, SOUS AUCUN PRÉTEXTE. C'est délibéré : une campagne de
 # masse qui se déclencherait seule serait exactement l'accident que ce
@@ -26,10 +26,15 @@ on:
         description: "N'envoyer qu'à cette adresse (auto-test avant l'envoi de masse)"
         type: string
         default: ''
+      contenu:
+        description: "Message envoyé (landing = refonte de septembre ; canaux = WhatsApp/Telegram d'octobre)"
+        type: choice
+        options: ['canaux', 'landing']
+        default: 'canaux'
       campagne:
-        description: 'Identifiant de campagne (clé de dédoublonnage dans campagne_envois)'
+        description: 'Identifiant de campagne (vide = celui du contenu choisi ; clé de dédoublonnage dans campagne_envois)'
         type: string
-        default: 'landing-2026-09'
+        default: ''
 
 # Un seul envoi de campagne à la fois — deux exécutions en parallèle
 # pourraient toutes deux lire "pas encore journalisé" pour le même compte
@@ -63,9 +68,9 @@ jobs:
       - name: Annoncer le mode avant tout envoi
         run: |
           if [ "${{ inputs.envoyer }}" = "true" ]; then
-            echo "::warning::ENVOI RÉEL ARMÉ — campagne « ${{ inputs.campagne }} »."
+            echo "::warning::ENVOI RÉEL ARMÉ — contenu « ${{ inputs.contenu }} », campagne « ${{ inputs.campagne }} »."
           else
-            echo "Mode d'essai — rien ne sera envoyé (campagne « ${{ inputs.campagne }} »)."
+            echo "Mode d'essai — rien ne sera envoyé (contenu « ${{ inputs.contenu }} »)."
           fi
 
       - name: Exécuter la campagne
@@ -79,6 +84,7 @@ jobs:
           LIMITE: ${{ inputs.limite }}
           SEULEMENT: ${{ inputs.seulement }}
           CAMPAGNE: ${{ inputs.campagne }}
+          CONTENU: ${{ inputs.contenu }}
         run: |
           set -u
           ARGS=()
@@ -86,4 +92,5 @@ jobs:
           if [ -n "$LIMITE" ]; then ARGS+=("--limite=$LIMITE"); fi
           if [ -n "$SEULEMENT" ]; then ARGS+=("--seulement=$SEULEMENT"); fi
           if [ -n "$CAMPAGNE" ]; then ARGS+=("--campagne=$CAMPAGNE"); fi
+          ARGS+=("--contenu=$CONTENU")
           node scripts/campagne-landing.mjs "${ARGS[@]}"

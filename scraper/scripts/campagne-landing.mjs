@@ -69,13 +69,32 @@
  * journalisée.
  */
 import { entetesSupabase } from '../../video/supabaseEntetes.mjs';
-import {
-  CAMPAGNE as CAMPAGNE_PAR_DEFAUT,
+/* Le CONTENU est choisi par `--contenu=` (défaut : landing). Chaque gabarit
+   porte son propre identifiant de campagne par défaut : deux contenus ne
+   partagent jamais une même clé de dédoublonnage par accident. */
+const CONTENUS = {
+  landing: './campagne-landing.email.mjs',
+  canaux: './campagne-canaux.email.mjs',
+};
+const contenuDemande = (process.argv.find((a) => a.startsWith('--contenu=')) ?? '--contenu=landing').slice('--contenu='.length);
+if (!CONTENUS[contenuDemande]) {
+  console.error(`--contenu inconnu : "${contenuDemande}". Valeurs : ${Object.keys(CONTENUS).join(', ')}.`);
+  process.exit(1);
+}
+const {
+  CAMPAGNE: CAMPAGNE_PAR_DEFAUT,
   URL_PREFERENCES,
   sujet,
   html,
   texte,
-} from './campagne-landing.email.mjs';
+} = await import(CONTENUS[contenuDemande]);
+
+/* Personnes ayant répondu STOP à une campagne : une ligne `campagne_envois`
+   sous la campagne réservée `desinscription` (insérée à la main, depuis
+   l'éditeur SQL). Exclues de TOUTES les campagnes, sans exception. */
+const CAMPAGNE_DESINSCRIPTION = 'desinscription';
+/* Les réponses (dont STOP) arrivent à une boîte lue par un humain. */
+const REPONDRE_A = 'support@westbourse.com';
 
 const dors = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -106,11 +125,11 @@ async function principal() {
   };
 
   const OPTION_RECONNUE = (a) =>
-    a === '--envoyer' || /^--(limite|seulement|campagne)=/.test(a);
+    a === '--envoyer' || /^--(limite|seulement|campagne|contenu)=/.test(a);
   const inconnues = argv.filter((a) => a.startsWith('--') && !OPTION_RECONNUE(a));
   if (inconnues.length) {
     console.error(`Option(s) non reconnue(s) : ${inconnues.join(', ')}`);
-    console.error('Options acceptées : --envoyer, --limite=N, --seulement=email, --campagne=id');
+    console.error('Options acceptées : --envoyer, --limite=N, --seulement=email, --campagne=id, --contenu=landing|canaux');
     process.exit(1);
   }
 
@@ -212,6 +231,12 @@ async function principal() {
       String(r.email).toLowerCase(),
     ),
   );
+  // Les désinscrits sont traités comme « déjà journalisés » : jamais écrits.
+  const desinscrits = (
+    await lireTout(`campagne_envois?select=email&campagne=eq.${CAMPAGNE_DESINSCRIPTION}`)
+  ).map((r) => String(r.email).toLowerCase());
+  for (const e of desinscrits) dejaJournalises.add(e);
+  console.log(`  ${desinscrits.length} désinscription(s) respectée(s).`);
   console.log(
     `  ${dejaJournalises.size} adresse(s) déjà journalisée(s) pour cette campagne (ne seront pas retouchées).`,
   );
@@ -297,6 +322,7 @@ async function principal() {
         body: JSON.stringify({
           from: ALERTS_EMAIL_FROM,
           to: dest.email,
+          reply_to: REPONDRE_A,
           subject: sujet(),
           html: html({ prenom: dest.prenom }),
           text: texte({ prenom: dest.prenom }),
@@ -320,7 +346,8 @@ async function principal() {
       console.log(`  ${masquer(dest.email)} — envoyé`);
     } else {
       echecsEnvoi++;
-      console.error(`  ${dest.email} — ÉCHEC ENVOI : ${raison}`);
+      // MASQUÉE aussi en cas d'échec : le journal est public (incident du 2026-09-24).
+      console.error(`  ${masquer(dest.email)} — ÉCHEC ENVOI : ${raison}`);
     }
 
     // Journalisation IMMÉDIATE — avant de passer au destinataire suivant.
@@ -337,8 +364,8 @@ async function principal() {
       }
       ecrituresReussies++;
     } catch (e) {
-      arretPrecoce = `journalisation impossible pour ${dest.email} : ${e.message}`;
-      console.error(`  ${dest.email} — IMPOSSIBLE DE JOURNALISER L'ENVOI : ${e.message}`);
+      arretPrecoce = `journalisation impossible pour ${masquer(dest.email)} : ${e.message}`;
+      console.error(`  ${masquer(dest.email)} — IMPOSSIBLE DE JOURNALISER L'ENVOI : ${e.message}`);
       console.error(
         "  ARRÊT DE LA CAMPAGNE — continuer créerait des envois non tracés, donc rejouables en double au prochain lancement.",
       );
