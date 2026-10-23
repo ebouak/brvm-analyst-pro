@@ -6,8 +6,11 @@ import { estConversationPrivee, lireEvenementWaha, verifierSignatureWaha } from 
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { statutsRemplacables } from '@/lib/contact/livraison';
 import { recevoirMessageWhatsapp } from '@/lib/contact/whatsappEntrant';
-import { lireCommande } from '@/lib/whatsapp/commandes';
+import { estDemandeHumain, lireCommande } from '@/lib/whatsapp/commandes';
 import { repondreCommande } from '@/lib/whatsapp/repondreCommande';
+import { appairerWhatsapp } from '@/lib/whatsapp/appairage';
+import { abonneAvecAgent, repondreAgent } from '@/lib/whatsapp/agent';
+import { isPairingCode } from '@/lib/pairingCodes';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -85,12 +88,24 @@ export async function POST(req: Request) {
   if (ev.deMoi || !estConversationPrivee(ev.de)) return NextResponse.json({ ok: true, ignore: true });
   if (await dejaTraite(ev.id)) return NextResponse.json({ ok: true, doublon: true });
 
-  // Commande rapide (COURS, DIV, PALMARES, AIDE) : réponse automatique sans IA ;
-  // toute autre phrase va à la console, chez un humain (lot A §1).
+  // Aiguillage (lots A et D) : code d'appairage → liaison du compte ;
+  // commande rapide → réponse sans IA ; abonné lié ayant activé l'assistant →
+  // agent (sauf HUMAIN) ; tout le reste → console de contact, chez un humain.
+  if (isPairingCode(ev.texte)) {
+    await appairerWhatsapp(ev.de, ev.texte);
+    return NextResponse.json({ ok: true, appairage: true });
+  }
   const commande = lireCommande(ev.texte);
   if (commande) {
     await repondreCommande(ev.de, commande);
     return NextResponse.json({ ok: true, commande: commande.type });
+  }
+  if (ev.texte.trim() && !estDemandeHumain(ev.texte)) {
+    const abonne = await abonneAvecAgent(ev.de);
+    if (abonne) {
+      await repondreAgent(ev.de, abonne, ev.texte);
+      return NextResponse.json({ ok: true, agent: true });
+    }
   }
 
   try {

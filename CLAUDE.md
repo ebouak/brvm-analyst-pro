@@ -1033,6 +1033,16 @@ Décision de l'exploitant : **non officiel pour tester, puis officiel**.
   pas. Variable GitHub `WHATSAPP_CHAINE_ID`. Le bucket `seance-video` refuse
   `text/plain` (415). Création de Chaîne : WhatsApp refuse description/photo
   à la création (graphql 400) — nom seul, le reste depuis l'application.
+- **Lot D — appairage + agent (2026-10-24, migration 0162 à appliquer)** :
+  code envoyé depuis WhatsApp → `whatsapp_chat_id` PROUVÉ (…@lid accepté) ;
+  la PRÉCONDITION ci-dessous (« appairage d'abord, outils ensuite ») est
+  remplie pour la passerelle WAHA (`lib/whatsapp/agent.ts`). Gratuit : 3/j,
+  outils de marché seuls ; Premium : 100/j + portefeuille/alertes, appliqué
+  côté serveur. `HUMAIN` → console. **Verrou 0162** : le propriétaire ne peut
+  plus POSER `telegram_chat_id`/`whatsapp_phone`/`whatsapp_chat_id` avec la clé
+  publique (il pouvait avant), seulement les vider. ⚠️ Tout composant qui
+  upsert `notification_prefs` ne doit JAMAIS inclure ces colonnes : la branche
+  INSERT du déclencheur les viderait à chaque enregistrement.
 
 ## 9. Bugs connus / limites
 

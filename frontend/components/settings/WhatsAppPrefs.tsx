@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client';
 
 interface Prefs {
   whatsapp_phone: string | null;
+  /** Identifiant prouvé par appairage via la passerelle (migration 0162) ; souvent sans numéro (…@lid). */
+  whatsapp_chat_id: string | null;
   whatsapp_optin: boolean;
   brief_whatsapp: boolean;
   alerts_whatsapp: boolean;
@@ -15,6 +17,7 @@ interface Prefs {
 
 const DEFAULTS: Prefs = {
   whatsapp_phone: null,
+  whatsapp_chat_id: null,
   whatsapp_optin: false,
   brief_whatsapp: false,
   alerts_whatsapp: false,
@@ -23,7 +26,7 @@ const DEFAULTS: Prefs = {
 };
 
 const SELECT_COLS =
-  'whatsapp_phone, whatsapp_optin, brief_whatsapp, alerts_whatsapp, alerts_email, agent_optin';
+  'whatsapp_phone, whatsapp_chat_id, whatsapp_optin, brief_whatsapp, alerts_whatsapp, alerts_email, agent_optin';
 
 /**
  * Numéro WhatsApp professionnel vers lequel envoyer le code d'appairage.
@@ -106,7 +109,8 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
     const { error } = await sb.from('notification_prefs').upsert(
       {
         user_id: userId,
-        whatsapp_phone: next.whatsapp_phone,
+        // Ni whatsapp_phone ni whatsapp_chat_id : seul le webhook les pose après
+        // un code d'appairage, et le verrou de la migration 0162 refuserait.
         whatsapp_optin: next.whatsapp_optin,
         whatsapp_optin_at: next.whatsapp_optin ? new Date().toISOString() : null,
         brief_whatsapp: next.brief_whatsapp,
@@ -169,16 +173,32 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
     );
   }
 
-  function handleWithdraw() {
+  async function handleWithdraw() {
     // Le retrait coupe aussi l'agent : sa case n'est visible que si WhatsApp est
     // actif, un consentement resté à true serait un consentement invisible.
-    void save({
-      ...prefs,
-      whatsapp_optin: false,
-      brief_whatsapp: false,
-      alerts_whatsapp: false,
-      agent_optin: false,
-    });
+    // Il EFFACE aussi le numéro et l'identifiant de conversation, comme le
+    // déliement Telegram : garder l'identifiant après un retrait de
+    // consentement conserverait une donnée personnelle sans base légale.
+    setState('saving');
+    const { error } = await createClient()
+      .from('notification_prefs')
+      .update({
+        whatsapp_phone: null,
+        whatsapp_chat_id: null,
+        whatsapp_verifie_at: null,
+        whatsapp_optin: false,
+        brief_whatsapp: false,
+        alerts_whatsapp: false,
+        agent_optin: false,
+      })
+      .eq('user_id', userId);
+    if (error) {
+      setState('error');
+      setErrMsg(error.message);
+      return;
+    }
+    setPrefs({ ...prefs, whatsapp_phone: null, whatsapp_chat_id: null, whatsapp_optin: false, brief_whatsapp: false, alerts_whatsapp: false, agent_optin: false });
+    setState('ready');
   }
 
   if (state === 'loading') {
@@ -312,7 +332,9 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
         </>
       ) : (
         <>
-          <p className="tabular text-sm text-white">{prefs.whatsapp_phone}</p>
+          <p className="tabular text-sm text-white">
+            {prefs.whatsapp_phone ?? 'WhatsApp lié (numéro masqué par WhatsApp)'}
+          </p>
           <div className="flex flex-wrap gap-4 text-sm">
             <label className="flex items-center gap-2 text-muted">
               <input
@@ -349,7 +371,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
 
           <button
             type="button"
-            onClick={handleWithdraw}
+            onClick={() => void handleWithdraw()}
             disabled={state === 'saving'}
             className="text-xs text-muted underline underline-offset-2 hover:text-down"
           >
