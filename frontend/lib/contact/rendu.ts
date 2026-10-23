@@ -212,16 +212,30 @@ export function renduReponse(e: EntreeRendu): { subject: string; html: string; t
  * conversation l'affiche déjà au-dessus. Borné à 4096 caractères (limite WhatsApp).
  */
 export function renduReponseWhatsapp(e: { reponse: string; offre?: OffreFormation | null }): string {
+  // Mise en forme NATIVE de WhatsApp (*gras*, _italique_, émojis) : le pendant de
+  // la carte d'offre de l'email. Le lien est seul sur sa ligne pour que WhatsApp
+  // en affiche l'aperçu illustré (image de partage du site).
+  const FILET = '━━━━━━━━━━━━━━━━';
   const parties = [e.reponse.trim()];
   if (e.offre && e.offre.montant > 0) {
     parties.push(
       [
-        '— Pour aller plus loin —',
-        `La formation WESTBOURSE Academy complète : 4 niveaux, accès à vie, et 1 mois Premium offert (alertes email comprises) — ${prix(e.offre)}.`,
-        `Créez votre compte gratuit, vous arrivez directement sur l'offre : ${LIEN_OFFRE}`,
+        FILET,
+        '🎓 *Pour aller plus loin*',
+        '*WESTBOURSE Academy — la formation complète*',
+        '',
+        '✅ Les 4 niveaux, accès à vie',
+        '✅ 1 mois Premium offert, alertes email sur vos valeurs comprises',
+        '✅ Paiement en ligne sécurisé, depuis votre compte gratuit',
+        '',
+        `💰 *${prix(e.offre)}* · paiement unique`,
+        '',
+        '👉 Créez votre compte et accédez directement à l’offre :',
+        LIEN_OFFRE,
+        FILET,
       ].join('\n'),
     );
   }
-  parties.push(AVERTISSEMENT, `${SIGNATURE}\nwww.westbourse.com`);
+  parties.push(`_${AVERTISSEMENT}_`, `*${SIGNATURE}*\nwww.westbourse.com`);
   return parties.join('\n\n').slice(0, 4096);
 }

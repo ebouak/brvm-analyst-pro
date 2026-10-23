@@ -46,8 +46,11 @@ export function normaliserEmail(email: string): string {
  */
 export function accuseReceptionWhatsapp(): string {
   return [
-    'Bonjour, merci pour votre message à WESTBOURSE.',
-    `Un membre de l'équipe vous répondra ${DELAI_REPONSE}, ici même sur WhatsApp.`,
-    'Inutile de renvoyer votre message entre-temps.',
+    '👋 Bonjour, merci pour votre message à *WESTBOURSE*.',
+    '',
+    `⏱️ Un membre de l'équipe vous répond *${DELAI_REPONSE}*, ici même sur WhatsApp. Inutile de renvoyer votre message.`,
+    '',
+    '📈 En attendant, suivez la séance et les sociétés cotées de la BRVM :',
+    'https://www.westbourse.com',
   ].join('\n');
 }

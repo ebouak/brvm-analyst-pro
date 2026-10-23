@@ -16,6 +16,15 @@ describe('réponse et accusé sur WhatsApp', () => {
     expect(t).not.toContain('Votre message du');
     expect(t.length).toBeLessThanOrEqual(4096);
   });
+  it('mise en forme WhatsApp incitative : titres en gras, coches, prix en gras, lien seul sur sa ligne', () => {
+    const t = renduReponseWhatsapp({ reponse: 'Bonjour Awa,\n\nRéponse.', offre: { montant: 9000, devise: 'XOF' } });
+    expect(t).toContain('🎓 *Pour aller plus loin*');
+    expect(t).toContain('✅ ');
+    expect(t).toContain('*9 000 FCFA*');
+    expect(t).toMatch(/\n👉 [^\n]+\nhttps:\/\/www\.westbourse\.com\/signup\?next=%2Fformations%2Facademy\n/);
+    expect(t).toContain("*L'équipe WESTBOURSE*");
+    expect(t).toMatch(/_WESTBOURSE est un outil d'information/);
+  });
   it('sans offre active : aucun bloc commercial', () => {
     expect(renduReponseWhatsapp({ reponse: 'Bonjour,', offre: null })).not.toContain('FCFA');
   });
