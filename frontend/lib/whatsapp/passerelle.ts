@@ -56,7 +56,8 @@ const waha: Passerelle = {
       const r = await fetch(`${cfg.url}/api/sendText`, {
         method: 'POST',
         headers: { 'X-Api-Key': cfg.cle, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session: cfg.session, chatId, text: texte.slice(0, 4096) }),
+        // linkPreview : WhatsApp affiche l'aperçu illustré du premier lien (image de partage du site).
+        body: JSON.stringify({ session: cfg.session, chatId, text: texte.slice(0, 4096), linkPreview: true }),
         signal: AbortSignal.timeout(DELAI_MS),
         cache: 'no-store',
       });
