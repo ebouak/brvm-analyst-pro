@@ -89,6 +89,10 @@ export async function envoyerReponse(id: string, texte: string): Promise<Retour>
         repondu_par: ctx.userId,
         resend_id: res.id ?? null,
         derniere_activite_at: maintenant,
+        // « Envoyé » n'est pas « reçu » : Resend fera progresser ce statut par
+        // webhook (remis, rejeté, spam) — voir /api/webhooks/resend.
+        livraison: 'envoye',
+        livraison_at: maintenant,
       })
       .eq('id', id);
   } else {

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
 import { loadMessageContact, STATUT_CONTACT_LABEL } from '@/lib/admin/contact';
+import { LIVRAISON_LABEL } from '@/lib/contact/livraison';
 import ReponseForm from './ReponseForm';
 
 export const dynamic = 'force-dynamic';
@@ -44,7 +45,17 @@ export default async function Page({ params }: { params: { id: string } }) {
             <div className="text-[11px] uppercase tracking-wider text-faint">
               Réponse envoyée{m.repondu_at ? ` le ${fmtDate(m.repondu_at)}` : ''} depuis support@westbourse.com
             </div>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted">{m.reponse}</p>
+            <p className={`mt-2 text-sm ${m.livraison === 'rejete' || m.livraison === 'spam' ? 'text-down font-medium' : m.livraison === 'remis' ? 'text-up' : 'text-muted'}`}>
+              Livraison : {m.livraison ? LIVRAISON_LABEL[m.livraison] : 'non suivie'}
+              {m.livraison_at ? ` (${fmtDate(m.livraison_at)})` : ''}
+              {m.livraison_detail ? ` — ${m.livraison_detail}` : ''}
+            </p>
+            {(m.livraison === 'rejete' || m.livraison === 'spam') && (
+              <p className="mt-1 text-xs text-down">
+                La réponse n&apos;est pas arrivée : vérifiez l&apos;adresse, ou joignez cette personne par un autre moyen.
+              </p>
+            )}
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">{m.reponse}</p>
             <p className="mt-4 text-xs text-faint">
               Une relance du visiteur arrive dans la boîte de support (routage Cloudflare vers Gmail).
             </p>

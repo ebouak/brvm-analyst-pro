@@ -109,6 +109,10 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Sécurité : RLS sans aucune policy (service_role seul) ; console `/admin/contact` derrière
   `support.read` / `support.reply` ; l'audit ne trace que l'action et l'identifiant ;
   relance Telegram exploitant sans aucune donnée personnelle.
+- Livraison (migration 0159, 2026-10-21) : statut Resend reçu par webhook signé ; seule
+  donnée nouvelle, la raison d'un rejet (`livraison_detail`, 300 caractères au plus, peut
+  citer l'adresse du destinataire) — même table, même RLS, même purge 12 mois. Ouvertures
+  et clics ne sont PAS suivis.
 
 **Formulaire de contact (`/api/contact`) — accusé de réception (2026-10-15)**
 - Données : prénom, email, message, page — **non persistés** : relayés par email à la
