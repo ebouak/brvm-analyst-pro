@@ -1009,6 +1009,22 @@ Décision de l'exploitant : **non officiel pour tester, puis officiel**.
   accusé FIXE (une fois / 24 h, en réponse seulement), email à l'exploitant ; la
   réponse repart par le canal d'arrivée et sa remise est suivie par `message.ack`.
   Hetzner déclaré sous-traitant dans `/confidentialite`.
+- **Feuille de route révisée (2026-10-23)**, spec
+  `2026-10-23-whatsapp-lot-a-design.md` §0 : A (commandes, bouton, suivi),
+  B (Chaîne), C (vocaux), D (appairage par identifiant PROUVÉ + agent : gratuit
+  3/j marché, Premium 100/j + portefeuille), E (alertes/dossiers Premium).
+  **Chaîne oui, groupe NON** : un groupe expose le numéro de chaque membre à
+  tous et attire les « tuyaux » sous notre marque. WAHA ≥ 2026.6.1 inclut
+  médias et Chaînes dans la version gratuite.
+- **Lot A (migration 0161, à appliquer)** : `COURS`/`PRIX`, `DIV`, `PALMARES`
+  (`BAISSES`/`VOLUMES`), `AIDE` → réponse SANS IA, chiffres de
+  `lib/agent/outils.ts` (même source que l'agent), ni signal ni rendement. Toute
+  phrase va à la console. 30 commandes/h/conversation, au-delà silence. Journal
+  `whatsapp_commandes` sans numéro ni texte. Pied incitatif (inscrire son
+  numéro ; Chaîne si `WHATSAPP_CHAINE_URL`). Numéro affiché = **+33 7 43 65 72 71**
+  (`NEXT_PUBLIC_WHATSAPP_NUMBER`, absente de Vercel avant ce lot : l'encart de
+  contact n'avait AUCUN bouton WhatsApp). `/dividendes` exige une connexion :
+  les liens publics pointent vers `/societes/<CODE>` et `/actions`.
 
 ## 9. Bugs connus / limites
 

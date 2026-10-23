@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
-import { loadMessagesContact, STATUT_CONTACT_LABEL, type StatutContact } from '@/lib/admin/contact';
+import { loadMessagesContact, loadSuiviWhatsapp, STATUT_CONTACT_LABEL, type StatutContact } from '@/lib/admin/contact';
 import { LIVRAISON_LABEL, type Livraison } from '@/lib/contact/livraison';
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +37,7 @@ function anciennete(jours: number): string {
 
 export default async function Page() {
   await requirePermission('support.read');
-  const { rows, erreur } = await loadMessagesContact();
+  const [{ rows, erreur }, suivi] = await Promise.all([loadMessagesContact(), loadSuiviWhatsapp()]);
   const attente = rows.filter((r) => r.statut === 'nouveau' || r.statut === 'envoi');
   const retard = attente.filter((r) => r.enRetard);
   const nonRemis = rows.filter((r) => r.livraison === 'rejete' || r.livraison === 'spam');
@@ -56,6 +56,24 @@ export default async function Page() {
         <MetricCard label="En retard (> 1 j ouvré)" value={nf.format(retard.length)} accent={retard.length ? 'gold' : 'neutral'} />
         <MetricCard label="Réponses non remises" value={nf.format(nonRemis.length)} accent={nonRemis.length ? 'gold' : 'neutral'} />
         <MetricCard label="Total conservé" value={nf.format(rows.length)} accent="sapphire" />
+      </div>
+
+      <div>
+        <h2 className="mb-2 text-xs font-medium uppercase tracking-wider text-faint">WhatsApp</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <MetricCard label="Messages reçus (7 j)" value={nf.format(suivi.stats.recus7)} accent="neutral" />
+          <MetricCard label="Messages reçus (30 j)" value={nf.format(suivi.stats.recus30)} accent="neutral" />
+          <MetricCard
+            label="Délai médian de réponse (30 j)"
+            value={suivi.stats.delaiMedianHeures == null ? '—' : `${nf.format(suivi.stats.delaiMedianHeures)} h`}
+            accent="neutral"
+          />
+          <MetricCard
+            label="Commandes servies (7 j / 30 j)"
+            value={suivi.commandes7 == null ? '—' : `${nf.format(suivi.commandes7)} / ${nf.format(suivi.commandes30 ?? 0)}`}
+            accent="sapphire"
+          />
+        </div>
       </div>
 
       {erreur ? (

@@ -52,5 +52,7 @@ export function accuseReceptionWhatsapp(): string {
     '',
     '📈 En attendant, suivez la séance et les sociétés cotées de la BRVM :',
     'https://www.westbourse.com',
+    '',
+    '💡 Tapez *AIDE* pour obtenir tout de suite un cours, des dividendes ou le palmarès du jour.',
   ].join('\n');
 }
