@@ -94,6 +94,10 @@ export async function GET() {
     contactMessages = data ?? [];
   }
 
+  // Lu à part : table de 0165 ; absente, la lecture renvoie une erreur et
+  // l'export reste complet pour le reste.
+  const whatsappLiaisons = await supabase.from('whatsapp_liaisons').select('chat_id, telephone, lie_le').eq('user_id', user.id);
+
   const payload = {
     exported_at: new Date().toISOString(),
     account: {
@@ -129,6 +133,9 @@ export async function GET() {
     // perso, rétention 90 jours) et codes d'appairage du numéro.
     whatsapp_conversations: whatsappConversations.data ?? [],
     whatsapp_pairing_codes: whatsappPairingCodes.data ?? [],
+    // WhatsApp liés au compte (migration 0165, au plus 2) : identifiant de
+    // conversation, numéro quand WhatsApp le fournit, date de liaison.
+    whatsapp_liaisons: whatsappLiaisons.data ?? [],
     // Même agent conversationnel, canal Telegram : contenu des messages
     // (donnée perso, rétention 90 jours) et codes d'appairage. Le chat_id
     // lui-même figure déjà dans notification_prefs ci-dessus.

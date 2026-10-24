@@ -26,8 +26,8 @@ interface Prefs {
   dossiers_whatsapp: boolean;
   dossiers_optin_at: string | null;
   telegram_chat_id: number | null;
-  /** Lu seulement, jamais écrit : seul le webhook le pose (migration 0162). */
-  whatsapp_chat_id: string | null;
+  /** Lu seulement : posé par le webhook à chaque liaison d'un WhatsApp (0165). */
+  whatsapp_optin: boolean;
 }
 
 const DEFAUTS: Prefs = {
@@ -36,10 +36,10 @@ const DEFAUTS: Prefs = {
   dossiers_whatsapp: false,
   dossiers_optin_at: null,
   telegram_chat_id: null,
-  whatsapp_chat_id: null,
+  whatsapp_optin: false,
 };
 
-const COLONNES = 'dossiers_email, dossiers_telegram, dossiers_whatsapp, dossiers_optin_at, telegram_chat_id, whatsapp_chat_id';
+const COLONNES = 'dossiers_email, dossiers_telegram, dossiers_whatsapp, dossiers_optin_at, telegram_chat_id, whatsapp_optin';
 
 export default function DossiersPrefs({ userId }: { userId: string }) {
   const [prefs, setPrefs] = useState<Prefs>(DEFAUTS);
@@ -103,7 +103,7 @@ export default function DossiersPrefs({ userId }: { userId: string }) {
   if (etat === 'indisponible') return null;
 
   const appaire = prefs.telegram_chat_id != null;
-  const appaireWa = prefs.whatsapp_chat_id != null;
+  const appaireWa = prefs.whatsapp_optin;
   const fige = etat !== 'pret';
 
   return (

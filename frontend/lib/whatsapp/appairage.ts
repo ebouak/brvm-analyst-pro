@@ -4,6 +4,7 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 import { normalizePairingCode, PAIRING_TTL_MINUTES } from '@/lib/pairingCodes';
 import { passerelleWhatsapp } from './passerelle';
+import { MAX_LIAISONS, TABLE_ABSENTE } from './liaisons';
 
 /**
  * Appairage WhatsApp par la passerelle WAHA (lot D, migration 0162).
@@ -62,27 +63,50 @@ export async function appairerWhatsapp(chatId: string, texte: string): Promise<v
       return;
     }
 
+    const userId = reclame.user_id as string;
+    const DEJA_AILLEURS = 'Ce WhatsApp est déjà lié à un autre compte WESTBOURSE. Déliez-le depuis ce compte, ou écrivez *HUMAIN* pour joindre l’équipe.';
+
+    // Une ligne par WhatsApp lié (0165), au plus MAX_LIAISONS par compte.
+    const { data: existant, error: errLecture } = await db.from('whatsapp_liaisons').select('user_id').eq('chat_id', chatId).maybeSingle();
+    const tableAbsente = !!errLecture && TABLE_ABSENTE.has(errLecture.code ?? '');
+    if (errLecture && !tableAbsente) throw new Error(`liaisons : ${errLecture.code ?? errLecture.message}`);
+
+    if (tableAbsente) {
+      // Migration 0165 pas encore appliquée : ancien comportement (un seul WhatsApp).
+      const { error } = await db.from('notification_prefs').upsert(
+        { user_id: userId, whatsapp_chat_id: chatId, whatsapp_phone: telephoneDepuisChatId(chatId), whatsapp_verifie_at: maintenant },
+        { onConflict: 'user_id' },
+      );
+      if (error) {
+        await repondre(error.code === '23505' ? DEJA_AILLEURS : 'La liaison a échoué. Réessayez dans quelques instants.');
+        return;
+      }
+    } else if (existant && existant.user_id !== userId) {
+      await repondre(DEJA_AILLEURS);
+      return;
+    } else if (!existant) {
+      const { count } = await db.from('whatsapp_liaisons').select('id', { count: 'exact', head: true }).eq('user_id', userId);
+      if ((count ?? 0) >= MAX_LIAISONS) {
+        await repondre(`Votre compte a déjà ${MAX_LIAISONS} WhatsApp liés, le maximum. Déliez-en un dans vos paramètres, puis renvoyez un code :\n${LIEN_PARAMETRES}`);
+        return;
+      }
+      const { error } = await db.from('whatsapp_liaisons').insert({ user_id: userId, chat_id: chatId, telephone: telephoneDepuisChatId(chatId) });
+      if (error) {
+        console.error('[whatsapp] liaison impossible', { code: error.code });
+        await repondre(error.code === '23505' ? DEJA_AILLEURS : 'La liaison a échoué. Réessayez dans quelques instants.');
+        return;
+      }
+    }
+
+    // L'envoi volontaire du code EST l'acte de consentement : horodaté ici,
+    // au niveau du compte (il vaut pour chaque WhatsApp lié).
     const { error } = await db.from('notification_prefs').upsert(
-      {
-        user_id: reclame.user_id as string,
-        whatsapp_chat_id: chatId,
-        whatsapp_phone: telephoneDepuisChatId(chatId),
-        whatsapp_verifie_at: maintenant,
-        // L'envoi volontaire du code EST l'acte de consentement : horodaté ici.
-        whatsapp_optin: true,
-        whatsapp_optin_at: maintenant,
-      },
+      { user_id: userId, whatsapp_optin: true, whatsapp_optin_at: maintenant },
       { onConflict: 'user_id' },
     );
-
     if (error) {
-      // 23505 : cette conversation (ou ce numéro) est déjà liée à un autre compte.
-      console.error('[whatsapp] liaison impossible', { code: error.code });
-      await repondre(
-        error.code === '23505'
-          ? 'Ce WhatsApp est déjà lié à un autre compte WESTBOURSE. Déliez-le depuis ce compte, ou écrivez *HUMAIN* pour joindre l’équipe.'
-          : 'La liaison a échoué. Réessayez dans quelques instants.',
-      );
+      console.error('[whatsapp] consentement non enregistré', { code: error.code });
+      await repondre('La liaison a échoué. Réessayez dans quelques instants.');
       return;
     }
 

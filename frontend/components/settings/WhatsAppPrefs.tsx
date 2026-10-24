@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import WhatsAppLiaisons from './WhatsAppLiaisons';
 
 interface Prefs {
   whatsapp_phone: string | null;
@@ -180,6 +181,8 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
     // déliement Telegram : garder l'identifiant après un retrait de
     // consentement conserverait une donnée personnelle sans base légale.
     setState('saving');
+    // Délie TOUS les WhatsApp du compte (0165) ; table absente → sans effet.
+    await createClient().from('whatsapp_liaisons').delete().eq('user_id', userId);
     const { error } = await createClient()
       .from('notification_prefs')
       .update({
@@ -333,9 +336,8 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
         </>
       ) : (
         <>
-          <p className="tabular text-sm text-white">
-            {prefs.whatsapp_phone ?? 'WhatsApp lié (numéro masqué par WhatsApp)'}
-          </p>
+          {/* Liste des WhatsApp liés (au plus 2, 0165), délier, en lier un autre. */}
+          <WhatsAppLiaisons userId={userId} />
           <div className="flex flex-wrap gap-4 text-sm">
             <label className="flex items-center gap-2 text-muted">
               <input

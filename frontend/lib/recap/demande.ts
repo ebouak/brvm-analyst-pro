@@ -6,6 +6,7 @@ import { isAdminEmail } from '@/lib/server/admin-emails';
 import { passerelleWhatsapp } from '@/lib/whatsapp/passerelle';
 import { sendTelegramPhoto, sendTelegramReply } from '@/lib/telegramAgent/sendTelegram';
 import { telechargerRecap } from './telecharger';
+import { compteConsentant } from '@/lib/whatsapp/liaisons';
 
 /**
  * Commande RECAP sur WhatsApp ou Telegram (spec 2026-10-24-recap-portefeuille).
@@ -32,12 +33,13 @@ export async function traiterDemandeRecap(canal: Canal, destinataire: string | n
     if (!allowed) return;
 
     const db = getServiceClient();
-    const { data: prefs } = await db
-      .from('notification_prefs')
-      .select('user_id')
-      .eq(wa ? 'whatsapp_chat_id' : 'telegram_chat_id', destinataire)
-      .eq(wa ? 'whatsapp_optin' : 'telegram_optin', true)
-      .maybeSingle();
+    // WhatsApp : n'importe lequel des WhatsApp liés au compte (0165).
+    const prefs = wa
+      ? await compteConsentant(db, String(destinataire)).then((u) => (u ? { user_id: u } : null))
+      : (
+          await db.from('notification_prefs').select('user_id')
+            .eq('telegram_chat_id', destinataire).eq('telegram_optin', true).maybeSingle()
+        ).data;
     if (!prefs) {
       await texte(`🔗 La récap de votre portefeuille demande de lier ce ${wa ? 'WhatsApp' : 'Telegram'} à votre compte : générez un code dans vos paramètres, puis envoyez-le ici.\n${SITE}/parametres/alertes`);
       return;
