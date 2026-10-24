@@ -6,6 +6,7 @@ import WhatsAppPrefs from '@/components/settings/WhatsAppPrefs';
 import TelegramPrefs from '@/components/settings/TelegramPrefs';
 import DossiersPrefs from '@/components/settings/DossiersPrefs';
 import BriefPrefs from '@/components/settings/BriefPrefs';
+import RecapPrefs from '@/components/settings/RecapPrefs';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 
@@ -55,6 +56,8 @@ export default async function AlertesPage() {
           appairée, et l'appairage se fait juste au-dessus. Se masque d'elle-
           même tant que la migration 0132 n'est pas appliquée. */}
       <BriefPrefs userId={user.id} />
+
+      <RecapPrefs userId={user.id} />
 
       {gate.allowed ? (
         <>

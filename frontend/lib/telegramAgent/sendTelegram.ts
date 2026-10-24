@@ -50,3 +50,32 @@ export async function sendTelegramReply(chatId: number | string, text: string): 
     return false;
   }
 }
+
+/**
+ * Photo (PNG en mémoire) envoyée en multipart : l'image de la récap du
+ * portefeuille n'a pas d'URL publique, et ne doit pas en avoir. Mêmes règles
+ * que sendTelegramReply : ne lève jamais, ne journalise jamais l'URL (jeton).
+ */
+export async function sendTelegramPhoto(chatId: number | string, png: Buffer, legende: string): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    console.error('telegramAgent/sendTelegram: TELEGRAM_BOT_TOKEN absent');
+    return false;
+  }
+  try {
+    const form = new FormData();
+    form.set('chat_id', String(chatId));
+    form.set('photo', new Blob([new Uint8Array(png)], { type: 'image/png' }), 'westbourse-recap.png');
+    form.set('caption', legende.slice(0, 1024));
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form });
+    const rep = await r.json().catch(() => ({}));
+    if (!rep.ok) {
+      console.error('telegramAgent/sendTelegram: photo refusée', { description: rep.description ?? `HTTP ${r.status}` });
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('telegramAgent/sendTelegram: photo impossible', { message: err instanceof Error ? err.message : String(err) });
+    return false;
+  }
+}

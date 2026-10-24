@@ -179,6 +179,9 @@ jobs:
           WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
           # Lien de la Chaîne : la vidéo n'est pas renvoyée à chaque abonné WhatsApp.
           WHATSAPP_CHAINE_URL: ${{ vars.WHATSAPP_CHAINE_URL }}
+          # Récap du portefeuille en image (0164) : lien signé vers le site.
+          # Absent → le point du soir part sans image.
+          RECAP_SECRET: ${{ secrets.RECAP_SECRET }}
           LOG_LEVEL: info
         run: |
           npm install --no-audit --no-fund
@@ -201,6 +204,8 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          # Récap du portefeuille en pièce jointe (0164) ; absent → sans pièce jointe.
+          RECAP_SECRET: ${{ secrets.RECAP_SECRET }}
         run: node brief-envoi.mjs --envoyer
       - name: Envoi de découverte du brief (tous les comptes)
         # JAMAIS sur "schedule" : uniquement quand un humain coche la case.

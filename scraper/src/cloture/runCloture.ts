@@ -11,7 +11,8 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
-import { envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
+import { envoyerImageWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
+import { recapConfiguree, telechargerRecap } from '../recap/telecharger.js';
 import {
   composerCloture,
   type AlerteDeclenchee,
@@ -82,6 +83,25 @@ async function envoyer(
       bloque: false,
       description: err instanceof Error ? err.message : String(err),
     };
+  }
+}
+
+const LEGENDE_RECAP = 'Votre récap WESTBOURSE à la clôture. Information de marché, pas un conseil en investissement.';
+
+/** Photo en multipart (la récap n'a pas d'URL publique). Ne lève jamais. */
+async function envoyerPhotoTelegram(chatId: number, png: Buffer, legende: string): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return false;
+  try {
+    const form = new FormData();
+    form.set('chat_id', String(chatId));
+    form.set('photo', new Blob([new Uint8Array(png)], { type: 'image/png' }), 'westbourse-recap.png');
+    form.set('caption', legende);
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form });
+    const rep = (await r.json().catch(() => ({}))) as { ok?: boolean };
+    return Boolean(rep.ok);
+  } catch {
+    return false;
   }
 }
 
@@ -322,6 +342,28 @@ export async function runCloture(
        serait autant de téléversements. */
     const videoFileId = process.env.TELEGRAM_VIDEO_FILE_ID || null;
 
+    /* Récap du portefeuille en image (0164) : Premium + consentement
+       `recap_soir` + au moins une position. Le consentement est lu À PART et
+       de façon tolérante : colonne absente → le point du soir part sans image,
+       jamais pas du tout. Une seule image par utilisateur, même s'il reçoit
+       sur deux canaux. */
+    const recapVoulu = new Set<string>();
+    if (recapConfiguree()) {
+      const { data: rec, error: errRec } = await sb
+        .from('notification_prefs')
+        .select('user_id')
+        .eq('recap_soir', true)
+        .in('user_id', userIds);
+      if (errRec) logger.warn({ code: errRec.code }, 'recap_soir illisible — récap non jointe ce soir');
+      for (const r of (rec ?? []) as { user_id: string }[]) recapVoulu.add(r.user_id);
+    }
+    const recapCache = new Map<string, Promise<Buffer | null>>();
+    const recapPour = (uid: string): Promise<Buffer | null> => {
+      if (!recapVoulu.has(uid) || !premiumParUser.get(uid) || !(positionsParUser.get(uid)?.length)) return Promise.resolve(null);
+      if (!recapCache.has(uid)) recapCache.set(uid, telechargerRecap(uid));
+      return recapCache.get(uid)!;
+    };
+
     // 4. Composition et envoi, un utilisateur à la fois.
     let sent = 0;
     for (const d of destinataires) {
@@ -390,6 +432,13 @@ export async function runCloture(
             status: 'sent',
           });
         }
+        // La récap suit le message, jamais l'inverse.
+        const pngWa = await recapPour(d.user_id);
+        if (pngWa) {
+          await pauseEntreEnvois();
+          const ri = await envoyerImageWaha(d.whatsapp_chat_id, pngWa, LEGENDE_RECAP);
+          if (!ri.ok) logger.warn({ userId: d.user_id, err: ri.erreur }, 'Récap WhatsApp non envoyée');
+        }
         continue;
       }
 
@@ -421,6 +470,10 @@ export async function runCloture(
          de clôture est déjà parti. */
       if (videoFileId) {
         await envoyer('sendVideo', { chat_id: d.telegram_chat_id, video: videoFileId });
+      }
+      const pngTg = await recapPour(d.user_id);
+      if (pngTg && !(await envoyerPhotoTelegram(d.telegram_chat_id, pngTg, LEGENDE_RECAP))) {
+        logger.warn({ userId: d.user_id }, 'Récap Telegram non envoyée');
       }
 
       if (!cfg.DRY_RUN) {

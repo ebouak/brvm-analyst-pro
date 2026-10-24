@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { estDemandeHumain, lireCommande, rendreCommande, statsWhatsapp } from './commandes';
+import { estDemandeHumain, estDemandeRecap, lireCommande, rendreCommande, statsWhatsapp } from './commandes';
 
 describe('lireCommande — reconnaissance', () => {
   it.each([
@@ -164,5 +164,14 @@ describe('estDemandeHumain', () => {
   });
   it.each(['humain svp', 'je veux un conseiller', 'AIDE', ''])('« %s » → non', (t) => {
     expect(estDemandeHumain(t)).toBe(false);
+  });
+});
+
+describe('estDemandeRecap', () => {
+  it.each(['RECAP', 'récap', '/recap', 'Mon portefeuille', ' PORTEFEUILLE '])('« %s » → récap', (t) => {
+    expect(estDemandeRecap(t)).toBe(true);
+  });
+  it.each(['recap svp', 'où en est mon portefeuille ?', 'COURS SNTS', ''])('« %s » → non', (t) => {
+    expect(estDemandeRecap(t)).toBe(false);
   });
 });

@@ -6,6 +6,8 @@ import { handleIncomingMessage } from '@/lib/telegramAgent/handleMessage';
 import { redeemPairingCode } from '@/lib/telegramAgent/redeemPairing';
 import { sendTelegramReply } from '@/lib/telegramAgent/sendTelegram';
 import { isPairingCode, PAIRING_TTL_MINUTES } from '@/lib/pairingCodes';
+import { estDemandeRecap } from '@/lib/whatsapp/commandes';
+import { traiterDemandeRecap } from '@/lib/recap/demande';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 
 export const dynamic = 'force-dynamic';
@@ -115,6 +117,12 @@ export async function POST(request: Request) {
 
         if (isPairingCode(t)) {
           await redeemPairingCode(chatId, t);
+          return;
+        }
+
+        // RECAP (ou /recap) : image du portefeuille de l'abonné lié, Premium.
+        if (estDemandeRecap(t)) {
+          await traiterDemandeRecap('telegram', chatId, new URL(request.url).origin);
           return;
         }
 

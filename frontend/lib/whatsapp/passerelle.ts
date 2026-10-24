@@ -33,6 +33,8 @@ export interface Passerelle {
   nom: 'waha' | 'meta';
   /** `destinataire` : identifiant de conversation (…@c.us, …@lid) ou téléphone. */
   envoyerTexte(destinataire: string, texte: string): Promise<ResultatEnvoi>;
+  /** Image PNG en mémoire (récap du portefeuille) — jamais d'URL publique. */
+  envoyerImage(destinataire: string, png: Buffer, legende: string): Promise<ResultatEnvoi>;
   etatSession(): Promise<EtatSession>;
 }
 
@@ -69,6 +71,29 @@ const waha: Passerelle = {
       return { ok: false, erreur: (e as Error).name === 'TimeoutError' ? 'WAHA injoignable (délai dépassé)' : 'WAHA injoignable' };
     }
   },
+  async envoyerImage(destinataire, png, legende) {
+    const cfg = configWaha();
+    if (!cfg) return { ok: false, erreur: 'WAHA_URL ou WAHA_API_KEY absent' };
+    const chatId = destinataire.includes('@') ? destinataire : chatIdDepuisTelephone(destinataire);
+    if (!chatId) return { ok: false, erreur: 'destinataire illisible' };
+    try {
+      const r = await fetch(`${cfg.url}/api/sendImage`, {
+        method: 'POST',
+        headers: { 'X-Api-Key': cfg.cle, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session: cfg.session,
+          chatId,
+          file: { mimetype: 'image/png', filename: 'westbourse-recap.png', data: png.toString('base64') },
+          caption: legende.slice(0, 1024),
+        }),
+        signal: AbortSignal.timeout(30_000),
+        cache: 'no-store',
+      });
+      return r.ok ? { ok: true } : { ok: false, erreur: `WAHA HTTP ${r.status}` };
+    } catch (e) {
+      return { ok: false, erreur: (e as Error).name === 'TimeoutError' ? 'WAHA injoignable (délai dépassé)' : 'WAHA injoignable' };
+    }
+  },
   async etatSession() {
     const cfg = configWaha();
     if (!cfg) return { joignable: false, statut: null, compte: null };
@@ -94,6 +119,10 @@ const meta: Passerelle = {
     const numero = destinataire.replace(/@.*$/, '').replace(/[^\d]/g, '');
     const ok = await sendWhatsAppReply(numero, texte);
     return ok ? { ok } : { ok, erreur: 'Cloud API : envoi refusé ou non configuré' };
+  },
+  async envoyerImage() {
+    // L'API officielle exige un média téléversé au préalable : non branché.
+    return { ok: false, erreur: 'image non prise en charge par la passerelle Meta' };
   },
   async etatSession() {
     const configure = Boolean(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID);

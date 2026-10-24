@@ -6,7 +6,8 @@ import { estConversationPrivee, lireEvenementWaha, verifierSignatureWaha } from 
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { statutsRemplacables } from '@/lib/contact/livraison';
 import { recevoirMessageWhatsapp } from '@/lib/contact/whatsappEntrant';
-import { estDemandeHumain, lireCommande } from '@/lib/whatsapp/commandes';
+import { estDemandeHumain, estDemandeRecap, lireCommande } from '@/lib/whatsapp/commandes';
+import { traiterDemandeRecap } from '@/lib/recap/demande';
 import { repondreCommande } from '@/lib/whatsapp/repondreCommande';
 import { appairerWhatsapp } from '@/lib/whatsapp/appairage';
 import { abonneAvecAgent, repondreAgent } from '@/lib/whatsapp/agent';
@@ -94,6 +95,12 @@ export async function POST(req: Request) {
   if (isPairingCode(ev.texte)) {
     await appairerWhatsapp(ev.de, ev.texte);
     return NextResponse.json({ ok: true, appairage: true });
+  }
+  // RECAP : image du portefeuille de l'abonné lié (Premium) — avant les
+  // commandes anonymes, car elle est personnelle.
+  if (estDemandeRecap(ev.texte)) {
+    await traiterDemandeRecap('whatsapp', ev.de, new URL(req.url).origin);
+    return NextResponse.json({ ok: true, recap: true });
   }
   const commande = lireCommande(ev.texte);
   if (commande) {
