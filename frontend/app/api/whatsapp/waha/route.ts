@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createHmac } from 'node:crypto';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
-import { estConversationPrivee, lireEvenementWaha, verifierSignatureWaha } from '@/lib/whatsapp/waha';
+import { estAutoTest, estConversationPrivee, lireEvenementWaha, verifierSignatureWaha } from '@/lib/whatsapp/waha';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { statutsRemplacables } from '@/lib/contact/livraison';
 import { recevoirMessageWhatsapp } from '@/lib/contact/whatsappEntrant';
@@ -85,8 +85,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // Message : ni nos propres envois, ni groupes, statuts ou Chaînes.
-  if (ev.deMoi || !estConversationPrivee(ev.de)) return NextResponse.json({ ok: true, ignore: true });
+  // Message : ni nos propres envois, ni groupes, statuts ou Chaînes — SAUF le
+  // test de l'exploitant, tapé à la main dans la conversation « Vous » du
+  // numéro WESTBOURSE (estAutoTest : jamais nos réponses, source « api »).
+  const autoTest = estAutoTest(ev);
+  if ((ev.deMoi && !autoTest) || !estConversationPrivee(ev.de)) return NextResponse.json({ ok: true, ignore: true });
   if (await dejaTraite(ev.id)) return NextResponse.json({ ok: true, doublon: true });
 
   // Aiguillage (lots A et D) : code d'appairage → liaison du compte ;
@@ -114,6 +117,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, agent: true });
     }
   }
+
+  // Une note que l'exploitant s'écrit à lui-même n'ouvre pas de fiche de contact.
+  if (autoTest) return NextResponse.json({ ok: true, ignore: 'auto-test' });
 
   try {
     const r = await recevoirMessageWhatsapp({ de: ev.de, texte: ev.texte, media: ev.media, prenom: ev.prenom });

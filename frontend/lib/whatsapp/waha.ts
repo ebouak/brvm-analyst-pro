@@ -38,7 +38,13 @@ export function chatIdDepuisTelephone(telephone: string): string | null {
 export type LivraisonWaha = 'envoye' | 'remis' | 'rejete';
 
 export type EvenementWaha =
-  | { type: 'message'; id: string; de: string; texte: string; deMoi: boolean; media: boolean; horodatage: number | null; prenom: string | null }
+  | {
+      type: 'message'; id: string; de: string; texte: string; deMoi: boolean; media: boolean; horodatage: number | null; prenom: string | null;
+      /** `app` = tapé sur le téléphone, `api` = envoyé par la passerelle (nos réponses). */
+      source: string | null;
+      /** Destinataire ; absent ou égal à `de` dans la conversation « Vous ». */
+      vers: string | null;
+    }
   | { type: 'session.status'; session: string | null; statut: string }
   | { type: 'message.ack'; id: string; livraison: LivraisonWaha };
 
@@ -68,6 +74,24 @@ function livraisonDepuisAck(ack: unknown, nom: unknown): LivraisonWaha | null {
   return null;
 }
 
+/**
+ * Message du compte WESTBOURSE à LUI-MÊME, tapé À LA MAIN dans la conversation
+ * « Vous » : c'est ainsi que l'exploitant teste les commandes, l'appairage,
+ * RECAP et l'agent sans second téléphone.
+ *
+ * Trois conditions, toutes nécessaires :
+ *  - `deMoi` : envoyé depuis le numéro WESTBOURSE ;
+ *  - `source === 'app'` : tapé sur le téléphone. Nos réponses partent par
+ *    l'API (`source === 'api'`) et restent ignorées : AUCUNE BOUCLE possible,
+ *    le bot ne peut pas se répondre à lui-même ;
+ *  - pas d'autre destinataire : un message que l'exploitant tape depuis son
+ *    téléphone dans la conversation d'un CLIENT n'est jamais traité comme une
+ *    commande.
+ */
+export function estAutoTest(ev: { deMoi: boolean; source: string | null; de: string; vers: string | null }): boolean {
+  return ev.deMoi && ev.source === 'app' && (!ev.vers || ev.vers === ev.de);
+}
+
 export function lireEvenementWaha(corps: unknown): EvenementWaha | null {
   if (!corps || typeof corps !== 'object') return null;
   const c = corps as { event?: unknown; session?: unknown; payload?: unknown };
@@ -84,6 +108,8 @@ export function lireEvenementWaha(corps: unknown): EvenementWaha | null {
       media: p.hasMedia === true,
       horodatage: typeof p.timestamp === 'number' ? p.timestamp : null,
       prenom: prenomAffiche(p),
+      source: typeof p.source === 'string' ? p.source : null,
+      vers: typeof p.to === 'string' && p.to ? p.to : null,
     };
   }
   if (c.event === 'message.ack') {
