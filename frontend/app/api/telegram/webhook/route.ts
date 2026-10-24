@@ -122,7 +122,7 @@ export async function POST(request: Request) {
 
         // RECAP (ou /recap) : image du portefeuille de l'abonné lié, Premium.
         if (estDemandeRecap(t)) {
-          await traiterDemandeRecap('telegram', chatId);
+          await traiterDemandeRecap('telegram', chatId, new URL(request.url).origin);
           return;
         }
 

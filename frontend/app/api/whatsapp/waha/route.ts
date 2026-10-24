@@ -99,7 +99,7 @@ export async function POST(req: Request) {
   // RECAP : image du portefeuille de l'abonné lié (Premium) — avant les
   // commandes anonymes, car elle est personnelle.
   if (estDemandeRecap(ev.texte)) {
-    await traiterDemandeRecap('whatsapp', ev.de);
+    await traiterDemandeRecap('whatsapp', ev.de, new URL(req.url).origin);
     return NextResponse.json({ ok: true, recap: true });
   }
   const commande = lireCommande(ev.texte);

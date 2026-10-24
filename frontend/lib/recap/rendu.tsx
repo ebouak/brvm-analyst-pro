@@ -1,8 +1,6 @@
 import 'server-only';
 import { ImageResponse } from 'next/og';
 import type { Recap } from './calcul';
-import { chargerRecap } from './donnees';
-import { getServiceClient } from '@/lib/billing/serviceClient';
 
 /**
  * Image de la récap (1080×1350, portrait — le format qu'affichent sans
@@ -12,6 +10,10 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
  * mise en cache partagé, et ne porte que des chiffres calculés (calcul.ts).
  * Pas d'emoji ni d'espace fine insécable : la police par défaut de next/og ne
  * les a pas, ils s'afficheraient en carrés vides.
+ *
+ * Rendu UNIQUEMENT par la route Edge /api/recap/image, comme toutes les images
+ * du site : en runtime Node, @vercel/og bâtit sous Windows un chemin de police
+ * invalide (constaté le 2026-10-24). Les envois demandent l'image à la route.
  */
 export const LARGEUR = 1080;
 export const HAUTEUR = 1350;
@@ -113,10 +115,11 @@ export function imageRecap(r: Recap, prenom?: string | null): ImageResponse {
             <div style={{ display: 'flex', height: 26, borderRadius: 13, overflow: 'hidden', marginBottom: 16 }}>
               {r.secteurs.map((s, i) => <div key={s.secteur} style={{ display: 'flex', width: `${Math.max(1, s.poids * 100)}%`, background: PALETTE[i % PALETTE.length] }} />)}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 28px' }}>
+            {/* Marges explicites : le moteur d'image ignore `gap` entre lignes repliées. */}
+            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               {r.secteurs.map((s, i) => (
-                <div key={s.secteur} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 26, color: C.gris }}>
-                  <div style={{ display: 'flex', width: 18, height: 18, borderRadius: 9, background: PALETTE[i % PALETTE.length] }} />
+                <div key={s.secteur} style={{ display: 'flex', alignItems: 'center', fontSize: 26, color: C.gris, marginRight: 32, marginBottom: 8 }}>
+                  <div style={{ display: 'flex', width: 18, height: 18, borderRadius: 9, marginRight: 10, background: PALETTE[i % PALETTE.length] }} />
                   {`${s.secteur} ${nombre(s.poids * 100, 0)} %`}
                 </div>
               ))}
@@ -153,18 +156,4 @@ export function imageRecap(r: Recap, prenom?: string | null): ImageResponse {
       headers: { 'Cache-Control': 'private, no-store, max-age=0', 'X-Robots-Tag': 'noindex' },
     },
   );
-}
-
-/**
- * PNG de la récap d'un utilisateur, pour les envois directs (webhooks
- * WhatsApp/Telegram) : null si rien à montrer (pas de séance, portefeuille
- * vide). L'appelant a DÉJÀ vérifié l'identité et le niveau d'accès.
- */
-export async function pngRecap(userId: string): Promise<Buffer | null> {
-  const db = getServiceClient();
-  const recap = await chargerRecap(db, userId);
-  if (!recap || recap.vide) return null;
-  const { data: profil } = await db.from('profiles').select('display_name').eq('id', userId).maybeSingle();
-  const prenom = ((profil?.display_name as string | null) ?? '').trim().split(/\s+/)[0] || null;
-  return Buffer.from(await imageRecap(recap, prenom).arrayBuffer());
 }

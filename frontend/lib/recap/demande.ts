@@ -5,7 +5,7 @@ import { checkRateLimit } from '@/lib/server/rateLimit';
 import { isAdminEmail } from '@/lib/server/admin-emails';
 import { passerelleWhatsapp } from '@/lib/whatsapp/passerelle';
 import { sendTelegramPhoto, sendTelegramReply } from '@/lib/telegramAgent/sendTelegram';
-import { pngRecap } from './rendu';
+import { telechargerRecap } from './telecharger';
 
 /**
  * Commande RECAP sur WhatsApp ou Telegram (spec 2026-10-24-recap-portefeuille).
@@ -21,7 +21,8 @@ const SITE = 'https://www.westbourse.com';
 
 type Canal = 'whatsapp' | 'telegram';
 
-export async function traiterDemandeRecap(canal: Canal, destinataire: string | number): Promise<void> {
+/** `origine` : l'URL du site qui a reçu le webhook (l'image y est rendue par la route Edge). */
+export async function traiterDemandeRecap(canal: Canal, destinataire: string | number, origine: string): Promise<void> {
   const wa = canal === 'whatsapp';
   const texte = (t: string) =>
     wa ? passerelleWhatsapp().envoyerTexte(String(destinataire), t).catch(() => null) : sendTelegramReply(destinataire, t.replace(/\*/g, ''));
@@ -49,11 +50,17 @@ export async function traiterDemandeRecap(canal: Canal, destinataire: string | n
       return;
     }
 
-    const png = await pngRecap(userId);
-    if (!png) {
+    const recap = await telechargerRecap(userId, origine);
+    if (recap.etat === 'vide') {
       await texte(`Votre portefeuille est vide pour l'instant. Ajoutez vos positions sur ${SITE}/portefeuille`);
       return;
     }
+    if (recap.etat === 'panne') {
+      console.error('[recap] image indisponible (secret, site ou rendu)');
+      await texte(`La récap est momentanément indisponible. Réessayez dans quelques minutes, ou consultez-la sur ${SITE}/portefeuille`);
+      return;
+    }
+    const png = recap.png;
     const legende = 'Votre récap WESTBOURSE. Information de marché, pas un conseil en investissement.';
     const ok = wa
       ? (await passerelleWhatsapp().envoyerImage(String(destinataire), png, legende)).ok

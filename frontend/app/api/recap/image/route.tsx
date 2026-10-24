@@ -5,7 +5,7 @@ import { chargerRecap } from '@/lib/recap/donnees';
 import { imageRecap } from '@/lib/recap/rendu';
 import { verifierRecap } from '@/lib/recap/signature';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -18,6 +18,7 @@ export const dynamic = 'force-dynamic';
  * Un lien signé invalide est refusé (401) SANS retomber sur la session : on ne
  * mélange pas les deux voies.
  *
+ * Runtime Edge, comme toutes les images du site (next/og éprouvé en Edge).
  * Réponse privée et non mise en cache ; `?telecharger=1` propose le fichier.
  * Portefeuille vide → 404 (les workers n'envoient alors rien).
  */
@@ -28,7 +29,7 @@ export async function GET(req: Request) {
   let userId: string | null = null;
 
   if (p.has('sig')) {
-    userId = verifierRecap({ u: p.get('u'), exp: p.get('exp'), sig: p.get('sig') }, process.env.RECAP_SECRET);
+    userId = await verifierRecap({ u: p.get('u'), exp: p.get('exp'), sig: p.get('sig') }, process.env.RECAP_SECRET);
     if (!userId) return NextResponse.json({ erreur: 'Lien invalide ou expiré.' }, { status: 401, headers: NON_CACHE });
   } else {
     const { data } = await createClient().auth.getUser();
@@ -45,7 +46,9 @@ export async function GET(req: Request) {
   if (recap.vide) return NextResponse.json({ erreur: 'Portefeuille vide.' }, { status: 404, headers: NON_CACHE });
 
   const { data: profil } = await db.from('profiles').select('display_name').eq('id', userId).maybeSingle();
-  const prenom = ((profil?.display_name as string | null) ?? '').trim().split(/\s+/)[0] || null;
+  const brut = ((profil?.display_name as string | null) ?? '').trim().split(/\s+/)[0] ?? '';
+  // « feca » → « Feca » : le nom affiché est saisi librement par l'utilisateur.
+  const prenom = brut ? brut.charAt(0).toLocaleUpperCase('fr-FR') + brut.slice(1) : null;
   const image = imageRecap(recap, prenom);
 
   if (p.get('telecharger') === '1') {
