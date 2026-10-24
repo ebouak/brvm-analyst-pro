@@ -1,5 +1,5 @@
 {
-  "_": "Vidéo « WESTBOURSE sur WhatsApp et Telegram » (2026-10-24). Source unique : textes affichés ET voix off. Lu par canaux.tsx et canaux-voix.mjs. Les chiffres de marché ne sont PAS ici : canaux-prep.mjs les lit en base au moment du rendu (public/canaux/donnees.json), avec leur date de séance. Chaque fonction présentée existe en production : Chaîne (lot B), commandes (lot A), appairage + assistant (lot D), point du soir (lot E).",
+  "_": "Vidéo « WESTBOURSE sur WhatsApp et Telegram » (2026-10-24). Source unique : textes affichés ET voix off. Lu par canaux.tsx et canaux-voix.mjs. Les chiffres de marché ne sont PAS ici : canaux-prep.mjs les lit en base au moment du rendu (public/canaux/donnees.json), avec leur date de séance. Chaque fonction présentée existe en production : Chaîne (lot B, vraie vidéo de séance), commandes (lot A), appairage + assistant (lot D), point du soir (lot E). Les bulles affichent le texte produit par le code de production (rendreCommande, legendeWhatsapp) ; les écrans du site sont de vraies captures (video/captures-showreel.mjs).",
   "voixTts": "fr-FR-DeniseNeural",
   "numero": "+33 7 43 65 72 71",
   "chaine": "whatsapp.com/channel/0029VbDkKjK5K3zL18MshI0d",
@@ -20,7 +20,7 @@
       "id": "commandes",
       "titre": "Des réponses immédiates",
       "sous": "Écrivez AIDE",
-      "voix": "Une question ? Écrivez AIDE au +33 7 43 65 72 71. Cours SNTS : le dernier cours. Palmarès : les plus fortes hausses du jour."
+      "voix": "Une question ? Écrivez AIDE au plus 33, 7, 43, 65, 72, 71. Cours SNTS : le dernier cours. Palmarès : les plus fortes hausses du jour."
     },
     {
       "id": "appairage",
@@ -47,9 +47,15 @@
       "voix": "Vous préférez Telegram ? Tout existe aussi sur le canal WESTBOURSE."
     },
     {
+      "id": "site",
+      "titre": "Tout le détail, sur le site",
+      "sous": "Chaque société analysée",
+      "voix": "Et pour aller plus loin, chaque société est analysée en détail sur westbourse point com."
+    },
+    {
       "id": "outro",
       "titre": "Écrivez AIDE",
-      "voix": "Information de marché, pas un conseil en investissement. Rendez-vous sur westbourse point com."
+      "voix": "Information de marché, pas un conseil en investissement. Écrivez AIDE, dès maintenant."
     }
   ]
 }

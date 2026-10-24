@@ -2,7 +2,11 @@ import React from 'react';
 import {
   AbsoluteFill,
   Audio,
+  Img,
+  OffthreadVideo,
   Sequence,
+  interpolate,
+  random,
   spring,
   staticFile,
   useCurrentFrame,
@@ -10,32 +14,36 @@ import {
   type CalculateMetadataFunction,
 } from 'remotion';
 import { MONO, SANS, SERIF } from './polices';
-import { C, Entre, Fond, Logo, instant, t } from './ecosysteme';
+import { C, Entre, Logo, instant, t } from './ecosysteme';
 import CONTENU from './canaux.json';
 
 /**
  * « WESTBOURSE sur WhatsApp et Telegram » — vidéo verticale 1080×1920, voix off.
  *
- * Source unique : canaux.json (textes affichés ET voix). Durée de chaque scène
- * = sa piste de voix (public/canaux/durees.json, canaux-voix.mjs) + une
- * respiration. Les chiffres montrés dans les conversations viennent de
- * public/canaux/donnees.json, lu en base par canaux-prep.mjs, avec la date de
- * séance : rien n'est saisi à la main.
+ * VRAI d'un bout à l'autre :
+ *  - les bulles affichent le texte produit par le CODE DE PRODUCTION
+ *    (rendreCommande, legendeWhatsapp) à partir des chiffres lus en base par
+ *    canaux-prep.mjs (public/canaux/donnees.json), avec leur date de séance ;
+ *  - le post de la Chaîne joue la VRAIE vidéo de séance publiée ce soir-là ;
+ *  - les écrans du site sont de vraies captures (video/captures-showreel.mjs).
+ * Source des textes et de la voix : canaux.json. Durées : pistes de voix
+ * (public/canaux/durees.json, canaux-voix.mjs).
  */
 
 type SceneC = { id: string; titre: string; sous?: string; voix: string };
 const SCENES = CONTENU.scenes as SceneC[];
 const FPS = 30;
-const RESPIRATION = 0.7;
+const RESPIRATION = 0.6;
 
 type Donnees = {
   seanceFr: string;
-  snts: { cours: number; variation: number };
-  palmares: { code: string; cours: number; variation: number }[];
   hausses: number;
   baisses: number;
   valeurs: number;
   composite: { valeur: number; variation: number };
+  videoSeance: string | null;
+  legendeChaine: string | null;
+  messages: { aide: string; cours: string; palmares: string };
 };
 type Props = { durees: Record<string, number> | null; donnees: Donnees | null };
 
@@ -46,14 +54,85 @@ export const calculerCanaux: CalculateMetadataFunction<Props> = async () => {
   return { durationInFrames: total, props: { durees, donnees } };
 };
 
-// ── Mise en forme des nombres (fr) ──────────────────────────────────────────
-const nb = (x: number, d = 0) => x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
-const varia = (v: number) => `${v >= 0 ? '▲ +' : '▼ −'}${nb(Math.abs(v), 2)} %`;
+const nb = (x: number, d = 2) => x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const varia = (v: number) => `${v >= 0 ? '▲ +' : '▼ −'}${nb(Math.abs(v))} %`;
+/** Le corps d'un message de production, sans son pied (mention + incitation). */
+const corps = (m: string) => m.split('\n\n_Information de marché')[0];
 
-const WA = { vert: '#25D366', fond: '#0b141a', entete: '#1f2c34', moi: '#005c4b', lui: '#202c33', gris: '#8696a0' };
+const WA = { vert: '#25D366', fond: '#0b141a', entete: '#1f2c34', moi: '#005c4b', lui: '#202c33', gris: '#8696a0', lien: '#53bdeb' };
 const TG = { bleu: '#2AABEE', fond: '#0e1621', entete: '#17212b', lui: '#182533' };
 
-// ── Éléments ────────────────────────────────────────────────────────────────
+// ── Texte WhatsApp : *gras*, _italique_, liens ──────────────────────────────
+function TexteWa({ texte }: { texte: string }) {
+  return (
+    <>
+      {texte.split('\n').map((ligne, i) => (
+        <div key={i} style={{ minHeight: '1.38em' }}>
+          {ligne.split(/(\*[^*\n]+\*|_[^_\n]+_|https?:\/\/\S+)/g).map((m, j) =>
+            /^\*[^*]+\*$/.test(m) ? <b key={j}>{m.slice(1, -1)}</b>
+            : /^_[^_]+_$/.test(m) ? <i key={j} style={{ color: '#c7d0d5' }}>{m.slice(1, -1)}</i>
+            : /^https?:/.test(m) ? <span key={j} style={{ color: WA.lien }}>{m.replace(/^https?:\/\/(www\.)?/, '')}</span>
+            : <React.Fragment key={j}>{m}</React.Fragment>,
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
+
+// ── Décor : vraie capture en fond, particules, reflet ───────────────────────
+function FondEcran({ ecran, teinte = WA.vert }: { ecran: string; teinte?: string }) {
+  const f = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ background: C.fond, overflow: 'hidden' }}>
+      <Img
+        src={staticFile(`ecrans/${ecran}.png`)}
+        style={{
+          position: 'absolute', width: '220%', left: '-60%', top: '-10%', opacity: 0.22,
+          filter: 'blur(10px) saturate(1.2)',
+          transform: `scale(${1.05 + f * 0.0008}) translateY(${-f * 0.35}px)`,
+        }}
+      />
+      <AbsoluteFill style={{ background: `radial-gradient(ellipse 120% 60% at 50% 15%, ${teinte}2e 0%, transparent 60%), linear-gradient(180deg, rgba(3,3,3,.55), rgba(3,3,3,.92) 70%)` }} />
+      <Particules />
+    </AbsoluteFill>
+  );
+}
+
+function Particules() {
+  const f = useCurrentFrame();
+  return (
+    <AbsoluteFill>
+      {Array.from({ length: 34 }, (_, i) => {
+        const x = random(`x${i}`) * 1080;
+        const v = 0.6 + random(`v${i}`) * 1.6;
+        const y = 1920 - ((f * v + random(`y${i}`) * 1920) % 2050);
+        const taille = 3 + random(`s${i}`) * 6;
+        return (
+          <div key={i} style={{
+            position: 'absolute', left: x, top: y, width: taille, height: taille, borderRadius: taille,
+            background: i % 3 ? C.teal : WA.vert, opacity: 0.18 + random(`o${i}`) * 0.35,
+            boxShadow: `0 0 ${taille * 3}px ${i % 3 ? C.teal : WA.vert}`,
+          }} />
+        );
+      })}
+    </AbsoluteFill>
+  );
+}
+
+/** Titre avec reflet lumineux qui le traverse. */
+function Brillant({ children, debut = 0, taille = 76 }: { children: React.ReactNode; debut?: number; taille?: number }) {
+  const f = useCurrentFrame();
+  const pos = interpolate(f, [debut + 10, debut + 50], [-60, 160], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  return (
+    <span style={{
+      fontFamily: SERIF, fontSize: taille, lineHeight: 1.06, fontWeight: 600,
+      backgroundImage: `linear-gradient(105deg, ${C.blanc} 0%, ${C.blanc} ${pos - 12}%, #b8fff4 ${pos}%, ${C.blanc} ${pos + 12}%, ${C.blanc} 100%)`,
+      WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+    }}>{children}</span>
+  );
+}
+
 function Marque() {
   return (
     <div style={{ position: 'absolute', top: 80, left: 70, display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -65,70 +144,88 @@ function Marque() {
 
 function Titre({ s }: { s: SceneC }) {
   return (
-    <div style={{ position: 'absolute', top: 200, left: 70, right: 70 }}>
-      <Entre debut={4}>
-        <div style={{ fontFamily: SERIF, fontSize: 76, lineHeight: 1.08, fontWeight: 600, color: C.blanc }}>{s.titre}</div>
-      </Entre>
+    <div style={{ position: 'absolute', top: 190, left: 70, right: 70 }}>
+      <Entre debut={2}><Brillant debut={2}>{s.titre}</Brillant></Entre>
       {s.sous && (
-        <Entre debut={12}>
-          <div style={{ marginTop: 18, fontFamily: SANS, fontSize: 36, color: C.gris }}>{s.sous}</div>
+        <Entre debut={10}>
+          <div style={{ marginTop: 16, fontFamily: SANS, fontSize: 36, color: C.gris }}>{s.sous}</div>
         </Entre>
       )}
     </div>
   );
 }
 
-/** Téléphone : en-tête de conversation + zone de messages. */
-function Telephone({ nom, sous, theme = 'wa', top = 560, hauteur = 1220, children }: {
+/** Téléphone en 3D : entre de biais, se redresse, flotte. */
+function Telephone({ nom, sous, theme = 'wa', top = 540, hauteur = 1240, children }: {
   nom: string; sous: string; theme?: 'wa' | 'tg'; top?: number; hauteur?: number; children: React.ReactNode;
 }) {
   const f = useCurrentFrame();
-  const p = t(f, 0, 18);
+  const { fps } = useVideoConfig();
+  const p = spring({ frame: f, fps, config: { damping: 18, stiffness: 90 } });
   const tg = theme === 'tg';
   return (
-    <div style={{
-      position: 'absolute', left: 110, width: 860, top, height: hauteur, borderRadius: 64, overflow: 'hidden',
-      background: tg ? TG.fond : WA.fond, border: `2px solid ${C.bord}`, boxShadow: '0 40px 120px rgba(0,0,0,.6)',
-      opacity: p, transform: `translateY(${(1 - p) * 80}px)`,
-    }}>
-      <div style={{ height: 130, background: tg ? TG.entete : WA.entete, display: 'flex', alignItems: 'center', gap: 22, padding: '0 34px' }}>
-        <div style={{ width: 76, height: 76, borderRadius: 38, background: '#0a1417', display: 'grid', placeItems: 'center' }}>
-          <Logo taille={46} />
+    <div style={{ position: 'absolute', left: 110, width: 860, top, height: hauteur, perspective: 1800 }}>
+      <div style={{
+        width: '100%', height: '100%', borderRadius: 64, overflow: 'hidden',
+        background: tg ? TG.fond : WA.fond, border: `3px solid rgba(255,255,255,.14)`,
+        boxShadow: `0 50px 140px rgba(0,0,0,.7), 0 0 80px ${tg ? TG.bleu : WA.vert}22`,
+        opacity: p,
+        transform: `translateY(${(1 - p) * 220 + Math.sin(f / 22) * 6}px) rotateY(${(1 - p) * -28 + Math.sin(f / 40) * 2}deg) rotateX(${(1 - p) * 12}deg)`,
+      }}>
+        <div style={{ height: 130, background: tg ? TG.entete : WA.entete, display: 'flex', alignItems: 'center', gap: 22, padding: '0 34px' }}>
+          <div style={{ width: 76, height: 76, borderRadius: 38, background: '#0a1417', display: 'grid', placeItems: 'center' }}>
+            <Logo taille={46} />
+          </div>
+          <div>
+            <div style={{ fontFamily: SANS, fontSize: 34, fontWeight: 700, color: C.blanc }}>{nom}</div>
+            <div style={{ fontFamily: SANS, fontSize: 24, color: tg ? '#7f91a4' : WA.gris }}>{sous}</div>
+          </div>
         </div>
-        <div>
-          <div style={{ fontFamily: SANS, fontSize: 34, fontWeight: 700, color: C.blanc }}>{nom}</div>
-          <div style={{ fontFamily: SANS, fontSize: 24, color: tg ? '#7f91a4' : WA.gris }}>{sous}</div>
-        </div>
+        <div style={{ position: 'relative', padding: '30px 30px', height: hauteur - 130, overflow: 'hidden' }}>{children}</div>
       </div>
-      <div style={{ position: 'relative', padding: '30px 30px', height: hauteur - 130, overflow: 'hidden' }}>{children}</div>
     </div>
   );
 }
 
-/** Bulle de message, qui apparaît à `debut` (images, relatives à la scène). */
-function Bulle({ debut, moi = false, theme = 'wa', children }: { debut: number; moi?: boolean; theme?: 'wa' | 'tg'; children: React.ReactNode }) {
+/** « en train d'écrire… » puis la bulle. */
+function Bulle({ debut, moi = false, theme = 'wa', ecrit = 0, children }: {
+  debut: number; moi?: boolean; theme?: 'wa' | 'tg'; ecrit?: number; children: React.ReactNode;
+}) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const s = spring({ frame: f - debut, fps, config: { damping: 15, stiffness: 140 } });
+  const apparait = debut + ecrit;
+  const s = spring({ frame: f - apparait, fps, config: { damping: 14, stiffness: 150 } });
   const fond = theme === 'tg' ? (moi ? '#2b5278' : TG.lui) : moi ? WA.moi : WA.lui;
+  if (f < debut) return null;
+  if (f < apparait) {
+    return (
+      <div style={{ display: 'flex', marginBottom: 22 }}>
+        <div style={{ padding: '22px 28px', borderRadius: 26, background: fond, display: 'flex', gap: 10 }}>
+          {[0, 1, 2].map((i) => (
+            <span key={i} style={{ width: 14, height: 14, borderRadius: 7, background: WA.gris, opacity: 0.35 + 0.65 * Math.abs(Math.sin((f - debut) / 5 + i)) }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div style={{ display: 'flex', justifyContent: moi ? 'flex-end' : 'flex-start', marginBottom: 22, opacity: f < debut ? 0 : s }}>
+    <div style={{ display: 'flex', justifyContent: moi ? 'flex-end' : 'flex-start', marginBottom: 22, opacity: s }}>
       <div style={{
-        maxWidth: 640, padding: '20px 26px', borderRadius: 26, background: fond, color: C.blanc,
-        fontFamily: SANS, fontSize: 31, lineHeight: 1.38, whiteSpace: 'pre-line',
-        transform: `scale(${0.85 + 0.15 * s})`, transformOrigin: moi ? 'right bottom' : 'left bottom',
+        maxWidth: 680, padding: '20px 26px', borderRadius: 26, background: fond, color: C.blanc,
+        fontFamily: SANS, fontSize: 29, lineHeight: 1.38,
+        transform: `scale(${0.8 + 0.2 * s}) translateY(${(1 - s) * 30}px)`, transformOrigin: moi ? 'right bottom' : 'left bottom',
         borderBottomRightRadius: moi ? 8 : 26, borderBottomLeftRadius: moi ? 26 : 8,
       }}>{children}</div>
     </div>
   );
 }
 
-const G = ({ children }: { children: React.ReactNode }) => <b style={{ fontWeight: 700 }}>{children}</b>;
-
 function Pastille({ debut, couleur, children }: { debut: number; couleur: string; children: React.ReactNode }) {
+  const f = useCurrentFrame();
+  const halo = 0.5 + 0.5 * Math.sin((f - debut) / 8);
   return (
-    <Entre debut={debut} dy={24}>
-      <div style={{ padding: '18px 34px', borderRadius: 999, background: `${couleur}22`, border: `2px solid ${couleur}`, color: C.blanc, fontFamily: SANS, fontSize: 38, fontWeight: 700 }}>
+    <Entre debut={debut} dy={30}>
+      <div style={{ padding: '20px 38px', borderRadius: 999, background: `${couleur}26`, border: `2px solid ${couleur}`, color: C.blanc, fontFamily: SANS, fontSize: 40, fontWeight: 700, boxShadow: `0 0 ${20 + halo * 30}px ${couleur}66` }}>
         {children}
       </div>
     </Entre>
@@ -139,10 +236,12 @@ function Pastille({ debut, couleur, children }: { debut: number; couleur: string
 function Intro({ s, d }: { s: SceneC; d: number }) {
   const f = useCurrentFrame();
   return (
-    <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', gap: 60 }}>
-      <Logo taille={300} prog={t(f, 0, 40)} />
-      <Entre debut={20}>
-        <div style={{ fontFamily: SERIF, fontSize: 92, lineHeight: 1.06, textAlign: 'center', padding: '0 80px', color: C.blanc }}>{s.titre}</div>
+    <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', gap: 56 }}>
+      <div style={{ transform: `scale(${interpolate(f, [0, 30], [0.6, 1], { extrapolateRight: 'clamp' })})`, filter: `drop-shadow(0 0 ${30 + 20 * Math.sin(f / 9)}px ${C.teal}88)` }}>
+        <Logo taille={300} prog={t(f, 0, 36)} />
+      </div>
+      <Entre debut={14}>
+        <div style={{ textAlign: 'center', padding: '0 70px' }}><Brillant debut={14} taille={96}>{s.titre}</Brillant></div>
       </Entre>
       <div style={{ display: 'flex', gap: 28 }}>
         <Pastille debut={instant(s.voix, 'WhatsApp', d)} couleur={WA.vert}>WhatsApp</Pastille>
@@ -155,25 +254,21 @@ function Intro({ s, d }: { s: SceneC; d: number }) {
 function Chaine({ s, d, x }: { s: SceneC; d: number; x: Donnees }) {
   const f = useCurrentFrame();
   const tNumero = instant(s.voix, 'personne', d);
+  const legende = (x.legendeChaine ?? '').split('\n').slice(0, 3).join('\n');
   return (
     <>
       <Titre s={s} />
       <Telephone nom="WESTBOURSE Bourse BRVM" sous="Chaîne WhatsApp">
-        <Bulle debut={14}>
-          <div style={{ width: 560, height: 520, borderRadius: 18, marginBottom: 18, background: 'linear-gradient(160deg, #0a1417, #061012)', border: `1px solid ${C.bord}`, padding: 34, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div style={{ fontFamily: MONO, fontSize: 24, letterSpacing: '.2em', color: C.teal }}>VIDÉO DE SÉANCE</div>
-            <div>
-              <div style={{ fontFamily: SERIF, fontSize: 46, color: C.blanc }}>BRVM Composite</div>
-              <div style={{ fontFamily: MONO, fontSize: 56, fontWeight: 700, color: x.composite.variation >= 0 ? '#3fe18b' : '#ff6b6b' }}>{varia(x.composite.variation)}</div>
-              <div style={{ fontFamily: SANS, fontSize: 28, color: C.gris, marginTop: 10 }}>
-                {x.hausses} hausses · {x.baisses} baisses
-              </div>
-            </div>
-            <div style={{ fontFamily: SANS, fontSize: 24, color: C.sourd }}>▶ vidéo du soir</div>
+        <Bulle debut={10}>
+          {/* La VRAIE vidéo de séance, publiée ce soir-là sur la Chaîne. */}
+          <div style={{ width: 400, height: 711, borderRadius: 18, overflow: 'hidden', marginBottom: 16, background: '#000' }}>
+            {x.videoSeance ? (
+              <OffthreadVideo src={x.videoSeance} muted startFrom={60} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : null}
           </div>
-          📊 <G>BRVM — séance du {x.seanceFr}</G>
+          <TexteWa texte={legende} />
         </Bulle>
-        <div style={{ position: 'absolute', left: 30, right: 30, bottom: 40, opacity: t(f, tNumero, tNumero + 14) }}>
+        <div style={{ position: 'absolute', left: 30, right: 30, bottom: 34, opacity: t(f, tNumero, tNumero + 14) }}>
           <div style={{ textAlign: 'center', fontFamily: SANS, fontSize: 30, color: WA.gris }}>🔒 Votre numéro reste invisible des autres abonnés</div>
         </div>
       </Telephone>
@@ -186,25 +281,18 @@ function Commandes({ s, d, x }: { s: SceneC; d: number; x: Donnees }) {
   const tAide = instant(s.voix, 'AIDE', d);
   const tCours = instant(s.voix, 'Cours SNTS', d);
   const tPalm = instant(s.voix, 'Palmarès', d);
-  const defile = t(f, tPalm - 6, tPalm + 10) * 400;
+  const defile = t(f, tCours - 4, tCours + 12) * 470 + t(f, tPalm - 4, tPalm + 12) * 470;
   return (
     <>
       <Titre s={s} />
       <Telephone nom="WESTBOURSE" sous={CONTENU.numero}>
         <div style={{ transform: `translateY(${-defile}px)` }}>
           <Bulle debut={tAide} moi>AIDE</Bulle>
-          <Bulle debut={tAide + 16}>
-            👋 <G>Assistant WESTBOURSE</G>{'\n'}• <G>COURS SNTS</G> — dernier cours{'\n'}• <G>DIV ORAC</G> — dividendes{'\n'}• <G>PALMARES</G> — hausses du jour
-          </Bulle>
+          <Bulle debut={tAide + 4} ecrit={14}><TexteWa texte={corps(x.messages.aide)} /></Bulle>
           <Bulle debut={tCours} moi>COURS SNTS</Bulle>
-          <Bulle debut={tCours + 16}>
-            📈 <G>SNTS — SONATEL</G>{'\n'}Séance du {x.seanceFr}{'\n'}💰 Cours : <G>{nb(x.snts.cours)} FCFA</G>  {varia(x.snts.variation)}
-          </Bulle>
+          <Bulle debut={tCours + 4} ecrit={12}><TexteWa texte={corps(x.messages.cours)} /></Bulle>
           <Bulle debut={tPalm} moi>PALMARES</Bulle>
-          <Bulle debut={tPalm + 16}>
-            🏆 <G>Palmarès — séance du {x.seanceFr}</G>
-            {x.palmares.map((l, i) => `\n${i + 1}. ${l.code}  ${nb(l.cours)} FCFA  ${varia(l.variation)}`).join('')}
-          </Bulle>
+          <Bulle debut={tPalm + 4} ecrit={12}><TexteWa texte={corps(x.messages.palmares)} /></Bulle>
         </div>
       </Telephone>
     </>
@@ -212,32 +300,36 @@ function Commandes({ s, d, x }: { s: SceneC; d: number; x: Donnees }) {
 }
 
 function Appairage({ s, d }: { s: SceneC; d: number }) {
+  const f = useCurrentFrame();
   const tCode = instant(s.voix, 'envoyant', d);
+  const vol = t(f, tCode - 8, tCode + 6);
   return (
     <>
       <Titre s={s} />
-      <Entre debut={10} style={{ position: 'absolute', left: 110, right: 110, top: 520 }}>
-        <div style={{ borderRadius: 32, background: C.surface, border: `1px solid ${C.bord}`, padding: '34px 40px' }}>
+      <Entre debut={8} style={{ position: 'absolute', left: 110, right: 110, top: 500 }}>
+        <div style={{ borderRadius: 32, background: 'rgba(10,20,23,.92)', border: `1px solid ${C.bord}`, padding: '32px 40px', boxShadow: `0 0 60px ${C.cyan}22` }}>
           <div style={{ fontFamily: SANS, fontSize: 28, color: C.gris }}>westbourse.com · Paramètres → Mes alertes</div>
-          <div style={{ fontFamily: MONO, fontSize: 84, fontWeight: 700, letterSpacing: '.18em', color: C.cyan, margin: '14px 0' }}>WB-7K3QPA</div>
+          <div style={{ fontFamily: MONO, fontSize: 84, fontWeight: 700, letterSpacing: '.18em', color: C.cyan, margin: '12px 0', opacity: 1 - vol * 0.6, transform: `translateY(${vol * 60}px) scale(${1 - vol * 0.2})` }}>WB-7K3QPA</div>
           <div style={{ fontFamily: SANS, fontSize: 26, color: C.sourd }}>Code d'exemple · valable 15 minutes</div>
         </div>
       </Entre>
       <Telephone nom="WESTBOURSE" sous={CONTENU.numero} top={900} hauteur={880}>
         <Bulle debut={tCode} moi>WB-7K3QPA</Bulle>
-        <Bulle debut={tCode + 20}>
-          ✅ <G>Votre WhatsApp est lié à votre compte WESTBOURSE.</G>{'\n'}Tapez <G>AIDE</G> pour les commandes rapides.
+        <Bulle debut={tCode + 4} ecrit={14}>
+          <TexteWa texte={'✅ *Votre WhatsApp est lié à votre compte WESTBOURSE.*\n\n💡 Tapez *AIDE* pour les commandes rapides, *HUMAIN* pour écrire à l’équipe.'} />
         </Bulle>
       </Telephone>
     </>
   );
 }
 
-function Tuile({ debut, valeur, libelle, couleur }: { debut: number; valeur: string; libelle: string; couleur: string }) {
+function Compteur({ debut, jusqua, libelle, couleur }: { debut: number; jusqua: number; libelle: string; couleur: string }) {
+  const f = useCurrentFrame();
+  const v = Math.round(interpolate(f, [debut, debut + 20], [0, jusqua], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
   return (
     <Entre debut={debut} style={{ flex: 1 }}>
-      <div style={{ borderRadius: 28, background: C.surface, border: `2px solid ${couleur}`, padding: '26px 30px', textAlign: 'center' }}>
-        <div style={{ fontFamily: MONO, fontSize: 54, fontWeight: 700, color: couleur, whiteSpace: 'nowrap' }}>{valeur}</div>
+      <div style={{ borderRadius: 28, background: 'rgba(10,20,23,.92)', border: `2px solid ${couleur}`, padding: '24px 26px', textAlign: 'center', boxShadow: `0 0 50px ${couleur}33` }}>
+        <div style={{ fontFamily: MONO, fontSize: 60, fontWeight: 700, color: couleur, whiteSpace: 'nowrap' }}>{v} / jour</div>
         <div style={{ fontFamily: SANS, fontSize: 28, color: C.gris }}>{libelle}</div>
       </div>
     </Entre>
@@ -248,16 +340,15 @@ function Assistant({ s, d }: { s: SceneC; d: number }) {
   return (
     <>
       <Titre s={s} />
-      <Telephone nom="WESTBOURSE" sous="Assistant" top={560} hauteur={880}>
-        <Bulle debut={14} moi>Où en est mon portefeuille ?</Bulle>
-        <Bulle debut={34}>
-          ⭐ <G>Abonnés Premium</G> : votre portefeuille, vos alertes et vos dossiers du samedi, ici même.{'\n'}
-          <span style={{ color: WA.gris, fontSize: 26 }}>Information de marché, pas un conseil en investissement.</span>
+      <Telephone nom="WESTBOURSE" sous="Assistant" top={540} hauteur={900}>
+        <Bulle debut={10} moi>Où en est mon portefeuille ?</Bulle>
+        <Bulle debut={14} ecrit={18}>
+          <TexteWa texte={'⭐ *Abonnés Premium* : votre portefeuille, vos alertes et vos dossiers du samedi, ici même.\n_Information de marché, pas un conseil en investissement._'} />
         </Bulle>
       </Telephone>
       <div style={{ position: 'absolute', left: 110, right: 110, top: 1500, display: 'flex', gap: 30 }}>
-        <Tuile debut={instant(s.voix, 'trois', d)} valeur="3 / jour" libelle="Gratuit" couleur={C.cyan} />
-        <Tuile debut={instant(s.voix, 'cent en', d)} valeur="100 / jour" libelle="Premium" couleur="#F0B23A" />
+        <Compteur debut={instant(s.voix, 'trois', d)} jusqua={3} libelle="Gratuit" couleur={C.cyan} />
+        <Compteur debut={instant(s.voix, 'cent en', d)} jusqua={100} libelle="Premium" couleur="#F0B23A" />
       </div>
     </>
   );
@@ -266,15 +357,17 @@ function Assistant({ s, d }: { s: SceneC; d: number }) {
 function Soir({ s, x }: { s: SceneC; x: Donnees }) {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = spring({ frame: f - 12, fps, config: { damping: 14, stiffness: 120 } });
+  const p = spring({ frame: f - 10, fps, config: { damping: 9, stiffness: 140 } });
+  const vibre = f > 10 && f < 24 ? Math.sin(f * 2.4) * 6 : 0;
   return (
     <>
       <Titre s={s} />
-      <div style={{ position: 'absolute', left: 110, width: 860, top: 560, height: 1220, borderRadius: 64, background: 'linear-gradient(180deg,#0a1417,#030303)', border: `2px solid ${C.bord}` }}>
-        <div style={{ textAlign: 'center', marginTop: 110, fontFamily: SANS, fontSize: 140, fontWeight: 300, color: C.blanc }}>18:05</div>
-        <div style={{ margin: '80px 36px 0', borderRadius: 34, background: 'rgba(32,44,51,.92)', padding: '28px 32px', transform: `translateY(${(1 - p) * -260}px)`, opacity: p }}>
+      <div style={{ position: 'absolute', left: 110, width: 860, top: 540, height: 1240, borderRadius: 64, overflow: 'hidden', border: `3px solid rgba(255,255,255,.14)`, transform: `translateX(${vibre}px)` }}>
+        <Img src={staticFile('ecrans/mobile.png')} style={{ position: 'absolute', width: '100%', filter: 'blur(14px) brightness(.45)' }} />
+        <div style={{ position: 'relative', textAlign: 'center', marginTop: 110, fontFamily: SANS, fontSize: 150, fontWeight: 300, color: C.blanc }}>18:05</div>
+        <div style={{ position: 'relative', margin: '80px 36px 0', borderRadius: 34, background: 'rgba(32,44,51,.94)', padding: '28px 32px', transform: `translateY(${(1 - p) * -300}px)`, opacity: Math.min(1, p * 1.4), boxShadow: '0 20px 60px rgba(0,0,0,.5)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: SANS, fontSize: 26, color: WA.gris }}>
-            <span style={{ width: 34, height: 34, borderRadius: 9, background: WA.vert, display: 'inline-block' }} /> WhatsApp · WESTBOURSE
+            <span style={{ width: 34, height: 34, borderRadius: 9, background: WA.vert, display: 'inline-block' }} /> WhatsApp · WESTBOURSE · maintenant
           </div>
           <div style={{ marginTop: 12, fontFamily: SANS, fontSize: 32, fontWeight: 700, color: C.blanc }}>Point de clôture — séance du {x.seanceFr}</div>
           <div style={{ marginTop: 8, fontFamily: SANS, fontSize: 30, lineHeight: 1.4, color: C.gris }}>
@@ -291,29 +384,52 @@ function Telegram({ s, x }: { s: SceneC; x: Donnees }) {
     <>
       <Titre s={s} />
       <Telephone nom="WESTBOURSE" sous={CONTENU.telegram} theme="tg">
-        <Bulle debut={14} theme="tg">
-          📊 <G>BRVM — séance du {x.seanceFr}</G>{'\n'}BRVM Composite {varia(x.composite.variation)}{'\n'}{x.hausses} hausses · {x.baisses} baisses
+        <Bulle debut={10} theme="tg">
+          <div style={{ width: 400, height: 500, borderRadius: 16, overflow: 'hidden', marginBottom: 14, background: '#000' }}>
+            {x.videoSeance ? <OffthreadVideo src={x.videoSeance} muted startFrom={240} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}
+          </div>
+          <b>BRVM — séance du {x.seanceFr}</b>
+          {`\nBRVM Composite ${varia(x.composite.variation)}\n${x.hausses} hausses · ${x.baisses} baisses`.split('\n').map((l, i) => <div key={i}>{l}</div>)}
         </Bulle>
-        <Bulle debut={34} theme="tg">✈️ La vidéo de séance, chaque soir, sur le canal.</Bulle>
       </Telephone>
     </>
   );
 }
 
-function Outro({ s, d }: { s: SceneC; d: number }) {
+/** Vraies captures du site : fiche SONATEL sur mobile qui défile, accueil en fond. */
+function Site({ s }: { s: SceneC }) {
+  const f = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const p = spring({ frame: f, fps, config: { damping: 18, stiffness: 80 } });
+  return (
+    <>
+      <Titre s={s} />
+      <div style={{ position: 'absolute', left: -120, top: 560, width: 1320, perspective: 2000, opacity: 0.55 }}>
+        <Img src={staticFile('ecrans/accueil.png')} style={{ width: '100%', borderRadius: 24, transform: `rotateY(24deg) rotateX(8deg) translateX(${(1 - p) * -200}px)`, boxShadow: '0 40px 120px rgba(0,0,0,.8)' }} />
+      </div>
+      <div style={{ position: 'absolute', left: 300, width: 560, top: 620, height: 1180, borderRadius: 60, overflow: 'hidden', border: `4px solid rgba(255,255,255,.18)`, boxShadow: `0 50px 140px rgba(0,0,0,.8), 0 0 70px ${C.cyan}33`, transform: `translateY(${(1 - p) * 300}px) rotate(${(1 - p) * 6}deg)` }}>
+        <Img src={staticFile('ecrans/mobile.png')} style={{ width: '100%', transform: `translateY(${-interpolate(f, [20, 150], [0, 520], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}px)` }} />
+      </div>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 70, textAlign: 'center', fontFamily: MONO, fontSize: 30, color: C.sourd, opacity: t(f, 20, 40) }}>
+        Captures réelles de westbourse.com
+      </div>
+    </>
+  );
+}
+
+function Outro({ s }: { s: SceneC }) {
   const f = useCurrentFrame();
   return (
-    <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', gap: 44, padding: '0 80px', textAlign: 'center' }}>
-      <Logo taille={220} prog={t(f, 0, 30)} />
-      <Entre debut={10}><div style={{ fontFamily: SERIF, fontSize: 96, color: C.blanc }}>{s.titre}</div></Entre>
-      <Entre debut={18}><div style={{ fontFamily: MONO, fontSize: 64, fontWeight: 700, color: WA.vert }}>{CONTENU.numero}</div></Entre>
-      <Entre debut={26}>
-        <div style={{ fontFamily: SANS, fontSize: 34, lineHeight: 1.6, color: C.gris }}>
-          📣 Chaîne WhatsApp WESTBOURSE<br />✈️ {CONTENU.telegram}
-        </div>
+    <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', gap: 40, padding: '0 80px', textAlign: 'center' }}>
+      <div style={{ filter: `drop-shadow(0 0 ${30 + 20 * Math.sin(f / 9)}px ${C.teal}88)` }}><Logo taille={220} prog={t(f, 0, 28)} /></div>
+      <Entre debut={8}><Brillant debut={8} taille={104}>{s.titre}</Brillant></Entre>
+      <Entre debut={16}>
+        <div style={{ fontFamily: MONO, fontSize: 66, fontWeight: 700, color: WA.vert, textShadow: `0 0 ${20 + 14 * Math.sin(f / 7)}px ${WA.vert}aa` }}>{CONTENU.numero}</div>
       </Entre>
-      <Entre debut={instant(s.voix, 'westbourse', d)}>
-        <div style={{ fontFamily: MONO, fontSize: 48, fontWeight: 700, color: C.cyan }}>westbourse.com</div>
+      <Entre debut={24}>
+        <div style={{ fontFamily: SANS, fontSize: 34, lineHeight: 1.7, color: C.gris }}>
+          📣 Chaîne WhatsApp WESTBOURSE<br />✈️ {CONTENU.telegram}<br />🌐 westbourse.com
+        </div>
       </Entre>
       <div style={{ position: 'absolute', bottom: 110, fontFamily: SANS, fontSize: 26, color: C.sourd, opacity: t(f, 6, 20) }}>
         Information de marché, pas un conseil en investissement.
@@ -322,19 +438,33 @@ function Outro({ s, d }: { s: SceneC; d: number }) {
   );
 }
 
+/** Transition : zoom + flou à l'entrée et à la sortie de chaque scène. */
 function SceneCadre({ longueur, children }: { longueur: number; children: React.ReactNode }) {
   const f = useCurrentFrame();
-  const o = Math.min(t(f, 0, 10), t(f, longueur - 10, longueur, 1, 0));
-  return <AbsoluteFill style={{ opacity: o }}>{children}</AbsoluteFill>;
+  const entree = t(f, 0, 12);
+  const sortie = t(f, longueur - 10, longueur);
+  return (
+    <AbsoluteFill style={{
+      opacity: Math.min(entree, 1 - sortie),
+      transform: `scale(${1.06 - entree * 0.06 + sortie * 0.08})`,
+      filter: `blur(${(1 - entree) * 12 + sortie * 14}px)`,
+    }}>{children}</AbsoluteFill>
+  );
 }
+
+const ECRAN: Record<string, string> = {
+  intro: 'accueil', chaine: 'aujourdhui', commandes: 'fiche', appairage: 'accueil', assistant: 'fiche-bas',
+  soir: 'aujourdhui', telegram: 'analyses', site: 'societes', outro: 'accueil',
+};
 
 // ── Montage ─────────────────────────────────────────────────────────────────
 export default function Canaux({ durees, donnees }: Props) {
+  const f = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
   if (!durees || !donnees) return <AbsoluteFill style={{ background: C.fond }} />;
   let debut = 0;
   return (
     <AbsoluteFill style={{ background: C.fond, color: C.blanc, fontFamily: SANS }}>
-      <Fond teinte={WA.vert} />
       {SCENES.map((s) => {
         const d = durees[s.id];
         const longueur = Math.ceil((d + RESPIRATION) * FPS);
@@ -343,6 +473,7 @@ export default function Canaux({ durees, donnees }: Props) {
         return (
           <Sequence key={s.id} from={from} durationInFrames={longueur} name={s.id}>
             <Audio src={staticFile(`canaux/${s.id}.mp3`)} />
+            <FondEcran ecran={ECRAN[s.id] ?? 'accueil'} teinte={s.id === 'telegram' ? TG.bleu : WA.vert} />
             <SceneCadre longueur={longueur}>
               {s.id !== 'intro' && s.id !== 'outro' && <Marque />}
               {s.id === 'intro' && <Intro s={s} d={d} />}
@@ -352,11 +483,14 @@ export default function Canaux({ durees, donnees }: Props) {
               {s.id === 'assistant' && <Assistant s={s} d={d} />}
               {s.id === 'soir' && <Soir s={s} x={donnees} />}
               {s.id === 'telegram' && <Telegram s={s} x={donnees} />}
-              {s.id === 'outro' && <Outro s={s} d={d} />}
+              {s.id === 'site' && <Site s={s} />}
+              {s.id === 'outro' && <Outro s={s} />}
             </SceneCadre>
           </Sequence>
         );
       })}
+      {/* Barre de progression */}
+      <div style={{ position: 'absolute', left: 0, bottom: 0, height: 8, width: `${(f / durationInFrames) * 100}%`, background: `linear-gradient(90deg, ${C.teal}, ${WA.vert})`, boxShadow: `0 0 20px ${WA.vert}` }} />
     </AbsoluteFill>
   );
 }

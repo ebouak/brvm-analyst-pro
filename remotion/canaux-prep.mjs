@@ -11,6 +11,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from '../video/supabaseEntetes.mjs';
+// Le texte des bulles est produit par le CODE DE PRODUCTION, pas réécrit ici :
+// ce que la vidéo montre est ce que le numéro répond réellement.
+import { rendreCommande } from '../frontend/lib/whatsapp/commandes.ts';
+import { legendeWhatsapp } from '../video/chaineWhatsapp.mjs';
 
 const argEnv = process.argv.find((a) => a.startsWith('--env='))?.slice(6) ?? '../frontend/.env.local';
 const fichier = existsSync(argEnv) ? readFileSync(argEnv, 'utf8').replace(/^﻿/, '') : '';
@@ -29,7 +33,11 @@ const get = async (q) => {
 };
 
 const [{ date_marche: seance }] = await get('brvm_actions_daily?select=date_marche&order=date_marche.desc&limit=1');
-const lignes = await get(`brvm_actions_daily?select=code,cours_jour,variation_pct&date_marche=eq.${seance}&variation_pct=not.is.null`);
+const lignes = await get(`brvm_actions_daily?select=code,cours_jour,variation_pct,volume,valeur_echangee&date_marche=eq.${seance}&variation_pct=not.is.null`);
+const [sonatel] = await get('brvm_instruments?select=designation&code=eq.SNTS');
+// Vidéo de séance réellement publiée (bucket public) et sa fiche : la légende
+// de la Chaîne est recalculée par le même module que la publication du soir.
+const derniere = await (await fetch(`${URL_SB}/storage/v1/object/public/seance-video/derniere.json`)).json();
 const [indice] = await get(`brvm_indices_daily?select=valeur,variation_pct&code=eq.BRVMC&date_marche=eq.${seance}`);
 const snts = lignes.find((l) => l.code === 'SNTS');
 const palmares = [...lignes].sort((a, b) => b.variation_pct - a.variation_pct).slice(0, 3);
@@ -49,6 +57,21 @@ const donnees = {
   baisses: lignes.filter((l) => l.variation_pct < 0).length,
   valeurs: lignes.length,
   composite: { valeur: indice.valeur, variation: indice.variation_pct },
+  videoSeance: derniere.publiable ? derniere.url : null,
+  legendeChaine: derniere.publiable ? legendeWhatsapp(derniere) : null,
+  messages: {
+    aide: rendreCommande({ type: 'aide' }, null, {}),
+    cours: rendreCommande(
+      { type: 'cours', valeur: 'SNTS' },
+      { code: 'SNTS', societe: sonatel?.designation ?? null, seance, cours: snts.cours_jour, variation_pct: snts.variation_pct, volume: snts.volume, valeur_echangee: snts.valeur_echangee },
+      {},
+    ),
+    palmares: rendreCommande(
+      { type: 'palmares', critere: 'hausses' },
+      { seance, critere: 'plus fortes hausses', valeurs_cotees: lignes.length, classement: [...lignes].sort((a, b) => b.variation_pct - a.variation_pct).slice(0, 5).map((l) => ({ code: l.code, cours: l.cours_jour, variation_pct: l.variation_pct, volume: l.volume })) },
+      {},
+    ),
+  },
 };
 const dossier = fileURLToPath(new URL('./public/canaux/', import.meta.url));
 mkdirSync(dossier, { recursive: true });
