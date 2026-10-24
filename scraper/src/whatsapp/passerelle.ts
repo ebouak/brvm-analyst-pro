@@ -61,6 +61,15 @@ export function envoyerDocumentWaha(
   );
 }
 
+/** Image PNG en mémoire (récap du portefeuille) : base64, aucune URL publique. */
+export function envoyerImageWaha(chatId: string, png: Buffer, legende: string): Promise<ResultatWaha> {
+  return appeler(
+    'sendImage',
+    { chatId, file: { mimetype: 'image/png', filename: 'westbourse-recap.png', data: png.toString('base64') }, caption: legende.slice(0, 1024) },
+    30_000,
+  );
+}
+
 export function pauseEntreEnvois(): Promise<void> {
   if (process.env.NODE_ENV === 'test' || process.env.VITEST) return Promise.resolve();
   return new Promise((r) => setTimeout(r, 2000 + Math.floor(Math.random() * 2000)));

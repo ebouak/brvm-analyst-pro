@@ -14,6 +14,7 @@ import Sparkline from '@/components/Sparkline';
 import PortefeuilleExport from '@/components/PortefeuilleExport';
 import PortfolioTabs from '@/components/portfolio/PortfolioTabs';
 import PositionRowActions from '@/components/PositionRowActions';
+import RecapBouton from '@/components/portfolio/RecapBouton';
 import { computePositions, sectorBreakdown, concentrationHHI, bestWorst, nbHoldings } from '@/lib/portfolio/metrics';
 import {
   SectionHeader,
@@ -226,6 +227,7 @@ export default async function PortefeuillePage({
             subtitle="Valorisation au dernier cours, plus-values latentes et suivi de vos positions."
           />
           <div className="flex items-center gap-3">
+            <RecapBouton />
             <Link
               href="/portefeuille/import"
               className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"

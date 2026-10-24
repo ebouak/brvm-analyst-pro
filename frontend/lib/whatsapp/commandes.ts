@@ -63,6 +63,15 @@ export function estDemandeHumain(texte: string): boolean {
   return /^(humain|conseiller|equipe|support)$/.test(sansAccent(texte.trim().replace(/^[/!]\s*/, '')));
 }
 
+/**
+ * `RECAP` / `PORTEFEUILLE` (ou `/recap` sur Telegram) : l'image de la récap
+ * du portefeuille. Commande PERSONNELLE — l'appelant identifie l'abonné lié et
+ * vérifie le niveau Premium (lib/recap/demande.ts).
+ */
+export function estDemandeRecap(texte: string): boolean {
+  return /^(recap|mon recap|portefeuille|mon portefeuille)$/.test(sansAccent(texte.trim().replace(/^[/!]\s*/, '')));
+}
+
 /* ------------------------------------------------------------ mise en forme */
 
 type Res = Record<string, unknown> | null;

@@ -48,6 +48,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
 import { sujet, texte, html } from './brief.mjs';
+import { telechargerRecap } from './recapSignature.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
@@ -235,6 +236,33 @@ for (const d of destinataires) {
 
 console.log(`Destinataires éligibles : ${aTraiter.length} · sautés : ${sautes}`);
 
+/* Récap du portefeuille en pièce jointe (migration 0164) : Premium +
+   consentement `recap_soir` + au moins une position. Jamais en mode
+   découverte. Lecture TOLÉRANTE : si elle échoue, le brief part sans pièce
+   jointe — un soir sans récap vaut mieux qu'un soir sans brief. */
+const RECAP_SECRET = lire('RECAP_SECRET');
+const SITE_RECAP = lire('SITE_URL') || 'https://www.westbourse.com';
+const recapPour = new Set();
+if (!DECOUVERTE && RECAP_SECRET.length >= 32) {
+  const ids = aTraiter.map((d) => d.user_id).filter(Boolean);
+  if (ids.length) {
+    try {
+      const liste = ids.map(encodeURIComponent).join(',');
+      const [voulus, premiums, positions] = await Promise.all([
+        paginer(`notification_prefs?select=user_id&recap_soir=is.true&user_id=in.(${liste})&order=user_id.asc`),
+        paginer(`profiles?select=id&is_premium=is.true&id=in.(${liste})&order=id.asc`),
+        paginer(`portfolios_positions?select=user_id&user_id=in.(${liste})&order=user_id.asc`),
+      ]);
+      const prem = new Set(premiums.map((p) => p.id));
+      const porteurs = new Set(positions.map((p) => p.user_id));
+      for (const v of voulus) if (prem.has(v.user_id) && porteurs.has(v.user_id)) recapPour.add(v.user_id);
+    } catch (e) {
+      console.log(`Récap : consentements illisibles (${String(e.message).slice(0, 80)}) — e-mails sans pièce jointe.`);
+    }
+  }
+  console.log(`Récap du portefeuille jointe pour ${recapPour.size} destinataire(s).`);
+}
+
 /* ───────────────────────── Composition ───────────────────────── */
 
 const SUJET = sujet(m);
@@ -262,6 +290,8 @@ for (const d of aTraiter) {
 
   let statut = 'envoye';
   let raison = null;
+  // Image générée à l'envoi, jamais stockée ; absente → e-mail sans pièce jointe.
+  const png = recapPour.has(d.user_id) ? await telechargerRecap(d.user_id, { secret: RECAP_SECRET, site: SITE_RECAP }) : null;
   try {
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -277,6 +307,7 @@ for (const d of aTraiter) {
         text: CORPS_TEXTE,
         html: CORPS_HTML,
         headers: { 'List-Unsubscribe': `<${PAGE_PREFS}>` },
+        ...(png ? { attachments: [{ filename: `westbourse-recap-${m.seance}.png`, content: png.toString('base64') }] } : {}),
       }),
     });
     if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0, 160)}`);
