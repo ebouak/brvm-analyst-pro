@@ -26,6 +26,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { sendEmail, sendTelegramDocument, sendTelegramText } from '../alerts/channels.js';
 import { envoyerDocumentWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
+import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
 import { cleSemaine, selectionnerLignes, type LigneCandidate, type Selection } from './selection.js';
 import { composerMessage, composerRectificatif } from './message.js';
 
@@ -97,6 +98,10 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
     ((profils ?? []) as { id: string; is_premium: boolean | null }[]).filter((p) => p.is_premium).map((p) => p.id),
   );
   const passerelle = wahaConfiguree();
+  // Chaque WhatsApp lié au compte (0165, au plus 2) reçoit les dossiers.
+  const waPar = passerelle
+    ? await chatsParUtilisateur(sb, prefs.filter((p) => p.dossiers_whatsapp).map((p) => p.user_id))
+    : new Map<string, string[]>();
   const nomPar = new Map(
     ((instruments ?? []) as { code: string; designation: string | null }[]).map((i) => [i.code, i.designation ?? i.code]),
   );
@@ -191,7 +196,7 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
     const canaux: Canal[] = [];
     if (p.dossiers_email && emailPar.get(p.user_id)) canaux.push('email');
     if (p.dossiers_telegram && p.telegram_chat_id) canaux.push('telegram');
-    if (p.dossiers_whatsapp && p.whatsapp_chat_id && premiumPar.has(p.user_id) && passerelle) canaux.push('whatsapp');
+    if (p.dossiers_whatsapp && (waPar.get(p.user_id)?.length ?? 0) > 0 && premiumPar.has(p.user_id)) canaux.push('whatsapp');
 
     for (const canal of canaux) {
       if (rectificatif) {
@@ -241,16 +246,18 @@ export async function runEnvoi(opts: { mock?: boolean; rectificatif?: boolean } 
         } else if (canal === 'whatsapp') {
           // Rythme lent et constant : une rafale de documents ressemble à du spam.
           // Le corps commence déjà par le sujet (message.ts) : pas de titre en double.
-          const ouverture = await envoyerTexteWaha(p.whatsapp_chat_id!, msg.corps);
-          if (!ouverture.ok) throw new Error(ouverture.erreur ?? 'passerelle WhatsApp en échec');
-          for (const l of envoyees) {
-            await pauseEntreEnvois();
-            const r = await envoyerDocumentWaha(
-              p.whatsapp_chat_id!,
-              { octets: await telecharger(l.code), nom: `westbourse-dossier-${l.code}.pdf` },
-              `${l.code} — ${l.designation}`,
-            );
-            if (!r.ok) throw new Error(`${l.code} : ${r.erreur ?? 'envoi refusé'}`);
+          for (const chat of waPar.get(p.user_id) ?? []) {
+            const ouverture = await envoyerTexteWaha(chat, msg.corps);
+            if (!ouverture.ok) throw new Error(ouverture.erreur ?? 'passerelle WhatsApp en échec');
+            for (const l of envoyees) {
+              await pauseEntreEnvois();
+              const r = await envoyerDocumentWaha(
+                chat,
+                { octets: await telecharger(l.code), nom: `westbourse-dossier-${l.code}.pdf` },
+                `${l.code} — ${l.designation}`,
+              );
+              if (!r.ok) throw new Error(`${l.code} : ${r.erreur ?? 'envoi refusé'}`);
+            }
           }
         } else {
           const ouverture = await sendTelegramText({

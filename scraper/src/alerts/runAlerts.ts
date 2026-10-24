@@ -14,6 +14,7 @@ import { logger } from '../logger.js';
 import { isTriggered, isSmartTriggered, isSmartType, type AlertType, type SmartContext } from './evaluate.js';
 import { dispatch, sendWhatsAppTemplate, sendWhatsAppRaw } from './channels.js';
 import { envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
+import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
 
 export interface AlertRow {
   id: string;
@@ -107,7 +108,9 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
     const tgByUser = new Map<string, number>(); // user_id -> chat_id Telegram
     // WhatsApp par la passerelle (lot E) : identifiant PROUVÉ par appairage, et
     // réservé aux comptes Premium (grille validée le 2026-10-23).
-    const waChatByUser = new Map<string, string>();
+    // Chaque WhatsApp lié au compte (0165, au plus 2) reçoit l'alerte.
+    const waChatByUser = new Map<string, string[]>();
+    const eligiblesWa: string[] = [];
     const passerelle = wahaConfiguree();
     if (userIds.length > 0) {
       const [{ data: prefs }, { data: profils }] = await Promise.all([
@@ -137,7 +140,7 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
         // un `.eq()` par canal exclurait les lignes de l'autre canal.
         if (p.whatsapp_optin && p.alerts_whatsapp) {
           if (passerelle) {
-            if (p.whatsapp_chat_id && premium.has(p.user_id)) waChatByUser.set(p.user_id, p.whatsapp_chat_id);
+            if (premium.has(p.user_id)) eligiblesWa.push(p.user_id);
           } else {
             // Ancien chemin Meta (numéro déclaré), seulement sans passerelle :
             // les deux à la fois enverraient l'alerte en double.
@@ -149,6 +152,7 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
           tgByUser.set(p.user_id, p.telegram_chat_id);
         }
       }
+      for (const [u, chats] of await chatsParUtilisateur(sb, eligiblesWa)) waChatByUser.set(u, chats);
     }
 
     let triggered = 0;
@@ -184,8 +188,7 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
 
       // Canal WhatsApp PERSONNEL du propriétaire (opt-in) — en plus des canaux
       // globaux. Template Meta d'abord (hors fenêtre 24 h), repli texte.
-      const chatWa = waChatByUser.get(a.user_id);
-      if (chatWa) {
+      for (const chatWa of waChatByUser.get(a.user_id) ?? []) {
         await pauseEntreEnvois();
         const r = await envoyerTexteWaha(
           chatWa,

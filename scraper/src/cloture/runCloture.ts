@@ -13,6 +13,7 @@ import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { envoyerImageWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { recapConfiguree, telechargerRecap } from '../recap/telecharger.js';
+import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
 import {
   composerCloture,
   type AlerteDeclenchee,
@@ -253,19 +254,20 @@ export async function runCloture(
     const { data: prefsWa } = wahaConfiguree()
       ? await sb
           .from('notification_prefs')
-          .select('user_id, whatsapp_chat_id')
+          .select('user_id')
           .eq('whatsapp_optin', true)
           .eq('brief_whatsapp', true)
-          .not('whatsapp_chat_id', 'is', null)
       : { data: [] };
+    // Chaque WhatsApp lié au compte (0165, au plus 2) reçoit le point du soir.
+    const chatsWa = await chatsParUtilisateur(sb, ((prefsWa ?? []) as { user_id: string }[]).map((p) => p.user_id));
 
     const destinataires: Destinataire[] = [
       ...((prefs ?? []) as { user_id: string; telegram_chat_id: number | null }[])
         .filter((p) => p.telegram_chat_id != null)
         .map((p) => ({ user_id: p.user_id, canal: 'telegram' as const, telegram_chat_id: p.telegram_chat_id as number })),
-      ...((prefsWa ?? []) as { user_id: string; whatsapp_chat_id: string | null }[])
-        .filter((p) => p.whatsapp_chat_id)
-        .map((p) => ({ user_id: p.user_id, canal: 'whatsapp' as const, whatsapp_chat_id: p.whatsapp_chat_id as string })),
+      ...[...chatsWa].flatMap(([user_id, chats]) =>
+        chats.map((chat) => ({ user_id, canal: 'whatsapp' as const, whatsapp_chat_id: chat })),
+      ),
     ];
     if (destinataires.length === 0) {
       return { status: 'success', dateMarche, recipients: 0, sent: 0, message: null };

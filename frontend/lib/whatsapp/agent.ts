@@ -7,6 +7,7 @@ import { getWatchlistContext } from '@/lib/whatsappAgent/watchlistContext';
 import { callAgentLlm, type ChatMessage } from '@/lib/whatsappAgent/callAgentLlm';
 import { OUTILS, executerOutil } from '@/lib/agent/outils';
 import { passerelleWhatsapp } from './passerelle';
+import { compteConsentant } from './liaisons';
 
 /**
  * Agent conversationnel WhatsApp par la passerelle WAHA (lot D).
@@ -42,18 +43,11 @@ export function versWhatsapp(texte: string): string {
  * à la console de contact, chez un humain — jamais perdu.
  */
 export async function abonneAvecAgent(chatId: string): Promise<string | null> {
-  const { data, error } = await getServiceClient()
-    .from('notification_prefs')
-    .select('user_id')
-    .eq('whatsapp_chat_id', chatId)
-    .eq('whatsapp_optin', true)
-    .eq('agent_optin', true)
-    .maybeSingle();
-  if (error) {
-    console.warn('[whatsapp] recherche de l’abonné impossible :', error.code ?? error.message);
+  // Chaque WhatsApp lié au compte (0165) peut écrire à l'assistant.
+  return compteConsentant(getServiceClient(), chatId, 'agent_optin').catch((e) => {
+    console.warn('[whatsapp] recherche de l’abonné impossible :', (e as Error).message);
     return null;
-  }
-  return (data?.user_id as string | undefined) ?? null;
+  });
 }
 
 export async function repondreAgent(chatId: string, userId: string, texte: string): Promise<void> {
