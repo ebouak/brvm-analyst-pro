@@ -30,7 +30,7 @@ export default async function SessionsPage() {
         <SectionHeader
           kicker="Formations"
           title="Se former en direct, avec un formateur"
-          subtitle="Des sessions à date fixe, en petit groupe. Le parcours Academy reste gratuit et sert de préparation."
+          subtitle="Des sessions à date fixe, en petit groupe. Le parcours Academy, inclus dans l’abonnement Premium, sert de préparation."
         />
         {sessions.length === 0 ? (
           <EmptyStatePremium
