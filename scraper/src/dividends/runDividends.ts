@@ -9,6 +9,7 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
+import { garderEchelle } from './operations.js';
 import { sha256 } from '../utils/hash.js';
 import { extractDividendAmount, extractExercice } from './extract.js';
 import { fetchRichbourseDividends } from './richbourse.js';
@@ -141,7 +142,7 @@ async function upsert(divsBruts: Dividend[]): Promise<number> {
   }
   const sb = getSupabase();
   const references = await chargerReferences();
-  const divs = sansEcraserReference(divsBruts, references);
+  const divs = await garderEchelle(sansEcraserReference(divsBruts, references));
   if (divs.length < divsBruts.length) {
     logger.info({ preservees: divsBruts.length - divs.length }, 'dividendes : lignes officielles BRVM préservées');
   }

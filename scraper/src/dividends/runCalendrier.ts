@@ -9,6 +9,7 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { sha256 } from '../utils/hash.js';
+import { garderEchelle } from './operations.js';
 import { lireCalendrier, type RejetCalendrier } from './calendrier.js';
 import { codeDuNom } from './calendrierCodes.js';
 import { exerciceDepuisUrlCalendrier } from './esv.js';
@@ -132,7 +133,7 @@ export async function runCalendrier(opts: { ecrire?: boolean } = {}): Promise<Ra
   const aEcrire = lignes.filter((l) => l.ecart !== 'concordant');
   if (opts.ecrire && aEcrire.length) {
     if (!colonnes0157) throw new Error('écriture impossible : appliquer d’abord la migration 0157');
-    const rows = aEcrire.map((l) => ({
+    const bruts = aEcrire.map((l) => ({
       code: l.code,
       exercice: cal.exercice,
       montant: l.cible.montant,
@@ -148,6 +149,8 @@ export async function runCalendrier(opts: { ecrire?: boolean } = {}): Promise<Ra
       // Même clé que runDividends et runDividendesBoc (code|exercice|montant).
       dedupe_hash: sha256(`${l.code}|${cal.exercice}|${l.cible.montant}`),
     }));
+    // Un fractionnement passé rend 1 740 F « divergent » de 174 F : ramené, pas réécrit.
+    const rows = (await garderEchelle(bruts)).map((r) => ({ ...r, dedupe_hash: sha256(`${r.code}|${r.exercice}|${r.montant}`) }));
     const { error } = await getSupabase().from('dividends').upsert(rows, { onConflict: 'code,exercice' });
     if (error) throw new Error(`upsert dividends (brvm-calendrier) : ${error.message}`);
     ecrites = rows.length;
