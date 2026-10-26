@@ -17,7 +17,8 @@
 --    2025 (1 740) et 2021 (1 400) le sont ici, par exercice explicite ;
 --  - relevés intraday et carnet DU 26/10 : déjà à l'échelle nouvelle ;
 --  - valeur_echangee, valorisation : des montants, invariants ;
---  - documents datés (analyses hebdo, rapports figés) : ce sont des archives.
+--  - documents datés (analyses hebdo, rapports figés) : ce sont des archives ;
+--  - daily_quotes : une VUE (union actions/obligations), suit la table d'origine.
 --
 -- PRÉVENTION : registre operations_titres + trigger sur brvm_actions_daily
 -- (section 3) ; côté code, verrou « variations_plausibles » avant toute
@@ -61,7 +62,6 @@ begin
 
   -- Copies de sauvegarde (lignes SNTS uniquement)
   create table if not exists public.backup_snts_20261026_actions as select * from public.brvm_actions_daily where code = 'SNTS';
-  create table if not exists public.backup_snts_20261026_quotes as select * from public.daily_quotes where instrument_code = 'SNTS';
   create table if not exists public.backup_snts_20261026_intraday as select * from public.brvm_intraday_snapshots where code = 'SNTS';
   create table if not exists public.backup_snts_20261026_carnet as select * from public.brvm_carnet_daily where code = 'SNTS';
   create table if not exists public.backup_snts_20261026_liquidite as select * from public.liquidity_daily where code = 'SNTS';
@@ -94,14 +94,6 @@ begin
         from public.brvm_actions_daily x where x.code = 'SNTS' and x.date_marche >= d
     ) s
    where a.code = 'SNTS' and a.date_marche = s.date_marche;
-
-  update public.daily_quotes
-     set close_price = close_price / r, previous_close = previous_close / r, volume = volume * r
-   where instrument_code = 'SNTS' and date_marche < d;
-  update public.daily_quotes
-     set previous_close = previous_close / r,
-         variation_pct = round((close_price / (previous_close / r) - 1) * 100, 2)
-   where instrument_code = 'SNTS' and date_marche = d and previous_close > 0;
 
   update public.brvm_intraday_snapshots set close = close / r, volume = volume * r
    where code = 'SNTS' and date_marche < d;
