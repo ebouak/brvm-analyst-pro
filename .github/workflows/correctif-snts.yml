@@ -1,0 +1,47 @@
+name: Rectificatif SNTS (envoi unique, déclenchement manuel)
+
+# Fractionnement SONATEL du 26/10/2026 : le brief a annoncé −89,28 % au lieu
+# de +7,18 %. Écrit aux destinataires de ce brief et aux porteurs de SNTS.
+# Décoché = mode d'essai. Idempotent (campagne_envois) : relancer ne réécrit
+# à personne. À retirer une fois l'envoi fait.
+
+on:
+  workflow_dispatch:
+    inputs:
+      envoyer:
+        description: "Envoi RÉEL (décoché = mode d'essai, rien n'est envoyé)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: correctif-snts
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  correctif:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Envoyer le rectificatif
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_EMAIL_FROM: ${{ secrets.ALERTS_EMAIL_FROM }}
+          ENVOYER: ${{ inputs.envoyer }}
+        run: |
+          if [ "$ENVOYER" = "true" ]; then
+            node scripts/correctif-snts.mjs --envoyer
+          else
+            node scripts/correctif-snts.mjs
+          fi
