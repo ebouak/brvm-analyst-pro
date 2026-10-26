@@ -14,6 +14,7 @@ import { logger } from '../logger.js';
 import { envoyerImageWaha, envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { recapConfiguree, telechargerRecap } from '../recap/telecharger.js';
 import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
+import { variationsAberrantes } from './plausibilite.js';
 import {
   composerCloture,
   type AlerteDeclenchee,
@@ -172,6 +173,9 @@ export async function runCloture(
     const hausses = cotes.filter((a) => (a.variation_pct as number) > 0).length;
     const baisses = cotes.filter((a) => (a.variation_pct as number) < 0).length;
 
+    const aberrantes = variationsAberrantes(cotes as { code: string; variation_pct: number | null }[]);
+    if (aberrantes.length) logger.error({ dateMarche, aberrantes }, 'Variation impossible (opération sur titres non enregistrée ?)');
+
     /* Mêmes contrôles que la vidéo (video/genere.mjs) : un cron publie sans
        relecture humaine, mieux vaut un soir de silence qu'un message faux. */
     const ageJours = Math.floor((Date.now() - Date.parse(`${dateMarche}T12:00:00Z`)) / 86_400_000);
@@ -181,6 +185,7 @@ export async function runCloture(
       composite_present: !!composite,
       capitaux_non_nuls: capitauxTotal > 0,
       variations_non_plates: hausses + baisses > 0,
+      variations_plausibles: aberrantes.length === 0,
     };
     const manquants = Object.entries(controles)
       .filter(([, v]) => !v)

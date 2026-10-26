@@ -563,6 +563,8 @@ console.log('video montee :', sortie);
    post public affichant zero. On enonce donc ici ce qui rend une seance
    publiable, et publie.mjs s'arrete si l'un des points manque. */
 const AGE_MAX = Number(process.env.VIDEO_AGE_MAX_JOURS || 5);
+const aberrantes = cotes.filter((a) => Math.abs(a.variation_pct) > 50).map((a) => `${a.code} ${a.variation_pct} %`);
+if (aberrantes.length) console.error('variation impossible :', aberrantes.join(', '));
 const ageJours = Math.floor((Date.now() - Date.parse(`${seance}T12:00:00Z`)) / 86400000);
 const controles = {
   seance_recente: ageJours <= AGE_MAX,
@@ -570,6 +572,10 @@ const controles = {
   composite_present: !!composite,
   capitaux_non_nuls: T > 0,
   variations_non_plates: hausses.length + baisses.length > 0,
+  /* ±7,5 % est le plafond BRVM : au-delà de 50 %, c'est la donnée qui est
+     fausse (fractionnement SNTS du 26/10/2026 publié à −89,28 %). Même règle
+     que scraper/src/cloture/plausibilite.ts. */
+  variations_plausibles: aberrantes.length === 0,
   /* Chaque nombre lu vient de la donnée (recit.mjs, `chiffresEtrangers`). */
   texte_verifie: etrangers.length === 0,
 };

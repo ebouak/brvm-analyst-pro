@@ -15,6 +15,7 @@
 import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { sha256 } from '../utils/hash.js';
+import { garderEchelle } from './operations.js';
 import { listerBulletins, telechargerPdf } from '../carnet/fetch.js';
 import { lireDerniersDividendes, type DividendeBoc, type ItemPdf } from './boc.js';
 
@@ -91,7 +92,7 @@ export async function runDividendesBoc(opts: { ecrire?: boolean } = {}): Promise
   let ecrites = 0;
   const aEcrire = lignes.filter((l) => l.ecart !== 'concordant' && l.ecart !== 'ancien' && l.ecart !== 'calendrier');
   if (opts.ecrire && aEcrire.length) {
-    const rows = aEcrire.map((l) => ({
+    const bruts = aEcrire.map((l) => ({
       code: l.code,
       exercice: l.exercice,
       montant: l.boc.montant,
@@ -103,6 +104,7 @@ export async function runDividendesBoc(opts: { ecrire?: boolean } = {}): Promise
       // Même clé que runDividends (code|exercice|montant), pour rester cohérent.
       dedupe_hash: sha256(`${l.code}|${l.exercice}|${l.boc.montant}`),
     }));
+    const rows = (await garderEchelle(bruts)).map((r) => ({ ...r, dedupe_hash: sha256(`${r.code}|${r.exercice}|${r.montant}`) }));
     const { error: e } = await sb.from('dividends').upsert(rows, { onConflict: 'code,exercice' });
     if (e) throw new Error(`upsert dividends (brvm-boc) : ${e.message}`);
     ecrites = rows.length;
