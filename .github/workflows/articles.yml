@@ -1,0 +1,50 @@
+name: Articles de presse (lot 1)
+
+# Dividendes, détachements, paiements, opérations sur titres et séances hors
+# norme : détectés en base, rédigés sous liste blanche de chiffres, verrouillés,
+# publiés sur /actualites puis diffusés (Chaîne WhatsApp, canal Telegram,
+# 3 posts par jour au plus). Spec : docs/superpowers/specs/2026-10-28-articles-presse-design.md
+#
+# 17:00 UTC : après score.yml (16:00), qui calcule les bornes 52 semaines.
+on:
+  schedule:
+    - cron: '0 17 * * 1-5'
+  workflow_dispatch:
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+concurrency:
+  group: articles
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  articles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Détecter, rédiger, publier, diffuser
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          # Canal et Chaîne publics : variables, comme dans video-seance.yml.
+          TELEGRAM_CANAL: ${{ vars.TELEGRAM_CANAL }}
+          WAHA_URL: ${{ secrets.WAHA_URL }}
+          WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
+          WHATSAPP_CHAINE_ID: ${{ vars.WHATSAPP_CHAINE_ID }}
+        run: npm run articles -- --trigger=$SCRAPER_TRIGGER

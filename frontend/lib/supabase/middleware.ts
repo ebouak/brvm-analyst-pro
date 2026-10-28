@@ -34,6 +34,7 @@ const PUBLIC_PREFIXES = [
   '/analyse',    // Westbourse Combined Alpha & co (quant vitrine, publique)
   '/actions',    // fiches action + onglet /quant (publiques)
   '/brief',      // briefs de séance datés (SEO)
+  '/actualites', // articles de presse générés depuis la donnée (SEO)
   '/simulateur', // simulateur d'investissement public (/simulateur/[code])
   '/embed',      // widgets embarqués sur des sites tiers
   '/certificat', // vérification publique d'un certificat Academy

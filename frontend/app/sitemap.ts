@@ -32,10 +32,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createPublicClient();
-    const [{ data: instruments }, { data: briefs }, { data: analyses }] = await Promise.all([
+    const [{ data: instruments }, { data: briefs }, { data: analyses }, { data: articles }] = await Promise.all([
       supabase.from('brvm_instruments').select('code').eq('type', 'action').eq('actif', true),
       supabase.from('brief_daily').select('date_marche').order('date_marche', { ascending: false }).limit(365),
       supabase.from('citable_pages').select('slug, updated_at').eq('published', true),
+      // Articles publiés (RLS) ; table absente avant 0167 → data null, sans casser le sitemap.
+      supabase.from('articles').select('slug, publie_le').order('publie_le', { ascending: false }).limit(1000),
     ]);
 
     const companyPages: MetadataRoute.Sitemap = (instruments ?? []).map((i) => ({
@@ -60,7 +62,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     }));
 
-    return [...staticPages, ...companyPages, ...briefPages, ...analysePages];
+    // Articles de presse : contenu daté et figé.
+    const articlePages: MetadataRoute.Sitemap = (articles ?? []).map((a) => ({
+      url: `${SITE_URL}/actualites/${a.slug}`,
+      lastModified: a.publie_le ? new Date(a.publie_le) : undefined,
+      changeFrequency: 'never' as const,
+      priority: 0.75,
+    }));
+
+    return [...staticPages, ...companyPages, ...briefPages, ...analysePages, ...articlePages];
   } catch {
     // Base inaccessible au build : on publie au moins les pages statiques.
     return staticPages;
