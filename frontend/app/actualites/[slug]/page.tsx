@@ -88,7 +88,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         className="w-full rounded-xl border border-border"
       />
 
-      <div className="space-y-3 text-sm leading-relaxed text-muted [&_a]:text-accent [&_a]:underline [&_em]:text-faint [&_h2]:pt-2 [&_h2]:font-display [&_h2]:text-lg [&_h2]:text-white [&_strong]:text-ivory">
+      <div className="space-y-3 text-sm leading-relaxed text-muted [&_a]:text-accent [&_a]:underline [&_em]:text-faint [&_h2]:pt-2 [&_h2]:font-display [&_h2]:text-lg [&_h2]:text-white [&_strong]:text-ivory [&_table]:w-full [&_table]:text-xs [&_td]:border-b [&_td]:border-border/40 [&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left [&_th]:text-faint [&_ul]:list-disc [&_ul]:pl-5">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{a.corps_md}</ReactMarkdown>
       </div>
 
