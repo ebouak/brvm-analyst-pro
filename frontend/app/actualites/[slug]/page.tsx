@@ -92,6 +92,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{a.corps_md}</ReactMarkdown>
       </div>
 
+      {Array.isArray(a.chiffres.liens) && a.chiffres.liens.length > 0 ? (
+        <aside className="space-y-2 rounded-xl border border-border bg-surface p-4">
+          <p className="text-[11px] uppercase tracking-wide text-faint">À lire aussi</p>
+          <ul className="space-y-1.5">
+            {(a.chiffres.liens as { slug: string; titre: string }[]).map((l) => (
+              <li key={l.slug}>
+                <Link href={`/actualites/${l.slug}`} className="text-sm text-ivory hover:text-accent">
+                  {l.titre}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      ) : null}
+
       {a.sources.length > 0 ? (
         <footer className="border-t border-border/60 pt-4 text-xs text-faint">
           Sources :{' '}

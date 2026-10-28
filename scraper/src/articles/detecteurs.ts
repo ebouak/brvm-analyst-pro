@@ -9,8 +9,10 @@ import type { Contexte, CoursRow, DividendeRow, Fait, OperationRow } from './typ
 const SOURCES_FIABLES = new Set(['brvm-calendrier', 'brvm-boc', 'richbourse']);
 const SEUIL_VARIATION = 5;
 const SEUIL_VOLUME = 2;
+const SEUIL_PART = 40; // % des capitaux de la séance
 const MIN_HISTORIQUE = 10;
-const MAX_SEANCES = 2;
+const MIN_COTES = 20;
+const INDICES = ['BRVMC', 'BRVM30', 'BRVMPRES'];
 
 const arrondi = (x: number, d: number) => Number(x.toFixed(d));
 
@@ -60,54 +62,95 @@ function operations(ctx: Contexte, rows: OperationRow[]): Fait[] {
     }));
 }
 
-function seances(ctx: Contexte, divs: DividendeRow[]): Fait[] {
-  const candidats: { fait: Fait; poids: number }[] = [];
-  for (const c of Object.values(ctx.cours)) {
-    if (c.date_marche !== ctx.derniereSeance || c.cours_jour == null || c.variation_pct == null || !c.volume) continue;
+/** Mouvement d'une valeur, pour la liste des autres hausses et baisses. */
+export interface Mouvement {
+  code: string;
+  cours: number;
+  variation: number;
+}
+
+/**
+ * Le compte rendu de séance : UN par jour. L'angle est la valeur la plus
+ * remarquable, dans cet ordre — record de capitaux sur tout l'historique en
+ * base, puis valeur qui pèse au moins 40 % des échanges, puis séance hors
+ * norme (variation ≥ 5 % ou record 52 semaines, sur un volume ≥ 2× sa
+ * moyenne), sinon la plus forte variation.
+ */
+function seance(ctx: Contexte, divs: DividendeRow[], ops: OperationRow[]): Fait[] {
+  const cotes = Object.values(ctx.cours).filter(
+    (c) => c.date_marche === ctx.derniereSeance && c.cours_jour != null && c.variation_pct != null,
+  );
+  const total = cotes.reduce((s, c) => s + (c.valeur_echangee ?? 0), 0);
+  if (cotes.length < MIN_COTES || total <= 0) return [];
+
+  const evalues = cotes.map((c) => {
     const hist = (ctx.historique[c.code] ?? []).slice(-30).filter((h) => (h.volume ?? 0) > 0);
-    if (hist.length < MIN_HISTORIQUE) continue;
-    const moyenne = hist.reduce((s, h) => s + (h.volume ?? 0), 0) / hist.length;
-    const ratioVolume = c.volume / moyenne;
-    const record =
-      c.cours_haut_52s && c.cours_jour >= c.cours_haut_52s
-        ? 'haut'
-        : c.cours_bas_52s && c.cours_jour <= c.cours_bas_52s
-          ? 'bas'
-          : null;
-    if (ratioVolume < SEUIL_VOLUME || !(Math.abs(c.variation_pct) >= SEUIL_VARIATION || record)) continue;
-    // Un détachement à la séance ou depuis la précédente est JUXTAPOSÉ, jamais
-    // présenté comme la cause du mouvement (assertNoCausalClaim veille).
-    const veille = hist[hist.length - 1]?.date_marche ?? c.date_marche;
-    const detache = divs.find(
-      (d) => d.code === c.code && d.montant && d.ex_date && d.ex_date >= veille && d.ex_date <= c.date_marche,
-    );
-    candidats.push({
-      poids: Math.max(Math.abs(c.variation_pct), 1) * ratioVolume,
-      fait: {
-        type: 'seance_hors_norme',
-        code: c.code,
-        cle: c.date_marche,
-        dateFait: c.date_marche,
-        donnees: {
-          cours: c.cours_jour,
-          variation: c.variation_pct,
-          volume: c.volume,
-          volume_moyen: Math.round(moyenne),
-          ratio_volume: arrondi(ratioVolume, 1),
-          seances_moyenne: hist.length,
-          record,
-          dividende_detache: detache?.montant ?? null,
-          date_detachement: detache?.ex_date ?? null,
-        },
+    const moyenne = hist.length >= MIN_HISTORIQUE ? hist.reduce((s, h) => s + (h.volume ?? 0), 0) / hist.length : null;
+    const ratioVolume = moyenne && c.volume ? c.volume / moyenne : null;
+    const valeur = c.valeur_echangee ?? 0;
+    const part = (valeur / total) * 100;
+    const prec = ctx.recordsValeur?.[c.code];
+    const recordValeur = Boolean(prec && valeur > prec.valeur);
+    const record52 =
+      c.cours_haut_52s && c.cours_jour! >= c.cours_haut_52s ? 'haut' : c.cours_bas_52s && c.cours_jour! <= c.cours_bas_52s ? 'bas' : null;
+    const v = Math.abs(c.variation_pct!);
+    const horsNorme = ratioVolume != null && ratioVolume >= SEUIL_VOLUME && (v >= SEUIL_VARIATION || record52 != null);
+    const rang = recordValeur ? 4 : part >= SEUIL_PART ? 3 : horsNorme ? 2 : 1;
+    const departage = rang >= 3 ? valeur : rang === 2 ? v * (ratioVolume ?? 1) : v;
+    return { c, hist, moyenne, ratioVolume, valeur, part, prec, recordValeur, record52, rang, departage };
+  });
+  const angle = [...evalues].sort((a, b) => b.rang - a.rang || b.departage - a.departage)[0]!;
+  const c = angle.c;
+
+  const veille = angle.hist[angle.hist.length - 1]?.date_marche ?? c.date_marche;
+  const detache = divs.find((d) => d.code === c.code && d.montant && d.ex_date && d.ex_date >= veille && d.ex_date <= c.date_marche);
+  const op = ops.find((o) => o.code === c.code && o.date_effet <= c.date_marche && ecartJours(o.date_effet, c.date_marche) <= 10);
+  const mouvement = (x: CoursRow): Mouvement => ({ code: x.code, cours: x.cours_jour!, variation: x.variation_pct! });
+  const autres = cotes.filter((x) => x.code !== c.code);
+  const indice = (code: string) => {
+    const i = ctx.indices?.find((x) => x.code === code);
+    return i && i.valeur != null && i.variation_pct != null ? { valeur: i.valeur, variation: i.variation_pct } : null;
+  };
+  const actions = ctx.actions?.[c.code] ?? null;
+
+  return [
+    {
+      type: 'seance_hors_norme',
+      code: c.code,
+      cle: c.date_marche,
+      dateFait: c.date_marche,
+      donnees: {
+        rang: angle.rang,
+        cours: c.cours_jour,
+        cours_precedent: c.cours_precedent,
+        variation: c.variation_pct,
+        volume: c.volume,
+        valeur: angle.valeur,
+        total: total,
+        part: arrondi(angle.part, 2),
+        capitalisation_delta: actions && c.cours_precedent ? actions * (c.cours_jour! - c.cours_precedent) : null,
+        record_valeur: angle.recordValeur,
+        record_prec: angle.prec ?? null,
+        volume_moyen: angle.moyenne != null ? Math.round(angle.moyenne) : null,
+        ratio_volume: angle.ratioVolume != null ? arrondi(angle.ratioVolume, 1) : null,
+        seances_moyenne: angle.hist.length,
+        record: angle.record52,
+        cours_haut_52s: c.cours_haut_52s,
+        cours_bas_52s: c.cours_bas_52s,
+        dividende_detache: detache?.montant ?? null,
+        date_detachement: detache?.ex_date ?? null,
+        operation: op ? { type: op.type, ratio: op.ratio, date_effet: op.date_effet } : null,
+        indices: Object.fromEntries(INDICES.map((k) => [k, indice(k)])),
+        hausses: autres.filter((x) => x.variation_pct! > 0).length + (c.variation_pct! > 0 ? 1 : 0),
+        baisses: autres.filter((x) => x.variation_pct! < 0).length + (c.variation_pct! < 0 ? 1 : 0),
+        stables: autres.filter((x) => x.variation_pct === 0).length + (c.variation_pct === 0 ? 1 : 0),
+        top_hausses: [...autres].filter((x) => x.variation_pct! > 0).sort((a, b) => b.variation_pct! - a.variation_pct!).slice(0, 3).map(mouvement),
+        top_baisses: [...autres].filter((x) => x.variation_pct! < 0).sort((a, b) => a.variation_pct! - b.variation_pct!).slice(0, 3).map(mouvement),
       },
-    });
-  }
-  return candidats
-    .sort((a, b) => b.poids - a.poids)
-    .slice(0, MAX_SEANCES)
-    .map((c) => c.fait);
+    },
+  ];
 }
 
 export function detecter(ctx: Contexte, divs: DividendeRow[], ops: OperationRow[]): Fait[] {
-  return [...dividendes(ctx, divs), ...operations(ctx, ops), ...seances(ctx, divs)];
+  return [...dividendes(ctx, divs), ...operations(ctx, ops), ...seance(ctx, divs, ops)];
 }
