@@ -47,9 +47,9 @@ class Plume {
   }
 
   date(iso: string): string {
-    const [a, m, j] = iso.split('-').map(Number);
+    const [a = 0, m = 1, j = 0] = iso.split('-').map(Number);
     this.liste.push(j, a);
-    return `${j} ${MOIS[m - 1]} ${a}`;
+    return `${j} ${MOIS[m - 1] ?? ''} ${a}`;
   }
 
   /** Les chiffres d'un nom propre sont de la donnée, pas une invention. */

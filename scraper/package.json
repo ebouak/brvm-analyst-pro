@@ -16,6 +16,8 @@
     "score": "tsx src/index.ts score",
     "backtest-signals": "tsx src/index.ts backtest-signals",
     "score:mock": "tsx src/index.ts score --mock",
+    "articles": "tsx src/index.ts articles",
+    "articles:mock": "tsx src/index.ts articles --mock",
     "hebdo": "tsx src/index.ts hebdo",
     "hebdo:mock": "tsx src/index.ts hebdo --mock",
     "dossiers:envoi": "tsx src/index.ts dossiers:envoi",
