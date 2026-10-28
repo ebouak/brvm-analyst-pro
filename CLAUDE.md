@@ -1051,6 +1051,34 @@ Décision de l'exploitant : **non officiel pour tester, puis officiel**.
   compte connecté, alertes/dossiers derrière `canAccess('alertes')`.
   ⚠️ `scrape-daily.yml` lance `alerts` sans aucun canal — à vérifier.
 
+### Ajouts (passage 2026-10-28) — Articles de presse générés depuis la donnée
+
+Spec `docs/superpowers/specs/2026-10-28-articles-presse-design.md`, plan
+`docs/superpowers/plans/2026-10-28-articles-presse-lot1.md`. Migration `0167`
+**à appliquer**. 26 tests purs (`scraper/tests/articles.test.ts`).
+
+- **Un fait en base = un article.** `scraper/src/articles/` : détecteurs purs
+  (dividende annoncé, détachement J-1 à J-3 ouvrés, paiement la veille,
+  opération sur titres ±5 j, séance hors norme = |var| ≥ 5 % ET volume ≥ 2×
+  la moyenne 30 séances, ou record 52 semaines, 2 au plus). `fait` unique :
+  une relance ne crée rien.
+- **Aucun chiffre inventé, par construction.** Tout nombre écrit passe par
+  `Plume` (`redaction.ts`), qui l'inscrit dans la liste blanche ;
+  `polishNarrative` (cascade LLM de l'hebdo) est jugé contre elle, et les
+  verrous la relisent. Un détachement est JUXTAPOSÉ à une séance, jamais
+  présenté comme sa cause.
+- **Publication mixte** : lot 1 automatique si les 5 verrous passent
+  (fraîcheur, plausibilité ±50 %, chiffres, source, avertissement), sinon
+  brouillon avec sa raison (`/admin/articles`). Lots 2-3 (résultats,
+  notations, thèmes tendance) passeront par `a_valider`.
+- **Image tirée de la donnée** (`/api/articles/[slug]/image`, Edge, `next/og`) :
+  rendue depuis `chiffres` figés, 404 tant que l'article n'est pas publié.
+- **Diffusion** Chaîne WhatsApp + canal Telegram, **3 posts par jour** au plus,
+  regroupement « Les faits du jour » au-delà ; journal dans `diffuse`.
+  Cron `articles.yml` 17:00 UTC lun-ven.
+- `/actualites/[slug]` public (préfixe ajouté au middleware), JSON-LD
+  `NewsArticle`, sitemap. **Pas de `loading.tsx`** au-dessus (soft-404).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

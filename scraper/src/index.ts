@@ -338,6 +338,26 @@ async function main(): Promise<number> {
       );
       return res.status === 'failed' ? 1 : 0;
     }
+    case 'articles': {
+      const { runArticles } = await import('./articles/runArticles.js');
+      // monitored renvoie la valeur du runner ; un échec lève, il n'a pas de statut.
+      await monitored(
+        { code: 'articles', label: 'Articles de presse' },
+        async () => {
+          const r = await runArticles({ mock });
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.detectes,
+              rows_upserted: r.crees,
+              metadata: { ...r },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'hebdo': {
       const { runHebdo } = await import('./hebdo/runHebdo.js');
       const res = await monitored(
