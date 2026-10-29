@@ -1079,6 +1079,32 @@ Spec `docs/superpowers/specs/2026-10-28-articles-presse-design.md`, plan
 - `/actualites/[slug]` public (préfixe ajouté au middleware), JSON-LD
   `NewsArticle`, sitemap. **Pas de `loading.tsx`** au-dessus (soft-404).
 
+### Ajouts (passage 2026-10-29) — Gabarit « Décryptage valeur »
+
+- **Données, puis rendu.** `lib/articles/decryptage.ts` produit un objet
+  `DecryptageDonnees` (version 1) rangé dans `articles.chiffres.decryptage` ;
+  `components/decryptage/DecryptageVue.tsx` (+ `Graphiques.tsx`, Recharts) le
+  rend sur `/actualites/[slug]` et sur la relecture `/admin/articles/[id]`. Le
+  `corps_md` en est DÉRIVÉ (diffusion, repli). Aucune migration : jsonb.
+- **Deux sources, pas une troisième** : le dossier valeur (base) et la couche
+  éditoriale `lib/articles/decryptageEditorial.ts` (registre par code). Chaque
+  chiffre de cette couche figure TEL QUEL dans le document cité, vérifié sur le
+  PDF lui-même (`verifie_le`). Des `comptes` d'un autre exercice que le dossier
+  sont IGNORÉS — mélanger deux exercices fabriquerait des ratios faux.
+- **Prochain décryptage d'une valeur** : `/admin/articles` → Générer. Sans
+  entrée éditoriale, la page sort complète depuis la seule base (les sections
+  éditoriales disparaissent). Pour l'enrichir : ajouter une entrée au registre
+  (résultat part du groupe, fonds propres part du groupe, impôt, FCF, dividende
+  brut, risques sourcés, catalyseurs datés), sources relues, puis regénérer.
+- **PER et P/B sur la part du groupe** quand les comptes éditoriaux le
+  permettent : SNTS 12,3x et non 10,2x (le résultat consolidé inclut 71,6 Md
+  de minoritaires). Le pilier valorisation est recalculé sur cette base.
+- **Marge de sécurité** (`jaugePilier`) : échelle propre à chaque critère,
+  écrite sous le tableau. Pas un score. Statuts en badges texte, pas d'emoji.
+- **Thème** : les graphiques lisent les jetons CSS (`--color-*`) et suivent le
+  mode clair comme le sombre — des couleurs figées rendaient les étiquettes
+  invisibles en clair.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
