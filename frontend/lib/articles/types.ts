@@ -23,6 +23,7 @@ export const LIBELLE_TYPE: Record<string, string> = {
   paiement_rappel: 'Paiement',
   operation_titres: 'Opération sur titres',
   seance_hors_norme: 'Séance',
+  decryptage: 'Décryptage',
 };
 
 export const COLONNES_ARTICLE = 'id,slug,type,code,titre,chapo,corps_md,chiffres,sources,date_fait,publie_le';

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requirePermission } from '@/lib/server/rbac';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import ArticleStatutBoutons from '@/components/admin/ArticleStatutBoutons';
+import GenererDecryptage from '@/components/admin/GenererDecryptage';
 import { LIBELLE_TYPE } from '@/lib/articles/types';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,10 @@ const TON: Record<string, string> = { publie: 'text-up', brouillon: 'text-down',
 
 export default async function AdminArticlesPage() {
   await requirePermission('content.publish');
-  const { data } = await getServiceClient()
+  const svc = getServiceClient();
+  const { data: instr } = await svc.from('brvm_instruments').select('code').eq('type', 'action').eq('actif', true).order('code');
+  const codes = ((instr ?? []) as { code: string }[]).map((i) => i.code);
+  const { data } = await svc
     .from('articles')
     .select('id, slug, type, titre, statut, raison_blocage, date_fait, diffuse')
     .order('created_at', { ascending: false })
@@ -34,8 +38,10 @@ export default async function AdminArticlesPage() {
       <h1 className="font-display text-xl text-white">Articles de presse</h1>
       <p className="text-sm text-muted">
         Dividendes, détachements, paiements, opérations sur titres et séances hors norme sont publiés automatiquement
-        quand leurs verrous passent. Un brouillon indique le verrou qui a échoué.
+        quand leurs verrous passent. Un brouillon indique le verrou qui a échoué. Les décryptages arrivent « à
+        valider » : relisez-les sur la page avant de publier.
       </p>
+      <GenererDecryptage codes={codes} />
       {articles.length === 0 ? (
         <p className="text-sm text-faint">Aucun article pour le moment.</p>
       ) : (
@@ -59,6 +65,10 @@ export default async function AdminArticlesPage() {
                   {a.statut === 'publie' ? (
                     <Link href={`/actualites/${a.slug}`} className="text-xs text-faint hover:text-accent">
                       Voir la page
+                    </Link>
+                  ) : a.statut === 'a_valider' ? (
+                    <Link href={`/admin/articles/${a.id}`} className="text-xs text-accent hover:underline">
+                      Relire avant publication
                     </Link>
                   ) : null}
                 </td>
