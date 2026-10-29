@@ -19,6 +19,7 @@ import { detecter } from './detecteurs.js';
 import { assembler, rediger } from './redaction.js';
 import { verifier } from './verrous.js';
 import { legende, legendeGroupe, planDiffusion } from './diffusion.js';
+import { publierArticlesSociaux, type ResultatSocial } from '../social/runSocial.js';
 import {
   cleFait,
   TYPES_AUTOMATIQUES,
@@ -36,6 +37,8 @@ export interface ResultatArticles {
   publies: number;
   bloques: number;
   posts: number;
+  /** LinkedIn / TikTok (src/social) : absent en essai ou en réécriture. */
+  reseaux?: ResultatSocial;
 }
 
 const SITE = (process.env.SITE_URL || 'https://www.westbourse.com').replace(/\/+$/, '');
@@ -221,7 +224,16 @@ export async function runArticles(opts: { mock?: boolean } = {}): Promise<Result
     }
   }
 
-  if (!dryRun && !reecrire) res.posts = await diffuser(aujourdhui);
+  if (!dryRun && !reecrire) {
+    res.posts = await diffuser(aujourdhui);
+    // Après WhatsApp/Telegram, et isolé : une panne LinkedIn/TikTok est
+    // alertée par src/social, elle ne doit pas faire échouer les articles.
+    try {
+      res.reseaux = await publierArticlesSociaux(aujourdhui);
+    } catch (e) {
+      logger.error({ err: (e as Error).message }, 'articles : publication réseaux impossible');
+    }
+  }
   logger.info({ ...res }, 'articles');
   return res;
 }

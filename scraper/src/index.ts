@@ -418,6 +418,24 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'social:articles': {
+      // Reprise manuelle de la publication LinkedIn/TikTok des articles du
+      // jour (le cron `articles` la fait déjà). Le verrou par (article,
+      // réseau) empêche tout doublon ; seuls les échecs sont repris.
+      const { publierArticlesSociaux } = await import('./social/runSocial.js');
+      const { todayMarketDate } = await import('./utils/dates.js');
+      const r = await publierArticlesSociaux(todayMarketDate());
+      logger.info({ ...r }, 'social:articles');
+      return r.echecs > 0 ? 1 : 0;
+    }
+    case 'sante:reseaux': {
+      // Expiration des connexions LinkedIn (60 j, sans renouvellement) et
+      // TikTok, publications restées en plan : alerte Telegram quotidienne.
+      const { runSanteReseaux } = await import('./social/sante.js');
+      const r = await runSanteReseaux();
+      logger.info({ alertes: r.alertes.length }, 'sante:reseaux');
+      return 0;
+    }
     case 'sante:llm': {
       // Sonde réelle des trois fournisseurs LLM (DeepSeek/Mistral/xAI) : une
       // clé valide ne suffit pas, un modèle de repli retiré casse tout sans

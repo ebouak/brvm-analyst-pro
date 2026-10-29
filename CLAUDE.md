@@ -1129,6 +1129,49 @@ Migration `0169_article_campagnes.sql` **à appliquer**.
   réécrit entière. L'article aurait perdu sa diffusion sociale, et celle-ci
   aurait effacé la trace de l'email.
 
+### Ajouts (passage 2026-10-29) — Publication LinkedIn et TikTok
+
+Migration `0170_reseaux_sociaux.sql` **à appliquer**. Consultation Fable 1/3.
+
+- **Périmètre (choix de l'exploitant, contre l'avis Fable qui recommandait de
+  réduire)** : TOUS les articles publiés → LinkedIn (profil personnel) et TikTok
+  (brouillon photo), au plus **3 par jour et par réseau** ; plus la vidéo de
+  séance sur les deux. Automatique, sans semaine de simulation.
+- **Jetons** : table `social_tokens` (service_role seul), remplie par
+  `/admin/reseaux` → `/api/admin/reseaux/[reseau]/connexion|retour` (OAuth,
+  `state` en cookie httpOnly, comparaison à temps constant). PAS de secret
+  GitHub : un retour OAuth sur Vercel ne peut pas en écrire un, et TikTok fait
+  TOURNER son jeton de rafraîchissement — deux copies divergeraient. Écriture
+  du jeton tourné sous verrou optimiste (`refresh_token = ancien`).
+- **LinkedIn n'a PAS de jeton de rafraîchissement** (self-serve) : 60 jours,
+  puis reconnexion manuelle. `sante:reseaux` (étape de `sante-llm.yml`)
+  alerte Telegram **chaque jour** à partir de J-10.
+- **Verrou** `publications_sociales` (PK `cible, cible_id, reseau`) inséré
+  AVANT l'appel ; seul `echec` se reprend ; un `en_cours` de plus d'une heure
+  est signalé, jamais repris (l'API a pu publier). Interrupteur `actif` par
+  réseau ; « coupé » ne retombe jamais sur les anciens secrets TikTok.
+- **Articles** : `scraper/src/social/` appelé après `diffuser()` dans le cron
+  `articles` (17:00 UTC), isolé (une panne réseau ne fait pas échouer les
+  articles, elle est alertée). Reprise manuelle : `npm run social:articles`.
+  Texte = titre + chapô, rien d'autre (aucun LLM). ⚠️ Le `commentary`
+  LinkedIn est en « little text format » : `\ | { } @ [ ] ( ) < > # * _ ~`
+  doivent être échappés, sinon 400 ou texte tronqué (`echapperLinkedIn`).
+- **TikTok n'accepte que JPEG/WebP par URL, sur un préfixe vérifié** :
+  route `/api/articles/[slug]/photo.jpg` (Node, `pngjs` + `jpeg-js`, PAS
+  `sharp`). Elle ré-encode l'image Edge `/image?format=carre` au lieu de
+  rendre next/og en Node, qui échoue sous Windows (« Invalid URL » sur sa
+  police, mesuré).
+- **Vidéo** : `video/reseaux.mjs` (duplication assumée de `src/social`, deux
+  paquets) ; étape 4b LinkedIn dans `publie.mjs` ; TikTok lit d'abord la table,
+  les secrets `TIKTOK_*` ne servent qu'en repli tant qu'aucun compte n'est connecté.
+- **À poser** : Vercel `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`,
+  `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` ; GitHub `TIKTOK_CLIENT_KEY`,
+  `TIKTOK_CLIENT_SECRET`. URL de retour à déclarer dans chaque application :
+  `https://www.westbourse.com/api/admin/reseaux/<reseau>/retour`. Préfixe
+  TikTok à vérifier : `https://www.westbourse.com/api/articles/`.
+- `Linkedin-Version` figée à `202609` (`LINKEDIN_VERSION` pour la monter) :
+  LinkedIn retire une version après ~1 an et répond 426, message explicite.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

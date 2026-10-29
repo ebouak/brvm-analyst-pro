@@ -1,0 +1,112 @@
+import { getSupabase } from '../persistence/supabase.js';
+import { logger } from '../logger.js';
+import { sendTelegramText } from '../alerts/channels.js';
+import { jetonUtilisable, type ReseauSocial } from './jetons.js';
+import { prendreVerrou, terminer, ignorer } from './verrou.js';
+import { publierLinkedIn } from './linkedin.js';
+import { deposerPhotoTikTok } from './tiktok.js';
+import { PLAFOND_SOCIAL_JOUR, repartir, texteLinkedIn, texteTikTok, type ArticleSocial } from './texte.js';
+
+/**
+ * Publication automatique des articles PUBLIÉS aujourd'hui sur LinkedIn
+ * (profil de l'exploitant) et TikTok (brouillon photo). Appelée par le cron
+ * des articles (17:00 UTC) après WhatsApp/Telegram, et seule par
+ * `social:articles` pour une reprise manuelle.
+ *
+ * Garde-fous : interrupteur `actif` par réseau, plafond quotidien par réseau
+ * (PLAFOND_SOCIAL_JOUR), verrou par (article, réseau), et toute panne — jeton
+ * expiré, API qui refuse — part sur la conversation d'EXPLOITATION Telegram.
+ * Un échec n'est jamais silencieux : la panne email de sept semaines est
+ * passée derrière un workflow vert.
+ */
+const SITE = (process.env.SITE_URL || 'https://www.westbourse.com').replace(/\/+$/, '');
+
+export interface ResultatSocial {
+  linkedin: number;
+  tiktok: number;
+  echecs: number;
+  ignores: number;
+}
+
+async function alerter(sujet: string, corps: string): Promise<void> {
+  try {
+    await sendTelegramText({ subject: sujet, body: corps, operateur: true });
+  } catch (e) {
+    logger.error({ err: (e as Error).message }, 'réseaux : alerte Telegram impossible');
+  }
+}
+
+async function imagePaysage(slug: string): Promise<Buffer | null> {
+  try {
+    const r = await fetch(`${SITE}/api/articles/${slug}/image`, { signal: AbortSignal.timeout(30_000) });
+    return r.ok ? Buffer.from(await r.arrayBuffer()) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function publierUn(reseau: ReseauSocial, a: ArticleSocial, token: string, compteId: string | null): Promise<string> {
+  if (reseau === 'linkedin') {
+    if (!compteId) throw new Error('identifiant du profil LinkedIn absent, reconnectez LinkedIn');
+    return publierLinkedIn({ token, auteur: compteId, texte: texteLinkedIn(a, SITE), image: await imagePaysage(a.slug), titreImage: a.titre });
+  }
+  const t = texteTikTok(a);
+  return deposerPhotoTikTok({ token, titre: t.titre, description: t.description, urls: [`${SITE}/api/articles/${a.slug}/photo.jpg`] });
+}
+
+export async function publierArticlesSociaux(aujourdhui: string): Promise<ResultatSocial> {
+  const sb = getSupabase();
+  const res: ResultatSocial = { linkedin: 0, tiktok: 0, echecs: 0, ignores: 0 };
+  const debut = `${aujourdhui}T00:00:00Z`;
+  const { data, error } = await sb
+    .from('articles')
+    .select('id, slug, type, titre, chapo')
+    .eq('statut', 'publie')
+    .gte('publie_le', debut)
+    .order('publie_le');
+  if (error) throw new Error(`articles (réseaux) : ${error.message}`);
+  const articles = (data ?? []) as ArticleSocial[];
+  if (articles.length === 0) return res;
+
+  for (const reseau of ['linkedin', 'tiktok'] as ReseauSocial[]) {
+    const jeton = await jetonUtilisable(reseau);
+    if (!jeton.ok) {
+      logger.info({ reseau, raison: jeton.raison }, 'réseaux : abstention');
+      if (jeton.alerter) await alerter(`Réseaux : ${reseau} en panne`, `${articles.length} article(s) du jour non publiés sur ${reseau} : ${jeton.raison}.`);
+      continue;
+    }
+
+    const { data: lignes, error: eL } = await sb
+      .from('publications_sociales')
+      .select('cible_id, statut, lance_le')
+      .eq('cible', 'article')
+      .eq('reseau', reseau)
+      .in('cible_id', articles.map((a) => a.id));
+    if (eL) throw new Error(`publications_sociales : ${eL.message}`);
+    const traces = (lignes ?? []) as { cible_id: string; statut: string; lance_le: string }[];
+    const dejaTraites = new Set(traces.filter((t) => t.statut !== 'echec').map((t) => t.cible_id));
+    const dejaAujourdhui = traces.filter((t) => (t.statut === 'publie' || t.statut === 'en_cours') && t.lance_le >= debut).length;
+    const { aPublier, auDela } = repartir(articles.filter((a) => !dejaTraites.has(a.id)), dejaAujourdhui);
+
+    for (const a of auDela) {
+      await ignorer('article', a.id, reseau, `plafond de ${PLAFOND_SOCIAL_JOUR} articles par jour atteint`);
+      res.ignores++;
+    }
+    for (const a of aPublier) {
+      if (!(await prendreVerrou('article', a.id, reseau))) continue;
+      try {
+        const postId = await publierUn(reseau, a, jeton.token, jeton.compteId);
+        await terminer('article', a.id, reseau, { statut: 'publie', postId });
+        res[reseau]++;
+        logger.info({ reseau, slug: a.slug, postId }, 'réseaux : publié');
+      } catch (e) {
+        const msg = (e as Error).message;
+        await terminer('article', a.id, reseau, { statut: 'echec', erreur: msg });
+        res.echecs++;
+        logger.error({ reseau, slug: a.slug, err: msg }, 'réseaux : échec');
+        await alerter(`Réseaux : échec ${reseau}`, `« ${a.titre} » n'est pas parti sur ${reseau} : ${msg}. Relance possible (social:articles).`);
+      }
+    }
+  }
+  return res;
+}
