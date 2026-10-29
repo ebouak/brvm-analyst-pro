@@ -2,6 +2,26 @@ import { requirePermission } from '@/lib/server/rbac';
 import { SectionHeader, MetricCard, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
 import { loadNewsletter } from '@/lib/admin/newsletter';
 import { CampaignForm, UnsubscribeButton, ResendConfirmationsButton } from './CampaignForm';
+import Link from 'next/link';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import EnvoyerArticleEmail from '@/components/admin/EnvoyerArticleEmail';
+import { chargerCampagnes } from '@/lib/admin/articleCampagnes';
+import { libelleCampagne, peutRelancer } from '@/lib/email/articleEmail';
+import { LIBELLE_TYPE } from '@/lib/articles/types';
+
+/** Derniers articles publiés, avec leur trace d'envoi email (migration 0169). */
+async function articlesEnvoyables() {
+  const db = getServiceClient();
+  const { data } = await db
+    .from('articles')
+    .select('id, slug, type, titre, date_fait')
+    .eq('statut', 'publie')
+    .order('publie_le', { ascending: false })
+    .limit(6);
+  const articles = (data ?? []) as { id: string; slug: string; type: string; titre: string; date_fait: string }[];
+  const campagnes = await chargerCampagnes(db, articles.map((a) => a.id));
+  return articles.map((a) => ({ ...a, campagne: campagnes.get(a.id) ?? null }));
+}
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Newsletter — Administration' };
@@ -21,6 +41,7 @@ export default async function Page({ searchParams }: { searchParams: { q?: strin
   const search = searchParams.q ?? '';
   const { subscribers, kpis } = await loadNewsletter(search);
   const canCampaign = ctx.isSuperAdmin || ctx.permissions.has('content.publish');
+  const envoyables = canCampaign ? await articlesEnvoyables() : [];
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
@@ -34,6 +55,40 @@ export default async function Page({ searchParams }: { searchParams: { q?: strin
       </div>
 
       {canCampaign && <ResendConfirmationsButton pending={kpis.total - kpis.confirmed} />}
+      {canCampaign && (
+        <section className="rounded-panel border border-border bg-surface p-5">
+          <h2 className="font-display text-base text-ivory">Envoyer un article publié</h2>
+          <p className="mt-1 text-xs text-muted">
+            Titre, image, chapô et, pour un décryptage, ses chiffres clés, avec un lien vers la page. Une seule fois par
+            article, aux abonnés confirmés.
+          </p>
+          {envoyables.length === 0 ? (
+            <p className="mt-3 text-sm text-faint">Aucun article publié.</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-border/40">
+              {envoyables.map((a) => (
+                <li key={a.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <span className="text-[11px] uppercase text-accent">
+                      {LIBELLE_TYPE[a.type] ?? a.type} · {a.date_fait}
+                    </span>
+                    <Link href={`/actualites/${a.slug}`} className="block text-sm text-ivory hover:text-accent">
+                      {a.titre}
+                    </Link>
+                  </div>
+                  <EnvoyerArticleEmail
+                    id={a.id}
+                    titre={a.titre}
+                    abonnes={kpis.confirmed}
+                    trace={a.campagne ? libelleCampagne(a.campagne) : null}
+                    relancable={peutRelancer(a.campagne)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
       {canCampaign && <CampaignForm />}
 
       <div className="flex items-center justify-between gap-3">

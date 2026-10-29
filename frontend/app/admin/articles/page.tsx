@@ -4,6 +4,9 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import ArticleStatutBoutons from '@/components/admin/ArticleStatutBoutons';
 import GenererDecryptage from '@/components/admin/GenererDecryptage';
 import { LIBELLE_TYPE } from '@/lib/articles/types';
+import EnvoyerArticleEmail from '@/components/admin/EnvoyerArticleEmail';
+import { chargerCampagnes, compterAbonnesConfirmes } from '@/lib/admin/articleCampagnes';
+import { libelleCampagne, peutRelancer } from '@/lib/email/articleEmail';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +35,10 @@ export default async function AdminArticlesPage() {
       diffuse: { mode?: string; whatsapp?: string; telegram?: string } | null;
     }[]
   ).sort((a, b) => ORDRE.indexOf(a.statut) - ORDRE.indexOf(b.statut));
+  const [campagnes, abonnes] = await Promise.all([
+    chargerCampagnes(svc, articles.filter((a) => a.statut === 'publie').map((a) => a.id)),
+    compterAbonnesConfirmes(svc),
+  ]);
 
   return (
     <div className="space-y-4 p-6">
@@ -39,7 +46,8 @@ export default async function AdminArticlesPage() {
       <p className="text-sm text-muted">
         Dividendes, détachements, paiements, opérations sur titres et séances hors norme sont publiés automatiquement
         quand leurs verrous passent. Un brouillon indique le verrou qui a échoué. Les décryptages arrivent « à
-        valider » : relisez-les sur la page avant de publier.
+        valider » : relisez-les sur la page avant de publier. Un article publié peut être envoyé une fois aux abonnés
+        confirmés de la newsletter (colonne Diffusion).
       </p>
       <GenererDecryptage codes={codes} />
       {articles.length === 0 ? (
@@ -76,8 +84,21 @@ export default async function AdminArticlesPage() {
                   <span className={TON[a.statut] ?? 'text-faint'}>{a.statut}</span>
                   {a.raison_blocage ? <p className="text-xs text-faint">{a.raison_blocage}</p> : null}
                 </td>
-                <td className="px-3 py-2 text-xs text-muted">
-                  {a.diffuse ? `${a.diffuse.mode ?? ''} · WA ${a.diffuse.whatsapp ?? '—'} · TG ${a.diffuse.telegram ?? '—'}` : '—'}
+                <td className="space-y-2 px-3 py-2 text-xs text-muted">
+                  <p>{a.diffuse ? `${a.diffuse.mode ?? ''} · WA ${a.diffuse.whatsapp ?? '—'} · TG ${a.diffuse.telegram ?? '—'}` : '—'}</p>
+                  {a.statut === 'publie' &&
+                    (() => {
+                      const c = campagnes.get(a.id) ?? null;
+                      return (
+                        <EnvoyerArticleEmail
+                          id={a.id}
+                          titre={a.titre}
+                          abonnes={abonnes}
+                          trace={c ? libelleCampagne(c) : null}
+                          relancable={peutRelancer(c)}
+                        />
+                      );
+                    })()}
                 </td>
                 <td className="px-3 py-2">
                   <ArticleStatutBoutons id={a.id} statut={a.statut} />

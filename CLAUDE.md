@@ -1105,6 +1105,30 @@ Spec `docs/superpowers/specs/2026-10-28-articles-presse-design.md`, plan
   mode clair comme le sombre — des couleurs figées rendaient les étiquettes
   invisibles en clair.
 
+### Ajouts (passage 2026-10-29) — Articles sur la landing et envoi par email
+
+Migration `0169_article_campagnes.sql` **à appliquer**.
+
+- **Landing** : section « Nos articles » (`components/landing/bis/NosArticles.tsx`,
+  après les écrans du terminal). Un décryptage publié depuis moins de 30 jours
+  prend la une, sinon le plus récent (`lib/landing/articlesUne.ts`, testé) ;
+  trois autres articles à côté. Clé anon : seuls les publiés sont visibles. Sans
+  article, la section disparaît.
+- **Envoi email** : bouton « Envoyer par email » sur `/admin/articles` (colonne
+  Diffusion) et `/admin/newsletter`. Abonnés confirmés seulement, pied de
+  désabonnement, article PUBLIÉ seulement (le lien mènerait sinon à une 404).
+  Le courriel reprend ce que l'article publié contient déjà (titre, image,
+  chapô, chiffres clés et cartes de lecture d'un décryptage), sans recalcul.
+- **Une seule fois par article** : `article_campagnes` (PK `article_id`) est
+  insérée AVANT l'envoi et sert de verrou. Seul un échec total (`echec`, aucun
+  email parti) se relance ; un envoi partiel ne se relance pas, il a déjà écrit
+  à des abonnés. Service_role seul, aucune adresse stockée, l'auteur est dans
+  `admin_audit_logs`.
+- ⚠️ **Ne pas ranger l'envoi email dans `articles.diffuse`** : le scraper ne
+  diffuse sur WhatsApp/Telegram que les articles où `diffuse` est NULL, puis la
+  réécrit entière. L'article aurait perdu sa diffusion sociale, et celle-ci
+  aurait effacé la trace de l'email.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
