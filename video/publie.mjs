@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
 import { sujet, texte, html, esc as echappe } from './brief.mjs';
 import { marqueurBucket, publierChaine } from './chaineWhatsapp.mjs';
+import { creerReseaux, publierVideoLinkedIn, commentaireLinkedIn } from './reseaux.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
@@ -322,6 +323,56 @@ if (FB_PAGE && FB_TOKEN) {
   console.log('Facebook : ignore (FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN absents)');
 }
 
+/* ---------------------------------------------------------- 4b. LinkedIn */
+
+/* Profil LinkedIn de l'exploitant, connecté depuis /admin/reseaux (jeton dans
+   `social_tokens`, 60 jours, alerte quotidienne de sante:reseaux à J-10). Un
+   verrou par séance dans `publications_sociales` : relancer le workflow ne
+   republie pas. Une connexion absente ou coupée est ignorée ; un jeton expiré
+   ou une API qui refuse est un ECHEC, donc dans le récapitulatif du soir. */
+const reseaux = URL_SB && SERVICE ? creerReseaux({ urlSupabase: URL_SB, service: SERVICE }) : null;
+
+if (reseaux) {
+  try {
+    const j = await reseaux.jeton('linkedin');
+    if (!j.ok) {
+      console.log(`LinkedIn : ignore (${j.raison})`);
+      if (j.alerter) {
+        journal.push(`LinkedIn : ECHEC — ${j.raison}`);
+        echecs.push('linkedin');
+      }
+    } else if (!j.compteId) {
+      throw new Error('identifiant du profil absent, reconnectez LinkedIn');
+    } else if (!(await reseaux.prendreVerrou(m.seance, 'linkedin'))) {
+      console.log('LinkedIn : deja publiee pour cette seance — rien envoye');
+      journal.push('LinkedIn : déjà publiée (relance ignorée)');
+    } else {
+      try {
+        const urn = await publierVideoLinkedIn({
+          token: j.token,
+          auteur: j.compteId,
+          octets,
+          commentaire: commentaireLinkedIn(LEGENDE),
+          titre: TITRE,
+        });
+        await reseaux.terminer(m.seance, 'linkedin', { statut: 'publie', postId: urn });
+        console.log(`LinkedIn : publiee (${urn})`);
+        journal.push('LinkedIn : publiée');
+        envois++;
+      } catch (e) {
+        await reseaux.terminer(m.seance, 'linkedin', { statut: 'echec', erreur: e.message });
+        throw e;
+      }
+    }
+  } catch (e) {
+    console.error(`LinkedIn : ECHEC — ${e.message}`);
+    journal.push(`LinkedIn : ECHEC — ${e.message}`);
+    echecs.push('linkedin');
+  }
+} else {
+  console.log('LinkedIn : ignore (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY absents)');
+}
+
 /* ------------------------------------------------------------ 5. TikTok */
 
 /* Deux chemins selon l'etat de l'application developpeur :
@@ -372,12 +423,39 @@ const rafraichirTikTok = async () => {
   return rep.access_token;
 };
 
+/* Source du jeton : `social_tokens` d'abord (connexion faite depuis
+   /admin/reseaux, rafraîchie et réécrite en un seul endroit). Les secrets
+   TIKTOK_* ne servent plus que tant que la table n'est pas en service —
+   migration absente ou compte jamais connecté. Une publication COUPÉE par
+   l'exploitant ne retombe pas sur les secrets : couper, c'est couper. */
 let TT_TOKEN = null;
+let ttParTable = false;
+let ttDecide = false;
+let ttDepose = false;
 try {
-  TT_TOKEN = await rafraichirTikTok();
+  const j = reseaux ? await reseaux.jeton('tiktok') : { ok: false, table: false };
+  if (j.ok) {
+    TT_TOKEN = j.token;
+    ttParTable = true;
+  } else if (j.table === false || j.raison === 'compte non connecté') {
+    TT_TOKEN = await rafraichirTikTok();
+  } else {
+    ttDecide = true;
+    console.log(`TikTok : ignore (${j.raison})`);
+    if (j.alerter) {
+      journal.push(`TikTok : ECHEC — ${j.raison}`);
+      echecs.push('tiktok');
+    }
+  }
 } catch (e) {
   console.error(`TikTok : ECHEC — ${e.message}`);
   echecs.push('tiktok');
+}
+if (TT_TOKEN && ttParTable && !(await reseaux.prendreVerrou(m.seance, 'tiktok'))) {
+  console.log('TikTok : deja depose pour cette seance — rien envoye');
+  journal.push('TikTok : déjà déposée (relance ignorée)');
+  TT_TOKEN = null;
+  ttDecide = true;
 }
 
 const tt = async (chemin, corps) => {
@@ -441,6 +519,10 @@ if (TT_TOKEN) {
       throw new Error(`televersement → ${up.status} ${(await up.text()).slice(0, 300)}`);
     }
 
+    if (ttParTable) await reseaux.terminer(m.seance, 'tiktok', { statut: 'publie', postId: init.publish_id });
+    /* Déposé : une erreur après ce point (lecture du statut) ne doit plus
+       repasser la ligne en `echec`, sinon une relance déposerait un doublon. */
+    ttDepose = true;
     const etat = await tt('/post/publish/status/fetch/', { publish_id: init.publish_id });
     console.log(
       `TikTok : ${TT_MODE === 'direct' ? 'publie' : 'depose en brouillon'} ` +
@@ -459,8 +541,9 @@ if (TT_TOKEN) {
     console.error(`TikTok : ECHEC — ${e.message}`);
     journal.push(`TikTok : ECHEC — ${e.message}`);
     echecs.push('tiktok');
+    if (ttParTable && !ttDepose) await reseaux.terminer(m.seance, 'tiktok', { statut: 'echec', erreur: e.message }).catch(() => {});
   }
-} else if (!echecs.includes('tiktok')) {
+} else if (!echecs.includes('tiktok') && !ttDecide) {
   console.log('TikTok : ignore (ni TIKTOK_REFRESH_TOKEN ni TIKTOK_ACCESS_TOKEN)');
 }
 

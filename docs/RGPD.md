@@ -134,6 +134,18 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Droits : rien à exporter ni supprimer en base ; la boîte support se traite à la main.
 - Sécurité : limite 5 messages / 10 min par IP ; journal d'échec sans adresse.
 
+**Publication LinkedIn / TikTok (2026-10-29, migration 0170)**
+- Données : jetons OAuth, identifiant et nom affiché du compte **de l'exploitant**
+  (`social_tokens`) ; journal des publications (`publications_sociales`, aucune
+  donnée d'utilisateur, seulement des identifiants d'articles et de séances).
+- Finalité : publier les contenus WESTBOURSE sur les comptes de l'exploitant.
+- Base légale : **intérêt légitime** de l'éditeur, sur ses propres comptes.
+- Conservation : jetons jusqu'à déconnexion (`/admin/reseaux` → Déconnecter les
+  efface) ou expiration ; journal conservé comme trace d'exploitation.
+- Droits : aucun utilisateur concerné ; l'exploitant gère ses comptes depuis l'admin.
+- Sécurité : RLS sans policy (service_role seul), jetons jamais renvoyés au
+  navigateur ni journalisés ; `state` OAuth en cookie httpOnly ; audit sans jeton.
+
 **Monitoring scraping (Lot 3)**
 - Données : **aucune donnée personnelle** (sources de marché, métriques techniques).
 - N/A RGPD. `scraper_errors` ne doit pas contenir de donnée perso (messages techniques).

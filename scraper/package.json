@@ -79,6 +79,8 @@
     "carnet": "tsx src/index.ts carnet",
     "carnet:date": "tsx src/index.ts carnet",
     "sante:llm": "tsx src/index.ts sante:llm",
+    "sante:reseaux": "tsx src/index.ts sante:reseaux",
+    "social:articles": "tsx src/index.ts social:articles",
     "contact:rappel": "tsx src/index.ts contact:rappel",
     "whatsapp:sante": "tsx src/index.ts whatsapp:sante"
   },

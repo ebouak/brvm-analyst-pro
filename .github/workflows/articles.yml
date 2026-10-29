@@ -47,4 +47,10 @@ jobs:
           WAHA_URL: ${{ secrets.WAHA_URL }}
           WAHA_API_KEY: ${{ secrets.WAHA_API_KEY }}
           WHATSAPP_CHAINE_ID: ${{ vars.WHATSAPP_CHAINE_ID }}
+          # LinkedIn / TikTok (src/social) : jetons dans la table social_tokens.
+          # Le couple client TikTok sert à renouveler le jeton de 24 h ; la
+          # conversation d'EXPLOITATION reçoit toute panne de publication.
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: npm run articles -- --trigger=$SCRAPER_TRIGGER
