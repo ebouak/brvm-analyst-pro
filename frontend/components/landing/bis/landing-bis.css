@@ -929,3 +929,25 @@
 @media (prefers-reduced-motion: reduce) {
   .lb .today .card { transition: none; }
 }
+
+/* ── « Nos articles » : la une + trois articles (NosArticles.tsx) ───────── */
+.lb .articles { margin-top: 44px; }
+.lb .articles-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.lb .articles-head h2 { font-size: clamp(30px, 3.6vw, 44px); margin-top: 6px; }
+.lb .articles-head .lead { color: var(--ink-2); font-size: 15px; margin-top: 8px; max-width: 56ch; }
+.lb .articles-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.lb .articles-grid.seul { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
+@media (max-width: 860px) { .lb .articles-grid { grid-template-columns: minmax(0, 1fr); } }
+.lb .art-une, .lb .art-mini { display: block; transition: border-color .2s ease-out, box-shadow .2s ease-out; }
+.lb .art-une { padding: 0; overflow: hidden; }
+.lb .art-une img { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 630; object-fit: cover; background: var(--paper-2); border-bottom: 1px solid var(--line); }
+.lb .art-txt { padding: 16px 18px 18px; }
+.lb .art-une h3 { font-size: clamp(20px, 2.2vw, 26px); margin-top: 6px; }
+.lb .art-une p:not(.over), .lb .art-mini p:not(.over) { color: var(--ink-2); font-size: 14px; margin-top: 8px; }
+.lb .art-une .lire { display: inline-block; margin-top: 12px; font-weight: 600; font-size: 14px; color: var(--blue-tx); }
+.lb .art-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.lb .art-mini h3 { font-size: 17px; margin-top: 4px; line-height: 1.2; }
+.lb .art-mini p:not(.over) { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.lb .art-une:hover, .lb .art-mini:hover { border-color: rgb(var(--color-accent) / .5); box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .5); }
+.lb .art-une:focus-visible, .lb .art-mini:focus-visible { outline: 2px solid rgb(var(--color-accent)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .lb .art-une, .lb .art-mini { transition: none; } }

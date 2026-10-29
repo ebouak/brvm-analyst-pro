@@ -11,6 +11,8 @@ import { getMemberCount } from '@/lib/landing/memberCount';
 import { QuatreFacons } from '@/components/landing/bis/QuatreFacons';
 import { LandingNav } from '@/components/landing/bis/LandingNav';
 import { getLandingBisData, type Plan } from '@/lib/landing/bisData';
+import { getArticlesLanding } from '@/lib/landing/articles';
+import { NosArticles } from '@/components/landing/bis/NosArticles';
 import { computeFreshness } from '@/lib/freshness';
 import { fmtDateFR, fmtFcfa, fmtNumber } from '@/lib/format';
 import '@/components/landing/bis/landing-bis.css';
@@ -51,7 +53,7 @@ function PlanPrice({ p }: { p: Plan }) {
 const Thumb = ({ children }: { children: React.ReactNode }) => <div className="thumb" aria-hidden="true"><svg viewBox="0 0 96 64"><rect width="96" height="64" fill="rgb(var(--color-surface))" />{children}</svg></div>;
 
 export default async function Landing() {
-  const [d, membres] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null)]);
+  const [d, membres, articles] = await Promise.all([getLandingBisData(), getMemberCount().catch(() => null), getArticlesLanding()]);
   const fraicheur = computeFreshness(d.derniereCollecte, d.dateMarche, new Date());
   const dateLabel = d.dateMarche ? fmtDateFR(d.dateMarche) : null;
   const free = d.plans.find((p) => p.code === 'free');
@@ -126,6 +128,9 @@ export default async function Landing() {
 
           {/* 2 bis · ÉCRANS DU TERMINAL — vidéo de séance, note quantitative, dossier d’analyse */}
           <Terminal d={d} dateMarche={d.dateMarche} />
+
+          {/* 2 bis bis · NOS ARTICLES — décryptages et articles publiés (disparaît sans article) */}
+          <NosArticles une={articles.une} autres={articles.autres} />
 
           {/* 2 ter · QUATRE FAÇONS DE TRAVAILLER LE MARCHÉ */}
           <QuatreFacons />
