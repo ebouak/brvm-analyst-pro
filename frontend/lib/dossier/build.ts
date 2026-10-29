@@ -79,6 +79,8 @@ export interface ChiffresCles {
   dette: number | null;
   /** 'totale' : bilan, court + long terme ; 'long_terme' : banque ; 'declaree' : périmètre non vérifié. */
   dette_perimetre: 'totale' | 'long_terme' | 'declaree' | null;
+  /** Trésorerie du bilan de l'exercice, seulement quand ce bilan relève des mêmes comptes. */
+  tresorerie: number | null;
   croissance_ca_1an: number | null;
   croissance_ca_2ans: number | null;
   variation_capitaux_propres_1an: number | null;
@@ -313,9 +315,9 @@ export async function buildDossier(
   const annuels = exercicesAnnuels(exercices).filter((e) => exerciceRef == null || Number(e.periode) <= Number(exerciceRef));
   const annuelRef = annuels[0]?.periode === exerciceRef ? annuels : [];
   const { data: bilanRef } = exerciceRef
-    ? await sb.from('balance_sheets').select('total_actifs, total_capitaux_propres, dette_court_terme, dette_long_terme').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
+    ? await sb.from('balance_sheets').select('total_actifs, total_capitaux_propres, dette_court_terme, dette_long_terme, tresorerie_equivalents').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
     : { data: null };
-  const bilanBrut = bilanRef as { total_actifs?: number | null; total_capitaux_propres?: number | null; dette_court_terme?: number | null; dette_long_terme?: number | null } | null;
+  const bilanBrut = bilanRef as { total_actifs?: number | null; total_capitaux_propres?: number | null; dette_court_terme?: number | null; dette_long_terme?: number | null; tresorerie_equivalents?: number | null } | null;
   // Bilan et fondamentaux d'une même norme seulement : sinon on ne les croise pas.
   const bilan = memesComptes(bilanBrut?.total_capitaux_propres ?? null, fonda?.equity ?? null) ? bilanBrut : null;
   if (bilanBrut && !bilan) {
@@ -521,6 +523,7 @@ export async function buildDossier(
       capitaux_propres: fonda?.equity ?? null,
       dette: dette?.valeur ?? null,
       dette_perimetre: dette?.perimetre ?? null,
+      tresorerie: bilan?.tresorerie_equivalents ?? null,
       croissance_ca_1an: croissanceCA(annuelRef, 1),
       croissance_ca_2ans: croissanceCA(annuelRef, 2),
       variation_capitaux_propres_1an:

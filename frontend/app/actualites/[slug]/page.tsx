@@ -6,6 +6,8 @@ import remarkGfm from 'remark-gfm';
 import { createPublicClient } from '@/lib/supabase/public';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { COLONNES_ARTICLE, LIBELLE_TYPE, type Article } from '@/lib/articles/types';
+import type { DecryptageDonnees } from '@/lib/articles/decryptage';
+import DecryptageVue from '@/components/decryptage/DecryptageVue';
 
 /*
  * Article de presse généré depuis la donnée BRVM (spec 2026-10-28). Public, ISR.
@@ -54,9 +56,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     mainEntityOfPage: `${SITE}/actualites/${a.slug}`,
   };
 
-  return (
-    <article className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(ld) }} />
+  // Décryptage au gabarit structuré : rendu par composants depuis ses données.
+  const decryptage = (a.chiffres.decryptage as DecryptageDonnees | undefined) ?? null;
+  const nav = (
       <nav className="text-xs text-faint">
         <Link href="/actualites" className="hover:text-accent">
           Actualités
@@ -72,6 +74,23 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </>
         ) : null}
       </nav>
+  );
+
+  if (a.type === 'decryptage' && decryptage?.version === 1) {
+    return (
+      <article className="mx-auto max-w-5xl space-y-8 px-4 py-8">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(ld) }} />
+        {nav}
+        <DecryptageVue d={decryptage} />
+        <p className="text-xs text-faint">{date} · La rédaction WESTBOURSE</p>
+      </article>
+    );
+  }
+
+  return (
+    <article className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(ld) }} />
+      {nav}
 
       <header className="space-y-3">
         <h1 className="font-display text-2xl text-white md:text-3xl">{a.titre}</h1>

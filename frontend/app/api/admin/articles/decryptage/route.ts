@@ -4,8 +4,15 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { buildDossier } from '@/lib/dossier/build';
 import { construireNarratif } from '@/lib/dossier/narratif';
-import { composerDecryptage, type FaitRecent } from '@/lib/articles/decryptage';
+import {
+  composerDecryptage,
+  type ExtrasDecryptage,
+  type FaitRecent,
+  type OperationRecente,
+  type SeanceRecente,
+} from '@/lib/articles/decryptage';
 import { nomDit } from '@/lib/articles/noms';
+import { editorialDe } from '@/lib/articles/decryptageEditorial';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +32,24 @@ export async function POST(req: NextRequest) {
   const dossier = await buildDossier(sb, code, { medianes });
   if (!dossier) return NextResponse.json({ error: 'Valeur inconnue.' }, { status: 404 });
 
-  const [{ data: faits }, { data: instruments }] = await Promise.all([
+  const [{ data: faits }, { data: instruments }, { data: seances }, { data: operations }, { data: instrument }] = await Promise.all([
     sb.from('articles').select('slug,titre,type,date_fait').eq('code', code).eq('statut', 'publie')
       .neq('type', 'decryptage').order('date_fait', { ascending: false }).limit(5),
     sb.from('brvm_instruments').select('designation').eq('type', 'action'),
+    sb.from('brvm_actions_daily').select('date_marche,cours_jour,variation_pct,volume,valeur_echangee').eq('code', code)
+      .order('date_marche', { ascending: false }).limit(8),
+    sb.from('operations_titres').select('date_effet,type,ratio').eq('code', code).order('date_effet'),
+    sb.from('brvm_instruments').select('notation_json').eq('code', code).maybeSingle(),
   ]);
   const toutes = ((instruments ?? []) as { designation: string }[]).map((i) => i.designation);
   const nom = nomDit(dossier.identite.designation ?? code, toutes);
-  const a = composerDecryptage(dossier, construireNarratif(dossier), (faits ?? []) as FaitRecent[], nom, new Date().toISOString());
+  const notation = (instrument as { notation_json?: { history?: ExtrasDecryptage['notations'] } } | null)?.notation_json;
+  const a = composerDecryptage(dossier, construireNarratif(dossier), (faits ?? []) as FaitRecent[], nom, new Date().toISOString(), {
+    seances: ((seances ?? []) as SeanceRecente[]).reverse(),
+    operations: (operations ?? []) as OperationRecente[],
+    notations: notation?.history ?? [],
+    editorial: editorialDe(code),
+  });
 
   // Un décryptage déjà publié ce jour n'est pas remplacé en silence.
   const { data: existant } = await sb.from('articles').select('statut').eq('fait', a.fait).maybeSingle();
