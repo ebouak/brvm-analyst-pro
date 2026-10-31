@@ -17,6 +17,11 @@ describe('scorer', () => {
     expect(s.raisons[0]!.texte).toBe(`paiement de ${fmtFcfa(5000)} commencé le 12/10, non terminé`);
   });
 
+  it('paiement inachevé en EUR : la devise est affichée, jamais FCFA', () => {
+    const s = scorer({ ...d0, paiementsEnAttente: [{ montant: 50, devise: 'EUR', date: ilYa(19) }] }, MAINTENANT);
+    expect(s.raisons[0]!.texte).toBe('paiement de 50 EUR commencé le 12/10, non terminé');
+  });
+
   it('paiement inachevé : 30 jours compte, 31 non', () => {
     expect(scorer({ ...d0, paiementsEnAttente: [{ montant: 1, devise: 'XOF', date: ilYa(30) }] }, MAINTENANT).score).toBe(40);
     expect(scorer({ ...d0, paiementsEnAttente: [{ montant: 1, devise: 'XOF', date: ilYa(31) }] }, MAINTENANT).score).toBe(0);

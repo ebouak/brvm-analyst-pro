@@ -19,7 +19,11 @@ export const fmtJour = (iso: string): string => {
   return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 };
 // toLocaleString('fr-FR') sépare les milliers par une espace insécable (U+00A0 ou U+202F selon l'ICU) : on la normalise.
-export const fmtFcfa = (n: number): string => `${Math.round(n).toLocaleString('fr-FR').replace(/[  ]/g, ' ')} FCFA`;
+const nombreFr = (n: number): string => Math.round(n).toLocaleString('fr-FR').replace(/[\u00a0\u202f]/g, ' ');
+export const fmtFcfa = (n: number): string => `${nombreFr(n)} FCFA`;
+/** Montant dans SA devise : FCFA pour XOF/FCFA, sinon le code de la devise (jamais « FCFA » sur de l'EUR). */
+export const fmtMontant = (montant: number, devise: string): string =>
+  /^(xof|fcfa)$/i.test(devise.trim()) ? fmtFcfa(montant) : `${nombreFr(montant)} ${devise.trim().toUpperCase()}`;
 
 export function estExclu(d: Dossier): boolean {
   return d.premium || d.admin || d.oppose;
@@ -29,7 +33,7 @@ export function scorer(d: Dossier, maintenant: Date): Score {
   const raisons: Raison[] = [];
 
   const paiement = plusRecent(d.paiementsEnAttente.filter((p) => age(p.date, maintenant) <= FENETRES_JOURS.paiement));
-  if (paiement) raisons.push({ code: 'paiement', points: PONDERATIONS.paiement, date: paiement.date, texte: `paiement de ${fmtFcfa(paiement.montant)} commencé le ${fmtJour(paiement.date)}, non terminé` });
+  if (paiement) raisons.push({ code: 'paiement', points: PONDERATIONS.paiement, date: paiement.date, texte: `paiement de ${fmtMontant(paiement.montant, paiement.devise)} commencé le ${fmtJour(paiement.date)}, non terminé` });
 
   const vues = d.offreVues.map((v) => ({ ...v, date: `${v.jour}T12:00:00Z` })).filter((v) => age(v.date, maintenant) <= FENETRES_JOURS.offre);
   const derniereVue = plusRecent(vues);

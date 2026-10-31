@@ -4,7 +4,7 @@
  * d'opposition est ajouté À L'ENVOI (le jeton n'existe qu'à ce moment) :
  * art. 21 RGPD, absolu en prospection.
  */
-import { fmtFcfa, fmtJour } from './score';
+import { fmtMontant, fmtJour } from './score';
 import type { Dossier, Score } from './types';
 
 export type TemplateId = 'paiement_inacheve' | 'offre_consultee' | 'actif_sans_abonnement' | 'prospect_sans_compte';
@@ -31,7 +31,7 @@ export function composerRelance(id: TemplateId, d: Dossier): { sujet: string; co
           bonjour,
           '',
           paiement
-            ? `Vous aviez commencé votre abonnement Premium le ${fmtJour(paiement.date)}, pour ${fmtFcfa(paiement.montant)}, sans aller jusqu'au bout.`
+            ? `Vous aviez commencé votre abonnement Premium le ${fmtJour(paiement.date)}, pour ${fmtMontant(paiement.montant, paiement.devise)}, sans aller jusqu'au bout.`
             : "Vous aviez commencé votre abonnement Premium sans aller jusqu'au bout.",
           "Si quelque chose vous a arrêté (moyen de paiement, question sur l'offre), répondez simplement à ce message : nous vous répondrons personnellement.",
           '',
@@ -62,5 +62,12 @@ export function piedOpposition(lien: string): string {
 
 export function versHtml(texte: string): string {
   const echappe = texte.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  return echappe.replace(/https:\/\/[^\s<]+/g, (url) => `<a href="${url}">${url}</a>`).replace(/\n/g, '<br>');
+  // Le lien s'arrête avant une entité (&quot; &lt; &gt;) ; la ponctuation finale reste du texte.
+  return echappe
+    .replace(/https:\/\/(?:(?!&(?:quot|lt|gt);)[^\s<])+/g, (url) => {
+      const fin = /[.,;:!?)]+$/.exec(url)?.[0] ?? '';
+      const href = fin ? url.slice(0, -fin.length) : url;
+      return `<a href="${href}">${href}</a>${fin}`;
+    })
+    .replace(/\n/g, '<br>');
 }

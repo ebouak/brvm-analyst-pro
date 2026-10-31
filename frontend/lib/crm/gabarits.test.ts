@@ -29,13 +29,20 @@ describe('composerRelance', () => {
     const { sujet, corps } = composerRelance('paiement_inacheve', d);
     expect(corps.startsWith('Bonjour Awa,')).toBe(true);
     expect(sujet.length).toBeGreaterThan(0);
-    expect(nombres(corps).every((n) => ['12', '10', '5', '000'].includes(n))).toBe(true);
+    expect(nombres(corps)).toEqual(['12', '10', '5', '000']);
   });
 
   it('aucun autre gabarit n’invente de chiffre', () => {
     for (const id of ['offre_consultee', 'actif_sans_abonnement', 'prospect_sans_compte'] as const) {
       expect(nombres(composerRelance(id, d0).corps)).toEqual([]);
     }
+  });
+
+  it("affiche la devise du paiement, jamais FCFA pour de l'EUR", () => {
+    const d = { ...d0, paiementsEnAttente: [{ montant: 50, devise: 'EUR', date: '2026-10-12T10:00:00Z' }] };
+    const { corps } = composerRelance('paiement_inacheve', d);
+    expect(corps).toContain('50 EUR');
+    expect(corps).not.toContain('FCFA');
   });
 
   it('salue sans prénom quand le nom manque', () => {
@@ -51,5 +58,11 @@ describe('piedOpposition et versHtml', () => {
     const html = versHtml('a <b> & c\nhttps://www.westbourse.com/crm/opposition?t=abc');
     expect(html).toContain('a &lt;b&gt; &amp; c<br>');
     expect(html).toContain('<a href="https://www.westbourse.com/crm/opposition?t=abc">');
+  });
+  it('le lien ne garde pas la ponctuation finale', () => {
+    expect(versHtml('voir https://www.westbourse.com/signup.')).toBe('voir <a href="https://www.westbourse.com/signup">https://www.westbourse.com/signup</a>.');
+  });
+  it("le lien s'arrête avant une entité", () => {
+    expect(versHtml('"https://x.com/a"')).toBe('&quot;<a href="https://x.com/a">https://x.com/a</a>&quot;');
   });
 });
