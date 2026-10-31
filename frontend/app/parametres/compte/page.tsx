@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import NotificationButton from '@/components/NotificationButton';
 import { SectionHeader } from '@/components/ui/premium';
+import OppositionProfilage from '@/components/crm/OppositionProfilage';
 import { saveDisplayName } from './displayNameAction';
 
 export default function ComptePage() {
@@ -141,6 +142,12 @@ export default function ComptePage() {
           </div>
         </div>
         <NotificationButton />
+      </section>
+
+      {/* Section propositions commerciales */}
+      <section className="bg-surface border border-border rounded-card shadow-card p-6 space-y-4">
+        <SectionHeader title="Propositions commerciales" />
+        <OppositionProfilage />
       </section>
 
       {/* Section suppression */}
