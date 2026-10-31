@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { choisirGabarit, composerRelance, piedOpposition, versHtml } from './gabarits';
+import { choisirGabarit, composerRelance, piedOpposition, versHtml, estTemplateId } from './gabarits';
+
+describe('estTemplateId', () => {
+  it('accepte les quatre gabarits', () => {
+    for (const id of ['paiement_inacheve', 'offre_consultee', 'actif_sans_abonnement', 'prospect_sans_compte']) expect(estTemplateId(id)).toBe(true);
+  });
+  it('refuse le reste', () => {
+    for (const v of ['', 'autre', null, undefined, 3, {}]) expect(estTemplateId(v)).toBe(false);
+  });
+});
 import { scorer } from './score';
 import type { Dossier } from './types';
 

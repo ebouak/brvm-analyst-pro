@@ -18,7 +18,7 @@ export default function RelanceForm({ cle, templateId, sujetInitial, corpsInitia
       <input value={sujet} onChange={(e) => setSujet(e.target.value)} className="w-full rounded-md border border-border bg-sunken px-3 py-2 text-sm" aria-label="Sujet" />
       <textarea value={corps} onChange={(e) => setCorps(e.target.value)} rows={10} className="w-full rounded-md border border-border bg-sunken px-3 py-2 text-sm" aria-label="Message" />
       <p className="text-xs text-faint">Le lien d&apos;opposition est ajouté automatiquement en pied de message.</p>
-      <button disabled={envoi} onClick={() => demarrer(async () => setRetour(await envoyerRelance(cle, sujet, corps, templateId)))} className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-bg disabled:opacity-50">
+      <button disabled={envoi} onClick={() => demarrer(async () => { try { setRetour(await envoyerRelance(cle, sujet, corps, templateId)); } catch { setRetour({ ok: false, message: "Erreur serveur : rien n'a été envoyé." }); } })} className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-bg disabled:opacity-50">
         {envoi ? 'Envoi…' : 'Envoyer la relance'}
       </button>
       {retour && <p className={`text-sm ${retour.ok ? 'text-up' : 'text-down'}`}>{retour.message}</p>}

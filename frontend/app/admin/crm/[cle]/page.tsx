@@ -14,13 +14,19 @@ export const metadata = { title: 'Fiche CRM — Administration' };
 
 export default async function Page({ params }: { params: { cle: string } }) {
   const ctx = await requirePermission('crm.read');
-  const d = await chargerDossier(decodeURIComponent(params.cle));
+  let cle: string;
+  try {
+    cle = decodeURIComponent(params.cle);
+  } catch {
+    notFound();
+  }
+  const d = await chargerDossier(cle);
   if (!d) notFound();
   const maintenant = new Date();
   const s = scorer(d, maintenant);
   const templateId = choisirGabarit(d, s);
   const { sujet, corps } = composerRelance(templateId, d);
-  const derniere = [...d.actions].filter((a) => a.type === 'relance').sort((a, b) => b.date.localeCompare(a.date))[0];
+  const derniere = [...d.actions].filter((a) => a.type === 'relance' && a.statut === 'envoye').sort((a, b) => b.date.localeCompare(a.date))[0];
   const recente = derniere && maintenant.getTime() - Date.parse(derniere.date) < 14 * 86_400_000 ? fmtJour(derniere.date) : null;
 
   return (
@@ -39,7 +45,11 @@ export default async function Page({ params }: { params: { cle: string } }) {
         <>
           <section>
             <h2 className="mb-2 text-sm font-semibold text-ivory">Relance par e-mail</h2>
-            <RelanceForm cle={d.cle} templateId={templateId} sujetInitial={sujet} corpsInitial={corps} relanceRecente={recente} oppose={d.oppose} />
+            {d.premium || d.admin ? (
+              <p className="text-sm text-muted">Personne Premium ou administratrice : pas de relance commerciale.</p>
+            ) : (
+              <RelanceForm cle={d.cle} templateId={templateId} sujetInitial={sujet} corpsInitial={corps} relanceRecente={recente} oppose={d.oppose} />
+            )}
           </section>
           <section>
             <h2 className="mb-2 text-sm font-semibold text-ivory">Notes internes</h2>

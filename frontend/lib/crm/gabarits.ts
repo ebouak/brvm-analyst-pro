@@ -7,7 +7,12 @@
 import { fmtMontant, fmtJour } from './score';
 import type { Dossier, Score } from './types';
 
-export type TemplateId = 'paiement_inacheve' | 'offre_consultee' | 'actif_sans_abonnement' | 'prospect_sans_compte';
+export const TEMPLATE_IDS = ['paiement_inacheve', 'offre_consultee', 'actif_sans_abonnement', 'prospect_sans_compte'] as const;
+export type TemplateId = (typeof TEMPLATE_IDS)[number];
+
+export function estTemplateId(v: unknown): v is TemplateId {
+  return typeof v === 'string' && (TEMPLATE_IDS as readonly string[]).includes(v);
+}
 
 export function choisirGabarit(d: Dossier, s: Score): TemplateId {
   const codes = new Set(s.raisons.map((r) => r.code));

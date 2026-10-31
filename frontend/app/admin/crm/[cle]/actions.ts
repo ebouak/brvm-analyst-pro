@@ -10,7 +10,7 @@ import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { chargerDossier } from '@/lib/crm/charger';
 import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
 import { scorer } from '@/lib/crm/score';
-import { piedOpposition, versHtml, type TemplateId } from '@/lib/crm/gabarits';
+import { piedOpposition, versHtml, estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
 
 const EXPEDITEUR = `WESTBOURSE <${ADRESSE_SUPPORT}>`;
 const SITE = 'https://www.westbourse.com';
@@ -18,8 +18,9 @@ type Retour = { ok: boolean; message: string };
 
 export async function envoyerRelance(cle: string, sujet: string, corps: string, templateId: TemplateId): Promise<Retour> {
   const ctx = await requirePermission('crm.write');
-  const s = sujet.trim().slice(0, 150);
-  const c = corps.trim().slice(0, 5000);
+  if (!estTemplateId(templateId)) return { ok: false, message: 'Gabarit inconnu.' };
+  const s = String(sujet ?? '').replace(/[\r\n]+/g, ' ').trim().slice(0, 150);
+  const c = String(corps ?? '').trim().slice(0, 5000);
   if (!s || !c) return { ok: false, message: 'Sujet et message obligatoires.' };
   const d = await chargerDossier(cle);
   if (!d) return { ok: false, message: 'Personne introuvable.' };
@@ -31,10 +32,12 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
     return { ok: false, message: "Vérification de l'opposition impossible : envoi annulé." };
   }
 
+  if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
+
   const sb = getServiceClient();
   const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
-  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).eq('statut', 'envoi').gte('created_at', deuxMinutes).limit(1);
-  if (enCours && enCours.length > 0) return { ok: false, message: 'Une relance est déjà en cours d’envoi pour cette personne.' };
+  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye']).gte('created_at', deuxMinutes).limit(1);
+  if (enCours && enCours.length > 0) return { ok: false, message: "Une relance vient d'être envoyée ou est en cours pour cette personne." };
 
   const score = scorer(d, new Date());
   const jeton = randomBytes(24).toString('hex');
@@ -54,15 +57,17 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
     res = { ok: false, sent: 0, error: (e as Error).message || 'exception' };
   }
   // L'échec est journalisé et affiché, jamais avalé (panne e-mail 07–09/2026).
-  await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
-  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_contact', resourceId: d.cle, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok } });
+  const { error: errMaj } = await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
+  // Audit sans e-mail : identifiant de la ligne de journal, jamais la clé (qui embarque l'adresse).
+  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
+  if (res.ok && errMaj) return { ok: true, message: "Relance envoyée, mais le journal n'a pas pu être mis à jour." };
   return res.ok ? { ok: true, message: 'Relance envoyée.' } : { ok: false, message: `Échec de l'envoi : ${res.error ?? 'inconnu'}` };
 }
 
 export async function ajouterNote(cle: string, contenu: string): Promise<Retour> {
   const ctx = await requirePermission('crm.write');
-  const c = contenu.trim().slice(0, 2000);
+  const c = String(contenu ?? '').trim().slice(0, 2000);
   if (!c) return { ok: false, message: 'Note vide.' };
   const d = await chargerDossier(cle);
   if (!d) return { ok: false, message: 'Personne introuvable.' };
@@ -77,7 +82,7 @@ export async function opposerParAdmin(cle: string): Promise<Retour> {
   const d = await chargerDossier(cle);
   if (!d) return { ok: false, message: 'Personne introuvable.' };
   const ok = await enregistrerOpposition(d.emailNorm, 'admin');
-  await recordAudit(ctx, { action: 'crm.opposition', resourceType: 'crm_contact', resourceId: d.cle, severity: 'info', metadata: { ok } });
+  await recordAudit(ctx, { action: 'crm.opposition', resourceType: 'crm_contact', resourceId: d.userId ?? 'prospect', targetUserId: d.userId ?? undefined, severity: 'info', metadata: { ok } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
   return ok ? { ok: true, message: 'Opposition enregistrée.' } : { ok: false, message: 'Échec.' };
 }
