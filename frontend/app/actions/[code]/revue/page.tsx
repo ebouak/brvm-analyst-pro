@@ -124,8 +124,9 @@ export default async function RevuePage({ params }: Props) {
       <p className="text-[10px] text-gray-400 mb-4">Montants en FCFA. Source : états financiers publiés (extraction WESTBOURSE).</p>
       {comptesEnRetard && latest && (
         <p className="text-[11px] text-amber-700 -mt-2 mb-4">
-          Derniers comptes disponibles : exercice {latest.periode}. Les exercices suivants ne sont pas encore
-          intégrés ; le P/E rapporte donc le cours du jour à un bénéfice de {latest.periode}.
+          Derniers comptes disponibles : exercice {latest.periode}. Aucun compte plus récent ne figure dans
+          les publications officielles de la société ; le P/E rapporte donc le cours du jour à un bénéfice
+          de {latest.periode}.
         </p>
       )}
 
