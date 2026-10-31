@@ -39,7 +39,7 @@ export default async function RapportPage({ params }: Props) {
   const today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
   return (
-    <div className="bg-white text-black font-sans p-8 max-w-3xl mx-auto print:p-4 print:max-w-none">
+    <div className="bg-[#ffffff] text-black font-sans p-8 max-w-3xl mx-auto print:p-4 print:max-w-none">
       <PrintTrigger />
 
       {/* En-tête */}

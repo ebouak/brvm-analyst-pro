@@ -23,12 +23,12 @@ export function BacktestInfographic({
   const isFull = variant === 'full';
 
   return (
-    <article className={`mx-auto w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 ${className}`}>
+    <article className={`mx-auto w-full max-w-2xl rounded-2xl border border-gray-200 bg-[#ffffff] p-4 shadow-sm sm:p-6 ${className}`}>
       <div className="space-y-5">
         <BacktestHeader meta={report.meta} highlightShortHistory={highlightShortHistory} />
 
         {isFull && report.equityCurve && report.equityCurve.length >= 2 && (
-          <div className="rounded-xl border border-gray-200 bg-white p-3">
+          <div className="rounded-xl border border-gray-200 bg-[#ffffff] p-3">
             <p className="mb-1 text-xs font-medium text-gray-500">Évolution du capital (base 100)</p>
             <EquitySparkline data={report.equityCurve} width={320} height={56} />
           </div>

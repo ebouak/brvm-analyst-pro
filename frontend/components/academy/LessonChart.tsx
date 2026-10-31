@@ -26,7 +26,7 @@ const THEME = {
     tipBg: '#ffffff',
     tipBorder: '#d8cfbe',
     tipLabel: '#16324e',
-    frame: 'rounded-xl border border-[#e2d8c4] bg-white p-4',
+    frame: 'rounded-xl border border-[#e2d8c4] bg-[#ffffff] p-4',
     caption: 'mb-3 text-xs font-semibold text-[#123a5e]',
     note: 'mt-2 text-[11px] leading-relaxed text-[#6b7b8c]',
   },

@@ -83,7 +83,7 @@ export function ProofBand({ nbActions, testimonials = [] }: { nbActions: number;
           <p className="overline mb-3 text-faint">Nos données proviennent des sources du marché</p>
           <ul className="flex flex-wrap items-center gap-2.5">
             {SOURCES.map((s) => (
-              <li key={s.alt} className="flex h-8 items-center rounded-md bg-white px-2">
+              <li key={s.alt} className="flex h-8 items-center rounded-md bg-[#ffffff] px-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={s.src} alt={s.alt} className="h-4 w-auto" />
               </li>

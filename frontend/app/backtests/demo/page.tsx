@@ -21,19 +21,19 @@ export default function BacktestDemoPage() {
         <section className="space-y-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Chiffres animés (comptage flou)</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" data-testid="animated-kpis">
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <div className="rounded-xl border border-gray-200 bg-[#ffffff] p-4">
               <p className="text-xs text-gray-500">Valorisation</p>
               <p className="mt-1 text-2xl font-semibold text-gray-900 tabular-nums">
                 <AnimatedValue value={34250000} format={{ maximumFractionDigits: 0 }} suffix=" FCFA" />
               </p>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <div className="rounded-xl border border-gray-200 bg-[#ffffff] p-4">
               <p className="text-xs text-gray-500">P&L latent</p>
               <p className="mt-1 text-2xl font-semibold text-green-700 tabular-nums">
                 <AnimatedValue value={1650000} format={{ maximumFractionDigits: 0 }} suffix=" FCFA" signed />
               </p>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <div className="rounded-xl border border-gray-200 bg-[#ffffff] p-4">
               <p className="text-xs text-gray-500">Rendement</p>
               <p className="mt-1 text-2xl font-semibold text-green-700 tabular-nums">
                 <AnimatedValue value={92.8} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} suffix="%" signed />

@@ -166,7 +166,7 @@ export function MfaPanel({ mustEnroll }: { mustEnroll: boolean }) {
           <img
             src={enrolling.qr}
             alt="QR code de configuration de la double authentification"
-            className="h-44 w-44 rounded-lg bg-white p-2"
+            className="h-44 w-44 rounded-lg bg-[#ffffff] p-2"
           />
           <details className="text-xs text-faint">
             <summary className="cursor-pointer hover:text-muted">

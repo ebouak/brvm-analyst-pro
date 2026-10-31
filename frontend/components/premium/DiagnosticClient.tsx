@@ -183,7 +183,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt, graph
       )}
 
       {markdown && (
-        <div className="bg-surface border border-border rounded-xl p-6 space-y-1 print:bg-white print:text-black print:border-0">
+        <div className="bg-surface border border-border rounded-xl p-6 space-y-1 print:bg-[#ffffff] print:text-black print:border-0">
           {renderedMarkdown}
           {restants.length > 0 && (
             <>

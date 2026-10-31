@@ -33,7 +33,7 @@ export default function RecentSignalsCard({ signals }: { signals: SignalRow[] })
               <SignalBadge signal={s.signal} confiance={s.confiance} />
               {LOGOS[s.code] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={LOGOS[s.code]} alt={s.code} width={20} height={20} className="w-5 h-5 rounded object-contain bg-white p-px shrink-0" />
+                <img src={LOGOS[s.code]} alt={s.code} width={20} height={20} className="w-5 h-5 rounded object-contain bg-[#ffffff] p-px shrink-0" />
               ) : null}
               <span className="font-medium text-sm">{s.code}</span>
               {s.designation && (

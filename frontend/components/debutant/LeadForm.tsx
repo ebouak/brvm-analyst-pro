@@ -10,7 +10,7 @@ type Phase = 'idle' | 'loading' | 'success';
 const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '';
 
 const FIELD =
-  'w-full rounded-xl border border-[#ddd7cd] bg-white px-4 py-3 text-sm text-[#191714] placeholder:text-[#9b958c] focus:border-[#0b6b6f] focus:outline-none focus:ring-2 focus:ring-[#0b6b6f]/20';
+  'w-full rounded-xl border border-[#ddd7cd] bg-[#ffffff] px-4 py-3 text-sm text-[#191714] placeholder:text-[#9b958c] focus:border-[#0b6b6f] focus:outline-none focus:ring-2 focus:ring-[#0b6b6f]/20';
 
 /**
  * Formulaire de contact débutant → POST /api/leads. Consentement RGPD
@@ -157,7 +157,7 @@ export default function LeadForm() {
                   href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#0b6b6f]/30 bg-white px-7 py-3.5 text-sm font-semibold text-[#0b6b6f] transition hover:bg-[#d4ebe8]/40"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#0b6b6f]/30 bg-[#ffffff] px-7 py-3.5 text-sm font-semibold text-[#0b6b6f] transition hover:bg-[#d4ebe8]/40"
                 >
                   WhatsApp
                 </a>

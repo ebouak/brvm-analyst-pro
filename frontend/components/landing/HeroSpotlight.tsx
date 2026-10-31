@@ -98,7 +98,7 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
           <ellipse cx="240" cy="280" rx="9" ry="26" transform="rotate(18 240 280)" fill="rgba(86,215,253,.10)" stroke="#56d7fd" strokeWidth="1.6" />
         </svg>
         <span className="absolute left-[20%] top-[49%] -translate-x-1/2 -translate-y-1/2">
-          <img src="/brand/brvm-logo.png" alt="BRVM" className="brvm-blink block w-[62px] rounded-[7px] bg-white px-[5px] py-1" />
+          <img src="/brand/brvm-logo.png" alt="BRVM" className="brvm-blink block w-[62px] rounded-[7px] bg-[#ffffff] px-[5px] py-1" />
         </span>
       </div>
 
