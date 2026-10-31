@@ -1171,6 +1171,19 @@ Migration `0170_reseaux_sociaux.sql` **à appliquer**. Consultation Fable 1/3.
   TikTok à vérifier : `https://www.westbourse.com/api/articles/`.
 - `Linkedin-Version` figée à `202609` (`LINKEDIN_VERSION` pour la monter) :
   LinkedIn retire une version après ~1 an et répond 426, message explicite.
+- ⚠️ **TikTok ne se publie PAS par cron (migration `0171`, 2026-10-31).** Les
+  règles d'audit de la publication directe (Content Sharing Guidelines)
+  exigent à CHAQUE envoi : compte affiché (creator_info), visibilité choisie
+  sans défaut, commentaires/duo/collage décochés, déclaration commerciale,
+  aperçu, consentement « Music Usage Confirmation ». Un envoi automatique se
+  ferait refuser à l'audit. Les workers déposent donc une ligne `a_valider`
+  (+ `contenu`) et l'exploitant publie depuis `/admin/reseaux/tiktok`
+  (`lib/social/tiktokRegles.ts`, testé ; règles rejouées côté serveur).
+  TikTok va chercher les médias sur le domaine VÉRIFIÉ : photos
+  `/api/articles/[slug]/photo.jpg`, vidéos `/api/seance/[date]/video.mp4`
+  (relais en flux du bucket). Avant audit, TikTok n'autorise que le privé.
+  Le brouillon « inbox » est resté bloqué en PROCESSING_UPLOAD de longues
+  minutes (constaté le 2026-10-31) : ne pas en dépendre.
 
 ## 9. Bugs connus / limites
 

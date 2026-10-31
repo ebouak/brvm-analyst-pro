@@ -1,5 +1,106 @@
 import 'server-only';
 import { ENV_CLIENT, type Reseau } from '@/lib/social/oauth';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import type { CreatorInfo, TypeContenu } from '@/lib/social/tiktokRegles';
+
+const TT = 'https://open.tiktokapis.com/v2';
+
+/**
+ * Jeton TikTok prêt à l'emploi, lu dans `social_tokens`. Expiré (24 h), il est
+ * échangé contre le jeton de rafraîchissement, qui TOURNE : l'écriture est
+ * conditionnée à l'ancien (même verrou optimiste que les workers, cf.
+ * scraper/src/social/jetons.ts) — on ne remplace jamais un jeton valide par un
+ * jeton déjà consommé.
+ */
+export async function jetonTikTok(): Promise<{ ok: true; token: string } | { ok: false; raison: string }> {
+  const db = getServiceClient();
+  const lire = async () =>
+    (await db.from('social_tokens').select('access_token, refresh_token, expire_le, actif').eq('reseau', 'tiktok').maybeSingle()).data as
+      | { access_token: string; refresh_token: string | null; expire_le: string | null; actif: boolean }
+      | null;
+  const l = await lire();
+  if (!l) return { ok: false, raison: 'Compte TikTok non connecté.' };
+  if (!l.actif) return { ok: false, raison: 'Publication TikTok coupée (interrupteur).' };
+  const valide = (e: string | null) => !e || new Date(e).getTime() > Date.now() + 5 * 60_000;
+  if (valide(l.expire_le)) return { ok: true, token: l.access_token };
+  const client = identifiantsClient('tiktok');
+  if (!client || !l.refresh_token) return { ok: false, raison: 'Jeton TikTok expiré, reconnectez TikTok.' };
+  const r = await fetch(`${TT}/oauth/token/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_key: client.id, client_secret: client.secret, grant_type: 'refresh_token', refresh_token: l.refresh_token }),
+  });
+  const j = await json(r);
+  if (!r.ok || typeof j.access_token !== 'string') return { ok: false, raison: 'Renouvellement TikTok refusé, reconnectez TikTok.' };
+  const { data } = await db
+    .from('social_tokens')
+    .update({
+      access_token: j.access_token,
+      refresh_token: typeof j.refresh_token === 'string' ? j.refresh_token : l.refresh_token,
+      expire_le: dans(j.expires_in),
+      refresh_expire_le: dans(j.refresh_expires_in),
+      maj_le: new Date().toISOString(),
+    })
+    .eq('reseau', 'tiktok')
+    .eq('refresh_token', l.refresh_token)
+    .select('reseau');
+  if (data && data.length > 0) return { ok: true, token: j.access_token };
+  const relue = await lire();
+  return relue && valide(relue.expire_le) ? { ok: true, token: relue.access_token } : { ok: false, raison: 'Jeton TikTok illisible, reconnectez TikTok.' };
+}
+
+async function appelTikTok<T>(token: string, chemin: string, corps?: unknown): Promise<T> {
+  const r = await fetch(`${TT}${chemin}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
+    body: JSON.stringify(corps ?? {}),
+    cache: 'no-store',
+  });
+  const j = (await r.json().catch(() => ({}))) as { data?: T; error?: { code?: string; message?: string } };
+  if (!r.ok || (j.error?.code && j.error.code !== 'ok')) {
+    throw new Error(`${j.error?.code ?? `HTTP ${r.status}`}${j.error?.message ? ` — ${j.error.message.slice(0, 160)}` : ''}`);
+  }
+  return (j.data ?? {}) as T;
+}
+
+/** Règle 1 : informations du compte, relues à CHAQUE affichage et à chaque envoi. */
+export async function creatorInfoTikTok(token: string): Promise<CreatorInfo> {
+  const d = await appelTikTok<Partial<CreatorInfo>>(token, '/post/publish/creator_info/query/');
+  return {
+    creator_nickname: d.creator_nickname ?? null,
+    creator_username: d.creator_username ?? null,
+    creator_avatar_url: d.creator_avatar_url ?? null,
+    privacy_level_options: Array.isArray(d.privacy_level_options) ? d.privacy_level_options : [],
+    comment_disabled: Boolean(d.comment_disabled),
+    duet_disabled: Boolean(d.duet_disabled),
+    stitch_disabled: Boolean(d.stitch_disabled),
+    max_video_post_duration_sec: typeof d.max_video_post_duration_sec === 'number' ? d.max_video_post_duration_sec : null,
+  };
+}
+
+/** Publication directe ; TikTok va chercher le média sur westbourse.com (domaine vérifié). */
+export async function publierDirectTikTok(token: string, type: TypeContenu, postInfo: Record<string, unknown>, urls: string[]): Promise<string> {
+  const d =
+    type === 'video'
+      ? await appelTikTok<{ publish_id?: string }>(token, '/post/publish/video/init/', {
+          post_info: postInfo,
+          source_info: { source: 'PULL_FROM_URL', video_url: urls[0] },
+        })
+      : await appelTikTok<{ publish_id?: string }>(token, '/post/publish/content/init/', {
+          post_info: postInfo,
+          source_info: { source: 'PULL_FROM_URL', photo_cover_index: 0, photo_images: urls },
+          post_mode: 'DIRECT_POST',
+          media_type: 'PHOTO',
+        });
+  if (!d.publish_id) throw new Error('TikTok n’a pas renvoyé d’identifiant de publication.');
+  return d.publish_id;
+}
+
+/** Règle 5 : statut de la publication (PROCESSING_DOWNLOAD, PUBLISH_COMPLETE, FAILED…). */
+export async function statutTikTok(token: string, publishId: string): Promise<{ statut: string; raison: string | null }> {
+  const d = await appelTikTok<{ status?: string; fail_reason?: string }>(token, '/post/publish/status/fetch/', { publish_id: publishId });
+  return { statut: d.status ?? 'INCONNU', raison: d.fail_reason ?? null };
+}
 
 /**
  * Échange du code OAuth contre les jetons, côté serveur uniquement. Aucun

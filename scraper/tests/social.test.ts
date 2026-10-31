@@ -1,21 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { echapperLinkedIn, repartir, texteLinkedIn, texteTikTok, PLAFOND_SOCIAL_JOUR } from '../src/social/texte.js';
 import { evaluerReseaux } from '../src/social/sante.js';
-import { choisirVisibilite, peutPublierDirect } from '../src/social/tiktok.js';
-
-describe('TikTok : publication directe', () => {
-  it('publie en direct seulement si le compte a accordé video.publish', () => {
-    expect(peutPublierDirect('user.info.basic,video.upload,video.publish')).toBe(true);
-    expect(peutPublierDirect('user.info.basic,video.upload')).toBe(false);
-    expect(peutPublierDirect(null)).toBe(false);
-  });
-
-  it('demande la visibilité la plus ouverte que TikTok propose, privé à défaut', () => {
-    expect(choisirVisibilite(['SELF_ONLY', 'MUTUAL_FOLLOW_FRIENDS', 'PUBLIC_TO_EVERYONE'])).toBe('PUBLIC_TO_EVERYONE');
-    expect(choisirVisibilite(['SELF_ONLY'])).toBe('SELF_ONLY');
-    expect(choisirVisibilite(undefined)).toBe('SELF_ONLY');
-  });
-});
 
 const article = {
   id: '58adfff7-49fd-41c9-8e55-a58961b85969',

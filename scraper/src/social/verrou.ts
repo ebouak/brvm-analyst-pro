@@ -41,6 +41,20 @@ export async function terminer(
     .eq('reseau', reseau);
 }
 
+/**
+ * TikTok : dépose une publication PRÉPARÉE (`a_valider`), publiée ensuite par
+ * l'exploitant depuis /admin/reseaux/tiktok — les règles d'audit de TikTok
+ * exigent ce choix explicite à chaque envoi. Renvoie false si elle existe déjà.
+ */
+export async function proposer(cible: Cible, cibleId: string, reseau: ReseauSocial, contenu: Record<string, unknown>): Promise<boolean> {
+  const { error } = await getSupabase()
+    .from('publications_sociales')
+    .insert({ cible, cible_id: cibleId, reseau, statut: 'a_valider', contenu, lance_le: new Date().toISOString() });
+  if (!error) return true;
+  if (error.code === '23505') return false;
+  throw new Error(`proposition ${reseau} : ${error.message}`);
+}
+
 /** Marque d'avance ce qui dépasse le plafond : l'article ne partira pas sur ce réseau. */
 export async function ignorer(cible: Cible, cibleId: string, reseau: ReseauSocial, raison: string): Promise<void> {
   await getSupabase()

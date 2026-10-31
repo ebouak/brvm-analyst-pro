@@ -102,76 +102,23 @@ export function creerReseaux({ urlSupabase, service }) {
     });
   };
 
-  return { jeton, prendreVerrou, terminer };
-}
-
-/* -------------------------------------------------------------- TikTok */
-
-/** Le compte a-t-il accordé la publication directe ? */
-export const peutPublierDirect = (scopes) => String(scopes ?? '').split(/[,\s]+/).includes('video.publish');
-
-/**
- * Visibilité à demander : la plus ouverte que TikTok propose pour ce compte
- * (`creator_info`). Une application NON AUDITÉE ne peut publier qu'en privé ;
- * TikTok le dit par une erreur `unaudited_client…`, d'où le repli SELF_ONLY.
- */
-export function choisirVisibilite(options) {
-  const o = Array.isArray(options) ? options : [];
-  if (o.includes('PUBLIC_TO_EVERYONE')) return 'PUBLIC_TO_EVERYONE';
-  if (o.includes('SELF_ONLY')) return 'SELF_ONLY';
-  return o[0] ?? 'SELF_ONLY';
-}
-
-/**
- * Publie la vidéo : directement si `direct` (portée video.publish), sinon en
- * brouillon dans la boîte de réception. Renvoie { publishId, mode } où mode
- * vaut 'public' | 'prive' | 'brouillon'.
- */
-export async function publierVideoTikTok({ token, octets, legende, direct }) {
-  const tt = async (chemin, corps) => {
-    const r = await fetch(`https://open.tiktokapis.com/v2${chemin}`, {
+  /**
+   * TikTok : dépose une publication PRÉPARÉE (`a_valider`), publiée ensuite par
+   * l'exploitant depuis /admin/reseaux/tiktok (règles d'audit TikTok : choix
+   * explicite à chaque envoi). Renvoie false si la séance est déjà préparée.
+   */
+  const proposer = async (seance, reseau, contenu) => {
+    const r = await fetch(`${rest}/publications_sociales`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
-      body: JSON.stringify(corps ?? {}),
+      headers: h({ Prefer: 'return=minimal' }),
+      body: JSON.stringify({ cible: 'video', cible_id: seance, reseau, statut: 'a_valider', contenu, lance_le: new Date().toISOString() }),
     });
-    const rep = await r.json().catch(() => ({}));
-    if (!r.ok || (rep.error?.code && rep.error.code !== 'ok')) {
-      throw new Error(`${chemin} → ${r.status} ${rep.error?.code ?? ''} ${rep.error?.message ?? ''}`.trim());
-    }
-    return rep.data ?? {};
+    if (r.ok) return true;
+    if (r.status === 409) return false;
+    throw new Error(`proposition ${reseau} : HTTP ${r.status} ${(await r.text()).slice(0, 160)}`);
   };
-  const taille = octets.length;
-  const source_info = { source: 'FILE_UPLOAD', video_size: taille, chunk_size: taille, total_chunk_count: 1 };
 
-  let init;
-  let mode = 'brouillon';
-  if (direct) {
-    const info = await tt('/post/publish/creator_info/query/');
-    let vis = choisirVisibilite(info.privacy_level_options);
-    const essayer = (v) =>
-      tt('/post/publish/video/init/', {
-        post_info: { title: legende.slice(0, 2200), privacy_level: v, disable_comment: false, disable_duet: false, disable_stitch: false },
-        source_info,
-      });
-    try {
-      init = await essayer(vis);
-    } catch (e) {
-      if (vis === 'SELF_ONLY' || !/unaudited/i.test(e.message)) throw e;
-      vis = 'SELF_ONLY';
-      init = await essayer(vis);
-    }
-    mode = vis === 'SELF_ONLY' ? 'prive' : 'public';
-  } else {
-    init = await tt('/post/publish/inbox/video/init/', { source_info });
-  }
-
-  const up = await fetch(init.upload_url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'video/mp4', 'Content-Range': `bytes 0-${taille - 1}/${taille}` },
-    body: octets,
-  });
-  if (!up.ok) throw new Error(`téléversement → ${up.status} ${(await up.text()).slice(0, 200)}`);
-  return { publishId: init.publish_id, mode };
+  return { jeton, prendreVerrou, terminer, proposer };
 }
 
 /* ------------------------------------------------------------ LinkedIn */
