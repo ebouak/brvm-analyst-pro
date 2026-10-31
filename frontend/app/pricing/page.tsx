@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { PricingClient, type PricingPlan } from '@/components/pricing/PricingClient';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import SignalOffre from '@/components/crm/SignalOffre';
 
 export const metadata: Metadata = {
   title: 'Tarifs',
@@ -29,6 +30,7 @@ export default async function PricingPage() {
 
   return (
     <div className="min-h-screen bg-bg">
+      <SignalOffre page="/pricing" />
       <header className="flex items-center justify-between border-b border-border px-6 py-4">
         <Link href="/" className="flex items-center gap-2" aria-label="WESTBOURSE">
           <AnimatedLogo size={32} variant="mark" animate={false} />
