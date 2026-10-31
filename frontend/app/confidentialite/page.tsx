@@ -30,6 +30,10 @@ export default function ConfidentialitePage() {
             <strong>Messages WhatsApp</strong> envoyés au numéro WESTBOURSE : numéro (ou identifiant WhatsApp),
             nom affiché, contenu du message et réponse adressée.
           </li>
+          <li>
+            <strong>Relation commerciale</strong> : pages de l&apos;offre Premium consultées en étant connecté,
+            messages que nous vous adressons pour vous la proposer, et notes internes associées.
+          </li>
         </ul>
       </section>
 
@@ -42,6 +46,12 @@ export default function ConfidentialitePage() {
             Réponse aux messages du formulaire de contact : mesures précontractuelles et intérêt
             légitime à répondre à une demande que vous nous adressez.
           </li>
+          <li>
+            Vous proposer l&apos;offre Premium lorsque votre activité montre un intérêt (paiement commencé,
+            offre consultée…) : intérêt légitime. Une personne de WESTBOURSE décide de chaque message ;
+            vous pouvez vous y opposer à tout moment (lien en pied de chaque message, ou Paramètres → Compte). Pour les personnes ayant rempli le
+            formulaire de contact sans compte : consentement.
+          </li>
           <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
         </ul>
       </section>
@@ -53,7 +63,10 @@ export default function ConfidentialitePage() {
           ou anonymisées dans un délai raisonnable après sa fermeture. Les données de
           newsletter sont conservées jusqu&apos;au désabonnement. Les messages du formulaire de
           contact et nos réponses — y compris les messages WhatsApp — sont conservés 12 mois après le
-          dernier échange, puis supprimés automatiquement.
+          dernier échange, puis supprimés automatiquement. Les consultations de l&apos;offre sont conservées 90 jours,
+          nos messages de proposition et les notes associées 24 mois. Si vous vous êtes opposé aux propositions
+          commerciales, nous conservons seulement votre adresse et la date de ce refus, même après la suppression
+          de votre compte, pour ne plus jamais vous en adresser.
         </p>
       </section>
 

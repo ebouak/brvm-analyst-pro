@@ -8,6 +8,7 @@ import { SectionHeader, StatPill } from '@/components/ui/premium';
 import { PlanClient, type PlanOption } from './PlanClient';
 import { produitsActifs } from '@/lib/billing/chariow/catalogue';
 import AchatChariow from '@/components/billing/AchatChariow';
+import SignalOffre from '@/components/crm/SignalOffre';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Mon abonnement' };
@@ -110,6 +111,7 @@ export default async function Page() {
         )}
       </div>
 
+      <SignalOffre page="/account/plan" />
       <PlanClient plans={plans} canSubscribe={canSubscribe} />
 
       {/* Alternative sans abonnement : la formation complète, avec un mois Premium (Chariow). */}
