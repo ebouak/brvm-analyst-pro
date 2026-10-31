@@ -25,6 +25,7 @@ import LargeurMoteur from '@/components/dashboard/surface/LargeurMoteur';
 import Mouvements from '@/components/dashboard/surface/Mouvements';
 import Secteurs from '@/components/dashboard/surface/Secteurs';
 import SignauxRecents from '@/components/dashboard/surface/SignauxRecents';
+import type { NoteSeance } from '@/lib/dashboard/signauxProches';
 import Actualites from '@/components/dashboard/surface/Actualites';
 import Motifs from '@/components/dashboard/surface/Motifs';
 import Afrique from '@/components/dashboard/surface/Afrique';
@@ -59,7 +60,7 @@ async function getData() {
     .order('date_marche', { ascending: false })
     .limit(1);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, ticker: [] as TickerLine[] };
+  if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], notesHold: [] as NoteSeance[], sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, ticker: [] as TickerLine[] };
 
   // Date précédente pour le delta volume
   const { data: prevDateRow } = await supabase
@@ -79,7 +80,7 @@ async function getData() {
     .limit(1);
   const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
-  const [{ data: actions }, { data: indices }, { data: signals }, { data: summaryRows }] =
+  const [{ data: actions }, { data: indices }, { data: signals }, { data: summaryRows }, { data: notesHold }] =
     await Promise.all([
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
       supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastIdxDate),
@@ -96,6 +97,9 @@ async function getData() {
         .from('brvm_market_summary')
         .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
         .in('date_marche', prevDate ? [lastDate, prevDate] : [lastDate]),
+      // Notes « conserver » de la séance (48 lignes au plus) : le bloc signaux
+      // montre les plus proches du seuil quand le moteur s'abstient.
+      supabase.from('signals_daily').select('code, score_total').eq('date_marche', lastDate).eq('signal', 'HOLD'),
     ]);
   const resumes = (summaryRows ?? []) as MarketSummaryRow[];
   const summary = resumes.find((r) => r.date_marche === lastDate) ?? null;
@@ -205,6 +209,7 @@ async function getData() {
     actions: typedActions,
     indices: typedIndices,
     signals: typedSignals,
+    notesHold: (notesHold ?? []) as NoteSeance[],
     sparklines,
     summary,
     summaryPrev,
@@ -220,7 +225,7 @@ interface MarketSummaryRow {
 }
 
 export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, sparklines, summary, summaryPrev, ticker, vedette } = await getData();
+  const { lastDate, actions, indices, signals, notesHold, sparklines, summary, summaryPrev, ticker, vedette } = await getData();
 
   // Fraîcheur des cours — affichée au-dessus du ticker permanent.
   // `lecture_seance` verrouille l'encart « Ce que dit la séance · CODE » plus bas :
@@ -417,7 +422,7 @@ export default async function Dashboard() {
       // absent (aucun cadenas de plus) et les signaux prennent toute la largeur,
       // pour ne jamais laisser de cellule vide.
       const carnet = vedette && gateLectureSeance.allowed ? vedette : null;
-      const signauxBloc = isPremium ? <SignauxRecents signaux={signals as SignalDaily[]} /> : (
+      const signauxBloc = isPremium ? <SignauxRecents signaux={signals as SignalDaily[]} notes={notesHold} /> : (
         <Bloc id="t-signaux-lock">
           <TeteBloc id="t-signaux-lock" titre="Signaux d'opportunité" />
           <PremiumLock title="Signaux d'achat et de vente réservés au Premium" pitch="Les signaux notés A–F, avec leur explication, sont inclus dans l'abonnement Premium." rows={3} />

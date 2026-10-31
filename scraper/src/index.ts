@@ -521,6 +521,30 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'eval:signaux': {
+      // Banc d'évaluation des signaux (lecture seule) : les scores ont-ils
+      // annoncé la suite ? Aucun seuil de scoring/score.ts ne change sans un
+      // verdict « prouvé » de ce banc. Voir src/signaux/evaluation.ts.
+      const { runEvaluationSignaux } = await import('./signaux/runEvaluationSignaux.js');
+      await monitored(
+        { code: 'eval-signaux', label: 'Banc d’évaluation des signaux' },
+        async () => {
+          const r = await runEvaluationSignaux();
+          console.log(r.rapport);
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.nSignaux,
+              rows_upserted: 0,
+              metadata: { verdicts: r.resultats.map((x) => `${x.tranche.id}@${x.horizon}:${x.verdict}`) },
+            },
+          };
+        },
+      );
+      // Une lecture en échec lève : monitored l'enregistre puis la relance.
+      return 0;
+    }
     case 'range52': {
       // Plus-haut / plus-bas 52 semaines. À passer APRÈS `daily` : les bornes
       // incluent la clôture du jour, sinon elles ignoreraient un nouveau record.

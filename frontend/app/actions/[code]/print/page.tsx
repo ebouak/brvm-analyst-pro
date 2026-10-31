@@ -48,7 +48,7 @@ export default async function PrintPage({ params }: Props) {
   const today   = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
   return (
-    <div className="bg-white text-black font-sans p-8 max-w-4xl mx-auto print:p-4 print:max-w-none">
+    <div className="bg-[#ffffff] text-black font-sans p-8 max-w-4xl mx-auto print:p-4 print:max-w-none">
       <PrintTrigger />
       <div className="flex items-start justify-between mb-6 border-b pb-4">
         <div>
