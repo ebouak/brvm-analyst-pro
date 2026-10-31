@@ -82,6 +82,16 @@ export async function DELETE() {
   await admin.from('telegram_conversations').delete().eq('user_id', user.id);
   await admin.from('telegram_pairing_codes').delete().eq('user_id', user.id);
 
+  // 2quinquies. CRM (0172) : crm_signaux part avec la cascade ; actions et
+  //          opposition sont aussi indexées par e-mail (prospect devenu compte)
+  //          — purge explicite en service_role (aucune policy DELETE).
+  if (user.email) {
+    const emailCrm = user.email.trim().toLowerCase();
+    await admin.from('crm_actions').delete().eq('email_norm', emailCrm);
+    await admin.from('crm_oppositions').delete().eq('email_norm', emailCrm);
+  }
+  await admin.from('crm_actions').delete().eq('user_id', user.id);
+
   // 3. Suppression définitive du compte auth (cascade FK : profil + données ;
   //    billing_transactions.user_id → NULL = anonymisé, conservé pour la compta).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);

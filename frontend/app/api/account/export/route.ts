@@ -94,6 +94,27 @@ export async function GET() {
     contactMessages = data ?? [];
   }
 
+  // CRM (migration 0172) : tables sans policy, lecture service_role FILTRÉE.
+  // L'e-mail ne sert de clé que s'il est confirmé (même règle que contact_messages).
+  // Deux requêtes plutôt qu'un `.or()` : une adresse peut légalement contenir
+  // `,` ou des parenthèses, qui altéreraient le filtre PostgREST.
+  // Jamais exportés : jeton d'opposition, auteur, erreur, resend_id, signaux_json.
+  const sbCrm = getServiceClient();
+  const emailCrm = user.email && user.email_confirmed_at ? user.email.trim().toLowerCase() : null;
+  const colonnesCrm = 'id, type, canal, sujet, contenu, statut, created_at';
+  const crmSignaux =
+    (await sbCrm.from('crm_signaux').select('page, jour, created_at').eq('user_id', user.id)).data ?? [];
+  const actionsParCompte = (await sbCrm.from('crm_actions').select(colonnesCrm).eq('user_id', user.id)).data ?? [];
+  const actionsParEmail = emailCrm
+    ? (await sbCrm.from('crm_actions').select(colonnesCrm).eq('email_norm', emailCrm)).data ?? []
+    : [];
+  const crmActions = Array.from(
+    new Map([...actionsParCompte, ...actionsParEmail].map((a) => [a.id, a])).values(),
+  ).map(({ id: _id, ...reste }) => reste);
+  const crmOpposition = emailCrm
+    ? (await sbCrm.from('crm_oppositions').select('source, created_at').eq('email_norm', emailCrm)).data ?? []
+    : [];
+
   // Lu à part : table de 0165 ; absente, la lecture renvoie une erreur et
   // l'export reste complet pour le reste.
   const whatsappLiaisons = await supabase.from('whatsapp_liaisons').select('chat_id, telephone, lie_le').eq('user_id', user.id);
@@ -150,6 +171,10 @@ export async function GET() {
     user_entitlements: userEntitlements.data ?? [],
     // Messages envoyés via le formulaire de contact avec l'adresse du compte.
     contact_messages: contactMessages,
+    // CRM : intérêt pour l'offre, relances et notes vous concernant, opposition.
+    crm_signaux: crmSignaux,
+    crm_actions: crmActions,
+    crm_opposition: crmOpposition,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
