@@ -16,7 +16,12 @@ export async function POST(req: Request) {
   let page: unknown;
   try { page = ((await req.json()) as { page?: unknown })?.page; } catch { return new NextResponse(null, { status: 400 }); }
   if (!estPageOffre(page)) return new NextResponse(null, { status: 400 });
-  if (await estOppose(user.email)) return new NextResponse(null, { status: 204 });
+  let oppose: boolean;
+  try { oppose = await estOppose(user.email); } catch (e) {
+    console.error('crm_signal : opposition illisible, rien écrit', e instanceof Error ? e.message : e);
+    return new NextResponse(null, { status: 500 });
+  }
+  if (oppose) return new NextResponse(null, { status: 204 });
   const { error } = await getServiceClient()
     .from('crm_signaux')
     .upsert({ user_id: user.id, type: 'offre_vue', page }, { onConflict: 'user_id,page,jour', ignoreDuplicates: true });

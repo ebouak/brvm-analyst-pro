@@ -1,9 +1,9 @@
 /**
  * Lecture des sources du CRM — SERVEUR uniquement (service_role). Toute liste
- * passe par fetchAllRows : PostgREST tronque à 1000 lignes en silence.
+ * passe par lireTout : PostgREST tronque à 1000 lignes en silence.
  */
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { fetchAllRows } from '@/lib/supabase/paginate';
+import { lireTout } from './lecture';
 import { assemblerDossiers, type Sources } from './identite';
 import type { Dossier } from './types';
 
@@ -23,17 +23,17 @@ export async function chargerSources(): Promise<Sources> {
   const depuis = (jours: number) => new Date(Date.now() - jours * 86_400_000).toISOString().slice(0, 10);
   const [c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions] = await Promise.all([
     comptes(sb),
-    fetchAllRows<Sources['profils'][number]>((a, b) => sb.from('profiles').select('id, display_name, is_premium').order('id').range(a, b)),
-    fetchAllRows<Sources['admins'][number]>((a, b) => sb.from('admin_user_roles').select('user_id').order('user_id').range(a, b)),
-    fetchAllRows<Sources['paiements'][number]>((a, b) => sb.from('billing_transactions').select('user_id, amount, currency, status, created_at, paid_at').in('status', ['pending', 'paid']).order('created_at').range(a, b)),
-    fetchAllRows<Sources['signaux'][number]>((a, b) => sb.from('crm_signaux').select('user_id, page, jour').gte('jour', depuis(14)).order('id').range(a, b)),
-    fetchAllRows<Sources['positions'][number]>((a, b) => sb.from('portfolios_positions').select('user_id').order('id').range(a, b)),
-    fetchAllRows<Sources['messages'][number]>((a, b) => sb.from('contact_messages').select('email, created_at').order('created_at').range(a, b)),
-    fetchAllRows<Sources['prospects'][number]>((a, b) => sb.from('leads_brvm').select('email, nom, created_at, consent').order('created_at').range(a, b)),
-    fetchAllRows<Sources['newsletter'][number]>((a, b) => sb.from('newsletter_subscribers').select('email, confirmed').order('id').range(a, b)),
-    fetchAllRows<Sources['academy'][number]>((a, b) => sb.from('academy_progress').select('user_id, completed').eq('completed', true).order('user_id').range(a, b)),
-    fetchAllRows<Sources['actions'][number]>((a, b) => sb.from('crm_actions').select('email_norm, created_at, type, statut, canal, sujet, contenu').order('created_at').range(a, b)),
-    fetchAllRows<Sources['oppositions'][number]>((a, b) => sb.from('crm_oppositions').select('email_norm').order('email_norm').range(a, b)),
+    lireTout<Sources['profils'][number]>((a, b) => sb.from('profiles').select('id, display_name, is_premium').order('id').range(a, b), 'profils'),
+    lireTout<Sources['admins'][number]>((a, b) => sb.from('admin_user_roles').select('user_id').order('user_id').order('role_id').range(a, b), 'rôles admin'),
+    lireTout<Sources['paiements'][number]>((a, b) => sb.from('billing_transactions').select('user_id, amount, currency, status, created_at, paid_at').in('status', ['pending', 'paid']).order('created_at').order('id').range(a, b), 'paiements'),
+    lireTout<Sources['signaux'][number]>((a, b) => sb.from('crm_signaux').select('user_id, page, jour').gte('jour', depuis(14)).order('id').range(a, b), 'signaux'),
+    lireTout<Sources['positions'][number]>((a, b) => sb.from('portfolios_positions').select('user_id').order('id').range(a, b), 'positions de portefeuille'),
+    lireTout<Sources['messages'][number]>((a, b) => sb.from('contact_messages').select('email, created_at').order('created_at').order('id').range(a, b), 'messages de contact'),
+    lireTout<Sources['prospects'][number]>((a, b) => sb.from('leads_brvm').select('email, nom, created_at, consent').order('created_at').order('id').range(a, b), 'prospects'),
+    lireTout<Sources['newsletter'][number]>((a, b) => sb.from('newsletter_subscribers').select('email, confirmed').order('id').range(a, b), 'newsletter'),
+    lireTout<Sources['academy'][number]>((a, b) => sb.from('academy_progress').select('user_id, completed').eq('completed', true).order('user_id').order('course_id').order('lesson_idx').range(a, b), 'progression Academy'),
+    lireTout<Sources['actions'][number]>((a, b) => sb.from('crm_actions').select('email_norm, created_at, type, statut, canal, sujet, contenu').order('created_at').order('id').range(a, b), 'actions CRM'),
+    lireTout<Sources['oppositions'][number]>((a, b) => sb.from('crm_oppositions').select('email_norm').order('email_norm').range(a, b), 'oppositions'),
   ]);
   return { comptes: c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions };
 }
