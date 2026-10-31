@@ -76,7 +76,10 @@ export async function publierTikTok(cible: string, cibleId: string, choix: Choix
       severity: 'warning',
       metadata: { visibilite: choix.visibilite, commercial: choix.commercial, publishId },
     });
-    revalidatePath('/admin/reseaux/tiktok');
+    // PAS de revalidatePath ici : la page se rechargerait, la carte publiée
+    // disparaîtrait de la liste et, avec elle, l'avis « le traitement prend
+    // quelques minutes » et le suivi du statut — exigés par TikTok (règle 5).
+    // Constaté le 2026-10-31 pendant l'enregistrement de la démonstration.
     return { ok: true, publishId };
   } catch (e) {
     const raison = (e as Error).message.slice(0, 300);
