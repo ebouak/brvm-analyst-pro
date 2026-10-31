@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/paginate';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { classifyCompany, type ProfilInfo } from './profile';
 
@@ -29,6 +30,7 @@ export interface RevueData {
     items: { titre: string; detail: string }[];
     source_libelle: string | null;
     source_url: string | null;
+    exercice: number | null;
   } | null;
   generatedAt: string;
 }
@@ -39,14 +41,20 @@ export async function getRevue(code: string): Promise<RevueData | null> {
   const sb = createClient();
   const C = code.toUpperCase();
 
-  const [instrR, incomeR, balanceR, priceR, divR, hlR] = await Promise.all([
+  type LigneCours = { date_marche: string; cours_jour: unknown; valorisation: unknown; beta_1an: unknown };
+  const [instrR, incomeR, balanceR, priceRows, divR, hlR] = await Promise.all([
     sb.from('brvm_instruments').select('designation, secteur, pays').eq('code', C).maybeSingle(),
     sb.from('income_statements').select('periode, revenu_total, resultat_exploitation, resultat_net, benefice_par_action')
       .eq('code', C).eq('type_periode', 'annuel').order('periode', { ascending: false }).limit(6),
     sb.from('balance_sheets').select('periode, total_actifs, total_capitaux_propres')
       .eq('code', C).eq('type_periode', 'annuel').order('periode', { ascending: false }).limit(6),
-    sb.from('brvm_actions_daily').select('date_marche, cours_jour, valorisation, beta_1an')
-      .eq('code', C).order('date_marche', { ascending: true }),
+    // Paginé : PostgREST s'arrête à 1000 lignes en silence. Lu par ordre
+    // croissant, l'historique s'arrêtait donc en 2018, et la revue prenait la
+    // clôture de 2018 pour le « cours » (UNLC : 8 200 FCFA au 2018-05-18,
+    // P/E de 117x) alors que la base va jusqu'à la dernière séance.
+    fetchAllRows<LigneCours>((from, to) =>
+      sb.from('brvm_actions_daily').select('date_marche, cours_jour, valorisation, beta_1an')
+        .eq('code', C).order('date_marche', { ascending: true }).range(from, to)),
     sb.from('dividends').select('exercice, montant').eq('code', C).order('exercice', { ascending: true }),
     sb.from('rapport_highlights').select('synthese, highlights, source_libelle, source_url').eq('code', C).maybeSingle(),
   ]);
@@ -79,12 +87,9 @@ export async function getRevue(code: string): Promise<RevueData | null> {
   const prev = allYears[1] ?? null;
 
   // Cours : dernier point + série (échantillonnée pour le graphique).
-  const rawSeries = ((priceR.data ?? []) as Array<{ date_marche: string; cours_jour: unknown }>)
-    .filter((p) => num(p.cours_jour) != null);
+  const rawSeries = priceRows.filter((p) => num(p.cours_jour) != null);
   const lastPx = rawSeries.length ? rawSeries[rawSeries.length - 1] : null;
-  const lastFull = (priceR.data ?? []).slice(-1)[0] as
-    | { date_marche: string; valorisation: unknown; beta_1an: unknown }
-    | undefined;
+  const lastFull = priceRows.slice(-1)[0];
   // ~150 points max
   const step = Math.max(1, Math.floor(rawSeries.length / 150));
   const priceSeries = rawSeries.filter((_, i) => i % step === 0 || i === rawSeries.length - 1)
@@ -124,6 +129,9 @@ export async function getRevue(code: string): Promise<RevueData | null> {
           : [],
         source_libelle: hl.source_libelle ?? null,
         source_url: hl.source_url ?? null,
+        // « Rapport d'activités annuel exercice 2021 » → 2021. Sert à dire
+        // quand ce texte est antérieur aux comptes affichés au-dessus.
+        exercice: Number(hl.source_libelle?.match(/exercice\s+(\d{4})/i)?.[1]) || null,
       }
     : null;
 

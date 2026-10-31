@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseAfxPage, AFX_SOURCES } from '../src/scrapers/africanIndices.js';
+import { urlViaRelais } from '../src/scrapers/runAfricanIndices.js';
 
 function fixture(name: string): string {
   return readFileSync(join(__dirname, 'fixtures', name), 'utf8');
@@ -59,5 +60,17 @@ describe('parseAfxPage', () => {
     expect(row.valeur).toBe(14689.01);
     expect(row.variation_pts).toBeNull();
     expect(row.variation_pct).toBeNull();
+  });
+});
+
+describe('urlViaRelais', () => {
+  it("garde l'URL d'origine sans relais", () => {
+    expect(urlViaRelais('https://afx.kwayisi.org/gse/', undefined)).toBe('https://afx.kwayisi.org/gse/');
+  });
+  it('remplace seulement l’hôte par le relais, chemin et requête conservés', () => {
+    expect(urlViaRelais('https://afx.kwayisi.org/ngx/?p=1', 'https://wa.westbourse.com/afx')).toBe('https://wa.westbourse.com/afx/ngx/?p=1');
+  });
+  it('tolère une barre finale sur le relais', () => {
+    expect(urlViaRelais('https://afx.kwayisi.org/nse/', 'https://wa.westbourse.com/afx/')).toBe('https://wa.westbourse.com/afx/nse/');
   });
 });

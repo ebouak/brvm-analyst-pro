@@ -31,6 +31,15 @@ on:
   # centre de données (proxy, exécution planifiée ailleurs) ou une autre
   # source. Remettre le `schedule` sans l'un des deux ne fera que rallumer le
   # bruit.
+  #
+  # ── RÉTABLIE LE 2026-10-31, PAR LE RELAIS HETZNER ──────────────────────
+  # AFX filtre GitHub mais pas le serveur Hetzner de la passerelle WhatsApp
+  # (200 en < 1 s, vérifié). Caddy y relaie `/afx/*` vers afx.kwayisi.org
+  # seulement, derrière un jeton (`AFX_RELAIS_JETON`). Essai réel le 31/10 :
+  # 3 places sur 3 écrites pour la séance du 30/10. Un échec redevenu
+  # permanent signifie que le relais est tombé : `bash /opt/waha/diag.sh`.
+  schedule:
+    - cron: '30 19 * * 1-5' # après la clôture des trois places (UTC)
   workflow_dispatch: {} # déclenchement manuel conservé, pour tester une correction
 
 concurrency:
@@ -59,6 +68,8 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          AFX_RELAIS_URL: https://wa.westbourse.com/afx
+          AFX_RELAIS_JETON: ${{ secrets.AFX_RELAIS_JETON }}
         run: |
           # Le délai entre tentatives ne descend pas sous le Crawl-delay (60 s) du site.
           MAX_RETRIES=2

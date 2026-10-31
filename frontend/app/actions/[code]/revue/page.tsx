@@ -38,8 +38,18 @@ export default async function RevuePage({ params }: Props) {
     isRow('Total actif', (y) => y.totalActif),
   ];
 
+  // Rapport d'activité antérieur aux comptes affichés (UNLC : rapport 2021 sous
+  // des comptes 2023) : on le date et on ne le recycle pas en « à surveiller ».
+  const hlAncien = !!(d.highlights?.exercice && latest && d.highlights.exercice < Number(latest.periode));
+  // Comptes en retard (UNLC au 31/10/2026 : dernier exercice en base 2023) : le
+  // P/E rapporte alors le cours du jour à un bénéfice ancien, il faut le dire.
+  const anneeRevue = new Date(d.generatedAt).getFullYear();
+  const comptesEnRetard = !!latest && Number(latest.periode) < anneeRevue - 2;
+
   return (
-    <div className="bg-white text-black font-sans p-8 max-w-3xl mx-auto print:p-4 print:max-w-none">
+    // Blanc LITTÉRAL : `bg-white` suit le jeton --color-ivory, qui vaut le brun
+    // foncé du texte en thème clair — d'où un rapport noir sur brun, illisible.
+    <div className="bg-[#ffffff] text-[#111111] font-sans p-8 max-w-3xl mx-auto print:p-4 print:max-w-none">
       <PrintTrigger />
 
       {/* En-tête */}
@@ -112,6 +122,12 @@ export default async function RevuePage({ params }: Props) {
         </tbody>
       </table>
       <p className="text-[10px] text-gray-400 mb-4">Montants en FCFA. Source : états financiers publiés (extraction WESTBOURSE).</p>
+      {comptesEnRetard && latest && (
+        <p className="text-[11px] text-amber-700 -mt-2 mb-4">
+          Derniers comptes disponibles : exercice {latest.periode}. Les exercices suivants ne sont pas encore
+          intégrés ; le P/E rapporte donc le cours du jour à un bénéfice de {latest.periode}.
+        </p>
+      )}
 
       {/* Graphique financier pluriannuel */}
       {d.years.length >= 2 && (
@@ -127,8 +143,16 @@ export default async function RevuePage({ params }: Props) {
       {d.highlights && (d.highlights.synthese || d.highlights.items.length > 0) && (
         <>
           <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">
-            Activité · ce qui se passe dans l&apos;entreprise
+            {hlAncien
+              ? `Activité · dernier rapport disponible (exercice ${d.highlights.exercice})`
+              : <>Activité · ce qui se passe dans l&apos;entreprise</>}
           </h2>
+          {hlAncien && latest && (
+            <p className="text-[11px] text-amber-700 mb-2">
+              Ce rapport porte sur l&apos;exercice {d.highlights.exercice}, antérieur aux comptes {latest.periode} présentés
+              ci-dessus : aucun rapport d&apos;activité plus récent n&apos;est disponible pour cette valeur.
+            </p>
+          )}
           {d.highlights.synthese && <p className="text-sm text-gray-700 leading-relaxed mb-2">{d.highlights.synthese}</p>}
           <ul className="text-sm text-gray-700 list-disc pl-5 mb-2 space-y-1">
             {d.highlights.items.map((it, i) => (
@@ -186,7 +210,7 @@ export default async function RevuePage({ params }: Props) {
             {d.profil.cyclique && (
               <li><b>Activité cyclique</b> : surveiller la position dans le cycle (campagne, cours des matières premières) plutôt que le seul exercice.</li>
             )}
-            {d.highlights?.items.slice(0, 2).map((it, i) => (
+            {!hlAncien && d.highlights?.items.slice(0, 2).map((it, i) => (
               <li key={i}><b>{it.titre}</b>{it.titre && it.detail ? ' : ' : ''}{it.detail}</li>
             ))}
           </ul>

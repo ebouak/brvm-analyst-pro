@@ -13,6 +13,13 @@
 
 export const SEUIL_PERIME_JOURS = 4;
 
+/**
+ * Au-delà, le tableau de bord RETIRE la place au lieu de l'atténuer
+ * (décision du 2026-10-31) : quatre mois de valeurs du 3 juillet, même
+ * datées, n'apprenaient plus rien à personne.
+ */
+export const SEUIL_MASQUE_JOURS = 10;
+
 /** Nombre de jours calendaires (UTC) entre la date de marché et maintenant. */
 export function ageEnJours(dateMarche: string, maintenant: Date): number {
   const d = Date.UTC(
