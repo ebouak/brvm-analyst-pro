@@ -17,6 +17,7 @@ import {
   type LineSeriesOptions,
   type CandlestickSeriesOptions,
   type DeepPartial,
+  type IRange,
   type Time,
 } from 'lightweight-charts';
 import {
@@ -521,6 +522,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
 
     // ── RSI sub-chart ────────────────────────────────────────────────────
     let rsiChart: IChartApi | null = null;
+    let rsiHasData = false;
     if (visible.has('rsi') && rsiRef.current) {
       const rsiEl = rsiRef.current;
       rsiChart = createChart(rsiEl, {
@@ -546,6 +548,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
         priceFormat: { type: 'price', precision: 1, minMove: 0.1 },
       });
       rsiLine.setData(rsiLineData);
+      rsiHasData = rsiLineData.length > 0;
 
       // 30 and 70 reference lines via price lines
       rsiLine.createPriceLine({ price: 30, color: THEME.up, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: '30' });
@@ -556,6 +559,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
 
     // ── MACD sub-chart ────────────────────────────────────────────────────
     let macdChart: IChartApi | null = null;
+    let macdHasData = false;
     if (visible.has('macd') && macdRef.current) {
       const macdEl = macdRef.current;
       macdChart = createChart(macdEl, {
@@ -596,15 +600,28 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
         priceLineVisible: false,
       } as DeepPartial<HistogramSeriesOptions>);
       histSeries.setData(histData);
+      macdHasData = macdLineData.length > 0;
 
       macdChart.timeScale().fitContent();
     }
 
     // ── Time range sync ───────────────────────────────────────────────────
+    // RSI needs 14 sessions and MACD 26+ before their first point: on a short
+    // history the sub-chart is empty or starts later than the main one, and
+    // lightweight-charts throws "Value is null" (Sentry JAVASCRIPT-K/J). The
+    // sub-chart then keeps its own view rather than crashing the page.
+    const syncRange = (chart: IChartApi | null, hasData: boolean, range: IRange<Time>) => {
+      if (!chart || !hasData) return;
+      try {
+        chart.timeScale().setVisibleRange(range);
+      } catch {
+        // Range outside the indicator's data: nothing to align.
+      }
+    };
     main.timeScale().subscribeVisibleTimeRangeChange((range) => {
       if (!range) return;
-      rsiChart?.timeScale().setVisibleRange(range);
-      macdChart?.timeScale().setVisibleRange(range);
+      syncRange(rsiChart, rsiHasData, range);
+      syncRange(macdChart, macdHasData, range);
     });
 
     // ── Resize observer ───────────────────────────────────────────────────
