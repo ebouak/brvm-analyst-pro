@@ -1,0 +1,48 @@
+/**
+ * Lecture des sources du CRM — SERVEUR uniquement (service_role). Toute liste
+ * passe par fetchAllRows : PostgREST tronque à 1000 lignes en silence.
+ */
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import { fetchAllRows } from '@/lib/supabase/paginate';
+import { assemblerDossiers, type Sources } from './identite';
+import type { Dossier } from './types';
+
+async function comptes(sb: ReturnType<typeof getServiceClient>): Promise<Sources['comptes']> {
+  const tous: Sources['comptes'] = [];
+  for (let page = 1; ; page++) {
+    const { data, error } = await sb.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw new Error(`CRM : lecture des comptes impossible (${error.message})`);
+    tous.push(...data.users.map((u) => ({ id: u.id, email: u.email ?? null, created_at: u.created_at ?? null, last_sign_in_at: u.last_sign_in_at ?? null })));
+    if (data.users.length < 1000) break;
+  }
+  return tous;
+}
+
+export async function chargerSources(): Promise<Sources> {
+  const sb = getServiceClient();
+  const depuis = (jours: number) => new Date(Date.now() - jours * 86_400_000).toISOString().slice(0, 10);
+  const [c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions] = await Promise.all([
+    comptes(sb),
+    fetchAllRows<Sources['profils'][number]>((a, b) => sb.from('profiles').select('id, display_name, is_premium').order('id').range(a, b)),
+    fetchAllRows<Sources['admins'][number]>((a, b) => sb.from('admin_user_roles').select('user_id').order('user_id').range(a, b)),
+    fetchAllRows<Sources['paiements'][number]>((a, b) => sb.from('billing_transactions').select('user_id, amount, currency, status, created_at, paid_at').in('status', ['pending', 'paid']).order('created_at').range(a, b)),
+    fetchAllRows<Sources['signaux'][number]>((a, b) => sb.from('crm_signaux').select('user_id, page, jour').gte('jour', depuis(14)).order('id').range(a, b)),
+    fetchAllRows<Sources['positions'][number]>((a, b) => sb.from('portfolios_positions').select('user_id').order('id').range(a, b)),
+    fetchAllRows<Sources['messages'][number]>((a, b) => sb.from('contact_messages').select('email, created_at').order('created_at').range(a, b)),
+    fetchAllRows<Sources['prospects'][number]>((a, b) => sb.from('leads_brvm').select('email, nom, created_at, consent').order('created_at').range(a, b)),
+    fetchAllRows<Sources['newsletter'][number]>((a, b) => sb.from('newsletter_subscribers').select('email, confirmed').order('id').range(a, b)),
+    fetchAllRows<Sources['academy'][number]>((a, b) => sb.from('academy_progress').select('user_id, completed').eq('completed', true).order('user_id').range(a, b)),
+    fetchAllRows<Sources['actions'][number]>((a, b) => sb.from('crm_actions').select('email_norm, created_at, type, statut, canal, sujet, contenu').order('created_at').range(a, b)),
+    fetchAllRows<Sources['oppositions'][number]>((a, b) => sb.from('crm_oppositions').select('email_norm').order('email_norm').range(a, b)),
+  ]);
+  return { comptes: c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions };
+}
+
+export async function chargerDossiers(): Promise<Dossier[]> {
+  return assemblerDossiers(await chargerSources());
+}
+
+/** À l'échelle actuelle (≈ 200 personnes), recharger tout reste instantané. */
+export async function chargerDossier(cle: string): Promise<Dossier | null> {
+  return (await chargerDossiers()).find((d) => d.cle === cle) ?? null;
+}
