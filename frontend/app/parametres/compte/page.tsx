@@ -146,7 +146,9 @@ export default function ComptePage() {
 
       {/* Section propositions commerciales */}
       <section className="bg-surface border border-border rounded-card shadow-card p-6 space-y-4">
-        <SectionHeader title="Propositions commerciales" />
+        <h2 className="font-display text-base font-semibold text-ivory tracking-tight">
+          Propositions commerciales
+        </h2>
         <OppositionProfilage />
       </section>
 
