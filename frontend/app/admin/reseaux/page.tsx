@@ -90,6 +90,11 @@ export default async function ReseauxPage({ searchParams }: { searchParams: { ok
               )}
               <p className="break-all text-[11px] text-faint">URL de retour à déclarer : {base}{cheminRetour(r)}</p>
               <div className="flex flex-wrap gap-2">
+                {r === 'tiktok' && j && (
+                  <a href="/admin/reseaux/tiktok" className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg">
+                    Publications à valider
+                  </a>
+                )}
                 <a href={`/api/admin/reseaux/${r}/connexion`} className={`rounded-lg border border-accent/40 px-3 py-1.5 text-xs text-accent hover:bg-accent/10 ${configure ? '' : 'pointer-events-none opacity-40'}`}>
                   {j ? 'Reconnecter' : 'Connecter'}
                 </a>

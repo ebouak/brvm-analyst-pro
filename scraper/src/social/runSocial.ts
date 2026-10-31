@@ -2,27 +2,31 @@ import { getSupabase } from '../persistence/supabase.js';
 import { logger } from '../logger.js';
 import { sendTelegramText } from '../alerts/channels.js';
 import { jetonUtilisable, type ReseauSocial } from './jetons.js';
-import { prendreVerrou, terminer, ignorer } from './verrou.js';
+import { prendreVerrou, terminer, ignorer, proposer } from './verrou.js';
 import { publierLinkedIn } from './linkedin.js';
-import { publierPhotoTikTok, peutPublierDirect } from './tiktok.js';
 import { PLAFOND_SOCIAL_JOUR, repartir, texteLinkedIn, texteTikTok, type ArticleSocial } from './texte.js';
 
 /**
- * Publication automatique des articles PUBLIÉS aujourd'hui sur LinkedIn
- * (profil de l'exploitant) et TikTok (brouillon photo). Appelée par le cron
- * des articles (17:00 UTC) après WhatsApp/Telegram, et seule par
- * `social:articles` pour une reprise manuelle.
+ * Articles PUBLIÉS aujourd'hui vers les réseaux. Appelée par le cron des
+ * articles (17:00 UTC) après WhatsApp/Telegram, et seule par `social:articles`
+ * pour une reprise manuelle.
+ *
+ * - LinkedIn : publication directe sur le profil de l'exploitant.
+ * - TikTok : la publication est PRÉPARÉE (`a_valider`) puis publiée par
+ *   l'exploitant depuis /admin/reseaux/tiktok. Les règles d'audit de TikTok
+ *   (Content Sharing Guidelines) exigent un choix explicite à chaque envoi —
+ *   visibilité, interactions, déclaration commerciale — qu'un cron ne peut pas
+ *   faire à sa place.
  *
  * Garde-fous : interrupteur `actif` par réseau, plafond quotidien par réseau
- * (PLAFOND_SOCIAL_JOUR), verrou par (article, réseau), et toute panne — jeton
- * expiré, API qui refuse — part sur la conversation d'EXPLOITATION Telegram.
- * Un échec n'est jamais silencieux : la panne email de sept semaines est
- * passée derrière un workflow vert.
+ * (PLAFOND_SOCIAL_JOUR), une ligne par (article, réseau), et toute panne part
+ * sur la conversation d'EXPLOITATION Telegram — jamais d'échec silencieux.
  */
 const SITE = (process.env.SITE_URL || 'https://www.westbourse.com').replace(/\/+$/, '');
 
 export interface ResultatSocial {
   linkedin: number;
+  /** Publications TikTok préparées, en attente de validation. */
   tiktok: number;
   echecs: number;
   ignores: number;
@@ -43,23 +47,6 @@ async function imagePaysage(slug: string): Promise<Buffer | null> {
   } catch {
     return null;
   }
-}
-
-async function publierUn(reseau: ReseauSocial, a: ArticleSocial, token: string, compteId: string | null, scopes: string | null): Promise<string> {
-  if (reseau === 'linkedin') {
-    if (!compteId) throw new Error('identifiant du profil LinkedIn absent, reconnectez LinkedIn');
-    return publierLinkedIn({ token, auteur: compteId, texte: texteLinkedIn(a, SITE), image: await imagePaysage(a.slug), titreImage: a.titre });
-  }
-  const t = texteTikTok(a);
-  const r = await publierPhotoTikTok({
-    token,
-    titre: t.titre,
-    description: t.description,
-    urls: [`${SITE}/api/articles/${a.slug}/photo.jpg`],
-    direct: peutPublierDirect(scopes),
-  });
-  // Le mode (public / privé / brouillon) reste lisible dans /admin/reseaux.
-  return `${r.publishId} (${r.mode})`;
 }
 
 export async function publierArticlesSociaux(aujourdhui: string): Promise<ResultatSocial> {
@@ -93,19 +80,33 @@ export async function publierArticlesSociaux(aujourdhui: string): Promise<Result
     if (eL) throw new Error(`publications_sociales : ${eL.message}`);
     const traces = (lignes ?? []) as { cible_id: string; statut: string; lance_le: string }[];
     const dejaTraites = new Set(traces.filter((t) => t.statut !== 'echec').map((t) => t.cible_id));
-    const dejaAujourdhui = traces.filter((t) => (t.statut === 'publie' || t.statut === 'en_cours') && t.lance_le >= debut).length;
+    const dejaAujourdhui = traces.filter((t) => ['publie', 'en_cours', 'a_valider'].includes(t.statut) && t.lance_le >= debut).length;
     const { aPublier, auDela } = repartir(articles.filter((a) => !dejaTraites.has(a.id)), dejaAujourdhui);
 
     for (const a of auDela) {
       await ignorer('article', a.id, reseau, `plafond de ${PLAFOND_SOCIAL_JOUR} articles par jour atteint`);
       res.ignores++;
     }
+
+    if (reseau === 'tiktok') {
+      for (const a of aPublier) {
+        const t = texteTikTok(a);
+        const contenu = { type: 'photo', titre: t.titre, description: t.description, media: [`${SITE}/api/articles/${a.slug}/photo.jpg`], lien: `${SITE}/actualites/${a.slug}` };
+        if (await proposer('article', a.id, 'tiktok', contenu)) res.tiktok++;
+      }
+      if (res.tiktok > 0) {
+        await alerter('TikTok : publications à valider', `${res.tiktok} article(s) prêt(s) pour TikTok. À publier ici : ${SITE}/admin/reseaux/tiktok`);
+      }
+      continue;
+    }
+
     for (const a of aPublier) {
       if (!(await prendreVerrou('article', a.id, reseau))) continue;
       try {
-        const postId = await publierUn(reseau, a, jeton.token, jeton.compteId, jeton.scopes);
+        if (!jeton.compteId) throw new Error('identifiant du profil LinkedIn absent, reconnectez LinkedIn');
+        const postId = await publierLinkedIn({ token: jeton.token, auteur: jeton.compteId, texte: texteLinkedIn(a, SITE), image: await imagePaysage(a.slug), titreImage: a.titre });
         await terminer('article', a.id, reseau, { statut: 'publie', postId });
-        res[reseau]++;
+        res.linkedin++;
         logger.info({ reseau, slug: a.slug, postId }, 'réseaux : publié');
       } catch (e) {
         const msg = (e as Error).message;

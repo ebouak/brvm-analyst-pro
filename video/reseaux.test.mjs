@@ -1,14 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { commentaireLinkedIn, echapperLinkedIn, choisirVisibilite, peutPublierDirect } from './reseaux.mjs';
-
-test('TikTok : direct seulement avec video.publish, visibilité la plus ouverte permise', () => {
-  assert.equal(peutPublierDirect('user.info.basic,video.upload,video.publish'), true);
-  assert.equal(peutPublierDirect('user.info.basic,video.upload'), false);
-  assert.equal(choisirVisibilite(['SELF_ONLY', 'PUBLIC_TO_EVERYONE']), 'PUBLIC_TO_EVERYONE');
-  assert.equal(choisirVisibilite(['SELF_ONLY']), 'SELF_ONLY');
-  assert.equal(choisirVisibilite(null), 'SELF_ONLY');
-});
+import { commentaireLinkedIn, echapperLinkedIn } from './reseaux.mjs';
 
 /** Lancer : node --test reseaux.test.mjs */
 test('échappe les caractères réservés de LinkedIn, comme scraper/src/social/texte.ts', () => {

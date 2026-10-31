@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { entetesSupabase } from './supabaseEntetes.mjs';
 import { sujet, texte, html, esc as echappe } from './brief.mjs';
 import { marqueurBucket, publierChaine } from './chaineWhatsapp.mjs';
-import { creerReseaux, publierVideoLinkedIn, commentaireLinkedIn, publierVideoTikTok, peutPublierDirect } from './reseaux.mjs';
+import { creerReseaux, publierVideoLinkedIn, commentaireLinkedIn } from './reseaux.mjs';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = process.env.VIDEO_OUT || `${RACINE}/gan-harness/video`;
@@ -432,13 +432,11 @@ let TT_TOKEN = null;
 let ttParTable = false;
 let ttDecide = false;
 let ttDepose = false;
-let ttScopes = null;
 try {
   const j = reseaux ? await reseaux.jeton('tiktok') : { ok: false, table: false };
   if (j.ok) {
     TT_TOKEN = j.token;
     ttParTable = true;
-    ttScopes = j.scopes;
   } else if (j.table === false || j.raison === 'compte non connecté') {
     TT_TOKEN = await rafraichirTikTok();
   } else {
@@ -453,13 +451,6 @@ try {
   console.error(`TikTok : ECHEC — ${e.message}`);
   echecs.push('tiktok');
 }
-if (TT_TOKEN && ttParTable && !(await reseaux.prendreVerrou(m.seance, 'tiktok'))) {
-  console.log('TikTok : deja depose pour cette seance — rien envoye');
-  journal.push('TikTok : déjà déposée (relance ignorée)');
-  TT_TOKEN = null;
-  ttDecide = true;
-}
-
 const tt = async (chemin, corps) => {
   const r = await fetch(`https://open.tiktokapis.com/v2${chemin}`, {
     method: 'POST',
@@ -479,27 +470,29 @@ const tt = async (chemin, corps) => {
   return rep.data ?? {};
 };
 
-/* Compte connecté depuis /admin/reseaux : publication DIRECTE s'il a accordé
-   video.publish, avec la visibilité la plus ouverte que TikTok autorise
-   (privée tant que l'application n'est pas auditée) ; sinon brouillon. */
+/* Compte connecté depuis /admin/reseaux : la vidéo est PRÉPARÉE, pas publiée.
+   Les règles d'audit de TikTok (Content Sharing Guidelines) exigent à chaque
+   envoi un choix explicite — visibilité, interactions, déclaration commerciale
+   — fait par l'exploitant sur /admin/reseaux/tiktok. TikTok ira chercher la
+   vidéo sur westbourse.com (domaine vérifié), qui relaie le bucket. */
 if (TT_TOKEN && ttParTable) {
+  const site = (lire('SITE_URL') || 'https://www.westbourse.com').replace(/\/+$/, '');
   try {
-    const r = await publierVideoTikTok({ token: TT_TOKEN, octets, legende: LEGENDE, direct: peutPublierDirect(ttScopes) });
-    await reseaux.terminer(m.seance, 'tiktok', { statut: 'publie', postId: r.publishId });
-    const libelle =
-      r.mode === 'public'
-        ? 'publiée (publique)'
-        : r.mode === 'prive'
-          ? "publiée en PRIVÉ (application non auditée) — la passer en public dans l'appli"
-          : "brouillon déposé — À VALIDER dans l'appli (boîte de réception)";
-    console.log(`TikTok : ${libelle} (${r.publishId})`);
+    const nouveau = await reseaux.proposer(m.seance, 'tiktok', {
+      type: 'video',
+      titre: LEGENDE.slice(0, 2200),
+      media: [`${site}/api/seance/${m.seance}/video.mp4`],
+      duree_s: m.duree_s ?? null,
+    });
+    const libelle = nouveau
+      ? `à valider sur ${site}/admin/reseaux/tiktok`
+      : 'déjà préparée pour cette séance (relance ignorée)';
+    console.log(`TikTok : ${libelle}`);
     journal.push(`TikTok : ${libelle}`);
-    envois++;
   } catch (e) {
     console.error(`TikTok : ECHEC — ${e.message}`);
     journal.push(`TikTok : ECHEC — ${e.message}`);
     echecs.push('tiktok');
-    await reseaux.terminer(m.seance, 'tiktok', { statut: 'echec', erreur: e.message }).catch(() => {});
   }
   TT_TOKEN = null;
   ttDecide = true;
