@@ -6,7 +6,8 @@ import { enregistrerOpposition, estOppose, retirerOpposition } from '@/lib/crm/o
 export async function lireOpposition(): Promise<boolean | null> {
   try {
     const { data: { user } } = await createClient().auth.getUser();
-    return user?.email ? await estOppose(user.email) : false;
+    // Adresse non confirmée = peut-être celle d'un tiers : ni lire ni lever son refus.
+    return user?.email && user.email_confirmed_at ? await estOppose(user.email) : null;
   } catch {
     return null;
   }
@@ -16,7 +17,7 @@ export async function lireOpposition(): Promise<boolean | null> {
 export async function basculerOpposition(oppose: boolean): Promise<boolean | null> {
   try {
     const { data: { user } } = await createClient().auth.getUser();
-    if (!user?.email) return null;
+    if (!user?.email || !user.email_confirmed_at) return null;
     const ok = oppose ? await enregistrerOpposition(user.email, 'parametres') : await retirerOpposition(user.email);
     return ok ? oppose : null;
   } catch {

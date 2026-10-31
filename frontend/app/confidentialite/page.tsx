@@ -64,7 +64,9 @@ export default function ConfidentialitePage() {
           newsletter sont conservées jusqu&apos;au désabonnement. Les messages du formulaire de
           contact et nos réponses — y compris les messages WhatsApp — sont conservés 12 mois après le
           dernier échange, puis supprimés automatiquement. Les consultations de l&apos;offre sont conservées 90 jours,
-          nos messages de proposition et les notes associées 24 mois.
+          nos messages de proposition et les notes associées 24 mois. Si vous vous êtes opposé aux propositions
+          commerciales, nous conservons seulement votre adresse et la date de ce refus, même après la suppression
+          de votre compte, pour ne plus jamais vous en adresser.
         </p>
       </section>
 

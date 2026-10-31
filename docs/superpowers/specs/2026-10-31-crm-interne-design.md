@@ -142,8 +142,9 @@ created_at timestamptz not null default now()
 
 Table plutôt que colonne de `profiles` : couvre aussi les prospects sans
 compte, et aucune mise à jour de profil envoyant la ligne entière ne peut
-effacer le refus. Conservée tant que la personne existe (c'est la preuve du
-refus) ; supprimée avec le compte.
+effacer le refus. Conservée même après suppression du compte, réduite à
+l'adresse, la date et l'origine : c'est la liste d'opposition qui garantit
+qu'on ne vous recontacte pas.
 
 ### 4.4 Permissions
 
@@ -185,7 +186,7 @@ relancer pour l'instant » + rappel des signaux suivis.
   puis envoie.
 - **Garde-fou** : bandeau si la personne a été relancée il y a moins de
   14 jours ; l'envoi reste possible.
-- **Notes internes** (`crm.write`), jamais visibles par la personne.
+- **Notes internes** (`crm.write`), jamais envoyées ; incluses dans l'export RGPD de la personne.
 - **Opposition** : si la personne s'est opposée, la fiche reste lisible
   mais la relance est désactivée et le bandeau l'indique.
 
@@ -228,12 +229,12 @@ l'offre Premium » dans `/parametres/compte`, écrite par action serveur
   formulaire : consentement déjà recueilli (`leads_brvm.consent`).
 - **Information** : paragraphe ajouté à `/confidentialite`, section
   « Finalités et base légale » + « Données collectées ».
-- **Conservation** : signaux 90 j, actions 24 mois, opposition tant que la
-  personne existe.
+- **Conservation** : signaux 90 j, actions 24 mois, opposition conservée
+  même après suppression du compte (adresse, date, origine : liste d'opposition).
 - **Droits** : export (`/api/account/export` couvre `crm_signaux`,
   `crm_actions` par `user_id` **et** `email_norm`, `crm_oppositions`),
-  suppression (`/api/account/delete` efface par `email_norm` en plus de la
-  cascade), opposition (paramètre + lien en un clic), rectification (notes
+  suppression (`/api/account/delete` efface par `email_norm` confirmé en plus de la
+  cascade, sauf l'opposition, conservée), opposition (paramètre + lien en un clic), rectification (notes
   modifiables par l'admin).
 - **Sécurité** : RLS sans policy + revoke ×3, service_role côté serveur,
   permissions `crm.*`, aucun contenu de relance ni e-mail dans les logs.

@@ -5,7 +5,7 @@ export const metadata = { title: 'Ne plus recevoir de proposition', robots: { in
 
 export default function Page({ searchParams }: { searchParams: { t?: string; fait?: string; erreur?: string } }) {
   return (
-    <main className="mx-auto max-w-lg px-6 py-20 text-center">
+    <div className="mx-auto max-w-lg px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-ivory">Ne plus recevoir de proposition</h1>
       {searchParams.fait ? (
         <p className="mt-4 text-muted">C&apos;est noté : WESTBOURSE ne vous adressera plus de proposition commerciale fondée sur votre activité.</p>
@@ -19,6 +19,6 @@ export default function Page({ searchParams }: { searchParams: { t?: string; fai
           <button type="submit" className="mt-6 rounded-full bg-accent px-6 py-2.5 font-semibold text-bg">Confirmer</button>
         </form>
       )}
-    </main>
+    </div>
   );
 }

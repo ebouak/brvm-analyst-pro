@@ -41,9 +41,10 @@ export function scorer(d: Dossier, maintenant: Date): Score {
 
   if (d.derniereConnexion) {
     const a = age(d.derniereConnexion, maintenant);
-    const texte = a < 1 ? "connecté aujourd'hui" : `connecté il y a ${pluriel(Math.floor(a), 'jour')}`;
-    if (a <= FENETRES_JOURS.connexionForte) raisons.push({ code: 'connexion', points: PONDERATIONS.connexion7, date: d.derniereConnexion, texte });
-    else if (a <= FENETRES_JOURS.connexion) raisons.push({ code: 'connexion', points: PONDERATIONS.connexion30, date: d.derniereConnexion, texte });
+    const jours = Math.floor(a);
+    const texte = jours < 1 ? "connecté aujourd'hui" : `connecté il y a ${pluriel(jours, 'jour')}`;
+    if (jours <= FENETRES_JOURS.connexionForte) raisons.push({ code: 'connexion', points: PONDERATIONS.connexion7, date: d.derniereConnexion, texte });
+    else if (jours <= FENETRES_JOURS.connexion) raisons.push({ code: 'connexion', points: PONDERATIONS.connexion30, date: d.derniereConnexion, texte });
   }
 
   if (d.lignesPortefeuille > 0) raisons.push({ code: 'portefeuille', points: PONDERATIONS.portefeuille, date: null, texte: `portefeuille de ${pluriel(d.lignesPortefeuille, 'ligne')}` });

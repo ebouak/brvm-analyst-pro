@@ -5,6 +5,7 @@
  * prospects, newsletter et messages.
  */
 import type { Dossier } from './types';
+import { fmtMontant } from './score';
 
 export const normaliserEmail = (e: string | null | undefined): string => (e ?? '').trim().toLowerCase();
 
@@ -80,7 +81,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
       premium: pr?.is_premium === true,
       admin: admins.has(c.id),
       paiementsEnAttente: ps.filter((p) => p.status === 'pending').map((p) => ({ montant: Number(p.amount), devise: p.currency ?? 'XOF', date: p.created_at })),
-      paiementsReussis: ps.filter((p) => p.status === 'paid').map((p) => ({ montant: Number(p.amount), date: p.paid_at ?? p.created_at })),
+      paiementsReussis: ps.filter((p) => p.status === 'paid').map((p) => ({ montant: Number(p.amount), devise: p.currency ?? 'XOF', date: p.paid_at ?? p.created_at })),
       offreVues: (signaux.get(c.id) ?? []).map((x) => ({ page: x.page, jour: x.jour })),
       lignesPortefeuille: (positions.get(c.id) ?? []).length,
       leconsAcademy: (academy.get(c.id) ?? []).filter((a) => a.completed).length,
@@ -109,8 +110,8 @@ export interface Evenement { date: string; libelle: string }
 export function chronologie(d: Dossier): Evenement[] {
   const ev: Evenement[] = [];
   if (d.inscritLe) ev.push({ date: d.inscritLe, libelle: 'Inscription' });
-  for (const p of d.paiementsEnAttente) ev.push({ date: p.date, libelle: `Paiement commencé (${p.montant} ${p.devise}), non terminé` });
-  for (const p of d.paiementsReussis) ev.push({ date: p.date, libelle: `Paiement réussi (${p.montant})` });
+  for (const p of d.paiementsEnAttente) ev.push({ date: p.date, libelle: `Paiement commencé (${fmtMontant(p.montant, p.devise)}), non terminé` });
+  for (const p of d.paiementsReussis) ev.push({ date: p.date, libelle: `Paiement réussi (${fmtMontant(p.montant, p.devise)})` });
   for (const v of d.offreVues) ev.push({ date: `${v.jour}T12:00:00Z`, libelle: `A consulté ${v.page}` });
   for (const m of d.messages) ev.push({ date: m.date, libelle: 'Message envoyé au support' });
   if (d.prospect) ev.push({ date: d.prospect.date, libelle: 'Formulaire prospect' });

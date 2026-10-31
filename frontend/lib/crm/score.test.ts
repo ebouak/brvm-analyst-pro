@@ -40,6 +40,12 @@ describe('scorer', () => {
     expect(scorer({ ...d0, derniereConnexion: ilYa(31) }, MAINTENANT).score).toBe(0);
   });
 
+  it('connexion : 7,5 jours = 7 jours pour le texte ET le poids', () => {
+    const s = scorer({ ...d0, derniereConnexion: ilYa(7.5) }, MAINTENANT);
+    expect(s.score).toBe(15);
+    expect(s.raisons[0].texte).toBe('connecté il y a 7 jours');
+  });
+
   it('cumule portefeuille, contact, newsletter, Academy', () => {
     const s = scorer({ ...d0, lignesPortefeuille: 4, messages: [{ date: ilYa(6) }], newsletter: true, leconsAcademy: 3 }, MAINTENANT);
     expect(s.score).toBe(30);

@@ -82,16 +82,23 @@ export async function DELETE() {
   await admin.from('telegram_conversations').delete().eq('user_id', user.id);
   await admin.from('telegram_pairing_codes').delete().eq('user_id', user.id);
 
-  // 2quinquies. CRM (0172) : crm_signaux part avec la cascade ; actions et
-  //          opposition sont aussi indexées par e-mail (prospect devenu compte)
-  //          — purge explicite en service_role (aucune policy DELETE).
+  // 2quinquies. CRM (0172) : crm_signaux part avec la cascade ; crm_actions et
+  //          leads_brvm sont aussi indexés par e-mail (prospect devenu compte) —
+  //          purge explicite en service_role (aucune policy DELETE).
   //          Clé e-mail seulement si l'adresse est confirmée : un compte non
   //          confirmé peut porter l'adresse d'un tiers, et sa suppression ne
-  //          doit jamais effacer l'historique ni l'opposition de cette personne.
+  //          doit jamais effacer l'historique de cette personne.
+  //          `crm_oppositions` est VOLONTAIREMENT conservée (art. 21) : réduite
+  //          à l'adresse, la date et l'origine, c'est la liste d'opposition qui
+  //          garantit qu'on ne recontactera plus la personne.
+  //          leads_brvm : adresse stockée telle que saisie → deux égalités
+  //          exactes (saisie brute et minuscules), sans joker `ilike` qui
+  //          pourrait toucher d'autres lignes (`_` est un joker).
   if (user.email && user.email_confirmed_at) {
     const emailCrm = user.email.trim().toLowerCase();
     await admin.from('crm_actions').delete().eq('email_norm', emailCrm);
-    await admin.from('crm_oppositions').delete().eq('email_norm', emailCrm);
+    await admin.from('leads_brvm').delete().eq('email', user.email);
+    if (emailCrm !== user.email) await admin.from('leads_brvm').delete().eq('email', emailCrm);
   }
   await admin.from('crm_actions').delete().eq('user_id', user.id);
 

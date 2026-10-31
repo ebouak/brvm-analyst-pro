@@ -155,12 +155,13 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
   pour les prospects issus du formulaire de contact. Une personne décide de chaque
   message, aucun envoi automatique.
 - Conservation : `crm_signaux` 90 j ; `crm_actions` 24 mois (`purge_rgpd_retention`) ;
-  `crm_oppositions` tant que la personne existe — c'est la preuve du refus, la purger
-  permettrait de la relancer.
+  `crm_oppositions` conservée même après suppression du compte, réduite à l'adresse, la
+  date et l'origine : c'est la liste d'opposition qui garantit qu'on ne vous recontacte
+  pas (la purger permettrait de relancer).
 - Droits : export (`/api/account/export` : signaux, actions, opposition — adresse
   **confirmée** requise pour les données indexées par e-mail ; jamais le jeton
   d'opposition, l'auteur, les erreurs techniques ni l'instantané de score) ;
-  suppression (`/api/account/delete`) ; opposition par lien confirmé en pied de
+  suppression (`/api/account/delete` : actions et prospect par adresse confirmée ; l'opposition est conservée) ; opposition par lien confirmé en pied de
   message ou Paramètres → Compte.
 - `auteur` est mis à NULL si le compte de l'administrateur est supprimé.
 - Sécurité : RLS activée sans aucune policy + `revoke` pour `public`, `anon` et

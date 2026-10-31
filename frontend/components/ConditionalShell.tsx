@@ -70,6 +70,7 @@ export default function ConditionalShell({
     pathname !== '/login' &&
     pathname !== '/signup' &&
     !pathname.startsWith('/admin') &&
+    !pathname.startsWith('/crm') && // page d'opposition : aucun encart
     !pathname.startsWith('/embed') && // widget tiers : aucun chrome
     !pathname.startsWith('/formations/academy');
   // Invitation newsletter : uniquement sur les pages publiques (branche `bare`
@@ -80,6 +81,7 @@ export default function ConditionalShell({
   const showNewsletter =
     pathname !== '/login' &&
     pathname !== '/signup' &&
+    !pathname.startsWith('/crm') &&
     !pathname.startsWith('/embed') &&
     !LEGAL_PREFIXES.some((p) => pathname.startsWith(p));
   // /admin a sa propre console (layout dédié) → pas de shell applicatif ni footer.

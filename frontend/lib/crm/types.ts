@@ -11,7 +11,7 @@ export interface Dossier {
   admin: boolean;
   oppose: boolean;
   paiementsEnAttente: { montant: number; devise: string; date: string }[];
-  paiementsReussis: { montant: number; date: string }[];
+  paiementsReussis: { montant: number; devise: string; date: string }[];
   offreVues: { page: string; jour: string }[];
   lignesPortefeuille: number;
   messages: { date: string }[];

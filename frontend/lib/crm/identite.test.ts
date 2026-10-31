@@ -57,7 +57,7 @@ describe('assemblerDossiers', () => {
     });
     expect(d).toMatchObject({ premium: true, admin: true, oppose: true, lignesPortefeuille: 2, leconsAcademy: 1 });
     expect(d!.paiementsEnAttente).toEqual([{ montant: 5000, devise: 'XOF', date: '2026-10-12T10:00:00Z' }]);
-    expect(d!.paiementsReussis).toEqual([{ montant: 5000, date: '2026-09-01T11:00:00Z' }]);
+    expect(d!.paiementsReussis).toEqual([{ montant: 5000, devise: 'XOF', date: '2026-09-01T11:00:00Z' }]);
   });
 });
 
@@ -70,5 +70,19 @@ describe('chronologie', () => {
       signaux: [{ user_id: 'u1', page: '/pricing', jour: '2026-10-29' }],
     });
     expect(chronologie(d!).map((e) => e.libelle)).toEqual(['A consulté /pricing', 'Message envoyé au support', 'Inscription']);
+  });
+
+  it('affiche la devise des paiements réussis et en attente', () => {
+    const [d] = assemblerDossiers({
+      ...vide,
+      comptes: [{ id: 'u1', email: 'a@b.c', created_at: null, last_sign_in_at: null }],
+      paiements: [
+        { user_id: 'u1', amount: 20, currency: 'EUR', status: 'paid', created_at: '2026-09-01T10:00:00Z', paid_at: '2026-09-01T11:00:00Z' },
+        { user_id: 'u1', amount: 5000, currency: 'XOF', status: 'pending', created_at: '2026-10-12T10:00:00Z', paid_at: null },
+      ],
+    });
+    const lib = chronologie(d!).map((e) => e.libelle);
+    expect(lib.find((l) => l.startsWith('Paiement réussi'))).toContain('EUR');
+    expect(lib.find((l) => l.startsWith('Paiement commencé'))).toContain('FCFA');
   });
 });
