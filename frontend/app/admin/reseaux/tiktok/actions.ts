@@ -96,7 +96,9 @@ export async function publierTikTok(cible: string, cibleId: string, choix: Choix
 /** Règle 5 : suivi du traitement après publication. */
 export async function statutPublicationTikTok(publishId: string): Promise<{ statut: string; raison: string | null } | null> {
   await requirePermission('content.publish');
-  if (!/^[\w.-]{6,80}$/.test(publishId)) return null;
+  // Format réel d'un publish_id TikTok : v_pub_url~v2-1.<chiffres> — le « ~ »
+  // était refusé, et le suivi restait bloqué sur « en attente » (2026-10-31).
+  if (!/^[\w.~-]{6,120}$/.test(publishId)) return null;
   const jeton = await jetonTikTok();
   if (!jeton.ok) return null;
   try {
