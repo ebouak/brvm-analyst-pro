@@ -1,0 +1,43 @@
+name: Banc d'évaluation des signaux
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+# Chaque samedi, mesure si les scores de signal ont annoncé la suite (écart au
+# marché à 5, 20 et 60 séances, cas indépendants, intervalle à 95 %). LECTURE
+# SEULE. Le verdict se lit dans le résumé du run.
+#
+# Règle (CLAUDE.md) : aucun seuil de scoring/score.ts ne change sans un
+# verdict « prouvé » de ce banc. Au 2026-10-31 : rien de prouvé, dans aucune
+# tranche — l'historique (depuis le 25/05) est encore trop court.
+on:
+  schedule:
+    - cron: '0 8 * * 6'
+  workflow_dispatch: {}
+
+concurrency:
+  group: eval-signaux
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  eval-signaux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Évaluer les signaux
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx src/index.ts eval:signaux
