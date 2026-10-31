@@ -9,7 +9,7 @@ Pipeline :
   2. Snapshot World Bank CMO Pink Sheet (mensuel)
   3. Articles brvm_news récents liés aux commodités
   4. Score exposition BRVM par ticker
-  5. Appel DeepSeek (deepseek-chat) → HTML article
+  5. Appel LLM (DeepSeek → Gemini → Grok) → HTML article
   6. Sauvegarde public/weekly/<slug>.html
   7. Upsert brvm_news (content_html + slug + metadata)
 
@@ -400,19 +400,32 @@ def fetch_brvm_correlations() -> list[dict]:
     # 2) Cours des actions agro (journalier) → moyenne mensuelle
     all_codes = list({c for m in _FILIERES_CORR.values() for c in m["codes"]})
     codes_str = ",".join(all_codes)
+    # PostgREST plafonne À 1000 LIGNES EN SILENCE, quel que soit `limit` :
+    # mesuré le 2026-10-31, 1000 lignes reçues sur 4946 — les corrélations
+    # portaient sur fin 2021 – mi-2022 seulement. D'où la pagination.
+    page = 1000
+    stock_rows = []
     try:
-        resp = requests.get(
-            f"{SUPABASE_URL}/rest/v1/brvm_actions_daily"
-            f"?code=in.({codes_str})&date_marche=gte.{since}"
-            f"&select=code,cours_jour,date_marche"
-            f"&not.cours_jour=is.null&order=date_marche.asc&limit=20000",
-            headers=headers, timeout=30,
-        )
-        resp.raise_for_status()
-        stock_rows = resp.json()
+        while True:
+            resp = requests.get(
+                f"{SUPABASE_URL}/rest/v1/brvm_actions_daily"
+                f"?code=in.({codes_str})&date_marche=gte.{since}"
+                f"&select=code,cours_jour,date_marche"
+                f"&cours_jour=not.is.null&order=date_marche.asc,code.asc"
+                f"&limit={page}&offset={len(stock_rows)}",
+                headers=headers, timeout=30,
+            )
+            resp.raise_for_status()
+            lot = resp.json()
+            stock_rows.extend(lot)
+            if len(lot) < page:
+                break
     except Exception as e:
-        log.warning("Supabase brvm_actions_daily erreur : %s", e)
-        return []
+        # Bloquant depuis le 2026-10-31 : le filtre était écrit
+        # `not.cours_jour=is.null` (400 à chaque exécution) et l'avertissement
+        # laissait partir un rapport sans les valeurs agricoles BRVM, sans que
+        # rien ne le dise. Mieux vaut pas de rapport qu'un rapport amputé en silence.
+        raise RuntimeError(f"Supabase brvm_actions_daily illisible : {e}") from e
 
     # Index : code → {YYYY-MM: [prices...]}
     stock_vals: dict[str, dict[str, list[float]]] = {}
@@ -1182,21 +1195,50 @@ def assemble_content_html(
     )
 
 
-# ── 6. Appel DeepSeek ────────────────────────────────────────────────────────
+# ── 6. Appel LLM ────────────────────────────────────────────────────────────
 
-def call_deepseek(prompt: str) -> str:
-    if not DEEPSEEK_KEY:
-        raise RuntimeError("DEEPSEEK_API_KEY non définie")
+# Même cascade et mêmes modèles que `frontend/lib/server/llmModels.ts` (deux
+# paquets distincts : à corriger des deux côtés). Ajoutée le 2026-10-31 : ce
+# script n'avait AUCUN repli et s'arrêtait sur le 402 « Insufficient Balance »
+# de DeepSeek pendant que le reste du produit basculait sur Gemini puis Grok.
+CASCADE_LLM = (
+    ("deepseek", "https://api.deepseek.com", "deepseek-chat", {}),
+    # Gemini (compatible OpenAI) : sans `reasoning_effort` bas, la réflexion
+    # consomme le budget de jetons et la réponse revient vide ou tronquée.
+    ("gemini", "https://generativelanguage.googleapis.com/v1beta/openai/", "gemini-3.8-flash", {"reasoning_effort": "low"}),
+    ("xai", "https://api.x.ai/v1", "grok-4.6", {}),
+)
 
+
+def call_llm(prompt: str) -> str:
     from openai import OpenAI
 
-    client = OpenAI(api_key=DEEPSEEK_KEY, base_url="https://api.deepseek.com")
-    resp = client.chat.completions.create(
-        model="deepseek-chat",
-        max_tokens=4096,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return resp.choices[0].message.content
+    echecs: list[str] = []
+    for fournisseur, base_url, modele, extra in CASCADE_LLM:
+        cle = DEEPSEEK_KEY if fournisseur == "deepseek" else _resoudre_cle_llm(fournisseur)
+        cle = cle.encode("ascii", "ignore").decode("ascii")
+        if not cle:
+            echecs.append(f"{fournisseur}: clé absente")
+            continue
+        try:
+            client = OpenAI(api_key=cle, base_url=base_url)
+            resp = client.chat.completions.create(
+                model=modele,
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}],
+                **extra,
+            )
+            texte = (resp.choices[0].message.content or "").strip()
+            if not texte:
+                echecs.append(f"{fournisseur}: réponse vide")
+                continue
+            if echecs:
+                log.warning("LLM : repli sur %s après %s", fournisseur, " ; ".join(echecs))
+            return texte
+        except Exception as e:
+            # Le message de l'API ne contient pas la clé ; on n'en garde que le début.
+            echecs.append(f"{fournisseur}: {str(e)[:160]}")
+    raise RuntimeError("Tous les fournisseurs LLM ont échoué — " + " ; ".join(echecs))
 
 
 # ── 7. Assemblage HTML final ──────────────────────────────────────────────────
@@ -1391,7 +1433,7 @@ def main():
         log.info("[DRY-RUN] Appel DeepSeek ignoré")
         editorial_html = "<section><p>[DRY-RUN] Contenu éditorial non généré.</p></section>"
     else:
-        editorial_html = call_deepseek(prompt)
+        editorial_html = call_llm(prompt)
 
     article_html = assemble_content_html(
         editorial_html, prices, brvm_scores_simple, correlations,

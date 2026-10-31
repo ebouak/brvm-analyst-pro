@@ -41,6 +41,7 @@ import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import type { CarnetSeance as CarnetVedette } from '@/lib/carnet/commentaire';
 import { canAccess } from '@/lib/server/featureAccess';
+import { estPerime, SEUIL_MASQUE_JOURS } from '@/lib/african/fraicheur';
 import {
   SectionHeader,
   EmptyStatePremium,
@@ -436,13 +437,22 @@ export default async function Dashboard() {
         </GrilleInterne>
       );
     })(),
-    actus: (
-      <GrilleInterne>
-        <Cellule span={4}><Actualites items={actualites} /></Cellule>
-        <Cellule span={4}><Motifs premium={isPremium} compte={compteMotifs} date={lastDate} /></Cellule>
-        <Cellule span={4}><Afrique indices={afrique} composite={{ valeur: brvmcJour?.valeur ?? null, variation: brvmcJour?.variation_pct ?? null }} dateSeance={lastDate} /></Cellule>
-      </GrilleInterne>
-    ),
+    actus: (() => {
+      // Une place sans donnée depuis plus de SEUIL_MASQUE_JOURS est retirée ;
+      // sans aucune place fraîche, la cellule entière disparaît.
+      const seance = new Date(`${lastDate}T12:00:00Z`);
+      const afriqueFraiche = (afrique ?? []).filter((a) => !estPerime(a.date_marche, seance, SEUIL_MASQUE_JOURS));
+      const span = afriqueFraiche.length ? 4 : 6;
+      return (
+        <GrilleInterne>
+          <Cellule span={span}><Actualites items={actualites} /></Cellule>
+          <Cellule span={span}><Motifs premium={isPremium} compte={compteMotifs} date={lastDate} /></Cellule>
+          {afriqueFraiche.length > 0 && (
+            <Cellule span={4}><Afrique indices={afriqueFraiche} composite={{ valeur: brvmcJour?.valeur ?? null, variation: brvmcJour?.variation_pct ?? null }} dateSeance={lastDate} /></Cellule>
+          )}
+        </GrilleInterne>
+      );
+    })(),
     portefeuille: (
       <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsJour} />
     ),
