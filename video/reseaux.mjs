@@ -21,7 +21,7 @@ export function creerReseaux({ urlSupabase, service }) {
   const h = (extra = {}) => ({ ...entetesSupabase(service), 'Content-Type': 'application/json', ...extra });
 
   const lire = async (reseau) => {
-    const r = await fetch(`${rest}/social_tokens?reseau=eq.${reseau}&select=reseau,access_token,refresh_token,expire_le,compte_id,actif`, { headers: h() });
+    const r = await fetch(`${rest}/social_tokens?reseau=eq.${reseau}&select=reseau,access_token,refresh_token,expire_le,compte_id,actif,scopes`, { headers: h() });
     if (r.status === 404) return 'table_absente';
     if (!r.ok) {
       const t = await r.text();
@@ -59,9 +59,9 @@ export function creerReseaux({ urlSupabase, service }) {
       }),
     });
     const lignes = maj.ok ? await maj.json() : [];
-    if (lignes.length > 0) return { ok: true, token: j.access_token, compteId: l.compte_id };
+    if (lignes.length > 0) return { ok: true, token: j.access_token, compteId: l.compte_id, scopes: l.scopes };
     const relue = await lire('tiktok');
-    if (relue && relue !== 'table_absente' && valide(relue.expire_le)) return { ok: true, token: relue.access_token, compteId: relue.compte_id };
+    if (relue && relue !== 'table_absente' && valide(relue.expire_le)) return { ok: true, token: relue.access_token, compteId: relue.compte_id, scopes: relue.scopes };
     return { ok: false, raison: 'jeton TikTok tourné par un autre worker et illisible', alerter: true };
   };
 
@@ -71,7 +71,7 @@ export function creerReseaux({ urlSupabase, service }) {
     if (l === 'table_absente') return { ok: false, table: false, raison: 'migration 0170 non appliquée', alerter: false };
     if (!l) return { ok: false, raison: 'compte non connecté', alerter: false };
     if (!l.actif) return { ok: false, raison: 'publication coupée par l’exploitant', alerter: false };
-    if (valide(l.expire_le)) return { ok: true, token: l.access_token, compteId: l.compte_id };
+    if (valide(l.expire_le)) return { ok: true, token: l.access_token, compteId: l.compte_id, scopes: l.scopes };
     if (reseau === 'linkedin') return { ok: false, raison: 'jeton LinkedIn expiré, reconnectez LinkedIn depuis /admin/reseaux', alerter: true };
     return rafraichirTikTok(l);
   };
@@ -103,6 +103,75 @@ export function creerReseaux({ urlSupabase, service }) {
   };
 
   return { jeton, prendreVerrou, terminer };
+}
+
+/* -------------------------------------------------------------- TikTok */
+
+/** Le compte a-t-il accordé la publication directe ? */
+export const peutPublierDirect = (scopes) => String(scopes ?? '').split(/[,\s]+/).includes('video.publish');
+
+/**
+ * Visibilité à demander : la plus ouverte que TikTok propose pour ce compte
+ * (`creator_info`). Une application NON AUDITÉE ne peut publier qu'en privé ;
+ * TikTok le dit par une erreur `unaudited_client…`, d'où le repli SELF_ONLY.
+ */
+export function choisirVisibilite(options) {
+  const o = Array.isArray(options) ? options : [];
+  if (o.includes('PUBLIC_TO_EVERYONE')) return 'PUBLIC_TO_EVERYONE';
+  if (o.includes('SELF_ONLY')) return 'SELF_ONLY';
+  return o[0] ?? 'SELF_ONLY';
+}
+
+/**
+ * Publie la vidéo : directement si `direct` (portée video.publish), sinon en
+ * brouillon dans la boîte de réception. Renvoie { publishId, mode } où mode
+ * vaut 'public' | 'prive' | 'brouillon'.
+ */
+export async function publierVideoTikTok({ token, octets, legende, direct }) {
+  const tt = async (chemin, corps) => {
+    const r = await fetch(`https://open.tiktokapis.com/v2${chemin}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
+      body: JSON.stringify(corps ?? {}),
+    });
+    const rep = await r.json().catch(() => ({}));
+    if (!r.ok || (rep.error?.code && rep.error.code !== 'ok')) {
+      throw new Error(`${chemin} → ${r.status} ${rep.error?.code ?? ''} ${rep.error?.message ?? ''}`.trim());
+    }
+    return rep.data ?? {};
+  };
+  const taille = octets.length;
+  const source_info = { source: 'FILE_UPLOAD', video_size: taille, chunk_size: taille, total_chunk_count: 1 };
+
+  let init;
+  let mode = 'brouillon';
+  if (direct) {
+    const info = await tt('/post/publish/creator_info/query/');
+    let vis = choisirVisibilite(info.privacy_level_options);
+    const essayer = (v) =>
+      tt('/post/publish/video/init/', {
+        post_info: { title: legende.slice(0, 2200), privacy_level: v, disable_comment: false, disable_duet: false, disable_stitch: false },
+        source_info,
+      });
+    try {
+      init = await essayer(vis);
+    } catch (e) {
+      if (vis === 'SELF_ONLY' || !/unaudited/i.test(e.message)) throw e;
+      vis = 'SELF_ONLY';
+      init = await essayer(vis);
+    }
+    mode = vis === 'SELF_ONLY' ? 'prive' : 'public';
+  } else {
+    init = await tt('/post/publish/inbox/video/init/', { source_info });
+  }
+
+  const up = await fetch(init.upload_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'video/mp4', 'Content-Range': `bytes 0-${taille - 1}/${taille}` },
+    body: octets,
+  });
+  if (!up.ok) throw new Error(`téléversement → ${up.status} ${(await up.text()).slice(0, 200)}`);
+  return { publishId: init.publish_id, mode };
 }
 
 /* ------------------------------------------------------------ LinkedIn */

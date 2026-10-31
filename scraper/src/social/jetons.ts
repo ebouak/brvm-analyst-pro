@@ -19,9 +19,12 @@ interface Ligne {
   expire_le: string | null;
   compte_id: string | null;
   actif: boolean;
+  scopes: string | null;
 }
 
-export type Jeton = { ok: true; token: string; compteId: string | null } | { ok: false; raison: string; alerter: boolean };
+export type Jeton =
+  | { ok: true; token: string; compteId: string | null; scopes: string | null }
+  | { ok: false; raison: string; alerter: boolean };
 
 const MARGE_MS = 5 * 60_000;
 const valide = (expire: string | null) => !expire || new Date(expire).getTime() > Date.now() + MARGE_MS;
@@ -29,7 +32,7 @@ const valide = (expire: string | null) => !expire || new Date(expire).getTime() 
 async function lire(reseau: ReseauSocial): Promise<Ligne | null | 'table_absente'> {
   const { data, error } = await getSupabase()
     .from('social_tokens')
-    .select('reseau, access_token, refresh_token, expire_le, compte_id, actif')
+    .select('reseau, access_token, refresh_token, expire_le, compte_id, actif, scopes')
     .eq('reseau', reseau)
     .maybeSingle();
   if (error) return error.code === '42P01' || error.code === 'PGRST205' ? 'table_absente' : null;
@@ -65,10 +68,10 @@ async function rafraichirTikTok(l: Ligne): Promise<Jeton> {
     .eq('reseau', 'tiktok')
     .eq('refresh_token', l.refresh_token)
     .select('reseau');
-  if (maj && maj.length > 0) return { ok: true, token: j.access_token, compteId: l.compte_id };
+  if (maj && maj.length > 0) return { ok: true, token: j.access_token, compteId: l.compte_id, scopes: l.scopes };
   // Un autre worker a tourné le jeton entre-temps : sa version fait foi.
   const relue = await lire('tiktok');
-  if (relue && relue !== 'table_absente' && valide(relue.expire_le)) return { ok: true, token: relue.access_token, compteId: relue.compte_id };
+  if (relue && relue !== 'table_absente' && valide(relue.expire_le)) return { ok: true, token: relue.access_token, compteId: relue.compte_id, scopes: relue.scopes };
   return { ok: false, raison: 'jeton TikTok tourné par un autre worker et illisible', alerter: true };
 }
 
@@ -82,7 +85,7 @@ export async function jetonUtilisable(reseau: ReseauSocial): Promise<Jeton> {
   if (l === 'table_absente') return { ok: false, raison: 'migration 0170 non appliquée', alerter: false };
   if (!l) return { ok: false, raison: 'compte non connecté', alerter: false };
   if (!l.actif) return { ok: false, raison: 'publication coupée par l’exploitant', alerter: false };
-  if (valide(l.expire_le)) return { ok: true, token: l.access_token, compteId: l.compte_id };
+  if (valide(l.expire_le)) return { ok: true, token: l.access_token, compteId: l.compte_id, scopes: l.scopes };
   if (reseau === 'linkedin') return { ok: false, raison: 'jeton LinkedIn expiré, reconnectez LinkedIn depuis /admin/reseaux', alerter: true };
   return rafraichirTikTok(l);
 }
