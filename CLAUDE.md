@@ -1212,6 +1212,15 @@ Migration `0170_reseaux_sociaux.sql` **à appliquer**. Consultation Fable 1/3.
   réelle, (b) assumer l'abstention et le dire. **L'option (b) a été appliquée au
   niveau du discours** — `PlatformUniverses` et `AppPreview` annoncent désormais
   que le moteur s'abstient tant que rien n'est net. La calibration reste ouverte.
+  **Banc d'évaluation (2026-10-31)** : `npm run eval:signaux`
+  (`src/signaux/evaluation.ts`, cron `eval-signaux.yml` le samedi) mesure
+  l'écart au marché à 5/20/60 séances par tranche de score, sur des cas
+  **indépendants**, avec intervalle à 95 %. ⚠️ **RÈGLE : aucun seuil de
+  `scoring/score.ts` ne change sans un verdict « prouvé » du banc dans le bon
+  sens.** Premier passage (5 259 signaux, 25/05 → 30/10) : **rien de prouvé**.
+  Une mesure naïve donnait −2,9 % pour les achats à 20 séances ; dé-chevauchée,
+  il reste −0,9 % dans [−5,6 ; +4,4] — du bruit. Abaisser le seuil n'aurait
+  rien amélioré : aucune tranche d'achat ne montre de gain établi.
 - **mv_signal_inputs** ne matérialise que la dernière séance : le scoring d'une
   date passée précise est partiel (voir `docs/SCORING.md` §6).
 - **Comparatif dividendes** : dépend de l'ingestion des dividendes (mock fourni).
