@@ -6,6 +6,7 @@ import { getDebutantData, type FicheDebutant, type SerieMois } from '@/lib/landi
 import { fmtDateFR, fmtNumber } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import LeadForm from '@/components/debutant/LeadForm';
 import '@/components/landing/bis/landing-bis.css';
 
 /**
@@ -262,6 +263,16 @@ export default async function DebutantPage() {
                 <small>Sans carte bancaire · Sans engagement</small>
               </div>
             </div>
+          </section>
+
+          {/* 8 bis · ÊTRE ACCOMPAGNÉ — remis en ligne le 2026-11-01. La refonte
+              du 21/09 l'avait retiré (« l'objectif est le compte gratuit »).
+              Il revient SANS popup et APRÈS l'appel principal au compte : une
+              voie secondaire pour qui préfère être recontacté. Alimente
+              /admin/leads et le CRM (prospect avec consentement). */}
+          <section className="recontact" aria-labelledby="h-recontact">
+            <div className="sec-head"><div><p className="over">Vous préférez être accompagné&nbsp;?</p><h2 id="h-recontact">Laissez vos coordonnées, on vous rappelle.</h2><p className="lead">Un partenaire habilité vous recontacte pour vous aider à ouvrir votre compte BRVM.</p></div></div>
+            <div className="mx-auto mt-6 max-w-2xl"><LeadForm /></div>
           </section>
 
           {/* 9 · PLUS LOIN (sans survendre) */}

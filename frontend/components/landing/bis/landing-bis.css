@@ -632,6 +632,7 @@
 
 /* après inscription */
 .lb .apres-inscr { margin-top: 44px; }
+.lb .recontact { margin-top: 44px; }
 .lb .card.grand { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: center; padding: 28px; }
 @media (max-width: 860px) { .lb .card.grand { grid-template-columns: 1fr; } }
 .lb .card.grand h2 { font-size: clamp(26px, 3vw, 36px); margin-top: 6px; }
