@@ -35,13 +35,34 @@ function fixture(name: string): string {
   return readFileSync(join(here, '..', '..', 'tests', 'fixtures', name), 'utf8');
 }
 
+/**
+ * AFX filtre les adresses de GitHub Actions (expiration sur toutes ses IP
+ * depuis juillet 2026), pas celles du serveur Hetzner de la passerelle
+ * WhatsApp. Ce serveur relaie donc la lecture : `https://afx.kwayisi.org/gse/`
+ * devient `<relais>/gse/`. Le relais (Caddy, /opt/waha) n'accepte qu'un jeton
+ * et ne peut joindre que ce domaine. Sans relais configuré : URL d'origine.
+ */
+export function urlViaRelais(url: string, relais: string | undefined): string {
+  if (!relais) return url;
+  const { pathname, search } = new URL(url);
+  return `${relais.replace(/\/+$/, '')}${pathname}${search}`;
+}
+
 async function getHtml(url: string, fixtureName: string, mock: boolean): Promise<string> {
   if (mock) return fixture(fixtureName);
-  const resp = await fetch(url, {
+  const relais = process.env.AFX_RELAIS_URL || undefined;
+  const jeton = process.env.AFX_RELAIS_JETON;
+  if (relais && !jeton) throw new Error('AFX_RELAIS_URL défini sans AFX_RELAIS_JETON');
+  const cible = urlViaRelais(url, relais);
+  const resp = await fetch(cible, {
     signal: AbortSignal.timeout(20000),
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36' },
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+      ...(relais ? { Authorization: `Bearer ${jeton}` } : {}),
+    },
   });
-  if (!resp.ok) throw new Error(`AFX HTTP ${resp.status} (${url})`);
+  // L'URL journalisée est celle de la source : le relais ne change pas ce qui est lu.
+  if (!resp.ok) throw new Error(`AFX HTTP ${resp.status} (${url}${relais ? ' via relais' : ''})`);
   return resp.text();
 }
 

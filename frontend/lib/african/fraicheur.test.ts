@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ageEnJours, estPerime, plusRecente, SEUIL_PERIME_JOURS } from './fraicheur';
+import { ageEnJours, estPerime, plusRecente, SEUIL_PERIME_JOURS, SEUIL_MASQUE_JOURS } from './fraicheur';
 
 const LE_18_SEPT = new Date('2026-09-18T14:00:00Z');
 
@@ -32,5 +32,16 @@ describe('plusRecente', () => {
   it('renvoie la date la plus récente et ignore les vides', () => {
     expect(plusRecente(['2026-07-02', null, '2026-07-03', undefined])).toBe('2026-07-03');
     expect(plusRecente([])).toBeNull();
+  });
+});
+
+describe('SEUIL_MASQUE_JOURS (retrait du tableau de bord)', () => {
+  const seance = new Date('2026-10-30T12:00:00Z');
+  it('garde une place à 10 jours, la retire à 11', () => {
+    expect(estPerime('2026-10-20', seance, SEUIL_MASQUE_JOURS)).toBe(false);
+    expect(estPerime('2026-10-19', seance, SEUIL_MASQUE_JOURS)).toBe(true);
+  });
+  it('retire les valeurs du 3 juillet', () => {
+    expect(estPerime('2026-07-03', seance, SEUIL_MASQUE_JOURS)).toBe(true);
   });
 });
