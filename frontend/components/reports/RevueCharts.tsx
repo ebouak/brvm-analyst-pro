@@ -39,7 +39,9 @@ export function FinancialsBars({ data }: { data: { periode: string; revenu: numb
       <BarChart data={rows} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
         <CartesianGrid stroke="#eee" vertical={false} />
         <XAxis dataKey="periode" tick={{ fontSize: 10, fill: GREY }} />
-        <YAxis tick={{ fontSize: 10, fill: GREY }} width={52} tickFormatter={fr} />
+        {/* En milliards : « 45 000 000 000 » ne tenait pas dans l'axe et sortait coupé. */}
+        <YAxis tick={{ fontSize: 10, fill: GREY }} width={52}
+          tickFormatter={(v: number) => `${(v / 1e9).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} Md`} />
         <Tooltip formatter={(v: number, n: string) => [fr(v), n === 'revenu' ? 'CA' : 'Résultat net']}
           contentStyle={{ fontSize: 11 }} />
         <Bar dataKey="revenu" fill={ORANGE} name="revenu" radius={[2, 2, 0, 0]} />
