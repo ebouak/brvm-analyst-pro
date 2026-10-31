@@ -274,3 +274,17 @@ l'offre Premium » dans `/parametres/compte`, écrite par action serveur
    Lien d'opposition dans chaque relance **dès le lot 1** — **retenu**.
 
 Variante A/B (`variant`) : non ajoutée, le lot 2 n'en prévoit pas.
+
+## 10. Écarts tranchés à la rédaction du plan (2026-10-31)
+
+Constatés dans le code et la base ; le plan
+(`docs/superpowers/plans/2026-10-31-crm-interne.md`) les applique :
+
+1. Le rôle `admin` n'existe pas : `crm.*` va à `super_admin` et `support_admin`.
+2. `last_sign_in_at` se lit par `auth.admin.listUsers()` (`auth.users` n'est pas
+   exposé par PostgREST).
+3. Tests frontend en `*.test.ts` (vitest).
+4. Le lien d'opposition ouvre une page à **bouton de confirmation** : un scanner
+   de liens qui ouvre l'URL ne doit pas opposer la personne à sa place.
+5. Garde-fou anti double envoi : refus si une relance `envoi` de la même personne
+   date de moins de 2 minutes.
