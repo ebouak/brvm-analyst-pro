@@ -49,7 +49,8 @@ export default function ConfidentialitePage() {
           <li>
             Vous proposer l&apos;offre Premium lorsque votre activité montre un intérêt (paiement commencé,
             offre consultée…) : intérêt légitime. Une personne de WESTBOURSE décide de chaque message ;
-            vous pouvez vous y opposer à tout moment (lien en pied de chaque message, ou Paramètres → Compte).
+            vous pouvez vous y opposer à tout moment (lien en pied de chaque message, ou Paramètres → Compte). Pour les personnes ayant rempli le
+            formulaire de contact sans compte : consentement.
           </li>
           <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
         </ul>

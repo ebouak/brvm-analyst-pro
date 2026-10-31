@@ -30,7 +30,7 @@ create table if not exists public.crm_actions (
   erreur            text null,
   resend_id         text null,
   jeton_opposition  text null unique,
-  auteur            uuid not null references auth.users(id),
+  auteur            uuid null references auth.users(id) on delete set null,
   created_at        timestamptz not null default now()
 );
 create index if not exists crm_actions_email_created_idx on public.crm_actions (email_norm, created_at desc);

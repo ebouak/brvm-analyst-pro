@@ -85,7 +85,10 @@ export async function DELETE() {
   // 2quinquies. CRM (0172) : crm_signaux part avec la cascade ; actions et
   //          opposition sont aussi indexées par e-mail (prospect devenu compte)
   //          — purge explicite en service_role (aucune policy DELETE).
-  if (user.email) {
+  //          Clé e-mail seulement si l'adresse est confirmée : un compte non
+  //          confirmé peut porter l'adresse d'un tiers, et sa suppression ne
+  //          doit jamais effacer l'historique ni l'opposition de cette personne.
+  if (user.email && user.email_confirmed_at) {
     const emailCrm = user.email.trim().toLowerCase();
     await admin.from('crm_actions').delete().eq('email_norm', emailCrm);
     await admin.from('crm_oppositions').delete().eq('email_norm', emailCrm);

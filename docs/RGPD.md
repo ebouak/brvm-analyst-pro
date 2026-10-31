@@ -162,6 +162,7 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
   d'opposition, l'auteur, les erreurs techniques ni l'instantané de score) ;
   suppression (`/api/account/delete`) ; opposition par lien confirmé en pied de
   message ou Paramètres → Compte.
+- `auteur` est mis à NULL si le compte de l'administrateur est supprimé.
 - Sécurité : RLS activée sans aucune policy + `revoke` pour `public`, `anon` et
   `authenticated` ; lecture/écriture service_role côté serveur seulement ; console
   protégée par `crm.read` / `crm.write`.
