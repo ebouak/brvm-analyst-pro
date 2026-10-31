@@ -14,6 +14,7 @@ const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
 
 /** Sections publiques SEO : plein écran avec leur propre header (PublicShell). */
 const BARE_PREFIXES = [
+  '/crm', // page publique d'opposition (visiteur anonyme, sans shell applicatif)
   '/societes',
   '/simulateur',
   '/simulateur-budget',

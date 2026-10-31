@@ -12,9 +12,14 @@ export async function lireOpposition(): Promise<boolean | null> {
   }
 }
 
-export async function basculerOpposition(oppose: boolean): Promise<boolean> {
-  const { data: { user } } = await createClient().auth.getUser();
-  if (!user?.email) return false;
-  const ok = oppose ? await enregistrerOpposition(user.email, 'parametres') : await retirerOpposition(user.email);
-  return ok ? oppose : !oppose;
+/** `null` = changement non enregistré (pas de session ou erreur) : l'état affiché ne doit pas bouger. */
+export async function basculerOpposition(oppose: boolean): Promise<boolean | null> {
+  try {
+    const { data: { user } } = await createClient().auth.getUser();
+    if (!user?.email) return null;
+    const ok = oppose ? await enregistrerOpposition(user.email, 'parametres') : await retirerOpposition(user.email);
+    return ok ? oppose : null;
+  } catch {
+    return null;
+  }
 }
