@@ -44,7 +44,7 @@ export function ShareableInfographic({ children, filename = 'backtest' }: { chil
           onClick={exportPng}
           disabled={busy}
           aria-label="Partager ou télécharger l'infographie en image"
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-[#ffffff] px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
         >
           {busy ? 'Génération…' : '↗ Partager / Télécharger'}
         </button>

@@ -3,7 +3,7 @@ import { getRiskTone, toneSoftClass, toneTextClass, RISK_LABEL } from '@/lib/bac
 
 function Metric({ label, hint, value }: { label: string; hint?: string; value: string }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3">
+    <div className="rounded-lg border border-gray-200 bg-[#ffffff] p-3">
       <p className="text-xs font-medium text-gray-500">{label}</p>
       {hint && <p className="text-[11px] text-gray-400">{hint}</p>}
       <p className="mt-1 text-lg font-semibold text-gray-900 tabular-nums">{value}</p>
@@ -16,7 +16,7 @@ const pct = (v: number, d = 1) => `${v.toFixed(d).replace('.', ',')} %`;
 export function RiskBlock({ risk, showRiskDetails = false }: { risk: BacktestRisk; showRiskDetails?: boolean }) {
   const tone = getRiskTone(risk.riskLevel);
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+    <section className="rounded-xl border border-gray-200 bg-[#ffffff] p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Risque</p>
         {risk.riskLevel && (

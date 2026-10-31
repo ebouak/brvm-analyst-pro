@@ -84,7 +84,7 @@ export default function LevelModal() {
                   key={o.key}
                   type="button"
                   onClick={() => choose(o.key)}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-[#ddd7cd] bg-white p-3.5 text-left transition hover:border-[#0b6b6f] hover:bg-[#d4ebe8]/40 active:scale-[0.99]"
+                  className="flex w-full items-center gap-3 rounded-2xl border border-[#ddd7cd] bg-[#ffffff] p-3.5 text-left transition hover:border-[#0b6b6f] hover:bg-[#d4ebe8]/40 active:scale-[0.99]"
                 >
                   <span className="text-2xl" aria-hidden>{o.emoji}</span>
                   <span>

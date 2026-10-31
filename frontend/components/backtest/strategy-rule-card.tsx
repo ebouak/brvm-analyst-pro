@@ -7,7 +7,7 @@ export function StrategyRuleCard({ rule }: { rule: BacktestStrategyRule }) {
     { label: 'Sinon', value: rule.holdCondition, dot: 'bg-gray-400' },
   ];
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+    <section className="rounded-xl border border-gray-200 bg-[#ffffff] p-4 sm:p-5">
       <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Règle de la stratégie</p>
       <p className="mt-0.5 text-sm font-medium text-gray-900">{rule.label}</p>
       <ul className="mt-3 space-y-2">

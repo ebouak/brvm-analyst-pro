@@ -296,7 +296,7 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
         <Link href={`/actions/${s.code}`} className="flex items-center gap-2 hover:text-up group-hover:text-up">
           {LOGOS[s.code] ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={LOGOS[s.code]} alt={s.code} width={24} height={24} className="w-6 h-6 rounded object-contain shrink-0 bg-white p-px" />
+            <img src={LOGOS[s.code]} alt={s.code} width={24} height={24} className="w-6 h-6 rounded object-contain shrink-0 bg-[#ffffff] p-px" />
           ) : (
             <span className="inline-flex items-center justify-center w-6 h-6 rounded text-[9px] font-bold shrink-0 bg-border text-faint">{s.code.slice(0, 2)}</span>
           )}

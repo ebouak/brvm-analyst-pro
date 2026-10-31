@@ -168,7 +168,7 @@ export default function Footer() {
           <ColHeader>Sources officielles</ColHeader>
           <ul className="mt-3 flex flex-wrap items-center gap-2">
             {SOURCES.map((s) => (
-              <li key={s.alt} className="flex h-9 items-center rounded-md bg-white px-2">
+              <li key={s.alt} className="flex h-9 items-center rounded-md bg-[#ffffff] px-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={s.src} alt={s.alt} className="h-5 w-auto" />
               </li>

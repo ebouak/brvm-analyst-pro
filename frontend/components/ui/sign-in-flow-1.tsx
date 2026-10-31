@@ -71,7 +71,7 @@ export const CanvasRevealEffect = ({
   reverse?: boolean; // This prop determines the direction
 }) => {
   return (
-    <div className={cn("h-full relative w-full", containerClassName)}> {/* Removed bg-white */}
+    <div className={cn("h-full relative w-full", containerClassName)}> {/* Removed bg-[#ffffff] */}
       <div className="h-full w-full">
         <DotMatrix
           colors={colors ?? [[0, 255, 255]]}
@@ -88,7 +88,7 @@ export const CanvasRevealEffect = ({
         />
       </div>
       {showGradient && (
-        // Adjust gradient colors if needed based on background (was bg-white, now likely uses containerClassName bg)
+        // Adjust gradient colors if needed based on background (was bg-[#ffffff], now likely uses containerClassName bg)
         // Example assuming a dark background like the SignInPage uses:
          <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
       )}
@@ -664,7 +664,12 @@ export const SignInPage = ({
   };
 
   return (
-    <div className={cn("flex w-[100%] flex-col min-h-screen bg-black relative", className)}>
+    // `dark-band` (globals.css) : écran conçu sombre seulement. Sans lui, en
+    // thème clair, ses `text-white` suivaient le jeton ivory devenu brun foncé
+    // et la connexion s'affichait brun sur noir, presque illisible (2026-10-31).
+    // `[color-scheme:dark]` : le champ e-mail n'a pas de fond propre ; en
+    // schéma clair le navigateur le peint en blanc, sous un texte blanc.
+    <div className={cn("dark-band [color-scheme:dark] flex w-[100%] flex-col min-h-screen bg-black relative", className)}>
       <div className="absolute inset-0 z-0">
         {/* Initial canvas (forward animation) */}
         {initialCanvasVisible && (
@@ -854,7 +859,7 @@ export const SignInPage = ({
                     <div className="flex w-full gap-3">
                       <motion.button
                         onClick={handleBackClick}
-                        className="rounded-full bg-white text-black font-medium px-8 py-3 hover:bg-white/90 transition-colors w-[30%]"
+                        className="rounded-full bg-[#ffffff] text-black font-medium px-8 py-3 hover:bg-[#ffffff]/90 transition-colors w-[30%]"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         transition={{ duration: 0.2 }}
@@ -865,7 +870,7 @@ export const SignInPage = ({
                         onClick={() => { if (code.every(d => d !== "") && !submitting) void verifyComplete(code.join("")); }}
                         className={`flex-1 rounded-full font-medium py-3 border transition-all duration-300 ${
                           code.every(d => d !== "") && !submitting
-                          ? "bg-white text-black border-transparent hover:bg-white/90 cursor-pointer"
+                          ? "bg-[#ffffff] text-black border-transparent hover:bg-[#ffffff]/90 cursor-pointer"
                           : "bg-[#111] text-white/50 border-white/10 cursor-not-allowed"
                         }`}
                         disabled={!code.every(d => d !== "") || submitting}
@@ -911,7 +916,7 @@ export const SignInPage = ({
                       animate={{ opacity: 1 }}
                       transition={{ delay: 1 }}
                       onClick={() => onSuccess?.()}
-                      className="w-full rounded-full bg-white text-black font-medium py-3 hover:bg-white/90 transition-colors"
+                      className="w-full rounded-full bg-[#ffffff] text-black font-medium py-3 hover:bg-[#ffffff]/90 transition-colors"
                     >
                       Accéder au tableau de bord
                     </motion.button>
