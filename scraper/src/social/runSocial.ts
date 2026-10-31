@@ -4,7 +4,7 @@ import { sendTelegramText } from '../alerts/channels.js';
 import { jetonUtilisable, type ReseauSocial } from './jetons.js';
 import { prendreVerrou, terminer, ignorer } from './verrou.js';
 import { publierLinkedIn } from './linkedin.js';
-import { deposerPhotoTikTok } from './tiktok.js';
+import { publierPhotoTikTok, peutPublierDirect } from './tiktok.js';
 import { PLAFOND_SOCIAL_JOUR, repartir, texteLinkedIn, texteTikTok, type ArticleSocial } from './texte.js';
 
 /**
@@ -45,13 +45,21 @@ async function imagePaysage(slug: string): Promise<Buffer | null> {
   }
 }
 
-async function publierUn(reseau: ReseauSocial, a: ArticleSocial, token: string, compteId: string | null): Promise<string> {
+async function publierUn(reseau: ReseauSocial, a: ArticleSocial, token: string, compteId: string | null, scopes: string | null): Promise<string> {
   if (reseau === 'linkedin') {
     if (!compteId) throw new Error('identifiant du profil LinkedIn absent, reconnectez LinkedIn');
     return publierLinkedIn({ token, auteur: compteId, texte: texteLinkedIn(a, SITE), image: await imagePaysage(a.slug), titreImage: a.titre });
   }
   const t = texteTikTok(a);
-  return deposerPhotoTikTok({ token, titre: t.titre, description: t.description, urls: [`${SITE}/api/articles/${a.slug}/photo.jpg`] });
+  const r = await publierPhotoTikTok({
+    token,
+    titre: t.titre,
+    description: t.description,
+    urls: [`${SITE}/api/articles/${a.slug}/photo.jpg`],
+    direct: peutPublierDirect(scopes),
+  });
+  // Le mode (public / privé / brouillon) reste lisible dans /admin/reseaux.
+  return `${r.publishId} (${r.mode})`;
 }
 
 export async function publierArticlesSociaux(aujourdhui: string): Promise<ResultatSocial> {
@@ -95,7 +103,7 @@ export async function publierArticlesSociaux(aujourdhui: string): Promise<Result
     for (const a of aPublier) {
       if (!(await prendreVerrou('article', a.id, reseau))) continue;
       try {
-        const postId = await publierUn(reseau, a, jeton.token, jeton.compteId);
+        const postId = await publierUn(reseau, a, jeton.token, jeton.compteId, jeton.scopes);
         await terminer('article', a.id, reseau, { statut: 'publie', postId });
         res[reseau]++;
         logger.info({ reseau, slug: a.slug, postId }, 'réseaux : publié');

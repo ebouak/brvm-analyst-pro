@@ -16,7 +16,9 @@ export const LIBELLE_RESEAU: Record<Reseau, string> = { linkedin: 'LinkedIn', ti
 
 export const SCOPES: Record<Reseau, string> = {
   linkedin: 'openid profile w_member_social',
-  tiktok: 'user.info.basic,video.upload',
+  // video.publish : publication directe. Tant que l'application n'est pas
+  // auditée par TikTok, elle est forcée en privé (SELF_ONLY) — cf. creator_info.
+  tiktok: 'user.info.basic,video.upload,video.publish',
 };
 
 /** Variables d'environnement (Vercel) des applications développeur. */
