@@ -97,14 +97,14 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
   );
 
   return (
-    <div className="min-h-screen bg-neutral-200 py-8 print:bg-white print:py-0">
+    <div className="min-h-screen bg-neutral-200 py-8 print:bg-[#ffffff] print:py-0">
       <div className="mx-auto mb-4 flex max-w-[800px] items-center justify-between px-4 print:hidden">
         <Link href="/rapports/builder" className="text-sm text-neutral-600 hover:underline">← Modifier</Link>
         <PrintButton />
       </div>
 
       {/* Feuille A4 blanche */}
-      <article className="mx-auto max-w-[800px] bg-white px-12 py-10 font-serif text-neutral-900 shadow-xl print:max-w-none print:shadow-none print:px-0">
+      <article className="mx-auto max-w-[800px] bg-[#ffffff] px-12 py-10 font-serif text-neutral-900 shadow-xl print:max-w-none print:shadow-none print:px-0">
         <header className="flex items-end justify-between border-b-2 border-neutral-900 pb-2">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-neutral-400">WESTBOURSE · Rapport sur mesure</div>
