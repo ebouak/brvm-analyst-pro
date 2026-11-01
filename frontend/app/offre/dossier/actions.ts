@@ -31,7 +31,7 @@ export async function choisirDossier(jeton: string, codeBrut: string): Promise<R
   const { data: objets, error: errListe } = await sb.storage.from('dossiers').list(code, { search: 'dernier.pdf' });
   if (errListe) return { ok: false, message: INDISPONIBLE };
   const maj = objets?.find((o) => o.name === 'dernier.pdf')?.updated_at ?? null;
-  if (!pdfFrais(maj, new Date())) return { ok: false, message: 'Ce dossier est en cours de mise à jour. Choisissez-en un autre.' };
+  if (!pdfFrais(maj, new Date())) return { ok: false, message: "Ce dossier n'est pas disponible pour le moment. Choisissez-en un autre." };
 
   // Consommation ATOMIQUE : deux clics simultanés ne donnent pas deux dossiers.
   const { data: pris, error: errPris } = await sb
@@ -48,7 +48,12 @@ export async function choisirDossier(jeton: string, codeBrut: string): Promise<R
     .createSignedUrl(`${code}/dernier.pdf`, DUREE_URL_S, { download: `westbourse-dossier-${code}.pdf` });
   if (error || !signe?.signedUrl) {
     // Rendre la place : l'échec est le nôtre, pas celui de la personne.
-    await sb.from('crm_actions').update({ bonus_code: null, bonus_at: null }).eq('id', ligne.id);
+    const { error: errAnnul } = await sb
+      .from('crm_actions')
+      .update({ bonus_code: null, bonus_at: null })
+      .eq('id', ligne.id)
+      .eq('bonus_code', code);
+    if (errAnnul) console.error('[offre-dossier] annulation de consommation impossible', { id: ligne.id });
     return { ok: false, message: 'Téléchargement momentanément impossible. Réessayez dans un instant.' };
   }
   return { ok: true, url: signe.signedUrl };

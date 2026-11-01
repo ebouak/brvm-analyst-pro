@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { choisirDossier } from './actions';
 
-type Valeur = { code: string; designation: string; secteur: string | null; detenu: boolean };
+type Valeur = { code: string; designation: string; secteur: string | null };
 
 export default function Choix({ jeton, valeurs }: { jeton: string; valeurs: Valeur[] }) {
   const [filtre, setFiltre] = useState('');
@@ -51,11 +51,10 @@ export default function Choix({ jeton, valeurs }: { jeton: string; valeurs: Vale
       <ul className="grid gap-2 sm:grid-cols-2">
         {liste.map((v) => (
           <li key={v.code}>
-            <button disabled={enCours !== null || fini} onClick={() => choisir(v.code)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-left transition-colors hover:border-accent/60 disabled:opacity-60">
+            <button disabled={enCours !== null || fini} aria-busy={enCours === v.code} onClick={() => choisir(v.code)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-left transition-colors hover:border-accent/60 disabled:opacity-60">
               <span>
                 <span className="tabular block text-sm font-semibold text-ivory">
                   {v.code}
-                  {v.detenu && <span className="ml-2 rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-medium text-accent">dans votre portefeuille</span>}
                 </span>
                 <span className="block text-xs text-muted">{v.designation}{v.secteur ? ` · ${v.secteur}` : ''}</span>
               </span>

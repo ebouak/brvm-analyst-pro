@@ -28,7 +28,7 @@ export default async function Page({ searchParams }: { searchParams: { t?: strin
   const jeton = /^[a-f0-9]{48}$/.test(searchParams.t ?? '') ? (searchParams.t as string) : null;
   const sb = getServiceClient();
   const res = jeton
-    ? await sb.from('crm_actions').select('created_at, bonus_at, user_id').eq('jeton_bonus', jeton).maybeSingle()
+    ? await sb.from('crm_actions').select('created_at, bonus_at').eq('jeton_bonus', jeton).maybeSingle()
     : { data: null, error: null };
   // Échec fermé : une erreur de lecture n'est pas un lien inconnu.
   if (res.error) {
@@ -42,15 +42,18 @@ export default async function Page({ searchParams }: { searchParams: { t?: strin
     return <PageMessage titre={titre} texte="Créez votre compte gratuit pour suivre toutes les sociétés de la BRVM, ou écrivez-nous : nous vous répondons personnellement." />;
   }
 
-  const userId = (ligne as { user_id: string | null } | null)?.user_id ?? null;
-  const [{ data: instruments }, positions] = await Promise.all([
-    sb.from('brvm_instruments').select('code, designation, secteur').eq('type', 'action').order('designation'),
-    userId ? sb.from('portfolios_positions').select('code').eq('user_id', userId).gt('quantite', 0).then((r) => r.data ?? []) : Promise.resolve([] as { code: string }[]),
-  ]);
-  const detenus = new Set((positions as { code: string }[]).map((p) => p.code));
+  // Les positions du portefeuille ne sont volontairement PAS affichées : le lien peut être transféré, il ne révèle rien du portefeuille.
+  const { data: instruments, error: errInstruments } = await sb
+    .from('brvm_instruments')
+    .select('code, designation, secteur')
+    .eq('type', 'action')
+    .order('designation');
+  if (errInstruments) {
+    return <PageMessage titre="Service momentanément indisponible" texte="Réessayez dans un instant : votre lien reste valable." />;
+  }
   const valeurs = ((instruments ?? []) as { code: string; designation: string | null; secteur: string | null }[])
-    .map((i) => ({ code: i.code, designation: i.designation ?? i.code, secteur: i.secteur, detenu: detenus.has(i.code) }))
-    .sort((a, b) => Number(b.detenu) - Number(a.detenu) || a.designation.localeCompare(b.designation));
+    .map((i) => ({ code: i.code, designation: i.designation ?? i.code, secteur: i.secteur }))
+    .sort((a, b) => a.designation.localeCompare(b.designation));
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
