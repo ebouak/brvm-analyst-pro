@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useConsent } from '@/components/consent/ConsentProvider';
 import { markPostHogReady, markPostHogNotReady } from '@/lib/analytics/posthogClient';
+import { createClient } from '@/lib/supabase/client';
 
 /**
  * PostHog (product analytics) — STRICTEMENT conditionné au consentement
@@ -35,6 +36,13 @@ export default function PostHogInit() {
           session_recording: { maskAllInputs: true },
         });
         markPostHogReady();
+        // Une personne déjà connectée qui revient n'est pas passée par le formulaire de
+        // connexion (seul endroit qui identifiait) : on l'identifie ici, une fois, APRÈS init
+        // donc APRÈS consentement. Lecture locale de la session, aucune requête réseau.
+        void createClient().auth.getSession().then(({ data }) => {
+          const u = data.session?.user;
+          if (u && posthog.get_distinct_id() !== u.id) posthog.identify(u.id, { email: u.email });
+        }).catch(() => {});
       });
     } else if (!granted && loadedRef.current) {
       // Consentement retiré : stop + purge (droit de retrait effectif).
