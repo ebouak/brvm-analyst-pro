@@ -10,6 +10,7 @@ import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { createClient } from '@/lib/supabase/client';
 import { SignInPage } from '@/components/ui/sign-in-flow-1';
 import { phIdentify, phCapture } from '@/lib/analytics/posthogClient';
+import { estNouveauCompte, nextSur, versEcranWhatsapp } from '@/lib/bienvenue/redirection';
 
 // Clé de site Turnstile (publique — non secrète), lue depuis l'env
 // (NEXT_PUBLIC_TURNSTILE_SITE_KEY, définie sur Vercel). Le repli n'est que la
@@ -152,8 +153,23 @@ export default function SignInClient({
         // par défaut : depuis la page d'inscription (subscribeNewsletter), on
         // passe par le moment d'accueil « choisissez une action » ; depuis
         // /login, direct au tableau de bord.
-        router.push(next ?? (subscribeNewsletter ? '/bienvenue' : '/dashboard'));
-        router.refresh();
+        // `next` vient de l'URL : chemin interne seulement (nextSur).
+        const destination = next
+          ? nextSur(next)
+          : subscribeNewsletter
+            ? '/bienvenue'
+            : '/dashboard';
+        // Nouveau compte : écran WhatsApp facultatif d'abord (une seule fois).
+        void supabase.auth
+          .getUser()
+          .then(({ data: { user } }) => {
+            router.push(user && estNouveauCompte(user.created_at, new Date()) ? versEcranWhatsapp(destination) : destination);
+            router.refresh();
+          })
+          .catch(() => {
+            router.push(destination);
+            router.refresh();
+          });
       }}
     />
     </>

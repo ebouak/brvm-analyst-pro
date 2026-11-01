@@ -5,8 +5,8 @@
  */
 import type { Dossier, Niveau, Raison, Score } from './types';
 
-export const PONDERATIONS = { paiement: 40, offre: 20, connexion7: 15, connexion30: 5, portefeuille: 10, contact: 10, newsletter: 5, academy: 5 } as const;
-export const FENETRES_JOURS = { paiement: 30, offre: 14, connexionForte: 7, connexion: 30, contact: 30 } as const;
+export const PONDERATIONS = { paiement: 40, offre: 20, connexion7: 15, connexion30: 5, portefeuille: 10, contact: 10, newsletter: 5, academy: 5, bonus: 25 } as const;
+export const FENETRES_JOURS = { paiement: 30, offre: 14, connexionForte: 7, connexion: 30, contact: 30, bonus: 30 } as const;
 export const SEUILS = { chaud: 50, tiede: 25 } as const;
 
 const JOUR_MS = 86_400_000;
@@ -58,6 +58,9 @@ export function scorer(d: Dossier, maintenant: Date): Score {
 
   if (d.newsletter) raisons.push({ code: 'newsletter', points: PONDERATIONS.newsletter, date: null, texte: 'abonné à la newsletter' });
   if (d.leconsAcademy > 0) raisons.push({ code: 'academy', points: PONDERATIONS.academy, date: null, texte: `${pluriel(d.leconsAcademy, 'leçon')} de l'Academy suivie${d.leconsAcademy > 1 ? 's' : ''}` });
+
+  const bonus = plusRecent(d.bonus.filter((b) => age(b.date, maintenant) <= FENETRES_JOURS.bonus));
+  if (bonus) raisons.push({ code: 'bonus', points: PONDERATIONS.bonus, date: bonus.date, texte: `a téléchargé le dossier ${bonus.code} le ${fmtJour(bonus.date)}` });
 
   const score = Math.min(100, raisons.reduce((s, r) => s + r.points, 0));
   const niveau: Niveau = score >= SEUILS.chaud ? 'chaud' : score >= SEUILS.tiede ? 'tiede' : 'froid';

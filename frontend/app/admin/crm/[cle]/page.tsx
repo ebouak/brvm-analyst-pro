@@ -7,6 +7,8 @@ import { chronologie } from '@/lib/crm/identite';
 import { scorer, fmtJour } from '@/lib/crm/score';
 import { choisirGabarit, composerRelance } from '@/lib/crm/gabarits';
 import RelanceForm from './RelanceForm';
+import RelanceWhatsapp from './RelanceWhatsapp';
+import { texteWhatsappInitial } from '@/lib/crm/whatsappRelance';
 import NoteForm from './NoteForm';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +28,7 @@ export default async function Page({ params }: { params: { cle: string } }) {
   const s = scorer(d, maintenant);
   const templateId = choisirGabarit(d, s);
   const { sujet, corps } = composerRelance(templateId, d);
-  const derniere = [...d.actions].filter((a) => a.type === 'relance' && a.statut === 'envoye').sort((a, b) => b.date.localeCompare(a.date))[0];
+  const derniere = [...d.actions].filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare')).sort((a, b) => b.date.localeCompare(a.date))[0];
   const recente = derniere && maintenant.getTime() - Date.parse(derniere.date) < 14 * 86_400_000 ? fmtJour(derniere.date) : null;
 
   return (
@@ -49,6 +51,20 @@ export default async function Page({ params }: { params: { cle: string } }) {
               <p className="text-sm text-muted">Personne Premium ou administratrice : pas de relance commerciale.</p>
             ) : (
               <RelanceForm cle={d.cle} templateId={templateId} sujetInitial={sujet} corpsInitial={corps} relanceRecente={recente} oppose={d.oppose} />
+            )}
+          </section>
+          <section>
+            <h2 className="mb-2 text-sm font-semibold text-ivory">Relance par WhatsApp</h2>
+            {d.premium || d.admin || d.oppose ? (
+              <p className="text-sm text-muted">Relance commerciale désactivée pour cette personne.</p>
+            ) : d.whatsapp.numero && d.whatsapp.recontact && d.whatsapp.source ? (
+              <RelanceWhatsapp cle={d.cle} templateId={templateId} texteInitial={texteWhatsappInitial(d.nom?.trim().split(/\s+/)[0] || null)} numero={d.whatsapp.numero} source={d.whatsapp.source} />
+            ) : d.whatsapp.lieSansNumero ? (
+              <p className="text-sm text-muted">WhatsApp lié sans numéro visible : joignable en répondant dans la console de contact WhatsApp.</p>
+            ) : d.whatsapp.numero ? (
+              <p className="text-sm text-muted">Numéro connu, mais pas de consentement au recontact : pas de relance WhatsApp.</p>
+            ) : (
+              <p className="text-sm text-muted">Aucun numéro WhatsApp connu.</p>
             )}
           </section>
           <section>

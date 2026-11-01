@@ -2,7 +2,7 @@
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { normaliserEmail } from './identite';
 
-export type SourceOpposition = 'parametres' | 'lien' | 'admin';
+export type SourceOpposition = 'parametres' | 'lien' | 'admin' | 'whatsapp';
 
 /** Lève en cas d'erreur de lecture : le doute ne doit JAMAIS valoir « non opposé ». */
 export async function estOppose(email: string): Promise<boolean> {

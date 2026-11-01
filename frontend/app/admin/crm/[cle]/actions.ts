@@ -10,13 +10,15 @@ import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { chargerDossier } from '@/lib/crm/charger';
 import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
 import { scorer } from '@/lib/crm/score';
-import { piedOpposition, versHtml, estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
+import { estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
+import { construireEmailRelance } from '@/lib/crm/emailRelance';
+import { avecMentionStop, lienWaMeVers, texteOffre } from '@/lib/crm/whatsappRelance';
 
 const EXPEDITEUR = `WESTBOURSE <${ADRESSE_SUPPORT}>`;
 const SITE = 'https://www.westbourse.com';
 type Retour = { ok: boolean; message: string };
 
-export async function envoyerRelance(cle: string, sujet: string, corps: string, templateId: TemplateId): Promise<Retour> {
+export async function envoyerRelance(cle: string, sujet: string, corps: string, templateId: TemplateId, inclureOffre: boolean): Promise<Retour> {
   const ctx = await requirePermission('crm.write');
   if (!estTemplateId(templateId)) return { ok: false, message: 'Gabarit inconnu.' };
   const s = String(sujet ?? '').replace(/[\r\n]+/g, ' ').trim().slice(0, 150);
@@ -36,22 +38,30 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
 
   const sb = getServiceClient();
   const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
-  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye']).gte('created_at', deuxMinutes).limit(1);
+  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye', 'prepare']).gte('created_at', deuxMinutes).limit(1);
   if (enCours && enCours.length > 0) return { ok: false, message: "Une relance vient d'être envoyée ou est en cours pour cette personne." };
 
   const score = scorer(d, new Date());
   const jeton = randomBytes(24).toString('hex');
+  const jetonBonus = inclureOffre ? randomBytes(24).toString('hex') : null;
   const { data: ligne, error } = await sb.from('crm_actions').insert({
     email_norm: d.emailNorm, user_id: d.userId, type: 'relance', canal: 'email', template_id: templateId,
     sujet: s, contenu: c, score_at_envoi: score.score, signaux_json: score.raisons, statut: 'envoi',
-    jeton_opposition: jeton, auteur: ctx.userId,
+    jeton_opposition: jeton, jeton_bonus: jetonBonus, auteur: ctx.userId,
   }).select('id').single();
   if (error || !ligne) return { ok: false, message: 'Journal indisponible : envoi annulé.' };
 
-  const texte = `${c}\n\n${piedOpposition(`${SITE}/crm/opposition?t=${jeton}`)}`;
   let res: EmailResult;
   try {
-    res = await sendEmail({ to: d.emailNorm, subject: s, text: texte, html: versHtml(texte), from: EXPEDITEUR, replyTo: ADRESSE_SUPPORT });
+    // La construction est DANS le try : elle échoue fermé (lien d'opposition invalide) et l'échec est journalisé.
+    const { html, texte } = construireEmailRelance({
+      corps: c,
+      lienOpposition: `${SITE}/crm/opposition?t=${jeton}`,
+      lienOffre: jetonBonus ? `${SITE}/offre/dossier?t=${jetonBonus}` : null,
+      whatsappNumero: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || null,
+      chaineWhatsappUrl: process.env.NEXT_PUBLIC_WHATSAPP_CHAINE_URL || null,
+    });
+    res = await sendEmail({ to: d.emailNorm, subject: s, text: texte, html, from: EXPEDITEUR, replyTo: ADRESSE_SUPPORT });
   } catch (e) {
     // Une exception ne doit jamais laisser la ligne bloquée en « envoi ».
     res = { ok: false, sent: 0, error: (e as Error).message || 'exception' };
@@ -59,10 +69,46 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
   // L'échec est journalisé et affiché, jamais avalé (panne e-mail 07–09/2026).
   const { error: errMaj } = await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
   // Audit sans e-mail : identifiant de la ligne de journal, jamais la clé (qui embarque l'adresse).
-  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj } });
+  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: Boolean(inclureOffre) } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
   if (res.ok && errMaj) return { ok: true, message: "Relance envoyée, mais le journal n'a pas pu être mis à jour." };
   return res.ok ? { ok: true, message: 'Relance envoyée.' } : { ok: false, message: `Échec de l'envoi : ${res.error ?? 'inconnu'}` };
+}
+
+export async function preparerRelanceWhatsapp(cle: string, texte: string, templateId: TemplateId, inclureOffre: boolean): Promise<Retour & { url?: string }> {
+  const ctx = await requirePermission('crm.write');
+  if (!estTemplateId(templateId)) return { ok: false, message: 'Gabarit inconnu.' };
+  const brut = String(texte ?? '').trim().slice(0, 1500);
+  if (!brut) return { ok: false, message: 'Message vide.' };
+  const d = await chargerDossier(cle);
+  if (!d) return { ok: false, message: 'Personne introuvable.' };
+  try {
+    if (await estOppose(d.emailNorm)) return { ok: false, message: "Cette personne s'est opposée aux propositions commerciales : rien n'est préparé." };
+  } catch {
+    return { ok: false, message: "Vérification de l'opposition impossible : rien n'est préparé." };
+  }
+  if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
+  if (!d.whatsapp.recontact || !d.whatsapp.numero) return { ok: false, message: 'Pas de numéro avec consentement au recontact : relance WhatsApp impossible.' };
+
+  const sb = getServiceClient();
+  const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
+  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye', 'prepare']).gte('created_at', deuxMinutes).limit(1);
+  if (enCours && enCours.length > 0) return { ok: false, message: "Une relance vient d'être faite pour cette personne." };
+
+  const jetonBonus = inclureOffre ? randomBytes(24).toString('hex') : null;
+  // Le lien d'offre est ajouté AU SERVEUR : le texte relu ne peut pas porter un jeton forgé.
+  const message = avecMentionStop(jetonBonus ? `${brut}\n\n${texteOffre(`${SITE}/offre/dossier?t=${jetonBonus}`)}` : brut);
+  const score = scorer(d, new Date());
+  const { data: ligne, error } = await sb.from('crm_actions').insert({
+    email_norm: d.emailNorm, user_id: d.userId, type: 'relance', canal: 'whatsapp', template_id: templateId,
+    sujet: null, contenu: message, score_at_envoi: score.score, signaux_json: score.raisons, statut: 'prepare',
+    jeton_bonus: jetonBonus, auteur: ctx.userId,
+  }).select('id').single();
+  if (error || !ligne) return { ok: false, message: "Journal indisponible : rien n'est préparé." };
+  // Audit sans numéro ni e-mail.
+  await recordAudit(ctx, { action: 'crm.relance_whatsapp', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: 'info', metadata: { template: templateId, offre: Boolean(inclureOffre), source: d.whatsapp.source } });
+  revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
+  return { ok: true, message: 'Message prêt dans WhatsApp : relisez-le et envoyez-le depuis votre téléphone.', url: lienWaMeVers(d.whatsapp.numero, message) };
 }
 
 export async function ajouterNote(cle: string, contenu: string): Promise<Retour> {

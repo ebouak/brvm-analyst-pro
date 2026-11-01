@@ -21,7 +21,7 @@ async function comptes(sb: ReturnType<typeof getServiceClient>): Promise<Sources
 export async function chargerSources(): Promise<Sources> {
   const sb = getServiceClient();
   const depuis = (jours: number) => new Date(Date.now() - jours * 86_400_000).toISOString().slice(0, 10);
-  const [c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions] = await Promise.all([
+  const [c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions, prefs, liaisons] = await Promise.all([
     comptes(sb),
     lireTout<Sources['profils'][number]>((a, b) => sb.from('profiles').select('id, display_name, is_premium').order('id').range(a, b), 'profils'),
     lireTout<Sources['admins'][number]>((a, b) => sb.from('admin_user_roles').select('user_id').order('user_id').order('role_id').range(a, b), 'rôles admin'),
@@ -32,10 +32,12 @@ export async function chargerSources(): Promise<Sources> {
     lireTout<Sources['prospects'][number]>((a, b) => sb.from('leads_brvm').select('email, nom, created_at, consent').order('created_at').order('id').range(a, b), 'prospects'),
     lireTout<Sources['newsletter'][number]>((a, b) => sb.from('newsletter_subscribers').select('email, confirmed').order('id').range(a, b), 'newsletter'),
     lireTout<Sources['academy'][number]>((a, b) => sb.from('academy_progress').select('user_id, completed').eq('completed', true).order('user_id').order('course_id').order('lesson_idx').range(a, b), 'progression Academy'),
-    lireTout<Sources['actions'][number]>((a, b) => sb.from('crm_actions').select('email_norm, created_at, type, statut, canal, sujet, contenu').order('created_at').order('id').range(a, b), 'actions CRM'),
+    lireTout<Sources['actions'][number]>((a, b) => sb.from('crm_actions').select('email_norm, created_at, type, statut, canal, sujet, contenu, bonus_code, bonus_at').order('created_at').order('id').range(a, b), 'actions CRM'),
     lireTout<Sources['oppositions'][number]>((a, b) => sb.from('crm_oppositions').select('email_norm').order('email_norm').range(a, b), 'oppositions'),
+    lireTout<Sources['prefs'][number]>((a, b) => sb.from('notification_prefs').select('user_id, whatsapp_phone, whatsapp_chat_id, telephone_declare, recontact_optin_at').order('user_id').range(a, b), 'préférences'),
+    lireTout<Sources['liaisons'][number]>((a, b) => sb.from('whatsapp_liaisons').select('user_id, chat_id, telephone').order('id').range(a, b), 'liaisons WhatsApp'),
   ]);
-  return { comptes: c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions };
+  return { comptes: c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions, prefs, liaisons };
 }
 
 export async function chargerDossiers(): Promise<Dossier[]> {

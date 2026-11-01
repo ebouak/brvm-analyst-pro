@@ -8,6 +8,7 @@ const d0: Dossier = {
   cle: 'u1', emailNorm: 'a@b.c', userId: 'u1', nom: null, inscritLe: null, derniereConnexion: null,
   premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], offreVues: [],
   lignesPortefeuille: 0, messages: [], prospect: null, newsletter: false, leconsAcademy: 0, actions: [],
+  whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false }, bonus: [],
 };
 
 describe('scorer', () => {
@@ -74,5 +75,16 @@ describe('estExclu', () => {
     expect(estExclu({ ...d0, admin: true })).toBe(true);
     expect(estExclu({ ...d0, oppose: true })).toBe(true);
     expect(estExclu(d0)).toBe(false);
+  });
+});
+
+describe('scorer : offre utilisée', () => {
+  it("compte l'offre utilisée dans les 30 jours", () => {
+    const s = scorer({ ...d0, bonus: [{ code: 'SNTS', date: '2026-10-30T10:00:00Z' }] }, MAINTENANT);
+    expect(s.raisons.find((r) => r.code === 'bonus')).toMatchObject({ points: 25, texte: 'a téléchargé le dossier SNTS le 30/10' });
+  });
+  it('ignore une offre utilisée il y a plus de 30 jours', () => {
+    const s = scorer({ ...d0, bonus: [{ code: 'SNTS', date: ilYa(31) }] }, MAINTENANT);
+    expect(s.raisons.find((r) => r.code === 'bonus')).toBeUndefined();
   });
 });

@@ -15,6 +15,7 @@ const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
 /** Sections publiques SEO : plein écran avec leur propre header (PublicShell). */
 const BARE_PREFIXES = [
   '/crm', // page publique d'opposition (visiteur anonyme, sans shell applicatif)
+  '/offre', // dossier offert par jeton (visiteur anonyme, sans shell applicatif)
   '/societes',
   '/simulateur',
   '/simulateur-budget',
@@ -71,6 +72,7 @@ export default function ConditionalShell({
     pathname !== '/signup' &&
     !pathname.startsWith('/admin') &&
     !pathname.startsWith('/crm') && // page d'opposition : aucun encart
+    !pathname.startsWith('/offre') && // dossier offert : un seul choix, aucune distraction
     !pathname.startsWith('/embed') && // widget tiers : aucun chrome
     !pathname.startsWith('/formations/academy');
   // Invitation newsletter : uniquement sur les pages publiques (branche `bare`
@@ -82,6 +84,7 @@ export default function ConditionalShell({
     pathname !== '/login' &&
     pathname !== '/signup' &&
     !pathname.startsWith('/crm') &&
+    !pathname.startsWith('/offre') &&
     !pathname.startsWith('/embed') &&
     !LEGAL_PREFIXES.some((p) => pathname.startsWith(p));
   // /admin a sa propre console (layout dédié) → pas de shell applicatif ni footer.
