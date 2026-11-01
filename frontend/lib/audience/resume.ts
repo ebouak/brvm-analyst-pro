@@ -74,3 +74,35 @@ export function messageJour(a: AnalyseJour): { titre: string; texte: string } {
   const tete = a.baisse ? `⚠️ Baisse anormale : moins de 50 % de la moyenne des 7 jours précédents. ` : '';
   return { titre: a.baisse ? '⚠️ Audience' : '📈 Audience', texte: `${tete}Audience du ${a.jour.jour} — ${corps}. Visiteurs ayant accepté les cookies de mesure seulement.` };
 }
+
+/** Aucun événement reçu sur toute la série : l'ingestion PostHog est cassée (ou le consentement a disparu), c'est un incident. */
+export const serieVide = (serie: JourSerie[]): boolean => serie.every((j) => j.personnes === 0 && j.sessions === 0 && j.pagesVues === 0);
+
+export const MESSAGE_SERIE_VIDE = '⚠️ aucune donnée reçue par PostHog depuis 7 jours';
+
+/** Décision HTTP du check quotidien : tout ce qui n'est pas un message livré est un échec visible. */
+export function decisionJour(serie: JourSerie[], notifie: boolean): { http: 200 | 500; erreur?: 'serie_vide' | 'notification' } {
+  if (serieVide(serie)) return { http: 500, erreur: 'serie_vide' };
+  if (!notifie) return { http: 500, erreur: 'notification' };
+  return { http: 200 };
+}
+
+/** Classe d'erreur sûre à journaliser et à annoncer (jamais un message brut). */
+export function classeErreur(e: unknown): string {
+  const c = (e as { code?: unknown } | null)?.code;
+  if (e instanceof Error && e.name === 'ErreurPosthog' && typeof c === 'string') return c === 'http' ? 'http' : c;
+  return 'autre';
+}
+
+const NOMS_BLOCS: Record<string, string> = {
+  overview: 'chiffres généraux', overviewPrecedent: 'période précédente', continents: 'continents', continentsPrecedent: 'continents (précédent)',
+  pays: 'pays Afrique', villes: 'villes Afrique', sessions: 'sessions', pages: 'pages', clics: 'clics', appareils: 'appareils',
+  tendance: 'tendance', entonnoir: 'entonnoir Academy', formationCrm: 'intérêt formation CRM',
+};
+/** Noms lisibles des blocs en échec (aucune donnée). */
+export function blocsIndisponibles(a: Audience): string[] {
+  return Object.keys(NOMS_BLOCS).filter((k) => {
+    const b = (a as unknown as Record<string, { ok: boolean }>)[k];
+    return b && !b.ok;
+  }).map((k) => NOMS_BLOCS[k]);
+}

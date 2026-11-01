@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resumeAudience, alerteBaisse, analyseJour, messageJour } from './resume';
+import { resumeAudience, alerteBaisse, analyseJour, messageJour, decisionJour, serieVide, classeErreur, blocsIndisponibles } from './resume';
 import type { Audience } from './types';
 
 const ok = <T,>(data: T) => ({ ok: true as const, data });
@@ -74,5 +74,22 @@ describe('check quotidien', () => {
     expect(m.texte).not.toContain('⚠️');
     expect(m.texte).toContain('Afrique 9');
     expect(m.texte).toContain('2026-11-03');
+  });
+});
+
+describe('décisions du cron', () => {
+  const plein = [{ jour: '2026-11-03', personnes: 5, sessions: 5, pagesVues: 9, afrique: 1 }];
+  const zeros = [{ jour: '2026-11-03', personnes: 0, sessions: 0, pagesVues: 0, afrique: 0 }];
+  it('notification non livrée = 500', () => { expect(decisionJour(plein, false)).toEqual({ http: 500, erreur: 'notification' }); });
+  it('série entièrement vide = 500, même notifiée', () => { expect(decisionJour(zeros, true)).toEqual({ http: 500, erreur: 'serie_vide' }); expect(serieVide([])).toBe(true); });
+  it('cas nominal = 200', () => { expect(decisionJour(plein, true)).toEqual({ http: 200 }); });
+  it('classeErreur : jamais de message brut', () => {
+    expect(classeErreur(new Error('secret'))).toBe('autre');
+    const e = Object.assign(new Error('x'), { name: 'ErreurPosthog', code: 'reseau' });
+    expect(classeErreur(e)).toBe('reseau');
+  });
+  it('blocsIndisponibles liste des noms, sans données', () => {
+    expect(blocsIndisponibles({ ...base(), pages: ko, entonnoir: ko })).toEqual(['pages', 'entonnoir Academy']);
+    expect(blocsIndisponibles(base())).toEqual([]);
   });
 });
