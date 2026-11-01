@@ -1259,6 +1259,13 @@ relecture adverse en deux passes à la place.
 - ⚠️ **Aucune panne silencieuse** : réglages illisibles, base indisponible,
   journal non mis à jour ⇒ 500 + workflow rouge + alerte. Un `off` LU reste
   200 sans alerte. Ne pas « simplifier » en repli silencieux sur `off`.
+- **Manuel = sans limite de cadence** (PR #142, demande de l'exploitant) :
+  `max_relances` / `delai_min_jours` ne valent QUE pour les séquences
+  (`eligibilite(..., { manuel: true })`). Restent bloquants en manuel :
+  opposition, payé/à vérifier/Premium/admin, clôture, spam (e-mail), anti
+  double-clic 2 min. **Relance e-mail en masse** (sélection par vue/filtres,
+  confirmation serveur, envoi un par un depuis le navigateur, audit
+  `masse: true`) ; jamais de WhatsApp en masse.
 - **Passage en `actif`** = décision de l'exploitant après au moins une
   semaine de `simulation` relue. Les étapes simulées des 30 derniers jours
   partiront alors (plafonnées par passage et par jour).
