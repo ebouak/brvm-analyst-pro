@@ -55,7 +55,7 @@ dérivés, pour ne rien casser).
 
 | État | Règle (dans l'ordre) |
 |---|---|
-| `paye` | `premium`, OU un `paid` plus récent que tout `pending` et datant de moins de 35 jours |
+| `paye` | `premium` (seulement : un `paid` récent SANS Premium est une contradiction — activation probablement manquée — et tombe en `a_verifier` ; le classer « converti » masquerait le problème. Décision de mise en œuvre, 2026-11-01) |
 | doublons (marque) | tout `pending` antérieur à un `paid` est listé dans `doublons` et IGNORÉ ensuite |
 | `a_verifier` | un `pending` `manual` non supplanté, de moins de 30 jours ; OU contradiction : `paid` de moins de 35 jours et pas Premium |
 | `abandonne` | un `pending` en ligne (`chariow`…) non supplanté, OU un `pending` `manual` de plus de 30 jours, OU un `failed` récent sans `paid` |
@@ -216,9 +216,9 @@ Chaque raison porte déjà sa date ; la fiche affiche « score calculé le
 
 ### 3.3 Données — migrations
 
-`0176_crm_reglages_livraison.sql` (SP2) : table `crm_reglages` (RLS sans
+`0177_crm_reglages_livraison.sql` (SP2) : table `crm_reglages` (RLS sans
 policy, service_role), colonnes `livraison`, `livraison_at`.
-`0177_crm_sequences.sql` (SP3) : `statut` accepte `simulation`, colonne
+`0178_crm_sequences.sql` (SP3) : `statut` accepte `simulation`, colonne
 `sequence_cle`, index unique partiel.
 
 ## Tests
