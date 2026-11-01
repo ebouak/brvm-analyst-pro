@@ -7,6 +7,7 @@ import { chronologie } from '@/lib/crm/identite';
 import { scorer, fmtJour } from '@/lib/crm/score';
 import { choisirGabarit, composerRelance } from '@/lib/crm/gabarits';
 import RelanceForm from './RelanceForm';
+import RelanceWhatsapp from './RelanceWhatsapp';
 import NoteForm from './NoteForm';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,20 @@ export default async function Page({ params }: { params: { cle: string } }) {
               <p className="text-sm text-muted">Personne Premium ou administratrice : pas de relance commerciale.</p>
             ) : (
               <RelanceForm cle={d.cle} templateId={templateId} sujetInitial={sujet} corpsInitial={corps} relanceRecente={recente} oppose={d.oppose} />
+            )}
+          </section>
+          <section>
+            <h2 className="mb-2 text-sm font-semibold text-ivory">Relance par WhatsApp</h2>
+            {d.premium || d.admin || d.oppose ? (
+              <p className="text-sm text-muted">Relance commerciale désactivée pour cette personne.</p>
+            ) : d.whatsapp.numero && d.whatsapp.recontact && d.whatsapp.source ? (
+              <RelanceWhatsapp cle={d.cle} templateId={templateId} texteInitial={corps} numero={d.whatsapp.numero} source={d.whatsapp.source} />
+            ) : d.whatsapp.lieSansNumero ? (
+              <p className="text-sm text-muted">WhatsApp lié sans numéro visible : joignable en répondant dans la console de contact WhatsApp.</p>
+            ) : d.whatsapp.numero ? (
+              <p className="text-sm text-muted">Numéro connu, mais pas de consentement au recontact : pas de relance WhatsApp.</p>
+            ) : (
+              <p className="text-sm text-muted">Aucun numéro WhatsApp connu.</p>
             )}
           </section>
           <section>

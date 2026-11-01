@@ -12,6 +12,7 @@ import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
 import { scorer } from '@/lib/crm/score';
 import { estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
 import { construireEmailRelance } from '@/lib/crm/emailRelance';
+import { avecMentionStop, lienWaMeVers, texteOffre } from '@/lib/crm/whatsappRelance';
 
 const EXPEDITEUR = `WESTBOURSE <${ADRESSE_SUPPORT}>`;
 const SITE = 'https://www.westbourse.com';
@@ -72,6 +73,42 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
   if (res.ok && errMaj) return { ok: true, message: "Relance envoyée, mais le journal n'a pas pu être mis à jour." };
   return res.ok ? { ok: true, message: 'Relance envoyée.' } : { ok: false, message: `Échec de l'envoi : ${res.error ?? 'inconnu'}` };
+}
+
+export async function preparerRelanceWhatsapp(cle: string, texte: string, templateId: TemplateId, inclureOffre: boolean): Promise<Retour & { url?: string }> {
+  const ctx = await requirePermission('crm.write');
+  if (!estTemplateId(templateId)) return { ok: false, message: 'Gabarit inconnu.' };
+  const brut = String(texte ?? '').trim().slice(0, 3000);
+  if (!brut) return { ok: false, message: 'Message vide.' };
+  const d = await chargerDossier(cle);
+  if (!d) return { ok: false, message: 'Personne introuvable.' };
+  try {
+    if (await estOppose(d.emailNorm)) return { ok: false, message: "Cette personne s'est opposée aux propositions commerciales : rien n'est préparé." };
+  } catch {
+    return { ok: false, message: "Vérification de l'opposition impossible : rien n'est préparé." };
+  }
+  if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
+  if (!d.whatsapp.recontact || !d.whatsapp.numero) return { ok: false, message: 'Pas de numéro avec consentement au recontact : relance WhatsApp impossible.' };
+
+  const sb = getServiceClient();
+  const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
+  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye', 'prepare']).gte('created_at', deuxMinutes).limit(1);
+  if (enCours && enCours.length > 0) return { ok: false, message: "Une relance vient d'être faite pour cette personne." };
+
+  const jetonBonus = inclureOffre ? randomBytes(24).toString('hex') : null;
+  // Le lien d'offre est ajouté AU SERVEUR : le texte relu ne peut pas porter un jeton forgé.
+  const message = avecMentionStop(jetonBonus ? `${brut}\n\n${texteOffre(`${SITE}/offre/dossier?t=${jetonBonus}`)}` : brut);
+  const score = scorer(d, new Date());
+  const { data: ligne, error } = await sb.from('crm_actions').insert({
+    email_norm: d.emailNorm, user_id: d.userId, type: 'relance', canal: 'whatsapp', template_id: templateId,
+    sujet: null, contenu: message, score_at_envoi: score.score, signaux_json: score.raisons, statut: 'prepare',
+    jeton_bonus: jetonBonus, auteur: ctx.userId,
+  }).select('id').single();
+  if (error || !ligne) return { ok: false, message: "Journal indisponible : rien n'est préparé." };
+  // Audit sans numéro ni e-mail.
+  await recordAudit(ctx, { action: 'crm.relance_whatsapp', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: 'info', metadata: { template: templateId, offre: inclureOffre, source: d.whatsapp.source } });
+  revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
+  return { ok: true, message: 'Message prêt dans WhatsApp : relisez-le et envoyez-le depuis votre téléphone.', url: lienWaMeVers(d.whatsapp.numero, message) };
 }
 
 export async function ajouterNote(cle: string, contenu: string): Promise<Retour> {
