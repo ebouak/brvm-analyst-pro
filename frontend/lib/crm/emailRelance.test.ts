@@ -24,6 +24,21 @@ describe('construireEmailRelance', () => {
     const { html, texte } = construireEmailRelance(base);
     expect(html.lastIndexOf('crm/opposition?t=abc')).toBeGreaterThan(html.lastIndexOf('offre/dossier'));
     expect(texte.trimEnd().endsWith('https://www.westbourse.com/crm/opposition?t=abc')).toBe(true);
+    const apres = html.slice(html.lastIndexOf('crm/opposition?t=abc'));
+    expect(apres).not.toContain('<a ');
+  });
+  it("refuse une chaîne WhatsApp qui n'est pas en https", () => {
+    const { html } = construireEmailRelance({ ...base, chaineWhatsappUrl: 'javascript:alert(1)' });
+    expect(html).not.toContain('javascript:');
+    expect(html).not.toContain('Chaîne WhatsApp');
+  });
+  it("n'affiche pas d'offre si le lien n'est pas en https", () => {
+    const { html, texte } = construireEmailRelance({ ...base, lienOffre: 'http://x' });
+    expect(html).not.toContain('Choisir mon dossier');
+    expect(texte).not.toContain('OFFERT');
+  });
+  it("refuse d'envoyer sans lien d'opposition valide", () => {
+    expect(() => construireEmailRelance({ ...base, lienOpposition: 'javascript:x' })).toThrow();
   });
   it("inclut l'offre et le bouton WhatsApp quand ils sont fournis", () => {
     const { html, texte } = construireEmailRelance(base);
