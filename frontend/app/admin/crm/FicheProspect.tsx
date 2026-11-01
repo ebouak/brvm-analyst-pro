@@ -1,0 +1,158 @@
+// frontend/app/admin/crm/FicheProspect.tsx
+// Contenu de la fiche : réutilisé par la page pleine et par le panneau latéral de la liste.
+import type { Dossier, Score } from '@/lib/crm/types';
+import type { ResultatPaiement } from '@/lib/crm/paiement';
+import { decisionsCourantes, LIB_VUE, LIB_MOTIF, actionRecommandee, type Vue } from '@/lib/crm/vues';
+import { chronologie } from '@/lib/crm/identite';
+import { fmtJour, fmtMontant } from '@/lib/crm/score';
+import type { TemplateId } from '@/lib/crm/gabarits';
+import { texteWhatsappInitial } from '@/lib/crm/whatsappRelance';
+import RelanceForm from './[cle]/RelanceForm';
+import RelanceWhatsapp from './[cle]/RelanceWhatsapp';
+import NoteForm from './[cle]/NoteForm';
+import { ClotureForm, ActionSimple, ResponsableForm, EcheanceForm } from './DecisionForms';
+
+export const TON_ETAT: Record<ResultatPaiement['etat'], { lib: string; cls: string }> = {
+  paye: { lib: 'Payé', cls: 'border-up/30 bg-up/10 text-up' },
+  a_verifier: { lib: 'À vérifier', cls: 'border-warn/40 bg-warn/10 text-warn' },
+  abandonne: { lib: 'Abandonné', cls: 'border-down/30 bg-down/10 text-down' },
+  expire: { lib: 'Expiré', cls: 'border-border bg-elevated text-muted' },
+  aucun: { lib: 'Aucun paiement', cls: 'border-border bg-elevated text-muted' },
+};
+export const BadgeEtat = ({ etat }: { etat: ResultatPaiement['etat'] }) => (
+  <span className={`inline-block whitespace-nowrap rounded-full border px-2 py-0.5 text-xs ${TON_ETAT[etat].cls}`}>{TON_ETAT[etat].lib}</span>
+);
+
+const H2 = 'mb-2 text-sm font-semibold text-ivory';
+const STATUT_PAIEMENT = { paid: 'payé', pending: 'en attente', failed: 'échoué' } as const;
+const LIB_DECISION: Record<string, string> = { cloture: 'Clôture', reouverture: 'Réouverture', echeance: 'Échéance', responsable: 'Responsable', reponse: 'Réponse reçue' };
+
+export interface FicheProps {
+  d: Dossier; etat: ResultatPaiement; vue: Vue; score: Score; canWrite: boolean;
+  responsables: { id: string; email: string }[];
+  templateId: TemplateId; sujet: string; corps: string; relanceRecente: string | null;
+  maintenant: Date;
+}
+
+export default function FicheProspect({ d, etat, vue, score, canWrite, responsables, templateId, sujet, corps, relanceRecente, maintenant }: FicheProps) {
+  const dec = decisionsCourantes(d);
+  const reco = actionRecommandee(d, vue, etat, maintenant);
+  const nomResp = (id: string | null) => (id ? responsables.find((r) => r.id === id)?.email ?? 'compte inconnu' : null);
+  const relances = d.actions.filter((a) => a.type === 'relance').sort((a, b) => b.date.localeCompare(a.date));
+  const decisions = d.actions.filter((a) => a.type === 'decision').sort((a, b) => b.date.localeCompare(a.date));
+  const notes = d.actions.filter((a) => a.type === 'note').sort((a, b) => b.date.localeCompare(a.date));
+  const paiements = [...d.paiements].sort((a, b) => b.date.localeCompare(a.date));
+  const messages = [...d.messages].sort((a, b) => b.date.localeCompare(a.date));
+  const peutRelancer = !d.premium && !d.admin && etat.etat !== 'paye' && etat.etat !== 'a_verifier';
+  const nbDoublons = etat.doublons.length;
+
+  return (
+    <div className="space-y-6">
+      <section className="rounded-lg border border-accent/40 bg-accent/5 p-4">
+        <p className="overline text-faint">Action recommandée · {LIB_VUE[vue]}</p>
+        <p className="font-display text-lg text-ivory">{reco.libelle}</p>
+        <p className="text-sm text-muted">{reco.justification}</p>
+      </section>
+
+      <section className="space-y-1 text-sm">
+        <h2 className={H2}>Identité et coordonnées</h2>
+        <p className="text-ivory">{d.nom ?? '—'}</p>
+        <p className="text-muted">{d.emailNorm} · {d.userId ? (d.premium ? 'compte Premium' : 'compte gratuit') : 'prospect sans compte'}{d.inscritLe ? ` · inscrit le ${fmtJour(d.inscritLe)}` : ''}</p>
+        <p className="text-muted">
+          WhatsApp : {d.whatsapp.numero
+            ? <><span className="tabular text-ivory">{d.whatsapp.numero}</span> ({d.whatsapp.source === 'prouve' ? 'prouvé' : 'déclaré'}{d.whatsapp.recontact ? ', consentement au recontact' : ', sans consentement au recontact'})</>
+            : d.whatsapp.lieSansNumero ? 'lié, numéro non visible' : 'aucun numéro connu'}
+        </p>
+        <p className="tabular text-muted">Score {score.score} · {score.niveau}</p>
+      </section>
+
+      <section className="space-y-1 text-sm">
+        <h2 className={H2}>Offre et paiement</h2>
+        <p className="flex flex-wrap items-center gap-2 text-muted">
+          <BadgeEtat etat={etat.etat} />
+          {etat.enCours
+            ? <span className="tabular text-ivory">{fmtMontant(etat.enCours.montant, etat.enCours.devise)} · {etat.enCours.provider} · {fmtJour(etat.enCours.date)}</span>
+            : <span>Aucun paiement en cours.</span>}
+        </p>
+        <p className="text-muted">{etat.detail}</p>
+        {nbDoublons > 0 && <p className="text-xs text-faint">{nbDoublons} intention{nbDoublons > 1 ? 's' : ''} ancienne{nbDoublons > 1 ? 's' : ''} ignorée{nbDoublons > 1 ? 's' : ''} (antérieure{nbDoublons > 1 ? 's' : ''} à un paiement confirmé).</p>}
+      </section>
+
+      <section>
+        <h2 className={H2}>Chronologie des paiements</h2>
+        {paiements.length === 0 ? <p className="text-sm text-muted">Aucun paiement enregistré.</p> : (
+          <ul className="space-y-1 text-sm">{paiements.map((p) => (
+            <li key={p.id} className="text-muted"><span className="tabular text-faint">{fmtJour(p.date)}</span> · {STATUT_PAIEMENT[p.statut]} · <span className="tabular text-ivory">{fmtMontant(p.montant, p.devise)}</span> · {p.provider}{etat.doublons.includes(p.id) ? ' · intention ancienne ignorée' : ''}</li>
+          ))}</ul>
+        )}
+      </section>
+
+      <section>
+        <h2 className={H2}>Messages et réponses</h2>
+        <ul className="space-y-1 text-sm">
+          {relances.map((a, i) => <li key={`r${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · relance {a.canal ?? ''} ({a.statut}){a.sujet ? ` · ${a.sujet}` : ''}</li>)}
+          {messages.map((m, i) => <li key={`m${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(m.date)}</span> · message reçu via le formulaire de contact</li>)}
+          {decisions.map((a, i) => <li key={`d${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · {LIB_DECISION[a.decision ?? ''] ?? 'Décision'} — {a.contenu}</li>)}
+          {relances.length + messages.length + decisions.length === 0 && <li className="text-muted">Aucun échange enregistré.</li>}
+        </ul>
+        <details className="mt-2 text-sm">
+          <summary className="cursor-pointer text-faint">Chronologie complète</summary>
+          <ul className="mt-1 space-y-1">{chronologie(d).map((e, i) => <li key={i} className="text-muted"><span className="tabular text-faint">{fmtJour(e.date)}</span> · {e.libelle}</li>)}</ul>
+        </details>
+      </section>
+
+      <section>
+        <h2 className={H2}>Notes internes</h2>
+        {notes.length > 0 && <ul className="mb-2 space-y-1 text-sm">{notes.map((a, i) => <li key={i} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · {a.contenu}</li>)}</ul>}
+        {canWrite && <NoteForm cle={d.cle} />}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className={H2}>Suivi</h2>
+        <p className="text-sm text-muted">
+          Responsable : <span className="text-ivory">{nomResp(dec.responsable) ?? 'non assigné'}</span> · Échéance : <span className="tabular text-ivory">{dec.echeance ? fmtJour(dec.echeance) : 'aucune'}</span>
+          {dec.cloture ? ` · clôturé (${dec.cloture.motif ? LIB_MOTIF[dec.cloture.motif] : 'sans motif'})` : ''}{d.oppose ? ' · opposé aux propositions commerciales' : ''}
+        </p>
+        {canWrite && (
+          <div className="space-y-3">
+            <ResponsableForm cle={d.cle} courant={dec.responsable} responsables={responsables} />
+            <EcheanceForm cle={d.cle} courante={dec.echeance} />
+            <div className="flex flex-wrap items-start gap-3">
+              <ActionSimple cle={d.cle} type="reponse" libelle="Réponse reçue" />
+              {dec.cloture ? <ActionSimple cle={d.cle} type="rouvrir" libelle="Rouvrir le dossier" /> : <ClotureForm cle={d.cle} />}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {canWrite && (
+        <>
+          <section>
+            <h2 className={H2}>Relance par e-mail</h2>
+            {d.premium || d.admin ? (
+              <p className="text-sm text-muted">Personne Premium ou administratrice : pas de relance commerciale.</p>
+            ) : !peutRelancer ? (
+              <p className="text-sm text-muted">{etat.etat === 'paye' ? 'Paiement confirmé : plus de relance.' : "Paiement à vérifier d'abord dans Paiements."}</p>
+            ) : (
+              <RelanceForm cle={d.cle} templateId={templateId} sujetInitial={sujet} corpsInitial={corps} relanceRecente={relanceRecente} oppose={d.oppose} />
+            )}
+          </section>
+          <section>
+            <h2 className={H2}>Relance par WhatsApp</h2>
+            {d.premium || d.admin || d.oppose || !peutRelancer ? (
+              <p className="text-sm text-muted">Relance commerciale désactivée pour cette personne.</p>
+            ) : d.whatsapp.numero && d.whatsapp.recontact && d.whatsapp.source ? (
+              <RelanceWhatsapp cle={d.cle} templateId={templateId} texteInitial={texteWhatsappInitial(d.nom?.trim().split(/\s+/)[0] || null)} numero={d.whatsapp.numero} source={d.whatsapp.source} />
+            ) : d.whatsapp.lieSansNumero ? (
+              <p className="text-sm text-muted">WhatsApp lié sans numéro visible : joignable en répondant dans la console de contact WhatsApp.</p>
+            ) : d.whatsapp.numero ? (
+              <p className="text-sm text-muted">Numéro connu, mais pas de consentement au recontact : pas de relance WhatsApp.</p>
+            ) : (
+              <p className="text-sm text-muted">Aucun numéro WhatsApp connu.</p>
+            )}
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
