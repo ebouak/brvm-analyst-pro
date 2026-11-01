@@ -1,11 +1,12 @@
 // Échange le code OAuth (Google) contre une session Supabase, puis redirige.
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { estNouveauCompte, nextSur, versEcranWhatsapp } from '@/lib/bienvenue/redirection';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/dashboard';
+  const next = nextSur(searchParams.get('next'));
 
   if (!code) {
     console.error('auth/callback: aucun code dans l\'URL de retour OAuth', {
@@ -29,5 +30,8 @@ export async function GET(request: Request) {
     );
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  // Premier passage d'un nouveau compte : écran WhatsApp facultatif (une seule fois).
+  const { data: { user } } = await supabase.auth.getUser();
+  const destination = user && estNouveauCompte(user.created_at, new Date()) ? versEcranWhatsapp(next) : next;
+  return NextResponse.redirect(`${origin}${destination}`);
 }
