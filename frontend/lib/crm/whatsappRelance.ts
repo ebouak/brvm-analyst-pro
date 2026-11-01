@@ -20,6 +20,9 @@ export function lienWaMeVers(e164: string, texte: string): string {
 
 /** Un message qui n'est QUE « STOP » (ou ARRÊT), ponctuation finale et « / » tolérés. */
 export function estStop(texte: string): boolean {
-  const t = texte.trim().replace(/^[/!]\s*/, '').replace(/[.!]+$/, '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  const t = texte
+    .normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+    .replace(/^[\s/!]+/, '')
+    .replace(/[\s.!,;:?️\p{Extended_Pictographic}]+$/u, '');
   return t === 'stop' || t === 'arret';
 }

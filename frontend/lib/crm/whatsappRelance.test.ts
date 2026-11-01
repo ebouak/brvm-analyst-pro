@@ -10,8 +10,8 @@ describe('whatsappRelance', () => {
     expect(lienWaMeVers('+2250707123456', 'Salut & bienvenue')).toBe('https://wa.me/2250707123456?text=Salut%20%26%20bienvenue');
   });
   it('reconnaît STOP et ses variantes, rien d’autre', () => {
-    for (const t of ['STOP', ' stop ', 'Stop.', 'ARRET', 'arrêt', '/stop']) expect(estStop(t)).toBe(true);
-    for (const t of ['stop les alertes demain', 'cours SNTS', 'arrêtez de m’écrire svp']) expect(estStop(t)).toBe(false);
+    for (const t of ['STOP', ' stop ', 'Stop.', 'ARRET', 'arrêt', '/stop', 'Stop !', 'STOP,', 'STOP 🛑', 'stop!!']) expect(estStop(t)).toBe(true);
+    for (const t of ['Stop svp', 'stop les alertes demain', 'cours SNTS', 'arrêtez de m’écrire svp', '']) expect(estStop(t)).toBe(false);
   });
   it("le texte d'offre porte le lien", () => {
     expect(texteOffre('https://x/offre?t=1')).toContain('https://x/offre?t=1');
