@@ -51,6 +51,8 @@ export function etapesFaites(d: Pick<Dossier, 'actions'>, simulation = false, se
     if (typeof k !== 'string' || !k) continue;
     // « Réussie » : réellement envoyée (actif) ou simulée sans accroc (simulation). Un « envoi » indéterminé ou un échec ne l'est pas.
     if (seulementReussies && a.statut !== (simulation ? 'simulation' : 'envoye')) continue;
+    // Rejet (adresse invalide) ou plainte spam : l'étape n'est pas « réussie », la séquence s'arrête.
+    if (seulementReussies && (a.livraison === 'rejete' || a.livraison === 'spam')) continue;
     if (k.startsWith(PREFIXE_SIMULATION)) { if (simulation) out.add(k.slice(PREFIXE_SIMULATION.length)); }
     else if (!simulation) out.add(k);
   }
@@ -74,7 +76,8 @@ function ancreDe(sequence: NomSequence, d: Dossier, maintenant: Date): string | 
 /**
  * Une réponse (déclarée ou message de contact) postérieure à l'ancre arrête la
  * séquence, MÊME marquée « traitée » ensuite : un « non merci » traité ne doit
- * pas recevoir l'étape suivante. Seule une relance manuelle reprend la main.
+ * pas recevoir l'étape suivante. Une relance manuelle ultérieure ne déplace pas
+ * l'ancre : la séquence reste arrêtée.
  */
 function reponseApres(d: Dossier, ancre: string): boolean {
   const dec = decisionsCourantes(d);

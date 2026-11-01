@@ -48,6 +48,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
   const paiements = [...d.paiements].sort((a, b) => compareIso(b.date, a.date));
   const messages = [...d.messages].sort((a, b) => compareIso(b.date, a.date));
   const elig = eligibilite(d, reglages, maintenant);
+  const eligWa = eligibilite(d, reglages, maintenant, 'whatsapp');
   const nbRelances = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi')).length;
   const contact = dernierContact(d);
   const nbDoublons = etat.doublons.length;
@@ -158,8 +159,8 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
           </section>
           <section>
             <h2 className={H2}>Relance par WhatsApp</h2>
-            {!elig.ok ? (
-              <p className="text-sm text-muted">Relance bloquée : voir les raisons dans la section e-mail ci-dessus.</p>
+            {!eligWa.ok ? (
+              <p className="text-sm text-muted">Relance bloquée : {eligWa.raisons.join(' ; ')}</p>
             ) : d.whatsapp.numero && d.whatsapp.recontact && d.whatsapp.source ? (
               <RelanceWhatsapp cle={d.cle} templateId={templateId} texteInitial={texteWhatsappInitial(d.nom?.trim().split(/\s+/)[0] || null)} numero={d.whatsapp.numero} source={d.whatsapp.source} />
             ) : d.whatsapp.lieSansNumero ? (

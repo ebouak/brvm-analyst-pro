@@ -119,6 +119,14 @@ describe('garde-fous', () => {
       expect(selectionnerPassage([d], { ...REGLAGES_PAR_DEFAUT, mode_sequences: 'actif' }, MAINT)).toEqual([]);
     }
   });
+  it("étape 1 rejetée ou signalée spam : pas d'étape 2", () => {
+    for (const livraison of ['rejete', 'spam'] as const) {
+      const d = avec({ ...abandon(9), actions: [act({ date: ilYa(8), statut: 'envoye', livraison, sequenceCle: 'paiement_inacheve:1' })] });
+      expect(selectionnerPassage([d], { ...REGLAGES_PAR_DEFAUT, mode_sequences: 'actif' }, MAINT)).toEqual([]);
+    }
+    const remis = avec({ ...abandon(9), actions: [act({ date: ilYa(8), statut: 'envoye', livraison: 'remis', sequenceCle: 'paiement_inacheve:1' })] });
+    expect(selectionnerPassage([remis], { ...REGLAGES_PAR_DEFAUT, mode_sequences: 'actif' }, MAINT)).toHaveLength(1);
+  });
   it("simulation : l'étape 2 suit une étape 1 simulée", () => {
     const d = avec({ ...abandon(9), actions: [act({ date: ilYa(8), statut: 'simulation', sequenceCle: 'sim_paiement_inacheve:1' })] });
     expect(selectionnerPassage([d], { ...REGLAGES_PAR_DEFAUT, mode_sequences: 'simulation' }, MAINT).map((x) => x.etape.cle)).toEqual(['paiement_inacheve:2']);

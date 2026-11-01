@@ -50,7 +50,7 @@ export async function preparerRelanceWhatsapp(cle: string, texte: string, templa
     return { ok: false, message: "Vérification de l'opposition impossible : rien n'est préparé." };
   }
   // Règle unique d'éligibilité (paiement, opposition, clôture, plafond, délai) : mêmes raisons que l'interface.
-  const elig = eligibilite(d, await chargerReglages(), new Date());
+  const elig = eligibilite(d, await chargerReglages(), new Date(), 'whatsapp');
   if (!elig.ok) return { ok: false, message: elig.raisons.join(' ; ') };
   // Dernier garde : la personne a pu payer depuis le chargement du dossier.
   const verif = await verifierPaiementAvantEnvoi(d.userId, chargeLe);

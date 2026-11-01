@@ -201,6 +201,11 @@ Chaque raison porte déjà sa date ; la fiche affiche « score calculé le
   traité ne reçoit pas l'étape suivante). L'étape 2 ne part que si l'étape 1
   est réellement partie (`envoye`) ; échec ou état indéterminé, la séquence
   s'arrête. Une ligne restée `envoi` compte comme un contact possible.
+  Une étape dont l'e-mail a été rejeté ou signalé spam (`livraison`) n'est pas
+  « réussie » : pas d'étape suivante. Un signalement spam interdit toute
+  relance e-mail ultérieure (éligibilité, canal e-mail seulement ; WhatsApp
+  inchangé). Réglages illisibles : le passage répond 500 avec alerte et ne
+  s'exécute pas ; un `off` lu correctement reste silencieux.
 - **Idempotence** : colonne `sequence_cle` (`<sequence>:<etape>`), index
   unique `(email_norm, sequence_cle)` : une étape n'est jamais envoyée (ni
   simulée) deux fois, même si le cron est relancé. Les lignes de simulation
