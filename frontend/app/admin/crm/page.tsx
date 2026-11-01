@@ -162,7 +162,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
       {filtrees.length === 0 ? (
         <PremiumPanel><p className="text-sm text-muted">{compte[vueActive] > 0 ? 'Aucun résultat avec ces filtres.' : VIDE[vueActive]}</p></PremiumPanel>
       ) : (
-        <MasseProvider cles={filtrees.map((l) => l.d.cle)} peutEcrire={peutEcrire}>
+        <MasseProvider cles={filtrees.map((l) => l.d.cle)} peutEcrire={peutEcrire} masquerBarre={Boolean(searchParams.fiche)}>
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>

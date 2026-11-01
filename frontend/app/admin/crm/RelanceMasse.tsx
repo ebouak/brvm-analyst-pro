@@ -17,7 +17,7 @@ type Phase =
   | { etat: 'envoi' | 'fini'; tri: Tri; faits: number; echecs: Ligne[]; ecartsEnVol: Ligne[]; arret: boolean };
 
 /** `cles` = lignes actuellement affichées (vue + filtres) : « tout sélectionner » ne déborde jamais sur ce qu'on ne voit pas. */
-export function MasseProvider({ cles, peutEcrire, children }: { cles: string[]; peutEcrire: boolean; children: ReactNode }) {
+export function MasseProvider({ cles, peutEcrire, masquerBarre = false, children }: { cles: string[]; peutEcrire: boolean; masquerBarre?: boolean; children: ReactNode }) {
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const clesKey = cles.join('\n');
   const affichees = useMemo(() => new Set(clesKey ? clesKey.split('\n') : []), [clesKey]);
@@ -29,7 +29,7 @@ export function MasseProvider({ cles, peutEcrire, children }: { cles: string[]; 
   return (
     <MasseCtx.Provider value={{ selection, bascule, toutBasculer, total: affichees.size }}>
       {children}
-      <BarreMasse vider={() => setSelection(new Set())} />
+      <BarreMasse vider={() => setSelection(new Set())} masquee={masquerBarre} />
     </MasseCtx.Provider>
   );
 }
@@ -50,7 +50,7 @@ export function CaseLigne({ cle, nom }: { cle: string; nom: string }) {
   return <input type="checkbox" className="relative z-10" aria-label={`Sélectionner ${nom}`} checked={c.selection.has(cle)} onChange={() => c.bascule(cle)} />;
 }
 
-function BarreMasse({ vider }: { vider: () => void }) {
+function BarreMasse({ vider, masquee }: { vider: () => void; masquee: boolean }) {
   const c = useContext(MasseCtx)!;
   const router = useRouter();
   const [offre, setOffre] = useState(true);
@@ -95,7 +95,10 @@ function BarreMasse({ vider }: { vider: () => void }) {
   if (n === 0 && !phase) return null;
   return (
     <>
-      {n > 0 && !phase && (
+      {n > 0 && !phase && !masquee && (
+        <>
+        {/* Réserve la hauteur de la barre fixe : les dernières lignes ne sont jamais recouvertes. */}
+        <div aria-hidden className="h-28" />
         <div role="region" aria-label="Actions sur la sélection" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 px-6 py-3 backdrop-blur">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <span className="tabular text-ivory">{n} sélectionnée{n > 1 ? 's' : ''}</span>
@@ -106,6 +109,7 @@ function BarreMasse({ vider }: { vider: () => void }) {
             {erreur && <span role="alert" className="text-down">{erreur}</span>}
           </div>
         </div>
+        </>
       )}
       {phase && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="masse-titre">
