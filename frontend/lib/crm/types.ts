@@ -1,9 +1,12 @@
+import type { Livraison } from '@/lib/contact/livraison';
 export interface Paiement { id: string; montant: number; devise: string; statut: 'pending' | 'paid' | 'failed'; provider: string; date: string; payeLe: string | null }
 export type DecisionType = 'cloture' | 'reouverture' | 'echeance' | 'responsable' | 'reponse' | 'traite';
 export type MotifCloture = 'pas_interesse' | 'doublon' | 'deja_abonne';
 export interface ActionCrm {
   date: string; type: 'relance' | 'note' | 'decision'; statut: string; canal: string | null; sujet: string | null; contenu: string;
   decision: DecisionType | null; motif: MotifCloture | null; echeance: string | null; responsable: string | null;
+  /** Livraison de l'e-mail (webhook Resend) ; null = aucun événement reçu, ou relance non e-mail. */
+  livraison?: Livraison | null;
 }
 
 /** Une personne vue par le CRM : un compte, ou un prospect sans compte. */
