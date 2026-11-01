@@ -7,6 +7,9 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { doitMajPays, paysValide } from './geo';
 
 export async function enregistrerPays(userId: string, entetes: Headers, maintenant: Date = new Date()): Promise<'ecrit' | 'saute' | 'inconnu' | 'erreur'> {
+  // L'en-tête n'est digne de confiance que parce que Vercel l'écrase à la périphérie : hors Vercel
+  // (dev local, autre hébergeur) n'importe qui pourrait l'envoyer, donc on l'ignore.
+  if (!process.env.VERCEL) return 'inconnu';
   const pays = paysValide(entetes.get('x-vercel-ip-country'));
   if (!pays) return 'inconnu';
   try {

@@ -34,7 +34,8 @@ export async function GET(request: Request) {
   // Premier passage d'un nouveau compte : écran WhatsApp facultatif (une seule fois).
   const { data: { user } } = await supabase.auth.getUser();
   // Pays du compte (en-tête Vercel, côté serveur) : best-effort, jamais bloquant.
-  if (user) await enregistrerPays(user.id, request.headers);
+  // Sans attendre : la redirection ne doit pas dépendre de cette écriture (enregistrerPays ne lève jamais).
+  if (user) void enregistrerPays(user.id, request.headers).catch(() => {});
   const destination = user && estNouveauCompte(user.created_at, new Date()) ? versEcranWhatsapp(next) : next;
   return NextResponse.redirect(`${origin}${destination}`);
 }
