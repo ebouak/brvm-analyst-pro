@@ -190,7 +190,7 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
   (`<séquence>:<étape>`) identifie l'étape envoyée, le statut `simulation` marque
   un essai sans envoi.
 - Finalité : relancer par e-mail une personne ayant abandonné un paiement ou consulté l'offre
-  Premium (paiement abandonné : J+1 et J+4 ; offre consultée : J+2).
+  Premium (paiement abandonné : J+1 et J+8 ; offre consultée : J+2).
 - Base légale : **intérêt légitime** pour les titulaires de compte (relation existante, offre
   de leur propre service) ; **consentement** pour les prospects sans compte (case de collecte).
 - Opposition : à tout moment, par le lien présent dans chaque e-mail ; l'opposition est

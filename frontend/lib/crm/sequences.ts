@@ -24,7 +24,7 @@ const JOUR_MS = 86_400_000;
 export const FENETRE_ANCRE_JOURS = 30;
 
 export const SEQUENCES = {
-  paiement_inacheve: { templateId: 'paiement_inacheve', etapes: [{ etape: 1, apresJours: 1 }, { etape: 2, apresJours: 4 }] },
+  paiement_inacheve: { templateId: 'paiement_inacheve', etapes: [{ etape: 1, apresJours: 1 }, { etape: 2, apresJours: 8 }] },
   offre_consultee: { templateId: 'offre_consultee', etapes: [{ etape: 1, apresJours: 2 }] },
 } as const satisfies Record<string, { templateId: TemplateId; etapes: readonly { etape: number; apresJours: number }[] }>;
 export type NomSequence = keyof typeof SEQUENCES;
@@ -34,9 +34,25 @@ export interface EtapeDue { sequence: NomSequence; etape: number; cle: string; t
 
 export const cleEtape = (sequence: string, etape: number) => `${sequence}:${etape}`;
 
-/** Clés d'étapes déjà présentes au journal, quel que soit leur statut (envoyé, simulé, échec). */
-export function etapesFaites(d: Pick<Dossier, 'actions'>): Set<string> {
-  return new Set(d.actions.map((a) => a.sequenceCle).filter((x): x is string => typeof x === 'string' && x.length > 0));
+/** Préfixe des clés journalisées en mode simulation : elles ne consomment jamais une étape réelle. */
+export const PREFIXE_SIMULATION = 'sim_';
+/** Clé à écrire au journal selon le mode (valide sous le CHECK `^[a-z_]+:[0-9]+$`). */
+export const cleJournal = (cle: string, simulation: boolean) => (simulation ? PREFIXE_SIMULATION + cle : cle);
+
+/**
+ * Étapes déjà au journal POUR CE MODE, quel que soit leur statut (envoyé, échec…).
+ * Simulation : seules les clés `sim_` comptent (chaque étape est simulée une fois) ;
+ * actif : seules les clés réelles comptent (une étape simulée part quand même, une fois).
+ */
+export function etapesFaites(d: Pick<Dossier, 'actions'>, simulation = false): Set<string> {
+  const out = new Set<string>();
+  for (const a of d.actions) {
+    const k = a.sequenceCle;
+    if (typeof k !== 'string' || !k) continue;
+    if (k.startsWith(PREFIXE_SIMULATION)) { if (simulation) out.add(k.slice(PREFIXE_SIMULATION.length)); }
+    else if (!simulation) out.add(k);
+  }
+  return out;
 }
 
 /** Date d'ancrage de la séquence si SA condition tient, sinon null. */
@@ -90,7 +106,7 @@ export function selectionnerPassage(dossiers: readonly Dossier[], reglages: Regl
   const vus = new Set<string>();
   for (const d of dossiers) {
     if (d.admin || vus.has(d.emailNorm)) continue;
-    const [etape] = etapesDues(d, reglages, maintenant, etapesFaites(d));
+    const [etape] = etapesDues(d, reglages, maintenant, etapesFaites(d, reglages.mode_sequences === 'simulation'));
     if (!etape) continue;
     vus.add(d.emailNorm);
     out.push({ cle: d.cle, d, etape });

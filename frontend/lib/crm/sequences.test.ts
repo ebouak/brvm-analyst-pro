@@ -29,9 +29,16 @@ describe('paiement_inacheve', () => {
     expect(etapesDues(avec({ paiements: [p] }), R, MAINT, new Set())[0]?.cle).toBe('paiement_inacheve:1');
     expect(etapesDues(avec({ paiements: [p] }), R, new Date('2026-11-01T08:59:59Z'), new Set())).toEqual([]);
   });
-  it('étape 1 faite : étape 2 seulement à J+4', () => {
-    expect(dues(abandon(3), ['paiement_inacheve:1'])).toEqual([]);
-    expect(dues(abandon(4), ['paiement_inacheve:1'])[0].cle).toBe('paiement_inacheve:2');
+  it('étape 1 faite : étape 2 seulement à J+8', () => {
+    expect(dues(abandon(7), ['paiement_inacheve:1'])).toEqual([]);
+    expect(dues(abandon(8), ['paiement_inacheve:1'])[0].cle).toBe('paiement_inacheve:2');
+  });
+  it('réglages par défaut : étape 1 envoyée à J+1, étape 2 due à J+8 (délai minimal de 7 jours respecté)', () => {
+    const d = (j: number) => avec({ ...abandon(j), actions: [act({ date: ilYa(j - 1), sequenceCle: 'paiement_inacheve:1' })] });
+    const faites = (x: Dossier) => etapesFaites(x);
+    expect(etapesDues(d(4), REGLAGES_PAR_DEFAUT, MAINT, faites(d(4)))).toEqual([]);
+    expect(etapesDues(d(7), REGLAGES_PAR_DEFAUT, MAINT, faites(d(7)))).toEqual([]);
+    expect(etapesDues(d(8), REGLAGES_PAR_DEFAUT, MAINT, faites(d(8)))[0]?.cle).toBe('paiement_inacheve:2');
   });
   it("une seule étape par passage : à J+5 sans rien fait, l'étape 1 d'abord", () => {
     const r = dues(abandon(5));
@@ -108,6 +115,29 @@ describe('garde-fous', () => {
     expect(dues(d)).toHaveLength(1);
     expect(dues(d)[0].cle).toBe('paiement_inacheve:1');
     expect(dues(d, ['paiement_inacheve:1', 'paiement_inacheve:2'])).toEqual([]);
+  });
+});
+
+describe('simulation et mode actif', () => {
+  const sim = (cle: string) => act({ date: ilYa(1), statut: 'simulation', sequenceCle: `sim_${cle}` });
+  const reel = (cle: string) => act({ date: ilYa(1), sequenceCle: cle });
+  const cas = (actions: ActionCrm[]) => avec({ cle: 'u9', emailNorm: 'z@x.fr', userId: 'u9', paiements: [pay('pending', 'cinetpay', 2, 'z')], actions });
+  const passer = (d: Dossier, mode: 'simulation' | 'actif') => selectionnerPassage([d], { ...R, mode_sequences: mode }, MAINT);
+  it("simulation puis actif : l'étape simulée est due pour de vrai", () => {
+    const d = cas([sim('paiement_inacheve:1')]);
+    expect(passer(d, 'actif').map((x) => x.etape.cle)).toEqual(['paiement_inacheve:1']);
+  });
+  it('simulation deux fois : une seule simulation', () => {
+    expect(passer(cas([]), 'simulation')).toHaveLength(1);
+    expect(passer(cas([sim('paiement_inacheve:1')]), 'simulation')).toEqual([]);
+  });
+  it('actif deux fois : une seule étape réelle', () => {
+    expect(passer(cas([]), 'actif')).toHaveLength(1);
+    expect(passer(cas([reel('paiement_inacheve:1')]), 'actif')).toEqual([]);
+  });
+  it('une étape réelle ne bloque pas la simulation, et inversement', () => {
+    expect(etapesFaites(cas([reel('paiement_inacheve:1')]), true).size).toBe(0);
+    expect(etapesFaites(cas([sim('paiement_inacheve:1')]), false).size).toBe(0);
   });
 });
 
