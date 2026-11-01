@@ -1,6 +1,6 @@
 // Libellés d'état d'une action du journal — une seule table. Jamais « reçu » : le journal ne sait pas si le message est lu.
 export const LIB_STATUT: Record<string, string> = {
-  envoye: 'envoyé', prepare: 'préparé, non envoyé', echec: 'échec', envoi: 'en cours',
+  envoye: 'envoyé', prepare: 'préparé, non envoyé', echec: 'échec', envoi: 'en cours', simulation: 'simulation (non envoyé)',
 };
 export const libStatut = (s: string): string => LIB_STATUT[s] ?? s;
 
@@ -21,6 +21,12 @@ export function suiviRelance(d: Pick<Dossier, 'actions' | 'messages'>, a: Dossie
     : lib === 'échec' || lib === 'signalé comme spam' || lib === "échec d'envoi" ? 'text-down'
     : lib === 'remise retardée' ? 'text-warn' : 'text-muted';
   return { lib, cls };
+}
+
+/** « séquence paiement inachevé, étape 2 » pour une clé `paiement_inacheve:2` ; null si la relance n'est pas automatique. */
+export function libSequence(cle: string | null | undefined): string | null {
+  const m = /^([a-z_]+):(\d+)$/.exec(cle ?? '');
+  return m ? `séquence ${m[1].replace(/_/g, ' ')} étape ${m[2]}` : null;
 }
 
 /** Heure UTC (= Africa/Abidjan) « JJ/MM à HH:MM ». */

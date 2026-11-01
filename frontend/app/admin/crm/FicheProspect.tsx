@@ -10,7 +10,7 @@ import { eligibilite } from '@/lib/crm/eligibilite';
 import type { Reglages } from '@/lib/crm/reglages';
 import { dernierContact } from '@/lib/crm/vues';
 import { texteWhatsappInitial } from '@/lib/crm/whatsappRelance';
-import { suiviRelance, fmtJourHeure } from './libelles';
+import { suiviRelance, fmtJourHeure, libSequence } from './libelles';
 import RelanceForm from './[cle]/RelanceForm';
 import RelanceWhatsapp from './[cle]/RelanceWhatsapp';
 import NoteForm from './[cle]/NoteForm';
@@ -104,7 +104,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
       <section>
         <h2 className={H2}>Messages et réponses</h2>
         <ul className="space-y-1 text-sm">
-          {relances.map((a, i) => <li key={`r${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · relance {a.canal ?? ''} (<span className={suiviRelance(d, a).cls}>{suiviRelance(d, a).lib}</span>){a.sujet ? ` · ${a.sujet}` : ''}</li>)}
+          {relances.map((a, i) => <li key={`r${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · relance {a.canal ?? ''} (<span className={suiviRelance(d, a).cls}>{suiviRelance(d, a).lib}</span>){libSequence(a.sequenceCle) ? ` · ${libSequence(a.sequenceCle)}` : ''}{a.sujet ? ` · ${a.sujet}` : ''}</li>)}
           {messages.map((m, i) => <li key={`m${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(m.date)}</span> · message reçu via le formulaire de contact</li>)}
           {decisions.map((a, i) => <li key={`d${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · {LIB_DECISION[a.decision ?? ''] ?? 'Décision'} — {a.contenu}</li>)}
           {relances.length + messages.length + decisions.length === 0 && <li className="text-muted">Aucun échange enregistré.</li>}
