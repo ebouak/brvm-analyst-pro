@@ -14,6 +14,9 @@ import { preparerFiche } from './preparerFiche';
 import { suiviRelance } from './libelles';
 import PanneauFocus from './PanneauFocus';
 import IndicateursBandeau from './IndicateursBandeau';
+import ReglagesForm from './ReglagesForm';
+import { getServiceClient } from '@/lib/billing/serviceClient';
+import { fmtJourHeure } from './libelles';
 import { chargerReglages } from '@/lib/crm/reglagesServeur';
 import { calculerIndicateurs } from '@/lib/crm/indicateurs';
 import type { Reglages } from '@/lib/crm/reglages';
@@ -48,6 +51,8 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
   const niveau = (NIVEAUX as readonly string[]).includes(searchParams.niveau ?? '') ? (searchParams.niveau as Niveau | 'tous') : 'tous';
   const resp = searchParams.resp || 'tous';
   const q = (searchParams.q ?? '').trim().toLowerCase().slice(0, 100);
+  const peutEcrire = can(ctx, 'crm.write');
+  const surReglages = peutEcrire && searchParams.vue === 'reglages';
   const sp: Sp = { vue: searchParams.vue, niveau: searchParams.niveau, resp: searchParams.resp, q: searchParams.q, fiche: searchParams.fiche };
 
   const maintenant = new Date();
@@ -58,6 +63,13 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
     chargerReglages(),
   ]);
   const indicateurs = calculerIndicateurs(dossiers, reglages, maintenant);
+  let modifieLe: string | null = null;
+  if (surReglages) {
+    // Date de dernière modification : lecture seule, absente => non affichée.
+    const { data } = await getServiceClient().from('crm_reglages').select('modifie_le').eq('id', 1).maybeSingle().then((r) => r, () => ({ data: null }));
+    const iso = (data as { modifie_le?: string } | null)?.modifie_le;
+    modifieLe = iso ? fmtJourHeure(iso) : null;
+  }
   const emailResp = (id: string | null) => local(id ? responsables.find((r) => r.id === id)?.email : null);
 
   const lignes = dossiers.filter((d) => !d.admin).map((d) => {
@@ -97,12 +109,25 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
 
       <nav aria-label="Vues" className="flex flex-wrap gap-2 text-sm">
         {VUES.map((v) => (
-          <Link key={v} href={href(sansFiche, { vue: v })} aria-current={v === vueActive ? 'page' : undefined}
-            className={`rounded-full border px-3 py-1 ${v === vueActive ? 'border-accent text-accent-ink' : 'border-border text-muted hover:text-ivory'}`}>
+          <Link key={v} href={href(sansFiche, { vue: v })} aria-current={!surReglages && v === vueActive ? 'page' : undefined}
+            className={`rounded-full border px-3 py-1 ${!surReglages && v === vueActive ? 'border-accent text-accent-ink' : 'border-border text-muted hover:text-ivory'}`}>
             {LIB_VUE[v]} <span className="tabular text-faint">{compte[v]}</span>
           </Link>
         ))}
+        {peutEcrire && (
+          <Link href={href(sansFiche, { vue: 'reglages' })} aria-current={surReglages ? 'page' : undefined}
+            className={`ml-auto rounded-full border border-dashed px-3 py-1 ${surReglages ? 'border-accent text-accent-ink' : 'border-border text-muted hover:text-ivory'}`}>
+            Réglages
+          </Link>
+        )}
       </nav>
+
+      {surReglages ? (
+        <div className="max-w-2xl space-y-3">
+          <h2 className="font-display text-xl text-ivory">Réglages de la relance pilotée</h2>
+          <ReglagesForm initial={reglages} modifieLe={modifieLe} />
+        </div>
+      ) : (<>
 
       <form method="get" action="/admin/crm" className="flex flex-wrap items-end gap-3 text-sm">
         <input type="hidden" name="vue" value={vueActive} />
@@ -165,6 +190,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
           </table>
         </PremiumPanel>
       )}
+      </>)}
 
     </div>
     {searchParams.fiche && (ouverte
