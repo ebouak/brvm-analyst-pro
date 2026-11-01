@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react';
 import { preparerRelanceWhatsapp } from './actions';
 import type { TemplateId } from '@/lib/crm/gabarits';
 
+const NUMERO_WESTBOURSE = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '').replace(/\D/g, '');
+
 export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero, source }: {
   cle: string; templateId: TemplateId; texteInitial: string; numero: string; source: 'prouve' | 'declare';
 }) {
@@ -22,7 +24,7 @@ export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero,
         <input type="checkbox" checked={offre} onChange={(e) => setOffre(e.target.checked)} />
         Ajouter le lien « dossier valeur au choix »
       </label>
-      <p className="text-xs text-faint">La mention « Répondez STOP » est ajoutée automatiquement. WhatsApp s&apos;ouvre avec le message : c&apos;est vous qui l&apos;envoyez.</p>
+      <p className="text-xs text-faint">La mention « Répondez STOP » est ajoutée automatiquement. WhatsApp s&apos;ouvre avec le message : c&apos;est vous qui l&apos;envoyez. {NUMERO_WESTBOURSE ? `Envoyez-le depuis le WhatsApp WESTBOURSE (+${NUMERO_WESTBOURSE})` : 'Envoyez-le depuis le WhatsApp WESTBOURSE'} : sinon, un STOP de la personne ne nous parviendra pas.</p>
       <button
         disabled={envoi}
         onClick={() => {

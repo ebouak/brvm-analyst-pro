@@ -5,6 +5,7 @@ import { userParChat } from './liaisons';
 import { telephoneDepuisChatId } from './appairage';
 import { passerelleWhatsapp } from './passerelle';
 import { formesNumero } from './stopNumero';
+import { alerterExploitant } from '@/lib/server/alerteExploitant';
 
 const ACCUSE_OK = "C'est noté : WESTBOURSE ne vous enverra plus de propositions commerciales. Vos alertes et services restent actifs ; vous pouvez les couper dans vos paramètres.";
 const ACCUSE_INCONNU = 'STOP bien reçu. Si vous avez un compte WESTBOURSE, vous pouvez aussi vous opposer depuis vos paramètres.';
@@ -59,6 +60,10 @@ export async function traiterStop(chatId: string): Promise<boolean> {
   } catch (e) {
     console.error('[waha] STOP :', (e as Error).message);
     return false;
+  }
+  if (!connu) {
+    // Aucune opposition enregistrée : l'exploitant la saisit à la main (aucune donnée personnelle dans l'alerte).
+    await alerterExploitant('STOP reçu d’un expéditeur non rattaché : enregistrer l’opposition à la main depuis la console.', '🛑 WhatsApp').catch(() => null);
   }
   if (enregistre || !connu) {
     await passerelleWhatsapp().envoyerTexte(chatId, enregistre ? ACCUSE_OK : ACCUSE_INCONNU).catch(() => null);
