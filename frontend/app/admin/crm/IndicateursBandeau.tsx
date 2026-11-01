@@ -22,7 +22,7 @@ export default function IndicateursBandeau({ i }: { i: Indicateurs }) {
     ? { valeur: '—', detail: 'aucune relance sur la période' }
     : {
         valeur: `${c.converties} sur ${c.relances}${c.relances >= SEUIL_POURCENTAGE ? ` · ${Math.round((c.converties / c.relances) * 100)} %` : ''}`,
-        detail: `paiement dans les ${c.fenetreJours} j suivant la 1re relance, relances des ${c.periodeJours} derniers jours — après, pas nécessairement grâce à`,
+        detail: `${c.fenetreOuverte > 0 ? `dont ${c.fenetreOuverte} encore dans la fenêtre (résultat inconnu) — ` : ''}paiement dans les ${c.fenetreJours} j suivant la 1re relance, relances des ${c.periodeJours} derniers jours — après, pas nécessairement grâce à`,
       };
   return (
     <section aria-label="Indicateurs du CRM" className="space-y-2">

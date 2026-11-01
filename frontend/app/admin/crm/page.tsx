@@ -68,7 +68,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
     // Date de dernière modification : lecture seule, absente => non affichée.
     const { data } = await getServiceClient().from('crm_reglages').select('modifie_le').eq('id', 1).maybeSingle().then((r) => r, () => ({ data: null }));
     const iso = (data as { modifie_le?: string } | null)?.modifie_le;
-    modifieLe = iso ? fmtJourHeure(iso) : null;
+    modifieLe = iso ? fmtJourHeure(iso, true) : null;
   }
   const emailResp = (id: string | null) => local(id ? responsables.find((r) => r.id === id)?.email : null);
 

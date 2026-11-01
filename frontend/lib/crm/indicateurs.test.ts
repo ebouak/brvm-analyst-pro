@@ -26,7 +26,7 @@ describe('calculerIndicateurs', () => {
   it('liste vide : zéros', () => {
     expect(calc([])).toEqual({
       aTraiter: 0, ouvertes: 0, montantPotentiel: { total: 0, devise: 'XOF', sansMontant: 0, autresDevises: 0 },
-      conversions: { relances: 0, converties: 0, fenetreJours: 30, periodeJours: PERIODE_CONVERSION_JOURS },
+      conversions: { relances: 0, converties: 0, fenetreOuverte: 0, fenetreJours: 30, periodeJours: PERIODE_CONVERSION_JOURS },
     });
   });
   it('à traiter : silence au-delà du délai de suivi ; en attente et jamais contactés ne comptent pas', () => {
@@ -69,7 +69,14 @@ describe('calculerIndicateurs', () => {
     it('numérateur : paid dans la fenêtre après la PREMIÈRE relance ; plusieurs tentatives ne doublent pas', () => {
       const converti = dos({ actions: [act({ date: ilYa(40) }), act({ date: ilYa(20) }), act({ date: ilYa(10), canal: 'whatsapp', statut: 'prepare' })], paiements: [pay('paid', 'manual', 25)], premium: true });
       const non = dos({ actions: [act({ date: ilYa(40) })] });
-      expect(calc([converti, non]).conversions).toEqual({ relances: 2, converties: 1, fenetreJours: 30, periodeJours: 90 });
+      expect(calc([converti, non]).conversions).toEqual({ relances: 2, converties: 1, fenetreOuverte: 0, fenetreJours: 30, periodeJours: 90 });
+    });
+    it("fenetreOuverte : relances non converties dont la fenêtre court encore ; une convertie ou une fenêtre écoulée n'y entrent pas", () => {
+      const encore = dos({ actions: [act({ date: ilYa(10) })] });
+      const pile = dos({ actions: [act({ date: ilYa(30) })] });
+      const convertieTot = dos({ actions: [act({ date: ilYa(10) })], paiements: [pay('paid', 'manual', 5)] });
+      expect(calc([encore, pile, convertieTot]).conversions.fenetreOuverte).toBe(1);
+      expect(calc([encore, pile, convertieTot]).conversions.relances).toBe(3);
     });
     it('un paiement antérieur à la première relance ne compte pas', () => {
       const avant = dos({ actions: [act({ date: ilYa(20) })], paiements: [pay('paid', 'manual', 30)] });

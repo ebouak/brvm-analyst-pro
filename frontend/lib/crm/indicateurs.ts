@@ -26,7 +26,7 @@ export interface Indicateurs {
     /** Part de `sansMontant` due à une devise autre que le FCFA (jamais convertie). */
     autresDevises: number;
   };
-  conversions: { relances: number; converties: number; fenetreJours: number; periodeJours: typeof PERIODE_CONVERSION_JOURS };
+  conversions: { relances: number; converties: number; /** Relances non converties dont la fenêtre n'est pas écoulée : résultat encore inconnu (biaisent le taux à la baisse). */ fenetreOuverte: number; fenetreJours: number; periodeJours: typeof PERIODE_CONVERSION_JOURS };
 }
 
 export function calculerIndicateurs(dossiers: readonly Dossier[], reglages: Pick<Reglages, 'fenetre_conversion_jours'> & ReglagesVue, maintenant: Date): Indicateurs {
@@ -34,7 +34,7 @@ export function calculerIndicateurs(dossiers: readonly Dossier[], reglages: Pick
   const uniques = new Map<string, Dossier>();
   for (const d of dossiers) if (!d.admin && !uniques.has(d.cle)) uniques.set(d.cle, d);
 
-  let aTraiter = 0, ouvertes = 0, total = 0, sansMontant = 0, autresDevises = 0, relances = 0, converties = 0;
+  let aTraiter = 0, ouvertes = 0, total = 0, sansMontant = 0, autresDevises = 0, relances = 0, converties = 0, fenetreOuverte = 0;
   const debut = maintenant.getTime() - PERIODE_CONVERSION_JOURS * JOUR_MS;
   const fenetreMs = reglages.fenetre_conversion_jours * JOUR_MS;
 
@@ -63,12 +63,13 @@ export function calculerIndicateurs(dossiers: readonly Dossier[], reglages: Pick
         return t >= t0 && t <= t0 + fenetreMs;
       });
       if (paye) converties++;
+      else if (maintenant.getTime() - t0 < fenetreMs) fenetreOuverte++;
     }
   }
 
   return {
     aTraiter, ouvertes,
     montantPotentiel: { total, devise: 'XOF', sansMontant, autresDevises },
-    conversions: { relances, converties, fenetreJours: reglages.fenetre_conversion_jours, periodeJours: PERIODE_CONVERSION_JOURS },
+    conversions: { relances, converties, fenetreOuverte, fenetreJours: reglages.fenetre_conversion_jours, periodeJours: PERIODE_CONVERSION_JOURS },
   };
 }

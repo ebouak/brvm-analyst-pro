@@ -24,8 +24,8 @@ export function suiviRelance(d: Pick<Dossier, 'actions' | 'messages'>, a: Dossie
 }
 
 /** Heure UTC (= Africa/Abidjan) « JJ/MM à HH:MM ». */
-export function fmtJourHeure(iso: string): string {
+export function fmtJourHeure(iso: string, annee = false): string {
   const d = new Date(iso);
   const p = (n: number) => String(n).padStart(2, '0');
-  return `${p(d.getUTCDate())}/${p(d.getUTCMonth() + 1)} à ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+  return `${p(d.getUTCDate())}/${p(d.getUTCMonth() + 1)}${annee ? `/${d.getUTCFullYear()}` : ''} à ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
 }

@@ -25,6 +25,7 @@ export default function ReglagesForm({ initial, modifieLe }: { initial: Reglages
   const [mode, setMode] = useState<ModeSequences>(initial.mode_sequences);
   const [confirme, setConfirme] = useState(false);
   const [retour, setRetour] = useState<Retour | null>(null);
+  const effacer = () => setRetour(null);
   const [pending, demarrer] = useTransition();
   const verrou = useRef(false);
   const [occupe, setOccupe] = useState(false);
@@ -44,7 +45,7 @@ export default function ReglagesForm({ initial, modifieLe }: { initial: Reglages
   };
 
   return (
-    <form action={envoyer} className="space-y-6">
+    <form action={envoyer} onChange={effacer} className="space-y-6">
       <fieldset className="space-y-4 rounded-card border border-border bg-surface p-5">
         <legend className="px-1 text-sm font-semibold text-ivory">Règles de relance</legend>
         {CHAMPS.map(({ nom, aide, unite }) => {
@@ -67,7 +68,7 @@ export default function ReglagesForm({ initial, modifieLe }: { initial: Reglages
         <p className="text-xs text-muted">Les séquences automatiques arrivent ; ce réglage sera pris en compte dès leur mise en service.</p>
         {MODES.map((m) => (
           <label key={m.valeur} className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 ${mode === m.valeur ? 'border-accent bg-accent/5' : 'border-border'}`}>
-            <input type="radio" name="mode_sequences" value={m.valeur} checked={mode === m.valeur} onChange={() => setMode(m.valeur)} className="mt-1" />
+            <input type="radio" name="mode_sequences" value={m.valeur} checked={mode === m.valeur} onChange={() => { setMode(m.valeur); if (m.valeur !== 'actif') setConfirme(false); effacer(); }} className="mt-1" />
             <span>
               <span className="block text-sm text-ivory">{m.titre}</span>
               <span className="block text-xs text-muted">{m.texte}</span>
@@ -76,7 +77,7 @@ export default function ReglagesForm({ initial, modifieLe }: { initial: Reglages
         ))}
         {mode === 'actif' && initial.mode_sequences !== 'actif' && (
           <label className="flex cursor-pointer items-start gap-2 rounded-md border border-warn/40 bg-warn/10 p-3 text-sm text-warn">
-            <input type="checkbox" checked={confirme} onChange={(e) => setConfirme(e.target.checked)} className="mt-1" />
+            <input type="checkbox" checked={confirme} onChange={(e) => { setConfirme(e.target.checked); effacer(); }} className="mt-1" />
             <span>J&apos;ai relu au moins une semaine de simulation</span>
           </label>
         )}
@@ -85,7 +86,8 @@ export default function ReglagesForm({ initial, modifieLe }: { initial: Reglages
       <div className="flex flex-wrap items-center gap-3">
         <button type="submit" disabled={pending || occupe || bloque} className="rounded-full border border-border px-5 py-1.5 text-sm text-ivory hover:border-accent disabled:opacity-50">Enregistrer</button>
         {modifieLe && <span className="text-xs text-faint">Modifié le {modifieLe}</span>}
-        {retour && <p role="status" className={`text-sm ${retour.ok ? 'text-up' : 'text-down'}`}>{retour.message}</p>}
+        <div role="status" aria-live="polite">{retour?.ok && <p className="text-sm text-up">{retour.message}</p>}</div>
+        {retour && !retour.ok && <p role="alert" className="text-sm text-down">{retour.message}</p>}
       </div>
     </form>
   );

@@ -74,7 +74,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
         {score.raisons.length > 0 && (
           <ul className="space-y-0.5 text-xs text-muted">
             {score.raisons.map((r) => (
-              <li key={r.code}><span className="tabular text-faint">+{r.points}</span> {r.texte}{r.date ? <span className="text-faint"> · {fmtJourHeure(r.date)}</span> : null}</li>
+              <li key={r.code}><span className="tabular text-faint">+{r.points}</span> {r.texte}{r.date ? <span className="text-faint"> · {r.code === 'offre' ? fmtJour(r.date) : fmtJourHeure(r.date)}</span> : null}</li>
             ))}
           </ul>
         )}
