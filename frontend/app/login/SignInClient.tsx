@@ -141,6 +141,8 @@ export default function SignInClient({
         // Best-effort : jamais bloquant pour la navigation post-auth.
         void supabase.auth.getUser().then(({ data: { user } }) => {
           if (!user) return;
+          // Pays du compte (segmentation CRM) : l'en-tête est lu côté serveur, best-effort.
+          void fetch('/api/crm/geo', { method: 'POST', keepalive: true }).catch(() => {});
           phIdentify(user.id, { email: user.email });
           // plan: 'free' est un fait (tout nouveau compte démarre gratuit) —
           // pas de propriété 'source' inventée : $initial_referrer, déjà

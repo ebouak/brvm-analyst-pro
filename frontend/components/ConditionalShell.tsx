@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import BeginnerBanner from '@/components/BeginnerBanner';
 import ContactNudge from '@/components/contact/ContactNudge';
 import NewsletterNudge from '@/components/newsletter/NewsletterNudge';
+import GeoCompte from '@/components/crm/GeoCompte';
 
 /** Routes affichées en plein écran, sans la sidebar (landing + auth). */
 const BARE_ROUTES = new Set<string>(['/', '/login', '/signup']);
@@ -97,6 +98,7 @@ export default function ConditionalShell({
   if (bare) {
     return (
       <>
+        <GeoCompte />
         {/* Lien d'évitement : ces pages n'avaient AUCUN <main> ni raccourci
             clavier vers le contenu. Un visiteur au clavier ou au lecteur
             d'écran devait traverser l'en-tête à chaque chargement. */}
@@ -117,6 +119,7 @@ export default function ConditionalShell({
 
   return (
     <div className="flex min-h-screen">
+      <GeoCompte />
       <Sidebar isPremium={isPremium} isAdmin={isAdmin} />
       <div className="flex-1 min-w-0">
         <MobileNav isPremium={isPremium} isAdmin={isAdmin} />

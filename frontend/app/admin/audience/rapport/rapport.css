@@ -1,0 +1,23 @@
+/* Rapport d'audience — feuille A4 claire (écran et papier). Tout est préfixé .ra. */
+.ra { background: #fff; color: #12161c; max-width: 210mm; margin: 0 auto; padding: 14mm; border-radius: 6px; font-size: 11pt; line-height: 1.45; }
+.ra h1 { font-size: 20pt; margin: 0; color: #12161c; }
+.ra h2 { font-size: 12pt; margin: 14pt 0 4pt; color: #0e6f86; border-bottom: 1px solid #dfe4ea; padding-bottom: 2pt; }
+.ra p, .ra li { color: #12161c; }
+.ra .ra-sous { color: #5b6672; font-size: 10pt; margin: 2pt 0 0; }
+.ra table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+.ra td, .ra th { padding: 3pt 6pt; border-bottom: 1px solid #e5e9ee; text-align: left; }
+.ra td:not(:first-child), .ra th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.ra .ra-note { color: #5b6672; font-size: 9pt; margin-top: 3pt; }
+.ra .ra-barre { display: flex; gap: 8pt; margin-bottom: 8pt; }
+.ra .ra-bouton { background: #0e6f86; color: #fff; border: 0; border-radius: 6px; padding: 6pt 12pt; cursor: pointer; font-size: 10.5pt; }
+.ra .ra-onglet { color: #0e6f86; text-decoration: none; padding: 5pt 10pt; border: 1px solid #c9d3db; border-radius: 6px; font-size: 10.5pt; }
+.ra .ra-onglet[aria-current='true'] { background: #e6f2f5; font-weight: 600; }
+.ra section { break-inside: avoid; }
+
+@media print {
+  @page { size: A4; margin: 10mm; }
+  body:has(.ra) header, body:has(.ra) nav, body:has(.ra) aside { display: none !important; }
+  .ra { padding: 0; border-radius: 0; max-width: none; }
+  .ra .ra-barre { display: none; }
+  body:has(.ra) { background: #fff !important; }
+}

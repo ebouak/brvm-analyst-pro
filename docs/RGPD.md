@@ -44,11 +44,24 @@ Audit initial : 2026-06-16.
 
 - Mécanisme de consentement présent : `components/consent/` (`ConsentProvider`,
   `CookieBanner`, `CookiePreferences`) + lien pied de page (`FooterCookieLink`).
-- **Aucun SDK de tracking tiers** détecté (pas de Google Analytics/GTM, Facebook
-  Pixel, Hotjar, Mixpanel, Segment, PostHog, Clarity). Les seuls scripts sont
-  internes (rendu, PDF worker local `public/pdf.worker.min.mjs`). ✅
-- Cookies essentiels uniquement : session Supabase (auth). Pas de traceur non
-  essentiel à bloquer aujourd'hui — la bannière reste le garde-fou si on en ajoute.
+- **Un seul SDK d'audience : PostHog** (`components/analytics/PostHogInit.tsx`), chargé
+  UNIQUEMENT après consentement « Mesure d'audience » (rien n'est chargé ni émis avant ;
+  retrait du consentement = opt-out + purge locale). Hôte européen
+  (`eu.i.posthog.com`), saisies masquées dans les enregistrements de session. Pour une
+  personne connectée ayant consenti, la session est identifiée par son identifiant de compte
+  et son e-mail (`identify`). Pas de Google Analytics/GTM, Facebook Pixel, Hotjar, Mixpanel,
+  Segment ni Clarity. Autres scripts : internes (rendu, PDF worker local
+  `public/pdf.worker.min.mjs`). ✅
+- Sans consentement : cookies essentiels uniquement (session Supabase). Les traceurs non
+  essentiels sont bloqués par la bannière.
+- **Rapports d'audience (`/admin/audience`, `/api/cron/audience`)** : statistiques
+  AGRÉGÉES lues dans PostHog côté serveur (clé personnelle en lecture seule, jamais exposée au
+  client ni journalisée). Elles ne couvrent que les visiteurs ayant consenti à la mesure
+  d'audience : l'audience réelle est supérieure, et les pages l'indiquent. Les messages
+  (Telegram, e-mail hebdomadaire/mensuel à `ALERTS_EMAIL_TO`) ne contiennent que des
+  totaux : ni identifiant, ni e-mail, ni IP. Pas de pixel de suivi dans l'e-mail. Le bloc
+  « intérêt formation » vient de notre base (comptes distincts comptés, pays du compte), sans
+  noms. Rien n'est stocké : chaque rapport est recalculé à la demande.
 
 ## 4. Sécurité
 
@@ -203,6 +216,28 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
   l'export (`/api/account/export`) ; suppression avec le compte.
 - Aucune donnée personnelle dans les journaux de la route cron ni dans l'alerte exploitant
   (des comptes seulement).
+
+**CRM — formation consultée et pays du compte (2026-11-01, migration 0179)**
+- Données : pages de la formation (Academy) consultées en étant connecté
+  (`crm_signaux.type = 'formation_vue'`, une ligne par jour et par page) ; **code pays ISO**
+  du compte (`profiles.pays_code`, `pays_maj_le`), déduit de l'en-tête réseau de l'hébergeur à
+  la connexion. **Jamais** l'adresse IP, ni la ville, ni aucune coordonnée : le code pays est
+  seul conservé, l'IP n'est pas lue ni journalisée par ce traitement.
+- Finalité : segmentation commerciale (proposer la formation complète à qui a consulté la
+  formation gratuite ; cibler par zone géographique) et affichage dans le CRM interne.
+- Base légale : **intérêt légitime** (offre de son propre service à ses titulaires de compte),
+  avec droit d'**opposition** à tout moment (lien en pied de message, ou Paramètres → Compte) ;
+  l'opposition exclut aussi la personne de ces relances. Aucun enregistrement pour un visiteur
+  non connecté.
+- Conservation : `crm_signaux` 90 j (`purge_rgpd_retention`) ; le pays est conservé avec le
+  compte et supprimé avec lui.
+- Droits : export (`/api/account/export` : `profiles` complet dont `pays_code`, et
+  `crm_signaux` avec son `type`), rectification du pays par une nouvelle connexion,
+  suppression avec le compte.
+- Sécurité : écriture par le seul serveur (service_role), identifiant tiré de la session et
+  jamais du corps de la requête ; le pays provient de l'en-tête serveur, pas du navigateur.
+- Mesure d'audience : l'identification PostHog d'un compte reste soumise au consentement
+  « Mesure d'audience » (rien n'est chargé sans accord).
 
 **Monitoring scraping (Lot 3)**
 - Données : **aucune donnée personnelle** (sources de marché, métriques techniques).

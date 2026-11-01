@@ -4,6 +4,7 @@ import type { Dossier, Score } from '@/lib/crm/types';
 import type { ResultatPaiement } from '@/lib/crm/paiement';
 import { decisionsCourantes, reponseRecue, LIB_VUE, LIB_MOTIF, actionRecommandee, type Vue } from '@/lib/crm/vues';
 import { chronologie } from '@/lib/crm/identite';
+import { nomPays, continentDe } from '@/lib/crm/geo';
 import { fmtJour, fmtMontant, compareIso } from '@/lib/crm/score';
 import type { TemplateId } from '@/lib/crm/gabarits';
 import { eligibilite } from '@/lib/crm/eligibilite';
@@ -70,12 +71,17 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
             ? <><span className="tabular text-ivory">{d.whatsapp.numero}</span> ({d.whatsapp.source === 'prouve' ? 'prouvé' : 'déclaré'}{d.whatsapp.recontact ? ', consentement au recontact' : ', sans consentement au recontact'})</>
             : d.whatsapp.lieSansNumero ? 'lié, numéro non visible' : 'aucun numéro connu'}
         </p>
+        <p className="text-muted">Pays : {d.pays ? <><span className="text-ivory">{nomPays(d.pays)}</span> · {continentDe(d.pays) ?? 'continent inconnu'}</> : 'inconnu'}</p>
+        {d.formationAchetee && <p className="text-muted">Formation achetée : <span className="text-ivory">{d.formationAchetee === 'integrale' ? 'complète (quatre niveaux)' : 'certains niveaux'}</span></p>}
+        {d.formationVues.length > 0 && (
+          <p className="text-muted">Formation consultée : {[...new Set(d.formationVues.map((v) => v.page.replace('/formations/academy', '') || 'accueil'))].join(', ')}</p>
+        )}
         <p className="tabular text-muted">Score {score.score} · {score.niveau}</p>
         <p className="text-xs text-faint">Score calculé le {fmtJourHeure(maintenant.toISOString())} (heure d&apos;Abidjan)</p>
         {score.raisons.length > 0 && (
           <ul className="space-y-0.5 text-xs text-muted">
             {score.raisons.map((r) => (
-              <li key={r.code}><span className="tabular text-faint">+{r.points}</span> {r.texte}{r.date ? <span className="text-faint"> · {r.code === 'offre' ? fmtJour(r.date) : fmtJourHeure(r.date)}</span> : null}</li>
+              <li key={r.code}><span className="tabular text-faint">+{r.points}</span> {r.texte}{r.date ? <span className="text-faint"> · {r.code === 'offre' || r.code === 'formation' ? fmtJour(r.date) : fmtJourHeure(r.date)}</span> : null}</li>
             ))}
           </ul>
         )}

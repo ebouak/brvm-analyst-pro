@@ -1,0 +1,54 @@
+name: Audience (check et rapports)
+
+# Route /api/cron/audience :
+#   06:30 UTC chaque jour  -> check journalier (message court à l'exploitant)
+#   lundi 07:00 UTC        -> rapport hebdomadaire par e-mail
+#   le 1er 07:30 UTC       -> rapport mensuel par e-mail
+# Le job devient rouge si la route échoue (PostHog injoignable, destinataire absent, envoi refusé).
+# Secret requis : CRON_SECRET (même valeur que sur Vercel).
+
+on:
+  schedule:
+    - cron: '30 6 * * *'
+    - cron: '0 7 * * 1'
+    - cron: '30 7 1 * *'
+  workflow_dispatch:
+    inputs:
+      periode:
+        description: 'Période du rapport'
+        type: choice
+        options: [jour, semaine, mois]
+        default: jour
+
+concurrency:
+  group: audience-${{ github.event.schedule || github.event.inputs.periode }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  audience:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: https://www.westbourse.com
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      SCHEDULE: ${{ github.event.schedule }}
+      INPUT_PERIODE: ${{ github.event.inputs.periode }}
+    steps:
+      - name: Lancer le check ou le rapport
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent : audience NON exécutée."; exit 1; fi
+          case "$SCHEDULE" in
+            '30 6 * * *') P=jour ;;
+            '0 7 * * 1') P=semaine ;;
+            '30 7 1 * *') P=mois ;;
+            *) P="${INPUT_PERIODE:-jour}" ;;
+          esac
+          echo "Période : $P"
+          r=$(curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/audience?periode=$P")
+          code=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
+          echo "HTTP $code"; echo "$corps"
+          [ "$code" = "200" ] || { echo "::error::Audience ($P) : HTTP $code"; exit 1; }

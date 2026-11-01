@@ -8,7 +8,7 @@ type Ctx = { selection: Set<string>; bascule: (c: string) => void; toutBasculer:
 const MasseCtx = createContext<Ctx | null>(null);
 
 const LIB_GABARIT: Record<string, string> = {
-  paiement_inacheve: 'Paiement inachevé', offre_consultee: 'Offre consultée', actif_sans_abonnement: 'Actif sans abonnement', prospect_sans_compte: 'Prospect sans compte',
+  paiement_inacheve: 'Paiement inachevé', offre_consultee: 'Offre consultée', actif_sans_abonnement: 'Actif sans abonnement', prospect_sans_compte: 'Prospect sans compte', formation_gratuite: 'Intérêt formation',
 };
 type Tri = { eligibles: { cle: string; nom: string; gabarit: string }[]; ecartes: { cle: string; nom: string; raison: string }[] };
 type Ligne = { nom: string; message: string };

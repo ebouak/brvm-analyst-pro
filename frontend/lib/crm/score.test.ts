@@ -6,7 +6,7 @@ const MAINTENANT = new Date('2026-10-31T12:00:00Z');
 const ilYa = (j: number) => new Date(MAINTENANT.getTime() - j * 86_400_000).toISOString();
 const d0: Dossier = {
   cle: 'u1', emailNorm: 'a@b.c', userId: 'u1', nom: null, inscritLe: null, derniereConnexion: null,
-  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [],
+  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null, formationAchetee: null,
   lignesPortefeuille: 0, messages: [], prospect: null, newsletter: false, leconsAcademy: 0, actions: [],
   whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false }, bonus: [],
 };
@@ -32,6 +32,15 @@ describe('scorer', () => {
     const jour = (j: number) => ilYa(j).slice(0, 10);
     expect(scorer({ ...d0, offreVues: [{ page: '/pricing', jour: jour(14) }] }, MAINTENANT).score).toBe(20);
     expect(scorer({ ...d0, offreVues: [{ page: '/pricing', jour: jour(15) }] }, MAINTENANT).score).toBe(0);
+  });
+
+  it('formation consultée : 30 jours compte, 31 non ; texte factuel', () => {
+    const jour = (j: number) => ilYa(j).slice(0, 10);
+    const s = scorer({ ...d0, formationVues: [{ page: '/formations/academy', jour: jour(30) }, { page: '/formations/academy/lecon-0', jour: jour(5) }] }, MAINTENANT);
+    expect(s.score).toBe(15);
+    expect(s.raisons[0]).toMatchObject({ code: 'formation', texte: `a consulté la formation 2 fois, dernière le ${jour(5).slice(8, 10)}/${jour(5).slice(5, 7)}` });
+    expect(scorer({ ...d0, formationVues: [{ page: '/formations/academy', jour: jour(31) }] }, MAINTENANT).score).toBe(0);
+    expect(scorer({ ...d0, formationVues: [{ page: '/formations/academy', jour: jour(2) }] }, MAINTENANT).raisons[0].texte).toContain('une fois');
   });
 
   it('connexion : 15 points jusqu’à 7 jours, 5 de 8 à 30, 0 au-delà', () => {
