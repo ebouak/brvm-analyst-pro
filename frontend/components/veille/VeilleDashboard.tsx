@@ -495,7 +495,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
           type="button"
           onClick={() => setShowAlertes(!showAlertes)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors cursor-pointer ${
-            showAlertes ? 'bg-[#ff6b6b] border-[#ff6b6b] text-white' : 'bg-surface border-border text-muted hover:text-foreground'
+            showAlertes ? 'bg-[#ff6b6b] border-[#ff6b6b] text-[#ffffff]' : 'bg-surface border-border text-muted hover:text-foreground'
           }`}
         >
           Alertes

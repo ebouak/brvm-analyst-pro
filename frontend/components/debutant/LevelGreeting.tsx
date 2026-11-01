@@ -24,7 +24,7 @@ export default function LevelGreeting() {
         </p>
         <a
           href="#cta"
-          className="shrink-0 rounded-full bg-[#0b6b6f] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#084d50]"
+          className="shrink-0 rounded-full bg-[#0b6b6f] px-5 py-2.5 text-sm font-semibold text-[#ffffff] transition hover:bg-[#084d50]"
         >
           Parler à un partenaire →
         </a>

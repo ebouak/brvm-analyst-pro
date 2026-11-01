@@ -83,7 +83,7 @@ export default function LeadForm() {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#0b6b6f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#084d50]"
+                className="mt-2 inline-flex items-center gap-2 rounded-full bg-[#0b6b6f] px-6 py-3 text-sm font-semibold text-[#ffffff] transition hover:bg-[#084d50]"
               >
                 Discuter sur WhatsApp maintenant
               </a>
@@ -148,7 +148,7 @@ export default function LeadForm() {
                 type="submit"
                 whileTap={{ scale: 0.97 }}
                 disabled={phase === 'loading'}
-                className="inline-flex flex-1 items-center justify-center rounded-full bg-[#0b6b6f] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(11,107,111,0.18)] transition hover:bg-[#084d50] disabled:opacity-60"
+                className="inline-flex flex-1 items-center justify-center rounded-full bg-[#0b6b6f] px-7 py-3.5 text-sm font-semibold text-[#ffffff] shadow-[0_20px_60px_rgba(11,107,111,0.18)] transition hover:bg-[#084d50] disabled:opacity-60"
               >
                 {phase === 'loading' ? 'Envoi…' : 'Être recontacté(e)'}
               </motion.button>
