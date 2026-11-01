@@ -1227,6 +1227,42 @@ PRODUCTION (PDF SNTS réel téléchargé, second choix refusé).
 - **Reste à faire** : e-mail de relance réel non encore reçu par l'exploitant
   (pas de clé Resend en local ; `/admin/crm` refuse de relancer un admin).
 
+### Ajouts (passage 2026-11-01) — CRM v2 : vues de travail, relance pilotée, séquences
+
+Spec `docs/superpowers/specs/2026-11-01-crm-v2-design.md`. PR #139 (SP1), #140
+(SP2), #141 (SP3). Migrations `0175`→`0178` **appliquées**. 1198 tests verts.
+Conseil Fable tenté, indisponible (crédits) : décisions tranchées sans lui,
+relecture adverse en deux passes à la place.
+
+- **Le CRM ne modifie JAMAIS `billing_transactions`** : il en DÉRIVE un état
+  par personne (`lib/crm/paiement.ts`) : `paye` (= Premium SEULEMENT ; un
+  `paid` récent sans Premium est une contradiction → `a_verifier`),
+  `a_verifier`, `abandonne`, `expire`, `aucun`. Une intention antérieure à un
+  paiement réussi est un **doublon ignoré** (2 cas réels en production).
+- **Décisions = événements** de `crm_actions` (`type = 'decision'` : clôture +
+  motif, réouverture, échéance, responsable, réponse reçue, réponse traitée),
+  la plus récente l'emporte. 6 vues exclusives (`lib/crm/vues.ts`), fiche en
+  panneau latéral (`?fiche=`).
+- **Éligibilité UNIQUE** (`lib/crm/eligibilite.ts`) pour l'e-mail, WhatsApp et
+  les séquences ; paiement revérifié juste avant l'envoi
+  (`paiementServeur.ts`, marge 60 s) ; un statut `envoi` compte comme contact
+  (« peut-être parti ») ; spam signalé ⇒ plus jamais d'e-mail commercial.
+- **Réglages** `crm_reglages` (une ligne, onglet Réglages). Indicateurs :
+  « après relance, pas nécessairement grâce à », % seulement à partir de 5.
+- **Séquences : `mode_sequences = 'off'` à la livraison.** `paiement_inacheve`
+  J+1 / J+8 (état `abandonne` uniquement), `offre_consultee` J+2. E-mail
+  seulement. Simulation = clés `sim_` (ne consomme pas les vraies étapes).
+  Toute réponse arrête la séquence. Cœur d'envoi partagé avec la relance
+  manuelle (`lib/crm/envoiRelance.ts`). Route `POST /api/cron/crm-sequences`,
+  workflow `crm-sequences.yml` 09:00 UTC — prouvé en production le
+  2026-11-01 (`{"mode":"off","traites":0}`, 401 sans secret).
+- ⚠️ **Aucune panne silencieuse** : réglages illisibles, base indisponible,
+  journal non mis à jour ⇒ 500 + workflow rouge + alerte. Un `off` LU reste
+  200 sans alerte. Ne pas « simplifier » en repli silencieux sur `off`.
+- **Passage en `actif`** = décision de l'exploitant après au moins une
+  semaine de `simulation` relue. Les étapes simulées des 30 derniers jours
+  partiront alors (plafonnées par passage et par jour).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
