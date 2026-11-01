@@ -8,6 +8,7 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { sendEmail, type EmailResult } from '@/lib/server/email';
 import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { chargerDossier } from '@/lib/crm/charger';
+import { decisionsCourantes } from '@/lib/crm/vues';
 import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
 import { etatPaiement } from '@/lib/crm/paiement';
 import { scorer } from '@/lib/crm/score';
@@ -153,15 +154,21 @@ export async function opposerParAdmin(cle: string): Promise<Retour> {
 async function enregistrerDecision(
   cle: string, decision: DecisionType, contenu: string,
   extra: { motif?: MotifCloture; echeance?: string; responsable?: string },
+  refuser?: (d: NonNullable<Awaited<ReturnType<typeof chargerDossier>>>) => string | null,
 ): Promise<Retour> {
   const ctx = await requirePermission('crm.write');
   const d = await chargerDossier(cle);
   if (!d) return { ok: false, message: 'Personne introuvable.' };
+  const refus = refuser?.(d);
+  if (refus) return { ok: false, message: refus };
   const { data: ligne, error } = await getServiceClient().from('crm_actions').insert({
     email_norm: d.emailNorm, user_id: d.userId, type: 'decision', statut: 'decision', contenu, decision,
     motif: extra.motif ?? null, echeance: extra.echeance ?? null, responsable: extra.responsable ?? null, auteur: ctx.userId,
   }).select('id').single();
-  if (error || !ligne) return { ok: false, message: 'Décision non enregistrée.' };
+  if (error || !ligne) {
+    console.error('[crm] décision non enregistrée :', error?.code ?? error?.message ?? 'aucune ligne retournée');
+    return { ok: false, message: 'Décision non enregistrée.' };
+  }
   await recordAudit(ctx, { action: `crm.${decision}`, resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: 'info', metadata: { decision, motif: extra.motif ?? null } });
   revalidatePath('/admin/crm');
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
@@ -169,24 +176,26 @@ async function enregistrerDecision(
 }
 
 export async function cloturer(cle: string, motif: MotifCloture): Promise<Retour> {
+  await requirePermission('crm.write');
   if (!estMotif(motif)) return { ok: false, message: 'Motif de clôture inconnu.' };
   return enregistrerDecision(cle, 'cloture', contenuCloture(motif), { motif });
 }
 
 export async function rouvrir(cle: string): Promise<Retour> {
-  return enregistrerDecision(cle, 'reouverture', 'Dossier rouvert', {});
+  return enregistrerDecision(cle, 'reouverture', 'Dossier rouvert', {}, (d) => (decisionsCourantes(d).cloture ? null : "Ce dossier n'est pas clôturé."));
 }
 
 export async function fixerEcheance(cle: string, dateIso: string): Promise<Retour> {
+  await requirePermission('crm.write');
   const v = validerEcheance(dateIso, new Date());
   if (!v.ok) return { ok: false, message: v.message };
   return enregistrerDecision(cle, 'echeance', contenuEcheance(v.date), { echeance: v.date });
 }
 
 export async function assignerResponsable(cle: string, userId: string): Promise<Retour> {
-  if (!estUuid(userId)) return { ok: false, message: 'Responsable invalide.' };
-  // Contrôle d'autorisation AVANT la vérification de rôle : pas d'oracle pour un non-habilité.
+  // Autorisation d'abord, validation ensuite : pas d'oracle pour un non-habilité.
   await requirePermission('crm.write');
+  if (!estUuid(userId)) return { ok: false, message: 'Responsable invalide.' };
   if (!(await estAdministrateur(userId))) return { ok: false, message: "Ce compte n'est pas administrateur : assignation refusée." };
   return enregistrerDecision(cle, 'responsable', 'Responsable assigné', { responsable: userId });
 }
