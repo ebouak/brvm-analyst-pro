@@ -49,8 +49,8 @@ describe('assemblerDossiers', () => {
       admins: [{ user_id: 'u1' }],
       oppositions: [{ email_norm: 'a@b.c' }],
       paiements: [
-        { user_id: 'u1', amount: '5000', currency: 'XOF', status: 'pending', created_at: '2026-10-12T10:00:00Z', paid_at: null },
-        { user_id: 'u1', amount: 5000, currency: 'XOF', status: 'paid', created_at: '2026-09-01T10:00:00Z', paid_at: '2026-09-01T11:00:00Z' },
+        { id: 'p1', provider: 'manual', user_id: 'u1', amount: '5000', currency: 'XOF', status: 'pending', created_at: '2026-10-12T10:00:00Z', paid_at: null },
+        { id: 'p2', provider: 'chariow', user_id: 'u1', amount: 5000, currency: 'XOF', status: 'paid', created_at: '2026-09-01T10:00:00Z', paid_at: '2026-09-01T11:00:00Z' },
       ],
       positions: [{ user_id: 'u1' }, { user_id: 'u1' }],
       academy: [{ user_id: 'u1', completed: true }, { user_id: 'u1', completed: false }],
@@ -77,8 +77,8 @@ describe('chronologie', () => {
       ...vide,
       comptes: [{ id: 'u1', email: 'a@b.c', created_at: null, last_sign_in_at: null }],
       paiements: [
-        { user_id: 'u1', amount: 20, currency: 'EUR', status: 'paid', created_at: '2026-09-01T10:00:00Z', paid_at: '2026-09-01T11:00:00Z' },
-        { user_id: 'u1', amount: 5000, currency: 'XOF', status: 'pending', created_at: '2026-10-12T10:00:00Z', paid_at: null },
+        { id: 'p3', provider: 'chariow', user_id: 'u1', amount: 20, currency: 'EUR', status: 'paid', created_at: '2026-09-01T10:00:00Z', paid_at: '2026-09-01T11:00:00Z' },
+        { id: 'p4', provider: 'manual', user_id: 'u1', amount: 5000, currency: 'XOF', status: 'pending', created_at: '2026-10-12T10:00:00Z', paid_at: null },
       ],
     });
     const lib = chronologie(d!).map((e) => e.libelle);
@@ -135,5 +135,22 @@ describe('dossier : WhatsApp et offre utilisée', () => {
     const lib = chronologie(d!).map((e) => e.libelle);
     expect(lib).toContain('Dossier SNTS téléchargé (offre)');
     expect(lib).toContain('Relance WhatsApp préparée (envoi manuel)');
+  });
+});
+
+describe('dossier : paiements complets et décisions', () => {
+  it('expose id, fournisseur, échecs, et les colonnes de décision', () => {
+    const [d] = assemblerDossiers({
+      ...vide,
+      comptes: [{ id: 'u1', email: 'a@b.c', created_at: null, last_sign_in_at: null }],
+      paiements: [
+        { id: 'p1', provider: 'chariow', user_id: 'u1', amount: 100, currency: 'XOF', status: 'failed', created_at: '2026-10-01T10:00:00Z', paid_at: null },
+        { id: 'p2', provider: 'manual', user_id: 'u1', amount: 100, currency: 'XOF', status: 'refunded', created_at: '2026-10-02T10:00:00Z', paid_at: null },
+      ],
+      actions: [{ email_norm: 'a@b.c', created_at: '2026-10-30T10:00:00Z', type: 'decision', statut: 'decision', canal: null, sujet: null, contenu: 'Clôturée', bonus_code: null, bonus_at: null, decision: 'cloture', motif: 'doublon' }],
+    });
+    expect(d!.paiements).toEqual([{ id: 'p1', montant: 100, devise: 'XOF', statut: 'failed', provider: 'chariow', date: '2026-10-01T10:00:00Z', payeLe: null }]);
+    expect(d!.paiementsEnAttente).toEqual([]);
+    expect(d!.actions[0]).toMatchObject({ type: 'decision', decision: 'cloture', motif: 'doublon', echeance: null, responsable: null });
   });
 });
