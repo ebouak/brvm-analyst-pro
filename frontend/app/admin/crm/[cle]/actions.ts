@@ -10,7 +10,9 @@ import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { chargerDossier } from '@/lib/crm/charger';
 import { decisionsCourantes } from '@/lib/crm/vues';
 import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
-import { etatPaiement } from '@/lib/crm/paiement';
+import { eligibilite } from '@/lib/crm/eligibilite';
+import { chargerReglages } from '@/lib/crm/reglagesServeur';
+import { verifierPaiementAvantEnvoi } from '@/lib/crm/paiementServeur';
 import { scorer } from '@/lib/crm/score';
 import { estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
 import { construireEmailRelance } from '@/lib/crm/emailRelance';
@@ -29,6 +31,7 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
   const s = String(sujet ?? '').replace(/[\r\n]+/g, ' ').trim().slice(0, 150);
   const c = String(corps ?? '').trim().slice(0, 5000);
   if (!s || !c) return { ok: false, message: 'Sujet et message obligatoires.' };
+  const chargeLe = new Date().toISOString();
   const d = await chargerDossier(cle);
   if (!d) return { ok: false, message: 'Personne introuvable.' };
   // Revérifiée ICI, pas seulement dans la liste (revue Fable). Échec fermé :
@@ -39,11 +42,12 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
     return { ok: false, message: "Vérification de l'opposition impossible : envoi annulé." };
   }
 
-  if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
-  // P0 : un paiement confirmé retire la personne de toute relance ; une intention à vérifier se vérifie d'abord.
-  const paiement = etatPaiement(d, new Date());
-  if (paiement.etat === 'paye') return { ok: false, message: 'Paiement confirmé : plus de relance.' };
-  if (paiement.etat === 'a_verifier') return { ok: false, message: "Paiement à vérifier d'abord dans Paiements." };
+  // Règle unique d'éligibilité (paiement, opposition, clôture, plafond, délai) : mêmes raisons que l'interface.
+  const elig = eligibilite(d, await chargerReglages(), new Date());
+  if (!elig.ok) return { ok: false, message: elig.raisons.join(' ; ') };
+  // Dernier garde : la personne a pu payer depuis le chargement du dossier.
+  const verif = await verifierPaiementAvantEnvoi(d.userId, chargeLe);
+  if (!verif.ok) return { ok: false, message: verif.message };
 
   const sb = getServiceClient();
   const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
@@ -89,6 +93,7 @@ export async function preparerRelanceWhatsapp(cle: string, texte: string, templa
   if (!estTemplateId(templateId)) return { ok: false, message: 'Gabarit inconnu.' };
   const brut = String(texte ?? '').trim().slice(0, 1500);
   if (!brut) return { ok: false, message: 'Message vide.' };
+  const chargeLe = new Date().toISOString();
   const d = await chargerDossier(cle);
   if (!d) return { ok: false, message: 'Personne introuvable.' };
   try {
@@ -96,11 +101,12 @@ export async function preparerRelanceWhatsapp(cle: string, texte: string, templa
   } catch {
     return { ok: false, message: "Vérification de l'opposition impossible : rien n'est préparé." };
   }
-  if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
-  // P0 : un paiement confirmé retire la personne de toute relance ; une intention à vérifier se vérifie d'abord.
-  const paiement = etatPaiement(d, new Date());
-  if (paiement.etat === 'paye') return { ok: false, message: 'Paiement confirmé : plus de relance.' };
-  if (paiement.etat === 'a_verifier') return { ok: false, message: "Paiement à vérifier d'abord dans Paiements." };
+  // Règle unique d'éligibilité (paiement, opposition, clôture, plafond, délai) : mêmes raisons que l'interface.
+  const elig = eligibilite(d, await chargerReglages(), new Date());
+  if (!elig.ok) return { ok: false, message: elig.raisons.join(' ; ') };
+  // Dernier garde : la personne a pu payer depuis le chargement du dossier.
+  const verif = await verifierPaiementAvantEnvoi(d.userId, chargeLe);
+  if (!verif.ok) return { ok: false, message: verif.message };
   if (!d.whatsapp.recontact || !d.whatsapp.numero) return { ok: false, message: 'Pas de numéro avec consentement au recontact : relance WhatsApp impossible.' };
 
   const sb = getServiceClient();
