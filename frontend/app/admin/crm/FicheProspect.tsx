@@ -2,7 +2,7 @@
 // Contenu de la fiche : réutilisé par la page pleine et par le panneau latéral de la liste.
 import type { Dossier, Score } from '@/lib/crm/types';
 import type { ResultatPaiement } from '@/lib/crm/paiement';
-import { decisionsCourantes, LIB_VUE, LIB_MOTIF, actionRecommandee, type Vue } from '@/lib/crm/vues';
+import { decisionsCourantes, reponseRecue, LIB_VUE, LIB_MOTIF, actionRecommandee, type Vue } from '@/lib/crm/vues';
 import { chronologie } from '@/lib/crm/identite';
 import { fmtJour, fmtMontant } from '@/lib/crm/score';
 import type { TemplateId } from '@/lib/crm/gabarits';
@@ -25,7 +25,7 @@ export const BadgeEtat = ({ etat }: { etat: ResultatPaiement['etat'] }) => (
 
 const H2 = 'mb-2 text-sm font-semibold text-ivory';
 const STATUT_PAIEMENT = { paid: 'payé', pending: 'en attente', failed: 'échoué' } as const;
-const LIB_DECISION: Record<string, string> = { cloture: 'Clôture', reouverture: 'Réouverture', echeance: 'Échéance', responsable: 'Responsable', reponse: 'Réponse reçue' };
+const LIB_DECISION: Record<string, string> = { cloture: 'Clôture', reouverture: 'Réouverture', echeance: 'Échéance', responsable: 'Responsable', reponse: 'Réponse reçue', traite: 'Réponse traitée' };
 
 export interface FicheProps {
   d: Dossier; etat: ResultatPaiement; vue: Vue; score: Score; canWrite: boolean;
@@ -119,6 +119,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
             <EcheanceForm cle={d.cle} courante={dec.echeance} />
             <div className="flex flex-wrap items-start gap-3">
               <ActionSimple cle={d.cle} type="reponse" libelle="Réponse reçue" />
+              {reponseRecue(d) ? <ActionSimple cle={d.cle} type="traite" libelle="Réponse traitée" /> : null}
               {dec.cloture ? <ActionSimple cle={d.cle} type="rouvrir" libelle="Rouvrir le dossier" /> : <ClotureForm cle={d.cle} />}
             </div>
           </div>

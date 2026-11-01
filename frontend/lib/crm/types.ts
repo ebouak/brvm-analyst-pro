@@ -1,5 +1,5 @@
 export interface Paiement { id: string; montant: number; devise: string; statut: 'pending' | 'paid' | 'failed'; provider: string; date: string; payeLe: string | null }
-export type DecisionType = 'cloture' | 'reouverture' | 'echeance' | 'responsable' | 'reponse';
+export type DecisionType = 'cloture' | 'reouverture' | 'echeance' | 'responsable' | 'reponse' | 'traite';
 export type MotifCloture = 'pas_interesse' | 'doublon' | 'deja_abonne';
 export interface ActionCrm {
   date: string; type: 'relance' | 'note' | 'decision'; statut: string; canal: string | null; sujet: string | null; contenu: string;

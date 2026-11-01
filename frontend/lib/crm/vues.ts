@@ -30,6 +30,8 @@ export interface DecisionsCourantes {
   echeance: string | null;
   responsable: string | null;
   derniereReponse: string | null;
+  /** Dernière « réponse traitée » : les réponses antérieures ne comptent plus. */
+  derniereTraite: string | null;
 }
 
 const JOUR_MS = 86_400_000;
@@ -43,14 +45,16 @@ export function decisionsCourantes(d: Pick<Dossier, 'actions'>): DecisionsCouran
   let echeance: string | null = null;
   let responsable: string | null = null;
   let derniereReponse: string | null = null;
+  let derniereTraite: string | null = null;
   for (const a of decisions) {
     if (a.decision === 'cloture') cloture = { motif: a.motif, date: a.date };
     else if (a.decision === 'reouverture') cloture = null;
     else if (a.decision === 'echeance') echeance = a.echeance;
     else if (a.decision === 'responsable') responsable = a.responsable;
     else if (a.decision === 'reponse') derniereReponse = a.date;
+    else if (a.decision === 'traite') derniereTraite = a.date;
   }
-  return { cloture, echeance, responsable, derniereReponse };
+  return { cloture, echeance, responsable, derniereReponse, derniereTraite };
 }
 
 /** Date de la dernière relance envoyée ou préparée (tous canaux). */
@@ -62,8 +66,10 @@ export function dernierContact(d: Pick<Dossier, 'actions'>): string | null {
 function dateReponse(d: Pick<Dossier, 'actions' | 'messages'>): string | null {
   const contact = dernierContact(d);
   if (!contact) return null;
-  const rep = decisionsCourantes(d).derniereReponse;
-  return plusRecent([...(rep ? [rep] : []), ...d.messages.map((m) => m.date)].filter((x) => x > contact));
+  const { derniereReponse: rep, derniereTraite } = decisionsCourantes(d);
+  // Seuil : le plus récent du dernier contact et de la dernière « réponse traitée ».
+  const seuil = derniereTraite && derniereTraite > contact ? derniereTraite : contact;
+  return plusRecent([...(rep ? [rep] : []), ...d.messages.map((m) => m.date)].filter((x) => x > seuil));
 }
 
 export const reponseRecue = (d: Pick<Dossier, 'actions' | 'messages'>): boolean => dateReponse(d) !== null;

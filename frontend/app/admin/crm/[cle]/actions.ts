@@ -194,3 +194,7 @@ export async function assignerResponsable(cle: string, userId: string): Promise<
 export async function marquerReponse(cle: string): Promise<Retour> {
   return enregistrerDecision(cle, 'reponse', 'Réponse reçue (déclarée)', {});
 }
+
+export async function marquerTraite(cle: string): Promise<Retour> {
+  return enregistrerDecision(cle, 'traite', 'Réponse traitée', {});
+}

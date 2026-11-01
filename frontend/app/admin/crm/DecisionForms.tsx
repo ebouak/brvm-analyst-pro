@@ -1,7 +1,7 @@
 // frontend/app/admin/crm/DecisionForms.tsx
 'use client';
 import { useState, useTransition } from 'react';
-import { cloturer, rouvrir, marquerReponse, assignerResponsable, fixerEcheance } from './[cle]/actions';
+import { cloturer, rouvrir, marquerReponse, marquerTraite, assignerResponsable, fixerEcheance } from './[cle]/actions';
 import type { MotifCloture } from '@/lib/crm/types';
 
 type Retour = { ok: boolean; message: string };
@@ -36,11 +36,11 @@ export function ClotureForm({ cle }: { cle: string }) {
   );
 }
 
-export function ActionSimple({ cle, type, libelle }: { cle: string; type: 'rouvrir' | 'reponse'; libelle: string }) {
+export function ActionSimple({ cle, type, libelle }: { cle: string; type: 'rouvrir' | 'reponse' | 'traite'; libelle: string }) {
   const { retour, envoi, lancer } = useAction();
   return (
     <div className="space-y-1">
-      <button disabled={envoi} onClick={() => lancer(() => (type === 'rouvrir' ? rouvrir(cle) : marquerReponse(cle)))} className={BTN}>{libelle}</button>
+      <button disabled={envoi} onClick={() => lancer(() => (type === 'rouvrir' ? rouvrir(cle) : type === 'traite' ? marquerTraite(cle) : marquerReponse(cle)))} className={BTN}>{libelle}</button>
       <Msg r={retour} />
     </div>
   );

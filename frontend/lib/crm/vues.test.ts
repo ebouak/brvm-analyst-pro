@@ -39,7 +39,7 @@ describe('decisionsCourantes', () => {
     expect(decisionsCourantes(avec({ actions: [c, decision(5, 'reouverture'), decision(1, 'cloture', { motif: 'pas_interesse' })] })).cloture).toMatchObject({ motif: 'pas_interesse' });
   });
   it('ignore les relances et notes', () => {
-    expect(decisionsCourantes(avec({ actions: [relance(1), act({ date: ilYa(1), type: 'note', statut: 'note' })] }))).toEqual({ cloture: null, echeance: null, responsable: null, derniereReponse: null });
+    expect(decisionsCourantes(avec({ actions: [relance(1), act({ date: ilYa(1), type: 'note', statut: 'note' })] }))).toEqual({ cloture: null, echeance: null, responsable: null, derniereReponse: null, derniereTraite: null });
   });
 });
 
@@ -53,6 +53,27 @@ describe('dernierContact / reponseRecue', () => {
     expect(reponseRecue(avec({ actions: [relance(5), decision(1, 'reponse')] }))).toBe(true);
     expect(reponseRecue(avec({ actions: [relance(5)], messages: [{ date: ilYa(9) }] }))).toBe(false);
     expect(reponseRecue(avec({ messages: [{ date: ilYa(2) }] }))).toBe(false);
+  });
+});
+
+describe('réponse traitée', () => {
+  it('réponse puis traitée => plus à traiter pour cette raison', () => {
+    const d = avec({ actions: [relance(5), decision(3, 'reponse'), decision(1, 'traite')] });
+    expect(reponseRecue(d)).toBe(false);
+    expect(vueDe(d, MAINT).vue).toBe('en_attente');
+  });
+  it('message antérieur au traité => en attente', () => {
+    const d = avec({ actions: [relance(5), decision(1, 'traite')], messages: [{ date: ilYa(2) }] });
+    expect(vueDe(d, MAINT).vue).toBe('en_attente');
+  });
+  it('un nouveau message après traité => à traiter de nouveau', () => {
+    const d = avec({ actions: [relance(5), decision(2, 'traite')], messages: [{ date: ilYa(1) }] });
+    expect(reponseRecue(d)).toBe(true);
+    expect(vueDe(d, MAINT).vue).toBe('a_traiter');
+  });
+  it('traité sans aucun contact : aucune réponse, jamais_contactes', () => {
+    const d = avec({ actions: [decision(1, 'traite')], messages: [{ date: ilYa(2) }] });
+    expect(vueDe(d, MAINT).vue).toBe('jamais_contactes');
   });
 });
 
