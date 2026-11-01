@@ -21,7 +21,8 @@ export async function terminerEcran(numero: string, recontact: boolean): Promise
       user_id: user.id,
       ecran_whatsapp_vu_at: maintenant,
       ...(tel.e164 ? { telephone_declare: tel.e164 } : {}),
-      recontact_optin_at: recontact ? maintenant : null,
+      // Case décochée : on ne touche pas à un consentement déjà donné.
+      ...(recontact ? { recontact_optin_at: maintenant } : {}),
     },
     { onConflict: 'user_id' },
   );

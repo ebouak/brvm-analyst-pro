@@ -73,7 +73,7 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
       </label>
 
       {numeroAgent && !code && (
-        <button disabled={occupe} onClick={lier} className="w-full rounded-full bg-[#25D366] px-6 py-3.5 text-base font-semibold text-[#06210f] disabled:opacity-50 sm:w-auto">
+        <button type="button" disabled={occupe} onClick={lier} className="w-full rounded-full bg-[#25D366] px-6 py-3.5 text-base font-semibold text-[#06210f] disabled:opacity-50 sm:w-auto">
           Lier mon WhatsApp
         </button>
       )}
@@ -81,22 +81,22 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
         <div className="rounded-2xl border border-border bg-surface p-5">
           <p className="mb-2 text-sm text-muted">WhatsApp s&apos;est ouvert avec votre code. Envoyez le message tel quel, puis continuez.</p>
           <p className="tabular mb-2 text-2xl font-semibold tracking-[0.2em] text-ivory">{code}</p>
-          <a href={lienCode(code)} target="_blank" rel="noopener noreferrer" className="mb-4 inline-block text-sm text-accent underline underline-offset-4">
+          <a href={lienCode(code)} target="_blank" rel="noopener noreferrer" className="mb-4 inline-block text-sm text-accent underline underline-offset-4 rounded focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
             Ouvrir WhatsApp avec le code
           </a>
           <div>
-            <button disabled={occupe} onClick={() => finir('')} className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-bg disabled:opacity-50">C&apos;est envoyé, continuer</button>
+            <button type="button" disabled={occupe} onClick={() => finir('')} className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-bg disabled:opacity-50">C&apos;est envoyé, continuer</button>
           </div>
         </div>
       )}
 
       <div className="mt-6">
         {!saisie ? (
-          <button onClick={() => setSaisie(true)} className="text-sm text-muted underline underline-offset-4 hover:text-ivory">ou laissez simplement votre numéro</button>
+          <button type="button" onClick={() => setSaisie(true)} className="text-sm text-muted underline underline-offset-4 hover:text-ivory rounded focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">ou laissez simplement votre numéro</button>
         ) : (
           <div className="flex flex-col gap-3 sm:flex-row">
             <input value={numero} onChange={(e) => setNumero(e.target.value)} inputMode="tel" autoComplete="tel" placeholder="+225 07 07 12 34 56" aria-label="Votre numéro WhatsApp" className="flex-1 rounded-xl border border-border bg-surface px-4 py-3 text-sm text-ivory placeholder:text-faint" />
-            <button disabled={occupe || !numero.trim() || !numeroValide.ok} onClick={() => finir(numero)} className="rounded-full border border-border px-5 py-3 text-sm font-semibold text-ivory disabled:opacity-50">Enregistrer</button>
+            <button type="button" disabled={occupe || !numero.trim() || !numeroValide.ok} onClick={() => finir(numero)} className="rounded-full border border-border px-5 py-3 text-sm font-semibold text-ivory disabled:opacity-50">Enregistrer</button>
           </div>
         )}
         {saisie && numero.trim() && !numeroValide.ok && <p className="mt-2 text-xs text-down">{numeroValide.erreur}</p>}
@@ -104,7 +104,7 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
 
       {erreur && <p role="alert" className="mt-4 text-sm text-down">{erreur}</p>}
 
-      <button disabled={occupe} onClick={() => finir('')} className="mt-10 text-sm text-faint hover:text-muted">Plus tard</button>
+      <button type="button" disabled={occupe} onClick={() => finir('')} className="mt-10 text-sm text-faint hover:text-muted rounded focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">Plus tard</button>
     </main>
   );
 }
