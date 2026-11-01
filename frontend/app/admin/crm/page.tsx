@@ -15,6 +15,7 @@ import { suiviRelance } from './libelles';
 import PanneauFocus from './PanneauFocus';
 import IndicateursBandeau from './IndicateursBandeau';
 import ReglagesForm from './ReglagesForm';
+import { MasseProvider, CaseTout, CaseLigne } from './RelanceMasse';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { fmtJourHeure } from './libelles';
 import { chargerReglages } from '@/lib/crm/reglagesServeur';
@@ -161,10 +162,12 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
       {filtrees.length === 0 ? (
         <PremiumPanel><p className="text-sm text-muted">{compte[vueActive] > 0 ? 'Aucun résultat avec ces filtres.' : VIDE[vueActive]}</p></PremiumPanel>
       ) : (
+        <MasseProvider cles={filtrees.map((l) => l.d.cle)} peutEcrire={peutEcrire}>
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+                {peutEcrire && <th className="w-10 px-4 py-3"><CaseTout /></th>}
                 <th className="px-4 py-3 font-medium">Personne</th><th className="px-4 py-3 font-medium">Paiement</th>
                 <th className="px-4 py-3 text-right font-medium">Montant</th><th className="px-4 py-3 font-medium">Échéance</th>
                 <th className="px-4 py-3 font-medium">Dernière action</th><th className="px-4 py-3 font-medium">Responsable</th>
@@ -174,6 +177,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
             <tbody>
               {filtrees.map(({ d, etat, echeance, dec, dernier, score }) => (
                 <tr key={d.cle} className={`relative border-b border-border/40 align-top last:border-0 ${d.cle === searchParams.fiche ? 'bg-accent/5' : ''}`}>
+                  {peutEcrire && <td className="px-4 py-2.5"><CaseLigne cle={d.cle} nom={d.nom ?? d.emailNorm} /></td>}
                   <td className="px-4 py-2.5">
                     <Link href={href(sp, { fiche: d.cle })} scroll={false} className="font-medium text-ivory after:absolute after:inset-0 hover:text-accent-ink">{d.nom ?? d.emailNorm}</Link>
                     {!d.userId && <span className="ml-2 text-xs text-faint">prospect sans compte</span>}
@@ -189,6 +193,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
             </tbody>
           </table>
         </PremiumPanel>
+        </MasseProvider>
       )}
       </>)}
 

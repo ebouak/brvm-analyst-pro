@@ -31,6 +31,8 @@ export interface EntreeEnvoi {
   sequenceCle?: string;
   /** Écrit le journal (statut « simulation ») mais n'appelle JAMAIS sendEmail. */
   simulation?: boolean;
+  /** Envoi issu d'une relance en masse (voie manuelle) : tracé dans l'audit. */
+  masse?: boolean;
   /** Instant de chargement du dossier : un paiement postérieur doit bloquer l'envoi. */
   chargeLe: string;
 }
@@ -124,7 +126,7 @@ export async function envoyerRelanceEmail(e: EntreeEnvoi): Promise<SortieEnvoi> 
   const { error: errMaj } = await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null, livraison: 'envoye' } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
   // Audit sans e-mail : identifiant de la ligne de journal, jamais la clé (qui embarque l'adresse).
   if (e.ctxAudit) {
-    await recordAudit(e.ctxAudit, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: Boolean(inclureOffre), sequence: e.sequenceCle ?? null, auteur: e.auteur } });
+    await recordAudit(e.ctxAudit, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: Boolean(inclureOffre), sequence: e.sequenceCle ?? null, auteur: e.auteur, masse: Boolean(e.masse) } });
   }
   // E-mail parti mais journal non mis à jour : la ligne reste « envoi » (comptée comme contact possible).
   // Statut « echec » pour que le passage automatique le SIGNALE (500 + alerte) ; `ok` reste vrai : le message est bien parti.
