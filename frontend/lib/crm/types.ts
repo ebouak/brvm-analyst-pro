@@ -7,6 +7,8 @@ export interface ActionCrm {
   decision: DecisionType | null; motif: MotifCloture | null; echeance: string | null; responsable: string | null;
   /** Livraison de l'e-mail (webhook Resend) ; null = aucun événement reçu, ou relance non e-mail. */
   livraison?: Livraison | null;
+  /** `<séquence>:<étape>` pour une relance automatique, sinon absent. */
+  sequenceCle?: string | null;
 }
 
 /** Une personne vue par le CRM : un compte, ou un prospect sans compte. */

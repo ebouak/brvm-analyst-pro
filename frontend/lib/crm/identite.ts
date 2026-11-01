@@ -21,7 +21,7 @@ export interface Sources {
   prospects: { email: string; nom: string | null; created_at: string; consent: boolean | null }[];
   newsletter: { email: string; confirmed: boolean | null }[];
   academy: { user_id: string; completed: boolean | null }[];
-  actions: { email_norm: string; created_at: string; type: 'relance' | 'note' | 'decision'; statut: string; canal: string | null; sujet: string | null; contenu: string; bonus_code: string | null; bonus_at: string | null; decision?: DecisionType | null; motif?: MotifCloture | null; echeance?: string | null; responsable?: string | null; livraison?: Livraison | null }[];
+  actions: { email_norm: string; created_at: string; type: 'relance' | 'note' | 'decision'; statut: string; canal: string | null; sujet: string | null; contenu: string; bonus_code: string | null; bonus_at: string | null; decision?: DecisionType | null; motif?: MotifCloture | null; echeance?: string | null; responsable?: string | null; livraison?: Livraison | null; sequence_cle?: string | null }[];
   oppositions: { email_norm: string }[];
   prefs: { user_id: string; whatsapp_phone: string | null; whatsapp_chat_id: string | null; telephone_declare: string | null; recontact_optin_at: string | null }[];
   liaisons: { user_id: string; chat_id: string; telephone: string | null }[];
@@ -83,7 +83,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
       prospect: p ? { date: p.created_at, consent: p.consent === true } : null,
       newsletter: abonnes.has(emailNorm),
       oppose: opposes.has(emailNorm),
-      actions: (actions.get(emailNorm) ?? []).map((a) => ({ date: a.created_at, type: a.type, statut: a.statut, canal: a.canal, sujet: a.sujet, contenu: a.contenu, decision: a.decision ?? null, motif: a.motif ?? null, echeance: a.echeance ?? null, responsable: a.responsable ?? null, livraison: a.livraison ?? null })),
+      actions: (actions.get(emailNorm) ?? []).map((a) => ({ date: a.created_at, type: a.type, statut: a.statut, canal: a.canal, sujet: a.sujet, contenu: a.contenu, decision: a.decision ?? null, motif: a.motif ?? null, echeance: a.echeance ?? null, responsable: a.responsable ?? null, livraison: a.livraison ?? null, sequenceCle: a.sequence_cle ?? null })),
       bonus: (actions.get(emailNorm) ?? []).filter((a) => a.bonus_code && a.bonus_at).map((a) => ({ code: a.bonus_code as string, date: a.bonus_at as string })),
     };
   };
