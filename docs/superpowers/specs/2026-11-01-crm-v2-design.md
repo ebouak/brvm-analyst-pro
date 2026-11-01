@@ -135,12 +135,17 @@ obligatoire (libellé lisible de la décision).
 
 ### 2.1 Éligibilité — `lib/crm/eligibilite.ts` (pur)
 
-`eligibilite(d, reglages, maintenant) → { ok, raisons: string[] }`. Refus si :
-état de paiement `paye` ou `a_verifier` (on vérifie avant de relancer) ;
-opposition ; Premium/admin ; clôturé ; nombre de relances (`envoye` +
-`prepare`) ≥ `max_relances` ; dernier contact commercial (tous canaux) plus
-récent que `delai_min_jours`. L'interface affiche les raisons ; les server
-actions (e-mail, WhatsApp) et le cron appellent LA MÊME fonction.
+`eligibilite(d, reglages, maintenant, canal, { manuel? }) → { ok, raisons: string[] }`.
+Refus si : état de paiement `paye` ou `a_verifier` (on vérifie avant de
+relancer) ; opposition ; Premium/admin ; clôturé ; spam e-mail (canal e-mail) ;
+**et, hors mode manuel seulement**, nombre de relances (`envoye` + `prepare`)
+≥ `max_relances` ou dernier contact commercial (tous canaux) plus récent que
+`delai_min_jours`. **Une relance MANUELLE n'a aucune limite de cadence**
+(`manuel: true`) : `max_relances` et `delai_min_jours` ne bornent que les
+séquences automatiques et le cron, qui appellent la fonction SANS `manuel`.
+La fiche affiche le nombre de relances passées à titre d'information. Seul
+reste en manuel l'anti-doublon de 2 minutes (double clic accidentel), dans le
+cœur d'envoi. L'interface et les server actions appellent LA MÊME fonction.
 
 **Revérification juste avant l'envoi** : relecture directe, au moment de
 l'envoi, de `billing_transactions` (`paid` du compte) et de
@@ -177,6 +182,21 @@ Chaque raison porte déjà sa date ; la fiche affiche « score calculé le
 | Opportunités ouvertes | personnes uniques hors `convertis` et `clotures` |
 | Montant potentiel | somme, par opportunité ouverte, du montant du dernier paiement non abouti non supplanté ; « n opportunités sans montant » affiché à côté |
 | Conversions après relance | sur les 90 derniers jours : personnes relancées (dénominateur) ; parmi elles, celles avec un `paid` dans les `fenetre_conversion_jours` suivant leur PREMIÈRE relance (numérateur). Libellé : « après relance — pas nécessairement grâce à elle », fenêtre et dénominateur affichés |
+
+### 2.6 Relance en masse (e-mail uniquement)
+
+Sur `/admin/crm` (`crm.write`) : colonne de cases, « tout sélectionner » (lignes
+affichées : vue + filtres), barre d'action collante (« Relancer par e-mail (n) »,
+« Inclure l'offre dossier », « Désélectionner »). Le clic ouvre une confirmation
+calculée **côté serveur** (`preparerRelanceMasse`, dossiers rechargés,
+éligibilité manuelle canal e-mail) : « n partiront, m écartés » avec la raison
+de chaque écart et le gabarit (`choisirGabarit`) par destinataire. L'envoi est
+piloté par le **client, un par un** (`relancerUn`, pas de lot serveur long :
+limites Vercel et débit Resend) ; chaque envoi repasse par le cœur commun
+(opposition, paiement, éligibilité, anti-doublon 2 min, journal). Progression
+« x / n envoyés · y échecs · z écartés », bouton « Arrêter » (après l'envoi en
+cours), récapitulatif des échecs. Audit `crm.relance` avec `masse: true`.
+**Pas de WhatsApp en masse** (risque de blocage du numéro) : il reste à l'unité.
 
 ---
 
