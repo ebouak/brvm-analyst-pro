@@ -76,7 +76,9 @@ Décisions (`crm_actions.type = 'decision'`, colonne `decision`) :
 `cloture` (+ `motif` ∈ `pas_interesse | doublon | deja_abonne`),
 `reouverture`, `echeance` (+ `echeance` date ; « À recontacter plus tard »
 = une échéance), `responsable` (+ `responsable` uuid), `reponse` (réponse
-reçue, déclarée à la main).
+reçue, déclarée à la main), `traite` (réponse traitée — migration `0176` : une
+réponse antérieure à `traite` ne compte plus ; sans elle, une personne à qui
+l'exploitant a répondu hors de l'outil restait indéfiniment « à traiter »).
 
 `vueDe(d, maintenant, reglages) → { vue, echeance, raison }`, chaque personne
 dans UNE seule vue, dans cet ordre de priorité :
