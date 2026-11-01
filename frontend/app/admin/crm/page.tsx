@@ -21,11 +21,13 @@ import { fmtJourHeure } from './libelles';
 import { chargerReglages } from '@/lib/crm/reglagesServeur';
 import { calculerIndicateurs } from '@/lib/crm/indicateurs';
 import type { Reglages } from '@/lib/crm/reglages';
+import { nomPays, continentDe } from '@/lib/crm/geo';
+import { ZONES, LIB_ZONE, estZone, dansZone, aInteretFormation, type Zone } from '@/lib/crm/segments';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'CRM — Administration' };
 
-type Sp = { vue?: string; niveau?: string; resp?: string; q?: string; fiche?: string };
+type Sp = { vue?: string; niveau?: string; resp?: string; q?: string; fiche?: string; zone?: string; formation?: string };
 const NIVEAUX = ['chaud', 'tiede', 'froid', 'tous'] as const;
 const LIB_NIVEAU: Record<Niveau | 'tous', string> = { chaud: 'Chaud', tiede: 'Tiède', froid: 'Froid', tous: 'Tous' };
 const VIDE: Record<Vue, string> = {
@@ -51,10 +53,12 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
   const vueActive: Vue = (VUES as readonly string[]).includes(searchParams.vue ?? '') ? (searchParams.vue as Vue) : 'a_traiter';
   const niveau = (NIVEAUX as readonly string[]).includes(searchParams.niveau ?? '') ? (searchParams.niveau as Niveau | 'tous') : 'tous';
   const resp = searchParams.resp || 'tous';
+  const zone: Zone = estZone(searchParams.zone) ? searchParams.zone : 'tous';
+  const interetFormation = searchParams.formation === '1';
   const q = (searchParams.q ?? '').trim().toLowerCase().slice(0, 100);
   const peutEcrire = can(ctx, 'crm.write');
   const surReglages = peutEcrire && searchParams.vue === 'reglages';
-  const sp: Sp = { vue: searchParams.vue, niveau: searchParams.niveau, resp: searchParams.resp, q: searchParams.q, fiche: searchParams.fiche };
+  const sp: Sp = { vue: searchParams.vue, niveau: searchParams.niveau, resp: searchParams.resp, q: searchParams.q, fiche: searchParams.fiche, zone: searchParams.zone, formation: searchParams.formation };
 
   const maintenant = new Date();
   const [dossiers, orphelins, responsables, reglages] = await Promise.all([
@@ -89,6 +93,8 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
   const filtrees = lignes.filter((l) => l.vue === vueActive
     && (niveau === 'tous' || l.score.niveau === niveau)
     && (resp === 'tous' || (resp === 'aucun' ? !l.dec.responsable : l.dec.responsable === resp))
+    && dansZone(l.d.pays, zone)
+    && (!interetFormation || aInteretFormation(l.d))
     && (!q || (l.d.nom ?? '').toLowerCase().includes(q) || l.d.emailNorm.includes(q)));
 
   // « À traiter » et « Paiements à vérifier » : le plus ancien d'abord ; ailleurs : score décroissant.
@@ -141,10 +147,15 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
             <option value="tous">Tous</option><option value="aucun">Non assigné</option>
             {responsables.map((r) => <option key={r.id} value={r.id}>{local(r.email)}</option>)}
           </select></label>
+        <label className="space-y-1"><span className="block text-xs text-faint">Zone</span>
+          <select name="zone" defaultValue={zone} className="rounded-md border border-border bg-sunken px-3 py-1.5 text-ivory">
+            {ZONES.map((z) => <option key={z} value={z}>{LIB_ZONE[z]}</option>)}
+          </select></label>
+        <label className="flex items-center gap-2 pb-2 text-ivory"><input type="checkbox" name="formation" value="1" defaultChecked={interetFormation} className="accent-accent" />Intérêt formation</label>
         <label className="space-y-1"><span className="block text-xs text-faint">Recherche</span>
           <input name="q" defaultValue={searchParams.q ?? ''} placeholder="Nom ou e-mail" className="rounded-md border border-border bg-sunken px-3 py-1.5 text-ivory" /></label>
         <button type="submit" className="rounded-full border border-border px-4 py-1.5 text-ivory hover:border-accent">Filtrer</button>
-        {(niveau !== 'tous' || resp !== 'tous' || q) && <Link href={href({ vue: vueActive }, {})} className="py-1.5 text-muted hover:text-ivory">Réinitialiser</Link>}
+        {(niveau !== 'tous' || resp !== 'tous' || zone !== 'tous' || interetFormation || q) && <Link href={href({ vue: vueActive }, {})} className="py-1.5 text-muted hover:text-ivory">Réinitialiser</Link>}
       </form>
 
       {vueActive === 'paiements_a_verifier' && orphelins.length > 0 && (
@@ -168,7 +179,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
                 {peutEcrire && <th className="w-10 px-4 py-3"><CaseTout /></th>}
-                <th className="px-4 py-3 font-medium">Personne</th><th className="px-4 py-3 font-medium">Paiement</th>
+                <th className="px-4 py-3 font-medium">Personne</th><th className="px-4 py-3 font-medium">Pays</th><th className="px-4 py-3 font-medium">Paiement</th>
                 <th className="px-4 py-3 text-right font-medium">Montant</th><th className="px-4 py-3 font-medium">Échéance</th>
                 <th className="px-4 py-3 font-medium">Dernière action</th><th className="px-4 py-3 font-medium">Responsable</th>
                 <th className="px-4 py-3 font-medium">Score</th>
@@ -182,6 +193,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
                     <Link href={href(sp, { fiche: d.cle })} scroll={false} className="font-medium text-ivory after:absolute after:inset-0 hover:text-accent-ink">{d.nom ?? d.emailNorm}</Link>
                     {!d.userId && <span className="ml-2 text-xs text-faint">prospect sans compte</span>}
                   </td>
+                  <td className="px-4 py-2.5 text-muted">{d.pays ? <>{nomPays(d.pays)} <span className="ml-1 rounded-full border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-faint">{continentDe(d.pays) ?? '—'}</span></> : '—'}</td>
                   <td className="px-4 py-2.5"><BadgeEtat etat={etat.etat} /></td>
                   <td className="px-4 py-2.5 text-right tabular text-muted">{etat.enCours ? fmtMontant(etat.enCours.montant, etat.enCours.devise) : '—'}</td>
                   <td className="px-4 py-2.5 tabular text-muted">{echeance ? fmtJour(echeance) : '—'}</td>
