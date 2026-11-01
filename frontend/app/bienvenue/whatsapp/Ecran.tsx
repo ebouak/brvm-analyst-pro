@@ -32,7 +32,17 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
       router.refresh();
     });
 
-  const lienCode = (c: string) => `https://wa.me/${numeroAgent}?text=${encodeURIComponent(c)}`;
+  // « Plus tard » n'enregistre JAMAIS de consentement (aucun moyen de contact
+  // fourni) et ne piège jamais : on continue même si l'écriture échoue.
+  const plusTard = () =>
+    demarrer(async () => {
+      setErreur(null);
+      await terminerEcran('', false).catch(() => null);
+      router.push(next);
+      router.refresh();
+    });
+
+  const lienCode =(c: string) => `https://wa.me/${numeroAgent}?text=${encodeURIComponent(c)}`;
 
   const lier = async () => {
     setErreur(null);
@@ -104,7 +114,7 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
 
       {erreur && <p role="alert" className="mt-4 text-sm text-down">{erreur}</p>}
 
-      <button type="button" disabled={occupe} onClick={() => finir('')} className="mt-10 text-sm text-faint hover:text-muted rounded focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">Plus tard</button>
+      <button type="button" disabled={occupe} onClick={plusTard} className="mt-10 text-sm text-faint hover:text-muted rounded focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">Plus tard</button>
     </main>
   );
 }
