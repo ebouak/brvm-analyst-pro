@@ -20,6 +20,7 @@ const ACCUSE_INCONNU = 'STOP bien reçu. Si vous avez un compte WESTBOURSE, vous
  */
 export async function traiterStop(chatId: string): Promise<boolean> {
   let enregistre = false;
+  let connu = false;
   try {
     const db = getServiceClient();
     const ids = new Set<string>();
@@ -40,14 +41,27 @@ export async function traiterStop(chatId: string): Promise<boolean> {
       }
     }
 
+    let echec = false;
     for (const id of ids) {
-      const email = (await db.auth.admin.getUserById(id)).data.user?.email ?? null;
-      if (email && (await enregistrerOpposition(email, 'whatsapp'))) enregistre = true;
+      const { data, error } = await db.auth.admin.getUserById(id);
+      const email = data?.user?.email ?? null;
+      if (error || !email) {
+        echec = true;
+        continue;
+      }
+      if (await enregistrerOpposition(email, 'whatsapp')) enregistre = true;
+      else echec = true;
     }
+    if (echec) console.error('[waha] STOP : enregistrement incomplet'); // sans numéro ni e-mail
+    // Compte connu mais rien d'enregistré : pas d'accusé trompeur, la console prend le relais.
+    if (!enregistre && ids.size > 0) return false;
+    connu = ids.size > 0;
   } catch (e) {
     console.error('[waha] STOP :', (e as Error).message);
     return false;
   }
-  await passerelleWhatsapp().envoyerTexte(chatId, enregistre ? ACCUSE_OK : ACCUSE_INCONNU).catch(() => null);
+  if (enregistre || !connu) {
+    await passerelleWhatsapp().envoyerTexte(chatId, enregistre ? ACCUSE_OK : ACCUSE_INCONNU).catch(() => null);
+  }
   return enregistre;
 }
