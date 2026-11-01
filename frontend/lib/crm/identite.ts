@@ -5,7 +5,7 @@
  * prospects, newsletter et messages.
  */
 import type { Dossier, Paiement, DecisionType, MotifCloture } from './types';
-import { fmtMontant } from './score';
+import { fmtMontant, compareIso } from './score';
 
 export const normaliserEmail = (e: string | null | undefined): string => (e ?? '').trim().toLowerCase();
 
@@ -69,7 +69,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
   const prefs = new Map(s.prefs.map((p) => [p.user_id, p]));
   const liaisons = grouper(s.liaisons, (l) => l.user_id);
   const prospects = new Map<string, Sources['prospects'][number]>();
-  for (const p of [...s.prospects].sort((a, b) => b.created_at.localeCompare(a.created_at))) {
+  for (const p of [...s.prospects].sort((a, b) => compareIso(b.created_at, a.created_at))) {
     const k = normaliserEmail(p.email);
     if (k && !prospects.has(k)) prospects.set(k, p); // le plus récent
   }
@@ -144,5 +144,5 @@ export function chronologie(d: Dossier): Evenement[] {
   if (d.prospect) ev.push({ date: d.prospect.date, libelle: 'Formulaire prospect' });
   for (const b of d.bonus) ev.push({ date: b.date, libelle: `Dossier ${b.code} téléchargé (offre)` });
   for (const a of d.actions) ev.push({ date: a.date, libelle: a.type === 'note' ? `Note : ${a.contenu.slice(0, 80)}` : a.type === 'decision' ? `Décision : ${a.contenu.slice(0, 80)}` : a.canal === 'whatsapp' ? 'Relance WhatsApp préparée (envoi manuel)' : `Relance ${a.canal ?? ''} (${a.statut}) : ${a.sujet ?? ''}` });
-  return ev.sort((a, b) => b.date.localeCompare(a.date));
+  return ev.sort((a, b) => compareIso(b.date, a.date));
 }

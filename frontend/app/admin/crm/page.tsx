@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { requirePermission, can } from '@/lib/server/rbac';
 import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 import { chargerDossiers, chargerPaiementsOrphelins } from '@/lib/crm/charger';
-import { scorer, fmtJour, fmtMontant } from '@/lib/crm/score';
+import { scorer, fmtJour, fmtMontant, compareIso } from '@/lib/crm/score';
 import { etatPaiement } from '@/lib/crm/paiement';
 import { VUES, LIB_VUE, LIB_MOTIF, decisionsCourantes, vueDe, type Vue } from '@/lib/crm/vues';
 import { listerResponsables } from '@/lib/crm/responsables';
@@ -55,7 +55,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
     const etat = etatPaiement(d, maintenant);
     const v = vueDe(d, maintenant);
     const dec = decisionsCourantes(d);
-    const dernier = [...d.actions].filter((a) => a.type === 'relance' || a.type === 'decision').sort((a, b) => b.date.localeCompare(a.date))[0] ?? null;
+    const dernier = [...d.actions].filter((a) => a.type === 'relance' || a.type === 'decision').sort((a, b) => compareIso(b.date, a.date))[0] ?? null;
     return { d, etat, vue: v.vue, echeance: v.echeance, dec, dernier, score: scorer(d, maintenant) };
   });
 
@@ -72,7 +72,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
   // « À traiter » et « Paiements à vérifier » : le plus ancien d'abord ; ailleurs : score décroissant.
   const cleAncien = (l: (typeof lignes)[number]) => l.echeance ?? (vueActive === 'paiements_a_verifier' ? l.etat.enCours?.date : null) ?? l.dernier?.date ?? '9999';
   filtrees.sort(vueActive === 'a_traiter' || vueActive === 'paiements_a_verifier'
-    ? (a, b) => cleAncien(a).localeCompare(cleAncien(b))
+    ? (a, b) => compareIso(cleAncien(a), cleAncien(b))
     : (a, b) => b.score.score - a.score.score);
 
   const ouverte = searchParams.fiche ? lignes.find((l) => l.d.cle === searchParams.fiche) : undefined;

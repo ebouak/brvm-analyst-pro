@@ -8,7 +8,7 @@
 import type { Dossier, MotifCloture } from './types';
 import type { EtatPaiement, ResultatPaiement } from './paiement';
 import { etatPaiement } from './paiement';
-import { fmtJour, scorer } from './score';
+import { fmtJour, scorer, compareIso } from './score';
 
 export const VUES = ['a_traiter', 'jamais_contactes', 'paiements_a_verifier', 'en_attente', 'convertis', 'clotures'] as const;
 export type Vue = (typeof VUES)[number];
@@ -36,11 +36,11 @@ export interface DecisionsCourantes {
 
 const JOUR_MS = 86_400_000;
 const jours = (depuis: string, maintenant: Date) => Math.floor((maintenant.getTime() - Date.parse(depuis)) / JOUR_MS);
-const plusRecent = (xs: readonly string[]): string | null => [...xs].sort().reverse()[0] ?? null;
+const plusRecent = (xs: readonly string[]): string | null => [...xs].sort((a, b) => compareIso(b, a))[0] ?? null;
 
 /** La décision la plus récente de chaque nature l'emporte ; une réouverture postérieure annule la clôture. */
 export function decisionsCourantes(d: Pick<Dossier, 'actions'>): DecisionsCourantes {
-  const decisions = d.actions.filter((a) => a.type === 'decision').sort((a, b) => a.date.localeCompare(b.date));
+  const decisions = d.actions.filter((a) => a.type === 'decision').sort((a, b) => compareIso(a.date, b.date));
   let cloture: DecisionsCourantes['cloture'] = null;
   let echeance: string | null = null;
   let responsable: string | null = null;
@@ -68,8 +68,8 @@ function dateReponse(d: Pick<Dossier, 'actions' | 'messages'>): string | null {
   if (!contact) return null;
   const { derniereReponse: rep, derniereTraite } = decisionsCourantes(d);
   // Seuil : le plus récent du dernier contact et de la dernière « réponse traitée ».
-  const seuil = derniereTraite && derniereTraite > contact ? derniereTraite : contact;
-  return plusRecent([...(rep ? [rep] : []), ...d.messages.map((m) => m.date)].filter((x) => x > seuil));
+  const seuil = derniereTraite && compareIso(derniereTraite, contact) > 0 ? derniereTraite : contact;
+  return plusRecent([...(rep ? [rep] : []), ...d.messages.map((m) => m.date)].filter((x) => compareIso(x, seuil) > 0));
 }
 
 export const reponseRecue = (d: Pick<Dossier, 'actions' | 'messages'>): boolean => dateReponse(d) !== null;

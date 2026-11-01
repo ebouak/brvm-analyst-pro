@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { scorer, estExclu, fmtFcfa } from './score';
+import { compareIso, scorer, estExclu, fmtFcfa } from './score';
 import type { Dossier } from './types';
 
 const MAINTENANT = new Date('2026-10-31T12:00:00Z');
@@ -86,5 +86,14 @@ describe('scorer : offre utilisée', () => {
   it('ignore une offre utilisée il y a plus de 30 jours', () => {
     const s = scorer({ ...d0, bonus: [{ code: 'SNTS', date: ilYa(31) }] }, MAINTENANT);
     expect(s.raisons.find((r) => r.code === 'bonus')).toBeUndefined();
+  });
+});
+
+describe('compareIso', () => {
+  it('classe juste une seconde entière face à une fraction de seconde', () => {
+    expect(compareIso('2026-10-31T12:00:00Z', '2026-10-31T12:00:00.500Z')).toBe(-1);
+    expect(compareIso('2026-10-31T12:00:00.500+00:00', '2026-10-31T12:00:01Z')).toBe(-1);
+    expect(compareIso('2026-10-31T12:00:00Z', '2026-10-31T12:00:00Z')).toBe(0);
+    expect(['2026-10-31T12:00:01Z', '2026-10-31T12:00:00.9Z'].sort(compareIso)).toEqual(['2026-10-31T12:00:00.9Z', '2026-10-31T12:00:01Z']);
   });
 });

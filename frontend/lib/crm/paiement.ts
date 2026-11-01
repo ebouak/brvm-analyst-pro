@@ -11,7 +11,7 @@
  * que l'exploitant doit voir — la classer « converti » la cacherait.
  */
 import type { Dossier, Paiement } from './types';
-import { fmtJour, fmtMontant } from './score';
+import { fmtJour, fmtMontant, compareIso } from './score';
 
 export const JOURS_VERIF = 30;
 export const JOURS_PAYE = 35;
@@ -23,7 +23,7 @@ export interface ResultatPaiement { etat: EtatPaiement; detail: string; doublons
 const JOUR_MS = 86_400_000;
 const age = (iso: string, maintenant: Date) => (maintenant.getTime() - Date.parse(iso)) / JOUR_MS;
 const dateDe = (p: Paiement) => (p.statut === 'paid' ? p.payeLe ?? p.date : p.date);
-const plusRecent = (ps: readonly Paiement[]): Paiement | undefined => [...ps].sort((a, b) => dateDe(b).localeCompare(dateDe(a)))[0];
+const plusRecent = (ps: readonly Paiement[]): Paiement | undefined => [...ps].sort((a, b) => compareIso(dateDe(b), dateDe(a)))[0];
 const enCoursDe = (p: Paiement | undefined): EnCours | null => (p ? { montant: p.montant, devise: p.devise, date: p.date, provider: p.provider } : null);
 const montantJour = (p: Paiement) => `${fmtMontant(p.montant, p.devise)} le ${fmtJour(p.date)}`;
 
@@ -32,7 +32,7 @@ export function etatPaiement(d: Pick<Dossier, 'premium' | 'paiements'>, maintena
   const dateDernierPaid = dernierPaid ? dateDe(dernierPaid) : null;
   // Une intention antérieure à un paiement confirmé est un doublon : listée, puis ignorée.
   const pendings = d.paiements.filter((p) => p.statut === 'pending');
-  const doublons = pendings.filter((p) => dateDernierPaid !== null && p.date < dateDernierPaid).map((p) => p.id);
+  const doublons = pendings.filter((p) => dateDernierPaid !== null && compareIso(p.date, dateDernierPaid) < 0).map((p) => p.id);
   const actifs = pendings.filter((p) => !doublons.includes(p.id));
   const dernierActif = plusRecent(actifs);
   const sortie = (etat: EtatPaiement, detail: string, enCours: EnCours | null = enCoursDe(dernierActif)): ResultatPaiement => ({ etat, detail, doublons, enCours });

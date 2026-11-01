@@ -4,7 +4,7 @@ import type { Dossier, Score } from '@/lib/crm/types';
 import type { ResultatPaiement } from '@/lib/crm/paiement';
 import { decisionsCourantes, reponseRecue, LIB_VUE, LIB_MOTIF, actionRecommandee, type Vue } from '@/lib/crm/vues';
 import { chronologie } from '@/lib/crm/identite';
-import { fmtJour, fmtMontant } from '@/lib/crm/score';
+import { fmtJour, fmtMontant, compareIso } from '@/lib/crm/score';
 import type { TemplateId } from '@/lib/crm/gabarits';
 import { texteWhatsappInitial } from '@/lib/crm/whatsappRelance';
 import RelanceForm from './[cle]/RelanceForm';
@@ -38,11 +38,11 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
   const dec = decisionsCourantes(d);
   const reco = actionRecommandee(d, vue, etat, maintenant);
   const nomResp = (id: string | null) => (id ? responsables.find((r) => r.id === id)?.email ?? 'compte inconnu' : null);
-  const relances = d.actions.filter((a) => a.type === 'relance').sort((a, b) => b.date.localeCompare(a.date));
-  const decisions = d.actions.filter((a) => a.type === 'decision').sort((a, b) => b.date.localeCompare(a.date));
-  const notes = d.actions.filter((a) => a.type === 'note').sort((a, b) => b.date.localeCompare(a.date));
-  const paiements = [...d.paiements].sort((a, b) => b.date.localeCompare(a.date));
-  const messages = [...d.messages].sort((a, b) => b.date.localeCompare(a.date));
+  const relances = d.actions.filter((a) => a.type === 'relance').sort((a, b) => compareIso(b.date, a.date));
+  const decisions = d.actions.filter((a) => a.type === 'decision').sort((a, b) => compareIso(b.date, a.date));
+  const notes = d.actions.filter((a) => a.type === 'note').sort((a, b) => compareIso(b.date, a.date));
+  const paiements = [...d.paiements].sort((a, b) => compareIso(b.date, a.date));
+  const messages = [...d.messages].sort((a, b) => compareIso(b.date, a.date));
   const peutRelancer = !d.premium && !d.admin && etat.etat !== 'paye' && etat.etat !== 'a_verifier';
   const nbDoublons = etat.doublons.length;
 
