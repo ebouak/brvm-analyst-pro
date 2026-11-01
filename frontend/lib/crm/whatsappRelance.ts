@@ -23,6 +23,6 @@ export function estStop(texte: string): boolean {
   const t = texte
     .normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
     .replace(/^[\s/!]+/, '')
-    .replace(/[\s.!,;:?️\p{Extended_Pictographic}]+$/u, '');
+    .replace(/[\s.!,;:?\uFE0F\p{Extended_Pictographic}]+$/u, '');
   return t === 'stop' || t === 'arret';
 }
