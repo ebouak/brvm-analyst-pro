@@ -204,6 +204,28 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Aucune donnée personnelle dans les journaux de la route cron ni dans l'alerte exploitant
   (des comptes seulement).
 
+**CRM — formation consultée et pays du compte (2026-11-01, migration 0179)**
+- Données : pages de la formation (Academy) consultées en étant connecté
+  (`crm_signaux.type = 'formation_vue'`, une ligne par jour et par page) ; **code pays ISO**
+  du compte (`profiles.pays_code`, `pays_maj_le`), déduit de l'en-tête réseau de l'hébergeur à
+  la connexion. **Jamais** l'adresse IP, ni la ville, ni aucune coordonnée : le code pays est
+  seul conservé, l'IP n'est pas lue ni journalisée par ce traitement.
+- Finalité : segmentation commerciale (proposer la formation complète à qui a consulté la
+  formation gratuite ; cibler par zone géographique) et affichage dans le CRM interne.
+- Base légale : **intérêt légitime** (offre de son propre service à ses titulaires de compte),
+  avec droit d'**opposition** à tout moment (lien en pied de message, ou Paramètres → Compte) ;
+  l'opposition exclut aussi la personne de ces relances. Aucun enregistrement pour un visiteur
+  non connecté.
+- Conservation : `crm_signaux` 90 j (`purge_rgpd_retention`) ; le pays est conservé avec le
+  compte et supprimé avec lui.
+- Droits : export (`/api/account/export` : `profiles` complet dont `pays_code`, et
+  `crm_signaux` avec son `type`), rectification du pays par une nouvelle connexion,
+  suppression avec le compte.
+- Sécurité : écriture par le seul serveur (service_role), identifiant tiré de la session et
+  jamais du corps de la requête ; le pays provient de l'en-tête serveur, pas du navigateur.
+- Mesure d'audience : l'identification PostHog d'un compte reste soumise au consentement
+  « Mesure d'audience » (rien n'est chargé sans accord).
+
 **Monitoring scraping (Lot 3)**
 - Données : **aucune donnée personnelle** (sources de marché, métriques techniques).
 - N/A RGPD. `scraper_errors` ne doit pas contenir de donnée perso (messages techniques).
