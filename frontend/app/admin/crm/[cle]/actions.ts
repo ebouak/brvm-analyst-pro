@@ -80,7 +80,7 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
     res = { ok: false, sent: 0, error: (e as Error).message || 'exception' };
   }
   // L'échec est journalisé et affiché, jamais avalé (panne e-mail 07–09/2026).
-  const { error: errMaj } = await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
+  const { error: errMaj } = await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null, livraison: 'envoye' } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
   // Audit sans e-mail : identifiant de la ligne de journal, jamais la clé (qui embarque l'adresse).
   await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: Boolean(inclureOffre) } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
