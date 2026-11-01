@@ -34,7 +34,12 @@ export interface EntreeEnvoi {
   /** Instant de chargement du dossier : un paiement postérieur doit bloquer l'envoi. */
   chargeLe: string;
 }
-export interface SortieEnvoi { ok: boolean; message: string; statut: 'envoye' | 'echec' | 'simulation' | 'refus'; journalId?: number | string }
+export interface SortieEnvoi {
+  ok: boolean; message: string;
+  /** `indisponible` = panne technique (vérification ou journal impossibles) : à signaler, jamais un simple refus métier. */
+  statut: 'envoye' | 'echec' | 'simulation' | 'refus' | 'indisponible';
+  journalId?: number | string;
+}
 
 /**
  * Cœur d'envoi d'une relance e-mail, commun à la voie manuelle et aux séquences.
@@ -43,45 +48,55 @@ export interface SortieEnvoi { ok: boolean; message: string; statut: 'envoye' | 
 export async function envoyerRelanceEmail(e: EntreeEnvoi): Promise<SortieEnvoi> {
   const { d, sujet: s, corps: c, templateId, inclureOffre } = e;
   const refus = (message: string): SortieEnvoi => ({ ok: false, message, statut: 'refus' });
+  const panne = (message: string): SortieEnvoi => ({ ok: false, message, statut: 'indisponible' });
   // Revérifiée ICI, pas seulement dans la liste (revue Fable). Échec fermé :
   // si la vérification elle-même échoue, on n'envoie RIEN.
   try {
     if (await estOppose(d.emailNorm)) return refus("Cette personne s'est opposée aux propositions commerciales : envoi refusé.");
   } catch {
-    return refus("Vérification de l'opposition impossible : envoi annulé.");
+    return panne("Vérification de l'opposition impossible : envoi annulé.");
   }
 
+  const reglages = await chargerReglages();
+  // Séquence : l'interrupteur « off » (ou un changement de mode) prend effet IMMÉDIATEMENT, même en plein passage.
+  if (e.sequenceCle && reglages.mode_sequences !== (e.simulation ? 'simulation' : 'actif')) return refus('Mode des séquences changé : étape non traitée.');
   // Règle unique d'éligibilité (paiement, opposition, clôture, plafond, délai) : mêmes raisons que l'interface.
-  const elig = eligibilite(d, await chargerReglages(), new Date());
+  const elig = eligibilite(d, reglages, new Date());
   if (!elig.ok) return refus(elig.raisons.join(' ; '));
   // Dernier garde : la personne a pu payer depuis le chargement du dossier.
   const verif = await verifierPaiementAvantEnvoi(d.userId, e.chargeLe);
-  if (!verif.ok) return refus(verif.message);
+  if (!verif.ok) return verif.technique ? panne(verif.message) : refus(verif.message);
 
   const sb = getServiceClient();
   const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
-  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye', 'prepare']).gte('created_at', deuxMinutes).limit(1);
+  const { data: enCours, error: errDup } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye', 'prepare']).gte('created_at', deuxMinutes).limit(1);
+  if (errDup) return panne('Vérification des envois récents impossible : envoi annulé.');
   if (enCours && enCours.length > 0) return refus("Une relance vient d'être envoyée ou est en cours pour cette personne.");
+
+  if (e.sequenceCle) {
+    // Le dossier a été chargé il y a peut-être plusieurs minutes : un contact (manuel ou autre canal) a pu avoir lieu depuis.
+    const depuis = new Date(Date.now() - reglages.delai_min_jours * 86_400_000).toISOString();
+    const { data: recents, error: errRecent } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm)
+      .in('statut', ['envoye', 'prepare', 'envoi']).or('sequence_cle.is.null,sequence_cle.not.like.sim_%').gte('created_at', depuis).limit(1);
+    if (errRecent) return panne('Vérification du dernier contact impossible : envoi annulé.');
+    if (recents && recents.length > 0) return refus('Contact récent enregistré depuis le chargement : délai minimal non écoulé.');
+  }
 
   const score = scorer(d, new Date());
   const jeton = randomBytes(24).toString('hex');
   const jetonBonus = inclureOffre ? randomBytes(24).toString('hex') : null;
   const { data: ligne, error } = await sb.from('crm_actions').insert({
     email_norm: d.emailNorm, user_id: d.userId, type: 'relance', canal: 'email', template_id: templateId,
-    sujet: s, contenu: c, score_at_envoi: score.score, signaux_json: score.raisons, statut: 'envoi',
+    sujet: s, contenu: c, score_at_envoi: score.score, signaux_json: score.raisons,
+    // Simulation : écrite directement dans son état final — jamais de ligne « envoi » pour un message qui ne part pas.
+    statut: e.simulation ? 'simulation' : 'envoi',
     jeton_opposition: jeton, jeton_bonus: jetonBonus, auteur: e.auteur,
     ...(e.sequenceCle ? { sequence_cle: e.sequenceCle } : {}),
   }).select('id').single();
   // Violation d'unicité (email_norm, sequence_cle) : l'étape existe déjà — c'est la garantie d'idempotence.
   if (error?.code === '23505') return refus('Étape déjà traitée.');
-  if (error || !ligne) return refus('Journal indisponible : envoi annulé.');
-
-  if (e.simulation) {
-    // Simulation : la ligne est écrite pour que l'étape ne soit pas rejouée, mais RIEN ne part.
-    const { error: errSim } = await sb.from('crm_actions').update({ statut: 'simulation' }).eq('id', ligne.id);
-    if (errSim) return { ok: false, message: 'Simulation non journalisée.', statut: 'echec', journalId: ligne.id };
-    return { ok: true, message: 'Simulation (non envoyé).', statut: 'simulation', journalId: ligne.id };
-  }
+  if (error || !ligne) return panne('Journal indisponible : envoi annulé.');
+  if (e.simulation) return { ok: true, message: 'Simulation (non envoyé).', statut: 'simulation', journalId: ligne.id };
 
   let res: EmailResult;
   try {
@@ -104,7 +119,9 @@ export async function envoyerRelanceEmail(e: EntreeEnvoi): Promise<SortieEnvoi> 
   if (e.ctxAudit) {
     await recordAudit(e.ctxAudit, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: Boolean(inclureOffre), sequence: e.sequenceCle ?? null, auteur: e.auteur } });
   }
-  if (res.ok && errMaj) return { ok: true, message: "Relance envoyée, mais le journal n'a pas pu être mis à jour.", statut: 'envoye', journalId: ligne.id };
+  // E-mail parti mais journal non mis à jour : la ligne reste « envoi » (comptée comme contact possible).
+  // Statut « echec » pour que le passage automatique le SIGNALE (500 + alerte) ; `ok` reste vrai : le message est bien parti.
+  if (res.ok && errMaj) return { ok: true, message: "Relance envoyée (e-mail parti), mais le journal n'a pas pu être mis à jour.", statut: 'echec', journalId: ligne.id };
   return res.ok
     ? { ok: true, message: 'Relance envoyée.', statut: 'envoye', journalId: ligne.id }
     : { ok: false, message: `Échec de l'envoi : ${res.error ?? 'inconnu'}`, statut: 'echec', journalId: ligne.id };

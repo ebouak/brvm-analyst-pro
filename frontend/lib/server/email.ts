@@ -76,6 +76,8 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
         ...(msg.attachments && msg.attachments.length ? { attachments: msg.attachments } : {}),
         ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
       }),
+      // Un envoi ne doit jamais pendre indéfiniment (cron non surveillé) ; l'échec est journalisé par l'appelant.
+      signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) return { ok: false, sent: 0, error: `Resend HTTP ${res.status}` };
     const corps = (await res.json().catch(() => null)) as { id?: unknown } | null;

@@ -11,56 +11,69 @@
 // Aucune donnée personnelle dans les réponses, les journaux ni l'alerte : des
 // comptes seulement.
 import { NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
 import { chargerReglages } from '@/lib/crm/reglagesServeur';
 import { chargerDossiers } from '@/lib/crm/charger';
-import { selectionnerPassage, cleJournal } from '@/lib/crm/sequences';
+import { selectionnerPassage, cleJournal, PREFIXE_SIMULATION } from '@/lib/crm/sequences';
 import { composerRelance } from '@/lib/crm/gabarits';
 import { envoyerRelanceEmail } from '@/lib/crm/envoiRelance';
+import { autorise, issueVide, resumer, restantAujourdhui, debutJourUtc, type Issue } from '@/lib/crm/passageSequences';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-function autorise(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  if (!secret || !bearer) return false;
-  const a = Buffer.from(secret, 'utf8');
-  const b = Buffer.from(bearer, 'utf8');
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
-type Issue = 'envoye' | 'simulation' | 'echec' | 'refus';
-const issueVide = (): Record<Issue, number> => ({ envoye: 0, simulation: 0, echec: 0, refus: 0 });
+/** Au-delà, on s'arrête proprement : le reste est « reporté » au passage suivant (maxDuration = 300 s). */
+const BUDGET_MS = 240_000;
 
 export async function GET() {
   return NextResponse.json({ error: 'Méthode non autorisée' }, { status: 405, headers: { Allow: 'POST' } });
 }
 
+/** Étapes déjà traitées aujourd'hui (UTC) pour ce mode ; null si la base ne répond pas. */
+async function dejaAujourdhui(simulation: boolean, maintenant: Date): Promise<number | null> {
+  try {
+    let q = getServiceClient().from('crm_actions').select('id', { count: 'exact', head: true }).gte('created_at', debutJourUtc(maintenant));
+    q = simulation
+      ? q.like('sequence_cle', `${PREFIXE_SIMULATION}%`)
+      : q.not('sequence_cle', 'is', null).not('sequence_cle', 'like', `${PREFIXE_SIMULATION}%`).in('statut', ['envoye', 'envoi', 'echec']);
+    const { count, error } = await q;
+    return error || count === null ? null : count;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: Request) {
-  if (!autorise(req)) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  if (!autorise(process.env.CRON_SECRET, req.headers.get('authorization'))) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const reglages = await chargerReglages();
   if (reglages.mode_sequences === 'off') return NextResponse.json({ mode: 'off', traites: 0 });
   const simulation = reglages.mode_sequences === 'simulation';
+  const debut = Date.now();
 
   // Capturé AVANT le chargement : un paiement postérieur doit bloquer l'envoi.
   const chargeLe = new Date().toISOString();
   const maintenant = new Date();
-  let passage: ReturnType<typeof selectionnerPassage>;
-  try {
-    passage = selectionnerPassage(await chargerDossiers(), reglages, maintenant);
-  } catch (e) {
-    console.error('[crm-sequences] chargement impossible :', (e as Error).name);
-    await alerterExploitant('Séquences CRM : chargement des dossiers impossible, rien n\'a été traité.', '⚠️ CRM');
-    return NextResponse.json({ mode: reglages.mode_sequences, erreur: 'chargement' }, { status: 500 });
+  const parSequence: Record<string, Record<Issue, number>> = {};
+  const compter = (sequence: string, issue: Issue, n = 1) => { (parSequence[sequence] ??= issueVide())[issue] += n; };
+
+  // Plafond QUOTIDIEN (le cron peut être relancé à la main) : illisible => rien ne part.
+  const deja = await dejaAujourdhui(simulation, maintenant);
+  let passage: ReturnType<typeof selectionnerPassage> = [];
+  if (deja === null) compter('plafond', 'indisponible');
+  else {
+    try {
+      passage = selectionnerPassage(await chargerDossiers(), { ...reglages, plafond_par_execution: restantAujourdhui(reglages.plafond_par_execution, deja) }, maintenant);
+    } catch (e) {
+      console.error('[crm-sequences] chargement impossible :', (e as Error).name);
+      compter('chargement', 'indisponible');
+    }
   }
 
-  const parSequence: Record<string, Record<Issue, number>> = {};
   for (const { d, etape } of passage) {
-    const c = (parSequence[etape.sequence] ??= issueVide());
+    if (Date.now() - debut > BUDGET_MS) { compter(etape.sequence, 'reporte'); continue; }
     let issue: Issue;
     try {
       const { sujet, corps } = composerRelance(etape.templateId, d);
@@ -75,17 +88,16 @@ export async function POST(req: Request) {
       console.error('[crm-sequences] exception sur une étape :', (e as Error).name);
       issue = 'echec';
     }
-    c[issue]++;
+    compter(etape.sequence, issue);
   }
 
-  const total = Object.values(parSequence).reduce((n, c) => n + c.envoye + c.simulation + c.echec + c.refus, 0);
-  const somme = (k: Issue) => Object.values(parSequence).reduce((n, c) => n + c[k], 0);
-  const echecs = somme('echec');
-  if (somme('envoye') + somme('simulation') + echecs > 0) {
+  const r = resumer(parSequence);
+  if (r.alerter) {
+    const p = r.parIssue;
     await alerterExploitant(
-      `Séquences CRM (${reglages.mode_sequences}, ${maintenant.toISOString().slice(0, 10)}) : ${somme('envoye')} envoyée(s), ${somme('simulation')} simulée(s), ${echecs} en échec, ${somme('refus')} refusée(s).`,
-      echecs > 0 ? '⚠️ CRM' : '✉️ CRM',
+      `Séquences CRM (${reglages.mode_sequences}, ${maintenant.toISOString().slice(0, 10)}) : ${p.envoye} envoyée(s), ${p.simulation} simulée(s), ${p.echec} en échec, ${p.indisponible} indisponible(s), ${p.refus} refusée(s), ${p.reporte} reportée(s).`,
+      r.http === 500 ? '⚠️ CRM' : '✉️ CRM',
     );
   }
-  return NextResponse.json({ mode: reglages.mode_sequences, traites: total, sequences: parSequence }, { status: echecs > 0 ? 500 : 200 });
+  return NextResponse.json({ mode: reglages.mode_sequences, traites: r.total, sequences: parSequence }, { status: r.http });
 }
