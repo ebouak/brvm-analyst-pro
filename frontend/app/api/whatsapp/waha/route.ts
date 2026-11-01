@@ -12,6 +12,8 @@ import { repondreCommande } from '@/lib/whatsapp/repondreCommande';
 import { appairerWhatsapp } from '@/lib/whatsapp/appairage';
 import { abonneAvecAgent, repondreAgent } from '@/lib/whatsapp/agent';
 import { isPairingCode } from '@/lib/pairingCodes';
+import { estStop } from '@/lib/crm/whatsappRelance';
+import { traiterStop } from '@/lib/whatsapp/stop';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -99,6 +101,14 @@ export async function POST(req: Request) {
     await appairerWhatsapp(ev.de, ev.texte);
     return NextResponse.json({ ok: true, appairage: true });
   }
+  // STOP : opposition au recontact commercial (RGPD art. 21). Jamais pour le
+  // test de l'exploitant, jamais vers l'agent.
+  const stop = !autoTest && estStop(ev.texte);
+  if (stop) {
+    const enregistre = await traiterStop(ev.de).catch(() => false);
+    if (enregistre) return NextResponse.json({ ok: true, stop: true });
+    // Non rattaché : le message suit le chemin normal jusqu'à la console.
+  }
   // RECAP : image du portefeuille de l'abonné lié (Premium) — avant les
   // commandes anonymes, car elle est personnelle.
   if (estDemandeRecap(ev.texte)) {
@@ -110,7 +120,7 @@ export async function POST(req: Request) {
     await repondreCommande(ev.de, commande);
     return NextResponse.json({ ok: true, commande: commande.type });
   }
-  if (ev.texte.trim() && !estDemandeHumain(ev.texte)) {
+  if (ev.texte.trim() && !estDemandeHumain(ev.texte) && !estStop(ev.texte)) {
     const abonne = await abonneAvecAgent(ev.de);
     if (abonne) {
       await repondreAgent(ev.de, abonne, ev.texte);
