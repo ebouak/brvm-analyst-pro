@@ -69,7 +69,11 @@ la suppression du compte.
   normalisé, refusé s'il est illisible.
 - Case « J'accepte d'être recontacté par WESTBOURSE sur WhatsApp au sujet de
   son offre », décochée, distincte des deux options.
-- « Plus tard » pose `ecran_whatsapp_vu_at` : l'écran ne revient pas.
+- « Plus tard » pose `ecran_whatsapp_vu_at` (l'écran ne revient pas) et
+  n'enregistre AUCUN consentement, même case cochée. Le consentement
+  (`recontact_optin_at`) n'est enregistré qu'avec un moyen de contact : numéro
+  valide saisi ou compte appairé (vérifié côté serveur). Le retrait du
+  consentement (décocher dans `/parametres/alertes`) est toujours possible.
 - `/parametres/alertes` gagne le champ numéro et la case (modifier, retirer).
 
 ## 3. E-mail de relance habillé
@@ -107,7 +111,7 @@ Module pur `lib/crm/emailRelance.ts` : `(corps, options) → { html, texte }`.
 - Jeton expiré / utilisé / inconnu : page explicative avec lien d'inscription
   et bouton WhatsApp, jamais d'erreur sèche.
 - CRM : chronologie « Dossier SNTS téléchargé le 03/11 » ; nouveau signal de
-  score `offre_utilisee`.
+  score `bonus` (nom dans le code).
 
 ## 5. Relance WhatsApp depuis la fiche CRM
 
@@ -116,7 +120,11 @@ Module pur `lib/crm/emailRelance.ts` : `(corps, options) → { html, texte }`.
   Appairé sans numéro (`@lid`) : « joignable en répondant dans la console
   WhatsApp ».
 - Gabarit pur, court, sans HTML, avec le lien du dossier offert et la ligne
-  « Répondez STOP pour ne plus être recontacté ».
+  « Répondez STOP pour ne plus être recontacté ». Le texte pré-rempli est
+  NEUTRE (`texteWhatsappInitial` : aucun montant, aucune date, aucun détail de
+  compte), le numéro pouvant être déclaré et non vérifié. L'exploitant envoie
+  depuis le numéro WhatsApp WESTBOURSE, sinon un STOP de la personne ne nous
+  parvient pas (rappel affiché sur la fiche).
 - Server action : mêmes verrous que l'e-mail (opposition revérifiée, échec
   fermé ; pas de Premium ni d'admin ; anti-doublon 2 min ; `crm.write`), puis
   ligne `canal='whatsapp'`, `statut='prepare'`, jeton bonus, audit sans numéro.
@@ -125,7 +133,8 @@ Module pur `lib/crm/emailRelance.ts` : `(corps, options) → { html, texte }`.
   passerelle (`/api/whatsapp/waha`) enregistre l'opposition de l'e-mail du
   compte rattaché — par `whatsapp_chat_id` (couvre `@lid`), sinon par numéro
   (prouvé ou déclaré). Expéditeur non rattaché : message transmis à la console
-  de contact, comme aujourd'hui, et accusé « STOP bien reçu ».
+  de contact, comme aujourd'hui, accusé « STOP bien reçu » et alerte à l'exploitant
+  (sans donnée personnelle) pour saisir l'opposition à la main.
 
 ## 6. Erreurs
 
