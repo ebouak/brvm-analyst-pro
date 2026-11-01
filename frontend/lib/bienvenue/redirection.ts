@@ -2,7 +2,10 @@
 const JOUR_MS = 86_400_000;
 
 export function nextSur(next: string | null | undefined, defaut = '/dashboard'): string {
-  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return defaut;
+  // Chemin interne uniquement. Caractères de contrôle refusés : la norme WHATWG
+  // supprime tabulation/CR/LF avant d'analyser l'URL (« /\t/evil.com » devient
+  // « //evil.com »). Antislash refusé : les navigateurs le traitent comme « / ».
+  if (!next || !/^\/(?![/\\])/.test(next) || /[\u0000-\u001f\u007f\\]/.test(next)) return defaut;
   return next;
 }
 

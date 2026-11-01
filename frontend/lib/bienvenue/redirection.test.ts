@@ -5,8 +5,9 @@ const M = new Date('2026-11-02T10:00:00Z');
 
 describe('redirection', () => {
   it('nextSur garde un chemin interne', () => expect(nextSur('/societes/SNTS?x=1')).toBe('/societes/SNTS?x=1'));
+  it('nextSur garde la query string', () => expect(nextSur('/societes/SNTS?x=1&y=2')).toBe('/societes/SNTS?x=1&y=2'));
   it('nextSur refuse un domaine externe', () => {
-    for (const n of ['//evil.com', 'https://evil.com', '/\\evil.com', '', null, undefined]) expect(nextSur(n)).toBe('/dashboard');
+    for (const n of ['//evil.com', 'https://evil.com', '/\\evil.com', '/\t/evil.com', '/\n/evil.com', '/a\\b', '', null, undefined]) expect(nextSur(n)).toBe('/dashboard');
   });
   it('nouveau compte = créé il y a moins de 24 h', () => {
     expect(estNouveauCompte('2026-11-02T08:00:00Z', M)).toBe(true);
