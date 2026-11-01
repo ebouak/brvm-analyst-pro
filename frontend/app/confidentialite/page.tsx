@@ -52,6 +52,9 @@ export default function ConfidentialitePage() {
             vous pouvez vous y opposer à tout moment (lien en pied de chaque message, ou Paramètres → Compte). Pour les personnes ayant rempli le
             formulaire de contact sans compte : consentement.
           </li>
+          <li>
+            Recontact sur WhatsApp : si vous indiquez un numéro WhatsApp et cochez la case prévue, WESTBOURSE peut vous recontacter sur WhatsApp au sujet de son offre (consentement). C&apos;est facultatif ; vous pouvez le retirer à tout moment dans Paramètres → Alertes, ou en répondant STOP.
+          </li>
           <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
         </ul>
       </section>

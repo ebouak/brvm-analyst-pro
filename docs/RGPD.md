@@ -168,6 +168,23 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
   `authenticated` ; lecture/écriture service_role côté serveur seulement ; console
   protégée par `crm.read` / `crm.write`.
 
+**CRM — numéro WhatsApp déclaré et recontact (2026-11-01, migrations 0174+)**
+- Données : `notification_prefs.telephone_declare` (numéro déclaré, non vérifié),
+  `recontact_optin_at` (date du consentement), `ecran_whatsapp_vu_at` (écran
+  post-inscription vu) ; `crm_actions.bonus_code` / `bonus_at` (dossier offert) ;
+  `crm_oppositions.source = 'whatsapp'` (STOP reçu sur WhatsApp).
+- Finalité : recontact commercial sur WhatsApp au sujet de l'offre WESTBOURSE ; dossier offert.
+- Base légale : **consentement** pour le recontact WhatsApp (case décochée par défaut,
+  facultative, aucun consentement enregistré sans moyen de contact). Le reste du CRM
+  conserve la base documentée ci-dessus.
+- Conservation : jusqu'au retrait du consentement ou à la suppression du compte ;
+  `crm_actions` selon la rétention CRM (24 mois).
+- Droits : export (`/api/account/export`) ; rectification et suppression du numéro, et
+  retrait du consentement, dans `/parametres/alertes` ; STOP en réponse sur WhatsApp ;
+  suppression du compte.
+- Destinataires : aucun hors WESTBOURSE ; WhatsApp (Meta) comme simple transport quand
+  la personne écrit ou est contactée.
+
 **Monitoring scraping (Lot 3)**
 - Données : **aucune donnée personnelle** (sources de marché, métriques techniques).
 - N/A RGPD. `scraper_errors` ne doit pas contenir de donnée perso (messages techniques).
