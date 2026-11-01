@@ -104,11 +104,24 @@ describe('garde-fous', () => {
     expect(dues(avec({ ...abandon(3), messages: [{ date: ilYa(1) }] }))).toEqual([]);
     expect(dues(avec({ ...abandon(3), messages: [{ date: ilYa(5) }] }))).toHaveLength(1);
   });
-  it("réponse déclarée puis traitée : l'arrêt est levé", () => {
+  it('réponse déclarée, même ensuite « traitée » : la séquence reste arrêtée', () => {
     const rep = act({ date: ilYa(2), type: 'decision', statut: 'decision', decision: 'reponse' });
     expect(dues(avec({ ...abandon(3), actions: [rep] }))).toEqual([]);
     const tr = act({ date: ilYa(1), type: 'decision', statut: 'decision', decision: 'traite' });
-    expect(dues(avec({ ...abandon(3), actions: [rep, tr] }))).toHaveLength(1);
+    expect(dues(avec({ ...abandon(3), actions: [rep, tr] }))).toEqual([]);
+  });
+  it("étape 2 : seulement si l'étape 1 est réellement partie (échec ou « envoi » indéterminé = arrêt)", () => {
+    const ok = act({ date: ilYa(8), statut: 'envoye', sequenceCle: 'paiement_inacheve:1' });
+    const dOk = avec({ ...abandon(9), actions: [ok] });
+    expect(selectionnerPassage([dOk], { ...REGLAGES_PAR_DEFAUT, mode_sequences: 'actif' }, MAINT).map((x) => x.etape.cle)).toEqual(['paiement_inacheve:2']);
+    for (const statut of ['echec', 'envoi']) {
+      const d = avec({ ...abandon(9), actions: [act({ date: ilYa(8), statut, sequenceCle: 'paiement_inacheve:1' })] });
+      expect(selectionnerPassage([d], { ...REGLAGES_PAR_DEFAUT, mode_sequences: 'actif' }, MAINT)).toEqual([]);
+    }
+  });
+  it("simulation : l'étape 2 suit une étape 1 simulée", () => {
+    const d = avec({ ...abandon(9), actions: [act({ date: ilYa(8), statut: 'simulation', sequenceCle: 'sim_paiement_inacheve:1' })] });
+    expect(selectionnerPassage([d], { ...REGLAGES_PAR_DEFAUT, mode_sequences: 'simulation' }, MAINT).map((x) => x.etape.cle)).toEqual(['paiement_inacheve:2']);
   });
   it("paiement abandonné + offre vue : seule la séquence de paiement s'applique", () => {
     const d = avec({ paiements: [pay('pending', 'cinetpay', 6)], offreVues: [vue(3)] });

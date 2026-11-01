@@ -51,7 +51,7 @@ export function calculerIndicateurs(dossiers: readonly Dossier[], reglages: Pick
 
     // Conversion : la PREMIÈRE relance (envoyée ou préparée) fixe l'origine, quel que soit le nombre de tentatives.
     const premiere = d.actions
-      .filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare'))
+      .filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi'))
       .map((a) => a.date)
       .sort(compareIso)[0];
     if (premiere && Date.parse(premiere) >= debut) {

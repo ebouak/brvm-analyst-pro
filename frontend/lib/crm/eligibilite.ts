@@ -24,7 +24,7 @@ export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date): {
   if (d.oppose) raisons.push("Cette personne s'est opposée aux propositions commerciales : plus aucun contact.");
   if (decisionsCourantes(d).cloture) raisons.push('Dossier clôturé : relance refusée.');
 
-  const nb = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare')).length;
+  const nb = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi')).length;
   if (nb >= reglages.max_relances) raisons.push(`Déjà ${pluriel(nb, 'relance')} (maximum ${reglages.max_relances}).`);
 
   const contact = dernierContact(d);

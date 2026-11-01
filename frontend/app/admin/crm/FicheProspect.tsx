@@ -48,7 +48,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
   const paiements = [...d.paiements].sort((a, b) => compareIso(b.date, a.date));
   const messages = [...d.messages].sort((a, b) => compareIso(b.date, a.date));
   const elig = eligibilite(d, reglages, maintenant);
-  const nbRelances = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare')).length;
+  const nbRelances = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi')).length;
   const contact = dernierContact(d);
   const nbDoublons = etat.doublons.length;
 

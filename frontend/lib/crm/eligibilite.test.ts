@@ -85,4 +85,8 @@ describe('eligibilite', () => {
     const d = avec({ actions: [act({ date: ilYa(3) })] });
     expect(eligibilite(d, { ...R, delai_min_jours: 2 }, MAINT).ok).toBe(true);
   });
+  it("compte une relance restée « en envoi » comme un contact possible, pas une ligne de simulation", () => {
+    expect(eligibilite(avec({ actions: [act({ date: ilYa(1), statut: 'envoi' })] }), R, MAINT).ok).toBe(false);
+    expect(eligibilite(avec({ actions: [act({ date: ilYa(1), statut: 'simulation', sequenceCle: 'sim_x:1' })] }), R, MAINT).ok).toBe(true);
+  });
 });

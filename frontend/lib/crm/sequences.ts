@@ -44,11 +44,13 @@ export const cleJournal = (cle: string, simulation: boolean) => (simulation ? PR
  * Simulation : seules les clés `sim_` comptent (chaque étape est simulée une fois) ;
  * actif : seules les clés réelles comptent (une étape simulée part quand même, une fois).
  */
-export function etapesFaites(d: Pick<Dossier, 'actions'>, simulation = false): Set<string> {
+export function etapesFaites(d: Pick<Dossier, 'actions'>, simulation = false, seulementReussies = false): Set<string> {
   const out = new Set<string>();
   for (const a of d.actions) {
     const k = a.sequenceCle;
     if (typeof k !== 'string' || !k) continue;
+    // « Réussie » : réellement envoyée (actif) ou simulée sans accroc (simulation). Un « envoi » indéterminé ou un échec ne l'est pas.
+    if (seulementReussies && a.statut !== (simulation ? 'simulation' : 'envoye')) continue;
     if (k.startsWith(PREFIXE_SIMULATION)) { if (simulation) out.add(k.slice(PREFIXE_SIMULATION.length)); }
     else if (!simulation) out.add(k);
   }
@@ -69,15 +71,19 @@ function ancreDe(sequence: NomSequence, d: Dossier, maintenant: Date): string | 
   return dernier ? `${dernier}T23:59:59Z` : null;
 }
 
-/** Une réponse (déclarée ou message de contact) postérieure à l'ancre, non encore « traitée ». */
+/**
+ * Une réponse (déclarée ou message de contact) postérieure à l'ancre arrête la
+ * séquence, MÊME marquée « traitée » ensuite : un « non merci » traité ne doit
+ * pas recevoir l'étape suivante. Seule une relance manuelle reprend la main.
+ */
 function reponseApres(d: Dossier, ancre: string): boolean {
   const dec = decisionsCourantes(d);
-  const dates = [...d.messages.map((m) => m.date), ...(dec.derniereReponse ? [dec.derniereReponse] : [])];
-  return dates.some((x) => compareIso(x, ancre) > 0 && !(dec.derniereTraite && compareIso(dec.derniereTraite, x) >= 0));
+  const dates = [...d.messages.map((m) => m.date), ...d.actions.filter((a) => a.type === 'decision' && a.decision === 'reponse').map((a) => a.date), ...(dec.derniereReponse ? [dec.derniereReponse] : [])];
+  return dates.some((x) => compareIso(x, ancre) > 0);
 }
 
 /** Au plus UNE étape due (la plus ancienne) pour cette personne. [] = rien à faire. */
-export function etapesDues(d: Dossier, reglages: Reglages, maintenant: Date, dejaFaites: Set<string>): EtapeDue[] {
+export function etapesDues(d: Dossier, reglages: Reglages, maintenant: Date, dejaFaites: Set<string>, reussies: Set<string> = dejaFaites): EtapeDue[] {
   if (d.admin || d.premium || d.oppose) return [];
   if (decisionsCourantes(d).cloture) return [];
   if (!eligibilite(d, reglages, maintenant).ok) return [];
@@ -92,6 +98,8 @@ export function etapesDues(d: Dossier, reglages: Reglages, maintenant: Date, dej
     const seq = SEQUENCES[nom];
     const prochaine = seq.etapes.find((e) => !dejaFaites.has(cleEtape(nom, e.etape)));
     if (!prochaine) continue;
+    // Étape n>1 : seulement si l'étape précédente est PARTIE. Échec ou état indéterminé = la séquence s'arrête.
+    if (prochaine.etape > 1 && !reussies.has(cleEtape(nom, prochaine.etape - 1))) continue;
     const echeance = new Date(Date.parse(ancre) + prochaine.apresJours * JOUR_MS).toISOString();
     if (Date.parse(echeance) > maintenant.getTime()) continue;
     dues.push({ sequence: nom, etape: prochaine.etape, cle: cleEtape(nom, prochaine.etape), templateId: seq.templateId, ancre, echeance });
@@ -106,7 +114,8 @@ export function selectionnerPassage(dossiers: readonly Dossier[], reglages: Regl
   const vus = new Set<string>();
   for (const d of dossiers) {
     if (d.admin || vus.has(d.emailNorm)) continue;
-    const [etape] = etapesDues(d, reglages, maintenant, etapesFaites(d, reglages.mode_sequences === 'simulation'));
+    const simul = reglages.mode_sequences === 'simulation';
+    const [etape] = etapesDues(d, reglages, maintenant, etapesFaites(d, simul), etapesFaites(d, simul, true));
     if (!etape) continue;
     vus.add(d.emailNorm);
     out.push({ cle: d.cle, d, etape });
