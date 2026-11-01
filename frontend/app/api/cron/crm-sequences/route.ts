@@ -11,12 +11,12 @@
 // Aucune donnée personnelle dans les réponses, les journaux ni l'alerte : des
 // comptes seulement.
 import { NextResponse } from 'next/server';
-import { chargerReglages } from '@/lib/crm/reglagesServeur';
+import { lireReglages } from '@/lib/crm/reglagesServeur';
 import { chargerDossiers } from '@/lib/crm/charger';
 import { selectionnerPassage, cleJournal, PREFIXE_SIMULATION } from '@/lib/crm/sequences';
 import { composerRelance } from '@/lib/crm/gabarits';
 import { envoyerRelanceEmail } from '@/lib/crm/envoiRelance';
-import { autorise, issueVide, resumer, restantAujourdhui, debutJourUtc, type Issue } from '@/lib/crm/passageSequences';
+import { autorise, decisionReglages, issueVide, resumer, restantAujourdhui, debutJourUtc, type Issue } from '@/lib/crm/passageSequences';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
 
@@ -48,8 +48,16 @@ async function dejaAujourdhui(simulation: boolean, maintenant: Date): Promise<nu
 export async function POST(req: Request) {
   if (!autorise(process.env.CRON_SECRET, req.headers.get('authorization'))) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-  const reglages = await chargerReglages();
-  if (reglages.mode_sequences === 'off') return NextResponse.json({ mode: 'off', traites: 0 });
+  const lecture = await lireReglages();
+  const decision = decisionReglages(lecture.ok ? { ok: true, mode: lecture.reglages.mode_sequences } : { ok: false });
+  if (!lecture.ok) {
+    // Réglages illisibles : on ne sait pas si l'automatisation doit tourner — on le dit, on ne devine pas.
+    console.error('[crm-sequences] réglages illisibles :', lecture.raison);
+    await alerterExploitant('Séquences CRM : réglages illisibles, passage NON exécuté.', '⚠️ CRM');
+    return NextResponse.json({ mode: 'inconnu', erreur: 'reglages' }, { status: 500 });
+  }
+  const reglages = lecture.reglages;
+  if (decision === 'off') return NextResponse.json({ mode: 'off', traites: 0 });
   const simulation = reglages.mode_sequences === 'simulation';
   const debut = Date.now();
 

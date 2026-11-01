@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { autorise, resumer, issueVide, restantAujourdhui, debutJourUtc } from './passageSequences';
+import { autorise, decisionReglages, resumer, issueVide, restantAujourdhui, debutJourUtc } from './passageSequences';
 
 describe('autorise', () => {
   it('bon secret : oui', () => { expect(autorise('s'.repeat(40), `Bearer ${'s'.repeat(40)}`)).toBe(true); });
@@ -37,4 +37,13 @@ describe('plafond du jour', () => {
     expect(restantAujourdhui(20, 35)).toBe(0);
   });
   it('début du jour UTC', () => { expect(debutJourUtc(new Date('2026-11-02T23:59:00Z'))).toBe('2026-11-02T00:00:00.000Z'); });
+});
+
+describe('decisionReglages', () => {
+  it('illisibles : inconnu (500 + alerte), jamais « off »', () => { expect(decisionReglages({ ok: false })).toBe('inconnu'); });
+  it('off lu correctement : off ; autres modes : on poursuit', () => {
+    expect(decisionReglages({ ok: true, mode: 'off' })).toBe('off');
+    expect(decisionReglages({ ok: true, mode: 'simulation' })).toBe('poursuivre');
+    expect(decisionReglages({ ok: true, mode: 'actif' })).toBe('poursuivre');
+  });
 });

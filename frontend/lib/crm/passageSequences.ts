@@ -34,3 +34,9 @@ export function resumer(parSequence: Record<string, Record<Issue, number>>): Res
   const panne = parIssue.echec + parIssue.indisponible > 0;
   return { total, parIssue, http: panne ? 500 : 200, alerter: parIssue.envoye + parIssue.simulation + parIssue.echec + parIssue.indisponible > 0 };
 }
+
+/** Réglages illisibles : le passage n'est PAS exécuté et le dit (500) ; un `off` lu correctement reste silencieux (200). */
+export function decisionReglages(lecture: { ok: true; mode: string } | { ok: false }): 'inconnu' | 'off' | 'poursuivre' {
+  if (!lecture.ok) return 'inconnu';
+  return lecture.mode === 'off' ? 'off' : 'poursuivre';
+}

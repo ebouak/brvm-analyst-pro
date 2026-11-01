@@ -7,7 +7,7 @@ import type { AdminContext } from '@/lib/server/rbac';
 import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { estOppose } from '@/lib/crm/opposition';
 import { eligibilite } from '@/lib/crm/eligibilite';
-import { chargerReglages } from '@/lib/crm/reglagesServeur';
+import { chargerReglages, lireReglages } from '@/lib/crm/reglagesServeur';
 import { verifierPaiementAvantEnvoi } from '@/lib/crm/paiementServeur';
 import { scorer } from '@/lib/crm/score';
 import { construireEmailRelance } from '@/lib/crm/emailRelance';
@@ -57,7 +57,13 @@ export async function envoyerRelanceEmail(e: EntreeEnvoi): Promise<SortieEnvoi> 
     return panne("Vérification de l'opposition impossible : envoi annulé.");
   }
 
-  const reglages = await chargerReglages();
+  // Séquence : réglages illisibles => étape non traitée et SIGNALÉE (jamais de défauts silencieux, ils masqueraient l'interrupteur).
+  let reglages;
+  if (e.sequenceCle) {
+    const l = await lireReglages();
+    if (!l.ok) return panne('Réglages illisibles : étape non traitée.');
+    reglages = l.reglages;
+  } else reglages = await chargerReglages();
   // Séquence : l'interrupteur « off » (ou un changement de mode) prend effet IMMÉDIATEMENT, même en plein passage.
   if (e.sequenceCle && reglages.mode_sequences !== (e.simulation ? 'simulation' : 'actif')) return refus('Mode des séquences changé : étape non traitée.');
   // Règle unique d'éligibilité (paiement, opposition, clôture, plafond, délai) : mêmes raisons que l'interface.
