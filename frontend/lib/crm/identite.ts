@@ -30,11 +30,11 @@ type PrefsWa = Omit<Sources['prefs'][number], 'user_id'>;
 
 /** Joignabilité WhatsApp : le numéro PROUVÉ (appairage) prime sur le déclaré. */
 export function contactWhatsapp(p: PrefsWa | undefined, liaisons: { chat_id: string; telephone: string | null }[]): Dossier['whatsapp'] {
-  const prouve = p?.whatsapp_phone ?? liaisons.find((l) => l.telephone)?.telephone ?? null;
+  const prouve = p?.whatsapp_phone || liaisons.find((l) => l.telephone)?.telephone || null;
   const lie = Boolean(p?.whatsapp_chat_id) || liaisons.length > 0;
   const recontact = Boolean(p?.recontact_optin_at);
   if (prouve) return { numero: prouve, source: 'prouve', lieSansNumero: false, recontact };
-  if (p?.telephone_declare) return { numero: p.telephone_declare, source: 'declare', lieSansNumero: false, recontact };
+  if (p?.telephone_declare) return { numero: p.telephone_declare, source: 'declare', lieSansNumero: lie, recontact };
   return { numero: null, source: null, lieSansNumero: lie, recontact };
 }
 

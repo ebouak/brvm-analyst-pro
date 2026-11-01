@@ -103,6 +103,17 @@ describe('contactWhatsapp', () => {
   it('replie sur le déclaré', () => {
     expect(contactWhatsapp({ whatsapp_phone: null, whatsapp_chat_id: null, telephone_declare: '+2250707070707', recontact_optin_at: null }, []).source).toBe('declare');
   });
+  it('garde la liaison sans numéro même avec un numéro déclaré', () => {
+    expect(contactWhatsapp({ whatsapp_phone: null, whatsapp_chat_id: '1@lid', telephone_declare: '+2250707070707', recontact_optin_at: null }, []))
+      .toMatchObject({ source: 'declare', lieSansNumero: true });
+  });
+  it('ignore une chaîne vide comme un numéro absent', () => {
+    expect(contactWhatsapp({ whatsapp_phone: '', whatsapp_chat_id: null, telephone_declare: '+2250707070707', recontact_optin_at: null }, []).source).toBe('declare');
+  });
+  it('liaison sans numéro et sans préférences', () => {
+    expect(contactWhatsapp(undefined, [{ chat_id: '9@lid', telephone: null }]))
+      .toEqual({ numero: null, source: null, lieSansNumero: true, recontact: false });
+  });
   it('rien sans préférences', () => {
     expect(contactWhatsapp(undefined, [])).toEqual({ numero: null, source: null, lieSansNumero: false, recontact: false });
   });
