@@ -38,7 +38,7 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
 
   const sb = getServiceClient();
   const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
-  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye']).gte('created_at', deuxMinutes).limit(1);
+  const { data: enCours } = await sb.from('crm_actions').select('id').eq('email_norm', d.emailNorm).in('statut', ['envoi', 'envoye', 'prepare']).gte('created_at', deuxMinutes).limit(1);
   if (enCours && enCours.length > 0) return { ok: false, message: "Une relance vient d'être envoyée ou est en cours pour cette personne." };
 
   const score = scorer(d, new Date());
@@ -78,7 +78,7 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
 export async function preparerRelanceWhatsapp(cle: string, texte: string, templateId: TemplateId, inclureOffre: boolean): Promise<Retour & { url?: string }> {
   const ctx = await requirePermission('crm.write');
   if (!estTemplateId(templateId)) return { ok: false, message: 'Gabarit inconnu.' };
-  const brut = String(texte ?? '').trim().slice(0, 3000);
+  const brut = String(texte ?? '').trim().slice(0, 1500);
   if (!brut) return { ok: false, message: 'Message vide.' };
   const d = await chargerDossier(cle);
   if (!d) return { ok: false, message: 'Personne introuvable.' };

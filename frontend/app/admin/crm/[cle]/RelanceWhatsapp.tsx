@@ -10,6 +10,7 @@ export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero,
   const [texte, setTexte] = useState(texteInitial);
   const [offre, setOffre] = useState(true);
   const [retour, setRetour] = useState<{ ok: boolean; message: string } | null>(null);
+  const [lien, setLien] = useState<string | null>(null);
   const [envoi, demarrer] = useTransition();
   return (
     <div className="space-y-3">
@@ -26,12 +27,14 @@ export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero,
         disabled={envoi}
         onClick={() => {
           // Fenêtre ouverte AVANT l'appel serveur : sinon le navigateur bloque le popup.
+          setLien(null);
           const fenetre = window.open('', '_blank');
           if (fenetre) fenetre.opener = null;
           demarrer(async () => {
             try {
               const r = await preparerRelanceWhatsapp(cle, texte, templateId, offre);
-              setRetour(r);
+              setLien(r.ok && r.url ? r.url : null);
+              setRetour(r.ok && !fenetre ? { ok: true, message: "Message prêt, mais la fenêtre WhatsApp a été bloquée par le navigateur : utilisez le lien ci-dessous." } : r);
               if (r.ok && r.url && fenetre) fenetre.location.href = r.url;
               else fenetre?.close();
             } catch {
@@ -44,6 +47,7 @@ export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero,
       >
         {envoi ? 'Préparation…' : 'Ouvrir WhatsApp avec ce message'}
       </button>
+      {lien && <a href={lien} target="_blank" rel="noopener noreferrer" className="block text-sm text-accent underline underline-offset-4">Ouvrir WhatsApp avec ce message</a>}
       {retour && <p className={`text-sm ${retour.ok ? 'text-up' : 'text-down'}`}>{retour.message}</p>}
     </div>
   );
