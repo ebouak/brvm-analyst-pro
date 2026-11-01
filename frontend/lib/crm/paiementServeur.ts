@@ -13,10 +13,13 @@ export const MESSAGE_PAIEMENT_SURVENU = "Paiement confirmé à l'instant : relan
  */
 export async function verifierPaiementAvantEnvoi(userId: string | null, depuisIso: string): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!userId) return { ok: true };
+  // Marge de 60 s contre la dérive d'horloge entre ce serveur et la base : un paiement
+  // créé juste avant le chargement du dossier ne doit pas passer inaperçu.
+  const seuil = new Date(Date.parse(depuisIso) - 60_000).toISOString();
   try {
     const sb = getServiceClient();
     const [paye, profil] = await Promise.all([
-      sb.from('billing_transactions').select('id').eq('user_id', userId).eq('status', 'paid').or(`created_at.gt.${depuisIso},paid_at.gt.${depuisIso}`).limit(1),
+      sb.from('billing_transactions').select('id').eq('user_id', userId).eq('status', 'paid').or(`created_at.gt.${seuil},paid_at.gt.${seuil}`).limit(1),
       sb.from('profiles').select('is_premium').eq('id', userId).maybeSingle(),
     ]);
     if (paye.error || profil.error) {

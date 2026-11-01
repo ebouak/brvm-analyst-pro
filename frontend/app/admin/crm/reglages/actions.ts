@@ -27,11 +27,12 @@ export async function enregistrerReglages(form: FormData | Record<string, unknow
   if (!v.ok) return { ok: false, message: v.message };
 
   const avant = await chargerReglages();
-  const { error } = await getServiceClient().from('crm_reglages')
-    .update({ ...v.reglages, modifie_par: ctx.userId, modifie_le: new Date().toISOString() })
-    .eq('id', 1);
-  if (error) {
-    console.error('[crm] réglages non enregistrés :', error.code ?? error.message);
+  // Upsert (et non update) : si la ligne unique manquait, un update toucherait 0 ligne et annoncerait un faux succès.
+  const { data: ecrit, error } = await getServiceClient().from('crm_reglages')
+    .upsert({ id: 1, ...v.reglages, modifie_par: ctx.userId, modifie_le: new Date().toISOString() }, { onConflict: 'id' })
+    .select('id');
+  if (error || !ecrit || ecrit.length === 0) {
+    console.error('[crm] réglages non enregistrés :', error?.code ?? 'aucune ligne retournée');
     return { ok: false, message: 'Réglages non enregistrés.' };
   }
 
@@ -39,7 +40,7 @@ export async function enregistrerReglages(form: FormData | Record<string, unknow
   for (const k of Object.keys(v.reglages) as (keyof Reglages)[]) {
     if (avant[k] !== v.reglages[k]) changes[k] = { avant: avant[k], apres: v.reglages[k] };
   }
-  await recordAudit(ctx, { action: 'crm.reglages', resourceType: 'crm_reglages', resourceId: '1', severity: v.reglages.mode_sequences === 'actif' ? 'warning' : 'info', metadata: { changes } });
+  await recordAudit(ctx, { action: 'crm.reglages', resourceType: 'crm_reglages', resourceId: '1', severity: avant.mode_sequences !== 'actif' && v.reglages.mode_sequences === 'actif' ? 'warning' : 'info', metadata: { changes } });
   revalidatePath('/admin/crm');
   return { ok: true, message: 'Réglages enregistrés.' };
 }
