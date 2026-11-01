@@ -73,6 +73,10 @@ export function composerRelance(id: TemplateId, d: Dossier): { sujet: string; co
           '',
           'Activez votre mois de Premium : https://www.westbourse.com/account/plan',
           '',
+          // Règle commerciale réelle (migration 0156, 2026-10-19) : la formation
+          // complète ouvre aussi un mois de Premium.
+          'Vous préférez commencer par apprendre ? La formation complète de l’Academy vous donne un mois de Premium offert : https://www.westbourse.com/formations/academy',
+          '',
           'Une question avant de vous lancer ? Répondez simplement à ce message.',
           '',
           SIGNATURE,

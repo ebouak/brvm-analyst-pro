@@ -60,8 +60,10 @@ describe('composerRelance', () => {
     expect(sujet).toContain('Academy');
     expect(corps).toContain("l'Academy WESTBOURSE en accès complet");
     expect(corps).toContain('un mois');
-    // Une seule action : le lien de souscription, pas de page tarifs en concurrence.
-    expect(corps.match(/https:\/\/\S+/g)).toEqual(['https://www.westbourse.com/account/plan']);
+    // Action principale : Premium (qui inclut l'Academy) ; porte alternative : la
+    // formation complète, qui offre un mois de Premium (migration 0156).
+    expect(corps.match(/https:\/\/\S+/g)).toEqual(['https://www.westbourse.com/account/plan', 'https://www.westbourse.com/formations/academy']);
+    expect(corps).toContain('un mois de Premium offert');
     // Ni promesse de gain ni conseil : on décrit des outils.
     expect(corps).not.toMatch(/gagn|rentab|garanti|conseil/i);
   });
