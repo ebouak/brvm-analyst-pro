@@ -10,13 +10,14 @@ import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { chargerDossier } from '@/lib/crm/charger';
 import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
 import { scorer } from '@/lib/crm/score';
-import { piedOpposition, versHtml, estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
+import { estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
+import { construireEmailRelance } from '@/lib/crm/emailRelance';
 
 const EXPEDITEUR = `WESTBOURSE <${ADRESSE_SUPPORT}>`;
 const SITE = 'https://www.westbourse.com';
 type Retour = { ok: boolean; message: string };
 
-export async function envoyerRelance(cle: string, sujet: string, corps: string, templateId: TemplateId): Promise<Retour> {
+export async function envoyerRelance(cle: string, sujet: string, corps: string, templateId: TemplateId, inclureOffre: boolean): Promise<Retour> {
   const ctx = await requirePermission('crm.write');
   if (!estTemplateId(templateId)) return { ok: false, message: 'Gabarit inconnu.' };
   const s = String(sujet ?? '').replace(/[\r\n]+/g, ' ').trim().slice(0, 150);
@@ -41,17 +42,25 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
 
   const score = scorer(d, new Date());
   const jeton = randomBytes(24).toString('hex');
+  const jetonBonus = inclureOffre ? randomBytes(24).toString('hex') : null;
   const { data: ligne, error } = await sb.from('crm_actions').insert({
     email_norm: d.emailNorm, user_id: d.userId, type: 'relance', canal: 'email', template_id: templateId,
     sujet: s, contenu: c, score_at_envoi: score.score, signaux_json: score.raisons, statut: 'envoi',
-    jeton_opposition: jeton, auteur: ctx.userId,
+    jeton_opposition: jeton, jeton_bonus: jetonBonus, auteur: ctx.userId,
   }).select('id').single();
   if (error || !ligne) return { ok: false, message: 'Journal indisponible : envoi annulé.' };
 
-  const texte = `${c}\n\n${piedOpposition(`${SITE}/crm/opposition?t=${jeton}`)}`;
   let res: EmailResult;
   try {
-    res = await sendEmail({ to: d.emailNorm, subject: s, text: texte, html: versHtml(texte), from: EXPEDITEUR, replyTo: ADRESSE_SUPPORT });
+    // La construction est DANS le try : elle échoue fermé (lien d'opposition invalide) et l'échec est journalisé.
+    const { html, texte } = construireEmailRelance({
+      corps: c,
+      lienOpposition: `${SITE}/crm/opposition?t=${jeton}`,
+      lienOffre: jetonBonus ? `${SITE}/offre/dossier?t=${jetonBonus}` : null,
+      whatsappNumero: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || null,
+      chaineWhatsappUrl: process.env.NEXT_PUBLIC_WHATSAPP_CHAINE_URL || null,
+    });
+    res = await sendEmail({ to: d.emailNorm, subject: s, text: texte, html, from: EXPEDITEUR, replyTo: ADRESSE_SUPPORT });
   } catch (e) {
     // Une exception ne doit jamais laisser la ligne bloquée en « envoi ».
     res = { ok: false, sent: 0, error: (e as Error).message || 'exception' };
@@ -59,7 +68,7 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
   // L'échec est journalisé et affiché, jamais avalé (panne e-mail 07–09/2026).
   const { error: errMaj } = await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
   // Audit sans e-mail : identifiant de la ligne de journal, jamais la clé (qui embarque l'adresse).
-  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj } });
+  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: inclureOffre } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
   if (res.ok && errMaj) return { ok: true, message: "Relance envoyée, mais le journal n'a pas pu être mis à jour." };
   return res.ok ? { ok: true, message: 'Relance envoyée.' } : { ok: false, message: `Échec de l'envoi : ${res.error ?? 'inconnu'}` };

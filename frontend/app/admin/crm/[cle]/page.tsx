@@ -26,7 +26,7 @@ export default async function Page({ params }: { params: { cle: string } }) {
   const s = scorer(d, maintenant);
   const templateId = choisirGabarit(d, s);
   const { sujet, corps } = composerRelance(templateId, d);
-  const derniere = [...d.actions].filter((a) => a.type === 'relance' && a.statut === 'envoye').sort((a, b) => b.date.localeCompare(a.date))[0];
+  const derniere = [...d.actions].filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare')).sort((a, b) => b.date.localeCompare(a.date))[0];
   const recente = derniere && maintenant.getTime() - Date.parse(derniere.date) < 14 * 86_400_000 ? fmtJour(derniere.date) : null;
 
   return (
