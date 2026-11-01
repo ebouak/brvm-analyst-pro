@@ -54,6 +54,14 @@ Audit initial : 2026-06-16.
   `public/pdf.worker.min.mjs`). ✅
 - Sans consentement : cookies essentiels uniquement (session Supabase). Les traceurs non
   essentiels sont bloqués par la bannière.
+- **Rapports d'audience (`/admin/audience`, `/api/cron/audience`)** : statistiques
+  AGRÉGÉES lues dans PostHog côté serveur (clé personnelle en lecture seule, jamais exposée au
+  client ni journalisée). Elles ne couvrent que les visiteurs ayant consenti à la mesure
+  d'audience : l'audience réelle est supérieure, et les pages l'indiquent. Les messages
+  (Telegram, e-mail hebdomadaire/mensuel à `ALERTS_EMAIL_TO`) ne contiennent que des
+  totaux : ni identifiant, ni e-mail, ni IP. Pas de pixel de suivi dans l'e-mail. Le bloc
+  « intérêt formation » vient de notre base (comptes distincts comptés, pays du compte), sans
+  noms. Rien n'est stocké : chaque rapport est recalculé à la demande.
 
 ## 4. Sécurité
 
