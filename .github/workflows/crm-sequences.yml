@@ -1,0 +1,38 @@
+name: CRM séquences de relance
+
+# Relances automatiques (e-mail uniquement) — route /api/cron/crm-sequences.
+# Le MODE se règle dans /admin/crm › Réglages, pas ici :
+#   off         : la route répond sans rien faire (défaut) ;
+#   simulation  : journalise ce qui partirait, n'envoie rien ;
+#   actif       : envoie (plafond par exécution, une étape jamais deux fois).
+# Le job devient rouge si la route échoue ou si au moins un envoi est en échec.
+# Secret requis : CRON_SECRET (même valeur que sur Vercel).
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: crm-sequences
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sequences:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://www.westbourse.com
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Lancer les séquences
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then echo "::error::CRON_SECRET absent : séquences NON exécutées."; exit 1; fi
+          r=$(curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" -w '\n%{http_code}' "$SITE/api/cron/crm-sequences")
+          code=$(echo "$r" | tail -1); corps=$(echo "$r" | head -n -1)
+          echo "HTTP $code"; echo "$corps"
+          [ "$code" = "200" ] || { echo "::error::Séquences CRM : HTTP $code"; exit 1; }
