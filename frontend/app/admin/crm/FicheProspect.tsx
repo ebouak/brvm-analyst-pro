@@ -6,6 +6,9 @@ import { decisionsCourantes, reponseRecue, LIB_VUE, LIB_MOTIF, actionRecommandee
 import { chronologie } from '@/lib/crm/identite';
 import { fmtJour, fmtMontant, compareIso } from '@/lib/crm/score';
 import type { TemplateId } from '@/lib/crm/gabarits';
+import { eligibilite } from '@/lib/crm/eligibilite';
+import type { Reglages } from '@/lib/crm/reglages';
+import { dernierContact } from '@/lib/crm/vues';
 import { texteWhatsappInitial } from '@/lib/crm/whatsappRelance';
 import { libStatut } from './libelles';
 import RelanceForm from './[cle]/RelanceForm';
@@ -32,10 +35,10 @@ export interface FicheProps {
   d: Dossier; etat: ResultatPaiement; vue: Vue; score: Score; canWrite: boolean;
   responsables: { id: string; email: string }[];
   templateId: TemplateId; sujet: string; corps: string; relanceRecente: string | null;
-  maintenant: Date;
+  maintenant: Date; reglages: Reglages;
 }
 
-export default function FicheProspect({ d, etat, vue, score, canWrite, responsables, templateId, sujet, corps, relanceRecente, maintenant }: FicheProps) {
+export default function FicheProspect({ d, etat, vue, score, canWrite, responsables, templateId, sujet, corps, relanceRecente, maintenant, reglages }: FicheProps) {
   const dec = decisionsCourantes(d);
   const reco = actionRecommandee(d, vue, etat, maintenant);
   const nomResp = (id: string | null) => (id ? responsables.find((r) => r.id === id)?.email ?? 'compte inconnu' : null);
@@ -44,7 +47,9 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
   const notes = d.actions.filter((a) => a.type === 'note').sort((a, b) => compareIso(b.date, a.date));
   const paiements = [...d.paiements].sort((a, b) => compareIso(b.date, a.date));
   const messages = [...d.messages].sort((a, b) => compareIso(b.date, a.date));
-  const peutRelancer = !d.premium && !d.admin && etat.etat !== 'paye' && etat.etat !== 'a_verifier';
+  const elig = eligibilite(d, reglages, maintenant);
+  const nbRelances = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare')).length;
+  const contact = dernierContact(d);
   const nbDoublons = etat.doublons.length;
 
   return (
@@ -131,18 +136,22 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
         <>
           <section>
             <h2 className={H2}>Relance par e-mail</h2>
-            {d.premium || d.admin ? (
-              <p className="text-sm text-muted">Personne Premium ou administratrice : pas de relance commerciale.</p>
-            ) : !peutRelancer ? (
-              <p className="text-sm text-muted">{etat.etat === 'paye' ? 'Paiement confirmé : plus de relance.' : "Paiement à vérifier d'abord dans Paiements."}</p>
+            {elig.ok ? (
+              <p role="status" className="mb-2 text-xs text-up">Relance possible · {nbRelances}/{reglages.max_relances} relance{reglages.max_relances > 1 ? 's' : ''}{contact ? `, dernier contact le ${fmtJour(contact)}` : ', aucun contact encore'}</p>
             ) : (
+              <div role="status" className="mb-2 rounded-md border border-down/30 bg-down/5 p-3 text-sm">
+                <p className="font-medium text-down">Relance bloquée</p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-5 text-muted">{elig.raisons.map((r) => <li key={r}>{r}</li>)}</ul>
+              </div>
+            )}
+            {!elig.ok ? null : (
               <RelanceForm cle={d.cle} templateId={templateId} sujetInitial={sujet} corpsInitial={corps} relanceRecente={relanceRecente} oppose={d.oppose} />
             )}
           </section>
           <section>
             <h2 className={H2}>Relance par WhatsApp</h2>
-            {d.premium || d.admin || d.oppose || !peutRelancer ? (
-              <p className="text-sm text-muted">Relance commerciale désactivée pour cette personne.</p>
+            {!elig.ok ? (
+              <p className="text-sm text-muted">Relance bloquée : voir les raisons dans la section e-mail ci-dessus.</p>
             ) : d.whatsapp.numero && d.whatsapp.recontact && d.whatsapp.source ? (
               <RelanceWhatsapp cle={d.cle} templateId={templateId} texteInitial={texteWhatsappInitial(d.nom?.trim().split(/\s+/)[0] || null)} numero={d.whatsapp.numero} source={d.whatsapp.source} />
             ) : d.whatsapp.lieSansNumero ? (

@@ -12,6 +12,10 @@ import FicheProspect, { BadgeEtat } from './FicheProspect';
 import { preparerFiche } from './preparerFiche';
 import { libStatut } from './libelles';
 import PanneauFocus from './PanneauFocus';
+import IndicateursBandeau from './IndicateursBandeau';
+import { chargerReglages } from '@/lib/crm/reglagesServeur';
+import { calculerIndicateurs } from '@/lib/crm/indicateurs';
+import type { Reglages } from '@/lib/crm/reglages';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'CRM — Administration' };
@@ -46,16 +50,18 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
   const sp: Sp = { vue: searchParams.vue, niveau: searchParams.niveau, resp: searchParams.resp, q: searchParams.q, fiche: searchParams.fiche };
 
   const maintenant = new Date();
-  const [dossiers, orphelins, responsables] = await Promise.all([
+  const [dossiers, orphelins, responsables, reglages] = await Promise.all([
     chargerDossiers(),
     chargerPaiementsOrphelins().catch(() => []),
     listerResponsables().catch(() => []),
+    chargerReglages(),
   ]);
+  const indicateurs = calculerIndicateurs(dossiers, reglages, maintenant);
   const emailResp = (id: string | null) => local(id ? responsables.find((r) => r.id === id)?.email : null);
 
   const lignes = dossiers.filter((d) => !d.admin).map((d) => {
     const etat = etatPaiement(d, maintenant);
-    const v = vueDe(d, maintenant);
+    const v = vueDe(d, maintenant, reglages);
     const dec = decisionsCourantes(d);
     const dernier = [...d.actions].filter((a) => a.type === 'relance' || a.type === 'decision').sort((a, b) => compareIso(b.date, a.date))[0] ?? null;
     return { d, etat, vue: v.vue, echeance: v.echeance, dec, dernier, score: scorer(d, maintenant) };
@@ -85,6 +91,8 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
     {/* Contenu derrière le panneau : inerte (ni focus ni lecteur d'écran) tant qu'il est ouvert. */}
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6" {...(searchParams.fiche ? ({ inert: '' } as Record<string, unknown>) : {})}>
       <SectionHeader kicker="Administration" title="CRM · proches du Premium" />
+
+      <IndicateursBandeau i={indicateurs} />
 
       <nav aria-label="Vues" className="flex flex-wrap gap-2 text-sm">
         {VUES.map((v) => (
@@ -159,7 +167,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
 
     </div>
     {searchParams.fiche && (ouverte
-      ? <PanneauFiche l={ouverte} fermer={href(sansFiche, {})} canWrite={can(ctx, 'crm.write')} responsables={responsables} maintenant={maintenant} />
+      ? <PanneauFiche l={ouverte} fermer={href(sansFiche, {})} canWrite={can(ctx, 'crm.write')} responsables={responsables} maintenant={maintenant} reglages={reglages} />
       : <PanneauIntrouvable fermer={href(sansFiche, {})} />)}
     </>
   );
@@ -173,9 +181,9 @@ function libelleDernier(a: Dossier['actions'][number] | null): string {
   return `${fmtJour(a.date)} · ${lib[a.decision ?? ''] ?? 'décision'}`;
 }
 
-function PanneauFiche({ l, fermer, canWrite, responsables, maintenant }: {
+function PanneauFiche({ l, fermer, canWrite, responsables, maintenant, reglages }: {
   l: { d: Dossier; etat: ReturnType<typeof etatPaiement>; vue: Vue; score: ReturnType<typeof scorer> };
-  fermer: string; canWrite: boolean; responsables: { id: string; email: string }[]; maintenant: Date;
+  fermer: string; canWrite: boolean; responsables: { id: string; email: string }[]; maintenant: Date; reglages: Reglages;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={`Fiche de ${l.d.nom ?? l.d.emailNorm}`}>
@@ -189,7 +197,7 @@ function PanneauFiche({ l, fermer, canWrite, responsables, maintenant }: {
             <Link href={fermer} scroll={false} className="rounded-full border border-border px-3 py-1 text-ivory hover:border-accent">Fermer</Link>
           </div>
         </div>
-        <FicheProspect key={l.d.cle} d={l.d} etat={l.etat} vue={l.vue} score={l.score} canWrite={canWrite} responsables={responsables} maintenant={maintenant} {...preparerFiche(l.d, l.score, maintenant)} />
+        <FicheProspect key={l.d.cle} d={l.d} etat={l.etat} vue={l.vue} score={l.score} canWrite={canWrite} responsables={responsables} maintenant={maintenant} reglages={reglages} {...preparerFiche(l.d, l.score, maintenant)} />
       </aside>
     </div>
   );
