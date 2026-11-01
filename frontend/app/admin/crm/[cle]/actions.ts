@@ -9,6 +9,7 @@ import { sendEmail, type EmailResult } from '@/lib/server/email';
 import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { chargerDossier } from '@/lib/crm/charger';
 import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
+import { etatPaiement } from '@/lib/crm/paiement';
 import { scorer } from '@/lib/crm/score';
 import { estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
 import { construireEmailRelance } from '@/lib/crm/emailRelance';
@@ -38,6 +39,10 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
   }
 
   if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
+  // P0 : un paiement confirmé retire la personne de toute relance ; une intention à vérifier se vérifie d'abord.
+  const paiement = etatPaiement(d, new Date());
+  if (paiement.etat === 'paye') return { ok: false, message: 'Paiement confirmé : plus de relance.' };
+  if (paiement.etat === 'a_verifier') return { ok: false, message: "Paiement à vérifier d'abord dans Paiements." };
 
   const sb = getServiceClient();
   const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
@@ -91,6 +96,10 @@ export async function preparerRelanceWhatsapp(cle: string, texte: string, templa
     return { ok: false, message: "Vérification de l'opposition impossible : rien n'est préparé." };
   }
   if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
+  // P0 : un paiement confirmé retire la personne de toute relance ; une intention à vérifier se vérifie d'abord.
+  const paiement = etatPaiement(d, new Date());
+  if (paiement.etat === 'paye') return { ok: false, message: 'Paiement confirmé : plus de relance.' };
+  if (paiement.etat === 'a_verifier') return { ok: false, message: "Paiement à vérifier d'abord dans Paiements." };
   if (!d.whatsapp.recontact || !d.whatsapp.numero) return { ok: false, message: 'Pas de numéro avec consentement au recontact : relance WhatsApp impossible.' };
 
   const sb = getServiceClient();
