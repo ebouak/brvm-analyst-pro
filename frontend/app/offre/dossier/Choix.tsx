@@ -58,7 +58,7 @@ export default function Choix({ jeton, valeurs }: { jeton: string; valeurs: Vale
                 </span>
                 <span className="block text-xs text-muted">{v.designation}{v.secteur ? ` · ${v.secteur}` : ''}</span>
               </span>
-              <span className="text-xs text-accent">{enCours === v.code ? '…' : 'Choisir →'}</span>
+              <span className="shrink-0 whitespace-nowrap text-xs text-accent">{enCours === v.code ? '…' : 'Choisir →'}</span>
             </button>
           </li>
         ))}
