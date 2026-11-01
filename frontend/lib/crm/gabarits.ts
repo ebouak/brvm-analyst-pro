@@ -17,8 +17,9 @@ export function estTemplateId(v: unknown): v is TemplateId {
 export function choisirGabarit(d: Dossier, s: Score): TemplateId {
   const codes = new Set(s.raisons.map((r) => r.code));
   if (codes.has('paiement')) return 'paiement_inacheve';
+  // Jamais à qui a déjà acheté la formation (complète ou en niveaux) : on ne lui revend pas ce qu'il possède.
   // Intérêt pour la formation (pages consultées ou leçons suivies) : on vend la formation complète.
-  if (!d.premium && d.userId && (codes.has('formation') || codes.has('academy'))) return 'formation_gratuite';
+  if (!d.premium && d.userId && !d.formationAchetee && (codes.has('formation') || codes.has('academy'))) return 'formation_gratuite';
   if (codes.has('offre')) return 'offre_consultee';
   if (!d.userId) return 'prospect_sans_compte';
   return 'actif_sans_abonnement';
@@ -65,7 +66,7 @@ export function composerRelance(id: TemplateId, d: Dossier): { sujet: string; co
           '• les quatre niveaux, de débutant à expert, leçon après leçon ;',
           '• des quiz pour vérifier ce que vous retenez ;',
           '• un examen par niveau et un certificat vérifiable à la clé ;',
-          '• un accès à vie à ce contenu.',
+          '• un accès à vie à ce contenu (hors refonte majeure ultérieure : un niveau refondu plus d’un an après l’achat se rachète à prix réduit ; vos certificats restent acquis).',
           '',
           'Son achat vous offre aussi un mois de Premium sur toute la plateforme (screener, alertes, lecture de séance, valorisation).',
           '',

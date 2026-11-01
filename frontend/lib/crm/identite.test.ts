@@ -174,7 +174,18 @@ describe('signaux formation et pays', () => {
   });
   it('prospect sans compte : aucun pays, aucune vue de formation', () => {
     const [d] = assemblerDossiers({ ...vide, newsletter: [{ email: 'x@mail.com', confirmed: true }] });
-    expect(d).toMatchObject({ pays: null, formationVues: [] });
+    expect(d).toMatchObject({ pays: null, formationAchetee: null, formationVues: [] });
+  });
+  it('formation achetée : droits academy actifs uniquement', () => {
+    const d = (droits: NonNullable<Sources['droits']>) => assemblerDossiers({ ...base, droits })[0]!.formationAchetee;
+    const l = (product_code: string, extra = {}) => ({ user_id: 'u1', product_code, revoked_at: null, expires_at: null, ...extra });
+    expect(d([])).toBeNull();
+    expect(d([l('academy:integrale')])).toBe('integrale');
+    expect(d([l('academy:debutant')])).toBe('partielle');
+    expect(d([l('academy:integrale', { revoked_at: '2026-10-01T00:00:00Z' })])).toBeNull();
+    expect(d([l('academy:debutant', { expires_at: '2020-01-01T00:00:00Z' })])).toBeNull();
+    expect(d([l('autre:chose')])).toBeNull();
+    expect(d([{ ...l('academy:integrale'), user_id: 'u2' }])).toBeNull();
   });
   it('chronologie : « A consulté la formation »', () => {
     const [d] = assemblerDossiers(base);

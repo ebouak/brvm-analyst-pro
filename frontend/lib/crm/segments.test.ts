@@ -31,9 +31,11 @@ describe('dansZone', () => {
 
 describe('aInteretFormation', () => {
   it('vrai avec des pages consultées ou des leçons suivies', () => {
-    expect(aInteretFormation({ formationVues: [{ page: '/formations/academy', jour: '2026-10-30' }], leconsAcademy: 0 })).toBe(true);
-    expect(aInteretFormation({ formationVues: [], leconsAcademy: 1 })).toBe(true);
-    expect(aInteretFormation({ formationVues: [], leconsAcademy: 0 })).toBe(false);
+    expect(aInteretFormation({ formationVues: [{ page: '/formations/academy', jour: '2026-10-30' }], leconsAcademy: 0, formationAchetee: null })).toBe(true);
+    expect(aInteretFormation({ formationVues: [], leconsAcademy: 1, formationAchetee: null })).toBe(true);
+    expect(aInteretFormation({ formationVues: [], leconsAcademy: 0, formationAchetee: null })).toBe(false);
+    expect(aInteretFormation({ formationVues: [], leconsAcademy: 3, formationAchetee: 'integrale' })).toBe(false);
+    expect(aInteretFormation({ formationVues: [], leconsAcademy: 3, formationAchetee: 'partielle' })).toBe(true);
   });
 });
 

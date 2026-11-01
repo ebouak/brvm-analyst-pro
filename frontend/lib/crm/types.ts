@@ -33,6 +33,8 @@ export interface Dossier {
   formationVues: { page: string; jour: string }[];
   /** Code pays ISO du compte (jamais IP ni ville) ; null = inconnu ou prospect sans compte. */
   pays: string | null;
+  /** Formation achetée (droit `academy:*` actif) : 'integrale' = les quatre niveaux, 'partielle' = au moins un niveau. */
+  formationAchetee: 'integrale' | 'partielle' | null;
   lignesPortefeuille: number;
   messages: { date: string }[];
   prospect: { date: string; consent: boolean } | null;

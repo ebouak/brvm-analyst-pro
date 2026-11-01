@@ -192,6 +192,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
                   <td className="px-4 py-2.5">
                     <Link href={href(sp, { fiche: d.cle })} scroll={false} className="font-medium text-ivory after:absolute after:inset-0 hover:text-accent-ink">{d.nom ?? d.emailNorm}</Link>
                     {!d.userId && <span className="ml-2 text-xs text-faint">prospect sans compte</span>}
+                    {d.formationAchetee && <span className="ml-2 rounded-full border border-accent/40 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-accent-ink">formation achetée{d.formationAchetee === 'partielle' ? ' (partielle)' : ''}</span>}
                   </td>
                   <td className="px-4 py-2.5 text-muted">{d.pays ? <>{nomPays(d.pays)} <span className="ml-1 rounded-full border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-faint">{continentDe(d.pays) ?? '—'}</span></> : '—'}</td>
                   <td className="px-4 py-2.5"><BadgeEtat etat={etat.etat} /></td>

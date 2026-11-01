@@ -15,7 +15,7 @@ import type { Dossier } from './types';
 const MAINTENANT = new Date('2026-10-31T12:00:00Z');
 const d0: Dossier = {
   cle: 'u1', emailNorm: 'awa@mail.com', userId: 'u1', nom: 'Awa Koné', inscritLe: null, derniereConnexion: null,
-  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null,
+  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null, formationAchetee: null,
   lignesPortefeuille: 0, messages: [], prospect: null, newsletter: false, leconsAcademy: 0, actions: [],
   whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false }, bonus: [],
 };
@@ -34,6 +34,10 @@ describe('choisirGabarit', () => {
     // Un paiement inachevé prime ; Premium n'est jamais ciblé.
     const paye = { ...formation, paiementsEnAttente: [{ montant: 5000, devise: 'XOF', date: '2026-10-12T10:00:00Z' }] };
     expect(choisirGabarit(paye, scorer(paye, MAINTENANT))).toBe('paiement_inacheve');
+    const proprio = { ...lecons, formationAchetee: 'integrale' as const };
+    expect(choisirGabarit(proprio, scorer(proprio, MAINTENANT))).not.toBe('formation_gratuite');
+    const partiel = { ...lecons, formationAchetee: 'partielle' as const };
+    expect(choisirGabarit(partiel, scorer(partiel, MAINTENANT))).not.toBe('formation_gratuite');
     const premium = { ...formation, premium: true };
     expect(choisirGabarit(premium, scorer(premium, MAINTENANT))).not.toBe('formation_gratuite');
     const prospect = { ...d0, userId: null, cle: 'email:awa@mail.com' };
@@ -82,6 +86,7 @@ describe('composerRelance', () => {
     expect(sujet).toContain('formation complète');
     expect(corps).toContain('quatre niveaux');
     expect(corps).toContain('un mois de Premium');
+    expect(corps).toContain('hors refonte majeure');
     expect(corps.match(/https:\/\/\S+/g)).toEqual(['https://www.westbourse.com/formations/academy']);
     expect(corps).not.toMatch(/gagn|rentab|garanti|conseil/i);
   });

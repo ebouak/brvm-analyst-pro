@@ -72,6 +72,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
             : d.whatsapp.lieSansNumero ? 'lié, numéro non visible' : 'aucun numéro connu'}
         </p>
         <p className="text-muted">Pays : {d.pays ? <><span className="text-ivory">{nomPays(d.pays)}</span> · {continentDe(d.pays) ?? 'continent inconnu'}</> : 'inconnu'}</p>
+        {d.formationAchetee && <p className="text-muted">Formation achetée : <span className="text-ivory">{d.formationAchetee === 'integrale' ? 'complète (quatre niveaux)' : 'certains niveaux'}</span></p>}
         {d.formationVues.length > 0 && (
           <p className="text-muted">Formation consultée : {[...new Set(d.formationVues.map((v) => v.page.replace('/formations/academy', '') || 'accueil'))].join(', ')}</p>
         )}

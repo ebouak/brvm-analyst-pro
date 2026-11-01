@@ -22,4 +22,4 @@ export function dansZone(pays: string | null, zone: Zone): boolean {
 }
 
 /** Intérêt pour la formation : pages consultées ou au moins une leçon suivie. */
-export const aInteretFormation = (d: Pick<Dossier, 'formationVues' | 'leconsAcademy'>): boolean => d.formationVues.length > 0 || d.leconsAcademy > 0;
+export const aInteretFormation = (d: Pick<Dossier, 'formationVues' | 'leconsAcademy' | 'formationAchetee'>): boolean => d.formationAchetee !== 'integrale' && (d.formationVues.length > 0 || d.leconsAcademy > 0);

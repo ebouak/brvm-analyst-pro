@@ -26,6 +26,15 @@ export interface Sources {
   oppositions: { email_norm: string }[];
   prefs: { user_id: string; whatsapp_phone: string | null; whatsapp_chat_id: string | null; telephone_declare: string | null; recontact_optin_at: string | null }[];
   liaisons: { user_id: string; chat_id: string; telephone: string | null }[];
+  /** Droits d'accès achetés (`user_entitlements`) ; absent = aucun. */
+  droits?: { user_id: string; product_code: string; revoked_at: string | null; expires_at: string | null }[];
+}
+
+/** Formation achetée d'après les droits actifs (révoqués et expirés écartés). */
+export function formationAcheteeDe(droits: NonNullable<Sources['droits']>, maintenant: Date = new Date()): Dossier['formationAchetee'] {
+  const actifs = droits.filter((d) => d.product_code.startsWith('academy:') && !d.revoked_at && !(d.expires_at && Date.parse(d.expires_at) <= maintenant.getTime()));
+  if (actifs.length === 0) return null;
+  return actifs.some((d) => d.product_code === 'academy:integrale') ? 'integrale' : 'partielle';
 }
 
 type PrefsWa = Omit<Sources['prefs'][number], 'user_id'>;
@@ -70,6 +79,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
   const actions = grouper(s.actions, (x) => normaliserEmail(x.email_norm));
   const prefs = new Map(s.prefs.map((p) => [p.user_id, p]));
   const liaisons = grouper(s.liaisons, (l) => l.user_id);
+  const droits = grouper(s.droits ?? [], (x) => x.user_id);
   const prospects = new Map<string, Sources['prospects'][number]>();
   for (const p of [...s.prospects].sort((a, b) => compareIso(b.created_at, a.created_at))) {
     const k = normaliserEmail(p.email);
@@ -112,6 +122,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
       offreVues: (signaux.get(c.id) ?? []).filter((x) => (x.type ?? 'offre_vue') === 'offre_vue').map((x) => ({ page: x.page, jour: x.jour })),
       formationVues: (signaux.get(c.id) ?? []).filter((x) => x.type === 'formation_vue').map((x) => ({ page: x.page, jour: x.jour })),
       pays: pr?.pays_code ?? null,
+      formationAchetee: formationAcheteeDe(droits.get(c.id) ?? []),
       lignesPortefeuille: (positions.get(c.id) ?? []).length,
       leconsAcademy: (academy.get(c.id) ?? []).filter((a) => a.completed).length,
       whatsapp: contactWhatsapp(prefs.get(c.id), liaisons.get(c.id) ?? []),
@@ -127,7 +138,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
     dossiers.push({
       cle: `email:${emailNorm}`, emailNorm, userId: null, nom: prospects.get(emailNorm)?.nom ?? null,
       inscritLe: null, derniereConnexion: null, premium: false, admin: false,
-      paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null, lignesPortefeuille: 0, leconsAcademy: 0,
+      paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null, formationAchetee: null, lignesPortefeuille: 0, leconsAcademy: 0,
       whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false },
       ...commun(emailNorm),
     });
