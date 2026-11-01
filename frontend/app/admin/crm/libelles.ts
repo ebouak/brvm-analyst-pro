@@ -25,7 +25,7 @@ export function suiviRelance(d: Pick<Dossier, 'actions' | 'messages'>, a: Dossie
 
 /** « séquence paiement inachevé, étape 2 » pour une clé `paiement_inacheve:2` ; null si la relance n'est pas automatique. */
 export function libSequence(cle: string | null | undefined): string | null {
-  const m = /^([a-z_]+):(\d+)$/.exec(cle ?? '');
+  const m = /^(?:sim_)?([a-z_]+):(\d+)$/.exec(cle ?? '');
   return m ? `séquence ${m[1].replace(/_/g, ' ')} étape ${m[2]}` : null;
 }
 

@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { chargerReglages } from '@/lib/crm/reglagesServeur';
 import { chargerDossiers } from '@/lib/crm/charger';
-import { selectionnerPassage } from '@/lib/crm/sequences';
+import { selectionnerPassage, cleJournal } from '@/lib/crm/sequences';
 import { composerRelance } from '@/lib/crm/gabarits';
 import { envoyerRelanceEmail } from '@/lib/crm/envoiRelance';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       const r = await envoyerRelanceEmail({
         d, sujet: sujet.replace(/[\r\n]+/g, ' ').trim().slice(0, 150), corps: corps.trim().slice(0, 5000),
         templateId: etape.templateId, inclureOffre: true, auteur: null,
-        sequenceCle: etape.cle, simulation, chargeLe,
+        sequenceCle: cleJournal(etape.cle, simulation), simulation, chargeLe,
       });
       issue = r.statut;
     } catch (e) {

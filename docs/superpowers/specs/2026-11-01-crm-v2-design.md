@@ -191,7 +191,7 @@ Chaque raison porte déjà sa date ; la fiche affiche « score calculé le
   n'envoie rien. `actif` : envoie. Passage à `actif` = décision de
   l'exploitant après au moins une semaine de simulation relue.
 - Séquences (pures, `lib/crm/sequences.ts`) : `paiement_inacheve` étapes
-  J+1 et J+4 après le paiement commencé (état `abandonne` uniquement — un
+  J+1 et J+8 après le paiement commencé (J+8 = J+1 + le délai minimal de 7 jours entre deux relances, qui reste appliqué) (état `abandonne` uniquement — un
   paiement `a_verifier` se vérifie, il ne se relance pas) ;
   `offre_consultee` étape J+2 après la dernière consultation. Gabarits
   existants (`gabarits.ts`), e-mail habillé, offre dossier incluse.
@@ -199,7 +199,11 @@ Chaque raison porte déjà sa date ; la fiche affiche « score calculé le
   envoi, + arrêt si réponse reçue ou clôture.
 - **Idempotence** : colonne `sequence_cle` (`<sequence>:<etape>`), index
   unique `(email_norm, sequence_cle)` : une étape n'est jamais envoyée (ni
-  simulée) deux fois, même si le cron est relancé.
+  simulée) deux fois, même si le cron est relancé. Les lignes de simulation
+  portent le préfixe `sim_` (`sim_paiement_inacheve:1`) : en mode `simulation`
+  seules les clés `sim_` comptent (chaque étape est simulée une fois), en mode
+  `actif` seules les clés réelles comptent — une étape simulée part donc pour
+  de vrai, une fois, à l'activation.
 - Plafond `plafond_par_execution` par passage.
 
 ### 3.2 Exécution
