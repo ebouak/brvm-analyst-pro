@@ -2,7 +2,7 @@
 'use server';
 import { headers } from 'next/headers';
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { checkRateLimit } from '@/lib/server/rateLimit';
+import { checkRateLimit, getClientIp } from '@/lib/server/rateLimit';
 import { etatJeton, pdfFrais, estCodeValeur } from '@/lib/crm/jetonBonus';
 
 type Retour = { ok: true; url: string } | { ok: false; message: string };
@@ -10,7 +10,7 @@ const DUREE_URL_S = 600;
 const INDISPONIBLE = 'Service momentanément indisponible. Réessayez dans un instant.';
 
 export async function choisirDossier(jeton: string, codeBrut: string): Promise<Retour> {
-  const ip = headers().get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'inconnue';
+  const ip = getClientIp(new Request('http://local', { headers: headers() }));
   const { allowed } = await checkRateLimit({ route: 'offre-dossier', ip, maxHits: 20, windowSeconds: 600 });
   if (!allowed) return { ok: false, message: 'Trop de tentatives. Réessayez dans quelques minutes.' };
   const code = String(codeBrut ?? '').toUpperCase();

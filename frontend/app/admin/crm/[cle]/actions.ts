@@ -69,7 +69,7 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
   // L'échec est journalisé et affiché, jamais avalé (panne e-mail 07–09/2026).
   const { error: errMaj } = await sb.from('crm_actions').update(res.ok ? { statut: 'envoye', resend_id: res.id ?? null } : { statut: 'echec', erreur: (res.error ?? 'inconnue').slice(0, 300) }).eq('id', ligne.id);
   // Audit sans e-mail : identifiant de la ligne de journal, jamais la clé (qui embarque l'adresse).
-  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: inclureOffre } });
+  await recordAudit(ctx, { action: 'crm.relance', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: res.ok ? 'info' : 'warning', metadata: { template: templateId, ok: res.ok, journal: !errMaj, offre: Boolean(inclureOffre) } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
   if (res.ok && errMaj) return { ok: true, message: "Relance envoyée, mais le journal n'a pas pu être mis à jour." };
   return res.ok ? { ok: true, message: 'Relance envoyée.' } : { ok: false, message: `Échec de l'envoi : ${res.error ?? 'inconnu'}` };
@@ -106,7 +106,7 @@ export async function preparerRelanceWhatsapp(cle: string, texte: string, templa
   }).select('id').single();
   if (error || !ligne) return { ok: false, message: "Journal indisponible : rien n'est préparé." };
   // Audit sans numéro ni e-mail.
-  await recordAudit(ctx, { action: 'crm.relance_whatsapp', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: 'info', metadata: { template: templateId, offre: inclureOffre, source: d.whatsapp.source } });
+  await recordAudit(ctx, { action: 'crm.relance_whatsapp', resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: 'info', metadata: { template: templateId, offre: Boolean(inclureOffre), source: d.whatsapp.source } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
   return { ok: true, message: 'Message prêt dans WhatsApp : relisez-le et envoyez-le depuis votre téléphone.', url: lienWaMeVers(d.whatsapp.numero, message) };
 }

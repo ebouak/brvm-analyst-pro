@@ -47,6 +47,7 @@ export default async function Page({ searchParams }: { searchParams: { t?: strin
     .from('brvm_instruments')
     .select('code, designation, secteur')
     .eq('type', 'action')
+    .eq('actif', true)
     .order('designation');
   if (errInstruments) {
     return <PageMessage titre="Service momentanément indisponible" texte="Réessayez dans un instant : votre lien reste valable." />;
