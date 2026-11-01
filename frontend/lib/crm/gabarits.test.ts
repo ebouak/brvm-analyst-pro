@@ -55,6 +55,17 @@ describe('composerRelance', () => {
     expect(corps).not.toContain('FCFA');
   });
 
+  it("actif sans abonnement : vend l'Academy et Premium au mois, une seule action", () => {
+    const { sujet, corps } = composerRelance('actif_sans_abonnement', d0);
+    expect(sujet).toContain('Academy');
+    expect(corps).toContain("l'Academy WESTBOURSE en accès complet");
+    expect(corps).toContain('un mois');
+    // Une seule action : le lien de souscription, pas de page tarifs en concurrence.
+    expect(corps.match(/https:\/\/\S+/g)).toEqual(['https://www.westbourse.com/account/plan']);
+    // Ni promesse de gain ni conseil : on décrit des outils.
+    expect(corps).not.toMatch(/gagn|rentab|garanti|conseil/i);
+  });
+
   it('salue sans prénom quand le nom manque', () => {
     expect(composerRelance('offre_consultee', { ...d0, nom: null }).corps.startsWith('Bonjour,')).toBe(true);
   });

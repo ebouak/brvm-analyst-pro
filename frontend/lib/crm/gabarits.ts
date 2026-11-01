@@ -55,8 +55,28 @@ export function composerRelance(id: TemplateId, d: Dossier): { sujet: string; co
       };
     case 'actif_sans_abonnement':
       return {
-        sujet: "Ce que l'offre Premium ajoute",
-        corps: [bonjour, '', "Merci d'utiliser WESTBOURSE. L'offre Premium ajoute notamment les signaux expliqués et le diagnostic des sociétés.", 'Si vous voulez en savoir plus, répondez simplement à ce message.', '', SIGNATURE].join('\n'),
+        // Fonctions citées = celles que la table feature_flags réserve à Premium
+        // (formations, screener, alertes, lecture_seance, dcf). Aucun prix ici :
+        // il vit sur la page de souscription, il ne peut pas se périmer dans un e-mail.
+        sujet: "L'Academy complète et vos outils Premium, pour un mois",
+        corps: [
+          bonjour,
+          '',
+          "Vous suivez déjà la BRVM avec WESTBOURSE. Avec Premium, vous passez de l'observation à l'analyse.",
+          '',
+          'Pendant un mois, Premium vous ouvre :',
+          "• l'Academy WESTBOURSE en accès complet : cours, webinaires et conférences ;",
+          '• le screener multi-critères : RSI, volume, score, secteur, dividende ;',
+          '• vos alertes personnalisées, par e-mail ou sur WhatsApp ;',
+          '• la lecture commentée de chaque séance ;',
+          '• la valorisation DCF des sociétés cotées.',
+          '',
+          'Activez votre mois de Premium : https://www.westbourse.com/account/plan',
+          '',
+          'Une question avant de vous lancer ? Répondez simplement à ce message.',
+          '',
+          SIGNATURE,
+        ].join('\n'),
       };
   }
 }
