@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic';
  *
  *   1. corps BRUT lu avant tout parsing ; signature vérifiée à temps constant
  *      avec RESEND_WEBHOOK_SECRET (whsec_…), horodatage à ±5 min → 401 sinon ;
- *   2. seuls les emails dont l'id figure dans contact_messages.resend_id sont
- *      concernés ; les autres (alertes, dossiers…) sont accusés et ignorés ;
+ *   2. seuls les emails dont l'id figure dans contact_messages.resend_id ou
+ *      crm_actions.resend_id (relances CRM, migration 0177) sont concernés ; les autres (alertes, dossiers…) sont accusés et ignorés ;
  *   3. mise à jour CONDITIONNELLE : le statut ne recule jamais. Un événement
  *      rejoué (Resend réessaie tant qu'il n'a pas reçu 2xx) ou arrivé dans le
  *      désordre ne change rien — l'opération est idempotente par construction.
@@ -47,17 +47,20 @@ export async function POST(req: Request) {
     ? `livraison.is.null,livraison.in.(${remplacables.join(',')})`
     : 'livraison.is.null';
 
-  const { data, error } = await getServiceClient()
-    .from('contact_messages')
-    .update({ livraison: ev.statut, livraison_at: new Date().toISOString(), livraison_detail: ev.detail })
-    .eq('resend_id', ev.emailId)
-    .or(filtre)
-    .select('id');
+  // Même mise à jour monotone sur les deux journaux : réponses de contact ET relances CRM.
+  // Un email_id n'existe que dans l'un des deux (ou aucun : alertes, dossiers…).
+  const sb = getServiceClient();
+  const maj = { livraison: ev.statut, livraison_at: new Date().toISOString(), livraison_detail: ev.detail };
+  const [contact, crm] = await Promise.all([
+    sb.from('contact_messages').update(maj).eq('resend_id', ev.emailId).or(filtre).select('id'),
+    sb.from('crm_actions').update(maj).eq('resend_id', ev.emailId).or(filtre).select('id'),
+  ]);
 
-  if (error) {
-    // 500 : Resend réessaiera. Aucune donnée du corps dans le journal.
-    console.error('[webhook resend] mise à jour impossible :', error.code ?? error.message);
+  const erreur = contact.error ?? crm.error;
+  if (erreur) {
+    // 500 : Resend réessaiera (idempotent). Aucune donnée du corps dans le journal.
+    console.error('[webhook resend] mise à jour impossible :', erreur.code ?? erreur.message);
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
-  return NextResponse.json({ ok: true, mis_a_jour: (data ?? []).length });
+  return NextResponse.json({ ok: true, mis_a_jour: (contact.data ?? []).length + (crm.data ?? []).length });
 }
