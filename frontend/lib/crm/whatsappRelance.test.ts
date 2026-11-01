@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { avecMentionStop, lienWaMeVers, estStop, MENTION_STOP, texteOffre } from './whatsappRelance';
+import { avecMentionStop, lienWaMeVers, estStop, MENTION_STOP, texteOffre, texteWhatsappInitial } from './whatsappRelance';
 
 describe('whatsappRelance', () => {
   it('ajoute la mention STOP si elle manque, une seule fois', () => {
@@ -15,5 +15,16 @@ describe('whatsappRelance', () => {
   });
   it("le texte d'offre porte le lien", () => {
     expect(texteOffre('https://x/offre?t=1')).toContain('https://x/offre?t=1');
+  });
+});
+
+describe('texteWhatsappInitial', () => {
+  it('salue par le prénom si connu, sinon sans', () => {
+    expect(texteWhatsappInitial('Awa')).toMatch(/^Bonjour Awa,/);
+    expect(texteWhatsappInitial(null)).toMatch(/^Bonjour, /);
+  });
+  it('ne contient aucun chiffre (ni montant, ni date)', () => {
+    expect(texteWhatsappInitial('Awa')).not.toMatch(/\d/);
+    expect(texteWhatsappInitial(null)).not.toMatch(/\d/);
   });
 });

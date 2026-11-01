@@ -26,3 +26,9 @@ export function estStop(texte: string): boolean {
     .replace(/[\s.!,;:?\uFE0F\p{Extended_Pictographic}]+$/u, '');
   return t === 'stop' || t === 'arret';
 }
+
+/** Texte WhatsApp initial, NEUTRE : aucun montant, aucune date, aucun détail de compte — le numéro peut être déclaré, non vérifié. */
+export function texteWhatsappInitial(prenom: string | null): string {
+  const bonjour = prenom ? `Bonjour ${prenom},` : 'Bonjour,';
+  return `${bonjour} c'est l'équipe WESTBOURSE. Vous vous êtes intéressé(e) à notre offre : avez-vous une question ? Je vous réponds ici, simplement.`;
+}

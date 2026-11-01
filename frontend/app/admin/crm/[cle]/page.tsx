@@ -8,6 +8,7 @@ import { scorer, fmtJour } from '@/lib/crm/score';
 import { choisirGabarit, composerRelance } from '@/lib/crm/gabarits';
 import RelanceForm from './RelanceForm';
 import RelanceWhatsapp from './RelanceWhatsapp';
+import { texteWhatsappInitial } from '@/lib/crm/whatsappRelance';
 import NoteForm from './NoteForm';
 
 export const dynamic = 'force-dynamic';
@@ -57,7 +58,7 @@ export default async function Page({ params }: { params: { cle: string } }) {
             {d.premium || d.admin || d.oppose ? (
               <p className="text-sm text-muted">Relance commerciale désactivée pour cette personne.</p>
             ) : d.whatsapp.numero && d.whatsapp.recontact && d.whatsapp.source ? (
-              <RelanceWhatsapp cle={d.cle} templateId={templateId} texteInitial={corps} numero={d.whatsapp.numero} source={d.whatsapp.source} />
+              <RelanceWhatsapp cle={d.cle} templateId={templateId} texteInitial={texteWhatsappInitial(d.nom?.trim().split(/\s+/)[0] || null)} numero={d.whatsapp.numero} source={d.whatsapp.source} />
             ) : d.whatsapp.lieSansNumero ? (
               <p className="text-sm text-muted">WhatsApp lié sans numéro visible : joignable en répondant dans la console de contact WhatsApp.</p>
             ) : d.whatsapp.numero ? (
