@@ -59,9 +59,9 @@ export function decisionsCourantes(d: Pick<Dossier, 'actions'>): DecisionsCouran
   return { cloture, echeance, responsable, derniereReponse, derniereTraite };
 }
 
-/** Date de la dernière relance envoyée ou préparée (tous canaux). */
+/** Date de la dernière relance envoyée, préparée ou « en envoi » (peut-être partie : on échoue fermé). */
 export function dernierContact(d: Pick<Dossier, 'actions'>): string | null {
-  return plusRecent(d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare')).map((a) => a.date));
+  return plusRecent(d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi')).map((a) => a.date));
 }
 
 /** Date de la dernière réponse postérieure au dernier contact (déclarée ou message de contact), sinon null. */

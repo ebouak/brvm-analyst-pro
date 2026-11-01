@@ -185,6 +185,25 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Destinataires : aucun hors WESTBOURSE ; WhatsApp (Meta) comme simple transport quand
   la personne écrit ou est contactée.
 
+**CRM — relances automatiques par séquences (2026-11-01, migration 0178)**
+- Données : aucune nouvelle donnée personnelle ; `crm_actions.sequence_cle`
+  (`<séquence>:<étape>`) identifie l'étape envoyée, le statut `simulation` marque
+  un essai sans envoi.
+- Finalité : relancer par e-mail une personne ayant abandonné un paiement ou consulté l'offre
+  Premium (paiement abandonné : J+1 et J+8 ; offre consultée : J+2).
+- Base légale : **intérêt légitime** pour les titulaires de compte (relation existante, offre
+  de leur propre service) ; **consentement** pour les prospects sans compte (case de collecte).
+- Opposition : à tout moment, par le lien présent dans chaque e-mail ; l'opposition est
+  revérifiée à chaque envoi (échec fermé) et arrête toute séquence.
+- Limites : e-mail uniquement ; arrêt dès un paiement, une réponse, une clôture ou une
+  opposition ; une étape n'est jamais envoyée deux fois (index unique) ; plafond par
+  exécution et nombre maximal de relances ; désactivées par défaut (mode `off`), la
+  simulation précède toute activation.
+- Conservation et droits : ceux de `crm_actions` (24 mois) ; la colonne est incluse dans
+  l'export (`/api/account/export`) ; suppression avec le compte.
+- Aucune donnée personnelle dans les journaux de la route cron ni dans l'alerte exploitant
+  (des comptes seulement).
+
 **Monitoring scraping (Lot 3)**
 - Données : **aucune donnée personnelle** (sources de marché, métriques techniques).
 - N/A RGPD. `scraper_errors` ne doit pas contenir de donnée perso (messages techniques).

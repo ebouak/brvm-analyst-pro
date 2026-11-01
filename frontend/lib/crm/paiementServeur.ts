@@ -11,7 +11,7 @@ export const MESSAGE_PAIEMENT_SURVENU = "Paiement confirmé à l'instant : relan
  * échoue, on n'envoie rien. Sans compte (prospect), il n'y a rien à vérifier.
  * Réutilisable par les séquences automatiques (SP3).
  */
-export async function verifierPaiementAvantEnvoi(userId: string | null, depuisIso: string): Promise<{ ok: true } | { ok: false; message: string }> {
+export async function verifierPaiementAvantEnvoi(userId: string | null, depuisIso: string): Promise<{ ok: true } | { ok: false; message: string; technique?: true }> {
   if (!userId) return { ok: true };
   // Marge de 60 s contre la dérive d'horloge entre ce serveur et la base : un paiement
   // créé juste avant le chargement du dossier ne doit pas passer inaperçu.
@@ -24,12 +24,12 @@ export async function verifierPaiementAvantEnvoi(userId: string | null, depuisIs
     ]);
     if (paye.error || profil.error) {
       console.error('[crm] vérification du paiement impossible :', paye.error?.code ?? profil.error?.code ?? 'inconnue');
-      return { ok: false, message: 'Vérification du paiement impossible : relance annulée.' };
+      return { ok: false, message: 'Vérification du paiement impossible : relance annulée.', technique: true };
     }
     if ((paye.data ?? []).length > 0 || profil.data?.is_premium === true) return { ok: false, message: MESSAGE_PAIEMENT_SURVENU };
     return { ok: true };
   } catch (e) {
     console.error('[crm] vérification du paiement impossible :', (e as Error).name);
-    return { ok: false, message: 'Vérification du paiement impossible : relance annulée.' };
+    return { ok: false, message: 'Vérification du paiement impossible : relance annulée.', technique: true };
   }
 }

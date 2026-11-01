@@ -20,6 +20,9 @@ describe('libelleSuivi', () => {
   it('un échec d\'envoi reste un échec, même avec une réponse', () => {
     expect(libelleSuivi({ statut: 'echec', livraison: null }, true)).toBe("échec d'envoi");
   });
+  it('simulation : jamais présentée comme envoyée', () => {
+    expect(libelleSuivi({ statut: 'simulation', livraison: null }, true)).toBe('simulation (non envoyé)');
+  });
   it('préparé (WhatsApp) ou en cours : non envoyé, jamais « livré »', () => {
     expect(libelleSuivi({ statut: 'prepare', livraison: null }, false)).toBe('préparé, non envoyé');
     expect(libelleSuivi({ statut: 'prepare', livraison: 'remis' }, true)).toBe('préparé, non envoyé');

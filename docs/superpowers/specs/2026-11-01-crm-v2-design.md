@@ -191,16 +191,31 @@ Chaque raison porte déjà sa date ; la fiche affiche « score calculé le
   n'envoie rien. `actif` : envoie. Passage à `actif` = décision de
   l'exploitant après au moins une semaine de simulation relue.
 - Séquences (pures, `lib/crm/sequences.ts`) : `paiement_inacheve` étapes
-  J+1 et J+4 après le paiement commencé (état `abandonne` uniquement — un
+  J+1 et J+8 après le paiement commencé (J+8 = J+1 + le délai minimal de 7 jours entre deux relances, qui reste appliqué) (état `abandonne` uniquement — un
   paiement `a_verifier` se vérifie, il ne se relance pas) ;
   `offre_consultee` étape J+2 après la dernière consultation. Gabarits
   existants (`gabarits.ts`), e-mail habillé, offre dossier incluse.
 - Même éligibilité que la relance manuelle (2.1), même revérification avant
-  envoi, + arrêt si réponse reçue ou clôture.
+  envoi, + arrêt si réponse reçue ou clôture. **Toute réponse postérieure à
+  l'ancre arrête la séquence, même marquée « traitée »** (un « non merci »
+  traité ne reçoit pas l'étape suivante). L'étape 2 ne part que si l'étape 1
+  est réellement partie (`envoye`) ; échec ou état indéterminé, la séquence
+  s'arrête. Une ligne restée `envoi` compte comme un contact possible.
+  Une étape dont l'e-mail a été rejeté ou signalé spam (`livraison`) n'est pas
+  « réussie » : pas d'étape suivante. Un signalement spam interdit toute
+  relance e-mail ultérieure (éligibilité, canal e-mail seulement ; WhatsApp
+  inchangé). Réglages illisibles : le passage répond 500 avec alerte et ne
+  s'exécute pas ; un `off` lu correctement reste silencieux.
 - **Idempotence** : colonne `sequence_cle` (`<sequence>:<etape>`), index
   unique `(email_norm, sequence_cle)` : une étape n'est jamais envoyée (ni
-  simulée) deux fois, même si le cron est relancé.
-- Plafond `plafond_par_execution` par passage.
+  simulée) deux fois, même si le cron est relancé. Les lignes de simulation
+  portent le préfixe `sim_` (`sim_paiement_inacheve:1`) : en mode `simulation`
+  seules les clés `sim_` comptent (chaque étape est simulée une fois), en mode
+  `actif` seules les clés réelles comptent — une étape simulée part donc pour
+  de vrai, une fois, à l'activation.
+- Plafond `plafond_par_execution` **par jour UTC** (le cron peut être relancé) :
+  on retranche les lignes de séquence déjà écrites aujourd'hui (réelles ou
+  `sim_` selon le mode) ; compte illisible => rien ne part, signalé.
 
 ### 3.2 Exécution
 
@@ -212,6 +227,14 @@ Chaque raison porte déjà sa date ; la fiche affiche « score calculé le
 - Rapport à l'exploitant (`alerterExploitant`) à chaque passage où quelque
   chose a été envoyé, simulé ou a échoué : compte par séquence et par issue,
   sans adresse.
+- Garde de mode : le cœur relit le mode avant chaque étape ; `off` (ou un autre
+  mode) prend effet immédiatement. Avant chaque étape, un contact récent
+  (moins de `delai_min_jours`) est recherché directement en base.
+- Issues : `envoye`, `simulation`, `refus` (règle métier), `echec`,
+  `indisponible` (vérification ou journal impossibles), `reporte`. `echec` et
+  `indisponible` donnent HTTP 500 et une alerte ; un e-mail parti dont le
+  journal n'a pas pu être mis à jour est compté `echec`. Budget de 240 s :
+  le reste est `reporte`. L'appel Resend a un délai de 15 s.
 - Journal AVANT envoi (`envoi` → `envoye` | `echec`), comme la relance
   manuelle : une ligne ne reste jamais en `envoi`. Le cœur d'envoi est
   partagé avec la relance manuelle (une seule implémentation des garde-fous).

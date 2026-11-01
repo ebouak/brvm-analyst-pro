@@ -7,10 +7,12 @@ import type { ActionCrm } from './types';
 
 export type LibelleSuivi =
   | 'envoyé' | 'livré' | 'remise retardée' | 'échec' | 'signalé comme spam' | 'réponse reçue'
-  | 'préparé, non envoyé' | "échec d'envoi";
+  | 'préparé, non envoyé' | "échec d'envoi" | 'simulation (non envoyé)';
 
 export function libelleSuivi(action: Pick<ActionCrm, 'statut' | 'livraison'>, reponseRecueApres: boolean): LibelleSuivi {
   if (action.statut === 'echec') return "échec d'envoi";
+  // Séquence en mode simulation : journalisée pour ne pas rejouer l'étape, mais RIEN n'est parti.
+  if (action.statut === 'simulation') return 'simulation (non envoyé)';
   // Préparé (WhatsApp) ou encore en cours d'envoi : rien n'est parti à coup sûr.
   if (action.statut !== 'envoye') return 'préparé, non envoyé';
   if (reponseRecueApres) return 'réponse reçue';

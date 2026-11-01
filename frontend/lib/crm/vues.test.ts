@@ -44,8 +44,9 @@ describe('decisionsCourantes', () => {
 });
 
 describe('dernierContact / reponseRecue', () => {
-  it('dernier contact : envoyé ou préparé seulement', () => {
-    expect(dernierContact(avec({ actions: [relance(9), relance(3, 'prepare'), relance(1, 'echec'), relance(0, 'envoi')] }))).toBe(ilYa(3));
+  it('dernier contact : envoyé, préparé ou « en envoi » (peut-être parti) ; ni échec ni simulation', () => {
+    expect(dernierContact(avec({ actions: [relance(9), relance(3, 'prepare'), relance(1, 'echec'), relance(0.5, 'simulation')] }))).toBe(ilYa(3));
+    expect(dernierContact(avec({ actions: [relance(9), relance(0, 'envoi')] }))).toBe(ilYa(0));
     expect(dernierContact(d0)).toBeNull();
   });
   it('réponse : décision ou message postérieur au contact, jamais avant', () => {

@@ -32,7 +32,7 @@ export async function chargerSources(): Promise<Sources> {
     lireTout<Sources['prospects'][number]>((a, b) => sb.from('leads_brvm').select('email, nom, created_at, consent').order('created_at').order('id').range(a, b), 'prospects'),
     lireTout<Sources['newsletter'][number]>((a, b) => sb.from('newsletter_subscribers').select('email, confirmed').order('id').range(a, b), 'newsletter'),
     lireTout<Sources['academy'][number]>((a, b) => sb.from('academy_progress').select('user_id, completed').eq('completed', true).order('user_id').order('course_id').order('lesson_idx').range(a, b), 'progression Academy'),
-    lireTout<Sources['actions'][number]>((a, b) => sb.from('crm_actions').select('email_norm, created_at, type, statut, canal, sujet, contenu, bonus_code, bonus_at, decision, motif, echeance, responsable, livraison').order('created_at').order('id').range(a, b), 'actions CRM'),
+    lireTout<Sources['actions'][number]>((a, b) => sb.from('crm_actions').select('email_norm, created_at, type, statut, canal, sujet, contenu, bonus_code, bonus_at, decision, motif, echeance, responsable, livraison, sequence_cle').order('created_at').order('id').range(a, b), 'actions CRM'),
     lireTout<Sources['oppositions'][number]>((a, b) => sb.from('crm_oppositions').select('email_norm').order('email_norm').range(a, b), 'oppositions'),
     lireTout<Sources['prefs'][number]>((a, b) => sb.from('notification_prefs').select('user_id, whatsapp_phone, whatsapp_chat_id, telephone_declare, recontact_optin_at').order('user_id').range(a, b), 'préférences'),
     lireTout<Sources['liaisons'][number]>((a, b) => sb.from('whatsapp_liaisons').select('user_id, chat_id, telephone').order('id').range(a, b), 'liaisons WhatsApp'),

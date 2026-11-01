@@ -65,7 +65,12 @@ export default function ReglagesForm({ initial, modifieLe }: { initial: Reglages
 
       <fieldset className="space-y-3 rounded-card border border-border bg-surface p-5">
         <legend className="px-1 text-sm font-semibold text-ivory">Séquences automatiques</legend>
-        <p className="text-xs text-muted">Les séquences automatiques arrivent ; ce réglage sera pris en compte dès leur mise en service.</p>
+        <ul className="list-disc space-y-1 pl-5 text-xs text-muted">
+          <li>Paiement abandonné : un e-mail à J+1 puis à J+8 après la tentative.</li>
+          <li>Offre consultée : un e-mail à J+2 après la dernière visite.</li>
+          <li>E-mail uniquement. Arrêt dès un paiement, une réponse, une clôture ou une opposition ; une étape n'est jamais envoyée deux fois.</li>
+          <li>Exécution quotidienne à 09:00 UTC.</li>
+        </ul>
         {MODES.map((m) => (
           <label key={m.valeur} className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 ${mode === m.valeur ? 'border-accent bg-accent/5' : 'border-border'}`}>
             <input type="radio" name="mode_sequences" value={m.valeur} checked={mode === m.valeur} onChange={() => { setMode(m.valeur); if (m.valeur !== 'actif') setConfirme(false); effacer(); }} className="mt-1" />

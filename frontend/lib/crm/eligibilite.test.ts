@@ -85,4 +85,16 @@ describe('eligibilite', () => {
     const d = avec({ actions: [act({ date: ilYa(3) })] });
     expect(eligibilite(d, { ...R, delai_min_jours: 2 }, MAINT).ok).toBe(true);
   });
+  it("compte une relance restée « en envoi » comme un contact possible, pas une ligne de simulation", () => {
+    expect(eligibilite(avec({ actions: [act({ date: ilYa(1), statut: 'envoi' })] }), R, MAINT).ok).toBe(false);
+    expect(eligibilite(avec({ actions: [act({ date: ilYa(1), statut: 'simulation', sequenceCle: 'sim_x:1' })] }), R, MAINT).ok).toBe(true);
+  });
+  it('spam sur un e-mail précédent : plus de relance e-mail, mais WhatsApp reste possible', () => {
+    const d = avec({ actions: [act({ date: ilYa(30), livraison: 'spam' })] });
+    expect(eligibilite(d, R, MAINT).raisons).toEqual(['Un e-mail précédent a été signalé comme indésirable : plus de relance e-mail.']);
+    expect(eligibilite(d, R, MAINT, 'whatsapp').ok).toBe(true);
+  });
+  it('e-mail rejeté (adresse en erreur) : la relance manuelle reste possible', () => {
+    expect(eligibilite(avec({ actions: [act({ date: ilYa(30), livraison: 'rejete' })] }), R, MAINT).ok).toBe(true);
+  });
 });

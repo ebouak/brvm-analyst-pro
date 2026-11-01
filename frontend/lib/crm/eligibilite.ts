@@ -12,8 +12,12 @@ import { dernierContact, decisionsCourantes } from './vues';
 const JOUR_MS = 86_400_000;
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 
-export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date): { ok: boolean; raisons: string[] } {
+export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date, canal: 'email' | 'whatsapp' = 'email'): { ok: boolean; raisons: string[] } {
   const raisons: string[] = [];
+  // Un e-mail signalé comme indésirable : insister par e-mail abîme la réputation d'envoi et ignore un refus explicite.
+  if (canal === 'email' && d.actions.some((a) => a.type === 'relance' && a.canal === 'email' && a.livraison === 'spam')) {
+    raisons.push('Un e-mail précédent a été signalé comme indésirable : plus de relance e-mail.');
+  }
   // Premium implique « paye » côté paiement : on ne dit pas deux fois la même chose.
   if (d.premium || d.admin) raisons.push('Personne Premium ou administratrice : relance refusée.');
   else {
@@ -24,7 +28,7 @@ export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date): {
   if (d.oppose) raisons.push("Cette personne s'est opposée aux propositions commerciales : plus aucun contact.");
   if (decisionsCourantes(d).cloture) raisons.push('Dossier clôturé : relance refusée.');
 
-  const nb = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare')).length;
+  const nb = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi')).length;
   if (nb >= reglages.max_relances) raisons.push(`Déjà ${pluriel(nb, 'relance')} (maximum ${reglages.max_relances}).`);
 
   const contact = dernierContact(d);
