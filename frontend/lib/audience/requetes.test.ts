@@ -30,6 +30,10 @@ describe('requêtes HogQL', () => {
   it('la tendance couvre 12 semaines avant la fin', () => {
     expect(q.sqlTendance(f.fin)).toContain(`toDateTime('2026-08-09 00:00:00', 'UTC')`);
   });
+  it('les regroupements par jour et par semaine sont faits en UTC (semaine ISO, lundi)', () => {
+    expect(q.sqlSerieJournaliere(f)).toContain(`toDate(toTimeZone(timestamp, 'UTC'))`);
+    expect(q.sqlTendance(f.fin)).toContain(`toStartOfWeek(toTimeZone(timestamp, 'UTC'), 1)`);
+  });
   it('une borne invalide est refusée plutôt que injectée', () => {
     expect(() => q.sqlOverview({ debut: new Date('nope'), fin: f.fin })).toThrow();
   });

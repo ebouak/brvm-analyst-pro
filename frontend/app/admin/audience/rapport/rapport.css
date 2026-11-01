@@ -16,8 +16,8 @@
 
 @media print {
   @page { size: A4; margin: 10mm; }
-  header, nav, aside { display: none !important; }
+  body:has(.ra) header, body:has(.ra) nav, body:has(.ra) aside { display: none !important; }
   .ra { padding: 0; border-radius: 0; max-width: none; }
   .ra .ra-barre { display: none; }
-  body { background: #fff !important; }
+  body:has(.ra) { background: #fff !important; }
 }

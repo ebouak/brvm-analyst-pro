@@ -43,7 +43,7 @@ export const sqlAppareils = (f: Fenetre) =>
 export const SEMAINES_TENDANCE = 12;
 export function sqlTendance(fin: Date): string {
   const debut = new Date(fin.getTime() - SEMAINES_TENDANCE * 7 * 86_400_000);
-  return `SELECT toString(toStartOfWeek(timestamp, 1)) AS semaine, ${CONTINENT} AS continent, uniq(person_id) AS personnes FROM events WHERE ${filtreFenetre({ debut, fin })} GROUP BY semaine, continent ORDER BY semaine`;
+  return `SELECT toString(toStartOfWeek(toTimeZone(timestamp, 'UTC'), 1)) AS semaine, ${CONTINENT} AS continent, uniq(person_id) AS personnes FROM events WHERE ${filtreFenetre({ debut, fin })} GROUP BY semaine, continent ORDER BY semaine`;
 }
 
 /**
@@ -56,4 +56,4 @@ export const sqlEntonnoir = (f: Fenetre) =>
 
 /** Série journalière (check quotidien) : une seule requête pour la veille et les jours de référence. */
 export const sqlSerieJournaliere = (f: Fenetre) =>
-  `SELECT toString(toDate(timestamp)) AS jour, uniq(person_id) AS personnes, uniq($session_id) AS sessions, countIf(${PAGEVIEW}) AS pages_vues, uniqIf(person_id, ${CONTINENT} = 'AF') AS afrique FROM events WHERE ${filtreFenetre(f)} GROUP BY jour ORDER BY jour`;
+  `SELECT toString(toDate(toTimeZone(timestamp, 'UTC'))) AS jour, uniq(person_id) AS personnes, uniq($session_id) AS sessions, countIf(${PAGEVIEW}) AS pages_vues, uniqIf(person_id, ${CONTINENT} = 'AF') AS afrique FROM events WHERE ${filtreFenetre(f)} GROUP BY jour ORDER BY jour`;
