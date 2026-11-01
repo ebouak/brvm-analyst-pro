@@ -1,6 +1,6 @@
 // frontend/app/admin/crm/DecisionForms.tsx
 'use client';
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { cloturer, rouvrir, marquerReponse, marquerTraite, assignerResponsable, fixerEcheance } from './[cle]/actions';
 import type { MotifCloture } from '@/lib/crm/types';
 
@@ -10,11 +10,19 @@ const CHAMP = 'rounded-md border border-border bg-sunken px-3 py-1.5 text-sm tex
 
 function useAction() {
   const [retour, setRetour] = useState<Retour | null>(null);
-  const [envoi, demarrer] = useTransition();
-  const lancer = (f: () => Promise<Retour>) => demarrer(async () => {
-    try { setRetour(await f()); } catch { setRetour({ ok: false, message: 'Erreur serveur : décision non enregistrée.' }); }
-  });
-  return { retour, envoi, lancer };
+  const [pending, demarrer] = useTransition();
+  // Garde contre le double envoi : posée de façon synchrone (ref) avant l'appel serveur, levée en finally.
+  const verrou = useRef(false);
+  const [occupe, setOccupe] = useState(false);
+  const lancer = (f: () => Promise<Retour>) => {
+    if (verrou.current) return;
+    verrou.current = true;
+    setOccupe(true);
+    demarrer(async () => {
+      try { setRetour(await f()); } catch { setRetour({ ok: false, message: 'Erreur serveur : décision non enregistrée.' }); } finally { verrou.current = false; setOccupe(false); }
+    });
+  };
+  return { retour, envoi: pending || occupe, lancer };
 }
 const Msg = ({ r }: { r: Retour | null }) => (r ? <p role="status" className={`text-xs ${r.ok ? 'text-up' : 'text-down'}`}>{r.message}</p> : null);
 

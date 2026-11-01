@@ -10,6 +10,8 @@ import { listerResponsables } from '@/lib/crm/responsables';
 import type { Dossier, Niveau } from '@/lib/crm/types';
 import FicheProspect, { BadgeEtat } from './FicheProspect';
 import { preparerFiche } from './preparerFiche';
+import { libStatut } from './libelles';
+import PanneauFocus from './PanneauFocus';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'CRM — Administration' };
@@ -79,7 +81,9 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
   const sansFiche = { ...sp, fiche: undefined };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+    <>
+    {/* Contenu derrière le panneau : inerte (ni focus ni lecteur d'écran) tant qu'il est ouvert. */}
+    <div className="max-w-6xl mx-auto px-6 py-8 space-y-6" {...(searchParams.fiche ? ({ inert: '' } as Record<string, unknown>) : {})}>
       <SectionHeader kicker="Administration" title="CRM · proches du Premium" />
 
       <nav aria-label="Vues" className="flex flex-wrap gap-2 text-sm">
@@ -135,9 +139,9 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
             </thead>
             <tbody>
               {filtrees.map(({ d, etat, echeance, dec, dernier, score }) => (
-                <tr key={d.cle} className={`border-b border-border/40 align-top last:border-0 ${d.cle === searchParams.fiche ? 'bg-accent/5' : ''}`}>
+                <tr key={d.cle} className={`relative border-b border-border/40 align-top last:border-0 ${d.cle === searchParams.fiche ? 'bg-accent/5' : ''}`}>
                   <td className="px-4 py-2.5">
-                    <Link href={href(sp, { fiche: d.cle })} scroll={false} className="font-medium text-ivory hover:text-accent-ink">{d.nom ?? d.emailNorm}</Link>
+                    <Link href={href(sp, { fiche: d.cle })} scroll={false} className="font-medium text-ivory after:absolute after:inset-0 hover:text-accent-ink">{d.nom ?? d.emailNorm}</Link>
                     {!d.userId && <span className="ml-2 text-xs text-faint">prospect sans compte</span>}
                   </td>
                   <td className="px-4 py-2.5"><BadgeEtat etat={etat.etat} /></td>
@@ -153,16 +157,19 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
         </PremiumPanel>
       )}
 
-      {ouverte && <PanneauFiche l={ouverte} fermer={href(sansFiche, {})} canWrite={can(ctx, 'crm.write')} responsables={responsables} maintenant={maintenant} />}
     </div>
+    {searchParams.fiche && (ouverte
+      ? <PanneauFiche l={ouverte} fermer={href(sansFiche, {})} canWrite={can(ctx, 'crm.write')} responsables={responsables} maintenant={maintenant} />
+      : <PanneauIntrouvable fermer={href(sansFiche, {})} />)}
+    </>
   );
 }
 
 function libelleDernier(a: Dossier['actions'][number] | null): string {
   if (!a) return 'aucune';
-  if (a.type === 'relance') return `${fmtJour(a.date)} · ${a.canal ?? 'relance'} (${a.statut})`;
+  if (a.type === 'relance') return `${fmtJour(a.date)} · ${a.canal ?? 'relance'} (${libStatut(a.statut)})`;
   if (a.decision === 'cloture') return `${fmtJour(a.date)} · clôture${a.motif ? ` (${LIB_MOTIF[a.motif]})` : ''}`;
-  const lib: Record<string, string> = { reouverture: 'réouverture', echeance: 'échéance fixée', responsable: 'responsable assigné', reponse: 'réponse reçue' };
+  const lib: Record<string, string> = { reouverture: 'réouverture', echeance: 'échéance fixée', responsable: 'responsable assigné', reponse: 'réponse reçue', traite: 'réponse traitée' };
   return `${fmtJour(a.date)} · ${lib[a.decision ?? ''] ?? 'décision'}`;
 }
 
@@ -172,16 +179,31 @@ function PanneauFiche({ l, fermer, canWrite, responsables, maintenant }: {
 }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={`Fiche de ${l.d.nom ?? l.d.emailNorm}`}>
+      <PanneauFocus fermer={fermer} titreId="panneau-titre" />
       <Link href={fermer} scroll={false} aria-label="Fermer la fiche" className="hidden flex-1 bg-bg/70 backdrop-blur-sm lg:block" />
       <aside className="h-full w-full overflow-y-auto border-l border-border bg-surface p-6 lg:w-[34rem]">
         <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 className="font-display text-xl text-ivory">{l.d.nom ?? l.d.emailNorm}</h2>
+          <h2 id="panneau-titre" tabIndex={-1} className="font-display text-xl text-ivory outline-none">{l.d.nom ?? l.d.emailNorm}</h2>
           <div className="flex shrink-0 items-center gap-3 text-sm">
             <Link href={`/admin/crm/${encodeURIComponent(l.d.cle)}`} className="text-muted hover:text-ivory">Ouvrir en grand</Link>
             <Link href={fermer} scroll={false} className="rounded-full border border-border px-3 py-1 text-ivory hover:border-accent">Fermer</Link>
           </div>
         </div>
-        <FicheProspect d={l.d} etat={l.etat} vue={l.vue} score={l.score} canWrite={canWrite} responsables={responsables} maintenant={maintenant} {...preparerFiche(l.d, l.score, maintenant)} />
+        <FicheProspect key={l.d.cle} d={l.d} etat={l.etat} vue={l.vue} score={l.score} canWrite={canWrite} responsables={responsables} maintenant={maintenant} {...preparerFiche(l.d, l.score, maintenant)} />
+      </aside>
+    </div>
+  );
+}
+
+function PanneauIntrouvable({ fermer }: { fermer: string }) {
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Fiche introuvable">
+      <PanneauFocus fermer={fermer} titreId="panneau-titre" />
+      <Link href={fermer} scroll={false} aria-label="Fermer" className="hidden flex-1 bg-bg/70 backdrop-blur-sm lg:block" />
+      <aside className="h-full w-full overflow-y-auto border-l border-border bg-surface p-6 lg:w-[34rem]">
+        <h2 id="panneau-titre" tabIndex={-1} className="font-display text-xl text-ivory outline-none">Fiche introuvable</h2>
+        <p className="mt-2 text-sm text-muted">Cette personne n&apos;existe pas ou n&apos;est pas suivie dans le CRM.</p>
+        <Link href={fermer} scroll={false} className="mt-4 inline-block rounded-full border border-border px-3 py-1 text-sm text-ivory hover:border-accent">Fermer</Link>
       </aside>
     </div>
   );

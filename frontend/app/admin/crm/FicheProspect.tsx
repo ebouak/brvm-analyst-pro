@@ -7,6 +7,7 @@ import { chronologie } from '@/lib/crm/identite';
 import { fmtJour, fmtMontant, compareIso } from '@/lib/crm/score';
 import type { TemplateId } from '@/lib/crm/gabarits';
 import { texteWhatsappInitial } from '@/lib/crm/whatsappRelance';
+import { libStatut } from './libelles';
 import RelanceForm from './[cle]/RelanceForm';
 import RelanceWhatsapp from './[cle]/RelanceWhatsapp';
 import NoteForm from './[cle]/NoteForm';
@@ -90,7 +91,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
       <section>
         <h2 className={H2}>Messages et réponses</h2>
         <ul className="space-y-1 text-sm">
-          {relances.map((a, i) => <li key={`r${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · relance {a.canal ?? ''} ({a.statut}){a.sujet ? ` · ${a.sujet}` : ''}</li>)}
+          {relances.map((a, i) => <li key={`r${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · relance {a.canal ?? ''} ({libStatut(a.statut)}){a.sujet ? ` · ${a.sujet}` : ''}</li>)}
           {messages.map((m, i) => <li key={`m${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(m.date)}</span> · message reçu via le formulaire de contact</li>)}
           {decisions.map((a, i) => <li key={`d${i}`} className="text-muted"><span className="tabular text-faint">{fmtJour(a.date)}</span> · {LIB_DECISION[a.decision ?? ''] ?? 'Décision'} — {a.contenu}</li>)}
           {relances.length + messages.length + decisions.length === 0 && <li className="text-muted">Aucun échange enregistré.</li>}
