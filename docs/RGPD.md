@@ -44,11 +44,16 @@ Audit initial : 2026-06-16.
 
 - Mécanisme de consentement présent : `components/consent/` (`ConsentProvider`,
   `CookieBanner`, `CookiePreferences`) + lien pied de page (`FooterCookieLink`).
-- **Aucun SDK de tracking tiers** détecté (pas de Google Analytics/GTM, Facebook
-  Pixel, Hotjar, Mixpanel, Segment, PostHog, Clarity). Les seuls scripts sont
-  internes (rendu, PDF worker local `public/pdf.worker.min.mjs`). ✅
-- Cookies essentiels uniquement : session Supabase (auth). Pas de traceur non
-  essentiel à bloquer aujourd'hui — la bannière reste le garde-fou si on en ajoute.
+- **Un seul SDK d'audience : PostHog** (`components/analytics/PostHogInit.tsx`), chargé
+  UNIQUEMENT après consentement « Mesure d'audience » (rien n'est chargé ni émis avant ;
+  retrait du consentement = opt-out + purge locale). Hôte européen
+  (`eu.i.posthog.com`), saisies masquées dans les enregistrements de session. Pour une
+  personne connectée ayant consenti, la session est identifiée par son identifiant de compte
+  et son e-mail (`identify`). Pas de Google Analytics/GTM, Facebook Pixel, Hotjar, Mixpanel,
+  Segment ni Clarity. Autres scripts : internes (rendu, PDF worker local
+  `public/pdf.worker.min.mjs`). ✅
+- Sans consentement : cookies essentiels uniquement (session Supabase). Les traceurs non
+  essentiels sont bloqués par la bannière.
 
 ## 4. Sécurité
 
