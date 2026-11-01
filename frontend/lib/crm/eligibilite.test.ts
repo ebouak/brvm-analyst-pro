@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { eligibilite } from './eligibilite';
+import { eligibilite, libelleAnciennete } from './eligibilite';
 import { REGLAGES_PAR_DEFAUT } from './reglages';
 import type { Dossier, ActionCrm, Paiement } from './types';
 
@@ -96,5 +96,31 @@ describe('eligibilite', () => {
   });
   it('e-mail rejeté (adresse en erreur) : la relance manuelle reste possible', () => {
     expect(eligibilite(avec({ actions: [act({ date: ilYa(30), livraison: 'rejete' })] }), R, MAINT).ok).toBe(true);
+  });
+  it("délai minimal : « aujourd'hui » et « hier », jamais « il y a 0 jour »", () => {
+    expect(eligibilite(avec({ actions: [act({ date: ilYa(0) })] }), R, MAINT).raisons[0]).toMatch(/Dernier contact aujourd'hui :/);
+    expect(eligibilite(avec({ actions: [act({ date: ilYa(1) })] }), R, MAINT).raisons[0]).toMatch(/Dernier contact hier :/);
+    expect([0, 1, 2, 5].map(libelleAnciennete)).toEqual(["aujourd'hui", 'hier', 'il y a 2 jours', 'il y a 5 jours']);
+  });
+
+  describe('manuel : aucune limite de cadence', () => {
+    const M = { manuel: true };
+    it('ignore le plafond de relances et le délai minimal', () => {
+      const d = avec({ actions: [act({ date: ilYa(0) }), act({ date: ilYa(2) }), act({ date: ilYa(3) }), act({ date: ilYa(4) })] });
+      expect(eligibilite(d, R, MAINT).ok).toBe(false);
+      expect(eligibilite(d, R, MAINT, 'email', M)).toEqual({ ok: true, raisons: [] });
+      expect(eligibilite(d, R, MAINT, 'whatsapp', M).ok).toBe(true);
+    });
+    it('garde les règles de fond : opposition, Premium, admin, paiement, clôture, spam e-mail', () => {
+      expect(eligibilite(avec({ oppose: true }), R, MAINT, 'email', M).ok).toBe(false);
+      expect(eligibilite(avec({ premium: true }), R, MAINT, 'email', M).ok).toBe(false);
+      expect(eligibilite(avec({ admin: true }), R, MAINT, 'email', M).ok).toBe(false);
+      expect(eligibilite(avec({ paiements: [pay('paid', 'manual', 3)] }), R, MAINT, 'email', M).ok).toBe(false);
+      const cloture = act({ date: ilYa(40), type: 'decision', statut: 'decision', canal: null, decision: 'cloture', motif: 'doublon' });
+      expect(eligibilite(avec({ actions: [cloture] }), R, MAINT, 'email', M).ok).toBe(false);
+      const spam = avec({ actions: [act({ date: ilYa(30), livraison: 'spam' })] });
+      expect(eligibilite(spam, R, MAINT, 'email', M).ok).toBe(false);
+      expect(eligibilite(spam, R, MAINT, 'whatsapp', M).ok).toBe(true);
+    });
   });
 });

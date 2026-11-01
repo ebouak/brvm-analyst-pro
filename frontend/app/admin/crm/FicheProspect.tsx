@@ -47,8 +47,8 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
   const notes = d.actions.filter((a) => a.type === 'note').sort((a, b) => compareIso(b.date, a.date));
   const paiements = [...d.paiements].sort((a, b) => compareIso(b.date, a.date));
   const messages = [...d.messages].sort((a, b) => compareIso(b.date, a.date));
-  const elig = eligibilite(d, reglages, maintenant);
-  const eligWa = eligibilite(d, reglages, maintenant, 'whatsapp');
+  const elig = eligibilite(d, reglages, maintenant, 'email', { manuel: true });
+  const eligWa = eligibilite(d, reglages, maintenant, 'whatsapp', { manuel: true });
   const nbRelances = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi')).length;
   const contact = dernierContact(d);
   const nbDoublons = etat.doublons.length;
@@ -146,7 +146,7 @@ export default function FicheProspect({ d, etat, vue, score, canWrite, responsab
           <section>
             <h2 className={H2}>Relance par e-mail</h2>
             {elig.ok ? (
-              <p role="status" className="mb-2 text-xs text-up">Relance possible · {nbRelances}/{reglages.max_relances} relance{reglages.max_relances > 1 ? 's' : ''}{contact ? `, dernier contact le ${fmtJour(contact)}` : ', aucun contact encore'}</p>
+              <p role="status" className="mb-2 text-xs text-up">Relance possible · {nbRelances === 0 ? 'aucune relance encore' : `${nbRelances} relance${nbRelances > 1 ? 's' : ''} déjà envoyée${nbRelances > 1 ? 's' : ''}`}{contact ? `, dernière le ${fmtJour(contact)}` : ''} (information : aucune limite en manuel)</p>
             ) : (
               <div role="status" className="mb-2 rounded-md border border-down/30 bg-down/5 p-3 text-sm">
                 <p className="font-medium text-down">Relance bloquée</p>

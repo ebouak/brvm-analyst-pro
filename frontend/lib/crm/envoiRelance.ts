@@ -67,7 +67,8 @@ export async function envoyerRelanceEmail(e: EntreeEnvoi): Promise<SortieEnvoi> 
   // Séquence : l'interrupteur « off » (ou un changement de mode) prend effet IMMÉDIATEMENT, même en plein passage.
   if (e.sequenceCle && reglages.mode_sequences !== (e.simulation ? 'simulation' : 'actif')) return refus('Mode des séquences changé : étape non traitée.');
   // Règle unique d'éligibilité (paiement, opposition, clôture, plafond, délai) : mêmes raisons que l'interface.
-  const elig = eligibilite(d, reglages, new Date());
+  // Voie manuelle (sans séquence) : pas de limite de cadence ; séquences : toutes les règles.
+  const elig = eligibilite(d, reglages, new Date(), 'email', { manuel: !e.sequenceCle });
   if (!elig.ok) return refus(elig.raisons.join(' ; '));
   // Dernier garde : la personne a pu payer depuis le chargement du dossier.
   const verif = await verifierPaiementAvantEnvoi(d.userId, e.chargeLe);

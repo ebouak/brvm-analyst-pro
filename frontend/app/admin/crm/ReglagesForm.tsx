@@ -8,8 +8,8 @@ type Retour = { ok: boolean; message: string };
 const CHAMP = 'w-28 rounded-md border border-border bg-sunken px-3 py-1.5 text-sm text-ivory tabular';
 
 const CHAMPS: { nom: keyof typeof BORNES; aide: string; unite: string }[] = [
-  { nom: 'max_relances', aide: 'Au-delà, plus aucune relance (manuelle ou automatique).', unite: 'relances' },
-  { nom: 'delai_min_jours', aide: 'Temps à laisser entre deux relances.', unite: 'jours' },
+  { nom: 'max_relances', aide: 'Au-delà, plus aucune relance automatique (le manuel est sans limite).', unite: 'relances' },
+  { nom: 'delai_min_jours', aide: 'Temps à laisser entre deux relances automatiques.', unite: 'jours' },
   { nom: 'delai_suivi_jours', aide: "Après ce délai sans réponse, la personne repasse dans « À traiter ».", unite: 'jours' },
   { nom: 'fenetre_conversion_jours', aide: "Un paiement compte comme « conversion après relance » s'il arrive dans ce délai après la 1re relance.", unite: 'jours' },
   { nom: 'plafond_par_execution', aide: "Nombre maximal d'envois par passage des séquences automatiques.", unite: 'envois' },

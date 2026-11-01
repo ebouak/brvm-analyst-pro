@@ -12,7 +12,19 @@ import { dernierContact, decisionsCourantes } from './vues';
 const JOUR_MS = 86_400_000;
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 
-export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date, canal: 'email' | 'whatsapp' = 'email'): { ok: boolean; raisons: string[] } {
+/** « aujourd'hui », « hier », « il y a N jours » — jamais « il y a 0 jour ». */
+export function libelleAnciennete(jours: number): string {
+  if (jours <= 0) return "aujourd'hui";
+  if (jours === 1) return 'hier';
+  return `il y a ${jours} jours`;
+}
+
+/**
+ * `manuel` : relance décidée par l'exploitant — AUCUNE limite de cadence (plafond de relances et délai minimal
+ * ne s'appliquent qu'aux séquences automatiques). Les règles de fond (opposition, paiement, Premium, clôture,
+ * spam e-mail) restent absolues. Sans `manuel` (cron, séquences) : toutes les règles.
+ */
+export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date, canal: 'email' | 'whatsapp' = 'email', opts: { manuel?: boolean } = {}): { ok: boolean; raisons: string[] } {
   const raisons: string[] = [];
   // Un e-mail signalé comme indésirable : insister par e-mail abîme la réputation d'envoi et ignore un refus explicite.
   if (canal === 'email' && d.actions.some((a) => a.type === 'relance' && a.canal === 'email' && a.livraison === 'spam')) {
@@ -28,6 +40,8 @@ export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date, ca
   if (d.oppose) raisons.push("Cette personne s'est opposée aux propositions commerciales : plus aucun contact.");
   if (decisionsCourantes(d).cloture) raisons.push('Dossier clôturé : relance refusée.');
 
+  if (opts.manuel) return { ok: raisons.length === 0, raisons };
+
   const nb = d.actions.filter((a) => a.type === 'relance' && (a.statut === 'envoye' || a.statut === 'prepare' || a.statut === 'envoi')).length;
   if (nb >= reglages.max_relances) raisons.push(`Déjà ${pluriel(nb, 'relance')} (maximum ${reglages.max_relances}).`);
 
@@ -35,7 +49,7 @@ export function eligibilite(d: Dossier, reglages: Reglages, maintenant: Date, ca
   if (contact) {
     const ecoule = maintenant.getTime() - Date.parse(contact);
     if (ecoule < reglages.delai_min_jours * JOUR_MS) {
-      raisons.push(`Dernier contact il y a ${pluriel(Math.max(0, Math.floor(ecoule / JOUR_MS)), 'jour')} : délai minimal de ${reglages.delai_min_jours} jours non écoulé.`);
+      raisons.push(`Dernier contact ${libelleAnciennete(Math.max(0, Math.floor(ecoule / JOUR_MS)))} : délai minimal de ${reglages.delai_min_jours} jours non écoulé.`);
     }
   }
   return { ok: raisons.length === 0, raisons };
