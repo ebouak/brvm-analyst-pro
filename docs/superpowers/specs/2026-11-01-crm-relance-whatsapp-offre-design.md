@@ -92,8 +92,11 @@ Module pur `lib/crm/emailRelance.ts` : `(corps, options) → { html, texte }`.
 
 - Un jeton par relance incluant l'offre, 24 octets aléatoires, **14 jours**,
   **un dossier**.
-- Page publique (ajoutée aux exceptions du middleware), liste des valeurs dont
-  un dossier existe ; lignes du portefeuille de la personne en premier.
+- Page publique (ajoutée aux exceptions du middleware), liste des valeurs
+  cotées, par ordre alphabétique. **Aucune information de portefeuille**
+  (décision de relecture, 2026-11-01) : le lien peut être transféré ou parvenir
+  à un numéro déclaré erroné ; mettre en avant les lignes détenues révélerait le
+  portefeuille à un tiers.
 - Au choix : vérification (existe, non expiré, non utilisé), puis
   **consommation atomique** (`update … where bonus_at is null` renvoyant la
   ligne ; zéro ligne = déjà utilisé), puis URL signée 10 min vers
