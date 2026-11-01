@@ -9,6 +9,7 @@ import type { Dossier, MotifCloture } from './types';
 import type { EtatPaiement, ResultatPaiement } from './paiement';
 import { etatPaiement } from './paiement';
 import { fmtJour, scorer, compareIso } from './score';
+import { REGLAGES_PAR_DEFAUT, type Reglages } from './reglages';
 
 export const VUES = ['a_traiter', 'jamais_contactes', 'paiements_a_verifier', 'en_attente', 'convertis', 'clotures'] as const;
 export type Vue = (typeof VUES)[number];
@@ -22,8 +23,9 @@ export const LIB_VUE: Record<Vue, string> = {
 };
 export const LIB_MOTIF: Record<MotifCloture, string> = { pas_interesse: 'pas intéressé', doublon: 'doublon', deja_abonne: 'déjà abonné' };
 
-export interface Reglages { delai_suivi_jours: number }
-export const REGLAGES_DEFAUT: Reglages = { delai_suivi_jours: 7 };
+/** Seule la part des réglages qu'utilisent les vues ; une seule source de vérité : `reglages.ts`. */
+export type ReglagesVue = Pick<Reglages, 'delai_suivi_jours'>;
+export const REGLAGES_DEFAUT: ReglagesVue = { delai_suivi_jours: REGLAGES_PAR_DEFAUT.delai_suivi_jours };
 
 export interface DecisionsCourantes {
   cloture: { motif: MotifCloture | null; date: string } | null;
@@ -77,7 +79,7 @@ export const reponseRecue = (d: Pick<Dossier, 'actions' | 'messages'>): boolean 
 type Declencheur = 'echeance' | 'reponse' | 'silence';
 interface Analyse { vue: Vue; echeance: string | null; raison: string; declencheur?: Declencheur }
 
-function analyser(d: Dossier, maintenant: Date, reglages: Reglages, etat: ResultatPaiement): Analyse {
+function analyser(d: Dossier, maintenant: Date, reglages: ReglagesVue, etat: ResultatPaiement): Analyse {
   const dec = decisionsCourantes(d);
   const echeance = dec.echeance;
   const base = { echeance };
@@ -103,13 +105,13 @@ function analyser(d: Dossier, maintenant: Date, reglages: Reglages, etat: Result
 }
 
 /** Priorité : convertis > clôturés > paiements à vérifier > à traiter > en attente > jamais contactés. */
-export function vueDe(d: Dossier, maintenant: Date, reglages: Reglages = REGLAGES_DEFAUT): { vue: Vue; echeance: string | null; raison: string } {
+export function vueDe(d: Dossier, maintenant: Date, reglages: ReglagesVue = REGLAGES_DEFAUT): { vue: Vue; echeance: string | null; raison: string } {
   const { vue, echeance, raison } = analyser(d, maintenant, reglages, etatPaiement(d, maintenant));
   return { vue, echeance, raison };
 }
 
 /** Une action et sa justification, une phrase chacune, dérivées des seuls faits de la fiche. */
-export function actionRecommandee(d: Dossier, vue: Vue, etat: ResultatPaiement | { etat: EtatPaiement; detail: string; enCours?: ResultatPaiement['enCours'] }, maintenant: Date = new Date(), reglages: Reglages = REGLAGES_DEFAUT): { libelle: string; justification: string } {
+export function actionRecommandee(d: Dossier, vue: Vue, etat: ResultatPaiement | { etat: EtatPaiement; detail: string; enCours?: ResultatPaiement['enCours'] }, maintenant: Date = new Date(), reglages: ReglagesVue = REGLAGES_DEFAUT): { libelle: string; justification: string } {
   const complet: ResultatPaiement = { doublons: [], enCours: null, ...etat };
   const a = analyser(d, maintenant, reglages, complet);
   switch (vue) {
