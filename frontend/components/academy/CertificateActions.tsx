@@ -30,7 +30,7 @@ export default function CertificateActions({ niveau, defaultName }: { niveau: st
         <p className="text-sm text-up">✓ Certificat généré.</p>
         <a href={url} className="block text-sm text-accent hover:underline">Voir mon certificat →</a>
         <div className="flex flex-wrap gap-2">
-          <a href={linkedin} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-[#0a66c2] px-4 py-2 text-sm font-semibold text-white">Ajouter à LinkedIn</a>
+          <a href={linkedin} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-[#0a66c2] px-4 py-2 text-sm font-semibold text-[#ffffff]">Ajouter à LinkedIn</a>
           <button type="button" onClick={() => navigator.clipboard.writeText(url)} className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:text-white">Copier le lien</button>
           <a href={`https://wa.me/?text=${encodeURIComponent('Mon certificat WESTBOURSE : ' + url)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:text-white">WhatsApp</a>
         </div>

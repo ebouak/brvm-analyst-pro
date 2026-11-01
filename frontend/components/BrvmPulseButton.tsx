@@ -70,7 +70,7 @@ export function BrvmPulseButton({ href = "/terminal" }: { href?: string }) {
     >
       <Link
         href={href}
-        className="group relative z-10 inline-flex h-14 items-center justify-center rounded-full border border-white/10 bg-[#0b1620] px-7 text-sm font-medium text-white shadow-[0_0_40px_rgba(0,0,0,0.35)]"
+        className="group relative z-10 inline-flex h-14 items-center justify-center rounded-full border border-white/10 bg-[#0b1620] px-7 text-sm font-medium text-[#ffffff] shadow-[0_0_40px_rgba(0,0,0,0.35)]"
       >
         <span className="absolute inset-0 rounded-full bg-[radial-gradient(80%_120%_at_50%_0%,rgba(34,211,238,0.22)_0%,rgba(34,211,238,0)_70%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         <span className="relative bg-gradient-to-r from-cyan-200 via-sky-100 to-cyan-200 bg-clip-text text-transparent">
