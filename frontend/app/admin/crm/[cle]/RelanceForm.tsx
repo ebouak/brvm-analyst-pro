@@ -1,6 +1,6 @@
 // frontend/app/admin/crm/[cle]/RelanceForm.tsx
 'use client';
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { envoyerRelance } from './actions';
 import type { TemplateId } from '@/lib/crm/gabarits';
 
@@ -11,7 +11,10 @@ export default function RelanceForm({ cle, templateId, sujetInitial, corpsInitia
   const [corps, setCorps] = useState(corpsInitial);
   const [retour, setRetour] = useState<{ ok: boolean; message: string } | null>(null);
   const [offre, setOffre] = useState(true);
-  const [envoi, demarrer] = useTransition();
+  const [pending, demarrer] = useTransition();
+  const verrou = useRef(false);
+  const [occupe, setOccupe] = useState(false);
+  const envoi = pending || occupe;
   if (oppose) return <p className="text-sm text-down">Cette personne s&apos;est opposée aux propositions commerciales : relance désactivée.</p>;
   return (
     <div className="space-y-3">
@@ -23,7 +26,11 @@ export default function RelanceForm({ cle, templateId, sujetInitial, corpsInitia
         <input type="checkbox" checked={offre} onChange={(e) => setOffre(e.target.checked)} />
         Inclure l&apos;offre « dossier valeur au choix » (lien valable 14 jours, un dossier)
       </label>
-      <button disabled={envoi} onClick={() => demarrer(async () => { try { setRetour(await envoyerRelance(cle, sujet, corps, templateId, offre)); } catch { setRetour({ ok: false, message: "Erreur serveur : rien n'a été envoyé." }); } })} className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-bg disabled:opacity-50">
+      <button disabled={envoi} onClick={() => {
+        if (verrou.current) return;
+        verrou.current = true; setOccupe(true);
+        demarrer(async () => { try { setRetour(await envoyerRelance(cle, sujet, corps, templateId, offre)); } catch { setRetour({ ok: false, message: "Erreur serveur : rien n'a été envoyé." }); } finally { verrou.current = false; setOccupe(false); } });
+      }} className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-bg disabled:opacity-50">
         {envoi ? 'Envoi…' : 'Envoyer la relance'}
       </button>
       {retour && <p className={`text-sm ${retour.ok ? 'text-up' : 'text-down'}`}>{retour.message}</p>}

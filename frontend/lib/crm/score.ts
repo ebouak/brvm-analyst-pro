@@ -11,7 +11,14 @@ export const SEUILS = { chaud: 50, tiede: 25 } as const;
 
 const JOUR_MS = 86_400_000;
 const age = (iso: string, maintenant: Date) => (maintenant.getTime() - Date.parse(iso)) / JOUR_MS;
-const plusRecent = <T extends { date: string }>(xs: readonly T[]) => [...xs].sort((a, b) => b.date.localeCompare(a.date))[0];
+/** Comparaison ISO par unités de code : `localeCompare` suit la locale et classe mal « …:00Z » face à « …:00.5Z ». */
+export const compareIso = (a: string, b: string): number => {
+  // Instants parsables : comparés comme tels (« …:00Z » et « …:00.500Z » se classent juste) ; sinon unités de code.
+  const ta = Date.parse(a), tb = Date.parse(b);
+  if (!Number.isNaN(ta) && !Number.isNaN(tb) && ta !== tb) return ta < tb ? -1 : 1;
+  return a < b ? -1 : a > b ? 1 : 0;
+};
+const plusRecent = <T extends { date: string }>(xs: readonly T[]) => [...xs].sort((a, b) => compareIso(b.date, a.date))[0];
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 
 export const fmtJour = (iso: string): string => {

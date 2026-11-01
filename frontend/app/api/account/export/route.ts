@@ -101,7 +101,7 @@ export async function GET() {
   // Jamais exportés : jeton d'opposition, auteur, erreur, resend_id, signaux_json.
   const sbCrm = getServiceClient();
   const emailCrm = user.email && user.email_confirmed_at ? user.email.trim().toLowerCase() : null;
-  const colonnesCrm = 'id, type, canal, sujet, contenu, statut, created_at, bonus_code, bonus_at';
+  const colonnesCrm = 'id, type, canal, sujet, contenu, statut, created_at, bonus_code, bonus_at, decision, motif, echeance';
   const crmSignaux =
     (await sbCrm.from('crm_signaux').select('page, jour, created_at').eq('user_id', user.id)).data ?? [];
   const actionsParCompte = (await sbCrm.from('crm_actions').select(colonnesCrm).eq('user_id', user.id)).data ?? [];

@@ -4,8 +4,8 @@
  * rapprochement se fait par e-mail normalisé : seule clé commune entre comptes,
  * prospects, newsletter et messages.
  */
-import type { Dossier } from './types';
-import { fmtMontant } from './score';
+import type { Dossier, Paiement, DecisionType, MotifCloture } from './types';
+import { fmtMontant, compareIso } from './score';
 
 export const normaliserEmail = (e: string | null | undefined): string => (e ?? '').trim().toLowerCase();
 
@@ -13,14 +13,14 @@ export interface Sources {
   comptes: { id: string; email: string | null; created_at: string | null; last_sign_in_at: string | null }[];
   profils: { id: string; display_name: string | null; is_premium: boolean | null }[];
   admins: { user_id: string }[];
-  paiements: { user_id: string | null; amount: number | string; currency: string | null; status: string; created_at: string; paid_at: string | null }[];
+  paiements: { id: string; provider: string; user_id: string | null; amount: number | string; currency: string | null; status: string; created_at: string; paid_at: string | null }[];
   signaux: { user_id: string; page: string; jour: string }[];
   positions: { user_id: string }[];
   messages: { email: string; created_at: string }[];
   prospects: { email: string; nom: string | null; created_at: string; consent: boolean | null }[];
   newsletter: { email: string; confirmed: boolean | null }[];
   academy: { user_id: string; completed: boolean | null }[];
-  actions: { email_norm: string; created_at: string; type: 'relance' | 'note'; statut: string; canal: string | null; sujet: string | null; contenu: string; bonus_code: string | null; bonus_at: string | null }[];
+  actions: { email_norm: string; created_at: string; type: 'relance' | 'note' | 'decision'; statut: string; canal: string | null; sujet: string | null; contenu: string; bonus_code: string | null; bonus_at: string | null; decision?: DecisionType | null; motif?: MotifCloture | null; echeance?: string | null; responsable?: string | null }[];
   oppositions: { email_norm: string }[];
   prefs: { user_id: string; whatsapp_phone: string | null; whatsapp_chat_id: string | null; telephone_declare: string | null; recontact_optin_at: string | null }[];
   liaisons: { user_id: string; chat_id: string; telephone: string | null }[];
@@ -37,6 +37,13 @@ export function contactWhatsapp(p: PrefsWa | undefined, liaisons: { chat_id: str
   if (p?.telephone_declare) return { numero: p.telephone_declare, source: 'declare', lieSansNumero: lie, recontact };
   return { numero: null, source: null, lieSansNumero: lie, recontact };
 }
+
+const STATUTS_PAIEMENT = new Set(['pending', 'paid', 'failed']);
+const versPaiements = (ps: Sources['paiements']): Paiement[] =>
+  ps.filter((p) => STATUTS_PAIEMENT.has(p.status)).map((p) => ({
+    id: p.id, montant: Number(p.amount), devise: p.currency ?? 'XOF', statut: p.status as Paiement['statut'],
+    provider: p.provider, date: p.created_at, payeLe: p.paid_at,
+  }));
 
 function grouper<T>(lignes: readonly T[], cle: (l: T) => string): Map<string, T[]> {
   const m = new Map<string, T[]>();
@@ -62,7 +69,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
   const prefs = new Map(s.prefs.map((p) => [p.user_id, p]));
   const liaisons = grouper(s.liaisons, (l) => l.user_id);
   const prospects = new Map<string, Sources['prospects'][number]>();
-  for (const p of [...s.prospects].sort((a, b) => b.created_at.localeCompare(a.created_at))) {
+  for (const p of [...s.prospects].sort((a, b) => compareIso(b.created_at, a.created_at))) {
     const k = normaliserEmail(p.email);
     if (k && !prospects.has(k)) prospects.set(k, p); // le plus récent
   }
@@ -75,7 +82,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
       prospect: p ? { date: p.created_at, consent: p.consent === true } : null,
       newsletter: abonnes.has(emailNorm),
       oppose: opposes.has(emailNorm),
-      actions: (actions.get(emailNorm) ?? []).map((a) => ({ date: a.created_at, type: a.type, statut: a.statut, canal: a.canal, sujet: a.sujet, contenu: a.contenu })),
+      actions: (actions.get(emailNorm) ?? []).map((a) => ({ date: a.created_at, type: a.type, statut: a.statut, canal: a.canal, sujet: a.sujet, contenu: a.contenu, decision: a.decision ?? null, motif: a.motif ?? null, echeance: a.echeance ?? null, responsable: a.responsable ?? null })),
       bonus: (actions.get(emailNorm) ?? []).filter((a) => a.bonus_code && a.bonus_at).map((a) => ({ code: a.bonus_code as string, date: a.bonus_at as string })),
     };
   };
@@ -99,6 +106,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
       admin: admins.has(c.id),
       paiementsEnAttente: ps.filter((p) => p.status === 'pending').map((p) => ({ montant: Number(p.amount), devise: p.currency ?? 'XOF', date: p.created_at })),
       paiementsReussis: ps.filter((p) => p.status === 'paid').map((p) => ({ montant: Number(p.amount), devise: p.currency ?? 'XOF', date: p.paid_at ?? p.created_at })),
+      paiements: versPaiements(ps),
       offreVues: (signaux.get(c.id) ?? []).map((x) => ({ page: x.page, jour: x.jour })),
       lignesPortefeuille: (positions.get(c.id) ?? []).length,
       leconsAcademy: (academy.get(c.id) ?? []).filter((a) => a.completed).length,
@@ -115,7 +123,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
     dossiers.push({
       cle: `email:${emailNorm}`, emailNorm, userId: null, nom: prospects.get(emailNorm)?.nom ?? null,
       inscritLe: null, derniereConnexion: null, premium: false, admin: false,
-      paiementsEnAttente: [], paiementsReussis: [], offreVues: [], lignesPortefeuille: 0, leconsAcademy: 0,
+      paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], lignesPortefeuille: 0, leconsAcademy: 0,
       whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false },
       ...commun(emailNorm),
     });
@@ -135,6 +143,6 @@ export function chronologie(d: Dossier): Evenement[] {
   for (const m of d.messages) ev.push({ date: m.date, libelle: 'Message envoyé au support' });
   if (d.prospect) ev.push({ date: d.prospect.date, libelle: 'Formulaire prospect' });
   for (const b of d.bonus) ev.push({ date: b.date, libelle: `Dossier ${b.code} téléchargé (offre)` });
-  for (const a of d.actions) ev.push({ date: a.date, libelle: a.type === 'note' ? `Note : ${a.contenu.slice(0, 80)}` : a.canal === 'whatsapp' ? 'Relance WhatsApp préparée (envoi manuel)' : `Relance ${a.canal ?? ''} (${a.statut}) : ${a.sujet ?? ''}` });
-  return ev.sort((a, b) => b.date.localeCompare(a.date));
+  for (const a of d.actions) ev.push({ date: a.date, libelle: a.type === 'note' ? `Note : ${a.contenu.slice(0, 80)}` : a.type === 'decision' ? `Décision : ${a.contenu.slice(0, 80)}` : a.canal === 'whatsapp' ? 'Relance WhatsApp préparée (envoi manuel)' : `Relance ${a.canal ?? ''} (${a.statut}) : ${a.sujet ?? ''}` });
+  return ev.sort((a, b) => compareIso(b.date, a.date));
 }

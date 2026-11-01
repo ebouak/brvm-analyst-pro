@@ -1,6 +1,6 @@
 // frontend/app/admin/crm/[cle]/RelanceWhatsapp.tsx
 'use client';
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { preparerRelanceWhatsapp } from './actions';
 import type { TemplateId } from '@/lib/crm/gabarits';
 
@@ -13,7 +13,10 @@ export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero,
   const [offre, setOffre] = useState(true);
   const [retour, setRetour] = useState<{ ok: boolean; message: string } | null>(null);
   const [lien, setLien] = useState<string | null>(null);
-  const [envoi, demarrer] = useTransition();
+  const [pending, demarrer] = useTransition();
+  const verrou = useRef(false);
+  const [occupe, setOccupe] = useState(false);
+  const envoi = pending || occupe;
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted">
@@ -28,6 +31,8 @@ export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero,
       <button
         disabled={envoi}
         onClick={() => {
+          if (verrou.current) return;
+          verrou.current = true; setOccupe(true);
           // Fenêtre ouverte AVANT l'appel serveur : sinon le navigateur bloque le popup.
           setLien(null);
           const fenetre = window.open('', '_blank');
@@ -42,7 +47,7 @@ export default function RelanceWhatsapp({ cle, templateId, texteInitial, numero,
             } catch {
               fenetre?.close();
               setRetour({ ok: false, message: "Erreur serveur : rien n'a été préparé." });
-            }
+            } finally { verrou.current = false; setOccupe(false); }
           });
         }}
         className="rounded-full bg-[#25D366] px-5 py-2 text-sm font-semibold text-[#06210f] disabled:opacity-50"

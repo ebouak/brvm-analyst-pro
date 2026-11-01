@@ -15,7 +15,7 @@ import type { Dossier } from './types';
 const MAINTENANT = new Date('2026-10-31T12:00:00Z');
 const d0: Dossier = {
   cle: 'u1', emailNorm: 'awa@mail.com', userId: 'u1', nom: 'Awa Koné', inscritLe: null, derniereConnexion: null,
-  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], offreVues: [],
+  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [],
   lignesPortefeuille: 0, messages: [], prospect: null, newsletter: false, leconsAcademy: 0, actions: [],
   whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false }, bonus: [],
 };

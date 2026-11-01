@@ -8,10 +8,15 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { sendEmail, type EmailResult } from '@/lib/server/email';
 import { ADRESSE_SUPPORT } from '@/lib/contact/validerBrouillon';
 import { chargerDossier } from '@/lib/crm/charger';
+import { decisionsCourantes } from '@/lib/crm/vues';
 import { estOppose, enregistrerOpposition } from '@/lib/crm/opposition';
+import { etatPaiement } from '@/lib/crm/paiement';
 import { scorer } from '@/lib/crm/score';
 import { estTemplateId, type TemplateId } from '@/lib/crm/gabarits';
 import { construireEmailRelance } from '@/lib/crm/emailRelance';
+import { estMotif, estUuid, validerEcheance, contenuCloture, contenuEcheance } from '@/lib/crm/decisions';
+import { estAdministrateur } from '@/lib/crm/responsables';
+import type { DecisionType, MotifCloture } from '@/lib/crm/types';
 import { avecMentionStop, lienWaMeVers, texteOffre } from '@/lib/crm/whatsappRelance';
 
 const EXPEDITEUR = `WESTBOURSE <${ADRESSE_SUPPORT}>`;
@@ -35,6 +40,10 @@ export async function envoyerRelance(cle: string, sujet: string, corps: string, 
   }
 
   if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
+  // P0 : un paiement confirmé retire la personne de toute relance ; une intention à vérifier se vérifie d'abord.
+  const paiement = etatPaiement(d, new Date());
+  if (paiement.etat === 'paye') return { ok: false, message: 'Paiement confirmé : plus de relance.' };
+  if (paiement.etat === 'a_verifier') return { ok: false, message: "Paiement à vérifier d'abord dans Paiements." };
 
   const sb = getServiceClient();
   const deuxMinutes = new Date(Date.now() - 2 * 60_000).toISOString();
@@ -88,6 +97,10 @@ export async function preparerRelanceWhatsapp(cle: string, texte: string, templa
     return { ok: false, message: "Vérification de l'opposition impossible : rien n'est préparé." };
   }
   if (d.premium || d.admin) return { ok: false, message: 'Personne Premium ou administratrice : relance refusée.' };
+  // P0 : un paiement confirmé retire la personne de toute relance ; une intention à vérifier se vérifie d'abord.
+  const paiement = etatPaiement(d, new Date());
+  if (paiement.etat === 'paye') return { ok: false, message: 'Paiement confirmé : plus de relance.' };
+  if (paiement.etat === 'a_verifier') return { ok: false, message: "Paiement à vérifier d'abord dans Paiements." };
   if (!d.whatsapp.recontact || !d.whatsapp.numero) return { ok: false, message: 'Pas de numéro avec consentement au recontact : relance WhatsApp impossible.' };
 
   const sb = getServiceClient();
@@ -131,4 +144,66 @@ export async function opposerParAdmin(cle: string): Promise<Retour> {
   await recordAudit(ctx, { action: 'crm.opposition', resourceType: 'crm_contact', resourceId: d.userId ?? 'prospect', targetUserId: d.userId ?? undefined, severity: 'info', metadata: { ok } });
   revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
   return ok ? { ok: true, message: 'Opposition enregistrée.' } : { ok: false, message: 'Échec.' };
+}
+
+/**
+ * Enregistre UNE décision humaine comme événement daté (jamais de mise à jour
+ * d'une ligne existante : l'historique reste complet, la plus récente l'emporte).
+ * Audit sans e-mail : identifiant de la ligne de journal seulement.
+ */
+async function enregistrerDecision(
+  cle: string, decision: DecisionType, contenu: string,
+  extra: { motif?: MotifCloture; echeance?: string; responsable?: string },
+  refuser?: (d: NonNullable<Awaited<ReturnType<typeof chargerDossier>>>) => string | null,
+): Promise<Retour> {
+  const ctx = await requirePermission('crm.write');
+  const d = await chargerDossier(cle);
+  if (!d) return { ok: false, message: 'Personne introuvable.' };
+  const refus = refuser?.(d);
+  if (refus) return { ok: false, message: refus };
+  const { data: ligne, error } = await getServiceClient().from('crm_actions').insert({
+    email_norm: d.emailNorm, user_id: d.userId, type: 'decision', statut: 'decision', contenu, decision,
+    motif: extra.motif ?? null, echeance: extra.echeance ?? null, responsable: extra.responsable ?? null, auteur: ctx.userId,
+  }).select('id').single();
+  if (error || !ligne) {
+    console.error('[crm] décision non enregistrée :', error?.code ?? error?.message ?? 'aucune ligne retournée');
+    return { ok: false, message: 'Décision non enregistrée.' };
+  }
+  await recordAudit(ctx, { action: `crm.${decision}`, resourceType: 'crm_action', resourceId: String(ligne.id), targetUserId: d.userId ?? undefined, severity: 'info', metadata: { decision, motif: extra.motif ?? null } });
+  revalidatePath('/admin/crm');
+  revalidatePath(`/admin/crm/${encodeURIComponent(cle)}`);
+  return { ok: true, message: 'Décision enregistrée.' };
+}
+
+export async function cloturer(cle: string, motif: MotifCloture): Promise<Retour> {
+  await requirePermission('crm.write');
+  if (!estMotif(motif)) return { ok: false, message: 'Motif de clôture inconnu.' };
+  return enregistrerDecision(cle, 'cloture', contenuCloture(motif), { motif });
+}
+
+export async function rouvrir(cle: string): Promise<Retour> {
+  return enregistrerDecision(cle, 'reouverture', 'Dossier rouvert', {}, (d) => (decisionsCourantes(d).cloture ? null : "Ce dossier n'est pas clôturé."));
+}
+
+export async function fixerEcheance(cle: string, dateIso: string): Promise<Retour> {
+  await requirePermission('crm.write');
+  const v = validerEcheance(dateIso, new Date());
+  if (!v.ok) return { ok: false, message: v.message };
+  return enregistrerDecision(cle, 'echeance', contenuEcheance(v.date), { echeance: v.date });
+}
+
+export async function assignerResponsable(cle: string, userId: string): Promise<Retour> {
+  // Autorisation d'abord, validation ensuite : pas d'oracle pour un non-habilité.
+  await requirePermission('crm.write');
+  if (!estUuid(userId)) return { ok: false, message: 'Responsable invalide.' };
+  if (!(await estAdministrateur(userId))) return { ok: false, message: "Ce compte n'est pas administrateur : assignation refusée." };
+  return enregistrerDecision(cle, 'responsable', 'Responsable assigné', { responsable: userId });
+}
+
+export async function marquerReponse(cle: string): Promise<Retour> {
+  return enregistrerDecision(cle, 'reponse', 'Réponse reçue (déclarée)', {});
+}
+
+export async function marquerTraite(cle: string): Promise<Retour> {
+  return enregistrerDecision(cle, 'traite', 'Réponse traitée', {});
 }

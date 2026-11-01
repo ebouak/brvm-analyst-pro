@@ -4,7 +4,7 @@
  * d'opposition est ajouté À L'ENVOI (le jeton n'existe qu'à ce moment) :
  * art. 21 RGPD, absolu en prospection.
  */
-import { fmtMontant, fmtJour } from './score';
+import { fmtMontant, fmtJour, compareIso } from './score';
 import type { Dossier, Score } from './types';
 
 export const TEMPLATE_IDS = ['paiement_inacheve', 'offre_consultee', 'actif_sans_abonnement', 'prospect_sans_compte'] as const;
@@ -27,7 +27,7 @@ const SIGNATURE = "L'équipe WESTBOURSE";
 export function composerRelance(id: TemplateId, d: Dossier): { sujet: string; corps: string } {
   const prenom = d.nom?.trim().split(/\s+/)[0];
   const bonjour = prenom ? `Bonjour ${prenom},` : 'Bonjour,';
-  const paiement = [...d.paiementsEnAttente].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const paiement = [...d.paiementsEnAttente].sort((a, b) => compareIso(b.date, a.date))[0];
   switch (id) {
     case 'paiement_inacheve':
       return {
