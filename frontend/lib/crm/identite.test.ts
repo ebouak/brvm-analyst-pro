@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { assemblerDossiers, normaliserEmail, chronologie, type Sources } from './identite';
+import { assemblerDossiers, normaliserEmail, chronologie, contactWhatsapp, type Sources } from './identite';
 
 const vide: Sources = {
   comptes: [], profils: [], admins: [], paiements: [], signaux: [], positions: [],
-  messages: [], prospects: [], newsletter: [], academy: [], actions: [], oppositions: [],
+  messages: [], prospects: [], newsletter: [], academy: [], actions: [], oppositions: [], prefs: [], liaisons: [],
 };
 
 describe('normaliserEmail', () => {
@@ -84,5 +84,45 @@ describe('chronologie', () => {
     const lib = chronologie(d!).map((e) => e.libelle);
     expect(lib.find((l) => l.startsWith('Paiement réussi'))).toContain('EUR');
     expect(lib.find((l) => l.startsWith('Paiement commencé'))).toContain('FCFA');
+  });
+});
+
+describe('contactWhatsapp', () => {
+  it('préfère le numéro prouvé au déclaré', () => {
+    expect(contactWhatsapp({ whatsapp_phone: '+2250101010101', whatsapp_chat_id: '2250101010101@c.us', telephone_declare: '+2250707070707', recontact_optin_at: '2026-11-01T00:00:00Z' }, []))
+      .toEqual({ numero: '+2250101010101', source: 'prouve', lieSansNumero: false, recontact: true });
+  });
+  it('prend un numéro prouvé de la table des liaisons', () => {
+    expect(contactWhatsapp({ whatsapp_phone: null, whatsapp_chat_id: null, telephone_declare: null, recontact_optin_at: null }, [{ chat_id: 'x@c.us', telephone: '+33743657271' }]))
+      .toEqual({ numero: '+33743657271', source: 'prouve', lieSansNumero: false, recontact: false });
+  });
+  it('signale une liaison sans numéro (@lid)', () => {
+    expect(contactWhatsapp({ whatsapp_phone: null, whatsapp_chat_id: '123@lid', telephone_declare: null, recontact_optin_at: null }, []))
+      .toEqual({ numero: null, source: null, lieSansNumero: true, recontact: false });
+  });
+  it('replie sur le déclaré', () => {
+    expect(contactWhatsapp({ whatsapp_phone: null, whatsapp_chat_id: null, telephone_declare: '+2250707070707', recontact_optin_at: null }, []).source).toBe('declare');
+  });
+  it('rien sans préférences', () => {
+    expect(contactWhatsapp(undefined, [])).toEqual({ numero: null, source: null, lieSansNumero: false, recontact: false });
+  });
+});
+
+describe('dossier : WhatsApp et offre utilisée', () => {
+  it('expose le contact déclaré, le consentement et le dossier offert dans la chronologie', () => {
+    const [d] = assemblerDossiers({
+      ...vide,
+      comptes: [{ id: 'u1', email: 'a@b.c', created_at: null, last_sign_in_at: null }],
+      prefs: [{ user_id: 'u1', whatsapp_phone: null, whatsapp_chat_id: null, telephone_declare: '+2250707070707', recontact_optin_at: '2026-10-30T09:00:00Z' }],
+      actions: [
+        { email_norm: 'a@b.c', created_at: '2026-10-30T10:00:00Z', type: 'relance', statut: 'prepare', canal: null, sujet: null, contenu: '', bonus_code: 'SNTS', bonus_at: '2026-10-30T10:00:00Z' },
+        { email_norm: 'a@b.c', created_at: '2026-10-31T10:00:00Z', type: 'relance', statut: 'prepare', canal: 'whatsapp', sujet: null, contenu: '', bonus_code: null, bonus_at: null },
+      ],
+    });
+    expect(d!.whatsapp).toMatchObject({ source: 'declare', recontact: true });
+    expect(d!.bonus).toEqual([{ code: 'SNTS', date: '2026-10-30T10:00:00Z' }]);
+    const lib = chronologie(d!).map((e) => e.libelle);
+    expect(lib).toContain('Dossier SNTS téléchargé (offre)');
+    expect(lib).toContain('Relance WhatsApp préparée (envoi manuel)');
   });
 });

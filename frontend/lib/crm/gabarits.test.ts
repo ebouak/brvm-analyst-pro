@@ -17,6 +17,7 @@ const d0: Dossier = {
   cle: 'u1', emailNorm: 'awa@mail.com', userId: 'u1', nom: 'Awa Koné', inscritLe: null, derniereConnexion: null,
   premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], offreVues: [],
   lignesPortefeuille: 0, messages: [], prospect: null, newsletter: false, leconsAcademy: 0, actions: [],
+  whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false }, bonus: [],
 };
 const nombres = (t: string) => t.match(/\d+/g) ?? [];
 

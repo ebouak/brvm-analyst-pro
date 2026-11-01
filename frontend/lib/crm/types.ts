@@ -19,8 +19,12 @@ export interface Dossier {
   newsletter: boolean;
   leconsAcademy: number;
   actions: { date: string; type: 'relance' | 'note'; statut: string; canal: string | null; sujet: string | null; contenu: string }[];
+  /** Joignabilité WhatsApp : numéro prouvé (appairage) d'abord, sinon déclaré. */
+  whatsapp: { numero: string | null; source: 'prouve' | 'declare' | null; lieSansNumero: boolean; recontact: boolean };
+  /** Dossiers offerts téléchargés (crm_actions.bonus_*). */
+  bonus: { code: string; date: string }[];
 }
 
-export interface Raison { code: 'paiement' | 'offre' | 'connexion' | 'portefeuille' | 'contact' | 'newsletter' | 'academy'; points: number; texte: string; date: string | null }
+export interface Raison { code: 'paiement' | 'offre' | 'connexion' | 'portefeuille' | 'contact' | 'newsletter' | 'academy' | 'bonus'; points: number; texte: string; date: string | null }
 export type Niveau = 'chaud' | 'tiede' | 'froid';
 export interface Score { score: number; niveau: Niveau; raisons: Raison[] }
