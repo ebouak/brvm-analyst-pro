@@ -1185,6 +1185,48 @@ Migration `0170_reseaux_sociaux.sql` **à appliquer**. Consultation Fable 1/3.
   Le brouillon « inbox » est resté bloqué en PROCESSING_UPLOAD de longues
   minutes (constaté le 2026-10-31) : ne pas en dépendre.
 
+### Ajouts (passage 2026-11-01) — CRM : WhatsApp, numéro après inscription, e-mail habillé, dossier offert
+
+Spec `docs/superpowers/specs/2026-11-01-crm-relance-whatsapp-offre-design.md`,
+plan `docs/superpowers/plans/2026-11-01-crm-relance-whatsapp-offre.md`, PR #138.
+Migration `0174` **appliquée** (vérifiée : RLS, clé publique refusée `42501`).
+1061 tests frontend verts, build vert. Parcours du dossier offert vérifié EN
+PRODUCTION (PDF SNTS réel téléchargé, second choix refusé).
+
+- **Offre = un dossier PDF au choix**, pas de remise (aucun système de coupon
+  n'existe). Lien `/offre/dossier?t=<48 hex>` : un jeton par relance, 14 jours,
+  UN dossier, consommation ATOMIQUE (`update … is('bonus_at', null)`),
+  fraîcheur ≤ 3 jours vérifiée AVANT de consommer, URL signée 10 min, rendu
+  de la place si la signature échoue. ⚠️ **La page n'affiche AUCUNE
+  information de portefeuille** : le lien peut être transféré ou parvenir à un
+  numéro déclaré erroné. Ne pas réintroduire « dans votre portefeuille ».
+- **E-mail habillé** `lib/crm/emailRelance.ts` (pur) : tableaux + styles en
+  ligne, logo PNG (Gmail n'affiche pas le SVG). Liens https seuls, échappés ;
+  **sans lien d'opposition valide, il lève** et la ligne passe en `echec`.
+- **WhatsApp : envoi MANUEL uniquement** (`wa.me` depuis la fiche CRM), jamais
+  par la passerelle WAHA (non officielle : un envoi commercial en série fait
+  bannir le numéro). Texte pré-rempli NEUTRE (aucun montant ni date : le numéro
+  peut être déclaré). Journal `canal='whatsapp'`, `statut='prepare'` — on sait
+  que WhatsApp a été ouvert, pas que le message est parti. ⚠️ Envoyer depuis le
+  WhatsApp WESTBOURSE, sinon le STOP de la personne n'arrive pas chez nous.
+- **Deux numéros, à ne pas confondre** : `whatsapp_phone` / `whatsapp_liaisons`
+  (PROUVÉS par appairage, verrou 0162) et `notification_prefs.telephone_declare`
+  (DÉCLARÉ, E.164). Le déclaré ne sert JAMAIS à identifier quelqu'un auprès de
+  l'agent. Consentement `recontact_optin_at` distinct, décoché par défaut,
+  retrait toujours possible ; aucun consentement sans moyen de contact.
+- **Écran `/bienvenue/whatsapp`** une fois, comptes de moins de 24 h
+  (`lib/bienvenue/redirection.ts`), appairage d'abord. « Plus tard »
+  n'enregistre rien et ne bloque jamais.
+- **STOP** (`lib/whatsapp/stop.ts`) → `crm_oppositions` source `whatsapp`,
+  pour TOUS les comptes rattachés au numéro ; aucun accusé si rien n'a été
+  enregistré ; STOP non rattaché → alerte exploitant.
+- **Trou bouché au passage** : `next` de la page de connexion n'était pas
+  filtré (redirection externe possible) ; il passe désormais par `nextSur`.
+- RGPD : `docs/RGPD.md` et `/confidentialite` informent ; export complété
+  (`bonus_code`, `bonus_at`).
+- **Reste à faire** : e-mail de relance réel non encore reçu par l'exploitant
+  (pas de clé Resend en local ; `/admin/crm` refuse de relancer un admin).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
