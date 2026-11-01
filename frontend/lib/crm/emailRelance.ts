@@ -81,7 +81,7 @@ ${whatsapp}
 <tr><td style="padding:20px">&nbsp;</td></tr>
 </table></td></tr>
 <tr><td align="center" style="padding:22px 16px 6px;font-family:${POLICE};font-size:12px;line-height:1.7;color:${C.attenue}">${liens}<br>Données de marché de la BRVM, pas un conseil en investissement.</td></tr>
-<tr><td align="center" style="padding:6px 16px 24px;font-family:${POLICE};font-size:11px;color:#7d8a90">Vous ne souhaitez plus recevoir ce type de message ? <a href="${echapper(lienOpposition)}" style="color:#7d8a90">${echapper(lienOpposition)}</a></td></tr>
+<tr><td align="center" style="padding:6px 16px 24px;font-family:${POLICE};font-size:11px;color:#7d8a90">Vous ne souhaitez plus recevoir ce type de message ? <a href="${echapper(lienOpposition)}" style="color:#7d8a90">Ne plus recevoir ces messages</a></td></tr>
 </table></td></tr></table></body></html>`;
 
   const texte = [
