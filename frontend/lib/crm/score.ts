@@ -5,8 +5,8 @@
  */
 import type { Dossier, Niveau, Raison, Score } from './types';
 
-export const PONDERATIONS = { paiement: 40, offre: 20, connexion7: 15, connexion30: 5, portefeuille: 10, contact: 10, newsletter: 5, academy: 5, bonus: 25 } as const;
-export const FENETRES_JOURS = { paiement: 30, offre: 14, connexionForte: 7, connexion: 30, contact: 30, bonus: 30 } as const;
+export const PONDERATIONS = { paiement: 40, offre: 20, connexion7: 15, connexion30: 5, portefeuille: 10, contact: 10, newsletter: 5, academy: 5, bonus: 25, formation: 15 } as const;
+export const FENETRES_JOURS = { paiement: 30, offre: 14, connexionForte: 7, connexion: 30, contact: 30, bonus: 30, formation: 30 } as const;
 export const SEUILS = { chaud: 50, tiede: 25 } as const;
 
 const JOUR_MS = 86_400_000;
@@ -45,6 +45,10 @@ export function scorer(d: Dossier, maintenant: Date): Score {
   const vues = d.offreVues.map((v) => ({ ...v, date: `${v.jour}T12:00:00Z` })).filter((v) => age(v.date, maintenant) <= FENETRES_JOURS.offre);
   const derniereVue = plusRecent(vues);
   if (derniereVue) raisons.push({ code: 'offre', points: PONDERATIONS.offre, date: derniereVue.date, texte: `a consulté l'offre ${vues.length === 1 ? 'une fois' : `${vues.length} fois`}, dernière le ${fmtJour(derniereVue.date)}` });
+
+  const vuesFormation = d.formationVues.map((v) => ({ ...v, date: `${v.jour}T12:00:00Z` })).filter((v) => age(v.date, maintenant) <= FENETRES_JOURS.formation);
+  const derniereFormation = plusRecent(vuesFormation);
+  if (derniereFormation) raisons.push({ code: 'formation', points: PONDERATIONS.formation, date: derniereFormation.date, texte: `a consulté la formation ${vuesFormation.length === 1 ? 'une fois' : `${vuesFormation.length} fois`}, dernière le ${fmtJour(derniereFormation.date)}` });
 
   if (d.derniereConnexion) {
     const a = age(d.derniereConnexion, maintenant);

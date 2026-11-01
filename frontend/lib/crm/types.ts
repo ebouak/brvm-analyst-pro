@@ -27,7 +27,12 @@ export interface Dossier {
   paiementsReussis: { montant: number; devise: string; date: string }[];
   /** Tous les paiements du compte (en attente, réussis, échoués) : base de `etatPaiement`. */
   paiements: Paiement[];
+  /** Pages d'offre consultées (type `offre_vue`). */
   offreVues: { page: string; jour: string }[];
+  /** Pages de la formation consultées (type `formation_vue`), comptes connectés seulement. */
+  formationVues: { page: string; jour: string }[];
+  /** Code pays ISO du compte (jamais IP ni ville) ; null = inconnu ou prospect sans compte. */
+  pays: string | null;
   lignesPortefeuille: number;
   messages: { date: string }[];
   prospect: { date: string; consent: boolean } | null;
@@ -40,6 +45,6 @@ export interface Dossier {
   bonus: { code: string; date: string }[];
 }
 
-export interface Raison { code: 'paiement' | 'offre' | 'connexion' | 'portefeuille' | 'contact' | 'newsletter' | 'academy' | 'bonus'; points: number; texte: string; date: string | null }
+export interface Raison { code: 'paiement' | 'offre' | 'connexion' | 'portefeuille' | 'contact' | 'newsletter' | 'academy' | 'bonus' | 'formation'; points: number; texte: string; date: string | null }
 export type Niveau = 'chaud' | 'tiede' | 'froid';
 export interface Score { score: number; niveau: Niveau; raisons: Raison[] }

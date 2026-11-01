@@ -7,7 +7,7 @@
 import { fmtMontant, fmtJour, compareIso } from './score';
 import type { Dossier, Score } from './types';
 
-export const TEMPLATE_IDS = ['paiement_inacheve', 'offre_consultee', 'actif_sans_abonnement', 'prospect_sans_compte'] as const;
+export const TEMPLATE_IDS = ['paiement_inacheve', 'offre_consultee', 'actif_sans_abonnement', 'prospect_sans_compte', 'formation_gratuite'] as const;
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
 
 export function estTemplateId(v: unknown): v is TemplateId {
@@ -17,6 +17,8 @@ export function estTemplateId(v: unknown): v is TemplateId {
 export function choisirGabarit(d: Dossier, s: Score): TemplateId {
   const codes = new Set(s.raisons.map((r) => r.code));
   if (codes.has('paiement')) return 'paiement_inacheve';
+  // Intérêt pour la formation (pages consultées ou leçons suivies) : on vend la formation complète.
+  if (!d.premium && d.userId && (codes.has('formation') || codes.has('academy'))) return 'formation_gratuite';
   if (codes.has('offre')) return 'offre_consultee';
   if (!d.userId) return 'prospect_sans_compte';
   return 'actif_sans_abonnement';
@@ -47,6 +49,32 @@ export function composerRelance(id: TemplateId, d: Dossier): { sujet: string; co
       return {
         sujet: "Une question sur l'offre Premium ?",
         corps: [bonjour, '', "Vous avez récemment regardé l'offre Premium de WESTBOURSE.", 'Si vous avez une question sur ce qu’elle contient, répondez simplement à ce message.', '', SIGNATURE].join('\n'),
+      };
+    case 'formation_gratuite':
+      return {
+        // Contenu = ce que vend réellement la page d'achat (OffresNiveaux) : quatre niveaux,
+        // examens, certificats, accès à vie, un mois de Premium (migration 0156). Aucun prix ni
+        // chiffre ici : ils vivent sur la page d'achat et ne doivent pas se périmer dans un e-mail.
+        sujet: 'Après la leçon gratuite : la formation complète de l’Academy',
+        corps: [
+          bonjour,
+          '',
+          "Vous avez commencé la formation gratuite de l'Academy WESTBOURSE, et nous espérons qu'elle vous a été utile.",
+          '',
+          'La formation complète va plus loin, à votre rythme :',
+          '• les quatre niveaux, de débutant à expert, leçon après leçon ;',
+          '• des quiz pour vérifier ce que vous retenez ;',
+          '• un examen par niveau et un certificat vérifiable à la clé ;',
+          '• un accès à vie à ce contenu.',
+          '',
+          'Son achat vous offre aussi un mois de Premium sur toute la plateforme (screener, alertes, lecture de séance, valorisation).',
+          '',
+          'Découvrir la formation complète : https://www.westbourse.com/formations/academy',
+          '',
+          'Une question avant de vous lancer ? Répondez simplement à ce message.',
+          '',
+          SIGNATURE,
+        ].join('\n'),
       };
     case 'prospect_sans_compte':
       return {

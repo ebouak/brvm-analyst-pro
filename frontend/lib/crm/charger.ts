@@ -23,10 +23,10 @@ export async function chargerSources(): Promise<Sources> {
   const depuis = (jours: number) => new Date(Date.now() - jours * 86_400_000).toISOString().slice(0, 10);
   const [c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions, prefs, liaisons] = await Promise.all([
     comptes(sb),
-    lireTout<Sources['profils'][number]>((a, b) => sb.from('profiles').select('id, display_name, is_premium').order('id').range(a, b), 'profils'),
+    lireTout<Sources['profils'][number]>((a, b) => sb.from('profiles').select('id, display_name, is_premium, pays_code').order('id').range(a, b), 'profils'),
     lireTout<Sources['admins'][number]>((a, b) => sb.from('admin_user_roles').select('user_id').order('user_id').order('role_id').range(a, b), 'rôles admin'),
     lireTout<Sources['paiements'][number]>((a, b) => sb.from('billing_transactions').select('id, provider, user_id, amount, currency, status, created_at, paid_at').in('status', ['pending', 'paid', 'failed']).order('created_at').order('id').range(a, b), 'paiements'),
-    lireTout<Sources['signaux'][number]>((a, b) => sb.from('crm_signaux').select('user_id, page, jour').gte('jour', depuis(14)).order('id').range(a, b), 'signaux'),
+    lireTout<Sources['signaux'][number]>((a, b) => sb.from('crm_signaux').select('user_id, page, jour, type').gte('jour', depuis(30)).order('id').range(a, b), 'signaux'),
     lireTout<Sources['positions'][number]>((a, b) => sb.from('portfolios_positions').select('user_id').order('id').range(a, b), 'positions de portefeuille'),
     lireTout<Sources['messages'][number]>((a, b) => sb.from('contact_messages').select('email, created_at').order('created_at').order('id').range(a, b), 'messages de contact'),
     lireTout<Sources['prospects'][number]>((a, b) => sb.from('leads_brvm').select('email, nom, created_at, consent').order('created_at').order('id').range(a, b), 'prospects'),
@@ -37,7 +37,11 @@ export async function chargerSources(): Promise<Sources> {
     lireTout<Sources['prefs'][number]>((a, b) => sb.from('notification_prefs').select('user_id, whatsapp_phone, whatsapp_chat_id, telephone_declare, recontact_optin_at').order('user_id').range(a, b), 'préférences'),
     lireTout<Sources['liaisons'][number]>((a, b) => sb.from('whatsapp_liaisons').select('user_id, chat_id, telephone').order('id').range(a, b), 'liaisons WhatsApp'),
   ]);
-  return { comptes: c, profils, admins, paiements, signaux, positions, messages, prospects, newsletter, academy, actions, oppositions, prefs, liaisons };
+  // Fenêtres distinctes : la formation se lit sur 30 jours, l'offre sur 14 — les séquences
+  // automatiques s'appuient sur cette borne, l'élargir déclencherait des relances plus anciennes.
+  const limiteOffre = depuis(14);
+  const signauxUtiles = signaux.filter((x) => x.type === 'formation_vue' || x.jour >= limiteOffre);
+  return { comptes: c, profils, admins, paiements, signaux: signauxUtiles, positions, messages, prospects, newsletter, academy, actions, oppositions, prefs, liaisons };
 }
 
 export async function chargerDossiers(): Promise<Dossier[]> {

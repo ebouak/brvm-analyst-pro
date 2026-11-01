@@ -9,7 +9,7 @@ const R = REGLAGES_PAR_DEFAUT;
 let n = 0;
 const d0: Dossier = {
   cle: 'u0', emailNorm: 'a@b.c', userId: 'u0', nom: null, inscritLe: null, derniereConnexion: null,
-  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [],
+  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null,
   lignesPortefeuille: 0, messages: [], prospect: null, newsletter: false, leconsAcademy: 0, actions: [],
   whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false }, bonus: [],
 };

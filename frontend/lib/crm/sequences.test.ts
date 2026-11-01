@@ -7,7 +7,7 @@ const MAINT = new Date('2026-11-01T09:00:00Z');
 const ilYa = (j: number, h = 0) => new Date(MAINT.getTime() - j * 86_400_000 - h * 3_600_000).toISOString();
 const d0: Dossier = {
   cle: 'u1', emailNorm: 'a@b.c', userId: 'u1', nom: 'Awa', inscritLe: null, derniereConnexion: null,
-  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [],
+  premium: false, admin: false, oppose: false, paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null,
   lignesPortefeuille: 0, messages: [], prospect: null, newsletter: false, leconsAcademy: 0, actions: [],
   whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false }, bonus: [],
 };

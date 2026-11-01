@@ -12,10 +12,11 @@ export const normaliserEmail = (e: string | null | undefined): string => (e ?? '
 
 export interface Sources {
   comptes: { id: string; email: string | null; created_at: string | null; last_sign_in_at: string | null }[];
-  profils: { id: string; display_name: string | null; is_premium: boolean | null }[];
+  profils: { id: string; display_name: string | null; is_premium: boolean | null; pays_code?: string | null }[];
   admins: { user_id: string }[];
   paiements: { id: string; provider: string; user_id: string | null; amount: number | string; currency: string | null; status: string; created_at: string; paid_at: string | null }[];
-  signaux: { user_id: string; page: string; jour: string }[];
+  /** `type` absent = `offre_vue` (lignes antérieures à la migration 0179). */
+  signaux: { user_id: string; page: string; jour: string; type?: 'offre_vue' | 'formation_vue' }[];
   positions: { user_id: string }[];
   messages: { email: string; created_at: string }[];
   prospects: { email: string; nom: string | null; created_at: string; consent: boolean | null }[];
@@ -108,7 +109,9 @@ export function assemblerDossiers(s: Sources): Dossier[] {
       paiementsEnAttente: ps.filter((p) => p.status === 'pending').map((p) => ({ montant: Number(p.amount), devise: p.currency ?? 'XOF', date: p.created_at })),
       paiementsReussis: ps.filter((p) => p.status === 'paid').map((p) => ({ montant: Number(p.amount), devise: p.currency ?? 'XOF', date: p.paid_at ?? p.created_at })),
       paiements: versPaiements(ps),
-      offreVues: (signaux.get(c.id) ?? []).map((x) => ({ page: x.page, jour: x.jour })),
+      offreVues: (signaux.get(c.id) ?? []).filter((x) => (x.type ?? 'offre_vue') === 'offre_vue').map((x) => ({ page: x.page, jour: x.jour })),
+      formationVues: (signaux.get(c.id) ?? []).filter((x) => x.type === 'formation_vue').map((x) => ({ page: x.page, jour: x.jour })),
+      pays: pr?.pays_code ?? null,
       lignesPortefeuille: (positions.get(c.id) ?? []).length,
       leconsAcademy: (academy.get(c.id) ?? []).filter((a) => a.completed).length,
       whatsapp: contactWhatsapp(prefs.get(c.id), liaisons.get(c.id) ?? []),
@@ -124,7 +127,7 @@ export function assemblerDossiers(s: Sources): Dossier[] {
     dossiers.push({
       cle: `email:${emailNorm}`, emailNorm, userId: null, nom: prospects.get(emailNorm)?.nom ?? null,
       inscritLe: null, derniereConnexion: null, premium: false, admin: false,
-      paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], lignesPortefeuille: 0, leconsAcademy: 0,
+      paiementsEnAttente: [], paiementsReussis: [], paiements: [], offreVues: [], formationVues: [], pays: null, lignesPortefeuille: 0, leconsAcademy: 0,
       whatsapp: { numero: null, source: null, lieSansNumero: false, recontact: false },
       ...commun(emailNorm),
     });
@@ -141,6 +144,7 @@ export function chronologie(d: Dossier): Evenement[] {
   for (const p of d.paiementsEnAttente) ev.push({ date: p.date, libelle: `Paiement commencé (${fmtMontant(p.montant, p.devise)}), non terminé` });
   for (const p of d.paiementsReussis) ev.push({ date: p.date, libelle: `Paiement réussi (${fmtMontant(p.montant, p.devise)})` });
   for (const v of d.offreVues) ev.push({ date: `${v.jour}T12:00:00Z`, libelle: `A consulté ${v.page}` });
+  for (const v of d.formationVues) ev.push({ date: `${v.jour}T12:00:00Z`, libelle: `A consulté la formation (${v.page})` });
   for (const m of d.messages) ev.push({ date: m.date, libelle: 'Message envoyé au support' });
   if (d.prospect) ev.push({ date: d.prospect.date, libelle: 'Formulaire prospect' });
   for (const b of d.bonus) ev.push({ date: b.date, libelle: `Dossier ${b.code} téléchargé (offre)` });
