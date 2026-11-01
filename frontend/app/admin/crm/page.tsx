@@ -1,5 +1,6 @@
 // frontend/app/admin/crm/page.tsx
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { requirePermission, can } from '@/lib/server/rbac';
 import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 import { chargerDossiers, chargerPaiementsOrphelins } from '@/lib/crm/charger';
@@ -10,7 +11,7 @@ import { listerResponsables } from '@/lib/crm/responsables';
 import type { Dossier, Niveau } from '@/lib/crm/types';
 import FicheProspect, { BadgeEtat } from './FicheProspect';
 import { preparerFiche } from './preparerFiche';
-import { libStatut } from './libelles';
+import { suiviRelance } from './libelles';
 import PanneauFocus from './PanneauFocus';
 import IndicateursBandeau from './IndicateursBandeau';
 import { chargerReglages } from '@/lib/crm/reglagesServeur';
@@ -155,7 +156,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
                   <td className="px-4 py-2.5"><BadgeEtat etat={etat.etat} /></td>
                   <td className="px-4 py-2.5 text-right tabular text-muted">{etat.enCours ? fmtMontant(etat.enCours.montant, etat.enCours.devise) : '—'}</td>
                   <td className="px-4 py-2.5 tabular text-muted">{echeance ? fmtJour(echeance) : '—'}</td>
-                  <td className="px-4 py-2.5 text-muted">{libelleDernier(dernier)}</td>
+                  <td className="px-4 py-2.5 text-muted">{libelleDernier(d, dernier)}</td>
                   <td className="px-4 py-2.5 text-muted">{emailResp(dec.responsable) ?? '—'}</td>
                   <td className="px-4 py-2.5 tabular text-muted">{score.score} · {LIB_NIVEAU[score.niveau]}</td>
                 </tr>
@@ -173,9 +174,9 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
   );
 }
 
-function libelleDernier(a: Dossier['actions'][number] | null): string {
+function libelleDernier(d: Dossier, a: Dossier['actions'][number] | null): ReactNode {
   if (!a) return 'aucune';
-  if (a.type === 'relance') return `${fmtJour(a.date)} · ${a.canal ?? 'relance'} (${libStatut(a.statut)})`;
+  if (a.type === 'relance') { const s = suiviRelance(d, a); return <>{fmtJour(a.date)} · {a.canal ?? 'relance'} (<span className={s.cls}>{s.lib}</span>)</>; }
   if (a.decision === 'cloture') return `${fmtJour(a.date)} · clôture${a.motif ? ` (${LIB_MOTIF[a.motif]})` : ''}`;
   const lib: Record<string, string> = { reouverture: 'réouverture', echeance: 'échéance fixée', responsable: 'responsable assigné', reponse: 'réponse reçue', traite: 'réponse traitée' };
   return `${fmtJour(a.date)} · ${lib[a.decision ?? ''] ?? 'décision'}`;
