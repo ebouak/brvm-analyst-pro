@@ -80,17 +80,49 @@ export function assembleExam(bank: BankQuestion[], seed: string, taille = EXAM_S
 export function gradeExam(
   bank: BankQuestion[],
   answers: { id: string; options: string[]; choix: number }[],
+  /** Questions réellement ÉMISES : le score est calculé sur CE nombre, jamais sur
+   *  le nombre de réponses soumises (sinon une seule bonne réponse = 100 %). */
+  issuedIds?: string[],
 ): ExamGrade {
   const byId = new Map(bank.map((q) => [q.id, q]));
+  const issued = issuedIds ? new Set(issuedIds) : null;
+  const vus = new Set<string>();
   let bonnes = 0;
   const corrige: ExamGrade['corrige'] = [];
   for (const a of answers) {
     const q = byId.get(a.id);
     if (!q) continue;
+    if (issued && !issued.has(a.id)) continue;
+    if (vus.has(a.id)) continue; // un doublon ne compte pas deux fois
+    vus.add(a.id);
     const choixValeur = a.options[a.choix];
     if (choixValeur === q.options[q.correct]) bonnes++;
     corrige.push({ id: a.id, correct: q.correct, explication: q.explication });
   }
-  const score = answers.length > 0 ? Math.round((bonnes / answers.length) * 100) : 0;
+  const total = issuedIds ? issuedIds.length : answers.length;
+  const score = total > 0 ? Math.round((bonnes / total) * 100) : 0;
   return { score, passed: score >= PASS_THRESHOLD, corrige };
+}
+
+/**
+ * Vérifie que les réponses couvrent EXACTEMENT les questions émises : ni
+ * manquantes, ni en double, ni étrangères. Pur.
+ */
+export function validateAnswers(
+  issuedIds: string[],
+  answers: { id: string; options: string[]; choix: number }[],
+): { ok: true } | { ok: false; error: string } {
+  if (!Array.isArray(answers) || answers.length !== issuedIds.length) {
+    return { ok: false, error: 'Réponses incomplètes : toutes les questions doivent être traitées.' };
+  }
+  const attendu = new Set(issuedIds);
+  const vus = new Set<string>();
+  for (const a of answers) {
+    if (!a || typeof a.id !== 'string' || !attendu.has(a.id) || vus.has(a.id)
+      || !Array.isArray(a.options) || !Number.isInteger(a.choix)) {
+      return { ok: false, error: 'Réponses invalides.' };
+    }
+    vus.add(a.id);
+  }
+  return { ok: true };
 }

@@ -51,3 +51,44 @@ test('gradeExam : score et seuil 70 (correction par valeur)', () => {
   assert.equal(gradeExam(b, seven).score, 70);
   assert.equal(gradeExam(b, seven).passed, true);
 });
+
+// ── Anti-contournement : la correction se fait sur l'examen ÉMIS, pas sur ce que
+// le client choisit de soumettre (une seule réponse juste ne doit pas donner 100 %).
+import { validateAnswers } from './exam.ts';
+
+function toutJuste(b, ids) {
+  return ids.map((id) => {
+    const q = b.find((x) => x.id === id);
+    return { id, options: q.options, choix: 0 };
+  });
+}
+
+test('validateAnswers : réponses complètes et exactes → ok', () => {
+  const ids = ['q0', 'q1', 'q2'];
+  assert.equal(validateAnswers(ids, toutJuste(banque(3), ids)).ok, true);
+});
+
+test('validateAnswers : réponses incomplètes refusées', () => {
+  const b = banque(3);
+  assert.equal(validateAnswers(['q0', 'q1', 'q2'], toutJuste(b, ['q0'])).ok, false);
+});
+
+test('validateAnswers : doublons refusés', () => {
+  const b = banque(3);
+  const a = toutJuste(b, ['q0', 'q0', 'q1']);
+  assert.equal(validateAnswers(['q0', 'q1', 'q2'], a).ok, false);
+});
+
+test('validateAnswers : identifiant étranger à l\'examen refusé', () => {
+  const b = banque(4);
+  assert.equal(validateAnswers(['q0', 'q1', 'q2'], toutJuste(b, ['q0', 'q1', 'q3'])).ok, false);
+});
+
+test('gradeExam : le score se calcule sur le nombre de questions ÉMISES', () => {
+  const b = banque(10);
+  const issued = b.map((q) => q.id);
+  // une seule réponse juste soumise : 1/10 = 10 %, jamais 100 %
+  const g = gradeExam(b, toutJuste(b, ['q0']), issued);
+  assert.equal(g.score, 10);
+  assert.equal(g.passed, false);
+});
