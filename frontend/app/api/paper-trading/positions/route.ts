@@ -24,98 +24,32 @@ export async function POST(request: NextRequest) {
     }
     const requestedAmount = typeof body.amount === 'number' && Number.isFinite(body.amount) && body.amount > 0 ? body.amount : null;
 
-    // Compte
-    const { data: account } = await supabase
-      .from('paper_trading_accounts')
-      .select()
-      .eq('user_id', user.id)
-      .single();
-    if (!account) {
-      return NextResponse.json({ error: 'Compte non initialisé' }, { status: 400 });
-    }
-
-    // Dernier cours connu
-    const { data: quote } = await supabase
-      .from('brvm_actions_daily')
-      .select('cours_jour, date_marche')
-      .eq('code', code)
-      .order('date_marche', { ascending: false })
-      .limit(1)
-      .single();
-    const entryPrice = quote?.cours_jour ?? null;
-    if (!entryPrice || entryPrice <= 0) {
-      return NextResponse.json({ error: `Aucun cours pour ${code}` }, { status: 400 });
-    }
-
-    // Plafond : on ne peut pas engager plus que le capital courant (positions
-    // ouvertes comprises). Sans lui, un montant démesuré fabriquait un levier
-    // infini et donc un rendement arbitraire pour le classement public.
-    const { data: ouvertes } = await supabase
-      .from('paper_trading_positions')
-      .select('num_shares, entry_price')
-      .eq('account_id', account.id)
-      .eq('status', 'open');
-    const dejaEngage = ((ouvertes ?? []) as { num_shares: number; entry_price: number }[])
-      .reduce((s, p) => s + p.num_shares * p.entry_price, 0);
-    const disponible = Math.max(0, account.capital_current - dejaEngage);
-    const amountToInvest = Math.min(requestedAmount ?? account.capital_current * 0.1, disponible);
-    // On achète des actions ENTIÈRES (impossible de détenir une fraction d'action).
-    const numShares = Math.floor(amountToInvest / entryPrice);
-    if (numShares < 1) {
-      return NextResponse.json(
-        { error: `Montant insuffisant : il faut au moins ${Math.round(entryPrice).toLocaleString('fr-FR')} FCFA pour 1 titre de ${code}.` },
-        { status: 400 },
-      );
-    }
-
-    // Position déjà ouverte sur ce code : on RENFORCE (moyenne pondérée du PRU)
-    // au lieu de bloquer.
-    const { data: existing } = await supabase
-      .from('paper_trading_positions')
-      .select('id, num_shares, entry_price')
-      .eq('account_id', account.id)
-      .eq('code', code)
-      .eq('status', 'open')
-      .limit(1)
-      .maybeSingle();
-
-    if (existing) {
-      const old = existing as { id: string; num_shares: number; entry_price: number };
-      const totalShares = old.num_shares + numShares;
-      const avgEntry = totalShares > 0 ? (old.num_shares * old.entry_price + numShares * entryPrice) / totalShares : entryPrice;
-      const { data: position, error } = await getServiceClient()
-        .from('paper_trading_positions')
-        .update({ num_shares: totalShares, entry_price: avgEntry })
-        .eq('id', old.id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
-      if (error) {
-        console.error('Reinforce position error:', error);
-        return NextResponse.json({ error: 'Échec du renforcement de position' }, { status: 500 });
-      }
-      return NextResponse.json({ position, reinforced: true }, { status: 200 });
-    }
-
-    const { data: position, error } = await getServiceClient()
-      .from('paper_trading_positions')
-      .insert({
-        user_id: user.id,
-        account_id: account.id,
-        code,
-        entry_price: entryPrice,
-        entry_date: quote!.date_marche,
-        num_shares: numShares,
-        status: 'open',
-      })
-      .select()
-      .single();
-
-    if (error) {
+    // Plafond d'exposition + ouverture/renfort dans UNE fonction SQL qui verrouille
+    // le compte (migration 0185) : les requêtes parallèles ne peuvent plus lire le
+    // même « disponible ». Appel service_role, avec l'identifiant de la session.
+    const { data, error } = await getServiceClient().rpc('paper_ouvrir_position', {
+      p_user: user.id,
+      p_code: code,
+      p_amount: requestedAmount,
+    });
+    if (error || !data) {
       console.error('Create position error:', error);
       return NextResponse.json({ error: 'Échec ouverture position' }, { status: 500 });
     }
-    return NextResponse.json({ position }, { status: 201 });
+    const r = data as { ok: boolean; error?: string; prix?: number; reinforced?: boolean; position?: unknown };
+    if (!r.ok) {
+      if (r.error === 'NO_ACCOUNT') return NextResponse.json({ error: 'Compte non initialisé' }, { status: 400 });
+      if (r.error === 'NO_QUOTE') return NextResponse.json({ error: `Aucun cours pour ${code}` }, { status: 400 });
+      if (r.error === 'AMOUNT_TOO_LOW') {
+        return NextResponse.json(
+          { error: `Montant insuffisant : il faut au moins ${Math.round(r.prix ?? 0).toLocaleString('fr-FR')} FCFA pour 1 titre de ${code}.` },
+          { status: 400 },
+        );
+      }
+      return NextResponse.json({ error: 'Échec ouverture position' }, { status: 500 });
+    }
+    if (r.reinforced) return NextResponse.json({ position: r.position, reinforced: true }, { status: 200 });
+    return NextResponse.json({ position: r.position }, { status: 201 });
   } catch (error) {
     console.error('Paper trading create position error:', error);
     return NextResponse.json({ error: 'Échec ouverture position' }, { status: 500 });
