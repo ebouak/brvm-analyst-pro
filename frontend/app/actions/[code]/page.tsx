@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { getAdminContext, can } from '@/lib/server/rbac';
 import { createPublicClient } from '@/lib/supabase/public';
 import { chargerIntermediaire } from '@/lib/financials/interimServer';
 import FreshnessBadge from '@/components/FreshnessBadge';
@@ -255,6 +256,8 @@ export default async function InstrumentPage({
     : [];
   const fromDate = searchParams.from ?? '';
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
+  // Bouton « Corriger » réservé aux admins (la route /api/fundamentals revérifie).
+  const canEditFondamentaux = can(await getAdminContext(), 'content.write');
   const [valuation, scoring] = await Promise.all([
     getValuation(code).catch(() => null),
     getScoring(code).catch(() => null),
@@ -1188,6 +1191,7 @@ export default async function InstrumentPage({
           <div id="fondamentaux" className="scroll-mt-24">
             <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
             <FundamentalsPanel
+              canEdit={canEditFondamentaux}
               code={code}
               year={latest.year}
               inputs={{
