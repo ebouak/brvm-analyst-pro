@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -56,7 +57,10 @@ export async function POST(
       ),
     );
 
-    const { error: updErr } = await supabase
+    // Écritures service_role : la position a été vérifiée appartenir à l'utilisateur
+    // plus haut (lecture sous RLS + user_id). Le client n'écrit plus aucune métrique.
+    const svc = getServiceClient();
+    const { error: updErr } = await svc
       .from('paper_trading_positions')
       .update({
         exit_price: exitPrice,
@@ -66,7 +70,9 @@ export async function POST(
         pnl_pct: pnlPct,
         days_held: daysHeld,
       })
-      .eq('id', params.id);
+      .eq('id', params.id)
+      .eq('user_id', user.id)
+      .eq('status', 'open');
     if (updErr) {
       console.error('Close position error:', updErr);
       return NextResponse.json({ error: 'Échec fermeture' }, { status: 500 });
@@ -89,10 +95,11 @@ export async function POST(
     const capitalCurrent = capitalInitial + pnlTotal;
     const accountPnlPct = capitalInitial > 0 ? (pnlTotal / capitalInitial) * 100 : 0;
 
-    await supabase
+    await svc
       .from('paper_trading_accounts')
       .update({ capital_current: capitalCurrent, pnl_total: pnlTotal, pnl_pct: accountPnlPct })
-      .eq('id', position.account_id);
+      .eq('id', position.account_id)
+      .eq('user_id', user.id);
 
     return NextResponse.json({ pnl, pnl_pct: pnlPct }, { status: 200 });
   } catch (error) {

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (!code) {
       return NextResponse.json({ error: 'Code requis' }, { status: 400 });
     }
-    const requestedAmount = typeof body.amount === 'number' && body.amount > 0 ? body.amount : null;
+    const requestedAmount = typeof body.amount === 'number' && Number.isFinite(body.amount) && body.amount > 0 ? body.amount : null;
 
     // Compte
     const { data: account } = await supabase
@@ -46,7 +47,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Aucun cours pour ${code}` }, { status: 400 });
     }
 
-    const amountToInvest = requestedAmount ?? account.capital_current * 0.1;
+    // Plafond : on ne peut pas engager plus que le capital courant (positions
+    // ouvertes comprises). Sans lui, un montant démesuré fabriquait un levier
+    // infini et donc un rendement arbitraire pour le classement public.
+    const { data: ouvertes } = await supabase
+      .from('paper_trading_positions')
+      .select('num_shares, entry_price')
+      .eq('account_id', account.id)
+      .eq('status', 'open');
+    const dejaEngage = ((ouvertes ?? []) as { num_shares: number; entry_price: number }[])
+      .reduce((s, p) => s + p.num_shares * p.entry_price, 0);
+    const disponible = Math.max(0, account.capital_current - dejaEngage);
+    const amountToInvest = Math.min(requestedAmount ?? account.capital_current * 0.1, disponible);
     // On achète des actions ENTIÈRES (impossible de détenir une fraction d'action).
     const numShares = Math.floor(amountToInvest / entryPrice);
     if (numShares < 1) {
@@ -71,10 +83,11 @@ export async function POST(request: NextRequest) {
       const old = existing as { id: string; num_shares: number; entry_price: number };
       const totalShares = old.num_shares + numShares;
       const avgEntry = totalShares > 0 ? (old.num_shares * old.entry_price + numShares * entryPrice) / totalShares : entryPrice;
-      const { data: position, error } = await supabase
+      const { data: position, error } = await getServiceClient()
         .from('paper_trading_positions')
         .update({ num_shares: totalShares, entry_price: avgEntry })
         .eq('id', old.id)
+        .eq('user_id', user.id)
         .select()
         .single();
       if (error) {
@@ -84,7 +97,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ position, reinforced: true }, { status: 200 });
     }
 
-    const { data: position, error } = await supabase
+    const { data: position, error } = await getServiceClient()
       .from('paper_trading_positions')
       .insert({
         user_id: user.id,
