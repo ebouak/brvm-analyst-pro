@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
-import { isNiveau } from '@/lib/academy/examServer';
+import { isNiveau, niveauLessonsDone } from '@/lib/academy/examServer';
+import { peutSuivreNiveau } from '@/lib/server/academyAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,17 +17,26 @@ export async function POST(req: NextRequest) {
   if (name.length < 2 || name.length > 80) return NextResponse.json({ error: 'Nom invalide' }, { status: 400 });
   if (body.consent !== true) return NextResponse.json({ error: 'Consentement requis' }, { status: 400 });
 
-  // Exiger un examen réussi pour ce niveau (lecture RLS owner via session).
-  const { data: pass } = await db
+  // Le niveau doit être accessible (abonnement ou achat) ET ses leçons terminées :
+  // l'examen seul ne suffit pas à délivrer un certificat.
+  const gate = await peutSuivreNiveau(body.niveau);
+  if (!gate.allowed) return NextResponse.json({ error: 'premium' }, { status: 403 });
+  const done = await niveauLessonsDone(body.niveau);
+  if (!done.ok) return NextResponse.json({ error: 'Terminez les leçons de ce niveau.' }, { status: 409 });
+
+  // Exiger un examen réussi pour ce niveau, lu via service_role (les passages ne
+  // sont écrits que par la route de correction), borné à l'utilisateur de la session.
+  const svc = getServiceClient();
+  const { data: pass } = await svc
     .from('academy_exam_attempts')
     .select('id')
+    .eq('user_id', user.id)
     .eq('niveau', body.niveau)
     .eq('passed', true)
     .limit(1);
   if (!pass || pass.length === 0) return NextResponse.json({ error: 'Examen non validé' }, { status: 403 });
 
   // Écriture via service_role (pas de policy d'écriture authenticated) ; user_id fixé ici.
-  const svc = getServiceClient();
   const { data, error } = await svc
     .from('academy_certificates')
     .upsert(

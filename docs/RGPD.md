@@ -242,3 +242,11 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 **Monitoring scraping (Lot 3)**
 - Données : **aucune donnée personnelle** (sources de marché, métriques techniques).
 - N/A RGPD. `scraper_errors` ne doit pas contenir de donnée perso (messages techniques).
+
+### Sessions d'examen Academy (`academy_exam_sessions`, migration 0184)
+
+- Donnée : identifiant utilisateur, niveau, liste des questions émises, horodatages.
+- Finalité : intégrité de l'examen (correction sur l'examen émis, usage unique).
+- Base légale : intérêt légitime (sécurité du service). Aucune donnée sensible.
+- Conservation : 7 jours (`purge_rgpd_retention`) ; suppression du compte par cascade.
+- Accès : service_role seul (RLS sans policy). Pas d'export : donnée technique éphémère.

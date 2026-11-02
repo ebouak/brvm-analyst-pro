@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { nextSur } from '@/lib/bienvenue/redirection';
 import { createClient } from '@/lib/supabase/client';
 
 /** Élève la session en aal2 : l'utilisateur a déjà la 2FA, il doit la présenter. */
@@ -13,8 +14,9 @@ export function VerifyForm() {
   // Interne uniquement (doit commencer par « / ») — sinon c'est une redirection
   // ouverte : un attaquant forgerait ?next=https://site-piege et la 2FA elle-même
   // servirait d'hameçon.
-  const rawNext = params.get('next') ?? '/admin';
-  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/admin';
+  // nextSur écarte aussi « /\evil.com » et les tabulations/retours chariot que
+  // les navigateurs retirent avant d'interpréter l'URL (redirection externe).
+  const next = nextSur(params.get('next'), '/admin');
 
   const [factorId, setFactorId] = useState<string | null>(null);
   const [code, setCode] = useState('');

@@ -25,6 +25,8 @@ export interface FundamentalsPanelProps {
   dividendeExercice?: number | null;
   /** Le dividende a une date de détachement vérifiée. */
   dividendeVerifie?: boolean;
+  /** Droit de correction manuelle (admin) — la route /api/fundamentals le revérifie. */
+  canEdit?: boolean;
 }
 
 function pct(v: number | null): string { return v == null ? '—' : `${(v * 100).toFixed(1)} %`; }
@@ -88,10 +90,12 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
           {p.famille === 'banque' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[10px] font-medium text-info">Banque</span>}
           {p.famille === 'assurance' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[10px] font-medium text-info">Assurance</span>}
         </h2>
-        <button type="button" onClick={() => setEditing(true)}
-          className="text-xs border border-border rounded px-2 py-1 hover:border-up/40 hover:text-up transition">
-          ✏️ Corriger
-        </button>
+        {p.canEdit && (
+          <button type="button" onClick={() => setEditing(true)}
+            className="text-xs border border-border rounded px-2 py-1 hover:border-up/40 hover:text-up transition">
+            ✏️ Corriger
+          </button>
+        )}
       </div>
 
       {p.range52.low != null && (
@@ -154,7 +158,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         {p.isManual && ' · Fondamentaux corrigés manuellement.'}
       </p>
 
-      {editing && (
+      {p.canEdit && editing && (
         <EditFundamentalsModal
           code={p.code}
           inputs={p.inputs}

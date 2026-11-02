@@ -14,6 +14,7 @@ export default function ExamRunner({ niveau }: { niveau: string }) {
   const [result, setResult] = useState<{ score: number; passed: boolean; corrige: Corrige[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   async function start() {
     setBusy(true); setError(null);
@@ -21,14 +22,14 @@ export default function ExamRunner({ niveau }: { niveau: string }) {
     const d = await r.json();
     setBusy(false);
     if (!r.ok) { setError(d.error ?? 'Erreur'); return; }
-    setQuestions(d.questions); setChoix({}); setIdx(0); setPhase('run');
+    setSessionId(d.session_id); setQuestions(d.questions); setChoix({}); setIdx(0); setPhase('run');
   }
 
   async function submit() {
     setBusy(true);
     const answers = questions.map((q) => ({ id: q.id, options: q.options, choix: choix[q.id] ?? -1 }));
     const r = await fetch(`/api/academy/exam/${niveau}/submit`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answers }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, answers }),
     });
     const d = await r.json(); setBusy(false);
     if (!r.ok) { setError(d.error ?? 'Erreur'); return; }

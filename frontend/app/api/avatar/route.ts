@@ -29,6 +29,11 @@ export async function POST(req: Request) {
     .upload(path, bytes, { contentType: file.type, upsert: true });
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
 
+  // Changement de format : on retire les anciennes extensions, sinon l'ancienne
+  // photo resterait publique sous son URL après remplacement.
+  const anciens = ['png', 'webp', 'jpg'].filter((e) => e !== ext).map((e) => `avatars/${user.id}.${e}`);
+  await admin.storage.from(BUCKET).remove(anciens).catch(() => null);
+
   // Cache-buster pour forcer le rafraîchissement de l'image après remplacement.
   const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
   const url = `${pub.publicUrl}?v=${Date.now()}`;

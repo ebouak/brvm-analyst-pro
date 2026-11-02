@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getServiceClient } from '@/lib/billing/serviceClient';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -33,15 +34,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { capital_initial } = body as { capital_initial: number };
 
-    if (!capital_initial || capital_initial <= 0) {
+    if (typeof capital_initial !== 'number' || !Number.isFinite(capital_initial) || capital_initial <= 0 || capital_initial > 1e12) {
       return NextResponse.json(
         { error: 'Invalid capital_initial' },
         { status: 400 }
       );
     }
 
-    // Create account
-    const { data: account, error } = await supabase
+    // Create account — écriture service_role (migration 0182 retire l'INSERT
+    // authenticated : les métriques du compte ne sont plus falsifiables), user_id
+    // pris dans la session.
+    const { data: account, error } = await getServiceClient()
       .from('paper_trading_accounts')
       .insert({
         user_id: user.id,

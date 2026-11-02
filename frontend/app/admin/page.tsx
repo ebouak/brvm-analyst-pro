@@ -1,9 +1,7 @@
 import { loadAttention } from '@/lib/admin/attention';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { isAdminEmail } from '@/lib/server/admin';
+import { requireAdmin } from '@/lib/server/rbac';
 import { SectionHeader, PremiumPanel, MetricCard } from '@/components/ui/premium';
 
 export const dynamic = 'force-dynamic';
@@ -141,12 +139,9 @@ async function loadKpis(): Promise<Kpis> {
 }
 
 export default async function AdminPage() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-  if (!isAdminEmail(user.email)) redirect('/dashboard');
+  // Même garde que le layout (admin + 2FA) : un rendu partiel RSC peut contourner
+  // le layout, donc la page se garde elle-même.
+  await requireAdmin();
 
   const [kpis, attention] = await Promise.all([loadKpis(), loadAttention()]);
 

@@ -33,6 +33,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
@@ -58,6 +59,8 @@ _load_env(
     os.path.join(_here, ".env.local"),
     os.path.join(_here, ".env"),
 )
+import html as _html
+from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -1122,6 +1125,77 @@ def build_correlation_table(correlations: list[dict]) -> str:
     )
 
 
+# ── 5bis. Assainissement (HTML servi en même origine) ─────────────────────────
+# Le HTML est publié tel quel sous /weekly/<slug>.html : tout titre/URL issu de
+# Perplexity et tout HTML produit par le LLM doivent être neutralisés avant
+# insertion (XSS stocké sinon, exécuté sur l'origine du site).
+
+def _url_sure(url) -> str:
+    """URL http(s) uniquement, sinon chaîne vide (jamais javascript:/data:)."""
+    if not isinstance(url, str):
+        return ""
+    u = url.strip()
+    if urlparse(u).scheme.lower() not in ("http", "https"):
+        return ""
+    return _html.escape(u, quote=True)
+
+
+_TAGS_EDITORIAL = {
+    "section", "div", "p", "h2", "h3", "h4", "ul", "ol", "li", "strong", "em",
+    "b", "i", "br", "span", "table", "thead", "tbody", "tr", "th", "td", "a",
+    "blockquote", "hr", "code", "small", "sup", "sub",
+}
+_STYLE_SUR = re.compile(r"^[\w\s:;#%.,()'\-!/]*$")
+
+
+class _AssainisseurHtml(HTMLParser):
+    """Reconstruit le HTML en ne gardant qu'une liste blanche de balises ;
+    attributs : href (http/https) sur <a>, style restreint, rien d'autre."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out: list[str] = []
+        self._ignore = 0  # contenu de <script>/<style> supprimé
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style", "iframe", "object", "embed"):
+            self._ignore += 1
+            return
+        if tag not in _TAGS_EDITORIAL or self._ignore:
+            return
+        parts = []
+        for k, v in attrs:
+            v = v or ""
+            if k == "href" and tag == "a":
+                u = _url_sure(v)
+                if u:
+                    parts.append(f' href="{u}" target="_blank" rel="noopener noreferrer"')
+            elif k == "style":
+                low = v.lower()
+                if _STYLE_SUR.match(v) and not any(x in low for x in ("url(", "expression", "javascript", "@import", "behavior")):
+                    parts.append(f' style="{_html.escape(v, quote=True)}"')
+        self.out.append(f"<{tag}{''.join(parts)}>")
+
+    def handle_endtag(self, tag):
+        if tag in ("script", "style", "iframe", "object", "embed"):
+            self._ignore = max(0, self._ignore - 1)
+            return
+        if tag in _TAGS_EDITORIAL and tag not in ("br", "hr") and not self._ignore:
+            self.out.append(f"</{tag}>")
+
+    def handle_data(self, data):
+        if not self._ignore:
+            self.out.append(_html.escape(data))
+
+
+def assainir_editorial(texte: str) -> str:
+    p = _AssainisseurHtml()
+    p.feed(texte or "")
+    p.close()
+    return "".join(p.out)
+
+
+
 def build_footer(year: int) -> str:
     return (
         f'<footer style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;">'
@@ -1144,9 +1218,9 @@ def build_sources_perplexity(items: list[dict]) -> str:
         return ""
     rows = "".join(
         f'<li style="margin-bottom:6px;font-size:12px;color:#475569;">'
-        f'<a href="{it.get("url","")}" style="color:#56D7FD;text-decoration:none;" '
-        f'target="_blank" rel="noopener noreferrer">{it.get("titre","")}</a>'
-        f' <span style="color:#94a3b8;">— {it.get("date","")}</span></li>'
+        f'<a href="{_url_sure(it.get("url",""))}" style="color:#56D7FD;text-decoration:none;" '
+        f'target="_blank" rel="noopener noreferrer">{_html.escape(str(it.get("titre","")))}</a>'
+        f' <span style="color:#94a3b8;">— {_html.escape(str(it.get("date","")))}</span></li>'
         for it in items
     )
     return (
@@ -1174,7 +1248,7 @@ def assemble_content_html(
     now = datetime.now(timezone(timedelta(hours=1)))
     year = year if year is not None else now.year
     week_num = week if week is not None else now.isocalendar()[1]
-    text = editorial_html.strip()
+    text = assainir_editorial(editorial_html).strip()
     if not text.startswith("<section"):
         text = (f'<section style="font-family:\'Segoe UI\',system-ui,sans-serif;'
                 f'color:#1e293b;line-height:1.8;">{text}</section>')

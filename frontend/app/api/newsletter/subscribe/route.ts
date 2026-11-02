@@ -7,8 +7,10 @@ import { buildConfirmEmailHtml, CONFIRM_SUBJECT } from '@/lib/newsletter/confirm
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  // Prefer service_role (bypasses RLS); fall back to anon if unavailable
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // service_role UNIQUEMENT : la table n'accepte plus aucune écriture anonyme
+  // (migration 0183). Un repli sur la clé anon rouvrirait l'inscription
+  // pré-confirmée par PostgREST — mieux vaut échouer.
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('Supabase env vars manquantes');
   return createSupabaseClient(url, key, { auth: { persistSession: false } });
 }
@@ -31,11 +33,14 @@ export async function POST(req: NextRequest) {
     const supabase = getAdminClient();
 
     // Insert simple ; un doublon (déjà inscrit) est traité comme un succès.
-    // On évite l'upsert ON CONFLICT qui déclenche la policy RLS UPDATE et
-    // échoue côté clé anon (fallback sans service_role).
     const { error } = await supabase
       .from('newsletter_subscribers')
-      .insert({ email: email.toLowerCase().trim(), source });
+      .insert({
+        email: email.toLowerCase().trim(),
+        source: typeof source === 'string' ? source.slice(0, 40) : 'landing',
+        // Double opt-in : jamais pré-confirmé ici.
+        confirmed: false,
+      });
 
     if (error && error.code !== '23505') {
       console.error('[newsletter] insert error', JSON.stringify(error));

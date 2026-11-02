@@ -102,6 +102,20 @@ export async function DELETE() {
   }
   await admin.from('crm_actions').delete().eq('user_id', user.id);
 
+  // 2sexies. Photo de profil : bucket PUBLIC `newsletter-assets`, avatars/<id>.<ext>.
+  //          Sans cette purge, l'image resterait accessible par URL après effacement.
+  //          On liste le dossier filtré sur l'identifiant (toutes extensions).
+  try {
+    const { data: fichiers } = await admin.storage.from('newsletter-assets')
+      .list('avatars', { search: user.id, limit: 20 });
+    const aSupprimer = (fichiers ?? [])
+      .filter((f) => f.name.startsWith(`${user.id}.`))
+      .map((f) => `avatars/${f.name}`);
+    if (aSupprimer.length > 0) await admin.storage.from('newsletter-assets').remove(aSupprimer);
+  } catch {
+    // Ne bloque pas l'effacement du compte ; l'échec est visible dans les logs de stockage.
+  }
+
   // 3. Suppression définitive du compte auth (cascade FK : profil + données ;
   //    billing_transactions.user_id → NULL = anonymisé, conservé pour la compta).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);

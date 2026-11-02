@@ -14,7 +14,9 @@ const MIN_PASSWORD_LENGTH = 10;
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  // service_role uniquement : pas de repli sur la clé anon (inscription
+  // newsletter pré-confirmée, interdite à la clé publique depuis la migration 0183).
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   return createSupabaseClient(url, key, { auth: { persistSession: false } });
 }
 
