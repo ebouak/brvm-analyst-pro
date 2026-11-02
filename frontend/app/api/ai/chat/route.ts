@@ -3,6 +3,13 @@ import { redacteursDisponibles, redigerEnFlux } from '@/lib/server/redacteur';
 import { runTool } from '@/lib/briefTools';
 import { SYSTEM_PROMPT_ANALYSTE } from '@/lib/ai/prompts';
 import { createClient } from '@/lib/supabase/server';
+import { checkFeature } from '@/lib/server/featureGate';
+
+// Plafonds de saisie : sans eux, un appelant pouvait envoyer un contexte énorme
+// et le faire payer au budget LLM.
+const MAX_MESSAGES = 20;
+const MAX_CHARS_MESSAGE = 4000;
+const MAX_CHARS_TOTAL = 20000;
 
 const LIQUIDITES_CODE = 'LIQUIDITES';
 
@@ -168,7 +175,43 @@ async function buildRichContext(question: string): Promise<string> {
 // ── Route principale ──────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // 1. Au moins un fournisseur configuré (cascade commune : lib/server/redacteur)
+  // 0. Session obligatoire : cette route déclenche des complétions LLM payantes.
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return Response.json({ error: 'Connexion requise pour utiliser l’assistant.' }, { status: 401 });
+  }
+
+  // 1. Parser et BORNER le body AVANT toute consommation de quota.
+  const body = await req.json().catch(() => null) as { messages?: Array<{ role?: unknown; content?: unknown }> } | null;
+  const brut = body?.messages;
+  if (!Array.isArray(brut) || brut.length === 0) {
+    return Response.json({ error: 'messages requis' }, { status: 400 });
+  }
+  if (brut.length > MAX_MESSAGES) {
+    return Response.json({ error: `Trop de messages (maximum ${MAX_MESSAGES}).` }, { status: 400 });
+  }
+  const clientMessages: { role: 'user' | 'assistant'; content: string }[] = [];
+  let total = 0;
+  for (const m of brut) {
+    // Le rôle « system » n'est jamais accepté du client (injection de consignes).
+    if ((m?.role !== 'user' && m?.role !== 'assistant') || typeof m.content !== 'string') {
+      return Response.json({ error: 'Message invalide.' }, { status: 400 });
+    }
+    if (m.content.length > MAX_CHARS_MESSAGE) {
+      return Response.json({ error: `Message trop long (maximum ${MAX_CHARS_MESSAGE} caractères).` }, { status: 400 });
+    }
+    total += m.content.length;
+    clientMessages.push({ role: m.role, content: m.content });
+  }
+  if (total > MAX_CHARS_TOTAL) {
+    return Response.json({ error: 'Conversation trop longue.' }, { status: 400 });
+  }
+  if (clientMessages[clientMessages.length - 1].role !== 'user') {
+    return Response.json({ error: 'Le dernier message doit être une question.' }, { status: 400 });
+  }
+
+  // 2. Au moins un fournisseur configuré (cascade commune : lib/server/redacteur)
   if ((await redacteursDisponibles()).length === 0) {
     return Response.json(
       { error: 'Aucune clé IA configurée. Ajoutez DeepSeek, Gemini ou Grok dans /admin/cles-api.' },
@@ -176,14 +219,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 2. Parser le body
-  const body = await req.json().catch(() => null) as { messages?: Array<{ role: string; content: string }> } | null;
-  if (!body?.messages?.length) {
-    return Response.json({ error: 'messages requis' }, { status: 400 });
+  // 2b. Garde de fonctionnalité `assistant_ia` (accès + quota journalier),
+  // décomptée AVANT l'appel au LLM, comme pour le diagnostic.
+  const { data: profile } = await supabase.from('profiles').select('is_premium').eq('id', user.id).single();
+  const gate = await checkFeature('assistant_ia', {
+    id: user.id,
+    email: user.email,
+    isPremium: Boolean(profile?.is_premium),
+  });
+  if (!gate.allowed) {
+    return Response.json({ error: gate.reason }, { status: gate.status });
   }
 
   // 3. Charger les données temps réel BRVM + (si pertinent) le portefeuille user
-  const lastQuestion = body.messages[body.messages.length - 1]?.content ?? '';
+  const lastQuestion = clientMessages[clientMessages.length - 1].content;
   const [marketCtx, portfolioCtx] = await Promise.all([
     buildRichContext(lastQuestion),
     mentionsPortfolio(lastQuestion) ? buildPortfolioContext() : Promise.resolve(''),
@@ -193,7 +242,7 @@ export async function POST(req: NextRequest) {
   // 4. Construire la conversation avec contexte données injecté
   const messages = [
     { role: 'system', content: SYSTEM_PROMPT_ANALYSTE + '\n\n' + ctx },
-    ...body.messages.slice(-8),
+    ...clientMessages.slice(-8),
   ];
 
   // 5. Streaming
