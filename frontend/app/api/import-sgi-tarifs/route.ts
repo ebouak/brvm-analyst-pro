@@ -4,7 +4,7 @@ import { resolveApiKey } from '@/lib/server/apiKeys';
 import { TEXT_PROVIDERS, VISION_PROVIDERS, parseLlmJson, type Provider } from '@/lib/import/llmProviders';
 import { SGI_TARIF_SYSTEM_PROMPT, sgiTarifUserPrompt } from '@/lib/import/sgiTarifPrompt';
 import { sgiTarifSchema, checkSgiTarif, sgiTarifToRow } from '@/lib/import/sgiTarifSchema';
-import { getAdminContext, can } from '@/lib/server/rbac';
+import { requireAdminApi } from '@/lib/server/adminApi';
 
 export const maxDuration = 60;
 
@@ -66,10 +66,8 @@ async function callProvider(cfg: ProviderCfg, sgiNom: string, mode: 'text' | 'vi
 
 export async function POST(request: Request) {
   // Réservé admin (permission content.write ou super-admin), sans redirection.
-  const ctx = await getAdminContext();
-  if (!can(ctx, 'content.write')) {
-    return NextResponse.json({ error: 'Réservé à l’administration' }, { status: 403 });
-  }
+  const g = await requireAdminApi('content.write');
+  if ('error' in g) return g.error;
 
   const body = (await request.json().catch(() => null)) as Body | null;
   if (!body || !body.sgiNom || (body.mode !== 'text' && body.mode !== 'vision')) {

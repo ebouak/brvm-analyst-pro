@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+import { requireAdminApi } from '@/lib/server/adminApi';
 import { createClient as createSbAdmin } from '@supabase/supabase-js';
 import { resolveApiKey } from '@/lib/server/apiKeys';
 import { fetchPdfText } from '@/lib/import/serverPdf';
@@ -39,11 +39,8 @@ async function callLlm(text: string, symbol: string, famille: Famille): Promise<
 }
 
 export async function POST(req: Request) {
-  const supa = createServerClient();
-  const { data: { user } } = await supa.auth.getUser();
-  if (!user || user.email !== 'ebouak@gmail.com') {
-    return NextResponse.json({ error: 'Réservé à l’administrateur' }, { status: 403 });
-  }
+  const g = await requireAdminApi('content.write');
+  if ('error' in g) return g.error;
 
   const body = await req.json().catch(() => ({})) as { code?: string };
   const onlyCode = body.code?.toUpperCase();
