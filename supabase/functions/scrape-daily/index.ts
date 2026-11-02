@@ -26,10 +26,41 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+
+/**
+ * Garde d'appel : ces fonctions tournent avec la clé service_role et déclenchent
+ * des webhooks ; sans authentification de l'appelant, n'importe qui connaissant
+ * l'URL pouvait les invoquer (audit sécurité). Secret partagé EDGE_FUNCTION_SECRET
+ * (Supabase Dashboard -> Secrets), en-tête `x-edge-secret`, comparé en temps
+ * constant. FAIL CLOSED : secret absent => 503, jamais d'accès libre.
+ */
+function appelAutorise(req: Request): Response | null {
+  const attendu = Deno.env.get('EDGE_FUNCTION_SECRET') ?? '';
+  if (attendu.length < 16) {
+    return new Response(JSON.stringify({ error: 'EDGE_FUNCTION_SECRET non configuré' }), {
+      status: 503, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const recu = req.headers.get('x-edge-secret') ?? '';
+  const enc = new TextEncoder();
+  const a = enc.encode(recu), b = enc.encode(attendu);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < b.length; i++) diff |= (a[i] ?? 0) ^ b[i];
+  if (diff !== 0) {
+    return new Response(JSON.stringify({ error: 'Non autorisé' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  return null;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const refus = appelAutorise(req);
+  if (refus) return refus;
 
   const startedAt = new Date().toISOString();
   const supabase = createClient(
