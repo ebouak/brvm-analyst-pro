@@ -101,71 +101,94 @@ export default function DashboardTicker({
   }, [items, dateMarche]);
 
   if (items.length === 0) return null;
-  const loop = [...items, ...items];
+
+  /** Une copie de la liste. La boucle de défilement continu en affiche DEUX
+   *  côte à côte (translation de −50 %) : seule la première est exposée aux
+   *  technologies d'assistance et au clavier. La seconde est un pur effet
+   *  visuel — aria-hidden + liens hors tabulation — sinon un utilisateur
+   *  clavier traversait ~100 liens de 11 px avant d'atteindre le contenu
+   *  (audit UI/UX du 2026-11-03). */
+  const copie = (doublon: boolean) =>
+    items.map((it, i) => {
+      // Pour les actions, on superpose la donnée temps réel si disponible.
+      const live = it.kind === 'action' ? liveByCode.get(it.code) : undefined;
+      const variation = live ? live.variation_pct : it.variation;
+      const value = live && live.cours_jour != null ? nfmt(live.cours_jour) : it.value;
+      const up = (variation ?? 0) >= 0;
+      const flashDir = it.kind === 'action' ? (flashes[it.code] ?? 'none') : 'none';
+      // Pastille de section au début et à chaque changement Actions↔Obligations.
+      const showLabel = i === 0 || items[i - 1]!.kind !== it.kind;
+      return (
+        <span key={`seg-${doublon ? 'b' : 'a'}-${it.code}-${i}`} className="contents">
+        {showLabel && (
+          <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+            it.kind === 'action' ? 'border-info/40 bg-info/10 text-info' : 'border-gold/40 bg-gold/10 text-gold'
+          }`}>
+            {it.kind === 'action' ? '◆ Actions' : '◆ Obligations'}
+          </span>
+        )}
+        <Link
+          href={it.kind === 'action' ? `/actions/${it.code}` : '/obligations'}
+          // prefetch=false : le ticker défile en continu (~100 liens dupliqués) ;
+          // sans ça, Next préfetche chaque instrument qui entre dans le viewport
+          // → flot ininterrompu de requêtes RSC qui sature le routeur et bloque
+          // la navigation par <Link> quand /dashboard est la page d'entrée.
+          prefetch={false}
+          tabIndex={doublon ? -1 : undefined}
+          className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-bold transition-opacity hover:opacity-100"
+        >
+          <span className="text-muted">{it.code}</span>
+          {/* Pattern badges for actions */}
+          {it.kind === 'action' && patternsByCode[it.code] && patternsByCode[it.code].length > 0 && (
+            <span className="inline-flex gap-0.5">
+              {patternsByCode[it.code].some((p) => p.pattern_type === 'atr_extreme') && (
+                <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">ATR</span>
+              )}
+              {patternsByCode[it.code].some((p) => p.pattern_type === 'bullish_consolidation') && (
+                <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">CONS</span>
+              )}
+              {patternsByCode[it.code].some((p) => p.pattern_type === 'breakout_impulse') && (
+                <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">BRK</span>
+              )}
+            </span>
+          )}
+          {it.kind === 'action' && it.spark && <TickerSpark data={it.spark} up={up} />}
+          <FlashValue direction={flashDir} className="text-ivory">{value}</FlashValue>
+          {variation != null && (
+            <span className={up ? 'text-up' : 'text-down'}>
+              {up ? '+' : ''}{variation.toFixed(2)}%
+            </span>
+          )}
+        </Link>
+        </span>
+      );
+    });
 
   return (
-    <div
-      className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2 shadow-card"
-      role="marquee"
-      aria-label="Cours des actions et obligations en défilement"
-    >
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-bg to-transparent" />
-      <div className="flex w-max animate-ticker items-center gap-6 px-6 font-mono group-hover:[animation-play-state:paused]">
-        {loop.map((it, i) => {
-          // Pour les actions, on superpose la donnée temps réel si disponible.
-          const live = it.kind === 'action' ? liveByCode.get(it.code) : undefined;
-          const variation = live ? live.variation_pct : it.variation;
-          const value = live && live.cours_jour != null ? nfmt(live.cours_jour) : it.value;
-          const up = (variation ?? 0) >= 0;
-          const flashDir = it.kind === 'action' ? (flashes[it.code] ?? 'none') : 'none';
-          // Pastille de section au début et à chaque changement Actions↔Obligations.
-          const showLabel = i === 0 || loop[i - 1]!.kind !== it.kind;
-          return (
-            <span key={`seg-${it.code}-${i}`} className="contents">
-            {showLabel && (
-              <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                it.kind === 'action' ? 'border-info/40 bg-info/10 text-info' : 'border-gold/40 bg-gold/10 text-gold'
-              }`}>
-                {it.kind === 'action' ? '◆ Actions' : '◆ Obligations'}
-              </span>
-            )}
-            <Link
-              href={it.kind === 'action' ? `/actions/${it.code}` : '/obligations'}
-              // prefetch=false : le ticker défile en continu (~100 liens dupliqués) ;
-              // sans ça, Next préfetche chaque instrument qui entre dans le viewport
-              // → flot ininterrompu de requêtes RSC qui sature le routeur et bloque
-              // la navigation par <Link> quand /dashboard est la page d'entrée.
-              prefetch={false}
-              className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-bold transition-opacity hover:opacity-100"
-            >
-              <span className="text-muted">{it.code}</span>
-              {/* Pattern badges for actions */}
-              {it.kind === 'action' && patternsByCode[it.code] && patternsByCode[it.code].length > 0 && (
-                <span className="inline-flex gap-0.5">
-                  {patternsByCode[it.code].some((p) => p.pattern_type === 'atr_extreme') && (
-                    <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">ATR</span>
-                  )}
-                  {patternsByCode[it.code].some((p) => p.pattern_type === 'bullish_consolidation') && (
-                    <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">CONS</span>
-                  )}
-                  {patternsByCode[it.code].some((p) => p.pattern_type === 'breakout_impulse') && (
-                    <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">BRK</span>
-                  )}
-                </span>
-              )}
-              {it.kind === 'action' && it.spark && <TickerSpark data={it.spark} up={up} />}
-              <FlashValue direction={flashDir} className="text-ivory">{value}</FlashValue>
-              {variation != null && (
-                <span className={up ? 'text-up' : 'text-down'}>
-                  {up ? '+' : ''}{variation.toFixed(2)}%
-                </span>
-              )}
-            </Link>
-            </span>
-          );
-        })}
+    <div className="relative">
+      {/* Évitement : un seul Tab pour sauter tout le bandeau. */}
+      <a
+        href="#fin-bandeau-cours"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-1/2 focus:z-20 focus:-translate-y-1/2 focus:rounded-full focus:bg-surface focus:px-3 focus:py-1.5 focus:text-xs focus:font-semibold focus:text-accent-ink focus:outline focus:outline-2 focus:outline-accent"
+      >
+        Passer le bandeau des cours
+      </a>
+      <div
+        className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2 shadow-card motion-reduce:overflow-x-auto"
+        role="marquee"
+        aria-label="Cours des actions et obligations en défilement"
+      >
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg to-transparent motion-reduce:hidden" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-bg to-transparent motion-reduce:hidden" />
+        {/* Deux copies de largeur identique (même pl-6 + gap-6) : la translation
+            de −50 % boucle sans à-coup. Mouvement réduit demandé : défilement
+            arrêté, copie visuelle retirée, bandeau défilable à la main. */}
+        <div className="flex w-max animate-ticker items-center font-mono group-hover:[animation-play-state:paused] motion-reduce:animate-none">
+          <div className="flex items-center gap-6 pl-6 motion-reduce:pr-6">{copie(false)}</div>
+          <div className="flex items-center gap-6 pl-6 motion-reduce:hidden" aria-hidden="true">{copie(true)}</div>
+        </div>
       </div>
+      <span id="fin-bandeau-cours" tabIndex={-1} className="sr-only">Fin du bandeau des cours</span>
     </div>
   );
 }

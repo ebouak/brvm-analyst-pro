@@ -1,7 +1,9 @@
 import { createPublicClient } from '@/lib/supabase/public';
 import ObligationsTable, { type ObligationRow } from '@/components/ObligationsTable';
-import { yieldToMaturity, durations, yearsTo, parseObligationDesignation } from '@/lib/bonds';
 import type { ObligationDaily } from '@/lib/types';
+// Source UNIQUE du calcul (ligne, YTM, moyenne) : le bloc « Le marché
+// aujourd'hui » du tableau de bord lit la même, les deux chiffres concordent.
+import { syntheseObligations, versLigneObligation } from '@/lib/marche/obligations';
 import {
   SectionHeader,
   PremiumPanel,
@@ -13,54 +15,11 @@ import {
 export const revalidate = 300;
 export const metadata = { title: 'Obligations' };
 
-/**
- * Émetteur souverain / institution régionale → coupons exonérés de retenue
- * (barème lib/tax : États UEMOA, BOAD, BIDC). Détection par code + désignation.
- */
-function isEmetteurEtat(code: string, designation: string | null, emetteur: string | null): boolean {
-  return /(TPCI|TPBJ|TPBF|TPSN|TPTG|TPNE|TPML|EOM|EOB|EOS|ETAT|TRESOR|TRÉSOR|BOAD|BIDC)/i.test(
-    `${code} ${designation ?? ''} ${emetteur ?? ''}`,
-  );
-}
-
-function toRow(o: ObligationDaily): ObligationRow {
-  const parsed = parseObligationDesignation(o.designation);
-  const emetteur = o.emetteur ?? parsed.emetteur;
-  const tauxPct = o.taux_pct ?? parsed.couponPct;
-  const maturite = o.maturite ?? parsed.maturite;
-  const years = yearsTo(maturite);
-
-  // Les obligations dont le cours est très inférieur au nominal (< 8 000 FCFA)
-  // sont des obligations à amortissement partiel : le YTM calculé avec face=10 000
-  // serait trompeur — on le masque.
-  const isAmortissable = o.cours_jour != null && o.cours_jour < 8000;
-
-  let ytm: number | null = null;
-  let modDur: number | null = null;
-  if (!isAmortissable && o.cours_jour != null && tauxPct != null && years != null && years > 0) {
-    const inputs = { prix: o.cours_jour, couponRatePct: tauxPct, yearsToMaturity: years, face: 10000 };
-    ytm = yieldToMaturity(inputs);
-    if (ytm != null && ytm > 0 && ytm < 25) {
-      modDur = durations(inputs, ytm)?.modified ?? null;
-    } else {
-      ytm = null;
-    }
-  }
-
-  return {
-    code: o.code,
-    designation: o.designation,
-    emetteur,
-    taux_pct: tauxPct,
-    maturite,
-    cours_jour: o.cours_jour,
-    volume: o.volume,
-    yearsToMaturity: years,
-    ytm,
-    modifiedDuration: modDur,
-    isAmortissable,
-    couponExonere: isEmetteurEtat(o.code, o.designation, emetteur),
-  };
+/** "2026-11-03" → "3 nov. 2026" (affichage seul ; la donnée reste ISO). */
+function fmtSeance(iso: string): string {
+  const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 async function getData() {
@@ -81,14 +40,8 @@ async function getData() {
     .eq('date_marche', lastDate);
 
   const obls = (data ?? []) as ObligationDaily[];
-  const rows = obls.map(toRow);
-
-  const active = rows.filter((r) => r.yearsToMaturity != null && r.yearsToMaturity > 0);
-  const expired = rows.filter((r) => r.yearsToMaturity == null || r.yearsToMaturity <= 0);
-
-  // YTM moyen sur les obligations actives non-amorties avec YTM plausible
-  const ytms = active.map((r) => r.ytm).filter((y): y is number => y != null);
-  const avgBondYtm = ytms.length ? ytms.reduce((a, b) => a + b, 0) / ytms.length : null;
+  // YTM moyen = actives, non amorties, YTM plausible (règles dans lib/marche/obligations).
+  const { actives: active, echues: expired, ytmMoyen: avgBondYtm } = syntheseObligations(obls.map((o) => versLigneObligation(o)));
 
   return { lastDate, active, expired, avgBondYtm };
 }
@@ -127,7 +80,7 @@ export default async function ObligationsPage() {
         actions={
           <div className="flex items-center gap-2 flex-wrap">
             <StatPill tone="sapphire">
-              Séance <span className="tabular ml-1">{lastDate}</span>
+              Séance du <span className="tabular ml-1">{fmtSeance(lastDate)}</span>
             </StatPill>
             <StatPill tone="neutral">
               <span className="tabular">{active.length}</span>&nbsp;actives
@@ -165,11 +118,16 @@ export default async function ObligationsPage() {
         />
       </div>
 
-      {/* Note sur les obligations amorties */}
-      <p className="text-[11px] text-faint leading-relaxed border-l-2 border-[#1a2a30] pl-3">
-        <strong className="text-orange-400">YTM N/A</strong> = obligation à amortissement partiel (prix {`<`} 8 000 FCFA) : le capital remboursé périodiquement rend le calcul YTM non fiable avec nominal 10 000 FCFA.
-        Les obligations cotées &quot;Au pair&quot; (cours ≈ 10 000 FCFA) ont un YTM ≈ coupon nominal.
-      </p>
+      {/* Note sur les obligations amorties (repliée : elle occupait l'en-tête) */}
+      <details className="group text-[11px] text-faint leading-relaxed border-l-2 border-border pl-3">
+        <summary className="cursor-pointer text-muted hover:text-ivory py-0.5">
+          Pourquoi certains rendements sont « N/A » ?
+        </summary>
+        <p className="mt-1.5">
+          <strong className="text-warn">YTM N/A</strong> = obligation à amortissement partiel (prix {`<`} 8 000 FCFA) : le capital remboursé périodiquement rend le calcul YTM non fiable avec nominal 10 000 FCFA.
+          Les obligations cotées &quot;Au pair&quot; (cours ≈ 10 000 FCFA) ont un YTM ≈ coupon nominal.
+        </p>
+      </details>
 
       {/* Tableau obligations actives */}
       {active.length > 0 ? (
@@ -177,7 +135,7 @@ export default async function ObligationsPage() {
           <div className="p-5">
             <div className="flex items-center gap-3 mb-4">
               <p className="overline text-faint">Obligations actives</p>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#56D7FD]/10 text-[#56D7FD] border border-[#56D7FD]/20">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">
                 {active.length} titres · échéance future
               </span>
             </div>
@@ -196,7 +154,7 @@ export default async function ObligationsPage() {
       {expired.length > 0 && (
         <details className="group">
           <summary className="cursor-pointer text-xs text-faint hover:text-muted flex items-center gap-2 py-2 list-none">
-            <span className="border border-[#1a2a30] rounded px-2 py-0.5 group-open:border-[#56D7FD]/30">
+            <span className="border border-border rounded px-2 py-0.5 group-open:border-accent/30">
               {expired.length} obligations échues : cliquer pour afficher
             </span>
           </summary>
@@ -211,7 +169,7 @@ export default async function ObligationsPage() {
         </details>
       )}
 
-      <p className="text-[11px] text-faint leading-relaxed border-l-2 border-[#1a2a30] pl-3">
+      <p className="text-[11px] text-faint leading-relaxed border-l-2 border-border pl-3">
         YTM calculé par bisection (hypothèses : nominal 10 000 FCFA, coupon annuel, maturité = 31 déc. de l&apos;année de fin
         extraite de la désignation). Données source : scraper BRVM intraday.
         Fiscalité : coupons des émetteurs souverains (États, BOAD, BIDC) <strong className="text-up">exonérés</strong> de retenue —

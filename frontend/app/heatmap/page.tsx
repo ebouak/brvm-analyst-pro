@@ -1,6 +1,6 @@
 import type React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import HeatmapViews from '@/components/HeatmapViews';
+import HeatmapViews, { SecteurSelect } from '@/components/HeatmapViews';
 import brvmLogos from '@/lib/brvmLogos.json';
 import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
@@ -88,7 +88,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
       {/* ── Glow atmosphérique ─────────────────────────────────────────────── */}
       <div className="pointer-events-none fixed inset-0 bg-obsidian-glow" aria-hidden />
 
-      <div className="relative flex flex-col flex-1 max-w-7xl w-full mx-auto px-6 py-8 gap-6">
+      <div className="relative flex flex-col flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 gap-5 sm:gap-6">
 
         {/* ── En-tête + filtres secteur ──────────────────────────────────── */}
         <div className="animate-rise-in flex flex-wrap items-end justify-between gap-5">
@@ -98,9 +98,13 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
             subtitle={lastDate ? `Séance du ${fmtDateFR(lastDate)}` : undefined}
           />
 
-          {/* Chips secteur ─────────────────── */}
+          {/* Secteur — mobile : liste déroulante (les 8 puces occupaient tout
+              le premier écran) ; puces à partir de md. */}
           {allSectors.length > 0 && (
-            <div className="flex flex-wrap gap-2 max-w-xl">
+            <SecteurSelect secteurs={allSectors} courant={secteurParam} className="w-full md:hidden" />
+          )}
+          {allSectors.length > 0 && (
+            <div className="hidden md:flex flex-wrap gap-2 max-w-xl">
               <Link
                 href="/heatmap"
                 className={[
@@ -146,7 +150,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
         ) : (
           <div className="animate-rise-in [animation-delay:0.08s] flex-1 flex flex-col gap-4">
             <PremiumPanel>
-              <div className="p-4 min-h-[420px]">
+              <div className="p-3 sm:p-4 min-h-[420px]">
                 <HeatmapViews rows={rows} logos={brvmLogos as Record<string, string>} />
               </div>
             </PremiumPanel>

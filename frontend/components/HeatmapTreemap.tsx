@@ -4,7 +4,12 @@ import { useRouter } from 'next/navigation';
 import EChart from '@/components/EChart';
 import { groupBySector, colorForVariation, nodeWeight } from '@/lib/heatmap';
 import type { HeatmapNode } from '@/lib/heatmap';
-import { fmtFcfa, fmtNumber } from '@/lib/format';
+import { fmtFcfa, fmtNumber, fmtPctSigne } from '@/lib/format';
+
+/** « SNTS : +1,95 % » — libellé accessible d'une tuile (format français). */
+export function libelleTuile(code: string, pct: number | null): string {
+  return `${code} : ${pct == null ? 'variation indisponible' : fmtPctSigne(pct)}`;
+}
 
 /** Filtre couleur : toutes, hausses (vert) ou baisses (rouge) uniquement. */
 export type ColorFilter = 'all' | 'up' | 'down';
@@ -44,8 +49,8 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
   if (!data.length) {
     return (
       <div
-        className="flex items-center justify-center text-sm rounded-lg"
-        style={{ height, color: '#8b93a7', background: '#161922' }}
+        className="flex items-center justify-center text-sm rounded-lg bg-elevated text-muted"
+        style={{ height }}
       >
         Pas de séance disponible
       </div>
@@ -55,8 +60,8 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
   if (!filtered.length) {
     return (
       <div
-        className="flex items-center justify-center text-sm rounded-lg"
-        style={{ height, color: '#8b93a7', background: '#161922' }}
+        className="flex items-center justify-center text-sm rounded-lg bg-elevated text-muted"
+        style={{ height }}
       >
         {colorFilter === 'up' ? 'Aucune hausse sur cette séance.' : 'Aucune baisse sur cette séance.'}
       </div>
@@ -71,8 +76,10 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
   // ≈ √(surface) donne une taille de logo cohérente avec la tuile — et l'on
   // masque le logo sur les tuiles trop petites (sinon il déborde et paraît
   // « cassé »).
+  // Surface utile ≈ 85 % du conteneur : bandeaux de secteur (22 px) et
+  // espacements entre tuiles mangent le reste.
   const estW = height * aspect;
-  const estH = height;
+  const estH = height * 0.85;
   const grandTotal = sectors.reduce(
     (sum, s) => sum + s.children.reduce((c, n) => c + Math.max(nodeWeight(n), 1), 0),
     0,
@@ -96,9 +103,16 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
       // Côté estimé de la tuile (px) → taille de logo et de police proportionnelles.
       const weight = Math.max(nodeWeight(node), 1);
       const side = grandTotal > 0 ? Math.sqrt((weight / grandTotal) * estW * estH) : 0;
-      const logoPx = Math.round(Math.min(72, side * 0.42));
       const codeFont = Math.round(Math.min(22, Math.max(11, side * 0.13)));
       const varFont = Math.max(9, codeFont - 3);
+      // PRIORITÉ AU TEXTE : code + variation d'abord, le logo seulement avec la
+      // place restante. ECharts tronque un libellé trop haut PAR LE BAS : un
+      // logo placé au-dessus faisait disparaître la variation (SIBC, ECOC,
+      // BOAC n'affichaient que leur logo). On raisonne sur le côté COURT
+      // probable d'une tuile « squarifiée » (ratio jusqu'à ~2:1 → côté / √2).
+      const textH = codeFont + 4 + (varFont + 4);
+      const coteCourt = side / Math.SQRT2;
+      const logoPx = Math.round(Math.min(72, side * 0.42, coteCourt - textH - 14));
 
       // Rich label : logo (si la tuile est assez grande) au-dessus du code + variation.
       // Le rich doit être porté par CHAQUE nœud — sinon ECharts affiche le markup brut.
@@ -164,8 +178,20 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
     ].join('');
   };
 
+  // Accessibilité : le treemap est un canvas, ses tuiles ne sont pas des
+  // éléments du DOM. ECharts pose cette description en aria-label du
+  // conteneur : chaque valeur y figure sous la forme « CODE : +x,xx % ».
+  const description =
+    `Cartographie de ${filtered.length} valeur${filtered.length > 1 ? 's' : ''}, ` +
+    `taille selon la capitalisation, couleur selon la variation du jour. ` +
+    sectors
+      .map((sec) => `${sec.name} — ${sec.children.map((n) => libelleTuile(n.code, n.variation_pct)).join(' ; ')}`)
+      .join('. ') +
+    '.';
+
   const option = {
     backgroundColor: 'transparent',
+    aria: { enabled: true, label: { enabled: true, description } },
     tooltip: {
       backgroundColor: '#161922',
       borderColor: '#232733',

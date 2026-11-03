@@ -35,6 +35,10 @@ import BlocAgenda from '@/components/dashboard/blocs/BlocAgenda';
 import BlocPublications from '@/components/dashboard/blocs/BlocPublications';
 import BlocLiquidite from '@/components/dashboard/blocs/BlocLiquidite';
 import BlocPortefeuille from '@/components/dashboard/blocs/BlocPortefeuille';
+import BlocMarcheDuJour from '@/components/dashboard/blocs/BlocMarcheDuJour';
+import { chargerMarcheDuJour } from '@/lib/marche/chargement';
+import { largeurSeance } from '@/lib/marche/marcheDuJour';
+import { Fragment } from 'react';
 import { PremiumLock } from '@/components/dashboard/PremiumLock';
 import { MacroBanner } from '@/components/MacroBanner';
 import { fmtDateFR, fmtNumber } from '@/lib/format';
@@ -305,7 +309,7 @@ export default async function Dashboard() {
   const besoinPortefeuille = veut('portefeuille') || veut('agenda') || veut('publications') || veut('liquidite');
   const finAgenda = plusJours(aujourdhui, HORIZON_JOURS);
   const depuisPublications = plusJours(aujourdhui, -7);
-  const [resultatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs] = await Promise.all([
+  const [resultatPortefeuille, dividendes, fermetures, publicationsBrutes, liquidite, trajectoires, compteSignaux, actualites, afrique, compteMotifs, marcheDuJour] = await Promise.all([
     user && besoinPortefeuille
       ? chargerPortefeuille(supa, user.id, aujourdhui)
       : Promise.resolve<{ etat: PortfolioState; depuis: string } | null | undefined>(undefined),
@@ -318,6 +322,8 @@ export default async function Dashboard() {
     veut('actus') ? chargerActualites(supa, aujourdhui) : Promise.resolve(null),
     veut('actus') ? chargerAfrique(supa) : Promise.resolve(null),
     veut('actus') ? chargerCompteMotifs(supa, lastDate) : Promise.resolve(null),
+    // « Le marché aujourd'hui » : hors layout, toujours affiché (voir le rendu).
+    chargerMarcheDuJour(supa, { dateMarche: lastDate, lignes: actions }),
   ]);
   // `undefined` = visiteur, `null` = lecture en erreur.
   const etatPortefeuille: PortfolioState | null | undefined = resultatPortefeuille ? resultatPortefeuille.etat : resultatPortefeuille;
@@ -543,15 +549,37 @@ export default async function Dashboard() {
 
         <MacroBanner />
 
-        {/* ── Widgets configurables, par rangées (spec §4.0) ── */}
+        {/* ── Widgets configurables, par rangées (spec §4.0) ──
+            « Le marché aujourd'hui » n'est pas un widget du layout : il est posé
+            juste APRÈS la première rangée, quelle qu'elle soit. L'ordre adaptatif
+            reste intact (un actif voit d'abord son portefeuille, un débutant le
+            récit de séance), et la porte vers Secteurs / Heatmap / Obligations
+            tombe dans le premier écran pour les deux profils. */}
         <div className="border-t border-border">
-          {grouperEnRangees(layout.filter((k) => sections[k] != null)).map((r) => (
-            <div key={r.cles.join('-')} className={classeRangee(r)}>
-              {r.cles.map((k) => (
-                <div key={k} className={classeCellule(r.largeur, r.cles.length === 1)}>{sections[k]}</div>
-              ))}
-            </div>
-          ))}
+          {(() => {
+            const rangees = grouperEnRangees(layout.filter((k) => sections[k] != null));
+            const blocMarche = (
+              <div className="border-b border-border">
+                <BlocMarcheDuJour
+                  dateMarche={lastDate}
+                  secteurs={marcheDuJour.secteurs}
+                  largeur={largeurSeance(metriques)}
+                  obligations={marcheDuJour.obligations}
+                />
+              </div>
+            );
+            if (rangees.length === 0) return blocMarche;
+            return rangees.map((r, i) => (
+              <Fragment key={r.cles.join('-')}>
+                <div className={classeRangee(r)}>
+                  {r.cles.map((k) => (
+                    <div key={k} className={classeCellule(r.largeur, r.cles.length === 1)}>{sections[k]}</div>
+                  ))}
+                </div>
+                {i === 0 && blocMarche}
+              </Fragment>
+            ));
+          })()}
         </div>
 
         {/* ── Pied de page premium ───────────────────────────────────────── */}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { colorForVariation, groupBySector } from '@/lib/heatmap';
+import { fmtPctSigne } from '@/lib/format';
 
 /** Couleur stable dérivée du code (fallback monogramme quand pas de logo). */
 const MONO_COLORS = [
@@ -20,6 +21,11 @@ function fmtPct(pct: number | null): string {
   if (pct == null) return '—';
   const s = pct > 0 ? '+' : '';
   return `${s}${pct.toFixed(2)}%`;
+}
+
+/** « SNTS : +1,95 % » — libellé accessible d'une tuile (format français). */
+function libelleTuile(code: string, pct: number | null): string {
+  return `${code} : ${pct == null ? 'variation indisponible' : fmtPctSigne(pct)}`;
 }
 
 /** Texte lisible (blanc) ou sombre selon la luminance du fond. */
@@ -43,35 +49,41 @@ function Tile({ node, logoUrl }: LogoTileProps) {
   const initials = node.code.slice(0, 2);
   const [imgError, setImgError] = useState(false);
   const showLogo = logoUrl && !imgError;
+  const libelle = libelleTuile(node.code, node.variation_pct);
 
   return (
     <Link
       href={`/actions/${node.code}`}
-      className="relative flex flex-col items-center justify-center rounded-lg p-2 aspect-square transition-transform hover:scale-[1.04] hover:z-10"
+      className="relative flex min-w-0 flex-col items-center justify-center overflow-hidden rounded-lg p-1.5 sm:p-2 aspect-square transition-transform hover:scale-[1.04] hover:z-10"
       style={{ background: bg, color: fg }}
-      title={`${node.designation ?? node.code} — ${fmtPct(node.variation_pct)}`}
+      title={node.designation ? `${libelle} — ${node.designation}` : libelle}
+      aria-label={libelle}
     >
       {showLogo ? (
+        // Logo réduit sur mobile : la tuile (≈ 70 px en 4 colonnes) doit
+        // d'abord porter le code et la variation.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={logoUrl}
-          alt={node.code}
+          alt=""
+          aria-hidden
           width={40}
           height={40}
-          className="rounded-md object-contain"
-          style={{ width: 40, height: 40, background: '#fff', padding: 2 }}
+          className="h-7 w-7 shrink-0 rounded-md object-contain sm:h-10 sm:w-10"
+          style={{ background: '#fff', padding: 2 }}
           onError={() => setImgError(true)}
         />
       ) : (
         <div
-          className="flex items-center justify-center rounded-md text-[11px] font-bold"
-          style={{ width: 40, height: 40, background: monoColor(node.code), color: '#fff' }}
+          aria-hidden
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[10px] font-bold sm:h-10 sm:w-10 sm:text-[11px]"
+          style={{ background: monoColor(node.code), color: '#fff' }}
         >
           {initials}
         </div>
       )}
-      <span className="mt-1.5 text-[11px] font-semibold leading-none tabular">{node.code}</span>
-      <span className="mt-0.5 text-[10px] font-medium leading-none tabular opacity-90">
+      <span className="mt-1 sm:mt-1.5 max-w-full truncate text-[11px] font-semibold leading-none tabular">{node.code}</span>
+      <span className="mt-0.5 max-w-full truncate text-[10px] font-medium leading-none tabular opacity-90">
         {fmtPct(node.variation_pct)}
       </span>
     </Link>
