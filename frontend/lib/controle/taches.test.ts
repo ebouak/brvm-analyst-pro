@@ -141,12 +141,22 @@ describe('evaluerTaches — workflows planifiés', () => {
     expect(parId(s, 'taches:alerts.yml')?.detail).toContain('aurait dû tourner');
   });
 
-  it('cron toutes les 15 min arrêté depuis 50 min : détecté', () => {
+  it('cron toutes les 15 min arrêté depuis 4 h : détecté', () => {
     const s = evaluerTaches(
-      donnees([wf({ fichier: 'intraday.yml', crons: ['*/15 * * * *'], dernier_debut: il(50 * 60_000) })]),
+      donnees([wf({ fichier: 'intraday.yml', crons: ['*/15 * * * *'], dernier_debut: il(4 * H) })]),
       MAINTENANT,
     );
     expect(parId(s, 'taches:intraday.yml')?.niveau).toBe('attention');
+  });
+
+  it('horaire : un passage sauté par GitHub (dernier run il y a 2 h 30) n’est pas encore un retard', () => {
+    // Constaté le 2026-11-03 sur bienvenue.yml et forum-trending.yml : GitHub
+    // saute des passages horaires sous charge ; 2 h de marge faisait du bruit.
+    const s = evaluerTaches(
+      donnees([wf({ fichier: 'forum.yml', crons: ['5 * * * *'], dernier_debut: il(2.5 * H) })]),
+      MAINTENANT,
+    );
+    expect(parId(s, 'taches:forum.yml')).toBeUndefined();
   });
 
   it('échec au démarrage (YAML cassé) : vu comme un échec, pas comme un workflow sain', () => {

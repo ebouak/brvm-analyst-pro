@@ -62,6 +62,12 @@ const COLLECTE_MAX_MS = 2 * H;
  * intervalles pour les crons fréquents (*\/15 → 30 min, horaire → 2 h).
  */
 const MARGE_RETARD_MAX_MS = 8 * H;
+/**
+ * Plancher de la marge : GitHub saute aussi des passages HORAIRES sous charge
+ * (bienvenue.yml, forum-trending.yml le 2026-11-03). L'intraday, lui, reste
+ * surveillé à 45 min par le domaine « données ».
+ */
+const MARGE_RETARD_MIN_MS = 3 * H;
 const EN_COURS_MAX_MS = 2 * H;
 const ECHEC_MANUEL_RECENT_MS = 7 * J;
 const STATUTS_EN_COURS = new Set(['in_progress', 'queued', 'waiting', 'pending', 'requested']);
@@ -140,7 +146,7 @@ function constatsPlanifie(w: LigneWorkflow, maintenant: Date): Constat[] {
     // Le dernier passage planifié assez ancien pour que GitHub ait dû le lancer.
     // Comparer au prochain écart MAXIMAL (72 h pour un cron lun-ven) laissait
     // une panne du mardi invisible jusqu'au mardi suivant.
-    const marge = Math.min(MARGE_RETARD_MAX_MS, 2 * intervalle);
+    const marge = Math.min(MARGE_RETARD_MAX_MS, Math.max(MARGE_RETARD_MIN_MS, 2 * intervalle));
     const du = dernierDeclenchementAvant(w.crons, new Date(maintenant.getTime() - marge));
     if (du && new Date(w.dernier_debut!).getTime() < du.getTime()) {
       constats.push({
