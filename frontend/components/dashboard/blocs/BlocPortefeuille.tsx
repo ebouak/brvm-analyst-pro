@@ -5,7 +5,7 @@ import type { PortfolioState } from '@/lib/portfolio/derive';
 import type { ResultatPerfJour } from '@/lib/dashboard/performanceJour';
 import { contributions, syntheseValorisee, secteursValorises, echantillonner } from '@/lib/dashboard/portefeuilleBloc';
 import { CadreBloc, EtatVide, Indisponible } from './Cadre';
-import CourbeValeur from './CourbeValeur';
+import CourbeValeur from './CourbeValeurLazy';
 import AnneauRepartition from './AnneauRepartition';
 
 const sens = (v: number | null | undefined) => (v == null ? 'text-ivory' : v > 0 ? 'text-up' : v < 0 ? 'text-down' : 'text-ivory');
