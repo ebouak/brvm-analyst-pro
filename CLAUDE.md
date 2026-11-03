@@ -1282,6 +1282,33 @@ relecture adverse en deux passes à la place.
   semaine de `simulation` relue. Les étapes simulées des 30 derniers jours
   partiront alors (plafonnées par passage et par jour).
 
+### Ajouts (passage 2026-11-03) — Qualité & Tests (suivi Playwright, lecture seule)
+
+Spec `docs/superpowers/specs/2026-11-03-qualite-tests-design.md`, PR #145.
+Migration `0186` **appliquée** (RLS sans policy, clé publique → 401 sur les 4
+tables et la fonction). 1332 tests frontend verts.
+
+- `/admin/qualite` (permission `qa.read`, super_admin + data_admin) : dernière
+  exécution, version testée vs `VERCEL_GIT_COMMIT_SHA`, compteurs, historique
+  filtrable, détail scénario/tentatives, pièces jointes par URL signée 5 min
+  (`/api/admin/qa/artefacts/[id]`, qa.read + 2FA). **V1 sans déclenchement**.
+- **La CI n'a PAS la clé service_role** : `e2e.yml` (03:00 UTC + manuel)
+  publie via `/api/qa/ingest/{debut,fin,artefacts/confirmer}` avec
+  `QA_INGEST_SECRET` (Vercel prod + secret GitHub, variable `QA_INGEST_URL`).
+  Publication en `if: always()`, job remis au rouge si les tests échouent.
+- **Une panne n'est jamais un succès** (`lib/qa/normaliser.ts`, `verdict.ts`) :
+  build cassé / rapport absent / erreur hors scénario / navigateur introuvable
+  = `erreur_infra` ; runner tué = « incomplet » après 3 h (dérivé, pas de cron) ;
+  zéro test exécuté = « aucun test exécuté ».
+- Erreurs nettoyées avant stockage (`lib/qa/nettoyer.ts`) ; stdout/stderr retirés
+  dès la CI. Bucket privé `qa-artefacts`, pièces jointes 30 j, exécutions 180 j.
+  ⚠️ Ne JAMAIS publier traces/rapports comme artefacts GitHub : dépôt public.
+- **Scénarios Premium du screener IGNORÉS en CI** (choix de l'exploitant,
+  option b) : la connexion passe par un code e-mail derrière Turnstile, aucun
+  compte de test ne peut se connecter seul. Ils se lancent en local avec
+  `PW_PREMIUM_STATE=<storageState.json>`. Une route de session de test serait
+  une nouvelle porte d'entrée en production : à concevoir à part.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
