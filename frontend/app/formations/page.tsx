@@ -70,7 +70,7 @@ export default async function FormationsPage() {
           </h2>
           <p className="mt-1 max-w-xl text-sm text-muted leading-relaxed">
             Quatre heures en petit groupe, en ligne ou en présentiel, sur des cas réels de la BRVM.
-            L&apos;Academy reste gratuite et sert de préparation.
+            L&apos;Academy, incluse dans l&apos;abonnement Premium, sert de préparation&nbsp;; la leçon&nbsp;0 reste offerte à tous.
           </p>
           <span className="mt-3 inline-block text-[11px] font-semibold text-accent group-hover:underline">
             Voir les sessions →
