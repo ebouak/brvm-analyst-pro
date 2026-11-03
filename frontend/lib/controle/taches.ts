@@ -46,6 +46,8 @@ export interface DonneesTaches {
     partiels: number;
     /** Runs restés `running` plus de 2 h, SANS borne de 24 h : un job tué ne se termine jamais. */
     bloques: { total: number; plusAncien: string | null };
+    /** Commandes non entièrement réussies sur 24 h : quoi réparer. */
+    commandes: { code: string; echecs: number; partiels: number }[];
   };
 }
 
@@ -72,7 +74,16 @@ const EN_COURS_MAX_MS = 2 * H;
 const ECHEC_MANUEL_RECENT_MS = 7 * J;
 const STATUTS_EN_COURS = new Set(['in_progress', 'queued', 'waiting', 'pending', 'requested']);
 
-const RANG: Record<Niveau, number> = { alerte: 0, inconnu: 1, attention: 2, ok: 3 };
+const RANG: Record<Niveau, number> = { alerte: 0, inconnu: 1, attention: 2, ok: 3, na: 4 };
+const JOURS_COURTS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+const MOIS_COURTS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+/** « mar. 3 nov. 16:30 UTC » : l'horaire PRÉVU d'un passage, sans ambiguïté de fuseau. */
+function horaire(d: Date): string {
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const mm = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${JOURS_COURTS[d.getUTCDay()]} ${d.getUTCDate()} ${MOIS_COURTS[d.getUTCMonth()]} ${hh}:${mm} UTC`;
+}
+const DEPOT = 'https://github.com/ebouak/brvm-analyst-pro';
 const pire = (a: Niveau, b: Niveau): Niveau => (RANG[a] <= RANG[b] ? a : b);
 
 /** « il y a 5 min », « il y a 3 h », « il y a 2 j ». */
@@ -141,7 +152,12 @@ function constatsPlanifie(w: LigneWorkflow, maintenant: Date): Constat[] {
   if (intervalle === null) {
     constats.push({ niveau: 'inconnu', texte: `Planification illisible (${w.crons.join(' ; ')}) : le retard ne peut pas être évalué.` });
   } else if (age === null) {
-    constats.push({ niveau: 'attention', texte: 'Planifié, mais aucun run connu.' });
+    // « Aucun run connu » ne prouve pas qu'un passage a été manqué : le
+    // workflow peut être neuf (eval-signaux.yml, créé avant son premier samedi).
+    constats.push({
+      niveau: 'inconnu',
+      texte: 'À qualifier — workflow planifié, aucune exécution retrouvée. Vérifier sa date d’activation et son premier passage attendu.',
+    });
   } else {
     // Le dernier passage planifié assez ancien pour que GitHub ait dû le lancer.
     // Comparer au prochain écart MAXIMAL (72 h pour un cron lun-ven) laissait
@@ -149,9 +165,10 @@ function constatsPlanifie(w: LigneWorkflow, maintenant: Date): Constat[] {
     const marge = Math.min(MARGE_RETARD_MAX_MS, Math.max(MARGE_RETARD_MIN_MS, 2 * intervalle));
     const du = dernierDeclenchementAvant(w.crons, new Date(maintenant.getTime() - marge));
     if (du && new Date(w.dernier_debut!).getTime() < du.getTime()) {
+      // On dit ce que l'on SAIT : aucune exécution observée, pas « n'a pas eu lieu ».
       constats.push({
         niveau: 'attention',
-        texte: `Dernier run ${relatif(w.dernier_debut!, maintenant)} : le passage planifié ${relatif(du.toISOString(), maintenant)} n’a pas eu lieu (aurait dû tourner).`,
+        texte: `Aucune exécution observée pour le passage prévu ${horaire(du)}, après une tolérance de ${duree(marge)} ; dernière exécution observée ${relatif(w.dernier_debut!, maintenant)}.`,
       });
     }
   }
@@ -167,6 +184,16 @@ function signalWorkflow(w: LigneWorkflow, niveau: Niveau, detail: string): Signa
     detail,
     dernierSucces: w.dernier_succes_at,
     lien: w.dernier_url,
+    // Tentative et succès sont deux faits distincts : on les nomme tous deux.
+    reperes: [
+      ...(w.dernier_debut ? [{ libelle: 'Dernière exécution', date: w.dernier_debut, nature: 'instant' as const }] : []),
+      ...(w.dernier_succes_at ? [{ libelle: 'Dernière exécution réussie', date: w.dernier_succes_at, nature: 'instant' as const }] : []),
+    ],
+    // Liens seulement : relancer se décide sur GitHub, après lecture du journal.
+    actions: [
+      ...(w.dernier_url ? [{ libelle: 'Journal du dernier run', href: w.dernier_url }] : []),
+      ...(w.fichier.endsWith('.yml') ? [{ libelle: 'Historique / relancer sur GitHub', href: `${DEPOT}/actions/workflows/${w.fichier}` }] : []),
+    ],
   };
 }
 
@@ -231,19 +258,25 @@ function evaluerWorkflows(workflows: LigneWorkflow[], maintenant: Date): Signal[
 
 function evaluerScraper(r: DonneesTaches['scraperRuns24h'], maintenant: Date): Signal {
   const base = { id: 'taches:scraper', domaine: 'taches' as const, titre: 'Commandes du scraper', lien: '/admin/scraping', dernierSucces: null };
+  const actions = [{ libelle: 'Voir les exécutions et incidents', href: '/admin/scraping' }];
   if (r.total === 0) {
-    return { ...base, niveau: 'attention', detail: 'Aucune exécution terminée enregistrée en 24 h : rien ne prouve que le scraper tourne.' };
+    return { ...base, niveau: 'attention', detail: 'Aucune exécution terminée enregistrée en 24 h : rien ne prouve que le scraper tourne.', actions };
   }
   const taux = r.echecs / r.total;
   const pct = (taux * 100).toFixed(1).replace('.', ',');
   let niveau: Niveau = r.echecs >= 3 || taux >= 0.25 ? 'alerte' : r.echecs >= 1 ? 'attention' : 'ok';
+  // Convention de comptage, écrite : « échec » = statut failed ; « partielle »
+  // = statut partial ; les deux sont DISJOINTS et tous deux dans le total.
+  const nonReussies = r.echecs + r.partiels;
   let detail =
-    r.echecs === 0
-      ? `${pluriel(r.total, 'exécution')} en 24 h, aucun échec.`
-      : `${pluriel(r.echecs, 'échec')} sur ${r.total} exécutions en 24 h (${pct} %)${r.dernierEchec ? `, dernier ${relatif(r.dernierEchec, maintenant)}` : ''}.`;
-  if (r.partiels > 0) {
-    niveau = pire(niveau, 'attention');
-    detail += ` Dont ${r.partiels} ${r.partiels > 1 ? 'partielles' : 'partielle'} (travail incomplet).`;
+    nonReussies === 0
+      ? `${pluriel(r.total, 'exécution')} en 24 h, toutes réussies.`
+      : `${nonReussies} ${nonReussies > 1 ? 'exécutions' : 'exécution'} non entièrement réussie${nonReussies > 1 ? 's' : ''} sur ${r.total} en 24 h : ${pluriel(r.echecs, 'échec')} (${pct} %) et ${r.partiels} partielle${r.partiels > 1 ? 's' : ''}${r.dernierEchec ? ` ; dernier échec ${relatif(r.dernierEchec, maintenant)}` : ''}.`;
+  if (r.partiels > 0) niveau = pire(niveau, 'attention');
+  if (r.commandes.length > 0) {
+    detail += ` Commandes concernées : ${r.commandes
+      .map((c) => `${c.code} (${[c.echecs ? pluriel(c.echecs, 'échec') : '', c.partiels ? `${c.partiels} partielle${c.partiels > 1 ? 's' : ''}` : ''].filter(Boolean).join(', ')})`)
+      .join(' ; ')}.`;
   }
   if (r.bloques.total > 0) {
     niveau = pire(niveau, 'attention');
@@ -251,7 +284,7 @@ function evaluerScraper(r: DonneesTaches['scraperRuns24h'], maintenant: Date): S
       r.bloques.plusAncien ? ` (la plus ancienne ${relatif(r.bloques.plusAncien, maintenant)})` : ''
     } : job tué sans avoir pu se clore.`;
   }
-  return { ...base, niveau, detail };
+  return { ...base, niveau, detail, actions };
 }
 
 export function evaluerTaches(d: DonneesTaches, maintenant: Date): Signal[] {

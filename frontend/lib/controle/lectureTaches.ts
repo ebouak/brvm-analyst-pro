@@ -77,6 +77,26 @@ export async function chargerTaches(maintenant: Date = new Date()): Promise<Donn
     throw new Error('scraper_runs : comptage indisponible');
   }
 
+  // Quelles commandes reprendre : les exécutions non réussies des 24 h, avec le
+  // code de leur source. Borné à 500 (le comptage exact ci-dessus fait foi).
+  const nonReussis = await db
+    .from('scraper_runs')
+    .select('status, scraper_sources(code)')
+    .gte('started_at', depuis)
+    .in('status', ['failed', 'partial'])
+    .limit(500);
+  if (nonReussis.error) throw new Error(`scraper_runs illisible (commandes) : ${nonReussis.error.message}`);
+  const parCommande = new Map<string, { code: string; echecs: number; partiels: number }>();
+  for (const r of (nonReussis.data ?? []) as unknown as Array<{ status: string; scraper_sources: { code: string } | null }>) {
+    const code = r.scraper_sources?.code ?? 'inconnue';
+    if (code === 'ops-workflows') continue;
+    const c = parCommande.get(code) ?? { code, echecs: 0, partiels: 0 };
+    if (r.status === 'failed') c.echecs++;
+    else c.partiels++;
+    parCommande.set(code, c);
+  }
+  const commandes = [...parCommande.values()].sort((a, b) => b.echecs + b.partiels - (a.echecs + a.partiels));
+
   const workflows = (wf.data ?? []).map((r) => versLigne(r as Record<string, unknown>));
   const collecteAt = workflows.reduce<string | null>((max, w) => {
     if (!w.collecte_at) return max;
@@ -92,6 +112,7 @@ export async function chargerTaches(maintenant: Date = new Date()): Promise<Donn
       dernierEchec: (dernier.data?.[0]?.started_at as string | undefined) ?? null,
       partiels: partiels.count,
       bloques: { total: bloques.count, plusAncien: (plusAncienBloque.data?.[0]?.started_at as string | undefined) ?? null },
+      commandes,
     },
   };
 }
