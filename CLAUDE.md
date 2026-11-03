@@ -1315,6 +1315,35 @@ tables et la fonction). 1332 tests frontend verts.
   garde-fou de sécurité de Claude Code puis écartée par l'exploitant : ne pas la
   recréer sans décision explicite.
 
+### Ajouts (passage 2026-11-03) — Tour de contrôle et e-mails d'alerte réparés
+
+PR #146. Migration `0187_ops_workflows.sql` **appliquée** (RLS sans policy,
+clé publique → 401). Frontend 1491 tests, scraper 851.
+
+- **`/admin/controle`** (`scraping.read`) : envois, tâches, fraîcheur des
+  données sur UNE page, jugés sur la DONNÉE produite. Source illisible =
+  « inconnu », jamais « ok ». Modules purs `frontend/lib/controle/` (contrat
+  `types.ts`), chargeurs `lecture*.ts` qui LÈVENT.
+- **Collecte des workflows** : `ops-controle.yml` (horaire :17, `GITHUB_TOKEN`
+  natif en lecture, branche par défaut, PR exclues) → `ops_workflows`. Couvre
+  les 44 workflows, y compris ceux absents de `scraper_runs` (alerts, vidéo,
+  dossiers…) et les désactivations GitHub à 60 j.
+- Règles clés : échec décidé sur `echecs_consecutifs` (pas sur le dernier run) ;
+  retard mesuré au DERNIER passage planifié, marge 8 h (GitHub a retardé
+  alerts.yml/video-seance.yml de ~7 h) ; clôture prouvée par la commande
+  `daily`, pas par la ligne que l'intraday écrit à 15:55 ; runs bloqués
+  « running » et partiels comptés.
+- **DÉFAUT RÉEL CORRIGÉ** : les alertes de COURS ne partaient JAMAIS par e-mail
+  (`runAlerts` → `dispatch({ to: null })`), alors que /parametres/alertes le
+  promettait. Elles partent désormais à l'adresse du compte qui a coché
+  `alerts_email` (même chemin que les thèses) ; adresse introuvable = échec
+  journalisé. Le repli de `sendEmail` vers `ALERTS_EMAIL_TO` est réservé à
+  `operateur: true` (comme Telegram depuis 0129) : ⚠️ tout nouveau message
+  d'exploitation par e-mail doit poser `operateur: true`.
+- Premier passage réel (2026-11-03) : `interim.yml` 5 échecs consécutifs,
+  `commodity-weekly.yml` 2, `eval-signaux.yml` jamais lancé, 2 runs `events`
+  bloqués « running » depuis le 2026-08-06 et le 2026-10-26.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
