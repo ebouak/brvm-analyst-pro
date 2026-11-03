@@ -436,6 +436,33 @@ async function main(): Promise<number> {
       logger.info({ alertes: r.alertes.length }, 'sante:reseaux');
       return 0;
     }
+    case 'ops:workflows': {
+      // Tour de contrôle : photo de TOUS les workflows GitHub Actions (état,
+      // dernier run, échecs consécutifs, crons) → ops_workflows. Couvre les
+      // workflows non instrumentés et la désactivation par GitHub après 60 j.
+      // Une erreur d'API ou d'upsert lève : le run passe rouge.
+      const { runOpsWorkflows } = await import('./ops/runOpsWorkflows.js');
+      await monitored(
+        { code: 'ops-workflows', label: 'Collecte des workflows GitHub' },
+        async () => {
+          const r = await runOpsWorkflows();
+          return {
+            value: r,
+            outcome: {
+              status: 'success' as const,
+              rows_extracted: r.lignes.length,
+              rows_upserted: r.ecrits,
+              metadata: {
+                dry_run: r.dryRun,
+                non_actifs: r.lignes.filter((l) => l.etat !== 'active').map((l) => l.fichier),
+                en_echec: r.lignes.filter((l) => l.echecs_consecutifs > 0).map((l) => l.fichier),
+              },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'sante:llm': {
       // Sonde réelle des trois fournisseurs LLM (DeepSeek/Mistral/xAI) : une
       // clé valide ne suffit pas, un modèle de repli retiré casse tout sans

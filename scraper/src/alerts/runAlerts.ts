@@ -12,7 +12,7 @@ import { getSupabase } from '../persistence/supabase.js';
 import { getConfig } from '../config.js';
 import { logger } from '../logger.js';
 import { isTriggered, isSmartTriggered, isSmartType, type AlertType, type SmartContext } from './evaluate.js';
-import { dispatch, sendWhatsAppTemplate, sendWhatsAppRaw } from './channels.js';
+import { dispatch, sendWhatsAppTemplate, sendWhatsAppRaw, type SendResult } from './channels.js';
 import { envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
 
@@ -111,13 +111,17 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
     // Chaque WhatsApp lié au compte (0165, au plus 2) reçoit l'alerte.
     const waChatByUser = new Map<string, string[]>();
     const eligiblesWa: string[] = [];
+    // E-mail : comptes qui ont coché « alertes par e-mail » (alerts_email). Avant
+    // le 2026-11-03, dispatch recevait `to: null` et AUCUNE alerte de cours
+    // n'est jamais partie par e-mail, alors que /parametres/alertes l'annonçait.
+    const emailOptin = new Set<string>();
     const passerelle = wahaConfiguree();
     if (userIds.length > 0) {
       const [{ data: prefs }, { data: profils }] = await Promise.all([
         sb
           .from('notification_prefs')
           .select(
-            'user_id, whatsapp_phone, whatsapp_chat_id, whatsapp_optin, alerts_whatsapp, telegram_chat_id, telegram_optin, alerts_telegram',
+            'user_id, whatsapp_phone, whatsapp_chat_id, whatsapp_optin, alerts_whatsapp, telegram_chat_id, telegram_optin, alerts_telegram, alerts_email',
           )
           .in('user_id', userIds),
         sb.from('profiles').select('id, is_premium').in('id', userIds),
@@ -134,6 +138,7 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
         telegram_chat_id: number | null;
         telegram_optin: boolean | null;
         alerts_telegram: boolean | null;
+        alerts_email: boolean | null;
       };
       for (const p of (prefs ?? []) as PrefRow[]) {
         // Les deux opt-in sont désormais filtrés ICI et non dans la requête :
@@ -151,9 +156,29 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
         if (p.telegram_optin && p.alerts_telegram && p.telegram_chat_id != null) {
           tgByUser.set(p.user_id, p.telegram_chat_id);
         }
+        if (p.alerts_email) emailOptin.add(p.user_id);
       }
       for (const [u, chats] of await chatsParUtilisateur(sb, eligiblesWa)) waChatByUser.set(u, chats);
     }
+
+    // Une lecture d'adresse par compte et par passage (un compte peut avoir
+    // plusieurs alertes déclenchées le même jour).
+    const adresses = new Map<string, { email: string | null; erreur: string }>();
+    const adresseDe = async (userId: string) => {
+      const connue = adresses.get(userId);
+      if (connue) return connue;
+      let r: { email: string | null; erreur: string };
+      try {
+        const { data, error } = await sb.auth.admin.getUserById(userId);
+        r = error
+          ? { email: null, erreur: `adresse illisible : ${error.message}` }
+          : { email: data?.user?.email ?? null, erreur: 'compte sans adresse e-mail' };
+      } catch (err) {
+        r = { email: null, erreur: `adresse illisible : ${err instanceof Error ? err.message : String(err)}` };
+      }
+      adresses.set(userId, r);
+      return r;
+    };
 
     let triggered = 0;
     for (const a of rows) {
@@ -176,15 +201,26 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
         logger.info({ code: a.code, type: a.type, body }, 'DRY_RUN — alerte composée, non envoyée');
         continue;
       }
+      // Adresse du PROPRIÉTAIRE, lue au compte (même chemin que les thèses) et
+      // seulement s'il a consenti. Introuvable → échec JOURNALISÉ, jamais un
+      // silence : c'est le silence qui avait caché la panne.
+      let to: string | null = null;
+      let echecAdresse: SendResult | null = null;
+      if (emailOptin.has(a.user_id)) {
+        const r = await adresseDe(a.user_id);
+        if (r.email) to = r.email;
+        else echecAdresse = { channel: 'email', status: 'failed', error: r.erreur };
+      }
       const results = await dispatch({
         subject,
         body,
         code: a.code,
-        to: null,
+        to,
         // Destinataire Telegram du PROPRIÉTAIRE de l'alerte. Absent = aucun
         // envoi Telegram — voir sendTelegram dans channels.ts.
         telegramChatId: tgByUser.get(a.user_id) ?? null,
       });
+      if (echecAdresse) results.push(echecAdresse);
 
       // Canal WhatsApp PERSONNEL du propriétaire (opt-in) — en plus des canaux
       // globaux. Template Meta d'abord (hors fenêtre 24 h), repli texte.

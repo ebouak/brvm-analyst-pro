@@ -168,6 +168,8 @@ export async function runHebdo(opts: { mock?: boolean } = {}): Promise<HebdoRunR
     body: `L'analyse hebdomadaire du ${dateEdition} est en ligne : ${lien}\nValeurs : ${picks.map((p) => p.code).join(', ')}\nRévisez ou dépubliez depuis /admin/hebdo si nécessaire.`,
     code: null,
     to: null,
+    // Message d'exploitation : autorise le repli vers ALERTS_EMAIL_TO.
+    operateur: true,
   });
   for (const e of envois) {
     if (e.status === 'sent') logger.info({ canal: e.channel }, 'hebdo : notification envoyée');

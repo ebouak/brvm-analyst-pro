@@ -1,0 +1,50 @@
+name: Tour de contrôle — workflows
+
+# Pourquoi : seules les commandes du scraper enveloppées dans `monitored`
+# écrivent dans scraper_runs. alerts.yml, video-seance.yml, dossier.yml,
+# crm-sequences.yml, paper-trading-auto.yml, commodity-weekly.yml… n'y
+# apparaissent pas. Et GitHub DÉSACTIVE en silence les workflows planifiés
+# d'un dépôt public après 60 jours sans activité : un cron coupé ne produit
+# aucun run, donc aucun échec visible.
+#
+# Ce job ne fait QUE lire GitHub (jeton natif, lecture des Actions, aucun
+# jeton personnel) et écrire la table ops_workflows (une ligne par workflow).
+# Il échoue bruyamment si l'API GitHub ou l'upsert échoue.
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: ops-controle
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  ops-workflows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Collecter l'état des workflows
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+          LOG_LEVEL: info
+        run: npm run ops:workflows
