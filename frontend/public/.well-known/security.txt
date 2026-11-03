@@ -1,0 +1,14 @@
+# WESTBOURSE — signalement de vulnérabilités (RFC 9116)
+# Écrivez à l'adresse ci-dessous. N'y joignez ni clé, ni mot de passe, ni donnée personnelle.
+# Aucun test n'est autorisé sur nos systèmes sans accord écrit préalable.
+# Il n'existe pas de programme de récompense.
+#
+# WESTBOURSE — vulnerability disclosure (RFC 9116)
+# Write to the address below. Do not include keys, passwords or personal data.
+# No testing of our systems is authorised without prior written agreement.
+# There is no bug bounty programme.
+
+Contact: mailto:support@westbourse.com
+Expires: 2027-11-01T00:00:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://www.westbourse.com/.well-known/security.txt
