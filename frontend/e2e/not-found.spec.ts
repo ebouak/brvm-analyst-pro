@@ -37,8 +37,13 @@ for (const { chemin, quoi } of ROUTES_ABSENTES) {
 
     // 2. Le CORPS. Un 404 servant une page valide serait tout aussi faux qu'un
     //    200 servant une page d'erreur — on vérifie donc les deux.
-    const corps = await page.locator('body').innerText();
-    expect(corps, `corps de ${chemin}`).toMatch(/n['’]existe pas|introuvable|could not be found/i);
+    //    Assertion qui ATTEND : une 404 levée par notFound() est servie par Next
+    //    sous forme de coquille d'erreur (`<html id="__next_error__">`, corps
+    //    sans balisage), et le message n'est rendu qu'après l'exécution du
+    //    JavaScript. Une lecture unique d'innerText au domcontentloaded tombait
+    //    avant ce rendu : échec systématique en local, intermittent en CI
+    //    (constaté le 2026-11-03).
+    await expect(page.locator('body'), `corps de ${chemin}`).toContainText(/n['’]existe pas|introuvable|could not be found/i);
   });
 }
 

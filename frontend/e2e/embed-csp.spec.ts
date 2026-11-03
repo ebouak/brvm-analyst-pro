@@ -34,7 +34,7 @@ test.describe('CSP embed : ouverture et confinement', () => {
     // `page.setContent` ne convient pas : son about:blank a une origine OPAQUE,
     // que `frame-ancestors *` ne matche pas — les deux iframes seraient bloquées
     // et le test « réussirait » pour une mauvaise raison.
-    // Prérequis : cd frontend/scripts && python -m http.server 8081
+    // Page hôte servie par scripts/hote-embed.mjs, lancé par playwright.config.ts.
     await page.goto(HOST, { waitUntil: 'load' });
     await page.waitForTimeout(4000); // laisse les deux frames tenter leur chargement
 

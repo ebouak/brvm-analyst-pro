@@ -27,10 +27,19 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // Serveur de PRODUCTION (build préalable requis) : pages servies instantanément,
   // pas de compilation à la volée comme en dev → tests fiables.
-  webServer: {
-    command: 'npm run start',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: 'npm run start',
+      url: 'http://localhost:3000',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    // Page hôte « site tiers » d'embed-csp.spec.ts (autre origine : port 8081).
+    {
+      command: 'node scripts/hote-embed.mjs',
+      url: 'http://localhost:8081/embed-check.html',
+      reuseExistingServer: !process.env.CI,
+      timeout: 15_000,
+    },
+  ],
 });

@@ -3,11 +3,7 @@ import { test, expect } from '@playwright/test';
 /** Pages publiques / SSR : doivent charger sans crash et afficher leur titre. */
 const PUBLIC_PAGES: { path: string; heading: RegExp }[] = [
   { path: '/actions', heading: /Marché Actions/i },
-  { path: '/obligations', heading: /Marché obligataire/i },
-  { path: '/heatmap', heading: /Heatmap/i },
   { path: '/secteurs', heading: /secteur/i },
-  { path: '/dividendes', heading: /Dividendes/i },
-  { path: '/backtest', heading: /Backtest/i },
 ];
 
 for (const { path, heading } of PUBLIC_PAGES) {
@@ -15,6 +11,23 @@ for (const { path, heading } of PUBLIC_PAGES) {
     const resp = await page.goto(path, { waitUntil: 'domcontentloaded' });
     expect(resp?.status(), `statut HTTP de ${path}`).toBeLessThan(400);
     await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
+  });
+}
+
+/**
+ * Pages de l'application FERMÉES depuis le mur d'authentification du
+ * 2026-07-17 (958048e, « vitrine SEO ouverte + app fermée »). Elles figuraient
+ * ci-dessus comme publiques et échouaient depuis : le test cherchait leur titre
+ * sur la page de connexion. Ce qu'on garantit désormais : un visiteur est
+ * renvoyé vers /login, avec la destination conservée pour y revenir.
+ */
+const PAGES_FERMEES = ['/obligations', '/heatmap', '/dividendes', '/backtest'];
+
+for (const path of PAGES_FERMEES) {
+  test(`page fermée renvoie vers la connexion : ${path}`, async ({ page }) => {
+    const resp = await page.goto(path, { waitUntil: 'domcontentloaded' });
+    expect(resp?.status(), `statut HTTP de ${path}`).toBeLessThan(400);
+    await expect(page).toHaveURL(new RegExp(`/login\\?next=${encodeURIComponent(path)}$`));
   });
 }
 
