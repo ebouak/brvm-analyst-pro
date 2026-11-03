@@ -15,6 +15,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/subscriptions', label: 'Abonnements', permission: 'subscriptions.read' },
   { href: '/admin/payments', label: 'Paiements', permission: 'billing.read' },
   { href: '/admin/scraping', label: 'Scraping', permission: 'scraping.read' },
+  { href: '/admin/qualite', label: 'Qualité & Tests', permission: 'qa.read' },
   { href: '/admin/content', label: 'Contenu', permission: 'content.read' },
   { href: '/admin/analyses', label: 'Analyses citables', permission: 'content.write' },
   { href: '/admin/veille-brvm', label: 'Veille BRVM', permission: 'content.read' },

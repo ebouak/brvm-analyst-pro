@@ -12,11 +12,17 @@ export default defineConfig({
   fullyParallel: true,
   workers: 3,
   retries: 1,
-  reporter: 'list',
+  // En CI : JSON (importé dans /admin/qualite par scripts/qa-publier.mjs) et
+  // HTML (zippé, pièce jointe privée). Ni l'un ni l'autre n'est publié comme
+  // artefact GitHub : le dépôt est public, tout compte GitHub pourrait les lire.
+  reporter: process.env.CI
+    ? [['list'], ['json', { outputFile: 'test-results/rapport.json' }], ['html', { open: 'never', outputFolder: 'playwright-report' }]]
+    : 'list',
   use: {
     baseURL: 'http://localhost:3000',
     navigationTimeout: 45_000,
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // Serveur de PRODUCTION (build préalable requis) : pages servies instantanément,
