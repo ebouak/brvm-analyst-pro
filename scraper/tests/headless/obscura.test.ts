@@ -1,10 +1,10 @@
 // scraper/tests/headless/obscura.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import { ObscuraBrowser } from '../../src/headless/obscura.js';
 import { HeadlessError } from '../../src/headless/types.js';
 
-vi.mock('puppeteer');
+vi.mock('puppeteer-core');
 
 describe('ObscuraBrowser', () => {
   let mockBrowser: any;

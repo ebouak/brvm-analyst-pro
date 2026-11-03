@@ -684,13 +684,20 @@ Audit complet en 5 phases (`AUDIT_REPORT.md`, plan `PLAN_REMEDIATION.md`).
   2.17.5 → 2.17.7 — 17 charges XSS testées, aucune ne survit, sortie
   identique à l'ancienne version. `tar` (via `canvas`, optionnel, tiré par
   `pdfjs-dist`) reste vulnérable : n'intervient qu'à l'installation.
-- **`scraper/` : 9 avis hauts, lot séparé.** `xlsx` 0.18.5 n'a **aucun
-  correctif sur npm** (SheetJS publie désormais sur son CDN) ; il ne lit que la
-  Pink Sheet de la Banque mondiale, mais dans un job qui porte la clé
-  `service_role`. `axios`, `undici`, `ip-address`, `js-yaml` se corrigent sans
-  rupture ; la chaîne `puppeteer` exige une majeure. ⚠️ Le scraper tourne
-  avec **`NODE_TLS_REJECT_UNAUTHORIZED=0`** (script npm) : AUCUNE vérification
-  de certificat, y compris vers Supabase avec la clé secrète. Priorité du lot.
+- **`scraper/` : avis hauts traités (2026-11-03, PR #150), 15 → 1.** `xlsx`
+  vient du CDN officiel SheetJS (0.20.3, npm n'a plus de correctif) — vérifié
+  en réel sur la Pink Sheet (2 740 lignes, 1960 → 2026-10). `puppeteer`
+  remplacé par `puppeteer-core` 25 : on ne fait que `connect` à un navigateur
+  distant, aucun Chromium à télécharger, ce qui retire toute la chaîne
+  vulnérable (Node ≥ 22.12 exigé — tous les workflows sont en Node 22).
+  `undici`, `follow-redirects`, `ip-address`, `js-yaml` corrigés par
+  `npm audit fix`. Reste `zod` 3 (correctif en 4.6.6, majeure) : l'avis porte
+  sur la validation de collections démesurées, or zod ne valide que notre
+  propre configuration — non exploitable, migration sans urgence.
+  La vérification TLS est **active** depuis `c1e263d` (2026-09-18) :
+  `NODE_TLS_REJECT_UNAUTHORIZED=0` n'est plus posé nulle part, et
+  `polyfills.ts` avertit si l'environnement le pose. Un hôte au certificat
+  cassé se règle par `NODE_EXTRA_CA_CERTS`, jamais par le drapeau global.
 
 ### Agent WhatsApp — PRÉCONDITION avant de lui donner les outils (2026-09-08)
 
