@@ -55,37 +55,54 @@ import {
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard' };
 
+// PAS de loading.tsx sous /dashboard (retiré le 2026-11-03, mesuré). Avec lui,
+// tout le contenu arrivait dans un bloc caché que seul un script révèle ; sur
+// mobile ce script attendait que le processeur ait fini d'évaluer le JavaScript :
+// LCP 12,0 s (Pixel 7, 4G lente, CPU ×4). Sans lui, le contenu est lu dans
+// l'ordre du HTML : 4,1 s, et 1,7 s sur bureau grâce aux requêtes parallèles.
+// Ne pas le remettre sans refaire cette mesure.
+
 async function getData() {
   const supabase = createClient();
 
-  const { data: lastRow } = await supabase
-    .from('brvm_actions_daily')
-    .select('date_marche')
-    .order('date_marche', { ascending: false })
-    .limit(1);
+  // Trois étapes au lieu de sept allers-retours enchaînés : chaque requête part
+  // dès que ce dont elle dépend est connu. Sur mobile, le HTML complet arrive
+  // plus tôt, avant que le processeur ne soit pris par l'exécution des scripts.
+  // 1) Dates de séance et obligations : indépendantes entre elles.
+  const [{ data: lastRow }, { data: lastIdxRow }, { data: oblRows }] = await Promise.all([
+    supabase
+      .from('brvm_actions_daily')
+      .select('date_marche')
+      .order('date_marche', { ascending: false })
+      .limit(1),
+    // Les indices ne sont pas toujours scrapés à la même date que les cours.
+    supabase
+      .from('brvm_indices_daily')
+      .select('date_marche')
+      .not('valeur', 'is', null)
+      .order('date_marche', { ascending: false })
+      .limit(1),
+    // Ticker permanent : actions + obligations de la dernière séance disponible
+    supabase
+      .from('brvm_obligations_daily')
+      .select('*')
+      .order('date_marche', { ascending: false })
+      .limit(80),
+  ]);
   const lastDate = lastRow?.[0]?.date_marche ?? null;
   if (!lastDate) return { lastDate: null, actions: [], indices: [], signals: [], notesHold: [] as NoteSeance[], sparklines: {} as Record<string, number[]>, summary: null as MarketSummaryRow | null, summaryPrev: null as MarketSummaryRow | null, ticker: [] as TickerLine[] };
-
-  // Date précédente pour le delta volume
-  const { data: prevDateRow } = await supabase
-    .from('brvm_actions_daily')
-    .select('date_marche')
-    .lt('date_marche', lastDate)
-    .order('date_marche', { ascending: false })
-    .limit(1);
-  const prevDate = prevDateRow?.[0]?.date_marche ?? null;
-
-  // Les indices ne sont pas toujours scrapés à la même date que les cours.
-  const { data: lastIdxRow } = await supabase
-    .from('brvm_indices_daily')
-    .select('date_marche')
-    .not('valeur', 'is', null)
-    .order('date_marche', { ascending: false })
-    .limit(1);
   const lastIdxDate = lastIdxRow?.[0]?.date_marche ?? lastDate;
 
-  const [{ data: actions }, { data: indices }, { data: signals }, { data: summaryRows }, { data: notesHold }] =
+  // 2) Tout ce qui ne dépend que des dates.
+  const [{ data: prevDateRow }, { data: actions }, { data: indices }, { data: signals }, { data: notesHold }] =
     await Promise.all([
+      // Date précédente pour le delta volume
+      supabase
+        .from('brvm_actions_daily')
+        .select('date_marche')
+        .lt('date_marche', lastDate)
+        .order('date_marche', { ascending: false })
+        .limit(1),
       supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
       supabase.from('brvm_indices_daily').select('*').eq('date_marche', lastIdxDate),
       supabase
@@ -95,19 +112,11 @@ async function getData() {
         .neq('signal', 'HOLD')
         .order('confiance', { ascending: false })
         .limit(6),
-      // Résumés de CES deux séances (et non « les deux derniers ») : un résumé
-      // d'une autre séance comparé aux cours du jour serait incohérent.
-      supabase
-        .from('brvm_market_summary')
-        .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
-        .in('date_marche', prevDate ? [lastDate, prevDate] : [lastDate]),
       // Notes « conserver » de la séance (48 lignes au plus) : le bloc signaux
       // montre les plus proches du seuil quand le moteur s'abstient.
       supabase.from('signals_daily').select('code, score_total').eq('date_marche', lastDate).eq('signal', 'HOLD'),
     ]);
-  const resumes = (summaryRows ?? []) as MarketSummaryRow[];
-  const summary = resumes.find((r) => r.date_marche === lastDate) ?? null;
-  const summaryPrev = prevDate ? resumes.find((r) => r.date_marche === prevDate) ?? null : null;
+  const prevDate = prevDateRow?.[0]?.date_marche ?? null;
 
   const typedActions = (actions ?? []) as ActionDaily[];
   const typedIndices = (indices ?? []) as IndiceDaily[];
@@ -121,25 +130,45 @@ async function getData() {
     [...typedActions].sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0))[0]?.code ??
     null;
 
-  const [{ data: carnetVedette }, { data: actusVedette }] = vedetteCode
-    ? await Promise.all([
-        supabase
+  // 3) Ce qui dépend des cours ou des signaux du jour, en une seule vague.
+  const [{ data: summaryRows }, { data: carnetVedette }, { data: actusVedette }, { data: histRows }] = await Promise.all([
+    // Résumés de CES deux séances (et non « les deux derniers ») : un résumé
+    // d'une autre séance comparé aux cours du jour serait incohérent.
+    supabase
+      .from('brvm_market_summary')
+      .select('date_marche, valeur_transactions, capitalisation_actions, capitalisation_obligations')
+      .in('date_marche', prevDate ? [lastDate, prevDate] : [lastDate]),
+    vedetteCode
+      ? supabase
           .from('brvm_carnet_daily')
           .select('date_marche, qte_achat, cours_achat, qte_vente, cours_vente, achat_au_marche, vente_au_marche, cours_reference')
           .eq('code', vedetteCode)
           .order('date_marche', { ascending: false })
           .limit(1)
-          .maybeSingle(),
-        supabase
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    vedetteCode
+      ? supabase
           .from('brvm_news')
           .select('titre, date_publication')
           .not('hidden', 'is', true) // modération rédactionnelle
           .eq('instrument_code', vedetteCode)
           .lte('date_publication', new Date().toISOString().slice(0, 10))
           .order('date_publication', { ascending: false })
-          .limit(2),
-      ])
-    : [{ data: null }, { data: null }];
+          .limit(2)
+      : Promise.resolve({ data: null }),
+    // Historique cours (20 dernières séances) pour tous les codes — sparklines des mouvements
+    supabase
+      .from('brvm_actions_daily')
+      .select('code, cours_jour, date_marche')
+      .not('cours_jour', 'is', null)
+      .order('date_marche', { ascending: false })
+      // PostgREST tronque en silence à 1000 lignes : on plafonne explicitement.
+      .limit(Math.min(1000, 20 * (typedActions.length || NB_SOCIETES_COTEES))), // 20 séances × le nombre réel de valeurs cotées
+  ]);
+  const resumes = (summaryRows ?? []) as MarketSummaryRow[];
+  const summary = resumes.find((r) => r.date_marche === lastDate) ?? null;
+  const summaryPrev = prevDate ? resumes.find((r) => r.date_marche === prevDate) ?? null : null;
 
   const vedette = vedetteCode
     ? {
@@ -166,15 +195,6 @@ async function getData() {
       }
     : null;
 
-  // Historique cours (20 dernières séances) pour tous les codes — sparklines des mouvements
-  const { data: histRows } = await supabase
-    .from('brvm_actions_daily')
-    .select('code, cours_jour, date_marche')
-    .not('cours_jour', 'is', null)
-    .order('date_marche', { ascending: false })
-    // PostgREST tronque en silence à 1000 lignes : on plafonne explicitement.
-    .limit(Math.min(1000, 20 * (typedActions.length || NB_SOCIETES_COTEES))); // 20 séances × le nombre réel de valeurs cotées
-
   const sparklines: Record<string, number[]> = {};
   for (const row of (histRows ?? []) as { code: string; cours_jour: number; date_marche: string }[]) {
     (sparklines[row.code] ??= []).push(row.cours_jour);
@@ -182,12 +202,6 @@ async function getData() {
   // reverse: on a trié desc → on remet chronologique
   for (const k of Object.keys(sparklines)) sparklines[k]!.reverse();
 
-  // Ticker permanent : actions + obligations de la dernière séance disponible
-  const { data: oblRows } = await supabase
-    .from('brvm_obligations_daily')
-    .select('*')
-    .order('date_marche', { ascending: false })
-    .limit(80);
   const oblLatest = oblRows && oblRows.length > 0 ? (oblRows[0] as Record<string, unknown>).date_marche : null;
   const obligations = ((oblRows ?? []) as Record<string, unknown>[]).filter((o) => o.date_marche === oblLatest);
 
@@ -228,50 +242,54 @@ interface MarketSummaryRow {
   capitalisation_obligations: number | null;
 }
 
-export default async function Dashboard() {
-  const { lastDate, actions, indices, signals, notesHold, sparklines, summary, summaryPrev, ticker, vedette } = await getData();
-
-  // Fraîcheur des cours — affichée au-dessus du ticker permanent.
-  // `lecture_seance` verrouille l'encart « Ce que dit la séance · CODE » plus bas :
-  // vérifié ici, en parallèle, pour ne pas ajouter d'aller-retour dédié.
-  const [fIn, gateLectureSeance] = await Promise.all([
-    loadFreshnessInputs(),
-    canAccess('lecture_seance'),
-  ]);
-  const fraicheurCours = computeFreshness(fIn.derniereCollecte, fIn.derniereSeance, new Date());
-
-  // Secteurs favoris de l'utilisateur (paramétrage intelligent).
-  const supa = createClient();
+/** Compte, profil et alertes de l'utilisateur — indépendants des données de marché. */
+async function chargerUtilisateur(supa: ReturnType<typeof createClient>) {
   const { data: { user } } = await supa.auth.getUser();
-  let favoriteSectors: string[] = [];
-  let dashboardLayout: DashboardLayout | null = null;
-  let triggeredAlerts = 0;
-  let alertesBrutes: AlerteDeclenchee[] = [];
-  let profil: Profil = 'debutant';
   // Un visiteur non connecté est traité comme non-premium. Les sections premium
   // sont montrées mais verrouillées : on donne envie plutôt que de cacher.
-  let isPremium = false;
-  if (user) {
-    const [{ data: prof }, { data: alertesDeclenchees, count }, profilCharge] = await Promise.all([
-      supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle(),
-      supa
-        .from('alerts')
-        .select('code, type, seuil, declenchee_le', { count: 'exact' })
-        .eq('user_id', user.id)
-        .eq('actif', true)
-        .gte('declenchee_le', depuisAlertesRecentes(new Date()))
-        .order('declenchee_le', { ascending: false })
-        .limit(10),
-      chargerProfil(supa, user.id),
-    ]);
-    favoriteSectors = secteursCourants(prof?.favorite_sectors as string[] | null);
-    dashboardLayout = ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null;
-    isPremium = Boolean(prof?.is_premium);
-
-    triggeredAlerts = count ?? 0;
-    alertesBrutes = (alertesDeclenchees as AlerteDeclenchee[] | null) ?? [];
-    profil = profilCharge;
+  if (!user) {
+    return { user: null, favoriteSectors: [] as string[], dashboardLayout: null as DashboardLayout | null, isPremium: false, triggeredAlerts: 0, alertesBrutes: [] as AlerteDeclenchee[], profil: 'debutant' as Profil };
   }
+  const [{ data: prof }, { data: alertesDeclenchees, count }, profilCharge] = await Promise.all([
+    supa.from('profiles').select('favorite_sectors, preferences, is_premium').eq('id', user.id).maybeSingle(),
+    supa
+      .from('alerts')
+      .select('code, type, seuil, declenchee_le', { count: 'exact' })
+      .eq('user_id', user.id)
+      .eq('actif', true)
+      .gte('declenchee_le', depuisAlertesRecentes(new Date()))
+      .order('declenchee_le', { ascending: false })
+      .limit(10),
+    chargerProfil(supa, user.id),
+  ]);
+  return {
+    user,
+    // Secteurs favoris de l'utilisateur (paramétrage intelligent).
+    favoriteSectors: secteursCourants(prof?.favorite_sectors as string[] | null),
+    dashboardLayout: ((prof?.preferences as Record<string, unknown> | null)?.dashboard as DashboardLayout) ?? null,
+    isPremium: Boolean(prof?.is_premium),
+    triggeredAlerts: count ?? 0,
+    alertesBrutes: (alertesDeclenchees as AlerteDeclenchee[] | null) ?? [],
+    profil: profilCharge,
+  };
+}
+
+export default async function Dashboard() {
+  const supa = createClient();
+  // Marché, fraîcheur, droit d'accès et compte partent ensemble : aucun ne
+  // dépend d'un autre. `lecture_seance` verrouille l'encart « Ce que dit la
+  // séance · CODE » plus bas.
+  const [donnees, fIn, gateLectureSeance, utilisateur] = await Promise.all([
+    getData(),
+    loadFreshnessInputs(),
+    canAccess('lecture_seance'),
+    chargerUtilisateur(supa),
+  ]);
+  const { lastDate, actions, indices, signals, notesHold, sparklines, summary, summaryPrev, ticker, vedette } = donnees;
+  const { user, favoriteSectors, dashboardLayout, isPremium, triggeredAlerts, alertesBrutes, profil } = utilisateur;
+
+  // Fraîcheur des cours — affichée au-dessus du ticker permanent.
+  const fraicheurCours = computeFreshness(fIn.derniereCollecte, fIn.derniereSeance, new Date());
   const layout = resolveLayout(dashboardLayout, profil);
 
   /* ── État vide premium ──────────────────────────────────────────────────── */
