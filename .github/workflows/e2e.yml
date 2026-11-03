@@ -1,18 +1,29 @@
 name: Tests e2e (Playwright)
 
-# Tests « smoke » des parcours critiques sur un build de production.
-# Manuel uniquement tant que l'install Playwright n'est pas finalisée (évite des
-# échecs rouges à chaque push). Réactiver le bloc `push:` une fois Playwright prêt.
+# Tests de bout en bout sur un build de production du commit, branché sur la
+# base de production (clé PUBLIQUE seulement). Résultats publiés dans
+# /admin/qualite (scripts/qa-publier.mjs), MÊME en cas d'échec.
+#
+# Pas de déclenchement à chaque push tant que les anciens tests ne sont pas
+# tous verts : le dépôt passerait au rouge en permanence.
 on:
+  schedule:
+    - cron: '0 3 * * *'   # chaque nuit, 03:00 UTC
   workflow_dispatch: {}
 
 # Jeton GITHUB_TOKEN réduit au minimum : ce workflow ne fait que lire le dépôt.
 permissions:
   contents: read
 
+# Deux passages simultanés du même commit n'apportent rien.
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: frontend
@@ -20,16 +31,51 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       CI: 'true'
+      # Ingestion /admin/qualite : secret DÉDIÉ (jamais la clé service_role,
+      # ce job exécute du code npm tiers et compile toute l'application).
+      QA_INGEST_URL: ${{ vars.QA_INGEST_URL }}
+      QA_INGEST_SECRET: ${{ secrets.QA_INGEST_SECRET }}
+      QA_ENVIRONNEMENT: ci
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
+
+      # Déclare l'exécution « en cours » : si le runner meurt ensuite, elle
+      # apparaîtra « incomplète » au lieu de disparaître.
+      - name: Déclarer le début (Qualité & Tests)
+        run: node scripts/qa-publier.mjs debut
+
       - name: Install deps
+        id: deps
         run: npm install
       - name: Install Playwright browser
+        id: navigateur
         run: npx playwright install chromium --with-deps
       - name: Build
+        id: build
         run: npm run build
       - name: Run e2e
+        id: tests
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
         run: npm run e2e
+
+      # Publie dans tous les cas, y compris build cassé ou tests en échec : le
+      # serveur en fait une « erreur d'infrastructure », jamais un succès.
+      - name: Publier les résultats (Qualité & Tests)
+        if: always()
+        env:
+          BUILD_OUTCOME: ${{ steps.deps.outcome == 'success' && steps.navigateur.outcome == 'success' && steps.build.outcome || 'failure' }}
+          TESTS_OUTCOME: ${{ steps.tests.outcome || 'skipped' }}
+        run: node scripts/qa-publier.mjs fin
+
+      # continue-on-error a laissé passer l'échec pour publier : on le rend ici.
+      - name: Statut final
+        if: always()
+        run: |
+          if [ "${{ steps.tests.outcome }}" != "success" ]; then
+            echo "::error::Tests e2e non réussis (issue : ${{ steps.tests.outcome || 'non lancés' }})."
+            exit 1
+          fi
