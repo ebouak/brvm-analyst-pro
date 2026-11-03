@@ -47,15 +47,27 @@ afterEach(() => {
 const notif = (to: string | null) => ({ subject: 'Sujet', body: 'Corps', code: null, to });
 
 describe('dispatch — destinataire email', () => {
-  it('sans destinataire explicite, replie sur ALERTS_EMAIL_TO', async () => {
+  it('message d’exploitation sans destinataire : replie sur ALERTS_EMAIL_TO', async () => {
+    process.env.ALERTS_EMAIL_TO = 'exploitation@westbourse.com';
+    const { bodies } = stubFetch();
+
+    const res = await dispatch({ ...notif(null), operateur: true });
+
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0]!.to).toBe('exploitation@westbourse.com');
+    expect(res).toContainEqual({ channel: 'email', status: 'sent' });
+  });
+
+  it('alerte d’UTILISATEUR sans adresse consentie : JAMAIS envoyée à l’exploitation', async () => {
+    // Même défaut que Telegram avant la migration 0129 : un repli silencieux
+    // ferait lire à l'exploitant les alertes personnelles de ses clients.
     process.env.ALERTS_EMAIL_TO = 'exploitation@westbourse.com';
     const { bodies } = stubFetch();
 
     const res = await dispatch(notif(null));
 
-    expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.to).toBe('exploitation@westbourse.com');
-    expect(res).toContainEqual({ channel: 'email', status: 'sent' });
+    expect(bodies).toHaveLength(0);
+    expect(res).toEqual([{ channel: 'console', status: 'sent' }]);
   });
 
   it('le destinataire explicite prime sur ALERTS_EMAIL_TO', async () => {

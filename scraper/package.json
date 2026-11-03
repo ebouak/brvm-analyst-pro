@@ -83,7 +83,8 @@
     "sante:reseaux": "tsx src/index.ts sante:reseaux",
     "social:articles": "tsx src/index.ts social:articles",
     "contact:rappel": "tsx src/index.ts contact:rappel",
-    "whatsapp:sante": "tsx src/index.ts whatsapp:sante"
+    "whatsapp:sante": "tsx src/index.ts whatsapp:sante",
+    "ops:workflows": "tsx src/index.ts ops:workflows"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

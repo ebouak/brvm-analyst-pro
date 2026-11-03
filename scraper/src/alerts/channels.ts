@@ -59,7 +59,11 @@ export interface SendResult {
 export async function sendEmail(n: Notification): Promise<SendResult | null> {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.ALERTS_EMAIL_FROM;
-  const to = n.to || process.env.ALERTS_EMAIL_TO;
+  // Le repli vers l'adresse d'exploitation n'est permis qu'à un message
+  // d'exploitation déclaré (`operateur: true`), comme pour Telegram depuis la
+  // migration 0129 : sans ce garde, une alerte d'utilisateur sans adresse
+  // consentie partirait lire chez l'exploitant (2026-11-03).
+  const to = n.to || (n.operateur ? process.env.ALERTS_EMAIL_TO : undefined);
   if (!key || !from || !to) return null;
   try {
     const resp = await fetch('https://api.resend.com/emails', {
