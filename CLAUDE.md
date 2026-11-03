@@ -637,6 +637,18 @@ Audit complet en 5 phases (`AUDIT_REPORT.md`, plan `PLAN_REMEDIATION.md`).
   en « revoked » avec la preuve. La clé Resend, elle, était bien morte (401).
   ⚠️ **Leçon : une clé n'est révoquée que si un TEST le prouve** — jamais sur
   la foi d'un message de commit, d'une doc ou d'un rapport.
+  **RECHUTE DU 2026-11-03** (signalée par un chercheur externe) : désactiver les
+  « legacy API keys » ne révoquait PAS l'ancien **secret de signature HS256**,
+  resté dans « Previously used keys ». La base refusait la clé exposée, mais le
+  **stockage** l'acceptait : liste des buckets et lecture d'un fichier privé
+  (`dossiers/…pdf`) → 200. Le test du 18/09 n'avait porté que sur `/rest/v1`.
+  Résolu le jour même : secret HS256 révoqué (Settings → JWT Keys, la clé ECC
+  signe les sessions depuis 5 mois). Revérifié : base, auth admin, stockage
+  (liste, lecture, vidéos Academy) → 401/403 ; clés `sb_` et site intacts.
+  ⚠️ **Tester une clé exposée sur TOUS les services** (`/rest/v1`,
+  `/auth/v1/admin`, `/storage/v1/bucket`, lecture d'un objet privé), et laisser
+  un délai de propagation avant de conclure (une lecture a répondu 200 juste
+  après la révocation, puis 401).
 - **Deux pièges des nouvelles clés, mesurés pendant la bascule :**
   + en-têtes INCOMPATIBLES entre familles : clé héritée = `apikey` +
     `Authorization: Bearer` (apikey seul retombe au rôle anonyme) ; clé
