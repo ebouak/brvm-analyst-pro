@@ -31,7 +31,7 @@ function donnees(workflows: LigneWorkflow[], extra: Partial<DonneesTaches> = {})
   return {
     workflows,
     collecteAt: il(20 * 60_000),
-    scraperRuns24h: { total: 70, echecs: 0, dernierEchec: null, partiels: 0, bloques: { total: 0, plusAncien: null } },
+    scraperRuns24h: { total: 70, echecs: 0, dernierEchec: null, partiels: 0, bloques: { total: 0, plusAncien: null }, commandes: [] },
     ...extra,
   };
 }
@@ -109,11 +109,11 @@ describe('evaluerTaches — workflows planifiés', () => {
     expect(x?.dernierSucces).toBe(succes);
   });
 
-  it('retard : un cron quotidien sans run depuis 3 jours → attention « aurait dû tourner »', () => {
+  it('retard : un cron quotidien sans run depuis 3 jours → attention « aucune exécution observée »', () => {
     const s = evaluerTaches(donnees([wf({ fichier: 'nuit.yml', dernier_debut: il(3 * J) })]), MAINTENANT);
     const x = parId(s, 'taches:nuit.yml');
     expect(x?.niveau).toBe('attention');
-    expect(x?.detail).toContain('aurait dû tourner');
+    expect(x?.detail).toContain('Aucune exécution observée pour le passage prévu');
   });
 
   it('quotidien : un passage retardé de 6 h par GitHub n’est pas encore un retard', () => {
@@ -138,7 +138,7 @@ describe('evaluerTaches — workflows planifiés', () => {
       mercredi,
     );
     expect(parId(s, 'taches:alerts.yml')?.niveau).toBe('attention');
-    expect(parId(s, 'taches:alerts.yml')?.detail).toContain('aurait dû tourner');
+    expect(parId(s, 'taches:alerts.yml')?.detail).toContain('Aucune exécution observée pour le passage prévu');
   });
 
   it('cron toutes les 15 min arrêté depuis 4 h : détecté', () => {
@@ -192,9 +192,18 @@ describe('evaluerTaches — workflows planifiés', () => {
     expect(parId(s, 'taches:planifies')?.niveau).toBe('ok');
   });
 
-  it('aucun run connu pour un workflow planifié → attention', () => {
+  it('aucun run connu : « à qualifier » (inconnu), pas un passage manqué', () => {
     const s = evaluerTaches(donnees([wf({ fichier: 'neuf.yml', dernier_debut: null, derniere_conclusion: null, dernier_statut: null })]), MAINTENANT);
-    expect(parId(s, 'taches:neuf.yml')?.niveau).toBe('attention');
+    expect(parId(s, 'taches:neuf.yml')?.niveau).toBe('inconnu');
+    expect(parId(s, 'taches:neuf.yml')?.detail).toContain('À qualifier');
+  });
+
+  it('chaque workflow nomme ses horodatages et propose ses liens d’action', () => {
+    const s = evaluerTaches(donnees([wf({ fichier: 'casse.yml', derniere_conclusion: 'failure', echecs_consecutifs: 1 })]), MAINTENANT);
+    const x = parId(s, 'taches:casse.yml')!;
+    expect(x.reperes?.map((r) => r.libelle)).toEqual(['Dernière exécution', 'Dernière exécution réussie']);
+    expect(x.actions?.map((a) => a.libelle)).toEqual(['Journal du dernier run', 'Historique / relancer sur GitHub']);
+    expect(x.actions?.[1].href).toBe('https://github.com/ebouak/brvm-analyst-pro/actions/workflows/casse.yml');
   });
 
   it('cron illisible → on ne conclut pas sur le retard (inconnu)', () => {
@@ -228,7 +237,7 @@ describe('evaluerTaches — workflows planifiés', () => {
     const x = parId(s, 'taches:a.yml');
     expect(x?.niveau).toBe('alerte');
     expect(x?.detail).toContain('4 échecs consécutifs');
-    expect(x?.detail).toContain('aurait dû tourner');
+    expect(x?.detail).toContain('Aucune exécution observée pour le passage prévu');
   });
 
   it('un workflow supprimé n’est pas une alerte', () => {
@@ -304,7 +313,7 @@ describe('evaluerTaches — commandes du scraper', () => {
     parId(
       evaluerTaches(
         donnees([wf({ fichier: 'a.yml' })], {
-          scraperRuns24h: { total, echecs, dernierEchec: echecs ? il(3 * H) : null, partiels: extra.partiels ?? 0, bloques: extra.bloques ?? { total: 0, plusAncien: null } },
+          scraperRuns24h: { total, echecs, dernierEchec: echecs ? il(3 * H) : null, partiels: extra.partiels ?? 0, bloques: extra.bloques ?? { total: 0, plusAncien: null }, commandes: [] },
         }),
         MAINTENANT,
       ),
@@ -338,12 +347,29 @@ describe('evaluerTaches — commandes du scraper', () => {
   it('trois échecs → alerte', () => {
     const x = scraper(70, 3);
     expect(x?.niveau).toBe('alerte');
-    expect(x?.detail).toContain('3 échecs sur 70');
+    expect(x?.detail).toContain('3 exécutions non entièrement réussies sur 70');
+    expect(x?.detail).toContain('3 échecs (4,3 %) et 0 partielle');
     expect(x?.detail).toContain('il y a 3 h');
   });
 
   it('25 % d’échecs → alerte même sous 3 échecs', () => {
     expect(scraper(8, 2)?.niveau).toBe('alerte');
+  });
+
+  it('nomme les commandes à reprendre et propose le lien vers les incidents', () => {
+    const x = evaluerTaches(
+      donnees([wf({ fichier: 'a.yml' })], {
+        scraperRuns24h: {
+          total: 73, echecs: 5, dernierEchec: il(2 * H), partiels: 2, bloques: { total: 0, plusAncien: null },
+          commandes: [{ code: 'intraday', echecs: 3, partiels: 0 }, { code: 'african', echecs: 2, partiels: 2 }],
+        },
+      }),
+      MAINTENANT,
+    ).find((s) => s.id === 'taches:scraper')!;
+    expect(x.detail).toContain('7 exécutions non entièrement réussies sur 73');
+    expect(x.detail).toContain('intraday (3 échecs)');
+    expect(x.detail).toContain('african (2 échecs, 2 partielles)');
+    expect(x.actions?.[0].href).toBe('/admin/scraping');
   });
 
   it('aucune exécution en 24 h → pas un ok (rien ne prouve que le scraper tourne)', () => {

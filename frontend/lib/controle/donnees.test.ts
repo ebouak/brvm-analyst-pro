@@ -25,6 +25,32 @@ function frais(sur: Partial<DonneesFraicheur> = {}): DonneesFraicheur {
 }
 const SOIR = t('2026-11-03T21:00:00Z');
 
+describe('dates postérieures à la séance attendue (relecture du 2026-11-03)', () => {
+  const MARDI_MIDI = t('2026-11-03T12:00:00Z'); // séance attendue : lundi 2 nov.
+
+  it('ligne du jour en séance : à jour, mais déclarée PROVISOIRE (intrajournalière)', () => {
+    const x = sig(evaluerDonnees(frais({ coursCloture: '2026-11-03' }), MARDI_MIDI), 'donnees:cours');
+    expect(x.niveau).toBe('ok');
+    expect(x.detail).toMatch(/provisoire/);
+  });
+
+  it('date postérieure qui n’est pas aujourd’hui : anomalie à vérifier, jamais « à jour »', () => {
+    const x = sig(evaluerDonnees(frais({ indices: '2026-11-05' }), MARDI_MIDI), 'donnees:indices');
+    expect(x.niveau).toBe('attention');
+    expect(x.detail).toMatch(/postérieure/);
+  });
+
+  it('chaque flux nomme son horodatage et propose ses actions', () => {
+    const s = evaluerDonnees(frais(), SOIR);
+    expect(sig(s, 'donnees:cours').reperes?.[0]).toMatchObject({ libelle: 'Dernière séance en base', nature: 'periode' });
+    expect(sig(s, 'donnees:tests-e2e').actions?.[0].href).toBe('/admin/qualite');
+  });
+
+  it('calendrier des dividendes : preuve PARTIELLE (dernier passage non mesurable)', () => {
+    expect(sig(evaluerDonnees(frais(), SOIR), 'donnees:dividendes-calendrier').preuve).toBe('partielle');
+  });
+});
+
 describe('clôture consolidée (preuve par la commande daily, pas par la ligne intraday)', () => {
   const MERCREDI_MIDI = t('2026-11-04T12:00:00Z');
 

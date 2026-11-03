@@ -141,6 +141,8 @@ const BLOCAGE = H;
 const DOSSIERS_MAX_JOURS = 8;
 /** Relances : part de rejets (adresses mortes) au-delà de laquelle la liste se dégrade. */
 const TAUX_REJET_RELANCES = 0.1;
+/** À partir de ce nombre de rejets sur 7 j, la qualité de distribution est « à surveiller ». */
+const REJETS_A_SURVEILLER = 3;
 const MIN_RELANCES_TAUX = 10;
 
 // ── Outils de texte ────────────────────────────────────────────────────────
@@ -176,6 +178,28 @@ function signal(id: string, titre: string, niveau: Niveau, detail: string, derni
 }
 
 /** Ajoute la mention des comptes qui ont demandé le canal sans destination utilisable. */
+const NOM_CANAL: Record<CanalPerso, string> = { email: "l'e-mail", telegram: 'Telegram', whatsapp: 'WhatsApp' };
+
+/**
+ * Personne de joignable sur ce canal (relecture du 2026-11-03) :
+ *  - personne ne l'a demandé → non applicable (ne gonfle pas les « OK ») ;
+ *  - quelqu'un l'a demandé sans relier sa conversation → parcours inachevé,
+ *    à surveiller : ce n'est pas une panne, mais pas un état sain non plus.
+ */
+function sansAbonneJoignable(id: string, titre: string, canal: CanalPerso, a: Abonnes, dernier: string | null): Signal {
+  if (a.demandeurs === 0) {
+    return signal(id, titre, 'na', `Non applicable — aucun compte n'a demandé ${NOM_CANAL[canal]} (0 envoi sur 7 j).`, dernier);
+  }
+  const n = a.demandeurs;
+  return signal(
+    id,
+    titre,
+    'attention',
+    `${pl(n, 'compte')} ${n > 1 ? 'ont' : 'a'} demandé ${NOM_CANAL[canal]}, mais ${n > 1 ? 'leur' : 'sa'} ${QUOI_DESTINATION[canal]} n'est pas reliée : le canal n'est pas encore utilisable (activation incomplète, 0 envoi sur 7 j).`,
+    dernier,
+  );
+}
+
 function sansDestination(a: Abonnes, quoi: string): string {
   const n = a.demandeurs - a.joignables.length;
   return n > 0 ? ` ; ${pl(n, 'compte')} l'${n > 1 ? 'ont' : 'a'} demandé sans relier de ${quoi}` : '';
@@ -246,10 +270,7 @@ function evaluerAlerte(canal: CanalPerso, d: DonneesEnvois, now: number): Signal
 
   const volume = `${pl(l7.length, 'envoi')} sur 7 j, ${pl(echecs7, 'échec')}`;
 
-  if (abonnes.joignables.length === 0 && l7.length === 0) {
-    const base = abonnes.demandeurs > 0 ? 'Aucun abonné joignable' : 'Aucun abonné à ce canal';
-    return signal(id, titre, 'ok', `${base} ; ${volume}${sansDestination(abonnes, QUOI_DESTINATION[canal])}.`, dernier);
-  }
+  if (abonnes.joignables.length === 0 && l7.length === 0) return sansAbonneJoignable(id, titre, canal, abonnes, dernier);
   const abonnesTxt = `${pl(abonnes.joignables.length, 'compte abonné', 'comptes abonnés')}${sansDestination(abonnes, QUOI_DESTINATION[canal])}`;
 
   if (tauxAlerte(l7.length, echecs7)) {
@@ -308,10 +329,7 @@ function evaluerDossier(canal: CanalPerso, d: DonneesEnvois, now: number): Signa
 
   const volume = `${pl(tentatives.length, 'envoi')} sur 7 j, ${pl(echecs7, 'échec')}`;
 
-  if (abonnes.joignables.length === 0 && lignes.length === 0) {
-    const base = abonnes.demandeurs > 0 ? 'Aucun abonné joignable' : 'Aucun abonné à ce canal';
-    return signal(id, titre, 'ok', `${base} ; ${volume}${sansDestination(abonnes, QUOI_DESTINATION[canal])}.`, dernier);
-  }
+  if (abonnes.joignables.length === 0 && lignes.length === 0) return sansAbonneJoignable(id, titre, canal, abonnes, dernier);
   if (tauxAlerte(tentatives.length, echecs7)) {
     return signal(id, titre, 'alerte', `${volume} : au moins la moitié des envois échouent ; ${phraseSucces(dernier)}.`, dernier);
   }
@@ -516,7 +534,11 @@ function evaluerRelances(d: DonneesEnvois, now: number): Signal {
   const rejets7 = r7.filter((r) => r.livraison === 'rejete').length;
   const spam30 = d.relances.filter((r) => r.livraison === 'spam' && now - t(r.created_at) <= 30 * JOUR).length;
   const dernier = plusRecent(d.derniersSucces[id], ...d.relances.filter((r) => r.livraison === 'remis').map((r) => r.created_at));
-  const volume = `${pl(r7.length, 'relance')} sur 7 j, ${pl(echecs7, "échec d'envoi", "échecs d'envoi")}, ${pl(rejets7, 'adresse rejetée', 'adresses rejetées')}`;
+  // Étapes DISTINCTES (relecture du 2026-11-03) : « 0 échec, 13 rejetées »
+  // mélangeait la soumission au prestataire et la remise à la boîte.
+  const remis7 = r7.filter((r) => r.livraison === 'remis').length;
+  const sansRetour7 = r7.filter((r) => r.statut === 'envoye' && (r.livraison === null || r.livraison === 'envoye' || r.livraison === 'retarde')).length;
+  const volume = `${pl(r7.length, 'relance enregistrée', 'relances enregistrées')} sur 7 j — soumission : ${pl(echecs7, 'échec technique', 'échecs techniques')} ; remise : ${remis7} confirmée${remis7 > 1 ? 's' : ''}, ${pl(rejets7, 'adresse rejetée', 'adresses rejetées')}, ${sansRetour7} sans retour du prestataire`;
   const succes = phraseSucces(dernier, 'dernière remise confirmée');
 
   if (spam30 > 0) {
@@ -534,12 +556,44 @@ function evaluerRelances(d: DonneesEnvois, now: number): Signal {
   if (r7.length >= MIN_RELANCES_TAUX && rejets7 / r7.length >= TAUX_REJET_RELANCES) {
     return signal(id, titre, 'attention', `${volume} : au moins une adresse sur dix est rejetée ; ${succes}.`, dernier, lien);
   }
+  // Quelques rejets ne sont pas une panne, mais la qualité de distribution doit
+  // se voir : à surveiller, avec l'action à mener.
+  if (rejets7 >= REJETS_A_SURVEILLER) {
+    return signal(id, titre, 'attention', `${volume}. Vérifier les motifs de rejet et exclure ces adresses des prochaines relances ; ${succes}.`, dernier, lien);
+  }
   return signal(id, titre, 'ok', `${volume} ; ${succes}.`, dernier, lien);
 }
 
 // ── Point d'entrée ─────────────────────────────────────────────────────────
 
 const CANAUX: CanalPerso[] = ['email', 'telegram', 'whatsapp'];
+
+const DEPOT = 'https://github.com/ebouak/brvm-analyst-pro';
+
+/**
+ * Ce que date le repère de chaque flux, et où agir (relecture du 2026-11-03 :
+ * « dernier succès » désignait tour à tour un envoi, une remise, une campagne).
+ * Liens seulement : aucun renvoi automatique — un message ne se relance
+ * qu'après vérification des doublons et de sa pertinence actuelle.
+ */
+function enrichir(s: Signal): Signal {
+  const [, flux] = s.id.split(':');
+  const def: Record<string, { repere: string; actions: { libelle: string; href: string }[] }> = {
+    alertes: { repere: 'Dernier envoi réussi', actions: [{ libelle: 'Workflow des alertes', href: `${DEPOT}/actions/workflows/alerts.yml` }] },
+    dossiers: { repere: 'Dernier envoi réussi', actions: [{ libelle: 'Workflow des dossiers', href: `${DEPOT}/actions/workflows/dossier.yml` }] },
+    contact: { repere: 'Dernière remise confirmée', actions: [{ libelle: 'Messages de contact', href: '/admin/contact' }] },
+    reseaux: { repere: 'Dernière publication', actions: [{ libelle: 'Réseaux sociaux', href: '/admin/reseaux' }] },
+    campagnes: { repere: 'Dernière campagne complète', actions: [{ libelle: 'Newsletter', href: '/admin/newsletter' }] },
+    'relances-crm': { repere: 'Dernière remise confirmée', actions: [{ libelle: 'CRM', href: '/admin/crm' }] },
+  };
+  const e = def[flux];
+  if (!e) return s;
+  return {
+    ...s,
+    reperes: s.dernierSucces ? [{ libelle: e.repere, date: s.dernierSucces, nature: 'instant' }] : [],
+    actions: e.actions,
+  };
+}
 
 export function evaluerEnvois(d: DonneesEnvois, maintenant: Date): Signal[] {
   const now = maintenant.getTime();
@@ -550,5 +604,5 @@ export function evaluerEnvois(d: DonneesEnvois, maintenant: Date): Signal[] {
     ...evaluerReseaux(d, now),
     evaluerCampagnes(d, now),
     evaluerRelances(d, now),
-  ];
+  ].map(enrichir);
 }

@@ -66,27 +66,27 @@ describe('evaluerEnvois — forme', () => {
     }
   });
 
-  it('base vide : tout est ok, et chaque phrase porte un chiffre', () => {
+  it('base vide : rien en alerte, canaux non demandés « non applicables », chaque phrase porte un chiffre', () => {
     const s = evaluerEnvois(vide(), MAINT);
-    expect(s.every((x) => x.niveau === 'ok')).toBe(true);
+    expect(s.every((x) => x.niveau === 'ok' || x.niveau === 'na')).toBe(true);
     for (const x of s) expect(x.detail).toMatch(/\d/);
   });
 });
 
 describe('alertes — canaux personnels', () => {
-  it('aucun abonné et rien envoyé : ok « aucun abonné », pas d’alarme', () => {
+  it('personne n’a demandé le canal : non applicable (ne gonfle pas les OK)', () => {
     const t = par(evaluerEnvois(vide(), MAINT), 'envois:alertes:email');
-    expect(t.niveau).toBe('ok');
-    expect(t.detail).toMatch(/aucun abonné/i);
+    expect(t.niveau).toBe('na');
+    expect(t.detail).toMatch(/Non applicable/);
   });
 
-  it('demandé mais sans destination reliée : ok, et le dit', () => {
+  it('demandé sans conversation reliée : à surveiller (activation incomplète), et le dit', () => {
     const d = vide();
     d.abonnesAlertes.whatsapp = { demandeurs: 1, joignables: [] };
     const t = par(evaluerEnvois(d, MAINT), 'envois:alertes:whatsapp');
-    expect(t.niveau).toBe('ok');
-    expect(t.detail).toMatch(/1 compte/);
-    expect(t.detail).toMatch(/reli/i);
+    expect(t.niveau).toBe('attention');
+    expect(t.detail).toMatch(/1 compte a demandé WhatsApp/);
+    expect(t.detail).toMatch(/pas reliée/);
   });
 
   it('envois réussis : ok, volume et échecs chiffrés, dernier succès renseigné', () => {
@@ -269,11 +269,11 @@ describe('dossiers du samedi', () => {
     expect(t.detail).toMatch(/en cours/);
   });
 
-  it('WhatsApp demandé sans conversation reliée : ok, aucun abonné joignable', () => {
+  it('WhatsApp demandé sans conversation reliée : à surveiller (activation incomplète)', () => {
     const d = vide();
     d.abonnesDossiers.whatsapp = { demandeurs: 1, joignables: [] };
     const t = par(evaluerEnvois(d, MAINT), 'envois:dossiers:whatsapp');
-    expect(t.niveau).toBe('ok');
+    expect(t.niveau).toBe('attention');
     expect(t.detail).toMatch(/1 compte/);
   });
 

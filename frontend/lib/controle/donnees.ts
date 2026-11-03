@@ -155,8 +155,32 @@ function fluxSeance(
   if (!o.derniere) {
     return signal(o.id, o.titre, 'alerte', `${fin(`Aucune donnée en base (${o.table} vide) ; séance attendue : ${jourFr(attendue)}`)}${note}`, null);
   }
-  const retard = seancesDeRetard(o.derniere, attendue, feries);
   const faits = `dernière séance en base : ${jourFr(o.derniere)} ; attendue : ${jourFr(attendue)}`;
+  // Une date POSTÉRIEURE à la séance attendue n'est pas « à jour » d'office
+  // (relecture du 2026-11-03) : le jour même, c'est la ligne provisoire écrite
+  // en séance par l'intraday ; à toute autre date, c'est une anomalie.
+  const derniereJour = o.derniere.slice(0, 10);
+  if (derniereJour > attendue) {
+    const aujourdhui = maintenant.toISOString().slice(0, 10);
+    const jourOuvre = maintenant.getUTCDay() !== 0 && maintenant.getUTCDay() !== 6;
+    if (derniereJour === aujourdhui && jourOuvre) {
+      return signal(
+        o.id,
+        o.titre,
+        'ok',
+        `${fin(`À jour — ${faits}`)} La ligne du ${jourFr(derniereJour)} est provisoire (valeurs intrajournalières) tant que la clôture n'est pas consolidée.${o.note ? ` ${o.note}` : ''}`,
+        derniereJour,
+      );
+    }
+    return signal(
+      o.id,
+      o.titre,
+      'attention',
+      `${fin(`Date postérieure à la séance attendue — ${faits}`)} Ni séance en cours ni consolidation ne l'expliquent : vérifier la date enregistrée.`,
+      derniereJour,
+    );
+  }
+  const retard = seancesDeRetard(o.derniere, attendue, feries);
   const niveau: Niveau = retard >= o.alerte ? 'alerte' : retard >= o.attention ? 'attention' : 'ok';
   let entete: string;
   if (retard === 0) entete = 'À jour';
@@ -265,7 +289,42 @@ function testsE2e(d: DonneesFraicheur, maintenant: Date): Signal {
   );
 }
 
+const DEPOT = 'https://github.com/ebouak/brvm-analyst-pro';
+
+/**
+ * Ce que date chaque repère, et où agir. « Dernier succès » générique
+ * mélangeait séances couvertes, collectes et documents : chaque flux nomme
+ * désormais le sien (relecture du 2026-11-03).
+ */
+const ENRICHISSEMENT: Record<string, { repere: { libelle: string; nature: 'instant' | 'periode' }; actions: { libelle: string; href: string }[] }> = {
+  'donnees:cours': { repere: { libelle: 'Dernière séance en base', nature: 'periode' }, actions: [{ libelle: 'Voir les exécutions', href: '/admin/scraping' }] },
+  'donnees:cloture': { repere: { libelle: 'Dernière consolidation réussie', nature: 'instant' }, actions: [{ libelle: 'Voir les exécutions', href: '/admin/scraping' }, { libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/daily-brvm.yml` }] },
+  'donnees:indices': { repere: { libelle: 'Dernière séance en base', nature: 'periode' }, actions: [{ libelle: 'Voir les exécutions', href: '/admin/scraping' }] },
+  'donnees:intraday': { repere: { libelle: 'Dernière collecte en séance', nature: 'instant' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/intraday.yml` }] },
+  'donnees:signaux': { repere: { libelle: 'Dernière séance notée', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/score.yml` }] },
+  'donnees:liquidite': { repere: { libelle: 'Dernière séance calculée', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/score.yml` }] },
+  'donnees:carnet': { repere: { libelle: 'Dernier bulletin en base', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/carnet.yml` }] },
+  'donnees:video': { repere: { libelle: 'Séance de la dernière vidéo', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/video-seance.yml` }] },
+  'donnees:dividendes-calendrier': { repere: { libelle: 'Date du document BRVM', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/dividends.yml` }] },
+  'donnees:tests-e2e': { repere: { libelle: 'Dernier passage terminé', nature: 'instant' }, actions: [{ libelle: 'Voir les résultats', href: '/admin/qualite' }] },
+};
+
 export function evaluerDonnees(d: DonneesFraicheur, maintenant: Date): Signal[] {
+  return evaluerFlux(d, maintenant).map((s) => {
+    const e = ENRICHISSEMENT[s.id];
+    if (!e) return s;
+    return {
+      ...s,
+      reperes: s.dernierSucces ? [{ ...e.repere, date: s.dernierSucces }] : [],
+      actions: e.actions,
+      // Contenu disponible, mais la date du dernier passage n'est pas mesurable
+      // dans la table : on le dit plutôt que d'afficher un « OK » plein.
+      ...(s.id === 'donnees:dividendes-calendrier' ? { preuve: 'partielle' as const } : {}),
+    };
+  });
+}
+
+function evaluerFlux(d: DonneesFraicheur, maintenant: Date): Signal[] {
   const f = d.feries;
   return [
     fluxSeance({ id: 'cours', titre: 'Cours de clôture', table: 'brvm_actions_daily', derniere: d.coursCloture, heure: H_COURS, attention: 1, alerte: 2 }, maintenant, f),

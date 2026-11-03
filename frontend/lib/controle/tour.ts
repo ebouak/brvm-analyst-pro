@@ -7,12 +7,20 @@ import { chargerTaches } from './lectureTaches';
 import { evaluerDonnees } from './donnees';
 import { chargerDonnees } from './lectureDonnees';
 
+export interface Tour {
+  signaux: Signal[];
+  /** Instant où la page a été calculée. */
+  observeA: string;
+  /** Dernière photo des workflows GitHub (ops_workflows), null si illisible. */
+  collecteWorkflows: string | null;
+}
+
 /**
  * Assemble les trois domaines de la Tour de contrôle. Les chargeurs tournent
  * en parallèle ; celui qui échoue devient UN signal « inconnu » — jamais une
  * section vide qui passerait pour saine.
  */
-export async function chargerTour(maintenant = new Date()): Promise<Signal[]> {
+export async function chargerTour(maintenant = new Date()): Promise<Tour> {
   const [envois, taches, donnees] = await Promise.allSettled([chargerEnvois(), chargerTaches(), chargerDonnees()]);
   const signaux: Signal[] = [];
   signaux.push(
@@ -30,5 +38,9 @@ export async function chargerTour(maintenant = new Date()): Promise<Signal[]> {
       ? evaluerDonnees(donnees.value, maintenant)
       : [signalInconnu('donnees', 'donnees:lecture', 'Fraîcheur des données', 'tables de marché et vidéo de séance')]),
   );
-  return trierSignaux(signaux);
+  return {
+    signaux: trierSignaux(signaux),
+    observeA: maintenant.toISOString(),
+    collecteWorkflows: taches.status === 'fulfilled' ? taches.value.collecteAt : null,
+  };
 }
