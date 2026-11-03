@@ -66,7 +66,10 @@ export default function BlocPortefeuille({
       )}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-      <div className="grid gap-3 sm:grid-cols-3">
+      {/* Sous md : grille 2 colonnes (la variation du jour, au détail plus long,
+          occupe la rangée entière) au lieu d'un indicateur par ligne — même
+          choix que la page Obligations. À partir de md : 3 colonnes, inchangé. */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         <Chiffre
           libelle={synth.exclus.length > 0 ? `Valeur (hors ${listeExclus})` : 'Valeur'}
           valeur={rienDeValorise ? '—' : `${fmtFcfa(synth.valeur)} FCFA`}
@@ -96,6 +99,7 @@ export default function BlocPortefeuille({
             )
           }
           classe={sens(perf?.portefeuillePct)}
+          className="col-span-2 md:col-span-1"
         />
       </div>
         {!rienDeValorise && <AnneauRepartition lignes={lignesAnneau} total={synth.valeur} />}
@@ -189,11 +193,13 @@ export default function BlocPortefeuille({
   );
 }
 
-function Chiffre({ libelle, valeur, detail, classe = 'text-ivory' }: { libelle: string; valeur: string; detail?: ReactNode; classe?: string }) {
+function Chiffre({ libelle, valeur, detail, classe = 'text-ivory', className = '' }: { libelle: string; valeur: string; detail?: ReactNode; classe?: string; className?: string }) {
   return (
-    <div className="min-w-0 rounded-xl border border-border/60 bg-bg/40 p-3">
+    <div className={`min-w-0 rounded-xl border border-border/60 bg-bg/40 p-3 ${className}`}>
       <p className="text-[11px] uppercase tracking-wide text-faint">{libelle}</p>
-      <p className={`tabular mt-1 text-xl font-semibold ${classe}`}>{valeur}</p>
+      {/* text-lg sous md : une demi-largeur de 390 px tient « −1,25 M FCFA » ;
+          le retour à la ligne de secours évite tout débordement horizontal. */}
+      <p className={`tabular mt-1 text-lg font-semibold [overflow-wrap:anywhere] md:text-xl ${classe}`}>{valeur}</p>
       {detail != null && <p className={`tabular mt-0.5 text-xs ${classe}`}>{detail}</p>}
     </div>
   );

@@ -88,6 +88,17 @@ async function getData(withMetrics: boolean) {
   };
 }
 
+/**
+ * « 2026-11-03 » → « 3 nov. 2026 ». Affichage seulement : la donnée reste l'ISO
+ * (portée par `dateTime`). En UTC : une date seule interprétée en heure locale
+ * reculerait d'un jour à l'ouest de Greenwich.
+ */
+function fmtSeance(iso: string): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
 export default async function ActionsPage({ searchParams }: { searchParams?: { secteur?: string } }) {
   // Niveau requis LU EN BASE (feature_flags → `actions_metrics`, éditable dans
   // /admin/features). Les cours restent publics ; seules les colonnes calculées
@@ -129,7 +140,11 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
                 <span className="tabular">{actions.length}</span>&nbsp;titres
               </StatPill>
               <StatPill tone="gold">
-                Séance&nbsp;<span className="tabular">{lastDate}</span>
+                {/* Un seul bloc insécable : sinon la pastille dispose texte et
+                    date côte à côte et casse en « Séance 3 nov. / du 2026 ». */}
+                <span className="whitespace-nowrap">
+                  Séance du <time dateTime={lastDate} className="tabular">{fmtSeance(lastDate)}</time>
+                </span>
               </StatPill>
             </div>
             <PremiumCTA href="/actions/compare" variant="gold">

@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
@@ -14,6 +14,18 @@ const LOGOS = brvmLogos as Record<string, string>;
 type SortKey = 'code' | 'secteur' | 'variation_pct' | 'cours_jour' | 'volume' | 'valeur_echangee';
 const STRING_KEYS = new Set<SortKey>(['code', 'secteur']);
 
+/** Tri proposé sur mobile, où les en-têtes de colonnes n'existent pas. */
+const SORT_OPTIONS: { value: string; label: string; key: SortKey; asc: boolean }[] = [
+  { value: 'variation_pct:desc', label: 'Plus fortes hausses', key: 'variation_pct', asc: false },
+  { value: 'variation_pct:asc', label: 'Plus fortes baisses', key: 'variation_pct', asc: true },
+  { value: 'volume:desc', label: 'Volume décroissant', key: 'volume', asc: false },
+  { value: 'valeur_echangee:desc', label: 'Valeur échangée décroissante', key: 'valeur_echangee', asc: false },
+  { value: 'cours_jour:desc', label: 'Cours décroissant', key: 'cours_jour', asc: false },
+  { value: 'cours_jour:asc', label: 'Cours croissant', key: 'cours_jour', asc: true },
+  { value: 'code:asc', label: 'Code (A → Z)', key: 'code', asc: true },
+  { value: 'secteur:asc', label: 'Secteur (A → Z)', key: 'secteur', asc: true },
+];
+
 const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
   { header: 'Code', accessor: (r) => r.code },
   { header: 'Désignation', accessor: (r) => r.designation ?? '' },
@@ -26,15 +38,16 @@ const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
 ];
 
 const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60';
 
 /* ── Input/Select atoms ──────────────────────────────────────────────────── */
-const inputCls =
-  `bg-bg border border-border rounded-lg px-3 py-1.5 text-sm text-ivory placeholder:text-faint
+// Mobile : 44 px de haut (cible tactile) et 16 px de police (sinon iOS zoome
+// au focus). À partir de md, on revient au gabarit compact d'origine.
+const fieldCls =
+  `bg-bg border border-border rounded-lg px-3 py-1.5 min-h-[44px] md:min-h-0 text-base md:text-sm text-ivory
    focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 ${EASE}`;
-
-const selectCls =
-  `bg-bg border border-border rounded-lg px-3 py-1.5 text-sm text-ivory
-   focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 ${EASE}`;
+const inputCls = `${fieldCls} placeholder:text-faint`;
+const selectCls = fieldCls;
 
 /**
  * Cellule verrouillée : le calcul existe, l'utilisateur n'y a pas droit.
@@ -53,6 +66,28 @@ function LockedCell() {
       </svg>
       Premium
     </Link>
+  );
+}
+
+function Logo({ code, size }: { code: string; size: 'sm' | 'md' }) {
+  const box = size === 'md' ? 'w-9 h-9' : 'w-7 h-7';
+  const px = size === 'md' ? 36 : 28;
+  return LOGOS[code] ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={LOGOS[code]}
+      alt=""
+      width={px}
+      height={px}
+      className={`${box} rounded-md object-contain shrink-0 bg-white/10 p-0.5 border border-border/60`}
+    />
+  ) : (
+    <span
+      aria-hidden
+      className={`inline-flex items-center justify-center ${box} rounded-md text-[9px] font-bold shrink-0 bg-gold/10 text-gold/70 border border-gold/20`}
+    >
+      {code.slice(0, 2)}
+    </span>
   );
 }
 
@@ -82,6 +117,9 @@ export default function ActionsTable({
   const [perf, setPerf] = useState<'all' | 'up' | 'down'>('all');
   const [sortKey, setSortKey] = useState<SortKey>('variation_pct');
   const [asc, setAsc] = useState(false);
+  // Mobile : le bloc pays/secteur/perf/volume est replié par défaut.
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersId = useId();
 
   const paysOptions = useMemo(
     () => [...new Set(actions.map((a) => a.pays).filter(Boolean))].sort() as string[],
@@ -112,6 +150,23 @@ export default function ActionsTable({
     return r;
   }, [actions, q, pays, secteur, minVol, perf, sortKey, asc]);
 
+  /*
+   * Colonne Signal : le moteur s'abstient le plus souvent (CLAUDE.md §9). Une
+   * colonne entière de « — » n'informe pas ; on la masque quand AUCUNE ligne
+   * affichée n'a de signal, et on le dit une fois. Sans droit (`showMetrics`
+   * faux), la donnée n'est pas transmise : on garde la colonne verrouillée.
+   */
+  const anySignalShown = rows.some((r) => !!signals[r.code]?.signal);
+  const anySignalSeance = actions.some((a) => !!signals[a.code]?.signal);
+  const showSignalCol = !showMetrics || anySignalShown;
+  const colCount = showSignalCol ? 8 : 7;
+
+  const activeFilters =
+    (pays ? 1 : 0) + (secteur ? 1 : 0) + (perf !== 'all' ? 1 : 0) + (minVol > 0 ? 1 : 0);
+
+  const currentSort = `${sortKey}:${asc ? 'asc' : 'desc'}`;
+  const sortIsListed = SORT_OPTIONS.some((o) => o.value === currentSort);
+
   function toggleSort(k: SortKey) {
     if (k === sortKey) setAsc(!asc);
     else { setSortKey(k); setAsc(false); }
@@ -120,64 +175,118 @@ export default function ActionsTable({
   /* ── Column header with sort indicator ──────────────────────────────── */
   const Th = ({ k, label, right }: { k: SortKey; label: string; right?: boolean }) => (
     <th
-      onClick={() => toggleSort(k)}
-      className={`
-        overline px-4 py-3 cursor-pointer select-none whitespace-nowrap
-        text-faint hover:text-gold/80 ${EASE}
-        ${right ? 'text-right' : 'text-left'}
-        ${sortKey === k ? 'text-gold/70' : ''}
-      `}
+      aria-sort={sortKey === k ? (asc ? 'ascending' : 'descending') : 'none'}
+      className={`px-4 py-3 whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
     >
-      {label}
-      {sortKey === k && (
-        <span className="ml-1 text-gold/60 text-[9px]">{asc ? '▲' : '▼'}</span>
-      )}
+      <button
+        type="button"
+        onClick={() => toggleSort(k)}
+        className={`
+          overline cursor-pointer select-none rounded ${FOCUS}
+          hover:text-gold/80 ${EASE}
+          ${sortKey === k ? 'text-gold/70' : 'text-faint'}
+        `}
+      >
+        {label}
+        {sortKey === k && (
+          <span aria-hidden className="ml-1 text-gold/60 text-[9px]">{asc ? '▲' : '▼'}</span>
+        )}
+      </button>
     </th>
+  );
+
+  const noSignalNote = showMetrics && !anySignalShown && rows.length > 0 && (
+    <p className="px-4 py-2 border-b border-border/60 text-xs text-muted">
+      {anySignalSeance
+        ? 'Aucun signal net parmi les titres affichés : le moteur s’abstient tant que rien n’est clair.'
+        : 'Aucun signal net sur cette séance : le moteur s’abstient tant que rien n’est clair.'}
+    </p>
   );
 
   return (
     <div className="space-y-0">
       {/* ── Barre de filtres ──────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 items-center px-4 py-3 border-b border-border/60">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Rechercher code / nom…"
-          className={`${inputCls} w-52`}
-        />
-        <select value={pays} onChange={(e) => setPays(e.target.value)} className={selectCls}>
-          <option value="">Tous pays</option>
-          {paysOptions.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
-        <select value={secteur} onChange={(e) => setSecteur(e.target.value)} className={selectCls}>
-          <option value="">Tous secteurs</option>
-          {secteurOptions.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select
-          value={perf}
-          onChange={(e) => setPerf(e.target.value as 'all' | 'up' | 'down')}
-          className={selectCls}
-        >
-          <option value="all">Toutes perfs</option>
-          <option value="up">Hausses</option>
-          <option value="down">Baisses</option>
-        </select>
-        <label className="flex items-center gap-2 text-xs text-muted">
-          <span>Vol. min</span>
+      <div className="px-4 py-3 border-b border-border/60 space-y-2 md:space-y-0 md:flex md:flex-wrap md:items-center md:gap-2">
+        {/* Recherche (+ bouton Filtres sur mobile) : toujours visible */}
+        <div className="flex items-center gap-2">
           <input
-            type="number"
-            value={minVol}
-            onChange={(e) => setMinVol(Number(e.target.value) || 0)}
-            className={`${inputCls} w-24 tabular`}
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Rechercher code / nom…"
+            aria-label="Rechercher une valeur par code ou par nom"
+            className={`${inputCls} flex-1 min-w-0 md:flex-none md:w-52`}
           />
-        </label>
+          <button
+            type="button"
+            aria-expanded={filtersOpen}
+            aria-controls={filtersId}
+            onClick={() => setFiltersOpen((o) => !o)}
+            className={`md:hidden shrink-0 min-h-[44px] rounded-lg border px-3 text-sm ${FOCUS} ${EASE} ${
+              activeFilters > 0 ? 'border-gold/40 text-gold' : 'border-border text-muted'
+            }`}
+          >
+            Filtres{activeFilters > 0 && <span className="tabular">{` (${activeFilters})`}</span>}
+            <span aria-hidden className="ml-1 text-[10px]">{filtersOpen ? '▲' : '▼'}</span>
+          </button>
+        </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-xs text-faint tabular">
+        {/* Pays / secteur / perf / volume : repliés sur mobile, toujours visibles dès md */}
+        <div
+          id={filtersId}
+          className={`${filtersOpen ? 'grid' : 'hidden'} grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center`}
+        >
+          <select value={pays} onChange={(e) => setPays(e.target.value)} aria-label="Pays" className={selectCls}>
+            <option value="">Tous pays</option>
+            {paysOptions.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <select value={secteur} onChange={(e) => setSecteur(e.target.value)} aria-label="Secteur" className={selectCls}>
+            <option value="">Tous secteurs</option>
+            {secteurOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select
+            value={perf}
+            onChange={(e) => setPerf(e.target.value as 'all' | 'up' | 'down')}
+            aria-label="Performance"
+            className={selectCls}
+          >
+            <option value="all">Toutes perfs</option>
+            <option value="up">Hausses</option>
+            <option value="down">Baisses</option>
+          </select>
+          <label className="flex items-center gap-2 text-xs text-muted">
+            <span className="shrink-0">Vol. min</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={minVol}
+              onChange={(e) => setMinVol(Number(e.target.value) || 0)}
+              className={`${inputCls} w-full md:w-24 tabular`}
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 md:ml-auto md:flex-nowrap">
+          {/* Tri mobile : les en-têtes de colonnes n'existent pas sous md.
+              Sur sa propre ligne : partagée avec le compteur et l'export, la
+              liste était tronquée (« Plus fo… »). */}
+          <select
+            value={sortIsListed ? currentSort : ''}
+            onChange={(e) => {
+              const o = SORT_OPTIONS.find((x) => x.value === e.target.value);
+              if (o) { setSortKey(o.key); setAsc(o.asc); }
+            }}
+            aria-label="Trier les valeurs"
+            className={`${selectCls} md:hidden w-full basis-full`}
+          >
+            {!sortIsListed && <option value="">Tri personnalisé</option>}
+            {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <span className="text-xs text-faint tabular shrink-0">
             <span className="text-ivory font-medium">{rows.length}</span> résultats
           </span>
           {/* ExportButton — wrapper for premium look */}
-          <div className={`[&>button]:rounded-lg [&>button]:border-border-strong [&>button]:text-muted [&>button]:px-3 [&>button]:py-1.5 [&>button]:text-xs [&>button]:hover:border-gold/30 [&>button]:hover:text-gold ${EASE}`}>
+          <div className={`shrink-0 [&>button]:rounded-lg [&>button]:border-border-strong [&>button]:text-muted [&>button]:px-3 [&>button]:py-1.5 [&>button]:text-xs [&>button]:hover:border-gold/30 [&>button]:hover:text-gold ${EASE}`}>
             <ExportButton<ActionDaily>
               filename={`actions_${new Date().toISOString().slice(0, 10)}.csv`}
               rows={rows}
@@ -187,8 +296,51 @@ export default function ActionsTable({
         </div>
       </div>
 
-      {/* ── Tableau ───────────────────────────────────────────────────────── */}
-      <div className="overflow-x-auto">
+      {noSignalNote}
+
+      {/* ── Mobile (< md) : une carte par valeur ──────────────────────────── */}
+      <ul className="md:hidden divide-y divide-border/40" aria-label="Valeurs cotées">
+        {rows.length === 0 && (
+          <li className="px-4 py-12 text-center text-muted text-sm">
+            Aucun titre ne correspond aux filtres sélectionnés.
+          </li>
+        )}
+        {rows.map((a) => {
+          const varPct = a.variation_pct ?? 0;
+          const up = varPct >= 0;
+          const sig = showMetrics ? signals[a.code] : undefined;
+          return (
+            <li key={a.code}>
+              <Link
+                href={`/actions/${a.code}`}
+                className={`flex items-center gap-3 px-4 py-3 min-h-[56px] hover:bg-white/[0.02] ${FOCUS} focus-visible:ring-inset ${EASE}`}
+              >
+                <Logo code={a.code} size="md" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-ivory tracking-wide">{a.code}</span>
+                    {sig?.signal && <SignalBadge signal={sig.signal} confiance={sig.confiance} small />}
+                  </div>
+                  <div className="text-xs text-faint truncate leading-tight">{a.designation}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="tabular text-ivory font-medium">{fmtNumber(a.cours_jour)}</div>
+                  <div className={`tabular text-sm font-semibold ${up ? 'text-up' : 'text-down'}`}>
+                    <span aria-hidden className="text-[10px] opacity-70 mr-0.5">{up ? '▲' : '▼'}</span>
+                    {up ? '+' : ''}{varPct.toFixed(2)}%
+                  </div>
+                  <div className="tabular text-[11px] text-muted">
+                    Vol. {fmtNumber(a.volume)}
+                  </div>
+                </div>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* ── Tableau (≥ md) ────────────────────────────────────────────────── */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="border-b border-border/60 bg-bg/60">
             <tr>
@@ -201,15 +353,17 @@ export default function ActionsTable({
               </th>
               <Th k="volume" label="Volume" right />
               <Th k="valeur_echangee" label="Valeur" right />
-              <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
-                Signal {!showMetrics && <span aria-label="Premium" title="Premium">✦</span>}
-              </th>
+              {showSignalCol && (
+                <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
+                  Signal {!showMetrics && <span aria-label="Premium" title="Premium">✦</span>}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-16 text-center text-muted text-sm">
+                <td colSpan={colCount} className="px-4 py-16 text-center text-muted text-sm">
                   Aucun titre ne correspond aux filtres sélectionnés.
                 </td>
               </tr>
@@ -227,22 +381,9 @@ export default function ActionsTable({
                   <td className="px-4 py-3">
                     <Link
                       href={`/actions/${a.code}`}
-                      className={`flex items-center gap-2.5 hover:text-gold ${EASE}`}
+                      className={`flex items-center gap-2.5 rounded hover:text-gold ${FOCUS} ${EASE}`}
                     >
-                      {LOGOS[a.code] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={LOGOS[a.code]}
-                          alt={a.code}
-                          width={28}
-                          height={28}
-                          className="w-7 h-7 rounded-md object-contain shrink-0 bg-white/10 p-0.5 border border-border/60"
-                        />
-                      ) : (
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md text-[9px] font-bold shrink-0 bg-gold/10 text-gold/70 border border-gold/20">
-                          {a.code.slice(0, 2)}
-                        </span>
-                      )}
+                      <Logo code={a.code} size="sm" />
                       <div>
                         <span className="font-semibold text-ivory tracking-wide">{a.code}</span>
                         <div className="text-[11px] text-faint truncate max-w-[160px] leading-tight">
@@ -271,7 +412,7 @@ export default function ActionsTable({
                   {/* ── Variation % ───────────────────────────────────── */}
                   <td className={`px-4 py-3 text-right tabular font-semibold ${up ? 'text-up' : 'text-down'}`}>
                     <span className="inline-flex items-center justify-end gap-1">
-                      <span className="text-[10px] opacity-70">{up ? '▲' : '▼'}</span>
+                      <span aria-hidden className="text-[10px] opacity-70">{up ? '▲' : '▼'}</span>
                       {up ? '+' : ''}{varPct.toFixed(2)}%
                     </span>
                   </td>
@@ -300,13 +441,15 @@ export default function ActionsTable({
                   </td>
 
                   {/* ── Signal — métrique calculée ────────────────────── */}
-                  <td className="px-4 py-3 text-center">
-                    {showMetrics ? (
-                      <SignalBadge signal={sig?.signal} confiance={sig?.confiance} small />
-                    ) : (
-                      <LockedCell />
-                    )}
-                  </td>
+                  {showSignalCol && (
+                    <td className="px-4 py-3 text-center">
+                      {showMetrics ? (
+                        <SignalBadge signal={sig?.signal} confiance={sig?.confiance} small />
+                      ) : (
+                        <LockedCell />
+                      )}
+                    </td>
+                  )}
                 </tr>
               );
             })}

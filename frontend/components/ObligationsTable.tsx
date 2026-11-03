@@ -34,10 +34,10 @@ const CSV_COLUMNS: CsvColumn<ObligationRow>[] = [
 
 function prixStatus(cours: number | null): { label: string; cls: string } {
   if (cours == null) return { label: '—', cls: 'text-muted' };
-  if (cours >= 9500 && cours <= 10500) return { label: 'Au pair', cls: 'text-[#56D7FD]' };
-  if (cours > 10500) return { label: 'Surcôté', cls: 'text-[#3fe18b]' };
-  if (cours >= 5000) return { label: 'Décoté', cls: 'text-[#ff6b6b]' };
-  return { label: 'Amorti', cls: 'text-orange-400' };
+  if (cours >= 9500 && cours <= 10500) return { label: 'Au pair', cls: 'text-accent' };
+  if (cours > 10500) return { label: 'Surcôté', cls: 'text-up' };
+  if (cours >= 5000) return { label: 'Décoté', cls: 'text-down' };
+  return { label: 'Amorti', cls: 'text-warn' };
 }
 
 function maturiteYear(iso: string | null): string {
@@ -95,7 +95,7 @@ export default function ObligationsTable({
       className={`px-3 py-2 cursor-pointer select-none hover:text-white whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
     >
       {label}
-      {sortKey === k && <span className="text-[#56D7FD] ml-1">{asc ? '▲' : '▼'}</span>}
+      {sortKey === k && <span className="text-accent ml-1" aria-hidden="true">{asc ? '▲' : '▼'}</span>}
     </th>
   );
 
@@ -107,18 +107,19 @@ export default function ObligationsTable({
           value={q}
           onChange={(e) => { setQ(e.target.value); setPage(0); }}
           placeholder="Rechercher…"
-          className="bg-[#0a1417] border border-[#1a2a30] rounded px-3 py-1.5 text-sm w-44 focus:outline-none focus:border-[#56D7FD]/40"
+          aria-label="Rechercher une obligation (code, désignation, émetteur)"
+          className="bg-elevated text-ivory placeholder:text-faint border border-border rounded px-3 py-1.5 text-sm w-44 focus:outline-none focus:border-accent/40"
         />
         <select
           value={emetteurFilter}
           onChange={(e) => { setEmetteurFilter(e.target.value); setPage(0); }}
           aria-label="Filtrer par émetteur"
-          className="bg-[#0a1417] border border-[#1a2a30] rounded px-2 py-1.5 text-sm"
+          className="bg-elevated text-ivory border border-border rounded px-2 py-1.5 text-sm"
         >
           <option value="">Tous émetteurs</option>
           {emetteurs.map((e) => <option key={e} value={e}>{e}</option>)}
         </select>
-        <span className="text-xs text-gray-500 ml-auto">
+        <span className="text-xs text-muted ml-auto">
           {filtered.length} / {rows.length} {title.toLowerCase()}
         </span>
         <ExportButton<ObligationRow>
@@ -129,9 +130,9 @@ export default function ObligationsTable({
       </div>
 
       {/* Tableau */}
-      <div className="bg-[#0a1417] border border-[#1a2a30] rounded-xl overflow-x-auto">
+      <div className="bg-surface border border-border rounded-xl overflow-x-auto">
         <table className="w-full text-sm min-w-[640px]">
-          <thead className="text-xs text-gray-500 border-b border-[#1a2a30]">
+          <thead className="text-xs text-muted border-b border-border">
             <tr>
               <Th k="code" label="Code" />
               <th className="px-3 py-2 text-left">Émetteur</th>
@@ -144,7 +145,7 @@ export default function ObligationsTable({
           <tbody>
             {slice.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-gray-500 text-xs">
+                <td colSpan={6} className="px-3 py-8 text-center text-muted text-xs">
                   Aucune obligation correspondante
                 </td>
               </tr>
@@ -152,16 +153,16 @@ export default function ObligationsTable({
             {slice.map((o) => {
               const { label: pLabel, cls: pCls } = prixStatus(o.cours_jour);
               return (
-                <tr key={o.code} className="border-b border-[#1a2a30]/50 hover:bg-[#0f1f24] transition-colors">
+                <tr key={o.code} className="border-b border-border/50 text-ivory hover:bg-accent/5 transition-colors">
                   {/* Code + désignation */}
                   <td className="px-3 py-2.5">
-                    <span className="font-mono text-[#56D7FD] text-xs">{o.code}</span>
+                    <span className="font-mono text-accent text-xs">{o.code}</span>
                     {o.designation && (
-                      <div className="text-[10px] text-gray-500 truncate max-w-[160px] mt-0.5">{o.designation}</div>
+                      <div className="text-[10px] text-muted truncate max-w-[160px] mt-0.5">{o.designation}</div>
                     )}
                   </td>
                   {/* Émetteur */}
-                  <td className="px-3 py-2.5 text-xs text-gray-300 max-w-[140px] truncate">
+                  <td className="px-3 py-2.5 text-xs text-muted max-w-[140px] truncate">
                     {o.emetteur ?? '—'}
                   </td>
                   {/* Coupon */}
@@ -172,7 +173,7 @@ export default function ObligationsTable({
                   <td className="px-3 py-2.5 text-right">
                     <span className="text-xs">{maturiteYear(o.maturite)}</span>
                     {o.yearsToMaturity != null && (
-                      <div className="text-[10px] text-gray-500">{o.yearsToMaturity.toFixed(1)} ans</div>
+                      <div className="text-[10px] text-muted">{o.yearsToMaturity.toFixed(1)} ans</div>
                     )}
                   </td>
                   {/* Prix + statut */}
@@ -185,13 +186,13 @@ export default function ObligationsTable({
                   {/* YTM + fiscalité coupon */}
                   <td className="px-3 py-2.5 text-right font-mono text-xs">
                     {o.isAmortissable ? (
-                      <span className="text-orange-400/70">N/A</span>
+                      <span className="text-warn">N/A</span>
                     ) : o.ytm != null ? (
-                      <span className="text-[#3fe18b]">{o.ytm.toFixed(2)}%</span>
+                      <span className="text-up">{o.ytm.toFixed(2)}%</span>
                     ) : (
-                      <span className="text-gray-600">—</span>
+                      <span className="text-faint">—</span>
                     )}
-                    <div className={`text-[10px] ${o.couponExonere ? 'text-[#3fe18b]/80' : 'text-gray-500'}`}>
+                    <div className={`text-[10px] ${o.couponExonere ? 'text-up/80' : 'text-muted'}`}>
                       {o.couponExonere ? 'net (exonéré)' : 'retenue 2–6 %'}
                     </div>
                   </td>
@@ -209,18 +210,20 @@ export default function ObligationsTable({
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="px-3 py-1 text-xs border border-[#1a2a30] rounded hover:border-[#56D7FD]/40 disabled:opacity-30"
+            aria-label="Page précédente"
+            className="px-3 py-1 text-xs border border-border text-muted rounded hover:border-accent/40 hover:text-ivory disabled:opacity-30"
           >
-            ←
+            <span aria-hidden="true">←</span>
           </button>
-          <span className="text-xs text-gray-500">{page + 1} / {totalPages}</span>
+          <span className="text-xs text-muted" aria-live="polite">Page {page + 1} / {totalPages}</span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page === totalPages - 1}
-            className="px-3 py-1 text-xs border border-[#1a2a30] rounded hover:border-[#56D7FD]/40 disabled:opacity-30"
+            aria-label="Page suivante"
+            className="px-3 py-1 text-xs border border-border text-muted rounded hover:border-accent/40 hover:text-ivory disabled:opacity-30"
           >
-            →
+            <span aria-hidden="true">→</span>
           </button>
         </div>
       )}
