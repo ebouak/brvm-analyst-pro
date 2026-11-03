@@ -74,7 +74,9 @@ function SgiCard({ s, frais }: { s: Sgi; frais?: SgiFrais }) {
                 src={s.logo}
                 alt={`Logo ${s.nom}`}
                 loading="lazy"
-                className="absolute inset-0 h-full w-full object-contain"
+                // Logos officiels brvm.org : vignettes 3:2 sur fond blanc. Le
+                // fond blanc remplit la pastille au lieu de laisser deux bandes sombres.
+                className="absolute inset-0 h-full w-full bg-white object-contain p-0.5"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}

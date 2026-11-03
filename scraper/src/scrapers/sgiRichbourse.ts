@@ -149,16 +149,28 @@ function valueForLabel($: cheerio.CheerioAPI, labels: string[]): string | null {
 }
 
 /** Parse une fiche détail SGI (contacts + lien tarifs). */
+/** Liens qui ne sont jamais le site d'une SGI : RichBourse lui-même et les réseaux sociaux. */
+const LIENS_NON_SITE = /richbourse\.com|facebook\.com|fb\.com|twitter\.com|\/\/(www\.)?x\.com|linkedin\.com|instagram\.com|youtube\.com|youtu\.be|tiktok\.com|wa\.me|whatsapp\.com|t\.me/i;
+
 export function parseSgiContactFiche(html: string): SgiContactFiche {
   const $ = cheerio.load(html);
 
-  const telephone =
+  const telephoneBrut =
     $('a[href^="tel:"]').first().text().trim() ||
-    valueForLabel($, ['téléphone', 'telephone', 'tél', 'tel']);
+    valueForLabel($, ['téléphone', 'telephone', 'tél', 'tel']) ||
+    '';
+  // Le repli par libellé ramassait n'importe quel texte : trois SGI ont eu
+  // un paragraphe éditorial en guise de téléphone. Au moins 8 chiffres, et
+  // rien d'autre que chiffres, espaces et séparateurs usuels.
+  const telephone = /^[\d\s+().\/-]+$/.test(telephoneBrut) && (telephoneBrut.match(/\d/g) ?? []).length >= 8
+    ? telephoneBrut
+    : '';
 
+  // Le premier lien externe de la fiche était souvent la page Facebook de
+  // RichBourse (pied de page) : 28 SGI l'avaient pour « site officiel ».
   const siteWeb =
     $('a[href^="http"]')
-      .filter((_, a) => !/richbourse\.com/i.test($(a).attr('href') ?? ''))
+      .filter((_, a) => !LIENS_NON_SITE.test($(a).attr('href') ?? ''))
       .first()
       .attr('href') ?? valueForLabel($, ['site web', 'site internet', 'site']);
 

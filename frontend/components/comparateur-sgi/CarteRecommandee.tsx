@@ -1,6 +1,6 @@
 import type { CoutSGIResult } from '@/lib/sgi-frais/calculateur';
 import type { SgiFrais, ConfianceNiveau } from '@/lib/sgi-frais/types';
-import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS } from '@/lib/sgi-frais/types';
+import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS, lienDecision } from '@/lib/sgi-frais/types';
 import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 
 function fmt(n: number): string {
@@ -33,6 +33,7 @@ export function CarteRecommandee({
   seuilPct: number | null;
 }) {
   const confiance: ConfianceNiveau = sgi.confiance;
+  const decision = lienDecision(sgi);
   const lien = directory?.ficheBRVM ?? directory?.siteWeb ?? null;
   const paysNom = directory ? PAYS[directory.pays].nom : null;
 
@@ -54,6 +55,11 @@ export function CarteRecommandee({
           <span className={`mt-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CONFIANCE_BADGE_CLASS[confiance]}`}>
             {CONFIANCE_LABEL[confiance]}
           </span>
+          {decision && (
+            <a href={decision} target="_blank" rel="noopener" className="ml-2 text-[11px] text-accent hover:underline">
+              Décision officielle (PDF) ↗
+            </a>
+          )}
         </div>
         <div className="text-right">
           <p className="tabular font-display text-2xl font-bold text-up">{fmt(resultat.total)}</p>

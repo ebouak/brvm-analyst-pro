@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
-import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS } from '@/lib/sgi-frais/types';
+import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS, lienDecision } from '@/lib/sgi-frais/types';
 import { scorerSgi, type ProfilInvestisseur, type SgiMatch } from '@/lib/sgi-frais/moteur';
 
 /**
@@ -251,6 +251,9 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                   )}
                   {m.sgi.ficheBRVM && (
                     <a href={m.sgi.ficheBRVM} target="_blank" rel="nofollow noopener" className="text-accent hover:underline">Fiche BRVM ↗</a>
+                  )}
+                  {lienDecision(m.frais) && (
+                    <a href={lienDecision(m.frais)!} target="_blank" rel="noopener" className="text-accent hover:underline">Barème officiel (PDF) ↗</a>
                   )}
                 </div>
               </article>

@@ -98,6 +98,30 @@ describe('parseSgiContactFiche', () => {
     expect(f.telephone).toBeNull();
     expect(f.tarifsUrl).toBeNull();
   });
+
+  // Défaut constaté le 2026-11-04 : 28 SGI de l'annuaire avaient pour « site
+  // officiel » la page Facebook de RichBourse (lien du pied de page), et trois
+  // un paragraphe éditorial à la place du téléphone.
+  it("n'adopte jamais un lien de réseau social comme site officiel", () => {
+    const f = parseSgiContactFiche(
+      '<main><p>SGI sans site</p></main><footer><a href="https://www.facebook.com/richbourse">Facebook</a><a href="https://twitter.com/richbourse">X</a></footer>',
+    );
+    expect(f.siteWeb).toBeNull();
+  });
+
+  it("garde le site de la SGI même si un lien social le précède", () => {
+    const f = parseSgiContactFiche(
+      '<a href="https://www.linkedin.com/company/x">in</a><a href="https://www.sgi-exemple.com/">Site</a>',
+    );
+    expect(f.siteWeb).toBe('https://www.sgi-exemple.com/');
+  });
+
+  it("refuse un texte qui n'est pas un numéro de téléphone", () => {
+    const f = parseSgiContactFiche(
+      '<table><tr><th>Téléphone</th><td>La diaspora peut générer des revenus en bourse</td></tr></table>',
+    );
+    expect(f.telephone).toBeNull();
+  });
 });
 
 describe('normalizeSgiName', () => {
