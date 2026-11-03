@@ -1,6 +1,6 @@
 // scraper/src/headless/obscura.ts
-import puppeteer from 'puppeteer';
-import type { Browser, Page, ConnectOptions } from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import type { Browser, Page, ConnectOptions } from 'puppeteer-core';
 import { logger } from '../logger.js';
 import type { HeadlessBrowser, HeadlessPage, HeadlessConfig, CookieObject } from './types.js';
 import { HeadlessError } from './types.js';
