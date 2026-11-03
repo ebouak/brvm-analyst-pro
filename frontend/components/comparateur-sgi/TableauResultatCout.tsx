@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import type { CoutSGIResult } from '@/lib/sgi-frais/calculateur';
 import { estSousDepotMinimum } from '@/lib/sgi-frais/calculateur';
 import type { SgiFrais, ConfianceNiveau, Frequence } from '@/lib/sgi-frais/types';
-import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS } from '@/lib/sgi-frais/types';
+import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS, lienDecision } from '@/lib/sgi-frais/types';
 import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 
 type SortKey = 'sgiNom' | 'pays' | 'depotMinimum' | 'courtagePct' | 'gardePct' | 'total';
@@ -32,6 +32,8 @@ interface Row {
   gardePct: number | null;
   gardeFreq: Frequence | null;
   confiance: ConfianceNiveau;
+  /** PDF de la décision d'homologation, quand elle est la source du barème. */
+  decision: string | null;
   total: number;
   sousDepotMin: boolean;
   champCourtageManquant: boolean;
@@ -76,6 +78,7 @@ export function TableauResultatCout({
           gardePct,
           gardeFreq: sgi?.droitsGardeFrequence ?? null,
           confiance: sgi?.confiance ?? 'saisie_utilisateur',
+          decision: lienDecision(sgi),
           total: r.total,
           sousDepotMin: sgi ? estSousDepotMinimum(sgi, montant) : false,
           champCourtageManquant: r.champsManquants.includes('courtage'),
@@ -149,8 +152,13 @@ export function TableauResultatCout({
                 <td className="px-3 py-2">
                   <span className="font-medium text-white">{r.sgiNom}</span>
                   {i === 0 && <span className="ml-2 text-[10px] text-up">★ moins cher</span>}
-                  <div className="mt-0.5">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2">
                     <Badge niveau={r.confiance} />
+                    {r.decision && (
+                      <a href={r.decision} target="_blank" rel="noopener" className="text-[10px] text-accent hover:underline">
+                        Décision (PDF) ↗
+                      </a>
+                    )}
                   </div>
                 </td>
                 <td className="px-3 py-2 text-muted">{r.pays}</td>

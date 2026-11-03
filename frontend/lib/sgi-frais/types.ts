@@ -49,6 +49,16 @@ export const CONFIANCE_LABEL: Record<ConfianceNiveau, string> = {
   saisie_utilisateur: 'Estimation saisie par vous',
 };
 
+/**
+ * Lien vers la décision d'homologation (PDF publié sur brvm.org), seulement
+ * quand elle est la source du barème. Une liste tierce (RichBourse, SikaFinance)
+ * n'est jamais présentée comme la décision officielle.
+ */
+export function lienDecision(frais: Pick<SgiFrais, 'confiance' | 'sourceUrl'> | null | undefined): string | null {
+  if (!frais || frais.confiance !== 'homologue_crepmf' || !frais.sourceUrl) return null;
+  return /^https:\/\/www\.brvm\.org\/.+\.pdf$/i.test(frais.sourceUrl) ? frais.sourceUrl : null;
+}
+
 export const CONFIANCE_BADGE_CLASS: Record<ConfianceNiveau, string> = {
   homologue_crepmf: 'bg-up/15 text-up border-up/30',
   agrege_public: 'bg-info/15 text-info border-info/30',

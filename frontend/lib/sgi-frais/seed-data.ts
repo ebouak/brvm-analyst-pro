@@ -44,7 +44,7 @@ function base(partial: Partial<SgiFrais> & { sgiNom: string }): SgiFrais {
 export const SGI_FRAIS_SEED: SgiFrais[] = [
   base({ sgiNom: 'EDC Investment Corporation', courtagePctMax: 1.0, droitsGardePctMax: 0.5, droitsGardeFrequence: 'annuel', tenueCompteMontant: 2500, tenueCompteFrequence: 'trimestriel', depotMinimum: 1_000_000 }),
   base({
-    sgiNom: 'SOGEBOURSE',
+    sgiNom: 'Société Générale Capital Securities West Africa',
     courtagePctMax: 0.8,
     minimumPerception: 1000,
     droitsGardePctMin: 0.26,
@@ -87,7 +87,6 @@ export const SGI_FRAIS_SEED: SgiFrais[] = [
   base({ sgiNom: 'Hudson & Cie', courtagePctMax: 1.0, droitsGardePctMax: 0.25, droitsGardeFrequence: 'annuel', tenueCompteMontant: 0, tenueCompteFrequence: 'annuel', depotMinimum: 500_000 }),
   base({ sgiNom: 'Phoenix Capital Management', courtagePctMax: 1.0, droitsGardePctMax: 0.25, droitsGardeFrequence: 'annuel', tenueCompteMontant: 0, tenueCompteFrequence: 'annuel', depotMinimum: 200_000 }),
   base({ sgiNom: 'Sirius Capital', courtagePctMax: 1.0, droitsGardePctMax: 0.25, droitsGardeFrequence: 'annuel', tenueCompteMontant: 0, tenueCompteFrequence: 'annuel', depotMinimum: 0 }),
-  base({ sgiNom: 'Africaine de Bourse', courtagePctMax: 1.0, droitsGardePctMax: 0.4, droitsGardeFrequence: 'annuel', tenueCompteMontant: 25_000, tenueCompteFrequence: 'annuel', depotMinimum: 1_000_000 }),
   base({ sgiNom: 'CGF Bourse', courtagePctMax: 1.0, droitsGardePctMax: 0.25, droitsGardeFrequence: 'annuel', tenueCompteMontant: 0, tenueCompteFrequence: 'annuel', depotMinimum: 0 }),
   base({ sgiNom: 'Impaxis Securities', courtagePctMax: 0.8, minimumPerception: 2000, droitsGardePctMax: 0.05, droitsGardeFrequence: 'trimestriel', tenueCompteMontant: 2000, tenueCompteFrequence: 'annuel', depotMinimum: 250_000, notes: 'Décision d\'homologation CREPMF individuelle localisée sur brvm.org mais non encore dépouillée — candidate prioritaire pour passer en niveau "homologue_crepmf" (voir /admin/sgi-frais).' }),
   base({ sgiNom: 'Everest Finance', courtagePctMax: 0.9, droitsGardePctMax: 0.5, droitsGardeFrequence: 'annuel', tenueCompteMontant: 0, tenueCompteFrequence: 'annuel', depotMinimum: 0 }),
