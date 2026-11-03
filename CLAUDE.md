@@ -1303,11 +1303,17 @@ tables et la fonction). 1332 tests frontend verts.
 - Erreurs nettoyées avant stockage (`lib/qa/nettoyer.ts`) ; stdout/stderr retirés
   dès la CI. Bucket privé `qa-artefacts`, pièces jointes 30 j, exécutions 180 j.
   ⚠️ Ne JAMAIS publier traces/rapports comme artefacts GitHub : dépôt public.
-- **Scénarios Premium du screener IGNORÉS en CI** (choix de l'exploitant,
-  option b) : la connexion passe par un code e-mail derrière Turnstile, aucun
-  compte de test ne peut se connecter seul. Ils se lancent en local avec
-  `PW_PREMIUM_STATE=<storageState.json>`. Une route de session de test serait
-  une nouvelle porte d'entrée en production : à concevoir à part.
+- **Tests connectés (8) IGNORÉS en CI, lancés EN LOCAL** (choix de
+  l'exploitant) : Supabase exige le jeton Turnstile même pour une connexion par
+  mot de passe (`captcha_failed`, vérifié), la CI ne peut pas se connecter.
+  `npm run e2e:connecte` (`scripts/qa-sessions-locales.mjs`) prépare les comptes
+  `qa-e2e-actif@` (Premium, 2 positions) et `qa-e2e-debutant@` (sans position),
+  ouvre leurs sessions avec la clé de `.env.local` et lance toute la suite :
+  37/37 le 2026-11-03. `--fermer` révoque les sessions. Comptes marqués
+  `app_metadata.qa_e2e`, exclus du CRM, jamais admin, onboarding passé.
+  ⚠️ Une route qui ouvrirait une session pour la CI a été REFUSÉE par le
+  garde-fou de sécurité de Claude Code puis écartée par l'exploitant : ne pas la
+  recréer sans décision explicite.
 
 ## 9. Bugs connus / limites
 
