@@ -6,10 +6,13 @@ import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS, lienDecision } from '@/lib/sgi-frais/types';
 import { scorerSgi, type ProfilInvestisseur, type SgiMatch } from '@/lib/sgi-frais/moteur';
 import Link from 'next/link';
+import { Check, CheckCircle2, Globe2, Target } from 'lucide-react';
 import { drapeau, slugSgi } from '@/lib/sgi-frais/identite';
 import { ORDRES_MAX, lienAvecScenario, type Scenario } from '@/lib/sgi-frais/scenario';
 
 type Priorite = ProfilInvestisseur['priorite'];
+
+const ETAPES = ['Pays de résidence', 'Montant à investir', 'Fréquence d’opérations', 'Passage des ordres', 'Vos priorités'];
 
 /** Pays de résidence proposés : UEMOA entière, Guinée-Bissau comprise, même
  * sans SGI qui y ait son siège (le marché régional lui est ouvert). */
@@ -83,29 +86,30 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
     {
       titre: 'Où résidez-vous ?',
       contenu: (
-        <div className="flex flex-wrap gap-2">
-          {RESIDENCES.map(({ code, nom }) => (
-            <button
-              key={code} type="button"
-              onClick={() => { setPays(code); setStep(1); }}
-              aria-pressed={pays === code}
-              className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 text-sm transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95 ${
-                pays === code ? 'border-accent/60 bg-accent/15 text-ivory' : 'border-border bg-surface/40 text-ivory'
-              }`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={drapeau(code)} alt="" width={18} height={12} className="h-3 w-[18px] rounded-[2px]" />
-              {nom}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => { setPays('DIASPORA'); setStep(1); }}
-            className="rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-medium text-accent transition-all hover:bg-accent/20 active:scale-95"
-          >
-            Diaspora (hors UEMOA)
-          </button>
-          <p className="mt-1 w-full text-[12px] leading-relaxed text-faint">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5">
+          {[...RESIDENCES, { code: 'DIASPORA', nom: 'Diaspora (hors UEMOA)' }].map(({ code, nom }) => {
+            const choisi = pays === code;
+            return (
+              <button
+                key={code} type="button"
+                onClick={() => { setPays(code); setStep(1); }}
+                aria-pressed={choisi}
+                className={`relative flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-xl border px-2 py-3 text-center text-[13px] font-medium transition-all hover:-translate-y-0.5 hover:border-accent/50 active:scale-95 ${
+                  choisi ? 'border-accent bg-nuit text-sur-nuit shadow-[0_8px_24px_-12px_rgb(var(--color-accent)/0.6)]' : 'border-border bg-surface text-ivory'
+                }`}
+              >
+                {choisi && <CheckCircle2 size={16} aria-hidden className="absolute right-2 top-2 text-accent-nuit" />}
+                {code === 'DIASPORA' ? (
+                  <Globe2 size={26} aria-hidden className={choisi ? 'text-accent-nuit' : 'text-accent'} />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={drapeau(code)} alt="" width={36} height={24} className="h-6 w-9 rounded-[3px] ring-1 ring-border" />
+                )}
+                {nom}
+              </button>
+            );
+          })}
+          <p className="col-span-full mt-1 text-[12px] leading-relaxed text-faint">
             Aucune SGI n’a son siège en Guinée-Bissau : celles des autres pays de l’UEMOA vous sont ouvertes, le marché étant régional.
           </p>
         </div>
@@ -211,7 +215,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
   return (
     <section id="moteur-sgi" className="scroll-mt-24 rounded-panel border border-accent/25 bg-accent/[0.04] p-6 md:p-8">
-      <p className="overline mb-2 text-gold-2">Étape 1 · Moteur de choix (exclusif)</p>
+      <p className="overline mb-2 text-gold-2">Questionnaire en 5 étapes</p>
       <h2 className="mb-1 font-display text-2xl text-ivory [letter-spacing:-0.03em]">
         Quelle SGI est faite pour vous ?
       </h2>
@@ -223,27 +227,75 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
       {!profil ? (
         <div>
-          {/* Barre de progression */}
-          <div className="mb-5 flex items-center gap-2">
-            {QUESTIONS.map((_, i) => (
-              <span
-                key={i}
-                className={`h-1.5 flex-1 rounded-full transition-colors ${i < step ? 'bg-accent' : i === step ? 'bg-accent/50' : 'bg-border'}`}
-              />
-            ))}
-            <span className="ml-2 font-mono text-[11px] text-faint">{step + 1}/5</span>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px] lg:items-start">
+            <div>
+              {/* Étapes nommées : une étape déjà répondue se rouvre d'un clic. */}
+              <ol className="mb-6 grid grid-cols-5 gap-1" aria-label="Étapes du questionnaire">
+                {ETAPES.map((libelle, i) => {
+                  const fait = i < step;
+                  const actif = i === step;
+                  return (
+                    <li key={libelle} className="relative flex flex-col items-center text-center" aria-current={actif ? 'step' : undefined}>
+                      {i > 0 && (
+                        <span aria-hidden className={`absolute right-1/2 top-4 h-0.5 w-full -translate-y-1/2 transition-colors ${i <= step ? 'bg-accent' : 'bg-border'}`} />
+                      )}
+                      <button
+                        type="button"
+                        disabled={i > step}
+                        onClick={() => setStep(i)}
+                        aria-label={`Étape ${i + 1} : ${libelle}`}
+                        className={`relative z-10 grid h-8 w-8 place-items-center rounded-full border text-[13px] font-bold transition-colors disabled:cursor-default ${
+                          actif ? 'border-accent bg-accent text-bg' : fait ? 'border-accent bg-nuit text-accent-nuit hover:bg-accent hover:text-bg' : 'border-border bg-surface text-faint'
+                        }`}
+                      >
+                        {fait ? <Check size={14} aria-hidden /> : i + 1}
+                      </button>
+                      <span className={`mt-1.5 hidden text-[11.5px] leading-tight sm:block ${actif ? 'font-semibold text-ivory' : 'text-muted'}`}>{libelle}</span>
+                    </li>
+                  );
+                })}
+              </ol>
+              <p className="mb-1 text-[12px] font-medium text-accent">
+                Étape {step + 1} sur {ETAPES.length}
+              </p>
+              <p className="mb-4 font-display text-xl text-ivory">{QUESTIONS[step].titre}</p>
+              {QUESTIONS[step].contenu}
+              {/* Progression = étapes RÉPONDUES : 0 % tant que rien n'est saisi. */}
+              <div className="mt-6 flex items-center gap-3">
+                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
+                  <span className="block h-full rounded-full bg-accent transition-[width] duration-500" style={{ width: `${Math.round((step / ETAPES.length) * 100)}%` }} />
+                </span>
+                <span className="tabular text-[12px] text-muted">{Math.round((step / ETAPES.length) * 100)} %</span>
+              </div>
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  className="mt-3 inline-flex min-h-[36px] items-center text-xs text-muted underline-offset-4 hover:text-ivory hover:underline"
+                >
+                  ← Question précédente
+                </button>
+              )}
+            </div>
+
+            <aside className="relative overflow-hidden rounded-panel bg-nuit p-5 text-sur-nuit" aria-label="Ce que vous obtenez">
+              <Target aria-hidden strokeWidth={1.2} className="mb-3 h-14 w-14 text-accent-nuit" />
+              <p className="mb-3 font-display text-lg">À la fin, vous obtenez :</p>
+              <ul className="space-y-2.5 text-[13.5px] leading-snug text-sur-nuit/85">
+                {[
+                  `Le classement des ${directory.length} SGI selon votre profil`,
+                  'Le coût estimé de votre scénario, SGI par SGI',
+                  'Les raisons de chaque score, critère par critère',
+                  'Les liens vers les barèmes officiels',
+                ].map((t) => (
+                  <li key={t} className="flex gap-2">
+                    <CheckCircle2 size={16} aria-hidden className="mt-0.5 flex-none text-accent-nuit" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </aside>
           </div>
-          <p className="mb-4 font-display text-lg text-ivory">{QUESTIONS[step].titre}</p>
-          {QUESTIONS[step].contenu}
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={() => setStep(step - 1)}
-              className="mt-4 text-xs text-muted underline-offset-4 hover:text-ivory hover:underline"
-            >
-              ← Question précédente
-            </button>
-          )}
         </div>
       ) : (
         <div>

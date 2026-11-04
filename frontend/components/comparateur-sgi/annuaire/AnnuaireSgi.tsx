@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, LayoutGrid, List, Search } from 'lucide-react';
 import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { drapeau, slugSgi } from '@/lib/sgi-frais/identite';
 import {
   FILTRES_DEFAUT,
+  courtagePublieMax,
   entreesAnnuaire,
   filtrerAnnuaire,
   filtresActifs,
@@ -38,7 +39,18 @@ function monogram(nom: string): string {
 
 /* ── Carte SGI ─────────────────────────────────────────────────────────── */
 
-export function SgiCard({ s, frais, cout }: { s: Sgi; frais?: SgiFrais; cout?: Pick<EntreeAnnuaire, 'cout' | 'complet'> }) {
+export function SgiCard({
+  s,
+  frais,
+  cout,
+  meilleur = false,
+}: {
+  s: Sgi;
+  frais?: SgiFrais;
+  cout?: Pick<EntreeAnnuaire, 'cout' | 'complet'>;
+  /** La moins chère de la sélection (barème complet). */
+  meilleur?: boolean;
+}) {
   const p = PAYS[s.pays];
   // Courtage RÉEL du barème de la SGI (mêmes données que le simulateur).
   const courtageMax = frais?.courtagePctMax ?? frais?.courtagePctMin ?? null;
@@ -98,25 +110,6 @@ export function SgiCard({ s, frais, cout }: { s: Sgi; frais?: SgiFrais; cout?: P
       </div>
 
       <dl className="mt-auto grid gap-2.5 border-t border-border pt-3.5 text-[13.5px]">
-        {cout && (
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-faint">Coût estimé*</dt>
-            <dd className="text-[12.5px] font-medium">
-              {cout.cout == null ? (
-                <span className="text-faint">sans barème</span>
-              ) : (
-                <>
-                  <span className="tabular text-ivory">{fmtFcfa(cout.cout)}</span>
-                  {!cout.complet && (
-                    <span className="ml-1 text-[10px] text-warn" title="Un poste du barème manque : le coût réel est plus élevé">
-                      incomplet
-                    </span>
-                  )}
-                </>
-              )}
-            </dd>
-          </div>
-        )}
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-faint">Dépôt min.</dt>
           <dd className="tabular text-[12.5px] font-medium text-ivory">
@@ -185,12 +178,36 @@ export function SgiCard({ s, frais, cout }: { s: Sgi; frais?: SgiFrais; cout?: P
       )}
       {/* Pousse le lien en pied de carte : grilles alignées, quelle que soit la hauteur. */}
       <div aria-hidden className="min-h-3.5 flex-1" />
+      {/* Pied de carte : le coût estimé, cliquable vers la fiche. */}
       <Link
         href={`/comparateur-sgi/annuaire/${slugSgi(s)}`}
-        className="inline-flex min-h-[40px] items-center justify-between gap-2 border-t border-border pt-3 text-[13px] font-semibold text-accent transition-colors hover:text-ivory"
+        className={`group flex min-h-[64px] items-center justify-between gap-3 rounded-xl border px-4 py-3 transition-colors ${
+          meilleur ? 'border-up/40 bg-up/[0.07] hover:border-up/70' : 'border-border bg-elevated/40 hover:border-accent/40'
+        }`}
       >
-        Fiche détaillée
-        <ArrowRight size={15} aria-hidden />
+        <span className="min-w-0">
+          <span className="block text-[11.5px] text-faint">{cout ? 'Coût estimé* (scénario de référence)' : 'Fiche détaillée'}</span>
+          {cout &&
+            (cout.cout == null ? (
+              <span className="block text-[14px] text-faint">Sans barème référencé</span>
+            ) : (
+              <span className="flex flex-wrap items-baseline gap-x-2">
+                <span className={`tabular font-display text-xl font-bold ${meilleur ? 'text-up' : 'text-ivory'}`}>{fmtFcfa(cout.cout)}</span>
+                {!cout.complet && (
+                  <span className="text-[11px] text-warn" title="Un poste du barème manque : le coût réel est plus élevé">
+                    barème incomplet
+                  </span>
+                )}
+              </span>
+            ))}
+          <span className="sr-only"> — voir la fiche de {s.nom}</span>
+        </span>
+        <span
+          aria-hidden
+          className="grid h-9 w-9 flex-none place-items-center rounded-full border border-accent/40 text-accent transition-colors group-hover:bg-accent group-hover:text-bg"
+        >
+          <ArrowRight size={16} />
+        </span>
       </Link>
     </article>
   );
@@ -244,6 +261,12 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
   const set = (p: Partial<FiltresAnnuaire>) => setF((x) => ({ ...x, ...p }));
   const list = useMemo(() => trierAnnuaire(filtrerAnnuaire(entrees, f), tri), [entrees, f, tri]);
   const actifs = filtresActifs(f);
+  const [vue, setVue] = useState<'grille' | 'liste'>('grille');
+  // La moins chère de la sélection affichée, parmi les barèmes complets seulement.
+  const meilleurNom = useMemo(
+    () => list.filter((e) => e.cout != null && e.complet).sort((a, b) => a.cout! - b.cout!)[0]?.sgi.nom ?? null,
+    [list],
+  );
   const courtages = useMemo(
     () => [
       { v: 'tous', l: 'Tout courtage' },
@@ -328,17 +351,100 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
         })}
       </div>
 
-      <p className="mt-5 text-[12.5px] text-faint" aria-live="polite">
-        <span className="tabular">{list.length > 1 ? `${list.length} SGI affichées` : `${list.length} SGI affichée`}</span>
-        {' · '}*coût estimé hors taxes pour {fmtFcfa(SCENARIO_DEFAUT.montant)} sur un an, {SCENARIO_DEFAUT.nbAchats} achats et {SCENARIO_DEFAUT.nbVentes} ventes,
-        frais BRVM et DC/BR compris.
-      </p>
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[12.5px] text-faint" aria-live="polite">
+          <span className="tabular font-semibold text-ivory">{list.length > 1 ? `${list.length} SGI trouvées` : `${list.length} SGI trouvée`}</span>
+          {' · '}*coût estimé hors taxes pour {fmtFcfa(SCENARIO_DEFAUT.montant)} sur un an, {SCENARIO_DEFAUT.nbAchats} achats et {SCENARIO_DEFAUT.nbVentes} ventes,
+          frais BRVM et DC/BR compris.
+        </p>
+        <div className="flex rounded-lg border border-border p-0.5" role="group" aria-label="Affichage">
+          {([
+            ['grille', LayoutGrid, 'Grille'],
+            ['liste', List, 'Liste'],
+          ] as const).map(([v, Icone, libelle]) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={vue === v}
+              aria-label={`Affichage en ${libelle.toLowerCase()}`}
+              onClick={() => setVue(v)}
+              className={`grid h-9 w-9 place-items-center rounded-md transition-colors ${vue === v ? 'bg-nuit text-sur-nuit' : 'text-muted hover:text-ivory'}`}
+            >
+              <Icone size={16} aria-hidden />
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {list.length > 0 ? (
+      {list.length > 0 && vue === 'grille' ? (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((e) => (
-            <SgiCard key={e.sgi.nom} s={e.sgi} frais={fraisByNom.get(e.sgi.nom)} cout={e} />
+            <SgiCard key={e.sgi.nom} s={e.sgi} frais={fraisByNom.get(e.sgi.nom)} cout={e} meilleur={e.sgi.nom === meilleurNom} />
           ))}
+        </div>
+      ) : list.length > 0 ? (
+        <div className="mt-4 overflow-x-auto rounded-panel border border-border bg-surface">
+          <table className="w-full min-w-[640px] text-sm">
+            <caption className="sr-only">Annuaire des SGI en liste</caption>
+            <thead>
+              <tr className="border-b border-border text-left text-[11px] text-faint">
+                <th scope="col" className="px-4 py-3 font-medium">SGI</th>
+                <th scope="col" className="px-3 py-3 font-medium">Barème</th>
+                <th scope="col" className="px-3 py-3 text-right font-medium">Courtage max.</th>
+                <th scope="col" className="hidden px-3 py-3 font-medium md:table-cell">Dépôt min.</th>
+                <th scope="col" className="px-3 py-3 text-right font-medium">Coût estimé*</th>
+                <th scope="col" className="px-4 py-3">
+                  <span className="sr-only">Fiche</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((e) => {
+                const top = e.sgi.nom === meilleurNom;
+                const c = courtagePublieMax(e.frais);
+                return (
+                  <tr key={e.sgi.nom} className={`border-b border-border/60 last:border-0 ${top ? 'bg-up/[0.06]' : ''}`}>
+                    <td className="px-4 py-3">
+                      <span className="flex items-center gap-2.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={drapeau(e.sgi.pays)} alt={PAYS[e.sgi.pays]?.nom ?? ''} width={20} height={13} className="h-[13px] w-5 flex-none rounded-[2px] ring-1 ring-border" />
+                        <span className="font-medium text-ivory">{e.sgi.nom}</span>
+                      </span>
+                    </td>
+                    <td className="px-3 py-3">
+                      {e.frais ? (
+                        <span
+                          className={`inline-block rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${
+                            e.frais.confiance === 'homologue_crepmf' ? 'border-up/30 bg-up/10 text-up' : 'border-border text-muted'
+                          }`}
+                        >
+                          {e.frais.confiance === 'homologue_crepmf' ? 'Homologué' : 'À confirmer'}
+                        </span>
+                      ) : (
+                        <span className="text-[12px] text-faint">Aucun</span>
+                      )}
+                    </td>
+                    <td className="tabular px-3 py-3 text-right text-muted">
+                      {c != null ? `${c.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %` : '—'}
+                    </td>
+                    <td className="tabular hidden px-3 py-3 text-muted md:table-cell">{e.sgi.depotMin}</td>
+                    <td className={`tabular px-3 py-3 text-right font-semibold ${top ? 'text-up' : 'text-ivory'}`}>
+                      {e.cout != null ? fmtFcfa(e.cout) : <span className="font-normal text-faint">—</span>}
+                      {e.cout != null && !e.complet && <span className="block text-[10px] font-normal text-warn">barème incomplet</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        href={`/comparateur-sgi/annuaire/${slugSgi(e.sgi)}`}
+                        className="inline-flex min-h-[32px] items-center rounded-full border border-accent/40 px-3 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/10"
+                      >
+                        Fiche
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className="mt-4 rounded-panel border border-dashed border-border px-5 py-14 text-center">
