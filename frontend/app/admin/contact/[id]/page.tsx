@@ -13,7 +13,8 @@ function fmtDate(d: string): string {
   return new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const ctx = await requirePermission('support.read');
   if (!/^[0-9a-f-]{36}$/i.test(params.id)) notFound();
   const m = await loadMessageContact(params.id);

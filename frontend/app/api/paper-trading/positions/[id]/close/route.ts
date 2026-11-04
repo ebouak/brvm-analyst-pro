@@ -6,10 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
  * Ferme une position paper trading au dernier cours connu.
  * Calcule le P&L, met à jour le compte (capital, pnl_total, pnl_pct).
  */
-export async function POST(
-  _request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function POST(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const supabase = await createClient();
     const {

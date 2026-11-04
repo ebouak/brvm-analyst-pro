@@ -4,7 +4,8 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const db = createClient();
   const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Connexion requise' }, { status: 401 });

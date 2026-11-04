@@ -24,7 +24,8 @@ function PageMessage({ titre, texte }: { titre: string; texte: string }) {
   );
 }
 
-export default async function Page({ searchParams }: { searchParams: { t?: string } }) {
+export default async function Page(props: { searchParams: Promise<{ t?: string }> }) {
+  const searchParams = await props.searchParams;
   const jeton = /^[a-f0-9]{48}$/.test(searchParams.t ?? '') ? (searchParams.t as string) : null;
   const sb = getServiceClient();
   const res = jeton

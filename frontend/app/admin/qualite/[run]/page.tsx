@@ -16,7 +16,11 @@ const STATUTS = [
   ['ignore', 'Ignorés'],
 ] as const;
 
-export default async function Page({ params, searchParams }: { params: { run: string }; searchParams: { module?: string; statut?: string } }) {
+export default async function Page(
+  props: { params: Promise<{ run: string }>; searchParams: Promise<{ module?: string; statut?: string }> }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   await requirePermission('qa.read');
 
   let donnees: Awaited<ReturnType<typeof chargerRun>>;

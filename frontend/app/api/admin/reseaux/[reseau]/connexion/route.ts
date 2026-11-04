@@ -14,7 +14,8 @@ export const dynamic = 'force-dynamic';
  * `sameSite: lax` est nécessaire — le retour est une navigation de premier
  * niveau depuis LinkedIn ou TikTok, `strict` y perdrait le cookie.
  */
-export async function GET(req: NextRequest, { params }: { params: { reseau: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ reseau: string }> }) {
+  const params = await props.params;
   await requirePermission('content.publish');
   const r = params.reseau;
   if (!estReseau(r)) return NextResponse.json({ erreur: 'Réseau inconnu.' }, { status: 404 });

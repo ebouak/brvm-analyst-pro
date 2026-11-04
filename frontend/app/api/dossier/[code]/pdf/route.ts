@@ -13,7 +13,8 @@ export const dynamic = 'force-dynamic';
 
 const DUREE_SECONDES = 600;
 
-export async function GET(_req: Request, { params }: { params: { code: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const code = params.code.toUpperCase();
   if (!/^[A-Z0-9]{2,8}$/.test(code)) {
     return NextResponse.json({ error: 'Code invalide.' }, { status: 400 });

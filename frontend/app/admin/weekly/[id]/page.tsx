@@ -14,7 +14,8 @@ function fmtDate(d: string | null): string {
   return p.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requirePermission('content.publish');
   const report = await getWeeklyReport(params.id);
   if (!report) notFound();

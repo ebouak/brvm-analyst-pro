@@ -5,9 +5,10 @@ import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { extractBankYear, computeBankKpis, scoreBanqueUemoa, bankExportSections } from '@/lib/bank/kpis';
 import PrintTrigger from '@/components/financials/PrintTrigger';
 
-interface Props { params: { code: string } }
+interface Props { params: Promise<{ code: string }> }
 
-export default async function PrintPage({ params }: Props) {
+export default async function PrintPage(props: Props) {
+  const params = await props.params;
   const code = params.code.toUpperCase();
   const data = await loadCompanyFinancials(code);
   if (!data) notFound();

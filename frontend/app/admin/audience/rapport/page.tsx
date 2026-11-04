@@ -16,7 +16,8 @@ const LIB = { jour: 'journalier', semaine: 'hebdomadaire', mois: 'mensuel' } as 
 const Indispo = () => <p className="ra-note">Indisponible : PostHog n'a pas répondu pour ce bloc.</p>;
 const Sec = ({ t, children, note }: { t: string; children: ReactNode; note?: string }) => <section><h2>{t}</h2>{children}{note && <p className="ra-note">{note}</p>}</section>;
 
-export default async function Page({ searchParams }: { searchParams: { periode?: string } }) {
+export default async function Page(props: { searchParams: Promise<{ periode?: string }> }) {
+  const searchParams = await props.searchParams;
   await requirePermission('crm.read');
   const periode = (PERIODES_RAPPORT as readonly string[]).includes(searchParams.periode ?? '') ? (searchParams.periode as (typeof PERIODES_RAPPORT)[number]) : 'semaine';
   const b = bornesPeriode(periode, new Date());

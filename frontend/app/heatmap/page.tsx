@@ -40,7 +40,7 @@ const GRADIENT_STOPS: { pct: number; bgClass: string; label: string }[] = [
 ];
 
 interface PageProps {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 async function getData(secteur: string | null) {
@@ -77,7 +77,8 @@ async function getData(secteur: string | null) {
   return { lastDate, rows, allSectors, sectorStats } as const;
 }
 
-export default async function HeatmapPage({ searchParams }: PageProps) {
+export default async function HeatmapPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   const secteurParam = typeof searchParams.secteur === 'string' ? searchParams.secteur : null;
   const result = await getData(secteurParam);
   const { lastDate, rows, allSectors } = result;

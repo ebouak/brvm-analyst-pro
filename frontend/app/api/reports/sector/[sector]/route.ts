@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { buildSectorReport } from '@/lib/reports';
 import type { Period } from '@/lib/types';
 
-export async function GET(req: NextRequest, { params }: { params: { sector: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ sector: string }> }) {
+  const params = await props.params;
   const period = (req.nextUrl.searchParams.get('period') ?? '3M') as Period;
   const supabase = createClient();
   const report = await buildSectorReport(supabase, decodeURIComponent(params.sector), period);

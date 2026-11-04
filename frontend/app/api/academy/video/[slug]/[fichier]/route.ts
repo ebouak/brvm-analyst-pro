@@ -16,7 +16,11 @@ export const dynamic = 'force-dynamic';
 // (chaque saut relit l'URL signée par plage d'octets), ne doit pas expirer.
 const DUREE_SECONDES = 2 * 60 * 60;
 
-export async function GET(_req: Request, { params }: { params: { slug: string; fichier: string } }) {
+export async function GET(
+  _req: Request,
+  props: { params: Promise<{ slug: string; fichier: string }> }
+) {
+  const params = await props.params;
   const { slug, fichier } = params;
   if (!SLUG_VALIDE.test(slug) || !FICHIER_VALIDE.test(fichier)) {
     return NextResponse.json({ error: 'Ressource invalide.' }, { status: 400 });

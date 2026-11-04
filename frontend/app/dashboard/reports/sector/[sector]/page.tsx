@@ -9,12 +9,14 @@ import type { Period } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 const PERIODS: Period[] = ['1S', '1M', '3M', '6M', '1A', 'max'];
 
-export default async function SectorReportPage({
-  params, searchParams,
-}: {
-  params: { sector: string };
-  searchParams: { period?: string };
-}) {
+export default async function SectorReportPage(
+  props: {
+    params: Promise<{ sector: string }>;
+    searchParams: Promise<{ period?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const sector = decodeURIComponent(params.sector);
   const period = (PERIODS.includes(searchParams.period as Period) ? searchParams.period : '3M') as Period;
   const supabase = createClient();

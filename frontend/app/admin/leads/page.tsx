@@ -30,7 +30,8 @@ function fmtDate(d: string | null): string {
   return p.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-export default async function Page({ searchParams }: { searchParams: { q?: string; statut?: string } }) {
+export default async function Page(props: { searchParams: Promise<{ q?: string; statut?: string }> }) {
+  const searchParams = await props.searchParams;
   const ctx = await requirePermission('leads.read');
   const search = searchParams.q ?? '';
   const statut = searchParams.statut ?? 'tous';

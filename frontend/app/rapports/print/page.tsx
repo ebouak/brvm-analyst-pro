@@ -66,7 +66,10 @@ async function portfolioBlock() {
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
-export default async function ReportPrintPage({ searchParams }: { searchParams: { blocs?: string; code?: string; secteur?: string } }) {
+export default async function ReportPrintPage(
+  props: { searchParams: Promise<{ blocs?: string; code?: string; secteur?: string }> }
+) {
+  const searchParams = await props.searchParams;
   const blocks = parseBlocks(searchParams.blocs);
   const code = searchParams.code?.toUpperCase();
   const secteur = searchParams.secteur;

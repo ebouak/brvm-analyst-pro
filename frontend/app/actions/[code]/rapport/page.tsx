@@ -7,7 +7,7 @@ import type { SignalDaily } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-interface Props { params: { code: string } }
+interface Props { params: Promise<{ code: string }> }
 
 const fFCFA = (n: number | null | undefined) => (n != null ? `${Math.round(n).toLocaleString('fr-FR')} FCFA` : '—');
 const fPct = (n: number | null | undefined, d = 1) => (n != null ? `${n >= 0 ? '+' : ''}${(n * 100).toFixed(d)}%` : '—');
@@ -18,7 +18,8 @@ const STANCE_LABEL: Record<string, string> = {
 };
 const SIGNAL_LABEL: Record<string, string> = { BUY: 'ACHAT', SELL: 'VENTE', HOLD: 'CONSERVER' };
 
-export default async function RapportPage({ params }: Props) {
+export default async function RapportPage(props: Props) {
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   const supabase = createClient();
 

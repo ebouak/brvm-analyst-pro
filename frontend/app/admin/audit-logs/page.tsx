@@ -24,11 +24,12 @@ const SEVERITY_STYLE: Record<string, string> = {
   critical: 'text-down font-semibold',
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { critical?: string; action?: string };
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<{ critical?: string; action?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   await requirePermission('audit.read');
 
   const criticalOnly = searchParams.critical === '1';

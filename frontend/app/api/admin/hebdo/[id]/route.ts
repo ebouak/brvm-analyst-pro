@@ -4,7 +4,8 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requirePermission('content.publish');
   const body = (await req.json()) as { statut?: 'brouillon' | 'publie' };
   if (body.statut !== 'brouillon' && body.statut !== 'publie') {

@@ -9,7 +9,8 @@ import { canAccess } from '@/lib/server/featureAccess';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Saisonnalité' };
 
-export default async function SaisonnalitePage({ searchParams }: { searchParams?: { code?: string } }) {
+export default async function SaisonnalitePage(props: { searchParams?: Promise<{ code?: string }> }) {
+  const searchParams = await props.searchParams;
   // Niveau requis LU EN BASE. En cas de refus on n'affiche pas une porte fermee :
   // on bascule en APERCU (mois en cours seulement) — l'essai limite demande.
   const gate = await canAccess('saisonnalite');

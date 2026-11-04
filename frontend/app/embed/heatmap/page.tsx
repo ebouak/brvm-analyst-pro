@@ -22,11 +22,12 @@ function tileClass(v: number | null): string {
   return 'bg-[#ff6b6b] text-[#2b0303]';
 }
 
-export default async function EmbedHeatmapPage({
-  searchParams,
-}: {
-  searchParams: { theme?: string; lang?: string };
-}) {
+export default async function EmbedHeatmapPage(
+  props: {
+    searchParams: Promise<{ theme?: string; lang?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const theme = parseTheme(searchParams.theme);
   const lang = parseLang(searchParams.lang);
 

@@ -12,7 +12,8 @@ interface SubmitBody {
   answers: { id: string; options: string[]; choix: number }[];
 }
 
-export async function POST(req: NextRequest, { params }: { params: { niveau: string } }) {
+export async function POST(req: NextRequest, props: { params: Promise<{ niveau: string }> }) {
+  const params = await props.params;
   const niveau = params.niveau;
   if (!isNiveau(niveau)) return NextResponse.json({ error: 'Niveau inconnu' }, { status: 404 });
 

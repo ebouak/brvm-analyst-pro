@@ -17,7 +17,8 @@ interface MonthlyReport {
   created_at: string;
 }
 
-export default async function ReportDetailPage({ params }: { params: { month: string } }) {
+export default async function ReportDetailPage(props: { params: Promise<{ month: string }> }) {
+  const params = await props.params;
   const supabase = await createClient();
 
   // Get current user

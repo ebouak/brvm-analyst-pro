@@ -18,7 +18,8 @@ type Params = { page?: string; env?: string; verdict?: string; module?: string }
  * loading.tsx au-dessus des pages de détail, qui appellent notFound(), ferait
  * répondre 200 sur un identifiant inconnu (règle soft-404 de CLAUDE.md).
  */
-export default async function Page({ searchParams }: { searchParams: Params }) {
+export default async function Page(props: { searchParams: Promise<Params> }) {
+  const searchParams = await props.searchParams;
   await requirePermission('qa.read');
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">

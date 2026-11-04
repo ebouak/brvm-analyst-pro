@@ -73,11 +73,12 @@ function buildRaw(map: Record<string, ActionDaily[]>, codes: string[]): CompareP
 
 // -- Page --
 
-export default async function ComparePage({
-  searchParams,
-}: {
-  searchParams: { codes?: string; period?: string; mode?: string };
-}) {
+export default async function ComparePage(
+  props: {
+    searchParams: Promise<{ codes?: string; period?: string; mode?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const codes = (searchParams.codes ?? '')
     .split(',')
     .map((c) => c.trim().toUpperCase())

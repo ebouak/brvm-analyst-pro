@@ -12,7 +12,8 @@ export const metadata = { title: 'Éditer l’analyse — Administration' };
 // La route liste /admin/analyses/nouvelle passe ici via [slug]='nouvelle' ? Non :
 // Next donne priorité au segment statique /nouvelle. Ce [slug] ne capte donc que
 // les vrais slugs de pages existantes.
-export default async function EditAnalysePage({ params }: { params: { slug: string } }) {
+export default async function EditAnalysePage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   await requirePermission('content.write');
   const db = getServiceClient();
   const { data } = await db.from('citable_pages').select('*').eq('slug', params.slug).maybeSingle();

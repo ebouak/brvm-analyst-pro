@@ -17,11 +17,12 @@ async function getEvents(type?: string, source?: string, code?: string) {
   return (data ?? []) as MarketEvent[];
 }
 
-export default async function EventsListPage({
-  searchParams,
-}: {
-  searchParams: { type?: string; source?: string; code?: string };
-}) {
+export default async function EventsListPage(
+  props: {
+    searchParams: Promise<{ type?: string; source?: string; code?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const events = await getEvents(searchParams.type, searchParams.source, searchParams.code);
 
   return (

@@ -6,12 +6,14 @@ import CoursePlayer from '@/components/formations/CoursePlayer';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: { course: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ course: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const course = await getCourse(params.course).catch(() => null);
   return { title: course ? `${course.titre} — Formations` : 'Module introuvable' };
 }
 
-export default async function CoursePage({ params }: { params: { course: string } }) {
+export default async function CoursePage(props: { params: Promise<{ course: string }> }) {
+  const params = await props.params;
   const course = await getCourse(params.course).catch(() => null);
   if (!course) notFound();
 

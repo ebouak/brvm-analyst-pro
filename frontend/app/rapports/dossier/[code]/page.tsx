@@ -46,7 +46,8 @@ const STATUT_PILIER: Record<string, string> = {
 };
 const FLECHE: Record<string, string> = { hausse: '↗', baisse: '↘', stable: '→' };
 
-export async function generateMetadata({ params }: { params: { code: string } }) {
+export async function generateMetadata(props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   return { title: `Dossier ${params.code.toUpperCase()}` };
 }
 
@@ -147,7 +148,8 @@ function zoneRsi(rsi: number | null): string | null {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
-export default async function DossierPage({ params }: { params: { code: string } }) {
+export default async function DossierPage(props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const sb = createClient();
   /* Médianes des comparables : même source que le diagnostic (dernier calcul
      Combined Alpha), lue avec le client serveur. Absentes = panneau 15 vide et

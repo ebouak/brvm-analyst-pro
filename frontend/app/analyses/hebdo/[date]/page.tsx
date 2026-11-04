@@ -23,7 +23,8 @@ async function load(date: string) {
   return { date: (ed as { date_edition: string }).date_edition, items: (items ?? []) as Item[] };
 }
 
-export async function generateMetadata({ params }: { params: { date: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ date: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const e = await load(params.date);
   if (!e) return { title: 'Édition introuvable' };
   const codes = e.items.map((i) => i.code).join(', ');
@@ -33,7 +34,8 @@ export async function generateMetadata({ params }: { params: { date: string } })
   };
 }
 
-export default async function HebdoEditionPage({ params }: { params: { date: string } }) {
+export default async function HebdoEditionPage(props: { params: Promise<{ date: string }> }) {
+  const params = await props.params;
   const e = await load(params.date);
   if (!e) notFound();
 

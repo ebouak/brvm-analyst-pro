@@ -8,7 +8,8 @@ import { Alerte, Commit, LienArtefact, StatutFinal, fmtDate, fmtDuree, libelleTe
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Scénario de test — Administration' };
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requirePermission('qa.read');
 
   let donnees: Awaited<ReturnType<typeof chargerResultat>>;

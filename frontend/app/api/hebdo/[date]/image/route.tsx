@@ -6,7 +6,8 @@ import { HebdoCard } from '@/lib/hebdo/card';
 export const runtime = 'edge';
 
 /** PNG 2400×1260 d'une valeur de l'édition. GET /api/hebdo/2026-07-21/image?code=ETIT */
-export async function GET(req: NextRequest, { params }: { params: { date: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ date: string }> }) {
+  const params = await props.params;
   const code = (new URL(req.url).searchParams.get('code') ?? '').toUpperCase().slice(0, 8);
   const db = createPublicClient();
   const { data: ed } = await db.from('hebdo_editions').select('id').eq('date_edition', params.date).maybeSingle();

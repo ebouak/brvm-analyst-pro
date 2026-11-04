@@ -20,7 +20,8 @@ async function getCard(slug: string) {
   return data as { titre: string; resume: string | null; published: boolean; niveau: string | null } | null;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const card = await getCard(params.slug);
   return {
     title: card ? `${card.titre} · WestBourse Academy` : 'Cours — WestBourse Academy',
@@ -33,13 +34,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
  * abandonnée ; /api/academy/[slug] reste en legacy (rollback) mais n'est plus
  * référencée. Le niveau d'accès vient de feature_flags (`formations`).
  */
-export default async function AcademyCoursePage({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { lecon?: string };
-}) {
+export default async function AcademyCoursePage(
+  props: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ lecon?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const card = await getCard(params.slug);
   if (!card) notFound();
 

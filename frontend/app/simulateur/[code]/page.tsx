@@ -7,11 +7,13 @@ import SimulatorClient from '@/components/public/SimulatorClient';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
 
 interface PageProps {
-  params: { code: string };
-  searchParams: { montant?: string; annees?: string };
+  params: Promise<{ code: string }>;
+  searchParams: Promise<{ montant?: string; annees?: string }>;
 }
 
-export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   const supabase = createPublicClient();
   const { data: instr } = await supabase
@@ -43,7 +45,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   };
 }
 
-export default async function SimulatorCodePage({ params }: PageProps) {
+export default async function SimulatorCodePage(props: PageProps) {
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   const supabase = createPublicClient();
   const [{ data: instr }, { data: instruments }] = await Promise.all([

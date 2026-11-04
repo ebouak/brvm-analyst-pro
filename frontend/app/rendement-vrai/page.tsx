@@ -26,11 +26,12 @@ function parseAnnees(v: string | undefined): Horizon {
   return HORIZONS.includes(n as Horizon) ? (n as Horizon) : DEFAUT_ANNEES;
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { code?: string; mode?: string; annees?: string };
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<{ code?: string; mode?: string; annees?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const code = (searchParams.code ?? DEFAUT_CODE).toUpperCase();
   const mode = parseMode(searchParams.mode);
   const annees = parseAnnees(searchParams.annees);

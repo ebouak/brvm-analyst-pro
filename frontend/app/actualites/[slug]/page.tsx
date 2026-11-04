@@ -22,7 +22,8 @@ async function charger(slug: string): Promise<Article | null> {
   return (data as Article | null) ?? null;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const a = await charger(params.slug);
   if (!a) return {};
   const image = `${SITE}/api/articles/${a.slug}/image`;
@@ -35,7 +36,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
+export default async function ArticlePage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const a = await charger(params.slug);
   if (!a) notFound();
 

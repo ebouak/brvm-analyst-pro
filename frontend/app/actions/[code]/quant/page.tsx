@@ -9,7 +9,8 @@ function ef(s:string){return s==='eligible'?'Eligible':s==='eligible_with_warnin
 function tone(v:number|null){if(v==null)return 'text-faint';if(v>=70)return 'text-up';if(v>=50)return 'text-warn';return 'text-down';}
 function barC(v:number|null){if(v==null)return 'bg-border';if(v>=70)return 'bg-up';if(v>=50)return 'bg-warn';return 'bg-down';}
 function sigC(c:string){if(c==='Strong Buy Quant')return 'border-up/30 bg-up/10 text-up';if(c==='Buy Quant')return 'border-up/20 bg-up/[0.07] text-up';if(c==='Watchlist / Neutral')return 'border-warn/30 bg-warn/10 text-warn';if(c==='Reduce / Avoid')return 'border-down/20 bg-down/10 text-down';if(c==='High Risk / Avoid')return 'border-down/30 bg-down/15 text-down';return 'border-border bg-elevated text-faint';}
-export default async function QuantSecurityPage({ params }: { params: { code: string } }) {
+export default async function QuantSecurityPage(props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const symbol = params.code.toUpperCase();
   const supabase = createPublicClient();
   const { data: inst } = await supabase.from('brvm_instruments').select('code,designation,secteur,famille_comptable').eq('code', symbol).maybeSingle();

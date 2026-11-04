@@ -18,7 +18,8 @@ function fmtDate(d: string | null): string {
   return p.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-export default async function Page({ searchParams }: { searchParams: { tab?: string } }) {
+export default async function Page(props: { searchParams: Promise<{ tab?: string }> }) {
+  const searchParams = await props.searchParams;
   await requirePermission('content.read');
   const tab: Tab = searchParams.tab === 'mensuels' ? 'mensuels' : 'diagnostics';
 

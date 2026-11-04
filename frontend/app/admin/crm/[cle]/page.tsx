@@ -15,7 +15,8 @@ import FicheProspect from '../FicheProspect';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Fiche CRM — Administration' };
 
-export default async function Page({ params }: { params: { cle: string } }) {
+export default async function Page(props: { params: Promise<{ cle: string }> }) {
+  const params = await props.params;
   const ctx = await requirePermission('crm.read');
   let cle: string;
   try {

@@ -7,7 +7,8 @@ import { EditCourseForm } from './EditCourseForm';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Éditer un cours — Administration' };
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default async function Page(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   await requirePermission('content.write');
   const content = await getCourseContent(params.slug);
   if (!content) notFound();
