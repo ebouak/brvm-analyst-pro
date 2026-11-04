@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
-import { calculerCoutSGI, calculerSeuilRentabilite } from '@/lib/sgi-frais/calculateur';
+import { baremeComplet, calculerCoutSGI, calculerSeuilRentabilite, classerResultats } from '@/lib/sgi-frais/calculateur';
 import { PAYS, SGI_DIRECTORY, type Sgi } from '@/lib/sgi-frais/directory';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { TableauResultatCout } from './TableauResultatCout';
@@ -81,9 +81,8 @@ export function CalculateurCout({
 
   const resultats = useMemo(
     () =>
-      filtered
-        .map((sgi) => calculerCoutSGI(sgi, { montant, nbOrdres, dureeAns }))
-        .sort((a, b) => a.total - b.total),
+      // Barèmes complets d'abord : un poste inconnu compte 0 dans le total.
+      classerResultats(filtered.map((sgi) => calculerCoutSGI(sgi, { montant, nbOrdres, dureeAns }))),
     [filtered, montant, nbOrdres, dureeAns],
   );
 
@@ -95,7 +94,9 @@ export function CalculateurCout({
   }, [directory, fraisSource]);
 
   const top10 = resultats.slice(0, 10);
-  const recommandee = resultats[0] ?? null;
+  // Jamais une SGI dont un poste essentiel est inconnu : son total serait
+  // faussement bas.
+  const recommandee = resultats.find(baremeComplet) ?? null;
   const seuilRecommandee = useMemo(() => {
     if (!recommandee) return null;
     const sgi = sgiParNom.get(recommandee.sgiNom);
@@ -210,7 +211,7 @@ export function CalculateurCout({
 
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs text-muted">Toutes les SGI · triées par coût total</p>
+                <p className="text-xs text-muted">Toutes les SGI · barèmes complets d&apos;abord, par coût total</p>
                 <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] text-faint">
                   {resultats.length} SGI
                 </span>
@@ -221,6 +222,11 @@ export function CalculateurCout({
                 directoryParNom={directoryParNom}
                 montant={montant}
               />
+              <p className="mt-2 text-[11px] leading-relaxed text-faint">
+                Tarifs hors taxes : les barèmes homologués sont exprimés HT, et les taxes sur les commissions
+                s&apos;ajoutent sur l&apos;avis d&apos;opéré. Commissions BRVM (0,2 %) et DC/BR (0,1 %) incluses, à
+                l&apos;achat comme à la vente. Chaque ordre est compté sur le montant investi.
+              </p>
             </div>
 
             {sansBareme.length > 0 && (

@@ -1,6 +1,6 @@
 import type { Sgi } from './directory';
 import type { SgiFrais } from './types';
-import { calculerCoutSGI } from './calculateur';
+import { baremeComplet, calculerCoutSGI } from './calculateur';
 
 /**
  * Moteur de choix SGI — scoring TRANSPARENT et explicable (convention
@@ -72,7 +72,9 @@ export function scorerSgi(directory: Sgi[], fraisList: SgiFrais[], profil: Profi
       couts.set(s.nom, calculerCoutSGI(f, { montant: profil.capital, nbOrdres: profil.ordresParAn, dureeAns: 1 }));
     }
   }
-  const totaux = [...couts.values()].map((c) => c.total);
+  // Normalisation sur les seuls barèmes complets : un poste inconnu compte 0,
+  // un total incomplet fausserait l'échelle et le classement.
+  const totaux = [...couts.values()].filter(baremeComplet).map((c) => c.total);
   const minCout = totaux.length > 0 ? Math.min(...totaux) : 0;
   const maxCout = totaux.length > 0 ? Math.max(...totaux) : 0;
 
@@ -85,7 +87,12 @@ export function scorerSgi(directory: Sgi[], fraisList: SgiFrais[], profil: Profi
     // ── 1. Coût annuel simulé ──────────────────────────────────────────
     {
       const max = poids.cout;
-      if (cout) {
+      if (cout && !baremeComplet(cout)) {
+        criteres.push({
+          cle: 'cout', label: 'Coût annuel estimé', points: max * 0.35, max,
+          detail: `Barème incomplet (${cout.champsManquants.filter((c) => c !== 'frais_virement').join(', ')} non publié) — score neutre ; ≈ ${fmtFcfa(cout.total)}/an sans ce poste`,
+        });
+      } else if (cout) {
         // Normalisation linéaire : le moins cher = 100 %, le plus cher = 15 %.
         const spread = maxCout - minCout;
         const ratio = spread > 0 ? 1 - (cout.total - minCout) / spread : 1;

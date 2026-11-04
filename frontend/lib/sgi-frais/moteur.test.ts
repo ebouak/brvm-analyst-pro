@@ -52,6 +52,21 @@ describe('scorerSgi', () => {
     expect(critCout.points).toBeCloseTo(critCout.max * 0.35, 5);
   });
 
+  it('barème incomplet → score de coût neutre, même s’il paraît moins cher', () => {
+    const dir = [sgi({ nom: 'Complète' }), sgi({ nom: 'Sans tenue' })];
+    const res = scorerSgi(
+      dir,
+      [frais({ sgiNom: 'Complète', tenueCompteMontant: 20_000 }), frais({ sgiNom: 'Sans tenue', tenueCompteMontant: null })],
+      profil(),
+    );
+    const incomplete = res.find((m) => m.sgi.nom === 'Sans tenue')!;
+    const critCout = incomplete.criteres.find((c) => c.cle === 'cout')!;
+    expect(critCout.points).toBeCloseTo(critCout.max * 0.35, 5);
+    expect(critCout.detail).toContain('incomplet');
+    const complete = res.find((m) => m.sgi.nom === 'Complète')!;
+    expect(complete.criteres.find((c) => c.cle === 'cout')!.points).toBeCloseTo(complete.criteres.find((c) => c.cle === 'cout')!.max, 5);
+  });
+
   it('capital sous le dépôt minimum → alerte et 0 point dépôt', () => {
     const dir = [sgi({ nom: 'Exigeante' })];
     const fr = [frais({ sgiNom: 'Exigeante', depotMinimum: 5_000_000 })];

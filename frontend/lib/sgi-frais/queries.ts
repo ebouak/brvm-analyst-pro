@@ -2,7 +2,7 @@ import 'server-only';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SGI_DIRECTORY, type Sgi } from './directory';
 import { SGI_FRAIS_SEED } from './seed-data';
-import type { SgiFrais, ConfianceNiveau, Frequence } from './types';
+import type { SgiFrais, ConfianceNiveau, Frequence, Palier } from './types';
 
 /**
  * Lectures Supabase des données SGI (annuaire + frais) avec repli sur les
@@ -46,6 +46,9 @@ interface SgiFraisRow {
   source_label: string | null;
   verifie_le: string | null;
   notes: string | null;
+  // Migration 0189 : tranches par montant (jsonb), absentes avant elle.
+  courtage_paliers?: Palier[] | null;
+  garde_paliers?: Palier[] | null;
 }
 
 function mapDirectory(r: SgiDirectoryRow): Sgi {
@@ -85,6 +88,8 @@ function mapFrais(r: SgiFraisRow): SgiFrais {
     sourceLabel: r.source_label,
     verifieLe: r.verifie_le,
     notes: r.notes,
+    courtagePaliers: r.courtage_paliers ?? null,
+    gardePaliers: r.garde_paliers ?? null,
   };
 }
 

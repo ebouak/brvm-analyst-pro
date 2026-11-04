@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum, BRVM_DCBR_PCT } from './calculateur';
+import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum, BRVM_DCBR_PCT, baremeComplet, classerResultats } from './calculateur';
 import type { SgiFrais } from './types';
 
 function mkSgi(partial: Partial<SgiFrais>): SgiFrais {
@@ -136,5 +136,73 @@ describe('estSousDepotMinimum', () => {
   it('faux quand la SGI n’a pas de dépôt minimum renseigné (pas de fausse alerte)', () => {
     const sgi = mkSgi({ depotMinimum: null });
     expect(estSousDepotMinimum(sgi, 1000)).toBe(false);
+  });
+});
+
+// Défaut constaté le 2026-11-04 : IFI facture 0,2 % sous 100 M FCFA par ordre,
+// le moteur appliquait la borne haute (0,75 %) à tout le monde — un taux
+// inconnu n'était pas en cause, le barème le fixe selon le montant.
+describe('paliers par montant', () => {
+  const IFI = mkSgi({
+    courtagePctMin: 0.2,
+    courtagePctMax: 0.75,
+    courtagePaliers: [
+      { jusqua: 100_000_000, pct: 0.2 },
+      { jusqua: 500_000_000, pct: 0.75 },
+      { jusqua: null, pct: 0.5 },
+    ],
+  });
+
+  it('courtage : taux de la tranche du montant de l’ordre, pas la borne haute', () => {
+    const r = calculerCoutSGI(IFI, { montant: 1_000_000, nbOrdres: 1, dureeAns: 0 });
+    expect(r.coutCourtage).toBeCloseTo(2_000, 5); // 0,2 %
+  });
+
+  it('courtage : borne de tranche incluse, puis tranche suivante, puis dernière tranche ouverte', () => {
+    expect(calculerCoutSGI(IFI, { montant: 100_000_000, nbOrdres: 1, dureeAns: 0 }).coutCourtage).toBeCloseTo(200_000, 3);
+    expect(calculerCoutSGI(IFI, { montant: 200_000_000, nbOrdres: 1, dureeAns: 0 }).coutCourtage).toBeCloseTo(1_500_000, 3);
+    expect(calculerCoutSGI(IFI, { montant: 600_000_000, nbOrdres: 1, dureeAns: 0 }).coutCourtage).toBeCloseTo(3_000_000, 3);
+  });
+
+  it('garde : taux de la tranche de la valeur du portefeuille', () => {
+    const BOA = mkSgi({
+      droitsGardePctMin: 0.22,
+      droitsGardePctMax: 0.27,
+      droitsGardeFrequence: 'annuel',
+      gardePaliers: [{ jusqua: 10_000_000, pct: 0.27 }, { jusqua: null, pct: 0.22 }],
+    });
+    expect(calculerCoutSGI(BOA, { montant: 5_000_000, nbOrdres: 0, dureeAns: 1 }).coutGarde).toBeCloseTo(13_500, 3);
+    expect(calculerCoutSGI(BOA, { montant: 20_000_000, nbOrdres: 0, dureeAns: 1 }).coutGarde).toBeCloseTo(44_000, 3);
+  });
+
+  it('sans palier, la borne haute reste la règle', () => {
+    const r = calculerCoutSGI(mkSgi({ courtagePctMin: 0.2, courtagePctMax: 0.75 }), { montant: 1_000_000, nbOrdres: 1, dureeAns: 0 });
+    expect(r.coutCourtage).toBeCloseTo(7_500, 5);
+  });
+
+  it('liste de paliers vide : repli sur la borne haute, jamais un taux nul', () => {
+    const r = calculerCoutSGI(mkSgi({ courtagePctMax: 1, courtagePaliers: [] }), { montant: 1_000_000, nbOrdres: 1, dureeAns: 0 });
+    expect(r.coutCourtage).toBeCloseTo(10_000, 5);
+  });
+});
+
+// Défaut constaté le 2026-11-04 : un frais absent comptait 0 et faisait passer
+// la SGI devant des barèmes complets (BOA 5e pour un petit porteur).
+describe('barèmes incomplets', () => {
+  const complet = mkSgi({ sgiNom: 'Complète', courtagePctMax: 1, droitsGardePctMax: 0.5, droitsGardeFrequence: 'annuel', tenueCompteMontant: 5_000, tenueCompteFrequence: 'annuel' });
+  const sansTenue = mkSgi({ sgiNom: 'Sans tenue', courtagePctMax: 1, droitsGardePctMax: 0.5, droitsGardeFrequence: 'annuel' });
+
+  it('un frais de virement non publié ne rend pas un barème incomplet', () => {
+    expect(baremeComplet(calculerCoutSGI(complet, { montant: 1_000_000, nbOrdres: 1, dureeAns: 1 }))).toBe(true);
+  });
+
+  it('courtage, garde ou tenue absent rend le barème incomplet', () => {
+    expect(baremeComplet(calculerCoutSGI(sansTenue, { montant: 1_000_000, nbOrdres: 1, dureeAns: 1 }))).toBe(false);
+  });
+
+  it('les barèmes complets passent devant, même plus chers', () => {
+    const input = { montant: 1_000_000, nbOrdres: 1, dureeAns: 1 };
+    const classes = classerResultats([calculerCoutSGI(sansTenue, input), calculerCoutSGI(complet, input)]);
+    expect(classes.map((r) => r.sgiNom)).toEqual(['Complète', 'Sans tenue']);
   });
 });

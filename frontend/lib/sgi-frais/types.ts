@@ -11,8 +11,24 @@ export type ConfianceNiveau = 'homologue_crepmf' | 'agrege_public' | 'saisie_uti
 
 export type Frequence = 'annuel' | 'trimestriel' | 'semestriel';
 
+/**
+ * Tranche d'un barème fixé selon le montant : `pct` s'applique au montant
+ * entier quand il est ≤ `jusqua` (null = dernière tranche, ouverte).
+ * Tranches triées par `jusqua` croissant.
+ */
+export interface Palier {
+  jusqua: number | null;
+  pct: number;
+}
+
 export interface SgiFrais {
   sgiNom: string; // clé texte = nom exact dans SgiComparator.tsx
+
+  /** Courtage par tranche du montant de l'ordre (ex. IFI). Absent = min/max. */
+  courtagePaliers?: Palier[] | null;
+  /** Garde par tranche de la valeur du portefeuille, même période que
+   * `droitsGardeFrequence` (ex. BOA ≤ 10 M / > 10 M). Absent = min/max. */
+  gardePaliers?: Palier[] | null;
 
   courtagePctMin: number | null;
   courtagePctMax: number | null;
