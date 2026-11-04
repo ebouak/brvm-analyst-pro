@@ -160,7 +160,7 @@ export const OUTILS: DefinitionOutil[] = [
  * l'agent répondrait « valeur inconnue » sur une société parfaitement cotée —
  * la frustration exacte qu'on cherche à supprimer.
  */
-async function resoudreCode(db: SupabaseClient, saisie: string): Promise<string | null> {
+export async function resoudreCode(db: SupabaseClient, saisie: string): Promise<string | null> {
   const brut = saisie.trim().toUpperCase();
   const { data: exact } = await db
     .from('brvm_instruments')

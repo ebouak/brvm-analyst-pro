@@ -8,6 +8,7 @@ import { callAgentLlm, type ChatMessage } from '@/lib/whatsappAgent/callAgentLlm
 import { OUTILS, executerOutil } from '@/lib/agent/outils';
 import { passerelleWhatsapp } from './passerelle';
 import { compteConsentant } from './liaisons';
+import { versWhatsapp } from './chatbot/textes';
 
 /**
  * Agent conversationnel WhatsApp par la passerelle WAHA (lot D).
@@ -32,10 +33,8 @@ const OUTILS_PREMIUM = new Set(['mon_portefeuille', 'mes_alertes']);
 const OUTILS_GRATUITS = OUTILS.filter((o) => !OUTILS_PREMIUM.has(o.function.name));
 const LIEN_PREMIUM = 'https://www.westbourse.com/pricing';
 
-/** Le modèle écrit parfois du Markdown (**gras**) : WhatsApp attend *gras*. */
-export function versWhatsapp(texte: string): string {
-  return texte.replace(/\*\*(.+?)\*\*/g, '*$1*').replace(/^#{1,6}\s+/gm, '').slice(0, 4096);
-}
+/** Le modèle écrit parfois du Markdown (**gras**) : WhatsApp attend *gras*. Source unique : chatbot/textes. */
+export { versWhatsapp };
 
 /**
  * Compte lié à cette conversation ET ayant consenti à l'agent, sinon null.

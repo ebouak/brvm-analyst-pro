@@ -269,3 +269,13 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Finalité : répondre au message par la donnée exacte ; base légale : intérêt légitime.
 - Sous-traitant : TypeSafe. Interrupteur `whatsapp_jev` (livré coupé, activé seulement après évaluation favorable).
 - Accès : service_role seul (RLS sans policy ; fonction révoquée — clé publique : 401).
+
+### Assistant WhatsApp ouvert à tous (migration 0193)
+
+- Données : texte des messages adressés au numéro WESTBOURSE et transcription des notes vocales (l'audio n'est **jamais stocké** : il ne vit que le temps de la transcription) ; réponses de l'assistant.
+- Conservé chez nous : `whatsapp_conversations`, désormais aussi pour les conversations **non liées** à un compte, indexées par `chat_hash` (HMAC du chatId, pseudonyme — jamais le numéro en clair). Rétention **30 jours** sans compte, **90 jours** avec (`purge_rgpd_retention`). Adresses e-mail et numéros de téléphone **masqués** avant stockage et avant envoi à l'IA (testé).
+- Finalité : répondre à la question que la personne nous adresse ; base légale : mesures précontractuelles / intérêt légitime. Les outils **personnels** (portefeuille, alertes) restent soumis au consentement `agent_optin` et à l'appairage prouvé.
+- Droits : commande **EFFACER** (supprime toute la conversation) ; pour une conversation liée, export (`/api/account/export`, par `user_id`) et suppression (cascade) inchangés.
+- Sous-traitants : DeepSeek, Google Gemini, xAI (rédaction des réponses) ; Google Gemini (transcription des notes vocales). Information : pied fixe au premier échange + `/confidentialite`.
+- Quotas : inconnus 1 question IA/jour (numéro **haché** dans `rate_limit_hits`), comptes liés selon `whatsapp_agent` ; plafonds `jev_budget` (`whatsapp_ia`, `whatsapp_ia_inconnu`).
+- Interrupteur `whatsapp_chatbot` (livré coupé). Accès : service_role seul (RLS sans policy ; clé publique → `[]`, vérifié le 2026-11-04).

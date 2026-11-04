@@ -23,7 +23,8 @@ export type FeatureCode =
   | 'dcf'
   | 'whatsapp_agent'
   | 'recherche_ia'
-  | 'whatsapp_jev';
+  | 'whatsapp_jev'
+  | 'whatsapp_chatbot';
 
 export interface FeatureFlag {
   code: string;

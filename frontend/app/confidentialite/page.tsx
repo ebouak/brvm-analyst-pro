@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Politique de confidentialité' };
 
 export default function ConfidentialitePage() {
   return (
-    <LegalPage title="Politique de confidentialité" updatedAt="2026-10-21">
+    <LegalPage title="Politique de confidentialité" updatedAt="2026-11-04">
       <section>
         <h2>Responsable de traitement</h2>
         <p>
@@ -28,7 +28,8 @@ export default function ConfidentialitePage() {
           </li>
           <li>
             <strong>Messages WhatsApp</strong> envoyés au numéro WESTBOURSE : numéro (ou identifiant WhatsApp),
-            nom affiché, contenu du message et réponse adressée.
+            nom affiché, contenu des messages et des notes vocales transcrites, réponses adressées. L&apos;audio
+            des notes vocales n&apos;est pas conservé.
           </li>
           <li>
             <strong>Relation commerciale</strong> : pages de l&apos;offre Premium consultées en étant connecté,
@@ -55,6 +56,10 @@ export default function ConfidentialitePage() {
           <li>
             Recontact sur WhatsApp : si vous indiquez un numéro WhatsApp et cochez la case prévue, WESTBOURSE peut vous recontacter sur WhatsApp au sujet de son offre (consentement). C&apos;est facultatif ; vous pouvez le retirer à tout moment dans Paramètres → Alertes, ou en répondant STOP.
           </li>
+          <li>
+            Réponses de l&apos;assistant WhatsApp aux questions que vous lui adressez : mesures précontractuelles et
+            intérêt légitime à répondre à votre demande. Tapez EFFACER pour effacer l&apos;historique de la conversation.
+          </li>
           <li>Sécurité et prévention de la fraude : intérêt légitime.</li>
         </ul>
       </section>
@@ -66,7 +71,8 @@ export default function ConfidentialitePage() {
           ou anonymisées dans un délai raisonnable après sa fermeture. Les données de
           newsletter sont conservées jusqu&apos;au désabonnement. Les messages du formulaire de
           contact et nos réponses — y compris les messages WhatsApp — sont conservés 12 mois après le
-          dernier échange, puis supprimés automatiquement. Les consultations de l&apos;offre sont conservées 90 jours,
+          dernier échange, puis supprimés automatiquement. L&apos;historique d&apos;une conversation avec l&apos;assistant
+          WhatsApp est conservé 30 jours si elle n&apos;est liée à aucun compte, 90 jours sinon. Les consultations de l&apos;offre sont conservées 90 jours,
           nos messages de proposition et les notes associées 24 mois. Si vous vous êtes opposé aux propositions
           commerciales, nous conservons seulement votre adresse et la date de ce refus, même après la suppression
           de votre compte, pour ne plus jamais vous en adresser.
@@ -90,7 +96,8 @@ export default function ConfidentialitePage() {
             <strong>Fournisseurs d&apos;IA (DeepSeek, Google Gemini, xAI)</strong> — rédaction d&apos;un
             brouillon de réponse à votre message, relu et corrigé par un membre de l&apos;équipe avant
             tout envoi. Seuls votre prénom et votre message leur sont transmis, jamais votre adresse
-            e-mail.
+            e-mail. Ils rédigent aussi les réponses de l&apos;assistant WhatsApp à partir du texte de vos messages,
+            adresses e-mail et numéros de téléphone masqués ; les notes vocales sont transcrites par Google Gemini.
           </li>
           <li>
             <strong>TypeSafe (Jev)</strong> — classement des sociétés pour la recherche en langage naturel
