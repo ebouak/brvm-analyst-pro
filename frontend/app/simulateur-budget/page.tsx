@@ -3,8 +3,10 @@ import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import BudgetSimulator from '@/components/public/BudgetSimulator';
 import { computeYield } from '@/lib/dividends';
-import { fmtDateFR } from '@/lib/format';
-import type { SimAction } from '@/lib/budgetSimulator';
+import { fmtDateFR, fmtNumber } from '@/lib/format';
+import { STRATEGIES, type SimAction } from '@/lib/budgetSimulator';
+import { BarChart3, CalendarDays, Coins, Layers, Wallet } from 'lucide-react';
+import { EnteteComparateur } from '@/components/comparateur-sgi/cadre/Cadre';
 
 export const revalidate = 900;
 
@@ -144,10 +146,46 @@ async function getUnivers(): Promise<{ univers: SimAction[]; asOf: string | null
 
 export default async function SimulateurBudgetPage() {
   const { univers, asOf } = await getUnivers();
+  const avecDividende = univers.filter((a) => a.rendement != null).length;
+
+  // Repères tirés de l'univers chargé : rien n'est affiché sans donnée.
+  const reperes =
+    univers.length > 0
+      ? [
+          { icone: BarChart3, valeur: `${univers.length} actions`, libelle: 'simulables aux cours du jour' },
+          { icone: Coins, valeur: `${avecDividende} actions`, libelle: 'au dividende connu' },
+          { icone: Layers, valeur: `${STRATEGIES.length} portefeuilles`, libelle: 'revenu, croissance, équilibre' },
+          ...(asOf ? [{ icone: CalendarDays, valeur: asOf, libelle: 'dernière séance' }] : []),
+        ]
+      : undefined;
 
   return (
-    <PublicShell>
-      <BudgetSimulator univers={univers} asOf={asOf} className="scroll-mt-24" />
+    <PublicShell pleineLargeur>
+      <EnteteComparateur
+        titre="Que faire de votre budget ?"
+        sousTitre="Indiquez votre montant et vos frais de courtage : le moteur compose trois portefeuilles, action par action, frais déduits et dividendes projetés à partir des cours réels de la BRVM."
+        icone={Wallet}
+        surtitre="Simulateur · BRVM / UEMOA"
+        reperes={reperes}
+        variante="epargne"
+        bande={{
+          titre: `Cours de la séance du ${asOf ?? 'dernier jour connu'} et variation sur 12 mois`,
+          elements: univers.map((a) => ({
+            libelle: a.code,
+            valeur: `${fmtNumber(a.prix)} FCFA`,
+            // Sans cours d'il y a un an, aucune variation n'est affichée.
+            ...(a.perf12 != null
+              ? {
+                  detail: `${a.perf12 >= 0 ? '+' : '−'}${fmtNumber(Math.abs(a.perf12), 1)} % sur 12 mois`,
+                  ton: a.perf12 >= 0 ? ('up' as const) : ('down' as const),
+                }
+              : {}),
+          })),
+        }}
+      />
+      <div className="mx-auto max-w-[1280px] px-4 py-8 md:px-6 md:py-10">
+        <BudgetSimulator univers={univers} asOf={asOf} className="scroll-mt-24" />
+      </div>
     </PublicShell>
   );
 }

@@ -93,19 +93,8 @@ export default function BudgetSimulator({
 
   return (
     <section className={className}>
-      {/* En-tête */}
-      <p className="overline mb-2 text-gold-2">Simulateur · BRVM / UEMOA</p>
-      <h1 className="mb-3 max-w-[18ch] font-display text-3xl leading-tight text-ivory md:text-4xl">
-        Que faire de <span className="text-accent">votre budget</span> ?
-      </h1>
-      <p className="mb-8 max-w-[62ch] text-[15px] leading-relaxed text-muted">
-        Indiquez votre montant et vos frais de courtage. Le moteur compose trois portefeuilles (revenu,
-        croissance, équilibre) avec le détail action par action, frais déduits et dividendes projetés à partir
-        des cours réels de la BRVM.
-      </p>
-
       {/* ── Console de paramètres ───────────────────────────────────────── */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 md:p-7">
+      <div className="rounded-panel border border-border bg-surface p-6 md:p-7">
         <h2 className="mb-5 font-display text-lg text-ivory">Vos paramètres</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Budget */}
@@ -114,7 +103,7 @@ export default function BudgetSimulator({
               Budget d&apos;investissement
             </label>
             <p className="mb-2.5 text-[11.5px] text-faint">Le montant total que vous souhaitez placer</p>
-            <div className="flex items-center rounded-xl border border-white/10 bg-bg px-3.5 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
+            <div className="flex items-center rounded-xl border border-border bg-bg px-3.5 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
               <input
                 id="bs-budget"
                 inputMode="numeric"
@@ -135,8 +124,8 @@ export default function BudgetSimulator({
                   aria-pressed={budget === a}
                   className={`rounded-lg border px-2.5 py-1.5 font-mono text-[12px] transition-colors active:scale-95 ${
                     budget === a
-                      ? 'border-accent bg-accent/10 text-accent'
-                      : 'border-white/10 text-muted hover:border-white/25 hover:text-ivory'
+                      ? 'border-nuit bg-nuit text-sur-nuit'
+                      : 'border-border text-muted hover:border-accent/40 hover:text-ivory'
                   }`}
                 >
                   {fmtNumber(a)}
@@ -150,8 +139,13 @@ export default function BudgetSimulator({
             <label htmlFor="bs-fee" className="block text-[13px] font-semibold text-ivory">
               Frais de courtage SGI
             </label>
-            <p className="mb-2.5 text-[11.5px] text-faint">Courtage moyen par ordre : varie selon la SGI</p>
-            <div className="flex items-center rounded-xl border border-white/10 bg-bg px-3.5 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
+            <p className="mb-2.5 text-[11.5px] text-faint">
+              Courtage moyen par ordre : varie selon la SGI.{' '}
+              <a href="/comparateur-sgi/annuaire" className="text-accent hover:underline">
+                Taux publiés par SGI →
+              </a>
+            </p>
+            <div className="flex items-center rounded-xl border border-border bg-bg px-3.5 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
               <input
                 id="bs-fee"
                 inputMode="decimal"
@@ -162,12 +156,12 @@ export default function BudgetSimulator({
               />
               <span className="flex-none pl-2 font-mono text-xs text-faint">%</span>
             </div>
-            <label className="mt-3.5 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5 text-[13px] text-ivory">
+            <label className="mt-3.5 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2.5 text-[13px] text-ivory">
               <input
                 type="checkbox"
                 checked={netTax}
                 onChange={(e) => setNetTax(e.target.checked)}
-                className="h-4 w-4 accent-[#56D7FD]"
+                className="h-4 w-4 accent-accent"
               />
               Dividendes nets d&apos;IRVM ({Math.round(IRVM * 100)}&nbsp;%)
             </label>
@@ -178,7 +172,7 @@ export default function BudgetSimulator({
             <span className="block text-[13px] font-semibold text-ivory">Composition</span>
             <p className="mb-2.5 text-[11.5px] text-faint">Nombre de lignes par portefeuille</p>
             <div
-              className="inline-flex overflow-hidden rounded-xl border border-white/10"
+              className="inline-flex overflow-hidden rounded-xl border border-border"
               role="group"
               aria-label="Nombre de lignes par portefeuille"
             >
@@ -188,20 +182,20 @@ export default function BudgetSimulator({
                   type="button"
                   onClick={() => setNLines(n)}
                   aria-pressed={nLines === n}
-                  className={`border-r border-white/10 px-4 py-2.5 font-mono text-[13px] last:border-r-0 transition-colors ${
-                    nLines === n ? 'bg-accent text-bg font-semibold' : 'text-muted hover:text-ivory'
+                  className={`border-r border-border px-4 py-2.5 font-mono text-[13px] last:border-r-0 transition-colors ${
+                    nLines === n ? 'bg-nuit text-sur-nuit font-semibold' : 'text-muted hover:text-ivory'
                   }`}
                 >
                   {n}
                 </button>
               ))}
             </div>
-            <label className="mt-3.5 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5 text-[13px] text-ivory">
+            <label className="mt-3.5 flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2.5 text-[13px] text-ivory">
               <input
                 type="checkbox"
                 checked={diversify}
                 onChange={(e) => setDiversify(e.target.checked)}
-                className="h-4 w-4 accent-[#56D7FD]"
+                className="h-4 w-4 accent-accent"
               />
               Diversifier par secteur
             </label>
@@ -209,7 +203,7 @@ export default function BudgetSimulator({
         </div>
 
         {/* Résumé */}
-        <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/[0.07] pt-5">
+        <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4 border-t border-border/70 pt-5">
           {[
             ['Budget', fFcfa(budget), ''],
             ['Investi (moy.)', fFcfa(results.reduce((t, r) => t + r.investiTotal, 0) / results.length), ''],
@@ -227,7 +221,7 @@ export default function BudgetSimulator({
 
       {/* ── Cartes stratégies ───────────────────────────────────────────── */}
       {univers.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center">
+        <div className="mt-8 rounded-panel border border-border bg-surface p-10 text-center">
           <p className="text-sm text-muted">
             Données de marché momentanément indisponibles. Réessayez plus tard.
           </p>
@@ -242,8 +236,8 @@ export default function BudgetSimulator({
             return (
               <article
                 key={r.key}
-                className={`flex flex-col rounded-2xl border bg-white/[0.02] p-6 ${
-                  isBest ? 'border-accent/40 ring-1 ring-accent/20' : 'border-white/10'
+                className={`flex flex-col rounded-panel border bg-surface p-6 ${
+                  isBest ? 'border-accent/40 ring-1 ring-accent/20' : 'border-border'
                 }`}
               >
                 <div className="mb-1 flex items-center justify-between gap-3">
@@ -254,7 +248,7 @@ export default function BudgetSimulator({
                         ? 'border-accent/30 bg-accent/10 text-accent'
                         : meta.reco
                         ? 'border-gold-2/30 bg-gold-2/10 text-gold-2'
-                        : 'border-white/10 bg-white/[0.04] text-muted'
+                        : 'border-border bg-elevated text-muted'
                     }`}
                   >
                     {isBest ? 'Meilleur retour est.' : meta.tag}
@@ -262,7 +256,7 @@ export default function BudgetSimulator({
                 </div>
                 <p className="mb-4 min-h-[54px] text-[13px] leading-relaxed text-muted">{meta.desc}</p>
 
-                <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.05]">
+                <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/70 bg-border/70">
                   {kpis.map((k) => (
                     <div key={k.label} className="bg-bg p-3">
                       <div className={`font-mono text-[15px] ${toneClass(k.tone)}`}>{k.value}</div>
@@ -272,7 +266,7 @@ export default function BudgetSimulator({
                 </div>
 
                 {r.lines.length === 0 ? (
-                  <p className="mt-auto rounded-lg border border-white/[0.07] bg-white/[0.02] p-4 text-center text-[12.5px] text-faint">
+                  <p className="mt-auto rounded-lg border border-border/70 bg-surface p-4 text-center text-[12.5px] text-faint">
                     {r.eligibleCount === 0
                       ? 'Aucune action ne dispose de la métrique requise pour cette stratégie.'
                       : 'Budget insuffisant pour acheter au moins une action.'}
@@ -281,19 +275,19 @@ export default function BudgetSimulator({
                   <table className="mt-auto w-full border-collapse text-[12.5px]">
                     <thead>
                       <tr className="text-faint">
-                        <th className="border-b border-white/[0.07] pb-2 text-left font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-left font-mono text-[9.5px] font-medium uppercase tracking-wide">
                           Action
                         </th>
-                        <th className="border-b border-white/[0.07] pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
                           Cours
                         </th>
-                        <th className="border-b border-white/[0.07] pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
                           Qté
                         </th>
-                        <th className="border-b border-white/[0.07] pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
                           Montant
                         </th>
-                        <th className="border-b border-white/[0.07] pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
                           Part
                         </th>
                       </tr>
@@ -303,7 +297,7 @@ export default function BudgetSimulator({
                         const part = (l.montant / totMontant) * 100;
                         return (
                           <tr key={l.action.code}>
-                            <td className="border-b border-white/[0.07] py-2.5">
+                            <td className="border-b border-border/70 py-2.5">
                               <span className="block font-semibold text-ivory">{l.action.code}</span>
                               <span className="block text-[10px] text-faint">{l.action.designation}</span>
                               <span
@@ -312,16 +306,16 @@ export default function BudgetSimulator({
                                 aria-hidden
                               />
                             </td>
-                            <td className="border-b border-white/[0.07] py-2.5 text-right font-mono text-muted">
+                            <td className="border-b border-border/70 py-2.5 text-right font-mono text-muted">
                               {fmtNumber(l.action.prix)}
                             </td>
-                            <td className="border-b border-white/[0.07] py-2.5 text-right font-mono text-ivory">
+                            <td className="border-b border-border/70 py-2.5 text-right font-mono text-ivory">
                               {l.qty}
                             </td>
-                            <td className="border-b border-white/[0.07] py-2.5 text-right font-mono text-muted">
+                            <td className="border-b border-border/70 py-2.5 text-right font-mono text-muted">
                               {fmtNumber(l.montant)}
                             </td>
-                            <td className="border-b border-white/[0.07] py-2.5 text-right font-mono text-faint">
+                            <td className="border-b border-border/70 py-2.5 text-right font-mono text-faint">
                               {Math.round(part)}%
                             </td>
                           </tr>
@@ -361,7 +355,7 @@ export default function BudgetSimulator({
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <a
           href="/comparateur-sgi"
-          className="block rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-colors hover:border-accent/35"
+          className="block rounded-panel border border-border bg-surface p-5 transition-colors hover:border-accent/35"
         >
           <h4 className="mb-1.5 font-display text-[1.1rem] text-ivory">Choisir votre SGI</h4>
           <p className="text-[13.5px] text-muted">
@@ -371,7 +365,7 @@ export default function BudgetSimulator({
         </a>
         <a
           href="/societes"
-          className="block rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-colors hover:border-accent/35"
+          className="block rounded-panel border border-border bg-surface p-5 transition-colors hover:border-accent/35"
         >
           <h4 className="mb-1.5 font-display text-[1.1rem] text-ivory">Explorer les sociétés</h4>
           <p className="text-[13.5px] text-muted">
