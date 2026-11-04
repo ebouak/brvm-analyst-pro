@@ -55,10 +55,30 @@ describe('décision', () => {
     expect(decider(valide('cours', 0.9, 0.85))).toEqual({ type: 'clarification', intention: 'cours', codes: ['SNTS', 'ORAC'] });
     expect(decider(valide('cours', 0.2, 0.3))).toEqual({ type: 'clarification', intention: 'cours', codes: [] });
   });
-  it('intention incertaine ⇒ chemin actuel', () => {
-    expect(decider(valide('cours', 1, 0, 0.6))).toEqual({ type: 'aiguillage_actuel' });
+  it('intention incertaine sans société sûre ⇒ chemin actuel', () => {
+    expect(decider(valide('cours', 0.5, 0, 0.6))).toEqual({ type: 'aiguillage_actuel' });
+    expect(decider(valide('cours', 0.9, 0.85, 0.6))).toEqual({ type: 'aiguillage_actuel' });
     const serre: AiguillageValide = { intention: 'cours', probabilites: { cours: 0.86, conseil: 0.5 }, societes: { SNTS: 1, ORAC: 0 } };
     expect(decider(serre)).toEqual({ type: 'aiguillage_actuel' });
+  });
+  it('nom seul (« sonatel », « SNTS ? ») ⇒ cours de la société, probabilités mesurées', () => {
+    const sonatel: AiguillageValide = { intention: 'cours', probabilites: { cours: 0.59, autre: 0.41 }, societes: { SNTS: 0.89, ORAC: 0 } };
+    expect(decider(sonatel)).toEqual({ type: 'commande', commande: { type: 'cours', valeur: 'SNTS' } });
+    const code: AiguillageValide = { intention: 'cours', probabilites: { cours: 0.49, analyse: 0.06, autre: 0.43 }, societes: { SNTS: 0.98, ORAC: 0 } };
+    expect(decider(code)).toEqual({ type: 'commande', commande: { type: 'cours', valeur: 'SNTS' } });
+    const autre: AiguillageValide = { intention: 'autre', probabilites: { autre: 0.55, cours: 0.4 }, societes: { SNTS: 0, ORAC: 0.9 } };
+    expect(decider(autre)).toEqual({ type: 'commande', commande: { type: 'cours', valeur: 'ORAC' } });
+    const div: AiguillageValide = { intention: 'dividendes', probabilites: { dividendes: 0.84, cours: 0.12 }, societes: { SNTS: 0.98, ORAC: 0 } };
+    expect(decider(div)).toEqual({ type: 'commande', commande: { type: 'dividendes', valeur: 'SNTS' } });
+  });
+  it('nom seul : un soupçon de conseil, d’analyse ou d’humain ⇒ chemin actuel', () => {
+    for (const risque of ['conseil', 'analyse', 'humain'] as const) {
+      const v: AiguillageValide = { intention: 'cours', probabilites: { cours: 0.6, [risque]: 0.25 }, societes: { SNTS: 0.95, ORAC: 0 } };
+      expect(decider(v)).toEqual({ type: 'aiguillage_actuel' });
+    }
+    // Intention incertaine mais ni cours, ni dividendes, ni « autre » : jamais de réponse par nom.
+    const sal: AiguillageValide = { intention: 'salutation', probabilites: { salutation: 0.6, cours: 0.3 }, societes: { SNTS: 0.95, ORAC: 0 } };
+    expect(decider(sal)).toEqual({ type: 'aiguillage_actuel' });
   });
   it('conseil ⇒ refus, jamais une commande', () => {
     expect(decider(valide('conseil', 1, 0))).toEqual({ type: 'refus_conseil' });
