@@ -30,6 +30,26 @@ describe('bandeau commun des outils', () => {
     expect(html).toContain('40 actions');
   });
 
+  it('bande de données : chaque élément lisible une fois, la copie de boucle masquée', () => {
+    const html = rendu({
+      titre: 'T',
+      sousTitre: 'S',
+      bande: { titre: 'Cours du jour', elements: [{ libelle: 'SNTS', valeur: '25 000 FCFA', detail: '+3,1 % sur 12 mois', ton: 'up' }] },
+    });
+    expect(html).toContain('aria-label="Cours du jour"');
+    expect(html.match(/SNTS/g)).toHaveLength(2); // boucle visuelle…
+    expect(html.match(/aria-hidden="true"><li/g)).toHaveLength(1); // …dont une copie muette
+    expect(html).toContain('text-up');
+    expect(rendu({ titre: 'T', sousTitre: 'S', bande: { titre: 'Vide', elements: [] } })).not.toContain('Vide');
+  });
+
+  it('variante épargne : piles de pièces au lieu des bougies', () => {
+    const epargne = rendu({ titre: 'T', sousTitre: 'S', variante: 'epargne' });
+    expect(epargne).toContain('cmp-pile');
+    expect(epargne).not.toContain('cmp-bougie');
+    expect(rendu({ titre: 'T', sousTitre: 'S' })).toContain('cmp-bougie');
+  });
+
   it('un lien de retour explicite remplace celui du comparateur', () => {
     expect(rendu({ titre: 'T', sousTitre: 'S', filAriane: true })).toContain('href="/comparateur-sgi"');
     const html = rendu({ titre: 'T', sousTitre: 'S', filAriane: true, retour: { href: '/outils', libelle: 'Outils' } });

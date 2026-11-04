@@ -674,12 +674,57 @@ body::after {
   to { transform: scaleX(1); }
 }
 
-/* Bandeau du comparateur SGI : tendance qui se trace, bougies qui montent.
-   État de repos = état final (tracé entier, bougies pleines) : sans animation,
-   rien ne manque. */
+/* Bandeau des outils (comparateur SGI, simulateur de budget).
+   RÈGLE : l'état de repos est l'état final et complet — tracé entier, bougies
+   et piles pleines, bande lisible. Sans animation (préférence système,
+   navigateur ancien), rien ne manque. Seuls les ornements qui n'ont de sens
+   qu'en mouvement (comète, balayage, pièce qui tombe) sont absents au repos. */
+.cmp-comete,
+.cmp-balayage,
+.cmp-piece { opacity: 0; }
+
 @media (prefers-reduced-motion: no-preference) {
   .cmp-trace { animation: cmp-trace 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
-  .cmp-bougie { transform-box: fill-box; transform-origin: bottom; animation: cmp-bougie 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  /* Pousse puis respire, chaque élément à son rythme (--d). */
+  .cmp-bougie,
+  .cmp-pile {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    animation: cmp-bougie 0.8s cubic-bezier(0.16, 1, 0.3, 1) both, cmp-respire 3.6s ease-in-out infinite alternate;
+    animation-delay: var(--d, 0s), calc(var(--d, 0s) + 1.6s);
+  }
+  /* Éclat qui parcourt la tendance, en boucle. */
+  .cmp-comete { opacity: 1; animation: cmp-comete 5.2s cubic-bezier(0.45, 0, 0.2, 1) 2.3s infinite; }
+  .cmp-halo { transform-box: fill-box; transform-origin: center; animation: cmp-halo 2.6s ease-out 2.1s infinite; }
+  .cmp-balayage { opacity: 1; animation: cmp-balayage 8s ease-in-out 1.2s infinite; }
+  .cmp-piece { animation: cmp-piece 5.2s cubic-bezier(0.5, 0, 0.75, 0) 2.4s infinite; }
+  /* Repères qui arrivent l'un après l'autre (le titre, élément LCP, ne bouge pas). */
+  .cmp-revele > * { animation: cmp-revele 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .cmp-revele > :nth-child(1) { animation-delay: 0.15s; }
+  .cmp-revele > :nth-child(2) { animation-delay: 0.27s; }
+  .cmp-revele > :nth-child(3) { animation-delay: 0.39s; }
+  .cmp-revele > :nth-child(4) { animation-delay: 0.51s; }
+  /* Bande de données qui défile ; pause au survol et au focus clavier. */
+  .cmp-defile { animation: cmp-defile var(--duree, 60s) linear infinite; }
+  .cmp-defile-cadre:hover .cmp-defile,
+  .cmp-defile-cadre:focus-within .cmp-defile { animation-play-state: paused; }
 }
 @keyframes cmp-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes cmp-bougie { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes cmp-respire { from { transform: scaleY(1); } to { transform: scaleY(0.9); } }
+@keyframes cmp-comete {
+  0% { stroke-dashoffset: 0.08; opacity: 0; }
+  12% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { stroke-dashoffset: -1; opacity: 0; }
+}
+@keyframes cmp-halo { from { transform: scale(1); opacity: 0.55; } to { transform: scale(3.2); opacity: 0; } }
+@keyframes cmp-balayage { from { transform: translateX(-260px); } to { transform: translateX(760px); } }
+@keyframes cmp-piece {
+  0% { transform: translateY(-90px); opacity: 0; }
+  15% { opacity: 1; }
+  55% { transform: translateY(0); opacity: 1; }
+  70%, 100% { transform: translateY(0); opacity: 0; }
+}
+@keyframes cmp-revele { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes cmp-defile { from { transform: translateX(0); } to { transform: translateX(-50%); } }

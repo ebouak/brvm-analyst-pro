@@ -4,6 +4,9 @@ import { VueEnsemble } from '@/components/comparateur-sgi/vue/VueEnsemble';
 import { RedirectionAncres } from '@/components/comparateur-sgi/vue/RedirectionAncres';
 import { CadreComparateur } from '@/components/comparateur-sgi/cadre/Cadre';
 import { chargerSgi } from '@/lib/sgi-frais/chargement';
+import { syntheseVueEnsemble } from '@/lib/sgi-frais/vueEnsemble';
+import { SCENARIO_DEFAUT } from '@/lib/sgi-frais/scenario';
+import { fmtFcfa } from '@/lib/sgi-frais/comparaison';
 
 // ISR : données SGI lues depuis Supabase (repli sur les fichiers TS si vide),
 // revalidées chaque heure — l'annuaire change rarement.
@@ -44,6 +47,18 @@ export default async function ComparateurSgiPage() {
         titre: 'Comparateur de SGI',
         sousTitre: 'Trouvez la SGI adaptée à votre profil, simulez vos frais et comparez les intermédiaires de la BRVM.',
         stats,
+        bande: {
+          titre: `Coût estimé par SGI pour ${fmtFcfa(SCENARIO_DEFAUT.montant)} sur un an`,
+          // Barèmes complets seulement, dans l'ordre du classement : un coût
+          // sous-estimé n'a pas sa place dans une vitrine.
+          elements: syntheseVueEnsemble(directory, frais, SCENARIO_DEFAUT)
+            .classement.filter((l) => l.complet)
+            .map((l) => ({
+              libelle: l.sgi.nom,
+              valeur: fmtFcfa(l.cout.total),
+              detail: l.frais.confiance === 'homologue_crepmf' ? 'barème homologué' : 'à confirmer',
+            })),
+        },
       }}
     >
       <RedirectionAncres />
