@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { scorerSgi, type ProfilInvestisseur } from './moteur';
+import { poidsPour, scorerSgi, type ProfilInvestisseur } from './moteur';
 import type { Sgi } from './directory';
 import type { SgiFrais } from './types';
 
@@ -101,5 +101,30 @@ describe('scorerSgi', () => {
     expect(res[0].score).toBeLessThanOrEqual(100);
     const somme = res[0].criteres.reduce((a, c) => a + c.points, 0);
     expect(res[0].score).toBe(Math.round(somme));
+  });
+});
+
+describe('priorités multiples et Guinée-Bissau', () => {
+  const somme = (p: Record<string, number>) => Object.values(p).reduce((a, b) => a + b, 0);
+
+  it('une priorité seule garde exactement l’ancienne pondération', () => {
+    expect(poidsPour({ priorite: 'cout' })).toEqual({ cout: 55, depot: 15, pays: 10, autonomie: 10, solidite: 10 });
+    expect(poidsPour({ priorite: 'cout', priorites: [] })).toEqual(poidsPour({ priorite: 'cout' }));
+  });
+
+  it('plusieurs priorités : pondérations moyennées, total toujours 100', () => {
+    const p = poidsPour({ priorite: 'cout', priorites: ['cout', 'solidite'] });
+    expect(p.cout).toBe(40);
+    expect(p.solidite).toBe(22.5);
+    expect(somme(p)).toBe(100);
+    expect(somme(poidsPour({ priorite: 'cout', priorites: ['cout', 'solidite', 'proximite', 'cout'] }))).toBeCloseTo(100);
+  });
+
+  it('résident en Guinée-Bissau : aucune SGI n’y a son siège, aucune proximité maximale', () => {
+    const res = scorerSgi([sgi({ nom: 'A', pays: 'CI' }), sgi({ nom: 'B', pays: 'SN' })], [], profil({ pays: 'GW' }));
+    for (const m of res) {
+      const prox = m.criteres.find((c) => c.cle === 'pays')!;
+      expect(prox.points).toBeLessThan(prox.max);
+    }
   });
 });

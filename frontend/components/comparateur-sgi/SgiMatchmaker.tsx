@@ -5,6 +5,29 @@ import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS, lienDecision } from '@/lib/sgi-frais/types';
 import { scorerSgi, type ProfilInvestisseur, type SgiMatch } from '@/lib/sgi-frais/moteur';
+import Link from 'next/link';
+import { drapeau, slugSgi } from '@/lib/sgi-frais/identite';
+import { ORDRES_MAX, lienAvecScenario, type Scenario } from '@/lib/sgi-frais/scenario';
+
+type Priorite = ProfilInvestisseur['priorite'];
+
+/** Pays de résidence proposés : UEMOA entière, Guinée-Bissau comprise, même
+ * sans SGI qui y ait son siège (le marché régional lui est ouvert). */
+const RESIDENCES: { code: string; nom: string }[] = [
+  ...Object.entries(PAYS).map(([code, p]) => ({ code, nom: p.nom })),
+  { code: 'GW', nom: 'Guinée-Bissau' },
+];
+
+/** Scénario du comparateur tiré du profil : capital investi sur un an, ordres
+ * répartis en achats et ventes, plafonnés à ORDRES_MAX chacun. */
+function scenarioDuProfil(p: ProfilInvestisseur): { scenario: Scenario; plafonne: boolean } {
+  const achats = Math.ceil(p.ordresParAn / 2);
+  const ventes = Math.floor(p.ordresParAn / 2);
+  return {
+    scenario: { montant: p.capital, dureeAns: 1, nbAchats: Math.min(achats, ORDRES_MAX), nbVentes: Math.min(ventes, ORDRES_MAX), montantParOrdre: null },
+    plafonne: achats > ORDRES_MAX || ventes > ORDRES_MAX,
+  };
+}
 
 /**
  * Moteur de choix SGI — questionnaire en 5 étapes puis classement scoré
@@ -36,12 +59,14 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
   const [capital, setCapital] = useState<number | null>(null);
   const [ordres, setOrdres] = useState<number | null>(null);
   const [autonomie, setAutonomie] = useState<ProfilInvestisseur['autonomie'] | null>(null);
-  const [priorite, setPriorite] = useState<ProfilInvestisseur['priorite'] | null>(null);
+  const [priorites, setPriorites] = useState<Priorite[]>([]);
+  const [valide, setValide] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const priorite = valide && priorites.length ? priorites[0]! : null;
 
   const profil: ProfilInvestisseur | null =
     pays && capital != null && ordres != null && autonomie && priorite
-      ? { pays, capital, ordresParAn: ordres, autonomie, priorite }
+      ? { pays, capital, ordresParAn: ordres, autonomie, priorite, priorites }
       : null;
 
   const matches: SgiMatch[] = useMemo(
@@ -51,7 +76,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
   const reset = () => {
     setStep(0); setPays(null); setCapital(null); setOrdres(null);
-    setAutonomie(null); setPriorite(null); setShowAll(false);
+    setAutonomie(null); setPriorites([]); setValide(false); setShowAll(false);
   };
 
   const QUESTIONS: { titre: string; contenu: React.ReactNode }[] = [
@@ -59,13 +84,18 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
       titre: 'Où résidez-vous ?',
       contenu: (
         <div className="flex flex-wrap gap-2">
-          {(Object.keys(PAYS) as (keyof typeof PAYS)[]).map((code) => (
+          {RESIDENCES.map(({ code, nom }) => (
             <button
               key={code} type="button"
               onClick={() => { setPays(code); setStep(1); }}
-              className="rounded-full border border-border bg-surface/40 px-4 py-2.5 text-sm text-ivory transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95"
+              aria-pressed={pays === code}
+              className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 text-sm transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95 ${
+                pays === code ? 'border-accent/60 bg-accent/15 text-ivory' : 'border-border bg-surface/40 text-ivory'
+              }`}
             >
-              {PAYS[code].nom}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={drapeau(code)} alt="" width={18} height={12} className="h-3 w-[18px] rounded-[2px]" />
+              {nom}
             </button>
           ))}
           <button
@@ -75,6 +105,9 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
           >
             Diaspora (hors UEMOA)
           </button>
+          <p className="mt-1 w-full text-[12px] leading-relaxed text-faint">
+            Aucune SGI n’a son siège en Guinée-Bissau : celles des autres pays de l’UEMOA vous sont ouvertes, le marché étant régional.
+          </p>
         </div>
       ),
     },
@@ -132,23 +165,45 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
       ),
     },
     {
-      titre: 'Votre priorité n°1 ?',
+      titre: 'Ce qui compte pour vous (un ou plusieurs choix) ?',
       contenu: (
-        <div className="flex flex-wrap gap-2">
-          {([
-            ['cout', 'Les frais les plus bas'],
-            ['solidite', 'Un adossement bancaire solide'],
-            ['proximite', 'La proximité géographique'],
-            ['equilibre', 'Un bon équilibre de tout'],
-          ] as const).map(([val, label]) => (
-            <button
-              key={val} type="button"
-              onClick={() => { setPriorite(val); setStep(5); }}
-              className="rounded-full border border-border bg-surface/40 px-4 py-2.5 text-sm text-ivory transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95"
-            >
-              {label}
-            </button>
-          ))}
+        <div>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Vos priorités">
+            {([
+              ['cout', 'Les frais les plus bas'],
+              ['solidite', 'Un adossement bancaire solide'],
+              ['proximite', 'La proximité géographique'],
+              ['equilibre', 'Un bon équilibre de tout'],
+            ] as const).map(([val, label]) => {
+              const actif = priorites.includes(val);
+              return (
+                <button
+                  key={val} type="button"
+                  aria-pressed={actif}
+                  onClick={() => setPriorites((p) => (actif ? p.filter((x) => x !== val) : [...p, val]))}
+                  className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 text-sm transition-all hover:border-accent/50 active:scale-95 ${
+                    actif ? 'border-accent/60 bg-accent/15 text-ivory' : 'border-border bg-surface/40 text-ivory hover:bg-accent/10'
+                  }`}
+                >
+                  <span aria-hidden className={`grid h-4 w-4 place-items-center rounded border text-[10px] ${actif ? 'border-accent bg-accent text-bg' : 'border-border'}`}>
+                    {actif ? '✓' : ''}
+                  </span>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            disabled={priorites.length === 0}
+            onClick={() => setValide(true)}
+            className="mt-4 inline-flex min-h-[44px] items-center rounded-full bg-accent px-5 text-sm font-semibold text-bg transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Voir mon classement →
+          </button>
+          {priorites.length > 1 && (
+            <p className="mt-2 text-[12px] text-faint">Plusieurs choix : le score fait la moyenne de leurs pondérations.</p>
+          )}
         </div>
       ),
     },
@@ -243,6 +298,9 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                 </ul>
 
                 <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3 text-[11px]">
+                  <Link href={`/comparateur-sgi/annuaire/${slugSgi(m.sgi)}`} className="font-semibold text-accent hover:underline">
+                    Fiche de la SGI →
+                  </Link>
                   {m.sgi.telephone && (
                     <a href={`tel:${m.sgi.telephone.replace(/\s/g, '')}`} className="text-accent hover:underline">Tél. {m.sgi.telephone}</a>
                   )}
@@ -302,21 +360,48 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
             </div>
           )}
 
-          <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-4">
-            <a
-              href="#calculateur-cout"
-              className="rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-obsidian shadow-gold-sm transition hover:bg-gold-2"
-            >
-              Étape 2 : chiffrer précisément avec le calculateur →
-            </a>
-            <button
-              type="button"
-              onClick={reset}
-              className="rounded-full border border-border px-4 py-2 text-xs text-muted transition-colors hover:text-ivory"
-            >
-              ↺ Refaire le test
-            </button>
-          </div>
+          {(() => {
+            // Les liens gardent le profil : capital et rythme d'ordres suivent.
+            const { scenario, plafonne } = scenarioDuProfil(profil);
+            const podium = matches.slice(0, 3).map((m) => slugSgi(m.sgi)).join(',');
+            return (
+              <div className="mt-5 border-t border-border pt-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={lienAvecScenario('/comparateur-sgi/comparer', scenario, { sgi: podium })}
+                    className="inline-flex min-h-[44px] items-center rounded-full bg-accent px-5 text-sm font-semibold text-bg transition hover:brightness-110 active:scale-95"
+                  >
+                    Comparer ce podium côte à côte →
+                  </Link>
+                  <Link
+                    href={lienAvecScenario('/comparateur-sgi/simuler', scenario)}
+                    className="inline-flex min-h-[44px] items-center rounded-full border border-border px-5 text-sm font-semibold text-ivory transition-colors hover:border-accent/40 hover:text-accent"
+                  >
+                    Détailler mes frais poste par poste
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setValide(false)}
+                    className="inline-flex min-h-[44px] items-center rounded-full px-3 text-xs text-muted transition-colors hover:text-ivory"
+                  >
+                    Modifier mes priorités
+                  </button>
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="inline-flex min-h-[44px] items-center rounded-full px-3 text-xs text-muted transition-colors hover:text-ivory"
+                  >
+                    ↺ Refaire le test
+                  </button>
+                </div>
+                {plafonne && (
+                  <p className="mt-2 text-[11px] text-faint">
+                    Le comparateur et le simulateur vont jusqu’à {ORDRES_MAX} achats et {ORDRES_MAX} ventes par an : votre rythme y est ramené à ce maximum.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           <p className="mt-4 text-[10px] leading-relaxed text-faint">
             Classement indicatif dérivé des barèmes publiés (bornes maximales, prudence) et de votre

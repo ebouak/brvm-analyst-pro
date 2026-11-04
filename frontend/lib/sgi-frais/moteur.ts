@@ -24,6 +24,9 @@ export interface ProfilInvestisseur {
   ordresParAn: number;
   autonomie: 'en_ligne' | 'accompagne';
   priorite: 'cout' | 'solidite' | 'proximite' | 'equilibre';
+  /** Plusieurs priorités à la fois : leurs pondérations sont moyennées.
+   * Absente ou vide : seule `priorite` compte. */
+  priorites?: ProfilInvestisseur['priorite'][];
 }
 
 export interface CritereScore {
@@ -60,8 +63,18 @@ const fmtFcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
  * Fonction pure, testable — aucune donnée inventée : une SGI sans barème
  * publié reçoit un score de coût NEUTRE (35 %) explicitement libellé.
  */
+/**
+ * Pondération des critères pour un profil : moyenne des priorités choisies.
+ * Chaque grille somme à 100, leur moyenne aussi — le score reste sur 100.
+ */
+export function poidsPour(profil: Pick<ProfilInvestisseur, 'priorite' | 'priorites'>): Record<CritereScore['cle'], number> {
+  const choix = profil.priorites?.length ? [...new Set(profil.priorites)] : [profil.priorite];
+  const cles = Object.keys(POIDS.equilibre) as CritereScore['cle'][];
+  return Object.fromEntries(cles.map((k) => [k, choix.reduce((s, p) => s + POIDS[p][k], 0) / choix.length])) as Record<CritereScore['cle'], number>;
+}
+
 export function scorerSgi(directory: Sgi[], fraisList: SgiFrais[], profil: ProfilInvestisseur): SgiMatch[] {
-  const poids = POIDS[profil.priorite];
+  const poids = poidsPour(profil);
   const fraisByNom = new Map(fraisList.map((f) => [f.sgiNom, f]));
 
   // Pré-calcul des coûts (pour normaliser le critère coût entre SGI à barème connu).
