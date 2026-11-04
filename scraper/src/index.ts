@@ -694,7 +694,10 @@ async function main(): Promise<number> {
     case 'dividends:calendrier': {
       // Calendrier officiel de paiement (BRVM). À BLANC sauf --ecrire.
       const { runCalendrier } = await import('./dividends/runCalendrier.js');
-      const r = await runCalendrier({ ecrire: process.argv.includes('--ecrire') });
+      // --url=<pdf> : recouper un calendrier précis plutôt que le dernier publié.
+      const url = process.argv.find((a) => a.startsWith('--url='))?.slice('--url='.length);
+      if (url && !/^https:\/\/www\.brvm\.org\/.+\.pdf$/i.test(url)) throw new Error(`--url : PDF brvm.org attendu, reçu ${url}`);
+      const r = await runCalendrier({ ecrire: process.argv.includes('--ecrire'), url });
       console.log(`Calendrier ${r.url} (trouvé par ${r.via}) — exercice ${r.exercice}`);
       const parEcart: Record<string, number> = {};
       for (const l of r.lignes) {

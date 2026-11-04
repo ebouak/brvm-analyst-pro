@@ -1,0 +1,74 @@
+name: Calendrier des dividendes (quotidien)
+
+# Calendrier officiel de paiement des dividendes publié par la BRVM (PDF) :
+# chaque jour ouvré, le dernier calendrier est repéré, lu, recoupé avec la
+# table de brvm.org, puis écrit dans `dividends` (source 'brvm-calendrier').
+# La BRVM republie ce PDF au fil des assemblées (4 septembre, 9 octobre 2026…) :
+# l'hebdomadaire du samedi laissait jusqu'à six jours de retard.
+#
+# Sans risque de doublon : seules les lignes non concordantes sont écrites,
+# sur la clé (code, exercice). Une ligne dont le PDF et la table BRVM se
+# contredisent est REJETÉE et nommée dans le journal, jamais devinée. Moins
+# de 20 lignes lisibles : rien n'est écrit et le run échoue — une lecture
+# suspecte ne doit pas passer pour un succès.
+
+env:
+  SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
+
+on:
+  schedule:
+    # 07:30 UTC du lundi au vendredi : les avis BRVM de la veille sont publiés.
+    - cron: '30 7 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "PDF précis à recouper (vide = dernier calendrier publié). À blanc : rien n'est écrit."
+        required: false
+        default: ''
+
+# Même groupe que l'ingestion hebdomadaire : jamais deux écritures du
+# calendrier en même temps.
+concurrency:
+  group: dividends-ingestion
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  calendrier:
+    runs-on: ubuntu-latest
+    # brvm.org impose 10 s entre deux requêtes (robots.txt, Crawl-delay).
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: Calendrier officiel des dividendes
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+          URL_FOURNIE: ${{ github.event.inputs.url }}
+        run: |
+          if [ -n "$URL_FOURNIE" ]; then
+            # Recoupement d'un PDF précis : à blanc, pour ne jamais réécrire
+            # la base avec une version antérieure du calendrier.
+            npx tsx src/index.ts dividends:calendrier "--url=$URL_FOURNIE"
+          else
+            npx tsx src/index.ts dividends:calendrier --ecrire
+          fi
+
+      # Un run vert ne prouve rien : on relit la base.
+      - name: Vérifier le calendrier en base
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/verify-data.ts dividends-calendrier
