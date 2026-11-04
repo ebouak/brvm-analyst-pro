@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import SgiComparator from '@/components/landing/SgiComparator';
-import SgiMatchmaker from '@/components/comparateur-sgi/SgiMatchmaker';
+import { VueEnsemble } from '@/components/comparateur-sgi/vue/VueEnsemble';
+import { RedirectionAncres } from '@/components/comparateur-sgi/vue/RedirectionAncres';
 import { CadreComparateur } from '@/components/comparateur-sgi/cadre/Cadre';
 import { chargerSgi } from '@/lib/sgi-frais/chargement';
 
@@ -45,10 +46,11 @@ export default async function ComparateurSgiPage() {
         stats,
       }}
     >
-      <div className="mb-10">
-        <SgiMatchmaker directory={directory} frais={frais} />
+      <RedirectionAncres />
+      <VueEnsemble directory={directory} frais={frais} />
+      <div className="mt-12">
+        <SgiComparator />
       </div>
-      <SgiComparator directory={directory} frais={frais} />
     </CadreComparateur>
   );
 }

@@ -1,31 +1,13 @@
-import { CalculateurCout } from '@/components/comparateur-sgi/CalculateurCout';
-import { AnnuaireSgi } from '@/components/comparateur-sgi/annuaire/AnnuaireSgi';
 import { CriteresSgi, FaqSgi } from '@/components/comparateur-sgi/GuideSgi';
-import { SGI_DIRECTORY, type Sgi } from '@/lib/sgi-frais/directory';
-import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
-import type { SgiFrais } from '@/lib/sgi-frais/types';
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Vue d'ensemble du comparateur : rôle de la SGI, simulateur, annuaire,
-   critères et questions fréquentes. Chaque bloc vit aussi sur sa page
-   (/comparateur-sgi/simuler, /annuaire, /methodologie). Le titre et les
+   Contenu éditorial de la vue d'ensemble : rôle de la SGI, critères de
+   choix et questions fréquentes. Simulateur et annuaire ont leur propre page
+   (/comparateur-sgi/simuler, /annuaire). Le titre et les
    repères chiffrés sont portés par le bandeau, calculés depuis les données.
    ────────────────────────────────────────────────────────────────────────── */
 
-export default function SgiComparator({
-  className = 'scroll-mt-24',
-  directory,
-  frais,
-}: {
-  className?: string;
-  /** Annuaire depuis Supabase (repli sur le TS si non fourni). */
-  directory?: Sgi[];
-  /** Barèmes depuis Supabase (repli sur le TS si non fourni). */
-  frais?: SgiFrais[];
-}) {
-  const SGI = directory ?? SGI_DIRECTORY;
-  const FRAIS = frais ?? SGI_FRAIS_SEED;
-
+export default function SgiComparator({ className = 'scroll-mt-24' }: { className?: string }) {
   return (
     <section id="comparateur-sgi" className={className}>
       {/* Rôle de la SGI */}
@@ -58,23 +40,6 @@ export default function SgiComparator({
             </li>
           ))}
         </ol>
-      </div>
-
-      <div id="calculateur-cout" className="mt-10 scroll-mt-24">
-        <p className="overline mb-2 text-gold-2">Calculer le coût réel</p>
-        <h2 className="mb-1 font-display text-xl text-ivory">Combien coûterait votre investissement ?</h2>
-        <p className="mb-5 max-w-[64ch] text-sm leading-relaxed text-muted">
-          Décrivez votre scénario : le classement se met à jour à chaque réglage. Les coûts viennent des barèmes
-          publiés par la BRVM (décisions d&apos;homologation), chacun badgé selon sa fiabilité et décomposé poste
-          par poste.
-        </p>
-        <CalculateurCout frais={FRAIS} directory={SGI} />
-      </div>
-
-      <div className="mt-12">
-        <p className="overline mb-2 text-gold-2">L&apos;annuaire</p>
-        <h2 className="mb-4 font-display text-xl text-ivory">Les SGI par pays</h2>
-        <AnnuaireSgi directory={SGI} frais={FRAIS} />
       </div>
 
       <div className="mt-12">
