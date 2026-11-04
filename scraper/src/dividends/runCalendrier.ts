@@ -30,7 +30,7 @@ export interface LigneRapportCalendrier {
 
 export interface RapportCalendrier {
   url: string;
-  via: 'avis' | 'liste';
+  via: 'avis' | 'liste' | 'fourni';
   exercice: number;
   lignes: LigneRapportCalendrier[];
   rejets: RejetCalendrier[];
@@ -67,9 +67,11 @@ async function lireBase(codes: string[], exercice: number): Promise<{ base: Map<
   return { base, colonnes0157 };
 }
 
-export async function runCalendrier(opts: { ecrire?: boolean } = {}): Promise<RapportCalendrier> {
+export async function runCalendrier(opts: { ecrire?: boolean; url?: string } = {}): Promise<RapportCalendrier> {
   const esv = await lirePaiementsEsv();
-  const { url, via } = await trouverCalendrier(esv);
+  // `url` : un calendrier précis (ex. une version antérieure à recouper) au
+  // lieu du dernier publié. La table BRVM sert au recoupement dans les deux cas.
+  const { url, via } = opts.url ? { url: opts.url, via: 'fourni' as const } : await trouverCalendrier(esv);
   if (via === 'liste') logger.warn({ url }, 'calendrier trouvé par la page de liste : peut-être périmé');
   const cal = lireCalendrier(await telechargerCalendrier(url));
   const exerciceUrl = exerciceDepuisUrlCalendrier(url);
@@ -122,6 +124,16 @@ export async function runCalendrier(opts: { ecrire?: boolean } = {}): Promise<Ra
   if (uniques.length < MIN_LIGNES) {
     throw new Error(`calendrier : ${uniques.length} lignes exploitables dans ${url} — lecture suspecte, rien n'est fait`);
   }
+
+  // Ramené AVANT la comparaison : 1 740 F relu à l'échelle d'avant le
+  // fractionnement SNTS n'est pas un écart avec les 174 F en base, et ne doit
+  // pas être annoncé comme tel dans le rapport.
+  const aLEchelle = await garderEchelle(
+    uniques.map((c) => ({ code: c.code, exercice: cal.exercice, montant: c.cible.montant, montant_brut: c.cible.montant_brut })),
+  );
+  uniques.forEach((c, i) => {
+    c.cible = { ...c.cible, montant: aLEchelle[i]!.montant, montant_brut: aLEchelle[i]!.montant_brut ?? null };
+  });
 
   const { base, colonnes0157 } = await lireBase(uniques.map((c) => c.code), cal.exercice);
   const lignes: LigneRapportCalendrier[] = uniques.map((c) => {

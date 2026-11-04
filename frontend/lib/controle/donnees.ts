@@ -256,7 +256,7 @@ function calendrier(d: DonneesFraicheur): Signal {
   const doc = dateDocument ? `document BRVM du ${jourFr(dateDocument).replace(/^\S+ /, '')} ${dateDocument.slice(0, 4)}` : 'document BRVM non daté';
   const ex = exercice != null ? `exercice ${exercice}, ` : '';
   const limite =
-    ' La date du dernier passage hebdomadaire n’est pas mesurable dans la table (les lignes inchangées ne sont pas réécrites) : voir la tâche dividends.yml.';
+    ' La date du dernier passage quotidien n’est pas mesurable dans la table (les lignes inchangées ne sont pas réécrites) : voir la tâche dividendes-calendrier.yml.';
   if (lignes === 0) {
     return signal('dividendes-calendrier', titre, 'alerte', 'Aucune donnée : aucun dividende daté issu du calendrier officiel BRVM sur les deux derniers exercices.', null);
   }
@@ -305,7 +305,7 @@ const ENRICHISSEMENT: Record<string, { repere: { libelle: string; nature: 'insta
   'donnees:liquidite': { repere: { libelle: 'Dernière séance calculée', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/score.yml` }] },
   'donnees:carnet': { repere: { libelle: 'Dernier bulletin en base', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/carnet.yml` }] },
   'donnees:video': { repere: { libelle: 'Séance de la dernière vidéo', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/video-seance.yml` }] },
-  'donnees:dividendes-calendrier': { repere: { libelle: 'Date du document BRVM', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/dividends.yml` }] },
+  'donnees:dividendes-calendrier': { repere: { libelle: 'Date du document BRVM', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/dividendes-calendrier.yml` }] },
   'donnees:tests-e2e': { repere: { libelle: 'Dernier passage terminé', nature: 'instant' }, actions: [{ libelle: 'Voir les résultats', href: '/admin/qualite' }] },
 };
 
