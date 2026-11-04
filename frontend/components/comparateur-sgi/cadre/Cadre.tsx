@@ -84,26 +84,36 @@ export function EnteteComparateur({
   sousTitre,
   icone: Icone,
   stats,
+  reperes,
   filAriane = false,
+  retour,
+  surtitre = 'Outil BRVM / UEMOA',
 }: {
   titre: string;
   sousTitre: string;
   icone?: LucideIcon;
   /** Repères DÉRIVÉS des données (vue d'ensemble seulement). */
   stats?: StatistiquesSgi;
+  /** Repères d'un autre outil, eux aussi tirés des données. */
+  reperes?: { icone: LucideIcon; valeur?: string; libelle: string }[];
+  /** Lien de retour vers le comparateur. */
   filAriane?: boolean;
+  /** Lien de retour vers une autre page (remplace `filAriane`). */
+  retour?: { href: string; libelle: string };
+  surtitre?: string;
 }) {
+  const lienRetour = retour ?? (filAriane ? { href: '/comparateur-sgi', libelle: 'Outils · Comparateur de SGI' } : null);
   return (
     <header className="relative overflow-hidden bg-nuit text-sur-nuit">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_0%_0%,rgb(var(--color-accent-nuit)/0.10),transparent_60%)]" />
       <IllustrationMarche />
       <div className="relative mx-auto max-w-[1280px] px-4 pb-14 pt-8 md:px-6 md:pb-20 md:pt-12">
-        {filAriane && (
-          <Link href="/comparateur-sgi" className="mb-4 inline-flex min-h-[32px] items-center gap-1.5 text-xs text-sur-nuit/75 transition-colors hover:text-sur-nuit">
-            <ArrowLeft size={14} aria-hidden /> Outils · Comparateur de SGI
+        {lienRetour && (
+          <Link href={lienRetour.href} className="mb-4 inline-flex min-h-[32px] items-center gap-1.5 text-xs text-sur-nuit/75 transition-colors hover:text-sur-nuit">
+            <ArrowLeft size={14} aria-hidden /> {lienRetour.libelle}
           </Link>
         )}
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-nuit">Outil BRVM / UEMOA</p>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-nuit">{surtitre}</p>
         {/* Un nom de SGI publié en entier (jusqu’à 70 signes) passe à une taille plus sobre. */}
         <h1 className={`mt-2 flex items-center gap-3 font-display font-semibold leading-tight [letter-spacing:-0.02em] ${titre.length > 40 ? 'text-2xl md:text-[2.15rem]' : 'text-3xl md:text-5xl'}`}>
           {Icone && <Icone aria-hidden className="h-8 w-8 flex-none text-accent-nuit md:h-11 md:w-11" />}
@@ -116,6 +126,13 @@ export function EnteteComparateur({
             <Repere icone={MapPin} valeur={`${stats.pays} pays`} libelle="où siègent ces SGI" />
             <Repere icone={ShieldCheck} valeur={`${stats.baremesHomologues} barèmes`} libelle="homologués AMF-UMOA" />
             <Repere icone={Layers} valeur="Coûts" libelle="détaillés poste par poste" />
+          </ul>
+        )}
+        {!stats && reperes && reperes.length > 0 && (
+          <ul className="mt-7 grid max-w-[720px] grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
+            {reperes.map((r) => (
+              <Repere key={r.libelle} icone={r.icone} valeur={r.valeur} libelle={r.libelle} />
+            ))}
           </ul>
         )}
       </div>
