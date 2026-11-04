@@ -24,7 +24,8 @@ Audit initial : 2026-06-16.
 | `admin_audit_logs` | actor/target user_id, **ip_address**, **user_agent** | Sécurité / traçabilité admin | Intérêt légitime | 12 mois (recommandé) | n/a (admin) | Purge planifiée (à mettre en place) |
 | `forum_topics` / `forum_posts` | pseudonyme (`display_name`), contenu des messages, horodatage | Discussion communautaire | Intérêt légitime + action volontaire de l'utilisateur | Jusqu'à suppression par l'auteur ou masquage admin | ✅ (`/api/account/export`) | Anonymisation automatique à la suppression du compte (`author_id` → NULL, affichage « Utilisateur supprimé ») |
 
-| `recherche_societes_cache`, `rate_limit_hits` (route `recherche-societes`) | Aucun texte de recherche (empreinte SHA-256 seule) ; identifiant de compte **haché** pour le quota | Recherche des sociétés en langage naturel (Jev) | Contrat (exécution du service) | Cache 24 h ; quota : fenêtre d'une heure | N/A (rien de rattaché au compte) | Purge `purge_rgpd_retention()` |
+| `recherche_societes_cache`, `rate_limit_hits` (route `recherche-societes`) | Aucun texte de recherche (empreinte SHA-256 seule) ; identifiant de compte **haché** pour le quota | Recherche des sociétés en langage naturel (Jev) | Contrat (exécution du service) | Cache 24 h ; quota : fenêtre d'une heure | N/A (rien de rattaché au compte) | Purge `purge_rgpd_retention()` || `whatsapp_aiguillages`, `jev_budget` | Aucune (intention retenue, décision, probabilité ; compteur journalier) | Aiguillage des messages WhatsApp libres (Jev) | Intérêt légitime (répondre au message reçu) | 90 jours ; budget 30 jours | N/A (rien de rattaché à une personne) | Purge `purge_rgpd_retention()` |
+
 > IP et user-agent (`admin_audit_logs`) sont des données personnelles : limiter la
 > rétention et ne pas les exposer hors admin.
 
@@ -260,3 +261,11 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Conservation : cache 24 h, compteur de budget 30 jours (`purge_rgpd_retention`).
 - Accès : service_role seul (RLS sans policy, fonctions révoquées pour anon/authenticated — vérifié à la clé publique : 401).
 - Journaux : codes d'événement seulement, jamais le texte de la recherche (test « Confidentialité »).
+
+### Aiguillage des messages WhatsApp libres par Jev (migration 0192)
+
+- Données envoyées à TypeSafe : **le texte du message seulement**, jamais le numéro ni le nom ; un message contenant une adresse e-mail ou un numéro de téléphone n'est jamais envoyé (filtre testé).
+- Conservé chez nous : `whatsapp_aiguillages` (intention, décision, probabilité — ni texte ni numéro), 90 jours ; `jev_budget` (compteur par usage et par jour), 30 jours. Quota : numéro **haché** dans `rate_limit_hits`, fenêtre d'une heure.
+- Finalité : répondre au message par la donnée exacte ; base légale : intérêt légitime.
+- Sous-traitant : TypeSafe. Interrupteur `whatsapp_jev` (livré coupé, activé seulement après évaluation favorable).
+- Accès : service_role seul (RLS sans policy ; fonction révoquée — clé publique : 401).
