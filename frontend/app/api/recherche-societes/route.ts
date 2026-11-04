@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
     quota: async (u) =>
       (await checkRateLimit({ route: 'recherche-societes', ip: hacherIdentifiant(u.id), maxHits: QUOTA_HEURE, windowSeconds: 3600 })).allowed,
     stockage: stockageSupabase(),
-    reserverBudget: () => reserverBudgetRecherche(plafondJour()),
+    // Sans clé TypeSafe, ne rien réserver : chaque recherche brûlerait une unité du plafond pour rien.
+    reserverBudget: () => (process.env.TYPESAFE_API_KEY ? reserverBudgetRecherche(plafondJour()) : Promise.resolve('erreur' as const)),
     jev: (q, instantane, signal) => classerParJev(q, instantane.fiches, signal),
     attendre: (ms) => new Promise((r) => setTimeout(r, ms)),
     journal: (evenement, details) => console.warn('[recherche-societes]', evenement, details ?? {}),
