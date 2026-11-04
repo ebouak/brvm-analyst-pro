@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { createPublicClient } from '@/lib/supabase/public';
+import { RechercheSocietes } from '@/components/societes/RechercheSocietes';
 import PublicShell from '@/components/public/PublicShell';
 import CompaniesExplorer, { type CompanyCard } from '@/components/public/CompaniesExplorer';
 
@@ -73,6 +74,8 @@ export default async function CompaniesIndexPage() {
           Bourse Régionale des Valeurs Mobilières (UEMOA).
         </p>
       </div>
+
+      <RechercheSocietes />
 
       {companies.length === 0 ? (
         <div className="bg-surface border border-border rounded-xl p-10 text-center">
