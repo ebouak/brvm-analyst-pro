@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
-import { baremeComplet, calculerCoutSGI, calculerSeuilRentabilite, classerResultats } from '@/lib/sgi-frais/calculateur';
+import { baremeComplet, calculerCoutSGI, calculerSeuilRentabilite, classerResultats, montantParOrdreParDefaut } from '@/lib/sgi-frais/calculateur';
 import { PAYS, SGI_DIRECTORY, type Sgi } from '@/lib/sgi-frais/directory';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { TableauResultatCout } from './TableauResultatCout';
@@ -65,6 +65,11 @@ export function CalculateurCout({
   const [depotMax, setDepotMax] = useState(0); // 0 = pas de filtre
 
   const nbOrdres = nbAchats + nbVentes;
+  // Courtage et frais BRVM portent sur chaque ordre, la garde sur le capital :
+  // compter chaque ordre sur tout le capital simulait 8 M FCFA échangés pour
+  // 1 M investi. Saisie libre, sinon capital réparti sur les achats.
+  const [montantOrdreSaisi, setMontantOrdreSaisi] = useState<number | null>(null);
+  const montantParOrdre = montantOrdreSaisi ?? montantParOrdreParDefaut(montant, nbAchats);
 
   const filtered = useMemo(
     () =>
@@ -82,8 +87,8 @@ export function CalculateurCout({
   const resultats = useMemo(
     () =>
       // Barèmes complets d'abord : un poste inconnu compte 0 dans le total.
-      classerResultats(filtered.map((sgi) => calculerCoutSGI(sgi, { montant, nbOrdres, dureeAns }))),
-    [filtered, montant, nbOrdres, dureeAns],
+      classerResultats(filtered.map((sgi) => calculerCoutSGI(sgi, { montant, montantParOrdre, nbOrdres, dureeAns }))),
+    [filtered, montant, montantParOrdre, nbOrdres, dureeAns],
   );
 
   // SGI de l'annuaire SANS barème public connu : jamais classées (les classer
@@ -100,8 +105,9 @@ export function CalculateurCout({
   const seuilRecommandee = useMemo(() => {
     if (!recommandee) return null;
     const sgi = sgiParNom.get(recommandee.sgiNom);
-    return sgi ? calculerSeuilRentabilite(sgi, montant) : null;
-  }, [recommandee, sgiParNom, montant]);
+    // Aller-retour d'un ordre type : un minimum de perception pèse plus sur un petit ordre.
+    return sgi ? calculerSeuilRentabilite(sgi, montantParOrdre) : null;
+  }, [recommandee, sgiParNom, montantParOrdre]);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr] lg:items-start">
@@ -161,6 +167,29 @@ export function CalculateurCout({
               <option key={n} value={n}>{n} vente{n > 1 ? 's' : ''}</option>
             ))}
           </select>
+        </label>
+
+        <label className="block text-xs text-muted">
+          Montant moyen par ordre
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1_000}
+            step={10_000}
+            value={Math.round(montantParOrdre)}
+            onChange={(e) => setMontantOrdreSaisi(e.target.value === '' ? null : Math.max(0, Number(e.target.value)))}
+            className="tabular mt-1 w-full rounded-lg border border-border bg-bg/40 p-2 text-sm text-ivory"
+            aria-describedby="aide-montant-ordre"
+          />
+          <span id="aide-montant-ordre" className="mt-1 block text-[11px] text-faint">
+            {montantOrdreSaisi == null ? (
+              <>Par défaut : montant investi ÷ nombre d&apos;achats.</>
+            ) : (
+              <button type="button" onClick={() => setMontantOrdreSaisi(null)} className="text-accent hover:underline">
+                Revenir au calcul automatique
+              </button>
+            )}
+          </span>
         </label>
 
         <label className="block text-xs text-muted">
@@ -225,7 +254,8 @@ export function CalculateurCout({
               <p className="mt-2 text-[11px] leading-relaxed text-faint">
                 Tarifs hors taxes : les barèmes homologués sont exprimés HT, et les taxes sur les commissions
                 s&apos;ajoutent sur l&apos;avis d&apos;opéré. Commissions BRVM (0,2 %) et DC/BR (0,1 %) incluses, à
-                l&apos;achat comme à la vente. Chaque ordre est compté sur le montant investi.
+                l&apos;achat comme à la vente. Courtage et commissions sont comptés sur le montant moyen par ordre,
+                la garde sur le montant investi.
               </p>
             </div>
 

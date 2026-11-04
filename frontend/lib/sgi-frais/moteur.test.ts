@@ -52,6 +52,13 @@ describe('scorerSgi', () => {
     expect(critCout.points).toBeCloseTo(critCout.max * 0.35, 5);
   });
 
+  it('coût annuel : le capital est réparti sur les achats de l’année, pas échangé à chaque ordre', () => {
+    // 12 ordres/an = 6 achats + 6 ventes de 1 000 000 / 6 chacun.
+    const res = scorerSgi([sgi({ nom: 'Test SGI' })], [frais({})], profil({ capital: 1_000_000, ordresParAn: 12 }));
+    // courtage 12 × 166 667 × 1 % = 20 000 ; BRVM 12 × 166 667 × 0,3 % = 6 000 ; garde 0,5 % = 5 000.
+    expect(res[0].coutAnnuel).toBeCloseTo(31_000, 0);
+  });
+
   it('barème incomplet → score de coût neutre, même s’il paraît moins cher', () => {
     const dir = [sgi({ nom: 'Complète' }), sgi({ nom: 'Sans tenue' })];
     const res = scorerSgi(
