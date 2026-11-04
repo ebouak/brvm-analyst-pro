@@ -92,6 +92,12 @@ export default function ConfidentialitePage() {
             tout envoi. Seuls votre prénom et votre message leur sont transmis, jamais votre adresse
             e-mail.
           </li>
+          <li>
+            <strong>TypeSafe (Jev)</strong> — classement des sociétés pour la recherche en langage naturel
+            réservée aux comptes connectés. Seul le texte de votre recherche lui est transmis, sans votre
+            identité ; nous ne conservons qu&apos;une empreinte de la recherche, 24 heures, sans lien avec
+            votre compte.
+          </li>
         </ul>
         <p>Certains prestataires peuvent traiter des données hors UEMOA, avec les garanties appropriées.</p>
       </section>

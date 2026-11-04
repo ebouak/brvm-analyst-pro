@@ -24,6 +24,7 @@ Audit initial : 2026-06-16.
 | `admin_audit_logs` | actor/target user_id, **ip_address**, **user_agent** | Sécurité / traçabilité admin | Intérêt légitime | 12 mois (recommandé) | n/a (admin) | Purge planifiée (à mettre en place) |
 | `forum_topics` / `forum_posts` | pseudonyme (`display_name`), contenu des messages, horodatage | Discussion communautaire | Intérêt légitime + action volontaire de l'utilisateur | Jusqu'à suppression par l'auteur ou masquage admin | ✅ (`/api/account/export`) | Anonymisation automatique à la suppression du compte (`author_id` → NULL, affichage « Utilisateur supprimé ») |
 
+| `recherche_societes_cache`, `rate_limit_hits` (route `recherche-societes`) | Aucun texte de recherche (empreinte SHA-256 seule) ; identifiant de compte **haché** pour le quota | Recherche des sociétés en langage naturel (Jev) | Contrat (exécution du service) | Cache 24 h ; quota : fenêtre d'une heure | N/A (rien de rattaché au compte) | Purge `purge_rgpd_retention()` |
 > IP et user-agent (`admin_audit_logs`) sont des données personnelles : limiter la
 > rétention et ne pas les exposer hors admin.
 
@@ -250,3 +251,12 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Base légale : intérêt légitime (sécurité du service). Aucune donnée sensible.
 - Conservation : 7 jours (`purge_rgpd_retention`) ; suppression du compte par cascade.
 - Accès : service_role seul (RLS sans policy). Pas d'export : donnée technique éphémère.
+
+### Recherche des sociétés en langage naturel (Jev, migration 0191)
+
+- Données : texte saisi, **jamais conservé** (seule son empreinte SHA-256, 24 h) ; identifiant de compte haché dans `rate_limit_hits`, purgé hors fenêtre (1 h). Une requête contenant une adresse e-mail ou un numéro de téléphone est refusée et n'est jamais envoyée.
+- Finalité : classer les sociétés cotées selon la recherche ; base légale : exécution du service (comptes connectés).
+- Sous-traitant : **TypeSafe** (texte de la recherche, sans identité).
+- Conservation : cache 24 h, compteur de budget 30 jours (`purge_rgpd_retention`).
+- Accès : service_role seul (RLS sans policy, fonctions révoquées pour anon/authenticated — vérifié à la clé publique : 401).
+- Journaux : codes d'événement seulement, jamais le texte de la recherche (test « Confidentialité »).
