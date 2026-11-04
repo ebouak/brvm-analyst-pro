@@ -1,4 +1,4 @@
-import type { SgiFrais } from './types';
+import type { Palier, SgiFrais } from './types';
 
 /**
  * Commissions réglementaires BRVM + DC/BR — constante GLOBALE non nullable,
@@ -11,6 +11,38 @@ import type { SgiFrais } from './types';
 export const BRVM_DCBR_PCT = 0.3; // 0,2% + 0,1%, par ordre (achat ou vente)
 
 const FREQ_MULT: Record<string, number> = { annuel: 1, trimestriel: 4, semestriel: 2 };
+
+/**
+ * Taux de la tranche qui contient `montant` (borne incluse), ou null sans
+ * barème par tranche exploitable — l'appelant retombe alors sur min/max.
+ */
+function tauxDuPalier(paliers: Palier[] | null | undefined, montant: number): number | null {
+  if (!paliers || paliers.length === 0) return null;
+  const tries = [...paliers].sort((a, b) => (a.jusqua ?? Infinity) - (b.jusqua ?? Infinity));
+  return tries.find((p) => p.jusqua == null || montant <= p.jusqua)?.pct ?? null;
+}
+
+/** Postes sans lesquels un coût comparé serait faussement bas. Le virement,
+ * presque jamais publié, n'en fait pas partie. */
+const POSTES_ESSENTIELS = ['courtage', 'droits_garde', 'tenue_compte'];
+
+/** Vrai si courtage, garde et tenue de compte sont tous connus. */
+export function baremeComplet(r: Pick<CoutSGIResult, 'champsManquants'>): boolean {
+  return !r.champsManquants.some((c) => POSTES_ESSENTIELS.includes(c));
+}
+
+/**
+ * Classement des coûts : barèmes complets d'abord, chacun par coût croissant.
+ * Un poste inconnu compte 0 dans le total ; sans ce tri, une SGI passerait
+ * devant grâce à un trou dans nos données.
+ */
+export function classerResultats<T extends Pick<CoutSGIResult, 'champsManquants' | 'total'>>(resultats: T[]): T[] {
+  return [...resultats].sort((a, b) => {
+    const ca = baremeComplet(a), cb = baremeComplet(b);
+    if (ca !== cb) return ca ? -1 : 1;
+    return a.total - b.total;
+  });
+}
 
 export interface CoutSGIInput {
   montant: number;
@@ -44,8 +76,10 @@ export function calculerCoutSGI(sgi: SgiFrais, input: CoutSGIInput): CoutSGIResu
   const champsManquants: string[] = [];
 
   // 1) Courtage — le minimum de perception agit comme un plancher qui
-  // remplace le courtage proportionnel si celui-ci est plus faible.
-  const courtagePct = sgi.courtagePctMax ?? sgi.courtagePctMin;
+  // remplace le courtage proportionnel si celui-ci est plus faible. Un barème
+  // par tranche donne le taux exact selon le montant de l'ordre : la borne
+  // haute n'est qu'un repli quand le taux est réellement inconnu.
+  const courtagePct = tauxDuPalier(sgi.courtagePaliers, montant) ?? sgi.courtagePctMax ?? sgi.courtagePctMin;
   if (courtagePct == null) champsManquants.push('courtage');
   const courtageParOrdre = courtagePct != null ? montant * (courtagePct / 100) : 0;
   const planchePerception = sgi.minimumPerception ?? 0;
@@ -58,7 +92,7 @@ export function calculerCoutSGI(sgi: SgiFrais, input: CoutSGIInput): CoutSGIResu
   // plancher par période (`droitsGardeMinimum`) agit comme le minimum de
   // perception du courtage : il remplace le taux proportionnel s'il est
   // plus élevé (ex. Sogebourse : 2 500 FCFA/trimestre plancher intégré).
-  const gardePct = sgi.droitsGardePctMax ?? sgi.droitsGardePctMin;
+  const gardePct = tauxDuPalier(sgi.gardePaliers, montant) ?? sgi.droitsGardePctMax ?? sgi.droitsGardePctMin;
   if (gardePct == null) champsManquants.push('droits_garde');
   const gardeMult = sgi.droitsGardeFrequence ? (FREQ_MULT[sgi.droitsGardeFrequence] ?? 1) : 1;
   const gardeParPeriode = gardePct != null ? montant * (gardePct / 100) : 0;

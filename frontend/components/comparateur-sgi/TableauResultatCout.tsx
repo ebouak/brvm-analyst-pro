@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { CoutSGIResult } from '@/lib/sgi-frais/calculateur';
-import { estSousDepotMinimum } from '@/lib/sgi-frais/calculateur';
+import { baremeComplet, estSousDepotMinimum } from '@/lib/sgi-frais/calculateur';
 import type { SgiFrais, ConfianceNiveau, Frequence } from '@/lib/sgi-frais/types';
 import { CONFIANCE_LABEL, CONFIANCE_BADGE_CLASS, lienDecision } from '@/lib/sgi-frais/types';
 import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
@@ -34,6 +34,8 @@ interface Row {
   confiance: ConfianceNiveau;
   /** PDF de la décision d'homologation, quand elle est la source du barème. */
   decision: string | null;
+  /** Courtage, garde et tenue tous connus — sinon le total est faussement bas. */
+  complet: boolean;
   total: number;
   sousDepotMin: boolean;
   champCourtageManquant: boolean;
@@ -79,6 +81,7 @@ export function TableauResultatCout({
           gardeFreq: sgi?.droitsGardeFrequence ?? null,
           confiance: sgi?.confiance ?? 'saisie_utilisateur',
           decision: lienDecision(sgi),
+          complet: baremeComplet(r),
           total: r.total,
           sousDepotMin: sgi ? estSousDepotMinimum(sgi, montant) : false,
           champCourtageManquant: r.champsManquants.includes('courtage'),
@@ -91,6 +94,8 @@ export function TableauResultatCout({
   const tries = useMemo(() => {
     const arr = [...rows];
     arr.sort((a, b) => {
+      // Au tri par coût, un barème incomplet ne passe jamais devant un complet.
+      if (sortKey === 'total' && a.complet !== b.complet) return a.complet ? -1 : 1;
       const av = a[sortKey];
       const bv = b[sortKey];
       if (av == null && bv == null) return 0;
@@ -151,7 +156,7 @@ export function TableauResultatCout({
                 <td className="px-3 py-2 tabular text-faint">{i + 1}</td>
                 <td className="px-3 py-2">
                   <span className="font-medium text-white">{r.sgiNom}</span>
-                  {i === 0 && <span className="ml-2 text-[10px] text-up">★ moins cher</span>}
+                  {i === 0 && sortKey === 'total' && asc && r.complet && <span className="ml-2 text-[10px] text-up">★ moins cher</span>}
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2">
                     <Badge niveau={r.confiance} />
                     {r.decision && (
