@@ -21,7 +21,8 @@ export type FeatureCode =
   | 'backtest'
   | 'paper_trading'
   | 'dcf'
-  | 'whatsapp_agent';
+  | 'whatsapp_agent'
+  | 'recherche_ia';
 
 export interface FeatureFlag {
   code: string;
