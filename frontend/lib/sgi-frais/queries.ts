@@ -2,6 +2,7 @@ import 'server-only';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SGI_DIRECTORY, type Sgi } from './directory';
 import { SGI_FRAIS_SEED } from './seed-data';
+import { slugDepuisNom } from './identite';
 import type { SgiFrais, ConfianceNiveau, Frequence, Palier } from './types';
 
 /**
@@ -24,6 +25,10 @@ interface SgiDirectoryRow {
   fiche_brvm: string | null;
   telephone: string | null;
   email: string | null;
+  // Migration 0190 : identifiant stable et adresse officielle brvm.org.
+  slug?: string | null;
+  adresse?: string | null;
+  verifie_le?: string | null;
 }
 
 interface SgiFraisRow {
@@ -64,6 +69,9 @@ function mapDirectory(r: SgiDirectoryRow): Sgi {
     ficheBRVM: r.fiche_brvm ?? undefined,
     telephone: r.telephone ?? undefined,
     email: r.email ?? undefined,
+    slug: r.slug ?? slugDepuisNom(r.nom),
+    adresse: r.adresse ?? undefined,
+    verifieLe: r.verifie_le ?? undefined,
   };
 }
 
@@ -98,7 +106,7 @@ export async function getSgiDirectory(): Promise<Sgi[]> {
     const sb = createPublicClient();
     const { data, error } = await sb
       .from('sgi_directory')
-      .select('nom, pays, type, groupe, logo, depot_min, depot_min_source, site_web, fiche_brvm, telephone, email')
+      .select('nom, pays, type, groupe, logo, depot_min, depot_min_source, site_web, fiche_brvm, telephone, email, slug, adresse, verifie_le')
       .order('nom');
     if (error || !data || data.length === 0) return SGI_DIRECTORY;
     return (data as SgiDirectoryRow[]).map(mapDirectory);

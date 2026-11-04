@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ecrireScenario, lireScenario } from '@/lib/sgi-frais/scenario';
 import { MotionConfig } from 'framer-motion';
 import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
 import { baremeComplet, calculerCoutSGI, calculerSeuilRentabilite, classerResultats, montantParOrdreParDefaut } from '@/lib/sgi-frais/calculateur';
@@ -116,6 +117,26 @@ export function CalculateurCout({
   // 1 M investi. Saisie libre, sinon capital réparti sur les achats.
   const [montantOrdreSaisi, setMontantOrdreSaisi] = useState<number | null>(null);
   const montantParOrdre = montantOrdreSaisi ?? montantParOrdreParDefaut(montant, nbAchats);
+
+  // Scénario partagé entre modules par l'URL : lu au montage, réécrit ensuite.
+  // Les autres paramètres et l'ancre (#calculateur-cout) sont conservés.
+  const scenarioLu = useRef(false);
+  useEffect(() => {
+    const s = lireScenario(new URLSearchParams(window.location.search));
+    setMontant(s.montant);
+    setDureeAns(s.dureeAns);
+    setNbAchats(s.nbAchats);
+    setNbVentes(s.nbVentes);
+    setMontantOrdreSaisi(s.montantParOrdre);
+    scenarioLu.current = true;
+  }, []);
+  useEffect(() => {
+    if (!scenarioLu.current) return;
+    const url = new URL(window.location.href);
+    for (const k of ['capital', 'duree', 'achats', 'ventes', 'ordre']) url.searchParams.delete(k);
+    ecrireScenario({ montant, dureeAns, nbAchats, nbVentes, montantParOrdre: montantOrdreSaisi }).forEach((v, k) => url.searchParams.set(k, v));
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [montant, dureeAns, nbAchats, nbVentes, montantOrdreSaisi]);
 
   const filtered = useMemo(
     () =>
@@ -280,7 +301,7 @@ export function CalculateurCout({
         {recommandee && (
           <a
             href="#resultats-cout"
-            className="sticky bottom-3 z-10 mt-5 flex items-center justify-between gap-3 rounded-xl border border-up/30 bg-bg/95 px-4 py-3 shadow-lg backdrop-blur lg:hidden"
+            className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-10 mt-5 md:bottom-3 flex items-center justify-between gap-3 rounded-xl border border-up/30 bg-bg/95 px-4 py-3 shadow-lg backdrop-blur lg:hidden"
           >
             <span className="min-w-0">
               <span className="block text-[10px] uppercase tracking-wide text-faint">La moins chère</span>

@@ -46,6 +46,14 @@
   --color-muted: 181 181 181;
   --color-faint: 122 138 144; /* 5,21:1 sur surface, 5,76:1 sur bg — mesuré */
 
+  /* Bandeau « nuit » du comparateur SGI : sombre dans LES DEUX thèmes, donc
+     défini une seule fois ici (les blocs clair/sombre ne le redéfinissent pas).
+     sur-nuit sur nuit : contraste 12,4:1. */
+  --color-nuit: 16 43 53;
+  --color-sur-nuit: 245 243 237;
+  /* Turquoise lisible SUR nuit (8,6:1) : l'accent du thème clair n'y fait que 3:1. */
+  --color-accent-nuit: 86 215 253;
+
   --shadow-card: 0 10px 24px rgba(0,0,0,0.35);
   --shadow-panel: 0 22px 60px rgba(0,0,0,0.45);
   --shadow-modal: 0 24px 80px -16px rgba(0,0,0,0.85);
@@ -665,3 +673,13 @@ body::after {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
+
+/* Bandeau du comparateur SGI : tendance qui se trace, bougies qui montent.
+   État de repos = état final (tracé entier, bougies pleines) : sans animation,
+   rien ne manque. */
+@media (prefers-reduced-motion: no-preference) {
+  .cmp-trace { animation: cmp-trace 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+  .cmp-bougie { transform-box: fill-box; transform-origin: bottom; animation: cmp-bougie 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+}
+@keyframes cmp-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes cmp-bougie { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }

@@ -11,6 +11,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/brief`, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/simulateur`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/comparateur-sgi`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/comparateur-sgi/trouver`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${SITE_URL}/comparateur-sgi/simuler`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${SITE_URL}/comparateur-sgi/comparer`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${SITE_URL}/comparateur-sgi/annuaire`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${SITE_URL}/comparateur-sgi/methodologie`, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/secteurs`, changeFrequency: 'daily', priority: 0.8 },
     // Outils publics à contenu UNIQUE : personne d'autre sur la place ne les propose.
     // Ce sont eux qui peuvent capter des requêtes que les concurrents ne couvrent pas.
@@ -32,13 +37,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createPublicClient();
-    const [{ data: instruments }, { data: briefs }, { data: analyses }, { data: articles }] = await Promise.all([
+    const [{ data: instruments }, { data: briefs }, { data: analyses }, { data: articles }, { data: sgis }] = await Promise.all([
       supabase.from('brvm_instruments').select('code').eq('type', 'action').eq('actif', true),
       supabase.from('brief_daily').select('date_marche').order('date_marche', { ascending: false }).limit(365),
       supabase.from('citable_pages').select('slug, updated_at').eq('published', true),
       // Articles publiés (RLS) ; table absente avant 0167 → data null, sans casser le sitemap.
       supabase.from('articles').select('slug, publie_le').order('publie_le', { ascending: false }).limit(1000),
+      // Fiches SGI : slug stable depuis 0190.
+      supabase.from('sgi_directory').select('slug, verifie_le'),
     ]);
+
+    const sgiPages: MetadataRoute.Sitemap = (sgis ?? []).map((g) => ({
+      url: `${SITE_URL}/comparateur-sgi/annuaire/${g.slug}`,
+      ...(g.verifie_le ? { lastModified: new Date(g.verifie_le) } : {}),
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    }));
 
     const companyPages: MetadataRoute.Sitemap = (instruments ?? []).map((i) => ({
       url: `${SITE_URL}/societes/${i.code}`,
@@ -70,7 +84,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.75,
     }));
 
-    return [...staticPages, ...companyPages, ...briefPages, ...analysePages, ...articlePages];
+    return [...staticPages, ...companyPages, ...briefPages, ...analysePages, ...articlePages, ...sgiPages];
   } catch {
     // Base inaccessible au build : on publie au moins les pages statiques.
     return staticPages;
