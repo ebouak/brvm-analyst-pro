@@ -3,6 +3,7 @@ import { createHmac } from 'node:crypto';
 import {
   verifierSignatureWaha,
   lireEvenementWaha,
+  urlFichierPublique,
   estConversationPrivee,
   chatIdDepuisTelephone,
   estAutoTest,
@@ -61,11 +62,22 @@ describe('lecture défensive des événements', () => {
       texte: 'Bonjour',
       deMoi: false,
       media: false,
+      fichier: null,
       horodatage: 1792760000,
       prenom: null,
       source: null,
       vers: null,
     });
+  });
+  it('note vocale : fichier lu, URL réécrite sur l’origine publique', () => {
+    const e = lireEvenementWaha({
+      event: 'message',
+      payload: { id: 'x', from: '1@c.us', body: '', hasMedia: true, media: { url: 'http://localhost:3000/api/files/default/abc.oga', mimetype: 'audio/ogg; codecs=opus' } },
+    });
+    expect(e && e.type === 'message' ? e.fichier : null).toEqual({ url: 'http://localhost:3000/api/files/default/abc.oga', mimetype: 'audio/ogg; codecs=opus' });
+    expect(urlFichierPublique('http://localhost:3000/api/files/default/abc.oga', 'https://wa.westbourse.com')).toBe('https://wa.westbourse.com/api/files/default/abc.oga');
+    expect(urlFichierPublique('http://localhost:3000/api/sessions', 'https://wa.westbourse.com')).toBeNull();
+    expect(urlFichierPublique('pas une url', 'https://wa.westbourse.com')).toBeNull();
   });
   it('prénom affiché (pushName), selon le moteur, borné et nettoyé', () => {
     const gows = lireEvenementWaha({ event: 'message', payload: { id: 'i', from: 'a@c.us', body: 'x', _data: { Info: { PushName: '  Awa\n ' } } } });

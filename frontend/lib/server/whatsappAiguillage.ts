@@ -63,16 +63,15 @@ export function depsAiguillageWhatsapp(): DepsAiguillage {
 }
 
 /**
- * Exécute une décision qui se suffit à elle-même. Renvoie false si le message
+ * Exécute une décision qui se suffit à elle-même. Renvoie le texte envoyé, ou null si le message
  * doit suivre le chemin actuel (agent, console) ou si l'envoi a échoué :
  * un message n'est jamais perdu.
  */
-export async function appliquerDecision(chatId: string, d: Decision): Promise<boolean> {
-  const envoyer = async (texte: string) => (await passerelleWhatsapp().envoyerTexte(chatId, texte)).ok;
+export async function appliquerDecision(chatId: string, d: Decision): Promise<string | null> {
+  const envoyer = async (texte: string) => ((await passerelleWhatsapp().envoyerTexte(chatId, texte)).ok ? texte : null);
   switch (d.type) {
     case 'commande':
-      await repondreCommande(chatId, d.commande);
-      return true;
+      return repondreCommande(chatId, d.commande);
     case 'clarification':
       return envoyer(texteClarification(d.intention, d.codes));
     case 'refus_conseil':
@@ -80,6 +79,6 @@ export async function appliquerDecision(chatId: string, d: Decision): Promise<bo
     case 'salutation':
       return envoyer(TEXTE_SALUTATION);
     default:
-      return false;
+      return null;
   }
 }

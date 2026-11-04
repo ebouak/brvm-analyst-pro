@@ -29,6 +29,12 @@ export interface SystemPromptContext {
    * donnée n'existe pas. Absent = comportement historique (tous les outils).
    */
   premium?: boolean;
+  /**
+   * Assistant WhatsApp ouvert à tous (2026-11-04) : outils élargis (fiche,
+   * carnet, comparaison, recherche, notions), mémoire de conversation, verrou
+   * des chiffres. Absent = comportement historique.
+   */
+  chatbot?: boolean;
 }
 
 function formatWatchlistItem(item: WatchlistContextItem): string {
@@ -61,6 +67,21 @@ function formatWatchlistItem(item: WatchlistContextItem): string {
  * chiffre. Une entrée sans donnée du jour le dit explicitement plutôt que de
  * l'omettre silencieusement.
  */
+function regleChatbot(perso: boolean): string[] {
+  return [
+    '',
+    "OUTILS : tu consultes N'IMPORTE QUELLE valeur cotée à la BRVM : cours, historique, dividendes, actualités, liquidité, carnet d'ordres (meilleures limites publiées), fiche société (secteur, derniers comptes annuels), comparaison de deux ou trois valeurs, recherche de sociétés par description, palmarès de la séance, et les leçons WESTBOURSE Academy sur une notion. Appelle-les dès que la question porte sur ces sujets, AVANT de répondre que tu ne sais pas. Un outil qui renvoie une erreur ou une valeur nulle signifie que la donnée n'existe pas : dis-le, ne comble jamais le vide.",
+    perso
+      ? 'Tu peux aussi consulter le portefeuille et les alertes de cet utilisateur.'
+      : "Tu n'as PAS accès au portefeuille ni aux alertes de cette personne (réservés aux abonnés Premium dont le WhatsApp est lié et l'assistant activé). Si elle les demande, dis-le en une phrase et donne ce lien : https://www.westbourse.com/pricing",
+    "CONVERSATION : les messages précédents sont la conversation en cours. Une question courte (« et son dividende ? ») porte sur la dernière valeur évoquée. Si tu ne sais pas de quelle valeur il s'agit, demande-le en une phrase.",
+    "NOTIONS : pour expliquer une notion (PER, dividende, détachement, SGI…), explique-la en deux ou trois phrases SANS AUCUN chiffre, puis cite la leçon Academy renvoyée par l'outil, avec son lien.",
+    "CHIFFRES : n'écris QUE des nombres présents tels quels dans les retours d'outils ou dans la conversation. Aucun calcul, aucun pourcentage dérivé, aucun exemple chiffré : un contrôle automatique refuse tout autre nombre.",
+    "Ne cite jamais de signal d'achat ou de vente, de score ni de note.",
+    "Termine, si c'est utile, par UNE courte suggestion de question suivante.",
+  ];
+}
+
 export function buildSystemPrompt(ctx: SystemPromptContext): string {
   const watchlistLines =
     ctx.watchlist.length > 0
@@ -80,7 +101,9 @@ export function buildSystemPrompt(ctx: SystemPromptContext): string {
     ? "4. Réponds en français, de façon concise : vise moins de 800 caractères. N'utilise AUCUN symbole de mise en forme (ni *, ni _, ni #, ni tableaux, ni tirets de liste) : ils s'afficheraient tels quels. Structure avec des sauts de ligne simples."
     : '4. Réponds en français, de façon concise (WhatsApp, pas un rapport) : vise moins de 600 caractères, ne dépasse jamais 1500 (les messages WhatsApp sont tronqués au-delà de 4096 caractères, sans avertissement — reste large en dessous). N\'utilise JAMAIS de Markdown standard (pas de titres avec #, pas de tableaux avec |, pas de listes à puces avec -) : WhatsApp ne les affiche pas, ils apparaîtraient tels quels dans le message. Utilise uniquement le formatage WhatsApp réel : *gras*, _italique_, ~barré~, et des sauts de ligne simples.';
 
-  const regleOutils = ctx.outils && email
+  const regleOutils = ctx.chatbot && ctx.outils && !email
+    ? regleChatbot(ctx.premium === true)
+    : ctx.outils && email
     ? [
         '',
         "OUTILS : tu peux consulter le cours, l'historique, les dividendes, les actualités et la liquidité de N'IMPORTE QUELLE valeur cotée à la BRVM, ainsi que le palmarès de la séance. Tu n'as accès à AUCUNE donnée de compte : l'auteur du message n'est pas identifié. Un outil qui renvoie une erreur ou une valeur nulle signifie que la donnée n'existe pas — dis-le, ne comble jamais le vide.",

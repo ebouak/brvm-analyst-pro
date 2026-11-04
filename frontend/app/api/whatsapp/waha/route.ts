@@ -16,8 +16,12 @@ import { estStop } from '@/lib/crm/whatsappRelance';
 import { traiterStop } from '@/lib/whatsapp/stop';
 import { aiguillerParJev } from '@/lib/whatsapp/aiguillage/aiguiller';
 import { appliquerDecision, depsAiguillageWhatsapp } from '@/lib/server/whatsappAiguillage';
+import { chatbotActif, effacerConversation, memoriserEchange, repondreChatbotWhatsapp, traiterVocal } from '@/lib/server/whatsappChatbot';
+import { estDemandeEffacer } from '@/lib/whatsapp/chatbot/textes';
 
 export const runtime = 'nodejs';
+// Transcription d'une note vocale + réponse de l'assistant (outils, réécriture éventuelle).
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 /**
@@ -96,40 +100,69 @@ export async function POST(req: Request) {
   if ((ev.deMoi && !autoTest) || !estConversationPrivee(ev.de)) return NextResponse.json({ ok: true, ignore: true });
   if (await dejaTraite(ev.id)) return NextResponse.json({ ok: true, doublon: true });
 
+  // Assistant ouvert à tous (drapeau whatsapp_chatbot, spec 2026-11-04). Coupé,
+  // le parcours ci-dessous est exactement celui d'avant.
+  const chatbot = !autoTest && (await chatbotActif());
+  let texte = ev.texte;
+  let quotaPris = false;
+  let vocal = false;
+  if (chatbot && !texte.trim() && ev.fichier?.mimetype.startsWith('audio/')) {
+    const v = await traiterVocal(ev.de, ev.fichier);
+    if (v.etat !== 'texte') return NextResponse.json({ ok: true, vocal: v.etat });
+    texte = v.texte;
+    quotaPris = true;
+    vocal = true;
+  }
+
   // Aiguillage (lots A et D) : code d'appairage → liaison du compte ;
-  // commande rapide → réponse sans IA ; abonné lié ayant activé l'assistant →
-  // agent (sauf HUMAIN) ; tout le reste → console de contact, chez un humain.
-  if (isPairingCode(ev.texte)) {
-    await appairerWhatsapp(ev.de, ev.texte);
+  // commande rapide → réponse sans IA ; le reste → Jev, assistant, ou console.
+  if (isPairingCode(texte)) {
+    await appairerWhatsapp(ev.de, texte);
     return NextResponse.json({ ok: true, appairage: true });
   }
   // STOP : opposition au recontact commercial (RGPD art. 21). Jamais pour le
   // test de l'exploitant, jamais vers l'agent.
-  const stop = !autoTest && estStop(ev.texte);
+  const stop = !autoTest && estStop(texte);
   if (stop) {
     const enregistre = await traiterStop(ev.de).catch(() => false);
     if (enregistre) return NextResponse.json({ ok: true, stop: true });
     // Non rattaché : le message suit le chemin normal jusqu'à la console.
   }
+  if (chatbot && estDemandeEffacer(texte)) {
+    await effacerConversation(ev.de);
+    return NextResponse.json({ ok: true, efface: true });
+  }
   // RECAP : image du portefeuille de l'abonné lié (Premium) — avant les
   // commandes anonymes, car elle est personnelle.
-  if (estDemandeRecap(ev.texte)) {
+  if (estDemandeRecap(texte)) {
     await traiterDemandeRecap('whatsapp', ev.de, new URL(req.url).origin);
     return NextResponse.json({ ok: true, recap: true });
   }
-  const commande = lireCommande(ev.texte);
+  const commande = lireCommande(texte);
   if (commande) {
-    await repondreCommande(ev.de, commande);
+    const envoye = await repondreCommande(ev.de, commande);
+    if (chatbot && envoye) await memoriserEchange(ev.de, texte, envoye);
     return NextResponse.json({ ok: true, commande: commande.type });
   }
-  if (ev.texte.trim() && !estDemandeHumain(ev.texte) && !estStop(ev.texte)) {
-    // Jev (si activé) : réponse exacte, clarification ou refus de conseil ; sinon chemin actuel.
-    const decision = autoTest ? ({ type: 'aiguillage_actuel' } as const) : await aiguillerParJev(ev.texte, ev.de, depsAiguillageWhatsapp());
-    if (await appliquerDecision(ev.de, decision)) return NextResponse.json({ ok: true, aiguillage: decision.type });
-    if (decision.type !== 'console') {
+  if (texte.trim() && !estDemandeHumain(texte) && !estStop(texte)) {
+    // Jev (si activé) : réponse exacte, refus de conseil, salutation. Avec l'assistant,
+    // le doute, la clarification et l'analyse vont à l'assistant plutôt qu'à la console.
+    const decision = autoTest ? ({ type: 'aiguillage_actuel' } as const) : await aiguillerParJev(texte, ev.de, depsAiguillageWhatsapp());
+    const versAssistant = chatbot && (decision.type === 'aiguillage_actuel' || decision.type === 'clarification' || decision.type === 'agent');
+    if (!versAssistant) {
+      const envoye = await appliquerDecision(ev.de, decision);
+      if (envoye) {
+        if (chatbot) await memoriserEchange(ev.de, texte, envoye);
+        return NextResponse.json({ ok: true, aiguillage: decision.type });
+      }
+    }
+    if (chatbot && decision.type !== 'console') {
+      const issue = await repondreChatbotWhatsapp(ev.de, texte, { quotaDejaPris: quotaPris });
+      if (issue !== 'console') return NextResponse.json({ ok: true, assistant: issue });
+    } else if (decision.type !== 'console') {
       const abonne = await abonneAvecAgent(ev.de);
       if (abonne) {
-        await repondreAgent(ev.de, abonne, ev.texte);
+        await repondreAgent(ev.de, abonne, texte);
         return NextResponse.json({ ok: true, agent: true });
       }
     }
@@ -139,7 +172,7 @@ export async function POST(req: Request) {
   if (autoTest) return NextResponse.json({ ok: true, ignore: 'auto-test' });
 
   try {
-    const r = await recevoirMessageWhatsapp({ de: ev.de, texte: ev.texte, media: ev.media, prenom: ev.prenom });
+    const r = await recevoirMessageWhatsapp({ de: ev.de, texte: vocal ? `🎤 ${texte}` : ev.texte, media: ev.media, prenom: ev.prenom });
     return NextResponse.json({ ok: true, recu: true, ...(r ? { nouveau: r.nouveau } : { vide: true }) });
   } catch (e) {
     // L'identifiant est déjà marqué traité : un rejeu serait écarté. On alerte donc

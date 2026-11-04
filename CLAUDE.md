@@ -1351,6 +1351,41 @@ clé publique → 401). Frontend 1491 tests, scraper 851.
   `commodity-weekly.yml` 2, `eval-signaux.yml` jamais lancé, 2 runs `events`
   bloqués « running » depuis le 2026-08-06 et le 2026-10-26.
 
+### Ajouts (passage 2026-11-04) — Recherche partout, WhatsApp : Jev puis vrai assistant
+
+Specs `2026-11-04-recherche-societes-jev-design.md` (PR #163, #165) et
+`2026-11-04-whatsapp-chatbot-design.md`. Migrations `0191`, `0192`, `0193` **appliquées**.
+
+- **Recherche en langage naturel** (Jev, TypeSafe) sur `/societes`, la landing et
+  `/dashboard` ; réservée aux connectés, un visiteur voit d'abord l'invitation à se
+  connecter puis la recherche simple par mots-clés.
+- **Jev aiguille les messages WhatsApp libres** (`whatsapp_jev`, actif) : réponse
+  exacte sans IA quand il est sûr. Un nom de société seul (« sonatel ») reçoit son
+  cours (#166 : Jev reconnaît la société à 0,89-0,98 mais hésite sur la demande).
+- **Constat** : 0 conversation avec l'agent en 30 jours, 21 messages partis à la
+  console — l'agent exigeait compte + appairage + case `agent_optin` (1 compte).
+- **Assistant ouvert à tous** (`whatsapp_chatbot`, **livré COUPÉ**) : tout message
+  libre que ni les commandes ni Jev ne traitent va à l'agent au lieu de la console.
+  Inconnus 1 question IA/jour, liés selon `whatsapp_agent`, Premium + `agent_optin`
+  pour portefeuille/alertes. Plafond global `whatsapp_ia` (300) + sous-plafond
+  `whatsapp_ia_inconnu` (150) dans `jev_budget`. Commandes et réponses Jev illimitées.
+- **Verrou des chiffres** (`lib/whatsapp/chatbot/chiffres.ts`) : tout nombre de la
+  réponse doit figurer dans les retours d'outils ou la conversation (arrondi et
+  échelle « Md » tolérés) ; sinon une réécriture, puis réponse sans chiffre + lien.
+- **Mémoire** : `whatsapp_conversations` par `chat_hash` (HMAC), 10 messages / 72 h,
+  30 j sans compte ; **EFFACER** vide la conversation. Notes vocales transcrites par
+  Gemini, audio jamais stocké ; l'URL de fichier WAHA est réécrite sur `WAHA_URL`
+  (préfixe `/api/files/` seul) car le serveur n'a pas d'URL publique configurée.
+- Nouveaux outils (`lib/agent/outilsChatbot.ts`) : fiche société, carnet d'ordres,
+  comparaison, recherche par description, notions Academy (titres + lien, jamais le
+  contenu payant). Signal/confiance retirés de tout retour.
+- ⚠️ **DÉFAUT DE DONNÉES NON CORRIGÉ** : `income_statements` porte pour **SNTS** un
+  BPA de 413,6 et un dividende par action de 174, soit **÷ 10** (résultat net ÷ actions
+  ≈ 4 136 ; ORAC cohérent). BPA, DPA et PER sont donc exclus de la fiche de l'agent.
+  Auditer les autres sociétés avant de réintroduire un PER calculé sur cette table.
+- **Activation** : décision de l'exploitant, après essai réel (message libre, suite de
+  conversation, notion, comparaison, conseil déguisé, note vocale, EFFACER).
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

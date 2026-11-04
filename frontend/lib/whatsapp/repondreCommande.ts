@@ -29,13 +29,14 @@ async function journaliser(commande: Commande['type'], resultat: IssueCommande |
   if (error) console.warn('[whatsapp] journal des commandes indisponible :', error.code ?? error.message);
 }
 
-export async function repondreCommande(chatId: string, cmd: Commande): Promise<void> {
+/** Renvoie le texte envoyé (gardé en mémoire par l'assistant), sinon null. */
+export async function repondreCommande(chatId: string, cmd: Commande): Promise<string | null> {
   try {
     const cle = createHmac('sha256', process.env.WAHA_WEBHOOK_HMAC_KEY ?? 'westbourse-waha').update(`commande:${chatId}`).digest('hex');
     const { allowed } = await checkRateLimit({ route: 'whatsapp-commande', ip: cle, maxHits: LIMITE_HEURE, windowSeconds: 3600 });
     if (!allowed) {
       await journaliser(cmd.type, 'limite');
-      return;
+      return null;
     }
 
     let res: Record<string, unknown> | null = null;
@@ -49,7 +50,9 @@ export async function repondreCommande(chatId: string, cmd: Commande): Promise<v
     const envoi = await passerelleWhatsapp().envoyerTexte(chatId, texte);
     if (!envoi.ok) console.warn('[whatsapp] réponse à une commande non envoyée :', envoi.erreur);
     await journaliser(cmd.type, envoi.ok ? issueCommande(cmd, res) : 'erreur');
+    return envoi.ok ? texte : null;
   } catch (e) {
     console.error('[whatsapp] commande non traitée :', (e as Error).message);
+    return null;
   }
 }

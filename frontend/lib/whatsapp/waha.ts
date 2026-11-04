@@ -39,7 +39,7 @@ export type LivraisonWaha = 'envoye' | 'remis' | 'rejete';
 
 export type EvenementWaha =
   | {
-      type: 'message'; id: string; de: string; texte: string; deMoi: boolean; media: boolean; horodatage: number | null; prenom: string | null;
+      type: 'message'; id: string; de: string; texte: string; deMoi: boolean; media: boolean; fichier: FichierWaha | null; horodatage: number | null; prenom: string | null;
       /** `app` = tapé sur le téléphone, `api` = envoyé par la passerelle (nos réponses). */
       source: string | null;
       /** Destinataire ; absent ou égal à `de` dans la conversation « Vous ». */
@@ -92,6 +92,33 @@ export function estAutoTest(ev: { deMoi: boolean; source: string | null; de: str
   return ev.deMoi && ev.source === 'app' && (!ev.vers || ev.vers === ev.de);
 }
 
+export interface FichierWaha {
+  url: string;
+  mimetype: string;
+}
+
+function lireFichier(m: unknown): FichierWaha | null {
+  if (!m || typeof m !== 'object') return null;
+  const { url, mimetype } = m as { url?: unknown; mimetype?: unknown };
+  return typeof url === 'string' && url && typeof mimetype === 'string' && mimetype ? { url, mimetype } : null;
+}
+
+/**
+ * WAHA forge l'URL d'un fichier sur son origine INTERNE (aucune URL publique
+ * n'est configurée sur le serveur) : on garde le chemin, sur l'origine publique
+ * `WAHA_URL`. Seul le préfixe /api/files/ est admis : la clé d'API qui
+ * accompagne la requête ne doit servir à rien d'autre.
+ */
+export function urlFichierPublique(url: string, base: string): string | null {
+  try {
+    const u = new URL(url);
+    if (!u.pathname.startsWith('/api/files/') || u.pathname.includes('..')) return null;
+    return new URL(`${u.pathname}${u.search}`, base).toString();
+  } catch {
+    return null;
+  }
+}
+
 export function lireEvenementWaha(corps: unknown): EvenementWaha | null {
   if (!corps || typeof corps !== 'object') return null;
   const c = corps as { event?: unknown; session?: unknown; payload?: unknown };
@@ -106,6 +133,7 @@ export function lireEvenementWaha(corps: unknown): EvenementWaha | null {
       texte: typeof p.body === 'string' ? p.body.slice(0, TEXTE_MAX) : '',
       deMoi: p.fromMe === true,
       media: p.hasMedia === true,
+      fichier: lireFichier(p.media),
       horodatage: typeof p.timestamp === 'number' ? p.timestamp : null,
       prenom: prenomAffiche(p),
       source: typeof p.source === 'string' ? p.source : null,
