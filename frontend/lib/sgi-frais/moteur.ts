@@ -1,6 +1,6 @@
 import type { Sgi } from './directory';
 import type { SgiFrais } from './types';
-import { baremeComplet, calculerCoutSGI } from './calculateur';
+import { baremeComplet, calculerCoutSGI, montantParOrdreParDefaut } from './calculateur';
 
 /**
  * Moteur de choix SGI — scoring TRANSPARENT et explicable (convention
@@ -69,7 +69,9 @@ export function scorerSgi(directory: Sgi[], fraisList: SgiFrais[], profil: Profi
   for (const s of directory) {
     const f = fraisByNom.get(s.nom);
     if (f) {
-      couts.set(s.nom, calculerCoutSGI(f, { montant: profil.capital, nbOrdres: profil.ordresParAn, dureeAns: 1 }));
+      // Moitié achats, moitié ventes : le capital est réparti sur les achats.
+      const montantParOrdre = montantParOrdreParDefaut(profil.capital, Math.ceil(profil.ordresParAn / 2));
+      couts.set(s.nom, calculerCoutSGI(f, { montant: profil.capital, montantParOrdre, nbOrdres: profil.ordresParAn, dureeAns: 1 }));
     }
   }
   // Normalisation sur les seuls barèmes complets : un poste inconnu compte 0,

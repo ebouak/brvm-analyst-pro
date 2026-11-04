@@ -45,9 +45,22 @@ export function classerResultats<T extends Pick<CoutSGIResult, 'champsManquants'
 }
 
 export interface CoutSGIInput {
+  /** Capital investi : base de la garde (valeur du portefeuille). */
   montant: number;
+  /** Montant moyen d'un ordre : base du courtage et des frais BRVM/DC-BR.
+   * Absent, chaque ordre porte sur tout le capital (comportement antérieur). */
+  montantParOrdre?: number;
   nbOrdres: number; // achats + ventes sur la période
   dureeAns: number;
+}
+
+/**
+ * Montant d'un ordre quand l'utilisateur ne le précise pas : le capital
+ * réparti sur ses achats (ses ventes rendent les mêmes titres). Sans achat,
+ * l'ordre porte sur le capital entier.
+ */
+export function montantParOrdreParDefaut(capital: number, nbAchats: number): number {
+  return nbAchats > 0 ? capital / nbAchats : capital;
 }
 
 export interface CoutSGIResult {
@@ -73,20 +86,21 @@ export interface CoutSGIResult {
  */
 export function calculerCoutSGI(sgi: SgiFrais, input: CoutSGIInput): CoutSGIResult {
   const { montant, nbOrdres, dureeAns } = input;
+  const ordre = input.montantParOrdre ?? montant;
   const champsManquants: string[] = [];
 
   // 1) Courtage — le minimum de perception agit comme un plancher qui
   // remplace le courtage proportionnel si celui-ci est plus faible. Un barème
   // par tranche donne le taux exact selon le montant de l'ordre : la borne
   // haute n'est qu'un repli quand le taux est réellement inconnu.
-  const courtagePct = tauxDuPalier(sgi.courtagePaliers, montant) ?? sgi.courtagePctMax ?? sgi.courtagePctMin;
+  const courtagePct = tauxDuPalier(sgi.courtagePaliers, ordre) ?? sgi.courtagePctMax ?? sgi.courtagePctMin;
   if (courtagePct == null) champsManquants.push('courtage');
-  const courtageParOrdre = courtagePct != null ? montant * (courtagePct / 100) : 0;
+  const courtageParOrdre = courtagePct != null ? ordre * (courtagePct / 100) : 0;
   const planchePerception = sgi.minimumPerception ?? 0;
   const coutCourtage = Math.max(courtageParOrdre, planchePerception) * nbOrdres;
 
   // 2) Frais réglementaires BRVM/DC-BR — constante, toujours appliquée.
-  const coutReglementaire = montant * (BRVM_DCBR_PCT / 100) * nbOrdres;
+  const coutReglementaire = ordre * (BRVM_DCBR_PCT / 100) * nbOrdres;
 
   // 3) Droits de garde (conservation) — sur la durée de détention. Un
   // plancher par période (`droitsGardeMinimum`) agit comme le minimum de

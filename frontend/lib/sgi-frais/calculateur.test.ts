@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum, BRVM_DCBR_PCT, baremeComplet, classerResultats } from './calculateur';
+import { calculerCoutSGI, calculerSeuilRentabilite, estSousDepotMinimum, BRVM_DCBR_PCT, baremeComplet, classerResultats, montantParOrdreParDefaut } from './calculateur';
 import type { SgiFrais } from './types';
 
 function mkSgi(partial: Partial<SgiFrais>): SgiFrais {
@@ -183,6 +183,40 @@ describe('paliers par montant', () => {
   it('liste de paliers vide : repli sur la borne haute, jamais un taux nul', () => {
     const r = calculerCoutSGI(mkSgi({ courtagePctMax: 1, courtagePaliers: [] }), { montant: 1_000_000, nbOrdres: 1, dureeAns: 0 });
     expect(r.coutCourtage).toBeCloseTo(10_000, 5);
+  });
+});
+
+// Modèle réaliste (2026-11-04) : chaque ordre portait sur tout le capital —
+// 1 M FCFA et 4 achats + 4 ventes simulaient 8 M FCFA échangés dans l'année.
+describe('montant par ordre', () => {
+  const sgi = mkSgi({ courtagePctMax: 1, droitsGardePctMax: 0.5, droitsGardeFrequence: 'annuel', tenueCompteMontant: 0 });
+
+  it('courtage et frais BRVM portent sur le montant de l’ordre, la garde sur le capital', () => {
+    const r = calculerCoutSGI(sgi, { montant: 1_000_000, montantParOrdre: 250_000, nbOrdres: 8, dureeAns: 1 });
+    expect(r.coutCourtage).toBeCloseTo(20_000, 5); // 8 × 250 000 × 1 %
+    expect(r.coutReglementaire).toBeCloseTo(6_000, 5); // 8 × 250 000 × 0,3 %
+    expect(r.coutGarde).toBeCloseTo(5_000, 5); // 1 000 000 × 0,5 %
+  });
+
+  it('sans montant par ordre, chaque ordre porte sur le montant investi (comportement antérieur)', () => {
+    const r = calculerCoutSGI(sgi, { montant: 1_000_000, nbOrdres: 2, dureeAns: 1 });
+    expect(r.coutCourtage).toBeCloseTo(20_000, 5);
+  });
+
+  it('le minimum de perception joue sur chaque ordre, d’après son montant', () => {
+    const r = calculerCoutSGI(mkSgi({ courtagePctMax: 0.8, minimumPerception: 1_000 }), { montant: 1_000_000, montantParOrdre: 50_000, nbOrdres: 3, dureeAns: 0 });
+    expect(r.coutCourtage).toBeCloseTo(3_000, 5); // 0,8 % × 50 000 = 400 < 1 000
+  });
+
+  it('la tranche de courtage se lit sur le montant de l’ordre', () => {
+    const ifi = mkSgi({ courtagePctMax: 0.75, courtagePaliers: [{ jusqua: 100_000_000, pct: 0.2 }, { jusqua: null, pct: 0.75 }] });
+    const r = calculerCoutSGI(ifi, { montant: 1_000_000_000, montantParOrdre: 50_000_000, nbOrdres: 1, dureeAns: 0 });
+    expect(r.coutCourtage).toBeCloseTo(100_000, 3); // 0,2 % de 50 M
+  });
+
+  it('montant par ordre par défaut : capital réparti sur les achats', () => {
+    expect(montantParOrdreParDefaut(1_000_000, 4)).toBe(250_000);
+    expect(montantParOrdreParDefaut(1_000_000, 0)).toBe(1_000_000);
   });
 });
 
