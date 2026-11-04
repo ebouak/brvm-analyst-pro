@@ -31,7 +31,7 @@ const ERREURS: Record<string, string> = {
 
 const dateFr = (iso: string) => iso.split('-').reverse().join('/');
 
-export function RechercheSocietes() {
+export function RechercheSocietes({ retour = '/societes', className = 'mb-8' }: { retour?: string; className?: string } = {}) {
   const [q, setQ] = useState('');
   const [enCours, setEnCours] = useState(false);
   const [reponse, setReponse] = useState<ReponseRecherche | null>(null);
@@ -74,7 +74,7 @@ export function RechercheSocietes() {
   }
 
   return (
-    <section aria-labelledby="titre-recherche" className="mb-8 rounded-panel border border-border bg-surface p-5 md:p-6">
+    <section aria-labelledby="titre-recherche" className={`${className} rounded-panel border border-border bg-surface p-5 md:p-6`}>
       <h2 id="titre-recherche" className="flex items-center gap-2 font-display text-lg text-ivory">
         <Sparkles size={18} aria-hidden className="text-accent" /> Décrivez la société que vous cherchez
       </h2>
@@ -124,15 +124,30 @@ export function RechercheSocietes() {
         {erreur && <p className="text-sm text-warn">{erreur}</p>}
         {reponse && (
           <>
-            {reponse.raison && (
-              <p className="mb-3 text-[13px] text-muted">
-                {RAISONS[reponse.raison]}{' '}
-                {reponse.raison === 'non_connecte' && (
-                  <Link href="/login?next=/societes" className="font-semibold text-accent hover:underline">
+            {reponse.raison === 'non_connecte' ? (
+              // Invitation AVANT la réponse : la recherche simple reste visible dessous.
+              <div className="mb-4 rounded-xl border border-accent/30 bg-accent/[0.06] p-4">
+                <p className="font-medium text-ivory">Connectez-vous à WESTBOURSE pour la recherche intelligente</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                  Elle comprend votre phrase et classe les sociétés d’après leurs faits. En attendant, voici une recherche simple.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href={`/login?next=${encodeURIComponent(retour)}`}
+                    className="inline-flex min-h-[40px] items-center rounded-full bg-accent px-4 text-[13px] font-semibold text-bg transition hover:brightness-110 active:scale-95"
+                  >
                     Se connecter
                   </Link>
-                )}
-              </p>
+                  <Link
+                    href={`/signup?next=${encodeURIComponent(retour)}`}
+                    className="inline-flex min-h-[40px] items-center rounded-full border border-border px-4 text-[13px] font-semibold text-ivory transition-colors hover:border-accent/40 hover:text-accent"
+                  >
+                    Créer un compte gratuit
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              reponse.raison && <p className="mb-3 text-[13px] text-muted">{RAISONS[reponse.raison]}</p>
             )}
             {reponse.statut === 'aucune' ? (
               <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted">
