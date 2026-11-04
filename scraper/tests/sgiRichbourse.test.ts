@@ -5,6 +5,7 @@ import {
   paysToIso,
   normalizeSgiName,
   planDirectoryMerge,
+  slugDepuisNom,
   type ScrapedSgi,
   type ExistingSgiRow,
 } from '../src/scrapers/sgiRichbourse.js';
@@ -165,5 +166,23 @@ describe('planDirectoryMerge', () => {
   it("n'insère pas une SGI qui matche une existante (pas de doublon)", () => {
     const plan = planDirectoryMerge(scraped, existing, '2026-07-02');
     expect(plan.inserts.some((i) => i.nom === 'Coris Bourse S.A')).toBe(false);
+  });
+
+  // Régression : depuis la migration 0190, `slug` est non nul et unique. Une
+  // insertion sans slug faisait échouer tout le lot.
+  it('donne à chaque insertion un slug valide, unique et jamais déjà pris', () => {
+    const nouvelles: ScrapedSgi[] = [
+      { nom: 'Société Générale Bourse (SGB)', paysIso: 'CI', depotMin: null, siteWeb: null, telephone: null, tarifsUrl: null, slug: 'a' },
+      { nom: 'Nouvelle SGI XYZ', paysIso: 'CI', depotMin: null, siteWeb: null, telephone: null, tarifsUrl: null, slug: 'b' },
+      { nom: 'Nouvelle SGI  XYZ !', paysIso: 'SN', depotMin: null, siteWeb: null, telephone: null, tarifsUrl: null, slug: 'c' },
+    ];
+    const deja: ExistingSgiRow[] = [{ nom: 'Autre', telephone: null, site_web: null, email: null, slug: 'nouvelle-sgi-xyz' }];
+    const slugs = planDirectoryMerge(nouvelles, deja, '2026-07-02').inserts.map((i) => i.slug);
+    expect(slugs).toEqual(['societe-generale-bourse', 'nouvelle-sgi-xyz-2', 'nouvelle-sgi-xyz-3']);
+    for (const s of slugs) expect(s).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+  });
+
+  it('slugDepuisNom retire accents, parenthèses et ponctuation', () => {
+    expect(slugDepuisNom("Société d'Intermédiation (SA2IF)")).toBe('societe-d-intermediation');
   });
 });

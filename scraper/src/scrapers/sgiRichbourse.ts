@@ -224,10 +224,38 @@ export interface ExistingSgiRow {
   telephone: string | null;
   site_web: string | null;
   email: string | null;
+  /** Identifiant d'URL déjà attribué (migration 0190) : évite les collisions. */
+  slug?: string | null;
+}
+
+/**
+ * Identifiant d'URL dérivé du nom. Copie de `slugDepuisNom` du frontend
+ * (frontend/lib/sgi-frais/identite.ts) : deux paquets TS distincts, à
+ * corriger des deux côtés.
+ */
+export function slugDepuisNom(nom: string): string {
+  return nom
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\(.*?\)/g, ' ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/** Slug libre : suffixe -2, -3… si déjà pris ; « sgi » si le nom n'en donne aucun. */
+function slugLibre(nom: string, pris: Set<string>): string {
+  const base = slugDepuisNom(nom) || 'sgi';
+  let slug = base;
+  for (let i = 2; pris.has(slug); i++) slug = `${base}-${i}`;
+  pris.add(slug);
+  return slug;
 }
 
 export interface DirectoryInsert {
   nom: string;
+  /** Obligatoire depuis la migration 0190 (non nul, unique). */
+  slug: string;
   pays: string | null;
   type: 'Non déterminé';
   groupe: 'Non renseigné';
@@ -263,6 +291,7 @@ export function planDirectoryMerge(
   const byNorm = new Map(existing.map((e) => [normalizeSgiName(e.nom), e]));
   const inserts: DirectoryInsert[] = [];
   const enrichments: DirectoryEnrichment[] = [];
+  const slugsPris = new Set(existing.map((e) => e.slug).filter((x): x is string => !!x));
 
   for (const s of scraped) {
     const match = byNorm.get(normalizeSgiName(s.nom));
@@ -274,6 +303,7 @@ export function planDirectoryMerge(
     } else {
       inserts.push({
         nom: s.nom,
+        slug: slugLibre(s.nom, slugsPris),
         pays: s.paysIso,
         type: 'Non déterminé',
         groupe: 'Non renseigné',

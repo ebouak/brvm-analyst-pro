@@ -100,7 +100,7 @@ export async function runSgiRichbourse(opts: { mock?: boolean; withPdfs?: boolea
 
     // 3) Fusion annuaire (enrichit, n'écrase pas) — via fonction pure testée.
     const sb = getSupabase();
-    const { data: existingRows } = await sb.from('sgi_directory').select('nom, telephone, site_web, email');
+    const { data: existingRows } = await sb.from('sgi_directory').select('nom, telephone, site_web, email, slug');
     const today = new Date().toISOString().slice(0, 10);
     const plan = planDirectoryMerge(scraped, (existingRows ?? []) as ExistingSgiRow[], today);
 
