@@ -6,6 +6,21 @@ import { ArrowRight, Search } from 'lucide-react';
 import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { drapeau, slugSgi } from '@/lib/sgi-frais/identite';
+import {
+  FILTRES_DEFAUT,
+  entreesAnnuaire,
+  filtrerAnnuaire,
+  filtresActifs,
+  seuilsCourtage,
+  trierAnnuaire,
+  type EntreeAnnuaire,
+  type FiltresAnnuaire,
+  type StatutBareme,
+  type TriAnnuaire,
+  type TypeSgi,
+} from '@/lib/sgi-frais/annuaire';
+import { SCENARIO_DEFAUT } from '@/lib/sgi-frais/scenario';
+import { fmtFcfa } from '@/lib/sgi-frais/comparaison';
 
 /* ── Monogramme de repli (logo absent ou cassé) ─────────────────────────── */
 
@@ -23,7 +38,7 @@ function monogram(nom: string): string {
 
 /* ── Carte SGI ─────────────────────────────────────────────────────────── */
 
-export function SgiCard({ s, frais }: { s: Sgi; frais?: SgiFrais }) {
+export function SgiCard({ s, frais, cout }: { s: Sgi; frais?: SgiFrais; cout?: Pick<EntreeAnnuaire, 'cout' | 'complet'> }) {
   const p = PAYS[s.pays];
   // Courtage RÉEL du barème de la SGI (mêmes données que le simulateur).
   const courtageMax = frais?.courtagePctMax ?? frais?.courtagePctMin ?? null;
@@ -83,6 +98,25 @@ export function SgiCard({ s, frais }: { s: Sgi; frais?: SgiFrais }) {
       </div>
 
       <dl className="mt-auto grid gap-2.5 border-t border-border pt-3.5 text-[13.5px]">
+        {cout && (
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="text-faint">Coût estimé*</dt>
+            <dd className="text-[12.5px] font-medium">
+              {cout.cout == null ? (
+                <span className="text-faint">sans barème</span>
+              ) : (
+                <>
+                  <span className="tabular text-ivory">{fmtFcfa(cout.cout)}</span>
+                  {!cout.complet && (
+                    <span className="ml-1 text-[10px] text-warn" title="Un poste du barème manque : le coût réel est plus élevé">
+                      incomplet
+                    </span>
+                  )}
+                </>
+              )}
+            </dd>
+          </div>
+        )}
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-faint">Dépôt min.</dt>
           <dd className="tabular text-[12.5px] font-medium text-ivory">
@@ -162,19 +196,61 @@ export function SgiCard({ s, frais }: { s: Sgi; frais?: SgiFrais }) {
   );
 }
 
-/* ── Annuaire : recherche, filtre pays, grille ──────────────────────────── */
+/* ── Annuaire : filtres combinables, tri, coût estimé ─────────────────── */
+
+const BAREMES: { v: StatutBareme; l: string }[] = [
+  { v: 'tous', l: 'Tous les barèmes' },
+  { v: 'homologue', l: 'Homologué AMF-UMOA' },
+  { v: 'agrege', l: 'Agrégé, à confirmer' },
+  { v: 'aucun', l: 'Sans barème référencé' },
+];
+const TYPES: { v: TypeSgi; l: string }[] = [
+  { v: 'tous', l: 'Tous les types' },
+  { v: 'Banque', l: 'Adossée à une banque' },
+  { v: 'Indépendante', l: 'Indépendante' },
+];
+const TRIS: { v: TriAnnuaire; l: string }[] = [
+  { v: 'pays', l: 'Par pays' },
+  { v: 'cout', l: 'Coût estimé croissant' },
+  { v: 'courtage', l: 'Courtage croissant' },
+  { v: 'nom', l: 'Nom (A → Z)' },
+];
+
+function Choix({ libelle, valeur, options, onChange }: { libelle: string; valeur: string; options: { v: string; l: string }[]; onChange: (v: string) => void }) {
+  return (
+    <label className="flex min-w-0 flex-col gap-1 text-[11.5px] text-faint">
+      {libelle}
+      <select
+        value={valeur}
+        onChange={(e) => onChange(e.target.value)}
+        className="min-h-[40px] rounded-lg border border-border bg-surface px-2.5 text-[13.5px] text-ivory transition-colors hover:border-accent/40 focus:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent/15"
+      >
+        {options.map((o) => (
+          <option key={o.v} value={o.v}>
+            {o.l}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: SgiFrais[] }) {
   const fraisByNom = useMemo(() => new Map(frais.map((f) => [f.sgiNom, f])), [frais]);
-  const [filtreP, setFiltreP] = useState<'ALL' | keyof typeof PAYS>('ALL');
-  const [recherche, setRecherche] = useState('');
-
-  const list = useMemo(() => {
-    const q = recherche.trim().toLowerCase();
-    return directory
-      .filter((s) => (filtreP === 'ALL' || s.pays === filtreP) && (!q || s.nom.toLowerCase().includes(q) || s.groupe.toLowerCase().includes(q)))
-      .sort((a, b) => (a.pays === b.pays ? a.nom.localeCompare(b.nom) : a.pays.localeCompare(b.pays)));
-  }, [directory, filtreP, recherche]);
+  // Coût estimé de chaque SGI sur le scénario de référence, par le moteur du simulateur.
+  const entrees = useMemo(() => entreesAnnuaire(directory, frais, SCENARIO_DEFAUT), [directory, frais]);
+  const [f, setF] = useState<FiltresAnnuaire>(FILTRES_DEFAUT);
+  const [tri, setTri] = useState<TriAnnuaire>('pays');
+  const set = (p: Partial<FiltresAnnuaire>) => setF((x) => ({ ...x, ...p }));
+  const list = useMemo(() => trierAnnuaire(filtrerAnnuaire(entrees, f), tri), [entrees, f, tri]);
+  const actifs = filtresActifs(f);
+  const courtages = useMemo(
+    () => [
+      { v: 'tous', l: 'Tout courtage' },
+      ...seuilsCourtage(entrees).map((t) => ({ v: String(t), l: `Courtage ≤ ${t.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %` })),
+    ],
+    [entrees],
+  );
 
   // Seuls les pays où une SGI est référencée : un filtre vide serait un piège.
   const paysPresents = useMemo(
@@ -182,32 +258,62 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
     [directory],
   );
   const chips: ('ALL' | keyof typeof PAYS)[] = ['ALL', ...paysPresents];
+  const reinitialiser = () => setF(FILTRES_DEFAUT);
 
   return (
     <div>
-      <label className="mb-4 flex max-w-sm items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
-        <Search size={17} className="flex-none text-faint" aria-hidden />
-        <input
-          type="search"
-          value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
-          placeholder="Rechercher une SGI…"
-          aria-label="Rechercher une SGI par nom ou par groupe"
-          className="w-full bg-transparent py-2.5 text-[15px] text-ivory outline-none placeholder:text-faint"
-        />
-      </label>
+      <div className="rounded-panel border border-border bg-surface/60 p-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))] lg:items-end">
+          <label className="flex min-w-0 flex-col gap-1 text-[11.5px] text-faint">
+            Recherche
+            <span className="flex min-h-[40px] items-center gap-2 rounded-lg border border-border bg-surface px-2.5 focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
+              <Search size={16} className="flex-none text-faint" aria-hidden />
+              <input
+                type="search"
+                value={f.recherche}
+                onChange={(e) => set({ recherche: e.target.value })}
+                placeholder="Nom ou groupe…"
+                aria-label="Rechercher une SGI par nom ou par groupe"
+                className="w-full bg-transparent text-[14px] text-ivory outline-none placeholder:text-faint"
+              />
+            </span>
+          </label>
+          <Choix libelle="Barème" valeur={f.bareme} options={BAREMES} onChange={(v) => set({ bareme: v as StatutBareme })} />
+          <Choix libelle="Type" valeur={f.type} options={TYPES} onChange={(v) => set({ type: v as TypeSgi })} />
+          <Choix
+            libelle="Courtage publié"
+            valeur={f.courtageMax == null ? 'tous' : String(f.courtageMax)}
+            options={courtages}
+            onChange={(v) => set({ courtageMax: v === 'tous' ? null : Number(v) })}
+          />
+          <Choix libelle="Trier" valeur={tri} options={TRIS} onChange={(v) => setTri(v as TriAnnuaire)} />
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+          <label className="inline-flex min-h-[36px] cursor-pointer items-center gap-2 text-[13px] text-muted">
+            <input type="checkbox" checked={f.bourseEnLigne} onChange={(e) => set({ bourseEnLigne: e.target.checked })} className="h-4 w-4 accent-accent" />
+            Bourse en ligne au barème
+          </label>
+          {actifs > 0 && (
+            <button type="button" onClick={reinitialiser} className="inline-flex min-h-[36px] items-center text-[13px] font-semibold text-accent hover:underline">
+              Réinitialiser les filtres ({actifs})
+            </button>
+          )}
+        </div>
+      </div>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par pays">
+      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filtrer par pays">
         {chips.map((code) => {
-          const pressed = filtreP === code;
-          const n = code === 'ALL' ? directory.length : directory.filter((s) => s.pays === code).length;
+          const pressed = f.pays === code;
+          // Ce que donnerait un clic, compte tenu des AUTRES filtres actifs.
+          const n = filtrerAnnuaire(entrees, { ...f, pays: code }).length;
           return (
             <button
               key={code}
               type="button"
               aria-pressed={pressed}
-              onClick={() => setFiltreP(code)}
-              className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-3.5 font-mono text-[12.5px] font-medium transition-colors active:scale-95 ${
+              disabled={n === 0 && !pressed}
+              onClick={() => set({ pays: code })}
+              className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-3.5 font-mono text-[12.5px] font-medium transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 ${
                 pressed ? 'border-nuit bg-nuit text-sur-nuit' : 'border-border bg-surface text-muted hover:border-accent/40 hover:text-ivory'
               }`}
             >
@@ -222,28 +328,23 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
         })}
       </div>
 
-      <p className="mt-5 font-mono text-[12.5px] text-faint" aria-live="polite">
-        {list.length > 1 ? `${list.length} SGI affichées` : `${list.length} SGI affichée`}
+      <p className="mt-5 text-[12.5px] text-faint" aria-live="polite">
+        <span className="tabular">{list.length > 1 ? `${list.length} SGI affichées` : `${list.length} SGI affichée`}</span>
+        {' · '}*coût estimé hors taxes pour {fmtFcfa(SCENARIO_DEFAUT.montant)} sur un an, {SCENARIO_DEFAUT.nbAchats} achats et {SCENARIO_DEFAUT.nbVentes} ventes,
+        frais BRVM et DC/BR compris.
       </p>
 
       {list.length > 0 ? (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((s) => (
-            <SgiCard key={s.nom} s={s} frais={fraisByNom.get(s.nom)} />
+          {list.map((e) => (
+            <SgiCard key={e.sgi.nom} s={e.sgi} frais={fraisByNom.get(e.sgi.nom)} cout={e} />
           ))}
         </div>
       ) : (
         <div className="mt-4 rounded-panel border border-dashed border-border px-5 py-14 text-center">
-          <p className="text-sm text-muted">Aucune SGI ne correspond à votre recherche.</p>
-          <button
-            type="button"
-            onClick={() => {
-              setRecherche('');
-              setFiltreP('ALL');
-            }}
-            className="mt-3 text-xs font-semibold text-accent hover:underline"
-          >
-            Réinitialiser
+          <p className="text-sm text-muted">Aucune SGI ne correspond à ces critères.</p>
+          <button type="button" onClick={reinitialiser} className="mt-3 inline-flex min-h-[36px] items-center text-xs font-semibold text-accent hover:underline">
+            Réinitialiser les filtres
           </button>
         </div>
       )}
