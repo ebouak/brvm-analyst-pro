@@ -22,7 +22,8 @@ export type FeatureCode =
   | 'paper_trading'
   | 'dcf'
   | 'whatsapp_agent'
-  | 'recherche_ia';
+  | 'recherche_ia'
+  | 'whatsapp_jev';
 
 export interface FeatureFlag {
   code: string;

@@ -96,7 +96,9 @@ export default function ConfidentialitePage() {
             <strong>TypeSafe (Jev)</strong> — classement des sociétés pour la recherche en langage naturel
             réservée aux comptes connectés. Seul le texte de votre recherche lui est transmis, sans votre
             identité ; nous ne conservons qu&apos;une empreinte de la recherche, 24 heures, sans lien avec
-            votre compte.
+            votre compte. Il classe aussi les messages libres reçus sur WhatsApp, pour y répondre par la
+            donnée exacte : seul le texte du message lui est transmis, jamais votre numéro, et aucun message
+            contenant une adresse e-mail ou un numéro de téléphone ne lui est envoyé.
           </li>
         </ul>
         <p>Certains prestataires peuvent traiter des données hors UEMOA, avec les garanties appropriées.</p>

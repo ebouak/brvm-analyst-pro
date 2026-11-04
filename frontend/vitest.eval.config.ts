@@ -6,7 +6,7 @@ import path from 'node:path';
 export default defineConfig(({ mode }) => ({
   test: {
     environment: 'node',
-    include: ['lib/recherche/evaluation/**/*.eval.ts'],
+    include: ['lib/recherche/evaluation/**/*.eval.ts', 'lib/whatsapp/aiguillage/evaluation/**/*.eval.ts'],
     env: loadEnv(mode, process.cwd(), ''),
   },
   resolve: { alias: { '@': path.resolve(__dirname, '.') } },

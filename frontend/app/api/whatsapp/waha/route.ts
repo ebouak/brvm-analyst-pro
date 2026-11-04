@@ -14,6 +14,8 @@ import { abonneAvecAgent, repondreAgent } from '@/lib/whatsapp/agent';
 import { isPairingCode } from '@/lib/pairingCodes';
 import { estStop } from '@/lib/crm/whatsappRelance';
 import { traiterStop } from '@/lib/whatsapp/stop';
+import { aiguillerParJev } from '@/lib/whatsapp/aiguillage/aiguiller';
+import { appliquerDecision, depsAiguillageWhatsapp } from '@/lib/server/whatsappAiguillage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -121,10 +123,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, commande: commande.type });
   }
   if (ev.texte.trim() && !estDemandeHumain(ev.texte) && !estStop(ev.texte)) {
-    const abonne = await abonneAvecAgent(ev.de);
-    if (abonne) {
-      await repondreAgent(ev.de, abonne, ev.texte);
-      return NextResponse.json({ ok: true, agent: true });
+    // Jev (si activé) : réponse exacte, clarification ou refus de conseil ; sinon chemin actuel.
+    const decision = autoTest ? ({ type: 'aiguillage_actuel' } as const) : await aiguillerParJev(ev.texte, ev.de, depsAiguillageWhatsapp());
+    if (await appliquerDecision(ev.de, decision)) return NextResponse.json({ ok: true, aiguillage: decision.type });
+    if (decision.type !== 'console') {
+      const abonne = await abonneAvecAgent(ev.de);
+      if (abonne) {
+        await repondreAgent(ev.de, abonne, ev.texte);
+        return NextResponse.json({ ok: true, agent: true });
+      }
     }
   }
 
