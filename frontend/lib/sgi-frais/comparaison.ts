@@ -30,6 +30,23 @@ export function ecartALaMeilleure(ligne: LigneComparee, meilleure: LigneComparee
   return { montant, pct: (montant / meilleure.total) * 100 };
 }
 
+/**
+ * Économie de la moins chère face à la MOYENNE des barèmes complets. Un
+ * barème incomplet (coût sous-estimé) tirerait la moyenne vers le bas : il
+ * est exclu. Null sous deux barèmes complets (une moyenne d'un seul n'a pas
+ * de sens) ou si la moyenne est nulle.
+ */
+export function economieVsMoyenne(
+  lignes: Pick<LigneComparee, 'total' | 'complet'>[],
+): { montant: number; pct: number; moyenne: number; nb: number } | null {
+  const totaux = lignes.filter((l) => l.complet).map((l) => l.total);
+  if (totaux.length < 2) return null;
+  const moyenne = totaux.reduce((s, t) => s + t, 0) / totaux.length;
+  if (moyenne <= 0) return null;
+  const montant = moyenne - Math.min(...totaux);
+  return { montant, pct: (montant / moyenne) * 100, moyenne, nb: totaux.length };
+}
+
 const liste = (noms: string[]) => (noms.length <= 1 ? noms.join('') : `${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]}`);
 
 export function constatsComparaison(lignes: LigneComparee[]): string[] {

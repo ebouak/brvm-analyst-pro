@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ecrireScenario, lireScenario } from '@/lib/sgi-frais/scenario';
+import { economieVsMoyenne } from '@/lib/sgi-frais/comparaison';
 import { MotionConfig } from 'framer-motion';
 import { SGI_FRAIS_SEED } from '@/lib/sgi-frais/seed-data';
 import { baremeComplet, calculerCoutSGI, calculerSeuilRentabilite, classerResultats, montantParOrdreParDefaut } from '@/lib/sgi-frais/calculateur';
@@ -168,6 +169,8 @@ export function CalculateurCout({
   // Jamais une SGI dont un poste essentiel est inconnu : son total serait
   // faussement bas.
   const recommandee = resultats.find(baremeComplet) ?? null;
+  // Sur les SGI AFFICHÉES (filtres compris), barèmes complets seulement.
+  const economie = useMemo(() => economieVsMoyenne(resultats.map((r) => ({ total: r.total, complet: baremeComplet(r) }))), [resultats]);
   const seuilRecommandee = useMemo(() => {
     if (!recommandee) return null;
     const sgi = sgiParNom.get(recommandee.sgiNom);
@@ -329,6 +332,21 @@ export function CalculateurCout({
               dureeAns={dureeAns}
               seuilPct={seuilRecommandee?.seuilPct ?? null}
             />
+
+            {economie && economie.montant > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-panel border border-up/25 bg-up/[0.06] px-5 py-4">
+                <p className="max-w-[46ch] text-[13.5px] leading-relaxed text-muted">
+                  Économie face à la moyenne des <span className="tabular">{economie.nb}</span> SGI affichées au barème complet, qui
+                  coûtent en moyenne <span className="tabular text-ivory">{fmtFcfa(economie.moyenne)}</span>.
+                </p>
+                <p className="text-right">
+                  <ChiffreAnime valeur={economie.montant} format={fmtFcfa} className="tabular block font-display text-2xl font-bold text-up" />
+                  <span className="tabular text-xs text-muted">
+                    soit {economie.pct.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} % de moins
+                  </span>
+                </p>
+              </div>
+            )}
 
             <ClassementCout resultats={resultats} sgiParNom={sgiParNom} directoryParNom={directoryParNom} />
 

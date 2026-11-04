@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { constatsComparaison, ecartALaMeilleure, fmtFcfa, meilleureLigne, type LigneComparee } from './comparaison';
+import { constatsComparaison, ecartALaMeilleure, economieVsMoyenne, fmtFcfa, meilleureLigne, type LigneComparee } from './comparaison';
 
 const l = (o: Partial<LigneComparee> & { nom: string }): LigneComparee => ({
   total: 0, complet: true, homologue: true, depotMinimum: null, bourseEnLigne: false, ...o,
@@ -33,5 +33,19 @@ describe('comparaison de SGI', () => {
 
   it('aucun barème complet : aucune « moins chère » annoncée', () => {
     expect(constatsComparaison([c]).some((x) => x.includes('le plus faible'))).toBe(false);
+  });
+
+  it('économie face à la moyenne : barèmes complets seulement', () => {
+    const e = economieVsMoyenne([
+      { total: 20_000, complet: true },
+      { total: 30_000, complet: true },
+      { total: 40_000, complet: true },
+      { total: 1_000, complet: false }, // sous-estimé : n'entre pas dans la moyenne
+    ])!;
+    expect(e.moyenne).toBe(30_000);
+    expect(e.montant).toBe(10_000);
+    expect(e.nb).toBe(3);
+    expect(Math.round(e.pct * 100) / 100).toBe(33.33);
+    expect(economieVsMoyenne([{ total: 20_000, complet: true }, { total: 5_000, complet: false }])).toBeNull();
   });
 });
