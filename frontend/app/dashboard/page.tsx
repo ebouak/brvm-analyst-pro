@@ -46,6 +46,7 @@ import type { ActionDaily, IndiceDaily, SignalDaily } from '@/lib/types';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import type { CarnetSeance as CarnetVedette } from '@/lib/carnet/commentaire';
 import { canAccess } from '@/lib/server/featureAccess';
+import { RechercheSocietes } from '@/components/societes/RechercheSocietes';
 import { estPerime, SEUIL_MASQUE_JOURS } from '@/lib/african/fraicheur';
 import {
   SectionHeader,
@@ -534,6 +535,8 @@ export default async function Dashboard() {
             </Link>
           </nav>
         </header>
+
+        <RechercheSocietes retour="/dashboard" className="" />
 
         {/* ── Bandeau alertes déclenchées ──────────────────────────────────── */}
         {triggeredAlerts > 0 && (

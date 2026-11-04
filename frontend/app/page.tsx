@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import NewsletterForm from '@/components/NewsletterForm';
+import { RechercheSocietes } from '@/components/societes/RechercheSocietes';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { FilConducteur, type Fait } from '@/components/landing/bis/FilConducteur';
 import { Billboard } from '@/components/landing/bis/Billboard';
@@ -118,6 +119,11 @@ export default async function Landing() {
           {/* 1 bis · PREUVES (sous les 7 étapes) */}
           <ProofBandBis nbActions={d.nbActions} />
           <PreuveDonneeBis fraicheur={fraicheur} exemple={topH ? { code: topH.code, nom: topH.nom, cours: topH.cours } : null} nbActions={d.nbActions} />
+
+          {/* 1 ter · RECHERCHE EN LANGAGE NATUREL — connecté : Jev ; sinon invitation + recherche simple */}
+          <div className="mx-auto w-full max-w-4xl px-4 py-8 md:px-6">
+            <RechercheSocietes retour="/" className="" />
+          </div>
 
           {/* 2 · LA BRVM AUJOURD'HUI — aperçu de séance (réel, dérivé) */}
           <div id="marche">
