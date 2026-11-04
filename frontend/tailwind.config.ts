@@ -69,6 +69,11 @@ const themeColors = {
   warn:   withAlpha('--color-warn'),
   purple: withAlpha('--color-purple'),
 
+  // ── Bandeaux sombres (comparateur SGI) : identiques en clair et en sombre ──
+  nuit:       withAlpha('--color-nuit'),
+  'sur-nuit': withAlpha('--color-sur-nuit'),
+  'accent-nuit': withAlpha('--color-accent-nuit'),
+
   // ── Texte ───────────────────────────────────────────────────────────────
   white:  withAlpha('--color-ivory'),
   ivory:  withAlpha('--color-ivory'),

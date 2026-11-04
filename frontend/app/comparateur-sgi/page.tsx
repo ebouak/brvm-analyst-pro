@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import PublicShell from '@/components/public/PublicShell';
 import SgiComparator from '@/components/landing/SgiComparator';
 import SgiMatchmaker from '@/components/comparateur-sgi/SgiMatchmaker';
-import { getSgiDirectory, getSgiFrais } from '@/lib/sgi-frais/queries';
+import { CadreComparateur } from '@/components/comparateur-sgi/cadre/Cadre';
+import { chargerSgi } from '@/lib/sgi-frais/chargement';
 
 // ISR : données SGI lues depuis Supabase (repli sur les fichiers TS si vide),
 // revalidées chaque heure — l'annuaire change rarement.
@@ -13,7 +13,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com
 export const metadata: Metadata = {
   title: 'Comparateur des SGI BRVM — choisir son courtier UEMOA',
   description:
-    "Annuaire et comparateur des SGI agréées à la BRVM, classées par pays UEMOA : Côte d'Ivoire, Sénégal, Burkina Faso, Mali, Bénin, Togo, Niger. Type, groupe, dépôt minimum indicatif et critères pour choisir votre courtier.",
+    "Annuaire et comparateur des SGI agréées à la BRVM, classées par pays UEMOA : Côte d'Ivoire, Sénégal, Burkina Faso, Mali, Bénin, Togo, Niger. Barèmes homologués, coût réel simulé et critères pour choisir votre courtier.",
   keywords: [
     'SGI BRVM',
     'comparateur SGI',
@@ -29,19 +29,26 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Comparateur des SGI BRVM — choisir son courtier UEMOA',
     description:
-      'Toutes les SGI de la BRVM par pays. Comparez type, groupe et dépôt minimum indicatif pour choisir votre courtier UEMOA.',
+      'Toutes les SGI de la BRVM par pays : barèmes homologués, coût réel simulé, coordonnées officielles.',
     url: `${SITE_URL}/comparateur-sgi`,
   },
 };
 
 export default async function ComparateurSgiPage() {
-  const [directory, frais] = await Promise.all([getSgiDirectory(), getSgiFrais()]);
+  const { directory, frais, stats } = await chargerSgi();
   return (
-    <PublicShell>
-      <div className="mb-8">
+    <CadreComparateur
+      nbSgi={stats.sgi}
+      entete={{
+        titre: 'Comparateur de SGI',
+        sousTitre: 'Trouvez la SGI adaptée à votre profil, simulez vos frais et comparez les intermédiaires de la BRVM.',
+        stats,
+      }}
+    >
+      <div className="mb-10">
         <SgiMatchmaker directory={directory} frais={frais} />
       </div>
-      <SgiComparator className="scroll-mt-24" directory={directory} frais={frais} />
-    </PublicShell>
+      <SgiComparator directory={directory} frais={frais} />
+    </CadreComparateur>
   );
 }

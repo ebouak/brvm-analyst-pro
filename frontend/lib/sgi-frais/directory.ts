@@ -38,9 +38,15 @@ export interface Sgi {
   depotMinSource: 'indicatif' | 'relevé' | 'inconnu';
   siteWeb?: string;
   ficheBRVM?: string;
-  /** Contacts collectés (RichBourse) — absents des fichiers TS seed. */
+  /** Contacts : annuaire officiel brvm.org (migration 0188). */
   telephone?: string;
   email?: string;
+  /** Identifiant stable des URL (migration 0190) ; repli : dérivé du nom. */
+  slug?: string;
+  /** Adresse et BP publiées par brvm.org (migration 0190). */
+  adresse?: string;
+  /** Date de dernière vérification de la fiche (AAAA-MM-JJ). */
+  verifieLe?: string;
 }
 
 export const SGI_DIRECTORY: Sgi[] = [
