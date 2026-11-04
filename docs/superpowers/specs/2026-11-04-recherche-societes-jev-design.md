@@ -2,6 +2,17 @@
 
 Date : 2026-11-04 · Statut : v2, relecture intégrée · Chantier 3 de « Jev sur WESTBOURSE »
 
+## Écarts décidés au plan (2026-11-04)
+
+Constatés sur les données de production en rédigeant le plan ; ils priment sur le reste du document.
+
+1. **Fait `activite`** (banque / assurance, `brvm_instruments.famille_comptable`) : les 17 « Services financiers » mêlent banques et assurances.
+2. **Rendement à base fiscale inconnue affiché** « (base fiscale non précisée) » au lieu d'être omis : 222 dividendes sur 267 sont en base `inconnu` ; la règle « double IRVM » interdit de calculer un net, pas d'afficher le rendement publié.
+3. **Note A–F retirée des fiches** : ses libellés (« Achat », « Vente ») feraient de la recherche une recommandation déguisée.
+4. **Ordre du flux** : verrou → quota → budget ; attendre le résultat d'une autre recherche ne consomme pas de quota.
+5. **Modules ajoutés** : `orchestrer.ts` (flux injectable et testable) et `sequenceur.ts` (ordre des réponses dans l'interface).
+6. **`donnees_indisponibles`** : réponse vide en mode mots-clés (statut `aucune`), jamais d'erreur 503.
+
 ## Objectif
 
 Un abonné éligible décrit ce qu'il cherche (« une banque qui verse un dividende
