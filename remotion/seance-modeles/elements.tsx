@@ -62,8 +62,8 @@ export function Logo({ th, taille, prog = 1 }: { th: Theme; taille: number; prog
   const teal = th.modele === 'papier' ? '#0E8C80' : '#16B6A4';
   return (
     <svg width={taille} height={taille * 0.78} viewBox="6 4 122 90" style={{ overflow: 'visible' }}>
-      <path d="M16 24 L40 82 L58 48 L76 82" fill="none" stroke={trait} strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p1} />
-      <path d="M76 82 L100 33" fill="none" stroke={teal} strokeWidth={12} strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p2} />
+      <path d="M16 24 L40 82 L58 48 L76 82" fill="none" stroke={trait} strokeWidth={12} strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p1} opacity={p1 > 0 ? 1 : 0} />
+      <path d="M76 82 L100 33" fill="none" stroke={teal} strokeWidth={12} strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p2} opacity={p2 > 0 ? 1 : 0} />
       <polygon points="110,12 117,40 86,28" fill={teal} opacity={p3} />
     </svg>
   );

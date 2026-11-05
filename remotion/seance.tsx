@@ -4,6 +4,7 @@ import './polices';
 import { FPS, THEMES } from './seance-modeles/theme';
 import { EnTete, Fond, Progression, type Fiche } from './seance-modeles/elements';
 import { SCENES } from './seance-modeles/scenes';
+import { DUREE_SIGNATURE, Signature } from './seance-modeles/signature';
 
 /**
  * Vidéo de séance, version animée — 1080×1920, 30 i/s.
@@ -23,7 +24,9 @@ import { SCENES } from './seance-modeles/scenes';
  * démarrent sans le son.
  */
 
-const QUEUE = 45; // la carte finale reste 1,5 s après la dernière phrase
+// La carte finale (avertissement légal) reste 1,5 s après la dernière phrase,
+// puis la signature prend tout l'écran.
+const QUEUE = 45 + DUREE_SIGNATURE;
 
 export const calculerSeance: CalculateMetadataFunction<{ fiche: Fiche | null }> = async () => {
   const r = await fetch(staticFile('seance/seance.json'));
@@ -55,6 +58,9 @@ export default function Seance({ fiche }: { fiche: Fiche | null }) {
       })}
       <EnTete th={th} fiche={fiche} />
       <Progression th={th} plan={plan} total={durationInFrames} />
+      <Sequence from={durationInFrames - DUREE_SIGNATURE}>
+        <Signature th={th} />
+      </Sequence>
     </AbsoluteFill>
   );
 }

@@ -577,10 +577,9 @@ function Secteurs({ th, fiche, duree }: PropsScene) {
 
 /* ── Fin ──────────────────────────────────────────────────────────────── */
 function Fin({ th, fiche, duree }: PropsScene) {
-  const f = useCurrentFrame();
   return (
     <Scene th={th} duree={duree + 8} centre>
-      <Logo th={th} taille={160} prog={t(f, 0, 28)} />
+      <Logo th={th} taille={160} />
       <Entre th={th} debut={10}><div style={{ fontFamily: th.modele === 'papier' ? th.titre : th.chiffre, fontSize: 52, letterSpacing: th.modele === 'papier' ? '.04em' : '.34em', fontWeight: 700, marginTop: 40 }}>{th.modele === 'papier' ? 'Westbourse' : 'WESTBOURSE'}</div></Entre>
       <Entre th={th} debut={18}><div style={{ fontSize: 42, color: th.doux, marginTop: 30 }}>Le détail de chaque valeur</div></Entre>
       <Entre th={th} debut={24}><div style={{ fontFamily: th.chiffre, fontSize: 56, color: th.accent, marginTop: 18, fontWeight: 600 }}>westbourse.com</div></Entre>
