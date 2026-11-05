@@ -27,7 +27,7 @@ export function EditCourseForm({ slug, initial }: { slug: string; initial: Cours
     setMsg(null);
     start(async () => {
       const r = await updateCourseContent(slug, content);
-      if (r.ok) { setMsg('✅ Enregistré. Le cours est mis à jour.'); router.refresh(); }
+      if (r.ok) { setMsg('Enregistré. Le cours est mis à jour.'); router.refresh(); }
       else setMsg(r.message ?? 'Erreur.');
     });
   }

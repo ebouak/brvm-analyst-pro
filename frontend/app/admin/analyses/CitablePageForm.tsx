@@ -1,5 +1,6 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { savePage, uploadImage, type CitableInput } from './actions';
@@ -190,8 +191,8 @@ function ListEditor({
             {textarea
               ? <textarea value={it[fields[1]] ?? ''} onChange={(e) => upd(i, fields[1], e.target.value)} placeholder={placeholder[1]} rows={2} className={input} />
               : <input value={it[fields[1]] ?? ''} onChange={(e) => upd(i, fields[1], e.target.value)} placeholder={placeholder[1]} className={input} />}
-            <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))}
-              className="rounded-lg border border-down/40 px-2 text-xs text-down hover:bg-down/10">✕</button>
+            <button type="button" aria-label="Retirer cette ligne" onClick={() => onChange(items.filter((_, j) => j !== i))}
+              className="rounded-lg border border-down/40 px-2 text-xs text-down hover:bg-down/10"><IconeFermer size={14} strokeWidth={2} aria-hidden /></button>
           </div>
         ))}
       </div>

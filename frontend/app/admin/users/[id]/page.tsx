@@ -31,7 +31,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         subtitle="Droits, statut du compte, accès et actions sensibles."
       />
       <div className="flex flex-wrap items-center gap-2">
-        {rights.suspended && <StatPill tone="gold">⛔ Suspendu</StatPill>}
+        {rights.suspended && <StatPill tone="gold">Suspendu</StatPill>}
         {rights.is_premium ? <StatPill tone="gold">Premium</StatPill> : <StatPill tone="neutral">Gratuit</StatPill>}
         {!rights.email_confirmed && <StatPill tone="neutral">Email non confirmé</StatPill>}
         {rights.roleCodes.map((c) => <StatPill key={c} tone="sapphire">{c}</StatPill>)}
@@ -69,7 +69,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                   {e.event === 'sign_in'
                     ? 'Connexion'
                     : e.event === 'sign_in_failed'
-                      ? '⚠ Échec de connexion'
+                      ? 'Échec de connexion'
                       : e.event === 'sign_out'
                         ? 'Déconnexion'
                         : 'Réinit. mot de passe'}

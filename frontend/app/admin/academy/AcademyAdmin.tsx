@@ -52,7 +52,7 @@ export function AcademyAdmin({ courses }: { courses: AcademyCourseCard[] }) {
       });
       const data = await res.json();
       if (!res.ok) { setMsg(data.error ?? 'Échec de la génération.'); return; }
-      setMsg(`✅ « ${data.titre} » généré (${data.lessons} leçons, ${data.provider}). Brouillon créé — publiez-le ci-dessous.`);
+      setMsg(`« ${data.titre} » généré (${data.lessons} leçons, ${data.provider}). Brouillon créé — publiez-le ci-dessous.`);
       setSujet('');
       router.refresh();
     } catch (e) {
@@ -72,7 +72,7 @@ export function AcademyAdmin({ courses }: { courses: AcademyCourseCard[] }) {
   function applyCover(slug: string, url: string) {
     start(async () => {
       const r = await setCourseCover(slug, url);
-      setMsg(r.ok ? '✅ Couverture mise à jour.' : (r.message ?? 'Erreur couverture.'));
+      setMsg(r.ok ? 'Couverture mise à jour.' : (r.message ?? 'Erreur couverture.'));
       router.refresh();
     });
   }
@@ -109,7 +109,7 @@ export function AcademyAdmin({ courses }: { courses: AcademyCourseCard[] }) {
         {msg && <p className="text-xs text-info">{msg}</p>}
         <button type="button" onClick={generate} disabled={gen}
           className="rounded-lg bg-info px-4 py-2 text-sm font-medium text-bg disabled:opacity-50">
-          {gen ? 'Génération…' : '✨ Générer le cours'}
+          {gen ? 'Génération…' : 'Générer le cours'}
         </button>
       </div>
 

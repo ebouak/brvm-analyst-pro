@@ -70,7 +70,7 @@ export function CronHealthPanel({ jobs }: { jobs: CronJob[] }) {
                     {!j.active ? (
                       <span className="text-faint">Désactivée</span>
                     ) : ko ? (
-                      <span className="font-semibold text-down">✖ En échec</span>
+                      <span className="font-semibold text-down">En échec</span>
                     ) : (
                       <span className="text-up">✓ OK</span>
                     )}
