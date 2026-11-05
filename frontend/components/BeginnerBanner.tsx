@@ -1,5 +1,6 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -68,7 +69,7 @@ export default function BeginnerBanner() {
               aria-label="Fermer le bandeau"
               className="shrink-0 rounded-full p-1 text-muted transition hover:bg-white/5 hover:text-white"
             >
-              ✕
+              <IconeFermer size={16} strokeWidth={2} aria-hidden />
             </button>
           </div>
         </motion.div>

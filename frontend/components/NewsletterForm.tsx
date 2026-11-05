@@ -149,7 +149,6 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_100%,rgba(201,162,39,0.08),transparent)]" aria-hidden />
 
       <div className="relative space-y-2">
-        <p className="overline text-gold-2">Newsletter</p>
         <h2 className="font-display text-heading-sm text-ivory">
           Le brief BRVM chaque semaine dans votre boîte mail
         </h2>

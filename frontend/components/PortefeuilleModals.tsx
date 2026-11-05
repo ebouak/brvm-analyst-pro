@@ -17,7 +17,7 @@ export default function PortefeuilleModals({ watchlistId, instruments, liquidite
       <div className="flex gap-2 flex-wrap">
         <button type="button" onClick={() => setModal('position')}
           className="text-xs bg-up/10 border border-up/30 text-up rounded px-3 py-1.5 hover:bg-up/20 transition">
-          ➕ Nouvelle position
+          Nouvelle position
         </button>
         <button type="button" onClick={() => setModal('liquidites')}
           className="text-xs border border-border text-muted rounded px-3 py-1.5 hover:text-white hover:border-up/40 transition">

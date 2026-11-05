@@ -9,9 +9,9 @@ const OUTILS = [
   { t: 'SGI', d: 'Choisir sa SGI', href: '/comparateur-sgi' },
   { t: 'Simulateur', d: 'Et si vous aviez investi ?', href: '/simulateur' },
   { t: 'Budget', d: 'Plan d’épargne', href: '/simulateur-budget' },
-  { t: 'Paper trading', d: 'Capital virtuel — Premium ✦', href: '/premium/paper-trading' },
+  { t: 'Paper trading', d: 'Capital virtuel — Premium', href: '/premium/paper-trading' },
   { t: 'Backtest', d: 'Rejouer une stratégie', href: '/backtest' },
-  { t: 'Dossier d’analyse', d: 'Rapport par société — Premium ✦', href: '/premium/diagnostic' },
+  { t: 'Dossier d’analyse', d: 'Rapport par société — Premium', href: '/premium/diagnostic' },
 ] as const;
 
 function OutilsDrop() {
@@ -77,7 +77,7 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
         </span>
       </button>
       <div className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`} aria-hidden={!open}>
-        <div className={`absolute inset-0 bg-bg/80 backdrop-blur-md transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
+        <div className={`absolute inset-0 bg-bg/80 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
         <nav id={id} aria-label="Menu" className={`absolute inset-x-0 top-[57px] bottom-0 overflow-y-auto bg-bg px-5 py-6 transition-all duration-300 ${open ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
           <div className="flex justify-center mb-6"><ThemeToggle /></div>
           <div className="space-y-1">

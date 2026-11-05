@@ -30,7 +30,7 @@ export default function DeleteConfirmModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
       <div className="bg-surface border border-border rounded-xl shadow-lg max-w-sm w-full mx-4">
         <div className="px-6 py-4 border-b border-border">
           <h2 className="text-lg font-semibold">Confirmer la suppression</h2>

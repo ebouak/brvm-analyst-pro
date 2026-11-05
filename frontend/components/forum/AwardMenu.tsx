@@ -43,7 +43,7 @@ export function AwardMenu({ postId, onAward, disabled }: AwardMenuProps) {
           className="px-2 py-1 rounded-full text-lg transition hover:bg-accent/15 disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={`Attribuer: ${label}`}
         >
-          <span className={loading === emoji ? 'animate-bounce' : ''}>{emoji}</span>
+          <span className={loading === emoji ? 'animate-pulse' : ''}>{emoji}</span>
         </button>
       ))}
     </div>

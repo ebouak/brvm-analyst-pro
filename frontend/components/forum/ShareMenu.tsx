@@ -1,5 +1,6 @@
 'use client';
 
+import { Copy, Share2 } from 'lucide-react';
 import { useState } from 'react';
 
 export interface ShareMenuProps {
@@ -22,7 +23,7 @@ const SHARE_TARGETS = [
   },
   {
     name: 'WhatsApp',
-    icon: '✆',
+    icon: '',
     href: (title: string, url: string) =>
       `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`,
   },
@@ -50,7 +51,7 @@ export function ShareMenu({ postTitle, shareUrl }: ShareMenuProps) {
         title="Partager"
         aria-label="Partager"
       >
-        <span>🔗</span>
+        <Share2 size={14} strokeWidth={1.75} aria-hidden />
         <span className="text-xs">Partager</span>
       </button>
 
@@ -68,7 +69,7 @@ export function ShareMenu({ postTitle, shareUrl }: ShareMenuProps) {
               className="flex items-center gap-2 px-3 py-2 hover:bg-elevated rounded text-sm transition text-ivory"
               role="menuitem"
             >
-              <span>{target.icon}</span>
+              {target.icon ? <span aria-hidden>{target.icon}</span> : null}
               {target.name}
             </a>
           ))}
@@ -78,7 +79,7 @@ export function ShareMenu({ postTitle, shareUrl }: ShareMenuProps) {
             className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-elevated rounded text-sm transition text-ivory"
             role="menuitem"
           >
-            <span>📋</span>
+            <Copy size={14} strokeWidth={1.75} aria-hidden />
             {copied ? 'Lien copié' : 'Copier le lien'}
           </button>
         </div>

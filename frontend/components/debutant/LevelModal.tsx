@@ -1,14 +1,15 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLevelModal } from './useLevelModal';
 import type { LeadLevel } from '@/lib/leads';
 
-const OPTIONS: { key: LeadLevel; label: string; desc: string; emoji: string }[] = [
-  { key: 'debutant', label: 'Je débute', desc: "Je découvre la BRVM, je pars de zéro.", emoji: '○' },
-  { key: 'intermediaire', label: 'Je connais les bases', desc: 'Je sais ce qu’est une action, je veux ouvrir un compte.', emoji: '◐' },
-  { key: 'confirme', label: 'Je suis à l’aise', desc: 'Je veux juste être mis en relation avec un partenaire.', emoji: '●' },
+const OPTIONS: { key: LeadLevel; label: string; desc: string }[] = [
+  { key: 'debutant', label: 'Je débute', desc: "Je découvre la BRVM, je pars de zéro." },
+  { key: 'intermediaire', label: 'Je connais les bases', desc: 'Je sais ce qu’est une action, je veux ouvrir un compte.' },
+  { key: 'confirme', label: 'Je suis à l’aise', desc: 'Je veux juste être mis en relation avec un partenaire.' },
 ];
 
 /**
@@ -43,7 +44,7 @@ export default function LevelModal() {
     <AnimatePresence mode="wait">
       {open && (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-[#191714]/40 p-4 backdrop-blur-sm sm:items-center"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-[#191714]/40 p-4 sm:items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -74,7 +75,7 @@ export default function LevelModal() {
                 aria-label="Fermer"
                 className="shrink-0 rounded-full p-1 text-[#6e6a63] transition hover:bg-[#efe7db] hover:text-[#191714]"
               >
-                ✕
+                <IconeFermer size={16} strokeWidth={2} aria-hidden />
               </button>
             </div>
 
@@ -86,7 +87,7 @@ export default function LevelModal() {
                   onClick={() => choose(o.key)}
                   className="flex w-full items-center gap-3 rounded-2xl border border-[#ddd7cd] bg-[#ffffff] p-3.5 text-left transition hover:border-[#0b6b6f] hover:bg-[#d4ebe8]/40 active:scale-[0.99]"
                 >
-                  <span className="text-2xl" aria-hidden>{o.emoji}</span>
+                  
                   <span>
                     <span className="block text-sm font-semibold text-[#191714]">{o.label}</span>
                     <span className="block text-xs text-[#6e6a63]">{o.desc}</span>

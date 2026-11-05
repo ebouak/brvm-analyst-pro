@@ -46,7 +46,7 @@ export default async function DiagnosticPage({ params }: Props) {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold">{code}</h1>
-              <span className="px-2 py-0.5 rounded text-xs bg-warn/10 text-warn border border-warn/20 font-medium">★ Premium</span>
+              <span className="px-2 py-0.5 rounded text-xs bg-warn/10 text-warn border border-warn/20 font-medium">Premium</span>
             </div>
             {instrument.designation && <p className="text-sm text-muted mt-0.5">{instrument.designation}</p>}
             {instrument.secteur && <p className="text-xs text-faint">{instrument.secteur}</p>}

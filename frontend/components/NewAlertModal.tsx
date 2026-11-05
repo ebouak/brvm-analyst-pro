@@ -1,5 +1,6 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import { useState } from 'react';
 import { createAlert } from '@/app/portefeuille/actions';
 
@@ -29,11 +30,11 @@ export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
   const noSeuil = alertType === 'signal_achat' || alertType === 'signal_vente';
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
       <div className="bg-surface border border-border rounded-xl shadow-lg max-w-md w-full mx-4">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-lg font-semibold">Créer une alerte</h2>
-          <button type="button" onClick={onClose} className="text-muted hover:text-fg text-lg" aria-label="Fermer">✕</button>
+          <button type="button" onClick={onClose} className="text-muted hover:text-fg text-lg" aria-label="Fermer"><IconeFermer size={16} strokeWidth={2} aria-hidden /></button>
         </div>
 
         <form
@@ -68,8 +69,8 @@ export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
                 <option value="variation">↕ Variation en %</option>
               </optgroup>
               <optgroup label="Intelligentes">
-                <option value="signal_achat">★ Signal passe à ACHAT</option>
-                <option value="signal_vente">★ Signal passe à VENTE</option>
+                <option value="signal_achat">Signal passe à ACHAT</option>
+                <option value="signal_vente">Signal passe à VENTE</option>
                 <option value="rsi_survente">RSI en survente</option>
                 <option value="rsi_surachat">RSI en surachat</option>
                 <option value="dividende_proche">Détachement de dividende proche</option>

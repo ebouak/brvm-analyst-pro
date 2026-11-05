@@ -2,7 +2,7 @@ import type { Commentaire } from '@/lib/carnet/commentaire';
 import { syntheseRedigee } from '@/lib/carnet/syntheseServeur';
 
 const CLASSE =
-  'rounded-lg border-l-2 border-accent bg-accent/[0.06] px-3.5 py-2.5 text-sm leading-relaxed text-ivory';
+  'rounded-lg bg-accent/[0.06] px-3.5 py-2.5 text-sm leading-relaxed text-ivory';
 
 /** La synthèse déterministe — aussi l'état d'attente et le repli. */
 export function SyntheseDeterministe({ texte, classe }: { texte: string | null; classe?: string }) {

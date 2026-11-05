@@ -1,5 +1,6 @@
 'use client';
 
+import { TriangleAlert } from 'lucide-react';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { isChunkLoadError, reloadOnceForChunkError } from '@/lib/chunk-reload';
@@ -31,7 +32,7 @@ export default function DashboardError({
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-6 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/25 bg-accent/10 text-xl text-accent">◇</div>
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/25 bg-accent/10 text-xl text-accent"><TriangleAlert size={20} strokeWidth={1.75} aria-hidden /></div>
       <div className="space-y-1">
         <h2 className="font-display text-lg text-white">Cette section n&apos;a pas pu se charger</h2>
         <p className="max-w-sm text-sm text-muted">Le reste de l&apos;application fonctionne. Réessayez ou changez de page.</p>

@@ -1,4 +1,5 @@
 'use client';
+import { ChevronDown, Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -69,13 +70,13 @@ export default function Sidebar({
             >
               <span className="overline text-[9px] text-faint">
                 {group.label === 'Premium' ? (
-                  <span className="flex items-center gap-1.5 text-gold/70">Premium <span className="text-gold">✦</span></span>
+                  <span className="flex items-center gap-1.5 text-gold/70">Premium <Lock size={11} strokeWidth={2} className="text-gold" aria-hidden /></span>
                 ) : (
                   group.label
                 )}
               </span>
               {!hasActive && (
-                <span className={`text-[8px] text-faint ${EASE} ${isOpen ? 'rotate-0' : '-rotate-90'}`}>▾</span>
+                <ChevronDown size={13} strokeWidth={2} aria-hidden className={`text-faint ${EASE} ${isOpen ? 'rotate-0' : '-rotate-90'}`} />
               )}
             </button>
             <div className={`space-y-0.5 ${isOpen ? '' : 'hidden'}`}>
@@ -90,7 +91,7 @@ export default function Sidebar({
                       className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-faint hover:text-gold hover:bg-gold/[0.06] ${EASE}`}
                     >
                       {item.label}
-                      <span className="ml-auto text-[9px] opacity-60 group-hover:opacity-100">✦</span>
+                      <Lock size={11} strokeWidth={2} className="ml-auto opacity-60 group-hover:opacity-100" aria-hidden />
                     </Link>
                   );
                 }

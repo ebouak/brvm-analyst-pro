@@ -1,4 +1,5 @@
 'use client';
+import { Lock } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
@@ -349,13 +350,13 @@ export default function ActionsTable({
               <Th k="cours_jour" label="Cours" right />
               <Th k="variation_pct" label="Var %" right />
               <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
-                Tendance 30j {!showMetrics && <span aria-label="Premium" title="Premium">✦</span>}
+                Tendance 30j {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
               </th>
               <Th k="volume" label="Volume" right />
               <Th k="valeur_echangee" label="Valeur" right />
               {showSignalCol && (
                 <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
-                  Signal {!showMetrics && <span aria-label="Premium" title="Premium">✦</span>}
+                  Signal {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
                 </th>
               )}
             </tr>

@@ -93,7 +93,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         {p.canEdit && (
           <button type="button" onClick={() => setEditing(true)}
             className="text-xs border border-border rounded px-2 py-1 hover:border-up/40 hover:text-up transition">
-            ✏️ Corriger
+            Corriger
           </button>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { GraduationCap } from 'lucide-react';
 import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import { accesAcademy } from '@/lib/server/academyAccess';
 import Link from 'next/link';
@@ -88,7 +89,7 @@ export default async function FormationsPage() {
         <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-[#56D7FD]/8 blur-3xl" />
         {/* Icône */}
         <div className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-[#56D7FD]/10 border border-[#56D7FD]/20 text-3xl">
-          ◈
+          <GraduationCap size={26} strokeWidth={1.75} className="text-[#56D7FD]" aria-hidden />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
@@ -174,7 +175,7 @@ export default async function FormationsPage() {
                 {f.cover_url
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={f.cover_url} alt="" className="h-full w-full object-cover" />
-                  : <div className="h-full w-full flex items-center justify-center text-3xl opacity-40">◈</div>}
+                  : <div className="h-full w-full flex items-center justify-center opacity-40"><GraduationCap size={30} strokeWidth={1.75} aria-hidden /></div>}
                 <span className="absolute top-2 right-2 rounded-full bg-gold/90 px-2 py-0.5 text-[10px] font-semibold text-bg">Premium</span>
               </div>
               <div className="flex flex-1 flex-col p-4">

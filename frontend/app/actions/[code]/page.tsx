@@ -763,7 +763,7 @@ export default async function InstrumentPage({
                 href={`/actions/${code}/quant`}
                 className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/[0.10] px-3.5 py-1.5 text-xs font-semibold text-gold transition hover:bg-gold/15 hover:border-gold/40"
               >
-                ◈ Fiche Quant — Combined Alpha
+                Fiche Quant — Combined Alpha
               </Link>
               <Link
                 href="/analyse/combined-alpha"

@@ -64,7 +64,7 @@ function ArticleCard({ item }: { item: VeilleNews }) {
     : sent === 'négatif'
     ? 'border-l-[3px] border-l-[#ff6b6b]'
     : 'border-l-[3px] border-l-transparent';
-  const sentEmoji = sent === 'positif' ? '🟢' : sent === 'négatif' ? '🔴' : '⚪';
+  const sentCouleur = sent === 'positif' ? 'bg-up' : sent === 'négatif' ? 'bg-down' : 'bg-faint';
   const srcLabel = libelleSource(item);
 
   return (
@@ -81,7 +81,7 @@ function ArticleCard({ item }: { item: VeilleNews }) {
         <p className="text-xs text-muted line-clamp-2 leading-relaxed">{item.resume}</p>
       )}
       <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[11px] text-muted shrink-0">
+        <span className="min-w-0 truncate text-[11px] text-muted">
           {srcLabel.length > 35 ? srcLabel.slice(0, 35) + '…' : srcLabel}
         </span>
         <span className="text-[10px] text-muted/60">· il y a {relativeTime(item.created_at ?? item.date_publication)}</span>
@@ -91,7 +91,7 @@ function ArticleCard({ item }: { item: VeilleNews }) {
           </span>
         )}
         {tickers.map((t) => <TickerBadge key={t} code={t} />)}
-        <span className="ml-auto text-base" title={`Sentiment : ${sent}`}>{sentEmoji}</span>
+        <span className={`ml-auto h-2 w-2 shrink-0 rounded-full ${sentCouleur}`} role="img" aria-label={`Sentiment : ${sent}`} title={`Sentiment : ${sent}`} />
       </div>
     </a>
   );
@@ -299,7 +299,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     const top = [...news].sort((a, b) => (b.score_impact ?? 0) - (a.score_impact ?? 0))[0];
     if (top && (top.score_impact ?? 0) > 0) {
       out.push({
-        icon: '◇',
+        icon: '•',
         text: `Impact le plus fort (${top.score_impact}/100) : ${top.titre}`,
         detail: `${libelleSource(top)} · ${top.date_publication}`,
       });
@@ -314,7 +314,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     const topTicker = [...parTicker.entries()].sort((a, b) => b[1] - a[1])[0];
     if (topTicker && topTicker[1] >= 2) {
       out.push({
-        icon: '🏢',
+        icon: '•',
         text: `${topTicker[0]} est la valeur la plus citée (${topTicker[1]} articles)`,
         detail: 'Cliquez la heatmap pour le détail par société',
       });
@@ -488,7 +488,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
         >
           <option value="">Tout sentiment</option>
           <option value="positif">Positif</option>
-          <option value="neutre">⚪ Neutre</option>
+          <option value="neutre">Neutre</option>
           <option value="négatif">Négatif</option>
         </select>
         <button
@@ -501,7 +501,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
           Alertes
         </button>
         <button type="button" onClick={reset} className="px-3 py-1.5 rounded-lg text-sm border border-border text-muted hover:text-foreground transition-colors cursor-pointer">
-          ✕ Reset
+          Reset
         </button>
         <button
           type="button"
@@ -528,7 +528,6 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <span className="text-xs w-4">{v.icon}</span>
                   {v.label}
                 </span>
                 {v.count > 0 && (

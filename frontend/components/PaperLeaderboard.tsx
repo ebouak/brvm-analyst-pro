@@ -72,7 +72,6 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
     <section className="rounded-panel border border-border bg-surface/40 p-5 md:p-6">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="overline mb-1 text-gold-2">Classement</p>
           <h2 className="font-display text-xl text-ivory">Meilleures performances papier</h2>
           <p className="mt-1 max-w-[52ch] text-xs leading-relaxed text-muted">
             Perfs de trading fictif (capital papier), anonymisées et sur la base du volontariat.

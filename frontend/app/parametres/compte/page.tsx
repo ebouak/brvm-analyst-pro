@@ -1,5 +1,6 @@
 'use client';
 
+import { Bell, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import NotificationButton from '@/components/NotificationButton';
 import { SectionHeader } from '@/components/ui/premium';
@@ -94,7 +95,7 @@ export default function ComptePage() {
       <section className="bg-surface border border-border rounded-card shadow-card p-6 space-y-4">
         <div className="flex items-start gap-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-sapphire/20 bg-sapphire/[0.06] text-sapphire/80 text-base">
-            ✎
+            <Pencil size={16} strokeWidth={1.75} aria-hidden />
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="font-display text-base font-semibold text-ivory tracking-tight">
@@ -127,7 +128,7 @@ export default function ComptePage() {
       <section className="bg-surface border border-border rounded-card shadow-card p-6 space-y-4">
         <div className="flex items-start gap-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-sapphire/20 bg-sapphire/[0.06] text-sapphire/80 text-base">
-            ◎
+            <Bell size={16} strokeWidth={1.75} aria-hidden />
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="font-display text-base font-semibold text-ivory tracking-tight">
@@ -155,7 +156,7 @@ export default function ComptePage() {
       <section className="bg-surface border border-down/20 rounded-card shadow-card p-6 space-y-4">
         <div className="flex items-start gap-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-down/20 bg-down/[0.06] text-down/80 text-base">
-            ✕
+            <Trash2 size={16} strokeWidth={1.75} aria-hidden />
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="font-display text-base font-semibold text-down tracking-tight">

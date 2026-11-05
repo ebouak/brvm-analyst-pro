@@ -183,7 +183,6 @@ export default function ReportsPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="overline mb-1 text-gold-2">Analyse · période & événements</p>
           <h1 className="font-display text-2xl text-ivory [letter-spacing:-0.02em]">Rapports interactifs</h1>
           <p className="mt-1 max-w-[58ch] text-sm text-muted">
             Composez un rapport sur mesure (titres, période) : performances, séries de cours,

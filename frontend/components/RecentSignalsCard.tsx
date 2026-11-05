@@ -47,7 +47,7 @@ export default function RecentSignalsCard({ signals }: { signals: SignalRow[] })
               {s.explication ?? 'Signal calculé à partir des indicateurs techniques.'}
             </p>
             <div className="flex gap-3">
-              <Link href={`/signaux`} className="text-xs text-muted hover:text-up">❓ Pourquoi?</Link>
+              <Link href={`/signaux`} className="text-xs text-muted hover:text-up">Pourquoi?</Link>
               <Link href={`/actions/${s.code}`} className="text-xs text-up hover:underline">Voir fiche →</Link>
             </div>
           </div>

@@ -165,7 +165,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt, graph
             aria-label={cachedMarkdown ? 'Regénérer le diagnostic' : 'Générer le diagnostic'}
             className="px-3 py-1.5 text-xs rounded-lg bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-up/50"
           >
-            {loading ? 'Génération…' : cachedMarkdown ? '↺ Regénérer' : '✦ Générer le diagnostic'}
+            {loading ? 'Génération…' : cachedMarkdown ? '↺ Regénérer' : 'Générer le diagnostic'}
           </button>
         </div>
       </div>

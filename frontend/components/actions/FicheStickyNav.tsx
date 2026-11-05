@@ -60,7 +60,7 @@ export function FicheStickyNav({
           href={`/actions/${code}/quant`}
           className="whitespace-nowrap rounded-full border border-gold/30 bg-gold/[0.10] px-2.5 py-1 font-medium text-gold transition-colors hover:bg-gold/15 hover:border-gold/40"
         >
-          ◈ Quant
+          Quant
         </Link>
       </div>
     </nav>

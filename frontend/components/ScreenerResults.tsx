@@ -1,5 +1,6 @@
 'use client';
 
+import { SearchX } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import type { ActionRow } from '@/lib/screener/filters';
@@ -78,7 +79,7 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
   if (results.length === 0) {
     return (
       <div className="bg-surface border border-border rounded-xl p-10 text-center">
-        <p className="text-2xl mb-2" aria-hidden>◎</p>
+        <SearchX size={26} strokeWidth={1.5} className="mx-auto mb-2 text-muted" aria-hidden />
         <p className="text-white font-medium">Aucune action ne correspond</p>
         <p className="text-sm text-muted mt-1">Assouplissez vos critères ou choisissez un autre preset.</p>
       </div>

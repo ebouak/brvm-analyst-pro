@@ -62,13 +62,13 @@ export default function IntraDayPatternsTable({
     const configs: Record<string, { icon: string; label: string; color: string }> = {
       // Signaux du moteur « fixing » (les seuls produits aujourd'hui).
       intraday_momentum: { icon: '▲', label: 'Momentum', color: 'bg-up text-white' },
-      volume_spike: { icon: '🔊', label: 'Volume anormal', color: 'bg-info text-white' },
+      volume_spike: { icon: '•', label: 'Volume anormal', color: 'bg-info text-white' },
       // Types hérités : plus produits (l'ATR ne peut rien mesurer sur un marché
       // de fixing), mais des lignes historiques existent encore en base.
       atr_extreme: { icon: 'ATR', label: 'ATR (hérité)', color: 'bg-muted text-ivory' },
       bullish_consolidation: { icon: 'CONS', label: 'Consolidation (hérité)', color: 'bg-muted text-ivory' },
     };
-    const config = configs[type] || { icon: '◈', label: type, color: 'bg-muted text-ivory' };
+    const config = configs[type] || { icon: '•', label: type, color: 'bg-muted text-ivory' };
     return (
       <span className={`px-2 py-1 rounded text-xs font-medium ${config.color}`}>
         {config.icon} {config.label}
@@ -104,7 +104,7 @@ export default function IntraDayPatternsTable({
   if (patterns.length === 0) {
     return (
       <div className="bg-surface border border-border rounded-xl p-10 text-center">
-        <p className="text-muted mb-2">◈ Aucun pattern détecté</p>
+        <p className="text-muted mb-2">Aucun pattern détecté</p>
         <p className="text-xs text-faint">Aucune configuration détectée pour la séance du {dateMarche}</p>
       </div>
     );
@@ -205,7 +205,7 @@ export default function IntraDayPatternsTable({
           dernières séances.
         </p>
         <p>
-          <strong>✦ Confluence :</strong> un titre qui bouge <em>avec</em> du volume traduit une
+          <strong>Confluence :</strong> un titre qui bouge <em>avec</em> du volume traduit une
           conviction ; sans volume, surtout son illiquidité. Les titres cumulant les deux signaux
           méritent l&apos;attention.
         </p>

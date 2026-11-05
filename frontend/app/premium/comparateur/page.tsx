@@ -16,7 +16,7 @@ export default async function ComparateurPage() {
       <SectionHeader
         title="Comparateur multi-actifs"
         subtitle="Rendement vs risque des grandes classes d'actifs BRVM — actions, obligations, revenu dividende, sans-risque."
-        actions={<StatPill tone="gold">✦ Premium</StatPill>}
+        actions={<StatPill tone="gold">Premium</StatPill>}
       />
 
       {!hasData ? (

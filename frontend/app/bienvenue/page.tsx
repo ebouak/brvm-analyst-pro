@@ -49,7 +49,6 @@ export default async function BienvenuePage() {
   const actions = await getActions();
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:py-16">
-      <p className="overline mb-3 text-gold-2">Bienvenue sur WESTBOURSE</p>
       <h1 className="mb-3 font-display text-3xl text-ivory md:text-4xl [letter-spacing:-0.03em]">
         Votre compte est prêt. Voyons une action ensemble.
       </h1>

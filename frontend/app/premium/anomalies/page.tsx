@@ -35,7 +35,7 @@ export default async function AnomaliesPage() {
       <SectionHeader
         title="Anomalies de marché"
         subtitle="Quatre analyses visuelles pour repérer les valeurs atypiques : dividendes, liquidité, carte de chaleur et valorisation."
-        actions={<StatPill tone="gold">✦ Premium</StatPill>}
+        actions={<StatPill tone="gold">Premium</StatPill>}
       />
 
       <div className="gold-rule" />

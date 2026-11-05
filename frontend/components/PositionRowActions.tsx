@@ -1,5 +1,7 @@
 'use client';
 
+import { Pencil } from 'lucide-react';
+import { X as IconeFermer } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { deletePosition } from '@/app/portefeuille/actions';
@@ -55,7 +57,7 @@ export default function PositionRowActions({ position }: { position: RowPosition
         className="text-xs text-muted hover:text-up transition"
         title="Modifier la position"
       >
-        ✏️
+        <Pencil size={14} strokeWidth={1.75} aria-hidden />
       </button>
       <form action={deletePosition} className="inline">
         <input type="hidden" name="id" value={position.id} />
@@ -64,7 +66,7 @@ export default function PositionRowActions({ position }: { position: RowPosition
           className="text-xs text-down hover:underline transition"
           title="Supprimer la position"
         >
-          ✕
+          <IconeFermer size={16} strokeWidth={2} aria-hidden />
         </button>
       </form>
 

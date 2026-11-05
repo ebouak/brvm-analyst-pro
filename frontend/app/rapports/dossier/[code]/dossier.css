@@ -307,9 +307,8 @@
 
 .dv-encadre {
   border: 1px solid var(--dv-trame);
-  border-left: 3px solid var(--dv-accent);
   background: var(--dv-fond);
-  border-radius: 0 3px 3px 0;
+  border-radius: 3px;
   padding: 3.5mm 4mm;
   font-size: 9.5pt;
 }

@@ -1,4 +1,5 @@
 'use client';
+import { X as IconeFermer } from 'lucide-react';
 import { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import type { SignalDaily } from '@/lib/types';
@@ -411,7 +412,7 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
           </div>
           <div className="flex items-center gap-2">
             <SignalBadge signal={s.signal} confiance={s.confiance} />
-            <button type="button" onClick={onClose} className="text-muted hover:text-white text-xl leading-none ml-2">✕</button>
+            <button type="button" onClick={onClose} aria-label="Fermer" className="text-muted hover:text-white text-xl leading-none ml-2"><IconeFermer size={16} strokeWidth={2} aria-hidden /></button>
           </div>
         </div>
 
@@ -502,7 +503,7 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
               onClick={onClose}
               className="text-xs ml-auto border border-border rounded px-3 py-1.5 text-muted hover:text-white transition"
             >
-              ✕ Fermer
+              Fermer
             </button>
           </div>
         </div>

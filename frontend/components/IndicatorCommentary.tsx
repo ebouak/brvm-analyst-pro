@@ -38,7 +38,7 @@ export default function IndicatorCommentary({ reading, code }: { reading: Indica
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[11px] text-faint">✦ Expliquer :</span>
+        <span className="text-[11px] text-faint">Expliquer :</span>
         {QUESTIONS.map((q) => (
           <Link
             key={q}

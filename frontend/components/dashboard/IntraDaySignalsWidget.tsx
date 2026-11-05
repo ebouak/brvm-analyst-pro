@@ -1,5 +1,6 @@
 'use client';
 
+import { Volume2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getPatternsForDate } from '@/lib/patterns/queries';
@@ -61,9 +62,9 @@ export default function IntraDaySignalsWidget() {
       case 'intraday_momentum':
         return { icon: '▲', label: 'Momentum', bgClass: 'bg-up/20', textClass: 'text-up' };
       case 'volume_spike':
-        return { icon: '🔊', label: 'Volume', bgClass: 'bg-info/20', textClass: 'text-info' };
+        return { icon: '•', label: 'Volume', bgClass: 'bg-info/20', textClass: 'text-info' };
       case 'price_move':
-        return { icon: '➡️', label: 'Mouvement', bgClass: 'bg-accent/20', textClass: 'text-accent' };
+        return { icon: '•', label: 'Mouvement', bgClass: 'bg-accent/20', textClass: 'text-accent' };
       default:
         return { icon: '•', label: patternType, bgClass: 'bg-muted/20', textClass: 'text-muted' };
     }
@@ -101,7 +102,7 @@ export default function IntraDaySignalsWidget() {
             )}
             {volumeCount > 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-info/10">
-                <span className="text-info">🔊</span>
+                <Volume2 size={14} strokeWidth={1.75} className="text-info" aria-hidden />
                 <span className="text-info font-medium">{volumeCount} Volume</span>
               </div>
             )}

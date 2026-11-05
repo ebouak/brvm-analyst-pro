@@ -1,5 +1,6 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import { useState } from 'react';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
@@ -37,11 +38,11 @@ export default function BriefAssistant() {
         Poser une question
       </button>
       {open && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={() => setOpen(false)}>
           <div className="bg-surface border border-border rounded-xl shadow-lg max-w-lg w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="px-4 py-3 border-b border-border flex items-center justify-between">
               <h2 className="text-sm font-semibold">Questions sur la séance</h2>
-              <button type="button" onClick={() => setOpen(false)} className="text-muted hover:text-fg">✕</button>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" className="text-muted hover:text-fg"><IconeFermer size={16} strokeWidth={2} aria-hidden /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px]">
               {msgs.length === 0 && <p className="text-xs text-muted">Posez une question sur la séance (ex. « Quelles actions ont le plus monté ? », « Analyse SONATEL »).</p>}

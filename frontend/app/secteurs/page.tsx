@@ -162,7 +162,6 @@ export default async function SecteursPage() {
             <section className="animate-rise-in [animation-delay:0.08s] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Eyebrow>Meilleurs secteurs</Eyebrow>
                   <h2 className="font-display text-heading-sm text-ivory mt-1">
                     Secteurs en tête du jour
                   </h2>
@@ -200,7 +199,6 @@ export default async function SecteursPage() {
             {/* ── Section 2 : Classement complet ───────────────────────────── */}
             <section className="animate-rise-in [animation-delay:0.28s] space-y-4">
               <div>
-                <Eyebrow>Classement complet</Eyebrow>
                 <h2 className="font-display text-heading-sm text-ivory mt-1">
                   Tableau de performance multi-horizon
                 </h2>
@@ -216,7 +214,6 @@ export default async function SecteursPage() {
             {/* ── Section 3 : Rotation sectorielle ─────────────────────────── */}
             <section className="animate-rise-in [animation-delay:0.36s] space-y-4">
               <div>
-                <Eyebrow>Analyse dynamique</Eyebrow>
                 <h2 className="font-display text-heading-sm text-ivory mt-1">
                   Rotation sectorielle · 30 jours
                 </h2>

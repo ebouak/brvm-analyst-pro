@@ -1,5 +1,6 @@
 'use client';
 
+import { TriangleAlert } from 'lucide-react';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { isChunkLoadError, reloadOnceForChunkError } from '@/lib/chunk-reload';
@@ -29,7 +30,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bg px-6 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#56D7FD]/25 bg-[#56D7FD]/10 text-2xl text-[#56D7FD]">
-        ◇
+        <TriangleAlert size={22} strokeWidth={1.75} aria-hidden />
       </div>
       <div className="space-y-1">
         <h1 className="font-display text-xl text-white">Une erreur est survenue</h1>

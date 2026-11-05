@@ -107,7 +107,7 @@ export default function ImportRow({ file, validCodes }: Props) {
           {status === 'auto-saving' && 'Enregistrement…'}
           {status === 'done' && <span className="text-up">✓ enregistré ({provider})</span>}
           {status === 'review' && <span className="text-warn">à valider ({provider})</span>}
-          {status === 'error' && <span className="text-down">✕ {error}</span>}
+          {status === 'error' && <span className="text-down">{error}</span>}
         </span>
         {status === 'pending' && (
           <button type="button" onClick={() => void run()} disabled={!symbol.trim()}

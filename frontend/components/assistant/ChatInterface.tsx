@@ -1,4 +1,5 @@
 'use client';
+import { MessageSquareText } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { PROMPTS_TEMPLATES } from '@/lib/ai/prompts';
 import { ExportButton } from './ExportButton';
@@ -179,7 +180,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         {/* Avatar double-bezel */}
         <div className="rounded-xl border border-gold/20 bg-gold/[0.06] p-0.5 shrink-0">
           <div className="w-8 h-8 rounded-[calc(0.75rem-2px)] bg-elevated flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
-            <span className="text-gold text-xs font-bold font-display">✦</span>
+            <MessageSquareText size={15} strokeWidth={1.75} className="text-gold" aria-hidden />
           </div>
         </div>
         <div>
@@ -269,9 +270,9 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
             >
               {msg.loading && !msg.content ? (
                 <span className="inline-flex gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-bounce [animation-delay:0ms]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-bounce [animation-delay:150ms]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-bounce [animation-delay:300ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-pulse [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-pulse [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-pulse [animation-delay:300ms]" />
                 </span>
               ) : (
                 <>

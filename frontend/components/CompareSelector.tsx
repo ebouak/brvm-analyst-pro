@@ -1,5 +1,6 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -94,7 +95,7 @@ export default function CompareSelector({ instruments, selected, period, mode }:
               className="ml-0.5 hover:opacity-70 transition-opacity leading-none"
               aria-label={`Retirer ${code}`}
             >
-              ✕
+              <IconeFermer size={16} strokeWidth={2} aria-hidden />
             </button>
           </span>
         ))}

@@ -1,5 +1,6 @@
 'use client';
 
+import { MoveRight, Volume2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getPatternStats } from '@/lib/patterns/queries';
 
@@ -91,7 +92,7 @@ export default function PatternSummaryWidget() {
             {volumeCount > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-info text-xs">🔊</span>
+                  <Volume2 size={13} strokeWidth={1.75} className="text-info" aria-hidden />
                   <span className="text-muted">Volume anormal</span>
                 </div>
                 <span className="font-mono font-bold text-info">{volumeCount}</span>
@@ -100,7 +101,7 @@ export default function PatternSummaryWidget() {
             {moveCount > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-accent text-xs">➡️</span>
+                  <MoveRight size={13} strokeWidth={1.75} className="text-accent" aria-hidden />
                   <span className="text-muted">Mouvement</span>
                 </div>
                 <span className="font-mono font-bold text-accent">{moveCount}</span>

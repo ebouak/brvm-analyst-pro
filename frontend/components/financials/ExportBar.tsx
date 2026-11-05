@@ -1,4 +1,5 @@
 'use client';
+import { Printer } from 'lucide-react';
 import { useState } from 'react';
 import { generateXlsxBlob } from '@/lib/export/xlsx';
 import type { IncomeStatement, BalanceSheet, CashFlowStatement, FundamentalRatios } from '@/lib/financials/types';
@@ -55,7 +56,7 @@ export default function ExportBar({ code, designation, secteur, ratios, incomeSt
         aria-label="Ouvrir la version imprimable (PDF)"
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs text-muted hover:text-white hover:border-up/40 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-up/50"
       >
-        <span aria-hidden="true">🖨</span>
+        <Printer size={14} strokeWidth={1.75} aria-hidden />
         PDF (imprimer)
       </button>
     </div>

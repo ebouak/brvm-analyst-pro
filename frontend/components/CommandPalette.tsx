@@ -1,5 +1,7 @@
 'use client';
 
+import { CornerDownLeft, Loader2, MessageSquareText } from 'lucide-react';
+import { X as IconeFermer } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { type SearchItem, fuzzyFilter } from '@/lib/search-index';
@@ -202,7 +204,7 @@ export default function CommandPalette({ items }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-20 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-20"
       onClick={closePalette}
       role="dialog"
       aria-modal="true"
@@ -232,7 +234,7 @@ export default function CommandPalette({ items }: Props) {
               className="text-[#8b93a7] hover:text-[#e6e9f0] transition-colors"
               aria-label="Effacer la recherche"
             >
-              ✕
+              <IconeFermer size={16} strokeWidth={2} aria-hidden />
             </button>
           )}
         </div>
@@ -242,7 +244,7 @@ export default function CommandPalette({ items }: Props) {
           {copilotResults ? (
             <div>
               <p className="px-4 pb-1 pt-3 text-xs font-semibold tracking-wider text-[#8b93a7]">
-                ◈ {copilotResults.titre}
+                {copilotResults.titre}
               </p>
               {copilotResults.items.length === 0 && (
                 <p className="px-4 py-4 text-sm text-[#8b93a7]">Aucune action ne correspond à ce critère.</p>
@@ -262,7 +264,7 @@ export default function CommandPalette({ items }: Props) {
                       isSelected ? 'bg-[#00c853]/10 text-[#00c853]' : 'text-[#e6e9f0] hover:bg-[#0f1117]',
                     ].join(' ')}
                   >
-                    <span aria-hidden>◇</span>
+                    <CornerDownLeft size={13} strokeWidth={1.75} aria-hidden />
                     <span className="flex-1 truncate">
                       <span className="font-medium">{r.code}</span>
                       <span className={`ml-2 text-sm ${isSelected ? 'text-[#00c853]/70' : 'text-[#8b93a7]'}`}>
@@ -339,7 +341,7 @@ export default function CommandPalette({ items }: Props) {
                       : 'text-[#e6e9f0] hover:bg-[#0f1117]',
                   ].join(' ')}
                 >
-                  <span aria-hidden>{copilotLoading ? '⏳' : '◈'}</span>
+                  {copilotLoading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" aria-hidden /> : <MessageSquareText size={13} strokeWidth={1.75} aria-hidden />}
                   <span className="flex-1 truncate">
                     <span className="font-medium">
                       {copilotLoading ? 'Recherche en cours…' : `Demander : « ${query.trim()} »`}

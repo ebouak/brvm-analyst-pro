@@ -43,7 +43,7 @@ export default async function FormationDetailPage({ params }: { params: { id: st
         ) : (
           <a href={f.replay_url} target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-info px-4 py-2 text-sm font-medium text-bg">
-            ▶ Regarder le replay
+            Regarder le replay
           </a>
         )
       ) : (

@@ -1,5 +1,7 @@
 'use client';
 
+import { Mail } from 'lucide-react';
+import { X as IconeFermer } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -136,7 +138,7 @@ export function ContactNudge() {
         onClick={dismiss}
         className="absolute right-3 top-3 text-muted transition-colors hover:text-ivory"
       >
-        ✕
+        <IconeFermer size={16} strokeWidth={2} aria-hidden />
       </button>
 
       {status === 'sent' ? (
@@ -148,7 +150,7 @@ export function ContactNudge() {
       ) : (
         <>
           <div className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-accent/15 text-lg">✉</span>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-accent/15"><Mail size={17} strokeWidth={1.75} aria-hidden /></span>
             <div>
               <p className="font-display text-[1.02rem] font-semibold leading-tight text-ivory">
                 Salut, on se parle&nbsp;?

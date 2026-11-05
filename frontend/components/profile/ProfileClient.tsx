@@ -1,4 +1,5 @@
 'use client';
+import { Camera } from 'lucide-react';
 import { SECTEURS_2026, secteursCourants } from '@/lib/secteurs/nomenclature';
 
 import { useRef, useState } from 'react';
@@ -100,7 +101,7 @@ export default function ProfileClient({ initial, email, isPremium, initialPrefer
             <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
               aria-label="Changer la photo"
               className="absolute bottom-0 right-0 rounded-full bg-accent p-1.5 text-bg shadow hover:brightness-110 disabled:opacity-50">
-              {uploading ? '…' : '📷'}
+              {uploading ? '…' : <Camera size={14} strokeWidth={1.75} aria-hidden />}
             </button>
             <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onPhoto} />
           </div>
