@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import WhatsAppLiaisons from './WhatsAppLiaisons';
+import QrAppairage from '@/components/whatsapp/QrAppairage';
+import { lienAppairage } from '@/lib/whatsapp/qrAppairage';
+import { useDetectionLiaison } from '@/lib/whatsapp/useDetectionLiaison';
 
 interface Prefs {
   whatsapp_phone: string | null;
@@ -102,6 +105,20 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
     const id = setInterval(() => setNow(Date.now()), 15_000);
     return () => clearInterval(id);
   }, [pairing]);
+
+  // Détection automatique : dès que le webhook a lié le numéro, la section bascule.
+  useDetectionLiaison(
+    pairing !== null && !prefs.whatsapp_optin,
+    async () => {
+      const fresh = await loadPrefs();
+      return fresh?.whatsapp_optin ? fresh : null;
+    },
+    (fresh) => {
+      setPrefs(fresh);
+      setPairing(null);
+      setPairingMsg(null);
+    },
+  );
 
   async function save(next: Prefs) {
     setState('saving');
@@ -218,6 +235,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
   const remainingMs = pairing ? new Date(pairing.expiresAt).getTime() - now : 0;
   const remainingMin = Math.max(0, Math.ceil(remainingMs / 60_000));
   const codeExpired = pairing !== null && remainingMs <= 0;
+  const lienCode = pairing ? lienAppairage(AGENT_NUMBER, pairing.code) : null;
 
   return (
     <section className="rounded-xl border border-border bg-surface p-5 space-y-4">
@@ -296,15 +314,22 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
                   : `Valide encore ${remainingMin} minute${remainingMin > 1 ? 's' : ''}.`}
               </p>
 
-              {AGENT_NUMBER && !codeExpired && (
-                <a
-                  href={`https://wa.me/${AGENT_NUMBER}?text=${encodeURIComponent(pairing.code)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#03222b] transition active:scale-95"
-                >
-                  Ouvrir WhatsApp avec le code
-                </a>
+              {lienCode && !codeExpired && (
+                <>
+                  <QrAppairage lien={lienCode} />
+                  <a
+                    href={lienCode}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#03222b] transition active:scale-95"
+                  >
+                    Ouvrir WhatsApp avec le code
+                  </a>
+                  <p role="status" className="flex items-center gap-2 text-xs text-muted">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent motion-reduce:animate-none" aria-hidden />
+                    En attente de votre message : la liaison sera détectée automatiquement.
+                  </p>
+                </>
               )}
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
