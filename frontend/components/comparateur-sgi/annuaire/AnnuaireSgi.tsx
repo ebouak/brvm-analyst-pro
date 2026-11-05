@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { ArrowRight, LayoutGrid, List, Search } from 'lucide-react';
+import { ArrowRight, LayoutGrid, List, Mail, Phone, Search } from 'lucide-react';
 import { PAYS, type Sgi } from '@/lib/sgi-frais/directory';
 import type { SgiFrais } from '@/lib/sgi-frais/types';
 import { drapeau, slugSgi } from '@/lib/sgi-frais/identite';
@@ -97,15 +97,15 @@ export function SgiCard({
 
       <div className="mb-4 flex flex-wrap gap-1.5">
         <span
-          className={`rounded-md border px-2 py-1 font-mono text-[10.5px] uppercase tracking-wide ${
+          className={`rounded-md border px-2 py-1 font-mono text-xs ${
             s.type === 'Banque' ? 'border-accent/25 bg-accent/10 text-accent' : 'border-border bg-elevated/60 text-muted'
           }`}
         >
           {s.type}
         </span>
-        <span className="rounded-md border border-border px-2 py-1 font-mono text-[10.5px] uppercase tracking-wide text-muted">{p.nom}</span>
+        <span className="rounded-md border border-border px-2 py-1 font-mono text-xs text-muted">{p.nom}</span>
         {homologue && (
-          <span className="rounded-md border border-up/30 bg-up/10 px-2 py-1 font-mono text-[10.5px] uppercase tracking-wide text-up">Barème homologué</span>
+          <span className="rounded-md border border-up/30 bg-up/10 px-2 py-1 font-mono text-xs text-up">Barème homologué</span>
         )}
       </div>
 
@@ -166,12 +166,12 @@ export function SgiCard({
           )}
           {s.telephone && (
             <a href={`tel:${s.telephone.split('/')[0]!.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-1 text-muted transition-colors hover:text-accent" title="Appeler la SGI">
-              <span aria-hidden>☎</span> {s.telephone.split('/')[0]!.trim()}
+              <Phone size={13} strokeWidth={1.75} aria-hidden /> {s.telephone.split('/')[0]!.trim()}
             </a>
           )}
           {s.email && (
             <a href={`mailto:${s.email}`} className="inline-flex items-center gap-1 text-muted transition-colors hover:text-accent" title="Écrire à la SGI">
-              <span aria-hidden>✉</span> e-mail
+              <Mail size={13} strokeWidth={1.75} aria-hidden /> e-mail
             </a>
           )}
         </div>
@@ -455,7 +455,7 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
         </div>
       )}
 
-      <div className="mt-7 rounded-xl border border-border border-l-2 border-l-accent bg-surface px-5 py-4 text-[14px] leading-relaxed text-muted">
+      <div className="mt-7 rounded-xl border border-border bg-surface px-5 py-4 text-[14px] leading-relaxed text-muted">
         <b className="text-ivory">D&apos;où viennent ces informations.</b> Coordonnées et logos : annuaire officiel
         de la BRVM. Courtage marqué « homologué » : décision d&apos;homologation de l&apos;AMF-UMOA, dont le PDF est lié
         dans le simulateur. « Agrégé » : sources publiques, à confirmer. Dépôts minimums marqués{' '}

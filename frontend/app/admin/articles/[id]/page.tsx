@@ -42,7 +42,7 @@ export default async function RelireArticlePage({ params }: { params: { id: stri
         <DecryptageVue d={decryptage} />
       ) : (
         <>
-      <p className="text-[11px] uppercase tracking-wide text-accent">
+      <p className="text-[11px] text-accent">
         {LIBELLE_TYPE[a.type] ?? a.type} · {a.date_fait}
       </p>
       <h1 className="font-display text-2xl text-white">{a.titre}</h1>

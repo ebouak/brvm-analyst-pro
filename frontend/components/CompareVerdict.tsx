@@ -29,7 +29,7 @@ export default function CompareVerdict({ rows }: { rows: FundaRow[] }) {
 
   return (
     <div className="bg-surface border border-cyan/20 rounded-xl p-4 space-y-3">
-      <span className="text-[10px] text-cyan uppercase tracking-wide font-bold">Verdict comparatif</span>
+      <span className="text-xs text-cyan font-bold">Verdict comparatif</span>
       <div className="flex items-center gap-3 flex-wrap">
         <span className="text-2xl">✦</span>
         <div>

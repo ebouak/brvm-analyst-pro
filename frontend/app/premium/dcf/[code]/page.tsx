@@ -58,7 +58,6 @@ export default async function DcfPage({ params }: Props) {
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       {Breadcrumb}
       <SectionHeader
-        kicker={data.secteur ?? 'BRVM'}
         title={`${data.code}${data.designation ? ` — ${data.designation}` : ''}`}
         subtitle={`Valorisation par flux de trésorerie actualisés. WACC dérivé du MEDAF (rf ${data.meta.riskFreeSource === 'souverain' ? 'souverain réel' : 'de repli'}, prime de risque ${data.meta.riskPremiumCountry}${data.meta.moodyRating ? ` — ${data.meta.moodyRating}` : ''}). ${data.meta.fcfYears} exercice(s) de flux, ${data.meta.betaObs} observations pour le bêta.`}
         actions={<StatPill tone="gold">✦ Premium</StatPill>}

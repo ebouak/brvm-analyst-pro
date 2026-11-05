@@ -79,7 +79,7 @@ export default function KeyMetrics({
       <Row label="Nombre de transactions" value={<span className="text-faint">non publié</span>} />
       <div className="flex items-center justify-between gap-3 py-2">
         <span className="text-xs text-muted">Activité du marché</span>
-        <span className={`text-xs font-semibold uppercase tracking-wide ${activiteCls}`}>{activite}</span>
+        <span className={`text-xs font-semibold ${activiteCls}`}>{activite}</span>
       </div>
     </div>
   );

@@ -745,7 +745,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
 
       {/* ── Drawing toolbar ── */}
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] text-muted uppercase tracking-wide mr-1">Tracé</span>
+        <span className="text-xs text-muted mr-1">Tracé</span>
         {DRAW_TOOLS.map(({ key, label, title }) => (
           <button
             key={key}
@@ -779,7 +779,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       {/* ── Indicator toggles ── */}
       <div className="space-y-1.5">
         <div className="flex flex-wrap gap-1.5 items-center">
-          <span className="text-[10px] text-muted uppercase tracking-wide mr-1">Overlays</span>
+          <span className="text-xs text-muted mr-1">Overlays</span>
           {OVERLAY_INDICATORS.map(({ key, label }) => {
             const active = visible.has(key);
             return (
@@ -799,7 +799,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
           })}
         </div>
         <div className="flex flex-wrap gap-1.5 items-center">
-          <span className="text-[10px] text-muted uppercase tracking-wide mr-1">Oscillateurs</span>
+          <span className="text-xs text-muted mr-1">Oscillateurs</span>
           {OSCILLATOR_INDICATORS.map(({ key, label }) => {
             const active = visible.has(key);
             return (

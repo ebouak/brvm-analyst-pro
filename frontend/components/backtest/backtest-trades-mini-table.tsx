@@ -11,7 +11,7 @@ export function BacktestTradesMiniTable({ trades }: { trades: BacktestTrade[] })
   if (trades.length === 0) return null;
   return (
     <section className="rounded-xl border border-gray-200 bg-[#ffffff] p-4 sm:p-5">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Détail des trades</p>
+      <p className="mb-3 text-xs font-semibold text-gray-400">Détail des trades</p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

@@ -55,7 +55,7 @@ export default async function RevuePage({ params }: Props) {
       {/* En-tête */}
       <div className="flex items-start justify-between mb-5 border-b-2 border-gray-900 pb-3">
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">WESTBOURSE · Revue de résultats</p>
+          <p className="text-xs text-gray-500">WESTBOURSE · Revue de résultats</p>
           <h1 className="text-2xl font-bold mt-1">{d.code} — {d.designation}</h1>
           <p className="text-xs text-gray-500 mt-0.5">{[d.secteur, d.pays].filter(Boolean).join(' · ')} · {profil.label}</p>
         </div>
@@ -83,7 +83,7 @@ export default async function RevuePage({ params }: Props) {
 
       {/* Bandeau cyclique pour l'agro */}
       {profil.cyclique && (
-        <div className="border-l-4 border-orange-500 bg-orange-50 px-3 py-2 mb-5 text-xs text-gray-700">
+        <div className="rounded-md bg-orange-50 px-3 py-2 mb-5 text-xs text-orange-950">
           <b>Activité cyclique.</b> Le secteur agro-industriel est sensible aux campagnes et aux cours
           des matières premières : la performance d&apos;un exercice isolé n&apos;est pas représentative.
           Cette revue privilégie une <b>lecture pluriannuelle</b> (jusqu&apos;à 5 exercices) pour situer
@@ -92,7 +92,7 @@ export default async function RevuePage({ params }: Props) {
       )}
 
       {/* Résultats */}
-      <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">
+      <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">
         Résultats {latest ? `· exercice ${latest.periode}` : ''}
       </h2>
       <table className="w-full text-sm mb-2">
@@ -143,7 +143,7 @@ export default async function RevuePage({ params }: Props) {
       {/* Activité — qualitatif des rapports */}
       {d.highlights && (d.highlights.synthese || d.highlights.items.length > 0) && (
         <>
-          <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">
+          <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">
             {hlAncien
               ? `Activité · dernier rapport disponible (exercice ${d.highlights.exercice})`
               : <>Activité · ce qui se passe dans l&apos;entreprise</>}
@@ -175,7 +175,7 @@ export default async function RevuePage({ params }: Props) {
       )}
 
       {/* Cours vs résultats & dividendes */}
-      <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">
+      <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">
         Cours de bourse vs résultats & dividendes
       </h2>
       <PriceChart data={d.priceSeries} />
@@ -192,7 +192,7 @@ export default async function RevuePage({ params }: Props) {
       {/* Avant la prochaine publication (earnings preview qualitatif) */}
       {d.years.length >= 2 && latest && prev && (
         <>
-          <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1 mt-5">
+          <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1 mt-5">
             Avant la prochaine publication · à surveiller
           </h2>
           <ul className="text-sm text-gray-700 list-disc pl-5 mb-2 space-y-1">

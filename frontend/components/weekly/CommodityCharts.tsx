@@ -70,7 +70,7 @@ export function PriceVariationsChart({ yf_prices }: Pick<CommodityChartsProps, '
 
   return (
     <div className="bg-[#0a1417] border border-[#1a2a30] rounded-xl p-5">
-      <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider mb-4">
+      <h3 className="text-sm font-semibold text-cyan-400 mb-4">
         Variations sur 5 jours (futures)
       </h3>
       <ResponsiveContainer width="100%" height={240}>
@@ -110,7 +110,7 @@ export function WorldBankChart({ wb_snapshot }: Pick<CommodityChartsProps, 'wb_s
 
   return (
     <div className="bg-[#0a1417] border border-[#1a2a30] rounded-xl p-5">
-      <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider mb-4">
+      <h3 className="text-sm font-semibold text-cyan-400 mb-4">
         Variation mensuelle – Banque Mondiale
       </h3>
       <ResponsiveContainer width="100%" height={220}>
@@ -147,7 +147,7 @@ export function BrvmExposureChart({ brvm_scores }: Pick<CommodityChartsProps, 'b
 
   return (
     <div className="bg-[#0a1417] border border-[#1a2a30] rounded-xl p-5">
-      <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider mb-4">
+      <h3 className="text-sm font-semibold text-cyan-400 mb-4">
         Exposition BRVM aux matières premières
       </h3>
       <ResponsiveContainer width="100%" height={260}>

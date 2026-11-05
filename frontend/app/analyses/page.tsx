@@ -28,7 +28,7 @@ export default async function AnalysesIndex() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
+      <header className="border-b border-border/60 bg-surface">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-6">
           <Link href="/" className="font-display tracking-tight text-white hover:text-accent">WESTBOURSE</Link>
           <Link href="/" className="text-sm text-muted hover:text-white">← Accueil</Link>
@@ -37,7 +37,6 @@ export default async function AnalysesIndex() {
 
       <main className="mx-auto max-w-4xl space-y-6 px-6 py-10">
         <SectionHeader
-          kicker="Analyses"
           title="Analyses BRVM"
           subtitle="Sourcées, datées, reproductibles. Une question, une réponse, la méthode."
         />
@@ -46,7 +45,7 @@ export default async function AnalysesIndex() {
           href="/analyses/hebdo"
           className="block rounded-xl border border-accent/30 bg-accent/5 p-5 transition-colors hover:border-accent/60"
         >
-          <p className="text-[11px] uppercase tracking-wider text-accent">Chaque semaine</p>
+          <p className="text-[11px] text-accent">Chaque semaine</p>
           <h2 className="mt-1 font-display text-lg text-white">Analyse hebdo · les valeurs qui bougent</h2>
           <p className="mt-1 text-sm text-muted">
             Les cinq titres les plus actifs de la semaine, expliqués simplement : ce qui s’est passé,

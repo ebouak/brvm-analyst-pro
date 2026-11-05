@@ -16,7 +16,7 @@ export default async function ProfilPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-      <SectionHeader kicker="Compte" title="Mon profil" subtitle="Votre identité sur WESTBOURSE — photo, bio et préférences." />
+      <SectionHeader title="Mon profil" subtitle="Votre identité sur WESTBOURSE — photo, bio et préférences." />
       <ProfileClient
         email={user.email ?? ''}
         isPremium={Boolean(profile.is_premium)}

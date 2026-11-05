@@ -31,13 +31,13 @@ export default function BalanceSheet({ statements, famille }: Props) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border">
-            <th className="text-left py-2 pr-4 text-muted font-normal text-xs uppercase tracking-wider w-64">
+            <th className="text-left py-2 pr-4 text-muted font-normal text-xs w-64">
               Poste
             </th>
             {sorted.map((s) => (
               <th
                 key={s.periode}
-                className="text-right py-2 px-3 text-muted font-normal text-xs uppercase tracking-wider min-w-[120px]"
+                className="text-right py-2 px-3 text-muted font-normal text-xs min-w-[120px]"
               >
                 {s.periode}
               </th>
@@ -51,7 +51,7 @@ export default function BalanceSheet({ statements, famille }: Props) {
                 <tr key={`section-${row.key}`} className="bg-surface/50">
                   <td
                     colSpan={sorted.length + 1}
-                    className="py-2 pr-4 text-xs uppercase tracking-widest text-gray-400 font-semibold pt-4"
+                    className="py-2 pr-4 text-xs text-gray-400 font-semibold pt-4"
                   >
                     {row.label}
                   </td>

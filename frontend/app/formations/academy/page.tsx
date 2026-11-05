@@ -91,7 +91,6 @@ export default async function AcademyHubPage() {
           ← Formations
         </Link>
         <SectionHeader
-          kicker="Académie"
           title="WestBourse Academy"
           subtitle="Des cours interactifs par niveau, avec progression sauvegardée, quiz, examens et certificats."
         />

@@ -201,7 +201,7 @@ export default async function FinancialsPage({ params }: Props) {
         ) : (
         <div className="bg-surface border border-border rounded-xl p-4 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted uppercase tracking-wide">Valorisation</span>
+            <span className="text-xs text-muted">Valorisation</span>
             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${VERDICT_COLORS[valuation.verdict]}`}>
               {VERDICT_LABELS[valuation.verdict]}
             </span>
@@ -257,7 +257,7 @@ export default async function FinancialsPage({ params }: Props) {
             {/* Analyse bancaire UEMOA (banques uniquement) */}
             {bankAnalysis && (
               <div>
-                <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse bancaire UEMOA</p>
+                <p className="text-xs text-muted mb-3 px-0.5">Analyse bancaire UEMOA</p>
                 <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} />
               </div>
             )}
@@ -268,7 +268,7 @@ export default async function FinancialsPage({ params }: Props) {
             {/* Ratios fondamentaux */}
             <div>
               <div className="flex items-center gap-2 mb-3 px-0.5">
-                <p className="text-xs text-muted uppercase tracking-widest">Ratios fondamentaux</p>
+                <p className="text-xs text-muted">Ratios fondamentaux</p>
                 {periodeAffichee && (
                   <PasseportPopover passeport={passeport} titre={`Exercice ${periodeAffichee}`} />
                 )}
@@ -279,7 +279,7 @@ export default async function FinancialsPage({ params }: Props) {
             {/* Analyse graphique pluriannuelle */}
             {chartPoints.length >= 2 && (
               <div>
-                <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">Analyse graphique</p>
+                <p className="text-xs text-muted mb-3 px-0.5">Analyse graphique</p>
                 <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} />
               </div>
             )}
@@ -289,7 +289,7 @@ export default async function FinancialsPage({ params }: Props) {
                 fondait dans la page et passait inaperçu. */}
             {data.incomeStatements.length >= 2 && (
               <div>
-                <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">
+                <p className="text-xs text-muted mb-3 px-0.5">
                   Graphique personnalisé
                 </p>
                 <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
@@ -300,7 +300,7 @@ export default async function FinancialsPage({ params }: Props) {
 
         {/* Financial statement tabs */}
         <div id="etats">
-          <p className="text-xs text-muted uppercase tracking-widest mb-3 px-0.5">États financiers</p>
+          <p className="text-xs text-muted mb-3 px-0.5">États financiers</p>
           <div className="bg-surface border border-border rounded-xl p-5">
             <FinancialTabs
               incomeStatements={data.incomeStatements}
@@ -402,7 +402,7 @@ export default async function FinancialsPage({ params }: Props) {
         {/* Lien vers le diagnostic Premium */}
         <div className="bg-surface border border-warn/20 rounded-xl p-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-warn">✦ Diagnostic financier &amp; économique</p>
+            <p className="text-sm font-semibold text-warn">Diagnostic financier &amp; économique</p>
             <p className="text-xs text-muted mt-0.5">
               Analyse générée automatiquement à partir des états financiers publiés, vérifiée par
               nos garde-fous de plausibilité. Réservée aux membres Premium.

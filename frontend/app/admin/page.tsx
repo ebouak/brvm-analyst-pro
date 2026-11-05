@@ -148,7 +148,6 @@ export default async function AdminPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Poste de pilotage"
         subtitle="Ce qui demande une décision, en premier. Puis les indicateurs de la plateforme."
       />

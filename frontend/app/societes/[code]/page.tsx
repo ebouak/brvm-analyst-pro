@@ -246,7 +246,7 @@ export default async function CompanyPage({ params }: PageProps) {
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <div>
-          <p className="text-[11px] text-accent/70 uppercase tracking-[0.18em] mb-1">
+          <p className="text-[11px] text-accent/70 mb-1">
             {instrument.secteur ?? 'BRVM'} · {instrument.pays ?? 'UEMOA'}
           </p>
           <h1 className="font-display text-2xl md:text-3xl text-white">
@@ -413,7 +413,7 @@ export default async function CompanyPage({ params }: PageProps) {
       {/* ── Teaser dossier d’analyse (convertisseur) ─────────────────────────── */}
       {teaserLines.length > 0 && (
         <section className="bg-surface border border-accent/30 rounded-xl p-5 mb-6 relative overflow-hidden">
-          <p className="text-[11px] text-accent/80 uppercase tracking-[0.18em] mb-2">Dossier d’analyse · extrait</p>
+          <p className="text-[11px] text-accent/80 mb-2">Dossier d’analyse · extrait</p>
           <div className="space-y-2 text-sm text-muted leading-relaxed">
             {teaserLines.map((l, i) => (
               <p key={i}>{l}</p>

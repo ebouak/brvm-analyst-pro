@@ -67,7 +67,7 @@ export default async function PublierTikTokPage() {
         info &&
         lignes.map((l) => (
           <div key={`${l.cible}-${l.cible_id}`} className="space-y-1">
-            <p className="text-[11px] uppercase tracking-wide text-faint">
+            <p className="text-[11px] text-faint">
               {l.cible === 'video' ? `Vidéo de séance du ${l.cible_id}` : 'Article'}
               {l.statut === 'echec' && l.erreur ? <span className="ml-2 normal-case text-down">Échec précédent : {l.erreur}</span> : null}
             </p>

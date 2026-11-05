@@ -23,7 +23,6 @@ export default async function ReportBuilderPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
-        kicker="Rapports"
         title="Composer un rapport"
         subtitle="Cochez les blocs à inclure, puis générez un PDF imprimable à partir de vos données réelles."
       />

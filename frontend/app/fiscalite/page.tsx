@@ -49,7 +49,7 @@ const FAQ: { q: string; a: string }[] = [
 export default function FiscalitePage() {
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
+      <header className="border-b border-border/60 bg-surface">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
           <Link href="/" className="font-display tracking-tight text-white hover:text-accent">WESTBOURSE</Link>
           <div className="flex items-center gap-3 text-sm">
@@ -63,7 +63,6 @@ export default function FiscalitePage() {
       <div className="mx-auto max-w-4xl px-4 py-10 space-y-8">
         <SectionHeader
           accent="emerald"
-          kicker="UEMOA · IRVM & IRC"
           title="Fiscalité des dividendes et obligations BRVM"
           subtitle="Ce que vous touchez vraiment, net de retenue à la source, selon le pays de l'émetteur."
         />

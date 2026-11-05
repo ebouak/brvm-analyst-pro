@@ -211,7 +211,6 @@ export default async function BacktestPage({ searchParams }: PageProps) {
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* Header */}
       <SectionHeader
-        kicker="BRVM · Simulation de stratégie"
         title="Backtest"
         subtitle="Signal momentum : variation > 2 % → ACHAT · < −2 % → VENTE · sinon CONSERVER"
       />

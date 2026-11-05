@@ -11,7 +11,7 @@ export default async function NewAnalysePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-6 py-8">
       <Link href="/admin/analyses" className="text-sm text-muted hover:text-ivory">← Analyses</Link>
-      <SectionHeader kicker="Administration" title="Nouvelle analyse" subtitle="Créez une page citable — data auto ou éditoriale." />
+      <SectionHeader title="Nouvelle analyse" subtitle="Créez une page citable — data auto ou éditoriale." />
       <CitablePageForm />
     </div>
   );

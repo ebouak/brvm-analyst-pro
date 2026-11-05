@@ -111,7 +111,6 @@ export default async function DividendCalendarPage() {
     <div className="min-h-screen bg-bg">
       <div className={`mx-auto px-4 py-8 space-y-8`}>
         <SectionHeader
-          kicker="Calendrier boursier"
           title="Dividendes"
           subtitle="Calendrier annuel : dates de détachement, montants et rendements estimés."
         />

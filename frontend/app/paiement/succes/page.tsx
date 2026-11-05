@@ -17,7 +17,7 @@ export default function PaiementSuccesPage({ searchParams }: { searchParams: { t
 
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 py-10 sm:px-6">
-      <SectionHeader kicker="Paiement" title="Merci pour votre achat" subtitle="Vérification de la commande auprès de Chariow." />
+      <SectionHeader title="Merci pour votre achat" subtitle="Vérification de la commande auprès de Chariow." />
       {valide ? (
         <SuiviPaiement txn={txn} />
       ) : (

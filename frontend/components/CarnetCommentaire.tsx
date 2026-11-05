@@ -72,7 +72,7 @@ export default function CarnetCommentaire({
   return (
     <section className={compact ? 'space-y-3' : 'mb-6 rounded-xl border border-border bg-surface p-5'}>
       {!compact && (
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">Ce que dit la séance</h2>
+        <h2 className="mb-4 text-sm font-semibold text-muted">Ce que dit la séance</h2>
       )}
 
       {/* La synthèse en tête : le lecteur qui ne lit qu'une ligne lit celle-ci. */}
@@ -89,7 +89,7 @@ export default function CarnetCommentaire({
           const p = PASTILLE[c.origine] ?? PASTILLE.carnet!;
           return (
             <li key={c.fait} className="flex gap-3">
-              <span className={`mt-[3px] h-fit w-[4.75rem] shrink-0 rounded px-1.5 py-0.5 text-center text-[10px] font-semibold uppercase tracking-wide ${p.classe}`}>
+              <span className={`mt-[3px] h-fit w-[4.75rem] shrink-0 rounded px-1.5 py-0.5 text-center text-xs font-semibold ${p.classe}`}>
                 {p.libelle}
               </span>
               <div className="min-w-0 space-y-1">

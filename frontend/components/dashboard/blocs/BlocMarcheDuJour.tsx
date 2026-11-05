@@ -91,7 +91,7 @@ function Porte({ href, rubrique, action, children }: { href: string; rubrique: s
         href={href}
         className="group flex h-full min-h-[44px] flex-col rounded-xl border border-border/60 bg-bg/40 p-3 transition-colors hover:border-accent/40 hover:bg-accent/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
-        <span className="text-[11px] uppercase tracking-wide text-faint">{rubrique}</span>
+        <span className="text-[11px] text-faint">{rubrique}</span>
         <div className="mt-1.5 flex-1">{children}</div>
         <span className="mt-2 text-xs font-semibold text-accent-ink group-hover:underline">
           {action} <span aria-hidden>→</span>

@@ -26,7 +26,7 @@ function RankCircle({ n, direction }: { n: number; direction?: 'up' | 'down' }) 
 function CountryBadge({ pays }: { pays: string | null | undefined }) {
   if (!pays) return null;
   return (
-    <span className="hidden sm:inline-block text-[9px] font-semibold tracking-wider border border-border rounded-sm px-1 py-px text-faint uppercase leading-none">
+    <span className="hidden sm:inline-block text-xs font-semibold border border-border rounded-sm px-1 py-px text-faint leading-none">
       {pays.slice(0, 2)}
     </span>
   );

@@ -172,7 +172,7 @@ function CompanyCard({ instrument }: { instrument: InstrumentNotation }) {
       {/* Expanded history */}
       {expanded && history.length > 0 && (
         <div className="px-4 pb-4 space-y-2 border-t border-border/50 pt-3">
-          <p className="text-[10px] text-faint uppercase tracking-widest mb-2">
+          <p className="text-xs text-faint mb-2">
             Historique des notations · {agence}
           </p>
           {history.map((entry, i) => (
@@ -271,7 +271,7 @@ export default function NotationsGrid({ data }: { data: InstrumentNotation[] }) 
 
       {/* Legend */}
       <div className="bg-surface border border-border rounded-xl p-4">
-        <p className="text-[10px] text-faint uppercase tracking-widest mb-3">Légende des notes</p>
+        <p className="text-xs text-faint mb-3">Légende des notes</p>
         <div className="flex flex-wrap gap-4">
           {[
             { label: 'AAA / AA / AA+', cls: 'text-up',      desc: 'Très haute qualité' },

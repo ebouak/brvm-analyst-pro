@@ -5,7 +5,7 @@ export default function UpgradePage() {
     <div className="max-w-2xl mx-auto py-16 px-6">
       <SignalOffre page="/premium/upgrade" />
       <div className="text-center mb-10">
-        <span className="inline-block px-3 py-1 rounded-full bg-warn/10 text-warn text-xs font-semibold uppercase tracking-widest mb-4">
+        <span className="inline-block px-3 py-1 rounded-full bg-warn/10 text-warn text-xs font-semibold mb-4">
           Premium
         </span>
         <h1 className="text-3xl font-bold text-white mb-3">Accès Premium BRVM</h1>

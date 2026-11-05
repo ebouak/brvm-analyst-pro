@@ -34,7 +34,7 @@ export default async function Page({ params }: { params: { cle: string } }) {
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
       <Link href="/admin/crm" className="text-sm text-muted hover:text-ivory">← Retour au CRM</Link>
-      <SectionHeader kicker="CRM" title={d.nom ?? d.emailNorm} />
+      <SectionHeader title={d.nom ?? d.emailNorm} />
       <FicheProspect d={d} etat={etat} vue={vue} score={score} canWrite={can(ctx, 'crm.write')} responsables={responsables} maintenant={maintenant} reglages={reglages} {...preparerFiche(d, score, maintenant)} />
     </div>
   );

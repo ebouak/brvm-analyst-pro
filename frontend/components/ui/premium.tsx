@@ -1,5 +1,19 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { Hourglass, Inbox, Lock, Pause, Target, type LucideIcon } from 'lucide-react';
+
+/**
+ * Les états vides recevaient un glyphe Unicode (◈ ◇ ✦ ◎…) en guise d'icône —
+ * tic des interfaces générées, retiré le 2026-11-05. Les appels passent encore
+ * une chaîne : elle choisit désormais une icône dessinée (lucide), même trait
+ * partout. Glyphe inconnu → boîte vide.
+ */
+const ICONE_ETAT: Record<string, LucideIcon> = {
+  '✦': Lock,
+  '◎': Target,
+  '⏸': Pause,
+  '⏳': Hourglass,
+};
 
 /* ════════════════════════════════════════════════════════════════════════
    Kit premium — « Maison de marché premium africaine »
@@ -14,40 +28,24 @@ export function Eyebrow({ children, className = '' }: { children: ReactNode; cla
   return <p className={`overline text-gold/70 ${className}`}>{children}</p>;
 }
 
-/* ── SectionHeader : titre de page/section (display) + eyebrow + actions ─── */
-/** Lueur ambiante par section (identité couleur) — placée derrière le titre. */
-const HEADER_GLOW: Record<'cyan' | 'gold' | 'emerald' | 'none', string> = {
-  cyan: 'from-[#56d7fd1f]',
-  gold: 'from-[#d0a2311f]',
-  emerald: 'from-[#3fe18b1a]',
-  none: '',
-};
-
+/* ── SectionHeader : titre de page/section (display) + actions ──────────────
+   Ni surtitre au-dessus du titre, ni lueur floue derrière : deux tics des
+   interfaces générées (retirés le 2026-11-05). Le titre porte seul la page. */
 export function SectionHeader({
-  kicker,
   title,
   subtitle,
   actions,
-  accent = 'cyan',
 }: {
-  kicker?: string;
   title: string;
   subtitle?: string;
   actions?: ReactNode;
-  /** Teinte de la lueur ambiante derrière le titre (identité de section). */
+  /** Ancienne teinte de lueur, sans effet depuis le retrait de la lueur. */
   accent?: 'cyan' | 'gold' | 'emerald' | 'none';
 }) {
   return (
-    <div className="relative">
-      {accent !== 'none' && (
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute -left-6 -top-8 -z-10 h-28 w-[min(28rem,90%)] rounded-full bg-gradient-to-br ${HEADER_GLOW[accent]} to-transparent blur-2xl`}
-        />
-      )}
+    <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          {kicker && <Eyebrow className="mb-2">{kicker}</Eyebrow>}
           <h1 className="font-display text-heading-lg md:text-3xl text-ivory tracking-tight">{title}</h1>
           {subtitle && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>}
         </div>
@@ -168,8 +166,11 @@ export function EmptyStatePremium({
 }) {
   return (
     <div className="rounded-panel border border-border bg-surface p-12 text-center shadow-card">
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-lg text-gold/70">
-        {icon}
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-gold/70">
+        {(() => {
+          const Icone = ICONE_ETAT[icon] ?? Inbox;
+          return <Icone size={20} strokeWidth={1.75} aria-hidden />;
+        })()}
       </div>
       <p className="mt-4 font-display text-base text-ivory">{title}</p>
       {hint && <p className="mt-1.5 text-sm text-muted">{hint}</p>}

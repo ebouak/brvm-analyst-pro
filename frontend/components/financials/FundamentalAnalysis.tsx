@@ -38,7 +38,7 @@ function Row({
 function Bloc({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
-      <h3 className="text-xs text-muted uppercase tracking-wider mb-3">{title}</h3>
+      <h3 className="text-xs text-muted mb-3">{title}</h3>
       <div className="space-y-2">{children}</div>
     </div>
   );

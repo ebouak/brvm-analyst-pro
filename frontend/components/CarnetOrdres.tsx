@@ -65,12 +65,12 @@ export default function CarnetOrdres({ carnet }: { carnet: CarnetRow | null }) {
         <>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs uppercase tracking-wide text-faint">À l&apos;achat</p>
+              <p className="text-xs text-faint">À l&apos;achat</p>
               <p className="tabular text-xl font-semibold text-up">{achat > 0 ? fmtNumber(achat) : '—'}</p>
               <p className="text-xs text-muted">{achat > 0 ? prix(carnet.cours_achat, carnet.achat_au_marche) : 'aucun acheteur'}</p>
             </div>
             <div className="text-right">
-              <p className="text-xs uppercase tracking-wide text-faint">À la vente</p>
+              <p className="text-xs text-faint">À la vente</p>
               <p className="tabular text-xl font-semibold text-down">{vente > 0 ? fmtNumber(vente) : '—'}</p>
               <p className="text-xs text-muted">{vente > 0 ? prix(carnet.cours_vente, carnet.vente_au_marche) : 'aucun vendeur'}</p>
             </div>

@@ -21,7 +21,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         ← Organisations
       </Link>
 
-      <SectionHeader kicker="Administration" title={org.name} subtitle={org.owner_email ? `Propriétaire : ${org.owner_email}` : 'Sans propriétaire désigné'} />
+      <SectionHeader title={org.name} subtitle={org.owner_email ? `Propriétaire : ${org.owner_email}` : 'Sans propriétaire désigné'} />
       <div className="gold-rule" />
 
       <OrgHeader id={org.id} name={org.name} />

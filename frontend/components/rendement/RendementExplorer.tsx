@@ -240,7 +240,7 @@ function Etape({
         strong ? 'border-accent/40 bg-accent/5' : 'border-border/60 bg-bg'
       }`}
     >
-      <p className="text-[10px] uppercase tracking-wide text-faint">{label}</p>
+      <p className="text-xs text-faint">{label}</p>
       <p className={`tabular mt-0.5 text-sm font-semibold ${color}`}>{value}</p>
     </div>
   );

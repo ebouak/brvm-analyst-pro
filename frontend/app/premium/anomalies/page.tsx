@@ -33,7 +33,6 @@ export default async function AnomaliesPage() {
 
       {/* Header */}
       <SectionHeader
-        kicker="Détection d'anomalies · Visuels exclusifs"
         title="Anomalies de marché"
         subtitle="Quatre analyses visuelles pour repérer les valeurs atypiques : dividendes, liquidité, carte de chaleur et valorisation."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
@@ -73,7 +72,7 @@ export default async function AnomaliesPage() {
 
       {/* Signal key */}
       <div className="flex items-center gap-6 px-1">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-faint">Légende</span>
+        <span className="text-xs font-semibold text-faint">Légende</span>
         <span className="flex items-center gap-1.5 text-xs text-up">
           <span className="w-2 h-2 rounded-full bg-up inline-block" />
           Achat

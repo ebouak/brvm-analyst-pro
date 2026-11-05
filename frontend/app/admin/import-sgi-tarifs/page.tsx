@@ -157,7 +157,6 @@ export default function ImportSgiTarifsPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Import tarifs SGI"
         subtitle="Déposez un PDF de barème (décision CREPMF / grille officielle). Analyse par IA vision (Mistral/Grok), garde-fous de plausibilité, écriture dans sgi_frais après revue — jamais un barème hors bornes."
       />

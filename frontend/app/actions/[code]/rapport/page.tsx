@@ -45,7 +45,7 @@ export default async function RapportPage({ params }: Props) {
       {/* En-tête */}
       <div className="flex items-start justify-between mb-5 border-b-2 border-gray-900 pb-3">
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest">WESTBOURSE · Note d&apos;analyse</p>
+          <p className="text-xs text-gray-500">WESTBOURSE · Note d&apos;analyse</p>
           <h1 className="text-2xl font-bold mt-1">{code} — {designation}</h1>
           <p className="text-xs text-gray-500 mt-0.5">{secteur}</p>
         </div>
@@ -58,7 +58,7 @@ export default async function RapportPage({ params }: Props) {
       {/* Synthèse : verdict valorisation + signal */}
       <div className="grid grid-cols-2 gap-4 mb-5">
         <div className="border border-gray-300 rounded p-3">
-          <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Valorisation</p>
+          <p className="text-xs text-gray-500 mb-1">Valorisation</p>
           <p className="text-base font-bold">{valuation ? STANCE_LABEL[valuation.verdict.stance] : '—'}</p>
           {fv?.fairValue != null && valuation?.price != null && (
             <p className="text-xs text-gray-600 mt-1">
@@ -67,7 +67,7 @@ export default async function RapportPage({ params }: Props) {
           )}
         </div>
         <div className="border border-gray-300 rounded p-3">
-          <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Signal quantitatif</p>
+          <p className="text-xs text-gray-500 mb-1">Signal quantitatif</p>
           <p className="text-base font-bold">{signal ? SIGNAL_LABEL[signal.signal] ?? signal.signal : '—'}</p>
           {signal && (
             <p className="text-xs text-gray-600 mt-1">
@@ -79,7 +79,7 @@ export default async function RapportPage({ params }: Props) {
       </div>
 
       {/* Ratios de valorisation */}
-      <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">Valorisation & rentabilité</h2>
+      <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">Valorisation & rentabilité</h2>
       <div className="grid grid-cols-3 gap-3 mb-5 text-sm">
         {([
           ['P/E', fNum(m?.per, 1)],
@@ -96,7 +96,7 @@ export default async function RapportPage({ params }: Props) {
       </div>
 
       {/* Santé financière */}
-      <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">Santé financière</h2>
+      <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">Santé financière</h2>
       <div className="grid grid-cols-2 gap-4 mb-5 text-sm">
         <div className="border border-gray-200 rounded p-3">
           <p className="text-[10px] uppercase text-gray-500">Piotroski F-Score</p>
@@ -117,7 +117,7 @@ export default async function RapportPage({ params }: Props) {
       {/* Lecture du signal */}
       {signal?.explication && (
         <>
-          <h2 className="text-sm font-bold uppercase tracking-wide mb-2 border-b border-gray-300 pb-1">Lecture du signal</h2>
+          <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">Lecture du signal</h2>
           <p className="text-sm text-gray-700 leading-relaxed mb-5">{signal.explication}</p>
         </>
       )}

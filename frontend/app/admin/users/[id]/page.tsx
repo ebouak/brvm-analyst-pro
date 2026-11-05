@@ -27,7 +27,6 @@ export default async function Page({ params }: { params: { id: string } }) {
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
       <Link href="/admin/users" className="text-sm text-muted hover:text-ivory">← Utilisateurs</Link>
       <SectionHeader
-        kicker="Administration"
         title={rights.email ?? params.id}
         subtitle="Droits, statut du compte, accès et actions sensibles."
       />

@@ -55,7 +55,7 @@ export default async function Page({ params, searchParams }: { params: { run: st
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <Link href="/admin/qualite" className="text-xs text-muted hover:text-ivory">← Qualité & Tests</Link>
-      <SectionHeader kicker="Exécution" title={`Passage du ${fmtDate(run.debut_at)}`} subtitle={LIBELLE_VERDICT[verdict]} />
+      <SectionHeader title={`Passage du ${fmtDate(run.debut_at)}`} subtitle={LIBELLE_VERDICT[verdict]} />
       <div className="gold-rule" />
 
       <PremiumPanel className="p-5">
@@ -94,7 +94,7 @@ export default async function Page({ params, searchParams }: { params: { run: st
           <table className="w-full text-sm">
             <caption className="sr-only">Scénarios de l&apos;exécution</caption>
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 <th scope="col" className="px-4 py-3 font-medium">Statut</th>
                 <th scope="col" className="px-4 py-3 font-medium">Module</th>
                 <th scope="col" className="px-4 py-3 font-medium">Scénario</th>

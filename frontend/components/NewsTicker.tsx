@@ -36,7 +36,7 @@ export default async function NewsTicker({ className = '' }: Props) {
       {/* Label fixe */}
       <div className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-border/60 h-full bg-gold/10">
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-gold whitespace-nowrap">
+        <span className="text-xs font-semibold text-gold whitespace-nowrap">
           Actualités
         </span>
       </div>

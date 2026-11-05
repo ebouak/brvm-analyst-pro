@@ -90,7 +90,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
           if (series.length === 0) return null;
           return (
             <fieldset key={g} className="min-w-[10rem]">
-              <legend className="text-[10px] uppercase tracking-wider text-faint mb-1">{g}</legend>
+              <legend className="text-xs text-faint mb-1">{g}</legend>
               <div className="flex flex-wrap gap-1.5">
                 {series.map((s) => {
                   const coche = selection.includes(s.id);

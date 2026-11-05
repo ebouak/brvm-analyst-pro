@@ -212,7 +212,7 @@ export default function BudgetSimulator({
             ['Actions dispo.', String(univers.length), 'accent'],
           ].map(([l, v, tone]) => (
             <div key={l} className="min-w-[120px]">
-              <dt className="font-mono text-[10.5px] uppercase tracking-wide text-faint">{l}</dt>
+              <dt className="font-mono text-xs text-faint">{l}</dt>
               <dd className={`mt-1 font-mono text-lg ${tone === 'accent' ? 'text-accent' : 'text-ivory'}`}>{v}</dd>
             </div>
           ))}
@@ -243,7 +243,7 @@ export default function BudgetSimulator({
                 <div className="mb-1 flex items-center justify-between gap-3">
                   <h3 className="font-display text-xl text-ivory">{meta.nom}</h3>
                   <span
-                    className={`flex-none rounded-md border px-2 py-1 font-mono text-[9.5px] uppercase tracking-wide ${
+                    className={`flex-none rounded-md border px-2 py-1 font-mono text-xs ${
                       isBest
                         ? 'border-accent/30 bg-accent/10 text-accent'
                         : meta.reco
@@ -260,7 +260,7 @@ export default function BudgetSimulator({
                   {kpis.map((k) => (
                     <div key={k.label} className="bg-bg p-3">
                       <div className={`font-mono text-[15px] ${toneClass(k.tone)}`}>{k.value}</div>
-                      <div className="mt-1 text-[10.5px] uppercase tracking-wide text-faint">{k.label}</div>
+                      <div className="mt-1 text-xs text-faint">{k.label}</div>
                     </div>
                   ))}
                 </div>
@@ -275,19 +275,19 @@ export default function BudgetSimulator({
                   <table className="mt-auto w-full border-collapse text-[12.5px]">
                     <thead>
                       <tr className="text-faint">
-                        <th className="border-b border-border/70 pb-2 text-left font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-left font-mono text-[9.5px] font-medium">
                           Action
                         </th>
-                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium">
                           Cours
                         </th>
-                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium">
                           Qté
                         </th>
-                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium">
                           Montant
                         </th>
-                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium uppercase tracking-wide">
+                        <th className="border-b border-border/70 pb-2 text-right font-mono text-[9.5px] font-medium">
                           Part
                         </th>
                       </tr>

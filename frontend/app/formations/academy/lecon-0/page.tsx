@@ -54,7 +54,6 @@ export default function Lecon0Page() {
         ← Formations
       </Link>
       <SectionHeader
-        kicker="Académie · Leçon 0 · gratuite"
         title={LECON0.titre}
         subtitle={LECON0.resume}
       />
@@ -93,7 +92,7 @@ export default function Lecon0Page() {
             <ol className="mt-3 space-y-4">
               {FAMILLES.map((f) => (
                 <li key={f.numero}>
-                  <p className="text-xs uppercase tracking-widest text-accent">{f.numero} · {f.nom}</p>
+                  <h3 className="text-sm font-semibold text-ivory">{f.nom}</h3>
                   <ul className="mt-2 space-y-2">
                     {f.acteurs.map((a) => (
                       <li key={a.sigle} className="text-sm leading-relaxed">

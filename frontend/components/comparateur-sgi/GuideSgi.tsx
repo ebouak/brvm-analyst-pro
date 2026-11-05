@@ -22,7 +22,6 @@ const FAQ: { q: string; r: string; open?: boolean }[] = [
 export function CriteresSgi() {
   return (
     <section aria-labelledby="titre-criteres">
-      <p className="overline mb-2 text-gold-2">Méthode</p>
       <h2 id="titre-criteres" className="mb-1 font-display text-xl text-ivory">Six critères pour décider</h2>
       <p className="mb-5 max-w-[64ch] text-sm leading-relaxed text-muted">
         Au-delà du nom, ce sont ces points qui font la différence à l&apos;usage. Posez-les en questions directes à
@@ -46,7 +45,6 @@ export function CriteresSgi() {
 export function FaqSgi() {
   return (
     <section aria-labelledby="titre-faq">
-      <p className="overline mb-2 text-gold-2">Questions fréquentes</p>
       <h2 id="titre-faq" className="mb-4 font-display text-xl text-ivory">Avant d&apos;ouvrir un compte</h2>
       <div className="border-t border-border">
         {FAQ.map((f) => (

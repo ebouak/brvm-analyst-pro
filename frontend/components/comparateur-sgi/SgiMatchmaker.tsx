@@ -190,7 +190,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                   }`}
                 >
                   <span aria-hidden className={`grid h-4 w-4 place-items-center rounded border text-[10px] ${actif ? 'border-accent bg-accent text-bg' : 'border-border'}`}>
-                    {actif ? '✓' : ''}
+                    {actif && <Check size={11} strokeWidth={3} />}
                   </span>
                   {label}
                 </button>
@@ -215,7 +215,6 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
 
   return (
     <section id="moteur-sgi" className="scroll-mt-24 rounded-panel border border-accent/25 bg-accent/[0.04] p-6 md:p-8">
-      <p className="overline mb-2 text-gold-2">Questionnaire en 5 étapes</p>
       <h2 className="mb-1 font-display text-2xl text-ivory [letter-spacing:-0.03em]">
         Quelle SGI est faite pour vous ?
       </h2>
@@ -385,10 +384,10 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border text-left">
-                        <th className="py-2 pr-3 font-mono text-[10px] uppercase tracking-wider text-faint">#</th>
-                        <th className="py-2 pr-3 font-mono text-[10px] uppercase tracking-wider text-faint">SGI</th>
-                        <th className="py-2 pr-3 text-right font-mono text-[10px] uppercase tracking-wider text-faint">Score</th>
-                        <th className="hidden py-2 text-right font-mono text-[10px] uppercase tracking-wider text-faint sm:table-cell">Coût/an estimé</th>
+                        <th className="py-2 pr-3 font-mono text-xs text-faint">#</th>
+                        <th className="py-2 pr-3 font-mono text-xs text-faint">SGI</th>
+                        <th className="py-2 pr-3 text-right font-mono text-xs text-faint">Score</th>
+                        <th className="hidden py-2 text-right font-mono text-xs text-faint sm:table-cell">Coût/an estimé</th>
                       </tr>
                     </thead>
                     <tbody>

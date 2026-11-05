@@ -60,7 +60,7 @@ export default async function Page() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader kicker="Compte" title="Facturation" subtitle="Historique de vos transactions." />
+      <SectionHeader title="Facturation" subtitle="Historique de vos transactions." />
       <div className="gold-rule" />
 
       {txns.length === 0 ? (
@@ -69,7 +69,7 @@ export default async function Page() {
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Référence</th>
                 <th className="px-4 py-3 font-medium text-right">Montant</th>

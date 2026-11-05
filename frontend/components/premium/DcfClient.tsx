@@ -115,7 +115,7 @@ export default function DcfClient({
       <div className="rounded-xl border border-border bg-surface p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted">
+            <p className="text-xs text-muted">
               {isRange ? 'Fourchette de juste-valeur (DCF)' : 'Juste-valeur estimée (DCF)'}
             </p>
             <p className="mt-1 text-3xl font-semibold tabular text-white">
@@ -134,7 +134,7 @@ export default function DcfClient({
             )}
           </div>
           <div className="text-right">
-            <p className="text-xs uppercase tracking-wider text-muted">Potentiel</p>
+            <p className="text-xs text-muted">Potentiel</p>
             {isRange ? (
               <p className="text-2xl font-semibold tabular text-white">
                 {pct(upsideLo, 0, true)} … {pct(upsideHi, 0, true)}

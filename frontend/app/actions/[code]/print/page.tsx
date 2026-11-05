@@ -52,7 +52,7 @@ export default async function PrintPage({ params }: Props) {
       <PrintTrigger />
       <div className="flex items-start justify-between mb-6 border-b pb-4">
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-widest">WESTBOURSE</p>
+          <p className="text-xs text-gray-500">WESTBOURSE</p>
           <h1 className="text-2xl font-bold mt-1">{code} — {data.instrument.designation ?? code}</h1>
           <p className="text-sm text-gray-500 mt-0.5">{data.instrument.secteur ?? ''}</p>
         </div>

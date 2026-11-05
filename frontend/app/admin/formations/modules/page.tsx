@@ -22,7 +22,6 @@ export default async function Page() {
       </div>
 
       <SectionHeader
-        kicker="Académie"
         title="Modules vidéo interactifs"
         subtitle="Créez des cours en vidéo. Collez simplement le lien YouTube/Vimeo (ou une URL .mp4) — l'identifiant est extrait automatiquement."
       />

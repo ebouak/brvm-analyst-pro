@@ -73,7 +73,7 @@ const STATUTS: Record<StatutAgenda, { libelle: string; classe: string }> = {
 
 export function PastilleStatut({ statut }: { statut: StatutAgenda }) {
   const s = STATUTS[statut];
-  return <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${s.classe}`}>{s.libelle}</span>;
+  return <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${s.classe}`}>{s.libelle}</span>;
 }
 
 /** Pastille neutre (type de publication, « Détenue »…). */

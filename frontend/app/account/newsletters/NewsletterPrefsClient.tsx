@@ -86,7 +86,7 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       {/* Header */}
       <div>
-        <p className="text-xs font-medium tracking-widest uppercase text-[#56d7fd]/70 mb-2">
+        <p className="text-xs font-medium text-[#56d7fd]/70 mb-2">
           Compte
         </p>
         <h1 className="font-display text-2xl md:text-3xl text-[#FCFCFC] tracking-tight">

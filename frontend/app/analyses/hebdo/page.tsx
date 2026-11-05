@@ -21,7 +21,6 @@ export default async function HebdoIndexPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-10">
       <SectionHeader
-        kicker="Analyses"
         title="Analyses hebdomadaires"
         subtitle="Les valeurs BRVM en vue chaque semaine, en hausse comme en baisse."
       />

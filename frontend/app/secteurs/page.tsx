@@ -130,7 +130,6 @@ export default async function SecteursPage() {
         {/* ── En-tête ─────────────────────────────────────────────────────── */}
         <div className="animate-rise-in">
           <SectionHeader
-            kicker="BRVM · Analyse sectorielle"
             title="Performance sectorielle"
             subtitle={
               lastDate

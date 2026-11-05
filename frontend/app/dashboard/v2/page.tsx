@@ -456,7 +456,7 @@ export default async function DashboardV2() {
         </h1>
         <Link
           href="/dashboard"
-          className="v2-tab text-[11px] uppercase tracking-[0.16em] text-muted underline underline-offset-4 hover:text-ivory"
+          className="v2-tab text-[11px] text-muted underline underline-offset-4 hover:text-ivory"
         >
           Version actuelle →
         </Link>
@@ -591,7 +591,7 @@ export default async function DashboardV2() {
 
       {/* ---- dispersion --------------------------------------------------- */}
       <section className="pt-7" aria-labelledby="v2-t-disp">
-        <h2 id="v2-t-disp" className="v2-tab text-[11px] uppercase tracking-[0.22em] text-muted">
+        <h2 id="v2-t-disp" className="v2-tab text-[11px] text-muted">
           Toute la cote sur un seul axe
         </h2>
         <p className="mt-1 max-w-[78ch] text-[12.5px] italic text-faint">
@@ -605,7 +605,7 @@ export default async function DashboardV2() {
 
       {/* ---- indices sur le même axe -------------------------------------- */}
       <section className="pt-9" aria-labelledby="v2-t-ind">
-        <h2 id="v2-t-ind" className="v2-tab text-[11px] uppercase tracking-[0.22em] text-muted">
+        <h2 id="v2-t-ind" className="v2-tab text-[11px] text-muted">
           Les indices, sur le même axe
         </h2>
         <p className="mt-1 max-w-[78ch] text-[12.5px] italic text-faint">
@@ -648,7 +648,7 @@ export default async function DashboardV2() {
 
       {/* ---- trajectoire --------------------------------------------------- */}
       <section className="pt-9" aria-labelledby="v2-t-traj">
-        <h2 id="v2-t-traj" className="v2-tab text-[11px] uppercase tracking-[0.22em] text-muted">
+        <h2 id="v2-t-traj" className="v2-tab text-[11px] text-muted">
           Trajectoire des indices
         </h2>
         <p className="mt-1 max-w-[78ch] text-[12.5px] italic text-faint">
@@ -661,7 +661,7 @@ export default async function DashboardV2() {
 
       {/* ---- portefeuille -------------------------------------------------- */}
       <section className="pt-9" aria-labelledby="v2-t-pf">
-        <h2 id="v2-t-pf" className="v2-tab text-[11px] uppercase tracking-[0.22em] text-muted">
+        <h2 id="v2-t-pf" className="v2-tab text-[11px] text-muted">
           Mon portefeuille
         </h2>
         <p className="mt-1 max-w-[78ch] text-[12.5px] italic text-faint">

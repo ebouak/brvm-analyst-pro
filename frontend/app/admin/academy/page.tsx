@@ -14,7 +14,6 @@ export default async function Page() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        kicker="Académie · IA"
         title="Cours générés par IA"
         subtitle="Générez un cours complet (leçons + QCM) par IA, relisez, puis publiez sur /formations/academy."
       />

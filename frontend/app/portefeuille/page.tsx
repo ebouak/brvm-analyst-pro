@@ -222,7 +222,6 @@ export default async function PortefeuillePage({
       <div className="max-w-7xl mx-auto px-6 pt-8 pb-6">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <SectionHeader
-            kicker="Gestion patrimoniale"
             title="Mon portefeuille"
             subtitle="Valorisation au dernier cours, plus-values latentes et suivi de vos positions."
           />
@@ -364,17 +363,17 @@ export default async function PortefeuillePage({
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-border/60">
-                          <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-faint font-semibold">Titre</th>
-                          <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-faint font-semibold">Secteur</th>
-                          <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold">Qté</th>
-                          <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold" title="Prix de Revient Unitaire">PRU</th>
-                          <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold hidden sm:table-cell">30j</th>
-                          <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold" title="Dernier cours connu">Cours</th>
-                          <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold hidden md:table-cell" title="Date d'achat">Entrée</th>
-                          <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold hidden md:table-cell" title="Date du dernier cours">Date cours</th>
-                          <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold">Valorisation</th>
-                          <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold">P&L latent</th>
-                          <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold">—</th>
+                          <th className="px-4 py-3 text-left text-xs text-faint font-semibold">Titre</th>
+                          <th className="px-4 py-3 text-left text-xs text-faint font-semibold">Secteur</th>
+                          <th className="px-4 py-3 text-right text-xs text-faint font-semibold">Qté</th>
+                          <th className="px-4 py-3 text-right text-xs text-faint font-semibold" title="Prix de Revient Unitaire">PRU</th>
+                          <th className="px-4 py-3 text-center text-xs text-faint font-semibold hidden sm:table-cell">30j</th>
+                          <th className="px-4 py-3 text-right text-xs text-faint font-semibold" title="Dernier cours connu">Cours</th>
+                          <th className="px-4 py-3 text-center text-xs text-faint font-semibold hidden md:table-cell" title="Date d'achat">Entrée</th>
+                          <th className="px-4 py-3 text-center text-xs text-faint font-semibold hidden md:table-cell" title="Date du dernier cours">Date cours</th>
+                          <th className="px-4 py-3 text-right text-xs text-faint font-semibold">Valorisation</th>
+                          <th className="px-4 py-3 text-right text-xs text-faint font-semibold">P&L latent</th>
+                          <th className="px-4 py-3 text-center text-xs text-faint font-semibold">—</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -436,7 +435,7 @@ export default async function PortefeuillePage({
                         {/* Ligne TOTAL */}
                         {(rows.length > 0 || liquidites != null) && (
                           <tr className="border-t border-border-strong bg-elevated/50">
-                            <td className="px-4 py-3 text-[10px] uppercase tracking-widest text-faint font-semibold" colSpan={8}>
+                            <td className="px-4 py-3 text-xs text-faint font-semibold" colSpan={8}>
                               Total portefeuille
                             </td>
                             <td className="px-4 py-3 text-right tabular text-ivory font-bold">{fmtFcfa(totalValue)}</td>
@@ -482,7 +481,7 @@ export default async function PortefeuillePage({
                   >
                     <span>{w.nom}</span>
                     {w.is_default && (
-                      <span className="text-[9px] uppercase tracking-widest text-gold/60">Défaut</span>
+                      <span className="text-xs text-gold/60">Défaut</span>
                     )}
                   </Link>
                 ))}
@@ -504,7 +503,7 @@ export default async function PortefeuillePage({
               {/* Items de la watchlist */}
               <PremiumPanel>
                 <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-widest text-faint font-semibold">Titres suivis</span>
+                  <span className="text-xs text-faint font-semibold">Titres suivis</span>
                   <StatPill tone="neutral">{items.length}</StatPill>
                 </div>
                 {items.length === 0 ? (
@@ -568,9 +567,9 @@ export default async function PortefeuillePage({
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border/60">
-                        <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-faint font-semibold">Secteur</th>
-                        <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold">Valeur FCFA</th>
-                        <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold">Poids</th>
+                        <th className="px-4 py-3 text-left text-xs text-faint font-semibold">Secteur</th>
+                        <th className="px-4 py-3 text-right text-xs text-faint font-semibold">Valeur FCFA</th>
+                        <th className="px-4 py-3 text-right text-xs text-faint font-semibold">Poids</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -592,7 +591,7 @@ export default async function PortefeuillePage({
                         </tr>
                       ))}
                       <tr className="border-t border-border-strong bg-elevated/40">
-                        <td className="px-4 py-3 text-[10px] uppercase tracking-widest text-faint font-semibold">Total</td>
+                        <td className="px-4 py-3 text-xs text-faint font-semibold">Total</td>
                         <td className="px-4 py-3 text-right tabular text-ivory font-semibold">{fmtFcfa(totalValue)}</td>
                         <td className="px-4 py-3 text-right tabular text-xs text-muted">100,0%</td>
                       </tr>
@@ -625,11 +624,11 @@ export default async function PortefeuillePage({
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border/60">
-                        <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-faint font-semibold">Titre</th>
-                        <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-faint font-semibold">Type</th>
-                        <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-faint font-semibold">Seuil</th>
-                        <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold">Statut</th>
-                        <th className="px-4 py-3 text-center text-[10px] uppercase tracking-widest text-faint font-semibold">—</th>
+                        <th className="px-4 py-3 text-left text-xs text-faint font-semibold">Titre</th>
+                        <th className="px-4 py-3 text-left text-xs text-faint font-semibold">Type</th>
+                        <th className="px-4 py-3 text-right text-xs text-faint font-semibold">Seuil</th>
+                        <th className="px-4 py-3 text-center text-xs text-faint font-semibold">Statut</th>
+                        <th className="px-4 py-3 text-center text-xs text-faint font-semibold">—</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -58,7 +58,7 @@ export function CarteRecommandee({
     <div className="rounded-panel border border-up/25 bg-gradient-to-br from-up/10 to-transparent p-5 md:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <span className="mb-2 inline-block rounded-full bg-up px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-bg">
+          <span className="mb-2 inline-block rounded-full bg-up px-2.5 py-0.5 text-xs font-bold text-bg">
             La moins chère pour votre scénario
           </span>
           <AnimatePresence mode="wait" initial={false}>

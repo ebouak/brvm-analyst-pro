@@ -160,7 +160,7 @@ export function FundamentalsPreview({
           <span className="min-w-0">
             <span className="font-mono text-lg font-bold text-ivory">{data.code}</span>
             {data.nom && (
-              <span className="ml-2 text-[11px] uppercase tracking-wide text-faint">{data.nom}</span>
+              <span className="ml-2 text-[11px] text-faint">{data.nom}</span>
             )}
           </span>
           <span className="tabular shrink-0 text-xs text-muted">

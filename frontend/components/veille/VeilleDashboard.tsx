@@ -159,7 +159,7 @@ function MatieresView({ news }: { news: VeilleNews[] }) {
     <div className="space-y-4">
       {items.map(([mat, arts]) => (
         <div key={mat}>
-          <p className="text-xs font-bold uppercase tracking-widest text-accent mb-2">
+          <p className="text-xs font-bold text-accent mb-2">
             {mat.replace(/_/g, ' ')} ({arts.length})
           </p>
           <div className="space-y-2">
@@ -361,7 +361,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
     <div className="space-y-4">
       {/* Sélecteur de période */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-muted uppercase tracking-widest">Période :</span>
+        <span className="text-xs text-muted">Période :</span>
         {PERIODS.map((p) => (
           <button
             key={p.val}
@@ -384,12 +384,12 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
         {/* ARTICLES — reset filtres */}
         <button type="button" onClick={reset}
           className="bg-surface border border-border rounded-lg p-3 text-center cursor-pointer hover:border-accent/40 transition-colors">
-          <p className="text-[9px] uppercase tracking-widest text-muted">{period === 365 ? 'ARTICLES 1 AN' : `ARTICLES ${period}J`}</p>
+          <p className="text-xs text-muted">{period === 365 ? 'ARTICLES 1 AN' : `ARTICLES ${period}J`}</p>
           <p className="text-xl font-bold tabular mt-0.5 text-foreground">{stats.total}</p>
         </button>
         {/* AUJOURD'HUI — non filtrable */}
         <div className="bg-surface border border-border rounded-lg p-3 text-center" title="Articles publiés aujourd'hui">
-          <p className="text-[9px] uppercase tracking-widest text-muted">AUJOURD'HUI</p>
+          <p className="text-xs text-muted">AUJOURD'HUI</p>
           <p className="text-xl font-bold tabular mt-0.5 text-[#3fe18b]">{stats.today}</p>
         </div>
         {/* ALERTES — filtrable */}
@@ -399,18 +399,18 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
             activeStatFilter === 'alertes' ? 'border-[#ff6b6b] ring-1 ring-[#ff6b6b]/40' : 'border-border'
           }`}
           title="Filtrer par articles en alerte">
-          <p className="text-[9px] uppercase tracking-widest text-muted">ALERTES</p>
+          <p className="text-xs text-muted">ALERTES</p>
           <p className="text-xl font-bold tabular mt-0.5 text-[#ff6b6b]">{stats.alertes}</p>
         </button>
         {/* COUVERTS — non filtrable */}
         <div className="bg-surface border border-border rounded-lg p-3 text-center" title={`${stats.covered} tickers BRVM couverts sur la période`}>
-          <p className="text-[9px] uppercase tracking-widest text-muted">COUVERTS</p>
+          <p className="text-xs text-muted">COUVERTS</p>
           <p className="text-xl font-bold tabular mt-0.5 text-accent">{stats.covered}/{BRVM_TOTAL_TICKERS}</p>
         </div>
         {/* SANS ACTU — non filtrable, compteur informatif */}
         <div className="bg-surface border border-border rounded-lg p-3 text-center"
           title={`${BRVM_TOTAL_TICKERS - stats.covered} valeurs BRVM sans aucun article sur la période`}>
-          <p className="text-[9px] uppercase tracking-widest text-muted">SANS ACTU</p>
+          <p className="text-xs text-muted">SANS ACTU</p>
           <p className="text-xl font-bold tabular mt-0.5 text-[#f59e0b]">{BRVM_TOTAL_TICKERS - stats.covered}</p>
         </div>
         {/* G.NEWS — filtrable */}
@@ -420,7 +420,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
             activeStatFilter === 'gnews' ? 'border-[#56d7fd] ring-1 ring-[#56d7fd]/40' : 'border-border'
           }`}
           title="Filtrer par sources Google News">
-          <p className="text-[9px] uppercase tracking-widest text-muted">G.NEWS</p>
+          <p className="text-xs text-muted">G.NEWS</p>
           <p className="text-xl font-bold tabular mt-0.5 text-[#56d7fd]">{stats.gnews}</p>
         </button>
         {/* SITES OFF. — filtrable */}
@@ -430,14 +430,14 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
             activeStatFilter === 'sites_off' ? 'border-[#c77dff] ring-1 ring-[#c77dff]/40' : 'border-border'
           }`}
           title="Filtrer par sites officiels et institutions">
-          <p className="text-[9px] uppercase tracking-widest text-muted">SITES OFF.</p>
+          <p className="text-xs text-muted">SITES OFF.</p>
           <p className="text-xl font-bold tabular mt-0.5 text-[#c77dff]">{stats.sitesOff}</p>
         </button>
         {/* MATIÈRES — non filtrable (vue dédiée) */}
         <button type="button" onClick={() => setView('matieres')}
           className="bg-surface border border-border rounded-lg p-3 text-center cursor-pointer hover:border-[#ffd166]/40 transition-colors"
           title="Voir la vue Matières premières">
-          <p className="text-[9px] uppercase tracking-widest text-muted">MATIÈRES</p>
+          <p className="text-xs text-muted">MATIÈRES</p>
           <p className="text-xl font-bold tabular mt-0.5 text-[#ffd166]">{stats.matieres}</p>
         </button>
       </div>
@@ -517,7 +517,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
         {/* Sidebar */}
         <div className="w-48 shrink-0 space-y-4">
           <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5">
-            <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Vues</p>
+            <p className="text-xs text-muted mb-2 px-1">Vues</p>
             {VIEWS.map((v) => (
               <button
                 key={v.id}
@@ -542,7 +542,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
 
           {sidebarSources.length > 0 && (
             <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5" id="top-sources-section">
-              <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Top Sources</p>
+              <p className="text-xs text-muted mb-2 px-1">Top Sources</p>
               {sidebarSources.map(([name, count]) => {
                 const isActive = sourceFilter === name;
                 const colorCls = sourceColorClass(name);
@@ -575,7 +575,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
 
           {secteurs.length > 0 && (
             <div className="bg-surface border border-border rounded-xl p-3 space-y-0.5">
-              <p className="text-[10px] uppercase tracking-widest text-muted mb-2 px-1">Secteurs</p>
+              <p className="text-xs text-muted mb-2 px-1">Secteurs</p>
               {secteurs.slice(0, 10).map((s) => (
                 <button
                   key={s.secteur}
@@ -608,7 +608,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
           {/* Alertes critiques */}
           {view === 'flux' && alertesCritiques.length > 0 && !showAlertes && (
             <div className="bg-[#ff6b6b]/5 border border-[#ff6b6b]/30 rounded-xl p-3 space-y-2">
-              <p className="text-xs font-bold text-[#ff6b6b] uppercase tracking-widest">
+              <p className="text-xs font-bold text-[#ff6b6b]">
                 Alertes critiques ({stats.alertes})
               </p>
               {alertesCritiques.map((n) => (

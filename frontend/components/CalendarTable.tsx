@@ -49,7 +49,7 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
     <th
       key={key}
       onClick={() => toggleSort(key)}
-      className="px-3 py-2 text-xs font-medium text-muted uppercase tracking-wide cursor-pointer hover:text-white whitespace-nowrap select-none"
+      className="px-3 py-2 text-xs font-medium text-muted cursor-pointer hover:text-white whitespace-nowrap select-none"
     >
       {label}
       {sortKey === key && <span className="ml-1">{sortDir === 1 ? '↑' : '↓'}</span>}
@@ -65,7 +65,7 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
             {th('kind', 'Type')}
             {th('code', 'Code')}
             {th('societe', 'Société')}
-            <th className="px-3 py-2 text-xs font-medium text-muted uppercase tracking-wide text-left">Détail</th>
+            <th className="px-3 py-2 text-xs font-medium text-muted text-left">Détail</th>
             {th('pays', 'Pays')}
             <th className="px-3 py-2 w-8" />
           </tr>

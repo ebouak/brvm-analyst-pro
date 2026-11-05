@@ -49,7 +49,7 @@ export default async function ValorisationSecteurs() {
             Médianes du PER, du PBR et du rendement du dividende par secteur, avec le nombre de sociétés retenues.
           </caption>
           <thead>
-            <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
+            <tr className="border-b border-border text-left text-xs text-muted">
               <th scope="col" className="px-4 py-3 font-medium">Secteur</th>
               <th scope="col" className="px-4 py-3 font-medium">Retenues</th>
               <th scope="col" className="px-4 py-3 font-medium">PER médian</th>

@@ -13,7 +13,7 @@ export default async function Page() {
 
   return (
     <div className="space-y-6">
-      <SectionHeader kicker="Académie" title="Formations & conférences"
+      <SectionHeader title="Formations & conférences"
         subtitle="Créez et publiez les contenus de l'espace Premium /formations." />
       <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
         <MetricCard label="Total" value={String(kpis.total)} />

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Check } from 'lucide-react';
 import type { LearnData, LessonState } from '@/lib/academy/learn';
 import { markLessonDone, saveQuizResult, saveNote } from '@/app/formations/academy/actions';
 import { courseProgress } from '@/lib/academy/progressCalc';
@@ -244,7 +245,7 @@ function Sommaire({
         return (
           <li key={i}>
             {showModule && (
-              <p className="mb-1 mt-3 px-1 text-[10px] font-semibold uppercase tracking-wide text-faint first:mt-0">
+              <p className="mb-1 mt-3 px-1 text-xs font-semibold text-faint first:mt-0">
                 {l.module}
               </p>
             )}
@@ -264,7 +265,7 @@ function Sommaire({
                   st?.completed ? 'bg-up/20 text-up' : 'border border-border text-faint'
                 }`}
               >
-                {st?.completed ? '✓' : i + 1}
+                {st?.completed ? <Check size={13} strokeWidth={2.5} aria-label="Terminée" /> : i + 1}
               </span>
               <span className="min-w-0">
                 <span className="block truncate">{l.titre}</span>

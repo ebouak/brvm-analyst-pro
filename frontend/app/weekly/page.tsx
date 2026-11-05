@@ -155,7 +155,7 @@ export default async function WeeklyPage() {
         <div className="flex-1 bg-surface p-5 flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-accent/70">Référentiel stratégique</span>
+              <span className="text-xs font-mono text-accent/70">Référentiel stratégique</span>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">permanent</span>
             </div>
             <h2 className="font-semibold text-ivory group-hover:text-accent transition-colors">

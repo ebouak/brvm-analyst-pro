@@ -135,7 +135,7 @@ export default function CompaniesExplorer({ companies }: { companies: CompanyCar
       ) : (
         [...bySector.entries()].map(([sector, list]) => (
           <section key={sector} className="mb-8">
-            <h2 className="text-sm text-muted uppercase tracking-wide mb-3">{sector}</h2>
+            <h2 className="text-sm text-muted mb-3">{sector}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {list.map((c) => {
                 const positive = (c.variation_pct ?? 0) >= 0;

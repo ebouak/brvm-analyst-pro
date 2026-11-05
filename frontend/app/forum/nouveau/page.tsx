@@ -14,7 +14,7 @@ export default async function NewTopicPage({ searchParams }: { searchParams?: { 
   const initialCode = searchParams?.code?.toUpperCase() ?? '';
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <SectionHeader kicker="Communauté" title="Nouveau sujet" subtitle="Partagez une analyse ou posez une question." />
+      <SectionHeader title="Nouveau sujet" subtitle="Partagez une analyse ou posez une question." />
       <ForumNewTopicForm instruments={instruments ?? []} initialCode={initialCode} />
     </div>
   );

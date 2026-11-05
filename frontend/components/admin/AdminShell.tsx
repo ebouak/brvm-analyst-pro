@@ -75,7 +75,7 @@ export function AdminShell({
           <div className="flex items-center gap-3">
             <span className="hidden text-xs text-muted sm:inline">{email}</span>
             {roles.length > 0 && (
-              <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+              <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
                 {roles.includes('super_admin') ? 'super admin' : roles[0]}
               </span>
             )}

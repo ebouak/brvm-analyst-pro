@@ -15,7 +15,7 @@ export default async function ForumPage({ searchParams }: { searchParams?: { cod
   const nouveauHref = code ? `/forum/nouveau?code=${code}` : '/forum/nouveau';
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <SectionHeader kicker="Communauté" title={code ? `Forum · ${code}` : 'Forum'}
+      <SectionHeader title={code ? `Forum · ${code}` : 'Forum'}
         subtitle={code ? `Discussions sur la valeur ${code}.` : 'Échangez sur les actions, obligations et événements de la BRVM.'}
         actions={user ? <Link href={nouveauHref} className="rounded-lg bg-info px-4 py-2 text-sm font-medium text-bg">Nouveau sujet</Link> : null} />
       {code && (

@@ -77,7 +77,7 @@ export default function PatternSummaryWidget() {
 
         {/* By pattern type */}
         <div className="border-t border-border/40 pt-3">
-          <p className="text-xs text-muted mb-2 font-semibold uppercase tracking-wide">Par Type</p>
+          <p className="text-xs text-muted mb-2 font-semibold">Par Type</p>
           <div className="space-y-2">
             {momentumCount > 0 && (
               <div className="flex justify-between items-center text-sm">
@@ -114,7 +114,7 @@ export default function PatternSummaryWidget() {
 
         {/* By confidence */}
         <div className="border-t border-border/40 pt-3">
-          <p className="text-xs text-muted mb-2 font-semibold uppercase tracking-wide">Confiance</p>
+          <p className="text-xs text-muted mb-2 font-semibold">Confiance</p>
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center gap-2">
               <span className="text-up text-xs">✓</span>

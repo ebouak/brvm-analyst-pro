@@ -24,7 +24,6 @@ export default async function Page() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Tour de contrôle"
         subtitle="Ce qui part, ce qui tourne, ce qui est à jour — jugé sur la donnée produite, pas sur la couleur des runs."
       />
@@ -172,7 +171,7 @@ async function Contenu() {
 function ListeDecisions({ titre, vide, signaux }: { titre: string; vide: string; signaux: Signal[] }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-faint">{titre}</p>
+      <p className="text-xs font-semibold text-faint">{titre}</p>
       {signaux.length === 0 ? (
         <p className="mt-1.5 text-sm text-muted">{vide}</p>
       ) : (
@@ -200,7 +199,7 @@ function Carte({ s, maintenant }: { s: Signal; maintenant: Date }) {
         <p className="text-sm font-medium text-ivory">
           {s.titre}
           {s.preuve && s.preuve !== 'verifiee' && (
-            <span className="ml-2 rounded border border-warn/30 px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-warn">
+            <span className="ml-2 rounded border border-warn/30 px-1.5 py-0.5 text-xs font-normal text-warn">
               Preuve {s.preuve === 'partielle' ? 'partielle' : 'inconnue'}
             </span>
           )}

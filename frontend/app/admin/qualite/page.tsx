@@ -23,7 +23,6 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Qualité & Tests"
         subtitle="Résultats des tests de bout en bout (Playwright) publiés par la CI. Lecture seule : les exécutions se lancent depuis GitHub Actions."
       />
@@ -95,7 +94,7 @@ async function Contenu({ params }: { params: Params }) {
           <table className="w-full text-sm">
             <caption className="sr-only">Historique des exécutions de tests</caption>
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 <th scope="col" className="px-4 py-3 font-medium">Début</th>
                 <th scope="col" className="px-4 py-3 font-medium">Verdict</th>
                 <th scope="col" className="px-4 py-3 font-medium">Env.</th>

@@ -64,7 +64,7 @@ function Tableau({ tete, droite = [], children }: { tete: string[]; droite?: num
         <thead>
           <tr className="border-b border-border bg-surface">
             {tete.map((t, i) => (
-              <th key={t} scope="col" className={`px-3 py-2.5 text-xs font-medium uppercase tracking-wide text-faint ${droite.includes(i) ? 'text-right' : ''}`}>
+              <th key={t} scope="col" className={`px-3 py-2.5 text-xs font-medium text-faint ${droite.includes(i) ? 'text-right' : ''}`}>
                 {t}
               </th>
             ))}
@@ -83,7 +83,7 @@ function StatsBar({ stats }: { stats: Stat[] }) {
     <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
       {stats.map((s) => (
         <div key={s.label} className={`${carte} p-4`}>
-          <dt className="text-xs uppercase tracking-wide text-faint">{s.label}</dt>
+          <dt className="text-xs text-faint">{s.label}</dt>
           <dd className="tabular mt-1 text-[clamp(1.25rem,2.2vw,1.5rem)] text-white">{s.valeur}</dd>
           {s.sous ? <dd className={`tabular mt-1 text-xs ${s.ton ? TON_TEXTE[s.ton] : 'text-muted'}`}>{s.sous}</dd> : null}
         </div>
@@ -95,8 +95,8 @@ function StatsBar({ stats }: { stats: Stat[] }) {
 function Hero({ d }: { d: DecryptageDonnees }) {
   return (
     <header className="space-y-5">
-      <p className="tabular text-xs uppercase tracking-[0.14em] text-accent">{d.kicker}</p>
       <h1 className="font-display text-[clamp(1.875rem,4.4vw,3rem)] font-medium leading-[1.1] text-white">{d.titre}</h1>
+      <p className="text-sm text-muted">{d.kicker}</p>
       <p className="max-w-3xl text-[clamp(1rem,1.6vw,1.125rem)] leading-relaxed text-ivory">{d.chapo}</p>
       <StatsBar stats={d.stats} />
     </header>

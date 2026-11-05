@@ -146,7 +146,7 @@ function CalendarKpiCard({
       <div className={`rounded-[calc(1.125rem-0.375rem)] border ${styles.inner} bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5`}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-semibold text-faint">{label}</p>
+            <p className="text-xs font-semibold text-faint">{label}</p>
             <p className={`tabular text-4xl font-bold mt-2 leading-none ${styles.number}`}>{value}</p>
           </div>
           <div className={`grid h-10 w-10 place-items-center rounded-full border text-base flex-shrink-0 ${styles.icon}`}>
@@ -187,7 +187,6 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
       {/* ── En-tête ────────────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 pt-8 pb-6 animate-rise-in">
         <SectionHeader
-          kicker="Marché BRVM"
           title="Calendrier économique"
           subtitle={`Dividendes et événements corporatifs sur les ${daysN} prochains jours.`}
           actions={

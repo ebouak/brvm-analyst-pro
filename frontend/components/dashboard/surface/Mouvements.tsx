@@ -24,7 +24,7 @@ export default function Mouvements({ id, titre, lignes }: { id: string; titre: s
       {lignes.length === 0 ? <p className="text-sm text-muted">Aucune variation connue pour cette séance.</p> : (
         <div className="-mx-1 overflow-x-auto">
           <table className="w-full min-w-[19rem] text-sm" aria-labelledby={id}>
-            <thead className="text-[11px] uppercase tracking-wide text-faint">
+            <thead className="text-[11px] text-faint">
               <tr>
                 <th scope="col" className="px-1 pb-2 text-left font-medium">Valeur</th>
                 <th scope="col" className="px-1 pb-2 text-right font-medium">Cours</th>

@@ -32,7 +32,6 @@ export default async function SecurityPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-6 py-8">
       <SectionHeader
-        kicker="Compte"
         title="Sécurité"
         subtitle="Double authentification et historique de vos connexions."
       />

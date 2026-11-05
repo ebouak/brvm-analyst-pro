@@ -20,7 +20,6 @@ export default async function AdminAnalysesPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
       <SectionHeader
-        kicker="Administration"
         title="Analyses citables"
         subtitle="Pages optimisées pour la citation (Perplexity, ChatGPT). Data auto ou éditorial."
       />

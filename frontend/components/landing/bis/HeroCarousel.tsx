@@ -176,7 +176,7 @@ function Permanente({ s, dateLabel, brvmCVar, hausses, nbActions, topNote, topHa
       <div className="pv"><div className="box">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span className="g" aria-label={topNote?.grade ? `Note ${topNote.grade}` : 'Note'}>{topNote?.grade ?? '–'}</span>
-          <div><span className="o">Meilleure note du jour</span><h3 style={{ margin: 0 }}>{topNote ? `${topNote.code}${topNote.nom ? ` · ${topNote.nom}` : ''}` : 'Aucun signal publié'}</h3></div>
+          <div><h3 style={{ margin: 0 }}>{topNote ? `${topNote.code}${topNote.nom ? ` · ${topNote.nom}` : ''}` : 'Aucun signal publié'}</h3><p className="meta" style={{ marginTop: 2 }}>Meilleure note du jour</p></div>
         </div>
         <p>Tendance, momentum, liquidité, valorisation : chaque sous-score est affiché avec son poids. Quand rien n&apos;est net, le moteur s&apos;abstient.</p>
       </div></div>

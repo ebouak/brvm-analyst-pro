@@ -103,7 +103,7 @@ function Panneau({ children, className = '' }: { children: React.ReactNode; clas
 function Titre({ children, d }: { children: React.ReactNode; d: number }) {
   return (
     <p
-      className="ht-in mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em]"
+      className="ht-in mb-2 font-mono text-[11px] font-bold"
       style={{ ...delai(d), color: '#8fe6ff' }}
     >
       {children}
@@ -153,7 +153,7 @@ export function HeroDeviceMockup({
         {/* ── Colonne discours ───────────────────────────────────────── */}
         <div>
           <span
-            className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em]"
+            className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[11px] font-bold"
             style={{ border: '1px solid rgba(86,215,253,0.3)', color: '#8fe6ff' }}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: VERT }} />
@@ -198,7 +198,7 @@ export function HeroDeviceMockup({
             className="ht-in flex items-center justify-between px-3.5 py-2"
             style={{ ...delai(140), background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${LIGNE}` }}
           >
-            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: '#8fe6ff' }}>
+            <span className="font-mono text-[11px] font-bold" style={{ color: '#8fe6ff' }}>
               Terminal WESTBOURSE
             </span>
             {dateLabel && (
@@ -252,7 +252,7 @@ export function HeroDeviceMockup({
                   { l: 'Transact.', v: nbTransactions > 0 ? fmtNumber(nbTransactions) : '—' },
                 ].map((x, i) => (
                   <div key={x.l} className="ht-in" style={delai(620 + i * 60)}>
-                    <dt className="text-[11px] uppercase tracking-wide" style={{ color: GRIS }}>{x.l}</dt>
+                    <dt className="text-[11px]" style={{ color: GRIS }}>{x.l}</dt>
                     <dd className="tabular mt-0.5 text-[12.5px] font-medium" style={{ color: '#fcfcfc' }}>{x.v}</dd>
                   </div>
                 ))}
@@ -280,7 +280,7 @@ export function HeroDeviceMockup({
                     className="ht-pop mt-4 flex items-center justify-between border-t pt-3"
                     style={{ ...delai(1060), borderColor: LIGNE }}
                   >
-                    <span className="text-[11px] uppercase tracking-wide" style={{ color: GRIS }}>Signal</span>
+                    <span className="text-[11px]" style={{ color: GRIS }}>Signal</span>
                     <span
                       className="rounded px-2 py-0.5 font-mono text-[11px] font-bold"
                       style={{ background: 'rgba(63,225,139,0.14)', color: VERT }}
@@ -289,7 +289,7 @@ export function HeroDeviceMockup({
                     </span>
                   </div>
                   <div className="ht-in mt-1.5 flex items-center justify-between" style={delai(1140)}>
-                    <span className="text-[11px] uppercase tracking-wide" style={{ color: GRIS }}>Confiance</span>
+                    <span className="text-[11px]" style={{ color: GRIS }}>Confiance</span>
                     <span className="tabular text-[11px] font-bold" style={{ color: '#fcfcfc' }}>
                       {diagnostic.confiance != null ? `${(diagnostic.confiance * 100).toFixed(0)} %` : '—'}
                     </span>

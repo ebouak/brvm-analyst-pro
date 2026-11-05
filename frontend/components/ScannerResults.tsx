@@ -112,7 +112,7 @@ export default function ScannerResults({ rows }: Props) {
   function Th({ k, label }: { k: SortKey; label: string }) {
     return (
       <th
-        className="px-3 py-2 text-left text-xs text-muted uppercase tracking-wider cursor-pointer select-none hover:text-white whitespace-nowrap"
+        className="px-3 py-2 text-left text-xs text-muted cursor-pointer select-none hover:text-white whitespace-nowrap"
         onClick={() => toggleSort(k)}
       >
         {label}<SortIcon active={sortKey === k} asc={asc} />
@@ -150,11 +150,11 @@ export default function ScannerResults({ rows }: Props) {
               <Th k="cours_jour" label="Cours" />
               <Th k="variation_pct" label="Var %" />
               <Th k="rsi" label="RSI" />
-              <th className="px-3 py-2 text-left text-xs text-muted uppercase tracking-wider whitespace-nowrap">MACD</th>
-              <th className="px-3 py-2 text-left text-xs text-muted uppercase tracking-wider whitespace-nowrap">Tendance MA</th>
+              <th className="px-3 py-2 text-left text-xs text-muted whitespace-nowrap">MACD</th>
+              <th className="px-3 py-2 text-left text-xs text-muted whitespace-nowrap">Tendance MA</th>
               <Th k="volume" label="Vol×moy" />
               <Th k="score" label="Signal" />
-              <th className="px-3 py-2 text-left text-xs text-muted uppercase tracking-wider">Score</th>
+              <th className="px-3 py-2 text-left text-xs text-muted">Score</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>

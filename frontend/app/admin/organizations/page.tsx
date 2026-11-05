@@ -24,7 +24,6 @@ export default async function Page() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Organisations"
         subtitle="Comptes entreprise : membres, rôles et abonnement rattaché (premium hérité)."
       />

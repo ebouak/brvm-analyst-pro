@@ -41,7 +41,6 @@ export default async function Page() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
       <SectionHeader
-        kicker="Administration"
         title="Fonctionnalités"
         subtitle="Ouvrez une fonction à tous, réservez-la aux abonnés, ou coupez-la — sans redéployer. Les quotas journaliers protègent le budget des fonctions coûteuses (LLM)."
       />

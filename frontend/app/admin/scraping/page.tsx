@@ -15,7 +15,6 @@ export default async function Page() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Monitoring"
         subtitle="Tâches planifiées côté base de données et détection de patterns intraday."
       />

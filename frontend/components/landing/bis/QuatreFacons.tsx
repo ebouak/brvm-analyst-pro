@@ -91,8 +91,7 @@ export function QuatreFacons() {
     <section className="facons" aria-labelledby="h-facons">
       <div className="facons-head">
         <div>
-          <p className="over">La plateforme</p>
-          <h2 id="h-facons">Quatre façons de travailler<br />le <span className="accent">marché</span>.</h2>
+                    <h2 id="h-facons">Quatre façons de travailler<br />le <span className="accent">marché</span>.</h2>
           <p className="lead">Comprendre, surveiller, tester et explorer — les mêmes outils que dans l’app, présentés en vitrine.</p>
         </div>
         <div className="annot-2" aria-hidden="true"><span className="hand">Des outils concrets<br />pour aller plus loin.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
@@ -110,8 +109,8 @@ export function QuatreFacons() {
               {col.outils.map((o) => (
                 <li key={o.t}>
                   <Link href={o.href}>
-                    <motion.span className="ic" whileHover={{rotate:6,scale:1.08}} transition={{type:'spring',stiffness:420,damping:18}}><Ic c={o.ic} /></motion.span>
-                    <span><b>{o.t}{PROTEGEES.has(o.href) && !PREMIUM.has(o.href) && <em className="cg" title="Accessible avec un compte gratuit">compte gratuit</em>}{PREMIUM.has(o.href) && <em className="cg cg--premium" title="Réservé aux abonnés Premium">Premium ✦</em>}</b><small>{o.d}</small></span>
+                    <motion.span className="ic" whileHover={{y:-2}} transition={{duration:0.2,ease:[0.22,1,0.36,1]}}><Ic c={o.ic} /></motion.span>
+                    <span><b>{o.t}{PROTEGEES.has(o.href) && !PREMIUM.has(o.href) && <em className="cg" title="Accessible avec un compte gratuit">compte gratuit</em>}{PREMIUM.has(o.href) && <em className="cg cg--premium" title="Réservé aux abonnés Premium">Premium</em>}</b><small>{o.d}</small></span>
                   </Link>
                 </li>
               ))}

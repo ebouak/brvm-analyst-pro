@@ -37,7 +37,6 @@ export default function ImportFondamentauxPage() {
 
       {/* En-tête de page */}
       <SectionHeader
-        kicker="Administration"
         title="Import fondamentaux"
         subtitle="Déposez des PDF d'états financiers. Analyse par IA (DeepSeek → Mistral → Grok), écriture automatique si les valeurs sont plausibles, validation sinon."
       />

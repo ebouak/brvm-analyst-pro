@@ -23,7 +23,6 @@ export default async function CustomizeDashboardPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
-        kicker="Tableau de bord"
         title="Personnaliser"
         subtitle="Activez, désactivez et réordonnez vos widgets. Le ticker reste toujours visible."
       />

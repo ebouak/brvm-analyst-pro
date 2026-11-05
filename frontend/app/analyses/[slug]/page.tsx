@@ -43,7 +43,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
+      <header className="border-b border-border/60 bg-surface">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-6">
           <Link href="/" className="font-display tracking-tight text-white hover:text-accent">WESTBOURSE</Link>
           <div className="flex items-center gap-3 text-sm">
@@ -57,7 +57,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       </header>
 
       <main className="mx-auto max-w-4xl space-y-8 px-6 py-10">
-        <SectionHeader kicker="Analyse BRVM" title={page.title} subtitle={page.question} />
+        <SectionHeader title={page.title} subtitle={page.question} />
 
         {/* Auteur + fraîcheur : les signaux de confiance que les moteurs valorisent. */}
         <p className="text-xs text-faint">

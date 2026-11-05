@@ -40,7 +40,7 @@ export default function TechnicalSummary({ result }: { result: TechnicalSummaryR
 
   return (
     <div className="bg-surface border border-border rounded-xl p-5">
-      <p className="text-xs text-muted uppercase tracking-widest mb-4">Analyse technique</p>
+      <p className="text-xs text-muted mb-4">Analyse technique</p>
 
       {/* Jauge de synthèse (verdict global type speedomètre) */}
       <div className="mb-5 pb-5 border-b border-border/30">

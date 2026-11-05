@@ -70,7 +70,7 @@ export default function IndexCard({
 
         {/* Header row */}
         <div className="flex items-start justify-between mb-1">
-          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-muted">{label}</p>
+          <p className="text-[11px] font-semibold text-muted">{label}</p>
           <span
             className={`
               grid h-7 w-7 place-items-center rounded-full border transition-all duration-300

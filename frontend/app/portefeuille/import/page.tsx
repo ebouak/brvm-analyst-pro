@@ -116,7 +116,6 @@ export default function ImportRelevePage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
       <SectionHeader
-        kicker="Portefeuille"
         title="Importer mon relevé SGI"
         subtitle="Déposez le relevé de compte-titres PDF de votre SGI : vos positions sont détectées automatiquement, vous vérifiez, vous importez. Rien n'est écrit sans votre validation."
       />
@@ -163,10 +162,10 @@ export default function ImportRelevePage() {
               <thead>
                 <tr className="border-b border-border text-left">
                   <th className="py-2 pr-2" aria-label="Inclure" />
-                  <th className="py-2 pr-3 font-mono text-[10px] uppercase tracking-wider text-faint">Code</th>
-                  <th className="py-2 pr-3 font-mono text-[10px] uppercase tracking-wider text-faint">Libellé relevé</th>
-                  <th className="py-2 pr-3 text-right font-mono text-[10px] uppercase tracking-wider text-faint">Quantité</th>
-                  <th className="py-2 text-right font-mono text-[10px] uppercase tracking-wider text-faint">PRU (FCFA)</th>
+                  <th className="py-2 pr-3 font-mono text-xs text-faint">Code</th>
+                  <th className="py-2 pr-3 font-mono text-xs text-faint">Libellé relevé</th>
+                  <th className="py-2 pr-3 text-right font-mono text-xs text-faint">Quantité</th>
+                  <th className="py-2 text-right font-mono text-xs text-faint">PRU (FCFA)</th>
                 </tr>
               </thead>
               <tbody>

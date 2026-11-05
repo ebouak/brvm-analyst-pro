@@ -25,7 +25,7 @@ export function ContentTable({ kind, rows }: { kind: ContentKind; rows: ContentR
     <div className="overflow-x-auto rounded-panel border border-border bg-surface">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+          <tr className="border-b border-border text-left text-xs text-faint">
             <th className="px-4 py-3 font-medium">Titre</th>
             <th className="px-4 py-3 font-medium">Date</th>
             <th className="px-4 py-3 font-medium">État</th>

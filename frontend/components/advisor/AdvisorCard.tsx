@@ -85,7 +85,7 @@ export function AdvisorCard({ row, liquidite }: {
             <p className="text-[11px] leading-relaxed text-white/90">{result.narrative}</p>
 
             <div className="border-t border-border/50 pt-2">
-              <p className="mb-1.5 text-[10px] uppercase tracking-wider text-faint">Détail du calcul</p>
+              <p className="mb-1.5 text-xs text-faint">Détail du calcul</p>
             </div>
 
             {result.breakdown.map((b, i) => (

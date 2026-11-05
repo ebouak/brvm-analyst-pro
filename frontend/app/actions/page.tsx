@@ -111,7 +111,6 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
     return (
       <div className="max-w-7xl mx-auto px-6 py-12">
         <SectionHeader
-          kicker="BRVM · Cote officielle"
           title="Marché actions"
           subtitle="Tableau de bord des valeurs cotées sur la Bourse Régionale des Valeurs Mobilières."
         />
@@ -130,7 +129,6 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* ── En-tête de page ─────────────────────────────────────────────── */}
       <SectionHeader
-        kicker="BRVM · Cote officielle"
         title="Marché actions"
         subtitle="Toutes les valeurs cotées · cours, volumes, performances et signaux assistés."
         actions={

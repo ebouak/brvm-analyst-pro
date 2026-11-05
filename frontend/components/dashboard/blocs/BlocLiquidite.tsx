@@ -44,7 +44,7 @@ function Positions({ donnees, positions }: { donnees: { dateMarche: string; lign
     <>
       <div className="-mx-1 overflow-x-auto">
         <table aria-labelledby="bloc-liquidite" className="w-full min-w-[30rem] text-sm">
-          <thead className="text-[11px] uppercase tracking-wide text-faint">
+          <thead className="text-[11px] text-faint">
             <tr className="border-b border-border">
               <th scope="col" className="px-1 py-2 text-left font-medium">Valeur</th>
               <th scope="col" className="px-1 py-2 text-right font-medium">Position</th>

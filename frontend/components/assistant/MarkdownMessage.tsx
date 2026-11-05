@@ -14,7 +14,7 @@ export function MarkdownMessage({ content }: { content: string }) {
         remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => <h1 className="mt-3 mb-2 font-display text-base font-semibold text-white">{children}</h1>,
-          h2: ({ children }) => <h2 className="mt-3 mb-2 font-display text-sm font-semibold uppercase tracking-wide text-gold">{children}</h2>,
+          h2: ({ children }) => <h2 className="mt-3 mb-2 font-display text-sm font-semibold text-gold">{children}</h2>,
           h3: ({ children }) => <h3 className="mt-2 mb-1 text-sm font-semibold text-white">{children}</h3>,
           strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
           ul: ({ children }) => <ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>,
@@ -26,7 +26,7 @@ export function MarkdownMessage({ content }: { content: string }) {
               <table className="w-full border-collapse text-[13px] tabular">{children}</table>
             </div>
           ),
-          thead: ({ children }) => <thead className="bg-surface text-xs uppercase tracking-wide text-muted">{children}</thead>,
+          thead: ({ children }) => <thead className="bg-surface text-xs text-muted">{children}</thead>,
           th: ({ children }) => <th className="border-b border-border/70 px-3 py-2 text-left font-medium">{children}</th>,
           td: ({ children }) => <td className="border-b border-border/40 px-3 py-1.5 text-ivory">{children}</td>,
           tr: ({ children }) => <tr className="even:bg-surface/40">{children}</tr>,

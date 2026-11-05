@@ -157,7 +157,7 @@ export default async function BriefDatePage({ params }: PageProps) {
         {/* ── En-tête de note ─────────────────────────────────────────── */}
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] text-accent/70 uppercase tracking-[0.18em] mb-1">
+            <p className="text-[11px] text-accent/70 mb-1">
               Note de conjoncture · BRVM
             </p>
             <h1 className="font-display text-2xl md:text-3xl text-white">

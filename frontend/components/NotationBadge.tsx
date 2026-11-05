@@ -95,7 +95,7 @@ export default function NotationBadge({ notation, notationPubs = [] }: NotationP
     <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-muted uppercase tracking-wider">Notation financière</p>
+        <p className="text-xs text-muted">Notation financière</p>
       </div>
 
       {/* Agency + latest rating */}

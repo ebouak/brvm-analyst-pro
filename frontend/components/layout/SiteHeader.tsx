@@ -85,7 +85,7 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
               <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="flex min-h-[48px] items-center rounded-xl px-3 text-[15px] font-medium text-ivory hover:bg-white/[0.06]">{l.t}</Link>
             ))}
           </div>
-          <p className="mt-6 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">Outils</p>
+          <p className="mt-6 px-3 text-xs font-semibold text-faint">Outils</p>
           <div className="mt-2 space-y-1">
             {OUTILS.map((l) => (
               <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="flex min-h-[44px] items-center rounded-xl px-3 text-sm text-muted hover:text-ivory hover:bg-white/[0.04]">{l.t}</Link>
@@ -108,7 +108,7 @@ export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string 
         <Link href="/" aria-label="WESTBOURSE accueil" className="flex shrink-0 items-center gap-2.5">
           <AnimatedLogo size={30} variant="mark" animate={false} />
           <span className="hidden font-display text-lg font-semibold tracking-tight text-ivory min-[400px]:inline">WESTBOURSE</span>
-          <span className="ml-1 hidden border-l border-border pl-3 text-[9px] font-semibold uppercase leading-none tracking-[0.14em] text-faint 2xl:block">Comprendre aujourd&apos;hui,<br />investir demain</span>
+          <span className="ml-1 hidden border-l border-border pl-3 text-xs font-semibold leading-none text-faint 2xl:block">Comprendre aujourd&apos;hui,<br />investir demain</span>
         </Link>
         {/* Navigation complète à partir de 1280 px seulement : six liens, le thème,
             la connexion et l'inscription mesurent ~1 200 px et débordaient de 150 à

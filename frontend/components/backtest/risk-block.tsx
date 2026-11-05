@@ -18,7 +18,7 @@ export function RiskBlock({ risk, showRiskDetails = false }: { risk: BacktestRis
   return (
     <section className="rounded-xl border border-gray-200 bg-[#ffffff] p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Risque</p>
+        <p className="text-xs font-semibold text-gray-400">Risque</p>
         {risk.riskLevel && (
           <span
             role="status"

@@ -53,7 +53,6 @@ export default async function Page({ searchParams }: { searchParams: { periode?:
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <SectionHeader
-        kicker="Audience"
         title="Audience du site"
         subtitle={`${libelleFenetre(b)} — comparée à la période précédente de même durée. Source : PostHog (UE).`}
         actions={

@@ -26,7 +26,6 @@ export default async function Page({ params }: { params: { id: string } }) {
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <div className="flex items-start justify-between gap-4">
         <SectionHeader
-          kicker="Rapports hebdomadaires"
           title={report.titre}
           subtitle={`Publié le ${fmtDate(report.date_publication)} · ${report.slug}`}
         />

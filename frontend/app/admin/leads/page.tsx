@@ -40,7 +40,6 @@ export default async function Page({ searchParams }: { searchParams: { q?: strin
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Leads débutants"
         subtitle="Demandes de contact issues du tunnel /debutant. Recontactez par WhatsApp et suivez l'avancement."
       />
@@ -84,7 +83,7 @@ export default async function Page({ searchParams }: { searchParams: { q?: strin
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 <th className="px-4 py-3 font-medium">Contact</th>
                 <th className="px-4 py-3 font-medium">Niveau</th>
                 <th className="px-4 py-3 font-medium">Pays</th>

@@ -73,7 +73,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
 /** En-tête de colonne avec point d'accent qui s'allume au survol de la colonne. */
 function ColHeader({ children }: { children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-[#fff]/55">
+    <p className="flex items-center gap-1.5 text-xs text-[#fff]/55">
       <span className="h-1 w-1 rounded-full bg-[#fff]/35 transition-colors duration-300 group-hover/col:bg-[#56d7fd]" />
       {children}
     </p>
@@ -110,7 +110,7 @@ export default function Footer() {
             Analyse et aide à la décision d&apos;investissement sur la BRVM (UEMOA).
           </p>
           <div className="mt-4">
-            <p className="mb-2 text-xs uppercase tracking-wider text-[#fff]/55">Suivez-nous</p>
+            <p className="mb-2 text-xs text-[#fff]/55">Suivez-nous</p>
             <SocialLinks />
           </div>
           {/* N'apparaît que si le navigateur propose l'installation PWA. */}

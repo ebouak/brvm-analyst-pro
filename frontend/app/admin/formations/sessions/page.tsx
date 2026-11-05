@@ -27,7 +27,7 @@ export default async function AdminFormationsSessionsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
-      <SectionHeader kicker="Administration" title="Formations en direct" subtitle="Séances, places et inscriptions." />
+      <SectionHeader title="Formations en direct" subtitle="Séances, places et inscriptions." />
       <div className="grid grid-cols-3 gap-3">
         <MetricCard label="Séances" value={String(lignes.length)} accent="sapphire" />
         <MetricCard label="Inscriptions" value={String(ins.length)} accent="neutral" />
@@ -42,7 +42,7 @@ export default async function AdminFormationsSessionsPage() {
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
+              <tr className="border-b border-border text-left text-xs text-muted">
                 <th scope="col" className="px-4 py-3 font-medium">Séance</th>
                 <th scope="col" className="px-4 py-3 font-medium">Début</th>
                 <th scope="col" className="px-4 py-3 font-medium">Places</th>

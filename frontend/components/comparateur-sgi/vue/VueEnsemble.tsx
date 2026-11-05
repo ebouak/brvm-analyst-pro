@@ -178,7 +178,7 @@ function Recommandation({ r, nbComplets, economie }: { r: LigneClassement; nbCom
 
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-7">
         <div>
-          <span className="inline-block rounded-md bg-up px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-bg">Meilleur coût estimé</span>
+          <span className="inline-block rounded-md bg-up px-2.5 py-0.5 text-[11px] font-bold text-bg">Meilleur coût estimé</span>
           <p className="tabular mt-2 font-display text-4xl font-bold leading-none text-up md:text-[2.75rem]">{fmtFcfa(r.cout.total)}</p>
           <p className="mt-1.5 text-[12px] text-muted">Coût total HT · {SCENARIO_TXT}</p>
         </div>

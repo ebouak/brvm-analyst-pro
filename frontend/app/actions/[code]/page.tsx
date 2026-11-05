@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { BellPlus, Download, FileText, History, MessageSquareText, Star } from 'lucide-react';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { getAdminContext, can } from '@/lib/server/rbac';
@@ -714,7 +715,6 @@ export default async function InstrumentPage({
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="text-[11px] text-faint uppercase tracking-[0.18em] mb-0.5">BRVM · Action</p>
                   <h1 className="font-display text-xl md:text-2xl text-ivory tracking-tight leading-tight">
                     {code}
                   </h1>
@@ -954,7 +954,7 @@ export default async function InstrumentPage({
             {/* ── Indicateurs ── */}
             <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
               <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Indicateurs</p>
+                <p className="text-[11px] text-gold/70 mb-5">Indicateurs</p>
 
                 {/* RSI */}
                 <div className="mb-5">
@@ -986,7 +986,7 @@ export default async function InstrumentPage({
 
                 {/* Moyennes mobiles */}
                 <div className="border-t border-border/30 pt-4 mb-4">
-                  <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Moyennes mobiles</p>
+                  <p className="text-[11px] text-faint mb-3">Moyennes mobiles</p>
                   <div className="space-y-2">
                     {[
                       { label: 'MA 20', val: lastMa20 },
@@ -1013,7 +1013,7 @@ export default async function InstrumentPage({
                 {/* MACD */}
                 {lastMacd && (
                   <div className="border-t border-border/30 pt-4">
-                    <p className="text-[11px] text-faint uppercase tracking-wider mb-3">MACD</p>
+                    <p className="text-[11px] text-faint mb-3">MACD</p>
                     <div className="grid grid-cols-3 gap-2 text-xs text-center">
                       <MacdCell label="Ligne" value={lastMacd.macd?.toFixed(0) ?? '—'} />
                       <MacdCell label="Signal" value={lastMacd.signal?.toFixed(0) ?? '—'} />
@@ -1034,7 +1034,7 @@ export default async function InstrumentPage({
             {/* ── Détections ── */}
             <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
               <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Détections actives</p>
+                <p className="text-[11px] text-gold/70 mb-5">Détections actives</p>
                 <div className="space-y-2.5">
                   {detections.map((d) => (
                     <div
@@ -1128,7 +1128,7 @@ export default async function InstrumentPage({
             </>
           ) : (
             <div className="rounded-panel border border-border bg-surface shadow-card p-6">
-              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-1.5">Signal quantitatif</p>
+              <p className="text-[11px] text-gold/70 mb-1.5">Signal quantitatif</p>
               <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
             </div>
           )}
@@ -1243,7 +1243,7 @@ export default async function InstrumentPage({
           {/* Dividendes */}
           <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Dividendes</p>
+              <p className="text-[11px] text-gold/70 mb-5">Dividendes</p>
               {lastDiv ? (
                 <div>
                   {/* Rendement en vedette */}
@@ -1271,7 +1271,7 @@ export default async function InstrumentPage({
           {/* Événements */}
           <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em] mb-5">Événements récents</p>
+              <p className="text-[11px] text-gold/70 mb-5">Événements récents</p>
               {events.length > 0 ? (
                 <div className="space-y-3.5">
                   {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
@@ -1343,19 +1343,19 @@ export default async function InstrumentPage({
           <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
               {[
-                { href: '/portefeuille', label: 'Ajouter à la watchlist', icon: '★' },
-                { href: '/parametres/alertes', label: 'Créer une alerte prix', icon: '◎' },
-                { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: '↓', external: true },
-                { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: '⌛' },
-                { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: '▤', external: true },
-                { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: '◈' },
-              ].map(({ href, label, icon, external }) => {
+                { href: '/portefeuille', label: 'Ajouter à la watchlist', icon: Star },
+                { href: '/parametres/alertes', label: 'Créer une alerte prix', icon: BellPlus },
+                { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: Download, external: true },
+                { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: History },
+                { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: FileText, external: true },
+                { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: MessageSquareText },
+              ].map(({ href, label, icon: Icone, external }) => {
                 const cls =
                   'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
                 const inner = (
                   <>
-                    <span className="text-gold/50 group-hover:text-gold/80 transition-colors duration-300 text-sm leading-none shrink-0">
-                      {icon}
+                    <span className="text-gold/50 group-hover:text-gold/80 transition-colors duration-300 leading-none shrink-0">
+                      <Icone size={15} strokeWidth={1.75} aria-hidden />
                     </span>
                     <span>{label}</span>
                     <span className="ml-auto text-border-strong group-hover:text-gold/40 transition-colors duration-300">→</span>
@@ -1405,7 +1405,7 @@ function SessionMetric({
 }) {
   return (
     <div className="py-0.5">
-      <p className="text-[10px] text-faint uppercase tracking-[0.12em] mb-1">{label}</p>
+      <p className="text-xs text-faint mb-1">{label}</p>
       <div className="flex items-baseline gap-1">
         <span className={`tabular font-mono text-sm font-semibold leading-tight ${accent ? 'text-gold' : 'text-ivory'}`}>
           {value}
@@ -1467,7 +1467,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
       >
         {/* Header signal */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
-          <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em]">Signal quantitatif</p>
+          <p className="text-[11px] text-gold/70">Signal quantitatif</p>
           <SignalBadge signal={signal.signal} confiance={signal.confiance} />
           <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           <span className="ml-auto tabular text-[11px] text-faint font-mono">
@@ -1497,7 +1497,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
           if (subScoreRows.length === 0) return null;
           return (
             <div className="border-t border-border/30 pt-4 mb-4">
-              <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Sous-scores</p>
+              <p className="text-[11px] text-faint mb-3">Sous-scores</p>
               <div className="space-y-2">
                 {subScoreRows.map(({ label, val }) => (
                   <div key={label} className="flex items-center justify-between text-xs">
@@ -1521,7 +1521,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
           if (entries.length === 0) return null;
           return (
             <div className="border-t border-border/30 pt-4 mb-4">
-              <p className="text-[11px] text-faint uppercase tracking-wider mb-3">Indicateurs utilisés</p>
+              <p className="text-[11px] text-faint mb-3">Indicateurs utilisés</p>
               <div className="space-y-2">
                 {entries.slice(0, 6).map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between text-xs">

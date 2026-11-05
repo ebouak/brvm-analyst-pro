@@ -69,7 +69,7 @@ export function DarkBandHeader({
 }) {
   return (
     <div className="mb-8 max-w-[54ch]">
-      <p className="mb-3 font-mono text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: '#8fe6ff' }}>
+      <p className="mb-3 font-mono text-xs font-bold" style={{ color: '#8fe6ff' }}>
         {eyebrow}
       </p>
       <h2

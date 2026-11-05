@@ -29,7 +29,6 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
-        kicker="Outil · Analyse statistique"
         title="Saisonnalité"
         subtitle="Performance mensuelle moyenne d'une action sur plusieurs années · lecture statistique, à croiser avec tendance, liquidité et dividende."
       />

@@ -121,7 +121,7 @@ export default function DashboardTicker({
       return (
         <span key={`seg-${doublon ? 'b' : 'a'}-${it.code}-${i}`} className="contents">
         {showLabel && (
-          <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+          <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-bold ${
             it.kind === 'action' ? 'border-info/40 bg-info/10 text-info' : 'border-gold/40 bg-gold/10 text-gold'
           }`}>
             {it.kind === 'action' ? '◆ Actions' : '◆ Obligations'}

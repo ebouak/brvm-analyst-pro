@@ -253,7 +253,6 @@ export default async function ScannerPage({ searchParams }: PageProps) {
 function ScannerPageHeader({ universeSize }: { universeSize?: number }) {
   return (
     <SectionHeader
-      kicker="BRVM · Analyse technique"
       title="Scanner technique"
       subtitle="Filtrez les valeurs selon des critères techniques combinables : RSI, MACD, moyennes mobiles, volume et signal."
       actions={

@@ -26,7 +26,6 @@ export default async function ClesApiPage() {
 
       {/* En-tête de page */}
       <SectionHeader
-        kicker="Administration"
         title="Clés API"
         subtitle="Configurez les clés des fournisseurs IA (extraction de fondamentaux : DeepSeek, Mistral, Grok) et de Resend (envoi d'emails newsletter/individuels)."
       />
@@ -62,7 +61,7 @@ export default async function ClesApiPage() {
             key={name}
             className={`flex items-center gap-3 rounded-card border px-4 py-3 shadow-card ${tone}`}
           >
-            <span className="text-[10px] font-semibold tracking-widest uppercase">{name}</span>
+            <span className="text-xs font-semibold">{name}</span>
             <span className="text-[11px] text-faint">{role}</span>
           </div>
         ))}

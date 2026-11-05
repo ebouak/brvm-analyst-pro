@@ -19,7 +19,6 @@ export default async function BacktestingPremiumPage() {
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <SectionHeader
-        kicker="Analyse historique"
         title="Backtesting"
         subtitle="Classement des meilleures performances et dividendes historiques sur la BRVM."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
@@ -59,7 +58,7 @@ export default async function BacktestingPremiumPage() {
 
       {/* ── Bandeau édito ─────────────────────────────────────────────────── */}
       <div className="gold-rule flex items-center gap-4">
-        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest text-gold/60">
+        <span className="shrink-0 text-xs font-semibold text-gold/60">
           Classements détaillés
         </span>
         <div className="h-px flex-1 bg-gradient-to-r from-gold/20 to-transparent" />

@@ -72,12 +72,12 @@ export function LiquidityCard({
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-right">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-faint">Valeur échangée / séance</p>
+            <p className="text-xs text-faint">Valeur échangée / séance</p>
             <p className="tabular text-sm font-bold text-ivory">{fmtFcfa(liquidity.valeurMoyenne)}</p>
           </div>
           {arMin != null && arMax != null && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-faint">Coût aller-retour</p>
+              <p className="text-xs text-faint">Coût aller-retour</p>
               <p className="tabular text-sm font-bold text-warn">
                 {arMin.toFixed(1)} – {arMax.toFixed(1)} %
               </p>
