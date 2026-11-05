@@ -25,7 +25,6 @@ export default async function ValorisationPage() {
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
       <SectionHeader
         accent="gold"
-        kicker="Intelligence fondamentale"
         title="Valorisation BRVM"
         subtitle="Juste-valeur estimée vs cours · multiples sectoriels (P/E, P/B) et DDM. Classement value du marché."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}

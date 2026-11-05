@@ -58,7 +58,7 @@ export function EditCourseForm({ slug, initial }: { slug: string; initial: Cours
       {content.lessons.map((lesson, i) => (
         <div key={i} className="rounded-xl border border-border bg-surface p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-info">Leçon {i + 1}</span>
+            <span className="text-[11px] font-bold text-info">Leçon {i + 1}</span>
           </div>
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <label className={lab}>Titre
@@ -84,7 +84,7 @@ export function EditCourseForm({ slug, initial }: { slug: string; initial: Cours
           {/* QCM */}
           {lesson.qcm && (
             <div className="rounded-lg border border-border/60 bg-bg/30 p-3 space-y-2">
-              <span className="text-[10px] uppercase tracking-wider text-faint">QCM</span>
+              <span className="text-xs text-faint">QCM</span>
               <label className={lab}>Question
                 <input value={lesson.qcm.question} onChange={(e) => mutate((c) => { if (c.lessons[i].qcm) c.lessons[i].qcm!.question = e.target.value; })} className={ta} />
               </label>
@@ -109,7 +109,7 @@ export function EditCourseForm({ slug, initial }: { slug: string; initial: Cours
       {/* Glossaire */}
       {content.glossaire && content.glossaire.length > 0 && (
         <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-info">Glossaire</span>
+          <span className="text-[11px] font-bold text-info">Glossaire</span>
           {content.glossaire.map((g, k) => (
             <div key={k} className="grid grid-cols-[1fr_2fr] gap-3">
               <input value={g.terme} onChange={(e) => mutate((c) => { c.glossaire![k].terme = e.target.value; })} className={ta} />

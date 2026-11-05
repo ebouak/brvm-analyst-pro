@@ -48,17 +48,16 @@ export function JaugeSentiment({ score }: { score: number }) {
   const { controls, rejouer } = useRevelation(ref, {
     onArme: () => mv.set(50),
     onRevele: () => {
-      void animate(mv, s, { type: 'spring', stiffness: 70, damping: 14, mass: 0.8, delay: 0.55 });
+      void animate(mv, s, { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.55 });
     },
   });
 
-  // Survol (souris seulement) : les arcs se retracent et l'aiguille reçoit une
-  // impulsion qui la fait osciller AUTOUR du vrai score, où elle se pose — elle
-  // ne repart pas du neutre sous les yeux de la personne.
+  // Survol (souris seulement) : les arcs se retracent. L'aiguille ne bouge plus :
+  // son oscillation élastique autour du score (ressort amorti à 7) a été retirée
+  // le 2026-11-05 — un rebond est un effet, pas une information.
   const survol = (e: PointerEvent<HTMLDivElement>) => {
     if (sobre || e.pointerType !== 'mouse') return;
     rejouer();
-    void animate(mv, s, { type: 'spring', stiffness: 120, damping: 7, velocity: s >= 50 ? -160 : 160 });
   };
 
   const libelle = s >= 60 ? 'Positif' : s <= 40 ? 'Négatif' : 'Neutre';

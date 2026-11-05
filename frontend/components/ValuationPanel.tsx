@@ -41,7 +41,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
     <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
       <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface p-5 md:p-6 space-y-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em]">Valorisation fondamentale</p>
+          <p className="text-[11px] text-gold/70">Valorisation fondamentale</p>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${STANCE_STYLE[verdict.stance]}`}>
             {verdict.headline}
           </span>
@@ -73,7 +73,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
             {scoring.fscore?.reliable && (
               <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] uppercase tracking-wider text-faint">Piotroski F-Score</span>
+                  <span className="text-xs text-faint">Piotroski F-Score</span>
                   <span className="tabular text-sm font-semibold text-ivory">{scoring.fscore.score}/9 · {scoring.fscore.label}</span>
                 </div>
                 <div className="flex gap-0.5">
@@ -86,7 +86,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
             )}
             <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] uppercase tracking-wider text-faint">Altman Z-Score</span>
+                <span className="text-xs text-faint">Altman Z-Score</span>
                 {scoring.altman?.applicable && scoring.altman.zone ? (
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${ZONE_STYLE[scoring.altman.zone].cls}`}>
                     {scoring.altman.z} · {ZONE_STYLE[scoring.altman.zone].txt}

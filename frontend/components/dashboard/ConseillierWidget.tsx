@@ -121,7 +121,7 @@ export default function ConseillierWidget({
       {/* Breakdown factors */}
       {advisor.breakdown.length > 0 && (
         <div className="mt-3 pt-3 border-t border-border/30">
-          <p className="text-[10px] uppercase tracking-wider text-faint mb-2">
+          <p className="text-xs text-faint mb-2">
             Détail du calcul
           </p>
           <div className="space-y-1.5">

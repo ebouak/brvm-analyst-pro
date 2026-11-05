@@ -43,7 +43,7 @@ export default async function CombinedAlphaPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader kicker="BRVM · Quant — vitrine publique" title="Westbourse Combined Alpha" subtitle="Un score de 0 à 100 pour comparer toutes les actions BRVM. 5 piliers — valorisation, momentum, qualité bénéficiaire, solidité financière et dividende — puis une pénalité risque (max 25 pts) si garde-fous déclenchés." accent="gold" actions={runDate ? (<div className="flex flex-wrap gap-2"><StatPill tone="neutral">Màj {runDate}</StatPill><StatPill tone="gold">v{runVer}</StatPill><StatPill tone="emerald">{elig}/{tot} éligibles</StatPill></div>) : undefined} />
+      <SectionHeader title="Westbourse Combined Alpha" subtitle="Un score de 0 à 100 pour comparer toutes les actions BRVM. 5 piliers — valorisation, momentum, qualité bénéficiaire, solidité financière et dividende — puis une pénalité risque (max 25 pts) si garde-fous déclenchés." accent="gold" actions={runDate ? (<div className="flex flex-wrap gap-2"><StatPill tone="neutral">Màj {runDate}</StatPill><StatPill tone="gold">v{runVer}</StatPill><StatPill tone="emerald">{elig}/{tot} éligibles</StatPill></div>) : undefined} />
       <div className="gold-rule" />
       {!run ? <EmptyStatePremium icon="◈" title="Aucun calcul disponible" hint="Lancez un run via POST /api/admin/quant/run (admin)." /> : (
         <>

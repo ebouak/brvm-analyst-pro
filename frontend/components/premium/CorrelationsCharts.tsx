@@ -92,7 +92,7 @@ export default function CorrelationsCharts({ series }: { series: CorrelationSeri
               <SerieChart serie={selected} />
               {/* Lecture macro */}
               <div className="rounded-lg border border-border bg-bg/40 px-4 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-gold/70 mb-1">Lecture macro</p>
+                <p className="text-xs text-gold/70 mb-1">Lecture macro</p>
                 <p className="text-xs text-muted leading-relaxed">{selected.macro.reading}</p>
               </div>
               <p className="text-[11px] text-faint">

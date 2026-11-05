@@ -103,11 +103,11 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="py-2 pr-3 font-mono text-[10px] uppercase tracking-wider text-faint">#</th>
-                <th className="py-2 pr-3 font-mono text-[10px] uppercase tracking-wider text-faint">Investisseur</th>
-                <th className="py-2 pr-3 text-right font-mono text-[10px] uppercase tracking-wider text-faint">Perf</th>
-                <th className="hidden py-2 pr-3 text-right font-mono text-[10px] uppercase tracking-wider text-faint sm:table-cell">Trades clos</th>
-                <th className="hidden py-2 text-right font-mono text-[10px] uppercase tracking-wider text-faint sm:table-cell">Réussite</th>
+                <th className="py-2 pr-3 font-mono text-xs text-faint">#</th>
+                <th className="py-2 pr-3 font-mono text-xs text-faint">Investisseur</th>
+                <th className="py-2 pr-3 text-right font-mono text-xs text-faint">Perf</th>
+                <th className="hidden py-2 pr-3 text-right font-mono text-xs text-faint sm:table-cell">Trades clos</th>
+                <th className="hidden py-2 text-right font-mono text-xs text-faint sm:table-cell">Réussite</th>
               </tr>
             </thead>
             <tbody>

@@ -73,7 +73,6 @@ export default async function FondamentauxPage() {
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* Header */}
       <SectionHeader
-        kicker="BRVM · Ratios fondamentaux"
         title="Analyse fondamentale"
         subtitle="PER, P/B, ROE, marge nette et rendement du dividende pour les actions cotées. Triez et filtrez par secteur."
       />

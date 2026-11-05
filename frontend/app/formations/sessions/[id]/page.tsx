@@ -27,7 +27,6 @@ export default async function SessionPage({ params }: { params: { id: string } }
     <PublicShell>
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <SectionHeader
-          kicker={NIVEAUX[s.niveau] ?? s.niveau}
           title={s.titre}
           subtitle={new Date(s.debut_at).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
         />

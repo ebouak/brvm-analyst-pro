@@ -25,7 +25,7 @@ export default async function Page() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader kicker="Administration" title="Landing — À la une" subtitle="Publicités et annonces : en bandeau (toutes tournent, une par chargement) ou dans le carrousel du hero, en plus des vues permanentes du produit." />
+      <SectionHeader title="Landing — À la une" subtitle="Publicités et annonces : en bandeau (toutes tournent, une par chargement) ou dans le carrousel du hero, en plus des vues permanentes du produit." />
       <div className="gold-rule" />
       <div className="grid grid-cols-3 gap-3">
         <MetricCard label="Vues permanentes" value={String(PERMANENT_SLIDES.length)} accent="sapphire" />
@@ -41,7 +41,7 @@ export default async function Page() {
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 <th className="px-4 py-3 font-medium">Aperçu</th>
                 <th className="px-4 py-3 font-medium">Titre</th>
                 <th className="px-4 py-3 font-medium">Type</th>

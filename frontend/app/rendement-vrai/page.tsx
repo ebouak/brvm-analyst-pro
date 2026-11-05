@@ -42,7 +42,7 @@ export default async function Page({
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
+      <header className="border-b border-border/60 bg-surface">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
           <Link href="/" className="font-display tracking-tight text-white hover:text-accent">
             WESTBOURSE
@@ -58,7 +58,6 @@ export default async function Page({
 
       <main className="mx-auto max-w-5xl space-y-8 px-6 py-10">
         <SectionHeader
-          kicker="Pouvoir d'achat"
           title="Le rendement vrai"
           subtitle="Le cours ne dit qu'une partie de l'histoire. Voici ce que votre action vous a réellement rapporté : d'abord le cours seul, puis dividendes nets réinvestis compris, toujours corrigé de l'inflation de votre pays."
         />

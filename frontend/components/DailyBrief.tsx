@@ -64,7 +64,7 @@ export default function DailyBrief({ brief }: Props) {
               <span className="text-faint font-sans font-normal text-xs">· {fmtDateFR(brief.date)}</span>
             </h2>
           </div>
-          <span className={`inline-flex items-center rounded-full border px-3 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${cfg.badge}`}>
+          <span className={`inline-flex items-center rounded-full border px-3 py-0.5 text-xs font-semibold ${cfg.badge}`}>
             {cfg.label}
           </span>
         </div>

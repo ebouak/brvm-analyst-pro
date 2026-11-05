@@ -26,7 +26,6 @@ export default async function Page({ params }: { params: { id: string } }) {
         ← Tous les messages
       </Link>
       <SectionHeader
-        kicker="Message de contact"
         title={m.prenom || 'Visiteur sans prénom'}
         subtitle={`${m.canal === 'whatsapp' ? 'WhatsApp ' : ''}${m.destinataire} · reçu le ${fmtDate(m.created_at)}${m.page ? ` · depuis ${m.page}` : ''}`}
         actions={<StatPill tone={m.enRetard ? 'gold' : 'neutral'}>{STATUT_CONTACT_LABEL[m.statut]}</StatPill>}
@@ -34,7 +33,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
       <PremiumPanel>
         <div className="rounded-[calc(var(--radius-panel,16px)-6px)] bg-surface p-5">
-          <div className="text-[11px] uppercase tracking-wider text-faint">Message reçu</div>
+          <div className="text-[11px] text-faint">Message reçu</div>
           <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed text-ivory">{m.message}</p>
         </div>
       </PremiumPanel>
@@ -42,7 +41,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       {m.statut === 'repondu' ? (
         <PremiumPanel>
           <div className="rounded-[calc(var(--radius-panel,16px)-6px)] bg-surface p-5">
-            <div className="text-[11px] uppercase tracking-wider text-faint">
+            <div className="text-[11px] text-faint">
               Réponse envoyée{m.repondu_at ? ` le ${fmtDate(m.repondu_at)}` : ''}{' '}
               {m.canal === 'whatsapp' ? 'sur WhatsApp, depuis le numéro WESTBOURSE' : 'depuis support@westbourse.com'}
             </div>

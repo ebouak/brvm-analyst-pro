@@ -42,7 +42,7 @@ export default async function JournalPage() {
         )}
 
         <section className="space-y-3">
-          <h2 className="text-xs uppercase tracking-widest text-muted">Thèses actives</h2>
+          <h2 className="text-xs text-muted">Thèses actives</h2>
           {actives.length === 0 ? (
             <p className="text-sm text-muted rounded-xl border border-border bg-surface p-6 text-center">
               Aucune thèse active. Rédigez-en une depuis la fiche d’une action.
@@ -69,7 +69,7 @@ export default async function JournalPage() {
 
         {cloturees.length > 0 && (
           <section className="space-y-3">
-            <h2 className="text-xs uppercase tracking-widest text-muted">Historique</h2>
+            <h2 className="text-xs text-muted">Historique</h2>
             {cloturees.map((t) => {
               const bilan = t.cours_cloture != null
                 ? computeBilan(

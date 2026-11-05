@@ -93,7 +93,6 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
         {/* ── En-tête + filtres secteur ──────────────────────────────────── */}
         <div className="animate-rise-in flex flex-wrap items-end justify-between gap-5">
           <SectionHeader
-            kicker="BRVM · Cartographie"
             title="Heatmap marché"
             subtitle={lastDate ? `Séance du ${fmtDateFR(lastDate)}` : undefined}
           />
@@ -184,7 +183,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
             {sectorStats.length > 0 && (
               <div className="animate-rise-in [animation-delay:0.14s]">
                 <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-muted">
+                  <span className="text-xs font-semibold text-muted">
                     Performance par secteur
                   </span>
                   <div className="flex items-center gap-3">

@@ -28,7 +28,6 @@ export default async function SessionsPage() {
     <PublicShell>
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
         <SectionHeader
-          kicker="Formations"
           title="Se former en direct, avec un formateur"
           subtitle="Des sessions à date fixe, en petit groupe. Le parcours Academy, inclus dans l’abonnement Premium, sert de préparation."
         />

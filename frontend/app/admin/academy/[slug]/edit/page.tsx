@@ -15,7 +15,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
   return (
     <div className="space-y-6">
       <SectionHeader
-        kicker="Académie · IA"
         title="Éditer le cours"
         subtitle="Corrigez le contenu manuellement. L'enregistrement re-rend la page sans rappeler l'IA."
       />

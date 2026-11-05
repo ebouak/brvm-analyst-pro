@@ -299,7 +299,6 @@ export default async function Dashboard() {
       <div className="min-h-screen bg-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-8">
           <SectionHeader
-            kicker="Tableau de bord"
             title="Marché BRVM"
             subtitle="Bourse Régionale des Valeurs Mobilières · UEMOA"
           />

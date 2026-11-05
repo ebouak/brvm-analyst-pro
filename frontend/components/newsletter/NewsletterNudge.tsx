@@ -126,7 +126,7 @@ export default function NewsletterNudge() {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">WESTBOURSE</p>
+          <p className="font-mono text-xs text-faint">WESTBOURSE</p>
           {/* HEBDOMADAIRE, et pas un mot de plus. La liste
               `newsletter_subscribers` reçoit un résumé par semaine : le
               formulaire du pied de page et l'email de confirmation le disent

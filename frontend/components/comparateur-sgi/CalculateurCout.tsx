@@ -307,7 +307,7 @@ export function CalculateurCout({
             className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-10 mt-5 md:bottom-3 flex items-center justify-between gap-3 rounded-xl border border-up/30 bg-bg/95 px-4 py-3 shadow-lg backdrop-blur lg:hidden"
           >
             <span className="min-w-0">
-              <span className="block text-[10px] uppercase tracking-wide text-faint">La moins chère</span>
+              <span className="block text-xs text-faint">La moins chère</span>
               <span className="block truncate text-sm font-medium text-ivory">{recommandee.sgiNom}</span>
             </span>
             <span className="flex flex-none items-center gap-2">

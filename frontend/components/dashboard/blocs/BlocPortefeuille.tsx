@@ -116,7 +116,7 @@ export default function BlocPortefeuille({
 
       <div className="-mx-1 mt-5 overflow-x-auto" role="region" tabIndex={0} aria-label="Positions du portefeuille">
         <table className="w-full min-w-[36rem] text-sm" aria-labelledby="bloc-portefeuille">
-          <thead className="text-[11px] uppercase tracking-wide text-faint">
+          <thead className="text-[11px] text-faint">
             <tr className="border-b border-border">
               <th scope="col" className="px-1 py-2 text-left font-medium">Valeur</th>
               <th scope="col" className="px-1 py-2 text-right font-medium">Qté</th>
@@ -196,7 +196,7 @@ export default function BlocPortefeuille({
 function Chiffre({ libelle, valeur, detail, classe = 'text-ivory', className = '' }: { libelle: string; valeur: string; detail?: ReactNode; classe?: string; className?: string }) {
   return (
     <div className={`min-w-0 rounded-xl border border-border/60 bg-bg/40 p-3 ${className}`}>
-      <p className="text-[11px] uppercase tracking-wide text-faint">{libelle}</p>
+      <p className="text-[11px] text-faint">{libelle}</p>
       {/* text-lg sous md : une demi-largeur de 390 px tient « −1,25 M FCFA » ;
           le retour à la ligne de secours évite tout débordement horizontal. */}
       <p className={`tabular mt-1 text-lg font-semibold [overflow-wrap:anywhere] md:text-xl ${classe}`}>{valeur}</p>

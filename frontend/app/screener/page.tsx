@@ -23,7 +23,6 @@ export default async function ScreenerPage() {
     return (
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-8">
         <SectionHeader
-          kicker="Outils"
           title="Screener multi-critères"
           subtitle="Filtrez les actions par RSI, volume, score, secteur et rendement du dividende."
         />

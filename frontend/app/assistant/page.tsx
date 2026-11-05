@@ -19,7 +19,6 @@ export default async function AssistantPage({ searchParams }: Props) {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <SectionHeader
-          kicker="Intelligence artificielle · Exclusif"
           title={sym ? `Questions — ${sym}` : 'Poser une question'}
           subtitle="Posez vos questions sur le marché, une valeur ou votre portefeuille : les réponses s’appuient sur les données de la plateforme."
           actions={

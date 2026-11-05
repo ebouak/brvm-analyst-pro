@@ -71,7 +71,6 @@ export default async function TrackRecordPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <SectionHeader
-        kicker="Conseiller · transparence"
         title="Track record du Conseiller"
         subtitle="Chaque changement de recommandation est daté au moment où il a été émis, et la performance du cours depuis est affichée, les bonnes bascules comme les mauvaises. Rien n'est antidaté, rien n'est effacé."
       />
@@ -122,13 +121,13 @@ export default async function TrackRecordPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-bg/40 text-left">
-                    <th className="px-4 py-2.5 font-mono text-[10px] uppercase tracking-wider text-faint">Date</th>
-                    <th className="px-4 py-2.5 font-mono text-[10px] uppercase tracking-wider text-faint">Titre</th>
-                    <th className="px-4 py-2.5 font-mono text-[10px] uppercase tracking-wider text-faint">Bascule</th>
-                    <th className="px-4 py-2.5 text-right font-mono text-[10px] uppercase tracking-wider text-faint">Cours bascule</th>
-                    <th className="px-4 py-2.5 text-right font-mono text-[10px] uppercase tracking-wider text-faint">Cours actuel</th>
-                    <th className="px-4 py-2.5 text-right font-mono text-[10px] uppercase tracking-wider text-faint">Depuis</th>
-                    <th className="px-4 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider text-faint">Verdict</th>
+                    <th className="px-4 py-2.5 font-mono text-xs text-faint">Date</th>
+                    <th className="px-4 py-2.5 font-mono text-xs text-faint">Titre</th>
+                    <th className="px-4 py-2.5 font-mono text-xs text-faint">Bascule</th>
+                    <th className="px-4 py-2.5 text-right font-mono text-xs text-faint">Cours bascule</th>
+                    <th className="px-4 py-2.5 text-right font-mono text-xs text-faint">Cours actuel</th>
+                    <th className="px-4 py-2.5 text-right font-mono text-xs text-faint">Depuis</th>
+                    <th className="px-4 py-2.5 text-center font-mono text-xs text-faint">Verdict</th>
                   </tr>
                 </thead>
                 <tbody>

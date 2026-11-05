@@ -121,7 +121,7 @@ export default async function ReseauxPage({ searchParams }: { searchParams: { ok
         ) : (
           <table className="mt-3 w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-border text-[11px] uppercase tracking-wide text-faint">
+              <tr className="border-b border-border text-[11px] text-faint">
                 <th className="py-2 pr-3">Date</th><th className="py-2 pr-3">Réseau</th><th className="py-2 pr-3">Contenu</th><th className="py-2">Statut</th>
               </tr>
             </thead>

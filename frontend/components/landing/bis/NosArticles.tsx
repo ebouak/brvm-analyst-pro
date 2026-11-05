@@ -20,8 +20,7 @@ export function NosArticles({ une, autres }: { une: ArticleLanding | null; autre
     <section className="articles" aria-labelledby="h-articles">
       <div className="articles-head">
         <div>
-          <p className="over">Analyses et actualités</p>
-          <h2 id="h-articles">Nos articles</h2>
+                    <h2 id="h-articles">Nos articles</h2>
           <p className="lead">Rédigés à partir des données de la plateforme, sources citées. Aucun n&apos;est un conseil en investissement.</p>
         </div>
         <Link href="/actualites" className="btn btn-ghost">
@@ -34,8 +33,8 @@ export function NosArticles({ une, autres }: { une: ArticleLanding | null; autre
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={`/api/articles/${encodeURIComponent(une.slug)}/image`} alt="" width={1200} height={630} loading="lazy" decoding="async" />
           <div className="art-txt">
-            <p className="over">{kicker(une)}</p>
             <h3>{une.titre}</h3>
+            <p className="meta">{kicker(une)}</p>
             <p>{une.chapo}</p>
             <span className="lire">
               {une.type === 'decryptage' ? 'Lire le décryptage' : "Lire l'article"} <span aria-hidden="true">→</span>
@@ -47,8 +46,8 @@ export function NosArticles({ une, autres }: { une: ArticleLanding | null; autre
             {autres.map((a) => (
               <li key={a.slug}>
                 <Link href={`/actualites/${a.slug}`} className="card art-mini">
-                  <p className="over">{kicker(a)}</p>
                   <h3>{a.titre}</h3>
+                  <p className="meta">{kicker(a)}</p>
                   <p>{a.chapo}</p>
                 </Link>
               </li>

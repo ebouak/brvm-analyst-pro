@@ -132,7 +132,6 @@ export default async function NotationsPage() {
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       {/* Header */}
       <SectionHeader
-        kicker="BRVM · Agences de notation"
         title="Notations financières"
         subtitle={`${COMPANIES.length} sociétés cotées · BloomField Investment · GCR Ratings`}
         actions={

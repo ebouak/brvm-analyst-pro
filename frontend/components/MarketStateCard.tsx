@@ -32,7 +32,7 @@ function MoverTooltip({ rows, label }: { rows: Mover[]; label: string }) {
       "
     >
       <div className="mb-1.5 flex items-center justify-between px-1">
-        <span className="text-[10px] uppercase tracking-wider text-faint">{label}</span>
+        <span className="text-xs text-faint">{label}</span>
         <span className="tabular text-[10px] text-muted">{rows.length}</span>
       </div>
       <div className="max-h-48 space-y-0.5 overflow-y-auto pr-0.5">
@@ -61,7 +61,7 @@ function BreadthBadge({ ratio }: { ratio: number }) {
     : { cls: 'border-warn/25 bg-warn/10 text-warn', label: 'Neutre'   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-[10px] font-semibold tracking-wide uppercase tabular ${cls}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-xs font-semibold tabular ${cls}`}>
       <span className={`h-1.5 w-1.5 rounded-full ${ratio >= 60 ? 'bg-up' : ratio <= 40 ? 'bg-down' : 'bg-warn'}`} />
       {label} {ratio.toFixed(0)}%
     </span>
@@ -182,7 +182,7 @@ export default function MarketStateCard({
               >
                 <div className="flex items-center gap-1.5 opacity-70">
                   {cfg.icon(13)}
-                  <span className="text-[10px] uppercase tracking-wider opacity-80 font-medium">{cfg.label}</span>
+                  <span className="text-xs opacity-80 font-medium">{cfg.label}</span>
                 </div>
                 <div className={`tabular text-lg font-bold leading-none ${cfg.valueCls}`}>
                   {values[cfg.key]}

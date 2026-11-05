@@ -168,7 +168,7 @@ export default function IntraDayMonitoringDashboard({
 
       {/* Job Runs Table */}
       <div className="space-y-3">
-        <h2 className="text-sm uppercase tracking-wider text-faint font-medium">Exécutions Récentes</h2>
+        <h2 className="text-sm text-faint font-medium">Exécutions Récentes</h2>
         {runs.length === 0 ? (
           <EmptyStatePremium
             title="Aucune exécution enregistrée"
@@ -178,7 +178,7 @@ export default function IntraDayMonitoringDashboard({
           <PremiumPanel className="overflow-x-auto p-0">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+                <tr className="border-b border-border text-left text-xs text-faint">
                   <th className="px-4 py-3 font-medium">Date</th>
                   <th className="px-4 py-3 font-medium">Phase</th>
                   <th className="px-4 py-3 font-medium">Statut</th>
@@ -227,7 +227,7 @@ export default function IntraDayMonitoringDashboard({
       {/* Error Feed */}
       {errors.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm uppercase tracking-wider text-faint font-medium">Incidents Récents</h2>
+          <h2 className="text-sm text-faint font-medium">Incidents Récents</h2>
           <PremiumPanel className="divide-y divide-border/40 p-0">
             {errors.map(err => (
               <div key={err.id} className="px-4 py-3">

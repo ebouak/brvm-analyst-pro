@@ -25,7 +25,6 @@ export default async function Page({ searchParams }: { searchParams: { tab?: str
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Rapports IA"
         subtitle="Diagnostics sell-side par action et rapports mensuels par utilisateur — fraîcheur, export, régénération."
       />

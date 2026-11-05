@@ -41,7 +41,7 @@ export default function BankScorecard({ kpis, score, periode, absences, qualite 
       {/* ── Le bilan bancaire en clair : prêts, dépôts, transformation ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-xs text-muted uppercase tracking-wider mb-3">
+          <h3 className="text-xs text-muted mb-3">
             Intermédiation{periode ? ` (exercice ${periode})` : ''}
           </h3>
           <KpiRow label="Crédits à la clientèle (prêts)" value={md(kpis.creditsClientele)} />
@@ -50,7 +50,7 @@ export default function BankScorecard({ kpis, score, periode, absences, qualite 
           <KpiRow label="Total actifs" value={md(kpis.totalActifs)} />
         </div>
         <div className="bg-surface border border-border rounded-xl p-4">
-          <h3 className="text-xs text-muted uppercase tracking-wider mb-3">Performance bancaire</h3>
+          <h3 className="text-xs text-muted mb-3">Performance bancaire</h3>
           <KpiRow label="Marge nette d'intérêts (NIM)" value={pct(kpis.nim, 2)} />
           <KpiRow
             label="Coefficient d'exploitation"
@@ -75,7 +75,7 @@ export default function BankScorecard({ kpis, score, periode, absences, qualite 
       {/* ── Score UEMOA /100 ── */}
       <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-xs text-muted uppercase tracking-wider">Score bancaire UEMOA</h3>
+          <h3 className="text-xs text-muted">Score bancaire UEMOA</h3>
           <div className="flex items-center gap-3">
             {score.total != null ? (
               <span className="tabular text-2xl font-semibold text-white">{score.total}<span className="text-sm text-muted">/100</span></span>

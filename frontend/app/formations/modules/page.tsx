@@ -16,7 +16,6 @@ export default async function ModulesPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <SectionHeader
-        kicker="Formations"
         title="Modules vidéo interactifs"
         subtitle="Des cours en vidéo, chapitrés, avec quiz et suivi de progression. Reprenez là où vous vous êtes arrêté."
       />

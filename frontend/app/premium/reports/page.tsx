@@ -57,7 +57,6 @@ export default async function ReportsArchivePage() {
     <div className="min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
         <SectionHeader
-          kicker="Gestion de portefeuille"
           title="Archive des rapports"
           subtitle="L’ensemble de vos rapports mensuels."
         />

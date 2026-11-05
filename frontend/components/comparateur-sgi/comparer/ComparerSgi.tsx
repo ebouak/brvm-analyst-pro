@@ -91,7 +91,7 @@ function Drapeau({ pays }: { pays: string }) {
 
 function Meilleur() {
   return (
-    <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-up px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-bg">
+    <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-up px-2.5 py-0.5 text-xs font-bold text-bg">
       <Trophy size={11} aria-hidden /> Meilleur coût
     </span>
   );

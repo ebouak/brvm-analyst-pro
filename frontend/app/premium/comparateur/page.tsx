@@ -14,7 +14,6 @@ export default async function ComparateurPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
       <SectionHeader
-        kicker="Allocation · arbitrage"
         title="Comparateur multi-actifs"
         subtitle="Rendement vs risque des grandes classes d'actifs BRVM — actions, obligations, revenu dividende, sans-risque."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}

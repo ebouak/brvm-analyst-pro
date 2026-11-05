@@ -30,7 +30,7 @@ export default async function Page({ searchParams }: { searchParams: { kind?: st
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader kicker="Administration" title="Contenu" subtitle="Actualités, communiqués et bulletins — modération, édition, création." />
+      <SectionHeader title="Contenu" subtitle="Actualités, communiqués et bulletins — modération, édition, création." />
       <div className="gold-rule" />
 
       <nav className="flex gap-2">

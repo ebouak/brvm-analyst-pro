@@ -90,7 +90,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
   }
 
   const H = ({ children }: { children: React.ReactNode }) => (
-    <h2 className="mt-6 mb-2 border-b border-neutral-300 pb-1 text-[13px] font-bold uppercase tracking-wide text-neutral-800">{children}</h2>
+    <h2 className="mt-6 mb-2 border-b border-neutral-300 pb-1 text-[13px] font-bold text-neutral-800">{children}</h2>
   );
   const Row = ({ l, r }: { l: string; r: React.ReactNode }) => (
     <div className="flex justify-between border-b border-neutral-100 py-1 text-[12px]"><span className="text-neutral-500">{l}</span><span className="font-medium text-neutral-900">{r}</span></div>
@@ -107,7 +107,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
       <article className="mx-auto max-w-[800px] bg-[#ffffff] px-12 py-10 font-serif text-neutral-900 shadow-xl print:max-w-none print:shadow-none print:px-0">
         <header className="flex items-end justify-between border-b-2 border-neutral-900 pb-2">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-neutral-400">WESTBOURSE · Rapport sur mesure</div>
+            <div className="text-xs text-neutral-400">WESTBOURSE · Rapport sur mesure</div>
             <div className="text-2xl font-bold">Rapport — {today}</div>
           </div>
           <div className="text-right text-[10px] text-neutral-400">Généré le {today}<br />BRVM · UEMOA</div>

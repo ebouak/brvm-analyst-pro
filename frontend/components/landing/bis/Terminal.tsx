@@ -39,8 +39,8 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
         <div className="tc-row tc-video">
           <div className="tc-head">
             <div>
-              <p className="o">La séance en {Math.round(v.duree_s)} secondes</p>
               <h2>La séance du {v.date_fr}{videoPrecedente && <span className="tag">séance précédente</span>}</h2>
+              <p className="meta">Vidéo de {Math.round(v.duree_s)} secondes</p>
               <p className="tc-sub">Montée chaque soir après la clôture, à partir des mêmes chiffres que cette page. Un jour sans séance exploitable est un jour sans vidéo : rien n’est repris d’un ancien épisode.</p>
             </div>
             <span className="hand-dark" aria-hidden="true">Des données<br />pour de meilleures<br />décisions.</span>
@@ -79,7 +79,6 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
       {/* Rangée 2 — la note quantitative */}
       <div className="tc-row tc-note">
         <div>
-          <p className="o">Note quantitative</p>
           <h2>Chaque action. Une note.</h2>
           <p className="tc-sub">Chaque note A–F est calculée à partir de signaux quantitatifs explicables (variation, volume, RSI, tendance et liquidité), jamais d&apos;opinion inventée.</p>
           <dl className="tc-legende">
@@ -103,7 +102,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
       {/* Rangée 3 — le dossier d’analyse, sur une ligne */}
       <div className="tc-row tc-diag">
         <div className="tc-head compact">
-          <div><p className="o">Dossier d’analyse</p><h2>Votre analyste BRVM en quelques secondes.</h2></div>
+          <div><h2>Votre analyste BRVM en quelques secondes.</h2></div>
           {r?.generated_at && <span className="tc-date num">{new Date(r.generated_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>}
         </div>
         <div className="tc-report">

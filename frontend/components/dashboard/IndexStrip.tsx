@@ -32,7 +32,7 @@ export default function IndexStrip({ indices }: { indices: IndiceDaily[] }) {
             "
           >
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-faint">{LABELS[i.code] ?? i.libelle ?? i.code}</div>
+              <div className="text-xs text-faint">{LABELS[i.code] ?? i.libelle ?? i.code}</div>
               <div className="tabular mt-0.5 text-xl font-bold text-ivory leading-none">
                 {(i.valeur as number).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>

@@ -124,7 +124,6 @@ export default async function CalendrierPremiumPage() {
       {/* Header */}
       <div className="space-y-4">
         <SectionHeader
-          kicker="Agenda Premium"
           title="Dates clés"
           subtitle="Communiqués, états financiers, dividendes et Assemblées Générales, regroupés par société."
           actions={<StatPill tone="gold">✦ Premium</StatPill>}
@@ -154,7 +153,7 @@ export default async function CalendrierPremiumPage() {
           const future = avenir.filter((d) => d.type === type).length;
           return (
             <div key={type} className={`rounded-card border bg-surface p-3 shadow-card ${cfg.border}`}>
-              <p className={`text-[10px] font-semibold uppercase tracking-widest ${cfg.color}`}>{cfg.label}</p>
+              <p className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</p>
               <p className={`tabular mt-1 text-2xl font-bold ${cfg.color}`}>{count}</p>
               <p className="text-[10px] text-faint mt-0.5">{future > 0 ? `${future} à venir` : 'sur 12 mois'}</p>
             </div>

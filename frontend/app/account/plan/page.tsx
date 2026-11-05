@@ -81,7 +81,7 @@ export default async function Page() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader kicker="Compte" title="Mon abonnement" subtitle="Votre formule et vos options Premium." />
+      <SectionHeader title="Mon abonnement" subtitle="Votre formule et vos options Premium." />
       <div className="gold-rule" />
 
       <div className="rounded-panel border border-border bg-surface p-5">

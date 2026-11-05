@@ -112,7 +112,7 @@ export default async function WeeklyArticlePage({ params }: { params: { slug: st
         {/* Graphiques Recharts — uniquement si content_html absent (anciens articles sans SVG intégré) */}
         {hasCharts && !article.content_html && (
           <section>
-            <h2 className="text-sm font-semibold text-accent uppercase tracking-widest mb-5">
+            <h2 className="text-sm font-semibold text-accent mb-5">
               Données de marché
             </h2>
             <div className="grid md:grid-cols-2 gap-4">

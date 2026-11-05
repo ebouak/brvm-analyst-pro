@@ -8,7 +8,6 @@ export default function MethodologiePage() {
 
       {/* En-tête */}
       <SectionHeader
-        kicker="Transparence"
         title="Méthodologie et sources"
         subtitle="Provenance des données, indicateurs techniques et calcul des signaux d'opportunité."
       />

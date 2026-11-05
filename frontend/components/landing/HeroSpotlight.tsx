@@ -104,7 +104,7 @@ export function HeroSpotlight({ dateLabel, ticks }: { dateLabel: string | null; 
 
       {/* Contenu */}
       <div className="absolute inset-0 z-[3] flex max-w-[58%] flex-col justify-center p-6 sm:p-9">
-        <span className="landing-hero-badge inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#8fe6ff]">
+        <span className="landing-hero-badge inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[9.5px] font-bold text-[#8fe6ff]">
           <span className="h-1.5 w-1.5 rounded-full bg-[#3fe18b] animate-pulse" />
           {dateLabel ? `Séance du ${dateLabel}` : 'Bourse Régionale des Valeurs Mobilières'}
         </span>

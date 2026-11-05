@@ -42,7 +42,6 @@ export default async function AlertesPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
-        kicker="Paramètres"
         title="Mes alertes"
         subtitle="Soyez notifié dès qu'un titre franchit un seuil de prix, change de signal ou approche d'un détachement de dividende."
       />

@@ -55,7 +55,7 @@ export default async function AdminArticlesPage() {
       ) : (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border text-[11px] uppercase tracking-wide text-faint">
+            <tr className="border-b border-border text-[11px] text-faint">
               <th className="px-3 py-2">Article</th>
               <th className="px-3 py-2">Statut</th>
               <th className="px-3 py-2">Diffusion</th>

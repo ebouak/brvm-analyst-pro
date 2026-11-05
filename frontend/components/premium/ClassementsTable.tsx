@@ -78,12 +78,12 @@ export function ClassementsTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-elevated/80 border-b border-border">
-              <th className="text-left px-4 py-3 text-[10px] text-faint font-semibold uppercase tracking-widest w-8">Rang</th>
-              <th className="text-left px-4 py-3 text-[10px] text-faint font-semibold uppercase tracking-widest">Symbole</th>
-              <th className="text-left px-4 py-3 text-[10px] text-faint font-semibold uppercase tracking-widest">Société</th>
-              <th className="text-left px-4 py-3 text-[10px] text-faint font-semibold uppercase tracking-widest hidden md:table-cell">Secteur</th>
-              <th className="text-right px-4 py-3 text-[10px] text-faint font-semibold uppercase tracking-widest">Signal</th>
-              <th className="text-right px-4 py-3 text-[10px] text-gold font-semibold uppercase tracking-widest">
+              <th className="text-left px-4 py-3 text-xs text-faint font-semibold w-8">Rang</th>
+              <th className="text-left px-4 py-3 text-xs text-faint font-semibold">Symbole</th>
+              <th className="text-left px-4 py-3 text-xs text-faint font-semibold">Société</th>
+              <th className="text-left px-4 py-3 text-xs text-faint font-semibold hidden md:table-cell">Secteur</th>
+              <th className="text-right px-4 py-3 text-xs text-faint font-semibold">Signal</th>
+              <th className="text-right px-4 py-3 text-xs text-gold font-semibold">
                 {CRITERES.find((c) => c.id === critere)?.label}
               </th>
             </tr>

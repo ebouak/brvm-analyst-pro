@@ -30,7 +30,6 @@ export default async function CorrelationsPage() {
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <SectionHeader
-        kicker="Intelligence de marché"
         title="Corrélations avec les matières premières"
         subtitle="Relation entre le cours des actions BRVM et les matières premières sous-jacentes · huile de palme, caoutchouc, sucre, cacao."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
@@ -64,7 +63,7 @@ export default async function CorrelationsPage() {
       {/* ── Séparateur éditorial ─────────────────────────────────────────── */}
       <div className="flex items-center gap-4">
         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest text-gold/50">
+        <span className="shrink-0 text-xs font-semibold text-gold/50">
           Analyse graphique
         </span>
         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -78,7 +77,7 @@ export default async function CorrelationsPage() {
       {/* ── Actualité & publications des sociétés agro ───────────────────── */}
       {news.length > 0 && (
         <PremiumPanel className="p-5">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-gold/60 mb-4">
+          <p className="text-xs font-semibold text-gold/60 mb-4">
             Actualité des sociétés agro
           </p>
           <ul className="space-y-2">

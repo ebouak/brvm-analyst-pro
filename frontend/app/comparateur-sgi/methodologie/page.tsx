@@ -37,7 +37,6 @@ export default async function MethodologiePage() {
       }}
     >
       <section aria-labelledby="titre-sources" className="space-y-4">
-        <p className="overline text-gold-2">Sources et calcul</p>
         <h2 id="titre-sources" className="font-display text-xl text-ivory">Comment le coût est calculé</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Regle titre="Des barèmes officiels d’abord">

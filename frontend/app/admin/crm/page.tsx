@@ -110,7 +110,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
     <>
     {/* Contenu derrière le panneau : inerte (ni focus ni lecteur d'écran) tant qu'il est ouvert. */}
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6" {...(searchParams.fiche ? ({ inert: '' } as Record<string, unknown>) : {})}>
-      <SectionHeader kicker="Administration" title="CRM · proches du Premium" />
+      <SectionHeader title="CRM · proches du Premium" />
 
       <IndicateursBandeau i={indicateurs} />
 
@@ -177,7 +177,7 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 {peutEcrire && <th className="w-10 px-4 py-3"><CaseTout /></th>}
                 <th className="px-4 py-3 font-medium">Personne</th><th className="px-4 py-3 font-medium">Pays</th><th className="px-4 py-3 font-medium">Paiement</th>
                 <th className="px-4 py-3 text-right font-medium">Montant</th><th className="px-4 py-3 font-medium">Échéance</th>
@@ -192,9 +192,9 @@ export default async function Page({ searchParams }: { searchParams: Sp }) {
                   <td className="px-4 py-2.5">
                     <Link href={href(sp, { fiche: d.cle })} scroll={false} className="font-medium text-ivory after:absolute after:inset-0 hover:text-accent-ink">{d.nom ?? d.emailNorm}</Link>
                     {!d.userId && <span className="ml-2 text-xs text-faint">prospect sans compte</span>}
-                    {d.formationAchetee && <span className="ml-2 rounded-full border border-accent/40 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-accent-ink">formation achetée{d.formationAchetee === 'partielle' ? ' (partielle)' : ''}</span>}
+                    {d.formationAchetee && <span className="ml-2 rounded-full border border-accent/40 px-1.5 py-0.5 text-xs text-accent-ink">formation achetée{d.formationAchetee === 'partielle' ? ' (partielle)' : ''}</span>}
                   </td>
-                  <td className="px-4 py-2.5 text-muted">{d.pays ? <>{nomPays(d.pays)} <span className="ml-1 rounded-full border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-faint">{continentDe(d.pays) ?? '—'}</span></> : '—'}</td>
+                  <td className="px-4 py-2.5 text-muted">{d.pays ? <>{nomPays(d.pays)} <span className="ml-1 rounded-full border border-border px-1.5 py-0.5 text-xs text-faint">{continentDe(d.pays) ?? '—'}</span></> : '—'}</td>
                   <td className="px-4 py-2.5"><BadgeEtat etat={etat.etat} /></td>
                   <td className="px-4 py-2.5 text-right tabular text-muted">{etat.enCours ? fmtMontant(etat.enCours.montant, etat.enCours.devise) : '—'}</td>
                   <td className="px-4 py-2.5 tabular text-muted">{echeance ? fmtJour(echeance) : '—'}</td>

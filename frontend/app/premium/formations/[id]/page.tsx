@@ -28,7 +28,6 @@ export default async function FormationDetailPage({ params }: { params: { id: st
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
       <Link href="/formations" className="text-xs text-faint hover:text-white">← Toutes les formations</Link>
       <SectionHeader
-        kicker={TYPE_LABEL[f.type] ?? 'Formation'}
         title={f.titre}
         subtitle={f.description ?? undefined}
       />

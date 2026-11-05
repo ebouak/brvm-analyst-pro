@@ -19,7 +19,7 @@ export default function BacktestDemoPage() {
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Chiffres animés (comptage flou)</h2>
+          <h2 className="text-sm font-semibold text-gray-400">Chiffres animés (comptage flou)</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" data-testid="animated-kpis">
             <div className="rounded-xl border border-gray-200 bg-[#ffffff] p-4">
               <p className="text-xs text-gray-500">Valorisation</p>
@@ -43,12 +43,12 @@ export default function BacktestDemoPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Variante « full » (rapport)</h2>
+          <h2 className="text-sm font-semibold text-gray-400">Variante « full » (rapport)</h2>
           <BacktestInfographic report={mockBacktestReportBICC} variant="full" />
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Variante « compact » (dashboard)</h2>
+          <h2 className="text-sm font-semibold text-gray-400">Variante « compact » (dashboard)</h2>
           <BacktestInfographic report={mockBacktestReportBICC} variant="compact" />
         </section>
       </div>

@@ -32,7 +32,7 @@ export function SocialProof() {
 
       {/* Sources officielles */}
       <div className="rounded-panel border border-white/10 bg-white/[0.02] px-5 py-4">
-        <p className="mb-3 text-center text-[10px] uppercase tracking-[0.18em] text-faint">
+        <p className="mb-3 text-center text-xs text-faint">
           Données vérifiées · sources officielles
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">

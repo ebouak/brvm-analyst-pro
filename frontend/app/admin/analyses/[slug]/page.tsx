@@ -28,7 +28,7 @@ export default async function EditAnalysePage({ params }: { params: { slug: stri
           Voir la page publique ↗
         </Link>
       </div>
-      <SectionHeader kicker="Administration" title={initial.title} subtitle={`/analyses/${params.slug}`} />
+      <SectionHeader title={initial.title} subtitle={`/analyses/${params.slug}`} />
       <CitablePageForm initial={initial} />
     </div>
   );

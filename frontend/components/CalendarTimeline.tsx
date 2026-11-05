@@ -24,7 +24,7 @@ export default function CalendarTimeline({ items }: { items: CalendarItem[] }) {
         return (
           <div key={date}>
             <div className="flex items-center gap-3 mb-3">
-              <span className="text-xs font-semibold text-blue tracking-widest uppercase">
+              <span className="text-xs font-semibold text-blue">
                 {fmtDateLong(date)}
               </span>
               <div className="flex-1 h-px bg-border" />
@@ -81,7 +81,7 @@ function CalendarCard({ item }: { item: CalendarItem }) {
             <p className="text-xs text-muted mt-0.5">{item.secteur}</p>
           )}
           {item.importance != null && item.importance >= 3 && (
-            <span className="inline-block mt-1 text-[10px] uppercase tracking-wide text-warn">
+            <span className="inline-block mt-1 text-xs text-warn">
               {'★'.repeat(item.importance)}
             </span>
           )}

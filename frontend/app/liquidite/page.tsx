@@ -47,7 +47,6 @@ export default async function LiquiditePage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <SectionHeader
-        kicker="Analyse"
         title="Liquidité du marché"
         subtitle={
           asOf
@@ -66,7 +65,7 @@ export default async function LiquiditePage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead>
-                <tr className="border-b border-border text-[11px] uppercase tracking-wide text-faint">
+                <tr className="border-b border-border text-[11px] text-faint">
                   <th className="px-3 py-2">Titre</th>
                   <th className="px-3 py-2">Score</th>
                   <th className="px-3 py-2">Classe</th>

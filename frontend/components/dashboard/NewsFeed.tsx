@@ -26,7 +26,7 @@ export default async function NewsFeed() {
   return (
     <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted uppercase tracking-wide">Actualités</span>
+        <span className="text-xs text-muted">Actualités</span>
         <Link href="/actualites" className="text-[10px] text-cyan hover:underline">Tout voir →</Link>
       </div>
       <div className="space-y-2">

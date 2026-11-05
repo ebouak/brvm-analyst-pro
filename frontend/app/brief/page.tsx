@@ -30,7 +30,7 @@ export default async function BriefPage() {
     <PublicShell>
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
-          <p className="text-[11px] text-accent/70 uppercase tracking-[0.18em] mb-1">Brief quotidien</p>
+          <p className="text-[11px] text-accent/70 mb-1">Brief quotidien</p>
           <h1 className="font-display text-2xl md:text-3xl text-white mb-2">
             Le résumé de séance BRVM, chaque jour
           </h1>

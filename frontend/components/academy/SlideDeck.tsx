@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Check, Star, X } from 'lucide-react';
 import type { CourseContent } from '@/lib/academy/types';
 import { courseToSlides, splitNumbered, type Slide } from '@/lib/academy/slides';
 import { SECTION_LABEL } from '@/lib/academy/types';
@@ -78,9 +79,9 @@ export default function SlideDeck({ content, onClose }: { content: CourseContent
       {/* Barre d'outils (masquée à l'impression) */}
       <div className="deck-toolbar flex items-center gap-3 px-4 py-2" style={{ borderBottom: `1px solid rgba(255,255,255,0.1)` }}>
         <button type="button" onClick={onClose} className="rounded-md px-2.5 py-1 text-sm text-white/80 hover:text-white" style={{ border: '1px solid rgba(255,255,255,0.2)' }}>
-          ✕ Fermer
+          <X size={14} strokeWidth={2} aria-hidden className="mr-1 inline-block align-[-2px]" />Fermer
         </button>
-        <span className="text-xs uppercase tracking-wider" style={{ color: GOLD }}>BRVM Academy · Présentation</span>
+        <span className="text-xs" style={{ color: GOLD }}>BRVM Academy · Présentation</span>
         <div className="ml-auto flex items-center gap-2">
           <button type="button" onClick={() => window.print()} className="rounded-md px-2.5 py-1 text-sm text-white/80 hover:text-white" style={{ border: '1px solid rgba(255,255,255,0.2)' }}>
             ⤓ Imprimer / PDF
@@ -158,7 +159,7 @@ export default function SlideDeck({ content, onClose }: { content: CourseContent
 
 function Foot({ page, total, label }: { page: number; total: number; label: string }) {
   return (
-    <div className="flex items-center justify-between px-8 pb-4 text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+    <div className="flex items-center justify-between px-8 pb-4 text-xs" style={{ color: MUTED }}>
       <span>{label}</span>
       <span className="tabular">{String(page).padStart(2, '0')} / {total}</span>
     </div>
@@ -170,7 +171,7 @@ function SlideView({ slide, page, total }: { slide: Slide; page: number; total: 
     return (
       <div className="flex h-full flex-col" style={{ background: NAVY, color: '#fff' }}>
         <div className="flex flex-1 flex-col justify-center px-10 sm:px-14">
-          <span className="mb-4 inline-block w-fit rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest" style={{ border: `1px solid ${GOLD}`, color: GOLD }}>
+          <span className="mb-4 inline-block w-fit rounded-full px-3 py-1 text-[11px] font-semibold" style={{ border: `1px solid ${GOLD}`, color: GOLD }}>
             UEMOA · 8 pays · un marché
           </span>
           <h1 className="font-display text-4xl leading-tight sm:text-6xl" style={{ color: GOLD }}>{slide.titre}</h1>
@@ -178,7 +179,7 @@ function SlideView({ slide, page, total }: { slide: Slide; page: number; total: 
           <div className="mt-8 grid max-w-2xl grid-cols-3 gap-4">
             {slide.stats.map((s, i) => (
               <div key={i}>
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</p>
                 <p className="tabular mt-1 text-xl font-bold sm:text-2xl" style={{ color: '#fff' }}>{s.valeur}</p>
               </div>
             ))}
@@ -220,14 +221,14 @@ function SlideView({ slide, page, total }: { slide: Slide; page: number; total: 
         <div className="flex flex-1 flex-col">
           <div className="flex flex-1 flex-col justify-center px-8 sm:px-12">
             <span className="mb-2 h-1 w-12" style={{ background: GOLD }} />
-            <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: GOLD }}>{slide.sur}</p>
+            <p className="text-[11px] font-semibold" style={{ color: GOLD }}>{slide.sur}</p>
             <h1 className="mt-2 font-display text-3xl leading-tight sm:text-5xl">{slide.titre}</h1>
             <p className="mt-3 max-w-xl text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.8)' }}>{slide.resume}</p>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-2 px-8 pb-6 sm:px-12">
             {slide.objectifs.map((o, i) => (
               <div key={i}>
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: GOLD }}>Objectif {i + 1}</p>
+                <p className="text-xs" style={{ color: GOLD }}>Objectif {i + 1}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>{o}</p>
               </div>
             ))}
@@ -241,7 +242,7 @@ function SlideView({ slide, page, total }: { slide: Slide; page: number; total: 
     return (
       <div className="flex h-full flex-col" style={{ background: CREAM, color: INK }}>
         <div className="flex flex-1 flex-col px-10 pt-8 sm:px-14">
-          <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: GOLD }}>Leçon {String(slide.leconNum).padStart(2, '0')} · graphique</p>
+          <p className="text-[11px] font-semibold" style={{ color: GOLD }}>Leçon {String(slide.leconNum).padStart(2, '0')} · graphique</p>
           <div className="mt-3 flex-1">
             <LessonChart chart={slide.chart} variant="slide" />
           </div>
@@ -277,7 +278,7 @@ function SectionSlide({
     <div className="flex h-full flex-col" style={{ background: bg, color: textColor }}>
       <div className="h-1.5 w-full" style={{ background: accent }} />
       <div className="flex-1 overflow-hidden px-10 pt-6 sm:px-14">
-        <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: isPiege ? RED : accent }}>
+        <p className="text-[11px] font-semibold" style={{ color: isPiege ? RED : accent }}>
           Leçon {String(slide.leconNum).padStart(2, '0')} · {SECTION_LABEL[s.type] ?? ''}
         </p>
         <h2 className="mt-1 font-display text-2xl leading-tight sm:text-4xl" style={{ color: isPiege ? '#fff' : NAVY }}>{s.titre}</h2>
@@ -303,7 +304,7 @@ function SectionSlide({
           <div className={`mt-4 grid gap-3 grid-cols-${Math.min(s.stats.length, 4)}`} style={{ gridTemplateColumns: `repeat(${Math.min(s.stats.length, 4)}, minmax(0, 1fr))` }}>
             {s.stats.map((k, i) => (
               <div key={i} className="rounded-lg border p-3" style={{ borderColor: isPiege ? 'rgba(255,255,255,0.2)' : '#e2d8c4', background: isPiege ? 'rgba(255,255,255,0.05)' : '#fff' }}>
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>{k.label}</p>
+                <p className="text-xs" style={{ color: MUTED }}>{k.label}</p>
                 <p className="tabular mt-0.5 text-lg font-bold" style={{ color: isPiege ? GOLD : NAVY }}>{k.valeur}</p>
                 {k.detail && <p className="mt-0.5 text-[10px] leading-snug" style={{ color: MUTED }}>{k.detail}</p>}
               </div>
@@ -318,7 +319,7 @@ function SectionSlide({
               <thead>
                 <tr style={{ background: NAVY }}>
                   {s.tableau.colonnes.map((c, j) => (
-                    <th key={j} className="px-3 py-2 font-semibold uppercase tracking-wide" style={{ color: '#fff' }}>{c}</th>
+                    <th key={j} className="px-3 py-2 font-semibold" style={{ color: '#fff' }}>{c}</th>
                   ))}
                 </tr>
               </thead>
@@ -341,7 +342,7 @@ function SectionSlide({
             {s.etapes.map((e, i) => (
               <div key={i} className="rounded-lg border p-2.5" style={{ borderColor: e.cle ? GOLD : '#e2d8c4', background: e.cle ? 'rgba(212,165,60,0.08)' : '#fff' }}>
                 <span className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: e.cle ? GOLD : NAVY, color: '#fff' }}>
-                  {e.cle ? '★' : i + 1}
+                  {e.cle ? <Star size={12} strokeWidth={2.25} aria-label="Étape clé" /> : i + 1}
                 </span>
                 <p className="mt-1.5 text-[11px] font-semibold leading-tight" style={{ color: NAVY }}>{e.titre}</p>
                 {e.detail && <p className="mt-0.5 text-[10px] leading-snug" style={{ color: MUTED }}>{e.detail}</p>}
@@ -369,7 +370,7 @@ function QuizSlide({
   return (
     <div className="flex h-full flex-col" style={{ background: NAVY, color: '#fff' }}>
       <div className="flex-1 px-10 pt-8 sm:px-14">
-        <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: GOLD }}>Quiz · Leçon {String(slide.num).padStart(2, '0')}</p>
+        <p className="text-[11px] font-semibold" style={{ color: GOLD }}>Quiz · Leçon {String(slide.num).padStart(2, '0')}</p>
         <h2 className="mt-2 font-display text-2xl leading-tight sm:text-3xl">{q.question}</h2>
         <div className="mt-5 grid grid-cols-2 gap-3">
           {q.options.map((opt, i) => {
@@ -386,7 +387,7 @@ function QuizSlide({
                 style={{ border: `1px solid ${border}`, background: bg }}>
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
                   style={{ border: `1px solid ${revealed && isCorrect ? GREEN : 'rgba(255,255,255,0.4)'}`, color: revealed && isCorrect ? GREEN : '#fff' }}>
-                  {revealed && isCorrect ? '✓' : letters[i]}
+                  {revealed && isCorrect ? <Check size={14} strokeWidth={2.5} aria-label="Bonne réponse" /> : letters[i]}
                 </span>
                 <span className="text-sm" style={{ color: 'rgba(255,255,255,0.9)' }}>{opt}</span>
               </button>
@@ -394,8 +395,8 @@ function QuizSlide({
           })}
         </div>
         {choice !== null && (
-          <div className="mt-4 rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)', borderLeft: `3px solid ${GOLD}` }}>
-            <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: GOLD }}>Explication</p>
+          <div className="mt-4 rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <p className="text-xs font-semibold" style={{ color: GOLD }}>Explication</p>
             <p className="mt-1 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>{q.explication}</p>
           </div>
         )}

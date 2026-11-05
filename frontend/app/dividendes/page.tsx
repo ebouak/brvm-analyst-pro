@@ -183,7 +183,6 @@ export default async function DividendesPage({ searchParams }: PageProps) {
       {/* En-tête premium */}
       <SectionHeader
         accent="emerald"
-        kicker="Rémunération de l'actionnaire"
         title="Dividendes BRVM"
         subtitle="Historique des distributions. Le rendement est calculé sur le dernier cours disponible."
         actions={

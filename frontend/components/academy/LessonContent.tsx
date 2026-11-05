@@ -23,10 +23,14 @@ import './lecon/lecon.css';
  * étapes, simplement mieux mis en page.
  */
 
-/** Kicker de section : numéro, puis le rôle de la section quand il éclaire la lecture. */
-function kicker(s: Section, i: number): string {
-  const num = String(i + 1).padStart(2, '0');
-  return s.type === 'importance' ? num : `${num} · ${libelleSection(s)}`;
+/**
+ * Rôle de la section, montré seulement quand il change la lecture (un piège, un
+ * point à retenir, un cas réel), en pastille accolée au titre. Plus de numéro
+ * ni de surtitre au-dessus du titre (retirés le 2026-11-05).
+ */
+function role(s: Section): string | null {
+  if (s.type === 'piege' || s.type === 'retenir' || (s.type === 'cas' && s.reel)) return libelleSection(s);
+  return null;
 }
 
 function SectionLecon({ s, i, donnees }: { s: Section; i: number; donnees?: DonneesSection | null }) {
@@ -34,8 +38,10 @@ function SectionLecon({ s, i, donnees }: { s: Section; i: number; donnees?: Donn
   return (
     <section className={`lp-section lp-large lp-section--${s.type}`} aria-labelledby={`lp-s${i}`}>
       <div className="lp-col">
-        <p className="lp-kicker">{kicker(s, i)}</p>
-        <h2 id={`lp-s${i}`} className="lp-h2">{s.titre}</h2>
+        <h2 id={`lp-s${i}`} className="lp-h2">
+          {s.titre}
+          {role(s) && <span className="lp-role">{role(s)}</span>}
+        </h2>
       </div>
       <div className="lp-col lp-corps">
         <Texte contenu={s.contenu} />

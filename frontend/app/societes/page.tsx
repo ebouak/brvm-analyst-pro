@@ -65,7 +65,7 @@ export default async function CompaniesIndexPage() {
   return (
     <PublicShell>
       <div className="mb-8">
-        <p className="text-[11px] text-accent/70 uppercase tracking-[0.18em] mb-1">Marché actions BRVM</p>
+        <p className="text-[11px] text-accent/70 mb-1">Marché actions BRVM</p>
         <h1 className="font-display text-2xl md:text-3xl text-white mb-2">
           Les sociétés cotées à la BRVM
         </h1>

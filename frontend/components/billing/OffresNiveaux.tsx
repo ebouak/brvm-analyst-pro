@@ -54,7 +54,7 @@ export default async function OffresNiveaux({
         {offres.map((p) => (
           <li key={p.productCode} className="flex flex-col gap-3 rounded-lg border border-border/70 bg-bg/40 p-4">
             <div>
-              <p className="text-xs uppercase tracking-widest text-accent">
+              <p className="text-xs text-accent">
                 {p.kind === 'formation' ? 'Formation complète · 4 niveaux + 1 mois Premium' : p.niveau ? NIVEAU_LABEL[p.niveau] : ''}
                 {p.kind === 'upgrade' ? ' · nouvelle version' : ''}
               </p>

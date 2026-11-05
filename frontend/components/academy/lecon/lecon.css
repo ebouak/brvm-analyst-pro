@@ -42,7 +42,7 @@
 /* ── En-tête ─────────────────────────────────────────────────────────── */
 .lp-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin-bottom: 1rem; }
 .lp-categorie {
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  font-size: 0.8rem; font-weight: 600;
   color: var(--lp-accent);
 }
 .lp-duree { font-size: 0.8rem; color: var(--lp-doux); }
@@ -63,8 +63,15 @@
 /* ── Sections ────────────────────────────────────────────────────────── */
 .lp-section { margin-top: 3rem; padding-top: 2.25rem; border-top: 1px solid var(--lp-trame); }
 .lp-kicker {
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  font-size: 0.95rem; font-weight: 600;
   color: var(--lp-accent); margin: 0 0 0.4rem;
+}
+/* Rôle d'une section (piège, à retenir, cas réel) : pastille accolée au titre. */
+.lp-role {
+  display: inline-block; margin-left: 0.6rem; vertical-align: 0.3em;
+  font-family: inherit; font-size: 0.72rem; font-weight: 600; line-height: 1;
+  padding: 0.3rem 0.6rem; border-radius: 999px;
+  color: var(--lp-accent); border: 1px solid currentColor;
 }
 .lp-h2 {
   font-family: var(--font-display), Georgia, serif;
@@ -75,10 +82,10 @@
 .lp-texte p + p { margin-top: 0.85em; }
 
 /* Pièges et « à retenir » : un filet, pas une boîte. */
-.lp-section--piege .lp-corps { border-left: 3px solid var(--lp-alerte); padding-left: 1.1rem; }
-.lp-section--piege .lp-kicker { color: var(--lp-alerte); }
-.lp-section--retenir .lp-corps { border-left: 3px solid var(--lp-retenir); padding-left: 1.1rem; }
-.lp-section--retenir .lp-kicker { color: var(--lp-retenir); }
+.lp-section--piege .lp-corps { border-left: 1px solid var(--lp-alerte); padding-left: 1.1rem; }
+.lp-section--piege .lp-role { color: var(--lp-alerte); }
+.lp-section--retenir .lp-corps { border-left: 1px solid var(--lp-retenir); padding-left: 1.1rem; }
+.lp-section--retenir .lp-role { color: var(--lp-retenir); }
 
 .lp-bloc { margin-top: 1.6rem; }
 
@@ -86,7 +93,7 @@
 .lp-formules { display: grid; gap: 0.75rem; }
 @media (min-width: 640px) { .lp-formules { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); } }
 .lp-formule { background: var(--lp-accent-clair); border-radius: 12px; padding: 1rem 1.15rem; }
-.lp-formule-nom { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lp-accent); }
+.lp-formule-nom { font-size: 0.8rem; font-weight: 600; color: var(--lp-accent); }
 .lp-formule-expr {
   margin-top: 0.35rem; font-family: var(--font-display), Georgia, serif;
   font-size: 1.15rem; line-height: 1.35; color: var(--lp-encre);
@@ -161,7 +168,7 @@
 .lp-frise-etape:not(:last-child)::after {
   content: ''; position: absolute; left: 0.74rem; top: 1.45rem; bottom: -1.25rem; border-left: 2px solid var(--lp-trame);
 }
-.lp-frise-num { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lp-doux); }
+.lp-frise-num { font-size: 0.8rem; font-weight: 600; color: var(--lp-doux); }
 .lp-frise-etape--cle .lp-frise-num { color: var(--lp-accent); }
 .lp-frise-titre { font-weight: 600; color: var(--lp-encre); }
 .lp-frise-detail { font-size: 0.92rem; margin-top: 0.15rem; }
@@ -180,7 +187,7 @@
    une colonne étroite : dans les tableaux, on ne coupe qu'entre les mots. */
 .lp-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; overflow-wrap: normal; }
 .lp-table th {
-  text-align: left; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  text-align: left; font-size: 0.8rem; font-weight: 600;
   color: var(--lp-doux); padding: 0.5rem 0.6rem; border-bottom: 1.5px solid var(--lp-encre); vertical-align: bottom;
 }
 .lp-table td { padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--lp-trame); vertical-align: top; }
@@ -203,7 +210,7 @@
 .lp-figure-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.35rem 1rem; margin-bottom: 0.75rem; }
 .lp-figure-titre { font-weight: 600; color: var(--lp-encre); }
 .lp-badge {
-  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: 0.8rem; font-weight: 600;
   color: var(--lp-retenir); border: 1px solid currentColor; border-radius: 999px; padding: 0.1rem 0.55rem;
 }
 .lp-badge--reel { color: var(--lp-accent); }

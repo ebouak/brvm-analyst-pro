@@ -35,7 +35,7 @@ export function IndicesCompactCard({ indices }: { indices: IndiceDaily[] }) {
             const down = v < 0;
             return (
               <li key={i.code} className="border-b border-border/60 pb-2.5 last:border-0 last:pb-0">
-                <p className="text-[10px] uppercase tracking-wide text-faint">{LABELS[i.code] ?? i.code}</p>
+                <p className="text-xs text-faint">{LABELS[i.code] ?? i.code}</p>
                 <div className="mt-0.5 flex items-baseline justify-between gap-2">
                   <span className="tabular text-sm font-bold text-ivory">
                     {i.valeur != null ? nf(i.valeur as number) : '—'}

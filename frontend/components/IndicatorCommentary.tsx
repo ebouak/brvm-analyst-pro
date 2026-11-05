@@ -27,7 +27,7 @@ export default function IndicatorCommentary({ reading, code }: { reading: Indica
   return (
     <div className="space-y-3">
       <div className={`rounded-card border p-4 ${t.cls}`}>
-        <p className="text-[11px] uppercase tracking-[0.18em] mb-2 opacity-80">{t.label}</p>
+        <p className="text-[11px] mb-2 opacity-80">{t.label}</p>
         <ul className="space-y-1.5">
           {reading.points.map((p, i) => (
             <li key={i} className="flex items-start gap-2 text-xs text-muted leading-relaxed">

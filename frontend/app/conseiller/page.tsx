@@ -84,7 +84,6 @@ export default async function ConseillerPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
-        kicker="Bot conseiller"
         title="Conseiller BRVM"
         subtitle="Une recommandation unifiée par action (Acheter / Conserver / Vendre) qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
         actions={

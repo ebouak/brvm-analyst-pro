@@ -50,7 +50,6 @@ export default async function VeillePage() {
   return (
     <div className="min-h-screen bg-bg px-4 py-6 space-y-6 max-w-7xl mx-auto">
       <SectionHeader
-        kicker={`Intelligence · ${NB_SOCIETES_COTEES} sociétés · 150+ sources · 1 an d'historique`}
         title="Veille BRVM"
         subtitle="Veille automatisée de l’actualité du marché, mise à jour chaque jour."
       />

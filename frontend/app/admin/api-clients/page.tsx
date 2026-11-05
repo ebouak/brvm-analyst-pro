@@ -18,7 +18,6 @@ export default async function Page() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
       <SectionHeader
-        kicker="Administration"
         title="Clients de l'API"
         subtitle="L'API BRVM est accessible sur autorisation. Chaque clé est nominative, plafonnée par un quota journalier, et révocable à tout moment."
       />

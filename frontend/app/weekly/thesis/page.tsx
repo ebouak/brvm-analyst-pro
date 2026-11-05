@@ -244,7 +244,7 @@ export default function ThesisPage() {
         {/* ── Matrice de sensibilité ── */}
         <section>
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Matrice de sensibilité</span>
+            <span className="text-xs font-mono text-accent/60">Matrice de sensibilité</span>
             <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
           <div className="overflow-x-auto rounded-xl border border-border">
@@ -283,7 +283,7 @@ export default function ThesisPage() {
         {/* ── Fiches sociétés ── */}
         <section>
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Fiches valeurs</span>
+            <span className="text-xs font-mono text-accent/60">Fiches valeurs</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {COMPANIES.map(c => (
@@ -328,7 +328,7 @@ export default function ThesisPage() {
                   </div>
 
                   {/* Filière */}
-                  <p className="text-xs text-faint font-semibold uppercase tracking-wide">{c.filiere}</p>
+                  <p className="text-xs text-faint font-semibold">{c.filiere}</p>
 
                   {/* Thesis */}
                   <ul className="space-y-1">
@@ -342,7 +342,7 @@ export default function ThesisPage() {
 
                   {/* Risks */}
                   <div className="border-t border-border pt-3">
-                    <p className="text-[10px] text-faint uppercase tracking-wider mb-1.5">Risques</p>
+                    <p className="text-xs text-faint mb-1.5">Risques</p>
                     <div className="flex flex-wrap gap-1.5">
                       {c.risks.map((r, i) => (
                         <span key={i} className="text-[11px] bg-red-950/40 text-red-400 border border-red-800/30 px-2 py-0.5 rounded">
@@ -387,7 +387,7 @@ export default function ThesisPage() {
         {/* ── Facteurs transversaux ── */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Facteurs transversaux</span>
+            <span className="text-xs font-mono text-accent/60">Facteurs transversaux</span>
             <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -420,7 +420,7 @@ export default function ThesisPage() {
         {/* ── Calendrier catalyseurs ── */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-accent/60">Calendrier des catalyseurs</span>
+            <span className="text-xs font-mono text-accent/60">Calendrier des catalyseurs</span>
             <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
           <div className="rounded-xl border border-border overflow-hidden">

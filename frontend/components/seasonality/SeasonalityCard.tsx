@@ -14,7 +14,7 @@ export default function SeasonalityCard({ code, returns }: { code: string; retur
   return (
     <div className="rounded-panel border border-border bg-surface p-4 space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] text-gold/70 uppercase tracking-[0.18em]">Saisonnalité (10 ans)</p>
+        <p className="text-[11px] text-gold/70">Saisonnalité (10 ans)</p>
         <Link href={`/saisonnalite?code=${code}`} className="text-[11px] text-info hover:underline">Complet →</Link>
       </div>
       <div className="grid grid-cols-3 gap-2 text-xs">

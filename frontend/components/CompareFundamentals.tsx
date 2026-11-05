@@ -36,7 +36,7 @@ export default function CompareFundamentals({ rows }: { rows: FundaRow[] }) {
   return (
     <div className="bg-surface border border-border rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-border">
-        <span className="text-xs text-muted uppercase tracking-wide">Fondamentaux comparés</span>
+        <span className="text-xs text-muted">Fondamentaux comparés</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">

@@ -30,7 +30,6 @@ export default async function Page() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Paiements"
         subtitle="Transactions de facturation, statut et encaissements (lecture seule)."
       />
@@ -49,7 +48,7 @@ export default async function Page() {
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 <th className="px-4 py-3 font-medium">Utilisateur</th>
                 <th className="px-4 py-3 font-medium">Fournisseur</th>
                 <th className="px-4 py-3 font-medium text-right">Montant</th>

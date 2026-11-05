@@ -67,7 +67,7 @@ export default function BacktestMetrics({ result }: Props) {
     <div className="bg-surface border border-border rounded-xl p-4 space-y-5">
       {/* Performance */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider text-faint mb-3">Performance</h3>
+        <h3 className="text-[11px] text-faint mb-3">Performance</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <PlainCard label="Rendement total" value={pct(totalReturn)} cls={signClass(totalReturn)}
             hint="Gain/perte cumulé de la stratégie sur la période." />
@@ -82,7 +82,7 @@ export default function BacktestMetrics({ result }: Props) {
 
       {/* Risque */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider text-faint mb-3">Risque ajusté</h3>
+        <h3 className="text-[11px] text-faint mb-3">Risque ajusté</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <RatedCard label="Sharpe" value={sharpeRatio != null ? fmt(sharpeRatio, 2) : '—'} metricKey="sharpe" rawValue={sharpeRatio} />
           <RatedCard label="Sortino" value={sortinoRatio != null ? fmt(sortinoRatio, 2) : '—'} metricKey="sortino" rawValue={sortinoRatio} />
@@ -93,7 +93,7 @@ export default function BacktestMetrics({ result }: Props) {
 
       {/* Exécution */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider text-faint mb-3">Exécution & régularité</h3>
+        <h3 className="text-[11px] text-faint mb-3">Exécution & régularité</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <RatedCard label="Win Rate" value={`${fmt(winRate * 100)}%`} metricKey="winRate" rawValue={winRate} />
           <RatedCard label="Volatilité" value={`${fmt(volatility * 100)}%`} metricKey="volatility" rawValue={volatility} />

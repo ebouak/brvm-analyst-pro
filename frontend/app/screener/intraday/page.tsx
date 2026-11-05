@@ -30,7 +30,6 @@ export default async function IntraDayScreenerPage() {
     <div className="space-y-6">
       <div>
         <SectionHeader
-          kicker="Outils"
           title="Screener Intraday"
           subtitle="Les plus fortes variations et les volumes inhabituels de la séance en cours."
         />

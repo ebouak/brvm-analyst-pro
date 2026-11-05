@@ -29,7 +29,6 @@ export default async function OutilsPage() {
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <SectionHeader
         accent="gold"
-        kicker="Boîte à outils"
         title="Outils Premium"
         subtitle="Saisonnalité, actions proches de leurs plus bas, réaction aux états financiers · signaux structurels de la BRVM."
         actions={<StatPill tone="gold">✦ Premium</StatPill>}
@@ -84,7 +83,7 @@ export default async function OutilsPage() {
       {/* ── Séparateur éditorial ─────────────────────────────────────────── */}
       <div className="flex items-center gap-4">
         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest text-gold/50">
+        <span className="shrink-0 text-xs font-semibold text-gold/50">
           Visualisations
         </span>
         <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />

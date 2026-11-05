@@ -85,7 +85,7 @@ export function StockSpotlight({ stock, dateLabel }: { stock: StockDetail | null
               <span className="font-mono text-2xl font-bold text-ivory">{stock.code}</span>
               <RatingBadge scoreTotal={stock.score} confiance={stock.confiance} />
             </div>
-            {stock.nom && <p className="mt-1 text-xs uppercase tracking-wide text-faint">{stock.nom}</p>}
+            {stock.nom && <p className="mt-1 text-xs text-faint">{stock.nom}</p>}
 
             <p className="tabular mt-5 font-display text-[clamp(32px,5vw,44px)] leading-none text-ivory">
               {n0(stock.cours)} <span className="text-base font-normal text-faint">FCFA</span>
@@ -97,7 +97,7 @@ export function StockSpotlight({ stock, dateLabel }: { stock: StockDetail | null
 
             <div className="mt-6 flex flex-wrap gap-2">
               {stock.signal && (
-                <span className="rounded-full border border-accent/30 bg-accent/[0.07] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-accent">
+                <span className="rounded-full border border-accent/30 bg-accent/[0.07] px-3 py-1 text-[11px] font-bold text-accent">
                   Signal {stock.signal}
                 </span>
               )}

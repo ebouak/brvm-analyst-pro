@@ -27,7 +27,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
     <div className="space-y-4">
       {/* Verdict de synthèse */}
       <div className={`rounded-card border bg-elevated/40 p-4 ${TONE_RING[technical.tone]}`}>
-        <p className="text-[11px] uppercase tracking-[0.18em] text-gold/70 mb-1.5">Analyse de synthèse</p>
+        <p className="text-[11px] text-gold/70 mb-1.5">Analyse de synthèse</p>
         <p className="text-sm text-ivory leading-relaxed">{synthesis.verdict}</p>
 
         {synthesis.cautions.length > 0 && (
@@ -45,7 +45,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
       {/* Lecture technique */}
       <div className="rounded-card border border-border bg-surface p-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[11px] uppercase tracking-wider text-faint">Lecture technique</p>
+          <p className="text-[11px] text-faint">Lecture technique</p>
           <span className="text-xs font-semibold text-ivory">{technical.headline}</span>
         </div>
         <ul className="space-y-1.5">
@@ -57,7 +57,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
           ))}
         </ul>
         {technical.tension && (
-          <p className="mt-3 rounded-md border-l-2 border-warn/50 bg-warn/[0.06] px-3 py-2 text-xs text-warn/90 leading-relaxed">
+          <p className="mt-3 rounded-md bg-warn/[0.08] px-3 py-2 text-xs text-warn/90 leading-relaxed">
             {technical.tension}
           </p>
         )}
@@ -67,7 +67,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Position */}
         <div className="rounded-card border border-border bg-surface p-4">
-          <p className="text-[11px] uppercase tracking-wider text-faint mb-2">Votre position</p>
+          <p className="text-[11px] text-faint mb-2">Votre position</p>
           {position.held ? (
             <div className="space-y-1">
               <div className="flex items-baseline justify-between">
@@ -89,7 +89,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
 
         {/* Dividende */}
         <div className="rounded-card border border-border bg-surface p-4">
-          <p className="text-[11px] uppercase tracking-wider text-faint mb-2">Dividende</p>
+          <p className="text-[11px] text-faint mb-2">Dividende</p>
           {dividend.status === 'none' ? (
             <p className="text-xs text-faint">Aucune information dividende disponible.</p>
           ) : (

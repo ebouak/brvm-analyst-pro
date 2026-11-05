@@ -25,13 +25,13 @@ function DivTable({ rows }: { rows: TopDividende[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-elevated border-b border-border">
-            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider w-8">#</th>
-            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Symbole</th>
-            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider hidden md:table-cell">Société</th>
-            <th className="text-center px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Années</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Dernier div.</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Total / Moyen</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Signal</th>
+            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold w-8">#</th>
+            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold">Symbole</th>
+            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold hidden md:table-cell">Société</th>
+            <th className="text-center px-4 py-2.5 text-xs text-faint font-semibold">Années</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">Dernier div.</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">Total / Moyen</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">Signal</th>
           </tr>
         </thead>
         <tbody>
@@ -63,14 +63,14 @@ function PvTable({ rows }: { rows: TopPlusValue[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-elevated border-b border-border">
-            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider w-8">#</th>
-            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Symbole</th>
-            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider hidden md:table-cell">Société</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">1er cours</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Dernier cours</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">+Value</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Perf %</th>
-            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold uppercase tracking-wider">Signal</th>
+            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold w-8">#</th>
+            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold">Symbole</th>
+            <th className="text-left px-4 py-2.5 text-xs text-faint font-semibold hidden md:table-cell">Société</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">1er cours</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">Dernier cours</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">+Value</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">Perf %</th>
+            <th className="text-right px-4 py-2.5 text-xs text-faint font-semibold">Signal</th>
           </tr>
         </thead>
         <tbody>

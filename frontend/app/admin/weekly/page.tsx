@@ -33,7 +33,6 @@ export default async function Page() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Rapports hebdomadaires"
         subtitle="Rapports commodity générés chaque vendredi — modération et publication."
       />
@@ -54,7 +53,7 @@ export default async function Page() {
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1a2a30] text-left text-xs uppercase tracking-wider text-[#6b8a9a]">
+              <tr className="border-b border-[#1a2a30] text-left text-xs text-[#6b8a9a]">
                 <th className="px-4 py-3 font-medium">Semaine</th>
                 <th className="px-4 py-3 font-medium">Titre</th>
                 <th className="px-4 py-3 font-medium">Date</th>

@@ -92,7 +92,7 @@ export default function TechnicalGauge({ result }: { result: TechnicalSummaryRes
       </svg>
 
       {/* Bornes */}
-      <div className="w-full max-w-[300px] flex justify-between -mt-1 px-1 text-[9px] uppercase tracking-wide text-faint">
+      <div className="w-full max-w-[300px] flex justify-between -mt-1 px-1 text-xs text-faint">
         <span>Vente forte</span>
         <span>Achat fort</span>
       </div>
@@ -101,15 +101,15 @@ export default function TechnicalGauge({ result }: { result: TechnicalSummaryRes
       <div className="mt-3 grid grid-cols-3 gap-2 w-full max-w-[300px] text-center">
         <div>
           <div className="text-down font-mono tabular text-lg font-semibold">{bearCount}</div>
-          <div className="text-[10px] uppercase tracking-wide text-muted">Vente</div>
+          <div className="text-xs text-muted">Vente</div>
         </div>
         <div>
           <div className="text-muted font-mono tabular text-lg font-semibold">{neutCount}</div>
-          <div className="text-[10px] uppercase tracking-wide text-muted">Neutre</div>
+          <div className="text-xs text-muted">Neutre</div>
         </div>
         <div>
           <div className="text-up font-mono tabular text-lg font-semibold">{bullCount}</div>
-          <div className="text-[10px] uppercase tracking-wide text-muted">Achat</div>
+          <div className="text-xs text-muted">Achat</div>
         </div>
       </div>
     </div>

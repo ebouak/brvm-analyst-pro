@@ -160,7 +160,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
               }`}
             >
               {highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#03222b]">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-0.5 text-[11px] font-bold text-[#03222b]">
                   Le plus choisi
                 </span>
               )}

@@ -53,7 +53,7 @@ export function ExportButton({ texteAnalyse, symbole }: ExportButtonProps) {
 
   return (
     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-      <span className="text-[10px] text-faint uppercase tracking-wider">Télécharger</span>
+      <span className="text-xs text-faint">Télécharger</span>
 
       <button
         type="button"

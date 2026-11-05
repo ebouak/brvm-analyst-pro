@@ -188,7 +188,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeProvider && (
-            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/10 px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wide text-up">
+            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/10 px-2.5 py-0.5 text-xs font-mono text-up">
               {activeProvider}
             </span>
           )}
@@ -209,7 +209,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 bg-bg/60">
         {messages.length === 0 && (
           <div className="py-8">
-            <p className="text-center text-faint text-[10px] mb-6 uppercase tracking-widest">Posez une question ou choisissez un template</p>
+            <p className="text-center text-faint text-xs mb-6">Posez une question ou choisissez un template</p>
             {/* Symbol shortcuts */}
             <div className="flex gap-2 mb-6 flex-wrap justify-center">
               {['PALC', 'SNTS', 'BOAC', 'ORAC', 'SGBC', 'CIEC'].map((s) => (

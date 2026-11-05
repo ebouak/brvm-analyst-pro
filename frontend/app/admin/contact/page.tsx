@@ -45,7 +45,6 @@ export default async function Page() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Administration"
         title="Messages de contact"
         subtitle="Messages de l'encart « Salut, on se parle ? ». L'accusé de réception promet une réponse sous 2 jours ouvrés ; une ligne passe en alerte après un jour."
       />
@@ -59,7 +58,7 @@ export default async function Page() {
       </div>
 
       <div>
-        <h2 className="mb-2 text-xs font-medium uppercase tracking-wider text-faint">WhatsApp</h2>
+        <h2 className="mb-2 text-xs font-medium text-faint">WhatsApp</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <MetricCard label="Messages reçus (7 j)" value={nf.format(suivi.stats.recus7)} accent="neutral" />
           <MetricCard label="Messages reçus (30 j)" value={nf.format(suivi.stats.recus30)} accent="neutral" />
@@ -84,7 +83,7 @@ export default async function Page() {
         <PremiumPanel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+              <tr className="border-b border-border text-left text-xs text-faint">
                 <th className="px-4 py-3 font-medium">Visiteur</th>
                 <th className="px-4 py-3 font-medium">Message</th>
                 <th className="px-4 py-3 font-medium">Reçu</th>

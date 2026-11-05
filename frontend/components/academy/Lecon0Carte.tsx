@@ -15,8 +15,8 @@ export function Lecon0Carte({ className = '' }: { className?: string }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={LECON0.vignette} alt="" width={96} height={104} loading="lazy" className="h-[104px] w-24 flex-none rounded-lg object-cover" />
       <div className="min-w-0">
-        <p className="text-xs uppercase tracking-widest text-accent">Leçon 0 · gratuite · vidéo {LECON0.duree}</p>
-        <p className="mt-1 font-display text-base text-white transition group-hover:text-accent">{LECON0.titre}</p>
+        <p className="font-display text-base text-white transition group-hover:text-accent">{LECON0.titre}</p>
+        <p className="mt-0.5 text-xs text-accent">Leçon 0 · gratuite · vidéo {LECON0.duree}</p>
         <p className="mt-1 line-clamp-2 text-sm text-muted">{LECON0.resume}</p>
       </div>
     </Link>

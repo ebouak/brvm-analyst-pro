@@ -118,7 +118,6 @@ export default async function SignauxPage() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12">
         <SectionHeader
-          kicker="BRVM · Moteur de signaux"
           title="Signaux d'opportunité"
           subtitle="Signaux techniques calculés à chaque séance, avec le détail des facteurs qui les composent."
         />
@@ -148,7 +147,6 @@ export default async function SignauxPage() {
 
       {/* ── En-tête de page ─────────────────────────────────────────────── */}
       <SectionHeader
-        kicker="BRVM · Moteur de signaux"
         title="Signaux d'opportunité"
         subtitle="Signaux techniques calculés à chaque séance, avec le détail des facteurs qui les composent."
         actions={

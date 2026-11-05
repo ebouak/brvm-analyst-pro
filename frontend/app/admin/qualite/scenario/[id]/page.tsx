@@ -27,7 +27,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <Link href={`/admin/qualite/${run.id}`} className="text-xs text-muted hover:text-ivory">← Exécution du {fmtDate(run.debut_at)}</Link>
-      <SectionHeader kicker={`Module ${resultat.module}`} title={resultat.titre} subtitle={`${resultat.fichier}${resultat.projet ? ` · ${resultat.projet}` : ''}`} />
+      <SectionHeader title={resultat.titre} subtitle={`${resultat.fichier}${resultat.projet ? ` · ${resultat.projet}` : ''}`} />
       <div className="gold-rule" />
 
       <PremiumPanel className="p-5">
@@ -82,7 +82,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             <table className="w-full text-sm">
               <caption className="sr-only">Historique du scénario</caption>
               <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-faint">
+                <tr className="border-b border-border text-left text-xs text-faint">
                   <th scope="col" className="px-4 py-3 font-medium">Exécution</th>
                   <th scope="col" className="px-4 py-3 font-medium">Version</th>
                   <th scope="col" className="px-4 py-3 font-medium">Env.</th>

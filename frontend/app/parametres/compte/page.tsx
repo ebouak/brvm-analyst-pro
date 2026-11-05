@@ -51,7 +51,6 @@ export default function ComptePage() {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-8">
       <SectionHeader
-        kicker="Paramètres"
         title="Mon compte"
         subtitle="Gérez vos données personnelles, notifications et préférences de compte."
       />

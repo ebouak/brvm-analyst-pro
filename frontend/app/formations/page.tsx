@@ -1,6 +1,7 @@
 import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import { accesAcademy } from '@/lib/server/academyAccess';
 import Link from 'next/link';
+import { Clapperboard, Mic } from 'lucide-react';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
 import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/server';
 import { SectionHeader, StatPill } from '@/components/ui/premium';
@@ -48,7 +49,6 @@ export default async function FormationsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <SectionHeader
-        kicker="Académie"
         title="Formations et conférences"
         subtitle="Montez en compétence sur l'investissement à la BRVM : cours, replays et conférences. Accès réservé aux membres Premium."
       />
@@ -56,12 +56,12 @@ export default async function FormationsPage() {
       {/* ── Sessions en direct — places limitées ────────────────────────────── */}
       <Link href="/formations/sessions"
         className="group flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-surface p-6 transition-all hover:border-accent/50">
-        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-3xl">
-          🎤
+        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
+          <Mic size={26} strokeWidth={1.75} aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-accent">En direct</span>
+            <span className="text-xs font-bold text-accent">En direct</span>
             <StatPill tone="sapphire">Places limitées</StatPill>
             <StatPill tone="neutral">Avec un formateur</StatPill>
           </div>
@@ -92,7 +92,7 @@ export default async function FormationsPage() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#56D7FD]">Académie</span>
+            <span className="text-xs font-bold text-[#56D7FD]">Académie</span>
             <StatPill tone="sapphire">44 leçons · 4 niveaux</StatPill>
             <StatPill tone="neutral">QCM interactifs</StatPill>
           </div>
@@ -112,12 +112,12 @@ export default async function FormationsPage() {
       {/* ── Modules vidéo interactifs ─────────────────────────────────────── */}
       <Link href="/formations/modules"
         className="group flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-surface p-6 transition-all hover:border-accent/50">
-        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-3xl">
-          🎬
+        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
+          <Clapperboard size={26} strokeWidth={1.75} aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-accent">Vidéo</span>
+            <span className="text-xs font-bold text-accent">Vidéo</span>
             <StatPill tone="sapphire">Chapitres</StatPill>
             <StatPill tone="neutral">Quiz + progression</StatPill>
           </div>

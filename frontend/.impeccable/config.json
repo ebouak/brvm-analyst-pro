@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "border-left: 7px solid var(--lp-accent)",
+        "createdAt": "2026-11-05T12:24:46.391Z",
+        "reason": "pointe de flèche CSS (astuce des bordures) dans le schéma de flux des leçons, pas un filet latéral"
+      }
+    ]
+  }
+}

@@ -58,7 +58,7 @@ export default async function MesAchatsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
-      <SectionHeader kicker="Compte" title="Mes achats" subtitle="Niveaux de l’Academy et pass achetés via Chariow." />
+      <SectionHeader title="Mes achats" subtitle="Niveaux de l’Academy et pass achetés via Chariow." />
 
       <section aria-labelledby="h-acces" className="rounded-panel border border-border bg-surface p-5">
         <h2 id="h-acces" className="font-display text-lg text-white">Mes accès</h2>

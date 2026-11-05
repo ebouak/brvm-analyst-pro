@@ -87,7 +87,7 @@ export default function OnboardingModal() {
         {step === 1 && (
           <>
             <div className="space-y-1">
-              <p className="text-[10px] text-faint uppercase tracking-wide">Bienvenue · Étape 1/4</p>
+              <p className="text-xs text-faint">Bienvenue · Étape 1/4</p>
               <h2 className="text-lg font-semibold text-ivory">Quel est votre profil ?</h2>
               <p className="text-xs text-muted">Personnalise vos signaux et recommandations.</p>
             </div>
@@ -112,7 +112,7 @@ export default function OnboardingModal() {
         {step === 2 && (
           <>
             <div className="space-y-1">
-              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 2/4</p>
+              <p className="text-xs text-faint">Étape 2/4</p>
               <h2 className="text-lg font-semibold text-ivory">Votre horizon d&apos;investissement ?</h2>
             </div>
             <div className="space-y-2">
@@ -142,7 +142,7 @@ export default function OnboardingModal() {
         {step === 3 && (
           <>
             <div className="space-y-1">
-              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 3/4</p>
+              <p className="text-xs text-faint">Étape 3/4</p>
               <h2 className="text-lg font-semibold text-ivory">Votre niveau d&apos;expérience ?</h2>
               <p className="text-xs text-muted">Le mode débutant remplace le jargon par des explications simples.</p>
             </div>
@@ -182,7 +182,7 @@ export default function OnboardingModal() {
         {step === 4 && (
           <>
             <div className="space-y-1">
-              <p className="text-[10px] text-faint uppercase tracking-wide">Étape 4/4</p>
+              <p className="text-xs text-faint">Étape 4/4</p>
               <h2 className="text-lg font-semibold text-ivory">Choisissez votre formule</h2>
               <p className="text-xs text-muted">Vous pouvez démarrer gratuitement et passer Premium à tout moment.</p>
             </div>

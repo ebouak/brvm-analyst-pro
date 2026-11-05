@@ -68,7 +68,7 @@ export default function ReponseForm({
       {actif ? (
         <>
           <label className="block">
-            <span className="text-[11px] uppercase tracking-wider text-faint">Réponse à {email}</span>
+            <span className="text-[11px] text-faint">Réponse à {email}</span>
             <textarea
               value={texte}
               onChange={(e) => {

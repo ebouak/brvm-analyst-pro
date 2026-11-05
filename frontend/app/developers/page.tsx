@@ -66,7 +66,7 @@ const WIDGETS: { nom: string; path: string; h: number; titre: string }[] = [
 export default function DevelopersPage() {
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
+      <header className="border-b border-border/60 bg-surface">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="font-display text-white tracking-tight hover:text-accent transition-colors">WESTBOURSE</Link>
           <Link href="/" className="text-sm text-muted hover:text-white transition-colors">← Accueil</Link>
@@ -75,7 +75,6 @@ export default function DevelopersPage() {
 
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
         <div>
-          <p className="overline text-faint mb-2">Développeurs</p>
           <h1 className="font-display text-3xl text-white">API BRVM</h1>
           <p className="mt-3 max-w-2xl text-muted leading-relaxed">
             API REST JSON sur les données de marché de la BRVM (Bourse Régionale des Valeurs

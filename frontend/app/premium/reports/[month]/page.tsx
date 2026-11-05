@@ -95,7 +95,6 @@ export default async function ReportDetailPage({ params }: { params: { month: st
 
         {/* Page title */}
         <SectionHeader
-          kicker="Rapport mensuel"
           title={monthName}
           subtitle="Vos performances du mois, les signaux marquants et les événements de marché."
         />

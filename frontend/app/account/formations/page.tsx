@@ -34,7 +34,7 @@ export default async function MesFormationsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-      <SectionHeader kicker="Mon compte" title="Mes formations" subtitle="Vos inscriptions aux sessions en direct." />
+      <SectionHeader title="Mes formations" subtitle="Vos inscriptions aux sessions en direct." />
       {lignes.length === 0 ? (
         <EmptyStatePremium
           title="Aucune inscription"

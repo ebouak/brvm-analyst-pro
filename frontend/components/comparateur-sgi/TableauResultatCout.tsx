@@ -156,7 +156,7 @@ export function TableauResultatCout({
                 <td className="px-3 py-2 tabular text-faint">{i + 1}</td>
                 <td className="px-3 py-2">
                   <span className="font-medium text-white">{r.sgiNom}</span>
-                  {i === 0 && sortKey === 'total' && asc && r.complet && <span className="ml-2 text-[10px] text-up">★ moins cher</span>}
+                  {i === 0 && sortKey === 'total' && asc && r.complet && <span className="ml-2 text-[10px] font-semibold text-up">moins cher</span>}
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2">
                     <Badge niveau={r.confiance} />
                     {r.decision && (

@@ -53,7 +53,6 @@ export default async function ObligationsPage() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
         <SectionHeader
-          kicker="Instruments de taux"
           title="Marché obligataire"
           subtitle="Rendement à l’échéance (YTM), duration modifiée et courbe des taux des obligations cotées à la BRVM."
         />
@@ -74,7 +73,6 @@ export default async function ObligationsPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <SectionHeader
-        kicker="Instruments de taux"
         title="Marché obligataire"
         subtitle="Rendement à l’échéance (YTM) et duration modifiée des obligations cotées à la BRVM."
         actions={

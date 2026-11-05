@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Info } from 'lucide-react';
 import { EtatSeanceLive } from './EtatSeanceLive';
 import { pct, tone } from '@/lib/landing/formats';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
@@ -72,8 +73,7 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
           composants clients : le contenu reste rendu ici, côté serveur. */}
       <Apparition className="today-head" variante="entete" survol={false}>
         <div>
-          <p className="over">Aperçu du marché</p>
-          <h2 id="h-today">La BRVM aujourd&apos;hui</h2>
+                    <h2 id="h-today">La BRVM aujourd&apos;hui</h2>
           <p className="lead">{n.sousTitre}</p>
         </div>
         <div className="head-right">
@@ -107,7 +107,7 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
         </Apparition>
         <Apparition className="card r1b" rang={1}><IndexChart serie={d.brvmCSerie} /></Apparition>
         <Apparition className="card senti r1c" rang={2}>
-          <p className="over">Sentiment de séance <span className="info" title="Part des valeurs en hausse parmi celles qui ont varié, sur 100.">ⓘ</span></p>
+          <p className="over">Sentiment de séance <span className="info" title="Part des valeurs en hausse parmi celles qui ont varié, sur 100."><Info size={13} strokeWidth={2} aria-label="Définition" /></span></p>
           <JaugeSentiment score={score} />
           <p className="senti-foot"><b className="down">{d.baisses}</b> baisse{d.baisses > 1 ? 's' : ''} sur {d.nbActions} titres suivis{d.etat.sentimentDelta != null && <small className={`num ${tone(d.etat.sentimentDelta)}`}> · {d.etat.sentimentDelta >= 0 ? '+' : '−'}{Math.abs(Math.round(d.etat.sentimentDelta))} pts vs veille</small>}</p>
         </Apparition>

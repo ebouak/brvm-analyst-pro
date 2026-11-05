@@ -178,13 +178,16 @@ body::before {
   letter-spacing: -0.01em;
 }
 
-/* Surtitre éditorial (mono, espacé) */
+/* Étiquette de section / d'en-tête de tableau. Plus de « surtitre » monospace,
+   capitales et lettres espacées (déguisement typique des interfaces générées,
+   retiré le 2026-11-05) : le monospace reste réservé aux chiffres (.tabular). */
 .overline {
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 10px;
-  font-weight: 700;
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
 }
 
 /* Filet doré décoratif */
@@ -193,14 +196,11 @@ body::before {
   background: linear-gradient(90deg, transparent, rgba(208, 162, 49, 0.55), transparent);
 }
 
-/* Texte cyan à reflet (accent) */
+/* Mot mis en avant : couleur d'accent pleine. Le texte en dégradé a été
+   retiré (2026-11-05) — l'emphase vient de la couleur et de la graisse. */
 .text-gold-shimmer {
-  background: linear-gradient(100deg, #2a8aa8 0%, #8fe6ff 45%, #56d7fd 55%, #2a8aa8 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: rgb(var(--color-accent));
+  font-weight: inherit;
 }
 
 ::selection { background: rgba(86, 215, 253, 0.26); color: #fcfcfc; }

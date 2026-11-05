@@ -145,8 +145,7 @@ export default async function Landing() {
           <section className="gratuit" aria-labelledby="h-gratuit">
             <div className="card grand">
               <div>
-                <p className="over">Avec un compte gratuit</p>
-                <h2 id="h-gratuit">Commencez par explorer. Gratuitement.</h2>
+                                <h2 id="h-gratuit">Commencez par explorer. Gratuitement.</h2>
                 <ul className="coches deux">
                   {[`Explorer les ${NB_SOCIETES_COTEES} sociétés cotées et leurs fiches`, 'Consulter les fondamentaux et les dividendes', 'Suivre la séance et les indices', 'Créer votre watchlist et votre portefeuille', 'Recevoir le brief du soir et vos alertes par email'].map((t) => <li key={t}><span className="check" aria-hidden="true" />{t}</li>)}
                 </ul>
@@ -162,8 +161,7 @@ export default async function Landing() {
           {/* 3 · POUR ALLER PLUS LOIN — Premium, une seule fois */}
           <section id="premium" className="prem" aria-labelledby="h-prem">
             <div className="prem-copy">
-              <p className="over">Accédez à plus avec Premium</p>
-              <h2 id="h-prem">Pour aller <span className="accent">plus loin</span>,<br />quand vous serez prêt.</h2>
+                            <h2 id="h-prem">Pour aller <span className="accent">plus loin</span>,<br />quand vous serez prêt.</h2>
               <p>Les essentiels pour suivre le marché sont gratuits. Premium vous donne plus d&apos;outils pour aller plus loin et saisir davantage d&apos;opportunités.</p>
               <Link href="/pricing" className="btn btn-ghost">Voir les offres <span aria-hidden="true">→</span></Link>
               <div className="skyline" aria-hidden="true">
@@ -229,8 +227,7 @@ export default async function Landing() {
           {/* 4 · NEWSLETTER */}
           <section className="nl" aria-labelledby="h-nl">
             <div className="card">
-              <p className="over">Brief du soir</p>
-              <h2 id="h-nl" style={{ fontSize: 26, marginTop: 8 }}>La séance résumée chaque soir.</h2>
+                            <h2 id="h-nl" style={{ fontSize: 26, marginTop: 8 }}>La séance résumée chaque soir.</h2>
               <p style={{ color: 'var(--muted)', marginTop: 8 }}>Cinq lignes, chaque jour de cotation à 18 h. Inscription confirmée par email, désabonnement en un clic.</p>
             </div>
             <div className="card nl-form"><p className="over" style={{ marginBottom: 8 }}>Recevoir le brief</p><NewsletterForm source="landing" compact /></div>

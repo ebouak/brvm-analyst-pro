@@ -108,7 +108,7 @@ export function LoginMarketBar({ asOf, ticks, candles }: { asOf: string | null; 
       )}
 
       <div className="px-4 pb-1 text-center">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-white/25">
+        <span className="text-xs text-white/25">
           Séance BRVM · {asOf}
         </span>
       </div>

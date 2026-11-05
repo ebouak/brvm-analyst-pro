@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Check, X } from 'lucide-react';
 import type { Qcm } from '@/lib/academy/types';
 
 /** Même seuil que les examens de niveau : 70 %. */
@@ -70,8 +71,8 @@ export default function QcmBlock({
                       >
                         <b aria-hidden="true">{String.fromCharCode(65 + i)}</b>
                         <span>{opt}</span>
-                        {juste && <span style={{ marginLeft: 'auto' }} aria-label="bonne réponse">✓</span>}
-                        {faux && <span style={{ marginLeft: 'auto' }} aria-label="réponse choisie, inexacte">✗</span>}
+                        {juste && <Check size={16} strokeWidth={2.5} style={{ marginLeft: 'auto' }} aria-label="bonne réponse" />}
+                        {faux && <X size={16} strokeWidth={2.5} style={{ marginLeft: 'auto' }} aria-label="réponse choisie, inexacte" />}
                       </button>
                     );
                   })}

@@ -19,7 +19,7 @@ export default function EventTimeline({ events }: { events: MarketEvent[] }) {
           <div className={`border rounded-lg p-3 ${SENTIMENT[e.sentiment ?? 'neutral']}`}>
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-muted tabular">{e.event_date}</span>
-              <span className="text-[10px] uppercase tracking-wide text-muted">{e.event_type}</span>
+              <span className="text-xs text-muted">{e.event_type}</span>
             </div>
             <Link href={`/dashboard/reports/events/${e.id}`} className="text-sm font-medium hover:text-up block mt-1">
               {e.title}

@@ -64,7 +64,7 @@ export default function LevelModal() {
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#0b6b6f]">Bienvenue</p>
+                <p className="text-[11px] font-semibold text-[#0b6b6f]">Bienvenue</p>
                 <h2 className="mt-1 text-xl font-bold text-[#191714]">Où en êtes-vous avec la BRVM ?</h2>
                 <p className="mt-1 text-sm text-[#6e6a63]">On adapte le contenu à votre niveau. Aucune obligation.</p>
               </div>

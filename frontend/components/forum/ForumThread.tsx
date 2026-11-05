@@ -34,7 +34,7 @@ export function ForumThread({ topic, posts, authors, canPost, voteCounts, myVote
 
       {/* Réponses */}
       <section className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+        <p className="text-xs font-semibold text-muted">
           {posts.length} réponse{posts.length !== 1 ? 's' : ''}
         </p>
         {posts.map((p) => (

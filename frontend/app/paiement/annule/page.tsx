@@ -9,7 +9,6 @@ export default function PaiementAnnulePage() {
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 py-10 sm:px-6">
       <SectionHeader
-        kicker="Paiement"
         title="Paiement annulé"
         subtitle="La commande n’a pas été validée. Vous pouvez la reprendre quand vous le souhaitez."
       />
