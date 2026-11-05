@@ -25,6 +25,12 @@ import { texteQuota, TEXTE_EFFACE, TEXTE_VOCAL_INCOMPRIS, TEXTE_VOCAL_TROP_LONG 
 
 const HISTORIQUE = 10;
 const FENETRE_MS = 72 * 3600 * 1000;
+/**
+ * Temps accordé à l'IA pour UN message (tous fournisseurs, outils et réécriture
+ * du verrou des chiffres compris). La route a 120 s (maxDuration) ; une note
+ * vocale a pu en consommer 30 avant, l'envoi en demande quelques-unes après.
+ */
+const ECHEANCE_IA_MS = 80_000;
 const entier = (v: string | undefined, defaut: number) => {
   const n = Number(v ?? defaut);
   return Number.isInteger(n) && n >= 0 ? n : defaut;
@@ -53,6 +59,7 @@ async function memoriser(db: SupabaseClient, chatHash: string, userId: string | 
 function depsChatbot(chatId: string): DepsChatbot {
   const db = getServiceClient();
   const h = hacherChat(chatId);
+  const echeance = Date.now() + ECHEANCE_IA_MS;
   let profil: { email: string | null; isPremium: boolean } | null = null;
 
   return {
@@ -103,14 +110,18 @@ function depsChatbot(chatId: string): DepsChatbot {
     },
     llm: async (messages, id) => {
       const sources: string[] = [];
-      const texte = await callAgentLlm(messages as ChatMessage[], {
-        definitions: outilsChatbot(id.perso),
-        executer: async (nom, args) => {
-          const r = await executerOutilChatbot(db, id.userId, id.perso, nom, args);
-          sources.push(JSON.stringify(r));
-          return r;
+      const texte = await callAgentLlm(
+        messages as ChatMessage[],
+        {
+          definitions: outilsChatbot(id.perso),
+          executer: async (nom, args) => {
+            const r = await executerOutilChatbot(db, id.userId, id.perso, nom, args);
+            sources.push(JSON.stringify(r));
+            return r;
+          },
         },
-      });
+        { echeance },
+      );
       return { texte, sources };
     },
     enregistrer: (id, lignes) => memoriser(db, h, id.userId, lignes),

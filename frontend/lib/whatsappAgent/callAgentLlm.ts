@@ -2,6 +2,7 @@
 import 'server-only';
 import { parametresFournisseur, redacteursDisponibles } from '@/lib/server/redacteur';
 import type { DefinitionOutil } from '@/lib/agent/outils';
+import { delaiAppel } from './delai';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
@@ -43,11 +44,21 @@ const MAX_TOURS = 3;
  * d'activer les outils sur Telegram sans rien changer au chemin WhatsApp, qui
  * est en production et que je ne peux pas éprouver ici.
  */
+export interface OptionsAgentLlm {
+  /**
+   * Instant (ms epoch) au-delà duquel plus aucun appel n'est lancé. Chaque
+   * appel reçoit le temps restant (≤ 60 s) au lieu de 30 s fixes — voir delai.ts.
+   */
+  echeance?: number;
+}
+
 export async function callAgentLlm(
   messages: ChatMessage[],
   outils?: BoiteAOutils,
+  options: OptionsAgentLlm = {},
 ): Promise<string | null> {
   const providers = (await redacteursDisponibles()).map((r) => ({
+    nom: r.fournisseur,
     key: r.cle,
     url: r.url,
     model: r.modele,
@@ -62,6 +73,11 @@ export async function callAgentLlm(
       const fil: ChatMessage[] = [...messages];
 
       for (let tour = 0; tour < MAX_TOURS; tour++) {
+        const delai = delaiAppel(Date.now(), options.echeance);
+        if (delai === null) {
+          console.warn(`[agent-llm] échéance atteinte avant ${p.nom} (tour ${tour + 1})`);
+          return null;
+        }
         const r = await fetch(p.url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
@@ -72,19 +88,29 @@ export async function callAgentLlm(
             ...p.extra,
             ...(outils ? { tools: outils.definitions, tool_choice: 'auto' } : {}),
           }),
-          signal: AbortSignal.timeout(30000),
+          signal: AbortSignal.timeout(delai),
         });
-        if (!r.ok) break; // fournisseur suivant
+        // Chaque abandon est journalisé (fournisseur + raison, jamais la clé) :
+        // un repli qui échoue en silence ne se voit que le jour où il sert.
+        if (!r.ok) {
+          console.warn(`[agent-llm] ${p.nom} : HTTP ${r.status}`);
+          break; // fournisseur suivant
+        }
 
         const j = (await r.json()) as { choices?: Array<{ message?: ChatMessage }> };
         const msg = j.choices?.[0]?.message;
-        if (!msg) break;
+        if (!msg) {
+          console.warn(`[agent-llm] ${p.nom} : réponse sans message`);
+          break;
+        }
 
         const appels = msg.tool_calls;
         if (!outils || !appels || appels.length === 0) {
           if (msg.content) return msg.content;
+          console.warn(`[agent-llm] ${p.nom} : réponse vide`);
           break;
         }
+        if (tour === MAX_TOURS - 1) console.warn(`[agent-llm] ${p.nom} : ${MAX_TOURS} tours d'outils sans réponse`);
 
         // Le message de l'assistant PORTANT les appels doit être réinjecté tel
         // quel : les fournisseurs rejettent un résultat d'outil orphelin.
@@ -106,8 +132,9 @@ export async function callAgentLlm(
           });
         }
       }
-    } catch {
-      /* fournisseur suivant */
+    } catch (e) {
+      const nom = (e as Error).name;
+      console.warn(`[agent-llm] ${p.nom} : ${nom === 'TimeoutError' || nom === 'AbortError' ? 'délai dépassé' : `erreur (${nom})`}`);
     }
   }
   return null;

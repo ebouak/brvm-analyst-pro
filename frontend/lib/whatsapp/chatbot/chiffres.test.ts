@@ -45,3 +45,24 @@ describe('masquage des données personnelles', () => {
     );
   });
 });
+
+describe('écriture lisible demandée au modèle (2026-11-05)', () => {
+  // Retour réel de comparer_valeurs : montants bruts, variation décimale à point.
+  const brut = JSON.stringify({
+    valeurs: [
+      { code: 'SNTS', cours: 4245, variation_pct: -1.28, comptes: { revenus: 1923122000000, resultat_net: 413588000000 } },
+      { code: 'ORAC', cours: 21500, variation_pct: 0.05, volume_valeur: 419100000 },
+    ],
+  });
+
+  it('accepte milliers espacés, virgule décimale, %, et montants arrondis en Md / M', () => {
+    const reponse =
+      'SNTS : 4 245 FCFA (-1,28 %), revenus 1 923 Md FCFA, résultat net 413,6 Md FCFA. ' +
+      'ORAC : 21 500 FCFA (0,05 %), 419,1 M FCFA échangés.';
+    expect(chiffresEtrangers(reponse, [brut])).toEqual([]);
+  });
+
+  it('refuse toujours un chiffre absent, même joliment écrit', () => {
+    expect(chiffresEtrangers('ORAC : 22 750 FCFA, résultat 512 Md FCFA.', [brut])).toEqual(['22 750', '512']);
+  });
+});

@@ -76,7 +76,8 @@ function regleChatbot(perso: boolean): string[] {
       : "Tu n'as PAS accès au portefeuille ni aux alertes de cette personne (réservés aux abonnés Premium dont le WhatsApp est lié et l'assistant activé). Si elle les demande, dis-le en une phrase et donne ce lien : https://www.westbourse.com/pricing",
     "CONVERSATION : les messages précédents sont la conversation en cours. Une question courte (« et son dividende ? ») porte sur la dernière valeur évoquée. Si tu ne sais pas de quelle valeur il s'agit, demande-le en une phrase.",
     "NOTIONS : pour expliquer une notion (PER, dividende, détachement, SGI…), explique-la en deux ou trois phrases SANS AUCUN chiffre, puis cite la leçon Academy renvoyée par l'outil, avec son lien.",
-    "CHIFFRES : n'écris QUE des nombres présents tels quels dans les retours d'outils ou dans la conversation. Aucun calcul, aucun pourcentage dérivé, aucun exemple chiffré : un contrôle automatique refuse tout autre nombre.",
+    "CHIFFRES : n'écris QUE des nombres issus des retours d'outils ou de la conversation. Aucun calcul, aucun pourcentage dérivé, aucun exemple chiffré : un contrôle automatique refuse tout autre nombre.",
+    "Écris-les lisiblement, à la française : espace entre les milliers (« 12 500 FCFA »), virgule décimale et signe % pour une variation (« -2,35 % »), grands montants arrondis en milliards ou millions (« 1 234 Md FCFA », « 56,7 M FCFA »). Ces exemples montrent la FORME, pas des données. Ne recopie jamais un montant brut à rallonge.",
     "Ne cite jamais de signal d'achat ou de vente, de score ni de note.",
     "Termine, si c'est utile, par UNE courte suggestion de question suivante.",
   ];
