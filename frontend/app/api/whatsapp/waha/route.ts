@@ -21,7 +21,9 @@ import { estDemandeEffacer } from '@/lib/whatsapp/chatbot/textes';
 
 export const runtime = 'nodejs';
 // Transcription d'une note vocale + réponse de l'assistant (outils, réécriture éventuelle).
-export const maxDuration = 60;
+// 120 s : l'assistant peut ne plus avoir que Grok, qui met jusqu'à ~25 s par
+// rédaction (mesuré le 2026-11-05) — voir ECHEANCE_IA_MS dans whatsappChatbot.
+export const maxDuration = 120;
 export const dynamic = 'force-dynamic';
 
 /**
