@@ -1,7 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import QrAppairage from '@/components/whatsapp/QrAppairage';
+import { lienAppairage } from '@/lib/whatsapp/qrAppairage';
+import { useDetectionLiaison } from '@/lib/whatsapp/useDetectionLiaison';
 
 /**
  * WhatsApp liés au compte (migration 0165, au plus 2). Chacun reçoit tout.
@@ -35,6 +38,20 @@ export default function WhatsAppLiaisons({ userId }: { userId: string }) {
     void charger();
   }, [charger]);
 
+  // Nombre de liaisons au moment où le code a été généré : une de plus = c'est lié.
+  const nbAvant = useRef(0);
+  useDetectionLiaison(
+    code !== null,
+    async () => {
+      const l = await charger();
+      return l && l.length > nbAvant.current ? l : null;
+    },
+    () => {
+      setCode(null);
+      setMessage(null);
+    },
+  );
+
   async function delier(id: string) {
     setOccupe(true);
     const { error } = await createClient().from('whatsapp_liaisons').delete().eq('id', id);
@@ -50,6 +67,7 @@ export default function WhatsAppLiaisons({ userId }: { userId: string }) {
       const r = await fetch('/api/whatsapp/pairing', { method: 'POST' });
       const corps = (await r.json()) as { code?: string; error?: string };
       if (!r.ok || !corps.code) return setMessage(corps.error ?? 'Génération du code impossible.');
+      nbAvant.current = liaisons?.length ?? 0;
       setCode(corps.code);
     } catch {
       setMessage('Génération du code impossible : vérifiez votre connexion.');
@@ -70,6 +88,7 @@ export default function WhatsAppLiaisons({ userId }: { userId: string }) {
   }
 
   if (liaisons === null) return null;
+  const lien = code ? lienAppairage(NUMERO, code) : null;
 
   return (
     <div className="space-y-2">
@@ -103,9 +122,10 @@ export default function WhatsAppLiaisons({ userId }: { userId: string }) {
             Depuis l&apos;autre WhatsApp, envoyez ce code {NUMERO ? <>au <span className="tabular text-white">+{NUMERO}</span></> : 'au numéro WESTBOURSE'} (valable 15 minutes) :
           </p>
           <p className="select-all font-mono text-2xl font-bold tracking-[0.2em] text-accent">{code}</p>
+          {lien && <QrAppairage lien={lien} />}
           <div className="flex flex-wrap gap-3">
-            {NUMERO && (
-              <a href={`https://wa.me/${NUMERO}?text=${encodeURIComponent(code)}`} target="_blank" rel="noopener noreferrer" className="rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-[#03222b]">
+            {lien && (
+              <a href={lien} target="_blank" rel="noopener noreferrer" className="rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-[#03222b]">
                 Ouvrir WhatsApp avec le code
               </a>
             )}
@@ -113,6 +133,7 @@ export default function WhatsAppLiaisons({ userId }: { userId: string }) {
               J&apos;ai envoyé le code
             </button>
           </div>
+          <p role="status" className="text-[11px] text-faint">La liaison sera détectée automatiquement dès réception.</p>
         </div>
       )}
       {message && <p className="text-xs text-down">{message}</p>}

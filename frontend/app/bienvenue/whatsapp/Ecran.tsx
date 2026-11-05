@@ -1,8 +1,18 @@
 'use client';
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { terminerEcran } from './actions';
 import { normaliserTelephone } from '@/lib/crm/telephone';
+import { createClient } from '@/lib/supabase/client';
+import QrAppairage from '@/components/whatsapp/QrAppairage';
+import { lienAppairage } from '@/lib/whatsapp/qrAppairage';
+import { useDetectionLiaison } from '@/lib/whatsapp/useDetectionLiaison';
+
+/** Liaisons du compte connecté (RLS owner) ; null si illisible — la détection se tait, le bouton reste. */
+async function compterLiaisons(): Promise<number | null> {
+  const { count, error } = await createClient().from('whatsapp_liaisons').select('id', { count: 'exact', head: true });
+  return error ? null : count ?? 0;
+}
 
 // Uniquement ce qui fonctionne aujourd'hui (lots A, D, E). L'assistant est Premium.
 const AVANTAGES = [
@@ -42,16 +52,31 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
       router.refresh();
     });
 
-  const lienCode =(c: string) => `https://wa.me/${numeroAgent}?text=${encodeURIComponent(c)}`;
+  const [lie, setLie] = useState(false);
+  const nbAvant = useRef(0);
+  const lien = code ? lienAppairage(numeroAgent, code) : null;
+
+  // Le webhook crée la liaison dès réception du code : on la voit arriver seul.
+  useDetectionLiaison(
+    code !== null && !lie,
+    async () => {
+      const n = await compterLiaisons();
+      return n !== null && n > nbAvant.current ? true : null;
+    },
+    () => setLie(true),
+  );
 
   const lier = async () => {
     setErreur(null);
+    nbAvant.current = (await compterLiaisons()) ?? 0;
     const res = await fetch('/api/whatsapp/pairing', { method: 'POST' }).catch(() => null);
     const body = (await res?.json().catch(() => null)) as { code?: string; error?: string } | null;
     if (!res?.ok || !body?.code) { setErreur(body?.error ?? 'Génération du code impossible : réessayez.'); return; }
     setCode(body.code);
-    // Fenêtre bloquée : le lien reste affiché dans le cadre du code.
-    window.open(lienCode(body.code), '_blank', 'noopener');
+    // Sur téléphone, WhatsApp s'ouvre tout de suite. Sur ordinateur, NON : un
+    // nouvel onglet masquerait le QR code, qui est justement la voie à suivre.
+    const l = lienAppairage(numeroAgent, body.code);
+    if (l && window.matchMedia('(pointer: coarse)').matches) window.open(l, '_blank', 'noopener');
   };
 
   const numeroValide = normaliserTelephone(numero);
@@ -89,13 +114,23 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
       )}
       {numeroAgent && code && (
         <div className="rounded-2xl border border-border bg-surface p-5">
-          <p className="mb-2 text-sm text-muted">WhatsApp s&apos;est ouvert avec votre code. Envoyez le message tel quel, puis continuez.</p>
-          <p className="tabular mb-2 text-2xl font-semibold tracking-[0.2em] text-ivory">{code}</p>
-          <a href={lienCode(code)} target="_blank" rel="noopener noreferrer" className="mb-4 inline-block text-sm text-accent underline underline-offset-4 rounded focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
-            Ouvrir WhatsApp avec le code
-          </a>
+          {lie ? (
+            <p role="status" className="mb-4 text-sm font-semibold text-up">✓ Votre WhatsApp est lié. Écrivez-nous quand vous voulez.</p>
+          ) : (
+            <>
+              <p className="mb-2 text-sm text-muted">Envoyez ce code par WhatsApp au numéro WESTBOURSE, tel quel, depuis le téléphone à lier.</p>
+              <p className="tabular mb-3 text-2xl font-semibold tracking-[0.2em] text-ivory">{code}</p>
+              {lien && <QrAppairage lien={lien} className="mb-4" />}
+              {lien && (
+                <a href={lien} target="_blank" rel="noopener noreferrer" className="mb-3 inline-block text-sm text-accent underline underline-offset-4 rounded focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
+                  Ouvrir WhatsApp avec le code
+                </a>
+              )}
+              <p role="status" className="mb-4 text-xs text-faint">La liaison sera détectée automatiquement dès réception.</p>
+            </>
+          )}
           <div>
-            <button type="button" disabled={occupe} onClick={() => finir('')} className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-bg disabled:opacity-50">C&apos;est envoyé, continuer</button>
+            <button type="button" disabled={occupe} onClick={() => finir('')} className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-bg disabled:opacity-50">{lie ? 'Continuer' : 'C’est envoyé, continuer'}</button>
           </div>
         </div>
       )}
