@@ -105,7 +105,7 @@ export function ClientRow({ c }: { c: ApiClientRow }) {
               Le taire = perdre la clé au moment où il ferme la page. */}
           {emailed === false ? (
             <p className="rounded bg-down/10 p-2 text-[11px] font-semibold text-down">
-              ⚠ L&apos;email n&apos;a PAS pu être envoyé à {c.email}. Vous êtes le seul à
+              L&apos;email n&apos;a PAS pu être envoyé à {c.email}. Vous êtes le seul à
               détenir cette clé : transmettez-la manuellement avant de quitter cette page.
             </p>
           ) : emailed === true ? (

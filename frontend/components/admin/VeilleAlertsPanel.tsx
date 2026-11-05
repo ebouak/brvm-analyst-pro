@@ -1,5 +1,6 @@
 'use client';
 
+import { TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 
 interface VeilleAlert {
@@ -37,17 +38,17 @@ export default function VeilleAlertsPanel({
   };
 
   const alertTypeLabels: Record<string, string> = {
-    regulatory_change: '📋 Changement Réglementaire',
-    competitor_move: '🎯 Mouvement Concurrent',
-    technical_vulnerability: '🔓 Vulnérabilité Technique',
-    market_shock: '⚡ Choc de Marché',
-    systemic_risk: '⚠️ Risque Systémique',
+    regulatory_change: 'Changement Réglementaire',
+    competitor_move: 'Mouvement Concurrent',
+    technical_vulnerability: 'Vulnérabilité Technique',
+    market_shock: 'Choc de Marché',
+    systemic_risk: 'Risque Systémique',
   };
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <div className="text-2xl">🚨</div>
+        <TriangleAlert size={20} strokeWidth={1.75} className="text-gold" aria-hidden />
         <h2 className="font-semibold text-gold text-lg">
           Alertes Critiques ({unacknowledgedAlerts.length})
         </h2>
@@ -69,9 +70,7 @@ export default function VeilleAlertsPanel({
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold uppercase px-2 py-1 bg-black/30 rounded">
-                  {alert.severity === 'high' && '🔴'}
-                  {alert.severity === 'medium' && '🟠'}
-                  {alert.severity === 'low' && '🔵'} {alert.severity}
+                  {alert.severity}
                 </span>
               </div>
             </div>

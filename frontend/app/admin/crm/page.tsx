@@ -233,7 +233,7 @@ function PanneauFiche({ l, fermer, canWrite, responsables, maintenant, reglages 
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={`Fiche de ${l.d.nom ?? l.d.emailNorm}`}>
       <PanneauFocus fermer={fermer} titreId="panneau-titre" />
-      <Link href={fermer} scroll={false} aria-label="Fermer la fiche" className="hidden flex-1 bg-bg/70 backdrop-blur-sm lg:block" />
+      <Link href={fermer} scroll={false} aria-label="Fermer la fiche" className="hidden flex-1 bg-bg/70 lg:block" />
       <aside className="h-full w-full overflow-y-auto border-l border-border bg-surface p-6 lg:w-[34rem]">
         <div className="mb-4 flex items-start justify-between gap-3">
           <h2 id="panneau-titre" tabIndex={-1} className="font-display text-xl text-ivory outline-none">{l.d.nom ?? l.d.emailNorm}</h2>
@@ -252,7 +252,7 @@ function PanneauIntrouvable({ fermer }: { fermer: string }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Fiche introuvable">
       <PanneauFocus fermer={fermer} titreId="panneau-titre" />
-      <Link href={fermer} scroll={false} aria-label="Fermer" className="hidden flex-1 bg-bg/70 backdrop-blur-sm lg:block" />
+      <Link href={fermer} scroll={false} aria-label="Fermer" className="hidden flex-1 bg-bg/70 lg:block" />
       <aside className="h-full w-full overflow-y-auto border-l border-border bg-surface p-6 lg:w-[34rem]">
         <h2 id="panneau-titre" tabIndex={-1} className="font-display text-xl text-ivory outline-none">Fiche introuvable</h2>
         <p className="mt-2 text-sm text-muted">Cette personne n&apos;existe pas ou n&apos;est pas suivie dans le CRM.</p>

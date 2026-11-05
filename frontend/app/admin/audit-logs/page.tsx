@@ -67,7 +67,7 @@ export default async function Page({
 
       <div className="flex flex-wrap items-center gap-2">
         {tab('Tout', '/admin/audit-logs', !criticalOnly && !action)}
-        {tab('⚠ Actions dangereuses', '/admin/audit-logs?critical=1', criticalOnly)}
+        {tab('Actions dangereuses', '/admin/audit-logs?critical=1', criticalOnly)}
         {actions.slice(0, 8).map((a) =>
           tab(a, `/admin/audit-logs?action=${encodeURIComponent(a)}`, action === a),
         )}

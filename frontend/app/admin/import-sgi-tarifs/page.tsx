@@ -86,12 +86,12 @@ function ImportRow({ file }: { file: File }) {
         <span className="text-muted text-xs truncate flex-1">{file.name}</span>
         <span className="text-xs">
           {status === 'pending' && <span className="text-faint">en attente</span>}
-          {status === 'reading' && '📄 lecture…'}
-          {status === 'analyzing' && '🤖 analyse…'}
-          {status === 'saving' && '💾 écriture…'}
+          {status === 'reading' && 'lecture…'}
+          {status === 'analyzing' && 'analyse…'}
+          {status === 'saving' && 'écriture…'}
           {status === 'review' && <span className="text-warn">à valider ({provider})</span>}
           {status === 'done' && <span className="text-up">✓ importé</span>}
-          {status === 'error' && <span className="text-down">✕ {error}</span>}
+          {status === 'error' && <span className="text-down">{error}</span>}
         </span>
         {(status === 'pending' || status === 'error') && (
           <button type="button" onClick={() => void analyse()}
@@ -127,7 +127,7 @@ function ImportRow({ file }: { file: File }) {
           {guard.ok ? (
             <p className="text-[11px] text-up">✓ Barème plausible — sera tagué « barème homologué CREPMF ».</p>
           ) : (
-            <p className="text-[11px] text-warn">⚠ {guard.reasons.join(' · ')}</p>
+            <p className="text-[11px] text-warn">{guard.reasons.join(' · ')}</p>
           )}
           <button
             type="button"

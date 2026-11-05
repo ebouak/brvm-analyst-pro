@@ -102,14 +102,14 @@ export default function IntraDayMonitoringDashboard({
       {hasFailures && (
         <div className="rounded-panel border border-down/30 bg-down/10 p-4">
           <span className="font-semibold text-down">
-            ⚠️ {kpis.failed_count} exécution(s) échouée(s) dans les dernières 24 heures
+            {kpis.failed_count} exécution(s) échouée(s) dans les dernières 24 heures
           </span>
         </div>
       )}
 
       {hasHighErrorRate && !hasFailures && (
         <div className="rounded-panel border border-warn/30 bg-warn/10 p-4">
-          <span className="font-semibold text-warn">⚠️ Taux d'erreur élevé : {errorRate.toFixed(0)}%</span>
+          <span className="font-semibold text-warn">Taux d'erreur élevé : {errorRate.toFixed(0)}%</span>
         </div>
       )}
 

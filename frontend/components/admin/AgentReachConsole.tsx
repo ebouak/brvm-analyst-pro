@@ -1,5 +1,6 @@
 'use client';
 
+import { Lightbulb, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 type Source = 'github' | 'twitter' | 'stackoverflow' | 'youtube' | 'rss' | 'linkedin';
@@ -20,12 +21,12 @@ export default function AgentReachConsole() {
   const [activeSource, setActiveSource] = useState<Source | null>(null);
 
   const sources: Array<{ id: Source; label: string; icon: string }> = [
-    { id: 'github', label: 'GitHub', icon: '🔗' },
-    { id: 'twitter', label: 'Twitter', icon: '🐦' },
-    { id: 'stackoverflow', label: 'Stack Overflow', icon: '❓' },
-    { id: 'youtube', label: 'YouTube', icon: '📹' },
-    { id: 'rss', label: 'RSS', icon: '📰' },
-    { id: 'linkedin', label: 'LinkedIn', icon: '💼' },
+    { id: 'github', label: 'GitHub', icon: '' },
+    { id: 'twitter', label: 'Twitter', icon: '' },
+    { id: 'stackoverflow', label: 'Stack Overflow', icon: '' },
+    { id: 'youtube', label: 'YouTube', icon: '' },
+    { id: 'rss', label: 'RSS', icon: '' },
+    { id: 'linkedin', label: 'LinkedIn', icon: '' },
   ];
 
   const handleSearch = async (source: Source) => {
@@ -107,7 +108,6 @@ export default function AgentReachConsole() {
                   : 'bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              <span className="text-lg">{source.icon}</span>
               <span className="text-xs">{source.label}</span>
             </button>
           ))}
@@ -117,14 +117,14 @@ export default function AgentReachConsole() {
       {/* Error Message */}
       {error && (
         <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-300 text-sm">
-          ❌ {error}
+          {error}
         </div>
       )}
 
       {/* Loading State */}
       {loading && (
         <div className="bg-surface border border-border rounded-lg p-6 text-center text-muted">
-          <div className="inline-block animate-spin mr-2">⌛</div>
+          <Loader2 size={16} strokeWidth={2} className="mr-2 inline-block animate-spin" aria-hidden />
           Recherche en cours sur {activeSource}...
         </div>
       )}
@@ -133,7 +133,6 @@ export default function AgentReachConsole() {
       {!loading && results.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-lg">✨</span>
             <h3 className="font-semibold text-accent">
               Résultats: {results.length} trouvé(s)
             </h3>
@@ -201,7 +200,7 @@ export default function AgentReachConsole() {
       {/* Info Box */}
       <div className="bg-elevated border border-border rounded-lg p-4">
         <p className="text-xs text-muted leading-relaxed">
-          💡 <strong>Conseil:</strong> Le système Agent Reach recherche sur GitHub (repos BRVM), Twitter
+          <Lightbulb size={14} strokeWidth={1.75} className="mr-1 inline-block align-[-2px]" aria-hidden /> <strong>Conseil:</strong> Le système Agent Reach recherche sur GitHub (repos BRVM), Twitter
           (hashtags #BRVM), Stack Overflow (tags techniques), YouTube (tutoriels), RSS (news financières)
           et LinkedIn (intelligence concurrentielle).
         </p>

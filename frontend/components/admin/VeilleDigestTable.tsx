@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface VeilleDigestItem {
@@ -37,12 +38,12 @@ export default function VeilleDigestTable({
   }, [digest]);
 
   const sourceLabels: Record<string, { label: string; icon: string; color: string }> = {
-    github: { label: 'GitHub', icon: '🔗', color: 'text-gray-300' },
-    twitter: { label: 'Twitter/X', icon: '🐦', color: 'text-blue-400' },
-    stack_overflow: { label: 'Stack Overflow', icon: '❓', color: 'text-orange-400' },
-    youtube: { label: 'YouTube', icon: '📹', color: 'text-red-500' },
-    rss: { label: 'RSS Feeds', icon: '📰', color: 'text-accent' },
-    linkedin: { label: 'LinkedIn', icon: '💼', color: 'text-blue-600' },
+    github: { label: 'GitHub', icon: '', color: 'text-gray-300' },
+    twitter: { label: 'Twitter/X', icon: '', color: 'text-blue-400' },
+    stack_overflow: { label: 'Stack Overflow', icon: '', color: 'text-orange-400' },
+    youtube: { label: 'YouTube', icon: '', color: 'text-red-500' },
+    rss: { label: 'RSS Feeds', icon: '', color: 'text-accent' },
+    linkedin: { label: 'LinkedIn', icon: '', color: 'text-blue-600' },
   };
 
   const sentimentColors: Record<string, string> = {
@@ -54,7 +55,7 @@ export default function VeilleDigestTable({
   if (loading) {
     return (
       <div className="bg-surface border border-border rounded-lg p-8 text-center text-muted">
-        <div className="inline-block animate-spin mr-2">⌛</div> Chargement...
+        <Loader2 size={16} strokeWidth={2} className="mr-2 inline-block animate-spin" aria-hidden /> Chargement...
       </div>
     );
   }
@@ -70,12 +71,11 @@ export default function VeilleDigestTable({
   return (
     <div className="space-y-6">
       {Object.entries(groupedBySource).map(([source, items]) => {
-        const meta = sourceLabels[source] || { label: source, icon: '📡', color: 'text-accent' };
+        const meta = sourceLabels[source] || { label: source, icon: '', color: 'text-accent' };
 
         return (
           <div key={source} className="space-y-3">
             <div className="flex items-center gap-2 px-4">
-              <span className="text-xl">{meta.icon}</span>
               <h2 className="font-semibold text-accent">
                 {meta.label} ({items.length})
               </h2>
@@ -105,7 +105,7 @@ export default function VeilleDigestTable({
                     </div>
                     {item.is_critical && (
                       <div className="flex-shrink-0 bg-gold/30 text-gold px-2 py-1 rounded text-xs font-semibold">
-                        🚨 CRITIQUE
+                        CRITIQUE
                       </div>
                     )}
                   </div>

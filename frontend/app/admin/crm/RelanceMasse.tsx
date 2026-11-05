@@ -112,7 +112,7 @@ function BarreMasse({ vider, masquee }: { vider: () => void; masquee: boolean })
         </>
       )}
       {phase && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="masse-titre">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-bg/80 p-4" role="dialog" aria-modal="true" aria-labelledby="masse-titre">
           <div className="max-h-[85vh] w-full max-w-xl space-y-4 overflow-y-auto rounded-lg border border-border bg-surface p-6 text-sm">
             <h2 id="masse-titre" className="font-display text-xl text-ivory">Relance en masse par e-mail</h2>
             {phase.etat === 'confirmation' ? (<>

@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
           <p><strong>Email :</strong> ${esc(e)}</p>
           <p><strong>Page :</strong> ${esc(pageLabel) || '—'}</p>
           <p><strong>Message :</strong></p>
-          <p style="white-space:pre-wrap;border-left:3px solid #56d7fd;padding-left:12px">${esc(m)}</p>
+          <p style="white-space:pre-wrap;background:#eef8fb;border-radius:6px;padding:10px 12px">${esc(m)}</p>
         </div>
       `,
     });

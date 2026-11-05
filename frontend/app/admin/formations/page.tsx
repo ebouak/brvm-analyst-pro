@@ -25,7 +25,7 @@ export default async function Page() {
         className="flex items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/[0.05] px-4 py-3 transition hover:border-accent/50"
       >
         <div>
-          <p className="text-sm font-semibold text-ivory">🎬 Modules vidéo interactifs</p>
+          <p className="text-sm font-semibold text-ivory">Modules vidéo interactifs</p>
           <p className="text-xs text-muted">Cours multi-leçons : collez un lien YouTube/Vimeo, chapitres, quiz, progression.</p>
         </div>
         <span className="text-sm font-semibold text-accent">Gérer →</span>
