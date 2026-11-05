@@ -41,7 +41,7 @@ export function RemotionRoot() {
         width={1920}
         height={1080}
       />
-      {/* Vidéo de séance animée, verticale. Durée = voix du jour + 1,5 s,
+      {/* Vidéo de séance animée, verticale. Durée = voix du jour + 1,5 s + signature 2,2 s,
           lue dans public/seance/seance.json (écrit par video/genere.mjs). */}
       <Composition
         id="seance"

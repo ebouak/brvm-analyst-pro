@@ -382,31 +382,33 @@ body::before {
   .legal-prose strong { @apply text-white/90; }
 }
 
-/* ----- WESTBOURSE animated logo (stroke-draw) ----- */
-.wslogo-anim .wslogo-w { stroke-dasharray: 220; stroke-dashoffset: 220; animation: wslogo-draw 1.8s ease-in-out forwards; }
-.wslogo-anim .wslogo-shaft { stroke-dasharray: 60; stroke-dashoffset: 60; animation: wslogo-draw 1.8s ease-in-out forwards; animation-delay: .55s; }
-.wslogo-anim .wslogo-head { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; animation: wslogo-pop 1.8s ease-in-out forwards; animation-delay: .85s; }
-
-.wslogo-loop .wslogo-w,
-.wslogo-loop .wslogo-shaft,
-.wslogo-loop .wslogo-head { animation-iteration-count: infinite; }
+/* ----- Logo WESTBOURSE animé (tracé) -----
+   Une seule idée : le W se trace comme une courbe de cours, la flèche prolonge
+   son dernier jambage, la pointe conclut. Posé à 0,78 s : le splash vit 1,2 s,
+   le tracé doit donc finir bien avant lui (il durait 1,57 s, coupé à 0,95 s, et
+   le logo complet n'était jamais visible). pathLength=1 normalise les tracés :
+   une seule valeur de dash, quelle que soit leur longueur. Opacité nulle au
+   départ : un trait à bout rond laisse sinon un point visible avant de partir. */
+.wslogo-anim .wslogo-w,
+.wslogo-anim .wslogo-shaft { opacity: 0; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.wslogo-anim .wslogo-w { animation: wslogo-draw .45s cubic-bezier(.65, 0, .35, 1) .05s forwards; }
+.wslogo-anim .wslogo-shaft { animation: wslogo-draw .2s cubic-bezier(.22, 1, .36, 1) .46s forwards; }
+.wslogo-anim .wslogo-head { opacity: 0; transform: translate(-4px, 8px); animation: wslogo-pop .18s cubic-bezier(.22, 1, .36, 1) .6s forwards; }
+.wslogo-anim ~ .wslogo-mot { opacity: 0; clip-path: inset(0 100% 0 0); animation: wslogo-mot .32s cubic-bezier(.22, 1, .36, 1) .5s forwards; }
 
 @keyframes wslogo-draw {
-  0% { stroke-dashoffset: var(--ws-len, 220); }
-  50% { stroke-dashoffset: 0; }
-  88% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 0; }
+  0% { opacity: 0; stroke-dashoffset: 1; }
+  2% { opacity: 1; }
+  100% { opacity: 1; stroke-dashoffset: 0; }
 }
-@keyframes wslogo-pop {
-  0%, 18% { opacity: 0; transform: scale(.2) translateY(6px); }
-  40%, 88% { opacity: 1; transform: scale(1) translateY(0); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
+@keyframes wslogo-pop { to { opacity: 1; transform: none; } }
+@keyframes wslogo-mot { to { opacity: 1; clip-path: inset(0 0 0 0); } }
 
 @media (prefers-reduced-motion: reduce) {
   .wslogo-anim .wslogo-w,
-  .wslogo-anim .wslogo-shaft { stroke-dashoffset: 0; animation: none; }
+  .wslogo-anim .wslogo-shaft { opacity: 1; stroke-dashoffset: 0; animation: none; }
   .wslogo-anim .wslogo-head { opacity: 1; transform: none; animation: none; }
+  .wslogo-anim ~ .wslogo-mot { opacity: 1; clip-path: none; animation: none; }
 }
 
 @keyframes wslogo-splash-out { to { opacity: 0; visibility: hidden; } }
