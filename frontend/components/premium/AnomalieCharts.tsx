@@ -1,4 +1,5 @@
 'use client';
+import { Inbox } from 'lucide-react';
 import EChart from '@/components/EChart';
 import type { PointDividende, PointLiquiditeVol, CellHeatmap, PointValuation } from '@/lib/premium/anomalies';
 
@@ -25,7 +26,7 @@ function ChartCard({ title, desc, children }: { title: string; desc: string; chi
 function EmptyState() {
   return (
     <div className="py-12 text-center">
-      <div className="mx-auto grid h-10 w-10 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-gold/60 text-base mb-3">◇</div>
+      <div className="mx-auto grid h-10 w-10 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-gold/60 text-base mb-3"><Inbox size={18} strokeWidth={1.75} aria-hidden /></div>
       <p className="text-muted text-sm">Données insuffisantes pour cette analyse.</p>
     </div>
   );

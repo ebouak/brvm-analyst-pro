@@ -16,7 +16,7 @@ export default function SaveReportButton({
       <input type="hidden" name="title" value={title} />
       <input type="hidden" name="params" value={JSON.stringify(params)} />
       <button className="text-xs border border-border rounded px-3 py-1.5 text-muted hover:text-up hover:border-up/50">
-        ★ Sauvegarder
+        Sauvegarder
       </button>
     </form>
   );

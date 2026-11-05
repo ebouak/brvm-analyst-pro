@@ -17,7 +17,6 @@ export const revalidate = 300;
 export default function ClassementPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
-      <p className="overline mb-3 text-gold-2">Compétition · Paper trading</p>
       <h1 className="mb-3 font-display text-3xl text-ivory [letter-spacing:-0.03em] md:text-4xl">
         Qui lit le mieux le marché BRVM&nbsp;?
       </h1>

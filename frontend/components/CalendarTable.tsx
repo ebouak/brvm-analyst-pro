@@ -77,7 +77,7 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
               <tr key={item.id} className="hover:bg-surface/60 transition-colors">
                 <td className="px-3 py-2 tabular text-muted whitespace-nowrap">{fmtDateFR(item.date)}</td>
                 <td className="px-3 py-2 whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border-l-2 bg-surface ${borderClass}`}>
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-surface ${borderClass}`}>
                     {iconForKind(item.kind)} {kindLabel(item.kind)}
                   </span>
                 </td>

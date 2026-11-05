@@ -98,7 +98,7 @@ export default function PublicationsModal({ code, designation, publications, cou
       {/* Modal overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
+          className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center pt-20 px-4"
           onClick={(e) => { if (e.target === e.currentTarget) close(); }}
           role="dialog"
           aria-modal="true"

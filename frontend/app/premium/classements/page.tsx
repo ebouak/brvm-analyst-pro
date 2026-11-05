@@ -32,7 +32,7 @@ export default async function ClassementsPage({
       <SectionHeader
         title="Classements des actions BRVM"
         subtitle="Palmarès de toutes les sociétés cotées selon la performance, la liquidité, la valorisation et les fondamentaux."
-        actions={<StatPill tone="gold">✦ Premium</StatPill>}
+        actions={<StatPill tone="gold">Premium</StatPill>}
       />
 
       <div className="gold-rule" />

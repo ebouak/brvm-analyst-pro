@@ -1,5 +1,6 @@
 'use client';
 
+import { CalendarDays } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from '@/components/icons';
 import {
@@ -365,7 +366,7 @@ export function DividendCalendar({
       {/* Empty state (when no dividends match filters) */}
       {filtered.length === 0 && (
         <div className="rounded-card border border-border/30 bg-surface/50 p-12 text-center">
-          <div className="text-4xl mb-3 text-muted">◎</div>
+          <CalendarDays size={32} strokeWidth={1.5} className="mx-auto mb-3 text-muted" aria-hidden />
           <h3 className="font-semibold text-ivory text-sm mb-1">
             Aucun dividende déclaré
           </h3>

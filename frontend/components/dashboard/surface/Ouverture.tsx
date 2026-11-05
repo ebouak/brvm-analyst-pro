@@ -13,10 +13,10 @@ export default function Ouverture({ dateMarche, titre, chapo, chiffres }: {
   return (
     <section aria-labelledby="titre-seance" className="grid gap-8 py-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-end lg:px-5">
       <div className="min-w-0">
-        <p className="overline text-faint">{jour}</p>
-        <h2 id="titre-seance" className="mt-2 font-display text-[clamp(28px,3.1vw,40px)] leading-[1.08] tracking-tight text-ivory [text-wrap:balance]">
+        <h2 id="titre-seance" className="font-display text-[clamp(28px,3.1vw,40px)] leading-[1.08] tracking-tight text-ivory [text-wrap:balance]">
           {titre ?? `Séance du ${fmtDateFR(dateMarche)}`}
         </h2>
+        <p className="overline mt-1.5 text-faint">{jour}</p>
         {chapo && <p className="mt-2.5 max-w-[60ch] text-[15px] text-muted">{chapo}</p>}
         <div className="mt-3.5"><BriefAssistant /></div>
       </div>

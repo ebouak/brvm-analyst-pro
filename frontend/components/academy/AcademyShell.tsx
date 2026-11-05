@@ -141,7 +141,7 @@ export default function AcademyShell({
             className="rounded-lg border border-gold/40 bg-gold/10 px-2.5 py-1 text-xs font-medium text-gold transition hover:bg-gold/20"
             title="Voir le cours en diapositives, fidèle au support imprimable"
           >
-            ▭ Mode présentation
+            Mode présentation
           </button>
           <button
             type="button"

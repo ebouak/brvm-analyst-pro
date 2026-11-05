@@ -13,7 +13,6 @@ const WHATSAPP = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '').replace(/\D/g, 
 function PageMessage({ titre, texte }: { titre: string; texte: string }) {
   return (
     <main className="mx-auto max-w-xl px-4 py-16 text-center">
-      <p className="overline mb-3 text-gold-2">Dossier offert</p>
       <h1 className="mb-4 font-display text-3xl text-ivory [letter-spacing:-0.03em]">{titre}</h1>
       <p className="mb-8 text-sm text-muted">{texte}</p>
       <div className="flex flex-wrap justify-center gap-3">
@@ -58,7 +57,6 @@ export default async function Page({ searchParams }: { searchParams: { t?: strin
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
-      <p className="overline mb-3 text-gold-2">Offert par WESTBOURSE</p>
       <h1 className="mb-3 font-display text-3xl text-ivory md:text-4xl [letter-spacing:-0.03em]">Choisissez votre dossier valeur</h1>
       <p className="mb-8 max-w-[56ch] text-sm leading-relaxed text-muted">Une société cotée, son dossier complet en PDF, tel que nous le produisons chaque semaine. Un seul choix : prenez celle qui compte pour vous.</p>
       <Choix jeton={jeton} valeurs={valeurs} />

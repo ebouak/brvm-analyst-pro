@@ -72,7 +72,7 @@ export default async function IntraDayScreenerPage() {
             </div>
 
             <div>
-              <p className="font-medium text-ivory mb-1">✦ La confluence, c&apos;est le vrai signal</p>
+              <p className="font-medium text-ivory mb-1">La confluence, c&apos;est le vrai signal</p>
               <p>
                 Un titre qui monte <em>avec</em> du volume traduit une conviction. Un titre qui
                 monte <em>sans</em> volume traduit surtout son illiquidité. Ce sont les titres

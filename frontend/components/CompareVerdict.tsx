@@ -1,3 +1,4 @@
+import { Scale } from 'lucide-react';
 import type { FundamentalRatios } from '@/lib/financials/types';
 import { computeValuation, VERDICT_LABELS } from '@/lib/financials/valuation';
 
@@ -31,7 +32,7 @@ export default function CompareVerdict({ rows }: { rows: FundaRow[] }) {
     <div className="bg-surface border border-cyan/20 rounded-xl p-4 space-y-3">
       <span className="text-xs text-cyan font-bold">Verdict comparatif</span>
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-2xl">✦</span>
+        <Scale size={22} strokeWidth={1.75} className="text-cyan" aria-hidden />
         <div>
           <p className="text-sm font-semibold text-ivory">
             {winner.code}{winner.designation ? ` — ${winner.designation}` : ''}

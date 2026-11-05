@@ -48,7 +48,7 @@ export default function DailyBrief({ brief }: Props) {
     <div className="rounded-panel border border-border/60 p-1.5 bg-border/25 transition-all duration-300">
       {/* Inner core — left accent bar + voile de tonalité */}
       <div
-        className={`relative overflow-hidden rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] border-l-2 ${cfg.bar} px-4 py-4`}
+        className={`relative overflow-hidden rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] px-4 py-4`}
       >
         <div
           aria-hidden

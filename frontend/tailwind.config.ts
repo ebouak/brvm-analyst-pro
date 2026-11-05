@@ -82,7 +82,7 @@ const themeColors = {
 };
 
 const config: Config = {
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/calendarHelpers.ts'],
   darkMode: 'class',
   theme: {
     extend: {

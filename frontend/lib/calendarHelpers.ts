@@ -159,11 +159,11 @@ export function iconForKind(kind: CalendarItem['kind']): string {
 export function colorForKind(kind: CalendarItem['kind']): string {
   switch (kind) {
     case 'ex-date':
-    case 'payment': return 'border-l-2 border-l-warn';
-    case 'AG': return 'border-l-2 border-l-blue';
-    case 'RESULTAT': return 'border-l-2 border-l-up';
-    case 'COMMUNIQUE': return 'border-l-2 border-l-purple';
-    default: return 'border-l-2 border-l-muted';
+    case 'payment': return 'border border-warn/50';
+    case 'AG': return 'border border-blue/50';
+    case 'RESULTAT': return 'border border-up/50';
+    case 'COMMUNIQUE': return 'border border-purple/50';
+    default: return 'border border-muted/50';
   }
 }
 

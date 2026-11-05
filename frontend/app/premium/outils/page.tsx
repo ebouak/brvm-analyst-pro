@@ -31,7 +31,7 @@ export default async function OutilsPage() {
         accent="gold"
         title="Outils Premium"
         subtitle="Saisonnalité, actions proches de leurs plus bas, réaction aux états financiers · signaux structurels de la BRVM."
-        actions={<StatPill tone="gold">✦ Premium</StatPill>}
+        actions={<StatPill tone="gold">Premium</StatPill>}
       />
 
       {/* ── Annuaire des outils (hub — refonte nav 2026-07-10) ──────────── */}

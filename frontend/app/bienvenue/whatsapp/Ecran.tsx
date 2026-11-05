@@ -83,7 +83,6 @@ export default function Ecran({ next, numeroAgent }: { next: string; numeroAgent
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:py-16">
-      <p className="overline mb-3 text-gold-2">Une dernière étape, facultative</p>
       <h1 className="mb-3 font-display text-3xl text-ivory md:text-4xl [letter-spacing:-0.03em]">Recevez WESTBOURSE sur WhatsApp</h1>
       <p className="mb-8 max-w-[56ch] text-sm leading-relaxed text-muted">Là où vous lisez déjà vos messages. Gratuit, et vous pouvez tout couper à tout moment.</p>
 

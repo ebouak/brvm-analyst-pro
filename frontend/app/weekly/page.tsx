@@ -36,12 +36,12 @@ async function fetchWeeklyArticles(): Promise<WeeklyArticle[]> {
 }
 
 const COMMO_LABELS: Record<string, { label: string; icon: string }> = {
-  cocoa: { label: 'Cacao', icon: '◇' },
-  palm_oil: { label: 'Huile de palme', icon: '◇' },
-  rubber: { label: 'Caoutchouc', icon: '◇' },
-  sugar: { label: 'Sucre', icon: '◇' },
-  crude_brent: { label: 'Brent', icon: '◇' },
-  gold: { label: 'Or', icon: '◇' },
+  cocoa: { label: 'Cacao', icon: '' },
+  palm_oil: { label: 'Huile de palme', icon: '' },
+  rubber: { label: 'Caoutchouc', icon: '' },
+  sugar: { label: 'Sucre', icon: '' },
+  crude_brent: { label: 'Brent', icon: '' },
+  gold: { label: 'Or', icon: '' },
 };
 
 interface CommoTick {
@@ -119,7 +119,7 @@ export default async function WeeklyPage() {
             {commos.map((c) => (
               <div key={c.commodity} className="rounded-xl border border-border bg-surface/40 p-3">
                 <p className="truncate text-[11px] text-muted">
-                  <span aria-hidden className="mr-1">{c.icon}</span>{c.label}
+                  {c.label}
                 </p>
                 <p className="tabular mt-1 text-lg font-bold leading-none text-ivory">
                   {c.price.toLocaleString('fr-FR', { maximumFractionDigits: 2 })}

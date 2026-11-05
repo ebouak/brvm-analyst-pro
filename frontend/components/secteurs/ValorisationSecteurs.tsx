@@ -33,7 +33,6 @@ export default async function ValorisationSecteurs() {
     <section className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <Eyebrow>Valorisation</Eyebrow>
           <h2 className="mt-1 font-display text-heading-sm text-ivory">À quel prix se paie chaque secteur</h2>
         </div>
         <dl className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">

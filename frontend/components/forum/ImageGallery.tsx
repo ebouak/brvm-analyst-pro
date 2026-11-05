@@ -1,5 +1,7 @@
 'use client';
 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { X as IconeFermer } from 'lucide-react';
 import { useState } from 'react';
 
 export interface ImageGalleryProps {
@@ -64,7 +66,7 @@ export function ImageGallery({ images, altPrefix = 'Image' }: ImageGalleryProps)
               title="Fermer"
               aria-label="Fermer"
             >
-              ✕
+              <IconeFermer size={16} strokeWidth={2} aria-hidden />
             </button>
             <button
               type="button"
@@ -73,7 +75,7 @@ export function ImageGallery({ images, altPrefix = 'Image' }: ImageGalleryProps)
               title="Image précédente"
               aria-label="Image précédente"
             >
-              ◀
+              <ChevronLeft size={20} strokeWidth={2} aria-hidden />
             </button>
             <button
               type="button"
@@ -82,7 +84,7 @@ export function ImageGallery({ images, altPrefix = 'Image' }: ImageGalleryProps)
               title="Image suivante"
               aria-label="Image suivante"
             >
-              ▶
+              <ChevronRight size={20} strokeWidth={2} aria-hidden />
             </button>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/40 text-white text-sm">
               {lightboxIndex + 1} / {images.length}

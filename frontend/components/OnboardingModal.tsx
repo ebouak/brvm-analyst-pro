@@ -1,5 +1,6 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveInvestorProfile } from '@/app/onboarding/actions';
@@ -72,7 +73,7 @@ export default function OnboardingModal() {
   if (dismissed) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="relative bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-6">
         {/* Échappatoire : fermer / passer — ne jamais bloquer l'utilisateur. */}
         <button
@@ -81,7 +82,7 @@ export default function OnboardingModal() {
           aria-label="Fermer et passer l’onboarding"
           className="absolute right-3 top-3 text-faint hover:text-ivory transition text-lg leading-none active:scale-95"
         >
-          ✕
+          <IconeFermer size={16} strokeWidth={2} aria-hidden />
         </button>
 
         {step === 1 && (

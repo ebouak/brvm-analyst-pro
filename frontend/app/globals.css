@@ -180,8 +180,11 @@ body::before {
 
 /* Étiquette de section / d'en-tête de tableau. Plus de « surtitre » monospace,
    capitales et lettres espacées (déguisement typique des interfaces générées,
-   retiré le 2026-11-05) : le monospace reste réservé aux chiffres (.tabular). */
+   retiré le 2026-11-05) : le monospace reste réservé aux chiffres (.tabular).
+   `overline` est AUSSI un utilitaire Tailwind (text-decoration: overline) : sans
+   la remise à zéro ci-dessous, chaque étiquette porte un trait au-dessus d'elle. */
 .overline {
+  text-decoration-line: none;
   font-family: inherit;
   text-transform: none;
   letter-spacing: 0;

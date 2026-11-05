@@ -225,7 +225,7 @@ export default async function PortefeuillePage({
             title="Mon portefeuille"
             subtitle="Valorisation au dernier cours, plus-values latentes et suivi de vos positions."
           />
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <RecapBouton />
             <Link
               href="/portefeuille/import"

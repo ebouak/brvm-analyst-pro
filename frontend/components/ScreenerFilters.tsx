@@ -1,5 +1,6 @@
 'use client';
 
+import { Lock } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQueryStates, parseAsFloat, parseAsString } from 'nuqs';
 import { PRESETS } from '@/lib/screener/presets';
@@ -161,7 +162,7 @@ export default function ScreenerFilters({
                 }`}
                 onClick={() => applyPreset(p)}
               >
-                {p.label} {p.isPremium && '✦'}
+                {p.label} {p.isPremium && <Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden />}
               </button>
             ) : null
           )}

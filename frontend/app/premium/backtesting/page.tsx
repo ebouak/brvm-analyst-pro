@@ -21,7 +21,7 @@ export default async function BacktestingPremiumPage() {
       <SectionHeader
         title="Backtesting"
         subtitle="Classement des meilleures performances et dividendes historiques sur la BRVM."
-        actions={<StatPill tone="gold">✦ Premium</StatPill>}
+        actions={<StatPill tone="gold">Premium</StatPill>}
       />
 
       {/* ── KPIs ──────────────────────────────────────────────────────────── */}

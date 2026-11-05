@@ -1,3 +1,4 @@
+import { Crosshair } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import { smaSeries, rsiSeries, macdSeries } from '@/lib/indicators';
@@ -191,7 +192,7 @@ export default async function ScannerPage({ searchParams }: PageProps) {
       {!filtersActive ? (
         <div className="rounded-card border border-border bg-surface shadow-card p-12 text-center space-y-3">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-lg text-gold/70">
-            ⌖
+            <Crosshair size={20} strokeWidth={1.75} aria-hidden />
           </div>
           <p className="font-display text-base text-ivory">Configurez des filtres puis lancez le scan</p>
           <p className="text-sm text-muted max-w-md mx-auto leading-relaxed">

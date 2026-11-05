@@ -1,5 +1,6 @@
 'use client';
 
+import { X as IconeFermer } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { FundamentalInputs } from '@/lib/fundamentals';
@@ -51,11 +52,11 @@ export default function EditFundamentalsModal({ code, inputs, year, onClose }: P
   );
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={onClose}>
       <div className="bg-surface border border-border rounded-xl shadow-lg max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-lg font-semibold">Corriger les fondamentaux — {code}</h2>
-          <button type="button" onClick={onClose} className="text-muted hover:text-fg text-lg" aria-label="Fermer">✕</button>
+          <button type="button" onClick={onClose} className="text-muted hover:text-fg text-lg" aria-label="Fermer"><IconeFermer size={16} strokeWidth={2} aria-hidden /></button>
         </div>
         <form onSubmit={onSubmit} className="p-6 space-y-3">
           <div className="grid grid-cols-2 gap-3">

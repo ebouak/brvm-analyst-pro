@@ -23,7 +23,7 @@ export default async function AssistantPage({ searchParams }: Props) {
           subtitle="Posez vos questions sur le marché, une valeur ou votre portefeuille : les réponses s’appuient sur les données de la plateforme."
           actions={
             <div className="flex items-center gap-2">
-              <StatPill tone="gold">✦ Premium</StatPill>
+              <StatPill tone="gold">Premium</StatPill>
               {sym && (
                 <StatPill tone="sapphire">{sym}</StatPill>
               )}

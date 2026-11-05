@@ -1,3 +1,4 @@
+import { CalendarClock, FileSearch, LineChart } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import type { MarketEvent } from '@/lib/types';
@@ -53,21 +54,21 @@ export default async function ReportsHome() {
       title: 'Rapport marché journalier',
       desc: 'Synthèse de séance, indices, top movers, breadth, événements.',
       kicker: 'Marché',
-      icon: '▦',
+      icon: LineChart,
     },
     {
       href: '/dashboard/reports/events',
       title: 'Événements de marché',
       desc: 'Listing filtrable des communiqués, avis et annonces émetteurs.',
       kicker: 'Communiqués',
-      icon: '◈',
+      icon: CalendarClock,
     },
     {
       href: '/actions',
       title: 'Rapport par instrument',
       desc: 'Choisissez un titre dans le marché actions pour son rapport détaillé.',
       kicker: 'Instrument',
-      icon: '◎',
+      icon: FileSearch,
     },
   ];
 
@@ -100,7 +101,7 @@ export default async function ReportsHome() {
             >
               <div className="flex items-start justify-between">
                 <span className="grid h-9 w-9 place-items-center rounded-lg border border-gold/20 bg-gold/[0.06] text-base text-gold/70">
-                  {c.icon}
+                  <c.icon size={18} strokeWidth={1.75} aria-hidden />
                 </span>
                 <StatPill tone="neutral">{c.kicker}</StatPill>
               </div>

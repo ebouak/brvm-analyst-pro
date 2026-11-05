@@ -16,12 +16,11 @@ export default function UpgradePage() {
 
       <div className="grid gap-4 mb-10">
         {[
-          { icon: '◇', title: 'Classements multi-critères', desc: 'PBR, PER, marge nette, liquidité, performance, volatilité, rotation · 9 classements actualisés.' },
-          { icon: '◇', title: 'Calendrier des dates clés', desc: 'Dates de publication des états financiers, annonces et versements de dividendes, Assemblées Générales.' },
-          { icon: '◇', title: 'Détection d\'anomalies', desc: '4 analyses visuelles : scatter dividendes, liquidité/volatilité, heatmap 20 séances, marge vs croissance.' },
+          { title: 'Classements multi-critères', desc: 'PBR, PER, marge nette, liquidité, performance, volatilité, rotation · 9 classements actualisés.' },
+          { title: 'Calendrier des dates clés', desc: 'Dates de publication des états financiers, annonces et versements de dividendes, Assemblées Générales.' },
+          { title: 'Détection d\'anomalies', desc: '4 analyses visuelles : scatter dividendes, liquidité/volatilité, heatmap 20 séances, marge vs croissance.' },
         ].map((f) => (
           <div key={f.title} className="flex gap-4 p-4 bg-surface border border-border rounded-xl">
-            <span className="text-2xl shrink-0">{f.icon}</span>
             <div>
               <p className="text-sm font-semibold text-white mb-1">{f.title}</p>
               <p className="text-xs text-muted leading-relaxed">{f.desc}</p>

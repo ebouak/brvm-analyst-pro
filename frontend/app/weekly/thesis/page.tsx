@@ -1,3 +1,4 @@
+import { ArrowLeftRight, CloudRain, Landmark } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
@@ -334,7 +335,7 @@ export default function ThesisPage() {
                   <ul className="space-y-1">
                     {c.thesis.map((t, i) => (
                       <li key={i} className="flex gap-2 text-xs text-muted">
-                        <span className="text-cyan-500 mt-0.5 shrink-0">✦</span>
+                        <span className="text-cyan-500 mt-0.5 shrink-0" aria-hidden>•</span>
                         <span>{t}</span>
                       </li>
                     ))}
@@ -393,23 +394,23 @@ export default function ThesisPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               {
-                icon: '💱',
+                icon: ArrowLeftRight,
                 title: 'Parité USD / FCFA',
                 text: 'Toutes les matières sont cotées en USD. Le FCFA est arrimé à l\'euro (655 = 1 €). Un dollar fort augmente mécaniquement les revenus en FCFA des exportateurs sans mouvement du cours.',
               },
               {
-                icon: '🏛️',
+                icon: Landmark,
                 title: 'Prix administrés',
                 text: 'Carburants, sucre et parfois huile de palme sont régulés dans plusieurs pays UEMOA. Cela amortit les chocs mondiaux mais crée un risque de compression de marge en phase haussière.',
               },
               {
-                icon: '🌧️',
+                icon: CloudRain,
                 title: 'Récoltes locales',
                 text: 'Pour les valeurs agro (SAPH, SOGB, PALC, SICC, SCRC, SIFCA), le volume de récolte locale peut neutraliser ou amplifier l\'impact d\'un mouvement mondial de prix.',
               },
             ].map(f => (
               <div key={f.title} className="bg-surface border border-border rounded-xl p-4">
-                <div className="text-2xl mb-2">{f.icon}</div>
+                <f.icon size={24} strokeWidth={1.75} className="mb-2 text-accent" aria-hidden />
                 <h4 className="font-semibold text-ivory mb-2 text-sm">{f.title}</h4>
                 <p className="text-xs text-muted leading-relaxed">{f.text}</p>
               </div>

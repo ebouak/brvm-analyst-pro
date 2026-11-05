@@ -519,7 +519,7 @@ export default async function Dashboard() {
             <FreshnessBadge fraicheur={fraicheurCours} />
             {user && (
               <Link href="/dashboard/personnaliser" className="rounded-full border border-border px-3 py-1.5 text-xs text-muted hover:text-accent hover:border-accent/40 transition-colors" title={dashboardLayout ? 'Ordre personnalisé enregistré : il remplace l’ordre automatique de votre profil' : 'Personnaliser le tableau de bord'}>
-                {dashboardLayout ? '⚙︎ Ordre personnalisé' : '⚙︎ Personnaliser'}
+                {dashboardLayout ? 'Ordre personnalisé' : 'Personnaliser'}
               </Link>
             )}
             {/* Passage vers la seconde version du tableau de bord. Les deux
