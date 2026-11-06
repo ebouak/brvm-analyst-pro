@@ -12,7 +12,7 @@ import { logger } from '../logger.js';
 import { garderEchelle } from './operations.js';
 import { sha256 } from '../utils/hash.js';
 import { extractDividendAmount, extractExercice } from './extract.js';
-import { fetchRichbourseDividends } from './richbourse.js';
+import { fetchRichbourseDividends, repliRichbourseActif } from './richbourse.js';
 import { fetchSikafinanceDividends } from './sikafinance.js';
 import type { Dividend } from './types.js';
 
@@ -44,7 +44,8 @@ export async function runDividends(opts: { mock?: boolean } = {}): Promise<Divid
       logger.warn('Mode MOCK dividendes');
       divs = buildMock();
     } else {
-      // Trois sources, et L'ORDRE COMPTE : le dédoublonnage intra-lot par
+      // RichBourse n'est interrogé que si le calendrier officiel est KO (voir
+      // repliRichbourseActif). Trois sources, et L'ORDRE COMPTE : le dédoublonnage intra-lot par
       // (code, exercice) conserve la DERNIÈRE occurrence. Richbourse passe donc
       // en dernier, car c'est la plus fiable des trois sur la campagne en
       // cours — codes BRVM natifs (aucune correspondance par nom, donc pas la
@@ -59,10 +60,12 @@ export async function runDividends(opts: { mock?: boolean } = {}): Promise<Divid
           return [] as Dividend[];
         }),
         deriveFromEvents().catch(() => [] as Dividend[]),
-        fetchRichbourseDividends().catch((e) => {
-          logger.warn({ err: (e as Error).message }, 'richbourse indisponible');
-          return [] as Dividend[];
-        }),
+        repliRichbourseActif(process.env)
+          ? fetchRichbourseDividends().catch((e) => {
+              logger.warn({ err: (e as Error).message }, 'repli richbourse refusé ou indisponible');
+              return [] as Dividend[];
+            })
+          : Promise.resolve([] as Dividend[]),
       ]);
       divs = [...sika, ...fromEvents, ...rich];
     }

@@ -30,7 +30,21 @@ import type { Dividend } from './types.js';
  * à 2293 ; STBC 1707,2 face à 1707 ; ABJC 201,52 face à 202).
  */
 
-const RICHBOURSE_URL = 'https://www.richbourse.com/common/dividende/index';
+/**
+ * URL déclarée dans leur sitemap. Le 2026-11-06 elle répond 403 (« extraction
+ * automatique non autorisée ») : ne PAS revenir à `/common/dividende/index`, hors
+ * sitemap, qui passait encore. Ce serait profiter d'un trou dans leur refus.
+ */
+const RICHBOURSE_URL = 'https://www.richbourse.com/common/dividende';
+
+/**
+ * RichBourse n'est plus une source courante : uniquement un repli, si le calendrier
+ * officiel est KO (décision de l'exploitant du 2026-11-06). Le workflow le signale
+ * par RICHBOURSE_REPLI=1 ; hors de ce cas, aucune requête ne part.
+ */
+export function repliRichbourseActif(env: Record<string, string | undefined>): boolean {
+  return env.RICHBOURSE_REPLI === '1';
+}
 
 
 /** Convertit « 2 293.28 » ou « 1 707,2 » en nombre. Null si illisible. */

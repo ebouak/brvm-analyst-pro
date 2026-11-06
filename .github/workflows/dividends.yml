@@ -21,9 +21,9 @@ permissions:
 jobs:
   dividends:
     runs-on: ubuntu-latest
-    # 15 min : l'étape du calendrier officiel respecte 10 s entre deux requêtes
-    # vers brvm.org (robots.txt, Crawl-delay 10).
-    timeout-minutes: 15
+    # 20 min : le calendrier officiel passe deux fois (test puis écriture), à 10 s
+    # entre deux requêtes vers brvm.org (robots.txt, Crawl-delay 10).
+    timeout-minutes: 20
     strategy:
       max-parallel: 1
     steps:
@@ -35,12 +35,24 @@ jobs:
         working-directory: scraper
         run: npm install
 
+      # Test à blanc du calendrier officiel : il décide du repli. RichBourse refuse
+      # les robots, il n'est donc interrogé que si le calendrier est KO.
+      - name: Tester le calendrier officiel (à blanc)
+        id: calendrier_test
+        continue-on-error: true
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx src/index.ts dividends:calendrier
+
       - name: Run dividends ingestion with retry
         working-directory: scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           LOG_LEVEL: info
+          RICHBOURSE_REPLI: ${{ steps.calendrier_test.outcome == 'failure' && '1' || '0' }}
         run: |
           MAX_RETRIES=2
           RETRY_DELAY=30
@@ -70,6 +82,18 @@ jobs:
       # Calendrier officiel BRVM (dates de détachement, brut/net). APRÈS
       # « dividends » : le calendrier est le dernier à écrire, et plus aucune
       # autre source ne l'écrase (runDividends.SOURCES_REFERENCE).
+      # Calendrier KO : le Bulletin officiel de la BRVM prend le relais, et le repli
+      # se voit sur la page du run.
+      - name: Bulletin officiel (repli si calendrier KO)
+        if: steps.calendrier_test.outcome == 'failure'
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "::warning title=Dividendes::calendrier officiel KO, repli sur le Bulletin officiel et RichBourse"
+          npx tsx src/index.ts dividends:boc --ecrire
+
       - name: Calendrier officiel des dividendes
         working-directory: scraper
         env:
