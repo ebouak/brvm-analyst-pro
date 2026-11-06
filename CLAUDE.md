@@ -1379,9 +1379,12 @@ Specs `2026-11-04-recherche-societes-jev-design.md` (PR #163, #165) et
 - Nouveaux outils (`lib/agent/outilsChatbot.ts`) : fiche société, carnet d'ordres,
   comparaison, recherche par description, notions Academy (titres + lien, jamais le
   contenu payant). Signal/confiance retirés de tout retour.
-- **BPA et dividende par action de la fiche de l'agent** : exclus au départ sur un
-  diagnostic FAUX (voir la correction du 2026-11-06 plus bas). Ils restent exclus tant
-  que personne n'a décidé de les réintroduire.
+- **BPA, dividende par action et PER de la fiche de l'agent** : exclus au départ sur un
+  diagnostic FAUX (voir la correction du 2026-11-06 plus bas), réintroduits le même jour
+  via `chiffresParAction` (`lib/agent/chatbotPur.ts`) : BPA à moins de 5 % de résultat ÷
+  titres, comptes de moins de 2 ans, dividende nul = inconnu. Le PER sort de
+  `computeRatios`, comme la fiche société, donc sur le résultat CONSOLIDÉ : SNTS y
+  paraît moins chère que sur la part du groupe (12,3x dans le décryptage du 29/10).
 - **Activation** : décision de l'exploitant, après essai réel (message libre, suite de
   conversation, notion, comparaison, conseil déguisé, note vocale, EFFACER).
 
