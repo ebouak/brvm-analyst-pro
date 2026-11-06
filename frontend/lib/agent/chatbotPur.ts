@@ -1,3 +1,5 @@
+import { computeRatios } from '../fundamentals';
+
 /**
  * Parties PURES des outils de l'assistant WhatsApp (lib/agent/outilsChatbot.ts).
  */
@@ -58,4 +60,59 @@ export function sansSignal(r: unknown): unknown {
 export function lireListeValeurs(saisie: string): string[] | null {
   const liste = [...new Set(saisie.split(/[,;/]+|\s+et\s+/i).map((s) => s.trim()).filter(Boolean))].slice(0, 3);
   return liste.length >= 2 ? liste : null;
+}
+
+export interface EntreeParAction {
+  /** Exercice des comptes (« 2025 »). */
+  exercice: string | number | null;
+  resultatNet: number | null;
+  /** BPA publié, en base. */
+  bpa: number | null;
+  /** Dividende par action en base. Zéro = inconnu : ces zéros sont souvent des trous de collecte. */
+  dpa: number | null;
+  titres: number | null;
+  cours: number | null;
+  /** Année de la séance, pour écarter des comptes trop anciens. */
+  anneeSeance: number;
+}
+
+export interface ChiffresParAction {
+  exercice: string;
+  bpa_fcfa: number;
+  dividende_par_action_fcfa: number | null;
+  /** null en cas de perte : un PER négatif ne signifie rien. */
+  per: number | null;
+  base_per: string;
+}
+
+/** Écart toléré entre le BPA publié et résultat net ÷ titres. */
+export const ECART_BPA_MAX = 0.05;
+/** Au-delà, un PER compare un cours d'aujourd'hui à des comptes dépassés (STAC : 2021). */
+export const AGE_COMPTES_MAX = 2;
+
+/**
+ * BPA, dividende par action et PER, ou null si on ne peut pas s'y fier. Le PER
+ * sort de computeRatios, le calcul de la fiche société : l'assistant et le site
+ * donnent le même chiffre.
+ *
+ * Le contrôle : le BPA publié doit coller à résultat net ÷ titres. Mesuré le
+ * 2026-11-06 sur 30 sociétés, BOAC (0,67), SAFC (0,68), SEMC (0,56), ORGT (1,18)
+ * et ETIT (1,30) s'en écartent, sans qu'on sache encore pourquoi : un chiffre non
+ * recoupé ne part pas. SNTS passe (1 000 000 000 de titres depuis le
+ * fractionnement du 26/10/2026) : son BPA de 413,6 est juste.
+ */
+export function chiffresParAction(e: EntreeParAction): ChiffresParAction | null {
+  const { resultatNet, bpa, titres, cours } = e;
+  if (resultatNet == null || bpa == null || bpa === 0 || !titres || !cours) return null;
+  const annee = Number(String(e.exercice ?? '').slice(0, 4));
+  if (!annee || e.anneeSeance - annee > AGE_COMPTES_MAX) return null;
+  if (Math.abs(resultatNet / titres / bpa - 1) > ECART_BPA_MAX) return null;
+  const { per } = computeRatios({ cours, shares: titres, net_income: resultatNet, revenue: null, equity: null, debt: null, dividende: null });
+  return {
+    exercice: String(annee),
+    bpa_fcfa: bpa,
+    dividende_par_action_fcfa: e.dpa != null && e.dpa > 0 ? e.dpa : null,
+    per: per != null && per > 0 ? Math.round(per * 10) / 10 : null,
+    base_per: 'résultat net consolidé, intérêts minoritaires inclus',
+  };
 }

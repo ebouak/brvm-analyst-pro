@@ -6,7 +6,7 @@ import { getServiceClient } from '@/lib/billing/serviceClient';
 import { chargerInstantane } from '@/lib/server/rechercheDonnees';
 import { rechercheMotsCles } from '@/lib/recherche/motsCles';
 import { OUTILS, executerOutil, resoudreCode, type DefinitionOutil } from './outils';
-import { classerNotions, lireListeValeurs, sansSignal, type LeconIndex } from './chatbotPur';
+import { chiffresParAction, classerNotions, lireListeValeurs, sansSignal, type LeconIndex } from './chatbotPur';
 
 /**
  * Outils de l'assistant WhatsApp ouvert à tous (spec 2026-11-04 §3).
@@ -28,7 +28,7 @@ const CODE = { code: { type: 'string', description: 'Code BRVM (ex. SNTS) ou nom
 export const OUTILS_CHATBOT: DefinitionOutil[] = [
   outil(
     'fiche_societe',
-    "Fiche d'une société cotée : secteur, pays, cours et plage sur 52 semaines, derniers comptes annuels publiés (revenus et résultat net, en FCFA), rendement du dividende avec sa base fiscale, liquidité, performance sur 12 mois.",
+    "Fiche d'une société cotée : secteur, pays, cours et plage sur 52 semaines, derniers comptes annuels publiés (revenus et résultat net, en FCFA), BPA, dividende par action et PER quand ils sont recoupés (par_action nul : non vérifiable, dis-le), rendement du dividende avec sa base fiscale, liquidité, performance sur 12 mois.",
     CODE,
     ['code'],
   ),
@@ -80,7 +80,7 @@ async function ficheSociete(db: SupabaseClient, saisie: string) {
   if (!code) return { erreur: `Aucune valeur cotée ne correspond à « ${saisie} ».` };
   const asOf = await getLastMarketDate(db);
   const [instrument, seance, comptes, instantane] = await Promise.all([
-    db.from('brvm_instruments').select('designation, secteur, pays').eq('code', code).maybeSingle().then((r) => r.data),
+    db.from('brvm_instruments').select('designation, secteur, pays, shares').eq('code', code).maybeSingle().then((r) => r.data),
     asOf
       ? db
           .from('brvm_actions_daily')
@@ -92,7 +92,7 @@ async function ficheSociete(db: SupabaseClient, saisie: string) {
       : Promise.resolve(null),
     db
       .from('income_statements')
-      .select('periode, revenu_total, resultat_net')
+      .select('periode, revenu_total, resultat_net, benefice_par_action, dividende_par_action')
       .eq('code', code)
       .in('type_periode', ['annuel', 'annual'])
       .order('periode', { ascending: false })
@@ -101,8 +101,18 @@ async function ficheSociete(db: SupabaseClient, saisie: string) {
       .then((r) => r.data),
     chargerInstantane().catch(() => null),
   ]);
-  // BPA, dividende par action et PER absents. Le motif d'origine était faux (voir CLAUDE.md,
-  // correction du 2026-11-06) ; les réintroduire reste une décision à prendre.
+  // Un chiffre par action ne part que recoupé : voir chiffresParAction.
+  const parAction = comptes
+    ? chiffresParAction({
+        exercice: comptes.periode,
+        resultatNet: comptes.resultat_net,
+        bpa: comptes.benefice_par_action,
+        dpa: comptes.dividende_par_action,
+        titres: instrument?.shares ?? null,
+        cours: seance?.cours_jour ?? null,
+        anneeSeance: Number(String(asOf ?? '').slice(0, 4)),
+      })
+    : null;
   const faits = instantane?.fiches.find((f) => f.code === code)?.faits.filter((f) => f.cle !== 'secteur' && f.cle !== 'pays') ?? [];
   return {
     code,
@@ -117,6 +127,7 @@ async function ficheSociete(db: SupabaseClient, saisie: string) {
     derniers_comptes_annuels: comptes
       ? { exercice: comptes.periode, revenus_fcfa: comptes.revenu_total, resultat_net_fcfa: comptes.resultat_net }
       : null,
+    par_action: parAction,
     faits: faits.map((f) => `${f.libelle} : ${f.valeur}`),
     lien: `${SITE}/societes/${code}`,
   };
