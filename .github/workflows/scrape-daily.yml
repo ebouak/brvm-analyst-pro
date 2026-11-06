@@ -44,7 +44,8 @@ jobs:
   # ══════════════════════════════════════════════════════════════════════
   post-cloture:
     name: Post-clôture BRVM (cours + signaux + alertes)
-    runs-on: ubuntu-latest
+    # Figé : Playwright 1.60 ne prend pas en charge ubuntu-latest passé en 26.04 (2026-11-06).
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     if: |
       github.event_name == 'workflow_dispatch' && (github.event.inputs.command == 'daily' || github.event.inputs.command == 'date') ||
@@ -197,7 +198,8 @@ jobs:
   # ══════════════════════════════════════════════════════════════════════
   matin-events:
     name: Matin — événements & dividendes
-    runs-on: ubuntu-latest
+    # Figé : Playwright 1.60 ne prend pas en charge ubuntu-latest passé en 26.04 (2026-11-06).
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     if: |
       github.event_name == 'workflow_dispatch' && (github.event.inputs.command == 'events' || github.event.inputs.command == 'dividends') ||
