@@ -1422,6 +1422,17 @@ PR #168 à #174. 1681 tests frontend verts.
   le serveur Hetzner (expiration depuis le serveur, 200 depuis une connexion
   résidentielle) et son `robots.txt` demande `Crawl-delay: 60`. La source refuse les
   serveurs : ne PAS empiler un autre détour. Il faut une autre source, ou son accord.
+- **RichBourse refuse désormais les robots** (2026-11-06) : `/common/mouvements/index/<CODE>`
+  répond 403 « Extraction automatique non autorisée », bien que cette page figure dans
+  leur sitemap. Le job `details` restait VERT en prenant 403 sur chaque valeur : c'est
+  pourquoi le flottant de SNTS n'avait pas suivi le fractionnement. Job retiré, remplacé
+  par `flottant` (`scraper/src/refdata/runFlottant.ts`, fiches société Sika, autorisées
+  par son robots.txt), qui écarte et nomme une valeur si le nombre de titres diverge, et
+  passe au rouge sous 50 % d'écritures. ⚠️ **Ne pas contourner ce refus** (autre
+  identité, navigateur, service tiers) : il faut leur accord ou une autre source.
+  `dividends/richbourse.ts` reste planifié : à trancher, sachant que le calendrier
+  officiel, le BOC et Sika couvrent le même besoin. La mention « hors Disallow » de
+  `richbourseAgent.ts` ne vaut donc plus autorisation.
 - ⚠️ **CORRECTION DU 2026-11-06 — le « défaut SNTS ÷ 10 » n'existait pas.** Le passage du
   2026-11-04 affirmait que le BPA de 413,6 était faux. **C'était faux.** SNTS a été
   fractionnée par 10 le 26/10/2026 (`fa41e205`) : 413,59 Md ÷ 1 000 000 000 de titres

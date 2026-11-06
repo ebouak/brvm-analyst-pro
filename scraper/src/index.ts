@@ -975,6 +975,12 @@ async function main(): Promise<number> {
       logger.info(res, 'Notations terminées');
       return res.errors > 0 ? 1 : 0;
     }
+    case 'flottant': {
+      const { runFlottant } = await import('./refdata/runFlottant.js');
+      const res = await runFlottant({ mock, dryRun: /^(1|true|yes)$/i.test(process.env.DRY_RUN ?? '') });
+      if (res.discordants.length > 0) console.log(`::warning title=Flottant::nombre de titres discordant : ${res.discordants.join(' ')}`);
+      return res.status === 'failed' ? 1 : 0;
+    }
     case 'details': {
       const codes = positional.length > 0 ? positional : undefined;
       const res = await runDetails({ codes, mock });
