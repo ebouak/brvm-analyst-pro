@@ -1379,12 +1379,56 @@ Specs `2026-11-04-recherche-societes-jev-design.md` (PR #163, #165) et
 - Nouveaux outils (`lib/agent/outilsChatbot.ts`) : fiche société, carnet d'ordres,
   comparaison, recherche par description, notions Academy (titres + lien, jamais le
   contenu payant). Signal/confiance retirés de tout retour.
-- ⚠️ **DÉFAUT DE DONNÉES NON CORRIGÉ** : `income_statements` porte pour **SNTS** un
-  BPA de 413,6 et un dividende par action de 174, soit **÷ 10** (résultat net ÷ actions
-  ≈ 4 136 ; ORAC cohérent). BPA, DPA et PER sont donc exclus de la fiche de l'agent.
-  Auditer les autres sociétés avant de réintroduire un PER calculé sur cette table.
+- **BPA et dividende par action de la fiche de l'agent** : exclus au départ sur un
+  diagnostic FAUX (voir la correction du 2026-11-06 plus bas). Ils restent exclus tant
+  que personne n'a décidé de les réintroduire.
 - **Activation** : décision de l'exploitant, après essai réel (message libre, suite de
   conversation, notion, comparaison, conseil déguisé, note vocale, EFFACER).
+
+### Ajouts (passage 2026-11-05/06) — Nettoyage des tics IA, logo animé, QR d'appairage
+
+PR #168 à #174. 1681 tests frontend verts.
+
+- **Appairage WhatsApp par QR code** (#168) : `lib/whatsapp/qrAppairage.ts` encode le lien
+  `wa.me` avec le code SEUL (le webhook compare le message entier au code),
+  `useDetectionLiaison` relit l'état toutes les 4 s. La preuve de possession est
+  inchangée : seul le webhook crée une liaison.
+- **Échéance par message dans la cascade LLM** (#169) : `callAgentLlm(..., { echeance })`,
+  module pur `whatsappAgent/delai.ts`. Sans échéance, 30 s comme avant. Chaque abandon
+  de fournisseur est journalisé (`[agent-llm] gemini : HTTP 402`).
+- **Nettoyage impeccable** (#170, #171, #172) : plus de surtitre au-dessus d'un titre
+  (prop `kicker` supprimée de `SectionHeader`), plus de capitales espacées, emoji et
+  glyphes remplacés par `lucide-react`, plus de barre latérale colorée > 1 px. Les
+  états vides passent par `EmptyStatePremium`, qui traduit l'ancien glyphe en icône.
+  ⚠️ `overline` est AUSSI un utilitaire Tailwind (`text-decoration`) : `.overline` le
+  remet à zéro dans `globals.css`, sinon chaque étiquette porte un trait au-dessus.
+  ⚠️ Tailwind ne scanne pas `lib/` : une classe renvoyée par un helper de `lib/` n'est
+  générée que si le fichier est ajouté à `content` (`calendarHelpers.ts`).
+  Non traités, volontairement : `components/landing/` hors `bis/` (code mort) et `/apercu`.
+- **Logo animé** (#173) : une seule idée, le W se trace comme une courbe de cours et la
+  flèche prolonge son dernier jambage. Splash posé à 0,8 s, sorti à 1,2 s (il durait
+  1,57 s pour un écran coupé à 0,95 s : le logo complet n'était jamais visible).
+  Signature vidéo de 2,2 s : `remotion/seance-modeles/signature.tsx`, après les 1,5 s de
+  la carte finale (avertissement légal). La version fixe de repli n'en a pas.
+- **Playwright et Ubuntu 26.04** : le 2026-11-06, GitHub a commencé à passer
+  `ubuntu-latest` en 26.04, que Playwright 1.60 ne prend pas en charge (job « Matin » en
+  échec). Bascule PROGRESSIVE : le même jour, une machine était encore en 24.04.
+  Versions désormais EXACTES (1.64.1) : un `^` a résolu vers une version sortie la
+  veille.
+- **Indices africains : cron coupé de nouveau (2026-11-06).** AFX filtre désormais aussi
+  le serveur Hetzner (expiration depuis le serveur, 200 depuis une connexion
+  résidentielle) et son `robots.txt` demande `Crawl-delay: 60`. La source refuse les
+  serveurs : ne PAS empiler un autre détour. Il faut une autre source, ou son accord.
+- ⚠️ **CORRECTION DU 2026-11-06 — le « défaut SNTS ÷ 10 » n'existait pas.** Le passage du
+  2026-11-04 affirmait que le BPA de 413,6 était faux. **C'était faux.** SNTS a été
+  fractionnée par 10 le 26/10/2026 (`fa41e205`) : 413,59 Md ÷ 1 000 000 000 de titres
+  = 413,6 FCFA. J'avais comparé à l'ancien nombre de titres, sans vérifier. Le BPA a
+  ainsi été exclu de la fiche de l'agent sans raison valable.
+  Audit de 30 sociétés (résultat net ÷ titres, comparé au BPA) : aucune erreur d'un
+  facteur 10. Écarts à recouper sur les documents, sans correction faite : BOAC (0,67),
+  SAFC (0,68), SEMC (0,56), ORGT (1,18), ETIT (1,30). Un écart peut venir d'une
+  augmentation de capital ou d'un résultat part du groupe : ne rien corriger sans source.
+  **Leçon** : avant de déclarer une donnée fausse, chercher un événement sur titres.
 
 ## 9. Bugs connus / limites
 

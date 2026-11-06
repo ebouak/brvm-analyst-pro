@@ -101,7 +101,8 @@ async function ficheSociete(db: SupabaseClient, saisie: string) {
       .then((r) => r.data),
     chargerInstantane().catch(() => null),
   ]);
-  // BPA, dividende par action et PER volontairement absents (spec §3 : SNTS faux d'un facteur 10 en base).
+  // BPA, dividende par action et PER absents. Le motif d'origine était faux (voir CLAUDE.md,
+  // correction du 2026-11-06) ; les réintroduire reste une décision à prendre.
   const faits = instantane?.fiches.find((f) => f.code === code)?.faits.filter((f) => f.cle !== 'secteur' && f.cle !== 'pays') ?? [];
   return {
     code,
