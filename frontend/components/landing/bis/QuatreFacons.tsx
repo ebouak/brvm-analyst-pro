@@ -91,10 +91,9 @@ export function QuatreFacons() {
     <section className="facons" aria-labelledby="h-facons">
       <div className="facons-head">
         <div>
-                    <h2 id="h-facons">Quatre façons de travailler<br />le <span className="accent">marché</span>.</h2>
+                    <h2 id="h-facons">Quatre façons de travailler le marché</h2>
           <p className="lead">Comprendre, surveiller, tester et explorer — les mêmes outils que dans l’app, présentés en vitrine.</p>
         </div>
-        <div className="annot-2" aria-hidden="true"><span className="hand">Des outils concrets<br />pour aller plus loin.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
       </div>
       <div className="cols">
         {COLONNES.map((col, idx) => (
@@ -118,11 +117,6 @@ export function QuatreFacons() {
             <Link href={col.href} className="voir">Voir les outils <span aria-hidden="true">→</span></Link>
           </motion.article>
         ))}
-      </div>
-      <div className="banner">
-        <div className="leaf" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 20c0-8 6-14 16-16-1 10-7 16-16 16z" /><path d="M4 20c4-6 8-9 12-11" /></svg></div>
-        <div className="t"><b>Une plateforme. Plusieurs façons de travailler le marché.</b><span>Des données fiables · Des analyses claires · Des outils concrets</span></div>
-        <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
       </div>
     </section>
   );

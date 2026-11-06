@@ -23,7 +23,7 @@ import type { TopNote } from '@/lib/landing/bisData';
  *   `images.remotePatterns`, interdit tant que Next < 15.5.24 (voir CLAUDE.md).
  */
 
-const INTERVALLE_MS = 4200;
+const INTERVALLE_MS = 7000;
 const EASE: [number,number,number,number] = [0.22,1,0.36,1];
 const fmtPct = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
 
@@ -79,7 +79,7 @@ export function HeroCarousel({ slides, dateLabel, brvmCVar, hausses, nbActions, 
       onKeyDown={(e) => { if (e.key === 'ArrowLeft') go(i - 1); if (e.key === 'ArrowRight') go(i + 1); }}
       drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.18} onDragEnd={onDragEnd} style={{ touchAction: 'pan-y' } as any}
     >
-      <AnimatePresence mode="wait"><motion.div key={'kb-'+i} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 0.45, scale: 1.06 }} exit={{ opacity: 0 }} transition={{ duration: 0.55, ease: EASE }} style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' } as any} aria-hidden>{slides[i]?.imageUrl && <img src={slides[i].imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: (slides[i] as any).imageFit ?? 'cover' } as any} />}</motion.div></AnimatePresence>
+      <AnimatePresence mode="wait"><motion.div key={'kb-'+i} initial={{ opacity: 0, scale: 1 }} animate={{ opacity: 0.45, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.55, ease: EASE }} style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' } as any} aria-hidden>{slides[i]?.imageUrl && <img src={slides[i].imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: (slides[i] as any).imageFit ?? 'cover' } as any} />}</motion.div></AnimatePresence>
       {slides.map((s, k) => {
         const active = k === i;
         const label = `${k + 1} sur ${n} : ${s.kind === 'ad' ? `Publicité, ${s.sponsorName}` : s.title}`;

@@ -5,7 +5,6 @@ import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
-import BeginnerBanner from '@/components/BeginnerBanner';
 import ContactNudge from '@/components/contact/ContactNudge';
 import NewsletterNudge from '@/components/newsletter/NewsletterNudge';
 import GeoCompte from '@/components/crm/GeoCompte';
@@ -82,6 +81,7 @@ export default function ConditionalShell({
   // pire endroit possible. Le composant se tait de lui-même pour les personnes
   // déjà connectées et tant que le bandeau cookies attend une réponse.
   const showNewsletter =
+    pathname !== '/' && // la landing a son propre formulaire : pas de popup en plus
     pathname !== '/login' &&
     pathname !== '/signup' &&
     !pathname.startsWith('/crm') &&
@@ -108,7 +108,6 @@ export default function ConditionalShell({
         >
           Aller au contenu
         </a>
-        {pathname === '/' && <BeginnerBanner />}
         <main id="contenu">{children}</main>
         {showsFooter(pathname) && <Footer />}
         {showNudge && <ContactNudge />}

@@ -5,6 +5,7 @@ import { RechercheSocietes } from '@/components/societes/RechercheSocietes';
 import { HeroCarousel } from '@/components/landing/bis/HeroCarousel';
 import { FilConducteur, type Fait } from '@/components/landing/bis/FilConducteur';
 import { Billboard } from '@/components/landing/bis/Billboard';
+import { Seance } from '@/components/landing/bis/Seance';
 import { ProofBandBis, PreuveDonneeBis } from '@/components/landing/bis/Preuve';
 import { BrvmAujourdhui } from '@/components/landing/bis/BrvmAujourdhui';
 import { Terminal } from '@/components/landing/bis/Terminal';
@@ -86,33 +87,37 @@ export default async function Landing() {
         <LandingNav />
 
         <main>
-          {/* 1 · HERO + 7 ÉTAPES */}
-          <section className="hero" aria-labelledby="h1">
-            <div className="hero-grid">
-              <div className="hero-copy">
-                <div className="annot" aria-hidden="true"><span className="hand">Des données<br />à vos décisions,<br />tout simplement.</span><svg className="stroke" viewBox="0 0 90 8"><path d="M2 5 C 25 1, 60 8, 88 3" fill="none" stroke="rgb(var(--color-accent))" strokeWidth="3" strokeLinecap="round" /></svg></div>
-                <h1 id="h1">De la donnée<br />à la <span className="accent">décision.</span></h1>
-                <p className="lead">Une méthode simple et transparente pour analyser la BRVM autrement, avec des données officielles et des outils concrets.</p>
-                <ul className="assur" aria-label="Sans engagement">
-                  {['Aucune carte bancaire', 'Compte en 1 minute', 'Sans engagement'].map((t) => (
-                    <li key={t}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="rgb(var(--color-up))" /><path d="M4.5 8.5l2.3 2.3L11.5 6" fill="none" stroke="rgb(var(--color-surface))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>{t}</li>
-                  ))}
-                </ul>
-                <div className="cta">
-                  <Link href="/signup" className="btn btn-ink">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
-                  <Link href="/societes" className="btn btn-ghost">Explorer les sociétés <span aria-hidden="true">→</span></Link>
-                </div>
+          {/* 1 · LA COTE DU SOIR — l'argument à gauche, la séance réelle à droite */}
+          <section className="hc" aria-labelledby="h1">
+            <div>
+              <h1 id="h1">Les {NB_SOCIETES_COTEES} valeurs de la BRVM, chiffre par chiffre, source à l&apos;appui.</h1>
+              <p className="lead">Cours toutes les 15 minutes en séance, note de A à F par action, fondamentaux, dossiers et simulateur. Chaque chiffre porte sa source, sa date et son heure.</p>
+              <div className="cta">
+                <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit</Link>
+                <Link href="/societes" className="btn btn-ghost">Explorer les sociétés</Link>
               </div>
-              <HeroCarousel
-                slides={d.slides} dateLabel={dateLabel} brvmCVar={d.brvmC?.variation ?? null}
-                hausses={d.hausses} nbActions={d.nbActions} topNote={d.topNote}
-                topHausse={topH ? { code: topH.code, variation: topH.variation } : null}
-                topBaisse={topB ? { code: topB.code, variation: topB.variation } : null}
-                sgi={d.sgi}
-              />
+              <p className="apres">Sans carte bancaire. Vous débutez ? <Link href="/debutant">Commencez par le guide</Link></p>
             </div>
-            <Billboard creations={d.bandeaux} slot="Emplacement annonceur, haut de page" />
-            <div className="fil"><span className="tag-fil">Le fil conducteur</span><span>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</span></div>
+            <Seance d={d} fraicheur={fraicheur} dateLabel={dateLabel} />
+          </section>
+
+          {/* 1 bis · À LA UNE — carrousel et annonceurs, sous le premier écran */}
+          <section className="une" aria-label="À la une">
+            <HeroCarousel
+              slides={d.slides} dateLabel={dateLabel} brvmCVar={d.brvmC?.variation ?? null}
+              hausses={d.hausses} nbActions={d.nbActions} topNote={d.topNote}
+              topHausse={topH ? { code: topH.code, variation: topH.variation } : null}
+              topBaisse={topB ? { code: topB.code, variation: topB.variation } : null}
+              sgi={d.sgi}
+            />
+          </section>
+
+          {/* 1 ter · LA MÉTHODE — sept étapes, chacune illustrée par un fait réel */}
+          <section className="methode" aria-labelledby="h-methode">
+            <div className="methode-tete">
+              <h2 id="h-methode">De la donnée à la décision</h2>
+              <p>Chaque étape s&apos;appuie sur la précédente. Rien n&apos;est affirmé sans la donnée qui le justifie.</p>
+            </div>
             <FilConducteur etapes={STEPS.map((s, k) => ({ ...s, fait: FAITS[k] ?? null }))} />
           </section>
 
@@ -127,7 +132,7 @@ export default async function Landing() {
 
           {/* 2 · LA BRVM AUJOURD'HUI — aperçu de séance (réel, dérivé) */}
           <div id="marche">
-            <BrvmAujourdhui d={d} fraicheur={fraicheur} dateLabel={dateLabel} />
+            <BrvmAujourdhui d={d} fraicheur={fraicheur} />
           </div>
 
           <Billboard creations={d.bandeaux} slot="Emplacement annonceur, milieu de page" />
@@ -152,7 +157,7 @@ export default async function Landing() {
                 <p className="muted">Sans carte bancaire, sans engagement. Les outils avancés viennent ensuite, quand vous en aurez besoin.</p>
               </div>
               <div className="cta-col">
-                <Link href="/signup" className="btn btn-ink btn-lg">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
+                <Link href="/signup" className="btn btn-ghost">Créer mon compte gratuit</Link>
                 <small>Sans carte bancaire · Sans engagement</small>
               </div>
             </div>
@@ -161,20 +166,9 @@ export default async function Landing() {
           {/* 3 · POUR ALLER PLUS LOIN — Premium, une seule fois */}
           <section id="premium" className="prem" aria-labelledby="h-prem">
             <div className="prem-copy">
-                            <h2 id="h-prem">Pour aller <span className="accent">plus loin</span>,<br />quand vous serez prêt.</h2>
+                            <h2 id="h-prem">Pour aller plus loin, quand vous serez prêt.</h2>
               <p>Les essentiels pour suivre le marché sont gratuits. Premium vous donne plus d&apos;outils pour aller plus loin et saisir davantage d&apos;opportunités.</p>
               <Link href="/pricing" className="btn btn-ghost">Voir les offres <span aria-hidden="true">→</span></Link>
-              <div className="skyline" aria-hidden="true">
-                <svg viewBox="0 0 600 210" preserveAspectRatio="xMidYMax slice">
-                  <defs><linearGradient id="lb-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f7f5f0" /><stop offset=".55" stopColor="#cfe3ee" /><stop offset="1" stopColor="#7fb0c8" /></linearGradient><linearGradient id="lb-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#6a9fbb" /><stop offset="1" stopColor="#2f6f8f" /></linearGradient></defs>
-                  <rect width="600" height="210" fill="url(#lb-sky)" />
-                  <g fill="#3b5670" opacity=".85"><rect x="20" y="96" width="26" height="70" /><rect x="52" y="70" width="18" height="96" /><rect x="76" y="110" width="34" height="56" /><rect x="118" y="58" width="22" height="108" /><rect x="146" y="88" width="30" height="78" /><rect x="184" y="40" width="16" height="126" /><rect x="206" y="104" width="40" height="62" /><rect x="254" y="76" width="24" height="90" /><rect x="286" y="118" width="46" height="48" /><rect x="340" y="62" width="20" height="104" /><rect x="368" y="92" width="34" height="74" /><rect x="410" y="50" width="18" height="116" /><rect x="436" y="108" width="42" height="58" /><rect x="486" y="84" width="26" height="82" /><rect x="520" y="112" width="30" height="54" /><rect x="558" y="70" width="22" height="96" /></g>
-                  <rect x="0" y="166" width="600" height="44" fill="url(#lb-sea)" />
-                  <path d="M60 166 L60 150 L540 150 L540 166" fill="none" stroke="#1f3448" strokeWidth="3" />
-                  <g stroke="#1f3448" strokeWidth="2" fill="none"><path d="M160 150 v-30 M440 150 v-30" /><path d="M60 150 Q160 120 260 150 M160 150 Q300 118 440 150 M440 150 Q490 130 540 150" /></g>
-                </svg>
-              </div>
-              <span className="hand" aria-hidden="true">L&apos;Afrique<br />a du potentiel.</span>
             </div>
 
             <div>
@@ -215,11 +209,6 @@ export default async function Landing() {
                     <span><b>Alertes &amp; détection proactive</b><p>Seuils personnalisés, Telegram, événements clés.</p></span><span className="chev" aria-hidden="true">›</span>
                   </Link>
                 </div>
-                <div className="banner">
-                  <div className="leaf" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 20c0-8 6-14 16-16-1 10-7 16-16 16z" /><path d="M4 20c4-6 8-9 12-11" /></svg></div>
-                  <div className="t"><b>Des marchés plus compréhensibles. Des opportunités plus accessibles.</b><span>Informations fiables · Analyses claires · Outils concrets</span></div>
-                  <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
-                </div>
               </div>
             </div>
           </section>
@@ -250,7 +239,7 @@ export default async function Landing() {
               <h2 id="h-final">Votre première analyse peut commencer maintenant.</h2>
               <p>Explorez gratuitement la BRVM, découvrez les sociétés cotées et entraînez-vous avant d&apos;aller plus loin.</p>
               <div className="cta">
-                <Link href="/signup" className="btn btn-gold btn-lg">Créer mon compte gratuit <span aria-hidden="true">→</span></Link>
+                <Link href="/signup" className="btn btn-gold">Créer mon compte gratuit</Link>
                 <Link href="/societes" className="btn btn-ghost-inv">Explorer les sociétés</Link>
               </div>
               <small>Gratuit · Sans carte bancaire · À votre rythme · Ceci n&apos;est pas un conseil en investissement.</small>
