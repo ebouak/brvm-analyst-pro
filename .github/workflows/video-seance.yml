@@ -47,7 +47,8 @@ permissions:
 
 jobs:
   video:
-    runs-on: ubuntu-latest
+    # Figé : Playwright 1.60 ne prend pas en charge ubuntu-latest passé en 26.04 (2026-11-06).
+    runs-on: ubuntu-24.04
     # 35 et non plus 25 : le rendu Remotion (borné à 12 min) s'ajoute.
     timeout-minutes: 35
     defaults:
