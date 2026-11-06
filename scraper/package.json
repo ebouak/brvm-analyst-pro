@@ -59,6 +59,8 @@
     "validate": "tsx src/index.ts validate",
     "notations": "tsx src/index.ts notations",
     "notations:mock": "tsx src/index.ts notations --mock",
+    "flottant": "tsx src/index.ts flottant",
+    "flottant:mock": "tsx src/index.ts flottant --mock",
     "details": "tsx src/index.ts details",
     "details:mock": "tsx src/index.ts details --mock",
     "news": "tsx src/index.ts news",
