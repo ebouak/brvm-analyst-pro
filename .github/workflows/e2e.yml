@@ -22,8 +22,7 @@ concurrency:
 
 jobs:
   e2e:
-    # Figé : Playwright 1.60 ne prend pas en charge ubuntu-latest passé en 26.04 (2026-11-06).
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     defaults:
       run:

@@ -38,8 +38,13 @@ on:
   # seulement, derrière un jeton (`AFX_RELAIS_JETON`). Essai réel le 31/10 :
   # 3 places sur 3 écrites pour la séance du 30/10. Un échec redevenu
   # permanent signifie que le relais est tombé : `bash /opt/waha/diag.sh`.
-  schedule:
-    - cron: '30 19 * * 1-5' # après la clôture des trois places (UTC)
+  #
+  # ── COUPÉE DE NOUVEAU LE 2026-11-06 ────────────────────────────────────
+  # Une seule réussite (31/10), puis 29 échecs : AFX filtre aussi Hetzner
+  # (expiration depuis le serveur, 200 depuis une connexion résidentielle), et
+  # son robots.txt demande Crawl-delay: 60. Le relais est sain, c'est la source
+  # qui refuse les serveurs : ne pas empiler un autre détour. Il faut une autre
+  # source, ou l'accord de celle-ci. L'affichage date les valeurs (voir plus haut).
   workflow_dispatch: {} # déclenchement manuel conservé, pour tester une correction
 
 concurrency:

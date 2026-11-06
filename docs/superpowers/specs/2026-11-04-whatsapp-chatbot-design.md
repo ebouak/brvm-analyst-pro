@@ -188,3 +188,5 @@ borné par le `maxDuration` de la route. Doublons WAHA : déjà dédupliqués
 
 Images entrantes (analyse de capture d'écran), réponses vocales, envois
 proactifs, groupes (refusés par principe), migration vers l'API officielle Meta.
+
+> **Correction du 2026-11-06** : le BPA et le dividende de SNTS cités plus haut sont JUSTES. La société a été fractionnée par 10 le 26/10/2026 (voir CLAUDE.md).
