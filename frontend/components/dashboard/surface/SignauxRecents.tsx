@@ -47,7 +47,7 @@ export default function SignauxRecents({ signaux, notes = [] }: { signaux: Signa
           {actionnables.map((s, i) => (
             <li key={`${s.code}-${i}`} className="flex items-baseline gap-3 border-t border-border py-2 text-sm first:border-t-0">
               <Link href={`/actions/${s.code}`} className="tabular font-semibold text-ivory hover:text-accent-ink">{s.code}</Link>
-              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${s.signal === 'BUY' ? 'border-up/40 text-up' : 'border-down/40 text-down'}`}>{LIB[s.signal] ?? s.signal}</span>
+              <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${s.signal === 'BUY' ? 'border-up/40 text-up' : 'border-down/40 text-down'}`}>{LIB[s.signal] ?? s.signal}</span>
               <span className="tabular ml-auto text-xs text-muted">Conf : {s.confiance != null ? `${Math.round(s.confiance * 100)} %` : '—'}</span>
             </li>
           ))}
