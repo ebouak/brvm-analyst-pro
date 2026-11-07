@@ -22,7 +22,7 @@
 // indépendamment des phrases. Un gabarit fautif ne peut donc pas faire dire à
 // la voix un chiffre que la séance n'a pas produit.
 
-export const MODELES = ['nuit', 'papier', 'mosaique'];
+export const MODELES = ['nuit', 'papier', 'mosaique', 'verre'];
 
 /* ── Rotation ─────────────────────────────────────────────────────────── */
 
@@ -389,6 +389,9 @@ const ORDRE = {
   nuit: ['indice', 'largeur', 'capitaux', 'lourde', 'palmares', 'secteurs'],
   papier: ['indice', 'palmares', 'secteurs', 'lourde', 'largeur'],
   mosaique: ['largeur', 'indice', 'palmares', 'secteurs', 'capitaux'],
+  // verre : la version « premium » — l'indice et sa courbe d'abord, puis qui a
+  // porté les échanges avant le palmarès.
+  verre: ['indice', 'largeur', 'lourde', 'palmares', 'capitaux', 'secteurs'],
 };
 
 /**

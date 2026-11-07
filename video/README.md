@@ -31,7 +31,7 @@ Même règle pour les logos : une société sans fichier dans
 `frontend/public/logos/` s'affiche avec son code, **jamais** avec le logo
 d'une autre.
 
-## Trois modèles, un récit tiré de la donnée
+## Quatre modèles, un récit tiré de la donnée
 
 `recit.mjs` (pur, testé : `npm test`) décide **quoi dire, dans quel ordre, sous
 quel habillage**. Il rend une suite de « temps » — une phrase lue + la scène
@@ -42,6 +42,7 @@ qui l'illustre — dont sont tirés la voix, les images animées et le repli fix
 | `nuit` | terminal sombre, chiffres en chasse fixe | indice · largeur · capitaux · valeur la plus échangée · palmarès |
 | `papier` | une de journal claire, empattements, filets | indice · palmarès · secteurs · valeur la plus échangée |
 | `mosaique` | carte de chaleur : une tuile par valeur | largeur · indice · palmarès · capitaux |
+| `verre` | studio sombre, panneaux de verre, logo officiel en tuile | indice · largeur · valeur la plus échangée · palmarès · capitaux · secteurs |
 
 - **Rotation sur le rang ouvré** : jamais le même modèle deux séances de suite,
   vendredi → lundi compris (un modulo sur les jours calendaires les aurait
@@ -62,6 +63,30 @@ qui l'illustre — dont sont tirés la voix, les images animées et le repli fix
 - **Une piste par phrase** : chaque temps est synthétisé seul et mesuré, puis
   les pistes sont assemblées. Une scène dure exactement le temps de sa phrase,
   avec ElevenLabs comme avec Denise (tout ou rien : jamais deux voix mêlées).
+
+## La version 16:9 du site
+
+`remotion/seance-site.tsx` rend chaque soir la même séance en 1920×1080, habillage
+`verre`, quel que soit le modèle vertical du jour. Elle lit le **même**
+`public/seance/seance.json` et la **même** voix que la verticale, et suit le même
+plan : elle ne peut pas dire autre chose.
+
+C'est un ajout, jamais une condition. `rendu-anime.mjs` la soumet aux mêmes
+contrôles (même lecture, taille, piste audio, durée) et en tire l'affiche ; s'il
+la refuse, il l'écrit dans `paysage_raison` et la landing garde la verticale.
+`publie.mjs` l'héberge en `seance/<date>-paysage.mp4` (+ `.jpg`) et ajoute
+`url_paysage` / `affiche_paysage` à `derniere.json`. Les réseaux sociaux, la
+Chaîne et Telegram reçoivent toujours la verticale.
+
+### Bruitages et effets d'écriture (modèle verre, version 16:9)
+
+`remotion/seance-modeles/ecrits.tsx` : étiquettes en machine à écrire, titres
+mot à mot, grands nombres dévoilés caractère par caractère (la valeur FINALE,
+jamais une valeur intermédiaire) avec un reflet. Les bruitages
+(`remotion/public/sfx/*.wav`, synthétisés par `remotion/sfx-genere.py`, donc
+libres de droits) passent sous la voix : souffle et flèche aux transitions,
+verre à la pose d'un panneau, tic par ligne, impact sous un grand nombre,
+carillon à la signature.
 
 ## Le verrou de publiabilité
 

@@ -2,8 +2,9 @@ import Link from 'next/link';
 import type { VideoSeance as Data } from '@/lib/landing/videoSeance';
 
 /**
- * Résumé vidéo de la séance (vertical), produit chaque soir par le worker
- * `video/`.
+ * Résumé vidéo de la séance, produit chaque soir par le worker `video/`.
+ * Version 16:9 (habillage verre) quand elle a été rendue, verticale sinon :
+ * les deux viennent de la même lecture de la séance, avec la même voix.
  *
  * Deux règles de véracité, visibles à l'écran :
  *  - la section porte la date de la séance filmée, jamais celle du jour ;
@@ -32,6 +33,7 @@ export function VideoSeance({
   const md = data.capitaux_fcfa / 1e9;
   const nb = (x: number, d = 2) => x.toFixed(d).replace('.', ',');
   const secondes = Math.round(data.duree_s);
+  const paysage = !!data.url_paysage;
 
   const chiffres: { k: string; v: string; ton?: string }[] = [
     ...(data.composite
@@ -52,7 +54,9 @@ export function VideoSeance({
   ];
 
   return (
-    <section aria-labelledby="video-seance-titre" className="mt-8 md:mt-12">
+    // L'ancre `seance-<date>` est celle du bouton « Voir la vidéo de la séance »
+    // du brief de clôture (video/brief.mjs).
+    <section id={`seance-${data.seance}`} aria-labelledby="video-seance-titre" className="mt-8 md:mt-12 scroll-mt-24">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="video-seance-titre" className="overline text-gold-2">
           La séance en {secondes} secondes
@@ -78,16 +82,34 @@ export function VideoSeance({
       {/* items-start : sans cela le panneau s'étire à la hauteur de la vidéo
           (461 px mesurés) et reste aux trois quarts vide — un cadre creux se
           lit comme une section cassée. Il épouse maintenant son contenu. */}
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
-        <video
-          controls
-          preload="metadata"
-          playsInline
-          poster={data.affiche ?? undefined}
-          src={data.url}
-          aria-label={`Résumé vidéo de la séance BRVM du ${data.date_fr}`}
-          className="mx-auto w-full max-w-[260px] rounded-xl border border-border/60 bg-black"
-        />
+      <div
+        className={
+          paysage
+            ? 'grid grid-cols-1 items-start gap-4'
+            : 'grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]'
+        }
+      >
+        {paysage ? (
+          <video
+            controls
+            preload="metadata"
+            playsInline
+            poster={data.affiche_paysage ?? undefined}
+            src={data.url_paysage ?? undefined}
+            aria-label={`Résumé vidéo de la séance BRVM du ${data.date_fr}`}
+            className="aspect-video w-full rounded-xl border border-border/60 bg-black"
+          />
+        ) : (
+          <video
+            controls
+            preload="metadata"
+            playsInline
+            poster={data.affiche ?? undefined}
+            src={data.url}
+            aria-label={`Résumé vidéo de la séance BRVM du ${data.date_fr}`}
+            className="mx-auto w-full max-w-[260px] rounded-xl border border-border/60 bg-black"
+          />
+        )}
 
         <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-surface/60 p-4 sm:p-5">
           <div>

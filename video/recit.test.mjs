@@ -126,7 +126,7 @@ test('composition : ouverture d’abord, fin ensuite, chaque modèle a son propr
     assert.equal(o[0], 'ouverture');
     assert.equal(o[o.length - 1], 'fin');
   }
-  assert.equal(new Set(ordres.map((o) => o.join())).size, MODELES.length, 'trois déroulés distincts');
+  assert.equal(new Set(ordres.map((o) => o.join())).size, MODELES.length, 'un déroulé distinct par modèle');
 });
 
 test('composition : déterministe — même séance, même texte', () => {
@@ -156,7 +156,7 @@ test('accords : une seule valeur au singulier', () => {
   assert.doesNotMatch(l, /1 valeurs|1 hausses|1 baisses/);
 });
 
-test('garde-fou : aucun chiffre étranger dans les trois modèles, et un intrus est bien détecté', () => {
+test('garde-fou : aucun chiffre étranger dans les quatre modèles, et un intrus est bien détecté', () => {
   for (const m of MODELES) {
     const d = seance();
     const r = composerRecit(d, { modele: m });
@@ -224,7 +224,7 @@ test('détail : cours de clôture, valeur suivante et volume', () => {
   assert.match(texteDe(r, 'capitaux'), /412345 titres/);
 });
 
-test('détail : les trois modèles contiennent la scène des secteurs', () => {
+test('détail : les quatre modèles contiennent la scène des secteurs', () => {
   for (const m of MODELES) {
     assert.ok(composerRecit(seanceDetaillee(), { modele: m }).temps.some((t) => t.type === 'secteurs'), m);
   }

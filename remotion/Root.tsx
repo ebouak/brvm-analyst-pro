@@ -3,6 +3,7 @@ import Main from './landing-video';
 import FilConducteurVideo, { TOTAL as FIL_TOTAL } from './fil-conducteur';
 import Showreel, { TOTAL as SHOWREEL_TOTAL } from './showreel';
 import Seance, { calculerSeance } from './seance';
+import SeanceSite, { calculerSeanceSite } from './seance-site';
 import Ecosysteme, { calculerEcosysteme } from './ecosysteme';
 import Canaux, { calculerCanaux } from './canaux';
 import AcademyLecon, { calculerLecon } from './academy-lecon';
@@ -52,6 +53,18 @@ export function RemotionRoot() {
         height={1920}
         defaultProps={{ fiche: null }}
         calculateMetadata={calculerSeance}
+      />
+      {/* Même séance, version 16:9 du site (habillage verre). Même seance.json,
+          même voix, même plan : elle ne peut pas dire autre chose que la verticale. */}
+      <Composition
+        id="seance-site"
+        component={SeanceSite}
+        durationInFrames={300}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ fiche: null }}
+        calculateMetadata={calculerSeanceSite}
       />
       {/* « Qui fait quoi sur le marché financier de l'UMOA » — pédagogique,
           vertical, voix off. Durée dérivée des pistes de voix. */}

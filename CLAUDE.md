@@ -1468,6 +1468,20 @@ Refonte par le skill `unslop`, sans changer l'ordre du fond : tests purs
   ce qui le compressait. Corrigé en `.fil-contenu`.
 - **Mobile** : 19 900 → 14 355 px, en retirant ce qui répète le premier écran.
 
+### Ajouts (passage 2026-11-07) — Vidéo de séance : modèle « verre » et version 16:9 du site
+
+- **4e modèle `verre`** dans la rotation (`video/recit.mjs`, `MODELES`) : studio
+  sombre, panneaux de verre, logo officiel en tuile, signature où le logo se
+  construit. Mêmes scènes que `nuit` (helper `sombre(th)` dans `theme.ts`).
+  Rotation sur 4 : jamais le même modèle deux séances de suite.
+- **Version 16:9 du site** (`remotion/seance-site.tsx`, composition
+  `seance-site`) : même `seance.json`, même voix, même plan que la verticale.
+  Ajout facultatif : en échec, `paysage_raison` et la landing garde la
+  verticale (`Terminal.tsx`, classe `tc-grid paysage`). L'ancre
+  `#seance-<date>` du brief pointe enfin sur la section vidéo.
+- **Fraîcheur** : aucune vidéo figée sur le site ; tout est rendu chaque soir
+  par `video-seance.yml` sous le verrou de publiabilité existant.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles
