@@ -5,6 +5,7 @@ import { FPS, THEMES } from './seance-modeles/theme';
 import { EnTete, Fond, Progression, type Fiche } from './seance-modeles/elements';
 import { SCENES } from './seance-modeles/scenes';
 import { DUREE_SIGNATURE, Signature } from './seance-modeles/signature';
+import { Sfx } from './seance-modeles/ecrits';
 
 /**
  * Vidéo de séance, version animée — 1080×1920, 30 i/s.
@@ -61,6 +62,10 @@ export default function Seance({ fiche }: { fiche: Fiche | null }) {
       <Sequence from={durationInFrames - DUREE_SIGNATURE}>
         <Signature th={th} />
       </Sequence>
+      {/* Modèle verre : bruitages sous la voix (transitions, signature). Les
+          trois autres modèles restent sans, comme avant. */}
+      {th.modele === 'verre' && plan.slice(1).map((p) => <Sfx key={p.d0} nom="souffle" a={p.d0 - 12} volume={0.16} />)}
+      {th.modele === 'verre' && <Sfx nom="carillon" a={durationInFrames - DUREE_SIGNATURE + 30} volume={0.24} />}
     </AbsoluteFill>
   );
 }

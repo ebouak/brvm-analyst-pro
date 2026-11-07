@@ -31,12 +31,17 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
   const s = d.spotlightSignal;
   const r = d.latestDiagnostic;
   const videoPrecedente = !!(v && dateMarche && v.seance < dateMarche);
+  /* Version 16:9 (habillage verre) quand elle a été rendue ce soir-là, sinon
+     la verticale. Même séance, même voix : jamais l'une d'hier et l'autre
+     d'aujourd'hui, les deux URL sont écrites ensemble dans derniere.json. */
+  const paysage = !!v?.url_paysage;
 
   return (
     <section className="etat termc" aria-label="La séance, la note, le diagnostic">
       {/* Rangée 1 — la séance en vidéo */}
       {v && (
-        <div className="tc-row tc-video">
+        // Ancre du bouton « Voir la vidéo de la séance » du brief de clôture.
+        <div className="tc-row tc-video" id={`seance-${v.seance}`}>
           <div className="tc-head">
             <div>
               <h2>La séance du {v.date_fr}{videoPrecedente && <span className="tag">séance précédente</span>}</h2>
@@ -45,10 +50,17 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
             </div>
             <span className="hand-dark" aria-hidden="true">Des données<br />pour de meilleures<br />décisions.</span>
           </div>
-          <div className="tc-grid">
+          <div className={paysage ? 'tc-grid paysage' : 'tc-grid'}>
             <div className="tc-player">
-              <video controls preload="none" poster={v.affiche ?? undefined} playsInline aria-label={`Vidéo de la séance du ${v.date_fr}`}>
-                <source src={v.url} type="video/mp4" />
+              <video
+                key={paysage ? 'paysage' : 'verticale'}
+                controls
+                preload="none"
+                poster={(paysage ? v.affiche_paysage : v.affiche) ?? undefined}
+                playsInline
+                aria-label={`Vidéo de la séance du ${v.date_fr}`}
+              >
+                <source src={(paysage ? v.url_paysage : v.url) ?? v.url} type="video/mp4" />
               </video>
               <ul className="tc-logos" aria-label="Sources">
                 {SOURCES.map((x) => (

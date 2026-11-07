@@ -171,12 +171,37 @@ if (URL_SB && SERVICE) {
 
     const url = publique(cheminVideo);
     urlVideoPublique = url;
-    /* `fichier` est un chemin local sans interet pour le site, et qui trahirait
-       l'arborescence de la machine de build. On le remplace par l'URL. */
-    const { fichier, ...reste } = m;
+
+    /* Version 16:9 du site (modèle verre), rendue de la MÊME lecture : un
+       ajout, jamais une condition. Si elle manque ou si son envoi échoue, le
+       site affiche la verticale et le reste de la publication continue. */
+    let url_paysage = null, affiche_paysage = null;
+    if (m.paysage && existsSync(m.paysage)) {
+      try {
+        const cheminPaysage = `seance/${m.seance}-paysage.mp4`;
+        await envoyer(cheminPaysage, readFileSync(m.paysage), 'video/mp4', 31536000);
+        const fAff = `${OUT}/affiche-paysage.jpg`;
+        if (existsSync(fAff)) {
+          await envoyer(`seance/${m.seance}-paysage.jpg`, readFileSync(fAff), 'image/jpeg', 31536000);
+          affiche_paysage = publique(`seance/${m.seance}-paysage.jpg`);
+        }
+        url_paysage = publique(cheminPaysage);
+        journal.push('Site : version 16:9 en ligne');
+      } catch (e) {
+        console.error(`Landing 16:9 : ECHEC — ${e.message}`);
+        journal.push(`Site : version 16:9 EN ÉCHEC, verticale affichée — ${e.message}`);
+      }
+    } else if (m.paysage_raison) {
+      journal.push(`Site : version 16:9 non rendue, verticale affichée (${m.paysage_raison})`);
+    }
+
+    /* `fichier` et `paysage` sont des chemins locaux sans interet pour le site,
+       et qui trahiraient l'arborescence de la machine de build. On les
+       remplace par les URL. */
+    const { fichier, paysage, ...reste } = m;
     await envoyer(
       'derniere.json',
-      JSON.stringify({ ...reste, url, affiche }, null, 2),
+      JSON.stringify({ ...reste, url, affiche, url_paysage, affiche_paysage }, null, 2),
       'application/json',
       60,
     );

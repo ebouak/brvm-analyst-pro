@@ -34,7 +34,7 @@ on:
       modele:
         description: 'Modèle de vidéo (auto = rotation : jamais le même deux séances de suite)'
         type: choice
-        options: [auto, nuit, papier, mosaique]
+        options: [auto, nuit, papier, mosaique, verre]
         default: auto
 
 concurrency:
@@ -48,8 +48,9 @@ permissions:
 jobs:
   video:
     runs-on: ubuntu-latest
-    # 35 et non plus 25 : le rendu Remotion (borné à 12 min) s'ajoute.
-    timeout-minutes: 35
+    # 35 et non plus 25 : le rendu Remotion (borné à 12 min) s'ajoute ;
+    # 47 depuis la version 16:9 du site (bornée à 12 min elle aussi).
+    timeout-minutes: 47
     defaults:
       run:
         working-directory: video
@@ -117,6 +118,18 @@ jobs:
           npm ci --no-audit --no-fund
           node seance-prep.mjs "$VIDEO_OUT"
           npx remotion render index.ts seance "$VIDEO_OUT/westbourse-seance-anime.mp4" --codec h264 --crf 20 --log=error
+
+      - name: Animer la version 16:9 du site (Remotion)
+        # MÊME public/seance/seance.json que l'étape précédente (préparé par
+        # seance-prep.mjs), même voix : remotion/seance-site.tsx ne relit pas
+        # la base. Habillage « verre », quel que soit le modèle vertical du
+        # jour. Un ajout, jamais une condition : en échec, rendu-anime.mjs
+        # l'écrit (paysage_raison) et le site garde la verticale.
+        id: animer_site
+        continue-on-error: true
+        timeout-minutes: 12
+        working-directory: remotion
+        run: npx remotion render index.ts seance-site "$VIDEO_OUT/westbourse-seance-site.mp4" --codec h264 --crf 20 --log=error
 
       - name: Choisir la version publiée
         # Toujours exécuté, même si le rendu a échoué : c'est lui qui écrit le
@@ -234,6 +247,7 @@ jobs:
           path: |
             ${{ github.workspace }}/video-out/westbourse-seance.mp4
             ${{ github.workspace }}/video-out/westbourse-seance-anime.mp4
+            ${{ github.workspace }}/video-out/westbourse-seance-site.mp4
             ${{ github.workspace }}/video-out/seance.json
             ${{ github.workspace }}/video-out/texte.txt
           retention-days: 14
