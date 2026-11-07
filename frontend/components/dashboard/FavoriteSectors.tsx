@@ -10,12 +10,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 export default async function FavoriteSectors({ favorites }: { favorites: string[] }) {
   if (!favorites || favorites.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border bg-surface/60 p-5 text-center">
-        <p className="text-sm text-muted">Personnalisez votre dashboard.</p>
-        <Link href="/profil" className="mt-1 inline-block text-xs text-accent hover:underline">
-          Choisir vos secteurs favoris →
-        </Link>
-      </div>
+      <p className="text-sm text-muted">Aucun secteur suivi pour l&apos;instant. Leur variation du jour s&apos;affichera ici.</p>
     );
   }
 
