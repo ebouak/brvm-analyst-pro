@@ -10,7 +10,7 @@ import CarnetOrdres, { dateSeanceLongue, type CarnetRow } from '@/components/Car
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
-import { fmtNumber, fmtFcfa, fmtDateFR, fmtPctSigne } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { requiredAccess } from '@/lib/server/featureAccess';
 
@@ -278,8 +278,8 @@ export default async function CompanyPage({ params }: PageProps) {
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
           <div className="min-w-0">
             <h1 className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="tabular text-sm text-muted">{code}</span>
-              <span className="font-display text-2xl text-ivory md:text-3xl">{instrument.designation}</span>
+              <span className="font-mono text-sm font-medium text-ivory">{code}</span>
+              <span className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">{instrument.designation}</span>
             </h1>
             <p className="mt-1 text-sm text-faint">
               {instrument.secteur ?? 'BRVM'} · {instrument.pays ?? 'UEMOA'}
@@ -313,7 +313,7 @@ export default async function CompanyPage({ params }: PageProps) {
       <section className="mb-6 rounded-xl border border-border bg-surface p-5">
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 className={titreSection}>Cours de clôture</h2>
-          {etendue && <p className="tabular text-xs text-faint">{etendue}</p>}
+          {etendue && <p className="text-xs text-faint">{etendue}</p>}
         </div>
         {closes.length >= 2 ? (
           <>
@@ -389,7 +389,7 @@ export default async function CompanyPage({ params }: PageProps) {
         <section className="mb-6 rounded-xl border border-border bg-surface p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <h2 className={titreSection}>Fondamentaux</h2>
-            <p className="tabular text-xs text-faint">Exercice {bestFund.year ?? '—'}</p>
+            <p className="text-xs text-faint">Exercice <span className="tabular">{bestFund.year ?? '—'}</span></p>
           </div>
           <dl className="grid gap-x-8 md:grid-cols-2">
             {[
@@ -429,7 +429,7 @@ export default async function CompanyPage({ params }: PageProps) {
                   <tr key={i} className="border-t border-border/60">
                     <td className="tabular py-2 text-ivory">{d.exercice ?? '—'}</td>
                     <td className="tabular py-2 text-right text-ivory">{fmtNumber(d.montant)} FCFA</td>
-                    <td className="tabular py-2 text-right text-muted">{fmtDateFR(d.payment_date)}</td>
+                    <td className="py-2 text-right text-muted">{d.payment_date ? dateCourte(d.payment_date) : '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -455,7 +455,7 @@ export default async function CompanyPage({ params }: PageProps) {
                     <p className="text-sm leading-snug text-ivory">{n.titre}</p>
                   )}
                   <p className="mt-1 text-xs text-faint">
-                    <span className="tabular">{fmtDateFR(n.date_publication)}</span> · {n.source}
+                    <span>{n.date_publication ? dateCourte(n.date_publication) : '—'}</span> · {n.source}
                   </p>
                 </li>
               ))}

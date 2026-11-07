@@ -38,7 +38,7 @@ export default async function PricingPage() {
           <PricingClient plans={plans} />
         ) : (
           <div className="max-w-xl py-16">
-            <h1 className="font-display text-3xl font-medium text-ivory">Formules et tarifs</h1>
+            <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formules et tarifs</h1>
             <p className="mt-4 text-sm text-muted">
               Les formules ne sont pas encore publiées. Le plan Gratuit reste accessible en créant un compte.
             </p>

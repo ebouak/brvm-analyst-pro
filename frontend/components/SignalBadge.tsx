@@ -31,16 +31,16 @@ export default function SignalBadge({
     <div>
       <span
         className={`inline-flex items-center gap-1 border rounded px-1.5 py-0.5 ${
-          small ? 'text-[10px]' : 'text-xs'
+          small ? 'text-[11px]' : 'text-xs'
         } ${STYLES[signal]}`}
       >
         {signal}
         {confiance != null && (
-          <span className="opacity-70 tabular">{Math.round(confiance * 100)}%</span>
+          <span className="text-muted tabular">{Math.round(confiance * 100)}%</span>
         )}
       </span>
       {beginner && signal in SIGNAL_HINTS && (
-        <span className="block text-[10px] text-faint mt-0.5 leading-snug">
+        <span className="block text-[11px] text-faint mt-0.5 leading-snug">
           {SIGNAL_HINTS[signal]}
         </span>
       )}

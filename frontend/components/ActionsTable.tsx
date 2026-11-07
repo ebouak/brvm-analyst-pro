@@ -32,7 +32,7 @@ const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
   { header: 'Désignation', accessor: (r) => r.designation ?? '' },
   { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
   { header: 'Pays', accessor: (r) => r.pays ?? '' },
-  { header: 'Cours', accessor: (r) => r.cours_jour ?? '' },
+  { header: 'Cours (FCFA)', accessor: (r) => r.cours_jour ?? '' },
   { header: 'Variation %', accessor: (r) => r.variation_pct ?? '' },
   { header: 'Volume', accessor: (r) => r.volume ?? '' },
   { header: 'Valeur échangée', accessor: (r) => r.valeur_echangee ?? '' },
@@ -97,7 +97,7 @@ function Logo({ code, size }: { code: string; size: 'sm' | 'md' }) {
   ) : (
     <span
       aria-hidden
-      className={`tabular inline-flex items-center justify-center ${box} rounded-md text-[10px] font-medium shrink-0 bg-elevated text-muted border border-border/60`}
+      className={`tabular inline-flex items-center justify-center ${box} rounded-md text-[11px] font-medium shrink-0 bg-elevated text-muted border border-border/60`}
     >
       {code.slice(0, 2)}
     </span>
@@ -306,8 +306,8 @@ export default function ActionsTable({
             {!sortIsListed && <option value="">Tri personnalisé</option>}
             {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-          <span className="text-xs text-faint tabular shrink-0">
-            <span className="text-ivory font-medium">{rows.length}</span> résultats
+          <span className="text-xs text-faint shrink-0">
+            <span className="tabular text-ivory font-medium">{rows.length}</span> résultats
           </span>
           {/* ExportButton — wrapper for premium look */}
           <div className={`shrink-0 [&>button]:rounded-lg [&>button]:border-border-strong [&>button]:text-muted [&>button]:px-3 [&>button]:py-1.5 [&>button]:text-xs [&>button]:hover:border-gold/30 [&>button]:hover:text-accent-ink ${EASE}`}>
@@ -340,18 +340,18 @@ export default function ActionsTable({
                 <Logo code={a.code} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="tabular font-medium text-ivory">{a.code}</span>
+                    <span className="font-mono font-medium text-ivory">{a.code}</span>
                     {sig?.signal && <SignalBadge signal={sig.signal} confiance={sig.confiance} small />}
                   </div>
                   <div className="text-xs text-faint truncate leading-tight">{a.designation}</div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="tabular text-ivory font-medium">{fmtNumber(a.cours_jour)}</div>
+                  <div className="tabular text-ivory font-medium">{fmtNumber(a.cours_jour)} <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
                   <div className={`tabular text-sm font-medium ${tonVariation(a.variation_pct)}`}>
                     <Variation v={a.variation_pct} />
                   </div>
-                  <div className="tabular text-xs text-muted">
-                    Vol. {fmtNumber(a.volume)}
+                  <div className="text-xs text-muted">
+                    Vol. <span className="tabular">{fmtNumber(a.volume)}</span>
                   </div>
                 </div>
               </Link>
@@ -367,7 +367,7 @@ export default function ActionsTable({
             <tr>
               <Th k="code" label="Titre" />
               <Th k="secteur" label="Secteur" />
-              <Th k="cours_jour" label="Cours" right />
+              <Th k="cours_jour" label="Cours (FCFA)" right />
               <Th k="variation_pct" label="Var %" right />
               <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
                 Tendance 30j {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
@@ -409,7 +409,7 @@ export default function ActionsTable({
                     >
                       <Logo code={a.code} size="sm" />
                       <div>
-                        <span className={`tabular font-medium text-ivory group-hover:text-accent-ink ${EASE}`}>{a.code}</span>
+                        <span className={`font-mono font-medium text-ivory group-hover:text-accent-ink ${EASE}`}>{a.code}</span>
                         <div className="text-[11px] text-faint truncate max-w-[160px] leading-tight">
                           {a.designation}
                         </div>

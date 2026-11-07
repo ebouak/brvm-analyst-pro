@@ -78,11 +78,11 @@ async function getCompanies(): Promise<{ companies: CompanyCard[]; dateSeance: s
   return { companies, dateSeance };
 }
 
-/** « 2026-11-06 » → « 6 novembre 2026 » (date de séance, sans fuseau). */
+/** « 2026-11-06 » → « 6 nov. 2026 » (date de séance, sans fuseau). */
 function dateLongue(iso: string): string {
   const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 export default async function CompaniesIndexPage() {
@@ -91,7 +91,7 @@ export default async function CompaniesIndexPage() {
   return (
     <PublicShell>
       <header className="mb-8 max-w-3xl">
-        <h1 className="font-display text-3xl md:text-4xl text-ivory tracking-tight">
+        <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">
           Les sociétés cotées à la BRVM
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">

@@ -114,7 +114,7 @@ export default function Sidebar({
                     />
                     {item.label}
                     {item.premium && (
-                      <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[8px] font-semibold tracking-wide text-gold">
+                      <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-gold">
                         PRO
                       </span>
                     )}

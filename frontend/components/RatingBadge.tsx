@@ -5,13 +5,24 @@ import { scoreToRating, RATING_DISCLAIMER, type Rating } from '@/lib/rating';
  * Composant serveur (aucun hook) — utilisable partout, y compris pages publiques.
  */
 
-const TONE_CLASSES: Record<Rating['tone'], string> = {
-  up: 'text-up border-up/40 bg-up/10',
-  mid: 'text-accent-ink border-accent/40 bg-accent/10',
-  neutral: 'text-white border-border-strong bg-elevated',
-  down: 'text-down border-down/40 bg-down/10',
-  muted: 'text-muted border-border bg-surface',
+/**
+ * Gradation NEUTRE par lettre (DESIGN.md : rouge = baisse, vert = hausse,
+ * cyan = accent actif — jamais une note). A le plus marqué, F le plus effacé.
+ * Texte ivory (A–C) ou muted (D–F/NR) : contraste ≥ 4,5:1 dans les deux thèmes.
+ */
+const NOTE_CLASSES: Record<string, string> = {
+  A: 'text-ivory border-ivory/70 bg-elevated',
+  B: 'text-ivory border-ivory/45 bg-elevated',
+  C: 'text-ivory border-border-strong bg-elevated',
+  D: 'text-muted border-border-strong bg-surface',
+  E: 'text-muted border-border bg-surface',
+  F: 'text-muted border-border bg-surface',
 };
+const NOTE_PAR_DEFAUT = 'text-muted border-border bg-surface';
+
+function classesNote(note: string): string {
+  return NOTE_CLASSES[note.charAt(0)] ?? NOTE_PAR_DEFAUT;
+}
 
 export default function RatingBadge({
   scoreTotal,
@@ -35,7 +46,7 @@ export default function RatingBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 border tabular transition-colors ${TONE_CLASSES[rating.tone]} ${sizeClasses}`}
+      className={`inline-flex items-center gap-1.5 border tabular transition-colors ${rating.note === 'NR' ? NOTE_PAR_DEFAUT : classesNote(rating.note)} ${sizeClasses}`}
       title={neutre ? `Note BRVM ${rating.note}. ${RATING_DISCLAIMER}` : `Note BRVM : ${rating.note} — ${rating.label}. ${RATING_DISCLAIMER}`}
       aria-label={neutre ? `Note BRVM ${rating.note}` : `Note BRVM ${rating.note} : ${rating.label}`}
     >
