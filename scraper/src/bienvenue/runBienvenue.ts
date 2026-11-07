@@ -72,7 +72,7 @@ export async function runBienvenue({ mock = false } = {}): Promise<BienvenueResu
   const url = process.env.SUPABASE_URL?.replace(/\/$/, '') ?? '';
   const liens = {
     lecon: `${SITE}/formations/academy/lecon-0`,
-    affiche: `${url}/storage/v1/object/public/academy-videos/ecosysteme-umoa.jpg`,
+    affiche: `${url}/storage/v1/object/public/academy-lecon0/ecosysteme-umoa.jpg`,
     sgi: `${SITE}/comparateur-sgi`,
   };
 

@@ -112,6 +112,10 @@ export default async function Page() {
       </div>
 
       <SignalOffre page="/account/plan" />
+      <p className="max-w-[65ch] text-sm text-muted">
+        L’abonnement prend effet à la confirmation du paiement et reste actif jusqu’à la fin de la période payée. Aucun
+        prélèvement automatique : pour le prolonger, vous effectuez un nouveau paiement.
+      </p>
       <PlanClient plans={plans} canSubscribe={canSubscribe} />
 
       {/* Alternative sans abonnement : la formation complète, avec un mois Premium (Chariow). */}

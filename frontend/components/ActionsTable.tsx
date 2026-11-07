@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import SignalBadge from './SignalBadge';
+import RatingBadge from './RatingBadge';
 import Sparkline from './Sparkline';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
@@ -37,6 +38,17 @@ const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
   { header: 'Volume', accessor: (r) => r.volume ?? '' },
   { header: 'Valeur échangée', accessor: (r) => r.valeur_echangee ?? '' },
 ];
+
+/** Ce que mesure la confiance (docs/SCORING.md : 0,5 complétude + 0,3 historique + 0,2 netteté). */
+const CONFIANCE_AIDE =
+  "Confiance du modèle : part de données disponibles et d'historique derrière le score (50 % complétude des entrées, 30 % richesse de l'historique, 20 % netteté du score). Ce n'est pas une probabilité de gain.";
+const NOTE_AIDE = 'Note BRVM A–F, dérivée du score quantitatif. NR (non noté) quand la confiance du modèle est trop faible.';
+
+const LIBELLE_SIGNAL: Record<string, string> = { BUY: 'achat', HOLD: 'attente', SELL: 'vente' };
+
+function fmtConfiance(c: number | null | undefined): string {
+  return c == null ? '—' : `${Math.round(c * 100)} %`;
+}
 
 const EASE = 'transition-colors duration-150 ease-out';
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60';
@@ -178,7 +190,7 @@ export default function ActionsTable({
   const anySignalShown = rows.some((r) => !!signals[r.code]?.signal);
   const anySignalSeance = actions.some((a) => !!signals[a.code]?.signal);
   const showSignalCol = !showMetrics || anySignalShown;
-  const colCount = showSignalCol ? 8 : 7;
+  const colCount = showSignalCol ? 10 : 7;
 
   const activeFilters =
     (pays ? 1 : 0) + (secteur ? 1 : 0) + (perf !== 'all' ? 1 : 0) + (minVol > 0 ? 1 : 0);
@@ -341,9 +353,14 @@ export default function ActionsTable({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-medium text-ivory">{a.code}</span>
-                    {sig?.signal && <SignalBadge signal={sig.signal} confiance={sig.confiance} small />}
+                    {sig?.signal && <RatingBadge scoreTotal={sig.score_total} confiance={sig.confiance} neutre />}
                   </div>
                   <div className="text-xs text-faint truncate leading-tight">{a.designation}</div>
+                  {sig?.signal && (
+                    <div className="text-[11px] text-muted leading-tight mt-0.5" title={CONFIANCE_AIDE}>
+                      Signal : {LIBELLE_SIGNAL[sig.signal]} · Confiance du modèle : <span className="tabular">{fmtConfiance(sig.confiance)}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="text-right shrink-0">
                   <div className="tabular text-ivory font-medium">{fmtNumber(a.cours_jour)} <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
@@ -375,9 +392,17 @@ export default function ActionsTable({
               <Th k="volume" label="Volume" right />
               <Th k="valeur_echangee" label="Valeur" right />
               {showSignalCol && (
-                <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
-                  Signal {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
-                </th>
+                <>
+                  <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap" title={NOTE_AIDE}>
+                    Note {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
+                  </th>
+                  <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
+                    Signal {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
+                  </th>
+                  <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap" title={CONFIANCE_AIDE}>
+                    Confiance du modèle
+                  </th>
+                </>
               )}
             </tr>
           </thead>
@@ -461,15 +486,27 @@ export default function ActionsTable({
                     {fmtFcfa(a.valeur_echangee)}
                   </td>
 
-                  {/* ── Signal — métrique calculée ────────────────────── */}
+                  {/* ── Note, signal, confiance : trois indicateurs distincts ── */}
                   {showSignalCol && (
-                    <td className="px-4 py-3 text-center">
-                      {showMetrics ? (
-                        <SignalBadge signal={sig?.signal} confiance={sig?.confiance} small />
-                      ) : (
-                        <LockedCell />
-                      )}
-                    </td>
+                    <>
+                      <td className="px-4 py-3 text-center">
+                        {showMetrics ? (
+                          sig?.signal ? <RatingBadge scoreTotal={sig.score_total} confiance={sig.confiance} neutre /> : <span className="text-faint text-xs">—</span>
+                        ) : (
+                          <LockedCell />
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {showMetrics ? (
+                          <SignalBadge signal={sig?.signal} small francais />
+                        ) : (
+                          <LockedCell />
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center tabular text-muted" title={CONFIANCE_AIDE}>
+                        {showMetrics ? fmtConfiance(sig?.confiance) : <LockedCell />}
+                      </td>
+                    </>
                   )}
                 </tr>
               );

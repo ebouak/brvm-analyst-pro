@@ -119,7 +119,7 @@ function Cellule({ v }: { v: boolean | string }) {
 }
 
 export function PricingClient({ plans }: { plans: PricingPlan[] }) {
-  const [cycle, setCycle] = useState<Cycle>('yearly');
+  const [cycle, setCycle] = useState<Cycle>('monthly');
   const ordered = ORDRE
     .map((code) => plans.find((p) => p.code === code))
     .filter((p): p is PricingPlan => Boolean(p));
@@ -131,20 +131,24 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
   // Réponse sur les cycles tirée des prix en base, jamais écrite en dur.
   const reponseCycles =
     ecoAnnuel > 0
-      ? `Mensuel, trimestriel ou annuel. Sur ${reference?.name ?? 'la formule recommandée'}, l’annuel revient ${ecoAnnuel} % moins cher que douze mois réglés au mois${ecoTrimestre > 0 ? `, le trimestriel ${ecoTrimestre} % moins cher que trois` : ''}.`
-      : 'Mensuel, trimestriel ou annuel, selon la formule. Le prix de chaque cycle s’affiche sur le sélecteur en haut de page.';
+      ? `Une période d’un mois, de trois mois ou d’un an, renouvelée par vous. Sur ${reference?.name ?? 'la formule recommandée'}, l’annuel revient ${ecoAnnuel} % moins cher que douze mois réglés au mois${ecoTrimestre > 0 ? `, le trimestriel ${ecoTrimestre} % moins cher que trois` : ''}.`
+      : 'Une période d’un mois, de trois mois ou d’un an, renouvelée par vous, selon la formule. Le prix de chaque cycle s’affiche sur le sélecteur en haut de page.';
 
   const faq: { q: string; a: string }[] = [
     { q: 'Puis-je commencer gratuitement ?', a: 'Oui. Le plan Gratuit s’ouvre sans carte bancaire.' },
     {
       q: 'Puis-je changer de formule à tout moment ?',
-      a: 'Oui. Le changement de formule prend effet immédiatement.',
+      a: 'Oui. Le changement de formule prend effet à la confirmation du paiement.',
     },
     {
       q: 'Que signifie « gestion assistée » ?',
       a: 'Un accompagnement plus suivi, avec une analyse plus poussée et une aide à la décision. Ce n’est ni une gestion automatique de votre portefeuille, ni un mandat de gestion.',
     },
-    { q: 'Les paiements sont-ils mensuels ou annuels ?', a: reponseCycles },
+    { q: 'Quelle période puis-je payer ?', a: reponseCycles },
+    {
+      q: 'Y a-t-il un prélèvement automatique ?',
+      a: 'Non. Votre abonnement reste actif jusqu’à la fin de la période payée, puis s’arrête sans démarche de votre part. Pour le prolonger, vous effectuez vous-même un nouveau paiement.',
+    },
     {
       q: 'Mes rapports peuvent-ils être exportés ?',
       a: 'Oui, selon la formule : PDF et Word avec Premium, exports enrichis avec Platinium.',
@@ -332,7 +336,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
       </section>
 
       <p className="mt-12 text-sm text-muted">
-        Prix en francs CFA (FCFA). Résiliation possible à tout moment depuis votre espace compte.
+        Prix en francs CFA (FCFA). Sans prélèvement automatique : l’accès s’arrête à la fin de la période payée.
       </p>
     </div>
   );
