@@ -57,7 +57,7 @@
   --shadow-card: 0 10px 24px rgba(0,0,0,0.35);
   --shadow-panel: 0 22px 60px rgba(0,0,0,0.45);
   --shadow-modal: 0 24px 80px -16px rgba(0,0,0,0.85);
-  --shadow-gold: 0 0 0 1px rgba(86,215,253,0.22), 0 16px 50px rgba(86,215,253,0.14);
+  --shadow-gold: 0 0 0 1px rgba(86,215,253,0.22); /* halo retiré (2026-11-07) */
   --shadow-gold-sm: 0 0 0 1px rgba(86,215,253,0.45);
   --shadow-emerald: 0 0 0 1px rgba(63,225,139,0.18), 0 8px 28px -10px rgba(63,225,139,0.3);
 
@@ -65,7 +65,7 @@
     radial-gradient(circle at 14% -2%, rgba(86, 215, 253, 0.10), transparent 26%),
     radial-gradient(circle at 86% 4%, rgba(17, 43, 51, 0.55), transparent 30%),
     linear-gradient(180deg, #050709 0%, #030303 55%, #04070a 100%);
-  --obsidian-glow: radial-gradient(120% 80% at 50% -10%, rgba(86,215,253,0.10), transparent 60%);
+  --obsidian-glow: none;
 }
 
 /* ── Mode clair « Warm Ivory » ──────────────────────────────────────────
@@ -86,14 +86,20 @@
   --color-border: 236 230 218;
   --color-border-strong: 217 208 189;
 
-  --color-accent: 12 143 174;
-  --color-accent-dim: 10 125 153;
-  --color-accent-ink: 10 111 136;   /* 5,4 : 1 sur surface, 5,1 : 1 sur bg — mesuré */
-  --color-gold-2: 10 125 153;
-  --color-gold-deep: 10 125 153;
+  /* Cyan clair assombri (2026-11-07) : l'ancien 12 143 174 mesurait 3,78 : 1 sur surface
+     et 3,56 : 1 sur bg — sous le seuil AA de 4,5 pour du texte. Mesuré (WCAG 2.x) :
+     accent 5,31 / 5,01 / 4,67 (surface / bg / sunken) ; ink 6,36 / 6,00 / 5,59 ;
+     texte bg sur fond accent 5,01. Le thème sombre est inchangé (11,1 : 1). */
+  --color-accent: 9 117 143;
+  --color-accent-dim: 8 112 138;
+  --color-accent-ink: 7 104 128;
+  --color-gold-2: 8 112 138;
+  --color-gold-deep: 8 112 138;
 
-  --color-up: 13 138 79;
-  --color-emerald-soft: 13 138 79;
+  /* Vert des hausses : 13 138 79 mesurait 4,41 / 4,15 / 3,87 (surface / bg / sunken).
+     10 120 68 : 5,55 / 5,23 / 4,87. Le rouge (179 38 30 : 6,54 / 6,16 / 5,74) passait déjà. */
+  --color-up: 10 120 68;
+  --color-emerald-soft: 10 120 68;
   --color-down: 179 38 30;
   --color-warn: 138 90 16;
   --color-purple: 109 79 168;
@@ -196,13 +202,13 @@ body::before {
 /* Filet doré décoratif */
 .gold-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(208, 162, 49, 0.55), transparent);
+  background: rgb(var(--color-border));
 }
 
 /* Mot mis en avant : couleur d'accent pleine. Le texte en dégradé a été
    retiré (2026-11-05) — l'emphase vient de la couleur et de la graisse. */
 .text-gold-shimmer {
-  color: rgb(var(--color-accent));
+  color: rgb(var(--color-accent-ink));
   font-weight: inherit;
 }
 
@@ -254,14 +260,12 @@ body::before {
 @keyframes nudgeIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 /* Footer premium : balayage lumineux lent du filet supérieur */
 .footer-sheen {
-  background-size: 200% 100%;
-  animation: footerSheen 6s linear infinite;
+  /* balayage en boucle retiré (2026-11-07) : ne signale aucune donnée vivante */
 }
 @keyframes footerSheen {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-@media (prefers-reduced-motion: reduce) { .footer-sheen { animation: none; } }
 /* Diaporama landing : chaque écran visible ~20 % du cycle, fondu enchaîné */
 @keyframes showcase-fade {
   0% { opacity: 0; z-index: 2; }
@@ -285,7 +289,7 @@ body::before {
 .landing-hero-cta:hover {
   transform: translateY(-2px);
   filter: brightness(1.05);
-  box-shadow: 0 0 0 1px rgba(86,215,253,0.45), 0 14px 44px rgba(86,215,253,0.38);
+  box-shadow: 0 0 0 1px rgba(86,215,253,0.45);
 }
 .landing-hero-cta:active {
   transform: translateY(0) scale(0.97);
@@ -298,14 +302,14 @@ body::before {
   pointer-events: none;
   background: linear-gradient(115deg, transparent 32%, rgba(255,255,255,0.5) 50%, transparent 68%);
   transform: translateX(-130%);
-  animation: cta-sheen 5s ease-in-out infinite;
+  /* reflet en boucle retiré (2026-11-07) */
+  opacity: 0;
 }
 @keyframes cta-sheen {
   0%, 74% { transform: translateX(-130%); }
   94%, 100% { transform: translateX(130%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .landing-hero-cta::after { animation: none; }
   .landing-hero-cta:hover { transform: none; }
 }
 .landing-live-card {

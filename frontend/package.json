@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "e2e": "playwright test",
+    "eval:visual": "node scripts/eval-visual.mjs",
     "e2e:connecte": "node scripts/qa-sessions-locales.mjs --lancer",
     "eval:recherche": "vitest run --config vitest.eval.config.ts"
   },

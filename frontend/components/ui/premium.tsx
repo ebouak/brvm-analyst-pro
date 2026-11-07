@@ -21,11 +21,11 @@ const ICONE_ETAT: Record<string, LucideIcon> = {
    Tous server-compatibles (pas de hook client).
    ════════════════════════════════════════════════════════════════════════ */
 
-const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+const EASE = 'transition-[color,background-color,border-color,box-shadow,transform,filter] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
 /* ── Eyebrow : surtitre éditorial doré ──────────────────────────────────── */
 export function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <p className={`overline text-gold/70 ${className}`}>{children}</p>;
+  return <p className={`overline text-accent-ink ${className}`}>{children}</p>;
 }
 
 /* ── SectionHeader : titre de page/section (display) + actions ──────────────
@@ -125,7 +125,7 @@ export function SignalBadge({ signal }: { signal: 'BUY' | 'HOLD' | 'SELL' | stri
   };
   const m = map[signal] ?? { cls: 'border-border bg-elevated text-muted', label: signal };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide ${m.cls}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${m.cls}`}>
       {m.label}
     </span>
   );
@@ -140,13 +140,13 @@ export function StatPill({
   tone?: 'gold' | 'emerald' | 'sapphire' | 'neutral';
 }) {
   const cls = {
-    gold: 'border-gold/30 bg-gold/10 text-gold',
+    gold: 'border-gold/30 bg-gold/10 text-accent-ink',
     emerald: 'border-up/30 bg-up/10 text-up',
-    sapphire: 'border-sapphire/30 bg-sapphire/10 text-sapphire',
+    sapphire: 'border-sapphire/30 bg-sapphire/10 text-accent-ink',
     neutral: 'border-border bg-elevated text-muted',
   }[tone];
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${cls}`}>
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${cls}`}>
       {children}
     </span>
   );
@@ -166,7 +166,7 @@ export function EmptyStatePremium({
 }) {
   return (
     <div className="rounded-panel border border-border bg-surface p-12 text-center shadow-card">
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-gold/70">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-gold/20 bg-gold/[0.06] text-accent-ink">
         {(() => {
           const Icone = ICONE_ETAT[icon] ?? Inbox;
           return <Icone size={20} strokeWidth={1.75} aria-hidden />;
@@ -177,7 +177,7 @@ export function EmptyStatePremium({
       {action && (
         <Link
           href={action.href}
-          className={`mt-5 inline-flex items-center gap-1.5 rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-obsidian shadow-gold ${EASE} hover:bg-gold-soft active:scale-95`}
+          className={`mt-5 inline-flex items-center gap-1.5 rounded-lg bg-accent-ink px-4 py-2 text-sm font-semibold text-obsidian ${EASE} hover:brightness-110 active:scale-95`}
         >
           {action.label} <span>→</span>
         </Link>
@@ -200,7 +200,7 @@ export function PremiumCTA({
     return (
       <Link
         href={href}
-        className={`inline-flex items-center gap-2 rounded-xl border border-border-strong px-5 py-2.5 text-sm font-medium text-ivory ${EASE} hover:border-gold/40 hover:text-gold`}
+        className={`inline-flex items-center gap-2 rounded-xl border border-border-strong px-5 py-2.5 text-sm font-medium text-ivory ${EASE} hover:border-gold/40 hover:text-accent-ink`}
       >
         {children}
       </Link>
@@ -209,10 +209,10 @@ export function PremiumCTA({
   return (
     <Link
       href={href}
-      className={`group inline-flex items-center gap-2 rounded-full bg-gold py-2 pl-5 pr-2 text-sm font-semibold text-obsidian shadow-gold ${EASE} hover:bg-gold-soft active:scale-[0.98]`}
+      className={`group inline-flex items-center gap-2 rounded-xl bg-accent-ink px-5 py-2.5 text-sm font-semibold text-obsidian ${EASE} hover:brightness-110 active:scale-[0.98]`}
     >
       {children}
-      <span className={`grid h-7 w-7 place-items-center rounded-full bg-obsidian/15 ${EASE} group-hover:translate-x-0.5 group-hover:-translate-y-px`}>
+      <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-0.5">
         →
       </span>
     </Link>
