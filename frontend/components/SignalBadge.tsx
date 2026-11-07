@@ -19,10 +19,13 @@ export default function SignalBadge({
   signal,
   confiance,
   small,
+  francais,
 }: {
   signal: SignalDaily['signal'] | null | undefined;
   confiance?: number | null;
   small?: boolean;
+  /** Libellé français (achat / attente / vente) au lieu de BUY / HOLD / SELL. */
+  francais?: boolean;
 }) {
   const { beginner } = useBeginnerMode();
 
@@ -34,7 +37,7 @@ export default function SignalBadge({
           small ? 'text-[11px]' : 'text-xs'
         } ${STYLES[signal]}`}
       >
-        {signal}
+        {francais ? { BUY: 'achat', HOLD: 'attente', SELL: 'vente' }[signal] : signal}
         {confiance != null && (
           <span className="text-muted tabular">{Math.round(confiance * 100)}%</span>
         )}

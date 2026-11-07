@@ -54,8 +54,8 @@ export default function CguPage() {
         </p>
         <ul>
           <li>Le paiement s&apos;effectue via le prestataire <Placeholder>prestataire de paiement</Placeholder>.</li>
-          <li>L&apos;abonnement est reconduit automatiquement, sauf résiliation avant l&apos;échéance.</li>
-          <li>La résiliation s&apos;effectue depuis l&apos;espace compte ; elle prend effet à la fin de la période en cours.</li>
+          <li>L&apos;abonnement prend effet à la confirmation du paiement et reste actif jusqu&apos;à la fin de la période payée.</li>
+          <li>À l&apos;issue de la période payée, l&apos;abonnement cesse sans démarche ni frais. Aucun prélèvement automatique n&apos;est effectué : le renouvellement se fait par un nouveau paiement, à votre initiative.</li>
           <li>Les conditions de remboursement sont précisées au moment de l&apos;achat : <Placeholder>politique de remboursement</Placeholder>.</li>
         </ul>
       </section>

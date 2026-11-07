@@ -255,7 +255,7 @@ export function AppPreview({ nbObligations }: { nbObligations?: number | null })
               <Coche /> Sans engagement
             </span>
             <span className="flex items-center gap-1.5">
-              <Coche /> Résiliable à tout moment
+              <Coche /> Sans prélèvement automatique
             </span>
           </p>
         </div>
