@@ -16,7 +16,7 @@ import brvmLogos from '@/lib/brvmLogos.json';
 import { getVideoSeance, type VideoSeance } from '@/lib/landing/videoSeance';
 import { getLatestDiagnostic, type LatestDiagnostic } from '@/lib/landing/latestDiagnostic';
 import type { SignalDaily } from '@/lib/types';
-import { serieSaine } from '@/lib/landing/serieSaine';
+import { serieSaine, veilleIndice } from '@/lib/landing/serieSaine';
 import { getSgiDirectory, getSgiFrais } from '@/lib/sgi-frais/queries';
 import { PAYS } from '@/lib/sgi-frais/directory';
 
@@ -224,6 +224,7 @@ async function load(): Promise<LandingBisData> {
   // Série BRVM Composite (chronologique) et variations sectorielles pondérées
   // par la capitalisation (brvmSectors.json + brvm_instruments.shares).
   const brvmCSerie: Point[] = serieSaine((serieRes.data ?? []).filter((r) => r.valeur != null).map((r) => ({ d: String(r.date_marche), v: Number(r.valeur) })).reverse());
+  if (brvmC) brvmC.veille = veilleIndice(brvmC, brvmCSerie, dateMarche);
   const sharesByCode = new Map<string, number | null>((instRes.data ?? []).map((i) => [String(i.code), i.shares == null ? null : Number(i.shares)]));
   const maxVal = rows.filter((r) => r.valeur != null && r.valeur > 0).sort((a, b) => (b.valeur ?? 0) - (a.valeur ?? 0))[0];
   const plusEchangee = maxVal ? { code: maxVal.code, valeur: maxVal.valeur as number } : null;

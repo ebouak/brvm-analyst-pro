@@ -60,11 +60,11 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
     return () => { document.removeEventListener('keydown', h); document.body.style.overflow = ''; };
   }, [open]);
   const links = [
-    { t: 'Marches', href: marchesHref },
-    { t: 'Societes', href: '/societes' },
+    { t: 'Marchés', href: marchesHref },
+    { t: 'Sociétés', href: '/societes' },
     { t: 'Analyses', href: '/analyses' },
     { t: 'Formations', href: '/formations' },
-    { t: 'A propos', href: '/methodologie' },
+    { t: 'À propos', href: '/methodologie' },
     { t: 'Se connecter', href: '/login' },
   ] as const;
   return (
@@ -114,12 +114,12 @@ export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string 
             la connexion et l'inscription mesurent ~1 200 px et débordaient de 150 à
             300 px entre 768 et 1440 px (mesuré). En dessous, le tiroir. */}
         <nav className="hidden items-center gap-1 xl:flex" aria-label="Navigation principale">
-          <Link href={marchesHref} className={cls('/#marche')}>Marches</Link>
-          <Link href="/societes" className={cls('/societes')}>Societes</Link>
+          <Link href={marchesHref} className={cls('/#marche')}>Marchés</Link>
+          <Link href="/societes" className={cls('/societes')}>Sociétés</Link>
           <Link href="/analyses" className={cls('/analyses')}>Analyses</Link>
           <Link href="/formations" className={cls('/formations')}>Formations</Link>
           <OutilsDrop />
-          <Link href="/methodologie" className={cls('/methodologie')}>A propos</Link>
+          <Link href="/methodologie" className={`${cls('/methodologie')} whitespace-nowrap`}>À propos</Link>
           <span className="mx-1 hidden h-5 w-px bg-border lg:block" aria-hidden />
           <ThemeToggle className="hidden lg:inline-flex" />
           <Link href="/login" className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-muted hover:text-ivory">Se connecter</Link>

@@ -1446,6 +1446,32 @@ PR #168 à #174. 1681 tests frontend verts.
   augmentation de capital ou d'un résultat part du groupe : ne rien corriger sans source.
   **Leçon** : avant de déclarer une donnée fausse, chercher un événement sur titres.
 
+### Ajouts (passage 2026-11-06) — Landing « la cote du soir »
+
+Refonte par le skill `unslop`, sans changer l'ordre du fond : tests purs
+`lib/landing/courbeSeance.test.ts`, détecteur impeccable à 0 constat.
+
+- **Le premier écran montre la séance réelle** (`components/landing/bis/Seance.tsx`,
+  rendu serveur) : indice, courbe 60 séances, largeur du marché, plus forte hausse et
+  baisse, valeur échangée. Aucun chiffre saisi ; une donnée absente retire sa ligne.
+- **Signature : `<Source>`** (« Source BRVM · relevé le JJ/MM à HH:MM UTC »), sous la
+  carte de séance et « La BRVM aujourd'hui ». À réutiliser, pas à redessiner.
+- **Une seule palette.** La charte marine de « La BRVM aujourd'hui » (`41241f3a`) est
+  retirée : la section suit les jetons du site. Plus d'écriture manuscrite Caveat, de
+  numéros d'étapes ni de mots colorés dans les titres.
+- **Carrousel sous le premier écran** (`.une`), donc les annonceurs `placement=hero`
+  (BGFI, Bridge) ne sont plus à côté du titre. Bandeau `landing_slides` « Votre
+  marque, ici. » désactivé en base, réversible.
+- **DÉFAUT CORRIGÉ** : « Marché en cours » s'affichait hors séance, l'état `frais` de
+  `computeFreshness` valant aussi « base à jour ». Il faut `estEnSeance(now)` en plus.
+- **Fil de la méthode** : `.fil-panel` était une grille à 3 colonnes avec un seul enfant,
+  ce qui le compressait. Corrigé en `.fil-contenu`.
+- **Mobile** : 19 900 → 14 355 px, en retirant ce qui répète le premier écran.
+- **Veille de l'indice** : `valeur_precedente` est vide 8 séances sur 9. `veilleIndice`
+  (`lib/landing/serieSaine.ts`) reprend la clôture précédente, seulement si elle concorde
+  avec la variation publiée (±0,02 point). Mesuré sur 67 séances : 12 rejets, aucun depuis
+  le 15/09 ; les six plus récents sont des trous de collecte où la veille aurait été fausse.
+
 ### Ajouts (passage 2026-11-07) — Vidéo de séance : modèle « verre » et version 16:9 du site
 
 - **4e modèle `verre`** dans la rotation (`video/recit.mjs`, `MODELES`) : studio

@@ -91,13 +91,13 @@ export function PreuveDonneeBis({ fraicheur, exemple, nbActions }: PreuveProps) 
       </div>
       <ol className="chain">
         <li>
-          <span className="rang">01</span><span className="ic"><Ico d={ICONS.doc} size={20} /></span>
+          <span className="ic"><Ico d={ICONS.doc} size={20} /></span>
           <p className="over">La source</p>
           <p className="val">BRVM · publications des émetteurs</p>
           <p className="det">Cotations relevées sur le site officiel de la Bourse, états financiers extraits des publications.{nbActions > 0 ? ` ${nbActions} sociétés suivies.` : ''}</p>
         </li>
         <li>
-          <span className="rang">02</span><span className="ic"><Ico d={ICONS.hash} size={20} /></span>
+          <span className="ic"><Ico d={ICONS.hash} size={20} /></span>
           <p className="over">Le chiffre</p>
           {exemple && exemple.cours != null ? (
             <>
@@ -112,7 +112,7 @@ export function PreuveDonneeBis({ fraicheur, exemple, nbActions }: PreuveProps) 
           )}
         </li>
         <li>
-          <span className="rang">03</span><span className="ic"><Ico d={ICONS.cal} size={20} /></span>
+          <span className="ic"><Ico d={ICONS.cal} size={20} /></span>
           <p className="over">La collecte</p>
           {collecte ? (
             <>
@@ -127,7 +127,7 @@ export function PreuveDonneeBis({ fraicheur, exemple, nbActions }: PreuveProps) 
           )}
         </li>
       </ol>
-      <p className="preuve-note">Ce que nous ne savons pas, nous l&apos;écrivons. La BRVM ne publiant pas de carnet d&apos;ordres, la profondeur de marché est <em>estimée</em> — jamais présentée comme mesurée.</p>
+      <p className="preuve-note">Ce que nous ne savons pas, nous l&apos;écrivons. Le carnet d&apos;ordres vient du Bulletin officiel de la BRVM, qui ne publie que la meilleure limite de chaque côté : la profondeur complète reste inconnue, et nous le disons.</p>
     </section>
   );
 }

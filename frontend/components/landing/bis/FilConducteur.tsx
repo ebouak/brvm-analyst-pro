@@ -56,19 +56,19 @@ export function FilConducteur({ etapes }: { etapes: Etape[] }) {
         ))}
       </div>
       <div className="fil-panel" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${sel}`} style={{overflow:'hidden'} as any}>
-        <AnimatePresence mode="wait"><motion.div key={sel} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}} transition={{duration:0.35,ease:EASE}} style={{display:'flex',gap:14,alignItems:'flex-start',width:'100%'}}><span className="ic" style={{ background: e.bg, color: e.c, flex:'none'} as any} aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{e.ic}</svg></span>
+        <AnimatePresence mode="wait"><motion.div key={sel} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}} transition={{duration:0.35,ease:EASE}} className="fil-contenu"><span className="ic" style={{ background: e.bg, color: e.c, flex:'none'} as any} aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{e.ic}</svg></span>
         {e.fait ? (
           <>
-            <div>
-              <span className="over">Étape {e.k} · {e.fait.libelle}</span>
+            <div className="fil-texte">
+              <span className="over">{e.fait.libelle}</span>
               <b className="val">{e.fait.valeur}</b>
               <p>{e.fait.detail}</p>
             </div>
             {e.fait.href && <Link href={e.fait.href} className="btn btn-ghost btn-sm">{e.fait.hrefLabel ?? 'Voir'} →</Link>}
           </>
         ) : (
-          <div>
-            <span className="over">Étape {e.k} · {e.t}</span>
+          <div className="fil-texte">
+            <span className="over">{e.t}</span>
             <b className="val">Donnée indisponible pour le moment</b>
             <p>Cette étape s&apos;illustre avec un chiffre réel de la dernière séance ; il n&apos;est pas encore en base.</p>
           </div>

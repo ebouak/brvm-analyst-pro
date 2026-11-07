@@ -4,12 +4,13 @@ import { EtatSeanceLive } from './EtatSeanceLive';
 import { pct, tone } from '@/lib/landing/formats';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import type { LandingBisData, Mover } from '@/lib/landing/bisData';
-import type { Fraicheur } from '@/lib/freshness';
+import { estEnSeance, type Fraicheur } from '@/lib/freshness';
 import { seanceNarrative } from '@/lib/landing/seanceNarrative';
 import { fmtNumber } from '@/lib/format';
 import { IndexChart } from './IndexChart';
 import { JaugeSentiment } from './JaugeSentiment';
 import { Apparition, MouvementSobre } from './Apparition';
+import { Source } from './Seance';
 
 /**
  * « La BRVM aujourd'hui » — aperçu de séance, charte claire, structure en
@@ -53,7 +54,7 @@ function Table({ titre, rows, tone: t, href, vide }: { titre: string; rows: Move
   );
 }
 
-export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData; fraicheur: Fraicheur; dateLabel: string | null }) {
+export function BrvmAujourdhui({ d, fraicheur }: { d: LandingBisData; fraicheur: Fraicheur }) {
   const n = seanceNarrative({
     nbActions: d.nbActions, hausses: d.hausses, baisses: d.baisses, inchangees: d.inchangees, brvmCVar: d.brvmC?.variation ?? null,
     secteurs: d.secteurs, topHausse: d.topHausses[0] ?? null, topBaisse: d.topBaisses[0] ?? null, plusEchangee: d.plusEchangee,
@@ -62,8 +63,7 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
   const p = (x: number) => Math.round((x / total) * 100);
   const points = d.brvmC && d.brvmC.veille != null ? d.brvmC.valeur - d.brvmC.veille : null;
   const score = Math.round(d.etat.sentimentScore);
-  const enSeance = fraicheur.etat === 'frais';
-  const age = fraicheur.ageMinutes;
+  const enSeance = estEnSeance(new Date()) && fraicheur.etat === 'frais';
   const secteurs = [...d.secteurs].sort((a, b) => b.variation_pct - a.variation_pct);
 
   return (
@@ -79,14 +79,8 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
         <div className="head-right">
           <div className="status">
             <span className={`live ${enSeance ? 'on' : ''}`}><i aria-hidden="true" />{enSeance ? 'Marché en cours' : 'Marché fermé'}</span>
-            {age != null && fraicheur.etat !== 'inconnu' && <small>Dernière mise à jour : il y a {age < 60 ? `${age} min` : `${Math.round(age / 60)} h`}</small>}
           </div>
-          <div className="pills num" aria-label="Résumé">
-            <span className="pill"><b className="up">{d.hausses}</b> hausses</span>
-            <span className="pill"><b>{d.inchangees}</b> stables</span>
-            <span className="pill"><b>{d.nbActions}</b> suivies</span>
-            {dateLabel && <span className="pill date">{dateLabel}</span>}
-          </div>
+          <Source fraicheur={fraicheur} />
         </div>
       </Apparition>
 

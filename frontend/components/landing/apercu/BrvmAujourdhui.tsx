@@ -3,7 +3,7 @@ import { EtatSeanceLive } from './EtatSeanceLive';
 import { pct, tone } from '@/lib/landing/formats';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import type { LandingBisData, Mover } from '@/lib/landing/bisData';
-import type { Fraicheur } from '@/lib/freshness';
+import { estEnSeance, type Fraicheur } from '@/lib/freshness';
 import { seanceNarrative } from '@/lib/landing/seanceNarrative';
 import { fmtNumber } from '@/lib/format';
 import { IndexChart } from './IndexChart';
@@ -61,7 +61,7 @@ export function BrvmAujourdhui({ d, fraicheur, dateLabel }: { d: LandingBisData;
   const p = (x: number) => Math.round((x / total) * 100);
   const points = d.brvmC && d.brvmC.veille != null ? d.brvmC.valeur - d.brvmC.veille : null;
   const score = Math.round(d.etat.sentimentScore);
-  const enSeance = fraicheur.etat === 'frais';
+  const enSeance = estEnSeance(new Date()) && fraicheur.etat === 'frais';
   const age = fraicheur.ageMinutes;
   const secteurs = [...d.secteurs].sort((a, b) => b.variation_pct - a.variation_pct);
 

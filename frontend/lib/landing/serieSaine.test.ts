@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { serieSaine } from './serieSaine';
+import { serieSaine, veilleIndice } from './serieSaine';
 
 const P = (vs: number[]) => vs.map((v, i) => ({ d: `2026-01-${String(i + 1).padStart(2, '0')}`, v }));
 
@@ -18,5 +18,31 @@ describe('serieSaine', () => {
   it('série vide ou à un point : inchangée', () => {
     expect(serieSaine([])).toEqual([]);
     expect(serieSaine(P([500])).length).toBe(1);
+  });
+});
+
+describe('veilleIndice', () => {
+  // Valeurs réelles de BRVM Composite, séance du 6 novembre 2026.
+  const serie = [{ d: '2026-11-04', v: 528.49 }, { d: '2026-11-05', v: 520.2 }, { d: '2026-11-06', v: 520.74 }];
+
+  it('reprend la clôture précédente quand la colonne est vide', () => {
+    expect(veilleIndice({ veille: null, variation: 0.1 }, serie, '2026-11-06')).toBe(520.2);
+  });
+
+  it('préfère la valeur publiée par la source', () => {
+    expect(veilleIndice({ veille: 519, variation: 0.1 }, serie, '2026-11-06')).toBe(519);
+  });
+
+  it('refuse une clôture qui contredirait la variation publiée', () => {
+    expect(veilleIndice({ veille: null, variation: 1.5 }, serie, '2026-11-06')).toBeNull();
+  });
+
+  it('accepte une variation inconnue : rien à contredire', () => {
+    expect(veilleIndice({ veille: null, variation: null }, serie, '2026-11-06')).toBe(520.2);
+  });
+
+  it('ne devine rien sans séance précédente ni séance du jour', () => {
+    expect(veilleIndice({ veille: null, variation: 0.1 }, serie.slice(2), '2026-11-06')).toBeNull();
+    expect(veilleIndice({ veille: null, variation: 0.1 }, serie, '2026-11-07')).toBeNull();
   });
 });
