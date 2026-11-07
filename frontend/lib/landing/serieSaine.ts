@@ -15,3 +15,29 @@ export function serieSaine<P extends PointSerie>(points: P[], sautMax = 0.10): P
   return points;
 }
 
+
+/** Écart toléré entre la variation publiée (2 décimales) et celle recalculée, en points de %. */
+const TOLERANCE_VARIATION = 0.02;
+
+/**
+ * Clôture de la veille d'un indice. `valeur_precedente` est vide la plupart des
+ * jours (8 séances sur 9 pour BRVMC, mesuré le 2026-11-07), alors que la clôture
+ * précédente est dans la série. On ne la reprend que si elle concorde avec la
+ * variation publiée : mieux vaut un tiret qu'une veille contredite par le % voisin.
+ */
+export function veilleIndice(
+  indice: { veille: number | null; variation: number | null },
+  serie: PointSerie[],
+  dateMarche: string,
+): number | null {
+  if (indice.veille != null && indice.veille > 0) return indice.veille;
+  const i = serie.findIndex((p) => p.d === dateMarche);
+  if (i < 1) return null;
+  const precedente = serie[i - 1].v;
+  if (precedente <= 0) return null;
+  if (indice.variation != null) {
+    const recalculee = (serie[i].v / precedente - 1) * 100;
+    if (Math.abs(recalculee - indice.variation) > TOLERANCE_VARIATION) return null;
+  }
+  return precedente;
+}

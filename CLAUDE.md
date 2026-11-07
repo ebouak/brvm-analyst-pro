@@ -1467,6 +1467,10 @@ Refonte par le skill `unslop`, sans changer l'ordre du fond : tests purs
 - **Fil de la méthode** : `.fil-panel` était une grille à 3 colonnes avec un seul enfant,
   ce qui le compressait. Corrigé en `.fil-contenu`.
 - **Mobile** : 19 900 → 14 355 px, en retirant ce qui répète le premier écran.
+- **Veille de l'indice** : `valeur_precedente` est vide 8 séances sur 9. `veilleIndice`
+  (`lib/landing/serieSaine.ts`) reprend la clôture précédente, seulement si elle concorde
+  avec la variation publiée (±0,02 point). Mesuré sur 67 séances : 12 rejets, aucun depuis
+  le 15/09 ; les six plus récents sont des trous de collecte où la veille aurait été fausse.
 
 ### Ajouts (passage 2026-11-07) — Vidéo de séance : modèle « verre » et version 16:9 du site
 

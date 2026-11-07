@@ -157,7 +157,7 @@ export default async function Landing() {
                 <p className="muted">Sans carte bancaire, sans engagement. Les outils avancés viennent ensuite, quand vous en aurez besoin.</p>
               </div>
               <div className="cta-col">
-                <Link href="/signup" className="btn btn-ghost">Créer mon compte gratuit</Link>
+                <Link href="/signup" className="btn btn-ink">Créer mon compte gratuit</Link>
                 <small>Sans carte bancaire · Sans engagement</small>
               </div>
             </div>
