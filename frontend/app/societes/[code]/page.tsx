@@ -6,11 +6,11 @@ import { chargerIntermediaire } from '@/lib/financials/interimServer';
 import PublicShell from '@/components/public/PublicShell';
 import Sparkline from '@/components/public/Sparkline';
 import RatingBadge from '@/components/RatingBadge';
-import CarnetOrdres, { type CarnetRow } from '@/components/CarnetOrdres';
+import CarnetOrdres, { dateSeanceLongue, type CarnetRow } from '@/components/CarnetOrdres';
 import CarnetCommentaire from '@/components/CarnetCommentaire';
 import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
-import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtDateFR, fmtPctSigne } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { requiredAccess } from '@/lib/server/featureAccess';
 
@@ -18,6 +18,13 @@ import { requiredAccess } from '@/lib/server/featureAccess';
 export const revalidate = 900;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
+
+/** « 2025-11-07 » → « 7 nov. 2025 » (UTC : une date seule ne doit pas glisser d'un jour). */
+function dateCourte(iso: string): string {
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T12:00:00Z` : iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
 
 interface PageProps {
   params: { code: string };
@@ -148,7 +155,6 @@ export default async function CompanyPage({ params }: PageProps) {
   const last = hist[0] ?? null;
   const cours = last?.cours_jour ?? null;
   const variation = last?.variation_pct ?? null;
-  const positive = (variation ?? 0) >= 0;
 
   const bestFund = pickBestFundamental(fundamentals);
   // Dividende VÉRIFIÉ (détachement daté) pour le rendement : les valeurs société
@@ -239,42 +245,92 @@ export default async function CompanyPage({ params }: PageProps) {
     url: `${SITE_URL}/societes/${code}`,
   };
 
+  // ── Étendue réelle du graphique ──────────────────────────────────────────
+  // Dérivée des points tracés : l'historique peut être plus court qu'un an,
+  // on écrit donc les dates, pas « 12 derniers mois ». Les bornes sont celles
+  // de la SÉRIE tracée, distinctes de cours_haut_52s / cours_bas_52s.
+  const pointsTraces = series.filter((r) => r.cours_jour != null);
+  const debutSerie = pointsTraces[0]?.date_marche ?? null;
+  const finSerie = pointsTraces[pointsTraces.length - 1]?.date_marche ?? null;
+  const etendue =
+    debutSerie && finSerie && closes.length >= 2
+      ? `Du ${dateCourte(debutSerie)} au ${dateCourte(finSerie)} · ${fmtNumber(closes.length)} séances`
+      : null;
+  const plusHautSerie = closes.length >= 2 ? Math.max(...closes) : null;
+  const plusBasSerie = closes.length >= 2 ? Math.min(...closes) : null;
+
+  const avecUnite = (valeur: string, unite: string) => (valeur === '—' ? valeur : `${valeur} ${unite}`);
+  const titreSection = 'font-display text-lg text-ivory';
+
+  const chiffresCles = [
+    { label: 'Capitalisation (FCFA)', value: fmtFcfa(ratios?.capitalisation ?? null) },
+    { label: 'Volume de la séance (titres)', value: fmtNumber(last?.volume) },
+    { label: 'Plus haut 52 semaines (FCFA)', value: fmtNumber(last?.cours_haut_52s) },
+    { label: 'Plus bas 52 semaines (FCFA)', value: fmtNumber(last?.cours_bas_52s) },
+  ];
+
   return (
     <PublicShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
 
-      {/* ── En-tête ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
-        <div>
-          <p className="text-[11px] text-accent/70 mb-1">
-            {instrument.secteur ?? 'BRVM'} · {instrument.pays ?? 'UEMOA'}
-          </p>
-          <h1 className="font-display text-2xl md:text-3xl text-white">
-            {instrument.designation} <span className="text-muted text-xl">({code})</span>
-          </h1>
-        </div>
-        <div className="text-right">
-          <div className="flex items-center gap-3 justify-end">
+      {/* ── En-tête : une ligne de la cote ───────────────────────────────── */}
+      <header className="mb-8 border-b border-border pb-4">
+        <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+          <div className="min-w-0">
+            <h1 className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="tabular text-sm text-muted">{code}</span>
+              <span className="font-display text-2xl text-ivory md:text-3xl">{instrument.designation}</span>
+            </h1>
+            <p className="mt-1 text-sm text-faint">
+              {instrument.secteur ?? 'BRVM'} · {instrument.pays ?? 'UEMOA'}
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
             <RatingBadge scoreTotal={signal?.score_total} confiance={signal?.confiance} size="lg" />
-            <div>
-              <p className="tabular text-3xl text-white font-semibold">{fmtNumber(cours)} <span className="text-sm text-muted">FCFA</span></p>
-              {variation != null && (
-                <p className={`tabular text-sm font-medium ${positive ? 'text-up' : 'text-down'}`}>
-                  {positive ? '+' : ''}{fmtNumber(variation, 2)} % aujourd&apos;hui
-                </p>
-              )}
+            <div className="text-right">
+              <p className="tabular text-2xl text-ivory">
+                {fmtNumber(cours)} <span className="text-sm text-muted">FCFA</span>
+              </p>
+              <p className="text-sm text-faint">
+                {variation != null && (
+                  <span
+                    className={`tabular ${
+                      Number(variation.toFixed(2)) > 0 ? 'text-up' : Number(variation.toFixed(2)) < 0 ? 'text-down' : 'text-muted'
+                    }`}
+                  >
+                    {fmtPctSigne(variation)}
+                  </span>
+                )}
+                {variation != null && last && ' · '}
+                {last && <>séance du {dateSeanceLongue(last.date_marche)}</>}
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* ── Graphique 1 an ───────────────────────────────────────────────── */}
-      <section className="bg-surface border border-border rounded-xl p-5 mb-6">
-        <h2 className="text-sm text-muted mb-3">Cours de clôture · 12 derniers mois</h2>
+      {/* ── Cours de clôture ─────────────────────────────────────────────── */}
+      <section className="mb-6 rounded-xl border border-border bg-surface p-5">
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 className={titreSection}>Cours de clôture</h2>
+          {etendue && <p className="tabular text-xs text-faint">{etendue}</p>}
+        </div>
         {closes.length >= 2 ? (
-          <Sparkline values={closes} positive={closes[closes.length - 1]! >= closes[0]!} />
+          <>
+            <Sparkline values={closes} positive={closes[closes.length - 1]! >= closes[0]!} />
+            <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs">
+              <div className="flex gap-2">
+                <dt className="text-faint">Plus haut de la période</dt>
+                <dd className="tabular text-muted">{avecUnite(fmtNumber(plusHautSerie), 'FCFA')}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-faint">Plus bas de la période</dt>
+                <dd className="tabular text-muted">{avecUnite(fmtNumber(plusBasSerie), 'FCFA')}</dd>
+              </div>
+            </dl>
+          </>
         ) : (
-          <p className="text-faint text-sm py-8 text-center">Historique de cours en cours de constitution.</p>
+          <p className="py-8 text-sm text-faint">Pas encore assez de séances pour tracer l&apos;historique des cours.</p>
         )}
       </section>
 
@@ -300,152 +356,163 @@ export default async function CompanyPage({ params }: PageProps) {
           economie={economieSociete}
         />
       ) : (
-        <div className="mb-6 rounded-xl border border-border bg-surface p-5 text-center">
-          <h2 className="text-sm text-muted mb-1.5">Ce que dit la séance</h2>
-          <p className="text-faint text-sm">
-            Le carnet d&apos;ordres mis à l&apos;échelle, le score technique face à ses
-            seuils et les comptes rapportés au cours : cette lecture de la séance
-            est sur la fiche détaillée.
+        <section className="mb-6 rounded-xl border border-border bg-surface p-5">
+          <h2 className={titreSection}>Ce que dit la séance</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+            La fiche détaillée met le carnet d&apos;ordres à l&apos;échelle, place le
+            score technique face à ses seuils et rapporte les comptes au cours.
           </p>
           <Link
             href={`/actions/${code}`}
-            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
+            className="mt-3 inline-block text-sm font-medium text-accent-ink underline-offset-4 transition-colors hover:underline"
           >
-            Voir l&apos;analyse de la séance →
+            Voir l&apos;analyse de la séance
           </Link>
-        </div>
+        </section>
       )}
 
-      {/* ── Chiffres clés ────────────────────────────────────────────────── */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: 'Capitalisation', value: ratios?.capitalisation != null ? fmtFcfa(ratios.capitalisation) + ' FCFA' : '—' },
-          { label: 'Volume (dernière séance)', value: fmtNumber(last?.volume) },
-          { label: 'Plus haut 52 sem.', value: fmtNumber(last?.cours_haut_52s) },
-          { label: 'Plus bas 52 sem.', value: fmtNumber(last?.cours_bas_52s) },
-        ].map((m) => (
-          <div key={m.label} className="bg-surface border border-border rounded-xl p-4">
-            <p className="text-[11px] text-faint mb-1">{m.label}</p>
-            <p className="tabular text-lg text-white">{m.value}</p>
+      {/* ── Chiffres clés : une bande, pas quatre cartes ─────────────────── */}
+      <dl className="mb-6 grid grid-cols-2 gap-y-4 rounded-xl border border-border bg-surface py-4 md:grid-cols-4 md:gap-y-0 md:divide-x md:divide-border">
+        {chiffresCles.map((m, i) => (
+          <div
+            key={m.label}
+            className={`px-5 ${i >= 2 ? 'border-t border-border pt-4 md:border-t-0 md:pt-0' : ''}`}
+          >
+            <dt className="text-xs text-faint">{m.label}</dt>
+            <dd className="tabular mt-1 text-lg text-ivory">{m.value}</dd>
           </div>
         ))}
-      </section>
+      </dl>
 
       {/* ── Fondamentaux ─────────────────────────────────────────────────── */}
       {bestFund && (
-        <section className="bg-surface border border-border rounded-xl p-5 mb-6">
-          <h2 className="text-sm text-muted mb-4">
-            Fondamentaux · exercice {bestFund.year ?? '—'}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3">
+        <section className="mb-6 rounded-xl border border-border bg-surface p-5">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className={titreSection}>Fondamentaux</h2>
+            <p className="tabular text-xs text-faint">Exercice {bestFund.year ?? '—'}</p>
+          </div>
+          <dl className="grid gap-x-8 md:grid-cols-2">
             {[
-              { label: "Chiffre d'affaires", value: fmtFcfa(bestFund.revenue) + ' FCFA' },
-              { label: 'Résultat net', value: fmtFcfa(bestFund.net_income) + ' FCFA' },
-              { label: 'Capitaux propres', value: fmtFcfa(bestFund.equity) + ' FCFA' },
+              { label: "Chiffre d'affaires", value: avecUnite(fmtFcfa(bestFund.revenue), 'FCFA') },
+              { label: 'Résultat net', value: avecUnite(fmtFcfa(bestFund.net_income), 'FCFA') },
+              { label: 'Capitaux propres', value: avecUnite(fmtFcfa(bestFund.equity), 'FCFA') },
               { label: 'BPA', value: ratios?.bpa != null ? fmtNumber(ratios.bpa, 0) + ' FCFA' : '—' },
               { label: 'PER', value: ratios?.per != null ? fmtNumber(ratios.per, 1) + '×' : '—' },
               { label: 'ROE', value: ratios?.roe != null ? fmtNumber(ratios.roe * 100, 1) + ' %' : '—' },
               { label: 'Marge nette', value: ratios?.margeNette != null ? fmtNumber(ratios.margeNette * 100, 1) + ' %' : '—' },
               { label: 'Rendement dividende', value: ratios?.rendementDiv != null ? fmtNumber(ratios.rendementDiv * 100, 2) + ' %' : '—' },
             ].map((m) => (
-              <div key={m.label} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0 md:border-0">
-                <span className="text-xs text-muted">{m.label}</span>
-                <span className="tabular text-sm text-white font-medium">{m.value}</span>
+              <div key={m.label} className="flex items-baseline justify-between gap-4 border-b border-border/60 py-2">
+                <dt className="text-sm text-muted">{m.label}</dt>
+                <dd className="tabular text-sm text-ivory">{m.value}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         </section>
       )}
 
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      <div className="mb-6 grid gap-6 md:grid-cols-2">
         {/* ── Dividendes ──────────────────────────────────────────────────── */}
-        <section className="bg-surface border border-border rounded-xl p-5">
-          <h2 className="text-sm text-muted mb-3">Historique des dividendes</h2>
+        <section className="rounded-xl border border-border bg-surface p-5">
+          <h2 className={`${titreSection} mb-3`}>Historique des dividendes</h2>
           {dividends.length > 0 ? (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-[11px] text-faint text-left">
+                <tr className="text-left text-xs text-faint">
                   <th className="pb-2 font-normal">Exercice</th>
-                  <th className="pb-2 font-normal text-right">Dividende / action</th>
-                  <th className="pb-2 font-normal text-right">Paiement</th>
+                  <th className="pb-2 text-right font-normal">Dividende par action</th>
+                  <th className="pb-2 text-right font-normal">Paiement</th>
                 </tr>
               </thead>
               <tbody>
                 {dividends.map((d, i) => (
-                  <tr key={i} className="border-t border-border/40">
-                    <td className="py-2 text-white">{d.exercice ?? '—'}</td>
-                    <td className="py-2 tabular text-right text-up">{fmtNumber(d.montant)} FCFA</td>
-                    <td className="py-2 tabular text-right text-muted">{fmtDateFR(d.payment_date)}</td>
+                  <tr key={i} className="border-t border-border/60">
+                    <td className="tabular py-2 text-ivory">{d.exercice ?? '—'}</td>
+                    <td className="tabular py-2 text-right text-ivory">{fmtNumber(d.montant)} FCFA</td>
+                    <td className="tabular py-2 text-right text-muted">{fmtDateFR(d.payment_date)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <p className="text-faint text-sm py-6 text-center">Aucun dividende enregistré.</p>
+            <p className="py-6 text-sm text-faint">Aucun dividende enregistré.</p>
           )}
         </section>
 
         {/* ── Actualités ──────────────────────────────────────────────────── */}
-        <section className="bg-surface border border-border rounded-xl p-5">
-          <h2 className="text-sm text-muted mb-3">Dernières actualités</h2>
+        <section className="rounded-xl border border-border bg-surface p-5">
+          <h2 className={`${titreSection} mb-3`}>Dernières actualités</h2>
           {news.length > 0 ? (
-            <ul className="space-y-3">
+            <ul>
               {news.map((n, i) => (
-                <li key={i} className="border-t border-border/40 first:border-0 pt-3 first:pt-0">
+                <li key={i} className="border-t border-border/60 py-3 first:border-0 first:pt-0 last:pb-0">
                   {n.source_url ? (
                     <a href={n.source_url} target="_blank" rel="noopener noreferrer"
-                       className="text-sm text-white hover:text-accent transition-colors leading-snug block">
+                       className="block text-sm leading-snug text-ivory transition-colors hover:text-accent-ink">
                       {n.titre}
                     </a>
                   ) : (
-                    <p className="text-sm text-white leading-snug">{n.titre}</p>
+                    <p className="text-sm leading-snug text-ivory">{n.titre}</p>
                   )}
-                  <p className="text-[11px] text-faint mt-1">{fmtDateFR(n.date_publication)} · {n.source}</p>
+                  <p className="mt-1 text-xs text-faint">
+                    <span className="tabular">{fmtDateFR(n.date_publication)}</span> · {n.source}
+                  </p>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-faint text-sm py-6 text-center">Aucune actualité récente.</p>
+            <p className="py-6 text-sm text-faint">Aucune actualité récente.</p>
           )}
         </section>
       </div>
 
-      {/* ── Teaser dossier d’analyse (convertisseur) ─────────────────────────── */}
+      {/* ── Extrait du dossier d’analyse (convertisseur) ─────────────────────
+          Plus de faux paragraphes floutés derrière le bouton : on dit en
+          clair ce qui est réservé, et où le lire. */}
       {teaserLines.length > 0 && (
-        <section className="bg-surface border border-accent/30 rounded-xl p-5 mb-6 relative overflow-hidden">
-          <p className="text-[11px] text-accent/80 mb-2">Dossier d’analyse · extrait</p>
-          <div className="space-y-2 text-sm text-muted leading-relaxed">
+        <section className="mb-6 rounded-xl border border-border bg-surface p-5">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className={titreSection}>Dossier d’analyse</h2>
+            <p className="text-xs text-faint">Extrait</p>
+          </div>
+          <div className="max-w-3xl space-y-2 text-sm leading-relaxed text-muted">
             {teaserLines.map((l, i) => (
               <p key={i}>{l}</p>
             ))}
           </div>
-          <div className="relative mt-2">
-            <div className="space-y-2 select-none blur-sm" aria-hidden="true">
-              <p className="text-sm text-muted">Le détail de la valorisation, les forces et risques identifiés, et la conclusion de l&apos;analyse sont réservés aux membres.</p>
-              <p className="text-sm text-muted">Créez un compte gratuit pour accéder à l&apos;analyse complète et aux signaux quotidiens.</p>
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Link href="/signup"
-                className="px-5 py-2.5 rounded-lg bg-accent text-bg font-semibold hover:bg-gold-2 transition-colors active:scale-95">
-                Lire l&apos;analyse complète · gratuit
-              </Link>
-            </div>
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border/60 pt-4">
+            <p className="max-w-xl text-sm text-faint">
+              La suite (valorisation détaillée, forces, risques relevés et conclusion) est
+              réservée aux membres.
+            </p>
+            <Link
+              href="/signup"
+              className="rounded-lg bg-accent-ink px-4 py-2 text-sm font-medium text-bg transition-[background-color,transform] hover:bg-gold-2 active:scale-[0.98]"
+            >
+              Lire la suite avec un compte gratuit
+            </Link>
           </div>
         </section>
       )}
 
-      {/* ── CTA secondaires ──────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-3">
-        <Link href={`/simulateur/${code}`}
-          className="px-4 py-2 rounded-lg border border-accent/40 text-accent hover:bg-accent/10 transition-colors text-sm font-medium">
+      {/* ── Suites ───────────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <Link
+          href={`/simulateur/${code}`}
+          className="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium text-ivory transition-colors hover:border-accent/60 hover:text-accent-ink"
+        >
           Simuler un investissement dans {code}
         </Link>
-        <Link href="/signup"
-          className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white hover:border-border-strong transition-colors text-sm">
+        <Link
+          href="/signup"
+          className="text-sm text-muted underline-offset-4 transition-colors hover:text-ivory hover:underline"
+        >
           Suivre {code} dans ma watchlist
         </Link>
-        <Link href="/societes"
-          className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white hover:border-border-strong transition-colors text-sm">
+        <Link
+          href="/societes"
+          className="text-sm text-muted underline-offset-4 transition-colors hover:text-ivory hover:underline"
+        >
           Toutes les sociétés BRVM
         </Link>
       </div>
