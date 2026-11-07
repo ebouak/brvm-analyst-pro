@@ -1,6 +1,6 @@
 import React from 'react';
 import { spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { chaleur, fr, sg, t, ton, type Theme } from './theme';
+import { chaleur, fr, sg, sombre, t, ton, type Theme } from './theme';
 import { Entre, Etiquette, Logo, Scene, Vignette, type Fiche } from './elements';
 
 /**
@@ -45,7 +45,7 @@ function Ouverture({ th, fiche, duree }: PropsScene) {
   const { fps } = useVideoConfig();
   const acc = fiche.video.accroche;
   const frise = (taille: number, debut: number) => (
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: th.modele === 'nuit' ? 'center' : 'flex-start' }}>
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: sombre(th) ? 'center' : 'flex-start' }}>
       {fiche.video.frise.map((code, i) => {
         const s = spring({ frame: f - debut - i * 4, fps, config: { damping: 14, stiffness: 140 } });
         return <div key={code} style={{ transform: `scale(${0.6 + s * 0.4})`, opacity: s }}><Vignette th={th} fiche={fiche} code={code} taille={taille} /></div>;
@@ -215,13 +215,13 @@ function Indice({ th, fiche, duree }: PropsScene) {
       <AutresIndices th={th} fiche={fiche} debut={16} />
       {th.modele === 'mosaique'
         ? <BarresJour th={th} fiche={fiche} debut={18} />
-        : <Courbe th={th} fiche={fiche} debut={18} encre={th.modele === 'papier'} />}
+        : <Courbe th={th} fiche={fiche} debut={18} encre={th.modele === 'papier'} largeur={th.modele === 'verre' ? 820 : 890} />}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 40 }}>
         {badges.map((b, i) => (
           <Entre key={b} th={th} debut={40 + i * 8}>
             <div style={{
               fontFamily: th.modele === 'papier' ? th.texte : th.chiffre, fontSize: 28, padding: '12px 20px',
-              border: `1.5px solid ${th.modele === 'papier' ? th.encre : th.bord}`, borderRadius: th.modele === 'nuit' ? 40 : 0,
+              border: `1.5px solid ${th.modele === 'papier' ? th.encre : th.bord}`, borderRadius: sombre(th) ? 40 : 0,
               color: th.encre, background: th.modele === 'papier' ? 'transparent' : th.surface,
             }}>{b}</div>
           </Entre>
@@ -327,7 +327,7 @@ function Capitaux({ th, fiche, duree }: PropsScene) {
   );
   const contributeurs = [...fiche.video.cotes].sort((a, b) => b.part_pct - a.part_pct).slice(0, th.modele === 'mosaique' ? 7 : 5);
 
-  if (th.modele === 'nuit') {
+  if (sombre(th)) {
     const prog = t(f, 26, 56);
     return (
       <Scene th={th} duree={duree}>

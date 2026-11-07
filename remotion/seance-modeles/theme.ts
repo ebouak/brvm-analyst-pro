@@ -9,8 +9,10 @@ import { MONO, SANS, SERIF } from '../polices';
  *  nuit     — terminal sombre, chiffres en chasse fixe, cyan de la marque
  *  papier   — une de journal claire, titres à empattements, encre et filets
  *  mosaique — carte du marché : chaque valeur est une tuile
+ *  verre    — studio sombre, panneaux de verre (réfraction, liseré, reflet),
+ *             logo officiel en tuile ; la version « premium » de la marque
  */
-export type Modele = 'nuit' | 'papier' | 'mosaique';
+export type Modele = 'nuit' | 'papier' | 'mosaique' | 'verre';
 
 export interface Theme {
   modele: Modele;
@@ -30,7 +32,7 @@ export interface Theme {
   chiffre: string;       // famille des grands nombres
   texte: string;         // famille du corps
   casseTitre: 'none' | 'uppercase';
-  entree: 'flou' | 'volet' | 'zoom';
+  entree: 'flou' | 'volet' | 'zoom' | 'bascule';
   logoClair: boolean;    // trait du logo en clair (fond sombre) ou en encre
 }
 
@@ -67,7 +69,22 @@ export const THEMES: Record<Modele, Theme> = {
     surface: '#0b1518', bord: 'rgba(86,215,253,.16)',
     titre: MONO, chiffre: MONO, texte: SANS, casseTitre: 'uppercase', entree: 'zoom', logoClair: true,
   },
+  verre: {
+    modele: 'verre',
+    fond: '#03070B',
+    // Éclairage de studio : une lumière douce tombe du haut sur un fond nuit.
+    halo: 'radial-gradient(ellipse 120% 70% at 50% -8%, #12293d 0%, #07111b 46%, #020508 100%)',
+    trame: 'none',
+    encre: '#F1F5F6', doux: '#A7B6BD', sourd: '#74858C',
+    // Turquoise du logo officiel (#18B6A4), éclairci pour le texte sur fond nuit.
+    accent: '#3FE0CB', haut: '#4ADE80', bas: '#F87171', neutre: '#4B5A61',
+    surface: 'rgba(255,255,255,.06)', bord: 'rgba(255,255,255,.14)',
+    titre: SERIF, chiffre: MONO, texte: SANS, casseTitre: 'none', entree: 'bascule', logoClair: true,
+  },
 };
+
+/** Les modèles sombres partagent leurs mises en page (nuit et verre). */
+export const sombre = (th: Theme) => th.modele === 'nuit' || th.modele === 'verre';
 
 /* ── Mesure et formatage ──────────────────────────────────────────────── */
 

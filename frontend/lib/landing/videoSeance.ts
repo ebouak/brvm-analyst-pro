@@ -25,6 +25,10 @@ export type VideoSeance = {
   texte: string;
   url: string;
   affiche: string | null;
+  /** Version 16:9 (habillage verre), rendue de la MÊME lecture que la
+   *  verticale. Absente si son rendu a échoué : le site garde la verticale. */
+  url_paysage?: string | null;
+  affiche_paysage?: string | null;
 };
 
 const CHEMIN = 'storage/v1/object/public/seance-video/derniere.json';

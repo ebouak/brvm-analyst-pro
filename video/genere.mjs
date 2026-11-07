@@ -239,8 +239,8 @@ console.log(
 /* Le récit — quoi dire, dans quel ordre, sous quel modèle — est composé par
    recit.mjs (pur, testé : `npm test`) à partir des MÊMES variables que les
    images. Il rend une suite de « temps » : une phrase lue + la scène qui
-   l'illustre. Trois modèles tournent d'une séance à l'autre ; VIDEO_MODELE
-   (nuit | papier | mosaique) en force un pour un essai. */
+   l'illustre. Quatre modèles tournent d'une séance à l'autre ; VIDEO_MODELE
+   (nuit | papier | mosaique | verre) en force un pour un essai. */
 const nomDe = (a) => a.designation ?? a.code;
 const mvt = (a) => ({ code: a.code, designation: nomDe(a), variation_pct: a.variation_pct });
 const donneesRecit = {
