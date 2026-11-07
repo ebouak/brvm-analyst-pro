@@ -20,6 +20,16 @@ const TYPE_LABEL: Record<string, string> = { cours: 'Cours', conference: 'Confé
 const NIVEAU_LABEL: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' };
 const NIVEAU_COURSE: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé', expert: 'Expert' };
 
+// Clé de niveau tolérante (casse, accents) : sert à l'affichage et au tri seulement.
+const cleNiveau = (n: string | null) =>
+  (n ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+const libelleNiveau = (n: string, table: Record<string, string>) => table[cleNiveau(n)] ?? n;
+const rangNiveau = (n: string | null) => {
+  const i = (NIVEAUX as readonly string[]).indexOf(cleNiveau(n));
+  return i === -1 ? NIVEAUX.length : i;
+};
+const numeroTitre = (t: string) => Number(/niveau\s*(\d+)/i.exec(t)?.[1] ?? Infinity);
+
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
 // Heure de la place (Abidjan, UTC+0) : un début en soirée ne change pas de
@@ -157,7 +167,9 @@ export default async function FormationsPage() {
             <span className="tabular text-sm text-muted">{pluriel(courses.length, 'cours', 'cours')}</span>
           </div>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {courses.map((c) => (
+            {[...courses]
+              .sort((a, b) => rangNiveau(a.niveau) - rangNiveau(b.niveau) || numeroTitre(a.titre) - numeroTitre(b.titre))
+              .map((c) => (
               <li key={c.id}>
                 <Link
                   href={`/formations/academy/${c.slug}`}
@@ -166,7 +178,7 @@ export default async function FormationsPage() {
                   <h3 className="font-display text-base text-ivory transition-colors line-clamp-2 group-hover:text-accent-ink">
                     {c.titre}
                   </h3>
-                  {c.niveau && <p className="mt-1 text-xs text-faint">{NIVEAU_COURSE[c.niveau] ?? c.niveau}</p>}
+                  {c.niveau && <p className="mt-1 text-xs text-faint">{libelleNiveau(c.niveau, NIVEAU_COURSE)}</p>}
                   {c.resume && <p className="mt-2 text-sm text-muted line-clamp-3">{c.resume}</p>}
                 </Link>
               </li>
@@ -209,7 +221,7 @@ export default async function FormationsPage() {
                     </h3>
                     <p className="mt-1 text-xs text-faint">
                       {TYPE_LABEL[f.type] ?? f.type}
-                      {f.niveau && <> · {NIVEAU_LABEL[f.niveau] ?? f.niveau}</>}
+                      {f.niveau && <> · {libelleNiveau(f.niveau, NIVEAU_LABEL)}</>}
                       {f.duree_min && (
                         <>
                           {' · '}
