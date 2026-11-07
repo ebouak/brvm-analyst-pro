@@ -93,16 +93,21 @@ for (const route of routes) {
         ctx = await browser.newContext({
           viewport: { width: vue.width, height: vue.height },
           colorScheme: theme === 'clair' ? 'light' : 'dark',
+          // Animations coupées : axe mesurait des textes en cours d'apparition, donc
+          // à demi transparents, et les signalait à tort comme mal contrastés.
+          reducedMotion: 'reduce',
           bypassCSP: true, // la CSP du site bloque cdnjs ; l'outil de mesure n'est pas le site
           storageState: etat,
         });
         await ctx.addInitScript((t) => {
-          try { localStorage.setItem('westbourse-theme', t); } catch {}
+          // L'écran d'introduction (logo animé) recouvre la page : on le marque comme vu.
+          try { localStorage.setItem('westbourse-theme', t); sessionStorage.setItem('ws_splash_seen', '1'); } catch {}
         }, theme === 'clair' ? 'light' : 'dark');
         const page = await ctx.newPage();
         const erreurs = [];
         page.on('pageerror', (e) => erreurs.push(String(e.message).slice(0, 160)));
         const rep = await page.goto(base + route, { waitUntil: 'networkidle', timeout: 45000 });
+        await page.waitForTimeout(1500);
         const statut = rep?.status();
         const finale = new URL(page.url());
         if (statut !== 200) r.bloquants.push(`statut HTTP ${statut}`);
@@ -120,6 +125,15 @@ for (const route of routes) {
         const axe = await page.evaluate(() => axe.run(document, { resultTypes: ['violations'] }));
         const graves = axe.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
         for (const v of graves) r.bloquants.push(`axe ${v.impact} : ${v.id} (${v.nodes.length} nœud(s))`);
+        // Le détail des nœuds sert à corriger : sans lui, le rapport ne dit pas quoi réparer.
+        r.axe = graves.map((v) => ({
+          id: v.id,
+          noeuds: v.nodes.slice(0, 15).map((n) => ({
+            cible: n.target.join(' ').slice(-80),
+            html: n.html.slice(0, 120),
+            mesure: n.any?.[0]?.data?.contrastRatio ? `${n.any[0].data.fgColor} sur ${n.any[0].data.bgColor} = ${n.any[0].data.contrastRatio}:1` : null,
+          })),
+        }));
         r.mesures = { sections: m.sections, h1: m.h1 };
         const base0 = ref?.resultats?.find((x) => x.cle === cle)?.mesures;
         if (ref && !base0) r.avertissements.push('absent du référentiel');

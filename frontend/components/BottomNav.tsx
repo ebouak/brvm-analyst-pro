@@ -71,7 +71,7 @@ export default function BottomNav() {
             key={t.href}
             href={t.href}
             aria-current={active ? 'page' : undefined}
-            className={`flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
+            className={`flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
               active ? 'text-accent' : 'text-muted hover:text-white'
             }`}
           >
@@ -84,7 +84,7 @@ export default function BottomNav() {
         type="button"
         aria-label="Rechercher un titre ou une page"
         onClick={() => window.dispatchEvent(new Event(OPEN_PALETTE_EVENT))}
-        className="flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted transition-colors hover:text-white active:scale-95"
+        className="flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted transition-colors hover:text-white active:scale-95"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
           <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />

@@ -70,6 +70,7 @@ export default function MobileNav({
       <div
         className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`}
         aria-hidden={!open}
+        {...(open ? {} : ({ inert: '' } as object))}
       >
         <div
           className={`absolute inset-0 bg-obsidian/80 ${EASE} ${open ? 'opacity-100' : 'opacity-0'}`}
@@ -114,7 +115,7 @@ export default function MobileNav({
                         {locked ? (
                           <Lock size={12} strokeWidth={2} className="ml-auto opacity-60" aria-hidden />
                         ) : item.premium ? (
-                          <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[8px] font-semibold text-gold">
+                          <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[11px] font-semibold text-gold">
                             PRO
                           </span>
                         ) : null}

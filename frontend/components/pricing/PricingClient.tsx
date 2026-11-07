@@ -275,7 +275,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
         <h2 id="h-comparatif" className="font-display text-2xl font-medium text-ivory">
           Comparatif des formules
         </h2>
-        <div className="relative mt-6 overflow-x-auto rounded-xl border border-border bg-surface">
+        <div tabIndex={0} role="region" aria-label="Comparatif des formules" className="relative mt-6 overflow-x-auto rounded-xl border border-border bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-ink">
           <table className="w-full min-w-[560px] text-sm">
             <caption className="sr-only">Fonctionnalités incluses dans chaque formule</caption>
             <thead>

@@ -76,7 +76,7 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
           <span className={`absolute left-0 h-[1.5px] w-full rounded bg-current transition-[transform,opacity] duration-300 ${open ? 'top-1/2 -translate-y-1/2 -rotate-45' : 'bottom-0'}`} />
         </span>
       </button>
-      <div className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`} aria-hidden={!open}>
+      <div className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`} aria-hidden={!open} {...(open ? {} : ({ inert: '' } as object))}>
         <div className={`absolute inset-0 bg-bg/80 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
         <nav id={id} aria-label="Menu" className={`absolute inset-x-0 top-[57px] bottom-0 overflow-y-auto bg-bg px-5 py-6 transition-[transform,opacity] duration-300 ${open ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
           <div className="flex justify-center mb-6"><ThemeToggle /></div>

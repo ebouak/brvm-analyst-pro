@@ -97,7 +97,7 @@ function Logo({ code, size }: { code: string; size: 'sm' | 'md' }) {
   ) : (
     <span
       aria-hidden
-      className={`tabular inline-flex items-center justify-center ${box} rounded-md text-[10px] font-medium shrink-0 bg-elevated text-muted border border-border/60`}
+      className={`tabular inline-flex items-center justify-center ${box} rounded-md text-[11px] font-medium shrink-0 bg-elevated text-muted border border-border/60`}
     >
       {code.slice(0, 2)}
     </span>
