@@ -6,6 +6,7 @@ import { useRealtimeActions } from '@/lib/realtime/useRealtimeActions';
 import type { RealtimeActionRow } from '@/lib/realtime/mergeActions';
 import { FlashValue } from '@/components/ui/FlashValue';
 import { getPatternsByCode } from '@/lib/patterns/queries';
+import { estEnSeance } from '@/lib/freshness';
 import type { PatternScreenerData } from '@/lib/patterns/queries';
 
 export interface TickerLine {
@@ -164,6 +165,22 @@ export default function DashboardTicker({
       );
     });
 
+  return <BandeauDefilant copie={copie} />;
+}
+
+/**
+ * Défilement seulement pendant la séance : marché fermé, des cours qui bougent à
+ * l'écran laisseraient croire à une cotation en cours. Fermé au premier rendu
+ * (serveur et client identiques), l'heure est lue après le montage.
+ */
+function BandeauDefilant({ copie }: { copie: (dup: boolean) => React.ReactNode }) {
+  const [defile, setDefile] = useState(false);
+  useEffect(() => {
+    const maj = () => setDefile(estEnSeance(new Date()));
+    maj();
+    const t = setInterval(maj, 60_000);
+    return () => clearInterval(t);
+  }, []);
   return (
     <div className="relative">
       {/* Évitement : un seul Tab pour sauter tout le bandeau. */}
@@ -174,18 +191,18 @@ export default function DashboardTicker({
         Passer le bandeau des cours
       </a>
       <div
-        className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2 shadow-card motion-reduce:overflow-x-auto"
+        className={`group relative rounded-full border border-border bg-surface/70 py-2 shadow-card ${defile ? 'overflow-hidden motion-reduce:overflow-x-auto' : 'overflow-x-auto'}`}
         role="marquee"
-        aria-label="Cours des actions et obligations en défilement"
+        aria-label={defile ? 'Cours des actions et obligations en défilement' : 'Cours des actions et obligations à la dernière clôture'}
       >
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg to-transparent motion-reduce:hidden" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-bg to-transparent motion-reduce:hidden" />
+        {defile && <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg to-transparent motion-reduce:hidden" />}
+        {defile && <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-bg to-transparent motion-reduce:hidden" />}
         {/* Deux copies de largeur identique (même pl-6 + gap-6) : la translation
             de −50 % boucle sans à-coup. Mouvement réduit demandé : défilement
             arrêté, copie visuelle retirée, bandeau défilable à la main. */}
-        <div className="flex w-max animate-ticker items-center font-mono group-hover:[animation-play-state:paused] motion-reduce:animate-none">
-          <div className="flex items-center gap-6 pl-6 motion-reduce:pr-6">{copie(false)}</div>
-          <div className="flex items-center gap-6 pl-6 motion-reduce:hidden" aria-hidden="true">{copie(true)}</div>
+        <div className={`flex w-max items-center font-mono ${defile ? 'animate-ticker group-hover:[animation-play-state:paused] motion-reduce:animate-none' : ''}`}>
+          <div className={`flex items-center gap-6 pl-6 ${defile ? 'motion-reduce:pr-6' : 'pr-6'}`}>{copie(false)}</div>
+          {defile && <div className="flex items-center gap-6 pl-6 motion-reduce:hidden" aria-hidden="true">{copie(true)}</div>}
         </div>
       </div>
       <span id="fin-bandeau-cours" tabIndex={-1} className="sr-only">Fin du bandeau des cours</span>
