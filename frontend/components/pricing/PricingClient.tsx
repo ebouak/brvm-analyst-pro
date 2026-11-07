@@ -159,7 +159,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
           <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formules et tarifs</h1>
           <p className="mt-4 text-base leading-relaxed text-muted">
             Le plan Gratuit suffit pour suivre la séance à la BRVM, avec des alertes et des rapports en nombre
-            limité. Premium et Platinium ouvrent les signaux avancés et l’analyse par société.
+            limité. Premium ouvre les signaux avancés ; Platinium y ajoute l’analyse fondamentale complète.
           </p>
         </div>
 

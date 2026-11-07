@@ -6,7 +6,7 @@ import { CookiePreferences } from './CookiePreferences';
 import { defaultDenied, acceptAll } from '@/lib/consent/state';
 
 // Style unique pour les deux choix : poids visuel strictement identique.
-const CHOIX = 'flex-1 rounded-full border border-ivory/40 bg-ivory/5 px-4 py-2 text-sm font-semibold text-ivory hover:bg-ivory/15 sm:flex-none sm:px-5';
+const CHOIX = 'flex min-h-[40px] flex-1 items-center justify-center whitespace-nowrap rounded-full border border-ivory/40 bg-ivory/5 px-3 py-2 text-[13px] font-semibold sm:text-sm text-ivory hover:bg-ivory/15 sm:flex-none sm:px-5';
 
 export function CookieBanner() {
   const { needsChoice, open, save } = useConsent();
@@ -24,7 +24,7 @@ export function CookieBanner() {
               Vous pouvez accepter la mesure d&apos;audience pour nous aider à l&apos;améliorer.{' '}
               <Link href="/confidentialite" className="underline hover:text-ivory">En savoir plus</Link>.
             </p>
-            <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto">
+            <div className="flex w-full shrink-0 flex-wrap items-stretch gap-2 sm:w-auto">
               <button type="button" onClick={() => save(defaultDenied())} className={CHOIX}>Refuser</button>
               <button type="button" onClick={() => save(acceptAll())} className={CHOIX}>Tout accepter</button>
               <button type="button" onClick={open} className="px-2 py-2 text-sm text-ivory/80 underline underline-offset-2 hover:text-ivory">Personnaliser</button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
 import { LECON0 } from '@/lib/academy/lecon0';
@@ -16,6 +16,12 @@ import { LECON0 } from '@/lib/academy/lecon0';
  */
 export function Lecon0Carte({ className = '' }: { className?: string }) {
   const [imageKo, setImageKo] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  // L'image peut avoir échoué avant l'hydratation : onError ne se déclenche alors jamais.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth === 0) setImageKo(true);
+  }, []);
   return (
     <Link
       href={LECON0.chemin}
@@ -31,6 +37,7 @@ export function Lecon0Carte({ className = '' }: { className?: string }) {
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
         <img
+          ref={imgRef}
           src={LECON0.vignette}
           alt=""
           width={96}

@@ -165,6 +165,8 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
           <span className="whitespace-nowrap">
             <span className="tabular text-ivory">{actions.length}</span> valeurs
           </span>
+          <span aria-hidden className="mx-2 text-faint">·</span>
+          <span className="whitespace-nowrap">Source BRVM</span>
         </p>
       </div>
 
