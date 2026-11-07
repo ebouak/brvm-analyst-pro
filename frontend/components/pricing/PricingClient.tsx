@@ -156,7 +156,7 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
       {/* En-tête : titre et cycle sur une même ligne, alignés à gauche */}
       <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
         <div className="max-w-xl">
-          <h1 className="font-display text-4xl font-medium leading-tight text-ivory md:text-5xl">Formules et tarifs</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formules et tarifs</h1>
           <p className="mt-4 text-base leading-relaxed text-muted">
             Le plan Gratuit suffit pour suivre la séance à la BRVM, avec des alertes et des rapports en nombre
             limité. Premium et Platinium ouvrent les signaux avancés et l’analyse par société.
@@ -241,8 +241,8 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
                   <span className="tabular text-4xl font-medium text-ivory">{fmtPrice(shown)}</span>
                   <span className="text-sm text-muted">{isFree ? 'FCFA' : `FCFA / ${unite}`}</span>
                 </p>
-                <p className="tabular mt-2 min-h-5 text-xs text-faint">
-                  {parMois != null ? `soit ${fmtPrice(parMois)} FCFA / mois` : isFree ? 'sans engagement' : ''}
+                <p className="mt-2 min-h-5 text-xs text-faint">
+                  {parMois != null ? <>soit <span className="tabular">{fmtPrice(parMois)}</span> FCFA / mois</> : isFree ? 'sans engagement' : ''}
                 </p>
               </div>
 

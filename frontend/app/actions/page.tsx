@@ -3,7 +3,7 @@ import { fetchAllRows } from '@/lib/supabase/paginate';
 import ActionsTable from '@/components/ActionsTable';
 import brvmSectors from '@/lib/brvmSectors.json';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
-import { SectionHeader, EmptyStatePremium, PremiumPanel, PremiumCTA } from '@/components/ui/premium';
+import { EmptyStatePremium, PremiumPanel, PremiumCTA } from '@/components/ui/premium';
 import { canAccess } from '@/lib/server/featureAccess';
 
 // Les COURS restent publics. Seules les colonnes CALCULÉES (Tendance 30 j, Signal)
@@ -119,10 +119,10 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
   if (!lastDate) {
     return (
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <SectionHeader
-          title="Marché actions"
-          subtitle="Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM."
-        />
+        <div>
+          <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Marché actions</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM.</p>
+        </div>
         <div className="mt-8">
           {erreur ? (
             <EmptyStatePremium
@@ -144,20 +144,22 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-6">
       {/* ── En-tête de page : titre, puis la séance comme en tête d'une cote ── */}
       <div>
-        <SectionHeader
-          title="Marché actions"
-          subtitle="Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM."
-          actions={
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Marché actions</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             <PremiumCTA href="/actions/compare" variant="ghost">
               Comparer des titres
             </PremiumCTA>
-          }
-        />
+          </div>
+        </div>
         {/* Date et compte tirés de la donnée : `date_marche` de la dernière
             séance et nombre de lignes de cette séance (avant filtre). */}
         <p className="mt-3 text-xs text-muted">
           <span className="whitespace-nowrap">
-            Séance du <time dateTime={lastDate} className="tabular text-ivory">{fmtSeance(lastDate)}</time>
+            Séance du <time dateTime={lastDate} className="text-ivory">{fmtSeance(lastDate)}</time>
           </span>
           <span aria-hidden className="mx-2 text-faint">·</span>
           <span className="whitespace-nowrap">
@@ -182,7 +184,7 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
             jour par la collecte intraday et n'est pas encore une clôture. */}
         <p className="px-1 text-xs leading-relaxed text-faint">
           Cours publiés par la BRVM, séance du{' '}
-          <time dateTime={lastDate} className="tabular">{fmtSeance(lastDate)}</time>
+          <time dateTime={lastDate}>{fmtSeance(lastDate)}</time>
           {' '}· variation par rapport au cours précédent · volume en titres, valeur échangée en FCFA
         </p>
       </div>

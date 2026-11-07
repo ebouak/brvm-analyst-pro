@@ -7,7 +7,6 @@ import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/serv
 import { listerSessionsAVenir, type SessionPublique } from '@/lib/formations/sessions';
 import { listCourses, type VideoCourseCard } from '@/lib/video/server';
 import { NIVEAUX } from '@/lib/academy/types';
-import { SectionHeader } from '@/components/ui/premium';
 import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
@@ -31,16 +30,15 @@ const rangNiveau = (n: string | null) => {
 const numeroTitre = (t: string) => Number(/niveau\s*(\d+)/i.exec(t)?.[1] ?? Infinity);
 
 const fmtDate = (d: string | null) =>
-  d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
+  d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Abidjan' }) : null;
 // Heure de la place (Abidjan, UTC+0) : un début en soirée ne change pas de
 // jour selon le fuseau du serveur. L'année n'est écrite que si elle diffère.
 const fmtJour = (d: string) => {
   const date = new Date(d);
-  const memeAnnee = date.getUTCFullYear() === new Date().getUTCFullYear();
   return date.toLocaleDateString('fr-FR', {
     day: 'numeric',
-    month: 'long',
-    ...(memeAnnee ? {} : { year: 'numeric' }),
+    month: 'short',
+    year: 'numeric',
     timeZone: 'Africa/Abidjan',
   });
 };
@@ -72,7 +70,7 @@ function LigneParcours({
           {titre}
         </span>
         <span className="max-w-[60ch] text-sm leading-relaxed text-muted">{description}</span>
-        <span className="tabular text-sm text-muted md:text-right">{volume}</span>
+        <span className="text-sm text-muted md:text-right">{volume}</span>
       </Link>
     </li>
   );
@@ -122,10 +120,10 @@ export default async function FormationsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-      <SectionHeader
-        title="Formations et conférences"
-        subtitle="Cours, sessions en direct, replays et conférences pour apprendre à investir à la BRVM."
-      />
+      <div>
+        <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formations et conférences</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Cours, sessions en direct, replays et conférences pour apprendre à investir à la BRVM.</p>
+      </div>
 
       {/* Leçon 0 : gratuite, ouverte à tous. Seule image réelle de la page. */}
       <Lecon0Carte />
@@ -164,7 +162,7 @@ export default async function FormationsPage() {
             <h2 id="h-cours" className="font-display text-lg text-ivory">
               Cours de l’Academy
             </h2>
-            <span className="tabular text-sm text-muted">{pluriel(courses.length, 'cours', 'cours')}</span>
+            <span className="text-sm text-muted">{pluriel(courses.length, 'cours', 'cours')}</span>
           </div>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[...courses]
@@ -225,13 +223,13 @@ export default async function FormationsPage() {
                       {f.duree_min && (
                         <>
                           {' · '}
-                          <span className="tabular">{f.duree_min} min</span>
+                          <><span className="tabular">{f.duree_min}</span> min</>
                         </>
                       )}
                     </p>
                     {f.description && <p className="mt-2 text-sm text-muted line-clamp-2">{f.description}</p>}
                     <div className="mt-auto flex items-center justify-between gap-3 pt-4 text-xs">
-                      <span className="tabular text-faint">{fmtDate(f.date_evenement) ?? ''}</span>
+                      <span className="text-faint">{fmtDate(f.date_evenement) ?? ''}</span>
                       <span className="text-muted">Premium</span>
                     </div>
                   </div>

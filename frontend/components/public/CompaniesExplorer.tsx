@@ -40,11 +40,11 @@ const COLONNES =
 /** Valeurs sans secteur en base : regroupées, en dernier, jamais écartées. */
 const NON_CLASSE = 'Non classé';
 
-/** « 2026-11-03 » → « 3 nov. » */
+/** « 2026-11-03 » → « 3 nov. 2026 » */
 function dateCourte(iso: string): string {
   const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 /**
@@ -184,8 +184,8 @@ export default function CompaniesExplorer({ companies }: { companies: CompanyCar
             </span>
           )}
           {filtreActif && (
-            <p role="status" className="tabular">
-              {filtered.length} société{filtered.length > 1 ? 's' : ''}
+            <p role="status">
+              <span className="tabular">{filtered.length}</span> société{filtered.length > 1 ? 's' : ''}
               {query.trim() !== '' && <span className="font-sans"> pour « {query.trim()} »</span>}
             </p>
           )}
@@ -241,11 +241,11 @@ export default function CompaniesExplorer({ companies }: { companies: CompanyCar
                         onClick={handleCardClick(c.code)}
                         className={`${COLONNES} min-h-14 px-4 py-3 transition-colors hover:bg-elevated/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/60`}
                       >
-                        <span className="tabular hidden text-xs text-muted md:block">{c.code}</span>
+                        <span className="hidden font-mono text-sm font-medium text-ivory md:block">{c.code}</span>
                         <span className="min-w-0">
                           <span className="block truncate text-sm text-ivory">{c.designation}</span>
                           <span className="mt-1 block truncate text-xs text-faint md:hidden">
-                            <span className="tabular">{c.code}</span> · {c.pays ?? '—'}
+                            <span className="font-mono font-medium text-ivory">{c.code}</span> · {c.pays ?? '—'}
                           </span>
                         </span>
                         <span className="hidden truncate text-sm text-muted md:block">{c.pays ?? '—'}</span>
