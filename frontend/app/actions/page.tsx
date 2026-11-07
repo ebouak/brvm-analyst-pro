@@ -3,7 +3,7 @@ import { fetchAllRows } from '@/lib/supabase/paginate';
 import ActionsTable from '@/components/ActionsTable';
 import brvmSectors from '@/lib/brvmSectors.json';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
-import { SectionHeader, EmptyStatePremium, PremiumPanel, StatPill, PremiumCTA } from '@/components/ui/premium';
+import { SectionHeader, EmptyStatePremium, PremiumPanel, PremiumCTA } from '@/components/ui/premium';
 import { canAccess } from '@/lib/server/featureAccess';
 
 // Les COURS restent publics. Seules les colonnes CALCULÉES (Tendance 30 j, Signal)
@@ -22,21 +22,29 @@ export const metadata = { title: 'Marché actions' };
  */
 async function getData(withMetrics: boolean) {
   const supabase = createPublicClient();
-  const { data: lastRow } = await supabase
+  // Une panne de lecture n'est PAS une base vide : sans cette distinction,
+  // l'état vide promettrait des cours « dès la prochaine séance » alors que
+  // la séance est en base et simplement illisible.
+  const vide = { lastDate: null, actions: [] as ActionDaily[], signals: {} as Record<string, SignalDaily>, sparklines: {} as Record<string, number[]> };
+  const { data: lastRow, error: lastError } = await supabase
     .from('brvm_actions_daily')
     .select('date_marche')
     .order('date_marche', { ascending: false })
     .limit(1);
+  if (lastError) return { ...vide, erreur: true };
   const lastDate = lastRow?.[0]?.date_marche ?? null;
-  if (!lastDate) return { lastDate: null, actions: [] as ActionDaily[], signals: {} as Record<string, SignalDaily>, sparklines: {} as Record<string, number[]> };
+  if (!lastDate) return { ...vide, erreur: false };
 
-  const [{ data: actions }, { data: signals }, { data: instruments }] = await Promise.all([
+  const [{ data: actions, error: actionsError }, { data: signals }, { data: instruments }] = await Promise.all([
     supabase.from('brvm_actions_daily').select('*').eq('date_marche', lastDate),
     withMetrics
       ? supabase.from('signals_daily').select('*').eq('date_marche', lastDate)
       : Promise.resolve({ data: null }),
     supabase.from('brvm_instruments').select('code, secteur, pays').eq('type', 'action'),
   ]);
+  // La séance existe mais ses lignes sont illisibles : afficher un tableau
+  // vide sous « 0 valeurs » serait une affirmation fausse.
+  if (actionsError) return { ...vide, erreur: true };
 
   // Secteur : classification fiable brvmSectors.json (GICS par ticker, comme la
   // heatmap) en priorité, car brvm_instruments.secteur est quasi vide (1/48).
@@ -85,6 +93,7 @@ async function getData(withMetrics: boolean) {
     actions: enrichedActions,
     signals: sigMap,
     sparklines,
+    erreur: false,
   };
 }
 
@@ -104,67 +113,79 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
   // /admin/features). Les cours restent publics ; seules les colonnes calculées
   // sont soumises au flag.
   const gate = await canAccess('actions_metrics');
-  const { lastDate, actions, signals, sparklines } = await getData(gate.allowed);
+  const { lastDate, actions, signals, sparklines, erreur } = await getData(gate.allowed);
   const initialSecteur = searchParams?.secteur ?? '';
 
   if (!lastDate) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <SectionHeader
           title="Marché actions"
-          subtitle="Tableau de bord des valeurs cotées sur la Bourse Régionale des Valeurs Mobilières."
+          subtitle="Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM."
         />
-        <div className="mt-10">
-          <EmptyStatePremium
-            title="Aucune séance disponible"
-            hint="Lancez le scraper pour alimenter la base de données."
-            icon="◈"
-          />
+        <div className="mt-8">
+          {erreur ? (
+            <EmptyStatePremium
+              title="Les cours n'ont pas pu être chargés"
+              hint="Réessayez dans un instant."
+            />
+          ) : (
+            <EmptyStatePremium
+              title="Aucune séance disponible"
+              hint="Les cours apparaîtront ici dès la publication de la prochaine séance."
+            />
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      {/* ── En-tête de page ─────────────────────────────────────────────── */}
-      <SectionHeader
-        title="Marché actions"
-        subtitle="Toutes les valeurs cotées · cours, volumes, performances et signaux assistés."
-        actions={
-          <>
-            <div className="flex items-center gap-2">
-              <StatPill tone="neutral">
-                <span className="tabular">{actions.length}</span>&nbsp;titres
-              </StatPill>
-              <StatPill tone="gold">
-                {/* Un seul bloc insécable : sinon la pastille dispose texte et
-                    date côte à côte et casse en « Séance 3 nov. / du 2026 ». */}
-                <span className="whitespace-nowrap">
-                  Séance du <time dateTime={lastDate} className="tabular">{fmtSeance(lastDate)}</time>
-                </span>
-              </StatPill>
-            </div>
-            <PremiumCTA href="/actions/compare" variant="gold">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-6">
+      {/* ── En-tête de page : titre, puis la séance comme en tête d'une cote ── */}
+      <div>
+        <SectionHeader
+          title="Marché actions"
+          subtitle="Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM."
+          actions={
+            <PremiumCTA href="/actions/compare" variant="ghost">
               Comparer des titres
             </PremiumCTA>
-          </>
-        }
-      />
-
-      {/* ── Filet doré de séparation ────────────────────────────────────── */}
-      <div className="gold-rule" />
+          }
+        />
+        {/* Date et compte tirés de la donnée : `date_marche` de la dernière
+            séance et nombre de lignes de cette séance (avant filtre). */}
+        <p className="mt-3 text-xs text-muted">
+          <span className="whitespace-nowrap">
+            Séance du <time dateTime={lastDate} className="tabular text-ivory">{fmtSeance(lastDate)}</time>
+          </span>
+          <span aria-hidden className="mx-2 text-faint">·</span>
+          <span className="whitespace-nowrap">
+            <span className="tabular text-ivory">{actions.length}</span> valeurs
+          </span>
+        </p>
+      </div>
 
       {/* ── Tableau principal (avec colonne Tendance 30j) ───────────────── */}
-      <PremiumPanel>
-        <ActionsTable
-          actions={actions}
-          signals={signals}
-          sparklines={sparklines}
-          initialSecteur={initialSecteur}
-          showMetrics={gate.allowed}
-        />
-      </PremiumPanel>
+      <div className="space-y-3">
+        <PremiumPanel>
+          <ActionsTable
+            actions={actions}
+            signals={signals}
+            sparklines={sparklines}
+            initialSecteur={initialSecteur}
+            showMetrics={gate.allowed}
+          />
+        </PremiumPanel>
+        {/* Pied de cote : d'où viennent les chiffres et ce qu'ils mesurent.
+            Pas « cours de clôture » : en séance, la ligne du jour est mise à
+            jour par la collecte intraday et n'est pas encore une clôture. */}
+        <p className="px-1 text-xs leading-relaxed text-faint">
+          Cours publiés par la BRVM, séance du{' '}
+          <time dateTime={lastDate} className="tabular">{fmtSeance(lastDate)}</time>
+          {' '}· variation par rapport au cours précédent · volume en titres, valeur échangée en FCFA
+        </p>
+      </div>
     </div>
   );
 }

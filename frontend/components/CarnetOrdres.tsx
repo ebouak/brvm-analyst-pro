@@ -1,4 +1,4 @@
-import { fmtDateFR, fmtNumber } from '@/lib/format';
+import { fmtNumber } from '@/lib/format';
 
 /**
  * Carnet d'ordres d'une valeur — quantités résiduelles non servies à la clôture.
@@ -41,6 +41,19 @@ export function spreadPct(c: CarnetRow): number | null {
 const prix = (c: number | null, auMarche: boolean) =>
   auMarche ? 'au marché' : c == null ? '—' : `${fmtNumber(c)} FCFA`;
 
+/**
+ * « 2026-11-06 » → « jeudi 6 novembre 2026 ». La date de séance s'écrit en
+ * toutes lettres : en chiffres (06/11/2026), elle se lit comme un horodatage
+ * de l'instant, ce que ces quantités ne sont pas.
+ */
+export function dateSeanceLongue(iso: string): string {
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T12:00:00Z` : iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  });
+}
+
 export default function CarnetOrdres({ carnet }: { carnet: CarnetRow | null }) {
   if (!carnet) return null;
 
@@ -52,13 +65,15 @@ export default function CarnetOrdres({ carnet }: { carnet: CarnetRow | null }) {
 
   return (
     <section className="mb-6 rounded-xl border border-border bg-surface p-5">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm text-muted">Carnet d&apos;ordres · quantités résiduelles</h2>
-        <span className="text-xs text-faint">clôture du {fmtDateFR(carnet.date_marche)}</span>
-      </div>
+      <header className="mb-4">
+        <h2 className="font-display text-lg text-ivory">Carnet d&apos;ordres</h2>
+        <p className="mt-1 text-xs text-faint">
+          Quantités restées en carnet à la clôture de la séance du {dateSeanceLongue(carnet.date_marche)}
+        </p>
+      </header>
 
       {total === 0 ? (
-        <p className="py-4 text-center text-sm text-faint">
+        <p className="py-4 text-sm text-faint">
           Aucun ordre resté en carnet à la clôture de cette séance.
         </p>
       ) : (
@@ -66,46 +81,52 @@ export default function CarnetOrdres({ carnet }: { carnet: CarnetRow | null }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-faint">À l&apos;achat</p>
-              <p className="tabular text-xl font-semibold text-up">{achat > 0 ? fmtNumber(achat) : '—'}</p>
-              <p className="text-xs text-muted">{achat > 0 ? prix(carnet.cours_achat, carnet.achat_au_marche) : 'aucun acheteur'}</p>
+              <p className="tabular mt-1 text-xl font-medium text-ivory">{achat > 0 ? fmtNumber(achat) : '—'}</p>
+              <p className="tabular text-xs text-muted">{achat > 0 ? prix(carnet.cours_achat, carnet.achat_au_marche) : 'aucun acheteur'}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-faint">À la vente</p>
-              <p className="tabular text-xl font-semibold text-down">{vente > 0 ? fmtNumber(vente) : '—'}</p>
-              <p className="text-xs text-muted">{vente > 0 ? prix(carnet.cours_vente, carnet.vente_au_marche) : 'aucun vendeur'}</p>
+              <p className="tabular mt-1 text-xl font-medium text-ivory">{vente > 0 ? fmtNumber(vente) : '—'}</p>
+              <p className="tabular text-xs text-muted">{vente > 0 ? prix(carnet.cours_vente, carnet.vente_au_marche) : 'aucun vendeur'}</p>
             </div>
           </div>
 
           <div
-            className="mt-3 flex h-2 overflow-hidden rounded-full bg-elevated"
+            className="mt-4 flex h-2 gap-0.5 overflow-hidden rounded"
             role="img"
             aria-label={`${fmtNumber(achat)} titres demandés contre ${fmtNumber(vente)} offerts`}
           >
-            <div className="bg-up" style={{ width: `${partAchat}%` }} />
-            <div className="bg-down" style={{ width: `${100 - partAchat}%` }} />
+            {/* Deux tons neutres, pas vert et rouge : sur une page de bourse, le
+                vert se lit « ça monte ». La barre encode le rapport, sans verdict. */}
+            {partAchat > 0 && <div className="bg-ivory/70" style={{ width: `${partAchat}%` }} />}
+            {partAchat < 100 && <div className="flex-1 bg-faint/50" />}
+          </div>
+          <div className="mt-1 flex justify-between text-xs text-muted" aria-hidden="true">
+            <span>Achat</span>
+            <span>Vente</span>
           </div>
 
-          <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
+          <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-border pt-4 text-xs">
             <div>
               <dt className="text-faint">Fourchette</dt>
-              <dd className="tabular text-ivory">
+              <dd className="tabular mt-1 text-ivory">
                 {spread == null
                   ? <span className="text-muted">non calculable</span>
                   : `${spread.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`}
               </dd>
             </div>
-            <div>
+            <div className="text-right">
               <dt className="text-faint">Cours de référence</dt>
-              <dd className="tabular text-ivory">{carnet.cours_reference != null ? `${fmtNumber(carnet.cours_reference)} FCFA` : '—'}</dd>
+              <dd className="tabular mt-1 text-ivory">{carnet.cours_reference != null ? `${fmtNumber(carnet.cours_reference)} FCFA` : '—'}</dd>
             </div>
           </dl>
         </>
       )}
 
-      <p className="mt-3 text-xs text-faint">
+      <p className="mt-4 text-xs leading-relaxed text-faint">
         Ordres non servis restés en carnet à la clôture, publiés par la BRVM dans son Bulletin Officiel de la Cote.
-        Seule la meilleure limite de chaque côté est publiée : ce n&apos;est ni un carnet temps réel, ni la profondeur
-        complète.{spread == null && (carnet.achat_au_marche || carnet.vente_au_marche) ? ' Un ordre « au marché » n’a pas de limite de cours : aucune fourchette ne peut en être tirée.' : ''}
+        Seule la meilleure limite de chaque côté est publiée : ce n&apos;est ni un carnet en temps réel, ni la profondeur
+        complète. Un écart entre les deux côtés décrit le carnet. Ce n&apos;est pas un signal.{spread == null && (carnet.achat_au_marche || carnet.vente_au_marche) ? ' Un ordre « au marché » n’a pas de limite de cours : aucune fourchette ne peut en être tirée.' : ''}
       </p>
     </section>
   );

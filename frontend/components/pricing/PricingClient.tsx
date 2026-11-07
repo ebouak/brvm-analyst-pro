@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Check, ChevronDown, Minus } from 'lucide-react';
 
 type Cycle = 'monthly' | 'quarterly' | 'yearly';
 
@@ -40,18 +41,18 @@ export interface PricingPlan {
 /** Listes de fonctionnalités par plan (copy produit ; les prix viennent de la base). */
 const FEATURES: Record<string, { tagline: string; cta: string; items: string[] }> = {
   free: {
-    tagline: 'Pour découvrir la plateforme et suivre l’essentiel du marché.',
+    tagline: 'Suivre la séance et l’actualité des sociétés cotées.',
     cta: 'Commencer gratuitement',
     items: [
       'Vue marché globale',
-      'Actualités et informations clés',
+      'Actualités des sociétés cotées',
       'Watchlist limitée',
       'Alertes limitées',
       'Rapports restreints',
     ],
   },
   premium: {
-    tagline: 'Pour les investisseurs actifs qui veulent décider plus vite et avec plus de profondeur.',
+    tagline: 'Analyser une valeur en profondeur avant de passer un ordre.',
     cta: 'Passer à Premium',
     items: [
       'Tout le plan Gratuit',
@@ -64,7 +65,7 @@ const FEATURES: Record<string, { tagline: string; cta: string; items: string[] }
     ],
   },
   platinium: {
-    tagline: 'Pour les investisseurs exigeants qui veulent une gestion assistée et un accompagnement renforcé.',
+    tagline: 'Être accompagné dans ses décisions, avec un support prioritaire.',
     cta: 'Choisir Platinium',
     items: [
       'Tout le plan Premium',
@@ -73,51 +74,102 @@ const FEATURES: Record<string, { tagline: string; cta: string; items: string[] }
       'Rapports approfondis',
       'Exports enrichis',
       'Support prioritaire',
-      'Accompagnement premium',
+      'Accompagnement renforcé',
     ],
   },
 };
 
-const FAQ: { q: string; a: string }[] = [
-  { q: 'Puis-je commencer gratuitement ?', a: 'Oui, le plan Gratuit est accessible sans carte bancaire.' },
-  { q: 'Puis-je changer de formule à tout moment ?', a: 'Oui, l’upgrade et le downgrade sont simples et prennent effet immédiatement.' },
-  {
-    q: 'Que signifie « gestion assistée » ?',
-    a: 'Un accompagnement premium : analyse renforcée et aide à la décision. Ce n’est pas une gestion automatique de portefeuille ni un mandat de gestion.',
-  },
-  { q: 'Les paiements sont-ils mensuels ou annuels ?', a: 'Les deux, avec une réduction sur l’abonnement annuel.' },
-  { q: 'Mes rapports peuvent-ils être exportés ?', a: 'Oui, selon le plan (PDF/Word, exports enrichis pour Platinium).' },
+/** Ordre d'affichage des formules ; les cellules du comparatif suivent cet ordre. */
+const ORDRE = ['free', 'premium', 'platinium'];
+
+/** Tableau comparatif : true = inclus, false = absent, texte = niveau. */
+const COMPARATIF: { label: string; cells: (boolean | string)[] }[] = [
+  { label: 'Vue marché et actualités', cells: [true, true, true] },
+  { label: 'Signaux avancés', cells: [false, true, true] },
+  { label: 'Historique étendu', cells: [false, true, true] },
+  { label: 'Rapports', cells: ['Restreints', 'Enrichis', 'Approfondis'] },
+  { label: 'Exports', cells: [false, 'PDF / Word', 'Enrichis'] },
+  { label: 'Comparatifs sectoriels', cells: [false, true, true] },
+  { label: 'Analyse fondamentale complète', cells: [false, false, true] },
+  { label: 'Accompagnement et support', cells: [false, 'Standard', 'Prioritaire'] },
 ];
 
 function fmtPrice(n: number): string {
-  return new Intl.NumberFormat('fr-FR').format(n);
+  return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n);
+}
+
+function Cellule({ v }: { v: boolean | string }) {
+  if (v === true) {
+    return (
+      <>
+        <Check size={16} strokeWidth={1.5} className="text-ivory" aria-hidden />
+        <span className="sr-only">Inclus</span>
+      </>
+    );
+  }
+  if (v === false) {
+    return (
+      <>
+        <Minus size={16} strokeWidth={1.5} className="text-faint" aria-hidden />
+        <span className="sr-only">Non inclus</span>
+      </>
+    );
+  }
+  return <span className="text-ivory">{v}</span>;
 }
 
 export function PricingClient({ plans }: { plans: PricingPlan[] }) {
   const [cycle, setCycle] = useState<Cycle>('yearly');
-  const ordered = ['free', 'premium', 'platinium']
+  const ordered = ORDRE
     .map((code) => plans.find((p) => p.code === code))
     .filter((p): p is PricingPlan => Boolean(p));
   // Plan de référence pour l'économie affichée : celui mis en avant, sinon Premium.
   const reference = ordered.find((p) => p.is_recommended) ?? ordered.find((p) => p.code === 'premium');
+  const ecoAnnuel = economie(reference, 'yearly');
+  const ecoTrimestre = economie(reference, 'quarterly');
+
+  // Réponse sur les cycles tirée des prix en base, jamais écrite en dur.
+  const reponseCycles =
+    ecoAnnuel > 0
+      ? `Mensuel, trimestriel ou annuel. Sur ${reference?.name ?? 'la formule recommandée'}, l’annuel revient ${ecoAnnuel} % moins cher que douze mois réglés au mois${ecoTrimestre > 0 ? `, le trimestriel ${ecoTrimestre} % moins cher que trois` : ''}.`
+      : 'Mensuel, trimestriel ou annuel, selon la formule. Le prix de chaque cycle s’affiche sur le sélecteur en haut de page.';
+
+  const faq: { q: string; a: string }[] = [
+    { q: 'Puis-je commencer gratuitement ?', a: 'Oui. Le plan Gratuit s’ouvre sans carte bancaire.' },
+    {
+      q: 'Puis-je changer de formule à tout moment ?',
+      a: 'Oui. Le changement de formule prend effet immédiatement.',
+    },
+    {
+      q: 'Que signifie « gestion assistée » ?',
+      a: 'Un accompagnement plus suivi, avec une analyse plus poussée et une aide à la décision. Ce n’est ni une gestion automatique de votre portefeuille, ni un mandat de gestion.',
+    },
+    { q: 'Les paiements sont-ils mensuels ou annuels ?', a: reponseCycles },
+    {
+      q: 'Mes rapports peuvent-ils être exportés ?',
+      a: 'Oui, selon la formule : PDF et Word avec Premium, exports enrichis avec Platinium.',
+    },
+  ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16">
-      {/* Hero */}
-      <div className="mx-auto max-w-2xl text-center">
-        <h1 className="font-display text-4xl font-bold text-ivory">
-          Choisissez le niveau d’accompagnement adapté à votre profil
-        </h1>
-        <p className="mt-4 text-muted">
-          Données de marché, rapports d’analyse et outils de suivi BRVM/UEMOA dans une
-          expérience premium pensée pour l’Afrique de l’Ouest.
-        </p>
-      </div>
+    <div>
+      {/* En-tête : titre et cycle sur une même ligne, alignés à gauche */}
+      <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-xl">
+          <h1 className="font-display text-4xl font-medium leading-tight text-ivory md:text-5xl">Formules et tarifs</h1>
+          <p className="mt-4 text-base leading-relaxed text-muted">
+            Le plan Gratuit suffit pour suivre la séance à la BRVM, avec des alertes et des rapports en nombre
+            limité. Premium et Platinium ouvrent les signaux avancés et l’analyse par société.
+          </p>
+        </div>
 
-      {/* Choix du cycle. L'économie est calculée sur le plan mis en avant. */}
-      <div role="radiogroup" aria-label="Cycle de facturation" className="mt-8 flex items-center justify-center">
-        <div className="inline-flex rounded-full border border-border bg-elevated p-1">
-          {CYCLES.map((c) => {
+        {/* Choix du cycle. L'économie est calculée sur le plan mis en avant. */}
+        <div
+          role="radiogroup"
+          aria-label="Cycle de facturation"
+          className="inline-flex self-start rounded-xl border border-border bg-surface p-1 md:self-auto"
+        >
+          {CYCLES.map((c, i) => {
             const actif = c.cle === cycle;
             const eco = economie(reference, c.cle);
             return (
@@ -126,20 +178,33 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
                 type="button"
                 role="radio"
                 aria-checked={actif}
+                tabIndex={actif ? 0 : -1}
                 onClick={() => setCycle(c.cle)}
-                className={`min-h-[40px] rounded-full px-4 text-sm font-semibold transition-colors ${actif ? 'bg-accent text-[#03222b]' : 'text-muted hover:text-ivory'}`}
+                onKeyDown={(e) => {
+                  // Groupe radio : les flèches déplacent la sélection et le focus.
+                  const pas = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+                  if (!pas) return;
+                  e.preventDefault();
+                  const j = (i + pas + CYCLES.length) % CYCLES.length;
+                  setCycle(CYCLES[j].cle);
+                  (e.currentTarget.parentElement?.children[j] as HTMLElement | undefined)?.focus();
+                }}
+                // Actif : filet renforcé sur le fond de page (surface et elevated se confondent en clair).
+                className={`inline-flex min-h-[40px] items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${
+                  actif ? 'bg-bg text-ivory ring-1 ring-inset ring-border-strong' : 'text-muted hover:text-ivory'
+                }`}
               >
                 {c.label}
-                {eco > 0 && <span className={actif ? 'ml-1.5 opacity-80' : 'ml-1.5 text-up'}>−{eco}&nbsp;%</span>}
+                {eco > 0 && <span className="tabular text-xs text-accent-ink">−{eco}&nbsp;%</span>}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Cartes */}
-      <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {ordered.map((plan) => {
+      {/* Fiche des formules : un seul panneau, colonnes séparées par des filets */}
+      <div className="mt-12 grid grid-cols-1 overflow-hidden rounded-2xl border border-border bg-surface md:grid-cols-3">
+        {ordered.map((plan, i) => {
           const f = FEATURES[plan.code];
           const monthly = plan.price_monthly;
           // Un plan sans prix pour ce cycle retombe sur son mensuel, ET l'unité
@@ -150,107 +215,125 @@ export function PricingClient({ plans }: { plans: PricingPlan[] }) {
           const isFree = monthly === 0;
           const highlighted = plan.is_recommended;
           const href = isFree ? '/signup' : `/signup?plan=${plan.code}`;
+          // Équivalent mensuel, dérivé du prix en base (trimestriel et annuel seulement).
+          const parMois = !isFree && prix != null && cycle !== 'monthly' ? Math.round(prix / MOIS[cycle]) : null;
           return (
-            <div
+            <section
               key={plan.code}
-              className={`relative flex flex-col rounded-2xl border p-6 ${
-                highlighted
-                  ? 'border-accent/50 bg-accent/[0.04] shadow-gold'
-                  : 'border-border bg-surface'
-              }`}
+              aria-labelledby={`plan-${plan.code}`}
+              // Sous-grille : nom, phrase, prix, CTA et liste tombent sur la même ligne dans les trois colonnes.
+              // La formule recommandée se distingue par un filet d'accent de 2 px en haut (surface et elevated
+              // sont identiques en mode clair : un palier de fond y serait invisible).
+              className={`flex flex-col p-6 md:row-span-5 md:grid md:grid-rows-subgrid md:p-8 ${
+                i > 0 ? 'border-t border-border md:border-l md:border-t-0' : ''
+              } ${highlighted ? 'shadow-[inset_0_2px_0_rgb(var(--color-accent))]' : ''}`}
             >
-              {highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-0.5 text-[11px] font-bold text-[#03222b]">
-                  Le plus choisi
-                </span>
-              )}
-              <h2 className="font-display text-xl font-semibold text-ivory">{plan.name}</h2>
-              <p className="mt-1 min-h-[3rem] text-sm text-muted">{f?.tagline}</p>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="tabular text-3xl font-bold text-ivory">{fmtPrice(shown)}</span>
-                <span className="text-sm text-muted">
-                  {isFree ? '' : `XOF / ${unite}`}
-                </span>
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 id={`plan-${plan.code}`} className="font-display text-2xl font-medium text-ivory">
+                  {plan.name}
+                </h2>
+                {highlighted && <span className="text-xs font-medium text-accent-ink">Recommandé</span>}
               </div>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{f?.tagline}</p>
+
+              <div className="mt-8 border-t border-border pt-6">
+                <p className="flex items-baseline gap-2">
+                  <span className="tabular text-4xl font-medium text-ivory">{fmtPrice(shown)}</span>
+                  <span className="text-sm text-muted">{isFree ? 'FCFA' : `FCFA / ${unite}`}</span>
+                </p>
+                <p className="tabular mt-2 min-h-5 text-xs text-faint">
+                  {parMois != null ? `soit ${fmtPrice(parMois)} FCFA / mois` : isFree ? 'sans engagement' : ''}
+                </p>
+              </div>
+
               <Link
                 href={href}
-                className={`mt-5 inline-flex min-h-[44px] items-center justify-center rounded-full px-4 text-sm font-semibold transition-all active:scale-95 ${
+                className={`mt-6 inline-flex min-h-[44px] items-center justify-center rounded-chip px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                   highlighted
-                    ? 'bg-accent text-[#03222b] hover:bg-accent/90'
+                    ? 'bg-ivory text-bg hover:bg-ivory/90'
                     : 'border border-border text-ivory hover:border-accent/40'
                 }`}
               >
                 {f?.cta ?? 'Choisir'}
               </Link>
-              <ul className="mt-6 space-y-2 text-sm">
+
+              <ul className="mt-8 space-y-3 text-sm">
                 {f?.items.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-muted">
-                    <span className="mt-0.5 text-up" aria-hidden>✓</span>
+                  <li key={item} className="flex items-start gap-3 text-muted">
+                    <Check size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-faint" aria-hidden />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
-            </div>
+            </section>
           );
         })}
       </div>
 
       {/* Tableau comparatif */}
-      <div className="mt-16">
-        <h2 className="font-display text-2xl font-bold text-ivory">Comparatif des formules</h2>
-        <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm">
+      <section aria-labelledby="h-comparatif" className="mt-20">
+        <h2 id="h-comparatif" className="font-display text-2xl font-medium text-ivory">
+          Comparatif des formules
+        </h2>
+        <div className="relative mt-6 overflow-x-auto rounded-xl border border-border bg-surface">
+          <table className="w-full min-w-[560px] text-sm">
+            <caption className="sr-only">Fonctionnalités incluses dans chaque formule</caption>
             <thead>
               <tr className="border-b border-border bg-surface text-left">
-                <th className="px-4 py-3 font-medium text-muted">Fonctionnalité</th>
+                <th scope="col" className="sticky left-0 bg-surface px-4 py-3 font-medium text-muted">
+                  Fonctionnalité
+                </th>
                 {ordered.map((p) => (
-                  <th key={p.code} className="px-4 py-3 font-semibold text-ivory">{p.name}</th>
+                  <th key={p.code} scope="col" className="px-4 py-3 font-medium text-ivory">
+                    {p.name}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {[
-                ['Vue marché & actualités', ['✓', '✓', '✓']],
-                ['Signaux avancés', ['—', '✓', '✓']],
-                ['Historique étendu', ['—', '✓', '✓']],
-                ['Rapports', ['Restreint', 'Enrichi', 'Approfondi']],
-                ['Exports', ['—', 'PDF / Word', 'Enrichis']],
-                ['Comparatifs sectoriels', ['—', '✓', '✓']],
-                ['Analyse fondamentale complète', ['—', '—', '✓']],
-                ['Accompagnement / support', ['—', 'Standard', 'Prioritaire']],
-              ].map(([label, cells]) => (
-                <tr key={label as string} className="border-b border-border/50 last:border-0">
-                  <td className="px-4 py-3 text-muted">{label as string}</td>
-                  {(cells as string[]).map((c, i) => (
-                    <td key={i} className={`px-4 py-3 ${c === '✓' ? 'text-up' : c === '—' ? 'text-faint' : 'text-ivory'}`}>{c}</td>
+              {COMPARATIF.map((ligne) => (
+                <tr key={ligne.label} className="border-b border-border/60 last:border-0">
+                  <th scope="row" className="sticky left-0 bg-surface px-4 py-3 text-left font-normal text-muted">
+                    {ligne.label}
+                  </th>
+                  {ordered.map((p) => (
+                    <td key={p.code} className="px-4 py-3">
+                      <Cellule v={ligne.cells[ORDRE.indexOf(p.code)] ?? false} />
+                    </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
       {/* FAQ */}
-      <div className="mt-16">
-        <h2 className="font-display text-2xl font-bold text-ivory">Questions fréquentes</h2>
-        <div className="mt-4 space-y-3">
-          {FAQ.map((item) => (
-            <details key={item.q} className="rounded-xl border border-border bg-surface p-4">
-              <summary className="cursor-pointer text-sm font-medium text-ivory">{item.q}</summary>
-              <p className="mt-2 text-sm text-muted">{item.a}</p>
+      <section aria-labelledby="h-faq" className="mt-20 grid gap-6 md:grid-cols-[1fr_2fr] md:gap-12">
+        <h2 id="h-faq" className="font-display text-2xl font-medium text-ivory">
+          Questions fréquentes
+        </h2>
+        <div className="divide-y divide-border border-y border-border">
+          {faq.map((item) => (
+            <details key={item.q} className="group">
+              <summary className="flex min-h-[48px] cursor-pointer list-none items-center justify-between gap-4 py-3 text-sm font-medium text-ivory focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+                {item.q}
+                <ChevronDown
+                  size={16}
+                  strokeWidth={1.5}
+                  className="shrink-0 text-muted transition-transform group-open:rotate-180"
+                  aria-hidden
+                />
+              </summary>
+              <p className="pb-4 text-sm leading-relaxed text-muted">{item.a}</p>
             </details>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Bloc confiance */}
-      <div className="mt-12 rounded-xl border border-border bg-surface p-6 text-center">
-        <p className="text-sm text-muted">
-          Données réelles BRVM/UEMOA · Analyses dérivées des métriques (jamais inventées) ·
-          Résiliation possible à tout moment.
-        </p>
-      </div>
+      <p className="mt-12 text-sm text-muted">
+        Prix en francs CFA (FCFA). Résiliation possible à tout moment depuis votre espace compte.
+      </p>
     </div>
   );
 }
