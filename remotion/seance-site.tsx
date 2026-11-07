@@ -7,6 +7,7 @@ import './polices';
 import { FPS, THEMES, fr, sg, t, ton } from './seance-modeles/theme';
 import { Logo, Studio, Verre, Vignette, type Fiche } from './seance-modeles/elements';
 import { DUREE_SIGNATURE, Signature } from './seance-modeles/signature';
+import { Chiffre, Frappe, Mots, Sfx } from './seance-modeles/ecrits';
 
 /**
  * Vidéo de séance, version SITE — 1920×1080, habillage « verre ».
@@ -57,13 +58,14 @@ function Panneau({ debut = 0, style, children, rayon = 36 }: { debut?: number; s
   const p = t(f, debut, debut + 26);
   return (
     <div style={{ opacity: Math.min(1, p * 1.4), transform: `perspective(1800px) translateY(${(1 - p) * 70}px) rotateX(${(1 - p) * 18}deg) scale(${0.94 + 0.06 * p})`, ...style }}>
+      <Sfx nom="verre" a={debut + 8} volume={0.16} />
       <Verre rayon={rayon} reflet={t(f, debut + 18, debut + 52)} style={{ height: '100%', padding: '40px 44px' }}>{children}</Verre>
     </div>
   );
 }
 
-function Etiquette({ texte, couleur = th.accent }: { texte: string; couleur?: string }) {
-  return <div style={{ fontFamily: th.chiffre, fontSize: 24, letterSpacing: '.16em', textTransform: 'uppercase', color: couleur }}>{texte}</div>;
+function Etiquette({ texte, couleur = th.accent, debut = 0 }: { texte: string; couleur?: string; debut?: number }) {
+  return <div style={{ fontFamily: th.chiffre, fontSize: 24, letterSpacing: '.16em', textTransform: 'uppercase', color: couleur }}><Frappe texte={texte} debut={debut} /></div>;
 }
 
 /** Enveloppe de scène : fondu, sortie glissée et floutée, lente poussée de caméra. */
@@ -87,10 +89,12 @@ function Ouverture({ fiche }: PropsScene) {
   const acc = fiche.video.accroche;
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+      <Sfx nom="montee" a={0} volume={0.22} />
+      <Sfx nom="carillon" a={26} volume={0.14} />
       <Logo th={th} taille={200} prog={t(f, 0, 30)} />
       <Entre debut={14}><div style={{ fontFamily: th.chiffre, fontSize: 26, letterSpacing: '.3em', color: th.accent, marginTop: 52 }}>SÉANCE BRVM</div></Entre>
-      <Entre debut={20}><div style={{ fontFamily: th.titre, fontSize: 84, fontWeight: 600, marginTop: 12 }}>{fiche.date_fr}</div></Entre>
-      {acc && <Entre debut={30}><div style={{ fontSize: 44, fontWeight: 700, marginTop: 26, maxWidth: 1300, lineHeight: 1.2 }}>{acc}</div></Entre>}
+      <div style={{ fontFamily: th.titre, fontSize: 84, fontWeight: 600, marginTop: 12 }}><Mots texte={fiche.date_fr} debut={20} ecart={4} /></div>
+      {acc && <div style={{ fontSize: 44, fontWeight: 700, marginTop: 26, maxWidth: 1300, lineHeight: 1.2 }}><Mots texte={acc} debut={32} /></div>}
       <div style={{ display: 'flex', gap: 14, marginTop: 46 }}>
         {fiche.video.frise.map((code, i) => {
           const p = t(f, 40 + i * 3, 52 + i * 3);
@@ -154,7 +158,9 @@ function Indice({ fiche }: PropsScene) {
         <Entre debut={0}><Etiquette texte="BRVM Composite" /></Entre>
         {c ? (
           <>
-            <Entre debut={4}><div style={{ fontFamily: th.titre, fontSize: 190, lineHeight: 1, marginTop: 22 }}>{fr(c.valeur)}</div></Entre>
+            <Sfx nom="impact" a={6} volume={0.3} />
+            <div style={{ fontFamily: th.titre, fontSize: 190, lineHeight: 1, marginTop: 22 }}><Chiffre texte={fr(c.valeur)} debut={6} couleur={th.encre} /></div>
+            <Sfx nom="scintille" a={30} volume={0.12} />
             <Entre debut={10}>
               <div style={{ display: 'inline-flex', marginTop: 26, padding: '10px 22px', borderRadius: 14, fontFamily: th.chiffre, fontWeight: 700, fontSize: 44,
                 color: ton(th, c.variation_pct), background: c.variation_pct >= 0 ? 'rgba(74,222,128,.14)' : 'rgba(248,113,113,.14)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.18)' }}>
@@ -189,7 +195,7 @@ function Largeur({ fiche }: PropsScene) {
         <Entre debut={0}><Etiquette texte="Largeur du marché" /></Entre>
         <Entre debut={4}>
           <div style={{ fontFamily: th.titre, fontSize: 92, marginTop: 16 }}>
-            <span style={{ color: th.haut }}>{fiche.hausses} hausses</span>, <span style={{ color: th.bas }}>{fiche.baisses} baisses</span>.
+            <Mots texte={`${fiche.hausses} hausses,`} debut={4} style={{ color: th.haut }} /> <Mots texte={`${fiche.baisses} baisses.`} debut={12} style={{ color: th.bas }} />
           </div>
         </Entre>
         <Entre debut={8}><div style={{ fontSize: 32, color: th.doux, marginTop: 12 }}>sur {fiche.valeurs} valeurs cotées</div></Entre>
@@ -225,7 +231,8 @@ function Largeur({ fiche }: PropsScene) {
         {segs.map((s, k) => (
           <div key={s.lib} style={{ width: `${Math.max(16, (s.v / n) * 100)}%`, textAlign: k === 2 ? 'right' : 'left' }}>
             <Entre debut={24 + k * 14}>
-              <div style={{ fontFamily: th.titre, fontSize: 112, lineHeight: 1, color: s.couleur }}>{s.v}</div>
+              <Sfx nom="tic" a={24 + k * 14} volume={0.3} />
+              <div style={{ fontFamily: th.titre, fontSize: 112, lineHeight: 1 }}><Chiffre texte={String(s.v)} debut={24 + k * 14} couleur={s.couleur} reflet={false} /></div>
               <div style={{ fontFamily: th.chiffre, fontSize: 24, color: th.doux, marginTop: 8 }}>{s.lib} · {fr((s.v / n) * 100, 0)} %</div>
             </Entre>
           </div>
@@ -249,11 +256,12 @@ function Capitaux({ fiche }: PropsScene) {
   const prog = t(f, 40, 76);
   return (
     <AbsoluteFill>
+      <Sfx nom="impact" a={12} volume={0.26} />
       <div style={{ position: 'absolute', left: GAUCHE, top: 190 }}><Entre debut={0}><Etiquette texte="Activité de la séance" /></Entre></div>
       <div style={{ position: 'absolute', left: GAUCHE, right: GAUCHE, top: 250, display: 'flex', gap: 30 }}>
         {tuiles.map((x, i) => (
           <Panneau key={x.lib} debut={4 + i * 6} style={{ flex: i === 0 ? 1.3 : 1, height: 300 }}>
-            <div style={{ fontFamily: th.titre, fontSize: 104, lineHeight: 1, whiteSpace: 'nowrap' }}>{x.v}<span style={{ fontSize: 42 }}>{x.u}</span></div>
+            <div style={{ fontFamily: th.titre, fontSize: 104, lineHeight: 1, whiteSpace: 'nowrap' }}><Chiffre texte={x.v} debut={12 + i * 6} couleur={th.encre} /><span style={{ fontSize: 42 }}>{x.u}</span></div>
             <div style={{ fontSize: 30, color: th.doux, marginTop: 18 }}>{x.lib}</div>
           </Panneau>
         ))}
@@ -274,34 +282,59 @@ function Capitaux({ fiche }: PropsScene) {
   );
 }
 
-/* ── La valeur la plus échangée ───────────────────────────────────────── */
-function Lourde({ fiche }: PropsScene) {
+/* ── La valeur la plus échangée ─────────────────────────────────────────
+   DEUX TEMPS, parce que la phrase lue en a deux : la valeur dominante et sa
+   part, puis « vient ensuite … ». Sans le second temps, l'image restait figée
+   pendant la moitié de la phrase. Sans seconde valeur, la scène reste en un
+   temps. */
+function Lourde({ fiche, duree }: PropsScene) {
   const f = useCurrentFrame();
   const l = fiche.ligne_lourde;
+  const sec = fiche.video.seconde;
   const prog = t(f, 16, 60);
   const R = 170;
   const circ = 2 * Math.PI * R;
   const cours = fiche.video.cours_lourde;
+  const b0 = sec ? Math.max(84, Math.round(duree * 0.5)) : Infinity;
+  const pb = t(f, b0, b0 + 26);
   return (
     <AbsoluteFill>
-      <div style={{ position: 'absolute', left: GAUCHE, top: 300, width: 820 }}>
+      <div style={{ position: 'absolute', left: GAUCHE, top: 300 - pb * 90, width: 900 }}>
         <Entre debut={0}><Etiquette texte="La valeur la plus échangée" /></Entre>
         <Entre debut={4}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 30 }}>
             <Vignette th={th} fiche={fiche} code={l.code} taille={120} />
             <div>
-              <div style={{ fontFamily: th.titre, fontSize: 66, lineHeight: 1.05 }}>{nom(fiche, l.code)}</div>
+              <div style={{ fontFamily: th.titre, fontSize: 66, lineHeight: 1.05 }}><Mots texte={nom(fiche, l.code)} debut={8} /></div>
               <div style={{ fontFamily: th.chiffre, fontSize: 26, color: th.doux, marginTop: 8 }}>{l.code}</div>
             </div>
           </div>
         </Entre>
         <Entre debut={14}>
-          <div style={{ fontSize: 36, color: th.doux, marginTop: 48, lineHeight: 1.4 }}>
+          <div style={{ fontSize: 36, color: th.doux, marginTop: 40, lineHeight: 1.4 }}>
             {Math.abs(l.variation_pct) < 0.05 ? 'Cours quasi inchangé' : l.variation_pct > 0 ? 'Gagne ' : 'Cède '}
             {Math.abs(l.variation_pct) >= 0.05 && <b style={{ fontFamily: th.chiffre, color: ton(th, l.variation_pct) }}>{sg(l.variation_pct)} %</b>}
             {cours ? <> · clôture <b style={{ fontFamily: th.chiffre, color: th.encre }}>{fr(cours, 0)}</b> FCFA</> : null}
           </div>
         </Entre>
+        {sec && f >= b0 - 2 && (
+          <div style={{ marginTop: 56, opacity: pb, transform: `translateY(${(1 - pb) * 40}px)` }}>
+            <Sfx nom="verre" a={b0} volume={0.18} />
+            <Verre rayon={28} reflet={t(f, b0 + 14, b0 + 44)} style={{ padding: '26px 32px' }}>
+              <div style={{ fontFamily: th.chiffre, fontSize: 20, letterSpacing: '.16em', textTransform: 'uppercase', color: th.sourd }}><Frappe texte="Vient ensuite" debut={b0 + 4} /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 22, marginTop: 16 }}>
+                <Vignette th={th} fiche={fiche} code={sec.code} taille={72} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 34, fontWeight: 600 }}>{nom(fiche, sec.code)}</div>
+                  <div style={{ height: 14, borderRadius: 7, background: 'rgba(255,255,255,.07)', marginTop: 12, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: 7, width: `${Math.min(100, (sec.part_pct / Math.max(l.part_pct, 1)) * 100) * t(f, b0 + 10, b0 + 40)}%`, background: 'linear-gradient(90deg,#18B6A4,#7FF5E6)' }} />
+                  </div>
+                </div>
+                <div style={{ fontFamily: th.chiffre, fontSize: 40, color: th.accent }}><Chiffre texte={`${fr(sec.part_pct, 1)} %`} debut={b0 + 12} couleur={th.accent} reflet={false} /></div>
+              </div>
+            </Verre>
+          </div>
+        )}
       </div>
       <Panneau debut={8} rayon={260} style={{ position: 'absolute', left: 1180, top: 250, width: 520, height: 520 }}>
         <div style={{ position: 'relative', width: 432, height: 432, margin: '4px auto 0' }}>
@@ -309,10 +342,15 @@ function Lourde({ fiche }: PropsScene) {
             <circle cx={216} cy={216} r={R} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth={34} />
             <circle cx={216} cy={216} r={R} fill="none" stroke="#3FE0CB" strokeWidth={34} strokeLinecap="round"
               strokeDasharray={`${circ * (l.part_pct / 100) * prog} ${circ}`} transform="rotate(-90 216 216)" style={{ filter: 'drop-shadow(0 0 12px #18B6A4)' }} />
+            {sec && pb > 0 && (
+              <circle cx={216} cy={216} r={R} fill="none" stroke="#A7B6BD" strokeWidth={34} strokeLinecap="round" opacity={0.8}
+                strokeDasharray={`${circ * (sec.part_pct / 100) * pb} ${circ}`} transform={`rotate(${-90 + 360 * (l.part_pct / 100) + 4} 216 216)`} />
+            )}
           </svg>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: t(f, 30, 44) }}>
-            <div style={{ fontFamily: th.chiffre, fontSize: 84, color: th.accent }}>{fr(l.part_pct, 1)}<span style={{ fontSize: 40 }}> %</span></div>
-            <div style={{ fontSize: 24, color: th.doux, marginTop: 4 }}>du montant échangé</div>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <Sfx nom="impact" a={30} volume={0.26} />
+            <div style={{ fontFamily: th.chiffre, fontSize: 84 }}><Chiffre texte={fr(l.part_pct, 1)} debut={30} couleur={th.accent} /><span style={{ fontSize: 40, color: th.accent, opacity: t(f, 40, 50) }}> %</span></div>
+            <div style={{ fontSize: 24, color: th.doux, marginTop: 4, opacity: t(f, 40, 54) }}>du montant échangé</div>
           </div>
         </div>
       </Panneau>
@@ -336,7 +374,7 @@ function Palmares({ fiche }: PropsScene) {
           const p = t(f, s, s + 18);
           return (
             <div key={x.code} style={{ display: 'grid', gridTemplateColumns: '42px 96px 150px 1fr 150px', alignItems: 'center', height: 92, borderBottom: i < liste.length - 1 ? `1px solid ${th.bord}` : 'none', opacity: p, transform: `translateX(${(1 - p) * -36}px)` }}>
-              <span style={{ fontFamily: th.chiffre, fontSize: 22, color: th.sourd }}>{i + 1}</span>
+              <span style={{ fontFamily: th.chiffre, fontSize: 22, color: th.sourd }}>{i + 1}<Sfx nom="tic" a={s} volume={0.25} /></span>
               <Vignette th={th} fiche={fiche} code={x.code} taille={64} />
               <span style={{ fontFamily: th.chiffre, fontSize: 30, fontWeight: 700 }}>{x.code}</span>
               <span style={{ height: 16, marginRight: 22, position: 'relative' }}>
@@ -366,7 +404,7 @@ function Secteurs({ fiche }: PropsScene) {
     <AbsoluteFill>
       <div style={{ position: 'absolute', left: GAUCHE, top: 180 }}>
         <Entre debut={0}><Etiquette texte="Les secteurs" /></Entre>
-        <Entre debut={4}><div style={{ fontFamily: th.titre, fontSize: 64, marginTop: 12 }}>Où se sont concentrés les échanges</div></Entre>
+        <div style={{ fontFamily: th.titre, fontSize: 64, marginTop: 12 }}><Mots texte="Où se sont concentrés les échanges" debut={6} /></div>
       </div>
       <Panneau debut={8} style={{ position: 'absolute', left: GAUCHE, right: GAUCHE, top: 330, height: 560 }}>
         {liste.map((s, i) => {
@@ -374,6 +412,7 @@ function Secteurs({ fiche }: PropsScene) {
           const p = t(f, d, d + 30);
           return (
             <div key={s.secteur} style={{ display: 'grid', gridTemplateColumns: '560px 1fr 150px', alignItems: 'center', height: 80, opacity: t(f, d - 4, d + 10) }}>
+              <Sfx nom="tic" a={d} volume={0.22} />
               <div>
                 <div style={{ fontSize: 30, whiteSpace: 'nowrap' }}>{s.secteur}</div>
                 <div style={{ fontFamily: th.chiffre, fontSize: 18, color: th.sourd, marginTop: 2 }}>{s.hausses} en hausse sur {s.valeurs}</div>
@@ -398,7 +437,7 @@ function Fin({ fiche }: PropsScene) {
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
       <Logo th={th} taille={150} />
-      <Entre debut={8}><div style={{ fontFamily: th.titre, fontSize: 72, letterSpacing: '.04em', marginTop: 40 }}>Le détail de chaque valeur</div></Entre>
+      <div style={{ fontFamily: th.titre, fontSize: 72, letterSpacing: '.04em', marginTop: 40 }}><Mots texte="Le détail de chaque valeur" debut={8} /></div>
       <Entre debut={16}><div style={{ fontFamily: th.chiffre, fontSize: 48, color: th.accent, marginTop: 16, fontWeight: 600 }}>westbourse.com</div></Entre>
       <Entre debut={26}>
         <div style={{ fontSize: 24, color: th.sourd, marginTop: 56, lineHeight: 1.5 }}>
@@ -500,6 +539,9 @@ export default function SeanceSite({ fiche }: { fiche: Fiche | null }) {
       <EnTete fiche={fiche} />
       <Chapitres plan={plan} total={durationInFrames} />
       {plan.slice(1).map((p) => <Fleche key={p.d0} coupe={p.d0} />)}
+      {plan.slice(1).map((p) => <Sfx key={`s${p.d0}`} nom="fleche" a={p.d0 - 10} volume={0.2} />)}
+      {plan.slice(1).map((p) => <Sfx key={`w${p.d0}`} nom="souffle" a={p.d0 - 14} volume={0.18} />)}
+      <Sfx nom="carillon" a={durationInFrames - DUREE_SIGNATURE + 30} volume={0.26} />
       <Sequence from={durationInFrames - DUREE_SIGNATURE}>
         <Signature th={th} />
       </Sequence>

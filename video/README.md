@@ -78,6 +78,16 @@ la refuse, il l'écrit dans `paysage_raison` et la landing garde la verticale.
 `url_paysage` / `affiche_paysage` à `derniere.json`. Les réseaux sociaux, la
 Chaîne et Telegram reçoivent toujours la verticale.
 
+### Bruitages et effets d'écriture (modèle verre, version 16:9)
+
+`remotion/seance-modeles/ecrits.tsx` : étiquettes en machine à écrire, titres
+mot à mot, grands nombres dévoilés caractère par caractère (la valeur FINALE,
+jamais une valeur intermédiaire) avec un reflet. Les bruitages
+(`remotion/public/sfx/*.wav`, synthétisés par `remotion/sfx-genere.py`, donc
+libres de droits) passent sous la voix : souffle et flèche aux transitions,
+verre à la pose d'un panneau, tic par ligne, impact sous un grand nombre,
+carillon à la signature.
+
 ## Le verrou de publiabilité
 
 `genere.mjs` écrit `seance.json`, qui porte six contrôles :
