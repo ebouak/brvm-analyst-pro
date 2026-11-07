@@ -71,7 +71,11 @@ video/out/
 remotion/out/
 # Fichiers générés du showreel (captures, voix, bande-son : ~44 Mo) —
 # régénérés par video/captures-showreel.mjs et `npm run render:showreel`.
-remotion/public/
+remotion/public/*
+# Sauf les bruitages de la vidéo de séance : petits, synthétisés par
+# remotion/sfx-genere.py, et INDISPENSABLES au rendu en CI (un fichier
+# manquant ferait échouer tout le rendu animé).
+!remotion/public/sfx/
 
 # Artefacts locaux — ne jamais committer (générés, caches, previews)
 .vite/
