@@ -482,7 +482,7 @@ export default function ActionsTable({
                   </td>
 
                   {/* ── Valeur échangée ───────────────────────────────── */}
-                  <td className="px-4 py-3 text-right tabular text-muted">
+                  <td className="px-4 py-3 text-right tabular whitespace-nowrap text-muted">
                     {fmtFcfa(a.valeur_echangee)}
                   </td>
 
