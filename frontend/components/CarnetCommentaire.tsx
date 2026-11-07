@@ -72,7 +72,7 @@ export default function CarnetCommentaire({
   return (
     <section className={compact ? 'space-y-3' : 'mb-6 rounded-xl border border-border bg-surface p-5'}>
       {!compact && (
-        <h2 className="mb-4 text-sm font-semibold text-muted">Ce que dit la séance</h2>
+        <h2 className="mb-4 font-display text-lg text-ivory">Ce que dit la séance</h2>
       )}
 
       {/* La synthèse en tête : le lecteur qui ne lit qu'une ligne lit celle-ci. */}
