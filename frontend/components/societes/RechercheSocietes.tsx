@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import { Search, Sparkles } from 'lucide-react';
+import { Search } from 'lucide-react';
 import type { RaisonRepli, ReponseRecherche } from '@/lib/recherche/types';
 import { Sequenceur } from '@/lib/recherche/sequenceur';
 
@@ -75,8 +75,8 @@ export function RechercheSocietes({ retour = '/societes', className = 'mb-8' }: 
 
   return (
     <section aria-labelledby="titre-recherche" className={`${className} rounded-panel border border-border bg-surface p-5 md:p-6`}>
-      <h2 id="titre-recherche" className="flex items-center gap-2 font-display text-lg text-ivory">
-        <Sparkles size={18} aria-hidden className="text-accent" /> Décrivez la société que vous cherchez
+      <h2 id="titre-recherche" className="font-display text-lg text-ivory">
+        Décrivez la société que vous cherchez
       </h2>
       <form
         className="mt-3 flex flex-col gap-2 sm:flex-row"

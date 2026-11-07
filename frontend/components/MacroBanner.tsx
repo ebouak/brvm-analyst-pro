@@ -79,7 +79,7 @@ export async function MacroBanner() {
       {items.map((it) => (
         <span key={it.label} className="inline-flex items-baseline gap-1.5 text-xs" title={it.hint}>
           <span className="text-muted">{it.label}</span>
-          <span className="tabular font-bold text-ivory">{it.value}</span>
+          <span className="tabular font-medium text-ivory">{it.value}</span>
         </span>
       ))}
       <span className="ml-auto hidden text-[10px] text-faint sm:inline">sources : BCEAO · BCE</span>

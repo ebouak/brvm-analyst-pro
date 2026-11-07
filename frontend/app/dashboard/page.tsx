@@ -543,14 +543,14 @@ export default async function Dashboard() {
             href="/parametres/alertes"
             className="flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-down/30 bg-down/10 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
           >
-            <span className="animate-pulse" aria-hidden>●</span>
+            <span aria-hidden>●</span>
             <span className="font-semibold">
               {triggeredAlerts} alerte{triggeredAlerts > 1 ? 's' : ''} déclenchée{triggeredAlerts > 1 ? 's' : ''} ces {ALERTES_RECENTES_JOURS} derniers jours
             </span>
             {detailAlertes.map((d, i) => (
               <span key={`${d.code}-${i}`} className="flex min-w-0 flex-wrap items-center gap-x-1.5">
                 <span aria-hidden className="text-muted">·</span>
-                <span className="font-bold">{d.code}</span>
+                <span className="tabular font-medium">{d.code}</span>
                 <span className="min-w-0 break-words text-muted">{d.motif}</span>
                 {d.le && <span className="tabular whitespace-nowrap text-muted">· le {fmtDateFR(d.le).slice(0, 5)}</span>}
               </span>
