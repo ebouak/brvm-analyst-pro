@@ -61,7 +61,8 @@ export interface DividendeCourant extends DividendeLigne { ancien: boolean }
 
 /** Dernier dividende > 0. « ancien » : son exercice précède le dernier exercice publié de plus d'un an. */
 export function dividendeCourant(lignes: DividendeLigne[], dernierExercice: number | null): DividendeCourant | null {
-  const d = lignes.find((l) => l.montant > 0);
+  // Une ligne sans exercice n'est pas datable : on l'écarte plutôt que de la croire la plus récente.
+  const d = lignes.find((l) => l.montant > 0 && l.exercice != null);
   if (!d) return null;
   return { ...d, ancien: dernierExercice != null && d.exercice != null && dernierExercice - d.exercice > 1 };
 }

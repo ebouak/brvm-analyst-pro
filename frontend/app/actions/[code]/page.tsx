@@ -194,7 +194,7 @@ async function getData(code: string, fromDate?: string) {
         .eq('code', code)
         // Tri par exercice (toujours renseigné). Trier par ex_date mettait les
         // NULL en tête (PostgREST) et pouvait évincer les lignes datées du limit.
-        .order('exercice', { ascending: false })
+        .order('exercice', { ascending: false, nullsFirst: false })
         .limit(6),
       supabase
         .from('market_events')
