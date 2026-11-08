@@ -43,7 +43,11 @@ export interface FundamentalsPanelProps {
   sansAlertePerte?: boolean;
 }
 
-function pct(v: number | null): string { return v == null ? '—' : `${(v * 100).toFixed(1)} %`; }
+function pct(v: number | null): string {
+  if (v == null) return '—';
+  // Format français : virgule décimale, signe moins typographique, espace insécable avant %.
+  return `${(v * 100).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace('-', '−')} %`;
+}
 function num(v: number | null, d = 2): string { return v == null ? '—' : fmtNumber(v, d); }
 
 /**
