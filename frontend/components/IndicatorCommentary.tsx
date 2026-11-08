@@ -17,17 +17,21 @@ export const QUESTIONS_INDICATEURS = [
 ];
 
 /**
+ * `sansVerdict` : titre neutre, sans teinte ni libellé haussier/baissier (la fiche
+ * porte déjà UN verdict ailleurs ; ce bloc n'en donne que les points).
  * Encart de lecture automatique des indicateurs + boutons « Expliquer »
  * (questions prêtes à l'emploi, deep-link vers l'assistant pré-rempli).
  */
-export default function IndicatorCommentary({ reading, code, sansQuestions = false }: { reading: IndicatorReading; code: string; sansQuestions?: boolean }) {
+export default function IndicatorCommentary({ reading, code, sansQuestions = false, sansVerdict = false }: { reading: IndicatorReading; code: string; sansQuestions?: boolean; sansVerdict?: boolean }) {
   if (reading.points.length === 0) return null;
-  const t = TONE[reading.tone];
+  const t = sansVerdict
+    ? { label: 'Ce que montrent les indicateurs historiques', cls: 'text-muted border-border bg-surface' }
+    : TONE[reading.tone];
 
   return (
     <div className="space-y-3">
       <div className={`rounded-card border p-4 ${t.cls}`}>
-        <p className="text-[11px] mb-2 opacity-80">{t.label}</p>
+        <p className={`text-[11px] mb-2 ${sansVerdict ? '' : 'opacity-80'}`}>{t.label}</p>
         <ul className="space-y-1.5">
           {reading.points.map((p, i) => (
             <li key={i} className="flex items-start gap-2 text-xs text-muted leading-relaxed">
