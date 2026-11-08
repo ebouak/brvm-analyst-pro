@@ -175,12 +175,30 @@ def purge(conn, jours):
 # ─────────────────────────────────────────────────────────────
 # MATCHING
 # ─────────────────────────────────────────────────────────────
+def _motif_mot_entier(k: str):
+    r"""Motif d'un mot-clé en MOT ENTIER (insensible à la casse).
+
+    Sans bornes, « STAC » se trouvait dans « obstacle » et rattachait à SETAO CI
+    un article sur l'école au Mali. Les bornes sont des \w (lettres accentuées
+    comprises), pas des \b ASCII : « aérien » reste un mot.
+    """
+    return re.compile(r"(?<!\w)" + re.escape(k.strip()) + r"(?!\w)", re.IGNORECASE)
+
 def build_index(valeurs):
-    return {v["ticker"]: [re.compile(re.escape(k), re.IGNORECASE)
-                          for k in v["mots_cles"]] for v in valeurs}
+    return {v["ticker"]: [_motif_mot_entier(k) for k in v["mots_cles"] if k and k.strip()]
+            for v in valeurs}
 
 def match_tickers(text: str, idx: dict) -> list:
     return [t for t, ps in idx.items() if any(p.search(text) for p in ps)]
+
+def preuve_rattachement(texte: str, ticker: str, idx: dict) -> bool:
+    """Vrai si le texte nomme la société : un de ses mots-clés, en mot entier.
+
+    Un flux « Google News » dédié à une société renvoie aussi ce que le moteur
+    juge voisin (compagnies aériennes, autres pays) : l'appartenance au flux ne
+    prouve rien. Aucune similarité approximative ici, jamais.
+    """
+    return any(p.search(texte) for p in idx.get(ticker, []))
 
 def is_alerte(text: str, kws: list) -> bool:
     t = text.lower()
@@ -238,7 +256,7 @@ def fetch_rss(source: dict, idx: dict, alertes: list, global_kw: list, cfg: dict
 # ─────────────────────────────────────────────────────────────
 # COLLECTE 2 — GOOGLE NEWS PAR SOCIÉTÉ
 # ─────────────────────────────────────────────────────────────
-def fetch_google_news(soc: dict, alertes: list, cfg: dict) -> list:
+def fetch_google_news(soc: dict, idx: dict, alertes: list, cfg: dict) -> list:
     url  = soc.get("google_news")
     if not url: return []
     ticker = soc["ticker"]
@@ -253,6 +271,9 @@ def fetch_google_news(soc: dict, alertes: list, cfg: dict) -> list:
             url_e  = e.get("link","")
             resume = clean_html(e.get("summary","") or "")
             texte  = f"{titre} {resume}"
+            # Rattachement sur preuve : un article du flux qui ne nomme pas la
+            # société n'est pas conservé (il n'avait jamais de raison de l'être).
+            if not preuve_rattachement(texte, ticker, idx): continue
             results.append({
                 "hash": make_hash(titre, url_e), "titre": titre, "url": url_e,
                 "source": f"Google News – {nom}",
@@ -786,7 +807,7 @@ def run_pipeline(config: dict, conn: sqlite3.Connection):
         t = soc["ticker"]
         soc_gnews.append({**soc, "nom_display": val_map.get(t, {}).get("nom", t)})
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        futs = {pool.submit(fetch_google_news, s, alertes_kw, config): s for s in soc_gnews}
+        futs = {pool.submit(fetch_google_news, s, idx, alertes_kw, config): s for s in soc_gnews}
         for f in as_completed(futs):
             all_articles.extend(f.result())
     totals["google_news"] = sum(1 for a in all_articles if a.get("source_type")=="google_news")
