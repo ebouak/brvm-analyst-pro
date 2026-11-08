@@ -54,16 +54,19 @@ export default function FundamentalsCharts({
   points,
   revenuLabel = 'CA',
   isBank = false,
+  sansCaRn = false,
 }: {
   points: FundaChartPoint[];
   revenuLabel?: string;
   isBank?: boolean;
+  /** Masque « Évolution CA & résultat net » : le constructeur de graphique le remplace. */
+  sansCaRn?: boolean;
 }) {
   // Chronologique (les tableaux arrivent en ordre décroissant).
   const data = [...points].sort((a, b) => a.periode.localeCompare(b.periode));
   if (data.length < 2) return null; // une seule année = pas de tendance à tracer
 
-  const hasResultat = data.some((d) => d.revenu != null || d.net != null);
+  const hasResultat = !sansCaRn && data.some((d) => d.revenu != null || d.net != null);
   const hasParAction = data.some((d) => d.bpa != null || d.dividende != null);
   const hasBank = isBank && data.some((d) => d.credits != null || d.depots != null);
 

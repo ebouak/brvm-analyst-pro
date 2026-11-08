@@ -1,11 +1,17 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { fmtDateCourte } from '@/lib/format';
+import { fmtDateCourte, fmtFcfa } from '@/lib/format';
+import RatioCard from '@/components/fundamentals/RatioCard';
+import FluxComptable from '@/components/fiche/FluxComptable';
+import { fluxCompteResultat, type FluxCR } from '@/lib/fiche/flux';
+import { perAffichable, distributionAffichable, evolutionResultat } from '@/lib/fiche/affichage';
+import { plageSurFenetre } from '@/lib/fiche/plages';
+import { computeRatios } from '@/lib/fundamentals';
+import { formatXOF, formatPct, formatRatio, formatGrowth } from '@/lib/financials/formatters';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financials/valuation';
 import WeekRange52 from '@/components/financials/WeekRange52';
-import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ChartBuilder from '@/components/financials/ChartBuilder';
 import PasseportPopover from '@/components/provenance/PasseportPopover';
@@ -58,7 +64,7 @@ export default async function FinancialsPage({ params }: Props) {
   // affichées dans un encadré séparé — elles sont désormais intégrées AU BON
   // ENDROIT de la cascade du compte de résultat et du bilan (statementRows.ts).
 
-  const ratios = calculateFundamentals({
+  const ratiosBase = calculateFundamentals({
     coursActuel: data.latestDaily?.cours_jour ?? null,
     shares: data.instrument.shares,
     cours_bas_52s: data.latestDaily?.cours_bas_52s ?? null,
@@ -69,12 +75,54 @@ export default async function FinancialsPage({ params }: Props) {
     cashflow: latestCashflow,
   });
 
+  // Plage 52 semaines : fenêtre de 365 jours calendaires inclusive (source unique de la fiche).
+  const dateRef = data.serieCours[0]?.date_marche ?? null;
+  const plage52 = dateRef ? plageSurFenetre(data.serieCours, dateRef, 365, ratiosBase.cours_actuel) : null;
+  const ratios = { ...ratiosBase, cours_bas_52s: plage52?.bas ?? null, cours_haut_52s: plage52?.haut ?? null };
+
   const valuation = computeValuation(
     ratios,
     data.latestDaily?.cours_jour ?? null,
     latestCashflow?.flux_tresorerie_disponible ?? null,
     data.instrument.shares,
   );
+
+  // Dette financière : somme court + long terme du bilan si les deux existent, sinon la
+  // valeur extraite dans `fundamentals` pour le MÊME exercice. Fonds propres : idem.
+  const anneeDernierBilan = latestBalance?.periode ? Number(String(latestBalance.periode).slice(0, 4)) : null;
+  const { data: fondaRows } = anneeDernierBilan != null && Number.isFinite(anneeDernierBilan)
+    ? await createClient().from('fundamentals').select('year, debt, equity').eq('code', code).eq('year', anneeDernierBilan).limit(1)
+    : { data: null };
+  const fonda = ((fondaRows ?? []) as { year: number; debt: number | null; equity: number | null }[])[0] ?? null;
+  const detteBilan = latestBalance && latestBalance.dette_court_terme != null && latestBalance.dette_long_terme != null
+    ? latestBalance.dette_court_terme + latestBalance.dette_long_terme : null;
+  const gearing = computeRatios({
+    cours: null, shares: null, revenue: null, net_income: null,
+    equity: latestBalance?.total_capitaux_propres ?? fonda?.equity ?? null,
+    debt: detteBilan ?? fonda?.debt ?? null, dividende: null,
+  }).gearing;
+
+  // PER et distribution : une perte s'explique, elle ne devient pas « non disponible ».
+  const rnDernier = latestIncome?.resultat_net ?? null;
+  const per = perAffichable(ratios.per, ratios.bpa ?? (rnDernier != null && rnDernier <= 0 ? rnDernier : null));
+  const distribution = distributionAffichable(ratios.payout, rnDernier);
+  const evolutionRn = evolutionResultat(rnDernier, prevIncome?.resultat_net ?? null);
+  const alertePerte = rnDernier != null && rnDernier < 0 && latestIncome
+    ? `Exercice ${latestIncome.periode} en perte : résultat net de ${fmtFcfa(rnDernier)}${evolutionRn ? ` (${evolutionRn})` : ''}. PER et taux de distribution sont sans objet.`
+    : null;
+
+  // Flux du compte de résultat, un par exercice annuel ; null si un poste manque.
+  const fluxParExercice: Record<number, FluxCR | null> = {};
+  for (const st of data.incomeStatements) {
+    if (st.type_periode !== 'annuel') continue;
+    const y = Number(String(st.periode).slice(0, 4));
+    if (!Number.isFinite(y)) continue;
+    fluxParExercice[y] = fluxCompteResultat({
+      chiffreAffaires: st.revenu_total, resultatExploitation: st.resultat_exploitation,
+      resultatAvantImpot: st.resultat_avant_impots, resultatNet: st.resultat_net,
+    });
+  }
+  const exercicesFlux = Object.keys(fluxParExercice).map(Number);
 
   // Pourquoi la solvabilité manque, s'il manque : ce que disent les documents
   // consultés pour l'exercice du bilan affiché (indicateur_source, lecture publique).
@@ -136,6 +184,37 @@ export default async function FinancialsPage({ params }: Props) {
   const isBank = data.instrument.famille_comptable === 'banque';
   const revenuLabel = isBank ? 'PNB' : data.instrument.famille_comptable === 'assurance' ? 'Primes' : 'CA';
 
+  // Trois cartes de ratios ; chaque ligne porte sa formule.
+  type LigneRatio = React.ComponentProps<typeof RatioCard>;
+  const ligne = (label: string, formule: string, v: number | null, fmt: (x: number) => string, opts: { positive?: boolean | null; motif?: string | null } = {}): LigneRatio =>
+    v == null ? { label, formule, value: '', quality: 'missing', motif: opts.motif ?? null }
+      : { label, formule, value: fmt(v), quality: 'ok', positive: opts.positive ?? null };
+  const signe = (v: number | null) => (v == null ? null : v >= 0);
+  const caLong = revenuLabel === 'CA' ? "chiffre d'affaires" : revenuLabel;
+  const ratiosValorisation: LigneRatio[] = [
+    ligne('Capitalisation boursière', "cours × nombre d'actions", ratios.capitalisation, formatXOF),
+    ligne('BPA', "résultat net ÷ nombre d'actions", ratios.bpa, (x) => `${formatRatio(x)} FCFA`, { positive: signe(ratios.bpa) }),
+    ligne('PER', 'cours ÷ BPA', per.valeur, formatRatio, { motif: per.motif }),
+    ligne('P / valeur comptable', 'capitalisation ÷ capitaux propres', ratios.pb, formatRatio),
+    ligne(`P / ${revenuLabel}`, `capitalisation ÷ ${caLong}`, ratios.ps, formatRatio),
+    ligne('Rendement dividende', 'dividende par action ÷ cours', ratios.rendement_dividende, formatPct),
+  ];
+  const ratiosRentabilite: LigneRatio[] = [
+    ligne('ROE', 'résultat net ÷ capitaux propres', ratios.roe, formatPct, { positive: signe(ratios.roe) }),
+    ligne('Marge nette', `résultat net ÷ ${caLong}`, ratios.marge_nette, formatPct, { positive: signe(ratios.marge_nette) }),
+    ligne('Taux de distribution', 'dividendes versés ÷ résultat net', distribution.valeur, formatPct, { motif: distribution.motif }),
+  ];
+  const ratiosSolidite: LigneRatio[] = [
+    // La dette n'a pas de sens pour une banque ou un assureur : on ne l'affiche que pour les autres.
+    ...(data.instrument.famille_comptable === 'general'
+      ? [ligne('Dette / fonds propres', 'dette financière ÷ capitaux propres', gearing, formatRatio)]
+      : []),
+    ligne(`Croissance ${revenuLabel}`, 'exercice N ÷ exercice N−1', ratios.croissance_ca, formatGrowth, { positive: signe(ratios.croissance_ca) }),
+    evolutionRn
+      ? { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: evolutionRn, quality: 'ok', positive: null }
+      : { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: '', quality: 'missing', motif: null },
+  ];
+
   // Points du graphique : croisement compte de résultat + bilan par période.
   const balanceByPeriode = new Map(data.balanceSheets.map((b) => [b.periode, b]));
   const chartPoints: FundaChartPoint[] = data.incomeStatements.map((s) => {
@@ -196,6 +275,110 @@ export default async function FinancialsPage({ params }: Props) {
           )}
         </div>
 
+        {/* Alerte de perte : l'exercice affiché est déficitaire */}
+        {alertePerte && (
+          <div className="rounded-card border border-down/40 bg-down/5 p-4 text-sm text-down">
+            {alertePerte}
+          </div>
+        )}
+
+        {/* Financial statement tabs */}
+        <div id="etats">
+          <p className="text-xs text-muted mb-3 px-0.5">États financiers</p>
+          <div className="bg-surface border border-border rounded-xl p-5">
+            <FinancialTabs
+              incomeStatements={data.incomeStatements}
+              balanceSheets={data.balanceSheets}
+              cashFlowStatements={data.cashFlowStatements}
+              incomeInterim={data.incomeInterim}
+              balanceInterim={data.balanceInterim}
+              famille={data.instrument.famille_comptable}
+            />
+          </div>
+        </div>
+
+        {/* Vue en flux du compte de résultat (calculée sur quatre postes publiés) */}
+        {data.incomeStatements.length > 0 && (
+          <div>
+            <p className="text-xs text-muted mb-3 px-0.5">Vue en flux</p>
+            <FluxComptable parExercice={fluxParExercice} exercices={exercicesFlux} />
+          </div>
+        )}
+
+        {/* ── Analyse fondamentale (premium, flag `fondamentaux`) ──
+            Ratios, value trap, analyse bancaire et graphiques : réservés.
+            Un anonyme/gratuit voit un cadenas, pas les valeurs (vrai verrou). */}
+        {!gateFonda.allowed ? (
+          <SectionLock
+            required={lockLevel(gateFonda.required)}
+            titre="Analyse fondamentale"
+            pitch="Ratios (PER, ROE, marge…), détection de value trap, graphiques pluriannuels"
+          />
+        ) : (
+          <>
+            {/* Analyse bancaire UEMOA (banques uniquement) */}
+            {bankAnalysis && (
+              <div>
+                <p className="text-xs text-muted mb-3 px-0.5">Analyse bancaire UEMOA</p>
+                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} />
+              </div>
+            )}
+
+            {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
+            <ValueTrapBadge result={trap} />
+
+            {/* Ratios fondamentaux : trois cartes, formule en sous-libellé */}
+            <div>
+              <div className="flex items-center gap-2 mb-3 px-0.5">
+                <p className="text-xs text-muted">Ratios fondamentaux</p>
+                {periodeAffichee && (
+                  <PasseportPopover passeport={passeport} titre={`Exercice ${periodeAffichee}`} />
+                )}
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-card border border-border bg-surface p-4">
+                  <h3 className="mb-1 text-xs text-muted">Valorisation</h3>
+                  <div className="divide-y divide-border/40">
+                    {ratiosValorisation.map((r) => <RatioCard key={r.label} {...r} />)}
+                  </div>
+                </div>
+                <div className="rounded-card border border-border bg-surface p-4">
+                  <h3 className="mb-1 text-xs text-muted">Rentabilité</h3>
+                  <div className="divide-y divide-border/40">
+                    {ratiosRentabilite.map((r) => <RatioCard key={r.label} {...r} />)}
+                  </div>
+                </div>
+                <div className="rounded-card border border-border bg-surface p-4">
+                  <h3 className="mb-1 text-xs text-muted">Solidité et croissance</h3>
+                  <div className="divide-y divide-border/40">
+                    {ratiosSolidite.map((r) => <RatioCard key={r.label} {...r} />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analyse graphique pluriannuelle */}
+            {chartPoints.length >= 2 && (
+              <div>
+                <p className="text-xs text-muted mb-3 px-0.5">Analyse graphique</p>
+                <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} sansCaRn />
+              </div>
+            )}
+
+            {/* Constructeur de graphique — séries au choix, axes automatiques.
+                En-tête de section comme les blocs voisins : sans lui, le bloc se
+                fondait dans la page et passait inaperçu. */}
+            {data.incomeStatements.length >= 2 && (
+              <div>
+                <p className="text-xs text-muted mb-3 px-0.5">
+                  Graphique personnalisé
+                </p>
+                <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
+              </div>
+            )}
+          </>
+        )}
+
         {/* Panneau valorisation — premium (flag dcf) */}
         {!gateValo.allowed ? (
           <SectionLock required={lockLevel(gateValo.required)} titre="Valorisation (Graham, DCF, score)" pitch="Juste prix, marge de sécurité et score de valorisation." />
@@ -242,76 +425,6 @@ export default async function FinancialsPage({ params }: Props) {
             haut={ratios.cours_haut_52s}
             actuel={ratios.cours_actuel}
           />
-        </div>
-
-        {/* ── Analyse fondamentale (premium, flag `fondamentaux`) ──
-            Ratios, value trap, analyse bancaire et graphiques : réservés.
-            Un anonyme/gratuit voit un cadenas, pas les valeurs (vrai verrou). */}
-        {!gateFonda.allowed ? (
-          <SectionLock
-            required={lockLevel(gateFonda.required)}
-            titre="Analyse fondamentale"
-            pitch="Ratios (PER, ROE, marge…), détection de value trap, graphiques pluriannuels"
-          />
-        ) : (
-          <>
-            {/* Analyse bancaire UEMOA (banques uniquement) */}
-            {bankAnalysis && (
-              <div>
-                <p className="text-xs text-muted mb-3 px-0.5">Analyse bancaire UEMOA</p>
-                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} />
-              </div>
-            )}
-
-            {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
-            <ValueTrapBadge result={trap} />
-
-            {/* Ratios fondamentaux */}
-            <div>
-              <div className="flex items-center gap-2 mb-3 px-0.5">
-                <p className="text-xs text-muted">Ratios fondamentaux</p>
-                {periodeAffichee && (
-                  <PasseportPopover passeport={passeport} titre={`Exercice ${periodeAffichee}`} />
-                )}
-              </div>
-              <FundamentalAnalysis ratios={ratios} famille={data.instrument.famille_comptable} />
-            </div>
-
-            {/* Analyse graphique pluriannuelle */}
-            {chartPoints.length >= 2 && (
-              <div>
-                <p className="text-xs text-muted mb-3 px-0.5">Analyse graphique</p>
-                <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} />
-              </div>
-            )}
-
-            {/* Constructeur de graphique — séries au choix, axes automatiques.
-                En-tête de section comme les blocs voisins : sans lui, le bloc se
-                fondait dans la page et passait inaperçu. */}
-            {data.incomeStatements.length >= 2 && (
-              <div>
-                <p className="text-xs text-muted mb-3 px-0.5">
-                  Graphique personnalisé
-                </p>
-                <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Financial statement tabs */}
-        <div id="etats">
-          <p className="text-xs text-muted mb-3 px-0.5">États financiers</p>
-          <div className="bg-surface border border-border rounded-xl p-5">
-            <FinancialTabs
-              incomeStatements={data.incomeStatements}
-              balanceSheets={data.balanceSheets}
-              cashFlowStatements={data.cashFlowStatements}
-              incomeInterim={data.incomeInterim}
-              balanceInterim={data.balanceInterim}
-              famille={data.instrument.famille_comptable}
-            />
-          </div>
         </div>
 
         {/* Publications disponibles — fallback si données absentes */}
