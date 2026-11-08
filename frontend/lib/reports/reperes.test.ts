@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { reperesSurCourbe, echelleReguliere } from './reperes';
+import { reperesSurCourbe, echelleReguliere, etiquettesEspacees } from './reperes';
 
 const dates = ['2026-01-05', '2026-01-12', '2026-01-19', '2026-01-26'];
 
@@ -56,4 +56,17 @@ describe('echelleReguliere', () => {
     const e = echelleReguliere(0, 0);
     expect(e.max).toBeGreaterThan(e.min);
   });
+});
+
+describe('etiquettesEspacees', () => {
+  const dates = Array.from({ length: 100 }, (_, i) => `2020-01-${String(i + 1).padStart(3, '0')}`);
+  const rep = (i: number) => ({ date: dates[i]!, x: dates[i]!, type: 'resultats' as const, libelle: '' });
+  it('masque l\'étiquette d\'un repère trop proche du précédent étiqueté', () => {
+    const r = etiquettesEspacees([rep(10), rep(12), rep(40)], dates, 0.05);
+    expect(r.map((x) => x.etiquette)).toEqual([true, false, true]);
+  });
+  it('garde toutes les étiquettes quand les repères sont espacés', () => {
+    expect(etiquettesEspacees([rep(0), rep(30), rep(60)], dates, 0.05).every((x) => x.etiquette)).toBe(true);
+  });
+  it('liste vide', () => expect(etiquettesEspacees([], dates)).toEqual([]));
 });

@@ -34,3 +34,22 @@ export function echelleReguliere(minDonnees: number, maxDonnees: number, cibleGr
   for (let t = min; t <= max + pas / 1000; t += pas) ticks.push(Math.round(t / pas) * pas);
   return { min, max, pas, ticks };
 }
+
+export interface RepereEtiquete extends Repere { etiquette: boolean }
+
+/**
+ * Sur une longue période, les repères se touchent et leurs lettres se chevauchent.
+ * On garde tous les repères (trait discret) mais on n'écrit la lettre que si le repère
+ * est éloigné d'au moins `ecartMin` (fraction de la période) du dernier repère étiqueté.
+ */
+export function etiquettesEspacees(reperes: Repere[], datesCourbe: string[], ecartMin = 0.05): RepereEtiquete[] {
+  const dates = [...datesCourbe].sort();
+  const n = Math.max(dates.length - 1, 1);
+  let dernier = -Infinity;
+  return reperes.map((r) => {
+    const pos = Math.max(dates.indexOf(r.x), 0) / n;
+    const etiquette = pos - dernier >= ecartMin;
+    if (etiquette) dernier = pos;
+    return { ...r, etiquette };
+  });
+}

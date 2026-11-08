@@ -8,15 +8,14 @@ interface Props {
   resultatNet: number;
 }
 
-const VERT = 'rgb(var(--color-up))';
-const ROUGE = 'rgb(var(--color-down))';
-const GRIS = 'rgb(var(--color-muted))';
-
 interface Barre { libelle: string; debut: number; fin: number; total: boolean }
+
+const HAUTEUR_BARRES = 120;
 
 /**
  * Cascade exploitation → hors exploitation → avant impôt → impôt → net.
- * Barres flottantes en SVG pur (rendu serveur, lisible à l'impression).
+ * Barres en HTML/CSS (rendu serveur, lisible à l'impression) : les textes gardent
+ * leur taille réelle quelle que soit la largeur, contrairement à un SVG mis à l'échelle.
  * Rendue seulement si les cinq montants existent.
  */
 export default function CascadeResultat(p: Props) {
@@ -30,29 +29,33 @@ export default function CascadeResultat(p: Props) {
   const vals = barres.flatMap((b) => [b.debut, b.fin]);
   const max = Math.max(...vals, 0), min = Math.min(...vals, 0);
   const etendue = max - min || 1;
-  const W = 640, H = 220, haut = 28, bas = 48, zone = H - haut - bas;
-  const y = (v: number) => haut + ((max - v) / etendue) * zone;
-  const pas = W / barres.length, larg = pas * 0.5;
+  const pct = (v: number) => ((max - v) / etendue) * 100;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img"
-      aria-label={`Cascade du résultat : exploitation ${fmtFcfa(p.resultatExploitation)}, hors exploitation ${fmtFcfa(p.horsExploitation)}, avant impôt ${fmtFcfa(p.resultatAvantImpot)}, impôt ${fmtFcfa(p.impot)}, net ${fmtFcfa(p.resultatNet)}`}>
-      <line x1={0} x2={W} y1={y(0)} y2={y(0)} stroke="rgb(var(--color-faint))" strokeWidth={1} />
-      {barres.map((b, i) => {
-        const x = i * pas + (pas - larg) / 2;
-        const y1 = y(Math.max(b.debut, b.fin)), y2 = y(Math.min(b.debut, b.fin));
+    <div
+      role="img"
+      aria-label={`Cascade du résultat : exploitation ${fmtFcfa(p.resultatExploitation)}, hors exploitation ${fmtFcfa(p.horsExploitation)}, avant impôt ${fmtFcfa(p.resultatAvantImpot)}, impôt ${fmtFcfa(p.impot)}, net ${fmtFcfa(p.resultatNet)}`}
+      className="grid grid-cols-5 gap-x-2"
+    >
+      {barres.map((b) => {
         const delta = b.fin - b.debut;
-        const couleur = b.total ? GRIS : delta >= 0 ? VERT : ROUGE;
         const valeur = b.total ? b.fin : delta;
+        const haut = pct(Math.max(b.debut, b.fin)), bas = pct(Math.min(b.debut, b.fin));
+        const couleur = b.total ? 'bg-muted' : delta >= 0 ? 'bg-up' : 'bg-down';
         return (
-          <g key={b.libelle}>
-            <rect x={x} y={y1} width={larg} height={Math.max(y2 - y1, 1.5)} fill={couleur} rx={2} />
-            <text x={x + larg / 2} y={y1 - 6} textAnchor="middle" fontSize={12} fill="rgb(var(--color-ivory))">
+          <div key={b.libelle} className="flex min-w-0 flex-col">
+            <div className="relative" style={{ height: HAUTEUR_BARRES }} aria-hidden>
+              <div className="absolute inset-x-[20%] rounded-sm" style={{ top: `${haut}%`, height: `max(${bas - haut}%, 2px)` }}>
+                <div className={`h-full w-full rounded-sm ${couleur}`} />
+              </div>
+              <div className="absolute inset-x-0 border-t border-faint" style={{ top: `${pct(0)}%` }} />
+            </div>
+            <p className="tabular mt-1 text-center text-xs text-ivory">
               {valeur > 0 && !b.total ? '+' : ''}{fmtFcfa(valeur)}
-            </text>
-            <text x={x + larg / 2} y={H - 22} textAnchor="middle" fontSize={12} fill="rgb(var(--color-muted))">{b.libelle}</text>
-          </g>
+            </p>
+            <p className="mt-0.5 text-center text-xs leading-tight text-muted">{b.libelle}</p>
+          </div>
         );
       })}
-    </svg>
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import SousPageNav from '@/components/sousPage/SousPageNav';
 import { PriceChart, FinancialsBars } from '@/components/reports/RevueCharts';
 import CascadeResultat from '@/components/revue/CascadeResultat';
 import { fmtFcfa, fmtNumber, fmtDateCourte } from '@/lib/format';
+import { classeValeur } from '@/lib/fiche/prose';
 import { reperesSurCourbe } from '@/lib/reports/reperes';
 import { perAffichable, distributionAffichable, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, dividendeCourant } from '@/lib/fiche/affichage';
 
@@ -113,12 +114,12 @@ export default async function RevuePage({ params }: Props) {
           {([
             ['Cours', fcfa(d.price?.cours), d.price?.date ? `au ${fmtDateCourte(d.price.date)}` : ''],
             ['Capitalisation', md(d.price?.mcap), ''],
-            ['P/E', per.valeur != null ? `${nf1(per.valeur)}x` : 'non calculable', per.motif ?? (latest?.bpa ? `BPA ${bpaTxt(latest.bpa)}` : '')],
+            ['P/E', per.valeur != null ? `${nf1(per.valeur)}x` : (per.motif ?? 'non calculable'), per.valeur != null && latest?.bpa ? `BPA ${bpaTxt(latest.bpa)}` : ''],
             ['Rendement du dividende', rendementDiv != null ? `${nf2(rendementDiv)} %` : '—', divCourant ? `${fcfa(divCourant.montant)} · ex. ${divCourant.exercice}` : ''],
           ] as [string, string, string][]).map(([l, v, sub]) => (
             <div key={l} className={carte}>
               <p className="text-xs text-muted">{l}</p>
-              <p className="tabular mt-0.5 text-base font-semibold leading-tight text-ivory">{v}</p>
+              <p className={`${classeValeur(v)} mt-0.5 text-base font-semibold leading-tight text-ivory`}>{v}</p>
               {sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}
             </div>
           ))}
@@ -147,7 +148,7 @@ export default async function RevuePage({ params }: Props) {
               ] as [string, string, string][]).map(([l, v, sub]) => (
                 <div key={l} className={carte}>
                   <p className="text-xs text-muted">{l}</p>
-                  <p className="tabular mt-0.5 text-base font-semibold leading-tight text-ivory">{v}</p>
+                  <p className={`${classeValeur(v)} mt-0.5 text-base font-semibold leading-tight text-ivory`}>{v}</p>
                   {sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}
                 </div>
               ))}
@@ -188,14 +189,14 @@ export default async function RevuePage({ params }: Props) {
                     <td className="py-1 text-muted">{r.label}</td>
                     <td className="tabular text-right font-semibold text-ivory">{md(r.cur)}</td>
                     <td className="tabular text-right text-muted">{md(r.prv)}</td>
-                    <td className="tabular text-right text-ivory">{EN_MOTS.has(r.label) ? (evolutionResultat(r.cur, r.prv) ?? '—') : yoy(r.cur, r.prv)}</td>
+                    <td className={`${classeValeur(EN_MOTS.has(r.label) ? (evolutionResultat(r.cur, r.prv) ?? '—') : yoy(r.cur, r.prv))} text-right text-ivory`}>{EN_MOTS.has(r.label) ? (evolutionResultat(r.cur, r.prv) ?? '—') : yoy(r.cur, r.prv)}</td>
                   </tr>
                 ))}
                 <tr className="border-b border-border/40">
                   <td className="py-1 text-muted">BPA</td>
                   <td className="tabular text-right font-semibold text-ivory">{bpaTxt(latest?.bpa)}</td>
                   <td className="tabular text-right text-muted">{bpaTxt(prev?.bpa)}</td>
-                  <td className="tabular text-right text-ivory">{evolutionResultat(latest?.bpa ?? null, prev?.bpa ?? null) ?? '—'}</td>
+                  <td className={`${classeValeur(evolutionResultat(latest?.bpa ?? null, prev?.bpa ?? null) ?? '—')} text-right text-ivory`}>{evolutionResultat(latest?.bpa ?? null, prev?.bpa ?? null) ?? '—'}</td>
                 </tr>
               </tbody>
             </table>
@@ -294,7 +295,7 @@ export default async function RevuePage({ params }: Props) {
           <PriceChart data={d.priceSeries} reperes={reperes} />
           <p className="mb-3 mt-1 text-center text-xs text-muted">
             Cours de clôture sur la période disponible.
-            {reperes.length > 0 && ' R : publication des états financiers (trait plein) ; D : détachement du dividende (trait pointillé).'}
+            {reperes.length > 0 && ' Traits au pied du graphique : R, publication des états financiers (trait plein) ; D, détachement du dividende (trait pointillé).'}
             {' '}Source : brvm.org (via WESTBOURSE).
           </p>
           <p className="mb-2 text-sm leading-relaxed text-muted">
@@ -331,7 +332,7 @@ export default async function RevuePage({ params }: Props) {
               ))}
             </ul>
             <p className="mb-4 text-xs italic text-muted">
-              Repères qualitatifs dérivés de l&apos;historique réel : il ne s&apos;agit PAS d&apos;un consensus
+              Repères qualitatifs dérivés de l&apos;historique réel : il ne s&apos;agit pas d&apos;un consensus
               d&apos;analystes ni d&apos;une prévision chiffrée.
             </p>
           </div>

@@ -4,7 +4,7 @@ import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis,
   Tooltip, CartesianGrid, Cell, ReferenceLine,
 } from 'recharts';
-import { echelleReguliere, type Repere } from '@/lib/reports/reperes';
+import { echelleReguliere, etiquettesEspacees, type Repere } from '@/lib/reports/reperes';
 import { fmtFcfa, fmtNumber } from '@/lib/format';
 
 // Jetons du thème (suivent le mode sombre ou clair) ; l'impression les redéfinit
@@ -21,19 +21,28 @@ const mois = (d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('fr-FR
 /** Cours de clôture, avec les repères de publication de résultats et de détachement de dividende. */
 export function PriceChart({ data, reperes = [] }: { data: { date: string; cours: number }[]; reperes?: Repere[] }) {
   if (data.length < 2) return <p className="text-xs text-muted">Historique de cours indisponible.</p>;
+  // Repères discrets : trait fin et court au pied du graphique, d'une autre teinte que la courbe.
+  // Domaine explicite pour pouvoir ancrer le trait en bas ; lettres masquées si deux repères se touchent.
+  const cours = data.map((d) => d.cours);
+  const lo = Math.min(...cours), hi = Math.max(...cours);
+  const marge = (hi - lo) * 0.08 || 1;
+  const bas = Math.max(0, lo - marge), haut = hi + marge;
+  const hauteurRepere = (haut - bas) * 0.12;
+  const marques = etiquettesEspacees(reperes, data.map((d) => d.date));
   return (
     <ResponsiveContainer width="100%" height={240}>
       <LineChart data={data} margin={{ top: 16, right: 12, bottom: 4, left: 4 }}>
         <CartesianGrid stroke={GRILLE} vertical={false} />
         <XAxis dataKey="date" tick={{ fontSize: 11, fill: MUTED }} minTickGap={56} tickFormatter={mois} />
-        <YAxis tick={{ fontSize: 11, fill: MUTED }} width={52} tickFormatter={fr} domain={['auto', 'auto']} />
+        <YAxis tick={{ fontSize: 11, fill: MUTED }} width={52} tickFormatter={fr} domain={[bas, haut]} allowDataOverflow />
         <Tooltip formatter={(v: number) => [`${fr(v)} FCFA`, 'Cours']} labelFormatter={(d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
           labelStyle={{ fontSize: 12 }} contentStyle={FOND_INFOBULLE} />
-        {reperes.map((r, i) => (
-          <ReferenceLine key={`${r.type}-${r.date}-${i}`} x={r.x}
-            stroke={r.type === 'resultats' ? ACCENT : MUTED} strokeWidth={1.5}
-            strokeDasharray={r.type === 'resultats' ? undefined : '4 3'}
-            label={{ value: r.type === 'resultats' ? 'R' : 'D', position: 'top', fontSize: 11, fill: r.type === 'resultats' ? ACCENT : MUTED }} />
+        {marques.map((r, i) => (
+          <ReferenceLine key={`${r.type}-${r.date}-${i}`}
+            segment={[{ x: r.x, y: bas }, { x: r.x, y: bas + hauteurRepere }]}
+            stroke={FAINT} strokeWidth={1}
+            strokeDasharray={r.type === 'resultats' ? undefined : '2 2'}
+            label={r.etiquette ? { value: r.type === 'resultats' ? 'R' : 'D', position: 'top', fontSize: 11, fill: MUTED } : undefined} />
         ))}
         <Line type="monotone" dataKey="cours" stroke={ACCENT} strokeWidth={1.8} dot={false} />
       </LineChart>
