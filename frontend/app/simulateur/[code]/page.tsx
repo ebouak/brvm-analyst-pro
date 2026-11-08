@@ -61,8 +61,7 @@ export default async function SimulatorCodePage({ params }: PageProps) {
     <PublicShell>
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
-          <p className="text-[11px] text-accent/70 mb-1">Simulateur</p>
-          <h1 className="font-display text-2xl md:text-3xl text-white mb-2">
+          <h1 className="font-display text-2xl md:text-3xl text-ivory mb-2">
             Et si vous aviez investi dans {instr.designation}&nbsp;?
           </h1>
         </div>

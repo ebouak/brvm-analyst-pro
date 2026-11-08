@@ -13,8 +13,8 @@ export function fmtFcfa(n: number | null | undefined): string {
   if (Math.abs(n) >= 1e12) return fmtNumber(Math.round(n / 1e9), 0) + ' Md';
   if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2).replace('.', ',') + ' Md';
   if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1).replace('.', ',') + ' M';
-  if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(0) + ' k';
-  return fmtNumber(n);
+  // Sous le million : montant entier, jamais arrondi au millier (1 500 ≠ « 2 k »).
+  return fmtNumber(Math.round(n), 0);
 }
 
 /** "2026-05-26" → "26/05/2026" */
@@ -24,6 +24,15 @@ export function fmtDateFR(iso: string | null | undefined): string {
   if (isNaN(d.getTime())) return iso;
   const soloDate = /^\d{4}-\d{2}-\d{2}$/.test(iso);
   return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', ...(soloDate ? { timeZone: 'UTC' } : {}) });
+}
+
+/** Date courte « 6 nov. 2026 » (DESIGN.md) : listes, en-têtes, tableaux. Une date ISO seule (AAAA-MM-JJ) est lue en UTC. */
+export function fmtDateCourte(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const soloDate = /^\d{4}-\d{2}-\d{2}$/.test(iso);
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', ...(soloDate ? { timeZone: 'UTC' } : {}) });
 }
 
 /** "2026-05-26" + "16:30" → "26/05/2026 16:30" */

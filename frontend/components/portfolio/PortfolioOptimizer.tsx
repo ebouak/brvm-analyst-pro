@@ -41,7 +41,7 @@ export default function PortfolioOptimizer({ userId }: { userId: string }) {
       </div>
 
       {/* Allocation actuelle vs cibles */}
-      <div className="bg-surface border border-border rounded-xl p-4 overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl p-4 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <h3 className="text-sm font-semibold text-white mb-3">Allocation & rééquilibrage</h3>
         <table className="w-full text-sm">
           <thead className="text-xs text-muted border-b border-border">
@@ -112,7 +112,7 @@ function RebalancePlan({
   ];
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 overflow-x-auto">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl p-4 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
       <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
         <h3 className="text-sm font-semibold text-white">Plan de rééquilibrage</h3>
         <div className="flex gap-1 bg-bg/40 rounded-lg p-0.5">

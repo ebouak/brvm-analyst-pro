@@ -12,7 +12,7 @@ export function BacktestTradesMiniTable({ trades }: { trades: BacktestTrade[] })
   return (
     <section className="rounded-xl border border-gray-200 bg-[#ffffff] p-4 sm:p-5">
       <p className="mb-3 text-xs font-semibold text-gray-400">Détail des trades</p>
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-xs text-gray-400">

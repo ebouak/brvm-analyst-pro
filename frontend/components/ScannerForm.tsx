@@ -15,19 +15,19 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
 
         {/* Signal */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">Signal</label>
-          <select name="signal" defaultValue={criteria.signal ?? ''} className="select-field">
+          <label htmlFor="sc-signal" className="text-xs text-muted">Signal</label>
+          <select id="sc-signal" name="signal" defaultValue={criteria.signal ?? ''} className="select-field">
             <option value="">Tous</option>
-            <option value="BUY">BUY</option>
-            <option value="HOLD">HOLD</option>
-            <option value="SELL">SELL</option>
+            <option value="BUY">Achat</option>
+            <option value="HOLD">Attente</option>
+            <option value="SELL">Vente</option>
           </select>
         </div>
 
         {/* RSI */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">RSI</label>
-          <select name="rsiBucket" defaultValue={criteria.rsiBucket ?? ''} className="select-field">
+          <label htmlFor="sc-rsiBucket" className="text-xs text-muted">RSI</label>
+          <select id="sc-rsiBucket" name="rsiBucket" defaultValue={criteria.rsiBucket ?? ''} className="select-field">
             <option value="">Tous</option>
             <option value="oversold">{'< 30 (survendu)'}</option>
             <option value="low">30 – 50</option>
@@ -38,8 +38,8 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
 
         {/* Tendance MA */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">Tendance MA</label>
-          <select name="maTrend" defaultValue={criteria.maTrend ?? ''} className="select-field">
+          <label htmlFor="sc-maTrend" className="text-xs text-muted">Tendance MA</label>
+          <select id="sc-maTrend" name="maTrend" defaultValue={criteria.maTrend ?? ''} className="select-field">
             <option value="">Aucune</option>
             <option value="above_ma20">Prix {'>'} MA20</option>
             <option value="above_ma50">Prix {'>'} MA50</option>
@@ -50,8 +50,8 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
 
         {/* MACD */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">MACD</label>
-          <select name="macdDir" defaultValue={criteria.macdDir ?? ''} className="select-field">
+          <label htmlFor="sc-macdDir" className="text-xs text-muted">MACD</label>
+          <select id="sc-macdDir" name="macdDir" defaultValue={criteria.macdDir ?? ''} className="select-field">
             <option value="">Tous</option>
             <option value="bullish">Bullish (MACD {'>'} Signal)</option>
             <option value="bearish">Bearish (MACD {'<'} Signal)</option>
@@ -60,8 +60,8 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
 
         {/* Volume */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">Volume</label>
-          <select name="volumeRatio" defaultValue={criteria.volumeRatio != null ? String(criteria.volumeRatio) : ''} className="select-field">
+          <label htmlFor="sc-volumeRatio" className="text-xs text-muted">Volume</label>
+          <select id="sc-volumeRatio" name="volumeRatio" defaultValue={criteria.volumeRatio != null ? String(criteria.volumeRatio) : ''} className="select-field">
             <option value="">Tous</option>
             <option value="2">{'> 2× moyenne 20j'}</option>
             <option value="5">{'> 5× moyenne 20j'}</option>
@@ -70,8 +70,8 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
 
         {/* Variation */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">Variation jour</label>
-          <select name="variationDir" defaultValue={criteria.variationDir ?? ''} className="select-field">
+          <label htmlFor="sc-variationDir" className="text-xs text-muted">Variation jour</label>
+          <select id="sc-variationDir" name="variationDir" defaultValue={criteria.variationDir ?? ''} className="select-field">
             <option value="">Tous</option>
             <option value="up_2">Hausse {'>'} 2%</option>
             <option value="up_5">Hausse {'>'} 5%</option>
@@ -82,8 +82,8 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
 
         {/* Secteur */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted">Secteur</label>
-          <select name="secteur" defaultValue={criteria.secteur ?? ''} className="select-field">
+          <label htmlFor="sc-secteur" className="text-xs text-muted">Secteur</label>
+          <select id="sc-secteur" name="secteur" defaultValue={criteria.secteur ?? ''} className="select-field">
             <option value="">Tous les secteurs</option>
             {secteurs.map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -98,7 +98,7 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
           type="submit"
           className="px-5 py-2 rounded-lg bg-up text-black font-semibold text-sm hover:bg-up/80 transition-colors"
         >
-          Lancer le scan →
+          Lancer le scan
         </button>
         <Link
           href="/scanner"

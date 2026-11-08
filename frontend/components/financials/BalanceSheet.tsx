@@ -27,7 +27,7 @@ export default function BalanceSheet({ statements, famille }: Props) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent" tabIndex={0} role="region" aria-label="Tableau défilant : faites défiler horizontalement avec les flèches du clavier">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border">

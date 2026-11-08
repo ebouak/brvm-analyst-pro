@@ -130,7 +130,7 @@ export default function ObligationsTable({
       </div>
 
       {/* Tableau */}
-      <div className="bg-surface border border-border rounded-xl overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm min-w-[640px]">
           <thead className="text-xs text-muted border-b border-border">
             <tr>

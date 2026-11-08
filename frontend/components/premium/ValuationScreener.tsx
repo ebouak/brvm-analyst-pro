@@ -45,7 +45,7 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
     <th className="text-right py-2 px-3">
       <button type="button" onClick={() => setSortKey(k)} aria-label={`Trier par ${label}`}
         className={`hover:text-white transition ${sortKey === k ? 'text-up' : ''}`}>
-        {label}{sortKey === k ? ' ▾' : ''}
+        {label}
       </button>
     </th>
   );
@@ -60,7 +60,7 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
         <span className="text-xs text-faint">{rows.length} sociétés</span>
       </div>
 
-      <div className="bg-surface border border-border rounded-xl overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead className="text-xs text-muted border-b border-border">
             <tr>
@@ -100,7 +100,7 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
                     })()}
                   </td>
                   <td className="py-2 px-3 text-right">
-                    <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border ${s.cls}`}>{s.txt}</span>
+                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border ${s.cls}`}>{s.txt}</span>
                   </td>
                 </tr>
               );
@@ -108,7 +108,7 @@ export default function ValuationScreener({ data, scoring = {} }: { data: Compan
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-faint">
+      <p className="text-xs text-faint">
         Juste-valeur par multiples sectoriels (P/E, P/B médians) et DDM pour les valeurs à dividende. P/E, P/B et potentiel
         nécessitent le nombre d’actions (disponible pour une partie des sociétés). Outil informatif.
       </p>

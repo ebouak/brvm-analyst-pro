@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowDown, ArrowRight, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import type { ScanRow } from '@/lib/scanner';
@@ -33,15 +34,15 @@ interface Props {
 function signalBadge(signal: ScanRow['signal']) {
   if (signal === 'BUY')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-up/15 text-up">BUY</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-up/15 text-up">Achat</span>
     );
   if (signal === 'SELL')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-down/15 text-down">SELL</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-down/15 text-down">Vente</span>
     );
   if (signal === 'HOLD')
     return (
-      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-white/10 text-muted">HOLD</span>
+      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-white/10 text-muted">Attente</span>
     );
   return <span className="text-muted">—</span>;
 }
@@ -57,9 +58,9 @@ function rsiBadge(rsi: number | null) {
 function macdLabel(macd: number | null, macdSignal: number | null) {
   if (macd == null || macdSignal == null) return <span className="text-muted">—</span>;
   if (macd > macdSignal)
-    return <span className="text-up text-xs">↑ Bullish</span>;
+    return <span className="inline-flex items-center gap-1 text-up text-xs"><ArrowUp className="h-3 w-3" aria-hidden />Haussier</span>;
   if (macd < macdSignal)
-    return <span className="text-down text-xs">↓ Bearish</span>;
+    return <span className="inline-flex items-center gap-1 text-down text-xs"><ArrowDown className="h-3 w-3" aria-hidden />Baissier</span>;
   return <span className="text-muted text-xs">Neutre</span>;
 }
 
@@ -86,8 +87,8 @@ function volumeRatioLabel(volume: number | null, avg: number | null) {
 }
 
 function SortIcon({ active, asc }: { active: boolean; asc: boolean }) {
-  if (!active) return <span className="text-border ml-1">↕</span>;
-  return <span className="text-up ml-1">{asc ? '↑' : '↓'}</span>;
+  if (!active) return <ArrowUpDown className="ml-1 inline h-3 w-3 text-faint" aria-hidden />;
+  return asc ? <ArrowUp className="ml-1 inline h-3 w-3 text-accent-ink" aria-hidden /> : <ArrowDown className="ml-1 inline h-3 w-3 text-accent-ink" aria-hidden />;
 }
 
 export default function ScannerResults({ rows }: Props) {
@@ -132,7 +133,7 @@ export default function ScannerResults({ rows }: Props) {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm text-muted">
-          <span className="text-white font-semibold">{rows.length}</span> action{rows.length > 1 ? 's' : ''} trouvée{rows.length > 1 ? 's' : ''}
+          <span className="text-ivory font-medium">{rows.length}</span> action{rows.length > 1 ? 's' : ''} trouvée{rows.length > 1 ? 's' : ''}
         </p>
         <ExportButton<ScanRow>
           filename={`scanner_${new Date().toISOString().slice(0, 10)}.csv`}
@@ -140,21 +141,21 @@ export default function ScannerResults({ rows }: Props) {
           columns={SCANNER_CSV_COLUMNS}
         />
       </div>
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead className="bg-black/20 border-b border-border">
             <tr>
               <Th k="code" label="Code" />
               <Th k="designation" label="Désignation" />
               <Th k="secteur" label="Secteur" />
-              <Th k="cours_jour" label="Cours" />
-              <Th k="variation_pct" label="Var %" />
+              <Th k="cours_jour" label="Cours (FCFA)" />
+              <Th k="variation_pct" label="Variation (%)" />
               <Th k="rsi" label="RSI" />
               <th className="px-3 py-2 text-left text-xs text-muted whitespace-nowrap">MACD</th>
               <th className="px-3 py-2 text-left text-xs text-muted whitespace-nowrap">Tendance MA</th>
-              <Th k="volume" label="Vol×moy" />
+              <Th k="volume" label="Volume (× moy. 20 j)" />
               <Th k="score" label="Signal" />
-              <th className="px-3 py-2 text-left text-xs text-muted">Score</th>
+              <th className="px-3 py-2 text-left text-xs text-muted">Score (/100)</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -163,7 +164,7 @@ export default function ScannerResults({ rows }: Props) {
               const varPct = row.variation_pct;
               return (
                 <tr key={row.code} className="hover:bg-white/5 transition-colors">
-                  <td className="px-3 py-2.5 font-mono font-semibold text-white">{row.code}</td>
+                  <td className="px-3 py-2.5 font-mono font-medium text-ivory">{row.code}</td>
                   <td className="px-3 py-2.5 text-muted max-w-[180px] truncate" title={row.designation ?? undefined}>
                     {row.designation ?? '—'}
                   </td>
@@ -188,9 +189,9 @@ export default function ScannerResults({ rows }: Props) {
                   <td className="px-3 py-2.5">
                     <Link
                       href={`/actions/${row.code}`}
-                      className="text-xs text-up hover:underline whitespace-nowrap"
+                      className="inline-flex items-center gap-1 text-xs text-accent-ink hover:underline whitespace-nowrap"
                     >
-                      → Fiche
+                      Fiche<ArrowRight className="h-3 w-3" aria-hidden />
                     </Link>
                   </td>
                 </tr>

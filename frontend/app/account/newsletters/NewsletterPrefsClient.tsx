@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ArrowLeft, Check, X } from 'lucide-react';
 
 interface NewsletterPrefs {
   weekly_commodity: boolean;
@@ -86,18 +87,15 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       {/* Header */}
       <div>
-        <p className="text-xs font-medium text-[#56d7fd]/70 mb-2">
-          Compte
-        </p>
-        <h1 className="font-display text-2xl md:text-3xl text-[#FCFCFC] tracking-tight">
+        <h1 className="font-display text-2xl md:text-3xl text-ivory tracking-tight">
           Préférences newsletter
         </h1>
-        <p className="mt-2 text-sm text-[#8a9aa0]">
+        <p className="mt-2 text-sm text-muted">
           Choisissez les contenus que vous souhaitez recevoir par email.
         </p>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-[#56d7fd]/30 via-[#56d7fd]/10 to-transparent" />
+      <div className="h-px bg-border" />
 
       {/* Topic cards */}
       <div className="space-y-3">
@@ -109,11 +107,11 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
               type="button"
               onClick={() => toggle(topic.key)}
               className={[
-                'w-full text-left rounded-xl border p-5 transition-all duration-200',
+                'w-full text-left rounded-xl border p-5 transition-colors duration-200',
                 'flex items-start gap-4',
                 checked
-                  ? 'border-[#56d7fd]/40 bg-[#0a1417] shadow-[0_0_0_1px_rgba(86,215,253,0.08)]'
-                  : 'border-[#1a2a30] bg-[#0a1417] hover:border-[#1a2a30]/80',
+                  ? 'border-accent/40 bg-surface'
+                  : 'border-border bg-surface hover:border-border-strong',
               ].join(' ')}
             >
               {/* Toggle switch */}
@@ -121,14 +119,14 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
                 <div
                   className={[
                     'relative w-10 h-6 rounded-full transition-colors duration-200',
-                    checked ? 'bg-[#56d7fd]' : 'bg-[#1a2a30]',
+                    checked ? 'bg-accent' : 'bg-border',
                   ].join(' ')}
                   aria-checked={checked}
                   role="switch"
                 >
                   <div
                     className={[
-                      'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200',
+                      'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-ivory transition-transform duration-200',
                       checked ? 'translate-x-4' : 'translate-x-0',
                     ].join(' ')}
                   />
@@ -141,23 +139,23 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
                   <span
                     className={[
                       'text-sm font-semibold',
-                      checked ? 'text-[#FCFCFC]' : 'text-[#c8d8dc]',
+                      checked ? 'text-ivory' : 'text-ivory',
                     ].join(' ')}
                   >
                     {topic.title}
                   </span>
                   <span
                     className={[
-                      'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wide',
+                      'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium',
                       checked
-                        ? 'border-[#56d7fd]/30 bg-[#56d7fd]/10 text-[#56d7fd]'
-                        : 'border-[#1a2a30] bg-[#030303] text-[#5a6e73]',
+                        ? 'border-accent/30 bg-accent/10 text-accent'
+                        : 'border-border bg-bg text-faint',
                     ].join(' ')}
                   >
                     {topic.badge}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-[#8a9aa0] leading-relaxed">
+                <p className="mt-1 text-sm text-muted leading-relaxed">
                   {topic.description}
                 </p>
               </div>
@@ -173,9 +171,9 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
           onClick={handleSave}
           disabled={saving}
           className={[
-            'inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200',
-            'bg-[#56d7fd] text-[#030303] shadow-[0_0_12px_rgba(86,215,253,0.25)]',
-            'hover:bg-[#7de3ff] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
+            'inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors duration-200',
+            'bg-accent text-bg',
+            'hover:bg-accent-dim active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
           ].join(' ')}
         >
           {saving ? (
@@ -196,11 +194,11 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
             className={[
               'flex items-center gap-2 rounded-lg border px-4 py-2 text-sm',
               toast.type === 'success'
-                ? 'border-[#3fe18b]/30 bg-[#3fe18b]/10 text-[#3fe18b]'
-                : 'border-[#ff6b6b]/30 bg-[#ff6b6b]/10 text-[#ff6b6b]',
+                ? 'border-up/30 bg-up/10 text-up'
+                : 'border-down/30 bg-down/10 text-down',
             ].join(' ')}
           >
-            <span>{toast.type === 'success' ? '✓' : '✕'}</span>
+            {toast.type === 'success' ? <Check size={14} aria-hidden /> : <X size={14} aria-hidden />}
             {toast.message}
           </div>
         )}
@@ -210,9 +208,9 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
       <div className="pt-2">
         <Link
           href="/account/plan"
-          className="text-sm text-[#5a6e73] hover:text-[#56d7fd] transition-colors duration-150"
+          className="text-sm text-faint hover:text-accent transition-colors duration-150"
         >
-          ← Retour à mon abonnement
+          <ArrowLeft size={14} aria-hidden className="mr-1 inline" />Retour à mon abonnement
         </Link>
       </div>
     </div>

@@ -1,4 +1,5 @@
 // frontend/components/landing/RatingSpotlight.tsx
+import { libelleSignal } from '@/lib/signalLabel';
 import Link from 'next/link';
 import RatingBadge from '@/components/RatingBadge';
 import type { SignalDaily } from '@/lib/types';
@@ -65,7 +66,7 @@ export function RatingSpotlight({ signal, nbActions }: Props) {
           </div>
           <SubscoreBars signal={signal} />
           <p className="mt-4 text-[10px] text-faint">
-            {signal.signal} · confiance {signal.confiance != null ? `${(signal.confiance * 100).toFixed(0)}%` : '—'} · exemple réel de la séance en cours
+            {libelleSignal(signal.signal)} · confiance {signal.confiance != null ? `${(signal.confiance * 100).toFixed(0)}%` : '—'} · exemple réel de la séance en cours
           </p>
         </div>
       </div>

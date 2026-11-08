@@ -93,7 +93,7 @@ export function LiquidityCard({
           Coût d&apos;un achat + une revente selon les barèmes SGI en base (courtage{' '}
           {courtageMin!.toFixed(2)}–{courtageMax!.toFixed(2)} % + 0,30 % BRVM/DC-BR par ordre) :
           votre position doit gagner au moins {arMax.toFixed(1)} % pour couvrir les frais au barème
-          le plus élevé. <a href="/comparateur-sgi" className="text-accent hover:underline">Comparer les SGI →</a>
+          le plus élevé. <a href="/comparateur-sgi" className="text-accent underline underline-offset-2">Comparer les SGI</a>
         </p>
       )}
 

@@ -42,7 +42,7 @@ function Positions({ donnees, positions }: { donnees: { dateMarche: string; lign
   const lignes = lignesLiquiditePositions(positions, donnees.lignes);
   return (
     <>
-      <div className="-mx-1 overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="-mx-1 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table aria-labelledby="bloc-liquidite" className="w-full min-w-[30rem] text-sm">
           <thead className="text-[11px] text-faint">
             <tr className="border-b border-border">

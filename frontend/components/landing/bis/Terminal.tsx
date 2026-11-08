@@ -1,3 +1,4 @@
+import { libelleSignal } from '@/lib/signalLabel';
 import Link from 'next/link';
 import { NB_SOCIETES_COTEES } from '@/lib/universe';
 import RatingBadge from '@/components/RatingBadge';
@@ -104,7 +105,7 @@ export function Terminal({ d, dateMarche }: { d: LandingBisData; dateMarche: str
             <>
               <div className="tc-card-head"><b className="num">{s.code}</b><RatingBadge scoreTotal={s.score_total} confiance={s.confiance} neutre /></div>
               <SubscoreBars signal={s} compact couleurs={COULEURS_TOKEN} />
-              <p className="tc-foot">Signal {s.signal} · confiance {s.confiance != null ? `${(s.confiance * 100).toFixed(0)} %` : '—'} · exemple réel de la séance en cours</p>
+              <p className="tc-foot">Signal {libelleSignal(s.signal)} · confiance {s.confiance != null ? `${(s.confiance * 100).toFixed(0)} %` : '—'} · exemple réel de la séance en cours</p>
               <p className="tc-disc">{RATING_DISCLAIMER}</p>
             </>
           ) : <p className="tc-foot">Aucun signal publié pour cette séance.</p>}

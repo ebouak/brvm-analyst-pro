@@ -378,7 +378,7 @@ export default function ActionsTable({
       </ul>
 
       {/* ── Tableau (≥ md) ────────────────────────────────────────────────── */}
-      <div className="hidden md:block overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="hidden md:block overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead className="border-b border-border/60 bg-bg/60">
             <tr>

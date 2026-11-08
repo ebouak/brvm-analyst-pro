@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { fmtDateFR } from '@/lib/format';
+import { fmtDateCourte } from '@/lib/format';
 import { libelleSource } from '@/lib/news/origine';
 
 export interface NewsItem {
@@ -87,20 +87,20 @@ export default function NewsList({ items }: { items: NewsItem[] }) {
               )}
               <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] px-1.5 py-0.5 rounded border border-accent/30 text-accent bg-accent/10 font-semibold">
+                  <span className="text-[11px] px-1.5 py-0.5 rounded border border-accent/30 text-accent-ink bg-accent/10 font-semibold">
                     {origine(item)}
                   </span>
-                  <span className="text-xs text-faint tabular">{fmtDateFR(item.date_publication)}</span>
-                  <span className="text-[10px] text-faint">· {readingTime(item)} min de lecture</span>
+                  <span className="text-xs text-faint">{fmtDateCourte(item.date_publication)}</span>
+                  <span className="text-xs text-faint">· {readingTime(item)} min de lecture</span>
                   {item.instrument_code && (
-                    <Link href={`/actions/${item.instrument_code}`} className="text-xs text-accent hover:underline">
+                    <Link href={`/actions/${item.instrument_code}`} className="font-mono text-xs font-medium text-ivory hover:underline">
                       {item.instrument_code}
                     </Link>
                   )}
                 </div>
                 {item.source_url ? (
                   <a href={item.source_url} target="_blank" rel="noopener noreferrer"
-                    className="block text-sm font-semibold text-ivory hover:text-accent transition-colors line-clamp-2">
+                    className="block text-sm font-semibold text-ivory hover:text-accent-ink transition-colors line-clamp-2">
                     {item.titre}
                   </a>
                 ) : (

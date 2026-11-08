@@ -96,7 +96,7 @@ function OpenPositionsTable({
   const totLatent = positions.reduce((s, p) => s + p.pnl, 0);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-elevated/40 text-xs text-muted">
@@ -227,7 +227,7 @@ function ClosedTradesTable({ trades }: { trades: Position[] }) {
   const totRealized = trades.reduce((s, p) => s + p.pnl, 0);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-elevated/40 text-xs text-muted">

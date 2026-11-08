@@ -43,7 +43,7 @@ import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { selectionnerEvenements, type EvenementMarche, type MesureEvenement } from '@/lib/carnet/evenements';
 import { eventStudy, type DatedClose } from '@/lib/eventStudy';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
-import { fmtNumber, fmtFcfa } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtDateCourte } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
 import { computeTechnicalSummary } from '@/lib/technicalSummary';
 import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
@@ -270,7 +270,7 @@ export default async function InstrumentPage({
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
         <Link
           href="/actions"
-          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
         >
           ← Marché actions
         </Link>
@@ -631,7 +631,7 @@ export default async function InstrumentPage({
         <nav className="flex items-center gap-2 text-xs text-faint">
           <Link
             href="/actions"
-            className="hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Marché actions
           </Link>
@@ -644,19 +644,19 @@ export default async function InstrumentPage({
           {/* Actions primaires (pleines) */}
           <Link
             href={`/actions/${code}/revue`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-info/40 bg-info/[0.12] rounded-full px-3 py-1 text-info hover:bg-info/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="inline-flex items-center gap-1 text-[11px] font-medium border border-info/40 bg-info/[0.12] rounded-full px-3 py-1 text-accent-ink hover:bg-info/20 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Revue de résultats →
           </Link>
           <Link
             href={`/actions/${code}/financials`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-gold/40 bg-gold/[0.12] rounded-full px-3 py-1 text-gold hover:bg-gold/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="inline-flex items-center gap-1 text-[11px] font-medium border border-gold/40 bg-gold/[0.12] rounded-full px-3 py-1 text-accent-ink hover:bg-gold/20 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             États financiers →
           </Link>
           <Link
             href={`/rapports/dossier/${code}`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-up/40 bg-up/[0.12] rounded-full px-3 py-1 text-up hover:bg-up/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="inline-flex items-center gap-1 text-[11px] font-medium border border-up/40 bg-up/[0.12] rounded-full px-3 py-1 text-up hover:bg-up/20 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Dossier A4 →
           </Link>
@@ -711,7 +711,7 @@ export default async function InstrumentPage({
                   </div>
                 ) : (
                   <div className="w-11 h-11 rounded-xl border border-border/60 bg-elevated grid place-items-center shrink-0">
-                    <span className="text-gold/60 text-sm font-display font-medium">{code.slice(0, 2)}</span>
+                    <span className="text-accent-ink/60 text-sm font-display font-medium">{code.slice(0, 2)}</span>
                   </div>
                 )}
                 <div className="min-w-0">
@@ -761,13 +761,13 @@ export default async function InstrumentPage({
             <div className="mt-4 flex flex-wrap gap-2">
               <Link
                 href={`/actions/${code}/quant`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/[0.10] px-3.5 py-1.5 text-xs font-semibold text-gold transition hover:bg-gold/15 hover:border-gold/40"
+                className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/[0.10] px-3.5 py-1.5 text-xs font-semibold text-accent-ink transition hover:bg-gold/15 hover:border-gold/40"
               >
                 Fiche Quant — Combined Alpha
               </Link>
               <Link
                 href="/analyse/combined-alpha"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs text-muted transition hover:border-gold/30 hover:text-gold"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs text-muted transition hover:border-gold/30 hover:text-accent-ink"
               >
                 Classement complet →
               </Link>
@@ -954,7 +954,7 @@ export default async function InstrumentPage({
             {/* ── Indicateurs ── */}
             <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
               <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-gold/70 mb-5">Indicateurs</p>
+                <p className="text-[11px] text-accent-ink/70 mb-5">Indicateurs</p>
 
                 {/* RSI */}
                 <div className="mb-5">
@@ -976,7 +976,7 @@ export default async function InstrumentPage({
                     <div className="absolute right-0 top-0 bottom-0 w-[30%] rounded-r-full bg-gradient-to-l from-down/35 to-down/[0.08]" />
                     {lastRsi != null && <RsiCursor rsi={lastRsi} />}
                   </div>
-                  <div className="flex justify-between text-[10px] text-faint mt-1.5">
+                  <div className="flex justify-between text-[11px] text-faint mt-1.5">
                     <span>Survente &lt;30</span>
                     <span>Équilibre</span>
                     <span>Surachat &gt;70</span>
@@ -1000,7 +1000,7 @@ export default async function InstrumentPage({
                             {val != null ? fmtNumber(val) : '—'}
                           </span>
                           {val != null && last.cours_jour != null && (
-                            <span className={`text-[10px] ${last.cours_jour >= val ? 'text-up' : 'text-down'}`}>
+                            <span className={`text-[11px] ${last.cours_jour >= val ? 'text-up' : 'text-down'}`}>
                               {last.cours_jour >= val ? '↑' : '↓'}
                             </span>
                           )}
@@ -1034,24 +1034,23 @@ export default async function InstrumentPage({
             {/* ── Détections ── */}
             <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
               <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-gold/70 mb-5">Détections actives</p>
+                <p className="text-[11px] text-accent-ink/70 mb-5">Détections actives</p>
                 <div className="space-y-2.5">
                   {detections.map((d) => (
                     <div
                       key={d.label}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
                         d.ok
                           ? 'bg-up/5 border border-up/15'
                           : 'border border-transparent'
                       }`}
                     >
                       <span
-                        className={`text-[10px] shrink-0 leading-none ${
-                          d.ok ? 'text-up' : 'text-border-strong'
+                        aria-hidden
+                        className={`size-2 shrink-0 rounded-full ${
+                          d.ok ? 'bg-up' : 'border border-border-strong'
                         }`}
-                      >
-                        {d.ok ? '●' : '○'}
-                      </span>
+                      />
                       <span
                         className={`text-xs ${
                           d.ok ? 'text-ivory' : 'text-faint'
@@ -1128,7 +1127,7 @@ export default async function InstrumentPage({
             </>
           ) : (
             <div className="rounded-panel border border-border bg-surface shadow-card p-6">
-              <p className="text-[11px] text-gold/70 mb-1.5">Signal quantitatif</p>
+              <p className="text-[11px] text-accent-ink/70 mb-1.5">Signal quantitatif</p>
               <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
             </div>
           )}
@@ -1243,7 +1242,7 @@ export default async function InstrumentPage({
           {/* Dividendes */}
           <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-gold/70 mb-5">Dividendes</p>
+              <p className="text-[11px] text-accent-ink/70 mb-5">Dividendes</p>
               {lastDiv ? (
                 <div>
                   {/* Rendement en vedette */}
@@ -1260,7 +1259,7 @@ export default async function InstrumentPage({
                     <DivRow label="Ex-date" value={lastDiv.ex_date ?? '—'} />
                     {lastDiv.payment_date && <DivRow label="Paiement" value={lastDiv.payment_date} />}
                   </div>
-                  <p className="text-[10px] text-faint mt-3">Rendement calculé sur le cours actuel</p>
+                  <p className="text-[11px] text-faint mt-3">Rendement calculé sur le cours actuel</p>
                 </div>
               ) : (
                 <p className="text-xs text-faint italic">Aucun dividende enregistré.</p>
@@ -1271,21 +1270,21 @@ export default async function InstrumentPage({
           {/* Événements */}
           <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-gold/70 mb-5">Événements récents</p>
+              <p className="text-[11px] text-accent-ink/70 mb-5">Événements récents</p>
               {events.length > 0 ? (
                 <div className="space-y-3.5">
                   {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
                     <div key={e.id} className="border-b border-border/30 pb-3.5 last:border-0 last:pb-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] text-faint tabular">{e.event_date}</span>
-                        <span className="text-[10px] border border-border/60 rounded-full px-2 py-px text-faint">
+                        <span className="text-[11px] text-faint">{fmtDateCourte(e.event_date)}</span>
+                        <span className="text-[11px] border border-border/60 rounded-full px-2 py-px text-faint">
                           {e.event_type}
                         </span>
                       </div>
                       <p className="text-xs text-muted line-clamp-2 mb-1.5">{e.title}</p>
                       <Link
                         href={`/dashboard/reports/events/${e.id}`}
-                        className="text-[11px] text-gold/70 hover:text-gold transition-colors duration-300"
+                        className="text-[11px] text-accent-ink/70 hover:text-accent-ink transition-colors duration-300"
                       >
                         Lire l'analyse →
                       </Link>
@@ -1351,14 +1350,14 @@ export default async function InstrumentPage({
                 { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: MessageSquareText },
               ].map(({ href, label, icon: Icone, external }) => {
                 const cls =
-                  'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+                  'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
                 const inner = (
                   <>
-                    <span className="text-gold/50 group-hover:text-gold/80 transition-colors duration-300 leading-none shrink-0">
+                    <span className="text-accent-ink/50 group-hover:text-accent-ink/80 transition-colors duration-300 leading-none shrink-0">
                       <Icone size={15} strokeWidth={1.75} aria-hidden />
                     </span>
                     <span>{label}</span>
-                    <span className="ml-auto text-border-strong group-hover:text-gold/40 transition-colors duration-300">→</span>
+                    <span className="ml-auto text-border-strong group-hover:text-accent-ink/40 transition-colors duration-300">→</span>
                   </>
                 );
                 return external ? (
@@ -1378,7 +1377,7 @@ export default async function InstrumentPage({
       <section id="discussions" className="mt-8 space-y-3 scroll-mt-24">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Discussions</h2>
-          <Link href="/forum/nouveau" className="text-sm text-info hover:underline">Démarrer une discussion</Link>
+          <Link href="/forum/nouveau" className="text-sm text-accent-ink hover:underline">Démarrer une discussion</Link>
         </div>
         <ForumTopicList topics={forumTopics} authors={forumAuthors} />
       </section>
@@ -1407,10 +1406,10 @@ function SessionMetric({
     <div className="py-0.5">
       <p className="text-xs text-faint mb-1">{label}</p>
       <div className="flex items-baseline gap-1">
-        <span className={`tabular font-mono text-sm font-semibold leading-tight ${accent ? 'text-gold' : 'text-ivory'}`}>
+        <span className={`tabular font-mono text-sm font-semibold leading-tight ${accent ? 'text-accent-ink' : 'text-ivory'}`}>
           {value}
         </span>
-        {unit && <span className="text-[10px] text-faint">{unit}</span>}
+        {unit && <span className="text-[11px] text-faint">{unit}</span>}
       </div>
     </div>
   );
@@ -1428,7 +1427,7 @@ function MacdCell({
 }) {
   return (
     <div className="bg-elevated rounded-lg py-2.5 px-2">
-      <div className="text-faint text-[10px] mb-1">{label}</div>
+      <div className="text-faint text-[11px] mb-1">{label}</div>
       <div
         className={`tabular font-mono text-sm font-semibold ${
           accent === 'up' ? 'text-up' : accent === 'down' ? 'text-down' : 'text-ivory'
@@ -1467,7 +1466,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
       >
         {/* Header signal */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
-          <p className="text-[11px] text-gold/70">Signal quantitatif</p>
+          <p className="text-[11px] text-accent-ink/70">Signal quantitatif</p>
           <SignalBadge signal={signal.signal} confiance={signal.confiance} />
           <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           <span className="ml-auto tabular text-[11px] text-faint font-mono">
@@ -1539,7 +1538,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
         <div className="border-t border-border/30 pt-4 flex items-center justify-between">
           <Link
             href="/signaux"
-            className="text-xs text-gold/70 hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="text-xs text-accent-ink/70 hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Voir tous les signaux →
           </Link>

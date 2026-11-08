@@ -2,6 +2,8 @@
 
 import { CalendarDays } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { fmtNumber } from '@/lib/format';
+import { fmtDateCourte } from '@/lib/dateCourte';
 import { ChevronLeft, ChevronRight } from '@/components/icons';
 import {
   getMonthDays,
@@ -148,7 +150,7 @@ export function DividendCalendar({
 
       {/* Desktop Calendar Grid (hidden on mobile, shown on md+) */}
       <div className={`hidden md:block rounded-panel border p-1.5 border-border/50 bg-border/20`}>
-        <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-6">
+        <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface p-6">
           {/* Month/Year Header */}
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-xl font-semibold text-ivory">
@@ -177,7 +179,7 @@ export function DividendCalendar({
           {/* Day names (Mon-Sun) */}
           <div className="mb-3 grid grid-cols-7 gap-2 text-center">
             {DAY_NAMES.map((day) => (
-              <div key={day} className="text-xs font-semibold text-muted uppercase">
+              <div key={day} className="text-xs font-medium text-muted">
                 {day}
               </div>
             ))}
@@ -212,7 +214,7 @@ export function DividendCalendar({
                       <div className={`text-xs font-semibold ${
                         day.isCurrentMonth
                           ? isToday
-                            ? 'text-gold'
+                            ? 'text-accent-ink'
                             : 'text-ivory'
                           : 'text-muted'
                       }`}>
@@ -222,14 +224,13 @@ export function DividendCalendar({
                       {/* Dividend badge */}
                       {hasDividends && (
                         <div className="mt-1">
-                          <div className="text-[10px] font-bold text-info leading-tight">
-                            {(day.dividends[0].montant >= 1000
-                              ? `${(day.dividends[0].montant / 1000).toFixed(0)}k`
-                              : day.dividends[0].montant.toFixed(0)
-                            )} F
+                          <div className="text-xs font-semibold text-accent-ink leading-tight">
+                            {day.dividends[0].montant > 0
+                              ? `${fmtNumber(day.dividends[0].montant, 0)} F`
+                              : '—'}
                           </div>
                           {day.dividends.length > 1 && (
-                            <div className="text-xs text-info/70">
+                            <div className="text-xs text-accent-ink/80">
                               +{day.dividends.length - 1}
                             </div>
                           )}
@@ -250,7 +251,7 @@ export function DividendCalendar({
                                 }`}
                               >
                                 {/* Code & Designation */}
-                                <div className="font-semibold text-ivory">
+                                <div className="font-mono font-medium text-ivory">
                                   {div.code}
                                 </div>
                                 {div.designation && (
@@ -262,31 +263,31 @@ export function DividendCalendar({
                                 {/* Details grid */}
                                 <div className="mt-2 space-y-1 text-xs">
                                   <div className="flex justify-between">
-                                    <span className="text-muted">Montant:</span>
+                                    <span className="text-muted">Dividende (FCFA)</span>
                                     <span className="font-semibold text-ivory">
-                                      {div.montant.toLocaleString('fr-FR')} FCFA
+                                      {div.montant > 0 ? fmtNumber(div.montant, Number.isInteger(div.montant) ? 0 : 2) : '—'}
                                     </span>
                                   </div>
 
                                   {estimatedYield(div) !== null && (
                                     <div className="flex justify-between">
-                                      <span className="text-muted">Rendement:</span>
+                                      <span className="text-muted">Rendement (%)</span>
                                       <span className="font-semibold text-up">
-                                        {estimatedYield(div)?.toFixed(2)}%
+                                        {fmtNumber(estimatedYield(div), 2)}
                                       </span>
                                     </div>
                                   )}
 
                                   <div className="flex justify-between">
-                                    <span className="text-muted">Paiement:</span>
+                                    <span className="text-muted">Paiement</span>
                                     <span className="text-ivory font-medium">
-                                      {new Date(div.payment_date).toLocaleDateString('fr-FR')}
+                                      {fmtDateCourte(div.payment_date)}
                                     </span>
                                   </div>
 
                                   <div className="flex justify-between pt-1">
-                                    <span className="text-muted">Statut:</span>
-                                    <span className="font-semibold text-info">
+                                    <span className="text-muted">Statut</span>
+                                    <span className="font-semibold text-accent-ink">
                                       {getCountdown(div.ex_date)}
                                     </span>
                                   </div>
@@ -322,7 +323,7 @@ export function DividendCalendar({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <div className="font-semibold text-ivory text-sm">
+                      <div className="font-mono font-medium text-ivory text-sm">
                         {div.code}
                       </div>
                       {div.designation && (
@@ -332,26 +333,26 @@ export function DividendCalendar({
                       )}
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-info text-sm">
-                        {div.taux?.toFixed(1)}%
+                      <div className="font-semibold text-accent-ink text-sm">
+                        {div.taux != null && div.montant > 0 ? `${fmtNumber(div.taux, 1)} %` : '—'}
                       </div>
-                      <div className="text-xs text-info/70 mt-0.5">
+                      <div className="text-xs text-accent-ink/80 mt-0.5">
                         {getCountdown(div.ex_date)}
                       </div>
                     </div>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                     <div className="text-muted">
-                      Détachement:{' '}
+                      Détachement{' '}
                       <span className="text-ivory font-medium">
-                        {new Date(div.ex_date).toLocaleDateString('fr-FR')}
+                        {fmtDateCourte(div.ex_date)}
                       </span>
                     </div>
                     {estimatedYield(div) !== null && (
                       <div className="text-muted">
-                        Rendement:{' '}
-                        <span className="text-emerald-400 font-medium">
-                          {estimatedYield(div)?.toFixed(2)}%
+                        Rendement (%){' '}
+                        <span className="text-up font-medium">
+                          {fmtNumber(estimatedYield(div), 2)}
                         </span>
                       </div>
                     )}

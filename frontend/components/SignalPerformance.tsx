@@ -69,7 +69,7 @@ export default function SignalPerformance({
       {recentReal.length > 0 && (
         <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-3">
           <p className="overline text-gold-2">Derniers signaux d&apos;achat réels</p>
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
             <table className="w-full text-sm">
               <thead className="text-xs text-muted border-b border-border">
                 <tr>

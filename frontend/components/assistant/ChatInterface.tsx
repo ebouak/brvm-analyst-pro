@@ -180,26 +180,26 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         {/* Avatar double-bezel */}
         <div className="rounded-xl border border-gold/20 bg-gold/[0.06] p-0.5 shrink-0">
           <div className="w-8 h-8 rounded-[calc(0.75rem-2px)] bg-elevated flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
-            <MessageSquareText size={15} strokeWidth={1.75} className="text-gold" aria-hidden />
+            <MessageSquareText size={15} strokeWidth={1.75} className="text-accent-ink" aria-hidden />
           </div>
         </div>
         <div>
           <h2 className="text-sm font-semibold text-ivory">Questions sur la BRVM</h2>
-          <p className="text-[11px] text-faint">Analyse technique · Fondamentale · Macro UEMOA</p>
+          <p className="text-xs text-faint">Analyse technique · Fondamentale · Macro UEMOA</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeProvider && (
-            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/10 px-2.5 py-0.5 text-xs font-mono text-up">
+            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/10 px-2.5 py-0.5 text-xs text-up">
               {activeProvider}
             </span>
           )}
           {noKey && (
-            <span className="inline-flex items-center rounded-full border border-down/30 bg-down/10 px-2.5 py-0.5 text-[10px] text-down">
+            <span className="inline-flex items-center rounded-full border border-down/30 bg-down/10 px-2.5 py-0.5 text-xs text-down">
               Aucune clé — <a href="/admin/cles-api" className="underline ml-1">configurer</a>
             </span>
           )}
           {symbole && (
-            <span className="inline-flex items-center rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-xs font-mono font-semibold text-gold">
+            <span className="inline-flex items-center rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-xs font-mono font-semibold text-accent-ink">
               {symbole}
             </span>
           )}
@@ -218,7 +218,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
                   key={s}
                   type="button"
                   onClick={() => { setSymbole(s); sendMessage(`Analyse complète de ${s} sur la BRVM.`); }}
-                  className="px-3 py-1.5 text-xs font-mono rounded-full border border-border text-muted hover:text-gold hover:border-gold/40 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  className="px-3 py-1.5 text-xs font-mono rounded-full border border-border text-muted hover:text-accent-ink hover:border-gold/40 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
                 >
                   {s}
                 </button>
@@ -235,7 +235,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
                   key={q}
                   type="button"
                   onClick={() => sendMessage(q)}
-                  className="px-3 py-1.5 text-xs rounded-full border border-gold/30 bg-gold/[0.05] text-gold/90 hover:bg-gold/10 transition-colors"
+                  className="px-3 py-1.5 text-xs rounded-full border border-gold/30 bg-gold/[0.05] text-accent-ink hover:bg-gold/10 transition-colors"
                 >
                   {q}
                 </button>
@@ -248,7 +248,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
                   key={t.id}
                   type="button"
                   onClick={() => handleTemplate(t)}
-                  className="text-left p-4 rounded-card border border-border bg-elevated/60 hover:border-gold/30 hover:bg-elevated transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-card"
+                  className="text-left p-4 rounded-card border border-border bg-elevated/60 hover:border-gold/30 hover:bg-elevated transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-card"
                 >
                   <span className="font-semibold text-sm block text-ivory mb-0.5">{t.titre}</span>
                   <span className="text-xs text-muted">{t.description}</span>
@@ -285,7 +285,7 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
                       <button
                         type="button"
                         onClick={() => printAnalyse(i, symbole || symbolePreselect)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-[11px] text-muted hover:text-white hover:border-gold/40"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs text-muted hover:text-white hover:border-gold/40"
                       >
                         Imprimer
                       </button>
@@ -307,13 +307,13 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
             onChange={(e) => setInput(e.target.value)}
             placeholder={symbole ? `Question sur ${symbole}…` : 'Analysez PALC, screener opportunités, rapport hebdo…'}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-ivory text-sm placeholder:text-faint focus:outline-none focus:border-gold/40 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-ivory text-sm placeholder:text-faint focus:outline-none focus:border-gold/40 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-50"
           />
           {loading ? (
             <button
               type="button"
               onClick={stop}
-              className="px-4 py-2.5 bg-down/15 text-down border border-down/30 rounded-xl text-sm font-medium hover:bg-down/25 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="px-4 py-2.5 bg-down/15 text-down border border-down/30 rounded-xl text-sm font-medium hover:bg-down/25 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
             >
               Stop
             </button>
@@ -321,13 +321,13 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
             <button
               type="submit"
               disabled={!input.trim()}
-              className="group px-4 py-2.5 bg-gold text-obsidian rounded-xl text-sm font-semibold shadow-gold disabled:opacity-40 hover:bg-gold-soft transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]"
+              className="group px-4 py-2.5 bg-gold text-obsidian rounded-xl text-sm font-semibold shadow-gold disabled:opacity-40 hover:bg-gold-soft transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]"
             >
               Envoyer
             </button>
           )}
         </form>
-        <p className="text-[10px] text-faint mt-2 px-1">
+        <p className="text-xs text-faint mt-2 px-1">
           Outil d&apos;aide à l&apos;analyse. Ne constitue pas un conseil en investissement.
         </p>
       </div>

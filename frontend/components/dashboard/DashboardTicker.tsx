@@ -174,8 +174,9 @@ export default function DashboardTicker({
         Passer le bandeau des cours
       </a>
       <div
-        className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2 shadow-card motion-reduce:overflow-x-auto"
+        className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2 shadow-card motion-reduce:overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         role="marquee"
+        tabIndex={0}
         aria-label="Cours des actions et obligations en défilement"
       >
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg to-transparent motion-reduce:hidden" />

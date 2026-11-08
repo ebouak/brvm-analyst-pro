@@ -80,7 +80,7 @@ export function AdvisorCard({ row, liquidite }: {
             <button type="button" onClick={() => setFlipped(false)} className="text-[11px] text-faint hover:text-white">↩ retour</button>
           </div>
 
-          <div className="mt-2 flex-1 space-y-2.5 overflow-y-auto">
+          <div tabIndex={0} role="region" aria-label={`Justification détaillée de ${row.code}`} className="mt-2 flex-1 space-y-2.5 overflow-y-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
             {/* Explication en clair (débutant) */}
             <p className="text-[11px] leading-relaxed text-white/90">{result.narrative}</p>
 

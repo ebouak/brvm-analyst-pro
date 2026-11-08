@@ -1,4 +1,5 @@
 'use client';
+import { libelleSignal } from '@/lib/signalLabel';
 import { Inbox } from 'lucide-react';
 import { useState } from 'react';
 import type { LigneClassement, CritereClassement } from '@/lib/premium/classements';
@@ -75,7 +76,7 @@ export function ClassementsTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-card border border-border">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-card border border-border">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-elevated/80 border-b border-border">
@@ -106,7 +107,7 @@ export function ClassementsTable({
                 <td className="px-4 py-3 text-right">
                   {row.signal ? (
                     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide ${SIGNAL_COLOR[row.signal] ?? 'border-border bg-elevated text-muted'}`}>
-                      {row.signal}
+                      {libelleSignal(row.signal)}
                     </span>
                   ) : <span className="text-faint text-xs">—</span>}
                 </td>

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { fmtDateCourte } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { SectionHeader, PremiumPanel, EmptyStatePremium, StatPill } from '@/components/ui/premium';
@@ -9,12 +10,7 @@ export const metadata = { title: 'Facturation' };
 const DASH = '—';
 const nf = new Intl.NumberFormat('fr-FR');
 
-function fmtDate(d: string | null): string {
-  if (!d) return DASH;
-  const p = new Date(d);
-  if (Number.isNaN(p.getTime())) return DASH;
-  return p.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+const fmtDate = (d: string | null) => fmtDateCourte(d);
 
 const STATUS: Record<string, { label: string; tone: 'gold' | 'emerald' | 'sapphire' | 'neutral' }> = {
   paid: { label: 'Payé', tone: 'emerald' },
@@ -81,7 +77,7 @@ export default async function Page() {
                 const st = STATUS[t.status] ?? { label: t.status, tone: 'neutral' as const };
                 return (
                   <tr key={t.id} className="border-b border-border/40 last:border-0">
-                    <td className="px-4 py-2.5 text-muted tabular">{fmtDate(t.paid_at ?? t.created_at)}</td>
+                    <td className="px-4 py-2.5 text-muted">{fmtDate(t.paid_at ?? t.created_at)}</td>
                     <td className="px-4 py-2.5 text-muted">{t.id.slice(0, 8)}</td>
                     <td className="px-4 py-2.5 text-right text-ivory tabular">{nf.format(Math.round(t.amount))} {t.currency}</td>
                     <td className="px-4 py-2.5"><StatPill tone={st.tone}>{st.label}</StatPill></td>

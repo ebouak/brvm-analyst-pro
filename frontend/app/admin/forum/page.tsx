@@ -1,3 +1,4 @@
+import { SectionHeader } from '@/components/ui/premium';
 import { listOpenReports, setHidden, resolveReport } from '@/lib/forum/admin';
 
 export const dynamic = 'force-dynamic';
@@ -7,14 +8,14 @@ export default async function AdminForumPage() {
   const reports = await listOpenReports();
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-4">
-      <h1 className="text-xl font-semibold text-white">Modération du forum</h1>
+      <SectionHeader title="Modération du forum" />
       {reports.length === 0 ? (
         <p className="text-sm text-muted">Aucun signalement en attente.</p>
       ) : (
         <ul className="space-y-2">
           {reports.map((r) => (
             <li key={r.id} className="rounded-lg border border-border bg-surface p-4 text-sm">
-              <p className="text-white">
+              <p className="text-ivory">
                 {r.target_type} · {r.target_id}
               </p>
               {r.reason && <p className="text-muted mt-1">« {r.reason} »</p>}

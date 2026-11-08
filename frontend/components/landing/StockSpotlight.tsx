@@ -1,3 +1,4 @@
+import { libelleSignal } from '@/lib/signalLabel';
 import Link from 'next/link';
 import RatingBadge from '@/components/RatingBadge';
 import { sparklinePath } from '@/lib/landing/sparkline';
@@ -98,7 +99,7 @@ export function StockSpotlight({ stock, dateLabel }: { stock: StockDetail | null
             <div className="mt-6 flex flex-wrap gap-2">
               {stock.signal && (
                 <span className="rounded-full border border-accent/30 bg-accent/[0.07] px-3 py-1 text-[11px] font-bold text-accent">
-                  Signal {stock.signal}
+                  Signal {libelleSignal(stock.signal)}
                 </span>
               )}
               {stock.confiance != null && (

@@ -16,7 +16,7 @@ export default function Motifs({ premium, compte, date }: { premium: boolean; co
             <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 border-t border-border py-2"><dt className="text-xs font-medium text-accent-ink">Momentum</dt><dd className="text-ivory">Tendance marquée au fil de la séance.</dd></div>
             <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 border-t border-border py-2"><dt className="text-xs font-medium text-accent-ink">Volume</dt><dd className="text-ivory">Pic d&apos;échanges inhabituel pour la valeur.</dd></div>
           </dl>
-          <p className="mt-2 text-xs text-faint">Adaptés au marché de fixing de la BRVM. <Link href="/signaux" className="text-accent-ink hover:underline">Tous les motifs →</Link></p>
+          <p className="mt-2 text-xs text-faint">Adaptés au marché de fixing de la BRVM. <Link href="/signaux" className="text-accent-ink underline underline-offset-2">Tous les motifs</Link></p>
         </>
       )}
     </section>

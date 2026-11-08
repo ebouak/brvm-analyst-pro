@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 };
 
 const COLS: { key: TypeRevenu; label: string }[] = [
-  { key: 'dividende_cote', label: 'Dividendes (cotés)' },
-  { key: 'obligation_etat', label: "Oblig. d'État" },
-  { key: 'obligation_privee', label: 'Oblig. privées' },
+  { key: 'dividende_cote', label: 'Dividendes cotés (%)' },
+  { key: 'obligation_etat', label: 'Oblig. d’État (%)' },
+  { key: 'obligation_privee', label: 'Oblig. privées (%)' },
 ];
 
 function fmtTaux(t: number | null): string {
@@ -51,7 +51,7 @@ export default function FiscalitePage() {
     <div className="min-h-screen bg-bg">
       <header className="border-b border-border/60 bg-surface">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link href="/" className="font-display tracking-tight text-white hover:text-accent">WESTBOURSE</Link>
+          <Link href="/" className="font-display tracking-tight text-white hover:text-accent-ink">WESTBOURSE</Link>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/login" className="text-muted hover:text-white">Connexion</Link>
             <Link href="/signup" className="rounded-lg bg-accent px-3.5 py-1.5 font-semibold text-bg transition-colors hover:bg-gold-2 active:scale-95">
@@ -104,7 +104,7 @@ export default function FiscalitePage() {
               </tbody>
             </table>
           </div>
-          <p className="text-[11px] text-faint">
+          <p className="text-xs text-faint">
             Survolez un taux pour voir sa source. « Non confirmé » signale l&apos;absence de source
             vérifiée, jamais un taux estimé.
           </p>
@@ -124,7 +124,7 @@ export default function FiscalitePage() {
           Information générale fondée sur les sources citées, à leur date de vérification.
           Ne constitue pas un conseil fiscal. Consultez votre SGI ou un fiscaliste.
           Suivez vos revenus réels dans{' '}
-          <Link href="/dividendes" className="text-accent underline underline-offset-2">
+          <Link href="/dividendes" className="text-accent-ink underline underline-offset-2">
             l&apos;espace Dividendes
           </Link>.
         </p>

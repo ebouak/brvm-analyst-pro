@@ -1,3 +1,5 @@
+import { Scissors, Wallet, Users, FileBarChart, Megaphone, Sparkles, CircleDot, type LucideIcon } from 'lucide-react';
+
 /**
  * Helpers purs pour le calendrier économique BRVM.
  * Séparé de lib/calendar.ts (qui gère les jours de bourse).
@@ -144,15 +146,15 @@ export function filterByKind(
   return items.filter((i) => i.kind !== 'ex-date' && i.kind !== 'payment');
 }
 
-export function iconForKind(kind: CalendarItem['kind']): string {
+export function iconForKind(kind: CalendarItem['kind']): LucideIcon {
   switch (kind) {
-    case 'ex-date': return '◆';
-    case 'payment': return '◉';
-    case 'AG': return '◈';
-    case 'RESULTAT': return '▸';
-    case 'COMMUNIQUE': return '·';
-    case 'INTRODUCTION': return '✦';
-    default: return '◇';
+    case 'ex-date': return Scissors;
+    case 'payment': return Wallet;
+    case 'AG': return Users;
+    case 'RESULTAT': return FileBarChart;
+    case 'COMMUNIQUE': return Megaphone;
+    case 'INTRODUCTION': return Sparkles;
+    default: return CircleDot;
   }
 }
 
@@ -172,10 +174,9 @@ export function fmtDateLong(iso: string): string {
   const d = new Date(iso + 'T12:00:00Z');
   if (isNaN(d.getTime())) return iso;
   return d.toLocaleDateString('fr-FR', {
-    weekday: 'long',
     day: 'numeric',
-    month: 'long',
+    month: 'short',
     year: 'numeric',
     timeZone: 'UTC',
-  }).toUpperCase();
+  });
 }

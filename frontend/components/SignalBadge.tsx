@@ -1,5 +1,6 @@
 'use client';
 
+import { libelleSignal } from '@/lib/signalLabel';
 import type { SignalDaily } from '@/lib/types';
 import { useBeginnerMode } from '@/lib/beginner-mode';
 
@@ -19,12 +20,11 @@ export default function SignalBadge({
   signal,
   confiance,
   small,
-  francais,
 }: {
   signal: SignalDaily['signal'] | null | undefined;
   confiance?: number | null;
   small?: boolean;
-  /** Libellé français (achat / attente / vente) au lieu de BUY / HOLD / SELL. */
+  /** Sans effet : le libellé est toujours français (Achat / Attente / Vente). */
   francais?: boolean;
 }) {
   const { beginner } = useBeginnerMode();
@@ -37,7 +37,7 @@ export default function SignalBadge({
           small ? 'text-[11px]' : 'text-xs'
         } ${STYLES[signal]}`}
       >
-        {francais ? { BUY: 'achat', HOLD: 'attente', SELL: 'vente' }[signal] : signal}
+        {libelleSignal(signal)}
         {confiance != null && (
           <span className="text-muted tabular">{Math.round(confiance * 100)}%</span>
         )}

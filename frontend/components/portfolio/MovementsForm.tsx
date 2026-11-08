@@ -280,7 +280,7 @@ export default function MovementsForm({ onSuccess }: Props) {
             {moisFin ? 'Aucun mouvement pour ce mois' : 'Sélectionnez un mois pour afficher les mouvements'}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-elevated border-b border-border">

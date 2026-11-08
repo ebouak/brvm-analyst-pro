@@ -1,4 +1,5 @@
 'use client';
+import { fmtDateCourte } from '@/lib/format';
 import { topMovers, computeVariation } from '@/lib/reportUtils';
 
 interface Row {
@@ -30,8 +31,8 @@ export default function ExecutiveSummary({ rows, dateFrom, dateTo }: Props) {
     <section className="bg-surface border border-border rounded-xl p-5 space-y-4">
       <h2 className="font-semibold">Résumé exécutif</h2>
       <p className="text-xs text-muted">
-        Période : <span className="tabular">{dateFrom}</span> →{' '}
-        <span className="tabular">{dateTo}</span>
+        Période : <span>{fmtDateCourte(dateFrom)}</span> →{' '}
+        <span>{fmtDateCourte(dateTo)}</span>
       </p>
 
       {avgVar != null && (

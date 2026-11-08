@@ -38,7 +38,7 @@ export default function CompareFundamentals({ rows }: { rows: FundaRow[] }) {
       <div className="px-4 py-3 border-b border-border">
         <span className="text-xs text-muted">Fondamentaux comparés</span>
       </div>
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border">

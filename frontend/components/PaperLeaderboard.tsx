@@ -98,7 +98,7 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">

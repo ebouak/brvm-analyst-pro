@@ -1,12 +1,9 @@
 'use client';
 import { Inbox } from 'lucide-react';
+import { chartTheme } from '@/lib/chartTheme';
 import EChart from '@/components/EChart';
 import type { PointDividende, PointLiquiditeVol, CellHeatmap, PointValuation } from '@/lib/premium/anomalies';
 
-const SIG_COLOR: Record<string, string> = { BUY: '#00c853', HOLD: '#ffb300', SELL: '#f44336' };
-const GRID = { lineStyle: { color: '#232733' } };
-const AXIS_LABEL = { color: '#8b93a7' };
-const AXIS_NAME = { color: '#8b93a7' };
 
 function ChartCard({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
@@ -43,6 +40,11 @@ export function AnomalieCharts({
   heatmapCells: CellHeatmap[];
   pointsValuation: PointValuation[];
 }) {
+  const T = chartTheme();
+  const SIG_COLOR: Record<string, string> = { BUY: T.up, HOLD: T.warn, SELL: T.down };
+  const GRID = { lineStyle: { color: T.border } };
+  const AXIS_LABEL = { color: T.muted };
+  const AXIS_NAME = { color: T.muted };
   const divSigMap = new Map(pointsDividendes.map((p) => [p.code, p.signal]));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,10 +62,10 @@ export function AnomalieCharts({
       type: 'scatter',
       data: pointsDividendes.map((p) => [p.payout, p.rendement, p.code, p.nom]),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      itemStyle: { color: (params: any) => SIG_COLOR[divSigMap.get(params.data[2]) ?? 'HOLD'] ?? '#ffb300' },
+      itemStyle: { color: (params: any) => SIG_COLOR[divSigMap.get(params.data[2]) ?? 'HOLD'] ?? T.warn },
       symbolSize: 10,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      label: { show: pointsDividendes.length < 20, formatter: (p: any) => p.data[2], color: '#e6e9f0', fontSize: 9, position: 'top' },
+      label: { show: pointsDividendes.length < 20, formatter: (p: any) => p.data[2], color: T.ivory, fontSize: 11, position: 'top' },
     }],
   };
 
@@ -83,10 +85,10 @@ export function AnomalieCharts({
       type: 'scatter',
       data: pointsLiqVol.map((p) => [p.liquidite, p.volatilite, p.code]),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      itemStyle: { color: (params: any) => SIG_COLOR[liqSigMap.get(params.data[2]) ?? 'HOLD'] ?? '#ffb300' },
+      itemStyle: { color: (params: any) => SIG_COLOR[liqSigMap.get(params.data[2]) ?? 'HOLD'] ?? T.warn },
       symbolSize: 10,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      label: { show: true, formatter: (p: any) => p.data[2], color: '#e6e9f0', fontSize: 9, position: 'top' },
+      label: { show: true, formatter: (p: any) => p.data[2], color: T.ivory, fontSize: 11, position: 'top' },
     }],
   };
 
@@ -100,10 +102,10 @@ export function AnomalieCharts({
     backgroundColor: 'transparent',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tooltip: { formatter: (p: any) => `${codes[p.data[1]]} — ${dates[p.data[0]]}<br/>Variation : ${p.data[2]}%` },
-    xAxis: { type: 'category', data: dates.map((d) => d.slice(5)), axisLabel: { color: '#8b93a7', fontSize: 8, rotate: 45 }, splitLine: { show: false } },
-    yAxis: { type: 'category', data: codes, axisLabel: { color: '#e6e9f0', fontSize: 8 } },
-    visualMap: { min: -5, max: 5, calculable: true, orient: 'horizontal', left: 'center', bottom: 0, textStyle: { color: '#8b93a7' }, inRange: { color: ['#f44336', '#232733', '#00c853'] } },
-    series: [{ type: 'heatmap', data: heatData, itemStyle: { borderColor: '#0f1117', borderWidth: 1 } }],
+    xAxis: { type: 'category', data: dates.map((d) => d.slice(5)), axisLabel: { color: T.muted, fontSize: 11, rotate: 45 }, splitLine: { show: false } },
+    yAxis: { type: 'category', data: codes, axisLabel: { color: T.ivory, fontSize: 11 } },
+    visualMap: { min: -5, max: 5, calculable: true, orient: 'horizontal', left: 'center', bottom: 0, textStyle: { color: T.muted }, inRange: { color: [T.down, T.border, T.up] } },
+    series: [{ type: 'heatmap', data: heatData, itemStyle: { borderColor: T.surface, borderWidth: 1 } }],
   };
 
   const valSigMap = new Map(pointsValuation.map((p) => [p.code, p.signal]));
@@ -123,10 +125,10 @@ export function AnomalieCharts({
       type: 'scatter',
       data: valData.map((p) => [p.marge_nette, p.croissance_ca, p.code]),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      itemStyle: { color: (params: any) => SIG_COLOR[valSigMap.get(params.data[2]) ?? 'HOLD'] ?? '#ffb300' },
+      itemStyle: { color: (params: any) => SIG_COLOR[valSigMap.get(params.data[2]) ?? 'HOLD'] ?? T.warn },
       symbolSize: 10,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      label: { show: true, formatter: (p: any) => p.data[2], color: '#e6e9f0', fontSize: 9, position: 'top' },
+      label: { show: true, formatter: (p: any) => p.data[2], color: T.ivory, fontSize: 11, position: 'top' },
     }],
   };
 

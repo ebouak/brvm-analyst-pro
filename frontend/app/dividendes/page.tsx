@@ -5,7 +5,8 @@ import DividendsTopCard from '@/components/DividendsTopCard';
 import ViewTabs from '@/components/ViewTabs';
 import { REVENUS_TABS } from '@/lib/viewTabsPresets';
 import { computeYield, groupByYear, type DividendRow } from '@/lib/dividends';
-import { fmtFcfa, fmtDateFR } from '@/lib/format';
+import { fmtFcfa, fmtNumber } from '@/lib/format';
+import { fmtDateCourte } from '@/lib/dateCourte';
 import { TrendingUp, Activity, BarChart3 } from '@/components/icons';
 import {
   SectionHeader,
@@ -18,6 +19,9 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dividendes' };
+
+// Dividende par action : jamais arrondi en « k » (1 500 FCFA ≠ « 2 k »).
+const fmtMontant = (n: number) => fmtNumber(n, Number.isInteger(n) ? 0 : 2);
 
 interface RawDividend {
   id: string;
@@ -156,15 +160,15 @@ export default async function DividendesPage({ searchParams }: PageProps) {
   const top5Entries = top5Yield.map((r) => ({
     code: r.code,
     label: r.designation ?? '',
-    value: r.rendement_pct != null ? `${r.rendement_pct.toFixed(2)}%` : '—',
-    sub: fmtFcfa(r.montant) + ' FCFA',
+    value: r.rendement_pct != null && r.montant > 0 ? `${fmtNumber(r.rendement_pct, 2)} %` : '—',
+    sub: fmtMontant(r.montant) + ' FCFA',
   }));
 
   const upcomingEntries = upcoming.map((r) => ({
     code: r.code,
     label: r.designation ?? '',
-    value: fmtDateFR(r.payment_date),
-    sub: fmtFcfa(r.montant) + ' FCFA',
+    value: fmtDateCourte(r.payment_date),
+    sub: fmtMontant(r.montant) + ' FCFA',
   }));
 
   // Max total for inline bar scaling
@@ -184,7 +188,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
       <SectionHeader
         accent="emerald"
         title="Dividendes BRVM"
-        subtitle="Historique des distributions. Le rendement est calculé sur le dernier cours disponible."
+        subtitle="Historique des distributions. Le rendement est calculé sur le dernier cours disponible, à partir du dividende tel que publié (net ou brut selon la source)."
         actions={
           <StatPill tone="neutral">
             <span className="tabular">{rows.length}</span>&nbsp;enregistrement{rows.length !== 1 ? 's' : ''}
@@ -204,13 +208,13 @@ export default async function DividendesPage({ searchParams }: PageProps) {
           accent="gold"
         />
         <MetricCard
-          label="Meilleur rendement"
-          value={top5Yield[0]?.rendement_pct != null ? `${top5Yield[0].rendement_pct.toFixed(2)}%` : '—'}
+          label="Meilleur rendement (%)"
+          value={top5Yield[0]?.rendement_pct != null ? fmtNumber(top5Yield[0].rendement_pct, 2) : '—'}
           accent="emerald"
         />
         <MetricCard
-          label="Rendement moy. Top 5"
-          value={avgYield != null ? `${avgYield.toFixed(2)}%` : '—'}
+          label="Rendement moyen top 5 (%)"
+          value={avgYield != null ? fmtNumber(avgYield, 2) : '—'}
           accent="sapphire"
         />
         <MetricCard
@@ -243,7 +247,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
           <div className="p-5">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-sapphire"><Activity size={14} /></span>
-              <Eyebrow className="text-sapphire/70">Prochains paiements</Eyebrow>
+              <Eyebrow>Prochains paiements</Eyebrow>
             </div>
             <DividendsTopCard
               title="Prochains paiements"
@@ -258,7 +262,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
           <div className="p-5">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-up"><BarChart3 size={14} /></span>
-              <Eyebrow className="text-up/70">Dividendes par exercice</Eyebrow>
+              <Eyebrow>Dividendes par exercice</Eyebrow>
             </div>
             {byYear.length === 0 ? (
               <p className="text-xs text-muted">Aucune donnée disponible.</p>
@@ -272,7 +276,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
                     </div>
                     <div className="h-1.5 bg-border rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-up/60 rounded-full transition-all duration-500"
+                        className="h-full bg-up/60 rounded-full"
                         style={{ '--bar-w': `${Math.round((b.total / maxTotal) * 100)}%`, width: 'var(--bar-w)' } as React.CSSProperties}
                       />
                     </div>
@@ -294,7 +298,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
       ) : (
         <PremiumPanel>
           <div className="p-5">
-            <p className="overline text-faint mb-4">Historique des distributions</p>
+            <p className="overline text-muted mb-4">Historique des distributions</p>
             <DividendsTable rows={rows} years={years} sectors={sectors} />
           </div>
         </PremiumPanel>

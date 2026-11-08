@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { fmtFcfa } from '@/lib/format';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel, EmptyStatePremium } from '@/components/ui/premium';
 import { fromDailyRow, LIQUIDITY_LABELS, type LiquidityDailyRow } from '@/lib/liquidity';
@@ -14,15 +15,13 @@ export const metadata: Metadata = {
 
 const CLASS_STYLE: Record<string, string> = {
   A: 'border-up/30 bg-up/10 text-up',
-  B: 'border-accent/30 bg-accent/10 text-accent',
+  B: 'border-accent/30 bg-accent/10 text-accent-ink',
   C: 'border-gold/30 bg-gold/10 text-gold',
   D: 'border-down/30 bg-down/10 text-down',
 };
 
-const fmtFcfa = (n: number) =>
-  n >= 1_000_000
-    ? `${(n / 1_000_000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} M FCFA`
-    : `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
+const dateCourte = (iso: string) =>
+  new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 export default async function LiquiditePage() {
   const db = createPublicClient();
@@ -50,7 +49,7 @@ export default async function LiquiditePage() {
         title="Liquidité du marché"
         subtitle={
           asOf
-            ? `Scores au ${asOf} : présence, activité, impact prix (Amihud), spread estimé (Roll) et flux intraday.`
+            ? `Scores au ${dateCourte(asOf)} : présence, activité, impact prix (Amihud), spread estimé (Roll) et flux intraday.`
             : 'Score de liquidité par titre, reconstitué à partir des échanges.'
         }
       />
@@ -69,8 +68,8 @@ export default async function LiquiditePage() {
                   <th className="px-3 py-2">Titre</th>
                   <th className="px-3 py-2">Score</th>
                   <th className="px-3 py-2">Classe</th>
-                  <th className="px-3 py-2">Présence</th>
-                  <th className="px-3 py-2">Valeur moy. / séance</th>
+                  <th className="px-3 py-2">Présence (%)</th>
+                  <th className="px-3 py-2">Valeur moy. / séance (FCFA)</th>
                   <th className="px-3 py-2">Spread estimé</th>
                   <th className="px-3 py-2">Flux net séance</th>
                 </tr>
@@ -81,14 +80,14 @@ export default async function LiquiditePage() {
                   return (
                     <tr key={r.code} className="border-b border-border/40 transition-colors last:border-0 hover:bg-bg/40">
                       <td className="px-3 py-2">
-                        <Link href={`/actions/${r.code}`} className="font-semibold text-ivory transition-colors hover:text-accent">
+                        <Link href={`/actions/${r.code}`} className="font-mono font-medium text-ivory transition-colors hover:text-accent-ink">
                           {r.code}
                         </Link>
                       </td>
                       <td className="tabular px-3 py-2 text-ivory">{s ? s.score : '—'}</td>
                       <td className="px-3 py-2">
                         {s ? (
-                          <span className={`rounded-full border px-2 py-0.5 text-[11px] ${CLASS_STYLE[s.classe]}`}>
+                          <span className={`rounded-full border px-2 py-0.5 text-xs ${CLASS_STYLE[s.classe]}`}>
                             {s.classe} · {LIQUIDITY_LABELS[s.classe]}
                           </span>
                         ) : (
@@ -123,7 +122,7 @@ export default async function LiquiditePage() {
       )}
 
       <PremiumPanel>
-        <h2 className="text-sm font-semibold text-ivory">Méthodologie</h2>
+        <h2 className="font-display text-base text-ivory">Méthodologie</h2>
         <p className="mt-2 text-xs leading-relaxed text-muted">
           Score 0-100 calculé sur 30 séances, en quatre parts égales : la présence (part des séances
           où le titre a réellement traité), l’activité en valeur échangée (échelle logarithmique de

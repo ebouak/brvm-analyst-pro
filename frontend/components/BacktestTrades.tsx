@@ -1,3 +1,4 @@
+import { fmtDateCourte } from '@/lib/format';
 import type { Trade } from '@/lib/backtest';
 
 function pct(v: number | null): string {
@@ -20,7 +21,7 @@ export default function BacktestTrades({ trades, bestTradePct, worstTradePct }: 
     return (
       <div className="bg-surface border border-border rounded-xl p-6 text-center">
         <p className="text-sm text-muted">Aucune opération sur la période.</p>
-        <p className="mt-1 text-xs text-faint">La stratégie n’a déclenché aucun aller-retour (BUY → SELL).</p>
+        <p className="mt-1 text-xs text-faint">La stratégie n’a déclenché aucun aller-retour (achat puis vente).</p>
       </div>
     );
   }
@@ -35,15 +36,15 @@ export default function BacktestTrades({ trades, bestTradePct, worstTradePct }: 
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead className="text-xs text-muted border-b border-border">
             <tr>
               <th className="text-left px-2 py-2 font-medium">#</th>
-              <th className="text-left px-2 py-2 font-medium">Entrée (BUY)</th>
-              <th className="text-left px-2 py-2 font-medium">Sortie (SELL)</th>
-              <th className="text-right px-2 py-2 font-medium">Durée</th>
-              <th className="text-right px-2 py-2 font-medium">Rendement</th>
+              <th className="text-left px-2 py-2 font-medium">Entrée (achat)</th>
+              <th className="text-left px-2 py-2 font-medium">Sortie (vente)</th>
+              <th className="text-right px-2 py-2 font-medium">Durée (séances)</th>
+              <th className="text-right px-2 py-2 font-medium">Rendement (%)</th>
               <th className="text-right px-2 py-2 font-medium">Résultat</th>
             </tr>
           </thead>
@@ -51,16 +52,16 @@ export default function BacktestTrades({ trades, bestTradePct, worstTradePct }: 
             {trades.map((t, i) => (
               <tr key={i} className={`border-b border-border/40 ${i % 2 === 1 ? 'bg-bg/20' : ''}`}>
                 <td className="px-2 py-2 tabular text-faint">{i + 1}</td>
-                <td className="px-2 py-2 tabular text-xs text-ivory">{t.entryDate ?? `#${t.entryIndex}`}</td>
-                <td className="px-2 py-2 tabular text-xs text-ivory">
-                  {t.exitDate ?? (t.exitIndex == null ? 'en cours' : `#${t.exitIndex}`)}
+                <td className="px-2 py-2 text-xs text-ivory">{t.entryDate ? fmtDateCourte(t.entryDate) : `#${t.entryIndex}`}</td>
+                <td className="px-2 py-2 text-xs text-ivory">
+                  {t.exitDate ? fmtDateCourte(t.exitDate) : (t.exitIndex == null ? 'en cours' : `#${t.exitIndex}`)}
                 </td>
-                <td className="px-2 py-2 text-right tabular text-xs text-muted">{t.bars != null ? `${t.bars} j` : '—'}</td>
+                <td className="px-2 py-2 text-right tabular text-xs text-muted">{t.bars != null ? `${t.bars}` : '—'}</td>
                 <td className={`px-2 py-2 text-right tabular font-semibold ${(t.returnPct ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
                   {pct(t.returnPct)}
                 </td>
                 <td className="px-2 py-2 text-right">
-                  <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
                     t.win ? 'bg-up/10 text-up' : 'bg-down/10 text-down'
                   }`}>
                     {t.exitIndex == null ? 'latent' : t.win ? 'gagnant' : 'perdant'}

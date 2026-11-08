@@ -89,8 +89,9 @@ export default function ReportConfig({ instruments, onGenerate, loading }: Props
       {/* Dates */}
       <div className="flex gap-4">
         <div className="space-y-1">
-          <label className="text-xs text-muted">Date début</label>
+          <label htmlFor="rapport-date-debut" className="text-xs text-muted">Date début</label>
           <input
+            id="rapport-date-debut"
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
@@ -99,8 +100,9 @@ export default function ReportConfig({ instruments, onGenerate, loading }: Props
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-muted">Date fin</label>
+          <label htmlFor="rapport-date-fin" className="text-xs text-muted">Date fin</label>
           <input
+            id="rapport-date-fin"
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}

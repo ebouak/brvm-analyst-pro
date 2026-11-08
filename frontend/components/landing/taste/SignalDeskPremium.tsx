@@ -2,9 +2,9 @@ import Link from 'next/link';
 import type { SignalRow } from './types';
 
 const STYLE: Record<SignalRow['action'], { cls: string; label: string }> = {
-  BUY: { cls: 'border-up/20 bg-up/10 text-up', label: 'ACHAT' },
-  HOLD: { cls: 'border-sapphire/20 bg-sapphire/10 text-sapphire', label: 'CONSERVER' },
-  SELL: { cls: 'border-down/20 bg-down/10 text-down', label: 'VENTE' },
+  BUY: { cls: 'border-up/20 bg-up/10 text-up', label: 'Achat' },
+  HOLD: { cls: 'border-sapphire/20 bg-sapphire/10 text-sapphire', label: 'Attente' },
+  SELL: { cls: 'border-down/20 bg-down/10 text-down', label: 'Vente' },
 };
 
 /** Desk des signaux récents — conviction avec score. */

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo, useDeferredValue, type ReactNode } from 'react';
 import { MARQUE_ECHEC, MESSAGE_ECHEC } from '@/lib/diagnostic/echec';
+import { fmtDateCourte } from '@/lib/format';
 
 /** Même durée que MAX_AGE_MS de la route : au-delà, le rapport est régénéré. */
 const AGE_MAX_MS = 7 * 24 * 3600 * 1000;
@@ -143,7 +144,7 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt, graph
       <div className="flex items-center justify-between gap-3">
         {dateRapport && (
           <p className="text-xs text-faint">
-            Rapport du {new Date(dateRapport).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+            Rapport du {fmtDateCourte(dateRapport)}
             {loading && perime && ' · mise à jour en cours…'}
           </p>
         )}
@@ -153,9 +154,9 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt, graph
               type="button"
               onClick={() => window.print()}
               aria-label="Imprimer le diagnostic en PDF"
-              className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted hover:text-white hover:border-up/40 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-up/50"
+              className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted hover:text-white hover:border-up/40 transition-colors active:scale-95 focus:outline-none focus:ring-2 focus:ring-up/50"
             >
-              <span aria-hidden="true">↓</span> PDF
+              Exporter en PDF
             </button>
           )}
           <button
@@ -163,9 +164,9 @@ export default function DiagnosticClient({ code, cachedMarkdown, cachedAt, graph
             onClick={() => void generate(true)}
             disabled={loading}
             aria-label={cachedMarkdown ? 'Regénérer le diagnostic' : 'Générer le diagnostic'}
-            className="px-3 py-1.5 text-xs rounded-lg bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-up/50"
+            className="px-3 py-1.5 text-xs rounded-lg bg-up text-bg font-semibold hover:opacity-90 active:scale-95 transition-opacity disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-up/50"
           >
-            {loading ? 'Génération…' : cachedMarkdown ? '↺ Regénérer' : 'Générer le diagnostic'}
+            {loading ? 'Génération…' : cachedMarkdown ? 'Regénérer' : 'Générer le diagnostic'}
           </button>
         </div>
       </div>

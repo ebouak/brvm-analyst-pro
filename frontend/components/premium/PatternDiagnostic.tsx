@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getLatestPatternScore } from '@/lib/patterns/queries';
 import type { PatternScore } from '@/lib/patterns/database';
+import { fmtDateCourte } from '@/lib/format';
 
 interface PatternDiagnosticProps {
   code: string;
@@ -75,7 +76,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
             <span className="font-semibold text-white">ATR Extrême</span>
             {pattern.atr_confidence && (
               <span className={`px-2 py-1 rounded text-xs font-bold border ${getConfidenceColor(pattern.atr_confidence)}`}>
-                {pattern.atr_confidence === 'HIGH' ? '●●● Élevée' : pattern.atr_confidence === 'MEDIUM' ? '●● Modérée' : '● Faible'}
+                {pattern.atr_confidence === 'HIGH' ? 'Confiance élevée' : pattern.atr_confidence === 'MEDIUM' ? 'Confiance modérée' : 'Confiance faible'}
               </span>
             )}
           </div>
@@ -95,7 +96,7 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
             <span className="font-semibold text-white">Consolidation Haussière</span>
             {pattern.consolidation_confidence && (
               <span className={`px-2 py-1 rounded text-xs font-bold border ${getConfidenceColor(pattern.consolidation_confidence)}`}>
-                {pattern.consolidation_confidence === 'HIGH' ? '●●● Élevée' : pattern.consolidation_confidence === 'MEDIUM' ? '●● Modérée' : '● Faible'}
+                {pattern.consolidation_confidence === 'HIGH' ? 'Confiance élevée' : pattern.consolidation_confidence === 'MEDIUM' ? 'Confiance modérée' : 'Confiance faible'}
               </span>
             )}
           </div>
@@ -158,8 +159,8 @@ export default function PatternDiagnostic({ code }: PatternDiagnosticProps) {
 
       {/* Footer - Timestamp & Engine Version */}
       <div className="text-xs text-faint px-4 py-2">
-        <span>Analyse du {new Date(pattern.date_marche).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-        <span className="mx-2">•</span>
+        <span>Analyse du {fmtDateCourte(pattern.date_marche)}</span>
+        <span className="mx-2" aria-hidden="true">·</span>
         <span>Engine v{pattern.engine_version}</span>
       </div>
     </div>

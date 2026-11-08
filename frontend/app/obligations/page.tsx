@@ -5,7 +5,6 @@ import type { ObligationDaily } from '@/lib/types';
 // aujourd'hui » du tableau de bord lit la même, les deux chiffres concordent.
 import { syntheseObligations, versLigneObligation } from '@/lib/marche/obligations';
 import {
-  SectionHeader,
   PremiumPanel,
   MetricCard,
   EmptyStatePremium,
@@ -52,10 +51,10 @@ export default async function ObligationsPage() {
   if (!lastDate) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-        <SectionHeader
-          title="Marché obligataire"
-          subtitle="Rendement à l’échéance (YTM), duration modifiée et courbe des taux des obligations cotées à la BRVM."
-        />
+        <div>
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Marché obligataire</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Rendement à l’échéance (YTM), duration modifiée et courbe des taux des obligations cotées à la BRVM.</p>
+        </div>
         <EmptyStatePremium
           icon="◎"
           title="Aucune donnée obligataire"
@@ -72,13 +71,14 @@ export default async function ObligationsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader
-        title="Marché obligataire"
-        subtitle="Rendement à l’échéance (YTM) et duration modifiée des obligations cotées à la BRVM."
-        actions={
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Marché obligataire</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Rendement à l’échéance (YTM) et duration modifiée des obligations cotées à la BRVM.</p>
+        </div>
           <div className="flex items-center gap-2 flex-wrap">
             <StatPill tone="sapphire">
-              Séance du <span className="tabular ml-1">{fmtSeance(lastDate)}</span>
+              Séance du <time dateTime={lastDate} className="ml-1">{fmtSeance(lastDate)}</time>
             </StatPill>
             <StatPill tone="neutral">
               <span className="tabular">{active.length}</span>&nbsp;actives
@@ -87,8 +87,7 @@ export default async function ObligationsPage() {
               <span className="tabular">{expired.length}</span>&nbsp;échues
             </StatPill>
           </div>
-        }
-      />
+      </div>
 
       <div className="h-px bg-gold-line" />
 
@@ -117,7 +116,7 @@ export default async function ObligationsPage() {
       </div>
 
       {/* Note sur les obligations amorties (repliée : elle occupait l'en-tête) */}
-      <details className="group text-[11px] text-faint leading-relaxed border-l-2 border-border pl-3">
+      <details className="group text-xs text-faint leading-relaxed border-l-2 border-border pl-3">
         <summary className="cursor-pointer text-muted hover:text-ivory py-0.5">
           Pourquoi certains rendements sont « N/A » ?
         </summary>
@@ -132,8 +131,8 @@ export default async function ObligationsPage() {
         <PremiumPanel>
           <div className="p-5">
             <div className="flex items-center gap-3 mb-4">
-              <p className="overline text-faint">Obligations actives</p>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">
+              <p className="text-sm font-medium text-ivory">Obligations actives</p>
+              <span className="text-xs px-1.5 py-0.5 rounded bg-accent/10 text-accent-ink border border-accent/20">
                 {active.length} titres · échéance future
               </span>
             </div>
@@ -159,7 +158,7 @@ export default async function ObligationsPage() {
           <div className="mt-3">
             <PremiumPanel>
               <div className="p-5">
-                <p className="overline text-faint mb-4">Obligations échues (référence historique)</p>
+                <p className="text-sm font-medium text-ivory mb-4">Obligations échues (référence historique)</p>
                 <ObligationsTable rows={expired} title="obligations échues" compact />
               </div>
             </PremiumPanel>
@@ -167,12 +166,12 @@ export default async function ObligationsPage() {
         </details>
       )}
 
-      <p className="text-[11px] text-faint leading-relaxed border-l-2 border-border pl-3">
+      <p className="text-xs text-faint leading-relaxed border-l-2 border-border pl-3">
         YTM calculé par bisection (hypothèses : nominal 10 000 FCFA, coupon annuel, maturité = 31 déc. de l&apos;année de fin
         extraite de la désignation). Données source : scraper BRVM intraday.
         Fiscalité : coupons des émetteurs souverains (États, BOAD, BIDC) <strong className="text-up">exonérés</strong> de retenue —
         le YTM affiché est donc net. Obligations privées : retenue de 2&nbsp;% (Côte d&apos;Ivoire) à ~6&nbsp;% selon le pays de
-        l&apos;émetteur. <a href="/fiscalite" className="text-accent underline underline-offset-2">Barème et sources</a>.
+        l&apos;émetteur. <a href="/fiscalite" className="text-accent-ink underline underline-offset-2">Barème et sources</a>.
       </p>
     </div>
   );

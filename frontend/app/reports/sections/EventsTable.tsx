@@ -1,4 +1,5 @@
 'use client';
+import { fmtDateCourte } from '@/lib/format';
 
 interface Event {
   id: string;
@@ -35,12 +36,12 @@ export default function EventsTable({ events }: { events: Event[] }) {
             <tbody className="divide-y divide-border">
               {events.map((e) => (
                 <tr key={e.id} className="hover:bg-bg/40">
-                  <td className="py-2 pr-4 tabular text-xs text-muted">{e.event_date}</td>
+                  <td className="py-2 pr-4 text-xs text-muted">{fmtDateCourte(e.event_date)}</td>
                   <td className="py-2 pr-4 text-xs">{e.event_type}</td>
                   <td className={`py-2 pr-4 ${SENTIMENT_CLS[e.sentiment ?? 'neutral'] ?? 'text-muted'}`}>
                     {e.title}
                   </td>
-                  <td className="py-2 text-xs text-muted">{e.instrument_code ?? '—'}</td>
+                  <td className="py-2 font-mono text-xs font-medium text-ivory">{e.instrument_code ?? '—'}</td>
                 </tr>
               ))}
             </tbody>

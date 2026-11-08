@@ -43,7 +43,7 @@ const SIG_PILLS: {
 }[] = [
   { value: 'ALL', key: 'all', label: 'Tous', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
   { value: 'BUY', key: 'buy', label: 'Achat', activeCls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', idleCls: 'border-emerald-500/20 text-emerald-400/70 hover:text-emerald-400' },
-  { value: 'HOLD', key: 'hold', label: 'Conserver', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
+  { value: 'HOLD', key: 'hold', label: 'Attente', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
   { value: 'SELL', key: 'sell', label: 'Vente', activeCls: 'bg-red-500/20 text-red-400 border-red-500/40', idleCls: 'border-red-500/20 text-red-400/70 hover:text-red-400' },
 ];
 
@@ -210,7 +210,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted border-b border-border bg-bg/40">
                   <tr>

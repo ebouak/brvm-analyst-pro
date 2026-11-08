@@ -251,7 +251,7 @@ export default function DcfClient({
 
       {/* Projection FCF */}
       {r.dcf && r.dcf.projectedFcf.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-elevated/40 text-xs text-muted">
@@ -286,7 +286,7 @@ export default function DcfClient({
       {r.dcf && !r.dcf.error && (
         <div>
           <h3 className="mb-2 text-sm font-semibold text-white">Sensibilité de la juste-valeur (WACC × g∞)</h3>
-          <div className="overflow-x-auto rounded-xl border border-border">
+          <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-elevated/40 text-xs text-muted">

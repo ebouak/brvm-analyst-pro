@@ -2,7 +2,9 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { DividendRow } from '@/lib/dividends';
-import { fmtFcfa, fmtDateFR } from '@/lib/format';
+import { ArrowDown, ArrowUp, Check } from 'lucide-react';
+import { fmtNumber } from '@/lib/format';
+import { fmtDateCourte } from '@/lib/dateCourte';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
 import { rendementNetSelonBase } from '@/lib/tax/compute';
@@ -44,7 +46,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('ex_date');
   const [asc, setAsc] = useState(false);
   const [page, setPage] = useState(0);
-  // Toggle rendement net d'IRVM (V1 : le tri par rendement reste sur le brut).
+  // Toggle rendement net d'IRVM (le tri par rendement reste sur la valeur publiée).
   const [net, setNet] = useState(false);
 
   const filtered = useMemo(() => {
@@ -99,7 +101,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
       className={`px-3 py-2 cursor-pointer select-none hover:text-white whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
     >
       {label}
-      {sortKey === k && <span className="text-up ml-1">{asc ? '▲' : '▼'}</span>}
+      {sortKey === k && (asc ? <ArrowUp size={12} aria-hidden className="ml-1 inline text-accent-ink" /> : <ArrowDown size={12} aria-hidden className="ml-1 inline text-accent-ink" />)}
     </th>
   );
 
@@ -113,6 +115,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           className="bg-surface border border-border rounded px-3 py-1.5 text-sm w-56"
         />
         <select
+          aria-label="Filtrer par exercice"
           value={yearFilter}
           onChange={handleFilterChange(setYearFilter)}
           className="bg-surface border border-border rounded px-2 py-1.5 text-sm"
@@ -123,6 +126,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           ))}
         </select>
         <select
+          aria-label="Filtrer par secteur"
           value={sectorFilter}
           onChange={handleFilterChange(setSectorFilter)}
           className="bg-surface border border-border rounded px-2 py-1.5 text-sm"
@@ -137,10 +141,10 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           onClick={() => setNet((v) => !v)}
           aria-pressed={net ? 'true' : 'false'}
           className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
-            net ? 'border-accent/40 bg-accent/10 text-accent' : 'border-border text-muted hover:text-white'
+            net ? 'border-accent/40 bg-accent/10 text-accent-ink' : 'border-border text-muted hover:text-white'
           }`}
         >
-          {net ? 'Net d’IRVM ✓' : 'Afficher net d’IRVM'}
+          {net ? <><Check size={12} aria-hidden className="inline mr-1" />Net d’IRVM</> : 'Afficher net d’IRVM'}
         </button>
         <span className="text-xs text-muted ml-auto">
           {filtered.length} dividende{filtered.length !== 1 ? 's' : ''}
@@ -152,16 +156,16 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
         />
       </div>
 
-      <div className="bg-surface border border-border rounded-xl overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead className="text-xs text-muted border-b border-border bg-bg/40">
             <tr>
-              <Th k="code" label="Ticker" />
+              <Th k="code" label="Code" />
               <Th k="designation" label="Société" />
               <Th k="secteur" label="Secteur" />
               <Th k="pays" label="Pays" />
-              <Th k="montant" label="Montant (FCFA)" right />
-              <Th k="rendement_pct" label="Rendement" right />
+              <Th k="montant" label="Dividende publié (FCFA)" right />
+              <Th k="rendement_pct" label={net ? 'Rendement net (%)' : 'Rendement (%)'} right />
               <Th k="ex_date" label="Ex-date" right />
               <Th k="payment_date" label="Paiement" right />
               <Th k="exercice" label="Exercice" right />
@@ -183,7 +187,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                   <td className="px-3 py-2">
                     <Link
                       href={`/actions/${row.code}`}
-                      className="font-medium text-white hover:text-up transition-colors"
+                      className="font-mono font-medium text-ivory hover:text-accent-ink transition-colors"
                     >
                       {row.code}
                     </Link>
@@ -193,11 +197,11 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                   </td>
                   <td className="px-3 py-2 text-xs text-muted">{row.secteur ?? '—'}</td>
                   <td className="px-3 py-2 text-xs text-muted">{row.pays ?? '—'}</td>
-                  <td className="px-3 py-2 text-right tabular">{fmtFcfa(row.montant)}</td>
+                  <td className="px-3 py-2 text-right tabular">{row.montant > 0 ? fmtNumber(row.montant, Number.isInteger(row.montant) ? 0 : 2) : '—'}</td>
                   <td className={`px-3 py-2 text-right tabular font-medium ${yieldColor(row.rendement_pct)}`}>
                     {(() => {
-                      if (row.rendement_pct == null) return '—';
-                      if (!net) return `${row.rendement_pct.toFixed(2)}%`;
+                      if (row.rendement_pct == null || !(row.montant > 0)) return '—';
+                      if (!net) return fmtNumber(row.rendement_pct, 2);
                       // Un montant déjà net n'est jamais retaxé (double IRVM
                       // corrigée le 2026-10-20) ; une base inconnue n'est pas supposée.
                       const p = toPaysUemoa(row.pays);
@@ -205,12 +209,12 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                         ? rendementNetSelonBase(row.rendement_pct, row.base_fiscale, p)
                         : ({ indisponible: true } as const);
                       return r.indisponible
-                        ? `${row.rendement_pct.toFixed(2)}%*`
-                        : `${r.valeur.toFixed(2)}%`;
+                        ? `${fmtNumber(row.rendement_pct, 2)}*`
+                        : fmtNumber(r.valeur, 2);
                     })()}
                   </td>
-                  <td className="px-3 py-2 text-right tabular text-xs">{fmtDateFR(row.ex_date)}</td>
-                  <td className="px-3 py-2 text-right tabular text-xs">{fmtDateFR(row.payment_date)}</td>
+                  <td className="px-3 py-2 text-right text-xs">{fmtDateCourte(row.ex_date)}</td>
+                  <td className="px-3 py-2 text-right text-xs">{fmtDateCourte(row.payment_date)}</td>
                   <td className="px-3 py-2 text-right tabular">{row.exercice ?? '—'}</td>
                 </tr>
               ))
@@ -218,7 +222,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           </tbody>
         </table>
         {net && (
-          <p className="px-3 pb-2 pt-1 text-[11px] text-faint">
+          <p className="px-3 pb-2 pt-1 text-xs text-faint">
             Un montant publié net d&apos;IRVM (calendrier officiel BRVM) est affiché tel quel ; un
             montant brut est réduit de l&apos;IRVM du pays de l&apos;émetteur. * base du montant inconnue
             ou taux non confirmé → montant publié affiché, sans retenue supposée.{' '}
