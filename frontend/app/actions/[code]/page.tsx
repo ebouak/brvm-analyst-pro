@@ -428,6 +428,15 @@ export default async function InstrumentPage({
     .maybeSingle();
   const liquidity = fromDailyRow(liqRow as LiquidityDailyRow | null) ?? computeLiquidity(liqRows, liqRows.length);
 
+  // Instantanés intraday de la dernière séance (volume CUMULÉ), pour le graphique de séance.
+  const { data: snapRows } = await liqDailyClient
+    .from('brvm_intraday_snapshots')
+    .select('captured_at, close, volume')
+    .eq('code', code)
+    .eq('date_marche', last.date_marche)
+    .order('captured_at', { ascending: true });
+  const instantanes = ((snapRows ?? []) as { captured_at: string; close: number | null; volume: number | null }[]).filter((s) => s.close != null && s.close > 0);
+
   // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
   // de celle des cours, le bulletin paraissant après la clôture.
   const { data: carnetRow } = await liqDailyClient
