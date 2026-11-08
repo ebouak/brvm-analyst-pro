@@ -366,6 +366,15 @@ body::before {
      rendu par Chromium (video/dossiers.mjs). */
   [data-splash] { display: none !important; }
   a { text-decoration: none !important; }
+
+  /* Document imprimable (revue de résultats) : les jetons passent à l'encre sur papier,
+     pour les graphiques SVG qui lisent `rgb(var(--color-*))`. */
+  .doc-impression {
+    --color-ivory: 17 17 17; --color-muted: 75 85 99; --color-faint: 90 98 110;
+    --color-border: 212 216 222; --color-border-strong: 160 167 176;
+    --color-accent: 9 117 143; --color-accent-ink: 7 104 128;
+    --color-surface: 255 255 255; --color-up: 21 128 61; --color-down: 185 28 28; --color-warn: 138 90 16;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

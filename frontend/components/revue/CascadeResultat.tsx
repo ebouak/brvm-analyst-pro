@@ -8,9 +8,9 @@ interface Props {
   resultatNet: number;
 }
 
-const VERT = '#2e9e5b';
-const ROUGE = '#c0392b';
-const GRIS = '#4b5563';
+const VERT = 'rgb(var(--color-up))';
+const ROUGE = 'rgb(var(--color-down))';
+const GRIS = 'rgb(var(--color-muted))';
 
 interface Barre { libelle: string; debut: number; fin: number; total: boolean }
 
@@ -36,7 +36,7 @@ export default function CascadeResultat(p: Props) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img"
       aria-label={`Cascade du résultat : exploitation ${fmtFcfa(p.resultatExploitation)}, hors exploitation ${fmtFcfa(p.horsExploitation)}, avant impôt ${fmtFcfa(p.resultatAvantImpot)}, impôt ${fmtFcfa(p.impot)}, net ${fmtFcfa(p.resultatNet)}`}>
-      <line x1={0} x2={W} y1={y(0)} y2={y(0)} stroke="#9ca3af" strokeWidth={1} />
+      <line x1={0} x2={W} y1={y(0)} y2={y(0)} stroke="rgb(var(--color-faint))" strokeWidth={1} />
       {barres.map((b, i) => {
         const x = i * pas + (pas - larg) / 2;
         const y1 = y(Math.max(b.debut, b.fin)), y2 = y(Math.min(b.debut, b.fin));
@@ -46,10 +46,10 @@ export default function CascadeResultat(p: Props) {
         return (
           <g key={b.libelle}>
             <rect x={x} y={y1} width={larg} height={Math.max(y2 - y1, 1.5)} fill={couleur} rx={2} />
-            <text x={x + larg / 2} y={y1 - 6} textAnchor="middle" fontSize={11} fill="#111111">
+            <text x={x + larg / 2} y={y1 - 6} textAnchor="middle" fontSize={12} fill="rgb(var(--color-ivory))">
               {valeur > 0 && !b.total ? '+' : ''}{fmtFcfa(valeur)}
             </text>
-            <text x={x + larg / 2} y={H - 22} textAnchor="middle" fontSize={11} fill="#4b5563">{b.libelle}</text>
+            <text x={x + larg / 2} y={H - 22} textAnchor="middle" fontSize={12} fill="rgb(var(--color-muted))">{b.libelle}</text>
           </g>
         );
       })}
