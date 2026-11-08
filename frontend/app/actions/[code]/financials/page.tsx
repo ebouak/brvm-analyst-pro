@@ -1,16 +1,18 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { fmtDateCourte, fmtFcfa } from '@/lib/format';
+import { fmtDateCourte, fmtFcfa, fmtNumber } from '@/lib/format';
 import RatioCard from '@/components/fundamentals/RatioCard';
 import FluxComptable from '@/components/fiche/FluxComptable';
 import { fluxCompteResultat, fluxBilan, type FluxCR, type FluxBilan } from '@/lib/fiche/flux';
-import { perAffichable, distributionAffichable, evolutionResultat, dividendeCourant } from '@/lib/fiche/affichage';
+import { perAffichable, distributionAffichable, evolutionResultat, dividendeCourant, titrePublication } from '@/lib/fiche/affichage';
+import { avecBpaCalcule, croissanceRnSignee, libelleValorisationSimplifiee } from '@/lib/fiche/financialsAffichage';
+import SousPageNav from '@/components/sousPage/SousPageNav';
 import { plageSurFenetre } from '@/lib/fiche/plages';
 import { computeRatios } from '@/lib/fundamentals';
 import { formatXOF, formatPct, formatRatio, formatGrowth } from '@/lib/financials/formatters';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
-import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financials/valuation';
+import { computeValuation, VERDICT_LABELS } from '@/lib/financials/valuation';
 import WeekRange52 from '@/components/financials/WeekRange52';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ChartBuilder from '@/components/financials/ChartBuilder';
@@ -38,8 +40,10 @@ interface Props {
 
 export default async function FinancialsPage({ params }: Props) {
   const code = params.code.toUpperCase();
-  const data = await loadCompanyFinancials(code);
-  if (!data) notFound();
+  const brut = await loadCompanyFinancials(code);
+  if (!brut) notFound();
+  // BPA : même source que la fiche (résultat net ÷ nombre de titres), pour tous les exercices affichés.
+  const data = { ...brut, incomeStatements: avecBpaCalcule(brut.incomeStatements, brut.instrument.shares) };
 
   // Provenance du dernier exercice publié — celui qu'affichent les cartes de tête.
   const provenance = await loadProvenance(code);
@@ -216,6 +220,7 @@ export default async function FinancialsPage({ params }: Props) {
       : { label, formule, value: fmt(v), quality: 'ok', positive: opts.positive ?? null };
   const signe = (v: number | null) => (v == null ? null : v >= 0);
   const caLong = revenuLabel === 'CA' ? "chiffre d'affaires" : revenuLabel;
+  const croissanceRn = croissanceRnSignee(rnDernier, prevIncome?.resultat_net ?? null, ratios.croissance_rn);
   const ratiosValorisation: LigneRatio[] = [
     ligne('Capitalisation boursière', "cours × nombre d'actions", ratios.capitalisation, formatXOF),
     ligne('BPA', "résultat net ÷ nombre d'actions", ratios.bpa, (x) => `${formatRatio(x)} FCFA`, { positive: signe(ratios.bpa) }),
@@ -238,7 +243,10 @@ export default async function FinancialsPage({ params }: Props) {
       ? [ligne('Dette / fonds propres', 'dette financière ÷ capitaux propres', gearing, formatRatio)]
       : []),
     ligne(`Croissance ${revenuLabel}`, 'exercice N ÷ exercice N−1', ratios.croissance_ca, formatGrowth, { positive: signe(ratios.croissance_ca) }),
-    ligne('Croissance résultat net', '(RN N − RN N−1) ÷ |RN N−1|', ratios.croissance_rn, formatGrowth, { positive: signe(ratios.croissance_rn) }),
+    // Pourcentage signé seulement si les deux exercices sont bénéficiaires ; sinon la forme en mots ci-dessous.
+    ...(croissanceRn != null
+      ? [ligne('Croissance résultat net', '(RN N − RN N−1) ÷ |RN N−1|', croissanceRn, formatGrowth, { positive: signe(croissanceRn) })]
+      : []),
     evolutionRn
       ? { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: evolutionRn, quality: 'ok', positive: null }
       : { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: '', quality: 'missing', motif: null },
@@ -261,21 +269,14 @@ export default async function FinancialsPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-6">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm">
-          <Link href="/actions" className="text-muted hover:text-white transition-colors">Marché</Link>
-          <span className="text-faint">/</span>
-          <Link href={`/actions/${code}`} className="text-muted hover:text-white transition-colors">{code}</Link>
-          <span className="text-faint">/</span>
-          <span className="text-white">Données financières</span>
-        </div>
+        <SousPageNav code={code} courant="États financiers" />
 
         {/* Page header */}
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <h1 className="font-mono font-medium text-xl tracking-tight text-ivory">{code}</h1>
+            <h1 className="font-display text-2xl text-ivory">{code}</h1>
             {data.instrument.designation && (
               <p className="text-sm text-muted">{data.instrument.designation}</p>
             )}
@@ -414,8 +415,8 @@ export default async function FinancialsPage({ params }: Props) {
         ) : (
         <div className="bg-surface border border-border rounded-xl p-4 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted">Valorisation</span>
-            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${VERDICT_COLORS[valuation.verdict]}`}>
+            <span className="text-xs text-muted">{libelleValorisationSimplifiee()}</span>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full border border-border bg-elevated text-ivory">
               {VERDICT_LABELS[valuation.verdict]}
             </span>
           </div>
@@ -438,12 +439,15 @@ export default async function FinancialsPage({ params }: Props) {
           )}
           {valuation.scoreValorisation !== null && (
             <div className="text-xs text-muted">
-              Score : <span className="tabular text-ivory font-medium">{Math.round(valuation.scoreValorisation)}/100</span>
+              Score de ce modèle : <span className="tabular text-ivory font-medium">{Math.round(valuation.scoreValorisation)}/100</span>
             </div>
           )}
           {valuation.verdict === 'inconnu' && (
             <p className="text-xs text-faint">BPA, PB ou FCF manquants pour calculer la valorisation.</p>
           )}
+          <p className="w-full text-xs text-faint">
+            Modèle indépendant : ce score ne se confond ni avec le pilier Valorisation de Combined Alpha ni avec la note de qualité.
+          </p>
         </div>
         )}
 
@@ -453,6 +457,8 @@ export default async function FinancialsPage({ params }: Props) {
             bas={ratios.cours_bas_52s}
             haut={ratios.cours_haut_52s}
             actuel={ratios.cours_actuel}
+            dateBas={plage52?.dateBas ?? null}
+            dateHaut={plage52?.dateHaut ?? null}
           />
         </div>
 
@@ -469,7 +475,7 @@ export default async function FinancialsPage({ params }: Props) {
               </div>
               <a
                 href={`/admin/import-fondamentaux?code=${code}`}
-                className="shrink-0 px-3 py-1.5 rounded-lg bg-up text-bg text-xs font-semibold hover:opacity-90 active:scale-95 transition-colors"
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-accent-ink text-bg text-xs font-semibold hover:opacity-90 active:scale-95 transition-colors"
               >
                 Importer via IA →
               </a>
@@ -486,7 +492,7 @@ export default async function FinancialsPage({ params }: Props) {
                       href={pub.source_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-up hover:underline shrink-0"
+                      className="text-xs text-accent-ink hover:underline shrink-0"
                     >
                       Voir le PDF ↗
                     </a>
@@ -503,7 +509,7 @@ export default async function FinancialsPage({ params }: Props) {
             <p className="text-muted text-sm">Aucune donnée financière ni publication disponible pour {code}.</p>
             <a
               href={`/admin/import-fondamentaux?code=${code}`}
-              className="inline-block px-4 py-2 rounded-lg bg-up text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-colors"
+              className="inline-block px-4 py-2 rounded-lg bg-accent-ink text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-colors"
             >
               Importer via IA
             </a>
@@ -521,18 +527,18 @@ export default async function FinancialsPage({ params }: Props) {
                 return (
                   <li key={p.id} className="flex flex-col gap-1 border-b border-border/40 pb-2 last:border-0">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm text-muted">{p.libelle}</span>
+                      <span className="text-sm text-muted">{p.libelle ? titrePublication(p.libelle) : ''}</span>
                       <div className="flex items-center gap-2 shrink-0">
-                        {inc && <a href="#etats" className="text-xs text-up hover:underline">Voir les états →</a>}
+                        {inc && <a href="#etats" className="text-xs text-accent-ink hover:underline">Voir les états →</a>}
                         {p.source_url && <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-ink hover:underline">PDF</a>}
                       </div>
                     </div>
                     {inc && (
                       <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-faint tabular">
-                        <span>CA&nbsp;: {inc.revenu_total != null ? (inc.revenu_total / 1e9).toFixed(1) + ' Md' : 'N/D'}</span>
-                        <span>RN&nbsp;: {inc.resultat_net != null ? (inc.resultat_net / 1e9).toFixed(1) + ' Md' : 'N/D'}</span>
-                        <span>BPA&nbsp;: {inc.benefice_par_action ?? 'N/D'}</span>
-                        <span>Div&nbsp;: {inc.dividende_par_action ?? 'N/D'}</span>
+                        <span>CA&nbsp;: {inc.revenu_total != null ? fmtFcfa(inc.revenu_total) : 'N/D'}</span>
+                        <span>RN&nbsp;: {inc.resultat_net != null ? fmtFcfa(inc.resultat_net) : 'N/D'}</span>
+                        <span>BPA&nbsp;: {inc.benefice_par_action != null ? fmtNumber(inc.benefice_par_action, 2) : 'N/D'}</span>
+                        <span>Div&nbsp;: {inc.dividende_par_action != null ? fmtNumber(inc.dividende_par_action, 2) : 'N/D'}</span>
                       </div>
                     )}
                   </li>

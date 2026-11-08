@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { fmtFcfa } from '@/lib/format';
+import { styleOnglet } from '@/components/sousPage/onglets';
 import type { FluxCR, FluxBilan, Noeud } from '@/lib/fiche/flux';
 
 interface Props {
@@ -119,8 +120,7 @@ function VueBarres({ f }: { f: FluxCR }) {
   );
 }
 
-const bouton = (actif: boolean) =>
-  `rounded-full border px-3 py-1 text-xs transition-colors ${actif ? 'border-accent text-accent-ink bg-accent/10' : 'border-border text-muted hover:text-ivory'}`;
+const bouton = styleOnglet;
 
 export default function FluxComptable({ parExercice, exercices, bilanParExercice = {} }: Props) {
   const tries = [...exercices].sort((a, b) => b - a);
