@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { fmtDateCourte } from '@/lib/format';
+import { libelleClasse } from '@/lib/fiche/quantTextes';
 import { SectionHeader, PremiumPanel, MetricCard, StatPill, Eyebrow, EmptyStatePremium } from '@/components/ui/premium';
 
 export const revalidate = 300;
@@ -14,14 +15,6 @@ function signalCls(c: string): string {
   if (c === 'High Risk / Avoid') return 'border-down/30 bg-down/15 text-down';
   return 'border-border bg-elevated text-muted';
 }
-const LIBELLE_CLASSE: Record<string, string> = {
-  'Strong Buy Quant': 'Achat fort',
-  'Buy Quant': 'Achat',
-  'Watchlist / Neutral': 'Attente',
-  'Reduce / Avoid': 'Allègement',
-  'High Risk / Avoid': 'Risque élevé',
-  'Insufficient Data': 'Données insuffisantes',
-};
 function tone(v: number | null): string {
   if (v == null) return 'text-faint';
   if (v >= 70) return 'text-up';
@@ -59,7 +52,7 @@ export default async function CombinedAlphaPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <MetricCard label="Univers BRVM" value={String(tot)} unit="titres" accent="neutral" />
             <MetricCard label="Score calculable" value={String(elig)} unit="titres" accent="gold" />
-            <MetricCard label="Signaux Achat quant" value={String(buys)} unit="titres" accent="emerald" />
+            <MetricCard label="Profils quant favorables" value={String(buys)} unit="titres" accent="emerald" />
             <MetricCard label="Meilleur score" value={top!=null?String(top):'—'} unit="/ 100" accent={top!=null&&top>=70?'emerald':'neutral'} />
           </div>
           <PremiumPanel className="overflow-hidden p-0">
@@ -94,25 +87,25 @@ export default async function CombinedAlphaPage() {
                       <td className="px-2 py-2.5 text-right tabular-nums text-xs">{r.earnings_quality_score ?? '—'}</td>
                       <td className="px-2 py-2.5 text-right tabular-nums text-xs">{r.financial_strength_score ?? '—'}</td>
                       <td className="px-2 py-2.5 text-right tabular-nums text-xs">{r.dividend_quality_score ?? '—'}</td>
-                      <td className="px-3 py-2.5"><span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap ${signalCls(r.classification)}`}>{LIBELLE_CLASSE[r.classification] ?? r.classification}</span></td>
+                      <td className="px-3 py-2.5"><span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap ${signalCls(r.classification)}`}>{libelleClasse(r.classification)}</span></td>
                     </tr>
                   );})}
                 </tbody>
               </table>
             </div>
             <div className="px-4 py-3 flex flex-wrap gap-3 border-t border-border/50 text-xs text-faint">
-              <span><span className="inline-block h-2 w-2 rounded-full bg-up mr-1.5" />Achat quant ≥ 65</span>
-              <span><span className="inline-block h-2 w-2 rounded-full bg-warn mr-1.5" />Surveiller 50–64</span>
-              <span><span className="inline-block h-2 w-2 rounded-full bg-down mr-1.5" />Éviter &lt; 50</span>
+              <span><span className="inline-block h-2 w-2 rounded-full bg-up mr-1.5" />Favorable ≥ 65</span>
+              <span><span className="inline-block h-2 w-2 rounded-full bg-warn mr-1.5" />Neutre 50–64</span>
+              <span><span className="inline-block h-2 w-2 rounded-full bg-down mr-1.5" />Défavorable &lt; 50</span>
               <span className="ml-auto">{rows.filter(r=>r.confidence_level==='high').length} fiabilité élevée · {rows.filter(r=>r.confidence_level==='medium').length} moyenne</span>
             </div>
           </PremiumPanel>
           <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-4">
             <Eyebrow>Comment lire ce classement ?</Eyebrow>
             <div className="grid md:grid-cols-3 gap-4 text-xs leading-relaxed">
-              <div><p className="font-semibold text-ivory">Le score Combined (0–100)</p><p className="text-muted mt-1">100 = excellent sur tous les piliers. 0 = très faible. Pastille : <span className="text-up font-medium">Achat quant</span> ≥65, <span className="text-warn font-medium">Surveiller</span> 50–64, <span className="text-down font-medium">Éviter</span> &lt;50. Filtre quantitatif, pas un conseil.</p></div>
+              <div><p className="font-semibold text-ivory">Le score Combined (0–100)</p><p className="text-muted mt-1">100 = excellent sur tous les piliers. 0 = très faible. Pastille : <span className="text-up font-medium">favorable</span> dès 65, <span className="text-warn font-medium">neutre</span> de 50 à 64, <span className="text-down font-medium">défavorable</span> sous 50. Filtre quantitatif, pas un conseil.</p></div>
               <div><p className="font-semibold text-ivory">Les 5 piliers</p><ul className="mt-1 space-y-1 text-muted"><li><span className="text-ivory font-medium">Valorisation 30%</span> — prix bon marché ?</li><li><span className="text-ivory font-medium">Momentum 25%</span> — tendance 3/6/12 mois</li><li><span className="text-ivory font-medium">Qualité 20%</span> — ROE & régularité</li><li><span className="text-ivory font-medium">Solidité 15%</span> — dette & trésorerie</li><li><span className="text-ivory font-medium">Dividende 10%</span> — rendement & régularité</li></ul></div>
-              <div><p className="font-semibold text-ivory">Fiabilité & garde-fous</p><p className="text-muted mt-1">Pilier manquant → poids redistribué. Fiabilité faible bloque “Achat fort”. Pénalité risque ≤25 : capitaux négatifs, pertes, illiquidité. “Données insuffisantes” = non calculable.</p></div>
+              <div><p className="font-semibold text-ivory">Fiabilité & garde-fous</p><p className="text-muted mt-1">Pilier manquant → poids redistribué. Fiabilité faible bloque le profil « très favorable ». Pénalité risque ≤25 : capitaux négatifs, pertes, illiquidité. “Données insuffisantes” = non calculable.</p></div>
             </div>
           </div>
           <details className="rounded-card border border-border bg-elevated/40 px-5 py-4"><summary className="cursor-pointer text-sm font-medium text-ivory">Méthodologie détaillée</summary><div className="mt-3 text-xs leading-relaxed text-muted space-y-2"><p>Combined Alpha = 30% Value + 25% Momentum + 20% Quality + 15% Strength + 10% Dividend − pénalité risque (≤25). Momentum = 0,40×M12_1 + 0,25×M6M + 0,15×M3M + 0,10×52w + 0,10×tendance − pénalités liquidité/volatilité. Percentile sectoriel si ≥5 comparables sinon global, winsorisation 5–95%.</p><p className="text-faint italic">Score propriétaire Westbourse, indicatif, ne constitue pas un conseil. Compléter par fondamentaux et liquidité.</p></div></details>

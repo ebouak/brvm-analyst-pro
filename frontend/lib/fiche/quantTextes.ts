@@ -106,3 +106,20 @@ export function noteEcartArrondi(c: ChaineGardeFous): string | null {
   if (ecart < 0.05) return null;
   return `écart de ${nf(ecart, 1)} dû à l'arrondi du score`;
 }
+
+/** Classes du modèle Combined Alpha, dites en constats et non en consignes. */
+const CLASSES_QUANT: Record<string, string> = {
+  'Strong Buy Quant': 'Profil quant très favorable',
+  'Buy Quant': 'Profil quant favorable',
+  'Watchlist / Neutral': 'Profil neutre',
+  'Reduce / Avoid': 'Profil défavorable',
+  'High Risk / Avoid': 'Profil défavorable, risque élevé',
+  'Insufficient Data': 'Données insuffisantes',
+};
+
+export function libelleClasse(c: string): string {
+  return CLASSES_QUANT[c] ?? c;
+}
+
+/** Phrase des seuils du score Combined, à l'identique partout. */
+export const SEUILS_CLASSES = '≥ 65 : profil favorable, 50 à 64 : neutre, sous 50 : défavorable';

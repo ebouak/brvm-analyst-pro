@@ -3,22 +3,14 @@ import { fmtDateCourte } from '@/lib/format';
 import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
 import { decomposerScore, calculeEstAncien } from '@/lib/fiche/quant';
-import { traduireNote, raisonAffichable, chaineGardeFous, penaliteRetiree, noteEcartArrondi } from '@/lib/fiche/quantTextes';
+import { traduireNote, raisonAffichable, chaineGardeFous, penaliteRetiree, noteEcartArrondi, libelleClasse, SEUILS_CLASSES } from '@/lib/fiche/quantTextes';
 import SousPageNav from '@/components/sousPage/SousPageNav';
 import { SectionHeader, PremiumPanel, StatPill, EmptyStatePremium } from '@/components/ui/premium';
 
 export const revalidate = 300;
 
-const CLASSES: Record<string, string> = {
-  'Strong Buy Quant': 'Achat quant fort',
-  'Buy Quant': 'Achat quant',
-  'Watchlist / Neutral': 'À surveiller',
-  'Reduce / Avoid': 'Alléger / éviter',
-  'High Risk / Avoid': 'Risque élevé · éviter',
-  'Insufficient Data': 'Données insuffisantes',
-};
 const Nb = ({ children }: { children: React.ReactNode }) => <span className="tabular">{children}</span>;
-const fr = (c: string) => CLASSES[c] ?? c;
+const fr = libelleClasse;
 const cf = (c: string) => (c === 'high' ? 'Élevée' : c === 'medium' ? 'Moyenne' : c === 'low' ? 'Faible' : 'Insuffisante');
 const ef = (s: string) => (s === 'eligible' ? 'Éligible' : s === 'eligible_with_warning' ? 'Éligible (réserve)' : 'Non éligible');
 // Un niveau de score n'est pas une variation de cours : pas de vert/rouge, la valeur reste en texte principal.
@@ -47,7 +39,7 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
   const { data: inst } = await supabase.from('brvm_instruments').select('code,designation,secteur,famille_comptable').eq('code', symbol).maybeSingle();
   if (!inst) notFound();
   const i = inst as { code: string; designation: string | null; secteur: string | null; famille_comptable: string | null };
-  // Toujours afficher la fiche WB_COMBINED_ALPHA (pas WB_PRICE_MOMENTUM) : sinon SNTS affichait "Strong Positive Momentum" au lieu de "Achat quant".
+  // Toujours afficher la fiche WB_COMBINED_ALPHA (pas WB_PRICE_MOMENTUM) : sinon SNTS affichait "Strong Positive Momentum" au lieu du profil quant favorable.
   const { data: runCA } = await supabase.from('quant_model_runs').select('id').eq('model_code', 'WB_COMBINED_ALPHA').order('calculation_date', { ascending: false }).limit(1).maybeSingle();
   const runId = (runCA as { id: string } | null)?.id ?? null;
   const { data: scores } = runId
@@ -126,7 +118,7 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
                 <span className="text-sm text-faint">/ 100</span>
                 <span className={`ml-auto inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${sigC(latest.classification)}`}>{fr(latest.classification)}</span>
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-muted">Combine les 5 piliers puis retire une pénalité de risque (25 pts au plus). <span className="font-medium text-ivory">≥ 65 : Achat quant</span>, 50–64 : À surveiller, &lt; 50 : Éviter.</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted">Combine les 5 piliers puis retire une pénalité de risque (25 pts au plus). {SEUILS_CLASSES}.</p>
               <p className="mt-2 text-xs text-faint">Fiabilité {cf(latest.confidence_level)} · {ef(latest.eligibility_status)}{latest.liquidity_score != null ? ` · Liquidité ${latest.liquidity_score}/100` : ''}</p>
             </PremiumPanel>
             <PremiumPanel className="p-5">
