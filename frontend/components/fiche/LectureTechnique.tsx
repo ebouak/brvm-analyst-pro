@@ -9,7 +9,13 @@ interface Props {
   score: number | null;
   qualiteDonnees: number | null;
   graphiques: ReactNode;
-  synthese: { haussiers: number; neutres: number; baissiers: number; tendancePct: number | null } | null;
+  synthese: {
+    haussiers: number; neutres: number; baissiers: number; tendancePct: number | null;
+    /** Tendance court terme (hausse / baisse / neutre), lue sur les mêmes indicateurs. */
+    tendance?: string | null;
+    /** Détail de chaque indicateur de la synthèse, déplié à la demande. */
+    indicateurs?: { texte: string; sens: 'up' | 'down' | 'neutral' | 'na' }[];
+  } | null;
   saisonnalite: ReactNode;
   detections: { label: string; ok: boolean }[];
   position: ReactNode;
@@ -86,7 +92,26 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
             <p className="tabular mt-2 text-[13px] text-muted">
               {synthese.haussiers} haussiers · {synthese.neutres} neutres · {synthese.baissiers} baissiers
             </p>
-            {synthese.tendancePct != null && <p className="tabular mt-1 text-xs text-faint">Tendance {Math.round(synthese.tendancePct)} %</p>}
+            {(synthese.tendance || synthese.tendancePct != null) && (
+              <p className="tabular mt-1 text-xs text-faint">
+                Tendance court terme{synthese.tendance ? ` : ${synthese.tendance}` : ''}{synthese.tendancePct != null ? ` · ${Math.round(synthese.tendancePct)} %` : ''}
+              </p>
+            )}
+            {synthese.indicateurs && synthese.indicateurs.length > 0 && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs text-muted hover:text-ivory">Les {synthese.indicateurs.length} indicateurs</summary>
+                <ul className="mt-2 space-y-1.5">
+                  {synthese.indicateurs.map((ind, i) => (
+                    <li key={`${i}-${ind.texte}`} className="flex gap-2 text-xs text-muted">
+                      <span aria-hidden className={ind.sens === 'up' ? 'text-up' : ind.sens === 'down' ? 'text-down' : 'text-faint'}>
+                        {ind.sens === 'up' ? '↑' : ind.sens === 'down' ? '↓' : ind.sens === 'neutral' ? '→' : '·'}
+                      </span>
+                      <span className={ind.sens === 'na' ? 'italic text-faint' : ''}>{ind.texte}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </div>
         )}
         <div className="rounded-card border border-border p-4">{saisonnalite}</div>
@@ -98,8 +123,13 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
             ) : (
               <p className="mt-2 text-[13px] text-muted">Aucune détection active.</p>
             )}
-            {inactives.length > 0 && actives.length > 0 && (
-              <p className="mt-2 text-xs text-faint">{inactives.length} autre{inactives.length > 1 ? 's' : ''} détection{inactives.length > 1 ? 's' : ''} non déclenchée{inactives.length > 1 ? 's' : ''}.</p>
+            {inactives.length > 0 && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs text-faint hover:text-muted">
+                  {inactives.length} {actives.length > 0 ? 'autre' : ''}{actives.length > 0 && inactives.length > 1 ? 's' : ''} détection{inactives.length > 1 ? 's' : ''} non déclenchée{inactives.length > 1 ? 's' : ''}
+                </summary>
+                <ul className="mt-1.5 space-y-1">{inactives.map((d) => <li key={d.label} className="text-xs text-faint">{d.label}</li>)}</ul>
+              </details>
             )}
           </div>
         )}

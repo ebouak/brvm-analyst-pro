@@ -9,7 +9,7 @@ const TONE: Record<IndicatorReading['tone'], { label: string; cls: string }> = {
 };
 
 /** Questions IA prêtes à l'emploi (deep-link vers l'assistant pré-rempli). */
-const QUESTIONS = [
+export const QUESTIONS_INDICATEURS = [
   'Que disent le RSI et le MACD aujourd’hui ?',
   'Quel est le risque à court terme ?',
   'Faut-il acheter, vendre ou conserver ?',
@@ -20,7 +20,7 @@ const QUESTIONS = [
  * Encart de lecture automatique des indicateurs + boutons « Expliquer »
  * (questions prêtes à l'emploi, deep-link vers l'assistant pré-rempli).
  */
-export default function IndicatorCommentary({ reading, code }: { reading: IndicatorReading; code: string }) {
+export default function IndicatorCommentary({ reading, code, sansQuestions = false }: { reading: IndicatorReading; code: string; sansQuestions?: boolean }) {
   if (reading.points.length === 0) return null;
   const t = TONE[reading.tone];
 
@@ -37,9 +37,10 @@ export default function IndicatorCommentary({ reading, code }: { reading: Indica
         </ul>
       </div>
 
+      {!sansQuestions && (
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] text-faint">Expliquer :</span>
-        {QUESTIONS.map((q) => (
+        {QUESTIONS_INDICATEURS.map((q) => (
           <Link
             key={q}
             href={`/assistant?symbole=${code}&q=${encodeURIComponent(q)}`}
@@ -49,6 +50,7 @@ export default function IndicatorCommentary({ reading, code }: { reading: Indica
           </Link>
         ))}
       </div>
+      )}
     </div>
   );
 }

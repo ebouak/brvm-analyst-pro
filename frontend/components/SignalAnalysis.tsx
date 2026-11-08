@@ -9,6 +9,8 @@ interface Props {
   technical: TechnicalReading;
   position: PositionContext;
   dividend: DividendTiming;
+  /** La position est déjà rendue à côté (fiche action) : ne pas la répéter. */
+  masquerPosition?: boolean;
 }
 
 const TONE_RING: Record<TechnicalReading['tone'], string> = {
@@ -22,7 +24,7 @@ const TONE_RING: Record<TechnicalReading['tone'], string> = {
  * Analyse synthétique du signal : verdict nuancé réconciliant lecture technique,
  * contexte de position (PRU) et timing dividende. Remplace l'ancien « SELL/BUY » sec.
  */
-export default function SignalAnalysis({ synthesis, technical, position, dividend }: Props) {
+export default function SignalAnalysis({ synthesis, technical, position, dividend, masquerPosition = false }: Props) {
   return (
     <div className="space-y-4">
       {/* Verdict de synthèse */}
@@ -64,8 +66,9 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
       </div>
 
       {/* Deux colonnes : Position | Dividende */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className={`grid grid-cols-1 gap-3 ${masquerPosition ? '' : 'sm:grid-cols-2'}`}>
         {/* Position */}
+        {!masquerPosition && (
         <div className="rounded-card border border-border bg-surface p-4">
           <p className="text-[11px] text-faint mb-2">Votre position</p>
           {position.held ? (
@@ -86,6 +89,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
           ) : null}
           <p className="mt-2 text-xs text-muted leading-relaxed">{position.reading}</p>
         </div>
+        )}
 
         {/* Dividende */}
         <div className="rounded-card border border-border bg-surface p-4">
