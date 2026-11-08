@@ -132,7 +132,7 @@ export function gabaritDividendes(v: Valeur, lignes: LigneDividende[], coursActu
         .slice(0, 8)
         .map(
           (d) =>
-            `· Exercice ${d.exercice} : ${nombre(d.montant, Number.isInteger(d.montant) ? 0 : 2)} ${d.devise ?? 'FCFA'} par action, ${base(d.base_fiscale)}${
+            `· Exercice ${d.exercice} : ${nombre(d.montant, Number.isInteger(d.montant) ? 0 : 2)} ${!d.devise || d.devise === 'XOF' ? 'FCFA' : d.devise} par action, ${base(d.base_fiscale)}${
               d.ex_date ? `, détaché le ${dateLongue(d.ex_date)}` : ''
             }${d.payment_date ? `, payé le ${dateLongue(d.payment_date)}` : ''}`,
         )
@@ -188,7 +188,10 @@ export function gabaritComptes(v: Valeur, exercices: ComptesExercice[], demande:
         return;
       }
       const e = ecart(a, b)!;
-      comp.push(`${l} ${Math.round(e * 100) === 0 ? 'stable' : `${e > 0 ? 'en hausse' : 'en baisse'} de ${pct(e)}`}`);
+      if (Math.round(e * 100) === 0) comp.push(`${l} stable`);
+      // Deux pertes : « en hausse » serait ambigu ; on dit si la perte se réduit ou se creuse.
+      else if (a < 0) comp.push(`${l} : perte ${e > 0 ? 'réduite' : 'creusée'} de ${pct(e)}`);
+      else comp.push(`${l} ${e > 0 ? 'en hausse' : 'en baisse'} de ${pct(e)}`);
     };
     compare('chiffre d’affaires', prec.revenu_total, ex.revenu_total);
     compare('résultat net', prec.resultat_net, ex.resultat_net);

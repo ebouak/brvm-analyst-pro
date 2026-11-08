@@ -92,6 +92,9 @@ describe('gabarits Jev', () => {
     expect(t).toContain('Comptes annuels 2024');
     expect(t).toContain('500,0 M FCFA (bénéfice)');
     expect(t).toContain('d’une perte à un bénéfice');
+    const pertes = espaces(gabaritComptes(v, [ex(2024, -400_000_000), ex(2025, -100_000_000)], null));
+    expect(pertes).toContain('résultat net : perte réduite de 75,00 %');
+    expect(espaces(gabaritDividendes(v, [{ exercice: 2021, montant: 66.15, devise: 'XOF', ex_date: null, payment_date: null, base_fiscale: 'net' }], null))).toContain('66,15 FCFA');
     expect(t).not.toContain('Résultat d’exploitation');
     expect(gabaritComptes(v, [], null)).toMatch(/Aucun compte/);
   });

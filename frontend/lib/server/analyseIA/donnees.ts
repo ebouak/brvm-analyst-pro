@@ -105,11 +105,20 @@ export async function lireActualites(db: SupabaseClient, code: string): Promise<
     .lte('date_publication', jour)
     .order('date_publication', { ascending: false })
     .limit(15);
-  const actus = (data ?? []).map((n) => ({
-    titre: tronquer(n.titre, 200) ?? '',
-    date: n.date_publication as string,
-    source: (n.source_label as string | null) ?? null,
-  }));
+  // Un même titre repris par plusieurs sites (« … - Abidjan.net », « … - news.abidjan.net ») n'est gardé qu'une fois.
+  const vus = new Set<string>();
+  const actus = (data ?? [])
+    .map((n) => ({
+      titre: tronquer(n.titre, 200) ?? '',
+      date: n.date_publication as string,
+      source: (n.source_label as string | null) ?? null,
+    }))
+    .filter((a) => {
+      const cle = a.titre.split(' - ')[0]!.trim().toLowerCase();
+      if (vus.has(cle)) return false;
+      vus.add(cle);
+      return true;
+    });
   return { donnees: actus, source: { libelle: 'Actualités', date: plusRecente(actus.map((a) => a.date), jour) } };
 }
 
