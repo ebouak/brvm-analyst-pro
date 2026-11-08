@@ -5,15 +5,17 @@ interface Props {
   value: string;
   quality?: Quality;
   positive?: boolean | null;
+  /** Raison d'absence (« non calculable, perte »…) : remplace « non disponible ». */
+  motif?: string | null;
 }
 
 /** Ligne ratio dans une carte de section (style Trading 212, dark finance). */
-export default function RatioCard({ label, value, quality = 'ok', positive }: Props) {
+export default function RatioCard({ label, value, quality = 'ok', positive, motif }: Props) {
   if (quality === 'missing') {
     return (
       <div className="flex items-center justify-between py-2 text-sm">
         <span className="text-muted">{label}</span>
-        <span className="text-muted">non disponible</span>
+        <span className="text-muted">{motif ?? 'non disponible'}</span>
       </div>
     );
   }

@@ -8,7 +8,7 @@ import RangeBar from './RangeBar';
 import EditFundamentalsModal from './EditFundamentalsModal';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ValueTrapBadge from './ValueTrapBadge';
-import { perAffichable, distributionAffichable } from '@/lib/fiche/affichage';
+import { perAffichable, distributionAffichable, evolutionResultat } from '@/lib/fiche/affichage';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 
 export interface FundamentalsPanelProps {
@@ -60,7 +60,10 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
   const last = sortedHist[sortedHist.length - 1];
   const prev = sortedHist[sortedHist.length - 2];
   const croissanceCA = last?.revenue && prev?.revenue ? last.revenue / prev.revenue - 1 : null;
-  const croissanceRN = last?.net_income && prev?.net_income ? last.net_income / prev.net_income - 1 : null;
+  const evolutionRN = evolutionResultat(last?.net_income ?? null, prev?.net_income ?? null);
+  const evolutionRNPositive = last?.net_income != null && prev?.net_income != null
+    ? (last.net_income < 0 && prev.net_income < 0 ? Math.abs(last.net_income) < Math.abs(prev.net_income) : last.net_income >= prev.net_income)
+    : null;
 
   const divSuffix = p.dividendeExercice != null && !p.dividendeVerifie
     ? ` (ex. ${p.dividendeExercice})` : '';
@@ -117,7 +120,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         </Section>
 
         <Section title="Évaluation">
-          <RatioCard label="PER (P/E)" value={per.valeur != null ? num(per.valeur) : per.motif ?? '—'} quality={per.valeur == null ? 'missing' : assessQuality('per', per.valeur)} />
+          <RatioCard label="PER (P/E)" value={per.valeur != null ? num(per.valeur) : per.motif ?? '—'} quality={per.valeur == null ? 'missing' : assessQuality('per', per.valeur)} motif={per.motif} />
           <RatioCard label="P/B" value={num(r.pb)} quality={assessQuality('pb', r.pb)} />
           {fam.ps && (
             <RatioCard label={p.famille === 'assurance' ? 'P/Primes' : 'P/S'} value={num(r.ps)} quality={assessQuality('ps', r.ps)} />
@@ -132,18 +135,18 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         {fam.gearing ? (
           <Section title="Effet de levier">
             <RatioCard label="Dette / Capitaux propres" value={num(r.gearing)} quality={assessQuality('gearing', r.gearing)} />
-            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} />
+            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} motif={dist.motif} />
           </Section>
         ) : (
           <Section title="Solidité & distribution">
             <RatioCard label="Capitaux propres" value={p.inputs.equity != null ? fmtFcfa(p.inputs.equity) + ' FCFA' : '—'} quality={p.inputs.equity == null ? 'missing' : 'ok'} />
-            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} />
+            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} motif={dist.motif} />
           </Section>
         )}
 
         <Section title="Croissance (1 an)">
           <RatioCard label={`Croissance ${fam.revenu}`} value={pct(croissanceCA)} positive={croissanceCA != null ? croissanceCA >= 0 : null} quality={croissanceCA == null ? 'missing' : 'ok'} />
-          <RatioCard label="Croissance RN" value={pct(croissanceRN)} positive={croissanceRN != null ? croissanceRN >= 0 : null} quality={croissanceRN == null ? 'missing' : 'ok'} />
+          <RatioCard label="Évolution du résultat net" value={evolutionRN ?? '—'} positive={evolutionRNPositive} quality={evolutionRN == null ? 'missing' : 'ok'} />
         </Section>
       </div>
 
