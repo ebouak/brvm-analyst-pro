@@ -12,7 +12,6 @@ const TONE: Record<IndicatorReading['tone'], { label: string; cls: string }> = {
 export const QUESTIONS_INDICATEURS = [
   'Que disent le RSI et le MACD aujourd’hui ?',
   'Quel est le risque à court terme ?',
-  'Faut-il acheter, vendre ou conserver ?',
   'Pourquoi ce signal aujourd’hui ?',
 ];
 

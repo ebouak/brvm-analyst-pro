@@ -104,7 +104,7 @@ describe('orchestration', () => {
   });
 
   it('données personnelles masquées avant le classement et le LLM', async () => {
-    const classer = vi.fn(async () => ({ voie: 'ia' }) as const);
+    const classer = vi.fn(async (_q: string) => ({ voie: 'ia' }) as const);
     const llm = vi.fn(async () => ({ texte: 'ok', retours: [], sources: [] }));
     const t = deps({ classer, llm });
     await repondreAnalyse({ question: 'écrivez à moi@exemple.com', historique: [], valeur }, t.d);

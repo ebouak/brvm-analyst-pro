@@ -24,7 +24,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com
 import PriceChart, { type PricePoint, type ChartMarker } from '@/components/PriceChart';
 import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
-import { QUESTIONS_INDICATEURS } from '@/components/IndicatorCommentary';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import RatingBadge from '@/components/RatingBadge';
@@ -43,6 +42,7 @@ import { chaineGardeFous, resumeGardeFous } from '@/lib/fiche/quantTextes';
 import { libelleSignal } from '@/lib/signalLabel';
 import { Chapitre } from '@/components/fiche/Chapitre';
 import { Essentiel, type CarteEssentiel } from '@/components/fiche/Essentiel';
+import { AnalyseIA } from '@/components/fiche/AnalyseIA';
 import { JaugesPlage } from '@/components/fiche/JaugesPlage';
 import { SeanceIntraday } from '@/components/fiche/SeanceIntraday';
 import { LectureTechnique } from '@/components/fiche/LectureTechnique';
@@ -839,6 +839,7 @@ export default async function InstrumentPage({
   // Chapitres de la barre collante (L'essentiel seulement s'il est rendu).
   const navSections = [
     ...(cartes.length > 0 ? [{ id: 'essentiel', label: 'L’essentiel' }] : []),
+    { id: 'analyse-ia', label: 'Analyse par IA' },
     { id: 'aujourdhui', label: 'Aujourd’hui' },
     { id: 'titre', label: 'Le titre' },
     { id: 'entreprise', label: 'L’entreprise' },
@@ -1090,6 +1091,9 @@ export default async function InstrumentPage({
           L'ESSENTIEL
       ══════════════════════════════════════════════════ */}
       <Essentiel cartes={cartes} />
+
+      {/* Analyse par IA : réponses Jev (type-safe) ou rédigées par IA, provenance et sources affichées. */}
+      <AnalyseIA code={code} nom={instrument?.designation ?? null} exerciceComptes={economieSociete?.exercice ?? null} />
 
       {/* ══════════════════════════════════════════════════
           01 · AUJOURD'HUI
@@ -1450,7 +1454,7 @@ export default async function InstrumentPage({
           04 · MON SUIVI
       ══════════════════════════════════════════════════ */}
       <section className="space-y-6">
-        <Chapitre id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils, l'assistant et les discussions sur cette valeur." />
+        <Chapitre id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
 
         <div id="these" className="scroll-mt-24">
           <Eyebrow className="mb-3">Ma thèse</Eyebrow>
@@ -1489,24 +1493,6 @@ export default async function InstrumentPage({
             </div>
           </div>
         </div>
-
-        {/* Questions à l'assistant — même verrou qu'avant (`indicateurs_techniques`). */}
-        {gateIndicateurs.allowed && (
-          <div>
-            <Eyebrow className="mb-3">Demander à l&apos;assistant</Eyebrow>
-            <div className="flex flex-wrap gap-2">
-              {QUESTIONS_INDICATEURS.map((q) => (
-                <Link
-                  key={q}
-                  href={`/assistant?symbole=${code}&q=${encodeURIComponent(q)}`}
-                  className="inline-flex min-h-[36px] items-center rounded-full border border-gold/30 bg-gold/[0.05] px-3 py-1 text-xs text-gold/90 transition-colors hover:bg-gold/10"
-                >
-                  {q}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div id="discussions" className="space-y-3 scroll-mt-24">
           <div className="flex items-center justify-between">
