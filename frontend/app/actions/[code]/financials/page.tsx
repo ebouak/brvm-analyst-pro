@@ -10,6 +10,9 @@ import SousPageNav from '@/components/sousPage/SousPageNav';
 import { plage52Semaines } from '@/lib/fiche/plages';
 import { exerciceRetenu, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
 import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { comptesIfrs } from '@/lib/fiche/comptesIfrs';
+import { chargerComptesIfrs } from '@/lib/fiche/comptesIfrsServeur';
+import ComptesIfrs from '@/components/fiche/ComptesIfrs';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { formatXOF, formatPct, formatRatio, formatGrowth } from '@/lib/financials/formatters';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
@@ -82,6 +85,15 @@ export default async function FinancialsPage({ params }: Props) {
     capitalisation: capitalisationFcfa({ valorisation: data.latestDaily?.valorisation, cours: coursRef, titres: data.instrument.shares }),
   });
   const mentionJeu = mentionSecondJeu(retenu.secondJeu);
+  // Comptes IFRS du même exercice, s'ils sont publiés : en regard, jamais à la place des SYSCOHADA.
+  const comparatifIfrs = retenu.source === 'syscohada'
+    ? comptesIfrs({
+      ligne: await chargerComptesIfrs(createClient(), code, retenu.exercice),
+      exercice: retenu.exercice,
+      syscohada: { resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires, capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere },
+      cours: coursRef, titres: data.instrument.shares, capitalisation: rb.capitalisation,
+    })
+    : null;
 
   const ratiosBase = calculateFundamentals({
     coursActuel: data.latestDaily?.cours_jour ?? null,
@@ -397,6 +409,7 @@ export default async function FinancialsPage({ params }: Props) {
                 </div>
               </div>
               {mentionJeu && <p className="mt-3 text-xs text-faint">{mentionJeu}</p>}
+              {comparatifIfrs && <ComptesIfrs c={comparatifIfrs} />}
             </div>
 
             {/* Analyse graphique pluriannuelle */}
