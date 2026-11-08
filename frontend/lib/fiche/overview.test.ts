@@ -76,7 +76,7 @@ describe('lignesStatistiques', () => {
   it('rend dividende, rendement, note, alpha et événement à venir quand ils existent', () => {
     const l = parCle({
       ...base,
-      rendementDividende: { pct: 6.2, exercice: 2025, net: true },
+      rendementDividende: { pct: 6.2, exercice: 2021, net: true, ancien: true },
       rendementNetIrvm: null,
       dernierDividende: { montant: 120, exercice: 2025, exDate: '2026-07-01' },
       noteTechnique: 'B',
@@ -84,7 +84,8 @@ describe('lignesStatistiques', () => {
       prochainEvenement: { titre: 'Assemblée générale ordinaire', date: '2026-12-01' },
     });
     expect(l.rendement!.libelle).toBe('Rendement du dividende net');
-    expect(l.rendement!.valeur).toBe('6,20 % (ex. 2025)');
+    expect(l.rendement!.valeur).toBe('6,20 %');
+    expect(l.rendement!.complement).toBe("ex. 2021, antérieur de plus d'un an au dernier exercice publié");
     expect(l.dividende!.valeur).toBe('120 FCFA');
     expect(l.dividende!.complement).toBe('ex. 2025, détaché le 1er juillet 2026');
     expect(l.note!.valeur).toBe('B');

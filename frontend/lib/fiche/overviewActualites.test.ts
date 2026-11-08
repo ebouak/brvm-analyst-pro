@@ -9,6 +9,8 @@ const news = [
   { id: 'n1', titre: 'BRVM : SETAO réduit fortement ses pertes de 72% en 2025 - Sika Finance', date_publication: '2026-04-20', source_label: 'Google News – SETAO', source: 'brvm', source_url: 'https://news.google.com/x' },
   { id: 'n2', titre: 'BRVM : SETAO réduit fortement ses pertes de 72% en 2025 - sikafinance.com', date_publication: '2026-04-20', source_label: 'Google News – SETAO', source: 'brvm', source_url: 'https://news.google.com/y' },
   { id: 'n3', titre: 'Article futur', date_publication: '2026-12-01', source_label: 'Sika Finance', source: 'autre', source_url: 'https://sikafinance.com/z' },
+  { id: 'n5', titre: 'Le titre SETAO réalise la meilleure performance. - Leral.net', date_publication: '2026-03-27', source_label: 'Sénégal', source: 'autre', source_url: 'https://leral.net/a' },
+  { id: 'n6', titre: 'Le titre SETAO réalise la meilleure performance.', date_publication: '2026-03-27', source_label: 'leral.net', source: 'autre', source_url: 'https://leral.net/b' },
   { id: 'n4', titre: 'Résultats annuels', date_publication: '2026-11-02', source_label: 'Sika Finance', source: 'autre', source_url: 'javascript:alert(1)' },
 ];
 
@@ -17,7 +19,7 @@ describe('regrouperActualites', () => {
 
   it('sépare publications officielles et presse', () => {
     expect(g.officielles.map((x) => x.id)).toEqual(['pub-p1', 'pub-p2']);
-    expect(g.presse.map((x) => x.id)).toEqual(['news-n4', 'news-n1']);
+    expect(g.presse.map((x) => x.id)).toEqual(['news-n4', 'news-n1', 'news-n5']);
   });
 
   it('retire le suffixe de source des titres Google News et en fait la source', () => {
@@ -26,13 +28,20 @@ describe('regrouperActualites', () => {
     expect(n1.source).toBe('Sika Finance');
   });
 
+  it('retire un suffixe de nom de domaine et dédoublonne la reprise sans suffixe', () => {
+    const n5 = g.presse.find((x) => x.id === 'news-n5')!;
+    expect(n5.titre).toBe('Le titre SETAO réalise la meilleure performance.');
+    expect(n5.source).toBe('Sénégal');
+    expect(g.presse.some((x) => x.id === 'news-n6')).toBe(false);
+  });
+
   it('dédoublonne un même titre repris par deux sites et écarte le futur', () => {
     expect(g.presse.some((x) => x.id === 'news-n2')).toBe(false);
     expect(g.presse.some((x) => x.id === 'news-n3')).toBe(false);
   });
 
   it('trie « Tout » par date décroissante, officiel d’abord à date égale', () => {
-    expect(g.tout.map((x) => x.id)).toEqual(['pub-p1', 'news-n4', 'pub-p2', 'news-n1']);
+    expect(g.tout.map((x) => x.id)).toEqual(['pub-p1', 'news-n4', 'pub-p2', 'news-n1', 'news-n5']);
   });
 
   it('date en toutes lettres, source officielle BRVM, lien seulement http(s)', () => {

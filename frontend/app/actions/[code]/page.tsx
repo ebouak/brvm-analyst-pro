@@ -918,7 +918,7 @@ export default async function InstrumentPage({
     bpa: retenu.source ? ratiosPublics.bpa : null,
     per: retenu.source ? ratiosPublics.per : null,
     titres: shares,
-    rendementDividende: divYield != null ? { pct: divYield, exercice: divExercice, net: divDejaNet } : null,
+    rendementDividende: divYield != null ? { pct: divYield, exercice: divExercice, net: divDejaNet, ancien: divCourant?.ancien ?? false } : null,
     rendementNetIrvm: divYieldNet,
     dernierDividende: lastDiv ? { montant: lastDiv.montant, exercice: lastDiv.exercice, exDate: lastDiv.ex_date } : null,
     volume: last.volume ?? null,

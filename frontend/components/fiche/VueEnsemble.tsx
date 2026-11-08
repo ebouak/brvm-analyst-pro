@@ -73,7 +73,7 @@ export function VueEnsemble({
                   <div key={l.cle} className="flex items-baseline justify-between gap-3 py-2">
                     <dt className="text-xs text-muted">{l.libelle}</dt>
                     <dd className="min-w-0 text-right">
-                      <span className="tabular text-sm text-ivory">{l.valeur}</span>
+                      <span className={`text-sm text-ivory ${/\d/.test(l.valeur) ? 'tabular' : ''}`}>{l.valeur}</span>
                       {l.complement && <span className="block text-[11px] text-faint">{l.complement}</span>}
                     </dd>
                   </div>

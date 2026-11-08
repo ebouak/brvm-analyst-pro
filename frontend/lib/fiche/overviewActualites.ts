@@ -35,11 +35,19 @@ export function lienSur(u: string | null | undefined): string | null {
 function separerSource(n: NewsEntree): { titre: string; source: string } {
   const agregateur = !n.source_label || /^google news/i.test(n.source_label);
   const i = n.titre.lastIndexOf(' - ');
-  if (agregateur && i > 0) return { titre: n.titre.slice(0, i).trim(), source: n.titre.slice(i + 3).trim() };
+  const suffixe = i > 0 ? n.titre.slice(i + 3).trim() : '';
+  if (agregateur && suffixe) return { titre: n.titre.slice(0, i).trim(), source: suffixe };
+  // Hors agrégateur, un suffixe qui n'est qu'un nom de domaine (« - Leral.net ») est retiré du titre.
+  if (suffixe && /^[\w-]+(\.[\w-]+)+$/i.test(suffixe)) return { titre: n.titre.slice(0, i).trim(), source: n.source_label ?? suffixe };
   return { titre: n.titre.trim(), source: n.source_label ?? 'Presse' };
 }
 
-const cle = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+/** Clé de dédoublonnage : sans accents, casse, ponctuation finale ni suffixe de site. */
+const cle = (t: string) => {
+  const i = t.lastIndexOf(' - ');
+  const sans = i > 0 && t.length - i <= 43 ? t.slice(0, i) : t;
+  return sans.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[\s.…!?]+$/g, '').replace(/\s+/g, ' ').trim();
+};
 const parDate = (a: ActuItem, b: ActuItem) =>
   b.dateIso.localeCompare(a.dateIso) || (a.nature === b.nature ? 0 : a.nature === 'officielle' ? -1 : 1);
 

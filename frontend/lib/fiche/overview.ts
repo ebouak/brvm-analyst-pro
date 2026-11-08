@@ -9,7 +9,7 @@
  * PER prévisionnel : la BRVM n'en publie pas.
  */
 import { fmtFcfa, fmtNumber } from '@/lib/format';
-import { evolutionResultat, evolutionResultatDetail, formatRendementDividende, insecable, nombreFr, type Affichable } from './affichage';
+import { evolutionResultat, evolutionResultatDetail, insecable, nombreFr, rendementDividendeParts, type Affichable } from './affichage';
 
 const nf = (x: number, d: number) => x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
 const moins = (s: string) => s.replace('-', '−');
@@ -49,7 +49,8 @@ export interface EntreeStats {
   bpa: Affichable | null;
   per: Affichable | null;
   titres: number | null;
-  rendementDividende: { pct: number | null; exercice: number | null; net: boolean } | null;
+  /** `ancien` : exercice du dividende antérieur de plus d'un an au dernier exercice publié (`dividendeCourant`). */
+  rendementDividende: { pct: number | null; exercice: number | null; net: boolean; ancien?: boolean } | null;
   rendementNetIrvm: number | null;
   dernierDividende: { montant: number; exercice: number | null; exDate: string | null } | null;
   volume: number | null;
@@ -92,11 +93,15 @@ export function lignesStatistiques(e: EntreeStats): LigneStat[] {
     if (e.per.valeur != null) add('per', 'PER', `${nombreFr(e.per.valeur, 2)}x`);
     else if (e.per.motif && e.per.motif !== 'non disponible') add('per', 'PER', e.per.motif.charAt(0).toUpperCase() + e.per.motif.slice(1));
   }
+  const exDiv = e.rendementDividende?.exercice ?? null;
+  const ancien = e.rendementDividende?.ancien ? ", antérieur de plus d'un an au dernier exercice publié" : '';
   if (e.rendementDividende) {
+    const r = rendementDividendeParts(e.rendementDividende.pct, exDiv);
     add('rendement', e.rendementDividende.net ? 'Rendement du dividende net' : 'Rendement du dividende',
-      formatRendementDividende(e.rendementDividende.pct, e.rendementDividende.exercice));
+      r?.valeur ?? null, r?.exercice ? `${r.exercice}${ancien}` : null);
   }
-  add('rendementNet', "Rendement net d'IRVM", e.rendementNetIrvm != null ? formatRendementDividende(e.rendementNetIrvm, e.rendementDividende?.exercice ?? null) : null);
+  const rn = e.rendementNetIrvm != null ? rendementDividendeParts(e.rendementNetIrvm, exDiv) : null;
+  add('rendementNet', "Rendement net d'IRVM", rn?.valeur ?? null, rn?.exercice ?? null);
   if (e.dernierDividende) {
     const d = e.dernierDividende;
     const morceaux = [d.exercice != null ? `ex. ${d.exercice}` : null, d.exDate ? `détaché le ${dateEnLettres(d.exDate)}` : null].filter(Boolean);

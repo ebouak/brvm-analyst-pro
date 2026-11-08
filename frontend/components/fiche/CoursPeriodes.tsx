@@ -131,7 +131,7 @@ function Courbe({ serie, survol, setSurvol }: { serie: SeriePeriode; survol: num
           ))}
         </div>
       </div>
-      <figcaption className="mt-2 text-[11px] text-faint">Clôtures de séance en FCFA, cote BRVM. Plus bas et plus haut de la période en pointillés.</figcaption>
+      <figcaption className="mt-2 text-[11px] text-faint">Clôtures de séance en FCFA, cote BRVM, telles que publiées : non ajustées des opérations sur titres. Plus bas et plus haut de la période en pointillés.</figcaption>
     </figure>
   );
 }
