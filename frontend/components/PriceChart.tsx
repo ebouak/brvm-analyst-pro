@@ -698,7 +698,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => setResolution(key)}
                 className={`text-xs px-2.5 py-0.5 transition ${
                   resolution === key
-                    ? 'bg-cyan/20 text-cyan'
+                    ? 'bg-cyan/20 text-accent-ink [[data-theme=light]_&]:bg-cyan/10'
                     : 'text-muted hover:text-cyan'
                 }`}
               >
@@ -715,7 +715,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => setChartType(t)}
                 className={`text-xs px-2.5 py-0.5 transition ${
                   chartType === t
-                    ? 'bg-up/20 text-up'
+                    ? 'bg-up/20 text-up [[data-theme=light]_&]:bg-up/10'
                     : 'text-muted hover:text-up'
                 }`}
               >
@@ -754,7 +754,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
             onClick={() => { setDrawTool(key); if (key !== 'tline') { setDraftLine(null); tlineFirstPt.current = null; } }}
             className={`text-xs px-2.5 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-cyan/40 ${
               drawTool === key
-                ? 'bg-cyan/20 text-cyan border-cyan/40'
+                ? 'bg-cyan/20 text-accent-ink border-cyan/40 [[data-theme=light]_&]:bg-cyan/10'
                 : 'border-border text-muted hover:border-cyan/40 hover:text-cyan'
             }`}
           >
@@ -789,7 +789,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => toggle(key)}
                 className={`text-xs px-2 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-up/50 ${
                   active
-                    ? 'bg-up/15 text-up border-up/40'
+                    ? 'bg-up/15 text-up border-up/40 [[data-theme=light]_&]:bg-up/10'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'
                 }`}
               >
@@ -809,7 +809,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => toggle(key)}
                 className={`text-xs px-2 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-up/50 ${
                   active
-                    ? 'bg-up/15 text-up border-up/40'
+                    ? 'bg-up/15 text-up border-up/40 [[data-theme=light]_&]:bg-up/10'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'
                 }`}
               >

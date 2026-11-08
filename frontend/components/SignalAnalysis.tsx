@@ -29,7 +29,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
     <div className="space-y-4">
       {/* Verdict de synthèse */}
       <div className={`rounded-card border bg-elevated/40 p-4 ${TONE_RING[technical.tone]}`}>
-        <p className="text-[11px] text-gold/70 mb-1.5">Analyse de synthèse</p>
+        <p className="text-[11px] text-accent-ink mb-1.5">Analyse de synthèse</p>
         <p className="text-sm text-ivory leading-relaxed">{synthesis.verdict}</p>
 
         {synthesis.cautions.length > 0 && (

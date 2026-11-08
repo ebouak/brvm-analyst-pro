@@ -38,7 +38,7 @@ export default function BacktestSynthesis({ synthesis, strategyReturn, benchmark
 
       {/* Verdict */}
       <div className="rounded-card border border-gold/20 bg-elevated/40 p-4">
-        <p className="text-xs text-gold/70 mb-1.5">Verdict de la stratégie</p>
+        <p className="text-xs text-accent-ink mb-1.5">Verdict de la stratégie</p>
         <p className="text-sm text-ivory leading-relaxed">{synthesis.verdict}</p>
 
         {synthesis.cautions.length > 0 && (

@@ -1,9 +1,9 @@
 import type { ChartMarker } from './PriceChart';
 
-const LEGEND_ITEMS: { label: string; color: string; desc: string }[] = [
+const LEGEND_ITEMS: { label: string; color: string; desc: string; text?: string }[] = [
   { label: 'AG', color: '#42a5f5', desc: 'Assemblée Générale' },
   { label: 'D',  color: '#ffb300', desc: 'Dividende / Ex-date' },
-  { label: 'RT', color: '#7e57c2', desc: 'Rapport / Publication' },
+  { label: 'RT', color: '#7e57c2', text: '#ffffff', desc: 'Rapport / Publication' },
   { label: 'A',  color: '#00c853', desc: 'Événement marché' },
 ];
 
@@ -19,7 +19,7 @@ export default function EventMarkerLegend({ markers }: { markers: ChartMarker[] 
         <div key={item.label} className="flex items-center gap-1.5">
           <span
             className="inline-flex items-center justify-center rounded-full text-[11px] font-bold shrink-0"
-            style={{ width: 18, height: 18, background: item.color, color: '#0f1117' }}
+            style={{ width: 18, height: 18, background: item.color, color: item.text ?? '#0f1117' }}
           >
             {item.label}
           </span>
