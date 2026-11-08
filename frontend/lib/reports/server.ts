@@ -7,6 +7,8 @@ export interface YearRow {
   periode: string;
   revenu: number | null;
   resultatExploitation: number | null;
+  resultatAvantImpot: number | null;
+  impots: number | null;
   resultatNet: number | null;
   bpa: number | null;
   capitauxPropres: number | null;
@@ -44,7 +46,7 @@ export async function getRevue(code: string): Promise<RevueData | null> {
   type LigneCours = { date_marche: string; cours_jour: unknown; valorisation: unknown; beta_1an: unknown };
   const [instrR, incomeR, balanceR, priceRows, divR, hlR] = await Promise.all([
     sb.from('brvm_instruments').select('designation, secteur, pays').eq('code', C).maybeSingle(),
-    sb.from('income_statements').select('periode, revenu_total, resultat_exploitation, resultat_net, benefice_par_action')
+    sb.from('income_statements').select('periode, revenu_total, resultat_exploitation, resultat_avant_impots, impots, resultat_net, benefice_par_action')
       .eq('code', C).eq('type_periode', 'annuel').order('periode', { ascending: false }).limit(6),
     sb.from('balance_sheets').select('periode, total_actifs, total_capitaux_propres')
       .eq('code', C).eq('type_periode', 'annuel').order('periode', { ascending: false }).limit(6),
@@ -76,6 +78,8 @@ export async function getRevue(code: string): Promise<RevueData | null> {
       periode: r.periode as string,
       revenu: num(r.revenu_total),
       resultatExploitation: num(r.resultat_exploitation),
+      resultatAvantImpot: num(r.resultat_avant_impots),
+      impots: num(r.impots),
       resultatNet: num(r.resultat_net),
       bpa: num(r.benefice_par_action),
       capitauxPropres: bal ? num(bal.total_capitaux_propres) : null,
