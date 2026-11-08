@@ -17,16 +17,38 @@ export function distributionAffichable(payout: number | null, resultatNet: numbe
   return { valeur: payout, motif: null };
 }
 
-export function evolutionResultat(n: number | null, n1: number | null): string | null {
+export type EvolutionType = 'perte_reduite' | 'perte_aggravee' | 'retour_benefice' | 'passage_perte' | 'hausse' | 'baisse' | 'stable';
+export interface EvolutionDetail { type: EvolutionType; pct: number | null }
+
+const arrondi1 = (x: number) => Math.round(x * 10) / 10;
+
+export function evolutionResultatDetail(n: number | null, n1: number | null): EvolutionDetail | null {
   if (n == null || n1 == null || n1 === 0) return null;
   if (n < 0 && n1 < 0) {
     const r = (Math.abs(Math.abs(n) - Math.abs(n1)) / Math.abs(n1)) * 100;
-    return `${Math.abs(n) < Math.abs(n1) ? 'perte réduite' : 'perte aggravée'} de ${nf(r, 1)} %`;
+    if (arrondi1(r) === 0) return { type: 'stable', pct: null };
+    return { type: Math.abs(n) < Math.abs(n1) ? 'perte_reduite' : 'perte_aggravee', pct: r };
   }
-  if (n >= 0 && n1 < 0) return 'retour au bénéfice';
-  if (n < 0 && n1 > 0) return 'passage en perte';
+  if (n >= 0 && n1 < 0) return { type: 'retour_benefice', pct: null };
+  if (n < 0 && n1 > 0) return { type: 'passage_perte', pct: null };
   const v = ((n - n1) / n1) * 100;
-  return `${v >= 0 ? '+' : '−'}${nf(Math.abs(v), 1)} %`;
+  if (arrondi1(v) === 0) return { type: 'stable', pct: null };
+  return { type: v > 0 ? 'hausse' : 'baisse', pct: Math.abs(v) };
+}
+
+export function evolutionResultat(n: number | null, n1: number | null): string | null {
+  const d = evolutionResultatDetail(n, n1);
+  if (!d) return null;
+  const p = d.pct != null ? nf(d.pct, 1) : '';
+  switch (d.type) {
+    case 'perte_reduite': return `perte réduite de ${p} %`;
+    case 'perte_aggravee': return `perte aggravée de ${p} %`;
+    case 'retour_benefice': return 'retour au bénéfice';
+    case 'passage_perte': return 'passage en perte';
+    case 'hausse': return `+${p} %`;
+    case 'baisse': return `−${p} %`;
+    case 'stable': return 'stable';
+  }
 }
 
 export function horsExploitation(resultatAvantImpot: number | null, resultatExploitation: number | null): number | null {
@@ -50,16 +72,35 @@ export function volumeAuDessusMoyenne(volume: number | null, moyenne: number | n
 
 export function ligneVerdict(signal: string | null, score: number | null, variationPct: number | null): string | null {
   if (!signal) return null;
-  const s = score != null ? ` · score ${moins(nf(score, 2))}` : '';
-  const v = variationPct ?? 0;
-  return `Signal ${libelleSignal(signal)}${s}. Séance en ${v >= 0 ? 'hausse' : 'baisse'} de ${nf(Math.abs(v), 2)} %.`;
+  const sc = score != null ? (Math.round(score * 100) === 0 ? 0 : score) : null;
+  const s = sc != null ? ` · score ${moins(nf(sc, 2))}` : '';
+  const base = `Signal ${libelleSignal(signal)}${s}.`;
+  if (variationPct == null) return base;
+  if (Math.round(variationPct * 100) === 0) return `${base} Séance stable.`;
+  return `${base} Séance en ${variationPct > 0 ? 'hausse' : 'baisse'} de ${nf(Math.abs(variationPct), 2)} %.`;
 }
 
+const PHRASE_EVOLUTION = (d: EvolutionDetail): string => {
+  const p = d.pct != null ? nf(d.pct, 1) : '';
+  switch (d.type) {
+    case 'perte_reduite': return 'la perte se réduit';
+    case 'perte_aggravee': return "la perte s'aggrave";
+    case 'retour_benefice': return 'le résultat redevient positif';
+    case 'passage_perte': return 'le résultat passe en perte';
+    case 'hausse': return `le résultat net progresse de ${p} %`;
+    case 'baisse': return `le résultat net recule de ${p} %`;
+    case 'stable': return 'le résultat net est stable';
+  }
+};
+
 /** Synthèse d'un exercice construite uniquement sur quatre valeurs déjà affichées. */
-export function syntheseExercice(p: { croissanceCaPct: number | null; evolution: string | null; resultatExploitation: number | null; horsExpl: number | null }): string | null {
+export function syntheseExercice(p: { croissanceCaPct: number | null; evolution: ReturnType<typeof evolutionResultatDetail>; resultatExploitation: number | null; horsExpl: number | null }): string | null {
   const morceaux: string[] = [];
-  if (p.croissanceCaPct != null) morceaux.push(p.croissanceCaPct >= 100 ? "le chiffre d'affaires a plus que doublé" : p.croissanceCaPct >= 0 ? "le chiffre d'affaires progresse" : "le chiffre d'affaires recule");
-  if (p.evolution) morceaux.push(p.evolution.startsWith('perte réduite') ? 'la perte se réduit' : p.evolution);
+  if (p.croissanceCaPct != null) {
+    const c = p.croissanceCaPct;
+    morceaux.push(c > 100 ? "le chiffre d'affaires a plus que doublé" : c === 100 ? "le chiffre d'affaires a doublé" : c >= 0 ? "le chiffre d'affaires progresse" : "le chiffre d'affaires recule");
+  }
+  if (p.evolution) morceaux.push(PHRASE_EVOLUTION(p.evolution));
   let s = morceaux.join(' et ');
   if (p.resultatExploitation != null && p.resultatExploitation < 0 && p.horsExpl != null && p.horsExpl > 0) {
     s += (s ? ', mais ' : '') + "l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation";

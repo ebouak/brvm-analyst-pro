@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { plageSurFenetre } from './plages';
+import { plageSurFenetre, plageSeance, positionDans } from './plages';
 
 const rows = [
   { date_marche: '2024-12-26', cours_jour: 405 },
@@ -25,4 +25,23 @@ describe('plageSurFenetre', () => {
   it('ignore les zéros et rend null sans donnée', () => {
     expect(plageSurFenetre([{ date_marche: '2026-11-06', cours_jour: 0 }], '2026-11-06', 365, 1950)).toBeNull();
   });
+});
+
+describe('positionDans', () => {
+  it('borne à [0, 1]', () => {
+    expect(positionDans(100, 200, 250)).toBe(1);
+    expect(positionDans(100, 200, 50)).toBe(0);
+    expect(positionDans(100, 200, 150)).toBe(0.5);
+  });
+  it('null si haut = bas ou cours absent', () => {
+    expect(positionDans(100, 100, 100)).toBeNull();
+    expect(positionDans(100, 200, null)).toBeNull();
+  });
+});
+
+describe('plageSeance', () => {
+  it('nominal', () => {
+    expect(plageSeance(100, 200, 125)).toEqual({ bas: 100, dateBas: null, haut: 200, dateHaut: null, position: 0.25 });
+  });
+  it('null sans bornes valides', () => expect(plageSeance(null, 200, 150)).toBeNull());
 });

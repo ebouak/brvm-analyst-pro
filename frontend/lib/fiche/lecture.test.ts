@@ -12,4 +12,8 @@ describe('lectureTechnique (STAC 6 nov. 2026)', () => {
     expect(lectureTechnique({ cours: null, variationPct: null, ma20: null, ma50: null, ma200: null, macd: null, macdSignal: null, rsi: null, volume: null, volumeMoyen: null }))
       .toEqual({ soutient: [], retient: [], neutres: [] });
   });
+  it('volume proche de la moyenne : deux décimales, pas « 1,0× » sous la moyenne', () => {
+    const l2 = lectureTechnique({ cours: null, variationPct: null, ma20: null, ma50: null, ma200: null, macd: null, macdSignal: null, rsi: null, volume: 960, volumeMoyen: 1000 });
+    expect(l2.retient).toEqual(['Volume sous la moyenne (0,96×)']);
+  });
 });

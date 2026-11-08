@@ -18,4 +18,14 @@ describe('fluxCompteResultat (STAC 2025, millions)', () => {
     const b = fluxCompteResultat({ chiffreAffaires: 1000, resultatExploitation: 200, resultatAvantImpot: 180, resultatNet: 150 })!;
     expect(b.emplois.map((n) => n.cle)).toEqual(['chargesExploitation', 'horsExploitation', 'impot', 'benefice']);
   });
+  it("CA non comparable (≤ 0 ou inférieur au résultat d'exploitation) : null", () => {
+    expect(fluxCompteResultat({ chiffreAffaires: 0, resultatExploitation: -5, resultatAvantImpot: 1, resultatNet: 1 })).toBeNull();
+    expect(fluxCompteResultat({ chiffreAffaires: 100, resultatExploitation: 150, resultatAvantImpot: 150, resultatNet: 100 })).toBeNull();
+  });
+  it('aucun nœud nul, équilibre conservé', () => {
+    const b = fluxCompteResultat({ chiffreAffaires: 1000, resultatExploitation: 200, resultatAvantImpot: 200, resultatNet: 200 })!;
+    expect([...b.ressources, ...b.emplois].every((n) => n.valeur > 0)).toBe(true);
+    expect(b.emplois.map((n) => n.cle)).toEqual(['chargesExploitation', 'benefice']);
+    expect(b.ressources.reduce((a, n) => a + n.valeur, 0)).toBeCloseTo(b.emplois.reduce((a, n) => a + n.valeur, 0), 6);
+  });
 });

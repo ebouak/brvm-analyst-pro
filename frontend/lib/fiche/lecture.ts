@@ -6,12 +6,15 @@ export interface EntreesLecture {
 }
 export interface Lecture { soutient: string[]; retient: string[]; neutres: string[] }
 
+/** Au-delà de cette variation journalière (en %), la séance est qualifiée de forte. */
+const SEUIL_FORTE_VARIATION_PCT = 2;
+
 const f = (x: number, d: number) => x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/ | /g, ' ');
 
 /** Une seule lecture : remplace jauge, analyse technique, signal et « lecture baissière », qui se contredisaient. */
 export function lectureTechnique(e: EntreesLecture): Lecture {
   const soutient: string[] = [], retient: string[] = [], neutres: string[] = [];
-  if (e.variationPct != null && Math.abs(e.variationPct) >= 2) {
+  if (e.variationPct != null && Math.abs(e.variationPct) >= SEUIL_FORTE_VARIATION_PCT) {
     const h = e.variationPct > 0;
     (h ? soutient : retient).push(`Forte ${h ? 'hausse' : 'baisse'} du jour, ${h ? '+' : '−'}${f(Math.abs(e.variationPct), 2)} %`);
   }
@@ -24,7 +27,7 @@ export function lectureTechnique(e: EntreesLecture): Lecture {
   if (e.macd != null) (e.macd >= 0 ? soutient : retient).push(`MACD ${e.macd >= 0 ? 'au-dessus de' : 'sous'} zéro`);
   if (e.volume != null && e.volumeMoyen != null && e.volumeMoyen > 0) {
     const r = e.volume / e.volumeMoyen;
-    (r < 1 ? retient : soutient).push(`Volume ${r < 1 ? 'sous' : 'au-dessus de'} la moyenne (${f(r, 1)}×)`);
+    (r < 1 ? retient : soutient).push(`Volume ${r < 1 ? 'sous' : 'au-dessus de'} la moyenne (${f(r, f(r, 1) === '1,0' ? 2 : 1)}×)`);
   }
   if (e.rsi != null) {
     const r = Math.round(e.rsi);

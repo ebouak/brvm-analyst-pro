@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
-  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, syntheseExercice, titrePublication,
+  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication,
 } from './affichage';
 
 const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
@@ -25,6 +25,22 @@ describe('evolutionResultat', () => {
   });
   it('variation signée', () => expect(sp(evolutionResultat(120, 100))).toBe('+20,0 %'));
   it('null sans exercice précédent', () => expect(evolutionResultat(10, null)).toBeNull());
+});
+
+describe('evolutionResultatDetail', () => {
+  it('types', () => {
+    expect(evolutionResultatDetail(-96.6e6, -348.2e6)!.type).toBe('perte_reduite');
+    expect(evolutionResultatDetail(-200, -100)).toEqual({ type: 'perte_aggravee', pct: 100 });
+    expect(evolutionResultatDetail(10, -5)).toEqual({ type: 'retour_benefice', pct: null });
+    expect(evolutionResultatDetail(-5, 10)).toEqual({ type: 'passage_perte', pct: null });
+    expect(evolutionResultatDetail(120, 100)).toEqual({ type: 'hausse', pct: 20 });
+    expect(evolutionResultatDetail(80, 100)).toEqual({ type: 'baisse', pct: 20 });
+  });
+  it('stable : valeurs égales ou variation arrondie à 0,0 %', () => {
+    expect(evolutionResultatDetail(100, 100)).toEqual({ type: 'stable', pct: null });
+    expect(evolutionResultatDetail(100.01, 100)).toEqual({ type: 'stable', pct: null });
+    expect(evolutionResultat(100, 100)).toBe('stable');
+  });
 });
 
 describe('horsExploitation', () => {
@@ -51,12 +67,22 @@ describe('ligneVerdict', () => {
   it('libellé français, score à deux décimales', () => expect(ligneVerdict('HOLD', 0.4412, 5.41)).toBe('Signal Attente · score 0,44. Séance en hausse de 5,41 %.'));
   it('baisse', () => expect(ligneVerdict('SELL', -0.7, -2)).toBe('Signal Vente · score −0,70. Séance en baisse de 2,00 %.'));
   it('null sans signal', () => expect(ligneVerdict(null, null, 1)).toBeNull());
+  it('variation absente : aucune phrase de séance', () => expect(ligneVerdict('HOLD', 0.4412, null)).toBe('Signal Attente · score 0,44.'));
+  it('variation nulle : séance stable', () => expect(ligneVerdict('HOLD', 0.4412, 0)).toBe('Signal Attente · score 0,44. Séance stable.'));
+  it('score arrondi à zéro : pas de −0,00', () => expect(ligneVerdict('HOLD', -0.001, 1)).toBe('Signal Attente · score 0,00. Séance en hausse de 1,00 %.'));
 });
 
 describe('syntheseExercice', () => {
   it('STAC 2025', () => {
-    expect(syntheseExercice({ croissanceCaPct: 116.3, evolution: 'perte réduite de 72,3 %', resultatExploitation: -772e6, horsExpl: 776.3e6 }))
+    expect(syntheseExercice({ croissanceCaPct: 116.3, evolution: evolutionResultatDetail(-96.6e6, -348.2e6), resultatExploitation: -772e6, horsExpl: 776.3e6 }))
       .toBe("Le chiffre d'affaires a plus que doublé et la perte se réduit, mais l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation.");
+  });
+  it('hausse', () => {
+    expect(sp(syntheseExercice({ croissanceCaPct: 10, evolution: evolutionResultatDetail(120, 100), resultatExploitation: 5, horsExpl: 0 })))
+      .toBe("Le chiffre d'affaires progresse et le résultat net progresse de 20,0 %.");
+  });
+  it('exactement 100 % : a doublé', () => {
+    expect(syntheseExercice({ croissanceCaPct: 100, evolution: null, resultatExploitation: null, horsExpl: null })).toBe("Le chiffre d'affaires a doublé.");
   });
   it('null sans donnée', () => expect(syntheseExercice({ croissanceCaPct: null, evolution: null, resultatExploitation: null, horsExpl: null })).toBeNull());
 });
