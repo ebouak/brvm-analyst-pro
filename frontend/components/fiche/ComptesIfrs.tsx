@@ -41,6 +41,9 @@ export default function ComptesIfrs({ c }: { c: ComparatifIfrs }) {
         </a>
         , vérifié le {fmtDateCourte(c.source.verifieLe)}.
       </p>
+      <p className="mt-1 text-xs text-faint">
+        Dette financière IFRS : emprunts à long et court terme, concours bancaires et passifs locatifs, comme le bilan IFRS les présente ; le document classe les dettes locatives parmi les flux de financement.
+      </p>
       {c.sika && <p className="mt-1 text-xs text-faint">{c.sika}</p>}
     </div>
   );
