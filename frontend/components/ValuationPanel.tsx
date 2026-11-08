@@ -1,3 +1,4 @@
+import { formatRendementDividende } from '@/lib/fiche/affichage';
 import type { CompanyValuation } from '@/lib/valuation/server';
 import type { CompanyScoring } from '@/lib/scoring/server';
 import type { AltmanZone } from '@/lib/scoring/altman';
@@ -38,8 +39,7 @@ export default function ValuationPanel({ v, scoring, rendementDividende }: { v: 
     rendementDividende !== undefined
       ? {
           label: 'Rdt dividende',
-          value: rendementDividende?.pct != null ? `${rendementDividende.pct.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %` : '—',
-          note: rendementDividende?.pct != null && rendementDividende.exercice != null ? `ex. ${rendementDividende.exercice}` : undefined,
+          value: formatRendementDividende(rendementDividende?.pct ?? null, rendementDividende?.exercice ?? null) ?? '—',
         }
       : { label: 'Rdt dividende', value: pct(m.dividendYield, 1) },
   ];
@@ -82,7 +82,7 @@ export default function ValuationPanel({ v, scoring, rendementDividende }: { v: 
               <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-faint">Piotroski F-Score</span>
-                  <span className="tabular text-sm font-semibold text-ivory">{scoring.fscore.score}/9 · {scoring.fscore.label}</span>
+                  <span className="text-sm font-semibold text-ivory"><span className="tabular">{scoring.fscore.score}/9</span> · {scoring.fscore.label}</span>
                 </div>
                 <div className="flex gap-0.5">
                   {scoring.fscore.criteria.map((c, i) => (

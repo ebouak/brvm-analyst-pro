@@ -1,4 +1,5 @@
 import type { LiquidityScore, LiquidityScoreV2 } from '@/lib/liquidity';
+import { insecable } from '@/lib/fiche/affichage';
 import { PremiumPanel } from '@/components/ui/premium';
 
 const CLASS_STYLE: Record<string, string> = {
@@ -65,15 +66,15 @@ export function LiquidityCard({
           </span>
           <div>
             <p className="font-display text-base text-ivory">{liquidity.label}</p>
-            <p className="tabular text-xs text-muted">
-              Score {liquidity.score}/100 · {liquidity.presencePct} % des {liquidity.nbSeances} dernières séances traitées
+            <p className="text-xs text-muted">
+              Score <span className="tabular">{liquidity.score}/100</span> · <span className="tabular">{liquidity.presencePct} %</span> des <span className="tabular">{liquidity.nbSeances}</span> dernières séances traitées
             </p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-right">
           <div>
-            <p className="text-xs text-faint">Valeur échangée / séance</p>
-            <p className="tabular text-sm font-bold text-ivory">{fmtFcfa(liquidity.valeurMoyenne)}</p>
+            <p className="text-xs text-faint">Valeur échangée moyenne (30 séances)</p>
+            <p className="tabular text-sm font-bold text-ivory">{insecable(fmtFcfa(liquidity.valeurMoyenne))}</p>
           </div>
           {arMin != null && arMax != null && (
             <div>
