@@ -48,6 +48,16 @@ describe('horsExploitation', () => {
   it('null si un terme manque', () => expect(horsExploitation(null, -1)).toBeNull());
 });
 
+describe('dividendeCourant sans exercice', () => {
+  it('ignore une ligne sans exercice placée en tête (tri PostgREST, nulls en premier)', () => {
+    const d = dividendeCourant([
+      { montant: 50, exercice: null, ex_date: null, payment_date: null },
+      { montant: 66.15, exercice: 2021, ex_date: null, payment_date: '2022-07-18' },
+    ], 2025);
+    expect(d).toMatchObject({ montant: 66.15, exercice: 2021 });
+  });
+});
+
 describe('dividendeCourant', () => {
   it('marque ancien un dividende de plus d’un exercice', () => {
     expect(dividendeCourant([{ montant: 66.15, exercice: 2021, ex_date: null, payment_date: '2022-07-18' }], 2025))
