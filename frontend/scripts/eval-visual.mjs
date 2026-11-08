@@ -108,6 +108,10 @@ for (const route of routes) {
         page.on('pageerror', (e) => erreurs.push(String(e.message).slice(0, 160)));
         const rep = await page.goto(base + route, { waitUntil: 'networkidle', timeout: 45000 });
         await page.waitForTimeout(1500);
+        // Les graphiques canvas (ECharts) animent leurs libellés même en mouvement
+        // réduit : capturée à 1,5 s, la cartographie paraissait vide et le
+        // critique a signalé à tort des tuiles « muettes » (2026-11-08).
+        if (await page.locator('canvas').count()) await page.waitForTimeout(2500);
         const statut = rep?.status();
         const finale = new URL(page.url());
         if (statut !== 200) r.bloquants.push(`statut HTTP ${statut}`);
@@ -145,7 +149,14 @@ for (const route of routes) {
             r.avertissements.push(`h1 ${JSON.stringify(base0.h1)} -> ${JSON.stringify(m.h1)}`);
           }
         }
-        await page.screenshot({ path: path.join(out, `${route.replace(/\W+/g, '_') || 'accueil'}__${theme}__${vue.nom}.png`), fullPage: true });
+        // Capture pleine page SANS fullPage : Chromium redimensionne la page au moment
+        // de la capture, ce qui efface les canvas (ECharts) et les fige sans leurs
+        // libellés. On agrandit la fenêtre, on laisse les graphiques se redessiner,
+        // puis on capture la fenêtre entière (constaté le 2026-11-08 sur /heatmap).
+        const hauteur = await page.evaluate(() => document.documentElement.scrollHeight);
+        await page.setViewportSize({ width: vue.width, height: Math.min(hauteur, 16000) });
+        if (await page.locator('canvas').count()) await page.waitForTimeout(2500);
+        await page.screenshot({ path: path.join(out, `${route.replace(/\W+/g, '_') || 'accueil'}__${theme}__${vue.nom}.png`) });
       } catch (e) {
         r.bloquants.push(`mesure impossible : ${String(e.message).split('\n')[0]}`);
       } finally {

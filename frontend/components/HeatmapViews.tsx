@@ -137,7 +137,7 @@ export default function HeatmapViews({ rows, logos = {} }: Props) {
               logos={logos}
               colorFilter={colorFilter}
             />
-            <p className="text-[10px] text-faint">
+            <p className="text-[11px] text-faint">
               Taille = capitalisation · couleur = variation du jour · logo de la société quand la tuile le permet
             </p>
           </div>

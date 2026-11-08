@@ -170,7 +170,7 @@ export function PaperLeaderboard({ withControls = false }: { withControls?: bool
               >
                 {saving ? 'Enregistrement…' : 'Rejoindre le classement'}
               </button>
-              <p className="w-full text-[10px] leading-relaxed text-faint">
+              <p className="w-full text-[11px] leading-relaxed text-faint">
                 Participation volontaire et réversible. Seuls votre alias et vos métriques de jeu
                 (perf %, nombre de trades) sont publics, jamais votre identité ni votre capital.
               </p>

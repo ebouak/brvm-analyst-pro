@@ -7,12 +7,12 @@ export const revalidate = 300;
 export const metadata = { title: 'Combined Alpha — classement quant BRVM' };
 
 function signalCls(c: string): string {
-  if (c === 'Strong Buy Quant') return 'border-up/30 bg-up/10 text-up';
+  if (c === 'Strong Buy Quant') return 'border-up/30 bg-up/5 text-up';
   if (c === 'Buy Quant') return 'border-up/20 bg-up/[0.07] text-up';
   if (c === 'Watchlist / Neutral') return 'border-warn/30 bg-warn/10 text-warn';
-  if (c === 'Reduce / Avoid') return 'border-down/20 bg-down/10 text-down';
+  if (c === 'Reduce / Avoid') return 'border-down/20 bg-down/5 text-down';
   if (c === 'High Risk / Avoid') return 'border-down/30 bg-down/15 text-down';
-  return 'border-border bg-elevated text-faint';
+  return 'border-border bg-elevated text-muted';
 }
 const LIBELLE_CLASSE: Record<string, string> = {
   'Strong Buy Quant': 'Achat fort',

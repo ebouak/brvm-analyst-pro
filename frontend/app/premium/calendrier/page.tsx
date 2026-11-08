@@ -11,7 +11,7 @@ import {
 
 const TYPE_CONFIG: Record<TypeDate, { label: string; color: string; bg: string; border: string; dot: string }> = {
   publication:        { label: 'États financiers', color: 'text-sapphire',  bg: 'bg-sapphire/10', border: 'border-sapphire/20', dot: 'bg-sapphire' },
-  dividende_annonce:  { label: 'Dividende annoncé', color: 'text-up',   bg: 'bg-up/10', border: 'border-up/20', dot: 'bg-up' },
+  dividende_annonce:  { label: 'Dividende annoncé', color: 'text-up',   bg: 'bg-up/5', border: 'border-up/20', dot: 'bg-up' },
   dividende_paiement: { label: 'Paiement dividende', color: 'text-gold',  bg: 'bg-gold/10', border: 'border-gold/20', dot: 'bg-gold' },
   ag:                 { label: 'Assemblée Générale', color: 'text-warn', bg: 'bg-warn/10', border: 'border-warn/20', dot: 'bg-warn' },
 };
@@ -29,17 +29,17 @@ function EventRow({ d, isFuture }: { d: DateCle; isFuture: boolean }) {
       {/* Date */}
       <div className="flex min-w-[48px] flex-col items-center justify-center rounded-md border border-border bg-elevated/60 px-1.5 py-1">
         <span className="tabular text-sm font-bold text-ivory leading-none">{jour}</span>
-        <span className="text-[9px] font-medium uppercase text-muted mt-0.5">{moisCourt} {String(annee).slice(2)}</span>
+        <span className="text-[11px] font-medium uppercase text-muted mt-0.5">{moisCourt} {String(annee).slice(2)}</span>
       </div>
       {/* Détail */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${cfg.color} ${cfg.bg} ${cfg.border}`}>
+          <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${cfg.color} ${cfg.bg} ${cfg.border}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
             {cfg.label}
           </span>
           {isFuture && (
-            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/10 px-2 py-0.5 text-[10px] font-semibold text-up">
+            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/5 px-2 py-0.5 text-[11px] font-semibold text-up">
               À venir
             </span>
           )}
@@ -136,7 +136,7 @@ export default async function CalendrierPremiumPage() {
             {(Object.entries(TYPE_CONFIG) as [TypeDate, typeof TYPE_CONFIG[TypeDate]][]).map(([type, cfg]) => (
               <span
                 key={type}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-semibold ${cfg.color} ${cfg.bg} ${cfg.border}`}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold ${cfg.color} ${cfg.bg} ${cfg.border}`}
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
                 {cfg.label}
@@ -155,7 +155,7 @@ export default async function CalendrierPremiumPage() {
             <div key={type} className={`rounded-card border bg-surface p-3 shadow-card ${cfg.border}`}>
               <p className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</p>
               <p className={`tabular mt-1 text-2xl font-bold ${cfg.color}`}>{count}</p>
-              <p className="text-[10px] text-faint mt-0.5">{future > 0 ? `${future} à venir` : 'sur 12 mois'}</p>
+              <p className="text-[11px] text-faint mt-0.5">{future > 0 ? `${future} à venir` : 'sur 12 mois'}</p>
             </div>
           );
         })}
@@ -165,7 +165,7 @@ export default async function CalendrierPremiumPage() {
       {avenir.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-3">
-            <Eyebrow className="text-up/70">À venir · {avenir.length} évènement{avenir.length !== 1 ? 's' : ''}</Eyebrow>
+            <Eyebrow className="text-up">À venir · {avenir.length} évènement{avenir.length !== 1 ? 's' : ''}</Eyebrow>
             <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
           </div>
           <PremiumPanel className="px-4 py-1">

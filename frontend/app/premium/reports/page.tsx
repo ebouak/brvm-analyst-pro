@@ -108,7 +108,7 @@ export default async function ReportsArchivePage() {
                     {/* Metrics row */}
                     <div className="flex items-center gap-4 sm:gap-6 text-xs">
                       <div className="text-center">
-                        <p className="text-muted text-[10px] mb-0.5">P&L</p>
+                        <p className="text-muted text-[11px] mb-0.5">P&L</p>
                         <p
                           className={`tabular font-semibold ${
                             isPositive ? 'text-up' : 'text-down'
@@ -119,7 +119,7 @@ export default async function ReportsArchivePage() {
                       </div>
 
                       <div className="text-center">
-                        <p className="text-muted text-[10px] mb-0.5">Rendement</p>
+                        <p className="text-muted text-[11px] mb-0.5">Rendement</p>
                         <p
                           className={`tabular font-semibold ${
                             isPositive ? 'text-up' : 'text-down'

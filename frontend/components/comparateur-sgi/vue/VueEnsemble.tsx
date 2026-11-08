@@ -315,14 +315,14 @@ function Classement({ lignes }: { lignes: LigneClassement[] }) {
                 </td>
                 <td className={`tabular py-3 pr-3 text-right font-semibold ${i === 0 ? 'text-up' : 'text-ivory'}`}>
                   {fmtFcfa(l.cout.total)}
-                  {!l.complet && <span className="block text-[10px] font-normal text-warn">barème incomplet</span>}
+                  {!l.complet && <span className="block text-[11px] font-normal text-warn">barème incomplet</span>}
                 </td>
                 <td className="tabular hidden py-3 pr-3 text-right text-muted sm:table-cell">{l.courtageMax != null ? pct(l.courtageMax) : '—'}</td>
                 <td className="tabular hidden py-3 pr-3 text-muted lg:table-cell">{l.sgi.depotMin}</td>
                 <td className="py-3 pr-3">
                   <span
-                    className={`inline-block rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${
-                      l.frais.confiance === 'homologue_crepmf' ? 'border-up/30 bg-up/10 text-up' : 'border-border text-muted'
+                    className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                      l.frais.confiance === 'homologue_crepmf' ? 'border-up/30 bg-up/5 text-up' : 'border-border text-muted'
                     }`}
                   >
                     {l.frais.confiance === 'homologue_crepmf' ? 'Homologué' : 'À confirmer'}

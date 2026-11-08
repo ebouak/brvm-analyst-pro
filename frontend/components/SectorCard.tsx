@@ -75,7 +75,7 @@ export default function SectorCard({ perf }: Props) {
             style={{ '--breadth': `${breadth.toFixed(0)}%` } as React.CSSProperties}
           />
         </div>
-        <div className="flex items-center justify-between mt-1 text-[10px] text-faint">
+        <div className="flex items-center justify-between mt-1 text-[11px] text-faint">
           <span>{hausses} hausse{hausses > 1 ? 's' : ''}</span>
           <span>{baisses} baisse{baisses > 1 ? 's' : ''}</span>
         </div>
@@ -88,7 +88,7 @@ export default function SectorCard({ perf }: Props) {
             <div className="flex items-center justify-between text-[11px]">
               <Link
                 href={`/actions/${topHausse.code}`}
-                className="font-mono font-bold text-up/90 hover:text-up transition-colors"
+                className="font-mono font-bold text-up hover:text-up transition-colors"
               >
                 ↑ {topHausse.code}
               </Link>
@@ -99,7 +99,7 @@ export default function SectorCard({ perf }: Props) {
             <div className="flex items-center justify-between text-[11px]">
               <Link
                 href={`/actions/${topBaisse.code}`}
-                className="font-mono font-bold text-down/90 hover:text-down transition-colors"
+                className="font-mono font-bold text-down hover:text-down transition-colors"
               >
                 ↓ {topBaisse.code}
               </Link>
@@ -111,7 +111,7 @@ export default function SectorCard({ perf }: Props) {
 
       <div className="flex items-center justify-between text-xs text-faint">
         <span>{count} action{count > 1 ? 's' : ''} · Vol. {fmtFcfa(volumeDay)}</span>
-        <span className="text-[10px]">30j</span>
+        <span className="text-[11px]">30j</span>
       </div>
 
       <Sparkline data={sparkline30d} />

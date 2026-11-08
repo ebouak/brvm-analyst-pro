@@ -95,7 +95,7 @@ export function SubscoreBars({
 
       {/* L'échelle doit être déclarée : cinq barres d'apparence identique
           couvraient trois intervalles différents sans le dire. */}
-      <p className={`pt-0.5 ${compact ? 'text-[8.5px]' : 'text-[10px]'} leading-snug`} style={{ color: couleurs.label }}>
+      <p className={`pt-0.5 ${compact ? 'text-[8.5px]' : 'text-[11px]'} leading-snug`} style={{ color: couleurs.label }}>
         Barres centrées sur zéro · à droite = contribution favorable, à gauche = défavorable.
       </p>
     </div>

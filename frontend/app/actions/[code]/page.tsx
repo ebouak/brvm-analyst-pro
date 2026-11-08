@@ -711,7 +711,7 @@ export default async function InstrumentPage({
                   </div>
                 ) : (
                   <div className="w-11 h-11 rounded-xl border border-border/60 bg-elevated grid place-items-center shrink-0">
-                    <span className="text-accent-ink/60 text-sm font-display font-medium">{code.slice(0, 2)}</span>
+                    <span className="text-accent-ink text-sm font-display font-medium">{code.slice(0, 2)}</span>
                   </div>
                 )}
                 <div className="min-w-0">
@@ -954,7 +954,7 @@ export default async function InstrumentPage({
             {/* ── Indicateurs ── */}
             <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
               <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-accent-ink/70 mb-5">Indicateurs</p>
+                <p className="text-[11px] text-accent-ink mb-5">Indicateurs</p>
 
                 {/* RSI */}
                 <div className="mb-5">
@@ -1034,7 +1034,7 @@ export default async function InstrumentPage({
             {/* ── Détections ── */}
             <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
               <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-accent-ink/70 mb-5">Détections actives</p>
+                <p className="text-[11px] text-accent-ink mb-5">Détections actives</p>
                 <div className="space-y-2.5">
                   {detections.map((d) => (
                     <div
@@ -1127,7 +1127,7 @@ export default async function InstrumentPage({
             </>
           ) : (
             <div className="rounded-panel border border-border bg-surface shadow-card p-6">
-              <p className="text-[11px] text-accent-ink/70 mb-1.5">Signal quantitatif</p>
+              <p className="text-[11px] text-accent-ink mb-1.5">Signal quantitatif</p>
               <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
             </div>
           )}
@@ -1242,7 +1242,7 @@ export default async function InstrumentPage({
           {/* Dividendes */}
           <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-accent-ink/70 mb-5">Dividendes</p>
+              <p className="text-[11px] text-accent-ink mb-5">Dividendes</p>
               {lastDiv ? (
                 <div>
                   {/* Rendement en vedette */}
@@ -1270,7 +1270,7 @@ export default async function InstrumentPage({
           {/* Événements */}
           <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-accent-ink/70 mb-5">Événements récents</p>
+              <p className="text-[11px] text-accent-ink mb-5">Événements récents</p>
               {events.length > 0 ? (
                 <div className="space-y-3.5">
                   {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
@@ -1284,7 +1284,7 @@ export default async function InstrumentPage({
                       <p className="text-xs text-muted line-clamp-2 mb-1.5">{e.title}</p>
                       <Link
                         href={`/dashboard/reports/events/${e.id}`}
-                        className="text-[11px] text-accent-ink/70 hover:text-accent-ink transition-colors duration-300"
+                        className="text-[11px] text-accent-ink hover:text-accent-ink transition-colors duration-300"
                       >
                         Lire l'analyse →
                       </Link>
@@ -1353,11 +1353,11 @@ export default async function InstrumentPage({
                   'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
                 const inner = (
                   <>
-                    <span className="text-accent-ink/50 group-hover:text-accent-ink/80 transition-colors duration-300 leading-none shrink-0">
+                    <span className="text-accent-ink group-hover:text-accent-ink transition-colors duration-300 leading-none shrink-0">
                       <Icone size={15} strokeWidth={1.75} aria-hidden />
                     </span>
                     <span>{label}</span>
-                    <span className="ml-auto text-border-strong group-hover:text-accent-ink/40 transition-colors duration-300">→</span>
+                    <span className="ml-auto text-border-strong group-hover:text-accent-ink transition-colors duration-300">→</span>
                   </>
                 );
                 return external ? (
@@ -1427,7 +1427,7 @@ function MacdCell({
 }) {
   return (
     <div className="bg-elevated rounded-lg py-2.5 px-2">
-      <div className="text-faint text-[11px] mb-1">{label}</div>
+      <div className="text-muted text-[11px] mb-1">{label}</div>
       <div
         className={`tabular font-mono text-sm font-semibold ${
           accent === 'up' ? 'text-up' : accent === 'down' ? 'text-down' : 'text-ivory'
@@ -1466,7 +1466,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
       >
         {/* Header signal */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
-          <p className="text-[11px] text-accent-ink/70">Signal quantitatif</p>
+          <p className="text-[11px] text-accent-ink">Signal quantitatif</p>
           <SignalBadge signal={signal.signal} confiance={signal.confiance} />
           <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           <span className="ml-auto tabular text-[11px] text-faint font-mono">
@@ -1538,7 +1538,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
         <div className="border-t border-border/30 pt-4 flex items-center justify-between">
           <Link
             href="/signaux"
-            className="text-xs text-accent-ink/70 hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="text-xs text-accent-ink hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Voir tous les signaux →
           </Link>

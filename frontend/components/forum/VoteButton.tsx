@@ -37,7 +37,7 @@ export function VoteButton({
       disabled={!canVote || busy}
       title={canVote ? (voted ? 'Retirer mon vote' : "Vote utile") : 'Connectez-vous pour voter'}
       className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition ${
-        voted ? 'border-up/40 bg-up/10 text-up' : 'border-border text-faint hover:text-white hover:border-info/40'
+        voted ? 'border-up/40 bg-up/5 text-up' : 'border-border text-faint hover:text-white hover:border-info/40'
       } ${canVote ? '' : 'cursor-default opacity-70'}`}
     >
       <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

@@ -45,7 +45,7 @@ export function SocialProof() {
           {SOURCES.map((s) => (
             <span
               key={s}
-              className="font-mono text-[12px] font-medium text-muted/70 transition-colors duration-300 hover:text-ivory"
+              className="font-mono text-[12px] font-medium text-muted transition-colors duration-300 hover:text-ivory"
             >
               {s}
             </span>

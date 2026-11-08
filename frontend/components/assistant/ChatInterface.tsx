@@ -189,12 +189,12 @@ export function ChatInterface({ symbolePreselect, questionPreset }: { symbolePre
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeProvider && (
-            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/10 px-2.5 py-0.5 text-xs text-up">
+            <span className="inline-flex items-center rounded-full border border-up/30 bg-up/5 px-2.5 py-0.5 text-xs text-up">
               {activeProvider}
             </span>
           )}
           {noKey && (
-            <span className="inline-flex items-center rounded-full border border-down/30 bg-down/10 px-2.5 py-0.5 text-xs text-down">
+            <span className="inline-flex items-center rounded-full border border-down/30 bg-down/5 px-2.5 py-0.5 text-xs text-down">
               Aucune clé — <a href="/admin/cles-api" className="underline ml-1">configurer</a>
             </span>
           )}

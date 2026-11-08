@@ -728,7 +728,7 @@ export default async function DashboardV2() {
         </Repli>
       </div>
 
-      <p className="v2-tab mt-8 border-t border-border pt-4 text-[10.5px] leading-relaxed text-faint">
+      <p className="v2-tab mt-8 border-t border-border pt-4 text-[11px] leading-relaxed text-faint">
         Source · séance BRVM du {lastDate}
         {lastIdxDate && lastIdxDate !== lastDate ? `, indices relevés le ${lastIdxDate}` : ''}. Tous
         les montants sont en FCFA. Les agrégats (largeur, parts, totaux) sont calculés sur les

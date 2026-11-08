@@ -194,8 +194,8 @@ export function NewsletterPrefsClient({ initial }: { initial: NewsletterPrefs })
             className={[
               'flex items-center gap-2 rounded-lg border px-4 py-2 text-sm',
               toast.type === 'success'
-                ? 'border-up/30 bg-up/10 text-up'
-                : 'border-down/30 bg-down/10 text-down',
+                ? 'border-up/30 bg-up/5 text-up'
+                : 'border-down/30 bg-down/5 text-down',
             ].join(' ')}
           >
             {toast.type === 'success' ? <Check size={14} aria-hidden /> : <X size={14} aria-hidden />}

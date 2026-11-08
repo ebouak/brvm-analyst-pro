@@ -15,9 +15,9 @@ interface Props {
 
 export default function DividendsTopCard({ title, icon, entries }: Props) {
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
+    <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-semibold">
-        <span className="text-up">{icon}</span>
+        <span className="text-muted">{icon}</span>
         {title}
       </div>
       {entries.length === 0 ? (
@@ -32,9 +32,9 @@ export default function DividendsTopCard({ title, icon, entries }: Props) {
                   <span className="text-xs text-muted ml-1 truncate">{e.label}</span>
                 )}
               </div>
-              <div className="text-right shrink-0">
-                <span className="text-xs tabular text-up font-semibold">{e.value}</span>
-                {e.sub && <span className="text-xs text-muted ml-1">{e.sub}</span>}
+              <div className="text-right shrink-0 flex items-baseline gap-2">
+                <span className="text-xs tabular text-ivory font-semibold">{e.value}</span>
+                {e.sub && <span className="text-xs text-muted tabular">{e.sub}</span>}
               </div>
             </li>
           ))}

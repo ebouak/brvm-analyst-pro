@@ -5,6 +5,7 @@ import brvmLogos from '@/lib/brvmLogos.json';
 import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
 import Link from 'next/link';
+import { fmtPctSigne } from '@/lib/format';
 import {
   PremiumPanel,
   EmptyStatePremium,
@@ -34,15 +35,15 @@ export const metadata = { title: 'Heatmap marché' };
 
 /**
  * Légende du gradient : jetons up / down
- * Alignés sur colorForVariation() dans lib/heatmap.ts (seuil MAX_VAR = 8 %).
+ * Alignés sur couleurVariation() dans lib/heatmap.ts (pleine intensité à ±4 %).
  * bgClass = classe Tailwind arbitraire statique pour éviter tout style inline.
  */
 const GRADIENT_STOPS: { pct: number; bgClass: string; label: string }[] = [
-  { pct: -8, bgClass: 'bg-down',                        label: '−8 %' },
-  { pct: -4, bgClass: 'bg-down/60',                   label: '−4 %' },
+  { pct: -4, bgClass: 'bg-down',                        label: '−4 %' },
+  { pct: -2, bgClass: 'bg-down/60',                   label: '−2 %' },
   { pct:  0, bgClass: 'bg-border-strong',                label:  '0 %' },
-  { pct:  4, bgClass: 'bg-up/60',                   label: '+4 %' },
-  { pct:  8, bgClass: 'bg-up',                           label: '+8 %' },
+  { pct:  2, bgClass: 'bg-up/60',                   label: '+2 %' },
+  { pct:  4, bgClass: 'bg-up',                           label: '+4 %' },
 ];
 
 interface PageProps {
@@ -106,35 +107,6 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
               le premier écran) ; puces à partir de md. */}
           {allSectors.length > 0 && (
             <SecteurSelect secteurs={allSectors} courant={secteurParam} className="w-full md:hidden" />
-          )}
-          {allSectors.length > 0 && (
-            <div className="hidden md:flex flex-wrap gap-2 max-w-xl">
-              <Link
-                href="/heatmap"
-                className={[
-                  'px-3 py-1 rounded-chip text-xs font-medium transition-colors duration-200',
-                  secteurParam == null
-                    ? 'bg-gold text-obsidian '
-                    : 'bg-elevated border border-border text-muted hover:border-border-strong hover:text-ivory',
-                ].join(' ')}
-              >
-                Tous
-              </Link>
-              {allSectors.map((s) => (
-                <Link
-                  key={s}
-                  href={`/heatmap?secteur=${encodeURIComponent(s)}`}
-                  className={[
-                    'px-3 py-1 rounded-chip text-xs font-medium transition-colors duration-200',
-                    secteurParam === s
-                      ? 'bg-gold text-obsidian '
-                      : 'bg-elevated border border-border text-muted hover:border-border-strong hover:text-ivory',
-                  ].join(' ')}
-                >
-                  {s}
-                </Link>
-              ))}
-            </div>
           )}
         </div>
 
@@ -200,7 +172,35 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
                     </Link>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* md+ : liste compacte, hiérarchie inférieure à la cartographie */}
+                <ul className="hidden md:block divide-y divide-border rounded-lg border border-border">
+                  {sectorStats.map((s) => {
+                    const avg = s.avgVar;
+                    const color = avg > 0 ? 'text-up' : avg < 0 ? 'text-down' : 'text-muted';
+                    const stables = s.count - s.hausses - s.baisses;
+                    const actif = secteurParam === s.secteur;
+                    return (
+                      <li key={s.secteur}>
+                        <Link
+                          href={actif ? '/heatmap' : `/heatmap?secteur=${encodeURIComponent(s.secteur)}`}
+                          aria-current={actif ? 'true' : undefined}
+                          className={`grid grid-cols-[minmax(0,1.6fr)_5.5rem_minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-4 px-3 py-2 text-xs transition-colors hover:bg-elevated ${actif ? 'bg-elevated' : ''}`}
+                        >
+                          <span className="truncate font-medium text-ivory">{s.secteur}</span>
+                          <span className={`tabular text-right font-semibold ${color}`}>{fmtPctSigne(avg)}</span>
+                          <span className="tabular text-muted">
+                            {s.hausses} hausse{s.hausses > 1 ? 's' : ''} · {s.baisses} baisse{s.baisses > 1 ? 's' : ''} · {stables} stable{stables > 1 ? 's' : ''}
+                          </span>
+                          <span className="tabular truncate text-right text-muted">
+                            {s.topHausse ? `${s.topHausse.code} ${fmtPctSigne(s.topHausse.pct, 1)}` : '—'}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {/* Mobile : grille de cartes inchangée */}
+                <div className="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-3">
                   {sectorStats.map((s) => {
                     const avg = s.avgVar;
                     const color = avg > 0 ? 'text-up' : avg < 0 ? 'text-down' : 'text-muted';
@@ -215,22 +215,22 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
                         <div className="flex items-start justify-between gap-2">
                           <span className="text-xs font-semibold text-ivory leading-tight">{s.secteur}</span>
                           <span className={`tabular text-xs font-bold shrink-0 ${color}`}>
-                            {avg >= 0 ? '+' : ''}{avg.toFixed(2)}%
+                            {fmtPctSigne(avg)}
                           </span>
                         </div>
                         {/* Barre breadth : hausses/total */}
                         <div className="h-1.5 rounded-full bg-border overflow-hidden">
                           {/* eslint-disable-next-line react/forbid-dom-props */}
                           <div
-                            className="h-full rounded-full bg-up transition-[width] [width:var(--breadth)]"
+                            className={`h-full rounded-full ${avg < 0 ? 'bg-down' : avg > 0 ? 'bg-up' : 'bg-muted'} transition-[width] motion-reduce:transition-none [width:var(--breadth)]`}
                             style={{ '--breadth': `${breadth.toFixed(0)}%` } as React.CSSProperties}
                           />
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-faint">
-                          <span>{s.hausses} hausses · {s.baisses} baisses · {s.count - s.hausses - s.baisses} stables</span>
+                          <span>{s.hausses} hausse{s.hausses > 1 ? 's' : ''} · {s.baisses} baisse{s.baisses > 1 ? 's' : ''} · {s.count - s.hausses - s.baisses} stable{s.count - s.hausses - s.baisses > 1 ? 's' : ''}</span>
                           {s.topHausse && (
-                            <span className="text-up/80">
-                              Top : {s.topHausse.code} +{s.topHausse.pct.toFixed(1)}%
+                            <span className="text-up">
+                              Top : {s.topHausse.code} {fmtPctSigne(s.topHausse.pct, 1)}
                             </span>
                           )}
                         </div>
@@ -260,7 +260,7 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
           <span>WESTBOURSE</span>
           {lastDate && (
             <span>
-              Données au{' '}
+              Source BRVM · données au{' '}
               <span className="text-muted">{fmtDateFR(lastDate)}</span>
             </span>
           )}

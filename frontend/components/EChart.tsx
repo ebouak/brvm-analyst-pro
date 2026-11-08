@@ -24,7 +24,13 @@ export default function EChart({ option, height = 320, className, loading, onEve
   if (!mounted) return <div style={style} className={className} />;
 
   const T = chartTheme();
+  // Mouvement réduit : aucune animation ECharts. Sans cela, chaque redimensionnement
+  // relançait l'apparition des libellés, et la cartographie restait muette le
+  // temps de l'animation (constaté sur capture le 2026-11-08).
+  const mouvementReduit =
+    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const baseTheme: EChartsOption = {
+    animation: !mouvementReduit,
     backgroundColor: 'transparent',
     textStyle: { color: T.muted, fontFamily: 'Inter, sans-serif' },
     grid: { top: 32, right: 16, bottom: 40, left: 56, containLabel: false },

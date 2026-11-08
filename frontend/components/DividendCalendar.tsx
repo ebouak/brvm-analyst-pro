@@ -230,7 +230,7 @@ export function DividendCalendar({
                               : '—'}
                           </div>
                           {day.dividends.length > 1 && (
-                            <div className="text-xs text-accent-ink/80">
+                            <div className="text-xs text-accent-ink">
                               +{day.dividends.length - 1}
                             </div>
                           )}
@@ -336,7 +336,7 @@ export function DividendCalendar({
                       <div className="font-semibold text-accent-ink text-sm">
                         {div.taux != null && div.montant > 0 ? `${fmtNumber(div.taux, 1)} %` : '—'}
                       </div>
-                      <div className="text-xs text-accent-ink/80 mt-0.5">
+                      <div className="text-xs text-accent-ink mt-0.5">
                         {getCountdown(div.ex_date)}
                       </div>
                     </div>

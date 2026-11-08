@@ -19,9 +19,9 @@ const STANCE_STYLE: Record<CompanyValuation['verdict']['stance'], string> = {
 };
 
 const ZONE_STYLE: Record<AltmanZone, { txt: string; cls: string }> = {
-  safe: { txt: 'Sain', cls: 'text-up bg-up/10 border-up/30' },
+  safe: { txt: 'Sain', cls: 'text-up bg-up/5 border-up/30' },
   grey: { txt: 'Zone grise', cls: 'text-warn bg-warn/10 border-warn/30' },
-  distress: { txt: 'Risque de détresse', cls: 'text-down bg-down/10 border-down/30' },
+  distress: { txt: 'Risque de détresse', cls: 'text-down bg-down/5 border-down/30' },
 };
 
 /** Bloc valorisation fondamentale d'une société (fiche premium). */
@@ -61,7 +61,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {ratios.map((r) => (
             <div key={r.label} className="rounded-lg bg-bg/40 border border-border/60 p-2.5 text-center">
-              <div className="text-[10px] text-muted">{r.label}</div>
+              <div className="text-[11px] text-muted">{r.label}</div>
               <div className="tabular text-sm font-mono font-semibold text-ivory mt-0.5">{r.value}</div>
             </div>
           ))}
@@ -81,7 +81,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
                     <span key={i} title={c.label} className={`h-1.5 flex-1 rounded-full ${c.pass ? 'bg-up' : 'bg-border'}`} />
                   ))}
                 </div>
-                <p className="mt-1.5 text-[10px] text-faint">Solidité fondamentale : rentabilité, levier, efficience (9 critères).</p>
+                <p className="mt-1.5 text-[11px] text-faint">Solidité fondamentale : rentabilité, levier, efficience (9 critères).</p>
               </div>
             )}
             <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
@@ -92,10 +92,10 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
                     {scoring.altman.z} · {ZONE_STYLE[scoring.altman.zone].txt}
                   </span>
                 ) : (
-                  <span className="text-[10px] text-faint">non applicable</span>
+                  <span className="text-[11px] text-faint">non applicable</span>
                 )}
               </div>
-              <p className="mt-1.5 text-[10px] text-faint">{scoring.altman?.note ?? 'Risque de détresse financière (modèle Z″ marchés émergents).'}</p>
+              <p className="mt-1.5 text-[11px] text-faint">{scoring.altman?.note ?? 'Risque de détresse financière (modèle Z″ marchés émergents).'}</p>
             </div>
           </div>
         )}
@@ -110,7 +110,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
             ))}
           </ul>
           {verdict.cautions.map((c, i) => (
-            <p key={i} className="flex items-start gap-2 text-xs text-warn/90"><span>!</span><span>{c}</span></p>
+            <p key={i} className="flex items-start gap-2 text-xs text-warn"><span>!</span><span>{c}</span></p>
           ))}
         </div>
 
@@ -125,9 +125,9 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
 function Cell({ label, value, unit, accent, cls }: { label: string; value: string; unit?: string; accent?: boolean; cls?: string }) {
   return (
     <div className={`rounded-lg border p-3 text-center ${accent ? 'border-gold/30 bg-gold/[0.04]' : 'border-border/60 bg-bg/40'}`}>
-      <div className="text-[10px] text-muted">{label}</div>
+      <div className="text-[11px] text-muted">{label}</div>
       <div className={`tabular text-base font-mono font-semibold mt-0.5 ${cls ?? 'text-ivory'}`}>
-        {value}{unit ? <span className="text-[10px] text-faint ml-1">{unit}</span> : null}
+        {value}{unit ? <span className="text-[11px] text-faint ml-1">{unit}</span> : null}
       </div>
     </div>
   );

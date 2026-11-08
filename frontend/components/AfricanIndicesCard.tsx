@@ -107,7 +107,7 @@ export async function AfricanIndicesCard({ brvmComposite }: {
                 {it.pct == null ? '—' : `${it.pct >= 0 ? '+' : ''}${it.pct.toFixed(2)} %`}
               </span>
               {it.ytd != null && (
-                <span className="tabular text-[10px] text-faint" title="Performance depuis le 1er janvier">
+                <span className="tabular text-[11px] text-faint" title="Performance depuis le 1er janvier">
                   YTD {it.ytd >= 0 ? '+' : ''}{it.ytd.toFixed(1)} %
                 </span>
               )}
@@ -115,7 +115,7 @@ export async function AfricanIndicesCard({ brvmComposite }: {
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[10px] leading-relaxed text-faint">
+      <p className="mt-2 text-[11px] leading-relaxed text-faint">
         Indices en devise locale : non comparables en niveau, seulement en variation.
       </p>
     </div>

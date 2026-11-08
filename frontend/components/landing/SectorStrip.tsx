@@ -31,7 +31,7 @@ export function SectorStrip({ sectors, dateLabel }: { sectors: SectorVariation[]
               className="rounded-xl border border-border/60 bg-surface/60 px-3 py-2.5"
               title={`${s.nb} valeur${s.nb > 1 ? 's' : ''} · moyenne pondérée par la capitalisation`}
             >
-              <p className="truncate text-[10.5px] leading-tight text-muted">{s.secteur}</p>
+              <p className="truncate text-[11px] leading-tight text-muted">{s.secteur}</p>
               <p className={`tabular mt-1 text-sm font-bold ${tone}`}>
                 {up ? '+' : ''}
                 {s.variation_pct.toFixed(2)}&nbsp;%

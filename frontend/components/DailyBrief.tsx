@@ -14,14 +14,14 @@ const toneConfig: Record<Brief['tone'], {
 }> = {
   positive: {
     bar:   'border-l-up/50',
-    badge: 'border-up/25 bg-up/10 text-up',
+    badge: 'border-up/25 bg-up/5 text-up',
     label: 'Marché porteur',
     glow:  'rgba(22,180,106,0.04)',
     dot:   'bg-up',
   },
   negative: {
     bar:   'border-l-down/50',
-    badge: 'border-down/25 bg-down/10 text-down',
+    badge: 'border-down/25 bg-down/5 text-down',
     label: 'Marché défavorable',
     glow:  'rgba(226,75,75,0.04)',
     dot:   'bg-down',
@@ -74,7 +74,7 @@ export default function DailyBrief({ brief }: Props) {
           {paragraphs.map((p, i) => (
             <div key={i} className="grid gap-1.5 sm:grid-cols-[88px_1fr] sm:gap-4">
               <span className="overline text-faint pt-0.5">{p.label}</span>
-              <p className={`text-ivory/85 leading-relaxed ${i === 0 ? 'text-[15px]' : 'text-sm'}`}>{p.text}</p>
+              <p className={`text-ivory leading-relaxed ${i === 0 ? 'text-[15px]' : 'text-sm'}`}>{p.text}</p>
             </div>
           ))}
         </div>

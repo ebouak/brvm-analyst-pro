@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 };
 
 const CLASS_STYLE: Record<string, string> = {
-  A: 'border-up/30 bg-up/10 text-up',
+  A: 'border-up/30 bg-up/5 text-up',
   B: 'border-accent/30 bg-accent/10 text-accent-ink',
   C: 'border-gold/30 bg-gold/10 text-gold',
-  D: 'border-down/30 bg-down/10 text-down',
+  D: 'border-down/30 bg-down/5 text-down',
 };
 
 const dateCourte = (iso: string) =>

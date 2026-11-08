@@ -171,9 +171,6 @@ export default async function SignauxPage() {
       {/* ── Filet doré de séparation ────────────────────────────────────── */}
       <div className="gold-rule" />
 
-      {/* ── Track record : backtest méthode + signaux réels récents ────── */}
-      <SignalPerformance backtest={backtest} recentReal={recentReal} />
-
       {/* ── Métriques KPI ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MetricCard
@@ -183,27 +180,42 @@ export default async function SignauxPage() {
           accent="neutral"
         />
         <MetricCard
-          label="Signaux ACHAT"
+          label="Signaux Achat"
           value={String(buyCount)}
           delta={total > 0 ? `${Math.round((buyCount / total) * 100)} % du marché` : undefined}
-          deltaDir="up"
+          deltaDir="flat"
           accent="emerald"
         />
         <MetricCard
-          label="Signaux CONSERVER"
+          label="Signaux Attente"
           value={String(holdCount)}
           delta={total > 0 ? `${Math.round((holdCount / total) * 100)} % du marché` : undefined}
           deltaDir="flat"
           accent="neutral"
         />
         <MetricCard
-          label="Signaux VENTE"
+          label="Signaux Vente"
           value={String(sellCount)}
           delta={total > 0 ? `${Math.round((sellCount / total) * 100)} % du marché` : undefined}
-          deltaDir="down"
+          deltaDir="flat"
           accent="sapphire"
         />
       </div>
+
+      {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
+      {total > 0 && buyCount === 0 && (
+        <div className="rounded-xl border border-info/25 bg-info/[0.06] px-4 py-3 text-sm text-muted">
+          <span className="font-medium text-ivory">Aucun signal d&apos;achat sur cette séance.</span>{' '}
+          Aucun titre ne réunit les conditions d&apos;un signal d&apos;achat. C&apos;est une situation
+          courante en phase de marché neutre, pas une anomalie. Les titres classés{' '}
+          <span className="text-ivory">Attente</span> n&apos;ont simplement franchi aucun des deux seuils.
+        </div>
+      )}
+
+      {/* ── Tableau interactif avec filtres ─────────────────────────────── */}
+      <PremiumPanel>
+        <SignalsTable rows={rows} />
+      </PremiumPanel>
 
       {/* ── Bascules depuis la séance précédente (les VRAIES nouveautés) ── */}
       {changes.length > 0 && (
@@ -227,20 +239,8 @@ export default async function SignauxPage() {
         </div>
       )}
 
-      {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
-      {total > 0 && buyCount === 0 && (
-        <div className="rounded-xl border border-info/25 bg-info/[0.06] px-4 py-3 text-sm text-muted">
-          <span className="font-medium text-ivory">Aucun signal d&apos;achat sur cette séance.</span>{' '}
-          Aucun titre ne réunit les conditions d&apos;un signal d&apos;achat. C&apos;est une situation
-          courante en phase de marché neutre, pas une anomalie. Les titres classés
-          <span className="text-ivory">Conserver</span> n&apos;ont simplement franchi aucun des deux seuils.
-        </div>
-      )}
-
-      {/* ── Tableau interactif avec filtres ─────────────────────────────── */}
-      <PremiumPanel>
-        <SignalsTable rows={rows} />
-      </PremiumPanel>
+      {/* ── Track record : backtest méthode + signaux réels récents ────── */}
+      <SignalPerformance backtest={backtest} recentReal={recentReal} />
 
       {/* ── Légende de lecture ──────────────────────────────────────────── */}
       <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-4">

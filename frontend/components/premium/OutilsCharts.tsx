@@ -5,9 +5,9 @@ import type { ActionProcheBas, MoisSaisonnalite, ReactionEtatFinancier } from '@
 import { fmtDateCourte } from '@/lib/format';
 
 const SIGNAL_COLOR: Record<string, string> = {
-  ACHAT: 'text-up bg-up/10 border-up/30',
+  ACHAT: 'text-up bg-up/5 border-up/30',
   NEUTRE: 'text-warn bg-warn/10 border-warn/30',
-  VENTE: 'text-down bg-down/10 border-down/30',
+  VENTE: 'text-down bg-down/5 border-down/30',
 };
 
 function ProchesBasTable({ data }: { data: ActionProcheBas[] }) {

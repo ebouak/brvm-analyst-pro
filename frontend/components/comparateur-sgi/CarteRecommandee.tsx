@@ -76,7 +76,7 @@ export function CarteRecommandee({
             </motion.div>
           </AnimatePresence>
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className={`inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CONFIANCE_BADGE_CLASS[confiance]}`}>
+            <span className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${CONFIANCE_BADGE_CLASS[confiance]}`}>
               {CONFIANCE_LABEL[confiance]}
             </span>
             {decision && (

@@ -86,7 +86,7 @@ export default function ImportFondamentauxPage() {
 
       {/* Note pipeline IA */}
       <div className="flex items-start gap-3 rounded-card border border-border/50 bg-surface/60 px-4 py-3 shadow-card">
-        <span className="mt-0.5 shrink-0 text-accent-ink/60 text-xs" aria-hidden>•</span>
+        <span className="mt-0.5 shrink-0 text-accent-ink text-xs" aria-hidden>•</span>
         <p className="text-xs text-faint leading-relaxed">
           Pipeline IA&nbsp;: <span className="text-muted">DeepSeek → Mistral → Grok</span>.
           Écriture automatique si plausibilité &gt;&nbsp;95&nbsp;%. Les valeurs hors seuil sont soumises

@@ -87,8 +87,8 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">
           Fondamentaux{p.year ? ` (exercice ${p.year})` : ''}
-          {p.famille === 'banque' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[10px] font-medium text-info">Banque</span>}
-          {p.famille === 'assurance' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[10px] font-medium text-info">Assurance</span>}
+          {p.famille === 'banque' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[11px] font-medium text-info">Banque</span>}
+          {p.famille === 'assurance' && <span className="ml-2 rounded-full border border-info/40 px-2 py-0.5 text-[11px] font-medium text-info">Assurance</span>}
         </h2>
         {p.canEdit && (
           <button type="button" onClick={() => setEditing(true)}
@@ -151,7 +151,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
           États financiers officiels (PDF)
         </a>
       )}
-      <p className="text-[10px] text-muted">
+      <p className="text-[11px] text-muted">
         {fam.revenuLong} retenu comme revenu. Nombre d&apos;actions : {p.inputs.shares != null ? fmtNumber(p.inputs.shares) : 'non renseigné'}
         {p.sharesSource ? ` (${p.sharesSource})` : ''}.
         {p.dividendeExercice != null && !p.dividendeVerifie && ` Dividende : exercice ${p.dividendeExercice} (date de détachement non publiée).`}

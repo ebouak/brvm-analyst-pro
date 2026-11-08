@@ -126,7 +126,7 @@ export function VideoSeance({
             <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
               {chiffres.map((c) => (
                 <div key={c.k} className="rounded-lg border border-border/50 bg-bg/40 px-3 py-2">
-                  <dt className="truncate text-[10.5px] leading-tight text-muted">{c.k}</dt>
+                  <dt className="truncate text-[11px] leading-tight text-muted">{c.k}</dt>
                   <dd className={`tabular mt-0.5 text-sm font-bold ${c.ton ?? 'text-ivory'}`}>
                     {c.v}
                   </dd>

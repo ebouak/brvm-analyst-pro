@@ -110,7 +110,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
             <div className="text-xs text-neutral-400">WESTBOURSE · Rapport sur mesure</div>
             <div className="text-2xl font-bold">Rapport — {today}</div>
           </div>
-          <div className="text-right text-[10px] text-neutral-400">Généré le {today}<br />BRVM · UEMOA</div>
+          <div className="text-right text-[11px] text-neutral-400">Généré le {today}<br />BRVM · UEMOA</div>
         </header>
 
         {/* Bloc marché */}
@@ -122,7 +122,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
             <Row l="Breadth (part de hausses)" r={market.summary.breadthPct == null ? '—' : `${market.summary.breadthPct}%`} />
             {market.summary.topHausse && <Row l="Plus forte hausse" r={`${market.summary.topHausse.code} ${pct(market.summary.topHausse.pct)}`} />}
             {market.summary.topBaisse && <Row l="Plus forte baisse" r={`${market.summary.topBaisse.code} ${pct(market.summary.topBaisse.pct)}`} />}
-            <p className="mt-1 text-[10px] text-neutral-400">Séance du {market.lastDate}.</p>
+            <p className="mt-1 text-[11px] text-neutral-400">Séance du {market.lastDate}.</p>
           </section>
         )}
 
@@ -189,7 +189,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
           </section>
         )}
 
-        <footer className="mt-8 border-t border-neutral-200 pt-2 text-[9px] italic text-neutral-400">
+        <footer className="mt-8 border-t border-neutral-200 pt-2 text-[11px] italic text-neutral-400">
           Données réelles WESTBOURSE — à titre informatif, ne constitue pas un conseil en investissement.
         </footer>
       </article>

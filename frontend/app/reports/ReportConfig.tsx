@@ -133,7 +133,7 @@ export default function ReportConfig({ instruments, onGenerate, loading }: Props
               title={instr.designation ?? instr.code}
               className={`text-xs px-2 py-1 rounded border transition ${
                 selectedCodes.includes(instr.code)
-                  ? 'border-up text-up bg-up/10'
+                  ? 'border-up text-up bg-up/5'
                   : 'border-border text-muted hover:border-up/30'
               }`}
             >

@@ -26,16 +26,16 @@ const CSV_COLUMNS: CsvColumn<ActionRow>[] = [
 function liqBadge(classe: string | null | undefined, score: number | null | undefined) {
   if (!classe || score == null) return <span className="text-faint">—</span>;
   const cls =
-    classe === 'A' ? 'border-up/30 bg-up/10 text-up'
+    classe === 'A' ? 'border-up/30 bg-up/5 text-up'
     : classe === 'B' ? 'border-accent/30 bg-accent/10 text-accent'
     : classe === 'C' ? 'border-warn/30 bg-warn/10 text-warn'
-    : 'border-down/30 bg-down/10 text-down';
+    : 'border-down/30 bg-down/5 text-down';
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-bold ${cls}`}
+      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[11px] font-bold ${cls}`}
       title={`Score de liquidité ${score}/100 (présence en séance + valeur échangée moyenne, ~30 séances)`}
     >
-      {classe}<span className="font-normal opacity-70">{score}</span>
+      {classe}<span className="font-normal">{score}</span>
     </span>
   );
 }
@@ -122,7 +122,7 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
                   </Link>
                 </td>
                 <td className="px-4 py-2.5 text-muted hidden sm:table-cell">
-                  {r.secteur ? <span className="rounded-full border border-border px-2 py-0.5 text-[10px]">{r.secteur}</span> : '—'}
+                  {r.secteur ? <span className="rounded-full border border-border px-2 py-0.5 text-[11px]">{r.secteur}</span> : '—'}
                 </td>
                 <td className="px-4 py-2.5 text-right tabular text-ivory">{r.cours_jour ? fmt(r.cours_jour) : '—'}</td>
                 <td className={`px-4 py-2.5 text-right tabular font-medium ${r.variation_pct != null ? (r.variation_pct >= 0 ? 'text-up' : 'text-down') : 'text-faint'}`}>

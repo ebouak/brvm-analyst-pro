@@ -123,8 +123,8 @@ export function MonthlyReportViewer({ report, pdfUrl }: MonthlyReportViewerProps
                     <div
                       className={`text-xs font-semibold px-2 py-1 rounded-full ${
                         signal.pnlPct >= 0
-                          ? 'bg-up/10 text-up border border-up/30'
-                          : 'bg-down/10 text-down border border-down/30'
+                          ? 'bg-up/5 text-up border border-up/30'
+                          : 'bg-down/5 text-down border border-down/30'
                       }`}
                     >
                       {signal.pnlPct >= 0 ? '+' : ''}{fmtNumber(signal.pnlPct, 2)}%
@@ -150,13 +150,13 @@ export function MonthlyReportViewer({ report, pdfUrl }: MonthlyReportViewerProps
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted">Entrée</span>
-                      <span className="tabular text-muted text-[10px]">
+                      <span className="tabular text-muted text-[11px]">
                         {new Date(signal.entryDate).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted">Sortie</span>
-                      <span className="tabular text-muted text-[10px]">
+                      <span className="tabular text-muted text-[11px]">
                         {new Date(signal.exitDate).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
@@ -239,7 +239,7 @@ export function MonthlyReportViewer({ report, pdfUrl }: MonthlyReportViewerProps
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <h4 className="font-semibold text-ivory text-sm">{event.title}</h4>
-                    <span className="text-[10px] text-muted bg-elevated px-2 py-1 rounded whitespace-nowrap">
+                    <span className="text-[11px] text-muted bg-elevated px-2 py-1 rounded whitespace-nowrap">
                       {new Date(event.date).toLocaleDateString('fr-FR')}
                     </span>
                   </div>

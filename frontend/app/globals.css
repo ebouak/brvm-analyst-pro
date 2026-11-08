@@ -18,7 +18,7 @@
      Voir docs/superpowers/specs/2026-07-03-mode-clair-design.md pour la
      table complète sombre/clair et le raisonnement des choix de couleur.
      Triplets RGB (pas de hex) : requis pour que les modificateurs d'opacité
-     Tailwind (bg-accent/10, text-up/80...) fonctionnent avec des couleurs
+     Tailwind (bg-accent/10, text-up...) fonctionnent avec des couleurs
      pilotées par variable CSS — voir la fonction withAlpha dans
      tailwind.config.ts. */
   --color-bg: 3 3 3;

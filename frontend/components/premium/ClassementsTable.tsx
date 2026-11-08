@@ -17,7 +17,7 @@ const CRITERES: { id: CritereClassement; label: string }[] = [
 ];
 
 const SIGNAL_COLOR: Record<string, string> = {
-  BUY: 'text-up bg-up/10', HOLD: 'text-warn bg-warn/10', SELL: 'text-down bg-down/10',
+  BUY: 'text-up bg-up/5', HOLD: 'text-warn bg-warn/10', SELL: 'text-down bg-down/5',
 };
 
 export function ClassementsTable({
@@ -106,7 +106,7 @@ export function ClassementsTable({
                 <td className="px-4 py-3 text-muted text-xs hidden md:table-cell">{row.secteur ?? '—'}</td>
                 <td className="px-4 py-3 text-right">
                   {row.signal ? (
-                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide ${SIGNAL_COLOR[row.signal] ?? 'border-border bg-elevated text-muted'}`}>
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${SIGNAL_COLOR[row.signal] ?? 'border-border bg-elevated text-muted'}`}>
                       {libelleSignal(row.signal)}
                     </span>
                   ) : <span className="text-faint text-xs">—</span>}

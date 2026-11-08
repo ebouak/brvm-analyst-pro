@@ -2,8 +2,8 @@ import type { BacktestTrade } from '@/types/backtest';
 import { formatPercent, formatDate } from '@/lib/backtest-formatters';
 
 const STATUS: Record<BacktestTrade['result'], { label: string; cls: string }> = {
-  winner: { label: 'Gagnant', cls: 'bg-green-50 text-green-700 border-green-200' },
-  loser: { label: 'Perdant', cls: 'bg-red-50 text-red-600 border-red-200' },
+  winner: { label: 'Gagnant', cls: 'bg-up/5 text-up border-up/30' },
+  loser: { label: 'Perdant', cls: 'bg-down/5 text-down border-down/30' },
   open: { label: 'En cours', cls: 'bg-sky-50 text-sky-700 border-sky-200' },
 };
 
@@ -29,7 +29,7 @@ export function BacktestTradesMiniTable({ trades }: { trades: BacktestTrade[] })
                 <td className="py-2 pr-3 text-gray-700">{formatDate(t.entryDate)}</td>
                 <td className="py-2 pr-3 text-gray-700">{t.exitDate ? formatDate(t.exitDate) : '—'}</td>
                 <td className="py-2 pr-3 text-right tabular-nums text-gray-500">{t.durationDays} j</td>
-                <td className={`py-2 pr-3 text-right font-medium tabular-nums ${t.returnPct >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+                <td className={`py-2 pr-3 text-right font-medium tabular-nums ${t.returnPct >= 0 ? 'text-up' : 'text-down'}`}>
                   {formatPercent(t.returnPct)}
                 </td>
                 <td className="py-2 text-right">

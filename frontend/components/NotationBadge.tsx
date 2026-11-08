@@ -16,9 +16,9 @@ function rank(note: string) {
 
 function noteColor(note: string): string {
   if (note.startsWith('AAA') || note.startsWith('AA')) return 'text-up';
-  if (note.startsWith('A')) return 'text-up/80';
+  if (note.startsWith('A')) return 'text-up';
   if (note.startsWith('BBB')) return 'text-warn';
-  if (note.startsWith('BB') || note.startsWith('B')) return 'text-warn/70';
+  if (note.startsWith('BB') || note.startsWith('B')) return 'text-warn';
   return 'text-down';
 }
 

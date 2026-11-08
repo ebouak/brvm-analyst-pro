@@ -36,7 +36,7 @@ function VarCell({ v }: { v: number | null }) {
 function ColTooltip({ text }: { text: string }) {
   return (
     <span className="group/tip relative inline-flex items-center ml-1">
-      <span className="text-faint/60 text-[9px] cursor-help select-none">(?)</span>
+      <span className="text-faint text-[11px] cursor-help select-none">(?)</span>
       <span
         role="tooltip"
         className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-20 w-52 rounded-lg border border-border bg-elevated px-3 py-2 text-xs text-muted leading-relaxed opacity-0 transition-opacity group-hover/tip:opacity-100 shadow-modal"

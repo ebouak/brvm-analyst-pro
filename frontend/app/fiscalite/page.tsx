@@ -71,7 +71,7 @@ export default function FiscalitePage() {
 
         <section className="space-y-3">
           <h2 className="font-display text-lg text-ivory">Comparatif des 8 pays UEMOA</h2>
-          <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+          <div tabIndex={0} role="region" aria-label="Comparatif fiscal des pays UEMOA" className="overflow-x-auto rounded-xl border border-border bg-surface">
             <table className="w-full text-sm">
               <thead className="border-b border-border text-left text-xs text-muted">
                 <tr>

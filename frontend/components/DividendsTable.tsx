@@ -26,9 +26,7 @@ const CSV_COLUMNS: CsvColumn<DividendRow>[] = [
 
 function yieldColor(pct: number | null): string {
   if (pct == null) return 'text-muted';
-  if (pct >= 8) return 'text-up';
-  if (pct >= 4) return 'text-warn';
-  return 'text-muted';
+  return 'text-ivory';
 }
 
 const PAGE_SIZE = 50;
@@ -48,8 +46,14 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
   const [page, setPage] = useState(0);
   // Toggle rendement net d'IRVM (le tri par rendement reste sur la valeur publiée).
   const [net, setNet] = useState(false);
+  const [showEmpty, setShowEmpty] = useState(false);
 
-  const filtered = useMemo(() => {
+  const { filtered, hidden } = useMemo(() => {
+    // Ligne sans donnée : montant nul/absent, rendement nul/absent (un 0 en base
+    // est un trou de collecte, affiché « — »), et aucune date.
+    const sansDonnee = (row: DividendRow) =>
+      !(row.montant > 0) && !(row.rendement_pct != null && row.rendement_pct > 0) && !row.ex_date && !row.payment_date;
+    let hiddenCount = 0;
     let r = rows.filter((row) => {
       if (yearFilter && String(row.exercice) !== yearFilter) return false;
       if (sectorFilter && row.secteur !== sectorFilter) return false;
@@ -60,6 +64,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           !(row.designation ?? '').toLowerCase().includes(needle)
         ) return false;
       }
+      if (!showEmpty && sansDonnee(row)) { hiddenCount++; return false; }
       return true;
     });
     r = [...r].sort((a, b) => {
@@ -76,8 +81,8 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
       }
       return asc ? cmp : -cmp;
     });
-    return r;
-  }, [rows, q, yearFilter, sectorFilter, sortKey, asc]);
+    return { filtered: r, hidden: hiddenCount };
+  }, [rows, q, yearFilter, sectorFilter, sortKey, asc, showEmpty]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const pageRows = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -93,6 +98,18 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
       setter(e.target.value);
       setPage(0);
     };
+  }
+
+  function rendementLabel(row: DividendRow): string {
+    if (row.rendement_pct == null || !(row.montant > 0)) return '—';
+    if (!net) return fmtNumber(row.rendement_pct, 2);
+    // Un montant déjà net n'est jamais retaxé (double IRVM
+    // corrigée le 2026-10-20) ; une base inconnue n'est pas supposée.
+    const p = toPaysUemoa(row.pays);
+    const r = p
+      ? rendementNetSelonBase(row.rendement_pct, row.base_fiscale, p)
+      : ({ indisponible: true } as const);
+    return r.indisponible ? `${fmtNumber(row.rendement_pct, 2)}*` : fmtNumber(r.valeur, 2);
   }
 
   const Th = ({ k, label, right }: { k: SortKey; label: string; right?: boolean }) => (
@@ -112,7 +129,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           value={q}
           onChange={handleFilterChange(setQ)}
           placeholder="Rechercher ticker ou société…"
-          className="bg-surface border border-border rounded px-3 py-1.5 text-sm w-56"
+          className="bg-surface border border-border rounded px-3 py-1.5 text-sm w-full sm:w-56"
         />
         <select
           aria-label="Filtrer par exercice"
@@ -146,17 +163,63 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
         >
           {net ? <><Check size={12} aria-hidden className="inline mr-1" />Net d’IRVM</> : 'Afficher net d’IRVM'}
         </button>
-        <span className="text-xs text-muted ml-auto">
-          {filtered.length} dividende{filtered.length !== 1 ? 's' : ''}
-        </span>
-        <ExportButton<DividendRow>
-          filename={`dividendes_${new Date().toISOString().slice(0, 10)}.csv`}
-          rows={filtered}
-          columns={CSV_COLUMNS}
-        />
+        <div className="flex w-full sm:w-auto items-center justify-between gap-3 sm:ml-auto">
+          <span className="text-xs text-muted tabular">
+            {filtered.length} dividende{filtered.length !== 1 ? 's' : ''}
+            {hidden > 0 && ` (${hidden} sans donnée masquée${hidden !== 1 ? 's' : ''})`}
+          </span>
+          <ExportButton<DividendRow>
+            filename={`dividendes_${new Date().toISOString().slice(0, 10)}.csv`}
+            rows={filtered}
+            columns={CSV_COLUMNS}
+          />
+        </div>
       </div>
 
-      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+      {(hidden > 0 || showEmpty) && (
+        <button
+          type="button"
+          onClick={() => { setShowEmpty((v) => !v); setPage(0); }}
+          className="text-xs text-muted underline underline-offset-2 hover:text-white"
+        >
+          {showEmpty ? 'Masquer les lignes sans donnée' : `Afficher les ${hidden} lignes sans donnée`}
+        </button>
+      )}
+
+      {/* Mobile (< md) : une ligne empilée par distribution */}
+      <div className="md:hidden bg-surface border border-border rounded-xl">
+        {pageRows.length === 0 ? (
+          <p className="px-3 py-8 text-center text-muted text-sm">Aucun dividende enregistré pour ces critères.</p>
+        ) : (
+          <ul className="divide-y divide-border/40">
+            {pageRows.map((row) => (
+              <li key={row.id} className="px-3 py-3 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="min-w-0 flex items-baseline gap-2">
+                    <Link href={`/actions/${row.code}`} className="font-mono font-medium text-ivory hover:text-accent-ink">{row.code}</Link>
+                    <span className="min-w-0 truncate text-xs text-muted" title={row.designation ?? row.code}>{row.designation ?? ''}</span>
+                  </span>
+                  <span className={`tabular text-sm font-medium shrink-0 ${yieldColor(row.rendement_pct)}`}>
+                    {rendementLabel(row)}{rendementLabel(row) !== '—' ? ' %' : ''}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2 text-xs text-muted">
+                  <span className="tabular">
+                    {row.montant > 0 ? `${fmtNumber(row.montant, Number.isInteger(row.montant) ? 0 : 2)} FCFA` : '—'}
+                    {row.exercice != null && <> · ex. {row.exercice}</>}
+                  </span>
+                  <span className="tabular shrink-0">Paiement {fmtDateCourte(row.payment_date)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        {net && (
+          <p className="px-3 pb-2 pt-1 text-xs text-faint">* base du montant inconnue ou taux non confirmé : montant publié affiché, sans retenue supposée.</p>
+        )}
+      </div>
+
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="hidden md:block bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead className="text-xs text-muted border-b border-border bg-bg/40">
             <tr>
@@ -199,19 +262,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                   <td className="px-3 py-2 text-xs text-muted">{row.pays ?? '—'}</td>
                   <td className="px-3 py-2 text-right tabular">{row.montant > 0 ? fmtNumber(row.montant, Number.isInteger(row.montant) ? 0 : 2) : '—'}</td>
                   <td className={`px-3 py-2 text-right tabular font-medium ${yieldColor(row.rendement_pct)}`}>
-                    {(() => {
-                      if (row.rendement_pct == null || !(row.montant > 0)) return '—';
-                      if (!net) return fmtNumber(row.rendement_pct, 2);
-                      // Un montant déjà net n'est jamais retaxé (double IRVM
-                      // corrigée le 2026-10-20) ; une base inconnue n'est pas supposée.
-                      const p = toPaysUemoa(row.pays);
-                      const r = p
-                        ? rendementNetSelonBase(row.rendement_pct, row.base_fiscale, p)
-                        : ({ indisponible: true } as const);
-                      return r.indisponible
-                        ? `${fmtNumber(row.rendement_pct, 2)}*`
-                        : fmtNumber(r.valeur, 2);
-                    })()}
+                    {rendementLabel(row)}
                   </td>
                   <td className="px-3 py-2 text-right text-xs">{fmtDateCourte(row.ex_date)}</td>
                   <td className="px-3 py-2 text-right text-xs">{fmtDateCourte(row.payment_date)}</td>

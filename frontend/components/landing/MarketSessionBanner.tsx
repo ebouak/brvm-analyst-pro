@@ -283,7 +283,7 @@ function Cell({
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="text-xs font-semibold text-slate-500">{label}</span>
         <span className={`truncate font-display text-base leading-tight tracking-tight ${valueClass}`}>{value}</span>
-        <span className="truncate text-[10.5px] leading-tight text-slate-400">{sub}</span>
+        <span className="truncate text-[11px] leading-tight text-slate-400">{sub}</span>
       </div>
     </div>
   );

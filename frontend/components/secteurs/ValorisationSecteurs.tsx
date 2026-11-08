@@ -79,10 +79,10 @@ export default async function ValorisationSecteurs() {
                 <td className="px-4 py-3 text-xs text-muted">
                   {s.moinsChere && s.plusChere ? (
                     <>
-                      <Link href={`/societes/${s.moinsChere.code}`} className="text-accent-ink hover:underline">{s.moinsChere.code}</Link>
+                      <Link href={`/societes/${s.moinsChere.code}`} className="text-accent-ink underline underline-offset-2">{s.moinsChere.code}</Link>
                       <span className="tabular"> {n1(s.moinsChere.per)}</span>
                       <span className="text-faint"> → </span>
-                      <Link href={`/societes/${s.plusChere.code}`} className="text-accent-ink hover:underline">{s.plusChere.code}</Link>
+                      <Link href={`/societes/${s.plusChere.code}`} className="text-accent-ink underline underline-offset-2">{s.plusChere.code}</Link>
                       <span className="tabular"> {n1(s.plusChere.per)}</span>
                     </>
                   ) : '—'}

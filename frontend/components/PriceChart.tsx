@@ -772,7 +772,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
           </button>
         )}
         {draftLine && (
-          <span className="text-[10px] text-cyan ml-1 animate-pulse">Cliquer pour le 2ᵉ point…</span>
+          <span className="text-[11px] text-cyan ml-1 animate-pulse">Cliquer pour le 2ᵉ point…</span>
         )}
       </div>
 
@@ -836,7 +836,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       {/* ── RSI sub-chart ── */}
       {visible.has('rsi') && (
         <div>
-          <div className="text-[10px] text-muted mb-0.5 pl-1">RSI (14)</div>
+          <div className="text-[11px] text-muted mb-0.5 pl-1">RSI (14)</div>
           <div ref={rsiRef} />
         </div>
       )}
@@ -844,7 +844,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       {/* ── MACD sub-chart ── */}
       {visible.has('macd') && (
         <div>
-          <div className="text-[10px] text-muted mb-0.5 pl-1">MACD (12, 26, 9)</div>
+          <div className="text-[11px] text-muted mb-0.5 pl-1">MACD (12, 26, 9)</div>
           <div ref={macdRef} />
         </div>
       )}

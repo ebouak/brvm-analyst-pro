@@ -523,7 +523,7 @@ export default async function PortefeuillePage({
                               {it.code}
                             </Link>
                             {hit && (
-                              <span className="ml-2 inline-flex items-center rounded-full border border-down/30 bg-down/10 px-1.5 py-0.5 text-xs font-semibold text-down">
+                              <span className="ml-2 inline-flex items-center rounded-full border border-down/30 bg-down/5 px-1.5 py-0.5 text-xs font-semibold text-down">
                                 Alerte
                               </span>
                             )}
@@ -652,7 +652,7 @@ export default async function PortefeuillePage({
                             <td className="px-4 py-3 text-center">
                               <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
                                 a.actif
-                                  ? 'border-up/30 bg-up/10 text-up'
+                                  ? 'border-up/30 bg-up/5 text-up'
                                   : 'border-border bg-elevated text-faint'
                               }`}>
                                 {a.actif ? 'Actif' : 'Inactif'}

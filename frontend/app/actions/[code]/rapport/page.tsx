@@ -49,7 +49,7 @@ export default async function RapportPage({ params }: Props) {
           <h1 className="text-2xl font-bold mt-1">{code} — {designation}</h1>
           <p className="text-xs text-gray-500 mt-0.5">{secteur}</p>
         </div>
-        <div className="text-right text-[10px] text-gray-400">
+        <div className="text-right text-[11px] text-gray-400">
           <p>Générée le {today}</p>
           <p className="mt-1 max-w-[180px]">Document informatif : ne constitue pas un conseil en investissement</p>
         </div>
@@ -99,18 +99,18 @@ export default async function RapportPage({ params }: Props) {
       <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">Santé financière</h2>
       <div className="grid grid-cols-2 gap-4 mb-5 text-sm">
         <div className="border border-gray-200 rounded p-3">
-          <p className="text-[10px] uppercase text-gray-500">Piotroski F-Score</p>
+          <p className="text-[11px] uppercase text-gray-500">Piotroski F-Score</p>
           <p className="text-lg font-bold">{scoring?.fscore?.reliable ? `${scoring.fscore.score}/9 · ${scoring.fscore.label}` : '—'}</p>
-          <p className="text-[10px] text-gray-400 mt-0.5">Rentabilité · levier · efficience</p>
+          <p className="text-[11px] text-gray-400 mt-0.5">Rentabilité · levier · efficience</p>
         </div>
         <div className="border border-gray-200 rounded p-3">
-          <p className="text-[10px] uppercase text-gray-500">Altman Z-Score</p>
+          <p className="text-[11px] uppercase text-gray-500">Altman Z-Score</p>
           <p className="text-lg font-bold">
             {scoring?.altman?.applicable && scoring.altman.zone
               ? `${scoring.altman.z} · ${scoring.altman.zone === 'safe' ? 'Sain' : scoring.altman.zone === 'grey' ? 'Zone grise' : 'Risque'}`
               : 'n/a'}
           </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">{scoring?.altman?.applicable ? 'Risque de détresse' : (scoring?.altman?.note ?? 'Risque de détresse')}</p>
+          <p className="text-[11px] text-gray-400 mt-0.5">{scoring?.altman?.applicable ? 'Risque de détresse' : (scoring?.altman?.note ?? 'Risque de détresse')}</p>
         </div>
       </div>
 
@@ -122,7 +122,7 @@ export default async function RapportPage({ params }: Props) {
         </>
       )}
 
-      <p className="text-[10px] text-gray-400 mt-6 border-t pt-2 italic">
+      <p className="text-[11px] text-gray-400 mt-6 border-t pt-2 italic">
         Source : WESTBOURSE · {today}. Valorisation par multiples sectoriels et DDM. Les performances passées ne préjugent pas des résultats futurs.
       </p>
     </div>

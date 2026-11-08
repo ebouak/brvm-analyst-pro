@@ -52,7 +52,7 @@ export default function RecapBouton() {
       <button
         type="button"
         onClick={() => void ouvrir()}
-        className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
+        className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent-ink transition-all hover:border-accent/60 hover:bg-accent/20"
       >
         Mon récap en image
       </button>

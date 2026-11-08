@@ -7,15 +7,15 @@ import Sparkline from '@/components/Sparkline';
 
 function RankCircle({ n, direction }: { n: number; direction?: 'up' | 'down' }) {
   const cls = direction === 'up'
-    ? 'border-up/20 bg-up/[0.06] text-up/70'
+    ? 'border-up/20 bg-up/[0.06] text-up'
     : direction === 'down'
-    ? 'border-down/20 bg-down/[0.06] text-down/70'
+    ? 'border-down/20 bg-down/[0.06] text-down'
     : 'border-border bg-elevated text-muted';
   return (
     <span
       className={`
         inline-flex items-center justify-center w-6 h-6 rounded-full border
-        text-[10px] font-bold shrink-0 ${cls}
+        text-[11px] font-bold shrink-0 ${cls}
       `}
     >
       {n}
@@ -140,11 +140,11 @@ export default function TopMovers({
         <div className="flex items-center gap-2 px-3 mb-2">
           <span
             className={`
-              grid h-5 w-5 place-items-center rounded-full border text-[10px]
+              grid h-5 w-5 place-items-center rounded-full border text-[11px]
               ${direction === 'up'
-                ? 'border-up/25 bg-up/10 text-up'
+                ? 'border-up/25 bg-up/5 text-up'
                 : direction === 'down'
-                ? 'border-down/25 bg-down/10 text-down'
+                ? 'border-down/25 bg-down/5 text-down'
                 : 'border-border bg-elevated text-muted'
               }
             `}

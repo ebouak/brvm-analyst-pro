@@ -179,7 +179,7 @@ function Kpi({ label, value, sub, cls }: { label: string; value: string; sub?: s
     <div className="bg-bg/40 border border-border/60 rounded-xl p-4">
       <div className="text-xs text-muted mb-1">{label}</div>
       <div className={`tabular text-lg font-mono font-semibold ${cls ?? 'text-white'}`}>{value}</div>
-      {sub && <div className="text-[10px] text-faint mt-0.5">{sub}</div>}
+      {sub && <div className="text-[11px] text-faint mt-0.5">{sub}</div>}
     </div>
   );
 }

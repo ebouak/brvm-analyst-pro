@@ -12,9 +12,9 @@ const pct = (v: number | null | undefined, d = 1, signed = false) =>
 /** Badge distinguant une valeur sourcée (« réel ») d'une hypothèse ajustable. */
 function Tag({ kind }: { kind: 'reel' | 'hypothese' }) {
   return kind === 'reel' ? (
-    <span className="rounded bg-up/10 px-1.5 py-0.5 text-[10px] font-semibold text-up">réel</span>
+    <span className="rounded bg-up/5 px-1.5 py-0.5 text-[11px] font-semibold text-up">réel</span>
   ) : (
-    <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] font-semibold text-info">hypothèse</span>
+    <span className="rounded bg-info/10 px-1.5 py-0.5 text-[11px] font-semibold text-info">hypothèse</span>
   );
 }
 

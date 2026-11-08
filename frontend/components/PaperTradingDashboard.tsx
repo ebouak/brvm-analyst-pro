@@ -214,7 +214,7 @@ export function PaperTradingDashboard() {
     <div className="space-y-8">
       {/* Bannière de confirmation */}
       {success && (
-        <div role="status" className="rounded-lg border border-up/40 bg-up/10 px-4 py-2.5 text-sm font-medium text-up">
+        <div role="status" className="rounded-lg border border-up/40 bg-up/5 px-4 py-2.5 text-sm font-medium text-up">
           {success}
         </div>
       )}
@@ -297,7 +297,7 @@ export function PaperTradingDashboard() {
                       onChange={(e) => setAmountInput(e.target.value)}
                       placeholder={`Défaut : ${Math.round(account.capital_current * 0.1).toLocaleString('fr-FR')} (10 % du capital)`}
                       aria-label="Montant à investir en FCFA"
-                      className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-info/50"
+                      className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-info/50"
                     />
                     <p className="text-xs text-muted">
                       <span className="text-white tabular">{titres}</span> titre{titres > 1 ? 's' : ''} au cours de{' '}

@@ -98,7 +98,7 @@ export default function Lecon0Page() {
                       <li key={a.sigle} className="text-sm leading-relaxed">
                         <span className="font-semibold text-ivory">{a.sigle}</span>
                         <span className="text-muted"> — {a.nom}.</span>{' '}
-                        <span className="text-ivory/85">{a.roles.join(' · ')}.</span>
+                        <span className="text-ivory">{a.roles.join(' · ')}.</span>
                       </li>
                     ))}
                   </ul>
@@ -111,7 +111,7 @@ export default function Lecon0Page() {
 
       <section aria-labelledby="h-transcription" className="mt-8 rounded-xl border border-border/60 bg-surface/60 p-5">
         <h2 id="h-transcription" className="font-display text-lg text-white">Transcription</h2>
-        <div className="mt-3 max-w-[70ch] space-y-3 text-sm leading-relaxed text-ivory/90">
+        <div className="mt-3 max-w-[70ch] space-y-3 text-sm leading-relaxed text-ivory">
           {TRANSCRIPTION.map((p) => <p key={p}>{p}</p>)}
         </div>
       </section>

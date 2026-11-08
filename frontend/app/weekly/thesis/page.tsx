@@ -246,7 +246,7 @@ export default function ThesisPage() {
         <section>
           <div className="flex items-center gap-3 mb-6">
             <span className="text-xs font-mono text-accent/60">Matrice de sensibilité</span>
-            <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
+            <span className="text-[11px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm">
@@ -389,7 +389,7 @@ export default function ThesisPage() {
         <section>
           <div className="flex items-center gap-3 mb-5">
             <span className="text-xs font-mono text-accent/60">Facteurs transversaux</span>
-            <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
+            <span className="text-[11px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
@@ -422,7 +422,7 @@ export default function ThesisPage() {
         <section>
           <div className="flex items-center gap-3 mb-5">
             <span className="text-xs font-mono text-accent/60">Calendrier des catalyseurs</span>
-            <span className="text-[10px] text-amber-500/60 font-mono">#MODEL</span>
+            <span className="text-[11px] text-amber-500/60 font-mono">#MODEL</span>
           </div>
           <div className="rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
@@ -441,7 +441,7 @@ export default function ThesisPage() {
                     <td className="py-2.5 px-4">
                       <div className="flex flex-wrap gap-1">
                         {c.tickers.map(t => (
-                          <span key={t} className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-cyan-500/20 text-accent/80 bg-cyan-400/5">
+                          <span key={t} className="font-mono text-[11px] px-1.5 py-0.5 rounded border border-cyan-500/20 text-accent/80 bg-cyan-400/5">
                             {t}
                           </span>
                         ))}

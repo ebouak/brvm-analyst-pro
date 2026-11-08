@@ -40,7 +40,7 @@ function Panel({ title, children, hint }: { title: string; children: React.React
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
       <p className="text-xs text-muted mb-1">{title}</p>
-      {hint && <p className="text-[10px] text-faint mb-2">{hint}</p>}
+      {hint && <p className="text-[11px] text-faint mb-2">{hint}</p>}
       <div style={{ height: 240 }}>
         <ResponsiveContainer width="100%" height="100%">
           {children as React.ReactElement}
@@ -74,8 +74,8 @@ export default function FundamentalsCharts({
         <Panel title={`Évolution ${revenuLabel} & résultat net`} hint="Barres en Md FCFA · ligne = marge nette (%)">
           <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
             <XAxis dataKey="periode" tick={{ fill: AXIS, fontSize: 11 }} />
-            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 10 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
-            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
+            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
             <Tooltip
               {...tooltipStyle}
               formatter={(v: number, name: string) =>
@@ -103,7 +103,7 @@ export default function FundamentalsCharts({
         <Panel title="BPA & dividende par action" hint="FCFA par action · l'écart = bénéfice réinvesti">
           <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
             <XAxis dataKey="periode" tick={{ fill: AXIS, fontSize: 11 }} />
-            <YAxis tick={{ fill: AXIS, fontSize: 10 }} tickFormatter={(v) => nf.format(v)} />
+            <YAxis tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => nf.format(v)} />
             <Tooltip {...tooltipStyle} formatter={(v: number, name: string) => [fcfa(v), name]} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
             <Bar dataKey="bpa" name="BPA" fill={ACCENT} fillOpacity={0.85} radius={[3, 3, 0, 0]} isAnimationActive={false} />
@@ -117,8 +117,8 @@ export default function FundamentalsCharts({
         <Panel title="Crédits & dépôts à la clientèle" hint="Md FCFA · ligne = taux de transformation (%)">
           <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
             <XAxis dataKey="periode" tick={{ fill: AXIS, fontSize: 11 }} />
-            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 10 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
-            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
+            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
             <Tooltip
               {...tooltipStyle}
               formatter={(v: number, name: string) =>

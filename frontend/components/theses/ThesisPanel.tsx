@@ -100,7 +100,7 @@ export default function ThesisPanel({ code, coursActuel }: { code: string; cours
               <span>Depuis rédaction : <b className={check.perfPct >= 0 ? 'text-up' : 'text-down'}>{check.perfPct >= 0 ? '+' : ''}{check.perfPct.toFixed(1)}%</b></span>
             )}
           </div>
-          <p className="text-sm text-ivory/90 whitespace-pre-wrap leading-relaxed">{these.these}</p>
+          <p className="text-sm text-ivory whitespace-pre-wrap leading-relaxed">{these.these}</p>
           {check && check.raisons.length > 0 && (
             <ul className="text-[11px] text-warn list-disc pl-4 space-y-0.5">
               {check.raisons.map((r, i) => <li key={i}>{r}</li>)}
@@ -143,7 +143,7 @@ export default function ThesisPanel({ code, coursActuel }: { code: string; cours
             </button>
             <button type="button" onClick={() => { setEditing(false); if (!these) setTexte(''); }} className="text-xs text-muted hover:text-white px-2">Annuler</button>
           </div>
-          <p className="text-[10px] text-faint">Donnée privée, visible de vous seul. Exportable et supprimable depuis votre compte (RGPD).</p>
+          <p className="text-[11px] text-faint">Donnée privée, visible de vous seul. Exportable et supprimable depuis votre compte (RGPD).</p>
         </div>
       )}
     </div>

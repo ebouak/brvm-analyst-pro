@@ -45,7 +45,7 @@ export default function TechnicalSummary({ result }: { result: TechnicalSummaryR
       {/* Jauge de synthèse (verdict global type speedomètre) */}
       <div className="mb-5 pb-5 border-b border-border/30">
         <TechnicalGauge result={result} />
-        <p className="mt-3 text-[10px] text-faint text-center leading-relaxed">
+        <p className="mt-3 text-[11px] text-faint text-center leading-relaxed">
           Synthèse des 7 indicateurs ci-dessous · horizon séance quotidienne
         </p>
       </div>

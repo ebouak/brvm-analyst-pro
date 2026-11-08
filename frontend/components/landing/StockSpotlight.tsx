@@ -47,7 +47,7 @@ const H = 132;
 function Cell({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-t border-border/50 pt-2">
-      <dt className="text-[10px] leading-tight text-faint">{label}</dt>
+      <dt className="text-[11px] leading-tight text-faint">{label}</dt>
       <dd className="tabular mt-0.5 text-[13px] font-medium text-ivory">{value}</dd>
     </div>
   );
@@ -111,7 +111,7 @@ export function StockSpotlight({ stock, dateLabel }: { stock: StockDetail | null
 
             <Link
               href={`/societes/${stock.code}`}
-              className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors hover:text-gold-2"
+              className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-ivory transition-colors hover:text-gold-2"
             >
               Voir la fiche complète <span aria-hidden>→</span>
             </Link>
@@ -126,7 +126,7 @@ export function StockSpotlight({ stock, dateLabel }: { stock: StockDetail | null
                   <path d={geo.area} fill="currentColor" opacity={0.1} />
                   <path d={geo.line} stroke="currentColor" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
                 </svg>
-                <p className="mt-1 text-[10px] text-faint">
+                <p className="mt-1 text-[11px] text-faint">
                   Clôtures des {stock.serie.length} dernières séances cotées.
                 </p>
               </div>

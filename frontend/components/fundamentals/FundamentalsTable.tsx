@@ -55,10 +55,10 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
 
   const Cell = ({ metric, value, isPct }: { metric: SortKey; value: number | null; isPct?: boolean }) => {
     const q = assessQuality(metric, value);
-    if (q === 'missing') return <td className="px-3 py-2 text-right text-muted/60">—</td>;
+    if (q === 'missing') return <td className="px-3 py-2 text-right text-muted">—</td>;
     if (q === 'ns') {
       return (
-        <td className="px-3 py-2 text-right text-muted/70"
+        <td className="px-3 py-2 text-right text-muted"
             title="Non significatif : résultat (ou capitaux propres) négatif. Le ratio n'a pas de sens financier, la donnée n'est pas en cause.">
           n.s.
         </td>

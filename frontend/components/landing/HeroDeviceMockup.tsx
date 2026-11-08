@@ -334,7 +334,7 @@ export function HeroDeviceMockup({
                       className="ht-in rounded-lg px-2.5 py-2 text-center"
                       style={{ ...delai(800 + i * 70), background: 'rgba(255,255,255,0.035)' }}
                     >
-                      <p className="font-mono text-[10.5px]" style={{ color: GRIS }}>{r.code}</p>
+                      <p className="font-mono text-[11px]" style={{ color: GRIS }}>{r.code}</p>
                       <p className="font-display text-2xl leading-none" style={{ color: CYAN }}>{lettre(r.score)}</p>
                       <p className="tabular mt-0.5 text-[11px]" style={{ color: GRIS }}>
                         {r.confiance != null ? `conf. ${(r.confiance * 100).toFixed(0)} %` : '—'}

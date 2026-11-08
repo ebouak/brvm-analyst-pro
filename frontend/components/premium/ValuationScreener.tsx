@@ -15,8 +15,8 @@ function num(v: number | null, d = 1): string {
 type SortKey = 'upside' | 'per' | 'pbr' | 'roe' | 'quality';
 
 const STANCE_LABEL: Record<CompanyValuation['verdict']['stance'], { txt: string; cls: string }> = {
-  decote: { txt: 'Décote', cls: 'text-up bg-up/10 border-up/30' },
-  surcote: { txt: 'Surcote', cls: 'text-down bg-down/10 border-down/30' },
+  decote: { txt: 'Décote', cls: 'text-up bg-up/5 border-up/30' },
+  surcote: { txt: 'Surcote', cls: 'text-down bg-down/5 border-down/30' },
   proche: { txt: 'Juste prix', cls: 'text-warn bg-warn/10 border-warn/30' },
   indisponible: { txt: 'n/d', cls: 'text-muted bg-surface border-border' },
 };

@@ -46,7 +46,7 @@ export function AdvisorCard({ row, liquidite }: {
 
           {liquidite && result.action === 'acheter' && (liquidite.classe === 'C' || liquidite.classe === 'D') && (
             <p
-              className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-warn/30 bg-warn/10 px-1.5 py-0.5 text-[10px] font-medium text-warn"
+              className="mt-1 inline-flex w-fit items-center gap-1 rounded-md border border-warn/30 bg-warn/10 px-1.5 py-0.5 text-[11px] font-medium text-warn"
               title={`Score de liquidité ${liquidite.score}/100 : le titre traite peu : fractionnez vos ordres et prévoyez un délai de revente.`}
             >
               Liquidité {liquidite.classe === 'D' ? 'très faible' : 'faible'} — position à dimensionner
@@ -77,7 +77,7 @@ export function AdvisorCard({ row, liquidite }: {
         <div className="absolute inset-0 flex flex-col rounded-xl border border-info/30 bg-elevated p-4 [backface-visibility:hidden] [transform:rotateY(180deg)]">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-white">{row.code} — pourquoi&nbsp;?</span>
-            <button type="button" onClick={() => setFlipped(false)} className="text-[11px] text-faint hover:text-white">↩ retour</button>
+            <button type="button" onClick={() => setFlipped(false)} className="text-xs text-muted hover:text-white">Retour</button>
           </div>
 
           <div tabIndex={0} role="region" aria-label={`Justification détaillée de ${row.code}`} className="mt-2 flex-1 space-y-2.5 overflow-y-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
@@ -85,7 +85,7 @@ export function AdvisorCard({ row, liquidite }: {
             <p className="text-[11px] leading-relaxed text-white/90">{result.narrative}</p>
 
             <div className="border-t border-border/50 pt-2">
-              <p className="mb-1.5 text-xs text-faint">Détail du calcul</p>
+              <p className="mb-1.5 text-xs text-muted">Détail du calcul</p>
             </div>
 
             {result.breakdown.map((b, i) => (
@@ -102,11 +102,11 @@ export function AdvisorCard({ row, liquidite }: {
                     style={{ width: `${(Math.abs(b.points) / maxAbs) * 100}%` }}
                   />
                 </div>
-                <p className="mt-0.5 text-[10px] leading-snug text-faint">{b.detail}</p>
+                <p className="mt-0.5 text-[11px] leading-snug text-muted">{b.detail}</p>
               </div>
             ))}
             {result.breakdown.length === 0 && (
-              <p className="text-xs text-faint">Données insuffisantes pour argumenter.</p>
+              <p className="text-xs text-muted">Données insuffisantes pour argumenter.</p>
             )}
           </div>
 

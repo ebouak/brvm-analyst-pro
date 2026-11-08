@@ -4,10 +4,9 @@ import DividendsTable from '@/components/DividendsTable';
 import DividendsTopCard from '@/components/DividendsTopCard';
 import ViewTabs from '@/components/ViewTabs';
 import { REVENUS_TABS } from '@/lib/viewTabsPresets';
-import { computeYield, groupByYear, type DividendRow } from '@/lib/dividends';
+import { computeYield, type DividendRow } from '@/lib/dividends';
 import { fmtFcfa, fmtNumber } from '@/lib/format';
-import { fmtDateCourte } from '@/lib/dateCourte';
-import { TrendingUp, Activity, BarChart3 } from '@/components/icons';
+import { TrendingUp, BarChart3 } from '@/components/icons';
 import {
   SectionHeader,
   PremiumPanel,
@@ -22,6 +21,21 @@ export const metadata = { title: 'Dividendes' };
 
 // Dividende par action : jamais arrondi en « k » (1 500 FCFA ≠ « 2 k »).
 const fmtMontant = (n: number) => fmtNumber(n, Number.isInteger(n) ? 0 : 2);
+
+interface UpcomingEvent {
+  key: string;
+  code: string;
+  designation: string | null;
+  date: string;
+  type: 'Détachement' | 'Paiement';
+  montant: number;
+  base: 'brut' | 'net' | 'inconnu' | null;
+}
+
+const fmtDateLongue = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  });
 
 interface RawDividend {
   id: string;
@@ -51,8 +65,10 @@ async function getData(year?: string, sector?: string): Promise<{
   years: number[];
   sectors: string[];
   top5Yield: DividendRow[];
-  upcoming: DividendRow[];
-  byYear: { exercice: number; total: number }[];
+  upcoming: UpcomingEvent[];
+  byYear: { exercice: number; societes: number }[];
+  exerciceRecent: number | null;
+  nbDistributeurs: number | null;
 }> {
   const supabase = createClient();
 
@@ -129,22 +145,43 @@ async function getData(year?: string, sector?: string): Promise<{
     .sort((a, b) => (b.rendement_pct ?? 0) - (a.rendement_pct ?? 0))
     .slice(0, 5);
 
-  // Upcoming: payment_date >= today
+  // À venir : détachements et paiements postérieurs à aujourd'hui (données déjà chargées).
   const today = new Date().toISOString().slice(0, 10);
-  const upcoming = [...rows]
-    .filter((r) => r.payment_date != null && r.payment_date >= today)
-    .sort((a, b) => (a.payment_date ?? '').localeCompare(b.payment_date ?? ''))
-    .slice(0, 5);
+  const upcoming: UpcomingEvent[] = [];
+  for (const r of rows) {
+    if (!(r.montant > 0)) continue;
+    const ev = (date: string | null, type: UpcomingEvent['type']) => {
+      if (date != null && date >= today) {
+        upcoming.push({ key: `${r.id}-${type}`, code: r.code, designation: r.designation, date, type, montant: r.montant, base: r.base_fiscale ?? null });
+      }
+    };
+    ev(r.ex_date, 'Détachement');
+    ev(r.payment_date, 'Paiement');
+  }
+  upcoming.sort((a, b) => a.date.localeCompare(b.date) || a.code.localeCompare(b.code));
 
-  // Group by year (last 5 years)
-  const yearMap = groupByYear(rows);
+  // Par exercice (5 dernières années) : NOMBRE de sociétés ayant distribué (montant > 0).
+  // Une somme de dividendes PAR ACTION de sociétés différentes n'a pas de sens
+  // économique et ne se recoupe avec aucune source (critique it.6, 2026-11-08) ;
+  // ce compte, lui, se vérifie contre le calendrier BRVM et Sika (36 pour 2025).
   const currentYear = new Date().getFullYear();
-  const byYear = Array.from(yearMap.entries())
-    .filter(([y]) => y >= currentYear - 4)
+  const parExercice = new Map<number, Set<string>>();
+  for (const r of rows) {
+    if (r.exercice == null || r.exercice < currentYear - 4 || !(r.montant > 0)) continue;
+    if (!parExercice.has(r.exercice)) parExercice.set(r.exercice, new Set());
+    parExercice.get(r.exercice)!.add(r.code);
+  }
+  const byYear = Array.from(parExercice.entries())
     .sort(([a], [b]) => a - b)
-    .map(([exercice, total]) => ({ exercice, total }));
+    .map(([exercice, codes]) => ({ exercice, societes: codes.size }));
 
-  return { rows: filtered, years, sectors, top5Yield, upcoming, byYear };
+  // Sociétés ayant distribué (montant > 0) sur l'exercice le plus récent des 5 dernières années.
+  const exerciceRecent = byYear.length > 0 ? byYear[byYear.length - 1].exercice : null;
+  const nbDistributeurs = exerciceRecent == null
+    ? null
+    : new Set(rows.filter((r) => r.exercice === exerciceRecent && r.montant > 0).map((r) => r.code)).size;
+
+  return { rows: filtered, years, sectors, top5Yield, upcoming, byYear, exerciceRecent, nbDistributeurs };
 }
 
 interface PageProps {
@@ -155,7 +192,7 @@ export default async function DividendesPage({ searchParams }: PageProps) {
   const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
   const sector = typeof searchParams.sector === 'string' ? searchParams.sector : undefined;
 
-  const { rows, years, sectors, top5Yield, upcoming, byYear } = await getData(year, sector);
+  const { rows, years, sectors, top5Yield, upcoming, byYear, exerciceRecent, nbDistributeurs } = await getData(year, sector);
 
   const top5Entries = top5Yield.map((r) => ({
     code: r.code,
@@ -164,23 +201,14 @@ export default async function DividendesPage({ searchParams }: PageProps) {
     sub: fmtMontant(r.montant) + ' FCFA',
   }));
 
-  const upcomingEntries = upcoming.map((r) => ({
-    code: r.code,
-    label: r.designation ?? '',
-    value: fmtDateCourte(r.payment_date),
-    sub: fmtMontant(r.montant) + ' FCFA',
-  }));
-
   // Max total for inline bar scaling
-  const maxTotal = byYear.length > 0 ? Math.max(...byYear.map((b) => b.total)) : 1;
+  const maxTotal = byYear.length > 0 ? Math.max(...byYear.map((b) => b.societes)) : 1;
 
   // KPIs synthèse
   const avgYield = (() => {
     const vals = top5Yield.map((r) => r.rendement_pct).filter((v): v is number => v != null);
     return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
   })();
-  const totalDistrib = byYear.length > 0 ? byYear[byYear.length - 1]?.total ?? null : null;
-  const lastExercice = byYear.length > 0 ? byYear[byYear.length - 1]?.exercice ?? null : null;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
@@ -201,10 +229,10 @@ export default async function DividendesPage({ searchParams }: PageProps) {
       <div className="h-px bg-gold-line" />
 
       {/* KPI cards de synthèse */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <MetricCard
-          label="Émetteurs actifs"
-          value={String(new Set(top5Yield.map((r) => r.code)).size || '—')}
+          label={exerciceRecent ? `Sociétés ayant distribué (ex. ${exerciceRecent})` : 'Sociétés ayant distribué'}
+          value={nbDistributeurs != null && nbDistributeurs > 0 ? String(nbDistributeurs) : '—'}
           accent="gold"
         />
         <MetricCard
@@ -217,23 +245,47 @@ export default async function DividendesPage({ searchParams }: PageProps) {
           value={avgYield != null ? fmtNumber(avgYield, 2) : '—'}
           accent="sapphire"
         />
-        <MetricCard
-          label={lastExercice ? `Total distribué ${lastExercice}` : 'Dernière année'}
-          value={totalDistrib != null ? fmtFcfa(totalDistrib) : '—'}
-          unit="FCFA"
-          accent="neutral"
-        />
       </div>
 
-      {/* Cartes résumé (top rendements · prochains paiements · évolution) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Top 5 rendements */}
+      {/* À venir : prochains détachements et paiements */}
+      {upcoming.length === 0 ? (
+        <EmptyStatePremium
+          icon="◎"
+          title="Aucun détachement ni paiement à venir"
+          hint="Aucune date postérieure à aujourd’hui dans les distributions enregistrées."
+        />
+      ) : (
         <PremiumPanel glow>
           <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-gold"><TrendingUp size={14} /></span>
-              <Eyebrow>Top 5 rendements</Eyebrow>
-            </div>
+            <h2 className="font-display text-lg text-ivory mb-3">À venir</h2>
+            <ul className="divide-y divide-border/40">
+              {upcoming.map((e) => (
+                <li key={e.key} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5 text-sm">
+                  <span className="min-w-0 flex items-baseline gap-2">
+                    <span className="font-mono font-medium text-ivory">{e.code}</span>
+                    <span className="truncate text-xs text-muted">{e.designation ?? ''}</span>
+                  </span>
+                  <span className="flex items-baseline gap-4">
+                    <span className="text-xs text-muted">{e.type}</span>
+                    <span className="text-ivory">{fmtDateLongue(e.date)}</span>
+                    <span className="tabular text-ivory font-semibold">
+                      {fmtMontant(e.montant)} FCFA
+                      <span className="ml-1 text-xs font-normal text-muted">
+                        {e.base === 'net' ? 'net' : e.base === 'brut' ? 'brut' : 'publié'}
+                      </span>
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </PremiumPanel>
+      )}
+
+      {/* Top rendements · évolution */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <PremiumPanel>
+          <div className="p-5">
             <DividendsTopCard
               title="Top 5 rendements"
               icon={<TrendingUp size={14} />}
@@ -242,27 +294,12 @@ export default async function DividendesPage({ searchParams }: PageProps) {
           </div>
         </PremiumPanel>
 
-        {/* Prochains paiements */}
-        <PremiumPanel>
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-sapphire"><Activity size={14} /></span>
-              <Eyebrow>Prochains paiements</Eyebrow>
-            </div>
-            <DividendsTopCard
-              title="Prochains paiements"
-              icon={<Activity size={14} />}
-              entries={upcomingEntries}
-            />
-          </div>
-        </PremiumPanel>
-
         {/* Évolution par exercice */}
         <PremiumPanel>
           <div className="p-5">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-up"><BarChart3 size={14} /></span>
-              <Eyebrow>Dividendes par exercice</Eyebrow>
+              <span className="text-muted"><BarChart3 size={14} /></span>
+              <Eyebrow>Sociétés ayant distribué, par exercice</Eyebrow>
             </div>
             {byYear.length === 0 ? (
               <p className="text-xs text-muted">Aucune donnée disponible.</p>
@@ -272,12 +309,12 @@ export default async function DividendesPage({ searchParams }: PageProps) {
                   <li key={b.exercice} className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted">{b.exercice}</span>
-                      <span className="tabular text-ivory">{fmtFcfa(b.total)} FCFA</span>
+                      <span className="tabular text-ivory">{b.societes} société{b.societes > 1 ? 's' : ''}</span>
                     </div>
                     <div className="h-1.5 bg-border rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-up/60 rounded-full"
-                        style={{ '--bar-w': `${Math.round((b.total / maxTotal) * 100)}%`, width: 'var(--bar-w)' } as React.CSSProperties}
+                        className="h-full bg-accent/60 rounded-full"
+                        style={{ '--bar-w': `${Math.round((b.societes / maxTotal) * 100)}%`, width: 'var(--bar-w)' } as React.CSSProperties}
                       />
                     </div>
                   </li>

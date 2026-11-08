@@ -72,19 +72,39 @@ export function mixColor(hex1: string, hex2: string, t: number): string {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
-const NEUTRAL = '#232733';
-const UP = '#00c853';
-const DOWN = '#f44336';
-const MAX_VAR = 8;
+/** Variation à partir de laquelle la teinte est à pleine intensité. */
+export const VAR_PLEINE = 4;
+/** Intensité minimale dès qu'il y a une hausse ou une baisse : jamais confondue avec le neutre. */
+export const INTENSITE_MIN = 0.5;
 
-/** Maps variation_pct to a colour on the red–grey–green gradient. */
-export function colorForVariation(pct: number | null): string {
-  if (pct == null) return NEUTRAL;
-  const clamped = Math.max(-MAX_VAR, Math.min(MAX_VAR, pct));
-  if (clamped > 0) {
-    return mixColor(NEUTRAL, UP, clamped / MAX_VAR);
-  } else if (clamped < 0) {
-    return mixColor(NEUTRAL, DOWN, -clamped / MAX_VAR);
-  }
-  return NEUTRAL;
+export interface PaletteVariation {
+  up: string;
+  down: string;
+  neutre: string;
+}
+
+/**
+ * Couleur d'une tuile selon la variation : source unique pour la cartographie
+ * et la grille mobile. Les teintes viennent des jetons up/down du thème
+ * (chartTheme), le neutre mélange surface et muted.
+ */
+export function couleurVariation(pct: number | null, p: PaletteVariation): string {
+  if (pct == null || pct === 0) return p.neutre;
+  const t = Math.min(1, INTENSITE_MIN + (1 - INTENSITE_MIN) * (Math.abs(pct) / VAR_PLEINE));
+  return mixColor(p.neutre, pct > 0 ? p.up : p.down, t);
+}
+
+/** « rgb(r,g,b) » ou « rgba(r,g,b,a) » (sortie de chartTheme) → #rrggbb. */
+export function versHex(c: string): string {
+  const m = c.match(/\d+/g) ?? ['0', '0', '0'];
+  return '#' + m.slice(0, 3).map((n) => Number(n).toString(16).padStart(2, '0')).join('');
+}
+
+/** Palette du thème courant (à appeler côté client uniquement). */
+export function paletteDepuisTheme(T: { up: string; down: string; surface: string; muted: string }): PaletteVariation {
+  return {
+    up: versHex(T.up),
+    down: versHex(T.down),
+    neutre: mixColor(versHex(T.surface), versHex(T.muted), 0.3),
+  };
 }

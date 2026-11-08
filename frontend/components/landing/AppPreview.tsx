@@ -41,7 +41,7 @@ import Link from 'next/link';
 type Badge = 'GRATUIT' | 'PREMIUM' | 'UNIQUE';
 
 const BADGE_CLS: Record<Badge, string> = {
-  GRATUIT: 'border-up/30 bg-up/10 text-up',
+  GRATUIT: 'border-up/30 bg-up/5 text-up',
   PREMIUM: 'border-warn/30 bg-warn/10 text-warn',
   UNIQUE: 'border-purple/30 bg-purple/10 text-purple',
 };
@@ -193,7 +193,7 @@ export function AppPreview({ nbObligations }: { nbObligations?: number | null })
                 <span className="text-muted transition-colors group-hover:text-accent">
                   <Ico d={f.icon} />
                 </span>
-                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide ${BADGE_CLS[f.badge]}`}>
+                <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-wide ${BADGE_CLS[f.badge]}`}>
                   {f.badge}
                 </span>
               </div>

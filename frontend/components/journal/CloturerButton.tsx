@@ -57,7 +57,7 @@ export default function CloturerButton({ id }: { id: string }) {
       {erreur && <p className="text-[11px] text-down">{erreur}</p>}
       <div className="flex gap-2">
         <button type="button" onClick={cloturer} disabled={envoi}
-          className="text-xs border border-up/40 bg-up/10 text-up rounded px-2 py-1 disabled:opacity-50">
+          className="text-xs border border-up/40 bg-up/5 text-up rounded px-2 py-1 disabled:opacity-50">
           {envoi ? '…' : 'Confirmer la clôture'}
         </button>
         <button type="button" onClick={() => setOuvert(false)}

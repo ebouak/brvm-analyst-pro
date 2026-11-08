@@ -62,7 +62,7 @@ export default function BacktestTrades({ trades, bestTradePct, worstTradePct }: 
                 </td>
                 <td className="px-2 py-2 text-right">
                   <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                    t.win ? 'bg-up/10 text-up' : 'bg-down/10 text-down'
+                    t.win ? 'bg-up/5 text-up' : 'bg-down/5 text-down'
                   }`}>
                     {t.exitIndex == null ? 'latent' : t.win ? 'gagnant' : 'perdant'}
                   </span>

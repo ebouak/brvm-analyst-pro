@@ -62,7 +62,7 @@ export function VerdictBand({
         {/* Position 52 sem */}
         {pos != null && (
           <div className="min-w-[180px] flex-1">
-            <div className="flex items-center justify-between text-[10px] text-faint mb-1">
+            <div className="flex items-center justify-between text-[11px] text-faint mb-1">
               <span className="tabular">{fmtNumber(low52)}</span>
               <span className="overline">Plage observée</span>
               <span className="tabular">{fmtNumber(high52)}</span>

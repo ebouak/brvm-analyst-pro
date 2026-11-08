@@ -96,7 +96,7 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
       <div className="flex items-center gap-3 pt-1">
         <button
           type="submit"
-          className="px-5 py-2 rounded-lg bg-up text-black font-semibold text-sm hover:bg-up/80 transition-colors"
+          className="px-5 py-2 rounded-lg bg-up text-obsidian font-semibold text-sm hover:bg-up/80 transition-colors"
         >
           Lancer le scan
         </button>

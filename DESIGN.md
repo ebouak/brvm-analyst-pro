@@ -38,7 +38,7 @@ Contrastes : WCAG 2.x, calculés sur les valeurs du code (texte sur `bg` / sur `
 | `gold-2` / `gold-deep` | 143 230 255 / 42 138 168 | 8 112 138 / 8 112 138 | dégradés, survols (alias cyan) |
 | `up` | 63 225 139 | 10 120 68 | hausse, rendement. Rien d'autre |
 | `down` | 255 107 107 | 179 38 30 | baisse. Rien d'autre |
-| `warn` | 240 178 58 | 138 90 16 | « Conserver », avertissements |
+| `warn` | 240 178 58 | 138 90 16 | « Attente », avertissements |
 | `purple` | 139 111 194 | 109 79 168 | catégorie secondaire (rare) |
 | `emerald-soft` | 122 240 179 | 10 120 68 | variante claire du vert |
 
@@ -67,7 +67,7 @@ Tout passe AA (4,5) dans les deux thèmes. Texte `bg` posé sur fond `accent-ink
 - **`text-accent-ink` pour tout texte cyan, jamais `text-accent`.** En clair, l'ancien cyan 12 143 174 mesurait 3,4 à 3,8 : sous AA ; `accent` reste réservé aux aplats, traits et graphiques.
 - **Vert et rouge signifient hausse et baisse**, et uniquement cela (`MetricCard` delta, `SignalBadge` achat/vente). Jamais décoratifs, jamais en état « succès/erreur » générique hors de ce sens.
 - Ne jamais coder un hex de texte en dur : utiliser un jeton, sinon le thème clair casse. Exception tolérée : `.weekly-content` (§9).
-- Le sens ne passe jamais par la seule couleur : flèche ▲/▼ et libellé (`ACHAT`, `VENTE`, `CONSERVER`) l'accompagnent.
+- Le sens ne passe jamais par la seule couleur : flèche ▲/▼ et libellé (`Achat`, `Vente`, `Attente`, via `lib/signalLabel.ts`) l'accompagnent.
 
 ## 3. Typographie
 
@@ -137,7 +137,7 @@ Tous compatibles serveur, sans hook client.
 | `SectionHeader` | tête de chaque page : `h1` display + sous-titre `muted` + actions à droite. Seul. Jamais de surtitre ; la prop `accent` est sans effet. |
 | `PremiumPanel` | conteneur principal d'un bloc (double coque `border` + cœur `surface`). `glow` réservé au bloc mis en avant d'une page, une fois. |
 | `MetricCard` | un KPI : libellé 12 px `muted`, valeur `.tabular` 2xl 600, unité `faint`, delta ▲/▼ coloré `up`/`down`/`muted`. |
-| `SignalBadge` | signal moteur uniquement : ACHAT (up), VENTE (down), CONSERVER (warn). Valeur inconnue : pastille neutre avec le libellé brut. |
+| `SignalBadge` | signal moteur uniquement : Achat (up), Vente (down), Attente (warn), libellés de `lib/signalLabel.ts` — décision de l'exploitant du 2026-11-08 ; « Conserver », « HOLD » et « BUY » n'apparaissent jamais à l'écran. Valeur inconnue : pastille neutre « — ». |
 | `StatPill` | micro-information (statut, étiquette) ; tons `gold`/`sapphire` = cyan en `accent-ink`, `emerald` = hausse, `neutral`. |
 | `EmptyStatePremium` | toute absence de donnée : titre display, indication, icône lucide (`ICONE_ETAT`, défaut `Inbox`), action facultative. Chaque page doit gérer l'état vide. |
 | `PremiumCTA` | action principale (`gold` : fond `accent-ink`, texte `obsidian`) ; `ghost` pour l'action secondaire. Un seul plein par écran. |

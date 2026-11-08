@@ -17,7 +17,7 @@ function fmt(n: number): string {
 
 function Badge({ niveau }: { niveau: ConfianceNiveau }) {
   return (
-    <span className={`inline-block rounded-full border px-1.5 py-0.5 text-[9px] font-semibold leading-none ${CONFIANCE_BADGE_CLASS[niveau]}`}>
+    <span className={`inline-block rounded-full border px-1.5 py-0.5 text-[11px] font-semibold leading-none ${CONFIANCE_BADGE_CLASS[niveau]}`}>
       {CONFIANCE_LABEL[niveau]}
     </span>
   );
@@ -156,11 +156,11 @@ export function TableauResultatCout({
                 <td className="px-3 py-2 tabular text-faint">{i + 1}</td>
                 <td className="px-3 py-2">
                   <span className="font-medium text-white">{r.sgiNom}</span>
-                  {i === 0 && sortKey === 'total' && asc && r.complet && <span className="ml-2 text-[10px] font-semibold text-up">moins cher</span>}
+                  {i === 0 && sortKey === 'total' && asc && r.complet && <span className="ml-2 text-[11px] font-semibold text-up">moins cher</span>}
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2">
                     <Badge niveau={r.confiance} />
                     {r.decision && (
-                      <a href={r.decision} target="_blank" rel="noopener" className="text-[10px] text-accent hover:underline">
+                      <a href={r.decision} target="_blank" rel="noopener" className="text-[11px] text-accent hover:underline">
                         Décision (PDF) ↗
                       </a>
                     )}
@@ -171,21 +171,21 @@ export function TableauResultatCout({
                 <td className="px-3 py-2 text-right">
                   <div className="tabular">{r.depotMinimum > 0 ? fmt(r.depotMinimum) : 'Aucun'}</div>
                   {r.sousDepotMin && (
-                    <span className="text-[10px] text-warn" title="Montant investi inférieur au dépôt minimum">
+                    <span className="text-[11px] text-warn" title="Montant investi inférieur au dépôt minimum">
                       insuffisant
                     </span>
                   )}
                 </td>
                 <td className="px-3 py-2 text-right">
                   {r.champCourtageManquant ? (
-                    <span className="text-[10px] text-warn">Non renseigné</span>
+                    <span className="text-[11px] text-warn">Non renseigné</span>
                   ) : (
                     <span className="tabular">{r.courtagePct}%</span>
                   )}
                 </td>
                 <td className="px-3 py-2 text-right">
                   {r.champGardeManquant || r.gardePct == null ? (
-                    <span className="text-[10px] text-warn">Non renseigné</span>
+                    <span className="text-[11px] text-warn">Non renseigné</span>
                   ) : (
                     <span className="tabular">
                       {r.gardePct}%{r.gardeFreq ? `/${FREQ_ABBR[r.gardeFreq]}` : ''}

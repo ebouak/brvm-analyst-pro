@@ -133,7 +133,7 @@ function CalendarKpiCard({
       outer: 'border-up/20 bg-up/[0.04]',
       inner: 'border-up/10',
       number: 'text-up',
-      icon: 'border-up/20 bg-up/[0.08] text-up/60',
+      icon: 'border-up/20 bg-up/[0.08] text-up',
     },
     sapphire: {
       outer: 'border-sapphire/20 bg-sapphire/[0.04]',

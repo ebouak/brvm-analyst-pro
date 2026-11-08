@@ -142,7 +142,7 @@ export default function ConseillierWidget({
                     {factor.points}
                   </span>
                 </div>
-                <p className="text-[10px] leading-snug text-faint">
+                <p className="text-[11px] leading-snug text-faint">
                   {factor.detail}
                 </p>
               </div>
