@@ -107,7 +107,8 @@ export function gabaritActualites(v: Valeur, actus: Actualite[], pubs: Publicati
   const blocs: string[] = [];
   if (actus.length > 0) {
     blocs.push(
-      `Dernières actualités sur ${societe(v)} :\n` +
+      // Le rattachement d'une actualité à une valeur vient de la veille automatique : il peut se tromper, on le dit.
+      `Dernières actualités rattachées à ${societe(v)} par la veille automatique de WESTBOURSE :\n` +
         actus.slice(0, 6).map((a) => `· ${dateLongue(a.date)} : ${a.titre}${a.source ? ` (${a.source})` : ''}`).join('\n'),
     );
   } else {
