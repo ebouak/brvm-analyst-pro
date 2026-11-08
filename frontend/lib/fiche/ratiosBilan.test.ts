@@ -44,3 +44,16 @@ describe('ratiosBilan', () => {
     expect(r.pb).toBeNull(); expect(r.gearing).toBeNull();
   });
 });
+
+describe('SNTS (bénéficiaire, comptes de la base)', () => {
+  it('PER calculable, rien ne casse', () => {
+    const r = ratiosBilan({
+      cours: 4000, titres: 1_000_000_000, resultatNet: 413_588_000_000, chiffreAffaires: 1_923_122_000_000,
+      capitauxPropres: 1_399_263_000_000, detteFinanciere: 402_686_000_000, capitalisation: 4_000_000_000_000,
+    });
+    expect(r.bpa.valeur).toBe(413.59);
+    expect(r.per.valeur).toBeCloseTo(9.67, 2);
+    expect(r.pb).toBeCloseTo(2.86, 2);
+    expect(r.roe! * 100).toBeCloseTo(29.56, 1);
+  });
+});

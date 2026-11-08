@@ -26,7 +26,7 @@ export interface LigneFondamentaux {
   revenue: number | null;
   net_income: number | null;
   equity: number | null;
-  debt: number | null;
+  debt?: number | null;
 }
 
 export interface ExerciceRetenu {
@@ -66,7 +66,7 @@ export function exerciceRetenu(p: {
     if (!f) return vide;
     return {
       exercice: f.year, source: 'fundamentals',
-      resultatNet: f.net_income, chiffreAffaires: f.revenue, capitauxPropres: f.equity, detteFinanciere: f.debt, secondJeu: null,
+      resultatNet: f.net_income, chiffreAffaires: f.revenue, capitauxPropres: f.equity, detteFinanciere: f.debt ?? null, secondJeu: null,
     };
   }
 

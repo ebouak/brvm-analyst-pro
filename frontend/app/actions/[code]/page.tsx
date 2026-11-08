@@ -34,6 +34,9 @@ import PublicationsModal, { type Publication } from '@/components/PublicationsMo
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, formatRendementDividende, rendementDividendeParts, nombreFr, pctFr, insecable, libelleEvenement } from '@/lib/fiche/affichage';
 import { plageSurFenetre, plageSeance } from '@/lib/fiche/plages';
+import { exerciceRetenu, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
+import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
 import { chaineGardeFous, resumeGardeFous } from '@/lib/fiche/quantTextes';
@@ -420,10 +423,18 @@ export default async function InstrumentPage({
   // Capitalisation boursière en MFCFA : valorisation scrapée (Sika) en priorité,
   // sinon calcul cours × shares.
   const shares = instrument?.shares ?? null;
-  const capitalisation = last.valorisation != null
-    ? last.valorisation / 1_000_000
-    : (shares != null && last.cours_jour != null
-        ? (last.cours_jour * shares) / 1_000_000 : null);
+  const capitalisationBrute = capitalisationFcfa({ valorisation: last.valorisation != null ? Number(last.valorisation) : null, cours: last.cours_jour ?? null, titres: shares });
+  const capitalisation = capitalisationBrute != null ? capitalisationBrute / 1_000_000 : null;
+
+  // Comptes retenus (SYSCOHADA : income/balance), source unique des ratios publics ; `fundamentals` en repli.
+  const retenu = exerciceRetenu({ income: financials?.incomeStatements ?? [], balance: financials?.balanceSheets ?? [], fundamentals });
+  const ratiosPublics = ratiosBilan({
+    cours: last.cours_jour ?? null, titres: shares,
+    resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires,
+    capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere,
+    capitalisation: capitalisationBrute,
+  });
+  const mentionJeu = mentionSecondJeu(retenu.secondJeu);
 
   // Volume moyen 20j
   const recentVols = rows.slice(-20).map((r) => r.volume).filter((v): v is number => v != null);
@@ -564,7 +575,7 @@ export default async function InstrumentPage({
         resultatNetPrecedent: exPrecedent?.net_income ?? null,
         chiffreAffaires: exCourant.revenue ?? null,
         chiffreAffairesPrecedent: exPrecedent?.revenue ?? null,
-        capitauxPropres: exCourant.equity ?? null,
+        capitauxPropres: (retenu.exercice === exCourant.year ? retenu.capitauxPropres : null) ?? exCourant.equity ?? null,
         actions: instrument?.shares ?? null,
         coursJour: last.cours_jour ?? null,
         source: exCourant.is_manual ? 'pdf-verified' : null,
@@ -1245,7 +1256,10 @@ export default async function InstrumentPage({
               <FundamentalsPanel
                 canEdit={canEditFondamentaux}
                 code={code}
-                year={latest.year}
+                year={retenu.exercice ?? latest.year}
+                ratiosPublics={retenu.source ? ratiosPublics : undefined}
+                comptesRetenus={retenu.source ? { chiffreAffaires: retenu.chiffreAffaires, resultatNet: retenu.resultatNet, capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere } : undefined}
+                mentionSecondJeu={mentionJeu}
                 inputs={{
                   cours: last.cours_jour ?? null,
                   shares: instrument?.shares ?? null,
@@ -1269,7 +1283,7 @@ export default async function InstrumentPage({
                 })()}
                 sourceUrl={null}
                 range52={range52}
-                resultatNet={latest.net_income ?? null}
+                resultatNet={(retenu.source ? retenu.resultatNet : latest.net_income) ?? null}
                 famille={(instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null}
                 dividendeExercice={divCourant?.exercice ?? null}
                 dividendeVerifie={divCourant?.ex_date != null}

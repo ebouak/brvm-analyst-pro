@@ -71,3 +71,19 @@ describe('mentionSecondJeu', () => {
   });
   it('rien sans second jeu', () => expect(mentionSecondJeu(null)).toBeNull());
 });
+
+describe('chaîne exerciceRetenu → ratiosBilan (SCRC, comptes de la base)', () => {
+  it('P/B 2,44 · ROE −44,4 % · dette/CP 5,80 · BPA −312,85, PER non calculable', async () => {
+    const { ratiosBilan } = await import('./ratiosBilan');
+    const e = exerciceRetenu({ income, balance, fundamentals: fonda });
+    const r = ratiosBilan({
+      cours: 1720, titres: 19_600_000, resultatNet: e.resultatNet, chiffreAffaires: e.chiffreAffaires,
+      capitauxPropres: e.capitauxPropres, detteFinanciere: e.detteFinanciere, capitalisation: 33_712_000_000,
+    });
+    expect(r.pb).toBeCloseTo(2.44, 2);
+    expect(r.roe! * 100).toBeCloseTo(-44.36, 1);
+    expect(r.gearing).toBeCloseTo(5.80, 2);
+    expect(r.bpa.valeur).toBe(-312.85);
+    expect(r.per.valeur).toBeNull();
+  });
+});
