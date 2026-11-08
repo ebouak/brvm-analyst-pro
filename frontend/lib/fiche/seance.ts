@@ -26,3 +26,14 @@ export function heureReleve(iso: string): string | null {
   if (Number.isNaN(d.getTime())) return null;
   return libelleHeure(d.getUTCHours() * 60 + d.getUTCMinutes());
 }
+
+/**
+ * Avant la première transaction, brvm.org affiche le cours de la veille : ces relevés ne prouvent
+ * aucun cours échangé. On ne garde que ceux à partir du premier dont le volume cumulé est > 0.
+ * Sans transaction, la liste est vide.
+ */
+export function depuisPremiereTransaction<T extends { captured_at: string; volume: number | null }>(points: T[]): T[] {
+  const tries = [...points].sort((a, b) => Date.parse(a.captured_at) - Date.parse(b.captured_at));
+  const i = tries.findIndex((p) => (p.volume ?? 0) > 0);
+  return i < 0 ? [] : tries.slice(i);
+}

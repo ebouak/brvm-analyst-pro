@@ -981,7 +981,7 @@ export default async function InstrumentPage({
               </div>
 
               {/* Graphique de séance (absent sans instantané) */}
-              <SeanceIntraday points={instantanes} plusBasPublie={last.plus_bas ?? null} />
+              <SeanceIntraday points={instantanes} />
             </div>
 
             <div className="mt-5 h-px bg-gold-line opacity-40" />
