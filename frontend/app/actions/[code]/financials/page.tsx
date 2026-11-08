@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { fmtDateCourte, fmtFcfa } from '@/lib/format';
 import RatioCard from '@/components/fundamentals/RatioCard';
 import FluxComptable from '@/components/fiche/FluxComptable';
-import { fluxCompteResultat, type FluxCR } from '@/lib/fiche/flux';
-import { perAffichable, distributionAffichable, evolutionResultat } from '@/lib/fiche/affichage';
+import { fluxCompteResultat, fluxBilan, type FluxCR, type FluxBilan } from '@/lib/fiche/flux';
+import { perAffichable, distributionAffichable, evolutionResultat, dividendeCourant } from '@/lib/fiche/affichage';
 import { plageSurFenetre } from '@/lib/fiche/plages';
 import { computeRatios } from '@/lib/fundamentals';
 import { formatXOF, formatPct, formatRatio, formatGrowth } from '@/lib/financials/formatters';
@@ -94,6 +94,12 @@ export default async function FinancialsPage({ params }: Props) {
     ? await createClient().from('fundamentals').select('year, debt, equity').eq('code', code).eq('year', anneeDernierBilan).limit(1)
     : { data: null };
   const fonda = ((fondaRows ?? []) as { year: number; debt: number | null; equity: number | null }[])[0] ?? null;
+  // Toutes les années (dette financière par exercice pour la vue en flux du bilan).
+  const { data: fondaTousRows } = await createClient().from('fundamentals').select('year, debt').eq('code', code);
+  const detteFonda = new Map(((fondaTousRows ?? []) as { year: number; debt: number | null }[]).map((r) => [r.year, r.debt]));
+  // Dividendes : même requête que la fiche (tri par exercice, lignes sans exercice en dernier).
+  const { data: divRowsBrut } = await createClient().from('dividends').select('montant, ex_date, payment_date, exercice')
+    .eq('code', code).order('exercice', { ascending: false, nullsFirst: false }).limit(6);
   const detteBilan = latestBalance && latestBalance.dette_court_terme != null && latestBalance.dette_long_terme != null
     ? latestBalance.dette_court_terme + latestBalance.dette_long_terme : null;
   const gearing = computeRatios({
@@ -122,7 +128,26 @@ export default async function FinancialsPage({ params }: Props) {
       resultatAvantImpot: st.resultat_avant_impots, resultatNet: st.resultat_net,
     });
   }
-  const exercicesFlux = Object.keys(fluxParExercice).map(Number);
+  // Flux du bilan : dette = court + long terme si les deux existent, sinon la valeur extraite du même exercice.
+  const bilanParExercice: Record<number, FluxBilan | null> = {};
+  for (const bs of data.balanceSheets) {
+    if (bs.type_periode !== 'annuel') continue;
+    const y = Number(String(bs.periode).slice(0, 4));
+    if (!Number.isFinite(y)) continue;
+    const dette = bs.dette_court_terme != null && bs.dette_long_terme != null
+      ? bs.dette_court_terme + bs.dette_long_terme : detteFonda.get(y) ?? null;
+    bilanParExercice[y] = fluxBilan({ totalActif: bs.total_actifs, capitauxPropres: bs.total_capitaux_propres, detteFinanciere: dette });
+  }
+  const exercicesFlux = Array.from(new Set([...Object.keys(fluxParExercice), ...Object.keys(bilanParExercice)].map(Number)));
+
+  // Rendement du dividende : même source que la fiche (dernier dividende versé > 0 et son exercice).
+  const exerciceDernier = latestIncome?.periode ? Number(String(latestIncome.periode).slice(0, 4)) : null;
+  const divCourant = dividendeCourant(
+    ((divRowsBrut ?? []) as { montant: number; exercice: number | null; ex_date: string | null; payment_date: string | null }[]),
+    exerciceDernier != null && Number.isFinite(exerciceDernier) ? exerciceDernier : null,
+  );
+  const coursDiv = data.latestDaily?.cours_jour ?? null;
+  const rendementDiv = divCourant && coursDiv != null && coursDiv > 0 ? (divCourant.montant / coursDiv) * 100 : null;
 
   // Pourquoi la solvabilité manque, s'il manque : ce que disent les documents
   // consultés pour l'exercice du bilan affiché (indicateur_source, lecture publique).
@@ -197,7 +222,10 @@ export default async function FinancialsPage({ params }: Props) {
     ligne('PER', 'cours ÷ BPA', per.valeur, formatRatio, { motif: per.motif }),
     ligne('P / valeur comptable', 'capitalisation ÷ capitaux propres', ratios.pb, formatRatio),
     ligne(`P / ${revenuLabel}`, `capitalisation ÷ ${caLong}`, ratios.ps, formatRatio),
-    ligne('Rendement dividende', 'dividende par action ÷ cours', ratios.rendement_dividende, formatPct),
+    ligne(divCourant?.exercice != null ? `Rendement dividende · ex. ${divCourant.exercice}` : 'Rendement dividende',
+      divCourant?.ancien
+        ? "dernier dividende versé ÷ cours (antérieur au dernier exercice publié : pas un point d'appui)"
+        : 'dernier dividende versé ÷ cours', rendementDiv, formatPct),
   ];
   const ratiosRentabilite: LigneRatio[] = [
     ligne('ROE', 'résultat net ÷ capitaux propres', ratios.roe, formatPct, { positive: signe(ratios.roe) }),
@@ -210,6 +238,7 @@ export default async function FinancialsPage({ params }: Props) {
       ? [ligne('Dette / fonds propres', 'dette financière ÷ capitaux propres', gearing, formatRatio)]
       : []),
     ligne(`Croissance ${revenuLabel}`, 'exercice N ÷ exercice N−1', ratios.croissance_ca, formatGrowth, { positive: signe(ratios.croissance_ca) }),
+    ligne('Croissance résultat net', '(RN N − RN N−1) ÷ |RN N−1|', ratios.croissance_rn, formatGrowth, { positive: signe(ratios.croissance_rn) }),
     evolutionRn
       ? { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: evolutionRn, quality: 'ok', positive: null }
       : { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: '', quality: 'missing', motif: null },
@@ -301,7 +330,7 @@ export default async function FinancialsPage({ params }: Props) {
         {data.incomeStatements.length > 0 && (
           <div>
             <p className="text-xs text-muted mb-3 px-0.5">Vue en flux</p>
-            <FluxComptable parExercice={fluxParExercice} exercices={exercicesFlux} />
+            <FluxComptable parExercice={fluxParExercice} exercices={exercicesFlux} bilanParExercice={bilanParExercice} />
           </div>
         )}
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fluxCompteResultat } from './flux';
+import { fluxCompteResultat, fluxBilan } from './flux';
 
 describe('fluxCompteResultat (STAC 2025, millions)', () => {
   const f = fluxCompteResultat({ chiffreAffaires: 3880, resultatExploitation: -772, resultatAvantImpot: 4.3, resultatNet: -96.6 })!;
@@ -27,5 +27,32 @@ describe('fluxCompteResultat (STAC 2025, millions)', () => {
     expect([...b.ressources, ...b.emplois].every((n) => n.valeur > 0)).toBe(true);
     expect(b.emplois.map((n) => n.cle)).toEqual(['chargesExploitation', 'benefice']);
     expect(b.ressources.reduce((a, n) => a + n.valeur, 0)).toBeCloseTo(b.emplois.reduce((a, n) => a + n.valeur, 0), 6);
+  });
+});
+
+describe('fluxBilan (STAC 2025, FCFA)', () => {
+  const p = { totalActif: 5446509000, capitauxPropres: 356746000, detteFinanciere: 463307000 };
+  it('trois passifs dont les autres passifs en solde', () => {
+    const f = fluxBilan(p)!;
+    expect(f.actif.valeur).toBe(5446509000);
+    expect(f.passifs.map((n) => [n.cle, n.valeur])).toEqual([
+      ['capitauxPropres', 356746000], ['detteFinanciere', 463307000], ['autresPassifs', 4626456000],
+    ]);
+  });
+  it('les passifs égalent l’actif', () => {
+    const f = fluxBilan(p)!;
+    expect(f.passifs.reduce((a, n) => a + n.valeur, 0)).toBe(f.actif.valeur);
+  });
+  it('null si un terme manque', () => {
+    expect(fluxBilan({ ...p, detteFinanciere: null })).toBeNull();
+    expect(fluxBilan({ ...p, capitauxPropres: null })).toBeNull();
+    expect(fluxBilan({ ...p, totalActif: null })).toBeNull();
+  });
+  it('null si actif ≤ 0 ou autres passifs négatifs', () => {
+    expect(fluxBilan({ ...p, totalActif: 0 })).toBeNull();
+    expect(fluxBilan({ ...p, totalActif: 100, capitauxPropres: 80, detteFinanciere: 50 })).toBeNull();
+  });
+  it('capitaux propres négatifs : pas de bande de hauteur négative', () => {
+    expect(fluxBilan({ totalActif: 100, capitauxPropres: -20, detteFinanciere: 30 })).toBeNull();
   });
 });

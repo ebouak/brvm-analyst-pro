@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { fmtFcfa } from '@/lib/format';
-import type { FluxCR, Noeud } from '@/lib/fiche/flux';
+import type { FluxCR, FluxBilan, Noeud } from '@/lib/fiche/flux';
 
 interface Props {
   /** Flux calculés côté serveur par `fluxCompteResultat` ; null = poste manquant. */
   parExercice: Record<number, FluxCR | null>;
   exercices: number[];
+  /** Flux du bilan par exercice (`fluxBilan`) ; null = terme manquant. */
+  bilanParExercice?: Record<number, FluxBilan | null>;
 }
 
 type Onglet = 'cr' | 'bilan' | 'flux';
@@ -20,6 +22,10 @@ const COULEUR: Record<string, string> = {
   impot: 'rgb(var(--color-down))',
   chargesExploitation: 'rgb(var(--color-purple))',
   benefice: 'rgb(var(--color-up))',
+  actif: 'rgb(var(--color-accent))',
+  capitauxPropres: 'rgb(var(--color-up))',
+  detteFinanciere: 'rgb(var(--color-down))',
+  autresPassifs: 'rgb(var(--color-purple))',
 };
 const coul = (cle: string) => COULEUR[cle] ?? 'rgb(var(--color-muted))';
 
@@ -51,7 +57,7 @@ function bande(x1: number, ya: number, yb: number, x2: number, yc: number, yd: n
   return `M ${x1} ${ya} C ${xm} ${ya}, ${xm} ${yc}, ${x2} ${yc} L ${x2} ${yd} C ${xm} ${yd}, ${xm} ${yb}, ${x1} ${yb} Z`;
 }
 
-function VueFlux({ f }: { f: FluxCR }) {
+function VueFlux({ f, titreCentre = 'Ressources', ariaLabel }: { f: FluxCR; titreCentre?: string; ariaLabel?: string }) {
   const nMax = Math.max(f.ressources.length, f.emplois.length);
   const hCol = (n: number) => H_TOTAL + ECART * (n - 1);
   const H = hCol(nMax) + 24;
@@ -60,7 +66,7 @@ function VueFlux({ f }: { f: FluxCR }) {
   const d = empiler(f.emplois, f.total, (H - hCol(f.emplois.length)) / 2);
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img"
-      aria-label={`Flux du compte de résultat : ressources ${fmtFcfa(f.total)} réparties en emplois`}>
+      aria-label={ariaLabel ?? `Flux du compte de résultat : ressources ${fmtFcfa(f.total)} réparties en emplois`}>
       {g.map((p) => (
         <g key={`g-${p.n.cle}`}>
           <path d={bande(XG + LN, p.y, p.y + p.h, XC, yc + p.c, yc + p.c + p.h)} fill={coul(p.n.cle)} opacity={0.28} />
@@ -81,7 +87,7 @@ function VueFlux({ f }: { f: FluxCR }) {
       ))}
       <rect x={XC} y={yc} width={LN} height={H_TOTAL} fill="rgb(var(--color-border-strong))" rx={2} />
       <text x={XC + LN / 2} y={yc - 8} textAnchor="middle" fontSize={11.5} fill="rgb(var(--color-ivory))">
-        Ressources <tspan className="tabular" fill="rgb(var(--color-muted))">{fmtFcfa(f.total)}</tspan>
+        {titreCentre} <tspan className="tabular" fill="rgb(var(--color-muted))">{fmtFcfa(f.total)}</tspan>
       </text>
     </svg>
   );
@@ -116,13 +122,14 @@ function VueBarres({ f }: { f: FluxCR }) {
 const bouton = (actif: boolean) =>
   `rounded-full border px-3 py-1 text-xs transition-colors ${actif ? 'border-accent text-accent-ink bg-accent/10' : 'border-border text-muted hover:text-ivory'}`;
 
-export default function FluxComptable({ parExercice, exercices }: Props) {
+export default function FluxComptable({ parExercice, exercices, bilanParExercice = {} }: Props) {
   const tries = [...exercices].sort((a, b) => b - a);
   const [exercice, setExercice] = useState<number | null>(tries[0] ?? null);
   const [onglet, setOnglet] = useState<Onglet>('cr');
   const [vue, setVue] = useState<Vue>('flux');
   if (tries.length === 0) return null;
   const f = exercice != null ? parExercice[exercice] ?? null : null;
+  const b = exercice != null ? bilanParExercice[exercice] ?? null : null;
 
   return (
     <div className="rounded-card border border-border bg-surface p-5">
@@ -153,10 +160,20 @@ export default function FluxComptable({ parExercice, exercices }: Props) {
         {onglet === 'cr' ? (
           f ? (vue === 'flux' ? <VueFlux f={f} /> : <VueBarres f={f} />)
             : <p className="text-sm text-muted">Flux non disponible pour cet exercice : un des quatre postes publiés (chiffre d&apos;affaires, résultat d&apos;exploitation, avant impôt, net) manque ou n&apos;est pas comparable.</p>
+        ) : onglet === 'bilan' ? (
+          b ? (
+            <VueFlux f={{ ressources: [b.actif], emplois: b.passifs, total: b.actif.valeur }} titreCentre="Total actif"
+              ariaLabel={`Flux du bilan : total actif ${fmtFcfa(b.actif.valeur)} réparti entre capitaux propres, dette financière et autres passifs`} />
+          ) : (
+            <p className="text-sm text-muted">Vue en flux non disponible pour le bilan de cet exercice : total actif, capitaux propres ou dette financière manque. Consulter le tableau sur cinq ans ci-dessus.</p>
+          )
         ) : (
-          <p className="text-sm text-muted">Vue en flux non disponible pour {onglet === 'bilan' ? 'le bilan' : 'les flux de trésorerie'} : consulter le tableau sur cinq ans ci-dessus.</p>
+          <p className="text-sm text-muted">Vue en flux non disponible pour les flux de trésorerie : consulter le tableau sur cinq ans ci-dessus.</p>
         )}
       </div>
+      {onglet === 'bilan' && b && (
+        <p className="mt-3 text-xs text-faint">Autres passifs = total actif − capitaux propres − dette financière.</p>
+      )}
       {onglet === 'cr' && f && (
         <p className="mt-3 text-xs text-faint">
           Les ressources égalent les emplois : une perte figure parmi les ressources pour équilibrer les charges.

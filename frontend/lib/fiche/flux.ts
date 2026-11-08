@@ -20,3 +20,23 @@ export function fluxCompteResultat(p: { chiffreAffaires: number | null; resultat
   else if (rn > 0) emplois.push({ cle: 'benefice', libelle: "Bénéfice de l'exercice", valeur: rn });
   return { ressources, emplois, total: ressources.reduce((a, n) => a + n.valeur, 0) };
 }
+
+export interface FluxBilan { actif: Noeud; passifs: Noeud[] }
+
+/**
+ * Actif total → capitaux propres, dette financière, autres passifs (solde).
+ * Un terme manquant, un actif ≤ 0, ou un terme négatif (aucune bande de hauteur négative) → null.
+ */
+export function fluxBilan(p: { totalActif: number | null; capitauxPropres: number | null; detteFinanciere: number | null }): FluxBilan | null {
+  const { totalActif: ta, capitauxPropres: cp, detteFinanciere: dette } = p;
+  if (ta == null || cp == null || dette == null) return null;
+  if (ta <= 0 || cp < 0 || dette < 0) return null;
+  const autres = ta - cp - dette;
+  if (autres < 0) return null;
+  const passifs: Noeud[] = [
+    { cle: 'capitauxPropres', libelle: 'Capitaux propres', valeur: cp },
+    { cle: 'detteFinanciere', libelle: 'Dette financière', valeur: dette },
+    { cle: 'autresPassifs', libelle: 'Autres passifs', valeur: autres },
+  ];
+  return { actif: { cle: 'actif', libelle: 'Total actif', valeur: ta }, passifs };
+}
