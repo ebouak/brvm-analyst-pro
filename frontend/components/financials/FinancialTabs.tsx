@@ -66,7 +66,7 @@ export default function FinancialTabs({
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-up/20 text-up border border-up/30'
+                  ? 'bg-up/20 [[data-theme=light]_&]:bg-up/10 text-up border border-up/30'
                   : 'text-muted hover:text-white'
               }`}
             >
