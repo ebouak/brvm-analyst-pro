@@ -19,6 +19,7 @@ export function VerdictBand({
   low52,
   high52,
   synthesisLine,
+  libelleNote,
 }: {
   /** Notation financière A à F (null si non notée). */
   note: string | null;
@@ -31,6 +32,8 @@ export function VerdictBand({
   low52: number | null;
   high52: number | null;
   synthesisLine?: string | null;
+  /** Libellé de la note (« Momentum positif ») : B+ et Attente se lisent ensemble. */
+  libelleNote?: string | null;
 }) {
   // Position du cours dans le range (0 = plus bas, 1 = plus haut).
   const pos =
@@ -46,7 +49,10 @@ export function VerdictBand({
           <div className="flex items-center gap-3">
             <span className="text-xs text-faint">Note</span>
             <span className="font-display rounded-[10px] border border-ivory px-3 py-1.5 text-3xl leading-none text-ivory">{note}</span>
-            <span className="max-w-[110px] text-[11px] leading-snug text-faint">note technique A à F, tirée du score de signal</span>
+            <span className="max-w-[150px] text-[11px] leading-snug text-faint">
+              {libelleNote && <span className="block text-xs text-muted">{libelleNote}</span>}
+              note technique A à F, tirée du même score
+            </span>
           </div>
         )}
 
@@ -61,7 +67,8 @@ export function VerdictBand({
                   score {scoreTotal.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               )}
-              {confiance != null && <span className="tabular text-xs text-faint">qualité des données {Math.round(confiance <= 1 ? confiance * 100 : confiance)} %</span>}
+              {signal === 'HOLD' && note && <span className="text-xs text-faint">sous le seuil d&apos;achat</span>}
+              {confiance != null && <span className="text-xs text-faint">qualité des données <span className="tabular">{Math.round(confiance <= 1 ? confiance * 100 : confiance)} %</span></span>}
             </span>
           ) : (
             <span className="text-xs text-faint">—</span>

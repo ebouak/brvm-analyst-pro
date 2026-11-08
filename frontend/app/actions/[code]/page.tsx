@@ -24,8 +24,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com
 import PriceChart, { type PricePoint, type ChartMarker } from '@/components/PriceChart';
 import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
-import IndicatorCommentary, { QUESTIONS_INDICATEURS } from '@/components/IndicatorCommentary';
-import { readIndicators } from '@/lib/indicators/commentary';
+import { QUESTIONS_INDICATEURS } from '@/components/IndicatorCommentary';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import RatingBadge from '@/components/RatingBadge';
@@ -33,9 +32,10 @@ import { VerdictBand } from '@/components/actions/VerdictBand';
 import { FicheStickyNav } from '@/components/actions/FicheStickyNav';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
-import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice } from '@/lib/fiche/affichage';
+import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, formatRendementDividende, insecable, libelleEvenement } from '@/lib/fiche/affichage';
 import { plageSurFenetre, plageSeance } from '@/lib/fiche/plages';
 import { lectureTechnique } from '@/lib/fiche/lecture';
+import { decomposerScore } from '@/lib/fiche/quant';
 import { libelleSignal } from '@/lib/signalLabel';
 import { Chapitre } from '@/components/fiche/Chapitre';
 import { Essentiel, type CarteEssentiel } from '@/components/fiche/Essentiel';
@@ -409,7 +409,8 @@ export default async function InstrumentPage({
   );
   // Même ligne que `divCourant` (premier montant > 0), avec sa base fiscale.
   const lastDiv = divCourant ? divRows.find((d) => d.montant > 0 && d.exercice != null) ?? null : null;
-  const divExercice = divCourant?.exercice != null ? ` · ex. ${divCourant.exercice}` : '';
+  const divExercice = divCourant?.exercice ?? null;
+  const divYieldTexte = (v: number | null) => formatRendementDividende(v, divExercice);
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
     ? (lastDiv.montant / last.cours_jour) * 100 : null;
 
@@ -491,6 +492,10 @@ export default async function InstrumentPage({
           : null,
         calculeLe: combinedAlphaRow.score_date,
       }
+    : null;
+  // Pénalité réellement appliquée : somme pondérée des piliers − score (même calcul que la fiche Quant).
+  const decompositionCA = combinedAlpha
+    ? decomposerScore(combinedAlpha.piliers.map((x, k) => ({ poids: [30, 25, 20, 15, 10][k]!, valeur: x.valeur })), combinedAlpha.score)
     : null;
 
   // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
@@ -667,7 +672,7 @@ export default async function InstrumentPage({
 
   // Détections sous forme de checklist
   const detections = [
-    { label: 'Momentum haussier', ok: up && (last.variation_pct ?? 0) > 1 },
+    { label: 'Hausse de plus de 1 % sur la séance', ok: up && (last.variation_pct ?? 0) > 1 },
     { label: 'Golden Cross (MA20 > MA50)', ok: det.goldenCross },
     { label: 'Volume > moyenne', ok: volumeAuDessusMoyenne(last.volume ?? null, volMoyen) },
     { label: 'Cassure haussière 20j', ok: det.breakoutUp },
@@ -692,13 +697,6 @@ export default async function InstrumentPage({
     rsi: lastRsi ?? null,
     volume: last.volume ?? null,
     volumeMoyen: volMoyen,
-  });
-  const lastOf = (arr: (number | null)[]) => { for (let k = arr.length - 1; k >= 0; k--) if (arr[k] != null) return arr[k]!; return null; };
-  const lectureIndicateurs = readIndicators({
-    rsi: lastOf(indicatorData.map((d) => d.rsi)),
-    macd: lastOf(indicatorData.map((d) => d.macd)),
-    ma20: lastOf(ma20),
-    ma50: lastOf(ma50),
   });
 
   // Signal quantitatif : synthèse, lecture du signal, position (PRU), timing dividende.
@@ -811,8 +809,8 @@ export default async function InstrumentPage({
     cartes.push({
       href: '#entreprise',
       etiquette: 'L’entreprise',
-      titre: `Exercice ${economieSociete.exercice} : ${rn >= 0 ? 'bénéfice' : 'perte'} de ${fmtFcfa(Math.abs(rn))}`,
-      detail: evolutionTexte ? `Résultat net sur un an : ${evolutionTexte}.` : 'Évolution sur un an non disponible.',
+      titre: insecable(`Exercice ${economieSociete.exercice} : ${rn >= 0 ? 'bénéfice' : 'perte'} de ${fmtFcfa(Math.abs(rn))}`),
+      detail: evolutionTexte ? insecable(`Résultat net sur un an : ${evolutionTexte}.`) : 'Évolution sur un an non disponible.',
     });
   }
   if (liquidity) {
@@ -820,7 +818,7 @@ export default async function InstrumentPage({
       href: '#liquidite',
       etiquette: 'Négociabilité',
       titre: `Classe ${liquidity.classe} · ${liquidity.label}`,
-      detail: `Échangé ${liquidity.presencePct} % des séances, ${fmtFcfa(liquidity.valeurMoyenne)} par séance en moyenne.`,
+      detail: insecable(`Échangé ${liquidity.presencePct} % des séances, ${fmtFcfa(liquidity.valeurMoyenne)} par séance en moyenne.`),
     });
   }
 
@@ -927,7 +925,7 @@ export default async function InstrumentPage({
                   <div className="flex items-center gap-1.5 flex-wrap shrink-0">
                     {pays && <StatPill tone="neutral">{pays}</StatPill>}
                     {secteur && <StatPill tone="sapphire">{secteur}</StatPill>}
-                    {divYield != null && <StatPill tone="gold">Rdt {divYield.toFixed(1)}%{divExercice}</StatPill>}
+                    {divYield != null && <StatPill tone="gold">Rdt {divYieldTexte(divYield)}</StatPill>}
                   </div>
                 </div>
 
@@ -948,7 +946,7 @@ export default async function InstrumentPage({
                 </div>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <p className="text-[11px] text-faint">
-                    Séance du <span className="text-muted">{last.date_marche}</span>
+                    Séance du <span className="text-muted">{fmtDateCourte(last.date_marche)}</span>
                   </p>
                   <FreshnessBadge fraicheur={fraicheur} />
                 </div>
@@ -1007,8 +1005,8 @@ export default async function InstrumentPage({
                   unit={flottantPct != null ? `${fmtNumber(flottantPct, 1)} %` : undefined}
                 />
               )}
-              {divYield != null && <SessionMetric label={`${divDejaNet ? 'Rdt dividende net' : 'Rdt dividende'}${divExercice}`} value={divYield.toFixed(2)} unit="%" accent />}
-              {divYieldNet != null && <SessionMetric label={`Rdt net d'IRVM${divExercice}`} value={divYieldNet.toFixed(2)} unit="%" />}
+              {divYield != null && <SessionMetric label={divDejaNet ? 'Rdt dividende net' : 'Rdt dividende'} value={divYieldTexte(divYield) ?? '—'} accent />}
+              {divYieldNet != null && <SessionMetric label="Rdt net d'IRVM" value={divYieldTexte(divYieldNet) ?? '—'} />}
             </div>
           </div>
         </div>
@@ -1033,6 +1031,7 @@ export default async function InstrumentPage({
           low52={plage2ans?.bas ?? null}
           high52={plage2ans?.haut ?? null}
           synthesisLine={verdictLine}
+          libelleNote={scoreToRating(signal?.score_total ?? null, signal?.confiance ?? null).note === 'NR' ? null : scoreToRating(signal?.score_total ?? null, signal?.confiance ?? null).label}
         />
       ) : (
         <VerdictBand
@@ -1163,15 +1162,12 @@ export default async function InstrumentPage({
                   macd={lastMacd ?? null}
                 />
                 <IndicatorCharts data={indicatorData} />
-                <IndicatorCommentary reading={lectureIndicateurs} code={code} sansQuestions sansVerdict />
               </div>
             }
             synthese={{
               haussiers: technicalSummary.bullCount,
               neutres: technicalSummary.neutCount,
               baissiers: technicalSummary.bearCount,
-              tendancePct: technicalSummary.confidence,
-              tendance: technicalSummary.trend.charAt(0).toUpperCase() + technicalSummary.trend.slice(1),
               indicateurs: technicalSummary.signals.map((s) => ({ texte: s.detail, sens: s.direction })),
             }}
             saisonnalite={
@@ -1217,7 +1213,7 @@ export default async function InstrumentPage({
         {gateFonda.allowed && exCourant?.net_income != null && exCourant.net_income < 0 && (
           <div role="note" className="rounded-card border border-down/30 bg-down/5 px-5 py-4">
             <p className="text-sm text-ivory">
-              Exercice {exCourant.year} en perte : résultat net de −{fmtFcfa(Math.abs(exCourant.net_income))} FCFA.
+              {insecable(`Exercice ${exCourant.year} en perte : résultat net de −${fmtFcfa(Math.abs(exCourant.net_income))} FCFA.`)}
             </p>
             <p className="mt-1 text-xs text-muted">Le PER n&apos;est pas calculable et le taux de distribution est sans objet tant que le résultat est négatif.</p>
           </div>
@@ -1274,6 +1270,8 @@ export default async function InstrumentPage({
                 famille={(instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null}
                 dividendeExercice={divCourant?.exercice ?? null}
                 dividendeVerifie={divCourant?.ex_date != null}
+                sansPlage52
+                sansAlertePerte
               />
 
               {/* Constructeur de graphique replié sous le graphique CA / résultat net */}
@@ -1299,14 +1297,14 @@ export default async function InstrumentPage({
                 <div key={l.label} className="flex items-center justify-between py-2 text-xs">
                   <dt className="text-muted">{l.label}</dt>
                   <dd className={`tabular font-mono ${(l.valeur as number) < 0 ? 'text-down' : 'text-ivory'}`}>
-                    {(l.valeur as number) < 0 ? '−' : ''}{fmtFcfa(Math.abs(l.valeur as number))} FCFA
+                    {(l.valeur as number) < 0 ? '−' : ''}{insecable(`${fmtFcfa(Math.abs(l.valeur as number))} FCFA`)}
                   </dd>
                 </div>
               ))}
               {evolutionTexte && (
                 <div className="flex items-center justify-between py-2 text-xs">
                   <dt className="text-muted">Évolution du résultat net{exPrecedent?.year != null ? ` (vs ${exPrecedent.year})` : ''}</dt>
-                  <dd className="tabular font-mono text-ivory">{evolutionTexte}</dd>
+                  <dd className="text-ivory">{insecable(evolutionTexte)}</dd>
                 </div>
               )}
             </dl>
@@ -1343,11 +1341,10 @@ export default async function InstrumentPage({
                     {divYield != null && (
                       <div className="mb-4 flex flex-wrap items-baseline gap-2">
                         <span className="tabular font-mono text-3xl font-bold text-up leading-none">
-                          {divYield.toFixed(2)}%
+                          {divYieldTexte(divYield)}
                         </span>
                         <span className="text-xs text-muted">
                           {divDejaNet ? "rendement estimé, net d'IRVM" : 'rendement estimé'}
-                          {divCourant.exercice != null ? ` · exercice ${divCourant.exercice}` : ''}
                         </span>
                       </div>
                     )}
@@ -1394,7 +1391,7 @@ export default async function InstrumentPage({
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[11px] text-faint">{fmtDateCourte(e.event_date)}</span>
                           <span className="text-[11px] border border-border/60 rounded-full px-2 py-px text-faint">
-                            {e.event_type}
+                            {libelleEvenement(e.event_type)}
                           </span>
                         </div>
                         <p className="text-xs text-muted line-clamp-2 mb-1.5">{e.title}</p>
@@ -1422,6 +1419,7 @@ export default async function InstrumentPage({
           rang={combinedAlpha?.rang ?? null}
           piliers={combinedAlpha?.piliers ?? []}
           penalite={combinedAlpha?.penalite ?? null}
+          penaliteAppliquee={decompositionCA?.penalite ?? null}
           calculeLe={combinedAlpha?.calculeLe ?? null}
           derniereSeance={last.date_marche}
         />
@@ -1444,8 +1442,6 @@ export default async function InstrumentPage({
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                 {[
-                  { href: '/portefeuille', label: 'Ajouter à la watchlist', icon: Star },
-                  { href: '/parametres/alertes', label: 'Créer une alerte prix', icon: BellPlus },
                   { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: Download, external: true },
                   { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: History },
                   { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: FileText, external: true },
@@ -1690,7 +1686,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
             {signal.score_total != null
               ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2)
               : '—'}
-            {' / 1.00 · dernière séance scorée '}{signal.date_marche}
+            {' / 1.00 · dernière séance scorée '}{fmtDateCourte(signal.date_marche)}
           </span>
         </div>
 

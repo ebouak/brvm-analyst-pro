@@ -128,10 +128,40 @@ export function titrePublication(t: string): string {
 export const PLAFOND_PENALITE_RISQUE = 25;
 
 /** `somme` = total brut des garde-fous ; le score n'en retire qu'au plus 25 points. */
-export function libellePenalite(somme: number | null): string | null {
+export function libellePenalite(somme: number | null, appliquee?: number | null): string | null {
   if (somme == null || !(somme > 0)) return null;
   const brut = Math.round(somme);
+  if (appliquee != null && appliquee > 0) {
+    return `Pénalité appliquée −${nf(appliquee, 1)} pts · garde-fous déclenchés −${brut} pts, plafond ${PLAFOND_PENALITE_RISQUE}`;
+  }
   return brut > PLAFOND_PENALITE_RISQUE
     ? `Garde-fous déclenchés : −${brut} pts (pénalité plafonnée à ${PLAFOND_PENALITE_RISQUE} pts)`
     : `Garde-fous déclenchés : −${brut} pts (pénalité de ${brut} pts)`;
+}
+
+/** Rendement de dividende, format unique de la fiche : « 3,39 % (ex. 2021) ». */
+export function formatRendementDividende(pct: number | null, exercice: number | null): string | null {
+  if (pct == null || !Number.isFinite(pct)) return null;
+  return `${nf(pct, 2)} %${exercice != null ? ` (ex. ${exercice})` : ''}`;
+}
+
+/** Lie un nombre à son unité (M, Md, FCFA, %) pour qu'une unité ne tombe jamais seule en début de ligne. */
+export function insecable(texte: string): string {
+  return texte.replace(/(\d) (?=(?:Md|M|k|FCFA|%))/g, '$1 ').replace(/( (?:Md|M|k)) (?=FCFA)/g, '$1 ');
+}
+
+const TYPES_EVENEMENT: Record<string, string> = {
+  resultats: 'Résultats', resultat: 'Résultat', assemblee: 'Assemblée', dividende: 'Dividende', dividendes: 'Dividendes',
+  operation: 'Opération', operations: 'Opérations', publication: 'Publication', communique: 'Communiqué',
+  notation: 'Notation', nomination: 'Nomination', autre: 'Autre',
+};
+
+/** Type d'événement brut (« resultats ») → libellé accentué (« Résultats »). */
+export function libelleEvenement(type: string | null | undefined): string {
+  const t = (type ?? '').trim();
+  if (!t) return '';
+  const cle = t.toLowerCase();
+  if (TYPES_EVENEMENT[cle]) return TYPES_EVENEMENT[cle]!;
+  const propre = t.replace(/[_-]+/g, ' ');
+  return propre.charAt(0).toUpperCase() + propre.slice(1);
 }

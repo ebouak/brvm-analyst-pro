@@ -9,6 +9,8 @@ interface Props {
   motif?: string | null;
   /** Formule en sous-libellé (« cours ÷ BPA »). */
   formule?: string;
+  /** Valeur en prose (« perte réduite de 72,3 % ») : police de texte, pas de chiffres. */
+  texte?: boolean;
 }
 
 function Libelle({ label, formule }: { label: string; formule?: string }) {
@@ -21,7 +23,7 @@ function Libelle({ label, formule }: { label: string; formule?: string }) {
 }
 
 /** Ligne ratio dans une carte de section (style Trading 212, dark finance). */
-export default function RatioCard({ label, value, quality = 'ok', positive, motif, formule }: Props) {
+export default function RatioCard({ label, value, quality = 'ok', positive, motif, formule, texte }: Props) {
   if (quality === 'missing') {
     return (
       <div className="flex items-center justify-between gap-3 py-2 text-sm">
@@ -34,7 +36,7 @@ export default function RatioCard({ label, value, quality = 'ok', positive, moti
   return (
     <div className="flex items-center justify-between gap-3 py-2 text-sm">
       <Libelle label={label} formule={formule} />
-      <span className={`tabular shrink-0 whitespace-nowrap ${quality === 'suspect' ? 'text-warn' : colorCls}`}>
+      <span className={`${texte ? 'text-right' : 'tabular shrink-0 whitespace-nowrap'} ${quality === 'suspect' ? 'text-warn' : colorCls}`}>
         {value}
         {quality === 'suspect' && <span title="Donnée douteuse" className="ml-1">!</span>}
       </span>

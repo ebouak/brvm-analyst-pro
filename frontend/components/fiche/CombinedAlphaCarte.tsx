@@ -8,17 +8,19 @@ interface Props {
   rang: number | null;
   piliers: { libelle: string; valeur: number | null }[];
   penalite: number | null;
+  /** Pénalité réellement appliquée (somme pondérée − score). */
+  penaliteAppliquee?: number | null;
   calculeLe: string | null;
   derniereSeance: string;
 }
 
-export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, calculeLe, derniereSeance }: Props) {
+export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, penaliteAppliquee, calculeLe, derniereSeance }: Props) {
   const anterieur = calculeLe != null && calculeLe < derniereSeance;
   return (
     <section aria-labelledby="t-ca" className="rounded-card border border-border bg-surface p-5 md:p-6">
       <h3 id="t-ca" className="text-base font-semibold text-ivory">Combined Alpha</h3>
       <p className="mt-1 text-[13px] text-muted">
-        Un score de 0 à 100 pour comparer toutes les actions BRVM. 5 piliers — valorisation, momentum, qualité bénéficiaire, solidité financière et dividende — puis une pénalité risque (max 25 pts) si garde-fous déclenchés.
+        Un score de 0 à 100 pour comparer toutes les actions BRVM. 5 piliers (valorisation, momentum, qualité bénéficiaire, solidité financière et dividende), puis une pénalité risque (25 pts au plus) si des garde-fous se déclenchent.
       </p>
       {score == null ? (
         <p className="mt-4 text-sm text-muted">Score non calculé pour cette valeur.</p>
@@ -43,7 +45,7 @@ export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, calcu
             ))}
           </div>
           <p className="mt-2 text-[11px] text-faint">Repères à 50 et 65.</p>
-          {libellePenalite(penalite) && <p className="tabular mt-2 text-xs text-muted">{libellePenalite(penalite)}</p>}
+          {libellePenalite(penalite, penaliteAppliquee) && <p className="mt-2 text-xs text-muted">{libellePenalite(penalite, penaliteAppliquee)}</p>}
         </>
       )}
       {calculeLe && (

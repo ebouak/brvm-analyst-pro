@@ -671,7 +671,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold">
-            Cours{designation ? ` — ${designation}` : ''}
+            Cours{designation ? ` · ${designation}` : ''}
           </span>
           {lastClose != null && (
             <span className="tabular text-sm font-medium">

@@ -28,7 +28,7 @@ export interface Synthesis {
 const LABEL: Record<SignalLabel, string> = {
   BUY: 'plutôt acheteur',
   SELL: 'plutôt vendeur',
-  HOLD: 'neutre',
+  HOLD: 'en attente',
 };
 
 export function synthesize(s: SynthesisInput): Synthesis {

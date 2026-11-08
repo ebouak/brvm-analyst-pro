@@ -10,9 +10,7 @@ interface Props {
   qualiteDonnees: number | null;
   graphiques: ReactNode;
   synthese: {
-    haussiers: number; neutres: number; baissiers: number; tendancePct: number | null;
-    /** Tendance court terme (hausse / baisse / neutre), lue sur les mêmes indicateurs. */
-    tendance?: string | null;
+    haussiers: number; neutres: number; baissiers: number;
     /** Détail de chaque indicateur de la synthèse, déplié à la demande. */
     indicateurs?: { texte: string; sens: 'up' | 'down' | 'neutral' | 'na' }[];
   } | null;
@@ -54,7 +52,7 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
       <div className="flex flex-wrap items-center gap-3">
         <h3 id="t-lecture" className="text-base font-semibold text-ivory">Lecture technique</h3>
         {signal && <span className="rounded-full border border-border-strong px-2.5 py-0.5 text-xs text-ivory">{libelleSignal(signal)}</span>}
-        {qualiteDonnees != null && <span className="tabular text-xs text-faint">qualité des données {Math.round(qualiteDonnees <= 1 ? qualiteDonnees * 100 : qualiteDonnees)} %</span>}
+        {qualiteDonnees != null && <span className="text-xs text-faint">qualité des données <span className="tabular">{Math.round(qualiteDonnees <= 1 ? qualiteDonnees * 100 : qualiteDonnees)} %</span></span>}
       </div>
 
       {pos != null && score != null && (
@@ -69,7 +67,7 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
               <span key={t} className={`absolute ${i === 0 ? '' : i === SEUILS.length - 1 ? '-translate-x-full' : '-translate-x-1/2'}`} style={{ left: `${x}%` }}>{t}</span>
             ))}
           </div>
-          <p className="tabular mt-1 text-xs text-muted">Score {fr2(score)}</p>
+          <p className="mt-1 text-xs text-muted">Score <span className="tabular">{fr2(score)}</span></p>
         </div>
       )}
 
@@ -86,59 +84,56 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
       <div className="mt-6">{graphiques}</div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {synthese && (
-          <div className="rounded-card border border-border p-4">
-            <h4 className="text-xs font-semibold text-ivory">Synthèse des indicateurs</h4>
-            <p className="tabular mt-2 text-[13px] text-muted">
-              {synthese.haussiers} haussiers · {synthese.neutres} neutres · {synthese.baissiers} baissiers
-            </p>
-            {(synthese.tendance || synthese.tendancePct != null) && (
-              <p className="tabular mt-1 text-xs text-faint">
-                Tendance court terme{synthese.tendance ? ` : ${synthese.tendance}` : ''}{synthese.tendancePct != null ? ` · ${Math.round(synthese.tendancePct)} %` : ''}
-              </p>
-            )}
-            {synthese.indicateurs && synthese.indicateurs.length > 0 && (
-              <details className="mt-2">
-                <summary className="cursor-pointer text-xs text-muted hover:text-ivory">Les {synthese.indicateurs.length} indicateurs</summary>
-                <ul className="mt-2 space-y-1.5">
-                  {synthese.indicateurs.map((ind, i) => (
-                    <li key={`${i}-${ind.texte}`} className="flex gap-2 text-xs text-muted">
-                      <span aria-hidden className={ind.sens === 'up' ? 'text-up' : ind.sens === 'down' ? 'text-down' : 'text-faint'}>
-                        {ind.sens === 'up' ? '↑' : ind.sens === 'down' ? '↓' : ind.sens === 'neutral' ? '→' : '·'}
-                      </span>
-                      <span className={ind.sens === 'na' ? 'italic text-faint' : ''}>{ind.texte}</span>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-          </div>
-        )}
         <div className="rounded-card border border-border p-4">{saisonnalite}</div>
-        {detections.length > 0 && (
-          <div className="rounded-card border border-border p-4">
-            <h4 className="text-xs font-semibold text-ivory">Détections actives</h4>
-            {actives.length > 0 ? (
-              <ul className="mt-2 space-y-1">{actives.map((d) => <li key={d.label} className="text-[13px] text-muted">{d.label}</li>)}</ul>
-            ) : (
-              <p className="mt-2 text-[13px] text-muted">Aucune détection active.</p>
-            )}
-            {inactives.length > 0 && (
-              <details className="mt-2">
-                <summary className="cursor-pointer text-xs text-faint hover:text-muted">
-                  {inactives.length} {actives.length > 0 ? 'autre' : ''}{actives.length > 0 && inactives.length > 1 ? 's' : ''} détection{inactives.length > 1 ? 's' : ''} non déclenchée{inactives.length > 1 ? 's' : ''}
-                </summary>
-                <ul className="mt-1.5 space-y-1">{inactives.map((d) => <li key={d.label} className="text-xs text-faint">{d.label}</li>)}</ul>
-              </details>
-            )}
-          </div>
-        )}
         <div className="rounded-card border border-border p-4">
           <h4 className="text-xs font-semibold text-ivory">Votre position</h4>
           <div className="mt-2 text-[13px] text-muted">{position}</div>
           <Link href="/signaux" className="mt-3 inline-block text-xs text-accent-ink hover:underline">Voir tous les signaux</Link>
         </div>
       </div>
+
+      {(synthese || detections.length > 0) && (
+        <details className="mt-6 rounded-card border border-border p-4">
+          <summary className="cursor-pointer text-sm text-ivory">
+            Détail des {synthese?.indicateurs?.length ?? 0} indicateurs et des {detections.length} détections
+          </summary>
+          <p className="mt-2 text-xs text-faint">Données brutes de la lecture ci-dessus : elles la documentent, elles ne la remplacent pas.</p>
+          <div className="mt-3 grid gap-5 md:grid-cols-2">
+            {synthese && (
+              <div>
+                <h4 className="text-xs font-semibold text-ivory">Indicateurs</h4>
+                <p className="mt-1 text-[13px] text-muted">
+                  <span className="tabular">{synthese.haussiers}</span> en hausse · <span className="tabular">{synthese.neutres}</span> neutres · <span className="tabular">{synthese.baissiers}</span> en baisse
+                </p>
+                {synthese.indicateurs && synthese.indicateurs.length > 0 && (
+                  <ul className="mt-2 space-y-1.5">
+                    {synthese.indicateurs.map((ind, i) => (
+                      <li key={`${i}-${ind.texte}`} className="flex gap-2 text-xs text-muted">
+                        <span aria-hidden className="text-faint">
+                          {ind.sens === 'up' ? '↑' : ind.sens === 'down' ? '↓' : ind.sens === 'neutral' ? '→' : '·'}
+                        </span>
+                        <span className={ind.sens === 'na' ? 'italic text-faint' : ''}>{ind.texte}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            {detections.length > 0 && (
+              <div>
+                <h4 className="text-xs font-semibold text-ivory">Détections</h4>
+                <p className="mt-1 text-[13px] text-muted">
+                  <span className="tabular">{actives.length}</span> déclenchée{actives.length > 1 ? 's' : ''} sur <span className="tabular">{detections.length}</span>
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {actives.map((d) => <li key={d.label} className="text-xs text-muted">{d.label}</li>)}
+                  {inactives.map((d) => <li key={d.label} className="text-xs text-faint">{d.label} : non déclenchée</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        </details>
+      )}
 
       <details className="mt-6 rounded-card border border-border p-4">
         <summary className="cursor-pointer text-sm text-ivory">Comment le score est calculé</summary>

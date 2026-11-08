@@ -70,8 +70,10 @@ export default function FundamentalsCharts({
   const hasParAction = data.some((d) => d.bpa != null || d.dividende != null);
   const hasBank = isBank && data.some((d) => d.credits != null || d.depots != null);
 
+  // Un panneau seul prend toute la largeur : pas de moitié de ligne vide.
+  const nbPanneaux = [hasResultat, hasParAction, hasBank].filter(Boolean).length;
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className={`grid grid-cols-1 gap-4 ${nbPanneaux > 1 ? 'md:grid-cols-2' : ''}`}>
       {/* Revenu + résultat net + marge nette */}
       {hasResultat && (
         <Panel title={`Évolution ${revenuLabel} & résultat net`} hint="Barres en Md FCFA · ligne = marge nette (%)">
@@ -86,7 +88,7 @@ export default function FundamentalsCharts({
             />
             <Legend wrapperStyle={{ fontSize: 11 }} />
             <Bar yAxisId="mrd" dataKey="revenu" name={revenuLabel} fill={ACCENT} fillOpacity={0.85} radius={[3, 3, 0, 0]} isAnimationActive={false} />
-            <Bar yAxisId="mrd" dataKey="net" name="Résultat net" radius={[3, 3, 0, 0]} isAnimationActive={false}>
+            <Bar yAxisId="mrd" dataKey="net" name="Résultat net" fill={UP} radius={[3, 3, 0, 0]} isAnimationActive={false}>
               {data.map((d, i) => (
                 <Cell key={i} fill={(d.net ?? 0) >= 0 ? UP : DOWN} />
               ))}

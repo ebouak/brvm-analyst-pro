@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
-  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite, bpaAffichable,
+  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite, bpaAffichable, formatRendementDividende, insecable, libelleEvenement,
 } from './affichage';
 
 const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
@@ -125,4 +125,39 @@ describe('bpaAffichable', () => {
     expect(bpaAffichable(1000, 0).valeur).toBeNull();
   });
   it('résultat absent', () => expect(bpaAffichable(null, 100)).toEqual({ valeur: null, motif: 'non disponible' }));
+});
+
+describe('libellePenalite avec pénalité appliquée', () => {
+  it('annonce la pénalité réellement appliquée avant la somme des garde-fous', () => {
+    expect(sp(libellePenalite(45, 20.4))).toBe('Pénalité appliquée −20,4 pts · garde-fous déclenchés −45 pts, plafond 25');
+  });
+  it('sans pénalité appliquée mesurable, garde le libellé historique', () => {
+    expect(libellePenalite(45, null)).toBe('Garde-fous déclenchés : −45 pts (pénalité plafonnée à 25 pts)');
+  });
+});
+
+describe('formatRendementDividende', () => {
+  it('format unique : virgule, 2 décimales, exercice entre parenthèses', () => {
+    expect(sp(formatRendementDividende(3.3897, 2021))).toBe('3,39 % (ex. 2021)');
+  });
+  it('sans exercice', () => expect(sp(formatRendementDividende(3.3897, null))).toBe('3,39 %'));
+  it('absent', () => expect(formatRendementDividende(null, 2021)).toBeNull());
+  it('espace insécable avant le pourcent', () => expect(formatRendementDividende(1, null)).toBe('1,00 %'));
+});
+
+describe('insecable', () => {
+  it('lie le nombre à son unité', () => {
+    expect(insecable('perte de 96,6 M FCFA')).toBe('perte de 96,6 M FCFA');
+    expect(insecable('2,55 Md')).toBe('2,55 Md');
+    expect(insecable('72,3 %')).toBe('72,3 %');
+  });
+  it('laisse le reste intact', () => expect(insecable('la perte de Sonatel')).toBe('la perte de Sonatel'));
+});
+
+describe('libelleEvenement', () => {
+  it('accentue les types bruts', () => {
+    expect(libelleEvenement('resultats')).toBe('Résultats');
+    expect(libelleEvenement('assemblee')).toBe('Assemblée');
+  });
+  it('type inconnu : première lettre en capitale, tirets en espaces', () => expect(libelleEvenement('opération_titres')).toBe('Opération titres'));
 });
