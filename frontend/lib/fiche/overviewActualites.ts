@@ -1,0 +1,90 @@
+/**
+ * Actualités de la vue d'ensemble — logique pure. Seules celles de LA valeur :
+ * publications officielles (`publications` du code) et presse (`brvm_news` dont
+ * `ticker_codes` contient le code, filtrée et non masquée par la requête).
+ * Rien n'est daté dans le futur ; un même titre repris par deux sites n'est
+ * gardé qu'une fois.
+ */
+import { titrePublication } from './affichage';
+import { dateEnLettres } from './overview';
+
+/** Ancre de l'onglet « Publications officielles » : un lien vers elle l'ouvre. */
+export const ANCRE_OFFICIELLES = 'actualites-officielles';
+
+export interface ActuItem {
+  id: string;
+  titre: string;
+  href: string | null;
+  source: string;
+  date: string;
+  /** ISO, pour le tri. */
+  dateIso: string;
+  nature: 'officielle' | 'presse';
+}
+
+export interface GroupesActualites { tout: ActuItem[]; officielles: ActuItem[]; presse: ActuItem[] }
+
+export interface PubEntree { id: string; libelle: string | null; date_publication: string; type_publication?: string | null; source_url: string | null }
+export interface NewsEntree { id: string; titre: string; date_publication: string; source_label: string | null; source: string | null; source_url: string | null }
+
+export function lienSur(u: string | null | undefined): string | null {
+  return typeof u === 'string' && /^https?:\/\//i.test(u.trim()) ? u.trim() : null;
+}
+
+/** Les flux Google News suffixent le titre par « - Nom du site » : il devient la source. */
+function separerSource(n: NewsEntree): { titre: string; source: string } {
+  const agregateur = !n.source_label || /^google news/i.test(n.source_label);
+  const i = n.titre.lastIndexOf(' - ');
+  const suffixe = i > 0 ? n.titre.slice(i + 3).trim() : '';
+  if (agregateur && suffixe) return { titre: n.titre.slice(0, i).trim(), source: suffixe };
+  // Hors agrégateur, un suffixe qui n'est qu'un nom de domaine (« - Leral.net ») est retiré du titre.
+  if (suffixe && /^[\w-]+(\.[\w-]+)+$/i.test(suffixe)) return { titre: n.titre.slice(0, i).trim(), source: n.source_label ?? suffixe };
+  return { titre: n.titre.trim(), source: n.source_label ?? 'Presse' };
+}
+
+/** Clé de dédoublonnage : sans accents, casse, ponctuation finale ni suffixe de site. */
+const cle = (t: string) => {
+  const i = t.lastIndexOf(' - ');
+  const sans = i > 0 && t.length - i <= 43 ? t.slice(0, i) : t;
+  return sans.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[\s.…!?]+$/g, '').replace(/\s+/g, ' ').trim();
+};
+const parDate = (a: ActuItem, b: ActuItem) =>
+  b.dateIso.localeCompare(a.dateIso) || (a.nature === b.nature ? 0 : a.nature === 'officielle' ? -1 : 1);
+
+export function regrouperActualites(pubs: PubEntree[], news: NewsEntree[], aujourdhui: string): GroupesActualites {
+  const officielles: ActuItem[] = pubs
+    .filter((p) => p.date_publication.slice(0, 10) <= aujourdhui && (p.libelle ?? '').trim() !== '')
+    .map((p) => ({
+      id: `pub-${p.id}`,
+      titre: titrePublication(p.libelle!),
+      href: lienSur(p.source_url),
+      source: 'BRVM',
+      date: dateEnLettres(p.date_publication) ?? p.date_publication,
+      dateIso: p.date_publication.slice(0, 10),
+      nature: 'officielle' as const,
+    }))
+    .sort(parDate);
+
+  const vus = new Set<string>();
+  const presse: ActuItem[] = [];
+  for (const n of [...news].sort((a, b) => b.date_publication.localeCompare(a.date_publication))) {
+    if (n.date_publication.slice(0, 10) > aujourdhui) continue;
+    const { titre, source } = separerSource(n);
+    if (!titre) continue;
+    const k = cle(titre);
+    if (vus.has(k)) continue;
+    vus.add(k);
+    presse.push({
+      id: `news-${n.id}`,
+      titre,
+      href: lienSur(n.source_url),
+      source,
+      date: dateEnLettres(n.date_publication) ?? n.date_publication,
+      dateIso: n.date_publication.slice(0, 10),
+      nature: 'presse',
+    });
+  }
+  presse.sort(parDate);
+
+  return { tout: [...officielles, ...presse].sort(parDate), officielles, presse };
+}

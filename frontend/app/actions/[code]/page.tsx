@@ -50,6 +50,12 @@ import { JaugesPlage } from '@/components/fiche/JaugesPlage';
 import { SeanceIntraday } from '@/components/fiche/SeanceIntraday';
 import { LectureTechnique } from '@/components/fiche/LectureTechnique';
 import { CombinedAlphaCarte } from '@/components/fiche/CombinedAlphaCarte';
+import { VueEnsemble } from '@/components/fiche/VueEnsemble';
+import { lignesStatistiques, phrasePerformance, serieAnnuelle, dateEnLettres, libelleFamille } from '@/lib/fiche/overview';
+import { regrouperActualites, ANCRE_OFFICIELLES, type NewsEntree } from '@/lib/fiche/overviewActualites';
+import { seriesParPeriode } from '@/lib/fiche/overviewSeries';
+import { depuisPremiereTransaction } from '@/lib/fiche/seance';
+import { nomPays } from '@/lib/crm/geo';
 import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
 import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/liquidity';
@@ -427,7 +433,6 @@ export default async function InstrumentPage({
   // sinon calcul cours × shares.
   const shares = instrument?.shares ?? null;
   const capitalisationBrute = capitalisationFcfa({ valorisation: last.valorisation != null ? Number(last.valorisation) : null, cours: last.cours_jour ?? null, titres: shares });
-  const capitalisation = capitalisationBrute != null ? capitalisationBrute / 1_000_000 : null;
 
   // Comptes retenus (SYSCOHADA : income/balance), source unique des ratios publics ; `fundamentals` en repli.
   const retenu = exerciceRetenu({ income: financials?.incomeStatements ?? [], balance: financials?.balanceSheets ?? [], fundamentals });
@@ -850,6 +855,7 @@ export default async function InstrumentPage({
 
   // Chapitres de la barre collante (L'essentiel seulement s'il est rendu).
   const navSections = [
+    { id: 'vue-ensemble', label: 'Vue d’ensemble' },
     ...(cartes.length > 0 ? [{ id: 'essentiel', label: 'L’essentiel' }] : []),
     { id: 'analyse-ia', label: 'Analyse par IA' },
     { id: 'aujourdhui', label: 'Aujourd’hui' },
@@ -860,6 +866,90 @@ export default async function InstrumentPage({
 
   const flottantPct = instrument?.flottant != null && shares != null && shares > 0 ? (instrument.flottant / shares) * 100 : null;
   const historiqueDiv = divRows.filter((d) => d.montant > 0).slice(0, 5);
+
+  // ══ Vue d'ensemble ══════════════════════════════════════════════════════
+  const aujourdhuiIso = new Date().toISOString().slice(0, 10);
+  // Clôtures complètes pour 5A / Max : PostgREST tronque à 1000 lignes, on pagine.
+  const historiqueComplet: { date_marche: string; cours_jour: number | null }[] = [];
+  for (let page = 0; page < 20; page++) {
+    const { data: lot } = await liqDailyClient
+      .from('brvm_actions_daily')
+      .select('date_marche, cours_jour')
+      .eq('code', code)
+      .gt('cours_jour', 0)
+      .order('date_marche', { ascending: true })
+      .range(page * 1000, page * 1000 + 999);
+    const l = (lot ?? []) as { date_marche: string; cours_jour: number | null }[];
+    historiqueComplet.push(...l);
+    if (l.length < 1000) break;
+  }
+  const seriesCours = seriesParPeriode(historiqueComplet);
+  // 1J : graphique de séance s'il se trace, ou le constat « pas de transaction » ; sinon pas d'onglet 1J.
+  const transactionsSeance = depuisPremiereTransaction(instantanes).length;
+  const seanceTracable = transactionsSeance >= 2;
+  const vueJourDisponible = instantanes.length > 0 && (seanceTracable || transactionsSeance === 0);
+
+  const [{ data: presseRows }, { data: prochainRow }] = await Promise.all([
+    liqDailyClient
+      .from('brvm_news')
+      .select('id, titre, date_publication, source, source_label, source_url')
+      .contains('ticker_codes', [code])
+      .not('hidden', 'is', true) // modération rédactionnelle
+      .lte('date_publication', aujourdhuiIso)
+      .order('date_publication', { ascending: false })
+      .limit(80),
+    liqDailyClient
+      .from('market_events')
+      .select('title, event_date')
+      .eq('instrument_code', code)
+      .gt('event_date', aujourdhuiIso)
+      .order('event_date', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  const groupesActus = regrouperActualites(
+    publications.map((p) => ({ id: String(p.id), libelle: p.libelle, date_publication: p.date_publication, type_publication: p.type_publication, source_url: p.source_url })),
+    (presseRows ?? []) as NewsEntree[],
+    aujourdhuiIso,
+  );
+  const prochain = prochainRow as { title: string | null; event_date: string } | null;
+
+  // Comptes : exercice retenu (source unique des ratios) et exercice précédent de la même série.
+  const serieComptes = serieAnnuelle(financials?.incomeStatements ?? [], fundamentals);
+  const exerciceVue = retenu.exercice;
+  const comptesPrecedents = exerciceVue != null ? serieComptes.find((p) => p.exercice === exerciceVue - 1) ?? null : null;
+  const nomSociete = instrument?.designation ?? last.designation ?? code;
+  const lignesStats = lignesStatistiques({
+    fondamentauxVisibles: gateFonda.allowed,
+    capitalisation: capitalisationBrute,
+    exercice: exerciceVue,
+    chiffreAffaires: retenu.chiffreAffaires,
+    chiffreAffairesPrecedent: comptesPrecedents?.chiffreAffaires ?? null,
+    resultatNet: retenu.resultatNet,
+    resultatNetPrecedent: comptesPrecedents?.resultatNet ?? null,
+    bpa: retenu.source ? ratiosPublics.bpa : null,
+    per: retenu.source ? ratiosPublics.per : null,
+    titres: shares,
+    rendementDividende: divYield != null ? { pct: divYield, exercice: divExercice, net: divDejaNet, ancien: divCourant?.ancien ?? false } : null,
+    rendementNetIrvm: divYieldNet,
+    dernierDividende: lastDiv ? { montant: lastDiv.montant, exercice: lastDiv.exercice, exDate: lastDiv.ex_date } : null,
+    volume: last.volume ?? null,
+    volumeMoyen20: volMoyen,
+    valeurEchangee: last.valeur_echangee ?? null,
+    transactions: last.nb_transactions ?? null,
+    ouverture: last.ouverture ?? null,
+    cloturePrecedente: last.cours_precedent ?? null,
+    plusBas: last.plus_bas ?? null,
+    plusHaut: last.plus_haut ?? null,
+    plage52: plage52 ? { bas: plage52.bas, haut: plage52.haut } : null,
+    beta: last.beta_1an ?? null,
+    noteTechnique: gateSignaux.allowed ? noteAF(signal?.score_total ?? null, signal?.confiance ?? null) : null,
+    combinedAlpha: combinedAlpha?.score ?? null,
+    prochainEvenement: prochain?.title ? { titre: prochain.title, date: prochain.event_date } : null,
+  });
+  const notationVue = instrument?.notation_json
+    ? { agence: instrument.notation_json.agence, note: instrument.notation_json.note, perspective: instrument.notation_json.perspective ?? null }
+    : null;
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-6 animate-rise-in">
@@ -917,8 +1007,7 @@ export default async function InstrumentPage({
             }`}
           />
           <div className="relative px-5 pt-5 pb-6 md:px-7 md:pt-7">
-            <div className={`grid gap-6 ${instantanes.length >= 2 ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]' : ''}`}>
-              <div className="min-w-0">
+            <div className="min-w-0">
                 {/* Logo + identité instrument */}
                 <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -1004,40 +1093,54 @@ export default async function InstrumentPage({
                     Classement complet →
                   </Link>
                 </div>
-              </div>
-
-              {/* Graphique de séance (absent sans instantané) */}
-              <SeanceIntraday points={instantanes} />
             </div>
 
-            <div className="mt-5 h-px bg-gold-line opacity-40" />
-
-            {/* Grille des chiffres de séance */}
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-4">
-              {last.ouverture != null && <SessionMetric label="Ouverture" value={fmtNumber(last.ouverture)} unit="FCFA" />}
-              {last.plus_haut != null && <SessionMetric label="Plus haut" value={fmtNumber(last.plus_haut)} unit="FCFA" />}
-              {last.plus_bas != null && <SessionMetric label="Plus bas" value={fmtNumber(last.plus_bas)} unit="FCFA" />}
-              <SessionMetric label="Clôture préc." value={fmtNumber(last.cours_precedent)} unit="FCFA" />
-              <SessionMetric label="Volume du jour" value={fmtNumber(last.volume)} unit="titres" />
-              {volMoyen != null && <SessionMetric label="Vol. moyen 20j" value={fmtNumber(volMoyen)} unit="titres" />}
-              <SessionMetric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
-              <SessionMetric label="Transactions" value={fmtNumber(last.nb_transactions)} />
-              {last.beta_1an != null && <SessionMetric label="Beta 1 an" value={nombreFr(last.beta_1an, 2)} />}
-              {capitalisation != null && <SessionMetric label="Capitalisation" value={fmtNumber(Math.round(capitalisation))} unit="MFCFA" accent />}
-              {shares != null && <SessionMetric label="Titres totaux" value={fmtNumber(shares)} />}
-              {instrument?.flottant != null && (
-                <SessionMetric
-                  label="Titres flottant"
-                  value={fmtNumber(instrument.flottant)}
-                  unit={flottantPct != null ? `${fmtNumber(flottantPct, 1)} %` : undefined}
-                />
-              )}
-              {divYield != null && <SessionMetric label={divDejaNet ? 'Rdt dividende net' : 'Rdt dividende'} value={rendementDividendeParts(divYield, divExercice)?.valeur ?? '—'} unit={rendementDividendeParts(divYield, divExercice)?.exercice ?? undefined} accent />}
-              {divYieldNet != null && <SessionMetric label="Rdt net d'IRVM" value={rendementDividendeParts(divYieldNet, divExercice)?.valeur ?? '—'} unit={rendementDividendeParts(divYieldNet, divExercice)?.exercice ?? undefined} />}
-            </div>
           </div>
         </div>
       </header>
+
+      {/* ══════════════════════════════════════════════════
+          VUE D'ENSEMBLE — statistiques, cours par période, actualités, société
+          (remplace la grille des chiffres de séance et le graphique de séance de l'en-tête)
+      ══════════════════════════════════════════════════ */}
+      <VueEnsemble
+        code={code}
+        lignes={lignesStats}
+        series={seriesCours}
+        jour={vueJourDisponible ? <SeanceIntraday points={instantanes} /> : null}
+        variationJour={last.variation_pct ?? null}
+        periodeDefaut={seanceTracable ? '1J' : '1A'}
+        actualites={groupesActus}
+        apropos={{
+          nom: nomSociete,
+          code,
+          secteur,
+          pays: pays ? (/^[A-Za-z]{2}$/.test(pays) ? nomPays(pays) : pays) : null,
+          famille: libelleFamille((instrument as { famille_comptable?: string | null } | null)?.famille_comptable ?? null),
+          titres: shares,
+          flottant: instrument?.flottant ?? null,
+          flottantPct,
+          notation: notationVue,
+          historiqueDepuis: dateEnLettres(historiqueComplet[0]?.date_marche ?? null),
+        }}
+        performance={gateFonda.allowed ? {
+          phrase: phrasePerformance({
+            nom: nomSociete,
+            exercice: exerciceVue,
+            chiffreAffaires: retenu.chiffreAffaires,
+            chiffreAffairesPrecedent: comptesPrecedents?.chiffreAffaires ?? null,
+            resultatNet: retenu.resultatNet,
+            resultatNetPrecedent: comptesPrecedents?.resultatNet ?? null,
+          }),
+          serie: serieComptes,
+        } : null}
+        synthese={{
+          signalVisible: gateSignaux.allowed,
+          note: gateSignaux.allowed ? noteAF(signal?.score_total ?? null, signal?.confiance ?? null) : null,
+          signal: gateSignaux.allowed && signal ? libelleSignal(signal.signal) : null,
+          combinedAlpha: combinedAlpha?.score ?? null,
+        }}
+      />
 
       {/* ── Trois plages : 1 jour, 52 semaines, 2 ans ── */}
       <JaugesPlage jour={plageJour} an={plage52} deuxAns={plage2ans} hausseDuJour={up} />
@@ -1442,6 +1545,9 @@ export default async function InstrumentPage({
                 ) : (
                   <p className="text-xs text-faint italic">Aucun événement récent.</p>
                 )}
+                <a href={`#${ANCRE_OFFICIELLES}`} className="mt-4 inline-flex min-h-[36px] items-center text-[11px] text-accent-ink hover:underline">
+                  Toutes les publications officielles →
+                </a>
               </div>
             </div>
           </div>
@@ -1622,31 +1728,6 @@ function PositionLecture({ ctx }: { ctx: { held: boolean; pru: number | null; la
 // ══════════════════════════════════════════════════════════════════
 // SOUS-COMPOSANTS
 // ══════════════════════════════════════════════════════════════════
-
-/** Métrique de séance — affichage compact dans le hero */
-function SessionMetric({
-  label,
-  value,
-  unit,
-  accent,
-}: {
-  label: string;
-  value: string;
-  unit?: string;
-  accent?: boolean;
-}) {
-  return (
-    <div className="py-0.5">
-      <p className="text-xs text-faint mb-1">{label}</p>
-      <div className="flex flex-wrap items-baseline gap-x-1">
-        <span className={`tabular font-mono text-sm font-semibold leading-tight whitespace-nowrap ${accent ? 'text-accent-ink' : 'text-ivory'}`}>
-          {value}
-        </span>
-        {unit && <span className="text-[11px] text-faint">{unit}</span>}
-      </div>
-    </div>
-  );
-}
 
 /** Cellule MACD */
 function MacdCell({
