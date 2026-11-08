@@ -1,0 +1,29 @@
+/** Plage de cours sur N jours calendaires, bornes incluses. Zéros et nuls écartés : un zéro en base est un trou de collecte. */
+export interface Plage { bas: number; dateBas: string | null; haut: number; dateHaut: string | null; position: number | null }
+
+export function plageSurFenetre(
+  rows: { date_marche: string; cours_jour: number | null }[],
+  dateRef: string,
+  jours: number,
+  cours: number | null,
+): Plage | null {
+  const debut = new Date(dateRef + 'T00:00:00Z');
+  debut.setUTCDate(debut.getUTCDate() - jours);
+  const borne = debut.toISOString().slice(0, 10);
+  const utiles = rows.filter((r) => r.date_marche >= borne && r.date_marche <= dateRef && r.cours_jour != null && r.cours_jour > 0);
+  if (utiles.length === 0) return null;
+  let b = utiles[0]!, h = utiles[0]!;
+  for (const r of utiles) {
+    if (r.cours_jour! < b.cours_jour!) b = r;
+    if (r.cours_jour! > h.cours_jour!) h = r;
+  }
+  const bas = b.cours_jour!, haut = h.cours_jour!;
+  const position = cours != null && haut > bas ? (cours - bas) / (haut - bas) : null;
+  return { bas, dateBas: b.date_marche, haut, dateHaut: h.date_marche, position };
+}
+
+/** Plage d'une séance (plus bas / plus haut publiés), sans dates. */
+export function plageSeance(bas: number | null, haut: number | null, cours: number | null): Plage | null {
+  if (bas == null || haut == null || bas <= 0 || haut <= 0) return null;
+  return { bas, dateBas: null, haut, dateHaut: null, position: cours != null && haut > bas ? (cours - bas) / (haut - bas) : null };
+}
