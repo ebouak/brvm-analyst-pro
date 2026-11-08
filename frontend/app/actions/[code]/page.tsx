@@ -281,6 +281,8 @@ export default async function InstrumentPage({
   const { topics: forumTopics, authors: forumAuthors } = await listTopics(0, code);
 
   if (rows.length === 0) {
+    // Code inexistant : vrai 404 (pas d'état vide en 200). Instrument connu sans historique : état vide.
+    if (!instrument) notFound();
     return (
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
         <Link
