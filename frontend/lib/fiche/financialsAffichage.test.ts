@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { avecBpaCalcule, croissanceRnSignee, libelleValorisationSimplifiee } from './financialsAffichage';
+import { avecBpaCalcule, croissanceRnSignee, libelleValorisationSimplifiee, valorisationSimplifieeCalculable } from './financialsAffichage';
 
 const st = (periode: string, resultat_net: number | null, benefice_par_action: number | null) =>
   ({ periode, type_periode: 'annuel', resultat_net, benefice_par_action });
@@ -40,5 +40,21 @@ describe('libelleValorisationSimplifiee', () => {
   it('nomme le modèle et son objet', () => {
     expect(libelleValorisationSimplifiee()).toMatch(/Graham/);
     expect(libelleValorisationSimplifiee()).toMatch(/PER/);
+  });
+});
+
+describe('valorisationSimplifieeCalculable', () => {
+  it('perte : non calculable, avec son motif', () => {
+    expect(valorisationSimplifieeCalculable(-7.18, null)).toEqual({ calculable: false, motif: 'non calculable (bénéfice négatif)' });
+    expect(valorisationSimplifieeCalculable(0, 12).calculable).toBe(false);
+  });
+  it('PER absent alors que le BPA est positif : non calculable aussi (score partiel interdit)', () => {
+    expect(valorisationSimplifieeCalculable(2, null)).toEqual({ calculable: false, motif: 'non calculable (PER indisponible)' });
+  });
+  it('BPA et PER connus : calculable', () => {
+    expect(valorisationSimplifieeCalculable(2, 12)).toEqual({ calculable: true, motif: null });
+  });
+  it('BPA inconnu : non calculable', () => {
+    expect(valorisationSimplifieeCalculable(null, 12).calculable).toBe(false);
   });
 });

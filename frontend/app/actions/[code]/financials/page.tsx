@@ -4,8 +4,8 @@ import { fmtDateCourte, fmtFcfa, fmtNumber } from '@/lib/format';
 import RatioCard from '@/components/fundamentals/RatioCard';
 import FluxComptable from '@/components/fiche/FluxComptable';
 import { fluxCompteResultat, fluxBilan, type FluxCR, type FluxBilan } from '@/lib/fiche/flux';
-import { perAffichable, distributionAffichable, evolutionResultat, dividendeCourant, titrePublication } from '@/lib/fiche/affichage';
-import { avecBpaCalcule, croissanceRnSignee, libelleValorisationSimplifiee } from '@/lib/fiche/financialsAffichage';
+import { formatRendementDividende, perAffichable, distributionAffichable, evolutionResultat, dividendeCourant, titrePublication } from '@/lib/fiche/affichage';
+import { avecBpaCalcule, croissanceRnSignee, libelleValorisationSimplifiee, valorisationSimplifieeCalculable } from '@/lib/fiche/financialsAffichage';
 import SousPageNav from '@/components/sousPage/SousPageNav';
 import { plageSurFenetre } from '@/lib/fiche/plages';
 import { computeRatios } from '@/lib/fundamentals';
@@ -116,6 +116,7 @@ export default async function FinancialsPage({ params }: Props) {
   const rnDernier = latestIncome?.resultat_net ?? null;
   const per = perAffichable(ratios.per, ratios.bpa ?? (rnDernier != null && rnDernier <= 0 ? rnDernier : null));
   const distribution = distributionAffichable(ratios.payout, rnDernier);
+  const valoCalculable = valorisationSimplifieeCalculable(ratios.bpa ?? (rnDernier != null && rnDernier <= 0 ? rnDernier : null), ratios.per);
   const evolutionRn = evolutionResultat(rnDernier, prevIncome?.resultat_net ?? null);
   const alertePerte = rnDernier != null && rnDernier < 0 && latestIncome
     ? `Exercice ${latestIncome.periode} en perte : résultat net de ${fmtFcfa(rnDernier)}${evolutionRn ? ` (${evolutionRn})` : ''}. PER et taux de distribution sont sans objet.`
@@ -230,7 +231,7 @@ export default async function FinancialsPage({ params }: Props) {
     ligne(divCourant?.exercice != null ? `Rendement dividende · ex. ${divCourant.exercice}` : 'Rendement dividende',
       divCourant?.ancien
         ? "dernier dividende versé ÷ cours (antérieur au dernier exercice publié : pas un point d'appui)"
-        : 'dernier dividende versé ÷ cours', rendementDiv, formatPct),
+        : 'dernier dividende versé ÷ cours', rendementDiv, (x) => formatRendementDividende(x, null) ?? ''),
   ];
   const ratiosRentabilite: LigneRatio[] = [
     ligne('ROE', 'résultat net ÷ capitaux propres', ratios.roe, formatPct, { positive: signe(ratios.roe) }),
@@ -248,7 +249,7 @@ export default async function FinancialsPage({ params }: Props) {
       ? [ligne('Croissance résultat net', '(RN N − RN N−1) ÷ |RN N−1|', croissanceRn, formatGrowth, { positive: signe(croissanceRn) })]
       : []),
     evolutionRn
-      ? { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: evolutionRn, quality: 'ok', positive: null }
+      ? { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: evolutionRn, quality: 'ok', positive: null, texte: true }
       : { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: '', quality: 'missing', motif: null },
   ];
 
@@ -355,7 +356,8 @@ export default async function FinancialsPage({ params }: Props) {
             )}
 
             {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
-            <ValueTrapBadge result={trap} />
+            {/* Une perte est déjà signalée par le bandeau du haut : pas de second badge. */}
+            {!(alertePerte && trap.verdict === 'perte') && <ValueTrapBadge result={trap} />}
 
             {/* Ratios fondamentaux : trois cartes, formule en sous-libellé */}
             <div>
@@ -414,6 +416,12 @@ export default async function FinancialsPage({ params }: Props) {
           <SectionLock required={lockLevel(gateValo.required)} titre="Valorisation (Graham, DCF, score)" pitch="Juste prix, marge de sécurité et score de valorisation." />
         ) : (
         <div className="bg-surface border border-border rounded-xl p-4 flex flex-wrap items-center gap-6">
+          {!valoCalculable.calculable ? (
+            <p className="text-xs text-muted">
+              {libelleValorisationSimplifiee()} : <span className="text-ivory">{valoCalculable.motif}</span>
+            </p>
+          ) : (
+          <>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted">{libelleValorisationSimplifiee()}</span>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full border border-border bg-elevated text-ivory">
@@ -444,6 +452,8 @@ export default async function FinancialsPage({ params }: Props) {
           )}
           {valuation.verdict === 'inconnu' && (
             <p className="text-xs text-faint">BPA, PB ou FCF manquants pour calculer la valorisation.</p>
+          )}
+          </>
           )}
           <p className="w-full text-xs text-faint">
             Modèle indépendant : ce score ne se confond ni avec le pilier Valorisation de Combined Alpha ni avec la note de qualité.

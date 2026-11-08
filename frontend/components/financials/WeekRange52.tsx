@@ -45,7 +45,7 @@ export default function WeekRange52({ bas, haut, actuel, dateBas = null, dateHau
     <div className="space-y-3">
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-xs text-muted">Plage 52 semaines</p>
-        <p className="tabular text-xs text-muted">{Math.round(position)}&nbsp;% de la plage</p>
+        <p className="text-xs text-muted"><span className="tabular">{Math.round(position)}</span>&nbsp;% de la plage</p>
       </div>
 
       <div

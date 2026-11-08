@@ -26,3 +26,17 @@ export function croissanceRnSignee(rn: number | null, rnPrecedent: number | null
 export function libelleValorisationSimplifiee(): string {
   return 'Valorisation simplifiée (Graham, PER, P/B)';
 }
+
+/**
+ * La valorisation simplifiée moyenne trois sous-scores (Graham, PER, P/B) en ignorant ceux
+ * qui manquent : sans PER (perte), le seul P/B donnait un « 50/100 » trompeur. Elle n'est
+ * affichée que si le bénéfice est positif ET le PER connu ; sinon, aucun score ni verdict.
+ */
+export function valorisationSimplifieeCalculable(
+  bpa: number | null,
+  per: number | null,
+): { calculable: boolean; motif: string | null } {
+  if (bpa == null || !(bpa > 0)) return { calculable: false, motif: bpa != null ? 'non calculable (bénéfice négatif)' : 'non calculable (BPA indisponible)' };
+  if (per == null) return { calculable: false, motif: 'non calculable (PER indisponible)' };
+  return { calculable: true, motif: null };
+}
