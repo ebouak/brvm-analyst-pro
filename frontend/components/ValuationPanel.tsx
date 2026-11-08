@@ -25,23 +25,30 @@ const ZONE_STYLE: Record<AltmanZone, { txt: string; cls: string }> = {
 };
 
 /** Bloc valorisation fondamentale d'une société (fiche premium). */
-export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; scoring?: CompanyScoring | null }) {
+/** `rendementDividende` : rendement déjà calculé par la fiche (même source que le bloc dividendes), en %, avec son exercice. */
+export default function ValuationPanel({ v, scoring, rendementDividende }: { v: CompanyValuation; scoring?: CompanyScoring | null; rendementDividende?: { pct: number | null; exercice: number | null } | null }) {
   const { metrics: m, fairValue: fv, quality: q, verdict } = v;
 
-  const ratios: { label: string; value: string }[] = [
+  const ratios: { label: string; value: string; note?: string }[] = [
     { label: 'P/E', value: num(m.per, 1) },
     { label: 'P/B', value: num(m.pbr, 2) },
     { label: 'ROE', value: pct(m.roe, 1) },
     { label: 'Marge nette', value: pct(m.netMargin, 1) },
     { label: 'Dette/FP', value: num(m.debtToEquity, 2) },
-    { label: 'Rdt dividende', value: pct(m.dividendYield, 1) },
+    rendementDividende !== undefined
+      ? {
+          label: 'Rdt dividende',
+          value: rendementDividende?.pct != null ? `${rendementDividende.pct.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %` : '—',
+          note: rendementDividende?.pct != null && rendementDividende.exercice != null ? `ex. ${rendementDividende.exercice}` : undefined,
+        }
+      : { label: 'Rdt dividende', value: pct(m.dividendYield, 1) },
   ];
 
   return (
     <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
       <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface p-5 md:p-6 space-y-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <p className="text-[11px] text-gold/70">Valorisation fondamentale</p>
+          <p className="text-[11px] text-accent-ink">Valorisation fondamentale</p>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${STANCE_STYLE[verdict.stance]}`}>
             {verdict.headline}
           </span>
@@ -63,6 +70,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
             <div key={r.label} className="rounded-lg bg-bg/40 border border-border/60 p-2.5 text-center">
               <div className="text-[11px] text-muted">{r.label}</div>
               <div className="tabular text-sm font-mono font-semibold text-ivory mt-0.5">{r.value}</div>
+              {r.note && <div className="text-[11px] text-faint">{r.note}</div>}
             </div>
           ))}
         </div>

@@ -408,7 +408,7 @@ export default async function InstrumentPage({
     exCourant?.year ?? null,
   );
   // Même ligne que `divCourant` (premier montant > 0), avec sa base fiscale.
-  const lastDiv = divCourant ? divRows.find((d) => d.montant > 0) ?? null : null;
+  const lastDiv = divCourant ? divRows.find((d) => d.montant > 0 && d.exercice != null) ?? null : null;
   const divExercice = divCourant?.exercice != null ? ` · ex. ${divCourant.exercice}` : '';
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
     ? (lastDiv.montant / last.cours_jour) * 100 : null;
@@ -855,24 +855,6 @@ export default async function InstrumentPage({
         </nav>
 
         <div className="flex items-center gap-1.5 flex-wrap">
-          <Link
-            href={`/actions/${code}/revue`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-info/40 bg-info/[0.12] rounded-full px-3 py-1 text-accent-ink hover:bg-info/20 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Revue de résultats →
-          </Link>
-          <Link
-            href={`/actions/${code}/financials`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-gold/40 bg-gold/[0.12] rounded-full px-3 py-1 text-accent-ink hover:bg-gold/20 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            États financiers →
-          </Link>
-          <Link
-            href={`/rapports/dossier/${code}`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-up/40 bg-up/[0.12] rounded-full px-3 py-1 text-up hover:bg-up/20 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Dossier A4 →
-          </Link>
           <PublicationsModal
             code={code}
             designation={instrument?.designation}
@@ -1181,7 +1163,7 @@ export default async function InstrumentPage({
                   macd={lastMacd ?? null}
                 />
                 <IndicatorCharts data={indicatorData} />
-                <IndicatorCommentary reading={lectureIndicateurs} code={code} sansQuestions />
+                <IndicatorCommentary reading={lectureIndicateurs} code={code} sansQuestions sansVerdict />
               </div>
             }
             synthese={{
@@ -1338,7 +1320,7 @@ export default async function InstrumentPage({
           <div id="valorisation" className="scroll-mt-24">
             <Eyebrow className="mb-3">Valorisation</Eyebrow>
             {gateValo.allowed ? (
-              <ValuationPanel v={valuation} scoring={scoring} />
+              <ValuationPanel v={valuation} scoring={scoring} rendementDividende={{ pct: divYield, exercice: divCourant?.exercice ?? null }} />
             ) : (
               <SectionLock
                 required={gateValo.required === 'free' ? 'premium' : gateValo.required}
@@ -1377,8 +1359,8 @@ export default async function InstrumentPage({
                     <div className="space-y-0 border-t border-border/30 pt-3">
                       <DivRow label="Dernier versement" value={fmtNumber(lastDiv.montant) + ' FCFA'} />
                       {divCourant.exercice != null && <DivRow label="Exercice" value={String(divCourant.exercice)} />}
-                      <DivRow label="Détachement" value={lastDiv.ex_date ?? '—'} />
-                      {lastDiv.payment_date && <DivRow label="Paiement" value={lastDiv.payment_date} />}
+                      <DivRow label="Détachement" value={fmtDateCourte(lastDiv.ex_date)} />
+                      {lastDiv.payment_date && <DivRow label="Paiement" value={fmtDateCourte(lastDiv.payment_date)} />}
                     </div>
                     {historiqueDiv.length > 1 && (
                       <div className="mt-4">
