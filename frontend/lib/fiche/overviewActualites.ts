@@ -8,6 +8,9 @@
 import { titrePublication } from './affichage';
 import { dateEnLettres } from './overview';
 
+/** Ancre de l'onglet « Publications officielles » : un lien vers elle l'ouvre. */
+export const ANCRE_OFFICIELLES = 'actualites-officielles';
+
 export interface ActuItem {
   id: string;
   titre: string;
