@@ -51,6 +51,12 @@ import { computeTechnicalSummary } from '@/lib/technicalSummary';
 import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
 import TechnicalSummary from '@/components/TechnicalSummary';
 import NotationBadge from '@/components/NotationBadge';
+import { scoreToRating } from '@/lib/rating';
+
+function noteAF(score: number | null, confiance: number | null): string | null {
+  const n = scoreToRating(score, confiance).note;
+  return n === 'NR' ? null : n;
+}
 import SignalAnalysis from '@/components/SignalAnalysis';
 import ValuationPanel from '@/components/ValuationPanel';
 import { getValuation } from '@/lib/valuation/server';
@@ -678,6 +684,12 @@ export default async function InstrumentPage({
         variationPct={last.variation_pct}
         up={up}
         sections={navSections}
+        documents={[
+          { href: `/actions/${code}/revue`, label: 'Revue de résultats' },
+          { href: `/actions/${code}/financials`, label: 'États financiers' },
+          { href: `/rapports/dossier/${code}`, label: 'Dossier A4' },
+          { href: `/actions/${code}/quant`, label: 'Quant' },
+        ]}
       />
 
       {/* ══════════════════════════════════════════════════
@@ -802,6 +814,7 @@ export default async function InstrumentPage({
           allégé plutôt qu'un cadenas, pour ne pas amputer la page d'entrée. */}
       {gateSignaux.allowed ? (
         <VerdictBand
+          note={noteAF(signal?.score_total ?? null, signal?.confiance ?? null)}
           signal={signal?.signal ?? null}
           scoreTotal={signal?.score_total ?? null}
           confiance={signal?.confiance ?? null}
@@ -814,6 +827,7 @@ export default async function InstrumentPage({
         />
       ) : (
         <VerdictBand
+          note={null}
           signal={null}
           scoreTotal={null}
           confiance={null}
