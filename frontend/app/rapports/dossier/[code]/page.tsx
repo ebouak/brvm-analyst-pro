@@ -8,6 +8,7 @@ import { controlerDossier } from '@/lib/dossier/controles';
 import { construireSquelette, chargerProse } from '@/lib/dossier/prose';
 import { BarresAnnuelles, CourbeCours, BarreDetachement } from '@/components/dossier/Graphiques';
 import { fmtFcfa, fmtNumber, fmtDateFR } from '@/lib/format';
+import { perAffichable, distributionAffichable, horsExploitation, dividendeCourant, evolutionResultat } from '@/lib/fiche/affichage';
 import ImprimerDossier from './ImprimerDossier';
 import './dossier.css';
 
@@ -37,6 +38,19 @@ const TOTAL_PANNEAUX = 16;
    intermédiaire, comparables, piliers. ⚠️ Le worker (video/dossiers.mjs,
    FEUILLES_ATTENDUES) vérifie ce nombre : les deux changent ensemble. */
 const TOTAL_FEUILLES = 9;
+
+/* Sommaire : [titre, numéros des panneaux, feuille]. ⚠️ Suit la répartition des
+   feuilles ci-dessous ; à tenir avec TOTAL_FEUILLES. */
+const SOMMAIRE: [string, string, number][] = [
+  ['Identité et chiffres clés', '02-03', 2],
+  ['Trajectoire et valorisation', '04-05', 3],
+  ['Origine du bénéfice et dividende', '06-07', 4],
+  ['Détachement, cours et niveaux', '08-09', 5],
+  ['Appréciation, appuis et vigilance', '10-11', 6],
+  ['Niveaux et réserves', '12', 7],
+  ['Titre en bourse, publication, comparables', '13-15', 8],
+  ['Piliers et rendez-vous', '16', 9],
+];
 
 const STATUT_PILIER: Record<string, string> = {
   tenu: 'Seuil atteint',
@@ -77,6 +91,7 @@ function Mesure({
   note,
   ton,
   texte,
+  motif,
 }: {
   libelle: string;
   valeur: string | null;
@@ -84,6 +99,8 @@ function Mesure({
   ton?: 'hausse' | 'baisse';
   /** Valeur en mots (secteur…) : police du texte, plus petite, sans césure forcée. */
   texte?: boolean;
+  /** Raison affichée à la place de « non disponible » (perte, sans objet…). */
+  motif?: string | null;
 }) {
   const classes = [
     valeur == null ? null : ton === 'hausse' ? 'dv-hausse' : ton === 'baisse' ? 'dv-baisse' : null,
@@ -93,7 +110,7 @@ function Mesure({
     <div className="dv-mesure">
       <dt>{libelle}</dt>
       <dd className={classes || undefined}>
-        {valeur ?? <Absent />}
+        {valeur ?? (motif ? <span className="dv-absent">{motif}</span> : <Absent />)}
       </dd>
       {note ? <small>{note}</small> : null}
     </div>
@@ -168,6 +185,16 @@ export default async function DossierPage({ params }: { params: { code: string }
   const [lecture, scenarios] = prose.sections;
   const { identite: id, chiffres_cles: c, ratios: r, qualite_resultat: q, dividende: div, niveaux: lv } = d;
   const nomComplet = id.designation ?? id.code;
+  const per = perAffichable(r?.per ?? null, r?.bpa ?? null);
+  const distribution = distributionAffichable(div.payout, c.resultat_net);
+  const horsExpl = q ? horsExploitation(q.resultat_avant_impots, q.resultat_exploitation) : null;
+  const dernierExercice = c.exercice != null ? Number(c.exercice) : null;
+  const divCourant = div.montant != null && div.montant > 0
+    ? dividendeCourant([{ montant: div.montant, exercice: div.exercice, ex_date: div.ex_date, payment_date: div.payment_date }], dernierExercice)
+    : null;
+  const traj = d.trajectoire;
+  const evolution = traj.length >= 2 ? evolutionResultat(traj[traj.length - 1]!.resultat_net, traj[traj.length - 2]!.resultat_net) : null;
+  const dette = c.dette_perimetre === 'long_terme' ? 'dette à plus d’un an' : 'dette financière';
 
   /* Contrôles de cohérence : le worker d'impression lit cet attribut et REFUSE
      de ranger le PDF s'il n'est pas vide (comme pour un débordement). */
@@ -254,6 +281,53 @@ export default async function DossierPage({ params }: { params: { code: string }
             />
           </dl>
         </Panneau>
+
+        <section className="dv-resume" aria-label="En une page">
+          <h2 className="dv-sous-titre">En une page</h2>
+          <div className="dv-resume-grille">
+            <div className="dv-encadre">
+              <h3>Activité</h3>
+              <p>
+                {c.chiffre_affaires != null
+                  ? <><strong>{cfa(c.chiffre_affaires)}</strong> de chiffre d&apos;affaires{c.exercice ? ` en ${c.exercice}` : ''}{c.croissance_ca_1an != null ? `, ${pourcent(c.croissance_ca_1an)} sur un exercice` : ''}.</>
+                  : 'Chiffre d’affaires non disponible.'}
+              </p>
+            </div>
+            <div className="dv-encadre">
+              <h3>Résultat</h3>
+              <p>
+                {c.resultat_net != null
+                  ? <><strong>{cfa(c.resultat_net)}</strong> de résultat net{evolution ? ` (${evolution})` : ''}.</>
+                  : 'Résultat net non disponible.'}
+                {q?.resultat_exploitation != null ? ` Exploitation : ${cfa(q.resultat_exploitation)}.` : ''}
+              </p>
+            </div>
+            <div className="dv-encadre">
+              <h3>Bilan</h3>
+              <p>
+                {c.capitaux_propres != null ? <><strong>{cfa(c.capitaux_propres)}</strong> de capitaux propres</> : 'Capitaux propres non disponibles'}
+                {c.dette != null ? `, ${dette} de ${cfa(c.dette)}` : ''}.
+              </p>
+            </div>
+            <div className="dv-encadre">
+              <h3>Dividende</h3>
+              <p>
+                {divCourant
+                  ? <><strong>{fmtNumber(divCourant.montant, 2)} FCFA</strong>{divCourant.exercice != null ? ` au titre de ${divCourant.exercice}` : ''}{divCourant.ancien ? ', aucun depuis' : ''}.</>
+                  : 'Aucun dividende enregistré.'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <nav className="dv-sommaire" aria-label="Sommaire">
+          <h2 className="dv-sous-titre">Sommaire</h2>
+          <ol>
+            {SOMMAIRE.map(([titre, panneaux, feuille]) => (
+              <li key={titre}><span>{panneaux}</span> {titre} <em>p. {feuille}</em></li>
+            ))}
+          </ol>
+        </nav>
 
         <p className="dv-chapo" style={{ margin: 0 }}>
           Établi le {fmtDateFR(d.genere_le)} · Document d&apos;information. Il ne constitue ni un conseil en
@@ -370,7 +444,7 @@ export default async function DossierPage({ params }: { params: { code: string }
         >
           <dl className="dv-grille">
             <Mesure libelle="Bénéfice par action" valeur={nb(r?.bpa, 2)} note="Résultat net ÷ actions en circulation." />
-            <Mesure libelle="PER" valeur={fois(r?.per)} note="Cours ÷ bénéfice par action." />
+            <Mesure libelle="PER" valeur={fois(per.valeur)} motif={per.motif} note="Cours ÷ bénéfice par action." />
             <Mesure libelle="Cours / capitaux propres" valeur={fois(r?.pb)} />
             <Mesure libelle="Cours / chiffre d'affaires" valeur={fois(r?.ps)} />
             <Mesure
@@ -415,25 +489,19 @@ export default async function DossierPage({ params }: { params: { code: string }
                 <Mesure libelle="Résultat avant impôts" valeur={cfa(q.resultat_avant_impots)} />
                 <Mesure libelle="Marge d'exploitation" valeur={part(q.marge_exploitation)} />
                 <Mesure
-                  libelle="Part non opérationnelle"
-                  valeur={part(q.part_non_operationnelle)}
-                  ton={
-                    q.part_non_operationnelle == null
-                      ? undefined
-                      : q.part_non_operationnelle > 0.5
-                        ? 'baisse'
-                        : 'hausse'
-                  }
-                  note="Fraction du résultat avant impôts qui ne provient pas de l'activité."
+                  libelle="Produits hors exploitation"
+                  valeur={cfa(horsExpl)}
+                  ton={horsExpl == null || q.part_non_operationnelle == null ? undefined : q.part_non_operationnelle > 0.5 ? 'baisse' : 'hausse'}
+                  note="Avant impôts, moins l'exploitation."
                 />
               </dl>
-              {q.part_non_operationnelle != null && q.part_non_operationnelle > 0.5 && (
+              {q.part_non_operationnelle != null && q.part_non_operationnelle > 0.5 && horsExpl != null && (
                 <div className="dv-encadre dv-encadre--reserve" style={{ marginTop: '3mm' }}>
                   <h3>À lire avec prudence</h3>
                   <p style={{ margin: 0 }}>
-                    Plus de la moitié du résultat avant impôts ({part(q.part_non_operationnelle)}) ne vient pas de
-                    l&apos;exploitation. Rien ne garantit que cette part se reproduise l&apos;exercice suivant : le
-                    bénéfice publié ne peut pas être projeté tel quel.
+                    {cfa(horsExpl)} de produits hors exploitation, pour un résultat d&apos;exploitation de{' '}
+                    {cfa(q.resultat_exploitation)}. Rien ne garantit leur retour l&apos;exercice suivant : le bénéfice
+                    publié ne peut pas être projeté tel quel.
                   </p>
                 </div>
               )}
@@ -489,7 +557,8 @@ export default async function DossierPage({ params }: { params: { code: string }
                 />
                 <Mesure
                   libelle="Taux de distribution"
-                  valeur={part(div.payout)}
+                  valeur={part(distribution.valeur)}
+                  motif={distribution.motif}
                   note={
                     div.base_fiscale === 'net'
                       ? `Rapporte un dividende net à un bénéfice brut : minoré${id.taux_irvm != null ? ` d'environ ${taux(id.taux_irvm)}` : " du taux de l'impôt retenu à la source"}.`
