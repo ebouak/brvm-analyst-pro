@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
-  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication,
+  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite,
 } from './affichage';
 
 const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
@@ -101,5 +101,18 @@ describe('titrePublication', () => {
   it('harmonise les graphies BRVM', () => {
     expect(titrePublication('Etats Financiers exercice 2020 - SETAO CI')).toBe('États financiers exercice 2020 - SETAO CI');
     expect(titrePublication('Etats financiers - Exercice 2017: SETAO CI')).toBe('États financiers - Exercice 2017 · SETAO CI');
+  });
+});
+
+describe('libellePenalite', () => {
+  it('plafonne le libellé à 25 pts sans toucher à la somme', () => {
+    expect(libellePenalite(45)).toBe('Garde-fous déclenchés : −45 pts (pénalité plafonnée à 25 pts)');
+  });
+  it('sous le plafond, la pénalité égale la somme', () => {
+    expect(libellePenalite(15)).toBe('Garde-fous déclenchés : −15 pts (pénalité de 15 pts)');
+  });
+  it('rien si nul ou absent', () => {
+    expect(libellePenalite(0)).toBeNull();
+    expect(libellePenalite(null)).toBeNull();
   });
 });

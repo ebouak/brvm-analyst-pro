@@ -118,3 +118,14 @@ export function titrePublication(t: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
+
+export const PLAFOND_PENALITE_RISQUE = 25;
+
+/** `somme` = total brut des garde-fous ; le score n'en retire qu'au plus 25 points. */
+export function libellePenalite(somme: number | null): string | null {
+  if (somme == null || !(somme > 0)) return null;
+  const brut = Math.round(somme);
+  return brut > PLAFOND_PENALITE_RISQUE
+    ? `Garde-fous déclenchés : −${brut} pts (pénalité plafonnée à ${PLAFOND_PENALITE_RISQUE} pts)`
+    : `Garde-fous déclenchés : −${brut} pts (pénalité de ${brut} pts)`;
+}

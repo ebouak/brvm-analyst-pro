@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { fmtDateCourte } from '@/lib/format';
+import { libellePenalite } from '@/lib/fiche/affichage';
 
 interface Props {
   code: string;
@@ -42,7 +43,7 @@ export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, calcu
             ))}
           </div>
           <p className="mt-2 text-[11px] text-faint">Repères à 50 et 65.</p>
-          {penalite != null && penalite > 0 && <p className="tabular mt-2 text-xs text-muted">Pénalité risque −{Math.round(penalite)} pts</p>}
+          {libellePenalite(penalite) && <p className="tabular mt-2 text-xs text-muted">{libellePenalite(penalite)}</p>}
         </>
       )}
       {calculeLe && (
