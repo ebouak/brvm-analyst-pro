@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { plageSurFenetre, plageSeance, positionDans } from './plages';
+import { plageSurFenetre, plageSeance, positionDans, plage52Semaines } from './plages';
 
 const rows = [
   { date_marche: '2024-12-26', cours_jour: 405 },
@@ -44,4 +44,26 @@ describe('plageSeance', () => {
     expect(plageSeance(100, 200, 125)).toEqual({ bas: 100, dateBas: null, haut: 200, dateHaut: null, position: 0.25 });
   });
   it('null sans bornes valides', () => expect(plageSeance(null, 200, 150)).toBeNull());
+});
+
+describe('ex æquo : indépendant de l ordre', () => {
+  const trois = [
+    { date_marche: '2026-11-04', cours_jour: 100 },
+    { date_marche: '2026-11-05', cours_jour: 100 },
+    { date_marche: '2026-11-06', cours_jour: 100 },
+  ];
+  it('trois séances égales : la date la plus récente, quel que soit le sens', () => {
+    for (const rows of [trois, [...trois].reverse(), [trois[1]!, trois[2]!, trois[0]!]]) {
+      const p = plageSurFenetre(rows, '2026-11-06', 365, 100)!;
+      expect(p.dateBas).toBe('2026-11-06');
+      expect(p.dateHaut).toBe('2026-11-06');
+    }
+  });
+  it('plage52Semaines lit la même plage dans les deux sens', () => {
+    const a = plage52Semaines(trois, 100);
+    const b = plage52Semaines([...trois].reverse(), 100);
+    expect(a).toEqual(b);
+    expect(a!.dateBas).toBe('2026-11-06');
+  });
+  it('plage52Semaines sans série : null', () => expect(plage52Semaines([], 100)).toBeNull());
 });

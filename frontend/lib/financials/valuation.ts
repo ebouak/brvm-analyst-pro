@@ -64,7 +64,9 @@ export function computeValuation(
     // score 100 si MOS ≥ 50%, score 0 si MOS ≤ -50%
     scores.push(Math.max(0, Math.min(100, 50 + marginOfSafety)));
   }
-  if (ratios.per !== null) {
+  // Un PER n'a de sens que sur un bénéfice positif : perte (BPA ≤ 0) ou PER ≤ 0, le sous-score est ignoré.
+  const perSignifiant = ratios.per !== null && ratios.per > 0 && (ratios.bpa == null || ratios.bpa > 0);
+  if (perSignifiant && ratios.per !== null) {
     // PER idéal < 15 (score 100) → > 30 (score 0)
     scores.push(Math.max(0, Math.min(100, ((30 - ratios.per) / 15) * 100)));
   }
