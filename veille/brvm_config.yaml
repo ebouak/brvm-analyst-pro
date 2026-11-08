@@ -662,7 +662,7 @@ sites_societes:
   - ticker: "STAC"
     site_presse: null
     rss_officiel: null
-    google_news: "https://news.google.com/rss/search?q=SITAS+transport+aérien+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
+    google_news: "https://news.google.com/rss/search?q=SETAO+Côte+d'Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
 
   - ticker: "PRSC"
     site_presse: null
@@ -717,11 +717,6 @@ sites_societes:
     sel_date: ".date"
     rss_officiel: null
     google_news: "https://news.google.com/rss/search?q=SICOGI+immobilier+Côte+Ivoire+BRVM&hl=fr&gl=CI&ceid=CI:fr"
-
-  - ticker: "SETC"
-    site_presse: null
-    rss_officiel: null
-    google_news: "https://news.google.com/rss/search?q=SETAO+travaux+publics+BRVM&hl=fr&gl=CI&ceid=CI:fr"
 
   # Assurance
   - ticker: "GNBC"
@@ -943,11 +938,13 @@ valeurs:
     mots_cles: ["SICOGI", "Ivoirienne Construction", "SIER BRVM"]
     alertes_specifiques: ["logement", "immobilier", "résultats"]
 
-  - ticker: "SETC"
-    nom: "SETAO"
+  # STAC = SETAO CI (désignation BRVM). « SETC » n'existe pas à la BRVM ; SITAS
+  # (transport aérien) est une autre société, jamais cotée sous ce code.
+  - ticker: "STAC"
+    nom: "SETAO CI"
     secteur: "BTP"
     pays: "CI"
-    mots_cles: ["SETAO", "Travaux Publics Afrique Ouest", "SETC BRVM"]
+    mots_cles: ["SETAO", "Setao Côte d'Ivoire", "Setao CI", "STAC"]
     alertes_specifiques: ["infrastructure", "contrat", "résultats"]
 
   - ticker: "UNLC"
@@ -1054,13 +1051,6 @@ valeurs:
     pays: "CI"
     mots_cles: ["Bolloré Côte Ivoire", "Bolloré Transport", "SDSC BRVM"]
     alertes_specifiques: ["port", "logistique", "MSC", "cession", "résultats"]
-
-  - ticker: "STAC"
-    nom: "SITAS CI"
-    secteur: "Transport"
-    pays: "CI"
-    mots_cles: ["SITAS Côte Ivoire", "STAC BRVM", "transport aérien CI"]
-    alertes_specifiques: ["aviation", "aéroport", "résultats"]
 
   - ticker: "PRSC"
     nom: "PRESTIGE CI"
