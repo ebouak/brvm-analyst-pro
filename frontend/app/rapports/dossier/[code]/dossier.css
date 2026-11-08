@@ -427,3 +427,14 @@
   .dv-page, .dv-actions { width: 100%; }
   .dv-page { min-height: 0; padding: 8mm 6mm; }
 }
+
+/* Feuille 1 : résumé et sommaire, compacts pour tenir dans l'espace libre. */
+.dv-resume-grille { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2mm; }
+.dv-resume .dv-encadre { padding: 2mm 3mm; font-size: 8.5pt; }
+.dv-resume .dv-encadre h3 { margin-bottom: 0.8mm; }
+.dv-resume .dv-encadre p { margin: 0; }
+.dv-resume, .dv-sommaire { margin-top: 4mm; }
+.dv-sommaire ol { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 6mm; font-size: 8.5pt; }
+.dv-sommaire li { break-inside: avoid; padding: 0.6mm 0; }
+.dv-sommaire li span { font-variant-numeric: tabular-nums; color: var(--dv-encre-douce); margin-right: 1.5mm; }
+.dv-sommaire li em { font-style: normal; color: var(--dv-encre-douce); }

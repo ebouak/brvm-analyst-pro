@@ -1,11 +1,19 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { fmtDateCourte } from '@/lib/format';
+import { fmtDateCourte, fmtFcfa, fmtNumber } from '@/lib/format';
+import RatioCard from '@/components/fundamentals/RatioCard';
+import FluxComptable from '@/components/fiche/FluxComptable';
+import { fluxCompteResultat, fluxBilan, type FluxCR, type FluxBilan } from '@/lib/fiche/flux';
+import { formatRendementDividende, perAffichable, distributionAffichable, evolutionResultat, dividendeCourant, titrePublication } from '@/lib/fiche/affichage';
+import { avecBpaCalcule, croissanceRnSignee, libelleValorisationSimplifiee, valorisationSimplifieeCalculable } from '@/lib/fiche/financialsAffichage';
+import SousPageNav from '@/components/sousPage/SousPageNav';
+import { plageSurFenetre } from '@/lib/fiche/plages';
+import { computeRatios } from '@/lib/fundamentals';
+import { formatXOF, formatPct, formatRatio, formatGrowth } from '@/lib/financials/formatters';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
-import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financials/valuation';
+import { computeValuation, VERDICT_LABELS } from '@/lib/financials/valuation';
 import WeekRange52 from '@/components/financials/WeekRange52';
-import FundamentalAnalysis from '@/components/financials/FundamentalAnalysis';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ChartBuilder from '@/components/financials/ChartBuilder';
 import PasseportPopover from '@/components/provenance/PasseportPopover';
@@ -32,8 +40,10 @@ interface Props {
 
 export default async function FinancialsPage({ params }: Props) {
   const code = params.code.toUpperCase();
-  const data = await loadCompanyFinancials(code);
-  if (!data) notFound();
+  const brut = await loadCompanyFinancials(code);
+  if (!brut) notFound();
+  // BPA : même source que la fiche (résultat net ÷ nombre de titres), pour tous les exercices affichés.
+  const data = { ...brut, incomeStatements: avecBpaCalcule(brut.incomeStatements, brut.instrument.shares) };
 
   // Provenance du dernier exercice publié — celui qu'affichent les cartes de tête.
   const provenance = await loadProvenance(code);
@@ -58,7 +68,7 @@ export default async function FinancialsPage({ params }: Props) {
   // affichées dans un encadré séparé — elles sont désormais intégrées AU BON
   // ENDROIT de la cascade du compte de résultat et du bilan (statementRows.ts).
 
-  const ratios = calculateFundamentals({
+  const ratiosBase = calculateFundamentals({
     coursActuel: data.latestDaily?.cours_jour ?? null,
     shares: data.instrument.shares,
     cours_bas_52s: data.latestDaily?.cours_bas_52s ?? null,
@@ -69,12 +79,80 @@ export default async function FinancialsPage({ params }: Props) {
     cashflow: latestCashflow,
   });
 
+  // Plage 52 semaines : fenêtre de 365 jours calendaires inclusive (source unique de la fiche).
+  const dateRef = data.serieCours[0]?.date_marche ?? null;
+  const plage52 = dateRef ? plageSurFenetre(data.serieCours, dateRef, 365, ratiosBase.cours_actuel) : null;
+  const ratios = { ...ratiosBase, cours_bas_52s: plage52?.bas ?? null, cours_haut_52s: plage52?.haut ?? null };
+
   const valuation = computeValuation(
     ratios,
     data.latestDaily?.cours_jour ?? null,
     latestCashflow?.flux_tresorerie_disponible ?? null,
     data.instrument.shares,
   );
+
+  // Dette financière : somme court + long terme du bilan si les deux existent, sinon la
+  // valeur extraite dans `fundamentals` pour le MÊME exercice. Fonds propres : idem.
+  const anneeDernierBilan = latestBalance?.periode ? Number(String(latestBalance.periode).slice(0, 4)) : null;
+  const { data: fondaRows } = anneeDernierBilan != null && Number.isFinite(anneeDernierBilan)
+    ? await createClient().from('fundamentals').select('year, debt, equity').eq('code', code).eq('year', anneeDernierBilan).limit(1)
+    : { data: null };
+  const fonda = ((fondaRows ?? []) as { year: number; debt: number | null; equity: number | null }[])[0] ?? null;
+  // Toutes les années (dette financière par exercice pour la vue en flux du bilan).
+  const { data: fondaTousRows } = await createClient().from('fundamentals').select('year, debt').eq('code', code);
+  const detteFonda = new Map(((fondaTousRows ?? []) as { year: number; debt: number | null }[]).map((r) => [r.year, r.debt]));
+  // Dividendes : même requête que la fiche (tri par exercice, lignes sans exercice en dernier).
+  const { data: divRowsBrut } = await createClient().from('dividends').select('montant, ex_date, payment_date, exercice')
+    .eq('code', code).order('exercice', { ascending: false, nullsFirst: false }).limit(6);
+  const detteBilan = latestBalance && latestBalance.dette_court_terme != null && latestBalance.dette_long_terme != null
+    ? latestBalance.dette_court_terme + latestBalance.dette_long_terme : null;
+  const gearing = computeRatios({
+    cours: null, shares: null, revenue: null, net_income: null,
+    equity: latestBalance?.total_capitaux_propres ?? fonda?.equity ?? null,
+    debt: detteBilan ?? fonda?.debt ?? null, dividende: null,
+  }).gearing;
+
+  // PER et distribution : une perte s'explique, elle ne devient pas « non disponible ».
+  const rnDernier = latestIncome?.resultat_net ?? null;
+  const per = perAffichable(ratios.per, ratios.bpa ?? (rnDernier != null && rnDernier <= 0 ? rnDernier : null));
+  const distribution = distributionAffichable(ratios.payout, rnDernier);
+  const valoCalculable = valorisationSimplifieeCalculable(ratios.bpa ?? (rnDernier != null && rnDernier <= 0 ? rnDernier : null), ratios.per);
+  const evolutionRn = evolutionResultat(rnDernier, prevIncome?.resultat_net ?? null);
+  const alertePerte = rnDernier != null && rnDernier < 0 && latestIncome
+    ? `Exercice ${latestIncome.periode} en perte : résultat net de ${fmtFcfa(rnDernier)}${evolutionRn ? ` (${evolutionRn})` : ''}. PER et taux de distribution sont sans objet.`
+    : null;
+
+  // Flux du compte de résultat, un par exercice annuel ; null si un poste manque.
+  const fluxParExercice: Record<number, FluxCR | null> = {};
+  for (const st of data.incomeStatements) {
+    if (st.type_periode !== 'annuel') continue;
+    const y = Number(String(st.periode).slice(0, 4));
+    if (!Number.isFinite(y)) continue;
+    fluxParExercice[y] = fluxCompteResultat({
+      chiffreAffaires: st.revenu_total, resultatExploitation: st.resultat_exploitation,
+      resultatAvantImpot: st.resultat_avant_impots, resultatNet: st.resultat_net,
+    });
+  }
+  // Flux du bilan : dette = court + long terme si les deux existent, sinon la valeur extraite du même exercice.
+  const bilanParExercice: Record<number, FluxBilan | null> = {};
+  for (const bs of data.balanceSheets) {
+    if (bs.type_periode !== 'annuel') continue;
+    const y = Number(String(bs.periode).slice(0, 4));
+    if (!Number.isFinite(y)) continue;
+    const dette = bs.dette_court_terme != null && bs.dette_long_terme != null
+      ? bs.dette_court_terme + bs.dette_long_terme : detteFonda.get(y) ?? null;
+    bilanParExercice[y] = fluxBilan({ totalActif: bs.total_actifs, capitauxPropres: bs.total_capitaux_propres, detteFinanciere: dette });
+  }
+  const exercicesFlux = Array.from(new Set([...Object.keys(fluxParExercice), ...Object.keys(bilanParExercice)].map(Number)));
+
+  // Rendement du dividende : même source que la fiche (dernier dividende versé > 0 et son exercice).
+  const exerciceDernier = latestIncome?.periode ? Number(String(latestIncome.periode).slice(0, 4)) : null;
+  const divCourant = dividendeCourant(
+    ((divRowsBrut ?? []) as { montant: number; exercice: number | null; ex_date: string | null; payment_date: string | null }[]),
+    exerciceDernier != null && Number.isFinite(exerciceDernier) ? exerciceDernier : null,
+  );
+  const coursDiv = data.latestDaily?.cours_jour ?? null;
+  const rendementDiv = divCourant && coursDiv != null && coursDiv > 0 ? (divCourant.montant / coursDiv) * 100 : null;
 
   // Pourquoi la solvabilité manque, s'il manque : ce que disent les documents
   // consultés pour l'exercice du bilan affiché (indicateur_source, lecture publique).
@@ -136,6 +214,45 @@ export default async function FinancialsPage({ params }: Props) {
   const isBank = data.instrument.famille_comptable === 'banque';
   const revenuLabel = isBank ? 'PNB' : data.instrument.famille_comptable === 'assurance' ? 'Primes' : 'CA';
 
+  // Trois cartes de ratios ; chaque ligne porte sa formule.
+  type LigneRatio = React.ComponentProps<typeof RatioCard>;
+  const ligne = (label: string, formule: string, v: number | null, fmt: (x: number) => string, opts: { positive?: boolean | null; motif?: string | null } = {}): LigneRatio =>
+    v == null ? { label, formule, value: '', quality: 'missing', motif: opts.motif ?? null }
+      : { label, formule, value: fmt(v), quality: 'ok', positive: opts.positive ?? null };
+  const signe = (v: number | null) => (v == null ? null : v >= 0);
+  const caLong = revenuLabel === 'CA' ? "chiffre d'affaires" : revenuLabel;
+  const croissanceRn = croissanceRnSignee(rnDernier, prevIncome?.resultat_net ?? null, ratios.croissance_rn);
+  const ratiosValorisation: LigneRatio[] = [
+    ligne('Capitalisation boursière', "cours × nombre d'actions", ratios.capitalisation, formatXOF),
+    ligne('BPA', "résultat net ÷ nombre d'actions", ratios.bpa, (x) => `${formatRatio(x)} FCFA`, { positive: signe(ratios.bpa) }),
+    ligne('PER', 'cours ÷ BPA', per.valeur, formatRatio, { motif: per.motif }),
+    ligne('P / valeur comptable', 'capitalisation ÷ capitaux propres', ratios.pb, formatRatio),
+    ligne(`P / ${revenuLabel}`, `capitalisation ÷ ${caLong}`, ratios.ps, formatRatio),
+    ligne(divCourant?.exercice != null ? `Rendement dividende · ex. ${divCourant.exercice}` : 'Rendement dividende',
+      divCourant?.ancien
+        ? "dernier dividende versé ÷ cours (antérieur au dernier exercice publié : pas un point d'appui)"
+        : 'dernier dividende versé ÷ cours', rendementDiv, (x) => formatRendementDividende(x, null) ?? ''),
+  ];
+  const ratiosRentabilite: LigneRatio[] = [
+    ligne('ROE', 'résultat net ÷ capitaux propres', ratios.roe, formatPct, { positive: signe(ratios.roe) }),
+    ligne('Marge nette', `résultat net ÷ ${caLong}`, ratios.marge_nette, formatPct, { positive: signe(ratios.marge_nette) }),
+    ligne('Taux de distribution', 'dividendes versés ÷ résultat net', distribution.valeur, formatPct, { motif: distribution.motif }),
+  ];
+  const ratiosSolidite: LigneRatio[] = [
+    // La dette n'a pas de sens pour une banque ou un assureur : on ne l'affiche que pour les autres.
+    ...(data.instrument.famille_comptable === 'general'
+      ? [ligne('Dette / fonds propres', 'dette financière ÷ capitaux propres', gearing, formatRatio)]
+      : []),
+    ligne(`Croissance ${revenuLabel}`, 'exercice N ÷ exercice N−1', ratios.croissance_ca, formatGrowth, { positive: signe(ratios.croissance_ca) }),
+    // Pourcentage signé seulement si les deux exercices sont bénéficiaires ; sinon la forme en mots ci-dessous.
+    ...(croissanceRn != null
+      ? [ligne('Croissance résultat net', '(RN N − RN N−1) ÷ |RN N−1|', croissanceRn, formatGrowth, { positive: signe(croissanceRn) })]
+      : []),
+    evolutionRn
+      ? { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: evolutionRn, quality: 'ok', positive: null, texte: true }
+      : { label: 'Évolution du résultat net', formule: 'exercice N comparé à N−1', value: '', quality: 'missing', motif: null },
+  ];
+
   // Points du graphique : croisement compte de résultat + bilan par période.
   const balanceByPeriode = new Map(data.balanceSheets.map((b) => [b.periode, b]));
   const chartPoints: FundaChartPoint[] = data.incomeStatements.map((s) => {
@@ -153,21 +270,14 @@ export default async function FinancialsPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-6">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm">
-          <Link href="/actions" className="text-muted hover:text-white transition-colors">Marché</Link>
-          <span className="text-faint">/</span>
-          <Link href={`/actions/${code}`} className="text-muted hover:text-white transition-colors">{code}</Link>
-          <span className="text-faint">/</span>
-          <span className="text-white">Données financières</span>
-        </div>
+        <SousPageNav code={code} courant="États financiers" />
 
         {/* Page header */}
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <h1 className="font-mono font-medium text-xl tracking-tight text-ivory">{code}</h1>
+            <h1 className="font-display text-2xl text-ivory">{code}</h1>
             {data.instrument.designation && (
               <p className="text-sm text-muted">{data.instrument.designation}</p>
             )}
@@ -196,14 +306,125 @@ export default async function FinancialsPage({ params }: Props) {
           )}
         </div>
 
+        {/* Alerte de perte : l'exercice affiché est déficitaire */}
+        {alertePerte && (
+          <div className="rounded-card border border-down/40 bg-down/5 p-4 text-sm text-down">
+            {alertePerte}
+          </div>
+        )}
+
+        {/* Financial statement tabs */}
+        <div id="etats">
+          <p className="text-xs text-muted mb-3 px-0.5">États financiers</p>
+          <div className="bg-surface border border-border rounded-xl p-5">
+            <FinancialTabs
+              incomeStatements={data.incomeStatements}
+              balanceSheets={data.balanceSheets}
+              cashFlowStatements={data.cashFlowStatements}
+              incomeInterim={data.incomeInterim}
+              balanceInterim={data.balanceInterim}
+              famille={data.instrument.famille_comptable}
+            />
+          </div>
+        </div>
+
+        {/* Vue en flux du compte de résultat (calculée sur quatre postes publiés) */}
+        {data.incomeStatements.length > 0 && (
+          <div>
+            <p className="text-xs text-muted mb-3 px-0.5">Vue en flux</p>
+            <FluxComptable parExercice={fluxParExercice} exercices={exercicesFlux} bilanParExercice={bilanParExercice} />
+          </div>
+        )}
+
+        {/* ── Analyse fondamentale (premium, flag `fondamentaux`) ──
+            Ratios, value trap, analyse bancaire et graphiques : réservés.
+            Un anonyme/gratuit voit un cadenas, pas les valeurs (vrai verrou). */}
+        {!gateFonda.allowed ? (
+          <SectionLock
+            required={lockLevel(gateFonda.required)}
+            titre="Analyse fondamentale"
+            pitch="Ratios (PER, ROE, marge…), détection de value trap, graphiques pluriannuels"
+          />
+        ) : (
+          <>
+            {/* Analyse bancaire UEMOA (banques uniquement) */}
+            {bankAnalysis && (
+              <div>
+                <p className="text-xs text-muted mb-3 px-0.5">Analyse bancaire UEMOA</p>
+                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} />
+              </div>
+            )}
+
+            {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
+            {/* Une perte est déjà signalée par le bandeau du haut : pas de second badge. */}
+            {!(alertePerte && trap.verdict === 'perte') && <ValueTrapBadge result={trap} />}
+
+            {/* Ratios fondamentaux : trois cartes, formule en sous-libellé */}
+            <div>
+              <div className="flex items-center gap-2 mb-3 px-0.5">
+                <p className="text-xs text-muted">Ratios fondamentaux</p>
+                {periodeAffichee && (
+                  <PasseportPopover passeport={passeport} titre={`Exercice ${periodeAffichee}`} />
+                )}
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-card border border-border bg-surface p-4">
+                  <h3 className="mb-1 text-xs text-muted">Valorisation</h3>
+                  <div className="divide-y divide-border/40">
+                    {ratiosValorisation.map((r) => <RatioCard key={r.label} {...r} />)}
+                  </div>
+                </div>
+                <div className="rounded-card border border-border bg-surface p-4">
+                  <h3 className="mb-1 text-xs text-muted">Rentabilité</h3>
+                  <div className="divide-y divide-border/40">
+                    {ratiosRentabilite.map((r) => <RatioCard key={r.label} {...r} />)}
+                  </div>
+                </div>
+                <div className="rounded-card border border-border bg-surface p-4">
+                  <h3 className="mb-1 text-xs text-muted">Solidité et croissance</h3>
+                  <div className="divide-y divide-border/40">
+                    {ratiosSolidite.map((r) => <RatioCard key={r.label} {...r} />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Analyse graphique pluriannuelle */}
+            {chartPoints.length >= 2 && (
+              <div>
+                <p className="text-xs text-muted mb-3 px-0.5">Analyse graphique</p>
+                <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} sansCaRn />
+              </div>
+            )}
+
+            {/* Constructeur de graphique — séries au choix, axes automatiques.
+                En-tête de section comme les blocs voisins : sans lui, le bloc se
+                fondait dans la page et passait inaperçu. */}
+            {data.incomeStatements.length >= 2 && (
+              <div>
+                <p className="text-xs text-muted mb-3 px-0.5">
+                  Graphique personnalisé
+                </p>
+                <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
+              </div>
+            )}
+          </>
+        )}
+
         {/* Panneau valorisation — premium (flag dcf) */}
         {!gateValo.allowed ? (
           <SectionLock required={lockLevel(gateValo.required)} titre="Valorisation (Graham, DCF, score)" pitch="Juste prix, marge de sécurité et score de valorisation." />
         ) : (
         <div className="bg-surface border border-border rounded-xl p-4 flex flex-wrap items-center gap-6">
+          {!valoCalculable.calculable ? (
+            <p className="text-xs text-muted">
+              {libelleValorisationSimplifiee()} : <span className="text-ivory">{valoCalculable.motif}</span>
+            </p>
+          ) : (
+          <>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted">Valorisation</span>
-            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${VERDICT_COLORS[valuation.verdict]}`}>
+            <span className="text-xs text-muted">{libelleValorisationSimplifiee()}</span>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full border border-border bg-elevated text-ivory">
               {VERDICT_LABELS[valuation.verdict]}
             </span>
           </div>
@@ -226,12 +447,17 @@ export default async function FinancialsPage({ params }: Props) {
           )}
           {valuation.scoreValorisation !== null && (
             <div className="text-xs text-muted">
-              Score : <span className="tabular text-ivory font-medium">{Math.round(valuation.scoreValorisation)}/100</span>
+              Score de ce modèle : <span className="tabular text-ivory font-medium">{Math.round(valuation.scoreValorisation)}/100</span>
             </div>
           )}
           {valuation.verdict === 'inconnu' && (
             <p className="text-xs text-faint">BPA, PB ou FCF manquants pour calculer la valorisation.</p>
           )}
+          </>
+          )}
+          <p className="w-full text-xs text-faint">
+            Modèle indépendant : ce score ne se confond ni avec le pilier Valorisation de Combined Alpha ni avec la note de qualité.
+          </p>
         </div>
         )}
 
@@ -241,77 +467,9 @@ export default async function FinancialsPage({ params }: Props) {
             bas={ratios.cours_bas_52s}
             haut={ratios.cours_haut_52s}
             actuel={ratios.cours_actuel}
+            dateBas={plage52?.dateBas ?? null}
+            dateHaut={plage52?.dateHaut ?? null}
           />
-        </div>
-
-        {/* ── Analyse fondamentale (premium, flag `fondamentaux`) ──
-            Ratios, value trap, analyse bancaire et graphiques : réservés.
-            Un anonyme/gratuit voit un cadenas, pas les valeurs (vrai verrou). */}
-        {!gateFonda.allowed ? (
-          <SectionLock
-            required={lockLevel(gateFonda.required)}
-            titre="Analyse fondamentale"
-            pitch="Ratios (PER, ROE, marge…), détection de value trap, graphiques pluriannuels"
-          />
-        ) : (
-          <>
-            {/* Analyse bancaire UEMOA (banques uniquement) */}
-            {bankAnalysis && (
-              <div>
-                <p className="text-xs text-muted mb-3 px-0.5">Analyse bancaire UEMOA</p>
-                <BankScorecard kpis={bankAnalysis.kpis} score={bankAnalysis.score} periode={bankAnalysis.periode} absences={bankAnalysis.absences} qualite={bankAnalysis.qualite} />
-              </div>
-            )}
-
-            {/* Alerte value trap (PER vs trajectoire des bénéfices) */}
-            <ValueTrapBadge result={trap} />
-
-            {/* Ratios fondamentaux */}
-            <div>
-              <div className="flex items-center gap-2 mb-3 px-0.5">
-                <p className="text-xs text-muted">Ratios fondamentaux</p>
-                {periodeAffichee && (
-                  <PasseportPopover passeport={passeport} titre={`Exercice ${periodeAffichee}`} />
-                )}
-              </div>
-              <FundamentalAnalysis ratios={ratios} famille={data.instrument.famille_comptable} />
-            </div>
-
-            {/* Analyse graphique pluriannuelle */}
-            {chartPoints.length >= 2 && (
-              <div>
-                <p className="text-xs text-muted mb-3 px-0.5">Analyse graphique</p>
-                <FundamentalsCharts points={chartPoints} revenuLabel={revenuLabel} isBank={isBank} />
-              </div>
-            )}
-
-            {/* Constructeur de graphique — séries au choix, axes automatiques.
-                En-tête de section comme les blocs voisins : sans lui, le bloc se
-                fondait dans la page et passait inaperçu. */}
-            {data.incomeStatements.length >= 2 && (
-              <div>
-                <p className="text-xs text-muted mb-3 px-0.5">
-                  Graphique personnalisé
-                </p>
-                <ChartBuilder rows={buildChartRows(data.incomeStatements, data.balanceSheets, data.cashFlowStatements)} />
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Financial statement tabs */}
-        <div id="etats">
-          <p className="text-xs text-muted mb-3 px-0.5">États financiers</p>
-          <div className="bg-surface border border-border rounded-xl p-5">
-            <FinancialTabs
-              incomeStatements={data.incomeStatements}
-              balanceSheets={data.balanceSheets}
-              cashFlowStatements={data.cashFlowStatements}
-              incomeInterim={data.incomeInterim}
-              balanceInterim={data.balanceInterim}
-              famille={data.instrument.famille_comptable}
-            />
-          </div>
         </div>
 
         {/* Publications disponibles — fallback si données absentes */}
@@ -327,7 +485,7 @@ export default async function FinancialsPage({ params }: Props) {
               </div>
               <a
                 href={`/admin/import-fondamentaux?code=${code}`}
-                className="shrink-0 px-3 py-1.5 rounded-lg bg-up text-bg text-xs font-semibold hover:opacity-90 active:scale-95 transition-colors"
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-accent-ink text-bg text-xs font-semibold hover:opacity-90 active:scale-95 transition-colors"
               >
                 Importer via IA →
               </a>
@@ -344,7 +502,7 @@ export default async function FinancialsPage({ params }: Props) {
                       href={pub.source_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-up hover:underline shrink-0"
+                      className="text-xs text-accent-ink hover:underline shrink-0"
                     >
                       Voir le PDF ↗
                     </a>
@@ -361,7 +519,7 @@ export default async function FinancialsPage({ params }: Props) {
             <p className="text-muted text-sm">Aucune donnée financière ni publication disponible pour {code}.</p>
             <a
               href={`/admin/import-fondamentaux?code=${code}`}
-              className="inline-block px-4 py-2 rounded-lg bg-up text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-colors"
+              className="inline-block px-4 py-2 rounded-lg bg-accent-ink text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-colors"
             >
               Importer via IA
             </a>
@@ -379,18 +537,18 @@ export default async function FinancialsPage({ params }: Props) {
                 return (
                   <li key={p.id} className="flex flex-col gap-1 border-b border-border/40 pb-2 last:border-0">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm text-muted">{p.libelle}</span>
+                      <span className="text-sm text-muted">{p.libelle ? titrePublication(p.libelle) : ''}</span>
                       <div className="flex items-center gap-2 shrink-0">
-                        {inc && <a href="#etats" className="text-xs text-up hover:underline">Voir les états →</a>}
+                        {inc && <a href="#etats" className="text-xs text-accent-ink hover:underline">Voir les états →</a>}
                         {p.source_url && <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-ink hover:underline">PDF</a>}
                       </div>
                     </div>
                     {inc && (
                       <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-faint tabular">
-                        <span>CA&nbsp;: {inc.revenu_total != null ? (inc.revenu_total / 1e9).toFixed(1) + ' Md' : 'N/D'}</span>
-                        <span>RN&nbsp;: {inc.resultat_net != null ? (inc.resultat_net / 1e9).toFixed(1) + ' Md' : 'N/D'}</span>
-                        <span>BPA&nbsp;: {inc.benefice_par_action ?? 'N/D'}</span>
-                        <span>Div&nbsp;: {inc.dividende_par_action ?? 'N/D'}</span>
+                        <span>CA&nbsp;: {inc.revenu_total != null ? fmtFcfa(inc.revenu_total) : 'N/D'}</span>
+                        <span>RN&nbsp;: {inc.resultat_net != null ? fmtFcfa(inc.resultat_net) : 'N/D'}</span>
+                        <span>BPA&nbsp;: {inc.benefice_par_action != null ? fmtNumber(inc.benefice_par_action, 2) : 'N/D'}</span>
+                        <span>Div&nbsp;: {inc.dividende_par_action != null ? fmtNumber(inc.dividende_par_action, 2) : 'N/D'}</span>
                       </div>
                     )}
                   </li>

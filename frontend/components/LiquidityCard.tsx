@@ -1,4 +1,5 @@
 import type { LiquidityScore, LiquidityScoreV2 } from '@/lib/liquidity';
+import { insecable, nombreFr, pctFr } from '@/lib/fiche/affichage';
 import { PremiumPanel } from '@/components/ui/premium';
 
 const CLASS_STYLE: Record<string, string> = {
@@ -65,21 +66,21 @@ export function LiquidityCard({
           </span>
           <div>
             <p className="font-display text-base text-ivory">{liquidity.label}</p>
-            <p className="tabular text-xs text-muted">
-              Score {liquidity.score}/100 · {liquidity.presencePct} % des {liquidity.nbSeances} dernières séances traitées
+            <p className="text-xs text-muted">
+              Score <span className="tabular">{liquidity.score}/100</span> · <span className="tabular">{liquidity.presencePct} %</span> des <span className="tabular">{liquidity.nbSeances}</span> dernières séances traitées
             </p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-right">
           <div>
-            <p className="text-xs text-faint">Valeur échangée / séance</p>
-            <p className="tabular text-sm font-bold text-ivory">{fmtFcfa(liquidity.valeurMoyenne)}</p>
+            <p className="text-xs text-faint">Valeur échangée moyenne (30 séances)</p>
+            <p className="tabular text-sm font-bold text-ivory">{insecable(fmtFcfa(liquidity.valeurMoyenne))}</p>
           </div>
           {arMin != null && arMax != null && (
             <div>
               <p className="text-xs text-faint">Coût aller-retour</p>
               <p className="tabular text-sm font-bold text-warn">
-                {arMin.toFixed(1)} – {arMax.toFixed(1)} %
+                {nombreFr(arMin, 1)} – {pctFr(arMax, 1)}
               </p>
             </div>
           )}
@@ -91,8 +92,8 @@ export function LiquidityCard({
       {arMin != null && arMax != null && (
         <p className="mt-2 text-[11px] leading-relaxed text-faint">
           Coût d&apos;un achat + une revente selon les barèmes SGI en base (courtage{' '}
-          {courtageMin!.toFixed(2)}–{courtageMax!.toFixed(2)} % + 0,30 % BRVM/DC-BR par ordre) :
-          votre position doit gagner au moins {arMax.toFixed(1)} % pour couvrir les frais au barème
+          {nombreFr(courtageMin!, 2)}–{pctFr(courtageMax!, 2)} + 0,30 % BRVM/DC-BR par ordre) :
+          votre position doit gagner au moins {pctFr(arMax, 1)} pour couvrir les frais au barème
           le plus élevé. <a href="/comparateur-sgi" className="text-accent underline underline-offset-2">Comparer les SGI</a>
         </p>
       )}
@@ -104,7 +105,7 @@ export function LiquidityCard({
             <div className="mb-1 flex items-center justify-between text-[11px]">
               <span className="text-muted">Flux de la séance (achat / vente)</span>
               <span className="tabular text-faint">
-                {fluxOk ? `net ${v2.flux_net_pct! > 0 ? '+' : ''}${v2.flux_net_pct} %` : '—'}
+                {fluxOk ? `net ${pctFr(v2.flux_net_pct!, 0, true)}` : '—'}
               </span>
             </div>
             {fluxOk ? (
@@ -127,7 +128,7 @@ export function LiquidityCard({
             </span>
             <span className="tabular text-ivory">
               {v2.spread_pct != null
-                ? `${v2.spread_source === 'carnet' ? '' : '≈ '}${v2.spread_pct.toFixed(2)} % (${fmtFcfa(500_000 * (v2.spread_pct / 100))} sur 500 000 FCFA)`
+                ? `${v2.spread_source === 'carnet' ? '' : '≈ '}${pctFr(v2.spread_pct, 2)} (${fmtFcfa(500_000 * (v2.spread_pct / 100))} sur 500 000 FCFA)`
                 : 'non disponible'}
             </span>
           </div>
@@ -135,7 +136,7 @@ export function LiquidityCard({
           {v2.amihud != null && (
             <div className="flex items-center justify-between text-[11px]">
               <span className="text-muted">Impact prix (Amihud, %/M FCFA)</span>
-              <span className="tabular text-ivory">{v2.amihud.toFixed(3)}</span>
+              <span className="tabular text-ivory">{nombreFr(v2.amihud, 3)}</span>
             </div>
           )}
 

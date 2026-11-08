@@ -1,3 +1,4 @@
+import { rendementDividendeParts, nombreFr, pctFr } from '@/lib/fiche/affichage';
 import type { CompanyValuation } from '@/lib/valuation/server';
 import type { CompanyScoring } from '@/lib/scoring/server';
 import type { AltmanZone } from '@/lib/scoring/altman';
@@ -5,10 +6,10 @@ import { fmtFcfa } from '@/lib/format';
 
 function pct(v: number | null, d = 0): string {
   if (v == null) return '—';
-  return `${v >= 0 ? '+' : ''}${(v * 100).toFixed(d)}%`;
+  return pctFr(v * 100, d, true);
 }
 function num(v: number | null, d = 2): string {
-  return v == null ? '—' : v.toFixed(d);
+  return nombreFr(v, d);
 }
 
 const STANCE_STYLE: Record<CompanyValuation['verdict']['stance'], string> = {
@@ -25,23 +26,29 @@ const ZONE_STYLE: Record<AltmanZone, { txt: string; cls: string }> = {
 };
 
 /** Bloc valorisation fondamentale d'une société (fiche premium). */
-export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; scoring?: CompanyScoring | null }) {
+/** `rendementDividende` : rendement déjà calculé par la fiche (même source que le bloc dividendes), en %, avec son exercice. */
+export default function ValuationPanel({ v, scoring, rendementDividende, masquerRationale }: { v: CompanyValuation; scoring?: CompanyScoring | null; masquerRationale?: boolean; rendementDividende?: { pct: number | null; exercice: number | null } | null }) {
   const { metrics: m, fairValue: fv, quality: q, verdict } = v;
 
-  const ratios: { label: string; value: string }[] = [
+  const ratios: { label: string; value: string; note?: string }[] = [
     { label: 'P/E', value: num(m.per, 1) },
     { label: 'P/B', value: num(m.pbr, 2) },
     { label: 'ROE', value: pct(m.roe, 1) },
     { label: 'Marge nette', value: pct(m.netMargin, 1) },
     { label: 'Dette/FP', value: num(m.debtToEquity, 2) },
-    { label: 'Rdt dividende', value: pct(m.dividendYield, 1) },
+    rendementDividende !== undefined
+      ? (() => {
+          const p = rendementDividendeParts(rendementDividende?.pct ?? null, rendementDividende?.exercice ?? null);
+          return { label: 'Rdt dividende', value: p?.valeur ?? '—', note: p?.exercice ?? undefined };
+        })()
+      : { label: 'Rdt dividende', value: pct(m.dividendYield, 1) },
   ];
 
   return (
     <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
       <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface p-5 md:p-6 space-y-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <p className="text-[11px] text-gold/70">Valorisation fondamentale</p>
+          <p className="text-[11px] text-accent-ink">Valorisation fondamentale</p>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${STANCE_STYLE[verdict.stance]}`}>
             {verdict.headline}
           </span>
@@ -62,7 +69,8 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
           {ratios.map((r) => (
             <div key={r.label} className="rounded-lg bg-bg/40 border border-border/60 p-2.5 text-center">
               <div className="text-[11px] text-muted">{r.label}</div>
-              <div className="tabular text-sm font-mono font-semibold text-ivory mt-0.5">{r.value}</div>
+              <div className="tabular text-sm font-mono font-semibold text-ivory mt-0.5 whitespace-nowrap">{r.value}</div>
+              {r.note && <div className="text-[11px] text-faint">{r.note}</div>}
             </div>
           ))}
         </div>
@@ -74,7 +82,7 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
               <div className="rounded-lg border border-border/60 bg-bg/40 p-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-faint">Piotroski F-Score</span>
-                  <span className="tabular text-sm font-semibold text-ivory">{scoring.fscore.score}/9 · {scoring.fscore.label}</span>
+                  <span className="text-sm font-semibold text-ivory"><span className="tabular">{scoring.fscore.score}/9</span> · {scoring.fscore.label}</span>
                 </div>
                 <div className="flex gap-0.5">
                   {scoring.fscore.criteria.map((c, i) => (
@@ -102,13 +110,13 @@ export default function ValuationPanel({ v, scoring }: { v: CompanyValuation; sc
 
         {/* Verdict détaillé */}
         <div className="border-t border-border/30 pt-4 space-y-2">
-          <ul className="space-y-1">
+          {!masquerRationale && <ul className="space-y-1">
             {verdict.rationale.map((p, i) => (
               <li key={i} className="flex items-start gap-2 text-xs text-muted leading-relaxed">
                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-faint" /><span>{p}</span>
               </li>
             ))}
-          </ul>
+          </ul>}
           {verdict.cautions.map((c, i) => (
             <p key={i} className="flex items-start gap-2 text-xs text-warn"><span>!</span><span>{c}</span></p>
           ))}

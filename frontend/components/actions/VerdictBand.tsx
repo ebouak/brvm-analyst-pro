@@ -1,5 +1,4 @@
-import SignalBadge from '@/components/SignalBadge';
-import RatingBadge from '@/components/RatingBadge';
+import { libelleSignal } from '@/lib/signalLabel';
 import Sparkline from '@/components/Sparkline';
 import { fmtNumber } from '@/lib/format';
 
@@ -10,6 +9,7 @@ import { fmtNumber } from '@/lib/format';
  * signaux et de l'historique réels passés en props).
  */
 export function VerdictBand({
+  note,
   signal,
   scoreTotal,
   confiance,
@@ -19,7 +19,10 @@ export function VerdictBand({
   low52,
   high52,
   synthesisLine,
+  libelleNote,
 }: {
+  /** Notation financière A à F (null si non notée). */
+  note: string | null;
   signal: string | null;
   scoreTotal: number | null;
   confiance: number | null;
@@ -29,6 +32,8 @@ export function VerdictBand({
   low52: number | null;
   high52: number | null;
   synthesisLine?: string | null;
+  /** Libellé de la note (« Momentum positif ») : B+ et Attente se lisent ensemble. */
+  libelleNote?: string | null;
 }) {
   // Position du cours dans le range (0 = plus bas, 1 = plus haut).
   const pos =
@@ -40,22 +45,41 @@ export function VerdictBand({
     <div className="rounded-panel border border-border/60 bg-surface px-4 py-3.5 md:px-5">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         {/* Note A–F */}
-        <div className="flex items-center gap-2">
-          <span className="overline text-faint">Note</span>
-          <RatingBadge scoreTotal={scoreTotal} confiance={confiance} />
-        </div>
+        {note && (
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-faint">Note</span>
+            <span className="font-display rounded-[10px] border border-ivory px-3 py-1.5 text-3xl leading-none text-ivory">{note}</span>
+            <span className="max-w-[150px] text-[11px] leading-snug text-faint">
+              {libelleNote && <span className="block text-xs text-muted">{libelleNote}</span>}
+              note technique A à F, tirée du même score
+            </span>
+          </div>
+        )}
 
         {/* Signal */}
         <div className="flex items-center gap-2">
-          <span className="overline text-faint">Signal</span>
-          {signal ? <SignalBadge signal={signal as 'BUY' | 'SELL' | 'HOLD'} confiance={confiance} /> : <span className="text-xs text-faint">—</span>}
+          <span className="text-xs text-faint">Signal</span>
+          {signal ? (
+            <span className="inline-flex items-baseline gap-2 text-sm text-ivory">
+              <span className="font-semibold">{libelleSignal(signal)}</span>
+              {scoreTotal != null && (
+                <span className="tabular text-xs text-muted">
+                  score {scoreTotal.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              )}
+              {signal === 'HOLD' && note && <span className="text-xs text-faint">sous le seuil d&apos;achat</span>}
+              {confiance != null && <span className="text-xs text-faint">qualité des données <span className="tabular">{Math.round(confiance <= 1 ? confiance * 100 : confiance)} %</span></span>}
+            </span>
+          ) : (
+            <span className="text-xs text-faint">—</span>
+          )}
         </div>
 
         {/* Tendance (sparkline) */}
         {sparkData.length >= 2 && (
           <div className="flex items-center gap-2">
-            <span className="overline text-faint">Tendance</span>
-            <Sparkline data={sparkData} up={up} width={96} height={26} />
+            <span className="text-xs text-faint">Tendance</span>
+            <span className="text-muted"><Sparkline data={sparkData} up={up} width={96} height={26} /></span>
           </div>
         )}
 
@@ -64,7 +88,7 @@ export function VerdictBand({
           <div className="min-w-[180px] flex-1">
             <div className="flex items-center justify-between text-[11px] text-faint mb-1">
               <span className="tabular">{fmtNumber(low52)}</span>
-              <span className="overline">Plage observée</span>
+              <span>Plage observée sur 2 ans</span>
               <span className="tabular">{fmtNumber(high52)}</span>
             </div>
             <div className="relative h-1.5 rounded-full bg-border">

@@ -6,6 +6,7 @@ import type { Famille } from '@/lib/financials/sectors';
 import IncomeStatement from './IncomeStatement';
 import BalanceSheet from './BalanceSheet';
 import CashFlowStatement from './CashFlowStatement';
+import { styleOnglet } from '@/components/sousPage/onglets';
 
 interface Props {
   incomeStatements: IS[];
@@ -58,33 +59,28 @@ export default function FinancialTabs({
   return (
     <div>
       <div className="flex gap-2 mb-4 flex-wrap items-center justify-between">
-        <div className="flex gap-1">
+        <div role="tablist" className="flex flex-wrap gap-2">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-up/20 text-up border border-up/30'
-                  : 'text-muted hover:text-white'
-              }`}
+              className={styleOnglet(activeTab === tab.id)}
             >
               {tab.label}
             </button>
           ))}
         </div>
-        {aIntermediaire && <div className="flex gap-1">
+        {aIntermediaire && <div className="flex gap-2">
           {(['annuel', 'intermediaire'] as const).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => setPeriode(p)}
-              className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                periode === p
-                  ? 'bg-surface border border-border text-white'
-                  : 'text-muted hover:text-white'
-              }`}
+              aria-pressed={periode === p}
+              className={styleOnglet(periode === p)}
             >
               {p === 'annuel' ? 'Annuel' : 'Trimestres et semestres'}
             </button>

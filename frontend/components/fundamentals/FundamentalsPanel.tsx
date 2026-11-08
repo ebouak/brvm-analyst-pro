@@ -8,6 +8,8 @@ import RangeBar from './RangeBar';
 import EditFundamentalsModal from './EditFundamentalsModal';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ValueTrapBadge from './ValueTrapBadge';
+import { perAffichable, distributionAffichable, evolutionResultat, bpaAffichable, insecable } from '@/lib/fiche/affichage';
+import { formatRendementDividende } from '@/lib/fiche/affichage';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 
 export interface FundamentalsPanelProps {
@@ -19,6 +21,8 @@ export interface FundamentalsPanelProps {
   history: Array<{ year: number; revenue: number | null; net_income: number | null }>;
   sourceUrl: string | null;
   range52: { low: number | null; high: number | null; current: number | null };
+  /** Résultat net de l'exercice : sert à écarter un taux de distribution sans objet en cas de perte. */
+  resultatNet?: number | null;
   /** Famille comptable : la grille de lecture change selon le métier. */
   famille?: 'banque' | 'assurance' | 'general' | null;
   /** Exercice du dividende utilisé pour rendement/payout (si non daté en séance). */
@@ -27,6 +31,10 @@ export interface FundamentalsPanelProps {
   dividendeVerifie?: boolean;
   /** Droit de correction manuelle (admin) — la route /api/fundamentals le revérifie. */
   canEdit?: boolean;
+  /** La plage 52 semaines est déjà montrée ailleurs (jauges de la fiche). */
+  sansPlage52?: boolean;
+  /** Le bandeau de perte du chapitre dit déjà « PER non calculable ». */
+  sansAlertePerte?: boolean;
 }
 
 function pct(v: number | null): string { return v == null ? '—' : `${(v * 100).toFixed(1)} %`; }
@@ -50,15 +58,23 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
   const [editing, setEditing] = useState(false);
   const r = computeRatios(p.inputs);
   const fam = FAMILLES[p.famille ?? 'general'] ?? FAMILLES.general;
+  // BPA : source unique (résultat net ÷ titres, 2 décimales), comme les états financiers.
+  const bpa = bpaAffichable(p.inputs.net_income, p.inputs.shares);
+  const per = perAffichable(r.per, bpa.valeur ?? r.bpa);
+  const dist = distributionAffichable(r.payout, p.resultatNet ?? null);
 
   const sortedHist = [...p.history].sort((a, b) => a.year - b.year);
   const last = sortedHist[sortedHist.length - 1];
   const prev = sortedHist[sortedHist.length - 2];
   const croissanceCA = last?.revenue && prev?.revenue ? last.revenue / prev.revenue - 1 : null;
-  const croissanceRN = last?.net_income && prev?.net_income ? last.net_income / prev.net_income - 1 : null;
+  const evolutionRN = evolutionResultat(last?.net_income ?? null, prev?.net_income ?? null);
+  const evolutionRNPositive = last?.net_income != null && prev?.net_income != null
+    ? (last.net_income < 0 && prev.net_income < 0 ? Math.abs(last.net_income) < Math.abs(prev.net_income) : last.net_income >= prev.net_income)
+    : null;
 
   const divSuffix = p.dividendeExercice != null && !p.dividendeVerifie
     ? ` (ex. ${p.dividendeExercice})` : '';
+  const rendementDiv = formatRendementDividende(r.rendementDiv != null ? r.rendementDiv * 100 : null, p.dividendeExercice ?? null);
 
   // Alerte value trap : croise le PER avec la trajectoire du résultat net.
   const trap = assessValueTrap({
@@ -75,10 +91,10 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
     dividende: null,
   }));
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="bg-surface border border-border rounded-xl p-4">
+  const Section = ({ title, children, large }: { title: string; children: React.ReactNode; large?: boolean }) => (
+    <div className={`bg-surface border border-border rounded-xl p-4 ${large ? 'md:col-span-2' : ''}`}>
       <h3 className="text-sm font-semibold mb-1">{title}</h3>
-      <div className="divide-y divide-border/40">{children}</div>
+      <div className={large ? 'divide-y divide-border/40 md:grid md:grid-cols-2 md:gap-x-10 md:divide-y-0' : 'divide-y divide-border/40'}>{children}</div>
     </div>
   );
 
@@ -98,21 +114,21 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         )}
       </div>
 
-      {p.range52.low != null && (
+      {!p.sansPlage52 && p.range52.low != null && (
         <RangeBar title="52 semaines" low={p.range52.low} high={p.range52.high} current={p.range52.current} />
       )}
 
-      <ValueTrapBadge result={trap} />
+      {!(p.sansAlertePerte && trap.verdict === 'perte') && <ValueTrapBadge result={trap} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Section title="Générales">
           <RatioCard label="Capitalisation" value={r.capitalisation != null ? fmtFcfa(r.capitalisation) + ' FCFA' : '—'} quality={assessQuality('capitalisation', r.capitalisation)} />
-          <RatioCard label="BPA" value={r.bpa != null ? fmtNumber(r.bpa) + ' FCFA' : '—'} quality={r.bpa == null ? 'missing' : 'ok'} positive={r.bpa != null ? r.bpa >= 0 : null} />
-          <RatioCard label={`Rendement dividende${divSuffix}`} value={pct(r.rendementDiv)} quality={assessQuality('rendementDiv', r.rendementDiv)} />
+          <RatioCard label="BPA" value={bpa.valeur != null ? fmtNumber(bpa.valeur, 2) + ' FCFA' : '—'} quality={bpa.valeur == null ? 'missing' : 'ok'} positive={bpa.valeur != null ? bpa.valeur >= 0 : null} />
+          <RatioCard label="Rendement dividende" value={rendementDiv ?? '—'} quality={assessQuality('rendementDiv', r.rendementDiv)} />
         </Section>
 
         <Section title="Évaluation">
-          <RatioCard label="PER (P/E)" value={num(r.per)} quality={assessQuality('per', r.per)} />
+          <RatioCard label="PER (P/E)" value={per.valeur != null ? num(per.valeur) : per.motif ?? '—'} quality={per.valeur == null ? 'missing' : assessQuality('per', per.valeur)} motif={per.motif} />
           <RatioCard label="P/B" value={num(r.pb)} quality={assessQuality('pb', r.pb)} />
           {fam.ps && (
             <RatioCard label={p.famille === 'assurance' ? 'P/Primes' : 'P/S'} value={num(r.ps)} quality={assessQuality('ps', r.ps)} />
@@ -127,18 +143,18 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         {fam.gearing ? (
           <Section title="Effet de levier">
             <RatioCard label="Dette / Capitaux propres" value={num(r.gearing)} quality={assessQuality('gearing', r.gearing)} />
-            <RatioCard label={`Payout (distribution)${divSuffix}`} value={pct(r.payout)} quality={assessQuality('payout', r.payout)} />
+            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} motif={dist.motif} />
           </Section>
         ) : (
           <Section title="Solidité & distribution">
             <RatioCard label="Capitaux propres" value={p.inputs.equity != null ? fmtFcfa(p.inputs.equity) + ' FCFA' : '—'} quality={p.inputs.equity == null ? 'missing' : 'ok'} />
-            <RatioCard label={`Payout (distribution)${divSuffix}`} value={pct(r.payout)} quality={assessQuality('payout', r.payout)} />
+            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} motif={dist.motif} />
           </Section>
         )}
 
-        <Section title="Croissance (1 an)">
+        <Section title="Croissance (1 an)" large>
           <RatioCard label={`Croissance ${fam.revenu}`} value={pct(croissanceCA)} positive={croissanceCA != null ? croissanceCA >= 0 : null} quality={croissanceCA == null ? 'missing' : 'ok'} />
-          <RatioCard label="Croissance RN" value={pct(croissanceRN)} positive={croissanceRN != null ? croissanceRN >= 0 : null} quality={croissanceRN == null ? 'missing' : 'ok'} />
+          <RatioCard label="Évolution du résultat net" value={evolutionRN ? insecable(evolutionRN) : '—'} texte positive={evolutionRNPositive} quality={evolutionRN == null ? 'missing' : 'ok'} />
         </Section>
       </div>
 

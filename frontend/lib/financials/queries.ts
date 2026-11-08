@@ -20,7 +20,7 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
       .select('cours_jour, date_marche')
       .eq('code', code)
       .order('date_marche', { ascending: false })
-      .limit(260),
+      .limit(300),
     supabase
       .from('income_statements')
       .select('*')
@@ -82,6 +82,7 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
       famille_comptable: (instrument.famille_comptable ?? 'general') as 'banque' | 'assurance' | 'general',
     },
     latestDaily: { cours_jour, cours_bas_52s, cours_haut_52s },
+    serieCours: hist52.map((r) => ({ date_marche: r.date_marche, cours_jour: r.cours_jour })),
     incomeStatements: (incomeRes.data ?? []) as any,
     balanceSheets: (balanceRes.data ?? []) as any,
     cashFlowStatements: (cashflowRes.data ?? []) as any,

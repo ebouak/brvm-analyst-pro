@@ -1,4 +1,5 @@
 import { fmtFcfa, fmtDateFR } from '@/lib/format';
+import { dividendeCourant, horsExploitation } from '@/lib/fiche/affichage';
 import type { DossierValeur } from './build';
 
 /**
@@ -90,11 +91,14 @@ export function construireNarratif(d: DossierValeur): Narratif {
 
   /* La qualité du bénéfice prime sur son montant. Un profit massivement non
      opérationnel ne se reproduit pas, et le taire serait trompeur. */
-  if (q?.part_non_operationnelle != null && q.part_non_operationnelle > SEUILS.NON_OPERATIONNEL) {
+  const horsExpl = q ? horsExploitation(q.resultat_avant_impots, q.resultat_exploitation) : null;
+  if (q?.part_non_operationnelle != null && q.part_non_operationnelle > SEUILS.NON_OPERATIONNEL && horsExpl != null) {
+    /* En montant, pas en pourcentage : quand le résultat avant impôts frôle zéro
+       le rapport s'envole (17 883 % sur STAC) et ne veut plus rien dire. */
     risques.push({
       texte:
-        `${pct(q.part_non_operationnelle, 0).replace('+', '')} du résultat avant impôts ne vient pas de ` +
-        `l'exploitation : la récurrence du bénéfice reste à confirmer`,
+        `${mtt(horsExpl)} de produits hors exploitation, pour un résultat d'exploitation de ` +
+        `${mtt(q.resultat_exploitation ?? 0)} : la récurrence du bénéfice reste à confirmer`,
       fait: "un bénéfice majoritairement non opérationnel, dont la récurrence reste à confirmer",
       mesure: q.part_non_operationnelle,
     });
@@ -157,7 +161,13 @@ export function construireNarratif(d: DossierValeur): Narratif {
   }
 
   // ── Dividende ───────────────────────────────────────────────────────────
-  if (d.dividende.montant != null && d.dividende.montant > 0 && d.dividende.rendement != null) {
+  /* Un dividende dont l'exercice précède de plus d'un an le dernier publié ne
+     dit rien de la politique actuelle : ce n'est pas un point d'appui. */
+  const divAncien = dividendeCourant(
+    [{ montant: d.dividende.montant ?? 0, exercice: d.dividende.exercice, ex_date: d.dividende.ex_date, payment_date: d.dividende.payment_date }],
+    c.exercice != null ? Number(c.exercice) : null,
+  )?.ancien ?? false;
+  if (d.dividende.montant != null && d.dividende.montant > 0 && d.dividende.rendement != null && !divAncien) {
     const base =
       d.dividende.base_fiscale === 'net' ? ' net'
       : d.dividende.base_fiscale === 'brut' ? ' brut'

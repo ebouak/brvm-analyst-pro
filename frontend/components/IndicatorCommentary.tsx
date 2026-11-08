@@ -9,7 +9,7 @@ const TONE: Record<IndicatorReading['tone'], { label: string; cls: string }> = {
 };
 
 /** Questions IA prêtes à l'emploi (deep-link vers l'assistant pré-rempli). */
-const QUESTIONS = [
+export const QUESTIONS_INDICATEURS = [
   'Que disent le RSI et le MACD aujourd’hui ?',
   'Quel est le risque à court terme ?',
   'Faut-il acheter, vendre ou conserver ?',
@@ -17,17 +17,21 @@ const QUESTIONS = [
 ];
 
 /**
+ * `sansVerdict` : titre neutre, sans teinte ni libellé haussier/baissier (la fiche
+ * porte déjà UN verdict ailleurs ; ce bloc n'en donne que les points).
  * Encart de lecture automatique des indicateurs + boutons « Expliquer »
  * (questions prêtes à l'emploi, deep-link vers l'assistant pré-rempli).
  */
-export default function IndicatorCommentary({ reading, code }: { reading: IndicatorReading; code: string }) {
+export default function IndicatorCommentary({ reading, code, sansQuestions = false, sansVerdict = false }: { reading: IndicatorReading; code: string; sansQuestions?: boolean; sansVerdict?: boolean }) {
   if (reading.points.length === 0) return null;
-  const t = TONE[reading.tone];
+  const t = sansVerdict
+    ? { label: 'Ce que montrent les indicateurs historiques', cls: 'text-muted border-border bg-surface' }
+    : TONE[reading.tone];
 
   return (
     <div className="space-y-3">
       <div className={`rounded-card border p-4 ${t.cls}`}>
-        <p className="text-[11px] mb-2 opacity-80">{t.label}</p>
+        <p className={`text-[11px] mb-2 ${sansVerdict ? '' : 'opacity-80'}`}>{t.label}</p>
         <ul className="space-y-1.5">
           {reading.points.map((p, i) => (
             <li key={i} className="flex items-start gap-2 text-xs text-muted leading-relaxed">
@@ -37,9 +41,10 @@ export default function IndicatorCommentary({ reading, code }: { reading: Indica
         </ul>
       </div>
 
+      {!sansQuestions && (
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] text-faint">Expliquer :</span>
-        {QUESTIONS.map((q) => (
+        {QUESTIONS_INDICATEURS.map((q) => (
           <Link
             key={q}
             href={`/assistant?symbole=${code}&q=${encodeURIComponent(q)}`}
@@ -49,6 +54,7 @@ export default function IndicatorCommentary({ reading, code }: { reading: Indica
           </Link>
         ))}
       </div>
+      )}
     </div>
   );
 }

@@ -128,6 +128,8 @@ export interface FinancialsData {
     cours_bas_52s: number | null;
     cours_haut_52s: number | null;
   } | null;
+  /** Clôtures récentes (≈ 300 séances), pour la plage 52 semaines en jours calendaires. */
+  serieCours: { date_marche: string; cours_jour: number | null }[];
   incomeStatements: IncomeStatement[];
   balanceSheets: BalanceSheet[];
   cashFlowStatements: CashFlowStatement[];
