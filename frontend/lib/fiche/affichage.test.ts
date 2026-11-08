@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
-  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite,
+  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite, bpaAffichable,
 } from './affichage';
 
 const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
@@ -115,4 +115,14 @@ describe('libellePenalite', () => {
     expect(libellePenalite(0)).toBeNull();
     expect(libellePenalite(null)).toBeNull();
   });
+});
+
+describe('bpaAffichable', () => {
+  it('résultat net ÷ titres, 2 décimales (STAC)', () => expect(bpaAffichable(-96.6e6, 13.45e6)).toEqual({ valeur: -7.18, motif: null }));
+  it('bénéfice', () => expect(bpaAffichable(1000, 100)).toEqual({ valeur: 10, motif: null }));
+  it('titres absents ou nuls', () => {
+    expect(bpaAffichable(1000, null).valeur).toBeNull();
+    expect(bpaAffichable(1000, 0).valeur).toBeNull();
+  });
+  it('résultat absent', () => expect(bpaAffichable(null, 100)).toEqual({ valeur: null, motif: 'non disponible' }));
 });

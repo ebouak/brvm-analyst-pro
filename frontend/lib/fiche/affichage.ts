@@ -11,6 +11,12 @@ export function perAffichable(per: number | null, bpa: number | null): Affichabl
   return { valeur: per, motif: null };
 }
 
+/** BPA, source unique : résultat net ÷ nombre de titres, arrondi à 2 décimales. */
+export function bpaAffichable(resultatNet: number | null, titres: number | null): Affichable {
+  if (resultatNet == null || titres == null || !(titres > 0)) return { valeur: null, motif: 'non disponible' };
+  return { valeur: Math.round((resultatNet / titres) * 100) / 100, motif: null };
+}
+
 export function distributionAffichable(payout: number | null, resultatNet: number | null): Affichable {
   if (resultatNet != null && resultatNet <= 0) return { valeur: null, motif: 'sans objet, perte' };
   if (payout == null) return { valeur: null, motif: 'non disponible' };
