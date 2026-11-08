@@ -1,5 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { traduireNote, traduireRaison, chaineGardeFous } from './quantTextes';
+import { traduireNote, traduireRaison, chaineGardeFous, resumeGardeFous } from './quantTextes';
+
+describe('resumeGardeFous', () => {
+  it('STAC : seule la pénalité de risque est retirée du score', () => {
+    const c = chaineGardeFous([{ code: 'LIQ', points: 15 }, { code: 'VOL', points: 10 }, { code: 'RISK', points: 20 }], null);
+    expect(resumeGardeFous(c)).toBe('Pénalité de risque −20 pts retirée du score (plafond 25) · liquidité et volatilité (−25 pts) déjà déduites du pilier Momentum');
+  });
+  it('sans garde-fou', () => {
+    expect(resumeGardeFous(null)).toBeNull();
+  });
+  it('plafond atteint', () => {
+    const c = chaineGardeFous([{ code: 'RISK', points: 30 }], null);
+    expect(resumeGardeFous(c)).toBe('Pénalité de risque −25 pts retirée du score (plafond 25 atteint)');
+  });
+});
 
 describe('traduireNote', () => {
   it.each([

@@ -36,6 +36,7 @@ import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResulta
 import { plageSurFenetre, plageSeance } from '@/lib/fiche/plages';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
+import { chaineGardeFous, resumeGardeFous } from '@/lib/fiche/quantTextes';
 import { libelleSignal } from '@/lib/signalLabel';
 import { Chapitre } from '@/components/fiche/Chapitre';
 import { Essentiel, type CarteEssentiel } from '@/components/fiche/Essentiel';
@@ -1420,6 +1421,9 @@ export default async function InstrumentPage({
           piliers={combinedAlpha?.piliers ?? []}
           penalite={combinedAlpha?.penalite ?? null}
           penaliteAppliquee={decompositionCA?.penalite ?? null}
+          resumePenalite={combinedAlphaRow && Array.isArray(combinedAlphaRow.penalties_json)
+            ? resumeGardeFous(chaineGardeFous(combinedAlphaRow.penalties_json as { code: string; points: number }[], decompositionCA))
+            : null}
           calculeLe={combinedAlpha?.calculeLe ?? null}
           derniereSeance={last.date_marche}
         />

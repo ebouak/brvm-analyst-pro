@@ -61,6 +61,18 @@ export interface ChaineGardeFous {
  * Chaîne de calcul des garde-fous. Règle lue dans lib/quant : LIQ et VOL sont déduits du score
  * Momentum ; RISK est retiré de la somme pondérée, plafonné à 25. `appliquee` vient de decomposerScore.
  */
+/** Une phrase, identique sur la fiche et la page Quant : ce qui est retiré du score, ce qui l'est déjà du Momentum. */
+export function resumeGardeFous(c: ChaineGardeFous | null): string | null {
+  if (!c) return null;
+  const morceaux: string[] = [];
+  if (c.risque > 0) {
+    const retire = Math.min(c.risque, c.plafond);
+    morceaux.push(`Pénalité de risque −${retire} pts retirée du score (plafond ${c.plafond}${c.risquePlafonne ? ' atteint' : ''})`);
+  }
+  if (c.dansMomentum > 0) morceaux.push(`liquidité et volatilité (−${c.dansMomentum} pts) déjà déduites du pilier Momentum`);
+  return morceaux.length ? morceaux.join(' · ') : null;
+}
+
 export function chaineGardeFous(penalites: { code: string; points: number }[], decomposition: Decomposition | null): ChaineGardeFous | null {
   if (penalites.length === 0) return null;
   const total = penalites.reduce((a, p) => a + p.points, 0);

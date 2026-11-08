@@ -12,9 +12,12 @@ interface Props {
   penaliteAppliquee?: number | null;
   calculeLe: string | null;
   derniereSeance: string;
+  /** Phrase des garde-fous, même source que la page Quant (resumeGardeFous). Prioritaire sur le calcul local. */
+  resumePenalite?: string | null;
 }
 
-export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, penaliteAppliquee, calculeLe, derniereSeance }: Props) {
+export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, penaliteAppliquee, calculeLe, derniereSeance, resumePenalite }: Props) {
+  const lignePenalite = resumePenalite ?? libellePenalite(penalite, penaliteAppliquee);
   const anterieur = calculeLe != null && calculeLe < derniereSeance;
   return (
     <section aria-labelledby="t-ca" className="rounded-card border border-border bg-surface p-5 md:p-6">
@@ -45,7 +48,7 @@ export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, penal
             ))}
           </div>
           <p className="mt-2 text-[11px] text-faint">Repères à 50 et 65.</p>
-          {libellePenalite(penalite, penaliteAppliquee) && <p className="mt-2 text-xs text-muted">{libellePenalite(penalite, penaliteAppliquee)}</p>}
+          {lignePenalite && <p className="mt-2 text-xs text-muted">{lignePenalite}</p>}
         </>
       )}
       {calculeLe && (
