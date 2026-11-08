@@ -35,6 +35,9 @@ import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResulta
 import { plageSurFenetre, plageSeance } from '@/lib/fiche/plages';
 import { exerciceRetenu, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
 import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { comptesIfrs } from '@/lib/fiche/comptesIfrs';
+import { chargerComptesIfrs } from '@/lib/fiche/comptesIfrsServeur';
+import ComptesIfrs from '@/components/fiche/ComptesIfrs';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
@@ -435,6 +438,15 @@ export default async function InstrumentPage({
     capitalisation: capitalisationBrute,
   });
   const mentionJeu = mentionSecondJeu(retenu.secondJeu);
+  // Comptes IFRS du même exercice, s'ils sont publiés : en regard, jamais à la place des SYSCOHADA.
+  const comparatifIfrs = retenu.source === 'syscohada'
+    ? comptesIfrs({
+      ligne: await chargerComptesIfrs(createClient(), code, retenu.exercice),
+      exercice: retenu.exercice,
+      syscohada: { resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires, capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere },
+      cours: last.cours_jour ?? null, titres: shares, capitalisation: capitalisationBrute,
+    })
+    : null;
 
   // Volume moyen 20j
   const recentVols = rows.slice(-20).map((r) => r.volume).filter((v): v is number => v != null);
@@ -1294,6 +1306,7 @@ export default async function InstrumentPage({
                 sansPlage52
                 sansAlertePerte
               />
+              {comparatifIfrs && <ComptesIfrs c={comparatifIfrs} />}
 
               {/* Constructeur de graphique replié sous le graphique CA / résultat net */}
               {chartRows.length >= 2 && (
