@@ -437,6 +437,46 @@ export default async function InstrumentPage({
     .order('captured_at', { ascending: true });
   const instantanes = ((snapRows ?? []) as { captured_at: string; close: number | null; volume: number | null }[]).filter((s) => s.close != null && s.close > 0);
 
+  // Combined Alpha : même lecture que /actions/[code]/quant (dernier run WB_COMBINED_ALPHA).
+  const { data: runCA } = await liqDailyClient
+    .from('quant_model_runs')
+    .select('id')
+    .eq('model_code', 'WB_COMBINED_ALPHA')
+    .order('calculation_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const { data: scoresCA } = runCA
+    ? await liqDailyClient
+        .from('quant_model_scores')
+        .select('*')
+        .eq('security_id', code)
+        .eq('run_id', (runCA as { id: string }).id)
+        .order('score_date', { ascending: false })
+        .limit(1)
+    : { data: null };
+  const combinedAlphaRow = ((scoresCA as unknown[] | null)?.[0] ?? null) as {
+    combined_alpha_score: number | null; price_momentum_score: number | null; value_score: number | null;
+    earnings_quality_score: number | null; financial_strength_score: number | null; dividend_quality_score: number | null;
+    penalties_json: unknown; score_date: string; rank_global: number | null;
+  } | null;
+  const combinedAlpha = combinedAlphaRow
+    ? {
+        score: combinedAlphaRow.combined_alpha_score,
+        rang: combinedAlphaRow.rank_global,
+        piliers: [
+          { libelle: 'Valorisation', valeur: combinedAlphaRow.value_score },
+          { libelle: 'Momentum', valeur: combinedAlphaRow.price_momentum_score },
+          { libelle: 'Qualité bénéficiaire', valeur: combinedAlphaRow.earnings_quality_score },
+          { libelle: 'Solidité financière', valeur: combinedAlphaRow.financial_strength_score },
+          { libelle: 'Dividende', valeur: combinedAlphaRow.dividend_quality_score },
+        ],
+        penalite: Array.isArray(combinedAlphaRow.penalties_json)
+          ? (combinedAlphaRow.penalties_json as { points: number }[]).reduce((t, x) => t + (x.points ?? 0), 0)
+          : null,
+        calculeLe: combinedAlphaRow.score_date,
+      }
+    : null;
+
   // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
   // de celle des cours, le bulletin paraissant après la clôture.
   const { data: carnetRow } = await liqDailyClient
