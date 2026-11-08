@@ -207,7 +207,7 @@ async function getData(code: string, fromDate?: string) {
         .select('id, date_publication, libelle, type_publication, source_url')
         .eq('code', code)
         .order('date_publication', { ascending: false })
-        .limit(50),
+        .limit(300),
       supabase
         .from('publications')
         .select('*', { count: 'exact', head: true })
