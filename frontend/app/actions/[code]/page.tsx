@@ -32,7 +32,7 @@ import { VerdictBand } from '@/components/actions/VerdictBand';
 import { FicheStickyNav } from '@/components/actions/FicheStickyNav';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
-import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, formatRendementDividende, insecable, libelleEvenement } from '@/lib/fiche/affichage';
+import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, formatRendementDividende, rendementDividendeParts, nombreFr, pctFr, insecable, libelleEvenement } from '@/lib/fiche/affichage';
 import { plageSurFenetre, plageSeance } from '@/lib/fiche/plages';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
@@ -926,7 +926,7 @@ export default async function InstrumentPage({
                   <div className="flex items-center gap-1.5 flex-wrap shrink-0">
                     {pays && <StatPill tone="neutral">{pays}</StatPill>}
                     {secteur && <StatPill tone="sapphire">{secteur}</StatPill>}
-                    {divYield != null && <StatPill tone="gold">Rdt {divYieldTexte(divYield)}</StatPill>}
+                    {divYield != null && <StatPill tone="gold"><span className="whitespace-nowrap">Rdt {divYieldTexte(divYield)}</span></StatPill>}
                   </div>
                 </div>
 
@@ -940,7 +940,7 @@ export default async function InstrumentPage({
                     <span className={`tabular font-mono text-base font-semibold mb-1 ${up ? 'text-up' : 'text-down'}`}>
                       {up ? '+' : ''}{fmtNumber(varAbs)}{' '}
                       <span className="text-sm opacity-80">
-                        ({up ? '+' : ''}{(last.variation_pct ?? 0).toFixed(2)}%)
+                        ({pctFr(last.variation_pct ?? 0, 2, true)})
                       </span>
                     </span>
                   )}
@@ -996,7 +996,7 @@ export default async function InstrumentPage({
               {volMoyen != null && <SessionMetric label="Vol. moyen 20j" value={fmtNumber(volMoyen)} unit="titres" />}
               <SessionMetric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
               <SessionMetric label="Transactions" value={fmtNumber(last.nb_transactions)} />
-              {last.beta_1an != null && <SessionMetric label="Beta 1 an" value={last.beta_1an.toFixed(2)} />}
+              {last.beta_1an != null && <SessionMetric label="Beta 1 an" value={nombreFr(last.beta_1an, 2)} />}
               {capitalisation != null && <SessionMetric label="Capitalisation" value={fmtNumber(Math.round(capitalisation))} unit="MFCFA" accent />}
               {shares != null && <SessionMetric label="Titres totaux" value={fmtNumber(shares)} />}
               {instrument?.flottant != null && (
@@ -1006,8 +1006,8 @@ export default async function InstrumentPage({
                   unit={flottantPct != null ? `${fmtNumber(flottantPct, 1)} %` : undefined}
                 />
               )}
-              {divYield != null && <SessionMetric label={divDejaNet ? 'Rdt dividende net' : 'Rdt dividende'} value={divYieldTexte(divYield) ?? '—'} accent />}
-              {divYieldNet != null && <SessionMetric label="Rdt net d'IRVM" value={divYieldTexte(divYieldNet) ?? '—'} />}
+              {divYield != null && <SessionMetric label={divDejaNet ? 'Rdt dividende net' : 'Rdt dividende'} value={rendementDividendeParts(divYield, divExercice)?.valeur ?? '—'} unit={rendementDividendeParts(divYield, divExercice)?.exercice ?? undefined} accent />}
+              {divYieldNet != null && <SessionMetric label="Rdt net d'IRVM" value={rendementDividendeParts(divYieldNet, divExercice)?.valeur ?? '—'} unit={rendementDividendeParts(divYieldNet, divExercice)?.exercice ?? undefined} />}
             </div>
           </div>
         </div>
@@ -1303,7 +1303,7 @@ export default async function InstrumentPage({
                 </div>
               ))}
               {evolutionTexte && (
-                <div className="flex items-center justify-between py-2 text-xs">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 py-2 text-xs">
                   <dt className="text-muted">Évolution du résultat net{exPrecedent?.year != null ? ` (vs ${exPrecedent.year})` : ''}</dt>
                   <dd className="text-ivory">{insecable(evolutionTexte)}</dd>
                 </div>
@@ -1319,7 +1319,7 @@ export default async function InstrumentPage({
           <div id="valorisation" className="scroll-mt-24">
             <Eyebrow className="mb-3">Valorisation</Eyebrow>
             {gateValo.allowed ? (
-              <ValuationPanel v={valuation} scoring={scoring} rendementDividende={{ pct: divYield, exercice: divCourant?.exercice ?? null }} />
+              <ValuationPanel v={valuation} scoring={scoring} rendementDividende={{ pct: divYield, exercice: divCourant?.exercice ?? null }} masquerRationale />
             ) : (
               <SectionLock
                 required={gateValo.required === 'free' ? 'premium' : gateValo.required}
@@ -1341,11 +1341,12 @@ export default async function InstrumentPage({
                   <div>
                     {divYield != null && (
                       <div className="mb-4 flex flex-wrap items-baseline gap-2">
-                        <span className="tabular font-mono text-3xl font-bold text-up leading-none">
-                          {divYieldTexte(divYield)}
+                        <span className="tabular font-mono text-3xl font-bold text-ivory leading-none whitespace-nowrap">
+                          {rendementDividendeParts(divYield, divExercice)?.valeur}
                         </span>
                         <span className="text-xs text-muted">
                           {divDejaNet ? "rendement estimé, net d'IRVM" : 'rendement estimé'}
+                          {divExercice != null && <span className="block text-faint">ex. {divExercice}</span>}
                         </span>
                       </div>
                     )}
@@ -1522,7 +1523,7 @@ function IndicateursActuels({
         <div className="flex items-center justify-between text-xs mb-2">
           <span className="text-muted">RSI (14)</span>
           <span className={`tabular font-semibold font-mono ${rsi == null ? 'text-faint' : rsi < 30 ? 'text-up' : rsi > 70 ? 'text-down' : 'text-ivory'}`}>
-            {rsi != null ? rsi.toFixed(0) : '—'}
+            {nombreFr(rsi, 0)}
           </span>
         </div>
         <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
@@ -1560,11 +1561,11 @@ function IndicateursActuels({
         {macd ? (
           <>
             <div className="grid grid-cols-3 gap-2 text-xs text-center">
-              <MacdCell label="Ligne" value={macd.macd?.toFixed(0) ?? '—'} />
-              <MacdCell label="Signal" value={macd.signal?.toFixed(0) ?? '—'} />
+              <MacdCell label="Ligne" value={nombreFr(macd.macd, 0)} />
+              <MacdCell label="Signal" value={nombreFr(macd.signal, 0)} />
               <MacdCell
                 label="Histog."
-                value={macd.hist != null ? (macd.hist >= 0 ? '+' : '') + macd.hist.toFixed(0) : '—'}
+                value={macd.hist != null && macd.hist >= 0 ? '+' + nombreFr(macd.hist, 0) : nombreFr(macd.hist, 0)}
                 accent={(macd.hist ?? 0) >= 0 ? 'up' : 'down'}
               />
             </div>
@@ -1587,7 +1588,7 @@ function PositionLecture({ ctx }: { ctx: { held: boolean; pru: number | null; la
           <div className="flex items-baseline justify-between">
             <span className="text-xs text-muted">Plus-value latente</span>
             <span className={`tabular text-sm font-semibold ${(ctx.latentPnlPct ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
-              {ctx.latentPnlPct != null ? `${ctx.latentPnlPct >= 0 ? '+' : ''}${ctx.latentPnlPct.toFixed(1)}%` : '—'}
+              {pctFr(ctx.latentPnlPct, 1, true)}
             </span>
           </div>
           {ctx.pru != null && (
@@ -1622,8 +1623,8 @@ function SessionMetric({
   return (
     <div className="py-0.5">
       <p className="text-xs text-faint mb-1">{label}</p>
-      <div className="flex items-baseline gap-1">
-        <span className={`tabular font-mono text-sm font-semibold leading-tight ${accent ? 'text-accent-ink' : 'text-ivory'}`}>
+      <div className="flex flex-wrap items-baseline gap-x-1">
+        <span className={`tabular font-mono text-sm font-semibold leading-tight whitespace-nowrap ${accent ? 'text-accent-ink' : 'text-ivory'}`}>
           {value}
         </span>
         {unit && <span className="text-[11px] text-faint">{unit}</span>}
@@ -1688,9 +1689,9 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
           <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           <span className="ml-auto tabular text-[11px] text-faint font-mono">
             {signal.score_total != null
-              ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2)
+              ? (signal.score_total >= 0 ? '+' : '') + nombreFr(signal.score_total, 2)
               : '—'}
-            {' / 1.00 · dernière séance scorée '}{fmtDateCourte(signal.date_marche)}
+            {' / 1,00 · dernière séance scorée '}{fmtDateCourte(signal.date_marche)}
           </span>
         </div>
 
@@ -1723,7 +1724,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
                         (val as number) >= 0 ? 'text-up' : 'text-down'
                       }`}
                     >
-                      {(val as number) >= 0 ? '+' : ''}{(val as number).toFixed(2)}
+                      {(val as number) >= 0 ? '+' : ''}{nombreFr(val as number, 2)}
                     </span>
                   </div>
                 ))}
@@ -1743,7 +1744,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
                   <div key={k} className="flex items-center justify-between text-xs">
                     <span className="text-muted font-mono">{k}</span>
                     <span className="tabular font-mono text-faint">
-                      {typeof v === 'number' ? v.toFixed(3) : String(v)}
+                      {typeof v === 'number' ? nombreFr(v, 3) : String(v)}
                     </span>
                   </div>
                 ))}

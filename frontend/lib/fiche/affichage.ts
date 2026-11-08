@@ -145,6 +145,34 @@ export function formatRendementDividende(pct: number | null, exercice: number | 
   return `${nf(pct, 2)} %${exercice != null ? ` (ex. ${exercice})` : ''}`;
 }
 
+/** Même rendement, mais valeur et exercice séparés : l'exercice se pose sur sa propre ligne, sans casser « 3,39 % ». */
+export function rendementDividendeParts(pct: number | null, exercice: number | null): { valeur: string; exercice: string | null } | null {
+  if (pct == null || !Number.isFinite(pct)) return null;
+  return { valeur: `${nf(pct, 2)} %`, exercice: exercice != null ? `ex. ${exercice}` : null };
+}
+
+/** Nombre au format français (virgule, moins typographique) ; « — » si absent. */
+export function nombreFr(x: number | null | undefined, d = 2): string {
+  if (x == null || !Number.isFinite(x)) return '—';
+  return moins(nf(x, d));
+}
+
+/** Pourcentage au format français, espace insécable avant « % » ; `signe` ajoute « + » aux valeurs positives. */
+export function pctFr(x: number | null | undefined, d = 2, signe = false): string {
+  if (x == null || !Number.isFinite(x)) return '—';
+  const r = Number(x.toFixed(d));
+  return `${signe && r > 0 ? '+' : ''}${moins(nf(x, d))} %`;
+}
+
+const MOIS_COURTS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+/** « 2025-05-21 » → « mai 25 » : graduation d'axe qui porte l'année. */
+export function moisAnnee(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-\d{2}/.exec(iso);
+  const mois = m ? MOIS_COURTS[Number(m[2]) - 1] : undefined;
+  return m && mois ? `${mois} ${m[1]!.slice(2)}` : iso;
+}
+
 /** Lie un nombre à son unité (M, Md, FCFA, %) pour qu'une unité ne tombe jamais seule en début de ligne. */
 export function insecable(texte: string): string {
   return texte.replace(/(\d) (?=(?:Md|M|k|FCFA|%))/g, '$1 ').replace(/( (?:Md|M|k)) (?=FCFA)/g, '$1 ');

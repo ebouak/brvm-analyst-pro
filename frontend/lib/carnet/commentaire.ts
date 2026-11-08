@@ -412,7 +412,7 @@ export function commenterSeance(entree: {
     constats.push({
       origine: 'signal',
       fait: estHold
-        ? `Sur la séance du ${jour(signal.date_marche)}, la lecture technique reste neutre.${positionScore}`
+        ? `Sur la séance du ${jour(signal.date_marche)}, la lecture technique reste en attente (score entre les seuils).${positionScore}`
         : `Sur la séance du ${jour(signal.date_marche)}, la lecture technique donne un signal ${signal.signal === 'BUY' ? "d'achat" : signal.signal === 'SELL' ? 'de vente' : signal.signal}.${positionScore}`,
       portee: facteursEtConfiance(signal, estHold),
     });
@@ -617,16 +617,16 @@ function facteursEtConfiance(signal: SignalSeance, estHold: boolean): string | u
   // l'air unanime — et n'a aucun moyen de trancher.
   const divergents = div?.divergent === true;
   if (estHold && divergents && div) {
-    morceaux.push(`Elle reste neutre car ses facteurs s'opposent : ${et(div.hausse)} ${div.hausse.length > 1 ? 'tirent' : 'tire'} à la hausse, ${et(div.baisse)} à la baisse.`);
+    morceaux.push(`Elle reste en attente car ses facteurs s'opposent : ${et(div.hausse)} ${div.hausse.length > 1 ? 'tirent' : 'tire'} à la hausse, ${et(div.baisse)} à la baisse.`);
     if (facteurs) morceaux.push(`Facteurs retenus : ${facteurs}.`);
   } else if (facteurs) {
     // Sans sous-scores, ou sans opposition constatée, aucune contradiction
     // n'est affirmée : on énonce les facteurs, c'est tout.
     morceaux.push(estHold
-      ? `Elle reste neutre : aucun facteur ne l'emporte nettement. Facteurs retenus : ${facteurs}.`
+      ? `Elle reste en attente : aucun facteur ne l'emporte nettement. Facteurs retenus : ${facteurs}.`
       : `Facteurs retenus : ${facteurs}.`);
   } else if (estHold) {
-    morceaux.push("Elle reste neutre : aucun facteur ne l'emporte nettement.");
+    morceaux.push("Elle reste en attente : aucun facteur ne l'emporte nettement.");
   }
 
   const c = signal.confiance;
@@ -701,7 +701,7 @@ function synthetiser(e: {
   } else if (e.seanceOrdinaire === false) {
     parties.push("La séance sort de l'ordinaire par son ampleur.");
   } else if (rienAuCarnet && rienEnTechnique) {
-    parties.push("Séance sans fait notable : les ordres restés en carnet sont trop faibles pour être significatifs et la lecture technique reste neutre.");
+    parties.push("Séance sans fait notable : les ordres restés en carnet sont trop faibles pour être significatifs et la lecture technique reste en attente (score entre les seuils).");
     techniqueDeja = true;
   } else if (rienAuCarnet) {
     parties.push("Les ordres restés en carnet sont trop faibles pour être significatifs : l'écart entre acheteurs et vendeurs porte sur des montants marginaux.");
@@ -716,7 +716,7 @@ function synthetiser(e: {
       ? `Les ordres restés en carnet penchent côté ${e.carnetPenche}, et la lecture technique va dans le même sens. Les deux concordent sans se confirmer : elles ne mesurent pas la même chose.`
       : `Les ordres restés en carnet penchent côté ${e.carnetPenche}, la lecture technique vers la ${e.signalPenche} : les deux divergent, et rien ne permet ici de les départager.`);
   } else if (e.signalPenche === 'aucun') {
-    parties.push('La lecture technique reste neutre.');
+    parties.push('La lecture technique reste en attente (score entre les seuils).');
   } else if (e.signalPenche) {
     parties.push(`La lecture technique penche vers la ${e.signalPenche}, sans donner de signal.`);
   }

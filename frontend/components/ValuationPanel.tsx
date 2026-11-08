@@ -1,4 +1,4 @@
-import { formatRendementDividende } from '@/lib/fiche/affichage';
+import { rendementDividendeParts, nombreFr, pctFr } from '@/lib/fiche/affichage';
 import type { CompanyValuation } from '@/lib/valuation/server';
 import type { CompanyScoring } from '@/lib/scoring/server';
 import type { AltmanZone } from '@/lib/scoring/altman';
@@ -6,10 +6,10 @@ import { fmtFcfa } from '@/lib/format';
 
 function pct(v: number | null, d = 0): string {
   if (v == null) return '—';
-  return `${v >= 0 ? '+' : ''}${(v * 100).toFixed(d)}%`;
+  return pctFr(v * 100, d, true);
 }
 function num(v: number | null, d = 2): string {
-  return v == null ? '—' : v.toFixed(d);
+  return nombreFr(v, d);
 }
 
 const STANCE_STYLE: Record<CompanyValuation['verdict']['stance'], string> = {
@@ -27,7 +27,7 @@ const ZONE_STYLE: Record<AltmanZone, { txt: string; cls: string }> = {
 
 /** Bloc valorisation fondamentale d'une société (fiche premium). */
 /** `rendementDividende` : rendement déjà calculé par la fiche (même source que le bloc dividendes), en %, avec son exercice. */
-export default function ValuationPanel({ v, scoring, rendementDividende }: { v: CompanyValuation; scoring?: CompanyScoring | null; rendementDividende?: { pct: number | null; exercice: number | null } | null }) {
+export default function ValuationPanel({ v, scoring, rendementDividende, masquerRationale }: { v: CompanyValuation; scoring?: CompanyScoring | null; masquerRationale?: boolean; rendementDividende?: { pct: number | null; exercice: number | null } | null }) {
   const { metrics: m, fairValue: fv, quality: q, verdict } = v;
 
   const ratios: { label: string; value: string; note?: string }[] = [
@@ -37,10 +37,10 @@ export default function ValuationPanel({ v, scoring, rendementDividende }: { v: 
     { label: 'Marge nette', value: pct(m.netMargin, 1) },
     { label: 'Dette/FP', value: num(m.debtToEquity, 2) },
     rendementDividende !== undefined
-      ? {
-          label: 'Rdt dividende',
-          value: formatRendementDividende(rendementDividende?.pct ?? null, rendementDividende?.exercice ?? null) ?? '—',
-        }
+      ? (() => {
+          const p = rendementDividendeParts(rendementDividende?.pct ?? null, rendementDividende?.exercice ?? null);
+          return { label: 'Rdt dividende', value: p?.valeur ?? '—', note: p?.exercice ?? undefined };
+        })()
       : { label: 'Rdt dividende', value: pct(m.dividendYield, 1) },
   ];
 
@@ -69,7 +69,7 @@ export default function ValuationPanel({ v, scoring, rendementDividende }: { v: 
           {ratios.map((r) => (
             <div key={r.label} className="rounded-lg bg-bg/40 border border-border/60 p-2.5 text-center">
               <div className="text-[11px] text-muted">{r.label}</div>
-              <div className="tabular text-sm font-mono font-semibold text-ivory mt-0.5">{r.value}</div>
+              <div className="tabular text-sm font-mono font-semibold text-ivory mt-0.5 whitespace-nowrap">{r.value}</div>
               {r.note && <div className="text-[11px] text-faint">{r.note}</div>}
             </div>
           ))}
@@ -110,13 +110,13 @@ export default function ValuationPanel({ v, scoring, rendementDividende }: { v: 
 
         {/* Verdict détaillé */}
         <div className="border-t border-border/30 pt-4 space-y-2">
-          <ul className="space-y-1">
+          {!masquerRationale && <ul className="space-y-1">
             {verdict.rationale.map((p, i) => (
               <li key={i} className="flex items-start gap-2 text-xs text-muted leading-relaxed">
                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-faint" /><span>{p}</span>
               </li>
             ))}
-          </ul>
+          </ul>}
           {verdict.cautions.map((c, i) => (
             <p key={i} className="flex items-start gap-2 text-xs text-warn"><span>!</span><span>{c}</span></p>
           ))}

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
-  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite, bpaAffichable, formatRendementDividende, insecable, libelleEvenement,
+  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, evolutionResultatDetail, syntheseExercice, titrePublication, libellePenalite, bpaAffichable, formatRendementDividende, rendementDividendeParts, nombreFr, pctFr, moisAnnee, insecable, libelleEvenement,
 } from './affichage';
 
 const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
@@ -143,6 +143,38 @@ describe('formatRendementDividende', () => {
   it('sans exercice', () => expect(sp(formatRendementDividende(3.3897, null))).toBe('3,39 %'));
   it('absent', () => expect(formatRendementDividende(null, 2021)).toBeNull());
   it('espace insécable avant le pourcent', () => expect(formatRendementDividende(1, null)).toBe('1,00 %'));
+});
+
+describe('rendementDividendeParts', () => {
+  it('sépare la valeur et l exercice', () => {
+    const r = rendementDividendeParts(3.3897, 2021)!;
+    expect(sp(r.valeur)).toBe('3,39 %');
+    expect(r.exercice).toBe('ex. 2021');
+  });
+  it('sans exercice', () => expect(rendementDividendeParts(3.3897, null)?.exercice).toBeNull());
+  it('absent', () => expect(rendementDividendeParts(null, 2021)).toBeNull());
+});
+
+describe('nombreFr / pctFr', () => {
+  it('virgule décimale et moins typographique', () => {
+    expect(nombreFr(73.46, 2)).toBe('73,46');
+    expect(nombreFr(-27.1, 1)).toBe('−27,1');
+    expect(nombreFr(null)).toBe('—');
+  });
+  it('pourcentage avec espace insécable, signe facultatif', () => {
+    expect(sp(pctFr(5.41, 2, true))).toBe('+5,41 %');
+    expect(sp(pctFr(-27.1, 1))).toBe('−27,1 %');
+    expect(pctFr(1.78, 2)).toBe('1,78 %');
+  });
+});
+
+describe('moisAnnee', () => {
+  it('mois court + année sur 2 chiffres', () => {
+    expect(moisAnnee('2025-05-21')).toBe('mai 25');
+    expect(moisAnnee('2026-08-29')).toBe('août 26');
+    expect(moisAnnee('2026-01-03')).toBe('janv. 26');
+  });
+  it('date invalide : renvoyée telle quelle', () => expect(moisAnnee('n/a')).toBe('n/a'));
 });
 
 describe('insecable', () => {

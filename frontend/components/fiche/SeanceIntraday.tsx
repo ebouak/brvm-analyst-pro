@@ -1,6 +1,7 @@
+import { fmtNumber } from '@/lib/format';
 import { reperesHoraires, reperesPrix, heureReleve } from '@/lib/fiche/seance';
 
-const DEBUT = 9 * 60 + 15, FIN = 15 * 60 + 45, W = 520, H = 150;
+const DEBUT = 9 * 60 + 15, FIN = 15 * 60 + 45, W = 520, H = 150, VH = 40;
 
 export function SeanceIntraday({ points, plusBasPublie }: { points: { captured_at: string; close: number | null; volume: number | null }[]; plusBasPublie: number | null }) {
   const brut = [...points]
@@ -26,27 +27,41 @@ export function SeanceIntraday({ points, plusBasPublie }: { points: { captured_a
   const dernierReleve = heureReleve(points.map((p) => p.captured_at).sort().at(-1) ?? '');
   const hausse = pts[pts.length - 1]!.c >= pts[0]!.c;
   const couleur = hausse ? 'var(--color-up)' : 'var(--color-down)';
+  // Le tracé seul est dans le SVG (étiré, traits non redimensionnés) ; prix et heures sont en HTML
+  // positionné : ils gardent 11 px à toute largeur au lieu de suivre l'échelle du viewBox.
+  const pct = (v: number, t: number) => `${(v / t) * 100}%`;
+  const reperes = reperesHoraires();
   return (
     <figure className="rounded-card border border-border bg-surface px-5 pb-3.5 pt-5">
       <figcaption className="text-xs text-faint">Séance du jour · cours et volume par intervalle de 15 minutes{dernierReleve ? `, dernier relevé à ${dernierReleve}` : ''}</figcaption>
-      <svg viewBox={`-4 -10 ${W + 64} 226`} className="mt-3 block h-auto w-full" role="img" aria-label={`Séance : de ${pts[0]!.c} à ${pts[pts.length - 1]!.c}, plus bas relevé ${min}, plus haut relevé ${max}`}>
-        <path d={`${d} V${H} H0 Z`} style={{ fill: `rgb(${couleur} / 0.1)` }} />
-        <path d={d} fill="none" strokeWidth={2.5} style={{ stroke: `rgb(${couleur})` }} />
-        {reperesPrix(min, max).map((r) => (
-          <g key={r.valeur}>
-            <line x1={0} x2={W} y1={y(r.valeur)} y2={y(r.valeur)} strokeDasharray="2 4" strokeWidth={1} style={{ stroke: 'rgb(var(--color-border))' }} />
-            <text x={W + 6} y={y(r.valeur) + 4} fontSize={11} className="tabular" style={{ fill: 'rgb(var(--color-faint))' }}>{r.valeur.toLocaleString('fr-FR')}</text>
-          </g>
-        ))}
-        {reperesHoraires().map((r, i, a) => (
-          <text key={r.m} x={x(r.m)} y={H + 58} fontSize={11} textAnchor={i === 0 ? 'start' : i === a.length - 1 ? 'end' : 'middle'} className="tabular" style={{ fill: 'rgb(var(--color-faint))' }}>{r.libelle}</text>
-        ))}
-        <g transform={`translate(0,${H + 40})`}>
-          {barres.map((b, i) => <rect key={i} x={b.x - 3} y={-(b.v / vmax) * 40} width={6} height={(b.v / vmax) * 40} style={{ fill: 'rgb(var(--color-border-strong))' }} />)}
-        </g>
-      </svg>
+      <div className="mt-3 flex gap-2" role="img" aria-label={`Séance : de ${pts[0]!.c} à ${pts[pts.length - 1]!.c}, plus bas relevé ${min}, plus haut relevé ${max}`}>
+        <div className="min-w-0 flex-1">
+          <svg viewBox={`0 0 ${W} ${H + VH + 6}`} preserveAspectRatio="none" className="block h-[190px] w-full overflow-visible">
+            <path d={`${d} V${H} H0 Z`} style={{ fill: `rgb(${couleur} / 0.1)` }} />
+            <path d={d} fill="none" strokeWidth={2.5} vectorEffect="non-scaling-stroke" style={{ stroke: `rgb(${couleur})` }} />
+            {reperesPrix(min, max).map((r) => (
+              <line key={r.valeur} x1={0} x2={W} y1={y(r.valeur)} y2={y(r.valeur)} strokeDasharray="2 4" strokeWidth={1} vectorEffect="non-scaling-stroke" style={{ stroke: 'rgb(var(--color-border))' }} />
+            ))}
+            <g transform={`translate(0,${H + VH + 6})`}>
+              {barres.map((b, i) => <rect key={i} x={b.x - 3} y={-(b.v / vmax) * VH} width={6} height={(b.v / vmax) * VH} style={{ fill: 'rgb(var(--color-border-strong))' }} />)}
+            </g>
+          </svg>
+          <div className="relative mt-1 h-4">
+            {reperes.map((r, i, a) => (
+              <span key={r.m} className="tabular absolute whitespace-nowrap text-[11px] text-faint"
+                style={{ left: pct(x(r.m), W), transform: i === 0 ? 'none' : i === a.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)' }}>{r.libelle}</span>
+            ))}
+          </div>
+        </div>
+        <div className="relative h-[190px] w-14 shrink-0">
+          {reperesPrix(min, max).map((r) => (
+            <span key={r.valeur} className="tabular absolute left-0 -translate-y-1/2 whitespace-nowrap text-[11px] text-faint"
+              style={{ top: pct(y(r.valeur), H + VH + 6) }}>{fmtNumber(r.valeur)}</span>
+          ))}
+        </div>
+      </div>
       {plusBasPublie != null && min < plusBasPublie && (
-        <p className="mt-1 text-[11px] text-faint">Plus bas relevé {min} ; la cote publiée indique {plusBasPublie}.</p>
+        <p className="mt-1 text-[11px] text-faint">Plus bas relevé en séance : <span className="tabular">{fmtNumber(min)}</span> · plus bas de la cote publiée : <span className="tabular">{fmtNumber(plusBasPublie)}</span>.</p>
       )}
     </figure>
   );

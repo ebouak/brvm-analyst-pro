@@ -1,4 +1,5 @@
 'use client';
+import { pctFr } from '@/lib/fiche/affichage';
 import { useEffect, useRef, useState } from 'react';
 import {
   createChart,
@@ -682,7 +683,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
             <span
               className={`tabular text-xs font-medium ${varPct >= 0 ? 'text-up' : 'text-down'}`}
             >
-              {varPct >= 0 ? '+' : ''}{varPct.toFixed(2)}%
+              {pctFr(varPct, 2, true)}
             </span>
           )}
         </div>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { chartTheme } from '@/lib/chartTheme';
 import EChart from './EChart';
+import { moisAnnee } from '@/lib/fiche/affichage';
 
 export interface IndicatorPoint {
   date: string;
@@ -28,7 +29,7 @@ export default function IndicatorCharts({ data }: { data: IndicatorPoint[] }) {
     axisLabel: {
       color: T.muted, fontSize: 11, hideOverlap: true,
       interval: Math.max(0, Math.floor(dates.length / (mobile ? 2 : 4))),
-      formatter: (v: string) => (mobile ? `${v.slice(8, 10)}/${v.slice(5, 7)}` : `${v.slice(8, 10)}/${v.slice(5, 7)}/${v.slice(0, 4)}`),
+      formatter: (v: string) => (mobile ? moisAnnee(v) : `${v.slice(8, 10)}/${v.slice(5, 7)}/${v.slice(0, 4)}`),
     },
   };
 
