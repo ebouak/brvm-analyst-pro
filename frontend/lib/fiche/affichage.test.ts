@@ -1,0 +1,69 @@
+import { describe, it, expect } from 'vitest';
+import {
+  perAffichable, distributionAffichable, evolutionResultat, horsExploitation,
+  dividendeCourant, volumeAuDessusMoyenne, ligneVerdict, syntheseExercice, titrePublication,
+} from './affichage';
+
+const sp = (s: string | null) => s?.replace(/ | /g, ' ') ?? null;
+
+describe('perAffichable', () => {
+  it('non calculable si BPA ≤ 0', () => expect(perAffichable(-271.42, -7.18)).toEqual({ valeur: null, motif: 'non calculable, perte' }));
+  it('rend le PER si BPA > 0', () => expect(perAffichable(12.3, 40)).toEqual({ valeur: 12.3, motif: null }));
+});
+
+describe('distributionAffichable', () => {
+  it('sans objet si résultat ≤ 0', () => expect(distributionAffichable(-9.207, -96.6e6)).toEqual({ valeur: null, motif: 'sans objet, perte' }));
+  it('rend la valeur si bénéfice', () => expect(distributionAffichable(0.4, 1e9)).toEqual({ valeur: 0.4, motif: null }));
+});
+
+describe('evolutionResultat', () => {
+  it('perte réduite', () => expect(sp(evolutionResultat(-96.6e6, -348.2e6))).toBe('perte réduite de 72,3 %'));
+  it('perte aggravée', () => expect(sp(evolutionResultat(-200e6, -100e6))).toBe('perte aggravée de 100,0 %'));
+  it('changements de signe', () => {
+    expect(evolutionResultat(10e6, -5e6)).toBe('retour au bénéfice');
+    expect(evolutionResultat(-5e6, 10e6)).toBe('passage en perte');
+  });
+  it('variation signée', () => expect(sp(evolutionResultat(120, 100))).toBe('+20,0 %'));
+  it('null sans exercice précédent', () => expect(evolutionResultat(10, null)).toBeNull());
+});
+
+describe('horsExploitation', () => {
+  it('STAC 2025 : 776,3 M', () => expect(horsExploitation(4.3e6, -772.0e6)).toBeCloseTo(776.3e6, -4));
+  it('null si un terme manque', () => expect(horsExploitation(null, -1)).toBeNull());
+});
+
+describe('dividendeCourant', () => {
+  it('marque ancien un dividende de plus d’un exercice', () => {
+    expect(dividendeCourant([{ montant: 66.15, exercice: 2021, ex_date: null, payment_date: '2022-07-18' }], 2025))
+      .toMatchObject({ montant: 66.15, exercice: 2021, ancien: true });
+  });
+  it('courant', () => expect(dividendeCourant([{ montant: 100, exercice: 2025, ex_date: '2026-06-01', payment_date: null }], 2025)!.ancien).toBe(false));
+  it('ignore les montants nuls', () => expect(dividendeCourant([{ montant: 0, exercice: 2025, ex_date: null, payment_date: null }], 2025)).toBeNull());
+});
+
+describe('volumeAuDessusMoyenne', () => {
+  it('faux à 0,3× (STAC 6 nov.)', () => expect(volumeAuDessusMoyenne(1551, 4782)).toBe(false));
+  it('vrai au-dessus', () => expect(volumeAuDessusMoyenne(5000, 4782)).toBe(true));
+  it('faux sans moyenne', () => expect(volumeAuDessusMoyenne(5000, null)).toBe(false));
+});
+
+describe('ligneVerdict', () => {
+  it('libellé français, score à deux décimales', () => expect(ligneVerdict('HOLD', 0.4412, 5.41)).toBe('Signal Attente · score 0,44. Séance en hausse de 5,41 %.'));
+  it('baisse', () => expect(ligneVerdict('SELL', -0.7, -2)).toBe('Signal Vente · score −0,70. Séance en baisse de 2,00 %.'));
+  it('null sans signal', () => expect(ligneVerdict(null, null, 1)).toBeNull());
+});
+
+describe('syntheseExercice', () => {
+  it('STAC 2025', () => {
+    expect(syntheseExercice({ croissanceCaPct: 116.3, evolution: 'perte réduite de 72,3 %', resultatExploitation: -772e6, horsExpl: 776.3e6 }))
+      .toBe("Le chiffre d'affaires a plus que doublé et la perte se réduit, mais l'exploitation reste déficitaire et le résultat dépend de produits hors exploitation.");
+  });
+  it('null sans donnée', () => expect(syntheseExercice({ croissanceCaPct: null, evolution: null, resultatExploitation: null, horsExpl: null })).toBeNull());
+});
+
+describe('titrePublication', () => {
+  it('harmonise les graphies BRVM', () => {
+    expect(titrePublication('Etats Financiers exercice 2020 - SETAO CI')).toBe('États financiers exercice 2020 - SETAO CI');
+    expect(titrePublication('Etats financiers - Exercice 2017: SETAO CI')).toBe('États financiers - Exercice 2017 · SETAO CI');
+  });
+});
