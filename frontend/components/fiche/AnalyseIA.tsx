@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, Copy, Send, Sparkles, Square, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { lireEvenements } from '@/lib/analyseIA/flux';
 import { questionsProposees } from '@/lib/analyseIA/questions';
@@ -252,7 +253,11 @@ function Panneau({
   const dernierAssistant = [...tours].reverse().find((t) => t.role === 'assistant') as Extract<Tour, { role: 'assistant' }> | undefined;
   const relances = !enCours && dernierAssistant?.meta ? dernierAssistant.meta.relances : tours.length === 0 ? questionsDepart : [];
 
-  return (
+  // Portail vers <body> : la page porte `animate-rise-in`, dont le `transform`
+  // persistant (fill-mode both) ferait d'un `fixed` un enfant positionné dans
+  // la page au lieu de l'écran — le panneau sortait tout petit, en bas.
+  if (typeof document === 'undefined') return null;
+  return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-bg/70 backdrop-blur-[2px]" onClick={fermer} aria-hidden />
       <div
@@ -356,7 +361,8 @@ function Panneau({
           )}
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
