@@ -24,7 +24,7 @@ export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, calcu
       ) : (
         <>
           <p className="mt-4 flex items-baseline gap-2">
-            <span className="tabular font-display text-4xl text-ivory">{score}</span>
+            <span className="tabular font-display text-4xl text-ivory">{Math.round(score)}</span>
             <span className="text-sm text-faint">/ 100</span>
             {rang != null && <span className="tabular ml-auto text-xs text-muted">Rang n° {rang}</span>}
           </p>
@@ -37,12 +37,12 @@ export function CombinedAlphaCarte({ code, score, rang, piliers, penalite, calcu
                   <span aria-hidden className="absolute -inset-y-0.5 w-px bg-border-strong" style={{ left: '50%' }} />
                   <span aria-hidden className="absolute -inset-y-0.5 w-px bg-border-strong" style={{ left: '65%' }} />
                 </div>
-                <span className="tabular text-right text-ivory">{p.valeur ?? '—'}</span>
+                <span className="tabular text-right text-ivory">{p.valeur != null ? Math.round(p.valeur) : '—'}</span>
               </div>
             ))}
           </div>
           <p className="mt-2 text-[11px] text-faint">Repères à 50 et 65.</p>
-          {penalite != null && penalite > 0 && <p className="tabular mt-2 text-xs text-muted">Pénalité risque −{penalite} pts</p>}
+          {penalite != null && penalite > 0 && <p className="tabular mt-2 text-xs text-muted">Pénalité risque −{Math.round(penalite)} pts</p>}
         </>
       )}
       {calculeLe && (

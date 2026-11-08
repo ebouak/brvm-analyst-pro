@@ -16,6 +16,9 @@ interface Props {
   detailScore: ReactNode;
 }
 
+/** Libellés des seuils, placés sur l'échelle −1…+1 (−0,6 et +0,6 bordent les zones colorées de 20 %). */
+const SEUILS: [string, number][] = [['−1', 0], ['−0,6', 20], ['0', 50], ['+0,6', 80], ['+1', 100]];
+
 const fr2 = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function Liste({ titre, items, marque }: { titre: string; items: string[]; marque: string }) {
@@ -24,8 +27,8 @@ function Liste({ titre, items, marque }: { titre: string; items: string[]; marqu
     <div>
       <h4 className="text-xs font-semibold text-ivory">{titre}</h4>
       <ul className="mt-2 space-y-1.5">
-        {items.map((t) => (
-          <li key={t} className="flex gap-2 text-[13px] text-muted">
+        {items.map((t, i) => (
+          <li key={`${i}-${t}`} className="flex gap-2 text-[13px] text-muted">
             <span aria-hidden className="text-faint">{marque}</span>
             <span>{t}</span>
           </li>
@@ -55,8 +58,10 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
             <div className="absolute inset-y-0 right-0 rounded-r bg-up/30" style={{ width: '20%' }} />
             <span className="absolute top-1/2 h-4 w-1 -translate-x-1/2 -translate-y-1/2 rounded bg-ivory" style={{ left: `${pos}%` }} />
           </div>
-          <div className="tabular mt-1.5 flex justify-between text-[11px] text-faint">
-            <span>−1</span><span>−0,6</span><span>0</span><span>+0,6</span><span>+1</span>
+          <div aria-hidden className="tabular relative mt-1.5 h-4 text-[11px] text-faint">
+            {SEUILS.map(([t, x], i) => (
+              <span key={t} className={`absolute ${i === 0 ? '' : i === SEUILS.length - 1 ? '-translate-x-full' : '-translate-x-1/2'}`} style={{ left: `${x}%` }}>{t}</span>
+            ))}
           </div>
           <p className="tabular mt-1 text-xs text-muted">Score {fr2(score)}</p>
         </div>

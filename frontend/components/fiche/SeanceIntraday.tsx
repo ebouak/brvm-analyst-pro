@@ -1,10 +1,15 @@
 const DEBUT = 9 * 60 + 15, FIN = 15 * 60 + 45, W = 520, H = 150;
 
 export function SeanceIntraday({ points, plusBasPublie }: { points: { captured_at: string; close: number | null; volume: number | null }[]; plusBasPublie: number | null }) {
-  const pts = points
+  const brut = [...points]
+    .sort((a, b) => Date.parse(a.captured_at) - Date.parse(b.captured_at))
     .filter((p) => p.close != null && p.close > 0)
     .map((p) => { const d = new Date(p.captured_at); return { m: d.getUTCHours() * 60 + d.getUTCMinutes(), c: p.close as number, v: p.volume ?? 0 }; })
     .filter((p) => p.m >= DEBUT && p.m <= FIN);
+  // Un relevé par minute : le dernier de la minute l'emporte (relevés triés par heure ci-dessus).
+  const parMinute = new Map<number, { m: number; c: number; v: number }>();
+  for (const p of brut) parMinute.set(p.m, p);
+  const pts = [...parMinute.values()].sort((a, b) => a.m - b.m);
   if (pts.length < 2) return null;
   const min = Math.min(...pts.map((p) => p.c)), max = Math.max(...pts.map((p) => p.c));
   const marge = Math.max((max - min) * 0.15, max * 0.005);
@@ -25,7 +30,7 @@ export function SeanceIntraday({ points, plusBasPublie }: { points: { captured_a
         <path d={`${d} V${H} H0 Z`} style={{ fill: `rgb(${couleur} / 0.1)` }} />
         <path d={d} fill="none" strokeWidth={2.5} style={{ stroke: `rgb(${couleur})` }} />
         <g transform={`translate(0,${H + 40})`}>
-          {barres.map((b) => <rect key={b.x} x={b.x - 3} y={-(b.v / vmax) * 40} width={6} height={(b.v / vmax) * 40} style={{ fill: 'rgb(var(--color-border-strong))' }} />)}
+          {barres.map((b, i) => <rect key={i} x={b.x - 3} y={-(b.v / vmax) * 40} width={6} height={(b.v / vmax) * 40} style={{ fill: 'rgb(var(--color-border-strong))' }} />)}
         </g>
       </svg>
       {plusBasPublie != null && min < plusBasPublie && (

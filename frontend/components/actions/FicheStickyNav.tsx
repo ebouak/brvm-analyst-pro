@@ -33,7 +33,7 @@ export function FicheStickyNav({
   }, []);
 
   const [docsOuverts, setDocsOuverts] = useState(false);
-  const pastille = 'whitespace-nowrap rounded-full border border-border px-2.5 py-1 text-muted transition-colors hover:border-accent hover:text-accent-ink';
+  const pastille = 'inline-flex items-center max-md:min-h-[44px] whitespace-nowrap rounded-full border border-border px-2.5 py-1 text-muted transition-colors hover:border-accent hover:text-accent-ink';
 
   // Fond OPAQUE (pas de backdrop-blur) : un backdrop-filter collant par-dessus le
   // canvas du graphique provoque des artefacts de compositing (zones noires au
