@@ -24,7 +24,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com
 import PriceChart, { type PricePoint, type ChartMarker } from '@/components/PriceChart';
 import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
-import { QUESTIONS_INDICATEURS } from '@/components/IndicatorCommentary';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import RatingBadge from '@/components/RatingBadge';
@@ -34,12 +33,16 @@ import PublicationsModal, { type Publication } from '@/components/PublicationsMo
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
 import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, formatRendementDividende, rendementDividendeParts, nombreFr, pctFr, insecable, libelleEvenement } from '@/lib/fiche/affichage';
 import { plageSurFenetre, plageSeance } from '@/lib/fiche/plages';
+import { exerciceRetenu, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
+import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
 import { chaineGardeFous, resumeGardeFous } from '@/lib/fiche/quantTextes';
 import { libelleSignal } from '@/lib/signalLabel';
 import { Chapitre } from '@/components/fiche/Chapitre';
 import { Essentiel, type CarteEssentiel } from '@/components/fiche/Essentiel';
+import { AnalyseIA } from '@/components/fiche/AnalyseIA';
 import { JaugesPlage } from '@/components/fiche/JaugesPlage';
 import { SeanceIntraday } from '@/components/fiche/SeanceIntraday';
 import { LectureTechnique } from '@/components/fiche/LectureTechnique';
@@ -281,6 +284,8 @@ export default async function InstrumentPage({
   const { topics: forumTopics, authors: forumAuthors } = await listTopics(0, code);
 
   if (rows.length === 0) {
+    // Code inexistant : vrai 404 (pas d'état vide en 200). Instrument connu sans historique : état vide.
+    if (!instrument) notFound();
     return (
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
         <Link
@@ -418,10 +423,18 @@ export default async function InstrumentPage({
   // Capitalisation boursière en MFCFA : valorisation scrapée (Sika) en priorité,
   // sinon calcul cours × shares.
   const shares = instrument?.shares ?? null;
-  const capitalisation = last.valorisation != null
-    ? last.valorisation / 1_000_000
-    : (shares != null && last.cours_jour != null
-        ? (last.cours_jour * shares) / 1_000_000 : null);
+  const capitalisationBrute = capitalisationFcfa({ valorisation: last.valorisation != null ? Number(last.valorisation) : null, cours: last.cours_jour ?? null, titres: shares });
+  const capitalisation = capitalisationBrute != null ? capitalisationBrute / 1_000_000 : null;
+
+  // Comptes retenus (SYSCOHADA : income/balance), source unique des ratios publics ; `fundamentals` en repli.
+  const retenu = exerciceRetenu({ income: financials?.incomeStatements ?? [], balance: financials?.balanceSheets ?? [], fundamentals });
+  const ratiosPublics = ratiosBilan({
+    cours: last.cours_jour ?? null, titres: shares,
+    resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires,
+    capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere,
+    capitalisation: capitalisationBrute,
+  });
+  const mentionJeu = mentionSecondJeu(retenu.secondJeu);
 
   // Volume moyen 20j
   const recentVols = rows.slice(-20).map((r) => r.volume).filter((v): v is number => v != null);
@@ -562,7 +575,7 @@ export default async function InstrumentPage({
         resultatNetPrecedent: exPrecedent?.net_income ?? null,
         chiffreAffaires: exCourant.revenue ?? null,
         chiffreAffairesPrecedent: exPrecedent?.revenue ?? null,
-        capitauxPropres: exCourant.equity ?? null,
+        capitauxPropres: (retenu.exercice === exCourant.year ? retenu.capitauxPropres : null) ?? exCourant.equity ?? null,
         actions: instrument?.shares ?? null,
         coursJour: last.cours_jour ?? null,
         source: exCourant.is_manual ? 'pdf-verified' : null,
@@ -826,6 +839,7 @@ export default async function InstrumentPage({
   // Chapitres de la barre collante (L'essentiel seulement s'il est rendu).
   const navSections = [
     ...(cartes.length > 0 ? [{ id: 'essentiel', label: 'L’essentiel' }] : []),
+    { id: 'analyse-ia', label: 'Analyse par IA' },
     { id: 'aujourdhui', label: 'Aujourd’hui' },
     { id: 'titre', label: 'Le titre' },
     { id: 'entreprise', label: 'L’entreprise' },
@@ -981,7 +995,7 @@ export default async function InstrumentPage({
               </div>
 
               {/* Graphique de séance (absent sans instantané) */}
-              <SeanceIntraday points={instantanes} plusBasPublie={last.plus_bas ?? null} />
+              <SeanceIntraday points={instantanes} />
             </div>
 
             <div className="mt-5 h-px bg-gold-line opacity-40" />
@@ -1077,6 +1091,9 @@ export default async function InstrumentPage({
           L'ESSENTIEL
       ══════════════════════════════════════════════════ */}
       <Essentiel cartes={cartes} />
+
+      {/* Analyse par IA : réponses Jev (type-safe) ou rédigées par IA, provenance et sources affichées. */}
+      <AnalyseIA code={code} nom={instrument?.designation ?? null} exerciceComptes={economieSociete?.exercice ?? null} />
 
       {/* ══════════════════════════════════════════════════
           01 · AUJOURD'HUI
@@ -1243,7 +1260,10 @@ export default async function InstrumentPage({
               <FundamentalsPanel
                 canEdit={canEditFondamentaux}
                 code={code}
-                year={latest.year}
+                year={retenu.exercice ?? latest.year}
+                ratiosPublics={retenu.source ? ratiosPublics : undefined}
+                comptesRetenus={retenu.source ? { chiffreAffaires: retenu.chiffreAffaires, resultatNet: retenu.resultatNet, capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere } : undefined}
+                mentionSecondJeu={mentionJeu}
                 inputs={{
                   cours: last.cours_jour ?? null,
                   shares: instrument?.shares ?? null,
@@ -1267,7 +1287,7 @@ export default async function InstrumentPage({
                 })()}
                 sourceUrl={null}
                 range52={range52}
-                resultatNet={latest.net_income ?? null}
+                resultatNet={(retenu.source ? retenu.resultatNet : latest.net_income) ?? null}
                 famille={(instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null}
                 dividendeExercice={divCourant?.exercice ?? null}
                 dividendeVerifie={divCourant?.ex_date != null}
@@ -1434,7 +1454,7 @@ export default async function InstrumentPage({
           04 · MON SUIVI
       ══════════════════════════════════════════════════ */}
       <section className="space-y-6">
-        <Chapitre id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils, l'assistant et les discussions sur cette valeur." />
+        <Chapitre id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
 
         <div id="these" className="scroll-mt-24">
           <Eyebrow className="mb-3">Ma thèse</Eyebrow>
@@ -1473,24 +1493,6 @@ export default async function InstrumentPage({
             </div>
           </div>
         </div>
-
-        {/* Questions à l'assistant — même verrou qu'avant (`indicateurs_techniques`). */}
-        {gateIndicateurs.allowed && (
-          <div>
-            <Eyebrow className="mb-3">Demander à l&apos;assistant</Eyebrow>
-            <div className="flex flex-wrap gap-2">
-              {QUESTIONS_INDICATEURS.map((q) => (
-                <Link
-                  key={q}
-                  href={`/assistant?symbole=${code}&q=${encodeURIComponent(q)}`}
-                  className="inline-flex min-h-[36px] items-center rounded-full border border-gold/30 bg-gold/[0.05] px-3 py-1 text-xs text-gold/90 transition-colors hover:bg-gold/10"
-                >
-                  {q}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div id="discussions" className="space-y-3 scroll-mt-24">
           <div className="flex items-center justify-between">

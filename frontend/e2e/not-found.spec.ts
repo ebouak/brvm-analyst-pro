@@ -26,6 +26,7 @@ const ROUTES_ABSENTES = [
   { chemin: '/analyses/xxx', quoi: 'page citable' },
   { chemin: '/brief/1999-01-01', quoi: 'brief de séance' },
   { chemin: '/simulateur/ZZZZ', quoi: 'simulateur par valeur' },
+  { chemin: '/actions/ZZZZ', quoi: 'fiche action' },
 ];
 
 for (const { chemin, quoi } of ROUTES_ABSENTES) {

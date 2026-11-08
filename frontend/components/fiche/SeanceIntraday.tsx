@@ -1,11 +1,17 @@
 import { fmtNumber } from '@/lib/format';
-import { reperesHoraires, reperesPrix, heureReleve } from '@/lib/fiche/seance';
+import { reperesHoraires, reperesPrix, heureReleve, depuisPremiereTransaction } from '@/lib/fiche/seance';
 
 const DEBUT = 9 * 60 + 15, FIN = 15 * 60 + 45, W = 520, H = 150, VH = 40;
 
-export function SeanceIntraday({ points, plusBasPublie }: { points: { captured_at: string; close: number | null; volume: number | null }[]; plusBasPublie: number | null }) {
-  const brut = [...points]
-    .sort((a, b) => Date.parse(a.captured_at) - Date.parse(b.captured_at))
+export function SeanceIntraday({ points }: { points: { captured_at: string; close: number | null; volume: number | null }[] }) {
+  if (points.length > 0 && depuisPremiereTransaction(points).length === 0) {
+    return (
+      <figure className="rounded-card border border-border bg-surface px-5 py-4">
+        <p className="text-xs text-faint">Pas de transaction relevée sur la séance.</p>
+      </figure>
+    );
+  }
+  const brut = depuisPremiereTransaction(points)
     .filter((p) => p.close != null && p.close > 0)
     .map((p) => { const d = new Date(p.captured_at); return { m: d.getUTCHours() * 60 + d.getUTCMinutes(), c: p.close as number, v: p.volume ?? 0 }; })
     .filter((p) => p.m >= DEBUT && p.m <= FIN);
@@ -33,8 +39,8 @@ export function SeanceIntraday({ points, plusBasPublie }: { points: { captured_a
   const reperes = reperesHoraires();
   return (
     <figure className="rounded-card border border-border bg-surface px-5 pb-3.5 pt-5">
-      <figcaption className="text-xs text-faint">Séance du jour · cours et volume par intervalle de 15 minutes{dernierReleve ? `, dernier relevé à ${dernierReleve}` : ''}</figcaption>
-      <div className="mt-3 flex gap-2" role="img" aria-label={`Séance : de ${pts[0]!.c} à ${pts[pts.length - 1]!.c}, plus bas relevé ${min}, plus haut relevé ${max}`}>
+      <figcaption className="text-xs text-faint">Séance du jour · cours et volume par intervalle de 15 minutes{dernierReleve ? `, dernier relevé à ${dernierReleve}` : ''}. Cours affiché par brvm.org à chaque relevé de 15 minutes, depuis la première transaction. Les extrêmes de la séance sont ceux de la cote publiée.</figcaption>
+      <div className="mt-3 flex gap-2" role="img" aria-label={`Séance : de ${pts[0]!.c} à ${pts[pts.length - 1]!.c}, plus bas ${min}, plus haut ${max}`}>
         <div className="min-w-0 flex-1">
           <svg viewBox={`0 0 ${W} ${H + VH + 6}`} preserveAspectRatio="none" className="block h-[190px] w-full overflow-visible">
             <path d={`${d} V${H} H0 Z`} style={{ fill: `rgb(${couleur} / 0.1)` }} />
@@ -60,9 +66,6 @@ export function SeanceIntraday({ points, plusBasPublie }: { points: { captured_a
           ))}
         </div>
       </div>
-      {plusBasPublie != null && min < plusBasPublie && (
-        <p className="mt-1 text-[11px] text-faint">Plus bas relevé en séance : <span className="tabular">{fmtNumber(min)}</span> · plus bas de la cote publiée : <span className="tabular">{fmtNumber(plusBasPublie)}</span>.</p>
-      )}
     </figure>
   );
 }

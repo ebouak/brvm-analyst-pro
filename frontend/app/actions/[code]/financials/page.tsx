@@ -7,8 +7,10 @@ import { fluxCompteResultat, fluxBilan, type FluxCR, type FluxBilan } from '@/li
 import { formatRendementDividende, perAffichable, distributionAffichable, evolutionResultat, dividendeCourant, titrePublication } from '@/lib/fiche/affichage';
 import { avecBpaCalcule, croissanceRnSignee, libelleValorisationSimplifiee, valorisationSimplifieeCalculable } from '@/lib/fiche/financialsAffichage';
 import SousPageNav from '@/components/sousPage/SousPageNav';
-import { plageSurFenetre } from '@/lib/fiche/plages';
-import { computeRatios } from '@/lib/fundamentals';
+import { plage52Semaines } from '@/lib/fiche/plages';
+import { exerciceRetenu, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
+import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { formatXOF, formatPct, formatRatio, formatGrowth } from '@/lib/financials/formatters';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
@@ -68,6 +70,19 @@ export default async function FinancialsPage({ params }: Props) {
   // affichées dans un encadré séparé — elles sont désormais intégrées AU BON
   // ENDROIT de la cascade du compte de résultat et du bilan (statementRows.ts).
 
+  // Comptes retenus : SYSCOHADA (income/balance), source unique des ratios publics. `fundamentals` ne sert qu'au repli et à signaler un second jeu.
+  const { data: fondaTousRows } = await createClient().from('fundamentals').select('year, revenue, net_income, equity, debt').eq('code', code);
+  const fondaTous = (fondaTousRows ?? []) as { year: number; revenue: number | null; net_income: number | null; equity: number | null; debt: number | null }[];
+  const retenu = exerciceRetenu({ income: data.incomeStatements, balance: data.balanceSheets, fundamentals: fondaTous });
+  const coursRef = data.latestDaily?.cours_jour ?? null;
+  const rb = ratiosBilan({
+    cours: coursRef, titres: data.instrument.shares,
+    resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires,
+    capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere,
+    capitalisation: capitalisationFcfa({ valorisation: data.latestDaily?.valorisation, cours: coursRef, titres: data.instrument.shares }),
+  });
+  const mentionJeu = mentionSecondJeu(retenu.secondJeu);
+
   const ratiosBase = calculateFundamentals({
     coursActuel: data.latestDaily?.cours_jour ?? null,
     shares: data.instrument.shares,
@@ -80,9 +95,15 @@ export default async function FinancialsPage({ params }: Props) {
   });
 
   // Plage 52 semaines : fenêtre de 365 jours calendaires inclusive (source unique de la fiche).
-  const dateRef = data.serieCours[0]?.date_marche ?? null;
-  const plage52 = dateRef ? plageSurFenetre(data.serieCours, dateRef, 365, ratiosBase.cours_actuel) : null;
-  const ratios = { ...ratiosBase, cours_bas_52s: plage52?.bas ?? null, cours_haut_52s: plage52?.haut ?? null };
+  const plage52 = plage52Semaines(data.serieCours, ratiosBase.cours_actuel);
+  const ratios = {
+    ...ratiosBase,
+    cours_bas_52s: plage52?.bas ?? null, cours_haut_52s: plage52?.haut ?? null,
+    // Ratios publics : un seul calcul, sur les comptes retenus (voir ratiosBilan).
+    capitalisation: rb.capitalisation, bpa: rb.bpa.valeur, per: rb.per.valeur, pb: rb.pb, ps: rb.ps,
+    roe: rb.roe != null ? rb.roe * 100 : null, marge_nette: rb.margeNette != null ? rb.margeNette * 100 : null,
+    dette_sur_capitaux_propres: rb.gearing,
+  };
 
   const valuation = computeValuation(
     ratios,
@@ -93,24 +114,12 @@ export default async function FinancialsPage({ params }: Props) {
 
   // Dette financière : somme court + long terme du bilan si les deux existent, sinon la
   // valeur extraite dans `fundamentals` pour le MÊME exercice. Fonds propres : idem.
-  const anneeDernierBilan = latestBalance?.periode ? Number(String(latestBalance.periode).slice(0, 4)) : null;
-  const { data: fondaRows } = anneeDernierBilan != null && Number.isFinite(anneeDernierBilan)
-    ? await createClient().from('fundamentals').select('year, debt, equity').eq('code', code).eq('year', anneeDernierBilan).limit(1)
-    : { data: null };
-  const fonda = ((fondaRows ?? []) as { year: number; debt: number | null; equity: number | null }[])[0] ?? null;
-  // Toutes les années (dette financière par exercice pour la vue en flux du bilan).
-  const { data: fondaTousRows } = await createClient().from('fundamentals').select('year, debt').eq('code', code);
-  const detteFonda = new Map(((fondaTousRows ?? []) as { year: number; debt: number | null }[]).map((r) => [r.year, r.debt]));
+  // Dette financière par exercice pour la vue en flux du bilan (repli sur la dette déclarée de `fundamentals`).
+  const detteFonda = new Map(fondaTous.map((r) => [r.year, r.debt]));
   // Dividendes : même requête que la fiche (tri par exercice, lignes sans exercice en dernier).
   const { data: divRowsBrut } = await createClient().from('dividends').select('montant, ex_date, payment_date, exercice')
     .eq('code', code).order('exercice', { ascending: false, nullsFirst: false }).limit(6);
-  const detteBilan = latestBalance && latestBalance.dette_court_terme != null && latestBalance.dette_long_terme != null
-    ? latestBalance.dette_court_terme + latestBalance.dette_long_terme : null;
-  const gearing = computeRatios({
-    cours: null, shares: null, revenue: null, net_income: null,
-    equity: latestBalance?.total_capitaux_propres ?? fonda?.equity ?? null,
-    debt: detteBilan ?? fonda?.debt ?? null, dividende: null,
-  }).gearing;
+  const gearing = rb.gearing;
 
   // PER et distribution : une perte s'explique, elle ne devient pas « non disponible ».
   const rnDernier = latestIncome?.resultat_net ?? null;
@@ -387,6 +396,7 @@ export default async function FinancialsPage({ params }: Props) {
                   </div>
                 </div>
               </div>
+              {mentionJeu && <p className="mt-3 text-xs text-faint">{mentionJeu}</p>}
             </div>
 
             {/* Analyse graphique pluriannuelle */}

@@ -11,6 +11,7 @@ import ValueTrapBadge from './ValueTrapBadge';
 import { perAffichable, distributionAffichable, evolutionResultat, bpaAffichable, insecable } from '@/lib/fiche/affichage';
 import { formatRendementDividende } from '@/lib/fiche/affichage';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
+import type { RatiosBilan } from '@/lib/fiche/ratiosBilan';
 
 export interface FundamentalsPanelProps {
   code: string;
@@ -31,6 +32,11 @@ export interface FundamentalsPanelProps {
   dividendeVerifie?: boolean;
   /** Droit de correction manuelle (admin) — la route /api/fundamentals le revérifie. */
   canEdit?: boolean;
+  /** Ratios publics calculés sur les comptes retenus (SYSCOHADA) : l'emportent sur ceux de `inputs`, qui restent la base de correction manuelle. */
+  ratiosPublics?: RatiosBilan;
+  comptesRetenus?: { chiffreAffaires: number | null; resultatNet: number | null; capitauxPropres: number | null; detteFinanciere: number | null };
+  /** Mention d'un second jeu de comptes publié par la société. */
+  mentionSecondJeu?: string | null;
   /** La plage 52 semaines est déjà montrée ailleurs (jauges de la fiche). */
   sansPlage52?: boolean;
   /** Le bandeau de perte du chapitre dit déjà « PER non calculable ». */
@@ -56,10 +62,18 @@ const FAMILLES = {
 
 export default function FundamentalsPanel(p: FundamentalsPanelProps) {
   const [editing, setEditing] = useState(false);
-  const r = computeRatios(p.inputs);
+  // Comptes affichés : ceux retenus (SYSCOHADA) quand ils existent ; `p.inputs` ne sert plus qu'à la correction manuelle.
+  const inp: FundamentalInputs = p.comptesRetenus
+    ? { ...p.inputs, revenue: p.comptesRetenus.chiffreAffaires, net_income: p.comptesRetenus.resultatNet, equity: p.comptesRetenus.capitauxPropres, debt: p.comptesRetenus.detteFinanciere }
+    : p.inputs;
+  const r0 = computeRatios(inp);
+  const rp = p.ratiosPublics;
+  const r = rp
+    ? { ...r0, capitalisation: rp.capitalisation, bpa: rp.bpa.valeur, per: rp.per.valeur, pb: rp.pb, ps: rp.ps, roe: rp.roe, margeNette: rp.margeNette, gearing: rp.gearing }
+    : r0;
   const fam = FAMILLES[p.famille ?? 'general'] ?? FAMILLES.general;
   // BPA : source unique (résultat net ÷ titres, 2 décimales), comme les états financiers.
-  const bpa = bpaAffichable(p.inputs.net_income, p.inputs.shares);
+  const bpa = bpaAffichable(inp.net_income, inp.shares);
   const per = perAffichable(r.per, bpa.valeur ?? r.bpa);
   const dist = distributionAffichable(r.payout, p.resultatNet ?? null);
 
@@ -147,7 +161,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
           </Section>
         ) : (
           <Section title="Solidité & distribution">
-            <RatioCard label="Capitaux propres" value={p.inputs.equity != null ? fmtFcfa(p.inputs.equity) + ' FCFA' : '—'} quality={p.inputs.equity == null ? 'missing' : 'ok'} />
+            <RatioCard label="Capitaux propres" value={inp.equity != null ? fmtFcfa(inp.equity) + ' FCFA' : '—'} quality={inp.equity == null ? 'missing' : 'ok'} />
             <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} motif={dist.motif} />
           </Section>
         )}
@@ -173,6 +187,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         {p.dividendeExercice != null && !p.dividendeVerifie && ` Dividende : exercice ${p.dividendeExercice} (date de détachement non publiée).`}
         {p.isManual && ' · Fondamentaux corrigés manuellement.'}
       </p>
+      {p.mentionSecondJeu && <p className="text-xs text-faint">{p.mentionSecondJeu}</p>}
 
       {p.canEdit && editing && (
         <EditFundamentalsModal

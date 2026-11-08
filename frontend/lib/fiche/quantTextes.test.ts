@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { traduireNote, traduireRaison, chaineGardeFous, resumeGardeFous, raisonAffichable, penaliteRetiree, noteEcartArrondi } from './quantTextes';
+import { traduireNote, traduireRaison, chaineGardeFous, resumeGardeFous, raisonAffichable, penaliteRetiree, noteEcartArrondi, libelleClasse } from './quantTextes';
 
 describe('resumeGardeFous', () => {
   it('STAC : seule la pénalité de risque est retirée du score', () => {
@@ -92,5 +92,22 @@ describe('affichage de la pénalité de risque', () => {
   it('pas de note sans écart', () => {
     const c2 = chaineGardeFous([{ code: 'RISK', points: 20 }], { sommePonderee: 28, penalite: 20 } as never)!;
     expect(noteEcartArrondi(c2)).toBeNull();
+  });
+});
+
+describe('libelleClasse', () => {
+  it('dit un constat, jamais une consigne', () => {
+    expect(libelleClasse('Strong Buy Quant')).toBe('Profil quant très favorable');
+    expect(libelleClasse('Buy Quant')).toBe('Profil quant favorable');
+    expect(libelleClasse('Watchlist / Neutral')).toBe('Profil neutre');
+    expect(libelleClasse('Reduce / Avoid')).toBe('Profil défavorable');
+    expect(libelleClasse('High Risk / Avoid')).toBe('Profil défavorable, risque élevé');
+    expect(libelleClasse('Insufficient Data')).toBe('Données insuffisantes');
+    for (const c of ['Strong Buy Quant', 'Buy Quant', 'Watchlist / Neutral', 'Reduce / Avoid', 'High Risk / Avoid']) {
+      expect(libelleClasse(c)).not.toMatch(/achat|éviter|alléger|surveiller/i);
+    }
+  });
+  it('classe inconnue : rendue telle quelle', () => {
+    expect(libelleClasse('Autre')).toBe('Autre');
   });
 });

@@ -1,3 +1,5 @@
+import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
@@ -113,7 +115,8 @@ export async function getRevue(code: string): Promise<RevueData | null> {
     ? {
         date: lastPx.date_marche,
         cours: num(lastPx.cours_jour),
-        mcap: lastFull ? num(lastFull.valorisation) : null,
+        // Règle unique de capitalisation (valorisation de la séance, sinon cours × titres).
+        mcap: capitalisationFcfa({ valorisation: lastFull ? num(lastFull.valorisation) : null, cours: num(lastPx.cours_jour), titres: instr?.shares ?? null }),
         beta: lastFull ? num(lastFull.beta_1an) : null,
       }
     : null;
@@ -134,9 +137,16 @@ export async function getRevue(code: string): Promise<RevueData | null> {
   // Ratios (sur le dernier exercice + dernier cours).
   const cours = price?.cours ?? null;
   const lastDiv = dividends.length ? dividends[dividends.length - 1].montant : null;
-  const per = cours != null && latest?.bpa ? cours / latest.bpa : null;
+  // PER et marge nette : même calcul que la fiche et /financials (ratiosBilan, comptes SYSCOHADA).
+  const rb = ratiosBilan({
+    cours, titres: instr?.shares ?? null,
+    resultatNet: latest?.resultatNet ?? null, chiffreAffaires: latest?.revenu ?? null,
+    capitauxPropres: latest?.capitauxPropres ?? null, detteFinanciere: null,
+    capitalisation: price?.mcap ?? null,
+  });
+  const per = rb.per.valeur;
   const yieldPct = cours != null && lastDiv ? (lastDiv / cours) * 100 : null;
-  const margeNette = latest?.revenu && latest?.resultatNet != null ? (latest.resultatNet / latest.revenu) * 100 : null;
+  const margeNette = rb.margeNette != null ? rb.margeNette * 100 : null;
   const payout = latest?.bpa && lastDiv ? (lastDiv / latest.bpa) * 100 : null;
 
   const hl = hlR.data as
