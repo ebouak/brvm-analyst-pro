@@ -87,3 +87,22 @@ export function chaineGardeFous(penalites: { code: string; points: number }[], d
     appliquee: decomposition ? decomposition.penalite : null,
   };
 }
+
+/** Raison affichée sous le libellé du garde-fou ; null quand elle ne ferait que répéter le titre (« Risque global »). */
+export function raisonAffichable(p: { code: string; reason: string }, dateCalcul: string | null): string | null {
+  if (p.reason === 'penalite risque') return null;
+  return traduireRaison(p, dateCalcul);
+}
+
+/** Points de risque réellement retirés de la somme pondérée (plafonnés). */
+export function penaliteRetiree(c: ChaineGardeFous): number {
+  return Math.min(c.risque, c.plafond);
+}
+
+/** Note d'arrondi quand la pénalité mesurée sur le score diffère de celle retirée (score arrondi à l'entier). */
+export function noteEcartArrondi(c: ChaineGardeFous): string | null {
+  if (c.appliquee == null || c.risque <= 0) return null;
+  const ecart = Math.abs(c.appliquee - penaliteRetiree(c));
+  if (ecart < 0.05) return null;
+  return `écart de ${nf(ecart, 1)} dû à l'arrondi du score`;
+}

@@ -3,7 +3,7 @@ import { fmtDateCourte } from '@/lib/format';
 import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
 import { decomposerScore, calculeEstAncien } from '@/lib/fiche/quant';
-import { traduireNote, traduireRaison, chaineGardeFous } from '@/lib/fiche/quantTextes';
+import { traduireNote, raisonAffichable, chaineGardeFous, penaliteRetiree, noteEcartArrondi } from '@/lib/fiche/quantTextes';
 import SousPageNav from '@/components/sousPage/SousPageNav';
 import { SectionHeader, PremiumPanel, StatPill, EmptyStatePremium } from '@/components/ui/premium';
 
@@ -14,9 +14,10 @@ const CLASSES: Record<string, string> = {
   'Buy Quant': 'Achat quant',
   'Watchlist / Neutral': 'À surveiller',
   'Reduce / Avoid': 'Alléger / éviter',
-  'High Risk / Avoid': 'Risque élevé — éviter',
+  'High Risk / Avoid': 'Risque élevé · éviter',
   'Insufficient Data': 'Données insuffisantes',
 };
+const Nb = ({ children }: { children: React.ReactNode }) => <span className="tabular">{children}</span>;
 const fr = (c: string) => CLASSES[c] ?? c;
 const cf = (c: string) => (c === 'high' ? 'Élevée' : c === 'medium' ? 'Moyenne' : c === 'low' ? 'Faible' : 'Insuffisante');
 const ef = (s: string) => (s === 'eligible' ? 'Éligible' : s === 'eligible_with_warning' ? 'Éligible (réserve)' : 'Non éligible');
@@ -74,6 +75,8 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
   const n1 = (x: number) => x.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const dateCalcul = latest?.score_date ? fmtDateCourte(String(latest.score_date)) : null;
   const chaine = chaineGardeFous(penalties, decomposition);
+  const retiree = chaine ? penaliteRetiree(chaine) : (decomposition?.penalite ?? 0);
+  const noteArrondi = chaine ? noteEcartArrondi(chaine) : null;
   const rang = latest?.rank_global ? `Rang ${latest.rank_global}${nbClassees ? ` sur ${nbClassees}` : ''}` : null;
   const famille = ({ banque: 'Banque', assurance: 'Assurance', general: 'Société non financière' } as Record<string, string>)[i.famille_comptable ?? 'general'] ?? i.famille_comptable;
   const titreSection = 'text-sm font-semibold text-ivory';
@@ -81,7 +84,6 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 md:px-6">
       <SousPageNav code={symbol} courant="Fiche Quant" />
-      <p className="text-xs"><Link href="/analyse/combined-alpha" className="text-accent-ink hover:underline">Classement Combined Alpha →</Link></p>
       <SectionHeader
         title={`${i.code} · ${i.designation ?? i.code}`}
         subtitle={`${i.secteur ?? 'Secteur non renseigné'} · ${famille}${dateCalcul ? ` · Calcul du ${dateCalcul}` : ''}`}
@@ -95,6 +97,7 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
         ) : undefined}
       />
       <div className="gold-rule" />
+      <p className="text-xs"><Link href="/analyse/combined-alpha" className="text-accent-ink hover:underline">Classement Combined Alpha →</Link></p>
       {latest && ancien && derniereSeance && (
         <p role="status" className="rounded-lg border border-warn/30 bg-warn/10 px-4 py-2 text-sm text-warn">
           Calculée le {fmtDateCourte(String(latest.score_date))} : le score n’intègre pas la séance du {fmtDateCourte(derniereSeance)}.
@@ -141,7 +144,7 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
               <h2 className={titreSection}>Comment on arrive à {latest.combined_alpha_score}</h2>
               <dl className="grid gap-2 sm:grid-cols-3">
                 <div className="rounded-lg border border-border bg-elevated/40 px-3 py-2"><dt className="text-xs text-muted">Somme pondérée des piliers</dt><dd className="tabular text-xl font-semibold text-ivory">{n1(decomposition.sommePonderee)}</dd></div>
-                <div className="rounded-lg border border-border bg-elevated/40 px-3 py-2"><dt className="text-xs text-muted">Pénalité de risque appliquée</dt><dd className="tabular text-xl font-semibold text-ivory">{decomposition.penalite > 0 ? '−' : ''}{n1(decomposition.penalite)} pts</dd></div>
+                <div className="rounded-lg border border-border bg-elevated/40 px-3 py-2"><dt className="text-xs text-muted">Pénalité de risque retirée</dt><dd className="tabular text-xl font-semibold text-ivory">{retiree > 0 ? '−' : ''}{n1(retiree).replace(',0', '')} pts</dd>{noteArrondi && <p className="mt-0.5 text-xs text-faint">{noteArrondi}</p>}</div>
                 <div className="rounded-lg border border-border bg-elevated/40 px-3 py-2"><dt className="text-xs text-muted">Score Combined Alpha</dt><dd className="tabular text-xl font-semibold text-ivory">{latest.combined_alpha_score}</dd></div>
               </dl>
               <p className="text-xs leading-relaxed text-faint">Somme pondérée − pénalité = score. Les poids des piliers manquants sont redistribués sur les autres ; la pénalité est la différence mesurée, dans la limite de 25 pts (chaîne de calcul détaillée dans « Garde-fous et notes »).</p>
@@ -183,7 +186,7 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
                     <li key={k} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-elevated/40 px-3 py-2">
                       <div>
                         <p className="text-sm font-medium text-ivory">{pe.label}</p>
-                        <p className="text-xs leading-relaxed text-muted">{traduireRaison(pe, dateCalcul)}</p>
+                        {raisonAffichable(pe, dateCalcul) && <p className="text-xs leading-relaxed text-muted">{raisonAffichable(pe, dateCalcul)}</p>}
                       </div>
                       <span className="tabular shrink-0 rounded-full border border-border-strong px-2 py-0.5 text-xs font-semibold text-ivory">−{pe.points} pts</span>
                     </li>
@@ -192,17 +195,17 @@ export default async function QuantSecurityPage({ params }: { params: { code: st
                 {chaine && (
                   <div className="space-y-1 rounded-lg border border-border bg-elevated/30 px-3 py-3 text-xs leading-relaxed text-muted">
                     <p className="font-medium text-ivory">Chaîne de calcul</p>
-                    <p className="tabular">
-                      Garde-fous déclenchés : {chaine.points.map((p) => `−${p}`).join(' ')} = −{chaine.total} pts.
+                    <p>
+                      Garde-fous déclenchés : <Nb>{chaine.points.map((p) => `−${p}`).join(' ')}</Nb> = <Nb>−{chaine.total}</Nb> pts.
                     </p>
                     {chaine.dansMomentum > 0 && (
-                      <p>Liquidité et volatilité (−{chaine.dansMomentum} pts) sont déjà déduites du pilier Momentum ({latest.price_momentum_score ?? '—'}).</p>
+                      <p>Liquidité et volatilité (<Nb>−{chaine.dansMomentum}</Nb> pts) sont déjà déduites du pilier Momentum (<Nb>{latest.price_momentum_score ?? '—'}</Nb>).</p>
                     )}
                     {chaine.risque > 0 && (
-                      <p>La pénalité de risque (−{chaine.risque} pts, plafond {chaine.plafond}{chaine.risquePlafonne ? ', atteint' : ', non atteint'}) est retirée de la somme pondérée{decomposition ? ` : ${n1(decomposition.sommePonderee)} − ${chaine.risque} = ${n1(decomposition.sommePonderee - chaine.risque)}, arrondi à ${latest.combined_alpha_score}` : ''}.</p>
+                      <p>La pénalité de risque (<Nb>−{chaine.risque}</Nb> pts, plafond <Nb>{chaine.plafond}</Nb>{chaine.risquePlafonne ? ', atteint' : ', non atteint'}) est retirée de la somme pondérée{decomposition ? <> : <Nb>{n1(decomposition.sommePonderee)} − {chaine.risque} = {n1(decomposition.sommePonderee - chaine.risque)}</Nb>, arrondi à <Nb>{latest.combined_alpha_score}</Nb></> : ''}.</p>
                     )}
                     {chaine.appliquee != null && (
-                      <p className="tabular">Pénalité mesurée sur le score : −{n1(chaine.appliquee)} pts (écart entre la somme pondérée et le score affiché, arrondi compris).</p>
+                      <p>Pénalité mesurée sur le score : <Nb>−{n1(chaine.appliquee)}</Nb> pts (écart entre la somme pondérée et le score affiché, arrondi compris).</p>
                     )}
                   </div>
                 )}

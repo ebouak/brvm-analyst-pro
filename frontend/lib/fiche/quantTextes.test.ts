@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { traduireNote, traduireRaison, chaineGardeFous, resumeGardeFous } from './quantTextes';
+import { traduireNote, traduireRaison, chaineGardeFous, resumeGardeFous, raisonAffichable, penaliteRetiree, noteEcartArrondi } from './quantTextes';
 
 describe('resumeGardeFous', () => {
   it('STAC : seule la pénalité de risque est retirée du score', () => {
@@ -75,5 +75,22 @@ describe('chaineGardeFous', () => {
   });
   it('aucun garde-fou : null', () => {
     expect(chaineGardeFous([], null)).toBeNull();
+  });
+});
+
+describe('affichage de la pénalité de risque', () => {
+  const dec = { sommePonderee: 28.4, penalite: 20.4 } as never;
+  const c = chaineGardeFous([{ code: 'RISK', points: 20 }], dec)!;
+  it('retire le sous-titre redondant', () => {
+    expect(raisonAffichable({ code: 'RISK', reason: 'penalite risque' }, null)).toBeNull();
+    expect(raisonAffichable({ code: 'VOL', reason: 'Vol 0.5 rang 80% → -5' }, null)).not.toBeNull();
+  });
+  it('pénalité retirée plafonnée, et note d\'arrondi', () => {
+    expect(penaliteRetiree(c)).toBe(20);
+    expect(noteEcartArrondi(c)).toBe('écart de 0,4 dû à l\'arrondi du score');
+  });
+  it('pas de note sans écart', () => {
+    const c2 = chaineGardeFous([{ code: 'RISK', points: 20 }], { sommePonderee: 28, penalite: 20 } as never)!;
+    expect(noteEcartArrondi(c2)).toBeNull();
   });
 });
