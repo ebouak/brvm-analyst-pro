@@ -46,7 +46,7 @@ export function VerdictBand({
           <div className="flex items-center gap-3">
             <span className="text-xs text-faint">Note</span>
             <span className="font-display rounded-[10px] border border-ivory px-3 py-1.5 text-3xl leading-none text-ivory">{note}</span>
-            <span className="max-w-[110px] text-[11px] leading-snug text-faint">notation financière, échelle A à F</span>
+            <span className="max-w-[110px] text-[11px] leading-snug text-faint">note technique A à F, tirée du score de signal</span>
           </div>
         )}
 
