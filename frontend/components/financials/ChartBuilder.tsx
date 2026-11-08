@@ -67,7 +67,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs text-muted">Construire un graphique</p>
-          <p className="text-[10px] text-faint">
+          <p className="text-[11px] text-faint">
             {indice
               ? 'Mode indice : toutes les séries ramenées à 100 la première année. Comparez n’importe quelles trajectoires.'
               : 'Cochez jusqu’à deux familles d’unités (montants, %, FCFA/action), les axes se placent seuls. Pour tout combiner, activez « base 100 ».'}
@@ -161,7 +161,7 @@ export default function ChartBuilder({ rows }: { rows: ChartRow[] }) {
         </div>
       )}
 
-      <p className="text-[10px] text-faint">
+      <p className="text-[11px] text-faint">
         Séries dérivées des états financiers publiés (une valeur manquante laisse un trou, rien n’est estimé).
         Marges = résultat / CA ; ROE = résultat net / capitaux propres.
       </p>

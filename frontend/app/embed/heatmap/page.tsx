@@ -54,7 +54,7 @@ export default async function EmbedHeatmapPage({
         <p className="px-2 py-3 text-xs opacity-70">{T[lang].indisponible}</p>
       ) : (
         <>
-          <p className="px-1 text-[10px] opacity-60">
+          <p className="px-1 text-[11px] opacity-60">
             {T[lang].seance} {date}
           </p>
           <div className="grid grid-cols-4 gap-1 sm:grid-cols-6">

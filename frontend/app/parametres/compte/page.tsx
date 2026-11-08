@@ -155,7 +155,7 @@ export default function ComptePage() {
       {/* Section suppression */}
       <section className="bg-surface border border-down/20 rounded-card shadow-card p-6 space-y-4">
         <div className="flex items-start gap-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-down/20 bg-down/[0.06] text-down/80 text-base">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-down/20 bg-down/[0.06] text-down text-base">
             <Trash2 size={16} strokeWidth={1.75} aria-hidden />
           </div>
           <div className="flex-1 min-w-0">
@@ -173,7 +173,7 @@ export default function ComptePage() {
         <button
           onClick={handleDelete}
           disabled={busy != null}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-down/30 bg-down/10 text-down text-sm font-medium transition-all duration-200 hover:bg-down/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-down/30 bg-down/5 text-down text-sm font-medium transition-all duration-200 hover:bg-down/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
         >
           {busy === 'delete' ? (
             <>

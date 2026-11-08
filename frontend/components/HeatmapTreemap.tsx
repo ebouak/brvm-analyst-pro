@@ -2,13 +2,32 @@
 
 import { useRouter } from 'next/navigation';
 import EChart from '@/components/EChart';
-import { groupBySector, colorForVariation, nodeWeight } from '@/lib/heatmap';
+import { couleurVariation, groupBySector, nodeWeight, paletteDepuisTheme } from '@/lib/heatmap';
+import { chartTheme } from '@/lib/chartTheme';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtFcfa, fmtNumber, fmtPctSigne } from '@/lib/format';
 
 /** « SNTS : +1,95 % » — libellé accessible d'une tuile (format français). */
 export function libelleTuile(code: string, pct: number | null): string {
   return `${code} : ${pct == null ? 'variation indisponible' : fmtPctSigne(pct)}`;
+}
+
+/** Luminance relative WCAG 2.x d'une couleur #rrggbb. */
+function luminanceWcag(hex: string): number {
+  const c = hex.replace('#', '');
+  const ch = [0, 2, 4].map((i) => {
+    const v = parseInt(c.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+}
+
+/** Texte (blanc ou #030303) offrant le meilleur contraste WCAG sur ce fond. */
+function textOn(bg: string): string {
+  const l = luminanceWcag(bg);
+  const contrasteBlanc = 1.05 / (l + 0.05);
+  const contrasteSombre = (l + 0.05) / (0.0009 + 0.05);
+  return contrasteSombre > contrasteBlanc ? '#030303' : '#ffffff';
 }
 
 /** Filtre couleur : toutes, hausses (vert) ou baisses (rouge) uniquement. */
@@ -70,6 +89,11 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
 
   const sectors = groupBySector(filtered);
 
+  // Jetons du thème courant (clair ou sombre) : le treemap suit le thème.
+  const T = chartTheme();
+  const palette = paletteDepuisTheme(T);
+  const couleurTuile = (pct: number | null): string => couleurVariation(pct, palette);
+
   // Dimensionnement proportionnel des logos : on estime la surface en pixels de
   // chaque tuile à partir de sa part de capitalisation et des dimensions
   // estimées du conteneur (hauteur réelle × ratio largeur/hauteur). Le côté
@@ -91,13 +115,10 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const treemapData: any[] = sectors.map((sector) => ({
     name: sector.name,
-    itemStyle: { color: 'transparent', borderColor: '#0f1117', borderWidth: 3 },
-    upperLabel: { show: true, color: '#8b93a7', fontSize: 11, fontWeight: 'bold' as const },
+    itemStyle: { color: 'transparent', borderColor: T.surface, borderWidth: 3 },
+    upperLabel: { show: true, color: T.muted, fontSize: 11, fontWeight: 'bold' as const },
     children: sector.children.map((node) => {
-      const varStr =
-        node.variation_pct != null
-          ? `${node.variation_pct >= 0 ? '+' : ''}${node.variation_pct.toFixed(2)}%`
-          : '';
+      const varStr = node.variation_pct != null ? fmtPctSigne(node.variation_pct) : '';
       const logoUrl = logos[node.code];
 
       // Côté estimé de la tuile (px) → taille de logo et de police proportionnelles.
@@ -117,11 +138,20 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
       // Rich label : logo (si la tuile est assez grande) au-dessus du code + variation.
       // Le rich doit être porté par CHAQUE nœud — sinon ECharts affiche le markup brut.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fond = couleurTuile(node.variation_pct);
+      const fg = textOn(fond);
       const rich: any = {
-        code: { color: '#ffffff', fontSize: codeFont, fontWeight: 'bold', lineHeight: codeFont + 4 },
-        var: { color: '#e6e9f0', fontSize: varFont, lineHeight: varFont + 4 },
+        code: { color: fg, fontSize: codeFont, fontWeight: 'bold', lineHeight: codeFont + 4 },
+        var: { color: fg, fontSize: varFont, lineHeight: varFont + 4 },
       };
-      let formatter = `{code|${node.code}}\n{var|${varStr}}`;
+      // Jamais le code seul : deux lignes si la hauteur le permet, sinon
+      // « CODE +x,xx % » sur une ligne si la largeur le permet, sinon rien.
+      const deuxLignes = coteCourt >= textH + 4;
+      const largeurUneLigne = (node.code.length + 1 + varStr.length) * codeFont * 0.62;
+      const uneLigne = !deuxLignes && coteCourt >= codeFont + 6 && largeurUneLigne <= side * 0.92;
+      let formatter = deuxLignes
+        ? `{code|${node.code}}\n{var|${varStr}}`
+        : `{code|${node.code}} {var|${varStr}}`;
       if (logoUrl && logoPx >= 18) {
         rich.logo = {
           height: logoPx,
@@ -142,12 +172,13 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
         cours_jour: node.cours_jour,
         volume: node.volume,
         capitalisation: node.capitalisation ?? null,
-        itemStyle: { color: colorForVariation(node.variation_pct) },
+        itemStyle: { color: fond },
         label: {
-          show: true,
+          // Texte réservé aux tuiles assez grandes (≈ 60 px de côté).
+          show: side >= 60 && (deuxLignes || uneLigne),
           formatter,
           rich,
-          color: '#ffffff',
+          color: fg,
           overflow: 'truncate' as const,
         },
       };
@@ -159,15 +190,15 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
     const d = params?.data as (LeafExtra & { name: string }) | undefined;
     if (!d?.code) return (params?.name as string) ?? '';
     const varVal = d.variation_pct;
-    const varColor = varVal != null && varVal >= 0 ? '#00c853' : '#f44336';
+    const varColor = varVal != null && varVal >= 0 ? T.up : T.down;
     const varStr =
       varVal != null
-        ? `<span style="color:${varColor};font-weight:600">${varVal >= 0 ? '+' : ''}${varVal.toFixed(2)}%</span>`
+        ? `<span style="color:${varColor};font-weight:600">${fmtPctSigne(varVal)}</span>`
         : '—';
     return [
       `<div style="padding:4px 2px">`,
-      `<div style="font-weight:700;font-size:13px;color:#e6e9f0">${d.code}</div>`,
-      `<div style="color:#8b93a7;font-size:11px;margin-bottom:6px">${d.designation ?? ''}</div>`,
+      `<div style="font-weight:700;font-size:13px;color:${T.ivory}">${d.code}</div>`,
+      `<div style="color:${T.muted};font-size:11px;margin-bottom:6px">${d.designation ?? ''}</div>`,
       `<div>Prix : <b>${fmtFcfa(d.cours_jour)} FCFA</b></div>`,
       `<div>Variation : ${varStr}</div>`,
       `<div>Volume : <b>${fmtNumber(d.volume ?? 0)}</b> titres</div>`,
@@ -193,10 +224,10 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
     backgroundColor: 'transparent',
     aria: { enabled: true, label: { enabled: true, description } },
     tooltip: {
-      backgroundColor: '#161922',
-      borderColor: '#232733',
+      backgroundColor: T.surface,
+      borderColor: T.border,
       borderWidth: 1,
-      textStyle: { color: '#e6e9f0', fontSize: 12 },
+      textStyle: { color: T.ivory, fontSize: 12 },
       formatter: tooltipFormatter,
     },
     series: [
@@ -213,20 +244,20 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
         levels: [
           {
             // Sector level
-            itemStyle: { borderColor: '#0f1117', borderWidth: 3, gapWidth: 3 },
+            itemStyle: { borderColor: T.surface, borderWidth: 3, gapWidth: 3 },
             upperLabel: {
               show: true,
               height: 22,
-              color: '#8b93a7',
+              color: T.muted,
               fontSize: 11,
               fontWeight: 'bold' as const,
-              backgroundColor: 'rgba(15,17,23,0.7)',
+              backgroundColor: T.alpha('surface', 0.7),
               padding: [3, 6] as [number, number],
             },
           },
           {
             // Leaf level — bordures (le label/rich est porté par chaque nœud).
-            itemStyle: { borderColor: '#232733', borderWidth: 1, gapWidth: 1 },
+            itemStyle: { borderColor: T.border, borderWidth: 1, gapWidth: 1 },
           },
         ],
       },

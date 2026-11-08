@@ -266,7 +266,7 @@ export function CalculateurCout({
             <summary className="flex cursor-pointer list-none items-center justify-between text-xs text-muted hover:text-ivory">
               <span>
                 Affiner la liste
-                {filtresActifs > 0 && <span className="ml-1.5 rounded-full bg-accent/15 px-1.5 text-[10px] text-accent">{filtresActifs}</span>}
+                {filtresActifs > 0 && <span className="ml-1.5 rounded-full bg-accent/15 px-1.5 text-[11px] text-accent">{filtresActifs}</span>}
               </span>
               <span aria-hidden className="transition-transform group-open:rotate-180">⌄</span>
             </summary>

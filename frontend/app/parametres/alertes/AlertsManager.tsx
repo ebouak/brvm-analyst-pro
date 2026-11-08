@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import NewAlertModal from '@/components/NewAlertModal';
+import { fmtDateCourte } from '@/lib/format';
 import { toggleAlert, removeAlert } from './actions';
 
 export interface UserAlert {
@@ -97,16 +98,16 @@ export function AlertsManager({
             <tbody>
               {alerts.map((a) => (
                 <tr key={a.id} className="border-t border-border/50">
-                  <td className="px-3 py-2 font-mono text-white">{a.code}</td>
+                  <td className="px-3 py-2 font-mono font-medium text-ivory">{a.code}</td>
                   <td className="px-3 py-2 text-muted">{TYPE_LABEL[a.type] ?? a.type}</td>
                   <td className="px-3 py-2 text-right tabular">{fmtSeuil(a)}</td>
                   <td className="px-3 py-2 text-center">
                     {a.declenchee_le ? (
-                      <span className="text-[11px] text-warn" title={a.declenchee_le}>
+                      <span className="text-xs text-warn" title={fmtDateCourte(a.declenchee_le)}>
                         Déclenchée
                       </span>
                     ) : (
-                      <span className="text-[11px] text-faint">En veille</span>
+                      <span className="text-xs text-faint">En veille</span>
                     )}
                   </td>
                   <td className="px-3 py-2 text-center">
@@ -115,7 +116,7 @@ export function AlertsManager({
                       onClick={() => onToggle(a)}
                       disabled={pending}
                       aria-pressed={a.actif}
-                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                      className={`rounded-full px-2 py-0.5 text-xs ${
                         a.actif ? 'bg-up/15 text-up' : 'bg-border text-faint'
                       }`}
                     >

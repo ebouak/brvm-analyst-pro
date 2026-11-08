@@ -248,7 +248,7 @@ export default function WhatsAppPrefs({ userId }: { userId: string }) {
           </p>
         </div>
         {prefs.whatsapp_optin && (
-          <span className="shrink-0 rounded-full border border-up/30 bg-up/10 px-2.5 py-1 text-[10px] font-semibold text-up">
+          <span className="shrink-0 rounded-full border border-up/30 bg-up/5 px-2.5 py-1 text-[11px] font-semibold text-up">
             Activé
           </span>
         )}

@@ -6,10 +6,8 @@ import SectorRankingTable from '@/components/SectorRankingTable';
 import SectorRotation from '@/components/SectorRotation';
 import ValorisationSecteurs from '@/components/secteurs/ValorisationSecteurs';
 import NewsletterForm from '@/components/NewsletterForm';
-import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
 import {
-  SectionHeader,
   PremiumPanel,
   EmptyStatePremium,
   Eyebrow,
@@ -22,6 +20,14 @@ export const revalidate = 300;
 // BRVM » sont des requêtes réelles, et la valorisation sectorielle est de la
 // donnée de marché, sans rien de personnel.
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
+
+/** "2026-11-03" → "3 nov. 2026" (affichage seul). */
+function fmtDateFR(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+}
 
 export const metadata: import('next').Metadata = {
   title: 'Secteurs BRVM — performance, PER, PBR et rendement du dividende',
@@ -123,20 +129,19 @@ export default async function SecteursPage() {
   return (
     <div className="min-h-screen bg-bg">
       {/* ── Glow atmosphérique ─────────────────────────────────────────────── */}
-      <div className="pointer-events-none fixed inset-0 bg-obsidian-glow" aria-hidden />
 
       <div className="relative max-w-7xl mx-auto px-6 py-10 space-y-10">
 
         {/* ── En-tête ─────────────────────────────────────────────────────── */}
         <div className="animate-rise-in">
-          <SectionHeader
-            title="Performance sectorielle"
-            subtitle={
-              lastDate
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Performance sectorielle</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+              {lastDate
                 ? `Classement et rotation des secteurs cotés · Dernière séance : ${fmtDateFR(lastDate)}`
-                : 'Classement et rotation des secteurs cotés sur la BRVM'
-            }
-          />
+                : "Classement et rotation des secteurs cotés sur la BRVM"}
+            </p>
+          </div>
           {/* Règle dorée ────────────────────────── */}
           <div className="mt-5 h-px bg-gold-line" />
         </div>
@@ -241,9 +246,9 @@ export default async function SecteursPage() {
           </div>
           <Link
             href="/heatmap"
-            className="shrink-0 rounded-lg border border-gold/30 px-4 py-2 text-xs font-semibold text-gold hover:bg-gold/10 transition-colors"
+            className="shrink-0 rounded-lg border border-gold/30 px-4 py-2 text-xs font-semibold text-accent-ink hover:bg-gold/10 transition-colors"
           >
-            Ouvrir la heatmap →
+            Ouvrir la heatmap
           </Link>
         </div>
 

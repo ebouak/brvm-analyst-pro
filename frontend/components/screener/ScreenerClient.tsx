@@ -219,7 +219,7 @@ export default function ScreenerClient({ isPremium }: { isPremium: boolean }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <ScreenerFilters isPremium={isPremium} onFilterChange={handleFilter} />
-        <div className="lg:col-span-3 space-y-3">
+        <div className="min-w-0 lg:col-span-3 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted">Liquidité :</span>
             {([

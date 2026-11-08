@@ -105,7 +105,7 @@ export function SgiCard({
         </span>
         <span className="rounded-md border border-border px-2 py-1 font-mono text-xs text-muted">{p.nom}</span>
         {homologue && (
-          <span className="rounded-md border border-up/30 bg-up/10 px-2 py-1 font-mono text-xs text-up">Barème homologué</span>
+          <span className="rounded-md border border-up/30 bg-up/5 px-2 py-1 font-mono text-xs text-up">Barème homologué</span>
         )}
       </div>
 
@@ -116,7 +116,7 @@ export function SgiCard({
             {s.depotMin}
             {s.depotMinSource !== 'inconnu' && (
               <span
-                className="ml-1 text-[10px] text-faint"
+                className="ml-1 text-[11px] text-faint"
                 title={s.depotMinSource === 'relevé' ? 'Constaté, à reconfirmer auprès de la SGI' : 'Ordre de grandeur du marché'}
               >
                 {s.depotMinSource === 'relevé' ? 'relevé*' : 'indic.'}
@@ -131,7 +131,7 @@ export function SgiCard({
               <>
                 max {courtageMax.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %{' '}
                 <span
-                  className={`ml-0.5 text-[10px] ${homologue ? 'text-up' : 'text-faint'}`}
+                  className={`ml-0.5 text-[11px] ${homologue ? 'text-up' : 'text-faint'}`}
                   title={homologue ? 'Barème homologué AMF-UMOA/CREPMF' : 'Donnée agrégée de sources publiques, à confirmer'}
                 >
                   {homologue ? 'homologué' : 'agrégé'}
@@ -414,8 +414,8 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
                     <td className="px-3 py-3">
                       {e.frais ? (
                         <span
-                          className={`inline-block rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${
-                            e.frais.confiance === 'homologue_crepmf' ? 'border-up/30 bg-up/10 text-up' : 'border-border text-muted'
+                          className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                            e.frais.confiance === 'homologue_crepmf' ? 'border-up/30 bg-up/5 text-up' : 'border-border text-muted'
                           }`}
                         >
                           {e.frais.confiance === 'homologue_crepmf' ? 'Homologué' : 'À confirmer'}
@@ -430,7 +430,7 @@ export function AnnuaireSgi({ directory, frais }: { directory: Sgi[]; frais: Sgi
                     <td className="tabular hidden px-3 py-3 text-muted md:table-cell">{e.sgi.depotMin}</td>
                     <td className={`tabular px-3 py-3 text-right font-semibold ${top ? 'text-up' : 'text-ivory'}`}>
                       {e.cout != null ? fmtFcfa(e.cout) : <span className="font-normal text-faint">—</span>}
-                      {e.cout != null && !e.complet && <span className="block text-[10px] font-normal text-warn">barème incomplet</span>}
+                      {e.cout != null && !e.complet && <span className="block text-[11px] font-normal text-warn">barème incomplet</span>}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link

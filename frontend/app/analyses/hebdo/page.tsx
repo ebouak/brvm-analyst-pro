@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
+import { fmtDateCourte } from '@/lib/format';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel, EmptyStatePremium } from '@/components/ui/premium';
 
@@ -32,9 +34,9 @@ export default async function HebdoIndexPage() {
             {editions.map((e) => (
               <li key={e.date_edition}>
                 <Link href={`/analyses/hebdo/${e.date_edition}`}
-                  className="flex items-center justify-between py-3 text-sm text-ivory transition-colors hover:text-accent">
-                  <span>Semaine du {e.date_edition}</span>
-                  <span aria-hidden className="text-muted">→</span>
+                  className="flex items-center justify-between py-3 text-sm text-ivory transition-colors hover:text-accent-ink">
+                  <span>Semaine du {fmtDateCourte(e.date_edition)}</span>
+                  <ChevronRight aria-hidden className="h-4 w-4 text-muted" />
                 </Link>
               </li>
             ))}

@@ -45,7 +45,7 @@ export default function CompareVerdict({ rows }: { rows: FundaRow[] }) {
       <div className="space-y-1.5">
         {scored.map((s, rank) => (
           <div key={s.code} className="flex items-center gap-2">
-            <span className="text-[10px] text-faint w-4">{rank + 1}.</span>
+            <span className="text-[11px] text-faint w-4">{rank + 1}.</span>
             <span className="text-xs text-ivory font-medium w-16">{s.code}</span>
             <div className="flex-1 bg-border rounded-full h-1.5">
               <div
@@ -53,11 +53,11 @@ export default function CompareVerdict({ rows }: { rows: FundaRow[] }) {
                 style={{ width: `${s.total.toFixed(0)}%` }}
               />
             </div>
-            <span className="text-[10px] text-faint tabular w-8 text-right">{s.total.toFixed(0)}</span>
+            <span className="text-[11px] text-faint tabular w-8 text-right">{s.total.toFixed(0)}</span>
           </div>
         ))}
       </div>
-      <p className="text-[10px] text-faint italic">Score = 60% valorisation fondamentale + 40% performance sur la période. Aucun conseil d'investissement.</p>
+      <p className="text-[11px] text-faint italic">Score = 60% valorisation fondamentale + 40% performance sur la période. Aucun conseil d'investissement.</p>
     </div>
   );
 }

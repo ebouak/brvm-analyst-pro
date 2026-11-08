@@ -475,8 +475,8 @@ function Tableau({ colonnes, meilleure, scenario }: { colonnes: Colonne[]; meill
                 return (
                   <td key={c.slug} className={`p-4 ${fond(c)}`}>
                     <span
-                      className={`inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-                        c.ligne.homologue ? 'border-up/30 bg-up/10 text-up' : 'border-border text-muted'
+                      className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                        c.ligne.homologue ? 'border-up/30 bg-up/5 text-up' : 'border-border text-muted'
                       }`}
                     >
                       {CONFIANCE_LABEL[c.frais.confiance]}

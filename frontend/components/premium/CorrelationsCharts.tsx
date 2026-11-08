@@ -12,7 +12,7 @@ if (typeof window !== 'undefined') {
 function CorrBadge({ c }: { c: number }) {
   const abs = Math.abs(c);
   const label = abs > 0.7 ? 'Forte' : abs > 0.4 ? 'Modérée' : 'Faible';
-  const color = abs > 0.7 ? (c > 0 ? 'text-up bg-up/10 border-up/30' : 'text-down bg-down/10 border-down/30')
+  const color = abs > 0.7 ? (c > 0 ? 'text-up bg-up/5 border-up/30' : 'text-down bg-down/5 border-down/30')
     : abs > 0.4 ? 'text-warn bg-warn/10 border-warn/30'
     : 'text-muted bg-surface border-border';
   return (

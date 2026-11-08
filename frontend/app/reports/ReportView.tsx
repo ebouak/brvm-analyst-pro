@@ -4,6 +4,7 @@ import MultiPriceChart, { type PriceSeries } from './sections/PriceChart';
 import EventsTable from './sections/EventsTable';
 import SignalsTable from './sections/SignalsTable';
 import StatsTable, { type StatRow } from './sections/StatsTable';
+import { fmtDateCourte } from '@/lib/format';
 import { periodReturn } from '@/lib/reportUtils';
 
 export interface ReportData {
@@ -51,10 +52,10 @@ export default function ReportView({ data, onExportPDF }: Props) {
   return (
     <div className="space-y-4" id="report-root">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">
+        <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">
           Rapport BRVM{' '}
-          <span className="text-muted text-sm font-normal tabular">
-            {data.dateFrom} → {data.dateTo}
+          <span className="text-muted text-sm font-normal font-sans">
+            {fmtDateCourte(data.dateFrom)} → {fmtDateCourte(data.dateTo)}
           </span>
         </h1>
         {onExportPDF && (

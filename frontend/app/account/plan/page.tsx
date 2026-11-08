@@ -1,4 +1,5 @@
 import OffresNiveaux from '@/components/billing/OffresNiveaux';
+import { fmtDateCourte } from '@/lib/format';
 import { accesAcademy } from '@/lib/server/academyAccess';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -15,12 +16,7 @@ export const metadata = { title: 'Mon abonnement' };
 
 const DASH = '—';
 
-function fmtDate(d: string | null | undefined): string {
-  if (!d) return DASH;
-  const p = new Date(d);
-  if (Number.isNaN(p.getTime())) return DASH;
-  return p.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-}
+const fmtDate = (d: string | null | undefined) => fmtDateCourte(d);
 
 export default async function Page() {
   const supabase = createClient();
@@ -164,7 +160,7 @@ export default async function Page() {
       <div className="pt-2 border-t border-border">
         <Link
           href="/account/newsletters"
-          className="text-sm text-muted hover:text-[#56d7fd] transition-colors duration-150"
+          className="text-sm text-muted hover:text-accent-ink transition-colors duration-150"
         >
           Gérer mes préférences newsletter →
         </Link>

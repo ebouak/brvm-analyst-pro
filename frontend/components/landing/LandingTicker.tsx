@@ -20,7 +20,7 @@ export default function LandingTicker({ items }: { items: TickerItem[] }) {
           const up = (it.variation ?? 0) >= 0;
           return (
             <div key={`${it.code}-${i}`} className="flex items-center gap-2.5 whitespace-nowrap">
-              <span className="text-xs font-semibold tracking-wide text-ivory/90">{it.code}</span>
+              <span className="text-xs font-semibold tracking-wide text-ivory">{it.code}</span>
               <span className="tabular text-xs text-muted">
                 {it.cours != null ? it.cours.toLocaleString('fr-FR') : '—'}
               </span>

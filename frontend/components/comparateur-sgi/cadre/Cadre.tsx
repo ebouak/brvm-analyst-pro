@@ -175,7 +175,7 @@ function Bande({ elements, titre }: { elements: ElementBande[]; titre: string })
     // Fond presque opaque : la bande passe devant l'illustration (pièces,
     // bougies claires) et doit rester lisible par-dessus.
     <section aria-label={titre} className="cmp-defile-cadre relative z-10 mt-8 rounded-lg border border-sur-nuit/10 bg-nuit/85 py-2.5 backdrop-blur-sm">
-      <div className="overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
+      <div tabIndex={0} role="region" aria-label="Bandeau défilant, utilisez les flèches pour le parcourir" className="overflow-hidden motion-reduce:overflow-x-auto [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
         <div className="cmp-defile flex w-max" style={{ '--duree': `${Math.max(30, elements.length * 3.2)}s` } as CSSProperties}>
           {liste(false)}
           {liste(true)}
@@ -193,7 +193,7 @@ export function EnteteComparateur({
   reperes,
   filAriane = false,
   retour,
-  surtitre = 'Outil BRVM / UEMOA',
+  surtitre,
   variante = 'marche',
   bande,
 }: {
@@ -234,7 +234,7 @@ export function EnteteComparateur({
             <ArrowLeft size={14} aria-hidden /> {lienRetour.libelle}
           </Link>
         )}
-        <p className="font-mono text-[11px] font-semibold text-accent-nuit">{surtitre}</p>
+        {surtitre && <p className="font-mono text-[11px] font-semibold text-accent-nuit">{surtitre}</p>}
         {/* Un nom de SGI publié en entier (jusqu’à 70 signes) passe à une taille plus sobre. */}
         <h1 className={`mt-2 flex items-center gap-3 font-display font-semibold leading-tight [letter-spacing:-0.02em] ${titre.length > 40 ? 'text-2xl md:text-[2.15rem]' : 'text-3xl md:text-5xl'}`}>
           {Icone && <Icone aria-hidden className="h-8 w-8 flex-none text-accent-nuit md:h-11 md:w-11" />}

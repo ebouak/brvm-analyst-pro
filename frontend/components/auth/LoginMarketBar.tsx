@@ -69,7 +69,7 @@ function AnimatedCandle({ candle, index }: { candle: LoginCandle; index: number 
             : { duration: 2.2 + (index % 4) * 0.4, repeat: Infinity, ease: 'easeInOut', delay: index * 0.1 }
         }
       />
-      <span className="mt-1.5 text-[8px] font-medium tracking-tight text-white/35 group-hover:text-white/70 transition-colors">
+      <span className="mt-1.5 text-[11px] font-medium tracking-tight text-white/35 group-hover:text-white/70 transition-colors">
         {candle.code}
       </span>
     </div>

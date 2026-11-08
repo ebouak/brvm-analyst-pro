@@ -1,4 +1,5 @@
 'use client';
+import { chartTheme } from '@/lib/chartTheme';
 import EChart from './EChart';
 
 interface TradeMarker {
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default function BacktestChart({ equityCurve, closes, dates, drawdownPeriods, trades }: Props) {
+  const T = chartTheme();
   if (equityCurve.length === 0 || closes.length === 0) {
     return <div className="text-muted text-sm p-4">Aucune donnée à afficher.</div>;
   }
@@ -36,12 +38,12 @@ export default function BacktestChart({ equityCurve, closes, dates, drawdownPeri
     const pts: { name: string; xAxis: string; yAxis: number; itemStyle: { color: string } }[] = [];
     const entryLabel = labels[t.entryIndex];
     if (entryLabel !== undefined && strategie[t.entryIndex] !== undefined) {
-      pts.push({ name: 'BUY', xAxis: entryLabel, yAxis: strategie[t.entryIndex]!, itemStyle: { color: '#00c853' } });
+      pts.push({ name: 'BUY', xAxis: entryLabel, yAxis: strategie[t.entryIndex]!, itemStyle: { color: T.up } });
     }
     if (t.exitIndex != null) {
       const exitLabel = labels[t.exitIndex];
       if (exitLabel !== undefined && strategie[t.exitIndex] !== undefined) {
-        pts.push({ name: 'SELL', xAxis: exitLabel, yAxis: strategie[t.exitIndex]!, itemStyle: { color: '#f44336' } });
+        pts.push({ name: 'SELL', xAxis: exitLabel, yAxis: strategie[t.exitIndex]!, itemStyle: { color: T.down } });
       }
     }
     return pts;
@@ -55,37 +57,37 @@ export default function BacktestChart({ equityCurve, closes, dates, drawdownPeri
         option={{
           legend: {
             top: 0, right: 0,
-            textStyle: { color: '#8b93a7', fontSize: 11 },
+            textStyle: { color: T.muted, fontSize: 11 },
             data: ['Stratégie', 'Buy & Hold'],
           },
           xAxis: {
             type: 'category', data: labels, boundaryGap: false,
-            axisLabel: { color: '#8b93a7', fontSize: 10,
+            axisLabel: { color: T.muted, fontSize: 11,
               interval: Math.floor(labels.length / 6), rotate: 30 },
           },
           yAxis: { type: 'value', scale: true,
             axisLabel: { formatter: (v: number) => v.toFixed(0) } },
           dataZoom: [
             { type: 'inside', start: 0, end: 100 },
-            { type: 'slider', height: 20, bottom: 0, borderColor: '#232733',
-              fillerColor: 'rgba(0,200,83,0.08)', handleStyle: { color: '#00c853' },
-              textStyle: { color: '#4a5268', fontSize: 9 } },
+            { type: 'slider', height: 20, bottom: 0, borderColor: T.border,
+              fillerColor: T.alpha('up', 0.08), handleStyle: { color: T.up },
+              textStyle: { color: T.muted, fontSize: 11 } },
           ],
           series: [
             {
               name: 'Stratégie', type: 'line', data: strategie,
-              symbol: 'none', lineStyle: { color: '#00c853', width: 2 },
+              symbol: 'none', lineStyle: { color: T.up, width: 2 },
               areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                colorStops: [{ offset: 0, color: 'rgba(0,200,83,0.15)' }, { offset: 1, color: 'transparent' }] } },
+                colorStops: [{ offset: 0, color: T.alpha('up', 0.15) }, { offset: 1, color: 'transparent' }] } },
               markArea: markAreas.length > 0 ? {
                 silent: true,
-                itemStyle: { color: 'rgba(244,67,54,0.12)' },
+                itemStyle: { color: T.alpha('down', 0.12) },
                 data: markAreas,
               } : undefined,
             },
             {
               name: 'Buy & Hold', type: 'line', data: buyhold,
-              symbol: 'none', lineStyle: { color: '#8b93a7', width: 1.5, type: 'dashed' },
+              symbol: 'none', lineStyle: { color: T.muted, width: 1.5, type: 'dashed' },
             },
           ],
         }}

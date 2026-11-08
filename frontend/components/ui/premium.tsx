@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { libelleSignal } from '@/lib/signalLabel';
 import type { ReactNode } from 'react';
 import { Hourglass, Inbox, Lock, Pause, Target, type LucideIcon } from 'lucide-react';
 
@@ -23,9 +24,9 @@ const ICONE_ETAT: Record<string, LucideIcon> = {
 
 const EASE = 'transition-[color,background-color,border-color,box-shadow,transform,filter] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
 
-/* ── Eyebrow : surtitre éditorial doré ──────────────────────────────────── */
+/* ── Eyebrow : étiquette de section sobre ──────────────────────────────────── */
 export function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <p className={`overline text-accent-ink ${className}`}>{children}</p>;
+  return <p className={`text-sm font-medium text-muted ${className}`}>{children}</p>;
 }
 
 /* ── SectionHeader : titre de page/section (display) + actions ──────────────
@@ -46,7 +47,7 @@ export function SectionHeader({
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-heading-lg md:text-3xl text-ivory tracking-tight">{title}</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">{title}</h1>
           {subtitle && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -101,7 +102,7 @@ export function MetricCard({
   const deltaColor = deltaDir === 'up' ? 'text-up' : deltaDir === 'down' ? 'text-down' : 'text-muted';
   const arrow = deltaDir === 'up' ? '▲' : deltaDir === 'down' ? '▼' : '';
   return (
-    <div className={`group rounded-card border border-border bg-surface p-4 shadow-card ${EASE} ${accentRing}`}>
+    <div className={`group min-w-0 rounded-card border border-border bg-surface p-4 shadow-card ${EASE} ${accentRing}`}>
       <p className="text-xs text-muted">{label}</p>
       <div className="mt-2.5 flex items-baseline gap-1.5">
         <span className="tabular text-2xl font-semibold text-ivory">{value}</span>
@@ -119,11 +120,11 @@ export function MetricCard({
 /* ── SignalBadge : pastille BUY/HOLD/SELL statutaire ─────────────────────── */
 export function SignalBadge({ signal }: { signal: 'BUY' | 'HOLD' | 'SELL' | string }) {
   const map: Record<string, { cls: string; label: string }> = {
-    BUY: { cls: 'border-up/30 bg-up/10 text-up', label: 'ACHAT' },
-    SELL: { cls: 'border-down/30 bg-down/10 text-down', label: 'VENTE' },
-    HOLD: { cls: 'border-warn/30 bg-warn/10 text-warn', label: 'CONSERVER' },
+    BUY: { cls: 'border-up/30 bg-up/5 text-up', label: 'Achat' },
+    SELL: { cls: 'border-down/30 bg-down/5 text-down', label: 'Vente' },
+    HOLD: { cls: 'border-warn/30 bg-warn/10 text-warn', label: 'Attente' },
   };
-  const m = map[signal] ?? { cls: 'border-border bg-elevated text-muted', label: signal };
+  const m = map[signal] ?? { cls: 'border-border bg-elevated text-muted', label: libelleSignal(signal) };
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${m.cls}`}>
       {m.label}
@@ -141,7 +142,7 @@ export function StatPill({
 }) {
   const cls = {
     gold: 'border-gold/30 bg-gold/10 text-accent-ink',
-    emerald: 'border-up/30 bg-up/10 text-up',
+    emerald: 'border-up/30 bg-up/5 text-up',
     sapphire: 'border-sapphire/30 bg-sapphire/10 text-accent-ink',
     neutral: 'border-border bg-elevated text-muted',
   }[tone];

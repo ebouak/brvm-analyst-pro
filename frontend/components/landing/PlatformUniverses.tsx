@@ -102,7 +102,7 @@ export function PlatformUniverses() {
                 <h3 className="font-display text-xl text-ivory">{u.titre}</h3>
                 <p className="mt-1 text-[11.5px] leading-snug text-faint">{u.accroche}</p>
               </span>
-              <span className="univers-chevron mt-1 shrink-0 text-[10.5px] text-faint">
+              <span className="univers-chevron mt-1 shrink-0 text-[11px] text-faint">
                 {u.outils.length} outils
               </span>
             </summary>
@@ -123,7 +123,7 @@ export function PlatformUniverses() {
                         →
                       </span>
                     </span>
-                    <span className="mt-0.5 block text-[10.5px] leading-snug text-faint">{o.desc}</span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-faint">{o.desc}</span>
                   </Link>
                 </li>
               ))}

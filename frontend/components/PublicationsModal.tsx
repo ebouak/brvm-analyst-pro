@@ -128,7 +128,7 @@ export default function PublicationsModal({ code, designation, publications, cou
                 onClick={() => setActiveFilter('all')}
                 className={`text-xs px-2.5 py-1 rounded-chip border transition ${
                   activeFilter === 'all'
-                    ? 'border-up text-up bg-up/10'
+                    ? 'border-up text-up bg-up/5'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'
                 }`}
               >
@@ -144,7 +144,7 @@ export default function PublicationsModal({ code, designation, publications, cou
                     onClick={() => setActiveFilter(pt.value)}
                     className={`text-xs px-2.5 py-1 rounded-chip border transition ${
                       active
-                        ? 'border-up text-up bg-up/10'
+                        ? 'border-up text-up bg-up/5'
                         : 'border-border text-muted hover:border-up/40 hover:text-up'
                     }`}
                   >
@@ -172,7 +172,7 @@ export default function PublicationsModal({ code, designation, publications, cou
                   return (
                     <div key={pt.value} className="mb-5">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-chip ${bg} ${text}`}>
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-chip ${bg} ${text}`}>
                           {pt.label}
                         </span>
                         <span className="text-xs text-faint">{group.length} doc{group.length > 1 ? 's' : ''}</span>

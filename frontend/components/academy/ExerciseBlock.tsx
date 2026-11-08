@@ -99,7 +99,7 @@ export default function ExerciseBlock({
       {answered && (
         <div
           className={`mt-3 rounded-lg border px-3 py-2.5 text-sm ${
-            result!.correct ? 'border-up/40 bg-up/10 text-up' : 'border-down/40 bg-down/10 text-down'
+            result!.correct ? 'border-up/40 bg-up/5 text-up' : 'border-down/40 bg-down/5 text-down'
           }`}
         >
           <p className="font-semibold">
@@ -111,7 +111,7 @@ export default function ExerciseBlock({
         </div>
       )}
 
-      <p className="mt-2 text-[10px] text-faint">
+      <p className="mt-2 text-[11px] text-faint">
         Données de la séance du {exercise.asOf} — la correction est recalculée sur ces mêmes données.
       </p>
     </div>

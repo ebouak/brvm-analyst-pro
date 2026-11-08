@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { HeatmapNode } from '@/lib/heatmap';
-import { colorForVariation, groupBySector } from '@/lib/heatmap';
+import type { PaletteVariation } from '@/lib/heatmap';
+import { couleurVariation, groupBySector, paletteDepuisTheme } from '@/lib/heatmap';
+import { chartTheme } from '@/lib/chartTheme';
 import { fmtPctSigne } from '@/lib/format';
 
 /** Couleur stable dérivée du code (fallback monogramme quand pas de logo). */
@@ -19,8 +21,7 @@ function monoColor(code: string): string {
 
 function fmtPct(pct: number | null): string {
   if (pct == null) return '—';
-  const s = pct > 0 ? '+' : '';
-  return `${s}${pct.toFixed(2)}%`;
+  return fmtPctSigne(pct);
 }
 
 /** « SNTS : +1,95 % » — libellé accessible d'une tuile (format français). */
@@ -28,23 +29,33 @@ function libelleTuile(code: string, pct: number | null): string {
   return `${code} : ${pct == null ? 'variation indisponible' : fmtPctSigne(pct)}`;
 }
 
-/** Texte lisible (blanc) ou sombre selon la luminance du fond. */
+/** Luminance relative WCAG 2.x d'une couleur #rrggbb. */
+function luminanceWcag(hex: string): number {
+  const c = hex.replace('#', '');
+  const ch = [0, 2, 4].map((i) => {
+    const v = parseInt(c.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+}
+
+/** Texte (blanc ou #030303) offrant le meilleur contraste WCAG sur ce fond. */
 function textOn(bg: string): string {
-  const c = bg.replace('#', '');
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return lum > 0.6 ? '#0f1117' : '#ffffff';
+  const l = luminanceWcag(bg);
+  const contrasteBlanc = 1.05 / (l + 0.05);
+  const contrasteSombre = (l + 0.05) / (0.0009 + 0.05);
+  return contrasteSombre > contrasteBlanc ? '#030303' : '#ffffff';
 }
 
 interface LogoTileProps {
   node: HeatmapNode;
   logoUrl?: string | null;
+  /** Palette du thème (la même que la cartographie desktop). */
+  palette?: PaletteVariation;
 }
 
-function Tile({ node, logoUrl }: LogoTileProps) {
-  const bg = colorForVariation(node.variation_pct);
+function Tile({ node, logoUrl, palette }: LogoTileProps) {
+  const bg = palette ? couleurVariation(node.variation_pct, palette) : 'transparent';
   const fg = textOn(bg);
   const initials = node.code.slice(0, 2);
   const [imgError, setImgError] = useState(false);
@@ -76,14 +87,14 @@ function Tile({ node, logoUrl }: LogoTileProps) {
       ) : (
         <div
           aria-hidden
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[10px] font-bold sm:h-10 sm:w-10 sm:text-[11px]"
-          style={{ background: monoColor(node.code), color: '#fff' }}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-bold sm:h-10 sm:w-10 sm:text-[11px]"
+          style={{ background: monoColor(node.code), color: textOn(monoColor(node.code)) }}
         >
           {initials}
         </div>
       )}
       <span className="mt-1 sm:mt-1.5 max-w-full truncate text-[11px] font-semibold leading-none tabular">{node.code}</span>
-      <span className="mt-0.5 max-w-full truncate text-[10px] font-medium leading-none tabular opacity-90">
+      <span className="mt-0.5 max-w-full truncate text-[11px] font-medium leading-none tabular">
         {fmtPct(node.variation_pct)}
       </span>
     </Link>
@@ -100,6 +111,12 @@ type SortMode = 'sector' | 'gainers' | 'losers' | 'volume';
 
 export default function HeatmapGrid({ rows, logos = {} }: HeatmapGridProps) {
   const [sort, setSort] = useState<SortMode>('sector');
+  // Lu après le montage (les jetons CSS n'existent pas au rendu serveur).
+  const [palette, setPalette] = useState<PaletteVariation | undefined>(undefined);
+  useEffect(() => {
+    const T = chartTheme();
+    setPalette(paletteDepuisTheme(T));
+  }, []);
 
   if (rows.length === 0) {
     return (
@@ -113,8 +130,13 @@ export default function HeatmapGrid({ rows, logos = {} }: HeatmapGridProps) {
     <button
       type="button"
       onClick={() => setSort(mode)}
-      className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-      style={sort === mode ? { background: '#e6e9f0', color: '#0f1117' } : { background: '#232733', color: '#8b93a7' }}
+      aria-pressed={sort === mode}
+      className={[
+        'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+        sort === mode
+          ? 'bg-ivory text-obsidian'
+          : 'bg-elevated border border-border text-muted hover:text-ivory hover:border-border-strong',
+      ].join(' ')}
     >
       {label}
     </button>
@@ -136,12 +158,12 @@ export default function HeatmapGrid({ rows, logos = {} }: HeatmapGridProps) {
         </div>
         {groups.map((g) => (
           <div key={g.name}>
-            <h3 className="text-xs font-semibold mb-2" style={{ color: '#8b93a7' }}>
-              {g.name} <span className="opacity-60">· {g.children.length}</span>
+            <h3 className="text-xs font-semibold mb-2 text-muted">
+              {g.name} <span className="text-muted">· {g.children.length}</span>
             </h3>
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
               {g.children.map((n) => (
-                <Tile key={n.code} node={n} logoUrl={logos[n.code]} />
+                <Tile key={n.code} node={n} logoUrl={logos[n.code]} palette={palette} />
               ))}
             </div>
           </div>
@@ -166,7 +188,7 @@ export default function HeatmapGrid({ rows, logos = {} }: HeatmapGridProps) {
       </div>
       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
         {flat.map((n) => (
-          <Tile key={n.code} node={n} logoUrl={logos[n.code]} />
+          <Tile key={n.code} node={n} logoUrl={logos[n.code]} palette={palette} />
         ))}
       </div>
     </div>

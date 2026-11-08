@@ -70,7 +70,7 @@ export default async function DcfIndexPage() {
                       {r.code}
                     </Link>
                     {r.designation && <span className="ml-2 text-xs text-muted">{r.designation}</span>}
-                    {r.mode === 'proxy' && <span className="ml-2 rounded bg-info/10 px-1.5 py-0.5 text-[10px] text-info">proxy</span>}
+                    {r.mode === 'proxy' && <span className="ml-2 rounded bg-info/10 px-1.5 py-0.5 text-[11px] text-info">proxy</span>}
                   </td>
                   <td className="px-3 py-3 text-right tabular text-white">{r.cours != null ? fmtNumber(r.cours) : '—'}</td>
                   <td className="px-3 py-3 text-right tabular text-white">

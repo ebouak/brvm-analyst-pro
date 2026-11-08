@@ -541,7 +541,7 @@ export default async function Dashboard() {
         {triggeredAlerts > 0 && (
           <Link
             href="/parametres/alertes"
-            className="flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-down/30 bg-down/10 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
+            className="flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-down/30 bg-down/5 px-4 py-2 text-sm text-down transition-colors hover:bg-down/20"
           >
             <span aria-hidden>●</span>
             <span className="font-semibold">

@@ -142,13 +142,13 @@ export default function DashboardTicker({
           {it.kind === 'action' && patternsByCode[it.code] && patternsByCode[it.code].length > 0 && (
             <span className="inline-flex gap-0.5">
               {patternsByCode[it.code].some((p) => p.pattern_type === 'atr_extreme') && (
-                <span className="text-[9px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">ATR</span>
+                <span className="text-[11px] bg-up/20 text-up px-1 py-0.5 rounded font-medium">ATR</span>
               )}
               {patternsByCode[it.code].some((p) => p.pattern_type === 'bullish_consolidation') && (
-                <span className="text-[9px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">CONS</span>
+                <span className="text-[11px] bg-info/20 text-info px-1 py-0.5 rounded font-medium">CONS</span>
               )}
               {patternsByCode[it.code].some((p) => p.pattern_type === 'breakout_impulse') && (
-                <span className="text-[9px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">BRK</span>
+                <span className="text-[11px] bg-accent/20 text-accent px-1 py-0.5 rounded font-medium">BRK</span>
               )}
             </span>
           )}
@@ -174,8 +174,9 @@ export default function DashboardTicker({
         Passer le bandeau des cours
       </a>
       <div
-        className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2 shadow-card motion-reduce:overflow-x-auto"
+        className="group relative overflow-hidden rounded-full border border-border bg-surface/70 py-2 shadow-card motion-reduce:overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         role="marquee"
+        tabIndex={0}
         aria-label="Cours des actions et obligations en défilement"
       >
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-bg to-transparent motion-reduce:hidden" />

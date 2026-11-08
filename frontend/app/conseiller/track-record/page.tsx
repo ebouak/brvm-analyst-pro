@@ -2,7 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel, MetricCard, EmptyStatePremium } from '@/components/ui/premium';
-import { fmtDateFR } from '@/lib/format';
+import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
+
+function dateCourte(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
 import {
   computeFlips,
   attachPerformance,
@@ -76,10 +83,10 @@ export default async function TrackRecordPage() {
       />
 
       <div className="flex items-center justify-between gap-3">
-        <Link href="/conseiller" className="text-xs text-accent hover:underline">← Retour au Conseiller</Link>
+        <Link href="/conseiller" className="inline-flex items-center gap-1 text-xs text-accent-ink hover:underline"><ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Retour au Conseiller</Link>
         {depuis && (
           <span className="text-[11px] text-faint">
-            Historique suivi depuis le <span className="tabular text-muted">{fmtDateFR(depuis)}</span>
+            Historique suivi depuis le <span className="text-muted">{dateCourte(depuis)}</span>
           </span>
         )}
       </div>
@@ -121,28 +128,28 @@ export default async function TrackRecordPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-bg/40 text-left">
-                    <th className="px-4 py-2.5 font-mono text-xs text-faint">Date</th>
-                    <th className="px-4 py-2.5 font-mono text-xs text-faint">Titre</th>
-                    <th className="px-4 py-2.5 font-mono text-xs text-faint">Bascule</th>
-                    <th className="px-4 py-2.5 text-right font-mono text-xs text-faint">Cours bascule</th>
-                    <th className="px-4 py-2.5 text-right font-mono text-xs text-faint">Cours actuel</th>
-                    <th className="px-4 py-2.5 text-right font-mono text-xs text-faint">Depuis</th>
-                    <th className="px-4 py-2.5 text-center font-mono text-xs text-faint">Verdict</th>
+                    <th className="px-4 py-2.5 text-xs text-faint">Date</th>
+                    <th className="px-4 py-2.5 text-xs text-faint">Titre</th>
+                    <th className="px-4 py-2.5 text-xs text-faint">Bascule</th>
+                    <th className="px-4 py-2.5 text-right text-xs text-faint">Cours bascule</th>
+                    <th className="px-4 py-2.5 text-right text-xs text-faint">Cours actuel</th>
+                    <th className="px-4 py-2.5 text-right text-xs text-faint">Depuis</th>
+                    <th className="px-4 py-2.5 text-center text-xs text-faint">Verdict</th>
                   </tr>
                 </thead>
                 <tbody>
                   {flips.map((f, i) => (
                     <tr key={`${f.code}-${f.date}-${i}`} className="border-b border-border/50 transition hover:bg-white/[0.02] last:border-0">
-                      <td className="tabular whitespace-nowrap px-4 py-2.5 text-xs text-muted">{fmtDateFR(f.date)}</td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted">{dateCourte(f.date)}</td>
                       <td className="px-4 py-2.5">
-                        <Link href={`/actions/${f.code}`} className="font-semibold text-ivory transition hover:text-accent">
+                        <Link href={`/actions/${f.code}`} className="font-mono font-medium text-ivory transition-colors hover:text-accent-ink">
                           {f.code}
                         </Link>
                       </td>
                       <td className="px-4 py-2.5">
                         <span className="inline-flex items-center gap-1.5 text-xs">
                           <span className={`rounded-md border px-1.5 py-0.5 font-medium ${ACT_BADGE[f.from]}`}>{ACT_LABEL[f.from]}</span>
-                          <span className="text-faint">→</span>
+                          <ArrowRight className="h-3 w-3 text-faint" aria-hidden />
                           <span className={`rounded-md border px-1.5 py-0.5 font-bold ${ACT_BADGE[f.to]}`}>{ACT_LABEL[f.to]}</span>
                         </span>
                       </td>
@@ -161,9 +168,9 @@ export default async function TrackRecordPage() {
                         {f.correct == null ? (
                           <span className="text-faint" title="Bascule vers Conserver ou cours indisponible : non notée">·</span>
                         ) : f.correct ? (
-                          <span className="text-up" title="Le cours a évolué dans le sens de la recommandation">✓</span>
+                          <span className="text-up" title="Le cours a évolué dans le sens de la recommandation"><Check className="mx-auto h-4 w-4" aria-label="Dans le sens de la recommandation" /></span>
                         ) : (
-                          <span className="text-down" title="Le cours a évolué contre la recommandation">✗</span>
+                          <span className="text-down" title="Le cours a évolué contre la recommandation"><X className="mx-auto h-4 w-4" aria-label="Contre la recommandation" /></span>
                         )}
                       </td>
                     </tr>
@@ -175,7 +182,7 @@ export default async function TrackRecordPage() {
         </>
       )}
 
-      <p className="text-[11px] leading-relaxed text-faint">
+      <p className="text-xs leading-relaxed text-faint">
         Méthode : la bascule est datée du snapshot quotidien qui l&apos;a produite ; la performance va de
         la clôture de ce jour au dernier cours connu, brute (hors frais de courtage et hors dividendes).
         Les bascules vers « Conserver » ne sont pas notées. Un historique court n&apos;a pas de valeur

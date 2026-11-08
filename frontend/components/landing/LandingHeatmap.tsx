@@ -36,7 +36,7 @@ export default function LandingHeatmap({ rows, dateLabel }: { rows: HeatmapNode[
         <HeatmapTreemap data={rows} height={320} logos={brvmLogos as Record<string, string>} />
       </div>
 
-      <p className="mt-2.5 text-[10px] leading-relaxed text-faint">
+      <p className="mt-2.5 text-[11px] leading-relaxed text-faint">
         Taille = capitalisation · couleur = variation du jour · cliquez une société pour sa fiche.
       </p>
     </section>

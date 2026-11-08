@@ -38,16 +38,16 @@ export default function SeasonalityMatrix({
           <span className="text-xs text-faint">Fenêtre :</span>
           {WINDOWS.map((w) => (
             <button key={w} type="button" onClick={() => setWindowYears(w)}
-              className={`text-xs px-2.5 py-1 rounded-md border ${windowYears === w ? 'border-info text-info bg-info/10' : 'border-border text-muted'}`}>
+              className={`text-xs px-2.5 py-1 rounded-md border ${windowYears === w ? 'border-info text-accent-ink bg-info/10' : 'border-border text-muted'}`}>
               {w} ans
             </button>
           ))}
-          <span className="ml-auto text-[11px] text-faint">{r.yearsCovered} an(s) de données</span>
+          <span className="ml-auto text-xs text-faint">{r.yearsCovered} an(s) de données</span>
         </div>
       )}
 
       {preview && (
-        <div className="rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-xs text-gold">
+        <div className="rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-xs text-accent-ink">
           Aperçu gratuit : seul le mois en cours est révélé. La matrice complète, les
           meilleurs/pires mois et la table détaillée sont réservés au premium.
         </div>
@@ -72,13 +72,13 @@ export default function SeasonalityMatrix({
                 key={m.month}
                 className="relative rounded-lg border border-border bg-surface p-2.5 overflow-hidden"
               >
-                <span className="text-[11px] font-semibold text-faint">{MONTHS[m.month - 1]}</span>
+                <span className="text-xs font-semibold text-faint">{MONTHS[m.month - 1]}</span>
                 <div className="mt-1 flex items-center gap-1 text-faint">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                     <rect x="4" y="10" width="16" height="10" rx="2" />
                     <path d="M8 10V7a4 4 0 0 1 8 0v3" />
                   </svg>
-                  <span className="text-[10px]">Premium</span>
+                  <span className="text-xs">Premium</span>
                 </div>
               </div>
             );
@@ -86,17 +86,17 @@ export default function SeasonalityMatrix({
           return (
             <div key={m.month} className={`rounded-lg border p-2.5 ${cellBg(m.avgReturn, m.n)} ${preview ? 'ring-1 ring-gold/40' : ''}`}>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-white">{MONTHS[m.month - 1]}</span>
+                <span className="text-xs font-semibold text-white">{MONTHS[m.month - 1]}</span>
                 {m.reliability === 'low' && m.n > 0 && (
-                  <span className={`text-[8px] px-1 rounded ${m.n < 3 ? 'bg-down/20 text-down' : 'bg-warn/20 text-warn'}`}>N={m.n}</span>
+                  <span className={`text-xs px-1 rounded ${m.n < 3 ? 'bg-down/20 text-down' : 'bg-warn/20 text-warn'}`}>N={m.n}</span>
                 )}
               </div>
               {m.n === 0 ? (
-                <p className="mt-1 text-[10px] text-faint">aucune donnée</p>
+                <p className="mt-1 text-xs text-faint">aucune donnée</p>
               ) : (
                 <>
                   <p className={`mt-1 tabular text-sm font-bold ${m.avgReturn >= 0 ? 'text-up' : 'text-down'}`}>{pct(m.avgReturn)}</p>
-                  <p className="text-[10px] text-faint">hausse {m.bullPct.toFixed(0)}% · N={m.n}</p>
+                  <p className="text-xs text-faint">hausses {m.bullPct.toFixed(0)} % · N={m.n}</p>
                 </>
               )}
             </div>
@@ -108,9 +108,9 @@ export default function SeasonalityMatrix({
       {preview && (
         <a
           href="/account/plan"
-          className="block rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-center text-sm font-semibold text-gold transition hover:bg-gold/10"
+          className="block rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-center text-sm font-semibold text-accent-ink transition hover:bg-gold/10"
         >
-          Débloquer les 12 mois, les extrêmes et la table détaillée · Passer à Premium →
+          Débloquer les 12 mois, les extrêmes et la table détaillée · Passer à Premium
         </a>
       )}
 
@@ -138,7 +138,7 @@ export default function SeasonalityMatrix({
 
       {/* Table détaillée — réservée au premium. */}
       {!preview && (
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
         <table className="w-full text-[13px]">
           <thead className="bg-surface text-xs text-muted">
             <tr>

@@ -1,3 +1,4 @@
+import { libelleSignal } from '@/lib/signalLabel';
 import Link from 'next/link';
 
 /**
@@ -757,13 +758,13 @@ export function SignauxEtSuivi({
           <>
             <div className="v2-sgtot">
               <span className="v2-sg">
-                <b className="v2-up">{buy}</b> BUY
+                <b className="v2-up">{buy}</b> Achat
               </span>
               <span className="v2-sg">
-                <b>{hold}</b> HOLD
+                <b>{hold}</b> Attente
               </span>
               <span className="v2-sg">
-                <b className={sell > 0 ? 'v2-down' : undefined}>{sell}</b> SELL
+                <b className={sell > 0 ? 'v2-down' : undefined}>{sell}</b> Vente
               </span>
             </div>
             {tete.map((s) => {
@@ -774,7 +775,7 @@ export function SignauxEtSuivi({
                   <span
                     className={`v2-sgb ${sig === 'BUY' ? 'v2-b-up' : sig === 'SELL' ? 'v2-b-down' : 'v2-b-flat'}`}
                   >
-                    {sig}
+                    {libelleSignal(sig)}
                   </span>
                   <span className="v2-sgs v2-tab">
                     {s.score_total != null ? pct(s.score_total) : '—'}

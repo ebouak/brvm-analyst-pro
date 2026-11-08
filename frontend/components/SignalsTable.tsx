@@ -3,12 +3,16 @@ import { X as IconeFermer } from 'lucide-react';
 import { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import type { SignalDaily } from '@/lib/types';
-import { fmtNumber } from '@/lib/format';
-import SignalBadge from './SignalBadge';
+import { fmtNumber, fmtPctSigne } from '@/lib/format';
+import { SignalBadge } from '@/components/ui/premium';
 import RatingBadge from './RatingBadge';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
 import brvmLogos from '@/lib/brvmLogos.json';
+
+function fmtScore(v: number): string {
+  return (v >= 0 ? '+' : '') + fmtNumber(v, 2);
+}
 
 const LOGOS = brvmLogos as Record<string, string>;
 
@@ -42,9 +46,9 @@ const SIG_PILLS: {
   idleCls: string;
 }[] = [
   { value: 'ALL', key: 'all', label: 'Tous', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'BUY', key: 'buy', label: 'Achat', activeCls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', idleCls: 'border-emerald-500/20 text-emerald-400/70 hover:text-emerald-400' },
-  { value: 'HOLD', key: 'hold', label: 'Conserver', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'SELL', key: 'sell', label: 'Vente', activeCls: 'bg-red-500/20 text-red-400 border-red-500/40', idleCls: 'border-red-500/20 text-red-400/70 hover:text-red-400' },
+  { value: 'BUY', key: 'buy', label: 'Achat', activeCls: 'bg-up/10 text-up border-up/40', idleCls: 'border-up/20 text-up' },
+  { value: 'HOLD', key: 'hold', label: 'Attente', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
+  { value: 'SELL', key: 'sell', label: 'Vente', activeCls: 'bg-down/10 text-down border-down/40', idleCls: 'border-down/20 text-down' },
 ];
 
 // ─── Composante principale ─────────────────────────────────────────────────
@@ -131,7 +135,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
                 onClick={() => { setSigFilter(p.value); setPage(1); }}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? p.activeCls : p.idleCls}`}
               >
-                {p.label} <span className="tabular opacity-75">({counts[p.key]})</span>
+                {p.label} <span className="tabular">({counts[p.key]})</span>
               </button>
             );
           })}
@@ -172,7 +176,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
         {/* Slider confiance */}
         <div className="flex items-center gap-3">
           <label className="text-xs text-muted whitespace-nowrap">
-            Confiance min : <span className="tabular text-white font-medium">{minConf}%</span>
+            Confiance min : <span className="tabular text-white font-medium">{minConf} %</span>
           </label>
           <input
             type="range" min={0} max={100} step={5}
@@ -189,7 +193,7 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
             onClick={reset}
             className="text-xs text-muted border border-border rounded px-3 py-1.5 hover:text-white hover:border-up/30 transition"
           >
-            Reset
+            Réinitialiser
           </button>
           <span className="text-xs text-muted self-center ml-auto">
             {filtered.length} signal{filtered.length !== 1 ? 's' : ''}
@@ -210,7 +214,14 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Mobile (< md) : une ligne empilée par signal, sans défilement horizontal */}
+            <ul className="md:hidden divide-y divide-border/40">
+              {paged.map((s) => (
+                <MobileRow key={s.code} s={s} onDetail={() => openModal(s)} />
+              ))}
+            </ul>
+
+            <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="hidden md:block overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted border-b border-border bg-bg/40">
                   <tr>
@@ -272,6 +283,41 @@ export default function SignalsTable({ rows }: { rows: SignalRow[] }) {
   );
 }
 
+// ─── Ligne empilée (mobile) ────────────────────────────────────────────────
+function MobileRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
+  const up = (s.variation_pct ?? 0) >= 0;
+  const scoreUp = (s.score_total ?? 0) >= 0;
+  const conf = s.confiance ?? 0;
+  return (
+    <li className={`px-3 py-3 space-y-1 ${s.signal === 'BUY' ? 'bg-emerald-500/[0.06]' : ''}`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-2 min-w-0">
+          <SignalBadge signal={s.signal ?? ''} />
+          <Link href={`/actions/${s.code}`} className="font-medium text-sm hover:text-up">{s.code}</Link>
+        </span>
+        <span className="flex items-center gap-3 shrink-0">
+          <span className={`tabular text-sm font-medium text-accent`}>
+            {s.score_total != null ? fmtScore(s.score_total) : '—'}
+          </span>
+          <span className="tabular text-xs text-muted">{conf > 0 ? fmtNumber(Math.round(conf * 100), 0) + ' %' : '—'}</span>
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="min-w-0 truncate text-xs text-muted" title={s.designation ?? s.code}>
+          {s.designation ?? s.secteur ?? ''}
+        </span>
+        <span className="flex items-center gap-3 shrink-0">
+          <span className="tabular text-xs text-ivory">
+            {fmtNumber(s.cours_jour)}
+            {s.variation_pct != null && <span className={up ? 'text-up' : 'text-down'}> ({fmtPctSigne(s.variation_pct)})</span>}
+          </span>
+          <button type="button" onClick={onDetail} aria-label={`Voir le détail du signal ${s.code}`} className="text-sm text-muted hover:text-up px-1">→</button>
+        </span>
+      </div>
+    </li>
+  );
+}
+
 // ─── Ligne de tableau ──────────────────────────────────────────────────────
 function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
   const up  = (s.variation_pct ?? 0) >= 0;
@@ -287,7 +333,7 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
       {/* Signal */}
       <td className="px-3 py-2 text-center">
         <span className="inline-flex items-center gap-1.5">
-          <SignalBadge signal={s.signal} small />
+          <SignalBadge signal={s.signal ?? ''} />
           <RatingBadge scoreTotal={s.score_total} confiance={s.confiance} />
         </span>
       </td>
@@ -299,7 +345,7 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={LOGOS[s.code]} alt={s.code} width={24} height={24} className="w-6 h-6 rounded object-contain shrink-0 bg-[#ffffff] p-px" />
           ) : (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded text-[9px] font-bold shrink-0 bg-border text-faint">{s.code.slice(0, 2)}</span>
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold shrink-0 bg-border text-faint">{s.code.slice(0, 2)}</span>
           )}
           <span className="font-medium">{s.code}</span>
         </Link>
@@ -307,19 +353,19 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
           <div className="text-xs text-muted truncate max-w-[180px] ml-8">{s.designation}</div>
         )}
         {s.secteur && (
-          <div className="text-[10px] text-faint ml-8">{s.secteur}</div>
+          <div className="text-[11px] text-faint ml-8">{s.secteur}</div>
         )}
       </td>
 
       {/* Score avec barre */}
       <td className="px-3 py-2 text-right">
-        <span className={`tabular text-sm font-mono font-medium ${scoreUp ? 'text-up' : 'text-down'}`}>
-          {s.score_total != null ? (scoreUp ? '+' : '') + s.score_total.toFixed(2) : '—'}
+        <span className={`tabular text-sm font-mono font-medium text-accent`}>
+          {s.score_total != null ? fmtScore(s.score_total) : '—'}
         </span>
         {s.score_total != null && (
           <div className="w-16 ml-auto mt-0.5 h-1 bg-border rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full ${scoreUp ? 'bg-up' : 'bg-down'}`}
+              className={`h-full rounded-full bg-accent`}
               style={{ width: `${Math.min(100, Math.abs(s.score_total) * 100)}%` }}
             />
           </div>
@@ -328,7 +374,7 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
 
       {/* Confiance avec mini barre */}
       <td className="px-3 py-2 text-right">
-        <span className="tabular text-xs">{conf > 0 ? Math.round(conf * 100) + '%' : '—'}</span>
+        <span className="tabular text-xs">{conf > 0 ? Math.round(conf * 100) + ' %' : '—'}</span>
         {conf > 0 && (
           <div className="w-12 ml-auto mt-0.5 h-1 bg-border rounded-full overflow-hidden">
             <div
@@ -340,11 +386,11 @@ function TableRow({ s, onDetail }: { s: SignalRow; onDetail: () => void }) {
       </td>
 
       {/* Cours */}
-      <td className={`px-3 py-2 text-right tabular text-sm ${up ? 'text-up' : 'text-down'}`}>
+      <td className="px-3 py-2 text-right tabular text-sm text-ivory">
         {fmtNumber(s.cours_jour)}
         {s.variation_pct != null && (
-          <div className="text-[10px]">
-            {up ? '+' : ''}{s.variation_pct.toFixed(2)}%
+          <div className={`text-[11px] ${up ? 'text-up' : 'text-down'}`}>
+            {fmtPctSigne(s.variation_pct)}
           </div>
         )}
       </td>
@@ -405,13 +451,14 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
           <div>
             <h2 className="font-semibold">Détail du signal — {s.code}</h2>
             <p className="text-xs text-muted mt-0.5">
-              {s.date_marche} • Score : <span className={`tabular font-mono font-medium ${(s.score_total ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
-                {s.score_total != null ? ((s.score_total >= 0 ? '+' : '') + s.score_total.toFixed(2)) : '—'}
+              {s.date_marche} • Score : <span className={"tabular font-mono font-medium text-accent"}>
+                {s.score_total != null ? fmtScore(s.score_total) : '—'}
               </span>
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <SignalBadge signal={s.signal} confiance={s.confiance} />
+            <SignalBadge signal={s.signal ?? ''} />
+            {s.confiance != null && <span className="text-xs text-muted tabular">{Math.round(s.confiance * 100)}%</span>}
             <button type="button" onClick={onClose} aria-label="Fermer" className="text-muted hover:text-white text-xl leading-none ml-2"><IconeFermer size={16} strokeWidth={2} aria-hidden /></button>
           </div>
         </div>
@@ -431,7 +478,7 @@ function SignalDetailModal({ signal: s, onClose }: { signal: SignalRow; onClose:
                   <div key={label} className="flex items-center gap-2">
                     <span className="text-xs font-mono text-muted w-40 shrink-0">{label}</span>
                     <span className={`tabular text-xs font-mono w-12 text-right ${positive ? 'text-up' : 'text-down'}`}>
-                      {val >= 0 ? '+' : ''}{val.toFixed(2)}
+                      {fmtScore(val)}
                     </span>
                     <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
                       <div

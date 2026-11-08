@@ -12,9 +12,9 @@ const pct = (v: number | null | undefined, d = 1, signed = false) =>
 /** Badge distinguant une valeur sourcée (« réel ») d'une hypothèse ajustable. */
 function Tag({ kind }: { kind: 'reel' | 'hypothese' }) {
   return kind === 'reel' ? (
-    <span className="rounded bg-up/10 px-1.5 py-0.5 text-[10px] font-semibold text-up">réel</span>
+    <span className="rounded bg-up/5 px-1.5 py-0.5 text-[11px] font-semibold text-up">réel</span>
   ) : (
-    <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] font-semibold text-info">hypothèse</span>
+    <span className="rounded bg-info/10 px-1.5 py-0.5 text-[11px] font-semibold text-info">hypothèse</span>
   );
 }
 
@@ -251,7 +251,7 @@ export default function DcfClient({
 
       {/* Projection FCF */}
       {r.dcf && r.dcf.projectedFcf.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-elevated/40 text-xs text-muted">
@@ -286,7 +286,7 @@ export default function DcfClient({
       {r.dcf && !r.dcf.error && (
         <div>
           <h3 className="mb-2 text-sm font-semibold text-white">Sensibilité de la juste-valeur (WACC × g∞)</h3>
-          <div className="overflow-x-auto rounded-xl border border-border">
+          <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-elevated/40 text-xs text-muted">

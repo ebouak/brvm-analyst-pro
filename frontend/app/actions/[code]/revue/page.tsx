@@ -59,7 +59,7 @@ export default async function RevuePage({ params }: Props) {
           <h1 className="text-2xl font-bold mt-1">{d.code} — {d.designation}</h1>
           <p className="text-xs text-gray-500 mt-0.5">{[d.secteur, d.pays].filter(Boolean).join(' · ')} · {profil.label}</p>
         </div>
-        <div className="text-right text-[10px] text-gray-400">
+        <div className="text-right text-xs text-gray-600">
           <p>Générée le {today}</p>
           <p className="mt-1 max-w-[180px]">Document informatif : ne constitue pas un conseil en investissement</p>
         </div>
@@ -74,9 +74,9 @@ export default async function RevuePage({ params }: Props) {
           ['Rendement div.', d.ratios.yieldPct != null ? `${d.ratios.yieldPct.toFixed(2)}%` : '—', lastDiv ? `${fcfa(lastDiv.montant)}` : ''],
         ] as [string, string, string][]).map(([l, v, sub]) => (
           <div key={l} className="border border-gray-200 rounded p-2.5">
-            <p className="text-[10px] uppercase text-gray-500">{l}</p>
+            <p className="text-xs uppercase text-gray-500">{l}</p>
             <p className="text-base font-bold leading-tight mt-0.5">{v}</p>
-            {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
+            {sub && <p className="text-xs text-gray-600 mt-0.5">{sub}</p>}
           </div>
         ))}
       </div>
@@ -121,7 +121,7 @@ export default async function RevuePage({ params }: Props) {
           </tr>
         </tbody>
       </table>
-      <p className="text-[10px] text-gray-400 mb-4">Montants en FCFA. Source : états financiers publiés (extraction WESTBOURSE).</p>
+      <p className="text-xs text-gray-600 mb-4">Montants en FCFA. Source : états financiers publiés (extraction WESTBOURSE).</p>
       {comptesEnRetard && latest && (
         <p className="text-[11px] text-amber-700 -mt-2 mb-4">
           Derniers comptes disponibles : exercice {latest.periode}. Aucun compte plus récent ne figure dans
@@ -134,7 +134,7 @@ export default async function RevuePage({ params }: Props) {
       {d.years.length >= 2 && (
         <div className="mb-5">
           <FinancialsBars data={d.years.map((y) => ({ periode: y.periode, revenu: y.revenu, resultatNet: y.resultatNet }))} />
-          <p className="text-[10px] text-gray-400 text-center mt-1">
+          <p className="text-xs text-gray-600 text-center mt-1">
             CA (orange) et résultat net (gris){profil.cyclique ? ' sur plusieurs exercices · lecture du cycle' : ''}.
           </p>
         </div>
@@ -161,7 +161,7 @@ export default async function RevuePage({ params }: Props) {
             ))}
           </ul>
           {d.highlights.source_libelle && (
-            <p className="text-[10px] text-gray-400 mb-4">
+            <p className="text-xs text-gray-600 mb-4">
               Source :{' '}
               {d.highlights.source_url ? (
                 <a href={d.highlights.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
@@ -179,7 +179,7 @@ export default async function RevuePage({ params }: Props) {
         Cours de bourse vs résultats & dividendes
       </h2>
       <PriceChart data={d.priceSeries} />
-      <p className="text-[10px] text-gray-400 text-center mt-1 mb-3">
+      <p className="text-xs text-gray-600 text-center mt-1 mb-3">
         Cours de clôture sur la période disponible. Source : brvm.org (via WESTBOURSE).
       </p>
       <div className="mb-2"><DividendBars data={d.dividends} /></div>
@@ -215,14 +215,14 @@ export default async function RevuePage({ params }: Props) {
               <li key={i}><b>{it.titre}</b>{it.titre && it.detail ? ' : ' : ''}{it.detail}</li>
             ))}
           </ul>
-          <p className="text-[10px] text-gray-400 mb-4 italic">
+          <p className="text-xs text-gray-600 mb-4 italic">
             Repères qualitatifs dérivés de l&apos;historique réel : il ne s&apos;agit PAS d&apos;un consensus
             d&apos;analystes ni d&apos;une prévision chiffrée.
           </p>
         </>
       )}
 
-      <p className="text-[10px] text-gray-400 mt-6 border-t pt-2 italic">
+      <p className="text-xs text-gray-600 mt-6 border-t pt-2 italic">
         Source : WESTBOURSE · {today}. Données dérivées de publications réelles (états financiers, rapports
         d&apos;activité, cours BRVM), aucune valeur inventée. Les ordres s&apos;exécutent via une SGI agréée.
         Les performances passées ne préjugent pas des performances futures.

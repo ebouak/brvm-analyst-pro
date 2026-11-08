@@ -229,15 +229,15 @@ export default function SimulatorClient({
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4 text-sm">
             <div>
-              <p className="text-[11px] text-faint">Valeur des actions</p>
+              <p className="text-xs text-muted">Valeur des actions</p>
               <p className="tabular text-white">{fmtNumber(Math.round(result.finalStockValue))} FCFA</p>
             </div>
             <div>
-              <p className="text-[11px] text-faint">Dont dividendes perçus</p>
+              <p className="text-xs text-muted">Dont dividendes perçus</p>
               <p className="tabular text-up">{fmtNumber(Math.round(result.totalDividends))} FCFA</p>
             </div>
             <div>
-              <p className="text-[11px] text-faint">Cours final ({result.endDate})</p>
+              <p className="text-xs text-muted">Cours final ({result.endDate})</p>
               <p className="tabular text-white">{fmtNumber(result.endPrice)} FCFA</p>
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function SimulatorClient({
             </a>
           </div>
 
-          <p className="text-[11px] text-faint mt-4 leading-relaxed">
+          <p className="text-xs text-muted mt-4 leading-relaxed">
             Simulation fondée sur les cours de clôture historiques et les dividendes enregistrés (non
             réinvestis). Performances passées ne préjugent pas des performances futures.
           </p>

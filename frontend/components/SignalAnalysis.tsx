@@ -33,7 +33,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
         {synthesis.cautions.length > 0 && (
           <ul className="mt-3 space-y-1.5">
             {synthesis.cautions.map((c, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-warn/90">
+              <li key={i} className="flex items-start gap-2 text-xs text-warn">
                 <span className="mt-0.5 shrink-0">!</span>
                 <span className="leading-relaxed">{c}</span>
               </li>
@@ -57,7 +57,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
           ))}
         </ul>
         {technical.tension && (
-          <p className="mt-3 rounded-md bg-warn/[0.08] px-3 py-2 text-xs text-warn/90 leading-relaxed">
+          <p className="mt-3 rounded-md bg-warn/[0.08] px-3 py-2 text-xs text-warn leading-relaxed">
             {technical.tension}
           </p>
         )}

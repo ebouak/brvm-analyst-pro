@@ -2,10 +2,10 @@ import type { LiquidityScore, LiquidityScoreV2 } from '@/lib/liquidity';
 import { PremiumPanel } from '@/components/ui/premium';
 
 const CLASS_STYLE: Record<string, string> = {
-  A: 'border-up/30 bg-up/10 text-up',
+  A: 'border-up/30 bg-up/5 text-up',
   B: 'border-accent/30 bg-accent/10 text-accent',
   C: 'border-warn/30 bg-warn/10 text-warn',
-  D: 'border-down/30 bg-down/10 text-down',
+  D: 'border-down/30 bg-down/5 text-down',
 };
 
 const fmtFcfa = (n: number) =>
@@ -93,7 +93,7 @@ export function LiquidityCard({
           Coût d&apos;un achat + une revente selon les barèmes SGI en base (courtage{' '}
           {courtageMin!.toFixed(2)}–{courtageMax!.toFixed(2)} % + 0,30 % BRVM/DC-BR par ordre) :
           votre position doit gagner au moins {arMax.toFixed(1)} % pour couvrir les frais au barème
-          le plus élevé. <a href="/comparateur-sgi" className="text-accent hover:underline">Comparer les SGI →</a>
+          le plus élevé. <a href="/comparateur-sgi" className="text-accent underline underline-offset-2">Comparer les SGI</a>
         </p>
       )}
 
@@ -139,7 +139,7 @@ export function LiquidityCard({
             </div>
           )}
 
-          <p className="text-[10px] leading-relaxed text-faint">
+          <p className="text-[11px] leading-relaxed text-faint">
             {v2.spread_source === 'carnet'
               ? "La fourchette vient des meilleures limites publiées par la BRVM au Bulletin Officiel de la Cote, à la clôture de la dernière séance parue. L'impact prix, lui, reste estimé sur les échanges des 30 dernières séances."
               : "Faute de limites publiées pour cette valeur, la fourchette et l'impact prix sont estimés à partir des échanges des 30 dernières séances, jamais inventés."}

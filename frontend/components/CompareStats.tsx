@@ -80,7 +80,7 @@ export default function CompareStats({ rows, codes, meta = [] }: Props) {
                 {code}
               </span>
               {name && (
-                <p className="text-[10px] text-[#8b93a7] leading-tight truncate" title={name}>
+                <p className="text-[11px] text-[#8b93a7] leading-tight truncate" title={name}>
                   {name}
                 </p>
               )}

@@ -33,7 +33,7 @@ function MoverTooltip({ rows, label }: { rows: Mover[]; label: string }) {
     >
       <div className="mb-1.5 flex items-center justify-between px-1">
         <span className="text-xs text-faint">{label}</span>
-        <span className="tabular text-[10px] text-muted">{rows.length}</span>
+        <span className="tabular text-[11px] text-muted">{rows.length}</span>
       </div>
       <div className="max-h-48 space-y-0.5 overflow-y-auto pr-0.5">
         {rows.map((m) => {
@@ -41,7 +41,7 @@ function MoverTooltip({ rows, label }: { rows: Mover[]; label: string }) {
           const flat = m.variation === 0;
           return (
             <div key={m.code} className="flex items-center justify-between gap-2 rounded px-1 py-0.5 text-xs hover:bg-surface">
-              <span className="font-medium text-ivory/85">{m.code}</span>
+              <span className="font-medium text-ivory">{m.code}</span>
               <span className={`tabular font-medium ${flat ? 'text-muted' : up ? 'text-up' : 'text-down'}`}>
                 {up ? '+' : ''}{m.variation.toFixed(2)}%
               </span>
@@ -55,9 +55,9 @@ function MoverTooltip({ rows, label }: { rows: Mover[]; label: string }) {
 
 function BreadthBadge({ ratio }: { ratio: number }) {
   const { cls, label } = ratio >= 60
-    ? { cls: 'border-up/25 bg-up/10 text-up',     label: 'Haussier' }
+    ? { cls: 'border-up/25 bg-up/5 text-up',     label: 'Haussier' }
     : ratio <= 40
-    ? { cls: 'border-down/25 bg-down/10 text-down', label: 'Baissier' }
+    ? { cls: 'border-down/25 bg-down/5 text-down', label: 'Baissier' }
     : { cls: 'border-warn/25 bg-warn/10 text-warn', label: 'Neutre'   };
 
   return (
@@ -94,7 +94,7 @@ const PILL_CONFIGS = [
     key: 'total',
     label: 'Titres',
     icon: (s: number) => <Activity size={s} />,
-    cls: 'border-border-strong bg-elevated text-ivory/70 hover:border-gold/20',
+    cls: 'border-border-strong bg-elevated text-ivory hover:border-gold/20',
     valueCls: 'text-ivory',
   },
 ] as const;
@@ -211,7 +211,7 @@ export default function MarketStateCard({
               {/* baisse — rubis */}
               <rect x={hPct + sPct} y="0" width={bPct} height="8" fill="rgba(226,75,75,0.55)" rx="4" />
             </svg>
-            <div className="flex justify-between mt-1.5 text-[10px] text-faint">
+            <div className="flex justify-between mt-1.5 text-[11px] text-faint">
               <span>{hPct.toFixed(0)}% hausse</span>
               <span>{bPct.toFixed(0)}% baisse</span>
             </div>
@@ -223,7 +223,7 @@ export default function MarketStateCard({
           <span title={stats.volumeEstimated ? 'Estimation : cours × titres échangés (valeur officielle non publiée en intraday)' : undefined}>
             Valeur échangée{' '}
             {stats.volumeTotal != null ? (
-              <span className="tabular text-ivory/80 font-medium">
+              <span className="tabular text-ivory font-medium">
                 {stats.volumeEstimated && <span className="text-faint">≈ </span>}
                 {fmtFcfa(stats.volumeTotal)} FCFA
               </span>
@@ -239,7 +239,7 @@ export default function MarketStateCard({
           <span>
             Titres échangés{' '}
             {stats.titresEchanges != null ? (
-              <span className="tabular text-ivory/80 font-medium">{fmtNumber(stats.titresEchanges)}</span>
+              <span className="tabular text-ivory font-medium">{fmtNumber(stats.titresEchanges)}</span>
             ) : (
               <span className="text-faint">—</span>
             )}
@@ -248,7 +248,7 @@ export default function MarketStateCard({
             <BarChart3 size={11} className="text-faint" />
             Transactions{' '}
             {stats.transactions != null ? (
-              <span className="tabular text-ivory/80 font-medium">{fmtNumber(stats.transactions)}</span>
+              <span className="tabular text-ivory font-medium">{fmtNumber(stats.transactions)}</span>
             ) : (
               <span className="text-faint">—</span>
             )}

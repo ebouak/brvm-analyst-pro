@@ -13,7 +13,7 @@ export default function RatioCard({ label, value, quality = 'ok', positive }: Pr
     return (
       <div className="flex items-center justify-between py-2 text-sm">
         <span className="text-muted">{label}</span>
-        <span className="text-muted/60">non disponible</span>
+        <span className="text-muted">non disponible</span>
       </div>
     );
   }

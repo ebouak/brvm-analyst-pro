@@ -15,7 +15,7 @@ export default function PdfDropzone({ onFiles }: { onFiles: (files: File[]) => v
       }`}>
       <input {...getInputProps()} />
       <p className="text-sm text-muted">Déposez ici les PDF d'états financiers, ou cliquez pour les sélectionner.</p>
-      <p className="text-[10px] text-muted mt-1">Nom recommandé : SYMBOLE_ANNEE.pdf (ex. SNTS_2025.pdf)</p>
+      <p className="text-[11px] text-muted mt-1">Nom recommandé : SYMBOLE_ANNEE.pdf (ex. SNTS_2025.pdf)</p>
     </div>
   );
 }

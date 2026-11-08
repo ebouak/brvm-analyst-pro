@@ -38,7 +38,7 @@ function tickerColor(code: string) {
 }
 function TickerBadge({ code }: { code: string }) {
   return (
-    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${tickerColor(code)}`}>
+    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded font-mono ${tickerColor(code)}`}>
       {code}
     </span>
   );
@@ -84,9 +84,9 @@ function ArticleCard({ item }: { item: VeilleNews }) {
         <span className="min-w-0 truncate text-[11px] text-muted">
           {srcLabel.length > 35 ? srcLabel.slice(0, 35) + '…' : srcLabel}
         </span>
-        <span className="text-[10px] text-muted/60">· il y a {relativeTime(item.created_at ?? item.date_publication)}</span>
+        <span className="text-[11px] text-muted">· il y a {relativeTime(item.created_at ?? item.date_publication)}</span>
         {isAlerte && (
-          <span className="text-[10px] bg-[#ff6b6b]/20 text-[#ff6b6b] border border-[#ff6b6b]/30 px-1.5 py-0.5 rounded font-medium ml-1">
+          <span className="text-[11px] bg-[#ff6b6b]/20 text-[#ff6b6b] border border-[#ff6b6b]/30 px-1.5 py-0.5 rounded font-medium ml-1">
             ALERTE
           </span>
         )}
@@ -132,7 +132,7 @@ function HeatmapView({ news, onSelect }: { news: VeilleNews[]; onSelect: (code: 
             title={`${count} article(s) · cliquer pour filtrer`}
           >
             <p className="text-xs font-mono font-bold">{code}</p>
-            <p className="text-[10px] mt-0.5 opacity-70">{count}</p>
+            <p className="text-[11px] mt-0.5 opacity-70">{count}</p>
           </button>
         );
       })}
@@ -563,7 +563,7 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                       <span className={`w-2 h-2 rounded-full shrink-0 ${colorCls}`} />
                       <span className="truncate">{name}</span>
                     </span>
-                    <span className={`tabular shrink-0 ml-1 px-1.5 rounded text-[10px] ${isActive ? 'bg-accent/20 text-accent' : 'bg-white/5 text-muted'}`}>
+                    <span className={`tabular shrink-0 ml-1 px-1.5 rounded text-[11px] ${isActive ? 'bg-accent/20 text-accent' : 'bg-white/5 text-muted'}`}>
                       {count}
                     </span>
                   </button>
@@ -630,13 +630,13 @@ export default function VeilleDashboard({ news: allNews }: { news: VeilleNews[] 
                 </span>
                 {sourceFilter && (
                   <button type="button" onClick={() => setSourceFilter(null)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/15 text-accent text-[10px] font-medium hover:bg-accent/25 transition-colors cursor-pointer">
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/15 text-accent text-[11px] font-medium hover:bg-accent/25 transition-colors cursor-pointer">
                     Source: {sourceFilter} ×
                   </button>
                 )}
                 {activeStatFilter && (
                   <button type="button" onClick={() => setActiveStatFilter(null)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f59e0b]/15 text-[#f59e0b] text-[10px] font-medium hover:bg-[#f59e0b]/25 transition-colors cursor-pointer">
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f59e0b]/15 text-[#f59e0b] text-[11px] font-medium hover:bg-[#f59e0b]/25 transition-colors cursor-pointer">
                     {activeStatFilter.toUpperCase()} ×
                   </button>
                 )}

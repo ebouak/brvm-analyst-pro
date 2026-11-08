@@ -227,7 +227,7 @@ export default async function ScannerPage({ searchParams }: PageProps) {
         <Eyebrow className="mb-3">Référence des indicateurs</Eyebrow>
         <div className="flex flex-wrap gap-3 text-xs text-muted">
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/15 text-up font-medium tabular">RSI &lt; 30</span>
+            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/10 text-up font-medium tabular">RSI &lt; 30</span>
             Zone survendue
           </span>
           <span className="inline-flex items-center gap-1.5">
@@ -235,7 +235,7 @@ export default async function ScannerPage({ searchParams }: PageProps) {
             Zone surachetée
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/15 text-up font-medium">ACHAT</span>
+            <span className="inline-block px-1.5 py-0.5 rounded-sm bg-up/10 text-up font-medium">ACHAT</span>
             Signal haussier confirmé
           </span>
           <span className="inline-flex items-center gap-1.5">

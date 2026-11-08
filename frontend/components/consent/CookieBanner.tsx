@@ -19,7 +19,7 @@ export function CookieBanner() {
         // même style, même taille (CNIL : refuser aussi simple qu'accepter).
         <div className="print:hidden fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md sm:py-4">
           <div className="mx-auto flex max-w-4xl flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-            <p className="text-xs leading-snug text-ivory/80 sm:text-sm">
+            <p className="text-xs leading-snug text-ivory sm:text-sm">
               Nous utilisons des cookies strictement nécessaires au fonctionnement du site.
               Vous pouvez accepter la mesure d&apos;audience pour nous aider à l&apos;améliorer.{' '}
               <Link href="/confidentialite" className="underline hover:text-ivory">En savoir plus</Link>.
@@ -27,7 +27,7 @@ export function CookieBanner() {
             <div className="flex w-full shrink-0 flex-wrap items-stretch gap-2 sm:w-auto">
               <button type="button" onClick={() => save(defaultDenied())} className={CHOIX}>Refuser</button>
               <button type="button" onClick={() => save(acceptAll())} className={CHOIX}>Tout accepter</button>
-              <button type="button" onClick={open} className="px-2 py-2 text-sm text-ivory/80 underline underline-offset-2 hover:text-ivory">Personnaliser</button>
+              <button type="button" onClick={open} className="px-2 py-2 text-sm text-ivory underline underline-offset-2 hover:text-ivory">Personnaliser</button>
             </div>
           </div>
         </div>

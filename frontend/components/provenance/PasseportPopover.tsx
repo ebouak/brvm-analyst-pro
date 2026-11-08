@@ -12,7 +12,7 @@ import type { Passeport } from '@/lib/provenance/passport';
  */
 
 const ETIQUETTE: Record<Passeport['confiance'], { texte: string; classe: string }> = {
-  verifie:   { texte: 'Vérifié',   classe: 'border-up/40 bg-up/10 text-up' },
+  verifie:   { texte: 'Vérifié',   classe: 'border-up/40 bg-up/5 text-up' },
   extrait:   { texte: 'Extrait',   classe: 'border-border text-muted' },
   non_trace: { texte: 'Non tracé', classe: 'border-warn/40 bg-warn/10 text-warn' },
 };
@@ -34,7 +34,7 @@ export default function PasseportPopover({ passeport, titre }: { passeport: Pass
       <button
         type="button" onClick={() => setOuvert((v) => !v)} aria-expanded={ouvert}
         aria-label={`Provenance de ${titre}`}
-        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] transition hover:opacity-80 ${et.classe}`}
+        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] transition hover:opacity-80 ${et.classe}`}
       >
         ⓘ {et.texte}
       </button>
@@ -84,7 +84,7 @@ export default function PasseportPopover({ passeport, titre }: { passeport: Pass
           )}
 
           <button type="button" onClick={() => setOuvert(false)}
-            className="mt-3 text-[10px] text-faint hover:text-white">
+            className="mt-3 text-[11px] text-faint hover:text-white">
             Fermer
           </button>
         </div>

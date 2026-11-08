@@ -96,7 +96,7 @@ function MiniBarres({
 
       <div className="mt-1.5 flex gap-1.5">
         {dispo.map((x) => (
-          <span key={x.year} className="tabular flex-1 text-center text-[9px] text-faint">
+          <span key={x.year} className="tabular flex-1 text-center text-[11px] text-faint">
             {String(x.year).slice(2)}
           </span>
         ))}
@@ -202,7 +202,7 @@ export function FundamentalsPreview({
 
         <Link
           href="/methodologie"
-          className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory/80 transition-colors hover:text-gold-2"
+          className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-ivory transition-colors hover:text-gold-2"
         >
           Notre méthodologie <span aria-hidden>→</span>
         </Link>

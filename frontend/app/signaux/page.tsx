@@ -2,7 +2,14 @@ import { createPublicClient } from '@/lib/supabase/public';
 import SignalsTable, { type SignalRow } from '@/components/SignalsTable';
 import SignalPerformance from '@/components/SignalPerformance';
 import { getBacktestStats, getRecentRealBuySignals } from '@/lib/signals/backtest';
-import { fmtDateFR } from '@/lib/format';
+import { ArrowRight } from 'lucide-react';
+
+function dateCourte(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import {
   SectionHeader,
@@ -152,7 +159,7 @@ export default async function SignauxPage() {
         actions={
           <>
             <StatPill tone="gold">
-              Dernière séance scorée&nbsp;<span className="tabular">{fmtDateFR(lastDate)}</span>
+              Dernière séance scorée&nbsp;<span>{dateCourte(lastDate)}</span>
             </StatPill>
             <PremiumCTA href="/signaux" variant="ghost">
               Actualiser
@@ -164,9 +171,6 @@ export default async function SignauxPage() {
       {/* ── Filet doré de séparation ────────────────────────────────────── */}
       <div className="gold-rule" />
 
-      {/* ── Track record : backtest méthode + signaux réels récents ────── */}
-      <SignalPerformance backtest={backtest} recentReal={recentReal} />
-
       {/* ── Métriques KPI ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MetricCard
@@ -176,32 +180,47 @@ export default async function SignauxPage() {
           accent="neutral"
         />
         <MetricCard
-          label="Signaux ACHAT"
+          label="Signaux Achat"
           value={String(buyCount)}
           delta={total > 0 ? `${Math.round((buyCount / total) * 100)} % du marché` : undefined}
-          deltaDir="up"
+          deltaDir="flat"
           accent="emerald"
         />
         <MetricCard
-          label="Signaux CONSERVER"
+          label="Signaux Attente"
           value={String(holdCount)}
           delta={total > 0 ? `${Math.round((holdCount / total) * 100)} % du marché` : undefined}
           deltaDir="flat"
           accent="neutral"
         />
         <MetricCard
-          label="Signaux VENTE"
+          label="Signaux Vente"
           value={String(sellCount)}
           delta={total > 0 ? `${Math.round((sellCount / total) * 100)} % du marché` : undefined}
-          deltaDir="down"
+          deltaDir="flat"
           accent="sapphire"
         />
       </div>
 
+      {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
+      {total > 0 && buyCount === 0 && (
+        <div className="rounded-xl border border-info/25 bg-info/[0.06] px-4 py-3 text-sm text-muted">
+          <span className="font-medium text-ivory">Aucun signal d&apos;achat sur cette séance.</span>{' '}
+          Aucun titre ne réunit les conditions d&apos;un signal d&apos;achat. C&apos;est une situation
+          courante en phase de marché neutre, pas une anomalie. Les titres classés{' '}
+          <span className="text-ivory">Attente</span> n&apos;ont simplement franchi aucun des deux seuils.
+        </div>
+      )}
+
+      {/* ── Tableau interactif avec filtres ─────────────────────────────── */}
+      <PremiumPanel>
+        <SignalsTable rows={rows} />
+      </PremiumPanel>
+
       {/* ── Bascules depuis la séance précédente (les VRAIES nouveautés) ── */}
       {changes.length > 0 && (
         <div className="rounded-xl border border-accent/25 bg-accent/[0.05] px-4 py-3">
-          <p className="overline mb-2 text-gold-2">Nouveaux depuis la séance précédente</p>
+          <p className="mb-2 text-sm font-medium text-ivory">Nouveaux depuis la séance précédente</p>
           <ul className="flex flex-wrap gap-2">
             {changes.map((c) => (
               <li key={c.code}>
@@ -209,9 +228,9 @@ export default async function SignauxPage() {
                   href={`/actions/${c.code}`}
                   className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs transition-colors hover:border-accent/40"
                 >
-                  <span className="font-semibold text-ivory">{c.code}</span>
+                  <span className="font-mono font-medium text-ivory">{c.code}</span>
                   <SignalBadge signal={c.from as 'BUY' | 'HOLD' | 'SELL'} />
-                  <span className="text-faint">→</span>
+                  <ArrowRight className="h-3 w-3 text-faint" aria-hidden />
                   <SignalBadge signal={c.to as 'BUY' | 'HOLD' | 'SELL'} />
                 </a>
               </li>
@@ -220,20 +239,8 @@ export default async function SignauxPage() {
         </div>
       )}
 
-      {/* ── Message pédagogique quand aucun signal d'achat ──────────────── */}
-      {total > 0 && buyCount === 0 && (
-        <div className="rounded-xl border border-info/25 bg-info/[0.06] px-4 py-3 text-sm text-muted">
-          <span className="font-medium text-white">Aucun signal d&apos;achat sur cette séance.</span>{' '}
-          Aucun titre ne réunit les conditions d&apos;un signal d&apos;achat. C&apos;est une situation
-          courante en phase de marché neutre, pas une anomalie. Les titres classés
-          <span className="text-white">Conserver</span> n&apos;ont simplement franchi aucun des deux seuils.
-        </div>
-      )}
-
-      {/* ── Tableau interactif avec filtres ─────────────────────────────── */}
-      <PremiumPanel>
-        <SignalsTable rows={rows} />
-      </PremiumPanel>
+      {/* ── Track record : backtest méthode + signaux réels récents ────── */}
+      <SignalPerformance backtest={backtest} recentReal={recentReal} />
 
       {/* ── Légende de lecture ──────────────────────────────────────────── */}
       <div className="rounded-card border border-border bg-surface shadow-card p-5 space-y-4">

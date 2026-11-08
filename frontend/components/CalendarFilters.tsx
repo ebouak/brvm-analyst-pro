@@ -22,8 +22,8 @@ const DAYS = [
 
 function chip(active: boolean) {
   return active
-    ? 'px-3 py-1 rounded-full text-xs font-medium bg-blue/20 text-blue border border-blue/40'
-    : 'px-3 py-1 rounded-full text-xs font-medium bg-surface text-muted border border-border hover:border-blue/30 hover:text-blue transition-colors';
+    ? 'px-3 py-1 rounded-full text-xs font-medium bg-blue/20 text-accent-ink border border-blue/40'
+    : 'px-3 py-1 rounded-full text-xs font-medium bg-surface text-muted border border-border hover:border-blue/30 hover:text-accent-ink transition-colors';
 }
 
 function buildHref(params: { type: string; days: string; view: string }, overrides: Partial<{ type: string; days: string; view: string }>) {

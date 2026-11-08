@@ -46,7 +46,7 @@ export function DataToDecision() {
               className="flex h-full flex-col gap-2 p-4 transition-colors hover:bg-elevated/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/50"
             >
               <span className="flex items-center gap-2">
-                <span className="tabular font-mono text-[10px] font-bold text-accent">{e.n}</span>
+                <span className="tabular font-mono text-[11px] font-bold text-accent">{e.n}</span>
                 {/* La flèche marque l'enchaînement, sauf sur la dernière étape. */}
                 {i < ETAPES.length - 1 && (
                   <span className="hidden h-px flex-1 bg-gradient-to-r from-accent/40 to-transparent xl:block" aria-hidden />

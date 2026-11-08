@@ -100,7 +100,7 @@ export function EditCourseForm({ slug, initial }: { slug: string; initial: Cours
                   <input value={lesson.qcm.explication} onChange={(e) => mutate((c) => { if (c.lessons[i].qcm) c.lessons[i].qcm!.explication = e.target.value; })} className={ta} />
                 </label>
               </div>
-              <p className="text-[10px] text-faint">N° de réponse en base 0 : la 1re option = 0, la 2e = 1, etc.</p>
+              <p className="text-[11px] text-faint">N° de réponse en base 0 : la 1re option = 0, la 2e = 1, etc.</p>
             </div>
           )}
         </div>

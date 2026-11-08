@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
 import PrintButton from '@/components/public/PrintButton';
-import { fmtNumber, fmtFcfa, fmtDateFR } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtDateFR, fmtDateCourte } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
 
 export const revalidate = 900;
@@ -30,9 +31,9 @@ interface PageProps {
 }
 
 const TENDANCE = {
-  haussiere: { label: 'Tendance haussière', tone: 'text-up', dot: '#3fe18b' },
-  baissiere: { label: 'Tendance baissière', tone: 'text-down', dot: '#ff6b6b' },
-  mitigee: { label: 'Séance mitigée', tone: 'text-white', dot: '#56d7fd' },
+  haussiere: { label: 'Tendance haussière', tone: 'text-up', dot: 'bg-up' },
+  baissiere: { label: 'Tendance baissière', tone: 'text-down', dot: 'bg-down' },
+  mitigee: { label: 'Séance mitigée', tone: 'text-ivory', dot: 'bg-accent' },
 } as const;
 
 async function getBrief(date: string) {
@@ -88,12 +89,12 @@ function MoverBar({
   const width = Math.max(8, Math.round((Math.abs(pct) / maxAbs) * 100));
   return (
     <Link href={`/societes/${code}`} className="group flex items-center gap-3">
-      <span className="w-14 shrink-0 font-mono text-xs font-bold text-white group-hover:text-accent transition-colors">
+      <span className="w-14 shrink-0 font-mono text-xs font-medium text-ivory group-hover:text-accent-ink transition-colors">
         {code}
       </span>
       <span className="flex-1 h-6 rounded-md bg-elevated/60 overflow-hidden">
         <span
-          className={`block h-full rounded-md ${up ? 'bg-up/70' : 'bg-down/70'} transition-all`}
+          className={`block h-full rounded-md ${up ? 'bg-up/70' : 'bg-down/70'}`}
           style={{ width: `${width}%` }}
         />
       </span>
@@ -151,21 +152,18 @@ export default async function BriefDatePage({ params }: PageProps) {
           <span className="text-faint">/</span>
           <Link href="/brief" className="hover:text-white transition-colors">Brief</Link>
           <span className="text-faint">/</span>
-          <span className="text-white">{fmtDateFR(brief.date_marche)}</span>
+          <span className="text-ivory">{fmtDateCourte(brief.date_marche)}</span>
         </nav>
 
         {/* ── En-tête de note ─────────────────────────────────────────── */}
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] text-accent/70 mb-1">
-              Note de conjoncture · BRVM
-            </p>
-            <h1 className="font-display text-2xl md:text-3xl text-white">
-              Séance du {fmtDateFR(brief.date_marche)}
+            <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">
+              Note de conjoncture BRVM · séance du {fmtDateCourte(brief.date_marche)}
             </h1>
             {t && (
               <p className={`mt-2 inline-flex items-center gap-2 text-sm font-semibold ${t.tone}`}>
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: t.dot }} />
+                <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${t.dot}`} />
                 {t.label}
               </p>
             )}
@@ -203,7 +201,7 @@ export default async function BriefDatePage({ params }: PageProps) {
                 .filter((i) => i.valeur != null)
                 .map((i) => (
                   <div key={i.code} className="bg-surface border border-border rounded-xl p-4">
-                    <p className="text-[11px] text-faint mb-1">{i.code}</p>
+                    <p className="text-xs text-faint mb-1">{i.code}</p>
                     <p className="tabular text-lg text-white">{fmtNumber(i.valeur, 2)}</p>
                     {i.variation_pct != null && (
                       <p className={`tabular text-xs font-medium ${i.variation_pct >= 0 ? 'text-up' : 'text-down'}`}>
@@ -215,13 +213,13 @@ export default async function BriefDatePage({ params }: PageProps) {
                 ))}
               {d.valeur_transactions != null && (
                 <div className="bg-surface border border-border rounded-xl p-4">
-                  <p className="text-[11px] text-faint mb-1">Transactions</p>
+                  <p className="text-xs text-faint mb-1">Transactions</p>
                   <p className="tabular text-lg text-white">{fmtFcfa(d.valeur_transactions)}</p>
                   <p className="text-xs text-muted">FCFA échangés</p>
                 </div>
               )}
               <div className="bg-surface border border-border rounded-xl p-4">
-                <p className="text-[11px] text-faint mb-1">Volume</p>
+                <p className="text-xs text-faint mb-1">Volume</p>
                 <p className="tabular text-lg text-white">{fmtNumber(d.volume_total)}</p>
                 <p className="text-xs text-muted">titres</p>
               </div>
@@ -270,13 +268,13 @@ export default async function BriefDatePage({ params }: PageProps) {
                     <li key={i} className="border-t border-border/40 first:border-0 pt-3 first:pt-0">
                       {n.source_url ? (
                         <a href={n.source_url} target="_blank" rel="noopener noreferrer"
-                          className="text-sm text-white hover:text-accent transition-colors leading-snug block">
+                          className="text-sm text-ivory hover:text-accent-ink transition-colors leading-snug block">
                           {n.titre}
                         </a>
                       ) : (
                         <p className="text-sm text-white leading-snug">{n.titre}</p>
                       )}
-                      {n.source && <p className="text-[11px] text-faint mt-1">{n.source}</p>}
+                      {n.source && <p className="text-xs text-faint mt-1">{n.source}</p>}
                     </li>
                   ))}
                 </ul>
@@ -288,7 +286,7 @@ export default async function BriefDatePage({ params }: PageProps) {
           <section className="bg-surface border border-border rounded-xl p-5 mb-6">
             {brief.audio_url && (
               <div className="mb-4 rounded-xl border border-accent/25 bg-accent/[0.06] p-3">
-                <p className="overline mb-2 text-gold-2">Écouter le brief (1 min)</p>
+                <p className="overline mb-2 text-accent-ink">Écouter le brief (1 min)</p>
                 {/* eslint-disable-next-line jsx-a11y/media-has-caption -- transcription complète juste en dessous */}
                 <audio controls preload="none" src={brief.audio_url} className="w-full">
                   Votre navigateur ne lit pas l&apos;audio : le texte complet est ci-dessous.
@@ -320,9 +318,9 @@ export default async function BriefDatePage({ params }: PageProps) {
                 <li key={r.date_marche}>
                   <Link
                     href={`/brief/${r.date_marche}`}
-                    className="text-sm text-accent transition-colors hover:text-gold-2"
+                    className="text-sm text-accent-ink transition-colors hover:underline"
                   >
-                    Séance du {fmtDateFR(r.date_marche)} →
+                    Séance du {fmtDateCourte(r.date_marche)}
                   </Link>
                 </li>
               ))}
@@ -333,7 +331,7 @@ export default async function BriefDatePage({ params }: PageProps) {
         {/* ── Pied de note ───────────────────────────────────────────── */}
         <footer className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <Link href="/brief" className="text-sm text-muted hover:text-white transition-colors">
-            ← Toutes les notes
+            <span className="inline-flex items-center gap-1"><ArrowLeft aria-hidden className="h-4 w-4" />Toutes les notes</span>
           </Link>
           <a
             href={`https://wa.me/?text=${encodeURIComponent(brief.contenu)}`}
@@ -344,7 +342,7 @@ export default async function BriefDatePage({ params }: PageProps) {
             Partager sur WhatsApp
           </a>
         </footer>
-        <p className="mt-6 text-[10px] text-faint leading-relaxed">
+        <p className="mt-6 text-[11px] text-faint leading-relaxed">
           Note composée depuis les données de séance (brvm.org). La tendance est dérivée du
           rapport hausses/baisses, aucun commentaire inventé. Pas un conseil en investissement.
         </p>

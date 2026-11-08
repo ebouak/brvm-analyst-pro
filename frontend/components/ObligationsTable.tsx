@@ -130,7 +130,7 @@ export default function ObligationsTable({
       </div>
 
       {/* Tableau */}
-      <div className="bg-surface border border-border rounded-xl overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm min-w-[640px]">
           <thead className="text-xs text-muted border-b border-border">
             <tr>
@@ -158,7 +158,7 @@ export default function ObligationsTable({
                   <td className="px-3 py-2.5">
                     <span className="font-mono text-accent text-xs">{o.code}</span>
                     {o.designation && (
-                      <div className="text-[10px] text-muted truncate max-w-[160px] mt-0.5">{o.designation}</div>
+                      <div className="text-[11px] text-muted truncate max-w-[160px] mt-0.5">{o.designation}</div>
                     )}
                   </td>
                   {/* Émetteur */}
@@ -173,7 +173,7 @@ export default function ObligationsTable({
                   <td className="px-3 py-2.5 text-right">
                     <span className="text-xs">{maturiteYear(o.maturite)}</span>
                     {o.yearsToMaturity != null && (
-                      <div className="text-[10px] text-muted">{o.yearsToMaturity.toFixed(1)} ans</div>
+                      <div className="text-[11px] text-muted">{o.yearsToMaturity.toFixed(1)} ans</div>
                     )}
                   </td>
                   {/* Prix + statut */}
@@ -181,7 +181,7 @@ export default function ObligationsTable({
                     <span className="font-mono text-xs">
                       {o.cours_jour != null ? o.cours_jour.toLocaleString('fr-FR') : '—'}
                     </span>
-                    <div className={`text-[10px] ${pCls}`}>{pLabel}</div>
+                    <div className={`text-[11px] ${pCls}`}>{pLabel}</div>
                   </td>
                   {/* YTM + fiscalité coupon */}
                   <td className="px-3 py-2.5 text-right font-mono text-xs">
@@ -192,7 +192,7 @@ export default function ObligationsTable({
                     ) : (
                       <span className="text-faint">—</span>
                     )}
-                    <div className={`text-[10px] ${o.couponExonere ? 'text-up/80' : 'text-muted'}`}>
+                    <div className={`text-[11px] ${o.couponExonere ? 'text-up' : 'text-muted'}`}>
                       {o.couponExonere ? 'net (exonéré)' : 'retenue 2–6 %'}
                     </div>
                   </td>

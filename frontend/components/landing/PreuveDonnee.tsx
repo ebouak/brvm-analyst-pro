@@ -49,7 +49,7 @@ function Maillon({
 }) {
   return (
     <li className="relative flex-1 rounded-panel border border-border bg-surface/60 p-5">
-      <span className="tabular font-mono text-[10px] font-bold text-accent">{rang}</span>
+      <span className="tabular font-mono text-[11px] font-bold text-accent">{rang}</span>
       <p className="overline mt-1 text-faint">{titre}</p>
       <p className="mt-2 font-display text-xl leading-tight text-ivory">{valeur}</p>
       <p className="mt-1.5 text-[11.5px] leading-snug text-muted">{detail}</p>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { fmtDateCourte } from '@/lib/format';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -39,11 +40,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const a = await charger(params.slug);
   if (!a) notFound();
 
-  const date = new Date(a.publie_le ?? `${a.date_fait}T12:00:00Z`).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const date = fmtDateCourte(a.publie_le ?? a.date_fait);
   const ld = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -60,7 +57,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const decryptage = (a.chiffres.decryptage as DecryptageDonnees | undefined) ?? null;
   const nav = (
       <nav className="text-xs text-faint">
-        <Link href="/actualites" className="hover:text-accent">
+        <Link href="/actualites" className="hover:text-accent-ink">
           Actualités
         </Link>
         {' · '}
@@ -68,7 +65,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         {a.code ? (
           <>
             {' · '}
-            <Link href={`/societes/${a.code}`} className="hover:text-accent">
+            <Link href={`/societes/${a.code}`} className="font-mono font-medium text-ivory hover:text-accent-ink">
               {a.code}
             </Link>
           </>
@@ -93,7 +90,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       {nav}
 
       <header className="space-y-3">
-        <h1 className="font-display text-2xl text-white md:text-3xl">{a.titre}</h1>
+        <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">{a.titre}</h1>
         <p className="text-[15px] leading-relaxed text-ivory">{a.chapo}</p>
         <p className="text-xs text-faint">{date} · La rédaction WESTBOURSE</p>
       </header>
@@ -107,7 +104,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         className="w-full rounded-xl border border-border"
       />
 
-      <div className="space-y-3 text-sm leading-relaxed text-muted [&_a]:text-accent [&_a]:underline [&_em]:text-faint [&_h2]:pt-2 [&_h2]:font-display [&_h2]:text-lg [&_h2]:text-white [&_strong]:text-ivory [&_table]:w-full [&_table]:text-xs [&_td]:border-b [&_td]:border-border/40 [&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left [&_th]:text-faint [&_ul]:list-disc [&_ul]:pl-5">
+      <div className="space-y-3 text-sm leading-relaxed text-muted [&_a]:text-accent-ink [&_a]:underline [&_em]:text-faint [&_h2]:pt-2 [&_h2]:font-display [&_h2]:text-lg [&_h2]:text-white [&_strong]:text-ivory [&_table]:w-full [&_table]:text-xs [&_td]:border-b [&_td]:border-border/40 [&_td]:px-2 [&_td]:py-1.5 [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left [&_th]:text-faint [&_ul]:list-disc [&_ul]:pl-5">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{a.corps_md}</ReactMarkdown>
       </div>
 
@@ -117,7 +114,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <ul className="space-y-1.5">
             {(a.chiffres.liens as { slug: string; titre: string }[]).map((l) => (
               <li key={l.slug}>
-                <Link href={`/actualites/${l.slug}`} className="text-sm text-ivory hover:text-accent">
+                <Link href={`/actualites/${l.slug}`} className="text-sm text-ivory hover:text-accent-ink">
                   {l.titre}
                 </Link>
               </li>
@@ -132,7 +129,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           {a.sources.map((s, i) => (
             <span key={s.url}>
               {i > 0 ? ' ; ' : ''}
-              <a href={s.url} className="hover:text-accent" rel="noopener noreferrer" target="_blank">
+              <a href={s.url} className="hover:text-accent-ink" rel="noopener noreferrer" target="_blank">
                 {s.label}
               </a>
             </span>

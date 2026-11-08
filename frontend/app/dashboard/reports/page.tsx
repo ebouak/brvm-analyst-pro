@@ -132,7 +132,7 @@ export default async function ReportsHome() {
                 >
                   <Link
                     href={snapshotHref(snap)}
-                    className={`text-sm text-ivory/80 hover:text-gold truncate ${EASE}`}
+                    className={`text-sm text-ivory hover:text-gold truncate ${EASE}`}
                   >
                     {snap.title}
                   </Link>
@@ -198,7 +198,7 @@ export default async function ReportsHome() {
                   href={`/dashboard/reports/events/${e.id}`}
                   className={`flex items-center justify-between px-5 py-3 ${EASE} hover:bg-elevated/60`}
                 >
-                  <span className="text-sm text-ivory/80 truncate">{e.title}</span>
+                  <span className="text-sm text-ivory truncate">{e.title}</span>
                   <span className="tabular ml-4 shrink-0 text-xs text-muted">{e.event_date}</span>
                 </Link>
               ))}

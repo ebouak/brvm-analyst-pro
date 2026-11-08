@@ -34,7 +34,7 @@ export default function ActionMenu({ code }: { code: string }) {
         aria-expanded={open ? 'true' : 'false'}
         className="inline-flex items-center gap-1 text-[11px] border border-border rounded-full px-3 py-1 text-muted hover:border-gold/40 hover:text-gold transition"
       >
-        Plus d&apos;actions <span className={`text-[8px] transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
+        Plus d&apos;actions <span className={`text-[11px] transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
       </button>
       {open && (
         <div

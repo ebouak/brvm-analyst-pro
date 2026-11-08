@@ -24,7 +24,7 @@ export function InfoTip({ label, className = '' }: { label: string; className?: 
           e.preventDefault();
           setOpen((v) => !v);
         }}
-        className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-muted/50 text-[9px] font-semibold leading-none text-muted transition hover:border-info hover:text-info focus:outline-none focus:ring-2 focus:ring-info/50"
+        className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-muted/50 text-[11px] font-semibold leading-none text-muted transition hover:border-info hover:text-info focus:outline-none focus:ring-2 focus:ring-info/50"
       >
         i
       </button>

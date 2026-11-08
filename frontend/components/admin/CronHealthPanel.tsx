@@ -30,11 +30,11 @@ export function CronHealthPanel({ jobs }: { jobs: CronJob[] }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-ivory">Tâches planifiées (base de données)</h2>
         {broken.length === 0 ? (
-          <span className="rounded-full border border-up/30 bg-up/10 px-2 py-0.5 text-[10px] font-semibold text-up">
+          <span className="rounded-full border border-up/30 bg-up/10 px-2 py-0.5 text-[11px] font-semibold text-up">
             {jobs.length} tâche{jobs.length > 1 ? 's' : ''} · aucune en panne
           </span>
         ) : (
-          <span className="rounded-full border border-down/30 bg-down/10 px-2 py-0.5 text-[10px] font-semibold text-down">
+          <span className="rounded-full border border-down/30 bg-down/10 px-2 py-0.5 text-[11px] font-semibold text-down">
             {broken.length} en panne
           </span>
         )}

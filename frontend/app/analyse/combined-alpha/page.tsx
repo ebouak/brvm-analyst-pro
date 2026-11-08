@@ -1,18 +1,27 @@
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
+import { fmtDateCourte } from '@/lib/format';
 import { SectionHeader, PremiumPanel, MetricCard, StatPill, Eyebrow, EmptyStatePremium } from '@/components/ui/premium';
 
 export const revalidate = 300;
 export const metadata = { title: 'Combined Alpha — classement quant BRVM' };
 
 function signalCls(c: string): string {
-  if (c === 'Strong Buy Quant') return 'border-up/30 bg-up/10 text-up';
+  if (c === 'Strong Buy Quant') return 'border-up/30 bg-up/5 text-up';
   if (c === 'Buy Quant') return 'border-up/20 bg-up/[0.07] text-up';
   if (c === 'Watchlist / Neutral') return 'border-warn/30 bg-warn/10 text-warn';
-  if (c === 'Reduce / Avoid') return 'border-down/20 bg-down/10 text-down';
+  if (c === 'Reduce / Avoid') return 'border-down/20 bg-down/5 text-down';
   if (c === 'High Risk / Avoid') return 'border-down/30 bg-down/15 text-down';
-  return 'border-border bg-elevated text-faint';
+  return 'border-border bg-elevated text-muted';
 }
+const LIBELLE_CLASSE: Record<string, string> = {
+  'Strong Buy Quant': 'Achat fort',
+  'Buy Quant': 'Achat',
+  'Watchlist / Neutral': 'Attente',
+  'Reduce / Avoid': 'Allègement',
+  'High Risk / Avoid': 'Risque élevé',
+  'Insufficient Data': 'Données insuffisantes',
+};
 function tone(v: number | null): string {
   if (v == null) return 'text-faint';
   if (v >= 70) return 'text-up';
@@ -43,7 +52,7 @@ export default async function CombinedAlphaPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <SectionHeader title="Westbourse Combined Alpha" subtitle="Un score de 0 à 100 pour comparer toutes les actions BRVM. 5 piliers — valorisation, momentum, qualité bénéficiaire, solidité financière et dividende — puis une pénalité risque (max 25 pts) si garde-fous déclenchés." accent="gold" actions={runDate ? (<div className="flex flex-wrap gap-2"><StatPill tone="neutral">Màj {runDate}</StatPill><StatPill tone="gold">v{runVer}</StatPill><StatPill tone="emerald">{elig}/{tot} éligibles</StatPill></div>) : undefined} />
+      <SectionHeader title="Westbourse Combined Alpha" subtitle="Un score de 0 à 100 pour comparer toutes les actions BRVM. 5 piliers — valorisation, momentum, qualité bénéficiaire, solidité financière et dividende — puis une pénalité risque (max 25 pts) si garde-fous déclenchés." accent="gold" actions={runDate ? (<div className="flex flex-wrap gap-2"><StatPill tone="neutral">Màj {fmtDateCourte(runDate)}</StatPill><StatPill tone="gold">v{runVer}</StatPill><StatPill tone="emerald">{elig}/{tot} éligibles</StatPill></div>) : undefined} />
       <div className="gold-rule" />
       {!run ? <EmptyStatePremium icon="◈" title="Aucun calcul disponible" hint="Lancez un run via POST /api/admin/quant/run (admin)." /> : (
         <>
@@ -56,20 +65,20 @@ export default async function CombinedAlphaPage() {
           <PremiumPanel className="overflow-hidden p-0">
             <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-2 border-b border-border/50">
               <Eyebrow>Classement Combined Alpha — {rows.length} titres</Eyebrow>
-              <span className="text-xs text-faint">Tri décroissant · ticker → détail par pilier</span>
+              <span className="text-xs text-faint">Tri décroissant. Cliquez sur le code pour le détail par pilier.</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-elevated/60 text-[11px] tracking-wide text-faint"><tr>
+                <thead className="bg-elevated/60 text-xs text-faint"><tr>
                   <th className="px-3 py-2.5 text-left font-medium">Rang</th>
                   <th className="px-3 py-2.5 text-left font-medium">Ticker</th>
                   <th className="px-3 py-2.5 text-left font-medium">Société</th>
-                  <th className="px-2 py-2.5 text-right font-medium">Combined</th>
-                  <th className="px-2 py-2.5 text-right font-medium">Valo</th>
-                  <th className="px-2 py-2.5 text-right font-medium">Momentum</th>
-                  <th className="px-2 py-2.5 text-right font-medium">Qualité</th>
-                  <th className="px-2 py-2.5 text-right font-medium">Solidité</th>
-                  <th className="px-2 py-2.5 text-right font-medium">Dividende</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Score (/100)</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Valo. (/100)</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Momentum (/100)</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Qualité (/100)</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Solidité (/100)</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Dividende (/100)</th>
                   <th className="px-3 py-2.5 text-left font-medium">Signal</th>
                 </tr></thead>
 
@@ -77,7 +86,7 @@ export default async function CombinedAlphaPage() {
                   {rows.map(r=> { const insuf = r.classification==='Insufficient Data'||r.combined_alpha_score==null; return (
                     <tr key={r.security_id} className={insuf?'bg-elevated/20 text-faint':'hover:bg-gold/[0.03] transition-colors'}>
                       <td className="px-3 py-2.5 tabular-nums text-xs">{r.rank_global ?? '—'}</td>
-                      <td className="px-3 py-2.5 font-mono text-xs"><Link href={`/actions/${r.security_id}/quant`} className="text-sapphire hover:text-gold font-semibold hover:underline">{r.security_id}</Link></td>
+                      <td className="px-3 py-2.5 text-xs"><Link href={`/actions/${r.security_id}/quant`} className="font-mono font-medium text-ivory hover:text-accent-ink hover:underline">{r.security_id}</Link></td>
                       <td className="px-3 py-2.5 max-w-[18rem] truncate text-xs text-muted">{labels[r.security_id] ?? r.security_id}</td>
                       <td className={`px-2 py-2.5 text-right font-bold tabular-nums ${tone(r.combined_alpha_score)}`}>{r.combined_alpha_score ?? '—'}</td>
                       <td className="px-2 py-2.5 text-right tabular-nums text-xs">{r.value_score ?? '—'}</td>
@@ -85,7 +94,7 @@ export default async function CombinedAlphaPage() {
                       <td className="px-2 py-2.5 text-right tabular-nums text-xs">{r.earnings_quality_score ?? '—'}</td>
                       <td className="px-2 py-2.5 text-right tabular-nums text-xs">{r.financial_strength_score ?? '—'}</td>
                       <td className="px-2 py-2.5 text-right tabular-nums text-xs">{r.dividend_quality_score ?? '—'}</td>
-                      <td className="px-3 py-2.5"><span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide whitespace-nowrap ${signalCls(r.classification)}`}>{r.classification==='Insufficient Data'?'Données insuffisantes':r.classification}</span></td>
+                      <td className="px-3 py-2.5"><span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap ${signalCls(r.classification)}`}>{LIBELLE_CLASSE[r.classification] ?? r.classification}</span></td>
                     </tr>
                   );})}
                 </tbody>

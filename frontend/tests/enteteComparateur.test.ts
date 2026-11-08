@@ -7,9 +7,9 @@ import { EnteteComparateur } from '@/components/comparateur-sgi/cadre/Cadre';
 const rendu = (props: Parameters<typeof EnteteComparateur>[0]) => renderToStaticMarkup(createElement(EnteteComparateur, props));
 
 describe('bandeau commun des outils', () => {
-  it('par défaut : surtitre du comparateur, aucun repère, aucun retour', () => {
+  it('par défaut : aucun surtitre, aucun repère, aucun retour', () => {
     const html = rendu({ titre: 'T', sousTitre: 'S' });
-    expect(html).toContain('Outil BRVM / UEMOA');
+    expect(html).not.toContain('Outil BRVM / UEMOA');
     expect(html).not.toContain('<ul');
     expect(html).not.toContain('Comparateur de SGI');
   });

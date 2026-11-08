@@ -55,7 +55,7 @@ export default function ApiKeysForm() {
         </div>
       ))}
       {msg && <p className="text-xs text-muted">{msg}</p>}
-      <p className="text-[10px] text-muted">Les clés env Vercel sont prioritaires. Les clés saisies ici sont stockées en base (service_role) et jamais réaffichées.</p>
+      <p className="text-[11px] text-muted">Les clés env Vercel sont prioritaires. Les clés saisies ici sont stockées en base (service_role) et jamais réaffichées.</p>
     </div>
   );
 }

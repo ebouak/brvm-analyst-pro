@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react';
 import { SectionHeader, PremiumPanel, StatPill } from '@/components/ui/premium';
 
 export const metadata = { title: 'Méthodologie' };
@@ -11,8 +12,6 @@ export default function MethodologiePage() {
         title="Méthodologie et sources"
         subtitle="Provenance des données, indicateurs techniques et calcul des signaux d'opportunité."
       />
-
-      <div className="gold-rule" />
 
       {/* 1. Sources de données */}
       <Section title="Sources de données" index="01">
@@ -50,9 +49,9 @@ export default function MethodologiePage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/60">
-                <th className="overline text-faint text-left px-5 py-3 font-normal">Indicateur</th>
-                <th className="overline text-faint text-left px-5 py-3 font-normal hidden sm:table-cell">Paramètres</th>
-                <th className="overline text-faint text-left px-5 py-3 font-normal">Données min.</th>
+                <th className="text-xs text-faint text-left px-5 py-3 font-normal">Indicateur</th>
+                <th className="text-xs text-faint text-left px-5 py-3 font-normal hidden sm:table-cell">Paramètres</th>
+                <th className="text-xs text-faint text-left px-5 py-3 font-normal">Données min.</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -66,7 +65,7 @@ export default function MethodologiePage() {
               ].map(([ind, params, req]) => (
                 <tr key={ind} className="group transition-colors duration-150 hover:bg-elevated/40">
                   <td className="px-5 py-3">
-                    <code className="tabular text-xs text-up">{ind}</code>
+                    <code className="text-xs text-ivory font-mono">{ind}</code>
                   </td>
                   <td className="px-5 py-3 text-xs text-muted hidden sm:table-cell">{params}</td>
                   <td className="px-5 py-3 text-xs text-faint tabular">{req}</td>
@@ -97,7 +96,7 @@ export default function MethodologiePage() {
               { label: 'penalite_liquidite',    desc: 'Malus si volume < seuil minimum',             weight: '−malus', tone: 'neutral' as const },
             ].map(({ label, desc, weight, tone }) => (
               <div key={label} className="flex items-center gap-4 px-5 py-3">
-                <code className="tabular text-xs text-up font-mono shrink-0 w-44">{label}</code>
+                <code className="text-xs text-ivory font-mono shrink-0 w-44">{label}</code>
                 <span className="text-xs text-muted flex-1 hidden sm:block">{desc}</span>
                 <StatPill tone={tone}>{weight}</StatPill>
               </div>
@@ -107,20 +106,20 @@ export default function MethodologiePage() {
           {/* Seuils de signal */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <SignalThreshold
-              signal="BUY"
-              condition="score > +0.60"
+              signal="Achat"
+              condition="score > +0,60"
               cls="border-up/25 bg-up/[0.05] text-up"
               dot="bg-up"
             />
             <SignalThreshold
-              signal="HOLD"
-              condition="−0.60 ≤ score ≤ +0.60"
+              signal="Attente"
+              condition="−0,60 ≤ score ≤ +0,60"
               cls="border-border/60 bg-elevated/40 text-muted"
               dot="bg-muted"
             />
             <SignalThreshold
-              signal="SELL"
-              condition="score < −0.60"
+              signal="Vente"
+              condition="score < −0,60"
               cls="border-down/25 bg-down/[0.05] text-down"
               dot="bg-down"
             />
@@ -136,19 +135,19 @@ export default function MethodologiePage() {
           </p>
           <ul className="space-y-2">
             {[
-              'Entrée en position à la clôture du jour du signal BUY',
-              'Sortie à la clôture du jour du signal SELL',
+              'Entrée en position à la clôture du jour du signal d’achat',
+              'Sortie à la clôture du jour du signal de vente',
               'Frais appliqués à chaque transaction (achat + vente)',
               'Capital initial = 100 (normalisé)',
               'Une seule position à la fois (pas de levier)',
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-2.5 text-xs text-muted">
-                <span className="mt-1 shrink-0 h-1 w-1 rounded-full bg-gold/50" />
+                <span className="mt-1 shrink-0 h-1 w-1 rounded-full bg-border-strong" />
                 {item}
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-faint border-t border-border/40 pt-3 italic">
+          <p className="text-xs text-faint border-t border-border/40 pt-3 italic">
             Les frais de courtage BRVM sont typiquement de 0,6 % par transaction.
           </p>
         </PremiumPanel>
@@ -164,7 +163,7 @@ export default function MethodologiePage() {
           </p>
           <p className="text-sm text-muted">
             Le calendrier UEMOA est stocké dans la table{' '}
-            <code className="tabular text-xs text-up bg-up/10 px-1.5 py-0.5 rounded-sm">market_calendar</code>{' '}
+            <code className="font-mono text-xs text-ivory bg-elevated px-1.5 py-0.5 rounded-sm">market_calendar</code>{' '}
             (migrations 0008). Il couvre les jours fériés des 8 États membres&nbsp;:
             Bénin, Burkina Faso, Côte d&apos;Ivoire, Guinée-Bissau, Mali, Niger, Sénégal, Togo.
           </p>
@@ -174,8 +173,8 @@ export default function MethodologiePage() {
       {/* Avertissement légal */}
       <div className="rounded-panel border border-warn/20 bg-warn/[0.03] px-5 py-4 shadow-card space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-warn text-xs">▲</span>
-          <h3 className="overline text-warn/80">Avertissement légal · COSUMAF</h3>
+          <AlertTriangle aria-hidden className="h-3.5 w-3.5 text-warn" />
+          <h3 className="text-sm font-medium text-warn">Avertissement légal · COSUMAF</h3>
         </div>
         <p className="text-xs text-faint leading-relaxed">
           Les données, analyses, signaux et résultats de backtesting fournis par WESTBOURSE sont à titre{' '}
@@ -196,7 +195,7 @@ function Section({ title, index, children }: { title: string; index: string; chi
   return (
     <section className="space-y-4">
       <div className="flex items-baseline gap-3">
-        <span className="tabular text-[11px] text-gold/50 font-mono shrink-0">{index}</span>
+        <span className="tabular text-xs text-faint font-mono shrink-0">{index}</span>
         <h2 className="text-heading-sm text-ivory">{title}</h2>
       </div>
       {children}
@@ -222,7 +221,7 @@ function SourceCard({
     <PremiumPanel className="px-5 py-4 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-ivory">{title}</h3>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium tracking-wide ${badgeCls}`}>{badge}</span>
+        <span className={`text-[11px] px-2 py-0.5 rounded-full border font-medium ${badgeCls}`}>{badge}</span>
       </div>
       <ul className="space-y-1.5">
         {items.map((item, i) => (
@@ -232,7 +231,7 @@ function SourceCard({
           </li>
         ))}
       </ul>
-      <p className="text-[11px] text-faint italic border-t border-border/40 pt-2.5">{note}</p>
+      <p className="text-xs text-faint italic border-t border-border/40 pt-2.5">{note}</p>
     </PremiumPanel>
   );
 }
@@ -250,8 +249,8 @@ function SignalThreshold({
     <div className={`flex items-center gap-3 rounded-card border px-4 py-3 shadow-card ${cls}`}>
       <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${dot}`} />
       <div>
-        <p className="text-xs font-semibold tracking-wide">{signal}</p>
-        <p className="tabular text-[11px] text-faint">{condition}</p>
+        <p className="text-xs font-semibold">{signal}</p>
+        <p className="tabular text-xs text-faint">{condition}</p>
       </div>
     </div>
   );

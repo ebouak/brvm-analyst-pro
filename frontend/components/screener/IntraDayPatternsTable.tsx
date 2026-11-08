@@ -150,7 +150,7 @@ export default function IntraDayPatternsTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border border-border rounded-lg">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent border border-border rounded-lg">
         <table className="w-full text-sm">
           <thead className="bg-elevated/50 border-b border-border">
             <tr>

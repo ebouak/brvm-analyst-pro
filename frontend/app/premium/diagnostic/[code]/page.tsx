@@ -39,13 +39,13 @@ export default async function DiagnosticPage({ params }: Props) {
           <span className="text-faint">/</span>
           <Link href={`/actions/${code}/financials`} className="text-muted hover:text-white transition-colors">{code}</Link>
           <span className="text-faint">/</span>
-          <span className="text-white">Diagnostic</span>
+          <span className="text-ivory">Diagnostic</span>
         </div>
 
         <div className="flex items-start gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">{code}</h1>
+              <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Diagnostic <span className="font-mono font-medium">{code}</span></h1>
               <span className="px-2 py-0.5 rounded text-xs bg-warn/10 text-warn border border-warn/20 font-medium">Premium</span>
             </div>
             {instrument.designation && <p className="text-sm text-muted mt-0.5">{instrument.designation}</p>}
@@ -71,7 +71,7 @@ export default async function DiagnosticPage({ params }: Props) {
         />
 
         <section className="bg-surface border border-border rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-white">Analyse Technique</h2>
+          <h2 className="font-display text-2xl font-medium text-ivory">Analyse technique</h2>
           <PatternDiagnostic code={code} />
         </section>
 

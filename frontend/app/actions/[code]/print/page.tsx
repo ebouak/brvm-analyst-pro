@@ -118,7 +118,7 @@ export default async function PrintPage({ params }: Props) {
               </div>
             ))}
           </div>
-          <p className="text-[10px] text-gray-400 mb-6 italic">
+          <p className="text-[11px] text-gray-400 mb-6 italic">
             Barème Commission Bancaire UMOA / FSI FMI. Un indicateur non publié dans les états
             déposés est neutralisé (hors calcul) ; la confiance indique la part du barème mesurable.
           </p>

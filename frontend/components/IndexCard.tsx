@@ -77,8 +77,8 @@ export default function IndexCard({
               ${neutral
                 ? 'border-border bg-elevated text-muted'
                 : up
-                ? 'border-up/25 bg-up/10 text-up'
-                : 'border-down/25 bg-down/10 text-down'
+                ? 'border-up/25 bg-up/5 text-up'
+                : 'border-down/25 bg-down/5 text-down'
               }
             `}
           >
@@ -99,8 +99,8 @@ export default function IndexCard({
               ${neutral
                 ? 'border-border bg-elevated text-muted'
                 : up
-                ? 'border-up/30 bg-up/10 text-up'
-                : 'border-down/30 bg-down/10 text-down'
+                ? 'border-up/30 bg-up/5 text-up'
+                : 'border-down/30 bg-down/5 text-down'
               }
             `}
           >
@@ -145,10 +145,10 @@ export default function IndexCard({
         <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
           <span className="text-[11px] text-muted">
             Vol{' '}
-            <span className="tabular text-ivory/70 font-medium">{fmtFcfa(valeur_echangee)} FCFA</span>
+            <span className="tabular text-ivory font-medium">{fmtFcfa(valeur_echangee)} FCFA</span>
           </span>
           {displayDate && (
-            <span className="tabular text-[10px] text-faint">{displayDate}</span>
+            <span className="tabular text-[11px] text-faint">{displayDate}</span>
           )}
         </div>
 

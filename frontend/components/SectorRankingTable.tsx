@@ -36,7 +36,7 @@ function VarCell({ v }: { v: number | null }) {
 function ColTooltip({ text }: { text: string }) {
   return (
     <span className="group/tip relative inline-flex items-center ml-1">
-      <span className="text-faint/60 text-[9px] cursor-help select-none">(?)</span>
+      <span className="text-faint text-[11px] cursor-help select-none">(?)</span>
       <span
         role="tooltip"
         className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-20 w-52 rounded-lg border border-border bg-elevated px-3 py-2 text-xs text-muted leading-relaxed opacity-0 transition-opacity group-hover/tip:opacity-100 shadow-modal"
@@ -73,7 +73,7 @@ export default function SectorRankingTable({ perfs }: Props) {
   });
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-elevated/80 border-b border-border">

@@ -17,6 +17,30 @@ relevés par l'audit).
 | Rédacteur (humanizer) | Textes visibles uniquement, sans changer un fait | Sonnet |
 | Chef de produit | Checklist produit, tests, accessibilité, verdict par page | Opus |
 
+## Chaîne de skills (adoptée le 2026-11-08)
+
+Ordre d'application sur une page, fondé sur les tests comparatifs 2026 (même brief,
+avec et sans skill). Un skill de direction à la fois : `frontend-design` OU
+`taste-skill` au build, jamais les deux (consignes contradictoires). `impeccable`
+vient APRÈS, sur l'existant.
+
+| Étape | Skill | Rôle | Modèle |
+|---|---|---|---|
+| 1. Direction | `frontend-design` (ou `taste-skill:design-taste-frontend`) | Plan avant le code : couleurs nommées, rôles typo, grille ; rejette le gabarit | Opus |
+| 2. Build | — | La page, dans son périmètre de fichiers | Sonnet |
+| 3. Finition | `impeccable` (typeset, layout, colorize, puis polish) | Typographie, grille, couleur ; 59 détecteurs déterministes | Sonnet |
+| 4. Mouvement | `emil-design-eng` (+ `improve-animations`, `review-animations`) | Animations justifiées une par une ; `prefers-reduced-motion` toujours respecté | Sonnet |
+| 5. Preuve à l'écran | `webapp-testing` + `npm run eval:visual` | Captures 1440 / 375, rendu réel, contrôle déterministe en échec fermé | Haiku/Sonnet |
+| 6. Audit ligne à ligne | `web-design-guidelines` | ~100 règles d'interface, constats P0–P3 | Sonnet |
+| 7. Critique aveugle | `impeccable` (critique) | Note /10 sur la grille de DESIGN.md, sur captures seules | Opus |
+| 8. Habillage | `canvas-design` | Visuels de marque, cartes OG, hero — jamais de banque d'images | Opus |
+
+`frontend-design` reste toujours disponible (léger). `impeccable` et `taste-skill` se
+chargent au moment de leur étape, pas en permanence. `vercel-react-best-practices`
+sert de garde-fou performance (Next.js) ; `ui-ux-pro-max` sert seulement à élargir
+les options d'une exploration de direction. Le mouvement ne doit jamais retarder
+l'affichage d'un chiffre ni contredire `DESIGN.md` §4 (pas de boucle décorative).
+
 ## Règles communes
 
 - Une page = un agent = une liste fermée de fichiers. Un fichier partagé se PROPOSE au chef

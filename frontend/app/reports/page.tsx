@@ -183,7 +183,7 @@ export default function ReportsPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl text-ivory [letter-spacing:-0.02em]">Rapports interactifs</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Rapports interactifs</h1>
           <p className="mt-1 max-w-[58ch] text-sm text-muted">
             Composez un rapport sur mesure (titres, période) : performances, séries de cours,
             événements, signaux, exportable en PDF.
@@ -209,10 +209,10 @@ export default function ReportsPage() {
             type="button"
             disabled={loading}
             onClick={() => generate(p.params)}
-            className="group rounded-xl border border-border bg-surface/40 px-4 py-2.5 text-left transition-all hover:border-accent/50 hover:bg-accent/10 active:scale-95 disabled:opacity-50"
+            className="group rounded-xl border border-border bg-surface/40 px-4 py-2.5 text-left transition-colors hover:border-accent/50 hover:bg-accent/10 active:scale-95 disabled:opacity-50"
           >
-            <span className="block text-sm font-medium text-ivory group-hover:text-accent">{p.label}</span>
-            <span className="block text-[11px] text-faint">{p.hint}</span>
+            <span className="block text-sm font-medium text-ivory group-hover:text-accent-ink">{p.label}</span>
+            <span className="block text-xs text-faint">{p.hint}</span>
           </button>
         ))}
       </div>

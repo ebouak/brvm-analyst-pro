@@ -85,7 +85,7 @@ export function ExportButton({ texteAnalyse, symbole }: ExportButtonProps) {
         {loadingDocx ? 'Génération…' : 'Word'}
       </button>
 
-      {error && <span className="text-[10px] text-down ml-1">{error}</span>}
+      {error && <span className="text-[11px] text-down ml-1">{error}</span>}
     </div>
   );
 }

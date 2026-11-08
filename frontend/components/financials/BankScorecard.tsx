@@ -82,7 +82,7 @@ export default function BankScorecard({ kpis, score, periode, absences, qualite 
             ) : (
               <span className="text-sm text-faint italic">indicateurs publiés insuffisants</span>
             )}
-            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted">
+            <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted">
               confiance {Math.round(score.confiance * 100)} %
             </span>
           </div>
@@ -123,7 +123,7 @@ export default function BankScorecard({ kpis, score, periode, absences, qualite 
           })}
         </div>
 
-        <p className="text-[10px] text-faint leading-relaxed">
+        <p className="text-[11px] text-faint leading-relaxed">
           Barème inspiré des indicateurs de la Commission Bancaire UMOA et des FSI du FMI
           (ROE 15 %, ROA 1,5 %, coefficient d&apos;exploitation 50-80 %, NPL 5-15 %, solvabilité
           réglementaire ≥ 11,5 %, transformation 50-100 %, NIM 4 %). Un indicateur absent

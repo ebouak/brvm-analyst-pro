@@ -168,11 +168,11 @@ export function MfaPanel({ mustEnroll }: { mustEnroll: boolean }) {
             alt="QR code de configuration de la double authentification"
             className="h-44 w-44 rounded-lg bg-[#ffffff] p-2"
           />
-          <details className="text-xs text-faint">
+          <details className="text-xs text-muted">
             <summary className="cursor-pointer hover:text-muted">
               Impossible de scanner ? Saisir la clé à la main
             </summary>
-            <code className="mt-1 block break-all rounded bg-bg p-2 text-[11px] text-ivory">
+            <code className="mt-1 block break-all rounded bg-bg p-2 text-xs text-ivory">
               {enrolling.secret}
             </code>
           </details>
@@ -191,7 +191,7 @@ export function MfaPanel({ mustEnroll }: { mustEnroll: boolean }) {
               type="button"
               disabled={busy || code.length !== 6}
               onClick={confirmEnroll}
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-[#03222b] disabled:opacity-40"
+              className="rounded-lg bg-accent-ink px-4 py-2 text-sm font-semibold text-obsidian disabled:opacity-40"
             >
               {busy ? 'Vérification…' : 'Activer'}
             </button>
@@ -214,7 +214,7 @@ export function MfaPanel({ mustEnroll }: { mustEnroll: boolean }) {
           type="button"
           disabled={busy}
           onClick={startEnroll}
-          className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#03222b] disabled:opacity-40"
+          className="rounded-full bg-accent-ink px-5 py-2 text-sm font-semibold text-obsidian disabled:opacity-40"
         >
           {busy ? 'Préparation…' : 'Activer la double authentification'}
         </button>

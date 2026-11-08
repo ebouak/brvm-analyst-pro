@@ -49,8 +49,8 @@ export default async function OutilsPage() {
             href={t.href}
             className="group rounded-xl border border-border bg-surface/40 px-3 py-2.5 transition-colors hover:border-gold/40 hover:bg-gold/5"
           >
-            <span className="block text-sm font-medium text-ivory group-hover:text-gold">{t.label}</span>
-            <span className="block text-[11px] text-faint">{t.desc}</span>
+            <span className="block text-sm font-medium text-ivory group-hover:text-accent-ink">{t.label}</span>
+            <span className="block text-xs text-faint">{t.desc}</span>
           </Link>
         ))}
       </div>
@@ -82,11 +82,11 @@ export default async function OutilsPage() {
 
       {/* ── Séparateur éditorial ─────────────────────────────────────────── */}
       <div className="flex items-center gap-4">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-        <span className="shrink-0 text-xs font-semibold text-gold/50">
+        <div className="h-px flex-1 bg-border" />
+        <span className="shrink-0 text-xs font-semibold text-muted">
           Visualisations
         </span>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+        <div className="h-px flex-1 bg-border" />
       </div>
 
       {/* ── Graphiques + tables (client component) ───────────────────────── */}

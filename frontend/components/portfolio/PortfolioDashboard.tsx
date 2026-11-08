@@ -53,7 +53,7 @@ export default function PortfolioDashboard() {
         <button
           type="button"
           onClick={handleRefetch}
-          className="px-4 py-2 rounded-lg bg-up/10 text-up hover:bg-up/20 transition text-sm font-medium"
+          className="px-4 py-2 rounded-lg bg-up/5 text-up hover:bg-up/20 transition text-sm font-medium"
         >
           Mettre à jour
         </button>

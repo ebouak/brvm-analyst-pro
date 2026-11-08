@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, Download } from 'lucide-react';
+import { fmtDateCourte } from '@/lib/format';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 import HebdoChart from '@/components/hebdo/HebdoChart';
@@ -39,9 +41,9 @@ export default async function HebdoEditionPage({ params }: { params: { date: str
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-4 py-10">
-      <Link href="/analyses/hebdo" className="text-sm text-muted hover:text-white">← Toutes les éditions</Link>
+      <Link href="/analyses/hebdo" className="inline-flex items-center gap-1 text-sm text-muted hover:text-white"><ArrowLeft aria-hidden className="h-4 w-4" />Toutes les éditions</Link>
       <SectionHeader
-        title={`Les valeurs en vue · semaine du ${e.date}`}
+        title={`Les valeurs en vue · semaine du ${fmtDateCourte(e.date)}`}
         subtitle="Analyse technique sur données réelles de la BRVM : cours de clôture, RSI(14), niveaux de support et de résistance."
       />
 
@@ -50,8 +52,8 @@ export default async function HebdoEditionPage({ params }: { params: { date: str
         return (
           <PremiumPanel key={it.code} className="space-y-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="font-display text-xl text-white">
-                {it.code}{' '}
+              <h2 className="font-display text-xl text-ivory">
+                <span className="font-mono font-medium text-ivory">{it.code}</span>{' '}
                 <span className={`text-sm ${it.sens === 'hausse' ? 'text-up' : 'text-down'}`}>
                   {m.variationHebdo != null ? `${m.variationHebdo >= 0 ? '+' : ''}${m.variationHebdo.toFixed(2)} %` : ''}
                 </span>
@@ -83,8 +85,8 @@ export default async function HebdoEditionPage({ params }: { params: { date: str
               <CopyPostButton texte={it.post_long} label="LinkedIn" />
               <CopyPostButton texte={it.post_court} label="WhatsApp" />
               <a href={`/api/hebdo/${e.date}/image?code=${it.code}`} download
-                className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted hover:text-white">
-                ⤓ Télécharger l’image
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted hover:text-white">
+                <Download aria-hidden className="h-3.5 w-3.5" />Télécharger l’image
               </a>
             </div>
           </PremiumPanel>

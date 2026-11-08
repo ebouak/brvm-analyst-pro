@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { fmtDateCourte } from '@/lib/format';
 import { loadCompanyFinancials } from '@/lib/financials/queries';
 import { calculateFundamentals } from '@/lib/financials/fundamentals';
 import { computeValuation, VERDICT_LABELS, VERDICT_COLORS } from '@/lib/financials/valuation';
@@ -166,7 +167,7 @@ export default async function FinancialsPage({ params }: Props) {
         {/* Page header */}
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <h1 className="text-xl font-semibold tracking-tight">{code}</h1>
+            <h1 className="font-mono font-medium text-xl tracking-tight text-ivory">{code}</h1>
             {data.instrument.designation && (
               <p className="text-sm text-muted">{data.instrument.designation}</p>
             )}
@@ -174,7 +175,7 @@ export default async function FinancialsPage({ params }: Props) {
               <p className="text-xs text-faint">{data.instrument.secteur}</p>
             )}
             {data.instrument.famille_comptable !== 'general' && (
-              <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] bg-info/10 text-info border border-info/20 font-medium">
+              <span className="inline-block mt-1 px-2 py-0.5 rounded text-[11px] bg-info/10 text-accent-ink border border-info/20 font-medium">
                 {data.instrument.famille_comptable === 'banque' ? 'Banque' : 'Assurance'}
               </span>
             )}
@@ -326,7 +327,7 @@ export default async function FinancialsPage({ params }: Props) {
               </div>
               <a
                 href={`/admin/import-fondamentaux?code=${code}`}
-                className="shrink-0 px-3 py-1.5 rounded-lg bg-up text-bg text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-up text-bg text-xs font-semibold hover:opacity-90 active:scale-95 transition-colors"
               >
                 Importer via IA →
               </a>
@@ -336,7 +337,7 @@ export default async function FinancialsPage({ params }: Props) {
                 <div key={pub.id} className="py-2.5 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm text-white">{pub.libelle ?? pub.type_publication ?? 'Publication'}</p>
-                    <p className="text-xs text-muted">{new Date(pub.date_publication).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                    <p className="text-xs text-muted">{fmtDateCourte(pub.date_publication)}</p>
                   </div>
                   {pub.source_url && (
                     <a
@@ -360,7 +361,7 @@ export default async function FinancialsPage({ params }: Props) {
             <p className="text-muted text-sm">Aucune donnée financière ni publication disponible pour {code}.</p>
             <a
               href={`/admin/import-fondamentaux?code=${code}`}
-              className="inline-block px-4 py-2 rounded-lg bg-up text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+              className="inline-block px-4 py-2 rounded-lg bg-up text-bg text-sm font-semibold hover:opacity-90 active:scale-95 transition-colors"
             >
               Importer via IA
             </a>
@@ -381,7 +382,7 @@ export default async function FinancialsPage({ params }: Props) {
                       <span className="text-sm text-muted">{p.libelle}</span>
                       <div className="flex items-center gap-2 shrink-0">
                         {inc && <a href="#etats" className="text-xs text-up hover:underline">Voir les états →</a>}
-                        {p.source_url && <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-info hover:underline">PDF</a>}
+                        {p.source_url && <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-ink hover:underline">PDF</a>}
                       </div>
                     </div>
                     {inc && (
@@ -410,7 +411,7 @@ export default async function FinancialsPage({ params }: Props) {
           </div>
           <Link
             href={`/premium/diagnostic/${code}`}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-warn/10 border border-warn/30 text-warn text-xs font-semibold hover:bg-warn/20 transition-all"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-warn/10 border border-warn/30 text-warn text-xs font-semibold hover:bg-warn/20 transition-colors"
           >
             Voir le diagnostic →
           </Link>

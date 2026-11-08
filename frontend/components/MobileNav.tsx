@@ -88,7 +88,7 @@ export default function MobileNav({
           <div className="space-y-6">
             {groups.map((group) => (
               <div key={group.label}>
-                <p className="overline mb-2 px-1 text-[9px] text-faint">
+                <p className="overline mb-2 px-1 text-[11px] text-faint">
                   {group.label === 'Premium' ? (
                     <span className="flex items-center gap-1.5 text-gold/70">Premium <Lock size={11} strokeWidth={2} className="text-gold" aria-hidden /></span>
                   ) : (

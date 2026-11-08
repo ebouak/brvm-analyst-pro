@@ -57,7 +57,7 @@ export function EngagementRow({
         disabled={!onLike || disabled || loading}
         className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full transition ${
           liked
-            ? 'text-up bg-up/10'
+            ? 'text-up bg-up/5'
             : 'hover:text-up hover:bg-up/10'
         } ${!onLike ? 'cursor-default opacity-50' : ''}`}
         aria-label={liked ? 'Retirer mon like' : 'Aimer'}

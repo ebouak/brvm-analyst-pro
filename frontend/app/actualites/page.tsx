@@ -48,7 +48,7 @@ export default async function ActualitesPage() {
             {articles.map((a) => (
               <li key={a.slug} className="rounded-xl border border-border bg-surface p-4 transition hover:border-accent/40">
                 <Link href={`/actualites/${a.slug}`} className="block space-y-1">
-                  <span className="text-[11px] text-accent">{LIBELLE_TYPE[a.type] ?? 'Article'}</span>
+                  <span className="text-[11px] text-accent-ink">{LIBELLE_TYPE[a.type] ?? 'Article'}</span>
                   <p className="font-medium text-white">{a.titre}</p>
                   <p className="line-clamp-2 text-sm text-muted">{a.chapo}</p>
                 </Link>

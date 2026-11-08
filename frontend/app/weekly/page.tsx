@@ -123,7 +123,7 @@ export default async function WeeklyPage() {
                 </p>
                 <p className="tabular mt-1 text-lg font-bold leading-none text-ivory">
                   {c.price.toLocaleString('fr-FR', { maximumFractionDigits: 2 })}
-                  <span className="ml-1 text-[10px] font-normal text-faint">{c.unit}</span>
+                  <span className="ml-1 text-[11px] font-normal text-faint">{c.unit}</span>
                 </p>
                 <p className={`tabular mt-1 text-xs font-bold ${
                   c.varPct == null ? 'text-faint' : c.varPct >= 0 ? 'text-up' : 'text-down'
@@ -133,7 +133,7 @@ export default async function WeeklyPage() {
               </div>
             ))}
           </div>
-          <p className="mt-1.5 text-[10px] text-faint">
+          <p className="mt-1.5 text-[11px] text-faint">
             Prix mensuels · source Banque mondiale (Pink Sheet), dernier point : {commos[0]?.date}.
           </p>
         </div>
@@ -156,7 +156,7 @@ export default async function WeeklyPage() {
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-xs font-mono text-accent/70">Référentiel stratégique</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">permanent</span>
+              <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">permanent</span>
             </div>
             <h2 className="font-semibold text-ivory group-hover:text-accent transition-colors">
               Exposition BRVM aux matières premières

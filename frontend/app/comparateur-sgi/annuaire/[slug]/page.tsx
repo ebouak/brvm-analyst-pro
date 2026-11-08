@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
+import { fmtDateCourte } from '@/lib/format';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Building2, FileText, Globe, Mail, MapPin, Phone, Scale } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, Building2, FileText, Globe, Mail, MapPin, Phone, Scale } from 'lucide-react';
 import { CadreComparateur } from '@/components/comparateur-sgi/cadre/Cadre';
 import { chargerSgi } from '@/lib/sgi-frais/chargement';
 import { PAYS } from '@/lib/sgi-frais/directory';
@@ -29,8 +30,7 @@ const fourchette = (min: number | null, max: number | null) =>
   min == null && max == null ? null : min != null && max != null && min !== max ? `${pct(min)} à ${pct(max)}` : pct((max ?? min)!);
 /** Lien d’appel : un indicatif « (226) » ou « +226 » devient international. */
 const lienTel = (t: string) => `tel:${/^[(+]/.test(t) ? '+' : ''}${t.replace(/\D/g, '')}`;
-const dateFr = (d?: string | null) =>
-  d ? new Date(`${d}T00:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : null;
+const dateFr = (d?: string | null) => (d ? fmtDateCourte(d) : null);
 
 async function trouver(slug: string) {
   const { directory, frais, stats } = await chargerSgi();
@@ -231,7 +231,7 @@ export default async function FicheSgiPage({ params }: { params: { slug: string 
         filAriane: true,
       }}
     >
-      <Link href="/comparateur-sgi/annuaire" className="mb-5 inline-flex min-h-[36px] items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-accent">
+      <Link href="/comparateur-sgi/annuaire" className="mb-5 inline-flex min-h-[36px] items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-accent-ink">
         <ArrowLeft size={15} aria-hidden /> Retour à l’annuaire
       </Link>
 
@@ -316,7 +316,7 @@ export default async function FicheSgiPage({ params }: { params: { slug: string 
                 <li className="flex gap-2.5">
                   <Globe size={16} aria-hidden className="mt-0.5 flex-none text-faint" />
                   <a href={sgi.siteWeb} target="_blank" rel="nofollow noopener noreferrer" className="break-all text-accent hover:underline">
-                    {sgi.siteWeb.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} ↗
+                    {sgi.siteWeb.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} <ExternalLink size={12} aria-hidden className="inline" />
                   </a>
                 </li>
               )}
@@ -329,7 +329,7 @@ export default async function FicheSgiPage({ params }: { params: { slug: string 
                 <li className="flex gap-2.5">
                   <FileText size={16} aria-hidden className="mt-0.5 flex-none text-up" />
                   <a href={pdf} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                    Décision d’homologation des tarifs (PDF, brvm.org) ↗
+                    Décision d’homologation des tarifs (PDF, brvm.org) <ExternalLink size={12} aria-hidden className="inline" />
                   </a>
                 </li>
               )}
@@ -343,7 +343,7 @@ export default async function FicheSgiPage({ params }: { params: { slug: string 
                 <li className="flex gap-2.5">
                   <Building2 size={16} aria-hidden className="mt-0.5 flex-none text-faint" />
                   <a href={sgi.ficheBRVM} target="_blank" rel="nofollow noopener noreferrer" className="text-accent hover:underline">
-                    Fiche de l’intervenant sur brvm.org ↗
+                    Fiche de l’intervenant sur brvm.org <ExternalLink size={12} aria-hidden className="inline" />
                   </a>
                 </li>
               )}

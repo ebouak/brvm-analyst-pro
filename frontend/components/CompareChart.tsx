@@ -1,10 +1,11 @@
 'use client';
 
+import { chartTheme } from '@/lib/chartTheme';
 import { useCallback } from 'react';
 import EChart from './EChart';
 import { downloadCSV } from '@/lib/export';
 
-export const COLORS = ['#00c853', '#42a5f5', '#ffb300', '#7e57c2', '#f44336', '#e6e9f0'];
+export const COLORS = ['#00c853', '#42a5f5', '#ffb300', '#7e57c2', '#f44336', '#e6e9f0']; // palette catégorielle : une teinte par série
 
 export type NormMode = 'base100' | 'variation' | 'prix';
 export type PeriodKey = '1M' | '3M' | '6M' | '1A' | '2A' | 'MAX';
@@ -56,6 +57,7 @@ interface Props {
 }
 
 export default function CompareChart({ data, codes, mode, period, meta = [] }: Props) {
+  const T = chartTheme();
   const dates = data.map((d) => d.date);
 
   const yFormatter = useCallback(
@@ -70,7 +72,7 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
 
   const tooltipFormatter = useCallback(
     (params: Array<{ seriesName: string; value: number | null; marker: string; axisValue?: string }>): string => {
-      let html = `<div style="font-size:11px;color:#8b93a7;margin-bottom:4px">${params[0]?.axisValue ?? ''}</div>`;
+      let html = `<div style="font-size:11px;color:${T.muted};margin-bottom:4px">${params[0]?.axisValue ?? ''}</div>`;
       for (const p of params) {
         if (p.value == null) continue;
         const label = meta.find((m) => m.code === p.seriesName)?.designation ?? p.seriesName;
@@ -80,7 +82,7 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
             : mode === 'base100'
             ? p.value.toFixed(2)
             : p.value.toLocaleString('fr-FR') + ' F';
-        html += `<div style="display:flex;gap:8px;align-items:center">${p.marker}<span style="color:#e6e9f0">${p.seriesName}</span><span style="color:#8b93a7;font-size:10px">${label !== p.seriesName ? label : ''}</span><span style="margin-left:auto;font-weight:600;color:#e6e9f0">${formatted}</span></div>`;
+        html += `<div style="display:flex;gap:8px;align-items:center">${p.marker}<span style="color:${T.ivory}">${p.seriesName}</span><span style="color:${T.muted};font-size:10px">${label !== p.seriesName ? label : ''}</span><span style="margin-left:auto;font-weight:600;color:${T.ivory}">${formatted}</span></div>`;
       }
       return html;
     },
@@ -104,9 +106,9 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
   };
 
   return (
-    <div className="bg-[#161922] border border-[#232733] rounded-xl p-4 space-y-3">
+    <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[#e6e9f0]">
+        <h3 className="text-sm font-semibold text-ivory">
           {mode === 'base100' && 'Performance comparée (base 100)'}
           {mode === 'variation' && 'Variation cumulée (%)'}
           {mode === 'prix' && 'Prix brut (FCFA)'}
@@ -114,7 +116,7 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
         <button
           type="button"
           onClick={handleExport}
-          className="text-xs text-[#8b93a7] hover:text-[#e6e9f0] border border-[#232733] hover:border-[#42a5f5] rounded px-2.5 py-1 transition-colors"
+          className="text-xs text-muted hover:text-ivory border border-border hover:border-accent rounded px-2.5 py-1 transition-colors"
         >
           Exporter CSV
         </button>
@@ -126,7 +128,7 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
           legend: {
             top: 0,
             left: 0,
-            textStyle: { color: '#8b93a7', fontSize: 11 },
+            textStyle: { color: T.muted, fontSize: 11 },
             data: codes.map((code, i) => ({
               name: code,
               itemStyle: { color: COLORS[i % COLORS.length] },
@@ -140,8 +142,8 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
             data: dates,
             boundaryGap: false,
             axisLabel: {
-              color: '#8b93a7',
-              fontSize: 10,
+              color: T.muted,
+              fontSize: 11,
               interval: Math.max(0, Math.floor(dates.length / 8) - 1),
               rotate: 30,
             },
@@ -150,12 +152,12 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
             type: 'value',
             scale: true,
             position: 'right',
-            axisLabel: { formatter: yFormatter, color: '#8b93a7', fontSize: 10 },
-            splitLine: { lineStyle: { color: '#232733', type: 'dashed' } },
+            axisLabel: { formatter: yFormatter, color: T.muted, fontSize: 11 },
+            splitLine: { lineStyle: { color: T.border, type: 'dashed' } },
           },
           tooltip: {
             trigger: 'axis',
-            axisPointer: { type: 'cross', lineStyle: { color: '#4a5268' } },
+            axisPointer: { type: 'cross', lineStyle: { color: T.muted } },
             formatter: tooltipFormatter as unknown as string,
           },
           dataZoom: [
@@ -164,10 +166,10 @@ export default function CompareChart({ data, codes, mode, period, meta = [] }: P
               type: 'slider',
               height: 20,
               bottom: 0,
-              borderColor: '#232733',
-              fillerColor: 'rgba(0,200,83,0.08)',
-              handleStyle: { color: '#00c853' },
-              textStyle: { color: '#4a5268', fontSize: 9 },
+              borderColor: T.border,
+              fillerColor: T.alpha('up', 0.08),
+              handleStyle: { color: T.up },
+              textStyle: { color: T.muted, fontSize: 11 },
             },
           ],
           grid: { top: 36, right: 60, bottom: 56, left: 16, containLabel: false },

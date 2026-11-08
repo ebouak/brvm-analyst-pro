@@ -1,11 +1,13 @@
 'use client';
+import { libelleSignal } from '@/lib/signalLabel';
 import { useState } from 'react';
 import type { ActionProcheBas, MoisSaisonnalite, ReactionEtatFinancier } from '@/lib/premium/outils';
+import { fmtDateCourte } from '@/lib/format';
 
 const SIGNAL_COLOR: Record<string, string> = {
-  ACHAT: 'text-up bg-up/10 border-up/30',
+  ACHAT: 'text-up bg-up/5 border-up/30',
   NEUTRE: 'text-warn bg-warn/10 border-warn/30',
-  VENTE: 'text-down bg-down/10 border-down/30',
+  VENTE: 'text-down bg-down/5 border-down/30',
 };
 
 function ProchesBasTable({ data }: { data: ActionProcheBas[] }) {
@@ -15,16 +17,16 @@ function ProchesBasTable({ data }: { data: ActionProcheBas[] }) {
     </div>
   );
   return (
-    <div className="overflow-x-auto">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border text-xs text-muted uppercase">
+          <tr className="border-b border-border text-xs text-muted">
             <th className="text-left py-2 px-3">#</th>
             <th className="text-left py-2 px-3">Action</th>
-            <th className="text-right py-2 px-3">Cours</th>
-            <th className="text-right py-2 px-3">Plus bas 52s</th>
-            <th className="text-right py-2 px-3">Plus haut 52s</th>
-            <th className="text-right py-2 px-3">Distance bas</th>
+            <th className="text-right py-2 px-3">Cours (FCFA)</th>
+            <th className="text-right py-2 px-3">Plus bas 52s (FCFA)</th>
+            <th className="text-right py-2 px-3">Plus haut 52s (FCFA)</th>
+            <th className="text-right py-2 px-3">Distance bas (%)</th>
             <th className="text-left py-2 px-3">Signal</th>
           </tr>
         </thead>
@@ -36,7 +38,7 @@ function ProchesBasTable({ data }: { data: ActionProcheBas[] }) {
                 <div className="font-medium text-white">{a.code}</div>
                 <div className="text-xs text-muted">{a.designation}</div>
               </td>
-              <td className="py-2 px-3 text-right tabular text-white">{a.cours_actuel.toLocaleString('fr-FR')} F</td>
+              <td className="py-2 px-3 text-right tabular text-ivory">{a.cours_actuel.toLocaleString('fr-FR')} F</td>
               <td className="py-2 px-3 text-right tabular text-down">{a.cours_bas_52s.toLocaleString('fr-FR')} F</td>
               <td className="py-2 px-3 text-right tabular text-up">{a.cours_haut_52s.toLocaleString('fr-FR')} F</td>
               <td className="py-2 px-3 text-right">
@@ -47,7 +49,7 @@ function ProchesBasTable({ data }: { data: ActionProcheBas[] }) {
               <td className="py-2 px-3">
                 {a.signal ? (
                   <span className={`text-xs font-medium px-2 py-0.5 rounded border ${SIGNAL_COLOR[a.signal] ?? 'text-muted border-border'}`}>
-                    {a.signal}
+                    {libelleSignal(a.signal)}
                   </span>
                 ) : <span className="text-faint">—</span>}
               </td>
@@ -109,25 +111,25 @@ function ReactionTable({ data }: { data: ReactionEtatFinancier[] }) {
     </div>
   );
   return (
-    <div className="overflow-x-auto">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border text-xs text-muted uppercase">
+          <tr className="border-b border-border text-xs text-muted">
             <th className="text-left py-2 px-3">Action</th>
             <th className="text-left py-2 px-3">Date</th>
             <th className="text-left py-2 px-3">Type</th>
-            <th className="text-right py-2 px-3">Perf J+1</th>
-            <th className="text-right py-2 px-3">Perf J+5</th>
+            <th className="text-right py-2 px-3">Perf J+1 (%)</th>
+            <th className="text-right py-2 px-3">Perf J+5 (%)</th>
           </tr>
         </thead>
         <tbody>
           {data.map((r, i) => (
             <tr key={`${r.code}-${r.date_publication}`} className={`border-b border-border/40 hover:bg-elevated transition-colors ${i % 2 === 1 ? 'bg-elevated/40' : ''}`}>
               <td className="py-2 px-3">
-                <div className="font-medium text-white">{r.code}</div>
+                <div className="font-mono font-medium text-ivory">{r.code}</div>
                 <div className="text-xs text-muted truncate max-w-[140px]">{r.designation}</div>
               </td>
-              <td className="py-2 px-3 text-muted text-xs">{new Date(r.date_publication).toLocaleDateString('fr-FR')}</td>
+              <td className="py-2 px-3 text-muted text-xs">{fmtDateCourte(r.date_publication)}</td>
               <td className="py-2 px-3 text-xs text-muted">{r.type_event}</td>
               <td className="py-2 px-3 text-right">
                 <span className={`tabular text-sm font-medium ${r.perf_j1 >= 0 ? 'text-up' : 'text-down'}`}>

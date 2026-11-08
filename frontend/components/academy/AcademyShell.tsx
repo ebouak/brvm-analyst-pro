@@ -269,7 +269,7 @@ function Sommaire({
               </span>
               <span className="min-w-0">
                 <span className="block truncate">{l.titre}</span>
-                <span className="text-[10px] text-faint">
+                <span className="text-[11px] text-faint">
                   {l.duree_min ? `${l.duree_min} min` : 'leçon'}
                   {l.quiz?.length || l.qcm ? ' · quiz' : ''}
                 </span>

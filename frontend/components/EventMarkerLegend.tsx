@@ -18,7 +18,7 @@ export default function EventMarkerLegend({ markers }: { markers: ChartMarker[] 
       {visible.map((item) => (
         <div key={item.label} className="flex items-center gap-1.5">
           <span
-            className="inline-flex items-center justify-center rounded-full text-[9px] font-bold shrink-0"
+            className="inline-flex items-center justify-center rounded-full text-[11px] font-bold shrink-0"
             style={{ width: 18, height: 18, background: item.color, color: '#0f1117' }}
           >
             {item.label}

@@ -83,7 +83,7 @@ export default function IntraDaySignalsWidget() {
       </div>
 
       {error && (
-        <div className="text-xs text-down bg-down/10 border border-down/20 rounded p-2">
+        <div className="text-xs text-down bg-down/5 border border-down/20 rounded p-2">
           {error}
         </div>
       )}
@@ -121,12 +121,12 @@ export default function IntraDaySignalsWidget() {
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-mono text-sm font-bold text-accent shrink-0">{p.code}</span>
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap shrink-0 ${badge.bgClass} ${badge.textClass}`}
+                      className={`px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap shrink-0 ${badge.bgClass} ${badge.textClass}`}
                     >
                       {badge.icon} {badge.label}
                     </span>
                     {p.confidence_level && (
-                      <span className="text-[10px] text-muted bg-muted/10 px-1.5 py-0.5 rounded">
+                      <span className="text-[11px] text-muted bg-muted/10 px-1.5 py-0.5 rounded">
                         {p.confidence_level}
                       </span>
                     )}
@@ -154,7 +154,7 @@ export default function IntraDaySignalsWidget() {
           className="text-xs text-accent hover:text-accent/80 font-medium transition-colors flex items-center gap-1"
         >
           Voir tous les patterns
-          <span className="text-[10px]">→</span>
+          <span className="text-[11px]">→</span>
         </Link>
       </div>
     </div>

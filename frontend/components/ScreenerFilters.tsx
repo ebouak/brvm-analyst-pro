@@ -84,7 +84,7 @@ export default function ScreenerFilters({
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 space-y-4">
+    <div className="min-w-0 bg-surface border border-border rounded-xl p-4 space-y-4">
       <h3 className="text-sm font-medium text-ivory">Filtres</h3>
 
       <div className="space-y-2">
@@ -98,7 +98,7 @@ export default function ScreenerFilters({
             value={filters.rsiMin}
             onChange={(e) => handleChange('rsiMin', parseInt(e.target.value) || 0)}
             placeholder="Min"
-            className="flex-1 bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint focus:outline-none focus:ring-1 focus:ring-accent transition"
+            className="min-w-0 flex-1 bg-elevated border border-border rounded px-2 py-1 text-sm text-ivory placeholder-faint focus:outline-none focus:ring-1 focus:ring-accent transition"
             aria-label="RSI minimum"
           />
           <input

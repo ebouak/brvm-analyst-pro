@@ -1,5 +1,7 @@
 'use client';
 
+import { fmtDateCourte } from '@/lib/format';
+
 interface Signal {
   code: string;
   date_marche: string;
@@ -14,6 +16,8 @@ const SIGNAL_CLS: Record<string, string> = {
   SELL: 'text-down',
   HOLD: 'text-muted',
 };
+
+const SIGNAL_FR: Record<string, string> = { BUY: 'achat', SELL: 'vente', HOLD: 'attente' };
 
 export default function SignalsTable({ signals }: { signals: Signal[] }) {
   const actionable = signals.filter((s) => s.signal !== 'HOLD');
@@ -31,17 +35,17 @@ export default function SignalsTable({ signals }: { signals: Signal[] }) {
                 <th className="pb-2 pr-4">Date</th>
                 <th className="pb-2 pr-4">Code</th>
                 <th className="pb-2 pr-4">Signal</th>
-                <th className="pb-2 pr-4 tabular">Score</th>
+                <th className="pb-2 pr-4">Score</th>
                 <th className="pb-2">Explication</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {actionable.map((s, i) => (
                 <tr key={i} className="hover:bg-bg/40">
-                  <td className="py-2 pr-4 tabular text-xs text-muted">{s.date_marche}</td>
-                  <td className="py-2 pr-4 font-medium">{s.code}</td>
+                  <td className="py-2 pr-4 text-xs text-muted">{fmtDateCourte(s.date_marche)}</td>
+                  <td className="py-2 pr-4 font-mono font-medium text-ivory">{s.code}</td>
                   <td className={`py-2 pr-4 font-semibold ${SIGNAL_CLS[s.signal]}`}>
-                    {s.signal}
+                    {SIGNAL_FR[s.signal] ?? s.signal}
                   </td>
                   <td className="py-2 pr-4 tabular text-xs">{s.score_total.toFixed(2)}</td>
                   <td className="py-2 text-xs text-muted max-w-xs truncate">
