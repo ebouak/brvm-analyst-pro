@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { createPublicClient } from '@/lib/supabase/public';
 import { SectionHeader, PremiumPanel, StatPill, Eyebrow, EmptyStatePremium } from '@/components/ui/premium';
 export const revalidate = 300;
-function fr(c:string){const m:Record<string,string>={'Strong Buy Quant':'Achat quant fort','Buy Quant':'Achat quant','Watchlist / Neutral':'A surveiller','Reduce / Avoid':'Alleger / eviter','High Risk / Avoid':'Risque eleve — eviter','Insufficient Data':'Donnees insuffisantes'};return m[c]??c;}
+function fr(c:string){const m:Record<string,string>={'Strong Buy Quant':'Achat quant fort','Buy Quant':'Achat quant','Watchlist / Neutral':'À surveiller','Reduce / Avoid':'Alléger / éviter','High Risk / Avoid':'Risque élevé — éviter','Insufficient Data':'Données insuffisantes'};return m[c]??c;}
 function cf(c:string){return c==='high'?'Elevee':c==='medium'?'Moyenne':c==='low'?'Faible':'Insuffisante';}
 function ef(s:string){return s==='eligible'?'Eligible':s==='eligible_with_warning'?'Eligible (reserve)':'Non eligible';}
 function tone(v:number|null){if(v==null)return 'text-faint';if(v>=70)return 'text-up';if(v>=50)return 'text-warn';return 'text-down';}

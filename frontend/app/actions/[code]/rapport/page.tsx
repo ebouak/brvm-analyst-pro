@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getValuation } from '@/lib/valuation/server';
 import { getScoring } from '@/lib/scoring/server';
+import { libelleSignal } from '@/lib/signalLabel';
 import PrintTrigger from '@/components/financials/PrintTrigger';
 import type { SignalDaily } from '@/lib/types';
 
@@ -16,7 +17,6 @@ const fNum = (n: number | null | undefined, d = 2) => (n != null ? n.toFixed(d) 
 const STANCE_LABEL: Record<string, string> = {
   decote: 'Décote estimée', surcote: 'Surcote estimée', proche: 'Proche de la juste-valeur', indisponible: 'Valorisation indisponible',
 };
-const SIGNAL_LABEL: Record<string, string> = { BUY: 'ACHAT', SELL: 'VENTE', HOLD: 'CONSERVER' };
 
 export default async function RapportPage({ params }: Props) {
   const code = decodeURIComponent(params.code).toUpperCase();
@@ -68,7 +68,7 @@ export default async function RapportPage({ params }: Props) {
         </div>
         <div className="border border-gray-300 rounded p-3">
           <p className="text-xs text-gray-500 mb-1">Signal quantitatif</p>
-          <p className="text-base font-bold">{signal ? SIGNAL_LABEL[signal.signal] ?? signal.signal : '—'}</p>
+          <p className="text-base font-bold">{signal ? libelleSignal(signal.signal) : '—'}</p>
           {signal && (
             <p className="text-xs text-gray-600 mt-1">
               Score {signal.score_total >= 0 ? '+' : ''}{signal.score_total?.toFixed(2)} / 1.00

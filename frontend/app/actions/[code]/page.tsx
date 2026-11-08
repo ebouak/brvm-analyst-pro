@@ -33,6 +33,8 @@ import { VerdictBand } from '@/components/actions/VerdictBand';
 import { FicheStickyNav } from '@/components/actions/FicheStickyNav';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
+import { ligneVerdict, volumeAuDessusMoyenne } from '@/lib/fiche/affichage';
+import { plageSurFenetre } from '@/lib/fiche/plages';
 import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
 import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/liquidity';
@@ -591,10 +593,7 @@ export default async function InstrumentPage({
   const sparkData = closeHist.slice(-30);
   const low52 = closeHist.length ? Math.min(...closeHist) : null;
   const high52 = closeHist.length ? Math.max(...closeHist) : null;
-  const verdictLine = signal
-    ? `Signal ${signal.signal}${signal.score_total != null ? ` · score ${signal.score_total.toFixed(0)}` : ''}. ` +
-      `Tendance récente ${up ? 'haussière' : 'baissière'} (${(last.variation_pct ?? 0) >= 0 ? '+' : ''}${(last.variation_pct ?? 0).toFixed(2)}% sur la séance).`
-    : null;
+  const verdictLine = ligneVerdict(signal?.signal ?? null, signal?.score_total ?? null, last.variation_pct ?? null);
 
   // Ancres de navigation (uniquement les sections réellement rendues).
   const navSections = [
@@ -609,7 +608,7 @@ export default async function InstrumentPage({
   const detections = [
     { label: 'Momentum haussier', ok: up && (last.variation_pct ?? 0) > 1 },
     { label: 'Golden Cross (MA20 > MA50)', ok: det.goldenCross },
-    { label: 'Volume > moyenne', ok: last.volume != null && last.cours_precedent != null && last.volume > 0 },
+    { label: 'Volume > moyenne', ok: volumeAuDessusMoyenne(last.volume ?? null, volMoyen) },
     { label: 'Cassure haussière 20j', ok: det.breakoutUp },
     { label: 'Survente RSI < 30', ok: det.oversold },
     { label: 'Surachat RSI > 70', ok: det.overbought },
@@ -1166,12 +1165,8 @@ export default async function InstrumentPage({
       ══════════════════════════════════════════════════ */}
       {fundamentals.length > 0 && (() => {
         const latest = pickBestFundamental(fundamentals)!;
-        const closePrices = rows.map((r) => r.cours_jour).filter((c): c is number => c != null);
-        const range52 = {
-          low: closePrices.length ? Math.min(...closePrices) : null,
-          high: closePrices.length ? Math.max(...closePrices) : null,
-          current: last.cours_jour ?? null,
-        };
+        const p52 = plageSurFenetre(rows.map((r) => ({ date_marche: r.date_marche, cours_jour: r.cours_jour ?? null })), last.date_marche, 365, last.cours_jour ?? null);
+        const range52 = { low: p52?.bas ?? null, high: p52?.haut ?? null, current: last.cours_jour ?? null };
         // Verrou premium : on ne rend PAS le panneau (donc aucune donnée dans le HTML).
         if (!gateFonda.allowed) {
           return (
@@ -1216,6 +1211,7 @@ export default async function InstrumentPage({
               })()}
               sourceUrl={null}
               range52={range52}
+              resultatNet={latest.net_income ?? null}
               famille={(instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null}
               dividendeExercice={lastDiv?.exercice ?? null}
               dividendeVerifie={lastDivVerifie != null}

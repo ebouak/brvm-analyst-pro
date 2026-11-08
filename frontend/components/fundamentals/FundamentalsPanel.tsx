@@ -8,6 +8,7 @@ import RangeBar from './RangeBar';
 import EditFundamentalsModal from './EditFundamentalsModal';
 import FundamentalsCharts, { type FundaChartPoint } from '@/components/financials/FundamentalsCharts';
 import ValueTrapBadge from './ValueTrapBadge';
+import { perAffichable, distributionAffichable } from '@/lib/fiche/affichage';
 import { assessValueTrap } from '@/lib/fundamentals/valueTrap';
 
 export interface FundamentalsPanelProps {
@@ -19,6 +20,8 @@ export interface FundamentalsPanelProps {
   history: Array<{ year: number; revenue: number | null; net_income: number | null }>;
   sourceUrl: string | null;
   range52: { low: number | null; high: number | null; current: number | null };
+  /** Résultat net de l'exercice : sert à écarter un taux de distribution sans objet en cas de perte. */
+  resultatNet?: number | null;
   /** Famille comptable : la grille de lecture change selon le métier. */
   famille?: 'banque' | 'assurance' | 'general' | null;
   /** Exercice du dividende utilisé pour rendement/payout (si non daté en séance). */
@@ -50,6 +53,8 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
   const [editing, setEditing] = useState(false);
   const r = computeRatios(p.inputs);
   const fam = FAMILLES[p.famille ?? 'general'] ?? FAMILLES.general;
+  const per = perAffichable(r.per, r.bpa);
+  const dist = distributionAffichable(r.payout, p.resultatNet ?? null);
 
   const sortedHist = [...p.history].sort((a, b) => a.year - b.year);
   const last = sortedHist[sortedHist.length - 1];
@@ -112,7 +117,7 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         </Section>
 
         <Section title="Évaluation">
-          <RatioCard label="PER (P/E)" value={num(r.per)} quality={assessQuality('per', r.per)} />
+          <RatioCard label="PER (P/E)" value={per.valeur != null ? num(per.valeur) : per.motif ?? '—'} quality={per.valeur == null ? 'missing' : assessQuality('per', per.valeur)} />
           <RatioCard label="P/B" value={num(r.pb)} quality={assessQuality('pb', r.pb)} />
           {fam.ps && (
             <RatioCard label={p.famille === 'assurance' ? 'P/Primes' : 'P/S'} value={num(r.ps)} quality={assessQuality('ps', r.ps)} />
@@ -127,12 +132,12 @@ export default function FundamentalsPanel(p: FundamentalsPanelProps) {
         {fam.gearing ? (
           <Section title="Effet de levier">
             <RatioCard label="Dette / Capitaux propres" value={num(r.gearing)} quality={assessQuality('gearing', r.gearing)} />
-            <RatioCard label={`Payout (distribution)${divSuffix}`} value={pct(r.payout)} quality={assessQuality('payout', r.payout)} />
+            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} />
           </Section>
         ) : (
           <Section title="Solidité & distribution">
             <RatioCard label="Capitaux propres" value={p.inputs.equity != null ? fmtFcfa(p.inputs.equity) + ' FCFA' : '—'} quality={p.inputs.equity == null ? 'missing' : 'ok'} />
-            <RatioCard label={`Payout (distribution)${divSuffix}`} value={pct(r.payout)} quality={assessQuality('payout', r.payout)} />
+            <RatioCard label={`Payout (distribution)${divSuffix}`} value={dist.valeur != null ? pct(dist.valeur) : dist.motif ?? '—'} quality={dist.valeur == null ? 'missing' : assessQuality('payout', dist.valeur)} />
           </Section>
         )}
 
