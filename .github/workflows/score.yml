@@ -119,3 +119,26 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           LOG_LEVEL: info
         run: npm run range52
+
+  # Positions du Conseiller par famille de facteurs (sans verdict). Après la
+  # liquidité ; ne dépend pas de son succès (calcul sur les clôtures).
+  conseiller:
+    runs-on: ubuntu-latest
+    needs: liquidity
+    if: always()
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+      - name: Conseiller — positions par famille de facteurs
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts conseiller --ecrire
