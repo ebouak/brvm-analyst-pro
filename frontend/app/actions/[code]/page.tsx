@@ -41,6 +41,7 @@ import ComptesIfrs from '@/components/fiche/ComptesIfrs';
 import ProfilSociete from '@/components/fiche/ProfilSociete';
 import { normaliserProfil } from '@/lib/fiche/profilSociete';
 import { rubriqueDepuis, hrefRubrique } from '@/lib/fiche/rubriques';
+import { pointsCles } from '@/lib/fiche/pointsCles';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
@@ -885,8 +886,15 @@ export default async function InstrumentPage({
   const vueJourDisponible = instantanes.length > 0 && (seanceTracable || transactionsSeance === 0);
 
   // Profil de la société (0201) : public, sources officielles seulement.
-  const { data: profilRow } = await createClient().from('societes_profils').select('presentation, metiers, determinants, dirigeants, actionnariat, site_web, verifie_le').eq('code', code).maybeSingle();
+  const { data: profilRow } = await createClient().from('societes_profils').select('presentation, historique, identite, metiers, determinants, dirigeants, actionnariat, site_web, verifie_le').eq('code', code).maybeSingle();
   const profil = normaliserProfil(profilRow);
+  // Points clés tirés de NOS comptes et dividendes : verrouillés comme les fondamentaux.
+  const pointsProfil = gateFonda.allowed ? pointsCles({
+    famille: (instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null,
+    courant: exCourant,
+    precedent: exPrecedent,
+    dividendes: divRows.map((d) => ({ exercice: d.exercice, montant: d.montant })),
+  }) : [];
 
   const [{ data: presseRows }, { data: prochainRow }] = await Promise.all([
     liqDailyClient
@@ -1350,7 +1358,7 @@ export default async function InstrumentPage({
       <section className="space-y-6">
         <Chapitre premier id="entreprise" numero="03" titre="L’entreprise" sousTitre="Qui elle est, ses comptes publiés, la valorisation, les dividendes et les événements de la société." />
 
-        {profil && <ProfilSociete profil={profil} />}
+        {profil && <ProfilSociete profil={profil} points={pointsProfil} />}
 
         {/* Alerte de perte — donnée fondamentale : suit le verrou `fondamentaux`. */}
         {gateFonda.allowed && exCourant?.net_income != null && exCourant.net_income < 0 && (

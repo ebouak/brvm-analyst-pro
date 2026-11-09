@@ -8,8 +8,18 @@
 
 export interface Dirigeant { nom: string; fonction: string; depuis: string | null; source: string }
 export interface Actionnaire { nom: string; pct: number }
+export interface Identite {
+  raisonSociale: string | null;
+  isin: string | null;
+  introduction: string | null;
+  capital: { montant: number; nominal: number } | null;
+  siege: string | null;
+  fractionnements: { date: string; parite: string }[];
+}
 export interface ProfilSociete {
   presentation: string | null;
+  historique: string | null;
+  identite: Identite | null;
   metiers: string[];
   determinants: string[];
   dirigeants: Dirigeant[];
@@ -42,7 +52,7 @@ export function libelleSource(url: string): string {
 }
 
 interface LigneBrute {
-  presentation?: unknown; metiers?: unknown; determinants?: unknown;
+  presentation?: unknown; historique?: unknown; identite?: unknown; metiers?: unknown; determinants?: unknown;
   dirigeants?: unknown; actionnariat?: unknown; site_web?: unknown; verifie_le?: unknown;
 }
 
@@ -73,8 +83,30 @@ export function normaliserProfil(row: LigneBrute | null | undefined): ProfilSoci
   }
 
   const site = texte(row.site_web);
+  const id = (row.identite ?? null) as Record<string, unknown> | null;
+  let identite: Identite | null = null;
+  if (id) {
+    const cap = (id.capital ?? null) as Record<string, unknown> | null;
+    const montant = cap ? Number(cap.montant) : NaN, nominal = cap ? Number(cap.nominal) : NaN;
+    const iso = (v: unknown) => { const t = texte(v); return t && /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : null; };
+    identite = {
+      raisonSociale: texte(id.raison_sociale),
+      isin: texte(id.isin),
+      introduction: iso(id.introduction),
+      capital: Number.isFinite(montant) && montant > 0 && Number.isFinite(nominal) && nominal > 0 ? { montant, nominal } : null,
+      // Ceinture : aucun courriel ni numéro long ne passe, même si la base en contenait.
+      siege: (() => { const t = texte(id.siege); return t && !/@|\d{8,}|\d{2}\s\d{2}\s\d{2}\s\d{2}/.test(t) ? t : null; })(),
+      fractionnements: (Array.isArray(id.fractionnements) ? id.fractionnements : [])
+        .map((x: Record<string, unknown>) => ({ date: iso(x?.date), parite: texte(x?.parite) }))
+        .filter((x): x is { date: string; parite: string } => !!x.date && !!x.parite),
+    };
+    const vide = !identite.raisonSociale && !identite.isin && !identite.introduction && !identite.capital && !identite.siege && !identite.fractionnements.length;
+    if (vide) identite = null;
+  }
   return {
     presentation: texte(row.presentation),
+    historique: texte(row.historique),
+    identite,
     metiers: textes(row.metiers),
     determinants: textes(row.determinants),
     dirigeants,

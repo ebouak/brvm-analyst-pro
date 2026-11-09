@@ -33,6 +33,22 @@
    ],
    "date": "Exercice 2023",
    "source": "https://www.brvm.org/sites/default/files/20240819_-_etats_financiers_approuves_-_exercice_2023_-_servair_abidjan_ci.pdf"
+  },
+  "identite": {
+   "raison_sociale": "SERVAIR ABIDJAN COTE D’IVOIRE",
+   "isin": "CI0000000600",
+   "introduction": "2000-03-31",
+   "capital": {
+    "montant": 1364000000,
+    "nominal": 125
+   },
+   "siege": "Aéroport International Félix Houphouet Boigny d'Abidjan 07 BP 08 ABIDJAN 07 Côte d'Ivoire ABIDJAN",
+   "fractionnements": [
+    {
+     "date": "2016-09-30",
+     "parite": "20 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -54,7 +70,15 @@
     "source": "https://www.bridgebankgroup.com/documents/ipo/IPO-BBGCI-Note-dinformation-20260709.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "Bridge Bank Group Côte d'Ivoire",
+   "isin": "CI0000010609",
+   "introduction": "2026-09-24",
+   "capital": null,
+   "siege": "Immeuble Teyliom, 33 Avenue du Général de Gaulle, Plateau, Abidjan, Côte d’Ivoire.",
+   "fractionnements": []
+  }
  },
  {
   "code": "BICB",
@@ -70,7 +94,15 @@
    "Taux de bancarisation encore faible : un potentiel de croissance structurel"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "Banque Internationale pour l'Industrie et le Commerce",
+   "isin": "BJ0000002457",
+   "introduction": "2025-04-28",
+   "capital": null,
+   "siege": "Boulevard St Michel, Cotonou (Bénin), Littoral Département 01 BP 7744 Cotonou",
+   "fractionnements": []
+  }
  },
  {
   "code": "BICC",
@@ -84,7 +116,23 @@
    "Résultats sensibles au coût du risque et à la qualité du portefeuille de crédits"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "BICI COTE D’IVOIRE",
+   "isin": "CI0000000014",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 16666670000,
+    "nominal": 1000
+   },
+   "siege": "BANQUE INTERNATIONALE POUR LE COMMERCE ET L'INDUSTRIE DE CÔTE D'IVOIRE 01 ABIDJAN",
+   "fractionnements": [
+    {
+     "date": "2017-10-06",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "BNBC",
@@ -100,7 +148,23 @@
    "Concurrence du secteur informel et des importations à bas prix"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "BERNABE COTE D’IVOIRE",
+   "isin": "CI0000000048",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 1656000000,
+    "nominal": 250
+   },
+   "siege": "Abidjan Agence principale Bd. de Marseille KM4 01 B.P.1867 Abidjan 01 Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-07-27",
+     "parite": "20 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "BOAB",
@@ -121,7 +185,23 @@
     "source": "https://www.boabenin.com/institutionnels/nous-connaitre/"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "BOA BENIN",
+   "isin": "BJ0000000048",
+   "introduction": "2000-11-17",
+   "capital": {
+    "montant": 10072680000,
+    "nominal": 248
+   },
+   "siege": "BANK OF AFRICA – Av. Jean Paul II 08 BP 0879 – Cotonou – BÉNIN COTONOU",
+   "fractionnements": [
+    {
+     "date": "2017-10-31",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "BOABF",
@@ -135,7 +215,23 @@
    "Taux de bancarisation encore faible : un potentiel de croissance structurel"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "BOA BURKINA FASO",
+   "isin": "BF0000000133",
+   "introduction": "2010-12-30",
+   "capital": {
+    "montant": 11000000000,
+    "nominal": 250
+   },
+   "siege": "770, Avenue du Président Aboubakar Sangoulé Lamizana 01 BP 1319 Ouagad Ouagadougou",
+   "fractionnements": [
+    {
+     "date": "2017-10-24",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "BOAC",
@@ -164,6 +260,22 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-cote-divoire"
+  },
+  "identite": {
+   "raison_sociale": "BANK OF AFRICA CÔTE D’IVOIRE",
+   "isin": "CI0000000956",
+   "introduction": "2010-04-07",
+   "capital": {
+    "montant": 40000000000,
+    "nominal": 1000
+   },
+   "siege": "BANK OF AFRICA - CÔTE D’IVOIRE Abidjan Plateau, Angle Avenue Terrasson 01 BP 4132 – Abidjan 01 – CÔTE D’IVOIRE Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-10-26",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -198,6 +310,22 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-mali"
+  },
+  "identite": {
+   "raison_sociale": "BOA MALI",
+   "isin": "ML0000000520",
+   "introduction": "2016-05-31",
+   "capital": {
+    "montant": 27450000000,
+    "nominal": 1000
+   },
+   "siege": "BANK OF AFRICA au Mali 418, Avenue de la Marne – BAP 2249 – Bozola – Ba BP 2249 Bamako",
+   "fractionnements": [
+    {
+     "date": "2017-12-22",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -242,6 +370,22 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-niger"
+  },
+  "identite": {
+   "raison_sociale": "BOA NIGER",
+   "isin": "NE0000000015",
+   "introduction": "2003-12-30",
+   "capital": {
+    "montant": 20800000000,
+    "nominal": 1000
+   },
+   "siege": "BANK OF AFRICA – Immeuble BANK OF AFRICA au Niger – Rue du Gawèye BP 10973 – Niamey – Niger Niamey",
+   "fractionnements": [
+    {
+     "date": "2017-10-27",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -256,7 +400,23 @@
    "Taux de bancarisation encore faible : un potentiel de croissance structurel"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "BOA SENEGAL",
+   "isin": "SN0000000332",
+   "introduction": "2014-12-09",
+   "capital": {
+    "montant": 12000000000,
+    "nominal": 333
+   },
+   "siege": "BANK OF AFRICA - SENEGAL – Immeuble Elan – Route de Ngor, Zone 12, qua Dakar",
+   "fractionnements": [
+    {
+     "date": "2017-10-30",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "CABC",
@@ -291,6 +451,17 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-de-cables-sicable"
+  },
+  "identite": {
+   "raison_sociale": "SOCIETE IVOIRIENNE DE CABLES",
+   "isin": "CI0000000154",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 740000000,
+    "nominal": 125
+   },
+   "siege": "Zone industrielle de Vridi, rue de conteneur",
+   "fractionnements": []
   }
  },
  {
@@ -337,6 +508,22 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/coris-bank-international"
+  },
+  "identite": {
+   "raison_sociale": "Coris Bank International SA",
+   "isin": "BF0000000604",
+   "introduction": "2016-12-23",
+   "capital": {
+    "montant": 32000000000,
+    "nominal": 1000
+   },
+   "siege": "1242 Avenue du Dr Kwamé N’krumah 01 BP : 6585 Ouagadougou 01 Ouagadougou",
+   "fractionnements": [
+    {
+     "date": "2017-12-14",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -353,7 +540,20 @@
    "La réglementation limitant l’âge des véhicules d’occasion importés favorise le marché du neuf"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "CFAO MOTORS COTE D’IVOIRE",
+   "isin": "CI0000000220",
+   "introduction": "1998-09-16",
+   "capital": null,
+   "siege": "Treichville Boulevard de Marseille ABIDJAN",
+   "fractionnements": [
+    {
+     "date": "2017-12-13",
+     "parite": "100 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "CIEC",
@@ -390,6 +590,22 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/compagnie-ivoirienne-delectricite-cie-ci"
+  },
+  "identite": {
+   "raison_sociale": "COMPAGNIE IVOIRIENNE D’ELECTRICITE",
+   "isin": "CI0000000212",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 14000000000,
+    "nominal": 250
+   },
+   "siege": "Rue des Chevaliers de Clieu - Zone 4 C Marcory 01 BP 1840 Abidjan 01 Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-10-19",
+     "parite": "20 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -413,7 +629,20 @@
     "source": "https://www.brvm.org/sites/default/files/20260909_-_rapport_dactivites_-_1er_semestre_2026_-_ecobank_ci.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "ECOBANK CI",
+   "isin": "CI0000002424",
+   "introduction": "2017-12-12",
+   "capital": null,
+   "siege": "Rue du commerce, Non loin de la place de la République, Quartier Impér Abidjan",
+   "fractionnements": [
+    {
+     "date": "2018-12-27",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "ETIT",
@@ -435,7 +664,24 @@
     "source": "https://www.brvm.org/sites/default/files/20260413_-_etats_financiers_ifrs_-_exercice_2025_-_eti_tg.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "ETI TOGO",
+   "isin": "TG0000000132",
+   "introduction": "2006-09-11",
+   "capital": null,
+   "siege": "2365, Boulevard du Mono - BP : 3261 Lome",
+   "fractionnements": [
+    {
+     "date": "2008-06-09",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    },
+    {
+     "date": "2007-02-13",
+     "parite": "2 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "FTSC",
@@ -449,7 +695,23 @@
    "Activité étroitement liée aux volumes des campagnes agricoles (cacao, anacarde, coton) en Côte d’Ivoire et dans la sous-région"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "FILTISAC COTE D’IVOIRE",
+   "isin": "CI0000000121",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 8814837500,
+    "nominal": 625
+   },
+   "siege": "FILATURE, TISSAGE, SACS DE CÔTE D'IVOIRE Km8, Route d’Adzopé Abidjan Abidjan",
+   "fractionnements": [
+    {
+     "date": "2018-01-31",
+     "parite": "4 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "LNBB",
@@ -472,7 +734,15 @@
     "source": "https://www.loteriebenin.bj/accueil"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "Loterie Nationale du Bénin",
+   "isin": "BJ0000002275",
+   "introduction": "2024-12-13",
+   "capital": null,
+   "siege": "Lieu dit Ganhi, Cotonou, République du Bénin Cotonou",
+   "fractionnements": []
+  }
  },
  {
   "code": "NEIC",
@@ -488,7 +758,23 @@
    "Exposition au piratage et à la reprographie illégale"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "NEI - CEDA",
+   "isin": "CI0000000618",
+   "introduction": "2000-04-14",
+   "capital": {
+    "montant": 255316500,
+    "nominal": 20
+   },
+   "siege": "01 Bd Marseille, Non loin de la ex SONATT, Imm. NEI-CEDA - Zone portua 01 BP 1818 Abidjan 01 Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-08-10",
+     "parite": "25 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "NSBC",
@@ -516,7 +802,15 @@
     "source": "https://www.brvm.org/en/node/1240404"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "NSIA BANQUE CI",
+   "isin": "CI0000002416",
+   "introduction": "2017-10-24",
+   "capital": null,
+   "siege": "8-10 Rue des banques, Côte d'Ivoire, Avenue Anoma, Abidjan CI Abidjan",
+   "fractionnements": []
+  }
  },
  {
   "code": "NTLC",
@@ -543,7 +837,23 @@
     "source": "https://www.brvm.org/sites/default/files/20261022_-_rapport_dactivites_-_3e_trimestre_2026_-_nestle_ci_0.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "NESTLE COTE D’IVOIRE",
+   "isin": "CI0000000295",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 5517600000,
+    "nominal": 250
+   },
+   "siege": "Rue des Chevaliers de Clieu - Zone 4 C Marcory 01 BP 1840 Abidjan 01 Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-09-08",
+     "parite": "20 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "ONTBF",
@@ -583,6 +893,26 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/moov-africa-burkina-faso"
+  },
+  "identite": {
+   "raison_sociale": "ONATEL-SA",
+   "isin": "BF0000000117",
+   "introduction": "2009-04-30",
+   "capital": {
+    "montant": 34000000000,
+    "nominal": 500
+   },
+   "siege": "ONATEL - BURKINA FASO 705 Avenue de la nation BP 10 000 BF- Ouagadougou 01 Ouagadougou",
+   "fractionnements": [
+    {
+     "date": "2018-08-29",
+     "parite": "2 actions nouvelles pour 1 action ancienne"
+    },
+    {
+     "date": "2013-11-29",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -600,7 +930,15 @@
    "Fiscalité sectorielle et coût des licences et du spectre"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "Orange Côte d'Ivoire",
+   "isin": "CI0000005864",
+   "introduction": "2022-12-30",
+   "capital": null,
+   "siege": "Cocody, Riviera Golf, boulevard de France, immeuble Orange Village 11 BP 202 Abidjan 11 Abidjan",
+   "fractionnements": []
+  }
  },
  {
   "code": "ORGT",
@@ -633,7 +971,15 @@
     "source": "https://www.orabank.net/sites/default/files/2026-07/ORAGROUP%202025%20-%20RS%20440.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "Oragroup SA",
+   "isin": "TG0000001239",
+   "introduction": "2019-04-16",
+   "capital": null,
+   "siege": "Rue du Gouverneur Général Ponty 01 BP 2700 Cotonou Cotonou",
+   "fractionnements": []
+  }
  },
  {
   "code": "PALC",
@@ -655,7 +1001,23 @@
     "source": "https://groupesifca.com/wp-content/uploads/2026/04/RA-PALMCI-2025.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "PALM COTE D’IVOIRE",
+   "isin": "CI0000000592",
+   "introduction": "1999-10-18",
+   "capital": {
+    "montant": 20406297497,
+    "nominal": 1320
+   },
+   "siege": "Boulevard de Vridi, Abidjan – Zone portuaire 18 B.P. 3321 Abidjan 18 Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-11-03",
+     "parite": "2 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "PRSC",
@@ -679,7 +1041,20 @@
     "source": "https://www.brvm.org/sites/default/files/20261029_-_rapport_dactivites_-_1er_semestre_2026_-_tractafric_motors_ci.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "TRACTAFRIC MOTORS COTE D’IVOIRE",
+   "isin": "CI0000000055",
+   "introduction": "1998-09-16",
+   "capital": null,
+   "siege": "Km 4 -Boulevard de Marseille Zone 3, Abidjan Abidjan",
+   "fractionnements": [
+    {
+     "date": "2019-10-25",
+     "parite": "64 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SAFC",
@@ -702,7 +1077,23 @@
     "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-africaine-de-credit-automobile-de-cote-divoire-safca"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SAFCA COTE D’IVOIRE",
+   "isin": "CI0000000022",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 1299000000,
+    "nominal": 109
+   },
+   "siege": "1,Rue des Carrossiers – Zone 3 – 04BP 27 Abidjan04 Abidjan",
+   "fractionnements": [
+    {
+     "date": "2018-12-24",
+     "parite": "25 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SCRC",
@@ -723,7 +1114,20 @@
     "source": "https://groupesifca.com/sucrivoire/"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SUCRIVOIRE",
+   "isin": "CI0000002028",
+   "introduction": "2016-12-29",
+   "capital": null,
+   "siege": "Siège Abidjan, boulevard du Havre Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-12-04",
+     "parite": "4 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SDCC",
@@ -752,7 +1156,23 @@
     "source": "https://sodeci.ci/qui-sommes-nous/le-mot-du-president-du-conseil-d-administration"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SODE COTE D’IVOIRE",
+   "isin": "CI0000000204",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 4500000000,
+    "nominal": 500
+   },
+   "siege": "Avenue Christiani - Treichville Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-12-28",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SDSC",
@@ -768,7 +1188,23 @@
    "Marché concurrentiel face aux autres grands opérateurs internationaux présents dans les ports ivoiriens"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "AFRICA GLOBAL LOGISTICS (AGL) CÔTE D'IVOIRE",
+   "isin": "CI0000000261",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 10887060000,
+    "nominal": 200
+   },
+   "siege": null,
+   "fractionnements": [
+    {
+     "date": "2017-07-29",
+     "parite": "50 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SEMC",
@@ -800,6 +1236,22 @@
    ],
    "date": "31/12/2023",
    "source": "https://www.brvm.org/sites/default/files/20250415_-_notation_financiere_-_eviosys_packaging_siem_ci_0.pdf"
+  },
+  "identite": {
+   "raison_sociale": "CROWN SIEM COTE D’IVOIRE",
+   "isin": "CI0000000345",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 1889220000,
+    "nominal": 75
+   },
+   "siege": "Boulevard Valéry Giscard d’Estaing, 01 BP 1242 Abidjan 01, Côte d’Ivoire",
+   "fractionnements": [
+    {
+     "date": "2018-12-20",
+     "parite": "40 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -851,6 +1303,22 @@
    ],
    "date": "31/12/2023",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-generale-cote-divoire-sgci"
+  },
+  "identite": {
+   "raison_sociale": "SOCIETE GENERALE COTE D’IVOIRE",
+   "isin": "CI0000000030",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 15555555000,
+    "nominal": 500
+   },
+   "siege": "S.A, Siège Social à Abidjan, Plateau 5 et 7 Avenue Joseph Anoma 01 BP 1355 Abidjan 01 Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-08-25",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -867,7 +1335,23 @@
    "Croissance du parc automobile et de l’activité économique"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "VIVO ENERGY COTE D’IVOIRE",
+   "isin": "CI0000000246",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 3150000000,
+    "nominal": 50
+   },
+   "siege": "Rue des pétroliers, Zone Industrielle de Vridi Abidjan",
+   "fractionnements": [
+    {
+     "date": "2016-11-04",
+     "parite": "50 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SIBC",
@@ -901,7 +1385,20 @@
     "source": "https://sib.ci/wp-content/uploads/2025/06/SIB25-DocDeRef-v0.6-1_.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "Société Ivoirienne de Banque",
+   "isin": "CI0000001871",
+   "introduction": "2016-10-27",
+   "capital": null,
+   "siege": "34 bd République,Immeuble Alpha 2000 01 BP 1300 ABIDJAN 01 ABIDJAN",
+   "fractionnements": [
+    {
+     "date": "2018-06-15",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SICC",
@@ -916,7 +1413,18 @@
    "Aléas climatiques et rendements agricoles"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SICOR COTE D’IVOIRE",
+   "isin": "CI0000000113",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 1500000000,
+    "nominal": 2500
+   },
+   "siege": "SICOR COTE D’IVOIRE Bd Lagunaire, Imm Arc en ciel, angle Av Chardy Pla Abidjan",
+   "fractionnements": []
+  }
  },
  {
   "code": "SIVC",
@@ -932,7 +1440,23 @@
    "Coûts énergétiques significatifs dans le processus de production"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "ERIUM COTE D’IVOIRE",
+   "isin": "CI0000000550",
+   "introduction": "1999-04-19",
+   "capital": {
+    "montant": 873400000,
+    "nominal": 100
+   },
+   "siege": "131, boulevard de Marseille BP 1753 Abidjan Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-12-21",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SLBC",
@@ -954,7 +1478,27 @@
     "source": "https://www.brvm.org/sites/default/files/20240812_-_communique_-_changement_important_dans_la_direction_-_solibra_ci.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SOLIBRA COTE D’IVOIRE",
+   "isin": "CI0000000105",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 4115210000,
+    "nominal": 250
+   },
+   "siege": "Rue Canal ZONE 3, Abidjan Abidjan",
+   "fractionnements": [
+    {
+     "date": "2024-09-30",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    },
+    {
+     "date": "2014-12-30",
+     "parite": "2 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SMBC",
@@ -975,7 +1519,23 @@
     "source": "https://smb.ci/la-smb/"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SMB COTE D’IVOIRE",
+   "isin": "CI0000000170",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 4872000000,
+    "nominal": 625
+   },
+   "siege": "Boulevard de Petit Bassam - Enceinte de la raffinerie SIR Abidjan",
+   "fractionnements": [
+    {
+     "date": "2019-02-25",
+     "parite": "4 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SNTS",
@@ -991,7 +1551,27 @@
    "Fiscalité et régulation dans cinq juridictions différentes"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SONATEL SENEGAL",
+   "isin": "SN0000000019",
+   "introduction": "1998-10-02",
+   "capital": {
+    "montant": 50000000000,
+    "nominal": 50
+   },
+   "siege": "6 Rue WAGANE DIOUF, Sénégal",
+   "fractionnements": [
+    {
+     "date": "2026-10-26",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    },
+    {
+     "date": "2012-11-23",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SOGC",
@@ -1013,7 +1593,23 @@
     "source": "https://www.sogbci.com/media/rapports/pdf/415/rapport-annuel-2025.pdf"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SOGB COTE D’IVOIRE",
+   "isin": "CI0000000162",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 21601840000,
+    "nominal": 1000
+   },
+   "siege": "21 Route du Lycée Technique Cocody",
+   "fractionnements": [
+    {
+     "date": "2017-08-18",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "SPHC",
@@ -1028,7 +1624,23 @@
    "Aléas climatiques et maladies des plantations"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SAPH COTE D’IVOIRE",
+   "isin": "CI0000000196",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 14593621000,
+    "nominal": 571
+   },
+   "siege": "Abidjan Treichville - Zone portuaire - Rue des Galions Immeuble EX-SIT 01 BP 1322 ABIDJAN 01 ABIDJAN",
+   "fractionnements": [
+    {
+     "date": "2017-07-21",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "STAC",
@@ -1056,7 +1668,23 @@
     "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-detudes-et-de-travaux-pour-lafrique-de-louest-setao"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "SETAO COTE D’IVOIRE",
+   "isin": "CI0000000352",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 672000000,
+    "nominal": 50
+   },
+   "siege": "SETAO COTE D’IVOIRE Zone 3, 22 Rue Foreurs CI BP 925 CI-2360 Abidjan 01, Région des lagunes Côte Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-10-25",
+     "parite": "100 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "STBC",
@@ -1108,6 +1736,22 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-des-tabacs-sitab"
+  },
+  "identite": {
+   "raison_sociale": "SITAB COTE D’IVOIRE",
+   "isin": "CI0000000097",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 4487750000,
+    "nominal": 250
+   },
+   "siege": "Société Ivoirienne des Tabacs Direction Générale Cocody Nord - Quartie BP 724 CI- Abidjan Abidjan",
+   "fractionnements": [
+    {
+     "date": "2018-07-27",
+     "parite": "20 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -1131,7 +1775,27 @@
     "source": "https://totalenergies.ci/totalenergies-en-cote-divoire/les-engagements-totalenergies-en-cote-divoire/gouvernance"
    }
   ],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "TOTAL CI",
+   "isin": "CI0000000659",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 3148080000,
+    "nominal": 50
+   },
+   "siege": "Immeuble Rive Gauche 100, rue des brasseurs - Zone 3, Côte d'Ivoire Abidjan",
+   "fractionnements": [
+    {
+     "date": "2018-02-12",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    },
+    {
+     "date": "2015-07-27",
+     "parite": "20 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  },
  {
   "code": "TTLS",
@@ -1163,6 +1827,22 @@
    ],
    "date": "31/12/2025",
    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/total-senegal-total-senegal"
+  },
+  "identite": {
+   "raison_sociale": "TotalEnergies Marketing Sénégal",
+   "isin": "SN0000000357",
+   "introduction": "2015-02-19",
+   "capital": {
+    "montant": 3257770000,
+    "nominal": 100
+   },
+   "siege": "Route de l'Aéroport sur la station total NGOR, Sénégal",
+   "fractionnements": [
+    {
+     "date": "2017-11-02",
+     "parite": "10 actions nouvelles pour 1 action ancienne"
+    }
+   ]
   }
  },
  {
@@ -1177,7 +1857,18 @@
    "Demande liée au pouvoir d’achat des ménages"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "UNILEVER COTE D’IVOIRE",
+   "isin": "CI0000000287",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 8053000000,
+    "nominal": 877
+   },
+   "siege": "Zone Portuaire ( Directon Sotra) - Vidri, Côte d'Ivoire Abidjan",
+   "fractionnements": []
+  }
  },
  {
   "code": "UNXC",
@@ -1192,6 +1883,26 @@
    "Sensibilité aux coûts des intrants (coton, énergie) et aux taux de change"
   ],
   "dirigeants": [],
-  "actionnariat": null
+  "actionnariat": null,
+  "identite": {
+   "raison_sociale": "UNIWAX COTE D’IVOIRE",
+   "isin": "CI0000000337",
+   "introduction": "1998-09-16",
+   "capital": {
+    "montant": 3750000000,
+    "nominal": 181
+   },
+   "siege": "Zone Industrielle - Yopougon, Côte d'Ivoire Abidjan",
+   "fractionnements": [
+    {
+     "date": "2017-08-11",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    },
+    {
+     "date": "2015-04-30",
+     "parite": "5 actions nouvelles pour 1 action ancienne"
+    }
+   ]
+  }
  }
 ]

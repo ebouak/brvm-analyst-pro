@@ -47,6 +47,21 @@ describe('normaliserProfil', () => {
   });
 });
 
+describe('identité', () => {
+  it('garde capital, introduction et fractionnements valides', () => {
+    const p = normaliserProfil({ ...base, historique: 'Créée en 1962.', identite: { raison_sociale: 'SG CI', isin: 'CI0000000030', introduction: '1998-09-16', capital: { montant: 15555555000, nominal: 500 }, siege: 'Plateau, Abidjan', fractionnements: [{ date: '2017-08-25', parite: '10 pour 1' }, { date: '25 août', parite: 'x' }] } })!;
+    expect(p.historique).toBe('Créée en 1962.');
+    expect(p.identite!.capital!.nominal).toBe(500);
+    expect(p.identite!.fractionnements).toHaveLength(1);
+  });
+  it('refuse un siège portant un courriel ou un téléphone', () => {
+    const p = normaliserProfil({ ...base, identite: { siege: 'contact@x.ci Abidjan' } })!;
+    expect(p.identite).toBeNull();
+    const q = normaliserProfil({ ...base, identite: { siege: 'Abidjan 27 20 32 66', isin: 'CI1' } })!;
+    expect(q.identite!.siege).toBeNull();
+  });
+});
+
 describe('libelleSource', () => {
   it('nomme la BRVM et garde le domaine sinon', () => {
     expect(libelleSource('https://www.brvm.org/fr/x')).toBe('BRVM');
