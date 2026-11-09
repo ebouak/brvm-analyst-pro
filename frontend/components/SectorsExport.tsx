@@ -13,7 +13,7 @@ const COLUMNS: CsvColumn<SectorPerf>[] = [
   { header: 'Var 30 jours %', accessor: (s) => s.var30d ?? '' },
   { header: 'Var 90 jours %', accessor: (s) => s.var90d ?? '' },
   { header: 'Var 1 an %', accessor: (s) => s.var1y ?? '' },
-  { header: 'Valeur échangée FCFA', accessor: (s) => s.volumeDay },
+  { header: 'Valeur échangée FCFA', accessor: (s) => s.volumeDay ?? '' },
   { header: 'Hausses', accessor: (s) => s.hausses },
   { header: 'Baisses', accessor: (s) => s.baisses },
 ];

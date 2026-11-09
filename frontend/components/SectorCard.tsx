@@ -60,17 +60,19 @@ export default function SectorCard({ perf, rang }: Props) {
   const partHausse = mouvements > 0 ? (hausses / mouvements) * 100 : null;
 
   return (
-    <article className="flex flex-col gap-4 rounded-card border border-border bg-surface p-4 shadow-card">
+    <article className="flex flex-col gap-4 rounded-card border border-border bg-surface px-4 pb-4 pt-6 shadow-card">
       {/* En-tête : rang, secteur, variation de la séance */}
-      <header className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          {rang != null && <span className="tabular text-xs text-accent-ink">{String(rang).padStart(2, '0')}</span>}
-          <h3 className="text-base font-semibold leading-snug text-ivory [text-wrap:balance]">
-            <Link href={`/heatmap?secteur=${encodeURIComponent(secteur)}`} className={`transition-colors hover:text-accent-ink ${FOCUS}`}>
-              {secteur}
-            </Link>
-          </h3>
-        </div>
+      <header className="-mb-1 flex items-start justify-between gap-3">
+        <h3 className="flex min-w-0 items-baseline gap-2 text-base font-semibold leading-snug text-ivory">
+          {rang != null && (
+            <span className="tabular shrink-0 text-xs font-normal text-accent-ink">
+              <span className="sr-only">Rang </span>{String(rang).padStart(2, '0')}
+            </span>
+          )}
+          <Link href={`/heatmap?secteur=${encodeURIComponent(secteur)}`} className={`min-w-0 [text-wrap:balance] transition-colors hover:text-accent-ink ${FOCUS}`}>
+            {secteur}
+          </Link>
+        </h3>
         <p className={`flex shrink-0 items-center gap-1 ${varColor}`}>
           {Fleche && <Fleche size={16} strokeWidth={1.75} aria-hidden />}
           <span className="tabular text-xl font-semibold">{varDay == null ? '—' : fmtPctSigne(varDay)}</span>
@@ -152,7 +154,9 @@ export default function SectorCard({ perf, rang }: Props) {
         <span>
           <span className="tabular text-ivory">{count}</span> valeur{count > 1 ? 's' : ''}
           <span aria-hidden className="mx-1.5 text-faint">·</span>
-          <span className="tabular text-ivory">{fmtFcfa(volumeDay)}</span> FCFA échangés
+          {volumeDay != null
+            ? <><span className="tabular text-ivory">{fmtFcfa(volumeDay)}</span> FCFA échangés</>
+            : <>valeur échangée non publiée</>}
         </span>
         <Link
           href={`/actions?secteur=${encodeURIComponent(secteur)}`}

@@ -34,7 +34,7 @@ export default async function ValorisationSecteurs({ entete }: { entete?: ReactN
   const exploitables = d.societes.length - d.sansDonnees.length;
 
   return (
-    <section aria-labelledby={entete ? 'valorisation' : undefined} className="space-y-4">
+    <section aria-labelledby={entete ? 'valorisation-titre' : undefined} className="space-y-4">
       {entete}
       <div className="flex flex-wrap items-end justify-between gap-3">
         {!entete && (

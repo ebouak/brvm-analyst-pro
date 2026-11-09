@@ -46,8 +46,22 @@ function useVersionTheme(): number {
   return version;
 }
 
+/** Vrai sous 640 px (point de rupture `sm`) : libellés des bulles masqués, la légende les nomme. */
+function useEtroit(): boolean {
+  const [etroit, setEtroit] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)');
+    const maj = () => setEtroit(mq.matches);
+    maj();
+    mq.addEventListener('change', maj);
+    return () => mq.removeEventListener('change', maj);
+  }, []);
+  return etroit;
+}
+
 export default function SectorRotation({ perfs }: Props) {
   useVersionTheme();
+  const etroit = useEtroit();
   const validPerfs = perfs.filter((p) => p.var30d != null && p.var90d != null);
 
   if (validPerfs.length === 0) {
@@ -60,11 +74,13 @@ export default function SectorRotation({ perfs }: Props) {
 
   const T = chartTheme();
   const couleur = (q: Quadrant) => T[PAR_CLE[q].jeton];
-  const maxVol = Math.max(...validPerfs.map((p) => p.volumeDay), 1);
+  // Valeur échangée absente (séance non encore publiée) : bulles de taille égale, et la légende le dit.
+  const volumeConnu = validPerfs.some((p) => p.volumeDay != null);
+  const maxVol = Math.max(...validPerfs.map((p) => p.volumeDay ?? 0), 1);
 
   const points = validPerfs.map((p) => {
     const q = quadrant(p.var30d, p.var90d) ?? 'lagging';
-    const size = Math.max(10, (p.volumeDay / maxVol) * 50);
+    const size = volumeConnu ? Math.max(10, ((p.volumeDay ?? 0) / maxVol) * 50) : 16;
     return {
       secteur: p.secteur,
       quadrant: q,
@@ -80,7 +96,8 @@ export default function SectorRotation({ perfs }: Props) {
   });
 
   const option: EChartsOption = {
-    grid: { top: 32, right: 24, bottom: 48, left: 24, containLabel: true },
+    // Marge droite large : le libellé d'une bulle placée au bord (ex. « Énergie ») n'est plus rogné.
+    grid: { top: 32, right: etroit ? 16 : 72, bottom: 48, left: etroit ? 8 : 24, containLabel: true },
     tooltip: {
       trigger: 'item',
       formatter: (params: unknown) => {
@@ -101,7 +118,8 @@ export default function SectorRotation({ perfs }: Props) {
       nameGap: 32,
       nameTextStyle: { color: T.muted, fontSize: 12 },
       axisLine: { lineStyle: { color: T.border } },
-      axisLabel: { color: T.muted, fontSize: 11, formatter: pctAxe },
+      axisLabel: { color: T.muted, fontSize: 11, formatter: pctAxe, hideOverlap: true },
+      splitNumber: etroit ? 3 : 5,
       splitLine: { show: false },
     },
     yAxis: {
@@ -135,7 +153,7 @@ export default function SectorRotation({ perfs }: Props) {
           return v[2] ?? 16;
         },
         label: {
-          show: true,
+          show: !etroit,
           formatter: '{b}',
           position: 'top',
           color: T.ivory,
@@ -144,7 +162,7 @@ export default function SectorRotation({ perfs }: Props) {
         labelLayout: { hideOverlap: true },
         emphasis: {
           scale: true,
-          label: { show: true, fontWeight: 'bold' },
+          label: { show: true, fontWeight: 'bold', color: T.ivory, fontSize: 11 },
         },
       },
     ],
@@ -158,7 +176,11 @@ export default function SectorRotation({ perfs }: Props) {
   return (
     <figure>
       <figcaption className="text-xs text-muted">
-        Horizontal : variation sur 30 jours. Vertical : variation sur 90 jours. Taille de la bulle : valeur échangée sur la séance.
+        Horizontal : variation sur 30 jours. Vertical : variation sur 90 jours.{' '}
+        {volumeConnu
+          ? 'Taille de la bulle : valeur échangée sur la séance.'
+          : 'Valeur échangée de la séance non publiée : toutes les bulles ont la même taille.'}
+        <span className="sm:hidden"> Les secteurs sont nommés sous le graphique.</span>
       </figcaption>
       <div aria-hidden className="mt-3">
         <EChart option={option} height={420} />

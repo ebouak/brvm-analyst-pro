@@ -157,7 +157,7 @@ export default async function SecteursPage() {
       ) : (
         <>
           {/* ── 01 : Top secteurs du jour ─────────────────────────────────── */}
-          <section aria-labelledby="tete">
+          <section aria-labelledby="tete-titre">
             <Chapitre
               id="tete"
               numero="01"
@@ -195,7 +195,7 @@ export default async function SecteursPage() {
           </section>
 
           {/* ── 02 : Classement complet ───────────────────────────────────── */}
-          <section aria-labelledby="classement">
+          <section aria-labelledby="classement-titre">
             <Chapitre
               id="classement"
               numero="02"
@@ -212,7 +212,7 @@ export default async function SecteursPage() {
           </section>
 
           {/* ── 03 : Rotation sectorielle ─────────────────────────────────── */}
-          <section aria-labelledby="rotation">
+          <section aria-labelledby="rotation-titre">
             <Chapitre
               id="rotation"
               numero="03"

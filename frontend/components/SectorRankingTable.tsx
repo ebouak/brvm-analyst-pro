@@ -18,14 +18,14 @@ interface Props {
  */
 const COLS: { key: Col; label: string; definition: string; numerique: boolean }[] = [
   { key: 'secteur', label: 'Secteur', definition: 'Secteur de cotation de la société.', numerique: false },
+  { key: 'varDay', label: 'Séance', definition: 'Moyenne des variations de la séance des valeurs du secteur.', numerique: true },
   { key: 'count', label: 'Valeurs', definition: 'Nombre de sociétés cotées dans le secteur.', numerique: true },
   { key: 'coursMean', label: 'Cours moyen', definition: 'Moyenne simple des derniers cours de clôture du secteur, en FCFA.', numerique: true },
-  { key: 'varDay', label: 'Séance', definition: 'Moyenne des variations de la séance des valeurs du secteur.', numerique: true },
   { key: 'var5d', label: '5 jours', definition: 'Moyenne des variations de chaque valeur depuis le cours d’il y a 5 jours calendaires.', numerique: true },
   { key: 'var30d', label: '30 jours', definition: 'Même calcul sur 30 jours calendaires : la tendance du mois.', numerique: true },
   { key: 'var90d', label: '90 jours', definition: 'Même calcul sur 90 jours calendaires : la tendance du trimestre.', numerique: true },
   { key: 'var1y', label: '1 an', definition: 'Même calcul sur 365 jours.', numerique: true },
-  { key: 'volumeDay', label: 'Échangé', definition: 'Valeur totale échangée sur la séance par les valeurs du secteur, en FCFA.', numerique: true },
+  { key: 'volumeDay', label: 'Échangé', definition: 'Valeur totale échangée sur la séance par les valeurs du secteur, en FCFA. « — » : pas encore publiée pour la séance.', numerique: true },
 ];
 
 function VarCell({ v }: { v: number | null }) {
@@ -116,17 +116,19 @@ export default function SectorRankingTable({ perfs }: Props) {
                       {p.secteur}
                     </Link>
                   </th>
+                  <td className="px-4 py-3 text-right"><VarCell v={p.varDay} /></td>
                   <td className="tabular px-4 py-3 text-right text-muted">{p.count}</td>
                   <td className="tabular px-4 py-3 text-right text-ivory">
                     {p.coursMean != null ? fmtNumber(p.coursMean, 0) : <span className="text-faint">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-right"><VarCell v={p.varDay} /></td>
                   <td className="px-4 py-3 text-right"><VarCell v={p.var5d} /></td>
                   <td className="px-4 py-3 text-right"><VarCell v={p.var30d} /></td>
                   <td className="px-4 py-3 text-right"><VarCell v={p.var90d} /></td>
                   <td className="px-4 py-3 text-right"><VarCell v={p.var1y} /></td>
                   <td className="whitespace-nowrap px-4 py-3 text-right text-ivory">
-                    <span className="tabular">{fmtFcfa(p.volumeDay)}</span> <span className="text-xs text-faint">FCFA</span>
+                    {p.volumeDay != null
+                      ? <><span className="tabular">{fmtFcfa(p.volumeDay)}</span> <span className="text-xs text-faint">FCFA</span></>
+                      : <span className="text-faint" title="Valeur échangée non publiée pour cette séance">—</span>}
                   </td>
                 </tr>
               );
