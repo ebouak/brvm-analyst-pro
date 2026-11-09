@@ -548,6 +548,32 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'conseiller': {
+      // Positions par famille de facteurs (sans verdict). Sans --ecrire : calcul à blanc.
+      const { runConseiller } = await import('./conseiller/runConseiller.js');
+      const ecrire = process.argv.includes('--ecrire');
+      if (!ecrire) {
+        // À blanc : aucune écriture, pas même dans scraper_runs.
+        await runConseiller(false);
+        return 0;
+      }
+      await monitored(
+        { code: 'conseiller', label: 'Positions du Conseiller (facteurs)' },
+        async () => {
+          const r = await runConseiller(ecrire);
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lignes,
+              rows_upserted: r.lignes,
+              metadata: { date_marche: r.date },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'conseiller:audit': {
       const { runAudit } = await import('./conseiller/runAudit.js');
       const md = await runAudit();

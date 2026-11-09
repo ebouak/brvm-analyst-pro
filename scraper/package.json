@@ -82,6 +82,7 @@
     "carnet:date": "tsx src/index.ts carnet",
     "sante:llm": "tsx src/index.ts sante:llm",
     "eval:signaux": "tsx src/index.ts eval:signaux",
+    "conseiller": "tsx --env-file-if-exists=.env.local src/index.ts conseiller",
     "conseiller:audit": "tsx --env-file-if-exists=.env.local src/index.ts conseiller:audit",
     "conseiller:emd": "tsx --env-file-if-exists=.env.local src/index.ts conseiller:emd",
     "conseiller:banc": "tsx --env-file-if-exists=.env.local src/index.ts conseiller:banc",
