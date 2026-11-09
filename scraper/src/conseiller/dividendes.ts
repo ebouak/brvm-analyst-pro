@@ -18,27 +18,25 @@ export function reconstituerExDate(s: Serie, montant: number, apres: string): st
   return null;
 }
 
-const chevaucheMaiAout = (debut: string, fin: string) => {
-  for (let an = Number(debut.slice(0, 4)); an <= Number(fin.slice(0, 4)); an++) {
-    if (debut <= `${an}-08-31` && fin >= `${an}-05-01`) return true;
-  }
-  return false;
-};
+/** Chevauchement d'intervalles fermés de dates ISO. */
+export const chevauchePeriode = (debut: string, fin: string, p1: string, p2: string) => debut <= p2 && fin >= p1;
 
 /**
  * Rendement total entre les positions `a` et `b` (cours + dividendes détachés
  * dans ]a ; b]). `null` (observation EXCLUE, spec §3.5b) si un dividende de la
  * valeur, connu avant la fin de la fenêtre, n'a pas d'ex-date et que la fenêtre
- * chevauche mai-août.
+ * chevauche mai-août de l'année N+1 de l'exercice (seule année où il peut détacher).
  */
 export function rendementTotal(s: Serie, code: string, dividendes: Dividende[], a: number, b: number): number | null {
+  // Un cours nul est un trou de collecte, pas un cours.
+  if (s.cours[a]! <= 0 || s.cours[b]! <= 0) return null;
   const debut = s.dates[a]!;
   const fin = s.dates[b]!;
   let detache = 0;
   for (const dv of dividendes) {
     if (dv.code !== code) continue;
     if (dv.exDate == null) {
-      if (dv.disponibleLe <= fin && chevaucheMaiAout(debut, fin)) return null;
+      if (dv.disponibleLe <= fin && chevauchePeriode(debut, fin, `${dv.exercice + 1}-05-01`, `${dv.exercice + 1}-08-31`)) return null;
       continue;
     }
     if (dv.exDate > debut && dv.exDate <= fin) detache += dv.montant;

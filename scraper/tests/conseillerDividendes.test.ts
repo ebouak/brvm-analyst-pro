@@ -33,3 +33,27 @@ describe('rendementTotal', () => {
     expect(rendementTotal(s, 'A', [], 0, 10)).toBeCloseTo(10 / 1000, 6);
   });
 });
+
+describe('rendementTotal — portée de l exclusion', () => {
+  const longCal = calendrier(1500);
+  const s = serie(longCal, longCal.map(() => 1000));
+  const fenetreMai = (an: number) => {
+    const i = longCal.findIndex((d) => d >= `${an}-05-01`);
+    return [i - 5, i + 15] as const;
+  };
+  it('un dividende non daté de l exercice 2015 n exclut pas mai 2024', () => {
+    const div: Dividende[] = [{ code: 'A', exercice: 2015, montant: 80, disponibleLe: '2016-07-31', exDate: null }];
+    const [a, b] = fenetreMai(2024);
+    expect(rendementTotal(s, 'A', div, a, b)).not.toBeNull();
+  });
+  it('un dividende non daté de l exercice 2019 exclut mai 2020', () => {
+    const div: Dividende[] = [{ code: 'A', exercice: 2019, montant: 80, disponibleLe: '2020-01-02', exDate: null }];
+    const [a, b] = fenetreMai(2020);
+    expect(rendementTotal(s, 'A', div, a, b)).toBeNull();
+  });
+  it('un cours à 0 (trou de collecte) donne null', () => {
+    const z = serie(cal, cal.map((_, i) => (i === 5 ? 0 : 1000)));
+    expect(rendementTotal(z, 'A', [], 5, 10)).toBeNull();
+    expect(rendementTotal(z, 'A', [], 0, 5)).toBeNull();
+  });
+});
