@@ -10,8 +10,13 @@ import Link from 'next/link';
 import {
   PremiumPanel,
   EmptyStatePremium,
-  Eyebrow,
 } from '@/components/ui/premium';
+import { getDonneesSecteurs } from '@/lib/secteurs/server';
+import { fmtPctSigne } from '@/lib/format';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { SommaireChapitres } from '@/components/marche/SommaireChapitres';
+import { LigneSource } from '@/components/marche/LigneSource';
+import { Chapitre } from '@/components/fiche/Chapitre';
 
 // Donnees marche publiques (RLS lecture publique), rafraichies toutes les 15 min
 // par l'intraday : ISR 5 min (audit 2026-06-12).
@@ -111,162 +116,148 @@ async function getData() {
   return { lastDate, perfs };
 }
 
-/* Stagger delays for card grid — static Tailwind-safe classes */
-const CARD_DELAYS = [
-  '[animation-delay:0.12s]',
-  '[animation-delay:0.18s]',
-  '[animation-delay:0.24s]',
-  '[animation-delay:0.30s]',
-];
-
 export default async function SecteursPage() {
-  const { lastDate, perfs } = await getData();
-
+  const [{ lastDate, perfs }, valo] = await Promise.all([getData(), getDonneesSecteurs()]);
   const top4 = perfs.slice(0, 4);
   const best = perfs[0] ?? null;
   const worst = perfs[perfs.length - 1] ?? null;
+  const avecValo = valo.secteurs.length > 0;
+
+  const chapitres = perfs.length === 0 ? [] : [
+    { id: 'tete', label: 'En tête du jour' },
+    { id: 'classement', label: 'Multi-horizon' },
+    { id: 'rotation', label: 'Rotation 30 j' },
+    ...(avecValo ? [{ id: 'valorisation', label: 'Valorisation' }] : []),
+  ];
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* ── Glow atmosphérique ─────────────────────────────────────────────── */}
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      <EnTeteCote
+        titre="Performance sectorielle"
+        description="Classement, rotation et valorisation des secteurs cotés à la BRVM."
+        seance={lastDate}
+        compte={perfs.length > 0 ? { n: perfs.length, libelle: 'secteurs' } : null}
+        source={lastDate ? 'Source BRVM' : null}
+        actions={perfs.length > 0 ? <SectorsExport rows={perfs} /> : undefined}
+      />
+      <SommaireChapitres chapitres={chapitres} />
 
-      <div className="relative max-w-7xl mx-auto px-6 py-10 space-y-10">
-
-        {/* ── En-tête ─────────────────────────────────────────────────────── */}
-        <div className="animate-rise-in">
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Performance sectorielle</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-              {lastDate
-                ? `Classement et rotation des secteurs cotés · Dernière séance : ${fmtDateFR(lastDate)}`
-                : "Classement et rotation des secteurs cotés sur la BRVM"}
-            </p>
-          </div>
-          {/* Règle dorée ────────────────────────── */}
-          <div className="mt-5 h-px bg-gold-line" />
+      {perfs.length === 0 ? (
+        <div className="mt-8">
+          <EmptyStatePremium
+            icon="◈"
+            title="Aucune donnée sectorielle disponible"
+            hint="Les données sectorielles apparaîtront ici dès la première ingestion."
+            action={{ href: '/', label: 'Retour au tableau de bord' }}
+          />
         </div>
-
-        {perfs.length > 0 && (
-          <div className="flex justify-end -mt-4">
-            <SectorsExport rows={perfs} />
-          </div>
-        )}
-
-        {perfs.length === 0 ? (
-          <div className="animate-rise-in [animation-delay:0.10s]">
-            <EmptyStatePremium
-              icon="◈"
-              title="Aucune donnée sectorielle disponible"
-              hint="Les données sectorielles apparaîtront ici dès la première ingestion."
-              action={{ href: '/', label: 'Retour au tableau de bord' }}
+      ) : (
+        <>
+          {/* ── 01 : Top secteurs du jour ─────────────────────────────────── */}
+          <section aria-labelledby="tete">
+            <Chapitre
+              id="tete"
+              numero="01"
+              titre="Secteurs en tête du jour"
+              sousTitre="Les quatre secteurs à la plus forte variation moyenne sur la séance."
+              premier
             />
-          </div>
-        ) : (
-          <>
-            {/* ── Section 1 : Top secteurs du jour ─────────────────────────── */}
-            <section className="animate-rise-in [animation-delay:0.08s] space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="font-display text-heading-sm text-ivory mt-1">
-                    Secteurs en tête du jour
-                  </h2>
-                </div>
-                <div className="hidden sm:flex items-center gap-4 text-xs">
-                  {best && best.varDay != null && (
-                    <span className="flex items-center gap-1.5 text-up">
-                      <span className="inline-block w-2 h-2 rounded-full bg-up/60" />
-                      Meilleur : <strong>{best.secteur}</strong>
-                      <span className="tabular">+{best.varDay.toFixed(2)}%</span>
-                    </span>
-                  )}
-                  {worst && worst.varDay != null && worst.secteur !== best?.secteur && (
-                    <span className="flex items-center gap-1.5 text-down">
-                      <span className="inline-block w-2 h-2 rounded-full bg-down/60" />
-                      Pire : <strong>{worst.secteur}</strong>
-                      <span className="tabular">{worst.varDay.toFixed(2)}%</span>
-                    </span>
-                  )}
-                </div>
-              </div>
+            {(best?.varDay != null || worst?.varDay != null) && (
+              <p className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+                {best && best.varDay != null && (
+                  <span>
+                    Meilleur : <span className="text-ivory">{best.secteur}</span>{' '}
+                    <span className="tabular text-up">{fmtPctSigne(best.varDay)}</span>
+                  </span>
+                )}
+                {worst && worst.varDay != null && worst.secteur !== best?.secteur && (
+                  <span>
+                    Pire : <span className="text-ivory">{worst.secteur}</span>{' '}
+                    <span className="tabular text-down">{fmtPctSigne(worst.varDay)}</span>
+                  </span>
+                )}
+              </p>
+            )}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {top4.map((p) => (
+                <SectorCard key={p.secteur} perf={p} />
+              ))}
+            </div>
+          </section>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {top4.map((p, i) => (
-                  <div
-                    key={p.secteur}
-                    className={`animate-rise-in ${CARD_DELAYS[i] ?? CARD_DELAYS[3]}`}
-                  >
-                    <SectorCard perf={p} />
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* ── Section 2 : Classement complet ───────────────────────────── */}
-            <section className="animate-rise-in [animation-delay:0.28s] space-y-4">
-              <div>
-                <h2 className="font-display text-heading-sm text-ivory mt-1">
-                  Tableau de performance multi-horizon
-                </h2>
-              </div>
-
+          {/* ── 02 : Classement complet ───────────────────────────────────── */}
+          <section aria-labelledby="classement">
+            <Chapitre
+              id="classement"
+              numero="02"
+              titre="Performance multi-horizon"
+              sousTitre="Tous les secteurs, du jour à un an, triables par colonne."
+            />
+            <div className="mt-6">
               <PremiumPanel>
                 <div className="p-1">
                   <SectorRankingTable perfs={perfs} />
                 </div>
               </PremiumPanel>
-            </section>
+            </div>
+          </section>
 
-            {/* ── Section 3 : Rotation sectorielle ─────────────────────────── */}
-            <section className="animate-rise-in [animation-delay:0.36s] space-y-4">
-              <div>
-                <h2 className="font-display text-heading-sm text-ivory mt-1">
-                  Rotation sectorielle · 30 jours
-                </h2>
-              </div>
-
-              <PremiumPanel glow>
+          {/* ── 03 : Rotation sectorielle ─────────────────────────────────── */}
+          <section aria-labelledby="rotation">
+            <Chapitre
+              id="rotation"
+              numero="03"
+              titre="Rotation sectorielle sur 30 jours"
+              sousTitre="Performance sur 30 jours face à 90 jours : quels secteurs mènent, lesquels s’essoufflent."
+            />
+            <div className="mt-6">
+              <PremiumPanel>
                 <div className="p-4">
                   <SectorRotation perfs={perfs} />
                 </div>
               </PremiumPanel>
-            </section>
-
-            {/* ── Section 4 : Valorisation (PER, PBR, rendement) ───────────── */}
-            <div className="animate-rise-in [animation-delay:0.40s]">
-              <ValorisationSecteurs />
             </div>
-          </>
-        )}
+          </section>
 
-        {/* ── Lien heatmap ────────────────────────────────────────────────── */}
-        <div className="animate-rise-in [animation-delay:0.42s] flex items-center justify-between rounded-xl border border-border/50 bg-elevated/30 px-5 py-3.5">
-          <div>
-            <p className="text-sm font-medium text-ivory">Voir la cartographie visuelle</p>
-            <p className="text-xs text-muted">Heatmap : taille proportionnelle à la capitalisation, couleur = variation</p>
-          </div>
-          <Link
-            href="/heatmap"
-            className="shrink-0 rounded-lg border border-gold/30 px-4 py-2 text-xs font-semibold text-accent-ink hover:bg-gold/10 transition-colors"
-          >
-            Ouvrir la heatmap
-          </Link>
-        </div>
-
-        {/* ── Newsletter ───────────────────────────────────────────────────── */}
-        <div className="animate-rise-in [animation-delay:0.46s]">
-          <NewsletterForm source="secteurs" />
-        </div>
-
-        {/* ── Pied de page discret ─────────────────────────────────────────── */}
-        <footer className="pt-4 pb-6 flex items-center justify-between border-t border-border text-xs text-faint">
-          <span>WESTBOURSE</span>
-          {lastDate && (
-            <span>
-              Données au{' '}
-              <span className="text-muted">{fmtDateFR(lastDate)}</span>
-            </span>
+          {/* ── 04 : Valorisation (PER, PBR, rendement) ───────────────────── */}
+          {avecValo && (
+            <ValorisationSecteurs
+              entete={
+                <Chapitre
+                  id="valorisation"
+                  numero="04"
+                  titre="À quel prix se paie chaque secteur"
+                  sousTitre="PER, PBR et rendement du dividende médians, calculés sur les états financiers publiés."
+                />
+              }
+            />
           )}
-        </footer>
+          {lastDate && (
+            <LigneSource>
+              Variations calculées sur les cours publiés par la BRVM, séance du{' '}
+              <time dateTime={lastDate}>{fmtDateFR(lastDate)}</time>.
+            </LigneSource>
+          )}
+        </>
+      )}
+
+      {/* ── Lien heatmap ────────────────────────────────────────────────── */}
+      <div className="mt-16 flex items-center justify-between gap-4 rounded-card border border-border bg-surface px-5 py-4">
+        <div>
+          <p className="text-sm font-medium text-ivory">Voir la cartographie visuelle</p>
+          <p className="text-xs text-muted">Heatmap : taille proportionnelle à la capitalisation, couleur selon la variation</p>
+        </div>
+        <Link
+          href="/heatmap"
+          className="shrink-0 rounded-lg border border-border px-4 py-2 text-xs font-medium text-accent-ink transition-colors hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          Ouvrir la heatmap
+        </Link>
+      </div>
+
+      {/* ── Newsletter ───────────────────────────────────────────────────── */}
+      <div className="mt-6">
+        <NewsletterForm source="secteurs" />
       </div>
     </div>
   );

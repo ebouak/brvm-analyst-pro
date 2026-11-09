@@ -5,6 +5,9 @@ import brvmSectors from '@/lib/brvmSectors.json';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
 import { EmptyStatePremium, PremiumPanel, PremiumCTA } from '@/components/ui/premium';
 import { canAccess } from '@/lib/server/featureAccess';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { LigneSource } from '@/components/marche/LigneSource';
+import { Chapitre } from '@/components/fiche/Chapitre';
 
 // Les COURS restent publics. Seules les colonnes CALCULÉES (Tendance 30 j, Signal)
 // sont soumises au flag `actions_metrics`. Rendu dynamique : le contenu dépend
@@ -119,10 +122,11 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
   if (!lastDate) {
     return (
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Marché actions</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM.</p>
-        </div>
+        <EnTeteCote
+          titre="Marché actions"
+          description="Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM."
+          source={null}
+        />
         <div className="mt-8">
           {erreur ? (
             <EmptyStatePremium
@@ -141,37 +145,29 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-6">
-      {/* ── En-tête de page : titre, puis la séance comme en tête d'une cote ── */}
-      <div>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Marché actions</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <PremiumCTA href="/actions/compare" variant="ghost">
-              Comparer des titres
-            </PremiumCTA>
-          </div>
-        </div>
-        {/* Date et compte tirés de la donnée : `date_marche` de la dernière
-            séance et nombre de lignes de cette séance (avant filtre). */}
-        <p className="mt-3 text-xs text-muted">
-          <span className="whitespace-nowrap">
-            Séance du <time dateTime={lastDate} className="text-ivory">{fmtSeance(lastDate)}</time>
-          </span>
-          <span aria-hidden className="mx-2 text-faint">·</span>
-          <span className="whitespace-nowrap">
-            <span className="tabular text-ivory">{actions.length}</span> valeurs
-          </span>
-          <span aria-hidden className="mx-2 text-faint">·</span>
-          <span className="whitespace-nowrap">Source BRVM</span>
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      {/* Date et compte tirés de la donnée : `date_marche` de la dernière
+          séance et nombre de lignes de cette séance (avant filtre). */}
+      <EnTeteCote
+        titre="Marché actions"
+        description="Cours, variation, volume et valeur échangée de chaque action cotée à la BRVM."
+        seance={lastDate}
+        compte={{ n: actions.length, libelle: 'valeurs' }}
+        actions={
+          <PremiumCTA href="/actions/compare" variant="ghost">
+            Comparer des titres
+          </PremiumCTA>
+        }
+      />
 
-      {/* ── Tableau principal (avec colonne Tendance 30j) ───────────────── */}
-      <div className="space-y-3">
+      <Chapitre
+        id="cote"
+        numero="01"
+        titre="La cote du jour"
+        sousTitre="Filtrez par secteur, triez par colonne ; le code d'une valeur ouvre sa fiche."
+        premier
+      />
+      <div className="mt-6">
         <PremiumPanel>
           <ActionsTable
             actions={actions}
@@ -184,11 +180,11 @@ export default async function ActionsPage({ searchParams }: { searchParams?: { s
         {/* Pied de cote : d'où viennent les chiffres et ce qu'ils mesurent.
             Pas « cours de clôture » : en séance, la ligne du jour est mise à
             jour par la collecte intraday et n'est pas encore une clôture. */}
-        <p className="px-1 text-xs leading-relaxed text-faint">
+        <LigneSource>
           Cours publiés par la BRVM, séance du{' '}
           <time dateTime={lastDate}>{fmtSeance(lastDate)}</time>
           {' '}· variation par rapport au cours précédent · volume en titres, valeur échangée en FCFA
-        </p>
+        </LigneSource>
       </div>
     </div>
   );
