@@ -117,7 +117,7 @@ function LessonRow({ lesson }: { lesson: AdminLesson }) {
         <button type="button" onClick={() => setEdit(true)}
           className="rounded-lg border border-border px-2.5 py-1 text-xs text-muted hover:text-ivory">Modifier</button>
         <button type="button" onClick={remove} disabled={pending}
-          className="rounded-lg border border-down/30 px-2.5 py-1 text-xs text-down/80 hover:bg-down/10 disabled:opacity-50">Suppr.</button>
+          className="rounded-lg border border-down/30 px-2.5 py-1 text-xs text-down hover:bg-down/10 disabled:opacity-50">Suppr.</button>
       </div>
     </div>
   );

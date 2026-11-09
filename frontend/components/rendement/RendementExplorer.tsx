@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import {
   BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer,
 } from 'recharts';
 import type { UnifiedReport } from '@/lib/macro/unifiedReturn';
 
 const nf = new Intl.NumberFormat('fr-FR');
-const pct = (n: number) => `${n > 0 ? '+' : ''}${n.toFixed(2)} %`;
+const nf2 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = (n: number) => `${n > 0 ? '+' : ''}${nf2.format(n)} %`;
 
-const UP = '#3fe18b';
-const DOWN = '#ff6b6b';
-const ACCENT = '#56D7FD';
+// Jetons du design system (canaux RGB) : suivent le thème, aucun hex en dur.
+const UP = 'rgb(var(--color-up))';
+const DOWN = 'rgb(var(--color-down))';
+const ACCENT = 'rgb(var(--color-accent))';
 
 /**
  * Explorateur interactif du rendement (réel OU vrai selon le mode déjà résolu
@@ -49,12 +52,12 @@ export function RendementExplorer({ report }: { report: UnifiedReport }) {
             {pct(report.prixSeulPct)}
           </p>
           <p className="mt-2 text-xs text-faint">
-            {nf.format(report.coursDebut)} → {nf.format(report.coursFin)} FCFA
+            {nf.format(report.coursDebut)}<ArrowRight size={12} aria-hidden className="mx-1 inline" />{nf.format(report.coursFin)} FCFA
           </p>
         </div>
 
         <div className="rounded-xl border border-accent/40 bg-accent/5 p-5">
-          <p className="overline text-accent">Ce que vous avez vraiment gagné</p>
+          <p className="overline text-accent-ink">Ce que vous avez vraiment gagné</p>
           <p className="mt-1 text-xs text-muted">
             {avecDiv ? 'Dividendes nets réinvestis, ' : ''}après inflation — <strong className="text-ivory">{sel.nom}</strong>
           </p>
@@ -77,11 +80,11 @@ export function RendementExplorer({ report }: { report: UnifiedReport }) {
           {avecDiv && (
             <>
               <Signe>+</Signe>
-              <Etape label="Dividendes réinvestis" value={`+${report.apportDividendesPts.toFixed(2)} pts`} tone="accent" />
+              <Etape label="Dividendes réinvestis" value={`+${nf2.format(report.apportDividendesPts)} pts`} tone="accent" />
             </>
           )}
           <Signe>−</Signe>
-          <Etape label="Inflation" value={`${sel.cumulPct.toFixed(2)} %`} tone="down" />
+          <Etape label="Inflation" value={`${nf2.format(sel.cumulPct)} %`} tone="down" />
           <Signe>=</Signe>
           <Etape label="Rendement vrai" value={pct(sel.realPct)} tone={sel.perte ? 'down' : 'up'} strong />
         </div>
@@ -94,15 +97,15 @@ export function RendementExplorer({ report }: { report: UnifiedReport }) {
           <div className="mt-3 flex flex-wrap gap-3">
             {report.dividendes.map((d) => (
               <div key={d.exercice} className="rounded-lg border border-border/60 bg-bg px-3 py-2">
-                <p className="text-[11px] text-faint">Exercice {d.exercice}</p>
+                <p className="text-xs text-faint">Exercice {d.exercice}</p>
                 <p className="tabular text-sm font-semibold text-ivory">{nf.format(d.montantNet)} FCFA</p>
-                <p className="text-[10px] text-faint">réinvesti à {nf.format(d.coursReinvest)}</p>
+                <p className="text-xs text-faint">réinvesti à {nf.format(d.coursReinvest)}</p>
               </div>
             ))}
             <div className="rounded-lg border border-up/30 bg-up/5 px-3 py-2">
-              <p className="text-[11px] text-faint">Total net</p>
+              <p className="text-xs text-faint">Total net</p>
               <p className="tabular text-sm font-semibold text-up">{nf.format(report.totalDividendesNets)} FCFA</p>
-              <p className="text-[10px] text-faint">par action détenue</p>
+              <p className="text-xs text-faint">par action détenue</p>
             </div>
           </div>
         </section>
@@ -131,7 +134,7 @@ export function RendementExplorer({ report }: { report: UnifiedReport }) {
                 aria-pressed={on}
                 className={`rounded-full border px-3 py-1.5 text-xs font-medium transition active:scale-95 ${
                   on
-                    ? 'border-accent bg-accent/10 text-accent'
+                    ? 'border-accent bg-accent/10 text-accent-ink'
                     : 'border-border bg-surface text-muted hover:border-accent/40 hover:text-white'
                 }`}
               >
@@ -147,14 +150,14 @@ export function RendementExplorer({ report }: { report: UnifiedReport }) {
           <div style={{ height: Math.max(180, chart.length * 34) }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chart} layout="vertical" margin={{ left: 8, right: 24 }}>
-                <XAxis type="number" tick={{ fill: '#7a9ea8', fontSize: 10 }} tickFormatter={(v) => `${v} %`} />
-                <YAxis type="category" dataKey="nom" width={92} tick={{ fill: '#e5e7eb', fontSize: 11 }} />
-                <ReferenceLine x={0} stroke="#232733" />
+                <XAxis type="number" tick={{ fill: 'rgb(var(--color-muted))', fontSize: 12 }} tickFormatter={(v) => `${v} %`} />
+                <YAxis type="category" dataKey="nom" width={92} tick={{ fill: 'rgb(var(--color-ivory))', fontSize: 12 }} />
+                <ReferenceLine x={0} stroke="rgb(var(--color-border))" />
                 <Tooltip
-                  cursor={{ fill: 'rgba(86,215,253,0.06)' }}
+                  cursor={{ fill: 'rgb(var(--color-accent) / 0.06)' }}
                   formatter={(v: number) => [pct(v), 'Rendement réel']}
-                  contentStyle={{ background: '#0a1417', border: '1px solid #1a2a30', borderRadius: 8, fontSize: 12 }}
-                  labelStyle={{ color: '#e5e7eb' }}
+                  contentStyle={{ background: 'rgb(var(--color-surface))', border: '1px solid rgb(var(--color-border))', borderRadius: 8, fontSize: 12 }}
+                  labelStyle={{ color: 'rgb(var(--color-ivory))' }}
                 />
                 <Bar dataKey="real" radius={[0, 4, 4, 0]} isAnimationActive={false} onClick={(d: { code?: string }) => d?.code && setSelCode(d.code)}>
                   {chart.map((c) => (
@@ -174,14 +177,14 @@ export function RendementExplorer({ report }: { report: UnifiedReport }) {
         </div>
 
         {/* Tableau détaillé */}
-        <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+        <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border bg-surface">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/60 text-left text-xs text-muted">
                 <th className="px-4 py-3 font-medium">Pays</th>
-                <th className="px-4 py-3 text-right font-medium">Inflation cumulée</th>
-                <th className="px-4 py-3 text-right font-medium">Rendement RÉEL</th>
-                <th className="px-4 py-3 text-right font-medium">Par an</th>
+                <th className="px-4 py-3 text-right font-medium">Inflation cumulée (%)</th>
+                <th className="px-4 py-3 text-right font-medium">Rendement réel (%)</th>
+                <th className="px-4 py-3 text-right font-medium">Par an (%)</th>
                 <th className="px-4 py-3 text-right font-medium">1 000 000 FCFA deviennent</th>
               </tr>
             </thead>
@@ -197,7 +200,7 @@ export function RendementExplorer({ report }: { report: UnifiedReport }) {
                     }`}
                   >
                     <td className="px-4 py-3 font-medium text-ivory">{p.nom}</td>
-                    <td className="tabular px-4 py-3 text-right text-muted">+{p.cumulPct.toFixed(2)} %</td>
+                    <td className="tabular px-4 py-3 text-right text-muted">+{nf2.format(p.cumulPct)} %</td>
                     <td className={`tabular px-4 py-3 text-right font-semibold ${p.perte ? 'text-down' : 'text-up'}`}>
                       {pct(p.realPct)}
                     </td>
@@ -233,7 +236,7 @@ function Etape({
   tone: 'up' | 'down' | 'accent';
   strong?: boolean;
 }) {
-  const color = tone === 'up' ? 'text-up' : tone === 'down' ? 'text-down' : 'text-accent';
+  const color = tone === 'up' ? 'text-up' : tone === 'down' ? 'text-down' : 'text-accent-ink';
   return (
     <div
       className={`min-w-[104px] flex-1 rounded-lg border px-3 py-2 ${

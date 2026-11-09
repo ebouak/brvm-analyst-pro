@@ -111,7 +111,7 @@ export default async function EmbedValeurPage({
               </div>
             </div>
           </div>
-          <div className="mt-2 flex justify-between text-[10px] opacity-60">
+          <div className="mt-2 flex justify-between text-[11px] opacity-60">
             <span>
               {T[lang].volume} : {v.last.volume?.toLocaleString('fr-FR') ?? '—'}
             </span>

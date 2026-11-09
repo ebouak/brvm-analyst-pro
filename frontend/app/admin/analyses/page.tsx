@@ -40,12 +40,12 @@ export default async function AdminAnalysesPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-ivory">{p.title}</span>
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] ${p.kind === 'data' ? 'border-accent/30 bg-accent/10 text-accent' : 'border-border text-muted'}`}>
+                  <span className={`rounded-full border px-2 py-0.5 text-[11px] ${p.kind === 'data' ? 'border-accent/30 bg-accent/10 text-accent' : 'border-border text-muted'}`}>
                     {p.kind === 'data' ? 'data' : 'éditorial'}
                   </span>
                   {p.published
-                    ? <span className="rounded-full border border-up/30 bg-up/10 px-2 py-0.5 text-[10px] text-up">publiée</span>
-                    : <span className="rounded-full border border-warn/30 bg-warn/10 px-2 py-0.5 text-[10px] text-warn">brouillon</span>}
+                    ? <span className="rounded-full border border-up/30 bg-up/10 px-2 py-0.5 text-[11px] text-up">publiée</span>
+                    : <span className="rounded-full border border-warn/30 bg-warn/10 px-2 py-0.5 text-[11px] text-warn">brouillon</span>}
                 </div>
                 <p className="text-xs text-faint">/analyses/{p.slug}</p>
               </div>

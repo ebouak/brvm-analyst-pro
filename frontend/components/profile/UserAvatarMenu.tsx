@@ -69,7 +69,7 @@ export default function UserAvatarMenu() {
               <p className="truncate text-sm font-medium text-white">{me.displayName}</p>
               <p className="truncate text-[11px] text-faint">{me.email}</p>
             </div>
-            <span className={`ml-auto rounded-full px-2 py-0.5 text-[9px] font-bold ${me.isPremium ? 'bg-gradient-to-r from-accent to-up text-bg' : 'border border-border text-faint'}`}>
+            <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${me.isPremium ? 'bg-gradient-to-r from-accent to-up text-bg' : 'border border-border text-faint'}`}>
               {me.isPremium ? 'PRO' : 'FREE'}
             </span>
           </div>

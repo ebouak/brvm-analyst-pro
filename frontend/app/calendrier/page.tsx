@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+import { CalendarClock, Wallet, Activity } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import {
   combineDividendsAndEvents,
@@ -118,7 +120,7 @@ function CalendarKpiCard({
   label: string;
   value: number;
   tone: 'gold' | 'emerald' | 'sapphire';
-  icon: string;
+  icon: ReactNode;
 }) {
   const styles = {
     gold: {
@@ -131,7 +133,7 @@ function CalendarKpiCard({
       outer: 'border-up/20 bg-up/[0.04]',
       inner: 'border-up/10',
       number: 'text-up',
-      icon: 'border-up/20 bg-up/[0.08] text-up/60',
+      icon: 'border-up/20 bg-up/[0.08] text-up',
     },
     sapphire: {
       outer: 'border-sapphire/20 bg-sapphire/[0.04]',
@@ -142,14 +144,14 @@ function CalendarKpiCard({
   }[tone];
 
   return (
-    <div className={`rounded-panel border p-1.5 ${styles.outer} transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.01]`}>
-      <div className={`rounded-[calc(1.125rem-0.375rem)] border ${styles.inner} bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5`}>
+    <div className={`rounded-panel border p-1.5 ${styles.outer} `}>
+      <div className={`rounded-[calc(1.125rem-0.375rem)] border ${styles.inner} bg-surface p-5`}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-faint">{label}</p>
             <p className={`tabular text-4xl font-bold mt-2 leading-none ${styles.number}`}>{value}</p>
           </div>
-          <div className={`grid h-10 w-10 place-items-center rounded-full border text-base flex-shrink-0 ${styles.icon}`}>
+          <div className={`grid h-10 w-10 place-items-center rounded-full border flex-shrink-0 ${styles.icon}`}>
             {icon}
           </div>
         </div>
@@ -197,9 +199,9 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
               <a
                 href="/api/calendar"
                 title="Abonnez-vous dans Google Calendar / Apple / Outlook : les nouvelles ex-dates et paiements apparaîtront automatiquement"
-                className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
+                className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent-ink transition-colors hover:border-accent/60 hover:bg-accent/20"
               >
-                S'abonner au calendrier (.ics)
+                S’abonner au calendrier (.ics)
               </a>
             </>
           }
@@ -218,19 +220,19 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
             label="Ex-dates à venir"
             value={countExDates}
             tone="gold"
-            icon="◈"
+            icon={<CalendarClock size={18} aria-hidden />}
           />
           <CalendarKpiCard
             label="Paiements à venir"
             value={countPayments}
             tone="emerald"
-            icon="◉"
+            icon={<Wallet size={18} aria-hidden />}
           />
           <CalendarKpiCard
             label="Événements de marché"
             value={countEvents}
             tone="sapphire"
-            icon="◎"
+            icon={<Activity size={18} aria-hidden />}
           />
         </div>
 
@@ -274,15 +276,15 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
           <div className="flex flex-wrap items-center gap-4">
             <Eyebrow className="text-faint">Légende</Eyebrow>
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
                 <span className="h-1.5 w-4 rounded-full bg-gold/60 inline-block" />
                 Ex-date dividende
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
                 <span className="h-1.5 w-4 rounded-full bg-up/60 inline-block" />
                 Paiement dividende
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
                 <span className="h-1.5 w-4 rounded-full bg-sapphire/60 inline-block" />
                 Événement corporatif
               </span>

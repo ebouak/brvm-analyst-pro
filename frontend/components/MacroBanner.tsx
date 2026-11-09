@@ -82,7 +82,7 @@ export async function MacroBanner() {
           <span className="tabular font-medium text-ivory">{it.value}</span>
         </span>
       ))}
-      <span className="ml-auto hidden text-[10px] text-faint sm:inline">sources : BCEAO · BCE</span>
+      <span className="ml-auto hidden text-[11px] text-faint sm:inline">sources : BCEAO · BCE</span>
     </div>
   );
 }

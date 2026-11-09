@@ -141,12 +141,13 @@ async function consolidationCloture(sb: ReturnType<typeof getServiceClient>): Pr
 export async function chargerDonnees(maintenant = new Date()): Promise<DonneesFraicheur> {
   const sb = getServiceClient();
   const consolidation = consolidationCloture(sb);
-  const [coursCloture, indices, intraday, signaux, liquidite, carnet, cal, e2e, fer, vid] = await Promise.all([
+  const [coursCloture, indices, intraday, signaux, liquidite, conseiller, carnet, cal, e2e, fer, vid] = await Promise.all([
     derniereDate(sb, 'brvm_actions_daily'),
     derniereDate(sb, 'brvm_indices_daily'),
     collecteIntraday(sb),
     derniereDate(sb, 'signals_daily'),
     derniereDate(sb, 'liquidity_daily'),
+    derniereDate(sb, 'conseiller_facteurs'),
     derniereDate(sb, 'brvm_carnet_daily'),
     calendrierDividendes(sb, maintenant),
     testsE2e(sb),
@@ -159,6 +160,7 @@ export async function chargerDonnees(maintenant = new Date()): Promise<DonneesFr
     collecteIntraday: intraday,
     signaux,
     liquidite,
+    conseiller,
     carnet,
     video: vid,
     calendrierDividendes: cal,

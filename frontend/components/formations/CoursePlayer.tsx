@@ -223,9 +223,9 @@ function Quiz({ quiz }: { quiz: VideoQuiz }) {
               onClick={() => setPicked(i)}
               className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition disabled:cursor-default ${
                 isCorrect
-                  ? 'border-up/50 bg-up/10 text-up'
+                  ? 'border-up/50 bg-up/5 text-up'
                   : isWrongPick
-                    ? 'border-down/50 bg-down/10 text-down'
+                    ? 'border-down/50 bg-down/5 text-down'
                     : 'border-border bg-bg text-muted hover:border-accent/40 hover:text-white'
               }`}
             >

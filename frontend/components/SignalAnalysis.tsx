@@ -9,6 +9,8 @@ interface Props {
   technical: TechnicalReading;
   position: PositionContext;
   dividend: DividendTiming;
+  /** La position est déjà rendue à côté (fiche action) : ne pas la répéter. */
+  masquerPosition?: boolean;
 }
 
 const TONE_RING: Record<TechnicalReading['tone'], string> = {
@@ -22,18 +24,18 @@ const TONE_RING: Record<TechnicalReading['tone'], string> = {
  * Analyse synthétique du signal : verdict nuancé réconciliant lecture technique,
  * contexte de position (PRU) et timing dividende. Remplace l'ancien « SELL/BUY » sec.
  */
-export default function SignalAnalysis({ synthesis, technical, position, dividend }: Props) {
+export default function SignalAnalysis({ synthesis, technical, position, dividend, masquerPosition = false }: Props) {
   return (
     <div className="space-y-4">
       {/* Verdict de synthèse */}
       <div className={`rounded-card border bg-elevated/40 p-4 ${TONE_RING[technical.tone]}`}>
-        <p className="text-[11px] text-gold/70 mb-1.5">Analyse de synthèse</p>
+        <p className="text-[11px] text-accent-ink mb-1.5">Analyse de synthèse</p>
         <p className="text-sm text-ivory leading-relaxed">{synthesis.verdict}</p>
 
         {synthesis.cautions.length > 0 && (
           <ul className="mt-3 space-y-1.5">
             {synthesis.cautions.map((c, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-warn/90">
+              <li key={i} className="flex items-start gap-2 text-xs text-warn">
                 <span className="mt-0.5 shrink-0">!</span>
                 <span className="leading-relaxed">{c}</span>
               </li>
@@ -57,15 +59,16 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
           ))}
         </ul>
         {technical.tension && (
-          <p className="mt-3 rounded-md bg-warn/[0.08] px-3 py-2 text-xs text-warn/90 leading-relaxed">
+          <p className="mt-3 rounded-md bg-warn/[0.08] px-3 py-2 text-xs text-warn leading-relaxed">
             {technical.tension}
           </p>
         )}
       </div>
 
       {/* Deux colonnes : Position | Dividende */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className={`grid grid-cols-1 gap-3 ${masquerPosition ? '' : 'sm:grid-cols-2'}`}>
         {/* Position */}
+        {!masquerPosition && (
         <div className="rounded-card border border-border bg-surface p-4">
           <p className="text-[11px] text-faint mb-2">Votre position</p>
           {position.held ? (
@@ -86,6 +89,7 @@ export default function SignalAnalysis({ synthesis, technical, position, dividen
           ) : null}
           <p className="mt-2 text-xs text-muted leading-relaxed">{position.reading}</p>
         </div>
+        )}
 
         {/* Dividende */}
         <div className="rounded-card border border-border bg-surface p-4">

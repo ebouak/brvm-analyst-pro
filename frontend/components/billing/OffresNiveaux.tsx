@@ -39,23 +39,27 @@ export default async function OffresNiveaux({
   const seuleFormation = offresNiveaux.length === 0;
 
   return (
-    <section aria-labelledby="h-offres-niveaux" className="space-y-3 rounded-xl border border-border bg-surface p-5">
+    <section aria-labelledby="h-offres-niveaux" className="space-y-4 rounded-xl border border-border bg-surface p-5">
       <div>
-        <h2 id="h-offres-niveaux" className="font-display text-lg text-white">
+        <h2 id="h-offres-niveaux" className="font-display text-lg text-ivory">
           {seuleFormation ? 'Acheter la formation' : 'Acheter sans abonnement'}
         </h2>
         <p className="mt-1 max-w-[65ch] text-sm text-muted">
-          Sans abonnement : les leçons, les examens et les certificats de l’Academy, accessibles à vie
-          {seuleFormation ? ', et un mois d’accès Premium à toute la plateforme' : ''}. Une refonte majeure publiée plus de
-          12 mois après votre achat ne serait pas incluse ; vos certificats restent acquis.
+          Vous gardez à vie l’accès aux leçons, aux examens et aux certificats de l’Academy
+          {seuleFormation ? ', avec en plus un mois d’accès Premium à toute la plateforme' : ''}. Une refonte majeure publiée plus de
+          12 mois après votre achat ne serait pas incluse. Vos certificats restent acquis.
         </p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
         {offres.map((p) => (
-          <li key={p.productCode} className="flex flex-col gap-3 rounded-lg border border-border/70 bg-bg/40 p-4">
+          <li key={p.productCode} className="flex flex-col justify-between gap-4 rounded-lg border border-border bg-bg/40 p-4">
             <div>
-              <p className="text-xs text-accent">
-                {p.kind === 'formation' ? 'Formation complète · 4 niveaux + 1 mois Premium' : p.niveau ? NIVEAU_LABEL[p.niveau] : ''}
+              <p className="text-xs text-accent-ink">
+                {p.kind === 'formation'
+                  ? `Formation complète · ${NIVEAUX.length} niveaux + 1 mois Premium`
+                  : p.niveau
+                    ? NIVEAU_LABEL[p.niveau]
+                    : ''}
                 {p.kind === 'upgrade' ? ' · nouvelle version' : ''}
               </p>
               <p className="mt-1 text-sm text-ivory">{p.libelle}</p>

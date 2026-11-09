@@ -22,7 +22,7 @@ export function MarkdownMessage({ content }: { content: string }) {
           a: ({ children, href }) => <a href={href} className="text-info underline" target="_blank" rel="noopener noreferrer">{children}</a>,
           code: ({ children }) => <code className="rounded bg-bg/60 px-1 py-0.5 font-mono text-[12px] text-gold">{children}</code>,
           table: ({ children }) => (
-            <div className="my-3 overflow-x-auto rounded-lg border border-border/70">
+            <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="my-3 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg border border-border/70">
               <table className="w-full border-collapse text-[13px] tabular">{children}</table>
             </div>
           ),

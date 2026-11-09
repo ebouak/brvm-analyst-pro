@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { iconForKind, colorForKind, type CalendarItem } from '@/lib/calendarHelpers';
-import { fmtFcfa, fmtDateFR } from '@/lib/format';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
+import { fmtFcfa } from '@/lib/format';
+import { fmtDateCourte } from '@/lib/dateCourte';
 
 type SortKey = 'date' | 'kind' | 'code' | 'societe' | 'pays';
 
@@ -28,7 +30,7 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
       <div className="text-center py-16 text-muted">
         <p className="text-lg mb-2">Aucun événement prévu dans cette période.</p>
         <Link href="/dashboard" className="text-blue hover:underline text-sm">
-          ← Retour au dashboard
+          <ArrowLeft size={14} aria-hidden className="inline mr-1" />Retour au tableau de bord
         </Link>
       </div>
     );
@@ -52,12 +54,12 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
       className="px-3 py-2 text-xs font-medium text-muted cursor-pointer hover:text-white whitespace-nowrap select-none"
     >
       {label}
-      {sortKey === key && <span className="ml-1">{sortDir === 1 ? '↑' : '↓'}</span>}
+      {sortKey === key && (sortDir === 1 ? <ArrowUp size={12} aria-hidden className="ml-1 inline" /> : <ArrowDown size={12} aria-hidden className="ml-1 inline" />)}
     </th>
   );
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
       <table className="w-full text-sm">
         <thead className="bg-surface border-b border-border">
           <tr>
@@ -75,13 +77,13 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
             const borderClass = colorForKind(item.kind);
             return (
               <tr key={item.id} className="hover:bg-surface/60 transition-colors">
-                <td className="px-3 py-2 tabular text-muted whitespace-nowrap">{fmtDateFR(item.date)}</td>
+                <td className="px-3 py-2 text-muted whitespace-nowrap">{fmtDateCourte(item.date)}</td>
                 <td className="px-3 py-2 whitespace-nowrap">
                   <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-surface ${borderClass}`}>
-                    {iconForKind(item.kind)} {kindLabel(item.kind)}
+                    {(() => { const Icon = iconForKind(item.kind); return <Icon size={12} aria-hidden />; })()} {kindLabel(item.kind)}
                   </span>
                 </td>
-                <td className="px-3 py-2 font-mono text-xs text-blue whitespace-nowrap">{item.code ?? '—'}</td>
+                <td className="px-3 py-2 font-mono font-medium text-xs text-ivory whitespace-nowrap">{item.code ?? '—'}</td>
                 <td className="px-3 py-2 font-medium whitespace-nowrap max-w-[160px] truncate">{item.societe ?? '—'}</td>
                 <td className="px-3 py-2 text-muted max-w-[200px] truncate">
                   {item.detail}
@@ -92,7 +94,7 @@ export default function CalendarTable({ items }: { items: CalendarItem[] }) {
                 <td className="px-3 py-2 text-xs text-muted whitespace-nowrap">{item.pays ?? '—'}</td>
                 <td className="px-3 py-2 text-right">
                   {item.href && (
-                    <Link href={item.href} className="text-blue hover:underline text-xs">→</Link>
+                    <Link href={item.href} className="text-accent-ink hover:underline" aria-label="Voir le détail"><ArrowRight size={14} aria-hidden /></Link>
                   )}
                 </td>
               </tr>

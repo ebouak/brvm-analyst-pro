@@ -24,8 +24,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.westbourse.com
 import PriceChart, { type PricePoint, type ChartMarker } from '@/components/PriceChart';
 import EventMarkerLegend from '@/components/EventMarkerLegend';
 import IndicatorCharts, { type IndicatorPoint } from '@/components/IndicatorCharts';
-import IndicatorCommentary from '@/components/IndicatorCommentary';
-import { readIndicators } from '@/lib/indicators/commentary';
 import RsiCursor from '@/components/RsiCursor';
 import SignalBadge from '@/components/SignalBadge';
 import RatingBadge from '@/components/RatingBadge';
@@ -33,6 +31,31 @@ import { VerdictBand } from '@/components/actions/VerdictBand';
 import { FicheStickyNav } from '@/components/actions/FicheStickyNav';
 import PublicationsModal, { type Publication } from '@/components/PublicationsModal';
 import FundamentalsPanel from '@/components/fundamentals/FundamentalsPanel';
+import { ligneVerdict, volumeAuDessusMoyenne, dividendeCourant, evolutionResultat, evolutionResultatDetail, horsExploitation, syntheseExercice, formatRendementDividende, rendementDividendeParts, nombreFr, pctFr, insecable, libelleEvenement } from '@/lib/fiche/affichage';
+import { plageSurFenetre, plageSeance } from '@/lib/fiche/plages';
+import { exerciceRetenu, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
+import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { comptesIfrs } from '@/lib/fiche/comptesIfrs';
+import { chargerComptesIfrs } from '@/lib/fiche/comptesIfrsServeur';
+import ComptesIfrs from '@/components/fiche/ComptesIfrs';
+import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
+import { lectureTechnique } from '@/lib/fiche/lecture';
+import { decomposerScore } from '@/lib/fiche/quant';
+import { chaineGardeFous, resumeGardeFous } from '@/lib/fiche/quantTextes';
+import { libelleSignal } from '@/lib/signalLabel';
+import { Chapitre } from '@/components/fiche/Chapitre';
+import { Essentiel, type CarteEssentiel } from '@/components/fiche/Essentiel';
+import { AnalyseIA } from '@/components/fiche/AnalyseIA';
+import { JaugesPlage } from '@/components/fiche/JaugesPlage';
+import { SeanceIntraday } from '@/components/fiche/SeanceIntraday';
+import { LectureTechnique } from '@/components/fiche/LectureTechnique';
+import { CombinedAlphaCarte } from '@/components/fiche/CombinedAlphaCarte';
+import { VueEnsemble } from '@/components/fiche/VueEnsemble';
+import { lignesStatistiques, phrasePerformance, serieAnnuelle, dateEnLettres, libelleFamille } from '@/lib/fiche/overview';
+import { regrouperActualites, ANCRE_OFFICIELLES, type NewsEntree } from '@/lib/fiche/overviewActualites';
+import { seriesParPeriode } from '@/lib/fiche/overviewSeries';
+import { depuisPremiereTransaction } from '@/lib/fiche/seance';
+import { nomPays } from '@/lib/crm/geo';
 import { BeginnerHint } from '@/components/BeginnerHint';
 import { pickBestFundamental } from '@/lib/fundamentals';
 import { computeLiquidity, fromDailyRow, type LiquidityDailyRow } from '@/lib/liquidity';
@@ -43,12 +66,17 @@ import { ecartTypeVariations } from '@/lib/carnet/commentaire';
 import { selectionnerEvenements, type EvenementMarche, type MesureEvenement } from '@/lib/carnet/evenements';
 import { eventStudy, type DatedClose } from '@/lib/eventStudy';
 import { getSgiFrais } from '@/lib/sgi-frais/queries';
-import { fmtNumber, fmtFcfa } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtDateCourte, fmtPctAbs } from '@/lib/format';
 import { smaSeries, rsiSeries, macdSeries, bollingerSeries, detect, stochasticSeries, cciSeries } from '@/lib/indicators';
 import { computeTechnicalSummary } from '@/lib/technicalSummary';
 import type { TechnicalSummaryResult } from '@/lib/technicalSummary';
-import TechnicalSummary from '@/components/TechnicalSummary';
 import NotationBadge from '@/components/NotationBadge';
+import { scoreToRating } from '@/lib/rating';
+
+function noteAF(score: number | null, confiance: number | null): string | null {
+  const n = scoreToRating(score, confiance).note;
+  return n === 'NR' ? null : n;
+}
 import SignalAnalysis from '@/components/SignalAnalysis';
 import ValuationPanel from '@/components/ValuationPanel';
 import { getValuation } from '@/lib/valuation/server';
@@ -179,7 +207,7 @@ async function getData(code: string, fromDate?: string) {
         .eq('code', code)
         // Tri par exercice (toujours renseigné). Trier par ex_date mettait les
         // NULL en tête (PostgREST) et pouvait évincer les lignes datées du limit.
-        .order('exercice', { ascending: false })
+        .order('exercice', { ascending: false, nullsFirst: false })
         .limit(6),
       supabase
         .from('market_events')
@@ -192,7 +220,7 @@ async function getData(code: string, fromDate?: string) {
         .select('id, date_publication, libelle, type_publication, source_url')
         .eq('code', code)
         .order('date_publication', { ascending: false })
-        .limit(50),
+        .limit(300),
       supabase
         .from('publications')
         .select('*', { count: 'exact', head: true })
@@ -250,10 +278,9 @@ export default async function InstrumentPage({
   // États financiers complets pour le constructeur de graphique — chargés
   // seulement si l'accès fondamental est ouvert (aucun coût pour les anonymes,
   // qui ne verraient qu'un cadenas de toute façon).
-  const chartRows = gateFonda.allowed
-    ? await loadCompanyFinancials(code).then((f) =>
-        f ? buildChartRows(f.incomeStatements, f.balanceSheets, f.cashFlowStatements) : [],
-      )
+  const financials = gateFonda.allowed ? await loadCompanyFinancials(code) : null;
+  const chartRows = financials
+    ? buildChartRows(financials.incomeStatements, financials.balanceSheets, financials.cashFlowStatements)
     : [];
   const fromDate = searchParams.from ?? '';
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
@@ -266,11 +293,13 @@ export default async function InstrumentPage({
   const { topics: forumTopics, authors: forumAuthors } = await listTopics(0, code);
 
   if (rows.length === 0) {
+    // Code inexistant : vrai 404 (pas d'état vide en 200). Instrument connu sans historique : état vide.
+    if (!instrument) notFound();
     return (
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
         <Link
           href="/actions"
-          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
         >
           ← Marché actions
         </Link>
@@ -378,24 +407,51 @@ export default async function InstrumentPage({
   const varAbs = last.cours_precedent != null && last.cours_jour != null
     ? last.cours_jour - last.cours_precedent : null;
 
-  // Rendement dividende
-  // Priorité au dividende VÉRIFIÉ (détachement daté). À défaut, repli sur le
-  // dividende du dernier exercice (montants alignés Sika Finance depuis la
-  // reconstruction de la table) — c'est le rendement « trailing » standard.
-  // Le repli est signalé à l'utilisateur (exercice affiché, date non publiée).
-  const divRows = dividends as { montant: number; ex_date: string | null; exercice: number | null; payment_date?: string; base_fiscale?: BaseFiscale }[];
-  const lastDivVerifie = divRows.find((d) => d.ex_date && d.montant > 0) ?? null;
-  const lastDiv = lastDivVerifie ?? divRows.find((d) => d.montant > 0) ?? null;
+  // Comptes du dernier exercice publié, et celui d'avant pour l'évolution.
+  const exBrut = fundamentals.length > 0 ? pickBestFundamental(fundamentals) : null;
+  // Un exercice sans année n'est pas exploitable : on n'en tire rien plutôt que de deviner.
+  const exCourant = exBrut?.year != null ? (exBrut as typeof exBrut & { year: number }) : null;
+  const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
+
+  // Rendement dividende — SOURCE UNIQUE : `dividendeCourant` (dernier dividende
+  // > 0, lignes triées par exercice décroissant). Pastille, grille de séance,
+  // fondamentaux et bloc dividendes lisent tous cette même ligne, et chaque
+  // rendement affiché porte son exercice.
+  const divRows = dividends as { montant: number; ex_date: string | null; exercice: number | null; payment_date?: string | null; base_fiscale?: BaseFiscale }[];
+  const divCourant = dividendeCourant(
+    divRows.map((d) => ({ montant: d.montant, exercice: d.exercice, ex_date: d.ex_date, payment_date: d.payment_date ?? null })),
+    exCourant?.year ?? null,
+  );
+  // Même ligne que `divCourant` (premier montant > 0), avec sa base fiscale.
+  const lastDiv = divCourant ? divRows.find((d) => d.montant > 0 && d.exercice != null) ?? null : null;
+  const divExercice = divCourant?.exercice ?? null;
+  const divYieldTexte = (v: number | null) => formatRendementDividende(v, divExercice);
   const divYield = lastDiv && last.cours_jour && last.cours_jour > 0
     ? (lastDiv.montant / last.cours_jour) * 100 : null;
 
   // Capitalisation boursière en MFCFA : valorisation scrapée (Sika) en priorité,
   // sinon calcul cours × shares.
   const shares = instrument?.shares ?? null;
-  const capitalisation = last.valorisation != null
-    ? last.valorisation / 1_000_000
-    : (shares != null && last.cours_jour != null
-        ? (last.cours_jour * shares) / 1_000_000 : null);
+  const capitalisationBrute = capitalisationFcfa({ valorisation: last.valorisation != null ? Number(last.valorisation) : null, cours: last.cours_jour ?? null, titres: shares });
+
+  // Comptes retenus (SYSCOHADA : income/balance), source unique des ratios publics ; `fundamentals` en repli.
+  const retenu = exerciceRetenu({ income: financials?.incomeStatements ?? [], balance: financials?.balanceSheets ?? [], fundamentals });
+  const ratiosPublics = ratiosBilan({
+    cours: last.cours_jour ?? null, titres: shares,
+    resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires,
+    capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere,
+    capitalisation: capitalisationBrute,
+  });
+  const mentionJeu = mentionSecondJeu(retenu.secondJeu);
+  // Comptes IFRS du même exercice, s'ils sont publiés : en regard, jamais à la place des SYSCOHADA.
+  const comparatifIfrs = retenu.source === 'syscohada'
+    ? comptesIfrs({
+      ligne: await chargerComptesIfrs(createClient(), code, retenu.exercice),
+      exercice: retenu.exercice,
+      syscohada: { resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires, capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere },
+      cours: last.cours_jour ?? null, titres: shares, capitalisation: capitalisationBrute,
+    })
+    : null;
 
   // Volume moyen 20j
   const recentVols = rows.slice(-20).map((r) => r.volume).filter((v): v is number => v != null);
@@ -419,6 +475,59 @@ export default async function InstrumentPage({
     .limit(1)
     .maybeSingle();
   const liquidity = fromDailyRow(liqRow as LiquidityDailyRow | null) ?? computeLiquidity(liqRows, liqRows.length);
+
+  // Instantanés intraday de la dernière séance (volume CUMULÉ), pour le graphique de séance.
+  const { data: snapRows } = await liqDailyClient
+    .from('brvm_intraday_snapshots')
+    .select('captured_at, close, volume')
+    .eq('code', code)
+    .eq('date_marche', last.date_marche)
+    .order('captured_at', { ascending: true });
+  const instantanes = ((snapRows ?? []) as { captured_at: string; close: number | null; volume: number | null }[]).filter((s) => s.close != null && s.close > 0);
+
+  // Combined Alpha : même lecture que /actions/[code]/quant (dernier run WB_COMBINED_ALPHA).
+  const { data: runCA } = await liqDailyClient
+    .from('quant_model_runs')
+    .select('id')
+    .eq('model_code', 'WB_COMBINED_ALPHA')
+    .order('calculation_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const { data: scoresCA } = runCA
+    ? await liqDailyClient
+        .from('quant_model_scores')
+        .select('*')
+        .eq('security_id', code)
+        .eq('run_id', (runCA as { id: string }).id)
+        .order('score_date', { ascending: false })
+        .limit(1)
+    : { data: null };
+  const combinedAlphaRow = ((scoresCA as unknown[] | null)?.[0] ?? null) as {
+    combined_alpha_score: number | null; price_momentum_score: number | null; value_score: number | null;
+    earnings_quality_score: number | null; financial_strength_score: number | null; dividend_quality_score: number | null;
+    penalties_json: unknown; score_date: string; rank_global: number | null;
+  } | null;
+  const combinedAlpha = combinedAlphaRow
+    ? {
+        score: combinedAlphaRow.combined_alpha_score,
+        rang: combinedAlphaRow.rank_global,
+        piliers: [
+          { libelle: 'Valorisation', valeur: combinedAlphaRow.value_score },
+          { libelle: 'Momentum', valeur: combinedAlphaRow.price_momentum_score },
+          { libelle: 'Qualité bénéficiaire', valeur: combinedAlphaRow.earnings_quality_score },
+          { libelle: 'Solidité financière', valeur: combinedAlphaRow.financial_strength_score },
+          { libelle: 'Dividende', valeur: combinedAlphaRow.dividend_quality_score },
+        ],
+        penalite: Array.isArray(combinedAlphaRow.penalties_json)
+          ? (combinedAlphaRow.penalties_json as { points: number }[]).reduce((t, x) => t + (x.points ?? 0), 0)
+          : null,
+        calculeLe: combinedAlphaRow.score_date,
+      }
+    : null;
+  // Pénalité réellement appliquée : somme pondérée des piliers − score (même calcul que la fiche Quant).
+  const decompositionCA = combinedAlpha
+    ? decomposerScore(combinedAlpha.piliers.map((x, k) => ({ poids: [30, 25, 20, 15, 10][k]!, valeur: x.valeur })), combinedAlpha.score)
+    : null;
 
   // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : sa date diffère
   // de celle des cours, le bulletin paraissant après la clôture.
@@ -473,11 +582,6 @@ export default async function InstrumentPage({
     volumeRatio: ((signal as { inputs?: { volume_ratio?: number | null } | null } | null)?.inputs)?.volume_ratio ?? null,
   };
 
-  // Comptes du dernier exercice publié, et celui d'avant pour l'évolution.
-  const exBrut = fundamentals.length > 0 ? pickBestFundamental(fundamentals) : null;
-  // Un exercice sans année n'est pas exploitable : on n'en tire rien plutôt que de deviner.
-  const exCourant = exBrut?.year != null ? (exBrut as typeof exBrut & { year: number }) : null;
-  const exPrecedent = exCourant ? fundamentals.find((f) => f.year === exCourant.year - 1) ?? null : null;
   // Trimestre / semestre de l'année en cours, tant que l'exercice n'est pas publié.
   const intermediaire = exCourant ? await chargerIntermediaire(createPublicClient(), code, fundamentals) : null;
   const economieSociete = exCourant
@@ -488,7 +592,7 @@ export default async function InstrumentPage({
         resultatNetPrecedent: exPrecedent?.net_income ?? null,
         chiffreAffaires: exCourant.revenue ?? null,
         chiffreAffairesPrecedent: exPrecedent?.revenue ?? null,
-        capitauxPropres: exCourant.equity ?? null,
+        capitauxPropres: (retenu.exercice === exCourant.year ? retenu.capitauxPropres : null) ?? exCourant.equity ?? null,
         actions: instrument?.shares ?? null,
         coursJour: last.cours_jour ?? null,
         source: exCourant.is_manual ? 'pdf-verified' : null,
@@ -586,30 +690,22 @@ export default async function InstrumentPage({
     : ({ indisponible: true } as const);
   const divYieldNet = divNetRes.indisponible ? null : divNetRes.valeur;
 
-  // Bandeau verdict : sparkline 30j + plage observée (min/max de l'historique disponible).
+  // ── Plages : 1 jour (plus bas / plus haut publiés), 52 semaines, 2 ans ──
+  const serieCours = rows.map((r) => ({ date_marche: r.date_marche, cours_jour: r.cours_jour ?? null }));
+  const plageJour = plageSeance(last.plus_bas ?? null, last.plus_haut ?? null, last.cours_jour ?? null);
+  const plage52 = plageSurFenetre(serieCours, last.date_marche, 365, last.cours_jour ?? null);
+  const plage2ans = plageSurFenetre(serieCours, last.date_marche, 730, last.cours_jour ?? null);
+
+  // Bandeau verdict : sparkline 30 séances + plage observée sur 2 ans.
   const closeHist = rows.map((r) => r.cours_jour).filter((c): c is number => c != null && c > 0);
   const sparkData = closeHist.slice(-30);
-  const low52 = closeHist.length ? Math.min(...closeHist) : null;
-  const high52 = closeHist.length ? Math.max(...closeHist) : null;
-  const verdictLine = signal
-    ? `Signal ${signal.signal}${signal.score_total != null ? ` · score ${signal.score_total.toFixed(0)}` : ''}. ` +
-      `Tendance récente ${up ? 'haussière' : 'baissière'} (${(last.variation_pct ?? 0) >= 0 ? '+' : ''}${(last.variation_pct ?? 0).toFixed(2)}% sur la séance).`
-    : null;
-
-  // Ancres de navigation (uniquement les sections réellement rendues).
-  const navSections = [
-    { id: 'cours', label: 'Cours' },
-    { id: 'technique', label: 'Technique' },
-    ...(valuation && valuation.metrics.reliable ? [{ id: 'valorisation', label: 'Valorisation' }] : []),
-    ...(fundamentals.length > 0 ? [{ id: 'fondamentaux', label: 'Fondamentaux' }] : []),
-    { id: 'discussions', label: 'Discussions' },
-  ];
+  const verdictLine = ligneVerdict(signal?.signal ?? null, signal?.score_total ?? null, last.variation_pct ?? null);
 
   // Détections sous forme de checklist
   const detections = [
-    { label: 'Momentum haussier', ok: up && (last.variation_pct ?? 0) > 1 },
+    { label: 'Hausse de plus de 1 % sur la séance', ok: up && (last.variation_pct ?? 0) > 1 },
     { label: 'Golden Cross (MA20 > MA50)', ok: det.goldenCross },
-    { label: 'Volume > moyenne', ok: last.volume != null && last.cours_precedent != null && last.volume > 0 },
+    { label: 'Volume > moyenne', ok: volumeAuDessusMoyenne(last.volume ?? null, volMoyen) },
     { label: 'Cassure haussière 20j', ok: det.breakoutUp },
     { label: 'Survente RSI < 30', ok: det.oversold },
     { label: 'Surachat RSI > 70', ok: det.overbought },
@@ -620,18 +716,252 @@ export default async function InstrumentPage({
   // Saisonnalité (série mensuelle compacte ; React.cache déduplique avec /saisonnalite).
   const seasonalityReturns = await getMonthlyReturns(code).catch(() => []);
 
+  // ── Lecture technique unique (remplace jauge, analyse technique, signal et lecture commentée) ──
+  const lecture = lectureTechnique({
+    cours: last.cours_jour ?? null,
+    variationPct: last.variation_pct ?? null,
+    ma20: lastMa20,
+    ma50: lastMa50,
+    ma200: lastMa200,
+    macd: lastMacd?.macd ?? null,
+    macdSignal: lastMacd?.signal ?? null,
+    rsi: lastRsi ?? null,
+    volume: last.volume ?? null,
+    volumeMoyen: volMoyen,
+  });
+
+  // Signal quantitatif : synthèse, lecture du signal, position (PRU), timing dividende.
+  const analyseSignal = (() => {
+    if (!signal) return null;
+    const inp = (signal as SignalDaily & { inputs?: Record<string, number | boolean> | null }).inputs ?? {};
+    const num = (k: string): number | null => (typeof inp[k] === 'number' ? (inp[k] as number) : null);
+    const technical = readTechnical({
+      signal: signal.signal,
+      rsi: num('rsi'),
+      ma20: num('ma20'),
+      ma50: num('ma50'),
+      volumeRatio: num('volume_ratio'),
+      variationPct: num('variation_pct'),
+      incomplet: inp.incomplet === true,
+    });
+    const dividend = analyzeDividendTiming(
+      dividends as { montant: number; ex_date: string | null; payment_date: string | null; exercice: number | null }[],
+      last.cours_jour ?? null,
+      new Date().toISOString().slice(0, 10),
+    );
+    const positionCtx = readPosition(position, last.cours_jour ?? null, signal.signal);
+    const synthesis = synthesize({
+      signal: signal.signal,
+      confiance: signal.confiance,
+      incomplet: inp.incomplet === true,
+      technical,
+      position: positionCtx,
+      dividend,
+    });
+    return { technical, dividend, positionCtx, synthesis };
+  })();
+
+  const lockSignaux = (
+    <SectionLock
+      required={gateSignaux.required === 'free' ? 'premium' : gateSignaux.required}
+      titre="Signal quantitatif"
+      pitch="Le signal BUY / HOLD / SELL, sa note et ses sous-scores expliqués."
+    />
+  );
+  // Verrou premium : sans accès, aucun élément du signal n'atteint le HTML.
+  const blocSignal = !gateSignaux.allowed
+    ? lockSignaux
+    : signal && analyseSignal ? (
+        <div className="space-y-4">
+          <SignalAnalysis
+            signal={signal.signal}
+            synthesis={analyseSignal.synthesis}
+            technical={analyseSignal.technical}
+            position={analyseSignal.positionCtx}
+            dividend={analyseSignal.dividend}
+            masquerPosition={gateIndicateurs.allowed}
+          />
+          <SignalPanel signal={signal} />
+        </div>
+      ) : (
+        <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
+      );
+
+  // ── Dernier exercice : compte de résultat détaillé (si accès fondamental) ──
+  const isCourant = exCourant && financials
+    ? financials.incomeStatements.find((s) => String(s.periode).slice(0, 4) === String(exCourant.year)) ?? null
+    : null;
+  const horsExpl = isCourant ? horsExploitation(isCourant.resultat_avant_impots, isCourant.resultat_exploitation) : null;
+  const evolutionTexte = exCourant ? evolutionResultat(exCourant.net_income ?? null, exPrecedent?.net_income ?? null) : null;
+  const croissanceCaPct = exCourant?.revenue != null && exPrecedent?.revenue != null && exPrecedent.revenue !== 0
+    ? ((exCourant.revenue - exPrecedent.revenue) / Math.abs(exPrecedent.revenue)) * 100
+    : null;
+  const phraseExercice = exCourant
+    ? syntheseExercice({
+        croissanceCaPct,
+        evolution: evolutionResultatDetail(exCourant.net_income ?? null, exPrecedent?.net_income ?? null),
+        resultatExploitation: isCourant?.resultat_exploitation ?? null,
+        horsExpl,
+      })
+    : null;
+  const detailExercice = exCourant
+    ? [
+        { label: "Résultat d'exploitation", valeur: isCourant?.resultat_exploitation ?? null },
+        { label: 'Hors exploitation', valeur: horsExpl },
+        { label: 'Impôt', valeur: isCourant?.impots ?? null },
+        { label: 'Résultat net', valeur: exCourant.net_income ?? null },
+      ].filter((l) => l.valeur != null)
+    : [];
+
+  // ── L'essentiel : un constat par chapitre, tiré des mêmes données ──
+  const fr2 = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const cartes: CarteEssentiel[] = [];
+  if (last.variation_pct != null) {
+    const v = last.variation_pct;
+    cartes.push({
+      href: '#aujourdhui',
+      etiquette: 'Aujourd’hui',
+      titre: Math.round(v * 100) === 0 ? 'Séance stable' : `Séance en ${v > 0 ? 'hausse' : 'baisse'} de ${fmtPctAbs(v)}`,
+      detail: carnet && carnet.qte_achat != null && carnet.qte_vente != null
+        ? `Carnet du ${fmtDateCourte(carnet.date_marche)} : ${fmtNumber(carnet.qte_achat)} titres demandés, ${fmtNumber(carnet.qte_vente)} offerts.`
+        : `${fmtNumber(last.volume)} titres échangés${volMoyen != null ? `, pour ${fmtNumber(volMoyen)} en moyenne sur 20 séances` : ''}.`,
+    });
+  }
+  if (gateSignaux.allowed && signal) {
+    cartes.push({
+      href: '#titre',
+      etiquette: 'Le titre',
+      titre: `Signal ${libelleSignal(signal.signal)}`,
+      detail: `${signal.score_total != null ? `Score ${fr2(signal.score_total)} sur une échelle de −1 à +1` : 'Score non calculé'}${gateIndicateurs.allowed ? ` · ${lecture.soutient.length} élément${lecture.soutient.length > 1 ? 's' : ''} soutien${lecture.soutient.length > 1 ? 'nent' : 't'}, ${lecture.retient.length} reti${lecture.retient.length > 1 ? 'ennent' : 'ent'}` : ''}.`,
+    });
+  }
+  if (gateFonda.allowed && economieSociete && economieSociete.resultatNet != null) {
+    const rn = economieSociete.resultatNet;
+    cartes.push({
+      href: '#entreprise',
+      etiquette: 'L’entreprise',
+      titre: insecable(`Exercice ${economieSociete.exercice} : ${rn >= 0 ? 'bénéfice' : 'perte'} de ${fmtFcfa(Math.abs(rn))}`),
+      detail: evolutionTexte ? insecable(`Résultat net sur un an : ${evolutionTexte}.`) : 'Évolution sur un an non disponible.',
+    });
+  }
+  if (liquidity) {
+    cartes.push({
+      href: '#liquidite',
+      etiquette: 'Négociabilité',
+      titre: `Classe ${liquidity.classe} · ${liquidity.label}`,
+      detail: insecable(`Échangé ${liquidity.presencePct} % des séances, ${fmtFcfa(liquidity.valeurMoyenne)} par séance en moyenne.`),
+    });
+  }
+
+  // Chapitres de la barre collante (L'essentiel seulement s'il est rendu).
+  const navSections = [
+    { id: 'vue-ensemble', label: 'Vue d’ensemble' },
+    ...(cartes.length > 0 ? [{ id: 'essentiel', label: 'L’essentiel' }] : []),
+    { id: 'analyse-ia', label: 'Analyse par IA' },
+    { id: 'aujourdhui', label: 'Aujourd’hui' },
+    { id: 'titre', label: 'Le titre' },
+    { id: 'entreprise', label: 'L’entreprise' },
+    { id: 'suivi', label: 'Mon suivi' },
+  ];
+
+  const flottantPct = instrument?.flottant != null && shares != null && shares > 0 ? (instrument.flottant / shares) * 100 : null;
+  const historiqueDiv = divRows.filter((d) => d.montant > 0).slice(0, 5);
+
+  // ══ Vue d'ensemble ══════════════════════════════════════════════════════
+  const aujourdhuiIso = new Date().toISOString().slice(0, 10);
+  // Clôtures complètes pour 5A / Max : PostgREST tronque à 1000 lignes, on pagine.
+  const historiqueComplet: { date_marche: string; cours_jour: number | null }[] = [];
+  for (let page = 0; page < 20; page++) {
+    const { data: lot } = await liqDailyClient
+      .from('brvm_actions_daily')
+      .select('date_marche, cours_jour')
+      .eq('code', code)
+      .gt('cours_jour', 0)
+      .order('date_marche', { ascending: true })
+      .range(page * 1000, page * 1000 + 999);
+    const l = (lot ?? []) as { date_marche: string; cours_jour: number | null }[];
+    historiqueComplet.push(...l);
+    if (l.length < 1000) break;
+  }
+  const seriesCours = seriesParPeriode(historiqueComplet);
+  // 1J : graphique de séance s'il se trace, ou le constat « pas de transaction » ; sinon pas d'onglet 1J.
+  const transactionsSeance = depuisPremiereTransaction(instantanes).length;
+  const seanceTracable = transactionsSeance >= 2;
+  const vueJourDisponible = instantanes.length > 0 && (seanceTracable || transactionsSeance === 0);
+
+  const [{ data: presseRows }, { data: prochainRow }] = await Promise.all([
+    liqDailyClient
+      .from('brvm_news')
+      .select('id, titre, date_publication, source, source_label, source_url')
+      .contains('ticker_codes', [code])
+      .not('hidden', 'is', true) // modération rédactionnelle
+      .lte('date_publication', aujourdhuiIso)
+      .order('date_publication', { ascending: false })
+      .limit(80),
+    liqDailyClient
+      .from('market_events')
+      .select('title, event_date')
+      .eq('instrument_code', code)
+      .gt('event_date', aujourdhuiIso)
+      .order('event_date', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  const groupesActus = regrouperActualites(
+    publications.map((p) => ({ id: String(p.id), libelle: p.libelle, date_publication: p.date_publication, type_publication: p.type_publication, source_url: p.source_url })),
+    (presseRows ?? []) as NewsEntree[],
+    aujourdhuiIso,
+  );
+  const prochain = prochainRow as { title: string | null; event_date: string } | null;
+
+  // Comptes : exercice retenu (source unique des ratios) et exercice précédent de la même série.
+  const serieComptes = serieAnnuelle(financials?.incomeStatements ?? [], fundamentals);
+  const exerciceVue = retenu.exercice;
+  const comptesPrecedents = exerciceVue != null ? serieComptes.find((p) => p.exercice === exerciceVue - 1) ?? null : null;
+  const nomSociete = instrument?.designation ?? last.designation ?? code;
+  const lignesStats = lignesStatistiques({
+    fondamentauxVisibles: gateFonda.allowed,
+    capitalisation: capitalisationBrute,
+    exercice: exerciceVue,
+    chiffreAffaires: retenu.chiffreAffaires,
+    chiffreAffairesPrecedent: comptesPrecedents?.chiffreAffaires ?? null,
+    resultatNet: retenu.resultatNet,
+    resultatNetPrecedent: comptesPrecedents?.resultatNet ?? null,
+    bpa: retenu.source ? ratiosPublics.bpa : null,
+    per: retenu.source ? ratiosPublics.per : null,
+    titres: shares,
+    rendementDividende: divYield != null ? { pct: divYield, exercice: divExercice, net: divDejaNet, ancien: divCourant?.ancien ?? false } : null,
+    rendementNetIrvm: divYieldNet,
+    dernierDividende: lastDiv ? { montant: lastDiv.montant, exercice: lastDiv.exercice, exDate: lastDiv.ex_date } : null,
+    volume: last.volume ?? null,
+    volumeMoyen20: volMoyen,
+    valeurEchangee: last.valeur_echangee ?? null,
+    transactions: last.nb_transactions ?? null,
+    ouverture: last.ouverture ?? null,
+    cloturePrecedente: last.cours_precedent ?? null,
+    plusBas: last.plus_bas ?? null,
+    plusHaut: last.plus_haut ?? null,
+    plage52: plage52 ? { bas: plage52.bas, haut: plage52.haut } : null,
+    beta: last.beta_1an ?? null,
+    noteTechnique: gateSignaux.allowed ? noteAF(signal?.score_total ?? null, signal?.confiance ?? null) : null,
+    combinedAlpha: combinedAlpha?.score ?? null,
+    prochainEvenement: prochain?.title ? { titre: prochain.title, date: prochain.event_date } : null,
+  });
+  const notationVue = instrument?.notation_json
+    ? { agence: instrument.notation_json.agence, note: instrument.notation_json.note, perspective: instrument.notation_json.perspective ?? null }
+    : null;
+
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-6 animate-rise-in">
 
       {/* ══════════════════════════════════════════════════
-          BREADCRUMB + ACTIONS RAPIDES
+          BREADCRUMB + DOCUMENTS
       ══════════════════════════════════════════════════ */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-xs text-faint">
           <Link
             href="/actions"
-            className="hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Marché actions
           </Link>
@@ -639,28 +969,7 @@ export default async function InstrumentPage({
           <span className="text-muted">{code}</span>
         </nav>
 
-        {/* Actions header */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          {/* Actions primaires (pleines) */}
-          <Link
-            href={`/actions/${code}/revue`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-info/40 bg-info/[0.12] rounded-full px-3 py-1 text-info hover:bg-info/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Revue de résultats →
-          </Link>
-          <Link
-            href={`/actions/${code}/financials`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-gold/40 bg-gold/[0.12] rounded-full px-3 py-1 text-gold hover:bg-gold/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            États financiers →
-          </Link>
-          <Link
-            href={`/rapports/dossier/${code}`}
-            className="inline-flex items-center gap-1 text-[11px] font-medium border border-up/40 bg-up/[0.12] rounded-full px-3 py-1 text-up hover:bg-up/20 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          >
-            Dossier A4 →
-          </Link>
-          {/* Action contextuelle : publications */}
           <PublicationsModal
             code={code}
             designation={instrument?.designation}
@@ -672,157 +981,199 @@ export default async function InstrumentPage({
         </div>
       </div>
 
-      {/* ── Navigation d'ancres collante (+ mini-header au scroll) ── */}
+      {/* ── Barre collante : chapitres + documents ── */}
       <FicheStickyNav
         code={code}
         cours={last.cours_jour}
         variationPct={last.variation_pct}
         up={up}
         sections={navSections}
+        documents={[
+          { href: `/actions/${code}/revue`, label: 'Revue de résultats' },
+          { href: `/actions/${code}/financials`, label: 'États financiers' },
+          { href: `/rapports/dossier/${code}`, label: 'Dossier A4' },
+          { href: `/actions/${code}/quant`, label: 'Fiche Quant' },
+        ]}
       />
 
       {/* ══════════════════════════════════════════════════
-          HERO — COTATION PRINCIPALE
+          EN-TÊTE — identité, cours, séance, plages, verdict
       ══════════════════════════════════════════════════ */}
-      {/* Outer shell double-bezel */}
-      <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-        <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] overflow-hidden">
-          {/* Glow atmosphérique */}
+      <header className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+        <div className="relative rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] overflow-hidden">
           <div
             className={`absolute inset-0 pointer-events-none ${
               up ? 'bg-emerald-veil' : '[background:radial-gradient(120%_60%_at_80%_-10%,rgba(226,75,75,0.06),transparent_55%)]'
             }`}
           />
           <div className="relative px-5 pt-5 pb-6 md:px-7 md:pt-7">
-            {/* Logo + identité instrument */}
-            <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
-              <div className="flex items-center gap-3.5 min-w-0">
-                {LOGOS[code] ? (
-                  /* Double-bezel logo */
-                  <div className="rounded-xl border border-border/60 bg-border/40 p-1 shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={LOGOS[code]}
-                      alt={code}
-                      width={36}
-                      height={36}
-                      className="w-9 h-9 rounded-lg object-contain bg-white/90 p-0.5"
-                    />
+            <div className="min-w-0">
+                {/* Logo + identité instrument */}
+                <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {LOGOS[code] ? (
+                      <div className="rounded-xl border border-border/60 bg-border/40 p-1 shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={LOGOS[code]}
+                          alt={code}
+                          width={36}
+                          height={36}
+                          className="w-9 h-9 rounded-lg object-contain bg-white/90 p-0.5"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-11 h-11 rounded-xl border border-border/60 bg-elevated grid place-items-center shrink-0">
+                        <span className="text-accent-ink text-sm font-display font-medium">{code.slice(0, 2)}</span>
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h1 className="font-display text-xl md:text-2xl text-ivory tracking-tight leading-tight">
+                        {code}
+                      </h1>
+                      <p className="text-xs text-muted truncate max-w-xs mt-0.5">
+                        {instrument?.designation ?? last.designation ?? ''}
+                      </p>
+                    </div>
                   </div>
-                ) : (
-                  <div className="w-11 h-11 rounded-xl border border-border/60 bg-elevated grid place-items-center shrink-0">
-                    <span className="text-gold/60 text-sm font-display font-medium">{code.slice(0, 2)}</span>
+
+                  {/* Chips méta */}
+                  <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                    {pays && <StatPill tone="neutral">{pays}</StatPill>}
+                    {secteur && <StatPill tone="sapphire">{secteur}</StatPill>}
+                    {divYield != null && <StatPill tone="gold"><span className="whitespace-nowrap">Rdt {divYieldTexte(divYield)}</span></StatPill>}
                   </div>
-                )}
-                <div className="min-w-0">
-                  <h1 className="font-display text-xl md:text-2xl text-ivory tracking-tight leading-tight">
-                    {code}
-                  </h1>
-                  <p className="text-xs text-muted truncate max-w-xs mt-0.5">
-                    {instrument?.designation ?? last.designation ?? ''}
-                  </p>
                 </div>
-              </div>
 
-              {/* Chips méta */}
-              <div className="flex items-center gap-1.5 flex-wrap shrink-0">
-                {pays && <StatPill tone="neutral">{pays}</StatPill>}
-                {secteur && <StatPill tone="sapphire">{secteur}</StatPill>}
-                {divYield != null && <StatPill tone="gold">Rdt {divYield.toFixed(1)}%</StatPill>}
-              </div>
-            </div>
-
-            {/* Prix principal */}
-            <div className="flex flex-wrap items-end gap-x-4 gap-y-1 mb-1.5">
-              <span className="tabular font-mono text-4xl md:text-5xl font-bold tracking-tight text-ivory leading-none">
-                {fmtNumber(last.cours_jour)}
-              </span>
-              <span className="text-muted text-base mb-1">FCFA</span>
-              {varAbs != null && (
-                <span
-                  className={`tabular font-mono text-base font-semibold mb-1 ${
-                    up ? 'text-up' : 'text-down'
-                  }`}
-                >
-                  {up ? '+' : ''}{fmtNumber(varAbs)}{' '}
-                  <span className="text-sm opacity-80">
-                    ({up ? '+' : ''}{(last.variation_pct ?? 0).toFixed(2)}%)
+                {/* Prix principal */}
+                <div className="flex flex-wrap items-end gap-x-4 gap-y-1 mb-1.5">
+                  <span className="tabular font-mono text-4xl md:text-5xl font-bold tracking-tight text-ivory leading-none">
+                    {fmtNumber(last.cours_jour)}
                   </span>
-                </span>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <p className="text-[11px] text-faint">
-                Séance du <span className="text-muted">{last.date_marche}</span>
-              </p>
-              <FreshnessBadge fraicheur={fraicheur} />
+                  <span className="text-muted text-base mb-1">FCFA</span>
+                  {varAbs != null && (
+                    <span className={`tabular font-mono text-base font-semibold mb-1 ${up ? 'text-up' : 'text-down'}`}>
+                      {up ? '+' : ''}{fmtNumber(varAbs)}{' '}
+                      <span className="text-sm opacity-80">
+                        ({pctFr(last.variation_pct ?? 0, 2, true)})
+                      </span>
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p className="text-[11px] text-faint">
+                    Séance du <span className="text-muted">{fmtDateCourte(last.date_marche)}</span>
+                  </p>
+                  <FreshnessBadge fraicheur={fraicheur} />
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    href="/portefeuille"
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs text-ivory transition hover:border-accent hover:text-accent-ink"
+                  >
+                    <Star size={14} strokeWidth={1.75} aria-hidden /> Suivre
+                  </Link>
+                  <Link
+                    href="/parametres/alertes"
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs text-ivory transition hover:border-accent hover:text-accent-ink"
+                  >
+                    <BellPlus size={14} strokeWidth={1.75} aria-hidden /> Créer une alerte de prix
+                  </Link>
+                  <Link
+                    href={`/actions/${code}/quant`}
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-gold/30 bg-gold/[0.10] px-3.5 py-1.5 text-xs font-semibold text-accent-ink transition hover:bg-gold/15 hover:border-gold/40"
+                  >
+                    Fiche Quant · Combined Alpha
+                  </Link>
+                  <Link
+                    href="/analyse/combined-alpha"
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs text-muted transition hover:border-gold/30 hover:text-accent-ink"
+                  >
+                    Classement complet →
+                  </Link>
+                </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                href={`/actions/${code}/quant`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/[0.10] px-3.5 py-1.5 text-xs font-semibold text-gold transition hover:bg-gold/15 hover:border-gold/40"
-              >
-                Fiche Quant — Combined Alpha
-              </Link>
-              <Link
-                href="/analyse/combined-alpha"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs text-muted transition hover:border-gold/30 hover:text-gold"
-              >
-                Classement complet →
-              </Link>
-            </div>
-
-            {/* Séparateur or */}
-            <div className="mt-5 h-px bg-gold-line opacity-40" />
-
-            {/* Grille métriques de séance */}
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-4">
-              {last.ouverture != null && <SessionMetric label="Ouverture" value={fmtNumber(last.ouverture)} unit="FCFA" />}
-              {last.plus_haut != null && <SessionMetric label="Plus haut" value={fmtNumber(last.plus_haut)} unit="FCFA" />}
-              {last.plus_bas != null && <SessionMetric label="Plus bas" value={fmtNumber(last.plus_bas)} unit="FCFA" />}
-              <SessionMetric label="Clôture préc." value={fmtNumber(last.cours_precedent)} unit="FCFA" />
-              <SessionMetric label="Volume du jour" value={fmtNumber(last.volume)} unit="titres" />
-              <SessionMetric label="Valeur échangée" value={fmtFcfa(last.valeur_echangee)} />
-              <SessionMetric label="Transactions" value={fmtNumber(last.nb_transactions)} />
-              {last.beta_1an != null && <SessionMetric label="Beta 1 an" value={last.beta_1an.toFixed(2)} />}
-              {volMoyen != null && <SessionMetric label="Vol. moyen 20j" value={fmtNumber(volMoyen)} unit="titres" />}
-              {capitalisation != null && <SessionMetric label="Capitalisation" value={fmtNumber(Math.round(capitalisation))} unit="MFCFA" accent />}
-              {shares != null && <SessionMetric label="Titres totaux" value={fmtNumber(shares)} />}
-              {instrument?.flottant != null && <SessionMetric label="Titres flottant" value={fmtNumber(instrument.flottant)} />}
-              {divYield != null && <SessionMetric label={divDejaNet ? 'Rdt dividende net' : 'Rdt dividende'} value={divYield.toFixed(2)} unit="%" accent />}
-              {divYieldNet != null && <SessionMetric label="Rdt net d'IRVM" value={divYieldNet.toFixed(2)} unit="%" />}
-            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* ── Bandeau verdict (note + signal + tendance + plage + synthèse) ──
+      {/* ══════════════════════════════════════════════════
+          VUE D'ENSEMBLE — statistiques, cours par période, actualités, société
+          (remplace la grille des chiffres de séance et le graphique de séance de l'en-tête)
+      ══════════════════════════════════════════════════ */}
+      <VueEnsemble
+        code={code}
+        lignes={lignesStats}
+        series={seriesCours}
+        jour={vueJourDisponible ? <SeanceIntraday points={instantanes} /> : null}
+        variationJour={last.variation_pct ?? null}
+        periodeDefaut={seanceTracable ? '1J' : '1A'}
+        actualites={groupesActus}
+        apropos={{
+          nom: nomSociete,
+          code,
+          secteur,
+          pays: pays ? (/^[A-Za-z]{2}$/.test(pays) ? nomPays(pays) : pays) : null,
+          famille: libelleFamille((instrument as { famille_comptable?: string | null } | null)?.famille_comptable ?? null),
+          titres: shares,
+          flottant: instrument?.flottant ?? null,
+          flottantPct,
+          notation: notationVue,
+          historiqueDepuis: dateEnLettres(historiqueComplet[0]?.date_marche ?? null),
+        }}
+        performance={gateFonda.allowed ? {
+          phrase: phrasePerformance({
+            nom: nomSociete,
+            exercice: exerciceVue,
+            chiffreAffaires: retenu.chiffreAffaires,
+            chiffreAffairesPrecedent: comptesPrecedents?.chiffreAffaires ?? null,
+            resultatNet: retenu.resultatNet,
+            resultatNetPrecedent: comptesPrecedents?.resultatNet ?? null,
+          }),
+          serie: serieComptes,
+        } : null}
+        synthese={{
+          signalVisible: gateSignaux.allowed,
+          note: gateSignaux.allowed ? noteAF(signal?.score_total ?? null, signal?.confiance ?? null) : null,
+          signal: gateSignaux.allowed && signal ? libelleSignal(signal.signal) : null,
+          combinedAlpha: combinedAlpha?.score ?? null,
+        }}
+      />
+
+      {/* ── Trois plages : 1 jour, 52 semaines, 2 ans ── */}
+      <JaugesPlage jour={plageJour} an={plage52} deuxAns={plage2ans} hausseDuJour={up} />
+
+      {/* ── Bandeau verdict (note + signal + tendance + plage 2 ans + synthèse) ──
           Le SIGNAL et la NOTE sont du calculé : ils suivent le flag `signaux`.
-          Le cours et la plage 52 semaines, eux, restent publics — d'où un bandeau
-          allégé plutôt qu'un cadenas, pour ne pas amputer la page d'entrée. */}
+          Le cours et la plage, eux, restent publics — d'où un bandeau allégé
+          plutôt qu'un cadenas, pour ne pas amputer la page d'entrée. */}
       {gateSignaux.allowed ? (
         <VerdictBand
+          note={noteAF(signal?.score_total ?? null, signal?.confiance ?? null)}
           signal={signal?.signal ?? null}
           scoreTotal={signal?.score_total ?? null}
           confiance={signal?.confiance ?? null}
           sparkData={sparkData}
           up={up}
           cours={last.cours_jour}
-          low52={low52}
-          high52={high52}
+          low52={plage2ans?.bas ?? null}
+          high52={plage2ans?.haut ?? null}
           synthesisLine={verdictLine}
+          libelleNote={scoreToRating(signal?.score_total ?? null, signal?.confiance ?? null).note === 'NR' ? null : scoreToRating(signal?.score_total ?? null, signal?.confiance ?? null).label}
         />
       ) : (
         <VerdictBand
+          note={null}
           signal={null}
           scoreTotal={null}
           confiance={null}
           sparkData={sparkData}
           up={up}
           cours={last.cours_jour}
-          low52={low52}
-          high52={high52}
+          low52={plage2ans?.bas ?? null}
+          high52={plage2ans?.haut ?? null}
           synthesisLine={null}
         />
       )}
@@ -852,33 +1203,21 @@ export default async function InstrumentPage({
       )}
 
       {/* ══════════════════════════════════════════════════
-          GRAPHIQUE COURS
+          L'ESSENTIEL
       ══════════════════════════════════════════════════ */}
-      <div id="cours" className="scroll-mt-24">
-        <Eyebrow className="mb-3">Cours & Volume</Eyebrow>
-        <PremiumPanel className="p-0 overflow-hidden">
-          <div className="px-4 py-4 md:px-5">
-            <PriceChart
-              data={priceData}
-              designation={instrument?.designation ?? last.designation ?? code}
-              markers={chartMarkers}
-            />
-          </div>
-        </PremiumPanel>
-        <div className="mt-2">
-          <EventMarkerLegend markers={chartMarkers} />
-        </div>
-      </div>
+      <Essentiel cartes={cartes} />
+
+      {/* Analyse par IA : réponses Jev (type-safe) ou rédigées par IA, provenance et sources affichées. */}
+      <AnalyseIA code={code} nom={instrument?.designation ?? null} exerciceComptes={economieSociete?.exercice ?? null} />
 
       {/* ══════════════════════════════════════════════════
-          LIQUIDITÉ & COÛT DE FRICTION
+          01 · AUJOURD'HUI
       ══════════════════════════════════════════════════ */}
-      <div id="liquidite" className="scroll-mt-24">
-        <Eyebrow className="mb-3">Liquidité & coût de friction</Eyebrow>
-        <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
-        <CarnetOrdres carnet={carnet} />
+      <section className="space-y-6">
+        <Chapitre id="aujourdhui" numero="01" titre="Aujourd’hui" sousTitre={`Séance du ${fmtDateCourte(last.date_marche)} : ce qu'elle dit, le carnet d'ordres et la négociabilité du titre.`} />
         {gateLectureSeance.allowed ? (
           <CarnetCommentaire
+            replie
             carnet={carnet}
             signal={signal ? {
               date_marche: signal.date_marche,
@@ -909,480 +1248,479 @@ export default async function InstrumentPage({
             pitch="Le carnet d'ordres rapporté aux capitaux échangés, la fourchette chiffrée en francs et comparée au reste du marché, le score technique face à ses seuils, et les comptes rapportés au cours."
           />
         )}
-      </div>
+        <CarnetOrdres carnet={carnet} />
+        <div id="liquidite" className="scroll-mt-24">
+          <Eyebrow className="mb-3">Liquidité & coût de friction</Eyebrow>
+          <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
+        </div>
+      </section>
 
       {/* ══════════════════════════════════════════════════
-          MA THÈSE D'INVESTISSEMENT (suivi de conviction)
+          02 · LE TITRE
       ══════════════════════════════════════════════════ */}
-      <div id="these" className="scroll-mt-24">
-        <Eyebrow className="mb-3">Ma thèse</Eyebrow>
-        <ThesisPanel code={code} coursActuel={last.cours_jour ?? null} />
-      </div>
-
-      {/* ══════════════════════════════════════════════════
-          SAISONNALITÉ (encart résumé → page complète)
-      ══════════════════════════════════════════════════ */}
-      <div id="saisonnalite" className="scroll-mt-24">
-        <Eyebrow className="mb-3">Saisonnalité</Eyebrow>
-        <SeasonalityCard code={code} returns={seasonalityReturns} />
-      </div>
-
-      {/* ══════════════════════════════════════════════════
-          CONFIGURATION TECHNIQUE (TechnicalSummary)
-      ══════════════════════════════════════════════════ */}
-      <div id="technique" className="scroll-mt-24">
-        <Eyebrow className="mb-3">Configuration technique</Eyebrow>
-        {gateIndicateurs.allowed ? (
-          <TechnicalSummary result={technicalSummary} />
-        ) : (
-          <SectionLock
-            required={gateIndicateurs.required === 'free' ? 'premium' : gateIndicateurs.required}
-            titre="Configuration technique"
-            pitch="Tendance, momentum et niveaux clés, synthétisés."
-          />
-        )}
-      </div>
-
-      {/* ══════════════════════════════════════════════════
-          INDICATEURS + DÉTECTIONS (grille 2 col)
-      ══════════════════════════════════════════════════ */}
-      {gateIndicateurs.allowed ? (
+      <section className="space-y-6">
+        <Chapitre id="titre" numero="02" titre="Le titre" sousTitre="Le cours dans la durée, puis une seule lecture technique de ses indicateurs." />
         <div>
-          <Eyebrow className="mb-3">Analyse technique</Eyebrow>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Eyebrow className="mb-3">Cours & Volume</Eyebrow>
+          <PremiumPanel className="p-0 overflow-hidden">
+            <div className="px-4 py-4 md:px-5">
+              <PriceChart
+                data={priceData}
+                designation={instrument?.designation ?? last.designation ?? code}
+                markers={chartMarkers}
+              />
+            </div>
+          </PremiumPanel>
+          <div className="mt-2">
+            <EventMarkerLegend markers={chartMarkers} />
+          </div>
+        </div>
 
-            {/* ── Indicateurs ── */}
-            <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-gold/70 mb-5">Indicateurs</p>
+        {gateIndicateurs.allowed ? (
+          <LectureTechnique
+            lecture={lecture}
+            signal={gateSignaux.allowed ? signal?.signal ?? null : null}
+            score={gateSignaux.allowed ? signal?.score_total ?? null : null}
+            qualiteDonnees={gateSignaux.allowed ? signal?.confiance ?? null : null}
+            graphiques={
+              <div className="space-y-4">
+                <IndicateursActuels
+                  rsi={lastRsi ?? null}
+                  cours={last.cours_jour ?? null}
+                  moyennes={[
+                    { label: 'MA 20', val: lastMa20 },
+                    { label: 'MA 50', val: lastMa50 },
+                    { label: 'MA 200', val: lastMa200 },
+                  ]}
+                  macd={lastMacd ?? null}
+                />
+                <IndicatorCharts data={indicatorData} />
+              </div>
+            }
+            synthese={{
+              haussiers: technicalSummary.bullCount,
+              neutres: technicalSummary.neutCount,
+              baissiers: technicalSummary.bearCount,
+              indicateurs: technicalSummary.signals.map((s) => ({ texte: s.detail, sens: s.direction })),
+            }}
+            saisonnalite={
+              seasonalityReturns.length > 0
+                ? <SeasonalityCard code={code} returns={seasonalityReturns} />
+                : <p className="text-[13px] text-muted">Saisonnalité non disponible pour cette valeur.</p>
+            }
+            detections={detections}
+            position={
+              !gateSignaux.allowed ? (
+                <p>La lecture de votre position selon le signal est réservée aux abonnés.</p>
+              ) : analyseSignal ? (
+                <PositionLecture ctx={analyseSignal.positionCtx} />
+              ) : (
+                <p>Aucun signal calculé pour la dernière séance scorée.</p>
+              )
+            }
+            detailScore={blocSignal}
+          />
+        ) : (
+          <>
+            <SectionLock
+              required={gateIndicateurs.required === 'free' ? 'premium' : gateIndicateurs.required}
+              titre="Lecture technique"
+              pitch="RSI, MACD, moyennes mobiles, bandes de Bollinger, détections de configurations et lecture commentée."
+            />
+            <div>
+              <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
+              {blocSignal}
+            </div>
+            <SeasonalityCard code={code} returns={seasonalityReturns} />
+          </>
+        )}
+      </section>
 
-                {/* RSI */}
-                <div className="mb-5">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-muted">RSI (14)</span>
-                    <span
-                      className={`tabular font-semibold font-mono ${
-                        lastRsi == null ? 'text-faint' :
-                        lastRsi < 30 ? 'text-up' :
-                        lastRsi > 70 ? 'text-down' : 'text-ivory'
-                      }`}
-                    >
-                      {lastRsi != null ? lastRsi.toFixed(0) : '—'}
-                    </span>
+      {/* ══════════════════════════════════════════════════
+          03 · L'ENTREPRISE
+      ══════════════════════════════════════════════════ */}
+      <section className="space-y-6">
+        <Chapitre id="entreprise" numero="03" titre="L’entreprise" sousTitre="Les comptes publiés, la valorisation, les dividendes et les événements de la société." />
+
+        {/* Alerte de perte — donnée fondamentale : suit le verrou `fondamentaux`. */}
+        {gateFonda.allowed && exCourant?.net_income != null && exCourant.net_income < 0 && (
+          <div role="note" className="rounded-card border border-down/30 bg-down/5 px-5 py-4">
+            <p className="text-sm text-ivory">
+              {insecable(`Exercice ${exCourant.year} en perte : résultat net de −${fmtFcfa(Math.abs(exCourant.net_income))} FCFA.`)}
+            </p>
+            <p className="mt-1 text-xs text-muted">Le PER n&apos;est pas calculable et le taux de distribution est sans objet tant que le résultat est négatif.</p>
+          </div>
+        )}
+
+        {fundamentals.length > 0 && (() => {
+          const latest = pickBestFundamental(fundamentals)!;
+          const range52 = { low: plage52?.bas ?? null, high: plage52?.haut ?? null, current: last.cours_jour ?? null };
+          // Verrou premium : on ne rend PAS le panneau (donc aucune donnée dans le HTML).
+          if (!gateFonda.allowed) {
+            return (
+              <div id="fondamentaux" className="scroll-mt-24">
+                <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
+                <SectionLock
+                  required={gateFonda.required === 'free' ? 'premium' : gateFonda.required}
+                  titre="Analyse fondamentale"
+                  pitch="PER, P/B, ROE, marge, endettement, et leur lecture."
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div id="fondamentaux" className="scroll-mt-24">
+              <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
+              <FundamentalsPanel
+                canEdit={canEditFondamentaux}
+                code={code}
+                year={retenu.exercice ?? latest.year}
+                ratiosPublics={retenu.source ? ratiosPublics : undefined}
+                comptesRetenus={retenu.source ? { chiffreAffaires: retenu.chiffreAffaires, resultatNet: retenu.resultatNet, capitauxPropres: retenu.capitauxPropres, detteFinanciere: retenu.detteFinanciere } : undefined}
+                mentionSecondJeu={mentionJeu}
+                inputs={{
+                  cours: last.cours_jour ?? null,
+                  shares: instrument?.shares ?? null,
+                  revenue: latest.revenue,
+                  net_income: latest.net_income,
+                  equity: latest.equity,
+                  debt: latest.debt,
+                  dividende: lastDiv?.montant ?? null,
+                }}
+                sharesSource={instrument?.shares_source ?? null}
+                isManual={latest.is_manual ?? false}
+                history={(() => {
+                  // Un point par exercice (le corrigé manuellement l'emporte), sans
+                  // filtrer par is_manual : sinon une seule ligne corrigée vidait
+                  // l'historique et la croissance devenait « non disponible ».
+                  const byYear = new Map<number, { year: number; revenue: number | null; net_income: number | null }>();
+                  for (const f of [...fundamentals].sort((a, b) => (a.is_manual ? 1 : 0) - (b.is_manual ? 1 : 0))) {
+                    if (f.year != null) byYear.set(f.year, { year: f.year, revenue: f.revenue, net_income: f.net_income });
+                  }
+                  return [...byYear.values()];
+                })()}
+                sourceUrl={null}
+                range52={range52}
+                resultatNet={(retenu.source ? retenu.resultatNet : latest.net_income) ?? null}
+                famille={(instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null}
+                dividendeExercice={divCourant?.exercice ?? null}
+                dividendeVerifie={divCourant?.ex_date != null}
+                sansPlage52
+                sansAlertePerte
+              />
+              {comparatifIfrs && <ComptesIfrs c={comparatifIfrs} />}
+
+              {/* Constructeur de graphique replié sous le graphique CA / résultat net */}
+              {chartRows.length >= 2 && (
+                <details className="mt-4 rounded-card border border-border bg-surface p-4">
+                  <summary className="cursor-pointer text-sm text-ivory">Personnaliser ce graphique</summary>
+                  <div className="mt-4">
+                    <ChartBuilder rows={chartRows} />
                   </div>
-                  {/* Barre RSI premium */}
-                  <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
-                    <div className="absolute left-0 top-0 bottom-0 w-[30%] rounded-l-full bg-gradient-to-r from-up/35 to-up/[0.08]" />
-                    <div className="absolute right-0 top-0 bottom-0 w-[30%] rounded-r-full bg-gradient-to-l from-down/35 to-down/[0.08]" />
-                    {lastRsi != null && <RsiCursor rsi={lastRsi} />}
-                  </div>
-                  <div className="flex justify-between text-[10px] text-faint mt-1.5">
-                    <span>Survente &lt;30</span>
-                    <span>Équilibre</span>
-                    <span>Surachat &gt;70</span>
-                  </div>
-                  <BeginnerHint text="RSI sous 30 : le titre a fortement reculé en peu de séances (zone dite de survente). RSI au-dessus de 70 : il a fortement progressé (zone dite de surachat). Ni l'un ni l'autre ne prédit le mouvement suivant." />
+                </details>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Détail du dernier exercice */}
+        {gateFonda.allowed && exCourant && (detailExercice.length > 0 || evolutionTexte) && (
+          <div className="rounded-card border border-border bg-surface p-5">
+            <h3 className="text-base font-semibold text-ivory">Détail de l&apos;exercice {exCourant.year}</h3>
+            {phraseExercice && <p className="mt-1 text-[13px] text-muted">{phraseExercice}</p>}
+            <dl className="mt-4 divide-y divide-border/40">
+              {detailExercice.map((l) => (
+                <div key={l.label} className="flex items-center justify-between py-2 text-xs">
+                  <dt className="text-muted">{l.label}</dt>
+                  <dd className={`tabular font-mono ${(l.valeur as number) < 0 ? 'text-down' : 'text-ivory'}`}>
+                    {(l.valeur as number) < 0 ? '−' : ''}{insecable(`${fmtFcfa(Math.abs(l.valeur as number))} FCFA`)}
+                  </dd>
                 </div>
+              ))}
+              {evolutionTexte && (
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 py-2 text-xs">
+                  <dt className="text-muted">Évolution du résultat net{exPrecedent?.year != null ? ` (vs ${exPrecedent.year})` : ''}</dt>
+                  <dd className="text-ivory">{insecable(evolutionTexte)}</dd>
+                </div>
+              )}
+            </dl>
+            {horsExpl != null && (
+              <p className="mt-3 text-[11px] text-faint">Hors exploitation = résultat avant impôt − résultat d&apos;exploitation.</p>
+            )}
+          </div>
+        )}
 
-                {/* Moyennes mobiles */}
-                <div className="border-t border-border/30 pt-4 mb-4">
-                  <p className="text-[11px] text-faint mb-3">Moyennes mobiles</p>
-                  <div className="space-y-2">
-                    {[
-                      { label: 'MA 20', val: lastMa20 },
-                      { label: 'MA 50', val: lastMa50 },
-                      { label: 'MA 200', val: lastMa200 },
-                    ].map(({ label, val }) => (
-                      <div key={label} className="flex items-center justify-between text-xs">
-                        <span className="text-muted">{label}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="tabular font-mono text-ivory">
-                            {val != null ? fmtNumber(val) : '—'}
-                          </span>
-                          {val != null && last.cours_jour != null && (
-                            <span className={`text-[10px] ${last.cours_jour >= val ? 'text-up' : 'text-down'}`}>
-                              {last.cours_jour >= val ? '↑' : '↓'}
-                            </span>
-                          )}
+        {valuation && valuation.metrics.reliable && (
+          <div id="valorisation" className="scroll-mt-24">
+            <Eyebrow className="mb-3">Valorisation</Eyebrow>
+            {gateValo.allowed ? (
+              <ValuationPanel v={valuation} scoring={scoring} rendementDividende={{ pct: divYield, exercice: divCourant?.exercice ?? null }} masquerRationale />
+            ) : (
+              <SectionLock
+                required={gateValo.required === 'free' ? 'premium' : gateValo.required}
+                titre="Valorisation"
+                pitch="Le titre est-il cher ou bon marché ? Multiples et valeur intrinsèque."
+              />
+            )}
+          </div>
+        )}
+
+        {/* Dividendes + événements */}
+        <div>
+          <Eyebrow className="mb-3">Corporate & Dividendes</Eyebrow>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
+                <p className="text-[11px] text-accent-ink mb-5">Dividendes</p>
+                {lastDiv && divCourant ? (
+                  <div>
+                    {divYield != null && (
+                      <div className="mb-4 flex flex-wrap items-baseline gap-2">
+                        <span className="tabular font-mono text-3xl font-bold text-ivory leading-none whitespace-nowrap">
+                          {rendementDividendeParts(divYield, divExercice)?.valeur}
+                        </span>
+                        <span className="text-xs text-muted">
+                          {divDejaNet ? "rendement estimé, net d'IRVM" : 'rendement estimé'}
+                          {divExercice != null && <span className="block text-faint">ex. {divExercice}</span>}
+                        </span>
+                      </div>
+                    )}
+                    {divCourant.ancien && (
+                      <p className="mb-3 text-[11px] text-warn">
+                        Dividende de l&apos;exercice {divCourant.exercice}, antérieur de plus d&apos;un an au dernier exercice publié ({exCourant?.year}) : ce rendement n&apos;est pas un point d&apos;appui.
+                      </p>
+                    )}
+                    <div className="space-y-0 border-t border-border/30 pt-3">
+                      <DivRow label="Dernier versement" value={fmtNumber(lastDiv.montant) + ' FCFA'} />
+                      {divCourant.exercice != null && <DivRow label="Exercice" value={String(divCourant.exercice)} />}
+                      <DivRow label="Détachement" value={fmtDateCourte(lastDiv.ex_date)} />
+                      {lastDiv.payment_date && <DivRow label="Paiement" value={fmtDateCourte(lastDiv.payment_date)} />}
+                    </div>
+                    {historiqueDiv.length > 1 && (
+                      <div className="mt-4">
+                        <p className="text-[11px] text-faint mb-2">Historique ({historiqueDiv.length} derniers exercices)</p>
+                        <div className="space-y-0">
+                          {historiqueDiv.map((d, i) => (
+                            <DivRow
+                              key={`${i}-${d.exercice}`}
+                              label={d.exercice != null ? `Exercice ${d.exercice}` : 'Exercice non renseigné'}
+                              value={`${fmtNumber(d.montant)} FCFA${d.ex_date ? ` · ${fmtDateCourte(d.ex_date)}` : ''}`}
+                            />
+                          ))}
                         </div>
                       </div>
-                    ))}
+                    )}
+                    <p className="text-[11px] text-faint mt-3">Rendement calculé sur le cours actuel</p>
                   </div>
-                </div>
-
-                {/* MACD */}
-                {lastMacd && (
-                  <div className="border-t border-border/30 pt-4">
-                    <p className="text-[11px] text-faint mb-3">MACD</p>
-                    <div className="grid grid-cols-3 gap-2 text-xs text-center">
-                      <MacdCell label="Ligne" value={lastMacd.macd?.toFixed(0) ?? '—'} />
-                      <MacdCell label="Signal" value={lastMacd.signal?.toFixed(0) ?? '—'} />
-                      <MacdCell
-                        label="Histog."
-                        value={lastMacd.hist != null
-                          ? (lastMacd.hist >= 0 ? '+' : '') + lastMacd.hist.toFixed(0)
-                          : '—'}
-                        accent={(lastMacd.hist ?? 0) >= 0 ? 'up' : 'down'}
-                      />
-                    </div>
-                    <BeginnerHint text="MACD positif = tendance haussière. MACD négatif = tendance baissière." />
-                  </div>
+                ) : (
+                  <p className="text-xs text-faint italic">Aucun dividende enregistré.</p>
                 )}
               </div>
             </div>
 
-            {/* ── Détections ── */}
             <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5 h-full">
-                <p className="text-[11px] text-gold/70 mb-5">Détections actives</p>
-                <div className="space-y-2.5">
-                  {detections.map((d) => (
-                    <div
-                      key={d.label}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                        d.ok
-                          ? 'bg-up/5 border border-up/15'
-                          : 'border border-transparent'
-                      }`}
-                    >
-                      <span
-                        className={`text-[10px] shrink-0 leading-none ${
-                          d.ok ? 'text-up' : 'text-border-strong'
-                        }`}
-                      >
-                        {d.ok ? '●' : '○'}
-                      </span>
-                      <span
-                        className={`text-xs ${
-                          d.ok ? 'text-ivory' : 'text-faint'
-                        }`}
-                      >
-                        {d.label}
-                      </span>
-                    </div>
-                  ))}
-                  {detections.every((d) => !d.ok) && (
-                    <p className="text-xs text-faint italic mt-2">Aucune détection active.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <Eyebrow className="mb-3">Analyse technique</Eyebrow>
-          <SectionLock
-            required={gateIndicateurs.required === 'free' ? 'premium' : gateIndicateurs.required}
-            titre="Analyse technique"
-            pitch="RSI, MACD, moyennes mobiles, bandes de Bollinger et détections de configurations."
-          />
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          SIGNAL DU JOUR
-      ══════════════════════════════════════════════════ */}
-      {gateSignaux.allowed ? (
-        <div className="space-y-4">
-          <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
-          {signal ? (
-            <>
-              {(() => {
-                const inp = (signal as SignalDaily & { inputs?: Record<string, number | boolean> | null }).inputs ?? {};
-                const num = (k: string): number | null => (typeof inp[k] === 'number' ? (inp[k] as number) : null);
-                const technical = readTechnical({
-                  signal: signal.signal,
-                  rsi: num('rsi'),
-                  ma20: num('ma20'),
-                  ma50: num('ma50'),
-                  volumeRatio: num('volume_ratio'),
-                  variationPct: num('variation_pct'),
-                  incomplet: inp.incomplet === true,
-                });
-                const dividend = analyzeDividendTiming(
-                  dividends as { montant: number; ex_date: string | null; payment_date: string | null; exercice: number | null }[],
-                  last.cours_jour ?? null,
-                  new Date().toISOString().slice(0, 10),
-                );
-                const positionCtx = readPosition(position, last.cours_jour ?? null, signal.signal);
-                const synthesis = synthesize({
-                  signal: signal.signal,
-                  confiance: signal.confiance,
-                  incomplet: inp.incomplet === true,
-                  technical,
-                  position: positionCtx,
-                  dividend,
-                });
-                return (
-                  <SignalAnalysis
-                    signal={signal.signal}
-                    synthesis={synthesis}
-                    technical={technical}
-                    position={positionCtx}
-                    dividend={dividend}
-                  />
-                );
-              })()}
-              <SignalPanel signal={signal} />
-            </>
-          ) : (
-            <div className="rounded-panel border border-border bg-surface shadow-card p-6">
-              <p className="text-[11px] text-gold/70 mb-1.5">Signal quantitatif</p>
-              <p className="text-xs text-faint">Aucun signal calculé pour la dernière séance scorée.</p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
-          <SectionLock
-            required={gateSignaux.required === 'free' ? 'premium' : gateSignaux.required}
-            titre="Signal quantitatif"
-            pitch="Le signal BUY / HOLD / SELL, sa note et ses sous-scores expliqués."
-          />
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          VALORISATION FONDAMENTALE
-      ══════════════════════════════════════════════════ */}
-      {valuation && valuation.metrics.reliable && (
-        <div id="valorisation" className="scroll-mt-24">
-          <Eyebrow className="mb-3">Valorisation</Eyebrow>
-          {gateValo.allowed ? (
-            <ValuationPanel v={valuation} scoring={scoring} />
-          ) : (
-            <SectionLock
-              required={gateValo.required === 'free' ? 'premium' : gateValo.required}
-              titre="Valorisation"
-              pitch="Le titre est-il cher ou bon marché ? Multiples et valeur intrinsèque."
-            />
-          )}
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          FONDAMENTAUX
-      ══════════════════════════════════════════════════ */}
-      {fundamentals.length > 0 && (() => {
-        const latest = pickBestFundamental(fundamentals)!;
-        const closePrices = rows.map((r) => r.cours_jour).filter((c): c is number => c != null);
-        const range52 = {
-          low: closePrices.length ? Math.min(...closePrices) : null,
-          high: closePrices.length ? Math.max(...closePrices) : null,
-          current: last.cours_jour ?? null,
-        };
-        // Verrou premium : on ne rend PAS le panneau (donc aucune donnée dans le HTML).
-        if (!gateFonda.allowed) {
-          return (
-            <div id="fondamentaux" className="scroll-mt-24">
-              <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
-              <SectionLock
-                required={gateFonda.required === 'free' ? 'premium' : gateFonda.required}
-                titre="Analyse fondamentale"
-                pitch="PER, P/B, ROE, marge, endettement, et leur lecture."
-              />
-            </div>
-          );
-        }
-
-        return (
-          <div id="fondamentaux" className="scroll-mt-24">
-            <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
-            <FundamentalsPanel
-              canEdit={canEditFondamentaux}
-              code={code}
-              year={latest.year}
-              inputs={{
-                cours: last.cours_jour ?? null,
-                shares: instrument?.shares ?? null,
-                revenue: latest.revenue,
-                net_income: latest.net_income,
-                equity: latest.equity,
-                debt: latest.debt,
-                dividende: lastDiv?.montant ?? null,
-              }}
-              sharesSource={instrument?.shares_source ?? null}
-              isManual={latest.is_manual ?? false}
-              history={(() => {
-                // Un point par exercice (le corrigé manuellement l'emporte), sans
-                // filtrer par is_manual : sinon une seule ligne corrigée vidait
-                // l'historique et la croissance devenait « non disponible ».
-                const byYear = new Map<number, { year: number; revenue: number | null; net_income: number | null }>();
-                for (const f of [...fundamentals].sort((a, b) => (a.is_manual ? 1 : 0) - (b.is_manual ? 1 : 0))) {
-                  if (f.year != null) byYear.set(f.year, { year: f.year, revenue: f.revenue, net_income: f.net_income });
-                }
-                return [...byYear.values()];
-              })()}
-              sourceUrl={null}
-              range52={range52}
-              famille={(instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null}
-              dividendeExercice={lastDiv?.exercice ?? null}
-              dividendeVerifie={lastDivVerifie != null}
-            />
-
-            {/* Constructeur de graphique — séries au choix, base 100 optionnelle */}
-            {chartRows.length >= 2 && (
-              <div className="mt-4">
-                <Eyebrow className="mb-3">Graphique personnalisé</Eyebrow>
-                <ChartBuilder rows={chartRows} />
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* ══════════════════════════════════════════════════
-          DIVIDENDES + ÉVÉNEMENTS
-      ══════════════════════════════════════════════════ */}
-      <div>
-        <Eyebrow className="mb-3">Corporate & Dividendes</Eyebrow>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          {/* Dividendes */}
-          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-gold/70 mb-5">Dividendes</p>
-              {lastDiv ? (
-                <div>
-                  {/* Rendement en vedette */}
-                  {divYield != null && (
-                    <div className="mb-4 flex items-baseline gap-2">
-                      <span className="tabular font-mono text-3xl font-bold text-up leading-none">
-                        {divYield.toFixed(2)}%
-                      </span>
-                      <span className="text-xs text-muted">{divDejaNet ? "rendement estimé, net d'IRVM" : 'rendement estimé'}</span>
-                    </div>
-                  )}
-                  <div className="space-y-0 border-t border-border/30 pt-3">
-                    <DivRow label="Montant" value={fmtNumber(lastDiv.montant) + ' FCFA'} />
-                    <DivRow label="Ex-date" value={lastDiv.ex_date ?? '—'} />
-                    {lastDiv.payment_date && <DivRow label="Paiement" value={lastDiv.payment_date} />}
-                  </div>
-                  <p className="text-[10px] text-faint mt-3">Rendement calculé sur le cours actuel</p>
-                </div>
-              ) : (
-                <p className="text-xs text-faint italic">Aucun dividende enregistré.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Événements */}
-          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-              <p className="text-[11px] text-gold/70 mb-5">Événements récents</p>
-              {events.length > 0 ? (
-                <div className="space-y-3.5">
-                  {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
-                    <div key={e.id} className="border-b border-border/30 pb-3.5 last:border-0 last:pb-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] text-faint tabular">{e.event_date}</span>
-                        <span className="text-[10px] border border-border/60 rounded-full px-2 py-px text-faint">
-                          {e.event_type}
-                        </span>
+              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
+                <p className="text-[11px] text-accent-ink mb-5">Événements récents</p>
+                {events.length > 0 ? (
+                  <div className="space-y-3.5">
+                    {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
+                      <div key={e.id} className="border-b border-border/30 pb-3.5 last:border-0 last:pb-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[11px] text-faint">{fmtDateCourte(e.event_date)}</span>
+                          <span className="text-[11px] border border-border/60 rounded-full px-2 py-px text-faint">
+                            {libelleEvenement(e.event_type)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted line-clamp-2 mb-1.5">{e.title}</p>
+                        <Link
+                          href={`/dashboard/reports/events/${e.id}`}
+                          className="text-[11px] text-accent-ink hover:text-accent-ink transition-colors duration-300"
+                        >
+                          Lire l&apos;analyse →
+                        </Link>
                       </div>
-                      <p className="text-xs text-muted line-clamp-2 mb-1.5">{e.title}</p>
-                      <Link
-                        href={`/dashboard/reports/events/${e.id}`}
-                        className="text-[11px] text-gold/70 hover:text-gold transition-colors duration-300"
-                      >
-                        Lire l'analyse →
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-faint italic">Aucun événement récent.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════
-          GRAPHIQUES INDICATEURS (RSI/MACD historiques)
-      ══════════════════════════════════════════════════ */}
-      <div>
-        <Eyebrow className="mb-3">Indicateurs historiques</Eyebrow>
-        {gateIndicateurs.allowed ? (
-          <PremiumPanel className="p-0 overflow-hidden">
-            <div className="px-4 py-4 md:px-5 space-y-4">
-              <IndicatorCharts data={indicatorData} />
-              {(() => {
-                const lastOf = (arr: (number | null)[]) => { for (let k = arr.length - 1; k >= 0; k--) if (arr[k] != null) return arr[k]!; return null; };
-                const reading = readIndicators({
-                  rsi: lastOf(indicatorData.map((d) => d.rsi)),
-                  macd: lastOf(indicatorData.map((d) => d.macd)),
-                  ma20: lastOf(ma20),
-                  ma50: lastOf(ma50),
-                });
-                return <IndicatorCommentary reading={reading} code={code} />;
-              })()}
-            </div>
-          </PremiumPanel>
-        ) : (
-          <EmptyStatePremium
-            icon="✦"
-            title={`Indicateurs techniques · réservés au plan ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`}
-            hint="RSI, MACD, moyennes mobiles, lecture technique et lecture commentée."
-            action={{
-              href: '/account/plan',
-              label: `Passer à ${gateIndicateurs.required === 'pro' ? 'Platinium' : 'Premium'}`,
-            }}
-          />
-        )}
-      </div>
-
-      {/* ══════════════════════════════════════════════════
-          ACTIONS RAPIDES
-      ══════════════════════════════════════════════════ */}
-      <div>
-        <Eyebrow className="mb-3">Actions</Eyebrow>
-        <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-          <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-              {[
-                { href: '/portefeuille', label: 'Ajouter à la watchlist', icon: Star },
-                { href: '/parametres/alertes', label: 'Créer une alerte prix', icon: BellPlus },
-                { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: Download, external: true },
-                { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: History },
-                { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: FileText, external: true },
-                { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: MessageSquareText },
-              ].map(({ href, label, icon: Icone, external }) => {
-                const cls =
-                  'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
-                const inner = (
-                  <>
-                    <span className="text-gold/50 group-hover:text-gold/80 transition-colors duration-300 leading-none shrink-0">
-                      <Icone size={15} strokeWidth={1.75} aria-hidden />
-                    </span>
-                    <span>{label}</span>
-                    <span className="ml-auto text-border-strong group-hover:text-gold/40 transition-colors duration-300">→</span>
-                  </>
-                );
-                return external ? (
-                  <a key={label} href={href} className={cls}>{inner}</a>
+                    ))}
+                  </div>
                 ) : (
-                  <Link key={label} href={href} className={cls}>{inner}</Link>
-                );
-              })}
+                  <p className="text-xs text-faint italic">Aucun événement récent.</p>
+                )}
+                <a href={`#${ANCRE_OFFICIELLES}`} className="mt-4 inline-flex min-h-[36px] items-center text-[11px] text-accent-ink hover:underline">
+                  Toutes les publications officielles →
+                </a>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ══════════════════════════════════════════════════
-          DISCUSSIONS FORUM
-      ══════════════════════════════════════════════════ */}
-      <section id="discussions" className="mt-8 space-y-3 scroll-mt-24">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Discussions</h2>
-          <Link href="/forum/nouveau" className="text-sm text-info hover:underline">Démarrer une discussion</Link>
-        </div>
-        <ForumTopicList topics={forumTopics} authors={forumAuthors} />
+        {/* Westbourse Combined Alpha */}
+        <CombinedAlphaCarte
+          code={code}
+          score={combinedAlpha?.score ?? null}
+          rang={combinedAlpha?.rang ?? null}
+          piliers={combinedAlpha?.piliers ?? []}
+          penalite={combinedAlpha?.penalite ?? null}
+          penaliteAppliquee={decompositionCA?.penalite ?? null}
+          resumePenalite={combinedAlphaRow && Array.isArray(combinedAlphaRow.penalties_json)
+            ? resumeGardeFous(chaineGardeFous(combinedAlphaRow.penalties_json as { code: string; points: number }[], decompositionCA))
+            : null}
+          calculeLe={combinedAlpha?.calculeLe ?? null}
+          derniereSeance={last.date_marche}
+        />
       </section>
 
+      {/* ══════════════════════════════════════════════════
+          04 · MON SUIVI
+      ══════════════════════════════════════════════════ */}
+      <section className="space-y-6">
+        <Chapitre id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
+
+        <div id="these" className="scroll-mt-24">
+          <Eyebrow className="mb-3">Ma thèse</Eyebrow>
+          <ThesisPanel code={code} coursActuel={last.cours_jour ?? null} />
+        </div>
+
+        <div>
+          <Eyebrow className="mb-3">Outils</Eyebrow>
+          <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
+            <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                {[
+                  { href: `/api/export/actions/${code}`, label: 'Exporter CSV', icon: Download, external: true },
+                  { href: `/backtest?code=${code}`, label: 'Lancer un backtest', icon: History },
+                  { href: `/actions/${code}/rapport`, label: 'Rapport PDF analyste', icon: FileText, external: true },
+                  { href: `/assistant?symbole=${code}`, label: 'Analyser cette valeur', icon: MessageSquareText },
+                ].map(({ href, label, icon: Icone, external }) => {
+                  const cls =
+                    'group flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-xs text-muted hover:border-gold/30 hover:text-ivory hover:bg-gold/[0.03] transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+                  const inner = (
+                    <>
+                      <span className="text-accent-ink group-hover:text-accent-ink transition-colors duration-300 leading-none shrink-0">
+                        <Icone size={15} strokeWidth={1.75} aria-hidden />
+                      </span>
+                      <span>{label}</span>
+                      <span className="ml-auto text-border-strong group-hover:text-accent-ink transition-colors duration-300">→</span>
+                    </>
+                  );
+                  return external ? (
+                    <a key={label} href={href} className={cls}>{inner}</a>
+                  ) : (
+                    <Link key={label} href={href} className={cls}>{inner}</Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="discussions" className="space-y-3 scroll-mt-24">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-ivory">Discussions</h3>
+            <Link href="/forum/nouveau" className="text-sm text-accent-ink hover:underline">Démarrer une discussion</Link>
+          </div>
+          <ForumTopicList topics={forumTopics} authors={forumAuthors} />
+        </div>
+      </section>
+
+    </div>
+  );
+}
+
+/** Valeurs actuelles des indicateurs (RSI, moyennes mobiles, MACD), reprises de l'ancienne « Analyse technique ». */
+function IndicateursActuels({
+  rsi,
+  cours,
+  moyennes,
+  macd,
+}: {
+  rsi: number | null;
+  cours: number | null;
+  moyennes: { label: string; val: number | null }[];
+  macd: { macd: number | null; signal: number | null; hist: number | null } | null;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="rounded-card border border-border p-4">
+        <div className="flex items-center justify-between text-xs mb-2">
+          <span className="text-muted">RSI (14)</span>
+          <span className={`tabular font-semibold font-mono ${rsi == null ? 'text-faint' : rsi < 30 ? 'text-up' : rsi > 70 ? 'text-down' : 'text-ivory'}`}>
+            {nombreFr(rsi, 0)}
+          </span>
+        </div>
+        <div className="relative h-1.5 rounded-full overflow-hidden bg-border">
+          <div className="absolute left-0 top-0 bottom-0 w-[30%] rounded-l-full bg-gradient-to-r from-up/35 to-up/[0.08]" />
+          <div className="absolute right-0 top-0 bottom-0 w-[30%] rounded-r-full bg-gradient-to-l from-down/35 to-down/[0.08]" />
+          {rsi != null && <RsiCursor rsi={rsi} />}
+        </div>
+        <div className="flex justify-between text-[11px] text-faint mt-1.5">
+          <span>Survente &lt;30</span>
+          <span>Équilibre</span>
+          <span>Surachat &gt;70</span>
+        </div>
+        <BeginnerHint text="RSI sous 30 : le titre a fortement reculé en peu de séances (zone dite de survente). RSI au-dessus de 70 : il a fortement progressé (zone dite de surachat). Ni l'un ni l'autre ne prédit le mouvement suivant." />
+      </div>
+
+      <div className="rounded-card border border-border p-4">
+        <p className="text-[11px] text-faint mb-3">Moyennes mobiles</p>
+        <div className="space-y-2">
+          {moyennes.map(({ label, val }) => (
+            <div key={label} className="flex items-center justify-between text-xs">
+              <span className="text-muted">{label}</span>
+              <div className="flex items-center gap-2">
+                <span className="tabular font-mono text-ivory">{val != null ? fmtNumber(val) : '—'}</span>
+                {val != null && cours != null && (
+                  <span className={`text-[11px] ${cours >= val ? 'text-up' : 'text-down'}`}>{cours >= val ? '↑' : '↓'}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-card border border-border p-4">
+        <p className="text-[11px] text-faint mb-3">MACD</p>
+        {macd ? (
+          <>
+            <div className="grid grid-cols-3 gap-2 text-xs text-center">
+              <MacdCell label="Ligne" value={nombreFr(macd.macd, 0)} />
+              <MacdCell label="Signal" value={nombreFr(macd.signal, 0)} />
+              <MacdCell
+                label="Histog."
+                value={macd.hist != null && macd.hist >= 0 ? '+' + nombreFr(macd.hist, 0) : nombreFr(macd.hist, 0)}
+                accent={(macd.hist ?? 0) >= 0 ? 'up' : 'down'}
+              />
+            </div>
+            <BeginnerHint text="MACD positif = tendance haussière. MACD négatif = tendance baissière." />
+          </>
+        ) : (
+          <p className="text-xs text-faint">Historique insuffisant pour le MACD.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Position de l'utilisateur lue selon le signal (PRU, plus-value latente) — reprise de SignalAnalysis. */
+function PositionLecture({ ctx }: { ctx: { held: boolean; pru: number | null; latentPnlPct: number | null; reading: string } }) {
+  return (
+    <div className="space-y-1">
+      {ctx.held && (
+        <>
+          <div className="flex items-baseline justify-between">
+            <span className="text-xs text-muted">Plus-value latente</span>
+            <span className={`tabular text-sm font-semibold ${(ctx.latentPnlPct ?? 0) >= 0 ? 'text-up' : 'text-down'}`}>
+              {pctFr(ctx.latentPnlPct, 1, true)}
+            </span>
+          </div>
+          {ctx.pru != null && (
+            <div className="flex items-baseline justify-between">
+              <span className="text-xs text-muted">PRU</span>
+              <span className="tabular text-xs text-ivory">{ctx.pru.toLocaleString('fr-FR')} FCFA</span>
+            </div>
+          )}
+        </>
+      )}
+      <p className="text-xs text-muted leading-relaxed">{ctx.reading}</p>
     </div>
   );
 }
@@ -1390,31 +1728,6 @@ export default async function InstrumentPage({
 // ══════════════════════════════════════════════════════════════════
 // SOUS-COMPOSANTS
 // ══════════════════════════════════════════════════════════════════
-
-/** Métrique de séance — affichage compact dans le hero */
-function SessionMetric({
-  label,
-  value,
-  unit,
-  accent,
-}: {
-  label: string;
-  value: string;
-  unit?: string;
-  accent?: boolean;
-}) {
-  return (
-    <div className="py-0.5">
-      <p className="text-xs text-faint mb-1">{label}</p>
-      <div className="flex items-baseline gap-1">
-        <span className={`tabular font-mono text-sm font-semibold leading-tight ${accent ? 'text-gold' : 'text-ivory'}`}>
-          {value}
-        </span>
-        {unit && <span className="text-[10px] text-faint">{unit}</span>}
-      </div>
-    </div>
-  );
-}
 
 /** Cellule MACD */
 function MacdCell({
@@ -1428,7 +1741,7 @@ function MacdCell({
 }) {
   return (
     <div className="bg-elevated rounded-lg py-2.5 px-2">
-      <div className="text-faint text-[10px] mb-1">{label}</div>
+      <div className="text-muted text-[11px] mb-1">{label}</div>
       <div
         className={`tabular font-mono text-sm font-semibold ${
           accent === 'up' ? 'text-up' : accent === 'down' ? 'text-down' : 'text-ivory'
@@ -1467,14 +1780,14 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
       >
         {/* Header signal */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
-          <p className="text-[11px] text-gold/70">Signal quantitatif</p>
+          <p className="text-[11px] text-accent-ink">Signal quantitatif</p>
           <SignalBadge signal={signal.signal} confiance={signal.confiance} />
           <RatingBadge scoreTotal={signal.score_total} confiance={signal.confiance} />
           <span className="ml-auto tabular text-[11px] text-faint font-mono">
             {signal.score_total != null
-              ? (signal.score_total >= 0 ? '+' : '') + signal.score_total.toFixed(2)
+              ? (signal.score_total >= 0 ? '+' : '') + nombreFr(signal.score_total, 2)
               : '—'}
-            {' / 1.00 · dernière séance scorée '}{signal.date_marche}
+            {' / 1,00 · dernière séance scorée '}{fmtDateCourte(signal.date_marche)}
           </span>
         </div>
 
@@ -1507,7 +1820,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
                         (val as number) >= 0 ? 'text-up' : 'text-down'
                       }`}
                     >
-                      {(val as number) >= 0 ? '+' : ''}{(val as number).toFixed(2)}
+                      {(val as number) >= 0 ? '+' : ''}{nombreFr(val as number, 2)}
                     </span>
                   </div>
                 ))}
@@ -1527,7 +1840,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
                   <div key={k} className="flex items-center justify-between text-xs">
                     <span className="text-muted font-mono">{k}</span>
                     <span className="tabular font-mono text-faint">
-                      {typeof v === 'number' ? v.toFixed(3) : String(v)}
+                      {typeof v === 'number' ? nombreFr(v, 3) : String(v)}
                     </span>
                   </div>
                 ))}
@@ -1539,7 +1852,7 @@ function SignalPanel({ signal }: { signal: SignalDaily }) {
         <div className="border-t border-border/30 pt-4 flex items-center justify-between">
           <Link
             href="/signaux"
-            className="text-xs text-gold/70 hover:text-gold transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+            className="text-xs text-accent-ink hover:text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
           >
             Voir tous les signaux →
           </Link>

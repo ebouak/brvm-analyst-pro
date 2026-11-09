@@ -4,10 +4,12 @@ import HeatmapViews, { SecteurSelect } from '@/components/HeatmapViews';
 import brvmLogos from '@/lib/brvmLogos.json';
 import { loadHeatmap } from '@/lib/heatmapData';
 import type { HeatmapNode } from '@/lib/heatmap';
-import { fmtDateFR } from '@/lib/format';
 import Link from 'next/link';
+import { fmtPctSigne, fmtDateCourte } from '@/lib/format';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { LigneSource } from '@/components/marche/LigneSource';
+import { Chapitre } from '@/components/fiche/Chapitre';
 import {
-  SectionHeader,
   PremiumPanel,
   EmptyStatePremium,
 } from '@/components/ui/premium';
@@ -24,19 +26,20 @@ interface SectorStat {
 }
 
 export const dynamic = 'force-dynamic';
+
 export const metadata = { title: 'Heatmap marché' };
 
 /**
- * Légende du gradient : émeraude (#16b46a) / rubis (#e24b4b)
- * Alignés sur colorForVariation() dans lib/heatmap.ts (seuil MAX_VAR = 8 %).
+ * Légende du gradient : jetons up / down
+ * Alignés sur couleurVariation() dans lib/heatmap.ts (pleine intensité à ±4 %).
  * bgClass = classe Tailwind arbitraire statique pour éviter tout style inline.
  */
 const GRADIENT_STOPS: { pct: number; bgClass: string; label: string }[] = [
-  { pct: -8, bgClass: 'bg-down',                        label: '−8 %' },
-  { pct: -4, bgClass: 'bg-[#8a2828]',                   label: '−4 %' },
+  { pct: -4, bgClass: 'bg-down',                        label: '−4 %' },
+  { pct: -2, bgClass: 'bg-down/60',                   label: '−2 %' },
   { pct:  0, bgClass: 'bg-border-strong',                label:  '0 %' },
-  { pct:  4, bgClass: 'bg-[#0d6b3f]',                   label: '+4 %' },
-  { pct:  8, bgClass: 'bg-up',                           label: '+8 %' },
+  { pct:  2, bgClass: 'bg-up/60',                   label: '+2 %' },
+  { pct:  4, bgClass: 'bg-up',                           label: '+4 %' },
 ];
 
 interface PageProps {
@@ -85,60 +88,25 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen bg-bg flex flex-col">
-      {/* ── Glow atmosphérique ─────────────────────────────────────────────── */}
-      <div className="pointer-events-none fixed inset-0 bg-obsidian-glow" aria-hidden />
-
-      <div className="relative flex flex-col flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 gap-5 sm:gap-6">
+      <div className="relative flex flex-col flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 py-8">
 
         {/* ── En-tête + filtres secteur ──────────────────────────────────── */}
-        <div className="animate-rise-in flex flex-wrap items-end justify-between gap-5">
-          <SectionHeader
-            title="Heatmap marché"
-            subtitle={lastDate ? `Séance du ${fmtDateFR(lastDate)}` : undefined}
-          />
-
-          {/* Secteur — mobile : liste déroulante (les 8 puces occupaient tout
-              le premier écran) ; puces à partir de md. */}
-          {allSectors.length > 0 && (
-            <SecteurSelect secteurs={allSectors} courant={secteurParam} className="w-full md:hidden" />
-          )}
-          {allSectors.length > 0 && (
-            <div className="hidden md:flex flex-wrap gap-2 max-w-xl">
-              <Link
-                href="/heatmap"
-                className={[
-                  'px-3 py-1 rounded-chip text-xs font-medium transition-all duration-200',
-                  secteurParam == null
-                    ? 'bg-gold text-obsidian shadow-gold-sm'
-                    : 'bg-elevated border border-border text-muted hover:border-border-strong hover:text-ivory',
-                ].join(' ')}
-              >
-                Tous
-              </Link>
-              {allSectors.map((s) => (
-                <Link
-                  key={s}
-                  href={`/heatmap?secteur=${encodeURIComponent(s)}`}
-                  className={[
-                    'px-3 py-1 rounded-chip text-xs font-medium transition-all duration-200',
-                    secteurParam === s
-                      ? 'bg-gold text-obsidian shadow-gold-sm'
-                      : 'bg-elevated border border-border text-muted hover:border-border-strong hover:text-ivory',
-                  ].join(' ')}
-                >
-                  {s}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Règle dorée */}
-        <div className="h-px bg-gold-line -mt-2" />
+        <EnTeteCote
+          titre="Heatmap marché"
+          description="Chaque action cotée à la BRVM : la surface suit la capitalisation, la couleur suit la variation du jour."
+          seance={lastDate}
+          compte={lastDate ? { n: rows.length, libelle: secteurParam ? `valeurs · ${secteurParam}` : 'valeurs' } : null}
+          source={lastDate ? 'Source BRVM' : null}
+        />
+        {/* Secteur — mobile : liste déroulante (les 8 puces occupaient tout
+            le premier écran) ; puces à partir de md. */}
+        {allSectors.length > 0 && (
+          <SecteurSelect secteurs={allSectors} courant={secteurParam} className="mt-4 w-full md:hidden" />
+        )}
 
         {/* ── Corps : treemap ou état vide ──────────────────────────────────── */}
         {!lastDate ? (
-          <div className="animate-rise-in [animation-delay:0.10s] flex-1 flex items-center justify-center">
+          <div className="mt-8 flex-1 flex items-center justify-center">
             <EmptyStatePremium
               icon="◈"
               title="Aucune séance disponible"
@@ -147,15 +115,24 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
             />
           </div>
         ) : (
-          <div className="animate-rise-in [animation-delay:0.08s] flex-1 flex flex-col gap-4">
+          <div className="flex-1 flex flex-col">
+            <Chapitre
+              id="cartographie"
+              numero="01"
+              titre="Cartographie de la séance"
+              sousTitre="Cliquez sur une case pour ouvrir la fiche de la valeur."
+              premier
+            />
+            <div className="mt-6">
             <PremiumPanel>
               <div className="p-3 sm:p-4 min-h-[420px]">
                 <HeatmapViews rows={rows} logos={brvmLogos as Record<string, string>} />
               </div>
             </PremiumPanel>
+            </div>
 
             {/* ── Légende gradient ─────────────────────────────────────────── */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-1">
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 px-1">
               <span className="text-xs text-faint whitespace-nowrap">Variation du jour :</span>
 
               {/* Barre de gradient continue — segments colorés juxtaposés */}
@@ -181,21 +158,52 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
 
             {/* ── Panel statistiques sectorielles ──────────────────────────── */}
             {sectorStats.length > 0 && (
-              <div className="animate-rise-in [animation-delay:0.14s]">
-                <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
-                  <span className="text-xs font-semibold text-muted">
-                    Performance par secteur
-                  </span>
+              <section aria-labelledby="par-secteur">
+                <Chapitre
+                  id="par-secteur"
+                  numero="02"
+                  titre="Performance par secteur"
+                  sousTitre="Variation moyenne, largeur et meilleure valeur de chaque secteur. Un clic filtre la carte."
+                />
+                <div className="mt-6 mb-3 flex items-center justify-end gap-2 flex-wrap">
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-faint hidden sm:inline">
+                    <span className="text-[11px] text-faint hidden sm:inline">
                       Cliquez pour filtrer la carte
                     </span>
-                    <Link href="/secteurs" className="text-[11px] text-info hover:underline">
-                      Analyse sectorielle complète →
+                    <Link href="/secteurs" className="text-xs text-accent-ink hover:underline">
+                      Analyse sectorielle complète
                     </Link>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* md+ : liste compacte, hiérarchie inférieure à la cartographie */}
+                <ul className="hidden md:block divide-y divide-border rounded-lg border border-border">
+                  {sectorStats.map((s) => {
+                    const avg = s.avgVar;
+                    const color = avg > 0 ? 'text-up' : avg < 0 ? 'text-down' : 'text-muted';
+                    const stables = s.count - s.hausses - s.baisses;
+                    const actif = secteurParam === s.secteur;
+                    return (
+                      <li key={s.secteur}>
+                        <Link
+                          href={actif ? '/heatmap' : `/heatmap?secteur=${encodeURIComponent(s.secteur)}`}
+                          aria-current={actif ? 'true' : undefined}
+                          className={`grid grid-cols-[minmax(0,1.6fr)_5.5rem_minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-4 px-3 py-2 text-xs transition-colors hover:bg-elevated ${actif ? 'bg-elevated' : ''}`}
+                        >
+                          <span className="truncate font-medium text-ivory">{s.secteur}</span>
+                          <span className={`tabular text-right font-semibold ${color}`}>{fmtPctSigne(avg)}</span>
+                          <span className="tabular text-muted">
+                            {s.hausses} hausse{s.hausses > 1 ? 's' : ''} · {s.baisses} baisse{s.baisses > 1 ? 's' : ''} · {stables} stable{stables > 1 ? 's' : ''}
+                          </span>
+                          <span className="tabular truncate text-right text-muted">
+                            {s.topHausse ? `${s.topHausse.code} ${fmtPctSigne(s.topHausse.pct, 1)}` : '—'}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {/* Mobile : grille de cartes inchangée */}
+                <div className="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-3">
                   {sectorStats.map((s) => {
                     const avg = s.avgVar;
                     const color = avg > 0 ? 'text-up' : avg < 0 ? 'text-down' : 'text-muted';
@@ -205,27 +213,27 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
                       <Link
                         key={s.secteur}
                         href={secteurParam === s.secteur ? '/heatmap' : `/heatmap?secteur=${encodeURIComponent(s.secteur)}`}
-                        className={`group flex flex-col gap-2 rounded-xl border bg-elevated/50 p-3.5 transition-all duration-200 hover:bg-elevated ${borderColor} ${secteurParam === s.secteur ? 'ring-1 ring-gold/40' : ''}`}
+                        className={`group flex flex-col gap-2 rounded-xl border bg-elevated/50 p-3.5 transition-colors duration-200 hover:bg-elevated ${borderColor} ${secteurParam === s.secteur ? 'ring-1 ring-gold/40' : ''}`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <span className="text-xs font-semibold text-ivory leading-tight">{s.secteur}</span>
                           <span className={`tabular text-xs font-bold shrink-0 ${color}`}>
-                            {avg >= 0 ? '+' : ''}{avg.toFixed(2)}%
+                            {fmtPctSigne(avg)}
                           </span>
                         </div>
                         {/* Barre breadth : hausses/total */}
                         <div className="h-1.5 rounded-full bg-border overflow-hidden">
                           {/* eslint-disable-next-line react/forbid-dom-props */}
                           <div
-                            className="h-full rounded-full bg-up transition-all [width:var(--breadth)]"
+                            className={`h-full rounded-full ${avg < 0 ? 'bg-down' : avg > 0 ? 'bg-up' : 'bg-muted'} transition-[width] motion-reduce:transition-none [width:var(--breadth)]`}
                             style={{ '--breadth': `${breadth.toFixed(0)}%` } as React.CSSProperties}
                           />
                         </div>
-                        <div className="flex items-center justify-between text-[10px] text-faint">
-                          <span>{s.hausses}↑ {s.baisses}↓ {s.count - s.hausses - s.baisses}→</span>
+                        <div className="flex items-center justify-between text-[11px] text-faint">
+                          <span>{s.hausses} hausse{s.hausses > 1 ? 's' : ''} · {s.baisses} baisse{s.baisses > 1 ? 's' : ''} · {s.count - s.hausses - s.baisses} stable{s.count - s.hausses - s.baisses > 1 ? 's' : ''}</span>
                           {s.topHausse && (
-                            <span className="text-up/80">
-                              ↑ {s.topHausse.code} +{s.topHausse.pct.toFixed(1)}%
+                            <span className="text-up">
+                              Top : {s.topHausse.code} {fmtPctSigne(s.topHausse.pct, 1)}
                             </span>
                           )}
                         </div>
@@ -233,12 +241,12 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
                     );
                   })}
                 </div>
-              </div>
+              </section>
             )}
 
             {/* ── Secteur vide après filtre ─────────────────────────────────── */}
             {rows.length === 0 && secteurParam && (
-              <div className="animate-rise-in [animation-delay:0.04s]">
+              <div className="mt-6">
                 <EmptyStatePremium
                   icon="◌"
                   title={`Aucune action dans « ${secteurParam} »`}
@@ -250,16 +258,12 @@ export default async function HeatmapPage({ searchParams }: PageProps) {
           </div>
         )}
 
-        {/* ── Pied de page discret ─────────────────────────────────────────── */}
-        <footer className="pt-4 pb-2 flex items-center justify-between border-t border-border text-xs text-faint">
-          <span>WESTBOURSE</span>
-          {lastDate && (
-            <span>
-              Données au{' '}
-              <span className="text-muted">{fmtDateFR(lastDate)}</span>
-            </span>
-          )}
-        </footer>
+        {lastDate && (
+          <LigneSource>
+            Cours et variations publiés par la BRVM, séance du{' '}
+            <time dateTime={lastDate}>{fmtDateCourte(lastDate)}</time> · taille selon la capitalisation (cours × nombre de titres), à défaut la valeur échangée.
+          </LigneSource>
+        )}
       </div>
     </div>
   );

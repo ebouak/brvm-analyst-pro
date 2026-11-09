@@ -40,7 +40,7 @@ export default function EditPositionModal({ isOpen, onClose, position }: Props) 
           <div>
             <label className="block text-sm font-medium mb-1">Titre</label>
             <div className="w-full bg-bg/40 border border-border rounded px-3 py-2 text-sm text-muted">
-              {position.code} <span className="text-[10px]">(non modifiable)</span>
+              {position.code} <span className="text-[11px]">(non modifiable)</span>
             </div>
           </div>
 

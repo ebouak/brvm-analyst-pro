@@ -27,19 +27,19 @@ const SECTOR_BAR: Record<string, string> = {
 function noteColor(note: string): string {
   const n = note.toUpperCase();
   if (n.startsWith('AAA') || n.startsWith('AA')) return 'text-up';
-  if (n.startsWith('A')) return 'text-up/80';
+  if (n.startsWith('A')) return 'text-up';
   if (n.startsWith('BBB')) return 'text-warn';
-  if (n.startsWith('BB') || n.startsWith('B')) return 'text-warn/60';
+  if (n.startsWith('BB') || n.startsWith('B')) return 'text-warn';
   return 'text-down';
 }
 
 function noteBg(note: string): string {
   const n = note.toUpperCase();
-  if (n.startsWith('AAA') || n.startsWith('AA')) return 'bg-up/10 border-up/30 text-up';
-  if (n.startsWith('A')) return 'bg-up/5 border-up/20 text-up/80';
+  if (n.startsWith('AAA') || n.startsWith('AA')) return 'bg-up/5 border-up/30 text-up';
+  if (n.startsWith('A')) return 'bg-up/5 border-up/20 text-up';
   if (n.startsWith('BBB')) return 'bg-warn/10 border-warn/30 text-warn';
-  if (n.startsWith('BB') || n.startsWith('B')) return 'bg-warn/5 border-warn/20 text-warn/60';
-  return 'bg-down/10 border-down/30 text-down';
+  if (n.startsWith('BB') || n.startsWith('B')) return 'bg-warn/5 border-warn/20 text-warn';
+  return 'bg-down/5 border-down/30 text-down';
 }
 
 function fmtDate(iso: string): string {
@@ -73,7 +73,7 @@ function HistoryRow({ entry, prev }: { entry: NotationEntry; prev?: NotationEntr
       <div className="flex gap-5">
         {entry.long_terme && (
           <div>
-            <p className="text-[10px] text-faint mb-0.5">Long terme</p>
+            <p className="text-[11px] text-faint mb-0.5">Long terme</p>
             <p className={`text-sm font-bold ${noteColor(shortNote(entry.long_terme))}`}>
               {entry.long_terme}
             </p>
@@ -81,7 +81,7 @@ function HistoryRow({ entry, prev }: { entry: NotationEntry; prev?: NotationEntr
         )}
         {entry.court_terme && (
           <div>
-            <p className="text-[10px] text-faint mb-0.5">Court terme</p>
+            <p className="text-[11px] text-faint mb-0.5">Court terme</p>
             <p className={`text-sm font-bold ${noteColor(shortNote(entry.court_terme))}`}>
               {entry.court_terme}
             </p>
@@ -120,7 +120,7 @@ function CompanyCard({ instrument }: { instrument: InstrumentNotation }) {
               >
                 {ticker}
               </Link>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded border ${sectorColor} border-opacity-40`}>
+              <span className={`text-[11px] px-1.5 py-0.5 rounded border ${sectorColor} border-opacity-40`}>
                 {sector}
               </span>
             </div>
@@ -232,7 +232,7 @@ export default function NotationsGrid({ data }: { data: InstrumentNotation[] }) 
                 onClick={() => setFilter(s)}
                 className={`text-xs px-2.5 py-1 rounded-chip border transition ${
                   active
-                    ? 'border-up text-up bg-up/10'
+                    ? 'border-up text-up bg-up/5'
                     : 'border-border text-muted hover:border-up/30 hover:text-white'
                 }`}
               >
@@ -275,9 +275,9 @@ export default function NotationsGrid({ data }: { data: InstrumentNotation[] }) 
         <div className="flex flex-wrap gap-4">
           {[
             { label: 'AAA / AA / AA+', cls: 'text-up',      desc: 'Très haute qualité' },
-            { label: 'A+ / A / A-',    cls: 'text-up/80',   desc: 'Haute qualité' },
+            { label: 'A+ / A / A-',    cls: 'text-up',   desc: 'Haute qualité' },
             { label: 'BBB+ / BBB',     cls: 'text-warn',    desc: 'Investment grade' },
-            { label: 'BB / B',         cls: 'text-warn/60', desc: 'Spéculatif' },
+            { label: 'BB / B',         cls: 'text-warn', desc: 'Spéculatif' },
             { label: 'CCC / D',        cls: 'text-down',    desc: 'Risque élevé' },
           ].map((l) => (
             <div key={l.label} className="flex items-center gap-2">

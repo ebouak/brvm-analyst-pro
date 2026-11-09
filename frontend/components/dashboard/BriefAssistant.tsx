@@ -34,7 +34,7 @@ export default function BriefAssistant() {
   return (
     <>
       <button type="button" onClick={() => setOpen(true)}
-        className="text-xs bg-up/10 border border-up/30 text-up rounded px-3 py-1.5 hover:bg-up/20 transition">
+        className="text-xs bg-up/5 border border-up/30 text-up rounded px-3 py-1.5 hover:bg-up/20 transition">
         Poser une question
       </button>
       {open && (
@@ -48,7 +48,7 @@ export default function BriefAssistant() {
               {msgs.length === 0 && <p className="text-xs text-muted">Posez une question sur la séance (ex. « Quelles actions ont le plus monté ? », « Analyse SONATEL »).</p>}
               {msgs.map((m, i) => (
                 <div key={i} className={`text-sm ${m.role === 'user' ? 'text-white' : 'text-muted'}`}>
-                  <span className="text-[10px] uppercase opacity-60">{m.role === 'user' ? 'Vous' : 'Réponse'}</span>
+                  <span className="text-[11px] uppercase opacity-60">{m.role === 'user' ? 'Vous' : 'Réponse'}</span>
                   <p className="whitespace-pre-wrap">{m.content}</p>
                 </div>
               ))}

@@ -1,5 +1,6 @@
 'use client';
 
+import { libelleSignal } from '@/lib/signalLabel';
 import type { SignalDaily } from '@/lib/types';
 import { useBeginnerMode } from '@/lib/beginner-mode';
 
@@ -23,6 +24,8 @@ export default function SignalBadge({
   signal: SignalDaily['signal'] | null | undefined;
   confiance?: number | null;
   small?: boolean;
+  /** Sans effet : le libellé est toujours français (Achat / Attente / Vente). */
+  francais?: boolean;
 }) {
   const { beginner } = useBeginnerMode();
 
@@ -31,16 +34,16 @@ export default function SignalBadge({
     <div>
       <span
         className={`inline-flex items-center gap-1 border rounded px-1.5 py-0.5 ${
-          small ? 'text-[10px]' : 'text-xs'
+          small ? 'text-[11px]' : 'text-xs'
         } ${STYLES[signal]}`}
       >
-        {signal}
+        {libelleSignal(signal)}
         {confiance != null && (
-          <span className="opacity-70 tabular">{Math.round(confiance * 100)}%</span>
+          <span className="text-muted tabular">{Math.round(confiance * 100)}%</span>
         )}
       </span>
       {beginner && signal in SIGNAL_HINTS && (
-        <span className="block text-[10px] text-faint mt-0.5 leading-snug">
+        <span className="block text-[11px] text-faint mt-0.5 leading-snug">
           {SIGNAL_HINTS[signal]}
         </span>
       )}

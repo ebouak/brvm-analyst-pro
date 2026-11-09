@@ -786,7 +786,7 @@ export const SignInPage = ({
                     )}
 
                     {error && (
-                      <p className="text-sm text-red-400" role="alert">{error}</p>
+                      <p className="text-sm text-down" role="alert">{error}</p>
                     )}
 
                     <p className="text-xs text-white/40 pt-10">
@@ -842,7 +842,7 @@ export const SignInPage = ({
                     </div>
                     
                     {error && (
-                      <p className="text-sm text-red-400" role="alert">{error}</p>
+                      <p className="text-sm text-down" role="alert">{error}</p>
                     )}
 
                     <div>

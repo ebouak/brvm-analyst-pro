@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { fmtDateCourte } from '@/lib/format';
 
 export default async function DiagnosticIndexPage() {
   const supa = createClient();
@@ -23,7 +24,7 @@ export default async function DiagnosticIndexPage() {
     <div className="min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <div>
-          <h1 className="text-xl font-semibold">Dossier d’analyse</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Dossier d’analyse</h1>
           <p className="text-sm text-muted mt-1">
             Analyse générée automatiquement à partir des états financiers publiés, vérifiée par nos
             garde-fous de plausibilité. Disponible pour chaque action de la cote BRVM.
@@ -37,21 +38,21 @@ export default async function DiagnosticIndexPage() {
               <Link
                 key={inst.code}
                 href={`/premium/diagnostic/${inst.code}`}
-                className="bg-surface border border-border rounded-xl p-4 hover:border-up/40 hover:bg-elevated transition-all group"
+                className="bg-surface border border-border rounded-xl p-4 hover:border-up/40 hover:bg-elevated transition-colors group"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-sm font-semibold text-white">{inst.code}</p>
+                    <p className="text-sm font-mono font-medium text-ivory">{inst.code}</p>
                     {inst.designation && <p className="text-xs text-muted mt-0.5 line-clamp-1">{inst.designation}</p>}
                     {inst.secteur && <p className="text-xs text-faint">{inst.secteur}</p>}
                   </div>
                   <div className="text-right shrink-0">
                     {gen ? (
-                      <span className="text-[10px] text-up font-medium">
-                        ✓ {new Date(gen).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                      <span className="text-xs text-up font-medium">
+                        Généré le {fmtDateCourte(gen)}
                       </span>
                     ) : (
-                      <span className="text-[10px] text-faint">À générer</span>
+                      <span className="text-xs text-faint">À générer</span>
                     )}
                   </div>
                 </div>

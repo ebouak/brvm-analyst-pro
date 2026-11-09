@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useId, useRef, useState } from 'react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import { BoutonsSession } from '@/components/layout/BoutonsSession';
 
 const OUTILS = [
   { t: 'SGI', d: 'Choisir sa SGI', href: '/comparateur-sgi' },
@@ -65,25 +66,25 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
     { t: 'Analyses', href: '/analyses' },
     { t: 'Formations', href: '/formations' },
     { t: 'À propos', href: '/methodologie' },
-    { t: 'Se connecter', href: '/login' },
   ] as const;
   return (
     <div className="xl:hidden">
       <button type="button" aria-haspopup="dialog" aria-expanded={open} aria-controls={id} aria-label={open ? 'Fermer' : 'Ouvrir'} onClick={() => setOpen((o) => !o)} className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-surface text-ivory">
         <span className="relative block h-3.5 w-4">
-          <span className={`absolute left-0 h-[1.5px] w-full rounded bg-current transition-all duration-300 ${open ? 'top-1/2 -translate-y-1/2 rotate-45' : 'top-0'}`} />
-          <span className={`absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 rounded bg-current transition-all duration-300 ${open ? 'opacity-0' : 'opacity-100'}`} />
-          <span className={`absolute left-0 h-[1.5px] w-full rounded bg-current transition-all duration-300 ${open ? 'top-1/2 -translate-y-1/2 -rotate-45' : 'bottom-0'}`} />
+          <span className={`absolute left-0 h-[1.5px] w-full rounded bg-current transition-[transform,opacity] duration-300 ${open ? 'top-1/2 -translate-y-1/2 rotate-45' : 'top-0'}`} />
+          <span className={`absolute left-0 top-1/2 h-[1.5px] w-full -translate-y-1/2 rounded bg-current transition-[transform,opacity] duration-300 ${open ? 'opacity-0' : 'opacity-100'}`} />
+          <span className={`absolute left-0 h-[1.5px] w-full rounded bg-current transition-[transform,opacity] duration-300 ${open ? 'top-1/2 -translate-y-1/2 -rotate-45' : 'bottom-0'}`} />
         </span>
       </button>
-      <div className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`} aria-hidden={!open}>
+      <div className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`} aria-hidden={!open} {...(open ? {} : ({ inert: '' } as object))}>
         <div className={`absolute inset-0 bg-bg/80 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} onClick={() => setOpen(false)} />
-        <nav id={id} aria-label="Menu" className={`absolute inset-x-0 top-[57px] bottom-0 overflow-y-auto bg-bg px-5 py-6 transition-all duration-300 ${open ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
+        <nav id={id} aria-label="Menu" className={`absolute inset-x-0 top-[57px] bottom-0 overflow-y-auto bg-bg px-5 py-6 transition-[transform,opacity] duration-300 ${open ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
           <div className="flex justify-center mb-6"><ThemeToggle /></div>
           <div className="space-y-1">
             {links.map((l) => (
               <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="flex min-h-[48px] items-center rounded-xl px-3 text-[15px] font-medium text-ivory hover:bg-white/[0.06]">{l.t}</Link>
             ))}
+            <BoutonsSession variante="tiroir-haut" onNavigate={() => setOpen(false)} />
           </div>
           <p className="mt-6 px-3 text-xs font-semibold text-faint">Outils</p>
           <div className="mt-2 space-y-1">
@@ -91,7 +92,7 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
               <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="flex min-h-[44px] items-center rounded-xl px-3 text-sm text-muted hover:text-ivory hover:bg-white/[0.04]">{l.t}</Link>
             ))}
           </div>
-          <div className="mt-8"><Link href="/signup" onClick={() => setOpen(false)} className="flex min-h-[48px] items-center justify-center rounded-xl bg-accent px-6 text-sm font-semibold text-bg">Creer mon compte gratuit -{'>'}</Link></div>
+          <div className="mt-8"><BoutonsSession variante="tiroir-bas" onNavigate={() => setOpen(false)} /></div>
         </nav>
       </div>
     </div>
@@ -101,7 +102,7 @@ function MobileDrawer({ marchesHref }: { marchesHref: string }) {
 export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string }) {
   const pathname = usePathname();
   const active = (h: string) => pathname === h || pathname.startsWith(h + '/');
-  const cls = (h: string) => `inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors ${active(h) ? 'bg-accent/10 text-accent' : 'text-muted hover:bg-white/[0.06] hover:text-ivory'}`;
+  const cls = (h: string) => `inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors ${active(h) ? 'bg-accent/10 text-accent-ink' : 'text-muted hover:bg-white/[0.06] hover:text-ivory'}`;
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-surface/90 backdrop-blur print:hidden">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
@@ -122,12 +123,11 @@ export function SiteHeader({ marchesHref = '/#marche' }: { marchesHref?: string 
           <Link href="/methodologie" className={`${cls('/methodologie')} whitespace-nowrap`}>À propos</Link>
           <span className="mx-1 hidden h-5 w-px bg-border lg:block" aria-hidden />
           <ThemeToggle className="hidden lg:inline-flex" />
-          <Link href="/login" className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-muted hover:text-ivory">Se connecter</Link>
-          <Link href="/signup" className="ml-1 whitespace-nowrap rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-bg hover:bg-gold-2">Creer mon compte gratuit</Link>
+          <BoutonsSession variante="bureau" />
         </nav>
         <div className="flex items-center gap-2 xl:hidden">
           <ThemeToggle className="hidden sm:inline-flex" />
-          <Link href="/signup" className="whitespace-nowrap rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-bg">Creer un compte</Link>
+          <BoutonsSession variante="compact" />
           <MobileDrawer marchesHref={marchesHref} />
         </div>
       </div>

@@ -65,8 +65,8 @@ export default function DashboardCustomizer({ initial, profil }: { initial: Dash
         return (
           <div key={k} className={`flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 ${on ? '' : 'opacity-50'}`}>
             <div className="flex flex-col gap-0.5">
-              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Monter" className="text-faint hover:text-accent disabled:opacity-30 text-[10px] leading-none">▲</button>
-              <button type="button" onClick={() => move(i, 1)} disabled={i === order.length - 1} aria-label="Descendre" className="text-faint hover:text-accent disabled:opacity-30 text-[10px] leading-none">▼</button>
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Monter" className="text-faint hover:text-accent disabled:opacity-30 text-[11px] leading-none">▲</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === order.length - 1} aria-label="Descendre" className="text-faint hover:text-accent disabled:opacity-30 text-[11px] leading-none">▼</button>
             </div>
             <div className="flex-1">
               <div className="text-sm font-medium text-white">{meta.label}</div>

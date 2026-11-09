@@ -72,9 +72,10 @@ test('chaque appréciation porte le chiffre qui la fonde', () => {
 
 test('NEIC : un bénéfice majoritairement non opérationnel est un risque, pas une force', () => {
   const n = construireNarratif(neic());
-  const r = n.risques.find((a) => a.texte.includes('51 %'));
-  assert.ok(r, 'le risque « 51 % non opérationnel » doit être présent');
-  assert.match(r.texte, /ne vient pas de l'exploitation/);
+  const r = n.risques.find((a) => a.texte.includes('hors exploitation'));
+  assert.ok(r, 'le risque « produits hors exploitation » doit être présent');
+  assert.match(r.texte, /1,25 Md FCFA/); // 2 467 M − 1 213 M, en montant
+  assert.ok(!r.texte.includes('%'), 'aucun pourcentage : le dénominateur peut être quasi nul');
   assert.ok(!n.forces.some((a) => a.texte.includes('opérationnel')), 'aucune force ne doit vanter l\'origine du bénéfice');
 });
 
@@ -130,4 +131,28 @@ test('un exercice déficitaire bascule du côté des risques', () => {
   const n = construireNarratif(d);
   assert.ok(n.risques.some((a) => a.texte.startsWith('Exercice déficitaire')));
   assert.ok(!n.forces.some((a) => a.texte.startsWith('Exercice bénéficiaire')));
+});
+
+test('STAC : exploitation en perte, résultat avant impôts quasi nul : montant, jamais un pourcentage délirant', () => {
+  const d = neic();
+  d.qualite_resultat = { periode: '2025', resultat_exploitation: -772_000_000, resultat_avant_impots: 4_300_000, resultat_net: -772_000_000, marge_exploitation: null, part_non_operationnelle: 178.828 };
+  const r = construireNarratif(d).risques.find((a) => a.texte.includes('hors exploitation'));
+  assert.ok(r);
+  assert.match(r.texte, /776,3 M FCFA/);
+  assert.ok(!r.texte.includes('%'));
+  assert.ok(!r.fait.match(/\d/));
+});
+
+test('un dividende ancien (exercice plus d un an avant le dernier publie) n est pas un point d appui', () => {
+  const d = neic();
+  d.chiffres_cles.exercice = '2025';
+  d.dividende.exercice = 2021;
+  assert.ok(!construireNarratif(d).forces.some((a) => a.texte.startsWith('Dividende')));
+});
+
+test('un dividende de l exercice precedent reste un point d appui', () => {
+  const d = neic();
+  d.chiffres_cles.exercice = '2025';
+  d.dividende.exercice = 2024;
+  assert.ok(construireNarratif(d).forces.some((a) => a.texte.startsWith('Dividende')));
 });

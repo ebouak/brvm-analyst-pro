@@ -35,7 +35,7 @@ export default function AnneauRepartition({ lignes, total }: { lignes: { code: s
           ))}
         </g>
         <text x="70" y="68" textAnchor="middle" className="tabular fill-ivory text-[13px] font-semibold">{fmtFcfa(total)}</text>
-        <text x="70" y="84" textAnchor="middle" className="fill-muted text-[9px]">FCFA</text>
+        <text x="70" y="84" textAnchor="middle" className="fill-muted text-[11px]">FCFA</text>
       </svg>
       <ul className="min-w-0 space-y-1 text-xs">
         {parts.map((p, i) => (

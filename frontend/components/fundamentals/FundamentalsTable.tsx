@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { fmtNumber } from '@/lib/format';
@@ -48,16 +49,16 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
   const Th = ({ k, label }: { k: SortKey; label: string }) => (
     <th className="px-3 py-2 text-right cursor-pointer hover:text-up"
       onClick={() => { if (sort === k) setAsc(!asc); else { setSort(k); setAsc(true); } }}>
-      {label}{sort === k ? (asc ? ' ▲' : ' ▼') : ''}
+      {label}{sort === k ? (asc ? <ChevronUp className="ml-1 inline h-3 w-3" aria-hidden /> : <ChevronDown className="ml-1 inline h-3 w-3" aria-hidden />) : null}
     </th>
   );
 
   const Cell = ({ metric, value, isPct }: { metric: SortKey; value: number | null; isPct?: boolean }) => {
     const q = assessQuality(metric, value);
-    if (q === 'missing') return <td className="px-3 py-2 text-right text-muted/60">—</td>;
+    if (q === 'missing') return <td className="px-3 py-2 text-right text-muted">—</td>;
     if (q === 'ns') {
       return (
-        <td className="px-3 py-2 text-right text-muted/70"
+        <td className="px-3 py-2 text-right text-muted"
             title="Non significatif : résultat (ou capitaux propres) négatif. Le ratio n'a pas de sens financier, la donnée n'est pas en cause.">
           n.s.
         </td>
@@ -93,7 +94,7 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
           columns={csvColumns}
         />
       </div>
-      <div className="bg-surface border border-border rounded-xl overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead className="text-xs text-muted border-b border-border bg-bg/40">
             <tr>
@@ -119,7 +120,7 @@ export default function FundamentalsTable({ rows }: { rows: ScreenerRow[] }) {
           </tbody>
         </table>
       </div>
-      <p className="text-[10px] text-muted">
+      <p className="text-xs text-muted">
         = donnée extraite douteuse (vérifier les états financiers).
         {' '}« n.s. » = non significatif : la société est en perte, le ratio n’a pas de sens, la donnée, elle, est correcte.
         {' '}« — » = non disponible.

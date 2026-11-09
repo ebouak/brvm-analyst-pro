@@ -159,7 +159,7 @@ export function SimulateurInteractif({ code, nom, serie, dividendes }: Props) {
 
       <Link
         href="/simulateur"
-        className="mt-4 inline-block text-sm font-medium text-ivory/80 transition-colors hover:text-gold-2"
+        className="mt-4 inline-block text-sm font-medium text-ivory transition-colors hover:text-gold-2"
       >
         Tester une autre action <span aria-hidden>→</span>
       </Link>

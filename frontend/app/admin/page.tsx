@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { requireAdmin } from '@/lib/server/rbac';
 import { SectionHeader, PremiumPanel, MetricCard } from '@/components/ui/premium';
+import { fmtDateCourte } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Administration' };
@@ -24,9 +25,8 @@ function fmtInt(n: number | null | undefined): string {
 
 function fmtDate(d: string | null | undefined): string {
   if (!d) return DASH;
-  const parsed = new Date(d);
-  if (Number.isNaN(parsed.getTime())) return DASH;
-  return parsed.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+  if (Number.isNaN(new Date(d).getTime())) return DASH;
+  return fmtDateCourte(d);
 }
 
 const STATUS_LABEL: Record<string, string> = {

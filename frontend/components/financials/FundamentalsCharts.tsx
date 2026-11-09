@@ -40,7 +40,7 @@ function Panel({ title, children, hint }: { title: string; children: React.React
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
       <p className="text-xs text-muted mb-1">{title}</p>
-      {hint && <p className="text-[10px] text-faint mb-2">{hint}</p>}
+      {hint && <p className="text-[11px] text-faint mb-2">{hint}</p>}
       <div style={{ height: 240 }}>
         <ResponsiveContainer width="100%" height="100%">
           {children as React.ReactElement}
@@ -54,28 +54,33 @@ export default function FundamentalsCharts({
   points,
   revenuLabel = 'CA',
   isBank = false,
+  sansCaRn = false,
 }: {
   points: FundaChartPoint[];
   revenuLabel?: string;
   isBank?: boolean;
+  /** Masque « Évolution CA & résultat net » : le constructeur de graphique le remplace. */
+  sansCaRn?: boolean;
 }) {
   // Chronologique (les tableaux arrivent en ordre décroissant).
   const data = [...points].sort((a, b) => a.periode.localeCompare(b.periode));
   if (data.length < 2) return null; // une seule année = pas de tendance à tracer
 
-  const hasResultat = data.some((d) => d.revenu != null || d.net != null);
+  const hasResultat = !sansCaRn && data.some((d) => d.revenu != null || d.net != null);
   const hasParAction = data.some((d) => d.bpa != null || d.dividende != null);
   const hasBank = isBank && data.some((d) => d.credits != null || d.depots != null);
 
+  // Un panneau seul prend toute la largeur : pas de moitié de ligne vide.
+  const nbPanneaux = [hasResultat, hasParAction, hasBank].filter(Boolean).length;
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className={`grid grid-cols-1 gap-4 ${nbPanneaux > 1 ? 'md:grid-cols-2' : ''}`}>
       {/* Revenu + résultat net + marge nette */}
       {hasResultat && (
         <Panel title={`Évolution ${revenuLabel} & résultat net`} hint="Barres en Md FCFA · ligne = marge nette (%)">
           <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
             <XAxis dataKey="periode" tick={{ fill: AXIS, fontSize: 11 }} />
-            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 10 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
-            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
+            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
             <Tooltip
               {...tooltipStyle}
               formatter={(v: number, name: string) =>
@@ -83,7 +88,7 @@ export default function FundamentalsCharts({
             />
             <Legend wrapperStyle={{ fontSize: 11 }} />
             <Bar yAxisId="mrd" dataKey="revenu" name={revenuLabel} fill={ACCENT} fillOpacity={0.85} radius={[3, 3, 0, 0]} isAnimationActive={false} />
-            <Bar yAxisId="mrd" dataKey="net" name="Résultat net" radius={[3, 3, 0, 0]} isAnimationActive={false}>
+            <Bar yAxisId="mrd" dataKey="net" name="Résultat net" fill={UP} radius={[3, 3, 0, 0]} isAnimationActive={false}>
               {data.map((d, i) => (
                 <Cell key={i} fill={(d.net ?? 0) >= 0 ? UP : DOWN} />
               ))}
@@ -103,7 +108,7 @@ export default function FundamentalsCharts({
         <Panel title="BPA & dividende par action" hint="FCFA par action · l'écart = bénéfice réinvesti">
           <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
             <XAxis dataKey="periode" tick={{ fill: AXIS, fontSize: 11 }} />
-            <YAxis tick={{ fill: AXIS, fontSize: 10 }} tickFormatter={(v) => nf.format(v)} />
+            <YAxis tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => nf.format(v)} />
             <Tooltip {...tooltipStyle} formatter={(v: number, name: string) => [fcfa(v), name]} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
             <Bar dataKey="bpa" name="BPA" fill={ACCENT} fillOpacity={0.85} radius={[3, 3, 0, 0]} isAnimationActive={false} />
@@ -117,8 +122,8 @@ export default function FundamentalsCharts({
         <Panel title="Crédits & dépôts à la clientèle" hint="Md FCFA · ligne = taux de transformation (%)">
           <ComposedChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
             <XAxis dataKey="periode" tick={{ fill: AXIS, fontSize: 11 }} />
-            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 10 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
-            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+            <YAxis yAxisId="mrd" tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1e9)}`} />
+            <YAxis yAxisId="pct" orientation="right" tick={{ fill: GOLD, fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
             <Tooltip
               {...tooltipStyle}
               formatter={(v: number, name: string) =>

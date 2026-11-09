@@ -46,6 +46,7 @@ export default function CarnetCommentaire({
   economie,
   evenements,
   compact = false,
+  replie = false,
 }: {
   carnet: CarnetSeance | null;
   signal: SignalSeance | null;
@@ -56,6 +57,8 @@ export default function CarnetCommentaire({
   evenements?: MesureEvenement[];
   /** Variante resserrée pour le tableau de bord : la synthèse d'abord, deux constats. */
   compact?: boolean;
+  /** Fiche action : la synthèse reste visible, les constats passent dans un dépliant. */
+  replie?: boolean;
 }) {
   // Rien à dire : on n'affiche pas un cadre vide.
   if (!carnet && !signal && !economie && !bruit?.variationPct && !(actualites && actualites.length > 0) && !(evenements && evenements.length > 0)) return null;
@@ -72,7 +75,7 @@ export default function CarnetCommentaire({
   return (
     <section className={compact ? 'space-y-3' : 'mb-6 rounded-xl border border-border bg-surface p-5'}>
       {!compact && (
-        <h2 className="mb-4 text-sm font-semibold text-muted">Ce que dit la séance</h2>
+        <h2 className="mb-4 font-display text-lg text-ivory">Ce que dit la séance</h2>
       )}
 
       {/* La synthèse en tête : le lecteur qui ne lit qu'une ligne lit celle-ci. */}
@@ -84,22 +87,34 @@ export default function CarnetCommentaire({
         <SyntheseSeance commentaire={commentaire} classe={compact ? '' : 'mb-4'} />
       </Suspense>
 
-      <ul className="space-y-3.5">
-        {visibles.map((c) => {
-          const p = PASTILLE[c.origine] ?? PASTILLE.carnet!;
-          return (
-            <li key={c.fait} className="flex gap-3">
-              <span className={`mt-[3px] h-fit w-[4.75rem] shrink-0 rounded px-1.5 py-0.5 text-center text-xs font-semibold ${p.classe}`}>
-                {p.libelle}
-              </span>
-              <div className="min-w-0 space-y-1">
-                <p className="text-sm leading-relaxed text-ivory">{c.fait}</p>
-                {c.portee && <p className="text-[13px] leading-relaxed text-muted">{c.portee}</p>}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      {(() => {
+        const liste = (
+          <ul className="space-y-3.5">
+            {visibles.map((c) => {
+              const p = PASTILLE[c.origine] ?? PASTILLE.carnet!;
+              return (
+                <li key={c.fait} className="flex gap-3">
+                  <span className={`mt-[3px] h-fit w-[4.75rem] shrink-0 rounded px-1.5 py-0.5 text-center text-xs font-semibold ${p.classe}`}>
+                    {p.libelle}
+                  </span>
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm leading-relaxed text-ivory">{c.fait}</p>
+                    {c.portee && <p className="text-[13px] leading-relaxed text-muted">{c.portee}</p>}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        );
+        return replie && visibles.length > 0 ? (
+          <details className="group">
+            <summary className="cursor-pointer text-[13px] text-muted hover:text-ivory">
+              Les {visibles.length} constat{visibles.length > 1 ? 's' : ''} de la séance
+            </summary>
+            <div className="mt-3">{liste}</div>
+          </details>
+        ) : liste;
+      })()}
 
       <div className={compact ? 'mt-3' : 'mt-5 border-t border-border pt-3'}>
         {autres.length > 0 && (

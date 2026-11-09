@@ -62,8 +62,10 @@ export async function getMarketValuations(): Promise<CompanyValuation[]> {
   }
 
   const divByCode = new Map<string, number>();
-  for (const d of (divs ?? []) as { code: string; montant: number }[]) {
-    if (!divByCode.has(d.code)) divByCode.set(d.code, d.montant); // le plus récent
+  // Le plus récent STRICTEMENT POSITIF et daté par son exercice (comme `dividendeCourant`) :
+  // un zéro ou une ligne sans exercice ne doit pas masquer un vrai dividende.
+  for (const d of (divs ?? []) as { code: string; montant: number; exercice: number | null }[]) {
+    if (!divByCode.has(d.code) && d.montant > 0 && d.exercice != null) divByCode.set(d.code, d.montant);
   }
 
   // 1re passe : métriques par société.

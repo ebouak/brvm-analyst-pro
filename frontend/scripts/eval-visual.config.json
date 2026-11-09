@@ -1,0 +1,9 @@
+{
+  "pages": {
+    "/actions": { "requis": ["h1", "table"] },
+    "/societes": { "requis": ["h1"] },
+    "/societes/SNTS": { "requis": ["h1"] },
+    "/pricing": { "requis": ["h1", "a[href*='signup'], a[href*='plan'], button"] },
+    "/formations": { "requis": ["h1"] }
+  }
+}

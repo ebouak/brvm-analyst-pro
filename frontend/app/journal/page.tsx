@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { loadTheses } from '@/lib/journal/queries';
 import { computeBilan } from '@/lib/journal/bilan';
+import { fmtDateCourte } from '@/lib/format';
 import CloturerButton from '@/components/journal/CloturerButton';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,7 @@ export default async function JournalPage() {
     <div className="min-h-screen bg-bg">
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
         <div>
-          <h1 className="text-xl font-semibold text-white">Journal de décision</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">Journal de décision</h1>
           <p className="text-sm text-muted mt-1">
             Vos thèses d’investissement et leur bilan a posteriori. Apprendre de ses choix,
             confirmés comme démentis.
@@ -50,14 +51,14 @@ export default async function JournalPage() {
           ) : actives.map((t) => (
             <div key={t.id} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center justify-between">
-                <Link href={`/actions/${t.code}`} className="font-semibold text-white hover:text-accent">
+                <Link href={`/actions/${t.code}`} className="font-mono font-medium text-ivory hover:text-accent-ink">
                   {t.code}
                 </Link>
-                <span className="text-[11px] text-muted uppercase">{t.stance}</span>
+                <span className="text-xs text-muted">{t.stance}</span>
               </div>
               <p className="text-sm text-muted mt-1.5 whitespace-pre-wrap">{t.these}</p>
               {t.cours_reference != null && (
-                <p className="text-[11px] text-faint mt-1">
+                <p className="text-xs text-faint mt-1">
                   Référence : {t.cours_reference} FCFA
                   {t.objectif != null && ` · Objectif : ${t.objectif} FCFA`}
                 </p>
@@ -85,22 +86,22 @@ export default async function JournalPage() {
               return (
                 <div key={t.id} className="rounded-xl border border-border/60 bg-surface/60 p-4">
                   <div className="flex items-center justify-between">
-                    <Link href={`/actions/${t.code}`} className="font-semibold text-white hover:text-accent">
+                    <Link href={`/actions/${t.code}`} className="font-mono font-medium text-ivory hover:text-accent-ink">
                       {t.code}
                     </Link>
-                    <span className="text-[11px] text-muted">
+                    <span className="text-xs text-muted">
                       {t.verdict ? VERDICT_LABEL[t.verdict] : '—'}
                       {bilan && ` · ${pct(bilan.performancePct)}`}
                     </span>
                   </div>
                   {t.bilan && <p className="text-sm text-muted mt-1.5 whitespace-pre-wrap">{t.bilan}</p>}
                   {bilan && bilan.verdictCoherent === false && (
-                    <p className="text-[11px] text-warn mt-1">
-                      ⓘ Le verdict « jouée » ne concorde pas avec l’évolution réelle du cours.
+                    <p className="text-xs text-warn mt-1">
+                      Le verdict « jouée » ne concorde pas avec l’évolution réelle du cours.
                     </p>
                   )}
-                  <p className="text-[11px] text-faint mt-1">
-                    Clôturée le {t.cloturee_le?.slice(0, 10) ?? '—'}
+                  <p className="text-xs text-faint mt-1">
+                    Clôturée le {fmtDateCourte(t.cloturee_le)}
                     {t.cours_cloture != null && ` · cours ${t.cours_cloture} FCFA`}
                   </p>
                 </div>

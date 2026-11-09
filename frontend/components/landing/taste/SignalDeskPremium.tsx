@@ -2,9 +2,9 @@ import Link from 'next/link';
 import type { SignalRow } from './types';
 
 const STYLE: Record<SignalRow['action'], { cls: string; label: string }> = {
-  BUY: { cls: 'border-up/20 bg-up/10 text-up', label: 'ACHAT' },
-  HOLD: { cls: 'border-sapphire/20 bg-sapphire/10 text-sapphire', label: 'CONSERVER' },
-  SELL: { cls: 'border-down/20 bg-down/10 text-down', label: 'VENTE' },
+  BUY: { cls: 'border-up/20 bg-up/5 text-up', label: 'Achat' },
+  HOLD: { cls: 'border-sapphire/20 bg-sapphire/10 text-sapphire', label: 'Attente' },
+  SELL: { cls: 'border-down/20 bg-down/5 text-down', label: 'Vente' },
 };
 
 /** Desk des signaux récents — conviction avec score. */
@@ -28,7 +28,7 @@ export function SignalDeskPremium({ signals }: { signals: SignalRow[] }) {
               className="grid items-start gap-3 rounded-card border border-border bg-surface/40 p-4 transition-all hover:bg-elevated/60"
               style={{ gridTemplateColumns: 'auto 1fr auto' }}
             >
-              <span className={`inline-flex min-h-[30px] min-w-[64px] items-center justify-center rounded-full border px-3 font-mono text-[10px] font-bold tracking-[0.14em] ${s.cls}`}>
+              <span className={`inline-flex min-h-[30px] min-w-[64px] items-center justify-center rounded-full border px-3 font-mono text-[11px] font-bold tracking-[0.14em] ${s.cls}`}>
                 {s.label}
               </span>
               <div className="min-w-0">

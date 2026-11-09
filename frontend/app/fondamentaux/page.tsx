@@ -103,7 +103,7 @@ export default async function FondamentauxPage() {
         />
         <MetricCard
           label="ROE moyen (univers)"
-          value={avgROE !== null ? `${avgROE.toFixed(1)}%` : '—'}
+          value={avgROE !== null ? `${avgROE.toFixed(1)} %` : '—'}
           accent="neutral"
         />
       </div>

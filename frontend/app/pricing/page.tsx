@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import { PricingClient, type PricingPlan } from '@/components/pricing/PricingClient';
-import { AnimatedLogo } from '@/components/brand/AnimatedLogo';
+import { SiteHeader } from '@/components/layout/SiteHeader';
 import SignalOffre from '@/components/crm/SignalOffre';
 
 export const metadata: Metadata = {
   title: 'Tarifs',
-  description: 'Plans Gratuit, Premium et Platinium · analyse BRVM/UEMOA premium.',
+  description: 'Formules Gratuit, Premium et Platinium de WESTBOURSE : cours, signaux, rapports et alertes sur la BRVM.',
 };
 export const revalidate = 300;
 
@@ -29,25 +29,39 @@ export default async function PricingPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="flex min-h-screen flex-col bg-bg">
       <SignalOffre page="/pricing" />
-      <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <Link href="/" className="flex items-center gap-2" aria-label="WESTBOURSE">
-          <AnimatedLogo size={32} variant="mark" animate={false} />
-          <span className="font-display font-semibold text-ivory">WESTBOURSE</span>
-        </Link>
-        <Link href="/login" className="text-sm text-muted transition-colors hover:text-ivory">
-          Connexion
-        </Link>
-      </header>
+      <SiteHeader />
 
-      {plans.length > 0 ? (
-        <PricingClient plans={plans} />
-      ) : (
-        <div className="mx-auto max-w-md px-4 py-24 text-center">
-          <p className="text-sm text-muted">Les formules seront bientôt disponibles.</p>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-12 md:px-6 md:pt-16">
+        {plans.length > 0 ? (
+          <PricingClient plans={plans} />
+        ) : (
+          <div className="max-w-xl py-16">
+            <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formules et tarifs</h1>
+            <p className="mt-4 text-sm text-muted">
+              Les formules ne sont pas encore publiées. Le plan Gratuit reste accessible en créant un compte.
+            </p>
+            <Link
+              href="/signup"
+              className="mt-6 inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 text-sm font-medium text-ivory transition-colors hover:border-accent/40"
+            >
+              Créer un compte
+            </Link>
+          </div>
+        )}
+      </main>
+
+      <footer className="border-t border-border/60">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-faint md:flex-row md:items-center md:justify-between md:px-6">
+          <p>Cours issus de la BRVM et des publications officielles. Aucun texte d’analyse n’est rédigé sans les chiffres qui le fondent.</p>
+          <nav aria-label="Informations légales" className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link href="/cgu" className="underline-offset-2 transition-colors hover:text-muted hover:underline">Conditions générales</Link>
+            <Link href="/mentions-legales" className="underline-offset-2 transition-colors hover:text-muted hover:underline">Mentions légales</Link>
+            <Link href="/confidentialite" className="underline-offset-2 transition-colors hover:text-muted hover:underline">Confidentialité</Link>
+          </nav>
         </div>
-      )}
+      </footer>
     </div>
   );
 }

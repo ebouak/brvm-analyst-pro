@@ -90,7 +90,7 @@ export default async function CorrelationsPage() {
                   </a>
                 )}
                 <span className="text-xs text-muted leading-relaxed flex-1">{n.title}</span>
-                <span className="text-[10px] text-faint shrink-0">{n.source}</span>
+                <span className="text-[11px] text-faint shrink-0">{n.source}</span>
               </li>
             ))}
           </ul>

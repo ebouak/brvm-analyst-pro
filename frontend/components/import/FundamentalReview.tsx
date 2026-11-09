@@ -56,7 +56,7 @@ export default function FundamentalReview({ symbol, year, initial, suspects, onS
       <div className="grid grid-cols-2 gap-2">
         {FIELDS.map(({ key, label }) => (
           <div key={key}>
-            <label className="block text-[10px] text-muted mb-0.5">
+            <label className="block text-[11px] text-muted mb-0.5">
               {label}{suspects.includes(key) && <span className="text-warn ml-1">!</span>}
             </label>
             <input

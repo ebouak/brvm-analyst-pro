@@ -58,7 +58,7 @@ export default async function NewsTicker({ className = '' }: Props) {
               ) : (
                 <span className="text-xs text-muted">{item.titre}</span>
               )}
-              <span className="text-faint/50 text-xs">•</span>
+              <span className="text-faint text-xs">•</span>
             </span>
           ))}
         </div>

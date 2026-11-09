@@ -70,7 +70,7 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 font-mono text-[10px]">
+        <div className="flex items-center gap-2 font-mono text-[11px]">
           <span className="rounded-full border border-border bg-elevated px-1.5 py-0.5 text-faint">
             RSI <span className={rsi == null ? 'text-faint' : 'text-muted'}>{rsi != null ? rsi.toFixed(0) : '—'}</span>
           </span>
@@ -84,7 +84,7 @@ export default function WeeklyIndexChart({ title, code, candles, rsi, macd, last
                 type="button"
                 onClick={() => setWeeks(w)}
                 aria-pressed={weeks === w}
-                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all ${
+                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all ${
                   weeks === w ? 'bg-cyan text-bg' : 'text-muted hover:text-ivory'
                 }`}
               >

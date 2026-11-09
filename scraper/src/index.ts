@@ -548,6 +548,44 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'conseiller': {
+      // Positions par famille de facteurs (sans verdict). Sans --ecrire : calcul à blanc.
+      const { runConseiller } = await import('./conseiller/runConseiller.js');
+      const ecrire = process.argv.includes('--ecrire');
+      if (!ecrire) {
+        // À blanc : aucune écriture, pas même dans scraper_runs.
+        await runConseiller(false);
+        return 0;
+      }
+      await monitored(
+        { code: 'conseiller', label: 'Positions du Conseiller (facteurs)' },
+        async () => {
+          const r = await runConseiller(ecrire);
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lignes,
+              rows_upserted: r.lignes,
+              metadata: { date_marche: r.date },
+            },
+          };
+        },
+      );
+      return 0;
+    }
+    case 'conseiller:audit': {
+      const { runAudit } = await import('./conseiller/runAudit.js');
+      const md = await runAudit();
+      logger.info({ octets: md.length }, 'conseiller:audit écrit dans docs/conseiller/audit-donnees.md');
+      return 0;
+    }
+    case 'conseiller:emd': {
+      const { runEmd } = await import('./conseiller/runEmd.js');
+      // Seuls l'écart-type et l'EMD sortent : jamais la moyenne (spec §2.4).
+      console.log(JSON.stringify(await runEmd(), null, 2));
+      return 0;
+    }
     case 'eval:signaux': {
       // Banc d'évaluation des signaux (lecture seule) : les scores ont-ils
       // annoncé la suite ? Aucun seuil de scoring/score.ts ne change sans un

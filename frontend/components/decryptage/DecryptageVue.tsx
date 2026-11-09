@@ -59,7 +59,7 @@ function Figure({ titre, sous, label, children }: { titre: string; sous: string;
 
 function Tableau({ tete, droite = [], children }: { tete: string[]; droite?: number[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
       <table className="w-full min-w-[640px] border-collapse text-left text-sm">
         <thead>
           <tr className="border-b border-border bg-surface">

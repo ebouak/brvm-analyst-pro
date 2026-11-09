@@ -43,7 +43,7 @@ export default async function AssistantPage({ searchParams }: Props) {
       </div>
 
       {/* Disclaimer */}
-      <p className="text-[11px] text-faint text-center leading-relaxed">
+      <p className="text-xs text-faint text-center leading-relaxed">
         Cet outil est une aide à l&apos;analyse. Il ne constitue pas un conseil en investissement.
         Les informations produites sont dérivées des données de marché BRVM et ne garantissent pas les performances futures.
       </p>

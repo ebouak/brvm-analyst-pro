@@ -37,12 +37,12 @@ export function DiagnosticSpotlight({ report }: Props) {
           <div className="rounded-panel border border-white/10 bg-surface p-5 shadow-panel">
             <div className="mb-3 flex items-center justify-between">
               <span className="font-mono text-sm font-bold text-ivory">{report.code}</span>
-              <span className="text-[10px] text-faint">
+              <span className="text-[11px] text-faint">
                 {new Date(report.generated_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-ivory/85">{excerpt(report.markdown_content)}</p>
-            <p className="mt-4 text-[10px] text-faint">
+            <p className="text-sm leading-relaxed text-ivory">{excerpt(report.markdown_content)}</p>
+            <p className="mt-4 text-[11px] text-faint">
               Exemple réel effectivement généré. Votre analyse sera personnalisée à chaque société.
             </p>
           </div>

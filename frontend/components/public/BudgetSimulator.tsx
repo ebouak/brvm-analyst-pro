@@ -299,7 +299,7 @@ export default function BudgetSimulator({
                           <tr key={l.action.code}>
                             <td className="border-b border-border/70 py-2.5">
                               <span className="block font-semibold text-ivory">{l.action.code}</span>
-                              <span className="block text-[10px] text-faint">{l.action.designation}</span>
+                              <span className="block text-[11px] text-faint">{l.action.designation}</span>
                               <span
                                 className="mt-1 block h-[3px] rounded-sm bg-accent/55"
                                 style={{ width: `${Math.max(4, Math.round(part))}%` }}

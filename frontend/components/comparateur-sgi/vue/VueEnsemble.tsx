@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import {
   ArrowRight,
+  ExternalLink,
   Award,
   BookOpen,
   Calculator,
@@ -67,7 +68,7 @@ function Drapeau({ pays, grand = false }: { pays: string; grand?: boolean }) {
 
 function Panneau({ titre, icone: Icone, action, children, className = '' }: { titre: string; icone: LucideIcon; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-panel border border-border bg-surface p-5 md:p-6 ${className}`}>
+    <section className={`min-w-0 rounded-panel border border-border bg-surface p-5 md:p-6 ${className}`}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2.5 font-display text-lg text-ivory">
           <Icone size={20} aria-hidden className="text-accent" />
@@ -193,12 +194,12 @@ function Recommandation({ r, nbComplets, economie }: { r: LigneClassement; nbCom
       </div>
 
       <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-4 text-[13px] font-semibold">
-        <Link href={`/comparateur-sgi/annuaire/${slugSgi(r.sgi)}`} className="inline-flex min-h-[36px] items-center gap-1.5 text-accent hover:underline">
+        <Link href={`/comparateur-sgi/annuaire/${slugSgi(r.sgi)}`} className="inline-flex min-h-[36px] items-center gap-1.5 text-accent underline underline-offset-2 hover:no-underline">
           Voir la fiche <ArrowRight size={14} aria-hidden />
         </Link>
         {pdf && (
-          <a href={pdf} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[36px] items-center text-accent hover:underline">
-            Décision officielle (PDF) ↗
+          <a href={pdf} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[36px] items-center text-accent underline underline-offset-2 hover:no-underline">
+            Décision officielle (PDF) <ExternalLink size={12} aria-hidden className="ml-1" />
           </a>
         )}
       </div>
@@ -278,13 +279,13 @@ function Classement({ lignes }: { lignes: LigneClassement[] }) {
       titre="Classement des SGI (coût total)"
       icone={Trophy}
       action={
-        <Link href="/comparateur-sgi/simuler" className="inline-flex min-h-[36px] items-center gap-1.5 text-[13px] font-semibold text-accent hover:underline">
+        <Link href="/comparateur-sgi/simuler" className="inline-flex min-h-[36px] items-center gap-1.5 text-[13px] font-semibold text-accent underline underline-offset-2 hover:no-underline">
           Classement complet <ArrowRight size={14} aria-hidden />
         </Link>
       }
     >
       <p className="-mt-2 mb-4 text-[12.5px] text-muted">Top {lignes.length} sur le scénario de référence ({SCENARIO_TXT})</p>
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Classement des SGI les moins chères, défilement horizontal" className="overflow-x-auto rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
         <table className="w-full min-w-[560px] text-sm">
           <caption className="sr-only">Les SGI les moins chères sur le scénario de référence</caption>
           <thead>
@@ -314,14 +315,14 @@ function Classement({ lignes }: { lignes: LigneClassement[] }) {
                 </td>
                 <td className={`tabular py-3 pr-3 text-right font-semibold ${i === 0 ? 'text-up' : 'text-ivory'}`}>
                   {fmtFcfa(l.cout.total)}
-                  {!l.complet && <span className="block text-[10px] font-normal text-warn">barème incomplet</span>}
+                  {!l.complet && <span className="block text-[11px] font-normal text-warn">barème incomplet</span>}
                 </td>
                 <td className="tabular hidden py-3 pr-3 text-right text-muted sm:table-cell">{l.courtageMax != null ? pct(l.courtageMax) : '—'}</td>
                 <td className="tabular hidden py-3 pr-3 text-muted lg:table-cell">{l.sgi.depotMin}</td>
                 <td className="py-3 pr-3">
                   <span
-                    className={`inline-block rounded-full border px-2 py-0.5 text-[10.5px] font-semibold ${
-                      l.frais.confiance === 'homologue_crepmf' ? 'border-up/30 bg-up/10 text-up' : 'border-border text-muted'
+                    className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                      l.frais.confiance === 'homologue_crepmf' ? 'border-up/30 bg-up/5 text-up' : 'border-border text-muted'
                     }`}
                   >
                     {l.frais.confiance === 'homologue_crepmf' ? 'Homologué' : 'À confirmer'}

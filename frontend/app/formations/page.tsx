@@ -1,11 +1,12 @@
+import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
 import OffresNiveaux from '@/components/billing/OffresNiveaux';
 import { accesAcademy } from '@/lib/server/academyAccess';
-import Link from 'next/link';
-import { Clapperboard, Mic } from 'lucide-react';
 import { listFormations, type FormationCard } from '@/lib/formations/server';
 import { listPublishedCourses, type AcademyCourseCard } from '@/lib/academy/server';
-import { SectionHeader, StatPill } from '@/components/ui/premium';
+import { listerSessionsAVenir, type SessionPublique } from '@/lib/formations/sessions';
+import { listCourses, type VideoCourseCard } from '@/lib/video/server';
+import { NIVEAUX } from '@/lib/academy/types';
 import { Lecon0Carte } from '@/components/academy/Lecon0Carte';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
@@ -16,10 +17,64 @@ export const dynamic = 'force-dynamic';
 
 const TYPE_LABEL: Record<string, string> = { cours: 'Cours', conference: 'Conférence', webinaire: 'Webinaire' };
 const NIVEAU_LABEL: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' };
-const fmtDate = (d: string | null) =>
-  d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : null;
-
 const NIVEAU_COURSE: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé', expert: 'Expert' };
+
+// Clé de niveau tolérante (casse, accents) : sert à l'affichage et au tri seulement.
+const cleNiveau = (n: string | null) =>
+  (n ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+const libelleNiveau = (n: string, table: Record<string, string>) => table[cleNiveau(n)] ?? n;
+const rangNiveau = (n: string | null) => {
+  const i = (NIVEAUX as readonly string[]).indexOf(cleNiveau(n));
+  return i === -1 ? NIVEAUX.length : i;
+};
+const numeroTitre = (t: string) => Number(/niveau\s*(\d+)/i.exec(t)?.[1] ?? Infinity);
+
+const fmtDate = (d: string | null) =>
+  d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Abidjan' }) : null;
+// Heure de la place (Abidjan, UTC+0) : un début en soirée ne change pas de
+// jour selon le fuseau du serveur. L'année n'est écrite que si elle diffère.
+const fmtJour = (d: string) => {
+  const date = new Date(d);
+  return date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Africa/Abidjan',
+  });
+};
+const pluriel = (n: number, mot: string, motPluriel = `${mot}s`) => `${n} ${n > 1 ? motPluriel : mot}`;
+
+/**
+ * Une ligne du programme, lue comme une ligne de cote : le parcours, ce qu'on
+ * y trouve, puis son volume RÉEL (lu en base, jamais saisi). Toute la ligne est
+ * un seul lien.
+ */
+function LigneParcours({
+  href,
+  titre,
+  description,
+  volume,
+}: {
+  href: string;
+  titre: string;
+  description: string;
+  volume: string;
+}) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className="group flex min-h-[56px] flex-col gap-1 px-4 py-4 transition-colors duration-150 hover:bg-elevated/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent md:grid md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_minmax(0,11rem)] md:items-baseline md:gap-6 md:px-5"
+      >
+        <span className="font-display text-lg text-ivory transition-colors [text-wrap:balance] group-hover:text-accent-ink">
+          {titre}
+        </span>
+        <span className="max-w-[60ch] text-sm leading-relaxed text-muted">{description}</span>
+        <span className="text-sm text-muted md:text-right">{volume}</span>
+      </Link>
+    </li>
+  );
+}
 
 export default async function FormationsPage() {
   // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
@@ -35,170 +90,161 @@ export default async function FormationsPage() {
         </div>
         <AccessGate
           required={gate.required === 'free' ? 'premium' : gate.required}
-          feature="Les formations & conférences"
+          feature="Les formations et conférences"
           hint="Cours, webinaires et conférences de l'Académie WESTBOURSE."
         />
       </>
     );
   }
 
-  const [formations, courses] = await Promise.all([
+  // Sessions et modules : les lecteurs de lib/ rendent [] AUSSI en cas d'erreur
+  // Supabase. Une liste vide ne prouve donc pas l'absence : on n'affiche un
+  // volume que s'il y a quelque chose à compter, sinon un libellé neutre.
+  const [formations, courses, sessions, modules] = await Promise.all([
     listFormations().catch(() => [] as FormationCard[]),
     listPublishedCourses().catch(() => [] as AcademyCourseCard[]),
+    listerSessionsAVenir().catch(() => [] as SessionPublique[]),
+    listCourses().catch(() => [] as VideoCourseCard[]),
   ]);
 
+  // Volumes du programme : comptés dans les sources qui servent les pages
+  // de destination, pour ne jamais annoncer un nombre que la page suivante
+  // contredirait.
+  const volumeSessions =
+    sessions.length > 0
+      ? `${pluriel(sessions.length, 'date')} · dès le ${fmtJour(sessions[0].debut_at)}`
+      : 'Voir le calendrier';
+  const volumeAcademy =
+    courses.length > 0 ? `${pluriel(courses.length, 'cours', 'cours')} · ${NIVEAUX.length} niveaux` : `${NIVEAUX.length} niveaux`;
+  const volumeModules = modules.length > 0 ? pluriel(modules.length, 'module') : 'Voir les modules';
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <SectionHeader
-        title="Formations et conférences"
-        subtitle="Montez en compétence sur l'investissement à la BRVM : cours, replays et conférences. Accès réservé aux membres Premium."
-      />
+    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
+      <div>
+        <h1 className="font-display text-3xl font-medium tracking-tight text-ivory md:text-4xl">Formations et conférences</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">Cours, sessions en direct, replays et conférences pour apprendre à investir à la BRVM.</p>
+      </div>
 
-      {/* ── Sessions en direct — places limitées ────────────────────────────── */}
-      <Link href="/formations/sessions"
-        className="group flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-surface p-6 transition-all hover:border-accent/50">
-        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
-          <Mic size={26} strokeWidth={1.75} aria-hidden />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-accent">En direct</span>
-            <StatPill tone="sapphire">Places limitées</StatPill>
-            <StatPill tone="neutral">Avec un formateur</StatPill>
-          </div>
-          <h2 className="font-display text-xl text-white transition-colors group-hover:text-accent">
-            Sessions animées par un formateur
-          </h2>
-          <p className="mt-1 max-w-xl text-sm text-muted leading-relaxed">
-            Quatre heures en petit groupe, en ligne ou en présentiel, sur des cas réels de la BRVM.
-            L&apos;Academy, incluse dans l&apos;abonnement Premium, sert de préparation&nbsp;; la leçon&nbsp;0 reste offerte à tous.
-          </p>
-          <span className="mt-3 inline-block text-[11px] font-semibold text-accent group-hover:underline">
-            Voir les sessions →
-          </span>
-        </div>
-      </Link>
+      {/* Leçon 0 : gratuite, ouverte à tous. Seule image réelle de la page. */}
+      <Lecon0Carte />
 
-      {/* ── Leçon 0 — gratuite, ouverte à tous ─────────────────────────────── */}
-      <Lecon0Carte className="mb-4" />
+      {/* Le programme : trois parcours, lus comme une cote. */}
+      <section aria-labelledby="h-parcours" className="space-y-3">
+        <h2 id="h-parcours" className="font-display text-lg text-ivory">
+          Les parcours
+        </h2>
+        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+          <LigneParcours
+            href="/formations/sessions"
+            titre="Sessions en direct, avec un formateur"
+            description="En petit groupe, à date fixe, en ligne ou en présentiel. On y travaille des cas réels de la BRVM. L’Academy prépare à ces sessions, et la leçon 0 reste gratuite pour tous."
+            volume={volumeSessions}
+          />
+          <LigneParcours
+            href="/formations/academy"
+            titre="WestBourse Academy"
+            description="Des cours par niveau, avec définitions, cas réels de la BRVM, pièges fréquents, lexique et points à retenir. Des quiz en chemin, puis un examen et un certificat par niveau. Incluse dans l’abonnement Premium."
+            volume={volumeAcademy}
+          />
+          <LigneParcours
+            href="/formations/modules"
+            titre="Modules vidéo interactifs"
+            description="Des cours en vidéo découpés en chapitres, avec quiz de validation. Votre progression est enregistrée : vous reprenez là où vous vous étiez arrêté."
+            volume={volumeModules}
+          />
+        </ul>
+      </section>
 
-      {/* ── WestBourse Academy — mise en avant permanente ─────────────────── */}
-      <Link href="/formations/academy"
-        className="group relative flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-[#56D7FD]/25 bg-gradient-to-br from-[#0a1f25] to-[#050e11] p-6 overflow-hidden hover:border-[#56D7FD]/50 transition-all">
-        {/* Halo déco */}
-        <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-[#56D7FD]/8 blur-3xl" />
-        {/* Icône */}
-        <div className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-[#56D7FD]/10 border border-[#56D7FD]/20 text-3xl">
-          <GraduationCap size={26} strokeWidth={1.75} className="text-[#56D7FD]" aria-hidden />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="text-xs font-bold text-[#56D7FD]">Académie</span>
-            <StatPill tone="sapphire">44 leçons · 4 niveaux</StatPill>
-            <StatPill tone="neutral">QCM interactifs</StatPill>
-          </div>
-          <h2 className="font-display text-xl text-white group-hover:text-[#56D7FD] transition-colors">
-            WestBourse Academy · Édition Intégrale
-          </h2>
-          <p className="mt-1 text-sm text-[#7a9ea8] leading-relaxed max-w-xl">
-            Formation complète en 8 sections par leçon : définition, cas réels BRVM, pièges fréquents, lexique ciblé et points à retenir. Du débutant au niveau Expert CREPMF.
-          </p>
-          <div className="mt-3 flex items-center gap-3 flex-wrap">
-            <span className="text-[11px] text-[#56D7FD] font-semibold group-hover:underline">Accéder à l'Academy →</span>
-            <span className="text-[10px] text-[#4a7a85] border border-[#1a3540] rounded px-2 py-0.5">Inclus Premium</span>
-          </div>
-        </div>
-      </Link>
-
-      {/* ── Modules vidéo interactifs ─────────────────────────────────────── */}
-      <Link href="/formations/modules"
-        className="group flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-surface p-6 transition-all hover:border-accent/50">
-        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
-          <Clapperboard size={26} strokeWidth={1.75} aria-hidden />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-accent">Vidéo</span>
-            <StatPill tone="sapphire">Chapitres</StatPill>
-            <StatPill tone="neutral">Quiz + progression</StatPill>
-          </div>
-          <h2 className="font-display text-xl text-white transition-colors group-hover:text-accent">
-            Modules vidéo interactifs
-          </h2>
-          <p className="mt-1 max-w-xl text-sm text-muted leading-relaxed">
-            Des cours en vidéo chapitrés, avec quiz de validation et suivi de progression. Reprenez
-            exactement là où vous vous êtes arrêté.
-          </p>
-          <span className="mt-3 inline-block text-[11px] font-semibold text-accent group-hover:underline">
-            Voir les modules →
-          </span>
-        </div>
-      </Link>
-
-      {/* ── Cours générés (Academy IA) ────────────────────────────────────── */}
+      {/* Cours générés (Academy) */}
       {courses.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <p className="overline text-faint">Cours de l&apos;Academy</p>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#56D7FD]/10 text-[#56D7FD] border border-[#56D7FD]/20">
-              {courses.length} cours
-            </span>
+        <section aria-labelledby="h-cours" className="space-y-3">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 id="h-cours" className="font-display text-lg text-ivory">
+              Cours de l’Academy
+            </h2>
+            <span className="text-sm text-muted">{pluriel(courses.length, 'cours', 'cours')}</span>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {courses.map((c) => (
-              <Link key={c.id} href={`/formations/academy/${c.slug}`}
-                className="group flex flex-col rounded-xl border border-border bg-surface p-4 hover:border-[#56D7FD]/40 transition">
-                <div className="flex items-center gap-2 text-[11px] text-faint">
-                  <span className="text-[#56D7FD]">Cours</span>
-                  {c.niveau && <span>· {NIVEAU_COURSE[c.niveau] ?? c.niveau}</span>}
-                </div>
-                <h3 className="mt-1 font-display text-white group-hover:text-[#56D7FD] transition line-clamp-2">{c.titre}</h3>
-                {c.resume && <p className="mt-1 text-xs text-muted line-clamp-3">{c.resume}</p>}
-                <span className="mt-auto pt-3 text-[11px] text-[#56D7FD] group-hover:underline">Commencer →</span>
-              </Link>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[...courses]
+              .sort((a, b) => rangNiveau(a.niveau) - rangNiveau(b.niveau) || numeroTitre(a.titre) - numeroTitre(b.titre))
+              .map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/formations/academy/${c.slug}`}
+                  className="group flex h-full flex-col rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                >
+                  <h3 className="font-display text-base text-ivory transition-colors line-clamp-2 group-hover:text-accent-ink">
+                    {c.titre}
+                  </h3>
+                  {c.niveau && <p className="mt-1 text-xs text-faint">{libelleNiveau(c.niveau, NIVEAU_COURSE)}</p>}
+                  {c.resume && <p className="mt-2 text-sm text-muted line-clamp-3">{c.resume}</p>}
+                </Link>
+              </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Catalogue : replays, webinaires, conférences */}
+      <section aria-labelledby="h-catalogue" className="space-y-3">
+        <h2 id="h-catalogue" className="font-display text-lg text-ivory">
+          Replays et conférences
+        </h2>
+        {formations.length === 0 ? (
+          <div className="rounded-xl border border-border bg-surface px-5 py-8 text-center">
+            <p className="text-sm text-muted">Aucune formation à afficher pour l’instant</p>
+            <p className="mt-1 text-xs text-faint">Les replays et conférences publiés apparaîtront ici.</p>
           </div>
-        </div>
-      )}
+        ) : (
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {formations.map((f) => (
+              <li key={f.id}>
+                <Link
+                  href={`/premium/formations/${f.id}`}
+                  className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                >
+                  <div className="aspect-video bg-elevated">
+                    {f.cover_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.cover_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-faint">
+                        <GraduationCap size={28} strokeWidth={1.5} aria-hidden />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="font-display text-base text-ivory transition-colors line-clamp-2 group-hover:text-accent-ink">
+                      {f.titre}
+                    </h3>
+                    <p className="mt-1 text-xs text-faint">
+                      {TYPE_LABEL[f.type] ?? f.type}
+                      {f.niveau && <> · {libelleNiveau(f.niveau, NIVEAU_LABEL)}</>}
+                      {f.duree_min && (
+                        <>
+                          {' · '}
+                          <><span className="tabular">{f.duree_min}</span> min</>
+                        </>
+                      )}
+                    </p>
+                    {f.description && <p className="mt-2 text-sm text-muted line-clamp-2">{f.description}</p>}
+                    <div className="mt-auto flex items-center justify-between gap-3 pt-4 text-xs">
+                      <span className="text-faint">{fmtDate(f.date_evenement) ?? ''}</span>
+                      <span className="text-muted">Premium</span>
+                    </div>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-      {formations.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface p-8 text-center">
-          <p className="text-sm text-muted">Aucune formation publiée pour l&apos;instant.</p>
-          <p className="mt-1 text-xs text-faint">De nouveaux contenus arrivent prochainement.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {formations.map((f) => (
-            <Link key={f.id} href={`/premium/formations/${f.id}`}
-              className="group flex flex-col rounded-xl border border-border bg-surface overflow-hidden hover:border-info/40 transition">
-              <div className="aspect-video bg-elevated relative">
-                {f.cover_url
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={f.cover_url} alt="" className="h-full w-full object-cover" />
-                  : <div className="h-full w-full flex items-center justify-center opacity-40"><GraduationCap size={30} strokeWidth={1.75} aria-hidden /></div>}
-                <span className="absolute top-2 right-2 rounded-full bg-gold/90 px-2 py-0.5 text-[10px] font-semibold text-bg">Premium</span>
-              </div>
-              <div className="flex flex-1 flex-col p-4">
-                <div className="flex items-center gap-2 text-[11px] text-faint">
-                  <span className="text-info">{TYPE_LABEL[f.type] ?? f.type}</span>
-                  {f.niveau && <span>· {NIVEAU_LABEL[f.niveau] ?? f.niveau}</span>}
-                  {f.duree_min && <span>· {f.duree_min} min</span>}
-                </div>
-                <h3 className="mt-1 font-display text-white group-hover:text-info transition line-clamp-2">{f.titre}</h3>
-                {f.description && <p className="mt-1 text-xs text-muted line-clamp-2">{f.description}</p>}
-                <div className="mt-auto pt-3 flex items-center justify-between text-[11px]">
-                  <span className="text-faint">{fmtDate(f.date_evenement) ?? ''}</span>
-                  <span className="text-info group-hover:underline">Accéder →</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      <p className="text-[11px] text-faint">
-        Les contenus (replays, supports) sont accessibles aux membres Premium.{' '}
-        <Link href="/pricing" className="text-info hover:underline">Voir les offres →</Link>
+      <p className="text-xs text-faint">
+        Les replays et supports sont réservés aux membres Premium.{' '}
+        <Link href="/pricing" className="text-accent-ink hover:underline">
+          Voir les offres
+        </Link>
       </p>
     </div>
   );

@@ -42,7 +42,7 @@ export default function ExamRunner({ niveau }: { niveau: string }) {
         <Link href="/formations/academy" className="text-sm text-muted hover:text-white">← Academy</Link>
         <h1 className="font-display text-2xl text-white">Examen · {NIVEAU_LABEL[niveau] ?? niveau}</h1>
         <p className="text-sm text-muted">20 questions tirées au hasard. Réussite à partir de 70 %. Tentatives illimitées.</p>
-        {error && <p className="rounded-lg border border-down/40 bg-down/10 p-3 text-sm text-down">{error}</p>}
+        {error && <p className="rounded-lg border border-down/40 bg-down/5 p-3 text-sm text-down">{error}</p>}
         <button type="button" onClick={start} disabled={busy}
           className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-bg disabled:opacity-50">
           {busy ? '…' : 'Commencer l’examen'}

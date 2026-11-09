@@ -306,7 +306,7 @@ function SectionSlide({
               <div key={i} className="rounded-lg border p-3" style={{ borderColor: isPiege ? 'rgba(255,255,255,0.2)' : '#e2d8c4', background: isPiege ? 'rgba(255,255,255,0.05)' : '#fff' }}>
                 <p className="text-xs" style={{ color: MUTED }}>{k.label}</p>
                 <p className="tabular mt-0.5 text-lg font-bold" style={{ color: isPiege ? GOLD : NAVY }}>{k.valeur}</p>
-                {k.detail && <p className="mt-0.5 text-[10px] leading-snug" style={{ color: MUTED }}>{k.detail}</p>}
+                {k.detail && <p className="mt-0.5 text-[11px] leading-snug" style={{ color: MUTED }}>{k.detail}</p>}
               </div>
             ))}
           </div>
@@ -345,7 +345,7 @@ function SectionSlide({
                   {e.cle ? <Star size={12} strokeWidth={2.25} aria-label="Étape clé" /> : i + 1}
                 </span>
                 <p className="mt-1.5 text-[11px] font-semibold leading-tight" style={{ color: NAVY }}>{e.titre}</p>
-                {e.detail && <p className="mt-0.5 text-[10px] leading-snug" style={{ color: MUTED }}>{e.detail}</p>}
+                {e.detail && <p className="mt-0.5 text-[11px] leading-snug" style={{ color: MUTED }}>{e.detail}</p>}
               </div>
             ))}
           </div>

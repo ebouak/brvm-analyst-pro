@@ -120,7 +120,7 @@ export default function PortfolioOverview({ state, isLoading = false }: Props) {
           </ul>
         </div>
 
-        <div className="bg-surface border border-border rounded-xl p-4 overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl p-4 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
           <h3 className="text-sm font-semibold text-white mb-3">Positions ({state.positions.length})</h3>
           <table className="w-full text-sm">
             <thead className="text-xs text-muted border-b border-border">

@@ -27,14 +27,14 @@ export default async function NewsFeed() {
     <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted">Actualités</span>
-        <Link href="/actualites" className="text-[10px] text-cyan hover:underline">Tout voir →</Link>
+        <Link href="/actualites" className="text-[11px] text-cyan hover:underline">Tout voir →</Link>
       </div>
       <div className="space-y-2">
         {news.map((n) => (
           <div key={n.id} className="border-b border-border/50 pb-2 last:border-0 last:pb-0">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="text-[9px] text-cyan uppercase font-bold">{n.source}</span>
-              <span className="text-[9px] text-faint">{n.date_publication}</span>
+              <span className="text-[11px] text-cyan uppercase font-bold">{n.source}</span>
+              <span className="text-[11px] text-faint">{n.date_publication}</span>
             </div>
             {n.source_url ? (
               <a href={n.source_url} target="_blank" rel="noopener noreferrer"

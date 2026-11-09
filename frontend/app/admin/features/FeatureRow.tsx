@@ -61,7 +61,7 @@ export function FeatureRow({ f }: { f: FlagRow }) {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-ivory">{f.label}</span>
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STYLE[f.acces]}`}>
+            <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${STYLE[f.acces]}`}>
               {ACCES.find((a) => a.value === f.acces)?.label}
             </span>
           </div>

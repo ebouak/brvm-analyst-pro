@@ -43,7 +43,7 @@ export default function ClassementPage() {
         </Link>
       </div>
 
-      <p className="mt-6 text-[10px] leading-relaxed text-faint">
+      <p className="mt-6 text-[11px] leading-relaxed text-faint">
         Performances de portefeuilles fictifs (paper trading), affichées sur la base du volontariat
         et sous alias. Elles ne constituent ni des performances réelles, ni un conseil en
         investissement. Les performances passées ne préjugent pas des performances futures.

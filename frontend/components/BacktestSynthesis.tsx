@@ -38,13 +38,13 @@ export default function BacktestSynthesis({ synthesis, strategyReturn, benchmark
 
       {/* Verdict */}
       <div className="rounded-card border border-gold/20 bg-elevated/40 p-4">
-        <p className="text-[11px] text-gold/70 mb-1.5">Verdict de la stratégie</p>
+        <p className="text-xs text-accent-ink mb-1.5">Verdict de la stratégie</p>
         <p className="text-sm text-ivory leading-relaxed">{synthesis.verdict}</p>
 
         {synthesis.cautions.length > 0 && (
           <ul className="mt-3 space-y-1.5">
             {synthesis.cautions.map((c, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-warn/90">
+              <li key={i} className="flex items-start gap-2 text-xs text-warn">
                 <span className="mt-0.5 shrink-0">!</span>
                 <span className="leading-relaxed">{c}</span>
               </li>
@@ -55,7 +55,7 @@ export default function BacktestSynthesis({ synthesis, strategyReturn, benchmark
 
       {/* Détail du raisonnement */}
       <div className="rounded-card border border-border bg-surface p-4">
-        <p className="text-[11px] text-faint mb-2">Lecture détaillée</p>
+        <p className="text-xs text-faint mb-2">Lecture détaillée</p>
         <ul className="space-y-1.5">
           {synthesis.rationale.map((p, i) => (
             <li key={i} className="flex items-start gap-2 text-xs text-muted leading-relaxed">
@@ -64,7 +64,7 @@ export default function BacktestSynthesis({ synthesis, strategyReturn, benchmark
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-[11px] text-faint italic border-t border-border/50 pt-3">
+        <p className="mt-3 text-xs text-faint italic border-t border-border/50 pt-3">
           Les résultats passés ne préjugent pas des performances futures. Outil informatif.
         </p>
       </div>

@@ -108,7 +108,7 @@ export default function ProfileClient({ initial, email, isPremium, initialPrefer
           <div className="pb-1">
             <p className="text-lg font-semibold text-white">{name || 'Votre nom'}</p>
             <p className="text-xs text-faint">{email} ·
-              <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${isPremium ? 'bg-gradient-to-r from-accent to-up text-bg' : 'border border-border text-faint'}`}>
+              <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[11px] font-bold ${isPremium ? 'bg-gradient-to-r from-accent to-up text-bg' : 'border border-border text-faint'}`}>
                 {isPremium ? 'PRO' : 'FREE'}
               </span>
             </p>
@@ -168,7 +168,7 @@ export default function ProfileClient({ initial, email, isPremium, initialPrefer
               ['actus', 'Actualités importantes', ''],
             ] as [keyof typeof notify, string, string][]).map(([k, label, sub]) => (
               <label key={k} className="flex items-center justify-between border-b border-border/40 py-2 cursor-pointer">
-                <span><span className="text-sm text-ivory">{label}</span>{sub && <span className="block text-[10px] text-faint">{sub}</span>}</span>
+                <span><span className="text-sm text-ivory">{label}</span>{sub && <span className="block text-[11px] text-faint">{sub}</span>}</span>
                 <input type="checkbox" checked={notify[k]} onChange={() => setNotif(k)} className="accent-accent h-4 w-4" />
               </label>
             ))}

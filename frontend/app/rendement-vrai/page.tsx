@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import {
   buildUnifiedReturn, listCodesUnified, HORIZONS, type Mode, type Horizon,
 } from '@/lib/macro/unifiedReturn';
@@ -44,7 +45,7 @@ export default async function Page({
     <div className="min-h-screen bg-bg">
       <header className="border-b border-border/60 bg-surface">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
-          <Link href="/" className="font-display tracking-tight text-white hover:text-accent">
+          <Link href="/" className="font-display tracking-tight text-white hover:text-accent-ink">
             WESTBOURSE
           </Link>
           <div className="flex items-center gap-3 text-sm">
@@ -72,7 +73,7 @@ export default async function Page({
                 name="mode"
                 value="reel"
                 className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                  mode === 'reel' ? 'bg-accent text-[#03222b]' : 'text-muted hover:text-white'
+                  mode === 'reel' ? 'bg-accent text-bg' : 'text-muted hover:text-white'
                 }`}
               >
                 Cours seul · réel
@@ -82,13 +83,13 @@ export default async function Page({
                 name="mode"
                 value="vrai"
                 className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                  mode === 'vrai' ? 'bg-accent text-[#03222b]' : 'text-muted hover:text-white'
+                  mode === 'vrai' ? 'bg-accent text-bg' : 'text-muted hover:text-white'
                 }`}
               >
                 + Dividendes · vrai
               </button>
             </div>
-            <span className="text-[11px] text-faint">
+            <span className="text-xs text-faint">
               {mode === 'vrai'
                 ? 'Cours + dividendes nets réinvestis, corrigés de l’inflation.'
                 : 'Cours seul corrigé de l’inflation · horizon au choix.'}
@@ -132,7 +133,7 @@ export default async function Page({
               type="submit"
               name="mode"
               value={mode}
-              className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#03222b] transition active:scale-95"
+              className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-bg transition active:scale-95"
             >
               Calculer
             </button>
@@ -144,7 +145,7 @@ export default async function Page({
         {!report ? (
           <div className="rounded-xl border border-border bg-surface p-8 text-center">
             <p className="text-sm text-muted">
-              Données incomplètes pour <strong className="text-white">{code}</strong>
+              Données incomplètes pour <strong className="font-mono font-medium text-ivory">{code}</strong>
               {mode === 'vrai' ? ' en mode dividendes réinvestis' : ` sur ${annees} ans`}.
             </p>
             <p className="mt-1 text-xs text-faint">
@@ -154,16 +155,16 @@ export default async function Page({
             {mode === 'vrai' && (
               <Link
                 href={`/rendement-vrai?mode=reel&code=${code}`}
-                className="mt-3 inline-block rounded-full border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/10"
+                className="mt-3 inline-block rounded-full border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent-ink transition hover:bg-accent/10"
               >
-                Essayer la vue « cours seul · réel » →
+                Essayer la vue « cours seul · réel »<ArrowRight size={12} aria-hidden className="ml-1 inline" />
               </Link>
             )}
           </div>
         ) : (
           <>
             <p className="text-sm text-muted">
-              <strong className="text-ivory">{report.code}</strong>
+              <strong className="font-mono font-medium text-ivory">{report.code}</strong>
               {report.nom ? ` — ${report.nom}` : ''}
               <span className="text-faint"> · {report.periodeLabel}</span>
             </p>
@@ -186,7 +187,7 @@ export default async function Page({
                       publiés par les émetteurs BRVM sont <strong>nets d&apos;IRVM</strong>, prélevé à
                       la source par l&apos;émetteur selon son pays de cotation, pas le vôtre. On les
                       réinvestit tels quels, sans les re-taxer. Détail :{' '}
-                      <Link href="/fiscalite" className="text-accent underline">barème IRVM par pays</Link>.
+                      <Link href="/fiscalite" className="text-accent-ink underline">barème IRVM par pays</Link>.
                     </li>
                     <li className="text-faint">
                       <strong>Convention assumée</strong> : les dates de détachement n&apos;étant pas
@@ -213,7 +214,7 @@ export default async function Page({
                   <a
                     href="https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG"
                     target="_blank" rel="noopener noreferrer"
-                    className="text-accent underline"
+                    className="text-accent-ink underline"
                   >FP.CPI.TOTL.ZG</a>, chaînée année par année. Recoupée avec la BCEAO.
                 </li>
                 <li className="text-faint">

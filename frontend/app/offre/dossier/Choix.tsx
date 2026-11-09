@@ -41,7 +41,7 @@ export default function Choix({ jeton, valeurs }: { jeton: string; valeurs: Vale
   return (
     <div className="space-y-4">
       <input value={filtre} onChange={(e) => setFiltre(e.target.value)} placeholder="Rechercher une société (ex. Sonatel, SNTS)" aria-label="Rechercher une société" className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-ivory placeholder:text-faint" />
-      {message && <p role="status" className={`rounded-lg border px-4 py-3 text-sm ${message.ok ? 'border-up/40 bg-up/10 text-up' : 'border-down/40 bg-down/10 text-down'}`}>{message.texte}</p>}
+      {message && <p role="status" className={`rounded-lg border px-4 py-3 text-sm ${message.ok ? 'border-up/40 bg-up/5 text-up' : 'border-down/40 bg-down/5 text-down'}`}>{message.texte}</p>}
       {fini && lien && (
         <p className="text-sm text-muted">
           Le téléchargement ne démarre pas ?{' '}

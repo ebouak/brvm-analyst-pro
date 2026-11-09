@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { fmtDateCourte } from '@/lib/format';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
@@ -212,7 +213,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       {/* Header */}
       <SectionHeader
         title="Backtest"
-        subtitle="Signal momentum : variation > 2 % → ACHAT · < −2 % → VENTE · sinon CONSERVER"
+        subtitle="Signal momentum : variation supérieure à 2 % = achat, inférieure à −2 % = vente, sinon attente. Simulation sur performances passées, sans garantie pour l'avenir."
       />
 
       <div className="gold-rule" />
@@ -221,13 +222,13 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       <PremiumPanel>
         <form method="GET" action="" className="p-5 flex flex-wrap items-end gap-4">
           {/* Instrument */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="code" className="overline text-faint text-[10px]">Instrument</label>
+          <div className="flex min-w-0 max-w-full flex-col gap-1.5">
+            <label htmlFor="code" className="text-xs text-faint">Instrument</label>
             <select
               id="code"
               name="code"
               defaultValue={selectedCode}
-              className={`${inputCls} min-w-[200px]`}
+              className={`${inputCls} w-full min-w-0 sm:min-w-[200px] sm:w-auto`}
             >
               <option value="">— Choisir un titre —</option>
               {instrumentList.map((ins) => (
@@ -240,7 +241,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
 
           {/* Date From */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="dateFrom" className="overline text-faint text-[10px]">Du</label>
+            <label htmlFor="dateFrom" className="text-xs text-faint">Du</label>
             <input
               id="dateFrom"
               type="date"
@@ -252,7 +253,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
 
           {/* Date To */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="dateTo" className="overline text-faint text-[10px]">Au</label>
+            <label htmlFor="dateTo" className="text-xs text-faint">Au</label>
             <input
               id="dateTo"
               type="date"
@@ -264,7 +265,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
 
           {/* Period */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="period" className="overline text-faint text-[10px]">Période (si sans dates)</label>
+            <label htmlFor="period" className="text-xs text-faint">Période (si sans dates)</label>
             <select
               id="period"
               name="period"
@@ -281,7 +282,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
 
           {/* Frais */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="fees" className="overline text-faint text-[10px]">Frais</label>
+            <label htmlFor="fees" className="text-xs text-faint">Frais</label>
             <input
               id="fees"
               type="number"
@@ -296,7 +297,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
 
           {/* Slippage */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="slippage" className="overline text-faint text-[10px]">Slippage</label>
+            <label htmlFor="slippage" className="text-xs text-faint">Slippage</label>
             <input
               id="slippage"
               type="number"
@@ -311,7 +312,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
 
           <button
             type="submit"
-            className="px-5 py-2 rounded-lg bg-gold text-obsidian text-sm font-semibold shadow-gold transition-all duration-200 hover:bg-gold-soft active:scale-[0.98]"
+            className="px-5 py-2 rounded-lg bg-gold text-obsidian text-sm font-semibold transition-colors duration-200 hover:bg-gold-soft active:scale-[0.98]"
           >
             Analyser
           </button>
@@ -333,7 +334,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           <div className="p-8 text-center space-y-4">
             <p className="text-muted text-sm">
               Aucun historique de cours pour{' '}
-              <span className="tabular text-ivory font-semibold">{selectedCode}</span>{' '}
+              <span className="font-mono font-medium text-ivory">{selectedCode}</span>{' '}
               sur cette période.
             </p>
             <p className="text-xs text-faint">
@@ -347,8 +348,8 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       {/* Coverage indicator */}
       {result && closes.length > 0 && (
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-xs text-faint tabular">
-            {dates[0]} → {dates[dates.length - 1]}
+          <span className="text-xs text-faint">
+            du {fmtDateCourte(dates[0])} au {fmtDateCourte(dates[dates.length - 1])}
           </span>
           <StatPill tone={coverageTone}>
             {closes.length} séances
@@ -372,8 +373,8 @@ export default async function BacktestPage({ searchParams }: PageProps) {
       {result && (
         <div className="rounded-xl border border-border bg-surface p-3 text-xs text-muted space-y-1">
           <p>
-            {result.nbSeances ?? 0} séances utilisées, du {result.premiereSeance ?? '—'} au{' '}
-            {result.derniereSeance ?? '—'}.
+            {result.nbSeances ?? 0} séances utilisées, du {fmtDateCourte(result.premiereSeance)} au{' '}
+            {fmtDateCourte(result.derniereSeance)}.
           </p>
           <p>
             {result.nbSignauxReels ?? 0} séance{(result.nbSignauxReels ?? 0) > 1 ? 's' : ''} sur{' '}
@@ -383,13 +384,13 @@ export default async function BacktestPage({ searchParams }: PageProps) {
           </p>
           {(result.nbSeances ?? 0) > 0 && (result.nbSeances ?? 0) < 60 && (
             <p className="text-warn">
-              ⓘ Moins de 60 séances sur la période : les ratios annualisés (Sharpe, Sortino,
+              Moins de 60 séances sur la période : les ratios annualisés (Sharpe, Sortino,
               Calmar, rendement annualisé) reposent sur trop peu d’observations pour être fiables.
             </p>
           )}
           {!result.annualisationCalendaire && (
             <p className="text-warn">
-              ⓘ Annualisation approchée sur 252 séances théoriques, faute de dates exploitables.
+              Annualisation approchée sur 252 séances théoriques, faute de dates exploitables.
             </p>
           )}
         </div>
@@ -400,7 +401,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
         <>
           {/* Instrument label */}
           <div className="flex items-center gap-3 flex-wrap">
-            <Eyebrow>{selectedCode}</Eyebrow>
+            <span className="font-mono font-medium text-ivory">{selectedCode}</span>
             {designation && designation !== selectedCode && (
               <span className="text-sm text-muted">{designation}</span>
             )}
@@ -477,7 +478,7 @@ export default async function BacktestPage({ searchParams }: PageProps) {
             />
             <a
               href="/backtest"
-              className="text-xs border border-border text-muted rounded-lg px-4 py-2 hover:text-gold hover:border-gold/40 transition-all duration-200"
+              className="text-xs border border-border text-muted rounded-lg px-4 py-2 hover:text-accent-ink hover:border-gold/40 transition-colors duration-200"
             >
               Tester un autre titre
             </a>

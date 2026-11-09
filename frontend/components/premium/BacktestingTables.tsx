@@ -1,4 +1,5 @@
 'use client';
+import { libelleSignal } from '@/lib/signalLabel';
 import { useState } from 'react';
 import type { BacktestingData, TopDividende, TopPlusValue } from '@/lib/premium/backtesting';
 
@@ -11,7 +12,7 @@ const VUES: { id: Vue; label: string; desc: string }[] = [
   { id: 'pv_pct',     label: 'Plus-values (%)',         desc: 'Performance % depuis le premier cours disponible' },
 ];
 
-const SIG: Record<string, string> = { BUY: 'text-up bg-up/10', HOLD: 'text-warn bg-warn/10', SELL: 'text-down bg-down/10' };
+const SIG: Record<string, string> = { BUY: 'text-up bg-up/5', HOLD: 'text-warn bg-warn/10', SELL: 'text-down bg-down/5' };
 
 function fmt(n: number) {
   if (Math.abs(n) >= 1e9) return `${(n / 1e9).toFixed(2)} Md`;
@@ -21,7 +22,7 @@ function fmt(n: number) {
 
 function DivTable({ rows }: { rows: TopDividende[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-elevated border-b border-border">
@@ -46,7 +47,7 @@ function DivTable({ rows }: { rows: TopDividende[] }) {
               <td className="px-4 py-2.5 text-right text-muted text-xs tabular">{r.dernier_div ? `${fmt(r.dernier_div)} F` : '—'}</td>
               <td className="px-4 py-2.5 text-right font-semibold text-white tabular">{fmt(r.total_divs)} F</td>
               <td className="px-4 py-2.5 text-right">
-                {r.signal ? <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${SIG[r.signal] ?? ''}`}>{r.signal}</span> : <span className="text-faint text-xs">—</span>}
+                {r.signal ? <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${SIG[r.signal] ?? ''}`}>{libelleSignal(r.signal)}</span> : <span className="text-faint text-xs">—</span>}
               </td>
             </tr>
           ))}
@@ -59,7 +60,7 @@ function DivTable({ rows }: { rows: TopDividende[] }) {
 
 function PvTable({ rows }: { rows: TopPlusValue[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-elevated border-b border-border">
@@ -90,7 +91,7 @@ function PvTable({ rows }: { rows: TopPlusValue[] }) {
                 {r.performance_pct >= 0 ? '+' : ''}{r.performance_pct.toFixed(1)}%
               </td>
               <td className="px-4 py-2.5 text-right">
-                {r.signal ? <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${SIG[r.signal] ?? ''}`}>{r.signal}</span> : <span className="text-faint text-xs">—</span>}
+                {r.signal ? <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${SIG[r.signal] ?? ''}`}>{libelleSignal(r.signal)}</span> : <span className="text-faint text-xs">—</span>}
               </td>
             </tr>
           ))}

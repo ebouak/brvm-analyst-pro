@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { chartTheme } from '@/lib/chartTheme';
 import dynamic from 'next/dynamic';
 import type { EChartsOption } from 'echarts';
 import type { EChartsReactProps } from 'echarts-for-react';
@@ -22,26 +23,33 @@ export default function EChart({ option, height = 320, className, loading, onEve
 
   if (!mounted) return <div style={style} className={className} />;
 
+  const T = chartTheme();
+  // Mouvement réduit : aucune animation ECharts. Sans cela, chaque redimensionnement
+  // relançait l'apparition des libellés, et la cartographie restait muette le
+  // temps de l'animation (constaté sur capture le 2026-11-08).
+  const mouvementReduit =
+    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const baseTheme: EChartsOption = {
+    animation: !mouvementReduit,
     backgroundColor: 'transparent',
-    textStyle: { color: '#8b93a7', fontFamily: 'Inter, sans-serif' },
+    textStyle: { color: T.muted, fontFamily: 'Inter, sans-serif' },
     grid: { top: 32, right: 16, bottom: 40, left: 56, containLabel: false },
     tooltip: {
-      backgroundColor: '#161922',
-      borderColor: '#232733',
+      backgroundColor: T.surface,
+      borderColor: T.border,
       borderWidth: 1,
-      textStyle: { color: '#e6e9f0', fontSize: 12 },
-      axisPointer: { type: 'cross', lineStyle: { color: '#4a5268' } },
+      textStyle: { color: T.ivory, fontSize: 12 },
+      axisPointer: { type: 'cross', lineStyle: { color: T.muted } },
     },
     xAxis: {
-      axisLine: { lineStyle: { color: '#232733' } },
-      axisLabel: { color: '#8b93a7', fontSize: 11 },
+      axisLine: { lineStyle: { color: T.border } },
+      axisLabel: { color: T.muted, fontSize: 11 },
       splitLine: { show: false },
     },
     yAxis: {
       axisLine: { show: false },
-      axisLabel: { color: '#8b93a7', fontSize: 11 },
-      splitLine: { lineStyle: { color: '#232733', type: 'dashed' } },
+      axisLabel: { color: T.muted, fontSize: 11 },
+      splitLine: { lineStyle: { color: T.border, type: 'dashed' } },
     },
   };
 
@@ -53,7 +61,7 @@ export default function EChart({ option, height = 320, className, loading, onEve
       style={style}
       className={className}
       showLoading={loading}
-      loadingOption={{ color: '#00c853', maskColor: 'rgba(15,17,23,0.8)', text: '' }}
+      loadingOption={{ color: T.up, maskColor: T.alpha('surface', 0.8), text: '' }}
       onEvents={onEvents}
       notMerge
     />

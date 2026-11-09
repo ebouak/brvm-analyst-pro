@@ -70,6 +70,7 @@ export default function MobileNav({
       <div
         className={`fixed inset-0 z-30 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`}
         aria-hidden={!open}
+        {...(open ? {} : ({ inert: '' } as object))}
       >
         <div
           className={`absolute inset-0 bg-obsidian/80 ${EASE} ${open ? 'opacity-100' : 'opacity-0'}`}
@@ -87,7 +88,7 @@ export default function MobileNav({
           <div className="space-y-6">
             {groups.map((group) => (
               <div key={group.label}>
-                <p className="overline mb-2 px-1 text-[9px] text-faint">
+                <p className="overline mb-2 px-1 text-[11px] text-faint">
                   {group.label === 'Premium' ? (
                     <span className="flex items-center gap-1.5 text-gold/70">Premium <Lock size={11} strokeWidth={2} className="text-gold" aria-hidden /></span>
                   ) : (
@@ -114,7 +115,7 @@ export default function MobileNav({
                         {locked ? (
                           <Lock size={12} strokeWidth={2} className="ml-auto opacity-60" aria-hidden />
                         ) : item.premium ? (
-                          <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[8px] font-semibold text-gold">
+                          <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[11px] font-semibold text-gold">
                             PRO
                           </span>
                         ) : null}

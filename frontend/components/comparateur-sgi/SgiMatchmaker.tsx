@@ -189,7 +189,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                     actif ? 'border-accent/60 bg-accent/15 text-ivory' : 'border-border bg-surface/40 text-ivory hover:bg-accent/10'
                   }`}
                 >
-                  <span aria-hidden className={`grid h-4 w-4 place-items-center rounded border text-[10px] ${actif ? 'border-accent bg-accent text-bg' : 'border-border'}`}>
+                  <span aria-hidden className={`grid h-4 w-4 place-items-center rounded border text-[11px] ${actif ? 'border-accent bg-accent text-bg' : 'border-border'}`}>
                     {actif && <Check size={11} strokeWidth={3} />}
                   </span>
                   {label}
@@ -321,7 +321,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                   </p>
                 )}
                 {m.frais && (
-                  <span className={`mt-2 inline-block rounded-md border px-2 py-0.5 text-[10px] ${CONFIANCE_BADGE_CLASS[m.frais.confiance]}`}>
+                  <span className={`mt-2 inline-block rounded-md border px-2 py-0.5 text-[11px] ${CONFIANCE_BADGE_CLASS[m.frais.confiance]}`}>
                     {CONFIANCE_LABEL[m.frais.confiance]}
                   </span>
                 )}
@@ -396,7 +396,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
                           <td className="tabular py-2 pr-3 text-xs text-faint">{i + 4}</td>
                           <td className="py-2 pr-3 text-ivory">
                             {m.sgi.nom}
-                            <span className="ml-2 text-[10px] text-faint">{PAYS[m.sgi.pays]?.nom}</span>
+                            <span className="ml-2 text-[11px] text-faint">{PAYS[m.sgi.pays]?.nom}</span>
                           </td>
                           <td className="tabular py-2 pr-3 text-right font-mono text-xs text-muted">{m.score}</td>
                           <td className="tabular hidden py-2 text-right text-xs text-muted sm:table-cell">
@@ -454,7 +454,7 @@ export default function SgiMatchmaker({ directory, frais }: { directory: Sgi[]; 
             );
           })()}
 
-          <p className="mt-4 text-[10px] leading-relaxed text-faint">
+          <p className="mt-4 text-[11px] leading-relaxed text-faint">
             Classement indicatif dérivé des barèmes publiés (bornes maximales, prudence) et de votre
             profil déclaré, pas une recommandation d&apos;investissement. Confirmez toujours les
             conditions auprès de la SGI avant d&apos;ouvrir un compte.

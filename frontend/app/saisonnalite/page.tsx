@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { createPublicClient } from '@/lib/supabase/public';
 import { getMonthlyReturns } from '@/lib/seasonality/server';
 import SeasonalityMatrix from '@/components/seasonality/SeasonalityMatrix';
@@ -35,32 +36,32 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
 
       {/* Sélecteur de titre (form GET). En essai, il est désactivé : l'aperçu
           gratuit porte sur un seul titre (le défaut), pour un seul mois. */}
-      <form className="flex items-center gap-2">
-        <label className="text-xs text-faint">Titre :</label>
-        <select name="code" defaultValue={code} disabled={preview}
-          className="bg-bg border border-border rounded-lg px-3 py-1.5 text-sm text-ivory disabled:opacity-50 disabled:cursor-not-allowed">
+      <form className="flex min-w-0 flex-wrap items-center gap-2">
+        <label htmlFor="saison-titre" className="text-xs text-faint">Titre :</label>
+        <select id="saison-titre" name="code" defaultValue={code} disabled={preview}
+          className="min-w-0 max-w-full bg-bg border border-border rounded-lg px-3 py-1.5 text-sm text-ivory disabled:opacity-50 disabled:cursor-not-allowed">
           {instruments.map((i) => <option key={i.code} value={i.code}>{i.code} — {i.designation ?? ''}</option>)}
         </select>
         {!preview && (
-          <button type="submit" className="text-xs px-3 py-1.5 rounded-lg bg-info/15 text-info">Afficher</button>
+          <button type="submit" className="text-xs px-3 py-1.5 rounded-lg bg-info/15 text-accent-ink">Afficher</button>
         )}
         {preview && (
-          <span className="text-[11px] text-faint">Choix du titre réservé au premium</span>
+          <span className="text-xs text-faint">Choix du titre réservé au premium</span>
         )}
       </form>
 
       <div>
-        <h2 className="font-display text-lg text-white">{code} <span className="text-sm text-muted">— {designation}</span></h2>
+        <h2 className="font-display text-lg text-ivory"><span className="font-mono font-medium">{code}</span> <span className="text-sm text-muted">— {designation}</span></h2>
         <div className="mt-3">
           <SeasonalityMatrix returns={returns} preview={preview} />
         </div>
       </div>
 
-      <p className="text-[11px] text-faint">
+      <p className="text-xs text-faint">
         Calcul sur l&apos;historique réel des cours (max 15 ans). Lecture statistique uniquement ;
         ne constitue pas un conseil en investissement.
       </p>
-      <Link href="/outils" className="text-xs text-info hover:underline">← Outils</Link>
+      <Link href="/outils" className="inline-flex items-center gap-1 text-xs text-accent-ink hover:underline"><ArrowLeft size={12} aria-hidden />Outils</Link>
     </div>
   );
 }

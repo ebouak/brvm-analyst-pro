@@ -51,11 +51,11 @@ export interface ValueTrapResult {
 }
 
 const LABELS: Record<TrapVerdict, string> = {
-  'trap-decote-piege': 'Value trap — décote piège',
-  'trap-benefice-effondre': 'Value trap — bénéfice effondré',
-  'perte': 'Perte — PER non calculable',
+  'trap-decote-piege': 'Value trap : décote piège',
+  'trap-benefice-effondre': 'Value trap : bénéfice effondré',
+  'perte': 'Perte : PER non calculable',
   'decote-reelle': 'Décote réelle',
-  'cher-croissance': 'Cher — croissance à confirmer',
+  'cher-croissance': 'Cher : croissance à confirmer',
   'sain': 'Valorisation saine',
   'indetermine': 'Données insuffisantes',
 };

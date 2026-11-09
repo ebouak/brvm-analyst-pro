@@ -98,7 +98,7 @@ export default async function Page() {
                       {m.prenom || 'Sans prénom'}
                     </Link>
                     <div className="text-xs text-muted">
-                      {m.canal === 'whatsapp' && <span className="mr-1 rounded bg-up/15 px-1.5 py-0.5 text-[10px] font-semibold text-up">WhatsApp</span>}
+                      {m.canal === 'whatsapp' && <span className="mr-1 rounded bg-up/15 px-1.5 py-0.5 text-[11px] font-semibold text-up">WhatsApp</span>}
                       {m.destinataire}
                     </div>
                   </td>

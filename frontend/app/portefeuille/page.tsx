@@ -7,7 +7,7 @@ import {
   createWatchlist, deleteWatchlist, setDefaultWatchlist,
   deleteAlert, updateAlert,
 } from './actions';
-import { fmtNumber, fmtFcfa } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtDateCourte } from '@/lib/format';
 import { AddWatchForm } from '@/components/portfolio/AddWatchForm';
 import PortefeuilleModals from '@/components/PortefeuilleModals';
 import Sparkline from '@/components/Sparkline';
@@ -229,7 +229,7 @@ export default async function PortefeuillePage({
             <RecapBouton />
             <Link
               href="/portefeuille/import"
-              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent-ink transition-colors hover:border-accent/60 hover:bg-accent/20"
             >
               Importer mon relevé SGI
             </Link>
@@ -237,7 +237,7 @@ export default async function PortefeuillePage({
             <form action={logout}>
               <button
                 type="submit"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border-strong px-4 py-1.5 text-xs text-muted transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-down/40 hover:text-down"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border-strong px-4 py-1.5 text-xs text-muted transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-down/40 hover:text-down"
               >
                 Déconnexion
               </button>
@@ -380,12 +380,12 @@ export default async function PortefeuillePage({
                         {rows.map((r) => (
                           <tr
                             key={r.id}
-                            className="border-b border-border/30 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-elevated/60 group"
+                            className="border-b border-border/30 transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-elevated/60 group"
                           >
                             <td className="px-4 py-3">
                               <Link
                                 href={`/actions/${r.code}`}
-                                className="font-semibold text-ivory transition-colors duration-200 hover:text-gold"
+                                className="font-mono font-medium text-ivory transition-colors duration-200 hover:text-accent-ink"
                               >
                                 {r.code}
                               </Link>
@@ -401,8 +401,8 @@ export default async function PortefeuillePage({
                               ) : <span className="text-faint text-xs">—</span>}
                             </td>
                             <td className="px-4 py-3 text-right tabular text-ivory">{fmtNumber(r.last)}</td>
-                            <td className="px-4 py-3 text-center tabular text-xs text-faint hidden md:table-cell">{r.date_entree ?? '—'}</td>
-                            <td className="px-4 py-3 text-center tabular text-xs text-faint hidden md:table-cell">{lastPriceDate[r.code] ?? '—'}</td>
+                            <td className="px-4 py-3 text-center text-xs text-faint hidden md:table-cell">{fmtDateCourte(r.date_entree)}</td>
+                            <td className="px-4 py-3 text-center text-xs text-faint hidden md:table-cell">{fmtDateCourte(lastPriceDate[r.code])}</td>
                             <td className="px-4 py-3 text-right tabular text-ivory font-medium">{r.value != null ? fmtFcfa(r.value) : '—'}</td>
                             <td className={`px-4 py-3 text-right tabular font-semibold ${r.pnl == null ? 'text-faint' : r.pnl >= 0 ? 'text-up' : 'text-down'}`}>
                               {r.pnl != null
@@ -473,7 +473,7 @@ export default async function PortefeuillePage({
                   <Link
                     key={w.id}
                     href={`/portefeuille?wl=${w.id}`}
-                    className={`flex items-center justify-between rounded-chip border px-3 py-2 text-xs transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                    className={`flex items-center justify-between rounded-chip border px-3 py-2 text-xs transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
                       w.id === activeWl?.id
                         ? 'border-gold/40 bg-gold/[0.06] text-gold'
                         : 'border-border bg-surface text-muted hover:border-border-strong hover:text-ivory'
@@ -481,7 +481,7 @@ export default async function PortefeuillePage({
                   >
                     <span>{w.nom}</span>
                     {w.is_default && (
-                      <span className="text-xs text-gold/60">Défaut</span>
+                      <span className="text-xs text-accent-ink">Défaut</span>
                     )}
                   </Link>
                 ))}
@@ -493,7 +493,7 @@ export default async function PortefeuillePage({
                   />
                   <button
                     type="submit"
-                    className="rounded-chip border border-gold/30 bg-gold/[0.08] px-3 py-1.5 text-xs text-gold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-gold/[0.14] hover:border-gold/50"
+                    className="rounded-chip border border-gold/30 bg-gold/[0.08] px-3 py-1.5 text-xs text-accent-ink transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-gold/[0.14] hover:border-gold/50"
                   >
                     +
                   </button>
@@ -519,23 +519,23 @@ export default async function PortefeuillePage({
                       return (
                         <div key={it.id} className="px-4 py-2.5 group flex items-center justify-between transition-colors duration-200 hover:bg-elevated/50">
                           <div className="flex-1 min-w-0">
-                            <Link href={`/actions/${it.code}`} className="text-xs font-semibold text-ivory hover:text-gold transition-colors duration-200">
+                            <Link href={`/actions/${it.code}`} className="font-mono text-xs font-medium text-ivory hover:text-accent-ink transition-colors duration-200">
                               {it.code}
                             </Link>
                             {hit && (
-                              <span className="ml-2 inline-flex items-center rounded-full border border-down/30 bg-down/10 px-1.5 py-0.5 text-[9px] font-semibold text-down">
-                                ALERTE
+                              <span className="ml-2 inline-flex items-center rounded-full border border-down/30 bg-down/5 px-1.5 py-0.5 text-xs font-semibold text-down">
+                                Alerte
                               </span>
                             )}
                             {last != null && (
-                              <span className="ml-2 tabular text-[10px] text-muted">{fmtNumber(last)}</span>
+                              <span className="ml-2 tabular text-xs text-muted">{fmtNumber(last)}</span>
                             )}
                           </div>
                           <form action={deleteWatchItem} className="inline">
                             <input type="hidden" name="id" value={it.id} />
                             <button
                               type="submit"
-                              className="text-[10px] text-faint hover:text-down opacity-0 group-hover:opacity-100 transition-all duration-200 px-1"
+                              className="text-xs text-faint hover:text-down opacity-0 group-hover:opacity-100 transition-colors duration-200 px-1"
                             >
                               ×
                             </button>
@@ -550,7 +550,7 @@ export default async function PortefeuillePage({
               {/* Formulaire ajout watchlist */}
               <PremiumPanel glow>
                 <div className="p-4 space-y-3">
-                  <Eyebrow className="text-gold/50">Ajouter un titre</Eyebrow>
+                  <Eyebrow>Ajouter un titre</Eyebrow>
                   <AddWatchForm action={addWatchItem} watchlistId={activeWl?.id ?? null} />
                 </div>
               </PremiumPanel>
@@ -581,7 +581,7 @@ export default async function PortefeuillePage({
                             <div className="flex items-center justify-end gap-3">
                               <div className="w-24 h-1 bg-border rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-gold/60 rounded-full transition-all duration-700"
+                                  className="h-full bg-gold/60 rounded-full transition-colors duration-700"
                                   style={{ width: `${Math.min(s.pct, 100)}%` }}
                                 />
                               </div>
@@ -643,16 +643,16 @@ export default async function PortefeuillePage({
                             className={`border-b border-border/30 transition-colors duration-200 hover:bg-elevated/40 group ${!a.actif ? 'opacity-40' : ''}`}
                           >
                             <td className="px-4 py-3">
-                              <Link href={`/actions/${a.code}`} className="font-semibold text-ivory hover:text-gold transition-colors duration-200">
+                              <Link href={`/actions/${a.code}`} className="font-mono font-medium text-ivory hover:text-accent-ink transition-colors duration-200">
                                 {a.code}
                               </Link>
                             </td>
                             <td className="px-4 py-3 text-xs text-muted">{typeLabel}</td>
                             <td className="px-4 py-3 text-right tabular text-ivory">{fmtNumber(a.seuil)}</td>
                             <td className="px-4 py-3 text-center">
-                              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] font-semibold tracking-wide ${
+                              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
                                 a.actif
-                                  ? 'border-up/30 bg-up/10 text-up'
+                                  ? 'border-up/30 bg-up/5 text-up'
                                   : 'border-border bg-elevated text-faint'
                               }`}>
                                 {a.actif ? 'Actif' : 'Inactif'}
@@ -663,7 +663,7 @@ export default async function PortefeuillePage({
                                 <input type="hidden" name="id" value={a.id} />
                                 <button
                                   type="submit"
-                                  className="text-xs text-faint hover:text-down opacity-0 group-hover:opacity-100 transition-all duration-200 px-1"
+                                  className="text-xs text-faint hover:text-down opacity-0 group-hover:opacity-100 transition-colors duration-200 px-1"
                                 >
                                   ×
                                 </button>
@@ -677,7 +677,7 @@ export default async function PortefeuillePage({
                 </div>
               </PremiumPanel>
             )}
-            <p className="text-[11px] text-faint leading-relaxed">
+            <p className="text-xs text-faint leading-relaxed">
               Les alertes sont évaluées à chaque affichage sur le dernier cours connu. Une évaluation planifiée côté serveur peut déclencher des notifications email ou Telegram.
             </p>
           </section>

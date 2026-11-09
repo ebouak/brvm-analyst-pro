@@ -22,7 +22,7 @@ export default function Mouvements({ id, titre, lignes }: { id: string; titre: s
     <section aria-labelledby={id} className="py-5 lg:px-5">
       <TeteBloc id={id} titre={titre} droite={<Link href="/actions" className="text-xs text-accent-ink hover:underline">Tout le marché</Link>} />
       {lignes.length === 0 ? <p className="text-sm text-muted">Aucune variation connue pour cette séance.</p> : (
-        <div className="-mx-1 overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="-mx-1 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
           <table className="w-full min-w-[19rem] text-sm" aria-labelledby={id}>
             <thead className="text-[11px] text-faint">
               <tr>

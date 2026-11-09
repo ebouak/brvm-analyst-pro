@@ -58,7 +58,7 @@ export function IndicesCompactCard({ indices }: { indices: IndiceDaily[] }) {
       {total > 0 && (
         <Link
           href="/dashboard"
-          className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-ivory/80 transition-colors hover:text-gold-2"
+          className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-ivory transition-colors hover:text-gold-2"
         >
           Voir les {total} indices <span aria-hidden>→</span>
         </Link>

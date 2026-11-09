@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { FinancialsData } from './types';
 import { TYPES_INTERIM } from './interim';
+import { NB_SEANCES_SERIE, plage52Semaines } from '@/lib/fiche/plages';
 
 export async function loadCompanyFinancials(code: string): Promise<FinancialsData | null> {
   const supabase = createClient();
@@ -17,10 +18,10 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
     // Fetch 260 séances pour calculer plage 52 semaines dynamiquement
     supabase
       .from('brvm_actions_daily')
-      .select('cours_jour, date_marche')
+      .select('cours_jour, date_marche, valorisation')
       .eq('code', code)
       .order('date_marche', { ascending: false })
-      .limit(260),
+      .limit(NB_SEANCES_SERIE),
     supabase
       .from('income_statements')
       .select('*')
@@ -67,11 +68,12 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
   ]);
 
   // Calcul dynamique de la plage 52 semaines à partir de l'historique
-  const hist52 = (hist52Res.data ?? []) as { cours_jour: number | null; date_marche: string }[];
-  const validCours = hist52.map((r) => r.cours_jour).filter((c): c is number => c != null && c > 0);
-  const cours_bas_52s  = validCours.length > 0 ? Math.min(...validCours) : null;
-  const cours_haut_52s = validCours.length > 0 ? Math.max(...validCours) : null;
+  const hist52 = (hist52Res.data ?? []) as { cours_jour: number | null; date_marche: string; valorisation: number | null }[];
   const cours_jour     = hist52[0]?.cours_jour ?? null;
+  // Même plage 365 jours que la fiche (helper commun), pas un min/max sur toute la série lue.
+  const plage = plage52Semaines(hist52, cours_jour);
+  const cours_bas_52s  = plage?.bas ?? null;
+  const cours_haut_52s = plage?.haut ?? null;
 
   return {
     instrument: {
@@ -81,7 +83,8 @@ export async function loadCompanyFinancials(code: string): Promise<FinancialsDat
       shares: instrument.shares ?? null,
       famille_comptable: (instrument.famille_comptable ?? 'general') as 'banque' | 'assurance' | 'general',
     },
-    latestDaily: { cours_jour, cours_bas_52s, cours_haut_52s },
+    latestDaily: { cours_jour, cours_bas_52s, cours_haut_52s, valorisation: hist52[0]?.valorisation != null ? Number(hist52[0].valorisation) : null },
+    serieCours: hist52.map((r) => ({ date_marche: r.date_marche, cours_jour: r.cours_jour })),
     incomeStatements: (incomeRes.data ?? []) as any,
     balanceSheets: (balanceRes.data ?? []) as any,
     cashFlowStatements: (cashflowRes.data ?? []) as any,

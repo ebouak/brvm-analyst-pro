@@ -18,7 +18,10 @@ import { computeLevels, type Levels } from '@/lib/hebdo/levels';
 import { lectureIntermediaire, type LectureIntermediaire } from '@/lib/financials/interim';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import type { ComparaisonMedianes } from '@/lib/diagnostic/medianes';
-import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere, memesComptes, type PerformanceTitre, type Pilier } from './suivi';
+import { performanceTitre, piliersThese, controleExDate, rentabiliteActif, fiscaliteDividende, notationDepassee, detteFinanciere, type PerformanceTitre, type Pilier } from './suivi';
+import { exerciceRetenu, memesComptes, mentionSecondJeu } from '@/lib/fiche/exerciceRetenu';
+import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
+import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 
 /**
  * Dossier valeur — la matière d'un rapport illustré, panneau par panneau.
@@ -273,7 +276,7 @@ export async function buildDossier(
     { data: isRows },
   ] = await Promise.all([
     sb.from('brvm_instruments').select('code, designation, secteur, pays, shares, flottant, notation_json').eq('code', CODE).maybeSingle(),
-    sb.from('brvm_actions_daily').select('date_marche, cours_jour, variation_pct, volume, cours_haut_52s, cours_bas_52s').eq('code', CODE).order('date_marche', { ascending: false }).limit(seances),
+    sb.from('brvm_actions_daily').select('date_marche, cours_jour, variation_pct, volume, cours_haut_52s, cours_bas_52s, valorisation').eq('code', CODE).order('date_marche', { ascending: false }).limit(seances),
     sb.from('signals_daily').select('date_marche, signal, score_total, confiance, explication, inputs').eq('code', CODE).order('date_marche', { ascending: false }).limit(1).maybeSingle(),
     // `nullsFirst: false` : sans lui, les lignes datées passent DERRIÈRE les
     // NULL et sortent de la fenêtre. Même piège que dans briefTools.ts.
@@ -292,6 +295,7 @@ export async function buildDossier(
     volume: number | null;
     cours_haut_52s: number | null;
     cours_bas_52s: number | null;
+    valorisation: number | null;
   }[];
   const serie = lignes.slice().reverse();
   const derniere = lignes[0] ?? null;
@@ -318,19 +322,28 @@ export async function buildDossier(
     ? await sb.from('balance_sheets').select('total_actifs, total_capitaux_propres, dette_court_terme, dette_long_terme, tresorerie_equivalents').eq('code', CODE).eq('periode', exerciceRef).eq('type_periode', 'annuel').maybeSingle()
     : { data: null };
   const bilanBrut = bilanRef as { total_actifs?: number | null; total_capitaux_propres?: number | null; dette_court_terme?: number | null; dette_long_terme?: number | null; tresorerie_equivalents?: number | null } | null;
-  // Bilan et fondamentaux d'une même norme seulement : sinon on ne les croise pas.
-  const bilan = memesComptes(bilanBrut?.total_capitaux_propres ?? null, fonda?.equity ?? null) ? bilanBrut : null;
-  if (bilanBrut && !bilan) {
-    lacunes.push(
-      `Le bilan ${exerciceRef} en base et les fondamentaux ne relèvent pas des mêmes comptes (capitaux propres différents) : ` +
-        'la dette et l’actif total du bilan ne sont pas croisés avec eux.',
-    );
-  }
+  /* Comptes retenus : SYSCOHADA (income/balance), source unique des ratios publics.
+     Le bilan et le compte de résultat relèvent du même jeu : on les croise. `fundamentals`
+     ne sert qu'en repli, et signale un second jeu de comptes. */
+  const bilan = bilanBrut;
+  const retenu = exerciceRetenu({
+    income: annuelRef.map((e) => ({ periode: e.periode, resultat_net: e.resultat_net, revenu_total: e.revenu_total })),
+    balance: bilanBrut && exerciceRef ? [{
+      periode: exerciceRef,
+      total_capitaux_propres: bilanBrut.total_capitaux_propres ?? null,
+      dette_court_terme: bilanBrut.dette_court_terme ?? null,
+      dette_long_terme: bilanBrut.dette_long_terme ?? null,
+    }] : [],
+    fundamentals: fondaRows,
+  });
+  const mentionJeu = mentionSecondJeu(retenu.secondJeu);
+  if (mentionJeu) lacunes.push(mentionJeu);
   const dette = detteFinanciere({
     famille: (FAMILLE_PAR_CODE[CODE] ?? 'general') as 'banque' | 'assurance' | 'general',
     lt: bilan?.dette_long_terme ?? null,
     ct: bilan?.dette_court_terme ?? null,
-    declaree: (fonda as { debt?: number | null } | null)?.debt ?? null,
+    // La dette déclarée de `fundamentals` n'est reprise que si elle relève des mêmes comptes que le bilan.
+    declaree: memesComptes(bilan?.total_capitaux_propres ?? null, fonda?.equity ?? null) ? (fonda as { debt?: number | null } | null)?.debt ?? null : null,
   });
   const fisc = fiscaliteDividende((instr as { pays?: string | null }).pays ?? null);
   const notation = litNotation((instr as { notation_json?: unknown }).notation_json);
@@ -374,16 +387,26 @@ export async function buildDossier(
     );
   }
 
-  const ratios = fonda
+  const rb = ratiosBilan({
+    cours, titres: actions,
+    resultatNet: retenu.resultatNet, chiffreAffaires: retenu.chiffreAffaires,
+    capitauxPropres: retenu.capitauxPropres, detteFinanciere: dette?.valeur ?? null,
+    capitalisation: capitalisationFcfa({ valorisation: derniere?.valorisation != null ? Number(derniere.valorisation) : null, cours, titres: actions }),
+  });
+  const ratiosBrut = fonda
     ? computeRatios({
         cours,
         shares: actions,
-        revenue: fonda.revenue,
-        net_income: fonda.net_income,
-        equity: fonda.equity,
+        revenue: retenu.chiffreAffaires,
+        net_income: retenu.resultatNet,
+        equity: retenu.capitauxPropres,
         debt: dette?.valeur ?? null,
         dividende: divRetenu?.montant ?? null,
       })
+    : null;
+  // Ratios publics : un seul calcul (ratiosBilan), identique à la fiche, /financials et /revue.
+  const ratios = ratiosBrut
+    ? { ...ratiosBrut, capitalisation: rb.capitalisation, bpa: rb.bpa.valeur, per: rb.per.valeur, pb: rb.pb, ps: rb.ps, roe: rb.roe, margeNette: rb.margeNette, gearing: rb.gearing }
     : null;
 
   /* Rapporter un dividende NET à un bénéfice par action BRUT minore le taux de
@@ -518,9 +541,9 @@ export async function buildDossier(
       date_cours: derniere?.date_marche ?? null,
       variation_veille_pct: derniere?.variation_pct ?? null,
       capitalisation: ratios?.capitalisation ?? null,
-      chiffre_affaires: fonda?.revenue ?? null,
-      resultat_net: fonda?.net_income ?? null,
-      capitaux_propres: fonda?.equity ?? null,
+      chiffre_affaires: fonda ? retenu.chiffreAffaires : null,
+      resultat_net: fonda ? retenu.resultatNet : null,
+      capitaux_propres: fonda ? retenu.capitauxPropres : null,
       dette: dette?.valeur ?? null,
       dette_perimetre: dette?.perimetre ?? null,
       tresorerie: bilan?.tresorerie_equivalents ?? null,
@@ -570,9 +593,9 @@ export async function buildDossier(
     ratios,
     qualite_resultat: qualite,
     rentabilite_actif: rentabiliteActif({
-      resultatNet: fonda?.net_income ?? null,
+      resultatNet: fonda ? retenu.resultatNet : null,
       totalActif: bilan?.total_actifs ?? null,
-      capitauxPropres: fonda?.equity ?? null,
+      capitauxPropres: fonda ? retenu.capitauxPropres : null,
       dette: dette?.valeur ?? null,
     }),
     niveaux,

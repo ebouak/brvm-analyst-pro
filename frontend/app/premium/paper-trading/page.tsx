@@ -45,7 +45,7 @@ export default function PaperTradingPage() {
       setShowModal(false);
       void phCapture('paper_trading_started', { capital_initial: capital });
     } catch (err) {
-      setError((err as Error).message || 'Failed to initialize account');
+      setError((err as Error).message || 'Impossible d’initialiser le compte');
     }
   };
 
@@ -53,7 +53,7 @@ export default function PaperTradingPage() {
     <div className="min-h-screen bg-bg">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="space-y-2 mb-8">
-          <h1 className="text-2xl md:text-3xl font-semibold text-white">
+          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory">
             Paper Trading
           </h1>
           <p className="text-sm text-muted">
@@ -69,13 +69,13 @@ export default function PaperTradingPage() {
 
         {account === null && !showModal && (
           <div className="mt-8 bg-surface border border-border rounded-lg p-8 text-center">
-            <p className="text-white mb-6">
+            <p className="text-ivory mb-6">
               Pas encore de compte paper trading. Créez-en un maintenant.
             </p>
             <button
               type="button"
               onClick={() => setShowModal(true)}
-              className="bg-info hover:bg-info/90 text-white px-6 py-2 rounded transition"
+              className="bg-accent-ink hover:brightness-110 text-obsidian px-6 py-2 rounded transition"
             >
               Initialiser un compte
             </button>
@@ -85,12 +85,12 @@ export default function PaperTradingPage() {
         {showModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-elevated border border-border rounded-lg p-6 w-full max-w-md shadow-xl">
-              <h3 className="text-lg font-semibold text-white mb-4">
+              <h3 className="text-lg font-semibold text-ivory mb-4">
                 Capital fictif initial
               </h3>
 
               {error && (
-                <div className="mb-4 p-3 bg-down/10 border border-down/30 rounded text-down text-sm">
+                <div className="mb-4 p-3 bg-down/5 border border-down/30 rounded text-down text-sm">
                   {error}
                 </div>
               )}
@@ -101,7 +101,7 @@ export default function PaperTradingPage() {
                     key={preset.value}
                     type="button"
                     onClick={() => handleInitialize(preset.value)}
-                    className="w-full bg-surface hover:bg-surface/80 border border-border rounded p-3 text-white transition text-left text-sm font-medium"
+                    className="w-full bg-surface hover:bg-surface/80 border border-border rounded p-3 text-ivory transition text-left text-sm font-medium"
                   >
                     {preset.label}
                   </button>
@@ -121,7 +121,7 @@ export default function PaperTradingPage() {
                       setError(null);
                     }}
                     placeholder="Ex: 25000000"
-                    className="flex-1 bg-surface border border-border rounded px-3 py-2 text-white text-sm placeholder:text-muted/50 focus:outline-none focus:border-info"
+                    className="flex-1 bg-surface border border-border rounded px-3 py-2 text-ivory text-sm placeholder:text-muted focus:outline-none focus:border-info"
                   />
                   <button
                     type="button"
@@ -132,7 +132,7 @@ export default function PaperTradingPage() {
                         setError('Veuillez entrer un montant');
                       }
                     }}
-                    className="bg-info hover:bg-info/90 text-white px-4 py-2 rounded transition text-sm font-medium"
+                    className="bg-accent-ink hover:brightness-110 text-obsidian px-4 py-2 rounded transition text-sm font-medium"
                   >
                     Créer
                   </button>

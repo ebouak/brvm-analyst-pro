@@ -112,7 +112,7 @@ export default function DevelopersPage() {
           {ENDPOINTS.map((e) => (
             <div key={e.path} className="rounded-xl border border-border bg-surface overflow-hidden">
               <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
-                <span className="rounded bg-up/10 px-2 py-0.5 text-[11px] font-bold text-up">{e.method}</span>
+                <span className="rounded bg-up/5 px-2 py-0.5 text-[11px] font-bold text-up">{e.method}</span>
                 <code className="font-mono text-sm text-white">{e.path}</code>
               </div>
               <div className="px-4 py-3 space-y-2">

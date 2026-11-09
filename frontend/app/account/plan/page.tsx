@@ -1,4 +1,5 @@
 import OffresNiveaux from '@/components/billing/OffresNiveaux';
+import { fmtDateCourte } from '@/lib/format';
 import { accesAcademy } from '@/lib/server/academyAccess';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -15,12 +16,7 @@ export const metadata = { title: 'Mon abonnement' };
 
 const DASH = '—';
 
-function fmtDate(d: string | null | undefined): string {
-  if (!d) return DASH;
-  const p = new Date(d);
-  if (Number.isNaN(p.getTime())) return DASH;
-  return p.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-}
+const fmtDate = (d: string | null | undefined) => fmtDateCourte(d);
 
 export default async function Page() {
   const supabase = createClient();
@@ -112,6 +108,10 @@ export default async function Page() {
       </div>
 
       <SignalOffre page="/account/plan" />
+      <p className="max-w-[65ch] text-sm text-muted">
+        L’abonnement prend effet à la confirmation du paiement et reste actif jusqu’à la fin de la période payée. Aucun
+        prélèvement automatique : pour le prolonger, vous effectuez un nouveau paiement.
+      </p>
       <PlanClient plans={plans} canSubscribe={canSubscribe} />
 
       {/* Alternative sans abonnement : la formation complète, avec un mois Premium (Chariow). */}
@@ -160,7 +160,7 @@ export default async function Page() {
       <div className="pt-2 border-t border-border">
         <Link
           href="/account/newsletters"
-          className="text-sm text-muted hover:text-[#56d7fd] transition-colors duration-150"
+          className="text-sm text-muted hover:text-accent-ink transition-colors duration-150"
         >
           Gérer mes préférences newsletter →
         </Link>

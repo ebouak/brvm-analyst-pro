@@ -39,7 +39,7 @@ export default function EmbedFrame({
         href={BACKLINK}
         target="_blank"
         rel="noopener"
-        className={`self-end text-[10px] tracking-wide hover:underline ${
+        className={`self-end text-[11px] tracking-wide hover:underline ${
           dark ? 'text-[#56d7fd]' : 'text-[#0c8fae]'
         }`}
       >

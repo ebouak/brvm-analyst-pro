@@ -1,3 +1,4 @@
+import { ArrowRight, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { getAdvisorRecommendations } from '@/lib/advisor/server';
 import { createPublicClient } from '@/lib/supabase/public';
@@ -91,9 +92,9 @@ export default async function ConseillerPage() {
             <StatPill tone="neutral"><span className="tabular">{rows.length}</span>&nbsp;valeurs analysées</StatPill>
             <Link
               href="/conseiller/track-record"
-              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent transition-all hover:border-accent/60 hover:bg-accent/20"
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent-ink transition-colors hover:border-accent/60 hover:bg-accent/20"
             >
-              Track record public →
+              Track record public <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </>
         }
@@ -101,15 +102,15 @@ export default async function ConseillerPage() {
 
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-panel border-2 border-up/40 bg-up/10 px-4 py-3">
-          <p className="overline text-up flex items-center gap-1">▲ À acheter</p>
+          <p className="flex items-center gap-1 text-xs text-up"><TrendingUp className="h-3.5 w-3.5" aria-hidden /> À acheter</p>
           <p className="mt-1 tabular text-3xl font-bold text-up">{counts.acheter}</p>
         </div>
         <div className="rounded-panel border border-border bg-surface px-4 py-3">
-          <p className="overline text-muted flex items-center gap-1">■ À conserver</p>
-          <p className="mt-1 tabular text-3xl font-bold text-white">{counts.conserver}</p>
+          <p className="flex items-center gap-1 text-xs text-muted"><Minus className="h-3.5 w-3.5" aria-hidden /> À conserver</p>
+          <p className="mt-1 tabular text-3xl font-bold text-ivory">{counts.conserver}</p>
         </div>
         <div className="rounded-panel border-2 border-down/40 bg-down/10 px-4 py-3">
-          <p className="overline text-down flex items-center gap-1">▼ À vendre</p>
+          <p className="flex items-center gap-1 text-xs text-down"><TrendingDown className="h-3.5 w-3.5" aria-hidden /> À vendre</p>
           <p className="mt-1 tabular text-3xl font-bold text-down">{counts.vendre}</p>
         </div>
       </div>
@@ -117,7 +118,7 @@ export default async function ConseillerPage() {
       {/* ── Alertes : bascules de recommandation (vs séance précédente) ── */}
       {changes.length > 0 && (
         <section className="rounded-xl border border-info/30 bg-info/5 p-4">
-          <h2 className="mb-2 flex items-center gap-2 font-display text-base text-white">
+          <h2 className="mb-2 flex items-center gap-2 font-display text-base text-ivory">
             Changements de recommandation
             <span className="text-[11px] font-normal text-faint">(depuis la dernière séance)</span>
           </h2>
@@ -125,9 +126,9 @@ export default async function ConseillerPage() {
             {changes.map((c) => (
               <li key={c.code}>
                 <Link href={`/actions/${c.code}`} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs hover:border-info/40">
-                  <span className="font-semibold text-white">{c.code}</span>
+                  <span className="font-mono font-medium text-ivory">{c.code}</span>
                   <span className={ACT_COLOR[c.from]}>{ACT_LABEL[c.from]}</span>
-                  <span className="text-faint">→</span>
+                  <ArrowRight className="h-3 w-3 text-faint" aria-hidden />
                   <span className={`font-semibold ${ACT_COLOR[c.to]}`}>{ACT_LABEL[c.to]}</span>
                 </Link>
               </li>
@@ -151,7 +152,7 @@ export default async function ConseillerPage() {
           <section key={action} aria-label={`Recommandations ${ACT_LABEL[action]}`}>
             <div className="mb-3 flex items-baseline gap-3">
               <h2 className={`font-display text-lg ${ACT_COLOR[action]}`}>
-                {action === 'acheter' ? '▲' : action === 'vendre' ? '▼' : '■'} {ACT_LABEL[action]}
+                {action === 'acheter' ? <TrendingUp className="mr-1.5 inline h-4 w-4" aria-hidden /> : action === 'vendre' ? <TrendingDown className="mr-1.5 inline h-4 w-4" aria-hidden /> : <Minus className="mr-1.5 inline h-4 w-4" aria-hidden />}{ACT_LABEL[action]}
                 <span className="tabular ml-2 text-sm text-faint">({group.length})</span>
               </h2>
               <span className="text-[11px] text-faint">
@@ -167,7 +168,7 @@ export default async function ConseillerPage() {
         );
       })}
 
-      <p className="text-[11px] text-faint">
+      <p className="text-xs text-faint">
         Synthèse algorithmique dérivée des données réelles (signaux, DCF, RSI, dividendes), aucune
         valeur inventée. Ne constitue pas un conseil en investissement personnalisé. Performances passées
         ne préjugent pas des performances futures.

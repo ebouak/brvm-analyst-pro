@@ -38,7 +38,7 @@ export default function CompareFundamentals({ rows }: { rows: FundaRow[] }) {
       <div className="px-4 py-3 border-b border-border">
         <span className="text-xs text-muted">Fondamentaux comparés</span>
       </div>
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border">
@@ -59,7 +59,7 @@ export default function CompareFundamentals({ rows }: { rows: FundaRow[] }) {
                   const v = r.ratios[key];
                   if (v != null && NS_SI_NEGATIF.has(key) && (v as number) < 0) {
                     return (
-                      <td key={r.code} className="px-4 py-2 text-right text-muted/70"
+                      <td key={r.code} className="px-4 py-2 text-right text-muted"
                           title="Non significatif : résultat (ou capitaux propres) négatif, le ratio n'a pas de sens financier, la donnée est correcte.">
                         n.s.
                       </td>
@@ -80,7 +80,7 @@ export default function CompareFundamentals({ rows }: { rows: FundaRow[] }) {
                 const val = computeValuation(r.ratios, r.coursActuel, r.fcf, r.shares);
                 return (
                   <td key={r.code} className="px-4 py-2 text-right">
-                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${VERDICT_COLORS[val.verdict]}`}>
+                    <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full border ${VERDICT_COLORS[val.verdict]}`}>
                       {VERDICT_LABELS[val.verdict]}
                     </span>
                   </td>

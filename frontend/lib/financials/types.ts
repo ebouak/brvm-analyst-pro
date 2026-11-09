@@ -127,7 +127,11 @@ export interface FinancialsData {
     cours_jour: number | null;
     cours_bas_52s: number | null;
     cours_haut_52s: number | null;
+    /** Capitalisation de la dernière séance (FCFA), si la source la publie. */
+    valorisation?: number | null;
   } | null;
+  /** Clôtures récentes (NB_SEANCES_SERIE séances), pour la plage 52 semaines en jours calendaires. */
+  serieCours: { date_marche: string; cours_jour: number | null }[];
   incomeStatements: IncomeStatement[];
   balanceSheets: BalanceSheet[];
   cashFlowStatements: CashFlowStatement[];

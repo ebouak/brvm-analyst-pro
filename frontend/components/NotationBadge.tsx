@@ -1,56 +1,13 @@
+import { ArrowDown, ArrowRight, ArrowUp } from 'lucide-react';
+import { titrePublication } from '@/lib/fiche/affichage';
+import {
+  dernieresNotations,
+  libellePerspective,
+  logoAgence,
+  syntheseNotation,
+  type Variation,
+} from '@/lib/fiche/notation';
 import type { Publication } from './PublicationsModal';
-
-// Rating scale — higher index = better
-const RATING_SCALE = [
-  'D', 'C', 'CC', 'CCC-', 'CCC', 'CCC+',
-  'B-', 'B', 'B+', 'BB-', 'BB', 'BB+',
-  'BBB-', 'BBB', 'BBB+',
-  'A-', 'A', 'A+', 'AA-', 'AA', 'AA+', 'AAA',
-  'B', 'A3', 'A2', 'A1', 'A1+',
-];
-
-function rank(note: string) {
-  const i = RATING_SCALE.indexOf(note);
-  return i === -1 ? 5 : i;
-}
-
-function noteColor(note: string): string {
-  if (note.startsWith('AAA') || note.startsWith('AA')) return 'text-up';
-  if (note.startsWith('A')) return 'text-up/80';
-  if (note.startsWith('BBB')) return 'text-warn';
-  if (note.startsWith('BB') || note.startsWith('B')) return 'text-warn/70';
-  return 'text-down';
-}
-
-function buildComment(note: string, perspective: string, history: { note: string }[]): string {
-  let level = '';
-  if (note.startsWith('AAA')) level = 'qualité exceptionnelle';
-  else if (note.startsWith('AA')) level = 'très haute qualité';
-  else if (note.startsWith('A')) level = 'haute qualité';
-  else if (note.startsWith('BBB')) level = 'qualité investment grade';
-  else if (note.startsWith('BB')) level = 'catégorie spéculative';
-  else level = 'risque élevé';
-
-  const persp = perspective.toLowerCase() === 'stable'
-    ? 'perspective stable'
-    : perspective.toLowerCase() === 'positive'
-    ? 'perspective positive'
-    : 'perspective négative';
-
-  let trend = '';
-  if (history.length >= 2) {
-    const d = rank(history[0].note) - rank(history[1].note);
-    if (d > 0) trend = ' Tendance en amélioration sur la période récente.';
-    else if (d < 0) trend = ' Tendance en dégradation sur la période récente.';
-    else trend = ' Notation stable sur la période récente.';
-  }
-
-  return `Notation ${level}, ${persp}.${trend}`;
-}
-
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
-}
 
 interface HistoryEntry {
   note: string;
@@ -74,11 +31,31 @@ interface NotationProps {
   notationPubs?: Publication[];
 }
 
-export default function NotationBadge({ notation, notationPubs = [] }: NotationProps) {
-  const { agence, perspective } = notation;
+function dateCourte(iso: string): string {
+  return new Date(iso).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+}
 
-  // Build history: prefer stored history[], fall back to single entry
-  const entries: HistoryEntry[] = (notation.history && notation.history.length > 0)
+function Fleche({ v }: { v: Variation }) {
+  if (v === 'hausse') return <ArrowUp className="h-3.5 w-3.5 text-up" aria-label="en hausse" />;
+  if (v === 'baisse') return <ArrowDown className="h-3.5 w-3.5 text-down" aria-label="en baisse" />;
+  if (v === 'stable') return <ArrowRight className="h-3.5 w-3.5 text-muted" aria-label="inchangée" />;
+  return null;
+}
+
+function Pastille({ perspective }: { perspective: string }) {
+  const p = libellePerspective(perspective);
+  if (!p) return null;
+  return (
+    <span className="inline-flex items-center rounded-full border border-border-strong px-2.5 py-0.5 text-xs text-ivory">
+      {p}
+    </span>
+  );
+}
+
+export default function NotationBadge({ notation, notationPubs = [] }: NotationProps) {
+  const { agence } = notation;
+
+  const entries: HistoryEntry[] = notation.history && notation.history.length > 0
     ? notation.history
     : [{
         note: notation.note,
@@ -88,96 +65,120 @@ export default function NotationBadge({ notation, notationPubs = [] }: NotationP
         date_notation: notation.date_notation,
       }];
 
-  const latest = entries[0];
-  const comment = buildComment(latest.note, latest.perspective ?? perspective, entries);
+  const ordonnees = dernieresNotations(entries, entries.length);
+  const latest = ordonnees[0];
+  const persp = latest.perspective ?? notation.perspective;
+  const synthese = syntheseNotation(latest.note, persp, ordonnees);
+  const recentes = ordonnees.slice(0, 3);
+  const logo = logoAgence(agence);
+  const docs = notationPubs.slice(0, 3);
+  const longTerme = latest.long_terme ?? null;
+  const courtTerme = latest.court_terme ?? null;
+  const perspLib = libellePerspective(persp);
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted">Notation financière</p>
-      </div>
-
-      {/* Agency + latest rating */}
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">{agence}</span>
-        <div className="flex items-center gap-2">
-          <span className={`tabular text-xl font-bold ${noteColor(latest.note)}`}>{latest.note}</span>
-          <span className="text-xs text-muted">{latest.perspective ?? perspective}</span>
-        </div>
-      </div>
-
-      {/* Long/court terme detail */}
-      {(latest.long_terme || latest.court_terme) && (
-        <div className="flex gap-4 text-xs text-muted">
-          {latest.long_terme && (
-            <span>Long terme : <span className="text-white/80">{latest.long_terme}</span></span>
+    <section aria-label="Notation financière" className="space-y-5 rounded-xl border border-border bg-surface p-4 sm:p-5">
+      {/* Ligne haute : agence + note, puis détail long / court terme */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-4">
+          {logo && (
+            // Logo officiel, sombre sur fond transparent : posé sur pastille blanche.
+            <span className="flex h-12 shrink-0 items-center rounded-lg bg-white px-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logo} alt={agence} className="h-8 w-auto" />
+            </span>
           )}
-          {latest.court_terme && (
-            <span>Court terme : <span className="text-white/80">{latest.court_terme}</span></span>
-          )}
+          <div className="min-w-0">
+            <p className="text-xs text-muted">Notation financière</p>
+            <p className="text-sm font-medium text-ivory">{agence}</p>
+          </div>
+          <div className="flex items-center gap-3 sm:border-l sm:border-border sm:pl-4">
+            <span className="tabular text-4xl font-bold leading-none text-ivory sm:text-5xl">{latest.note}</span>
+            <Pastille perspective={persp} />
+          </div>
         </div>
-      )}
 
-      {/* History */}
-      {entries.length > 1 && (
-        <div className="border-t border-border/50 pt-3 space-y-1.5">
-          <p className="text-xs text-faint mb-2">Évolution</p>
-          {entries.map((e, i) => {
-            const prev = entries[i + 1];
-            let arrow = '';
-            let arrowCls = 'text-muted';
-            if (prev) {
-              const d = rank(e.note) - rank(prev.note);
-              if (d > 0) { arrow = '↑'; arrowCls = 'text-up'; }
-              else if (d < 0) { arrow = '↓'; arrowCls = 'text-down'; }
-              else { arrow = '→'; arrowCls = 'text-muted'; }
-            }
-            return (
-              <div key={e.date_notation + i} className="flex items-center justify-between py-0.5">
-                <span className="text-xs text-muted w-20">{fmtDate(e.date_notation)}</span>
-                <div className="flex items-center gap-2">
-                  {arrow && <span className={`text-xs font-bold ${arrowCls}`}>{arrow}</span>}
-                  <span className={`tabular text-xs font-semibold ${noteColor(e.note)}`}>{e.note}</span>
-                  <span className="text-xs text-faint w-16">{e.perspective}</span>
-                </div>
+        {(longTerme || courtTerme) && (
+          <dl className="space-y-1 text-sm text-muted">
+            {longTerme && (
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <dt>Long terme :</dt>
+                <dd className="font-semibold text-ivory">
+                  <span className="tabular">{longTerme}</span>
+                  {perspLib && <span className="ml-2 font-normal text-muted">perspective {perspLib}</span>}
+                </dd>
               </div>
-            );
-          })}
-        </div>
-      )}
+            )}
+            {courtTerme && (
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <dt>Court terme :</dt>
+                <dd className="font-semibold text-ivory">
+                  <span className="tabular">{courtTerme}</span>
+                  {perspLib && <span className="ml-2 font-normal text-muted">perspective {perspLib}</span>}
+                </dd>
+              </div>
+            )}
+          </dl>
+        )}
+      </div>
 
-      {/* Comment */}
-      <p className="text-xs text-muted italic border-t border-border/50 pt-2">{comment}</p>
+      <p className="text-sm text-muted">{synthese}</p>
 
-      {/* Publication links */}
-      {notationPubs.length > 0 && (
-        <div className="border-t border-border/50 pt-2 space-y-1">
-          <p className="text-xs text-faint mb-1">Documents officiels</p>
-          {notationPubs.slice(0, 3).map((pub) => (
-            <div key={pub.id} className="flex items-center justify-between">
-              <span className="text-xs text-muted truncate max-w-[60%]">
-                {new Date(pub.date_publication).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}
-                {' — '}{pub.libelle}
-              </span>
-              {pub.source_url ? (
-                <a
-                  href={pub.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-up border border-up/30 rounded px-2 py-0.5 hover:bg-up/10 transition whitespace-nowrap"
-                >
-                  Voir →
-                </a>
-              ) : (
-                <span className="text-xs text-faint border border-border rounded px-2 py-0.5 whitespace-nowrap cursor-not-allowed">
-                  Voir →
-                </span>
-              )}
+      {(recentes.length > 1 || docs.length > 0) && (
+        <div className="grid gap-5 border-t border-border/60 pt-4 lg:grid-cols-2">
+          {recentes.length > 1 && (
+            <div>
+              <h3 className="mb-2 text-xs text-faint">Évolution</h3>
+              <ol className="grid grid-cols-3 gap-2">
+                {recentes.map((e) => (
+                  <li key={e.date_notation + e.note} className="rounded-lg border border-border/60 px-2.5 py-2">
+                    <p className="text-xs text-muted">{dateCourte(e.date_notation)}</p>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm">
+                      <span className="tabular font-semibold text-ivory">{e.note}</span>
+                      <Fleche v={e.variation} />
+                    </p>
+                    {libellePerspective(e.perspective) && (
+                      <p className="text-xs text-faint">{libellePerspective(e.perspective)}</p>
+                    )}
+                  </li>
+                ))}
+              </ol>
             </div>
-          ))}
+          )}
+
+          {docs.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-xs text-faint">Documents officiels</h3>
+              <ul className="space-y-1">
+                {docs.map((pub) => {
+                  const titre = titrePublication(pub.libelle);
+                  const date = dateCourte(pub.date_publication);
+                  return (
+                    <li key={pub.id} className="flex min-h-[44px] items-center justify-between gap-3">
+                      <span className="min-w-0 text-xs text-muted">
+                        <span className="tabular">{date}</span> — {titre}
+                      </span>
+                      {pub.source_url ? (
+                        <a
+                          href={pub.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Voir le document : ${titre}, ${date}`}
+                          className="inline-flex min-h-[44px] shrink-0 items-center px-2 text-xs text-accent-ink underline-offset-2 hover:underline"
+                        >
+                          Voir
+                        </a>
+                      ) : (
+                        <span className="shrink-0 px-2 text-xs text-faint">Indisponible</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </section>
   );
 }

@@ -49,7 +49,7 @@ export function ClientRow({ c }: { c: ApiClientRow }) {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-ivory">{c.nom}</span>
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${STATUT_STYLE[c.statut]}`}>
+            <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${STATUT_STYLE[c.statut]}`}>
               {STATUT_LABEL[c.statut]}
             </span>
           </div>
@@ -109,9 +109,9 @@ export function ClientRow({ c }: { c: ApiClientRow }) {
               détenir cette clé : transmettez-la manuellement avant de quitter cette page.
             </p>
           ) : emailed === true ? (
-            <p className="text-[10px] text-up">✓ Clé envoyée par email à {c.email}.</p>
+            <p className="text-[11px] text-up">✓ Clé envoyée par email à {c.email}.</p>
           ) : null}
-          <p className="text-[10px] text-faint">
+          <p className="text-[11px] text-faint">
             Seul son empreinte (sha256) est conservée. En cas de perte : révoquer puis réémettre.
           </p>
         </div>

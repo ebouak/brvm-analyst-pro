@@ -50,7 +50,7 @@ export function MyPortfolioAdvice() {
   return (
     <section className="space-y-3">
       <h2 className="font-display text-lg text-white">Mon portefeuille · conseils</h2>
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-elevated/40 text-xs text-muted">

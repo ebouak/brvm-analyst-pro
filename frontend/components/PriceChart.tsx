@@ -1,4 +1,5 @@
 'use client';
+import { pctFr } from '@/lib/fiche/affichage';
 import { useEffect, useRef, useState } from 'react';
 import {
   createChart,
@@ -671,7 +672,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold">
-            Cours{designation ? ` — ${designation}` : ''}
+            Cours{designation ? ` · ${designation}` : ''}
           </span>
           {lastClose != null && (
             <span className="tabular text-sm font-medium">
@@ -682,7 +683,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
             <span
               className={`tabular text-xs font-medium ${varPct >= 0 ? 'text-up' : 'text-down'}`}
             >
-              {varPct >= 0 ? '+' : ''}{varPct.toFixed(2)}%
+              {pctFr(varPct, 2, true)}
             </span>
           )}
         </div>
@@ -698,7 +699,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => setResolution(key)}
                 className={`text-xs px-2.5 py-0.5 transition ${
                   resolution === key
-                    ? 'bg-cyan/20 text-cyan'
+                    ? 'bg-cyan/20 text-accent-ink [[data-theme=light]_&]:bg-cyan/10'
                     : 'text-muted hover:text-cyan'
                 }`}
               >
@@ -715,7 +716,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => setChartType(t)}
                 className={`text-xs px-2.5 py-0.5 transition ${
                   chartType === t
-                    ? 'bg-up/20 text-up'
+                    ? 'bg-up/20 text-up [[data-theme=light]_&]:bg-up/10'
                     : 'text-muted hover:text-up'
                 }`}
               >
@@ -754,7 +755,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
             onClick={() => { setDrawTool(key); if (key !== 'tline') { setDraftLine(null); tlineFirstPt.current = null; } }}
             className={`text-xs px-2.5 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-cyan/40 ${
               drawTool === key
-                ? 'bg-cyan/20 text-cyan border-cyan/40'
+                ? 'bg-cyan/20 text-accent-ink border-cyan/40 [[data-theme=light]_&]:bg-cyan/10'
                 : 'border-border text-muted hover:border-cyan/40 hover:text-cyan'
             }`}
           >
@@ -772,7 +773,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
           </button>
         )}
         {draftLine && (
-          <span className="text-[10px] text-cyan ml-1 animate-pulse">Cliquer pour le 2ᵉ point…</span>
+          <span className="text-[11px] text-cyan ml-1 animate-pulse">Cliquer pour le 2ᵉ point…</span>
         )}
       </div>
 
@@ -789,7 +790,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => toggle(key)}
                 className={`text-xs px-2 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-up/50 ${
                   active
-                    ? 'bg-up/15 text-up border-up/40'
+                    ? 'bg-up/15 text-up border-up/40 [[data-theme=light]_&]:bg-up/10'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'
                 }`}
               >
@@ -809,7 +810,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
                 onClick={() => toggle(key)}
                 className={`text-xs px-2 py-0.5 rounded border transition focus:outline-none focus:ring-2 focus:ring-up/50 ${
                   active
-                    ? 'bg-up/15 text-up border-up/40'
+                    ? 'bg-up/15 text-up border-up/40 [[data-theme=light]_&]:bg-up/10'
                     : 'border-border text-muted hover:border-up/40 hover:text-up'
                 }`}
               >
@@ -836,7 +837,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       {/* ── RSI sub-chart ── */}
       {visible.has('rsi') && (
         <div>
-          <div className="text-[10px] text-muted mb-0.5 pl-1">RSI (14)</div>
+          <div className="text-[11px] text-muted mb-0.5 pl-1">RSI (14)</div>
           <div ref={rsiRef} />
         </div>
       )}
@@ -844,7 +845,7 @@ export default function PriceChart({ data, designation, markers = [] }: Props) {
       {/* ── MACD sub-chart ── */}
       {visible.has('macd') && (
         <div>
-          <div className="text-[10px] text-muted mb-0.5 pl-1">MACD (12, 26, 9)</div>
+          <div className="text-[11px] text-muted mb-0.5 pl-1">MACD (12, 26, 9)</div>
           <div ref={macdRef} />
         </div>
       )}

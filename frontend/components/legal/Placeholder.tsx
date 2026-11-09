@@ -4,7 +4,7 @@
  */
 export function Placeholder({ children }: { children: React.ReactNode }) {
   return (
-    <mark className="rounded bg-amber-400/20 px-1 text-amber-300" title="À compléter avant publication">
+    <mark className="rounded bg-warn/15 px-1 text-ivory" title="À compléter avant publication">
       [À COMPLÉTER : {children}]
     </mark>
   );

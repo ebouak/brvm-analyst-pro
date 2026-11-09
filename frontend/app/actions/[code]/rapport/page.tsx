@@ -2,21 +2,22 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getValuation } from '@/lib/valuation/server';
 import { getScoring } from '@/lib/scoring/server';
+import { libelleSignal } from '@/lib/signalLabel';
 import PrintTrigger from '@/components/financials/PrintTrigger';
 import type { SignalDaily } from '@/lib/types';
+import { fmtNumber } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
 interface Props { params: { code: string } }
 
 const fFCFA = (n: number | null | undefined) => (n != null ? `${Math.round(n).toLocaleString('fr-FR')} FCFA` : '—');
-const fPct = (n: number | null | undefined, d = 1) => (n != null ? `${n >= 0 ? '+' : ''}${(n * 100).toFixed(d)}%` : '—');
-const fNum = (n: number | null | undefined, d = 2) => (n != null ? n.toFixed(d) : '—');
+const fPct = (n: number | null | undefined, d = 1) => (n != null ? `${n >= 0 ? '+' : '−'}${fmtNumber(Math.abs(n) * 100, d)} %` : '—');
+const fNum = (n: number | null | undefined, d = 2) => (n != null ? fmtNumber(n, d) : '—');
 
 const STANCE_LABEL: Record<string, string> = {
   decote: 'Décote estimée', surcote: 'Surcote estimée', proche: 'Proche de la juste-valeur', indisponible: 'Valorisation indisponible',
 };
-const SIGNAL_LABEL: Record<string, string> = { BUY: 'ACHAT', SELL: 'VENTE', HOLD: 'CONSERVER' };
 
 export default async function RapportPage({ params }: Props) {
   const code = decodeURIComponent(params.code).toUpperCase();
@@ -45,11 +46,10 @@ export default async function RapportPage({ params }: Props) {
       {/* En-tête */}
       <div className="flex items-start justify-between mb-5 border-b-2 border-gray-900 pb-3">
         <div>
-          <p className="text-xs text-gray-500">WESTBOURSE · Note d&apos;analyse</p>
-          <h1 className="text-2xl font-bold mt-1">{code} — {designation}</h1>
-          <p className="text-xs text-gray-500 mt-0.5">{secteur}</p>
+          <h1 className="text-2xl font-bold">Note d&apos;analyse · {designation}</h1>
+          <p className="text-xs text-gray-600 mt-0.5">{[code, secteur].filter(Boolean).join(' · ')}</p>
         </div>
-        <div className="text-right text-[10px] text-gray-400">
+        <div className="text-right text-xs text-gray-600">
           <p>Générée le {today}</p>
           <p className="mt-1 max-w-[180px]">Document informatif : ne constitue pas un conseil en investissement</p>
         </div>
@@ -58,7 +58,7 @@ export default async function RapportPage({ params }: Props) {
       {/* Synthèse : verdict valorisation + signal */}
       <div className="grid grid-cols-2 gap-4 mb-5">
         <div className="border border-gray-300 rounded p-3">
-          <p className="text-xs text-gray-500 mb-1">Valorisation</p>
+          <p className="text-xs text-gray-600 mb-1">Valorisation</p>
           <p className="text-base font-bold">{valuation ? STANCE_LABEL[valuation.verdict.stance] : '—'}</p>
           {fv?.fairValue != null && valuation?.price != null && (
             <p className="text-xs text-gray-600 mt-1">
@@ -67,12 +67,12 @@ export default async function RapportPage({ params }: Props) {
           )}
         </div>
         <div className="border border-gray-300 rounded p-3">
-          <p className="text-xs text-gray-500 mb-1">Signal quantitatif</p>
-          <p className="text-base font-bold">{signal ? SIGNAL_LABEL[signal.signal] ?? signal.signal : '—'}</p>
+          <p className="text-xs text-gray-600 mb-1">Signal quantitatif</p>
+          <p className="text-base font-bold">{signal ? libelleSignal(signal.signal) : '—'}</p>
           {signal && (
             <p className="text-xs text-gray-600 mt-1">
-              Score {signal.score_total >= 0 ? '+' : ''}{signal.score_total?.toFixed(2)} / 1.00
-              {signal.confiance != null ? ` · confiance ${(signal.confiance * 100).toFixed(0)}%` : ''}
+              Score {signal.score_total >= 0 ? '+' : '−'}{fmtNumber(Math.abs(signal.score_total), 2)} / 1,00
+              {signal.confiance != null ? ` · confiance ${fmtNumber(signal.confiance * 100, 0)} %` : ''}
             </p>
           )}
         </div>
@@ -90,7 +90,7 @@ export default async function RapportPage({ params }: Props) {
           ['Dette/FP', fNum(m?.debtToEquity, 2)],
         ] as [string, string][]).map(([label, val]) => (
           <div key={label} className="flex justify-between border-b border-gray-100 py-1">
-            <span className="text-gray-500">{label}</span><span className="font-semibold">{val}</span>
+            <span className="text-gray-600">{label}</span><span className="font-semibold">{val}</span>
           </div>
         ))}
       </div>
@@ -99,18 +99,18 @@ export default async function RapportPage({ params }: Props) {
       <h2 className="text-sm font-bold mb-2 border-b border-gray-300 pb-1">Santé financière</h2>
       <div className="grid grid-cols-2 gap-4 mb-5 text-sm">
         <div className="border border-gray-200 rounded p-3">
-          <p className="text-[10px] uppercase text-gray-500">Piotroski F-Score</p>
+          <p className="text-xs text-gray-600">Piotroski F-Score</p>
           <p className="text-lg font-bold">{scoring?.fscore?.reliable ? `${scoring.fscore.score}/9 · ${scoring.fscore.label}` : '—'}</p>
-          <p className="text-[10px] text-gray-400 mt-0.5">Rentabilité · levier · efficience</p>
+          <p className="text-xs text-gray-600 mt-0.5">Rentabilité · levier · efficience</p>
         </div>
         <div className="border border-gray-200 rounded p-3">
-          <p className="text-[10px] uppercase text-gray-500">Altman Z-Score</p>
+          <p className="text-xs text-gray-600">Altman Z-Score</p>
           <p className="text-lg font-bold">
             {scoring?.altman?.applicable && scoring.altman.zone
               ? `${scoring.altman.z} · ${scoring.altman.zone === 'safe' ? 'Sain' : scoring.altman.zone === 'grey' ? 'Zone grise' : 'Risque'}`
               : 'n/a'}
           </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">{scoring?.altman?.applicable ? 'Risque de détresse' : (scoring?.altman?.note ?? 'Risque de détresse')}</p>
+          <p className="text-xs text-gray-600 mt-0.5">{scoring?.altman?.applicable ? 'Risque de détresse' : (scoring?.altman?.note ?? 'Risque de détresse')}</p>
         </div>
       </div>
 
@@ -122,7 +122,7 @@ export default async function RapportPage({ params }: Props) {
         </>
       )}
 
-      <p className="text-[10px] text-gray-400 mt-6 border-t pt-2 italic">
+      <p className="text-xs text-gray-600 mt-6 border-t pt-2 italic">
         Source : WESTBOURSE · {today}. Valorisation par multiples sectoriels et DDM. Les performances passées ne préjugent pas des résultats futurs.
       </p>
     </div>

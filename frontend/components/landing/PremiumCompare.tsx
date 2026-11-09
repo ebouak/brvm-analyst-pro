@@ -71,7 +71,7 @@ export function PremiumCompare({ plans }: { plans: Plan[] }) {
         ))}
       </div>
       <div className="mt-5 text-center">
-        <Link href="/pricing" className="text-sm font-medium text-ivory/80 transition-colors hover:text-gold-2">
+        <Link href="/pricing" className="text-sm font-medium text-ivory transition-colors hover:text-gold-2">
           Comparer toutes les formules en détail →
         </Link>
       </div>

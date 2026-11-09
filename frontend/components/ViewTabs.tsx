@@ -32,7 +32,7 @@ export default function ViewTabs({ tabs, current }: { tabs: ViewTab[]; current: 
           >
             {tab.label}
             {tab.premium && (
-              <span className="rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[8px] font-semibold tracking-wide text-gold">
+              <span className="rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-accent-ink">
                 PRO
               </span>
             )}

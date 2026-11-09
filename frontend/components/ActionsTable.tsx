@@ -1,10 +1,11 @@
 'use client';
-import { Lock } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { ActionDaily, SignalDaily } from '@/lib/types';
-import { fmtNumber, fmtFcfa } from '@/lib/format';
+import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import SignalBadge from './SignalBadge';
+import RatingBadge from './RatingBadge';
 import Sparkline from './Sparkline';
 import ExportButton from './ExportButton';
 import type { CsvColumn } from '@/lib/export';
@@ -32,14 +33,40 @@ const CSV_COLUMNS: CsvColumn<ActionDaily>[] = [
   { header: 'Désignation', accessor: (r) => r.designation ?? '' },
   { header: 'Secteur', accessor: (r) => r.secteur ?? '' },
   { header: 'Pays', accessor: (r) => r.pays ?? '' },
-  { header: 'Cours', accessor: (r) => r.cours_jour ?? '' },
+  { header: 'Cours (FCFA)', accessor: (r) => r.cours_jour ?? '' },
   { header: 'Variation %', accessor: (r) => r.variation_pct ?? '' },
   { header: 'Volume', accessor: (r) => r.volume ?? '' },
   { header: 'Valeur échangée', accessor: (r) => r.valeur_echangee ?? '' },
 ];
 
-const EASE = 'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]';
+/** Ce que mesure la confiance (docs/SCORING.md : 0,5 complétude + 0,3 historique + 0,2 netteté). */
+const CONFIANCE_AIDE =
+  "Confiance du modèle : part de données disponibles et d'historique derrière le score (50 % complétude des entrées, 30 % richesse de l'historique, 20 % netteté du score). Ce n'est pas une probabilité de gain.";
+const NOTE_AIDE = 'Note BRVM A–F, dérivée du score quantitatif. NR (non noté) quand la confiance du modèle est trop faible.';
+
+const LIBELLE_SIGNAL: Record<string, string> = { BUY: 'achat', HOLD: 'attente', SELL: 'vente' };
+
+function fmtConfiance(c: number | null | undefined): string {
+  return c == null ? '—' : `${Math.round(c * 100)} %`;
+}
+
+const EASE = 'transition-colors duration-150 ease-out';
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60';
+
+/**
+ * Teinte d'une variation. Absente → « — » en faint, jamais un « +0,00 % » vert :
+ * un chiffre affiché pour une donnée manquante serait un chiffre inventé.
+ * Nulle (après arrondi, comme fmtPctSigne) → neutre.
+ */
+function tonVariation(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(v)) return 'text-faint';
+  const r = Number(v.toFixed(2));
+  return r > 0 ? 'text-up' : r < 0 ? 'text-down' : 'text-muted';
+}
+
+function Variation({ v }: { v: number | null | undefined }) {
+  return <>{v == null ? '—' : fmtPctSigne(v)}</>;
+}
 
 /* ── Input/Select atoms ──────────────────────────────────────────────────── */
 // Mobile : 44 px de haut (cible tactile) et 16 px de police (sinon iOS zoome
@@ -58,13 +85,10 @@ function LockedCell() {
   return (
     <Link
       href="/account/plan"
-      title="Réservé aux abonnés, cliquez pour débloquer"
-      className="inline-flex items-center gap-1 rounded-md border border-gold/25 bg-gold/5 px-2 py-0.5 text-[10px] text-gold/80 transition hover:bg-gold/10"
+      title="Réservé aux abonnés. Voir les formules"
+      className={`inline-flex items-center gap-1 rounded text-xs text-faint hover:text-accent-ink ${FOCUS} ${EASE}`}
     >
-      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
-        <rect x="4" y="10" width="16" height="10" rx="2" />
-        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-      </svg>
+      <Lock size={12} strokeWidth={1.75} aria-hidden />
       Premium
     </Link>
   );
@@ -85,7 +109,7 @@ function Logo({ code, size }: { code: string; size: 'sm' | 'md' }) {
   ) : (
     <span
       aria-hidden
-      className={`inline-flex items-center justify-center ${box} rounded-md text-[9px] font-bold shrink-0 bg-gold/10 text-gold/70 border border-gold/20`}
+      className={`tabular inline-flex items-center justify-center ${box} rounded-md text-[11px] font-medium shrink-0 bg-elevated text-muted border border-border/60`}
     >
       {code.slice(0, 2)}
     </span>
@@ -142,10 +166,16 @@ export default function ActionsTable({
       return true;
     });
     r = [...r].sort((a, b) => {
-      const fallback = STRING_KEYS.has(sortKey) ? '' : 0;
-      const av = a[sortKey] ?? fallback;
-      const bv = b[sortKey] ?? fallback;
-      const cmp = typeof av === 'string' ? av.localeCompare(bv as string) : (av as number) - (bv as number);
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      // Valeur absente : toujours en fin de liste, dans les deux sens. Comptée
+      // comme 0, elle se glissait au milieu des variations et des volumes.
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      const cmp = STRING_KEYS.has(sortKey)
+        ? String(av).localeCompare(String(bv))
+        : (av as number) - (bv as number);
       return asc ? cmp : -cmp;
     });
     return r;
@@ -160,7 +190,7 @@ export default function ActionsTable({
   const anySignalShown = rows.some((r) => !!signals[r.code]?.signal);
   const anySignalSeance = actions.some((a) => !!signals[a.code]?.signal);
   const showSignalCol = !showMetrics || anySignalShown;
-  const colCount = showSignalCol ? 8 : 7;
+  const colCount = showSignalCol ? 10 : 7;
 
   const activeFilters =
     (pays ? 1 : 0) + (secteur ? 1 : 0) + (perf !== 'all' ? 1 : 0) + (minVol > 0 ? 1 : 0);
@@ -184,14 +214,14 @@ export default function ActionsTable({
         onClick={() => toggleSort(k)}
         className={`
           overline cursor-pointer select-none rounded ${FOCUS}
-          hover:text-gold/80 ${EASE}
-          ${sortKey === k ? 'text-gold/70' : 'text-faint'}
+          hover:text-ivory ${EASE}
+          ${sortKey === k ? 'text-ivory' : 'text-faint'}
         `}
       >
         {label}
-        {sortKey === k && (
-          <span aria-hidden className="ml-1 text-gold/60 text-[9px]">{asc ? '▲' : '▼'}</span>
-        )}
+        {sortKey === k && (asc
+          ? <ChevronUp size={12} strokeWidth={1.75} aria-hidden className="ml-0.5 inline-block align-[-1px]" />
+          : <ChevronDown size={12} strokeWidth={1.75} aria-hidden className="ml-0.5 inline-block align-[-1px]" />)}
       </button>
     </th>
   );
@@ -199,13 +229,13 @@ export default function ActionsTable({
   const noSignalNote = showMetrics && !anySignalShown && rows.length > 0 && (
     <p className="px-4 py-2 border-b border-border/60 text-xs text-muted">
       {anySignalSeance
-        ? 'Aucun signal net parmi les titres affichés : le moteur s’abstient tant que rien n’est clair.'
-        : 'Aucun signal net sur cette séance : le moteur s’abstient tant que rien n’est clair.'}
+        ? 'Aucun signal net parmi les titres affichés. Le moteur s’abstient quand rien n’est clair.'
+        : 'Aucun signal net sur cette séance. Le moteur s’abstient quand rien n’est clair.'}
     </p>
   );
 
   return (
-    <div className="space-y-0">
+    <div>
       {/* ── Barre de filtres ──────────────────────────────────────────────── */}
       <div className="px-4 py-3 border-b border-border/60 space-y-2 md:space-y-0 md:flex md:flex-wrap md:items-center md:gap-2">
         {/* Recherche (+ bouton Filtres sur mobile) : toujours visible */}
@@ -214,7 +244,7 @@ export default function ActionsTable({
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Rechercher code / nom…"
+            placeholder="Code ou nom"
             aria-label="Rechercher une valeur par code ou par nom"
             className={`${inputCls} flex-1 min-w-0 md:flex-none md:w-52`}
           />
@@ -228,7 +258,12 @@ export default function ActionsTable({
             }`}
           >
             Filtres{activeFilters > 0 && <span className="tabular">{` (${activeFilters})`}</span>}
-            <span aria-hidden className="ml-1 text-[10px]">{filtersOpen ? '▲' : '▼'}</span>
+            <ChevronDown
+              size={14}
+              strokeWidth={1.75}
+              aria-hidden
+              className={`ml-1 inline-block align-[-2px] transition-transform duration-150 ${filtersOpen ? 'rotate-180' : ''}`}
+            />
           </button>
         </div>
 
@@ -248,15 +283,15 @@ export default function ActionsTable({
           <select
             value={perf}
             onChange={(e) => setPerf(e.target.value as 'all' | 'up' | 'down')}
-            aria-label="Performance"
+            aria-label="Variation"
             className={selectCls}
           >
-            <option value="all">Toutes perfs</option>
+            <option value="all">Toutes variations</option>
             <option value="up">Hausses</option>
             <option value="down">Baisses</option>
           </select>
           <label className="flex items-center gap-2 text-xs text-muted">
-            <span className="shrink-0">Vol. min</span>
+            <span className="shrink-0">Volume min.</span>
             <input
               type="number"
               inputMode="numeric"
@@ -283,11 +318,11 @@ export default function ActionsTable({
             {!sortIsListed && <option value="">Tri personnalisé</option>}
             {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-          <span className="text-xs text-faint tabular shrink-0">
-            <span className="text-ivory font-medium">{rows.length}</span> résultats
+          <span className="text-xs text-faint shrink-0">
+            <span className="tabular text-ivory font-medium">{rows.length}</span> résultats
           </span>
           {/* ExportButton — wrapper for premium look */}
-          <div className={`shrink-0 [&>button]:rounded-lg [&>button]:border-border-strong [&>button]:text-muted [&>button]:px-3 [&>button]:py-1.5 [&>button]:text-xs [&>button]:hover:border-gold/30 [&>button]:hover:text-gold ${EASE}`}>
+          <div className={`shrink-0 [&>button]:rounded-lg [&>button]:border-border-strong [&>button]:text-muted [&>button]:px-3 [&>button]:py-1.5 [&>button]:text-xs [&>button]:hover:border-gold/30 [&>button]:hover:text-accent-ink ${EASE}`}>
             <ExportButton<ActionDaily>
               filename={`actions_${new Date().toISOString().slice(0, 10)}.csv`}
               rows={rows}
@@ -303,12 +338,10 @@ export default function ActionsTable({
       <ul className="md:hidden divide-y divide-border/40" aria-label="Valeurs cotées">
         {rows.length === 0 && (
           <li className="px-4 py-12 text-center text-muted text-sm">
-            Aucun titre ne correspond aux filtres sélectionnés.
+            Aucun titre ne correspond à ces filtres.
           </li>
         )}
         {rows.map((a) => {
-          const varPct = a.variation_pct ?? 0;
-          const up = varPct >= 0;
           const sig = showMetrics ? signals[a.code] : undefined;
           return (
             <li key={a.code}>
@@ -319,19 +352,23 @@ export default function ActionsTable({
                 <Logo code={a.code} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-ivory tracking-wide">{a.code}</span>
-                    {sig?.signal && <SignalBadge signal={sig.signal} confiance={sig.confiance} small />}
+                    <span className="font-mono font-medium text-ivory">{a.code}</span>
+                    {sig?.signal && <RatingBadge scoreTotal={sig.score_total} confiance={sig.confiance} neutre />}
                   </div>
                   <div className="text-xs text-faint truncate leading-tight">{a.designation}</div>
+                  {sig?.signal && (
+                    <div className="text-[11px] text-muted leading-tight mt-0.5" title={CONFIANCE_AIDE}>
+                      Signal : {LIBELLE_SIGNAL[sig.signal]} · Confiance du modèle : <span className="tabular">{fmtConfiance(sig.confiance)}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="tabular text-ivory font-medium">{fmtNumber(a.cours_jour)}</div>
-                  <div className={`tabular text-sm font-semibold ${up ? 'text-up' : 'text-down'}`}>
-                    <span aria-hidden className="text-[10px] opacity-70 mr-0.5">{up ? '▲' : '▼'}</span>
-                    {up ? '+' : ''}{varPct.toFixed(2)}%
+                  <div className="tabular text-ivory font-medium">{fmtNumber(a.cours_jour)} <span className="font-sans text-xs font-normal text-muted">FCFA</span></div>
+                  <div className={`tabular text-sm font-medium ${tonVariation(a.variation_pct)}`}>
+                    <Variation v={a.variation_pct} />
                   </div>
-                  <div className="tabular text-[11px] text-muted">
-                    Vol. {fmtNumber(a.volume)}
+                  <div className="text-xs text-muted">
+                    Vol. <span className="tabular">{fmtNumber(a.volume)}</span>
                   </div>
                 </div>
               </Link>
@@ -341,13 +378,13 @@ export default function ActionsTable({
       </ul>
 
       {/* ── Tableau (≥ md) ────────────────────────────────────────────────── */}
-      <div className="hidden md:block overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="hidden md:block overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
           <thead className="border-b border-border/60 bg-bg/60">
             <tr>
               <Th k="code" label="Titre" />
               <Th k="secteur" label="Secteur" />
-              <Th k="cours_jour" label="Cours" right />
+              <Th k="cours_jour" label="Cours (FCFA)" right />
               <Th k="variation_pct" label="Var %" right />
               <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
                 Tendance 30j {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
@@ -355,9 +392,17 @@ export default function ActionsTable({
               <Th k="volume" label="Volume" right />
               <Th k="valeur_echangee" label="Valeur" right />
               {showSignalCol && (
-                <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
-                  Signal {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
-                </th>
+                <>
+                  <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap" title={NOTE_AIDE}>
+                    Note {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
+                  </th>
+                  <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap">
+                    Signal {!showMetrics && <span aria-label="Premium" title="Premium"><Lock size={11} strokeWidth={2} className="inline-block align-[-1px]" aria-hidden /></span>}
+                  </th>
+                  <th className="overline px-4 py-3 text-center text-faint whitespace-nowrap" title={CONFIANCE_AIDE}>
+                    Confiance du modèle
+                  </th>
+                </>
               )}
             </tr>
           </thead>
@@ -365,14 +410,17 @@ export default function ActionsTable({
             {rows.length === 0 && (
               <tr>
                 <td colSpan={colCount} className="px-4 py-16 text-center text-muted text-sm">
-                  Aucun titre ne correspond aux filtres sélectionnés.
+                  Aucun titre ne correspond à ces filtres.
                 </td>
               </tr>
             )}
             {rows.map((a) => {
-              const varPct = a.variation_pct ?? 0;
-              const up = varPct >= 0;
               const sig = signals[a.code];
+              // Couleur de la tendance tirée de la série elle-même (dernier cours
+              // contre premier de la fenêtre), pas de la variation du jour : une
+              // séance en hausse ne fait pas une tendance 30 j haussière.
+              const serie = sparklines[a.code];
+              const serieMonte = serie && serie.length >= 2 ? serie[serie.length - 1]! >= serie[0]! : true;
               return (
                 <tr
                   key={a.code}
@@ -382,11 +430,11 @@ export default function ActionsTable({
                   <td className="px-4 py-3">
                     <Link
                       href={`/actions/${a.code}`}
-                      className={`flex items-center gap-2.5 rounded hover:text-gold ${FOCUS} ${EASE}`}
+                      className={`flex items-center gap-2.5 rounded ${FOCUS}`}
                     >
                       <Logo code={a.code} size="sm" />
                       <div>
-                        <span className="font-semibold text-ivory tracking-wide">{a.code}</span>
+                        <span className={`font-mono font-medium text-ivory group-hover:text-accent-ink ${EASE}`}>{a.code}</span>
                         <div className="text-[11px] text-faint truncate max-w-[160px] leading-tight">
                           {a.designation}
                         </div>
@@ -397,7 +445,7 @@ export default function ActionsTable({
                   {/* ── Secteur ───────────────────────────────────────── */}
                   <td className="px-4 py-3">
                     {a.secteur ? (
-                      <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] text-muted">
+                      <span title={a.secteur} className="block max-w-[18ch] truncate whitespace-nowrap text-xs text-muted">
                         {a.secteur}
                       </span>
                     ) : (
@@ -411,11 +459,8 @@ export default function ActionsTable({
                   </td>
 
                   {/* ── Variation % ───────────────────────────────────── */}
-                  <td className={`px-4 py-3 text-right tabular font-semibold ${up ? 'text-up' : 'text-down'}`}>
-                    <span className="inline-flex items-center justify-end gap-1">
-                      <span aria-hidden className="text-[10px] opacity-70">{up ? '▲' : '▼'}</span>
-                      {up ? '+' : ''}{varPct.toFixed(2)}%
-                    </span>
+                  <td className={`px-4 py-3 text-right tabular font-medium whitespace-nowrap ${tonVariation(a.variation_pct)}`}>
+                    <Variation v={a.variation_pct} />
                   </td>
 
                   {/* ── Tendance 30j (sparkline) — métrique calculée ──── */}
@@ -423,8 +468,8 @@ export default function ActionsTable({
                     <div className="flex justify-center">
                       {!showMetrics ? (
                         <LockedCell />
-                      ) : (sparklines[a.code]?.length ?? 0) >= 2 ? (
-                        <Sparkline data={sparklines[a.code]!} up={up} width={72} height={24} />
+                      ) : serie && serie.length >= 2 ? (
+                        <Sparkline data={serie} up={serieMonte} width={72} height={24} />
                       ) : (
                         <span className="text-faint text-xs">—</span>
                       )}
@@ -437,19 +482,31 @@ export default function ActionsTable({
                   </td>
 
                   {/* ── Valeur échangée ───────────────────────────────── */}
-                  <td className="px-4 py-3 text-right tabular text-muted">
+                  <td className="px-4 py-3 text-right tabular whitespace-nowrap text-muted">
                     {fmtFcfa(a.valeur_echangee)}
                   </td>
 
-                  {/* ── Signal — métrique calculée ────────────────────── */}
+                  {/* ── Note, signal, confiance : trois indicateurs distincts ── */}
                   {showSignalCol && (
-                    <td className="px-4 py-3 text-center">
-                      {showMetrics ? (
-                        <SignalBadge signal={sig?.signal} confiance={sig?.confiance} small />
-                      ) : (
-                        <LockedCell />
-                      )}
-                    </td>
+                    <>
+                      <td className="px-4 py-3 text-center">
+                        {showMetrics ? (
+                          sig?.signal ? <RatingBadge scoreTotal={sig.score_total} confiance={sig.confiance} neutre /> : <span className="text-faint text-xs">—</span>
+                        ) : (
+                          <LockedCell />
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {showMetrics ? (
+                          <SignalBadge signal={sig?.signal} small francais />
+                        ) : (
+                          <LockedCell />
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center tabular text-muted" title={CONFIANCE_AIDE}>
+                        {showMetrics ? fmtConfiance(sig?.confiance) : <LockedCell />}
+                      </td>
+                    </>
                   )}
                 </tr>
               );

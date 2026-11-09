@@ -49,7 +49,7 @@ export default function Sidebar({
           <AnimatedLogo size={38} variant="mark" animate={false} />
           <div className="leading-none">
             <p className="font-display text-sm font-semibold tracking-tight text-ivory">WESTBOURSE</p>
-            <p className="overline mt-1 text-[9px] text-gold/70">Pro · UEMOA</p>
+            <p className="overline mt-1 text-[11px] text-gold/70">Pro · UEMOA</p>
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@ export default function Sidebar({
               aria-expanded={isOpen ? 'true' : 'false'}
               className={`group/h flex w-full items-center justify-between px-2 mb-1.5 ${EASE} ${hasActive ? 'cursor-default' : 'cursor-pointer hover:text-muted'}`}
             >
-              <span className="overline text-[9px] text-faint">
+              <span className="overline text-[11px] text-faint">
                 {group.label === 'Premium' ? (
                   <span className="flex items-center gap-1.5 text-gold/70">Premium <Lock size={11} strokeWidth={2} className="text-gold" aria-hidden /></span>
                 ) : (
@@ -114,7 +114,7 @@ export default function Sidebar({
                     />
                     {item.label}
                     {item.premium && (
-                      <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[8px] font-semibold tracking-wide text-gold">
+                      <span className="ml-auto rounded-full border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-gold">
                         PRO
                       </span>
                     )}
@@ -145,7 +145,7 @@ export default function Sidebar({
         <div className="flex justify-center">
           <ThemeToggle />
         </div>
-        <p className="overline text-[9px] text-faint text-center">Données BRVM · BDFIN</p>
+        <p className="overline text-[11px] text-faint text-center">Données BRVM · BDFIN</p>
       </div>
     </aside>
   );

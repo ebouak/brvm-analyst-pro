@@ -5,7 +5,7 @@
  * la porte d'entrée de la formation, envoyée à chaque nouvelle inscription et
  * à chaque abonnement payant (scraper/src/bienvenue/).
  *
- * La vidéo est servie depuis notre stockage (bucket public academy-videos) :
+ * La vidéo est servie depuis notre stockage (bucket public academy-lecon0, distinct du bucket privé academy-videos des cours payants) :
  * aucun lecteur tiers, la promesse « aucun traceur » tient.
  *
  * COPIE de remotion/ecosysteme.json (textes et voix off) : deux paquets
@@ -14,7 +14,7 @@
  */
 
 const BASE = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const DOSSIER = `${BASE}/storage/v1/object/public/academy-videos`;
+const DOSSIER = `${BASE}/storage/v1/object/public/academy-lecon0`;
 
 export const LECON0 = {
   chemin: '/formations/academy/lecon-0',

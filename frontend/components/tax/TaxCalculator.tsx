@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BAREME, PAYS_LABELS, type PaysUemoa, type TypeRevenu } from '@/lib/tax/rates';
+import { fmtDateCourte } from '@/lib/dateCourte';
 import { dividendeNet, couponNet } from '@/lib/tax/compute';
 
 const TYPES: { key: TypeRevenu; label: string }[] = [
@@ -11,7 +12,7 @@ const TYPES: { key: TypeRevenu; label: string }[] = [
 ];
 
 const fcfa = (v: number) => v.toLocaleString('fr-FR') + ' FCFA';
-const fmtPct = (t: number) => `${(t * 100) % 1 ? (t * 100).toFixed(1) : (t * 100).toFixed(0)} %`;
+const fmtPct = (t: number) => `${((t * 100) % 1 ? (t * 100).toFixed(1) : (t * 100).toFixed(0)).replace('.', ',')} %`;
 
 /** Calculateur net d'impôt (IRVM/IRC) — stateless, aucune donnée stockée. */
 export default function TaxCalculator() {
@@ -81,9 +82,9 @@ export default function TaxCalculator() {
           </div>
         </div>
       )}
-      <p className="text-[11px] text-faint">
+      <p className="text-xs text-faint">
         Base : {regle.source}
-        {regle.note ? ` — ${regle.note}` : ''} (vérifié le {regle.verifieLe}).
+        {regle.note ? ` — ${regle.note}` : ''} (vérifié le {fmtDateCourte(regle.verifieLe)}).
       </p>
     </div>
   );

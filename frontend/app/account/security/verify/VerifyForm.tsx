@@ -80,7 +80,7 @@ export function VerifyForm() {
       <button
         type="submit"
         disabled={busy || code.length !== 6 || !factorId}
-        className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#03222b] disabled:opacity-40"
+        className="w-full rounded-full bg-accent-ink px-5 py-2.5 text-sm font-semibold text-obsidian disabled:opacity-40"
       >
         {busy ? 'Vérification…' : 'Vérifier'}
       </button>
