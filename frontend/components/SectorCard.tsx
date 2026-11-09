@@ -62,7 +62,8 @@ export default function SectorCard({ perf, rang }: Props) {
   return (
     <article className="flex flex-col gap-4 rounded-card border border-border bg-surface px-4 pb-4 pt-6 shadow-card">
       {/* En-tête : rang, secteur, variation de la séance */}
-      <header className="-mb-1 flex items-start justify-between gap-3">
+      {/* Titre puis variation, empilés : côte à côte, un nom long (« Télécommunications ») n'avait plus la place. */}
+      <header className="-mb-1 flex flex-col gap-1">
         <h3 className="flex min-w-0 items-baseline gap-2 text-base font-semibold leading-snug text-ivory">
           {rang != null && (
             <span className="tabular shrink-0 text-xs font-normal text-accent-ink">
