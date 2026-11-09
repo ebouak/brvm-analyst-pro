@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { getSupabase } from '../persistence/supabase.js';
 import { reconstituerExDate } from './dividendes.js';
+import { detecterRuptures, nettoyerAllersRetours } from './nettoyage.js';
 import type { ComptesAnnuels, Dividende, Donnees, FamilleComptable, Serie } from './types.js';
 
 const TAILLE = 1000;
@@ -28,7 +29,12 @@ export function dispoComptes(pubs: { code: string; date_publication: string; lib
   return trouvee ?? repli;
 }
 
-export interface Chargement { donnees: Donnees; empreinte: string }
+export interface Chargement {
+  donnees: Donnees;
+  empreinte: string;
+  /** Séances retirées comme erreurs de saisie, par valeur (spec §11.2). */
+  retirees: Map<string, string[]>;
+}
 
 /** Charge tout l'historique (paginé). Lecture seule. */
 export async function chargerHistorique(): Promise<Chargement> {
@@ -61,6 +67,12 @@ export async function chargerHistorique(): Promise<Chargement> {
     s.valeurs.push(Number(r.valeur_echangee ?? 0));
     s.variations.push(r.variation_pct == null ? null : Number(r.variation_pct));
   }
+  // Erreurs de saisie (spec §11.2) : retirées AVANT toute reconstitution.
+  const retirees = new Map<string, string[]>();
+  for (const [code, brute] of [...series]) {
+    const { serie: propre, retirees: r } = nettoyerAllersRetours(brute);
+    if (r.length > 0) { series.set(code, propre); retirees.set(code, r); }
+  }
   const familles = new Map<string, FamilleComptable>();
   for (const i of inst) familles.set(i.code, i.famille_comptable === 'banque' ? 'banque' : 'general');
 
@@ -80,12 +92,19 @@ export async function chargerHistorique(): Promise<Chargement> {
   const dividendes: Dividende[] = divs.map((r) => {
     const exercice = Number(r.exercice);
     const s = series.get(r.code);
-    const exDate = r.ex_date ?? (s ? reconstituerExDate(s, Number(r.montant), `${exercice + 1}-04-01`) : null);
+    const exDate = r.ex_date ?? (s ? reconstituerExDate(s, Number(r.montant), `${exercice + 1}-04-01`, `${exercice + 1}-12-31`) : null);
     return { code: r.code, exercice, montant: Number(r.montant), disponibleLe: `${exercice + 1}-07-31`, exDate };
   });
+
+  // Ruptures (spec §11.3) : APRÈS nettoyage et APRÈS reconstitution des ex-dates.
+  const ruptures = new Map<string, Set<string>>();
+  for (const [code, s] of series) {
+    const r = detecterRuptures(s, dividendes.filter((x) => x.code === code));
+    if (r.size > 0) ruptures.set(code, r);
+  }
 
   const empreinte = createHash('sha256')
     .update(JSON.stringify({ n: cours.length, d0: cours[0]?.date_marche, d1: cours.at(-1)?.date_marche, comptes, dividendes }))
     .digest('hex');
-  return { donnees: { calendrier: [...calSet].sort(), series, comptes, dividendes, familles }, empreinte };
+  return { donnees: { calendrier: [...calSet].sort(), series, comptes, dividendes, familles, ruptures }, empreinte, retirees };
 }

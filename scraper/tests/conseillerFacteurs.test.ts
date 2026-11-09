@@ -22,6 +22,39 @@ describe('tendance', () => {
   });
 });
 
+describe('ruptures', () => {
+  const pentes = Array.from({ length: 20 }, (_, k) => (k - 10) / 20);
+  it('la tendance vaut null si ses deux fenêtres (60 et 120) contiennent une rupture', () => {
+    const d = univers(200, pentes);
+    const date = d.calendrier[190]!;
+    d.ruptures.set('V05', new Set([d.calendrier[160]!]));
+    const s = scoresFamilles(d, indiceEquipondere(d), date);
+    expect(s.get('V05')!.tendance).toBeNull();
+  });
+  it('une rupture dans la seule fenêtre de 120 annule ce sous-signal, pas la tendance de 60', () => {
+    const d = univers(200, pentes);
+    d.ruptures.set('V05', new Set([d.calendrier[100]!]));
+    const s = scoresFamilles(d, indiceEquipondere(d), d.calendrier[190]!);
+    expect(s.get('V05')!.tendance).not.toBeNull();
+  });
+  it('une rupture hors des fenêtres (avant p-120) ne change rien', () => {
+    const d = univers(200, pentes);
+    const date = d.calendrier[190]!;
+    const sans = scoresFamilles(d, indiceEquipondere(d), date).get('V05')!;
+    d.ruptures.set('V05', new Set([d.calendrier[10]!]));
+    const avec = scoresFamilles(d, indiceEquipondere(d), date).get('V05')!;
+    expect(avec.tendance).not.toBeNull();
+    expect(avec.risque).not.toBeNull();
+    expect(avec.tendance).toBeCloseTo(sans.tendance!, 6);
+  });
+  it('la volatilité (60) et la plus forte baisse (120) deviennent null : risque null', () => {
+    const d = univers(200, pentes);
+    d.ruptures.set('V05', new Set([d.calendrier[185]!]));
+    const s = scoresFamilles(d, indiceEquipondere(d), d.calendrier[190]!);
+    expect(s.get('V05')!.risque).toBeNull();
+  });
+});
+
 describe('valorisation', () => {
   const comptesPour = (codes: string[], dispo: string, cp: (k: number) => number): ComptesAnnuels[] =>
     codes.map((code, k) => ({ code, exercice: 2019, resultatNet: 1000 * (k + 1), capitauxPropres: cp(k), actions: 100, disponibleLe: dispo }));

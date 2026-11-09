@@ -6,13 +6,23 @@ import type { Dividende } from '../src/conseiller/types.js';
 const cal = calendrier(120);
 
 describe('reconstituerExDate', () => {
-  it('trouve la première baisse proche du montant (±20 %) dans les 60 séances', () => {
+  it('trouve la première baisse proche du montant (±20 %) dans la fenêtre [apres ; jusqua]', () => {
     const s = serie(cal, cal.map((_, i) => (i < 40 ? 1000 : 920)));
-    expect(reconstituerExDate(s, 80, cal[10]!)).toBe(cal[40]);
+    expect(reconstituerExDate(s, 80, cal[10]!, cal[119]!)).toBe(cal[40]);
   });
   it('renvoie null si aucune baisse ne correspond', () => {
     const s = serie(cal, cal.map(() => 1000));
-    expect(reconstituerExDate(s, 80, cal[10]!)).toBeNull();
+    expect(reconstituerExDate(s, 80, cal[10]!, cal[119]!)).toBeNull();
+  });
+  it('ignore une baisse postérieure à jusqua', () => {
+    const s = serie(cal, cal.map((_, i) => (i < 40 ? 1000 : 920)));
+    expect(reconstituerExDate(s, 80, cal[10]!, cal[39]!)).toBeNull();
+  });
+  it('trouve un détachement fin septembre (FTSC, exercice 2024)', () => {
+    const longCal = calendrier(1500);
+    const iEx = longCal.findIndex((d) => d >= '2024-09-26');
+    const s = serie(longCal, longCal.map((_, i) => (i < iEx ? 10000 : 8425)));
+    expect(reconstituerExDate(s, 1726.56, '2024-04-01', '2024-12-31')).toBe(longCal[iEx]);
   });
 });
 
@@ -31,6 +41,18 @@ describe('rendementTotal', () => {
   it('rend le rendement en cours seuls hors de ces cas', () => {
     const s = serie(cal, cal.map((_, i) => 1000 + i));
     expect(rendementTotal(s, 'A', [], 0, 10)).toBeCloseTo(10 / 1000, 6);
+  });
+});
+
+describe('rendementTotal — ruptures', () => {
+  it('vaut null sur une fenêtre qui contient une rupture', () => {
+    const s = serie(cal, cal.map(() => 1000));
+    expect(rendementTotal(s, 'A', [], 10, 30, new Set([cal[20]!]))).toBeNull();
+    expect(rendementTotal(s, 'A', [], 10, 30, new Set([cal[30]!]))).toBeNull();
+  });
+  it('ignore une rupture hors de ]a ; b]', () => {
+    const s = serie(cal, cal.map(() => 1000));
+    expect(rendementTotal(s, 'A', [], 10, 30, new Set([cal[10]!, cal[31]!]))).toBeCloseTo(0, 9);
   });
 });
 

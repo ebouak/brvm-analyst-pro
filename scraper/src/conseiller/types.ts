@@ -41,6 +41,8 @@ export interface Donnees {
   comptes: ComptesAnnuels[];
   dividendes: Dividende[];
   familles: Map<string, FamilleComptable>;
+  /** Dates de rupture non expliquée par valeur (spec §11.3). */
+  ruptures: Map<string, Set<string>>;
 }
 
 export type Action = 'acheter' | 'conserver' | 'vendre';

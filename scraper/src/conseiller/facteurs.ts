@@ -15,6 +15,15 @@ export const MIN_COUVERTURE = 15;
 
 export type ScoresFamilles = Record<FamilleFacteur, number | null>;
 
+/** Vrai si une rupture tombe dans ]dates[p-longueur] ; dates[p]] (spec §11.3). */
+function contientRupture(s: Serie, ruptures: Set<string> | undefined, p: number, longueur: number): boolean {
+  if (!ruptures || ruptures.size === 0 || p - longueur < 0) return false;
+  const debut = s.dates[p - longueur]!;
+  const fin = s.dates[p]!;
+  for (const r of ruptures) if (r > debut && r <= fin) return true;
+  return false;
+}
+
 function fenetreEchangee(s: Serie, p: number, longueur: number): boolean {
   if (p - longueur < 0) return false;
   let echangees = 0;
@@ -82,17 +91,18 @@ export function scoresFamilles(
     const s = d.series.get(code)!;
     const p = s.pos.get(date)!;
     const cours = s.cours[p]!;
+    const rup = d.ruptures.get(code);
     for (const [long, cible] of [[PARAMS.tendanceCourte, brut.t60], [PARAMS.tendanceLongue, brut.t120]] as const) {
-      cible.set(code, fenetreEchangee(s, p, long)
+      cible.set(code, fenetreEchangee(s, p, long) && !contientRupture(s, rup, p, long)
         ? cours / s.cours[p - long]! - 1 - perfIndice(ind, d.calendrier, s.dates[p - long]!, date)
         : null);
     }
-    if (fenetreEchangee(s, p, PARAMS.volatilite)) {
+    if (fenetreEchangee(s, p, PARAMS.volatilite) && !contientRupture(s, rup, p, PARAMS.volatilite)) {
       const r: number[] = [];
       for (let i = p - PARAMS.volatilite + 1; i <= p; i++) if ((s.volumes[i] ?? 0) > 0) r.push(Math.log(s.cours[i]! / s.cours[i - 1]!));
       brut.vol.set(code, r.length > 2 ? ecartType(r) : null);
     } else brut.vol.set(code, null);
-    if (fenetreEchangee(s, p, PARAMS.baisseMax)) {
+    if (fenetreEchangee(s, p, PARAMS.baisseMax) && !contientRupture(s, rup, p, PARAMS.baisseMax)) {
       let pic = 0, pire = 0;
       for (let i = p - PARAMS.baisseMax; i <= p; i++) { pic = Math.max(pic, s.cours[i]!); pire = Math.min(pire, s.cours[i]! / pic - 1); }
       brut.dd.set(code, -pire);
