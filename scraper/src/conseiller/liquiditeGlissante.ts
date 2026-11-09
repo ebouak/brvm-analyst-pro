@@ -7,8 +7,14 @@ export const FENETRE_LIQUIDITE = 30;
  * Plancher propre au banc. Le moteur de production surestime l'impact prix des
  * cours figés (variation nulle, donc Amihud à 0 = « parfait ») : une valeur
  * presque jamais échangée peut sortir en B. Pour le banc on impose donc : sous
- * 50 % de présence, ou activité nulle, la classe est D. Divergence ASSUMÉE par
- * rapport au score de production, qui n'est pas modifié.
+ * 50 % de présence, la classe est D. Divergence ASSUMÉE par rapport au score de
+ * production, qui n'est pas modifié.
+ *
+ * PAS de plancher sur l'activité (valeur échangée) : elle vaut 0 sous 2 M FCFA
+ * par séance, seuil que franchissent rarement les petites capitalisations et
+ * presque aucune valeur dans les années 2000 (montants nominaux plus faibles).
+ * Ce critère aurait vidé l'échantillon historique sans viser les cours figés,
+ * que la présence traite déjà. Décision prise avant toute mesure (PREREG).
  */
 export const PLANCHER_LIQUIDITE = { presenceMinPct: 50 } as const;
 
@@ -34,6 +40,6 @@ export function classeA(s: Serie, calendrier: string[], date: string): Liquidity
     });
   }
   const r = computeLiquidityV2(rows, fenetre.length);
-  if (r.classe && (r.presence_pct < PLANCHER_LIQUIDITE.presenceMinPct || r.activite === 0)) return 'D';
+  if (r.classe && r.presence_pct < PLANCHER_LIQUIDITE.presenceMinPct) return 'D';
   return r.classe;
 }
