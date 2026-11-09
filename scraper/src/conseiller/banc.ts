@@ -36,6 +36,16 @@ export function ecartsParDate(paniers: Panier[]): { date: string; ecart: number 
     .map((p) => ({ date: p.date, ecart: moyenne(p.achats) - moyenne(p.ventes) - PROTOCOLE.cout }));
 }
 
+/** Début de l'historique du test confirmatoire (spec §11.6) : avant, 2 à 3 valeurs seulement. */
+export const DEBUT_HISTORIQUE = '2007-01-01';
+
+/** Statistique confirmatoire (spec §11.6) : moyenne des achats (déjà en excès du marché) − coût, par date avec achat. */
+export function ecartsAchatMarche(paniers: Panier[]): { date: string; ecart: number }[] {
+  return paniers
+    .filter((p) => p.achats.length > 0)
+    .map((p) => ({ date: p.date, ecart: moyenne(p.achats) - PROTOCOLE.cout }));
+}
+
 export type VerdictBanc = 'prouve' | 'non_prouve' | 'insuffisant';
 
 export function verdictBanc(ecarts: number[]): { verdict: VerdictBanc; moyenne: number | null; borneBasse: number | null; n: number } {

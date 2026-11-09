@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { datesRebalancement, ecartsParDate, verdictBanc, construirePaniers, PROTOCOLE } from '../src/conseiller/banc.js';
+import { datesRebalancement, ecartsParDate, verdictBanc, construirePaniers, ecartsAchatMarche, DEBUT_HISTORIQUE, PROTOCOLE } from '../src/conseiller/banc.js';
 import { indiceEquipondere } from '../src/conseiller/indice.js';
 import { calendrier, univers } from './conseillerFabrique.js';
 
@@ -21,6 +21,22 @@ describe('ecartsParDate', () => {
     ]);
     expect(r).toHaveLength(1);
     expect(r[0]!.ecart).toBeCloseTo(0.04 - 0.01 - PROTOCOLE.cout, 10);
+  });
+});
+
+describe('ecartsAchatMarche', () => {
+  it('renvoie moyenne(achats) − coût pour chaque date avec achat, saute les autres', () => {
+    const r = ecartsAchatMarche([
+      { date: 'd1', achats: [0.05, 0.03], ventes: [] },
+      { date: 'd2', achats: [], ventes: [0.01] },
+      { date: 'd3', achats: [0.02], ventes: [0.5] },
+    ]);
+    expect(r.map((x) => x.date)).toEqual(['d1', 'd3']);
+    expect(r[0]!.ecart).toBeCloseTo(0.04 - PROTOCOLE.cout, 10);
+    expect(r[1]!.ecart).toBeCloseTo(0.02 - PROTOCOLE.cout, 10);
+  });
+  it('le début d historique est 2007-01-01', () => {
+    expect(DEBUT_HISTORIQUE).toBe('2007-01-01');
   });
 });
 
