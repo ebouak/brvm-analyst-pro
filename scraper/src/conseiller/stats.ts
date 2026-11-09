@@ -59,6 +59,7 @@ export function bootstrapStationnaire(
   opts: { blocMoyen: number; tirages: number; graine: number },
 ): number[] {
   const n = xs.length;
+  if (n === 0) return [];
   const alea = prng(opts.graine);
   const p = 1 / opts.blocMoyen;
   const moyennes: number[] = [];
@@ -83,6 +84,7 @@ export function bootstrapIid(xs: number[], tirages: number, graine: number): num
 export function testSigne(xs: number[]): { positifs: number; n: number; p: number } {
   const nonNuls = xs.filter((x) => x !== 0);
   const n = nonNuls.length;
+  if (n > 1000) throw new Error('testSigne : n > 1000, utiliser une approximation normale');
   const positifs = nonNuls.filter((x) => x > 0).length;
   let p = 0;
   let c = 1; // C(n, 0)

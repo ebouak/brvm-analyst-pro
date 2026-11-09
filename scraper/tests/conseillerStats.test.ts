@@ -61,3 +61,12 @@ describe('ecartType', () => {
     expect(ecartType([2, 4, 4, 4, 5, 5, 7, 9])).toBeCloseTo(2.138, 2);
   });
 });
+
+describe('garde-fous', () => {
+  it('testSigne lève au-delà de 1000 observations', () => {
+    expect(() => testSigne(Array.from({ length: 1001 }, () => 1))).toThrow('testSigne : n > 1000');
+  });
+  it('bootstrapStationnaire rend [] sur une série vide', () => {
+    expect(bootstrapStationnaire([], { blocMoyen: 3, tirages: 10, graine: 1 })).toEqual([]);
+  });
+});
