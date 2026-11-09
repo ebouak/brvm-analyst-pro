@@ -7,6 +7,7 @@ import SectorRotation from '@/components/SectorRotation';
 import ValorisationSecteurs from '@/components/secteurs/ValorisationSecteurs';
 import NewsletterForm from '@/components/NewsletterForm';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import {
   PremiumPanel,
   EmptyStatePremium,
@@ -25,6 +26,9 @@ export const revalidate = 300;
 // BRVM » sont des requêtes réelles, et la valorisation sectorielle est de la
 // donnée de marché, sans rien de personnel.
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.westbourse.com';
+
+/** Couleur du sens d'une variation : vert en hausse, rouge en baisse, neutre à zéro. */
+const sens = (v: number) => (v > 0 ? 'text-up' : v < 0 ? 'text-down' : 'text-muted');
 
 /** "2026-11-03" → "3 nov. 2026" (affichage seul). */
 function fmtDateFR(iso: string | null | undefined): string {
@@ -145,16 +149,15 @@ export default async function SecteursPage() {
       {perfs.length === 0 ? (
         <div className="mt-8">
           <EmptyStatePremium
-            icon="◈"
             title="Aucune donnée sectorielle disponible"
-            hint="Les données sectorielles apparaîtront ici dès la première ingestion."
-            action={{ href: '/', label: 'Retour au tableau de bord' }}
+            hint="Le classement des secteurs s’affichera après la première séance collectée."
+            action={{ href: '/', label: 'Retour à l’accueil' }}
           />
         </div>
       ) : (
         <>
           {/* ── 01 : Top secteurs du jour ─────────────────────────────────── */}
-          <section aria-labelledby="tete">
+          <section aria-labelledby="tete-titre">
             <Chapitre
               id="tete"
               numero="01"
@@ -163,30 +166,36 @@ export default async function SecteursPage() {
               premier
             />
             {(best?.varDay != null || worst?.varDay != null) && (
-              <p className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+              <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
                 {best && best.varDay != null && (
-                  <span>
-                    Meilleur : <span className="text-ivory">{best.secteur}</span>{' '}
-                    <span className="tabular text-up">{fmtPctSigne(best.varDay)}</span>
-                  </span>
+                  <div className="flex gap-1.5">
+                    <dt>Meilleur secteur</dt>
+                    <dd>
+                      <span className="text-ivory">{best.secteur}</span>{' '}
+                      <span className={`tabular ${sens(best.varDay)}`}>{fmtPctSigne(best.varDay)}</span>
+                    </dd>
+                  </div>
                 )}
                 {worst && worst.varDay != null && worst.secteur !== best?.secteur && (
-                  <span>
-                    Pire : <span className="text-ivory">{worst.secteur}</span>{' '}
-                    <span className="tabular text-down">{fmtPctSigne(worst.varDay)}</span>
-                  </span>
+                  <div className="flex gap-1.5">
+                    <dt>Le plus faible</dt>
+                    <dd>
+                      <span className="text-ivory">{worst.secteur}</span>{' '}
+                      <span className={`tabular ${sens(worst.varDay)}`}>{fmtPctSigne(worst.varDay)}</span>
+                    </dd>
+                  </div>
                 )}
-              </p>
+              </dl>
             )}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {top4.map((p) => (
-                <SectorCard key={p.secteur} perf={p} />
+              {top4.map((p, i) => (
+                <SectorCard key={p.secteur} perf={p} rang={i + 1} />
               ))}
             </div>
           </section>
 
           {/* ── 02 : Classement complet ───────────────────────────────────── */}
-          <section aria-labelledby="classement">
+          <section aria-labelledby="classement-titre">
             <Chapitre
               id="classement"
               numero="02"
@@ -203,7 +212,7 @@ export default async function SecteursPage() {
           </section>
 
           {/* ── 03 : Rotation sectorielle ─────────────────────────────────── */}
-          <section aria-labelledby="rotation">
+          <section aria-labelledby="rotation-titre">
             <Chapitre
               id="rotation"
               numero="03"
@@ -241,17 +250,20 @@ export default async function SecteursPage() {
         </>
       )}
 
-      {/* ── Lien heatmap ────────────────────────────────────────────────── */}
-      <div className="mt-16 flex items-center justify-between gap-4 rounded-card border border-border bg-surface px-5 py-4">
+      {/* ── Lien vers la cartographie ───────────────────────────────────── */}
+      <div className="mt-16 flex flex-col gap-4 rounded-card border border-border bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-ivory">Voir la cartographie visuelle</p>
-          <p className="text-xs text-muted">Heatmap : taille proportionnelle à la capitalisation, couleur selon la variation</p>
+          <p className="text-sm font-medium text-ivory">Voir la cartographie du marché</p>
+          <p className="mt-0.5 text-xs text-muted">
+            Une tuile par société : sa taille suit la capitalisation, sa couleur la variation de la séance.
+          </p>
         </div>
         <Link
           href="/heatmap"
-          className="shrink-0 rounded-lg border border-border px-4 py-2 text-xs font-medium text-accent-ink transition-colors hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border-strong px-4 text-sm font-medium text-accent-ink transition-colors hover:border-accent hover:bg-elevated active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
         >
-          Ouvrir la heatmap
+          Ouvrir la cartographie
+          <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
         </Link>
       </div>
 

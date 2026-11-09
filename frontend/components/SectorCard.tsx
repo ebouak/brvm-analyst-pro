@@ -1,12 +1,18 @@
 import type React from 'react';
-import type { SectorPerf } from '@/lib/sectors';
-import { fmtFcfa } from '@/lib/format';
 import Link from 'next/link';
+import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
+import type { SectorPerf } from '@/lib/sectors';
+import { fmtFcfa, fmtPctSigne } from '@/lib/format';
 
 interface Props {
   perf: SectorPerf;
+  /** Rang dans le classement du jour (1 = plus forte variation). Facultatif. */
+  rang?: number;
 }
 
+const FOCUS = 'rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface';
+
+/** Courbe de la performance cumulée sur 30 jours. Couleur par jeton (suit le thème). */
 function Sparkline({ data }: { data: number[] }) {
   if (data.length < 2) return null;
 
@@ -15,114 +21,152 @@ function Sparkline({ data }: { data: number[] }) {
   const range = max - min || 1;
 
   const W = 120;
-  const H = 28;
+  const H = 32;
   const step = W / (data.length - 1);
+  const y = (v: number) => H - ((v - min) / range) * H;
 
-  const points = data
-    .map((v, i) => {
-      const x = i * step;
-      const y = H - ((v - min) / range) * H;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
-
+  const points = data.map((v, i) => `${(i * step).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
   const last = data[data.length - 1] ?? 0;
-  const strokeColor = last >= 0 ? '#3fe18b' : '#ff6b6b';
+  const zero = min < 0 && max > 0 ? y(0) : null;
 
   return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      className={`h-8 w-full overflow-visible ${last >= 0 ? 'text-up' : 'text-down'}`}
+      aria-hidden
+    >
+      {zero != null && (
+        <line x1="0" x2={W} y1={zero} y2={zero} className="stroke-border" strokeWidth="1" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
+      )}
       <polyline
         points={points}
         fill="none"
-        stroke={strokeColor}
+        stroke="currentColor"
         strokeWidth="1.5"
         strokeLinejoin="round"
         strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
       />
     </svg>
   );
 }
 
-export default function SectorCard({ perf }: Props) {
-  const { secteur, count, varDay, volumeDay, sparkline30d, topHausse, topBaisse, hausses, baisses } = perf;
-  const isUp = (varDay ?? 0) >= 0;
-  const varColor = varDay == null ? 'text-muted' : isUp ? 'text-up' : 'text-down';
-  const borderColor = varDay == null ? 'border-border' : isUp ? 'border-up/20' : 'border-down/20';
-  const arrow = varDay == null ? '' : isUp ? '↑' : '↓';
-  const varText = varDay == null ? '—' : `${arrow} ${Math.abs(varDay).toFixed(2)}%`;
-  const breadth = (hausses + baisses) > 0 ? (hausses / (hausses + baisses)) * 100 : 50;
+export default function SectorCard({ perf, rang }: Props) {
+  const { secteur, count, varDay, var30d, volumeDay, sparkline30d, topHausse, topBaisse, hausses, baisses } = perf;
+  const varColor = varDay == null ? 'text-muted' : varDay > 0 ? 'text-up' : varDay < 0 ? 'text-down' : 'text-muted';
+  const Fleche = varDay == null || varDay === 0 ? null : varDay > 0 ? TrendingUp : TrendingDown;
+  const mouvements = hausses + baisses;
+  const partHausse = mouvements > 0 ? (hausses / mouvements) * 100 : null;
 
   return (
-    <div className={`rounded-xl border bg-elevated/60 p-4 flex flex-col gap-3 transition-all duration-200 hover:bg-elevated ${borderColor}`}>
-      {/* En-tête : nom secteur + variation */}
-      <div className="flex items-start justify-between gap-2">
-        <Link
-          href={`/heatmap?secteur=${encodeURIComponent(secteur)}`}
-          className="text-sm font-semibold text-ivory leading-tight hover:text-gold transition-colors"
-        >
-          {secteur}
-        </Link>
-        <span className={`tabular text-sm font-bold shrink-0 ${varColor}`}>
-          {varText}
-        </span>
-      </div>
+    <article className="flex flex-col gap-4 rounded-card border border-border bg-surface px-4 pb-4 pt-6 shadow-card">
+      {/* En-tête : rang, secteur, variation de la séance */}
+      {/* Titre puis variation, empilés : côte à côte, un nom long (« Télécommunications ») n'avait plus la place. */}
+      <header className="-mb-1 flex flex-col gap-1">
+        <h3 className="flex min-w-0 items-baseline gap-2 text-base font-semibold leading-snug text-ivory">
+          {rang != null && (
+            <span className="tabular shrink-0 text-xs font-normal text-accent-ink">
+              <span className="sr-only">Rang </span>{String(rang).padStart(2, '0')}
+            </span>
+          )}
+          <Link href={`/heatmap?secteur=${encodeURIComponent(secteur)}`} className={`min-w-0 [overflow-wrap:break-word] [text-wrap:balance] transition-colors hover:text-accent-ink ${FOCUS}`}>
+            {secteur}
+          </Link>
+        </h3>
+        <p className={`flex shrink-0 items-center gap-1 ${varColor}`}>
+          {Fleche && <Fleche size={16} strokeWidth={1.75} aria-hidden />}
+          <span className="tabular text-xl font-semibold">{varDay == null ? '—' : fmtPctSigne(varDay)}</span>
+        </p>
+      </header>
 
-      {/* Breadth bar */}
+      {/* Largeur : part des valeurs en hausse parmi celles qui ont bougé */}
       <div>
-        <div className="h-1.5 rounded-full bg-border overflow-hidden">
+        {partHausse != null ? (
           <div
-            className="h-full rounded-full bg-up transition-all [width:var(--breadth)]"
-            style={{ '--breadth': `${breadth.toFixed(0)}%` } as React.CSSProperties}
-          />
-        </div>
-        <div className="flex items-center justify-between mt-1 text-[11px] text-faint">
-          <span>{hausses} hausse{hausses > 1 ? 's' : ''}</span>
-          <span>{baisses} baisse{baisses > 1 ? 's' : ''}</span>
-        </div>
+            className="flex h-1.5 overflow-hidden rounded-full bg-down/70"
+            role="img"
+            aria-label={`${hausses} en hausse, ${baisses} en baisse`}
+          >
+            <div
+              className="h-full bg-up [width:var(--part)]"
+              style={{ '--part': `${partHausse.toFixed(0)}%` } as React.CSSProperties}
+            />
+          </div>
+        ) : (
+          <div className="h-1.5 rounded-full bg-border" aria-hidden />
+        )}
+        <p className="mt-1.5 flex items-center justify-between text-xs text-muted">
+          {partHausse != null ? (
+            <>
+              <span><span className="tabular text-ivory">{hausses}</span> en hausse</span>
+              <span><span className="tabular text-ivory">{baisses}</span> en baisse</span>
+            </>
+          ) : (
+            <span>Aucune valeur n&apos;a bougé sur la séance</span>
+          )}
+        </p>
       </div>
 
-      {/* Top performers */}
+      {/* Valeurs extrêmes du secteur sur la séance */}
       {(topHausse || topBaisse) && (
-        <div className="flex flex-col gap-0.5">
+        <dl className="space-y-1 text-xs">
           {topHausse && (
-            <div className="flex items-center justify-between text-[11px]">
-              <Link
-                href={`/actions/${topHausse.code}`}
-                className="font-mono font-bold text-up hover:text-up transition-colors"
-              >
-                ↑ {topHausse.code}
-              </Link>
-              <span className="tabular text-up">{topHausse.pct >= 0 ? '+' : ''}{topHausse.pct.toFixed(2)}%</span>
+            <div className="flex items-center justify-between gap-2">
+              <dt className="text-muted">Plus forte hausse</dt>
+              <dd className="flex items-center gap-2">
+                <Link href={`/actions/${topHausse.code}`} className={`font-medium text-ivory hover:text-accent-ink ${FOCUS}`}>
+                  {topHausse.code}
+                </Link>
+                <span className="tabular text-up">{fmtPctSigne(topHausse.pct)}</span>
+              </dd>
             </div>
           )}
           {topBaisse && (
-            <div className="flex items-center justify-between text-[11px]">
-              <Link
-                href={`/actions/${topBaisse.code}`}
-                className="font-mono font-bold text-down hover:text-down transition-colors"
-              >
-                ↓ {topBaisse.code}
-              </Link>
-              <span className="tabular text-down">{topBaisse.pct.toFixed(2)}%</span>
+            <div className="flex items-center justify-between gap-2">
+              <dt className="text-muted">Plus forte baisse</dt>
+              <dd className="flex items-center gap-2">
+                <Link href={`/actions/${topBaisse.code}`} className={`font-medium text-ivory hover:text-accent-ink ${FOCUS}`}>
+                  {topBaisse.code}
+                </Link>
+                <span className="tabular text-down">{fmtPctSigne(topBaisse.pct)}</span>
+              </dd>
             </div>
           )}
+        </dl>
+      )}
+
+      {/* Tendance sur 30 jours */}
+      {(var30d != null || sparkline30d.length >= 2) && (
+        <div>
+          <p className="flex items-baseline justify-between text-xs text-muted">
+            <span>Sur 30 jours</span>
+            {var30d != null && (
+              <span className={`tabular ${var30d > 0 ? 'text-up' : var30d < 0 ? 'text-down' : 'text-muted'}`}>{fmtPctSigne(var30d)}</span>
+            )}
+          </p>
+          <div className="mt-1.5">
+            <Sparkline data={sparkline30d} />
+          </div>
         </div>
       )}
 
-      <div className="flex items-center justify-between text-xs text-faint">
-        <span>{count} action{count > 1 ? 's' : ''} · Vol. {fmtFcfa(volumeDay)}</span>
-        <span className="text-[11px]">30j</span>
-      </div>
-
-      <Sparkline data={sparkline30d} />
-
-      {/* Navigation contextuelle : voir les actions de ce secteur */}
-      <Link
-        href={`/actions?secteur=${encodeURIComponent(secteur)}`}
-        className="mt-1 inline-flex items-center gap-1 text-[11px] text-info hover:underline"
-      >
-        Voir les actions de ce secteur →
-      </Link>
-    </div>
+      <footer className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-border pt-3 text-xs text-muted">
+        <span>
+          <span className="tabular text-ivory">{count}</span> valeur{count > 1 ? 's' : ''}
+          <span aria-hidden className="mx-1.5 text-faint">·</span>
+          {volumeDay != null
+            ? <><span className="tabular text-ivory">{fmtFcfa(volumeDay)}</span> FCFA échangés</>
+            : <>valeur échangée non publiée</>}
+        </span>
+        <Link
+          href={`/actions?secteur=${encodeURIComponent(secteur)}`}
+          className={`inline-flex min-h-[44px] items-center gap-1 text-accent-ink transition-colors hover:underline sm:min-h-0 ${FOCUS}`}
+        >
+          Voir les valeurs
+          <ArrowRight size={14} strokeWidth={1.75} aria-hidden />
+        </Link>
+      </footer>
+    </article>
   );
 }

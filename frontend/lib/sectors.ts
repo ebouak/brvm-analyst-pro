@@ -7,7 +7,8 @@ export interface SectorPerf {
   var30d: number | null;
   var90d: number | null;
   var1y: number | null;
-  volumeDay: number;
+  /** Valeur échangée de la séance (FCFA) ; null si aucune valeur du secteur ne la renseigne. */
+  volumeDay: number | null;
   sparkline30d: number[]; // perf cumulée j-30 → j (index 0 = le plus ancien)
   topHausse: { code: string; pct: number } | null;
   topBaisse: { code: string; pct: number } | null;
@@ -88,6 +89,7 @@ export function aggregateBySector(rows: Row[], lastDate: string): SectorPerf[] {
     const var1ys: number[] = [];
     const coursToday: number[] = [];
     let volumeDay = 0;
+    let volumeConnu = false;
     let hausses = 0;
     let baisses = 0;
     let topHausse: { code: string; pct: number } | null = null;
@@ -114,7 +116,10 @@ export function aggregateBySector(rows: Row[], lastDate: string): SectorPerf[] {
       }
 
       // Volume jour
-      if (todayRow?.valeur_echangee != null) volumeDay += todayRow.valeur_echangee;
+      if (todayRow?.valeur_echangee != null) {
+        volumeDay += todayRow.valeur_echangee;
+        volumeConnu = true;
+      }
 
       // Variations sur périodes
       const close5d = closestBefore(codeRows, ref5d);
@@ -170,7 +175,7 @@ export function aggregateBySector(rows: Row[], lastDate: string): SectorPerf[] {
       var30d: avg(var30ds),
       var90d: avg(var90ds),
       var1y: avg(var1ys),
-      volumeDay,
+      volumeDay: volumeConnu ? volumeDay : null,
       sparkline30d,
       topHausse,
       topBaisse,

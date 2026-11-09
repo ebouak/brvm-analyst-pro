@@ -95,7 +95,7 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre@email.com"
-              className="min-w-0 flex-1 rounded-full border border-border bg-elevated px-4 py-2.5 text-sm text-ivory transition placeholder:text-faint focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40 sm:w-56"
+              className="min-w-0 flex-1 rounded-full border border-border-strong bg-elevated px-4 py-2.5 text-sm text-ivory transition placeholder:text-faint focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/40 sm:w-56"
             />
             <button
               type="submit"
@@ -109,7 +109,7 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
 
         {status === 'error' && <p className="mt-3 text-sm text-down">{msg}</p>}
 
-        <p className="mt-3 text-[11px] text-faint">
+        <p className="mt-3 text-xs text-faint">
           En vous abonnant, vous acceptez de recevoir notre newsletter. Désabonnement en 1 clic.
         </p>
       </div>
@@ -128,7 +128,7 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="votre@email.com"
-            className="flex-1 min-w-0 bg-elevated border border-border rounded-lg px-3 py-1.5 text-sm text-ivory placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/60 transition"
+            className="flex-1 min-w-0 bg-elevated border border-border-strong rounded-lg px-3 py-1.5 text-sm text-ivory placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/60 transition"
           />
           <button
             type="submit"
@@ -164,12 +164,12 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="votre@email.com"
-          className="flex-1 bg-elevated border border-border rounded-xl px-4 py-2.5 text-sm text-ivory placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/60 transition"
+          className="flex-1 bg-elevated border border-border-strong rounded-xl px-4 py-2.5 text-sm text-ivory placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/60 transition"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="px-5 py-2.5 rounded-xl bg-gold text-obsidian font-semibold text-sm hover:bg-gold-2 hover:-translate-y-0.5 hover:shadow-gold active:translate-y-0 active:scale-95 transition disabled:opacity-50 shadow-gold-sm motion-reduce:hover:translate-y-0"
+          className="px-5 py-2.5 rounded-xl bg-gold text-obsidian font-semibold text-sm hover:bg-gold-2 hover:-translate-y-0.5 hover:shadow-gold active:translate-y-0 active:scale-95 transition disabled:opacity-50 shadow-gold-sm motion-reduce:hover:translate-y-0 whitespace-nowrap"
         >
           {status === 'loading' ? 'Inscription…' : 'S\'abonner gratuitement'}
         </button>
@@ -179,7 +179,7 @@ export default function NewsletterForm({ source = 'landing', compact = false, ba
         <p className="relative text-sm text-down">{msg}</p>
       )}
 
-      <p className="relative text-[11px] text-faint">
+      <p className="relative text-xs text-faint">
         En vous abonnant, vous acceptez de recevoir notre newsletter. Désabonnement en 1 clic.
       </p>
     </section>
