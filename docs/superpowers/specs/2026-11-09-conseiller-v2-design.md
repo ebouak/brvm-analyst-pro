@@ -294,10 +294,10 @@ Décisions de l'exploitant et règles qui en découlent :
    2021-07-01, sans valeur de preuve. Le Conseiller affiche les fondamentaux
    comme contexte tant qu'ils ne sont pas prouvés. Réévaluation annuelle.
 2. **Erreurs de saisie (allers-retours).** Une séance dont le cours sort de
-   [×0,625 ; ×1,6] par rapport à la précédente, et qui revient dans les 5 séances
+   [×0,8 ; ×1,25] par rapport à la précédente, et qui revient dans les 5 séances
    suivantes à ±10 % du cours d'avant le saut, est une erreur de saisie. Les
    séances concernées sont retirées de la série et traitées comme non cotées.
-   Cas d'origine : ONTBF 2014-2018, SIVC, SLBC, SGBC, PRSC.
+   Cas d'origine : ONTBF 2014-2018, SIVC, SLBC, SGBC, PRSC, cas BOAN 2014-2017 (+30 % puis −23 %).
 3. **Ruptures non expliquées.** Une variation hors de [×0,8 ; ×1,25] en une
    séance, après nettoyage, dépasse la limite de cotation. Si aucun dividende
    détaché ce jour-là n'en explique la baisse à ±20 %, c'est une **rupture**

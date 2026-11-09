@@ -1,8 +1,8 @@
 import type { Dividende, Serie } from './types.js';
 
-/** Spec §11.2 : bornes du saut, fenêtre de retour et tolérance de retour. */
-const SAUT_BAS = 0.625;
-const SAUT_HAUT = 1.6;
+/** Spec §11.2 : bornes du saut (étendues avant mesure : cas BOAN), fenêtre de retour et tolérance de retour. */
+const SAUT_BAS = 0.8;
+const SAUT_HAUT = 1.25;
 const RETOUR_MAX = 5;
 const RETOUR_MIN_RATIO = 0.9;
 const RETOUR_MAX_RATIO = 1.1;
@@ -28,7 +28,7 @@ function reconstruire(s: Serie, garde: boolean[]): Serie {
 }
 
 /**
- * Erreurs de saisie (spec §11.2) : un saut hors de [×0,625 ; ×1,6] qui revient,
+ * Erreurs de saisie (spec §11.2) : un saut hors de [×0,8 ; ×1,25] qui revient,
  * dans les 5 séances suivantes, à ±10 % du cours d'avant le saut. Les séances
  * du saut jusqu'au retour (exclu) sont retirées de la série.
  */

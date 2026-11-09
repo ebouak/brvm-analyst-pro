@@ -16,6 +16,11 @@ describe('nettoyerAllersRetours', () => {
     expect(s.pos.get(cal[21]!)).toBe(20);
     expect(s.variations.length).toBe(59);
   });
+  it('retire un aller-retour ×1,30 puis ×0,77 sur une séance (cas BOAN)', () => {
+    const { serie: s, retirees } = nettoyerAllersRetours(base((i) => (i === 20 ? 1300 : 1000)));
+    expect(retirees).toEqual([cal[20]]);
+    expect(s.dates.length).toBe(59);
+  });
   it('retire un aller-retour sur 4 séances', () => {
     const { serie: s, retirees } = nettoyerAllersRetours(base((i) => (i >= 20 && i < 24 ? 500 : 1000)));
     expect(retirees).toEqual([cal[20], cal[21], cal[22], cal[23]]);
