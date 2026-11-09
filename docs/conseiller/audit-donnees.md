@@ -1,28 +1,31 @@
 # Audit des données — Conseiller v2
 
-Exécuté le 2026-11-09T14:25:45.421Z · empreinte des données `f9fed6b7ca3b03985f1ce0b619688f7bbec1be294462e2ff529a29e06f197762`
+Exécuté le 2026-11-09T14:30:50.575Z · empreinte des données `f9fed6b7ca3b03985f1ce0b619688f7bbec1be294462e2ff529a29e06f197762`
 Calendrier : 1998-09-16 → 2026-11-09 (5905 séances), 49 valeurs.
 
-## 0. Erreurs de saisie retirées (59 séances, 6 valeurs)
+## 0. Erreurs de saisie retirées (96 séances, 10 valeurs)
 
-Allers-retours hors de [×0,625 ; ×1,6] revenus à ±10 % dans les 5 séances (spec §11.2), retirés avant tout calcul.
+Allers-retours hors de [×0,8 ; ×1,25] revenus à ±10 % dans les 5 séances (spec §11.2), retirés avant tout calcul.
 
 | Valeur | Séances retirées |
 |---|---|
 | ONTBF | 48 |
+| BOAN | 32 |
 | SLBC | 6 |
+| BICC | 3 |
 | SIVC | 2 |
 | BNBC | 1 |
+| NTLC | 1 |
 | PRSC | 1 |
+| SDSC | 1 |
 | SGBC | 1 |
 
-## 0 bis. Ruptures non expliquées (72)
+## 0 bis. Ruptures non expliquées (22)
 
 Variation d'une séance hors de [×0,8 ; ×1,25] sans dividende détaché ce jour-là qui l'explique (spec §11.3). Les fenêtres qui les contiennent sont exclues du banc.
 
 | Valeur | Date | Rapport |
 |---|---|---|
-| BICC | 2003-03-27 | 0.677 |
 | STAC | 2008-05-02 | 0.783 |
 | ABJC | 2008-09-23 | 0.733 |
 | CABC | 2008-12-19 | 0.668 |
@@ -30,8 +33,6 @@ Variation d'une séance hors de [×0,8 ; ×1,25] sans dividende détaché ce jou
 | FTSC | 2009-07-07 | 1.354 |
 | SMBC | 2009-08-27 | 0.747 |
 | SMBC | 2009-09-01 | 0.792 |
-| NTLC | 2009-10-22 | 1.543 |
-| NTLC | 2009-10-23 | 0.648 |
 | CFAC | 2010-03-04 | 0.791 |
 | UNXC | 2010-03-05 | 0.792 |
 | STBC | 2010-04-15 | 0.789 |
@@ -39,57 +40,10 @@ Variation d'une séance hors de [×0,8 ; ×1,25] sans dividende détaché ce jou
 | SGBC | 2011-06-07 | 1.335 |
 | SOGC | 2011-06-24 | 0.758 |
 | PRSC | 2011-07-21 | 0.760 |
-| SDSC | 2012-01-02 | 0.662 |
-| SDSC | 2012-01-05 | 1.494 |
 | BOAN | 2012-05-22 | 0.765 |
 | SOGC | 2012-07-19 | 0.798 |
 | BOABF | 2013-06-13 | 0.786 |
-| BOAN | 2014-08-07 | 1.300 |
-| BOAN | 2014-08-08 | 0.720 |
-| BOAN | 2014-12-25 | 1.300 |
-| BOAN | 2014-12-29 | 0.769 |
-| BOAN | 2015-02-09 | 1.300 |
-| BOAN | 2015-02-10 | 0.735 |
-| BOAN | 2015-05-25 | 1.300 |
-| BOAN | 2015-05-26 | 0.779 |
-| BOAN | 2015-07-14 | 1.300 |
-| BOAN | 2015-07-15 | 0.760 |
-| BOAN | 2015-07-17 | 1.300 |
-| BOAN | 2015-07-20 | 0.771 |
-| BOAN | 2015-08-07 | 1.300 |
-| BOAN | 2015-08-10 | 0.763 |
-| BOAN | 2015-09-24 | 1.300 |
-| BOAN | 2015-09-25 | 0.777 |
-| BOAN | 2015-12-24 | 1.300 |
-| BOAN | 2015-12-28 | 0.774 |
-| BOAN | 2016-03-28 | 1.300 |
-| BOAN | 2016-05-02 | 1.300 |
-| BOAN | 2016-05-03 | 0.776 |
-| BOAN | 2016-05-05 | 1.300 |
-| BOAN | 2016-05-06 | 0.775 |
-| BOAN | 2016-05-16 | 1.300 |
-| BOAN | 2016-05-17 | 0.783 |
-| BOAN | 2016-07-06 | 1.300 |
-| BOAN | 2016-07-07 | 0.762 |
-| BOAN | 2016-08-08 | 1.300 |
-| BOAN | 2016-08-09 | 0.769 |
-| BOAN | 2016-08-15 | 1.300 |
-| BOAN | 2016-08-16 | 0.769 |
 | ETIT | 2016-09-01 | 1.261 |
-| BOAN | 2016-09-12 | 1.300 |
-| BOAN | 2016-09-13 | 0.793 |
-| BOAN | 2016-11-01 | 1.300 |
-| BOAN | 2016-11-02 | 0.768 |
-| BOAN | 2016-12-12 | 1.300 |
-| BOAN | 2016-12-13 | 0.757 |
-| BOAN | 2016-12-26 | 1.300 |
-| BOAN | 2016-12-27 | 0.756 |
-| BOAN | 2017-05-01 | 1.300 |
-| BOAN | 2017-05-02 | 0.769 |
-| BOAN | 2017-05-25 | 1.300 |
-| BOAN | 2017-05-26 | 0.753 |
-| BOAN | 2017-06-05 | 1.300 |
-| BOAN | 2017-06-06 | 0.769 |
 | PALC | 2017-11-06 | 0.478 |
 | ONTBF | 2018-02-05 | 0.500 |
 | SLBC | 2018-05-09 | 0.793 |
@@ -114,11 +68,11 @@ Variation d'une séance hors de [×0,8 ; ×1,25] sans dividende détaché ce jou
 | UNLC | 1790 | 48.0 % |
 | BOAB | 4283 | 44.0 % |
 | SLBC | 2502 | 42.4 % |
+| BICC | 4160 | 41.9 % |
 | SEMC | 2017 | 41.9 % |
-| BICC | 4163 | 41.9 % |
 | SIVC | 3917 | 41.4 % |
 | SICC | 1664 | 41.2 % |
-| NTLC | 3312 | 39.6 % |
+| NTLC | 3311 | 39.7 % |
 | NEIC | 2337 | 39.6 % |
 | STBC | 3459 | 39.4 % |
 | PRSC | 2231 | 39.0 % |
@@ -132,10 +86,10 @@ Variation d'une séance hors de [×0,8 ; ×1,25] sans dividende détaché ce jou
 | SMBC | 3270 | 37.0 % |
 | SDCC | 3818 | 36.4 % |
 | CBIBF | 2374 | 35.8 % |
+| BOAN | 4023 | 35.8 % |
 | ABJC | 3944 | 35.5 % |
-| BOAN | 4055 | 35.5 % |
 | CIEC | 4509 | 35.3 % |
-| SDSC | 3837 | 33.7 % |
+| SDSC | 3836 | 33.7 % |
 | BOABF | 3535 | 33.3 % |
 | SOGC | 4348 | 32.7 % |
 | ORGT | 1767 | 32.4 % |

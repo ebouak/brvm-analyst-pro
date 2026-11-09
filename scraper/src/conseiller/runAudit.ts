@@ -26,7 +26,7 @@ export async function runAudit(): Promise<string> {
     ``,
     `## 0. Erreurs de saisie retirées (${totalRetirees} séances, ${retirees.size} valeurs)`,
     ``,
-    `Allers-retours hors de [×0,625 ; ×1,6] revenus à ±10 % dans les 5 séances (spec §11.2), retirés avant tout calcul.`,
+    `Allers-retours hors de [×0,8 ; ×1,25] revenus à ±10 % dans les 5 séances (spec §11.2), retirés avant tout calcul.`,
     ``,
     `| Valeur | Séances retirées |`,
     `|---|---|`,
