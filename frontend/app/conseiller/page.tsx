@@ -4,6 +4,8 @@ import { Chapitre } from '@/components/fiche/Chapitre';
 import { LigneSource } from '@/components/marche/LigneSource';
 import { EmptyStatePremium } from '@/components/ui/premium';
 import { MyPortfolioAdvice } from '@/components/advisor/MyPortfolioAdvice';
+import { LectureApprofondie, LectureApprofondieVerrouillee } from '@/components/conseiller/LectureApprofondie';
+import { chargerLecturesApprofondies } from '@/lib/conseiller/lectureApprofondie';
 import { Jauges } from '@/components/conseiller/Jauges';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
@@ -65,6 +67,12 @@ export default async function ConseillerPage() {
 
   const { date, lignes } = positions;
 
+  // Lecture approfondie : mécanisme d'accès existant de la fiche (feature_flags 'fondamentaux'). Rien de Premium n'est chargé sans accès.
+  const gateApprofondie = await canAccess('fondamentaux');
+  const lectures = gateApprofondie.allowed
+    ? await chargerLecturesApprofondies(lignes.map((l) => l.code), date, new Date().toISOString().slice(0, 10)).catch(() => null)
+    : null;
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <EnTeteCote
@@ -123,6 +131,9 @@ export default async function ConseillerPage() {
                   <div className="mt-3">
                     <Jauges scores={l.scores} tiers={l.tiers} />
                   </div>
+                  {gateApprofondie.allowed ? (
+                    lectures?.get(l.code) ? <LectureApprofondie lecture={lectures.get(l.code)!} tiers={l.tiers} /> : <p className="mt-3 border-t border-border pt-3 text-sm text-muted">Donnée momentanément illisible</p>
+                  ) : <LectureApprofondieVerrouillee />}
                 </li>
               ))}
             </ul>
