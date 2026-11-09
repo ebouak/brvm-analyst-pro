@@ -41,6 +41,8 @@ export interface Donnees {
   comptes: ComptesAnnuels[];
   dividendes: Dividende[];
   familles: Map<string, FamilleComptable>;
+  /** Nombre de titres du référentiel (cohérent avec les cours ajustés des fractionnements). */
+  titres: Map<string, number>;
   /** Dates de rupture non expliquée par valeur (spec §11.3). */
   ruptures: Map<string, Set<string>>;
 }

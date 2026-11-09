@@ -108,7 +108,11 @@ export function scoresFamilles(
       brut.dd.set(code, -pire);
     } else brut.dd.set(code, null);
     const { n, nm1 } = comptesA(d.comptes, code, date);
-    const capi = n?.actions != null && n.actions > 0 ? cours * n.actions : null;
+    // Le nombre de titres du référentiel est cohérent avec les cours ajustés des
+    // fractionnements ; `actions_en_circulation` est rare et antérieur aux
+    // fractionnements. Repli sur ce dernier seulement si le référentiel manque.
+    const titres = d.titres.get(code) ?? (n?.actions != null && n.actions > 0 ? n.actions : null);
+    const capi = titres != null && titres > 0 ? cours * titres : null;
     brut.per.set(code, capi != null && n?.resultatNet != null && n.resultatNet > 0 ? capi / n.resultatNet : null);
     brut.pb.set(code, capi != null && n?.capitauxPropres != null && n.capitauxPropres > 0 ? capi / n.capitauxPropres : null);
     brut.croiss.set(code, n?.resultatNet != null && nm1?.resultatNet != null && nm1.resultatNet !== 0

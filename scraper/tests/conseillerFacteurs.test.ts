@@ -65,6 +65,23 @@ describe('valorisation', () => {
     expect(s.get('V19')!.valorisation).toBeCloseTo(1, 5);
     expect(s.get('V00')!.valorisation).toBeCloseTo(-1, 5);
   });
+  it('utilise le nombre de titres du référentiel, même sans actions_en_circulation', () => {
+    const d = univers(200, Array.from({ length: 20 }, () => 0));
+    const comptes = comptesPour([...d.series.keys()], d.calendrier[10]!, (k) => 10000 * (k + 1)).map((c) => ({ ...c, actions: null }));
+    const titres = new Map([...d.series.keys()].map((c) => [c, 100]));
+    const s = scoresFamilles({ ...d, comptes, titres }, indiceEquipondere(d), d.calendrier[190]!);
+    expect(s.get('V19')!.valorisation).toBeCloseTo(1, 5);
+    expect(s.get('V00')!.valorisation).toBeCloseTo(-1, 5);
+  });
+  it('le référentiel l emporte sur actions_en_circulation (antérieur aux fractionnements)', () => {
+    const d = univers(200, Array.from({ length: 20 }, () => 0));
+    // actions = 100 partout dans les comptes ; le référentiel inverse l ordre de capitalisation.
+    const comptes = comptesPour([...d.series.keys()], d.calendrier[10]!, () => 10000);
+    const titres = new Map([...d.series.keys()].map((c, k) => [c, 100 * (20 - k)]));
+    const s = scoresFamilles({ ...d, comptes, titres }, indiceEquipondere(d), d.calendrier[190]!);
+    // V00 : 2000 titres pour un résultat de 1000 ; V19 : 100 titres pour 20000 → V19 moins chère.
+    expect(s.get('V19')!.valorisation).toBeGreaterThan(s.get('V00')!.valorisation!);
+  });
   it('ignore des comptes pas encore disponibles à la date', () => {
     const d = univers(200, Array.from({ length: 20 }, () => 0));
     const comptes = comptesPour([...d.series.keys()], '2099-01-01', () => 10000);

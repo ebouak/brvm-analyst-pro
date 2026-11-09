@@ -384,3 +384,11 @@ signe de la règle n'ont été lus, et le PREREG n'est pas consommé : le banc p
 - au plus 30 % de lignes dont toutes les familles sont nulles.
 
 Sinon, le job échoue (run rouge et `scraper_errors`).
+
+**Capitalisation (PER, P/B)** : `cours × brvm_instruments.shares`, car ce nombre de
+titres est cohérent avec les cours ajustés des fractionnements, alors que
+`income_statements.actions_en_circulation` est rare (9 à 12 sociétés sur 44 à 47)
+et antérieur aux fractionnements ; ce dernier ne sert que de repli si le
+référentiel n'a pas la valeur. Limite : le référentiel donne le nombre de titres
+ACTUEL, donc une augmentation de capital passée n'est pas reflétée sur les dates
+anciennes. Cela touche le banc descriptif, pas l'affichage du jour.

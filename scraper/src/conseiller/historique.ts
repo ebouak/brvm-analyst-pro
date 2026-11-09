@@ -42,8 +42,8 @@ export async function chargerHistorique(): Promise<Chargement> {
   const cours = await toutLire<{ code: string; date_marche: string; cours_jour: number; volume: number | null; valeur_echangee: number | null; variation_pct: number | null }>((a, b) =>
     sb.from('brvm_actions_daily').select('code, date_marche, cours_jour, volume, valeur_echangee, variation_pct')
       .gt('cours_jour', 0).order('date_marche', { ascending: true }).order('code', { ascending: true }).range(a, b));
-  const inst = await toutLire<{ code: string; famille_comptable: string | null }>((a, b) =>
-    sb.from('brvm_instruments').select('code, famille_comptable').eq('type', 'action').order('code').range(a, b));
+  const inst = await toutLire<{ code: string; famille_comptable: string | null; shares: number | null }>((a, b) =>
+    sb.from('brvm_instruments').select('code, famille_comptable, shares').eq('type', 'action').order('code').range(a, b));
   const inc = await toutLire<{ code: string; periode: string; resultat_net: number | null; actions_en_circulation: number | null }>((a, b) =>
     sb.from('income_statements').select('code, periode, resultat_net, actions_en_circulation').eq('type_periode', 'annuel').order('code').order('periode').range(a, b));
   const bal = await toutLire<{ code: string; periode: string; total_capitaux_propres: number | null }>((a, b) =>
@@ -74,7 +74,11 @@ export async function chargerHistorique(): Promise<Chargement> {
     if (r.length > 0) { series.set(code, propre); retirees.set(code, r); }
   }
   const familles = new Map<string, FamilleComptable>();
-  for (const i of inst) familles.set(i.code, i.famille_comptable === 'banque' ? 'banque' : 'general');
+  const titres = new Map<string, number>();
+  for (const i of inst) {
+    familles.set(i.code, i.famille_comptable === 'banque' ? 'banque' : 'general');
+    if (i.shares != null && Number(i.shares) > 0) titres.set(i.code, Number(i.shares));
+  }
 
   const cp = new Map(bal.map((b) => [`${b.code}|${b.periode.slice(0, 4)}`, b.total_capitaux_propres]));
   const comptes: ComptesAnnuels[] = inc.map((r) => {
@@ -106,5 +110,5 @@ export async function chargerHistorique(): Promise<Chargement> {
   const empreinte = createHash('sha256')
     .update(JSON.stringify({ n: cours.length, d0: cours[0]?.date_marche, d1: cours.at(-1)?.date_marche, comptes, dividendes }))
     .digest('hex');
-  return { donnees: { calendrier: [...calSet].sort(), series, comptes, dividendes, familles, ruptures }, empreinte, retirees };
+  return { donnees: { calendrier: [...calSet].sort(), series, comptes, dividendes, familles, titres, ruptures }, empreinte, retirees };
 }

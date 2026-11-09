@@ -36,5 +36,5 @@ export function univers(nbSeances: number, pentes: number[], famille: FamilleCom
     series.set(code, serie(cal, cours));
     familles.set(code, famille);
   });
-  return { calendrier: cal, series, comptes: [] as ComptesAnnuels[], dividendes: [] as Dividende[], familles, ruptures: new Map() };
+  return { calendrier: cal, series, comptes: [] as ComptesAnnuels[], dividendes: [] as Dividende[], familles, ruptures: new Map(), titres: new Map() };
 }
