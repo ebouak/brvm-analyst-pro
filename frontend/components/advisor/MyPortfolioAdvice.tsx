@@ -3,30 +3,25 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
+import { FAMILLES, libelleTier, type CleFamille, type Tier } from '@/lib/conseiller/facteurs';
 
-type Act = 'acheter' | 'conserver' | 'vendre' | null;
 interface Pos {
   code: string; quantite: number; pru: number; cours: number | null;
   valeur: number | null; pnl: number | null; pnlPct: number | null;
-  action: Act; conviction: number | null; reasons: string[];
+  tiers: Partial<Record<CleFamille, Tier | null>>;
+  classe_liquidite: 'A' | 'B' | 'C' | 'D' | null;
 }
-
-const VERB: Record<'acheter' | 'conserver' | 'vendre', string> = { acheter: 'Renforcer', conserver: 'Conserver', vendre: 'Alléger' };
-const BADGE: Record<'acheter' | 'conserver' | 'vendre', string> = {
-  acheter: 'bg-up/15 text-up border-up/30',
-  conserver: 'bg-gold/10 text-gold border-gold/25',
-  vendre: 'bg-down/15 text-down border-down/30',
-};
 
 export function MyPortfolioAdvice() {
   const [loading, setLoading] = useState(true);
   const [logged, setLogged] = useState(false);
   const [positions, setPositions] = useState<Pos[]>([]);
+  const [erreur, setErreur] = useState(false);
 
   useEffect(() => {
     fetch('/api/advisor/portfolio')
       .then((r) => r.json())
-      .then((d) => { setLogged(!!d.logged); setPositions(d.positions ?? []); })
+      .then((d) => { setLogged(!!d.logged); setPositions(d.positions ?? []); setErreur(!!d.erreur); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -35,21 +30,28 @@ export function MyPortfolioAdvice() {
   if (!logged) {
     return (
       <div className="rounded-xl border border-border bg-surface p-4 text-sm text-muted">
-        <Link href="/login" className="text-info hover:underline">Connectez-vous</Link> pour obtenir des conseils sur votre portefeuille.
+        <Link href="/login" className="text-info hover:underline">Connectez-vous</Link> pour voir la position de vos lignes.
+      </div>
+    );
+  }
+  if (erreur) {
+    return (
+      <div className="rounded-xl border border-border bg-surface p-4 text-sm text-muted">
+        Positions momentanément illisibles.
       </div>
     );
   }
   if (positions.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-surface p-4 text-sm text-muted">
-        Aucune position. <Link href="/portefeuille" className="text-info hover:underline">Ajoutez votre portefeuille</Link> pour des conseils personnalisés.
+        Aucune position. <Link href="/portefeuille" className="text-info hover:underline">Ajoutez votre portefeuille</Link> pour voir la position de vos lignes.
       </div>
     );
   }
 
   return (
     <section className="space-y-3">
-      <h2 className="font-display text-lg text-white">Mon portefeuille · conseils</h2>
+      <h2 className="font-display text-lg text-white">Mes positions</h2>
       <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
@@ -59,7 +61,10 @@ export function MyPortfolioAdvice() {
               <th className="px-3 py-2.5 text-right font-semibold">PRU</th>
               <th className="px-3 py-2.5 text-right font-semibold">Cours</th>
               <th className="px-3 py-2.5 text-right font-semibold">P&amp;L</th>
-              <th className="px-3 py-2.5 text-center font-semibold">Conseil</th>
+              <th className="px-3 py-2.5 text-left font-semibold">Liquidité</th>
+              {FAMILLES.map((f) => (
+                <th key={f.cle} className="px-3 py-2.5 text-left font-semibold">{f.titre}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -77,20 +82,20 @@ export function MyPortfolioAdvice() {
                     {p.pnl != null ? `${up ? '+' : ''}${fmtFcfa(p.pnl)}` : '—'}
                     {p.pnlPct != null && <span className="ml-1 text-[11px] opacity-80">({up ? '+' : ''}{p.pnlPct.toFixed(1)}%)</span>}
                   </td>
-                  <td className="px-3 py-3 text-center">
-                    {p.action ? (
-                      <span className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${BADGE[p.action]}`} title={p.reasons.slice(0, 2).join(' · ')}>
-                        {VERB[p.action]}{p.conviction != null ? ` ${p.conviction}%` : ''}
-                      </span>
-                    ) : <span className="text-xs text-faint">—</span>}
-                  </td>
+                  <td className="px-3 py-3 text-xs text-ivory">{p.classe_liquidite ?? '—'}</td>
+                  {FAMILLES.map((f) => {
+                    const t = p.tiers?.[f.cle] ?? null;
+                    return (
+                      <td key={f.cle} className={`px-3 py-3 text-xs ${t ? 'text-ivory' : 'text-faint'}`}>{libelleTier(t)}</td>
+                    );
+                  })}
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-faint">Conseil dérivé des signaux réels : exécutez via votre SGI. Survolez un conseil pour les raisons.</p>
+      <p className="text-[11px] text-faint">Positions par famille, sans recommandation : à vous de décider. Exécution via votre SGI.</p>
     </section>
   );
 }
