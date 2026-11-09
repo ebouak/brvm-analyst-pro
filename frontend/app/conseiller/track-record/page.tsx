@@ -1,193 +1,80 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createPublicClient } from '@/lib/supabase/public';
-import { SectionHeader, PremiumPanel, MetricCard, EmptyStatePremium } from '@/components/ui/premium';
-import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { Chapitre } from '@/components/fiche/Chapitre';
+import { LigneSource } from '@/components/marche/LigneSource';
 
-function dateCourte(iso: string | null | undefined): string {
-  if (!iso) return '—';
-  const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-}
-import {
-  computeFlips,
-  attachPerformance,
-  computeStats,
-  type AdvisorHistoryRow,
-} from '@/lib/advisor/trackRecord';
-import type { Action } from '@/lib/advisor/recommend';
-
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Track record du Conseiller BRVM',
+  title: 'Comment nous avons mesuré le Conseiller',
   description:
-    'Toutes les bascules de recommandation du Conseiller BRVM, datées, avec la performance du cours depuis chacune. Transparence totale : les bonnes comme les mauvaises.',
+    'Pourquoi le Conseiller WESTBOURSE ne recommande plus d\'acheter ni de vendre : la mesure, ses limites et ce que nous montrons à la place.',
 };
 
-const ACT_LABEL: Record<Action, string> = { acheter: 'Acheter', conserver: 'Conserver', vendre: 'Vendre' };
-const ACT_BADGE: Record<Action, string> = {
-  acheter: 'bg-up/15 text-up border-up/30',
-  conserver: 'bg-gold/10 text-gold border-gold/25',
-  vendre: 'bg-down/15 text-down border-down/30',
-};
+const LIGNES: { reco: string; cas: string; sens: string; ecart: string }[] = [
+  { reco: 'Acheter', cas: '363', sens: '50 %', ecart: '−1,1 pt' },
+  { reco: 'Vendre', cas: '2 093', sens: '50 %', ecart: '−2,1 pt' },
+  { reco: 'Conserver', cas: '985', sens: '—', ecart: '−5,0 pt' },
+];
 
-async function getData() {
-  const sb = createPublicClient();
-
-  // Historique complet des snapshots du Conseiller (~45 codes × 1/jour).
-  const { data: histData } = await sb
-    .from('advisor_history')
-    .select('date_marche, code, action, conviction')
-    .order('date_marche', { ascending: true })
-    .limit(50_000);
-  const history = (histData ?? []) as AdvisorHistoryRow[];
-  if (history.length === 0) return { flips: [], stats: null, depuis: null };
-
-  const flips = computeFlips(history);
-  const depuis = history[0]?.date_marche ?? null;
-  if (flips.length === 0) return { flips: [], stats: null, depuis };
-
-  // Clôtures des codes concernés depuis la première bascule (pour la perf).
-  const codes = [...new Set(flips.map((f) => f.code))];
-  const minDate = flips.reduce((m, f) => (f.date < m ? f.date : m), flips[0]!.date);
-  const { data: priceData } = await sb
-    .from('brvm_actions_daily')
-    .select('code, date_marche, cours_jour')
-    .in('code', codes)
-    .gte('date_marche', minDate)
-    .order('date_marche', { ascending: true })
-    .limit(50_000);
-
-  const series = new Map<string, { date: string; close: number }[]>();
-  for (const r of (priceData ?? []) as { code: string; date_marche: string; cours_jour: number | null }[]) {
-    if (r.cours_jour == null || r.cours_jour <= 0) continue;
-    const list = series.get(r.code) ?? [];
-    list.push({ date: r.date_marche, close: r.cours_jour });
-    series.set(r.code, list);
-  }
-
-  const withPerf = attachPerformance(flips, series);
-  return { flips: withPerf, stats: computeStats(withPerf), depuis };
-}
-
-export default async function TrackRecordPage() {
-  const { flips, stats, depuis } = await getData();
-
+export default function TrackRecordPage() {
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-      <SectionHeader
-        title="Track record du Conseiller"
-        subtitle="Chaque changement de recommandation est daté au moment où il a été émis, et la performance du cours depuis est affichée, les bonnes bascules comme les mauvaises. Rien n'est antidaté, rien n'est effacé."
+    <div className="mx-auto max-w-4xl px-4 py-8">
+      <EnTeteCote
+        titre="Comment nous avons mesuré le Conseiller"
+        description="Ce que l'ancien moteur a donné, pourquoi nous l'avons retiré et ce que nous montrons à la place."
+        source={null}
       />
 
-      <div className="flex items-center justify-between gap-3">
-        <Link href="/conseiller" className="inline-flex items-center gap-1 text-xs text-accent-ink hover:underline"><ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Retour au Conseiller</Link>
-        {depuis && (
-          <span className="text-[11px] text-faint">
-            Historique suivi depuis le <span className="text-muted">{dateCourte(depuis)}</span>
-          </span>
-        )}
+      <Chapitre id="ancien" numero="01" titre="L'ancien moteur, du 19 juin au 6 novembre 2026" sousTitre="Ce qu'il combinait et ce qu'il a donné." premier />
+      <div className="mt-6 space-y-4 text-sm leading-relaxed text-muted">
+        <p>
+          Il combinait un signal quantitatif, une valorisation par flux actualisés, le RSI et le dividende. Sur 93 séances et 49 valeurs, le marché a progressé de 17,6 %. Vingt séances après chaque recommandation :
+        </p>
+        <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto rounded-card border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-elevated/40 text-xs text-muted">
+                <th scope="col" className="px-3 py-2.5 text-left font-semibold">Recommandation</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-semibold">Cas</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-semibold">Cours dans le bon sens</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-semibold">Écart moyen au marché</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LIGNES.map((l) => (
+                <tr key={l.reco} className="border-b border-border/30">
+                  <th scope="row" className="px-3 py-2.5 text-left font-medium text-ivory">{l.reco}</th>
+                  <td className="tabular px-3 py-2.5 text-right text-ivory">{l.cas}</td>
+                  <td className="tabular px-3 py-2.5 text-right text-ivory">{l.sens}</td>
+                  <td className="tabular px-3 py-2.5 text-right text-ivory">{l.ecart}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Acheter et Vendre ne se distinguaient presque pas. 61 % des recommandations étaient « Vendre » en plein marché haussier : la valorisation par flux actualisés, calculée à un taux d&apos;environ 18 % et appliquée aussi aux banques, jugeait presque tout trop cher. Ces chiffres portent sur quatre périodes indépendantes seulement : ils décrivent, ils ne prouvent pas.
+        </p>
       </div>
 
-      {flips.length === 0 ? (
-        <EmptyStatePremium
-          title="Pas encore de bascule enregistrée"
-          hint="Le track record se construit séance après séance : dès que le Conseiller change une recommandation, elle apparaît ici avec sa performance."
-          icon="◈"
-        />
-      ) : (
-        <>
-          {stats && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <MetricCard label="Bascules enregistrées" value={String(stats.nb)} accent="neutral" />
-              <MetricCard
-                label="Taux de réussite"
-                value={stats.hitRate != null ? `${stats.hitRate.toFixed(0)} %` : '—'}
-                unit={stats.notees > 0 ? `sur ${stats.notees} notées` : undefined}
-                accent={stats.hitRate != null && stats.hitRate >= 50 ? 'emerald' : 'neutral'}
-              />
-              <MetricCard
-                label="Cours après « Acheter »"
-                value={stats.perfMoyenneAchat != null ? `${stats.perfMoyenneAchat >= 0 ? '+' : ''}${stats.perfMoyenneAchat.toFixed(1)} %` : '—'}
-                unit="en moyenne"
-                accent="emerald"
-              />
-              <MetricCard
-                label="Cours après « Vendre »"
-                value={stats.perfMoyenneVente != null ? `${stats.perfMoyenneVente >= 0 ? '+' : ''}${stats.perfMoyenneVente.toFixed(1)} %` : '—'}
-                unit="en moyenne (négatif = bon appel)"
-                accent="sapphire"
-              />
-            </div>
-          )}
-
-          <PremiumPanel className="overflow-hidden p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-bg/40 text-left">
-                    <th className="px-4 py-2.5 text-xs text-faint">Date</th>
-                    <th className="px-4 py-2.5 text-xs text-faint">Titre</th>
-                    <th className="px-4 py-2.5 text-xs text-faint">Bascule</th>
-                    <th className="px-4 py-2.5 text-right text-xs text-faint">Cours bascule</th>
-                    <th className="px-4 py-2.5 text-right text-xs text-faint">Cours actuel</th>
-                    <th className="px-4 py-2.5 text-right text-xs text-faint">Depuis</th>
-                    <th className="px-4 py-2.5 text-center text-xs text-faint">Verdict</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {flips.map((f, i) => (
-                    <tr key={`${f.code}-${f.date}-${i}`} className="border-b border-border/50 transition hover:bg-white/[0.02] last:border-0">
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted">{dateCourte(f.date)}</td>
-                      <td className="px-4 py-2.5">
-                        <Link href={`/actions/${f.code}`} className="font-mono font-medium text-ivory transition-colors hover:text-accent-ink">
-                          {f.code}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <span className="inline-flex items-center gap-1.5 text-xs">
-                          <span className={`rounded-md border px-1.5 py-0.5 font-medium ${ACT_BADGE[f.from]}`}>{ACT_LABEL[f.from]}</span>
-                          <ArrowRight className="h-3 w-3 text-faint" aria-hidden />
-                          <span className={`rounded-md border px-1.5 py-0.5 font-bold ${ACT_BADGE[f.to]}`}>{ACT_LABEL[f.to]}</span>
-                        </span>
-                      </td>
-                      <td className="tabular px-4 py-2.5 text-right text-xs text-muted">
-                        {f.coursBascule != null ? f.coursBascule.toLocaleString('fr-FR') : '—'}
-                      </td>
-                      <td className="tabular px-4 py-2.5 text-right text-xs text-ivory">
-                        {f.coursActuel != null ? f.coursActuel.toLocaleString('fr-FR') : '—'}
-                      </td>
-                      <td className={`tabular px-4 py-2.5 text-right text-xs font-bold ${
-                        f.perfPct == null ? 'text-faint' : f.perfPct >= 0 ? 'text-up' : 'text-down'
-                      }`}>
-                        {f.perfPct != null ? `${f.perfPct >= 0 ? '+' : ''}${f.perfPct.toFixed(1)} %` : '—'}
-                      </td>
-                      <td className="px-4 py-2.5 text-center text-sm">
-                        {f.correct == null ? (
-                          <span className="text-faint" title="Bascule vers Conserver ou cours indisponible : non notée">·</span>
-                        ) : f.correct ? (
-                          <span className="text-up" title="Le cours a évolué dans le sens de la recommandation"><Check className="mx-auto h-4 w-4" aria-label="Dans le sens de la recommandation" /></span>
-                        ) : (
-                          <span className="text-down" title="Le cours a évolué contre la recommandation"><X className="mx-auto h-4 w-4" aria-label="Contre la recommandation" /></span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </PremiumPanel>
-        </>
-      )}
-
-      <p className="text-xs leading-relaxed text-faint">
-        Méthode : la bascule est datée du snapshot quotidien qui l&apos;a produite ; la performance va de
-        la clôture de ce jour au dernier cours connu, brute (hors frais de courtage et hors dividendes).
-        Les bascules vers « Conserver » ne sont pas notées. Un historique court n&apos;a pas de valeur
-        statistique : jugez sur la durée. Ne constitue pas un conseil en investissement.
+      <Chapitre id="test" numero="02" titre="Le test du nouveau moteur" sousTitre="Une règle écrite avant toute mesure." />
+      <p className="mt-6 text-sm leading-relaxed text-muted">
+        Avant toute mesure, nous avons écrit la règle et le critère de réussite : les valeurs à « Acheter » devaient battre le marché sur 20 séances, frais de 1,5 % déduits, sur l&apos;historique depuis 2007. Nous avons d&apos;abord vérifié si le test pouvait réussir. Il fallait un écart d&apos;au moins 26,9 % par an pour que la mesure le confirme, avec environ 46 périodes indépendantes. Aucune règle honnête n&apos;atteint ce niveau : le test ne pouvait rien prouver, nous l&apos;avons arrêté avant d&apos;en lire le résultat.
       </p>
+
+      <Chapitre id="alternative" numero="03" titre="Ce que nous montrons à la place" sousTitre="Des faits mesurés, pas des conseils." />
+      <div className="mt-6 space-y-4 text-sm leading-relaxed text-muted">
+        <p>
+          Pour chaque valeur, sa position dans la cote du jour sur cinq familles : tendance, risque, valorisation, qualité, rendement. Ce sont des faits mesurés, pas des conseils. Nous referons le test chaque année : le jour où il pourra prouver quelque chose, nous publierons le résultat, quel qu&apos;il soit.
+        </p>
+        <p>
+          <Link href="/conseiller" className="text-accent-ink underline underline-offset-2 hover:no-underline">Voir les positions du jour</Link>
+        </p>
+      </div>
+
+      <LigneSource>Mesures du 9 novembre 2026. Ce n&apos;est pas un conseil en investissement.</LigneSource>
     </div>
   );
 }
