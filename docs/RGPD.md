@@ -279,3 +279,13 @@ explicitement (Supabase SQL editor / `supabase db push`). Sans pg_cron, appeler
 - Sous-traitants : DeepSeek, Google Gemini, xAI (rédaction des réponses) ; Google Gemini (transcription des notes vocales). Information : pied fixe au premier échange + `/confidentialite`.
 - Quotas : inconnus 1 question IA/jour (numéro **haché** dans `rate_limit_hits`), comptes liés selon `whatsapp_agent` ; plafonds `jev_budget` (`whatsapp_ia`, `whatsapp_ia_inconnu`).
 - Interrupteur `whatsapp_chatbot` (livré coupé). Accès : service_role seul (RLS sans policy ; clé publique → `[]`, vérifié le 2026-11-04).
+
+### Profil des sociétés cotées : dirigeants (`societes_profils`, migration 0201)
+
+- **Données** : nom et fonction des dirigeants de sociétés cotées (présidence, direction générale), date de prise de fonction quand elle est publiée, lien vers la source.
+- **Finalité** : informer l'investisseur sur la gouvernance de la société.
+- **Base légale** : intérêt légitime ; ce sont des mandataires sociaux, dont la fonction est rendue publique par la société ou la BRVM.
+- **Sources** : officielles seulement (brvm.org, l'émetteur, BCEAO, État). Aucun téléphone ni aucune adresse personnelle.
+- **Conservation** : tant que la fonction est exercée ; une ligne périmée est remplacée, pas archivée.
+- **Droits** : une personne concernée peut demander la rectification ou le retrait par le formulaire de contact. La table n'est pas rattachée à un compte utilisateur : elle n'entre pas dans l'export ni dans la suppression de compte.
+- **Sécurité** : lecture publique, écriture service_role seule. Écriture testée à la clé publique : 42501.
