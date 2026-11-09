@@ -322,3 +322,65 @@ Décisions de l'exploitant et règles qui en découlent :
    presque jamais « Vendre » sur une valeur liquide (16 dates seulement avec
    Acheter ET Vendre, toutes en 2023-2026). Acheter − Vendre devient une analyse
    descriptive.
+
+## 12. Résultat du banc et décision de production (2026-11-09)
+
+**Effet minimal détectable : 26,9 % par an** (écart-type 5,82 points par date ;
+23 dates sur la première moitié, environ 46 au total depuis 2007). Le seuil
+d'arrêt (8 %) est dépassé : le test ne peut rien prouver. Aucune moyenne et aucun
+signe de la règle n'ont été lus, et le PREREG n'est pas consommé : le banc pourra
+être relancé chaque année.
+
+**Décision de l'exploitant : abstention, facteurs en information.**
+
+- Aucun verdict Acheter / Vendre n'est plus affiché. Le Conseiller dit qu'il
+  s'abstient et explique pourquoi.
+- Pour chaque valeur, il montre sa position par famille de facteurs (tiers
+  haut / milieu / bas) et sa classe de liquidité, sans verdict.
+- Le moteur v1 (`lib/advisor/recommend.ts`) est retiré de l'affichage. Son
+  historique `advisor_history` est conservé, figé.
+- Les notifications de bascule (`notifyFlips`) ne visaient que les canaux de
+  l'exploitant, jamais les utilisateurs : aucun client n'est à prévenir.
+
+**Livraison en deux PR** (avis Fable, consultation 2/3) :
+
+1. **PR 1 — données.**
+   - Migration `0200_conseiller_facteurs`.
+   - Job `conseiller` dans `score.yml`, et le code du banc.
+   - Freshness dans la tour de contrôle.
+   - La migration est appliquée, le job lancé à la main, puis les lignes sont
+     vérifiées à la clé anon.
+2. **PR 2 — affichage**, fusionnée seulement une fois la table remplie.
+   - `/conseiller`, `MyPortfolioAdvice` et `/api/advisor/portfolio` lisent la
+     table.
+   - Track record réécrit.
+   - Textes de la landing.
+   - Suppression du cron `advisor-snapshot` (dans les DEUX `vercel.json`), de la
+     route, de `notifyFlips` et du code mort (`ConseillierWidget`,
+     `lib/conseiller.ts`).
+   - Contrôle qu'aucun autre affichage (agent, dossier, OG) ne montre de verdict
+     du Conseiller.
+
+**Table `conseiller_facteurs`.**
+
+- Colonnes :
+  - `date_marche date`, `code text` (référence `brvm_instruments`) ;
+  - `scores jsonb` : rang par famille dans [−1, +1] ou null ;
+  - `tiers jsonb` : `haut` | `milieu` | `bas` | null par famille, calculé par le
+    job ;
+  - `effectifs jsonb` : nombre de valeurs classées par famille ;
+  - `classe_liquidite text` ;
+  - `moteur_version text` ;
+  - `created_at`.
+- Clé primaire `(date_marche, code)`.
+- RLS : lecture publique, écriture par service_role.
+- Aucune donnée personnelle.
+- Le frontend ne recalcule JAMAIS un tiers.
+
+**Contrôle du job, sur la donnée** :
+
+- `date_marche` égale la dernière séance de `brvm_actions_daily` ;
+- nombre de lignes ≥ nombre de valeurs cotées ce jour-là, moins 2 ;
+- au plus 30 % de lignes dont toutes les familles sont nulles.
+
+Sinon, le job échoue (run rouge et `scraper_errors`).
