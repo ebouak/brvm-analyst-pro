@@ -233,7 +233,7 @@ function SyntheseBloc({ code, s }: { code: string; s: Synthese }) {
       )}
       {!s.signalVisible && !rien && <p className="mt-2 text-[11px] text-faint">Note technique et signal réservés aux abonnés.</p>}
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-        <a href="#titre" className="inline-flex min-h-[36px] items-center text-accent-ink hover:underline">Lecture technique →</a>
+        <a href="?rubrique=titre#rubrique" className="inline-flex min-h-[36px] items-center text-accent-ink hover:underline">Lecture technique →</a>
         <Link href={`/actions/${code}/quant`} className="inline-flex min-h-[36px] items-center text-accent-ink hover:underline">Fiche Quant →</Link>
       </div>
       <p className="mt-1 text-[11px] text-faint">Constats calculés sur les données en base, pas un conseil d&apos;investissement.</p>

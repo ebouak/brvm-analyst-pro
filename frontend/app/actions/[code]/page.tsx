@@ -40,6 +40,8 @@ import { chargerComptesIfrs } from '@/lib/fiche/comptesIfrsServeur';
 import ComptesIfrs from '@/components/fiche/ComptesIfrs';
 import ProfilSociete from '@/components/fiche/ProfilSociete';
 import { normaliserProfil } from '@/lib/fiche/profilSociete';
+import { rubriqueDepuis, hrefRubrique } from '@/lib/fiche/rubriques';
+import { pointsCles } from '@/lib/fiche/pointsCles';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
@@ -262,7 +264,7 @@ export default async function InstrumentPage({
   searchParams,
 }: {
   params: { code: string };
-  searchParams: { from?: string };
+  searchParams: { from?: string; rubrique?: string | string[] };
 }) {
   const code = decodeURIComponent(params.code).toUpperCase();
 
@@ -285,6 +287,7 @@ export default async function InstrumentPage({
     ? buildChartRows(financials.incomeStatements, financials.balanceSheets, financials.cashFlowStatements)
     : [];
   const fromDate = searchParams.from ?? '';
+  const rubrique = rubriqueDepuis(searchParams.rubrique);
   const { rows, instrument, signal, dividends, events, publications, pubCount, fundamentals, position } = await getData(code, fromDate || undefined);
   // Bouton « Corriger » réservé aux admins (la route /api/fundamentals revérifie).
   const canEditFondamentaux = can(await getAdminContext(), 'content.write');
@@ -856,15 +859,6 @@ export default async function InstrumentPage({
   }
 
   // Chapitres de la barre collante (L'essentiel seulement s'il est rendu).
-  const navSections = [
-    { id: 'vue-ensemble', label: 'Vue d’ensemble' },
-    ...(cartes.length > 0 ? [{ id: 'essentiel', label: 'L’essentiel' }] : []),
-    { id: 'analyse-ia', label: 'Analyse par IA' },
-    { id: 'aujourdhui', label: 'Aujourd’hui' },
-    { id: 'titre', label: 'Le titre' },
-    { id: 'entreprise', label: 'L’entreprise' },
-    { id: 'suivi', label: 'Mon suivi' },
-  ];
 
   const flottantPct = instrument?.flottant != null && shares != null && shares > 0 ? (instrument.flottant / shares) * 100 : null;
   const historiqueDiv = divRows.filter((d) => d.montant > 0).slice(0, 5);
@@ -892,8 +886,15 @@ export default async function InstrumentPage({
   const vueJourDisponible = instantanes.length > 0 && (seanceTracable || transactionsSeance === 0);
 
   // Profil de la société (0201) : public, sources officielles seulement.
-  const { data: profilRow } = await createClient().from('societes_profils').select('presentation, metiers, determinants, dirigeants, actionnariat, site_web, verifie_le').eq('code', code).maybeSingle();
+  const { data: profilRow } = await createClient().from('societes_profils').select('presentation, historique, identite, metiers, determinants, dirigeants, actionnariat, site_web, verifie_le').eq('code', code).maybeSingle();
   const profil = normaliserProfil(profilRow);
+  // Points clés tirés de NOS comptes et dividendes : verrouillés comme les fondamentaux.
+  const pointsProfil = gateFonda.allowed ? pointsCles({
+    famille: (instrument as { famille_comptable?: 'banque' | 'assurance' | 'general' | null } | null)?.famille_comptable ?? null,
+    courant: exCourant,
+    precedent: exPrecedent,
+    dividendes: divRows.map((d) => ({ exercice: d.exercice, montant: d.montant })),
+  }) : [];
 
   const [{ data: presseRows }, { data: prochainRow }] = await Promise.all([
     liqDailyClient
@@ -993,7 +994,8 @@ export default async function InstrumentPage({
         cours={last.cours_jour}
         variationPct={last.variation_pct}
         up={up}
-        sections={navSections}
+        actif={rubrique}
+        from={fromDate}
         documents={[
           { href: `/actions/${code}/revue`, label: 'Revue de résultats' },
           { href: `/actions/${code}/financials`, label: 'États financiers' },
@@ -1105,6 +1107,8 @@ export default async function InstrumentPage({
         </div>
       </header>
 
+      <div id="rubrique" className="scroll-mt-20 space-y-6">
+      {rubrique === 'vue-ensemble' && (<>
       {/* ══════════════════════════════════════════════════
           VUE D'ENSEMBLE — statistiques, cours par période, actualités, société
           (remplace la grille des chiffres de séance et le graphique de séance de l'en-tête)
@@ -1193,20 +1197,6 @@ export default async function InstrumentPage({
       )}
 
       {/* ── Bannière données insuffisantes ── */}
-      {rows.length < 20 && (
-        <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
-          <div className="flex items-center gap-2.5">
-            <span className="text-warn text-base leading-none">!</span>
-            <p className="text-xs text-warn font-medium">
-              Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
-            </p>
-          </div>
-          <p className="text-xs text-faint">
-            L&apos;historique s&apos;étoffe automatiquement séance après séance ; les indicateurs
-            s&apos;activeront dès que la profondeur sera suffisante.
-          </p>
-        </div>
-      )}
 
       {/* ══════════════════════════════════════════════════
           L'ESSENTIEL
@@ -1215,12 +1205,14 @@ export default async function InstrumentPage({
 
       {/* Analyse par IA : réponses Jev (type-safe) ou rédigées par IA, provenance et sources affichées. */}
       <AnalyseIA code={code} nom={instrument?.designation ?? null} exerciceComptes={economieSociete?.exercice ?? null} />
+      </>)}
 
       {/* ══════════════════════════════════════════════════
           01 · AUJOURD'HUI
       ══════════════════════════════════════════════════ */}
+      {rubrique === 'aujourdhui' && (
       <section className="space-y-6">
-        <Chapitre id="aujourdhui" numero="01" titre="Aujourd’hui" sousTitre={`Séance du ${fmtDateCourte(last.date_marche)} : ce qu'elle dit, le carnet d'ordres et la négociabilité du titre.`} />
+        <Chapitre premier id="aujourdhui" numero="01" titre="Aujourd’hui" sousTitre={`Séance du ${fmtDateCourte(last.date_marche)} : ce qu'elle dit, le carnet d'ordres et la négociabilité du titre.`} />
         {gateLectureSeance.allowed ? (
           <CarnetCommentaire
             replie
@@ -1260,12 +1252,28 @@ export default async function InstrumentPage({
           <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
         </div>
       </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           02 · LE TITRE
       ══════════════════════════════════════════════════ */}
+      {rubrique === 'titre' && (
       <section className="space-y-6">
-        <Chapitre id="titre" numero="02" titre="Le titre" sousTitre="Le cours dans la durée, puis une seule lecture technique de ses indicateurs." />
+        <Chapitre premier id="titre" numero="02" titre="Le titre" sousTitre="Le cours dans la durée, puis une seule lecture technique de ses indicateurs." />
+        {rows.length < 20 && (
+          <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-warn text-base leading-none">!</span>
+              <p className="text-xs text-warn font-medium">
+                Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
+              </p>
+            </div>
+            <p className="text-xs text-faint">
+              L&apos;historique s&apos;étoffe automatiquement séance après séance ; les indicateurs
+              s&apos;activeront dès que la profondeur sera suffisante.
+            </p>
+          </div>
+        )}
         <div>
           <Eyebrow className="mb-3">Cours & Volume</Eyebrow>
           <PremiumPanel className="p-0 overflow-hidden">
@@ -1341,14 +1349,16 @@ export default async function InstrumentPage({
           </>
         )}
       </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           03 · L'ENTREPRISE
       ══════════════════════════════════════════════════ */}
+      {rubrique === 'entreprise' && (
       <section className="space-y-6">
-        <Chapitre id="entreprise" numero="03" titre="L’entreprise" sousTitre="Qui elle est, ses comptes publiés, la valorisation, les dividendes et les événements de la société." />
+        <Chapitre premier id="entreprise" numero="03" titre="L’entreprise" sousTitre="Qui elle est, ses comptes publiés, la valorisation, les dividendes et les événements de la société." />
 
-        {profil && <ProfilSociete profil={profil} />}
+        {profil && <ProfilSociete profil={profil} points={pointsProfil} />}
 
         {/* Alerte de perte — donnée fondamentale : suit le verrou `fondamentaux`. */}
         {gateFonda.allowed && exCourant?.net_income != null && exCourant.net_income < 0 && (
@@ -1553,7 +1563,7 @@ export default async function InstrumentPage({
                 ) : (
                   <p className="text-xs text-faint italic">Aucun événement récent.</p>
                 )}
-                <a href={`#${ANCRE_OFFICIELLES}`} className="mt-4 inline-flex min-h-[36px] items-center text-[11px] text-accent-ink hover:underline">
+                <a href={hrefRubrique('vue-ensemble', fromDate).replace('#rubrique', `#${ANCRE_OFFICIELLES}`)} className="mt-4 inline-flex min-h-[36px] items-center text-[11px] text-accent-ink hover:underline">
                   Toutes les publications officielles →
                 </a>
               </div>
@@ -1576,12 +1586,14 @@ export default async function InstrumentPage({
           derniereSeance={last.date_marche}
         />
       </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           04 · MON SUIVI
       ══════════════════════════════════════════════════ */}
+      {rubrique === 'suivi' && (
       <section className="space-y-6">
-        <Chapitre id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
+        <Chapitre premier id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
 
         <div id="these" className="scroll-mt-24">
           <Eyebrow className="mb-3">Ma thèse</Eyebrow>
@@ -1629,7 +1641,9 @@ export default async function InstrumentPage({
           <ForumTopicList topics={forumTopics} authors={forumAuthors} />
         </div>
       </section>
+      )}
 
+      </div>
     </div>
   );
 }
