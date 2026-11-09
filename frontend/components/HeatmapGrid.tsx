@@ -6,18 +6,8 @@ import type { HeatmapNode } from '@/lib/heatmap';
 import type { PaletteVariation } from '@/lib/heatmap';
 import { couleurVariation, groupBySector, paletteDepuisTheme } from '@/lib/heatmap';
 import { chartTheme } from '@/lib/chartTheme';
+import { encreSur, encresDuTheme } from '@/lib/contrasteTuile';
 import { fmtPctSigne } from '@/lib/format';
-
-/** Couleur stable dérivée du code (fallback monogramme quand pas de logo). */
-const MONO_COLORS = [
-  '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981',
-  '#06b6d4', '#ef4444', '#84cc16', '#a855f7', '#14b8a6',
-];
-function monoColor(code: string): string {
-  let h = 0;
-  for (let i = 0; i < code.length; i++) h = (h * 31 + code.charCodeAt(i)) >>> 0;
-  return MONO_COLORS[h % MONO_COLORS.length];
-}
 
 function fmtPct(pct: number | null): string {
   if (pct == null) return '—';
@@ -29,34 +19,24 @@ function libelleTuile(code: string, pct: number | null): string {
   return `${code} : ${pct == null ? 'variation indisponible' : fmtPctSigne(pct)}`;
 }
 
-/** Luminance relative WCAG 2.x d'une couleur #rrggbb. */
-function luminanceWcag(hex: string): number {
-  const c = hex.replace('#', '');
-  const ch = [0, 2, 4].map((i) => {
-    const v = parseInt(c.slice(i, i + 2), 16) / 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
-}
-
-/** Texte (blanc ou #030303) offrant le meilleur contraste WCAG sur ce fond. */
-function textOn(bg: string): string {
-  const l = luminanceWcag(bg);
-  const contrasteBlanc = 1.05 / (l + 0.05);
-  const contrasteSombre = (l + 0.05) / (0.0009 + 0.05);
-  return contrasteSombre > contrasteBlanc ? '#030303' : '#ffffff';
+/** Couleurs lues dans les jetons du thème, après le montage. */
+interface Teintes {
+  palette: PaletteVariation;
+  encres: readonly [string, string] | null;
 }
 
 interface LogoTileProps {
   node: HeatmapNode;
   logoUrl?: string | null;
-  /** Palette du thème (la même que la cartographie desktop). */
-  palette?: PaletteVariation;
+  /** Teintes du thème (les mêmes que la cartographie). */
+  teintes?: Teintes;
 }
 
-function Tile({ node, logoUrl, palette }: LogoTileProps) {
-  const bg = palette ? couleurVariation(node.variation_pct, palette) : 'transparent';
-  const fg = textOn(bg);
+function Tile({ node, logoUrl, teintes }: LogoTileProps) {
+  // Avant le montage, les jetons ne sont pas lisibles : tuile neutre en
+  // classes de thème, puis la couleur de variation dès qu'elle est connue.
+  const bg = teintes ? couleurVariation(node.variation_pct, teintes.palette) : null;
+  const fg = bg && teintes?.encres ? encreSur(bg, teintes.encres) : null;
   const initials = node.code.slice(0, 2);
   const [imgError, setImgError] = useState(false);
   const showLogo = logoUrl && !imgError;
@@ -65,14 +45,21 @@ function Tile({ node, logoUrl, palette }: LogoTileProps) {
   return (
     <Link
       href={`/actions/${node.code}`}
-      className="relative flex min-w-0 flex-col items-center justify-center overflow-hidden rounded-lg p-1.5 sm:p-2 aspect-square transition-transform hover:scale-[1.04] hover:z-10"
-      style={{ background: bg, color: fg }}
-      title={node.designation ? `${libelle} — ${node.designation}` : libelle}
+      className={[
+        'relative flex min-w-0 aspect-square flex-col items-center justify-center overflow-hidden rounded-lg p-1.5 sm:p-2',
+        'transition-transform duration-150 hover:z-10 hover:scale-[1.04] active:scale-[0.98]',
+        'motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100',
+        'focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        bg ? '' : 'bg-elevated text-ivory',
+      ].join(' ')}
+      style={bg ? { background: bg, color: fg ?? undefined } : undefined}
+      title={node.designation ? `${libelle} (${node.designation})` : libelle}
       aria-label={libelle}
     >
       {showLogo ? (
         // Logo réduit sur mobile : la tuile (≈ 70 px en 4 colonnes) doit
-        // d'abord porter le code et la variation.
+        // d'abord porter le code et la variation. Fond `sur-nuit` : clair et
+        // identique dans les deux thèmes, comme l'exige un logo.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={logoUrl}
@@ -80,23 +67,19 @@ function Tile({ node, logoUrl, palette }: LogoTileProps) {
           aria-hidden
           width={40}
           height={40}
-          className="h-7 w-7 shrink-0 rounded-md object-contain sm:h-10 sm:w-10"
-          style={{ background: '#fff', padding: 2 }}
+          className="h-7 w-7 shrink-0 rounded-md bg-sur-nuit object-contain p-0.5 sm:h-10 sm:w-10"
           onError={() => setImgError(true)}
         />
       ) : (
         <div
           aria-hidden
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-bold sm:h-10 sm:w-10 sm:text-[11px]"
-          style={{ background: monoColor(node.code), color: textOn(monoColor(node.code)) }}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface/85 text-[11px] font-semibold text-ivory sm:h-10 sm:w-10"
         >
           {initials}
         </div>
       )}
-      <span className="mt-1 sm:mt-1.5 max-w-full truncate text-[11px] font-semibold leading-none tabular">{node.code}</span>
-      <span className="mt-0.5 max-w-full truncate text-[11px] font-medium leading-none tabular">
-        {fmtPct(node.variation_pct)}
-      </span>
+      <span className="mt-1 max-w-full truncate text-xs font-semibold leading-none tabular sm:mt-1.5">{node.code}</span>
+      <span className="mt-0.5 max-w-full truncate text-xs leading-none tabular">{fmtPct(node.variation_pct)}</span>
     </Link>
   );
 }
@@ -109,37 +92,55 @@ interface HeatmapGridProps {
 
 type SortMode = 'sector' | 'gainers' | 'losers' | 'volume';
 
+const TRIS: { mode: SortMode; label: string }[] = [
+  { mode: 'sector', label: 'Par secteur' },
+  { mode: 'gainers', label: 'Hausses' },
+  { mode: 'losers', label: 'Baisses' },
+  { mode: 'volume', label: 'Volume' },
+];
+
+const GRILLE = 'grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10';
+
 export default function HeatmapGrid({ rows, logos = {} }: HeatmapGridProps) {
   const [sort, setSort] = useState<SortMode>('sector');
   // Lu après le montage (les jetons CSS n'existent pas au rendu serveur).
-  const [palette, setPalette] = useState<PaletteVariation | undefined>(undefined);
+  const [teintes, setTeintes] = useState<Teintes | undefined>(undefined);
   useEffect(() => {
-    const T = chartTheme();
-    setPalette(paletteDepuisTheme(T));
+    setTeintes({ palette: paletteDepuisTheme(chartTheme()), encres: encresDuTheme() });
   }, []);
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg p-8 text-center" style={{ background: '#161922', border: '1px solid #232733', color: '#8b93a7' }}>
+      <p className="rounded-lg border border-border bg-elevated p-8 text-center text-sm text-muted">
         Aucune action pour cette séance.
-      </div>
+      </p>
     );
   }
 
-  const SortBtn = ({ mode, label }: { mode: SortMode; label: string }) => (
-    <button
-      type="button"
-      onClick={() => setSort(mode)}
-      aria-pressed={sort === mode}
-      className={[
-        'px-3 py-1 rounded-full text-xs font-medium transition-colors',
-        sort === mode
-          ? 'bg-ivory text-obsidian'
-          : 'bg-elevated border border-border text-muted hover:text-ivory hover:border-border-strong',
-      ].join(' ')}
+  const tri = (
+    <div
+      className="inline-flex flex-wrap gap-0.5 rounded-lg border border-border bg-sunken p-0.5"
+      role="group"
+      aria-label="Ordre des tuiles"
     >
-      {label}
-    </button>
+      {TRIS.map(({ mode, label }) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => setSort(mode)}
+          aria-pressed={sort === mode}
+          className={[
+            'relative h-8 rounded-md px-3 text-xs font-medium transition-colors',
+            "before:absolute before:-inset-y-1.5 before:inset-x-0 before:content-['']",
+            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
+            'active:bg-elevated disabled:cursor-not-allowed disabled:opacity-55',
+            sort === mode ? 'bg-accent/15 text-accent-ink' : 'text-muted hover:bg-elevated hover:text-ivory',
+          ].join(' ')}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
   );
 
   // Vue groupée par secteur
@@ -149,21 +150,17 @@ export default function HeatmapGrid({ rows, logos = {} }: HeatmapGridProps) {
       children: [...g.children].sort((a, b) => (b.variation_pct ?? 0) - (a.variation_pct ?? 0)),
     }));
     return (
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          <SortBtn mode="sector" label="Par secteur" />
-          <SortBtn mode="gainers" label="Hausses" />
-          <SortBtn mode="losers" label="Baisses" />
-          <SortBtn mode="volume" label="Volume" />
-        </div>
+      <div className="space-y-5">
+        {tri}
         {groups.map((g) => (
           <div key={g.name}>
-            <h3 className="text-xs font-semibold mb-2 text-muted">
-              {g.name} <span className="text-muted">· {g.children.length}</span>
+            <h3 className="mb-2 flex items-baseline gap-2 text-xs font-semibold text-muted">
+              <span>{g.name}</span>
+              <span className="tabular font-normal text-faint">{g.children.length}</span>
             </h3>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+            <div className={GRILLE}>
               {g.children.map((n) => (
-                <Tile key={n.code} node={n} logoUrl={logos[n.code]} palette={palette} />
+                <Tile key={n.code} node={n} logoUrl={logos[n.code]} teintes={teintes} />
               ))}
             </div>
           </div>
@@ -179,16 +176,11 @@ export default function HeatmapGrid({ rows, logos = {} }: HeatmapGridProps) {
   else if (sort === 'volume') flat.sort((a, b) => (b.valeur_echangee ?? 0) - (a.valeur_echangee ?? 0));
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <SortBtn mode="sector" label="Par secteur" />
-        <SortBtn mode="gainers" label="Hausses" />
-        <SortBtn mode="losers" label="Baisses" />
-        <SortBtn mode="volume" label="Volume" />
-      </div>
-      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+    <div className="space-y-5">
+      {tri}
+      <div className={GRILLE}>
         {flat.map((n) => (
-          <Tile key={n.code} node={n} logoUrl={logos[n.code]} palette={palette} />
+          <Tile key={n.code} node={n} logoUrl={logos[n.code]} teintes={teintes} />
         ))}
       </div>
     </div>

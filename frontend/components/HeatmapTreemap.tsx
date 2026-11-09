@@ -6,28 +6,11 @@ import { couleurVariation, groupBySector, nodeWeight, paletteDepuisTheme } from 
 import { chartTheme } from '@/lib/chartTheme';
 import type { HeatmapNode } from '@/lib/heatmap';
 import { fmtFcfa, fmtNumber, fmtPctSigne } from '@/lib/format';
+import { encreSur, encresDuTheme } from '@/lib/contrasteTuile';
 
 /** « SNTS : +1,95 % » — libellé accessible d'une tuile (format français). */
 export function libelleTuile(code: string, pct: number | null): string {
   return `${code} : ${pct == null ? 'variation indisponible' : fmtPctSigne(pct)}`;
-}
-
-/** Luminance relative WCAG 2.x d'une couleur #rrggbb. */
-function luminanceWcag(hex: string): number {
-  const c = hex.replace('#', '');
-  const ch = [0, 2, 4].map((i) => {
-    const v = parseInt(c.slice(i, i + 2), 16) / 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
-}
-
-/** Texte (blanc ou #030303) offrant le meilleur contraste WCAG sur ce fond. */
-function textOn(bg: string): string {
-  const l = luminanceWcag(bg);
-  const contrasteBlanc = 1.05 / (l + 0.05);
-  const contrasteSombre = (l + 0.05) / (0.0009 + 0.05);
-  return contrasteSombre > contrasteBlanc ? '#030303' : '#ffffff';
 }
 
 /** Filtre couleur : toutes, hausses (vert) ou baisses (rouge) uniquement. */
@@ -93,6 +76,10 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
   const T = chartTheme();
   const palette = paletteDepuisTheme(T);
   const couleurTuile = (pct: number | null): string => couleurVariation(pct, palette);
+  // Encre des libellés : celui des deux jetons (bg, ivory) qui contraste le
+  // plus avec la tuile. Hors navigateur, l'encre par défaut du thème.
+  const encres = encresDuTheme();
+  const encreTuile = (fond: string): string => (encres ? encreSur(fond, encres) : T.ivory);
 
   // Dimensionnement proportionnel des logos : on estime la surface en pixels de
   // chaque tuile à partir de sa part de capitalisation et des dimensions
@@ -139,7 +126,7 @@ export default function HeatmapTreemap({ data, height = 600, logos = {}, colorFi
       // Le rich doit être porté par CHAQUE nœud — sinon ECharts affiche le markup brut.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fond = couleurTuile(node.variation_pct);
-      const fg = textOn(fond);
+      const fg = encreTuile(fond);
       const rich: any = {
         code: { color: fg, fontSize: codeFont, fontWeight: 'bold', lineHeight: codeFont + 4 },
         var: { color: fg, fontSize: varFont, lineHeight: varFont + 4 },
