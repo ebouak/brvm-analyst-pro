@@ -1204,7 +1204,7 @@ export default async function InstrumentPage({
       ══════════════════════════════════════════════════ */}
       {rubrique === 'aujourdhui' && (
       <section className="space-y-6">
-        <Chapitre id="aujourdhui" numero="01" titre="Aujourd’hui" sousTitre={`Séance du ${fmtDateCourte(last.date_marche)} : ce qu'elle dit, le carnet d'ordres et la négociabilité du titre.`} />
+        <Chapitre premier id="aujourdhui" numero="01" titre="Aujourd’hui" sousTitre={`Séance du ${fmtDateCourte(last.date_marche)} : ce qu'elle dit, le carnet d'ordres et la négociabilité du titre.`} />
         {gateLectureSeance.allowed ? (
           <CarnetCommentaire
             replie
@@ -1251,7 +1251,7 @@ export default async function InstrumentPage({
       ══════════════════════════════════════════════════ */}
       {rubrique === 'titre' && (
       <section className="space-y-6">
-        <Chapitre id="titre" numero="02" titre="Le titre" sousTitre="Le cours dans la durée, puis une seule lecture technique de ses indicateurs." />
+        <Chapitre premier id="titre" numero="02" titre="Le titre" sousTitre="Le cours dans la durée, puis une seule lecture technique de ses indicateurs." />
         {rows.length < 20 && (
           <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
             <div className="flex items-center gap-2.5">
@@ -1348,7 +1348,7 @@ export default async function InstrumentPage({
       ══════════════════════════════════════════════════ */}
       {rubrique === 'entreprise' && (
       <section className="space-y-6">
-        <Chapitre id="entreprise" numero="03" titre="L’entreprise" sousTitre="Qui elle est, ses comptes publiés, la valorisation, les dividendes et les événements de la société." />
+        <Chapitre premier id="entreprise" numero="03" titre="L’entreprise" sousTitre="Qui elle est, ses comptes publiés, la valorisation, les dividendes et les événements de la société." />
 
         {profil && <ProfilSociete profil={profil} />}
 
@@ -1585,7 +1585,7 @@ export default async function InstrumentPage({
       ══════════════════════════════════════════════════ */}
       {rubrique === 'suivi' && (
       <section className="space-y-6">
-        <Chapitre id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
+        <Chapitre premier id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
 
         <div id="these" className="scroll-mt-24">
           <Eyebrow className="mb-3">Ma thèse</Eyebrow>
