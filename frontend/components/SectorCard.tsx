@@ -69,7 +69,7 @@ export default function SectorCard({ perf, rang }: Props) {
               <span className="sr-only">Rang </span>{String(rang).padStart(2, '0')}
             </span>
           )}
-          <Link href={`/heatmap?secteur=${encodeURIComponent(secteur)}`} lang="fr" className={`min-w-0 hyphens-auto [overflow-wrap:anywhere] [text-wrap:balance] transition-colors hover:text-accent-ink ${FOCUS}`}>
+          <Link href={`/heatmap?secteur=${encodeURIComponent(secteur)}`} className={`min-w-0 [overflow-wrap:break-word] [text-wrap:balance] transition-colors hover:text-accent-ink ${FOCUS}`}>
             {secteur}
           </Link>
         </h3>
