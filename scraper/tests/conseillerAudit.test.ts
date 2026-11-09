@@ -10,7 +10,7 @@ describe('audit', () => {
     expect(sautsSuspects(new Map([['A', s]])).map((x) => x.date)).toEqual([cal[10], cal[20]]);
   });
   it('mesure la part de séances non échangées', () => {
-    expect(partFigee(serie(cal, cal.map(() => 100), [0, 1, 2, 3]))).toBeCloseTo(0.1);
+    expect(partFigee(serie(cal, cal.map((_, i) => 100 + i), [0, 1, 2, 3]))).toBeCloseTo(0.1);
   });
   it('compte aussi comme figée une séance au cours inchangé', () => {
     // 10 séances : cours identique à la veille pour les indices 1 à 4 -> 4 figées
