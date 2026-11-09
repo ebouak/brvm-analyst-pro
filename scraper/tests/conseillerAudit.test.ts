@@ -12,6 +12,10 @@ describe('audit', () => {
   it('mesure la part de séances non échangées', () => {
     expect(partFigee(serie(cal, cal.map(() => 100), [0, 1, 2, 3]))).toBeCloseTo(0.1);
   });
+  it('compte aussi comme figée une séance au cours inchangé', () => {
+    // 10 séances : cours identique à la veille pour les indices 1 à 4 -> 4 figées
+    expect(partFigee(serie(cal.slice(0, 10), [100, 100, 100, 100, 100, 101, 102, 103, 104, 105]))).toBeCloseTo(0.4);
+  });
   it('liste les codes sans cotation depuis plus de 30 jours calendaires', () => {
     const a = serie(cal, cal.map(() => 100));
     const b = serie(cal.slice(0, 5), [1, 1, 1, 1, 1]);
