@@ -43,7 +43,7 @@ const UNIVERS: Univers[] = [
       // Promettre « BUY / HOLD / SELL » sans dire que l'abstention est la règle
       // laissait attendre des signaux francs quotidiens. Voir CLAUDE.md §9.
       { label: 'Signaux', href: '/signaux', desc: 'BUY / HOLD / SELL — le moteur s’abstient tant que rien n’est net' },
-      { label: 'Conseiller unifié', href: '/conseiller', desc: 'Synthèse DCF, technique et fondamentale' },
+      { label: 'Conseiller unifié', href: '/conseiller', desc: 'Tendance, risque, valorisation : la position de chaque valeur' },
       { label: 'Liquidité', href: '/liquidite', desc: 'Score de liquidité, spread estimé, flux acheteur' },
     ],
   },
