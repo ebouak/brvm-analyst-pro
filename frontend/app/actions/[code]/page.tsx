@@ -38,6 +38,8 @@ import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
 import { comptesIfrs } from '@/lib/fiche/comptesIfrs';
 import { chargerComptesIfrs } from '@/lib/fiche/comptesIfrsServeur';
 import ComptesIfrs from '@/components/fiche/ComptesIfrs';
+import ProfilSociete from '@/components/fiche/ProfilSociete';
+import { normaliserProfil } from '@/lib/fiche/profilSociete';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { lectureTechnique } from '@/lib/fiche/lecture';
 import { decomposerScore } from '@/lib/fiche/quant';
@@ -889,6 +891,10 @@ export default async function InstrumentPage({
   const seanceTracable = transactionsSeance >= 2;
   const vueJourDisponible = instantanes.length > 0 && (seanceTracable || transactionsSeance === 0);
 
+  // Profil de la société (0201) : public, sources officielles seulement.
+  const { data: profilRow } = await createClient().from('societes_profils').select('presentation, metiers, determinants, dirigeants, actionnariat, site_web, verifie_le').eq('code', code).maybeSingle();
+  const profil = normaliserProfil(profilRow);
+
   const [{ data: presseRows }, { data: prochainRow }] = await Promise.all([
     liqDailyClient
       .from('brvm_news')
@@ -1340,7 +1346,9 @@ export default async function InstrumentPage({
           03 · L'ENTREPRISE
       ══════════════════════════════════════════════════ */}
       <section className="space-y-6">
-        <Chapitre id="entreprise" numero="03" titre="L’entreprise" sousTitre="Les comptes publiés, la valorisation, les dividendes et les événements de la société." />
+        <Chapitre id="entreprise" numero="03" titre="L’entreprise" sousTitre="Qui elle est, ses comptes publiés, la valorisation, les dividendes et les événements de la société." />
+
+        {profil && <ProfilSociete profil={profil} />}
 
         {/* Alerte de perte — donnée fondamentale : suit le verrou `fondamentaux`. */}
         {gateFonda.allowed && exCourant?.net_income != null && exCourant.net_income < 0 && (

@@ -1,0 +1,1197 @@
+[
+ {
+  "code": "ABJC",
+  "site_web": "http://www.servairabidjan.ci/",
+  "metiers": [
+   "Restauration aérienne : préparation et mise à bord des repas",
+   "Services aéroportuaires et salons d’accueil",
+   "Restauration collective et traiteur événementiel"
+  ],
+  "determinants": [
+   "Activité étroitement corrélée au trafic passagers de l’aéroport d’Abidjan, lui-même lié à la vitalité économique du pays",
+   "Le développement du hub aérien d’Abidjan et du tourisme d’affaires soutient la demande",
+   "Les contrats avec les compagnies aériennes se renouvellent périodiquement : la qualité de service est déterminante"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Denis HASDENTEFEUL",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": null,
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/servair-abidjan"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "SERVAIR INVESTISSEMENT AÉROPORTUAIRE (SIA)",
+     "pct": 80
+    },
+    {
+     "nom": "Divers investisseurs de la sous-région UEMOA",
+     "pct": 20
+    }
+   ],
+   "date": "Exercice 2023",
+   "source": "https://www.brvm.org/sites/default/files/20240819_-_etats_financiers_approuves_-_exercice_2023_-_servair_abidjan_ci.pdf"
+  }
+ },
+ {
+  "code": "BBGC",
+  "site_web": "https://www.bridgebankgroup.com",
+  "metiers": [
+   "Banque des grandes entreprises, des institutionnels et des administrations",
+   "Banque des PME : financements court, moyen et long terme, trade finance",
+   "Banque des particuliers et professionnels, monétique et banque digitale"
+  ],
+  "determinants": [
+   "Secteur très réglementé : dispositif prudentiel UEMOA de plus en plus exigeant"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Ehouman KASSI",
+    "fonction": "Directeur Général (Administrateur Directeur Général)",
+    "depuis": "4 février 2019",
+    "source": "https://www.bridgebankgroup.com/documents/ipo/IPO-BBGCI-Note-dinformation-20260709.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "BICB",
+  "site_web": "https://www.biic-bank.com/",
+  "metiers": [
+   "Banque de détail : particuliers et professionnels",
+   "Banque des entreprises, des institutionnels et de l’État",
+   "Financements de l’économie, moyens de paiement et services digitaux"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "Forte exposition à l’économie béninoise et aux titres souverains de la sous-région",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "BICC",
+  "site_web": "https://www.bicici.ci/",
+  "metiers": [
+   "Services bancaires aux particuliers, aux PME et aux grandes entreprises"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel",
+   "Résultats sensibles au coût du risque et à la qualité du portefeuille de crédits"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "BNBC",
+  "site_web": "https://www.bernabeafrique.com/bernabe-ci.html?lang=fr",
+  "metiers": [
+   "Quincaillerie, outillage et équipements de protection",
+   "Produits métallurgiques (fers, aciers, tôles)",
+   "Matériaux et équipements pour le BTP et l’industrie"
+  ],
+  "determinants": [
+   "Activité corrélée à la dynamique du BTP et des programmes d’infrastructures en Côte d’Ivoire",
+   "Sensibilité aux cours de l’acier et aux coûts d’importation (fret, change)",
+   "Concurrence du secteur informel et des importations à bas prix"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "BOAB",
+  "site_web": "https://www.boabenin.com/",
+  "metiers": [
+   "Banque commerciale universelle auprès des particuliers, des entreprises et des institutionnels"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel",
+   "Résultats sensibles au coût du risque et à l’exposition aux titres souverains de la sous-région"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Abdel Mumin ZAMPALEGRE",
+    "fonction": "Directeur Général",
+    "depuis": "Décembre 2023",
+    "source": "https://www.boabenin.com/institutionnels/nous-connaitre/"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "BOABF",
+  "site_web": "https://www.boaburkinafaso.com/",
+  "metiers": [
+   "Banque commerciale universelle auprès des particuliers, des entreprises et des institutionnels"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "L’environnement sécuritaire et économique du Burkina Faso influence le coût du risque",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "BOAC",
+  "site_web": "https://boacoteivoire.com/",
+  "metiers": [
+   "Services bancaires aux particuliers",
+   "Services bancaires aux PME",
+   "Services bancaires aux grandes entreprises"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "Marché bancaire ivoirien le plus profond de l’UEMOA, mais fortement concurrentiel",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "BOA WEST AFRICA",
+     "pct": 69.68
+    },
+    {
+     "nom": "BLOC FLOTTANT",
+     "pct": 30.32
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-cote-divoire"
+  }
+ },
+ {
+  "code": "BOAM",
+  "site_web": "https://www.boamali.com/",
+  "metiers": [
+   "Banque commerciale universelle auprès des particuliers, des entreprises et des institutionnels"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "L’environnement politique, sécuritaire et économique du Mali influence le coût du risque",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Georges Nabi",
+    "fonction": "Directeur Général",
+    "depuis": null,
+    "source": "https://ns2.bceao.int/sites/default/files/2026-04/Annuaire-des-Banques-etablissements-financiers-a-caractere-bancaire-et-compagnies-financieres-de-l-UMOA-2024_mars_2026.pdf"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "BOA WEST AFRICA",
+     "pct": 64.18
+    },
+    {
+     "nom": "BLOC FLOTTANT",
+     "pct": 35.82
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-mali"
+  }
+ },
+ {
+  "code": "BOAN",
+  "site_web": "https://www.boaniger.com/",
+  "metiers": [
+   "Banque commerciale universelle auprès des particuliers, des entreprises et des institutionnels"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "L’environnement politique, sécuritaire et économique du Niger influence le coût du risque",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Mactar DIACK",
+    "fonction": "Directeur Général",
+    "depuis": "21/06/2024",
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-niger"
+   },
+   {
+    "nom": "Boureima WANKOYE",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": "2013",
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-niger"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "BOA WEST AFRICA",
+     "pct": 59.06
+    },
+    {
+     "nom": "SONIMEX",
+     "pct": 5.73
+    },
+    {
+     "nom": "BLOC FLOTTANT",
+     "pct": 35.21
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/bank-africa-niger"
+  }
+ },
+ {
+  "code": "BOAS",
+  "site_web": "https://www.boasenegal.com/",
+  "metiers": [
+   "Banque commerciale universelle auprès des particuliers, des entreprises et des institutionnels"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "Économie sénégalaise portée par les infrastructures et le développement des hydrocarbures",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "CABC",
+  "site_web": "http://www.sicable.ci/",
+  "metiers": [
+   "Câbles d’énergie basse et moyenne tension",
+   "Fils et câbles pour le bâtiment et l’industrie",
+   "Négoce des produits du groupe Prysmian"
+  ],
+  "determinants": [
+   "Demande portée par les programmes d’électrification, le BTP et l’immobilier",
+   "Concurrence des importations et des grands câbliers internationaux présents dans la sous-région"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Frédéric TAILHEURET",
+    "fonction": "Directeur général",
+    "depuis": null,
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-de-cables-sicable"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "Prysmian Câbles et Système France SAS",
+     "pct": 51
+    },
+    {
+     "nom": "BLOC FLOTTANT",
+     "pct": 49
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-de-cables-sicable"
+  }
+ },
+ {
+  "code": "CBIBF",
+  "site_web": "http://www.coris-bank.com/",
+  "metiers": [
+   "Banque des particuliers et des PME/PMI",
+   "Banque des grandes entreprises et des institutionnels",
+   "Finance islamique (fenêtre dédiée) et services digitaux"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "L’environnement sécuritaire et économique du Burkina Faso influence le coût du risque",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Emmanuel SAWADOGO",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": "12/06/2024",
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/coris-bank-international"
+   },
+   {
+    "nom": "Gisèle GUMEDZOE née OUEDRAOGO",
+    "fonction": "Directrice Générale",
+    "depuis": "08/08/2022",
+    "source": "https://burkina.coris.bank/gouvernance/"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "Coris Holding",
+     "pct": 63.61
+    },
+    {
+     "nom": "Personnes physiques",
+     "pct": 5.93
+    },
+    {
+     "nom": "BLOC FLOTTANT",
+     "pct": 30.46
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/coris-bank-international"
+  }
+ },
+ {
+  "code": "CFAC",
+  "site_web": "https://cfaomotors-cotedivoire.com/",
+  "metiers": [
+   "Vente de véhicules neufs (Toyota, Suzuki, Mitsubishi…)",
+   "Pièces de rechange, accessoires et service après-vente",
+   "Solutions de mobilité et location longue durée pour les entreprises"
+  ],
+  "determinants": [
+   "Marché très concurrentiel, face aux autres concessionnaires et au marché de l’occasion",
+   "Demande liée à l’investissement des entreprises, aux flottes et aux grands projets",
+   "La réglementation limitant l’âge des véhicules d’occasion importés favorise le marché du neuf"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "CIEC",
+  "site_web": "https://www.cie.ci/",
+  "metiers": [
+   "Distribution et commercialisation de l’électricité sur tout le territoire",
+   "Exploitation et maintenance des ouvrages de production et du réseau de transport",
+   "Échanges d’énergie avec les pays de la sous-région"
+  ],
+  "determinants": [
+   "Opérateur exclusif du service public dans le cadre de la concession ; le renouvellement périodique du contrat avec l’État est l’enjeu majeur",
+   "Croissance soutenue de la demande d’électricité (urbanisation, industrialisation, électrification rurale)",
+   "L’équilibre financier du secteur électrique ivoirien (coût du gaz, niveau des tarifs) conditionne l’environnement d’exploitation"
+  ],
+  "dirigeants": [],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "ERANOVE SA",
+     "pct": 54.02
+    },
+    {
+     "nom": "AUTRES ACTIONNAIRES CIE",
+     "pct": 0.03
+    },
+    {
+     "nom": "ETAT DE COTE D’IVOIRE",
+     "pct": 15
+    },
+    {
+     "nom": "DIVERS PORTEURS",
+     "pct": 30.95
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/compagnie-ivoirienne-delectricite-cie-ci"
+  }
+ },
+ {
+  "code": "ECOC",
+  "site_web": "https://www.ecobank.com/ci/personal-banking/countries",
+  "metiers": [
+   "Services bancaires aux particuliers",
+   "Services bancaires aux PME",
+   "Services bancaires aux grandes entreprises"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "Marché bancaire ivoirien le plus profond de l’UEMOA, mais fortement concurrentiel",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Serge Aimé Thiémélé Manizan",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": "29 avril 2025",
+    "source": "https://www.brvm.org/sites/default/files/20260909_-_rapport_dactivites_-_1er_semestre_2026_-_ecobank_ci.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "ETIT",
+  "site_web": "https://www.ecobank.com",
+  "metiers": [
+   "Banque universelle : grande clientèle, banque de détail, banque d’investissement et monétique",
+   "Plateforme digitale commune à l’ensemble des filiales"
+  ],
+  "determinants": [
+   "Les comptes étant publiés en dollars américains, les dépréciations des monnaies africaines, notamment le naira et le cedi, pèsent mécaniquement sur les résultats et les capitaux propres publiés.",
+   "Poids important du Nigeria et du Ghana dans l’activité du groupe.",
+   "Bancarisation encore faible sur la plupart des marchés, offrant un potentiel de croissance structurel."
+  ],
+  "dirigeants": [
+   {
+    "nom": "Jeremy Awori",
+    "fonction": "Directeur Général du Groupe",
+    "depuis": "1er mars 2023",
+    "source": "https://www.brvm.org/sites/default/files/20260413_-_etats_financiers_ifrs_-_exercice_2025_-_eti_tg.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "FTSC",
+  "site_web": "https://www.filtisac.com/",
+  "metiers": [
+   "Sacs en jute pour l’exportation du cacao, du café et de l’anacarde",
+   "Emballages en fibres synthétiques pour les produits agricoles",
+   "Emballages rigides : préformes, bouteilles, bouchons"
+  ],
+  "determinants": [
+   "Activité étroitement liée aux volumes des campagnes agricoles (cacao, anacarde, coton) en Côte d’Ivoire et dans la sous-région"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "LNBB",
+  "site_web": "https://www.loteriebenin.bj/",
+  "metiers": [
+   "Loteries traditionnelles et jeux instantanés",
+   "Paris sportifs (réseau physique et digital)",
+   "Jeux en ligne et services mobiles"
+  ],
+  "determinants": [
+   "Cadre réglementaire et fiscal des jeux fixé par l’État béninois",
+   "La croissance des paris sportifs et du jeu sur mobile constitue le principal relais de croissance",
+   "Concurrence des opérateurs privés de paris en ligne"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Marius ADANZOUNON",
+    "fonction": "Directeur général (DG)",
+    "depuis": "16 juin 2026 (prise de fonction ; nomination annoncée le 15 juin 2026)",
+    "source": "https://www.loteriebenin.bj/accueil"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "NEIC",
+  "site_web": "http://www.neiceda.com/",
+  "metiers": [
+   "Manuels scolaires et parascolaires",
+   "Littérature générale, jeunesse et ouvrages de référence",
+   "Travaux d’édition et prestations pour les institutions"
+  ],
+  "determinants": [
+   "Chiffre d’affaires très dépendant des commandes publiques de manuels scolaires (appels d’offres de l’État et des bailleurs), d’où des résultats irréguliers d’une année à l’autre",
+   "Démographie scolaire favorable en Côte d’Ivoire et dans la sous-région",
+   "Exposition au piratage et à la reprographie illégale"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "NSBC",
+  "site_web": "https://www.nsiabanque.ci/",
+  "metiers": [
+   "Services bancaires aux particuliers, aux PME et aux grandes entreprises",
+   "Synergies de bancassurance"
+  ],
+  "determinants": [
+   "Secteur très réglementé, avec un dispositif prudentiel UEMOA de plus en plus exigeant",
+   "Marché bancaire ivoirien le plus profond de l’UEMOA, mais fortement concurrentiel",
+   "Taux de bancarisation encore faible, représentant un potentiel de croissance structurel"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Jean Kacou Diagou",
+    "fonction": "Président du Conseil d’administration de NSIA Banque Côte d’Ivoire",
+    "depuis": null,
+    "source": "https://www.brvm.org/sites/default/files/20250502_-_avis_de_convocation_-_assemblee_generale_ordinaire_-_nsia_banque_ci.pdf"
+   },
+   {
+    "nom": "Sékou Chérif Sanogo",
+    "fonction": "Directeur général adjoint, chargé des fonctions supports",
+    "depuis": "1er juillet 2025",
+    "source": "https://www.brvm.org/en/node/1240404"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "NTLC",
+  "site_web": "https://www.nestle-cwa.com/fr",
+  "metiers": [
+   "Produits culinaires (bouillons et assaisonnements Maggi)",
+   "Cafés solubles (Nescafé)",
+   "Exportations vers les marchés de la sous-région"
+  ],
+  "determinants": [
+   "Demande liée au pouvoir d’achat des ménages ; concurrence vive sur le segment culinaire"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Mohamad Itani",
+    "fonction": "Directeur Général",
+    "depuis": "1er octobre 2022",
+    "source": "https://www.brvm.org/sites/default/files/20261022_-_rapport_dactivites_-_3e_trimestre_2026_-_nestle_ci_0.pdf"
+   },
+   {
+    "nom": "Sébastien K. Zouzouko",
+    "fonction": "Directeur Financier",
+    "depuis": null,
+    "source": "https://www.brvm.org/sites/default/files/20261022_-_rapport_dactivites_-_3e_trimestre_2026_-_nestle_ci_0.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "ONTBF",
+  "site_web": "https://onatel.bf/",
+  "metiers": [
+   "Téléphonie fixe et mobile",
+   "Internet fixe et mobile",
+   "Argent mobile (Moov Money) et services aux entreprises"
+  ],
+  "determinants": [
+   "La data et l’argent mobile sont les relais de croissance face à l’érosion des revenus de la voix (concurrence des applications OTT type WhatsApp)",
+   "Marché en duopole avec Orange Burkina",
+   "Contexte sécuritaire et fiscalité télécom pèsent sur l’exploitation"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Ragnang-newindé Isidore TIEMTORE",
+    "fonction": "Président du Conseil d’administration (PCA)",
+    "depuis": null,
+    "source": "https://www.brvm.org/sites/default/files/20260611_-_rapport_de_gestion_-_exercice_2025_-_onatel_bf.pdf"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "Maroc Telecom",
+     "pct": 61
+    },
+    {
+     "nom": "Etat Burkinabè",
+     "pct": 26
+    },
+    {
+     "nom": "BLOC FLOTTANT",
+     "pct": 23
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/moov-africa-burkina-faso"
+  }
+ },
+ {
+  "code": "ORAC",
+  "site_web": "https://groupe.orange.ci/",
+  "metiers": [
+   "Téléphonie mobile et fixe",
+   "Internet mobile et fixe très haut débit (fibre)",
+   "Orange Money et services financiers mobiles",
+   "Services et solutions pour les entreprises"
+  ],
+  "determinants": [
+   "La data mobile, la fibre et Orange Money sont les principaux moteurs de croissance",
+   "Concurrence de MTN et Moov sur le marché ivoirien ; pression réglementaire sur les prix",
+   "Fiscalité sectorielle et coût des licences et du spectre"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "ORGT",
+  "site_web": "https://www.orabank.net/fr",
+  "metiers": [
+   "Activités bancaires sous la marque Orabank"
+  ],
+  "determinants": [
+   "Secteur très réglementé : le respect des exigences de fonds propres est un enjeu spécifique pour le groupe.",
+   "Diversification géographique sur plusieurs zones monétaires d’Afrique de l’Ouest et Centrale.",
+   "Taux de bancarisation encore faible : potentiel de croissance structurel."
+  ],
+  "dirigeants": [
+   {
+    "nom": "Ibrahima Diouf",
+    "fonction": "Président du Conseil d’administration (PCA)",
+    "depuis": "Élu en août 2024",
+    "source": "https://www.orabank.net/fr/nos-actualites/oragroup-marque-une-nouvelle-etape-de-son-developpement-avec-une-succession-la"
+   },
+   {
+    "nom": "Ferdinand Ngon Kemoum",
+    "fonction": "Administrateur Directeur Général (DG)",
+    "depuis": "Juin 2019",
+    "source": "https://www.orabank.net/sites/default/files/2026-05/CP_R%C3%A9sultats%202025_OK.pdf"
+   },
+   {
+    "nom": "Mamoudou Kane",
+    "fonction": "Directeur Général Adjoint (DGA)",
+    "depuis": null,
+    "source": "https://www.orabank.net/sites/default/files/2026-07/ORAGROUP%202025%20-%20RS%20440.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "PALC",
+  "site_web": "https://www.groupesifca.com/palmci.php",
+  "metiers": [
+   "Huile de palme brute",
+   "Huile de palmiste et sous-produits"
+  ],
+  "determinants": [
+   "Résultats très sensibles au cours international de l’huile de palme, dicté par l’offre des grands producteurs asiatiques (Indonésie, Malaisie)",
+   "Aléas climatiques et rendements agricoles",
+   "Filière régulée : mécanisme de prix d’achat du régime aux planteurs"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Alassane DOUMBIA",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": null,
+    "source": "https://groupesifca.com/wp-content/uploads/2026/04/RA-PALMCI-2025.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "PRSC",
+  "site_web": "https://www.tractafrictmc-ci.com/fr",
+  "metiers": [
+   "Vente de véhicules neufs (Hyundai, Ford, BMW…)",
+   "Location de véhicules (Europcar)",
+   "Distribution de pneumatiques (Michelin)",
+   "Service après-vente : magasins et ateliers"
+  ],
+  "determinants": [
+   "Marché automobile très concurrentiel, face aux autres concessionnaires et au marché de l’occasion",
+   "Demande liée à l’investissement des entreprises et aux flottes",
+   "La réglementation limitant l’âge des véhicules d’occasion importés favorise le marché du neuf"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Rachid BELGHITI",
+    "fonction": "Directeur général",
+    "depuis": "18 juillet 2024",
+    "source": "https://www.brvm.org/sites/default/files/20261029_-_rapport_dactivites_-_1er_semestre_2026_-_tractafric_motors_ci.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SAFC",
+  "site_web": "https://www.alios-finance.com",
+  "metiers": [
+   "Crédit-bail et crédit d’investissement pour les entreprises",
+   "Location longue durée et financement d’équipements",
+   "Crédit automobile et crédit à la consommation"
+  ],
+  "determinants": [
+   "Activité liée à l’investissement des PME et au marché de l’équipement et de l’automobile",
+   "Le coût de refinancement (conditions du marché monétaire UEMOA) détermine directement les marges",
+   "La qualité du portefeuille de crédits conditionne la rentabilité"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Ahmed ABDELKEFI",
+    "fonction": "Président du conseil d’administration",
+    "depuis": null,
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-africaine-de-credit-automobile-de-cote-divoire-safca"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SCRC",
+  "site_web": "https://www.groupesifca.com/sucrivoire.php",
+  "metiers": [
+   "Sucre granulé et en morceaux destiné au marché local"
+  ],
+  "determinants": [
+   "Marché protégé : les importations de sucre sont strictement encadrées par l’État ivoirien.",
+   "Les aléas climatiques, les rendements agricoles et les coûts de l’énergie pèsent sur les marges.",
+   "Les importations d’appoint autorisées dégagent des marges plus faibles que la production propre."
+  ],
+  "dirigeants": [
+   {
+    "nom": "Jean-Louis BILLON",
+    "fonction": "Président du Conseil d’administration (PCA)",
+    "depuis": "En fonction au moins depuis 2023 ; mandat renouvelé jusqu’à l’assemblée appelée à statuer sur les comptes 2025",
+    "source": "https://groupesifca.com/sucrivoire/"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SDCC",
+  "site_web": "https://www.sodeci.ci/",
+  "metiers": [
+   "Production et distribution d’eau potable",
+   "Assainissement et travaux sur le réseau",
+   "Services aux abonnés et prestations connexes"
+  ],
+  "determinants": [
+   "Cadre contractuel et tarifs fixés par l’État : un profil d’activité régulier mais des marges encadrées",
+   "Croissance urbaine et démographique : hausse structurelle de la demande",
+   "Enjeux du renouvellement périodique des contrats et du rendement du réseau"
+  ],
+  "dirigeants": [
+   {
+    "nom": "EBAH Basile",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": "2019 (nomination rapportée en juin 2019)",
+    "source": "https://dgpe.gouv.ci/fr/wp-content/uploads/2026/05/SODECI.pdf"
+   },
+   {
+    "nom": "DA CRUZ Dominique",
+    "fonction": "Directeur général",
+    "depuis": "1er octobre 2025",
+    "source": "https://sodeci.ci/qui-sommes-nous/le-mot-du-president-du-conseil-d-administration"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SDSC",
+  "site_web": "https://www.bollore-logistics.com/fr/pays/cote-divoire/",
+  "metiers": [
+   "Logistique portuaire, manutention et consignation",
+   "Commission de transport, transit et corridors sous-régionaux",
+   "Entreposage et logistique à valeur ajoutée"
+  ],
+  "determinants": [
+   "Activité tirée par les volumes du commerce extérieur ivoirien (cacao, anacarde, importations)",
+   "Adossement au groupe MSC : synergies avec les flux maritimes mondiaux",
+   "Marché concurrentiel face aux autres grands opérateurs internationaux présents dans les ports ivoiriens"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "SEMC",
+  "site_web": "https://www.crowncork.com/",
+  "metiers": [
+   "Emballages pour produits alimentaires (conserves)",
+   "Emballages pour produits chimiques et aérosols",
+   "Emballages pour boissons"
+  ],
+  "determinants": [
+   "Activité liée à l’industrie locale de la conserve, notamment la filière thon",
+   "Sensibilité aux cours du fer blanc et de l’aluminium",
+   "Concurrence des emballages importés et des solutions plastiques"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Mohamed DAO",
+    "fonction": "Directeur Général",
+    "depuis": "2019 (selon les résultats de recherche fournis)",
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-demballage-metallique-crown-siem"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "KOUTI B.V.",
+     "pct": 85.24
+    }
+   ],
+   "date": "31/12/2023",
+   "source": "https://www.brvm.org/sites/default/files/20250415_-_notation_financiere_-_eviosys_packaging_siem_ci_0.pdf"
+  }
+ },
+ {
+  "code": "SGBC",
+  "site_web": "https://societegenerale.ci/fr/",
+  "metiers": [
+   "Banque de détail",
+   "Banque des entreprises",
+   "Marché des capitaux",
+   "SOGEBOURSE : société de gestion et d’intermédiation",
+   "SOGESPAR : gestion d’OPCVM"
+  ],
+  "determinants": [
+   "Secteur très réglementé (dispositif prudentiel UEMOA de plus en plus exigeant)",
+   "Taux de bancarisation encore faible : un potentiel de croissance structurel"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Patrick BLAS",
+    "fonction": "Directeur général",
+    "depuis": "1er mars 2024",
+    "source": "https://institutionnel.societegenerale.ci/fr/information/"
+   },
+   {
+    "nom": "Faman TOURÉ",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": "19 mai 2021",
+    "source": "https://www.brvm.org/sites/default/files/20260603_-_avis_de_convocation_-_assemblee_generale_mixte_-_societe_generale_ci.pdf"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "SOCIETE GENERALE",
+     "pct": 55.1
+    },
+    {
+     "nom": "S.G. FINANCIAL SERVICES HOLDING",
+     "pct": 1.41
+    },
+    {
+     "nom": "AUTRES ACTIONNAIRES",
+     "pct": 0.14
+    },
+    {
+     "nom": "BLOC FLOTTANT(DIVERS PORTEURS)",
+     "pct": 43.35
+    }
+   ],
+   "date": "31/12/2023",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-generale-cote-divoire-sgci"
+  }
+ },
+ {
+  "code": "SHEC",
+  "site_web": "https://www.vivoenergy.com/fr-FR",
+  "metiers": [
+   "Réseau de stations-service (carburants et boutiques)",
+   "Carburants et lubrifiants pour les entreprises et l’industrie",
+   "Aviation, marine et gaz de pétrole liquéfié"
+  ],
+  "determinants": [
+   "Les prix à la pompe et les marges de distribution sont fixés par l’État ivoirien : les volumes vendus sont le principal levier du résultat",
+   "Duopole de tête avec TotalEnergies sur le marché ivoirien",
+   "Croissance du parc automobile et de l’activité économique"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "SIBC",
+  "site_web": "http://www.sib.ci/",
+  "metiers": [
+   "Services bancaires aux particuliers, aux PME et aux grandes entreprises",
+   "Offre intégrée banque-assurance"
+  ],
+  "determinants": [
+   "Secteur très réglementé, avec un dispositif prudentiel UEMOA de plus en plus exigeant",
+   "Marché bancaire ivoirien le plus profond de l’UEMOA, mais fortement concurrentiel",
+   "Taux de bancarisation encore faible, représentant un potentiel de croissance structurel"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Mohamed EL GHAZI",
+    "fonction": "Directeur Général",
+    "depuis": "10/05/2021",
+    "source": "https://sib.ci/wp-content/uploads/2025/06/SIB25-DocDeRef-v0.6-1_.pdf"
+   },
+   {
+    "nom": "Léon Georges N’DIA COFFI",
+    "fonction": "Président du Conseil d’Administration",
+    "depuis": null,
+    "source": "https://sib.ci/wp-content/uploads/2025/06/SIB25-DocDeRef-v0.6-1_.pdf"
+   },
+   {
+    "nom": "Youssef KRISNI",
+    "fonction": "Directeur Général Adjoint en charge du Périmètre Support",
+    "depuis": null,
+    "source": "https://sib.ci/wp-content/uploads/2025/06/SIB25-DocDeRef-v0.6-1_.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SICC",
+  "site_web": null,
+  "metiers": [
+   "Coco râpé destiné à l’exportation",
+   "Huile de coprah et tourteaux"
+  ],
+  "determinants": [
+   "Exploitation pénalisée de longue date par un différend foncier sur une partie des cocoteraies et par le vieillissement des plantations",
+   "Sensibilité aux cours mondiaux des produits du cocotier",
+   "Aléas climatiques et rendements agricoles"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "SIVC",
+  "site_web": "http://www.ci.airliquide.com/",
+  "metiers": [
+   "Gaz industriels (soudage, process industriels)",
+   "Gaz médicaux pour les hôpitaux et cliniques",
+   "Matériel et prestations associées"
+  ],
+  "determinants": [
+   "Demande liée à l’activité industrielle et hospitalière du pays",
+   "Contrats récurrents : des revenus relativement stables",
+   "Coûts énergétiques significatifs dans le processus de production"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "SLBC",
+  "site_web": "https://www.solibra.ci/",
+  "metiers": [
+   "Bières et boissons alcoolisées",
+   "Boissons gazeuses et énergétiques",
+   "Eaux minérales"
+  ],
+  "determinants": [
+   "La fiscalité (droits d’accises) et les coûts des intrants importés (malt, emballages) pèsent sur les marges",
+   "La consommation est portée par la démographie, l’urbanisation et le pouvoir d’achat"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Marc Pozmentier",
+    "fonction": "Directeur général",
+    "depuis": "9 août 2024",
+    "source": "https://www.brvm.org/sites/default/files/20240812_-_communique_-_changement_important_dans_la_direction_-_solibra_ci.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SMBC",
+  "site_web": "http://smb.ci/",
+  "metiers": [
+   "Bitumes routiers et dérivés",
+   "Exportations vers les pays de la sous-région"
+  ],
+  "determinants": [
+   "Demande tirée par les programmes routiers des États d’Afrique de l’Ouest",
+   "Concurrence des importations de bitume"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Marie-Joséphine SIDIBE",
+    "fonction": "Directrice générale",
+    "depuis": "Août 2021",
+    "source": "https://smb.ci/la-smb/"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SNTS",
+  "site_web": "https://sonatel.sn/",
+  "metiers": [
+   "Téléphonie mobile et fixe",
+   "Internet mobile et fixe très haut débit (fibre)",
+   "Services financiers mobiles (Orange Money, Orange Finances Mobiles)",
+   "Services et solutions pour les entreprises"
+  ],
+  "determinants": [
+   "La data mobile, la fibre et l’argent mobile sont les principaux relais de croissance face à l’érosion de la voix (applications OTT)",
+   "Fiscalité et régulation dans cinq juridictions différentes"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "SOGC",
+  "site_web": "https://www.sogbci.com/",
+  "metiers": [
+   "Caoutchouc naturel usiné",
+   "Huile de palme et huile de palmiste"
+  ],
+  "determinants": [
+   "Résultats très sensibles aux cours mondiaux du caoutchouc naturel (demande pneumatique et offre asiatique) et de l’huile de palme",
+   "Aléas climatiques et rendements des plantations",
+   "Mécanismes de prix bord champ régulés par la filière hévéa-palmier"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Hervé Koffy",
+    "fonction": "Président du Conseil d’administration",
+    "depuis": null,
+    "source": "https://www.sogbci.com/media/rapports/pdf/415/rapport-annuel-2025.pdf"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "SPHC",
+  "site_web": "https://www.groupesifca.com/saph.php",
+  "metiers": [
+   "Caoutchouc naturel usiné destiné principalement à l’industrie du pneumatique",
+   "Assistance technique aux planteurs et production de matériel végétal"
+  ],
+  "determinants": [
+   "Résultats très sensibles au cours mondial du caoutchouc naturel, dicté par la demande pneumatique et l’offre asiatique",
+   "Part prépondérante des achats aux planteurs : la marge dépend du mécanisme de prix bord champ régulé par la filière",
+   "Aléas climatiques et maladies des plantations"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "STAC",
+  "site_web": "https://www.setao.ci/",
+  "metiers": [
+   "Bâtiment et génie civil",
+   "Travaux publics et infrastructures"
+  ],
+  "determinants": [
+   "Activité dépendante de la commande publique et des grands chantiers",
+   "Secteur cyclique : les marges dépendent fortement de la bonne exécution des projets",
+   "L’adossement au groupe PFO Africa structure le carnet de commandes"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Ali BENCHEQROUN",
+    "fonction": "Président du conseil d'administration",
+    "depuis": null,
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-detudes-et-de-travaux-pour-lafrique-de-louest-setao"
+   },
+   {
+    "nom": "Palacios Luis Manuel BAZAN",
+    "fonction": "Administrateur et Directeur général",
+    "depuis": null,
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-detudes-et-de-travaux-pour-lafrique-de-louest-setao"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "STBC",
+  "site_web": null,
+  "metiers": [
+   "Fabrication et distribution de cigarettes (Fine, Excellence et marques internationales sous licence)"
+  ],
+  "determinants": [
+   "Fiscalité du tabac en hausse structurelle (droits d’accises, harmonisation CEDEAO), répercutée sur les prix",
+   "Contrebande et importations illicites : principale forme de concurrence",
+   "Encadrement réglementaire croissant de la consommation (santé publique)"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Pierre MAGNE",
+    "fonction": "Président du Conseil d’administration (PCA)",
+    "depuis": null,
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-des-tabacs-sitab"
+   },
+   {
+    "nom": "Eric Thiam SABATES",
+    "fonction": "Directeur général (DG)",
+    "depuis": "8 juillet 2016",
+    "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-des-tabacs-sitab"
+   }
+  ],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "CORALMA INTERNATIONAL",
+     "pct": 59.92
+    },
+    {
+     "nom": "ITWA",
+     "pct": 13.13
+    },
+    {
+     "nom": "TOBACCOR INTERNATIONAL",
+     "pct": 0.00002
+    },
+    {
+     "nom": "AUTRES ACTIONNAIRES COMPTE EMETTEUR",
+     "pct": 0.59
+    },
+    {
+     "nom": "BLOC FLOTTANT",
+     "pct": 26.36
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/societe-ivoirienne-des-tabacs-sitab"
+  }
+ },
+ {
+  "code": "TTLC",
+  "site_web": "https://totalenergies.ci/",
+  "metiers": [
+   "Réseau de stations-service (carburants et boutiques)",
+   "Carburants et lubrifiants pour les entreprises et l’industrie",
+   "Aviation, gaz de pétrole liquéfié (butane) et services associés"
+  ],
+  "determinants": [
+   "Les prix à la pompe et les marges de distribution sont fixés par l’État ivoirien : les volumes vendus sont le principal levier du résultat",
+   "Duopole de tête avec Vivo Energy (Shell) sur le marché ivoirien",
+   "Le gaz butane et les services en station constituent des relais de croissance"
+  ],
+  "dirigeants": [
+   {
+    "nom": "Matthieu BOUVY",
+    "fonction": "Directeur Général",
+    "depuis": "01/09/2025",
+    "source": "https://totalenergies.ci/totalenergies-en-cote-divoire/les-engagements-totalenergies-en-cote-divoire/gouvernance"
+   }
+  ],
+  "actionnariat": null
+ },
+ {
+  "code": "TTLS",
+  "site_web": "https://totalenergies.sn/",
+  "metiers": [
+   "Réseau de stations-service (carburants et boutiques)",
+   "Carburants et lubrifiants pour les entreprises et l’industrie",
+   "Aviation, marine et gaz de pétrole liquéfié"
+  ],
+  "determinants": [
+   "La structure des prix à la pompe est fixée par l’État sénégalais : les volumes vendus sont le principal levier du résultat",
+   "Conjoncture économique sénégalaise et croissance du parc automobile"
+  ],
+  "dirigeants": [],
+  "actionnariat": {
+   "lignes": [
+    {
+     "nom": "TotalEnergies Marketing Afrique",
+     "pct": 23.1
+    },
+    {
+     "nom": "TotalEnergies Marketing African Holdings Limited",
+     "pct": 46
+    },
+    {
+     "nom": "BLOC FLOTTANT - BRVM",
+     "pct": 30.9
+    }
+   ],
+   "date": "31/12/2025",
+   "source": "https://www.brvm.org/fr/emetteurs/societes-cotees/total-senegal-total-senegal"
+  }
+ },
+ {
+  "code": "UNLC",
+  "site_web": "https://www.unilever.com/",
+  "metiers": [
+   "Corps gras alimentaires issus de l’huile de palme",
+   "Savonnerie et produits d’hygiène"
+  ],
+  "determinants": [
+   "Concurrence vive des autres transformateurs locaux et des importations",
+   "Demande liée au pouvoir d’achat des ménages"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ },
+ {
+  "code": "UNXC",
+  "site_web": "https://www.uniwax.com/",
+  "metiers": [
+   "Pagnes wax (wax print et wax block)",
+   "Collections sous marque Woodin et pagnes personnalisés"
+  ],
+  "determinants": [
+   "La contrefaçon et les imitations importées à bas prix constituent la principale menace du secteur",
+   "Demande liée au pouvoir d’achat des ménages et au calendrier des fêtes et événements",
+   "Sensibilité aux coûts des intrants (coton, énergie) et aux taux de change"
+  ],
+  "dirigeants": [],
+  "actionnariat": null
+ }
+]
