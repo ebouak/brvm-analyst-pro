@@ -312,3 +312,13 @@ Décisions de l'exploitant et règles qui en découlent :
 5. **Plancher de liquidité du banc** : présence seule (< 50 % → D). Le critère
    « activité nulle » (< 2 M FCFA par séance) est écarté, car il aurait vidé
    l'historique ancien sans viser les cours figés.
+6. **Statistique confirmatoire** (décidée sur des comptages de décisions, sans
+   aucun rendement lu) : par date, moyenne des rendements des « Acheter » en
+   excès de l'indice équipondéré (entrée t+1, sortie t+1+20, rendement total),
+   moins 1,5 % de coût aller-retour. Une date sans « Acheter » est sautée et
+   comptée. Historique 2007-01-01 → fin (avant 2007, la base ne contient que 2 à
+   3 valeurs). Prouvé ⇔ borne basse unilatérale (5e centile du bootstrap
+   stationnaire) > 0 avec au moins 30 dates. Raison : la règle cœur prix ne dit
+   presque jamais « Vendre » sur une valeur liquide (16 dates seulement avec
+   Acheter ET Vendre, toutes en 2023-2026). Acheter − Vendre devient une analyse
+   descriptive.
