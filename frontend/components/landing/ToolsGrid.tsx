@@ -128,7 +128,7 @@ const TOOLS: Tool[] = [
   { label: 'Screener avancé', href: '/screener', desc: 'RSI, MACD, dividendes, filtres multiples', icon: I.loupe },
   { label: 'Marché obligataire', href: '/obligations', desc: 'Obligations BRVM analysées', icon: I.obligations },
   { label: 'Matières premières', href: '/weekly', desc: 'Cacao, pétrole, or et valeurs sensibles', icon: I.matieres },
-  { label: 'Conseiller unifié', href: '/conseiller', desc: 'Recommandations basées sur DCF, RSI…', icon: I.conseiller },
+  { label: 'Conseiller unifié', href: '/conseiller', desc: 'Position de chaque valeur par famille, sans verdict', icon: I.conseiller },
   { label: 'Signaux BUY / HOLD / SELL', href: '/signaux', desc: 'Scores, confiance, export CSV', icon: I.signaux },
   { label: 'Paper trading', href: '/premium/paper-trading', desc: 'Entraînez-vous sans risque, capital virtuel', icon: I.paper },
   { label: 'Watchlist & alertes', href: '/parametres/alertes', desc: 'Suivi personnalisé en temps réel', icon: I.alertes },

@@ -119,10 +119,10 @@ const FEATURES: Feature[] = [
   {
     icon: I.bouclier,
     title: 'Conseiller unifié',
-    desc: 'Recommandation Acheter / Conserver / Vendre combinant DCF, RSI, dividende et signal.',
+    desc: 'La position de chaque valeur par famille : tendance, risque, valorisation, qualité, rendement. Sans verdict d’achat ni de vente.',
     badge: 'PREMIUM',
     href: '/pricing',
-    points: ['Notation A–F', 'Dossier d’analyse', 'Recommandations'],
+    points: ['Notation A–F', 'Dossier d’analyse', 'Positions par famille'],
   },
   {
     icon: I.barres,
