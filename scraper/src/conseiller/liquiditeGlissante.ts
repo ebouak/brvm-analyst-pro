@@ -4,6 +4,15 @@ import type { Serie } from './types.js';
 export const FENETRE_LIQUIDITE = 30;
 
 /**
+ * Plancher propre au banc. Le moteur de production surestime l'impact prix des
+ * cours figés (variation nulle, donc Amihud à 0 = « parfait ») : une valeur
+ * presque jamais échangée peut sortir en B. Pour le banc on impose donc : sous
+ * 50 % de présence, ou activité nulle, la classe est D. Divergence ASSUMÉE par
+ * rapport au score de production, qui n'est pas modifié.
+ */
+export const PLANCHER_LIQUIDITE = { presenceMinPct: 50 } as const;
+
+/**
  * Classe de liquidité d'une valeur à `date`, calculée par le moteur officiel
  * (`liquidity/compute.ts`) sur les 30 séances du calendrier qui finissent à
  * `date`. Aucune donnée postérieure n'est lue (spec §4, cours figés).
@@ -21,8 +30,10 @@ export function classeA(s: Serie, calendrier: string[], date: string): Liquidity
       cours_jour: s.cours[i]!,
       variation_pct: s.variations[i] ?? null,
       volume: s.volumes[i]!,
-      valeur_echangee: s.valeurs[i]!,
+      valeur_echangee: s.valeurs[i]! > 0 ? s.valeurs[i]! : null,
     });
   }
-  return computeLiquidityV2(rows, fenetre.length).classe;
+  const r = computeLiquidityV2(rows, fenetre.length);
+  if (r.classe && (r.presence_pct < PLANCHER_LIQUIDITE.presenceMinPct || r.activite === 0)) return 'D';
+  return r.classe;
 }

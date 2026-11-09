@@ -11,7 +11,12 @@ describe('classeA', () => {
   });
   it('classe D une valeur presque jamais échangée', () => {
     const figees = cal.map((_, i) => i).filter((i) => i % 10 !== 0);
-    const s = serie(cal, cal.map((_, i) => (i % 20 === 0 ? 1100 : 1000)), figees);
+    const s = serie(cal, cal.map(() => 1000), figees);
+    expect(classeA(s, cal, cal[59]!)).toBe('D');
+  });
+  it('classe D une valeur échangée 3 jours sur 30 même avec des cours qui varient', () => {
+    const figees = cal.map((_, i) => i).filter((i) => i % 10 !== 0);
+    const s = serie(cal, cal.map((_, i) => 1000 + (i % 7) * 10), figees);
     expect(classeA(s, cal, cal[59]!)).toBe('D');
   });
   it('renvoie null avant 30 séances de calendrier', () => {
