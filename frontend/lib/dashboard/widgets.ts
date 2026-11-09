@@ -10,7 +10,7 @@ export interface WidgetMeta { key: WidgetKey; label: string; desc: string }
 export const WIDGETS: WidgetMeta[] = [
   { key: 'etat', label: 'Récit de séance', desc: 'La séance racontée : titre, chapô, six mesures' },
   { key: 'comprendre', label: 'Comprendre la séance', desc: 'La séance en constats simples' },
-  { key: 'seance', label: 'Séance du jour', desc: 'Trajectoire des indices, largeur du marché, moteur de signaux' },
+  { key: 'seance', label: 'Séance du jour', desc: 'Trajectoire des indices et moteur de signaux' },
   { key: 'agenda', label: 'Agenda', desc: 'Dividendes et jours fermés des 30 prochains jours' },
   { key: 'publications', label: 'Publications', desc: 'Documents des émetteurs, 7 derniers jours' },
   { key: 'portefeuille', label: 'Mon portefeuille', desc: 'Valeur, plus-value latente, positions' },

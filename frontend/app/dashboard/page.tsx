@@ -431,7 +431,7 @@ export default async function Dashboard() {
         <Cellule span={8}>{trajectoires
           ? <Trajectoire series={trajectoires} jour={{ BRVMC: brvmcJour?.variation_pct ?? null, BRVM30: b30?.variation_pct ?? null }} />
           : <Bloc id="t-traj"><TeteBloc id="t-traj" titre="Trajectoire des indices" /><p className="text-sm text-muted">Trajectoire momentanément indisponible.</p></Bloc>}</Cellule>
-        <Cellule span={4}><LargeurMoteur hausses={metriques.hausses} baisses={metriques.baisses} stables={metriques.stables} signaux={compteSignaux} /></Cellule>
+        <Cellule span={4}><LargeurMoteur signaux={compteSignaux} /></Cellule>
       </GrilleInterne>
     ),
     indices: (
@@ -486,7 +486,7 @@ export default async function Dashboard() {
       <BlocPortefeuille etat={etatPortefeuille} debutCourbe={debutCourbe} perf={perf} variations={variationsJour} />
     ),
     comprendre: <BlocComprendre metriques={metriques} close={seanceClose} />,
-    agenda: <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={Object.fromEntries(quantites)} portefeuilleIndisponible={portefeuilleIndisponible} />,
+    agenda: agenda !== null && agenda.length === 0 && !portefeuilleIndisponible ? null : <BlocAgenda items={agenda} aujourdhui={aujourdhui} quantites={Object.fromEntries(quantites)} portefeuilleIndisponible={portefeuilleIndisponible} />,
     publications: <BlocPublications items={publications} depuis={depuisPublications} portefeuilleIndisponible={portefeuilleIndisponible} />,
     liquidite: (
       <BlocLiquidite
@@ -534,8 +534,6 @@ export default async function Dashboard() {
             </Link>
           </nav>
         </header>
-
-        <RechercheSocietes retour="/dashboard" className="" />
 
         {/* ── Bandeau alertes déclenchées ──────────────────────────────────── */}
         {triggeredAlerts > 0 && (
@@ -588,7 +586,10 @@ export default async function Dashboard() {
                 />
               </div>
             );
-            if (rangees.length === 0) return blocMarche;
+            // La recherche suit le premier bloc de travail : un actif voit d'abord son
+            // portefeuille, un débutant le récit de séance, puis de quoi chercher.
+            const recherche = <div className="border-b border-border py-5"><RechercheSocietes retour="/dashboard" className="" /></div>;
+            if (rangees.length === 0) return <>{blocMarche}{recherche}</>;
             return rangees.map((r, i) => (
               <Fragment key={r.cles.join('-')}>
                 <div className={classeRangee(r)}>
@@ -596,7 +597,7 @@ export default async function Dashboard() {
                     <div key={k} className={classeCellule(r.largeur, r.cles.length === 1)}>{sections[k]}</div>
                   ))}
                 </div>
-                {i === 0 && blocMarche}
+                {i === 0 && <>{blocMarche}{recherche}</>}
               </Fragment>
             ));
           })()}
