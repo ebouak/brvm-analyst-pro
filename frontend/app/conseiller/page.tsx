@@ -1,178 +1,106 @@
-import { ArrowRight, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { getAdvisorRecommendations } from '@/lib/advisor/server';
-import { createPublicClient } from '@/lib/supabase/public';
-import { computeLiquidity, type LiquidityDailyRow } from '@/lib/liquidity';
-import { getRecentChanges } from '@/lib/advisor/changes';
-import { SectionHeader, StatPill } from '@/components/ui/premium';
-import { AdvisorCard } from '@/components/advisor/AdvisorCard';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { Chapitre } from '@/components/fiche/Chapitre';
+import { LigneSource } from '@/components/marche/LigneSource';
+import { EmptyStatePremium } from '@/components/ui/premium';
 import { MyPortfolioAdvice } from '@/components/advisor/MyPortfolioAdvice';
-import type { Action } from '@/lib/advisor/recommend';
+import { TableauPositions } from '@/components/conseiller/TableauPositions';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
+import { FAMILLES } from '@/lib/conseiller/facteurs';
+import { lirePositions } from '@/lib/conseiller/lecture';
+import { fmtDateCourte } from '@/lib/format';
 
 export const metadata = { title: 'Conseiller BRVM' };
 // Garde par utilisateur : rendu dynamique obligatoire (plus de cache partagé).
 export const dynamic = 'force-dynamic';
 
-const ACT_LABEL: Record<Action, string> = { acheter: 'Acheter', conserver: 'Conserver', vendre: 'Vendre' };
-const ACT_COLOR: Record<Action, string> = { acheter: 'text-up', conserver: 'text-gold', vendre: 'text-down' };
-
-/** Scores de liquidité (~30 séances) pour toute la cote, en une requête. */
-async function getLiquidityMap(): Promise<Map<string, { classe: string; score: number }>> {
-  const sb = createPublicClient();
-  const d45 = new Date();
-  d45.setDate(d45.getDate() - 45);
-  const { data } = await sb
-    .from('brvm_actions_daily')
-    .select('code, date_marche, volume, cours_jour, valeur_echangee')
-    .gte('date_marche', d45.toISOString().slice(0, 10));
-  const rows = (data ?? []) as {
-    code: string; date_marche: string; volume: number | null;
-    cours_jour: number | null; valeur_echangee: number | null;
-  }[];
-  const seances = new Set(rows.map((r) => r.date_marche)).size;
-  const byCode = new Map<string, typeof rows>();
-  for (const r of rows) {
-    const list = byCode.get(r.code) ?? [];
-    list.push(r);
-    byCode.set(r.code, list);
-  }
-  // Liquidité v2 (table liquidity_daily) — fallback calcul legacy si table vide.
-  const { data: liqRows2 } = await sb
-    .from('liquidity_daily')
-    .select('code, score, classe, presence_pct, valeur_moyenne_30j, seances_traitees, seances_marche')
-    .order('date_marche', { ascending: false })
-    .limit(100);
-  const out = new Map<string, { classe: string; score: number }>();
-  for (const r of (liqRows2 ?? []) as LiquidityDailyRow[]) {
-    if (r.score != null && r.classe != null && r.code && !out.has(r.code)) out.set(r.code, { classe: r.classe, score: r.score });
-  }
-  if (out.size === 0) {
-    for (const [code, list] of byCode) {
-      const liq = computeLiquidity(list, seances);
-      if (liq) out.set(code, { classe: liq.classe, score: liq.score });
-    }
-  }
-  return out;
-}
-
 export default async function ConseillerPage() {
   // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
-  // La page ne decide rien : elle demande.
   const gate = await canAccess('conseiller');
   if (!gate.allowed) {
     return (
       <AccessGate
         required={gate.required === 'free' ? 'premium' : gate.required}
         feature="Le Conseiller"
-        hint="Recommandations d'achat, de conservation et de vente, argumentées."
+        hint="Positions de chaque valeur par famille de facteurs."
       />
     );
   }
 
-  const [rows, changes, liquidityMap] = await Promise.all([
-    getAdvisorRecommendations(),
-    getRecentChanges(),
-    getLiquidityMap().catch(() => new Map<string, { classe: string; score: number }>()),
-  ]);
-  const counts = {
-    acheter: rows.filter((r) => r.result.action === 'acheter').length,
-    conserver: rows.filter((r) => r.result.action === 'conserver').length,
-    vendre: rows.filter((r) => r.result.action === 'vendre').length,
-  };
+  let positions: Awaited<ReturnType<typeof lirePositions>> = null;
+  let illisible = false;
+  try {
+    positions = await lirePositions();
+  } catch {
+    illisible = true;
+  }
 
-  return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <SectionHeader
-        title="Conseiller BRVM"
-        subtitle="Une recommandation unifiée par action (Acheter / Conserver / Vendre) qui combine le signal quantitatif, la valorisation DCF, le RSI et le dividende. Aide à la décision : exécutez via votre SGI (la BRVM n'a pas d'ordres en ligne)."
-        actions={
-          <>
-            <StatPill tone="neutral"><span className="tabular">{rows.length}</span>&nbsp;valeurs analysées</StatPill>
-            <Link
-              href="/conseiller/track-record"
-              className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent-ink transition-colors hover:border-accent/60 hover:bg-accent/20"
-            >
-              Track record public <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-          </>
-        }
-      />
-
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-panel border-2 border-up/40 bg-up/10 px-4 py-3">
-          <p className="flex items-center gap-1 text-xs text-up"><TrendingUp className="h-3.5 w-3.5" aria-hidden /> À acheter</p>
-          <p className="mt-1 tabular text-3xl font-bold text-up">{counts.acheter}</p>
-        </div>
-        <div className="rounded-panel border border-border bg-surface px-4 py-3">
-          <p className="flex items-center gap-1 text-xs text-muted"><Minus className="h-3.5 w-3.5" aria-hidden /> À conserver</p>
-          <p className="mt-1 tabular text-3xl font-bold text-ivory">{counts.conserver}</p>
-        </div>
-        <div className="rounded-panel border-2 border-down/40 bg-down/10 px-4 py-3">
-          <p className="flex items-center gap-1 text-xs text-down"><TrendingDown className="h-3.5 w-3.5" aria-hidden /> À vendre</p>
-          <p className="mt-1 tabular text-3xl font-bold text-down">{counts.vendre}</p>
+  if (illisible || !positions) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <EnTeteCote
+          titre="Conseiller"
+          description="Où se situe chaque valeur de la cote, famille par famille, sans recommandation d'achat ni de vente."
+          source={null}
+        />
+        <div className="mt-8">
+          {illisible ? (
+            <EmptyStatePremium title="Positions momentanément illisibles" hint="Réessayez dans un instant." />
+          ) : (
+            <EmptyStatePremium title="Positions pas encore calculées" hint="Elles sont mises à jour chaque soir de séance." />
+          )}
         </div>
       </div>
+    );
+  }
 
-      {/* ── Alertes : bascules de recommandation (vs séance précédente) ── */}
-      {changes.length > 0 && (
-        <section className="rounded-xl border border-info/30 bg-info/5 p-4">
-          <h2 className="mb-2 flex items-center gap-2 font-display text-base text-ivory">
-            Changements de recommandation
-            <span className="text-[11px] font-normal text-faint">(depuis la dernière séance)</span>
-          </h2>
-          <ul className="flex flex-wrap gap-2">
-            {changes.map((c) => (
-              <li key={c.code}>
-                <Link href={`/actions/${c.code}`} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs hover:border-info/40">
-                  <span className="font-mono font-medium text-ivory">{c.code}</span>
-                  <span className={ACT_COLOR[c.from]}>{ACT_LABEL[c.from]}</span>
-                  <ArrowRight className="h-3 w-3 text-faint" aria-hidden />
-                  <span className={`font-semibold ${ACT_COLOR[c.to]}`}>{ACT_LABEL[c.to]}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+  const { date, lignes } = positions;
 
-      {/* Conseils personnalisés sur le portefeuille (client, user-scoped) */}
-      <MyPortfolioAdvice />
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-8">
+      <EnTeteCote
+        titre="Conseiller"
+        description="Où se situe chaque valeur de la cote, famille par famille, sans recommandation d'achat ni de vente."
+        seance={date}
+        compte={{ n: lignes.length, libelle: 'valeurs' }}
+        source="Calcul WESTBOURSE sur les cours et comptes publiés"
+      />
 
-      {/* ── Toute la cote, regroupée par recommandation (l'actionnable d'abord) ── */}
-      <p className="pt-2 text-xs text-muted">Cliquez une carte pour retourner et voir la justification détaillée.</p>
-      {(['acheter', 'conserver', 'vendre'] as Action[]).map((action) => {
-        const group = rows
-          .filter((r) => r.result.action === action)
-          .sort((a, b) => b.result.conviction - a.result.conviction);
-        if (group.length === 0) return null;
-        const convictionMoy = Math.round(group.reduce((s, r) => s + r.result.conviction, 0) / group.length);
-        return (
-          <section key={action} aria-label={`Recommandations ${ACT_LABEL[action]}`}>
-            <div className="mb-3 flex items-baseline gap-3">
-              <h2 className={`font-display text-lg ${ACT_COLOR[action]}`}>
-                {action === 'acheter' ? <TrendingUp className="mr-1.5 inline h-4 w-4" aria-hidden /> : action === 'vendre' ? <TrendingDown className="mr-1.5 inline h-4 w-4" aria-hidden /> : <Minus className="mr-1.5 inline h-4 w-4" aria-hidden />}{ACT_LABEL[action]}
-                <span className="tabular ml-2 text-sm text-faint">({group.length})</span>
-              </h2>
-              <span className="text-[11px] text-faint">
-                conviction moyenne <span className="tabular text-muted">{convictionMoy} %</span> · triées par conviction
-              </span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {group.map((r) => (
-                <AdvisorCard key={r.code} row={r} liquidite={liquidityMap.get(r.code) ?? null} />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+      <section aria-labelledby="t-abstention" className="mt-8 rounded-card border border-border bg-surface p-5">
+        <h2 id="t-abstention" className="font-display text-xl text-ivory">
+          Le Conseiller s&apos;abstient de recommander d&apos;acheter ou de vendre
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          Nous avons testé, sur l&apos;historique de la BRVM depuis 2007, si une règle combinant tendance, risque et valorisation battait le marché. Le marché est trop étroit pour le prouver : environ 46 périodes indépendantes seulement, et il faudrait un écart de près de 27 % par an pour que le test le confirme. Plutôt que d&apos;afficher un conseil que nous ne pouvons pas justifier, nous montrons où se situe chaque valeur, et vous décidez.
+        </p>
+        <p className="mt-3 text-sm">
+          <Link href="/conseiller/track-record" className="text-accent-ink underline underline-offset-2 hover:no-underline">
+            Comment nous l&apos;avons mesuré
+          </Link>
+        </p>
+      </section>
 
-      <p className="text-xs text-faint">
-        Synthèse algorithmique dérivée des données réelles (signaux, DCF, RSI, dividendes), aucune
-        valeur inventée. Ne constitue pas un conseil en investissement personnalisé. Performances passées
-        ne préjugent pas des performances futures.
-      </p>
+      <Chapitre id="mes-positions" numero="01" titre="Mes positions" sousTitre="Vos lignes, avec leur position par famille." />
+      <div className="mt-6">
+        <MyPortfolioAdvice />
+      </div>
+
+      <Chapitre id="cote" numero="02" titre="Toute la cote" sousTitre="Tiers haut = tiers le plus favorable de la famille dans la cote du jour." />
+      <TableauPositions lignes={lignes} />
+
+      <dl className="mt-8 grid gap-3 text-sm sm:grid-cols-2">
+        {FAMILLES.map((f) => (
+          <div key={f.cle}>
+            <dt className="font-medium text-ivory">{f.titre}</dt>
+            <dd className="text-muted">Tiers haut : {f.haut}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <LigneSource>
+        Positions calculées par WESTBOURSE pour la séance du {fmtDateCourte(date)} à partir des cours, des comptes et des dividendes publiés. Valeurs de liquidité C ou D : cours peu échangés, positions à lire avec prudence. Ce n&apos;est pas un conseil en investissement.
+      </LigneSource>
     </div>
   );
 }
