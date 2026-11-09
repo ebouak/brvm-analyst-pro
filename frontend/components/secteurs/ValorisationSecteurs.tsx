@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { PremiumPanel, Eyebrow } from '@/components/ui/premium';
 import { getDonneesSecteurs } from '@/lib/secteurs/server';
 import { fmtDateFR } from '@/lib/format';
@@ -23,7 +24,8 @@ function situe(valeur: number | null, marche: number | null): string {
   return `${ecart > 0 ? '+' : ''}${Math.round(ecart)} % vs marché`;
 }
 
-export default async function ValorisationSecteurs() {
+/** `entete` remplace le titre interne (chapitre numéroté de la page /secteurs). */
+export default async function ValorisationSecteurs({ entete }: { entete?: ReactNode } = {}) {
   const d = await getDonneesSecteurs();
   if (d.secteurs.length === 0) return null;
 
@@ -31,10 +33,13 @@ export default async function ValorisationSecteurs() {
 
   return (
     <section className="space-y-4">
+      {entete}
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="mt-1 font-display text-heading-sm text-ivory">À quel prix se paie chaque secteur</h2>
-        </div>
+        {!entete && (
+          <div>
+            <h2 className="mt-1 font-display text-heading-sm text-ivory">À quel prix se paie chaque secteur</h2>
+          </div>
+        )}
         <dl className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
           <div><dt className="inline">PER médian du marché </dt><dd className="tabular inline text-ivory">{n1(d.marche.per)}</dd></div>
           <div><dt className="inline">PBR </dt><dd className="tabular inline text-ivory">{n1(d.marche.pbr)}</dd></div>
