@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fmtNumber, fmtFcfa } from '@/lib/format';
-import { FAMILLES, libelleTier, type CleFamille, type Tier } from '@/lib/conseiller/facteurs';
+import type { CleFamille, Tier } from '@/lib/conseiller/facteurs';
+import { profilDe, LIBELLE_PROFIL } from '@/lib/conseiller/profil';
+import { Jauges } from '@/components/conseiller/Jauges';
 
 interface Pos {
   code: string; quantite: number; pru: number; cours: number | null;
   valeur: number | null; pnl: number | null; pnlPct: number | null;
   tiers: Partial<Record<CleFamille, Tier | null>>;
+  scores?: Partial<Record<CleFamille, number | null>>;
   classe_liquidite: 'A' | 'B' | 'C' | 'D' | null;
 }
 
@@ -62,9 +65,7 @@ export function MyPortfolioAdvice() {
               <th className="px-3 py-2.5 text-right font-semibold">Cours</th>
               <th className="px-3 py-2.5 text-right font-semibold">P&amp;L</th>
               <th className="px-3 py-2.5 text-left font-semibold">Liquidité</th>
-              {FAMILLES.map((f) => (
-                <th key={f.cle} className="px-3 py-2.5 text-left font-semibold">{f.titre}</th>
-              ))}
+              <th className="px-3 py-2.5 text-left font-semibold">Profil</th>
             </tr>
           </thead>
           <tbody>
@@ -73,7 +74,7 @@ export function MyPortfolioAdvice() {
               return (
                 <tr key={p.code} className="border-b border-border/30">
                   <td className="px-3 py-3">
-                    <Link href={`/actions/${p.code}`} className="font-semibold text-white hover:text-info">{p.code}</Link>
+                    <Link href={`/actions/${p.code}`} className="font-semibold text-white hover:text-info focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">{p.code}</Link>
                   </td>
                   <td className="px-3 py-3 text-right tabular text-muted">{fmtNumber(p.quantite)}</td>
                   <td className="px-3 py-3 text-right tabular text-muted">{fmtNumber(p.pru)}</td>
@@ -83,19 +84,17 @@ export function MyPortfolioAdvice() {
                     {p.pnlPct != null && <span className="ml-1 text-[11px] opacity-80">({up ? '+' : ''}{p.pnlPct.toFixed(1)}%)</span>}
                   </td>
                   <td className="px-3 py-3 text-xs text-ivory">{p.classe_liquidite ?? '—'}</td>
-                  {FAMILLES.map((f) => {
-                    const t = p.tiers?.[f.cle] ?? null;
-                    return (
-                      <td key={f.cle} className={`px-3 py-3 text-xs ${t ? 'text-ivory' : 'text-faint'}`}>{libelleTier(t)}</td>
-                    );
-                  })}
+                  <td className="px-3 py-3">
+                    <p className="mb-1.5 text-xs text-ivory">{LIBELLE_PROFIL[profilDe(p.tiers)]}</p>
+                    <Jauges compact scores={p.scores} tiers={p.tiers} />
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-faint">Positions par famille, sans recommandation : à vous de décider. Exécution via votre SGI.</p>
+      <p className="text-[11px] text-faint">Profil et jauges par famille, sans recommandation : à vous de décider. Exécution via votre SGI.</p>
     </section>
   );
 }

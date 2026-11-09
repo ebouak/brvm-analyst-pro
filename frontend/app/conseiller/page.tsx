@@ -4,16 +4,24 @@ import { Chapitre } from '@/components/fiche/Chapitre';
 import { LigneSource } from '@/components/marche/LigneSource';
 import { EmptyStatePremium } from '@/components/ui/premium';
 import { MyPortfolioAdvice } from '@/components/advisor/MyPortfolioAdvice';
-import { TableauPositions } from '@/components/conseiller/TableauPositions';
+import { Jauges } from '@/components/conseiller/Jauges';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import { FAMILLES } from '@/lib/conseiller/facteurs';
 import { lirePositions } from '@/lib/conseiller/lecture';
+import { profilDe, phraseDe, soldeDe, LIBELLE_PROFIL, type Profil } from '@/lib/conseiller/profil';
 import { fmtDateCourte } from '@/lib/format';
 
 export const metadata = { title: 'Conseiller BRVM' };
 // Garde par utilisateur : rendu dynamique obligatoire (plus de cache partagé).
 export const dynamic = 'force-dynamic';
+
+const GROUPES: { profil: Profil; titre: string }[] = [
+  { profil: 'porteur', titre: 'Profils porteurs' },
+  { profil: 'partage', titre: 'Profils partagés' },
+  { profil: 'fragile', titre: 'Profils fragiles' },
+  { profil: 'indetermine', titre: 'Lecture impossible' },
+];
 
 export default async function ConseillerPage() {
   // Niveau requis LU EN BASE (feature_flags, editable dans /admin/features).
@@ -86,10 +94,45 @@ export default async function ConseillerPage() {
         <MyPortfolioAdvice />
       </div>
 
-      <Chapitre id="cote" numero="02" titre="Toute la cote" sousTitre="Tiers haut = tiers le plus favorable de la famille dans la cote du jour." />
-      <TableauPositions lignes={lignes} />
+      <Chapitre id="cote" numero="02" titre="La cote, valeur par valeur" sousTitre="Lecture des cinq familles de facteurs : une suggestion, pas une décision." />
+      <p className="mt-4 rounded-card border border-border bg-surface p-4 text-sm leading-relaxed text-muted">
+        Lecture des facteurs, non testée : ce n&apos;est ni un conseil ni une décision. Le banc a montré qu&apos;on ne peut pas prouver qu&apos;elle bat le marché.
+      </p>
 
-      <dl className="mt-8 grid gap-3 text-sm sm:grid-cols-2">
+      {GROUPES.map((g) => {
+        const membres = lignes
+          .filter((l) => profilDe(l.tiers) === g.profil)
+          .sort((a, b) => soldeDe(b.tiers) - soldeDe(a.tiers) || a.code.localeCompare(b.code));
+        if (membres.length === 0) return null;
+        return (
+          <section key={g.profil} aria-labelledby={"g-" + g.profil} className="mt-8">
+            <h3 id={"g-" + g.profil} className="font-display text-lg text-ivory">
+              {g.titre} <span className="tabular text-sm text-muted">({membres.length})</span>
+            </h3>
+            <ul className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {membres.map((l) => (
+                <li key={l.code} className="rounded-card border border-border bg-surface p-4">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <Link href={"/actions/" + l.code} className="font-medium text-ivory hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">{l.code}</Link>
+                    <span className="text-xs text-muted">{LIBELLE_PROFIL[g.profil]}</span>
+                  </div>
+                  {(l.classe_liquidite === 'C' || l.classe_liquidite === 'D') && (
+                    <p className="mt-1 text-xs text-faint">peu échangée</p>
+                  )}
+                  <p className="mt-2 text-sm leading-relaxed text-ivory">{phraseDe(l.tiers)}</p>
+                  <div className="mt-3">
+                    <Jauges scores={l.scores} tiers={l.tiers} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
+
+      <h3 className="mt-10 font-display text-lg text-ivory">Comment lire les jauges</h3>
+      <p className="mt-2 text-sm text-muted">À droite = tiers le plus favorable de la cote du jour pour cette famille.</p>
+      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         {FAMILLES.map((f) => (
           <div key={f.cle}>
             <dt className="font-medium text-ivory">{f.titre}</dt>
