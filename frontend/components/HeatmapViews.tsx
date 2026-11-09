@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useRouter } from 'next/navigation';
 import HeatmapTreemap from '@/components/HeatmapTreemap';
 import type { ColorFilter } from '@/components/HeatmapTreemap';
@@ -12,6 +13,11 @@ type View = 'treemap' | 'grid';
 interface Props {
   rows: HeatmapNode[];
   logos?: Record<string, string | null>;
+  /**
+   * Légende des couleurs, posée dans la barre d'outils au-dessus de la carte.
+   * Sans elle, une phrase sous la cartographie explique taille et couleur.
+   */
+  legende?: ReactNode;
 }
 
 /** Point de rupture `md` de Tailwind (768 px). */
@@ -33,6 +39,32 @@ function useIsMd(): boolean | null {
   return isMd;
 }
 
+/** Largeur réelle d'un conteneur (px), `null` avant la première mesure. */
+function useLargeur<T extends HTMLElement>(): [RefObject<T>, number | null] {
+  const ref = useRef<T>(null);
+  const [largeur, setLargeur] = useState<number | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(([e]) => setLargeur(Math.round(e.contentRect.width)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, largeur];
+}
+
+/** Classes communes d'un segment de contrôle (vue, filtre). */
+const SEGMENT = [
+  'relative h-8 rounded-md px-3 text-xs font-medium transition-colors',
+  // Cible tactile de 44 px sans grossir le contrôle.
+  "before:absolute before:-inset-y-1.5 before:inset-x-0 before:content-['']",
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
+  'active:bg-elevated disabled:cursor-not-allowed disabled:opacity-55',
+].join(' ');
+const SEGMENT_ACTIF = 'bg-accent/15 text-accent-ink';
+const SEGMENT_INACTIF = 'text-muted hover:bg-elevated hover:text-ivory';
+const GROUPE = 'inline-flex gap-0.5 rounded-lg border border-border bg-sunken p-0.5';
+
 /**
  * Bascule entre la cartographie proportionnelle (treemap — taille =
  * capitalisation, couleur = variation) et la grille de tuiles.
@@ -50,52 +82,46 @@ function useIsMd(): boolean | null {
  * qu'on ne demande pas la cartographie). Les deux conteneurs gardent leur place
  * dans l'arbre : la vue visible n'est jamais remontée.
  */
-export default function HeatmapViews({ rows, logos = {} }: Props) {
+export default function HeatmapViews({ rows, logos = {}, legende }: Props) {
   const isMd = useIsMd();
   const [choix, setChoix] = useState<View | null>(null);
   const [colorFilter, setColorFilter] = useState<ColorFilter>('all');
+  const [refCarte, largeurCarte] = useLargeur<HTMLDivElement>();
 
   // Vue effective : choix explicite, sinon déduite de la largeur, sinon
   // inconnue (null) → arbitrage par le CSS.
   const view: View | null = choix ?? (isMd == null ? null : isMd ? 'treemap' : 'grid');
 
+  const hauteur = isMd === false ? 520 : 560;
+  // Ratio largeur/hauteur MESURÉ (dimensionnement des logos et des libellés) ;
+  // avant la mesure, l'estimation d'avant : un téléphone est plus haut que large.
+  const aspect = largeurCarte ? largeurCarte / hauteur : isMd === false ? 0.65 : 2;
+
   const ViewBtn = ({ mode, label }: { mode: View; label: string }) => {
-    const actif = 'bg-ivory text-obsidian';
-    const inactif =
-      'bg-elevated border border-border text-muted hover:text-ivory hover:border-border-strong';
     // Avant le montage : état visuel porté par le CSS, comme les vues.
     const auto =
       mode === 'treemap'
-        ? `${inactif} md:bg-ivory md:text-obsidian md:border-transparent`
-        : `${actif} md:bg-elevated md:border md:border-border md:text-muted`;
+        ? `${SEGMENT_INACTIF} md:bg-accent/15 md:text-accent-ink`
+        : `${SEGMENT_ACTIF} md:bg-transparent md:text-muted`;
     return (
       <button
         type="button"
         onClick={() => setChoix(mode)}
         aria-pressed={view == null ? undefined : view === mode}
-        className={[
-          'px-3 py-1 rounded-full text-xs font-medium transition-colors',
-          view == null ? auto : view === mode ? actif : inactif,
-        ].join(' ')}
+        className={`${SEGMENT} ${view == null ? auto : view === mode ? SEGMENT_ACTIF : SEGMENT_INACTIF}`}
       >
         {label}
       </button>
     );
   };
 
-  const FilterBtn = ({ mode, label, dot }: { mode: ColorFilter; label: string; dot?: string }) => (
+  const FilterBtn = ({ mode, label }: { mode: ColorFilter; label: string }) => (
     <button
       type="button"
       onClick={() => setColorFilter(mode)}
       aria-pressed={colorFilter === mode}
-      className={[
-        'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors',
-        colorFilter === mode
-          ? 'bg-elevated border border-border-strong text-ivory'
-          : 'bg-elevated/40 border border-border text-muted hover:text-ivory hover:border-border-strong',
-      ].join(' ')}
+      className={`${SEGMENT} ${colorFilter === mode ? SEGMENT_ACTIF : SEGMENT_INACTIF}`}
     >
-      {dot && <span aria-hidden className={`inline-block w-2 h-2 rounded-full ${dot}`} />}
       {label}
     </button>
   );
@@ -105,41 +131,45 @@ export default function HeatmapViews({ rows, logos = {} }: Props) {
   // Classes des conteneurs : arbitrage CSS avant le montage, explicite ensuite.
   const clsTreemap = view == null ? 'hidden md:block' : view === 'treemap' ? '' : 'hidden';
   const clsGrille = view == null ? 'md:hidden' : view === 'grid' ? '' : 'hidden';
-  const clsFiltres = view == null ? 'hidden md:flex' : view === 'treemap' ? 'flex' : 'hidden';
+  const clsFiltres = view == null ? 'hidden md:inline-flex' : view === 'treemap' ? 'inline-flex' : 'hidden';
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2" role="group" aria-label="Type de vue">
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className={GROUPE} role="group" aria-label="Type de vue">
           <ViewBtn mode="treemap" label="Cartographie" />
           <ViewBtn mode="grid" label="Grille" />
         </div>
 
-        <div
-          className={`${clsFiltres} flex-wrap items-center gap-2`}
-          role="group"
-          aria-label="Filtrer la cartographie"
-        >
+        <div className={`${GROUPE} ${clsFiltres}`} role="group" aria-label="Filtrer la cartographie">
           <FilterBtn mode="all" label="Tout" />
-          <FilterBtn mode="up" label="Hausses" dot="bg-up" />
-          <FilterBtn mode="down" label="Baisses" dot="bg-down" />
+          <FilterBtn mode="up" label="Hausses" />
+          <FilterBtn mode="down" label="Baisses" />
         </div>
+
+        {legende && <div className="w-full sm:ml-auto sm:w-auto">{legende}</div>}
       </div>
 
       <div className={clsTreemap}>
         {montrerTreemap && (
-          <div className="space-y-4">
-            <HeatmapTreemap
-              data={rows}
-              height={isMd === false ? 520 : 560}
-              // Ratio largeur/hauteur estimé : un téléphone est plus haut que large.
-              aspect={isMd === false ? 0.65 : 2}
-              logos={logos}
-              colorFilter={colorFilter}
-            />
-            <p className="text-[11px] text-faint">
-              Taille = capitalisation · couleur = variation du jour · logo de la société quand la tuile le permet
-            </p>
+          <div ref={refCarte} className="space-y-3">
+            {/* Hauteur fixée par la prop : aucun saut de mise en page à
+                l'arrivée d'ECharts. */}
+            <div className="overflow-hidden rounded-lg">
+              <HeatmapTreemap
+                data={rows}
+                height={hauteur}
+                aspect={aspect}
+                logos={logos}
+                colorFilter={colorFilter}
+              />
+            </div>
+            {!legende && (
+              <p className="text-xs text-faint">
+                La taille suit la capitalisation, la couleur la variation du jour ; le logo de la
+                société s&apos;affiche quand la tuile le permet.
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -167,8 +197,8 @@ export function SecteurSelect({
   const id = useId();
   return (
     <form method="get" action="/heatmap" className={`flex items-center gap-2 ${className}`}>
-      <label htmlFor={id} className="text-xs text-muted whitespace-nowrap">
-        Secteur :
+      <label htmlFor={id} className="whitespace-nowrap text-xs text-muted">
+        Secteur
       </label>
       <select
         id={id}
@@ -181,7 +211,7 @@ export function SecteurSelect({
           const v = e.target.value;
           router.push(v ? `/heatmap?secteur=${encodeURIComponent(v)}` : '/heatmap');
         }}
-        className="min-w-0 flex-1 rounded-md border border-border bg-elevated px-3 py-2 text-sm text-ivory focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+        className="h-10 min-w-0 flex-1 rounded-md border border-border-strong bg-sunken px-3 text-sm text-ivory hover:bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         <option value="">Tous</option>
         {secteurs.map((s) => (
@@ -193,7 +223,7 @@ export function SecteurSelect({
       <noscript>
         <button
           type="submit"
-          className="rounded-md border border-border bg-elevated px-3 py-2 text-xs text-ivory"
+          className="h-10 rounded-md border border-border-strong bg-elevated px-3 text-xs text-ivory hover:bg-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent active:bg-sunken"
         >
           Filtrer
         </button>
