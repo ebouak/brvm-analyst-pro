@@ -45,3 +45,45 @@ describe('valorisation', () => {
     expect(s.get('V00')!.valorisation).toBeNull();
   });
 });
+
+describe('univers filtré', () => {
+  it('retire les codes exclus du classement : le rang d une valeur retenue change', () => {
+    const pentes = Array.from({ length: 20 }, (_, k) => (k - 10) / 20);
+    const d = univers(200, pentes);
+    const ind = indiceEquipondere(d);
+    const date = d.calendrier[190]!;
+    const tout = scoresFamilles(d, ind, date);
+    const filtre = scoresFamilles(d, ind, date, (c) => c !== 'V19');
+    expect(filtre.has('V19')).toBe(false);
+    expect(tout.get('V18')!.tendance).not.toBeCloseTo(1, 5);
+    expect(filtre.get('V18')!.tendance).toBeCloseTo(1, 5);
+  });
+});
+
+describe('rendement du dividende', () => {
+  const divs = (f: (k: number, code: string) => { exercice: number; montant: number }[]) => {
+    const d = univers(200, Array.from({ length: 20 }, () => 0));
+    const dividendes = [...d.series.keys()].flatMap((code, k) =>
+      f(k, code).map((x) => ({ code, exercice: x.exercice, montant: x.montant, disponibleLe: d.calendrier[10]!, exDate: null })));
+    return { d, dividendes };
+  };
+  it('ignore un dividende vieux de plus de 2 exercices', () => {
+    const { d, dividendes } = divs((k) => [{ exercice: 2014, montant: 10 * (k + 1) }]);
+    const s = scoresFamilles({ ...d, dividendes }, indiceEquipondere(d), d.calendrier[190]!);
+    expect(s.get('V19')!.rendement).toBeNull();
+  });
+  it('additionne les lignes du même exercice (acompte et solde)', () => {
+    const { d, dividendes } = divs((k) => (k === 0
+      ? [{ exercice: 2019, montant: 10 }, { exercice: 2019, montant: 10 }]
+      : [{ exercice: 2019, montant: 15 }]));
+    const s = scoresFamilles({ ...d, dividendes }, indiceEquipondere(d), d.calendrier[190]!);
+    expect(s.get('V00')!.rendement).toBeCloseTo(1, 5);
+  });
+  it('retient l exercice le plus récent seulement', () => {
+    const { d, dividendes } = divs((k) => (k === 0
+      ? [{ exercice: 2019, montant: 10 }, { exercice: 2018, montant: 500 }]
+      : [{ exercice: 2019, montant: 15 }]));
+    const s = scoresFamilles({ ...d, dividendes }, indiceEquipondere(d), d.calendrier[190]!);
+    expect(s.get('V00')!.rendement).toBeCloseTo(-1, 5);
+  });
+});

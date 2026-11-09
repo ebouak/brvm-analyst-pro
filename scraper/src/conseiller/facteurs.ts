@@ -66,8 +66,16 @@ function famille(rangs: Map<string, number | null>[], codes: string[]): Map<stri
 }
 
 /** Scores des 5 familles pour toutes les valeurs cotées à `date`. Aucune donnée postérieure n'est lue. */
-export function scoresFamilles(d: Donnees, ind: Indice, date: string): Map<string, ScoresFamilles> {
-  const codes = [...d.series].filter(([, s]) => s.pos.has(date)).map(([c]) => c);
+export function scoresFamilles(
+  d: Donnees,
+  ind: Indice,
+  date: string,
+  /** Univers de classement : un code refusé n'entre ni dans les rangs ni dans les médianes. */
+  univers?: (code: string) => boolean,
+): Map<string, ScoresFamilles> {
+  const codes = [...d.series]
+    .filter(([c, s]) => s.pos.has(date) && (!univers || univers(c)))
+    .map(([c]) => c);
   const m = () => new Map<string, number | null>();
   const brut = { t60: m(), t120: m(), vol: m(), dd: m(), per: m(), pb: m(), croiss: m(), roe: m(), rdt: m() };
   for (const code of codes) {
@@ -96,8 +104,12 @@ export function scoresFamilles(d: Donnees, ind: Indice, date: string): Map<strin
     brut.croiss.set(code, n?.resultatNet != null && nm1?.resultatNet != null && nm1.resultatNet !== 0
       ? (n.resultatNet - nm1.resultatNet) / Math.abs(nm1.resultatNet) : null);
     brut.roe.set(code, n?.resultatNet != null && n.capitauxPropres != null && n.capitauxPropres > 0 ? n.resultatNet / n.capitauxPropres : null);
-    const div = d.dividendes.filter((x) => x.code === code && x.disponibleLe <= date).sort((a, b) => b.exercice - a.exercice)[0];
-    brut.rdt.set(code, div && cours > 0 ? div.montant / cours : null);
+    // Dividendes connus à `date`, d'au plus 2 exercices de recul ; exercice le
+    // plus récent ; toutes ses lignes (acompte + solde) sont additionnées.
+    const recents = d.dividendes.filter((x) => x.code === code && x.disponibleLe <= date && x.exercice >= Number(date.slice(0, 4)) - 2);
+    const dernier = recents.reduce((m, x) => Math.max(m, x.exercice), -Infinity);
+    const total = recents.filter((x) => x.exercice === dernier).reduce((a, x) => a + x.montant, 0);
+    brut.rdt.set(code, recents.length > 0 && cours > 0 ? total / cours : null);
   }
   const familles: Record<FamilleFacteur, Map<string, number | null>> = {
     valorisation: famille([rangTransversal(rapportMediane(brut.per, d.familles), -1), rangTransversal(rapportMediane(brut.pb, d.familles), -1)], codes),

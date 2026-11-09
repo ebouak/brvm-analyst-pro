@@ -9,8 +9,8 @@ import type { Decision, Donnees } from './types.js';
  * Décisions de toutes les valeurs cotées à `date`, avec les seules données
  * antérieures ou égales à `date`. Triées par code (sortie déterministe).
  */
-export function evaluerSeance(d: Donnees, ind: Indice, date: string): Decision[] {
-  const scores = scoresFamilles(d, ind, date);
+export function evaluerSeance(d: Donnees, ind: Indice, date: string, univers?: (code: string) => boolean): Decision[] {
+  const scores = scoresFamilles(d, ind, date, univers);
   const out: Decision[] = [];
   for (const [code, sc] of [...scores].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     const classe = classeA(d.series.get(code)!, d.calendrier, date);
