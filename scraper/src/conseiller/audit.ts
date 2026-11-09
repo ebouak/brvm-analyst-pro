@@ -13,7 +13,12 @@ export function sautsSuspects(series: Map<string, Serie>): { code: string; date:
 }
 
 export function partFigee(s: Serie): number {
-  return s.volumes.filter((v) => v <= 0).length / s.volumes.length;
+  // Figée : volume nul OU cours identique à la séance précédente.
+  let figees = 0;
+  for (let i = 0; i < s.volumes.length; i++) {
+    if (s.volumes[i]! <= 0 || (i > 0 && s.cours[i] === s.cours[i - 1])) figees++;
+  }
+  return figees / s.volumes.length;
 }
 
 /** Codes dont la dernière cotation précède `derniere` de plus de `joursMax` jours calendaires. */
