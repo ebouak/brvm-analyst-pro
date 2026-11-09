@@ -26,6 +26,8 @@ export interface LigneFacteurs {
   code: string;
   date_marche: string;
   tiers: Partial<Record<CleFamille, Tier | null>>;
+  /** Rang par famille entre -1 et +1, ou null. */
+  scores?: Partial<Record<CleFamille, number | null>>;
   effectifs?: Partial<Record<CleFamille, number>>;
   classe_liquidite: 'A' | 'B' | 'C' | 'D' | null;
 }
