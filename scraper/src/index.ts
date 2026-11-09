@@ -548,6 +548,18 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'conseiller:audit': {
+      const { runAudit } = await import('./conseiller/runAudit.js');
+      const md = await runAudit();
+      logger.info({ octets: md.length }, 'conseiller:audit écrit dans docs/conseiller/audit-donnees.md');
+      return 0;
+    }
+    case 'conseiller:emd': {
+      const { runEmd } = await import('./conseiller/runEmd.js');
+      // Seuls l'écart-type et l'EMD sortent : jamais la moyenne (spec §2.4).
+      console.log(JSON.stringify(await runEmd(), null, 2));
+      return 0;
+    }
     case 'eval:signaux': {
       // Banc d'évaluation des signaux (lecture seule) : les scores ont-ils
       // annoncé la suite ? Aucun seuil de scoring/score.ts ne change sans un
