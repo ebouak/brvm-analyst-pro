@@ -4,6 +4,8 @@ import { FAMILLES_FACTEURS, type Action, type Decision, type FamilleFacteur } fr
 /** Règle FIGÉE (spec §5). */
 export const REGLE = { K: 3, seuilConcorde: 1 / 3, seuilOppose: 2 / 3, minFamilles: 2 } as const;
 
+export type Regle = 'coeur_prix' | 'cinq_familles';
+
 export function decider(
   scores: Record<FamilleFacteur, number | null>,
   classe: LiquidityClass | null,
@@ -25,4 +27,21 @@ export function decider(
     disponibles,
     raison: action === 'conserver' ? 'pas_de_concordance' : 'concordance',
   };
+}
+
+/**
+ * Règle cœur prix (spec §11.1), test confirmatoire : tendance ET risque
+ * concordent à ±1/3, même garde-fou de liquidité, famille manquante = abstention.
+ */
+export function deciderCoeurPrix(
+  scores: Record<FamilleFacteur, number | null>,
+  classe: LiquidityClass | null,
+): Pick<Decision, 'action' | 'concordantes' | 'disponibles' | 'raison'> {
+  const { tendance, risque } = scores;
+  const disponibles = [tendance, risque].filter((v) => v != null).length;
+  if (classe == null || classe === 'C' || classe === 'D') return { action: 'conserver', concordantes: 0, disponibles, raison: 'liquidite' };
+  if (tendance == null || risque == null) return { action: 'conserver', concordantes: 0, disponibles, raison: 'abstention' };
+  if (tendance >= REGLE.seuilConcorde && risque >= REGLE.seuilConcorde) return { action: 'acheter', concordantes: 2, disponibles, raison: 'concordance' };
+  if (tendance <= -REGLE.seuilConcorde && risque <= -REGLE.seuilConcorde) return { action: 'vendre', concordantes: 2, disponibles, raison: 'concordance' };
+  return { action: 'conserver', concordantes: 0, disponibles, raison: 'pas_de_concordance' };
 }

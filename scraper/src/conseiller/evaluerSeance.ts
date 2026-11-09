@@ -1,4 +1,4 @@
-import { decider } from './decision.js';
+import { decider, deciderCoeurPrix, type Regle } from './decision.js';
 import { scoresFamilles } from './facteurs.js';
 import { classeA } from './liquiditeGlissante.js';
 import type { Indice } from './indice.js';
@@ -9,12 +9,12 @@ import type { Decision, Donnees } from './types.js';
  * Décisions de toutes les valeurs cotées à `date`, avec les seules données
  * antérieures ou égales à `date`. Triées par code (sortie déterministe).
  */
-export function evaluerSeance(d: Donnees, ind: Indice, date: string, univers?: (code: string) => boolean): Decision[] {
+export function evaluerSeance(d: Donnees, ind: Indice, date: string, univers?: (code: string) => boolean, regle: Regle = 'coeur_prix'): Decision[] {
   const scores = scoresFamilles(d, ind, date, univers);
   const out: Decision[] = [];
   for (const [code, sc] of [...scores].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
     const classe = classeA(d.series.get(code)!, d.calendrier, date);
-    out.push({ code, date, scores: sc, ...decider(sc, classe) });
+    out.push({ code, date, scores: sc, ...(regle === 'coeur_prix' ? deciderCoeurPrix(sc, classe) : decider(sc, classe)) });
   }
   return out;
 }

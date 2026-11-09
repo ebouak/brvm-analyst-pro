@@ -3,6 +3,7 @@ import { evaluerSeance } from './evaluerSeance.js';
 import { scoresFamilles } from './facteurs.js';
 import { classeA } from './liquiditeGlissante.js';
 import { perfIndice, type Indice } from './indice.js';
+import type { Regle } from './decision.js';
 import { rendementTotal } from './dividendes.js';
 import { FAMILLES_FACTEURS, type Donnees, type FamilleFacteur } from './types.js';
 
@@ -46,7 +47,12 @@ export function verdictBanc(ecarts: number[]): { verdict: VerdictBanc; moyenne: 
   return { verdict: borneBasse > 0 ? 'prouve' : 'non_prouve', moyenne: moyenne(ecarts), borneBasse, n: ecarts.length };
 }
 
+/** Début de la mesure descriptive de la règle à cinq familles (spec §11.1). */
+export const DEBUT_CINQ_FAMILLES = '2021-07-01';
+
 export interface OptionsBanc {
+  /** Règle de décision ; par défaut cœur prix (test confirmatoire, spec §11.1). */
+  regle?: Regle;
   debut: string;
   fin?: string;
   horizon?: number;
@@ -79,7 +85,7 @@ export function construirePaniers(d: Donnees, ind: Indice, o: OptionsBanc): {
     const univers = o.exclureCD
       ? (code: string) => { const c = classeA(d.series.get(code)!, d.calendrier, date); return c === 'A' || c === 'B'; }
       : undefined;
-    for (const dec of evaluerSeance(d, ind, date, univers)) {
+    for (const dec of evaluerSeance(d, ind, date, univers, o.regle ?? 'coeur_prix')) {
       const s = d.series.get(dec.code)!;
       const p = s.pos.get(date)!;
       if (o.exclureLimite && Math.abs(s.variations[p] ?? 0) >= PROTOCOLE.limiteVariation) continue;
@@ -88,7 +94,7 @@ export function construirePaniers(d: Donnees, ind: Indice, o: OptionsBanc): {
       const a = s.pos.get(entree);
       const b = s.pos.get(sortie);
       if (a == null || b == null) { exclues++; continue; }
-      const r = rendementTotal(s, dec.code, d.dividendes, a, b);
+      const r = rendementTotal(s, dec.code, d.dividendes, a, b, d.ruptures.get(dec.code));
       if (r == null) { exclues++; continue; }
       (dec.action === 'acheter' ? panier.achats : panier.ventes).push(r - marche);
     }
@@ -115,7 +121,7 @@ export function ecartsFamille(d: Donnees, ind: Indice, debut: string, f: Famille
       const a = s.pos.get(entree);
       const b = s.pos.get(sortie);
       if (a == null || b == null) continue;
-      const r = rendementTotal(s, code, d.dividendes, a, b);
+      const r = rendementTotal(s, code, d.dividendes, a, b, d.ruptures.get(code));
       if (r == null) continue;
       if (v >= 1 / 3) haut.push(r - marche);
       else if (v <= -1 / 3) bas.push(r - marche);
