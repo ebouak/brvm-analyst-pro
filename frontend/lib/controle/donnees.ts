@@ -41,6 +41,8 @@ export interface DonneesFraicheur {
   signaux: string | null;
   /** max(date_marche) de liquidity_daily. */
   liquidite: string | null;
+  /** max(date_marche) de conseiller_facteurs. */
+  conseiller: string | null;
   /** max(date_marche) de brvm_carnet_daily. */
   carnet: string | null;
   /** Champ `seance` de seance-video/derniere.json ; null si le fichier est absent ou incomplet. */
@@ -303,6 +305,7 @@ const ENRICHISSEMENT: Record<string, { repere: { libelle: string; nature: 'insta
   'donnees:intraday': { repere: { libelle: 'Dernière collecte en séance', nature: 'instant' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/intraday.yml` }] },
   'donnees:signaux': { repere: { libelle: 'Dernière séance notée', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/score.yml` }] },
   'donnees:liquidite': { repere: { libelle: 'Dernière séance calculée', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/score.yml` }] },
+  'donnees:conseiller': { repere: { libelle: 'Dernière séance calculée', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/score.yml` }] },
   'donnees:carnet': { repere: { libelle: 'Dernier bulletin en base', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/carnet.yml` }] },
   'donnees:video': { repere: { libelle: 'Séance de la dernière vidéo', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/video-seance.yml` }] },
   'donnees:dividendes-calendrier': { repere: { libelle: 'Date du document BRVM', nature: 'periode' }, actions: [{ libelle: 'Workflow sur GitHub', href: `${DEPOT}/actions/workflows/dividendes-calendrier.yml` }] },
@@ -333,6 +336,7 @@ function evaluerFlux(d: DonneesFraicheur, maintenant: Date): Signal[] {
     intraday(d, maintenant),
     fluxSeance({ id: 'signaux', titre: 'Signaux de scoring', table: 'signals_daily', derniere: d.signaux, heure: H_SIGNAUX, attention: 1, alerte: 2 }, maintenant, f),
     fluxSeance({ id: 'liquidite', titre: 'Liquidité', table: 'liquidity_daily', derniere: d.liquidite, heure: H_SIGNAUX, attention: 1, alerte: 2 }, maintenant, f),
+    fluxSeance({ id: 'conseiller', titre: 'Positions du Conseiller', table: 'conseiller_facteurs', derniere: d.conseiller, heure: H_SIGNAUX, attention: 1, alerte: 2 }, maintenant, f),
     fluxSeance(
       {
         id: 'carnet',

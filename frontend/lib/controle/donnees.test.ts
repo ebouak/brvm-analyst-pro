@@ -14,6 +14,7 @@ function frais(sur: Partial<DonneesFraicheur> = {}): DonneesFraicheur {
     collecteIntraday: '2026-11-03T15:50:00Z',
     signaux: '2026-11-03',
     liquidite: '2026-11-03',
+    conseiller: '2026-11-03',
     carnet: '2026-11-03',
     video: '2026-11-03',
     calendrierDividendes: { lignes: 34, exercice: 2025, dateDocument: '2026-10-09' },
@@ -103,6 +104,7 @@ describe('evaluerDonnees — ensemble', () => {
       [
         'donnees:carnet',
         'donnees:cloture',
+        'donnees:conseiller',
         'donnees:cours',
         'donnees:dividendes-calendrier',
         'donnees:indices',
@@ -173,6 +175,17 @@ describe('cours de clôture (séances)', () => {
     expect(sig(s, 'donnees:indices').niveau).toBe('attention');
     expect(sig(s, 'donnees:signaux').niveau).toBe('alerte');
     expect(sig(s, 'donnees:liquidite').niveau).toBe('attention');
+  });
+});
+
+describe('positions du Conseiller', () => {
+  it('une date en retard de 2 séances donne une alerte', () => {
+    const s = evaluerDonnees(frais({ conseiller: '2026-10-30' }), SOIR);
+    expect(sig(s, 'donnees:conseiller').niveau).toBe('alerte');
+  });
+  it('à jour → ok ; sans donnée → alerte', () => {
+    expect(sig(evaluerDonnees(frais(), SOIR), 'donnees:conseiller').niveau).toBe('ok');
+    expect(sig(evaluerDonnees(frais({ conseiller: null }), SOIR), 'donnees:conseiller').niveau).toBe('alerte');
   });
 });
 
