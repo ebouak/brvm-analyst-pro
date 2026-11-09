@@ -274,3 +274,41 @@ deux fois) :
 
 Aucune donnée personnelle n'est collectée ni traitée : uniquement des données
 de marché et des comptes publiés.
+
+## 11. Amendement du 2026-11-09 — après l'audit, AVANT toute mesure de performance
+
+L'audit (`docs/conseiller/audit-donnees.md`) et l'échec du calcul d'EMD ont été
+lus. Aucun rendement, aucune moyenne ni aucun signe d'écart n'a été calculé.
+Décisions de l'exploitant et règles qui en découlent :
+
+1. **Test confirmatoire = cœur prix.** Les comptes ne couvrent presque aucune
+   société avant l'exercice 2020 (≤ 3 valeurs avant 2019, 14 en 2020, 44-47
+   ensuite). La règle à 5 familles ne peut donc rien recommander avant mi-2021
+   (≈ 65 dates). Le test confirmatoire porte sur la règle **cœur prix**
+   (familles tendance et risque, 1998-2026) :
+   - Acheter si tendance ≥ +1/3 ET risque ≥ +1/3 ;
+   - Vendre si tendance ≤ −1/3 ET risque ≤ −1/3 ;
+   - sinon Conserver ;
+   - même garde-fou de liquidité ; famille manquante → Conserver (abstention).
+   La règle à 5 familles est mesurée **à titre descriptif** à partir du
+   2021-07-01, sans valeur de preuve. Le Conseiller affiche les fondamentaux
+   comme contexte tant qu'ils ne sont pas prouvés. Réévaluation annuelle.
+2. **Erreurs de saisie (allers-retours).** Une séance dont le cours sort de
+   [×0,625 ; ×1,6] par rapport à la précédente, et qui revient dans les 5 séances
+   suivantes à ±10 % du cours d'avant le saut, est une erreur de saisie. Les
+   séances concernées sont retirées de la série et traitées comme non cotées.
+   Cas d'origine : ONTBF 2014-2018, SIVC, SLBC, SGBC, PRSC.
+3. **Ruptures non expliquées.** Une variation hors de [×0,8 ; ×1,25] en une
+   séance, après nettoyage, dépasse la limite de cotation. Si aucun dividende
+   détaché ce jour-là n'en explique la baisse à ±20 %, c'est une **rupture**
+   (fractionnement non ajusté ou autre opération sur titres). Tout rendement du
+   banc dont la fenêtre ]entrée ; sortie] contient une rupture est exclu
+   (`null`). Toute fenêtre de tendance, de volatilité ou de plus forte baisse qui
+   en contient une donne `null`. Rien n'est ajusté ni deviné. Cas d'origine :
+   PALC le 2017-11-06 (÷2 durable, volume ×17).
+4. **Reconstitution des détachements élargie** : recherche du 1er avril au
+   31 décembre N+1, au lieu de 60 séances. Cas d'origine : FTSC, dividende de
+   l'exercice 2024 (1 726,56 FCFA), détaché le 2025-09-26 (−1 575 FCFA).
+5. **Plancher de liquidité du banc** : présence seule (< 50 % → D). Le critère
+   « activité nulle » (< 2 M FCFA par séance) est écarté, car il aurait vidé
+   l'historique ancien sans viser les cours figés.
