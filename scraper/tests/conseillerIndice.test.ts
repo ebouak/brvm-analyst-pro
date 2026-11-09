@@ -24,3 +24,14 @@ describe('indiceEquipondere', () => {
     expect(perfIndice(ind, cal, cal[22]!, cal[25]!)).toBeCloseTo(1.01 ** 3 - 1, 6);
   });
 });
+
+describe('indiceEquipondere — cours nul', () => {
+  it('saute l observation quand un cours est à 0', () => {
+    const cal = calendrier(30);
+    const a = serie(cal, cal.map((_, i) => (i === 25 ? 0 : 100)));
+    const ind = indiceEquipondere({ calendrier: cal, series: new Map([['A', a]]), comptes: [], dividendes: [], familles: new Map() });
+    expect(ind.rendements.has(cal[25]!)).toBe(false);
+    expect(ind.rendements.has(cal[26]!)).toBe(false);
+    for (const v of ind.rendements.values()) expect(Number.isFinite(v)).toBe(true);
+  });
+});

@@ -19,6 +19,8 @@ export function indiceEquipondere(d: Donnees): Indice {
   for (const serie of d.series.values()) {
     for (let i = Math.max(1, ENTREE_APRES_SEANCES); i < serie.dates.length; i++) {
       if ((serie.volumes[i] ?? 0) <= 0) continue;
+      // Un cours nul est un trou de collecte, pas un cours.
+      if (serie.cours[i - 1]! <= 0 || serie.cours[i]! <= 0) continue;
       const r = serie.cours[i]! / serie.cours[i - 1]! - 1;
       const date = serie.dates[i]!;
       const acc = sommes.get(date) ?? { s: 0, n: 0 };
