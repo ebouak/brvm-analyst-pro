@@ -1,5 +1,7 @@
 import { bootstrapIid, bootstrapStationnaire, moyenne, quantile, testSigne } from './stats.js';
 import { evaluerSeance } from './evaluerSeance.js';
+import { scoresFamilles } from './facteurs.js';
+import { classeA } from './liquiditeGlissante.js';
 import { perfIndice, type Indice } from './indice.js';
 import { rendementTotal } from './dividendes.js';
 import { FAMILLES_FACTEURS, type Donnees, type FamilleFacteur } from './types.js';
@@ -59,7 +61,7 @@ export function construirePaniers(d: Donnees, ind: Indice, o: OptionsBanc): {
   paniers: Panier[]; conserves: Map<string, { total: number; conserver: number }>; exclues: number;
 } {
   const h = o.horizon ?? PROTOCOLE.horizon;
-  const dates = datesRebalancement(d.calendrier, o.debut, PROTOCOLE.horizon).filter((x) => !o.fin || x <= o.fin);
+  const dates = datesRebalancement(d.calendrier, o.debut, h);
   const paniers: Panier[] = [];
   const conserves = new Map<string, { total: number; conserver: number }>();
   let exclues = 0;
@@ -68,12 +70,16 @@ export function construirePaniers(d: Donnees, ind: Indice, o: OptionsBanc): {
     const entree = d.calendrier[iCal + 1];
     const sortie = d.calendrier[iCal + 1 + h];
     if (!entree || !sortie) continue;
+    if (o.fin && sortie > o.fin) continue;
     const marche = perfIndice(ind, d.calendrier, entree, sortie);
     const panier: Panier = { date, achats: [], ventes: [] };
     const an = date.slice(0, 4);
     const acc = conserves.get(an) ?? { total: 0, conserver: 0 };
-    for (const dec of evaluerSeance(d, ind, date)) {
-      if (o.exclureCD && dec.raison === 'liquidite') continue;
+    // exclureCD : les valeurs C/D sortent de l'univers de classement (rangs et médianes).
+    const univers = o.exclureCD
+      ? (code: string) => { const c = classeA(d.series.get(code)!, d.calendrier, date); return c === 'A' || c === 'B'; }
+      : undefined;
+    for (const dec of evaluerSeance(d, ind, date, univers)) {
       const s = d.series.get(dec.code)!;
       const p = s.pos.get(date)!;
       if (o.exclureLimite && Math.abs(s.variations[p] ?? 0) >= PROTOCOLE.limiteVariation) continue;
@@ -102,14 +108,14 @@ export function ecartsFamille(d: Donnees, ind: Indice, debut: string, f: Famille
     const marche = perfIndice(ind, d.calendrier, entree, sortie);
     const haut: number[] = [];
     const bas: number[] = [];
-    for (const dec of evaluerSeance(d, ind, date)) {
-      const v = dec.scores[f];
+    for (const [code, sc] of scoresFamilles(d, ind, date)) {
+      const v = sc[f];
       if (v == null) continue;
-      const s = d.series.get(dec.code)!;
+      const s = d.series.get(code)!;
       const a = s.pos.get(entree);
       const b = s.pos.get(sortie);
       if (a == null || b == null) continue;
-      const r = rendementTotal(s, dec.code, d.dividendes, a, b);
+      const r = rendementTotal(s, code, d.dividendes, a, b);
       if (r == null) continue;
       if (v >= 1 / 3) haut.push(r - marche);
       else if (v <= -1 / 3) bas.push(r - marche);

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { datesRebalancement, ecartsParDate, verdictBanc, PROTOCOLE } from '../src/conseiller/banc.js';
-import { calendrier } from './conseillerFabrique.js';
+import { datesRebalancement, ecartsParDate, verdictBanc, construirePaniers, PROTOCOLE } from '../src/conseiller/banc.js';
+import { indiceEquipondere } from '../src/conseiller/indice.js';
+import { calendrier, univers } from './conseillerFabrique.js';
 
 describe('datesRebalancement', () => {
   it('prend une date toutes les 20 séances, avec 21 séances de recul à la fin', () => {
@@ -32,5 +33,43 @@ describe('verdictBanc', () => {
   });
   it('« insuffisant » sous 30 dates', () => {
     expect(verdictBanc([0.1, 0.1, 0.1]).verdict).toBe('insuffisant');
+  });
+});
+
+describe('construirePaniers', () => {
+  const pentes = Array.from({ length: 20 }, (_, k) => (k - 10) / 20);
+
+  it('espace les dates de l horizon choisi (60 séances sans chevauchement)', () => {
+    const d = univers(400, pentes);
+    const { paniers } = construirePaniers(d, indiceEquipondere(d), { debut: d.calendrier[0]!, horizon: 60 });
+    const idx = paniers.map((p) => d.calendrier.indexOf(p.date));
+    expect(idx.length).toBeGreaterThan(2);
+    for (let i = 1; i < idx.length; i++) expect(idx[i]! - idx[i - 1]!).toBeGreaterThanOrEqual(60);
+  });
+
+  it('ignore une date dont la sortie dépasse la fin demandée', () => {
+    const d = univers(300, pentes);
+    const fin = d.calendrier[100]!;
+    const { paniers } = construirePaniers(d, indiceEquipondere(d), { debut: d.calendrier[0]!, fin });
+    expect(paniers.length).toBeGreaterThan(0);
+    for (const p of paniers) expect(d.calendrier.indexOf(p.date) + 1 + PROTOCOLE.horizon).toBeLessThanOrEqual(100);
+  });
+
+  it('exclureCD retire les valeurs C/D de l univers au lieu de les compter en Conserver', () => {
+    const d = univers(200, pentes);
+    for (const v of d.series.values()) {
+      v.volumes = v.volumes.map(() => 100000);
+      v.valeurs = v.cours.map((c) => c * 100000);
+    }
+    for (const code of ['V15', 'V16', 'V17', 'V18', 'V19']) {
+      const v = d.series.get(code)!;
+      for (let i = 0; i < v.volumes.length; i++) if (i % 10 !== 0) { v.volumes[i] = 0; v.valeurs[i] = 0; }
+    }
+    const ind = indiceEquipondere(d);
+    const opts = { debut: d.calendrier[150]!, fin: d.calendrier[199]! };
+    const avec = construirePaniers(d, ind, opts).conserves.get('2020')!;
+    const sans = construirePaniers(d, ind, { ...opts, exclureCD: true }).conserves.get('2020')!;
+    expect(avec.total).toBeGreaterThan(sans.total);
+    expect(sans.total).toBe(avec.total - 5 * (avec.total / 20));
   });
 });
