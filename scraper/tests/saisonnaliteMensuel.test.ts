@@ -79,6 +79,19 @@ describe('faitsMensuels', () => {
     expect(mai.evenements).toEqual([{ type: 'detachement', date: '2025-05-16' }]);
   });
 
+  it('les autres événements sont rangés dans leur mois, triés par date', () => {
+    const s = serie(base);
+    const fs = faitsMensuels({
+      code: 'X', serie: s, calendrier: cal(s), dividendes: [], ruptures: new Set(), anneesDifficiles: new Set(), asOf: '2025-06-01',
+      autres: [{ type: 'convocation_ag', date: '2025-03-20' }, { type: 'comptes_annuels', date: '2025-03-02' }],
+    });
+    expect(ligne(fs, 2025, 3).evenements).toEqual([
+      { type: 'comptes_annuels', date: '2025-03-02' },
+      { type: 'convocation_ag', date: '2025-03-20' },
+    ]);
+    expect(ligne(fs, 2025, 2).evenements).toEqual([]);
+  });
+
   it('rupture non expliquée dans le mois : exclu « saut », aucun rendement', () => {
     const s = serie([['2025-01-31', 100, 10], ['2025-02-10', 40, 10], ['2025-02-28', 42, 10]]);
     const fs = faitsMensuels({ code: 'X', serie: s, calendrier: cal(s), dividendes: [], ruptures: new Set(['2025-02-10']), anneesDifficiles: new Set(), asOf: '2025-06-01' });
@@ -104,6 +117,15 @@ describe('anneesDifficiles', () => {
     // Payé pour 2019, rien pour 2020 (détachement attendu en 2021), payé à nouveau pour 2021.
     const r = anneesDifficiles([comptes(2020, 5)], [div(2019), div(2021)]);
     expect([...r]).toEqual([2021]);
+  });
+
+  it('suspension et avertissement marquent leur année', () => {
+    const r = anneesDifficiles([], [], [
+      { type: 'suspension', date: '2011-05-26' },
+      { type: 'avertissement', date: '2019-09-02' },
+      { type: 'convocation_ag', date: '2020-04-02' },
+    ]);
+    expect([...r].sort()).toEqual([2011, 2019]);
   });
 
   it('pas de suppression déclarée au-delà du dernier exercice connu', () => {

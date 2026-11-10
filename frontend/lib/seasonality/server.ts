@@ -15,6 +15,8 @@ export interface FaitLu {
   rdtMarche: number | null;
   dividende: number | null;
   detachements: string[];
+  /** Tous les événements datés du mois (détachement, comptes, convocation, suspension…). */
+  evenements: { type: string; date: string }[];
   exclu: string | null;
   difficulte: boolean;
   complet: boolean;
@@ -44,6 +46,7 @@ export const lireFaits = cache(async (code: string): Promise<FaitLu[]> => {
         annee: r.annee, mois: r.mois,
         rdtPrix: num(r.rdt_prix), rdtTotal: num(r.rdt_total), rdtMarche: num(r.rdt_marche), dividende: num(r.dividende),
         detachements: (r.evenements ?? []).filter((e) => e.type === 'detachement').map((e) => e.date),
+        evenements: r.evenements ?? [],
         exclu: r.exclu, difficulte: r.difficulte, complet: r.complet,
       });
     }
@@ -187,4 +190,48 @@ export const lireMarcheMensuel = cache(async (): Promise<MonthlyReturn[]> => {
     if (lot.length < PAGE) break;
   }
   return [...vus.values()];
+});
+
+/** Une ligne de `saisonnalite_fenetres` (migration 0207). */
+export interface PointFenetreLu { rang: number; moyenne: number | null; mediane: number | null; partPositifs: number | null; n: number }
+export interface FenetresValeur {
+  /** Par type d'événement : parcours de la valeur (absent si aucune fenêtre écrite). */
+  valeur: Record<string, PointFenetreLu[]>;
+  /** Par type d'événement : parcours de l'ensemble du marché. */
+  marche: Record<string, PointFenetreLu[]>;
+}
+
+/** Fenêtres d'événement de la valeur et du marché (MARCHE). Vide si la table l'est. */
+export const lireFenetres = cache(async (code: string): Promise<FenetresValeur> => {
+  const sb = createPublicClient();
+  const out: FenetresValeur = { valeur: {}, marche: {} };
+  const { data, error } = await sb
+    .from('saisonnalite_fenetres')
+    .select('code, type_evenement, rang, moyenne, mediane, part_positifs, n')
+    .in('code', [code.toUpperCase(), 'MARCHE'])
+    .order('type_evenement').order('rang')
+    .limit(2000);
+  if (error) return out;
+  for (const r of (data ?? []) as { code: string; type_evenement: string; rang: number; moyenne: number | null; mediane: number | null; part_positifs: number | null; n: number }[]) {
+    const cible = r.code === 'MARCHE' ? out.marche : out.valeur;
+    (cible[r.type_evenement] ??= []).push({ rang: r.rang, moyenne: num(r.moyenne), mediane: num(r.mediane), partPositifs: num(r.part_positifs), n: r.n });
+  }
+  return out;
+});
+
+/** Prochain détachement déjà connu (date à venir dans `dividends`), sinon null. */
+export const prochainDetachement = cache(async (code: string, aujourdhui: string = new Date().toISOString().slice(0, 10)) => {
+  const sb = createPublicClient();
+  const { data, error } = await sb
+    .from('dividends')
+    .select('ex_date, montant')
+    .eq('code', code.toUpperCase())
+    .gt('ex_date', aujourdhui)
+    .gt('montant', 0)
+    .order('ex_date')
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  const d = data as { ex_date: string; montant: number };
+  return { date: d.ex_date, montant: Number(d.montant) };
 });

@@ -10,9 +10,10 @@
  */
 import { rendementTotal } from '../conseiller/dividendes.js';
 import type { ComptesAnnuels, Dividende, Serie } from '../conseiller/types.js';
+import type { Evenement } from './evenements.js';
 
 export type Exclusion = 'sans_echange' | 'reprise' | 'saut';
-export interface Evenement { type: 'detachement'; date: string }
+export type { Evenement };
 
 /** Une ligne de `saisonnalite_mensuelle` (colonnes de la migration 0206). */
 export interface FaitMensuel {
@@ -55,6 +56,8 @@ export interface EntreeMensuelle {
   anneesDifficiles: Set<number>;
   /** Date du calcul (AAAA-MM-JJ) ; son mois est marqué incomplet. */
   asOf: string;
+  /** Autres événements datés (comptes, convocations, suspensions…), lot 3. */
+  autres?: Evenement[];
 }
 
 /**
@@ -120,7 +123,10 @@ export function faitsMensuels(e: EntreeMensuelle): FaitMensuel[] {
       seances_marche: seancesMarche.get(m) ?? 0,
       valeur_echangee: idx.reduce((t, i) => t + (s.valeurs[i] ?? 0), 0),
       exclu,
-      evenements: detaches.map((d) => ({ type: 'detachement' as const, date: d.exDate! })),
+      evenements: [
+        ...detaches.map((d) => ({ type: 'detachement' as const, date: d.exDate! })),
+        ...(e.autres ?? []).filter((x) => cleMois(x.date) === m),
+      ].sort((x, y) => x.date.localeCompare(y.date)),
       difficulte: e.anneesDifficiles.has(annee),
       complet: m < moisAsOf,
     });
@@ -129,15 +135,16 @@ export function faitsMensuels(e: EntreeMensuelle): FaitMensuel[] {
 }
 
 /**
- * Années calendaires de difficulté d'une valeur (lot 2 : deux critères sur quatre ;
- * suspension et avertissement viendront au lot 3 avec les événements).
+ * Années calendaires de difficulté d'une valeur (les quatre critères de la spec) :
  * - résultat net négatif de l'exercice E → année E ;
+ * - suspension de cotation ou avertissement sur résultat → année de l'événement ;
  * - dividende supprimé : payé pour E − 1, rien pour E, alors que la table couvre
  *   E (un exercice postérieur y figure) → année E + 1, celle du détachement manqué.
  *   Sans exercice postérieur, l'absence peut n'être qu'un trou de la table.
  */
-export function anneesDifficiles(comptes: ComptesAnnuels[], dividendes: Dividende[]): Set<number> {
+export function anneesDifficiles(comptes: ComptesAnnuels[], dividendes: Dividende[], evenements: Evenement[] = []): Set<number> {
   const out = new Set<number>();
+  for (const ev of evenements) if (ev.type === 'suspension' || ev.type === 'avertissement') out.add(Number(ev.date.slice(0, 4)));
   for (const c of comptes) if (c.resultatNet != null && c.resultatNet < 0) out.add(c.exercice);
   const payes = new Set(dividendes.filter((d) => d.montant > 0).map((d) => d.exercice));
   if (payes.size > 0) {
