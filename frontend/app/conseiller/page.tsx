@@ -7,6 +7,9 @@ import { MyPortfolioAdvice } from '@/components/advisor/MyPortfolioAdvice';
 import { LectureApprofondie, LectureApprofondieVerrouillee } from '@/components/conseiller/LectureApprofondie';
 import { chargerLecturesApprofondies } from '@/lib/conseiller/lectureApprofondie';
 import { Jauges } from '@/components/conseiller/Jauges';
+import { SignalPremium } from '@/components/conseiller/SignalPremium';
+import { lireSignaux } from '@/lib/conseiller/lectureSignal';
+import { moisProchaineRevision } from '@/lib/conseiller/signal';
 import { canAccess } from '@/lib/server/featureAccess';
 import { AccessGate } from '@/components/premium/AccessGate';
 import { FAMILLES } from '@/lib/conseiller/facteurs';
@@ -73,6 +76,11 @@ export default async function ConseillerPage() {
     ? await chargerLecturesApprofondies(lignes.map((l) => l.code), date, new Date().toISOString().slice(0, 10)).catch(() => null)
     : null;
 
+  // Signal « tendance longue » : drapeau DÉCLARÉ et ouvert seulement (le filet « non déclaré = premium » ne suffit pas ici).
+  // Coupé, non déclaré ou illisible : rien n'est chargé ni affiché.
+  const gateSignal = await canAccess('conseiller_signal');
+  const signaux = gateSignal.allowed && !gateSignal.undeclared ? await lireSignaux(date).catch(() => null) : null;
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <EnTeteCote
@@ -107,6 +115,21 @@ export default async function ConseillerPage() {
         Lecture des facteurs, non testée : ce n&apos;est ni un conseil ni une décision. Le banc a montré qu&apos;on ne peut pas prouver qu&apos;elle bat le marché.
       </p>
 
+      {signaux && (
+        <section aria-labelledby="t-signal" className="mt-6 rounded-card border border-border bg-surface p-5">
+          <h3 id="t-signal" className="font-display text-lg text-ivory">Signal tendance longue</h3>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            Chaque carte porte un état tiré du parcours de la valeur sur 120 et 250 séances, comparé au reste de la cote. Le seul écart mesuré sur l&apos;historique concerne l&apos;état « À éviter » ; cette mesure est exploratoire et sa confirmation, sur les séances postérieures au 10 novembre 2026, ne sera pas lue avant novembre 2031.
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            État du <span className="tabular">{fmtDateCourte(signaux.date)}</span>, révisé à la première séance de chaque mois (prochaine révision : {moisProchaineRevision(date)}). Horizon : trois mois. Signal général, identique pour tous les abonnés : il ne tient compte ni de votre portefeuille ni de votre situation, et n&apos;est pas un conseil en investissement.{' '}
+            <Link href="/conseiller/track-record" className="text-accent-ink underline underline-offset-2 hover:no-underline">
+              Méthode et protocole
+            </Link>
+          </p>
+        </section>
+      )}
+
       {GROUPES.map((g) => {
         const membres = lignes
           .filter((l) => profilDe(l.tiers) === g.profil)
@@ -131,6 +154,7 @@ export default async function ConseillerPage() {
                   <div className="mt-3">
                     <Jauges scores={l.scores} tiers={l.tiers} />
                   </div>
+                  {signaux && <SignalPremium signal={signaux.parCode.get(l.code)} />}
                   {gateApprofondie.allowed ? (
                     lectures?.get(l.code) ? <LectureApprofondie lecture={lectures.get(l.code)!} tiers={l.tiers} /> : <p className="mt-3 border-t border-border pt-3 text-sm text-muted">Donnée momentanément illisible</p>
                   ) : <LectureApprofondieVerrouillee />}
