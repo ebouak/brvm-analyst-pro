@@ -31,7 +31,7 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
     <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
       <EnTeteCote
         titre="Saisonnalité"
-        description="La performance moyenne d’un titre, mois par mois, sur plusieurs années. Une lecture statistique, à croiser avec la tendance, la liquidité et le dividende."
+        description="L’habitude d’un titre, mois par mois, et sa fiabilité mesurée. Une saison est une habitude du passé, pas une prévision."
         compte={instruments.length > 0 ? { n: instruments.length, libelle: 'titres' } : null}
         source={null}
       />
@@ -75,8 +75,11 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
           <SeasonalityMatrix returns={returns} preview={preview} />
         </div>
         <LigneSource>
-          Calcul sur l’historique réel des cours de clôture de la BRVM (15 ans au plus). Lecture statistique : un mois
-          favorable par le passé ne dit rien de l’année en cours. Ce n’est pas un conseil en investissement.{' '}
+          Rendement médian de chaque mois calendaire, sur les cours de clôture de la BRVM (15 ans au plus), dividendes
+          non réintégrés : un mois de détachement paraît donc plus faible qu’il ne l’est. Le mois en cours, inachevé, et
+          les mois sans échange sont exclus. La fiabilité de chaque mois est calculée : la plupart des régularités par
+          valeur ne se distinguent pas du hasard et ne se sont pas répétées l’année suivante. Ce n’est pas un conseil en
+          investissement.{' '}
           <Link href="/outils" className="underline underline-offset-2 hover:text-muted">Tous les outils</Link>
         </LigneSource>
       </section>

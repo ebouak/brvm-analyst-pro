@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
+import { aggregateSeasonality, marketMonthlyReturns, monthlyReturnsFromPrices, type DailyClose, type Verdict } from '@/lib/seasonality/compute';
 
 export interface ActionProcheBas {
   code: string;
@@ -15,10 +16,14 @@ export interface ActionProcheBas {
 export interface MoisSaisonnalite {
   mois: number;           // 1-12
   nom_mois: string;
+  /** Années où le mois a fini en hausse / en baisse (moyenne équipondérée du marché). */
   nb_hausses: number;
   nb_baisses: number;
   perf_moyenne: number;   // en %
-  taux_hausse: number;    // en %
+  perf_mediane: number;   // en % — valeur principale
+  taux_hausse: number;    // en % des années
+  n: number;              // années observées
+  verdict: Verdict;       // fiabilité calculée (lib/seasonality/compute)
 }
 
 export interface ReactionEtatFinancier {
@@ -120,39 +125,29 @@ export async function getOutilsData(): Promise<OutilsData> {
       .range(from, to),
   );
 
-  // Compute monthly average variation per stock, then aggregate
-  const moisStats: Record<number, { hausses: number; baisses: number; somme: number; count: number }> = {};
-  for (let m = 1; m <= 12; m++) moisStats[m] = { hausses: 0, baisses: 0, somme: 0, count: 0 };
-
-  const byCodeChron = new Map<string, { date: string; cours: number }[]>();
+  // Même calcul que /saisonnalite (lib/seasonality/compute), appliqué à la
+  // moyenne équipondérée du marché : rendements MENSUELS par valeur, mois en
+  // cours et mois sans échange exclus, écrêtage à ±30 %. L'ancien calcul
+  // (variations quotidiennes de tous les titres mélangées) est retiré.
+  const byCodeChron = new Map<string, DailyClose[]>();
   for (const r of histAll) {
+    if (!r.cours_cloture) continue;
     if (!byCodeChron.has(r.code)) byCodeChron.set(r.code, []);
-    byCodeChron.get(r.code)!.push({ date: r.date_marche, cours: r.cours_cloture as number });
+    byCodeChron.get(r.code)!.push({ date: r.date_marche, close: r.cours_cloture });
   }
-
-  for (const series of byCodeChron.values()) {
-    for (let i = 1; i < series.length; i++) {
-      const prev = series[i - 1]!;
-      const curr = series[i]!;
-      if (!prev.cours || !curr.cours) continue;
-      const mois = new Date(curr.date).getMonth() + 1;
-      const var_pct = ((curr.cours - prev.cours) / prev.cours) * 100;
-      moisStats[mois]!.somme += var_pct;
-      moisStats[mois]!.count++;
-      if (var_pct > 0) moisStats[mois]!.hausses++;
-      else if (var_pct < 0) moisStats[mois]!.baisses++;
-    }
-  }
-
-  const saisonnalite: MoisSaisonnalite[] = Object.entries(moisStats).map(([m, s]) => {
-    const total = s.hausses + s.baisses;
+  const marche = marketMonthlyReturns([...byCodeChron.values()].map((serie) => monthlyReturnsFromPrices(serie)));
+  const saisonnalite: MoisSaisonnalite[] = aggregateSeasonality(marche, 5).matrix.map((m) => {
+    const hausses = Math.round((m.bullPct / 100) * m.n);
     return {
-      mois: parseInt(m),
-      nom_mois: MOIS_FR[parseInt(m) - 1]!,
-      nb_hausses: s.hausses,
-      nb_baisses: s.baisses,
-      perf_moyenne: s.count > 0 ? s.somme / s.count : 0,
-      taux_hausse: total > 0 ? (s.hausses / total) * 100 : 50,
+      mois: m.month,
+      nom_mois: MOIS_FR[m.month - 1]!,
+      nb_hausses: hausses,
+      nb_baisses: m.n - hausses,
+      perf_moyenne: m.avgReturn * 100,
+      perf_mediane: m.medianReturn * 100,
+      taux_hausse: m.bullPct,
+      n: m.n,
+      verdict: m.verdict,
     };
   });
 
