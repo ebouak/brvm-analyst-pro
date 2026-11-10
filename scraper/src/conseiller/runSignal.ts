@@ -7,6 +7,33 @@ import { CONFIRMATION, ecartsCohortes, lireConfirmation, resumer, type EtatValeu
 const COLONNES = 'date_marche, code, etat, score, eligible, perf_120, perf_250, rang_120, rang_250, presence_60, effectif, revision, moteur_version';
 
 /**
+ * Écart de score toléré entre le calcul et la relecture. PostgREST renvoie un
+ * double précision sur 15 chiffres significatifs, JavaScript en garde 17 : un
+ * score relu peut différer au 16e chiffre (constaté le 2026-11-10, écart 4,4e-16
+ * sur BOAN). Le score vit dans [−1, 1] : 1e-9 ne masque aucun vrai changement.
+ */
+export const TOLERANCE_SCORE = 1e-9;
+
+/**
+ * Codes dont la ligne relue diffère du calcul (état, éligibilité, ou score au-delà
+ * de TOLERANCE_SCORE), ou relus sans calcul correspondant. Fonction pure.
+ */
+export function lignesDivergentes(
+  calculees: Pick<LigneSignal, 'code' | 'etat' | 'score' | 'eligible'>[],
+  relues: Pick<LigneSignal, 'code' | 'etat' | 'score' | 'eligible'>[],
+): string[] {
+  const parCode = new Map(calculees.map((l) => [l.code, l]));
+  const scoreDiffere = (a: number | null, b: number | null) =>
+    a == null || b == null ? a !== b : Math.abs(a - b) > TOLERANCE_SCORE;
+  return relues
+    .filter((r) => {
+      const c = parCode.get(r.code);
+      return !c || c.etat !== r.etat || c.eligible !== r.eligible || scoreDiffere(c.score, r.score);
+    })
+    .map((r) => r.code);
+}
+
+/**
  * Signal « tendance longue » de la dernière séance.
  * Sans `ecrire` : calcul et contrôle à blanc. Avec `ecrire` : insertion sur
  * (date_marche, code), la première écriture faisant foi (doublons ignorés), puis
@@ -46,13 +73,7 @@ export async function runSignaux(ecrire: boolean): Promise<{ date: string; ligne
   if (anomalies.length) throw new Error(`conseiller:signaux : contrôle sur la donnée relue — ${anomalies.join(' ; ')}`);
   // Une séance déjà écrite AUTREMENT (état, score ou éligibilité différents du calcul
   // de ce soir) se résout par un humain : on le dit et on s'arrête, sans réécrire.
-  const calculees = new Map(lignes.map((l) => [l.code, l]));
-  const divergentes = ((relues ?? []) as LigneSignal[])
-    .filter((r) => {
-      const c = calculees.get(r.code);
-      return !c || c.etat !== r.etat || c.score !== r.score || c.eligible !== r.eligible;
-    })
-    .map((r) => r.code);
+  const divergentes = lignesDivergentes(lignes, (relues ?? []) as LigneSignal[]);
   if (divergentes.length) {
     logger.error({ date, codes: divergentes }, 'conseiller:signaux : séance déjà écrite avec un contenu différent, rien réécrit');
     throw new Error(`conseiller:signaux : séance ${date} déjà écrite autrement pour ${divergentes.join(', ')} — à résoudre par un humain`);
