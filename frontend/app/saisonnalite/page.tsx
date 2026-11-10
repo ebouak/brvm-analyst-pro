@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
-import { getMonthlyReturns } from '@/lib/seasonality/server';
+import { getSaisonValeur } from '@/lib/seasonality/server';
+import ConfrontationMois, { phraseConfrontation } from '@/components/seasonality/ConfrontationMois';
 import SeasonalityMatrix from '@/components/seasonality/SeasonalityMatrix';
 import { canAccess } from '@/lib/server/featureAccess';
 import { EnTeteCote } from '@/components/marche/EnTeteCote';
@@ -24,7 +25,7 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
   const instruments = (instr ?? []) as { code: string; designation: string | null; type: string }[];
 
   const code = (searchParams?.code ?? instruments[0]?.code ?? 'PALC').toUpperCase();
-  const returns = await getMonthlyReturns(code).catch(() => []);
+  const saison = await getSaisonValeur(code).catch(() => null);
   const designation = instruments.find((i) => i.code === code)?.designation ?? null;
 
   return (
@@ -71,15 +72,30 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
           <span className="font-mono">{code}</span>
           {designation && <span className="text-ivory/90">, {designation}</span>}
         </h2>
+        {/* F1 : le mois en cours face à son habitude. En aperçu, la phrase seule. */}
+        {saison?.confrontation && (
+          <div className="mt-4 rounded-panel border border-border bg-surface p-4">
+            {preview
+              ? <p className="text-sm text-ivory">{phraseConfrontation(saison.confrontation)}</p>
+              : <ConfrontationMois c={saison.confrontation} />}
+          </div>
+        )}
         <div className="mt-4">
-          <SeasonalityMatrix returns={returns} preview={preview} />
+          <SeasonalityMatrix
+            returns={saison?.total ?? []}
+            returnsPrix={saison?.source === 'table' ? saison.prix : undefined}
+            anneesDifficiles={saison?.anneesDifficiles ?? []}
+            detachementsParMois={saison?.detachementsParMois}
+            faits={saison?.faits ?? []}
+            preview={preview}
+          />
         </div>
         <LigneSource>
-          Rendement médian de chaque mois calendaire, sur les cours de clôture de la BRVM (15 ans au plus), dividendes
-          non réintégrés : un mois de détachement paraît donc plus faible qu’il ne l’est. Le mois en cours, inachevé, et
-          les mois sans échange sont exclus. La fiabilité de chaque mois est calculée : la plupart des régularités par
-          valeur ne se distinguent pas du hasard et ne se sont pas répétées l’année suivante. Ce n’est pas un conseil en
-          investissement.{' '}
+          Rendement médian de chaque mois calendaire, sur les cours de clôture de la BRVM (15 ans au plus), dividende
+          réinvesti par défaut : en cours seul, un mois de détachement paraît plus faible qu’il ne l’est. Le mois en cours,
+          inachevé, les mois sans échange, les reprises et les variations non expliquées sont exclus. La fiabilité de chaque
+          mois est calculée : la plupart des régularités par valeur ne se distinguent pas du hasard et ne se sont pas
+          répétées l’année suivante. Ce n’est pas un conseil en investissement.{' '}
           <Link href="/outils" className="underline underline-offset-2 hover:text-muted">Tous les outils</Link>
         </LigneSource>
       </section>

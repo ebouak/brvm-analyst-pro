@@ -14,6 +14,7 @@
  *   dividends         — informatif : nb de dividendes ingérés dans les dernières 24h
  *   dividends-calendrier — bloquant : ≥ 20 dividendes du calendrier officiel datés (2 derniers exercices)
  *   alerts            — informatif : nb de notifications d'alertes envoyées dans les dernières 24h
+ *   saisonnalite      — bloquant : le mois incomplet de saisonnalite_mensuelle est celui de la dernière séance, datée de 4 jours au plus
  */
 import { createClient } from '@supabase/supabase-js';
 import { appendFileSync } from 'node:fs';
@@ -120,6 +121,40 @@ async function main(): Promise<void> {
         process.exit(1);
       }
       console.log(`✅ ${count} signaux calculés depuis ${since}`);
+      break;
+    }
+
+    case 'saisonnalite': {
+      // La table doit suivre la DERNIÈRE SÉANCE (pas l'horloge) et cette séance
+      // doit être récente : un run vert sur des cours périmés ne prouve rien.
+      const { data: der, error: e1 } = await client
+        .from('brvm_actions_daily').select('date_marche').order('date_marche', { ascending: false }).limit(1).maybeSingle();
+      if (e1 || !der) {
+        console.error('❌ Dernière séance illisible:', e1?.message ?? 'aucune ligne');
+        process.exit(1);
+      }
+      const seance = (der as { date_marche: string }).date_marche;
+      const age = Math.round((Date.parse(today!) - Date.parse(seance)) / 86_400_000);
+      if (age > 4) {
+        console.error(`❌ Dernière séance ${seance}, ${age} jours : cours périmés`);
+        process.exit(1);
+      }
+      const [annee, mois] = [Number(seance.slice(0, 4)), Number(seance.slice(5, 7))];
+      const { count, error: e2 } = await client
+        .from('saisonnalite_mensuelle').select('code', { count: 'exact', head: true })
+        .eq('complet', false).eq('annee', annee).eq('mois', mois);
+      const { count: autres, error: e3 } = await client
+        .from('saisonnalite_mensuelle').select('code', { count: 'exact', head: true })
+        .eq('complet', false).or(`annee.neq.${annee},mois.neq.${mois}`);
+      if (e2 || e3) {
+        console.error('❌ Échec requête:', (e2 ?? e3)!.message);
+        process.exit(1);
+      }
+      if ((count ?? 0) === 0 || (autres ?? 0) > 0) {
+        console.error(`❌ Mois incomplet attendu ${annee}-${mois} : ${count ?? 0} ligne(s) ; ${autres ?? 0} ligne(s) incomplète(s) sur un autre mois`);
+        process.exit(1);
+      }
+      console.log(`✅ saisonnalité à jour : ${count} valeurs sur le mois de la séance ${seance}`);
       break;
     }
 

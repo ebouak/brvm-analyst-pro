@@ -199,7 +199,7 @@ export default function OutilsCharts({
       {tab === 'saisonnalite' && (
         <div>
           <p className="text-xs text-muted mb-4">
-            Rendement mensuel médian du marché (moyenne équipondérée des actions cotées) sur les 5 dernières années, mois en cours exclu. Cinq années ne suffisent pas à établir une régularité : les barres grises ne se distinguent pas du hasard.
+            Rendement mensuel médian du marché (moyenne équipondérée des actions cotées, dividende réinvesti) sur les 15 dernières années, mois en cours exclu. Les barres grises ne se distinguent pas du hasard ; la colonne de droite compte les années en hausse.
           </p>
           <SaisonnaliteChart data={saisonnalite} />
         </div>
