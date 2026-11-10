@@ -148,9 +148,9 @@ export default async function BriefDatePage({ params }: PageProps) {
 
         {/* ── Fil d'Ariane ───────────────────────────────────────────── */}
         <nav aria-label="Fil d'Ariane" className="mb-4 flex items-center gap-2 text-xs text-muted print:hidden">
-          <Link href="/" className="hover:text-white transition-colors">Accueil</Link>
+          <Link href="/" className="hover:text-ivory transition-colors">Accueil</Link>
           <span className="text-faint">/</span>
-          <Link href="/brief" className="hover:text-white transition-colors">Brief</Link>
+          <Link href="/brief" className="hover:text-ivory transition-colors">Brief</Link>
           <span className="text-faint">/</span>
           <span className="text-ivory">{fmtDateCourte(brief.date_marche)}</span>
         </nav>
@@ -202,7 +202,7 @@ export default async function BriefDatePage({ params }: PageProps) {
                 .map((i) => (
                   <div key={i.code} className="bg-surface border border-border rounded-xl p-4">
                     <p className="text-xs text-faint mb-1">{i.code}</p>
-                    <p className="tabular text-lg text-white">{fmtNumber(i.valeur, 2)}</p>
+                    <p className="tabular text-lg text-ivory">{fmtNumber(i.valeur, 2)}</p>
                     {i.variation_pct != null && (
                       <p className={`tabular text-xs font-medium ${i.variation_pct >= 0 ? 'text-up' : 'text-down'}`}>
                         {i.variation_pct >= 0 ? '+' : ''}
@@ -214,13 +214,13 @@ export default async function BriefDatePage({ params }: PageProps) {
               {d.valeur_transactions != null && (
                 <div className="bg-surface border border-border rounded-xl p-4">
                   <p className="text-xs text-faint mb-1">Transactions</p>
-                  <p className="tabular text-lg text-white">{fmtFcfa(d.valeur_transactions)}</p>
+                  <p className="tabular text-lg text-ivory">{fmtFcfa(d.valeur_transactions)}</p>
                   <p className="text-xs text-muted">FCFA échangés</p>
                 </div>
               )}
               <div className="bg-surface border border-border rounded-xl p-4">
                 <p className="text-xs text-faint mb-1">Volume</p>
-                <p className="tabular text-lg text-white">{fmtNumber(d.volume_total)}</p>
+                <p className="tabular text-lg text-ivory">{fmtNumber(d.volume_total)}</p>
                 <p className="text-xs text-muted">titres</p>
               </div>
             </section>
@@ -247,13 +247,13 @@ export default async function BriefDatePage({ params }: PageProps) {
                 {d.capitalisation_actions != null && (
                   <div className="bg-surface border border-border rounded-xl p-4 flex items-center justify-between">
                     <span className="text-xs text-muted">Capitalisation actions</span>
-                    <span className="tabular text-white font-medium">{fmtFcfa(d.capitalisation_actions)} FCFA</span>
+                    <span className="tabular text-ivory font-medium">{fmtFcfa(d.capitalisation_actions)} FCFA</span>
                   </div>
                 )}
                 {d.capitalisation_obligations != null && (
                   <div className="bg-surface border border-border rounded-xl p-4 flex items-center justify-between">
                     <span className="text-xs text-muted">Capitalisation obligations</span>
-                    <span className="tabular text-white font-medium">{fmtFcfa(d.capitalisation_obligations)} FCFA</span>
+                    <span className="tabular text-ivory font-medium">{fmtFcfa(d.capitalisation_obligations)} FCFA</span>
                   </div>
                 )}
               </section>
@@ -272,7 +272,7 @@ export default async function BriefDatePage({ params }: PageProps) {
                           {n.titre}
                         </a>
                       ) : (
-                        <p className="text-sm text-white leading-snug">{n.titre}</p>
+                        <p className="text-sm text-ivory leading-snug">{n.titre}</p>
                       )}
                       {n.source && <p className="text-xs text-faint mt-1">{n.source}</p>}
                     </li>
@@ -293,13 +293,13 @@ export default async function BriefDatePage({ params }: PageProps) {
                 </audio>
               </div>
             )}
-            <pre className="whitespace-pre-wrap text-sm text-white/90 leading-relaxed font-sans">{brief.contenu}</pre>
+            <pre className="whitespace-pre-wrap text-sm text-ivory/90 leading-relaxed font-sans">{brief.contenu}</pre>
           </section>
         )}
 
         {/* ── CTA conversion ─────────────────────────────────────────── */}
         <section className="mb-6 rounded-xl border border-accent/20 bg-accent/[0.04] p-5 text-center print:hidden">
-          <p className="text-sm font-medium text-white">Recevez ce brief chaque soir après la clôture.</p>
+          <p className="text-sm font-medium text-ivory">Recevez ce brief chaque soir après la clôture.</p>
           <p className="mt-1 text-xs text-muted">Compte gratuit · aucune carte bancaire · 1 minute.</p>
           <Link
             href="/signup"
@@ -330,14 +330,14 @@ export default async function BriefDatePage({ params }: PageProps) {
 
         {/* ── Pied de note ───────────────────────────────────────────── */}
         <footer className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-          <Link href="/brief" className="text-sm text-muted hover:text-white transition-colors">
+          <Link href="/brief" className="text-sm text-muted hover:text-ivory transition-colors">
             <span className="inline-flex items-center gap-1"><ArrowLeft aria-hidden className="h-4 w-4" />Toutes les notes</span>
           </Link>
           <a
             href={`https://wa.me/?text=${encodeURIComponent(brief.contenu)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 rounded-lg border border-border text-muted hover:text-white hover:border-border-strong transition-colors text-sm"
+            className="px-4 py-2 rounded-lg border border-border text-muted hover:text-ivory hover:border-border-strong transition-colors text-sm"
           >
             Partager sur WhatsApp
           </a>

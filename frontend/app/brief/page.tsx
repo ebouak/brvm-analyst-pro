@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
 import PublicShell from '@/components/public/PublicShell';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { LigneSource } from '@/components/marche/LigneSource';
 import { fmtDateFR, fmtDateCourte } from '@/lib/format';
 
 export const revalidate = 900;
@@ -16,6 +18,9 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/brief` },
 };
 
+const BOUTON_SECONDAIRE =
+  'inline-flex min-h-[44px] items-center rounded-lg border border-border px-3 text-xs text-muted transition-colors hover:border-border-strong hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:min-h-[32px]';
+
 export default async function BriefPage() {
   const supabase = createPublicClient();
   const { data: briefs } = await supabase
@@ -28,64 +33,64 @@ export default async function BriefPage() {
 
   return (
     <PublicShell>
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="font-display text-3xl md:text-4xl font-medium tracking-tight text-ivory mb-2">
-            Le résumé de séance BRVM, chaque jour
-          </h1>
-          <p className="text-muted text-sm leading-relaxed">
-            Indices, hausses, baisses, volumes et actualités : composé après chaque clôture depuis
-            les données officielles.
-          </p>
-          {TELEGRAM_CHANNEL_URL && (
-            <a
-              href={TELEGRAM_CHANNEL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-4 px-5 py-2.5 rounded-lg bg-accent text-bg font-semibold hover:bg-accent/90 transition-colors active:scale-95"
-            >
-              Recevoir le brief sur Telegram
-            </a>
-          )}
-        </div>
+      <div className="mx-auto max-w-3xl">
+        <EnTeteCote
+          titre="Le résumé de séance, chaque jour"
+          description="Indices, hausses, baisses, volumes et actualités, composés après chaque clôture à partir des données officielles de la BRVM."
+          seance={list[0]?.date_marche ?? null}
+          libelleSeance="Dernier brief : séance du"
+          source="Source BRVM"
+          actions={
+            TELEGRAM_CHANNEL_URL ? (
+              <a
+                href={TELEGRAM_CHANNEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center rounded-lg bg-accent px-5 text-sm font-semibold text-bg transition-colors hover:bg-accent/90 active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+              >
+                Recevoir le brief sur Telegram
+              </a>
+            ) : undefined
+          }
+        />
 
-        {list.length === 0 ? (
-          <div className="bg-surface border border-border rounded-xl p-10 text-center">
-            <p className="text-muted text-sm">
+        <div className="mt-8 border-t border-border-strong pt-6">
+          {list.length === 0 ? (
+            <p className="rounded-card border border-dashed border-border px-5 py-6 text-sm text-muted">
               Le premier brief sera publié après la prochaine clôture de séance.
             </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {list.map((b) => {
-              const waText = encodeURIComponent(b.contenu);
-              return (
-                <article key={b.date_marche} className="bg-surface border border-border rounded-xl p-5 hover:border-accent/30 transition-colors">
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <Link
-                      href={`/brief/${b.date_marche}`}
-                      className="text-sm text-accent-ink font-medium hover:underline transition-colors"
-                    >
-                      Note de conjoncture · séance du {fmtDateCourte(b.date_marche)}
+          ) : (
+            <ol className="space-y-4">
+              {list.map((b) => (
+                <li key={b.date_marche}>
+                  <article aria-labelledby={`b-${b.date_marche}`} className="rounded-card border border-border bg-surface p-5">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                      <h2 id={`b-${b.date_marche}`} className="text-base font-medium text-ivory">
+                        <Link href={`/brief/${b.date_marche}`} className="rounded hover:text-accent-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                          Séance du <time dateTime={b.date_marche} className="tabular">{fmtDateCourte(b.date_marche)}</time>
+                        </Link>
+                      </h2>
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(b.contenu)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={BOUTON_SECONDAIRE}
+                        aria-label={`Partager le brief du ${fmtDateFR(b.date_marche)} sur WhatsApp`}
+                      >
+                        Partager sur WhatsApp
+                      </a>
+                    </div>
+                    <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-ivory/90">{b.contenu}</pre>
+                    <Link href={`/brief/${b.date_marche}`} className="mt-3 inline-flex min-h-[44px] items-center rounded text-sm text-accent-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:min-h-0">
+                      Lire la note complète
                     </Link>
-                    <a
-                      href={`https://wa.me/?text=${waText}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs px-2.5 py-1 rounded-md border border-border text-muted hover:text-white hover:border-border-strong transition-colors shrink-0"
-                      aria-label={`Partager le brief du ${fmtDateFR(b.date_marche)} sur WhatsApp`}
-                    >
-                      Partager sur WhatsApp
-                    </a>
-                  </div>
-                  <pre className="whitespace-pre-wrap text-sm text-white/90 leading-relaxed font-sans">
-                    {b.contenu}
-                  </pre>
-                </article>
-              );
-            })}
-          </div>
-        )}
+                  </article>
+                </li>
+              ))}
+            </ol>
+          )}
+          <LigneSource>Les vingt dernières séances. Chiffres tirés des cours et indices publiés par la BRVM.</LigneSource>
+        </div>
       </div>
     </PublicShell>
   );
