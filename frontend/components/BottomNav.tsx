@@ -13,7 +13,7 @@ const TABS: { href: string; label: string; match: (p: string) => boolean; icon: 
   {
     href: '/dashboard',
     label: 'Marché',
-    match: (p) => p === '/dashboard' || p.startsWith('/actions') || p.startsWith('/secteurs') || p.startsWith('/heatmap') || p.startsWith('/obligations'),
+    match: (p) => p === '/dashboard' || p.startsWith('/secteurs') || p.startsWith('/heatmap') || p.startsWith('/obligations'),
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path d="M4 19V5m0 14h16M8 15l3-4 3 2 4-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -21,14 +21,16 @@ const TABS: { href: string; label: string; match: (p: string) => boolean; icon: 
     ),
   },
   {
-    href: '/conseiller',
-    label: 'Conseiller',
-    match: (p) => p.startsWith('/conseiller') || p.startsWith('/signaux'),
+    // Fiche action mise en avant à la place du Conseiller (décision du 2026-11-10,
+    // spec fiche note d'analyse § 8), sous mesure : si les visites mobiles de
+    // /conseiller baissent de plus de 30 % sur 30 jours, il revient ici.
+    // Le Conseiller reste dans le menu complet (lib/nav.ts).
+    href: '/actions',
+    label: 'Actions',
+    match: (p) => p.startsWith('/actions') || p.startsWith('/societes'),
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="12" cy="12" r="0.8" fill="currentColor" />
+        <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
