@@ -110,7 +110,7 @@ export function DividendCalendar({
                 id="sector-select"
                 value={sector}
                 onChange={(e) => setSector(e.target.value)}
-                className="rounded-card border border-border bg-surface px-3 py-2 text-sm text-ivory focus:outline-none focus:ring-1 focus:ring-info transition"
+                className="rounded-card border border-border bg-surface px-3 py-2 text-sm text-ivory transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <option value="">Tous les secteurs</option>
                 {sectors.map((s) => (
@@ -131,7 +131,7 @@ export function DividendCalendar({
               value={rendementMin ?? ''}
               onChange={(e) => setRendementMin(e.target.value ? parseFloat(e.target.value) : undefined)}
               placeholder="Aucun minimum"
-              className="w-full md:w-32 rounded-card border border-border bg-surface px-3 py-2 text-sm text-ivory placeholder-muted focus:outline-none focus:ring-1 focus:ring-info transition"
+              className="w-full md:w-32 rounded-card border border-border bg-surface px-3 py-2 text-sm text-ivory placeholder-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             />
           </div>
         </div>
@@ -141,7 +141,7 @@ export function DividendCalendar({
           <button
             type="button"
             onClick={() => setIsMobileListView(!isMobileListView)}
-            className="px-3 py-2 rounded-card border border-border bg-surface text-sm text-ivory hover:bg-elevated transition"
+            className="px-3 py-2 rounded-card border border-border bg-surface text-sm text-ivory hover:bg-elevated transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             {isMobileListView ? 'Calendrier' : 'Liste'}
           </button>
@@ -160,7 +160,7 @@ export function DividendCalendar({
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="rounded-card p-2 hover:bg-elevated transition text-muted hover:text-ivory"
+                className="rounded-card p-2 hover:bg-elevated transition text-muted hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 aria-label="Mois précédent"
               >
                 <ChevronLeft size={20} />
@@ -168,7 +168,7 @@ export function DividendCalendar({
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="rounded-card p-2 hover:bg-elevated transition text-muted hover:text-ivory"
+                className="rounded-card p-2 hover:bg-elevated transition text-muted hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 aria-label="Mois suivant"
               >
                 <ChevronRight size={20} />
@@ -272,7 +272,7 @@ export function DividendCalendar({
                                   {estimatedYield(div) !== null && (
                                     <div className="flex justify-between">
                                       <span className="text-muted">Rendement (%)</span>
-                                      <span className="font-semibold text-up">
+                                      <span className="font-semibold text-ivory">
                                         {fmtNumber(estimatedYield(div), 2)}
                                       </span>
                                     </div>
@@ -351,7 +351,7 @@ export function DividendCalendar({
                     {estimatedYield(div) !== null && (
                       <div className="text-muted">
                         Rendement (%){' '}
-                        <span className="text-up font-medium">
+                        <span className="text-ivory font-medium">
                           {fmtNumber(estimatedYield(div), 2)}
                         </span>
                       </div>

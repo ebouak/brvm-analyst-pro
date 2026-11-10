@@ -158,15 +158,25 @@ export function iconForKind(kind: CalendarItem['kind']): LucideIcon {
   }
 }
 
-export function colorForKind(kind: CalendarItem['kind']): string {
+/**
+ * Le type d'un élément du calendrier, écrit en clair. Il remplace l'ancien code
+ * couleur par type (cinq bordures, dont une violette), qui exigeait une légende.
+ */
+export function libelleType(kind: CalendarItem['kind']): string {
   switch (kind) {
-    case 'ex-date':
-    case 'payment': return 'border border-warn/50';
-    case 'AG': return 'border border-blue/50';
-    case 'RESULTAT': return 'border border-up/50';
-    case 'COMMUNIQUE': return 'border border-purple/50';
-    default: return 'border border-muted/50';
+    case 'ex-date': return 'Détachement';
+    case 'payment': return 'Paiement';
+    case 'AG': return 'Assemblée générale';
+    case 'RESULTAT': return 'Résultats';
+    case 'COMMUNIQUE': return 'Communiqué';
+    case 'INTRODUCTION': return 'Introduction en bourse';
+    default: return 'Événement';
   }
+}
+
+/** Dividende par action, au centime : jamais arrondi (201,52 n'est pas « 202 »). */
+export function montantDividende(n: number): string {
+  return n.toLocaleString('fr-FR', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
 }
 
 /** "2026-05-30" → "SAMEDI 30 mai 2026" */
