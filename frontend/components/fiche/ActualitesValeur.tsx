@@ -27,7 +27,7 @@ export function ActualitesValeur({ groupes, nom }: { groupes: GroupesActualites;
 
   return (
     <section aria-labelledby="actualites-titre" className="rounded-card border border-border bg-surface p-4 md:p-5">
-      <h3 id="actualites-titre" className="text-base font-semibold text-ivory">Actualités de {nom}</h3>
+      <h3 id="actualites-titre" className="text-lg font-medium text-ivory">Publications et actualités de {nom}</h3>
       <div role="tablist" aria-label="Type d'actualité" className="-mx-1 mt-3 flex flex-wrap gap-1 border-b border-border/60 pb-2">
         {ONGLETS.map((o) => (
           <button

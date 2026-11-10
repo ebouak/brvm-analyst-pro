@@ -1,4 +1,8 @@
 import Link from 'next/link';
+import { LienSuivi } from '@/components/analytics/LienSuivi';
+
+const BOUTON =
+  'shrink-0 rounded-full bg-gold px-4 py-1.5 text-xs font-semibold text-[#1a1205] transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg';
 
 /**
  * Cadenas COMPACT, pour un bloc situé dans le flux d'une page (par opposition à
@@ -15,10 +19,13 @@ export function SectionLock({
   required,
   titre,
   pitch,
+  suivi,
 }: {
   required: 'premium' | 'pro' | 'disabled';
   titre: string;
   pitch: string;
+  /** Propriétés de l'événement `fiche_verrou_clic` ; absent = aucun suivi. */
+  suivi?: Record<string, unknown>;
 }) {
   // Kill switch : proposer un abonnement serait mensonger — payer ne débloque rien.
   if (required === 'disabled') {
@@ -50,12 +57,15 @@ export function SectionLock({
           <p className="text-xs text-muted">{pitch}</p>
         </div>
       </div>
-      <Link
-        href="/account/plan"
-        className="shrink-0 rounded-full bg-gold px-4 py-1.5 text-xs font-semibold text-[#1a1205] transition active:scale-95"
-      >
-        Débloquer
-      </Link>
+      {suivi ? (
+        <LienSuivi href="/account/plan" evenement="fiche_verrou_clic" proprietes={suivi} className={BOUTON}>
+          Débloquer
+        </LienSuivi>
+      ) : (
+        <Link href="/account/plan" className={BOUTON}>
+          Débloquer
+        </Link>
+      )}
     </div>
   );
 }

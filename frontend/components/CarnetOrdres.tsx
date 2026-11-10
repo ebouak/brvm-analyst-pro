@@ -54,7 +54,7 @@ export function dateSeanceLongue(iso: string): string {
   });
 }
 
-export default function CarnetOrdres({ carnet }: { carnet: CarnetRow | null }) {
+export default function CarnetOrdres({ carnet, sansTitre = false }: { carnet: CarnetRow | null; sansTitre?: boolean }) {
   if (!carnet) return null;
 
   const achat = carnet.qte_achat ?? 0;
@@ -66,8 +66,8 @@ export default function CarnetOrdres({ carnet }: { carnet: CarnetRow | null }) {
   return (
     <section className="mb-6 rounded-xl border border-border bg-surface p-5">
       <header className="mb-4">
-        <h2 className="font-display text-lg text-ivory">Carnet d&apos;ordres</h2>
-        <p className="mt-1 text-xs text-faint">
+        {!sansTitre && <h2 className="font-display text-lg text-ivory">Carnet d&apos;ordres</h2>}
+        <p className={`${sansTitre ? '' : 'mt-1 '}text-xs text-faint`}>
           Quantités restées en carnet à la clôture de la séance du {dateSeanceLongue(carnet.date_marche)}
         </p>
       </header>

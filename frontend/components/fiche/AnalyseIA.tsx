@@ -133,10 +133,7 @@ export function AnalyseIA({ code, nom, exerciceComptes }: Props) {
   }, []);
 
   return (
-    <section id="analyse-ia" aria-labelledby="t-analyse-ia" className="mt-8 scroll-mt-24">
-      <h2 id="t-analyse-ia" className="mb-3.5 text-base font-semibold text-ivory">
-        Analyse par IA
-      </h2>
+    <div>
       <div
         ref={rangeeRef}
         className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:thin] md:mx-0 md:px-0"
@@ -183,7 +180,7 @@ export function AnalyseIA({ code, nom, exerciceComptes }: Props) {
           questionsDepart={questions.slice(0, 3)}
         />
       )}
-    </section>
+    </div>
   );
 }
 
