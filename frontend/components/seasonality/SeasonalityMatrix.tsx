@@ -1,11 +1,18 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { aggregateSeasonality, type MonthlyReturn } from '@/lib/seasonality/compute';
+import { aggregateSeasonality, type MonthlyReturn, type MonthStats, type Verdict } from '@/lib/seasonality/compute';
 
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 const WINDOWS = [5, 10, 15] as const;
-const pct = (v: number) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(1)}%`;
+const pct = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(1).replace('.', ',')}\u00a0%`;
+const VERDICT: Record<Verdict, string> = {
+  etabli: 'régularité établie',
+  indicatif: 'indicative',
+  hasard: 'non distinguable du hasard',
+};
+/** Couleur d'un rendement : une cellule « hasard » reste grise, jamais verte ni rouge. */
+const ton = (m: MonthStats) => (m.verdict === 'hasard' ? 'text-muted' : m.medianReturn >= 0 ? 'text-up' : 'text-down');
 
 export default function SeasonalityMatrix({
   returns,
@@ -27,8 +34,11 @@ export default function SeasonalityMatrix({
     return <p className="text-sm text-muted">Historique indisponible pour ce titre.</p>;
   }
 
-  const cellBg = (avg: number, n: number) =>
-    n === 0 ? 'bg-surface' : avg > 0 ? 'bg-up/10 border-up/30' : avg < 0 ? 'bg-down/10 border-down/30' : 'bg-surface';
+  const cellBg = (m: MonthStats) =>
+    m.n === 0 || m.verdict === 'hasard' ? 'border-border bg-surface'
+      : m.medianReturn > 0 ? 'bg-up/10 border-up/30' : 'bg-down/10 border-down/30';
+  const fort = r.matrix.find((m) => m.month === r.bestMonth) ?? null;
+  const faible = r.matrix.find((m) => m.month === r.worstMonth) ?? null;
 
   return (
     <div className="space-y-4">
@@ -49,7 +59,7 @@ export default function SeasonalityMatrix({
       {preview && (
         <div className="rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-xs text-accent-ink">
           Aperçu gratuit : seul le mois en cours est révélé. La matrice complète, les
-          meilleurs/pires mois et la table détaillée sont réservés au premium.
+          mois qui se détachent et la table détaillée sont réservés au premium.
         </div>
       )}
 
@@ -84,19 +94,16 @@ export default function SeasonalityMatrix({
             );
           }
           return (
-            <div key={m.month} className={`rounded-lg border p-2.5 ${cellBg(m.avgReturn, m.n)} ${preview ? 'ring-1 ring-gold/40' : ''}`}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white">{MONTHS[m.month - 1]}</span>
-                {m.reliability === 'low' && m.n > 0 && (
-                  <span className={`text-xs px-1 rounded ${m.n < 3 ? 'bg-down/20 text-down' : 'bg-warn/20 text-warn'}`}>N={m.n}</span>
-                )}
-              </div>
+            <div key={m.month} className={`rounded-lg border p-2.5 ${cellBg(m)} ${preview ? 'ring-1 ring-gold/40' : ''}`}>
+              <span className="text-xs font-semibold text-white">{MONTHS[m.month - 1]}</span>
               {m.n === 0 ? (
                 <p className="mt-1 text-xs text-faint">aucune donnée</p>
               ) : (
                 <>
-                  <p className={`mt-1 tabular text-sm font-bold ${m.avgReturn >= 0 ? 'text-up' : 'text-down'}`}>{pct(m.avgReturn)}</p>
-                  <p className="text-xs text-faint">hausses {m.bullPct.toFixed(0)} % · N={m.n}</p>
+                  <p className={`mt-1 tabular text-sm font-bold ${ton(m)}`}>{pct(m.medianReturn)}</p>
+                  <p className="text-xs text-faint">médiane · {m.n} an{m.n > 1 ? 's' : ''}</p>
+                  <p className="text-xs text-faint">en hausse {m.bullPct.toFixed(0)}&nbsp;%</p>
+                  <p className={`mt-1 text-xs ${m.verdict === 'hasard' ? 'text-faint' : 'text-muted'}`}>{VERDICT[m.verdict]}</p>
                 </>
               )}
             </div>
@@ -110,28 +117,39 @@ export default function SeasonalityMatrix({
           href="/account/plan"
           className="block rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-center text-sm font-semibold text-accent-ink transition hover:bg-gold/10"
         >
-          Débloquer les 12 mois, les extrêmes et la table détaillée · Passer à Premium
+          Débloquer les 12 mois, les mois qui se détachent et la table détaillée · Passer à Premium
         </a>
       )}
 
-      {/* Extrêmes + biais — réservés au premium. */}
+      {/* Mois qui se détachent + habitude du mois en cours — réservés au premium. */}
       {!preview && (
-      <div className="grid grid-cols-3 gap-2 text-xs">
-        <div className="rounded-lg border border-up/30 bg-up/5 p-2">
-          <p className="text-faint">Meilleur mois</p>
-          <p className="font-semibold text-up">{r.bestMonth ? MONTHS[r.bestMonth - 1] : '—'}</p>
-        </div>
-        <div className="rounded-lg border border-down/30 bg-down/5 p-2">
-          <p className="text-faint">Pire mois</p>
-          <p className="font-semibold text-down">{r.worstMonth ? MONTHS[r.worstMonth - 1] : '—'}</p>
-        </div>
+      <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
+        {fort || faible ? (
+          <>
+            <div className="rounded-lg border border-border bg-surface p-2">
+              <p className="text-faint">Mois habituellement fort</p>
+              {fort ? (
+                <p className="font-semibold text-up">{MONTHS[fort.month - 1]} <span className="tabular">{pct(fort.medianReturn)}</span> <span className="font-normal text-faint">médiane, {fort.n} ans, {VERDICT[fort.verdict]}</span></p>
+              ) : <p className="text-muted">aucun ne se détache</p>}
+            </div>
+            <div className="rounded-lg border border-border bg-surface p-2">
+              <p className="text-faint">Mois habituellement faible</p>
+              {faible ? (
+                <p className="font-semibold text-down">{MONTHS[faible.month - 1]} <span className="tabular">{pct(faible.medianReturn)}</span> <span className="font-normal text-faint">médiane, {faible.n} ans, {VERDICT[faible.verdict]}</span></p>
+              ) : <p className="text-muted">aucun ne se détache</p>}
+            </div>
+          </>
+        ) : (
+          <div className="rounded-lg border border-border bg-surface p-2 sm:col-span-2">
+            <p className="text-faint">Mois forts et faibles</p>
+            <p className="text-muted">Aucun mois ne se détache : sur cette fenêtre, aucune régularité ne se distingue du hasard.</p>
+          </div>
+        )}
         <div className="rounded-lg border border-border bg-surface p-2">
-          <p className="text-faint">Biais mois en cours</p>
-          <p className="font-semibold text-white">
-            {r.currentMonthBias && r.currentMonthBias.n > 0
-              ? `${MONTHS[r.currentMonthBias.month - 1]} ${pct(r.currentMonthBias.avgReturn)}`
-              : '—'}
-          </p>
+          <p className="text-faint">Habitude du mois en cours</p>
+          {r.currentMonthBias && r.currentMonthBias.n > 0 ? (
+            <p className={`font-semibold ${ton(r.currentMonthBias)}`}>{MONTHS[r.currentMonthBias.month - 1]} <span className="tabular">{pct(r.currentMonthBias.medianReturn)}</span> <span className="font-normal text-faint">médiane, {r.currentMonthBias.n} ans, {VERDICT[r.currentMonthBias.verdict]}</span></p>
+          ) : <p className="text-muted">aucune donnée</p>}
         </div>
       </div>
       )}
@@ -143,22 +161,24 @@ export default function SeasonalityMatrix({
           <thead className="bg-surface text-xs text-muted">
             <tr>
               <th className="px-3 py-2 text-left">Mois</th>
-              <th className="px-3 py-2 text-right">Moy.</th>
               <th className="px-3 py-2 text-right">Médiane</th>
-              <th className="px-3 py-2 text-right">Volatilité</th>
-              <th className="px-3 py-2 text-right">Hausse %</th>
-              <th className="px-3 py-2 text-right">N</th>
+              <th className="px-3 py-2 text-right">Moyenne</th>
+              <th className="px-3 py-2 text-right">Écart-type</th>
+              <th className="px-3 py-2 text-right">En hausse</th>
+              <th className="px-3 py-2 text-right">Années</th>
+              <th className="px-3 py-2 text-left">Fiabilité</th>
             </tr>
           </thead>
           <tbody>
             {r.matrix.map((m) => (
               <tr key={m.month} className="border-t border-border/50">
                 <td className="px-3 py-1.5 text-white">{MONTHS[m.month - 1]}</td>
-                <td className={`px-3 py-1.5 text-right tabular ${m.avgReturn >= 0 ? 'text-up' : 'text-down'}`}>{m.n ? pct(m.avgReturn) : '—'}</td>
-                <td className="px-3 py-1.5 text-right tabular text-muted">{m.n ? pct(m.medianReturn) : '—'}</td>
-                <td className="px-3 py-1.5 text-right tabular text-muted">{m.volatility != null ? `${(m.volatility * 100).toFixed(1)}%` : '—'}</td>
-                <td className="px-3 py-1.5 text-right tabular text-muted">{m.n ? `${m.bullPct.toFixed(0)}%` : '—'}</td>
+                <td className={`px-3 py-1.5 text-right tabular ${ton(m)}`}>{m.n ? pct(m.medianReturn) : '—'}</td>
+                <td className="px-3 py-1.5 text-right tabular text-muted">{m.n ? pct(m.avgReturn) : '—'}</td>
+                <td className="px-3 py-1.5 text-right tabular text-muted">{m.volatility != null ? `${(m.volatility * 100).toFixed(1).replace('.', ',')}\u00a0%` : '—'}</td>
+                <td className="px-3 py-1.5 text-right tabular text-muted">{m.n ? `${m.bullPct.toFixed(0)}\u00a0%` : '—'}</td>
                 <td className="px-3 py-1.5 text-right tabular text-faint">{m.n}</td>
+                <td className="px-3 py-1.5 text-left text-faint">{m.n ? VERDICT[m.verdict] : '—'}</td>
               </tr>
             ))}
           </tbody>

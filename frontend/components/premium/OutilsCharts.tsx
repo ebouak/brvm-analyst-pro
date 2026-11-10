@@ -67,35 +67,37 @@ function SaisonnaliteChart({ data }: { data: MoisSaisonnalite[] }) {
       <p className="text-muted text-sm">Aucune donnée disponible.</p>
     </div>
   );
-  const maxAbs = Math.max(...data.map((d) => Math.abs(d.perf_moyenne)), 0.01);
+  const maxAbs = Math.max(...data.map((d) => Math.abs(d.perf_mediane)), 0.01);
   return (
     <div className="space-y-2">
       {data.map((m) => {
-        const isPos = m.perf_moyenne >= 0;
-        const barW = Math.min(100, (Math.abs(m.perf_moyenne) / maxAbs) * 100);
+        const isPos = m.perf_mediane >= 0;
+        // Une régularité non distinguable du hasard reste grise.
+        const hasard = m.verdict === 'hasard';
+        const barW = Math.min(100, (Math.abs(m.perf_mediane) / maxAbs) * 100);
         return (
           <div key={m.mois} className="flex items-center gap-3">
             <span className="text-xs text-muted w-8 shrink-0">{m.nom_mois}</span>
             <div className="flex-1 flex items-center gap-1 h-6">
               {!isPos && (
                 <div
-                  className="h-4 rounded-l bg-down/70 ml-auto"
+                  className={`h-4 rounded-l ml-auto ${hasard ? 'bg-border-strong' : 'bg-down/70'}`}
                   style={{ width: `${barW / 2}%` }}
                 />
               )}
               <div className="w-px h-5 bg-border shrink-0" />
               {isPos && (
                 <div
-                  className="h-4 rounded-r bg-up/70"
+                  className={`h-4 rounded-r ${hasard ? 'bg-border-strong' : 'bg-up/70'}`}
                   style={{ width: `${barW / 2}%` }}
                 />
               )}
             </div>
-            <span className={`tabular text-xs w-14 text-right ${isPos ? 'text-up' : 'text-down'}`}>
-              {isPos ? '+' : ''}{m.perf_moyenne.toFixed(2)}%
+            <span className={`tabular text-xs w-16 text-right ${hasard ? 'text-muted' : isPos ? 'text-up' : 'text-down'}`}>
+              {m.n === 0 ? '—' : `${isPos ? '+' : '−'}${Math.abs(m.perf_mediane).toFixed(1).replace('.', ',')}\u00a0%`}
             </span>
-            <span className="text-xs text-muted w-16 text-right">
-              {m.taux_hausse.toFixed(0)}% haussier
+            <span className="text-xs text-muted w-28 text-right">
+              {m.n === 0 ? 'aucune donnée' : `en hausse ${m.nb_hausses} an${m.nb_hausses > 1 ? 's' : ''} sur ${m.n}`}
             </span>
           </div>
         );
@@ -197,7 +199,7 @@ export default function OutilsCharts({
       {tab === 'saisonnalite' && (
         <div>
           <p className="text-xs text-muted mb-4">
-            Performance journalière moyenne par mois sur les 5 dernières années (toutes actions BRVM). Le taux haussier indique le pourcentage de séances positives.
+            Rendement mensuel médian du marché (moyenne équipondérée des actions cotées) sur les 5 dernières années, mois en cours exclu. Cinq années ne suffisent pas à établir une régularité : les barres grises ne se distinguent pas du hasard.
           </p>
           <SaisonnaliteChart data={saisonnalite} />
         </div>

@@ -14,14 +14,11 @@ export default async function OutilsPage() {
   const { actionsProchesBas, saisonnalite, reactionsEtats } = await getOutilsData();
 
   const nbProcheBas = actionsProchesBas.filter((a) => a.distance_pct < 5).length;
-  const moisMeilleur = saisonnalite.reduce(
-    (best, m) => (m.perf_moyenne > best.perf_moyenne ? m : best),
-    saisonnalite[0] ?? { nom_mois: '—', perf_moyenne: 0 },
-  );
-  const moisPire = saisonnalite.reduce(
-    (worst, m) => (m.perf_moyenne < worst.perf_moyenne ? m : worst),
-    saisonnalite[0] ?? { nom_mois: '—', perf_moyenne: 0 },
-  );
+  // Un mois n'est nommé que si sa régularité est au moins indicative.
+  const fiables = saisonnalite.filter((m) => m.verdict !== 'hasard');
+  const moisFort = fiables.filter((m) => m.perf_mediane > 0).sort((x, y) => y.perf_mediane - x.perf_mediane)[0] ?? null;
+  const moisFaible = fiables.filter((m) => m.perf_mediane < 0).sort((x, y) => x.perf_mediane - y.perf_mediane)[0] ?? null;
+  const fmt = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1).replace('.', ',')}\u00a0%`;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
@@ -65,16 +62,16 @@ export default async function OutilsPage() {
           accent="neutral"
         />
         <MetricCard
-          label="Meilleur mois historique"
-          value={moisMeilleur.nom_mois}
-          delta={`+${moisMeilleur.perf_moyenne.toFixed(2)} % en moyenne`}
-          deltaDir="up"
-          accent="emerald"
+          label="Mois habituellement fort du marché"
+          value={moisFort ? moisFort.nom_mois : 'Aucun'}
+          delta={moisFort ? `${fmt(moisFort.perf_mediane)} en médiane, ${moisFort.n} ans` : 'aucun mois ne se détache sur 5 ans'}
+          deltaDir={moisFort ? 'up' : 'down'}
+          accent={moisFort ? 'emerald' : 'neutral'}
         />
         <MetricCard
-          label="Pire mois historique"
-          value={moisPire.nom_mois}
-          delta={`${moisPire.perf_moyenne.toFixed(2)} % en moyenne`}
+          label="Mois habituellement faible du marché"
+          value={moisFaible ? moisFaible.nom_mois : 'Aucun'}
+          delta={moisFaible ? `${fmt(moisFaible.perf_mediane)} en médiane, ${moisFaible.n} ans` : 'aucun mois ne se détache sur 5 ans'}
           deltaDir="down"
           accent="neutral"
         />
