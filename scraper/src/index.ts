@@ -574,6 +574,43 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'conseiller:signaux': {
+      // Signal « tendance longue » (Premium). Sans --ecrire : calcul à blanc.
+      const { runSignaux } = await import('./conseiller/runSignal.js');
+      if (!process.argv.includes('--ecrire')) {
+        const r = await runSignaux(false);
+        console.log(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      await monitored(
+        { code: 'conseiller-signaux', label: 'Signal tendance longue du Conseiller' },
+        async () => {
+          const r = await runSignaux(true);
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lignes,
+              rows_upserted: r.lignes,
+              metadata: { date_marche: r.date, revision: r.revision, a_eviter: r.etats.a_eviter.length, favorable: r.etats.favorable.length },
+            },
+          };
+        },
+      );
+      return 0;
+    }
+    case 'conseiller:confirmation': {
+      // Test confirmatoire pré-enregistré, sur les signaux d'époque. Lecture seule.
+      const { runConfirmation } = await import('./conseiller/runSignal.js');
+      console.log(JSON.stringify(await runConfirmation(), null, 2));
+      return 0;
+    }
+    case 'conseiller:signal-historique': {
+      // Relecture exploratoire de l'historique (pas une preuve). Lecture seule.
+      const { runSignalHistorique } = await import('./conseiller/runSignal.js');
+      console.log(JSON.stringify(await runSignalHistorique(), null, 2));
+      return 0;
+    }
     case 'conseiller:audit': {
       const { runAudit } = await import('./conseiller/runAudit.js');
       const md = await runAudit();

@@ -142,3 +142,13 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           LOG_LEVEL: info
         run: npx tsx src/index.ts conseiller --ecrire
+      # Signal « tendance longue » (Premium) : registre d'époque du test confirmatoire.
+      # Pas séparé : une panne des facteurs ne doit pas empêcher d'écrire le signal du jour.
+      - name: Conseiller — signal tendance longue
+        if: always()
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+        run: npx tsx src/index.ts conseiller:signaux --ecrire
