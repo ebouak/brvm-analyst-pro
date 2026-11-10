@@ -18,7 +18,7 @@ export async function lirePositions(): Promise<{ date: string; lignes: LigneFact
   if (!date) return null;
   const { data, error } = await sb
     .from('conseiller_facteurs')
-    .select('code, date_marche, tiers, effectifs, classe_liquidite')
+    .select('code, date_marche, tiers, scores, effectifs, classe_liquidite')
     .eq('date_marche', date)
     .order('code');
   if (error) throw new Error(`conseiller_facteurs illisible : ${error.message}`);

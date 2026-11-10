@@ -62,6 +62,7 @@ export async function GET() {
         pnl,
         pnlPct,
         tiers: f?.tiers ?? {},
+        scores: f?.scores ?? {},
         classe_liquidite: f?.classe_liquidite ?? null,
       };
     });
