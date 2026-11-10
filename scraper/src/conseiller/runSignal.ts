@@ -8,8 +8,9 @@ const COLONNES = 'date_marche, code, etat, score, eligible, perf_120, perf_250, 
 
 /**
  * Signal « tendance longue » de la dernière séance.
- * Sans `ecrire` : calcul et contrôle à blanc. Avec `ecrire` : upsert idempotent
- * sur (date_marche, code), relecture, contrôle sur la donnée RELUE. Une anomalie
+ * Sans `ecrire` : calcul et contrôle à blanc. Avec `ecrire` : insertion sur
+ * (date_marche, code), la première écriture faisant foi (doublons ignorés), puis
+ * relecture et contrôle sur la donnée RELUE, divergence comprise. Une anomalie
  * LÈVE. Seule la dernière séance est écrite : aucune option ne réécrit le passé,
  * c'est ce qui fait de la table un registre d'époque pour le test confirmatoire.
  */
@@ -31,13 +32,31 @@ export async function runSignaux(ecrire: boolean): Promise<{ date: string; ligne
   }
 
   const sb = getSupabase();
-  const { error } = await sb.from('conseiller_signaux').upsert(lignes, { onConflict: 'date_marche,code' });
+  // Registre d'époque : la PREMIÈRE écriture fait foi. Une séance déjà écrite n'est
+  // jamais réécrite (relance du workflow, lancement manuel) : doublons ignorés.
+  // supabase-js n'accepte pas onConflict/ignoreDuplicates sur insert() ; upsert()
+  // avec ignoreDuplicates produit « INSERT … ON CONFLICT (date_marche, code) DO
+  // NOTHING » (Prefer: resolution=ignore-duplicates) : aucune ligne existante modifiée.
+  const { error } = await sb.from('conseiller_signaux').upsert(lignes, { onConflict: 'date_marche,code', ignoreDuplicates: true });
   if (error) throw new Error(`conseiller:signaux : écriture refusée — ${error.message}`);
   const { data: relues, error: eRelue } = await sb.from('conseiller_signaux').select(COLONNES).eq('date_marche', date);
   if (eRelue) throw new Error(`conseiller:signaux : relecture impossible — ${eRelue.message}`);
   const anomalies = verifierSignaux((relues ?? []) as LigneSignal[], date);
   if ((relues?.length ?? 0) !== lignes.length) anomalies.push(`${relues?.length ?? 0} lignes relues pour ${lignes.length} écrites`);
   if (anomalies.length) throw new Error(`conseiller:signaux : contrôle sur la donnée relue — ${anomalies.join(' ; ')}`);
+  // Une séance déjà écrite AUTREMENT (état, score ou éligibilité différents du calcul
+  // de ce soir) se résout par un humain : on le dit et on s'arrête, sans réécrire.
+  const calculees = new Map(lignes.map((l) => [l.code, l]));
+  const divergentes = ((relues ?? []) as LigneSignal[])
+    .filter((r) => {
+      const c = calculees.get(r.code);
+      return !c || c.etat !== r.etat || c.score !== r.score || c.eligible !== r.eligible;
+    })
+    .map((r) => r.code);
+  if (divergentes.length) {
+    logger.error({ date, codes: divergentes }, 'conseiller:signaux : séance déjà écrite avec un contenu différent, rien réécrit');
+    throw new Error(`conseiller:signaux : séance ${date} déjà écrite autrement pour ${divergentes.join(', ')} — à résoudre par un humain`);
+  }
   logger.info({ date, lignes: relues?.length, revision }, 'conseiller:signaux : signaux écrits et vérifiés');
   return { date, lignes: relues?.length ?? 0, revision, etats };
 }
@@ -82,7 +101,7 @@ export async function runConfirmation(): Promise<RapportConfirmation> {
   let enRetard = 0;
   for (const l of lues) {
     const retard = (Date.parse(l.created_at) - Date.parse(`${l.date_marche}T00:00:00Z`)) / JOUR_MS;
-    if (retard > CONFIRMATION.retardMaxJours + 1) { enRetard++; continue; }
+    if (retard > CONFIRMATION.retardMaxJours) { enRetard++; continue; }
     let m = parDate.get(l.date_marche);
     if (!m) parDate.set(l.date_marche, (m = new Map()));
     m.set(l.code, { etat: l.etat, eligible: l.eligible });
