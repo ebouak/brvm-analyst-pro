@@ -102,7 +102,7 @@ Ancres héritées (`rubriqueDeAncre`) : `liquidite`, `carnet`, `seance`, `cours`
    des vigilances déjà calculées par le dossier valeur (`lib/dossier/narratif.ts`),
    jamais rédigés à la main. Sans vigilance calculée : la sous-section le dit.
 5. **L'essentiel** (`Essentiel`) — cinq chiffres au plus, dont **un de liquidité** :
-   valeur échangée médiane par séance sur 30 séances, en FCFA.
+   valeur moyenne échangée par séance sur 30 séances, en FCFA (`liquidity_daily.valeur_moyenne_30j`, déjà affichée).
 6. **Prochain rendez-vous** — prochain événement daté connu (détachement, paiement,
    AG, publication), ou « Aucune date annoncée ».
 7. **Analyse par IA** (`AnalyseIA`) — étiquetée, datée, repliée par défaut.
@@ -110,7 +110,7 @@ Ancres héritées (`rubriqueDeAncre`) : `liquidite`, `carnet`, `seance`, `cours`
    blocs « À propos » et « Performance financière » ne sont **plus rendus** ici.
 9. `JaugesPlage` (1 jour, 52 semaines, 2 ans) reste en tête, sous la fraîcheur.
 
-**Règle de lecture** — `lib/fiche/lecture.ts`, fonction pure testée :
+**Règle de lecture** — `lib/fiche/lectureSynthese.ts`, fonction pure testée (`lib/fiche/lecture.ts` existe déjà pour la lecture technique) :
 
 - Entrées : signal quantitatif (`BUY`/`HOLD`/`SELL`), classement Combined Alpha
   selon **ses propres catégories existantes** (aucun seuil nouveau), fraîcheur des
@@ -179,7 +179,7 @@ publié » : rien n'a encore été cherché.
 
 ## 7. Navigation, accessibilité, performance
 
-- Barre d'onglets : `role="tablist"`, flèches du clavier, onglet actif ramené dans le
+- Barre de rubriques : liens de page (`nav` + `aria-current`, pas `role="tablist"`, qui annoncerait des panneaux sans changement d’adresse), onglet actif ramené dans le
   champ, défilement horizontal sur mobile avec indice de débordement, Mon suivi séparé.
 - Changement de rubrique : focus sur le `h2` de la rubrique.
 - Priorité : `?rubrique=` l'emporte toujours ; une ancre héritée ne sert qu'en son
@@ -218,7 +218,7 @@ aperçu relu par l'exploitant avant `supabase db query --linked -f`.
 | PR | Contenu | Migration |
 |---|---|---|
 | 1 | Rubriques, titres, ancres, `DonneeAbsente`, Actionnariat « Non collecté », fraîcheur, liquidité en Synthèse, menu mobile, mesures | Non |
-| 2 | `lib/fiche/lecture.ts` (lecture descriptive, « Pas d'avis »), risques dérivés, prochain rendez-vous | Non |
+| 2 | `lib/fiche/lectureSynthese.ts` (lecture descriptive, « Pas d'avis »), risques dérivés, prochain rendez-vous | Non |
 | 3 | Collecte d'actionnariat sourcée, flottant | Données seules |
 | 4 | Calendrier complet, repères de valorisation, branchement banque | À évaluer |
 
@@ -229,7 +229,7 @@ aperçu relu par l'exploitant avant `supabase db query --linked -f`.
 - Les 48 fiches affichent une sous-section Actionnariat dans un état du § 6.
 - Tous les anciens liens et ancres mènent à la bonne sous-section.
 - Tests : `lib/fiche/rubriques.test.ts` (+ priorité paramètre sur ancre),
-  `lib/fiche/lecture.test.ts` (chaque état, chaque motif de « Pas d'avis »).
+  `lib/fiche/lectureSynthese.test.ts` (chaque état, chaque motif de « Pas d'avis »).
 - Captures sur quatre sociétés types : **SNTS** (documentée, liquide), **SGBC**
   (banque), une valeur peu liquide à données lacunaires (choisie sur la classe de
   liquidité D), **BBGC** (cotée récemment) — 7 vues × bureau/mobile × sombre/clair,
