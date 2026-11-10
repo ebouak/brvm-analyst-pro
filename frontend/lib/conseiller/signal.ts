@@ -27,7 +27,7 @@ export const LIBELLE_ETAT: Record<EtatSignal, string> = {
 
 /**
  * Chiffres de la relecture historique par la chaîne du dépôt
- * (`npm run conseiller:signal-historique`, 4 470 séances du 2 janvier 2008 au
+ * (`npm run conseiller:signal-historique`, 4 470 séances de 2008 au
  * 10 novembre 2026, PREREG §7). EXPLORATOIRES : à ne modifier qu'en relançant
  * cette commande, jamais à la main.
  */
