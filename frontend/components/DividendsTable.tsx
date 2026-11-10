@@ -19,8 +19,8 @@ const CSV_COLUMNS: CsvColumn<DividendRow>[] = [
   { header: 'Pays', accessor: (r) => r.pays ?? '' },
   { header: 'Montant FCFA', accessor: (r) => r.montant ?? '' },
   { header: 'Rendement %', accessor: (r) => r.rendement_pct ?? '' },
-  { header: 'Ex-date', accessor: (r) => r.ex_date ?? '' },
-  { header: 'Payment date', accessor: (r) => r.payment_date ?? '' },
+  { header: 'Détachement', accessor: (r) => r.ex_date ?? '' },
+  { header: 'Paiement', accessor: (r) => r.payment_date ?? '' },
   { header: 'Exercice', accessor: (r) => r.exercice ?? '' },
 ];
 
@@ -114,11 +114,18 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
 
   const Th = ({ k, label, right }: { k: SortKey; label: string; right?: boolean }) => (
     <th
-      onClick={() => toggleSort(k)}
-      className={`px-3 py-2 cursor-pointer select-none hover:text-white whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
+      scope="col"
+      aria-sort={sortKey === k ? (asc ? 'ascending' : 'descending') : 'none'}
+      className={`px-1 py-1 font-normal whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
     >
-      {label}
-      {sortKey === k && (asc ? <ArrowUp size={12} aria-hidden className="ml-1 inline text-accent-ink" /> : <ArrowDown size={12} aria-hidden className="ml-1 inline text-accent-ink" />)}
+      <button
+        type="button"
+        onClick={() => toggleSort(k)}
+        className={`inline-flex items-center gap-1 rounded px-2 py-1 transition-colors hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${sortKey === k ? 'text-ivory' : ''}`}
+      >
+        {label}
+        {sortKey === k && (asc ? <ArrowUp size={12} aria-hidden className="text-accent-ink" /> : <ArrowDown size={12} aria-hidden className="text-accent-ink" />)}
+      </button>
     </th>
   );
 
@@ -128,14 +135,16 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
         <input
           value={q}
           onChange={handleFilterChange(setQ)}
-          placeholder="Rechercher ticker ou société…"
-          className="bg-surface border border-border rounded px-3 py-1.5 text-sm w-full sm:w-56"
+          type="search"
+          aria-label="Rechercher une société"
+          placeholder="Code ou société"
+          className="min-h-[44px] md:min-h-0 bg-surface border border-border rounded-lg text-sm text-ivory transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent px-3 py-1.5 w-full placeholder:text-faint sm:w-56"
         />
         <select
           aria-label="Filtrer par exercice"
           value={yearFilter}
           onChange={handleFilterChange(setYearFilter)}
-          className="bg-surface border border-border rounded px-2 py-1.5 text-sm"
+          className="min-h-[44px] md:min-h-0 bg-surface border border-border rounded-lg text-sm text-ivory transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent px-2 py-1.5"
         >
           <option value="">Tous exercices</option>
           {years.map((y) => (
@@ -146,7 +155,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           aria-label="Filtrer par secteur"
           value={sectorFilter}
           onChange={handleFilterChange(setSectorFilter)}
-          className="bg-surface border border-border rounded px-2 py-1.5 text-sm"
+          className="min-h-[44px] md:min-h-0 bg-surface border border-border rounded-lg text-sm text-ivory transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent px-2 py-1.5"
         >
           <option value="">Tous secteurs</option>
           {sectors.map((s) => (
@@ -157,8 +166,8 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
           type="button"
           onClick={() => setNet((v) => !v)}
           aria-pressed={net ? 'true' : 'false'}
-          className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
-            net ? 'border-accent/40 bg-accent/10 text-accent-ink' : 'border-border text-muted hover:text-white'
+          className={`min-h-[44px] md:min-h-0 rounded-lg border px-3 py-1.5 text-xs transition-[color,background-color,border-color,transform] duration-150 active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+            net ? 'border-accent/40 bg-accent/10 text-accent-ink' : 'border-border text-muted hover:text-ivory'
           }`}
         >
           {net ? <><Check size={12} aria-hidden className="inline mr-1" />Net d’IRVM</> : 'Afficher net d’IRVM'}
@@ -180,7 +189,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
         <button
           type="button"
           onClick={() => { setShowEmpty((v) => !v); setPage(0); }}
-          className="text-xs text-muted underline underline-offset-2 hover:text-white"
+          className="rounded text-xs text-muted underline underline-offset-2 hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           {showEmpty ? 'Masquer les lignes sans donnée' : `Afficher les ${hidden} lignes sans donnée`}
         </button>
@@ -221,7 +230,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
 
       <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="hidden md:block bg-surface border border-border rounded-xl overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-sm">
-          <thead className="text-xs text-muted border-b border-border bg-bg/40">
+          <thead className="text-xs text-muted border-b border-border">
             <tr>
               <Th k="code" label="Code" />
               <Th k="designation" label="Société" />
@@ -229,7 +238,7 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
               <Th k="pays" label="Pays" />
               <Th k="montant" label="Dividende publié (FCFA)" right />
               <Th k="rendement_pct" label={net ? 'Rendement net (%)' : 'Rendement (%)'} right />
-              <Th k="ex_date" label="Ex-date" right />
+              <Th k="ex_date" label="Détachement" right />
               <Th k="payment_date" label="Paiement" right />
               <Th k="exercice" label="Exercice" right />
             </tr>
@@ -242,10 +251,10 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                 </td>
               </tr>
             ) : (
-              pageRows.map((row, idx) => (
+              pageRows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`border-b border-border/40 hover:bg-bg/40 ${idx % 2 === 1 ? 'bg-bg/20' : ''}`}
+                  className="border-b border-border/40 last:border-0 transition-colors hover:bg-white/[0.02]"
                 >
                   <td className="px-3 py-2">
                     <Link
@@ -264,8 +273,8 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
                   <td className={`px-3 py-2 text-right tabular font-medium ${yieldColor(row.rendement_pct)}`}>
                     {rendementLabel(row)}
                   </td>
-                  <td className="px-3 py-2 text-right text-xs">{fmtDateCourte(row.ex_date)}</td>
-                  <td className="px-3 py-2 text-right text-xs">{fmtDateCourte(row.payment_date)}</td>
+                  <td className="px-3 py-2 text-right text-xs tabular text-muted">{fmtDateCourte(row.ex_date)}</td>
+                  <td className="px-3 py-2 text-right text-xs tabular text-muted">{fmtDateCourte(row.payment_date)}</td>
                   <td className="px-3 py-2 text-right tabular">{row.exercice ?? '—'}</td>
                 </tr>
               ))
@@ -285,19 +294,21 @@ export default function DividendsTable({ rows, years, sectors }: Props) {
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-xs text-muted">
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="px-3 py-1.5 rounded border border-border hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="min-h-[44px] rounded-lg border border-border px-3 py-1.5 transition-[color,transform] duration-150 hover:text-ivory active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-30 disabled:cursor-not-allowed md:min-h-0"
           >
             Précédent
           </button>
-          <span>
-            Page {page + 1} / {totalPages}
+          <span className="tabular">
+            Page {page + 1} sur {totalPages}
           </span>
           <button
+            type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="px-3 py-1.5 rounded border border-border hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="min-h-[44px] rounded-lg border border-border px-3 py-1.5 transition-[color,transform] duration-150 hover:text-ivory active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-30 disabled:cursor-not-allowed md:min-h-0"
           >
             Suivant
           </button>

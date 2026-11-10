@@ -1,20 +1,17 @@
 import type React from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import DividendsTable from '@/components/DividendsTable';
-import DividendsTopCard from '@/components/DividendsTopCard';
 import ViewTabs from '@/components/ViewTabs';
 import { REVENUS_TABS } from '@/lib/viewTabsPresets';
 import { computeYield, type DividendRow } from '@/lib/dividends';
-import { fmtFcfa, fmtNumber } from '@/lib/format';
-import { TrendingUp, BarChart3 } from '@/components/icons';
-import {
-  SectionHeader,
-  PremiumPanel,
-  MetricCard,
-  EmptyStatePremium,
-  StatPill,
-  Eyebrow,
-} from '@/components/ui/premium';
+import { meilleursRendements } from '@/lib/dividendes/classement';
+import { fmtDateCourte, fmtNumber } from '@/lib/format';
+import { EmptyStatePremium, PremiumPanel } from '@/components/ui/premium';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { SommaireChapitres } from '@/components/marche/SommaireChapitres';
+import { LigneSource } from '@/components/marche/LigneSource';
+import { Chapitre } from '@/components/fiche/Chapitre';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dividendes' };
@@ -32,10 +29,11 @@ interface UpcomingEvent {
   base: 'brut' | 'net' | 'inconnu' | null;
 }
 
-const fmtDateLongue = (iso: string) =>
-  new Date(`${iso}T00:00:00Z`).toLocaleDateString('fr-FR', {
-    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
-  });
+const fmtJour = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const fmtAnnee = (iso: string) => iso.slice(0, 4);
+
+const libelleBase = (b: UpcomingEvent['base']) => (b === 'net' ? 'net' : b === 'brut' ? 'brut' : 'publié');
 
 interface RawDividend {
   id: string;
@@ -64,11 +62,12 @@ async function getData(year?: string, sector?: string): Promise<{
   rows: DividendRow[];
   years: number[];
   sectors: string[];
-  top5Yield: DividendRow[];
+  classement: DividendRow[];
   upcoming: UpcomingEvent[];
   byYear: { exercice: number; societes: number }[];
   exerciceRecent: number | null;
   nbDistributeurs: number | null;
+  dateCours: string | null;
 }> {
   const supabase = createClient();
 
@@ -91,19 +90,20 @@ async function getData(year?: string, sector?: string): Promise<{
 
   const divCodes = [...new Set(dividends.map((d) => d.code))];
 
-  let coursByCode = new Map<string, number | null>();
+  const coursByCode = new Map<string, number | null>();
+  let dateCours: string | null = null;
   if (divCodes.length > 0) {
     const { data: lastActRow } = await supabase
       .from('brvm_actions_daily')
       .select('date_marche')
       .order('date_marche', { ascending: false })
       .limit(1);
-    const lastDate = lastActRow?.[0]?.date_marche ?? null;
-    if (lastDate) {
+    dateCours = lastActRow?.[0]?.date_marche ?? null;
+    if (dateCours) {
       const { data: acts } = await supabase
         .from('brvm_actions_daily')
         .select('code, cours_jour')
-        .eq('date_marche', lastDate)
+        .eq('date_marche', dateCours)
         .in('code', divCodes);
       for (const a of (acts ?? []) as RawAction[]) {
         coursByCode.set(a.code, a.cours_jour);
@@ -130,20 +130,12 @@ async function getData(year?: string, sector?: string): Promise<{
     };
   });
 
-  // Unique sorted years and sectors
   const years = [...new Set(rows.map((r) => r.exercice).filter((y): y is number => y != null))].sort((a, b) => b - a);
   const sectors = [...new Set(rows.map((r) => r.secteur).filter((s): s is string => s != null))].sort();
 
-  // Apply SSR filters
   let filtered = rows;
   if (year) filtered = filtered.filter((r) => String(r.exercice) === year);
   if (sector) filtered = filtered.filter((r) => r.secteur === sector);
-
-  // Top 5 by yield (rendement non-null, all rows)
-  const top5Yield = [...rows]
-    .filter((r) => r.rendement_pct != null)
-    .sort((a, b) => (b.rendement_pct ?? 0) - (a.rendement_pct ?? 0))
-    .slice(0, 5);
 
   // À venir : détachements et paiements postérieurs à aujourd'hui (données déjà chargées).
   const today = new Date().toISOString().slice(0, 10);
@@ -175,13 +167,15 @@ async function getData(year?: string, sector?: string): Promise<{
     .sort(([a], [b]) => a - b)
     .map(([exercice, codes]) => ({ exercice, societes: codes.size }));
 
-  // Sociétés ayant distribué (montant > 0) sur l'exercice le plus récent des 5 dernières années.
   const exerciceRecent = byYear.length > 0 ? byYear[byYear.length - 1].exercice : null;
   const nbDistributeurs = exerciceRecent == null
     ? null
-    : new Set(rows.filter((r) => r.exercice === exerciceRecent && r.montant > 0).map((r) => r.code)).size;
+    : (byYear.find((b) => b.exercice === exerciceRecent)?.societes ?? null);
 
-  return { rows: filtered, years, sectors, top5Yield, upcoming, byYear, exerciceRecent, nbDistributeurs };
+  // Rendements : dernier exercice seulement (voir lib/dividendes/classement.ts).
+  const classement = meilleursRendements(rows, exerciceRecent, 5);
+
+  return { rows: filtered, years, sectors, classement, upcoming, byYear, exerciceRecent, nbDistributeurs, dateCours };
 }
 
 interface PageProps {
@@ -192,154 +186,206 @@ export default async function DividendesPage({ searchParams }: PageProps) {
   const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
   const sector = typeof searchParams.sector === 'string' ? searchParams.sector : undefined;
 
-  const { rows, years, sectors, top5Yield, upcoming, byYear, exerciceRecent, nbDistributeurs } = await getData(year, sector);
+  const { rows, years, sectors, classement, upcoming, byYear, exerciceRecent, nbDistributeurs, dateCours } =
+    await getData(year, sector);
 
-  const top5Entries = top5Yield.map((r) => ({
-    code: r.code,
-    label: r.designation ?? '',
-    value: r.rendement_pct != null && r.montant > 0 ? `${fmtNumber(r.rendement_pct, 2)} %` : '—',
-    sub: fmtMontant(r.montant) + ' FCFA',
-  }));
+  const maxSocietes = byYear.length > 0 ? Math.max(...byYear.map((b) => b.societes)) : 1;
+  const maxRdt = classement[0]?.rendement_pct ?? 1;
 
-  // Max total for inline bar scaling
-  const maxTotal = byYear.length > 0 ? Math.max(...byYear.map((b) => b.societes)) : 1;
-
-  // KPIs synthèse
-  const avgYield = (() => {
-    const vals = top5Yield.map((r) => r.rendement_pct).filter((v): v is number => v != null);
-    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-  })();
+  const chapitres = [
+    { id: 'a-venir', label: 'Prochaines dates' },
+    ...(classement.length > 0 ? [{ id: 'rendements', label: 'Rendements' }] : []),
+    ...(byYear.length > 0 ? [{ id: 'par-exercice', label: 'Par exercice' }] : []),
+    { id: 'historique', label: 'Historique' },
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      {/* En-tête premium */}
-      <SectionHeader
-        accent="emerald"
-        title="Dividendes BRVM"
-        subtitle="Historique des distributions. Le rendement est calculé sur le dernier cours disponible, à partir du dividende tel que publié (net ou brut selon la source)."
-        actions={
-          <StatPill tone="neutral">
-            <span className="tabular">{rows.length}</span>&nbsp;enregistrement{rows.length !== 1 ? 's' : ''}
-          </StatPill>
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      <EnTeteCote
+        titre="Dividendes"
+        description="Les prochaines dates de détachement et de paiement, les rendements du dernier exercice et l’historique des distributions."
+        seance={dateCours}
+        libelleSeance="Cours du"
+        compte={
+          nbDistributeurs != null && nbDistributeurs > 0 && exerciceRecent != null
+            ? { n: nbDistributeurs, libelle: `sociétés ayant distribué pour ${exerciceRecent}` }
+            : null
         }
+        source={null}
       />
-      <ViewTabs tabs={REVENUS_TABS} current="/dividendes" />
-
-      {/* Séparateur doré */}
-      <div className="h-px bg-gold-line" />
-
-      {/* KPI cards de synthèse */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <MetricCard
-          label={exerciceRecent ? `Sociétés ayant distribué (ex. ${exerciceRecent})` : 'Sociétés ayant distribué'}
-          value={nbDistributeurs != null && nbDistributeurs > 0 ? String(nbDistributeurs) : '—'}
-          accent="gold"
-        />
-        <MetricCard
-          label="Meilleur rendement (%)"
-          value={top5Yield[0]?.rendement_pct != null ? fmtNumber(top5Yield[0].rendement_pct, 2) : '—'}
-          accent="emerald"
-        />
-        <MetricCard
-          label="Rendement moyen top 5 (%)"
-          value={avgYield != null ? fmtNumber(avgYield, 2) : '—'}
-          accent="sapphire"
-        />
+      <div className="mt-6">
+        <ViewTabs tabs={REVENUS_TABS} current="/dividendes" />
       </div>
+      <SommaireChapitres chapitres={chapitres} />
 
-      {/* À venir : prochains détachements et paiements */}
-      {upcoming.length === 0 ? (
-        <EmptyStatePremium
-          icon="◎"
-          title="Aucun détachement ni paiement à venir"
-          hint="Aucune date postérieure à aujourd’hui dans les distributions enregistrées."
+      {/* ── 01 : Prochaines dates ─────────────────────────────────────────── */}
+      <section aria-labelledby="a-venir-titre">
+        <Chapitre
+          id="a-venir"
+          numero="01"
+          titre="Prochaines dates"
+          sousTitre="Détachements et paiements annoncés, du plus proche au plus lointain."
+          premier
         />
-      ) : (
-        <PremiumPanel glow>
-          <div className="p-5">
-            <h2 className="font-display text-lg text-ivory mb-3">À venir</h2>
-            <ul className="divide-y divide-border/40">
-              {upcoming.map((e) => (
-                <li key={e.key} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5 text-sm">
-                  <span className="min-w-0 flex items-baseline gap-2">
-                    <span className="font-mono font-medium text-ivory">{e.code}</span>
-                    <span className="truncate text-xs text-muted">{e.designation ?? ''}</span>
-                  </span>
-                  <span className="flex items-baseline gap-4">
-                    <span className="text-xs text-muted">{e.type}</span>
-                    <span className="text-ivory">{fmtDateLongue(e.date)}</span>
-                    <span className="tabular text-ivory font-semibold">
-                      {fmtMontant(e.montant)} FCFA
-                      <span className="ml-1 text-xs font-normal text-muted">
-                        {e.base === 'net' ? 'net' : e.base === 'brut' ? 'brut' : 'publié'}
-                      </span>
+        <div className="mt-6">
+          {upcoming.length === 0 ? (
+            <EmptyStatePremium
+              title="Aucune date annoncée"
+              hint="Aucun détachement ni paiement postérieur à aujourd’hui dans les distributions enregistrées."
+              action={{ href: '/dividendes/calendrier', label: 'Voir le calendrier' }}
+            />
+          ) : (
+            <PremiumPanel>
+              <ol className="divide-y divide-border/50">
+                {upcoming.map((e) => (
+                  <li
+                    key={e.key}
+                    className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-0.5 px-4 py-3 md:grid-cols-[88px_120px_minmax(0,1fr)_auto] md:px-5"
+                  >
+                    <time dateTime={e.date} className="row-span-2 md:row-span-1">
+                      <span className="block tabular text-base text-ivory">{fmtJour(e.date)}</span>
+                      <span className="block tabular text-xs text-faint">{fmtAnnee(e.date)}</span>
+                    </time>
+                    <span className="col-start-2 row-start-2 text-xs text-muted md:col-start-2 md:row-start-1 md:text-sm">
+                      {e.type}
                     </span>
-                  </span>
-                </li>
-              ))}
-            </ul>
+                    <span className="col-start-2 row-start-1 min-w-0 truncate md:col-start-3">
+                      <Link
+                        href={`/actions/${e.code}`}
+                        className="rounded font-mono font-medium text-ivory transition-colors hover:text-accent-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      >
+                        {e.code}
+                      </Link>
+                      <span className="ml-2 text-xs text-muted">{e.designation ?? ''}</span>
+                    </span>
+                    <span className="col-start-3 row-span-2 text-right md:col-start-4 md:row-span-1">
+                      <span className="tabular text-ivory">{fmtMontant(e.montant)}</span>
+                      <span className="ml-1 text-xs text-muted">FCFA {libelleBase(e.base)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </PremiumPanel>
+          )}
+          <LigneSource>
+            Dates du calendrier officiel des dividendes de la BRVM et du Bulletin officiel de la cote, à défaut
+            des sources publiques. Montant par action, net ou brut selon ce que la source publie.{' '}
+            <Link href="/dividendes/calendrier" className="underline underline-offset-2 hover:text-muted">
+              Calendrier complet
+            </Link>
+          </LigneSource>
+        </div>
+      </section>
+
+      {/* ── 02 : Rendements du dernier exercice ───────────────────────────── */}
+      {classement.length > 0 && exerciceRecent != null && (
+        <section aria-labelledby="rendements-titre">
+          <Chapitre
+            id="rendements"
+            numero="02"
+            titre={`Les rendements de l’exercice ${exerciceRecent}`}
+            sousTitre="Les cinq dividendes les plus élevés rapportés au cours actuel de l’action."
+          />
+          <div className="mt-6">
+            <PremiumPanel>
+              <ol className="divide-y divide-border/50">
+                {classement.map((r, i) => {
+                  const pct = r.rendement_pct ?? 0;
+                  return (
+                    <li key={r.id} className="grid grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-x-4 px-4 py-3.5 md:px-5">
+                      <span className="tabular text-sm text-faint">{i + 1}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-baseline gap-2">
+                          <Link
+                            href={`/actions/${r.code}`}
+                            className="rounded font-mono font-medium text-ivory transition-colors hover:text-accent-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                          >
+                            {r.code}
+                          </Link>
+                          <span className="truncate text-xs text-muted">{r.designation ?? ''}</span>
+                        </div>
+                        <div className="mt-2 h-1 overflow-hidden rounded-full bg-border/60" aria-hidden>
+                          <div
+                            className="h-full rounded-full bg-accent/70"
+                            style={{ width: `${Math.max(2, Math.round((pct / maxRdt) * 100))}%` } as React.CSSProperties}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="block tabular text-xl text-ivory">{fmtNumber(pct, 2)} %</span>
+                        <span className="block tabular text-xs text-muted">{fmtMontant(r.montant)} FCFA</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </PremiumPanel>
+            <LigneSource>
+              Dividende de l’exercice {exerciceRecent} divisé par le cours de clôture
+              {dateCours ? <> du <time dateTime={dateCours}>{fmtDateCourte(dateCours)}</time></> : null}. Un dividende
+              d’un exercice plus ancien n’entre pas dans ce classement : le rapporter au cours d’aujourd’hui ne
+              mesurerait rien.
+            </LigneSource>
           </div>
-        </PremiumPanel>
+        </section>
       )}
 
-      {/* Top rendements · évolution */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <PremiumPanel>
-          <div className="p-5">
-            <DividendsTopCard
-              title="Top 5 rendements"
-              icon={<TrendingUp size={14} />}
-              entries={top5Entries}
-            />
-          </div>
-        </PremiumPanel>
-
-        {/* Évolution par exercice */}
-        <PremiumPanel>
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-muted"><BarChart3 size={14} /></span>
-              <Eyebrow>Sociétés ayant distribué, par exercice</Eyebrow>
-            </div>
-            {byYear.length === 0 ? (
-              <p className="text-xs text-muted">Aucune donnée disponible.</p>
-            ) : (
-              <ul className="space-y-3">
+      {/* ── 03 : Sociétés ayant distribué, par exercice ───────────────────── */}
+      {byYear.length > 0 && (
+        <section aria-labelledby="par-exercice-titre">
+          <Chapitre
+            id="par-exercice"
+            numero={classement.length > 0 ? '03' : '02'}
+            titre="Combien de sociétés distribuent"
+            sousTitre="Nombre de sociétés cotées ayant versé un dividende, par exercice."
+          />
+          <div className="mt-6">
+            <PremiumPanel>
+              <ul className="space-y-4 px-4 py-5 md:px-5">
                 {byYear.map((b) => (
-                  <li key={b.exercice} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted">{b.exercice}</span>
-                      <span className="tabular text-ivory">{b.societes} société{b.societes > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className="h-1.5 bg-border rounded-full overflow-hidden">
+                  <li key={b.exercice} className="grid grid-cols-[48px_minmax(0,1fr)_96px] items-center gap-x-4">
+                    <span className="tabular text-sm text-muted">{b.exercice}</span>
+                    <div className="h-2 overflow-hidden rounded-full bg-border/60" aria-hidden>
                       <div
-                        className="h-full bg-accent/60 rounded-full"
-                        style={{ '--bar-w': `${Math.round((b.societes / maxTotal) * 100)}%`, width: 'var(--bar-w)' } as React.CSSProperties}
+                        className={`h-full rounded-full ${b.exercice === exerciceRecent ? 'bg-accent' : 'bg-accent/40'}`}
+                        style={{ width: `${Math.round((b.societes / maxSocietes) * 100)}%` } as React.CSSProperties}
                       />
                     </div>
+                    <span className="text-right text-sm">
+                      <span className="tabular text-ivory">{b.societes}</span>
+                      <span className="ml-1 text-xs text-muted">société{b.societes > 1 ? 's' : ''}</span>
+                    </span>
                   </li>
                 ))}
               </ul>
-            )}
+            </PremiumPanel>
+            <LigneSource>
+              Une société est comptée si au moins un dividende non nul est enregistré pour l’exercice. Un exercice en
+              cours peut encore évoluer jusqu’aux assemblées générales.
+            </LigneSource>
           </div>
-        </PremiumPanel>
-      </div>
-
-      {/* Tableau principal */}
-      {rows.length === 0 ? (
-        <EmptyStatePremium
-          icon="◎"
-          title="Aucun dividende enregistré"
-          hint="Lancez le scraper pour alimenter la base avec les distributions récentes."
-        />
-      ) : (
-        <PremiumPanel>
-          <div className="p-5">
-            <p className="overline text-muted mb-4">Historique des distributions</p>
-            <DividendsTable rows={rows} years={years} sectors={sectors} />
-          </div>
-        </PremiumPanel>
+        </section>
       )}
+
+      {/* ── Historique ────────────────────────────────────────────────────── */}
+      <section aria-labelledby="historique-titre">
+        <Chapitre
+          id="historique"
+          numero={String(chapitres.length).padStart(2, '0')}
+          titre="Historique des distributions"
+          sousTitre="Toutes les distributions enregistrées, filtrables par exercice et par secteur."
+        />
+        <div className="mt-6">
+          {rows.length === 0 ? (
+            <EmptyStatePremium
+              title="Aucun dividende enregistré"
+              hint="L’historique s’affichera dès que des distributions auront été collectées."
+            />
+          ) : (
+            <DividendsTable rows={rows} years={years} sectors={sectors} />
+          )}
+        </div>
+      </section>
     </div>
   );
 }
