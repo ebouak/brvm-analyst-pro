@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import { CalendarClock, Wallet, Activity } from 'lucide-react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
   combineDividendsAndEvents,
@@ -11,13 +10,9 @@ import ViewTabs from '@/components/ViewTabs';
 import { CALENDAR_TABS } from '@/lib/calendarTabs';
 import CalendarTimeline from '@/components/CalendarTimeline';
 import CalendarTable from '@/components/CalendarTable';
-import {
-  SectionHeader,
-  PremiumPanel,
-  Eyebrow,
-  StatPill,
-  EmptyStatePremium,
-} from '@/components/ui/premium';
+import { EmptyStatePremium } from '@/components/ui/premium';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { LigneSource } from '@/components/marche/LigneSource';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Calendrier' };
@@ -110,56 +105,6 @@ async function getData(daysN: number): Promise<{
   return { items, countExDates, countPayments, countEvents };
 }
 
-/* ─── KPI card premium ────────────────────────────────────────────────────── */
-function CalendarKpiCard({
-  label,
-  value,
-  tone,
-  icon,
-}: {
-  label: string;
-  value: number;
-  tone: 'gold' | 'emerald' | 'sapphire';
-  icon: ReactNode;
-}) {
-  const styles = {
-    gold: {
-      outer: 'border-gold/20 bg-gold/[0.04]',
-      inner: 'border-gold/10',
-      number: 'text-gold',
-      icon: 'border-gold/20 bg-gold/[0.08] text-gold/60',
-    },
-    emerald: {
-      outer: 'border-up/20 bg-up/[0.04]',
-      inner: 'border-up/10',
-      number: 'text-up',
-      icon: 'border-up/20 bg-up/[0.08] text-up',
-    },
-    sapphire: {
-      outer: 'border-sapphire/20 bg-sapphire/[0.04]',
-      inner: 'border-sapphire/10',
-      number: 'text-sapphire',
-      icon: 'border-sapphire/20 bg-sapphire/[0.08] text-sapphire/60',
-    },
-  }[tone];
-
-  return (
-    <div className={`rounded-panel border p-1.5 ${styles.outer} `}>
-      <div className={`rounded-[calc(1.125rem-0.375rem)] border ${styles.inner} bg-surface p-5`}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold text-faint">{label}</p>
-            <p className={`tabular text-4xl font-bold mt-2 leading-none ${styles.number}`}>{value}</p>
-          </div>
-          <div className={`grid h-10 w-10 place-items-center rounded-full border flex-shrink-0 ${styles.icon}`}>
-            {icon}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 interface PageProps {
   searchParams: { type?: string; days?: string; view?: string };
@@ -177,121 +122,63 @@ export default async function CalendrierPage({ searchParams }: PageProps) {
 
   const { items, countExDates, countPayments, countEvents } = await getData(daysN);
 
-  const filtered = filterByKind(
-    items,
-    type as 'dividende' | 'event' | 'all',
-  );
+  const filtered = filterByKind(items, type as 'dividende' | 'event' | 'all');
 
-  const totalFiltered = filtered.length;
+  const compteurs = [
+    { libelle: 'Détachements', n: countExDates },
+    { libelle: 'Paiements', n: countPayments },
+    { libelle: 'Événements de société', n: countEvents },
+  ];
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* ── En-tête ────────────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 pt-8 pb-6 animate-rise-in">
-        <SectionHeader
-          title="Calendrier économique"
-          subtitle={`Dividendes et événements corporatifs sur les ${daysN} prochains jours.`}
-          actions={
-            <>
-              <StatPill tone={totalFiltered > 0 ? 'gold' : 'neutral'}>
-                {totalFiltered} événement{totalFiltered > 1 ? 's' : ''}
-              </StatPill>
-              <a
-                href="/api/calendar"
-                title="Abonnez-vous dans Google Calendar / Apple / Outlook : les nouvelles ex-dates et paiements apparaîtront automatiquement"
-                className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-accent-ink transition-colors hover:border-accent/60 hover:bg-accent/20"
-              >
-                S’abonner au calendrier (.ics)
-              </a>
-            </>
-          }
-        />
-        <div className="mt-4">
-          <ViewTabs tabs={CALENDAR_TABS} current="/calendrier" />
-        </div>
-        <div className="gold-rule mt-6" />
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      <EnTeteCote
+        titre="Calendrier"
+        description={`Détachements et paiements de dividendes, assemblées et publications des sociétés cotées, sur les ${daysN} prochains jours.`}
+        source={null}
+        actions={
+          <a
+            href="/api/calendar"
+            className="inline-flex min-h-[44px] items-center rounded-xl border border-border-strong px-4 text-sm text-accent-ink transition-colors hover:border-accent hover:bg-elevated active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          >
+            S’abonner au calendrier
+          </a>
+        }
+      />
+      <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
+        {compteurs.map((c) => (
+          <div key={c.libelle} className="flex gap-1.5">
+            <dt>{c.libelle}</dt>
+            <dd className="tabular text-ivory">{c.n}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-6">
+        <ViewTabs tabs={CALENDAR_TABS} current="/calendrier" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pb-12 space-y-8">
+      <div className="mt-8 border-t border-border-strong pt-6">
+        <CalendarFilters type={type} days={String(daysN)} view={view} totalItems={filtered.length} />
+      </div>
 
-        {/* ── KPI ──────────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-rise-in">
-          <CalendarKpiCard
-            label="Ex-dates à venir"
-            value={countExDates}
-            tone="gold"
-            icon={<CalendarClock size={18} aria-hidden />}
-          />
-          <CalendarKpiCard
-            label="Paiements à venir"
-            value={countPayments}
-            tone="emerald"
-            icon={<Wallet size={18} aria-hidden />}
-          />
-          <CalendarKpiCard
-            label="Événements de marché"
-            value={countEvents}
-            tone="sapphire"
-            icon={<Activity size={18} aria-hidden />}
-          />
-        </div>
-
-        {/* ── Filtres ───────────────────────────────────────────────────────── */}
-        <PremiumPanel>
-          <div className="px-5 py-4">
-            <div className="flex items-center gap-3 mb-4">
-              <Eyebrow className="text-gold/50">Filtres</Eyebrow>
-            </div>
-            <CalendarFilters
-              type={type}
-              days={String(daysN)}
-              view={view}
-              totalItems={filtered.length}
-            />
-          </div>
-        </PremiumPanel>
-
-        {/* ── Vue principale ────────────────────────────────────────────────── */}
+      <div className="mt-6">
         {filtered.length === 0 ? (
           <EmptyStatePremium
-            icon="◎"
-            title="Aucun événement sur cette période"
-            hint={`Aucun dividende ni événement de marché trouvé pour les ${daysN} prochains jours avec les filtres sélectionnés.`}
+            title="Rien d’annoncé sur cette période"
+            hint={`Aucun dividende ni événement de société pour les ${daysN} prochains jours avec ces filtres. Une période plus longue en montrera peut-être.`}
+            action={{ href: '/calendrier?type=all&days=90&view=timeline', label: 'Voir les 90 prochains jours' }}
           />
+        ) : view === 'timeline' ? (
+          <CalendarTimeline items={filtered} />
         ) : (
-          <div className="animate-rise-in">
-            {view === 'timeline' ? (
-              <CalendarTimeline items={filtered} />
-            ) : (
-              <CalendarTable items={filtered} />
-            )}
-          </div>
+          <CalendarTable items={filtered} />
         )}
-
-        {/* ── Légende ───────────────────────────────────────────────────────── */}
-        {filtered.length > 0 && (
-          <div className="gold-rule" />
-        )}
-        {filtered.length > 0 && (
-          <div className="flex flex-wrap items-center gap-4">
-            <Eyebrow className="text-faint">Légende</Eyebrow>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-                <span className="h-1.5 w-4 rounded-full bg-gold/60 inline-block" />
-                Ex-date dividende
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-                <span className="h-1.5 w-4 rounded-full bg-up/60 inline-block" />
-                Paiement dividende
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-                <span className="h-1.5 w-4 rounded-full bg-sapphire/60 inline-block" />
-                Événement corporatif
-              </span>
-            </div>
-          </div>
-        )}
-
+        <LigneSource>
+          Dividendes : calendrier officiel de la BRVM et Bulletin officiel de la cote, à défaut les sources publiques ;
+          montant par action tel que publié. Événements : publications des sociétés et de la BRVM.{' '}
+          L’abonnement ajoute les nouvelles dates à Google Agenda, Apple Calendrier ou Outlook (format .ics).{' '}
+          <Link href="/dividendes" className="underline underline-offset-2 hover:text-muted">Tous les dividendes</Link>
+        </LigneSource>
       </div>
     </div>
   );

@@ -1,136 +1,122 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { SectionHeader } from '@/components/ui/premium';
 import ViewTabs from '@/components/ViewTabs';
 import { CALENDAR_TABS } from '@/lib/calendarTabs';
 import { DividendCalendar } from '@/components/DividendCalendar';
 import { EmptyStatePremium } from '@/components/ui/premium';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { LigneSource } from '@/components/marche/LigneSource';
 import type { DividendCalendarEvent } from '@/lib/dividend/calendar';
 
 export const metadata: Metadata = {
-  title: 'Calendrier des Dividendes',
-  description: 'Calendrier annuel des dividendes : dates de détachement, montants et rendements estimés.',
+  title: 'Calendrier des dividendes',
+  description: 'Calendrier mensuel des dividendes : dates de détachement et de paiement, montants par action.',
 };
 
 export const dynamic = 'force-dynamic';
 
-async function getDividends(): Promise<DividendCalendarEvent[]> {
+interface LigneDividende {
+  id: string;
+  code: string;
+  exercice: number | null;
+  ex_date: string;
+  payment_date: string;
+  montant: number;
+  brvm_instruments: { designation: string | null; secteur: string | null } | null;
+}
+
+async function getDividends(): Promise<{ events: DividendCalendarEvent[]; dateCours: string | null }> {
   const supabase = createClient();
 
-  // Fetch all dividends with instrument details
   const { data: divData, error: divError } = await supabase
     .from('dividends')
-    .select(`
-      id,
-      code,
-      ex_date,
-      payment_date,
-      montant,
-      brvm_instruments (
-        designation,
-        secteur
-      )
-    `)
+    .select('id, code, exercice, ex_date, payment_date, montant, brvm_instruments ( designation, secteur )')
     .order('ex_date', { ascending: false });
 
-  if (divError) {
-    console.error('Error fetching dividends:', divError);
-    return [];
-  }
+  if (divError || !divData || divData.length === 0) return { events: [], dateCours: null };
+  const lignes = divData as unknown as LigneDividende[];
 
-  if (!divData || divData.length === 0) {
-    return [];
-  }
-
-  // Get unique codes and fetch their latest cours_jour + taux info
-  const codes = [...new Set((divData as any[]).map((d) => d.code))];
-
-  let coursesByCode = new Map<string, number | null>();
-  let tauxByCode = new Map<string, number>();
-
-  // Fetch latest cours_jour for each code
-  if (codes.length > 0) {
-    const { data: latestDateData } = await supabase
+  const codes = [...new Set(lignes.map((d) => d.code))];
+  const coursParCode = new Map<string, number | null>();
+  const { data: derniere } = await supabase
+    .from('brvm_actions_daily')
+    .select('date_marche')
+    .order('date_marche', { ascending: false })
+    .limit(1);
+  const dateCours = (derniere as { date_marche: string }[] | null)?.[0]?.date_marche ?? null;
+  if (dateCours && codes.length > 0) {
+    const { data: actions } = await supabase
       .from('brvm_actions_daily')
-      .select('date_marche')
-      .order('date_marche', { ascending: false })
-      .limit(1);
-
-    const lastDate = (latestDateData as any[])?.[0]?.date_marche ?? null;
-
-    if (lastDate) {
-      const { data: actionsData } = await supabase
-        .from('brvm_actions_daily')
-        .select('code, cours_jour')
-        .eq('date_marche', lastDate)
-        .in('code', codes);
-
-      for (const action of (actionsData as any[]) ?? []) {
-        coursesByCode.set(action.code, action.cours_jour);
-      }
-    }
-
-    // Fetch taux from dividend events (ex_date, montant to estimate taux)
-    // For now, we'll calculate taux from historical context
-    // If taux field exists in dividends table, fetch it directly
+      .select('code, cours_jour')
+      .eq('date_marche', dateCours)
+      .in('code', codes);
+    for (const a of (actions as { code: string; cours_jour: number | null }[] | null) ?? []) coursParCode.set(a.code, a.cours_jour);
   }
 
-  // Transform data
-  const result: DividendCalendarEvent[] = (divData as any[]).map((div) => {
-    const cours = coursesByCode.get(div.code) ?? null;
-    const instrument = div.brvm_instruments as any;
+  // Un rendement n'a de sens que pour le DERNIER exercice distribué d'une société :
+  // rapporter un dividende ancien au cours d'aujourd'hui ne mesure rien (même
+  // règle que /dividendes, lib/dividendes/classement.ts). Pour les autres lignes,
+  // rendement ET cours sont mis à nul : estimatedYield() le recalculerait sinon.
+  const dernierExercice = new Map<string, number>();
+  for (const d of lignes) {
+    if (d.exercice != null && d.montant > 0) dernierExercice.set(d.code, Math.max(dernierExercice.get(d.code) ?? -Infinity, d.exercice));
+  }
 
-    // Calculate rendement if we have cours
-    let rendement: number | null = null;
-    if (cours && cours > 0 && div.montant > 0) {
-      rendement = (div.montant / cours) * 100;
-    }
-
+  const events: DividendCalendarEvent[] = lignes.map((d) => {
+    const recent = d.exercice != null && d.exercice === dernierExercice.get(d.code);
+    const cours = recent ? coursParCode.get(d.code) ?? null : null;
+    const rendement = cours && cours > 0 && d.montant > 0 ? (d.montant / cours) * 100 : null;
     return {
-      id: div.id,
-      code: div.code,
-      designation: instrument?.designation ?? null,
-      secteur: instrument?.secteur ?? null,
+      id: d.id,
+      code: d.code,
+      designation: d.brvm_instruments?.designation ?? null,
+      secteur: d.brvm_instruments?.secteur ?? null,
       taux: rendement,
-      ex_date: div.ex_date,
-      payment_date: div.payment_date,
+      ex_date: d.ex_date,
+      payment_date: d.payment_date,
       cours_jour: cours,
       rendement_pct: rendement,
-      montant: div.montant,
+      montant: d.montant,
     };
   });
 
-  return result;
+  return { events, dateCours };
 }
 
 export default async function DividendCalendarPage() {
-  const dividends = await getDividends();
+  const { events, dateCours } = await getDividends();
   const today = new Date();
 
   return (
-    <div className="min-h-screen bg-bg">
-      <div className={`mx-auto px-4 py-8 space-y-8`}>
-        <SectionHeader
-          title="Dividendes"
-          subtitle="Calendrier annuel : dates de détachement, montants et rendements estimés."
-        />
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      <EnTeteCote
+        titre="Calendrier des dividendes"
+        description="Les dates de détachement et de paiement mois par mois, avec le montant par action."
+        seance={dateCours}
+        libelleSeance="Cours du"
+        source={null}
+      />
+      <div className="mt-6">
         <ViewTabs tabs={CALENDAR_TABS} current="/dividendes/calendrier" />
+      </div>
 
-        {dividends.length === 0 ? (
+      <div className="mt-8 border-t border-border-strong pt-6">
+        {events.length === 0 ? (
           <EmptyStatePremium
-            icon="◎"
             title="Aucun dividende enregistré"
-            hint="Le calendrier des dividendes s'alimentera au fur et à mesure des annonces de distributions."
+            hint="Le calendrier se remplit au fil des annonces de distribution."
+            action={{ href: '/dividendes', label: 'Voir les dividendes' }}
           />
         ) : (
-          <div className="max-w-6xl">
-            <DividendCalendar
-              dividends={dividends}
-              defaultYear={today.getFullYear()}
-              defaultMonth={today.getMonth()}
-            />
-          </div>
+          <DividendCalendar dividends={events} defaultYear={today.getFullYear()} defaultMonth={today.getMonth()} />
         )}
+        <LigneSource>
+          Dates du calendrier officiel des dividendes de la BRVM et du Bulletin officiel de la cote, à défaut des
+          sources publiques ; montant par action tel que publié. Le rendement n’est indiqué que pour le dernier
+          exercice distribué de chaque société, rapporté au dernier cours de clôture.{' '}
+          <Link href="/dividendes" className="underline underline-offset-2 hover:text-muted">Tous les dividendes</Link>
+        </LigneSource>
       </div>
     </div>
   );
