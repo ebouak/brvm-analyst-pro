@@ -121,3 +121,60 @@ def test_page_de_liste_ecartee():
 
 def test_article_accepte():
     assert ressemble_a_un_article("https://www.sikafinance.com/marches/brvm-29-valeurs-en-baisse_64333") is True
+
+
+# ── API Search de Perplexity (remplace l'appel Sonar, 2026-11-10) ──
+# Client factice : aucune clé, aucun appel réseau.
+from types import SimpleNamespace
+
+import commodity_weekly_generator as cwg
+
+
+class FauxClient:
+    def __init__(self, resultats=None, erreur=None):
+        self.appels = []
+        self._resultats = resultats or []
+        self._erreur = erreur
+        self.search = SimpleNamespace(create=self._create)
+
+    def _create(self, **kwargs):
+        self.appels.append(kwargs)
+        if self._erreur:
+            raise self._erreur
+        return SimpleNamespace(id="r1", server_time=None, results=self._resultats)
+
+
+def resultat(url, date=None, title="Le cacao recule", snippet="Extrait de la page."):
+    date = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return SimpleNamespace(title=title, url=url, snippet=snippet, date=date, last_updated=None)
+
+
+def test_requetes_par_lots_de_cinq():
+    lots = cwg.requetes_commodites([f"m{i}" for i in range(7)])
+    assert [len(l) for l in lots] == [5, 2]
+    assert lots[0][0] == "m0 prix actualité de la semaine"
+
+
+def test_contexte_ne_garde_que_les_articles_joignables_et_dedoublonne(monkeypatch):
+    monkeypatch.setattr(cwg, "url_joignable", lambda u, *a, **k: "injoignable" not in u)
+    client = FauxClient([
+        resultat("https://www.example.com/le-cacao-recule-sur-les-marches-mondiaux"),
+        resultat("https://www.example.com/le-cacao-recule-sur-les-marches-mondiaux"),  # doublon
+        resultat("https://www.example.com/actualites"),  # page de liste
+        resultat("https://www.example.com/article-injoignable-sur-le-petrole-brut"),
+        resultat("https://www.example.com/sans-date-ce-lien-est-ecarte-avant-tout", date="pas-une-date"),
+    ])
+    items = cwg.fetch_perplexity_context(["cacao"], client=client)
+    assert [it["url"] for it in items] == ["https://www.example.com/le-cacao-recule-sur-les-marches-mondiaux"]
+    assert items[0]["resume"] == "Extrait de la page."
+
+
+def test_erreur_de_l_api_degrade_en_silence():
+    assert cwg.fetch_perplexity_context(["cacao"], client=FauxClient(erreur=RuntimeError("401"))) == []
+
+
+def test_un_appel_par_lot(monkeypatch):
+    monkeypatch.setattr(cwg, "url_joignable", lambda u, *a, **k: True)
+    client = FauxClient([])
+    cwg.fetch_perplexity_context([f"m{i}" for i in range(6)], client=client)
+    assert len(client.appels) == 2

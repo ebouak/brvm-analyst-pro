@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         working-directory: veille
         run: |
-          pip install feedparser requests beautifulsoup4 pyyaml lxml schedule
+          pip install feedparser requests beautifulsoup4 pyyaml lxml schedule perplexityai==0.46.1
 
       - name: Run pipeline
         working-directory: veille

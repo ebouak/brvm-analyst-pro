@@ -653,51 +653,85 @@ def ressemble_a_un_article(url: str) -> bool:
     return len(dernier) >= 20 and "-" in dernier
 
 
-def fetch_perplexity_context(commodites: list[str]) -> list[dict]:
-    """Contexte macro récent via Perplexity (recherche web + citations) —
-    injecté dans le prompt DeepSeek comme bloc distinct, jamais vérifié a
-    posteriori (design §5 : rôle volontairement limité au contexte d'entrée,
-    pas de garde-fou de rapprochement texte/citation). Dégradation silencieuse
-    si la clé est absente ou l'appel échoue : l'article se génère sans ce
-    bloc, exactement comme aujourd'hui."""
-    if not PERPLEXITY_KEY:
+def rechercher_perplexity(requetes, maintenant: datetime, client=None, fenetre_jours: int = 14,
+                          max_results: int = 20) -> list[dict]:
+    """API Search de Perplexity (POST /search) : des résultats RÉELS, classés,
+    avec titre, URL, extrait et date de la page. Aucun texte de modèle, donc
+    aucune URL inventée (l'ancien appel Sonar faisait écrire les adresses par le
+    modèle). Un champ absent reste absent : une date nulle échoue à la
+    validation, elle n'est jamais complétée.
+
+    Filtres calés sur le comportement déjà observé : fenêtre de 14 jours (celle
+    de valider_item_perplexity), français et anglais, westbourse.com exclu
+    (url_joignable l'écarte déjà).
+
+    `client` injectable pour les tests ; sinon le SDK `perplexityai` lit
+    PERPLEXITY_API_KEY dans l'environnement. Copie identique dans
+    veille/brvm_pipeline.py — toute correction doit être reportée des deux
+    côtés (pas de module Python partagé entre les deux pipelines)."""
+    if client is None:
+        from perplexity import Perplexity
+        client = Perplexity(timeout=30)
+    debut = (maintenant - timedelta(days=fenetre_jours)).strftime("%m/%d/%Y")
+    reponse = client.search.create(
+        query=list(requetes),
+        max_results=max_results,
+        search_after_date_filter=debut,
+        search_language_filter=["fr", "en"],
+        search_domain_filter=["-westbourse.com"],
+    )
+    items = []
+    for r in getattr(reponse, "results", None) or []:
+        date = r.date
+        # Une date ISO avec heure garde son jour ; tout autre format est laissé
+        # tel quel et sera rejeté à la validation.
+        if isinstance(date, str) and re.match(r"^\d{4}-\d{2}-\d{2}", date):
+            date = date[:10]
+        items.append({"titre": r.title, "resume": r.snippet, "date": date, "url": r.url})
+    return items
+
+
+def requetes_commodites(commodites: list[str], par_lot: int = 5) -> list[list[str]]:
+    """Une requête par matière première, par lots de 5 : l'API Search accepte
+    jusqu'à cinq requêtes par appel, facturées comme une seule."""
+    requetes = [f"{nom} prix actualité de la semaine" for nom in commodites]
+    return [requetes[i:i + par_lot] for i in range(0, len(requetes), par_lot)]
+
+
+def fetch_perplexity_context(commodites: list[str], client=None) -> list[dict]:
+    """Contexte macro récent via l'API Search de Perplexity — injecté dans le
+    prompt DeepSeek comme bloc distinct (design §5 : rôle volontairement limité
+    au contexte d'entrée). Titre et extrait viennent des pages trouvées, plus
+    d'un résumé rédigé par un modèle. Dégradation silencieuse si la clé est
+    absente ou l'appel échoue : l'article se génère sans ce bloc, exactement
+    comme aujourd'hui."""
+    if not PERPLEXITY_KEY and client is None:
         log.info("PERPLEXITY_API_KEY absente — contexte macro ignoré")
         return []
 
-    import requests
-
-    liste = ", ".join(commodites)
-    prompt = (
-        f"Actualités récentes ayant affecté les prix de : {liste}, cette "
-        "semaine. Réponds UNIQUEMENT avec un tableau JSON strict, sans texte "
-        'autour, de la forme : [{"titre": "...", "resume": "...", '
-        '"date": "YYYY-MM-DD", "url": "https://..."}]. Un objet par fait '
-        "distinct, chacun avec sa propre source. N'invente aucune URL."
-    )
+    maintenant = datetime.now(timezone.utc)
+    items: list[dict] = []
     try:
-        resp = requests.post(
-            "https://api.perplexity.ai/chat/completions",
-            headers={"Authorization": f"Bearer {PERPLEXITY_KEY}", "Content-Type": "application/json"},
-            json={"model": "sonar", "messages": [{"role": "user", "content": prompt}]},
-            timeout=30,
-        )
-        resp.raise_for_status()
-        content = resp.json()["choices"][0]["message"]["content"]
-        items = json.loads(content)
-        if not isinstance(items, list):
-            raise ValueError("réponse JSON n'est pas une liste")
+        for lot in requetes_commodites(commodites):
+            items.extend(rechercher_perplexity(lot, maintenant, client=client))
     except Exception as e:
-        log.warning("Perplexity contexte macro erreur : %s", e)
+        # Le SDK ne place jamais la clé dans ses messages d'erreur.
+        log.warning("Perplexity contexte macro erreur : %s: %s", type(e).__name__, e)
         return []
 
-    maintenant = datetime.now(timezone.utc)
     valides = [it for it in items if valider_item_perplexity(it, maintenant)]
     uniques: dict[str, dict] = {}
     for it in valides:
         uniques.setdefault(str(it["url"]).strip(), it)  # un article = une URL
-    joignables = [it for u, it in uniques.items() if ressemble_a_un_article(u) and url_joignable(u)]
+    articles = [u for u in uniques if ressemble_a_un_article(u)]
+    joignables = [uniques[u] for u in articles if url_joignable(u)]
     if len(joignables) < len(valides):
         log.info("Perplexity : %d item(s) écarté(s) (doublon, page de liste ou lien injoignable)", len(valides) - len(joignables))
+    # Ligne de bilan stable : comparer le taux d'URL joignables avant / après
+    # le passage à l'API Search.
+    taux = f"{len(joignables) / len(articles):.0%}" if articles else "n/a"
+    log.info("Perplexity bilan recus=%d valides=%d articles=%d joignables=%d taux_joignables=%s",
+             len(items), len(uniques), len(articles), len(joignables), taux)
     return joignables
 
 
