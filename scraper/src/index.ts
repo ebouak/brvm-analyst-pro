@@ -574,6 +574,31 @@ async function main(): Promise<number> {
       );
       return 0;
     }
+    case 'saisonnalite': {
+      // Faits mensuels de saisonnalité (spec saisonnalité v2, lot 2). Sans --ecrire : à blanc.
+      const { runSaisonnalite } = await import('./saisonnalite/runSaisonnalite.js');
+      const ecrire = process.argv.includes('--ecrire');
+      if (!ecrire) {
+        await runSaisonnalite(false);
+        return 0;
+      }
+      await monitored(
+        { code: 'saisonnalite', label: 'Faits mensuels de saisonnalité' },
+        async () => {
+          const r = await runSaisonnalite(true);
+          return {
+            value: r,
+            outcome: {
+              status: 'success',
+              rows_extracted: r.lignes,
+              rows_upserted: r.lignes,
+              metadata: { valeurs: r.valeurs, detachements: r.detachements },
+            },
+          };
+        },
+      );
+      return 0;
+    }
     case 'conseiller:signaux': {
       // Signal « tendance longue » (Premium). Sans --ecrire : calcul à blanc.
       const { runSignaux } = await import('./conseiller/runSignal.js');

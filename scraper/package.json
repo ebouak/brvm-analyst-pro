@@ -83,6 +83,7 @@
     "sante:llm": "tsx src/index.ts sante:llm",
     "eval:signaux": "tsx src/index.ts eval:signaux",
     "conseiller": "tsx --env-file-if-exists=.env.local src/index.ts conseiller",
+    "saisonnalite": "tsx --env-file-if-exists=.env.local src/index.ts saisonnalite",
     "conseiller:signaux": "tsx --env-file-if-exists=.env.local src/index.ts conseiller:signaux",
     "conseiller:confirmation": "tsx --env-file-if-exists=.env.local src/index.ts conseiller:confirmation",
     "conseiller:signal-historique": "tsx --env-file-if-exists=.env.local src/index.ts conseiller:signal-historique",
