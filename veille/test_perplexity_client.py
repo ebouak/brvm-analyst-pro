@@ -230,3 +230,83 @@ def test_charset_de_l_en_tete_prioritaire():
 
 def test_charset_inconnu_retombe_sur_utf8():
     assert "Trésor" in decoder_page("Trésor".encode("utf-8"), "text/html; charset=nimportequoi")
+
+
+# ── API Search de Perplexity (remplace l'appel Sonar, 2026-11-10) ──
+# Client factice : aucune clé, aucun appel réseau.
+from types import SimpleNamespace
+
+import brvm_pipeline
+from brvm_pipeline import rechercher_perplexity
+
+
+class FauxClient:
+    def __init__(self, resultats=None, erreur=None):
+        self.appels = []
+        self._resultats = resultats or []
+        self._erreur = erreur
+        self.search = SimpleNamespace(create=self._create)
+
+    def _create(self, **kwargs):
+        self.appels.append(kwargs)
+        if self._erreur:
+            raise self._erreur
+        return SimpleNamespace(id="r1", server_time=None, results=self._resultats)
+
+
+def resultat(**champs):
+    base = {"title": "BRVM : le Composite progresse", "url": "https://www.example.com/brvm-le-composite-progresse-cette-semaine",
+            "snippet": "Extrait de la page.", "date": "2026-07-28", "last_updated": None}
+    base.update(champs)
+    return SimpleNamespace(**base)
+
+
+def test_recherche_reprend_les_champs_structures_sans_rien_inventer():
+    client = FauxClient([resultat()])
+    assert rechercher_perplexity(["BRVM"], MAINTENANT, client=client) == [{
+        "titre": "BRVM : le Composite progresse",
+        "resume": "Extrait de la page.",
+        "date": "2026-07-28",
+        "url": "https://www.example.com/brvm-le-composite-progresse-cette-semaine",
+    }]
+
+
+def test_un_champ_absent_reste_absent_et_l_item_est_ecarte():
+    items = rechercher_perplexity(["BRVM"], MAINTENANT, client=FauxClient([resultat(date=None)]))
+    assert items[0]["date"] is None
+    assert valider_item_perplexity(items[0], MAINTENANT) is False
+
+
+def test_date_iso_avec_heure_garde_son_jour():
+    items = rechercher_perplexity(["BRVM"], MAINTENANT, client=FauxClient([resultat(date="2026-07-28T09:15:00Z")]))
+    assert items[0]["date"] == "2026-07-28"
+
+
+def test_filtres_transmis_calent_le_comportement_existant():
+    client = FauxClient()
+    rechercher_perplexity(("a", "b"), MAINTENANT, client=client)
+    appel = client.appels[0]
+    assert appel["query"] == ["a", "b"]
+    assert appel["search_after_date_filter"] == "07/16/2026"  # 14 jours, comme valider_item_perplexity
+    assert appel["search_language_filter"] == ["fr", "en"]
+    assert appel["search_domain_filter"] == ["-westbourse.com"]
+    assert appel["max_results"] == 20
+
+
+def test_reponse_vide_donne_une_liste_vide():
+    assert rechercher_perplexity(["BRVM"], MAINTENANT, client=FauxClient([])) == []
+
+
+def test_sans_cle_la_source_est_ignoree_sans_appel(monkeypatch):
+    monkeypatch.delenv("PERPLEXITY_API_KEY", raising=False)
+    monkeypatch.setattr(brvm_pipeline, "rechercher_perplexity", lambda *a, **k: (_ for _ in ()).throw(AssertionError("appelé")))
+    assert brvm_pipeline.fetch_perplexity({}, [], [], {}) == []
+
+
+def test_erreur_de_l_api_degrade_en_silence(monkeypatch):
+    monkeypatch.setenv("PERPLEXITY_API_KEY", "factice")
+
+    def echoue(*a, **k):
+        raise RuntimeError("429 trop de requêtes")
+    monkeypatch.setattr(brvm_pipeline, "rechercher_perplexity", echoue)
+    assert brvm_pipeline.fetch_perplexity({}, [], [], {}) == []

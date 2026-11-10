@@ -7,9 +7,37 @@ import { CONFIRMATION, ecartsCohortes, lireConfirmation, resumer, type EtatValeu
 const COLONNES = 'date_marche, code, etat, score, eligible, perf_120, perf_250, rang_120, rang_250, presence_60, effectif, revision, moteur_version';
 
 /**
+ * Écart de score toléré entre le calcul et la relecture. PostgREST renvoie un
+ * double précision sur 15 chiffres significatifs, JavaScript en garde 17 : un
+ * score relu peut différer au 16e chiffre (constaté le 2026-11-10, écart 4,4e-16
+ * sur BOAN). Le score vit dans [−1, 1] : 1e-9 ne masque aucun vrai changement.
+ */
+export const TOLERANCE_SCORE = 1e-9;
+
+/**
+ * Codes dont la ligne relue diffère du calcul (état, éligibilité, ou score au-delà
+ * de TOLERANCE_SCORE), ou relus sans calcul correspondant. Fonction pure.
+ */
+export function lignesDivergentes(
+  calculees: Pick<LigneSignal, 'code' | 'etat' | 'score' | 'eligible'>[],
+  relues: Pick<LigneSignal, 'code' | 'etat' | 'score' | 'eligible'>[],
+): string[] {
+  const parCode = new Map(calculees.map((l) => [l.code, l]));
+  const scoreDiffere = (a: number | null, b: number | null) =>
+    a == null || b == null ? a !== b : Math.abs(a - b) > TOLERANCE_SCORE;
+  return relues
+    .filter((r) => {
+      const c = parCode.get(r.code);
+      return !c || c.etat !== r.etat || c.eligible !== r.eligible || scoreDiffere(c.score, r.score);
+    })
+    .map((r) => r.code);
+}
+
+/**
  * Signal « tendance longue » de la dernière séance.
- * Sans `ecrire` : calcul et contrôle à blanc. Avec `ecrire` : upsert idempotent
- * sur (date_marche, code), relecture, contrôle sur la donnée RELUE. Une anomalie
+ * Sans `ecrire` : calcul et contrôle à blanc. Avec `ecrire` : insertion sur
+ * (date_marche, code), la première écriture faisant foi (doublons ignorés), puis
+ * relecture et contrôle sur la donnée RELUE, divergence comprise. Une anomalie
  * LÈVE. Seule la dernière séance est écrite : aucune option ne réécrit le passé,
  * c'est ce qui fait de la table un registre d'époque pour le test confirmatoire.
  */
@@ -31,13 +59,25 @@ export async function runSignaux(ecrire: boolean): Promise<{ date: string; ligne
   }
 
   const sb = getSupabase();
-  const { error } = await sb.from('conseiller_signaux').upsert(lignes, { onConflict: 'date_marche,code' });
+  // Registre d'époque : la PREMIÈRE écriture fait foi. Une séance déjà écrite n'est
+  // jamais réécrite (relance du workflow, lancement manuel) : doublons ignorés.
+  // supabase-js n'accepte pas onConflict/ignoreDuplicates sur insert() ; upsert()
+  // avec ignoreDuplicates produit « INSERT … ON CONFLICT (date_marche, code) DO
+  // NOTHING » (Prefer: resolution=ignore-duplicates) : aucune ligne existante modifiée.
+  const { error } = await sb.from('conseiller_signaux').upsert(lignes, { onConflict: 'date_marche,code', ignoreDuplicates: true });
   if (error) throw new Error(`conseiller:signaux : écriture refusée — ${error.message}`);
   const { data: relues, error: eRelue } = await sb.from('conseiller_signaux').select(COLONNES).eq('date_marche', date);
   if (eRelue) throw new Error(`conseiller:signaux : relecture impossible — ${eRelue.message}`);
   const anomalies = verifierSignaux((relues ?? []) as LigneSignal[], date);
   if ((relues?.length ?? 0) !== lignes.length) anomalies.push(`${relues?.length ?? 0} lignes relues pour ${lignes.length} écrites`);
   if (anomalies.length) throw new Error(`conseiller:signaux : contrôle sur la donnée relue — ${anomalies.join(' ; ')}`);
+  // Une séance déjà écrite AUTREMENT (état, score ou éligibilité différents du calcul
+  // de ce soir) se résout par un humain : on le dit et on s'arrête, sans réécrire.
+  const divergentes = lignesDivergentes(lignes, (relues ?? []) as LigneSignal[]);
+  if (divergentes.length) {
+    logger.error({ date, codes: divergentes }, 'conseiller:signaux : séance déjà écrite avec un contenu différent, rien réécrit');
+    throw new Error(`conseiller:signaux : séance ${date} déjà écrite autrement pour ${divergentes.join(', ')} — à résoudre par un humain`);
+  }
   logger.info({ date, lignes: relues?.length, revision }, 'conseiller:signaux : signaux écrits et vérifiés');
   return { date, lignes: relues?.length ?? 0, revision, etats };
 }
@@ -82,7 +122,7 @@ export async function runConfirmation(): Promise<RapportConfirmation> {
   let enRetard = 0;
   for (const l of lues) {
     const retard = (Date.parse(l.created_at) - Date.parse(`${l.date_marche}T00:00:00Z`)) / JOUR_MS;
-    if (retard > CONFIRMATION.retardMaxJours + 1) { enRetard++; continue; }
+    if (retard > CONFIRMATION.retardMaxJours) { enRetard++; continue; }
     let m = parDate.get(l.date_marche);
     if (!m) parDate.set(l.date_marche, (m = new Map()));
     m.set(l.code, { etat: l.etat, eligible: l.eligible });

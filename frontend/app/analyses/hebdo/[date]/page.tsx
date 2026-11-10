@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download } from 'lucide-react';
-import { fmtDateCourte } from '@/lib/format';
+import { fmtDateCourte, fmtNumber } from '@/lib/format';
 import { createPublicClient } from '@/lib/supabase/public';
-import { SectionHeader, PremiumPanel } from '@/components/ui/premium';
 import HebdoChart from '@/components/hebdo/HebdoChart';
 import CopyPostButton from '@/components/hebdo/CopyPostButton';
+import { EnTeteCote } from '@/components/marche/EnTeteCote';
+import { LigneSource } from '@/components/marche/LigneSource';
 import type { HebdoMetrics } from '@/lib/hebdo/types';
 
 export const dynamic = 'force-dynamic';
@@ -35,79 +36,107 @@ export async function generateMetadata({ params }: { params: { date: string } })
   };
 }
 
+const fmtVariation = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(2).replace('.', ',')} %`;
+
 export default async function HebdoEditionPage({ params }: { params: { date: string } }) {
   const e = await load(params.date);
   if (!e) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-4 py-10">
-      <Link href="/analyses/hebdo" className="inline-flex items-center gap-1 text-sm text-muted hover:text-white"><ArrowLeft aria-hidden className="h-4 w-4" />Toutes les éditions</Link>
-      <SectionHeader
-        title={`Les valeurs en vue · semaine du ${fmtDateCourte(e.date)}`}
-        subtitle="Analyse technique sur données réelles de la BRVM : cours de clôture, RSI(14), niveaux de support et de résistance."
+    <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
+      <Link
+        href="/analyses/hebdo"
+        className="mb-6 inline-flex min-h-[44px] items-center gap-1.5 rounded text-sm text-muted transition-colors hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <ArrowLeft aria-hidden className="h-4 w-4" />
+        Toutes les éditions
+      </Link>
+      <EnTeteCote
+        titre={`Les valeurs en vue, semaine du ${fmtDateCourte(e.date)}`}
+        description="Analyse technique sur les données réelles de la BRVM : cours de clôture, RSI sur 14 séances, niveaux de support et de résistance."
+        compte={{ n: e.items.length, libelle: e.items.length > 1 ? 'valeurs' : 'valeur' }}
+        source={null}
       />
 
       {e.items.map((it) => {
         const m = it.metrics;
         return (
-          <PremiumPanel key={it.code} className="space-y-4">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="font-display text-xl text-ivory">
-                <span className="font-mono font-medium text-ivory">{it.code}</span>{' '}
-                <span className={`text-sm ${it.sens === 'hausse' ? 'text-up' : 'text-down'}`}>
-                  {m.variationHebdo != null ? `${m.variationHebdo >= 0 ? '+' : ''}${m.variationHebdo.toFixed(2)} %` : ''}
-                </span>
+          <section key={it.code} aria-labelledby={`v-${it.code}`} className="mt-12 border-t border-border-strong pt-8">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 id={`v-${it.code}`} className="font-display text-2xl text-ivory">
+                <Link href={`/actions/${it.code}`} className="rounded font-mono font-medium hover:text-accent-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                  {it.code}
+                </Link>
               </h2>
-              <span className="tabular text-sm text-muted">{m.dernier} FCFA</span>
+              <p className="text-sm">
+                <span className="tabular text-ivory">{fmtNumber(m.dernier)} FCFA</span>
+                {m.variationHebdo != null && (
+                  <span className={`tabular ml-3 ${m.variationHebdo >= 0 ? 'text-up' : 'text-down'}`}>
+                    {fmtVariation(m.variationHebdo)} sur la semaine
+                  </span>
+                )}
+              </p>
             </div>
-            <p className="text-xs text-faint">{it.raison}</p>
+            <p className="mt-1 text-sm text-muted">{it.raison}</p>
 
-            <HebdoChart
-              dates={m.dates} closes={m.closes} rsi={m.rsi}
-              resistance={m.levels?.resistance ?? null} support={m.levels?.support ?? null}
-            />
+            <div className="mt-5 rounded-card border border-border bg-surface p-4">
+              <HebdoChart
+                dates={m.dates} closes={m.closes} rsi={m.rsi}
+                resistance={m.levels?.resistance ?? null} support={m.levels?.support ?? null}
+              />
+            </div>
 
-            <div className="space-y-3">
+            <div className="mt-6 max-w-[72ch] space-y-4">
               {it.narratif_md.split(/^##\s+/m).filter(Boolean).map((bloc, i) => {
                 const nl = bloc.indexOf('\n');
                 const titre = nl >= 0 ? bloc.slice(0, nl).trim() : bloc;
                 const texte = nl >= 0 ? bloc.slice(nl + 1).trim() : '';
                 return (
                   <div key={i}>
-                    <h3 className="text-sm font-semibold text-ivory">{titre}</h3>
+                    <h3 className="text-base font-medium text-ivory">{titre}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-muted">{texte}</p>
                   </div>
                 );
               })}
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-6 flex flex-wrap gap-2">
               <CopyPostButton texte={it.post_long} label="LinkedIn" />
               <CopyPostButton texte={it.post_court} label="WhatsApp" />
-              <a href={`/api/hebdo/${e.date}/image?code=${it.code}`} download
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted hover:text-white">
-                <Download aria-hidden className="h-3.5 w-3.5" />Télécharger l’image
+              <a
+                href={`/api/hebdo/${e.date}/image?code=${it.code}`}
+                download
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 text-xs text-muted transition-colors hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:min-h-[32px]"
+              >
+                <Download aria-hidden className="h-3.5 w-3.5" />
+                Télécharger l’image
               </a>
             </div>
-          </PremiumPanel>
+          </section>
         );
       })}
 
-      <PremiumPanel>
-        <h2 className="text-sm font-semibold text-ivory">Lexique</h2>
-        <p className="mt-2 text-xs leading-relaxed text-muted">
-          <strong>RSI (Relative Strength Index)</strong> : mesure de 0 à 100 si un titre a été acheté
-          ou vendu trop vite récemment. Au-dessus de 70 on parle de surachat, en dessous de 30 de
-          survente. <strong>MACD</strong> : compare deux moyennes de prix de vitesses différentes pour
-          détecter un changement de dynamique ; positif, il accompagne une tendance haussière.
-          <strong> Support / résistance</strong> : bornes basse et haute des 20 dernières séances.
-        </p>
-        <p className="mt-3 text-[11px] leading-relaxed text-faint">
-          Analyse technique produite automatiquement à partir des cours de clôture réels de la BRVM.
-          Contenu fourni à titre informatif et pédagogique : il ne constitue pas un conseil en
-          investissement.
-        </p>
-      </PremiumPanel>
+      <section aria-labelledby="lexique-titre" className="mt-12 border-t border-border pt-6">
+        <h2 id="lexique-titre" className="text-lg font-medium text-ivory">Lexique</h2>
+        <dl className="mt-3 max-w-[72ch] space-y-2 text-sm leading-relaxed text-muted">
+          <div>
+            <dt className="inline text-ivory">RSI (Relative Strength Index). </dt>
+            <dd className="inline">Mesure de 0 à 100 de la vitesse à laquelle un titre a été acheté ou vendu récemment. Au-dessus de 70 on parle de surachat, en dessous de 30 de survente.</dd>
+          </div>
+          <div>
+            <dt className="inline text-ivory">MACD. </dt>
+            <dd className="inline">Compare deux moyennes de prix de vitesses différentes pour repérer un changement de dynamique ; positif, il accompagne une tendance haussière.</dd>
+          </div>
+          <div>
+            <dt className="inline text-ivory">Support et résistance. </dt>
+            <dd className="inline">Bornes basse et haute des 20 dernières séances.</dd>
+          </div>
+        </dl>
+        <LigneSource>
+          Analyse technique produite automatiquement à partir des cours de clôture réels de la BRVM. Contenu informatif et
+          pédagogique : ce n’est pas un conseil en investissement.
+        </LigneSource>
+      </section>
     </div>
   );
 }

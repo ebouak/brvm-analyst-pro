@@ -33,7 +33,7 @@ jobs:
       - name: Installer les dépendances
         run: |
           pip install --upgrade pip
-          pip install yfinance openai requests pandas openpyxl
+          pip install yfinance openai requests pandas openpyxl perplexityai==0.46.1
 
       - name: Générer l'article
         env:
