@@ -15,6 +15,7 @@ import { isTriggered, isSmartTriggered, isSmartType, type AlertType, type SmartC
 import { dispatch, sendWhatsAppTemplate, sendWhatsAppRaw, type SendResult } from './channels.js';
 import { envoyerTexteWaha, pauseEntreEnvois, wahaConfiguree } from '../whatsapp/passerelle.js';
 import { chatsParUtilisateur } from '../whatsapp/liaisons.js';
+import { cleMois, messageSaison, saisonADeclencher, type LigneMessage } from './saison.js';
 
 export interface AlertRow {
   id: string;
@@ -24,6 +25,8 @@ export interface AlertRow {
   seuil: number | null;
   actif: boolean;
   declenchee_le: string | null;
+  dernier_etat_notifie?: string | null;
+  dernier_mois_notifie?: string | null;
 }
 
 export interface AlertsRunResult {
@@ -180,8 +183,56 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
       return r;
     };
 
+    /**
+     * Envoi au PROPRIÉTAIRE sur ses canaux consentis (e-mail, Telegram, WhatsApp).
+     * Extrait tel quel de la boucle des alertes (lot 4 saisonnalité) pour que
+     * le message groupé saisonnier passe par le même chemin, sans copie.
+     */
+    const envoyerA = async (userId: string, subject: string, body: string, code: string): Promise<SendResult[]> => {
+      // Adresse du PROPRIÉTAIRE, lue au compte (même chemin que les thèses) et
+      // seulement s'il a consenti. Introuvable → échec JOURNALISÉ, jamais un
+      // silence : c'est le silence qui avait caché la panne.
+      let to: string | null = null;
+      let echecAdresse: SendResult | null = null;
+      if (emailOptin.has(userId)) {
+        const r = await adresseDe(userId);
+        if (r.email) to = r.email;
+        else echecAdresse = { channel: 'email', status: 'failed', error: r.erreur };
+      }
+      const results = await dispatch({
+        subject,
+        body,
+        code: code,
+        to,
+        // Destinataire Telegram du PROPRIÉTAIRE de l'alerte. Absent = aucun
+        // envoi Telegram — voir sendTelegram dans channels.ts.
+        telegramChatId: tgByUser.get(userId) ?? null,
+      });
+      if (echecAdresse) results.push(echecAdresse);
+
+      // Canal WhatsApp PERSONNEL du propriétaire (opt-in) — en plus des canaux
+      // globaux. Template Meta d'abord (hors fenêtre 24 h), repli texte.
+      for (const chatWa of waChatByUser.get(userId) ?? []) {
+        await pauseEntreEnvois();
+        const r = await envoyerTexteWaha(
+          chatWa,
+          [`🔔 *${subject}*`, '', body, '', '_Information de marché, pas un conseil en investissement._'].join('\n'),
+        );
+        results.push({ channel: 'whatsapp', status: r.ok ? 'sent' : 'failed', ...(r.erreur ? { error: r.erreur } : {}) });
+      }
+      const phone = waByUser.get(userId);
+      if (phone) {
+        let wa = await sendWhatsAppTemplate(phone, 'alerte_titre', [code, body]);
+        if (wa?.status !== 'sent') wa = (await sendWhatsAppRaw(phone, `${subject}\n${body}`)) ?? wa;
+        if (wa) results.push(wa);
+      }
+      return results;
+    };
+
     let triggered = 0;
     for (const a of rows) {
+      // Alerte saisonnière : traitée après la boucle, en un message groupé par compte.
+      if (a.type === 'saison_hors_fourchette') continue;
       const px = priceByCode[a.code] ?? { cours: null, variation: null };
       const smart = smartByCode[a.code] ?? { signal: null, rsi: null, daysToExDividend: null };
       const fires = isSmartType(a.type)
@@ -201,43 +252,7 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
         logger.info({ code: a.code, type: a.type, body }, 'DRY_RUN — alerte composée, non envoyée');
         continue;
       }
-      // Adresse du PROPRIÉTAIRE, lue au compte (même chemin que les thèses) et
-      // seulement s'il a consenti. Introuvable → échec JOURNALISÉ, jamais un
-      // silence : c'est le silence qui avait caché la panne.
-      let to: string | null = null;
-      let echecAdresse: SendResult | null = null;
-      if (emailOptin.has(a.user_id)) {
-        const r = await adresseDe(a.user_id);
-        if (r.email) to = r.email;
-        else echecAdresse = { channel: 'email', status: 'failed', error: r.erreur };
-      }
-      const results = await dispatch({
-        subject,
-        body,
-        code: a.code,
-        to,
-        // Destinataire Telegram du PROPRIÉTAIRE de l'alerte. Absent = aucun
-        // envoi Telegram — voir sendTelegram dans channels.ts.
-        telegramChatId: tgByUser.get(a.user_id) ?? null,
-      });
-      if (echecAdresse) results.push(echecAdresse);
-
-      // Canal WhatsApp PERSONNEL du propriétaire (opt-in) — en plus des canaux
-      // globaux. Template Meta d'abord (hors fenêtre 24 h), repli texte.
-      for (const chatWa of waChatByUser.get(a.user_id) ?? []) {
-        await pauseEntreEnvois();
-        const r = await envoyerTexteWaha(
-          chatWa,
-          [`🔔 *${subject}*`, '', body, '', '_Information de marché, pas un conseil en investissement._'].join('\n'),
-        );
-        results.push({ channel: 'whatsapp', status: r.ok ? 'sent' : 'failed', ...(r.erreur ? { error: r.erreur } : {}) });
-      }
-      const phone = waByUser.get(a.user_id);
-      if (phone) {
-        let wa = await sendWhatsAppTemplate(phone, 'alerte_titre', [a.code, body]);
-        if (wa?.status !== 'sent') wa = (await sendWhatsAppRaw(phone, `${subject}\n${body}`)) ?? wa;
-        if (wa) results.push(wa);
-      }
+      const results = await envoyerA(a.user_id, subject, body, a.code);
 
       if (!cfg.DRY_RUN) {
         await sb.from('alerts').update({ declenchee_le: new Date().toISOString() }).eq('id', a.id);
@@ -246,6 +261,66 @@ export async function runAlerts(opts: { mock?: boolean } = {}): Promise<AlertsRu
             user_id: a.user_id, alert_id: a.id, code: a.code,
             channel: r.channel, message: body, status: r.status,
           });
+        }
+      }
+    }
+
+    // ── Alertes saisonnières (lot 4) : un message groupé par compte ──
+    const saisonnieres = rows.filter((r) => r.type === 'saison_hors_fourchette');
+    if (saisonnieres.length > 0 && lastDate) {
+      const { data: etatsLus, error: eEt } = await sb
+        .from('saisonnalite_etat')
+        .select('code, date_seance, annee, mois, rang, rdt_en_cours, q10, q90, n, etat_large, verdict')
+        .in('code', [...new Set(saisonnieres.map((r) => r.code))]);
+      type EtatLu = { code: string; date_seance: string; annee: number; mois: number; rang: number; rdt_en_cours: number; q10: number | null; q90: number | null; n: number; etat_large: string; verdict: string };
+      const etats = new Map(((etatsLus ?? []) as EtatLu[]).map((e) => [e.code, e]));
+      const perimes = [...etats.values()].filter((e) => e.date_seance !== lastDate).length;
+      if (eEt || perimes > 0 || etats.size === 0) {
+        // Bruyant, jamais silencieux : l'état saisonnier n'est pas celui de la dernière séance.
+        logger.error({ erreur: eEt?.message ?? null, perimes, lus: etats.size, derniereSeance: lastDate }, 'état saisonnier illisible ou périmé : alertes saisonnières non évaluées');
+      } else {
+        const parCompte = new Map<string, { alerte: AlertRow; etat: EtatLu }[]>();
+        for (const a of saisonnieres) {
+          const etat = etats.get(a.code);
+          const d = saisonADeclencher(
+            { dernier_etat_notifie: a.dernier_etat_notifie ?? null, dernier_mois_notifie: a.dernier_mois_notifie ?? null },
+            etat, lastDate,
+          );
+          if (!d.declenche || !etat) continue;
+          if (!parCompte.has(a.user_id)) parCompte.set(a.user_id, []);
+          parCompte.get(a.user_id)!.push({ alerte: a, etat });
+        }
+        for (const [userId, lignes] of parCompte) {
+          const msg = messageSaison(lignes.map(({ etat }) => ({
+            code: etat.code, etat_large: etat.etat_large, rdt_en_cours: Number(etat.rdt_en_cours),
+            q10: etat.q10 == null ? null : Number(etat.q10), q90: etat.q90 == null ? null : Number(etat.q90),
+            n: etat.n, mois: etat.mois, rang: etat.rang,
+          }) satisfies LigneMessage));
+          triggered += lignes.length;
+          if (cfg.DRY_RUN) {
+            logger.info({ userId, valeurs: lignes.map((l) => l.etat.code), body: msg.body }, 'DRY_RUN — alerte saisonnière composée, non envoyée');
+            continue;
+          }
+          const results = await envoyerA(userId, msg.subject, msg.body, lignes[0]!.etat.code);
+          // Mémoire écrite seulement si un canal a réellement accepté l'envoi :
+          // sinon la prochaine exécution retentera.
+          // La console n'est pas un envoi : dispatch y retombe quand aucun canal ne part.
+          const parti = results.some((r) => r.status === 'sent' && r.channel !== 'console');
+          for (const { alerte, etat } of lignes) {
+            if (parti) {
+              await sb.from('alerts').update({
+                declenchee_le: new Date().toISOString(),
+                dernier_etat_notifie: etat.etat_large,
+                dernier_mois_notifie: cleMois(etat.annee, etat.mois),
+              }).eq('id', alerte.id);
+            }
+            for (const r of results) {
+              await sb.from('notifications_log').insert({
+                user_id: userId, alert_id: alerte.id, code: etat.code, channel: r.channel, message: msg.body, status: r.status,
+              });
+            }
+          }
+          if (!parti) logger.error({ userId, valeurs: lignes.map((l) => l.etat.code) }, 'alerte saisonnière : aucun canal n’a accepté l’envoi');
         }
       }
     }

@@ -25,6 +25,7 @@ const TYPE_LABEL: Record<string, string> = {
   rsi_survente: 'RSI survente',
   rsi_surachat: 'RSI surachat',
   dividende_proche: 'Dividende proche',
+  saison_hors_fourchette: 'Hors fourchette saisonnière',
 };
 
 const PRICE_TYPES = new Set(['prix_au_dessus', 'prix_en_dessous', 'variation']);

@@ -154,7 +154,15 @@ async function main(): Promise<void> {
         console.error(`❌ Mois incomplet attendu ${annee}-${mois} : ${count ?? 0} ligne(s) ; ${autres ?? 0} ligne(s) incomplète(s) sur un autre mois`);
         process.exit(1);
       }
-      console.log(`✅ saisonnalité à jour : ${count} valeurs sur le mois de la séance ${seance}`);
+      // Lot 4 : l'état du mois doit porter la dernière séance pour 40 valeurs au moins
+      // (les alertes saisonnières refusent un état d'une autre séance).
+      const { count: etats, error: e4 } = await client
+        .from('saisonnalite_etat').select('code', { count: 'exact', head: true }).eq('date_seance', seance);
+      if (e4 || (etats ?? 0) < 40) {
+        console.error(`❌ État du mois : ${etats ?? 0} valeur(s) datée(s) du ${seance} (plancher 40)${e4 ? ` — ${e4.message}` : ''}`);
+        process.exit(1);
+      }
+      console.log(`✅ saisonnalité à jour : ${count} valeurs sur le mois de la séance ${seance}, état du mois pour ${etats}`);
       break;
     }
 

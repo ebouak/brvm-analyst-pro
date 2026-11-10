@@ -20,6 +20,8 @@ import { anneesDifficiles, faitsMensuels, rdtMarche, type FaitMensuel } from './
 import { classerPublication, dedoublonner, suspensionUtile, TYPES_FENETRE, type Evenement } from './evenements.js';
 import { agreger, cheminsEvenements, marcheQuotidien, rendementsQuotidiens, retourCoupon } from './fenetres.js';
 import type { Donnees } from '../conseiller/types.js';
+import { calculerEtat, type LigneEtat } from './etat.js';
+import { profilDuMois, realiseDuMois, tenue } from './bilan.js';
 
 const log = logger.child({ module: 'saisonnalite' });
 const LOT = 500;
@@ -221,8 +223,34 @@ export async function runSaisonnalite(ecrire: boolean, force = false): Promise<R
   for (const f of faits) f.rdt_marche = marche.get(`${f.annee}-${String(f.mois).padStart(2, '0')}`) ?? null;
 
   const fenetres = calculerFenetres(donnees, autresParCode);
+
+  // Lot 4 : état du mois en cours par valeur (F10, F12) et profils du mois (F11).
+  const faitsParCode = new Map<string, FaitMensuel[]>();
+  for (const f of faits) {
+    if (!faitsParCode.has(f.code)) faitsParCode.set(f.code, []);
+    faitsParCode.get(f.code)!.push(f);
+  }
+  const etats: LigneEtat[] = [];
+  const refus: string[] = [];
+  for (const [code, serie] of donnees.series) {
+    const r0 = calculerEtat({ code, serie, faits: faitsParCode.get(code) ?? [], asOf });
+    if (r0.refus) refus.push(r0.refus);
+    if (r0.ligne) etats.push(r0.ligne);
+  }
+  if (refus.length) log.warn({ refus }, 'état du mois refusé pour ces valeurs');
+  const anneeAsOf = Number(asOf.slice(0, 4));
+  const moisAsOf = Number(asOf.slice(5, 7));
+  const profils = [...faitsParCode].flatMap(([code, fs]) => {
+    const pr = profilDuMois(fs, anneeAsOf, moisAsOf);
+    return pr ? [{ code, annee: anneeAsOf, mois: moisAsOf, profil_mediane: pr.mediane, profil_q25: pr.q25, profil_q75: pr.q75, verdict: pr.verdict, n: pr.n, regle: pr.regle }] : [];
+  });
   const existants = await lireExistants();
   const controles = controler(faits, { existants, detachesAttendus, asOf, aujourdhui: new Date().toISOString().slice(0, 10), force });
+  controles.push({
+    nom: 'état du mois',
+    ok: etats.length >= 40 && etats.every((e) => e.date_seance === asOf),
+    detail: `${etats.length} valeurs, séance ${asOf}${refus.length ? `, ${refus.length} refusée(s)` : ''} (plancher 40)`,
+  });
   const nDetachMarche = fenetres.find((l) => l.code === 'MARCHE' && l.type_evenement === 'detachement' && l.rang === 0)?.n ?? 0;
   controles.push({
     nom: 'fenêtres d’événement',
@@ -285,6 +313,33 @@ export async function runSaisonnalite(ecrire: boolean, force = false): Promise<R
     if (eDF) throw new Error(`suppression des fenêtres périmées : ${eDF.message}`);
     log.warn({ fenetresSupprimees: perimeesF }, 'fenêtres périmées supprimées');
   }
+
+  // État du mois : réécrit à chaque passage ; une valeur disparue est retirée.
+  const { error: eE } = await sb.from('saisonnalite_etat').upsert(etats.map((e) => ({ ...e, maj })), { onConflict: 'code' });
+  if (eE) throw new Error(`upsert saisonnalite_etat : ${eE.message}`);
+  const { error: eED } = await sb.from('saisonnalite_etat').delete().lt('maj', maj);
+  if (eED) throw new Error(`nettoyage saisonnalite_etat : ${eED.message}`);
+
+  // Bilan : profil inséré une seule fois (la première écriture fait foi).
+  if (profils.length) {
+    const { error: eB } = await sb.from('saisonnalite_bilans').upsert(profils, { onConflict: 'code,annee,mois', ignoreDuplicates: true });
+    if (eB) throw new Error(`profils saisonnalite_bilans : ${eB.message}`);
+  }
+  // Réalisé : écrit une seule fois, quand le mois est terminé.
+  const { data: ouverts, error: eO } = await sb.from('saisonnalite_bilans').select('code, annee, mois, profil_mediane, verdict').is('realise', null);
+  if (eO) throw new Error(`lecture des bilans ouverts : ${eO.message}`);
+  let realises = 0;
+  for (const b of (ouverts ?? []) as { code: string; annee: number; mois: number; profil_mediane: number; verdict: string }[]) {
+    const rr = realiseDuMois(faitsParCode.get(b.code) ?? [], b.annee, b.mois);
+    if (rr.refus) { log.warn({ refus: rr.refus }, 'réalisé refusé'); continue; }
+    if (rr.realise == null) continue;
+    const { error: eU } = await sb.from('saisonnalite_bilans')
+      .update({ realise: rr.realise, tenue: tenue(Number(b.profil_mediane), b.verdict, rr.realise), realise_le: new Date().toISOString() })
+      .eq('code', b.code).eq('annee', b.annee).eq('mois', b.mois).is('realise', null);
+    if (eU) throw new Error(`réalisé ${b.code} ${b.annee}-${b.mois} : ${eU.message}`);
+    realises++;
+  }
+  log.info({ etats: etats.length, profilsProposes: profils.length, realises }, 'état et bilan écrits');
 
   // Relecture : la table doit compter exactement les lignes écrites.
   const { count, error } = await sb.from('saisonnalite_mensuelle').select('code', { count: 'exact', head: true });

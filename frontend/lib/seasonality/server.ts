@@ -2,6 +2,8 @@ import { cache } from 'react';
 import { createPublicClient } from '@/lib/supabase/public';
 import { monthlyReturnsFromPrices, type MonthlyReturn, type DailyClose } from './compute';
 import { bandeHistorique, etatMois, trajectoireMois, type EtatMois, type PointBande, type PointTrajectoire } from './trajectoire';
+import type { FaitLiquidite } from './liquidite';
+import type { LigneBilan } from './bilan';
 
 const WINDOW_YEARS_MAX = 15; // plafond des cours quotidiens lus (trajectoires)
 const PAGE = 1000;
@@ -20,11 +22,15 @@ export interface FaitLu {
   exclu: string | null;
   difficulte: boolean;
   complet: boolean;
+  valeurEchangee: number | null;
+  seancesCotees: number;
+  seancesMarche: number;
 }
 
 type LigneTable = {
   annee: number; mois: number; rdt_prix: number | null; rdt_total: number | null; rdt_marche: number | null;
   dividende: number | null; evenements: { type: string; date: string }[] | null; exclu: string | null; difficulte: boolean; complet: boolean;
+  valeur_echangee: number | null; seances_cotees: number; seances_marche: number;
 };
 const num = (v: unknown) => (v == null ? null : Number(v));
 
@@ -35,7 +41,7 @@ export const lireFaits = cache(async (code: string): Promise<FaitLu[]> => {
   for (let from = 0; from < 20000; from += PAGE) {
     const { data, error } = await sb
       .from('saisonnalite_mensuelle')
-      .select('annee, mois, rdt_prix, rdt_total, rdt_marche, dividende, evenements, exclu, difficulte, complet')
+      .select('annee, mois, rdt_prix, rdt_total, rdt_marche, dividende, evenements, exclu, difficulte, complet, valeur_echangee, seances_cotees, seances_marche')
       .eq('code', code.toUpperCase())
       .order('annee').order('mois')
       .range(from, from + PAGE - 1);
@@ -48,6 +54,7 @@ export const lireFaits = cache(async (code: string): Promise<FaitLu[]> => {
         detachements: (r.evenements ?? []).filter((e) => e.type === 'detachement').map((e) => e.date),
         evenements: r.evenements ?? [],
         exclu: r.exclu, difficulte: r.difficulte, complet: r.complet,
+        valeurEchangee: num(r.valeur_echangee), seancesCotees: r.seances_cotees, seancesMarche: r.seances_marche,
       });
     }
     if (lot.length < PAGE) break;
@@ -169,28 +176,40 @@ export const getSaisonValeur = cache(async (code: string, now: Date = new Date()
   };
 });
 
-/** Rendement mensuel du marché (moyenne équipondérée écrêtée), mois complets, tout l'historique. */
-export const lireMarcheMensuel = cache(async (): Promise<MonthlyReturn[]> => {
+/**
+ * Le marché en une lecture de `saisonnalite_mensuelle` : rendement mensuel
+ * (moyenne équipondérée écrêtée, identique sur chaque ligne d'un mois) et
+ * liquidité (valeur échangée et séances cumulées sur toutes les valeurs).
+ */
+export const lireMarche = cache(async (): Promise<{ rendements: MonthlyReturn[]; liquidite: FaitLiquidite[] }> => {
   const sb = createPublicClient();
-  const vus = new Map<string, MonthlyReturn>();
+  const rendements = new Map<string, MonthlyReturn>();
+  const liq = new Map<string, FaitLiquidite>();
   for (let from = 0; from < 40000; from += PAGE) {
     const { data, error } = await sb
       .from('saisonnalite_mensuelle')
-      .select('annee, mois, rdt_marche')
-      .eq('complet', true)
-      .not('rdt_marche', 'is', null)
+      .select('annee, mois, rdt_marche, complet, valeur_echangee, seances_cotees, seances_marche')
       .order('annee').order('mois').order('code')
       .range(from, from + PAGE - 1);
-    if (error) return [];
-    const lot = (data ?? []) as { annee: number; mois: number; rdt_marche: number }[];
+    if (error) return { rendements: [], liquidite: [] };
+    const lot = (data ?? []) as { annee: number; mois: number; rdt_marche: number | null; complet: boolean; valeur_echangee: number | null; seances_cotees: number; seances_marche: number }[];
     for (const r of lot) {
       const k = `${r.annee}-${r.mois}`;
-      if (!vus.has(k)) vus.set(k, { year: r.annee, month: r.mois, ret: Number(r.rdt_marche), gapMonths: 0 });
+      if (r.complet && r.rdt_marche != null && !rendements.has(k)) rendements.set(k, { year: r.annee, month: r.mois, ret: Number(r.rdt_marche), gapMonths: 0 });
+      const l = liq.get(k) ?? { annee: r.annee, mois: r.mois, valeurEchangee: 0, seancesCotees: 0, seancesMarche: 0, complet: r.complet };
+      l.valeurEchangee = (l.valeurEchangee ?? 0) + Number(r.valeur_echangee ?? 0);
+      l.seancesCotees += r.seances_cotees;
+      l.seancesMarche += r.seances_marche;
+      l.complet = l.complet && r.complet;
+      liq.set(k, l);
     }
     if (lot.length < PAGE) break;
   }
-  return [...vus.values()];
+  return { rendements: [...rendements.values()], liquidite: [...liq.values()] };
 });
+
+/** Rendement mensuel du marché (moyenne équipondérée écrêtée), mois complets, tout l'historique. */
+export const lireMarcheMensuel = cache(async (): Promise<MonthlyReturn[]> => (await lireMarche()).rendements);
 
 /** Une ligne de `saisonnalite_fenetres` (migration 0207). */
 export interface PointFenetreLu { rang: number; moyenne: number | null; mediane: number | null; partPositifs: number | null; n: number }
@@ -234,4 +253,36 @@ export const prochainDetachement = cache(async (code: string, aujourdhui: string
   if (error || !data) return null;
   const d = data as { ex_date: string; montant: number };
   return { date: d.ex_date, montant: Number(d.montant) };
+});
+
+/** Une ligne de `saisonnalite_etat` (migration 0208), avec la désignation de la valeur. */
+export interface EtatValeur {
+  code: string; designation: string | null; date_seance: string; annee: number; mois: number; rang: number;
+  rdt_en_cours: number; q25: number | null; mediane: number | null; q75: number | null; n: number;
+  etat: string; verdict: string;
+}
+
+/** État du mois en cours de toutes les valeurs (écrit chaque soir par le scraper). */
+export const lireEtats = cache(async (): Promise<EtatValeur[]> => {
+  const sb = createPublicClient();
+  const [{ data, error }, { data: instr }] = await Promise.all([
+    sb.from('saisonnalite_etat').select('code, date_seance, annee, mois, rang, rdt_en_cours, q25, mediane, q75, n, etat, verdict').order('code'),
+    sb.from('brvm_instruments').select('code, designation').eq('type', 'action'),
+  ]);
+  if (error) return [];
+  const noms = new Map(((instr ?? []) as { code: string; designation: string | null }[]).map((i) => [i.code, i.designation]));
+  return ((data ?? []) as Omit<EtatValeur, 'designation'>[]).map((e) => ({
+    ...e,
+    designation: noms.get(e.code) ?? null,
+    rdt_en_cours: Number(e.rdt_en_cours),
+    q25: num(e.q25), mediane: num(e.mediane), q75: num(e.q75),
+  }));
+});
+
+/** Bilans figés (F11). */
+export const lireBilans = cache(async (): Promise<LigneBilan[]> => {
+  const sb = createPublicClient();
+  const { data, error } = await sb.from('saisonnalite_bilans').select('code, annee, mois, verdict, tenue, realise').limit(20000);
+  if (error) return [];
+  return ((data ?? []) as LigneBilan[]).map((l) => ({ ...l, realise: num(l.realise) }));
 });

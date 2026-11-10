@@ -22,8 +22,11 @@ export default function SeasonalityMatrix({
   anneesDifficiles = [],
   detachementsParMois,
   faits = [],
+  marche,
   preview = false,
 }: {
+  /** Rendement mensuel du marché : chaque cellule montre la part du marché (F8). */
+  marche?: MonthlyReturn[];
   /** Rendements mensuels, dividende réinvesti quand la table est alimentée. */
   returns: MonthlyReturn[];
   /** Même série en cours seul ; absente = pas de bascule (calcul de repli). */
@@ -48,6 +51,7 @@ export default function SeasonalityMatrix({
     return horsDifficulte ? base.filter((x) => !anneesDifficiles.includes(x.year)) : base;
   }, [mode, horsDifficulte, returns, returnsPrix, anneesDifficiles]);
   const r = useMemo(() => aggregateSeasonality(retenus, windowYears), [retenus, windowYears]);
+  const rm = useMemo(() => (marche && marche.length ? aggregateSeasonality(marche, windowYears) : null), [marche, windowYears]);
   const currentMonth = new Date().getMonth() + 1; // 1-12
 
   if (returns.length === 0) {
@@ -143,6 +147,9 @@ export default function SeasonalityMatrix({
                 <>
                   <p className={`mt-1 tabular text-sm font-bold ${ton(m)}`}>{pct(m.medianReturn)}</p>
                   <p className="text-xs text-faint">médiane · {m.n} an{m.n > 1 ? 's' : ''}</p>
+                  {rm && rm.matrix[m.month - 1]!.n > 0 && (
+                    <p className="text-xs text-faint">dont marché {pct(rm.matrix[m.month - 1]!.medianReturn)}</p>
+                  )}
                   <p className="text-xs text-faint">en hausse {m.bullPct.toFixed(0)}&nbsp;%</p>
                   <p className={`mt-1 text-xs ${m.verdict === 'hasard' ? 'text-faint' : 'text-muted'}`}>{VERDICT[m.verdict]}</p>
                   {(detachementsParMois?.[m.month - 1] ?? 0) > 0 && (

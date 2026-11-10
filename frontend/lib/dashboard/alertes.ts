@@ -33,6 +33,7 @@ const SANS_SEUIL: Record<string, string> = {
   rsi_survente: 'RSI en zone de survente',
   rsi_surachat: 'RSI en zone de surachat',
   dividende_proche: 'Dividende proche',
+  saison_hors_fourchette: 'Hors fourchette saisonnière',
 };
 
 function motifDe(type: string, seuil: number | null): string {
