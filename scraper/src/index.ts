@@ -578,21 +578,22 @@ async function main(): Promise<number> {
       // Faits mensuels de saisonnalité (spec saisonnalité v2, lot 2). Sans --ecrire : à blanc.
       const { runSaisonnalite } = await import('./saisonnalite/runSaisonnalite.js');
       const ecrire = process.argv.includes('--ecrire');
+      const force = process.argv.includes('--force');
       if (!ecrire) {
-        await runSaisonnalite(false);
+        await runSaisonnalite(false, force);
         return 0;
       }
       await monitored(
         { code: 'saisonnalite', label: 'Faits mensuels de saisonnalité' },
         async () => {
-          const r = await runSaisonnalite(true);
+          const r = await runSaisonnalite(true, force);
           return {
             value: r,
             outcome: {
               status: 'success',
               rows_extracted: r.lignes,
               rows_upserted: r.lignes,
-              metadata: { valeurs: r.valeurs, detachements: r.detachements },
+              metadata: { valeurs: r.valeurs, detachements: r.detachements, supprimees: r.supprimees, as_of: r.asOf },
             },
           };
         },
