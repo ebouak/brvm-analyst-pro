@@ -38,9 +38,14 @@ import { ratiosBilan } from '@/lib/fiche/ratiosBilan';
 import { comptesIfrs } from '@/lib/fiche/comptesIfrs';
 import { chargerComptesIfrs } from '@/lib/fiche/comptesIfrsServeur';
 import ComptesIfrs from '@/components/fiche/ComptesIfrs';
-import ProfilSociete from '@/components/fiche/ProfilSociete';
+import { ProfilPresentation, ProfilHistorique, ProfilListe, PointsCles, ProfilDirection, ProfilActionnariat, ProfilIdentite, NoteSources } from '@/components/fiche/ProfilSociete';
+import { SousSection } from '@/components/fiche/SousSection';
+import { DonneeAbsente } from '@/components/fiche/DonneeAbsente';
+import { ActualitesValeur } from '@/components/fiche/ActualitesValeur';
+import { ViewTracker } from '@/components/analytics/ViewTracker';
+import { fraicheurComptes } from '@/lib/fiche/fraicheur';
 import { normaliserProfil } from '@/lib/fiche/profilSociete';
-import { rubriqueDepuis, hrefRubrique } from '@/lib/fiche/rubriques';
+import { RUBRIQUES, rubriqueDepuis, hrefRubrique } from '@/lib/fiche/rubriques';
 import { pointsCles } from '@/lib/fiche/pointsCles';
 import { capitalisationFcfa } from '@/lib/fiche/capitalisation';
 import { lectureTechnique } from '@/lib/fiche/lecture';
@@ -54,9 +59,9 @@ import { JaugesPlage } from '@/components/fiche/JaugesPlage';
 import { SeanceIntraday } from '@/components/fiche/SeanceIntraday';
 import { LectureTechnique } from '@/components/fiche/LectureTechnique';
 import { CombinedAlphaCarte } from '@/components/fiche/CombinedAlphaCarte';
-import { VueEnsemble } from '@/components/fiche/VueEnsemble';
+import { StatsEtCours, AProposBloc } from '@/components/fiche/VueEnsemble';
 import { lignesStatistiques, phrasePerformance, serieAnnuelle, dateEnLettres, libelleFamille } from '@/lib/fiche/overview';
-import { regrouperActualites, ANCRE_OFFICIELLES, type NewsEntree } from '@/lib/fiche/overviewActualites';
+import { regrouperActualites, type NewsEntree } from '@/lib/fiche/overviewActualites';
 import { seriesParPeriode } from '@/lib/fiche/overviewSeries';
 import { depuisPremiereTransaction } from '@/lib/fiche/seance';
 import { nomPays } from '@/lib/crm/geo';
@@ -105,7 +110,6 @@ import {
   StatPill,
   EmptyStatePremium,
   PremiumCTA,
-  Eyebrow,
 } from '@/components/ui/premium';
 
 /**
@@ -824,8 +828,8 @@ export default async function InstrumentPage({
   if (last.variation_pct != null) {
     const v = last.variation_pct;
     cartes.push({
-      href: '#aujourdhui',
-      etiquette: 'Aujourd’hui',
+      href: hrefRubrique('marche', fromDate, 'seance'),
+      etiquette: 'Séance',
       titre: Math.round(v * 100) === 0 ? 'Séance stable' : `Séance en ${v > 0 ? 'hausse' : 'baisse'} de ${fmtPctAbs(v)}`,
       detail: carnet && carnet.qte_achat != null && carnet.qte_vente != null
         ? `Carnet du ${fmtDateCourte(carnet.date_marche)} : ${fmtNumber(carnet.qte_achat)} titres demandés, ${fmtNumber(carnet.qte_vente)} offerts.`
@@ -834,8 +838,8 @@ export default async function InstrumentPage({
   }
   if (gateSignaux.allowed && signal) {
     cartes.push({
-      href: '#titre',
-      etiquette: 'Le titre',
+      href: hrefRubrique('marche', fromDate, 'technique'),
+      etiquette: 'Signal',
       titre: `Signal ${libelleSignal(signal.signal)}`,
       detail: `${signal.score_total != null ? `Score ${fr2(signal.score_total)} sur une échelle de −1 à +1` : 'Score non calculé'}${gateIndicateurs.allowed ? ` · ${lecture.soutient.length} élément${lecture.soutient.length > 1 ? 's' : ''} soutien${lecture.soutient.length > 1 ? 'nent' : 't'}, ${lecture.retient.length} reti${lecture.retient.length > 1 ? 'ennent' : 'ent'}` : ''}.`,
     });
@@ -843,16 +847,16 @@ export default async function InstrumentPage({
   if (gateFonda.allowed && economieSociete && economieSociete.resultatNet != null) {
     const rn = economieSociete.resultatNet;
     cartes.push({
-      href: '#entreprise',
-      etiquette: 'L’entreprise',
+      href: hrefRubrique('resultats', fromDate),
+      etiquette: 'Résultats',
       titre: insecable(`Exercice ${economieSociete.exercice} : ${rn >= 0 ? 'bénéfice' : 'perte'} de ${fmtFcfa(Math.abs(rn))}`),
       detail: evolutionTexte ? insecable(`Résultat net sur un an : ${evolutionTexte}.`) : 'Évolution sur un an non disponible.',
     });
   }
   if (liquidity) {
     cartes.push({
-      href: '#liquidite',
-      etiquette: 'Négociabilité',
+      href: hrefRubrique('marche', fromDate, 'liquidite'),
+      etiquette: 'Liquidité',
       titre: `Classe ${liquidity.classe} · ${liquidity.label}`,
       detail: insecable(`Échangé ${liquidity.presencePct} % des séances, ${fmtFcfa(liquidity.valeurMoyenne)} par séance en moyenne.`),
     });
@@ -926,6 +930,19 @@ export default async function InstrumentPage({
   const exerciceVue = retenu.exercice;
   const comptesPrecedents = exerciceVue != null ? serieComptes.find((p) => p.exercice === exerciceVue - 1) ?? null : null;
   const nomSociete = instrument?.designation ?? last.designation ?? code;
+
+  // ══ Note d'analyse (spec 2026-11-10 v2) ══════════════════════════════════
+  const infoRubrique = RUBRIQUES.find((r) => r.id === rubrique) ?? RUBRIQUES[0];
+  const fraicheurCpt = fraicheurComptes(exCourant?.year ?? null);
+  const premierePhrase = (t: string | null) => (t ? t.split(/(?<=[.!?])s+/)[0] : null);
+  // Calendrier : détachements et paiements annoncés, à partir d'aujourd'hui.
+  const aVenir = divRows
+    .filter((d) => d.montant > 0)
+    .flatMap((d) => [
+      ...(d.ex_date && d.ex_date >= aujourdhuiIso ? [{ type: 'Détachement' as const, date: d.ex_date, montant: d.montant }] : []),
+      ...(d.payment_date && d.payment_date >= aujourdhuiIso ? [{ type: 'Paiement' as const, date: d.payment_date, montant: d.montant }] : []),
+    ])
+    .sort((a, b) => a.date.localeCompare(b.date));
   const lignesStats = lignesStatistiques({
     fondamentauxVisibles: gateFonda.allowed,
     capitalisation: capitalisationBrute,
@@ -1107,58 +1124,33 @@ export default async function InstrumentPage({
         </div>
       </header>
 
-      <div id="rubrique" className="scroll-mt-20 space-y-6">
-      {rubrique === 'vue-ensemble' && (<>
-      {/* ══════════════════════════════════════════════════
-          VUE D'ENSEMBLE — statistiques, cours par période, actualités, société
-          (remplace la grille des chiffres de séance et le graphique de séance de l'en-tête)
-      ══════════════════════════════════════════════════ */}
-      <VueEnsemble
-        code={code}
-        lignes={lignesStats}
-        series={seriesCours}
-        jour={vueJourDisponible ? <SeanceIntraday points={instantanes} /> : null}
-        variationJour={last.variation_pct ?? null}
-        periodeDefaut={seanceTracable ? '1J' : '1A'}
-        actualites={groupesActus}
-        apropos={{
-          nom: nomSociete,
-          code,
-          secteur,
-          pays: pays ? (/^[A-Za-z]{2}$/.test(pays) ? nomPays(pays) : pays) : null,
-          famille: libelleFamille((instrument as { famille_comptable?: string | null } | null)?.famille_comptable ?? null),
-          titres: shares,
-          flottant: instrument?.flottant ?? null,
-          flottantPct,
-          notation: notationVue,
-          historiqueDepuis: dateEnLettres(historiqueComplet[0]?.date_marche ?? null),
-        }}
-        performance={gateFonda.allowed ? {
-          phrase: phrasePerformance({
-            nom: nomSociete,
-            exercice: exerciceVue,
-            chiffreAffaires: retenu.chiffreAffaires,
-            chiffreAffairesPrecedent: comptesPrecedents?.chiffreAffaires ?? null,
-            resultatNet: retenu.resultatNet,
-            resultatNetPrecedent: comptesPrecedents?.resultatNet ?? null,
-          }),
-          serie: serieComptes,
-        } : null}
-        synthese={{
-          signalVisible: gateSignaux.allowed,
-          note: gateSignaux.allowed ? noteAF(signal?.score_total ?? null, signal?.confiance ?? null) : null,
-          signal: gateSignaux.allowed && signal ? libelleSignal(signal.signal) : null,
-          combinedAlpha: combinedAlpha?.score ?? null,
-        }}
-      />
+      <div id="rubrique" className="scroll-mt-20 space-y-10">
+      <ViewTracker event="fiche_rubrique_vue" properties={{ code, rubrique }} />
+      <Chapitre premier id={`rubrique-${rubrique}`} titre={infoRubrique.label} sousTitre={infoRubrique.question} />
 
-      {/* ── Trois plages : 1 jour, 52 semaines, 2 ans ── */}
-      <JaugesPlage jour={plageJour} an={plage52} deuxAns={plage2ans} hausseDuJour={up} />
+      {/* ══ SYNTHÈSE : que faut-il retenir, avec quel degré de confiance ? ══ */}
+      {rubrique === 'synthese' && (<>
+        <p className="-mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+          <span>Cours du <time dateTime={last.date_marche} className="text-ivory">{fmtDateCourte(last.date_marche)}</time></span>
+          {fraicheurCpt && !fraicheurCpt.ancien && <span>Derniers comptes : exercice <span className="tabular text-ivory">{fraicheurCpt.exercice}</span></span>}
+        </p>
+        {fraicheurCpt?.ancien && <DonneeAbsente etat="ancien" date={`${fraicheurCpt.exercice}-12-31`} />}
 
-      {/* ── Bandeau verdict (note + signal + tendance + plage 2 ans + synthèse) ──
-          Le SIGNAL et la NOTE sont du calculé : ils suivent le flag `signaux`.
-          Le cours et la plage, eux, restent publics — d'où un bandeau allégé
-          plutôt qu'un cadenas, pour ne pas amputer la page d'entrée. */}
+        <SousSection id="cours" titre="Le cours">
+          <div className="space-y-5">
+            <StatsEtCours
+              lignes={lignesStats}
+              series={seriesCours}
+              jour={vueJourDisponible ? <SeanceIntraday points={instantanes} /> : null}
+              variationJour={last.variation_pct ?? null}
+              periodeDefaut={seanceTracable ? '1J' : '1A'}
+            />
+            <JaugesPlage jour={plageJour} an={plage52} deuxAns={plage2ans} hausseDuJour={up} />
+          </div>
+        </SousSection>
+
+        <SousSection id="lecture" titre="Ce que disent nos indicateurs" pied="Constats calculés sur les données en base, pas un conseil d’investissement.">
+          <div className="space-y-4">
       {gateSignaux.allowed ? (
         <VerdictBand
           note={noteAF(signal?.score_total ?? null, signal?.confiance ?? null)}
@@ -1187,180 +1179,91 @@ export default async function InstrumentPage({
           synthesisLine={null}
         />
       )}
-
-      {/* ── Notation financière ── */}
       {instrument?.notation_json && (
         <NotationBadge
           notation={instrument.notation_json}
           notationPubs={publications.filter((p) => p.type_publication === 'notation')}
         />
       )}
+        <CombinedAlphaCarte
+          code={code}
+          score={combinedAlpha?.score ?? null}
+          rang={combinedAlpha?.rang ?? null}
+          piliers={combinedAlpha?.piliers ?? []}
+          penalite={combinedAlpha?.penalite ?? null}
+          penaliteAppliquee={decompositionCA?.penalite ?? null}
+          resumePenalite={combinedAlphaRow && Array.isArray(combinedAlphaRow.penalties_json)
+            ? resumeGardeFous(chaineGardeFous(combinedAlphaRow.penalties_json as { code: string; points: number }[], decompositionCA))
+            : null}
+          calculeLe={combinedAlpha?.calculeLe ?? null}
+          derniereSeance={last.date_marche}
+        />
+          </div>
+        </SousSection>
 
-      {/* ── Bannière données insuffisantes ── */}
+        <SousSection id="essentiel" titre="L’essentiel">
+          <Essentiel cartes={cartes} />
+        </SousSection>
 
-      {/* ══════════════════════════════════════════════════
-          L'ESSENTIEL
-      ══════════════════════════════════════════════════ */}
-      <Essentiel cartes={cartes} />
+        <SousSection id="analyse-ia" titre="Analyse par IA">
+          <AnalyseIA code={code} nom={instrument?.designation ?? null} exerciceComptes={economieSociete?.exercice ?? null} />
+        </SousSection>
 
-      {/* Analyse par IA : réponses Jev (type-safe) ou rédigées par IA, provenance et sources affichées. */}
-      <AnalyseIA code={code} nom={instrument?.designation ?? null} exerciceComptes={economieSociete?.exercice ?? null} />
+        <SousSection id="plus-loin" titre="Pour aller plus loin">
+          <ul className="grid gap-3 md:grid-cols-2">
+            <li>
+              <Link href={hrefRubrique('societe', fromDate)} className="block h-full rounded-card border border-border bg-surface p-4 transition-colors hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                <span className="text-sm font-medium text-ivory">Ce que fait {nomSociete}</span>
+                <span className="mt-1 block text-[13px] leading-relaxed text-muted">{premierePhrase(profil?.presentation ?? null) ?? 'Présentation, direction et actionnariat.'}</span>
+              </Link>
+            </li>
+            <li>
+              <Link href={hrefRubrique('resultats', fromDate)} className="block h-full rounded-card border border-border bg-surface p-4 transition-colors hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                <span className="text-sm font-medium text-ivory">Ses comptes</span>
+                <span className="mt-1 block text-[13px] leading-relaxed text-muted">{(gateFonda.allowed ? phrasePerformance({
+            nom: nomSociete,
+            exercice: exerciceVue,
+            chiffreAffaires: retenu.chiffreAffaires,
+            chiffreAffairesPrecedent: comptesPrecedents?.chiffreAffaires ?? null,
+            resultatNet: retenu.resultatNet,
+            resultatNetPrecedent: comptesPrecedents?.resultatNet ?? null,
+          }) : null) ?? 'Comptes publiés et leur évolution.'}</span>
+              </Link>
+            </li>
+          </ul>
+        </SousSection>
       </>)}
 
-      {/* ══════════════════════════════════════════════════
-          01 · AUJOURD'HUI
-      ══════════════════════════════════════════════════ */}
-      {rubrique === 'aujourdhui' && (
-      <section className="space-y-6">
-        <Chapitre premier id="aujourdhui" numero="01" titre="Aujourd’hui" sousTitre={`Séance du ${fmtDateCourte(last.date_marche)} : ce qu'elle dit, le carnet d'ordres et la négociabilité du titre.`} />
-        {gateLectureSeance.allowed ? (
-          <CarnetCommentaire
-            replie
-            carnet={carnet}
-            signal={signal ? {
-              date_marche: signal.date_marche,
-              signal: signal.signal,
-              confiance: signal.confiance ?? null,
-              score_total: signal.score_total ?? null,
-              explication: signal.explication ?? null,
-              // Les sous-scores : seule base permettant de dire que les facteurs
-              // se contredisent. Sans eux, le texte ne l'affirme pas.
-              sousScores: (() => {
-                const s = signal as unknown as Record<string, unknown>;
-                const n = (k: string) => (typeof s[k] === 'number' ? (s[k] as number) : null);
-                return { variation: n('score_variation'), volume: n('score_volume'), rsi: n('score_rsi'), macd: n('score_macd'), tendance: n('bonus_tendance') };
-              })(),
-            } : null}
-            actualites={actualites}
-            contexte={contexteCarnet}
-            bruit={bruitSeance}
-            economie={economieSociete}
-            evenements={mesuresEvenements}
-          />
-        ) : (
-          // Verrou premium : le composant n'est pas rendu, aucun chiffre du
-          // commentaire n'atteint le HTML pour un visiteur non autorisé.
-          <SectionLock
-            required={gateLectureSeance.required === 'free' ? 'premium' : gateLectureSeance.required}
-            titre="Ce que dit la séance"
-            pitch="Le carnet d'ordres rapporté aux capitaux échangés, la fourchette chiffrée en francs et comparée au reste du marché, le score technique face à ses seuils, et les comptes rapportés au cours."
-          />
-        )}
-        <CarnetOrdres carnet={carnet} />
-        <div id="liquidite" className="scroll-mt-24">
-          <Eyebrow className="mb-3">Liquidité & coût de friction</Eyebrow>
-          <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
-        </div>
-      </section>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          02 · LE TITRE
-      ══════════════════════════════════════════════════ */}
-      {rubrique === 'titre' && (
-      <section className="space-y-6">
-        <Chapitre premier id="titre" numero="02" titre="Le titre" sousTitre="Le cours dans la durée, puis une seule lecture technique de ses indicateurs." />
-        {rows.length < 20 && (
-          <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
-            <div className="flex items-center gap-2.5">
-              <span className="text-warn text-base leading-none">!</span>
-              <p className="text-xs text-warn font-medium">
-                Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
-              </p>
-            </div>
-            <p className="text-xs text-faint">
-              L&apos;historique s&apos;étoffe automatiquement séance après séance ; les indicateurs
-              s&apos;activeront dès que la profondeur sera suffisante.
-            </p>
+      {/* ══ SOCIÉTÉ : que fait-elle et qui la contrôle ? ══ */}
+      {rubrique === 'societe' && (<>
+        {profil?.presentation && <SousSection id="presentation" titre="Présentation"><ProfilPresentation profil={profil} /></SousSection>}
+        {profil?.historique && <SousSection id="historique" titre="Historique"><ProfilHistorique profil={profil} /></SousSection>}
+        {profil && profil.metiers.length > 0 && <SousSection id="metiers" titre="Métiers"><ProfilListe items={profil.metiers} ton="fort" /></SousSection>}
+        {profil && profil.determinants.length > 0 && <SousSection id="determinants" titre="Ce qui fait varier l’activité"><ProfilListe items={profil.determinants} ton="doux" /></SousSection>}
+        <SousSection id="direction" titre="Direction"><ProfilDirection profil={profil} /></SousSection>
+        <SousSection id="actionnariat" titre="Actionnariat"><ProfilActionnariat profil={profil} /></SousSection>
+        <SousSection id="identite" titre="Identité">
+          <div className="grid gap-6 rounded-card border border-border bg-surface p-4 lg:grid-cols-2">
+            <ProfilIdentite profil={profil} />
+            <AProposBloc a={{
+          nom: nomSociete,
+          code,
+          secteur,
+          pays: pays ? (/^[A-Za-z]{2}$/.test(pays) ? nomPays(pays) : pays) : null,
+          famille: libelleFamille((instrument as { famille_comptable?: string | null } | null)?.famille_comptable ?? null),
+          titres: shares,
+          flottant: instrument?.flottant ?? null,
+          flottantPct,
+          notation: notationVue,
+          historiqueDepuis: dateEnLettres(historiqueComplet[0]?.date_marche ?? null),
+            }} />
           </div>
-        )}
-        <div>
-          <Eyebrow className="mb-3">Cours & Volume</Eyebrow>
-          <PremiumPanel className="p-0 overflow-hidden">
-            <div className="px-4 py-4 md:px-5">
-              <PriceChart
-                data={priceData}
-                designation={instrument?.designation ?? last.designation ?? code}
-                markers={chartMarkers}
-              />
-            </div>
-          </PremiumPanel>
-          <div className="mt-2">
-            <EventMarkerLegend markers={chartMarkers} />
-          </div>
-        </div>
+        </SousSection>
+        <NoteSources profil={profil} />
+      </>)}
 
-        {gateIndicateurs.allowed ? (
-          <LectureTechnique
-            lecture={lecture}
-            signal={gateSignaux.allowed ? signal?.signal ?? null : null}
-            score={gateSignaux.allowed ? signal?.score_total ?? null : null}
-            qualiteDonnees={gateSignaux.allowed ? signal?.confiance ?? null : null}
-            graphiques={
-              <div className="space-y-4">
-                <IndicateursActuels
-                  rsi={lastRsi ?? null}
-                  cours={last.cours_jour ?? null}
-                  moyennes={[
-                    { label: 'MA 20', val: lastMa20 },
-                    { label: 'MA 50', val: lastMa50 },
-                    { label: 'MA 200', val: lastMa200 },
-                  ]}
-                  macd={lastMacd ?? null}
-                />
-                <IndicatorCharts data={indicatorData} />
-              </div>
-            }
-            synthese={{
-              haussiers: technicalSummary.bullCount,
-              neutres: technicalSummary.neutCount,
-              baissiers: technicalSummary.bearCount,
-              indicateurs: technicalSummary.signals.map((s) => ({ texte: s.detail, sens: s.direction })),
-            }}
-            saisonnalite={
-              seasonalityReturns.length > 0
-                ? <SeasonalityCard code={code} returns={seasonalityReturns} />
-                : <p className="text-[13px] text-muted">Saisonnalité non disponible pour cette valeur.</p>
-            }
-            detections={detections}
-            position={
-              !gateSignaux.allowed ? (
-                <p>La lecture de votre position selon le signal est réservée aux abonnés.</p>
-              ) : analyseSignal ? (
-                <PositionLecture ctx={analyseSignal.positionCtx} />
-              ) : (
-                <p>Aucun signal calculé pour la dernière séance scorée.</p>
-              )
-            }
-            detailScore={blocSignal}
-          />
-        ) : (
-          <>
-            <SectionLock
-              required={gateIndicateurs.required === 'free' ? 'premium' : gateIndicateurs.required}
-              titre="Lecture technique"
-              pitch="RSI, MACD, moyennes mobiles, bandes de Bollinger, détections de configurations et lecture commentée."
-            />
-            <div>
-              <Eyebrow className="mb-3">Signal quantitatif</Eyebrow>
-              {blocSignal}
-            </div>
-            <SeasonalityCard code={code} returns={seasonalityReturns} />
-          </>
-        )}
-      </section>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          03 · L'ENTREPRISE
-      ══════════════════════════════════════════════════ */}
-      {rubrique === 'entreprise' && (
-      <section className="space-y-6">
-        <Chapitre premier id="entreprise" numero="03" titre="L’entreprise" sousTitre="Qui elle est, ses comptes publiés, la valorisation, les dividendes et les événements de la société." />
-
-        {profil && <ProfilSociete profil={profil} points={pointsProfil} />}
-
-        {/* Alerte de perte — donnée fondamentale : suit le verrou `fondamentaux`. */}
+      {/* ══ RÉSULTATS : gagne-t-elle de l'argent, et de mieux en mieux ? ══ */}
+      {rubrique === 'resultats' && (<>
         {gateFonda.allowed && exCourant?.net_income != null && exCourant.net_income < 0 && (
           <div role="note" className="rounded-card border border-down/30 bg-down/5 px-5 py-4">
             <p className="text-sm text-ivory">
@@ -1369,7 +1272,9 @@ export default async function InstrumentPage({
             <p className="mt-1 text-xs text-muted">Le PER n&apos;est pas calculable et le taux de distribution est sans objet tant que le résultat est négatif.</p>
           </div>
         )}
-
+        {pointsProfil.length > 0 && <SousSection id="points-cles" titre="Points clés"><PointsCles points={pointsProfil} /></SousSection>}
+        {fundamentals.length > 0 ? (
+          <SousSection id="comptes" titre="Comptes publiés">
         {fundamentals.length > 0 && (() => {
           const latest = pickBestFundamental(fundamentals)!;
           const range52 = { low: plage52?.bas ?? null, high: plage52?.haut ?? null, current: last.cours_jour ?? null };
@@ -1377,10 +1282,10 @@ export default async function InstrumentPage({
           if (!gateFonda.allowed) {
             return (
               <div id="fondamentaux" className="scroll-mt-24">
-                <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
                 <SectionLock
                   required={gateFonda.required === 'free' ? 'premium' : gateFonda.required}
                   titre="Analyse fondamentale"
+                  suivi={{ code, rubrique: 'resultats' }}
                   pitch="PER, P/B, ROE, marge, endettement, et leur lecture."
                 />
               </div>
@@ -1389,7 +1294,6 @@ export default async function InstrumentPage({
 
           return (
             <div id="fondamentaux" className="scroll-mt-24">
-              <Eyebrow className="mb-3">Analyse fondamentale</Eyebrow>
               <FundamentalsPanel
                 canEdit={canEditFondamentaux}
                 code={code}
@@ -1441,11 +1345,13 @@ export default async function InstrumentPage({
             </div>
           );
         })()}
-
-        {/* Détail du dernier exercice */}
+          </SousSection>
+        ) : (
+          <SousSection id="comptes" titre="Comptes publiés"><DonneeAbsente etat="non_collecte" /></SousSection>
+        )}
         {gateFonda.allowed && exCourant && (detailExercice.length > 0 || evolutionTexte) && (
-          <div className="rounded-card border border-border bg-surface p-5">
-            <h3 className="text-base font-semibold text-ivory">Détail de l&apos;exercice {exCourant.year}</h3>
+          <div id="exercice" className="scroll-mt-24 rounded-card border border-border bg-surface p-5">
+            <h3 className="text-lg font-medium text-ivory">L&apos;exercice {exCourant.year} en détail</h3>
             {phraseExercice && <p className="mt-1 text-[13px] text-muted">{phraseExercice}</p>}
             <dl className="mt-4 divide-y divide-border/40">
               {detailExercice.map((l) => (
@@ -1468,29 +1374,34 @@ export default async function InstrumentPage({
             )}
           </div>
         )}
+        <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+          <Link href={`/actions/${code}/revue`} className="rounded text-accent-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Revue de résultats</Link>
+          <Link href={`/actions/${code}/financials`} className="rounded text-accent-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">États financiers complets</Link>
+        </p>
+      </>)}
 
-        {valuation && valuation.metrics.reliable && (
+      {/* ══ VALORISATION ET DIVIDENDES : est-ce cher, et que me verse-t-elle ? ══ */}
+      {rubrique === 'valorisation' && (<>
+        <SousSection id="multiples" titre="Multiples de valorisation">
+        {valuation && valuation.metrics.reliable ? (
           <div id="valorisation" className="scroll-mt-24">
-            <Eyebrow className="mb-3">Valorisation</Eyebrow>
             {gateValo.allowed ? (
               <ValuationPanel v={valuation} scoring={scoring} rendementDividende={{ pct: divYield, exercice: divCourant?.exercice ?? null }} masquerRationale />
             ) : (
               <SectionLock
                 required={gateValo.required === 'free' ? 'premium' : gateValo.required}
                 titre="Valorisation"
+                suivi={{ code, rubrique: 'valorisation' }}
                 pitch="Le titre est-il cher ou bon marché ? Multiples et valeur intrinsèque."
               />
             )}
           </div>
+        ) : (
+          <DonneeAbsente etat="non_collecte" />
         )}
-
-        {/* Dividendes + événements */}
-        <div>
-          <Eyebrow className="mb-3">Corporate & Dividendes</Eyebrow>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-                <p className="text-[11px] text-accent-ink mb-5">Dividendes</p>
+        </SousSection>
+        <SousSection id="dividendes" titre="Dividendes">
+          <div className="rounded-card border border-border bg-surface p-5">
                 {lastDiv && divCourant ? (
                   <div>
                     {divYield != null && (
@@ -1499,7 +1410,7 @@ export default async function InstrumentPage({
                           {rendementDividendeParts(divYield, divExercice)?.valeur}
                         </span>
                         <span className="text-xs text-muted">
-                          {divDejaNet ? "rendement estimé, net d'IRVM" : 'rendement estimé'}
+                          {divDejaNet ? "rendement estimé, net d'IRVM" : lastDiv?.base_fiscale === 'brut' ? 'rendement estimé, brut' : 'rendement estimé, montant tel que publié'}
                           {divExercice != null && <span className="block text-faint">ex. {divExercice}</span>}
                         </span>
                       </div>
@@ -1534,12 +1445,169 @@ export default async function InstrumentPage({
                 ) : (
                   <p className="text-xs text-faint italic">Aucun dividende enregistré.</p>
                 )}
+          </div>
+        </SousSection>
+      </>)}
+
+      {/* ══ COURS ET LIQUIDITÉ : puis-je acheter et revendre, à quel coût ? ══ */}
+      {rubrique === 'marche' && (<>
+        {rows.length < 20 && (
+          <div className="border border-warn/20 bg-warn/5 rounded-card px-5 py-4 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-warn text-base leading-none">!</span>
+              <p className="text-xs text-warn font-medium">
+                Données insuffisantes — {rows.length} séance{rows.length > 1 ? 's' : ''} sur 20 requises pour RSI, MACD et moyennes mobiles.
+              </p>
+            </div>
+            <p className="text-xs text-faint">
+              L&apos;historique s&apos;étoffe automatiquement séance après séance ; les indicateurs
+              s&apos;activeront dès que la profondeur sera suffisante.
+            </p>
+          </div>
+        )}
+        <SousSection id="cours" titre="Cours et volume">
+          <div>
+          <PremiumPanel className="p-0 overflow-hidden">
+            <div className="px-4 py-4 md:px-5">
+              <PriceChart
+                data={priceData}
+                designation={instrument?.designation ?? last.designation ?? code}
+                markers={chartMarkers}
+              />
+            </div>
+          </PremiumPanel>
+          <div className="mt-2">
+            <EventMarkerLegend markers={chartMarkers} />
+          </div>
+          </div>
+        </SousSection>
+        <SousSection id="liquidite" titre="Liquidité et coût d’exécution">
+          <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
+        </SousSection>
+        <SousSection id="carnet" titre="Carnet d’ordres">
+          <CarnetOrdres carnet={carnet} />
+        </SousSection>
+        <SousSection id="seance" titre={`La séance du ${fmtDateCourte(last.date_marche)}`}>
+        {gateLectureSeance.allowed ? (
+          <CarnetCommentaire
+            replie
+            carnet={carnet}
+            signal={signal ? {
+              date_marche: signal.date_marche,
+              signal: signal.signal,
+              confiance: signal.confiance ?? null,
+              score_total: signal.score_total ?? null,
+              explication: signal.explication ?? null,
+              // Les sous-scores : seule base permettant de dire que les facteurs
+              // se contredisent. Sans eux, le texte ne l'affirme pas.
+              sousScores: (() => {
+                const s = signal as unknown as Record<string, unknown>;
+                const n = (k: string) => (typeof s[k] === 'number' ? (s[k] as number) : null);
+                return { variation: n('score_variation'), volume: n('score_volume'), rsi: n('score_rsi'), macd: n('score_macd'), tendance: n('bonus_tendance') };
+              })(),
+            } : null}
+            actualites={actualites}
+            contexte={contexteCarnet}
+            bruit={bruitSeance}
+            economie={economieSociete}
+            evenements={mesuresEvenements}
+          />
+        ) : (
+          // Verrou premium : le composant n'est pas rendu, aucun chiffre du
+          // commentaire n'atteint le HTML pour un visiteur non autorisé.
+          <SectionLock
+            required={gateLectureSeance.required === 'free' ? 'premium' : gateLectureSeance.required}
+            titre="Ce que dit la séance"
+            suivi={{ code, rubrique: 'marche' }}
+            pitch="Le carnet d'ordres rapporté aux capitaux échangés, la fourchette chiffrée en francs et comparée au reste du marché, le score technique face à ses seuils, et les comptes rapportés au cours."
+          />
+        )}
+        </SousSection>
+        <SousSection id="technique" titre="Lecture technique">
+          {gateIndicateurs.allowed ? (
+          <LectureTechnique
+            lecture={lecture}
+            signal={gateSignaux.allowed ? signal?.signal ?? null : null}
+            score={gateSignaux.allowed ? signal?.score_total ?? null : null}
+            qualiteDonnees={gateSignaux.allowed ? signal?.confiance ?? null : null}
+            graphiques={
+              <div className="space-y-4">
+                <IndicateursActuels
+                  rsi={lastRsi ?? null}
+                  cours={last.cours_jour ?? null}
+                  moyennes={[
+                    { label: 'MA 20', val: lastMa20 },
+                    { label: 'MA 50', val: lastMa50 },
+                    { label: 'MA 200', val: lastMa200 },
+                  ]}
+                  macd={lastMacd ?? null}
+                />
+                <IndicatorCharts data={indicatorData} />
+              </div>
+            }
+            synthese={{
+              haussiers: technicalSummary.bullCount,
+              neutres: technicalSummary.neutCount,
+              baissiers: technicalSummary.bearCount,
+              indicateurs: technicalSummary.signals.map((s) => ({ texte: s.detail, sens: s.direction })),
+            }}
+            saisonnalite={
+              seasonalityReturns.length > 0
+                ? <SeasonalityCard code={code} returns={seasonalityReturns} />
+                : <p className="text-[13px] text-muted">Saisonnalité non disponible pour cette valeur.</p>
+            }
+            detections={detections}
+            position={
+              !gateSignaux.allowed ? (
+                <p>La lecture de votre position selon le signal est réservée aux abonnés.</p>
+              ) : analyseSignal ? (
+                <PositionLecture ctx={analyseSignal.positionCtx} />
+              ) : (
+                <p>Aucun signal calculé pour la dernière séance scorée.</p>
+              )
+            }
+            detailScore={blocSignal}
+          />
+          ) : (
+            <div className="space-y-6">
+            <SectionLock
+              required={gateIndicateurs.required === 'free' ? 'premium' : gateIndicateurs.required}
+              titre="Lecture technique"
+              suivi={{ code, rubrique: 'marche' }}
+              pitch="RSI, MACD, moyennes mobiles, bandes de Bollinger, détections de configurations et lecture commentée."
+            />
+              <div>
+                <h4 className="mb-3 text-sm font-medium text-ivory">Signal quantitatif</h4>
+                {blocSignal}
               </div>
             </div>
+          )}
+        </SousSection>
+        {!gateIndicateurs.allowed && (
+          <SousSection id="saisonnalite" titre="Saisonnalité">
+            <SeasonalityCard code={code} returns={seasonalityReturns} />
+          </SousSection>
+        )}
+      </>)}
 
-            <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
-              <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
-                <p className="text-[11px] text-accent-ink mb-5">Événements récents</p>
+      {/* ══ ACTUALITÉS ET CALENDRIER : qu'est-ce qui a changé, qu'est-ce qui arrive ? ══ */}
+      {rubrique === 'actualites' && (<>
+        <SousSection id="calendrier" titre="Calendrier">
+          {aVenir.length > 0 ? (
+            <ul className="divide-y divide-border/50 rounded-card border border-border bg-surface px-4">
+              {aVenir.map((e) => (
+                <li key={e.type + e.date} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3 text-sm">
+                  <span className="text-ivory">{e.type} du dividende</span>
+                  <span className="text-muted"><time dateTime={e.date} className="tabular text-ivory">{fmtDateCourte(e.date)}</time>, {fmtNumber(e.montant)} FCFA par action</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted">Aucune date annoncée.</p>
+          )}
+        </SousSection>
+        <SousSection id="evenements" titre="Événements récents">
+          <div className="rounded-card border border-border bg-surface p-5">
                 {events.length > 0 ? (
                   <div className="space-y-3.5">
                     {(events as { id: string; title: string; event_date: string; event_type: string; sentiment?: string }[]).map((e) => (
@@ -1563,45 +1631,17 @@ export default async function InstrumentPage({
                 ) : (
                   <p className="text-xs text-faint italic">Aucun événement récent.</p>
                 )}
-                <a href={hrefRubrique('vue-ensemble', fromDate).replace('#rubrique', `#${ANCRE_OFFICIELLES}`)} className="mt-4 inline-flex min-h-[36px] items-center text-[11px] text-accent-ink hover:underline">
-                  Toutes les publications officielles →
-                </a>
-              </div>
-            </div>
           </div>
-        </div>
+        </SousSection>
+        <ActualitesValeur groupes={groupesActus} nom={nomSociete} />
+      </>)}
 
-        {/* Westbourse Combined Alpha */}
-        <CombinedAlphaCarte
-          code={code}
-          score={combinedAlpha?.score ?? null}
-          rang={combinedAlpha?.rang ?? null}
-          piliers={combinedAlpha?.piliers ?? []}
-          penalite={combinedAlpha?.penalite ?? null}
-          penaliteAppliquee={decompositionCA?.penalite ?? null}
-          resumePenalite={combinedAlphaRow && Array.isArray(combinedAlphaRow.penalties_json)
-            ? resumeGardeFous(chaineGardeFous(combinedAlphaRow.penalties_json as { code: string; points: number }[], decompositionCA))
-            : null}
-          calculeLe={combinedAlpha?.calculeLe ?? null}
-          derniereSeance={last.date_marche}
-        />
-      </section>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          04 · MON SUIVI
-      ══════════════════════════════════════════════════ */}
-      {rubrique === 'suivi' && (
-      <section className="space-y-6">
-        <Chapitre premier id="suivi" numero="04" titre="Mon suivi" sousTitre="Votre thèse, vos outils et les discussions sur cette valeur." />
-
-        <div id="these" className="scroll-mt-24">
-          <Eyebrow className="mb-3">Ma thèse</Eyebrow>
+      {/* ══ MON SUIVI : où en est ma propre thèse ? ══ */}
+      {rubrique === 'suivi' && (<>
+        <SousSection id="these" titre="Ma thèse">
           <ThesisPanel code={code} coursActuel={last.cours_jour ?? null} />
-        </div>
-
-        <div>
-          <Eyebrow className="mb-3">Outils</Eyebrow>
+        </SousSection>
+        <SousSection id="outils" titre="Mes outils">
           <div className="rounded-panel border border-border/60 bg-border/20 p-1.5">
             <div className="rounded-[calc(1.125rem-0.375rem)] bg-surface shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
@@ -1631,17 +1671,11 @@ export default async function InstrumentPage({
               </div>
             </div>
           </div>
-        </div>
-
-        <div id="discussions" className="space-y-3 scroll-mt-24">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-ivory">Discussions</h3>
-            <Link href="/forum/nouveau" className="text-sm text-accent-ink hover:underline">Démarrer une discussion</Link>
-          </div>
+        </SousSection>
+        <SousSection id="discussions" titre="Discussions sur le titre" action={<Link href="/forum/nouveau" className="rounded text-sm text-accent-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">Démarrer une discussion</Link>}>
           <ForumTopicList topics={forumTopics} authors={forumAuthors} />
-        </div>
-      </section>
-      )}
+        </SousSection>
+      </>)}
 
       </div>
     </div>

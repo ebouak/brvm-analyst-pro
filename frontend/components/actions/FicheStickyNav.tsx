@@ -54,7 +54,7 @@ export function FicheStickyNav({
       premierRendu.current = false;
       return;
     }
-    document.getElementById(`${actif}-titre`)?.focus({ preventScroll: true });
+    document.getElementById(`rubrique-${actif}-titre`)?.focus({ preventScroll: true });
   }, [actif]);
 
   useEffect(() => {
