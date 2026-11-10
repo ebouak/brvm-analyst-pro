@@ -610,63 +610,89 @@ def telecharger_page(url: str, timeout: int = 15) -> str:
     except Exception:
         return ""
 
+REQUETES_VEILLE = (
+    "BRVM Bourse Régionale des Valeurs Mobilières actualité",
+    "marché financier UEMOA actualité",
+)
+
+def rechercher_perplexity(requetes, maintenant: datetime, client=None, fenetre_jours: int = 14,
+                          max_results: int = 20) -> list:
+    """API Search de Perplexity (POST /search) : des résultats RÉELS, classés,
+    avec titre, URL, extrait et date de la page. Aucun texte de modèle, donc
+    aucune URL inventée (l'ancien appel Sonar faisait écrire les adresses par le
+    modèle). Un champ absent reste absent : une date nulle échoue à la
+    validation, elle n'est jamais complétée.
+
+    Filtres calés sur le comportement déjà observé : fenêtre de 14 jours (celle
+    de valider_item_perplexity), français et anglais (des articles anglais sont
+    gardés), westbourse.com exclu (url_joignable l'écarte déjà).
+
+    `client` injectable pour les tests ; sinon le SDK `perplexityai` lit
+    PERPLEXITY_API_KEY dans l'environnement. Copie identique dans
+    commodity_weekly_generator.py — toute correction doit être reportée des
+    deux côtés (pas de module Python partagé entre les deux pipelines)."""
+    if client is None:
+        from perplexity import Perplexity
+        client = Perplexity(timeout=30)
+    debut = (maintenant - timedelta(days=fenetre_jours)).strftime("%m/%d/%Y")
+    reponse = client.search.create(
+        query=list(requetes),
+        max_results=max_results,
+        search_after_date_filter=debut,
+        search_language_filter=["fr", "en"],
+        search_domain_filter=["-westbourse.com"],
+    )
+    items = []
+    for r in getattr(reponse, "results", None) or []:
+        date = r.date
+        # Une date ISO avec heure (« 2026-11-09T08:00:00Z ») garde son jour ;
+        # tout autre format est laissé tel quel et sera rejeté à la validation.
+        if isinstance(date, str) and re.match(r"^\d{4}-\d{2}-\d{2}", date):
+            date = date[:10]
+        items.append({"titre": r.title, "resume": r.snippet, "date": date, "url": r.url})
+    return items
+
 def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> list:
-    """Source additive : interroge Perplexity (recherche web + citations) pour
-    de l'actualité BRVM/UEMOA récente. Sortie JSON stricte imposée — un fait =
-    une citation, jamais de synthèse libre non sourcée (design §3-4).
-    Dégradation silencieuse si la clé est absente ou l'appel échoue : la
-    pipeline continue avec les ~150 autres sources, comme n'importe quel
-    fetcher de ce fichier."""
-    api_key = os.environ.get("PERPLEXITY_API_KEY", "")
-    if not api_key:
+    """Source additive : l'API Search de Perplexity trouve des articles récents
+    sur la BRVM et l'UEMOA. Elle ne sert qu'à TROUVER des liens : le titre et le
+    résumé publiés sont ceux de la page de l'éditeur, jamais ceux renvoyés par
+    la recherche (design §3-4). Dégradation silencieuse si la clé est absente
+    ou l'appel échoue : la pipeline continue avec les ~150 autres sources,
+    comme n'importe quel fetcher de ce fichier."""
+    if not os.environ.get("PERPLEXITY_API_KEY", ""):
         log.info("[Perplex.] PERPLEXITY_API_KEY absente — source ignorée")
         return []
 
-    prompt = (
-        "Actualités financières récentes concernant la BRVM (Bourse Régionale "
-        "des Valeurs Mobilières) et les marchés financiers de l'UEMOA. "
-        "Réponds UNIQUEMENT avec un tableau JSON strict, sans texte autour, "
-        'de la forme : [{"titre": "...", "resume": "...", "date": "YYYY-MM-DD", '
-        '"url": "https://..."}]. Un objet par fait distinct, chacun avec sa '
-        "propre source. N'invente aucune URL : n'inclus que des faits que tu "
-        "peux citer."
-    )
+    maintenant = datetime.utcnow()
     try:
-        resp = requests.post(
-            "https://api.perplexity.ai/chat/completions",
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            json={"model": "sonar", "messages": [{"role": "user", "content": prompt}]},
-            timeout=30,
-        )
-        resp.raise_for_status()
-        content = resp.json()["choices"][0]["message"]["content"]
-        items = json.loads(content)
-        if not isinstance(items, list):
-            raise ValueError("réponse JSON n'est pas une liste")
+        items = rechercher_perplexity(REQUETES_VEILLE, maintenant)
     except Exception as ex:
-        log.warning(f"[Perplex.] ✗ {ex}")
+        # Le SDK ne place jamais la clé dans ses messages d'erreur.
+        log.warning(f"[Perplex.] ✗ {type(ex).__name__}: {ex}")
         return []
 
-    log.info(f"[Perplex.] {len(items)} item(s) reçus, avant validation fraîcheur/format")
-    maintenant = datetime.utcnow()
+    log.info(f"[Perplex.] {len(items)} résultat(s) de recherche reçus, avant validation fraîcheur/format")
+    bilan = {"recus": len(items), "valides": 0, "articles": 0, "joignables": 0}
     results = []
     vues = set()
     for item in items:
         if not valider_item_perplexity(item, maintenant):
             continue
         url_e = str(item["url"]).strip()
-        # Un article = une URL : le modèle reformule le même fait sous
-        # plusieurs titres (jusqu'à 4 fois constaté), le hash titre+url
-        # laissait tout passer.
+        # Un article = une URL : un même article peut sortir de plusieurs
+        # requêtes ; le hash titre+url laissait tout passer.
         if url_e in vues:
             continue
         vues.add(url_e)
+        bilan["valides"] += 1
         if not ressemble_a_un_article(url_e):
             log.info(f"[Perplex.] ✗ page de liste, pas un article : {url_e}")
             continue
+        bilan["articles"] += 1
         if not url_joignable(url_e):
             log.info(f"[Perplex.] ✗ lien injoignable, item écarté : {url_e}")
             continue
+        bilan["joignables"] += 1
         editeur = metadonnees_editeur(telecharger_page(url_e))
         if not editeur["titre"]:
             log.info(f"[Perplex.] ✗ page sans titre d'éditeur, item écarté : {url_e}")
@@ -698,6 +724,12 @@ def fetch_perplexity(idx: dict, alertes: list, global_kw: list, cfg: dict) -> li
             log.debug(f"[Perplex.] item ignoré (format inattendu) : {ex}")
             continue
     log.info(f"[Perplex.] {len(results):>3} art. retenus après validation")
+    # Ligne de bilan stable : sert à comparer, run après run, le taux d'URL
+    # joignables avant / après le passage à l'API Search.
+    taux = f"{bilan['joignables'] / bilan['articles']:.0%}" if bilan["articles"] else "n/a"
+    log.info(f"[Perplex.] bilan recus={bilan['recus']} valides={bilan['valides']} "
+             f"articles={bilan['articles']} joignables={bilan['joignables']} "
+             f"retenus={len(results)} taux_joignables={taux}")
     return results
 
 # ─────────────────────────────────────────────────────────────
