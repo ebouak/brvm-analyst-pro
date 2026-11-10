@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { aggregateSeasonality, type MonthlyReturn, type MonthStats, type Verdict } from '@/lib/seasonality/compute';
+import type { FaitLu } from '@/lib/seasonality/server';
+import GrilleAnnees from './GrilleAnnees';
 
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 const WINDOWS = [5, 10, 15] as const;
@@ -16,9 +18,21 @@ const ton = (m: MonthStats) => (m.verdict === 'hasard' ? 'text-muted' : m.median
 
 export default function SeasonalityMatrix({
   returns,
+  returnsPrix,
+  anneesDifficiles = [],
+  detachementsParMois,
+  faits = [],
   preview = false,
 }: {
+  /** Rendements mensuels, dividende réinvesti quand la table est alimentée. */
   returns: MonthlyReturn[];
+  /** Même série en cours seul ; absente = pas de bascule (calcul de repli). */
+  returnsPrix?: MonthlyReturn[];
+  anneesDifficiles?: number[];
+  /** Années où chaque mois (index 0 = janvier) a porté un détachement. */
+  detachementsParMois?: number[];
+  /** Faits mensuels lus en base, pour la grille des années. */
+  faits?: FaitLu[];
   /**
    * Essai gratuit : ne révèle que le MOIS EN COURS, cadenasse les onze autres et
    * masque la table détaillée + les extrêmes. Donne un aperçu tangible sans livrer
@@ -27,7 +41,13 @@ export default function SeasonalityMatrix({
   preview?: boolean;
 }) {
   const [windowYears, setWindowYears] = useState<number>(10);
-  const r = useMemo(() => aggregateSeasonality(returns, windowYears), [returns, windowYears]);
+  const [mode, setMode] = useState<'total' | 'prix'>('total');
+  const [horsDifficulte, setHorsDifficulte] = useState(false);
+  const retenus = useMemo(() => {
+    const base = mode === 'prix' && returnsPrix ? returnsPrix : returns;
+    return horsDifficulte ? base.filter((x) => !anneesDifficiles.includes(x.year)) : base;
+  }, [mode, horsDifficulte, returns, returnsPrix, anneesDifficiles]);
+  const r = useMemo(() => aggregateSeasonality(retenus, windowYears), [retenus, windowYears]);
   const currentMonth = new Date().getMonth() + 1; // 1-12
 
   if (returns.length === 0) {
@@ -53,6 +73,27 @@ export default function SeasonalityMatrix({
             </button>
           ))}
           <span className="ml-auto text-xs text-faint">{r.yearsCovered} an(s) de données</span>
+        </div>
+      )}
+      {!preview && (returnsPrix || anneesDifficiles.length > 0) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {returnsPrix && (
+            <>
+              <span className="text-xs text-faint">Rendement :</span>
+              {(['total', 'prix'] as const).map((m) => (
+                <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)}
+                  className={`text-xs px-2.5 py-1 rounded-md border ${mode === m ? 'border-info text-accent-ink bg-info/10' : 'border-border text-muted'}`}>
+                  {m === 'total' ? 'dividende réinvesti' : 'cours seul'}
+                </button>
+              ))}
+            </>
+          )}
+          {anneesDifficiles.length > 0 && (
+            <button type="button" aria-pressed={horsDifficulte} onClick={() => setHorsDifficulte((v) => !v)}
+              className={`text-xs px-2.5 py-1 rounded-md border ${horsDifficulte ? 'border-info text-accent-ink bg-info/10' : 'border-border text-muted'}`}>
+              hors années de difficulté ({anneesDifficiles.length})
+            </button>
+          )}
         </div>
       )}
 
@@ -104,6 +145,9 @@ export default function SeasonalityMatrix({
                   <p className="text-xs text-faint">médiane · {m.n} an{m.n > 1 ? 's' : ''}</p>
                   <p className="text-xs text-faint">en hausse {m.bullPct.toFixed(0)}&nbsp;%</p>
                   <p className={`mt-1 text-xs ${m.verdict === 'hasard' ? 'text-faint' : 'text-muted'}`}>{VERDICT[m.verdict]}</p>
+                  {(detachementsParMois?.[m.month - 1] ?? 0) > 0 && (
+                    <p className="text-xs text-faint">détachement {detachementsParMois![m.month - 1]} an{detachementsParMois![m.month - 1]! > 1 ? 's' : ''}</p>
+                  )}
                 </>
               )}
             </div>
@@ -184,6 +228,10 @@ export default function SeasonalityMatrix({
           </tbody>
         </table>
       </div>
+      )}
+      {!preview && faits.length > 0 && (
+        <GrilleAnnees faits={faits} rets={retenus} mode={returnsPrix ? mode : 'total'}
+          anneesDifficiles={anneesDifficiles} horsDifficulte={horsDifficulte} windowYears={windowYears} />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/paginate';
 import { aggregateSeasonality, marketMonthlyReturns, monthlyReturnsFromPrices, type DailyClose, type Verdict } from '@/lib/seasonality/compute';
+import { lireMarcheMensuel } from '@/lib/seasonality/server';
 
 export interface ActionProcheBas {
   code: string;
@@ -135,8 +136,14 @@ export async function getOutilsData(): Promise<OutilsData> {
     if (!byCodeChron.has(r.code)) byCodeChron.set(r.code, []);
     byCodeChron.get(r.code)!.push({ date: r.date_marche, close: r.cours_cloture });
   }
-  const marche = marketMonthlyReturns([...byCodeChron.values()].map((serie) => monthlyReturnsFromPrices(serie)));
-  const saisonnalite: MoisSaisonnalite[] = aggregateSeasonality(marche, 5).matrix.map((m) => {
+  // Lot 2 : rendement du marché lu dans saisonnalite_mensuelle (dividende
+  // réinvesti, tout l'historique). Repli sur le calcul de 5 ans si la table est vide.
+  const enBase = await lireMarcheMensuel().catch(() => []);
+  const marche = enBase.length > 0
+    ? enBase
+    : marketMonthlyReturns([...byCodeChron.values()].map((serie) => monthlyReturnsFromPrices(serie)));
+  const fenetre = enBase.length > 0 ? 15 : 5;
+  const saisonnalite: MoisSaisonnalite[] = aggregateSeasonality(marche, fenetre).matrix.map((m) => {
     const hausses = Math.round((m.bullPct / 100) * m.n);
     return {
       mois: m.month,

@@ -64,14 +64,14 @@ export default async function OutilsPage() {
         <MetricCard
           label="Mois habituellement fort du marché"
           value={moisFort ? moisFort.nom_mois : 'Aucun'}
-          delta={moisFort ? `${fmt(moisFort.perf_mediane)} en médiane, ${moisFort.n} ans` : 'aucun mois ne se détache sur 5 ans'}
+          delta={moisFort ? `${fmt(moisFort.perf_mediane)} en médiane, ${moisFort.n} ans` : 'aucun mois ne se détache'}
           deltaDir={moisFort ? 'up' : 'down'}
           accent={moisFort ? 'emerald' : 'neutral'}
         />
         <MetricCard
           label="Mois habituellement faible du marché"
           value={moisFaible ? moisFaible.nom_mois : 'Aucun'}
-          delta={moisFaible ? `${fmt(moisFaible.perf_mediane)} en médiane, ${moisFaible.n} ans` : 'aucun mois ne se détache sur 5 ans'}
+          delta={moisFaible ? `${fmt(moisFaible.perf_mediane)} en médiane, ${moisFaible.n} ans` : 'aucun mois ne se détache'}
           deltaDir="down"
           accent="neutral"
         />
