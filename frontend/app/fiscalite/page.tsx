@@ -20,8 +20,10 @@ const COLS: { key: TypeRevenu; label: string }[] = [
 
 function fmtTaux(t: number | null): string {
   if (t == null) return 'non confirmé';
-  const pct = t * 100;
-  return `${pct % 1 ? pct.toFixed(1).replace('.', ',') : pct.toFixed(0)} %`;
+  // Arrondi au dixième AVANT de tester la partie décimale : 0,07 × 100 vaut
+  // 7,000000000000001 en flottant, et s'affichait « 7,0 % ».
+  const pct = Math.round(t * 1000) / 10;
+  return `${Number.isInteger(pct) ? pct.toFixed(0) : pct.toFixed(1).replace('.', ',')} %`;
 }
 
 const FAQ: { q: string; a: string }[] = [
@@ -58,7 +60,8 @@ export default function FiscalitePage() {
     for (const c of COLS) {
       const t = BAREME[p][c.key];
       const cle = `${t.source}|${t.sourceUrl ?? ''}`;
-      if (!sources.has(cle)) sources.set(cle, { source: t.source, url: t.sourceUrl, verifieLe: t.verifieLe });
+      // Un taux non confirmé n'a pas de source : son libellé de remplacement n'en est pas une.
+      if (t.taux != null && !sources.has(cle)) sources.set(cle, { source: t.source, url: t.sourceUrl, verifieLe: t.verifieLe });
       if (t.note) {
         const n = notes.get(t.note) ?? { type: c.label, pays: [] };
         n.pays.push(PAYS_LABELS[p]);

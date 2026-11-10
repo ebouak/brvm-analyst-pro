@@ -131,7 +131,7 @@ export function DividendCalendar({
               value={rendementMin ?? ''}
               onChange={(e) => setRendementMin(e.target.value ? parseFloat(e.target.value) : undefined)}
               placeholder="Aucun minimum"
-              className="w-full md:w-32 rounded-card border border-border bg-surface px-3 py-2 text-sm text-ivory placeholder-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="w-full md:w-44 rounded-card border border-border bg-surface px-3 py-2 text-sm text-ivory placeholder-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             />
           </div>
         </div>
