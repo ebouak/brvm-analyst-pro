@@ -1485,7 +1485,7 @@ export default async function InstrumentPage({
           <LiquidityCard liquidity={liquidity} courtageMin={courtageMin} courtageMax={courtageMax} />
         </SousSection>
         <SousSection id="carnet" titre="Carnet d’ordres">
-          <CarnetOrdres carnet={carnet} />
+          <CarnetOrdres carnet={carnet} sansTitre />
         </SousSection>
         <SousSection id="seance" titre={`La séance du ${fmtDateCourte(last.date_marche)}`}>
         {gateLectureSeance.allowed ? (

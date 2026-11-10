@@ -48,9 +48,8 @@ export function LectureTechnique({ lecture, signal, score, qualiteDonnees, graph
   const pos = score != null ? Math.max(0, Math.min(1, (score + 1) / 2)) * 100 : null;
   const vide = lecture.soutient.length + lecture.retient.length + lecture.neutres.length === 0;
   return (
-    <section aria-labelledby="t-lecture" className="rounded-card border border-border bg-surface p-5 md:p-6">
+    <section aria-labelledby="technique-h" className="rounded-card border border-border bg-surface p-5 md:p-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h3 id="t-lecture" className="text-base font-semibold text-ivory">Lecture technique</h3>
         {signal && <span className="rounded-full border border-border-strong px-2.5 py-0.5 text-xs text-ivory">{libelleSignal(signal)}</span>}
         {qualiteDonnees != null && <span className="text-xs text-faint">qualité des données <span className="tabular">{Math.round(qualiteDonnees <= 1 ? qualiteDonnees * 100 : qualiteDonnees)} %</span></span>}
       </div>

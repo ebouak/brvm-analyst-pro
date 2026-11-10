@@ -75,7 +75,7 @@ export default function ThesisPanel({ code, coursActuel }: { code: string; cours
   return (
     <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-white">Ma thèse d&apos;investissement</h3>
+        <p className="text-xs text-muted">Votre thèse d&apos;investissement sur cette valeur</p>
         {these && check && (
           <span className={`text-[11px] px-2 py-0.5 rounded-full border ${STATUS_UI[check.status].cls}`}>
             {STATUS_UI[check.status].label}
