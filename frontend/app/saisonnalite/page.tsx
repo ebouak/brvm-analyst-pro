@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
-import { getSaisonValeur } from '@/lib/seasonality/server';
+import { getSaisonValeur, lireFenetres, prochainDetachement } from '@/lib/seasonality/server';
+import { habitudes } from '@/lib/seasonality/frise';
+import FriseEvenements from '@/components/seasonality/FriseEvenements';
+import FenetreEvenement from '@/components/seasonality/FenetreEvenement';
 import ConfrontationMois, { phraseConfrontation } from '@/components/seasonality/ConfrontationMois';
 import SeasonalityMatrix from '@/components/seasonality/SeasonalityMatrix';
 import { canAccess } from '@/lib/server/featureAccess';
@@ -26,6 +29,11 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
 
   const code = (searchParams?.code ?? instruments[0]?.code ?? 'PALC').toUpperCase();
   const saison = await getSaisonValeur(code).catch(() => null);
+  // Lot 3 : événements (Premium seulement, donc lus seulement hors aperçu).
+  const [fenetres, prochain] = preview
+    ? [null, null]
+    : await Promise.all([lireFenetres(code).catch(() => null), prochainDetachement(code).catch(() => null)]);
+  const habitudesValeur = habitudes((saison?.faits ?? []).flatMap((f) => f.evenements));
   const designation = instruments.find((i) => i.code === code)?.designation ?? null;
 
   return (
@@ -90,6 +98,16 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
             preview={preview}
           />
         </div>
+        {!preview && (habitudesValeur.length > 0 || prochain) && (
+          <div className="mt-6">
+            <FriseEvenements habitudes={habitudesValeur} prochain={prochain} />
+          </div>
+        )}
+        {!preview && fenetres && (
+          <div className="mt-6">
+            <FenetreEvenement code={code} f={fenetres} />
+          </div>
+        )}
         <LigneSource>
           Rendement médian de chaque mois calendaire, sur les cours de clôture de la BRVM (15 ans au plus), dividende
           réinvesti par défaut : en cours seul, un mois de détachement paraît plus faible qu’il ne l’est. Le mois en cours,
