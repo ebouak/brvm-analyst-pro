@@ -662,6 +662,10 @@ Audit complet en 5 phases (`AUDIT_REPORT.md`, plan `PLAN_REMEDIATION.md`).
 - **Détection de secrets et blocage au push ACTIVÉS le 2026-09-18.** Ils
   étaient désactivés au niveau du dépôt, contrairement à ce que laissait
   croire `73455cc` (l'alerte venait du réglage du compte utilisateur).
+- **MONTÉE FAITE LE 2026-11-11 : Next 15.5.29 + React 19.2** (branche `chore/next-15-5`). Les
+  réserves ci-dessous (AVIF, `remotePatterns`, serveur de dev Windows) visaient 14.x ;
+  15.5.29 ≥ 15.5.24 porte les correctifs. `params`/`searchParams`/`cookies()` sont
+  asynchrones ; `lib/supabase/server.ts` attend `cookies()` dans getAll/setAll.
 - **NEXT 14 NE REÇOIT PLUS DE CORRECTIFS.** 14.2.35 est la dernière 14.x ; les
   correctifs de sécurité sont reportés sur la **15.5** (≥ 15.5.24) et la 16.
   Deux avis CRITIQUES d'exécution de code à distance la visent :

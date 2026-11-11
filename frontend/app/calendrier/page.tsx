@@ -107,10 +107,11 @@ async function getData(daysN: number): Promise<{
 
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 interface PageProps {
-  searchParams: { type?: string; days?: string; view?: string };
+  searchParams: Promise<{ type?: string; days?: string; view?: string }>;
 }
 
-export default async function CalendrierPage({ searchParams }: PageProps) {
+export default async function CalendrierPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   const rawType = searchParams.type ?? 'all';
   const type = ['dividende', 'event', 'all'].includes(rawType) ? rawType : 'all';
 

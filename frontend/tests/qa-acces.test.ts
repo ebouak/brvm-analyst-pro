@@ -31,7 +31,7 @@ const ctx = (roles: string[], permissions: string[], isSuperAdmin = false): Admi
 
 async function appeler() {
   const { GET } = await import('@/app/api/admin/qa/artefacts/[id]/route');
-  return GET(new Request(`http://x.test/api/admin/qa/artefacts/${ID}`), { params: { id: ID } });
+  return GET(new Request(`http://x.test/api/admin/qa/artefacts/${ID}`), { params: Promise.resolve({ id: ID }) });
 }
 
 beforeEach(() => {

@@ -27,7 +27,7 @@ function dateCourte(iso: string): string {
 }
 
 interface PageProps {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }
 
 async function getCompany(code: string) {
@@ -104,7 +104,8 @@ async function getCompany(code: string) {
   };
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   const supabase = createPublicClient();
   const { data: instr } = await supabase
@@ -133,7 +134,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function CompanyPage({ params }: PageProps) {
+export default async function CompanyPage(props: PageProps) {
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   // `requiredAccess`, PAS `canAccess` : cette page est la seule à porter
   // `revalidate = 900` (ISR) plutôt que `force-dynamic`. `canAccess` résout les

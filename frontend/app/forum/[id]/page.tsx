@@ -6,7 +6,8 @@ import { ForumThread } from '@/components/forum/ForumThread';
 // Les votes dépendent de l'utilisateur → rendu dynamique.
 export const dynamic = 'force-dynamic';
 
-export default async function ForumTopicPage({ params }: { params: { id: string } }) {
+export default async function ForumTopicPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const data = await getTopic(params.id);
   if (!data) notFound();
   const supabase = createClient();

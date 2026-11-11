@@ -76,7 +76,7 @@ interface Options {
  * pour que le rendu serveur reste l'état final) et `rejouer`, pour relancer
  * l'animation à la demande — au survol, par exemple.
  */
-export function useRevelation<T extends Element>(ref: RefObject<T>, options: Options = {}) {
+export function useRevelation<T extends Element>(ref: RefObject<T | null>, options: Options = {}) {
   const { amount = 0.2, onArme, onRevele } = options;
   const sobre = useReducedMotion();
   const controls = useAnimationControls();

@@ -28,7 +28,8 @@ interface Publication {
 const DATE = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 const TON: Record<string, string> = { publie: 'text-up', echec: 'text-down', en_cours: 'text-accent', ignore: 'text-faint' };
 
-export default async function ReseauxPage({ searchParams }: { searchParams: { ok?: string; erreur?: string } }) {
+export default async function ReseauxPage(props: { searchParams: Promise<{ ok?: string; erreur?: string }> }) {
+  const searchParams = await props.searchParams;
   await requirePermission('content.publish');
   const db = getServiceClient();
   const [{ data: jetons, error: eJ }, { data: pubs }] = await Promise.all([

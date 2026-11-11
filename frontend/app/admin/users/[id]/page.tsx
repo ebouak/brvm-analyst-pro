@@ -14,7 +14,8 @@ export const metadata = { title: 'Utilisateur — Administration' };
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }) : 'jamais';
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const ctx = await requirePermission('users.read');
   const [rights, allRoles, authEvents] = await Promise.all([
     getUserRights(params.id),

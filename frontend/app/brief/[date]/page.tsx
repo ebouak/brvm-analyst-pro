@@ -27,7 +27,7 @@ interface BriefData {
 }
 
 interface PageProps {
-  params: { date: string };
+  params: Promise<{ date: string }>;
 }
 
 const TENDANCE = {
@@ -58,7 +58,8 @@ async function getRecentBriefs(exclude: string) {
   return (data ?? []) as { date_marche: string }[];
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const title = `Note de conjoncture BRVM — séance du ${fmtDateFR(params.date)}`;
   const description =
     'Tendance du marché, hausses et baisses, valeur des transactions, capitalisations et actualités de la séance BRVM.';
@@ -106,7 +107,8 @@ function MoverBar({
   );
 }
 
-export default async function BriefDatePage({ params }: PageProps) {
+export default async function BriefDatePage(props: PageProps) {
+  const params = await props.params;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(params.date)) notFound();
   const brief = await getBrief(params.date);
   if (!brief) notFound();

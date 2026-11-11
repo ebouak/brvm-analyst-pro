@@ -6,7 +6,8 @@ export const runtime = 'nodejs';
  * dans le bucket public Supabase `seance-video`. Simple relais, en flux, avec
  * les requêtes partielles (Range) transmises — aucune copie en mémoire.
  */
-export async function GET(req: Request, { params }: { params: { date: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ date: string }> }) {
+  const params = await props.params;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(params.date)) return new Response('Date invalide.', { status: 400 });
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!base) return new Response('Stockage indisponible.', { status: 503 });

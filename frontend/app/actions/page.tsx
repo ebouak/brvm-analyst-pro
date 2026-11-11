@@ -111,7 +111,8 @@ function fmtSeance(iso: string): string {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
-export default async function ActionsPage({ searchParams }: { searchParams?: { secteur?: string } }) {
+export default async function ActionsPage(props: { searchParams?: Promise<{ secteur?: string }> }) {
+  const searchParams = await props.searchParams;
   // Niveau requis LU EN BASE (feature_flags → `actions_metrics`, éditable dans
   // /admin/features). Les cours restent publics ; seules les colonnes calculées
   // sont soumises au flag.

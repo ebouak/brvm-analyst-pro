@@ -22,7 +22,8 @@ function isKind(v: string | undefined): v is ContentKind {
   return v === 'news' || v === 'communique' || v === 'bulletin';
 }
 
-export default async function Page({ searchParams }: { searchParams: { kind?: string; q?: string } }) {
+export default async function Page(props: { searchParams: Promise<{ kind?: string; q?: string }> }) {
+  const searchParams = await props.searchParams;
   await requirePermission('content.read');
   const kind: ContentKind = isKind(searchParams.kind) ? searchParams.kind : 'news';
   const search = searchParams.q ?? '';

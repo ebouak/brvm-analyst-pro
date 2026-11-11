@@ -12,14 +12,16 @@ async function load(id: string) {
   return data as { id: string; niveau: string; display_name: string; issued_at: string } | null;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const c = await load(params.id);
   if (!c) return { title: 'Certificat introuvable' };
   const t = `${c.display_name} — Certificat ${NIVEAU_LABEL[c.niveau] ?? c.niveau} · WESTBOURSE Academy`;
   return { title: t, description: 'Certificat de formation BRVM délivré par WESTBOURSE Academy.' };
 }
 
-export default async function CertificatPublicPage({ params }: { params: { id: string } }) {
+export default async function CertificatPublicPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const c = await load(params.id);
   if (!c) notFound();
   const date = new Date(c.issued_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });

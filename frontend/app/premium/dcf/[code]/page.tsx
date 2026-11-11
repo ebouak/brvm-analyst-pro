@@ -5,11 +5,12 @@ import { getDcfData } from '@/lib/dcf/server';
 import DcfClient from '@/components/premium/DcfClient';
 import { SectionHeader, StatPill, EmptyStatePremium } from '@/components/ui/premium';
 
-interface Props { params: { code: string } }
+interface Props { params: Promise<{ code: string }> }
 
 export const metadata = { title: 'Valorisation DCF' };
 
-export default async function DcfPage({ params }: Props) {
+export default async function DcfPage(props: Props) {
+  const params = await props.params;
   const code = params.code.toUpperCase();
   const supa = createClient();
 

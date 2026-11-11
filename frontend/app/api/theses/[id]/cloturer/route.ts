@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
  * Clôture une thèse active : fige le dernier cours en base, enregistre verdict
  * et bilan. Le cours de clôture n'est jamais saisi — c'est un vrai prix de marché.
  */
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const sb = createClient();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });

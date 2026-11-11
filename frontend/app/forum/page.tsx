@@ -8,7 +8,8 @@ import { SectionHeader } from '@/components/ui/premium';
 export const metadata = { title: 'Forum' };
 export const revalidate = 60;
 
-export default async function ForumPage({ searchParams }: { searchParams?: { code?: string } }) {
+export default async function ForumPage(props: { searchParams?: Promise<{ code?: string }> }) {
+  const searchParams = await props.searchParams;
   const code = searchParams?.code?.toUpperCase();
   const { topics, authors } = await listTopics(0, code);
   const supabase = createClient();

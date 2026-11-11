@@ -11,7 +11,8 @@ export const metadata: Metadata = { title: 'Paiement', robots: { index: false, f
  * n'importe qui peut forger cette URL. Elle affiche le statut que le webhook,
  * seul habilité, a écrit — lu sous RLS, pour le seul compte connecté.
  */
-export default function PaiementSuccesPage({ searchParams }: { searchParams: { txn?: string } }) {
+export default async function PaiementSuccesPage(props: { searchParams: Promise<{ txn?: string }> }) {
+  const searchParams = await props.searchParams;
   const txn = searchParams.txn ?? '';
   const valide = /^[0-9a-f-]{36}$/i.test(txn);
 

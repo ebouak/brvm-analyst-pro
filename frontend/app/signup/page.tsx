@@ -4,11 +4,12 @@ import { LoginMarketBar } from '@/components/auth/LoginMarketBar';
 
 export const revalidate = 300;
 
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: { error?: string; next?: string };
-}) {
+export default async function SignupPage(
+  props: {
+    searchParams: Promise<{ error?: string; next?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const market = await getLoginMarket();
   return (
     <div className="relative min-h-screen">

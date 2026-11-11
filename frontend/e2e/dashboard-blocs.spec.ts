@@ -39,10 +39,15 @@ for (const profil of PROFILS) {
       if (profil.nom === 'actif') {
         // Un actif voit son portefeuille AVANT les indices pan-africains.
         const bloc = await page.locator('#bloc-portefeuille').boundingBox();
-        const indices = await page.locator('section[aria-label="Indices pan-africains"]').boundingBox();
         expect(bloc, 'bloc portefeuille introuvable').not.toBeNull();
-        expect(indices, 'section indices introuvable').not.toBeNull();
-        expect(bloc!.y).toBeLessThan(indices!.y);
+        // La section des indices disparaît, comme voulu, quand aucune place n'a de
+        // donnée de moins de SEUIL_MASQUE_JOURS (collecte AFX coupée le 2026-11-06) :
+        // l'ordre n'est vérifiable que si elle est affichée.
+        const section = page.locator('section[aria-label="Indices pan-africains"]');
+        if (await section.count()) {
+          const indices = await section.boundingBox();
+          expect(bloc!.y).toBeLessThan(indices!.y);
+        }
       } else {
         // Un débutant voit l'invitation à suivre une première position.
         await expect(page.getByText('Vous ne suivez encore aucune position.')).toBeVisible();

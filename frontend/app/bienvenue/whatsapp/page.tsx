@@ -7,7 +7,8 @@ import Ecran from './Ecran';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'WESTBOURSE sur WhatsApp', robots: { index: false } };
 
-export default async function Page({ searchParams }: { searchParams: { next?: string | string[] } }) {
+export default async function Page(props: { searchParams: Promise<{ next?: string | string[] }> }) {
+  const searchParams = await props.searchParams;
   const next = nextSur(typeof searchParams.next === 'string' ? searchParams.next : undefined);
   const sb = createClient();
   const { data: { user } } = await sb.auth.getUser();

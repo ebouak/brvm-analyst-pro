@@ -34,7 +34,10 @@ async function getData() {
   return { lastDate, actions: enriched, signals: sigMap, sparklines };
 }
 
-export default async function ApercuActionsPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
+export default async function ApercuActionsPage(
+  props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }
+) {
+  const searchParams = await props.searchParams;
   const { lastDate, actions, signals, sparklines } = await getData();
   if (!lastDate) return <ApercuFrame title="Aperçu — Actions" subtitle="Marché BRVM en lecture seule."><ApercuNav /><p style={{ color: 'rgb(var(--color-muted))', fontSize: 13 }}>Aucune séance.</p></ApercuFrame>;
   return (

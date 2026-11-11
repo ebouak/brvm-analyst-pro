@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { requirePermission } from '@/lib/server/rbac';
 import { updateWeeklyReport } from '@/lib/admin/weekly';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     await requirePermission('content.publish');
   } catch {

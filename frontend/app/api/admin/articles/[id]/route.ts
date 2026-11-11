@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 /** Statuts qu'un administrateur peut poser. `a_valider` n'est posé que par le scraper. */
 const STATUTS = new Set(['publie', 'rejete', 'brouillon']);
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requirePermission('content.publish');
   const body = (await req.json().catch(() => ({}))) as { statut?: string };
   if (!body.statut || !STATUTS.has(body.statut)) {

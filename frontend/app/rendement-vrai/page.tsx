@@ -30,11 +30,12 @@ function parseAnnees(v: string | undefined): Horizon {
 const CHAMP =
   'mt-1 min-h-[44px] rounded-lg border border-border bg-bg px-3 text-sm text-ivory transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-40';
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { code?: string; mode?: string; annees?: string };
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<{ code?: string; mode?: string; annees?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const code = (searchParams.code ?? DEFAUT_CODE).toUpperCase();
   const mode = parseMode(searchParams.mode);
   const annees = parseAnnees(searchParams.annees);

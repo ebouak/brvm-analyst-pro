@@ -29,7 +29,8 @@ async function getDaily(date?: string) {
   };
 }
 
-export default async function MarketDailyPage({ searchParams }: { searchParams: { date?: string } }) {
+export default async function MarketDailyPage(props: { searchParams: Promise<{ date?: string }> }) {
+  const searchParams = await props.searchParams;
   const data = await getDaily(searchParams.date);
   if (!data) {
     return (

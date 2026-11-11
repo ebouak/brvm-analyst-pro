@@ -1,3 +1,4 @@
+import type React from 'react';
 /**
  * ⚠️ ORPHELIN depuis la landing V2 : remplacé par PlatformUniverses, qui
  * reprend les 12 outils de ce fichier (vérifié un à un) et en ajoute 8.
@@ -19,7 +20,7 @@ interface Tool {
   label: string;
   href: string;
   desc: string;
-  icon: JSX.Element;
+  icon: React.JSX.Element;
 }
 
 /** Icônes au trait, 20×20, héritant de `currentColor` (donc de l'accent au survol). */
@@ -104,7 +105,7 @@ const I = {
   ),
 };
 
-function Icon({ children }: { children: JSX.Element }) {
+function Icon({ children }: { children: React.JSX.Element }) {
   return (
     <svg
       viewBox="0 0 20 20"

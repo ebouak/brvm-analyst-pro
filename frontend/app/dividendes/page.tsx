@@ -179,10 +179,11 @@ async function getData(year?: string, sector?: string): Promise<{
 }
 
 interface PageProps {
-  searchParams: { year?: string; sector?: string };
+  searchParams: Promise<{ year?: string; sector?: string }>;
 }
 
-export default async function DividendesPage({ searchParams }: PageProps) {
+export default async function DividendesPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   const year = typeof searchParams.year === 'string' ? searchParams.year : undefined;
   const sector = typeof searchParams.sector === 'string' ? searchParams.sector : undefined;
 

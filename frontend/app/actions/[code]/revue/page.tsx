@@ -12,7 +12,7 @@ import { perAffichable, distributionAffichable, evolutionResultat, evolutionResu
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Revue de résultats' };
 
-interface Props { params: { code: string } }
+interface Props { params: Promise<{ code: string }> }
 
 // Une seule mise en forme des montants, unité adaptée (M sous 1 Md) : 4,3 M n'est jamais arrondi en « 0 Md ».
 const moins = (s: string) => s.replace('-', '−'); // U+2212, comme le reste du site
@@ -29,7 +29,8 @@ const EN_MOTS = new Set(["Résultat d'exploitation", 'Résultat avant impôt', '
 const yoy = (a: number | null | undefined, b: number | null | undefined) =>
   a == null || b == null || b === 0 ? '—' : `${a / b - 1 >= 0 ? '+' : '−'}${nf1(Math.abs((a / b - 1) * 100))} %`;
 
-export default async function RevuePage({ params }: Props) {
+export default async function RevuePage(props: Props) {
+  const params = await props.params;
   const code = decodeURIComponent(params.code).toUpperCase();
   const d = await getRevue(code).catch(() => null);
   if (!d) notFound();

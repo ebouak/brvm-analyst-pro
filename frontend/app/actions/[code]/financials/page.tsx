@@ -40,10 +40,11 @@ const lockLevel = (required: string): 'premium' | 'pro' | 'disabled' =>
   required === 'pro' ? 'pro' : required === 'disabled' ? 'disabled' : 'premium';
 
 interface Props {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }
 
-export default async function FinancialsPage({ params }: Props) {
+export default async function FinancialsPage(props: Props) {
+  const params = await props.params;
   const code = params.code.toUpperCase();
   const brut = await loadCompanyFinancials(code);
   if (!brut) notFound();

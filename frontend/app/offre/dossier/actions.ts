@@ -10,7 +10,7 @@ const DUREE_URL_S = 600;
 const INDISPONIBLE = 'Service momentanément indisponible. Réessayez dans un instant.';
 
 export async function choisirDossier(jeton: string, codeBrut: string): Promise<Retour> {
-  const ip = getClientIp(new Request('http://local', { headers: headers() }));
+  const ip = getClientIp(new Request('http://local', { headers: await headers() }));
   const { allowed } = await checkRateLimit({ route: 'offre-dossier', ip, maxHits: 20, windowSeconds: 600 });
   if (!allowed) return { ok: false, message: 'Trop de tentatives. Réessayez dans quelques minutes.' };
   const code = String(codeBrut ?? '').toUpperCase();

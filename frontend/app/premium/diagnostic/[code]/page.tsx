@@ -6,9 +6,10 @@ import PatternDiagnostic from '@/components/premium/PatternDiagnostic';
 import { ViewTracker } from '@/components/analytics/ViewTracker';
 import { graphiquesParSection } from '@/components/diagnostic/GraphiquesDiagnostic';
 
-interface Props { params: { code: string } }
+interface Props { params: Promise<{ code: string }> }
 
-export default async function DiagnosticPage({ params }: Props) {
+export default async function DiagnosticPage(props: Props) {
+  const params = await props.params;
   const code = params.code.toUpperCase();
   const supa = createClient();
 

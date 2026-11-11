@@ -14,7 +14,8 @@ export const dynamic = 'force-dynamic';
 const NIVEAUX: Record<string, string> = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' };
 const fmtPrix = (v: number) => `${v.toLocaleString('fr-FR')} FCFA`;
 
-export default async function SessionPage({ params }: { params: { id: string } }) {
+export default async function SessionPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const s = await lireSessionPublique(params.id);
   if (!s) notFound();
 

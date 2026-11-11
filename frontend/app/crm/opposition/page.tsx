@@ -3,7 +3,10 @@ import { confirmerOpposition } from './actions';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Ne plus recevoir de proposition', robots: { index: false } };
 
-export default function Page({ searchParams }: { searchParams: { t?: string; fait?: string; erreur?: string } }) {
+export default async function Page(
+  props: { searchParams: Promise<{ t?: string; fait?: string; erreur?: string }> }
+) {
+  const searchParams = await props.searchParams;
   return (
     <div className="mx-auto max-w-lg px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-ivory">Ne plus recevoir de proposition</h1>

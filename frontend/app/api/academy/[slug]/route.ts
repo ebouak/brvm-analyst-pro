@@ -13,7 +13,8 @@ export const dynamic = 'force-dynamic';
  * désormais le même verrou que la page de cours, et la réponse n'est plus
  * jamais mise en cache partagé (elle dépend de l'utilisateur).
  */
-export async function GET(_req: Request, { params }: { params: { slug: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const introuvable = () =>
     new Response('Cours introuvable', {
       status: 404,
