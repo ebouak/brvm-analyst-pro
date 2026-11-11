@@ -98,7 +98,7 @@ export default function ScreenerResults({ results }: { results: ActionRow[] }) {
           columns={CSV_COLUMNS}
         />
       </div>
-      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+      <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="relative overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border bg-bg/40">
