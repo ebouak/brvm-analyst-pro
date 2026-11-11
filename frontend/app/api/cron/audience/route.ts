@@ -7,7 +7,6 @@
 // Auth : bearer CRON_SECRET, temps constant. Journaux : codes seulement. Agrégats seulement.
 import { cronAutorise } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
-import { autorise } from '@/lib/crm/passageSequences';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
 import { sendEmail } from '@/lib/server/email';
 import { bornesPeriode, libelleFenetre } from '@/lib/audience/periodes';

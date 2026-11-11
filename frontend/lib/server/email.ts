@@ -23,6 +23,8 @@ export interface EmailMessage {
   from?: string;
   /** Version texte brut, jointe à la version HTML. */
   text?: string;
+  /** En-têtes SMTP supplémentaires (ex. List-Unsubscribe). */
+  headers?: Record<string, string>;
 }
 /** `id` : identifiant Resend du message envoyé, preuve d'envoi conservée par l'appelant. */
 export interface EmailResult { ok: boolean; sent: number; error?: string; id?: string }
@@ -75,6 +77,7 @@ export async function sendEmail(msg: EmailMessage): Promise<EmailResult> {
         ...(msg.text ? { text: msg.text } : {}),
         ...(msg.attachments && msg.attachments.length ? { attachments: msg.attachments } : {}),
         ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
+        ...(msg.headers ? { headers: msg.headers } : {}),
       }),
       // Un envoi ne doit jamais pendre indéfiniment (cron non surveillé) ; l'échec est journalisé par l'appelant.
       signal: AbortSignal.timeout(15_000),
@@ -102,6 +105,7 @@ export async function sendBatch(messages: EmailMessage[]): Promise<EmailResult> 
       subject: m.subject,
       html: m.html,
       ...(m.attachments && m.attachments.length ? { attachments: m.attachments } : {}),
+      ...(m.headers ? { headers: m.headers } : {}),
     }));
     try {
       const res = await fetch('https://api.resend.com/emails/batch', {

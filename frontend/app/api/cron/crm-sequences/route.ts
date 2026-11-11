@@ -17,7 +17,7 @@ import { chargerDossiers } from '@/lib/crm/charger';
 import { selectionnerPassage, cleJournal, PREFIXE_SIMULATION } from '@/lib/crm/sequences';
 import { composerRelance } from '@/lib/crm/gabarits';
 import { envoyerRelanceEmail } from '@/lib/crm/envoiRelance';
-import { autorise, decisionReglages, issueVide, resumer, restantAujourdhui, debutJourUtc, type Issue } from '@/lib/crm/passageSequences';
+import { decisionReglages, issueVide, resumer, restantAujourdhui, debutJourUtc, type Issue } from '@/lib/crm/passageSequences';
 import { getServiceClient } from '@/lib/billing/serviceClient';
 import { alerterExploitant } from '@/lib/server/alerteExploitant';
 
