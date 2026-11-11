@@ -12,9 +12,9 @@ interface Props {
 
 type AlertType =
   | 'prix_au_dessus' | 'prix_en_dessous' | 'variation'
-  | 'signal_achat' | 'signal_vente' | 'rsi_survente' | 'rsi_surachat' | 'dividende_proche';
+  | 'signal_achat' | 'signal_vente' | 'rsi_survente' | 'rsi_surachat' | 'dividende_proche' | 'saison_hors_fourchette';
 
-const SMART_TYPES: AlertType[] = ['signal_achat', 'signal_vente', 'rsi_survente', 'rsi_surachat', 'dividende_proche'];
+const SMART_TYPES: AlertType[] = ['signal_achat', 'signal_vente', 'rsi_survente', 'rsi_surachat', 'dividende_proche', 'saison_hors_fourchette'];
 const SEUIL_HINT: Partial<Record<AlertType, string>> = {
   rsi_survente: 'Seuil RSI (défaut 30)', rsi_surachat: 'Seuil RSI (défaut 70)', dividende_proche: 'Jours avant détachement (défaut 7)',
 };
@@ -27,7 +27,7 @@ export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
   if (!isOpen) return null;
 
   const isSmart = SMART_TYPES.includes(alertType);
-  const noSeuil = alertType === 'signal_achat' || alertType === 'signal_vente';
+  const noSeuil = alertType === 'signal_achat' || alertType === 'signal_vente' || alertType === 'saison_hors_fourchette';
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
@@ -74,8 +74,16 @@ export default function NewAlertModal({ isOpen, onClose, instruments }: Props) {
                 <option value="rsi_survente">RSI en survente</option>
                 <option value="rsi_surachat">RSI en surachat</option>
                 <option value="dividende_proche">Détachement de dividende proche</option>
+                <option value="saison_hors_fourchette">Sortie de la fourchette saisonnière</option>
               </optgroup>
             </select>
+            {alertType === 'saison_hors_fourchette' && (
+              <p className="text-xs text-muted mt-1">
+                Un message quand le cours du mois sort de sa fourchette large habituelle (10 % à 90 % des années passées),
+                seulement si la saison de ce mois est au moins indicative. Au plus un message par sens et par mois, regroupé
+                avec vos autres valeurs.
+              </p>
+            )}
           </div>
 
           {!noSeuil && (

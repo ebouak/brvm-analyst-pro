@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { createPublicClient } from '@/lib/supabase/public';
-import { getSaisonValeur, lireFenetres, prochainDetachement } from '@/lib/seasonality/server';
+import { getSaisonValeur, lireFenetres, lireMarche, prochainDetachement } from '@/lib/seasonality/server';
+import { saisonLiquidite } from '@/lib/seasonality/liquidite';
+import LiquiditeSaison from '@/components/seasonality/LiquiditeSaison';
 import { habitudes } from '@/lib/seasonality/frise';
 import FriseEvenements from '@/components/seasonality/FriseEvenements';
 import FenetreEvenement from '@/components/seasonality/FenetreEvenement';
@@ -30,9 +32,13 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
   const code = (searchParams?.code ?? instruments[0]?.code ?? 'PALC').toUpperCase();
   const saison = await getSaisonValeur(code).catch(() => null);
   // Lot 3 : événements (Premium seulement, donc lus seulement hors aperçu).
-  const [fenetres, prochain] = preview
-    ? [null, null]
-    : await Promise.all([lireFenetres(code).catch(() => null), prochainDetachement(code).catch(() => null)]);
+  const [fenetres, prochain, marche] = preview
+    ? [null, null, null]
+    : await Promise.all([
+        lireFenetres(code).catch(() => null),
+        prochainDetachement(code).catch(() => null),
+        lireMarche().catch(() => null),
+      ]);
   const habitudesValeur = habitudes((saison?.faits ?? []).flatMap((f) => f.evenements));
   const designation = instruments.find((i) => i.code === code)?.designation ?? null;
 
@@ -75,6 +81,26 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
         )}
       </form>
 
+      <p className="mt-4 text-sm">
+        <Link href="/saisonnalite/ce-mois-ci" className="text-accent-ink underline underline-offset-2">
+          Ce mois-ci : toutes les valeurs face à leur habitude, et le bilan public
+        </Link>
+      </p>
+
+      {/* F8 : la saison du marché, résultat le plus solide, avant celle d'une valeur. */}
+      {!preview && marche && marche.rendements.length > 0 && (
+        <section aria-labelledby="saison-marche-h" className="mt-8">
+          <h2 id="saison-marche-h" className="text-lg font-medium text-ivory">Saison du marché</h2>
+          <p className="mt-1 text-sm text-muted">
+            Moyenne équipondérée des actions cotées, dividende réinvesti. Une valeur suit d’abord le marché : sa propre saison
+            se lit en regard de celle-ci.
+          </p>
+          <div className="mt-4">
+            <SeasonalityMatrix returns={marche.rendements} />
+          </div>
+        </section>
+      )}
+
       <section aria-labelledby="saison-titre-h" className="mt-8">
         <h2 id="saison-titre-h" className="text-lg font-medium text-ivory">
           <span className="font-mono">{code}</span>
@@ -95,6 +121,7 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
             anneesDifficiles={saison?.anneesDifficiles ?? []}
             detachementsParMois={saison?.detachementsParMois}
             faits={saison?.faits ?? []}
+            marche={marche?.rendements}
             preview={preview}
           />
         </div>
@@ -106,6 +133,11 @@ export default async function SaisonnalitePage({ searchParams }: { searchParams?
         {!preview && fenetres && (
           <div className="mt-6">
             <FenetreEvenement code={code} f={fenetres} />
+          </div>
+        )}
+        {!preview && marche && saison && saison.faits.length > 0 && (
+          <div className="mt-6">
+            <LiquiditeSaison code={code} valeur={saisonLiquidite(saison.faits)} marche={saisonLiquidite(marche.liquidite)} />
           </div>
         )}
         <LigneSource>

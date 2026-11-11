@@ -8,7 +8,8 @@ export type AlertType =
   | 'prix_au_dessus' | 'prix_en_dessous' | 'variation'
   | 'signal_achat' | 'signal_vente'
   | 'rsi_survente' | 'rsi_surachat'
-  | 'dividende_proche';
+  | 'dividende_proche'
+  | 'saison_hors_fourchette';
 
 /** Seuils par défaut des types intelligents (si seuil non renseigné). */
 export const SMART_DEFAULTS = { rsi_survente: 30, rsi_surachat: 70, dividende_proche: 7 } as const;
