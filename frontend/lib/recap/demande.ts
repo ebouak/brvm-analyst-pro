@@ -29,7 +29,7 @@ export async function traiterDemandeRecap(canal: Canal, destinataire: string | n
     wa ? passerelleWhatsapp().envoyerTexte(String(destinataire), t).catch(() => null) : sendTelegramReply(destinataire, t.replace(/\*/g, ''));
   try {
     const cle = createHmac('sha256', process.env.WAHA_WEBHOOK_HMAC_KEY ?? 'westbourse-recap').update(`recap:${canal}:${destinataire}`).digest('hex');
-    const { allowed } = await checkRateLimit({ route: 'recap-demande', ip: cle, maxHits: LIMITE_HEURE, windowSeconds: 3600, failClosed: true });
+    const { allowed } = await checkRateLimit({ route: 'recap-demande', ip: cle, maxHits: LIMITE_HEURE, windowSeconds: 3600 });
     if (!allowed) return;
 
     const db = getServiceClient();
