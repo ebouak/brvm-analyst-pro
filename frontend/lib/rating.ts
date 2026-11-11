@@ -37,13 +37,15 @@ export function scoreToRating(
     return { note: 'NR', tone: 'muted', label: 'Non noté' };
   }
 
-  if (scoreTotal >= 0.75) return { note: 'A+', tone: 'up', label: 'Achat très fort' };
-  if (scoreTotal >= 0.6) return { note: 'A', tone: 'up', label: 'Achat' };
+  // Libellés descriptifs du SCORE, jamais d'opération (« Achat », « Vente ») :
+  // audit de conformité, lot B, 2026-11-11.
+  if (scoreTotal >= 0.75) return { note: 'A+', tone: 'up', label: 'Score très élevé' };
+  if (scoreTotal >= 0.6) return { note: 'A', tone: 'up', label: 'Score élevé' };
   if (scoreTotal >= 0.3) return { note: 'B+', tone: 'mid', label: 'Momentum positif' };
   if (scoreTotal >= 0.1) return { note: 'B', tone: 'mid', label: 'Légèrement positif' };
   if (scoreTotal > -0.1) return { note: 'C', tone: 'neutral', label: 'Neutre' };
   if (scoreTotal > -0.6) return { note: 'D', tone: 'down', label: 'Momentum négatif' };
-  return { note: 'E', tone: 'down', label: 'Vente' };
+  return { note: 'E', tone: 'down', label: 'Score faible' };
 }
 
 export const RATING_DISCLAIMER =

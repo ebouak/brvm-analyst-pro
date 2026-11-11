@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
-import { redacteursDisponibles, redigerEnFlux } from '@/lib/server/redacteur';
+import { redacteursDisponibles, rediger } from '@/lib/server/redacteur';
 import { runTool } from '@/lib/briefTools';
 import { SYSTEM_PROMPT_ANALYSTE } from '@/lib/ai/prompts';
+import { repondreSansRecommandation } from '@/lib/ai/reponseConforme';
 import { createClient } from '@/lib/supabase/server';
 import { checkFeature } from '@/lib/server/featureGate';
 
@@ -16,6 +17,11 @@ const LIQUIDITES_CODE = 'LIQUIDITES';
 /**
  * Contexte portefeuille de l'utilisateur connecté (positions valorisées + P&L)
  * — injecté quand la question le concerne. Soumis à la RLS (auth.uid()).
+ *
+ * Il sert à DÉCRIRE le portefeuille (poids, concentration, plus-values), jamais
+ * à prescrire une opération : le prompt l'interdit et le filtre de sortie
+ * (lib/ai/filtreRecommandation) le vérifie (audit lot B, 2026-11-11). Le poids
+ * de chaque ligne est calculé ici pour que le modèle n'ait pas à le faire.
  */
 async function buildPortfolioContext(): Promise<string> {
   try {
@@ -45,7 +51,8 @@ async function buildPortfolioContext(): Promise<string> {
       return { code: p.code, qte: p.quantite, pru: p.prix_entree, cours, valeur: Math.round(valeur), pnl: Math.round(valeur - cost), pnlPct: cost > 0 ? +(((valeur - cost) / cost) * 100).toFixed(1) : 0 };
     });
     const pnl = totalVal - totalCost;
-    return `\n[PORTEFEUILLE UTILISATEUR] valorisation=${Math.round(totalVal)} FCFA · capital investi=${Math.round(totalCost)} FCFA · P&L latent=${Math.round(pnl)} FCFA (${totalCost > 0 ? ((pnl / totalCost) * 100).toFixed(1) : '0'}%)\nPositions: ${JSON.stringify(lines)}`;
+    const lignes = lines.map((l) => ({ ...l, poidsPct: totalVal > 0 ? +((l.valeur / totalVal) * 100).toFixed(1) : null }));
+    return `\n[PORTEFEUILLE UTILISATEUR — à décrire, aucune opération à proposer] valorisation=${Math.round(totalVal)} FCFA · capital investi=${Math.round(totalCost)} FCFA · P&L latent=${Math.round(pnl)} FCFA (${totalCost > 0 ? ((pnl / totalCost) * 100).toFixed(1) : '0'}%)\nPositions (pru = prix de revient unitaire, poidsPct = part de la valorisation): ${JSON.stringify(lignes)}`;
   } catch {
     return '';
   }
@@ -55,7 +62,8 @@ function mentionsPortfolio(text: string): boolean {
   return /portefeuille|portfolio|plus-?value|mes? position|mon portefeuille|ma position|r[ée]['é]?quilibr|renforcer|mes titres|mon capital/i.test(text);
 }
 
-export const maxDuration = 60;
+// Réponse entière, puis au plus une réécriture : deux rédactions possibles.
+export const maxDuration = 120;
 
 // ── Détecte les codes BRVM mentionnés dans le texte ──────────────────────────
 
@@ -78,6 +86,11 @@ function extractCodes(text: string): string[] {
 
 // ── Construit un contexte temps réel riche ────────────────────────────────────
 
+/* Libellés d'affichage, pas les codes stockés : « BUY » lu par le modèle
+   devenait « signal d'ACHAT » dans la réponse. Le champ confiance mesure la
+   complétude des données, pas une probabilité de gain (audit lot B). */
+const LIBELLE_SIGNAL: Record<string, string> = { BUY: 'haussier', HOLD: 'neutre', SELL: 'baissier' };
+
 async function buildRichContext(question: string): Promise<string> {
   const parts: string[] = [];
 
@@ -94,9 +107,15 @@ async function buildRichContext(question: string): Promise<string> {
     const sigs = signals as { date?: string; signals?: Array<{ code: string; signal: string; score_total: number; confiance: number; explication: string }> };
 
     parts.push(`=== DONNÉES TEMPS RÉEL BRVM — ${snap.date ?? 'dernière séance'} ===`);
-    parts.push(`\n[MARCHÉ]\n${JSON.stringify(snap.actions?.slice(0, 47), null, 0)}`);
+    const marche = snap.actions?.slice(0, 47).map((a) => (a.signal ? { ...a, signal: LIBELLE_SIGNAL[a.signal] ?? a.signal } : a));
+    parts.push(`\n[MARCHÉ]\n${JSON.stringify(marche, null, 0)}`);
     parts.push(`\n[TOP MOVERS]\n${JSON.stringify(movers, null, 0)}`);
-    parts.push(`\n[SIGNAUX BUY/HOLD/SELL]\n${JSON.stringify(sigs.signals?.slice(0, 20), null, 0)}`);
+    const signauxLus = (sigs.signals ?? []).slice(0, 20).map(({ signal, confiance, ...reste }) => ({
+      ...reste,
+      signal: LIBELLE_SIGNAL[signal] ?? signal,
+      completude_donnees: confiance,
+    }));
+    parts.push(`\n[SIGNAUX DU MOTEUR (haussier / neutre / baissier) — mesure d'indicateurs, pas une recommandation]\n${JSON.stringify(signauxLus, null, 0)}`);
 
     // Données spécifiques à la question (indices si demandés, obligations, etc.)
     const q = question.toLowerCase();
@@ -245,25 +264,40 @@ export async function POST(req: NextRequest) {
     ...clientMessages.slice(-8),
   ];
 
-  // 5. Streaming
+  // 5. Rédaction ENTIÈRE, filtre de sortie, puis envoi.
+  /* Le texte était diffusé au fil de l'eau. Un filtre de recommandation
+     appliqué à la fin d'un flux arrive trop tard : la phrase « achetez,
+     objectif … » a déjà été affichée. La réponse est donc rédigée en entier,
+     contrôlée (lib/ai/reponseConforme : une réécriture, puis repli prudent),
+     et seul un texte conforme part vers le navigateur. Le format SSE est
+     conservé pour ne pas toucher au client ; des commentaires SSE (« : … »,
+     ignorés par ChatInterface) gardent la connexion ouverte pendant l'attente. */
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
+      const veille = setInterval(() => {
+        try { controller.enqueue(encoder.encode(': redaction\n\n')); } catch { /* flux fermé */ }
+      }, 10_000);
       try {
-        // La cascade joue avant le premier octet : un fournisseur en panne
-        // (crédit épuisé, modèle retiré) cède la place au suivant.
-        const redaction = await redigerEnFlux(
+        const reponse = await repondreSansRecommandation(
           messages as { role: 'system' | 'user' | 'assistant'; content: string }[],
-          { temperature: 0.15, maxTokens: 2500, timeoutMs: 50_000 },
+          async (m) =>
+            (await rediger(m, { temperature: 0.15, maxTokens: 2500, timeoutMs: 50_000 }))?.texte ?? null,
         );
-        if (!redaction) throw new Error('Aucun fournisseur IA n’a répondu.');
-        for await (const text of redaction.fragments) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+        if (!reponse) throw new Error('Aucun fournisseur IA n’a répondu.');
+        if (reponse.issue !== 'conforme') {
+          // Motifs seulement (codes), jamais le texte de la question.
+          console.warn(`[ai/chat] recommandation détectée (${reponse.motifs.map((m) => m.code).join(', ')}) → ${reponse.issue}`);
+        }
+        // Découpé en morceaux pour garder l'affichage progressif du client.
+        for (let i = 0; i < reponse.texte.length; i += 400) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: reponse.texte.slice(i, i + 400) })}\n\n`));
         }
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       } catch (e) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: String(e) })}\n\n`));
       } finally {
+        clearInterval(veille);
         controller.close();
       }
     },

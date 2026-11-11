@@ -108,19 +108,19 @@ export default function MethodologiePage() {
           {/* Seuils de signal */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <SignalThreshold
-              signal="Achat"
+              signal="Signal haussier"
               condition="score > +0,60"
               cls="border-up/25 bg-up/[0.05] text-up"
               dot="bg-up"
             />
             <SignalThreshold
-              signal="Attente"
+              signal="Neutre"
               condition="−0,60 ≤ score ≤ +0,60"
               cls="border-border/60 bg-elevated/40 text-muted"
               dot="bg-muted"
             />
             <SignalThreshold
-              signal="Vente"
+              signal="Signal baissier"
               condition="score < −0,60"
               cls="border-down/25 bg-down/[0.05] text-down"
               dot="bg-down"

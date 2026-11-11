@@ -14,6 +14,7 @@ import { computeRatios, pickBestFundamental } from '@/lib/fundamentals';
 import { fmtNumber, fmtFcfa, fmtPctSigne } from '@/lib/format';
 import { jsonLdScript } from '@/lib/jsonLd';
 import { requiredAccess } from '@/lib/server/featureAccess';
+import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnostic/versionPrompt';
 
 // ISR : aligné sur la fréquence intraday (15 min)
 export const revalidate = 900;
@@ -69,6 +70,8 @@ async function getCompany(code: string) {
         .from('diagnostic_reports')
         .select('markdown_content, generated_at')
         .eq('code', code)
+        // Ancien prompt (verdict, objectif, stop) = rapport absent.
+        .eq(CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC)
         .maybeSingle(),
       // Carnet d'ordres de la dernière séance PUBLIÉE au bulletin : celui-ci
       // paraît après la clôture, parfois le lendemain, donc sa date diffère de

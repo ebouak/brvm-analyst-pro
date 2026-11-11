@@ -13,6 +13,8 @@ import { libelleAbsence, ligneQualiteActif, type ObsIndicateur } from '@/lib/ban
 import { findNewsSignals, type NewsCategory } from '@/lib/diagnostic/newsSignals';
 import { findWebSignals } from '@/lib/diagnostic/webSearch';
 import { MARQUE_ECHEC } from '@/lib/diagnostic/echec';
+import { CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC } from '@/lib/diagnostic/versionPrompt';
+import { detecterRecommandation } from '@/lib/ai/filtreRecommandation';
 import { chargerContexteQuant } from '@/lib/diagnostic/contexteQuant';
 import { FAMILLE_PAR_CODE } from '@/lib/financials/sectors';
 import { lectureIntermediaire } from '@/lib/financials/interim';
@@ -58,7 +60,10 @@ export async function POST(req: Request, props: { params: Promise<{ code: string
       .from('diagnostic_reports')
       .select('markdown_content, generated_at')
       .eq('code', code)
-      .single();
+      // Un rapport rédigé avec l'ancien prompt (verdict, objectif, stop) est
+      // traité comme absent : il est régénéré (lib/diagnostic/versionPrompt).
+      .eq(CHEMIN_VERSION_PROMPT, VERSION_PROMPT_DIAGNOSTIC)
+      .maybeSingle();
     if (cached && Date.now() - new Date(cached.generated_at).getTime() < MAX_AGE_MS) {
       return NextResponse.json({ markdown: cached.markdown_content, cached: true, generated_at: cached.generated_at });
     }
@@ -200,12 +205,18 @@ export async function POST(req: Request, props: { params: Promise<{ code: string
       }
 
       if (full && complet) {
+        // Contrôle a posteriori : le texte est déjà diffusé (flux), on ne peut
+        // que le signaler. Codes de motifs seulement, jamais le texte.
+        const reco = detecterRecommandation(full);
+        if (reco.recommandation) {
+          console.warn('[diagnostic] recommandation détectée pour', code, reco.motifs.map((x) => x.code).join(', '));
+        }
         await admin.from('diagnostic_reports').upsert(
           // generated_at explicite : son `default now()` ne joue qu'à la création.
           // Sans lui, la date restait celle du premier rapport (SGBC : 8 juin),
           // le cache de 7 jours n'était jamais valide et chaque visite relançait
           // une rédaction complète.
-          { code, markdown_content: full, model_used: usedModel, generated_at: new Date().toISOString(), metrics_snapshot: m as unknown as Record<string, unknown>, red_flag_score: redFlags.overallScore },
+          { code, markdown_content: full, model_used: usedModel, generated_at: new Date().toISOString(), metrics_snapshot: { ...(m as unknown as Record<string, unknown>), prompt_version: VERSION_PROMPT_DIAGNOSTIC }, red_flag_score: redFlags.overallScore },
           { onConflict: 'code' },
         );
       } else if (!full) {

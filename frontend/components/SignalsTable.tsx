@@ -46,9 +46,9 @@ const SIG_PILLS: {
   idleCls: string;
 }[] = [
   { value: 'ALL', key: 'all', label: 'Tous', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'BUY', key: 'buy', label: 'Achat', activeCls: 'bg-up/10 text-up border-up/40', idleCls: 'border-up/20 text-up' },
-  { value: 'HOLD', key: 'hold', label: 'Attente', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
-  { value: 'SELL', key: 'sell', label: 'Vente', activeCls: 'bg-down/10 text-down border-down/40', idleCls: 'border-down/20 text-down' },
+  { value: 'BUY', key: 'buy', label: 'Haussier', activeCls: 'bg-up/10 text-up border-up/40', idleCls: 'border-up/20 text-up' },
+  { value: 'HOLD', key: 'hold', label: 'Neutre', activeCls: 'bg-white/10 text-white border-white/30', idleCls: 'border-border text-muted hover:text-white' },
+  { value: 'SELL', key: 'sell', label: 'Baissier', activeCls: 'bg-down/10 text-down border-down/40', idleCls: 'border-down/20 text-down' },
 ];
 
 // ─── Composante principale ─────────────────────────────────────────────────

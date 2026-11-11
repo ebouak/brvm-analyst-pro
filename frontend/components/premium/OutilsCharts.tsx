@@ -4,10 +4,11 @@ import { useState } from 'react';
 import type { ActionProcheBas, MoisSaisonnalite, ReactionEtatFinancier } from '@/lib/premium/outils';
 import { fmtDateCourte } from '@/lib/format';
 
+// Clés = valeurs stockées (BUY/HOLD/SELL) ; le libellé vient de libelleSignal.
 const SIGNAL_COLOR: Record<string, string> = {
-  ACHAT: 'text-up bg-up/5 border-up/30',
-  NEUTRE: 'text-warn bg-warn/10 border-warn/30',
-  VENTE: 'text-down bg-down/5 border-down/30',
+  BUY: 'text-up bg-up/5 border-up/30',
+  HOLD: 'text-warn bg-warn/10 border-warn/30',
+  SELL: 'text-down bg-down/5 border-down/30',
 };
 
 function ProchesBasTable({ data }: { data: ActionProcheBas[] }) {

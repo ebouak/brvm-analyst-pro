@@ -69,12 +69,12 @@ export default function PortfolioOptimizer({ userId }: { userId: string }) {
           <span className="text-warn">Contribution au risque</span> : part de la volatilité totale apportée par chaque ligne.
           <span className="text-ivory"> Min-variance</span> : allocation qui minimise le risque.
           <span className="text-up"> Max-Sharpe</span> : allocation qui maximise le rendement par unité de risque.
-          Les poids peuvent être négatifs (vente à découvert théorique), à interpréter comme une direction de rééquilibrage.
+          Les poids peuvent être négatifs (vente à découvert théorique), à lire comme un écart théorique, pas comme une opération à passer.
           Hypothèses : rendements quotidiens 2 ans, sans-risque 6%.
         </p>
       </div>
 
-      {/* Plan de rééquilibrage : ordres concrets */}
+      {/* Écart à l'allocation théorique : simulation, pas des ordres (audit lot B) */}
       <RebalancePlan
         codes={codes}
         positions={positions}
@@ -114,7 +114,7 @@ function RebalancePlan({
   return (
     <div tabIndex={0} role="region" aria-label="Tableau, défilement horizontal" className="bg-surface border border-border rounded-xl p-4 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
       <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
-        <h3 className="text-sm font-semibold text-white">Plan de rééquilibrage</h3>
+        <h3 className="text-sm font-semibold text-white">Écart à l&apos;allocation théorique</h3>
         <div className="flex gap-1 bg-bg/40 rounded-lg p-0.5">
           {TABS.map((t) => (
             <button
@@ -132,7 +132,7 @@ function RebalancePlan({
       {targetWeights == null ? (
         <p className="text-xs text-faint">Allocation cible indisponible pour ce profil.</p>
       ) : aBouger.length === 0 ? (
-        <p className="text-xs text-up">✓ Portefeuille déjà aligné sur la cible (dérive &lt; 3%). Aucun ordre nécessaire.</p>
+        <p className="text-xs text-muted">Répartition actuelle proche de l&apos;allocation théorique choisie (écart &lt; 3 %).</p>
       ) : (
         <>
           <table className="w-full text-sm">
@@ -141,8 +141,8 @@ function RebalancePlan({
                 <th className="text-left py-2">Titre</th>
                 <th className="text-right py-2">Actuel → Cible</th>
                 <th className="text-right py-2">Dérive</th>
-                <th className="text-right py-2">Ordre</th>
-                <th className="text-right py-2">Montant</th>
+                <th className="text-right py-2">Écart à la cible</th>
+                <th className="text-right py-2">Écart en valeur</th>
               </tr>
             </thead>
             <tbody>
@@ -152,10 +152,12 @@ function RebalancePlan({
                   <td className="py-2 text-right tabular text-muted">{pctAbs(t.currentWeight, 0)} → {pctAbs(t.targetWeight, 0)}</td>
                   <td className={`py-2 text-right tabular ${t.driftPct >= 0 ? 'text-up' : 'text-down'}`}>{t.driftPct >= 0 ? '+' : ''}{t.driftPct.toFixed(1)} pts</td>
                   <td className="py-2 text-right">
-                    {t.action === 'conserver'
+                    {/* Écart en nombre de titres, sans verbe ni couleur d'achat/vente :
+                        une simulation n'est pas un ordre (audit lot B). */}
+                    {t.action === 'conserver' || t.deltaShares === 0
                       ? <span className="text-faint">—</span>
-                      : <span className={t.action === 'acheter' ? 'text-up font-medium' : 'text-down font-medium'}>
-                          {t.action === 'acheter' ? 'Acheter' : 'Vendre'} {Math.abs(t.deltaShares).toLocaleString('fr-FR')}
+                      : <span className="tabular text-ivory">
+                          {t.deltaShares > 0 ? '+' : '−'}{Math.abs(t.deltaShares).toLocaleString('fr-FR')} titres
                         </span>}
                   </td>
                   <td className="py-2 text-right tabular text-ivory">{t.action === 'conserver' ? '—' : fcfa(Math.abs(t.deltaValue))}</td>
@@ -164,9 +166,10 @@ function RebalancePlan({
             </tbody>
           </table>
           <p className="mt-3 text-[11px] text-faint leading-relaxed">
-            Ordres indicatifs pour atteindre l&apos;allocation <span className="text-info">{TABS.find((x) => x.id === cible)?.label}</span>,
-            long-only (pas de vente à découvert), bande de tolérance ±3%. Nombre d&apos;actions arrondi au dernier cours connu —
-            à exécuter via votre SGI. Ne constitue pas un conseil en investissement personnalisé.
+            Simulation : écart entre votre répartition actuelle et l&apos;allocation théorique choisie
+            (<span className="text-info">{TABS.find((x) => x.id === cible)?.label}</span>, sans vente à découvert, tolérance ±3 %,
+            nombre de titres arrondi au dernier cours connu). Ce n&apos;est ni un ordre ni une recommandation ;
+            WESTBOURSE ne connaît ni votre situation ni vos objectifs.
           </p>
         </>
       )}

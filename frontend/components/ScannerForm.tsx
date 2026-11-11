@@ -18,9 +18,9 @@ export default function ScannerForm({ criteria, secteurs }: Props) {
           <label htmlFor="sc-signal" className="text-xs text-muted">Signal</label>
           <select id="sc-signal" name="signal" defaultValue={criteria.signal ?? ''} className="select-field">
             <option value="">Tous</option>
-            <option value="BUY">Achat</option>
-            <option value="HOLD">Attente</option>
-            <option value="SELL">Vente</option>
+            <option value="BUY">Signal haussier</option>
+            <option value="HOLD">Neutre</option>
+            <option value="SELL">Signal baissier</option>
           </select>
         </div>
 
