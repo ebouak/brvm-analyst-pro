@@ -1,4 +1,4 @@
-name: Carnet d'ordres (Bulletin Officiel de la Cote)
+name: Carnet d'ordres, AG et informations (Bulletin Officiel de la Cote)
 
 env:
   SCRAPER_TRIGGER: ${{ github.event_name == 'schedule' && 'cron' || 'manual' }}
@@ -16,6 +16,10 @@ on:
       date:
         description: 'Séance à rattraper (AAAA-MM-JJ). Vide = dernier bulletin publié.'
         required: false
+      reprise:
+        description: 'AG et informations : relire TOUS les bulletins encore listés sur brvm.org (antériorité).'
+        type: boolean
+        default: false
 
 concurrency:
   group: carnet
@@ -64,6 +68,61 @@ jobs:
               const n = Number((r.headers.get('content-range') || '').split('/')[1] || 0);
               console.log('dernière séance ' + d + ' : ' + n + ' valeurs');
               if (n < 30) { console.error('carnet anormalement court'); process.exit(1); }
+            })
+            .catch((e) => { console.error(e); process.exit(1); });
+          "
+
+  # Calendrier des AG + page « Informations » du même bulletin. Job séparé :
+  # une page illisible ici ne doit pas faire perdre le carnet, et inversement.
+  informations:
+    # Après le carnet (robots.txt de brvm.org : Crawl-delay 10, pas deux jobs
+    # en parallèle sur le site), mais même si le carnet a échoué.
+    needs: carnet
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install scraper deps
+        working-directory: scraper
+        run: npm install
+
+      - name: AG et informations
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOG_LEVEL: info
+          DATE_SEANCE: ${{ inputs.date }}
+          REPRISE: ${{ inputs.reprise && '--reprise' || '' }}
+        run: npx tsx src/index.ts boc:infos $DATE_SEANCE $REPRISE
+
+      - name: Vérifier ce qui a été écrit
+        working-directory: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        # Relit le journal : dernier bulletin lu, volumes, émetteurs non rapprochés.
+        # Rouge si rien n'a jamais été lu, ou si le dernier bulletin n'a aucune AG
+        # alors qu'on est entre mars et décembre.
+        run: |
+          node -e "
+          const u = process.env.SUPABASE_URL, k = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          const h = { apikey: k, 'User-Agent': 'westbourse-ci' };
+          if (!k.startsWith('sb_')) h.Authorization = 'Bearer ' + k;
+          fetch(u + '/rest/v1/boc_bulletins_lus?select=*&order=date_bulletin.desc&limit=1', { headers: h })
+            .then((r) => r.json())
+            .then((rows) => {
+              const b = rows[0];
+              if (!b) { console.error('aucun bulletin lu'); process.exit(1); }
+              console.log('dernier bulletin lu ' + b.date_bulletin + ' : ' + b.nb_assemblees + ' AG, ' + b.nb_operations + ' opérations, ' + b.nb_avis + ' avis/communiqués');
+              if (b.non_rapproches.length) console.log('::warning title=Bulletin officiel::émetteurs non rapprochés (à ajouter à scraper/src/boc/noms.ts) : ' + b.non_rapproches.join(', '));
+              if (b.rejets.length) console.log('::warning title=Bulletin officiel::' + b.rejets.length + ' ligne(s) écartée(s) : ' + b.rejets.join(' / '));
+              const mois = Number(b.date_bulletin.slice(5, 7));
+              if (mois >= 3 && b.nb_assemblees === 0) { console.error('calendrier des AG vide'); process.exit(1); }
             })
             .catch((e) => { console.error(e); process.exit(1); });
           "

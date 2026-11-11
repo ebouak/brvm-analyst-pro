@@ -1490,6 +1490,47 @@ Refonte par le skill `unslop`, sans changer l'ordre du fond : tests purs
 - **Fraîcheur** : aucune vidéo figée sur le site ; tout est rendu chaque soir
   par `video-seance.yml` sous le verrou de publiabilité existant.
 
+### Ajouts (passage 2026-11-11) — Bulletin officiel : calendrier des AG et page « Informations »
+
+Migration `0209_boc_ag_informations.sql` **à appliquer** (puis tester la RLS à la
+clé anon). Branche `feat/boc-ag-informations`. 32 tests scraper + 10 tests purs
+frontend sur le bulletin RÉEL du 22/09/2026.
+
+- **Avant** : une AG n'existait que par l'avis de convocation, daté du jour de
+  sa PUBLICATION ; l'agenda du dashboard passait `assemblees: []`. Le BOC
+  publie chaque jour le calendrier des AG de l'année (date, heure, nature, lieu)
+  et une page « Informations » (opérations en cours, avis BRVM, communiqués).
+- **Lecture par position** (`scraper/src/boc/`, module pur `tableau.ts`) : le
+  bandeau « CALENDRIER DES ASSEMBLEES GENERALES » est une IMAGE — la page se
+  reconnaît à « ANNEE : AAAA » + l'en-tête `Société Nature Date Heure Lieu` ; le
+  tableau continue sur la page suivante SANS en-tête (reconnue à ses lignes
+  date + heure). Une cellule longue continue sous sa ligne ; un mot coupé
+  (« Abidjan-⏎Plateau ») se recolle sans espace. Un titre de section INCONNU
+  ferme la section au lieu d'être collé à l'émetteur précédent.
+- **Noms → codes** : table curée `boc/noms.ts` (46 noms du bulletin), sans
+  rapprochement flou. « TOTAL » seul = TTLC, « ECOBANK TG » = ETIT, « ERIUM CI »
+  = SIVC. Un nom inconnu est enregistré avec `code` NULL et NOMMÉ
+  (`boc_bulletins_lus.non_rapproches`, avertissement dans le workflow) ; les
+  émetteurs obligataires (ETAT DU …, TPCI…) ne sont pas signalés.
+- **Tables** `boc_assemblees`, `boc_operations`, `boc_avis` (lecture publique),
+  `boc_bulletins_lus` (journal, service_role seul). Pas de FK vers
+  `brvm_instruments` (leçon BBGC). `premier_bulletin`/`dernier_bulletin` : la
+  fusion (`versBase.ts`) les élargit dans N'IMPORTE QUEL ordre de lecture.
+  ⚠️ **Une AG à venir n'est affichée que si le DERNIER bulletin lu la liste
+  encore** (sinon retirée ou reportée) ; une opération n'est « en cours » qu'à
+  la même condition.
+- **CLI** `boc:infos` : dernier bulletin (cron) · `AAAA-MM-JJ` · `--reprise`
+  (toutes les pages de liste de brvm.org, plus ancien d'abord, 10 s entre
+  requêtes) · `--fichier x.pdf` / `--dossier dir/` (bulletins locaux, date du
+  nom de fichier CONFIRMÉE par l'en-tête imprimé) · `--forcer` · `--a-blanc`.
+  Idempotent par le journal. Job `informations` de `carnet.yml`, après le
+  carnet (jamais en parallèle sur brvm.org), entrée manuelle `reprise`. Rouge
+  si la page Informations manque, ou le calendrier des AG de mars à décembre.
+- **Site** : agenda du dashboard (AG en statut `officiel`), `/calendrier`,
+  fiche `/societes/[code]` (bloc `BulletinSociete` : AG à venir et passées,
+  opérations en cours, avis et communiqués). Tables absentes = blocs absents,
+  jamais une page en erreur.
+
 ## 9. Bugs connus / limites
 
 - **Calibrage scraping requis** : les sélecteurs CSS et noms de contrôles

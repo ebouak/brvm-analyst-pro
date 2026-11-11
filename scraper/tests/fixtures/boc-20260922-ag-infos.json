@@ -1,0 +1,1737 @@
+[
+ {
+  "page": 10,
+  "items": [
+   {
+    "s": "mardi 22 septembre 2026",
+    "x": 457.4,
+    "y": 801.9
+   },
+   {
+    "s": "OPERATIONS EN COURS",
+    "x": 16.2,
+    "y": 752.5
+   },
+   {
+    "s": "Emetteur",
+    "x": 16.2,
+    "y": 737.5
+   },
+   {
+    "s": "Opération",
+    "x": 190.1,
+    "y": 737.5
+   },
+   {
+    "s": "TPCI",
+    "x": 16.2,
+    "y": 721.6
+   },
+   {
+    "s": "Première cotation - TPCI 5,45 % 2026-2031 (TPCI.O103) - TPCI 5,70 % 2026-2033 (TPCI.O104) - Première cotation le 25",
+    "x": 190.1,
+    "y": 721.6
+   },
+   {
+    "s": "septembre 2026",
+    "x": 190.1,
+    "y": 713.5
+   },
+   {
+    "s": "BRVM",
+    "x": 16.2,
+    "y": 701.4
+   },
+   {
+    "s": "Première cotation - BRIDGE BANK GROUP COTE D’IVOIRE - Première cotation le 24 septembre 2026",
+    "x": 190.1,
+    "y": 701.4
+   },
+   {
+    "s": "ETAT DU SENEGAL",
+    "x": 16.2,
+    "y": 687.2
+   },
+   {
+    "s": "Première cotation - Emprunts ETAT DU SENEGAL 6,40 % 2026-2029, ETAT DU SENEGAL 6,60 % 2026-2031, ETAT DU SENEGAL",
+    "x": 190.1,
+    "y": 687.2
+   },
+   {
+    "s": "6,75 % 2026-2033 et ETAT DU SENEGAL 6,95 % 2026-2036 - Première cotation le 22 septembre 2026",
+    "x": 190.1,
+    "y": 679.0
+   },
+   {
+    "s": "VIVO ENERGY CI",
+    "x": 16.2,
+    "y": 666.9
+   },
+   {
+    "s": "Paiement de dividendes de 96,67 F CFA par action (IRVM applicable de 12 % pour les personnes physiques et 10 % pour les",
+    "x": 190.1,
+    "y": 666.9
+   },
+   {
+    "s": "personnes morales), le 25/09/2026",
+    "x": 190.1,
+    "y": 658.7
+   },
+   {
+    "s": "SERVAIR ABIDJAN CI",
+    "x": 16.2,
+    "y": 646.6
+   },
+   {
+    "s": "Paiement de dividendes de 229 F CFA par action (IRVM applicable de 12 % pour les personnes physiques et 10 % pour les",
+    "x": 190.1,
+    "y": 646.6
+   },
+   {
+    "s": "personnes morales), le 30/09/2026",
+    "x": 190.1,
+    "y": 638.5
+   },
+   {
+    "s": "AVIS",
+    "x": 16.2,
+    "y": 612.2
+   },
+   {
+    "s": "Entité",
+    "x": 16.2,
+    "y": 598.7
+   },
+   {
+    "s": "N°",
+    "x": 72.3,
+    "y": 598.7
+   },
+   {
+    "s": "Nature",
+    "x": 169.5,
+    "y": 598.7
+   },
+   {
+    "s": "Objet",
+    "x": 308.8,
+    "y": 598.7
+   },
+   {
+    "s": "BRVM",
+    "x": 16.2,
+    "y": 582.9
+   },
+   {
+    "s": "277-2026",
+    "x": 72.3,
+    "y": 582.9
+   },
+   {
+    "s": "Première cotation",
+    "x": 169.5,
+    "y": 582.9
+   },
+   {
+    "s": "Résultats de première cotation - « ETAT DU SENEGAL 6,40 % 2026-2029 », « ETAT DU",
+    "x": 308.8,
+    "y": 582.9
+   },
+   {
+    "s": "SENEGAL 6,60 % 2026-2031 », « ETAT DU SENEGAL 6,75 % 2026-2033 » et « ETAT DU",
+    "x": 308.8,
+    "y": 574.7
+   },
+   {
+    "s": "SENEGAL 6,95 % 2026-2036 »",
+    "x": 308.8,
+    "y": 566.6
+   },
+   {
+    "s": "BRVM",
+    "x": 16.2,
+    "y": 554.4
+   },
+   {
+    "s": "278-2026",
+    "x": 72.3,
+    "y": 554.4
+   },
+   {
+    "s": "Paiement Intérêts",
+    "x": 169.5,
+    "y": 554.4
+   },
+   {
+    "s": "Paiement des intérêts semestriels - TPBF 6,60 % 2025-2030 (TPBF.O23)",
+    "x": 308.8,
+    "y": 554.4
+   },
+   {
+    "s": "BRVM",
+    "x": 16.2,
+    "y": 540.2
+   },
+   {
+    "s": "279-2026",
+    "x": 72.3,
+    "y": 540.2
+   },
+   {
+    "s": "Paiement Intérêts",
+    "x": 169.5,
+    "y": 540.2
+   },
+   {
+    "s": "Paiement des intérêts semestriels - TPBF 6,80 % 2025-2032 (TPBF.O24)",
+    "x": 308.8,
+    "y": 540.2
+   },
+   {
+    "s": "BRVM",
+    "x": 16.2,
+    "y": 526.0
+   },
+   {
+    "s": "280-2026",
+    "x": 72.3,
+    "y": 526.0
+   },
+   {
+    "s": "Paiement Intérêts",
+    "x": 169.5,
+    "y": 526.0
+   },
+   {
+    "s": "Paiement des intérêts semestriels - TPBF 7 % 2025-2035 (TPBF.O25)",
+    "x": 308.8,
+    "y": 526.0
+   },
+   {
+    "s": "COMMUNIQUES",
+    "x": 16.2,
+    "y": 496.4
+   },
+   {
+    "s": "Emetteur",
+    "x": 16.2,
+    "y": 482.1
+   },
+   {
+    "s": "N°",
+    "x": 92.1,
+    "y": 482.1
+   },
+   {
+    "s": "Nature",
+    "x": 189.3,
+    "y": 482.1
+   },
+   {
+    "s": "Objet",
+    "x": 314.4,
+    "y": 482.1
+   },
+   {
+    "s": "10",
+    "x": 324.1,
+    "y": 10.3
+   }
+  ]
+ },
+ {
+  "page": 17,
+  "items": [
+   {
+    "s": "mardi 22 septembre 2026",
+    "x": 457.4,
+    "y": 801.9
+   },
+   {
+    "s": "ANNEE : 2026",
+    "x": 16.2,
+    "y": 761.0
+   },
+   {
+    "s": "Société",
+    "x": 16.2,
+    "y": 746.6
+   },
+   {
+    "s": "Nature",
+    "x": 152.1,
+    "y": 746.6
+   },
+   {
+    "s": "Date",
+    "x": 258.3,
+    "y": 746.6
+   },
+   {
+    "s": "Heure",
+    "x": 336.4,
+    "y": 746.6
+   },
+   {
+    "s": "Lieu",
+    "x": 401.8,
+    "y": 746.6
+   },
+   {
+    "s": "SONATEL",
+    "x": 16.2,
+    "y": 731.9
+   },
+   {
+    "s": "Extraordinaire",
+    "x": 152.1,
+    "y": 731.9
+   },
+   {
+    "s": "08/10/2026",
+    "x": 258.3,
+    "y": 731.9
+   },
+   {
+    "s": "15:00:00",
+    "x": 336.4,
+    "y": 731.9
+   },
+   {
+    "s": "VISIOCONFERENCE, au 64, Voie de Dégagement Nord",
+    "x": 401.8,
+    "y": 731.9
+   },
+   {
+    "s": "BOLLORE TRANSPORT & LOGISTICS",
+    "x": 16.2,
+    "y": 717.7
+   },
+   {
+    "s": "Mixte",
+    "x": 152.1,
+    "y": 717.7
+   },
+   {
+    "s": "02/09/2026",
+    "x": 258.3,
+    "y": 717.7
+   },
+   {
+    "s": "09:30:00",
+    "x": 336.4,
+    "y": 717.7
+   },
+   {
+    "s": "Amphithéâtre de l’immeuble CRRAE-UMOA, sis au",
+    "x": 401.8,
+    "y": 717.7
+   },
+   {
+    "s": "Plateau, Avenue Delafosse, à Abidjan",
+    "x": 401.8,
+    "y": 709.6
+   },
+   {
+    "s": "ECOBANK TG",
+    "x": 16.2,
+    "y": 697.4
+   },
+   {
+    "s": "Extraordinaire",
+    "x": 152.1,
+    "y": 697.4
+   },
+   {
+    "s": "13/08/2026",
+    "x": 258.3,
+    "y": 697.4
+   },
+   {
+    "s": "10:30:00",
+    "x": 336.4,
+    "y": 697.4
+   },
+   {
+    "s": "Visioconférence",
+    "x": 401.8,
+    "y": 697.4
+   },
+   {
+    "s": "ORAGROUP",
+    "x": 16.2,
+    "y": 683.3
+   },
+   {
+    "s": "Mixte",
+    "x": 152.1,
+    "y": 683.3
+   },
+   {
+    "s": "23/07/2026",
+    "x": 258.3,
+    "y": 683.3
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 683.3
+   },
+   {
+    "s": "Hôtel 2 Février situé à la Place de l'indépendance, BP",
+    "x": 401.8,
+    "y": 683.3
+   },
+   {
+    "s": "131 Lomé- Togo",
+    "x": 401.8,
+    "y": 675.2
+   },
+   {
+    "s": "UNIWAX CI",
+    "x": 16.2,
+    "y": 663.0
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 663.0
+   },
+   {
+    "s": "16/07/2026",
+    "x": 258.3,
+    "y": 663.0
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 663.0
+   },
+   {
+    "s": "Espace Latrille Events, sis à Abidjan, Cocody II-",
+    "x": 401.8,
+    "y": 663.0
+   },
+   {
+    "s": "Plateaux (Carrefour Duncan)",
+    "x": 401.8,
+    "y": 654.9
+   },
+   {
+    "s": "SITAB",
+    "x": 16.2,
+    "y": 642.7
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 642.7
+   },
+   {
+    "s": "15/07/2026",
+    "x": 258.3,
+    "y": 642.7
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 642.7
+   },
+   {
+    "s": "SALLE JEWELS de la CGECI au Plateau",
+    "x": 401.8,
+    "y": 642.7
+   },
+   {
+    "s": "ERIUM CI",
+    "x": 16.2,
+    "y": 628.6
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 628.6
+   },
+   {
+    "s": "13/07/2026",
+    "x": 258.3,
+    "y": 628.6
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 628.6
+   },
+   {
+    "s": "SALLE DE CONFÉRENCE DE L’HOTEL TIAMA , à Abidjan",
+    "x": 401.8,
+    "y": 628.6
+   },
+   {
+    "s": "(République de Côte d’Ivoire)",
+    "x": 401.8,
+    "y": 620.4
+   },
+   {
+    "s": "SODECI",
+    "x": 16.2,
+    "y": 608.3
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 608.3
+   },
+   {
+    "s": "30/06/2026",
+    "x": 258.3,
+    "y": 608.3
+   },
+   {
+    "s": "08:30:00",
+    "x": 336.4,
+    "y": 608.3
+   },
+   {
+    "s": "Espace CRYSTAL sis à Abidjan Zone 4C",
+    "x": 401.8,
+    "y": 608.3
+   },
+   {
+    "s": "NSBC",
+    "x": 16.2,
+    "y": 594.1
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 594.1
+   },
+   {
+    "s": "30/06/2026",
+    "x": 258.3,
+    "y": 594.1
+   },
+   {
+    "s": "10:30:00",
+    "x": 336.4,
+    "y": 594.1
+   },
+   {
+    "s": "Espace Latrille Events, sis à Abidjan-Cocody, Deux-",
+    "x": 401.8,
+    "y": 594.1
+   },
+   {
+    "s": "Plateaux, Boulevard Latrille, à proximité du Carrefour",
+    "x": 401.8,
+    "y": 586.0
+   },
+   {
+    "s": "Duncan",
+    "x": 401.8,
+    "y": 577.8
+   },
+   {
+    "s": "BIIC",
+    "x": 16.2,
+    "y": 565.7
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 565.7
+   },
+   {
+    "s": "30/06/2026",
+    "x": 258.3,
+    "y": 565.7
+   },
+   {
+    "s": "13:00:00",
+    "x": 336.4,
+    "y": 565.7
+   },
+   {
+    "s": "Salle bleue du palais des congrès de Cotonou",
+    "x": 401.8,
+    "y": 565.7
+   },
+   {
+    "s": "LNB",
+    "x": 16.2,
+    "y": 551.5
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 551.5
+   },
+   {
+    "s": "30/06/2026",
+    "x": 258.3,
+    "y": 551.5
+   },
+   {
+    "s": "08:00:00",
+    "x": 336.4,
+    "y": 551.5
+   },
+   {
+    "s": "Salle bleue du palais des congrès de Cotonou",
+    "x": 401.8,
+    "y": 551.5
+   },
+   {
+    "s": "TRACTAFRIC CI",
+    "x": 16.2,
+    "y": 537.4
+   },
+   {
+    "s": "Mixte",
+    "x": 152.1,
+    "y": 537.4
+   },
+   {
+    "s": "30/06/2026",
+    "x": 258.3,
+    "y": 537.4
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 537.4
+   },
+   {
+    "s": "Hôtel MOVENPICK ABIDJAN sis au Plateau, Avenue",
+    "x": 401.8,
+    "y": 537.4
+   },
+   {
+    "s": "Terrasson de Fougères, Ange Rue Gourgas",
+    "x": 401.8,
+    "y": 529.2
+   },
+   {
+    "s": "NEI-CEDA CI",
+    "x": 16.2,
+    "y": 517.0
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 517.0
+   },
+   {
+    "s": "25/06/2026",
+    "x": 258.3,
+    "y": 517.0
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 517.0
+   },
+   {
+    "s": "Hôtel TIAMA, Abidjan-Plateau",
+    "x": 401.8,
+    "y": 517.0
+   },
+   {
+    "s": "VIVO ENERGY CI",
+    "x": 16.2,
+    "y": 502.9
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 502.9
+   },
+   {
+    "s": "24/06/2026",
+    "x": 258.3,
+    "y": 502.9
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 502.9
+   },
+   {
+    "s": "Espace JECKAD, Angré 7e tranche Rue L155, à côté de",
+    "x": 401.8,
+    "y": 502.9
+   },
+   {
+    "s": "l'Hôtel Silver Moon",
+    "x": 401.8,
+    "y": 494.8
+   },
+   {
+    "s": "CIE CI",
+    "x": 16.2,
+    "y": 482.6
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 482.6
+   },
+   {
+    "s": "24/06/2026",
+    "x": 258.3,
+    "y": 482.6
+   },
+   {
+    "s": "08:30:00",
+    "x": 336.4,
+    "y": 482.6
+   },
+   {
+    "s": "Visioconférence",
+    "x": 401.8,
+    "y": 482.6
+   },
+   {
+    "s": "SMB",
+    "x": 16.2,
+    "y": 468.4
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 468.4
+   },
+   {
+    "s": "23/06/2026",
+    "x": 258.3,
+    "y": 468.4
+   },
+   {
+    "s": "09:30:00",
+    "x": 336.4,
+    "y": 468.4
+   },
+   {
+    "s": "Amphithéâtre de la CGECI (La Maison de l’Entreprise)",
+    "x": 401.8,
+    "y": 468.4
+   },
+   {
+    "s": "sis à Abidjan-Plateau, à l’Angle du Boulevard de la",
+    "x": 401.8,
+    "y": 460.3
+   },
+   {
+    "s": "République et de l’Avenue Lamblin ou par",
+    "x": 401.8,
+    "y": 452.2
+   },
+   {
+    "s": "visioconférence",
+    "x": 401.8,
+    "y": 444.0
+   },
+   {
+    "s": "SAFCA CI",
+    "x": 16.2,
+    "y": 431.9
+   },
+   {
+    "s": "Mixte",
+    "x": 152.1,
+    "y": 431.9
+   },
+   {
+    "s": "23/06/2026",
+    "x": 258.3,
+    "y": 431.9
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 431.9
+   },
+   {
+    "s": "Siège de Alios Finance Côte d’Ivoire, sis à Abidjan",
+    "x": 401.8,
+    "y": 431.9
+   },
+   {
+    "s": "Commune de Treichville, Rue des carrossiers, zone 3",
+    "x": 401.8,
+    "y": 423.8
+   },
+   {
+    "s": "CFAO MOTORS CI",
+    "x": 16.2,
+    "y": 411.6
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 411.6
+   },
+   {
+    "s": "23/06/2026",
+    "x": 258.3,
+    "y": 411.6
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 411.6
+   },
+   {
+    "s": "Siège social sis à Abidjan, 117, Boulevard de Marseille",
+    "x": 401.8,
+    "y": 411.6
+   },
+   {
+    "s": "SGB CI",
+    "x": 16.2,
+    "y": 397.5
+   },
+   {
+    "s": "Mixte",
+    "x": 152.1,
+    "y": 397.5
+   },
+   {
+    "s": "22/06/2026",
+    "x": 258.3,
+    "y": 397.5
+   },
+   {
+    "s": "15:00:00",
+    "x": 336.4,
+    "y": 397.5
+   },
+   {
+    "s": "Espace Latrille Events, sis à Abidjan commune de",
+    "x": 401.8,
+    "y": 397.5
+   },
+   {
+    "s": "Cocody, aux Deux-Plateaux Boulevard Latrille",
+    "x": 401.8,
+    "y": 389.3
+   },
+   {
+    "s": "FILTISAC CI",
+    "x": 16.2,
+    "y": 377.2
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 377.2
+   },
+   {
+    "s": "18/06/2026",
+    "x": 258.3,
+    "y": 377.2
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 377.2
+   },
+   {
+    "s": "Immeuble C.R.R.A.E – U.M.O.A ABIDJAN – Plateau (RCI)",
+    "x": 401.8,
+    "y": 377.2
+   },
+   {
+    "s": "TOTALENERGIES MARKETING SN",
+    "x": 16.2,
+    "y": 363.0
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 363.0
+   },
+   {
+    "s": "17/06/2026",
+    "x": 258.3,
+    "y": 363.0
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 363.0
+   },
+   {
+    "s": "Noom Hôtel Dakar Sea Plaza (ex Radisson Blu de Dakar)",
+    "x": 401.8,
+    "y": 363.0
+   },
+   {
+    "s": "BERNABE CI",
+    "x": 16.2,
+    "y": 342.7
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 342.7
+   },
+   {
+    "s": "15/06/2026",
+    "x": 258.3,
+    "y": 342.7
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 342.7
+   },
+   {
+    "s": "ABIDJAN, à la salle de conférence GEWELS de la Maison",
+    "x": 401.8,
+    "y": 342.7
+   },
+   {
+    "s": "du Patronat Ivoirien (CGECI) au Plateau",
+    "x": 401.8,
+    "y": 334.6
+   },
+   {
+    "s": "NESTLE CI",
+    "x": 16.2,
+    "y": 322.5
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 322.5
+   },
+   {
+    "s": "11/06/2026",
+    "x": 258.3,
+    "y": 322.5
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 322.5
+   },
+   {
+    "s": "l’ESPACE LATRILLE EVENTS situé à Abidjan, Cocody,",
+    "x": 401.8,
+    "y": 322.5
+   },
+   {
+    "s": "Deux Plateaux, Boulevard Latrille, Carrefour Duncan",
+    "x": 401.8,
+    "y": 314.4
+   },
+   {
+    "s": "SERVAIR ABIDJAN CI",
+    "x": 16.2,
+    "y": 302.2
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 302.2
+   },
+   {
+    "s": "10/06/2026",
+    "x": 258.3,
+    "y": 302.2
+   },
+   {
+    "s": "10:30:00",
+    "x": 336.4,
+    "y": 302.2
+   },
+   {
+    "s": "Salle JEWELS de la Maison de l’Entreprise (CGECI) sise",
+    "x": 401.8,
+    "y": 302.2
+   },
+   {
+    "s": "au Plateau, Avenue Lamblin",
+    "x": 401.8,
+    "y": 294.1
+   },
+   {
+    "s": "SOLIBRA",
+    "x": 16.2,
+    "y": 281.9
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 281.9
+   },
+   {
+    "s": "05/06/2026",
+    "x": 258.3,
+    "y": 281.9
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 281.9
+   },
+   {
+    "s": "Salle Jewels de la Maison de l’Entreprise sise au",
+    "x": 401.8,
+    "y": 281.9
+   },
+   {
+    "s": "Plateau, Avenue Lamblin",
+    "x": 401.8,
+    "y": 273.8
+   },
+   {
+    "s": "ECOBANK TG",
+    "x": 16.2,
+    "y": 261.7
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 261.7
+   },
+   {
+    "s": "03/06/2026",
+    "x": 258.3,
+    "y": 261.7
+   },
+   {
+    "s": "10:30:00",
+    "x": 336.4,
+    "y": 261.7
+   },
+   {
+    "s": "Salle de Conférence du Centre Panafricain Ecobank,",
+    "x": 401.8,
+    "y": 261.7
+   },
+   {
+    "s": "2365, Boulevard du Mono, Lomé, Togo",
+    "x": 401.8,
+    "y": 253.5
+   },
+   {
+    "s": "SOGB",
+    "x": 16.2,
+    "y": 241.4
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 241.4
+   },
+   {
+    "s": "28/05/2026",
+    "x": 258.3,
+    "y": 241.4
+   },
+   {
+    "s": "10:30:00",
+    "x": 336.4,
+    "y": 241.4
+   },
+   {
+    "s": "Immeuble CRRAE – UEMOA sis à Abidjan Plateau",
+    "x": 401.8,
+    "y": 241.4
+   },
+   {
+    "s": "SETAO CI",
+    "x": 16.2,
+    "y": 227.2
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 227.2
+   },
+   {
+    "s": "28/05/2026",
+    "x": 258.3,
+    "y": 227.2
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 227.2
+   },
+   {
+    "s": "Hôtel TIAMA (salon EBENE) - Abidjan Plateau",
+    "x": 401.8,
+    "y": 227.2
+   },
+   {
+    "s": "SICOR",
+    "x": 16.2,
+    "y": 213.1
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 213.1
+   },
+   {
+    "s": "22/05/2026",
+    "x": 258.3,
+    "y": 213.1
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 213.1
+   },
+   {
+    "s": "Siège de la Société à l’Usine SICOR de Jacqueville",
+    "x": 401.8,
+    "y": 213.1
+   },
+   {
+    "s": "SUCRIVOIRE",
+    "x": 16.2,
+    "y": 198.9
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 198.9
+   },
+   {
+    "s": "21/05/2026",
+    "x": 258.3,
+    "y": 198.9
+   },
+   {
+    "s": "09:30:00",
+    "x": 336.4,
+    "y": 198.9
+   },
+   {
+    "s": "Par visioconférence via la plateforme web dédiée à",
+    "x": 401.8,
+    "y": 198.9
+   },
+   {
+    "s": "l'Assemblée Générale ou en présentiel à la Salle de",
+    "x": 401.8,
+    "y": 190.7
+   },
+   {
+    "s": "conférence de la CRRAE-UMOA ) Abidjan Plateau (Côte",
+    "x": 401.8,
+    "y": 182.6
+   },
+   {
+    "s": "d'Ivoire)",
+    "x": 401.8,
+    "y": 174.5
+   },
+   {
+    "s": "TOTAL",
+    "x": 16.2,
+    "y": 162.3
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 162.3
+   },
+   {
+    "s": "21/05/2026",
+    "x": 258.3,
+    "y": 162.3
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 162.3
+   },
+   {
+    "s": "Sofitel Abidjan Hôtel Ivoire sis au Boulevard Hassan II,",
+    "x": 401.8,
+    "y": 162.3
+   },
+   {
+    "s": "Cocody Abidjan Côte d’Ivoire",
+    "x": 401.8,
+    "y": 154.2
+   },
+   {
+    "s": "SIB",
+    "x": 16.2,
+    "y": 142.1
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 142.1
+   },
+   {
+    "s": "12/05/2026",
+    "x": 258.3,
+    "y": 142.1
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 142.1
+   },
+   {
+    "s": "Par Visioconférence ou en présentiel à la CRRAE-UMOA",
+    "x": 401.8,
+    "y": 142.1
+   },
+   {
+    "s": "(Abidjan - Plateau, Angle Boulevard Botreau Roussel,",
+    "x": 401.8,
+    "y": 133.9
+   },
+   {
+    "s": "Rue Privée CRRAE-UMOA)",
+    "x": 401.8,
+    "y": 125.8
+   },
+   {
+    "s": "ECOBANK TG",
+    "x": 16.2,
+    "y": 113.6
+   },
+   {
+    "s": "Extraordinaire",
+    "x": 152.1,
+    "y": 113.6
+   },
+   {
+    "s": "07/05/2026",
+    "x": 258.3,
+    "y": 113.6
+   },
+   {
+    "s": "10:30:00",
+    "x": 336.4,
+    "y": 113.6
+   },
+   {
+    "s": "Par Visioconférence",
+    "x": 401.8,
+    "y": 113.6
+   },
+   {
+    "s": "BICI CI",
+    "x": 16.2,
+    "y": 99.4
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 99.4
+   },
+   {
+    "s": "04/05/2026",
+    "x": 258.3,
+    "y": 99.4
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 99.4
+   },
+   {
+    "s": "Auditorium de la Maison des Entreprises (CGECI) sise",
+    "x": 401.8,
+    "y": 99.4
+   },
+   {
+    "s": "au Plateau",
+    "x": 401.8,
+    "y": 91.3
+   },
+   {
+    "s": "BANK OF AFRICA BN",
+    "x": 16.2,
+    "y": 79.2
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 79.2
+   },
+   {
+    "s": "30/04/2026",
+    "x": 258.3,
+    "y": 79.2
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 79.2
+   },
+   {
+    "s": "GOLDEN TULIP LE DIPLOMATE à Cotonou",
+    "x": 401.8,
+    "y": 79.2
+   },
+   {
+    "s": "ORANGE CI",
+    "x": 16.2,
+    "y": 65.0
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 65.0
+   },
+   {
+    "s": "29/04/2026",
+    "x": 258.3,
+    "y": 65.0
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 65.0
+   },
+   {
+    "s": "En présentiel au siège de la société, sis à Abidjan,",
+    "x": 401.8,
+    "y": 65.0
+   },
+   {
+    "s": "Cocody Riviera Golf, Boulevard de France, Immeuble",
+    "x": 401.8,
+    "y": 56.9
+   },
+   {
+    "s": "Orange Village ou par visioconférence en envoyant un",
+    "x": 401.8,
+    "y": 48.8
+   },
+   {
+    "s": "courrier électronique à l’adresse ag2026-",
+    "x": 401.8,
+    "y": 40.6
+   },
+   {
+    "s": "orangeci@quorumenligne.com",
+    "x": 401.8,
+    "y": 32.5
+   },
+   {
+    "s": "17",
+    "x": 324.1,
+    "y": 10.3
+   }
+  ]
+ },
+ {
+  "page": 18,
+  "items": [
+   {
+    "s": "mardi 22 septembre 2026",
+    "x": 457.4,
+    "y": 801.9
+   },
+   {
+    "s": "ONATEL BF",
+    "x": 16.2,
+    "y": 788.1
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 788.1
+   },
+   {
+    "s": "29/04/2026",
+    "x": 258.3,
+    "y": 788.1
+   },
+   {
+    "s": "10:30:00",
+    "x": 336.4,
+    "y": 788.1
+   },
+   {
+    "s": "AZALAÏ HÔTEL, OUAGADOUGOU-BURKINA FASO",
+    "x": 401.8,
+    "y": 788.1
+   },
+   {
+    "s": "ECOBANK CI",
+    "x": 16.2,
+    "y": 773.9
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 773.9
+   },
+   {
+    "s": "28/04/2026",
+    "x": 258.3,
+    "y": 773.9
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 773.9
+   },
+   {
+    "s": "Par Visioconférence ou en présentiel à l’hôtel Radisson",
+    "x": 401.8,
+    "y": 773.9
+   },
+   {
+    "s": "Blu, sis à Abidjan Port-Bouët, route de l’Aéroport",
+    "x": 401.8,
+    "y": 765.8
+   },
+   {
+    "s": "International Félix Houphouët Boigny",
+    "x": 401.8,
+    "y": 757.7
+   },
+   {
+    "s": "SONATEL",
+    "x": 16.2,
+    "y": 745.6
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 745.6
+   },
+   {
+    "s": "16/04/2026",
+    "x": 258.3,
+    "y": 745.6
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 745.6
+   },
+   {
+    "s": "Visioconférence, au NOOM Hôtel à Dakar",
+    "x": 401.8,
+    "y": 745.6
+   },
+   {
+    "s": "CORIS BANK INTERNATIONAL",
+    "x": 16.2,
+    "y": 731.4
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 731.4
+   },
+   {
+    "s": "16/04/2026",
+    "x": 258.3,
+    "y": 731.4
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 731.4
+   },
+   {
+    "s": "Sopatel Hôtel Silmandé SA",
+    "x": 401.8,
+    "y": 731.4
+   },
+   {
+    "s": "BANK OF AFRICA CI",
+    "x": 16.2,
+    "y": 717.2
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 717.2
+   },
+   {
+    "s": "15/04/2026",
+    "x": 258.3,
+    "y": 717.2
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 717.2
+   },
+   {
+    "s": "Salle Fromager de l'hôtel IVOTEL du Plateau (10ème",
+    "x": 401.8,
+    "y": 717.2
+   },
+   {
+    "s": "étage)",
+    "x": 401.8,
+    "y": 709.1
+   },
+   {
+    "s": "BANK OF AFRICA ML",
+    "x": 16.2,
+    "y": 697.0
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 697.0
+   },
+   {
+    "s": "14/04/2026",
+    "x": 258.3,
+    "y": 697.0
+   },
+   {
+    "s": "09:30:00",
+    "x": 336.4,
+    "y": 697.0
+   },
+   {
+    "s": "Siège de la banque à l'Immeuble BANK OF AFRICA,",
+    "x": 401.8,
+    "y": 697.0
+   },
+   {
+    "s": "Avenue du Mali, Quartier ACI 2000",
+    "x": 401.8,
+    "y": 688.8
+   },
+   {
+    "s": "PALM CI",
+    "x": 16.2,
+    "y": 676.7
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 676.7
+   },
+   {
+    "s": "14/04/2026",
+    "x": 258.3,
+    "y": 676.7
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 676.7
+   },
+   {
+    "s": "Salle de Conférence de la CRRAE-UMOA à Abidjan-",
+    "x": 401.8,
+    "y": 676.7
+   },
+   {
+    "s": "Plateau (Côte d’Ivoire) ou par VISIOCONFERENCE, via",
+    "x": 401.8,
+    "y": 668.5
+   },
+   {
+    "s": "la plateforme web dédiée",
+    "x": 401.8,
+    "y": 660.4
+   },
+   {
+    "s": "SAPH CI",
+    "x": 16.2,
+    "y": 648.2
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 648.2
+   },
+   {
+    "s": "09/04/2026",
+    "x": 258.3,
+    "y": 648.2
+   },
+   {
+    "s": "09:00:00",
+    "x": 336.4,
+    "y": 648.2
+   },
+   {
+    "s": "Salle de Conférence de la CRRAE-UMOA à Abidjan-",
+    "x": 401.8,
+    "y": 648.2
+   },
+   {
+    "s": "Plateau en présentiel ou par visioconférence, via la",
+    "x": 401.8,
+    "y": 640.1
+   },
+   {
+    "s": "plateforme web dédiée à l’Assemblée Générale",
+    "x": 401.8,
+    "y": 632.0
+   },
+   {
+    "s": "BANK OF AFRICA SN",
+    "x": 16.2,
+    "y": 619.9
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 619.9
+   },
+   {
+    "s": "07/04/2026",
+    "x": 258.3,
+    "y": 619.9
+   },
+   {
+    "s": "09:30:00",
+    "x": 336.4,
+    "y": 619.9
+   },
+   {
+    "s": "Immeuble Elan II au 2ème Etage, Almadies, Zone 12,",
+    "x": 401.8,
+    "y": 619.9
+   },
+   {
+    "s": "Route de Ngor à Dakar",
+    "x": 401.8,
+    "y": 611.7
+   },
+   {
+    "s": "BANK OF AFRICA NG",
+    "x": 16.2,
+    "y": 599.6
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 599.6
+   },
+   {
+    "s": "03/04/2026",
+    "x": 258.3,
+    "y": 599.6
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 599.6
+   },
+   {
+    "s": "Centre de Formation de BOA-NIGER (BOA-Siège)",
+    "x": 401.8,
+    "y": 599.6
+   },
+   {
+    "s": "SICABLE",
+    "x": 16.2,
+    "y": 585.4
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 585.4
+   },
+   {
+    "s": "27/03/2026",
+    "x": 258.3,
+    "y": 585.4
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 585.4
+   },
+   {
+    "s": "Hôtel TIAMA, à ABIDJAN",
+    "x": 401.8,
+    "y": 585.4
+   },
+   {
+    "s": "UNILEVER CI",
+    "x": 16.2,
+    "y": 571.3
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 571.3
+   },
+   {
+    "s": "27/03/2026",
+    "x": 258.3,
+    "y": 571.3
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 571.3
+   },
+   {
+    "s": "Salle Sirocco 1 de l’Hôtel Novotel Adagio, situé à",
+    "x": 401.8,
+    "y": 571.3
+   },
+   {
+    "s": "Marcory Boulevard Felix Houphouet Boigny ex VGE, à",
+    "x": 401.8,
+    "y": 563.1
+   },
+   {
+    "s": "proximité de l’Hôtel Azalaï ou par Visioconférence en",
+    "x": 401.8,
+    "y": 555.0
+   },
+   {
+    "s": "envoyant un courriel à l’adresse :",
+    "x": 401.8,
+    "y": 546.9
+   },
+   {
+    "s": "servicesfinanciers@hudson-cie.com",
+    "x": 401.8,
+    "y": 538.7
+   },
+   {
+    "s": "BANK OF AFRICA BF",
+    "x": 16.2,
+    "y": 526.6
+   },
+   {
+    "s": "Ordinaire",
+    "x": 152.1,
+    "y": 526.6
+   },
+   {
+    "s": "23/03/2026",
+    "x": 258.3,
+    "y": 526.6
+   },
+   {
+    "s": "10:00:00",
+    "x": 336.4,
+    "y": 526.6
+   },
+   {
+    "s": "AZALAÏ Hôtel à la salle DIMAKO",
+    "x": 401.8,
+    "y": 526.6
+   },
+   {
+    "s": "18",
+    "x": 324.1,
+    "y": 10.3
+   }
+  ]
+ }
+]

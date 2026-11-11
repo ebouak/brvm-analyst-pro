@@ -8,6 +8,7 @@ import {
 import CalendarFilters from '@/components/CalendarFilters';
 import ViewTabs from '@/components/ViewTabs';
 import { CALENDAR_TABS } from '@/lib/calendarTabs';
+import { agAVenir, COLONNES_AG, versCalendrier, type BocAssemblee } from '@/lib/boc/assemblees';
 import CalendarTimeline from '@/components/CalendarTimeline';
 import CalendarTable from '@/components/CalendarTable';
 import { EmptyStatePremium } from '@/components/ui/premium';
@@ -95,6 +96,20 @@ async function getData(daysN: number): Promise<{
   for (const ins of instruments) instrMap[ins.code] = ins;
 
   const items = combineDividendsAndEvents({ dividends, events, instruments: instrMap });
+
+  // AG du Bulletin officiel : date de RÉUNION, encore au dernier bulletin lu.
+  // Table illisible (migration 0209 non appliquée) : le calendrier reste servi sans elles.
+  const { data: derAg } = await supabase
+    .from('boc_assemblees').select('dernier_bulletin').order('dernier_bulletin', { ascending: false }).limit(1);
+  const dernier = (derAg?.[0] as { dernier_bulletin?: string } | undefined)?.dernier_bulletin ?? null;
+  if (dernier) {
+    const { data: agData } = await supabase
+      .from('boc_assemblees').select(COLONNES_AG)
+      .gte('date_ag', todayStr).lte('date_ag', endStr).eq('dernier_bulletin', dernier)
+      .limit(200);
+    for (const a of agAVenir((agData ?? []) as BocAssemblee[], todayStr, dernier)) items.push(versCalendrier(a, instrMap));
+    items.sort((a, b) => a.date.localeCompare(b.date));
+  }
 
   const countExDates = items.filter((i) => i.kind === 'ex-date').length;
   const countPayments = items.filter((i) => i.kind === 'payment').length;

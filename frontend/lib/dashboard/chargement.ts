@@ -9,7 +9,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { LIQUIDITES_CODE } from '@/lib/portfolio/constantes';
 import { derivePortfolio, type PortfolioState, type RawPosition, type PricePoint } from '@/lib/portfolio/derive';
 import { toutesLesPages } from './pagination';
-import type { DividendeSource, FermetureSource } from './agenda';
+import type { AssembleeSource, DividendeSource, FermetureSource } from './agenda';
+import { agAVenir, COLONNES_AG, versAgenda, type BocAssemblee } from '@/lib/boc/assemblees';
 import type { PublicationSource } from './publications';
 import type { LiquiditeSource } from './liquiditeBloc';
 
@@ -87,6 +88,25 @@ export async function chargerFermetures(sb: SupabaseClient, debut: string, fin: 
     .gte('date', debut).lte('date', fin).eq('is_trading_day', false);
   if (error) return journal('agenda (calendrier)', error.message);
   return (data ?? []) as FermetureSource[];
+}
+
+/**
+ * AG du Bulletin officiel dans la fenêtre de l'agenda, encore présentes dans le
+ * DERNIER bulletin lu (une AG qui en a disparu a été retirée ou reportée).
+ */
+export async function chargerAssemblees(sb: SupabaseClient, debut: string, fin: string): Promise<AssembleeSource[] | null> {
+  if (!ISO.test(debut) || !ISO.test(fin)) return journal('agenda (assemblées)', 'dates invalides');
+  const { data: der, error: e1 } = await sb
+    .from('boc_assemblees').select('dernier_bulletin').order('dernier_bulletin', { ascending: false }).limit(1);
+  if (e1) return journal('agenda (assemblées)', e1.message);
+  const dernier = (der?.[0] as { dernier_bulletin: string } | undefined)?.dernier_bulletin ?? null;
+  if (!dernier) return [];
+  const { data, error } = await sb
+    .from('boc_assemblees').select(COLONNES_AG)
+    .gte('date_ag', debut).lte('date_ag', fin).eq('dernier_bulletin', dernier)
+    .limit(200);
+  if (error) return journal('agenda (assemblées)', error.message);
+  return agAVenir((data ?? []) as BocAssemblee[], debut, dernier).map(versAgenda);
 }
 
 export async function chargerPublications(sb: SupabaseClient, depuis: string): Promise<PublicationSource[] | null> {
